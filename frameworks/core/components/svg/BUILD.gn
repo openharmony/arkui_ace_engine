@@ -1,0 +1,52 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/ace/ace_engine/frameworks/core/components/components.gni")
+
+build_component("svg") {
+  sources = [
+    "flutter_render_svg.cpp",
+    "flutter_render_svg_circle.cpp",
+    "flutter_render_svg_ellipse.cpp",
+    "flutter_render_svg_line.cpp",
+    "flutter_render_svg_path.cpp",
+    "flutter_render_svg_polygon.cpp",
+    "flutter_render_svg_polyline.cpp",
+    "flutter_render_svg_rect.cpp",
+    "flutter_render_svg_text.cpp",
+    "flutter_render_svg_text_path.cpp",
+    "flutter_render_svg_tspan.cpp",
+    "render_svg.cpp",
+    "render_svg_base.cpp",
+    "render_svg_circle.cpp",
+    "render_svg_ellipse.cpp",
+    "render_svg_line.cpp",
+    "render_svg_path.cpp",
+    "render_svg_polygon.cpp",
+    "render_svg_polyline.cpp",
+    "render_svg_rect.cpp",
+    "render_svg_text.cpp",
+    "render_svg_text_path.cpp",
+    "svg_circle_component.cpp",
+    "svg_component.cpp",
+    "svg_ellipse_component.cpp",
+    "svg_line_component.cpp",
+    "svg_path_component.cpp",
+    "svg_polygon_component.cpp",
+    "svg_polyline_component.cpp",
+    "svg_rect_component.cpp",
+    "svg_text_component.cpp",
+    "svg_text_path_component.cpp",
+    "svg_tspan_component.cpp",
+  ]
+}

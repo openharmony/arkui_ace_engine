@@ -1,0 +1,25 @@
+{
+  "subsystem": "ace",
+  "parts": {
+    "ace_engine_standard": {
+      "variants": [
+        "phone"
+      ],
+      "module_list": [
+        "//foundation/ace/ace_engine:ace_packages",
+        "//foundation/ace/ace_engine/interfaces/kits/js/declaration:dts"
+      ],
+      "test_list": [
+        "//foundation/ace/ace_engine/frameworks/base/test:unittest",
+        "//foundation/ace/ace_engine/frameworks/bridge/test:unittest",
+        "//foundation/ace/ace_engine/frameworks/core/animation/test:unittest",
+        "//foundation/ace/ace_engine/frameworks/core/pipeline/test:unittest",
+        "//foundation/ace/ace_engine/frameworks/core/components/test:unittest",
+        "//foundation/ace/ace_engine/frameworks/core/components/common/properties/test:unittest",
+        "//foundation/ace/ace_engine/frameworks/core/event/test:unittest",
+        "//foundation/ace/ace_engine/frameworks/core/focus/test:unittest",
+        "//foundation/ace/ace_engine/frameworks/core/gestures/test:unittest"
+      ]
+    }
+  }
+}

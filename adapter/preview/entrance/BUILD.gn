@@ -1,0 +1,70 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/ace/ace_engine/ace_config.gni")
+
+template("libace_engine") {
+  forward_variables_from(invoker, "*")
+
+  ohos_shared_library(target_name) {
+    defines += invoker.defines
+    sources = [
+      "$ace_root/adapter/common/cpp/ace_res_config.cpp",
+      "$ace_root/adapter/common/cpp/ace_res_key_parser.cpp",
+      "$ace_root/adapter/common/cpp/ace_trace.cpp",
+      "$ace_root/adapter/common/cpp/localization.cpp",
+      "$ace_root/adapter/common/cpp/thread_util.cpp",
+      "$ace_root/adapter/preview/osal/download_manager.cpp",
+      "ace_ability.cpp",
+      "ace_application_info.cpp",
+      "ace_container.cpp",
+      "ace_resource_register.cpp",
+      "flutter_ace_view.cpp",
+      "flutter_window.cpp",
+    ]
+
+    configs = [
+      "$ace_root:ace_config",
+      "$flutter_root:flutter_config",
+      "$flutter_root:flutter_glfw_config",
+      "$flutter_root:icu_config_$platform",
+      "//third_party/curl:curl_config",
+    ]
+
+    cflags = [ "-std=c++17" ]
+    deps = [
+      "$ace_root/frameworks/base:ace_base_$platform",
+      "$ace_root/frameworks/bridge:js_engine_$platform",
+      "$ace_root/frameworks/core:ace_core_$platform",
+      "$flutter_root:ace_skia_$platform",
+      "//third_party/curl:curl",
+    ]
+    if (platform == "windows") {
+      defines += [ "NOGDI" ]
+    }
+    if (platform == "mac") {
+      include_dirs = [ "//utils/native/base/include" ]
+    }
+  }
+}
+
+libace_engine("libace_engine_windows") {
+  defines = ace_windows_defines
+  platform = "windows"
+}
+
+libace_engine("libace_engine_mac") {
+  defines = ace_mac_defines
+  platform = "mac"
+}

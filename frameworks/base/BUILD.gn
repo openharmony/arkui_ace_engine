@@ -1,0 +1,114 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/ace/ace_engine/ace_config.gni")
+
+config("ace_base_config") {
+  include_dirs = [ "//utils/native/base/include" ]
+}
+
+template("ace_base_source_set") {
+  # get is_ohos_platform
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+    deps = [
+      "$ace_root:third_party_cjson",
+      "i18n:ace_base_i18n_$platform",
+      "resource:ace_resource",
+    ]
+
+    if (is_ohos_platform) {
+      deps += [ "$ace_root/adapter/ohos/osal:ace_osal_$platform" ]
+    } else if (use_mingw_win || use_mac) {
+      deps += [ "$ace_root/adapter/preview/osal:ace_osal_$platform" ]
+    }
+
+    configs = [
+      ":ace_base_config",
+      "$ace_root:ace_config",
+      "//third_party/cJSON:cJSON_config",
+    ]
+
+    # add base source file here
+    sources = [
+      "geometry/matrix4.cpp",
+      "json/json_util.cpp",
+      "log/ace_trace.cpp",
+      "log/dump_log.cpp",
+      "memory/memory_monitor.cpp",
+      "thread/background_task_executor.cpp",
+      "utils/base_id.cpp",
+      "utils/date_util.cpp",
+      "utils/string_utils.cpp",
+      "utils/time_util.cpp",
+    ]
+
+    if (is_standard_system) {
+      configs += [ "//third_party/curl:curl_config" ]
+      deps += [ "//third_party/curl:curl" ]
+      sources += [ "network/download_manager.cpp" ]
+    }
+
+    if (use_mingw_win) {
+      defines += [ "_USE_MATH_DEFINES" ]
+
+      cflags = [ "-std=c++17" ]
+    } else {
+      # add secure c API
+      sources += [
+        "//utils/native/base/src/securec/memset_s.c",
+        "//utils/native/base/src/securec/securecutil.c",
+        "//utils/native/base/src/securec/secureprintoutput_a.c",
+        "//utils/native/base/src/securec/sprintf_s.c",
+        "//utils/native/base/src/securec/strcat_s.c",
+        "//utils/native/base/src/securec/strcpy_s.c",
+        "//utils/native/base/src/securec/vsnprintf_s.c",
+        "//utils/native/base/src/securec/vsprintf_s.c",
+      ]
+
+      if (!use_mac) {
+        # add ashmem API
+        sources += [
+          "//utils/native/base/src/ashmem.cpp",
+          "//utils/native/base/src/refbase.cpp",
+        ]
+      } else {
+        sources += [
+          # This is used only when logs are printed on the MAC platform.
+          "//utils/native/base/src/securec/snprintf_s.c",
+        ]
+      }
+    }
+  }
+}
+
+ace_base_source_set("ace_base_ohos") {
+  defines = ace_ohos_defines
+  is_ohos_platform = true
+  platform = "ohos"
+}
+
+ace_base_source_set("ace_base_windows") {
+  defines = ace_windows_defines
+  is_ohos_platform = false
+  platform = "windows"
+}
+
+ace_base_source_set("ace_base_mac") {
+  defines = ace_mac_defines
+  is_ohos_platform = false
+  platform = "mac"
+}

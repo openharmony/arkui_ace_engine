@@ -1,0 +1,63 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/ace/ace_engine/ace_config.gni")
+
+# build static
+template("ace_base_platform_source_set") {
+  # get is_ohos_platform
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+
+    sources = [
+      "$ace_root/adapter/ohos/cpp/ace_ability.cpp",
+      "$ace_root/adapter/ohos/cpp/ace_application_info.cpp",
+      "$ace_root/adapter/ohos/cpp/ace_container.cpp",
+      "$ace_root/adapter/ohos/cpp/flutter_ace_view.cpp",
+    ]
+
+    configs = [
+      "$ace_root:ace_config",
+      "$flutter_root:flutter_config",
+      "$flutter_root:icu_config_$platform",
+    ]
+
+    include_dirs = [ "//utils/native/base/include" ]
+
+    deps = [
+      "$flutter_root:ace_skia_$platform",
+      "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr",
+      "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
+      "//foundation/graphic/standard:libwms_client",
+      "//third_party/zlib:libz",
+    ]
+
+    external_deps = [
+      "aafwk_standard:ability_manager",
+      "aafwk_standard:want",
+      "appexecfwk_standard:appexecfwk_base",
+      "appexecfwk_standard:appexecfwk_core",
+      "appexecfwk_standard:libeventhandler",
+      "ipc:ipc_core",
+      "multimodalinput_base:mmi_event",
+    ]
+  }
+}
+
+ace_base_platform_source_set("ace_base_platform_ohos") {
+  defines = ace_ohos_defines
+  platform = "ohos"
+}

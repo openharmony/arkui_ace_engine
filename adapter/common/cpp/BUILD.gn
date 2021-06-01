@@ -1,0 +1,179 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/ace/ace_engine/ace_config.gni")
+
+# build static
+template("ace_base_platform_source_set") {
+  # get is_ohos_platform
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+    configs = [
+      "$ace_root:ace_config",
+      "$flutter_root:flutter_config",
+      "$flutter_root:icu_config_$platform",
+    ]
+
+    include_dirs = [ "//utils/native/base/include" ]
+
+    sources = [
+      "ace_res_config.cpp",
+      "ace_res_key_parser.cpp",
+      "ace_trace.cpp",
+      "file_asset_provider.cpp",
+      "flutter_task_executor.cpp",
+      "localization.cpp",
+      "thread_util.cpp",
+    ]
+    if (is_standard_system) {
+      sources += [ "$ace_root/adapter/common/cpp/flutter_window.cpp" ]
+      external_deps = [
+        "appexecfwk_standard:libeventhandler",
+        "ipc:ipc_core",
+      ]
+    }
+
+    if (is_ohos_platform) {
+      deps = [ "//third_party/zlib:libz" ]
+    }
+  }
+}
+
+ace_base_platform_source_set("ace_base_common_ohos") {
+  defines = ace_ohos_defines
+  is_ohos_platform = true
+  platform = "ohos"
+}
+
+# Build libace shared library
+template("libace_shared_library") {
+  # get is_ohos_platform
+  forward_variables_from(invoker, "*")
+
+  ohos_shared_library(target_name) {
+    deps = [
+      "$ace_root/frameworks/base:ace_base_$platform",
+      "$ace_root/frameworks/base/resource:ace_resource",
+      "$ace_root/frameworks/bridge:js_framework_$platform",
+      "$ace_root/frameworks/core:ace_core_$platform",
+      "$ace_root/frameworks/core/accessibility:ace_accessibility_$platform",
+    ]
+
+    if (link_qjs_engine) {
+      if (use_js_debug) {
+        deps += [ "$ace_root/frameworks/bridge:js_engine_debug_$platform" ]
+      } else {
+        deps += [
+          "$ace_root/frameworks/bridge:js_engine_$platform",
+          "$ace_root/frameworks/bridge:declarative_js_engine_qjs_$platform",
+        ]
+      }
+    }
+
+    if (is_ohos_platform) {
+      subsystem_name = "ace"
+    }
+
+    if (is_standard_system) {
+      part_name = "ace_engine_standard"
+    }
+  }
+}
+
+libace_shared_library("libace") {
+  is_ohos_platform = true
+  if (is_standard_system) {
+    platform = "ohos"
+  }
+  if (is_wearable_product) {
+    link_qjs_engine = true
+    use_js_debug = false
+  } else {
+    link_qjs_engine = false
+  }
+}
+
+libace_shared_library("libace_debug") {
+  is_ohos_platform = true
+  if (is_standard_system) {
+    platform = "ohos"
+  }
+  if (is_wearable_product) {
+    link_qjs_engine = true
+    use_js_debug = true
+  } else {
+    link_qjs_engine = false
+  }
+}
+
+# build platform engine sources
+template("ace_platform_engine") {
+  # get is_ohos_platform, use_quickjs_engine
+  forward_variables_from(invoker, "*")
+
+  ohos_shared_library(target_name) {
+    deps = []
+
+    if (is_ohos_platform) {
+      deps += [ "$ace_root/adapter/common/cpp:libace" ]
+    }
+
+    if (use_quickjs_engine) {
+      if (use_js_debug) {
+        deps += [ "$ace_root/frameworks/bridge:js_engine_debug_$platform" ]
+      } else if (is_declarative) {
+        deps += [ "$ace_root/frameworks/bridge:declarative_js_engine_qjs_$platform" ]
+      } else {
+        deps += [ "$ace_root/frameworks/bridge:js_engine_$platform"]
+      }
+    }
+
+    if (is_ohos_platform) {
+      subsystem_name = "ace"
+    }
+
+    if (is_standard_system) {
+      part_name = "ace_engine_standard"
+    }
+  }
+}
+
+ace_platform_engine("libace_engine_qjs") {
+  is_ohos_platform = true
+  use_quickjs_engine = true
+  if (is_standard_system) {
+    platform = "ohos"
+  }
+  is_declarative = false
+}
+
+ace_platform_engine("libace_engine_declarative_qjs") {
+  is_ohos_platform = true
+  use_quickjs_engine = true
+  if (is_standard_system) {
+    platform = "ohos"
+  }
+  is_declarative = true
+}
+
+ace_platform_engine("libace_engine_qjs_debug") {
+  is_ohos_platform = true
+  use_quickjs_engine = true
+  use_js_debug = true
+  if (is_standard_system) {
+    platform = "ohos"
+  }
+}

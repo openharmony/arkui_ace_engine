@@ -1,0 +1,110 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/ace/ace_engine/ace_config.gni")
+
+config("ace_pc_preview_config") {
+  cflags = [ "-std=c++17" ]
+  include_dirs = [
+    "$ace_root",
+    "$ace_root/frameworks",
+    "$flutter_root/engine",
+    "$flutter_root/engine/flutter/shell/platform/common/cpp/public",
+    "$flutter_root/engine/ace_adapter/flutter/shell/platform/glfw/public",
+  ]
+}
+
+template("ace_test") {
+  forward_variables_from(invoker, "*")
+  ohos_executable(target_name) {
+    defines += invoker.defines
+    if (device == "phone") {
+      sources = [ "ace_phone_test.cpp" ]
+    } else if (device == "wearable") {
+      sources = [ "ace_watch_test.cpp" ]
+    } else if (device == "tv") {
+      sources = [ "ace_tv_test.cpp" ]
+    } else if (device == "tablet") {
+      sources = [ "ace_tablet_test.cpp" ]
+    } else if (device == "card") {
+      sources = [ "ace_card_test.cpp" ]
+    }
+
+    configs = [ ":ace_pc_preview_config" ]
+    deps = [ "$ace_root/adapter/preview/entrance:libace_engine_$platform(${current_toolchain})" ]
+    if (platform == "windows") {
+      libs = [ "pthread" ]
+    }
+  }
+}
+
+ace_test("ace_test_windows_phone") {
+  defines = ace_windows_defines
+  platform = "windows"
+  device = "phone"
+}
+
+ace_test("ace_test_windows_tv") {
+  defines = ace_windows_defines
+  platform = "windows"
+  device = "tv"
+}
+
+ace_test("ace_test_windows_wearable") {
+  defines = ace_windows_defines
+  platform = "windows"
+  device = "wearable"
+}
+
+ace_test("ace_test_windows_tablet") {
+  defines = ace_windows_defines
+  platform = "windows"
+  device = "tablet"
+}
+
+ace_test("ace_test_windows_card") {
+  defines = ace_windows_defines
+  platform = "windows"
+  device = "card"
+}
+
+ace_test("ace_test_mac_phone") {
+  defines = ace_mac_defines
+  platform = "mac"
+  device = "phone"
+}
+
+ace_test("ace_test_mac_tv") {
+  defines = ace_mac_defines
+  platform = "mac"
+  device = "tv"
+}
+
+ace_test("ace_test_mac_wearable") {
+  defines = ace_mac_defines
+  platform = "mac"
+  device = "wearable"
+}
+
+ace_test("ace_test_mac_tablet") {
+  defines = ace_mac_defines
+  platform = "mac"
+  device = "tablet"
+}
+
+ace_test("ace_test_mac_card") {
+  defines = ace_mac_defines
+  platform = "mac"
+  device = "card"
+}

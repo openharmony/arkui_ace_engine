@@ -1,0 +1,56 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/ace/ace_engine/frameworks/core/components/components.gni")
+config("standard_camera_config") {
+  cflags_cc = [ "-Wno-user-defined-warnings" ]
+
+  include_dirs = [
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include/",
+    "//drivers/peripheral/codec/interfaces/include",
+    "//drivers/peripheral/display/interfaces/include",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//foundation/graphic/standard/frameworks/surface/include",
+    "//foundation/graphic/standard/interfaces/kits/surface",
+    "//foundation/graphic/standard/window_manager/include",
+    "//foundation/multimedia/camera_standard/frameworks/include",
+    "//foundation/multimedia/camera_standard/frameworks/innerkitsimpl/camera/include",
+    "//foundation/multimedia/camera_standard/interfaces/innerkits/native/include",
+    "//foundation/multimedia/media_standard/interfaces/kits/native/include",
+    "//utils/native/base/include",
+  ]
+}
+
+build_component("camera") {
+  sources = [
+    "camera_component.cpp",
+    "camera_element.cpp",
+  ]
+
+  if (is_standard_system) {
+    configs = [ ":standard_camera_config" ]
+
+    sources += [ "camera.cpp" ]
+
+    deps = [
+      "//foundation/graphic/standard:libwms_client",
+      "//foundation/multimedia/camera_standard/frameworks/innerkitsimpl/camera:camera",
+      "//utils/native/base:utils",
+    ]
+
+    external_deps = [
+      "ipc:ipc_core",
+      "multimedia_media_standard:recorder",
+    ]
+  }
+}

@@ -1,0 +1,134 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/ace/ace_engine/ace_config.gni")
+
+config("accessibility_library_config") {
+  include_dirs = [ "../accessibility/common/" ]
+}
+
+group("ace_packages") {
+  deps = []
+
+  # core library for Ability Cross-platform Environment(ACE) JS
+  deps += [
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "adapter/common/cpp:libace",
+  ]
+
+  if (is_wearable_product) {
+    deps += [ "adapter/common/cpp:libace_debug" ]
+  }
+
+  if (!is_wearable_product) {
+    deps += [
+      "adapter/common/cpp:libace_engine_qjs",
+      "adapter/common/cpp:libace_engine_qjs_debug",
+      "adapter/common/cpp:libace_engine_declarative_qjs"
+    ]
+  }
+}
+
+group("ace_test_packages") {
+  # ohos platform
+  deps = []
+}
+
+source_set("third_party_cjson") {
+  sources = [ "$cjson_root/cJSON.c" ]
+}
+
+# Common config for Ability Cross-platform Environment(ACE) source
+config("ace_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "$ace_root",
+    "$ace_root/frameworks",
+    "$root_out_dir/ace/framework",
+    "//third_party/zlib",
+  ]
+  if (is_standard_system) {
+    include_dirs += [
+      "//base/global/resmgr_standard/frameworks/resmgr/include",
+      "//base/global/resmgr_standard/interfaces/innerkits/include",
+    ]
+  }
+  defines = ace_common_defines
+
+  if (is_wearable_product) {
+    defines += ace_wearable_defines
+  }
+
+  if (enable_dump_drawcmd) {
+    defines += [ "DUMP_DRAW_CMD" ]
+  }
+
+  if (is_standard_system) {
+    defines += [ "SK_BUILD_FOR_UNIX" ]
+  }
+
+  cflags = [
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-Os",
+  ]
+
+  cflags_cc = [
+    "-fvisibility-inlines-hidden",
+    "-Os",
+  ]
+
+  if (use_js_debug) {
+    cflags_cc += [
+      "-fexceptions",
+      "-fno-complete-member-pointers",
+      "-Wno-implicit-fallthrough",
+    ]
+  }
+
+  if (use_mingw_win) {
+    cflags += [ "-std=c++17" ]
+    defines += [ "_USE_MATH_DEFINES" ]
+  }
+}
+
+config("ace_test_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "$ace_root",
+    "$ace_root/frameworks",
+    "$root_out_dir/ace/framework",
+  ]
+  if (is_standard_system) {
+    include_dirs += [
+      "//base/global/resmgr_standard/frameworks/resmgr/include",
+      "//base/global/resmgr_standard/interfaces/innerkits/include",
+    ]
+  }
+  defines = ace_common_defines
+  defines += ace_ohos_defines
+
+  if (is_wearable_product) {
+    defines += ace_wearable_defines
+  }
+
+  cflags = [
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+  ]
+
+  cflags_cc = [ "-fvisibility-inlines-hidden" ]
+}

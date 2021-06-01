@@ -1,0 +1,104 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/ace/ace_engine/ace_config.gni")
+
+# build core sources
+template("ace_core_pipeline_source_set") {
+  # get is_ohos_platform
+  forward_variables_from(invoker, "*")
+
+  source_set(target_name) {
+    defines += invoker.defines
+
+    # add common source file needed by all product platform here
+    sources = [
+      # context
+      "pipeline_context.cpp",
+
+      # base component
+      "base/component.cpp",
+      "base/component_group_element.cpp",
+      "base/composed_component.cpp",
+      "base/composed_element.cpp",
+      "base/constants.cpp",
+      "base/element.cpp",
+      "base/flutter_render_context.cpp",
+      "base/related_node.cpp",
+      "base/render_element.cpp",
+      "base/render_node.cpp",
+      "base/sole_child_element.cpp",
+
+      # factories
+      "base/factories/render_node_factory.cpp",
+
+      # layer
+      "layers/clip_layer.cpp",
+      "layers/container_layer.cpp",
+      "layers/dropfilter_layer.cpp",
+      "layers/flutter_scene_builder.cpp",
+      "layers/gradient_layer.cpp",
+      "layers/layer.cpp",
+      "layers/offset_layer.cpp",
+      "layers/opacity_layer.cpp",
+      "layers/picture_layer.cpp",
+      "layers/texture_layer.cpp",
+      "layers/transform_layer.cpp",
+    ]
+
+    configs += [
+      "$ace_root:ace_config",
+      "$flutter_root:flutter_config",
+      "$flutter_root:icu_config_$platform",
+    ]
+
+    deps = [
+      "$ace_root/frameworks/base:ace_base_$platform",
+      "$flutter_root:ace_skia_$platform",
+      "$flutter_root:third_party_flutter_engine_$platform",
+    ]
+
+    if (is_ohos_platform && enable_native_view) {
+      sources += [ "layers/ace_scene_builder.cpp" ]
+      deps += [ "$flutter_root/engine/flutter/flow/ohos_layers:flutter_ohos_layers_$platform" ]
+    }
+
+    if (use_mingw_win) {
+      cflags_cc = [ "-std=c++17" ]
+
+      defines += [
+        "_USE_MATH_DEFINES",
+        "NOGDI",
+      ]
+    }
+  }
+}
+
+ace_core_pipeline_source_set("ace_core_pipeline_ohos") {
+  defines = ace_ohos_defines
+  platform = "ohos"
+  is_ohos_platform = true
+}
+
+ace_core_pipeline_source_set("ace_core_pipeline_windows") {
+  defines = ace_windows_defines
+  platform = "windows"
+  is_ohos_platform = false
+}
+
+ace_core_pipeline_source_set("ace_core_pipeline_mac") {
+  defines = ace_mac_defines
+  platform = "mac"
+  is_ohos_platform = false
+}

@@ -1,0 +1,89 @@
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "frameworks/core/components/svg/flutter_render_svg_circle.h"
+
+#include "frameworks/core/components/common/painter/flutter_svg_painter.h"
+#include "frameworks/core/components/transform/flutter_render_transform.h"
+#include "frameworks/core/pipeline/base/flutter_render_context.h"
+
+namespace OHOS::Ace {
+
+using namespace Flutter;
+
+RefPtr<RenderNode> RenderSvgCircle::Create()
+{
+    return AceType::MakeRefPtr<FlutterRenderSvgCircle>();
+}
+
+RenderLayer FlutterRenderSvgCircle::GetRenderLayer()
+{
+    if (!transformLayer_) {
+        transformLayer_ = AceType::MakeRefPtr<Flutter::TransformLayer>(Matrix4::CreateIdentity(), 0.0, 0.0);
+    }
+    return AceType::RawPtr(transformLayer_);
+}
+
+void FlutterRenderSvgCircle::Paint(RenderContext& context, const Offset& offset)
+{
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkCanvas* skCanvas = canvas->canvas();
+    if (!skCanvas) {
+        LOGE("Paint skCanvas is null");
+        return;
+    }
+    SkPath path;
+    double lineWidth = NormalizeToPx(strokeState_.GetLineWidth());
+    path.addCircle(ConvertDimensionToPx(cx_, GetLayoutSize().Width()),
+        ConvertDimensionToPx(cy_, GetLayoutSize().Width()),
+        ConvertDimensionToPx(r_, GetLayoutSize().Height()) - lineWidth);
+    FlutterSvgPainter::SetFillStyle(skCanvas, path, fillState_, opacity_);
+    path.reset();
+    path.addCircle(ConvertDimensionToPx(cx_, GetLayoutSize().Width()),
+        ConvertDimensionToPx(cy_, GetLayoutSize().Width()),
+        ConvertDimensionToPx(r_, GetLayoutSize().Height()) - lineWidth * SK_ScalarHalf);
+    FlutterSvgPainter::SetStrokeStyle(skCanvas, path, strokeState_, opacity_);
+    RenderNode::Paint(context, offset);
+}
+
+void FlutterRenderSvgCircle::UpdateMotion(const std::string& path, const std::string& rotate,
+    double percent, const Point& point)
+{
+    if (!transformLayer_) {
+        LOGE("transformLayer is null");
+        return;
+    }
+    bool isSuccess = true;
+    auto motionMatrix = FlutterSvgPainter::CreateMotionMatrix(path, rotate, point, percent, isSuccess);
+    if (isSuccess) {
+        auto transform = FlutterRenderTransform::GetTransformByOffset(motionMatrix, GetGlobalOffset());
+        transformLayer_->Update(transform);
+    }
+}
+
+bool FlutterRenderSvgCircle::GetStartPoint(Point& point)
+{
+    double width = GetLayoutSize().Width();
+    double height = GetLayoutSize().Height();
+    point = Point(ConvertDimensionToPx(cx_, width), ConvertDimensionToPx(cy_, height));
+    return true;
+}
+
+} // namespace OHOS::Ace

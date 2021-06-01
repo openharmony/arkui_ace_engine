@@ -1,0 +1,103 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/ace/ace_engine/ace_config.gni")
+
+template("build_component") {
+  forward_variables_from(invoker, "*")
+
+  component_name = target_name
+
+  template("build_component_impl") {
+    forward_variables_from(invoker, "*")
+
+    platform = target_name
+
+    component_deps = []
+    extra_deps = []
+    foreach(item, component_deps) {
+      extra_deps += [ "$ace_root/frameworks/core/components/${item}:ace_core_components_${item}_${platform}" ]
+    }
+
+    if (defined(platform_deps)) {
+      foreach(item, platform_deps) {
+        extra_deps += [ "${item}_${platform}" ]
+      }
+    }
+
+    if (defined(deps)) {
+      extra_deps += deps
+    }
+
+    ohos_source_set("ace_core_components_${component_name}_${platform}") {
+      defines += invoker.defines
+
+      sources = []
+      sources += invoker.sources
+
+      configs = []
+      configs += [
+        "$ace_root:ace_config",
+        "$flutter_root:flutter_config",
+        "$flutter_root:icu_config_$platform",
+      ]
+      if (defined(invoker.configs)) {
+        configs += invoker.configs
+      }
+
+      deps = []
+      deps += extra_deps
+      deps += [
+        "$ace_root/frameworks/core/components/theme:build_theme_code",
+        "$flutter_root:ace_skia_$platform",
+      ]
+
+      if (defined(invoker.public_configs)) {
+        public_configs = []
+        public_configs += invoker.public_configs
+      }
+
+      if (defined(invoker.external_deps)) {
+        external_deps = []
+        external_deps += invoker.external_deps
+      }
+
+      if (defined(invoker.external_deps_info)) {
+        external_deps_info = []
+        external_deps_info += invoker.external_deps_info
+      }
+
+      if (use_mingw_win) {
+        cflags_cc = [ "-std=c++17" ]
+
+        defines += [
+          "_USE_MATH_DEFINES",
+          "NOGDI",
+        ]
+      }
+    }
+  }
+
+  build_component_impl("ohos") {
+    defines = ace_ohos_defines
+  }
+
+  build_component_impl("windows") {
+    defines = ace_windows_defines
+  }
+
+  build_component_impl("mac") {
+    defines = ace_mac_defines
+  }
+}

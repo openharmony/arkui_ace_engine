@@ -1,0 +1,26 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//third_party/flutter/flutter_ace_config.gni")
+
+ace_root = "//foundation/ace/ace_engine"
+
+ace_test_output_root = "ace_engine_standard"
+
+objcopy_aarch64 = "//prebuilts/gcc/linux-x86/arm/gcc-linaro-7.5.0-arm-linux-gnueabi/arm-linux-gnueabi/bin/objcopy"
+objcopy_x86_64 = ""
+ark_tools_root = "//prebuilts/ace-toolkit/ace-loader/panda"
+node_js_path = "//prebuilts/ace-toolkit/nodejs/node-v12.18.4-linux-x64/bin/"
+cjson_root = "//third_party/cJSON"
+
+use_js_debug = false

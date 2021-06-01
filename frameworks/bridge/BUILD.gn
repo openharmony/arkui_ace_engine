@@ -1,0 +1,581 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/ace/ace_engine/ace_config.gni")
+
+config("ace_utils_config") {
+  include_dirs = [ "//utils/native/base/include" ]
+}
+
+# build javascript sdk library
+template("js_framework") {
+  # get is_ohos_platform, use_quickjs_engine flag.
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+
+    deps = [
+      "$ace_root/frameworks/base:ace_base_$platform",
+      "$ace_root/frameworks/core:ace_core_$platform",
+      "$ace_root/frameworks/core/accessibility:ace_accessibility_$platform",
+    ]
+
+    # add common source file needed by all product platform here
+    sources = [
+      # codec
+      "codec/byte_buffer_operator.cpp",
+      "codec/standard_codec_buffer_operator.cpp",
+      "codec/standard_function_codec.cpp",
+
+      # dom
+      "common/dom/dom_badge.cpp",
+      "common/dom/dom_button.cpp",
+      "common/dom/dom_calendar.cpp",
+      "common/dom/dom_canvas.cpp",
+      "common/dom/dom_chart.cpp",
+      "common/dom/dom_dialog.cpp",
+      "common/dom/dom_div.cpp",
+      "common/dom/dom_divider.cpp",
+      "common/dom/dom_document.cpp",
+      "common/dom/dom_grid_column.cpp",
+      "common/dom/dom_grid_container.cpp",
+      "common/dom/dom_grid_row.cpp",
+      "common/dom/dom_image.cpp",
+      "common/dom/dom_image_animator.cpp",
+      "common/dom/dom_input.cpp",
+      "common/dom/dom_label.cpp",
+      "common/dom/dom_list.cpp",
+      "common/dom/dom_list_item.cpp",
+      "common/dom/dom_list_item_group.cpp",
+      "common/dom/dom_marquee.cpp",
+      "common/dom/dom_navigation_bar.cpp",
+      "common/dom/dom_node.cpp",
+      "common/dom/dom_panel.cpp",
+      "common/dom/dom_picker_base.cpp",
+      "common/dom/dom_picker_view.cpp",
+      "common/dom/dom_progress.cpp",
+      "common/dom/dom_proxy.cpp",
+      "common/dom/dom_refresh.cpp",
+      "common/dom/dom_search.cpp",
+      "common/dom/dom_slider.cpp",
+      "common/dom/dom_span.cpp",
+      "common/dom/dom_stack.cpp",
+      "common/dom/dom_svg.cpp",
+      "common/dom/dom_svg_animate.cpp",
+      "common/dom/dom_svg_animate_motion.cpp",
+      "common/dom/dom_svg_animate_transform.cpp",
+      "common/dom/dom_svg_base.cpp",
+      "common/dom/dom_svg_circle.cpp",
+      "common/dom/dom_svg_ellipse.cpp",
+      "common/dom/dom_svg_line.cpp",
+      "common/dom/dom_svg_path.cpp",
+      "common/dom/dom_svg_polygon.cpp",
+      "common/dom/dom_svg_polyline.cpp",
+      "common/dom/dom_svg_rect.cpp",
+      "common/dom/dom_svg_text.cpp",
+      "common/dom/dom_svg_text_path.cpp",
+      "common/dom/dom_svg_tspan.cpp",
+      "common/dom/dom_swiper.cpp",
+      "common/dom/dom_switch.cpp",
+      "common/dom/dom_text.cpp",
+      "common/dom/dom_textarea.cpp",
+      "common/dom/dom_toggle.cpp",
+      "common/dom/dom_type.cpp",
+      "common/dom/input/dom_button_util.cpp",
+      "common/dom/input/dom_checkbox_util.cpp",
+      "common/dom/input/dom_radio_util.cpp",
+      "common/dom/input/dom_textfield_util.cpp",
+
+      # card frontend
+      "card_frontend/card_frontend.cpp",
+      "card_frontend/card_frontend_delegate.cpp",
+      "card_frontend/js_card_parser.cpp",
+      "card_frontend/media_queryer.cpp",
+
+      # js frontend
+      "js_frontend/engine/common/base_animation_bridge.cpp",
+      "js_frontend/engine/common/js_api_perf.cpp",
+      "js_frontend/engine/common/js_constants.cpp",
+      "js_frontend/frontend_delegate_impl.cpp",
+      "js_frontend/js_ace_page.cpp",
+      "js_frontend/js_command.cpp",
+      "js_frontend/js_frontend.cpp",
+
+      # manifest
+      "common/manifest/manifest_appinfo.cpp",
+      "common/manifest/manifest_parser.cpp",
+      "common/manifest/manifest_router.cpp",
+      "common/manifest/manifest_widget.cpp",
+      "common/manifest/manifest_window.cpp",
+
+      # media query
+      "common/media_query/media_query_info.cpp",
+
+      # utils
+      "common/utils/source_map.cpp",
+      "common/utils/utils.cpp",
+
+      # declarative js
+      "declarative_frontend/declarative_frontend.cpp",
+      "declarative_frontend/frontend_delegate_declarative.cpp",
+    ]
+    if (!use_mingw_win && !use_mac) {
+      sources += [ "common/dom/dom_qrcode.cpp" ]
+    }
+
+    # add sources needed by phone and TV. wearable like watch do not need them
+    if (!is_wearable_product) {
+      sources += [
+        "common/dom/dom_camera.cpp",
+        "common/dom/dom_clock.cpp",
+        "common/dom/dom_menu.cpp",
+        "common/dom/dom_navigation_menu.cpp",
+        "common/dom/dom_option.cpp",
+        "common/dom/dom_picker_dialog.cpp",
+        "common/dom/dom_piece.cpp",
+        "common/dom/dom_popup.cpp",
+        "common/dom/dom_rating.cpp",
+        "common/dom/dom_select.cpp",
+        "common/dom/dom_stepper.cpp",
+        "common/dom/dom_stepper_item.cpp",
+        "common/dom/dom_tab_bar.cpp",
+        "common/dom/dom_tab_content.cpp",
+        "common/dom/dom_tabs.cpp",
+        "common/dom/dom_tool_bar.cpp",
+        "common/dom/dom_tool_bar_item.cpp",
+        "common/dom/dom_video.cpp",
+      ]
+    }
+
+    # add sources needed by phone and TV. wearable like watch do not need them
+    if (!is_wearable_product && !use_mingw_win && !use_mac) {
+      sources += [ "common/dom/dom_web.cpp" ]
+    }
+
+    if (!is_wearable_product && !use_mingw_win &&
+        !use_mac) {
+      sources += [ "js_frontend/engine/common/js_engine_loader.cpp" ]
+    }
+
+    configs = [
+      "$ace_root:ace_config",
+      ":ace_utils_config",
+    ]
+
+    if (is_ohos_platform) {
+      if (is_standard_system) {
+        sources += [ "common/accessibility/fake_accessibility_manager.cpp" ]
+        sources +=
+            [ "common/accessibility/fake_accessibility_node_manager.cpp" ]
+        deps += [
+          "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
+          "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base:appexecfwk_base",
+        ]
+        external_deps = [
+          "aafwk_standard:ability_manager",
+          "aafwk_standard:want",
+          "appexecfwk_standard:appexecfwk_base",
+          "appexecfwk_standard:appexecfwk_core",
+          "ipc:ipc_core",
+        ]
+      }
+    } else if (use_mingw_win) {
+      sources += [
+        "common/accessibility/accessibility_node_manager.cpp",
+        "common/inspector/inspect_button.cpp",
+        "common/inspector/inspect_canvas.cpp",
+        "common/inspector/inspect_chart.cpp",
+        "common/inspector/inspect_dialog.cpp",
+        "common/inspector/inspect_div.cpp",
+        "common/inspector/inspect_divider.cpp",
+        "common/inspector/inspect_image.cpp",
+        "common/inspector/inspect_image_animator.cpp",
+        "common/inspector/inspect_input.cpp",
+        "common/inspector/inspect_label.cpp",
+        "common/inspector/inspect_list.cpp",
+        "common/inspector/inspect_list_item.cpp",
+        "common/inspector/inspect_list_item_group.cpp",
+        "common/inspector/inspect_marquee.cpp",
+        "common/inspector/inspect_menu.cpp",
+        "common/inspector/inspect_node.cpp",
+        "common/inspector/inspect_option.cpp",
+        "common/inspector/inspect_picker.cpp",
+        "common/inspector/inspect_picker_view.cpp",
+        "common/inspector/inspect_popup.cpp",
+        "common/inspector/inspect_progress.cpp",
+        "common/inspector/inspect_rating.cpp",
+        "common/inspector/inspect_refresh.cpp",
+        "common/inspector/inspect_search.cpp",
+        "common/inspector/inspect_select.cpp",
+        "common/inspector/inspect_slider.cpp",
+        "common/inspector/inspect_span.cpp",
+        "common/inspector/inspect_stack.cpp",
+        "common/inspector/inspect_swiper.cpp",
+        "common/inspector/inspect_switch.cpp",
+        "common/inspector/inspect_tab_bar.cpp",
+        "common/inspector/inspect_tab_content.cpp",
+        "common/inspector/inspect_tabs.cpp",
+        "common/inspector/inspect_text.cpp",
+        "common/inspector/inspect_textarea.cpp",
+        "common/inspector/inspect_video.cpp",
+        "common/inspector/inspector_client.cpp",
+        "common/inspector/js_inspector_manager.cpp",
+      ]
+      defines += [ "_USE_MATH_DEFINES" ]
+      cflags = [ "-std=c++17" ]
+    } else if (use_mac) {
+      sources += [
+        "common/accessibility/accessibility_node_manager.cpp",
+        "common/inspector/inspect_button.cpp",
+        "common/inspector/inspect_canvas.cpp",
+        "common/inspector/inspect_chart.cpp",
+        "common/inspector/inspect_dialog.cpp",
+        "common/inspector/inspect_div.cpp",
+        "common/inspector/inspect_divider.cpp",
+        "common/inspector/inspect_image.cpp",
+        "common/inspector/inspect_image_animator.cpp",
+        "common/inspector/inspect_input.cpp",
+        "common/inspector/inspect_label.cpp",
+        "common/inspector/inspect_list.cpp",
+        "common/inspector/inspect_list_item.cpp",
+        "common/inspector/inspect_list_item_group.cpp",
+        "common/inspector/inspect_marquee.cpp",
+        "common/inspector/inspect_menu.cpp",
+        "common/inspector/inspect_node.cpp",
+        "common/inspector/inspect_option.cpp",
+        "common/inspector/inspect_picker.cpp",
+        "common/inspector/inspect_picker_view.cpp",
+        "common/inspector/inspect_popup.cpp",
+        "common/inspector/inspect_progress.cpp",
+        "common/inspector/inspect_rating.cpp",
+        "common/inspector/inspect_refresh.cpp",
+        "common/inspector/inspect_search.cpp",
+        "common/inspector/inspect_select.cpp",
+        "common/inspector/inspect_slider.cpp",
+        "common/inspector/inspect_span.cpp",
+        "common/inspector/inspect_stack.cpp",
+        "common/inspector/inspect_swiper.cpp",
+        "common/inspector/inspect_switch.cpp",
+        "common/inspector/inspect_tab_bar.cpp",
+        "common/inspector/inspect_tab_content.cpp",
+        "common/inspector/inspect_tabs.cpp",
+        "common/inspector/inspect_text.cpp",
+        "common/inspector/inspect_textarea.cpp",
+        "common/inspector/inspect_video.cpp",
+        "common/inspector/inspector_client.cpp",
+        "common/inspector/js_inspector_manager.cpp",
+      ]
+      cflags = [ "-std=c++17" ]
+    }
+  }
+}
+
+js_framework("js_framework_ohos") {
+  defines = ace_ohos_defines
+  is_ohos_platform = true
+  platform = "ohos"
+}
+
+js_framework("js_framework_windows") {
+  defines = ace_windows_defines
+  is_ohos_platform = false
+  platform = "windows"
+}
+
+js_framework("js_framework_mac") {
+  defines = ace_mac_defines
+  is_ohos_platform = false
+  platform = "mac"
+}
+
+ohos_static_library("intl_qjs_preview") {
+  include_dirs = [ "$ace_root" ]
+  sources = [ "js_frontend/engine/quickjs/intl/intl_support.cpp" ]
+}
+
+ohos_shared_library("intl_qjs") {
+  include_dirs = [ "$ace_root" ]
+  sources = [ "js_frontend/engine/quickjs/intl/intl_support.cpp" ]
+  subsystem_name = "ace"
+  if (is_standard_system) {
+    part_name = "ace_engine_standard"
+  }
+}
+
+# build javascript engine library
+template("js_engine") {
+  # get is_ohos_platform, use_quickjs_engine flag.
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+    deps = []
+    configs = []
+    sources = []
+
+    #add quickjs engine support
+    if (use_quickjs_engine) {
+      deps += [ "//third_party/jsframework:jsf" ]
+
+      if (use_js_debug) {
+        deps += [ "//third_party/quickjs:qjs_debugger" ]
+        defines += [ "ENABLE_JS_DEBUG" ]
+        configs += [ "//third_party/quickjs:qjs_debug_config" ]
+      } else {
+        deps += [ "//third_party/quickjs:qjs" ]
+      }
+
+      sources += [
+        #runtime
+        "js_frontend/engine/quickjs/animation_bridge.cpp",
+        "js_frontend/engine/quickjs/badge_bridge.cpp",
+        "js_frontend/engine/quickjs/canvas_bridge.cpp",
+        "js_frontend/engine/quickjs/chart_bridge.cpp",
+        "js_frontend/engine/quickjs/clock_bridge.cpp",
+        "js_frontend/engine/quickjs/component_api_bridge.cpp",
+        "js_frontend/engine/quickjs/image_animator_bridge.cpp",
+        "js_frontend/engine/quickjs/list_bridge.cpp",
+        "js_frontend/engine/quickjs/qjs_engine.cpp",
+        "js_frontend/engine/quickjs/qjs_engine_loader.cpp",
+        "js_frontend/engine/quickjs/qjs_group_js_bridge.cpp",
+        "js_frontend/engine/quickjs/stepper_bridge.cpp",
+
+        # utils
+        "js_frontend/engine/quickjs/qjs_utils.cpp",
+      ]
+      deps += [ "//foundation/ace/napi:ace_napi_quickjs" ]
+    }
+
+    configs += [ "$ace_root:ace_config" ]
+
+    print("platform: ${platform}")
+
+    if (is_ohos_platform) {
+      if (!is_wearable_product) {
+        deps += [ "$ace_root/adapter/common/cpp:libace" ]
+      } else {
+        deps += [ ":js_framework_$platform" ]
+        defines += [ "BUILT_IN_JS_ENGINE" ]
+      }
+      deps += [ ":intl_qjs" ]
+      if (is_standard_system) {
+        external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+      }
+    }
+
+    if (use_mingw_win || use_mac) {
+      deps += [
+        ":intl_qjs_preview",
+        ":js_framework_$platform",
+      ]
+
+      defines += [ "_USE_MATH_DEFINES" ]
+      defines += [ "BUILT_IN_JS_ENGINE" ]
+      cflags = [ "-std=c++17" ]
+    }
+  }
+}
+
+js_engine("js_engine_ohos") {
+  defines = ace_ohos_defines
+  is_ohos_platform = true
+  use_quickjs_engine = true
+  platform = "ohos"
+}
+
+js_engine("js_engine_debug_ohos") {
+  defines = ace_ohos_defines
+  is_ohos_platform = true
+  use_quickjs_engine = true
+  use_js_debug = true
+  platform = "ohos"
+}
+
+js_engine("js_engine_windows") {
+  defines = ace_windows_defines
+  is_ohos_platform = false
+  use_quickjs_engine = true
+  platform = "windows"
+}
+
+js_engine("js_engine_mac") {
+  defines = ace_mac_defines
+  is_ohos_platform = false
+  use_quickjs_engine = true
+  platform = "mac"
+}
+
+template("gen_obj") {
+  name = target_name
+  action("gen_obj_" + name) {
+    visibility = [ ":*" ]  # Only targets in this file can depend on this.
+
+    if (use_mingw_win) {
+      objcopy_tool = objcopy_mingw
+      script = "$flutter_root/engine/flutter/sky/tools/objcopy_pc_mac.py"
+    } else if (use_mac) {
+      objcopy_tool = objcopy_clang
+      script = "$flutter_root/engine/flutter/sky/tools/objcopy_pc_mac.py"
+    } else if (target_cpu == "x86_64") {
+      objcopy_tool = objcopy_x86_64
+      script = "$flutter_root/engine/flutter/sky/tools/objcopy.py"
+    } else {
+      objcopy_tool = objcopy_aarch64
+      script = "$flutter_root/engine/flutter/sky/tools/objcopy.py"
+    }
+
+    args = [
+      "--objcopy",
+      rebase_path(objcopy_tool),
+      "--input",
+      rebase_path(invoker.input),
+      "--output",
+      rebase_path(invoker.output),
+      "--arch",
+      current_cpu,
+    ]
+
+    deps = []
+    deps += invoker.snapshot_dep
+
+    inputs = [ invoker.input ]
+    outputs = [ invoker.output ]
+  }
+
+  source_set("gen_obj_src_" + name) {
+    sources = [ invoker.output ]
+    deps = [ ":gen_obj_" + name ]
+  }
+}
+
+base_output_path = get_label_info(":js_proxyclass", "target_out_dir")
+jsproxyclass_obj_path = base_output_path + "/js_proxy_class.o"
+
+gen_obj("js_proxyclass") {
+  input = "declarative_frontend/engine/jsproxyClass.js"
+  if (use_mac) {
+    jsproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
+  }
+  output = jsproxyclass_obj_path
+  snapshot_dep = []
+}
+
+# build declarative javascript engine library
+template("declarative_js_engine") {
+  # get is_ohos_platform, use_quickjs_engine flag.
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+    deps = []
+    configs = []
+    is_separated_so = is_ohos_platform && !is_wearable_product
+    sources = [
+      "declarative_frontend/engine/declarative_engine_loader.cpp",
+      "declarative_frontend/engine/js_view_listeners.cpp",
+      "declarative_frontend/jsview/js_animation.cpp",
+      "declarative_frontend/jsview/js_button.cpp",
+      "declarative_frontend/jsview/js_column.cpp",
+      "declarative_frontend/jsview/js_container_base.cpp",
+      "declarative_frontend/jsview/js_customview_base.cpp",
+      "declarative_frontend/jsview/js_divider.cpp",
+      "declarative_frontend/jsview/js_foreach.cpp",
+      "declarative_frontend/jsview/js_grid.cpp",
+      "declarative_frontend/jsview/js_grid_item.cpp",
+      "declarative_frontend/jsview/js_image.cpp",
+      "declarative_frontend/jsview/js_interactable_view.cpp",
+      "declarative_frontend/jsview/js_list.cpp",
+      "declarative_frontend/jsview/js_list_item.cpp",
+      "declarative_frontend/jsview/js_navigator.cpp",
+      "declarative_frontend/jsview/js_row.cpp",
+      "declarative_frontend/jsview/js_sliding_panel.cpp",
+      "declarative_frontend/jsview/js_stack.cpp",
+      "declarative_frontend/jsview/js_swiper.cpp",
+      "declarative_frontend/jsview/js_text.cpp",
+      "declarative_frontend/jsview/js_touch_handler.cpp",
+      "declarative_frontend/jsview/js_view.cpp",
+      "declarative_frontend/jsview/js_view_abstract.cpp",
+    ]
+
+    #add quickjs engine support
+    if (use_quickjs_engine) {
+      defines += [ "USE_QUICKJS_ENGINE" ]
+      defines += [ "ACE_CACHE_PATH=\"\"" ]
+
+      #shoule build qjs anytime, when use_quickjs_engine is true
+      if (is_separated_so || use_mingw_win || use_mac) {
+        deps += [ "//third_party/quickjs:qjs" ]
+      }
+
+      sources += [
+        "declarative_frontend/engine/quickjs/functions/qjs_click_function.cpp",
+        "declarative_frontend/engine/quickjs/functions/qjs_foreach_function.cpp",
+        "declarative_frontend/engine/quickjs/functions/qjs_function.cpp",
+        "declarative_frontend/engine/quickjs/functions/qjs_touch_function.cpp",
+        "declarative_frontend/engine/quickjs/functions/qjs_view_function.cpp",
+        "declarative_frontend/engine/quickjs/qjs_bindings.cpp",
+        "declarative_frontend/engine/quickjs/qjs_declarative_engine.cpp",
+        "declarative_frontend/engine/quickjs/qjs_declarative_engine_instance.cpp",
+        "declarative_frontend/engine/quickjs/qjs_function_list_entries_container.cpp",
+        "declarative_frontend/engine/quickjs/qjs_helpers.cpp",
+        "declarative_frontend/engine/quickjs/qjs_object_template.cpp",
+        "declarative_frontend/engine/quickjs/qjs_view_register.cpp",
+      ]
+
+      if (is_separated_so) {
+        sources += [
+          "js_frontend/engine/quickjs/qjs_group_js_bridge.cpp",
+          "js_frontend/engine/quickjs/qjs_utils.cpp",
+        ]
+      }
+      deps += [ "//foundation/ace/napi:ace_napi_quickjs" ]
+    }
+
+    configs += [ "$ace_root:ace_config" ]
+
+    print("platform: ${platform}")
+
+    if (is_separated_so) {
+      deps += [ "$ace_root/adapter/common/cpp:libace" ]
+    } else {
+      deps += [ ":js_framework_$platform" ]
+      defines += [ "BUILT_IN_JS_ENGINE" ]
+    }
+    if (is_ohos_platform) {
+      deps += [
+        ":gen_obj_src_js_proxyclass",
+        ":intl_qjs",
+       ]
+    }
+
+    if (use_mingw_win || use_mac) {
+      deps += [
+        ":gen_obj_src_js_proxyclass",
+        ":intl_qjs_preview",
+      ]
+
+      defines += [ "_USE_MATH_DEFINES" ]
+      defines += [ "BUILT_IN_JS_ENGINE" ]
+      cflags = [ "-std=c++17" ]
+    }
+  }
+}
+
+declarative_js_engine("declarative_js_engine_qjs_ohos") {
+  defines = ace_ohos_defines
+  is_ohos_platform = true
+  use_quickjs_engine = true
+  platform = "ohos"
+}
