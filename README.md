@@ -96,7 +96,7 @@ JS UI framework
 
 **ace\_ace\_engine**
 
-ace\_ace\_engine\_lite
+ace\_engine\_lite
 
 ace\_napi
 
