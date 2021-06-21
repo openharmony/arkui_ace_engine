@@ -2222,8 +2222,9 @@ JSValue QjsEngineInstance::FireJsEvent(const std::string& param)
         QjsUtils::ParseJSON(ctx, param.c_str(), param.size(), nullptr),
     };
 
-    JSValue retVal = JS_Call(ctx, callJsFunc, JS_UNDEFINED, countof(argv), argv);
+    JSValue retVal = JS_Call(ctx, callJsFunc, globalObj, countof(argv), argv);
 
+    js_std_loop(ctx);
     JS_FreeValue(ctx, globalObj);
 
     // It is up to the caller to check this value. No exception checks here.
@@ -2259,8 +2260,9 @@ void QjsEngineInstance::CallJs(const std::string& callbackId, const std::string&
         QjsUtils::NewString(ctx, std::to_string(instanceId).c_str()),
         QjsUtils::ParseJSON(ctx, callBuff.c_str(), callBuff.size(), nullptr),
     };
-    QjsUtils::Call(ctx, callJsFunc, JS_UNDEFINED, countof(argv), argv);
+    QjsUtils::Call(ctx, callJsFunc, globalObj, countof(argv), argv);
 
+    js_std_loop(ctx);
     JS_FreeValue(ctx, globalObj);
 }
 
