@@ -266,8 +266,8 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
 这里尤其要注意一点，`domNodeCreators[]`是一个线性表，添加`{ DOM_NODE_TAG_MYCIRCLE, &DOMNodeCreator<DOMMyCircle> }`的地方必须要符合字母序。
 
 ```c++
-DOM_NODE_TAG_MENU[] = "menu"，
-DOM_NODE_TAG_NAVIGATION_BAR[] = "navigation-bar"，
+DOM_NODE_TAG_MENU[] = "menu",
+DOM_NODE_TAG_NAVIGATION_BAR[] = "navigation-bar",
 DOM_NODE_TAG_MYCIRCLE[] = "mycircle"
 ```
 
