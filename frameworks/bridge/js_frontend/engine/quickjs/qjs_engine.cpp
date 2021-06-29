@@ -995,32 +995,20 @@ JSValue JsHandleImage(JSContext* ctx, JSValueConst argv)
     auto success = JsParseRouteUrl(ctx, argv, "success");
     auto fail = JsParseRouteUrl(ctx, argv, "fail");
 
-    std::set<std::string> callbacks;
-    if (!success.empty()) {
-        callbacks.emplace("success");
-    }
-    if (!fail.empty()) {
-        callbacks.emplace("fail");
-    }
-
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
         return JS_NULL;
     }
 
-    auto&& callback = [instance, success, fail](int32_t callbackType) {
-        switch (callbackType) {
-            case 0:
-                instance->CallJs(success.c_str(), std::string("\"success\",null").c_str(), false);
-                break;
-            case 1:
-                instance->CallJs(fail.c_str(), std::string("\"fail\",null").c_str(), false);
-                break;
-            default:
-                break;
+    auto&& callback = [instance, success, fail](bool callbackType, int32_t width, int32_t height) {
+        if (callbackType) {
+            instance->CallJs(success.c_str(), std::string("{\"width\":").append(std::to_string(width))
+                .append(", \"height\":").append(std::to_string(height)).append("}").c_str(), false);
+        } else {
+            instance->CallJs(fail.c_str(), std::string("\"fail\",null").c_str(), false);
         }
     };
-    instance->GetDelegate()->HandleImage(src, callback, callbacks);
+    instance->GetDelegate()->HandleImage(src, callback);
     return JS_NULL;
 }
 

@@ -501,25 +501,20 @@ sk_sp<SkImage> ImageProvider::GetSkImage(
     return image;
 }
 
-void RenderImageProvider::CanLoadImage(
-    const RefPtr<PipelineContext>& context, const std::string& src, const std::map<std::string, EventMarker>& callbacks)
+void RenderImageProvider::TryLoadImageInfo(const RefPtr<PipelineContext>& context, const std::string& src,
+        std::function<void(bool, int32_t, int32_t)>&& loadCallback)
 {
-    if (callbacks.find("success") == callbacks.end() || callbacks.find("fail") == callbacks.end()) {
-        return;
-    }
-    auto onSuccess = AceAsyncEvent<void()>::Create(callbacks.at("success"), context);
-    auto onFail = AceAsyncEvent<void()>::Create(callbacks.at("fail"), context);
     auto imageProvider = ImageProvider::Create(src, nullptr);
     if (imageProvider) {
         auto assetManager = context->GetAssetManager();
         BackgroundTaskExecutor::GetInstance().PostTask(
-            [src, imageProvider, onSuccess, onFail, assetManager]() {
+            [src, imageProvider, callback = std::move(loadCallback), assetManager]() {
                 auto image = imageProvider->GetSkImage(src, assetManager);
                 if (image) {
-                    onSuccess();
+                    callback(true, image->width(), image->height());
                     return;
                 }
-                onFail();
+                callback(false, 0, 0);
             });
     }
 }
