@@ -29,8 +29,8 @@ class RenderImageProvider : public virtual AceType {
     DECLARE_ACE_TYPE(RenderImageProvider, AceType);
 
 public:
-    static void CanLoadImage(const RefPtr<PipelineContext>& context, const std::string& src,
-        const std::map<std::string, EventMarker>& callbacks);
+    static void TryLoadImageInfo(const RefPtr<PipelineContext>& context, const std::string& src,
+        std::function<void(bool, int32_t, int32_t)>&& loadCallback);
 };
 
 } // namespace OHOS::Ace
