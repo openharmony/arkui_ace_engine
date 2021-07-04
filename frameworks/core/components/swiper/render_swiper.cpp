@@ -176,20 +176,6 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
         rotationController->SetRequestRotationImpl(weak, context_);
     }
 
-    int32_t index = swiper->GetIndex();
-    // can't change index when stretch indicator, as stretch direct is single.
-    if (index >= 0 && stretchRate_ == 0.0) {
-        if (index >= itemCount_) {
-            index = itemCount_ - 1;
-        }
-        if (indexInitialized) {
-            SwipeTo(index, false);
-        } else {
-            currentIndex_ = index;
-            indexInitialized = true;
-        }
-    }
-
     childrenArray_.clear();
     MarkNeedLayout();
 
@@ -197,7 +183,9 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
         LOGD("swiper item is less than least slide count");
         return;
     }
+    UpdateIndex(swiper->GetIndex());
     Initialize(GetContext());
+    isSwiperInitialized_ = isSwiperInitialized_ || swiper;
 }
 
 void RenderSwiper::UpdateTouchRect()
@@ -254,6 +242,11 @@ void RenderSwiper::PerformLayout()
         LayoutIndicator(swiperIndicatorData_);
     } else {
         UpdateIndicator();
+    }
+
+    if (swipeToIndex_ != -1) {
+        SwipeTo(swipeToIndex_, false);
+        swipeToIndex_ = -1;
     }
 }
 
@@ -400,6 +393,25 @@ void RenderSwiper::InitAccessibilityEventListener()
         }
         return false;
     });
+}
+
+void RenderSwiper::UpdateIndex(int32_t index)
+{
+    // can't change index when stretch indicator, as stretch direct is single.
+    if (index >= 0 && stretchRate_ == 0.0) {
+        if (index >= itemCount_) {
+            index = itemCount_ - 1;
+        }
+        if (isSwiperInitialized_) {
+            if (index_ != index) {
+                swipeToIndex_ = index; // swipe to animation need to start after perform layout
+                index_ = index;
+            }
+        } else {
+            // render node first update index
+            currentIndex_ = index;
+        }
+    }
 }
 
 void RenderSwiper::OnTouchTestHit(
@@ -696,6 +708,7 @@ void RenderSwiper::MoveItems(double dragOffset, int32_t fromIndex, int32_t toInd
         controller_->RemoveInterpolator(translate_);
         isAnimationAlreadyAdded_ = false;
     }
+
     isIndicatorAnimationStart_ = true;
     double start = dragOffset;
     double end;
@@ -1121,8 +1134,8 @@ void RenderSwiper::UpdateScrollPosition(double dragDelta)
     } else {
         toIndex = needReverse_ ? GetPrevIndex() : GetNextIndex();
     }
-    if (toIndex < 0 || toIndex >= itemCount_) {
-        LOGD("toIndex is out %{public}d", toIndex);
+    if (toIndex < 0 || toIndex >= itemCount_ || currentIndex_ == toIndex) {
+        LOGD("toIndex is error %{public}d", toIndex);
         return;
     }
 
@@ -1163,7 +1176,6 @@ void RenderSwiper::UpdateScrollPosition(double dragDelta)
 
 void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, int32_t toIndex)
 {
-    scrollOffset_ = offset;
     int32_t childrenCount = static_cast<int32_t>(childrenArray_.size());
     if (fromIndex < 0 || fromIndex >= childrenCount || toIndex < 0 || toIndex >= childrenCount ||
         fromIndex == toIndex) {
@@ -1171,6 +1183,7 @@ void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, int32_t
             fromIndex, childrenCount);
         return;
     }
+    scrollOffset_ = offset;
     const auto& fromItem = childrenArray_[fromIndex];
     fromItem->SetPosition(GetMainAxisOffset(offset));
     const auto& toItem = childrenArray_[toIndex];
