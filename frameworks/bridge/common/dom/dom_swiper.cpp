@@ -26,6 +26,12 @@ namespace {
 constexpr uint32_t METHOD_SWIPE_TO_ARGS_SIZE = 1;
 constexpr double MAX_OPACITY = 255.0;
 constexpr double INDICATOR_POINT_SCALE = 1.33;
+const std::string DISPLAY_COMPOSED_NAME = "SwiperDisplayChild";
+
+std::string GetDisplayComposedId(const RefPtr<DOMNode>& child)
+{
+    return "display" + std::to_string(child->GetNodeId());
+}
 
 } // namespace
 
@@ -199,13 +205,14 @@ void DOMSwiper::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
     ACE_DCHECK(child);
     auto display = AceType::MakeRefPtr<DisplayComponent>(child->GetRootComponent());
     display->SetOpacity(MAX_OPACITY);
-    swiperChild_->InsertChild(slot, display);
+    swiperChild_->InsertChild(
+        slot, AceType::MakeRefPtr<ComposedComponent>(GetDisplayComposedId(child), DISPLAY_COMPOSED_NAME, display));
 }
 
 void DOMSwiper::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 {
     ACE_DCHECK(child);
-    swiperChild_->RemoveChild(child->GetRootComponent());
+    swiperChild_->RemoveChildByComposedId(GetDisplayComposedId(child));
 }
 
 void DOMSwiper::PrepareSpecializedComponent()
@@ -214,6 +221,12 @@ void DOMSwiper::PrepareSpecializedComponent()
         swiperChild_->SetIndicator(indicator_);
     }
     swiperChild_->SetShow(GetDisplay() == DisplayType::NO_SETTING || GetDisplay() == DisplayType::FLEX);
+    for (const auto& item : swiperChild_->GetChildren()) {
+        auto composedDisplay = AceType::DynamicCast<ComposedComponent>(item);
+        if (composedDisplay) {
+            composedDisplay->MarkNeedUpdate();
+        }
+    }
 }
 
 void DOMSwiper::ResetInitializedStyle()

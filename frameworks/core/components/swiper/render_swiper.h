@@ -298,6 +298,7 @@ private:
     void InitDragRecognizer();
     void InitRawDragRecognizer();
     void InitAccessibilityEventListener();
+    void UpdateIndex(int32_t index);
     void MoveItems(double dragOffset, int32_t fromIndex, int32_t toIndex);
     void RestoreAutoPlay()
     {
@@ -375,7 +376,9 @@ private:
     bool loop_ = true;
     bool slideContinued_  = false;
     bool disableSwipe_ = false;
-    bool indexInitialized = false;
+    int32_t index_ = 0;
+    int32_t swipeToIndex_ = -1;
+    bool isSwiperInitialized_ = false;
 
     // need timer for auto play
     RefPtr<Scheduler> scheduler_;

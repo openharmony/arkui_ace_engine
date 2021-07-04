@@ -81,6 +81,21 @@ public:
         return;
     }
 
+    virtual void RemoveChildByComposedId(const ComposeId& composeId)
+    {
+        for (const auto& item : children_) {
+            auto compose = AceType::DynamicCast<ComposedComponent>(item);
+            if (compose && composeId == compose->GetId()) {
+                auto child = compose->GetChild();
+                if (child) {
+                    child->SetParent(nullptr);
+                }
+                children_.remove(item);
+                return;
+            }
+        }
+    }
+
     virtual void RemoveChild(const RefPtr<Component>& child)
     {
         if (!child) {
