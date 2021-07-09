@@ -1644,6 +1644,17 @@ void PipelineContext::RefreshRootBgColor() const
     }
 }
 
+void PipelineContext::ClipRootHole(double left, double top, double width, double height) const
+{
+    if (!rootElement_) {
+        return;
+    }
+    const auto& render = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
+    if (render) {
+        render->SetTransparentHole(left, top, width, height);
+    }
+}
+
 void PipelineContext::SetOnPageShow(OnPageShowCallBack&& onPageShowCallBack)
 {
     if (!onPageShowCallBack) {

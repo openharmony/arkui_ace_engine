@@ -552,6 +552,7 @@ public:
     }
 
     void RefreshRootBgColor() const;
+    void ClipRootHole(double left, double top, double width, double height) const;
     void AddToHoverList(const RefPtr<RenderNode>& node);
 
     using UpdateWindowBlurRegionHandler = std::function<void(const std::vector<std::vector<float>>&)>;
