@@ -112,6 +112,15 @@ void RenderRoot::SetDefaultBgColor()
     MarkNeedRender();
 }
 
+void RenderRoot::SetTransparentHole(double left, double top, double width, double height)
+{
+    transparentHole_.SetLeft(left);
+    transparentHole_.SetTop(top);
+    transparentHole_.SetWidth(width);
+    transparentHole_.SetHeight(height);
+    MarkNeedRender();
+}
+
 void RenderRoot::SetBgColor(const Color& color)
 {
     bgColor_ = color;

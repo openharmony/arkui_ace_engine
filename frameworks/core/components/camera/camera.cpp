@@ -356,6 +356,8 @@ void CameraCallback::StartPreview()
 
         subWindow_ = OHOS::WindowManager::GetInstance()->CreateSubWindow(context->GetWindowId(), &config);
         subWindow_->GetSurface()->SetQueueSize(10);
+        // call context to create hole
+        context->ClipRootHole(config.pos_x, config.pos_y, config.width, config.height);
     }
 
     previewSurface_ = subWindow_->GetSurface();
@@ -495,6 +497,8 @@ void CameraCallback::Stop(bool isClosePreView)
     if (isClosePreView) {
         LOGI("CameraCallback: Destroy subWindow.");
         subWindow_.reset();
+        auto context = context_.Upgrade();
+        context->ClipRootHole(0, 0, 0, 0);
     }
 }
 
@@ -546,9 +550,11 @@ void CameraCallback::onRecord(bool isSucces, std::string info)
 
 void CameraCallback::OnCameraSizeChange(int32_t width, int32_t height)
 {
+    auto context = context_.Upgrade();
     LOGE("CameraCallback:OnCameraSizeChange  %{public}d %{public}d %{public}p-", width, height, subWindow_.get());
     if (subWindow_) {
         subWindow_->SetSubWindowSize(width, height);
+        context->ClipRootHole(windowOffset_.GetX(), windowOffset_.GetY(), static_cast<double>(width), static_cast<double>(height));
     }
     windowSize_.SetWidth(width);
     windowSize_.SetWidth(height);
@@ -556,8 +562,10 @@ void CameraCallback::OnCameraSizeChange(int32_t width, int32_t height)
 
 void CameraCallback::OnCameraOffsetChange(int32_t x, int32_t y)
 {
+    auto context = context_.Upgrade();
     if (subWindow_) {
         subWindow_->Move(x, y);
+        context->ClipRootHole(static_cast<double>(x), static_cast<double>(y), windowSize_.Width(), windowSize_.Height());
     }
     windowOffset_.SetX(x);
     windowOffset_.SetX(y);

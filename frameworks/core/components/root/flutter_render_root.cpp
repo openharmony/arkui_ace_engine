@@ -41,11 +41,15 @@ void FlutterRenderRoot::Paint(RenderContext& context, const Offset& offset)
     }
     auto skColor = SkColorSetARGB(bgColor_.GetAlpha(), bgColor_.GetRed(), bgColor_.GetGreen(), bgColor_.GetBlue());
     auto pipelineContext = GetContext().Upgrade();
+    canvas->save();
+    canvas->clipRect(transparentHole_.Left(), transparentHole_.Top(), transparentHole_.Left() +
+        transparentHole_.Width(), transparentHole_.Top() + transparentHole_.Height(), SkClipOp::kDifference);
     if (pipelineContext && pipelineContext->IsJsCard()) {
         canvas->canvas()->drawColor(skColor);
     } else {
         canvas->canvas()->clear(skColor);
     }
+    canvas->restore();
 
     RenderNode::Paint(context, offset);
 }

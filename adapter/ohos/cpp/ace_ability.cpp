@@ -192,6 +192,11 @@ void AceAbility::OnStart(const Want& want)
         parsedPageUrl = "";
     }
 
+    auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
+    if (context != nullptr) {
+	    context->SetWindowId(window->GetWindowID());
+    }
+
     // run page.
     Platform::AceContainer::RunPage(
         abilityId_, Platform::AceContainer::GetContainer(abilityId_)->GeneratePageId(),
