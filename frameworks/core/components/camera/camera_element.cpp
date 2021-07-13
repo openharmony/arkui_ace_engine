@@ -99,8 +99,10 @@ void CameraElement::Prepare(const WeakPtr<Element>& parent)
 void CameraElement::HiddenChange(bool hidden)
 {
     if (hidden) {
+        LOGI("CameraElement::HiddenChange: hidden.");
         ReleasePlatformResource();
     } else {
+        LOGI("CameraElement::HiddenChange: show.");
         CreatePlatformResource();
     }
 }
@@ -115,7 +117,13 @@ void CameraElement::InitEvent(const RefPtr<CameraComponent>& cameraComponent)
 void CameraElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
     LOGI("CameraElement::OnTextureSize");
-    if (camera_) {
+    auto renderTexture = AceType::DynamicCast<RenderTexture>(renderNode_);
+    if (!renderTexture) {
+        LOGI("CameraElement::OnTextureSize: renderNode is not renderTexture type.");
+        return;
+    }
+
+    if (camera_ && renderTexture->GetFit() == ImageFit::FILL) {
         LOGE("CameraElement:OnTextureSize  %{public}d %{public}d ", textureWidth, textureHeight);
         camera_->OnCameraSizeChange(textureWidth, textureHeight);
     }
@@ -124,11 +132,28 @@ void CameraElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32
 void CameraElement::OnTextureOffset(int64_t textureId, int32_t x, int32_t y)
 {
     LOGI("CameraElement::OnTextureOffset");
-    if (camera_) {
-        camera_->OnCameraOffsetChange(x, y);
-        LOGE("Camera:OnTextureOffset %{public}d %{public}d", x, y);
-        StartPreview();
+    auto renderTexture = AceType::DynamicCast<RenderTexture>(renderNode_);
+    if (!renderTexture) {
+        LOGI("CameraElement::OnTextureSize: renderNode is not renderTexture type.");
+        return;
     }
+
+    if (camera_ && renderTexture->GetFit() == ImageFit::FILL) {
+        LOGE("Camera:OnTextureOffset %{public}d %{public}d", x, y);
+        camera_->OnCameraOffsetChange(x, y);
+    }
+}
+
+void CameraElement::OnPrepared()
+{
+    LOGI("CameraElement::OnPrepared");
+    if (!renderNode_) {
+        return;
+    }
+
+    auto camera = AceType::MakeRefPtr<CameraComponent>();
+    camera->SetFit(ImageFit::FILL);
+    renderNode_->Update(camera);
 }
 
 void CameraElement::CreatePlatformResource()
@@ -209,6 +234,11 @@ void CameraElement::InitListener()
         return;
     }
 
+    if (!camera_) {
+        LOGE("CameraElement::InitListener: camera is null.");
+        return;
+    }
+
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     auto takePhotoListener = [weak = WeakClaim(this), uiTaskExecutor](
         const std::map<std::string, std::string> result) {
@@ -219,6 +249,7 @@ void CameraElement::InitListener()
                 }
             });
     };
+    camera_->AddTakePhotoListener(takePhotoListener);
 
     auto onError = [weak = WeakClaim(this), uiTaskExecutor](const std::string& errorcode, const std::string& errormsg) {
         uiTaskExecutor.PostTask([&weak, errorcode, errormsg] {
@@ -228,6 +259,7 @@ void CameraElement::InitListener()
             }
         });
     };
+    camera_->AddErrorListener(onError);
 
     auto recorderCallBack = [weak = WeakClaim(this), uiTaskExecutor](
         const std::map<std::string, std::string> result) {
@@ -238,12 +270,17 @@ void CameraElement::InitListener()
                 }
             });
     };
+    camera_->AddRecordListener(recorderCallBack);
 
-    if (camera_) {
-        camera_->AddTakePhotoListener(takePhotoListener);
-        camera_->AddErrorListener(onError);
-        camera_->AddRecordListener(recorderCallBack);
-    }
+    auto preparedCallBack = [weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostTask([&weak] {
+                auto camera = weak.Upgrade();
+                if (camera) {
+                    camera->OnPrepared();
+                }
+            });
+    };
+    camera_->AddPrepareEventListener(preparedCallBack);
 }
 
 void CameraElement::OnTakePhotoCallBack(const std::map<std::string, std::string>& result)

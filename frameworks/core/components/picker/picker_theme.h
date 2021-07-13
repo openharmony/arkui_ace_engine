@@ -92,6 +92,7 @@ public:
             theme->dividerColor_ = themeConstants->GetColor(THEME_PICKER_SELECT_DIVIDER_COLOR);
             theme->gradientHeight_ = themeConstants->GetDimension(THEME_PICKER_GRADIENT_HEIGHT);
             theme->columnFixedWidth_ = themeConstants->GetDimension(THEME_PICKER_COLUMN_FIXED_WIDTH);
+            theme->pressColor_ = themeConstants->GetColor(THEME_CLICKEFFIC_DEFAULT_COLOR_OHOS);
             Parse(themeConstants->GetThemeStyle(), theme);
             return theme;
         }

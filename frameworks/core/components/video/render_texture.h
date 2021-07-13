@@ -63,6 +63,29 @@ public:
         return true;
     }
 
+    ImageFit GetFit() const
+    {
+        return imageFit_;
+    }
+
+    void OnAppShow() override
+    {
+        LOGE("RenderTexture: Camera OnAppShow.");
+        RenderNode::OnAppShow();
+        if (hiddenChangeEvent_) {
+            hiddenChangeEvent_(false);
+        }
+    }
+
+    void OnAppHide() override
+    {
+        LOGE("RenderTexture: Camera OnAppHidden.");
+        RenderNode::OnAppHide();
+        if (hiddenChangeEvent_) {
+            hiddenChangeEvent_(true);
+        }
+    }
+
 protected:
     RenderTexture();
 
