@@ -86,7 +86,8 @@ void RenderTexture::PerformLayout()
         textureSizeChangeEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
     }
     if (textureOffsetChangeEvent_) {
-        textureOffsetChangeEvent_(textureId_, (int32_t)alignmentX_, (int32_t)alignmentY_);
+        textureOffsetChangeEvent_(textureId_,
+            (int32_t)(alignmentX_ + GetGlobalOffset().GetX()), (int32_t)(alignmentY_ + GetGlobalOffset().GetY()));
     }
     MarkNeedRender();
 }

@@ -56,6 +56,7 @@ private:
     void InitEvent(const RefPtr<CameraComponent>& cameraComponent);
     void OnError(const std::string& errorcode, const std::string& errormsg);
     void HiddenChange(bool hidden);
+    void OnPrepared();
 
     void OnRecorderCallBack(const std::map<std::string, std::string>& result);
     void TakePhoto(const Size& size);

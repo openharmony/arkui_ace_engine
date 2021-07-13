@@ -65,6 +65,7 @@ private:
 class CameraCallback : public Media::CameraStateCallback {
 public:
     ACE_DISALLOW_COPY_AND_MOVE(CameraCallback);
+    using PrepareEventListener = std::function<void()>;
 
     explicit CameraCallback(Media::EventHandler &eventHdlr) : eventHandler_(eventHdlr)
     {}
@@ -97,8 +98,12 @@ public:
     void AddErrorListener(ErrorListener&& listener);
     void AddRecordListener(RecordListener&& listener);
     void SetCatchFilePath(std::string cacheFilePath);
-    void OnCameraSizeChange(int32_t width, int32_t height);
-    void OnCameraOffsetChange(int32_t x, int32_t y);
+    void OnCameraSizeChange(double width, double height);
+    void OnCameraOffsetChange(double x, double y);
+    void AddPrepareEventListener(PrepareEventListener&& listener)
+    {
+        prepareEventListener_ = std::move(listener);
+    }
 
 protected:
     void OnCreated(const Media::Camera &camera) override;
@@ -127,7 +132,7 @@ private:
     std::unique_ptr<OHOS::SubWindow> subWindow_;
     WeakPtr<PipelineContext> context_;
     sptr<Surface> captureSurface_;
-    Size windowSize_ = Size(TEMPORARY_WINDOW_SIZE, TEMPORARY_WINDOW_SIZE);
+    Size windowSize_ = Size(0, 0);
     Offset windowOffset_ = Offset(0, 0);
 
     bool isReady_ = false;
@@ -135,6 +140,7 @@ private:
 
     State previewState_ = State::STATE_IDLE;
     State recordState_ = State::STATE_IDLE;
+    PrepareEventListener prepareEventListener_;
 };
 
 class SurfaceListener : public IBufferConsumerListener {
@@ -149,6 +155,8 @@ class Camera : public virtual AceType {
     DECLARE_ACE_TYPE(Camera, AceType);
 
 public:
+    using PrepareEventListener = std::function<void()>;
+
     Camera(const WeakPtr<PipelineContext> &context, Media::EventHandler &eventHdlr)
         : context_(context), cameraCallback_(eventHdlr) {}
     ~Camera() override = default;
@@ -161,8 +169,12 @@ public:
     void StartPreview();
     void StartRecord();
 
-    void OnCameraSizeChange(int32_t width, int32_t height);
-    void OnCameraOffsetChange(int32_t x, int32_t y);
+    void OnCameraSizeChange(double width, double height);
+    void OnCameraOffsetChange(double x, double y);
+    void AddPrepareEventListener(PrepareEventListener&& listener)
+    {
+        cameraCallback_.AddPrepareEventListener(std::move(listener));
+    }
 
     void AddTakePhotoListener(TakePhotoListener&& listener);
     void AddErrorListener(ErrorListener&& listener);

@@ -65,6 +65,8 @@ constexpr int32_t SAMPLE_RATE = 48000;
 constexpr int32_t FRAME_RATE = 30;
 constexpr int32_t RATE = 4096;
 constexpr double FPS = 30;
+constexpr int32_t MAX_WIDTH = 480;
+constexpr int32_t MAX_HEIGHT = 892;
 
 inline void SaveFileData(const std::string& filePath, const char &buffer, uint32_t size, std::string& path)
 {
@@ -129,7 +131,6 @@ void FrameCallback::OnFrameFinished(const Media::Camera &camera,
             }
             surface->ReleaseBuffer(buffer, -1);
         }
-        delete surface;
     }
     delete &frameConfig;
 }
@@ -184,6 +185,10 @@ void CameraCallback::OnCreated(const Media::Camera &camera)
     isReady_ = true;
     if (hasCallPreView_) {
         StartPreview();
+    }
+
+    if (prepareEventListener_) {
+        prepareEventListener_();
     }
 }
 
@@ -326,7 +331,7 @@ void CameraCallback::StartPreview()
         return;
     }
 
-    LOGI("Camera StartPreview.");
+    LOGI("Camera StartPreview start.");
     if (camera_ == nullptr) {
         LOGE("Camera is null.");
         return;
@@ -346,8 +351,8 @@ void CameraCallback::StartPreview()
     if (!subWindow_) {
         OHOS::WindowConfig config;
         memset_s(&config, sizeof(OHOS::WindowConfig), 0, sizeof(OHOS::WindowConfig));
-        config.height = windowSize_.Width();
-        config.width = windowSize_.Height();
+        config.height = windowSize_.Height();
+        config.width = windowSize_.Width();
         config.format = PIXEL_FMT_RGBA_8888;
         config.pos_x = windowOffset_.GetX();
         config.pos_y = windowOffset_.GetY();
@@ -490,11 +495,12 @@ void CameraCallback::Stop(bool isClosePreView)
     }
 
     if (recordState_ == State::STATE_RUNNING) {
+        LOGI("CameraCallback:Stop:CloseRecorder.");
         CloseRecorder();
     }
     recordState_ = State::STATE_IDLE;
     previewState_ = State::STATE_IDLE;
-    if (isClosePreView) {
+    if (isClosePreView && subWindow_) {
         LOGI("CameraCallback: Destroy subWindow.");
         subWindow_.reset();
         auto context = context_.Upgrade();
@@ -548,38 +554,79 @@ void CameraCallback::onRecord(bool isSucces, std::string info)
     onRecordListener_(result);
 }
 
-void CameraCallback::OnCameraSizeChange(int32_t width, int32_t height)
+void CameraCallback::OnCameraSizeChange(double width, double height)
 {
     auto context = context_.Upgrade();
-    LOGE("CameraCallback:OnCameraSizeChange  %{public}d %{public}d %{public}p-", width, height, subWindow_.get());
-    if (subWindow_) {
-        subWindow_->SetSubWindowSize(width, height);
-        context->ClipRootHole(windowOffset_.GetX(), windowOffset_.GetY(), static_cast<double>(width), static_cast<double>(height));
+    if (!context) {
+        LOGE("Camera::CameraCallback: context is null.");
+        return;
     }
-    windowSize_.SetWidth(width);
-    windowSize_.SetWidth(height);
+    if (width + windowOffset_.GetX() > MAX_WIDTH) {
+        windowSize_.SetWidth(MAX_WIDTH - windowOffset_.GetX());
+    } else {
+        windowSize_.SetWidth(width);
+    }
+
+    if (height + windowOffset_.GetY() > MAX_HEIGHT) {
+        windowSize_.SetHeight(MAX_HEIGHT - windowOffset_.GetY());
+    } else {
+        windowSize_.SetHeight(height);
+    }
+
+    if (subWindow_) {
+        LOGE("CameraCallback::OnCameraSizeChange: %{public}lf  %{public}lf.", width, height);
+        subWindow_->SetSubWindowSize(windowSize_.Width(), windowSize_.Height());
+        context->ClipRootHole(windowOffset_.GetX(), windowOffset_.GetY(),
+            windowSize_.Width(), windowSize_.Height());
+    } else {
+        LOGE("CameraCallback::OnCameraSizeChange: subwindow is null.");
+    }
 }
 
-void CameraCallback::OnCameraOffsetChange(int32_t x, int32_t y)
+void CameraCallback::OnCameraOffsetChange(double x, double y)
 {
     auto context = context_.Upgrade();
-    if (subWindow_) {
-        subWindow_->Move(x, y);
-        context->ClipRootHole(static_cast<double>(x), static_cast<double>(y), windowSize_.Width(), windowSize_.Height());
+    if (!context) {
+        LOGE("Camera::CameraCallback: context is null.");
+        return;
     }
+    bool sizeChange = false;
+    if (x + windowSize_.Width() > MAX_WIDTH) {
+        windowSize_.SetWidth(MAX_WIDTH - x);
+        sizeChange = true;
+    }
+
+    if (y + windowSize_.Height() > MAX_HEIGHT) {
+        windowSize_.SetHeight(MAX_HEIGHT - y);
+        sizeChange = true;
+    }
+
+    if (sizeChange) {
+        OnCameraSizeChange(windowSize_.Width(), windowSize_.Height());
+    }
+
     windowOffset_.SetX(x);
-    windowOffset_.SetX(y);
+    windowOffset_.SetY(y);
+
+    if (subWindow_) {
+        LOGE("CameraCallback::OnCameraOffsetChange: %{public}lf  %{public}lf.", x, y);
+        subWindow_->Move(windowOffset_.GetX(), windowOffset_.GetY());
+        context->ClipRootHole(windowOffset_.GetX(), windowOffset_.GetY(),
+            windowSize_.Width(), windowSize_.Height());
+    } else {
+        LOGE("CameraCallback::OnCameraOffsetChange: subwindow is null.");
+    }
 }
 
 void Camera::Release()
 {
-    LOGI("Camera: Release!");
+    LOGI("Camera: Release start.");
     Stop(true);
     Media::Camera *camera = const_cast<Media::Camera *>(cameraCallback_.GetCameraInstance());
     if (camera != nullptr) {
-        camera->StopLoopingCapture();
-        camera = nullptr;
+        camera->Release();
     }
+    LOGI("Camera: Release end.");
 }
 
 void Camera::CreateCamera()
@@ -665,14 +712,30 @@ void Camera::AddRecordListener(RecordListener&& listener)
     cameraCallback_.AddRecordListener(std::move(listener));
 }
 
-void Camera::OnCameraSizeChange(int32_t width, int32_t height)
+void Camera::OnCameraSizeChange(double width, double height)
 {
-    cameraCallback_.OnCameraSizeChange(width, height);
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("Camera::OnCameraSizeChange: context is null.");
+        return;
+    }
+    float viewScale = context->GetViewScale();
+
+    LOGI("Camera::OnCameraSizeChange:viewScale %{public}f .", viewScale);
+    cameraCallback_.OnCameraSizeChange(width * viewScale, height * viewScale);
 }
 
-void Camera::OnCameraOffsetChange(int32_t x, int32_t y)
+void Camera::OnCameraOffsetChange(double x, double y)
 {
-    cameraCallback_.OnCameraOffsetChange(x, y);
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("Camera::OnCameraOffsetChange: context is null.");
+        return;
+    }
+    float viewScale = context->GetViewScale();
+
+    LOGI("Camera::OnCameraOffsetChange:viewScale %{public}f .", viewScale);
+    cameraCallback_.OnCameraOffsetChange(x * viewScale, y * viewScale);
 }
 
 } // namespace OHOS::Ace
