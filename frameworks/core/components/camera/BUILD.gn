@@ -26,7 +26,8 @@ config("standard_camera_config") {
     "//foundation/multimedia/camera_standard/frameworks/include",
     "//foundation/multimedia/camera_standard/frameworks/innerkitsimpl/camera/include",
     "//foundation/multimedia/camera_standard/interfaces/innerkits/native/include",
-    "//foundation/multimedia/media_standard/interfaces/kits/native/include",
+
+    "//foundation/multimedia/media_standard/interfaces/innerkits/native/media/include",
     "//utils/native/base/include",
   ]
 }
@@ -50,7 +51,7 @@ build_component("camera") {
 
     external_deps = [
       "ipc:ipc_core",
-      "multimedia_media_standard:recorder",
+      "multimedia_media_standard:media_client",
     ]
   }
 }
