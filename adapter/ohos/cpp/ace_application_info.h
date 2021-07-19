@@ -37,12 +37,9 @@ public:
         const std::string& keywordsAndValues) override;
     void ChangeLocale(const std::string& language, const std::string& countryOrRegion) override;
     std::vector<std::string> GetLocaleFallback(const std::vector<std::string>& localeList) const override;
-    std::vector<std::string> GetResourceFallback(const std::vector<std::string>& resourceList) const override
-    {
-        return std::vector<std::string>();
-    }
+    std::vector<std::string> GetResourceFallback(const std::vector<std::string>& resourceList) const override;
     double GetLifeTime() const override { return 0.0f; }
-    std::string GetCurrentDeviceResTag() const override { return std::string(); };
+    std::string GetCurrentDeviceResTag() const override;
     bool GetFiles(const std::string& filePath, std::vector<std::string>& fileList) const override;
 
     bool GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo) override;
