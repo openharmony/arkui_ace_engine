@@ -154,6 +154,8 @@ void FrontendDelegateImpl::GetConfigurationCommon(const std::string& filePath, s
     std::vector<std::string> priorityFileName;
     if (filePath.compare(I18N_FOLDER) == 0) {
         priorityFileName = AceApplicationInfo::GetInstance().GetLocaleFallback(fileNameList);
+    } else {
+        priorityFileName = AceApplicationInfo::GetInstance().GetResourceFallback(fileNameList);
     }
 
     for (const auto& fileName : priorityFileName) {

@@ -84,6 +84,24 @@ std::vector<std::string> AceApplicationInfoImpl::GetLocaleFallback(const std::ve
     return fileList;
 }
 
+std::vector<std::string> AceApplicationInfoImpl::GetResourceFallback(const std::vector<std::string>& resourceList) const
+{
+    ACE_SCOPED_TRACE("GetResourceFallback");
+    std::vector<std::string> fileList;
+    std::string deviceConfigTag = GetCurrentDeviceResTag();
+    AceResConfig::MatchAndSortResConfigs(resourceList, deviceConfigTag, fileList);
+    return fileList;
+}
+
+std::string AceApplicationInfoImpl::GetCurrentDeviceResTag() const
+{
+    ResolutionType resolutionType = AceResConfig::GetResolutionType(SystemProperties::GetResolution());
+    AceResConfig deviceResConfig = AceResConfig(SystemProperties::GetMcc(), SystemProperties::GetMnc(),
+        SystemProperties::GetDevcieOrientation(), SystemProperties::GetColorMode(), SystemProperties::GetDeviceType(),
+        resolutionType);
+    return AceResConfig::ConvertResConfigToTag(deviceResConfig);
+}
+
 void AceApplicationInfoImpl::SetLocale(
     const std::string& language,
     const std::string& countryOrRegion,
