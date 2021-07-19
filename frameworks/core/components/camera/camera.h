@@ -113,12 +113,13 @@ protected:
 
 private:
     int PrepareRecorder();
-    Media::Recorder *CreateRecorder();
+    std::shared_ptr<Media::Recorder> CreateRecorder();
     void onError();
     void onRecord(bool isSucces, std::string info);
 
     Media::Camera *camera_ = nullptr;
-    Media::Recorder *recorder_ = nullptr;
+    std::shared_ptr<Media::Recorder> recorder_ = nullptr;
+    int32_t videoSourceId_ = -1;
     sptr<Surface> previewSurface_;
     Media::EventHandler& eventHandler_;
 

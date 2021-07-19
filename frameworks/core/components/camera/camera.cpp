@@ -197,87 +197,75 @@ void CameraCallback::OnCreateFailed(const std::string cameraId, int32_t errorCod
     LOGE("CameraCallback: OnCreate Failed!");
 }
 
-Media::Recorder *CameraCallback::CreateRecorder()
+std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
 {
     LOGI("Camera CreateRecorder start.");
     int ret = 0;
     int32_t channelCount = 1;
-    AudioCodecFormat audioFormat = AAC_LC;
-    AudioSourceType inputSource = AUDIO_MIC;
+    Media::AudioCodecFormat audioFormat = Media::AAC_LC;
+    Media::AudioSourceType inputSource = Media::AUDIO_MIC;
     int32_t audioEncodingBitRate = SAMPLE_RATE;
     Media::VideoSourceType source = Media::VIDEO_SOURCE_SURFACE_ES;
     int32_t sourceId = 0;
     int32_t audioSourceId = 0;
     int32_t width = DEFAULT_WIDTH;
     int32_t height = DEFAULT_HEIGHT;
-    VideoCodecFormat encoder = HEVC;
+    Media::VideoCodecFormat encoder = Media::HEVC;
 
-    Media::Recorder *recorder = new Media::Recorder();
-    if ((ret = recorder->SetVideoSource(source, sourceId)) != Media::SUCCESS) {
+    std::shared_ptr<Media::Recorder> recorder = Media::RecorderFactory::CreateRecorder();
+    if ((ret = recorder->SetVideoSource(source, sourceId)) != ERR_OK) {
         LOGE("SetVideoSource failed. ret= %{private}d.", ret);
-        delete recorder;
         return nullptr;
     }
-    if ((ret = recorder->SetVideoEncoder(sourceId, encoder)) != Media::SUCCESS) {
-        LOGE("SetVideoEncoder failed. ret= %{private}d.", ret);
-        delete recorder;
-        return nullptr;
-    }
-    if ((ret = recorder->SetOutputFormat(Media::FORMAT_MPEG_4)) != Media::SUCCESS) {
-        LOGE("SetOutputFormat failed. ret= %{private}d.", ret);
-        delete recorder;
-        return nullptr;
-    }
-    if ((ret = recorder->SetVideoSize(sourceId, width, height)) != Media::SUCCESS) {
-        LOGE("SetVideoSize failed. ret= %{private}d.", ret);
-        delete recorder;
-        return nullptr;
-    }
-    if ((ret = recorder->SetVideoFrameRate(sourceId, FRAME_RATE)) != Media::SUCCESS) {
-        LOGE("SetVideoFrameRate failed. ret= %{private}d.", ret);
-        delete recorder;
-        return nullptr;
-    }
-    if ((ret = recorder->SetVideoEncodingBitRate(sourceId, RATE)) != Media::SUCCESS) {
-        LOGE("SetVideoEncodingBitRate failed. ret= %{private}d.", ret);
-        delete recorder;
-        return nullptr;
-    }
-    if ((ret = recorder->SetCaptureRate(sourceId, FPS)) != Media::SUCCESS) {
-        LOGE("SetCaptureRate failed. ret= %{private}d.", ret);
-        delete recorder;
-        return nullptr;
-    }
-    if ((ret = recorder->SetAudioSource(inputSource, audioSourceId)) != Media::SUCCESS) {
+    if ((ret = recorder->SetAudioSource(inputSource, audioSourceId)) != ERR_OK) {
         LOGE("SetAudioSource failed. ret= %{private}d.", ret);
-        delete recorder;
         return nullptr;
     }
-    if ((ret = recorder->SetAudioEncoder(audioSourceId, audioFormat)) != Media::SUCCESS) {
+    if ((ret = recorder->SetOutputFormat(Media::FORMAT_MPEG_4)) != ERR_OK) {
+        LOGE("SetOutputFormat failed. ret= %{private}d.", ret);
+        return nullptr;
+    }
+    if ((ret = recorder->SetVideoEncoder(sourceId, encoder)) != ERR_OK) {
+        LOGE("SetVideoEncoder failed. ret= %{private}d.", ret);
+        return nullptr;
+    }
+    if ((ret = recorder->SetVideoSize(sourceId, width, height)) != ERR_OK) {
+        LOGE("SetVideoSize failed. ret= %{private}d.", ret);
+        return nullptr;
+    }
+    if ((ret = recorder->SetVideoFrameRate(sourceId, FRAME_RATE)) != ERR_OK) {
+        LOGE("SetVideoFrameRate failed. ret= %{private}d.", ret);
+        return nullptr;
+    }
+    if ((ret = recorder->SetVideoEncodingBitRate(sourceId, RATE)) != ERR_OK) {
+        LOGE("SetVideoEncodingBitRate failed. ret= %{private}d.", ret);
+        return nullptr;
+    }
+    if ((ret = recorder->SetCaptureRate(sourceId, FPS)) != ERR_OK) {
+        LOGE("SetCaptureRate failed. ret= %{private}d.", ret);
+        return nullptr;
+    }
+    if ((ret = recorder->SetAudioEncoder(audioSourceId, audioFormat)) != ERR_OK) {
         LOGE("SetAudioEncoder failed. ret= %{private}d.", ret);
-        delete recorder;
         return nullptr;
     }
-    if ((ret = recorder->SetAudioSampleRate(audioSourceId, SAMPLE_RATE)) != Media::SUCCESS) {
+    if ((ret = recorder->SetAudioSampleRate(audioSourceId, SAMPLE_RATE)) != ERR_OK) {
         LOGE("SetAudioSampleRate failed. ret= %{private}d.", ret);
-        delete recorder;
         return nullptr;
     }
-    if ((ret = recorder->SetAudioChannels(audioSourceId, channelCount)) != Media::SUCCESS) {
+    if ((ret = recorder->SetAudioChannels(audioSourceId, channelCount)) != ERR_OK) {
         LOGE("SetAudioChannels failed. ret= %{private}d.", ret);
-        delete recorder;
         return nullptr;
     }
-    if ((ret = recorder->SetAudioEncodingBitRate(audioSourceId, audioEncodingBitRate)) != Media::SUCCESS) {
+    if ((ret = recorder->SetAudioEncodingBitRate(audioSourceId, audioEncodingBitRate)) != ERR_OK) {
         LOGE("SetAudioEncodingBitRate failed. ret= %{private}d.", ret);
-        delete recorder;
         return nullptr;
     }
-    if ((ret = recorder->SetMaxDuration(MAX_DURATION)) != Media::SUCCESS) { // 36000s=10h
+    if ((ret = recorder->SetMaxDuration(MAX_DURATION)) != ERR_OK) { // 36000s=10h
         LOGE("SetAudioEncodingBitRate failed. ret= %{private}d.", ret);
-        delete recorder;
         return nullptr;
     }
+    videoSourceId_ = sourceId;
     LOGI("Camera CreateRecorder success.");
     return recorder;
 }
@@ -303,7 +291,7 @@ int CameraCallback::PrepareRecorder()
         LOGE("Camera: Create fd failed.");
         return -1;
     }
-    return Media::SUCCESS;
+    return ERR_OK;
 }
 
 void CameraCallback::CloseRecorder()
@@ -311,7 +299,6 @@ void CameraCallback::CloseRecorder()
     if (recordState_ == State::STATE_RUNNING) {
         if (recorder_ != nullptr) {
             recorder_->Stop(true);
-            delete recorder_;
             recorder_ = nullptr;
         }
 
@@ -396,34 +383,34 @@ void CameraCallback::StartRecord()
         return;
     }
     int ret = PrepareRecorder();
-    if (ret != Media::SUCCESS) {
+    if (ret != ERR_OK) {
         LOGE("Camera PrepareRecorder failed.");
         CloseRecorder();
         onRecord(false, NULL_STRING);
         return;
     }
     ret = recorder_->SetOutputFile(recordFileId_);
-    if (ret != Media::SUCCESS) {
+    if (ret != ERR_OK) {
         LOGE("Camera SetOutputPath failed. ret= %{private}d", ret);
         CloseRecorder();
         onRecord(false, NULL_STRING);
         return;
     }
     ret = recorder_->Prepare();
-    if (ret != Media::SUCCESS) {
+    if (ret != ERR_OK) {
         LOGE("Prepare failed. ret= %{private}d", ret);
         CloseRecorder();
         onRecord(false, NULL_STRING);
         return;
     }
     ret = recorder_->Start();
-    if (ret != Media::SUCCESS) {
+    if (ret != ERR_OK) {
         LOGE("recorder start failed. ret= %{private}d", ret);
         CloseRecorder();
         onRecord(false, NULL_STRING);
         return;
     }
-    Surface *recorderSurface = (recorder_->GetSurface(0)).get();
+    Surface *recorderSurface = (recorder_->GetSurface(videoSourceId_)).GetRefPtr();
 
     int queueSize = 10;
     int oneKilobytes = 1024;
