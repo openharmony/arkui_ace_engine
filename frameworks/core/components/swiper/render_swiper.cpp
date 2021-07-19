@@ -178,7 +178,9 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
 
     childrenArray_.clear();
     MarkNeedLayout();
-
+    if (currentIndex_ >= itemCount_) {
+        currentIndex_ = itemCount_ > 0 ? itemCount_ - 1 : 0;
+    }
     if (itemCount_ < LEAST_SLIDE_ITEM_COUNT) {
         LOGD("swiper item is less than least slide count");
         return;
