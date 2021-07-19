@@ -92,6 +92,9 @@ void WebDelegate::UnregisterEvent()
         return;
     }
     auto resRegister = context->GetPlatformResRegister();
+    if (resRegister == nullptr) {
+        return;
+    }
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_PAGESTART));
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_PAGEFINISH));
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_PAGEERROR));
@@ -150,6 +153,9 @@ void WebDelegate::CreatePluginResource(
     auto resRegister = pipelineContext->GetPlatformResRegister();
 
     platformTaskExecutor.PostTask([this, resRegister, size, position] {
+        if (resRegister == nullptr) {
+            return;
+        }
         auto webCom = this->webComponent_.Upgrade();
         if (!webCom) {
             OnError(NTC_ERROR, "fail to call WebDelegate::SetSrc PostTask");
@@ -224,6 +230,9 @@ void WebDelegate::RegisterWebEvent()
         return;
     }
     auto resRegister = context->GetPlatformResRegister();
+    if (resRegister == nullptr) {
+        return;
+    }
     resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_PAGESTART),
                                [weak = WeakClaim(this)](const std::string& param) {
                 auto delegate = weak.Upgrade();
