@@ -19,16 +19,12 @@
 #include "core/components/common/properties/edge.h"
 #include "core/components/multimodal/render_multimodal.h"
 #include "core/components/slider/slider_theme.h"
-#include "core/components/video/media_player_callback.h"
 #include "core/components/video/resource/player.h"
 #include "core/components/video/resource/texture.h"
 #include "core/components/video/video_component.h"
 #include "core/components/video/video_theme.h"
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/render_element.h"
-
-#include "foundation/multimedia/media_standard/interfaces/innerkits/native/media/include/player.h"
-#include "window_manager.h"
 
 namespace OHOS::Ace {
 
@@ -118,8 +114,8 @@ private:
     bool isMute_ = false;
     std::string src_;
     std::string poster_;
-    uint64_t duration_ = 0;
-    uint64_t currentPos_ = 0;
+    uint32_t duration_ = 0;
+    uint32_t currentPos_ = 0;
     bool isPlaying_ = false;
     bool pastPlayingStatus_ = false; // Record the player status before dragging the progress bar.
     bool isReady_ = false;
@@ -160,15 +156,6 @@ private:
     VoiceEvent exitFullscreenVoiceEvent_;
 
     FullscreenEvent fullscreenEvent_;
-
-    std::unique_ptr<OHOS::SubWindow> CreateSubWindow();
-    void RegistMediaPlayerEvent();
-    void CreateMediaPlayer();
-    void PreparePlayer();
-
-    std::shared_ptr<OHOS::Media::Player> mediaPlayer_ = nullptr;
-    std::unique_ptr<OHOS::SubWindow> subWindow_ = nullptr;
-    std::shared_ptr<MediaPlayerCallback> mediaPlayerCallback_ = nullptr;
 };
 
 } // namespace OHOS::Ace

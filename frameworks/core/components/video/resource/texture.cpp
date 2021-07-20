@@ -40,9 +40,6 @@ Texture::~Texture()
     }
 
     auto resRegister = context->GetPlatformResRegister();
-    if (resRegister == nullptr) {
-        return;
-    }
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         resRegister->UnregisterEvent(MakeEventHash(TEXTURE_METHOD_REFRESH));
@@ -75,9 +72,6 @@ void Texture::CreateTexture(const std::function<void(int64_t)>& onCreate)
 {
     auto context = context_.Upgrade();
     auto resRegister = context->GetPlatformResRegister();
-    if (resRegister == nullptr) {
-        return;
-    }
     id_ = resRegister->CreateResource(type_, PARAM_NONE);
     if (id_ == INVALID_ID) {
         if (onError_) {

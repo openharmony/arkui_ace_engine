@@ -45,9 +45,6 @@ void Resource::Release(const std::function<void(bool)>& onRelease)
     auto resRegister = context->GetPlatformResRegister();
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     auto releaseTask = [this, resRegister, onRelease] {
-        if (resRegister == nullptr) {
-            return;
-        }
         bool ret = resRegister->ReleaseResource(hash_);
         if (ret) {
             id_ = INVALID_ID;
@@ -160,9 +157,6 @@ void Resource::CallResRegisterMethod(
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
 
     platformTaskExecutor.PostTask([method, param, resRegister, callback] {
-        if (resRegister == nullptr) {
-            return;
-        }
         std::string result;
         resRegister->OnMethodCall(method, param, result);
         if (callback) {

@@ -92,7 +92,7 @@ protected:
     int64_t textureId_ = INVALID_TEXTURE;
     Size drawSize_;   // size of draw area
     Size sourceSize_; // size of source
-    ImageFit imageFit_ = ImageFit::FILL;
+    ImageFit imageFit_ = ImageFit::CONTAIN;
     double alignmentX_ = 0.0;
     double alignmentY_ = 0.0;
 

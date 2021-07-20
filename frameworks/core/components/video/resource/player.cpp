@@ -85,9 +85,6 @@ void Player::CreatePlayer(const std::function<void(int64_t)>& onCreate)
         return;
     }
     auto resRegister = context->GetPlatformResRegister();
-    if (resRegister == nullptr) {
-        return;
-    }
     std::stringstream paramStream;
     paramStream << PLAYER_PARAM_TEXTURE << PARAM_EQUALS << textureId_;
     std::string param = paramStream.str();
@@ -337,9 +334,6 @@ void Player::UnregisterEvent()
         return;
     }
     auto resRegister = context->GetPlatformResRegister();
-    if (resRegister == nullptr) {
-        return;
-    }
     resRegister->UnregisterEvent(MakeEventHash(PLAYER_EVENT_PREPARED));
     resRegister->UnregisterEvent(MakeEventHash(PLAYER_EVENT_COMPLETION));
     resRegister->UnregisterEvent(MakeEventHash(PLAYER_EVENT_SEEKCOMPLETE));

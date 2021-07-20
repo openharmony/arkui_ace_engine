@@ -36,6 +36,7 @@ public:
     ~CameraElement() override;
 
     void Prepare(const WeakPtr<Element>& parent) override;
+    void SetNewComponent(const RefPtr<Component>& newComponent) override;
     void TakePhoto(const TakePhotoParams& params);
 
     void StartRecord();

@@ -28,6 +28,7 @@ void RenderTexture::Update(const RefPtr<Component>& component)
 
     textureId_ = texture->GetTextureId();
     sourceSize_ = Size(static_cast<double>(texture->GetSrcWidth()), static_cast<double>(texture->GetSrcHeight()));
+    imageFit_ = texture->GetFit();
 
     MarkNeedLayout();
 }

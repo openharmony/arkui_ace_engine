@@ -53,7 +53,6 @@ public:
     int32_t GetUid() const;
     void SetProcessName(const std::string& processName);
     const std::string& GetProcessName() const;
-    const std::string GetAssetAbsolutePath(const std::string& path) const;
 
 private:
     AceEngine();

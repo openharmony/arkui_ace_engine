@@ -65,8 +65,6 @@ constexpr int32_t SAMPLE_RATE = 48000;
 constexpr int32_t FRAME_RATE = 30;
 constexpr int32_t RATE = 4096;
 constexpr double FPS = 30;
-constexpr int32_t MAX_WIDTH = 480;
-constexpr int32_t MAX_HEIGHT = 892;
 
 inline void SaveFileData(const std::string& filePath, const char &buffer, uint32_t size, std::string& path)
 {
@@ -84,7 +82,7 @@ inline void SaveFileData(const std::string& filePath, const char &buffer, uint32
     }
 }
 
-inline int32_t GetRecordFile(const std::string filePath, std::string& path)
+inline int32_t GetRecordFile(const std::string& filePath, std::string& path)
 {
     LOGI("Camera GetRecordFile.");
     struct timeval tv = {};
@@ -561,14 +559,17 @@ void CameraCallback::OnCameraSizeChange(double width, double height)
         LOGE("Camera::CameraCallback: context is null.");
         return;
     }
-    if (width + windowOffset_.GetX() > MAX_WIDTH) {
-        windowSize_.SetWidth(MAX_WIDTH - windowOffset_.GetX());
+
+    int32_t maxWidth = OHOS::WindowManager::GetInstance()->GetMaxWidth();
+    int32_t maxHeight = OHOS::WindowManager::GetInstance()->GetMaxHeight();
+    if (width + windowOffset_.GetX() > maxWidth) {
+        windowSize_.SetWidth(maxWidth - windowOffset_.GetX());
     } else {
         windowSize_.SetWidth(width);
     }
 
-    if (height + windowOffset_.GetY() > MAX_HEIGHT) {
-        windowSize_.SetHeight(MAX_HEIGHT - windowOffset_.GetY());
+    if (height + windowOffset_.GetY() > maxHeight) {
+        windowSize_.SetHeight(maxHeight - windowOffset_.GetY());
     } else {
         windowSize_.SetHeight(height);
     }
@@ -590,14 +591,17 @@ void CameraCallback::OnCameraOffsetChange(double x, double y)
         LOGE("Camera::CameraCallback: context is null.");
         return;
     }
+
     bool sizeChange = false;
-    if (x + windowSize_.Width() > MAX_WIDTH) {
-        windowSize_.SetWidth(MAX_WIDTH - x);
+    int32_t maxWidth = OHOS::WindowManager::GetInstance()->GetMaxWidth();
+    int32_t maxHeight = OHOS::WindowManager::GetInstance()->GetMaxHeight();
+    if (x + windowSize_.Width() > maxWidth) {
+        windowSize_.SetWidth(maxWidth - x);
         sizeChange = true;
     }
 
-    if (y + windowSize_.Height() > MAX_HEIGHT) {
-        windowSize_.SetHeight(MAX_HEIGHT - y);
+    if (y + windowSize_.Height() > maxHeight) {
+        windowSize_.SetHeight(maxHeight - y);
         sizeChange = true;
     }
 

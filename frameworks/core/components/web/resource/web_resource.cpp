@@ -43,10 +43,6 @@ void WebResource::Release(const std::function<void(bool)>& onRelease)
     }
 
     auto resRegister = context->GetPlatformResRegister();
-    if (resRegister == nullptr) {
-        return;
-    }
-
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
                                                          TaskExecutor::TaskType::PLATFORM);
     auto releaseTask = [this, resRegister, onRelease] {
@@ -157,9 +153,6 @@ void WebResource::CallResRegisterMethod(const std::string& method,
                                                          TaskExecutor::TaskType::PLATFORM);
 
     platformTaskExecutor.PostTask([method, param, resRegister, callback] {
-        if (resRegister == nullptr) {
-            return;
-        }
         std::string result;
         resRegister->OnMethodCall(method, param, result);
         if (callback) {
