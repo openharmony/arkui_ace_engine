@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <iomanip>
+#include <securec.h>
 #include <sstream>
 
 #include "base/i18n/localization.h"
@@ -25,6 +26,7 @@
 #include "base/log/log.h"
 #include "base/resource/internal_resource.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
 #include "core/components/align/align_component.h"
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
@@ -42,6 +44,8 @@
 #include "core/event/back_end_event_manager.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/pipeline_context.h"
+#include "display_type.h"
+#include "surface.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -50,6 +54,10 @@ const char* PLAY_LABEL = "play";
 const char* PAUSE_LABEL = "pause";
 const char* FULLSCREEN_LABEL = "fullscreen";
 const char* EXIT_FULLSCREEN_LABEL = "exitFullscreen";
+const char* SURFACE_STRIDE_ALIGNMENT = "8";
+constexpr int32_t SURFACE_QUEUE_SIZE = 5;
+constexpr int32_t WINDOW_HEIGHT_DEFAULT = 1;
+constexpr int32_t WINDOW_WIDTH_DEFAULT = 1;
 
 } // namespace
 
@@ -86,6 +94,9 @@ VideoElement::~VideoElement()
         }
     }
     ReleasePlatformResource();
+    if (mediaPlayer_ != nullptr) {
+        mediaPlayer_->Release();
+    }
 }
 
 void VideoElement::PerformBuild()
@@ -108,6 +119,7 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
     src_ = videoComponent->GetSrc();
     poster_ = videoComponent->GetPoster();
     isFullScreen_ = videoComponent->IsFullscreen();
+    PreparePlayer();
 
     if (!videoComponent->GetPlayer().Invalid() && !videoComponent->GetTexture().Invalid()) {
         player_ = videoComponent->GetPlayer().Upgrade();
@@ -120,6 +132,151 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
             InitListener();
         }
     }
+}
+
+std::unique_ptr<OHOS::SubWindow> VideoElement::CreateSubWindow()
+{
+    OHOS::WindowManager* windowManager = OHOS::WindowManager::GetInstance();
+    if (windowManager == nullptr) {
+        LOGE("Window manager get instance failed");
+        return nullptr;
+    }
+
+    auto context = context_.Upgrade();
+    if (context == nullptr) {
+        LOGE("context is nullptr");
+        return nullptr;
+    }
+
+    int32_t windowId = context->GetWindowId();
+    OHOS::WindowConfig windowConfig;
+    memset_s(&windowConfig, sizeof(OHOS::WindowConfig), 0, sizeof(OHOS::WindowConfig));
+    windowConfig.height = WINDOW_HEIGHT_DEFAULT;
+    windowConfig.width = WINDOW_WIDTH_DEFAULT;
+    windowConfig.pos_x = 0;
+    windowConfig.pos_y = 0;
+    windowConfig.type = WINDOW_TYPE_NORMAL;
+    windowConfig.format = PIXEL_FMT_RGBA_8888;
+    windowConfig.subwindow = true;
+    return windowManager->CreateSubWindow(windowId, &windowConfig);
+}
+
+void VideoElement::RegistMediaPlayerEvent()
+{
+    auto context = context_.Upgrade();
+    if (context == nullptr) {
+        LOGE("context is nullptr");
+        return;
+    }
+
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    auto videoElement = WeakClaim(this);
+
+    auto&& positionUpdatedEvent = [videoElement, uiTaskExecutor](uint32_t currentPos) {
+        uiTaskExecutor.PostSyncTask([&videoElement, currentPos] {
+            auto video = videoElement.Upgrade();
+            if (video != nullptr) {
+                video->OnCurrentTimeChange(currentPos);
+            }
+        });
+    };
+
+    auto&& stateChangedEvent = [videoElement, uiTaskExecutor](bool isPlaying) {
+        uiTaskExecutor.PostSyncTask([&videoElement, isPlaying] {
+            auto video = videoElement.Upgrade();
+            if (video) {
+                LOGD("OnPlayerStatus");
+                video->OnPlayerStatus(isPlaying);
+            }
+        });
+    };
+
+    auto&& endOfStreamEvent = [videoElement, uiTaskExecutor] {
+        uiTaskExecutor.PostSyncTask([&videoElement] {
+            auto video = videoElement.Upgrade();
+            if (video) {
+                LOGD("OnCompletion");
+                video->OnCompletion();
+            }
+        });
+    };
+
+    mediaPlayerCallback_ = std::make_shared<MediaPlayerCallback>();
+    mediaPlayerCallback_->SetPositionUpdatedEvent(positionUpdatedEvent);
+    mediaPlayerCallback_->SetStateChangedEvent(stateChangedEvent);
+    mediaPlayerCallback_->SetEndOfStreamEvent(endOfStreamEvent);
+    mediaPlayer_->SetPlayerCallback(mediaPlayerCallback_);
+}
+
+void VideoElement::CreateMediaPlayer()
+{
+    if (mediaPlayer_ != nullptr) {
+        return;
+    }
+    subWindow_ = CreateSubWindow();
+    if (subWindow_ == nullptr) {
+        LOGE("Create subwindow failed");
+        return;
+    }
+
+    mediaPlayer_ = OHOS::Media::PlayerFactory::CreatePlayer();
+    if (mediaPlayer_ == nullptr) {
+        LOGE("Create player failed");
+        return;
+    }
+
+    PreparePlayer();
+}
+
+void VideoElement::PreparePlayer()
+{
+    if (mediaPlayer_ == nullptr) {
+        LOGE("mediaPlayer_ is nullptr");
+        return;
+    }
+
+    if (mediaPlayer_->Reset() != 0) {
+        LOGE("Player Reset failed");
+        return;
+    }
+    const std::string filePath = AceEngine::Get().GetAssetAbsolutePath(src_);
+    LOGI("filePath : %{private}s", filePath.c_str());
+    if (mediaPlayer_->SetSource(filePath) != 0) {
+        LOGE("Player SetSource failed");
+        return;
+    }
+    RegistMediaPlayerEvent();
+    sptr<Surface> producerSurface = subWindow_->GetSurface();
+    if (producerSurface == nullptr) {
+        LOGE("producerSurface is nullptr");
+        return;
+    }
+    producerSurface->SetQueueSize(SURFACE_QUEUE_SIZE);
+    producerSurface->SetUserData("SURFACE_STRIDE_ALIGNMENT", SURFACE_STRIDE_ALIGNMENT);
+    producerSurface->SetUserData("SURFACE_FORMAT", std::to_string(PIXEL_FMT_RGBA_8888));
+    if (mediaPlayer_->SetVideoSurface(producerSurface) != 0) {
+        LOGE("Player SetVideoSurface failed");
+        return;
+    }
+    if (mediaPlayer_->Prepare() != 0) {
+        LOGE("Player prepare failed");
+        return;
+    }
+
+    auto context = context_.Upgrade();
+    if (context == nullptr) {
+        LOGE("context is nullptr");
+        return;
+    }
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    auto videoElement = WeakClaim(this);
+    uiTaskExecutor.PostSyncTask([&videoElement] {
+        auto video = videoElement.Upgrade();
+        if (video) {
+            video->OnPrepared(0.0, 0.0, false, 0, 0, true);
+            LOGI("Video OnPrepared");
+        }
+    });
 }
 
 void VideoElement::ResetStatus()
@@ -167,6 +324,7 @@ void VideoElement::Prepare(const WeakPtr<Element>& parent)
 
     RenderElement::Prepare(parent);
     if (renderNode_) {
+        CreateMediaPlayer();
         auto renderTexture = AceType::DynamicCast<RenderTexture>(renderNode_);
         if (renderTexture) {
             renderTexture->SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
@@ -189,8 +347,30 @@ void VideoElement::Prepare(const WeakPtr<Element>& parent)
 
 void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
-    if (texture_) {
-        texture_->OnSize(textureId, textureWidth, textureHeight);
+    if (subWindow_ != nullptr) {
+        auto context = context_.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
+        int32_t height = textureHeight;
+        if (needControls_) {
+            height -= theme_->GetBtnSize().Height();
+            height -= theme_->GetBtnEdge().Top().Value();
+            height -= theme_->GetBtnEdge().Bottom().Value();
+        }
+        if (height <= 0) {
+            height = textureHeight;
+        }
+        float viewScale = context->GetViewScale();
+        subWindow_->SetSubWindowSize(textureWidth * viewScale, height * viewScale);
+        LOGI("SetSubWindowSize width: %{public}f, height: %{public}f", textureWidth * viewScale, height * viewScale);
+
+        if (renderNode_ != nullptr) {
+            Offset offset = renderNode_->GetGlobalOffset();
+            subWindow_->Move(offset.GetX() * viewScale, offset.GetY() * viewScale);
+            LOGI("SubWindow move X: %{public}f, Y: %{public}f", offset.GetX() * viewScale, offset.GetY() * viewScale);
+        }
     }
 }
 
@@ -341,7 +521,6 @@ void VideoElement::SetNewComponent(const RefPtr<Component>& newComponent)
             CreatePlatformResource();
         }
         if (texture_) {
-            videoComponent->SetTextureId(texture_->GetId());
             videoComponent->SetSrcWidth(videoWidth_);
             videoComponent->SetSrcHeight(videoHeight_);
             videoComponent->SetFit(imageFit_);
@@ -678,7 +857,6 @@ void VideoElement::OnPrepared(
     IntTimeToText(currentPos_, currentPosText_);
 
     auto video = AceType::MakeRefPtr<VideoComponent>();
-    video->SetTextureId(texture_->GetId());
     video->SetSrcWidth(videoWidth_);
     video->SetSrcHeight(videoHeight_);
     video->SetFit(imageFit_);
@@ -725,6 +903,17 @@ void VideoElement::OnPlayerStatus(bool isPlaying)
 
 void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
 {
+    if (currentPos == currentPos_) {
+        return;
+    }
+    if (duration_ == 0) {
+        uint64_t duration = 0;
+        if (mediaPlayer_->GetDuration(duration) == 0) {
+            duration_ = duration / MILLISECONDS_TO_SECONDS;
+            IntTimeToText(duration_, durationText_);
+        }
+    }
+
     isInitialState_ = isInitialState_ ? currentPos == 0 : false;
     IntTimeToText(currentPos, currentPosText_);
     currentPos_ = currentPos;
@@ -863,8 +1052,6 @@ const RefPtr<Component> VideoElement::CreateControl()
 
     rowChildren.emplace_back(SetPadding(CreateDurationText(), Edge(theme_->GetTextEdge())));
 
-    rowChildren.emplace_back(SetPadding(CreateFullScreenBtn(), Edge(theme_->GetBtnEdge())));
-
     auto decoration = AceType::MakeRefPtr<Decoration>();
     decoration->SetBackgroundColor(theme_->GetBkgColor());
     auto box = AceType::MakeRefPtr<BoxComponent>();
@@ -901,8 +1088,6 @@ const RefPtr<Component> VideoElement::CreateChild()
     RefPtr<Component> child;
     if (isInitialState_ && !poster_.empty()) {
         std::list<RefPtr<Component>> columnChildren;
-        columnChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(VIDEO_CHILD_COMMON_FLEX_GROW,
-            VIDEO_CHILD_COMMON_FLEX_SHRINK, VIDEO_CHILD_COMMON_FLEX_BASIS, CreatePoster()));
         if (needControls_) {
             columnChildren.emplace_back(CreateControl());
         }
@@ -937,7 +1122,7 @@ const RefPtr<Component> VideoElement::CreateChild()
 
 void VideoElement::OnStartBtnClick()
 {
-    if (isPlaying_) {
+    if (mediaPlayer_->IsPlaying()) {
         Pause();
     } else {
         Start();
@@ -1010,22 +1195,33 @@ void VideoElement::IntTimeToText(uint32_t time, std::string& timeText)
 
 void VideoElement::Start()
 {
-    if (!isPlaying_ && player_) {
-        player_->Start();
+    if (mediaPlayer_ != nullptr && !mediaPlayer_->IsPlaying()) {
+        LOGI("Video Start");
+        auto context = context_.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
+        auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+        platformTask.PostTask([mediaPlayer = mediaPlayer_] {
+            mediaPlayer->Play();
+        });
     }
 }
 
 void VideoElement::Pause()
 {
-    if (isPlaying_ && player_) {
-        player_->Pause();
+    if (mediaPlayer_ != nullptr && mediaPlayer_->IsPlaying()) {
+        LOGI("Video Pause");
+        mediaPlayer_->Pause();
     }
 }
 
 void VideoElement::SetCurrentTime(uint32_t currentPos)
 {
-    if (currentPos >= 0 && currentPos < duration_ && player_) {
-        player_->SeekTo(currentPos);
+    if (mediaPlayer_ != nullptr && currentPos >= 0 && currentPos < duration_) {
+        LOGI("Video Seek");
+        mediaPlayer_->Seek(currentPos * MILLISECONDS_TO_SECONDS, 0);
     }
 }
 
@@ -1093,8 +1289,8 @@ void VideoElement::ExitFullScreen()
 
 void VideoElement::SetVolume(float volume)
 {
-    if (player_) {
-        player_->SetVolume(volume);
+    if (mediaPlayer_ != nullptr) {
+        mediaPlayer_->SetVolume(volume, volume);
     }
 }
 
