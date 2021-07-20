@@ -16,6 +16,7 @@
 #include "core/common/ace_engine.h"
 
 #include <thread>
+#include "unistd.h"
 
 #include "base/log/log.h"
 #include "core/common/ace_page.h"
@@ -141,6 +142,18 @@ void AceEngine::SetProcessName(const std::string& processName)
 const std::string& AceEngine::GetProcessName() const
 {
     return processName_;
+}
+
+const std::string AceEngine::GetAssetAbsolutePath(const std::string& path) const
+{
+    for (auto basePath: assetBasePathSet_) {
+        std::string assetPath;
+        assetPath.append(packagePath_).append(basePath).append(path);
+        if (access(assetPath.c_str(), F_OK) == 0) {
+            return "file://" + assetPath;
+        }
+    }
+    return path;
 }
 
 } // namespace OHOS::Ace
