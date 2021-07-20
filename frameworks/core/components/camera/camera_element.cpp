@@ -96,6 +96,19 @@ void CameraElement::Prepare(const WeakPtr<Element>& parent)
     }
 }
 
+void CameraElement::SetNewComponent(const RefPtr<Component>& newComponent)
+{
+    if (newComponent == nullptr) {
+        Element::SetNewComponent(newComponent);
+        return;
+    }
+    auto cameraComponent = AceType::DynamicCast<CameraComponent>(newComponent);
+    if (cameraComponent) {
+        cameraComponent->SetFit(ImageFit::FILL);
+    }
+    Element::SetNewComponent(newComponent);
+}
+
 void CameraElement::HiddenChange(bool hidden)
 {
     if (hidden) {
@@ -180,8 +193,9 @@ void CameraElement::CreateCamera()
 {
     LOGI("CameraElement::CreateCamera");
     camera_ = AceType::MakeRefPtr<Camera>(context_, eventHdlr_);
-    camera_->Create(nullptr);
     InitListener();
+    camera_->Create(nullptr);
+    StartPreview();
 }
 
 void CameraElement::SetMethodCall(const RefPtr<CameraComponent>& cameraComponent)

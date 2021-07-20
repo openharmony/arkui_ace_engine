@@ -30,8 +30,6 @@ using TakePhotoListener = std::function<void(const std::map<std::string, std::st
 using ErrorListener = std::function<void(const std::string&, const std::string&)>;
 using RecordListener = std::function<void(const std::map<std::string, std::string>&)>;
 
-constexpr int32_t TEMPORARY_WINDOW_SIZE = 480;
-
 enum State : int32_t {
     STATE_IDLE,
     STATE_RUNNING,
