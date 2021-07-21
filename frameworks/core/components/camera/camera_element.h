@@ -72,7 +72,6 @@ private:
     std::string recorderBackId_;
     bool isRecording_ = false;
     bool isPreViewing_ = false;
-    Media::EventHandler eventHdlr_;
 };
 
 } // namespace OHOS::Ace

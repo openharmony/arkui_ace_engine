@@ -20,10 +20,9 @@
 #include "core/components/camera/camera_component.h"
 #include "core/components/common/layout/constants.h"
 
-#include "camera_kit.h"
 #include "recorder.h"
 #include "window_manager.h"
-
+#include "input/camera_manager.h"
 namespace OHOS::Ace {
 
 using TakePhotoListener = std::function<void(const std::map<std::string, std::string>&)>;
@@ -36,50 +35,17 @@ enum State : int32_t {
     STATE_BUTT
 };
 
-class FrameCallback final : public Media::FrameStateCallback {
-public:
-    ACE_DISALLOW_COPY_AND_MOVE(FrameCallback);
-    FrameCallback() = default;
-    ~FrameCallback() = default;
-
-    void AddTakePhotoListener(TakePhotoListener&& listener);
-    void SetCatchFilePath(std::string cacheFilePath);
-
-protected:
-    void OnFrameFinished(const Media::Camera &camera,
-                        const Media::FrameConfig &frameConfig,
-                        const Media::FrameResult &frameResult) override;
-    void OnFrameError(const Media::Camera &camera,
-                    const Media::FrameConfig &frameConfig,
-                    int32_t errorCode,
-                    const Media::FrameResult &frameResult) override;
-
-private:
-    void OnTakePhoto(bool isSucces, std::string info);
-    TakePhotoListener takePhotoListener_;
-    std::string cacheFilePath_;
-};
-
-class CameraCallback : public Media::CameraStateCallback {
+class CameraCallback : public IBufferConsumerListener {
 public:
     ACE_DISALLOW_COPY_AND_MOVE(CameraCallback);
     using PrepareEventListener = std::function<void()>;
 
-    explicit CameraCallback(Media::EventHandler &eventHdlr) : eventHandler_(eventHdlr)
+    CameraCallback()
     {}
+
     ~CameraCallback()
     {
         Stop(true);
-    }
-
-    const Media::Camera *GetCameraInstance()
-    {
-        return camera_;
-    }
-
-    Media::EventHandler& GetEventHandler()
-    {
-        return eventHandler_;
     }
 
     void SetPipelineContext(const WeakPtr<PipelineContext>& context)
@@ -88,10 +54,18 @@ public:
     }
 
     void Stop(bool isClosePreView);
+    void Release();
     void Capture(Size photoSize);
     void StartPreview();
     void StartRecord();
-
+    void PrepareCameraInput(sptr<OHOS::CameraStandard::CaptureInput> InCamInput_);
+    sptr<Surface> createSubWindowSurface();
+    int32_t PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> camManagerObj);
+    int32_t PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> camManagerObj);
+    int32_t PrepareCamera();
+    void OnBufferAvailable() override;
+    int32_t SaveData(char *buffer, int32_t size, std::string& path);
+    void OnTakePhoto(bool isSucces, std::string info);
     void AddTakePhotoListener(TakePhotoListener&& listener);
     void AddErrorListener(ErrorListener&& listener);
     void AddRecordListener(RecordListener&& listener);
@@ -104,9 +78,6 @@ public:
     }
 
 protected:
-    void OnCreated(const Media::Camera &camera) override;
-    void OnCreateFailed(const std::string cameraId, int32_t errorCode) override;
-    void OnReleased(const Media::Camera &camera) override {}
     void CloseRecorder();
 
 private:
@@ -115,18 +86,14 @@ private:
     void onError();
     void onRecord(bool isSucces, std::string info);
 
-    Media::Camera *camera_ = nullptr;
     std::shared_ptr<Media::Recorder> recorder_ = nullptr;
     int32_t videoSourceId_ = -1;
     sptr<Surface> previewSurface_;
-    Media::EventHandler& eventHandler_;
 
     ErrorListener onErrorListener_;
     RecordListener onRecordListener_;
-    FrameCallback frameCallback_;
     int32_t recordFileId_ = -1;
     std::string recordPath_;
-    std::string cacheFilePath_;
 
     std::unique_ptr<OHOS::SubWindow> subWindow_;
     WeakPtr<PipelineContext> context_;
@@ -136,18 +103,19 @@ private:
 
     bool isReady_ = false;
     bool hasCallPreView_ = false;
-
+    bool hasCallPhoto_ = false;
     State previewState_ = State::STATE_IDLE;
     State recordState_ = State::STATE_IDLE;
+    sptr<OHOS::CameraStandard::CaptureSession> capSession_;
+    sptr<OHOS::CameraStandard::CaptureInput> camInput_;
+    sptr<IBufferConsumerListener> photoListener_;
+    sptr<OHOS::CameraStandard::CaptureOutput> photoOutput_;
+    sptr<OHOS::CameraStandard::CaptureOutput> previewOutput_;
+    sptr<OHOS::CameraStandard::CaptureOutput> videoOutput_;
+    std::string cacheFilePath_;
+    TakePhotoListener takePhotoListener_;
+    sptr<Surface> captureConsumerSurface_;
     PrepareEventListener prepareEventListener_;
-};
-
-class SurfaceListener : public IBufferConsumerListener {
-public:
-    void OnBufferAvailable() override
-    {
-        LOGI("Camera SurfaceListener OnBufferAvailable");
-    }
 };
 
 class Camera : public virtual AceType {
@@ -156,8 +124,8 @@ class Camera : public virtual AceType {
 public:
     using PrepareEventListener = std::function<void()>;
 
-    Camera(const WeakPtr<PipelineContext> &context, Media::EventHandler &eventHdlr)
-        : context_(context), cameraCallback_(eventHdlr) {}
+    Camera(const WeakPtr<PipelineContext> &context)
+        : context_(context) {}
     ~Camera() override = default;
 
     void Release();
@@ -189,7 +157,7 @@ private:
 
     CameraCallback cameraCallback_;
     std::unique_ptr<OHOS::Window> window_;
-    Media::CameraKit *cameraKit_;
+    sptr<OHOS::CameraStandard::CaptureInput> camInput_;
 };
 
 } // namespace OHOS::Ace
