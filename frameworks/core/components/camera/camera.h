@@ -29,6 +29,8 @@ using TakePhotoListener = std::function<void(const std::map<std::string, std::st
 using ErrorListener = std::function<void(const std::string&, const std::string&)>;
 using RecordListener = std::function<void(const std::map<std::string, std::string>&)>;
 
+constexpr int32_t TEMPORARY_WINDOW_SIZE = 480;
+
 enum State : int32_t {
     STATE_IDLE,
     STATE_RUNNING,
@@ -98,7 +100,7 @@ private:
     std::unique_ptr<OHOS::SubWindow> subWindow_;
     WeakPtr<PipelineContext> context_;
     sptr<Surface> captureSurface_;
-    Size windowSize_ = Size(0, 0);
+    Size windowSize_ = Size(TEMPORARY_WINDOW_SIZE, TEMPORARY_WINDOW_SIZE);
     Offset windowOffset_ = Offset(0, 0);
 
     bool isReady_ = false;
