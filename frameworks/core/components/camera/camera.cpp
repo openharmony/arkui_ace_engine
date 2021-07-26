@@ -39,7 +39,7 @@ const char IS_SUCESS[] = "isSucceed";
 const char ERROR_CODE[] = "errorcode";
 const char PHOTO_PATH[] = "uri";
 const char NULL_STRING[] = "";
-const char DEFAULT_CATCH_PATH[] = "data/data/";
+const char DEFAULT_CATCH_PATH[] = "data/media/camera/";
 
 const char SURFACE_STRIDE_ALIGNMENT[] = "surface_stride_Alignment";
 const char SURFACE_WIDTH[] = "surface_width";
@@ -59,6 +59,10 @@ constexpr int32_t SAMPLE_RATE = 48000;
 constexpr int32_t FRAME_RATE = 30;
 constexpr int32_t RATE = 4096;
 constexpr double FPS = 30;
+const uid_t CHOWN_OWNER_ID = -1;
+const gid_t CHOWN_GROUP_ID = 1023;
+const mode_t MKDIR_RWX_USR_GRP_DIR = 0770;
+const mode_t MKDIR_RWX_USR_GRP_FILE = 0660;
 
 inline int32_t GetRecordFile(const std::string& filePath, std::string& path)
 {
@@ -75,6 +79,19 @@ inline int32_t GetRecordFile(const std::string& filePath, std::string& path)
     }
     return fd;
 }
+
+
+inline bool IsDirectory(const char *dirName)
+{
+    struct stat statInfo {};
+    if (stat(dirName, &statInfo) == 0) {
+        if (statInfo.st_mode & S_IFDIR) {
+            return true;
+        }
+    }
+    return false;
+}
+
 }
 
 void CameraCallback::PrepareCameraInput(sptr<OHOS::CameraStandard::CaptureInput> InCamInput_)
@@ -263,7 +280,32 @@ int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> c
         cacheFilePath = DEFAULT_CATCH_PATH;
     }
     cacheFilePath_ = cacheFilePath;
+    MakeDir(cacheFilePath_);
     return 0;
+}
+
+
+void CameraCallback::MakeDir(const std::string& path)
+{
+    LOGI("Camera MakeDir: %{public}s.", path.c_str());
+    char resolvedPath[PATH_MAX];
+    if (realpath(path.c_str(), resolvedPath)) {
+        LOGE("Camera MakeDir: realpath faile, %{public}s.", path.c_str());
+        return;
+    }
+
+    if (IsDirectory(resolvedPath)) {
+        LOGE("Camera MakeDir: It's already a directory, %{public}s.", resolvedPath);
+        return;
+    }
+
+    if (mkdir(resolvedPath, MKDIR_RWX_USR_GRP_DIR) != -1) {
+        chown(resolvedPath, CHOWN_OWNER_ID, CHOWN_GROUP_ID);
+        if (chmod(resolvedPath, MKDIR_RWX_USR_GRP_DIR) == -1) {
+            LOGE("chmod failed for the newly created directory");
+        }
+    }
+    LOGI("Camera MakeDir: success %{public}s.", resolvedPath);
 }
 
 int32_t CameraCallback::PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> camManagerObj)
@@ -577,9 +619,19 @@ int32_t CameraCallback::SaveData(char *buffer, int32_t size, std::string& path)
         std::ostringstream ss("Capture_");
         ss << "Capture" << ltm->tm_hour << "-" << ltm->tm_min << "-" << ltm->tm_sec << ".jpg";
         path = cacheFilePath_ + ss.str();
-        std::ofstream pic(path, std::ofstream::out | std::ofstream::trunc);
+        char resolvedPath[PATH_MAX];
+        if (realpath(path.c_str(), resolvedPath)) {
+            LOGE("Camera SaveData: realpath faile, %{public}s.", path.c_str());
+            return -1;
+        }
+
+        std::ofstream pic(resolvedPath, std::ofstream::out | std::ofstream::trunc);
         pic.write(buffer, size);
         pic.close();
+        chown(resolvedPath, CHOWN_OWNER_ID, CHOWN_GROUP_ID);
+        if (chmod(resolvedPath, MKDIR_RWX_USR_GRP_FILE) == -1) {
+            LOGE("chmod failed for the newly file %{public}s.", resolvedPath);
+        }
     }
 
     return 0;
