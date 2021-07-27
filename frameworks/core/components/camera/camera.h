@@ -37,7 +37,9 @@ enum State : int32_t {
     STATE_BUTT
 };
 
-class CameraCallback : public IBufferConsumerListener {
+class CaptureListener;
+
+class CameraCallback {
 public:
     ACE_DISALLOW_COPY_AND_MOVE(CameraCallback);
     using PrepareEventListener = std::function<void()>;
@@ -47,6 +49,10 @@ public:
 
     ~CameraCallback()
     {
+        photoListener_ = nullptr;
+        if (captureConsumerSurface_ != nullptr) {
+            captureConsumerSurface_->UnregisterConsumerListener();
+        }
         Stop(true);
     }
 
@@ -65,7 +71,6 @@ public:
     int32_t PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> camManagerObj);
     int32_t PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> camManagerObj);
     int32_t PrepareCamera();
-    void OnBufferAvailable() override;
     int32_t SaveData(char *buffer, int32_t size, std::string& path);
     void OnTakePhoto(bool isSucces, std::string info);
     void AddTakePhotoListener(TakePhotoListener&& listener);
@@ -78,6 +83,7 @@ public:
     {
         prepareEventListener_ = std::move(listener);
     }
+    friend class CaptureListener;
 
 protected:
     void CloseRecorder();
@@ -119,6 +125,20 @@ private:
     TakePhotoListener takePhotoListener_;
     sptr<Surface> captureConsumerSurface_;
     PrepareEventListener prepareEventListener_;
+};
+
+class CaptureListener : public IBufferConsumerListener {
+public:
+    explicit CaptureListener(CameraCallback *cameraCallback) : cameraCallback_(cameraCallback) {
+    }
+    ~CaptureListener() {
+        cameraCallback_->photoListener_ = nullptr;
+        cameraCallback_ = nullptr;
+    }
+    void OnBufferAvailable() override;
+
+private:
+    CameraCallback *cameraCallback_;
 };
 
 class Camera : public virtual AceType {
