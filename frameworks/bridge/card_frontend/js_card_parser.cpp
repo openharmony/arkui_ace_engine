@@ -33,8 +33,8 @@ const char BLOCK_VALUE[] = "blockValue";
 
 const std::string REPEAT_INDEX = "$idx";
 const std::string REPEAT_ITEM = "$item";
-const std::string TRUE = "true";
-const std::string FALSE = "false";
+const std::string TRUE_STR = "true";
+const std::string FALSE_STR = "false";
 
 std::unique_ptr<JsonValue> GetJsonValue(
     const std::vector<std::string>& keys, const std::unique_ptr<JsonValue>& fileData)
@@ -599,7 +599,7 @@ bool JsCardParser::GetShownValue(std::string& value)
             return false;
         }
     }
-    value = showValue ? TRUE : FALSE;
+    value = showValue ? TRUE_STR : FALSE_STR;
     return true;
 }
 
@@ -1147,11 +1147,11 @@ void JsCardParser::UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     auto attrCommand = Referenced::MakeRefPtr<JsCommandUpdateDomElementAttrs>(selfId);
     auto ptr = Referenced::RawPtr(attrCommand);
     if (shouldShow && hasShownAttr) {
-        attrs.emplace_back(std::make_pair("show", TRUE));
+        attrs.emplace_back(std::make_pair("show", TRUE_STR));
     }
     ParseAttributes(rootJson, selfId, attrs, (JsCommandDomElementOperator*)ptr);
     if (!shouldShow && hasShownAttr) {
-        attrs.emplace_back(std::make_pair("show", FALSE));
+        attrs.emplace_back(std::make_pair("show", FALSE_STR));
     }
     ParseStyles(rootJson, selfId, styles);
     ParseEvents(rootJson, events, page, selfId);
@@ -1211,7 +1211,7 @@ bool JsCardParser::ParseTernaryExpression(std::string& value)
         return false;
     }
     GetVariable(flagStr[0]);
-    auto flag = flagStr[0] == TRUE;
+    auto flag = flagStr[0] == TRUE_STR;
 
     std::vector<std::string> keyStr;
     StringUtils::SplitStr(flagStr[1], ":", keyStr);
@@ -1236,7 +1236,7 @@ bool JsCardParser::ParseLogicalExpression(std::string& value)
         }
         GetVariable(splitStr[0]);
         GetVariable(splitStr[1]);
-        value = (splitStr[0] == TRUE && splitStr[1] == TRUE) ? TRUE : FALSE;
+        value = (splitStr[0] == TRUE_STR && splitStr[1] == TRUE_STR) ? TRUE_STR : FALSE_STR;
         return true;
     } else if (value.find("||") != std::string::npos) {
         // for {{flag1 || flag2}}.
@@ -1246,7 +1246,7 @@ bool JsCardParser::ParseLogicalExpression(std::string& value)
         }
         GetVariable(splitStr[0]);
         GetVariable(splitStr[1]);
-        value = (splitStr[0] == TRUE || splitStr[1] == TRUE) ? TRUE : FALSE;
+        value = (splitStr[0] == TRUE_STR || splitStr[1] == TRUE_STR) ? TRUE_STR : FALSE_STR;
         return true;
     } else if (value.find('!') != std::string::npos) {
         // for {{!flag1}}.
@@ -1255,7 +1255,7 @@ bool JsCardParser::ParseLogicalExpression(std::string& value)
             return false;
         }
         GetVariable(splitStr[0]);
-        value = splitStr[0] == TRUE ? FALSE : TRUE;
+        value = splitStr[0] == TRUE_STR ? FALSE_STR : TRUE_STR;
         return true;
     }
     return false;
@@ -1394,11 +1394,11 @@ void JsCardParser::CreateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     command->SetPipelineContext(context_);
     auto ptr = Referenced::RawPtr(command);
     if (shouldShow && hasShownAttr) {
-        attrs.emplace_back(std::make_pair("show", TRUE));
+        attrs.emplace_back(std::make_pair("show", TRUE_STR));
     }
     ParseAttributes(rootJson, nodeId, attrs, (Framework::JsCommandDomElementOperator*)ptr);
     if (!shouldShow && hasShownAttr) {
-        attrs.emplace_back(std::make_pair("show", FALSE));
+        attrs.emplace_back(std::make_pair("show", FALSE_STR));
     }
     LOGD("card nodeId: %d, parentId: %d, type: %s", nodeId, parentId, type.c_str());
     ParseStyles(rootJson, nodeId, styles);

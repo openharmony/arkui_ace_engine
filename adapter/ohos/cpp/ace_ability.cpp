@@ -23,7 +23,6 @@
 #include "init_data.h"
 #include "touch_event.h"
 
-#include "locale_info.h"
 #include "res_config.h"
 #include "resource_manager.h"
 
@@ -127,9 +126,9 @@ void AceAbility::OnStart(const Want& want)
         auto localeInfo = resConfig->GetLocaleInfo();
         AceApplicationInfo::GetInstance().SetResourceManager(resourceManager);
         if (localeInfo != nullptr) {
-            auto language = localeInfo->GetLanguage();
-            auto region = localeInfo->GetRegion();
-            auto script = localeInfo->GetScript();
+            auto language = localeInfo->getLanguage();
+            auto region = localeInfo->getCountry();
+            auto script = localeInfo->getScript();
             AceApplicationInfo::GetInstance().SetLocale(
                 (language == nullptr) ? "" : language,
                 (region == nullptr) ? "" : region,

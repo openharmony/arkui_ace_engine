@@ -60,8 +60,8 @@ config("ace_config") {
   ]
   if (is_standard_system) {
     include_dirs += [
-      "//base/global/resmgr_standard/frameworks/resmgr/include",
       "//base/global/resmgr_standard/interfaces/innerkits/include",
+      "//third_party/icu/icu4c/source/common",
     ]
   }
   defines = ace_common_defines
@@ -113,8 +113,8 @@ config("ace_test_config") {
   ]
   if (is_standard_system) {
     include_dirs += [
-      "//base/global/resmgr_standard/frameworks/resmgr/include",
       "//base/global/resmgr_standard/interfaces/innerkits/include",
+      "//third_party/icu/icu4c/source/common",
     ]
   }
   defines = ace_common_defines
