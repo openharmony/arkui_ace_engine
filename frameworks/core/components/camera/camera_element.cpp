@@ -192,7 +192,7 @@ void CameraElement::CreatePlatformResource()
 void CameraElement::CreateCamera()
 {
     LOGI("CameraElement::CreateCamera");
-    camera_ = AceType::MakeRefPtr<Camera>(context_, eventHdlr_);
+    camera_ = AceType::MakeRefPtr<Camera>(context_);
     InitListener();
     camera_->Create(nullptr);
     StartPreview();
@@ -406,7 +406,7 @@ void CameraElement::StopPreview()
 {
     if (camera_ && isPreViewing_) {
         camera_->Stop(true);
-        isPreViewing_ = true;
+        isPreViewing_ = false;
     }
 }
 
