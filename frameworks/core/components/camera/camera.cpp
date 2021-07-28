@@ -459,10 +459,19 @@ void CameraCallback::Capture(Size photoSize)
 
 void CameraCallback::Release()
 {
+    LOGI("CameraCallback: Release start.");
     if (capSession_ != nullptr) {
         capSession_->Release();
         capSession_ = nullptr;
     }
+
+    if (subWindow_) {
+        LOGI("CameraCallback: Destroy subWindow.");
+        subWindow_.reset();
+        auto context = context_.Upgrade();
+        context->ClipRootHole(0, 0, 0, 0);
+    }
+    LOGI("CameraCallback: Release end.");
 }
 
 void CameraCallback::Stop(bool isClosePreView)
@@ -472,12 +481,6 @@ void CameraCallback::Stop(bool isClosePreView)
     }
 
     previewState_ = State::STATE_IDLE;
-    if (isClosePreView && subWindow_) {
-        LOGI("CameraCallback: Destroy subWindow.");
-        subWindow_.reset();
-        auto context = context_.Upgrade();
-        context->ClipRootHole(0, 0, 0, 0);
-    }
 }
 
 void CameraCallback::AddTakePhotoListener(TakePhotoListener&& listener)
