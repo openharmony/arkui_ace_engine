@@ -57,18 +57,6 @@ void CameraElement::ReleasePlatformResource()
 
 void CameraElement::Prepare(const WeakPtr<Element>& parent)
 {
-    auto themeManager = GetThemeManager();
-    if (!themeManager) {
-        return;
-    }
-    auto cameraComponent = AceType::DynamicCast<CameraComponent>(component_);
-    theme_ = themeManager->GetTheme<CameraTheme>();
-    if (cameraComponent) {
-        InitEvent(cameraComponent);
-        SetMethodCall(cameraComponent);
-        CreatePlatformResource();
-    }
-
     RenderElement::Prepare(parent);
     if (renderNode_) {
         auto renderTexture = AceType::DynamicCast<RenderTexture>(renderNode_);
@@ -93,6 +81,18 @@ void CameraElement::Prepare(const WeakPtr<Element>& parent)
                     cameraElement->OnTextureOffset(textureId, x, y);
                 }
             });
+    }
+	
+    auto themeManager = GetThemeManager();
+    if (!themeManager) {
+        return;
+    }
+    auto cameraComponent = AceType::DynamicCast<CameraComponent>(component_);
+    theme_ = themeManager->GetTheme<CameraTheme>();
+    if (cameraComponent) {
+        InitEvent(cameraComponent);
+        SetMethodCall(cameraComponent);
+        CreatePlatformResource();
     }
 }
 
@@ -194,6 +194,7 @@ void CameraElement::CreateCamera()
     LOGI("CameraElement::CreateCamera");
     camera_ = AceType::MakeRefPtr<Camera>(context_);
     InitListener();
+    camera_->SetRenderNode(GetRenderNode());
     camera_->Create(nullptr);
     StartPreview();
 }

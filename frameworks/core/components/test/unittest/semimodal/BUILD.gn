@@ -43,6 +43,7 @@ ohos_unittest("RenderSemiModalTest") {
     "$ace_root/frameworks/core/common/font_loader.cpp",
     "$ace_root/frameworks/core/common/font_manager.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
+    #"$ace_root/frameworks/core/pipeline/base/flutter_render_context.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
 
     #base
@@ -180,6 +181,7 @@ ohos_unittest("RenderSemiModalTest") {
     "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
   ]
 
   if (!is_wearable_product) {
@@ -197,6 +199,7 @@ ohos_unittest("RenderSemiModalTest") {
   configs = [
     ":config_render_semi_modal_test",
     "$ace_root:ace_test_config",
+    "$flutter_root:flutter_config",
   ]
 
   deps = [
@@ -208,7 +211,11 @@ ohos_unittest("RenderSemiModalTest") {
 
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-    deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
+    deps += [
+      "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr",
+      "$flutter_root:ace_skia_ohos",
+      "$flutter_root:third_party_flutter_engine_ohos",
+    ]
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }

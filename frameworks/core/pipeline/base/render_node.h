@@ -303,6 +303,16 @@ public:
 
     void MarkNeedRender(bool overlay = false);
 
+    void SetHasSubWindow(bool hasSubWindow)
+    {
+        hasSubWindow_ = hasSubWindow;
+    }
+
+    bool GetHasSubWindow() const
+    {
+        return hasSubWindow_;
+    }
+
     bool NeedRender() const
     {
         return needRender_;
@@ -438,6 +448,7 @@ public:
     }
 
     virtual void RenderWithContext(RenderContext& context, const Offset& offset);
+    virtual void ClipHole(RenderContext& context, const Offset& offset);
     virtual void Paint(RenderContext& context, const Offset& offset);
     virtual void PaintChild(const RefPtr<RenderNode>& child, RenderContext& context, const Offset& offset);
 
@@ -892,6 +903,7 @@ private:
     Rect paintRect_;
     WeakPtr<RenderNode> parent_;
     int32_t depth_ = 0;
+    bool hasSubWindow_ = false;
     bool needRender_ = false;
     bool needLayout_ = false;
     bool visible_ = true;

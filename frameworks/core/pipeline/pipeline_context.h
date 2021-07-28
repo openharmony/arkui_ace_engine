@@ -325,6 +325,31 @@ public:
         return isSurfaceReady_;
     }
 
+    bool GetHasMeetSubWindowNode() const
+    {
+        return hasMeetSubWindowNode_;
+    }
+
+    void SetHasMeetSubWindowNode(bool hasMeetSubWindowNode)
+    {
+        hasMeetSubWindowNode_ = hasMeetSubWindowNode;
+    }
+
+    bool GetHasClipHole() const
+    {
+        return hasClipHole_;
+    }
+
+    void SetHasClipHole(bool hasClipHole)
+    {
+        hasClipHole_ = hasClipHole;
+    }
+
+    bool GetIsHoleValid() const
+    {
+        return isHoleValid_;
+    }
+
     void ClearImageCache();
 
     RefPtr<ImageCache> GetImageCache() const;
@@ -552,7 +577,7 @@ public:
     }
 
     void RefreshRootBgColor() const;
-    void ClipRootHole(double left, double top, double width, double height) const;
+    void SetClipHole(double left, double top, double width, double height);
     void AddToHoverList(const RefPtr<RenderNode>& node);
 
     using UpdateWindowBlurRegionHandler = std::function<void(const std::vector<std::vector<float>>&)>;
@@ -611,6 +636,11 @@ public:
     const Rect& GetDirtyRect() const
     {
         return dirtyRect_;
+    }
+
+    const Rect& GetTransparentHole() const
+    {
+        return transparentHole_;
     }
 
     bool GetIsDeclarative() const;
@@ -694,6 +724,7 @@ private:
     std::set<RefPtr<RenderNode>, NodeCompare<RefPtr<RenderNode>>> predictLayoutNodes_;
     std::list<RefPtr<FlushEvent>> postFlushListeners_;
     std::list<RefPtr<FlushEvent>> preFlushListeners_;
+    Rect transparentHole_;
     std::unique_ptr<Window> window_;
     RefPtr<FocusAnimationManager> focusAnimationManager_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -740,6 +771,12 @@ private:
 
     bool isRightToLeft_ = false;
     bool isSurfaceReady_ = false;
+    // use for traversing cliping hole
+    bool hasMeetSubWindowNode_ = false;
+    // use for judge clip hole status
+    bool hasClipHole_ = false;
+    // judge hole is valid
+    bool isHoleValid_ = false;
     float viewScale_ = 1.0f;
     float fontScale_ = 1.0f;
     double density_ = 1.0;

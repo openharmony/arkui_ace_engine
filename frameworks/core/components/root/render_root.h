@@ -63,8 +63,6 @@ public:
 
     void SetDefaultBgColor();
 
-    void SetTransparentHole(double left, double top, double width, double height);
-
     void NotifyOnShow() const
     {
         for (const auto& child : GetChildren()) {
@@ -84,7 +82,6 @@ protected:
 
     float scale_ = 1.0f;
     Color bgColor_;
-    Rect transparentHole_;
     bool forceColor_ = false;
     bool isBgColorInit_ = false;
     bool isReset_ = false;
