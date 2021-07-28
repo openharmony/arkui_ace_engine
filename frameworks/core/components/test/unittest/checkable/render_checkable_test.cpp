@@ -109,11 +109,6 @@ private:
 
 } // namespace
 
-flutter::Canvas* FlutterRenderContext::GetCanvas()
-{
-    return nullptr;
-}
-
 class MockRenderSwitch final : public RenderSwitch {
     DECLARE_ACE_TYPE(MockRenderSwitch, RenderSwitch);
 

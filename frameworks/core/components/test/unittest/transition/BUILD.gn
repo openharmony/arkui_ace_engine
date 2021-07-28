@@ -54,6 +54,7 @@ common_module_files = [
   "$ace_root/frameworks/core/common/ace_engine.cpp",
   "$ace_root/frameworks/core/common/event_manager.cpp",
   "$ace_root/frameworks/core/common/font_manager.cpp",
+  #"$ace_root/frameworks/core/pipeline/base/flutter_render_context.cpp",
   "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
   "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
   "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
@@ -164,6 +165,7 @@ common_module_files = [
   "$ace_root/frameworks/core/components/common/properties/scroll_bar.cpp",
   "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
   "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
+  "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
 
   # add secure c API
   "//utils/native/base/src/securec/strcpy_s.c",
@@ -194,8 +196,8 @@ ohos_unittest("TransitionElementTest") {
   configs = [
     "$ace_root/frameworks/base:ace_base_config",
     "$ace_root:ace_test_config",
-    ":config_transition_element_test",
     "$flutter_root:flutter_config",
+    ":config_transition_element_test",
     "//third_party/cJSON:cJSON_config",
   ]
 
@@ -214,6 +216,10 @@ ohos_unittest("TransitionElementTest") {
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
       "startup_l2:syspara",
+    ]
+    deps += [
+      "$flutter_root:ace_skia_ohos",
+      "$flutter_root:third_party_flutter_engine_ohos",
     ]
     configs += [ "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config" ]
     subsystem_name = "ace"
@@ -263,6 +269,8 @@ ohos_unittest("SharedTransitionElementTest") {
     "//third_party/googletest:gtest_main",
     "//third_party/zlib:libz",
     "//utils/native/base:utils",
+    "$flutter_root:ace_skia_ohos",
+    "$flutter_root:third_party_flutter_engine_ohos",
   ]
 
   if (is_standard_system) {

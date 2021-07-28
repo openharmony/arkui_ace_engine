@@ -238,8 +238,6 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
 
         subWindow_ = OHOS::WindowManager::GetInstance()->CreateSubWindow(context->GetWindowId(), &config);
         subWindow_->GetSurface()->SetQueueSize(10);
-        // call context to create hole
-        context->ClipRootHole(config.pos_x, config.pos_y, config.width, config.height);
     }
     previewSurface_ = subWindow_->GetSurface();
     previewSurface_->SetUserData(SURFACE_STRIDE_ALIGNMENT, std::to_string(SURFACE_STRIDE_ALIGNMENT_VAL));
@@ -250,6 +248,13 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
     previewSurface_->SetUserData(REGION_HEIGHT, std::to_string(windowSize_.Height()));
     previewSurface_->SetUserData(REGION_POSITION_X, std::to_string(windowOffset_.GetX()));
     previewSurface_->SetUserData(REGION_POSITION_Y, std::to_string(windowOffset_.GetY()));
+
+    // call context to create hole
+    context->SetClipHole(windowOffset_.GetX(), windowOffset_.GetY(), windowSize_.Width(), windowSize_.Height());
+    auto renderNode = renderNode_.Upgrade();
+    if (renderNode) {
+        renderNode->SetHasSubWindow(true);
+    }
     return previewSurface_;
 }
 
@@ -476,7 +481,11 @@ void CameraCallback::Stop(bool isClosePreView)
         LOGI("CameraCallback: Destroy subWindow.");
         subWindow_.reset();
         auto context = context_.Upgrade();
-        context->ClipRootHole(0, 0, 0, 0);
+        context->SetClipHole(0, 0, 0, 0);
+        auto renderNode = renderNode_.Upgrade();
+        if (renderNode) {
+            renderNode->SetHasSubWindow(false);
+        }
     }
 }
 
@@ -545,8 +554,12 @@ void CameraCallback::OnCameraSizeChange(double width, double height)
     if (subWindow_) {
         LOGE("CameraCallback::OnCameraSizeChange: %{public}lf  %{public}lf.", width, height);
         subWindow_->SetSubWindowSize(windowSize_.Width(), windowSize_.Height());
-        context->ClipRootHole(windowOffset_.GetX(), windowOffset_.GetY(),
+        context->SetClipHole(windowOffset_.GetX(), windowOffset_.GetY(),
             windowSize_.Width(), windowSize_.Height());
+        auto renderNode = renderNode_.Upgrade();
+        if (renderNode) {
+            renderNode->SetHasSubWindow(true);
+        }
     } else {
         LOGE("CameraCallback::OnCameraSizeChange: subwindow is null.");
     }
@@ -583,8 +596,12 @@ void CameraCallback::OnCameraOffsetChange(double x, double y)
     if (subWindow_) {
         LOGE("CameraCallback::OnCameraOffsetChange: %{public}lf  %{public}lf.", x, y);
         subWindow_->Move(windowOffset_.GetX(), windowOffset_.GetY());
-        context->ClipRootHole(windowOffset_.GetX(), windowOffset_.GetY(),
+        context->SetClipHole(windowOffset_.GetX(), windowOffset_.GetY(),
             windowSize_.Width(), windowSize_.Height());
+        auto renderNode = renderNode_.Upgrade();
+        if (renderNode) {
+            renderNode->SetHasSubWindow(true);
+        }
     } else {
         LOGE("CameraCallback::OnCameraOffsetChange: subwindow is null.");
     }
@@ -697,6 +714,13 @@ void Camera::Create(const std::function<void()>& onCreate)
         onCreate();
     }
     LOGI("Camera:Create end");
+}
+
+void Camera::SetRenderNode(const WeakPtr<RenderNode> &renderNode)
+{
+    LOGI("Camera: camera set RenderNode");
+    renderNode_ = renderNode;
+    cameraCallback_.SetRenderNode(renderNode);
 }
 
 void Camera::Stop(bool isClosePreView)

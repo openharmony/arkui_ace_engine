@@ -369,6 +369,17 @@ void PipelineContext::ProcessPreFlush()
 {
     ACE_FUNCTION_TRACE();
 
+    // if we need clip hole
+    if (transparentHole_.IsValid()) {
+        hasMeetSubWindowNode_ = false;
+        hasClipHole_ = false;
+        isHoleValid_ = true;
+        needForcedRefresh_ = true;
+    } else {
+        hasMeetSubWindowNode_ = false;
+        hasClipHole_ = false;
+        isHoleValid_ = false;
+    }
     if (preFlushListeners_.empty()) {
         return;
     }
@@ -1644,15 +1655,16 @@ void PipelineContext::RefreshRootBgColor() const
     }
 }
 
-void PipelineContext::ClipRootHole(double left, double top, double width, double height) const
+void PipelineContext::SetClipHole(double left, double top, double width, double height)
 {
     if (!rootElement_) {
         return;
     }
-    const auto& render = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
-    if (render) {
-        render->SetTransparentHole(left, top, width, height);
-    }
+
+    transparentHole_.SetLeft(left);
+    transparentHole_.SetTop(top);
+    transparentHole_.SetWidth(width);
+    transparentHole_.SetHeight(height);
 }
 
 void PipelineContext::SetOnPageShow(OnPageShowCallBack&& onPageShowCallBack)
