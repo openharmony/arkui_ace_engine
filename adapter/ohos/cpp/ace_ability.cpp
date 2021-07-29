@@ -160,6 +160,16 @@ void AceAbility::OnStart(const Want& want)
         return aceView->DispatchTouchEvent(aceView, event);
     };
     window->RegistOnTouchCb(touchEventCallback);
+    // register surface change callback
+    auto&& surfaceChangedCallBack = [flutterAceView](OHOS::WindowInfo& info) {
+        LOGD("RegistWindowInfoChangeCb surfaceChangedCallBack called");
+        flutter::ViewportMetrics metrics;
+        metrics.physical_width = info.width;
+        metrics.physical_height = info.height;
+        Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
+        Platform::FlutterAceView::SurfaceChanged(flutterAceView, info.width, info.height, 0);
+    };
+    window->RegistWindowInfoChangeCb(surfaceChangedCallBack);
 
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window);
 
