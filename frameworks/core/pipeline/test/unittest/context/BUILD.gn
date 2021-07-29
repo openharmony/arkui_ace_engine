@@ -49,7 +49,6 @@ ohos_unittest("PipelineContextTest") {
     "//foundation/ace/ace_engine/frameworks/core/common/font_manager.cpp",
     "//foundation/ace/ace_engine/frameworks/core/common/vibrator/vibrator_proxy.cpp",
     "//foundation/ace/ace_engine/frameworks/core/common/window.cpp",
-    #"//foundation/ace/ace_engine/frameworks/core/pipeline/base/flutter_render_context.cpp",
     "//foundation/ace/ace_engine/frameworks/core/pipeline/pipeline_context.cpp",
 
     # components
