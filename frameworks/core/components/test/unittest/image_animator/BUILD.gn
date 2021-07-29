@@ -51,7 +51,6 @@ ohos_unittest("ImageAnimatorElementTest") {
     "$ace_root/frameworks/core/components/page/page_component.cpp",
     "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",
-    #"$ace_root/frameworks/core/pipeline/base/flutter_render_context.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
 
     #base

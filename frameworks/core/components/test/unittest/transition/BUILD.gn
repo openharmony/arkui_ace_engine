@@ -54,7 +54,6 @@ common_module_files = [
   "$ace_root/frameworks/core/common/ace_engine.cpp",
   "$ace_root/frameworks/core/common/event_manager.cpp",
   "$ace_root/frameworks/core/common/font_manager.cpp",
-  #"$ace_root/frameworks/core/pipeline/base/flutter_render_context.cpp",
   "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
   "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
   "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",

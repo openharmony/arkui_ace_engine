@@ -77,7 +77,6 @@ ohos_unittest("RatingComponentTest") {
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
     "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
-    #"$ace_root/frameworks/core/pipeline/base/flutter_render_context.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
 
     # components

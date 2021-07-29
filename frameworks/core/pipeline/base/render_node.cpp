@@ -35,7 +35,6 @@ namespace {
 
 constexpr float PRESS_KEYFRAME_START = 0.0f;
 constexpr float PRESS_KEYFRAME_END = 1.0f;
-
 } // namespace
 
 constexpr Dimension FOCUS_BOUNDARY = 4.0_vp; // focus padding + effect boundary, VP

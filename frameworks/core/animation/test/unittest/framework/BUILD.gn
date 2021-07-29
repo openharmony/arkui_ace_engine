@@ -54,7 +54,6 @@ ohos_unittest("AnimationTest") {
     "$ace_root/frameworks/core/gestures/raw_recognizer.cpp",
     "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",
-    # "$ace_root/frameworks/core/pipeline/base/flutter_render_context.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
 
     # components

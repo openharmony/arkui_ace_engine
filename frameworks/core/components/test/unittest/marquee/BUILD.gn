@@ -108,7 +108,6 @@ ohos_unittest("RenderMarqueeTest") {
     "$ace_root/frameworks/core/pipeline/base/component_group_element.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_element.cpp",
     "$ace_root/frameworks/core/pipeline/base/element.cpp",
-    #"$ace_root/frameworks/core/pipeline/base/flutter_render_context.cpp",
     "$ace_root/frameworks/core/pipeline/base/render_element.cpp",
     "$ace_root/frameworks/core/pipeline/base/sole_child_element.cpp",
 

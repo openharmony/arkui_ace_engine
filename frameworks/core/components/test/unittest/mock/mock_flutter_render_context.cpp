@@ -19,7 +19,6 @@
 #include "core/pipeline/layers/offset_layer.h"
 
 namespace OHOS::Ace {
-
 using namespace Flutter;
 
 RefPtr<RenderContext> RenderContext::Create()
