@@ -163,6 +163,7 @@ ohos_unittest("ImageAnimatorElementTest") {
     "$ace_root/frameworks/core/components/test/unittest/mock/semi_modal_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/transform_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/tween_mock.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
     "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
@@ -190,13 +191,16 @@ ohos_unittest("ImageAnimatorElementTest") {
 
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "$flutter_root:ace_skia_ohos",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
 
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    deps += [
+      "$flutter_root:ace_skia_ohos",
+      "$flutter_root:third_party_flutter_engine_ohos",
+    ]
     deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
     subsystem_name = "ace"
     part_name = "ace_engine_standard"

@@ -27,6 +27,7 @@
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/component.h"
+#include "core/pipeline/base/flutter_render_context.h"
 
 namespace OHOS::Ace {
 
@@ -34,7 +35,6 @@ namespace {
 
 constexpr float PRESS_KEYFRAME_START = 0.0f;
 constexpr float PRESS_KEYFRAME_END = 1.0f;
-
 } // namespace
 
 constexpr Dimension FOCUS_BOUNDARY = 4.0_vp; // focus padding + effect boundary, VP
@@ -153,11 +153,51 @@ void RenderNode::RenderWithContext(RenderContext& context, const Offset& offset)
     if (onLayoutReady_) {
         onLayoutReady_(std::string("\"layoutReady\",null,null"));
     }
+    ClipHole(context, offset);
     Paint(context, offset);
     if (needUpdateAccessibility_) {
         OnPaintFinish();
     }
     SetNeedRender(false);
+}
+
+void RenderNode::ClipHole(RenderContext& context, const Offset& offset)
+{
+    LOGI("Hole: PrePaint RenderNode");
+    auto pipelineContext = GetContext().Upgrade();
+
+    if (pipelineContext && pipelineContext->GetIsHoleValid()) {
+        if (!(pipelineContext->GetHasClipHole())) {
+            if (!(pipelineContext->GetHasMeetSubWindowNode())) {
+                LOGI("Hole: PrePaint save clip.");
+                auto canvas = static_cast<FlutterRenderContext&>(context).GetCanvas();
+                canvas->save();
+                if (pipelineContext->GetTransparentHole().IsValid()) {
+                    canvas->clipRect(pipelineContext->GetTransparentHole().Left(),
+                        pipelineContext->GetTransparentHole().Top(), pipelineContext->GetTransparentHole().Right(),
+                        pipelineContext->GetTransparentHole().Bottom(), SkClipOp::kDifference);
+                }
+                pipelineContext->SetHasClipHole(true);
+            } else {
+                LOGI("Hole: hole status is wrong.");
+            }
+        } else {
+            if (!(pipelineContext->GetHasMeetSubWindowNode())) {
+                if (GetHasSubWindow()) {
+                    LOGI("Hole: PostPaint restore clip");
+                    auto canvas = static_cast<FlutterRenderContext&>(context).GetCanvas();
+                    canvas->restore();
+                    pipelineContext->SetHasMeetSubWindowNode(true);
+                } else {
+                    LOGI("Hole: RenderNode has not SubWindow.");
+                }
+            } else {
+                LOGI("Hole: now clip has done.");
+            }
+        }
+    } else {
+        LOGI("Hole: hole is not valid.");
+    }
 }
 
 void RenderNode::Paint(RenderContext& context, const Offset& offset)

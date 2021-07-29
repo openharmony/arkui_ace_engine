@@ -75,11 +75,6 @@ std::list<Rect> GetRectList(const ImageRepeat&& imageRepeat, const Size& parentS
     return renderImage->GetRectList();
 }
 
-RefPtr<RenderContext> RenderContext::Create()
-{
-    return AceType::MakeRefPtr<MockRenderContext>();
-}
-
 RefPtr<RenderNode> RenderImage::Create()
 {
     return AceType::MakeRefPtr<MockRenderImage>();

@@ -159,6 +159,7 @@ ohos_unittest("SvgAnimateTest") {
     "$ace_root/frameworks/base/log/dump_log.cpp",
     "$ace_root/frameworks/base/thread/background_task_executor.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
   ]
 
   # add sources only needed by wearable like watch.
@@ -176,19 +177,22 @@ ohos_unittest("SvgAnimateTest") {
 
   configs = [
     "$ace_root:ace_test_config",
-    ":config_animation_test",
     "$flutter_root:flutter_config",
+    ":config_animation_test",
   ]
 
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "$flutter_root:ace_skia_ohos",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
 
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    deps += [
+      "$flutter_root:ace_skia_ohos",
+      "$flutter_root:third_party_flutter_engine_ohos",
+    ]
     deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
     subsystem_name = "ace"
     part_name = "ace_engine_standard"

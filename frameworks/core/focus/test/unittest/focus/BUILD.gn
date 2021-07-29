@@ -43,6 +43,7 @@ ohos_unittest("FocusTest") {
     "$ace_root/frameworks/core/pipeline/base/element.cpp",
     "$ace_root/frameworks/core/pipeline/base/render_element.cpp",
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
     "focus_test.cpp",
   ]
 
@@ -61,6 +62,11 @@ ohos_unittest("FocusTest") {
     "//utils/native/base:utils",
   ]
   if (is_standard_system) {
+    deps += [
+      "//third_party/curl:curl",
+      "$flutter_root:ace_skia_ohos",
+      "$flutter_root:third_party_flutter_engine_ohos",
+    ]
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     subsystem_name = "ace"
     part_name = "ace_engine_standard"

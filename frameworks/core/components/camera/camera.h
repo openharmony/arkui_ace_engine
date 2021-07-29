@@ -55,6 +55,10 @@ public:
         context_ = context;
     }
 
+    void SetRenderNode(const WeakPtr<RenderNode> &renderNode)
+    {
+        renderNode_ = renderNode;
+    }
     void Stop(bool isClosePreView);
     void Release();
     void Capture(Size photoSize);
@@ -99,6 +103,7 @@ private:
     std::string recordPath_;
 
     std::unique_ptr<OHOS::SubWindow> subWindow_;
+    WeakPtr<RenderNode> renderNode_;
     WeakPtr<PipelineContext> context_;
     sptr<Surface> captureSurface_;
     Size windowSize_ = Size(TEMPORARY_WINDOW_SIZE, TEMPORARY_WINDOW_SIZE);
@@ -133,6 +138,7 @@ public:
 
     void Release();
     void Create(const std::function<void()>& onCreate);
+    void SetRenderNode(const WeakPtr<RenderNode> &renderNode);
 
     void Stop(bool isClosePreView);
     void TakePhoto(Size photoSize);
@@ -153,6 +159,7 @@ public:
 private:
     void CreateCamera();
     WeakPtr<PipelineContext> context_;
+    WeakPtr<RenderNode> renderNode_;
 
     TakePhotoListener takePhotoListener_;
     ErrorListener onErrorListener_;

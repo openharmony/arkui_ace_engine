@@ -179,11 +179,6 @@ RefPtr<PipelineContext> RenderTestUtils::GetMockPipelineContext(const RefPtr<Fro
         std::move(window), taskExecutor, assetManager, resRegister, frontend, 0);
 }
 
-RefPtr<RenderContext> RenderContext::Create()
-{
-    return AceType::MakeRefPtr<MockRenderContext>();
-}
-
 RefPtr<RenderNode> RenderSwiper::Create()
 {
     return AceType::MakeRefPtr<MockRenderSwiper>();
