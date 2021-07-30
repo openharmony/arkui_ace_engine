@@ -69,7 +69,7 @@ void AceApplicationInfoImpl::ChangeLocale(const std::string& language, const std
         return;
     }
 
-    auto script = localeInfo->GetScript();
+    auto script = localeInfo->getScript();
     resConfig->SetLocaleInfo(languageLower.c_str(), script, countryOrRegionUpper.c_str());
     resourceManager_->UpdateResConfig(*resConfig);
 
