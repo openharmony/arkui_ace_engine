@@ -266,7 +266,9 @@ int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> c
         LOGE("Camera CreateSurface failed.");
         return -1;
     }
-    photoListener_ = this;
+    if (photoListener_ == nullptr) {
+        photoListener_ = new CaptureListener(this);
+    }
     captureConsumerSurface_->RegisterConsumerListener(photoListener_);
 
     photoOutput_ = camManagerObj->CreatePhotoOutput(captureConsumerSurface_);
@@ -610,21 +612,22 @@ void CameraCallback::OnCameraOffsetChange(double x, double y)
     }
 }
 
-void CameraCallback::OnBufferAvailable()
+void CaptureListener::OnBufferAvailable()
 {
     int32_t flushFence = 0;
     int64_t timestamp = 0;
     OHOS::Rect damage;
     OHOS::sptr<OHOS::SurfaceBuffer> buffer = nullptr;
-    captureConsumerSurface_->AcquireBuffer(buffer, flushFence, timestamp, damage);
+
+    cameraCallback_->captureConsumerSurface_->AcquireBuffer(buffer, flushFence, timestamp, damage);
     if (buffer != nullptr) {
         char *addr = static_cast<char *>(buffer->GetVirAddr());
         uint32_t size = buffer->GetSize();
         std::string path;
-        SaveData(addr, size, path);
-        OnTakePhoto(true, path);
-        captureConsumerSurface_->ReleaseBuffer(buffer, -1);
-        hasCallPhoto_ = false;
+        cameraCallback_->SaveData(addr, size, path);
+        cameraCallback_->OnTakePhoto(true, path);
+        cameraCallback_->captureConsumerSurface_->ReleaseBuffer(buffer, -1);
+        cameraCallback_->hasCallPhoto_ = false;
     } else {
         LOGE("AcquireBuffer failed!");
     }
