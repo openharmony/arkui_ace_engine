@@ -68,6 +68,31 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imageprovider/images/broken.webp" desc="自造的二进制图片"/>
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imageprovider/images/unbroken.bmp" desc="自研图片"/>
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imageprovider/images/unbroken.webp" desc="自研图片"/>
+                <filteritem type="filepath" name="test/resource/graphicalbasicability/imageprovider/images/unbroken.gif" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="test/resource/graphicalbasicability/imageprovider/images/unbroken.jpg" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="test/resource/graphicalbasicability/imageprovider/images/unbroken.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="test/resource/graphicalbasicability/imageprovider/images/broken.gif" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="test/resource/graphicalbasicability/imageprovider/images/broken.jpg" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="test/resource/graphicalbasicability/imageprovider/images/broken.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/rate_star_big_off.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/rate_star_big_on.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/rate_star_big_half.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/rate_star_small_off.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/rate_star_small_on.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/rate_star_small_half.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/select_arrow_disabled.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/select_arrow_normal.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/tv_rate_star_big_half.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/tv_rate_star_big_off.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/tv_rate_star_big_on.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/tv_rate_star_small_half.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/tv_rate_star_small_off.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/tv_rate_star_small_on.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/indexer_arrow.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/navigation_bar_back.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/navigation_bar_more.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="figures/JS-UI框架架构.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="figures/framework-architecture.png" desc="自研的二进制图片"/>
             </filefilter>
             <filefilter name="copyrightPolicyFilter" desc="copyright文件头校验策略的过滤条件" >
                 <filteritem type="filepath" name="frameworks/core/components/theme/theme.csv" desc="csv无法添加版权头"/>
