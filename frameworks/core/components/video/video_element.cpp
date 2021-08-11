@@ -239,7 +239,10 @@ void VideoElement::PreparePlayer()
         LOGE("Player Reset failed");
         return;
     }
-    const std::string filePath = AceEngine::Get().GetAssetAbsolutePath(src_);
+    std::string filePath = src_;
+    if (!StringUtils::StartWith(filePath, "file://")) {
+        filePath = AceEngine::Get().GetAssetAbsolutePath(src_);
+    }
     LOGI("filePath : %{private}s", filePath.c_str());
     if (mediaPlayer_->SetSource(filePath) != 0) {
         LOGE("Player SetSource failed");
