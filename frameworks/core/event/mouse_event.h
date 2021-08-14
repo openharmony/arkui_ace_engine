@@ -123,7 +123,7 @@ struct MouseEvent final {
 
         int32_t id = GetId();
 
-        return { id, .x = x, .y = y, type, .time = time, .size = 0.0 };
+        return { .id = id, .x = x, .y = y, .type = type, .time = time, .size = 0.0 };
     }
 
     MouseEvent operator-(const Offset& offset) const
