@@ -35,7 +35,7 @@ namespace OHOS::Ace {
 constexpr double VIDEO_CHILD_COMMON_FLEX_GROW = 1.0;
 constexpr double VIDEO_CHILD_COMMON_FLEX_SHRINK = 1.0;
 constexpr double VIDEO_CHILD_COMMON_FLEX_BASIS = 0.0;
-constexpr uint32_t VIDEO_SEEK_STEP = 5;
+constexpr int32_t VIDEO_SEEK_STEP = 5;
 
 class VideoElement : public RenderElement, public FocusNode {
     DECLARE_ACE_TYPE(VideoElement, RenderElement, FocusNode);
@@ -55,7 +55,7 @@ public:
 
     void Start();
     void Pause();
-    void SetCurrentTime(uint32_t currentPos);
+    void SetCurrentTime(int32_t currentPos);
     void FullScreen();
     void ExitFullScreen();
     void SetVolume(float volume);
@@ -65,7 +65,7 @@ private:
     void OnPrepared(
         uint32_t width, uint32_t height, bool isPlaying, uint32_t duration, uint32_t currentPos, bool needFireEvent);
     void OnPlayerStatus(bool isPlaying);
-    void OnCurrentTimeChange(uint32_t currentPos);
+    void OnCurrentTimeChange(int32_t currentPos);
     void OnCompletion();
     void OnStartBtnClick();
     void OnFullScreenBtnClick();
@@ -118,8 +118,8 @@ private:
     bool isMute_ = false;
     std::string src_;
     std::string poster_;
-    uint64_t duration_ = 0;
-    uint64_t currentPos_ = 0;
+    int32_t duration_ = 0;
+    int32_t currentPos_ = 0;
     bool isPlaying_ = false;
     bool pastPlayingStatus_ = false; // Record the player status before dragging the progress bar.
     bool isReady_ = false;
