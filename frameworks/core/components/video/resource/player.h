@@ -117,10 +117,10 @@ private:
 
     int64_t textureId_ = INVALID_ID;
     std::string src_;
-    uint32_t duration_ = 0;
+    int32_t duration_ = 0;
     uint32_t width_ = 0;
     uint32_t height_ = 0;
-    uint32_t currentPos_ = 0;
+    int32_t currentPos_ = 0;
     bool isPlaying_ = false;
     bool isMute_ = false;
     bool isAutoPlay_ = false;

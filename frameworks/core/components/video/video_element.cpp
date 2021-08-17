@@ -904,13 +904,13 @@ void VideoElement::OnPlayerStatus(bool isPlaying)
     }
 }
 
-void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
+void VideoElement::OnCurrentTimeChange(int32_t currentPos)
 {
     if (currentPos == currentPos_) {
         return;
     }
     if (duration_ == 0) {
-        uint64_t duration = 0;
+        int32_t duration = 0;
         if (mediaPlayer_->GetDuration(duration) == 0) {
             duration_ = duration / MILLISECONDS_TO_SECONDS;
             IntTimeToText(duration_, durationText_);
@@ -1220,11 +1220,11 @@ void VideoElement::Pause()
     }
 }
 
-void VideoElement::SetCurrentTime(uint32_t currentPos)
+void VideoElement::SetCurrentTime(int32_t currentPos)
 {
     if (mediaPlayer_ != nullptr && currentPos >= 0 && currentPos < duration_) {
         LOGI("Video Seek");
-        mediaPlayer_->Seek(currentPos * MILLISECONDS_TO_SECONDS, 0);
+        mediaPlayer_->Seek(currentPos * MILLISECONDS_TO_SECONDS, OHOS::Media::SEEK_PREVIOUS_SYNC);
     }
 }
 

@@ -37,48 +37,41 @@ public:
     MediaPlayerCallback() = default;
     ~MediaPlayerCallback() = default;
 
-    void OnError(int32_t errorType, int32_t errorCode) override
+    void OnError(Media::PlayerErrorType errorType, int32_t errorCode) override
     {
         LOGE("OnError callback, errorType: %{public}d, errorCode: %{public}d", errorType, errorCode);
     }
 
-    void OnEndOfStream(bool isLooping) override
+    virtual void OnInfo(Media::PlayerOnInfoType type, int32_t extra, const Media::Format &InfoBody = {}) override
     {
-        (void)isLooping;
-        LOGI("OnEndOfStream callback");
-        if (endOfStreamEvent_ != nullptr) {
-            endOfStreamEvent_();
-        }
-    }
-
-    void OnStateChanged(OHOS::Media::PlayerStates state) override
-    {
-        LOGI("OnStateChanged callback");
-        PrintState(state);
-        if (stateChangedEvent_ != nullptr) {
-            stateChangedEvent_(state == OHOS::Media::PLAYER_STARTED);
-        }
-    }
-
-    void OnSeekDone(uint64_t currentPosition) override
-    {
-        LOGI("OnSeekDone callback");
-        if (positionUpdatedEvent_ != nullptr && currentPosition != 0) {
-            positionUpdatedEvent_(currentPosition / MILLISECONDS_TO_SECONDS);
-        }
-    }
-
-    void OnPositionUpdated(uint64_t position) override
-    {
-        if (positionUpdatedEvent_ != nullptr && position != 0) {
-            positionUpdatedEvent_(position / MILLISECONDS_TO_SECONDS);
-        }
-    }
-
-    void OnMessage(int32_t type, int32_t extra) override
-    {
-        (void)extra;
-        LOGI("OnMessage callback type: %{public}d", type);
+        switch (type) {
+            case OHOS::Media::INFO_TYPE_SEEKDONE:
+                LOGI("OnSeekDone callback");
+                if (positionUpdatedEvent_ != nullptr) {
+                    positionUpdatedEvent_(extra);
+                }
+                break;
+            case OHOS::Media::INFO_TYPE_EOS:
+                LOGI("OnEndOfStream callback");
+                if (endOfStreamEvent_ != nullptr) {
+                    endOfStreamEvent_();
+                }
+                break;
+            case OHOS::Media::INFO_TYPE_STATE_CHANGE:
+                LOGI("OnStateChanged callback");
+                PrintState(static_cast<OHOS::Media::PlayerStates>(extra));
+                if (stateChangedEvent_ != nullptr) {
+                    stateChangedEvent_(extra == OHOS::Media::PLAYER_STARTED);
+                }
+                break;
+            case OHOS::Media::INFO_TYPE_POSITION_UPDATE:
+                break;
+            case OHOS::Media::INFO_TYPE_MESSAGE:
+                LOGI("OnMessage callback type: %{public}d", extra);
+                break;
+            default:
+                break;
+            }
     }
 
     void PrintState(OHOS::Media::PlayerStates state) const
