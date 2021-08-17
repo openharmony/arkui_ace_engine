@@ -115,6 +115,26 @@ public:
         dialogStretch_ = dialogStretch;
     }
 
+    MeasureType GetHorizontalMeasure() const
+    {
+        return horizontalMeasure_;
+    }
+
+    void SetHorizontalMeasure(MeasureType horizontalMeasure)
+    {
+        horizontalMeasure_ = horizontalMeasure;
+    }
+
+    MeasureType GetVerticalMeasure() const
+    {
+        return verticalMeasure_;
+    }
+
+    void SetVerticalMeasure(MeasureType verticalMeasure)
+    {
+        verticalMeasure_ = verticalMeasure;
+    }
+
 private:
     // The direction of main axis
     WrapDirection direction_ = WrapDirection::HORIZONTAL;
@@ -128,6 +148,9 @@ private:
     Dimension spacing_;
     // The space between each direction content
     Dimension contentSpacing_;
+
+    MeasureType horizontalMeasure_ = MeasureType::CONTENT;
+    MeasureType verticalMeasure_ = MeasureType::CONTENT;
 
     bool dialogStretch_ = false;
 };

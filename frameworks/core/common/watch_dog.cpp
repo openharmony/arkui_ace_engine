@@ -15,13 +15,18 @@
 
 #include "core/common/watch_dog.h"
 
+#include <cerrno>
+#include <csignal>
 #include <shared_mutex>
+
+#include <pthread.h>
 
 #include "flutter/fml/thread.h"
 
 #include "base/log/event_report.h"
 #include "base/log/log.h"
-#include "frameworks/core/common/ace_engine.h"
+#include "base/thread/background_task_executor.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -52,6 +57,73 @@ bool PostTaskToTaskRunner(Task&& task, uint32_t delayTime)
     }
     return true;
 }
+
+#if defined(OHOS_PLATFORM) || defined(ANDROID_PLATFORM)
+constexpr int32_t SIGNAL_FOR_GC = 60;
+constexpr int32_t GC_CHECK_PERIOD = 1;
+pthread_t g_signalThread;
+
+void CheckGcSignal()
+{
+    // Check if GC signal is in pending signal set
+    sigset_t sigSet;
+    sigemptyset(&sigSet);
+    sigaddset(&sigSet, SIGNAL_FOR_GC);
+    struct timespec interval = {
+        .tv_sec = 0,
+        .tv_nsec = 0,
+    };
+    int32_t result = sigtimedwait(&sigSet, nullptr, &interval);
+    if (result < 0) {
+        if (errno != EAGAIN && errno != EINTR) {
+            LOGE("Failed to wait signals, errno = %{public}d", errno);
+            return;
+        }
+    } else {
+        ACE_DCHECK(result == SIGNAL_FOR_GC);
+
+        // Start GC
+        LOGE("Receive GC signal");
+        AceEngine::Get().TriggerGarbageCollection();
+    }
+
+    // Check again
+    PostTaskToTaskRunner(CheckGcSignal, GC_CHECK_PERIOD);
+}
+
+inline int32_t BlockGcSignal()
+{
+    // Block GC signal on current thread.
+    sigset_t sigSet;
+    sigemptyset(&sigSet);
+    sigaddset(&sigSet, SIGNAL_FOR_GC);
+    return pthread_sigmask(SIG_BLOCK, &sigSet, nullptr);
+}
+
+void OnSignalReceive(int32_t sigNum)
+{
+    // Forward GC signal to signal handling thread
+    pthread_kill(g_signalThread, sigNum);
+    BlockGcSignal();
+}
+
+void InitializeGcTrigger()
+{
+    // Record watch dog thread as signal handling thread
+    g_signalThread = pthread_self();
+
+    int32_t result = BlockGcSignal();
+    if (result != 0) {
+        LOGE("Failed to block GC signal, errno = %{public}d", result);
+        return;
+    }
+
+    // Start to receive GC signal
+    signal(SIGNAL_FOR_GC, OnSignalReceive);
+    // Start check GC signal
+    CheckGcSignal();
+}
+#endif // #if defined(OHOS_PLATFORM) || defined(ANDROID_PLATFORM)
 
 } // namespace
 
@@ -237,6 +309,9 @@ WatchDog::WatchDog()
     if (!g_anrThread) {
         g_anrThread = std::make_unique<fml::Thread>("anr");
     }
+#if defined(OHOS_PLATFORM) || defined(ANDROID_PLATFORM)
+    PostTaskToTaskRunner(InitializeGcTrigger, GC_CHECK_PERIOD);
+#endif
 }
 
 WatchDog::~WatchDog()
@@ -263,9 +338,6 @@ void WatchDog::Unregister(int32_t instanceId)
     int32_t num = watchMap_.erase(instanceId);
     if (num == 0) {
         LOGW("Unregister from watch dog failed with instanceID %{public}d", instanceId);
-    }
-    if (watchMap_.empty()) {
-        g_anrThread.reset();
     }
 }
 

@@ -62,12 +62,12 @@ void RenderLoadingProgress::Update(const RefPtr<Component>& component)
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
-    diameter_ = NormalizeToPx(loadingProgress->GetDiameter());
     progressColor_ = loadingProgress->GetProgressColor();
     moveRatio_ = loadingProgress->GetMoveRatio();
-    ringRadius_ = NormalizeToPx(loadingProgress->GetRingRadius());
-    orbitRadius_ = NormalizeToPx(loadingProgress->GetOrbitRadius());
     cometTailLen_ = loadingProgress->GetCometTailLen();
+    diameterDimension_ = loadingProgress->GetDiameter();
+    ringRadiusDimension_ = loadingProgress->GetRingRadius();
+    orbitRadiusDimension_ = loadingProgress->GetOrbitRadius();
     MarkNeedLayout();
 }
 
@@ -337,6 +337,9 @@ void RenderLoadingProgress::SetDragDistance(double distance)
 void RenderLoadingProgress::PerformLayout()
 {
     // the diameter will be constrain by layout size.
+    diameter_ = NormalizeToPx(diameterDimension_);
+    ringRadius_ = NormalizeToPx(ringRadiusDimension_);
+    orbitRadius_ = NormalizeToPx(orbitRadiusDimension_);
     Size layoutSize;
     if (!NearEqual(diameter_, 0.0)) {
         layoutSize = GetLayoutParam().Constrain(Size(diameter_, diameter_));
@@ -363,6 +366,7 @@ void RenderLoadingProgress::PerformLayout()
         cometController_ = AceType::MakeRefPtr<Animator>(pipelineContext);
         UpdateRingAnimation();
         UpdateCometAnimation();
+        AnimationChanged();
     }
 }
 

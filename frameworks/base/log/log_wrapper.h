@@ -42,6 +42,8 @@
 #define LOGE(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)
 #define LOGF(fmt, ...) PRINT_LOG(FATAL, fmt, ##__VA_ARGS__)
 
+#define LOG_DESTROY() LOGI("destroyed")
+
 #define PRINT_APP_LOG(level, fmt, ...) \
     OHOS::Ace::LogWrapper::PrintLog(OHOS::Ace::LogDomain::JS_APP, OHOS::Ace::LogLevel::level, fmt, ##__VA_ARGS__)
 

@@ -44,7 +44,11 @@ template("ace_base_source_set") {
 
     # add base source file here
     sources = [
+      "geometry/animatable_dimension.cpp",
+      "geometry/animatable_matrix4.cpp",
       "geometry/matrix4.cpp",
+      "geometry/quaternion.cpp",
+      "geometry/transform_util.cpp",
       "json/json_util.cpp",
       "log/ace_trace.cpp",
       "log/dump_log.cpp",
@@ -56,7 +60,7 @@ template("ace_base_source_set") {
       "utils/time_util.cpp",
     ]
 
-    if (is_standard_system) {
+    if (is_standard_system && !use_mingw_win && !use_mac) {
       configs += [ "//third_party/curl:curl_config" ]
       deps += [ "//third_party/curl:curl" ]
       sources += [ "network/download_manager.cpp" ]

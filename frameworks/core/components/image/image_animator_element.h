@@ -29,7 +29,10 @@ class ImageAnimatorElement : public ComposedElement {
     DECLARE_ACE_TYPE(ImageAnimatorElement, ComposedElement);
 
 public:
-    explicit ImageAnimatorElement(const ComposeId& id) : ComposedElement(id) {}
+    explicit ImageAnimatorElement(const ComposeId& id) : ComposedElement(id)
+    {
+        animator_ = AceType::MakeRefPtr<Animator>();
+    }
     ~ImageAnimatorElement() override;
 
     void Update() override;
@@ -44,21 +47,24 @@ private:
     void UpdateFilterImages();
     void UpdateImageBox(ImageProperties& imageProperties, const RefPtr<BoxComponent>& box);
     void UpdatePreLoadImages(const RefPtr<BoxComponent>& box);
+    void CallAnimatorMethod(const std::string& method);
+    void UpdateCallbackAndFunc(const RefPtr<ImageAnimatorComponent>& imageAnimatorComponent);
+    Animator::Status GetAnimatorStatus() const;
 
     std::vector<ImageProperties> images_;
     std::vector<ImageProperties> filterImages_;
-    RefPtr<Animator> controller_;
+    RefPtr<Animator> animator_;
     RefPtr<Component> childComponent_;
     RefPtr<PictureAnimation<int32_t>> pictureAnimation_;
     WeakPtr<PageElement> pageElement_;
     Border border_;
-    float durationTotal_ = 0.0f;
+    Animator::Status status_ = Animator::Status::IDLE;
+    int32_t durationTotal_ = 0;
     int32_t preDecode_ = 1;
-    int32_t durationNums_ = 0;
     int32_t callbackId_ = -1;
-    int32_t iteration_ = 1;
     int32_t duration_ = 0; // Duration in millisecond.
     int64_t stopCallbackId_ = -1;
+    int64_t repeatCallbackId_ = -1;
     bool isPaused_ = false;
     bool isReverse_ = false;
     bool isFixedSize_ = true;

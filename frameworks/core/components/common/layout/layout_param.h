@@ -120,7 +120,7 @@ public:
         return !operator==(layoutParam);
     }
 
-    std::string ToString()
+    std::string ToString() const
     {
         return std::string("LayoutParam: ")
             .append(minSize_.ToString())

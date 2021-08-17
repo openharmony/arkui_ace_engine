@@ -35,7 +35,8 @@ group("ace_packages") {
     deps += [
       "adapter/common/cpp:libace_engine_qjs",
       "adapter/common/cpp:libace_engine_qjs_debug",
-      "adapter/common/cpp:libace_engine_declarative_qjs"
+      "adapter/common/cpp:libace_engine_declarative_qjs",
+      "adapter/common/cpp:libace_engine_pa_qjs"
     ]
   }
 }
@@ -101,6 +102,10 @@ config("ace_config") {
   if (use_mingw_win) {
     cflags += [ "-std=c++17" ]
     defines += [ "_USE_MATH_DEFINES" ]
+  }
+
+  if (enable_ace_debug) {
+    defines += [ "ACE_DEBUG" ]
   }
 }
 

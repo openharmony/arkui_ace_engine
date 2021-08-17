@@ -32,6 +32,9 @@ public:
     explicit ComponentGroup(const std::list<RefPtr<Component>>& children) : children_(children) {}
     ~ComponentGroup() override = default;
 
+    virtual void OnChildInserted(const RefPtr<Component>& child, int32_t position) {}
+    virtual void OnChildAppended(const RefPtr<Component>& child) {}
+
     RefPtr<Element> CreateElement() override
     {
         return AceType::MakeRefPtr<ComponentGroupElement>();
@@ -59,9 +62,20 @@ public:
         auto insertIter = children_.begin();
         std::advance(insertIter, position);
         children_.insert(insertIter, child);
+        OnChildInserted(child, position);
     }
 
     virtual void AppendChild(const RefPtr<Component>& child)
+    {
+        if (!child) {
+            return;
+        }
+        child->SetParent(WeakClaim(this));
+        children_.emplace_back(child);
+        OnChildAppended(child);
+    }
+
+    void AppendChildDirectly(const RefPtr<Component>& child)
     {
         if (!child) {
             return;
@@ -119,7 +133,7 @@ public:
 
     void SetUpdateType(UpdateType updateType) override
     {
-        Component::SetUpdateType(updateType);
+        RenderComponent::SetUpdateType(updateType);
         for (const auto& child : children_) {
             child->SetUpdateType(updateType);
         }
@@ -127,7 +141,7 @@ public:
 
     void SetDisabledStatus(bool disabledStatus) override
     {
-        Component::SetDisabledStatus(disabledStatus);
+        RenderComponent::SetDisabledStatus(disabledStatus);
         for (const auto& child : children_) {
             child->SetDisabledStatus(disabledStatus);
         }
@@ -135,7 +149,7 @@ public:
 
     void SetTextDirection(TextDirection direction) override
     {
-        direction_ = direction;
+        RenderComponent::SetTextDirection(direction);
         for (const auto& child : children_) {
             child->SetTextDirection(direction);
         }

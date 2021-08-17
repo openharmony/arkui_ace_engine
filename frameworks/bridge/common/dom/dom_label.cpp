@@ -32,29 +32,6 @@ DOMLabel::~DOMLabel()
     BackEndEventManager<void(const TouchEventInfo&)>::GetInstance().RemoveBackEndEvent(clickMarker_);
 }
 
-bool DOMLabel::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    LOGD("Domlabel SetSpecializedAttr");
-    if (DOMText::SetSpecializedAttr(attr)) {
-        return true;
-    }
-
-    bool consumed = true;
-    if (attr.first == DOM_TARGET) {
-        target_ = attr.second;
-    } else if (attr.first == DOM_VALUE) {
-        textChild_->SetData(attr.second);
-    } else {
-        consumed = false;
-    }
-    return consumed;
-}
-
-bool DOMLabel::SetSpecializedStyle(const std::pair<std::string, std::string>& style)
-{
-    return DOMText::SetSpecializedStyle(style);
-}
-
 void DOMLabel::PrepareSpecializedComponent()
 {
     DOMText::PrepareSpecializedComponent();

@@ -28,6 +28,8 @@ public:
     RenderLayer GetRenderLayer() override;
     void Paint(RenderContext& context, const Offset& offset) override;
 
+    void PaintDirectly(RenderContext& context, const Offset& offset) override;
+
     bool IsRepaintBoundary() const override
     {
         return true;
@@ -41,8 +43,12 @@ public:
         return !transformLayer_->GetMatrix4().IsIdentityMatrix();
     }
 
-    void UpdateMotion(const std::string& path, const std::string& rotate, double percent, const Point& point) override;
-    bool GetStartPoint(Point& point) override;
+    void UpdateMotion(const std::string& path, const std::string& rotate, double percent) override;
+
+    Rect GetPaintBounds(const Offset& offset) override;
+
+protected:
+    void GetPath(SkPath& path);
 
 private:
     RefPtr<Flutter::TransformLayer> transformLayer_;

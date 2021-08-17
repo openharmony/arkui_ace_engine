@@ -108,13 +108,18 @@ std::unique_ptr<fml::Mapping> FileAssetProvider::GetAsMapping(const std::string&
 
 std::string FileAssetProvider::GetAssetPath(const std::string& assetName)
 {
-    auto filePath = filePathMap_.find(assetName);
-    if (filePath == filePathMap_.end()) {
-        return "";
+    for (const auto& basePath: assetBasePaths_) {
+        std::string assetBasePath = packagePath_ + basePath;
+        std::string fileName = assetBasePath + assetName;
+        std::FILE* fp = std::fopen(fileName.c_str(), "r");
+        if (fp == nullptr) {
+            continue;
+        }
+        std::fclose(fp);
+        return assetBasePath;
     }
-    std::string assetPath;
-    assetPath.append(packagePath_).append("!/").append(filePath->second);
-    return assetPath;
+    LOGE("Cannot find base path of %{public}s", assetName.c_str());
+    return "";
 }
 
 } // namespace OHOS::Ace

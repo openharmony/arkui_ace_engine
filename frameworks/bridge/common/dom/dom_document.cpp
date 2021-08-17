@@ -18,6 +18,7 @@
 #include "base/log/event_report.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
+#include "core/common/thread_checker.h"
 #include "core/components/flex/flex_item_component.h"
 #include "frameworks/bridge/common/dom/dom_button.h"
 #include "frameworks/bridge/common/dom/dom_calendar.h"
@@ -27,6 +28,7 @@
 #include "frameworks/bridge/common/dom/dom_dialog.h"
 #include "frameworks/bridge/common/dom/dom_div.h"
 #include "frameworks/bridge/common/dom/dom_divider.h"
+#include "frameworks/bridge/common/dom/dom_form.h"
 #include "frameworks/bridge/common/dom/dom_grid_column.h"
 #include "frameworks/bridge/common/dom/dom_grid_container.h"
 #include "frameworks/bridge/common/dom/dom_grid_row.h"
@@ -43,9 +45,7 @@
 #include "frameworks/bridge/common/dom/dom_picker_view.h"
 #include "frameworks/bridge/common/dom/dom_progress.h"
 #include "frameworks/bridge/common/dom/dom_proxy.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/common/dom/dom_qrcode.h"
-#endif
 #include "frameworks/bridge/common/dom/dom_refresh.h"
 #include "frameworks/bridge/common/dom/dom_search.h"
 #include "frameworks/bridge/common/dom/dom_slider.h"
@@ -54,9 +54,11 @@
 #include "frameworks/bridge/common/dom/dom_svg.h"
 #include "frameworks/bridge/common/dom/dom_svg_animate.h"
 #include "frameworks/bridge/common/dom/dom_svg_animate_motion.h"
+#include "frameworks/bridge/common/dom/dom_svg_animate_transform.h"
 #include "frameworks/bridge/common/dom/dom_svg_circle.h"
 #include "frameworks/bridge/common/dom/dom_svg_ellipse.h"
 #include "frameworks/bridge/common/dom/dom_svg_line.h"
+#include "frameworks/bridge/common/dom/dom_svg_mask.h"
 #include "frameworks/bridge/common/dom/dom_svg_path.h"
 #include "frameworks/bridge/common/dom/dom_svg_polygon.h"
 #include "frameworks/bridge/common/dom/dom_svg_polyline.h"
@@ -79,6 +81,9 @@
 #include "frameworks/bridge/common/dom/dom_piece.h"
 #include "frameworks/bridge/common/dom/dom_popup.h"
 #include "frameworks/bridge/common/dom/dom_rating.h"
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "frameworks/bridge/common/dom/dom_rich_text.h"
+#endif
 #include "frameworks/bridge/common/dom/dom_select.h"
 #include "frameworks/bridge/common/dom/dom_stepper.h"
 #include "frameworks/bridge/common/dom/dom_stepper_item.h"
@@ -90,6 +95,7 @@
 #include "frameworks/bridge/common/dom/dom_video.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/common/dom/dom_web.h"
+#include "frameworks/bridge/common/dom/dom_xcomponent.h"
 #endif
 #endif
 
@@ -116,6 +122,12 @@ RefPtr<DOMNode> DOMListItemCreator(NodeId nodeId, const std::string& tag, int32_
 
 } // namespace
 
+DOMDocument::~DOMDocument()
+{
+    CHECK_RUN_ON(UI);
+    LOG_DESTROY();
+}
+
 RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nodeId, int32_t itemIndex)
 {
     LOGD("DOMDocument:created new DOMNode %{public}s, id %{public}d, itemIndex %{public}d", tag.c_str(), nodeId,
@@ -124,6 +136,7 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
     static const LinearMapNode<RefPtr<DOMNode>(*)(NodeId, const std::string&, int32_t)> domNodeCreators[] = {
         { DOM_NODE_TAG_ANIMATE, &DOMNodeCreator<DOMSvgAnimate> },
         { DOM_NODE_TAG_ANIMATE_MOTION, &DOMNodeCreator<DOMSvgAnimateMotion> },
+        { DOM_NODE_TAG_ANIMATE_TRANSFORM, &DOMNodeCreator<DOMSvgAnimateTransform> },
         { DOM_NODE_TAG_BADGE, &DOMNodeCreator<DOMBadge> },
         { DOM_NODE_TAG_BUTTON, &DOMNodeCreator<DOMButton> },
         { DOM_NODE_TAG_CALENDAR, &DOMNodeCreator<DomCalendar> },
@@ -133,13 +146,12 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_CANVAS, &DOMNodeCreator<DOMCanvas> },
         { DOM_NODE_TAG_CHART, &DOMNodeCreator<DOMChart> },
         { DOM_NODE_TAG_CIRCLE, &DOMNodeCreator<DOMSvgCircle> },
-#ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_CLOCK, &DOMNodeCreator<DOMClock> },
-#endif
         { DOM_NODE_TAG_DIALOG, &DOMNodeCreator<DOMDialog> },
         { DOM_NODE_TAG_DIV, &DOMNodeCreator<DOMDiv> },
         { DOM_NODE_TAG_DIVIDER, &DOMNodeCreator<DOMDivider> },
         { DOM_NODE_TAG_ELLIPSE, &DOMNodeCreator<DOMSvgEllipse> },
+        { DOM_NODE_TAG_FORM, &DOMNodeCreator<DOMForm> },
         { DOM_NODE_TAG_GRID_COLUMN, &DOMNodeCreator<DomGridColumn> },
         { DOM_NODE_TAG_GRID_CONTAINER, &DOMNodeCreator<DomGridContainer> },
         { DOM_NODE_TAG_GRID_ROW, &DOMNodeCreator<DomGridRow> },
@@ -152,6 +164,7 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_LIST_ITEM, &DOMListItemCreator<DOMListItem> },
         { DOM_NODE_TAG_LIST_ITEM_GROUP, &DOMListItemCreator<DOMListItemGroup> },
         { DOM_NODE_TAG_MARQUEE, &DOMNodeCreator<DOMMarquee> },
+        { DOM_NODE_TAG_MASK, &DOMNodeCreator<DOMSvgMask> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_MENU, &DOMNodeCreator<DOMMenu> },
 #endif
@@ -172,9 +185,7 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_POPUP, &DOMNodeCreator<DOMPopup> },
 #endif
         { DOM_NODE_TAG_PROGRESS, &DOMNodeCreator<DOMProgress> },
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
         { DOM_NODE_TAG_QRCODE, &DOMNodeCreator<DOMQrcode> },
-#endif
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_RATING, &DOMNodeCreator<DOMRating> },
 #endif
@@ -211,9 +222,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_TSPAN, &DOMNodeCreator<DOMSvgTspan> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_VIDEO, &DOMNodeCreator<DOMVideo> },
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-        { DOM_NODE_TAG_WEB, &DOMNodeCreator<DOMWeb> },
-#endif
 #endif
     };
 #ifndef WEARABLE_PRODUCT
@@ -330,7 +338,6 @@ void DOMDocument::RemoveNodes(const RefPtr<DOMNode>& node, bool scheduleUpdate)
             }
         }
     }
-    LOGD("RemoveNodes: remove node %{public}d, remain nodes number %{public}lu", node->GetNodeId(), domNodes_.size());
     domNodes_.erase(node->GetNodeId());
 }
 

@@ -52,6 +52,7 @@ group("unittest") {
     "swiper:unittest",
     "tabbar:unittest",
     "text:unittest",
+    "theme:unittest",
     "transform:unittest",
     "transition:unittest",
     "tween:unittest",
@@ -65,11 +66,12 @@ group("unittest") {
       "menu:unittest",
       "picker:unittest",
       "piece:unittest",
+      "rating:unittest",
       "select:unittest",
       "tabbar:unittest",
       "text_field:unittest",
       "text_select:unittest",
-      "video:unittest",
+      # "video:unittest",
     ]
   }
 }

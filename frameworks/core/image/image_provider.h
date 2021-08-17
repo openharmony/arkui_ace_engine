@@ -26,8 +26,10 @@
 #include "base/memory/ace_type.h"
 #include "base/resource/internal_resource.h"
 #include "core/components/common/layout/constants.h"
+#include "core/image/image_loader.h"
 #include "core/image/render_image_provider.h"
 #include "core/pipeline/pipeline_context.h"
+#include "frameworks/core/components/svg/parse/svg_dom.h"
 
 namespace OHOS::Ace {
 
@@ -35,11 +37,9 @@ class ImageProvider;
 class LoadImageCallback : public virtual Referenced {
 public:
     virtual void OnLoadSuccess(
-        const sk_sp<SkImage>& image, const RefPtr<ImageProvider>& imageProvider, const std::string& key) = 0;
-    virtual void OnLoadGPUImageSuccess(
         const fml::RefPtr<flutter::CanvasImage>& image, const RefPtr<ImageProvider>& imageProvider) = 0;
     virtual void OnAnimateImageSuccess(
-        const RefPtr<ImageProvider>& provider, std::unique_ptr<SkCodec> codec) = 0;
+        const RefPtr<ImageProvider>& provider, std::unique_ptr<SkCodec> codec, bool forceResize) = 0;
     virtual void OnLoadFail(const RefPtr<ImageProvider>& imageProvider) = 0;
     virtual void OnChangeProvider(const RefPtr<ImageProvider>& provider) = 0;
     virtual void OnLoadImageSize(
@@ -54,46 +54,52 @@ public:
     // Create function can be used for create File, Asset, Network image provider.
     // the image from memory should be create by class MemoryImageProvider constructor,
     // by passing a vector<uint8_t> as image data source to it.
-    static RefPtr<ImageProvider> Create(
-        const std::string& uri, RefPtr<SharedImageManager> sharedImageManager = nullptr);
+    explicit ImageProvider(InternalResource::ResourceId resourceId);
+    ImageProvider(const std::string& uri, RefPtr<SharedImageManager> sharedImageManager = nullptr);
     ~ImageProvider() override = default;
 
-    static SrcType ResolveURI(const std::string& uri);
-    static std::string RemovePathHead(const std::string& uri);
-    static bool IsValidBase64Head(const std::string& uri, const std::string& pattern);
-    static sk_sp<SkImage> ResizeSkImage(const sk_sp<SkImage>& rawImage, Size imageSize);
     static void RemoveLoadingImage(const std::string& key);
+    static sk_sp<SkImage> ApplySizeToSkImage(const sk_sp<SkImage>& rawImage, int32_t dstWidth, int32_t dstHeight);
 
-    virtual std::string GenerateKey(const std::string& src, Size targetSize) const;
-    virtual sk_sp<SkData> LoadImageData(const std::string& src, const RefPtr<AssetManager> assetManager) = 0;
-
-    void LoadImage(
-        const RefPtr<PipelineContext>& pipelineContext,
-        const std::string& src = std::string(),
-        Size imageSize = Size());
+    void LoadImage(const WeakPtr<PipelineContext> context, const std::string& src = std::string(),
+        Size imageSize = Size(), bool forceResize = false);
 
     void GetSVGImageDOMAsync(
         const std::string& src,
         std::function<void(const sk_sp<SkSVGDOM>&)> callback,
         std::function<void()> failedCallback,
-        RefPtr<TaskExecutor>& taskExecutor,
-        const RefPtr<AssetManager> assetManager,
+        const WeakPtr<PipelineContext> context,
         uint64_t svgThemeColor = 0);
 
-    void GetImageSize(bool syncMode, const RefPtr<AssetManager> assetManager, const std::string& src = std::string());
+    void GetSVGImageDOMAsyncCustom(
+        const std::string& src,
+        std::function<void(const RefPtr<SvgDom>&)> callback,
+        std::function<void()> failedCallback,
+        const WeakPtr<PipelineContext> context,
+        const std::optional<Color>& svgThemeColor);
+
+    sk_sp<SkImage> ResizeSkImage(const sk_sp<SkImage>& rawImage, Size imageSize, bool forceResize = false);
+    void GetImageSize(bool syncMode, const WeakPtr<PipelineContext> context, const std::string& src = std::string());
     void AddListener(const WeakPtr<LoadImageCallback>& listener);
     void RemoveListener(const WeakPtr<LoadImageCallback>& listener);
     int32_t GetTotalFrames() const;
-    void OnImageReady(const sk_sp<SkImage>& image, const std::string& key);
-    void OnGPUImageReady(const fml::RefPtr<flutter::CanvasImage>& image);
-    void OnAnimateImageReady(const std::unique_ptr<SkCodec> codec);
+    void OnImageReady(const fml::RefPtr<flutter::CanvasImage>& image);
+    void OnAnimateImageReady(const std::unique_ptr<SkCodec> codec, bool forceResize);
     void OnImageFailed();
     void OnImageSizeReady(Size rawImageSize, const std::string& imageSrc, bool syncMode);
+    void UploadToGPUForRender(
+        const sk_sp<SkImage>& image, const std::function<void(flutter::SkiaGPUObject<SkImage>)>& callback);
 
     sk_sp<SkImage> GetSkImage(
         const std::string& src,
-        const RefPtr<AssetManager> assetManager,
+        const WeakPtr<PipelineContext> context,
         Size targetSize = Size());
+
+    bool Invalid() const
+    {
+        return !imageLoader_;
+    }
+    static bool IsWideGamut(const sk_sp<SkColorSpace>& colorSpace);
 
 protected:
     ImageProvider() = default;
@@ -103,104 +109,39 @@ protected:
     void LoadFromRealSrc(
         const std::string& src,
         Size imageSize,
-        const RefPtr<PipelineContext>& piplineContext);
+        const WeakPtr<PipelineContext> context,
+        const RefPtr<ImageLoader> imageLoader,
+        bool forceResize);
 
     // construct canvas image for rendering.
     void ConstructCanvasImageForRender(
-        const std::string& key,
-        const sk_sp<SkData>& data,
-        Size imageSize);
+        const std::string& key, sk_sp<SkData> data, Size imageSize, bool forceResize = false);
 
     void ConstructSingleCanvasImage(
-        const std::string& key,
-        const sk_sp<SkData>& data,
-        Size imageSize);
+        const std::string& key, const sk_sp<SkData>& data, Size imageSize, bool forceResize = false);
 
     // manager loading image using static unordered_map.
     static bool TrySetLoadingImage(const std::string& key, const WeakPtr<ImageProvider>& provider);
 
     std::string loadingUri_;
+    RefPtr<ImageLoader> imageLoader_;
+    sk_sp<SkData> imageSkData_;
+    Size currentResolutionTargetSize_;
 
     // total frame count of this animated image
     int32_t totalFrames_ = 0;
 
     std::mutex listenersMutex_;
+    std::mutex imageSkDataMutex_;
     std::set<WeakPtr<LoadImageCallback>> listeners_;
 
     static std::mutex loadingImageMutex_;
     static std::unordered_map<std::string, WeakPtr<ImageProvider>> loadingImage_;
 
-    sk_sp<SkData> imageSkData_;
-};
-
-// File image provider: read image from file.
-class FileImageProvider final : public ImageProvider {
-public:
-    FileImageProvider() = default;
-    ~FileImageProvider() override = default;
-
-    std::string GenerateKey(const std::string& src, Size targetSize) const override;
-    sk_sp<SkData> LoadImageData(const std::string& src, const RefPtr<AssetManager> assetManager = nullptr) override;
-};
-
-class AssetImageProvider final : public ImageProvider {
-public:
-    AssetImageProvider() = default;
-    ~AssetImageProvider() override = default;
-
-    std::string GenerateKey(const std::string& src, Size targetSize) const override;
-    sk_sp<SkData> LoadImageData(const std::string& src, const RefPtr<AssetManager> assetManager = nullptr) override;
-};
-
-// Network image provider: read image from network.
-class NetworkImageProvider final : public ImageProvider {
-public:
-    NetworkImageProvider() = default;
-    ~NetworkImageProvider() override = default;
-    std::string GenerateKey(const std::string& url, Size targetSize) const override;
-    sk_sp<SkData> LoadImageData(const std::string& url, const RefPtr<AssetManager> assetManager = nullptr) override;
-};
-
-class ImageProviderLoader;
-// this class is for load image data in memory.
-// The memory data vector should not be released in the life circle of the image provider.
-class MemoryImageProvider final : public ImageProvider, public ImageProviderLoader {
-    DECLARE_ACE_TYPE(MemoryImageProvider, ImageProvider, ImageProviderLoader)
-
-public:
-    MemoryImageProvider() = default;
-    ~MemoryImageProvider() override = default;
-    sk_sp<SkData> LoadImageData(const std::string& url, const RefPtr<AssetManager> assetManager = nullptr) override;
-    std::string GenerateKey(const std::string& url, Size targetSize) const override;
-    void UpdateData(const std::string& uri, const std::vector<uint8_t>& memData) override;
-
-private:
-    sk_sp<SkData> skData_;
-};
-
-class InternalImageProvider final : public ImageProvider {
-public:
-    explicit InternalImageProvider(InternalResource::ResourceId resourceId)
-        : resourceId_(resourceId)
-    {}
-    ~InternalImageProvider() override = default;
-
-    std::string GenerateKey(const std::string& src, Size targetSize) const override;
-
-    sk_sp<SkData> LoadImageData(const std::string& url, const RefPtr<AssetManager> assetManager = nullptr) override;
-
-private:
-    InternalResource::ResourceId resourceId_;
-};
-
-class Base64ImageProvider final : public ImageProvider {
-public:
-    Base64ImageProvider() = default;
-    ~Base64ImageProvider() override = default;
-
-    static std::string GetBase64ImageCode(const std::string& url, size_t& imagSize);
-    static size_t GetBase64ImageSize(const std::string& code);
-    sk_sp<SkData> LoadImageData(const std::string& url, const RefPtr<AssetManager> assetManager = nullptr) override;
+    bool needCacheResizedImage = false;
+    fml::RefPtr<flutter::SkiaUnrefQueue> unrefQueue_;
+    fml::WeakPtr<flutter::IOManager> ioManager_;
+    fml::RefPtr<fml::TaskRunner> ioTaskRunner_;
 };
 
 } // namespace OHOS::Ace

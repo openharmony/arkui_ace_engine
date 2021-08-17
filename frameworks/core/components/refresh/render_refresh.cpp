@@ -81,6 +81,7 @@ void RenderRefresh::Update(const RefPtr<Component>& component)
         return;
     }
 
+    refreshComponent_ = AceType::WeakClaim(AceType::RawPtr(component));
     refreshing_ = refresh->IsRefreshing();
     showLastTime_ = refresh->IsShowLastTime();
     isUseOffset_ = refresh->IsUseOffset();
@@ -130,28 +131,42 @@ void RenderRefresh::Update(const RefPtr<Component>& component)
 
     refreshEvent_ = AceAsyncEvent<void(const std::string&)>::Create(refresh->GetRefreshEventId(), context_);
     pullDownEvent_ = AceAsyncEvent<void(const std::string&)>::Create(refresh->GetPulldownEventId(), context_);
-    auto pipelineContext = GetContext().Upgrade();
-    if (pipelineContext) {
-        triggerLoadingDistance_ = pipelineContext->NormalizeToPx(refresh->GetLoadingDistance());
-        triggerShowTimeDistance_ = pipelineContext->NormalizeToPx(refresh->GetShowTimeDistance());
-        if (showLastTime_) {
-            timeDistance_ = pipelineContext->NormalizeToPx(Dimension(DEFAULT_TIME_BOX_BOTTOM_SIZE, DimensionUnit::VP));
-            triggerRefreshDistance_ = triggerShowTimeDistance_;
-        } else {
-            triggerRefreshDistance_ = pipelineContext->NormalizeToPx(refresh->GetRefreshDistance());
-        }
-        loadingDiameter_ = pipelineContext->NormalizeToPx(refresh->GetProgressDiameter());
-        maxScrollOffset_ = pipelineContext->NormalizeToPx(refresh->GetMaxDistance());
-        indicatorOffset_ = pipelineContext->NormalizeToPx(refresh->GetIndicatorOffset());
-        timeOffset_ = pipelineContext->NormalizeToPx(refresh->GetTimeOffset());
-        loading_->SetDiameter(loadingDiameter_);
-        loading_->SetDragRange(triggerLoadingDistance_, triggerRefreshDistance_);
-        loadingBox_->SetHeight(loadingDiameter_);
-        decoration_->SetBorderRadius(Radius(loadingDiameter_ * HALF));
-        loadingBackgroundBox_->SetBackDecoration(decoration_);
-    }
+    CalcLoadingParams(component);
     Initialize();
     MarkNeedLayout();
+}
+
+void RenderRefresh::CalcLoadingParams(const RefPtr<Component>& component)
+{
+    auto refresh = AceType::DynamicCast<RefreshComponent>(component);
+    if (refresh == nullptr) {
+        LOGW("RefreshComponent is null");
+        return;
+    }
+    auto context = context_.Upgrade();
+    if (context == nullptr) {
+        LOGW("context is nullptr!");
+        return;
+    }
+    scale_ = context->GetDipScale();
+    triggerLoadingDistance_ = NormalizeToPx(refresh->GetLoadingDistance());
+    triggerShowTimeDistance_ = NormalizeToPx(refresh->GetShowTimeDistance());
+    if (showLastTime_) {
+        timeDistance_ = NormalizeToPx(Dimension(DEFAULT_TIME_BOX_BOTTOM_SIZE, DimensionUnit::VP));
+        triggerRefreshDistance_ = triggerShowTimeDistance_;
+    } else {
+        triggerRefreshDistance_ = NormalizeToPx(refresh->GetRefreshDistance());
+    }
+    loadingDiameter_ = NormalizeToPx(refresh->GetProgressDiameter());
+    maxScrollOffset_ = NormalizeToPx(refresh->GetMaxDistance());
+    indicatorOffset_ = NormalizeToPx(refresh->GetIndicatorOffset());
+    timeOffset_ = NormalizeToPx(refresh->GetTimeOffset());
+    loading_->SetDiameter(refresh->GetProgressDiameter());
+    loading_->SetDragRange(triggerLoadingDistance_, triggerRefreshDistance_);
+    loadingBox_->SetHeight(loadingDiameter_);
+    decoration_->SetBorderRadius(Radius(loadingDiameter_ * HALF));
+    loadingBackgroundBox_->SetBackDecoration(decoration_);
+    loadingBackgroundBox_->SetWidth(loadingDiameter_);
 }
 
 void RenderRefresh::Initialize()
@@ -199,6 +214,7 @@ void RenderRefresh::UpdateTouchRect()
 {
     touchRect_.SetSize(viewPort_);
     touchRect_.SetOffset(GetPosition());
+    ownTouchRect_ = touchRect_;
 }
 
 void RenderRefresh::HandleDragUpdate(double delta)
@@ -506,8 +522,12 @@ void RenderRefresh::UpdateScrollableOffset(double delta)
 
 void RenderRefresh::OnHiddenChanged(bool hidden)
 {
-    if (!hidden && refreshStatus_ == RefreshStatus::REFRESH) {
+    if (!hidden) {
         refreshing_ = false;
+        refreshStatus_ = RefreshStatus::INACTIVE;
+        scrollableOffset_.Reset();
+        loading_->SetLoadingMode(MODE_DRAG);
+        loading_->SetDragDistance(scrollableOffset_.GetY());
         MarkNeedLayout();
     }
 }
@@ -519,6 +539,11 @@ void RenderRefresh::PerformLayout()
         LOGW("Refresh has no child!");
         return;
     }
+    auto context = context_.Upgrade();
+    if (context == nullptr) {
+        LOGW("context is nullptr!");
+        return;
+    }
 
     RefreshStatus nextState = GetNextStatus();
     if (nextState != RefreshStatus::REFRESH && refreshStatus_ == RefreshStatus::REFRESH) {
@@ -527,6 +552,11 @@ void RenderRefresh::PerformLayout()
     refreshStatus_ = nextState;
     LayoutParam innerLayout = GetLayoutParam();
     innerLayout.SetMinSize(Size(0.0, 0.0));
+    if (!NearEqual(scale_, context->GetDipScale())) {
+        // Notify loading to updated when window size changed.
+        CalcLoadingParams(refreshComponent_.Upgrade());
+        loading_->Layout(innerLayout);
+    }
 
     loading_->SetDragDistance(scrollableOffset_.GetY());
     loadingBox_->SetPosition(GetLoadingOffset());
@@ -534,7 +564,7 @@ void RenderRefresh::PerformLayout()
     display_->UpdateOpacity(GetOpacity() * MAX_ALPHA);
     display_->SetPosition(GetShowTimeOffset());
 
-    loadingBox_->SetVisible(scrollableOffset_.GetY() >= triggerLoadingDistance_);
+    loadingBox_->SetHidden(scrollableOffset_.GetY() < triggerLoadingDistance_);
 
     columnChild_ = children.back();
     columnChild_->Layout(innerLayout);

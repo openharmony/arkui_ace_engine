@@ -20,6 +20,7 @@
 #include "flutter/third_party/txt/src/minikin/FontLanguageListCache.h"
 
 #include "base/i18n/localization.h"
+#include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -150,6 +151,34 @@ void FlutterFontCollection::VaryFontCollectionWithFontWeightScale(float fontWeig
 
     auto& fontCollection = window->client()->GetFontCollection();
     fontCollection.GetFontCollection()->VaryFontCollectionWithFontWeightScale(fontWeightScale);
+}
+
+void FlutterFontCollection::LoadSystemFont()
+{
+    ACE_FUNCTION_TRACE();
+    if (!isUseFlutterEngine) {
+        if (!isCompleted_) {
+            return;
+        }
+        if (fontCollection_ && fontCollection_->GetFontCollection()) {
+            fontCollection_->GetFontCollection()->LoadSystemFont();
+        }
+        return;
+    }
+
+    if (!flutter::UIDartState::Current()) {
+        LOGE("uiDartState is null");
+        return;
+    }
+
+    auto* window = flutter::UIDartState::Current()->window();
+    if (window == nullptr || window->client() == nullptr) {
+        LOGW("UpdateParagraph: window or client is null");
+        return;
+    }
+
+    auto& fontCollection = window->client()->GetFontCollection();
+    fontCollection.GetFontCollection()->LoadSystemFont();
 }
 
 } // namespace OHOS::Ace

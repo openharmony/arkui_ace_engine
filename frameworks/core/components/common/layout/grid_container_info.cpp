@@ -38,13 +38,14 @@ void GridContainerInfo::BuildColumnWidth()
 
 void GridContainerInfo::BuildColumnWidth(double width)
 {
+    containerWidth_ = width;
     SystemGridInfo systemGridInfo;
     if (sizeType_ != GridSizeType::UNDEFINED && currentSizeType_ == GridSizeType::UNDEFINED) {
         systemGridInfo = GridSystemManager::GetInstance().GetSystemGridInfo(sizeType_);
         // using fix size type
         currentSizeType_ = sizeType_;
     } else {
-        systemGridInfo = GridSystemManager::GetInstance().GetCurrentGridInfo();
+        systemGridInfo = GridSystemManager::GetInstance().GetSystemGridInfo(templateType_, containerWidth_);
         if (currentSizeType_ != systemGridInfo.sizeType) {
             // system size changed
             currentSizeType_ = systemGridInfo.sizeType;
@@ -64,8 +65,9 @@ void GridContainerInfo::BuildColumnWidth(double width)
     double padding = paddingLeft_.ConvertToPx(dipScale) + paddingRight_.ConvertToPx(dipScale);
 
     columnWidth_ = (width - marginLeft - marginRight - padding - (columns - 1) * gutterWidth) / columns;
-    LOGE("width = %f, columns: %d columnWidth: %f gutterWidth: %f marginLeft: %f marginRight: %f padding: %f", width,
-        columns, columnWidth_, gutterWidth, marginLeft, marginRight, padding);
+    LOGI("width = %{public}f, columns: %{public}d columnWidth: %{public}f gutterWidth: %{public}f marginLeft: "
+         "%{public}f marginRight: %{public}f padding: %{public}f",
+        width, columns, columnWidth_, gutterWidth, marginLeft, marginRight, padding);
 }
 
 GridSizeType GridContainerInfo::GetSizeType() const
@@ -77,31 +79,31 @@ GridSizeType GridContainerInfo::GetSizeType() const
 int32_t GridContainerInfo::GetColumns() const
 {
     if (columns_ == UNDEFINED_INT) {
-        return GridSystemManager::GetInstance().GetCurrentGridInfo().columns;
+        return GridSystemManager::GetInstance().GetSystemGridInfo(templateType_, containerWidth_).columns;
     }
     return columns_;
 }
 
-const Dimension& GridContainerInfo::GetGutterWidth() const
+Dimension GridContainerInfo::GetGutterWidth() const
 {
     if (gutterWidth_ == UNDEFINED_DIMENSION) {
-        return GridSystemManager::GetInstance().GetCurrentGridInfo().gutter;
+        return GridSystemManager::GetInstance().GetSystemGridInfo(templateType_, containerWidth_).gutter;
     }
     return gutterWidth_;
 }
 
-const Dimension& GridContainerInfo::GetMarginLeft() const
+Dimension GridContainerInfo::GetMarginLeft() const
 {
     if (marginLeft_ == UNDEFINED_DIMENSION) {
-        return GridSystemManager::GetInstance().GetCurrentGridInfo().margin;
+        return GridSystemManager::GetInstance().GetSystemGridInfo(templateType_, containerWidth_).margin;
     }
     return marginLeft_;
 }
 
-const Dimension& GridContainerInfo::GetMarginRight() const
+Dimension GridContainerInfo::GetMarginRight() const
 {
     if (marginRight_ == UNDEFINED_DIMENSION) {
-        return GridSystemManager::GetInstance().GetCurrentGridInfo().margin;
+        return GridSystemManager::GetInstance().GetSystemGridInfo(templateType_, containerWidth_).margin;
     }
     return marginRight_;
 }

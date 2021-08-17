@@ -62,7 +62,7 @@ struct TouchPoint final {
     TouchType type = TouchType::UNKNOWN;
     TimeStamp time;
     double size = 0.0;
-    float pressure = 0.0f;
+    float force = 0.0f;
     int64_t deviceId = 0;
 
     Offset GetOffset() const
@@ -73,9 +73,9 @@ struct TouchPoint final {
     TouchPoint CreateScalePoint(float scale) const
     {
         if (NearZero(scale)) {
-            return { id, x, y, type, time, size, pressure, deviceId };
+            return { id, x, y, type, time, size, force, deviceId };
         }
-        return { id, x / scale, y / scale, type, time, size, pressure, deviceId };
+        return { id, x / scale, y / scale, type, time, size, force, deviceId };
     }
 };
 
@@ -134,21 +134,13 @@ public:
     {
         return time_;
     }
-    void SetPressure(float pressure)
+    void SetForce(float force)
     {
-        pressure_ = pressure;
+        force_ = force;
     }
-    float GetPressure() const
+    float GetForce() const
     {
-        return pressure_;
-    }
-    void SetDeviceId(int64_t deviceId)
-    {
-        deviceId_ = deviceId;
-    }
-    int64_t GetDeviceId() const
-    {
-        return deviceId_;
+        return force_;
     }
 
 private:
@@ -156,10 +148,9 @@ private:
     float screenY_ = 0.0f;
     float localX_ = 0.0f;
     float localY_ = 0.0f;
-    float pressure_ = 0.0f;
+    float force_ = 0.0f;
     TouchType touchType_ = TouchType::UNKNOWN;
     TimeStamp time_;
-    int64_t deviceId_ = 0;
 };
 
 class TouchLocationInfo : public TypeInfoBase {
@@ -202,6 +193,31 @@ public:
     {
         return size_;
     }
+    void SetDeviceId(int64_t deviceId)
+    {
+        deviceId_ = deviceId;
+    }
+
+    int64_t GetDeviceId() const
+    {
+        return deviceId_;
+    }
+    void SetForce(float force)
+    {
+        force_ = force;
+    }
+    float GetForce() const
+    {
+        return force_;
+    }
+    TouchType GetTouchType() const
+    {
+        return touchType_;
+    }
+    void SetTouchType(TouchType type)
+    {
+        touchType_ = type;
+    }
 
 private:
     // The finger id is used to identify the point of contact between the finger and the screen. Different fingers have
@@ -216,6 +232,15 @@ private:
 
     // finger touch size
     double size_ = 0.0;
+
+    // input device id
+    int64_t deviceId_ = 0;
+
+    // touch pressure
+    float force_ = 0.0f;
+
+    // touch type
+    TouchType touchType_ = TouchType::UNKNOWN;
 };
 
 class TouchEventTarget : public virtual AceType {

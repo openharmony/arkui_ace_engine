@@ -139,13 +139,19 @@ HWTEST_F(DomCardButtonTest, DomCardButtonTest003, TestSize.Level1)
     auto domButton = document->GetDOMNodeById(DOM_ROOT_NODE_ID_BASE);
     ASSERT_TRUE(domButton != nullptr);
     ASSERT_TRUE(domButton->GetTag() == "button");
-    ASSERT_TRUE(static_cast<int32_t>(domButton->GetHeight().Value()) == 300);
-    ASSERT_TRUE(static_cast<int32_t>(domButton->GetWidth().Value()) == 300);
-    ASSERT_TRUE(static_cast<int32_t>(domButton->GetMarginTop().Value()) == 30);
-    ASSERT_TRUE(static_cast<int32_t>(domButton->GetMarginBottom().Value()) == 30);
-    ASSERT_TRUE(static_cast<int32_t>(domButton->GetMarginLeft().Value()) == 30);
-    ASSERT_TRUE(static_cast<int32_t>(domButton->GetMarginRight().Value()) == 30);
+    auto declaration = domButton->GetDeclaration();
+    auto& buttonStyle = static_cast<ButtonStyle&>(declaration->GetStyle(StyleTag::SPECIALIZED_STYLE));
+    ASSERT_TRUE(static_cast<int32_t>(buttonStyle.width.Value()) == 300);
+    ASSERT_TRUE(static_cast<int32_t>(buttonStyle.height.Value()) == 300);
     ASSERT_TRUE(CardTestFactory::GetInstance().GetNodeNumber() == 1);
+
+    ASSERT_TRUE(declaration != nullptr);
+    auto& marginStyle = static_cast<CommonMarginStyle&>(declaration->GetStyle(StyleTag::COMMON_MARGIN_STYLE));
+    ASSERT_TRUE(marginStyle.IsValid());
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Top().Value()) == 30);
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Bottom().Value()) == 30);
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Left().Value()) == 30);
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Right().Value()) == 30);
 }
 
 /**

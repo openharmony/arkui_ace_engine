@@ -115,4 +115,14 @@ void SharedTransitionComponent::SetShareId(const ShareId& shareId)
     shareId_ = shareId;
 }
 
+void SharedTransitionComponent::SetOpacity(float opacity)
+{
+    opacity_ = opacity;
+}
+
+float SharedTransitionComponent::GetOpacity() const
+{
+    return opacity_;
+}
+
 } // namespace OHOS::Ace

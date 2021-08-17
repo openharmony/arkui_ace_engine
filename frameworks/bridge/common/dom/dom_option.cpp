@@ -30,7 +30,6 @@ DOMOption::DOMOption(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeI
 {
     selectOptionComponent_ = AceType::MakeRefPtr<OptionComponent>();
     selectOptionComponent_->SetId(std::to_string(nodeId));
-    selectOptionComponent_->SetTextDirection((IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR));
 }
 
 void DOMOption::InitializeStyle()
@@ -154,6 +153,11 @@ bool DOMOption::SetSpecializedStyle(const std::pair<std::string, std::string>& s
     }
 
     return false;
+}
+
+void DOMOption::PrepareSpecializedComponent()
+{
+    selectOptionComponent_->SetTextDirection((IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR));
 }
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)

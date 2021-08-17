@@ -15,6 +15,9 @@
 
 #include "core/components/web/web_component.h"
 
+#include <iomanip>
+#include <sstream>
+
 #include "base/geometry/offset.h"
 #include "base/geometry/size.h"
 #include "base/log/log.h"
@@ -22,14 +25,15 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_element.h"
 
-#include <iomanip>
-#include <sstream>
-
 namespace OHOS::Ace {
 
 WebComponent::WebComponent(const std::string& type) : type_(type)
 {
     ACE_DCHECK(!type_.empty());
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<WebDeclaration>();
+        declaration_->Init();
+    }
 }
 
 RefPtr<RenderNode> WebComponent::CreateRenderNode()
@@ -54,9 +58,11 @@ RefPtr<RenderNode> WebComponent::CreateRenderNode()
         }
         auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(),
                                                        TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([renderWeb, this] {
+        auto weakRender = AceType::WeakClaim(AceType::RawPtr(renderWeb));
+        uiTaskExecutor.PostTask([weakRender, weakWeb = AceType::WeakClaim(this)] {
+            auto renderWeb = weakRender.Upgrade();
             if (renderWeb) {
-                renderWeb->Update(AceType::Claim<Component>(this));
+                renderWeb->Update(weakWeb.Upgrade());
             }
         });
     });

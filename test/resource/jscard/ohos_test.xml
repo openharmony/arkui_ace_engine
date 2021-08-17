@@ -15,8 +15,8 @@
 <configuration ver="2.0">
     <target name="DomCardClockTest">
         <preparer>
-            <option name="push" value="carddomclock/correct.json -> /data/test/resource/carddomclock/" src="res"/>
-            <option name="push" value="carddomclock/error.json -> /data/test/resource/carddomclock/" src="res"/>
+            <option name="push" value="/jscard/carddomclock/correct.json -> /data/test/resource/carddomclock/" src="res"/>
+            <option name="push" value="/jscard/carddomclock/error.json -> /data/test/resource/carddomclock/" src="res"/>
         </preparer>
     </target>
 </configuration>

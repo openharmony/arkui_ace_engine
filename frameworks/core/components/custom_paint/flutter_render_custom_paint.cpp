@@ -682,6 +682,7 @@ void FlutterRenderCustomPaint::Stroke(const Offset& offset, const RefPtr<CanvasP
         }
     }
     Path2DStroke(offset);
+    strokePath_.reset();
 }
 
 void FlutterRenderCustomPaint::Path2DAddPath(const Offset& offset, const PathArgs& args)
@@ -1091,12 +1092,11 @@ void FlutterRenderCustomPaint::DrawImage(
         return;
     }
     auto sharedImageManager = context->GetSharedImageManager();
-    auto imageProvider = ImageProvider::Create(canvasImage.src, sharedImageManager);
-    if (imageProvider) {
-        auto assetManager = context->GetAssetManager();
+    auto imageProvider = MakeRefPtr<ImageProvider>(canvasImage.src, sharedImageManager);
+    if (!imageProvider->Invalid()) {
         auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                         ? imageProvider->GetSkImage(canvasImage.src, assetManager, Size(width, height))
-                         : imageProvider->GetSkImage(canvasImage.src, assetManager);
+                         ? imageProvider->GetSkImage(canvasImage.src, context, Size(width, height))
+                         : imageProvider->GetSkImage(canvasImage.src, context);
 
         if (!image) {
             LOGE("image is null");
@@ -1144,14 +1144,13 @@ void FlutterRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint
         return;
     }
     auto sharedImageManager = context->GetSharedImageManager();
-    auto imageProvider = ImageProvider::Create(pattern.GetImgSrc(), sharedImageManager);
-    if (imageProvider) {
+    auto imageProvider = MakeRefPtr<ImageProvider>(pattern.GetImgSrc(), sharedImageManager);
+    if (!imageProvider->Invalid()) {
         auto width = pattern.GetImageWidth();
         auto height = pattern.GetImageHeight();
-        auto assetManager = context->GetAssetManager();
         auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                         ? imageProvider->GetSkImage(pattern.GetImgSrc(), assetManager, Size(width, height))
-                         : imageProvider->GetSkImage(pattern.GetImgSrc(), assetManager);
+                         ? imageProvider->GetSkImage(pattern.GetImgSrc(), context, Size(width, height))
+                         : imageProvider->GetSkImage(pattern.GetImgSrc(), context);
         if (!image) {
             LOGE("image is null");
             return;

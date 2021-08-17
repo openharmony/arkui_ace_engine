@@ -48,6 +48,8 @@ public:
         return false;
     }
 
+    void Destroy() override {}
+
     RefPtr<AcePage> GetPage(int32_t pageId) const override
     {
         return nullptr;
@@ -107,6 +109,7 @@ public:
     void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override {}
     void TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
     void LoadPluginJsCode(std::string&& jsCode) const override {}
+    void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const override {}
     void OnShow() override {}
     void OnHide() override {}
     void OnActive() override {}

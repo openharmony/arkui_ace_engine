@@ -25,6 +25,7 @@
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/offset_layer.h"
+#include "frameworks/core/components/svg/parse/svg_dom.h"
 
 namespace OHOS::Ace {
 
@@ -39,12 +40,10 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
 
     void OnLoadSuccess(
-        const sk_sp<SkImage>& image, const RefPtr<ImageProvider>& imageProvider, const std::string& key) override;
-
-    void OnLoadGPUImageSuccess(
         const fml::RefPtr<flutter::CanvasImage>& image, const RefPtr<ImageProvider>& imageProvider) override;
 
-    void OnAnimateImageSuccess(const RefPtr<ImageProvider>& provider, const std::unique_ptr<SkCodec> codec) override;
+    void OnAnimateImageSuccess(
+        const RefPtr<ImageProvider>& provider, const std::unique_ptr<SkCodec> codec, bool forceResize) override;
 
     void OnLoadFail(const RefPtr<ImageProvider>& imageProvider) override;
 
@@ -98,6 +97,8 @@ public:
     {
         return true;
     }
+    bool IsSourceWideGamut() const override;
+    virtual bool RetryLoading() override;
 
 protected:
     virtual bool MaybeRelease() override;
@@ -112,14 +113,17 @@ private:
         const ScopedCanvas& canvas);
     bool IsSVG(const std::string& src, InternalResource::ResourceId resourceId) const;
     void LoadSVGImage(const RefPtr<ImageProvider>& imageProvider, bool onlyLayoutSelf = false);
+    void LoadSVGImageCustom(const RefPtr<ImageProvider>& imageProvider, bool onlyLayoutSelf = false);
     void DrawSVGImage(const Offset& offset, ScopedCanvas& canvas);
+    void DrawSVGImageCustom(RenderContext& context, const Offset& offset);
     void UpdateLoadSuccessState();
     Rect RecalculateSrcRect(const Size& realImageSize);
-    void UploadToGPUForRender(
-        const sk_sp<SkImage>& image,
-        const std::function<void(flutter::SkiaGPUObject<SkImage>)>& callback);
+    void ApplyColorFilter(flutter::Paint& paint);
+    void ApplyInterpolation(flutter::Paint& paint);
+    void AddSvgChild();
 
     sk_sp<SkSVGDOM> skiaDom_;
+    RefPtr<SvgDom> svgDom_;
     bool isNetworkSrc_ = false;
     bool isSVG_ = false;
     bool needReload_ = false;

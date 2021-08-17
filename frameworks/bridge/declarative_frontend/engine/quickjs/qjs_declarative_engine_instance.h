@@ -29,16 +29,20 @@ namespace OHOS::Ace::Framework {
 class QJSDeclarativeEngineInstance final : public AceType {
 public:
     explicit QJSDeclarativeEngineInstance(const RefPtr<FrontendDelegate>& delegate)
-        : runtime_(nullptr), context_(nullptr), frontendDelegate_(delegate), dispatcher_(nullptr)
+        : context_(nullptr), frontendDelegate_(delegate), dispatcher_(nullptr)
     {}
 
     ~QJSDeclarativeEngineInstance() override;
 
     bool InitJSEnv();
 
+    bool InitAceModules(const char* start, size_t length, const char* fileName);
+
+    void InitJsNativeModuleObject(JSContext* ctx);
+
     void loadDocument();
 
-    JSRuntime* GetQJSRuntime() const
+    static JSRuntime* GetQJSRuntime()
     {
         return runtime_;
     }
@@ -57,6 +61,7 @@ public:
     }
 
     static RefPtr<JsAcePage> GetRunningPage(JSContext* ctx);
+    static RefPtr<JsAcePage> GetStagingPage(JSContext* ctx);
 
     void SetStagingPage(const RefPtr<JsAcePage>& page);
 
@@ -71,6 +76,7 @@ public:
 
     static void PostJsTask(JSContext* ctx, std::function<void()>&& task);
     static void TriggerPageUpdate(JSContext* ctx);
+    static RefPtr<PipelineContext> GetPipelineContext(JSContext* ctx);
 
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher)
     {
@@ -124,13 +130,20 @@ public:
 
     void RunGarbageCollection();
 
+    static std::unique_ptr<JsonValue> GetI18nStringResource(const std::string& targetStringKey,
+        const std::string& targetStringValue);
+    static std::string GetMeidaResource(const std::string& targetMediaFileName);
+
 private:
     void output_object_code(JSContext* ctx, int fho, JSValueConst obj);
     JSValue eval_binary_buf(JSContext* ctx, const uint8_t* buf, size_t buf_len);
 
-    JSRuntime* runtime_ = nullptr;
+    // TODO: does it have multi-instance error?
+    static JSRuntime* runtime_;
     JSContext* context_ = nullptr;
     RefPtr<FrontendDelegate> frontendDelegate_;
+    static std::map<std::string, std::string> mediaResourceFileMap_;
+    static std::unique_ptr<JsonValue> currentConfigResourceData_;
 
     // runningPage_ is the page that is loaded and rendered successfully, while stagingPage_ is to
     // handle all page routing situation, which include two stages:
@@ -146,7 +159,6 @@ private:
 
     WeakPtr<JsMessageDispatcher> dispatcher_;
     mutable std::mutex mutex_;
-    QuickJSNativeEngine* nativeEngine_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(QJSDeclarativeEngineInstance);
 };

@@ -31,18 +31,12 @@
 
 namespace OHOS::Ace {
 
-enum class TabBarMode {
-    FIXED,
-    SCROLLABEL,
-    FIXED_START,
-};
-
 enum class TabBarIndicatorType {
     TAB,
     LABEL,
 };
 
-class TabBarComponent : public ComponentGroup {
+class ACE_EXPORT TabBarComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(TabBarComponent, ComponentGroup);
 
 public:
@@ -175,6 +169,7 @@ public:
     }
 
     void InitNavigationBarStyle();
+    void InitBottomTabStyle(const RefPtr<TabTheme>& theme);
     void BuildItems(std::list<RefPtr<TabBarItemComponent>>& items);
 
 private:

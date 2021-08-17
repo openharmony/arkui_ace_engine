@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <list>
 #include <mutex>
+#include <shared_mutex>
 #include <unordered_map>
 #include <vector>
 
@@ -63,7 +64,7 @@ public:
     void CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image);
     std::shared_ptr<CachedImage> GetCacheImage(const std::string& key);
     static void SetCacheFileInfo();
-    static void WriteCacheFile(const std::string& url, std::vector<uint8_t>& byteData);
+    static void WriteCacheFile(const std::string& url, const void * const data, const size_t size);
 
     void RemoveCachedImage(const std::string& key)
     {
@@ -90,7 +91,7 @@ public:
 
     static void SetImageCacheFilePath(const std::string& cacheFilePath)
     {
-        std::lock_guard<std::mutex> lock(cacheFilePathMutex_);
+        std::unique_lock<std::shared_mutex> lock(cacheFilePathMutex_);
         if (cacheFilePath_.empty()) {
             cacheFilePath_ = cacheFilePath;
         }
@@ -98,13 +99,13 @@ public:
 
     static std::string GetImageCacheFilePath()
     {
-        std::lock_guard<std::mutex> lock(cacheFilePathMutex_);
+        std::shared_lock<std::shared_mutex> lock(cacheFilePathMutex_);
         return cacheFilePath_;
     }
 
     static std::string GetNetworkImageCacheFilePath(const std::string& url)
     {
-        std::lock_guard<std::mutex> lock(cacheFilePathMutex_);
+        std::shared_lock<std::shared_mutex> lock(cacheFilePathMutex_);
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         return cacheFilePath_ + "/" + std::to_string(std::hash<std::string> {}(url));
 #elif defined(MAC_PLATFORM)
@@ -150,6 +151,8 @@ public:
 
     virtual void Clear() = 0;
 
+    static void Purge();
+
 protected:
     static void ClearCacheFile(const std::vector<std::string>& removeFiles);
 
@@ -161,7 +164,7 @@ protected:
 
     std::atomic<size_t> capacity_ = 80; // by default memory cache can store 80 images.
 
-    static std::mutex cacheFilePathMutex_;
+    static std::shared_mutex cacheFilePathMutex_;
     static std::string cacheFilePath_;
 
     static std::atomic<size_t> cacheFileLimit_;

@@ -1,0 +1,122 @@
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "bridge/declarative_frontend/jsview/js_environment.h"
+
+#include "core/common/ace_application_info.h"
+#include "core/common/container.h"
+#include "core/common/environment/environment_proxy.h"
+#include "frameworks/base/i18n/localization.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+
+namespace OHOS::Ace::Framework {
+
+void JSEnvironment::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSEnvironment>::Declare("EnvironmentSetting");
+    JSClass<JSEnvironment>::CustomMethod("getAccessibilityEnabled", &JSEnvironment::GetAccessibilityEnabled);
+    JSClass<JSEnvironment>::CustomMethod("getColorMode", &JSEnvironment::GetColorMode);
+    JSClass<JSEnvironment>::CustomMethod("getFontScale", &JSEnvironment::GetFontScale);
+    JSClass<JSEnvironment>::CustomMethod("getFontWeightScale", &JSEnvironment::GetFontWeightScale);
+    JSClass<JSEnvironment>::CustomMethod("getLayoutDirection", &JSEnvironment::GetLayoutDirection);
+    JSClass<JSEnvironment>::CustomMethod("getLanguageCode", &JSEnvironment::GetLanguageCode);
+    JSClass<JSEnvironment>::Bind(globalObj, JSEnvironment::ConstructorCallback, JSEnvironment::DestructorCallback);
+}
+
+void JSEnvironment::ConstructorCallback(const JSCallbackInfo& args)
+{
+    auto obj = new JSEnvironment();
+    args.SetReturnValue(obj);
+}
+
+void JSEnvironment::DestructorCallback(JSEnvironment* obj)
+{
+    delete obj;
+}
+
+void JSEnvironment::GetAccessibilityEnabled(const JSCallbackInfo& args)
+{
+    std::string value;
+    value = "false";
+    auto execCtx = args.GetExecutionContext();
+    JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+    auto returnValue = JSVal(ToJSValue(value));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    args.SetReturnValue(returnPtr);
+}
+
+void JSEnvironment::GetColorMode(const JSCallbackInfo& args)
+{
+    auto execCtx = args.GetExecutionContext();
+    JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+    auto colorMode = SystemProperties::GetColorMode();
+    auto returnValue = JSVal(ToJSValue(static_cast<int32_t>(colorMode)));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    args.SetReturnValue(returnPtr);
+}
+
+void JSEnvironment::GetFontScale(const JSCallbackInfo& args)
+{
+    auto execCtx = args.GetExecutionContext();
+    JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return;
+    }
+    float fontScale = 1.0f;
+    auto context = container->GetPipelineContext();
+    if (context) {
+        fontScale = context->GetFontScale();
+    }
+    auto returnValue = JSVal(ToJSValue(fontScale));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    args.SetReturnValue(returnPtr);
+}
+
+void JSEnvironment::GetFontWeightScale(const JSCallbackInfo& args)
+{
+    auto execCtx = args.GetExecutionContext();
+    JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+    auto weightScale = SystemProperties::GetFontWeightScale();
+    auto returnValue = JSVal(ToJSValue(weightScale));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    args.SetReturnValue(returnPtr);
+}
+
+void JSEnvironment::GetLayoutDirection(const JSCallbackInfo& args)
+{
+    auto execCtx = args.GetExecutionContext();
+    JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+    auto isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto value = isRTL ? 0 : 1;
+    auto returnValue = JSVal(ToJSValue(value));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    args.SetReturnValue(returnPtr);
+}
+
+void JSEnvironment::GetLanguageCode(const JSCallbackInfo& args)
+{
+    auto execCtx = args.GetExecutionContext();
+    JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+    auto location = Localization::GetInstance();
+    auto language = location->GetLanguage();
+    auto returnValue = JSVal(ToJSValue(language));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    args.SetReturnValue(returnPtr);
+}
+
+} // namespace OHOS::Ace::Framework

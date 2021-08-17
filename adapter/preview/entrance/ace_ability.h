@@ -42,6 +42,7 @@ public:
     static void Stop();
     static bool DispatchTouchEvent(const TouchPoint& event);
     static bool DispatchBackPressedEvent();
+    void OnConfigurationChanged(const DeviceConfig& newConfig);
 
     explicit AceAbility(const AceRunArgs& runArgs);
     ~AceAbility();
@@ -49,7 +50,7 @@ public:
     void InitEnv();
     void Start();
     void SurfaceChanged(
-        const DeviceOrientation& orientation, const int32_t& width, const int32_t& height, const double& resolution);
+        const DeviceOrientation& orientation, const double& resolution, int32_t& width, int32_t& height);
     std::string GetJSONTree();
     std::string GetDefaultJSONTree();
 

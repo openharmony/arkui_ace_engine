@@ -26,9 +26,6 @@ DOMToggle::DOMToggle(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeI
     paddingChild_ = AceType::MakeRefPtr<PaddingComponent>();
     paddingChild_->SetChild(textChild_);
     toggleChild_->SetChild(paddingChild_);
-    if (IsRightToLeft()) {
-        textChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 void DOMToggle::InitializeStyle()
@@ -143,6 +140,7 @@ bool DOMToggle::AddSpecializedEvent(int32_t pageId, const std::string& event)
 
 void DOMToggle::PrepareSpecializedComponent()
 {
+    textChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     ResetColorStyle();
     if (isDisabled_) {
         PrepareDisabledStyle();

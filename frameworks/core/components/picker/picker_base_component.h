@@ -270,11 +270,6 @@ public:
         onCancel_ = value;
     }
 
-    void SetDisabledStatus(bool value) override
-    {
-        Component::SetDisabledStatus(value);
-    }
-
     void ClearColumns();
 
     void AppendColumn(const RefPtr<PickerColumnComponent>& column);

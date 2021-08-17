@@ -29,7 +29,6 @@ class QJSForEachFunction : public QJSFunction {
 private:
     JSValue jsIdentityMapperFunc_ = JS_NULL;
     JSValue jsViewMapperFunc_ = JS_NULL;
-    JSValue jsResult_ = JS_NULL;
 
 public:
     QJSForEachFunction(JSContext* ctx, JSValue jsArray, JSValue jsIdentityMapperFunc, JSValue jsViewMapperFunc)
@@ -48,22 +47,13 @@ public:
         LOGD("Destroy: QJSForEachFunction");
     }
 
-    // ForEach Syntax
-    //  ForEach(
-    //    [item],             // proxied array of data items
-    //    (item => String),   // IdentifierFunction: provide unique id for given data item
-    //    (item => View)      // BuilderFunction: provide View for given data item
-    //  )
-    //  This exexutes the IdentifierFunction
-    std::vector<std::tuple<std::string, JSViewAbstract*>> execute();
-
     // This exexutes the IdentifierFunction on all items  in a array
     // returns the vector of keys/ids in the same order.
     std::vector<std::string> executeIdentityMapper();
 
     // This exexutes the BuilderFunction on a specific index
     // returns the native JsView for the item in index.
-    std::vector<JSViewAbstract*> executeBuilderForIndex(int32_t index);
+    void executeBuilderForIndex(int32_t index);
 
     // Post task to the UI thread.
     // In ace_diff UI and js runs on the same thread
@@ -71,8 +61,6 @@ public:
 
     virtual void MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc) override;
     virtual void ReleaseRT(JSRuntime* rt) override;
-
-    virtual void Destroy(JSViewAbstract* parentCustomView);
 
 }; // QJSForEachFunction
 

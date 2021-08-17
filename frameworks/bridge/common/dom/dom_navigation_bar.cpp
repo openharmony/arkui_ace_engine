@@ -124,6 +124,11 @@ void DomNavigationBar::CallSpecializedMethod(const std::string& method, const st
     }
 }
 
+void DomNavigationBar::PrepareSpecializedComponent()
+{
+    navigationBarData_->imageFill = GetImageFill();
+}
+
 bool DomNavigationBar::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
 {
     static const LinearMapNode<void (*)(const std::string&, const RefPtr<NavigationBarData>&)> attrOperators[] = {

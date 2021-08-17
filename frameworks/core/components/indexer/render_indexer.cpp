@@ -241,20 +241,23 @@ void RenderIndexer::InitFocusedItem()
 
 void RenderIndexer::HandleTouchDown(const TouchEventInfo& info)
 {
-    Offset position = info.GetTouches().front().GetLocalLocation();
-    LOGI("[indexer] item is HandleTouchDown x:%{public}lf, y:%{public}lf", position.GetX(), position.GetY());
-    HandleTouched(position);
+    if (info.GetTouches().empty()) {
+        return;
+    }
+    touchPostion_ = info.GetTouches().front().GetLocalLocation();
+    LOGD("[indexer] item is HandleTouchDown x:%{public}lf, y:%{public}lf", touchPostion_.GetX(), touchPostion_.GetY());
+    HandleTouched(touchPostion_);
     clicked_ = true;
     MarkNeedLayout();
 }
 
 void RenderIndexer::HandleTouchUp(const TouchEventInfo& info)
 {
-    Offset position = info.GetTouches().front().GetLocalLocation();
-    LOGI("[indexer] item is HandleTouchUp x:%{public}lf, y:%{public}lf", position.GetX(), position.GetY());
-
-    HandleTouched(position);
-
+    if (!info.GetTouches().empty()) {
+        touchPostion_ = info.GetTouches().front().GetLocalLocation();
+    }
+    LOGD("[indexer] item is HandleTouchUp x:%{public}lf, y:%{public}lf", touchPostion_.GetX(), touchPostion_.GetY());
+    HandleTouched(touchPostion_);
     if (clicked_) {
         clicked_ = false;
         MarkNeedLayout();
@@ -263,9 +266,12 @@ void RenderIndexer::HandleTouchUp(const TouchEventInfo& info)
 
 void RenderIndexer::HandleTouchMove(const TouchEventInfo& info)
 {
-    Offset position = info.GetTouches().front().GetLocalLocation();
-    LOGI("[indexer] item is HandleTouchMove x:%{public}lf, y:%{public}lf", position.GetX(), position.GetY());
-    HandleTouched(position);
+    if (info.GetTouches().empty()) {
+        return;
+    }
+    touchPostion_ = info.GetTouches().front().GetLocalLocation();
+    LOGD("[indexer] item is HandleTouchMove x:%{public}lf, y:%{public}lf", touchPostion_.GetX(), touchPostion_.GetY());
+    HandleTouched(touchPostion_);
     if (clicked_) {
         clicked_ = true;
         MarkNeedLayout();

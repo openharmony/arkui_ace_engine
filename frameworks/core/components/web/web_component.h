@@ -20,55 +20,11 @@
 
 #include "base/geometry/size.h"
 #include "base/utils/utils.h"
+#include "core/components/declaration/web/web_client.h"
+#include "core/components/declaration/web/web_declaration.h"
 #include "core/pipeline/base/element.h"
 
 namespace OHOS::Ace {
-
-class WebClient {
-public:
-    using ReloadCallback = std::function<bool()>;
-    using UpdateUrlCallback = std::function<void(const std::string& url)>;
-    WebClient &operator = (const WebClient &) = delete;
-    WebClient(const WebClient &) = delete;
-    ~WebClient() = default;
-
-    static WebClient& GetInstance()
-    {
-        static WebClient instance;
-        return instance;
-    }
-
-    void RegisterReloadCallback(ReloadCallback&& callback)
-    {
-        reloadCallback_ = callback;
-    }
-
-    void RegisterUpdageUrlCallback(UpdateUrlCallback&& callback)
-    {
-        updateUrlCallback_ = callback;
-    }
-
-    void UpdateWebviewUrl(const std::string& url)
-    {
-        if (updateUrlCallback_) {
-            return updateUrlCallback_(url);
-        }
-    }
-
-    bool ReloadWebview()
-    {
-        if (reloadCallback_) {
-            return reloadCallback_();
-        } else {
-            return false;
-        }
-    }
-
-private:
-    WebClient() = default;
-    ReloadCallback reloadCallback_;
-    UpdateUrlCallback updateUrlCallback_;
-};
 
 class WebDelegate;
 // A component can show HTML5 webpages.
@@ -101,60 +57,69 @@ public:
 
     void SetSrc(const std::string& src)
     {
-        src_ = src;
+        declaration_->SetWebSrc(src);
     }
 
     const std::string& GetSrc() const
     {
-        return src_;
+        return declaration_->GetWebSrc();
     }
 
     void SetPageStartedEventId(const EventMarker& pageStartedEventId)
     {
-        pageStartedEventId_ = pageStartedEventId;
+        declaration_->SetPageStartedEventId(pageStartedEventId);
     }
 
     const EventMarker& GetPageStartedEventId() const
     {
-        return pageStartedEventId_;
+        return declaration_->GetPageStartedEventId();
     }
 
     void SetPageFinishedEventId(const EventMarker& pageFinishedEventId)
     {
-        pageFinishedEventId_ = pageFinishedEventId;
+        declaration_->SetPageFinishedEventId(pageFinishedEventId);
     }
 
     const EventMarker& GetPageFinishedEventId() const
     {
-        return pageFinishedEventId_;
+        return declaration_->GetPageFinishedEventId();
     }
 
     void SetPageErrorEventId(const EventMarker& pageErrorEventId)
     {
-        pageErrorEventId_ = pageErrorEventId;
+        declaration_->SetPageErrorEventId(pageErrorEventId);
     }
 
     const EventMarker& GetPageErrorEventId() const
     {
-        return pageErrorEventId_;
+        return declaration_->GetPageErrorEventId();
     }
 
-    void Reload()
+    void SetMessageEventId(const EventMarker& messageEventId)
     {
-        WebClient::GetInstance().ReloadWebview();
+        declaration_->SetMessageEventId(messageEventId);
+    }
+
+    const EventMarker& GetMessageEventId() const
+    {
+        return declaration_->GetMessageEventId();
+    }
+
+    void SetDeclaration(const RefPtr<WebDeclaration>& declaration)
+    {
+        if (declaration) {
+            declaration_ = declaration;
+        }
     }
 
 private:
+    RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
     ReleasedCallback releasedCallback_ = nullptr;
     ErrorCallback errorCallback_ = nullptr;
     RefPtr<WebDelegate> delegate_;
-    EventMarker pageStartedEventId_;
-    EventMarker pageFinishedEventId_;
-    EventMarker pageErrorEventId_;
 
     std::string type_;
-    std::string src_;
 };
 
 } // namespace OHOS::Ace

@@ -34,6 +34,8 @@ public:
 
     void CallSpecializedMethod(const std::string& method, const std::string& args) override;
 
+    void PrepareSpecializedComponent() override;
+
     RefPtr<Component> GetSpecializedComponent() override
     {
         return navigationBarComponent_;

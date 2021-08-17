@@ -54,40 +54,56 @@ void FlutterRenderSvgPolygon::Paint(RenderContext& context, const Offset& offset
         LOGE("Paint skCanvas is null");
         return;
     }
-    if (pointsVector_.empty()) {
-        std::vector<SkPoint> skPoints;
-        if (!CreateSkPath(points_, skPoints)) {
-            return;
-        }
-        SkPath out;
-        out.addPoly(&skPoints[0], skPoints.size(), true);
-        FlutterSvgPainter::SetFillStyle(skCanvas, out, fillState_, opacity_);
-        FlutterSvgPainter::SetStrokeStyle(skCanvas, out, strokeState_, opacity_);
-        RenderNode::Paint(context, offset);
+    SkPath out;
+    if (!GetPath(&out)) {
         return;
     }
-    int32_t firstPart = (int)weight_;
-    int32_t pathsSize = pointsVector_.size();
-    float weight = 1.0f;
-    int32_t currValue = 0;
-    int32_t nextValue = 0;
-    if (firstPart < 0 || firstPart > (pathsSize - 1)) {
+    if (transformLayer_) {
+        transformLayer_->UpdateTransformProperty(transformAttrs_, GetTransformOffset());
+    }
+
+    SkAutoCanvasRestore save(skCanvas, false);
+    PaintMaskLayer(context, offset, offset);
+
+    UpdateGradient(fillState_);
+
+    RenderInfo renderInfo = { AceType::Claim(this), offset, opacity_, true };
+    FlutterSvgPainter::SetFillStyle(skCanvas, out, fillState_, renderInfo);
+    FlutterSvgPainter::SetStrokeStyle(skCanvas, out, strokeState_, renderInfo);
+    RenderNode::Paint(context, offset);
+}
+
+void FlutterRenderSvgPolygon::PaintDirectly(RenderContext& context, const Offset& offset)
+{
+    if (points_.empty()) {
         return;
-    } else if (firstPart == (pathsSize - 1)) {
-        currValue = firstPart;
-        nextValue = firstPart - 1;
-    } else {
-        weight = weight_ - firstPart;
-        currValue = firstPart + 1;
-        nextValue = firstPart;
+    }
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkCanvas* skCanvas = canvas->canvas();
+    if (!skCanvas) {
+        LOGE("Paint skCanvas is null");
+        return;
     }
     SkPath out;
-    if (!CreateSkPaths(pointsVector_[currValue].c_str(), pointsVector_[nextValue].c_str(), weight, &out)) {
+    if (!GetPath(&out)) {
         return;
     }
+    if (!transformAttrs_.empty()) {
+        auto matrix4 = TransformLayer::UpdateTransformAttr(transformAttrs_, GetTransformOffset());
+        skCanvas->save();
+        skCanvas->concat(FlutterSvgPainter::ToSkMatrix(matrix4));
+    }
+    UpdateGradient(fillState_);
     FlutterSvgPainter::SetFillStyle(skCanvas, out, fillState_, opacity_);
     FlutterSvgPainter::SetStrokeStyle(skCanvas, out, strokeState_, opacity_);
-    RenderNode::Paint(context, offset);
+    if (!transformAttrs_.empty()) {
+        skCanvas->restore();
+    }
 }
 
 bool FlutterRenderSvgPolygon::CreateSkPath(const std::string& pointsStr, std::vector<SkPoint>& skPoints)
@@ -124,38 +140,85 @@ bool FlutterRenderSvgPolygon::CreateSkPaths(const std::string& points1,
             ++skPointIter2;
         }
     }
-    begin.addPoly(&skPoints1[0], skPoints1.size(), true);
-    end.addPoly(&skPoints2[0], skPoints2.size(), true);
+    begin.addPoly(&skPoints1[0], skPoints1.size(), isClose_);
+    end.addPoly(&skPoints2[0], skPoints2.size(), isClose_);
     begin.interpolate(end, weight, out);
     return true;
 }
 
-void FlutterRenderSvgPolygon::UpdateMotion(const std::string& path, const std::string& rotate,
-    double percent, const Point& point)
+void FlutterRenderSvgPolygon::UpdateMotion(const std::string& path, const std::string& rotate, double percent)
 {
     if (!transformLayer_) {
         LOGE("transformLayer is null");
         return;
     }
     bool isSuccess = true;
-    auto motionMatrix = FlutterSvgPainter::CreateMotionMatrix(path, rotate, point, percent, isSuccess);
+    auto motionMatrix = FlutterSvgPainter::CreateMotionMatrix(path, rotate, percent, isSuccess);
     if (isSuccess) {
         auto transform = FlutterRenderTransform::GetTransformByOffset(motionMatrix, GetGlobalOffset());
         transformLayer_->Update(transform);
     }
 }
 
-bool FlutterRenderSvgPolygon::GetStartPoint(Point& point)
+Rect FlutterRenderSvgPolygon::GetPaintBounds(const Offset& offset)
 {
-    if (points_.empty()) {
+    SkPath path;
+    if (!GetPath(&path)) {
+        return GetPaintRect();
+    }
+    auto& bounds = path.getBounds();
+    return Rect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
+}
+
+bool FlutterRenderSvgPolygon::GetPath(SkPath* out)
+{
+    if (!out) {
+        LOGE("SkPath is null");
+        return false;
+    }
+    if (pointsVector_.empty()) {
+        return GetPathWithoutAnimate(out);
+    } else {
+        int32_t firstPart = (int)weight_;
+        int32_t pathsSize = pointsVector_.size();
+        if (firstPart < 0 || firstPart > (pathsSize - 1)) {
+            return false;
+        }
+        float weight = 1.0f;
+        int32_t currValue = 0;
+        int32_t nextValue = 0;
+        if (firstPart == (pathsSize - 1)) {
+            currValue = firstPart;
+            nextValue = firstPart - 1;
+        } else {
+            weight = weight_ - firstPart;
+            currValue = firstPart + 1;
+            nextValue = firstPart;
+        }
+        if (!CreateSkPaths(pointsVector_[currValue].c_str(), pointsVector_[nextValue].c_str(), weight, out)) {
+            return GetPathWithoutAnimate(out);
+        }
+    }
+    if (fillState_.IsEvenodd()) {
+        out->setFillType(SkPath::FillType::kEvenOdd_FillType);
+    }
+    return true;
+}
+
+bool FlutterRenderSvgPolygon::GetPathWithoutAnimate(SkPath* out)
+{
+    if (!out) {
+        LOGE("SkPath is null");
         return false;
     }
     std::vector<SkPoint> skPoints;
-    FlutterSvgPainter::StringToPoints(points_.c_str(), skPoints);
-    if (skPoints.empty()) {
+    if (!CreateSkPath(points_, skPoints)) {
         return false;
     }
-    point = Point(skPoints[0].x(), skPoints[0].y());
+    out->addPoly(&skPoints[0], skPoints.size(), isClose_);
+    if (fillState_.IsEvenodd()) {
+        out->setFillType(SkPath::FillType::kEvenOdd_FillType);
+    }
     return true;
 }
 

@@ -26,7 +26,7 @@ class GridColumnInfo : public GridLayoutInfo {
     DECLARE_ACE_TYPE(GridColumnInfo, GridLayoutInfo);
 
 public:
-    class Builder {
+    class Builder : public AceType {
     public:
         Builder()
         {
@@ -55,6 +55,20 @@ public:
             columnInfo_->lgSizeColumn_ = lgSizeColumn;
             columnInfo_->lgSizeOffset_ = offset;
         }
+
+        void SetSizeColumn(GridSizeType type, uint32_t column, const Dimension& offset = UNDEFINED_DIMENSION)
+        {
+            if (type == GridSizeType::XS) {
+                SetXsSizeColumn(column, offset);
+            } else if (type == GridSizeType::SM) {
+                SetSmSizeColumn(column, offset);
+            } else if (type == GridSizeType::MD) {
+                SetMdSizeColumn(column, offset);
+            } else if (type == GridSizeType::LG) {
+                SetLgSizeColumn(column, offset);
+            }
+        }
+
         void SetSmSizeMaxColumn(uint32_t smSizeMaxColumn)
         {
             columnInfo_->smSizeMaxColumn_ = smSizeMaxColumn;
@@ -72,6 +86,8 @@ public:
         {
             columnInfo_->columns_ = columns;
         }
+
+        void ACE_EXPORT SetOffset(int32_t offset, GridSizeType type = GridSizeType::UNDEFINED);
 
         void SetParent(const RefPtr<GridContainerInfo>& parent)
         {
@@ -92,7 +108,7 @@ public:
     double GetWidth() const;
     double GetWidth(uint32_t columns) const;
     double GetMaxWidth() const;
-    const Dimension& GetOffset() const;
+    Dimension GetOffset() const;
     const RefPtr<GridContainerInfo>& GetParent() const
     {
         return parent_;
@@ -115,8 +131,10 @@ private:
     uint32_t mdSizeMaxColumn_ = 0;
     uint32_t lgSizeMaxColumn_ = 0;
 
-    // default column which no define column of the size
+    // default column and offset which no define column of the size
     uint32_t columns_ = DEFAULT_GRID_COLUMN_SPAN;
+    bool hasColumnOffset_ = false;
+    int32_t offsets_[static_cast<const int32_t>(GridSizeType::XL)] = { 0 };
     // parent container grid infos
     RefPtr<GridContainerInfo> parent_;
 };

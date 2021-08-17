@@ -53,16 +53,28 @@ private:
 };
 
 using MouseCallback = std::function<void(const MouseEventInfo&)>;
+using MouseHoverCallback = std::function<void()>;
 
 class MouseRawRecognizer : public MouseEventTarget {
     DECLARE_ACE_TYPE(MouseRawRecognizer, MouseEventTarget);
 
 public:
     void HandleEvent(const MouseEvent& event) override;
+    void HandleHoverEvent(MouseState mouseState);
 
     void SetOnMouse(const MouseCallback& onMouse)
     {
         onMouse_ = onMouse;
+    }
+
+    void SetOnMouseHover(const MouseHoverCallback& onMouseHover)
+    {
+        onMouseHover_ = onMouseHover;
+    }
+
+    void SetOnMouseHoverExit(const MouseHoverCallback& onMouseHoverExit)
+    {
+        onMouseHoverExit_ = onMouseHoverExit;
     }
 
     // Coordinate offset is used to calculate the local location of the mouse point in the render node.
@@ -77,6 +89,8 @@ private:
     MouseCallback onMouse_;
     Offset coordinateOffset_;
     MouseEvent lastEvent_;
+    MouseHoverCallback onMouseHover_;
+    MouseHoverCallback onMouseHoverExit_;
 };
 
 } // namespace OHOS::Ace

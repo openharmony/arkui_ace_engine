@@ -32,10 +32,10 @@ class StageElement : public StackElement, public PageTransitionListenable, publi
 public:
     void PerformBuild() override;
 
-    void PushPage(const RefPtr<Component>& newComponent);
+    virtual void PushPage(const RefPtr<Component>& newComponent);
     void Pop();
     void PopToPage(int32_t pageId);
-    void Replace(const RefPtr<Component>& newComponent);
+    virtual void Replace(const RefPtr<Component>& newComponent);
     bool ClearOffStage();
     bool CanPopPage();
     bool CanPushPage();
@@ -85,6 +85,17 @@ private:
     RefPtr<Animator> controllerOut_; // Controller for transition out.
     int32_t directedPageId_ = 0;
     bool isWaitingForBuild_ = false;
+};
+
+class SectionStageElement : public StageElement {
+    DECLARE_ACE_TYPE(SectionStageElement, StageElement);
+
+public:
+    void PushPage(const RefPtr<Component>& newComponent) override;
+    void Replace(const RefPtr<Component>& newComponent) override;
+
+private:
+    void AddAsOnlyPage(const RefPtr<Component>& newComponent);
 };
 
 } // namespace OHOS::Ace

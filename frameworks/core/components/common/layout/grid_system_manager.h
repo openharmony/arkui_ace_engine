@@ -54,12 +54,15 @@ public:
 
     static SystemGridInfo GetSystemGridInfo(const GridSizeType& sizeType);
     static RefPtr<GridColumnInfo> GetInfoByType(const GridColumnType& type);
+    // width is use px unit.
+    SystemGridInfo GetSystemGridInfo(const GridTemplateType& templateType, double width);
     void OnSurfaceChanged(double width);
     void SetWindowInfo(double screenWidth, double density, double dipScale)
     {
         screenWidth_ = screenWidth;
         density_ = density;
         dipScale_ = dipScale;
+        viewScale_ = density / dipScale;
     }
 
     double GetScreenWidth() const
@@ -86,6 +89,7 @@ private:
     double screenWidth_ = 0.0;
     double density_ = 1.0;
     double dipScale_ = 1.0;
+    double viewScale_ = 1.0;
     GridSizeType currentSize_ = GridSizeType::UNDEFINED;
     SystemGridInfo systemGridInfo_;
 

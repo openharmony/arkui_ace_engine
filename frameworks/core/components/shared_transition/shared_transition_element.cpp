@@ -57,6 +57,7 @@ void SharedTransitionElement::Update()
     enablePopExit_ = sharedComponent->IsEnablePopExit();
     enablePushEnter_ = sharedComponent->IsEnablePushEnter();
     enablePushExit_ = sharedComponent->IsEnablePushExit();
+    opacity_ = sharedComponent->GetOpacity();
 }
 
 RefPtr<RenderBox> SharedTransitionElement::GetRenderPassengerWithPajamas() const
@@ -91,6 +92,11 @@ Offset SharedTransitionElement::GetGlobalOffset() const
         return Offset();
     }
     return renderBox->GetGlobalOffset();
+}
+
+float SharedTransitionElement::GetOpacity() const
+{
+    return opacity_;
 }
 
 bool SharedTransitionElement::AboardShuttle(Offset& ticket)

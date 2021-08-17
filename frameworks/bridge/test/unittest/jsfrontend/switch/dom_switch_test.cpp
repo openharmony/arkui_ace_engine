@@ -37,7 +37,7 @@ constexpr FontStyle TEST_TEXT_FONT_STYLE = FontStyle::NORMAL;
 constexpr TextDecoration TEST_TEXT_DECORATION = TextDecoration::NONE;
 const double TEST_TEXT_PADDING = 12;
 constexpr double TEST_TEXT_FONT_SIZE = 30.0;
-constexpr double TEST_TEXT_LETTER_SPACING = 10.0;
+constexpr Dimension TEST_TEXT_LETTER_SPACING = 10.0_px;
 const std::string DEFAULT_TEXT_ON = "On";
 const std::string DEFAULT_TEXT_OFF = "Off";
 const std::string DEFAULT_TEXT_COLOR_ON = "#000000";
@@ -48,7 +48,7 @@ constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 const double DEFAULT_TEXT_PADDING = 0.0;
 constexpr double DEFAULT_TEXT_FONT_SIZE = 14.0;
 constexpr double INVALID_TEXT_FONT_SIZE = 0.0;
-constexpr double DEFAULT_TEXT_LETTER_SPACING = 0.0;
+constexpr Dimension DEFAULT_TEXT_LETTER_SPACING = 0.0_px;
 const std::string TEXT_SWITCH_JSON = "{                                                          "
                                      "  \"tag\": \"switch\",                                     "
                                      "  \"attr\": [{                                             "
@@ -229,7 +229,8 @@ HWTEST_F(DomSwitchTest, CreateTextSwitchFromDsl001, TestSize.Level1)
     EXPECT_EQ(switchComponent->GetTextStyle().GetFontSize().Value(), TEST_TEXT_FONT_SIZE);
     EXPECT_EQ(switchComponent->GetTextColorOn(), Color::FromString(TEST_TEXT_COLOR_ON));
     EXPECT_EQ(switchComponent->GetTextColorOff(), Color::FromString(TEST_TEXT_COLOR_OFF));
-    EXPECT_EQ(switchComponent->GetTextStyle().GetLetterSpacing(), TEST_TEXT_LETTER_SPACING);
+    EXPECT_TRUE(
+        NearEqual(switchComponent->GetTextStyle().GetLetterSpacing().Value(), TEST_TEXT_LETTER_SPACING.Value()));
     EXPECT_EQ(switchComponent->GetTextStyle().GetFontFamilies()[0], TEST_TEXT_FONT_FAMILY);
 }
 
@@ -266,7 +267,8 @@ HWTEST_F(DomSwitchTest, CreateTextSwitchFromDsl002, TestSize.Level1)
     EXPECT_EQ(switchComponent->GetTextStyle().GetFontSize().Value(), DEFAULT_TEXT_FONT_SIZE);
     EXPECT_EQ(switchComponent->GetTextColorOn(), Color::FromString(DEFAULT_TEXT_COLOR_ON));
     EXPECT_EQ(switchComponent->GetTextColorOff(), Color::FromString(DEFAULT_TEXT_COLOR_OFF));
-    EXPECT_EQ(switchComponent->GetTextStyle().GetLetterSpacing(), DEFAULT_TEXT_LETTER_SPACING);
+    EXPECT_TRUE(
+        NearEqual(switchComponent->GetTextStyle().GetLetterSpacing().Value(), DEFAULT_TEXT_LETTER_SPACING.Value()));
     EXPECT_TRUE(switchComponent->GetTextStyle().GetFontFamilies().empty());
 }
 
@@ -302,7 +304,8 @@ HWTEST_F(DomSwitchTest, CreateTextSwitchFromDsl003, TestSize.Level1)
     EXPECT_EQ(switchComponent->GetTextStyle().GetFontSize().Value(), INVALID_TEXT_FONT_SIZE);
     EXPECT_EQ(switchComponent->GetTextColorOn(), Color::FromString(DEFAULT_TEXT_COLOR_ON));
     EXPECT_EQ(switchComponent->GetTextColorOff(), Color::FromString(DEFAULT_TEXT_COLOR_OFF));
-    EXPECT_EQ(switchComponent->GetTextStyle().GetLetterSpacing(), DEFAULT_TEXT_LETTER_SPACING);
+    EXPECT_TRUE(
+        NearEqual(switchComponent->GetTextStyle().GetLetterSpacing().Value(), DEFAULT_TEXT_LETTER_SPACING.Value()));
 }
 
 } // namespace OHOS::Ace::Framework

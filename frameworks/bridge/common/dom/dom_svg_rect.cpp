@@ -21,38 +21,6 @@ namespace OHOS::Ace::Framework {
 
 DOMSvgRect::DOMSvgRect(NodeId nodeId, const std::string& nodeName) : DOMSvgBase(nodeId, nodeName) {}
 
-bool DOMSvgRect::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    if (DOMSvgBase::SetPresentationAttr(attr)) {
-        return true;
-    }
-    if (attr.first == DOM_SVG_X) {
-        x_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_Y) {
-        y_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_RX) {
-        rx_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_RY) {
-        ry_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_WIDTH) {
-        width_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_HEIGHT) {
-        height_ = ParseDimension(attr.second);
-        return true;
-    }
-    return false;
-}
-
 RefPtr<Component> DOMSvgRect::GetSpecializedComponent()
 {
     return rectComponent_;
@@ -65,7 +33,7 @@ void DOMSvgRect::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 
 void DOMSvgRect::OnMounted(const RefPtr<DOMNode>& parentNode)
 {
-    DOMSvgBase::InheritCommonAttrs(rectComponent_, parentNode);
+    DOMSvgBase::InheritAttrs(parentNode);
 }
 
 void DOMSvgRect::PrepareSpecializedComponent()
@@ -73,13 +41,10 @@ void DOMSvgRect::PrepareSpecializedComponent()
     if (!rectComponent_) {
         rectComponent_ = AceType::MakeRefPtr<SvgRectComponent>();
     }
-    rectComponent_->SetX(x_);
-    rectComponent_->SetY(y_);
-    rectComponent_->SetHeight(height_);
-    rectComponent_->SetWidth(width_);
-    rectComponent_->SetRx(rx_);
-    rectComponent_->SetRy(ry_);
-    DOMSvgBase::PrepareCommonAttrs(rectComponent_);
+    auto declaration = AceType::DynamicCast<SvgRectDeclaration>(declaration_);
+    if (declaration) {
+        rectComponent_->SetDeclaration(declaration);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

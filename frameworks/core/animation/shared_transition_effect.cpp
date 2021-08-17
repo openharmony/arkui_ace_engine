@@ -16,8 +16,10 @@
 #include "core/animation/shared_transition_effect.h"
 
 #include "core/animation/animation_pub.h"
+#include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
 #include "core/animation/keyframe.h"
+#include "core/components/common/properties/motion_path_evaluator.h"
 #include "core/components/common/properties/page_transition_option.h"
 #include "core/components/overlay/overlay_element.h"
 #include "core/components/positioned/positioned_component.h"
@@ -144,6 +146,7 @@ bool SharedTransitionEffect::TakeOffTween(const RefPtr<Element>& tweenElement,
     tweenSeatElement->SetController(controller_);
     tweenSeatElement->SetOption(option);
     tweenSeatElement->ApplyKeyframes();
+    tweenSeatElement->ApplyOptions();
     tweenSeatElement_ = tweenSeatElement;
     return true;
 }
@@ -166,17 +169,11 @@ RefPtr<SharedTransitionEffect> SharedTransitionEffect::GetSharedTransitionEffect
     }
 }
 
-bool SharedTransitionEffect::ApplyAnimation(RefPtr<OverlayElement>& overlay, RefPtr<Animator>& controller,
-    TweenOption& option, TransitionEvent event)
+bool SharedTransitionEffect::ApplyAnimation(
+    RefPtr<OverlayElement>& overlay, RefPtr<Animator>& controller, TweenOption& option, TransitionEvent event)
 {
-    if (!controller) {
-        LOGE("Add proxy controller failed. controller is null. event: %{public}d, share id: %{public}s", event,
-            shareId_.c_str());
-        return false;
-    }
     controller_->ClearAllListeners();
     controller_->ClearInterpolators();
-    controller->AddProxyController(controller_);
     return true;
 }
 
@@ -259,6 +256,17 @@ bool SharedTransitionExchange::CreateTranslateAnimation(
         if (destOffset != srcOffset) {
             auto translateAnimation = AceType::MakeRefPtr<CurveAnimation<DimensionOffset>>(
                 Offset(0, 0), destOffset - srcOffset, Curves::FRICTION);
+            const auto& motionPathOption = option.GetMotionPathOption();
+            if (motionPathOption.IsValid()) {
+                auto motionPathEvaluator =
+                    AceType::MakeRefPtr<MotionPathEvaluator>(motionPathOption, Offset(0, 0), destOffset - srcOffset);
+                translateAnimation->SetEvaluator(motionPathEvaluator->CreateDimensionOffstEvaluator());
+                if (motionPathOption.GetRotate()) {
+                    auto rotateAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, 1.0f, option.GetCurve());
+                    rotateAnimation->SetEvaluator(motionPathEvaluator->CreateRotateEvaluator());
+                    option.SetTransformFloatAnimation(AnimationType::ROTATE_Z, rotateAnimation);
+                }
+            }
             option.SetTranslateAnimations(AnimationType::TRANSLATE, translateAnimation);
             autoTranslate_ = true;
             LOGD("Create shared exchange animation for translate. event: %{public}d, share id: %{public}s", event,
@@ -307,6 +315,28 @@ bool SharedTransitionExchange::CreateSizeAnimation(TweenOption& option, Transiti
     return true;
 }
 
+bool SharedTransitionExchange::CreateOpacityAnimation(TweenOption& option, TransitionEvent event, bool isLazy)
+{
+    auto src = src_.Upgrade();
+    auto dest = dest_.Upgrade();
+    if (!dest || !src) {
+        LOGE("Create exchange animation failed. dest or src is null. event: %{public}d, share id: %{public}s", event,
+            shareId_.c_str());
+        return false;
+    }
+    auto destOpacity = dest->GetOpacity();
+    auto srcOpacity = src->GetOpacity();
+
+    LOGD("Get Opacity for event: %{public}d, share id: %{public}s. dest: %{public}f; src: %{public}f", event,
+        shareId_.c_str(), destOpacity, srcOpacity);
+
+    if (!NearEqual(destOpacity, srcOpacity) && !option.GetOpacityAnimation()) {
+        auto opacityAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(srcOpacity, destOpacity, Curves::FRICTION);
+        option.SetOpacityAnimation(opacityAnimation);
+    }
+    return true;
+}
+
 bool SharedTransitionExchange::CreateAnimation(TweenOption& option, TransitionEvent event, bool isLazy)
 {
     auto src = src_.Upgrade();
@@ -327,6 +357,9 @@ bool SharedTransitionExchange::CreateAnimation(TweenOption& option, TransitionEv
         return false;
     }
     if (!CreateSizeAnimation(option, event, isLazy)) {
+        return false;
+    }
+    if (!CreateOpacityAnimation(option, event, isLazy)) {
         return false;
     }
     AddLazyLoadCallback(event);

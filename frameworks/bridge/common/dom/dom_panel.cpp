@@ -52,10 +52,12 @@ void DOMPanel::PrepareSpecializedComponent()
     panelChild_->SetMiniHeight(miniHeight_);
     panelChild_->SetHalfHeight(halfHeight_);
     panelChild_->SetFullHeight(fullHeight_);
-    panelChild_->SetHasBoxStyle(hasBoxStyle_);
-    panelChild_->SetHasDecorationStyle(hasDecorationStyle_);
-    panelChild_->SetHasBackgroundColor(hasBackGroundColor_);
-    panelChild_->SetHasBorderStyle(hasBorderStyle_);
+    if (declaration_) {
+        panelChild_->SetHasBoxStyle(declaration_->HasBoxStyle());
+        panelChild_->SetHasDecorationStyle(declaration_->HasDecorationStyle());
+        panelChild_->SetHasBackgroundColor(declaration_->HasBackGroundColor());
+        panelChild_->SetHasBorderStyle(declaration_->HasBorderStyle());
+    }
     if (boxComponent_) {
         panelChild_->SetBoxStyle(boxComponent_);
     } else {
@@ -138,7 +140,12 @@ void DOMPanel::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
         display_ = AceType::MakeRefPtr<DisplayComponent>(child->GetRootComponent());
     }
     display_->SetVisible(isShow_ ? VisibleType::VISIBLE : VisibleType::GONE);
-    display_->SetOpacity(opacity_);
+    if (declaration_) {
+        auto& opacityStyle = static_cast<CommonOpacityStyle&>(declaration_->GetStyle(StyleTag::COMMON_OPACITY_STYLE));
+        if (opacityStyle.IsValid()) {
+            display_->SetOpacity(opacityStyle.opacity);
+        }
+    }
     panelChild_->SetChild(display_);
 }
 

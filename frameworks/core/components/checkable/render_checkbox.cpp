@@ -89,6 +89,9 @@ void RenderCheckbox::HandleClick()
     if (clickEvent_) {
         clickEvent_();
     }
+    if (onChange_) {
+        onChange_(checked_);
+    }
 }
 
 void RenderCheckbox::UpdateAnimation()

@@ -210,6 +210,15 @@ const MediaQueryerRule DEVICE_TYPE_RULE(
     },
     2);
 
+const MediaQueryerRule DEVICE_BRAND_RULE(
+    std::regex("\\(device-brand:([A-Z]+)\\)"),
+    [](const std::smatch& matchResults, const MediaFeature& mediaFeature, MediaError& failReason) {
+        static constexpr int32_t CONDITION_VALUE = 1;
+        auto value = matchResults[CONDITION_VALUE] == mediaFeature->GetString("device-brand", "");
+        return value;
+    },
+    2);
+
 const MediaQueryerRule DARK_MODE_RULE(
     std::regex("\\(dark-mode:([a-z]+)\\)"),
     [](const std::smatch& matchResults, const MediaFeature& mediaFeature, MediaError& failReason) {
@@ -225,6 +234,7 @@ const std::list<MediaQueryerRule> SINGLE_CONDITION_RULES = {
     CSS_LEVEL3_RULE,
     ORIENTATION_RULE,
     DEVICE_TYPE_RULE,
+    DEVICE_BRAND_RULE,
     SCREEN_SHAPE_RULE,
     DARK_MODE_RULE,
 
@@ -232,7 +242,6 @@ const std::list<MediaQueryerRule> SINGLE_CONDITION_RULES = {
 
 bool ParseSingleCondition(const std::string& condition, const MediaFeature& mediaFeature, MediaError& failReason)
 {
-    std::smatch result;
     for (const auto& rule : SINGLE_CONDITION_RULES) {
         std::smatch matchResults;
         if (rule.Match(condition, matchResults)) {
@@ -350,11 +359,13 @@ std::unique_ptr<JsonValue> MediaQueryer::GetMediaFeature() const
     json->Put("aspect-ratio", aspectRatio);
     json->Put("round-screen", SystemProperties::GetIsScreenRound());
     json->Put("device-width", SystemProperties::GetDeviceWidth());
+    json->Put("device-brand", SystemProperties::GetBrand().c_str());
     json->Put("device-height", SystemProperties::GetDeviceHeight());
     json->Put("resolution", SystemProperties::GetResolution());
     json->Put("orientation", mediaQueryInfo.GetOrientation().c_str());
     json->Put("device-type", mediaQueryInfo.GetDeviceType().c_str());
-    json->Put("dark-mode", colorMode_ == ColorMode::DARK ? true : false);
+    json->Put("dark-mode", colorMode_ == ColorMode::DARK);
+    LOGD("current media info %{public}s", json->ToString().c_str());
     return json;
 }
 

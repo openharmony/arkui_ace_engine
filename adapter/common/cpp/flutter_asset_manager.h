@@ -47,7 +47,7 @@ private:
     std::unique_ptr<fml::Mapping> mapping_;
 };
 
-class FlutterAssetManager final : public AssetManager {
+class ACE_EXPORT FlutterAssetManager final : public AssetManager {
     DECLARE_ACE_TYPE(FlutterAssetManager, AssetManager);
 
 public:
@@ -85,6 +85,8 @@ public:
         LOGE("find asset failed, assetName = %{private}s", assetName.c_str());
         return nullptr;
     }
+
+    std::string GetAssetPath(const std::string& assetName) override;
 
 private:
     std::deque<std::unique_ptr<flutter::AssetResolver>> providers_;

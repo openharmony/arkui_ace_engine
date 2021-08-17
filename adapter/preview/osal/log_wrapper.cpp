@@ -20,12 +20,14 @@
 #else
 #include "securec.h"
 #endif
+#include <securec_p.h>
 #include <thread>
 
 namespace OHOS::Ace {
 namespace {
 
-constexpr uint32_t MAX_BUFFER_SIZE = 512;
+// MAX_BUFFER_SIZE same with hilog
+constexpr uint32_t MAX_BUFFER_SIZE = 4000;
 constexpr uint32_t MAX_TIME_SIZE = 32;
 const char* const LOGLEVELNAME[] = { "DEBUG", "INFO", "WARNING", "ERROR", "FATAL" };
 
@@ -68,28 +70,28 @@ std::string GetTimeStamp()
 void LogWrapper::PrintLog(LogDomain domain, LogLevel level, const char* fmt, va_list args)
 {
     std::string newFmt(fmt);
-    StripFormatString("{public}", newFmt);
-    StripFormatString("{private}", newFmt);
 
     char buf[MAX_BUFFER_SIZE];
-    if (vsnprintf_s(buf, sizeof(buf), sizeof(buf) - 1, newFmt.c_str(), args) < 0) {
+    if (vsnprintfp_s(buf, sizeof(buf), sizeof(buf) - 1, true, newFmt.c_str(), args) < 0 && errno == EINVAL) {
         return;
     }
 
-    std::string newTimeFmt("%s %-6d [%-7s %7s]");
+    std::string newTimeFmt("[%-7s %7s] %s %-6d");
     char timeBuf[MAX_BUFFER_SIZE];
 #ifdef WINDOWS_PLATFORM
-    if (_snprintf_s(timeBuf, sizeof(timeBuf), sizeof(timeBuf) - 1, newTimeFmt.c_str(), GetTimeStamp().c_str(),
-            std::this_thread::get_id(), LOG_TAGS[static_cast<uint32_t>(domain)], GetNameForLogLevel(level)) < 0) {
+    if (_snprintf_s(timeBuf, sizeof(timeBuf), sizeof(timeBuf) - 1, newTimeFmt.c_str(),
+            LOG_TAGS[static_cast<uint32_t>(domain)], GetNameForLogLevel(level), GetTimeStamp().c_str(),
+            std::this_thread::get_id()) < 0) {
         return;
     }
 #else
-    if (snprintf_s(timeBuf, sizeof(timeBuf), sizeof(timeBuf) - 1, newTimeFmt.c_str(), GetTimeStamp().c_str(),
-            std::this_thread::get_id(), LOG_TAGS[static_cast<uint32_t>(domain)], GetNameForLogLevel(level)) < 0) {
+    if (snprintf_s(timeBuf, sizeof(timeBuf), sizeof(timeBuf) - 1, newTimeFmt.c_str(),
+            LOG_TAGS[static_cast<uint32_t>(domain)], GetNameForLogLevel(level), GetTimeStamp().c_str(),
+            std::this_thread::get_id()) < 0) {
         return;
     }
 #endif
-    printf("%s  %s\r\n", timeBuf, buf);
+    printf("%s %s\r\n", timeBuf, buf);
     fflush(stdout);
 }
 

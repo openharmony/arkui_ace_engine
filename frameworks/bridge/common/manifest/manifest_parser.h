@@ -38,6 +38,19 @@ public:
     const RefPtr<ManifestWidgetGroup>& GetWidget() const;
     const WindowConfig& GetWindowConfig() const;
 
+    bool IsWebFeature() const
+    {
+        return webFeature_;
+    }
+    bool IsUseLiteStyle() const
+    {
+        return useLiteStyle_;
+    }
+    int32_t GetMinPlatformVersion() const
+    {
+        return manifestAppInfo_->GetMinPlatformVersion();
+    }
+
     void Parse(const std::string& url);
     void Printer();
 
@@ -46,6 +59,8 @@ private:
     RefPtr<ManifestRouter> manifestRouter_;
     RefPtr<ManifestWidgetGroup> manifestWidget_;
     RefPtr<ManifestWindow> manifestWindow_;
+    bool webFeature_ = false;
+    bool useLiteStyle_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ManifestParser);
 };

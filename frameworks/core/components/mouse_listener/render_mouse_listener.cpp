@@ -32,6 +32,8 @@ void RenderMouseListener::Update(const RefPtr<Component>& component)
     auto mouseComponent = AceType::DynamicCast<MouseListenerComponent>(component);
     ACE_DCHECK(mouseComponent);
     SetOnMouse(AceAsyncEvent<void(const MouseEventInfo&)>::Create(mouseComponent->GetOnMouseId(), context_));
+    SetOnMouseHover(AceAsyncEvent<void()>::Create(mouseComponent->GetOnMouseHoverId(), context_));
+    SetOnMouseHoverExit(AceAsyncEvent<void()>::Create(mouseComponent->GetOnMouseHoverExitId(), context_));
 }
 
 void RenderMouseListener::OnMouseTestHit(const Offset& coordinateOffset, MouseTestResult& result)
@@ -39,6 +41,15 @@ void RenderMouseListener::OnMouseTestHit(const Offset& coordinateOffset, MouseTe
     LOGD("render touch listener: on touch test hit!");
     recognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(recognizer_);
+}
+
+bool RenderMouseListener::HandleMouseHoverEvent(MouseState mouseState)
+{
+    if (recognizer_) {
+        recognizer_->HandleHoverEvent(mouseState);
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace

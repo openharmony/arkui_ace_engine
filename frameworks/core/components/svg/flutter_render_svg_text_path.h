@@ -30,6 +30,9 @@ public:
     RenderLayer GetRenderLayer() override;
     void Paint(RenderContext& context, const Offset& offset) override;
     Offset PaintTextPath(RenderContext& context, const Offset& offset);
+    Offset MeasureTextPathBounds(const Offset& offset, Rect& bounds);
+
+    Rect GetPaintBounds(const Offset& offset) override;
 
     bool IsRepaintBoundary() const override
     {
@@ -42,6 +45,7 @@ protected:
 
 private:
     double OnDrawTextPath(RenderContext& context, const PathOffset& pathOffset);
+    double OnMeasureTextPathBounds(const PathOffset& pathOffset, Rect& bounds);
 
 private:
     RefPtr<Flutter::TransformLayer> transformLayer_;

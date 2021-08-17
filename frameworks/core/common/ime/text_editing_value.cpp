@@ -23,7 +23,9 @@
 namespace OHOS::Ace {
 namespace {
 
+// Negotiated fields with Java
 const char TEXT[] = "text";
+const char HINT[] = "hint";
 const char SELECTION_START[] = "selectionStart";
 const char SELECTION_END[] = "selectionEnd";
 
@@ -32,6 +34,7 @@ const char SELECTION_END[] = "selectionEnd";
 void TextEditingValue::ParseFromJson(const JsonValue& json)
 {
     text = json.GetString(TEXT);
+    hint = json.GetString(HINT);
     selection.baseOffset = json.GetInt(SELECTION_START, -1);
     selection.extentOffset = json.GetInt(SELECTION_END, -1);
 }
@@ -40,6 +43,7 @@ std::string TextEditingValue::ToJsonString() const
 {
     auto json = JsonUtil::Create(true);
     json->Put(TEXT, text.c_str());
+    json->Put(HINT, hint.c_str());
     json->Put(SELECTION_START, selection.baseOffset);
     json->Put(SELECTION_END, selection.extentOffset);
     return json->ToString();
@@ -51,7 +55,7 @@ bool TextEditingValue::operator==(const TextEditingValue& other) const
         return false;
     }
 
-    return text == other.text;
+    return text == other.text && hint == other.hint;
 }
 
 bool TextEditingValue::operator!=(const TextEditingValue& other) const

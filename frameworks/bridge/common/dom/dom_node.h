@@ -19,12 +19,16 @@
 #include <string>
 #include <unordered_map>
 
+#include "base/geometry/transform_util.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/animation/animation_util.h"
 #include "core/animation/keyframe_animation.h"
+#include "core/animation/property_animation.h"
 #include "core/components/box/box_component.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/declaration/common/declaration_creator_manager.h"
 #include "core/components/display/display_component.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/flex/flex_item_component.h"
@@ -40,59 +44,42 @@
 #include "core/components/theme/theme_utils.h"
 #include "core/components/touch_listener/touch_listener_component.h"
 #include "core/components/transform/transform_component.h"
+#include "core/components/transition/transition_component.h"
 #include "core/components/tween/tween_component.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
+#include "frameworks/bridge/common/utils/transform_convertor.h"
+#include "frameworks/core/animation/animatable_data.h"
 
 #ifndef WEARABLE_PRODUCT
 #include "core/components/multimodal/multimodal_component.h"
-#include "core/event/multimodal/multimodal_properties.h"
 #endif
 
 namespace OHOS::Ace::Framework {
 
-enum class DisplayType {
-    NO_SETTING = 0,
-    FLEX,
-    GRID,
-    NONE,
-};
-
-enum class VisibilityType {
-    NO_SETTING = 0,
-    VISIBLE,
-    HIDDEN,
-};
-
 // If no insertion location is specified, new child will be added to the end of children list by default.
 inline constexpr int32_t DEFAULT_ITEM_INDEX = -1;
 
-class ACE_EXPORT DOMNode : public AceType {
+class ACE_EXPORT DOMNode : public virtual AceType {
     DECLARE_ACE_TYPE(DOMNode, AceType);
 
 public:
     DOMNode(NodeId nodeId, const std::string& nodeName);
     ~DOMNode() override;
 
-    virtual void SetAttr(const std::vector<std::pair<std::string, std::string>>& attrs);
-    virtual void SetStyle(const std::vector<std::pair<std::string, std::string>>& styles);
-    virtual void AddEvent(int32_t pageId, const std::vector<std::string>& events);
-    void SetTweenComponent(const RefPtr<TweenComponent>& tweenComponent);
     void SetAnimationStyle(const std::vector<std::unordered_map<std::string, std::string>>& animationKeyframes);
     bool ParseAnimationStyle(const std::vector<std::unordered_map<std::string, std::string>>& animationKeyframes);
     void SetSharedTransitionStyle(const std::vector<std::unordered_map<std::string, std::string>>& animationKeyframes);
-
+    bool ParseTransitionPropertyStyle(const std::string& transitionProperty);
+    bool ParseTransitionNameStyle(const std::string& transitionName);
+    void CreateDeclaration(const std::string& tag);
+    void TweenOptionSetKeyframes(TweenOption& tweenOption);
+    void SetCustomAnimationStyleUpdate(bool enable);
     void AddNode(const RefPtr<DOMNode>& node, int32_t slot = DEFAULT_ITEM_INDEX);
     void RemoveNode(const RefPtr<DOMNode>& node);
     virtual void Mount(int32_t slot);
     void GenerateComponentNode();
     virtual void OnPageLoadFinish() {};
-
-    virtual void CallMethod(const std::string& method, const std::string& args);
-
-    virtual void OnRequestFocus(bool shouldFocus);
-
-    virtual void OnScrollBy(double dx, double dy, bool isSmooth);
 
     virtual void SetShowAttr(const std::string& showValue);
 
@@ -103,9 +90,24 @@ public:
 
     void MarkNeedUpdate();
 
+    void SetTweenComponent(const RefPtr<TweenComponent>& tweenComponent)
+    {
+        tweenComponent_ = tweenComponent;
+    }
+
+    RefPtr<TweenComponent> GetTweenComponent() const
+    {
+        return tweenComponent_;
+    }
+
     const std::list<RefPtr<DOMNode>>& GetChildList() const
     {
         return children_;
+    }
+
+    const RefPtr<Declaration>& GetDeclaration() const
+    {
+        return declaration_;
     }
 
     const RefPtr<ComposedComponent>& GetRootComponent() const
@@ -148,9 +150,17 @@ public:
         return transformComponent_;
     }
 
-    PositionType GetPosition() const
+    void SetShareId(const std::string& shareId)
     {
-        return position_;
+        shareId_ = shareId;
+        if (declaration_) {
+            declaration_->SetShareId(shareId);
+        }
+    }
+
+    const std::string& GetShareId() const
+    {
+        return shareId_;
     }
 
     const RefPtr<PageTransitionComponent>& BuildTransitionComponent();
@@ -162,9 +172,34 @@ public:
         gestureEventComponent_->SetOnClickId(eventMarker);
     }
 
+    void SetOnDoubleClick(const EventMarker& eventMarker)
+    {
+        gestureEventComponent_->SetOnDoubleClickId(eventMarker);
+    }
+
     void SetOnLongPress(const EventMarker& eventMarker)
     {
         gestureEventComponent_->SetOnLongPressId(eventMarker);
+    }
+
+    void SetOnPinchStart(const EventMarker& eventMarker)
+    {
+        gestureEventComponent_->SetOnPinchStartId(eventMarker);
+    }
+
+    void SetOnPinchUpdate(const EventMarker& eventMarker)
+    {
+        gestureEventComponent_->SetOnPinchUpdateId(eventMarker);
+    }
+
+    void SetOnPinchEnd(const EventMarker& eventMarker)
+    {
+        gestureEventComponent_->SetOnPinchEndId(eventMarker);
+    }
+
+    void SetOnPinchCancel(const EventMarker& eventMarker)
+    {
+        gestureEventComponent_->SetOnPinchCancelId(eventMarker);
     }
 
     void SetIsRootNode(bool isRootNode)
@@ -216,16 +251,6 @@ public:
         return tag_;
     }
 
-    DisplayType GetDisplay() const
-    {
-        return display_;
-    }
-
-    void SetDisplay(DisplayType type)
-    {
-        display_ = type;
-    }
-
     void SetProxyNode(bool isProxy)
     {
         isProxy_ = isProxy;
@@ -238,27 +263,40 @@ public:
 
     bool IsShow() const
     {
-        return visible_ == VisibleType::VISIBLE && !NearZero(opacity_);
+        double opacity = 1.0;
+        if (declaration_) {
+            auto& opacityStyle =
+                static_cast<CommonOpacityStyle&>(declaration_->GetStyle(StyleTag::COMMON_OPACITY_STYLE));
+            if (opacityStyle.IsValid()) {
+                opacity = opacityStyle.opacity;
+            }
+        }
+        return visible_ == VisibleType::VISIBLE && !NearZero(opacity);
     }
 
-    const Dimension& GetHeight() const
+    Color GetBackGroundColor() const
     {
-        return height_;
+        Color color = Color::TRANSPARENT;
+        if (declaration_ && isTransitionColor_) {
+            auto& style =
+                static_cast<CommonBackgroundStyle&>(declaration_->GetStyle(StyleTag::COMMON_BACKGROUND_STYLE));
+            if (style.IsValid()) {
+                color = style.backgroundColor;
+            }
+        }
+        return color;
     }
 
-    void SetHeight(const Dimension& height)
+    double GetOpacity() const
     {
-        height_ = height;
-    }
-
-    const Dimension& GetWidth() const
-    {
-        return width_;
-    }
-
-    void SetWidth(const Dimension& width)
-    {
-        width_ = width;
+        double opacity = 1.0;
+        if (declaration_) {
+            auto& style = static_cast<CommonOpacityStyle&>(declaration_->GetStyle(StyleTag::COMMON_OPACITY_STYLE));
+            if (style.IsValid()) {
+                opacity = style.opacity;
+            }
+        }
+        return opacity;
     }
 
     NodeId GetParentId() const
@@ -273,8 +311,6 @@ public:
 
     bool IsTabbarSubNode() const;
 
-    RefPtr<TweenComponent> GetTweenComponent() const;
-
     void SetParentNode(const RefPtr<DOMNode>& parentNode)
     {
         if (!parentNode) {
@@ -287,11 +323,6 @@ public:
         if (tag_ == DOM_NODE_TAG_SVG || parentNode->HasSvgTag()) {
             hasSvgTag_ = true;
         }
-    }
-
-    bool IsRightToLeft() const
-    {
-        return isRightToLeft_;
     }
 
     int32_t GetPageId() const
@@ -347,51 +378,6 @@ public:
         return ((cachedPseudoType_ & STATE_ACTIVE) > 0);
     }
 
-    void SetShareId(const std::string& shareId)
-    {
-        shareId_ = shareId;
-    }
-
-    const std::string& GetShareId() const
-    {
-        return shareId_;
-    }
-
-    void SetHasDisplayStyleFlag(bool flag)
-    {
-        hasDisplayStyle_ = flag;
-    }
-
-    const Dimension& GetMarginTop() const
-    {
-        return marginTop_;
-    }
-
-    const Dimension& GetMarginBottom() const
-    {
-        return marginBottom_;
-    }
-
-    const Dimension& GetMarginLeft() const
-    {
-        return marginLeft_;
-    }
-
-    const Dimension& GetMarginRight() const
-    {
-        return marginRight_;
-    }
-
-    bool GetDisable() const
-    {
-        return nodeDisabled_;
-    }
-
-    double GetFlexWeight() const
-    {
-        return flexWeight_;
-    }
-
     bool HasSvgTag()
     {
         return hasSvgTag_;
@@ -433,6 +419,12 @@ public:
      */
     std::vector<Dimension> ParsePreferFontSizes(const std::string& value) const;
 
+    /*
+     * Parse image src from string content and reference for id/attr, including format:
+     * "@app.media.customized_image", "@sys.media.123".
+     */
+    std::string ParseImageSrc(const std::string& imgSrc) const;
+
     RefPtr<ThemeManager> GetThemeManager() const
     {
         auto context = pipelineContext_.Upgrade();
@@ -470,17 +462,12 @@ public:
 
     bool HasBorderRadiusStyle() const
     {
-        return hasBorderRadiusStyle_;
-    }
-
-    bool HasPositionStyle() const
-    {
-        return hasPositionStyle_;
+        return declaration_ ? declaration_->HasBorderRadiusStyle() : false;
     }
 
     bool HasOverflowStyle() const
     {
-        return hasOverflowStyle_;
+        return declaration_ ? declaration_->HasOverflowStyle() : false;
     }
 
     bool IsBoxWrap() const
@@ -493,49 +480,219 @@ public:
         boxWrap_ = boxWrap;
     }
 
-    const TweenOption& GetTweenOption() const
-    {
-        return tweenOption_;
-    }
-
     void AdjustParamInLiteMode();
 
     virtual void AdjustSpecialParamInLiteMode() {}
+
+    // TODO delete those method form dom node, use declaration.
+    virtual void SetAttr(const std::vector<std::pair<std::string, std::string>>& attrs);
+    virtual void SetStyle(const std::vector<std::pair<std::string, std::string>>& styles);
+    virtual void AddEvent(int32_t pageId, const std::vector<std::string>& events);
+    virtual void CallMethod(const std::string& method, const std::string& args);
+    virtual void OnRequestFocus(bool shouldFocus);
+    virtual void OnScrollBy(double dx, double dy, bool isSmooth);
+
+    bool SetCurrentStyle(const std::pair<std::string, std::string>& style);
+
+    bool IsRightToLeft() const
+    {
+        return declaration_ ? declaration_->IsRightToLeft() : false;
+    }
+
+    void SetHeight(const Dimension& height)
+    {
+        if (declaration_) {
+            auto& sizeStyle = declaration_->MaybeResetStyle<CommonSizeStyle>(StyleTag::COMMON_SIZE_STYLE);
+            if (sizeStyle.IsValid()) {
+                sizeStyle.height = height;
+            }
+        }
+    }
+
+    void SetWidth(const Dimension& width)
+    {
+        if (declaration_) {
+            auto& sizeStyle = declaration_->MaybeResetStyle<CommonSizeStyle>(StyleTag::COMMON_SIZE_STYLE);
+            if (sizeStyle.IsValid()) {
+                sizeStyle.width = width;
+            }
+        }
+    }
+
+    virtual Dimension GetHeight() const
+    {
+        Dimension height = Dimension(-1.0, DimensionUnit::PX);
+        if (declaration_) {
+            auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
+            if (sizeStyle.IsValid()) {
+                height = sizeStyle.height;
+            }
+        }
+        return height;
+    }
+
+    virtual Dimension GetWidth() const
+    {
+        Dimension width = Dimension(-1.0, DimensionUnit::PX);
+        if (declaration_) {
+            auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
+            if (sizeStyle.IsValid()) {
+                width = sizeStyle.width;
+            }
+        }
+        return width;
+    }
+
+    DisplayType GetDisplay() const
+    {
+        DisplayType display = DisplayType::NO_SETTING;
+        if (declaration_) {
+            auto& displayStyle =
+                static_cast<CommonDisplayStyle&>(declaration_->GetStyle(StyleTag::COMMON_DISPLAY_STYLE));
+            if (displayStyle.IsValid()) {
+                display = displayStyle.display;
+            }
+        }
+        return display;
+    }
+
+    void SetDisplay(DisplayType type)
+    {
+        if (declaration_) {
+            auto& displayStyle = declaration_->MaybeResetStyle<CommonDisplayStyle>(StyleTag::COMMON_DISPLAY_STYLE);
+            if (displayStyle.IsValid()) {
+                displayStyle.display = type;
+            }
+        }
+    }
+
+    PositionType GetPosition() const
+    {
+        PositionType position = PositionType::RELATIVE;
+        if (declaration_) {
+            auto& positionStyle =
+                static_cast<CommonPositionStyle&>(declaration_->GetStyle(StyleTag::COMMON_POSITION_STYLE));
+            if (positionStyle.IsValid()) {
+                position = positionStyle.position;
+            }
+        }
+        return position;
+    }
+
+    std::optional<Color> GetImageFill() const
+    {
+        std::optional<Color> imageFill = std::nullopt;
+        if (declaration_) {
+            auto& imageStyle = static_cast<CommonImageStyle&>(declaration_->GetStyle(StyleTag::COMMON_IMAGE_STYLE));
+            if (imageStyle.IsValid()) {
+                imageFill = imageStyle.imageFill;
+            }
+        }
+        return imageFill;
+    }
 
 protected:
     virtual void OnMounted(const RefPtr<DOMNode>& parentNode) {};
     virtual void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) {};
     virtual void OnChildNodeRemoved(const RefPtr<DOMNode>& child) {};
-    virtual void CallSpecializedMethod(const std::string& method, const std::string& args) {};
     virtual void OnSetStyleFinished() {};
+    // Confirm declaration is exist before call GetClickId and GetLongPressId.
     virtual const EventMarker& GetClickId()
     {
-        return onClickId_;
+        static EventMarker defaultMarker;
+        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+        return gestureEvent.IsValid() ? gestureEvent.click.eventMarker : defaultMarker;
+    };
+    const EventMarker& GetDoubleClickId()
+    {
+        static EventMarker defaultMarker;
+        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+        return gestureEvent.IsValid() ? gestureEvent.doubleClick.eventMarker : defaultMarker;
+    };
+    const EventMarker& GetLongPressId()
+    {
+        static EventMarker defaultMarker;
+        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+        return gestureEvent.IsValid() ? gestureEvent.longPress.eventMarker : defaultMarker;
+    };
+        const EventMarker& GetPinchStartId()
+    {
+        static EventMarker defaultMarker;
+        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+        return gestureEvent.IsValid() ? gestureEvent.pinchStart.eventMarker : defaultMarker;
+    };
+    const EventMarker& GetPinchUpdateId()
+    {
+        static EventMarker defaultMarker;
+        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+        return gestureEvent.IsValid() ? gestureEvent.pinchUpdate.eventMarker : defaultMarker;
+    };
+    const EventMarker& GetPinchEndId()
+    {
+        static EventMarker defaultMarker;
+        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+        return gestureEvent.IsValid() ? gestureEvent.pinchEnd.eventMarker : defaultMarker;
+    };
+    const EventMarker& GetPinchCancelId()
+    {
+        static EventMarker defaultMarker;
+        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+        return gestureEvent.IsValid() ? gestureEvent.pinchCancel.eventMarker : defaultMarker;
     };
 
-    // Subclasses need to implement this interface to composite specialized component into common components.
+    // Confirm declaration exist and support raw event before call GetTouchId.
+    EventMarker& GetTouchId(uint32_t action, uint32_t stage, uint32_t type)
+    {
+        static EventMarker defaultMarker;
+        if (!declaration_) {
+            return defaultMarker;
+        }
+
+        auto& rawEvent = declaration_->MaybeResetEvent<CommonRawEvent>(EventTag::COMMON_RAW_EVENT);
+        if (!rawEvent.IsValid()) {
+            return defaultMarker;
+        }
+        if (action == EventAction::ON && stage == EventStage::CAPTURE && type == EventType::TOUCH_CANCEL) {
+            return rawEvent.captureTouchCancel.eventMarker;
+        } else if (action == EventAction::ON && stage == EventStage::CAPTURE && type == EventType::TOUCH_UP) {
+            return rawEvent.captureTouchEnd.eventMarker;
+        } else if (action == EventAction::ON && stage == EventStage::CAPTURE && type == EventType::TOUCH_MOVE) {
+            return rawEvent.captureTouchMove.eventMarker;
+        } else if (action == EventAction::ON && stage == EventStage::CAPTURE && type == EventType::TOUCH_DOWN) {
+            return rawEvent.captureTouchStart.eventMarker;
+        } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE && type == EventType::TOUCH_CANCEL) {
+            return rawEvent.catchBubbleTouchCancel.eventMarker;
+        } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE && type == EventType::TOUCH_UP) {
+            return rawEvent.catchBubbleTouchEnd.eventMarker;
+        } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE && type == EventType::TOUCH_MOVE) {
+            return rawEvent.catchBubbleTouchMove.eventMarker;
+        } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE && type == EventType::TOUCH_DOWN) {
+            return rawEvent.catchBubbleTouchStart.eventMarker;
+        } else if (action == EventAction::CATCH && stage == EventStage::CAPTURE && type == EventType::TOUCH_CANCEL) {
+            return rawEvent.catchCaptureTouchCancel.eventMarker;
+        } else if (action == EventAction::CATCH && stage == EventStage::CAPTURE && type == EventType::TOUCH_UP) {
+            return rawEvent.catchCaptureTouchEnd.eventMarker;
+        } else if (action == EventAction::CATCH && stage == EventStage::CAPTURE && type == EventType::TOUCH_MOVE) {
+            return rawEvent.catchCaptureTouchMove.eventMarker;
+        } else if (action == EventAction::CATCH && stage == EventStage::CAPTURE && type == EventType::TOUCH_DOWN) {
+            return rawEvent.catchCaptureTouchStart.eventMarker;
+        } else if (action == EventAction::ON && stage == EventStage::BUBBLE && type == EventType::TOUCH_CANCEL) {
+            return rawEvent.touchCancel.eventMarker;
+        } else if (action == EventAction::ON && stage == EventStage::BUBBLE && type == EventType::TOUCH_UP) {
+            return rawEvent.touchEnd.eventMarker;
+        } else if (action == EventAction::ON && stage == EventStage::BUBBLE && type == EventType::TOUCH_MOVE) {
+            return rawEvent.touchMove.eventMarker;
+        } else if (action == EventAction::ON && stage == EventStage::BUBBLE && type == EventType::TOUCH_DOWN) {
+            return rawEvent.touchStart.eventMarker;
+        }
+        return defaultMarker;
+    }
+
+    // Subclasses need to implement this interface to composit specialized component into common components.
     virtual RefPtr<Component> CompositeSpecializedComponent(const std::vector<RefPtr<SingleChild>>& components);
 
-    // Each subclass needs to override this function to obtain the properties. If it returns true, it means that the
-    // property has been consumed. If it returns false, it means it is handed over to the parent class.
-    virtual bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-    {
-        return false;
-    }
-
-    // Each subclass needs to override this function to obtain the style. If it returns true, it means that the
-    // style has been consumed. If it returns false, it means it is handed over to the parent class.
-    virtual bool SetSpecializedStyle(const std::pair<std::string, std::string>& style)
-    {
-        return false;
-    }
-
-    // Each subclass needs to override this function to obtain the event. If it returns true, it means that the
-    // event has been consumed. If it returns false, it means it is handed over to the parent class.
-    virtual bool AddSpecializedEvent(int32_t pageId, const std::string& event)
-    {
-        return false;
-    }
+    // Subclasses need to override this interface to update component with declaration.
+    virtual void UpdateSpecializedComponentWithDeclaration() {};
 
     // Subclasses need to override this interface to implement the dynamic creation of subclass specialized components.
     virtual void PrepareSpecializedComponent() {};
@@ -545,16 +702,11 @@ protected:
     virtual void UpdateBoxSize(const Dimension& width, const Dimension& height);
     virtual void UpdateBoxPadding(const Edge& padding);
     virtual void UpdateBoxBorder(const Border& border);
+    virtual void UpdatePropAnimations(const PropAnimationMap& animations);
+    virtual void UpdatePositionAnimations(const RefPtr<Component> componet);
 
     // Subclasses need to override this interface to implement reset initialization style before any frontend style set.
     virtual void ResetInitializedStyle() {};
-
-    // When the multi-mode input subscript is set to auto, need to determine whether the current component has the
-    // ability to support the subscript.
-    virtual bool IsSubscriptEnable() const
-    {
-        return false;
-    }
 
     virtual bool IsLeafNode() const
     {
@@ -577,90 +729,70 @@ protected:
         boxComponent_->SetAlignment(align);
     }
 
-    void SetPosition(const PositionType& positionType, const Dimension& top, const Dimension& left)
+    void OnChecked(bool isChecked);
+
+    // TODO delete those method from dom node.
+    // Each subclass needs to override this function to obtain the properties. If it returns true, it means that the
+    // property has been consumed. If it returns false, it means it is handed over to the parent class.
+    virtual bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
     {
-        hasPositionStyle_ = true;
-        position_ = positionType;
-        left_ = left;
-        top_ = top;
-        hasLeft_ = true;
-        hasTop_ = true;
+        return false;
     }
 
-    void OnChecked(bool isChecked);
+    // Each subclass needs to override this function to obtain the style. If it returns true, it means that the
+    // style has been consumed. If it returns false, it means it is handed over to the parent class.
+    virtual bool SetSpecializedStyle(const std::pair<std::string, std::string>& style)
+    {
+        return false;
+    }
+
+    // Each subclass needs to override this function to obtain the event. If it returns true, it means that the
+    // event has been consumed. If it returns false, it means it is handed over to the parent class.
+    virtual bool AddSpecializedEvent(int32_t pageId, const std::string& event)
+    {
+        return false;
+    }
+
+    virtual void CallSpecializedMethod(const std::string& method, const std::string& args) {};
+
+    // When the multi-mode input subscript is set to auto, need to determine whether the current component has the
+    // ability to support the subscript.
+    virtual bool IsSubscriptEnable() const
+    {
+        if (declaration_) {
+            declaration_->SetIsSubscriptEnable(false);
+        }
+        return false;
+    }
 
     WeakPtr<DOMNode> parentNode_;
     NodeId parentId_ = -1;
     bool isRootNode_ = false;
-    bool hasBackGroundColor_ = false;
-    bool hasPositionProcessed_ = false;
     std::string parentTag_;
     std::list<RefPtr<DOMNode>> children_;
-#ifndef WEARABLE_PRODUCT
-    MultimodalProperties multimodalProperties_;
-#endif
     RefPtr<ComposedComponent> rootComponent_;
     RefPtr<BoxComponent> boxComponent_;
     RefPtr<ScrollComponent> scrollComponent_;
     RefPtr<FlexItemComponent> flexItemComponent_;
     RefPtr<TransformComponent> transformComponent_;
     WeakPtr<PipelineContext> pipelineContext_;
-    RefPtr<Decoration> backDecoration_;
-    RefPtr<Decoration> frontDecoration_;
-    Shadow shadow_;
-    Border border_ = Border(borderLeftEdge_, borderTopEdge_, borderRightEdge_, borderBottomEdge_);
-    Dimension paddingTop_;
-    Dimension paddingRight_;
-    Dimension paddingBottom_;
-    Dimension paddingLeft_;
-    bool hasBoxStyle_ = false;
-    bool hasDecorationStyle_ = false;
-    bool hasShadowStyle_ = false;
-    bool hasFrontDecorationStyle_ = false;
-    bool hasBorderStyle_ = false;
-    bool hasBorderRadiusStyle_ = false;
-    double opacity_ = 1.0;
-    bool hasClickEffect_ = false;
-    bool hasTransitionAnimation_ = false;
-    Overflow overflow_ = Overflow::OBSERVABLE;
-    bool hasOverflowStyle_ = false;
+    RefPtr<Declaration> declaration_;
     bool isCustomComponent_ = false;
-    Dimension height_ = Dimension(-1.0, DimensionUnit::PX);
-    Dimension width_ = Dimension(-1.0, DimensionUnit::PX);
-    bool useLiteStyle_ = false;
     bool boxWrap_ = false;
 
-    // scroll bar
-    std::pair<bool, Color> scrollBarColor_;
-    std::pair<bool, Dimension> scrollBarWidth_;
-    EdgeEffect edgeEffect_ = EdgeEffect::NONE;
-
 private:
-    static void SetBackgroundImageSize(const std::string& value, DOMNode& node);
-    static void SetBackgroundImagePosition(const std::string& value, DOMNode& node);
-    static void SetBorderColorForFourEdges(const std::string& value, DOMNode& node);
-    static void SetBorderStyleForFourEdges(const std::string& value, DOMNode& node);
-    static void SetBorderWidthForFourEdges(const std::string& value, DOMNode& node);
-    static void SetBorderOverall(const std::string& value, DOMNode& node);
-    static void SetMarginOverall(const std::string& value, DOMNode& node);
-    static void SetPaddingOverall(const std::string& value, DOMNode& node);
-    static void SetGradientType(const std::string& gradientType, DOMNode& node);
-    static void SetGradientDirections(const std::unique_ptr<JsonValue>& gradientDirections, DOMNode& node);
-    static void SetGradientColor(const std::unique_ptr<JsonValue>& gradientColorValues, DOMNode& node);
-    static void SetBackground(const std::string& value, DOMNode& node);
     static void SetTransform(const std::string& value, DOMNode& node);
     static void AddKeyframe(
         double time, const std::string& typeValue, RefPtr<KeyframeAnimation<float>>& transformKeyframes);
-    static void AddKeyframe(
-        double time, double typeValue, RefPtr<KeyframeAnimation<float>>& transformKeyframes);
-    void AddKeyframeOffset(const std::string& keyValue, double time, const std::string& typeValue,
-        RefPtr<KeyframeAnimation<DimensionOffset>>& transformKeyframes);
+    static void AddKeyframe(double time, double typeValue, RefPtr<KeyframeAnimation<float>>& transformKeyframes);
     std::string GetTransformJsonValue(const std::string& value);
     std::string GetTransformType(const std::unique_ptr<JsonValue>& transformJson);
     std::string GetTransformTypeValue(const std::unique_ptr<JsonValue>& transformJson);
-    void KeyframesAddKeyFrame(const std::string& keyStyle, const std::string& value, double time);
-    void TransformAnimationAddKeyframe(const std::string& typeKey, const std::string& typeValue, double time);
-    void TweenOptionSetKeyframes(TweenOption& tweenOption);
+
+    void CreatePropertyAnimation(const std::string& property);
+    RefPtr<KeyframeAnimation<float>> SetPropertyFloatAnimationKeyframe(float begin, float end);
+    RefPtr<KeyframeAnimation<Color>> SetPropertyColorAnimationKeyframe(const Color& begin, const Color& end);
+    void TransitionOptionSetKeyframes(TweenOption& tweenOption);
     void SetDisplayStyle();
 
     void UpdateFlexItemComponent();
@@ -679,17 +811,18 @@ private:
     void UpdateMultimodalComponent();
 #endif
 
-    void SetCurrentStyle(const std::pair<std::string, std::string>& style);
     void CachePseudoClassStyle(const std::pair<std::string, std::string>& pseudoClassStyle);
     void UpdatePseudoStyle(bool isBackendChange);
     void PrepareTouchEvent(EventMarker& eventMarker, uint32_t type);
     void PrepareFocusableEventId();
+    void PrepareMouseHoverEvent();
     void UpdatePseudoStyleByStatus(int32_t status, bool isBackendChange);
     void ResetDefaultStyles();
     uint32_t CalculatePseudoStatus() const;
 
     // for state update callbacks
     void OnFocus(bool isFocus);
+    void OnHover(bool isHover);
 
     RefPtr<ThemeConstants> GetThemeConstants() const;
 
@@ -697,7 +830,7 @@ private:
     T ParseThemeReference(const std::string& value, std::function<T()>&& noRefFunc,
         std::function<T(uint32_t refId)>&& idRefFunc, const T& errorValue) const
     {
-        const auto& parseResult = ThemeUtils::ParseThemeIdReference(value);
+        const auto& parseResult = ThemeUtils::ParseThemeIdReference(value, GetThemeConstants());
         if (!parseResult.parseSuccess) {
             return noRefFunc();
         }
@@ -717,120 +850,51 @@ private:
         return themeStyle->GetAttr<T>(parseResult.refAttr, errorValue);
     }
 
+    bool isTransition_ = false;
+    bool isEnter_ = false;
+    bool isProxy_ = false;
+    bool animationStyleUpdated_ = false;
+    bool customAnimationStyleUpdated_ = false;
+    bool hasSvgTag_ = false;
+    VisibleType visible_ = VisibleType::VISIBLE;
+
     int32_t pageId_ = -1;
     NodeId nodeId_ = -1;
     std::string tag_;
 
     RefPtr<DisplayComponent> displayComponent_;
-    RefPtr<BackgroundImage> backgroundImage_;
     RefPtr<TouchListenerComponent> touchEventComponent_;
     RefPtr<GestureListenerComponent> gestureEventComponent_;
     RefPtr<FocusableComponent> focusableEventComponent_;
     RefPtr<MouseListenerComponent> mouseEventComponent_;
-
     RefPtr<PositionedComponent> positionComponent_;
     RefPtr<SharedTransitionComponent> sharedTransitionComponent_;
-
     RefPtr<TweenComponent> tweenComponent_;
+    RefPtr<TransitionComponent> propTransitionComponent_;
     RefPtr<PageTransitionComponent> transitionComponent_;
 
-    EventMarker onTouchIds_[EventAction::SIZE][EventStage::SIZE][EventType::SIZE];
-    EventMarker onClickId_;
-    EventMarker onLongPressId_;
-    EventMarker onFocusId_;
-    EventMarker onBlurId_;
-    EventMarker onKeyId_;
-    EventMarker onMouseId_;
-    EventMarker onSwipeId_;
-
-    Dimension marginTop_;
-    Dimension marginRight_;
-    Dimension marginBottom_;
-    Dimension marginLeft_;
-    std::string alignSelf_;
-    bool isTransition_ = false;
-    bool isEnter_ = false;
-    bool layoutInBox_ = false;
-    bool isProxy_ = false;
-
-    VisibleType visible_ { VisibleType::VISIBLE };
-    VisibilityType visibility_ { VisibilityType::NO_SETTING };
-    DisplayType display_ { DisplayType::NO_SETTING };
-    std::string showAttr_;
-    bool hasDisplayStyle_ = false;
-
-    // The target node (with id attribute) for popup should be added gesture event handler,
-    // it's ok to take 'id' as a flag, even not all dom nodes with id attribute should do this.
-    bool hasIdAttr_ = false;
-
-    double flexGrow_ = 0.0;
-    double flexShrink_ = 1.0;
-    double flexBasis_ = 0.0;
-    double flexWeight_ = 0.0;
-    Dimension minWidth_ = Dimension(0.0);
-    Dimension minHeight_ = Dimension(0.0);
-    Dimension maxWidth_ = Dimension(Size::INFINITE_SIZE);
-    Dimension maxHeight_ = Dimension(Size::INFINITE_SIZE);
-    int32_t displayIndex_ = 1;
-
-    double aspectRatio_ = 0.0;
-
-    BorderEdge borderLeftEdge_ = BorderEdge(Color::BLACK, Dimension(), BorderStyle::SOLID);
-    BorderEdge borderTopEdge_ = BorderEdge(Color::BLACK, Dimension(), BorderStyle::SOLID);
-    BorderEdge borderRightEdge_ = BorderEdge(Color::BLACK, Dimension(), BorderStyle::SOLID);
-    BorderEdge borderBottomEdge_ = BorderEdge(Color::BLACK, Dimension(), BorderStyle::SOLID);
-    Gradient gradient_;
-
-    PositionType position_ { PositionType::RELATIVE };
-    Dimension bottom_;
-    Dimension left_;
-    Dimension right_;
-    Dimension top_;
-    bool hasLeft_ = false;
-    bool hasTop_ = false;
-    bool hasRight_ = false;
-    bool hasBottom_ = false;
-    bool hasPositionStyle_ = false;
-    bool hasSvgTag_ = false;
-
-    RefPtr<KeyframeAnimation<DimensionOffset>> translateAnimation_;
-    RefPtr<KeyframeAnimation<DimensionOffset>> translateXAnimation_;
-    RefPtr<KeyframeAnimation<DimensionOffset>> translateYAnimation_;
-    double maxScaleXY_ = -1.0;
-    RefPtr<KeyframeAnimation<float>> scaleAnimationX_;
-    RefPtr<KeyframeAnimation<float>> scaleAnimationY_;
-    RefPtr<KeyframeAnimation<float>> scaleXAnimation_;
-    RefPtr<KeyframeAnimation<float>> scaleYAnimation_;
-    RefPtr<KeyframeAnimation<float>> rotateZAnimation_;
-    RefPtr<KeyframeAnimation<float>> rotateXAnimation_;
-    RefPtr<KeyframeAnimation<float>> rotateYAnimation_;
-    RefPtr<KeyframeAnimation<float>> widthAnimation_;
-    RefPtr<KeyframeAnimation<float>> heightAnimation_;
-    RefPtr<KeyframeAnimation<float>> opacityAnimation_;
-    RefPtr<KeyframeAnimation<Color>> colorAnimation_;
-    RefPtr<KeyframeAnimation<BackgroundImagePosition>> bgPositionAnimation_;
-    std::unordered_map<PropertyAnimatableType, RefPtr<KeyframeAnimation<float>>> propertyFloatAnimations;
-    bool sameScale_ = true;
-    TweenOption tweenOption_;
-    TweenOption transitionEnterOption_;
-    TweenOption transitionExitOption_;
-    TweenOption sharedTransitionOption_;
-    RefPtr<SharedTransitionEffect> sharedEffect_;
-    bool animationStyleUpdated_ = false;
-    std::pair<bool, bool> focusable_ = { false, false };
-    bool touchable_ = true;
-    bool nodeDisabled_ = false;
-    // for direction
-    bool isRightToLeft_ = false;
+    PropAnimationMap propAnimations_;
+    AnimationUtil animationUtil_;
+    RefPtr<KeyframeAnimation<float>> propertyWidthAnimation_;
+    RefPtr<KeyframeAnimation<float>> propertyHeightAnimation_;
+    RefPtr<KeyframeAnimation<Color>> propertyColorAnimation_;
+    std::string animationName_;
     // for pseudo class
     std::unordered_map<int32_t, std::unordered_map<std::string, std::string>> pseudoClassStyleMap_;
     bool isActive_ = false;
     bool isFocus_ = false;
-    bool isChecked_ = false;
-    bool isWaiting_ = false;
     uint32_t cachedPseudoType_ = STATE_NORMAL;
 
-    int32_t zIndex_ = 0;
+    TweenOption propTransitionOption_;
+    std::string transitionPropertyName_ = "all";
+    std::string transitionTimeFunction_ = "ease";
+    int32_t transitionDuration_ = 0;
+    int32_t transitionDelay_ = 0;
+    bool isTransitionNameUpdateFirst_ = true;
+    bool isTransitionDurationUpdateFirst_ = true;
+    bool transitionStyleUpdated_ = false;
+    bool isTransitionColor_ = false;
+
     // for shared transition
     std::string shareId_;
 #ifndef WEARABLE_PRODUCT

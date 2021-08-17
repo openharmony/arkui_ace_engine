@@ -186,8 +186,11 @@ public:
     std::string GetString(uint32_t resId) override;
     double GetDouble(uint32_t resId) override;
     int32_t GetInt(uint32_t resId) override;
+    bool GetResource(uint32_t resId, std::ostream& dest) const override;
+    bool GetIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const override;
 
 private:
+    bool ConvertToGlobalResourceType(const std::string& resTypeName, Global::Resource::ResourceType& resType) const;
     Global::Resource::ResourceManager resourceManger_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImpl);
@@ -366,6 +369,49 @@ int32_t ResourceAdapterImpl::GetInt(uint32_t resId)
         LOGE("GetInt error, id=%{public}u", resId);
     }
     return result;
+}
+
+bool ResourceAdapterImpl::GetResource(uint32_t resId, std::ostream& dest) const
+{
+    return resourceManger_.GetResource(static_cast<int32_t>(resId), dest);
+}
+
+bool ResourceAdapterImpl::ConvertToGlobalResourceType(const std::string& resTypeName,
+    Global::Resource::ResourceType& resType) const
+{
+    if (resTypeName == "color") {
+        resType = Global::Resource::ResourceType::COLOR;
+        return true;
+    }
+    if (resTypeName == "float") {
+        resType = Global::Resource::ResourceType::FLOAT;
+        return true;
+    }
+    if (resTypeName == "string") {
+        resType = Global::Resource::ResourceType::STRING;
+        return true;
+    }
+    if (resTypeName == "media") {
+        resType = Global::Resource::ResourceType::MEDIA;
+        return true;
+    }
+    LOGE("unsupported resource type(=%{public}s)", resTypeName.c_str());
+    return false;
+}
+
+bool ResourceAdapterImpl::GetIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const
+{
+    Global::Resource::ResourceType globalResType;
+    if (!ConvertToGlobalResourceType(resType, globalResType)) {
+        return false;
+    }
+    int32_t globalResId = 0;
+    if (!resourceManger_.GetIdByName("", resName, globalResType, globalResId)) {
+        LOGE("get resource id failed.(name=%{publid}s, type=%{public}s)", resName.c_str(), resType.c_str());
+        return false;
+    }
+    resId = static_cast<uint32_t>(globalResId);
+    return true;
 }
 
 } // namespace OHOS::Ace

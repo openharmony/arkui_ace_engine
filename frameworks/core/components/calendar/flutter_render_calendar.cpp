@@ -34,7 +34,7 @@ constexpr double CURRENT_MONTH_TRANSPARENT = 0xFF;
 constexpr double NON_CURRENT_MONTH_TRANSPARENT = 0x32;
 constexpr double WEEKEND_TRANSPARENT = 0x7D;
 constexpr double SCHEDULE_MARKER_TRANSPARENT = 0x4B;
-constexpr Dimension CARD_CALENDAR_TITLE_HEIGHT = 88.0_vp;
+constexpr Dimension CARD_CALENDAR_TITLE_HEIGHT = 68.0_vp;
 
 std::unique_ptr<txt::Paragraph> GetTextParagraph(const std::string& text, const txt::TextStyle& textStyle)
 {
@@ -114,8 +114,10 @@ void FlutterRenderCalendar::Update(const RefPtr<Component>& component)
 
     textDirection_ = calendarMonth->GetTextDirection();
     auto calendarTheme = calendarMonth->GetCalendarTheme();
-    calendarTheme_ = AceApplicationInfo::GetInstance().GetIsCardType() ? calendarTheme->GetCardCalendarTheme()
-                                                                       : calendarTheme->GetCalendarTheme();
+    if (!isV2Component_) {
+        calendarTheme_ = AceApplicationInfo::GetInstance().GetIsCardType() ? calendarTheme->GetCardCalendarTheme()
+                                                                           : calendarTheme->GetCalendarTheme();
+    }
     cardCalendar_ = calendarMonth->IsCardCalendar();
     RenderCalendar::Update(component);
 }
@@ -130,6 +132,14 @@ void FlutterRenderCalendar::Paint(RenderContext& context, const Offset& offset)
     }
     if (indexOfContainer_ != calendarController_->GetCurrentIndex()) {
         selectedDayNumber_ = 1;
+    }
+    if (isV2Component_ && calendarController_->IsCrossMonth()) {
+        if (touchIndex_ >= 0 && touchIndex_ < static_cast<int32_t>(calendarDays_.size())) {
+            calendarDays_[touchIndex_].touched = false;
+        }
+    }
+    if (isV2Component_ && calendarController_->FirstSetToday() && IsValid(touchIndex_)) {
+        calendarDays_[touchIndex_].touched = false;
     }
     DrawWeekAndDates(canvas, offset);
 }
@@ -148,23 +158,33 @@ void FlutterRenderCalendar::PerformLayout()
     dayHeight_ = NormalizeToPx(calendarTheme_.dayHeight);
     weekWidth_ = NormalizeToPx(calendarTheme_.weekWidth);
     dayWidth_ = NormalizeToPx(calendarTheme_.dayWidth);
+    weekAndDayRowSpace_ = NormalizeToPx(calendarTheme_.weekAndDayRowSpace);
+    touchCircleStrokeWidth_ = NormalizeToPx(calendarTheme_.touchCircleStrokeWidth);
     const static int32_t daysOfWeek = 7;
     const static int32_t fiveRow = 5;
     const static int32_t sixRow = 6;
-    colSpace_ = cardCalendar_ ? (maxWidth_ - weekWidth_ * daysOfWeek) / (daysOfWeek - 1)
-                              : NormalizeToPx(calendarTheme_.colSpace);
-    weekAndDayRowSpace_ = NormalizeToPx(calendarTheme_.weekAndDayRowSpace);
+    const static float heightOffset = 1.5f;
+    double titleHeight = topPadding_ + weekHeight_ + weekAndDayRowSpace_;
+    double boundaryRowOffset = NormalizeToPx(calendarTheme_.boundaryRowOffset);
+    double boundaryColOffset = NormalizeToPx(calendarTheme_.boundaryColOffset);
+    colSpace_ = cardCalendar_ || isV2Component_
+                    ? (maxWidth_ - dayWidth_ * daysOfWeek - boundaryRowOffset) / (daysOfWeek - 1)
+                    : NormalizeToPx(calendarTheme_.colSpace);
     dailyFiveRowSpace_ =
-        cardCalendar_ ? (maxHeight_ - NormalizeToPx(CARD_CALENDAR_TITLE_HEIGHT) - weekWidth_ * fiveRow) / (fiveRow - 1)
-                      : NormalizeToPx(calendarTheme_.dailyFiveRowSpace);
+        cardCalendar_ || isV2Component_
+            ? (maxHeight_ - titleHeight - dayHeight_ * fiveRow - boundaryColOffset) / (fiveRow - 1)
+            : NormalizeToPx(calendarTheme_.dailyFiveRowSpace);
     dailySixRowSpace_ =
-        cardCalendar_ ? (maxHeight_ - NormalizeToPx(CARD_CALENDAR_TITLE_HEIGHT) - weekWidth_ * sixRow) / (sixRow - 1)
-                      : NormalizeToPx(calendarTheme_.dailySixRowSpace);
+        cardCalendar_ || isV2Component_
+            ? (maxHeight_ - titleHeight - dayHeight_ * sixRow - boundaryColOffset) / (sixRow - 1)
+            : NormalizeToPx(calendarTheme_.dailySixRowSpace);
     gregorianCalendarHeight_ = NormalizeToPx(calendarTheme_.gregorianCalendarHeight);
     workStateWidth_ = NormalizeToPx(calendarTheme_.workStateWidth);
     workStateHorizontalMovingDistance_ = NormalizeToPx(calendarTheme_.workStateHorizontalMovingDistance);
     workStateVerticalMovingDistance_ = NormalizeToPx(calendarTheme_.workStateVerticalMovingDistance);
-    if (cardCalendar_ && (maxHeight_ - NormalizeToPx(CARD_CALENDAR_TITLE_HEIGHT)) < (dayWidth_ * rowCount_)) {
+    auto dayHeight = rowCount_ ? (maxHeight_ - NormalizeToPx(CARD_CALENDAR_TITLE_HEIGHT)) / rowCount_ : 0.0;
+    auto heightDifference = dayWidth_ - dayHeight;
+    if (cardCalendar_ && GreatNotEqual(dayWidth_, dayHeight) && GreatNotEqual(heightDifference, heightOffset)) {
         needShrink_ = true;
         focusedAreaRadius_ = (maxHeight_ - NormalizeToPx(CARD_CALENDAR_TITLE_HEIGHT)) / (rowCount_ * 2);
     } else {
@@ -172,7 +192,7 @@ void FlutterRenderCalendar::PerformLayout()
     }
 }
 
-void FlutterRenderCalendar::DrawWeekAndDates(ScopedCanvas& canvas, const Offset& offset)
+void FlutterRenderCalendar::DrawWeekAndDates(ScopedCanvas& canvas, Offset offset)
 {
     uint32_t totalWeek = weekNumbers_.size();
     uint32_t daysCount = rowCount_ * totalWeek;
@@ -180,7 +200,7 @@ void FlutterRenderCalendar::DrawWeekAndDates(ScopedCanvas& canvas, const Offset&
         LOGD("not full data");
         return;
     }
-
+    offset += Offset(focusedAreaRadius_ - dayWidth_ / 2 + touchCircleStrokeWidth_, 0);
     DrawWeek(canvas, offset);
 
     int32_t dateNumber = 0;
@@ -199,14 +219,18 @@ void FlutterRenderCalendar::DrawWeekAndDates(ScopedCanvas& canvas, const Offset&
             double x = textDirection_ == TextDirection::LTR ? column * (dayWidth_ + colSpace_)
                                                             : (totalWeek - column - 1) * (dayWidth_ + colSpace_);
             auto dayOffset = Offset(x, y);
-            cardCalendar_
-                ? DrawCardCalendar(canvas, offset + Offset(0, NormalizeToPx(dateOffset)), dayOffset, day, dateNumber)
-                : DrawTvCalendar(canvas, offset, dayOffset, day, dateNumber);
+            if (SystemProperties::GetDeviceType() == DeviceType::TV ||
+                SystemProperties::GetDeviceType() == DeviceType::WATCH) {
+                DrawTvCalendar(canvas, offset, dayOffset, day, dateNumber);
+            } else {
+                DrawCardCalendar(canvas, offset + Offset(0, NormalizeToPx(dateOffset)), dayOffset, day, dateNumber);
+            }
         }
     }
 }
 
-void FlutterRenderCalendar::DrawFocusedArea(ScopedCanvas& canvas, const Offset& offset, double x, double y) const
+void FlutterRenderCalendar::DrawFocusedArea(
+    ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, double x, double y) const
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
@@ -224,7 +248,17 @@ void FlutterRenderCalendar::DrawFocusedArea(ScopedCanvas& canvas, const Offset& 
     flutter::Paint paint;
     flutter::PaintData paintData;
     paint.paint()->setAntiAlias(true);
-    paint.paint()->setColor(focusedAreaBackgroundColor_);
+    if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
+        if (day.dayMark == "work") {
+            paint.paint()->setColor(workDayMarkColor_);
+        } else if (day.dayMark == "off") {
+            paint.paint()->setColor(offDayMarkColor_);
+        } else {
+            paint.paint()->setColor(focusedAreaBackgroundColor_);
+        }
+    } else {
+        paint.paint()->setColor(focusedAreaBackgroundColor_);
+    }
     Offset circleCenter = Offset(x - (focusedAreaRadius_ * 2 - dayWidth_) / 2 + focusedAreaRadius_,
         y - NormalizeToPx(1.0_vp) + focusedAreaRadius_);
     Offset bgCircleStart = offset + circleCenter;
@@ -249,7 +283,7 @@ void FlutterRenderCalendar::DrawWeek(ScopedCanvas& canvas, const Offset& offset)
         Offset weekNumberOffset = offset + Offset(x, topPadding_);
         Rect boxRect { weekNumberOffset.GetX(), weekNumberOffset.GetY(), weekWidth_, weekHeight_ };
         std::string newText { weekNumbers_[(startDayOfWeek + 1) % daysOfWeek] };
-        auto wText = StringUtils::ToWstring(weekNumbers_[column]);
+        auto wText = StringUtils::ToWstring(newText);
         if (wText.size() > 3) {
             wText = wText.substr(0, 3);
             newText = StringUtils::ToString(wText);
@@ -283,11 +317,22 @@ void FlutterRenderCalendar::PaintDay(
     // paint day
     Rect boxRect { offset.GetX(), offset.GetY(), dayWidth_, gregorianCalendarHeight_ };
     Rect textRect;
+    txt::TextStyle workStateStyle;
+    if (SystemProperties::GetDeviceType() == DeviceType::WATCH && IsToday(day) && !day.dayMark.empty()) {
+        auto workStateOffset = offset + Offset(0, NormalizeToPx(calendarTheme_.workStateOffset));
+        boxRect.SetOffset(workStateOffset);
+        workStateStyle.color = Color::WHITE.GetValue();
+        workStateStyle.font_size = dayFontSize_;
+        DrawCalendarText(canvas, day.dayMarkValue, workStateStyle, boxRect, textRect);
+        return;
+    }
+    if (SystemProperties::GetDeviceType() == DeviceType::WATCH && day.month.month != currentMonth_.month) {
+        return;
+    }
     auto dayStr = std::to_string(day.day);
     dayStr = Localization::GetInstance()->NumberFormat(day.day);
     DrawCalendarText(canvas, dayStr, textStyle, boxRect, textRect);
 
-    txt::TextStyle workStateStyle;
     if (!day.dayMark.empty() && showHoliday_) {
         if (cardCalendar_) {
             InitWorkStateStyle(day, offset, workStateStyle, boxRect);
@@ -326,9 +371,9 @@ void FlutterRenderCalendar::PaintLunarDay(
     ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, const txt::TextStyle& textStyle) const
 {
     Rect boxRect;
-    static const Dimension cardLunarHeight = 14.0_vp;
-    cardCalendar_ ? boxRect = { offset.GetX(), offset.GetY(), dayWidth_, NormalizeToPx(cardLunarHeight) }
-                  : boxRect = { offset.GetX(), offset.GetY(), dayWidth_, dayHeight_ - gregorianCalendarHeight_ };
+    cardCalendar_ || isV2Component_
+        ? boxRect = { offset.GetX(), offset.GetY(), dayWidth_, NormalizeToPx(calendarTheme_.lunarHeight) }
+        : boxRect = { offset.GetX(), offset.GetY(), dayWidth_, dayHeight_ - gregorianCalendarHeight_ };
     DrawCalendarText(canvas, day.lunarDay, textStyle, boxRect);
 }
 
@@ -344,7 +389,7 @@ void FlutterRenderCalendar::SetNonFocusStyle(
     } else if (IsToday(day)) {
         dateTextColor = todayDayColor_;
         lunarTextColor = todayLunarColor_;
-    } else if (day.weekend) {
+    } else if (IsOffDay(day)) {
         dateTextColor = weekendDayColor_;
         lunarTextColor =
             day.markLunarDay ? markLunarColor_ : weekendLunarColor_;
@@ -362,11 +407,14 @@ void FlutterRenderCalendar::DrawTouchedArea(ScopedCanvas& canvas, const Offset& 
     flutter::Paint paint;
     flutter::PaintData paintData;
     paint.paint()->setAntiAlias(true);
-    paint.paint()->setColor(touchColor_);
+    paint.paint()->setColor(focusedAreaBackgroundColor_);
+    paint.paint()->setStrokeWidth(touchCircleStrokeWidth_);
+    paint.paint()->setStyle(SkPaint::kStroke_Style);
     Offset circleCenter = Offset(x - (focusedAreaRadius_ * 2 - dayWidth_) / 2 + focusedAreaRadius_,
         y - NormalizeToPx(1.0_vp) + focusedAreaRadius_);
     Offset bgCircleStart = offset + circleCenter;
-    canvas->drawCircle(bgCircleStart.GetX(), bgCircleStart.GetY(), focusedAreaRadius_, paint, paintData);
+    canvas->drawCircle(
+        bgCircleStart.GetX(), bgCircleStart.GetY(), focusedAreaRadius_, paint, paintData);
 }
 
 void FlutterRenderCalendar::DrawCardCalendar(
@@ -379,14 +427,39 @@ void FlutterRenderCalendar::DrawCardCalendar(
     dateTextStyle.locale = Localization::GetInstance()->GetFontLocale();
     auto x = dayOffset.GetX();
     auto y = dayOffset.GetY();
+    if (isV2Component_) {
+        if (calendarController_->FirstSetToday() && IsToday(day) && (day.month.month == currentMonth_.month)) {
+            calendarDays_[day.index].touched = true;
+            touchIndex_ = day.index;
+            calendarController_->SetFirstSetToday(false);
+        }
+        auto crossMonthDay = calendarController_->GetCrossMonthDay();
+        if (calendarController_->IsCrossMonth() && crossMonthDay.month == day.month &&
+            crossMonthDay.day == day.day && crossMonthDay.month == currentMonth_) {
+            if (touchIndex_ >= 0 && touchIndex_ < static_cast<int32_t>(calendarDays_.size())) {
+                calendarDays_[touchIndex_].touched = false;
+            }
+            calendarDays_[day.index].touched = true;
+            touchIndex_ = day.index;
+            calendarController_->SetCrossMonth(false);
+        }
+    }
     if (IsToday(day) && (day.month.month == currentMonth_.month)) {
-        dateTextStyle.color = focusedDayColor_;
-        lunarTextStyle.color = focusedDayColor_;
-        DrawFocusedArea(canvas, offset, x, y);
+        dateTextStyle.color = isV2Component_ ? focusedAreaBackgroundColor_ : focusedDayColor_;
+        lunarTextStyle.color = isV2Component_ ? focusedAreaBackgroundColor_ : focusedDayColor_;
+        if (!isV2Component_) {
+            DrawFocusedArea(canvas, offset, day, x, y);
+        }
     }
 
-    if (day.touched) {
-        DrawTouchedArea(canvas, offset, x, y);
+    if (isV2Component_ && day.touched && currentMonth_ == calendarController_->GetCurrentMonth()) {
+        if (IsToday(day) && (day.month.month == currentMonth_.month)) {
+            dateTextStyle.color = focusedDayColor_;
+            lunarTextStyle.color = focusedDayColor_;
+            DrawFocusedArea(canvas, offset, day, x, y);
+        } else {
+            DrawTouchedArea(canvas, offset, x, y);
+        }
     }
 
     if (needShrink_) {
@@ -395,25 +468,25 @@ void FlutterRenderCalendar::DrawCardCalendar(
         return;
     }
 
-    static const Dimension dayYAxisOffset = 4.0_vp;
+    auto dayYAxisOffset = calendarTheme_.dayYAxisOffset;
     Offset dateNumberOffset = offset + Offset(x, y + NormalizeToPx(dayYAxisOffset));
     PaintDay(canvas, dateNumberOffset, day, dateTextStyle);
 
-    static const Dimension lunarDayYAxisOffset = 23.0_vp;
+    auto lunarDayYAxisOffset = calendarTheme_.lunarDayYAxisOffset;
     Offset lunarDayOffset = offset + Offset(x, y + NormalizeToPx(lunarDayYAxisOffset));
     PaintLunarDay(canvas, lunarDayOffset, day, lunarTextStyle);
 
     if (day.isFirstOfLunar) {
-        static const Dimension underscoreXAxisOffset = 12.0_vp;
-        static const Dimension underscoreYAxisOffset = 36.0_vp;
+        auto underscoreXAxisOffset = calendarTheme_.underscoreXAxisOffset;
+        auto underscoreYAxisOffset = calendarTheme_.underscoreYAxisOffset;
         Offset underscoreOffset =
             offset + Offset(x + NormalizeToPx(underscoreXAxisOffset), y + NormalizeToPx(underscoreYAxisOffset));
         PaintUnderscore(canvas, underscoreOffset, day);
     }
 
     if (day.hasSchedule) {
-        static const Dimension scheduleMarkerXAxisOffset = 22.0_vp;
-        static const Dimension scheduleMarkerYAxisOffset = 40.0_vp;
+        auto scheduleMarkerXAxisOffset = calendarTheme_.scheduleMarkerXAxisOffset;
+        auto scheduleMarkerYAxisOffset = calendarTheme_.scheduleMarkerYAxisOffset;
         Offset scheduleMarkerOffset =
             offset + Offset(x + NormalizeToPx(scheduleMarkerXAxisOffset), y + NormalizeToPx(scheduleMarkerYAxisOffset));
         PaintScheduleMarker(canvas, scheduleMarkerOffset, day);
@@ -423,6 +496,9 @@ void FlutterRenderCalendar::DrawCardCalendar(
 void FlutterRenderCalendar::DrawTvCalendar(
     ScopedCanvas& canvas, const Offset& offset, const Offset& dayOffset, const CalendarDay& day, int32_t dateNumber)
 {
+    if (SystemProperties::GetDeviceType() == DeviceType::WATCH && day.month.month != currentMonth_.month) {
+        return;
+    }
     txt::TextStyle dateTextStyle;
     txt::TextStyle lunarTextStyle;
     InitTextStyle(dateTextStyle, lunarTextStyle);
@@ -436,13 +512,21 @@ void FlutterRenderCalendar::DrawTvCalendar(
     int32_t selectedDay = selectedDayNumber_ + firstDayIndex_ - 1;
     auto x = dayOffset.GetX();
     auto y = dayOffset.GetY();
-    if (day.focused && day.month.month == currentMonth_.month && !renderSwiper->GetMoveStatus() &&
-        indexOfContainer_ == calendarController_->GetCurrentIndex()) {
-        dateTextStyle.color = focusedDayColor_;
-        lunarTextStyle.color = focusedLunarColor_;
-        DrawFocusedArea(canvas, offset, x, y);
+    if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
+        if (IsToday(day) && (day.month.month == currentMonth_.month)) {
+            dateTextStyle.color = focusedDayColor_;
+            lunarTextStyle.color = focusedDayColor_;
+            DrawFocusedArea(canvas, offset, day, x, y);
+        }
     } else {
-        SetNonFocusStyle(day, dateTextStyle, lunarTextStyle);
+        if (day.focused && day.month.month == currentMonth_.month && !renderSwiper->GetMoveStatus() &&
+            indexOfContainer_ == calendarController_->GetCurrentIndex()) {
+            dateTextStyle.color = focusedDayColor_;
+            lunarTextStyle.color = focusedLunarColor_;
+            DrawFocusedArea(canvas, offset, day, x, y);
+        } else {
+            SetNonFocusStyle(day, dateTextStyle, lunarTextStyle);
+        }
     }
 
     if (selectedDay == (dateNumber - 1) && !calendarFocusStatus_ && !renderSwiper->GetMoveStatus() &&
@@ -482,20 +566,22 @@ bool FlutterRenderCalendar::IsToday(const CalendarDay& day) const
 
 void FlutterRenderCalendar::PaintUnderscore(ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day)
 {
-    static const Dimension underscoreWidth = 1.0_vp;
-    static const Dimension underscoreLength = 20.0_vp;
+    auto underscoreWidth = calendarTheme_.underscoreWidth;
+    auto underscoreLength = calendarTheme_.underscoreLength;
     auto skCanvas = canvas.GetSkCanvas();
     SkPaint paint;
     SkColor color;
     if (day.month.month != currentMonth_.month) {
         color = SkColorSetA(focusedAreaBackgroundColor_, NON_CURRENT_MONTH_TRANSPARENT);
     } else if (IsToday(day)) {
-        color = focusedDayColor_;
+        color = isV2Component_ && !day.touched ? SkColorSetA(focusedAreaBackgroundColor_, CURRENT_MONTH_TRANSPARENT)
+                                               : focusedDayColor_;
     } else if (day.weekend) {
         color = SkColorSetA(focusedAreaBackgroundColor_, WEEKEND_TRANSPARENT);
     } else {
         color = SkColorSetA(focusedAreaBackgroundColor_, CURRENT_MONTH_TRANSPARENT);
     }
+    paint.setAntiAlias(true);
     paint.setColor(color);
     paint.setStyle(SkPaint::Style::kStroke_Style);
     paint.setStrokeWidth(NormalizeToPx(underscoreWidth));
@@ -505,19 +591,19 @@ void FlutterRenderCalendar::PaintUnderscore(ScopedCanvas& canvas, const Offset& 
 
 void FlutterRenderCalendar::PaintScheduleMarker(ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day)
 {
-    static const Dimension scheduleMarkerRadius = 2.0_vp;
+    auto scheduleMarkerRadius = calendarTheme_.scheduleMarkerRadius;
     auto skCanvas = canvas.GetSkCanvas();
     SkPaint paint;
     SkColor color;
     if (day.month.month != currentMonth_.month) {
         color = SkColorSetA(focusedAreaBackgroundColor_, NON_CURRENT_MONTH_TRANSPARENT);
     } else if (IsToday(day)) {
-        color = focusedDayColor_;
-    } else if (day.weekend) {
-        color = SkColorSetA(focusedAreaBackgroundColor_, SCHEDULE_MARKER_TRANSPARENT);
+        color = isV2Component_ && !day.touched ? SkColorSetA(focusedAreaBackgroundColor_, SCHEDULE_MARKER_TRANSPARENT)
+                                               : focusedDayColor_;
     } else {
         color = SkColorSetA(focusedAreaBackgroundColor_, SCHEDULE_MARKER_TRANSPARENT);
     }
+    paint.setAntiAlias(true);
     paint.setColor(color);
     skCanvas->drawCircle(offset.GetX(), offset.GetY(), NormalizeToPx(scheduleMarkerRadius), paint);
 }
@@ -550,7 +636,7 @@ void FlutterRenderCalendar::InitWorkStateStyle(
         SetWorkStateStyle(day, workColor, offColor, workStateStyle);
     } else if (IsToday(day)) {
         SetWorkStateStyle(day, focusedDayColor_, focusedDayColor_, workStateStyle);
-    } else if (day.weekend) {
+    } else if (IsOffDay(day)) {
         auto offColor = markLunarColor_;
         auto workColor = workDayMarkColor_;
         SetWorkStateStyle(day, workColor, offColor, workStateStyle);
@@ -571,30 +657,52 @@ void FlutterRenderCalendar::SetWorkStateStyle(
 
 void FlutterRenderCalendar::SetCalendarTheme()
 {
-    auto theme = GetTheme<CalendarTheme>();
-    auto calendarTheme = cardCalendar_ ? theme->GetCardCalendarTheme() : theme->GetCalendarTheme();
-    touchColor_ = SkColor(calendarTheme.touchColor.GetValue());
-    weekColor_ = SkColor(calendarTheme.weekColor.GetValue());
-    dayColor_ = SkColor(calendarTheme.dayColor.GetValue());
-    lunarColor_ = SkColor(calendarTheme.lunarColor.GetValue());
-    weekendDayColor_ = SkColor(calendarTheme.weekendDayColor.GetValue());
-    weekendLunarColor_ = SkColor(calendarTheme.weekendLunarColor.GetValue());
-    todayDayColor_ = SkColor(calendarTheme.todayColor.GetValue());
-    todayLunarColor_ = SkColor(calendarTheme.todayLunarColor.GetValue());
-    nonCurrentMonthDayColor_ = SkColor(calendarTheme.nonCurrentMonthDayColor.GetValue());
-    nonCurrentMonthLunarColor_ = SkColor(calendarTheme.nonCurrentMonthLunarColor.GetValue());
-    workDayMarkColor_ = SkColor(calendarTheme.workDayMarkColor.GetValue());
-    offDayMarkColor_ = SkColor(calendarTheme.offDayMarkColor.GetValue());
-    nonCurrentMonthWorkDayMarkColor_ = SkColor(calendarTheme.nonCurrentMonthOffDayMarkColor.GetValue());
-    nonCurrentMonthOffDayMarkColor_ = SkColor(calendarTheme.nonCurrentMonthOffDayMarkColor.GetValue());
-    focusedDayColor_ = SkColor(calendarTheme.focusedDayColor.GetValue());
-    focusedLunarColor_ = SkColor(calendarTheme.focusedLunarColor.GetValue());
-    focusedAreaBackgroundColor_ = SkColor(calendarTheme.focusedAreaBackgroundColor.GetValue());
-    blurAreaBackgroundColor_ = SkColor(calendarTheme.blurAreaBackgroundColor.GetValue());
-    markLunarColor_ = SkColor(calendarTheme.markLunarColor.GetValue());
-    dayFontWeight_ = StringUtils::StringToFontWeight(calendarTheme.dayFontWeight);
-    lunarDayFontWeight_ = StringUtils::StringToFontWeight(calendarTheme.lunarDayFontWeight);
-    workStateFontWeight_ = StringUtils::StringToFontWeight(calendarTheme.workStateFontWeight);
+    touchColor_ = SkColor(calendarTheme_.touchColor.GetValue());
+    weekColor_ = SkColor(calendarTheme_.weekColor.GetValue());
+    dayColor_ = SkColor(calendarTheme_.dayColor.GetValue());
+    lunarColor_ = SkColor(calendarTheme_.lunarColor.GetValue());
+    weekendDayColor_ = SkColor(calendarTheme_.weekendDayColor.GetValue());
+    weekendLunarColor_ = SkColor(calendarTheme_.weekendLunarColor.GetValue());
+    todayDayColor_ = SkColor(calendarTheme_.todayColor.GetValue());
+    todayLunarColor_ = SkColor(calendarTheme_.todayLunarColor.GetValue());
+    nonCurrentMonthDayColor_ = SkColor(calendarTheme_.nonCurrentMonthDayColor.GetValue());
+    nonCurrentMonthLunarColor_ = SkColor(calendarTheme_.nonCurrentMonthLunarColor.GetValue());
+    workDayMarkColor_ = SkColor(calendarTheme_.workDayMarkColor.GetValue());
+    offDayMarkColor_ = SkColor(calendarTheme_.offDayMarkColor.GetValue());
+    nonCurrentMonthWorkDayMarkColor_ = SkColor(calendarTheme_.nonCurrentMonthWorkDayMarkColor.GetValue());
+    nonCurrentMonthOffDayMarkColor_ = SkColor(calendarTheme_.nonCurrentMonthOffDayMarkColor.GetValue());
+    focusedDayColor_ = SkColor(calendarTheme_.focusedDayColor.GetValue());
+    focusedLunarColor_ = SkColor(calendarTheme_.focusedLunarColor.GetValue());
+    focusedAreaBackgroundColor_ = SkColor(calendarTheme_.focusedAreaBackgroundColor.GetValue());
+    blurAreaBackgroundColor_ = SkColor(calendarTheme_.blurAreaBackgroundColor.GetValue());
+    markLunarColor_ = SkColor(calendarTheme_.markLunarColor.GetValue());
+    dayFontWeight_ = StringUtils::StringToFontWeight(calendarTheme_.dayFontWeight);
+    lunarDayFontWeight_ = StringUtils::StringToFontWeight(calendarTheme_.lunarDayFontWeight);
+    workStateFontWeight_ = StringUtils::StringToFontWeight(calendarTheme_.workStateFontWeight);
+}
+
+bool FlutterRenderCalendar::IsOffDay(const CalendarDay& dayInfo) const
+{
+    auto weekday = Date::CalculateWeekDay(dayInfo.month.year, dayInfo.month.month + 1, dayInfo.day);
+    std::vector<std::string> days;
+    StringUtils::StringSpliter(offDays_, ',', days);
+    bool setOffDay = true;
+    for (const auto& day : days) {
+        auto num = StringUtils::StringToInt(day);
+        if (num < 0 || num > 6) {
+            setOffDay = false;
+            break;
+        }
+        if (num == weekday) {
+            return true;
+        }
+    }
+    if (!setOffDay) {
+        if (weekday == 5 || weekday == 6) { // set default weekend
+            return true;
+        }
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace

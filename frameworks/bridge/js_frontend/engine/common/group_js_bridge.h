@@ -19,6 +19,9 @@
 #include <string>
 #include <vector>
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#include "adapter/preview/osal/fetch_manager.h"
+#endif
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
@@ -28,6 +31,9 @@ class GroupJsBridge : public virtual AceType {
 public:
     virtual void TriggerModuleJsCallback(int32_t callbackId, int32_t code,
         std::vector<uint8_t>&& messageData) = 0;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    virtual void TriggerModuleJsCallbackPreview(int32_t callbackId, int32_t code, ResponseData responseData) = 0;
+#endif
 
     virtual void TriggerModulePluginGetErrorCallback(
         int32_t callbackId, int32_t errorCode, std::string&& errorMessage) = 0;
@@ -35,6 +41,8 @@ public:
     virtual void TriggerEventJsCallback(int32_t callbackId, int32_t code, std::vector<uint8_t>&& eventData) = 0;
 
     virtual void LoadPluginJsCode(std::string&& jsCode) {}
+
+    virtual void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) {}
 
     virtual void Destroy() {}
 };

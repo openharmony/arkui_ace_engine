@@ -36,7 +36,7 @@ public:
     using CardTransitionMap = std::unordered_map<int32_t, WeakPtr<TransformElement>>;
     PageElement(int32_t pageId, const ComposeId& id);
     PageElement(int32_t pageId, const ComposeId& cardComposeId, const ComposeId& id);
-    ~PageElement() override = default;
+    ~PageElement();
 
     int32_t GetPageId()
     {

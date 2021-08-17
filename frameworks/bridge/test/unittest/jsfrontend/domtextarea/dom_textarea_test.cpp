@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 
+#include "core/common/ime/text_selection.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/theme_manager.h"
@@ -41,6 +42,8 @@ constexpr double TEXTAREA_FONT_SIZE_VALUE = 30.0;
 const FontWeight TEXTAREA_FONT_WEIGHT_VALUE = FontWeight::W600;
 const std::string TEXTAREA_FONT_FAMILY_VALUE = "serif";
 const std::string TEXTAREA_HEADER_ICON = "test.png";
+const TextSelection TEXTAREA_SELECTION = TextSelection(2, 5);
+const TextSelection TEXTAREA_SELECTION_DEFAULT = TextSelection(-1, -1);
 
 } // namespace
 
@@ -88,7 +91,10 @@ HWTEST_F(DomTextareaTest, DomTextareaCreatorTest001, TestSize.Level1)
     ASSERT_TRUE(theme);
 
     EXPECT_EQ(textareaComponent->GetPlaceholderColor(), theme->GetPlaceholderColor());
+    EXPECT_EQ(textareaComponent->GetCursorColor(), theme->GetCursorColor());
     EXPECT_EQ(textareaComponent->GetMaxLength(), TEXTAREA_MAXLENGTH_VALUE_DEFAULT);
+    EXPECT_EQ(textareaComponent->GetSelection(), TEXTAREA_SELECTION_DEFAULT);
+    EXPECT_TRUE(textareaComponent->IsSoftKeyboardEnabled());
 
     auto style = textareaComponent->GetTextStyle();
     EXPECT_EQ(style.GetTextColor(), theme->GetTextColor());
@@ -121,6 +127,15 @@ HWTEST_F(DomTextareaTest, DomTextareaCreatorTest002, TestSize.Level1)
                                     "                \"extend\": \"true\"                   "
                                     "              },                                       "
                                     "              {                                        "
+                                    "                \"softkeyboardenabled\": \"false\"     "
+                                    "              },                                       "
+                                    "              {                                        "
+                                    "                \"selectedstart\": \"2\"               "
+                                    "              },                                       "
+                                    "              {                                        "
+                                    "                \"selectedend\": \"5\"                 "
+                                    "              },                                       "
+                                    "              {                                        "
                                     "                \"headerIcon\": \"test.png\"           "
                                     "              }],                                      "
                                     "  \"style\":  [{                                       "
@@ -128,6 +143,9 @@ HWTEST_F(DomTextareaTest, DomTextareaCreatorTest002, TestSize.Level1)
                                     "              },                                       "
                                     "              {                                        "
                                     "                \"placeholderColor\": \"#12345678\"    "
+                                    "              },                                       "
+                                    "              {                                        "
+                                    "                \"caretColor\": \"#12345678\"          "
                                     "              },                                       "
                                     "              {                                        "
                                     "                \"fontSize\": \"30.0\"                 "
@@ -155,9 +173,12 @@ HWTEST_F(DomTextareaTest, DomTextareaCreatorTest002, TestSize.Level1)
      */
     EXPECT_EQ(textareaComponent->GetPlaceholder(), TEXTAREA_PLACEHOLDER_VALUE);
     EXPECT_EQ(textareaComponent->GetPlaceholderColor(), Color::FromString(TEXTAREA_COLOR_STR_VALUE));
+    EXPECT_EQ(textareaComponent->GetCursorColor(), Color::FromString(TEXTAREA_COLOR_STR_VALUE));
     EXPECT_EQ(textareaComponent->GetMaxLength(), TEXTAREA_MAXLENGTH_VALUE);
     EXPECT_TRUE(textareaComponent->IsExtend());
+    EXPECT_TRUE(!textareaComponent->IsSoftKeyboardEnabled());
     EXPECT_EQ(textareaComponent->GetIconImage(), TEXTAREA_HEADER_ICON);
+    EXPECT_EQ(textareaComponent->GetSelection(), TEXTAREA_SELECTION);
 
     auto style = textareaComponent->GetTextStyle();
     EXPECT_EQ(style.GetTextColor(), Color::FromString(TEXTAREA_PLACEHOLDER_COLOR_STR_VALUE));

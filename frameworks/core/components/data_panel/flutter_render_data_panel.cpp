@@ -362,11 +362,7 @@ void PaintRainbowFilterMask(ScopedCanvas& canvas, double factor, const std::vect
 void FlutterRenderProgressDataPanel::Paint(RenderContext& context, const Offset& offset)
 {
     if (type_ == ChartType::LOADING) {
-        if (useEffect_) {
-            PaintEffectedLoadingProgress(context, offset);
-        } else {
-            PaintEffectedLoadingProgress(context, offset);
-        }
+        PaintEffectedLoadingProgress(context, offset);
     } else {
         PaintRingProgress(context, offset);
     }

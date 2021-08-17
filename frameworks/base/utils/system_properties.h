@@ -49,6 +49,18 @@ enum class ResolutionType : int32_t {
 constexpr int32_t MCC_UNDEFINED = 0;
 constexpr int32_t MNC_UNDEFINED = 0;
 
+enum class LongScreenType : int32_t {
+    LONG = 0,
+    NOT_LONG,
+    LONG_SCREEN_UNDEFINED,
+};
+
+enum class ScreenShape : int32_t {
+    ROUND = 0,
+    NOT_ROUND,
+    SCREEN_SHAPE_UNDEFINED,
+};
+
 class ACE_EXPORT SystemProperties final {
 public:
     /*
@@ -194,7 +206,9 @@ public:
 
     static void SetColorMode(ColorMode colorMode)
     {
-        colorMode_ = colorMode;
+        if (colorMode_ != colorMode) {
+            colorMode_ = colorMode;
+        }
     }
 
     static ColorMode GetColorMode()
@@ -203,6 +217,11 @@ public:
     }
 
     static void InitMccMnc(int32_t mcc, int32_t mnc);
+
+    static ScreenShape GetScreenShape()
+    {
+        return screenShape_;
+    }
 
 private:
     static bool traceEnabled_;
@@ -224,6 +243,8 @@ private:
     static int32_t mcc_;
     static int32_t mnc_;
     static ColorMode colorMode_;
+    static ScreenShape screenShape_;
+    static LongScreenType LongScreen_;
 };
 
 } // namespace OHOS::Ace

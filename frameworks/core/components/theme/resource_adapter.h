@@ -40,6 +40,14 @@ public:
     virtual std::string GetString(uint32_t resId) = 0;
     virtual double GetDouble(uint32_t resId) = 0;
     virtual int32_t GetInt(uint32_t resId) = 0;
+    virtual bool GetResource(uint32_t resId, std::ostream& dest) const
+    {
+        return false;
+    };
+    virtual bool GetIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const
+    {
+        return false;
+    }
 };
 
 } // namespace OHOS::Ace

@@ -193,6 +193,12 @@ void ScrollBarController::HandleDragEnd(const DragEndInfo& info)
 
     currentPos_ = mainPosition;
     dragEndAnimator_->ClearStopListeners();
+    dragEndAnimator_->AddStopListener([weakScroll = AceType::WeakClaim(this)]() {
+        auto scrollBarController = weakScroll.Upgrade();
+        if (scrollBarController) {
+            scrollBarController->SetActive(false);
+        }
+    });
     dragEndAnimator_->PlayMotion(dragEndMotion_);
 }
 
@@ -259,6 +265,16 @@ void ScrollBarController::HandleScrollBarEnd()
         scrollEndAnimator_->AddInterpolator(animation);
         scrollEndAnimator_->SetDuration(STOP_DURATION);
         scrollEndAnimator_->Play();
+    }
+}
+
+void ScrollBarController::Reset()
+{
+    if (scrollEndAnimator_) {
+        if (!scrollEndAnimator_->IsStopped()) {
+            scrollEndAnimator_->Stop();
+        }
+        scrollEndAnimator_->ClearInterpolators();
     }
 }
 

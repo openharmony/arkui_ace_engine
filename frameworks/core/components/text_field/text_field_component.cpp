@@ -20,6 +20,14 @@
 
 namespace OHOS::Ace {
 
+TextFieldComponent::TextFieldComponent()
+{
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<TextFieldDeclaration>();
+        declaration_->Init();
+    }
+}
+
 RefPtr<RenderNode> TextFieldComponent::CreateRenderNode()
 {
     return RenderTextField::Create();
@@ -32,620 +40,689 @@ RefPtr<Element> TextFieldComponent::CreateElement()
 
 const std::string& TextFieldComponent::GetValue() const
 {
-    return value_;
+    return declaration_->GetValue();
 }
 
 void TextFieldComponent::SetValue(const std::string& value)
 {
-    value_ = value;
-    isValueUpdated_ = true;
+    declaration_->SetValue(value);
 }
 
 bool TextFieldComponent::IsValueUpdated() const
 {
-    return isValueUpdated_;
+    return declaration_->IsValueUpdated();
 }
 
 const std::string& TextFieldComponent::GetPlaceholder() const
 {
-    return placeholder_;
+    return declaration_->GetPlaceholder();
 }
 
 void TextFieldComponent::SetPlaceholder(const std::string& placeholder)
 {
-    placeholder_ = placeholder;
+    declaration_->SetPlaceholder(placeholder);
 }
 
 const Color& TextFieldComponent::GetPlaceholderColor() const
 {
-    return placeholderColor_;
+    return declaration_->GetPlaceholderColor();
 }
 
 void TextFieldComponent::SetPlaceholderColor(const Color& placeholderColor)
 {
-    placeholderColor_ = placeholderColor;
+    declaration_->SetPlaceholderColor(placeholderColor);
 }
 
 void TextFieldComponent::SetTextMaxLines(uint32_t textMaxLines)
 {
-    textMaxLines_ = textMaxLines;
+    declaration_->SetTextMaxLines(textMaxLines);
 }
 
 TextAlign TextFieldComponent::GetTextAlign() const
 {
-    return textAlign_;
+    return declaration_->GetTextAlign();
 }
 
 void TextFieldComponent::SetTextAlign(TextAlign textAlign)
 {
-    textAlign_ = textAlign;
+    declaration_->SetTextAlign(textAlign);
 }
 
 uint32_t TextFieldComponent::GetTextMaxLines() const
 {
-    return textMaxLines_;
+    return declaration_->GetTextMaxLines();
 }
 
 const TextStyle& TextFieldComponent::GetTextStyle() const
 {
-    return textStyle_;
+    return declaration_->GetTextStyle();
 }
 
 void TextFieldComponent::SetTextStyle(const TextStyle& textStyle)
 {
-    textStyle_ = textStyle;
+    declaration_->SetTextStyle(textStyle);
 }
 
 const TextStyle& TextFieldComponent::GetErrorTextStyle() const
 {
-    return errorTextStyle_;
+    return declaration_->GetErrorTextStyle();
 }
 
 void TextFieldComponent::SetErrorTextStyle(const TextStyle& errorTextStyle)
 {
-    errorTextStyle_ = errorTextStyle;
+    declaration_->SetErrorTextStyle(errorTextStyle);
 }
 
 const Dimension& TextFieldComponent::GetErrorSpacing() const
 {
-    return errorSpacing_;
+    return declaration_->GetErrorSpacing();
 }
 
 void TextFieldComponent::SetErrorSpacing(const Dimension& errorSpacing)
 {
-    errorSpacing_ = errorSpacing;
+    declaration_->SetErrorSpacing(errorSpacing);
 }
 
 bool TextFieldComponent::GetErrorIsInner() const
 {
-    return errorIsInner_;
+    return declaration_->GetErrorIsInner();
 }
 
 void TextFieldComponent::SetErrorIsInner(bool errorIsInner)
 {
-    errorIsInner_ = errorIsInner;
+    declaration_->SetErrorIsInner(errorIsInner);
 }
 
 const Dimension& TextFieldComponent::GetErrorBorderWidth() const
 {
-    return errorBorderWidth_;
+    return declaration_->GetErrorBorderWidth();
 }
 
 void TextFieldComponent::SetErrorBorderWidth(const Dimension& errorBorderWidth)
 {
-    errorBorderWidth_ = errorBorderWidth;
+    declaration_->SetErrorBorderWidth(errorBorderWidth);
 }
 
 const Color& TextFieldComponent::GetErrorBorderColor() const
 {
-    return errorBorderColor_;
+    return declaration_->GetErrorBorderColor();
 }
 
 void TextFieldComponent::SetErrorBorderColor(const Color& errorBorderColor)
 {
-    errorBorderColor_ = errorBorderColor;
+    declaration_->SetErrorBorderColor(errorBorderColor);
 }
 
 bool TextFieldComponent::NeedFade() const
 {
-    return needFade_;
+    return declaration_->NeedFade();
 }
 
 void TextFieldComponent::SetNeedFade(bool needFade)
 {
-    needFade_ = needFade;
+    declaration_->SetNeedFade(needFade);
 }
 
 RefPtr<Decoration> TextFieldComponent::GetDecoration() const
 {
-    return decoration_;
+    return declaration_->GetDecoration();
 }
 
 void TextFieldComponent::SetDecoration(const RefPtr<Decoration>& decoration)
 {
-    decoration_ = decoration;
+    declaration_->SetDecoration(decoration);
 }
 
 void TextFieldComponent::SetOriginBorder(const Border& originBorder)
 {
-    originBorder_ = originBorder;
+    declaration_->SetOriginBorder(originBorder);
 }
 
 const Border& TextFieldComponent::GetOriginBorder() const
 {
-    return originBorder_;
+    return declaration_->GetOriginBorder();
 }
 
 bool TextFieldComponent::ShowCursor() const
 {
-    return showCursor_;
+    return declaration_->ShowCursor();
 }
 
 void TextFieldComponent::SetShowCursor(bool show)
 {
-    showCursor_ = show;
+    declaration_->SetShowCursor(show);
 }
 
 bool TextFieldComponent::NeedObscure() const
 {
-    return obscure_;
+    return declaration_->NeedObscure();
 }
 
 void TextFieldComponent::SetObscure(bool obscure)
 {
-    obscure_ = obscure;
+    declaration_->SetObscure(obscure);
 }
 
 bool TextFieldComponent::IsEnabled() const
 {
-    return enabled_;
+    return declaration_->IsEnabled();
 }
 
 void TextFieldComponent::SetEnabled(bool enable)
 {
-    enabled_ = enable;
+    declaration_->SetEnabled(enable);
 }
 
 TextInputType TextFieldComponent::GetTextInputType() const
 {
-    return keyboard_;
+    return declaration_->GetTextInputType();
 }
 
 void TextFieldComponent::SetTextInputType(TextInputType type)
 {
-    keyboard_ = type;
+    declaration_->SetTextInputType(type);
 }
 
 TextInputAction TextFieldComponent::GetAction() const
 {
-    return action_;
+    return declaration_->GetAction();
 }
 
 void TextFieldComponent::SetAction(TextInputAction action)
 {
-    action_ = action;
+    declaration_->SetAction(action);
 }
 
 void TextFieldComponent::SetCursorColor(const Color& color)
 {
-    cursorColor_ = color;
-    cursorColorIsSet_ = true;
+    declaration_->SetCursorColor(color);
 }
 
 const Color& TextFieldComponent::GetCursorColor()
 {
-    return cursorColor_;
+    return declaration_->GetCursorColor();
 }
 
 void TextFieldComponent::SetCursorRadius(const Dimension& radius)
 {
-    cursorRadius_ = radius;
+    declaration_->SetCursorRadius(radius);
 }
 
 const Dimension& TextFieldComponent::GetCursorRadius() const
 {
-    return cursorRadius_;
+    return declaration_->GetCursorRadius();
 }
 
 bool TextFieldComponent::IsCursorColorSet() const
 {
-    return cursorColorIsSet_;
+    return declaration_->IsCursorColorSet();
 }
 
 const std::string& TextFieldComponent::GetActionLabel() const
 {
-    return actionLabel_;
+    return declaration_->GetActionLabel();
 }
 
 void TextFieldComponent::SetActionLabel(const std::string& actionLabel)
 {
-    actionLabel_ = actionLabel;
+    declaration_->SetActionLabel(actionLabel);
 }
 
 uint32_t TextFieldComponent::GetMaxLength() const
 {
-    return maxLength_;
+    return declaration_->GetMaxLength();
 }
 
 void TextFieldComponent::SetMaxLength(uint32_t maxLength)
 {
-    maxLength_ = maxLength;
-    lengthLimited_ = true;
+    declaration_->SetMaxLength(maxLength);
 }
 
 bool TextFieldComponent::IsTextLengthLimited() const
 {
-    return lengthLimited_;
+    return declaration_->IsTextLengthLimited();
 }
 
 const Dimension& TextFieldComponent::GetHeight() const
 {
-    return height_;
+    return declaration_->GetHeight();
 }
 
 void TextFieldComponent::SetHeight(const Dimension& height)
 {
-    height_ = height;
+    declaration_->SetHeight(height);
 }
 
 bool TextFieldComponent::GetAutoFocus() const
 {
-    return autoFocus_;
+    return declaration_->GetAutoFocus();
 }
 
 void TextFieldComponent::SetAutoFocus(bool autoFocus)
 {
-    autoFocus_ = autoFocus;
+    declaration_->SetAutoFocus(autoFocus);
 }
 
 bool TextFieldComponent::IsExtend() const
 {
-    return extend_;
+    return declaration_->IsExtend();
 }
 
 void TextFieldComponent::SetExtend(bool extend)
 {
-    extend_ = extend;
+    declaration_->SetExtend(extend);
 }
 
 bool TextFieldComponent::ShowEllipsis() const
 {
-    return showEllipsis_;
+    return declaration_->ShowEllipsis();
 }
 
 void TextFieldComponent::SetShowEllipsis(bool showEllipsis)
 {
-    showEllipsis_ = showEllipsis;
+    declaration_->SetShowEllipsis(showEllipsis);
+}
+
+bool TextFieldComponent::IsSoftKeyboardEnabled() const
+{
+    return declaration_->IsSoftKeyboardEnabled();
+}
+
+void TextFieldComponent::SetSoftKeyboardEnabled(bool softKeyboardEnabled)
+{
+    declaration_->SetSoftKeyboardEnabled(softKeyboardEnabled);
+}
+
+bool TextFieldComponent::ShowPasswordIcon() const
+{
+    return declaration_->ShowPasswordIcon();
+}
+
+void TextFieldComponent::SetShowPasswordIcon(bool showPasswordIcon)
+{
+    declaration_->SetShowPasswordIcon(showPasswordIcon);
+}
+
+const std::optional<Color>& TextFieldComponent::GetImageFill() const
+{
+    return declaration_->GetImageFill();
+}
+
+void TextFieldComponent::SetImageFill(const std::optional<Color>& color)
+{
+    declaration_->SetImageFill(color);
 }
 
 const std::string& TextFieldComponent::GetIconImage() const
 {
-    return iconImage_;
+    return declaration_->GetIconImage();
 }
 
 void TextFieldComponent::SetIconImage(const std::string& iconImage)
 {
-    iconImage_ = iconImage;
+    declaration_->SetIconImage(iconImage);
 }
 
 const std::string& TextFieldComponent::GetShowIconImage() const
 {
-    return showImage_;
+    return declaration_->GetShowIconImage();
 }
 
 void TextFieldComponent::SetShowIconImage(const std::string& showImage)
 {
-    showImage_ = showImage;
+    declaration_->SetShowIconImage(showImage);
 }
 
 const std::string& TextFieldComponent::GetHideIconImage() const
 {
-    return hideImage_;
+    return declaration_->GetHideIconImage();
 }
 
 void TextFieldComponent::SetHideIconImage(const std::string& hideImage)
 {
-    hideImage_ = hideImage;
+    declaration_->SetHideIconImage(hideImage);
 }
 
 const Dimension& TextFieldComponent::GetIconSize() const
 {
-    return iconSize_;
+    return declaration_->GetIconSize();
 }
 
 void TextFieldComponent::SetIconSize(const Dimension& iconSize)
 {
-    iconSize_ = iconSize;
+    declaration_->SetIconSize(iconSize);
 }
 
 const Dimension& TextFieldComponent::GetIconHotZoneSize() const
 {
-    return iconHotZoneSize_;
+    return declaration_->GetIconHotZoneSize();
 }
 
 void TextFieldComponent::SetIconHotZoneSize(const Dimension& iconHotZoneSize)
 {
-    iconHotZoneSize_ = iconHotZoneSize;
+    declaration_->SetIconHotZoneSize(iconHotZoneSize);
 }
 
 const EventMarker& TextFieldComponent::GetOnTextChange() const
 {
-    return onTextChange_;
+    return declaration_->GetOnTextChange();
 }
 
 void TextFieldComponent::SetOnTextChange(const EventMarker& onTextChange)
 {
-    onTextChange_ = onTextChange;
+    declaration_->SetOnTextChange(onTextChange);
+}
+
+void TextFieldComponent::SetOnTextChangeFunction(std::function<void(const std::string&)>&& onTextChangeCallback)
+{
+    declaration_->SetOnTextChangeFunction(std::move(onTextChangeCallback));
+}
+
+const EventMarker& TextFieldComponent::GetOnSelectChange() const
+{
+    return declaration_->GetOnSelectChange();
+}
+
+void TextFieldComponent::SetOnSelectChange(const EventMarker& onSelectChange)
+{
+    declaration_->SetOnSelectChange(onSelectChange);
 }
 
 const EventMarker& TextFieldComponent::GetOnFinishInput() const
 {
-    return onFinishInput_;
+    return declaration_->GetOnFinishInput();
 }
 
 void TextFieldComponent::SetOnFinishInput(const EventMarker& onFinishInput)
 {
-    onFinishInput_ = onFinishInput;
+    declaration_->SetOnFinishInput(onFinishInput);
 }
 
 const EventMarker& TextFieldComponent::GetOnTap() const
 {
-    return onTap_;
+    return declaration_->GetOnTap();
 }
 
 void TextFieldComponent::SetOnTap(const EventMarker& onTap)
 {
-    onTap_ = onTap;
+    declaration_->SetOnTap(onTap);
 }
 
 const EventMarker& TextFieldComponent::GetOnLongPress() const
 {
-    return onLongPress_;
+    return declaration_->GetOnLongPress();
 }
 
 void TextFieldComponent::SetOnLongPress(const EventMarker& onLongPress)
 {
-    onLongPress_ = onLongPress;
+    declaration_->SetOnLongPress(onLongPress);
 }
 
-const RefPtr<TextEditController>& TextFieldComponent::GetTextEditController() const
+RefPtr<TextEditController> TextFieldComponent::GetTextEditController() const
 {
-    return controller_;
+    return declaration_->GetTextEditController();
 }
 
 void TextFieldComponent::SetTextEditController(const RefPtr<TextEditController>& controller)
 {
-    controller_ = controller;
+    declaration_->SetTextEditController(controller);
 }
 
-const RefPtr<TextFieldController>& TextFieldComponent::GetTextFieldController() const
+RefPtr<TextFieldController> TextFieldComponent::GetTextFieldController() const
 {
-    return textFieldController_;
+    return declaration_->GetTextFieldController();
 }
 
 void TextFieldComponent::SetTextFieldController(const RefPtr<TextFieldController>& controller)
 {
-    textFieldController_ = controller;
+    declaration_->SetTextFieldController(controller);
 }
 
 void TextFieldComponent::SetFocusBgColor(const Color& focusBgColor)
 {
-    focusBgColor_ = focusBgColor;
+    declaration_->SetFocusBgColor(focusBgColor);
 }
 
 const Color& TextFieldComponent::GetFocusBgColor()
 {
-    return focusBgColor_;
+    return declaration_->GetFocusBgColor();
 }
 
 void TextFieldComponent::SetFocusPlaceholderColor(const Color& focusPlaceholderColor)
 {
-    focusPlaceholderColor_ = focusPlaceholderColor;
+    declaration_->SetFocusPlaceholderColor(focusPlaceholderColor);
 }
 
 const Color& TextFieldComponent::GetFocusPlaceholderColor()
 {
-    return focusPlaceholderColor_;
+    return declaration_->GetFocusPlaceholderColor();
 }
 
 void TextFieldComponent::SetFocusTextColor(const Color& focusTextColor)
 {
-    focusTextColor_ = focusTextColor;
+    declaration_->SetFocusTextColor(focusTextColor);
 }
 
 const Color& TextFieldComponent::GetFocusTextColor()
 {
-    return focusTextColor_;
+    return declaration_->GetFocusTextColor();
 }
 
 void TextFieldComponent::SetBgColor(const Color& bgColor)
 {
-    bgColor_ = bgColor;
+    declaration_->SetBgColor(bgColor);
 }
 
 const Color& TextFieldComponent::GetBgColor()
 {
-    return bgColor_;
+    return declaration_->GetBgColor();
 }
 
 void TextFieldComponent::SetTextColor(const Color& textColor)
 {
-    textColor_ = textColor;
+    declaration_->SetTextColor(textColor);
 }
 
 const Color& TextFieldComponent::GetTextColor()
 {
-    return textColor_;
+    return declaration_->GetTextColor();
 }
 
 void TextFieldComponent::SetWidthReserved(const Dimension& widthReserved)
 {
-    widthReserved_ = widthReserved;
+    declaration_->SetWidthReserved(widthReserved);
 }
 
 const Dimension& TextFieldComponent::GetWidthReserved() const
 {
-    return widthReserved_;
+    return declaration_->GetWidthReserved();
 }
 
 const Color& TextFieldComponent::GetSelectedColor() const
 {
-    return selectedColor_;
+    return declaration_->GetSelectedColor();
 }
 
 void TextFieldComponent::SetSelectedColor(const Color& selectedColor)
 {
-    selectedColor_ = selectedColor;
+    declaration_->SetSelectedColor(selectedColor);
 }
 
 const Color& TextFieldComponent::GetHoverColor() const
 {
-    return hoverColor_;
+    return declaration_->GetHoverColor();
 }
 
 void TextFieldComponent::SetHoverColor(const Color& hoverColor)
 {
-    hoverColor_ = hoverColor;
+    declaration_->SetHoverColor(hoverColor);
 }
 
 const Color& TextFieldComponent::GetPressColor() const
 {
-    return pressColor_;
+    return declaration_->GetPressColor();
 }
 
 void TextFieldComponent::SetPressColor(const Color& pressColor)
 {
-    pressColor_ = pressColor;
+    declaration_->SetPressColor(pressColor);
 }
 
 void TextFieldComponent::SetBlockRightShade(bool blockRightShade)
 {
-    blockRightShade_ = blockRightShade;
+    declaration_->SetBlockRightShade(blockRightShade);
 }
 
 bool TextFieldComponent::GetBlockRightShade() const
 {
-    return blockRightShade_;
+    return declaration_->GetBlockRightShade();
 }
 
 void TextFieldComponent::SetIsVisible(bool isVisible)
 {
-    isVisible_ = isVisible;
+    declaration_->SetIsVisible(isVisible);
 }
 
 bool TextFieldComponent::IsVisible() const
 {
-    return isVisible_;
+    return declaration_->IsVisible();
 }
 
 void TextFieldComponent::SetResetToStart(bool resetToStart)
 {
-    resetToStart_ = resetToStart;
+    declaration_->SetResetToStart(resetToStart);
 }
 
 bool TextFieldComponent::GetResetToStart() const
 {
-    return resetToStart_;
+    return declaration_->GetResetToStart();
+}
+
+bool TextFieldComponent::HasSetResetToStart() const
+{
+    return declaration_->HasSetResetToStart();
 }
 
 void TextFieldComponent::SetShowCounter(bool showCounter)
 {
-    showCounter_ = showCounter;
+    declaration_->SetShowCounter(showCounter);
 }
 
 bool TextFieldComponent::ShowCounter() const
 {
-    return showCounter_;
+    return declaration_->ShowCounter();
 }
 
 void TextFieldComponent::SetCountTextStyle(const TextStyle& countTextStyle)
 {
-    countTextStyle_ = countTextStyle;
+    declaration_->SetCountTextStyle(countTextStyle);
 }
 
 const TextStyle& TextFieldComponent::GetCountTextStyle() const
 {
-    return countTextStyle_;
+    return declaration_->GetCountTextStyle();
 }
 
 void TextFieldComponent::SetOverCountStyle(const TextStyle& overCountStyle)
 {
-    overCountStyle_ = overCountStyle;
+    declaration_->SetOverCountStyle(overCountStyle);
 }
 
 const TextStyle& TextFieldComponent::GetOverCountStyle() const
 {
-    return overCountStyle_;
+    return declaration_->GetOverCountStyle();
 }
 
 void TextFieldComponent::SetCountTextStyleOuter(const TextStyle& countTextStyleOuter)
 {
-    countTextStyleOuter_ = countTextStyleOuter;
+    declaration_->SetCountTextStyleOuter(countTextStyleOuter);
 }
 
 const TextStyle& TextFieldComponent::GetCountTextStyleOuter() const
 {
-    return countTextStyleOuter_;
+    return declaration_->GetCountTextStyleOuter();
 }
 
 void TextFieldComponent::SetOverCountStyleOuter(const TextStyle& overCountStyleOuter)
 {
-    overCountStyleOuter_ = overCountStyleOuter;
+    declaration_->SetOverCountStyleOuter(overCountStyleOuter);
 }
 
 const TextStyle& TextFieldComponent::GetOverCountStyleOuter() const
 {
-    return overCountStyleOuter_;
+    return declaration_->GetOverCountStyleOuter();
 }
 
-void TextFieldComponent::SetInputOptions(const std::vector<Framework::InputOption>& inputOptions)
+const TextSelection& TextFieldComponent::GetSelection() const
 {
-    inputOptions_ = inputOptions;
+    return declaration_->GetSelection();
 }
 
-const std::vector<Framework::InputOption>& TextFieldComponent::GetInputOptions() const
+void TextFieldComponent::SetSelectedStart(int32_t selectedStart)
 {
-    return inputOptions_;
+    declaration_->SetSelectedStart(selectedStart);
+}
+
+void TextFieldComponent::SetSelectedEnd(int32_t selectedEnd)
+{
+    declaration_->SetSelectedEnd(selectedEnd);
+}
+
+void TextFieldComponent::SetInputOptions(const std::vector<InputOption>& inputOptions)
+{
+    declaration_->SetInputOptions(inputOptions);
+}
+
+const std::vector<InputOption>& TextFieldComponent::GetInputOptions() const
+{
+    return declaration_->GetInputOptions();
 }
 
 const EventMarker& TextFieldComponent::GetOnOptionsClick() const
 {
-    return onOptionsClick_;
+    return declaration_->GetOnOptionsClick();
 }
 
 void TextFieldComponent::SetOnOptionsClick(const EventMarker& onOptionsClick)
 {
-    onOptionsClick_ = onOptionsClick;
+    declaration_->SetOnOptionsClick(onOptionsClick);
 }
 
 const EventMarker& TextFieldComponent::GetOnTranslate() const
 {
-    return onTranslate_;
+    return declaration_->GetOnTranslate();
 }
 
 void TextFieldComponent::SetOnTranslate(const EventMarker& onTranslate)
 {
-    onTranslate_ = onTranslate;
+    declaration_->SetOnTranslate(onTranslate);
 }
 
 const EventMarker& TextFieldComponent::GetOnShare() const
 {
-    return onShare_;
+    return declaration_->GetOnShare();
 }
 
 void TextFieldComponent::SetOnShare(const EventMarker& onShare)
 {
-    onShare_ = onShare;
+    declaration_->SetOnShare(onShare);
 }
 
 const EventMarker& TextFieldComponent::GetOnSearch() const
 {
-    return onSearch_;
+    return declaration_->GetOnSearch();
 }
 
 void TextFieldComponent::SetOnSearch(const EventMarker& onSearch)
 {
-    onSearch_ = onSearch;
+    declaration_->SetOnSearch(onSearch);
+}
+
+void TextFieldComponent::SetDeclaration(const RefPtr<TextFieldDeclaration>& declaration)
+{
+    if (declaration) {
+        declaration_ = declaration;
+    }
 }
 
 } // namespace OHOS::Ace

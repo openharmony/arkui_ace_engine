@@ -394,6 +394,7 @@ void RenderStepper::UpdateTouchRect()
 {
     touchRect_.SetSize(GetLayoutSize());
     touchRect_.SetOffset(GetPosition());
+    ownTouchRect_ = touchRect_;
 }
 
 void RenderStepper::PerformLayout()

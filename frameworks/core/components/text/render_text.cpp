@@ -18,6 +18,7 @@
 #include "base/geometry/size.h"
 #include "core/common/font_manager.h"
 #include "core/components/text/text_component.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 
@@ -36,10 +37,8 @@ RenderText::~RenderText()
 
 void RenderText::Update(const RefPtr<Component>& component)
 {
-    const RefPtr<TextComponent> text = AceType::DynamicCast<TextComponent>(component);
-    if (text) {
-        CheckIfNeedMeasure(text);
-    }
+    text_ = AceType::DynamicCast<TextComponent>(component);
+    CheckIfNeedMeasure();
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("the context is nullptr in text update");
@@ -53,6 +52,7 @@ void RenderText::Update(const RefPtr<Component>& component)
             text->MarkNeedLayout();
         }
     };
+
     auto fontManager = context->GetFontManager();
     if (fontManager) {
         for (const auto& familyName : textStyle_.GetFontFamilies()) {
@@ -89,7 +89,9 @@ void RenderText::UpdateAccessibilityText()
         return;
     }
     if (GetChildren().empty()) {
-        accessibilityNode->SetText(textData_);
+        if (text_) {
+            accessibilityNode->SetText(text_->GetData());
+        }
     } else {
         std::string accessibilityText;
         for (const auto& child : GetChildren()) {
@@ -139,6 +141,254 @@ void RenderText::PerformLayout()
     }
 }
 
+bool RenderText::TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
+    TouchTestResult& result)
+{
+    if (GetDisableTouchEvent() || disabled_) {
+        return false;
+    }
+
+    // Since the paintRect is relative to parent, use parent local point to perform touch test.
+    if (!GetTouchRect().IsInRegion(parentLocalPoint)) {
+        return false;
+    }
+
+    // Reset flag firstly.
+    needClickDetector_ = false;
+    needLongPressDetector_ = false;
+    needTouchDetector_ = false;
+    // Calculates the local point location in this node.
+    const auto localPoint = parentLocalPoint - GetPaintRect().GetOffset();
+    Offset localOffset = Offset(localPoint.GetX(), localPoint.GetY());
+    // If span of touch position has click event, need add click detector.
+    if (!GetEventMarker(GetTouchPosition(localOffset), GestureType::CLICK).IsEmpty()) {
+        needClickDetector_ = true;
+    }
+    // If span of touch position has long press event, need add long press detector.
+    if (!GetEventMarker(GetTouchPosition(localOffset), GestureType::LONG_PRESS).IsEmpty()) {
+        needLongPressDetector_ = true;
+    }
+    // If span of touch position has touch event, need add touch detector.
+    if (!GetEventMarker(GetTouchPosition(localOffset), GestureType::TOUCH_START).IsEmpty() ||
+        !GetEventMarker(GetTouchPosition(localOffset), GestureType::TOUCH_MOVE).IsEmpty() ||
+        !GetEventMarker(GetTouchPosition(localOffset), GestureType::TOUCH_END).IsEmpty() ||
+        !GetEventMarker(GetTouchPosition(localOffset), GestureType::TOUCH_CANCEL).IsEmpty()) {
+        needTouchDetector_ = true;
+    }
+    if (!needClickDetector_ && !needLongPressDetector_ && !needTouchDetector_) {
+        return false;
+    }
+
+    auto beforeSize = result.size();
+    if (touchable_) {
+        // Calculates the coordinate offset in this node.
+        const auto coordinateOffset = globalPoint - localPoint;
+        globalPoint_ = globalPoint;
+        OnTouchTestHit(coordinateOffset, touchRestrict, result);
+    }
+    auto endSize = result.size();
+    return beforeSize != endSize;
+}
+
+void RenderText::OnTouchTestHit(
+    const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
+{
+    if (GetChildren().empty()) {
+        return;
+    }
+
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    if (needTouchDetector_) {
+        if (!rawRecognizer_) {
+            rawRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
+            rawRecognizer_->SetOnTouchDown([weak = WeakClaim(this)](const TouchEventInfo& info) {
+                auto text = weak.Upgrade();
+                if (text && !info.GetTouches().empty()) {
+                    text->HandleTouchEvent(GestureType::TOUCH_START,
+                        info.GetTouches().front().GetLocalLocation() - text->GetGlobalOffset());
+                }
+            });
+
+            rawRecognizer_->SetOnTouchMove([weak = WeakClaim(this)](const TouchEventInfo& info) {
+                auto text = weak.Upgrade();
+                if (text && !info.GetTouches().empty()) {
+                    text->HandleTouchEvent(GestureType::TOUCH_MOVE,
+                        info.GetTouches().front().GetLocalLocation() - text->GetGlobalOffset());
+                }
+            });
+
+            rawRecognizer_->SetOnTouchUp([weak = WeakClaim(this)](const TouchEventInfo& info) {
+                auto text = weak.Upgrade();
+                if (text && !info.GetTouches().empty()) {
+                    text->HandleTouchEvent(
+                        GestureType::TOUCH_END, info.GetTouches().front().GetLocalLocation() - text->GetGlobalOffset());
+                }
+            });
+
+            rawRecognizer_->SetOnTouchCancel([weak = WeakClaim(this)](const TouchEventInfo& info) {
+                auto text = weak.Upgrade();
+                if (text && !info.GetTouches().empty()) {
+                    text->HandleTouchEvent(GestureType::TOUCH_CANCEL,
+                        info.GetTouches().front().GetLocalLocation() - text->GetGlobalOffset());
+                }
+            });
+        }
+        rawRecognizer_->SetTouchRestrict(touchRestrict);
+        result.emplace_back(rawRecognizer_);
+        needTouchDetector_ = false;
+    }
+
+    if (needClickDetector_) {
+        if (!clickDetector_) {
+            clickDetector_ = AceType::MakeRefPtr<ClickRecognizer>();
+            clickDetector_->SetOnClick([weak = WeakClaim(this)](const ClickInfo& info) {
+                auto text = weak.Upgrade();
+                if (text) {
+                    text->HandleClick(info);
+                }
+            });
+        }
+        clickDetector_->SetCoordinateOffset(coordinateOffset);
+        clickDetector_->SetTouchRestrict(touchRestrict);
+        clickDetector_->SetIsExternalGesture(true);
+        result.emplace_back(clickDetector_);
+        needClickDetector_ = false;
+    }
+
+    if (needLongPressDetector_) {
+        if (!longPressRecognizer_) {
+            longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(context_);
+            longPressRecognizer_->SetOnLongPress([weak = WeakClaim(this)](const LongPressInfo& info) {
+                auto text = weak.Upgrade();
+                if (text) {
+                    text->HandleLongPress(info.GetLocalLocation());
+                }
+            });
+        }
+        longPressRecognizer_->SetCoordinateOffset(coordinateOffset);
+        longPressRecognizer_->SetTouchRestrict(touchRestrict);
+        result.emplace_back(longPressRecognizer_);
+        needLongPressDetector_ = false;
+    }
+}
+
+void RenderText::FireEvent(const EventMarker& marker)
+{
+    if (marker.IsEmpty()) {
+        return;
+    }
+
+    auto func = AceAsyncEvent<void()>::Create(marker, context_);
+    if (func) {
+        func();
+    }
+}
+
+void RenderText::HandleTouchEvent(GestureType type, const Offset& touchPosition)
+{
+    if (type == GestureType::TOUCH_START) {
+        touchStartPosition_ = GetTouchPosition(touchPosition);
+    }
+
+    auto eventMarker = GetEventMarker(touchStartPosition_, type);
+    if (!eventMarker.IsEmpty()) {
+        FireEvent(eventMarker);
+        return;
+    }
+
+    // If span has not touch event, use touch event of text.
+    if (!text_) {
+        return;
+    }
+    auto declaration = text_->GetDeclaration();
+    if (!declaration) {
+        return;
+    }
+    auto& rawEvent = static_cast<CommonRawEvent&>(declaration->GetEvent(EventTag::COMMON_RAW_EVENT));
+    if (!rawEvent.IsValid()) {
+        return;
+    }
+
+    switch (type) {
+        case GestureType::TOUCH_START:
+            eventMarker = rawEvent.touchStart.eventMarker;
+            break;
+        case GestureType::TOUCH_MOVE:
+            eventMarker = rawEvent.touchMove.eventMarker;
+            break;
+        case GestureType::TOUCH_END:
+            eventMarker = rawEvent.touchEnd.eventMarker;
+            break;
+        case GestureType::TOUCH_CANCEL:
+            eventMarker = rawEvent.touchCancel.eventMarker;
+            break;
+        default:
+            break;
+    }
+    FireEvent(eventMarker);
+}
+
+void RenderText::HandleClick(const ClickInfo& info)
+{
+    auto clickPosition = info.GetLocalLocation();
+    auto clickMarker = GetEventMarker(GetTouchPosition(clickPosition), GestureType::CLICK);
+    // If span has not click event, use click event of text.
+    if (text_ && clickMarker.IsEmpty()) {
+        auto declaration = text_->GetDeclaration();
+        if (declaration) {
+            auto& gestureEvent =
+                static_cast<CommonGestureEvent&>(declaration->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+            if (gestureEvent.IsValid() && !gestureEvent.click.eventMarker.IsEmpty()) {
+                clickMarker = gestureEvent.click.eventMarker;
+            }
+        }
+    }
+
+    auto onClick = AceAsyncEvent<void(const ClickInfo&)>::Create(clickMarker, context_);
+    if (onClick) {
+        onClick(info);
+    }
+}
+
+void RenderText::HandleLongPress(const Offset& longPressPosition)
+{
+    auto longPressMarker = GetEventMarker(GetTouchPosition(longPressPosition), GestureType::LONG_PRESS);
+    // If span has not long press event, use long press event of text.
+    if (text_ && longPressMarker.IsEmpty()) {
+        auto declaration = text_->GetDeclaration();
+        if (declaration) {
+            auto& gestureEvent =
+                static_cast<CommonGestureEvent&>(declaration->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+            if (gestureEvent.IsValid() && !gestureEvent.longPress.eventMarker.IsEmpty()) {
+                longPressMarker = gestureEvent.longPress.eventMarker;
+            }
+        }
+    }
+
+    FireEvent(longPressMarker);
+}
+
+EventMarker RenderText::GetEventMarker(int32_t position, GestureType type)
+{
+    if (touchRegions_.empty()) {
+        return EventMarker();
+    }
+    for (const auto& region : touchRegions_) {
+        if (position < region.first) {
+            auto markerIter = region.second.find(type);
+            if (markerIter != region.second.end()) {
+                return markerIter->second;
+            }
+            return EventMarker();
+        }
+    }
+    return EventMarker();
+}
+
 void RenderText::OnStatusChanged(OHOS::Ace::RenderStatus renderStatus)
 {
     if (renderStatus == RenderStatus::FOCUS) {
@@ -153,24 +403,42 @@ void RenderText::OnStatusChanged(OHOS::Ace::RenderStatus renderStatus)
     MarkNeedRender();
 }
 
-void RenderText::CheckIfNeedMeasure(const RefPtr<TextComponent>& text)
+void RenderText::CheckIfNeedMeasure()
 {
-    UpdateIfChanged(textData_, text->GetData());
-    UpdateIfChanged(textDirection_, text->GetTextDirection());
-    UpdateIfChanged(isMaxWidthLayout_, text->GetMaxWidthLayout());
-    UpdateIfChanged(textStyle_, text->GetTextStyle());
-    UpdateIfChanged(focusColor_, text->GetFocusColor());
+    if (!text_) {
+        return;
+    }
+
+    if (text_->IsChanged()) {
+        needMeasure_ = true;
+    }
+    UpdateIfChanged(textDirection_, text_->GetTextDirection());
+    UpdateIfChanged(textStyle_, text_->GetTextStyle());
+    UpdateIfChanged(focusColor_, text_->GetFocusColor());
     UpdateIfChanged(lostFocusColor_, textStyle_.GetTextColor());
+    UpdateIfChanged(maxLines_, textStyle_.GetMaxLines());
     if (needMeasure_) {
         MarkNeedLayout();
+    }
+}
+
+std::string RenderText::GetTextData() const
+{
+    return text_ ? text_->GetData() : "";
+}
+
+void RenderText::SetTextData(const std::string& textData)
+{
+    if (text_) {
+        text_->SetData(textData);
     }
 }
 
 void RenderText::ClearRenderObject()
 {
     RenderNode::ClearRenderObject();
-    LOGI("TextNode ClearRenderObject");
-    textData_ = "";
+    LOGD("TextNode ClearRenderObject");
+    text_.Reset();
     textStyle_ = TextStyle();
     textDirection_ = TextDirection::LTR;
     focusColor_ = Color();
@@ -178,9 +446,21 @@ void RenderText::ClearRenderObject()
     fontScale_ = 1.0;
     dipScale_ = 1.0;
     isFocus_ = false;
-    isMaxWidthLayout_ = false;
     needMeasure_ = true;
     isCallbackCalled_ = false;
+}
+
+Size RenderText::GetContentSize()
+{
+    if (textStyle_.GetAdaptTextSize()) {
+        return Size();
+    }
+    // Make sure text's height is not clipped, width is not guard.
+    auto measuredSize = Measure();
+    if (textStyle_.GetTextOverflow() != TextOverflow::NONE || maxLines_ > 1) {
+        measuredSize.SetWidth(0.0);
+    }
+    return measuredSize;
 }
 
 } // namespace OHOS::Ace

@@ -141,13 +141,33 @@ void CalendarDataAdapter::RequestData(const CalendarDataRequest& request)
     if (!context) {
         return;
     }
-    if (cardCalendar_) {
+    if (SystemProperties::GetDeviceType() == DeviceType::TV) {
+        GetCacheData(request);
+        context->GetMessageBridge()->SendMessage(dataAdapterAction_.GetAction(request.month.year, request.month.month),
+            [weak, request](const std::string& result) {
+                auto dataAdapter = weak.Upgrade();
+                if (!dataAdapter) {
+                    LOGE("date adapter is nullptr");
+                    return;
+                }
+                dataAdapter->HandleDataRequestResult(request, result);
+                dataAdapter->SaveCacheData(request, result);
+            });
+    } else if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
+        indexMap_[request.indexOfContainer] = request.month;
+        RequestDataInWatch(request);
+    } else {
         indexMap_[request.indexOfContainer] = request.month;
         auto json = JsonUtil::Create(true);
         json->Put("month", request.month.month);
         json->Put("year", request.month.year);
         json->Put("currentMonth", currentMonth_.month);
         json->Put("currentYear", currentMonth_.year);
+        if (request.month == today_.month) {
+            json->Put("monthState", 0);
+        } else {
+            json->Put("monthState", static_cast<int32_t>(request.state));
+        }
         if (requestDataEvent_) {
             requestDataEvent_(json->ToString());
         }
@@ -166,18 +186,6 @@ void CalendarDataAdapter::RequestData(const CalendarDataRequest& request)
                 dataAdapter->RequestNextData();
             },
             TaskExecutor::TaskType::UI);
-    } else {
-        GetCacheData(request);
-        context->GetMessageBridge()->SendMessage(dataAdapterAction_.GetAction(request.month.year, request.month.month),
-            [weak, request](const std::string& result) {
-                auto dataAdapter = weak.Upgrade();
-                if (!dataAdapter) {
-                    LOGE("date adapter is nullptr");
-                    return;
-                }
-                dataAdapter->HandleDataRequestResult(request, result);
-                dataAdapter->SaveCacheData(request, result);
-            });
     }
 }
 
@@ -248,10 +256,24 @@ void CalendarDataAdapter::ParseCardCalendarData(const std::string& source)
 void CalendarDataAdapter::UpdateCardCalendarAttr(const CardCalendarAttr& attr)
 {
     showLunar_ = attr.showLunar;
-    startDayOfWeek_ = attr.startDayOfWeek;
     cardCalendar_ = attr.cardCalendar;
     offDays_ = attr.offDays;
+    holidays_ = attr.holidays;
+    workDays_ = attr.workDays;
     SetRequestDataEvent(attr.requestData);
+
+    if (SystemProperties::GetDeviceType() == DeviceType::WATCH && startDayOfWeek_ != attr.startDayOfWeek) {
+        startDayOfWeek_ = attr.startDayOfWeek;
+        for (const auto& index : indexMap_) {
+            if (index.second == currentMonth_) {
+                CalendarDataRequest request(index.second, index.first);
+                RequestData(request);
+            } else {
+                AddPendingRequest(index.second, index.first);
+            }
+        }
+    }
+    startDayOfWeek_ = attr.startDayOfWeek;
     for (const auto& listen : allListeners_) {
         listen->UpdateCardCalendarAttr(attr);
     }
@@ -264,7 +286,7 @@ void CalendarDataAdapter::ParseMonthData(const std::unique_ptr<JsonValue>& month
     calendarMonth.year = monthData->GetInt("year", -1);
     monthCache_[calendarMonth] = monthData->ToString();
 
-    int32_t indexOfContainer;
+    int32_t indexOfContainer = -1;
     for (const auto& index : indexMap_) {
         if (index.second == calendarMonth) {
             indexOfContainer = index.first;
@@ -282,6 +304,7 @@ void CalendarDataAdapter::ParseMonthData(const std::unique_ptr<JsonValue>& month
     auto child = data->GetChild();
     CalendarDaysOfMonth result;
     result.month = calendarMonth;
+    bool hasLunarInfo = true;
     while (child->IsValid()) {
         CalendarDay dayInfo;
         dayInfo.day = child->GetInt("day");
@@ -295,9 +318,11 @@ void CalendarDataAdapter::ParseMonthData(const std::unique_ptr<JsonValue>& month
         dayInfo.hasSchedule = child->GetBool("hasSchedule", false);
         dayInfo.markLunarDay = child->GetBool("markLunarDay", false);
         SetOffDays(dayInfo);
+        hasLunarInfo = hasLunarInfo && !dayInfo.lunarDay.empty();
         result.days.push_back(dayInfo);
         child = child->GetNext();
     }
+    LOGI("current month  is %{public}s, has lunar info %{public}d", calendarMonth.ToString().c_str(), hasLunarInfo);
     dayOfMonthCache_[indexOfContainer] = result;
     NotifyDataChanged(result, indexOfContainer);
 }
@@ -323,6 +348,170 @@ void CalendarDataAdapter::SetOffDays(CalendarDay& dayInfo)
         if (weekday == 5 || weekday == 6) { // set default weekend
             dayInfo.weekend = true;
         }
+    }
+}
+
+void CalendarDataAdapter::RequestDataInWatch(const CalendarDataRequest& request)
+{
+    auto context = pipelineContext_.Upgrade();
+    auto weak = AceType::WeakClaim(this);
+    if (!context) {
+        return;
+    }
+    if (firstLoad_) {
+        context->SetBuildAfterCallback([weak, request]() {
+            auto dataAdapter = weak.Upgrade();
+            if (!dataAdapter) {
+                LOGW("dataAdapter is null");
+                return;
+            }
+            CalendarDaysOfMonth result;
+            dataAdapter->FillMonthData(request, result);
+            dataAdapter->NotifyDataChanged(result, request.indexOfContainer);
+            dataAdapter->firstLoad_ = false;
+            dataAdapter->RequestNextData();
+        });
+    } else {
+        context->GetTaskExecutor()->PostTask(
+            [weak, request]() {
+                auto dataAdapter = weak.Upgrade();
+                if (!dataAdapter) {
+                    LOGW("dataAdapter is null");
+                    return;
+                }
+                CalendarDaysOfMonth result;
+                dataAdapter->FillMonthData(request, result);
+                dataAdapter->NotifyDataChanged(result, request.indexOfContainer);
+                dataAdapter->RequestNextData();
+            },
+            TaskExecutor::TaskType::UI);
+    }
+}
+
+void CalendarDataAdapter::FillMonthData(const CalendarDataRequest& request, CalendarDaysOfMonth& result)
+{
+    auto currentMonth = request.month;
+    result.month = currentMonth;
+    int32_t index = 0;
+    // fill last month data
+    FillPreMonthData(currentMonth, request.indexOfContainer, index, result);
+    // fill current month data
+    FillCurrentMonthData(currentMonth, request.indexOfContainer, index, result);
+
+    result.lastDayIndex = index - 1;
+    // fill next month data
+    FillNextMonthData(currentMonth, request.indexOfContainer, index, result);
+}
+
+void CalendarDataAdapter::FillPreMonthData(
+    const CalendarMonth& currentMonth, int32_t indexOfContainer, int32_t& index, CalendarDaysOfMonth& result)
+{
+    static const int32_t DAYS_PER_WEEK = 7;
+    auto lastMonth = CalendarMonth::GetLastMonth(currentMonth);
+    auto currentWeekDay = Date::CalculateWeekDay(currentMonth.year, currentMonth.month + 1, 1);
+    if (currentWeekDay != startDayOfWeek_) {
+        auto lastMonthDays = Date::DayOfMonth(lastMonth.year, lastMonth.month + 1);
+        auto countDays = currentWeekDay - startDayOfWeek_ >= 0 ? currentWeekDay - startDayOfWeek_
+                                                               : currentWeekDay - startDayOfWeek_ + DAYS_PER_WEEK;
+        auto startDay = lastMonthDays - countDays + 1;
+        for (; index < countDays; ++index) {
+            CalendarDay dayInfo;
+            dayInfo.day = startDay++;
+            dayInfo.index = index;
+            dayInfo.month.month = lastMonth.month;
+            dayInfo.month.year = lastMonth.year;
+            SetOffDays(dayInfo);
+            calendarCache_[indexOfContainer].push_back(dayInfo.ToString());
+            result.days.emplace_back(dayInfo);
+        }
+    }
+}
+
+void CalendarDataAdapter::FillCurrentMonthData(
+    const CalendarMonth& currentMonth, int32_t indexOfContainer, int32_t& index, CalendarDaysOfMonth& result)
+{
+    result.firstDayIndex = index;
+    auto currentMonthDays = Date::DayOfMonth(currentMonth.year, currentMonth.month + 1);
+    for (int32_t i = 0; i < currentMonthDays; i++) {
+        CalendarDay dayInfo;
+        dayInfo.day = i + 1;
+        dayInfo.index = index;
+        dayInfo.month.month = currentMonth.month;
+        dayInfo.month.year = currentMonth.year;
+        SetOffDays(dayInfo);
+        // Mark today.
+        dayInfo.today = dayInfo.month == today_.month && dayInfo.day == today_.day;
+        if (dayInfo.today) {
+            result.today = dayInfo.index;
+        }
+        calendarCache_[indexOfContainer].push_back(dayInfo.ToString());
+        result.days.emplace_back(dayInfo);
+        ++index;
+    }
+}
+
+void CalendarDataAdapter::FillNextMonthData(
+    const CalendarMonth& currentMonth, int32_t indexOfContainer, int32_t& index, CalendarDaysOfMonth& result)
+{
+    auto nextMonth = CalendarMonth::GetNextMonth(currentMonth);
+    // The number of days the month view needs to be displayed
+    const int32_t daysOfCalendar = result.days.size() < 35 ? 35 : 42;
+    int32_t indexOfNextMonth = 0;
+    while ((int32_t)result.days.size() < daysOfCalendar) {
+        CalendarDay dayInfo;
+        dayInfo.day = ++indexOfNextMonth;
+        dayInfo.index = index++;
+        dayInfo.month.month = nextMonth.month;
+        dayInfo.month.year = nextMonth.year;
+        SetOffDays(dayInfo);
+        calendarCache_[indexOfContainer].push_back(dayInfo.ToString());
+        result.days.emplace_back(dayInfo);
+    }
+}
+
+void CalendarDataAdapter::ParseCalendarData(std::queue<ObtainedMonth> months)
+{
+    while (!months.empty()) {
+        auto month = months.front();
+        CalendarMonth calendarMonth;
+        calendarMonth.year = month.year;
+        calendarMonth.month = month.month;
+
+        int32_t indexOfContainer = -1;
+        for (const auto& index : indexMap_) {
+            if (index.second == calendarMonth) {
+                indexOfContainer = index.first;
+            }
+        }
+        static const int32_t miniIndex = 0;
+        static const int32_t maxIndex = 2;
+        if (indexOfContainer < miniIndex || indexOfContainer > maxIndex) {
+            months.pop();
+            continue;
+        }
+        CalendarDaysOfMonth result;
+        result.month = calendarMonth;
+        result.days = month.days;
+        result.firstDayIndex = month.firstDayIndex;
+        dayOfMonthCache_[indexOfContainer] = result;
+        NotifyDataChanged(result, indexOfContainer);
+        months.pop();
+    }
+    if (hasMoved_) {
+        for (const auto& listener : allListeners_) {
+            listener->OnSwiperMove();
+        }
+        hasMoved_ = false;
+    }
+
+}
+
+void CalendarDataAdapter::NotifyDataChanged(const CalendarDaysOfMonth& data, int32_t indexOfContainer)
+{
+    int32_t listenersSize = allListeners_.size();
+    if (indexOfContainer >= 0 && indexOfContainer < listenersSize) {
+        auto& listener = allListeners_[indexOfContainer];
+        listener->OnDataChanged(data);
     }
 }
 

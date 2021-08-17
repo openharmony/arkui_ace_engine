@@ -51,12 +51,20 @@ ohos_unittest("RenderImageTest") {
   module_out_path = module_output_path
 
   sources = [
+    "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
+    "$ace_root/frameworks/bridge/common/utils/utils.cpp",
+
     #base
     "$ace_root/adapter/common/cpp/thread_util.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
+    "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
+    "$ace_root/frameworks/base/geometry/quaternion.cpp",
+    "$ace_root/frameworks/base/geometry/transform_util.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
     "$ace_root/frameworks/base/log/dump_log.cpp",
+    "$ace_root/frameworks/base/memory/memory_monitor.cpp",
     "$ace_root/frameworks/base/thread/background_task_executor.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",
 
@@ -74,6 +82,7 @@ ohos_unittest("RenderImageTest") {
     # components
     "$ace_root/frameworks/core/components/image/image_component.cpp",
     "$ace_root/frameworks/core/components/root/root_component.cpp",
+    "$ace_root/frameworks/core/components/tween/tween_component.cpp",
     "$ace_root/frameworks/core/pipeline/base/component.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_element.cpp",
 
@@ -105,6 +114,7 @@ ohos_unittest("RenderImageTest") {
 
     # rendering
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
+    "$ace_root/frameworks/core/components/box/render_box.cpp",
     "$ace_root/frameworks/core/components/refresh/render_refresh.cpp",
     "$ace_root/frameworks/core/components/root/render_root.cpp",
     "$ace_root/frameworks/core/components/scroll/render_multi_child_scroll.cpp",
@@ -115,6 +125,7 @@ ohos_unittest("RenderImageTest") {
     "$ace_root/frameworks/core/components/stage/render_stage.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_font_manager.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_node_factory.cpp",
+    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
     "image_test_utils.cpp",
     "render_image_test.cpp",
@@ -122,6 +133,8 @@ ohos_unittest("RenderImageTest") {
     "render_imagefit_others_test.cpp",
 
     # focus
+    "$ace_root/frameworks/core/animation/animatable_data.cpp",
+    "$ace_root/frameworks/core/animation/animatable_properties.cpp",
     "$ace_root/frameworks/core/animation/animator.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
@@ -130,12 +143,15 @@ ohos_unittest("RenderImageTest") {
     "$ace_root/frameworks/core/focus/focus_node.cpp",
 
     # others
+    "$ace_root/frameworks/core/components/common/painter/flutter_svg_painter.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/decoration.cpp",
+    "$ace_root/frameworks/core/components/common/properties/motion_path_evaluator.cpp",
     "$ace_root/frameworks/core/components/common/properties/scroll_bar.cpp",
+    "$ace_root/frameworks/core/components/common/properties/shadow.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
@@ -147,9 +163,7 @@ ohos_unittest("RenderImageTest") {
     #mock
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
-    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
   ]
 
   # add sources only needed by wearable like watch.
@@ -168,12 +182,13 @@ ohos_unittest("RenderImageTest") {
   configs = [
     "//third_party/cJSON:cJSON_config",
     "$ace_root:ace_test_config",
-    "$flutter_root:flutter_config",
-    "$flutter_root:icu_config_ohos",
+    "$ace_flutter_engine_root:flutter_config",
+    "$ace_flutter_engine_root:icu_config_ohos",
     ":config_render_test",
   ]
 
   deps = [
+    "$ace_flutter_engine_root:ace_skia_ohos",
     "$ace_root:third_party_cjson",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
@@ -182,10 +197,6 @@ ohos_unittest("RenderImageTest") {
 
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-    deps += [
-      "$flutter_root:ace_skia_ohos",
-      "$flutter_root:third_party_flutter_engine_ohos",
-    ]
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }

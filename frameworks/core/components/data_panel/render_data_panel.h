@@ -60,6 +60,7 @@ protected:
     bool useEffect_ = false;
     bool animationInitialized_ = false;
     bool isUserSetPlay_ = false;
+    double userAnimationDuration_ = -1.0;
 
     double previousPercentValue_ = 0.0;
     double percentChange_ = 0.0;

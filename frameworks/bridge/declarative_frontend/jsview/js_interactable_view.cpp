@@ -18,164 +18,152 @@
 #include "core/components/gesture_listener/gesture_listener_component.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/pipeline/base/single_child.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_key_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
-JSInteractableView::~JSInteractableView()
-{
-    LOGD("Destroy: JSInteractableView");
-}
 
-std::vector<RefPtr<OHOS::Ace::SingleChild>> JSInteractableView::CreateComponents()
+void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
 {
-    std::vector<RefPtr<OHOS::Ace::SingleChild>> result;
-    if (jsOnTouchFunc_) {
+    LOGD("JSInteractableView JsOnTouch");
+    if (args[0]->IsFunction()) {
+        RefPtr<JsTouchFunction> jsOnTouchFunc = AceType::MakeRefPtr<JsTouchFunction>(JSRef<JSFunc>::Cast(args[0]));
         auto onTouchId = EventMarker(
-            [func = std::move(jsOnTouchFunc_)](const BaseEventInfo* info) {
-                const TouchCallBackInfo* touchInfo = static_cast<const TouchCallBackInfo*>(info);
-                if (!touchInfo) {
-                    LOGE("Error processing event. Not an instance of TouchCallBackInfo");
-                    return;
-                }
-                func->execute(*touchInfo);
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnTouchFunc)](BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                auto touchInfo = TypeInfoHelper::DynamicCast<TouchEventInfo>(info);
+                func->Execute(*touchInfo);
             },
-            "onTouch", 0);
-        auto touchComponent = AceType::MakeRefPtr<OHOS::Ace::TouchListenerComponent>();
+            "onTouch");
+        auto touchComponent = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
         touchComponent->SetOnTouchId(onTouchId);
-        result.emplace_back(touchComponent);
     }
-    if (panHandler_) {
-        result.emplace_back(panHandler_->CreateComponent());
+}
+
+void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        RefPtr<JsKeyFunction> jsOnKeyFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+        auto onKeyId = EventMarker(
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyFunc)](BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                auto keyInfo = TypeInfoHelper::DynamicCast<KeyEventInfo>(info);
+                func->Execute(*keyInfo);
+            },
+            "onKey", 0);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        focusableComponent->SetFocusable(true);
+        focusableComponent->SetOnKeyId(onKeyId);
     }
-    if (onClickFunc_) {
-        auto onClickId = EventMarker([func = std::move(onClickFunc_)](const BaseEventInfo* info) {
-            LOGD("About to call onclick method on js");
-#ifdef USE_QUICKJS_ENGINE
-            func->execute();
-#elif USE_V8_ENGINE
-            auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-            func->execute(*clickInfo);
-#endif
-        });
-        auto clickHandler = AceType::MakeRefPtr<OHOS::Ace::GestureListenerComponent>();
-        clickHandler->SetOnClickId(onClickId);
-        result.emplace_back(std::move(clickHandler));
-    }
-    return result;
 }
 
-void JSInteractableView::SetTouchHandler(JSTouchHandler* touchHandler)
+void JSInteractableView::JsOnPan(const JSCallbackInfo& args)
 {
-    LOGD("JSInteractableView setTouchHandler");
-    touchHandler_ = touchHandler;
-}
-
-void JSInteractableView::SetPanHandler(JSPanHandler* panHandler)
-{
-    LOGD("JSInteractableView setPanHandler");
-    panHandler_ = panHandler;
-}
-
-void JSInteractableView::SetClickHandler(RefPtr<ClickFunction>& clickHandler)
-{
-    onClickFunc_ = clickHandler;
-}
-
-#ifdef USE_QUICKJS_ENGINE
-void JSInteractableView::AttachJSTouchHandler(JSValueConst jsHandler)
-{
-    jsHandler_ = jsHandler;
-}
-
-void JSInteractableView::MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc)
-{
-    LOGD("JSInteractableView => MarkGC: Mark value for GC start");
-    if (!JS_IsNull(jsHandler_)) {
-        JS_MarkValue(rt, jsHandler_, markFunc);
-    }
-    LOGD("JSInteractableView => MarkGC: Mark value for GC end");
-}
-
-void JSInteractableView::ReleaseRT(JSRuntime* rt)
-{
-    LOGD("JSInteractableView => release start");
-    if (!JS_IsNull(jsHandler_)) {
-        JS_FreeValueRT(rt, jsHandler_);
-    }
-
-    LOGD("JSInteractableView => release end");
-}
-
-JSValue JSInteractableView::JsOnTouch(JSContext* ctx, JSValueConst this_value, int32_t argc, JSValueConst* argv)
-{
-    if ((argc != 1) || !JS_IsObject(argv[0])) {
-        return JS_ThrowSyntaxError(ctx, "touch() expects a TouchHandler object as parameter. Throwing exception.");
-    }
-
-    JSTouchHandler* handler = Unwrap<JSTouchHandler>(argv[0]);
-    if (!handler) {
-        return JS_ThrowSyntaxError(ctx, "touch() expects a TouchHandler object as parameter. Throwing exception.");
-    }
-
-    SetTouchHandler(handler);
-    AttachJSTouchHandler(JS_DupValue(ctx, argv[0]));
-    return JS_DupValue(ctx, this_value); // chaining
-}
-
-JSValue JSInteractableView::JsOnClick(JSContext* ctx, JSValueConst this_value, int32_t argc, JSValueConst* argv)
-{
-    if ((argc != 1) || !JS_IsFunction(ctx, argv[0])) {
-        LOGE("onCick expects a function as parameter. Throwing exception.");
-        return JS_ThrowSyntaxError(ctx, "onClick() expect a function parameter. Throwing exception");
-    }
-
-    QJSContext::Scope scope(ctx);
-
-    // Dup and Free shoulj happen inside the QJSClickFunction
-    RefPtr<QJSClickFunction> clickHandler = AceType::MakeRefPtr<QJSClickFunction>(ctx, JS_DupValue(ctx, argv[0]));
-    SetClickHandler(clickHandler);
-    return JS_DupValue(ctx, this_value); // for call chaining
-}
-
-#endif
-
-#ifdef USE_V8_ENGINE
-void JSInteractableView::JsOnTouch(const v8::FunctionCallbackInfo<v8::Value>& args)
-{
-    auto isolate = args.GetIsolate();
-    v8::HandleScope scp(isolate);
-    if (args.Length() > 0 && args[0]->IsFunction()) {
-        v8::Local<v8::Function> jsFunction = v8::Local<v8::Function>::Cast(args[0]);
-        jsOnTouchFunc_ = AceType::MakeRefPtr<V8TouchFunction>(jsFunction);
-    }
-    args.GetReturnValue().Set(args.This());
-}
-
-void JSInteractableView::JsOnPan(const v8::FunctionCallbackInfo<v8::Value>& args)
-{
-    auto isolate = args.GetIsolate();
-    v8::HandleScope scp(isolate);
-    auto context = isolate->GetCurrentContext();
-
     LOGD("JSInteractableView JsOnPan");
     if (args[0]->IsObject()) {
-        v8::Local<v8::Object> obj = args[0]->ToObject(context).ToLocalChecked();
-        JSPanHandler* handler = static_cast<JSPanHandler*>(obj->GetAlignedPointerFromInternalField(0));
-        SetPanHandler(handler);
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        JSPanHandler* handler = obj->Unwrap<JSPanHandler>();
+        if (handler) {
+            handler->CreateComponent(args);
+        }
     }
-    args.GetReturnValue().Set(args.This());
 }
 
-void JSInteractableView::JsOnClick(const v8::FunctionCallbackInfo<v8::Value>& info)
+void JSInteractableView::JsOnDelete(const JSCallbackInfo& info)
 {
-    auto isolate = info.GetIsolate();
-    v8::HandleScope scp(isolate);
-    LOGD("JSInteractableView JsOnClick");
+    LOGD("JSInteractableView JsOnDelete");
     if (info[0]->IsFunction()) {
-        v8::Local<v8::Function> clickFunction = v8::Local<v8::Function>::Cast(info[0]);
-        RefPtr<V8ClickFunction> jsOnClickFunc = AceType::MakeRefPtr<V8ClickFunction>(clickFunction);
-        SetClickHandler(jsOnClickFunc);
+        RefPtr<JsFunction> jsOnDeleteFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+            JSRef<JSFunc>::Cast(info[0]));
+        auto onDeleteId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnDeleteFunc)]() {
+            LOGD("onDelete callback");
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+            func->Execute();
+        });
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        focusableComponent->SetOnDeleteId(onDeleteId);
     }
-    info.GetReturnValue().Set(info.This());
 }
-#endif
+
+void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        click->SetOnClick(GetTapGesture(info));
+    }
+}
+
+EventMarker JSInteractableView::GetClickEventMarker(const JSCallbackInfo& info)
+{
+    RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onClickId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)]
+        (const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+        auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+        func->Execute(*clickInfo);
+    });
+    return onClickId;
+}
+
+RefPtr<Gesture> JSInteractableView::GetTapGesture(const JSCallbackInfo& info)
+{
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
+    RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    tapGesture->SetOnActionId([execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)]
+        (const GestureEvent& info) {
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+        func->Execute(info);
+    });
+    return tapGesture;
+}
+
+void JSInteractableView::SetFocusable(bool focusable)
+{
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+    if (focusableComponent) {
+        focusableComponent->SetFocusable(focusable);
+    }
+}
+void JSInteractableView::SetFocusNode(bool isFocusNode)
+{
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+    if (focusableComponent) {
+        focusableComponent->SetFocusNode(!isFocusNode);
+    }
+}
+
+void JSInteractableView::JsOnAppear(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        RefPtr<JsFunction> jsOnAppearFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+            JSRef<JSFunc>::Cast(info[0]));
+
+        auto onAppearId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+            LOGI("About to call JsOnAppear method on js");
+            func->Execute();
+        });
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        component->SetOnAppearEventId(onAppearId);
+    }
+}
+
+void JSInteractableView::JsOnDisAppear(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        RefPtr<JsFunction> jsOnDisAppearFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+            JSRef<JSFunc>::Cast(info[0]));
+        auto onDisAppearId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+            func->Execute();
+        });
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        component->SetOnDisappearEventId(onDisAppearId);
+    }
+}
+
 } // namespace OHOS::Ace::Framework

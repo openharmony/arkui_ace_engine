@@ -65,6 +65,10 @@ bool DOMChart::SetSpecializedAttr(const std::pair<std::string, std::string>& att
 {
     // this map should be sorted by key.
     static const LinearMapNode<void (*)(const std::string&, DOMChart&)> chartAttrsOperators[] = {
+        { DOM_CHART_ANIMATION_DURATION,
+            [](const std::string& val, DOMChart& chart) {
+              chart.animationDuration_ = StringToDouble(val);
+            } },
         { DOM_AUTO_SCALE,
             [](const std::string& val, DOMChart& chart) {
               chart.autoScale_ = StringToBool(val);
@@ -117,7 +121,7 @@ bool DOMChart::SetSpecializedStyle(const std::pair<std::string, std::string>& st
     static const LinearMapNode<void (*)(const std::string&, DOMChart&)> chartStylesOperators[] = {
         { DOM_BACKGROUND_COLOR,
             [](const std::string& val, DOMChart& chart) {
-                chart.backgroundColor_ = Color::FromString(val);
+                chart.backgroundColor_ = chart.ParseColor(val);
                 chart.trackColorSet_ = true;
             } },
         { DOM_CENTER_X,
@@ -203,7 +207,13 @@ void DOMChart::OnSetStyleFinished()
 // Sets other properties of a point, except coordinates.
 void DOMChart::SetPoint(PointInfo& pointInfo, PointInfo getPointInfo)
 {
+    if (!getPointInfo.GetFillColorString().empty()) {
+        getPointInfo.SetFillColor(ParseColor(getPointInfo.GetFillColorString()));
+    }
     pointInfo.SetFillColor(getPointInfo.GetFillColor());
+    if (!getPointInfo.GetStrokeColorString().empty()) {
+        getPointInfo.SetStrokeColor(ParseColor(getPointInfo.GetStrokeColorString()));
+    }
     pointInfo.SetStrokeColor(getPointInfo.GetStrokeColor());
     pointInfo.SetPointStrokeWidth(getPointInfo.GetPointStrokeWidth());
     pointInfo.SetPointSize(getPointInfo.GetPointSize());
@@ -220,12 +230,35 @@ void DOMChart::SetChart(MainChart& chartDataset)
     chartDataset.SetTextSize(textSize_);
     chartDataset.SetFontFamily(fontFamily_);
 
-    // remove points out of range. get topPoint and bottomPoint.
     auto points = chartDataset.GetData();
     if (points.empty()) {
         LOGD("points is empty, chart has no data to set.");
         return;
     }
+
+    // parse color from color string
+    for (auto& point : points) {
+        auto pointInfo = point.GetPointInfo();
+        if (!pointInfo.GetStrokeColorString().empty()) {
+            pointInfo.SetStrokeColor(ParseColor(pointInfo.GetStrokeColorString()));
+        }
+        if (!pointInfo.GetFillColorString().empty()) {
+            pointInfo.SetFillColor(ParseColor(pointInfo.GetFillColorString()));
+        }
+        auto segment = point.GetSegmentInfo();
+        if (!segment.GetColorString().empty()) {
+            segment.SetSegmentColor(ParseColor(segment.GetColorString()));
+        }
+        auto text = point.GetTextInfo();
+        if (!text.GetColorString().empty()) {
+            text.SetColor(ParseColor(text.GetColorString()));
+        }
+        point.SetPointInfo(pointInfo);
+        point.SetSegmentInfo(segment);
+        point.SetTextInfo(text);
+    }
+
+    // remove points out of range. get topPoint and bottomPoint.
     sort(points.begin(), points.end(),
         [](LineInfo a, LineInfo b) { return a.GetPointInfo().GetX() < b.GetPointInfo().GetX(); });
 
@@ -327,6 +360,7 @@ void DOMChart::PrepareSpecializedComponent()
         }
     } else if (chartType_ == ChartType::RAINBOW) {
         dataPanelChild_ = AceType::MakeRefPtr<PercentageDataPanelComponent>(chartType_);
+        dataPanelChild_->SetAnimationDuration(animationDuration_);
         dataPanelChild_->SetEffects(showEffect_);
         dataPanelChild_->SetAutoScale(autoScale_);
         auto percentageDataPanel = AceType::DynamicCast<PercentageDataPanelComponent>(dataPanelChild_);

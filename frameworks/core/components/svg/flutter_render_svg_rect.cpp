@@ -53,40 +53,100 @@ void FlutterRenderSvgRect::Paint(RenderContext& context, const Offset& offset)
         return;
     }
 
-    double width = GetLayoutSize().Width();
-    double height = GetLayoutSize().Height();
-    SkRRect rrect = SkRRect::MakeRectXY(
-        SkRect::MakeXYWH(ConvertDimensionToPx(x_, width), ConvertDimensionToPx(y_, height),
-            ConvertDimensionToPx(width_, width), ConvertDimensionToPx(height_, height)),
-        ConvertDimensionToPx(rx_, width), ConvertDimensionToPx(ry_, height));
+    if (transformLayer_) {
+        transformLayer_->UpdateTransformProperty(transformAttrs_, GetTransformOffset());
+    }
+
+    SkAutoCanvasRestore save(skCanvas, false);
+    PaintMaskLayer(context, offset, offset);
+
     SkPath path;
-    path.addRRect(rrect);
-    FlutterSvgPainter::SetFillStyle(skCanvas, path, fillState_, opacity_);
-    FlutterSvgPainter::SetStrokeStyle(skCanvas, path, strokeState_, opacity_);
+    GetPath(path);
+    UpdateGradient(fillState_);
+
+    RenderInfo renderInfo = { AceType::Claim(this), offset, opacity_, true };
+    FlutterSvgPainter::SetFillStyle(skCanvas, path, fillState_, renderInfo);
+    FlutterSvgPainter::SetStrokeStyle(skCanvas, path, strokeState_, renderInfo);
     RenderNode::Paint(context, offset);
 }
 
-void FlutterRenderSvgRect::UpdateMotion(const std::string& path, const std::string& rotate,
-    double percent, const Point& point)
+void FlutterRenderSvgRect::PaintDirectly(RenderContext& context, const Offset& offset)
+{
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkCanvas* skCanvas = canvas->canvas();
+    if (!skCanvas) {
+        LOGE("Paint skCanvas is null");
+        return;
+    }
+
+    if (!transformAttrs_.empty()) {
+        auto matrix4 = TransformLayer::UpdateTransformAttr(transformAttrs_, GetTransformOffset());
+        skCanvas->save();
+        skCanvas->concat(FlutterSvgPainter::ToSkMatrix(matrix4));
+    }
+
+    SkPath path;
+    GetPath(path);
+    UpdateGradient(fillState_);
+    FlutterSvgPainter::SetFillStyle(skCanvas, path, fillState_, opacity_);
+    FlutterSvgPainter::SetStrokeStyle(skCanvas, path, strokeState_, opacity_);
+    if (!transformAttrs_.empty()) {
+        skCanvas->restore();
+    }
+}
+
+void FlutterRenderSvgRect::UpdateMotion(const std::string& path, const std::string& rotate, double percent)
 {
     if (!transformLayer_) {
         LOGE("transformLayer is null");
         return;
     }
     bool isSuccess = true;
-    auto motionMatrix = FlutterSvgPainter::CreateMotionMatrix(path, rotate, point, percent, isSuccess);
+    auto motionMatrix = FlutterSvgPainter::CreateMotionMatrix(path, rotate, percent, isSuccess);
     if (isSuccess) {
         auto transform = FlutterRenderTransform::GetTransformByOffset(motionMatrix, GetGlobalOffset());
         transformLayer_->Update(transform);
     }
 }
 
-bool FlutterRenderSvgRect::GetStartPoint(Point& point)
+Rect FlutterRenderSvgRect::GetPaintBounds(const Offset& offset)
 {
-    double width = GetLayoutSize().Width();
-    double height = GetLayoutSize().Height();
-    point = Point(ConvertDimensionToPx(x_, width), ConvertDimensionToPx(y_, height));
-    return true;
+    SkPath path;
+    GetPath(path);
+    auto& bounds = path.getBounds();
+    return Rect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
+}
+
+void FlutterRenderSvgRect::GetPath(SkPath& path)
+{
+    double rx = 0.0;
+    if (GreatOrEqual(rx_.Value(), 0.0)) {
+        rx = ConvertDimensionToPx(rx_, LengthType::HORIZONTAL);
+    } else {
+        if (GreatNotEqual(ry_.Value(), 0.0)) {
+            rx = ConvertDimensionToPx(ry_, LengthType::VERTICAL);
+        }
+    }
+    double ry = 0.0;
+    if (GreatOrEqual(ry_.Value(), 0.0)) {
+        ry = ConvertDimensionToPx(ry_, LengthType::VERTICAL);
+    } else {
+        if (GreatNotEqual(rx_.Value(), 0.0)) {
+            ry = ConvertDimensionToPx(rx_, LengthType::HORIZONTAL);
+        }
+    }
+
+    SkRRect rrect = SkRRect::MakeRectXY(
+        SkRect::MakeXYWH(ConvertDimensionToPx(x_, LengthType::HORIZONTAL),
+            ConvertDimensionToPx(y_, LengthType::VERTICAL), ConvertDimensionToPx(width_, LengthType::HORIZONTAL),
+            ConvertDimensionToPx(height_, LengthType::VERTICAL)),
+        rx, ry);
+    path.addRRect(rrect);
 }
 
 } // namespace OHOS::Ace

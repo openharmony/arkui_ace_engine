@@ -48,7 +48,7 @@ public:
     void PopPanel(bool direct = false);
     void PushToastComponent(const RefPtr<Component>& newComponent, int32_t toastId);
     void PopToastComponent(int32_t toastPopId);
-    bool PushDialog(const RefPtr<Component>& newComponent);
+    bool PushDialog(const RefPtr<Component>& newComponent, bool directBuild = false);
     bool PopDialog(bool directBuild = false);
     void PopTextOverlay(bool directBuild = false);
     void PopPopup(const ComposeId& id);

@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components/common/layout/position_param.h"
+#include "core/components/common/properties/motion_path_option.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/base/component.h"
 
@@ -224,6 +225,26 @@ public:
         isIgnored_ = ignore;
     }
 
+    bool InterceptEvent() const
+    {
+        return interceptEvent_;
+    }
+
+    void SetInterceptEvent(bool interceptEvent)
+    {
+        interceptEvent_ = interceptEvent;
+    }
+
+    const MotionPathOption& GetMotionPathOption() const
+    {
+        return motionPathOption_;
+    }
+
+    void SetMotionPathOption(const MotionPathOption& option)
+    {
+        motionPathOption_ = option;
+    }
+
     virtual RefPtr<RenderNode> CreateRenderNode() = 0;
 
 protected:
@@ -235,9 +256,11 @@ protected:
     MeasureType measureType_ = MeasureType::PARENT;
     EventMarker onLayoutReady_;
     bool isIgnored_ = false;
+    bool interceptEvent_ = false;
 
     bool isCustomComponent_ = false;
     int32_t zIndex_ = 0;
+    MotionPathOption motionPathOption_;
 };
 
 } // namespace OHOS::Ace

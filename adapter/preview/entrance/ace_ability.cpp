@@ -30,12 +30,8 @@ std::atomic<bool> AceAbility::loopRunning_ = true;
 namespace {
 
 // JS frontend maintain the page ID self, so it's useless to pass page ID from platform
-// layer, neither OpenHarmony or Windows.
+// layer, neither OpenHarmony or Windows, we should delete here usage when Java delete it.
 constexpr int32_t UNUSED_PAGE_ID = 1;
-
-// Different with mobile, we don't support multi-instances in Windows, because we only want
-// preivew UI effect, it doesn't make scense to create multi ability in one process.
-constexpr int32_t ACE_INSTANCE_ID = 0;
 
 constexpr char ASSET_PATH_SHARE[] = "share";
 #ifdef WINDOWS_PLATFORM
@@ -87,12 +83,10 @@ bool AceAbility::DispatchTouchEvent(const TouchPoint& event)
 
     std::promise<bool> touchPromise;
     std::future<bool> touchFuture = touchPromise.get_future();
-    container->GetTaskExecutor()->PostTask(
-        [aceView, event, &touchPromise]() {
-            bool isHandled = aceView->HandleTouchEvent(event);
-            touchPromise.set_value(isHandled);
-        },
-        TaskExecutor::TaskType::PLATFORM);
+    container->GetTaskExecutor()->PostTask([aceView, event, &touchPromise]() {
+        bool isHandled = aceView->HandleTouchEvent(event);
+        touchPromise.set_value(isHandled);
+    }, TaskExecutor::TaskType::PLATFORM);
     return touchFuture.get();
 }
 
@@ -111,33 +105,43 @@ bool AceAbility::DispatchBackPressedEvent()
 
     std::promise<bool> backPromise;
     std::future<bool> backFuture = backPromise.get_future();
-    container->GetTaskExecutor()->PostTask(
-        [container, context, &backPromise]() {
-            bool canBack = false;
-            if (context->IsLastPage()) {
-                LOGW("Can't back because this is the last page!");
-            } else {
-                canBack = context->CallRouterBackToPopPage();
-            }
-            backPromise.set_value(canBack);
-        },
-        TaskExecutor::TaskType::PLATFORM);
+    auto weak = AceType::WeakClaim(AceType::RawPtr(context));
+    container->GetTaskExecutor()->PostTask([weak, &backPromise]() {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGW("context is nullptr.");
+            return;
+        }
+        bool canBack = false;
+        if (context->IsLastPage()) {
+            LOGW("Can't back because this is the last page!");
+        } else {
+            canBack = context->CallRouterBackToPopPage();
+        }
+        backPromise.set_value(canBack);
+    }, TaskExecutor::TaskType::PLATFORM);
     return backFuture.get();
 }
 
 AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
 {
     SystemProperties::InitDeviceInfo(runArgs_.deviceWidth, runArgs_.deviceHeight,
-        runArgs_.orientation == DeviceOrientation::PORTRAIT ? 0 : 1, runArgs_.resolution, runArgs_.isRound);
-    SystemProperties::InitDeviceType(runArgs_.deviceType);
-    SystemProperties::SetColorMode(runArgs_.colorMode == OHOS::Ace::Platform::ColorMode::DARK ?
+        runArgs_.deviceConfig.orientation == DeviceOrientation::PORTRAIT ? 0 : 1,
+        runArgs_.deviceConfig.density, runArgs_.isRound);
+    SystemProperties::InitDeviceType(runArgs_.deviceConfig.deviceType);
+    SystemProperties::SetColorMode(runArgs_.deviceConfig.colorMode == OHOS::Ace::Platform::ColorMode::DARK ?
         OHOS::Ace::ColorMode::DARK : OHOS::Ace::ColorMode::LIGHT);
     if (runArgs_.formsEnabled) {
         LOGI("CreateContainer with JS_CARD frontend");
         AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD);
-    } else {
+    } else if (runArgs_.aceVersion == AceVersion::ACE_1_0) {
         LOGI("CreateContainer with JS frontend");
         AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS);
+    } else if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
+        LOGI("CreateContainer with JSDECLARATIVE frontend");
+        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS);
+    } else {
+        LOGE("UnKnown frontend type");
     }
 }
 
@@ -169,16 +173,32 @@ void AceAbility::InitEnv()
         ACE_INSTANCE_ID, "", { runArgs_.assetPath, GetCustomAssetPath(runArgs_.assetPath).append(ASSET_PATH_SHARE) });
 
     AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.resourcesPath,
-                                                runArgs_.themeId, runArgs_.colorMode);
+                                                runArgs_.themeId, runArgs_.deviceConfig.colorMode);
 
     auto view = new FlutterAceView(ACE_INSTANCE_ID);
-    AceContainer::SetView(view, runArgs_.resolution, runArgs_.deviceWidth, runArgs_.deviceHeight);
+    AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
+    AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     IdleCallback idleNoticeCallback = [view](int64_t deadline) { view->ProcessIdleEvent(deadline); };
     FlutterDesktopSetIdleCallback(controller_, idleNoticeCallback);
 
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
     view->NotifySurfaceChanged(runArgs_.deviceWidth, runArgs_.deviceHeight);
-    view->NotifyDensityChanged(runArgs_.resolution);
+    view->NotifyDensityChanged(runArgs_.deviceConfig.density);
+}
+
+void AceAbility::OnConfigurationChanged(const DeviceConfig& newConfig)
+{
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null, change configuration failed.");
+        return;
+    }
+    if (newConfig.colorMode == runArgs_.deviceConfig.colorMode) {
+        LOGI("newConfig's colorMode is same as before, return.");
+        return;
+    }
+    container->UpdateColorMode(newConfig.colorMode);
+    runArgs_.deviceConfig.colorMode = newConfig.colorMode;
 }
 
 void AceAbility::Start()
@@ -200,14 +220,14 @@ void AceAbility::Stop()
 #ifdef USE_GLFW_WINDOW
 void AdaptDeviceType(AceRunArgs& runArgs)
 {
-    if (runArgs.deviceType == DeviceType::PHONE) {
-        runArgs.resolution = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_PHONE;
-    } else if (runArgs.deviceType == DeviceType::WATCH) {
-        runArgs.resolution = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_WATCH;
-    } else if (runArgs.deviceType == DeviceType::TABLET) {
-        runArgs.resolution = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_TABLE;
-    } else if (runArgs.deviceType == DeviceType::TV) {
-        runArgs.resolution = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_TV;
+    if (runArgs.deviceConfig.deviceType == DeviceType::PHONE) {
+        runArgs.deviceConfig.density = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_PHONE;
+    } else if (runArgs.deviceConfig.deviceType == DeviceType::WATCH) {
+        runArgs.deviceConfig.density = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_WATCH;
+    } else if (runArgs.deviceConfig.deviceType == DeviceType::TABLET) {
+        runArgs.deviceConfig.density = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_TABLE;
+    } else if (runArgs.deviceConfig.deviceType == DeviceType::TV) {
+        runArgs.deviceConfig.density = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_TV;
     } else {
         LOGE("DeviceType not supported");
     }
@@ -222,10 +242,10 @@ void AceAbility::RunEventLoop()
         auto window = FlutterDesktopGetWindow(controller_);
         int width;
         int height;
-        FlutterDesktopGetFramebufferSize(window, &width, &height);
+        FlutterDesktopGetWindowSize(window, &width, &height);
         if (width != runArgs_.deviceWidth || height != runArgs_.deviceHeight) {
             AdaptDeviceType(runArgs_);
-            SurfaceChanged(runArgs_.orientation, width, height, runArgs_.resolution);
+            SurfaceChanged(runArgs_.deviceConfig.orientation, runArgs_.deviceConfig.density, width, height);
         }
 #endif
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -254,10 +274,8 @@ void AceAbility::RunEventLoop()
 }
 
 void AceAbility::SurfaceChanged(
-    const DeviceOrientation& orientation, const int32_t& width, const int32_t& height, const double& resolution)
+    const DeviceOrientation& orientation, const double& resolution, int32_t& width, int32_t& height)
 {
-    SystemProperties::InitDeviceInfo(
-        width, height, orientation == DeviceOrientation::PORTRAIT ? 0 : 1, resolution, runArgs_.isRound);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
         LOGE("container is null, SurfaceChanged failed.");
@@ -269,12 +287,25 @@ void AceAbility::SurfaceChanged(
         LOGE("aceView is null, SurfaceChanged failed.");
         return;
     }
+    auto window = FlutterDesktopGetWindow(controller_);
+    // Need to change the window resolution and then change the rendering resolution. Otherwise, the image may not adapt
+    // to the new window after the window is modified.
+    auto context = container->GetPipelineContext();
+    if (context == nullptr) {
+        LOGE("context is null, SurfaceChanged failed.");
+        return;
+    }
+    context->GetTaskExecutor()->PostSyncTask(
+        [window, &width, &height]() { FlutterDesktopSetWindowSize(window, width, height); },
+        TaskExecutor::TaskType::PLATFORM);
+    SystemProperties::InitDeviceInfo(
+        width, height, orientation == DeviceOrientation::PORTRAIT ? 0 : 1, resolution, runArgs_.isRound);
     viewPtr->NotifySurfaceChanged(width, height);
     viewPtr->NotifyDensityChanged(resolution);
-    runArgs_.orientation = orientation;
+    runArgs_.deviceConfig.orientation = orientation;
     runArgs_.deviceWidth = width;
     runArgs_.deviceHeight = height;
-    runArgs_.resolution = resolution;
+    runArgs_.deviceConfig.density = resolution;
 }
 
 std::string AceAbility::GetJSONTree()

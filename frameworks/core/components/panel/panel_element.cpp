@@ -61,6 +61,17 @@ void PanelElement::ShowPanel()
     }
     auto slidingPanel = SlidingPanelComponent::Create(panel_);
     stackElement->PushPanel(slidingPanel, panel_->GetPanelType() == PanelType::TEMP_DISPLAY);
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    auto manager = context->GetAccessibilityManager();
+    if (manager) {
+        auto node = manager->GetAccessibilityNodeById(StringUtils::StringToInt(panel_->GetId()));
+        if (!node) {
+            return;
+        }
+        node->SetZIndexToChild(stackElement->GetChildrenSize());
+        manager->ClearNodeRectInfo(node, false);
+    }
+#endif
 }
 
 void PanelElement::ClosePanel()
@@ -74,6 +85,17 @@ void PanelElement::ClosePanel()
         return;
     }
     lastStack->PopPanel(true);
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    auto manager = context->GetAccessibilityManager();
+    if (manager) {
+        auto node = manager->GetAccessibilityNodeById(StringUtils::StringToInt(panel_->GetId()));
+        if (!node) {
+            return;
+        }
+        node->SetZIndexToChild(0);
+        manager->ClearNodeRectInfo(node, true);
+    }
+#endif
 }
 
 } // namespace OHOS::Ace

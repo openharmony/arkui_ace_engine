@@ -34,14 +34,6 @@ enum class PropertyAnimatableType {
     PROPERTY_OFFSET_X,
     PROPERTY_OFFSET_Y,
     PROPERTY_BORDER_RADIUS,
-    PROPERTY_PADDING_LEFT,
-    PROPERTY_PADDING_TOP,
-    PROPERTY_PADDING_RIGHT,
-    PROPERTY_PADDING_BOTTOM,
-    PROPERTY_MARGIN_LEFT,
-    PROPERTY_MARGIN_TOP,
-    PROPERTY_MARGIN_RIGHT,
-    PROPERTY_MARGIN_BOTTOM,
 };
 
 template<class T>
@@ -104,44 +96,6 @@ public:
         }
         animation->AddListener(setter);
         initValue = getter();
-        if (animation->IsDeclarativeAnimation()) {
-            animation->SetStart(getter());
-        }
-        return true;
-    }
-
-    template<class U, class V>
-    static bool SetProperty(const RefPtr<PropertyAnimatable>& propertyAnimatable, PropertyAnimatableType property,
-        RefPtr<Animation<V>>& animation)
-    {
-        U u {};
-        if (!propertyAnimatable) {
-            LOGE("Inavlid property animation. animatable is null.");
-            return false;
-        }
-        if (!animation) {
-            LOGE("Invalid property animation failed. animation is null.");
-            return false;
-        }
-        if (!animation->IsDeclarativeAnimation()) {
-            LOGE("SetProperty supports only for declarative frontend.");
-            return false;
-        }
-
-        LOGD("Property Animation. property: %{public}d.", property);
-        typename U::SetterMap setterMap = propertyAnimatable->GetPropertySetterMap(u);
-
-        auto setterIter = setterMap.find(property);
-        if (setterIter == setterMap.end()) {
-            LOGW("Property animation failed. no setter found for property: %{public}d", property);
-            return false;
-        }
-        auto& setter = setterIter->second;
-        if (!setter) {
-            LOGE("Property animation failed. setter is null for property: %{public}d", property);
-            return false;
-        }
-        setter(animation->GetEndValue());
         return true;
     }
 

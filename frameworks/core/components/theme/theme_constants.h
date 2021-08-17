@@ -29,7 +29,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_attributes.h"
-#include "core/components/theme/theme_constants_defines.h"
 #include "core/components/theme/theme_style.h"
 
 namespace OHOS::Ace {
@@ -107,6 +106,10 @@ public:
      * NOTE: ResourceId::NO_ID will be returned if not found or value is not ResourceId.
      */
     InternalResource::ResourceId GetResourceId(uint32_t key) const;
+
+    bool GetMediaResource(uint32_t resId, std::ostream& dest) const;
+
+    bool GetResourceIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const;
 
     void LoadCustomStyle(const RefPtr<AssetManager>& assetManager);
 

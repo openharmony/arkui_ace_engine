@@ -76,6 +76,10 @@ FlutterTaskExecutor::~FlutterTaskExecutor()
 void FlutterTaskExecutor::InitPlatformThread()
 {
     platformRunner_ = flutter::PlatformTaskRunnerAdapter::CurrentTaskRunner();
+
+#ifdef ACE_DEBUG
+    FillTaskTypeTable(TaskType::PLATFORM);
+#endif
 }
 
 void FlutterTaskExecutor::InitJsThread(bool newThread)
@@ -86,6 +90,11 @@ void FlutterTaskExecutor::InitJsThread(bool newThread)
     } else {
         jsRunner_ = uiRunner_;
     }
+
+#ifdef ACE_DEBUG
+    PostTaskToTaskRunner(
+        jsRunner_, [weak = AceType::WeakClaim(this)] { FillTaskTypeTable(weak, TaskType::JS); }, 0);
+#endif
 }
 
 void FlutterTaskExecutor::InitOtherThreads(const flutter::TaskRunners& taskRunners)
@@ -98,6 +107,15 @@ void FlutterTaskExecutor::InitOtherThreads(const flutter::TaskRunners& taskRunne
         uiRunner_, [] { SetThreadPriority(UI_THREAD_PRIORITY); }, 0);
     PostTaskToTaskRunner(
         gpuRunner_, [] { SetThreadPriority(GPU_THREAD_PRIORITY); }, 0);
+
+#ifdef ACE_DEBUG
+    PostTaskToTaskRunner(
+        uiRunner_, [weak = AceType::WeakClaim(this)] { FillTaskTypeTable(weak, TaskType::UI); }, 0);
+    PostTaskToTaskRunner(
+        ioRunner_, [weak = AceType::WeakClaim(this)] { FillTaskTypeTable(weak, TaskType::IO); }, 0);
+    PostTaskToTaskRunner(
+        gpuRunner_, [weak = AceType::WeakClaim(this)] { FillTaskTypeTable(weak, TaskType::GPU); }, 0);
+#endif
 }
 
 bool FlutterTaskExecutor::OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const
@@ -151,5 +169,101 @@ void FlutterTaskExecutor::RemoveTaskObserver()
 {
     fml::MessageLoop::GetCurrent().RemoveTaskObserver(reinterpret_cast<intptr_t>(this));
 }
+
+#ifdef ACE_DEBUG
+static const char* TaskTypeToString(TaskExecutor::TaskType type)
+{
+    switch (type) {
+        case TaskExecutor::TaskType::PLATFORM:
+            return "PLATFORM";
+        case TaskExecutor::TaskType::UI:
+            return "UI";
+        case TaskExecutor::TaskType::IO:
+            return "IO";
+        case TaskExecutor::TaskType::GPU:
+            return "GPU";
+        case TaskExecutor::TaskType::JS:
+            return "JS";
+        case TaskExecutor::TaskType::BACKGROUND:
+            return "BACKGROUND";
+        case TaskExecutor::TaskType::UNKNOWN:
+        default:
+            return "UNKNOWN";
+    }
+}
+
+thread_local TaskExecutor::TaskType FlutterTaskExecutor::localTaskType = TaskExecutor::TaskType::UNKNOWN;
+
+bool FlutterTaskExecutor::OnPreSyncTask(TaskType type) const
+{
+    std::lock_guard<std::mutex> lock(tableMutex_);
+    auto it = taskTypeTable_.find(type);
+    // when task type not filled, just skip
+    if (it == taskTypeTable_.end()) {
+        return true;
+    }
+
+    auto itSync = syncTaskTable_.find(it->second.threadId);
+    while (itSync != syncTaskTable_.end()) {
+        if (itSync->second == std::this_thread::get_id()) {
+            DumpDeadSyncTask(localTaskType, type);
+            ACE_DCHECK(itSync->second != std::this_thread::get_id() && "DEAD LOCK HAPPENED !!!");
+            return false;
+        }
+
+        itSync = syncTaskTable_.find(itSync->second);
+    }
+
+    syncTaskTable_.emplace(std::this_thread::get_id(), it->second.threadId);
+    return true;
+}
+
+void FlutterTaskExecutor::OnPostSyncTask() const
+{
+    std::lock_guard<std::mutex> lock(tableMutex_);
+    syncTaskTable_.erase(std::this_thread::get_id());
+}
+
+void FlutterTaskExecutor::DumpDeadSyncTask(TaskType from, TaskType to) const
+{
+    auto itFrom = taskTypeTable_.find(from);
+    auto itTo = taskTypeTable_.find(to);
+
+    ACE_DCHECK(itFrom != taskTypeTable_.end());
+    ACE_DCHECK(itTo != taskTypeTable_.end());
+
+    LOGE("DEAD LOCK HAPPEN: %{public}s(%{public}d, %{public}s) -> %{public}s(%{public}d, %{public}s)",
+        TaskTypeToString(from), itFrom->second.tid, itFrom->second.threadName.c_str(),
+        TaskTypeToString(to), itTo->second.tid, itTo->second.threadName.c_str());
+}
+
+void FlutterTaskExecutor::FillTaskTypeTable(TaskType type)
+{
+    constexpr size_t MAX_THREAD_NAME_SIZE = 32;
+    char threadNameBuf[MAX_THREAD_NAME_SIZE] = {0};
+    const char *threadName = threadNameBuf;
+    if (pthread_getname_np(pthread_self(), threadNameBuf, sizeof(threadNameBuf)) != 0) {
+        threadName = "unknown";
+    }
+
+    localTaskType = type;
+    ThreadInfo info = {
+        .threadId = std::this_thread::get_id(),
+        .tid = gettid(),
+        .threadName = threadName,
+    };
+
+    std::lock_guard<std::mutex> lock(tableMutex_);
+    taskTypeTable_.emplace(type, info);
+}
+
+void FlutterTaskExecutor::FillTaskTypeTable(const WeakPtr<FlutterTaskExecutor>& weak, TaskType type)
+{
+    auto taskExecutor = weak.Upgrade();
+    if (taskExecutor) {
+        taskExecutor->FillTaskTypeTable(type);
+    }
+}
+#endif
 
 } // namespace OHOS::Ace

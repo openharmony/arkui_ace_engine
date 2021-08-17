@@ -63,4 +63,24 @@ void RenderPositioned::SetTop(const Dimension& top)
     MarkNeedLayout();
 }
 
+void RenderPositioned::SetRight(const Dimension& right)
+{
+    if (NearEqual(right_.Value(), right.Value()) && (right_.Unit() == right.Unit())) {
+        return;
+    }
+    right_ = right;
+    hasRight_ = true;
+    MarkNeedLayout();
+}
+
+void RenderPositioned::SetBottom(const Dimension& bottom)
+{
+    if (NearEqual(bottom_.Value(), bottom.Value()) && (bottom_.Unit() == bottom.Unit())) {
+        return;
+    }
+    bottom_ = bottom;
+    hasBottom_ = true;
+    MarkNeedLayout();
+}
+
 } // namespace OHOS::Ace

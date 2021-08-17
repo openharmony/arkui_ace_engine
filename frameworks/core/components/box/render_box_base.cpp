@@ -19,6 +19,7 @@
 
 #include "base/geometry/offset.h"
 #include "base/log/dump_log.h"
+#include "core/animation/property_animatable_helper.h"
 #include "core/components/box/box_base_component.h"
 #include "core/components/text_field/render_text_field.h"
 
@@ -28,39 +29,7 @@ namespace {
 const double CIRCLE_LAYOUT_IN_BOX_SCALE = sin(M_PI_4);
 constexpr double BOX_DIAMETER_TO_RADIUS = 2.0;
 
-class DimensionHelper {
-public:
-    using Getter = const Dimension& (Edge::*)() const;
-    using Setter = void (Edge::*)(const Dimension&);
-
-    DimensionHelper(Setter setter, Getter getter) : setter_(setter), getter_(getter) {}
-    ~DimensionHelper() = default;
-
-    const Dimension& Get(const Edge& edge) const
-    {
-        return std::bind(getter_, &edge)();
-    }
-
-    bool Set(double value, Edge* edge) const
-    {
-        if (LessNotEqual(value, 0.0)) {
-            return false;
-        }
-        Dimension dimension = Get(*edge);
-        if (NearEqual(dimension.Value(), value)) {
-            return false;
-        }
-        dimension.SetValue(value);
-        std::bind(setter_, edge, dimension)();
-        return true;
-    }
-
-private:
-    Setter setter_ = nullptr;
-    Getter getter_ = nullptr;
-};
-
-}
+} // namespace
 
 Size RenderBoxBase::GetBorderSize() const
 {
@@ -82,6 +51,11 @@ bool RenderBoxBase::IsSizeValid(const Dimension& value, double maxLimit)
         return percentFlag_ == PERCENT_FLAG_USE_VIEW_PORT;
     }
     return true;
+}
+
+void RenderBoxBase::OnAnimationCallback()
+{
+    MarkNeedLayout();
 }
 
 double RenderBoxBase::CalculateHeightPercent(double percent) const
@@ -226,8 +200,8 @@ EdgePx RenderBoxBase::ConvertEdgeToPx(const Edge& edge, bool additional)
 
 void RenderBoxBase::ConvertMarginPaddingToPx()
 {
-    padding_ = ConvertEdgeToPx(paddingOrigin_, false);
-    margin_ = ConvertEdgeToPx(marginOrigin_, false) + ConvertEdgeToPx(additionalMargin_, true);
+    padding_ = ConvertEdgeToPx(paddingOrigin_, false) + ConvertEdgeToPx(additionalPadding_, true);
+    margin_ = ConvertEdgeToPx(marginOrigin_, false);
 }
 
 void RenderBoxBase::ConvertConstraintsToPx()
@@ -279,16 +253,18 @@ void RenderBoxBase::CalculateGridLayoutSize()
             constraints_.SetMinWidth(defaultWidth);
             constraints_.SetMaxWidth(maxWidth);
         } else {
-            width_ = Dimension(gridColumnInfo_->GetWidth(), DimensionUnit::PX);
+            width_ = AnimatableDimension(gridColumnInfo_->GetWidth(), DimensionUnit::PX);
             LayoutParam gridLayoutParam = GetLayoutParam();
             gridLayoutParam.SetMaxSize(Size(width_.Value(), gridLayoutParam.GetMaxSize().Height()));
             gridLayoutParam.SetMinSize(Size(width_.Value(), gridLayoutParam.GetMinSize().Height()));
             SetLayoutParam(gridLayoutParam);
         }
 
-        const auto& offset = gridColumnInfo_->GetOffset();
+        auto offset = gridColumnInfo_->GetOffset();
         if (offset != UNDEFINED_DIMENSION) {
-            positionParam_.type = PositionType::ABSOLUTE;
+            auto context = context_.Upgrade();
+            positionParam_.type =
+                (context && context->GetIsDeclarative()) ? PositionType::SEMI_RELATIVE : PositionType::ABSOLUTE;
             positionParam_.left.first = offset;
             positionParam_.left.second = true;
         }
@@ -319,13 +295,12 @@ void RenderBoxBase::CalculateSelfLayoutParam()
     const LayoutParam& layoutSetByParent = GetLayoutParam();
     Size constrainMax = selfMax;
     Size constrainMin = selfMin;
+
     if (width_.Unit() != DimensionUnit::PERCENT) {
-        // Margin layout width effect to the child when width unit is PERCENT.
         constrainMax.SetWidth(constrainMax.Width() + margin_.GetLayoutSize().Width());
         constrainMin.SetWidth(constrainMin.Width() + margin_.GetLayoutSize().Width());
     }
     if (height_.Unit() != DimensionUnit::PERCENT) {
-        // Margin layout height effect to the child when height unit is PERCENT.
         constrainMax.SetHeight(constrainMax.Height() + margin_.GetLayoutSize().Height());
         constrainMin.SetHeight(constrainMin.Height() + margin_.GetLayoutSize().Height());
     }
@@ -388,9 +363,12 @@ void RenderBoxBase::AdjustSizeByAspectRatio()
 
 void RenderBoxBase::SetChildLayoutParam()
 {
-    Size deflate = padding_.GetLayoutSize();
+    Size deflate;
+    if (boxSizing_ == BoxSizing::BORDER_BOX) {
+        deflate += padding_.GetLayoutSize();
+        deflate += GetBorderSize();
+    }
     deflate += margin_.GetLayoutSize();
-    deflate += GetBorderSize();
 
     if (deliverMinToChild_) {
         double minWidth = std::max(selfLayoutParam_.GetMinSize().Width() - deflate.Width(), 0.0);
@@ -442,7 +420,11 @@ void RenderBoxBase::CalculateSelfLayoutSize()
     double width = 0.0;
     double childWidth = childSize_.Width() + padding_.GetLayoutSize().Width() + borderSize.Width();
     if (selfDefineWidth_) {
-        width = selfMax.Width();
+        if (boxSizing_ == BoxSizing::BORDER_BOX) {
+            width = selfMax.Width();
+        } else {
+            width = selfMax.Width() + padding_.GetLayoutSize().Width() + borderSize.Width();
+        }
     } else if (useFlexWidth_) {
         if (layoutSetByParent.GetMaxSize().IsWidthInfinite() && viewPort_.Width() < childWidth) {
             width = childWidth;
@@ -463,7 +445,11 @@ void RenderBoxBase::CalculateSelfLayoutSize()
     double height = 0.0;
     double childHeight = childSize_.Height() + padding_.GetLayoutSize().Height() + borderSize.Height();
     if (selfDefineHeight_) {
-        height = selfMax.Height();
+        if (boxSizing_ == BoxSizing::BORDER_BOX) {
+            height = selfMax.Height();
+        } else {
+            height = selfMax.Height() + padding_.GetLayoutSize().Height() + borderSize.Height();
+        }
     } else if (useFlexHeight_) {
         if (layoutSetByParent.GetMaxSize().IsHeightInfinite() && viewPort_.Height() < childHeight) {
             height = childHeight;
@@ -483,6 +469,7 @@ void RenderBoxBase::CalculateSelfLayoutSize()
     touchArea_.SetOffset(margin_.GetOffset());
     touchArea_.SetSize(paintSize_);
     SetLayoutSize(selfLayoutSize_);
+    isChildOverflow_ = childSize_.Width() > GetLayoutSize().Width() || childSize_.Height() > GetLayoutSize().Height();
 }
 
 void RenderBoxBase::CalculateChildPosition()
@@ -507,13 +494,10 @@ void RenderBoxBase::PerformLayout()
         LOGE("[BOX][Dep:%{public}d][LAYOUT]Call Context Upgrade failed. PerformLayout failed.", this->GetDepth());
         return;
     }
-    if (useLiteStyle_) {
-        PerformLayoutInLiteMode();
-        if (layoutCallback_) {
-            layoutCallback_();
-        }
-        return;
+    if (isUseAlign_) {
+        context->AddAlignDeclarationNode(AceType::Claim(this));
     }
+
     CalculateGridLayoutSize();
     // first. calculate self layout param
     CalculateSelfLayoutParam();
@@ -523,6 +507,11 @@ void RenderBoxBase::PerformLayout()
     CalculateSelfLayoutSize();
     // forth. calculate position of child
     CalculateChildPosition();
+
+    if (isUseAlign_) {
+        CalculateAlignDeclaration();
+    }
+
     if (layoutCallback_) {
         layoutCallback_();
     }
@@ -577,22 +566,19 @@ void RenderBoxBase::Update(const RefPtr<Component>& component)
 
         paddingOrigin_ = box->GetPadding();
         marginOrigin_ = box->GetMargin();
-        additionalMargin_ = box->GetAdditionalMargin();
+        additionalPadding_ = box->GetAdditionalPadding();
         flex_ = box->GetFlex();
+        boxSizing_ = box->GetBoxSizing();
         constraints_ = box->GetConstraints();
         align_ = box->GetAlignment();
+        overflow_ = box->GetOverflow();
+        clipPath_ = box->GetClipPath();
         deliverMinToChild_ = box->GetDeliverMinToChild();
-        // When declarative animation is active for this renderbox,
-        // the animatable properties are set by PropertyAnimatable::SetProperty.
-        // And currently declarative api allow only animating
-        // PROPERTY_WIDTH,  PROPERTY_HEIGHT
-        if (!IsDeclarativeAnimationActive()) {
-            width_ = box->GetWidthDimension();
-            height_ = box->GetHeightDimension();
-        }
+        width_ = box->GetWidthDimension();
+        height_ = box->GetHeightDimension();
         auto context = context_.Upgrade();
         if (context && scrollPage_) {
-            height_ = Dimension(context->GetStageRect().Height(), DimensionUnit::PX);
+            height_ = AnimatableDimension(context->GetStageRect().Height(), DimensionUnit::PX);
         }
         percentFlag_ = box->GetPercentFlag();
         layoutInBox_ = box->GetLayoutInBoxFlag();
@@ -602,6 +588,7 @@ void RenderBoxBase::Update(const RefPtr<Component>& component)
         maxWidth_ = box->GetMaxWidth();
         maxHeight_ = box->GetMaxHeight();
         useLiteStyle_ = box->UseLiteStyle();
+        mask_ = box->GetMask();
         auto gridLayoutInfo = box->GetGridLayoutInfo();
         auto gridColumnInfo = AceType::DynamicCast<GridColumnInfo>(gridLayoutInfo);
         if (gridColumnInfo) {
@@ -612,6 +599,13 @@ void RenderBoxBase::Update(const RefPtr<Component>& component)
                 gridContainerInfo_ = gridContainerInfo;
             }
         }
+        isUseAlign_ = box->IsUseAlign();
+        if (isUseAlign_) {
+            alignPtr_ = box->GetAlignDeclarationPtr();
+            alignSide_ = box->GetUseAlignSide();
+            alignItemOffset_ = box->GetUseAlignOffset();
+        }
+        boxClipFlag_ = box->GetBoxClipFlag();
 
         MarkNeedLayout();
     }
@@ -641,8 +635,10 @@ void RenderBoxBase::Dump()
     }
     Size borderSize = GetBorderSize();
     DumpLog::GetInstance().AddDesc(std::string("WH: ").append(Size(width_.Value(), height_.Value()).ToString()));
-    DumpLog::GetInstance().AddDesc("Flex: " + std::to_string(static_cast<int32_t>(flex_)) + ", LayoutInBox: " +
-        std::to_string(static_cast<int32_t>(layoutInBox_)) + ", BGcolor: " + std::to_string(GetColor().GetValue()));
+    DumpLog::GetInstance().AddDesc("Flex: " + std::to_string(static_cast<int32_t>(flex_)) +
+                                   ", LayoutInBox: " + std::to_string(static_cast<int32_t>(layoutInBox_)) +
+                                   ", BGcolor: " + std::to_string(GetColor().GetValue()));
+    DumpLog::GetInstance().AddDesc(std::string("BoxSizing: ").append(std::to_string(static_cast<int32_t>(boxSizing_))));
     DumpLog::GetInstance().AddDesc(std::string("Align: ").append(align_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("Margin: ").append(margin_.GetLayoutSizeInPx(dipScale).ToString()));
     DumpLog::GetInstance().AddDesc(std::string("Padding: ").append(padding_.GetLayoutSizeInPx(dipScale).ToString()));
@@ -668,8 +664,8 @@ void RenderBoxBase::Dump()
 void RenderBoxBase::ClearRenderObject()
 {
     RenderNode::ClearRenderObject();
-    width_ = Dimension(-1.0, DimensionUnit::PX);
-    height_ = Dimension(-1.0, DimensionUnit::PX);
+    width_ = Dimension(-1.0);
+    height_ = Dimension(-1.0);
     flex_ = BoxFlex::FLEX_NO;
 
     constraints_ = LayoutParam(Size(), Size());
@@ -686,7 +682,7 @@ void RenderBoxBase::ClearRenderObject()
 
     paddingOrigin_ = Edge();
     marginOrigin_ = Edge();
-    additionalMargin_ = Edge();
+    additionalPadding_ = Edge();
 
     useFlexWidth_ = false;
     useFlexHeight_ = false;
@@ -712,6 +708,12 @@ void RenderBoxBase::ClearRenderObject()
     layoutCallback_ = nullptr;
     gridColumnInfo_ = nullptr;
     gridContainerInfo_ = nullptr;
+
+    isUseAlign_ = false;
+    alignPtr_ = nullptr;
+    alignSide_ = AlignDeclaration::Edge::AUTO;
+    alignItemOffset_ = Dimension();
+    alignOffset_.Reset();
 }
 
 FloatPropertyAnimatable::SetterMap RenderBoxBase::GetFloatPropertySetterMap()
@@ -747,46 +749,6 @@ FloatPropertyAnimatable::SetterMap RenderBoxBase::GetFloatPropertySetterMap()
             box->SetHeight(value);
         };
     }
-
-    auto paddingSetFunc = [weak](float value, const DimensionHelper& helper) {
-        auto box = weak.Upgrade();
-        if (!box) {
-            LOGE("Set Padding value failed. box is null");
-            return;
-        }
-        if (helper.Set(value, &box->paddingOrigin_)) {
-            box->MarkNeedLayout();
-        }
-    };
-    map[PropertyAnimatableType::PROPERTY_PADDING_LEFT] =
-        std::bind(paddingSetFunc, std::placeholders::_1, DimensionHelper(&Edge::SetLeft, &Edge::Left));
-    map[PropertyAnimatableType::PROPERTY_PADDING_TOP] =
-        std::bind(paddingSetFunc, std::placeholders::_1, DimensionHelper(&Edge::SetTop, &Edge::Top));
-    map[PropertyAnimatableType::PROPERTY_PADDING_RIGHT] =
-        std::bind(paddingSetFunc, std::placeholders::_1, DimensionHelper(&Edge::SetRight, &Edge::Right));
-    map[PropertyAnimatableType::PROPERTY_PADDING_BOTTOM] =
-        std::bind(paddingSetFunc, std::placeholders::_1, DimensionHelper(&Edge::SetBottom, &Edge::Bottom));
-
-    auto marginSetFunc = [weak](float value, const DimensionHelper& helper) {
-        auto box = weak.Upgrade();
-        if (!box) {
-            LOGE("Set Margin value failed. box is null.");
-            return;
-        }
-        if (helper.Set(value, &box->marginOrigin_)) {
-            box->MarkNeedLayout();
-        }
-    };
-
-    map[PropertyAnimatableType::PROPERTY_MARGIN_LEFT] =
-        std::bind(marginSetFunc, std::placeholders::_1, DimensionHelper(&Edge::SetLeft, &Edge::Left));
-    map[PropertyAnimatableType::PROPERTY_MARGIN_TOP] =
-        std::bind(marginSetFunc, std::placeholders::_1, DimensionHelper(&Edge::SetTop, &Edge::Top));
-    map[PropertyAnimatableType::PROPERTY_MARGIN_RIGHT] =
-        std::bind(marginSetFunc, std::placeholders::_1, DimensionHelper(&Edge::SetRight, &Edge::Right));
-    map[PropertyAnimatableType::PROPERTY_MARGIN_BOTTOM] =
-        std::bind(marginSetFunc, std::placeholders::_1, DimensionHelper(&Edge::SetBottom, &Edge::Bottom));
-
     return map;
 };
 
@@ -823,41 +785,49 @@ FloatPropertyAnimatable::GetterMap RenderBoxBase::GetFloatPropertyGetterMap()
             return box->GetHeight();
         };
     }
-
-    auto paddingGetFunc = [weak](const DimensionHelper& helper) -> float {
-        auto box = weak.Upgrade();
-        if (!box) {
-            LOGE("Get Padding failed, box is null.");
-            return 0.0f;
-        }
-        return helper.Get(box->paddingOrigin_).Value();
-    };
-    map[PropertyAnimatableType::PROPERTY_PADDING_LEFT] =
-        std::bind(paddingGetFunc, DimensionHelper(&Edge::SetLeft, &Edge::Left));
-    map[PropertyAnimatableType::PROPERTY_PADDING_TOP] =
-        std::bind(paddingGetFunc, DimensionHelper(&Edge::SetTop, &Edge::Top));
-    map[PropertyAnimatableType::PROPERTY_PADDING_RIGHT] =
-        std::bind(paddingGetFunc, DimensionHelper(&Edge::SetRight, &Edge::Right));
-    map[PropertyAnimatableType::PROPERTY_PADDING_BOTTOM] =
-        std::bind(paddingGetFunc, DimensionHelper(&Edge::SetBottom, &Edge::Bottom));
-
-    auto marginGetFunc = [weak](const DimensionHelper& helper) -> float {
-        auto box = weak.Upgrade();
-        if (!box) {
-            LOGE("Get margin failed. box is null.");
-            return 0.0f;
-        }
-        return helper.Get(box->marginOrigin_).Value();
-    };
-    map[PropertyAnimatableType::PROPERTY_MARGIN_LEFT] =
-        std::bind(marginGetFunc, DimensionHelper(&Edge::SetLeft, &Edge::Left));
-    map[PropertyAnimatableType::PROPERTY_MARGIN_TOP] =
-        std::bind(marginGetFunc, DimensionHelper(&Edge::SetTop, &Edge::Top));
-    map[PropertyAnimatableType::PROPERTY_MARGIN_RIGHT] =
-        std::bind(marginGetFunc, DimensionHelper(&Edge::SetRight, &Edge::Right));
-    map[PropertyAnimatableType::PROPERTY_MARGIN_BOTTOM] =
-        std::bind(marginGetFunc, DimensionHelper(&Edge::SetBottom, &Edge::Bottom));
     return map;
+}
+
+void RenderBoxBase::CalculateAlignDeclaration()
+{
+    alignOffset_.Reset();
+    if (!GetAlignDeclarationOffset(alignPtr_, alignOffset_)) {
+        alignOffset_.Reset();
+        return;
+    }
+
+    double itemAlignOffset = 0.0;
+    auto context = GetContext().Upgrade();
+    if (context) {
+        itemAlignOffset = context->NormalizeToPx(alignItemOffset_);
+    }
+
+    switch (alignSide_) {
+        case AlignDeclaration::Edge::TOP:
+            alignOffset_ = alignOffset_ + Offset(0, itemAlignOffset);
+            break;
+        case AlignDeclaration::Edge::CENTER:
+            alignOffset_ = alignOffset_ - Offset(0, GetLayoutSize().Height() / 2 - itemAlignOffset);
+            break;
+        case AlignDeclaration::Edge::BOTTOM:
+            alignOffset_ = alignOffset_ - Offset(0, GetLayoutSize().Height() - itemAlignOffset);
+            break;
+        case AlignDeclaration::Edge::BASELINE:
+            alignOffset_ = alignOffset_ - Offset(0, GetBaselineDistance(TextBaseline::ALPHABETIC) - itemAlignOffset);
+            break;
+        case AlignDeclaration::Edge::START:
+            alignOffset_ = alignOffset_ + Offset(itemAlignOffset, 0);
+            break;
+        case AlignDeclaration::Edge::MIDDLE:
+            alignOffset_ = alignOffset_ - Offset(GetLayoutSize().Width() / 2 - itemAlignOffset, 0);
+            break;
+        case AlignDeclaration::Edge::END:
+            alignOffset_ = alignOffset_ - Offset(GetLayoutSize().Width() - itemAlignOffset, 0);
+            break;
+        default:
+            alignOffset_.Reset();
+            break;
+    }
 }
 
 } // namespace OHOS::Ace

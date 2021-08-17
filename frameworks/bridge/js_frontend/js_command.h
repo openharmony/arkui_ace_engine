@@ -330,6 +330,28 @@ private:
     RefPtr<AnimationBridgeTask> task_;
 };
 
+class ACE_EXPORT AnimatorBridgeTask : public AceType {
+    DECLARE_ACE_TYPE(AnimatorBridgeTask, AceType)
+
+public:
+    AnimatorBridgeTask() = default;
+    ~AnimatorBridgeTask() override = default;
+    virtual void AnimatorBridgeTaskFunc(const RefPtr<JsAcePage>& page, int32_t bridgeId) = 0;
+};
+
+class ACE_EXPORT JsCommandAnimator final : public JsCommand {
+public:
+    JsCommandAnimator(int32_t bridgeId, RefPtr<AnimatorBridgeTask> task) : bridgeId_(bridgeId),
+    task_(std::move(task)) {}
+    ~JsCommandAnimator() final = default;
+
+    void Execute(const RefPtr<JsAcePage>& page) const final;
+
+private:
+    int32_t bridgeId_ = -1;
+    RefPtr<AnimatorBridgeTask> task_;
+};
+
 } // namespace OHOS::Ace::Framework
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_JS_COMMAND_H

@@ -25,7 +25,7 @@ class JsEngineLoader {
 public:
     virtual ~JsEngineLoader() = default;
 
-    static JsEngineLoader& Get();
+    static JsEngineLoader& Get(bool isArkApp = false);
     static JsEngineLoader& GetDeclarative();
 
     virtual RefPtr<JsEngine> CreateJsEngine(int32_t instanceId) const = 0;

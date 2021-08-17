@@ -87,6 +87,17 @@ private:
 
 } // namespace
 
+// mock
+size_t V2::LazyForEachComponent::TotalCount()
+{
+    return 0;
+}
+
+RefPtr<Component> V2::LazyForEachComponent::GetChildByIndex(size_t index)
+{
+    return nullptr;
+}
+
 class SwiperComponentTest : public testing::Test {
 public:
     static void SetUpTestCase()
@@ -160,7 +171,6 @@ public:
         swiperHeight_ = SWIPER_HEIGHT;
         scale_ = 1.0;
     }
-    ~SwiperIndicatorTest() = default;
 
     static RefPtr<SwiperIndicatorTest> CreateIndicatorTest(const RefPtr<PipelineContext>& context)
     {
@@ -200,6 +210,11 @@ public:
     void SetCurrentIndex(int32_t index)
     {
         currentIndex_ = index;
+    }
+
+    bool GetQuickTrunItem() const
+    {
+        return quickTrunItem_;
     }
 
     SwiperIndicatorData& GetSwiperIndicatorData()
@@ -366,7 +381,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper004, TestSize.Level1)
         swiper->SetIndex(initIndex);
         swiperController = swiper->GetSwiperController();
     });
-    ASSERT_NE(swiperController, nullptr);
     swiperController->SwipeTo(initIndex);
     WaitAndMockVsync(SWIPETO_ANIMATION_TIME);
     EXPECT_EQ(swiperChildren_[initIndex]->GetPosition().GetX(), 0);
@@ -495,7 +509,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper008, TestSize.Level1)
      * @tc.steps: step2. Swipe left from the first one to the last.
      * @tc.expected: step2. Swipe success.
      */
-    ASSERT_NE(swiperController, nullptr);
     swiperController->SwipeTo(LAST_CHILD_INDEX);
     WaitAndMockVsync(SWIPETO_ANIMATION_TIME);
     DragSwiper(DragDirection::LEFT);
@@ -556,7 +569,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper010, TestSize.Level1)
      * @tc.steps: step2. Swipe left.
      * @tc.expected: step2. Swipe failed.
      */
-    ASSERT_NE(swiperController, nullptr);
     swiperController->SwipeTo(LAST_CHILD_INDEX);
     WaitAndMockVsync(SWIPETO_ANIMATION_TIME);
     DragSwiper(DragDirection::LEFT);
@@ -656,7 +668,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper013, TestSize.Level1)
     /**
      * @tc.steps: step2. Get swiperController and call the controller's swipeTo interface to jump to the last page.
      */
-    ASSERT_NE(swiperController, nullptr);
     swiperController->SwipeTo(LAST_CHILD_INDEX);
     WaitAndMockVsync(SWIPETO_ANIMATION_TIME);
     /**
@@ -687,7 +698,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper014, TestSize.Level1)
     /**
      * @tc.steps: step2. Get swiperController and call the controller's showNext interface to jump to the last page.
      */
-    ASSERT_NE(swiperController, nullptr);
     swiperController->SwipeTo(PENULTIMATE_CHILD_INDEX);
     WaitAndMockVsync(SWIPETO_ANIMATION_TIME);
     swiperController->ShowNext();
@@ -730,7 +740,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper015, TestSize.Level1)
      * @tc.steps: step2. Get swiperController and call the controller's showPrevious interface to jump to the first
      * page.
      */
-    ASSERT_NE(swiperController, nullptr);
     swiperController->SwipeTo(SECOND_CHILD_INDEX);
     WaitAndMockVsync(SWIPETO_ANIMATION_TIME);
     swiperController->ShowPrevious();
@@ -1161,6 +1170,52 @@ HWTEST_F(SwiperComponentTest, Indicator012, TestSize.Level0)
     EXPECT_TRUE(NearZero(offsetPoint2 - offsetPoint1));
     EXPECT_TRUE(NearZero(offsetTail2 - 3 * offsetTail1));
     EXPECT_TRUE(NearZero(offsetHead2 - 3 * offsetHead1));
+}
+
+/**
+ * @tc.name: Indicator013
+ * @tc.desc: Test the swiper refuse layout during animation unless forced.
+ * @tc.type: FUNC
+ * @tc.require: DTS2021042001065
+ */
+HWTEST_F(SwiperComponentTest, Indicator013, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Build a swiper render, set current index.
+     */
+    RefPtr<SwiperIndicatorTest> swiperIndicator = SwiperIndicatorTest::CreateIndicatorTest(context_);
+    swiperIndicator->SetCurrentIndex(2);
+
+    /**
+     * @tc.steps: step2. Layout swiper without animation.
+     */
+    swiperIndicator->PerformLayout();
+
+    /**
+     * @tc.steps: step3. Start animation to the next index.
+     * @tc.expected: step3. Quick trun item tag is false.
+     */
+    swiperIndicator->ShowNext();
+    EXPECT_FALSE(swiperIndicator->GetQuickTrunItem());
+
+    /**
+     * @tc.steps: step4. Layout swiper with animation.
+     */
+    swiperIndicator->PerformLayout();
+
+    /**
+     * @tc.steps: step5. Start a new animation to the new index.
+     * @tc.expected: step5. Quick trun item tag is true.
+     */
+    swiperIndicator->ShowNext();
+    EXPECT_TRUE(swiperIndicator->GetQuickTrunItem());
+
+    /**
+     * @tc.steps: step6. Layout swiper with a new animation.
+     * @tc.expected: step6. Quick trun item tag is false.
+     */
+    swiperIndicator->PerformLayout();
+    EXPECT_FALSE(swiperIndicator->GetQuickTrunItem());
 }
 
 } // namespace OHOS::Ace

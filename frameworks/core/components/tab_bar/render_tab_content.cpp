@@ -57,8 +57,14 @@ void RenderTabContent::Update(const RefPtr<Component>& component)
         currentIndex_ = tabIndex;
         isInitialized_ = true;
     }
-    changeEvent_ = AceAsyncEvent<void(const std::string&)>::Create(tabContent->GetChangeEventId(), context_);
-    domChangeEvent_ = AceAsyncEvent<void(uint32_t)>::Create(tabContent->GetDomChangeEventId(), context_);
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        onChangeEvent_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            tabContent->GetChangeEventId(), context_);
+    } else {
+        changeEvent_ = AceAsyncEvent<void(const std::string&)>::Create(tabContent->GetChangeEventId(), context_);
+        domChangeEvent_ = AceAsyncEvent<void(uint32_t)>::Create(tabContent->GetDomChangeEventId(), context_);
+    }
 
     MarkNeedLayout();
     Initialize(GetContext());
@@ -104,6 +110,13 @@ void RenderTabContent::Initialize(const WeakPtr<PipelineContext>& context)
 
 void RenderTabContent::FireContentChangeEvent() const
 {
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        if (onChangeEvent_) {
+            onChangeEvent_(std::make_shared<TabContentChangeEvent>(currentIndex_));
+        }
+        return;
+    }
     if (changeEvent_) {
         LOGI("FireChangeEvent, index = %{public}d.", currentIndex_);
         std::string param =
@@ -153,13 +166,13 @@ void RenderTabContent::HandleDragEnd()
     ScrollContents(newIndex, false);
 }
 
-void RenderTabContent::ChangeScroll(int32_t index)
+void RenderTabContent::ChangeScroll(int32_t index, bool fromController)
 {
     LOGI("Change scroll index is %{public}d", index);
-    ScrollContents(index, true);
+    ScrollContents(index, true, fromController);
 }
 
-void RenderTabContent::ScrollContents(int32_t newIndex, bool isLinkBar)
+void RenderTabContent::ScrollContents(int32_t newIndex, bool isLinkBar, bool fromController)
 {
     LOGD("ScrollContents from %{public}d to %{public}d", currentIndex_, newIndex);
     if (!animator_->IsStopped()) {
@@ -214,10 +227,10 @@ void RenderTabContent::ScrollContents(int32_t newIndex, bool isLinkBar)
         }
     }));
 
-    animator_->AddStopListener([weak, newIndex, needChange]() {
+    animator_->AddStopListener([weak, newIndex, needChange, fromController]() {
         auto tabContent = weak.Upgrade();
         if (tabContent) {
-            tabContent->HandleStopListener(newIndex, needChange);
+            tabContent->HandleStopListener(newIndex, needChange, fromController);
         }
     });
     animator_->AddStartListener([weak, newIndex, needChange, isLinkBar]() {
@@ -255,12 +268,14 @@ void RenderTabContent::HandleStartListener(int32_t newIndex, bool needChange, bo
     }
 }
 
-void RenderTabContent::HandleStopListener(int32_t newIndex, bool needChange)
+void RenderTabContent::HandleStopListener(int32_t newIndex, bool needChange, bool fromController)
 {
     LOGI("HandleStopListener start, newIndex is %{public}d,needChange is %{public}d", newIndex, needChange);
     // callback used to notify the change of index
     if (newIndex >= 0 && newIndex < contentCount_ && needChange) {
-        FireContentChangeEvent();
+        if (!fromController) {
+            FireContentChangeEvent();
+        }
         SetHiddenChild();
     }
     if (isInAnimation_) {
@@ -436,6 +451,7 @@ void RenderTabContent::PerformLayout()
 void RenderTabContent::UpdateTouchRect()
 {
     SetTouchRect(GetPaintRect());
+    ownTouchRect_ = touchRect_;
 }
 
 } // namespace OHOS::Ace

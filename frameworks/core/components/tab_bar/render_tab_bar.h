@@ -55,6 +55,11 @@ public:
 
     void OnPaintFinish() override;
 
+    int32_t GetTabsSize() const
+    {
+        return tabsSize_;
+    }
+
 protected:
     RenderTabBar();
     void OnTouchTestHit(

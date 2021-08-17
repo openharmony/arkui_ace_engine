@@ -45,15 +45,6 @@ public:
         return currentValue_;
     }
 
-    void SetEvaluator(const RefPtr<Evaluator<T>>& evaluator)
-    {
-        if (!evaluator) {
-            LOGE("input evaluator is null, use linear evaluator as default.");
-            return;
-        }
-        evaluator_ = evaluator;
-    }
-
     void SetCurve(const RefPtr<Curve>& curve) override
     {
         if (!curve) {
@@ -64,17 +55,6 @@ public:
         reverseCurve_ = curve;
     }
 
-    void SetStart(const T& value) override
-    {
-        begin_ = value;
-        currentValue_ = value;
-    }
-
-    T GetEndValue() override
-    {
-        return end_;
-    }
-
     void SetReverseCurve(const RefPtr<Curve>& reverseCurve)
     {
         if (!reverseCurve) {
@@ -82,6 +62,13 @@ public:
             return;
         }
         reverseCurve_ = reverseCurve;
+    }
+
+    void SetEvaluator(const RefPtr<Evaluator<T>>& evaluator)
+    {
+        if (evaluator) {
+            evaluator_ = evaluator;
+        }
     }
 
 private:

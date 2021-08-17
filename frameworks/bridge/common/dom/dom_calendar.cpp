@@ -61,8 +61,11 @@ bool DomCalendar::SetSpecializedAttr(const std::pair<std::string, std::string>& 
                 return false;
             } },
         { DOM_CALENDAR_DATE_ADAPTER,
+            [](const std::string& value, DomCalendar& calendar) { return calendar.ParseDataAdapter(value); } },
+        { DOM_CALENDAR_HOLIDAYS,
             [](const std::string& value, DomCalendar& calendar) {
-                return calendar.ParseDataAdapter(value);
+                calendar.calendarComponent_->SetHolidays(value);
+                return true;
             } },
         { DOM_CALENDAR_OFF_DAYS,
             [](const std::string& value, DomCalendar& calendar) {
@@ -91,6 +94,11 @@ bool DomCalendar::SetSpecializedAttr(const std::pair<std::string, std::string>& 
         { DOM_VERTICAL,
             [](const std::string& value, DomCalendar& calendar) {
                 calendar.calendarComponent_->SetAxis(StringToBool(value) ? Axis::VERTICAL : Axis::HORIZONTAL);
+                return true;
+            } },
+        { DOM_CALENDAR_WORK_DAYS,
+            [](const std::string& value, DomCalendar& calendar) {
+                calendar.calendarComponent_->SetWorkDays(value);
                 return true;
             } },
     };

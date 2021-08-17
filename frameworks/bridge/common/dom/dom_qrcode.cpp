@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/common/dom/dom_qrcode.h"
 
+#include "core/components/declaration/qrcode/qrcode_declaration.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
@@ -26,68 +27,14 @@ DOMQrcode::DOMQrcode(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeI
 
 void DOMQrcode::ResetInitializedStyle()
 {
-    InitializeStyle();
+    if (declaration_) {
+        declaration_->InitializeStyle();
+    }
 }
 
-bool DOMQrcode::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
+void DOMQrcode::PrepareSpecializedComponent()
 {
-    static const LinearMapNode<void (*)(DOMQrcode&, const std::string&)> qrcodeAttrOperators[] = {
-        { DOM_QRCODE_TYPE,
-            [](DOMQrcode& qrcode,
-                const std::string& value) { qrcode.qrcodeChild_->SetQrcodeType(ConvertStrToQrcodeType(value)); } },
-        { DOM_QRCODE_VALUE,
-            [](DOMQrcode& qrcode, const std::string& value) { qrcode.qrcodeChild_->SetValue(value); } },
-    };
-    auto operatorIter = BinarySearchFindIndex(qrcodeAttrOperators, ArraySize(qrcodeAttrOperators), attr.first.c_str());
-    if (operatorIter != -1) {
-        qrcodeAttrOperators[operatorIter].value(*this, attr.second);
-        return true;
-    }
-    return false;
-}
-
-bool DOMQrcode::SetSpecializedStyle(const std::pair<std::string, std::string>& style)
-{
-    const static LinearMapNode<void (*)(DOMQrcode&, const std::string&)> qrcodeOperators[] = {
-        { DOM_QRCODE_BACKGROUND_COLOR,
-            [](DOMQrcode& qrcode, const std::string& value) {
-                qrcode.qrcodeChild_->SetBackgroundColor(qrcode.ParseColor(value));
-            } },
-        { DOM_QRCODE_COLOR,
-            [](DOMQrcode& qrcode, const std::string& value) {
-                qrcode.qrcodeChild_->SetQrcodeColor(qrcode.ParseColor(value));
-            } },
-        { DOM_QRCODE_HEIGHT,
-            [](DOMQrcode& qrcode, const std::string& value) {
-                qrcode.qrcodeChild_->SetQrcodeHeight(qrcode.ParseDimension(value));
-                qrcode.qrcodeChild_->SetHeightDefined(true);
-            } },
-        { DOM_QRCODE_WIDTH,
-            [](DOMQrcode& qrcode, const std::string& value) {
-                qrcode.qrcodeChild_->SetQrcodeWidth(qrcode.ParseDimension(value));
-                qrcode.qrcodeChild_->SetWidthDefined(true);
-            } },
-    };
-    auto operatorIter = BinarySearchFindIndex(qrcodeOperators, ArraySize(qrcodeOperators), style.first.c_str());
-    if (operatorIter != -1) {
-        qrcodeOperators[operatorIter].value(*this, style.second);
-        return true;
-    }
-    return false;
-}
-
-void DOMQrcode::InitializeStyle()
-{
-    qrcodeTheme_ = GetTheme<QrcodeTheme>();
-    if (!qrcodeTheme_) {
-        LOGE("qrcodeTheme is null");
-        return;
-    }
-    qrcodeChild_->SetQrcodeColor(qrcodeTheme_->GetQrcodeColor());
-    qrcodeChild_->SetBackgroundColor(qrcodeTheme_->GetBackgroundColor());
-    qrcodeChild_->SetQrcodeType(qrcodeTheme_->GetQrcodeType());
-    qrcodeChild_->SetQrcodeWidth(qrcodeTheme_->GetQrcodeWidth());
-    qrcodeChild_->SetQrcodeHeight(qrcodeTheme_->GetQrcodeHeight());
+    qrcodeChild_->SetDeclaration(AceType::DynamicCast<QrcodeDeclaration>(declaration_));
 }
 
 } // namespace OHOS::Ace::Framework

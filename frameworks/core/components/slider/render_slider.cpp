@@ -452,6 +452,9 @@ void RenderSlider::UpdateBlockPosition(const Offset& touchPosition, bool isClick
         double stepRatio = step_ / (max_ - min_);
         double endRatio = stepRatio * std::floor((totalRatio + HALF * stepRatio) / stepRatio);
         endValue = (max_ - min_) * endRatio + min_;
+        if (GreatOrEqual(endValue, max_)) {
+            endValue = max_;
+        }
     }
     RestartMoveAnimation(endValue, isClick);
 }
@@ -637,6 +640,12 @@ void RenderSlider::UpdateAnimation()
     }));
     controller_->SetDuration(DEFAULT_SLIDER_ANIMATION_DURATION);
     controller_->AddInterpolator(translate_);
+}
+
+void RenderSlider::UpdateTouchRect()
+{
+    touchRect_ = GetPaintRect();
+    ownTouchRect_ = touchRect_;
 }
 
 } // namespace OHOS::Ace

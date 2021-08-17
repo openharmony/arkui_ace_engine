@@ -141,7 +141,7 @@ void RenderPickerColumn::OnTouchTestHit(
     }
 
     if (!dragRecognizer_) {
-        dragRecognizer_ = AceType::MakeRefPtr<FreeDragRecognizer>();
+        dragRecognizer_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
     }
 
     result.emplace_back(rawRecognizer_);

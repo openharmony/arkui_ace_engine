@@ -51,8 +51,12 @@ protected:
     void OnMouseHoverExitTest() override;
     void OnMouseClickDownAnimation() override;
     void OnMouseClickUpAnimation() override;
+    void SetOnChange(const std::function<void(bool)>& value)
+    {
+        onChangeToggle_ = value;
+    }
 
-    WeakPtr<ToggleComponent> toggleComponent_;
+    RefPtr<ToggleComponent> toggleComponent_;
 
     RefPtr<ClickRecognizer> clickRecognizer_;
     RefPtr<RawRecognizer> touchRecognizer_;
@@ -74,6 +78,7 @@ protected:
     Size toggleSize_;
     std::function<void()> onClick_;
     std::function<void(const std::string&)> onChange_;
+    std::function<void(bool)> onChangeToggle_;
 
 private:
     void ResetController(RefPtr<Animator>& controller);

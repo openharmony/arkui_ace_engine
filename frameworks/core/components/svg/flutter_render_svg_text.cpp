@@ -40,12 +40,91 @@ RenderLayer FlutterRenderSvgText::GetRenderLayer()
 
 void FlutterRenderSvgText::Paint(RenderContext& context, const Offset& offset)
 {
+    if (transformLayer_) {
+        transformLayer_->UpdateTransformProperty(transformAttrs_, GetTransformOffset());
+    }
+
     DrawOffset drawOffset = { offset, offset, false };
     DrawText(context, drawOffset);
 }
 
+void FlutterRenderSvgText::PaintDirectly(RenderContext& context, const Offset& offset)
+{
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkCanvas* skCanvas = canvas->canvas();
+    if (!skCanvas) {
+        LOGE("Paint skCanvas is null");
+        return;
+    }
+    if (!transformAttrs_.empty()) {
+        auto matrix4 = TransformLayer::UpdateTransformAttr(transformAttrs_, GetTransformOffset());
+        skCanvas->save();
+        skCanvas->concat(FlutterSvgPainter::ToSkMatrix(matrix4));
+    }
+
+    DrawOffset drawOffset = { offset, offset, false };
+    DrawText(context, drawOffset);
+
+    if (!transformAttrs_.empty()) {
+        skCanvas->restore();
+    }
+}
+
+Rect FlutterRenderSvgText::GetPaintBounds(const Offset& offset)
+{
+    DrawOffset drawOffset = { Offset(), offset, false };
+    Rect bounds;
+    MeasureTextBounds(drawOffset, bounds);
+    return bounds;
+}
+
+void FlutterRenderSvgText::MeasureTextBounds(DrawOffset& drawOffset, Rect& bounds)
+{
+    UpdateDrawOffset(drawOffset);
+    if (!textData_.empty()) {
+        drawOffset.current = OnMeasureTextBounds(drawOffset, bounds);
+        drawOffset.isTspan = true;
+    }
+
+    const auto& children = GetChildren();
+    if (!children.empty()) {
+        for (const auto& child : children) {
+            auto textSpan = AceType::DynamicCast<FlutterRenderSvgTspan>(child);
+            if (textSpan) {
+                textSpan->MeasureTextBounds(drawOffset, bounds);
+                continue;
+            }
+
+            auto textPath = AceType::DynamicCast<FlutterRenderSvgTextPath>(child);
+            if (textPath) {
+                drawOffset.current = textPath->MeasureTextPathBounds(drawOffset.svg, bounds);
+                drawOffset.isTspan = true;
+            }
+        }
+    }
+}
+
 void FlutterRenderSvgText::DrawText(RenderContext& context, DrawOffset& drawOffset)
 {
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkCanvas* skCanvas = canvas->canvas();
+    if (!skCanvas) {
+        LOGE("Paint skCanvas is null");
+        return;
+    }
+    SkAutoCanvasRestore save(skCanvas, false);
+    PaintMaskLayer(context, drawOffset.svg, drawOffset.current);
+
     // update current offset by attribute
     UpdateDrawOffset(drawOffset);
 
@@ -94,14 +173,22 @@ Offset FlutterRenderSvgText::OnDrawText(RenderContext& context, const DrawOffset
     return offset;
 }
 
+Offset FlutterRenderSvgText::OnMeasureTextBounds(const DrawOffset& drawOffset, Rect& bounds)
+{
+    Offset offset = drawOffset.current;
+    std::string text = isDrawSpace_ ? " " + textData_ : textData_;
+    SvgTextInfo svgTextInfo = { fillState_, strokeState_, textStyle_, text, opacity_ };
+    TextDrawInfo textDrawInfo = { offset, rotate_ };
+    offset = FlutterSvgPainter::MeasureTextBounds(svgTextInfo, textDrawInfo, bounds);
+    return offset;
+}
+
 void FlutterRenderSvgText::UpdateDrawOffset(DrawOffset& drawOffset)
 {
-    double width = GetLayoutSize().Width();
-    double height = GetLayoutSize().Height();
-    double x = ConvertDimensionToPx(x_, width);
-    double dx = ConvertDimensionToPx(dx_, width);
-    double y = ConvertDimensionToPx(y_, height);
-    double dy = ConvertDimensionToPx(dy_, height);
+    double x = ConvertDimensionToPx(x_, LengthType::HORIZONTAL);
+    double dx = ConvertDimensionToPx(dx_, LengthType::HORIZONTAL);
+    double y = ConvertDimensionToPx(y_, LengthType::VERTICAL);
+    double dy = ConvertDimensionToPx(dy_, LengthType::VERTICAL);
     drawOffset.current = drawOffset.current + Offset(x + dx, y + dy);
     drawOffset.isTspan = false;
 }

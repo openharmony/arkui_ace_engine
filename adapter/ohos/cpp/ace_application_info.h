@@ -38,13 +38,33 @@ public:
     void ChangeLocale(const std::string& language, const std::string& countryOrRegion) override;
     std::vector<std::string> GetLocaleFallback(const std::vector<std::string>& localeList) const override;
     std::vector<std::string> GetResourceFallback(const std::vector<std::string>& resourceList) const override;
-    double GetLifeTime() const override { return 0.0f; }
-    std::string GetCurrentDeviceResTag() const override;
+    std::vector<std::string> GetStyleResourceFallback(const std::vector<std::string>& resourceList) const override
+    {
+        return std::vector<std::string>();
+    }
+    std::vector<std::string> GetDeclarativeResourceFallback(const std::set<std::string>& resourceList) const override
+    {
+        std::vector<std::string> vector;
+        return vector;
+    }
+
     bool GetFiles(const std::string& filePath, std::vector<std::string>& fileList) const override;
 
     bool GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo) override;
-
+    double GetLifeTime() const override
+    {
+        return 0.0;
+    }
     std::string GetJsEngineParam(const std::string& key) const override;
+    std::string GetCurrentDeviceResTag() const override;
+    std::string GetCurrentDeviceDeclarativeResTag() const override
+    {
+        return std::string();
+    }
+    double GetTargetMediaScaleRatio(const std::string& targetResTag) const override
+    {
+        return 1.0;
+    }
 
     void SetJsEngineParam(const std::string& key, const std::string& value);
 

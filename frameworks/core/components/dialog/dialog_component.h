@@ -21,6 +21,7 @@
 #include "core/components/button/button_component.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/dialog_tween/dialog_tween_component.h"
 #include "core/components/flex/flex_component.h"
@@ -42,21 +43,13 @@ extern const char CALLBACK_CANCEL[];
 extern const char CALLBACK_COMPLETE[];
 extern const char DIALOG_TWEEN_NAME[];
 
-struct DialogProperties {
-    std::string title;
-    std::string content;
-    bool autoCancel = true;
-    std::vector<std::pair<std::string, std::string>> buttons;
-    std::unordered_map<std::string, EventMarker> callbacks;
-};
-
 class DialogComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(DialogComponent, SoleChildComponent);
 
 public:
     RefPtr<Element> CreateElement() override;
     RefPtr<RenderNode> CreateRenderNode() override;
-    void BuildChild(const RefPtr<ThemeManager>& themeManager);
+    virtual void BuildChild(const RefPtr<ThemeManager>& themeManager);
 
     void SetTitle(const RefPtr<TextComponent>& title)
     {
@@ -110,6 +103,8 @@ public:
 
     void SetOnSuccessId(const EventMarker& onSuccessId)
     {
+        // Before update event marker, remove old marker from manager.
+        BackEndEventManager<void(int32_t)>::GetInstance().RemoveBackEndEvent(onSuccessId_);
         onSuccessId_ = onSuccessId;
     }
 
@@ -156,6 +151,11 @@ public:
     bool GetAutoCancel() const
     {
         return autoCancel_;
+    }
+
+    std::vector<EventMarker>& GetMenuSuccessId()
+    {
+        return menuSuccessId_;
     }
 
     const EventMarker& GetOnPositiveSuccessId() const
@@ -267,20 +267,37 @@ public:
         customDialogId_ = dialogId;
     }
 
-private:
-    void BuildFocusChild(const RefPtr<Component>& child, const RefPtr<FocusCollaborationComponent>& collaboration);
-    void BuildTitle(const RefPtr<ColumnComponent>& column);
-    void BuildContent(const RefPtr<ColumnComponent>& column);
-    void BuildActions(const RefPtr<ThemeManager>& themeManager, const RefPtr<ColumnComponent>& column);
-    void BuildActionsForWatch(const RefPtr<ColumnComponent>& column);
-    RefPtr<Component> BuildButton(const RefPtr<ButtonComponent>& button, const EventMarker& callbackId,
+    void SetIsMenu(bool isMenu)
+    {
+        isMenu_ = isMenu;
+    }
+
+    void SetDialogProperties(const DialogProperties& properties)
+    {
+        properties_ = properties;
+    }
+
+    const DialogProperties& GetDialogProperties() const
+    {
+        return properties_;
+    }
+
+protected:
+    virtual void BuildFocusChild(
+        const RefPtr<Component>& child, const RefPtr<FocusCollaborationComponent>& collaboration);
+    virtual void BuildTitle(const RefPtr<ColumnComponent>& column);
+    virtual void BuildContent(const RefPtr<ColumnComponent>& column);
+    virtual void BuildActions(const RefPtr<ThemeManager>& themeManager, const RefPtr<ColumnComponent>& column);
+    virtual void BuildActionsForWatch(const RefPtr<ColumnComponent>& column);
+    virtual void BuildMenu(const RefPtr<ColumnComponent>& column);
+    virtual RefPtr<Component> BuildButton(const RefPtr<ButtonComponent>& button, const EventMarker& callbackId,
         const Edge& edge, bool isAutoFocus = false);
-    RefPtr<TransitionComponent> BuildAnimation(const RefPtr<BoxComponent>& child);
-    RefPtr<TransitionComponent> BuildAnimationForPhone(const RefPtr<Component>& child);
-    RefPtr<Component> GenerateComposed(
+    virtual RefPtr<TransitionComponent> BuildAnimation(const RefPtr<BoxComponent>& child);
+    virtual RefPtr<TransitionComponent> BuildAnimationForPhone(const RefPtr<Component>& child);
+    virtual RefPtr<Component> GenerateComposed(
         const std::string& name, const RefPtr<Component>& child, bool isDialogTweenChild);
-    void BuildDialogTween(const RefPtr<TransitionComponent>& transition, bool isLimit, Edge margin);
-    RefPtr<Component> BuildDivider(const RefPtr<ThemeManager>& themeManager);
+    virtual void BuildDialogTween(const RefPtr<TransitionComponent>& transition, bool isLimit, Edge margin);
+    virtual RefPtr<Component> BuildDivider(const RefPtr<ThemeManager>& themeManager);
 
     std::string data_;
     int32_t dialogComposeId_ = 0;
@@ -302,9 +319,12 @@ private:
     EventMarker onPositiveSuccessId_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
     EventMarker onNegativeSuccessId_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
     EventMarker onNeutralSuccessId_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+    std::vector<EventMarker> menuSuccessId_;
     WeakPtr<PipelineContext> context_;
     DeviceType deviceType_ = DeviceType::PHONE;
     bool isDeviceTypeSet_ = false;
+    bool isMenu_ = false;
+    DialogProperties properties_;
 
     RefPtr<Component> customComponent_;
     Dimension height_;
@@ -321,6 +341,7 @@ public:
         const DialogProperties& dialogProperties, const WeakPtr<PipelineContext>& context);
 
 private:
+    static RefPtr<DialogComponent> BuildDialogWithType(DialogType type);
     static void BuildTitleAndContent(const RefPtr<DialogComponent>& dialog, const DialogProperties& dialogProperties,
         const RefPtr<DialogTheme>& dialogTheme, std::string& data);
     static void BuildButtons(const RefPtr<ThemeManager>& themeManager, const RefPtr<DialogComponent>& dialog,

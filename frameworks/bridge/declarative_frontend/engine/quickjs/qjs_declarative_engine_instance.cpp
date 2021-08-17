@@ -26,6 +26,7 @@
 #include "base/log/event_report.h"
 #include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
+#include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_helpers.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
@@ -34,9 +35,16 @@
 #include "frameworks/core/common/ace_application_info.h"
 #include "frameworks/core/image/image_cache.h"
 
-extern const char _binary_jsproxyClass_js_start[];
-extern const char _binary_jsproxyClass_js_end[];
+extern const char _binary_stateMgmt_js_start[];
+extern const char _binary_stateMgmt_js_end[];
+extern const char _binary_jsEnumStyle_js_start[];
+extern const char _binary_jsEnumStyle_js_end[];
+extern const char _binary_jsMockSystemPlugin_js_start[];
+extern const char _binary_jsMockSystemPlugin_js_end[];
+
 namespace OHOS::Ace::Framework {
+
+JSRuntime* QJSDeclarativeEngineInstance::runtime_ = nullptr;
 
 QJSDeclarativeEngineInstance* QJSDeclarativeEngineInstance::UnWrapEngineInstance(JSContext* ctx)
 {
@@ -73,6 +81,17 @@ RefPtr<JsAcePage> QJSDeclarativeEngineInstance::GetRunningPage(JSContext* ctx)
     auto* instance = QJSDeclarativeEngineInstance::UnWrapEngineInstance(ctx);
     if (instance != nullptr) {
         return instance->GetRunningPage();
+    } else {
+        LOGE("QJS context has no ref to engine instance. Failed!");
+        return nullptr;
+    }
+}
+
+RefPtr<JsAcePage> QJSDeclarativeEngineInstance::GetStagingPage(JSContext* ctx)
+{
+    auto* instance = QJSDeclarativeEngineInstance::UnWrapEngineInstance(ctx);
+    if (instance != nullptr) {
+        return instance->GetStagingPage();
     } else {
         LOGE("QJS context has no ref to engine instance. Failed!");
         return nullptr;
@@ -124,18 +143,23 @@ void QJSDeclarativeEngineInstance::TriggerPageUpdate(JSContext* ctx)
     LOGE("QJS context has no ref to instance. Failed!");
 }
 
+RefPtr<PipelineContext> QJSDeclarativeEngineInstance::GetPipelineContext(JSContext* ctx)
+{
+    auto* instance = QJSDeclarativeEngineInstance::UnWrapEngineInstance(ctx);
+    if (instance != nullptr) {
+        return instance->GetDelegate()->GetPipelineContext();
+    }
+    return nullptr;
+}
+
 static int EvalBuf(JSContext* ctx, const char* buf, size_t bufLen, const char* filename, int evalFlags)
 {
-    JSValue val;
-    int ret;
-
-    val = JS_Eval(ctx, buf, bufLen, filename, evalFlags);
+    JSValue val = JS_Eval(ctx, buf, bufLen, filename, evalFlags);
+    int32_t ret = JS_CALL_SUCCESS;
     if (JS_IsException(val)) {
-        LOGE("[QJS Native EvalBuf()  FAILED FAILED FAILED!!!!\n\n");
-        QjsUtils::JsStdDumpErrorAce(ctx);
-        ret = -1;
-    } else {
-        ret = 0;
+        LOGE("[Qjs Native] EvalBuf failed!");
+        QJSUtils::JsStdDumpErrorAce(ctx);
+        ret = JS_CALL_FAIL;
     }
     JS_FreeValue(ctx, val);
     return ret;
@@ -189,12 +213,10 @@ JSValue QJSDeclarativeEngineInstance::CompileSource(std::string url, const char*
 
     struct stat statbuf;
     int statres = stat(filename.c_str(), &statbuf);
-    LOGD("Cache file stat result for %s, %d, errno %d, size %ld", filename.c_str(), statres, errno, statbuf.st_size);
 
     JSValue retVal = JS_NULL;
     int fhi;
     if (statres == 0 && (fhi = open(filename.c_str(), O_RDONLY)) != -1) {
-        LOGD("Cache file open result for %s, fhi: %d, errno %d, reading", filename.c_str(), fhi, errno);
         uint8_t* in_buf = (uint8_t*)malloc(statbuf.st_size + 5);
         if (!in_buf) {
             close(fhi);
@@ -210,7 +232,7 @@ JSValue QJSDeclarativeEngineInstance::CompileSource(std::string url, const char*
         retVal = JS_Eval(GetQJSContext(), buf, bufSize, url.c_str(), JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_COMPILE_ONLY);
         if (JS_IsException(retVal)) {
             LOGE("Failed reading (source) JS file %s into QuickJS!", url.c_str());
-            QjsUtils::JsStdDumpErrorAce(ctx);
+            QJSUtils::JsStdDumpErrorAce(ctx);
             return JS_UNDEFINED;
         }
 
@@ -229,8 +251,8 @@ JSValue QJSDeclarativeEngineInstance::CompileSource(std::string url, const char*
 void QJSDeclarativeEngineInstance::CallAnimationFinishJs(JSValue animationContext)
 {
     JSContext* ctx = GetQJSContext();
-    QjsHandleScope handleScope(ctx);
-    auto proto = QjsUtils::GetPropertyStr(ctx, animationContext, "onfinish");
+    QJSHandleScope handleScope(ctx);
+    auto proto = QJSUtils::GetPropertyStr(ctx, animationContext, "onfinish");
     if (!JS_IsFunction(ctx, proto)) {
         LOGE("cannot find 'CallAnimationFinishJs' function from global object, this should not happen!");
         return;
@@ -244,8 +266,8 @@ void QJSDeclarativeEngineInstance::CallAnimationFinishJs(JSValue animationContex
 void QJSDeclarativeEngineInstance::CallAnimationCancelJs(JSValue animationContext)
 {
     JSContext* ctx = GetQJSContext();
-    QjsHandleScope handleScope(ctx);
-    auto proto = QjsUtils::GetPropertyStr(ctx, animationContext, "oncancel");
+    QJSHandleScope handleScope(ctx);
+    auto proto = QJSUtils::GetPropertyStr(ctx, animationContext, "oncancel");
     if (!JS_IsFunction(ctx, proto)) {
         return;
     }
@@ -266,7 +288,7 @@ bool QJSDeclarativeEngineInstance::ExecuteDocumentJS(JSValue jsCode)
     JSValue result = JS_EvalFunction(ctx, jsCode);
     if (JS_IsException(result)) {
         LOGD("Failed executing JS!");
-        QjsUtils::JsStdDumpErrorAce(ctx);
+        QJSUtils::JsStdDumpErrorAce(ctx);
         return false;
     }
     js_std_loop(ctx);
@@ -294,7 +316,7 @@ JSModuleDef* JsInitModule(JSContext* ctx)
     return m;
 }
 
-JSContext* InitJSContext(JSRuntime* rt, size_t maxStackSize, const RefPtr<FrontendDelegate>& delegate)
+JSContext* InitJSContext(JSRuntime* rt, const RefPtr<FrontendDelegate>& delegate, size_t maxStackSize)
 {
     LOGD("QJS Creating new JS context and loading HBS module");
 
@@ -327,7 +349,7 @@ JSContext* InitJSContext(JSRuntime* rt, size_t maxStackSize, const RefPtr<Fronte
                       "// QJS rel 1 Sept no longer defines global but globalThis object, fix it \n"
                       "var global = globalThis;\n";
 
-    if (-1 == EvalBuf(ctx1, str, strlen(str), "JS Context initialize", JS_EVAL_TYPE_MODULE)) {
+    if (JS_CALL_FAIL == EvalBuf(ctx1, str, strlen(str), "JS Context initialize", JS_EVAL_TYPE_GLOBAL)) {
         LOGE("QJS created JS context but failed to init hbs, os, or std module.!");
     }
     NativeObjectInfo* nativeObjectInfo = new NativeObjectInfo();
@@ -339,8 +361,13 @@ JSContext* InitJSContext(JSRuntime* rt, size_t maxStackSize, const RefPtr<Fronte
         }
     }, nullptr);
     JS_SetPropertyStr(ctx1, globalObj, "ability", abilityValue);
+    JS_FreeValue(ctx1, globalObj);
     return ctx1;
 }
+
+std::map<std::string, std::string> QJSDeclarativeEngineInstance::mediaResourceFileMap_;
+
+std::unique_ptr<JsonValue> QJSDeclarativeEngineInstance::currentConfigResourceData_;
 
 bool QJSDeclarativeEngineInstance::InitJSEnv()
 {
@@ -350,31 +377,84 @@ bool QJSDeclarativeEngineInstance::InitJSEnv()
         LOGE("QJS cannot allocate JS runtime");
         return false;
     }
-    ACE_DCHECK(frontendDelegate_);
-    context_ = InitJSContext(runtime_, MAX_STACK_SIZE, frontendDelegate_);
+    context_ = InitJSContext(runtime_, frontendDelegate_, MAX_STACK_SIZE);
     if (!context_) {
         LOGE("QJS cannot allocate JS context");
         JS_FreeRuntime(runtime_);
         return false;
     }
-    auto result = EvalBuf(context_, _binary_jsproxyClass_js_start,
-        _binary_jsproxyClass_js_end - _binary_jsproxyClass_js_start, "jsproxyClass.js", JS_EVAL_TYPE_GLOBAL);
+    // make jsProxy end of '\0'
+    std::string jsProxy(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end - _binary_stateMgmt_js_start);
+    std::string jsEnum(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end - _binary_jsEnumStyle_js_start);
+    if (!InitAceModules(jsProxy.c_str(), jsProxy.length(), "stateMgmt.js")
+        || !InitAceModules(jsEnum.c_str(), jsEnum.length(), "jsEnumStyle.js")) {
+        return false;
+    }
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    std::string jsMockSystemPlugin(_binary_jsMockSystemPlugin_js_start,
+                                   _binary_jsMockSystemPlugin_js_end - _binary_jsMockSystemPlugin_js_start);
+    if (!InitAceModules(jsMockSystemPlugin.c_str(), jsMockSystemPlugin.length(), "jsMockSystemPlugin.js")) {
+        return false;
+    }
+#endif
+    InitJsNativeModuleObject(context_);
+
+    currentConfigResourceData_ = JsonUtil::CreateArray(true);
+    frontendDelegate_->LoadResourceConfiguration(mediaResourceFileMap_, currentConfigResourceData_);
+
+    return true;
+}
+
+bool QJSDeclarativeEngineInstance::InitAceModules(const char* start, size_t length, const char* fileName)
+{
+    if (start == nullptr || length == 0 || fileName == nullptr) {
+        LOGE("Failed to init Ace modules, start, end or fileName can not be null!");
+        return false;
+    }
+    auto result = EvalBuf(context_, start, length, fileName, JS_EVAL_TYPE_GLOBAL);
     if (result == -1) {
         EventInfo eventInfo;
         eventInfo.eventType = EXCEPTION_JS;
         eventInfo.errorType = static_cast<int32_t>(JsExcepType::JS_CONTEXT_INIT_ERR);
         EventReport::SendEvent(eventInfo);
-        LOGW("JS Engine created JS context but failed to init proxy class!");
+        LOGE("JS Engine created JS context but failed to init Ace modules!");
         return false;
     }
-    // TODO: add js group function for js interface.
-
-    // initialize native qjs engine.
-    nativeEngine_ = new QuickJSNativeEngine(runtime_, context_);
-    frontendDelegate_->AddTaskObserver([nativeEngine = nativeEngine_](){
-        nativeEngine->Loop();
-    });
     return true;
+}
+
+JSValue RequireNativeModule(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    if ((argc != 1) || !JS_IsString(argv[0])) {
+        LOGE("RequireNativeModule expects a single string as parameter");
+        return JS_NULL;
+    }
+    ScopedString moduleName(ctx, argv[0]);
+
+    // has already init module object
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue moduleObject = JS_GetPropertyStr(ctx, globalObj, moduleName.get());
+    if (JS_IsObject(moduleObject)) {
+        LOGE("has already init moduleObject %s", moduleName.get());
+        return moduleObject;
+    }
+
+    // init module object first time
+    JSValue jsModuleObject = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, globalObj, moduleName.get(), jsModuleObject);
+    if (ModuleManager::GetInstance()->InitModule(ctx, moduleName, jsModuleObject)) {
+        return jsModuleObject;
+    } else {
+        LOGE("init moduleObject %s failed", moduleName.get());
+        return JS_NULL;
+    }
+    return JS_NULL;
+}
+
+void QJSDeclarativeEngineInstance::InitJsNativeModuleObject(JSContext* ctx)
+{
+    QJSUtils::DefineGlobalFunction(ctx, RequireNativeModule, "requireNativeModule", 1);
 }
 
 QJSDeclarativeEngineInstance::~QJSDeclarativeEngineInstance()
@@ -385,15 +465,41 @@ QJSDeclarativeEngineInstance::~QJSDeclarativeEngineInstance()
     if (runtime_) {
         JS_FreeRuntime(runtime_);
     }
-    if (nativeEngine_ != nullptr) {
-        delete nativeEngine_;
-    }
 }
 
 void QJSDeclarativeEngineInstance::FireAsyncEvent(const std::string& eventId, const std::string& param)
 {
     LOGE("Not implemented!");
 }
+
+std::unique_ptr<JsonValue> QJSDeclarativeEngineInstance::GetI18nStringResource(const std::string& targetStringKey,
+    const std::string& targetStringValue)
+{
+    auto resourceI18nFileNum = currentConfigResourceData_->GetArraySize();
+    for (int i = 0; i < resourceI18nFileNum; i++) {
+        auto priorResource = currentConfigResourceData_->GetArrayItem(i);
+        if ((priorResource->Contains(targetStringKey))) {
+            auto valuePair = priorResource->GetValue(targetStringKey);
+            if (valuePair->Contains(targetStringValue)) {
+                return valuePair->GetValue(targetStringValue);
+            }
+        }
+    }
+
+    return JsonUtil::Create(true);
+}
+
+std::string QJSDeclarativeEngineInstance::GetMeidaResource(const std::string& targetMediaFileName)
+{
+    auto iter = mediaResourceFileMap_.find(targetMediaFileName);
+
+    if (iter != mediaResourceFileMap_.end()) {
+        return iter->second;
+    }
+
+    return std::string();
+}
+
 
 void QJSDeclarativeEngineInstance::RunGarbageCollection()
 {

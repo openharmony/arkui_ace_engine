@@ -32,11 +32,9 @@ protected:
     void OnMounted(const RefPtr<DOMNode>& parentNode) override;
     void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) override;
     void PrepareSpecializedComponent() override;
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
     RefPtr<Component> GetSpecializedComponent() override;
 
 private:
-    std::string points_;
     RefPtr<SvgPolygonComponent> polygonComponent_;
 };
 

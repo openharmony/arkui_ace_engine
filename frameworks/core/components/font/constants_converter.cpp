@@ -196,10 +196,11 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineContext>&
         txtStyle.font_size = textStyle.GetFontSize().Value();
     }
     txtStyle.font_style = ConvertTxtFontStyle(textStyle.GetFontStyle());
-    txtStyle.word_spacing = static_cast<SkScalar>(textStyle.GetWordSpacing());
-    txtStyle.letter_spacing = textStyle.GetLetterSpacing();
+    txtStyle.word_spacing = pipelineContext->NormalizeToPx(textStyle.GetWordSpacing());
+    txtStyle.letter_spacing = pipelineContext->NormalizeToPx(textStyle.GetLetterSpacing());
     txtStyle.text_baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
+    txtStyle.decoration_color = ConvertSkColor(textStyle.GetTextDecorationColor());
     txtStyle.font_families = textStyle.GetFontFamilies();
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
 
@@ -227,6 +228,16 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineContext>&
             LOGD("use default text style height value.");
             txtStyle.height = 1;
         }
+    }
+
+    // set font variant
+    auto fontFeatures = textStyle.GetFontFeatures();
+    if (!fontFeatures.empty()) {
+        txt::FontFeatures features;
+        for (auto iter = fontFeatures.begin(); iter != fontFeatures.end(); ++iter) {
+            features.SetFeature(iter->first, iter->second);
+        }
+        txtStyle.font_features = features;
     }
 }
 

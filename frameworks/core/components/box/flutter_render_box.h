@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_FLUTTER_RENDER_BOX_H
 
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "include/core/SkPath.h"
 
 #include "core/components/box/render_box.h"
 #include "core/components/common/layout/constants.h"
@@ -99,6 +100,17 @@ private:
     void UpdateBlurRRect(const flutter::RRect& rRect, const Offset& offset);
     void DrawLayerForBlur(SkCanvas* canvas, Flutter::ContainerLayer* containerLayer);
     flutter::RRect GetBoxRRect(const Offset& offset, const Border& border, double shrinkFactor, bool isRound);
+    float DimensionToPx(const Dimension& value, const Size& size, LengthMode type) const;
+    void GetSizeAndPosition(GeometryBoxType geometryBoxType, Size& size, Offset& position);
+    float GetFloatRadiusValue(const Dimension& src, const Dimension& dest, const Size& size, LengthMode type);
+
+    bool CreateSkPath(const RefPtr<BasicShape>& basicShape, GeometryBoxType geometryBoxType, SkPath *skPath);
+    bool CreateInset(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
+    bool CreateCircle(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
+    bool CreateEllipse(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
+    bool CreatePolygon(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
+    bool CreatePath(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
+    bool CreateRect(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
 
     RefPtr<Flutter::ClipLayer> clipLayer_;
     RRect windowBlurRRect_;

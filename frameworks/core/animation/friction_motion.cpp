@@ -72,7 +72,7 @@ void FrictionMotion::Move(float offsetTime)
 
 double FrictionMotion::GetPosition(float offsetTime) const
 {
-    return initPosition_ + signum_ * (initVelocity_ / friction_) * (std::exp(friction_ * offsetTime) - 1.0);
+    return initPosition_ + signum_ * (initVelocity_ / friction_) * std::expm1(friction_ * offsetTime);
 }
 
 double FrictionMotion::GetVelocityByFinalPosition(double final, double threshold) const

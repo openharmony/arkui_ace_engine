@@ -64,44 +64,42 @@ void FlutterRenderTransform::Paint(RenderContext& context, const Offset& offset)
 
 void FlutterRenderTransform::UpdateTransformByGlobalOffset()
 {
-    Offset absoluteOffset = GetGlobalOffset();
-    Matrix4 transform = GetEffectiveTransform(absoluteOffset);
+    Offset absoluteOffset = GetTransitionGlobalOffset();
+    auto currentTransform = GetEffectiveTransform(absoluteOffset);
+    if (!(transformPaint_ == currentTransform)) {
+        transformPaint_ = currentTransform;
+        MarkNeedUpdateTouchRect(true);
+        CheckIfNeedUpdateTouchRect();
+    }
     if (layer_) {
-        layer_->Update(transform);
+        layer_->Update(transformPaint_);
     }
 }
 
 void FlutterRenderTransform::OnGlobalPositionChanged()
 {
     UpdateTransformByGlobalOffset();
+    RenderTransform::OnGlobalPositionChanged();
 }
 
-bool FlutterRenderTransform::TouchTest(const Point& globalPoint, const Point& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
+Point FlutterRenderTransform::GetTransformPoint(const Point& point)
 {
-    LOGD("Global point is %{public}lf, %{public}lf", globalPoint.GetX(), globalPoint.GetY());
-    LOGD("Local point  is %{public}lf, %{public}lf", parentLocalPoint.GetX(), parentLocalPoint.GetY());
+    Matrix4 transform = GetEffectiveTransform(GetPosition());
+    return Matrix4::Invert(transform) * point;
+}
 
-    if (!enableTouchTest_ || disabled_) {
-        LOGD("transform touch test disabled, skip touch test");
-        return false;
-    }
-    Offset offset = GetPosition();
-    Matrix4 transform = GetEffectiveTransform(offset);
-    Matrix4 inverse = Matrix4::Invert(transform);
-    Point beforeTransform = inverse * parentLocalPoint;
-    if (GetTouchRect().IsInRegion(beforeTransform)) {
-        const auto localPoint = beforeTransform - GetPaintRect().GetOffset();
-        for (const auto& child : GetChildren()) {
-            if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {
-                break;
-            }
-        }
-        const auto coordinateOffset = globalPoint - localPoint;
-        OnTouchTestHit(coordinateOffset, touchRestrict, result);
-        return true;
-    }
-    return false;
+Rect FlutterRenderTransform::GetTransformRect(const Rect& rect)
+{
+    Matrix4 transform = GetEffectiveTransform(GetPosition());
+    Point ltPoint = transform * Point(rect.Left(), rect.Top());
+    Point rtPoint = transform * Point(rect.Right(), rect.Top());
+    Point lbPoint = transform * Point(rect.Left(), rect.Bottom());
+    Point rbPoint = transform * Point(rect.Right(), rect.Bottom());
+    auto left = std::min(std::min(ltPoint.GetX(), rtPoint.GetX()), std::min(lbPoint.GetX(), rbPoint.GetX()));
+    auto right = std::max(std::max(ltPoint.GetX(), rtPoint.GetX()), std::max(lbPoint.GetX(), rbPoint.GetX()));
+    auto top = std::min(std::min(ltPoint.GetY(), rtPoint.GetY()), std::min(lbPoint.GetY(), rbPoint.GetY()));
+    auto bottom = std::max(std::max(ltPoint.GetY(), rtPoint.GetY()), std::max(lbPoint.GetY(), rbPoint.GetY()));
+    return Rect(left, top, right - left, bottom - top).CombineRect(rect);
 }
 
 Matrix4 FlutterRenderTransform::GetTransformByOffset(Matrix4 matrix, const Offset& offset)
@@ -154,6 +152,22 @@ bool FlutterRenderTransform::CheckNeedPaint() const
         return false; // If RotateX or RotateY is 90 deg, not need to paint.
     }
     return true;
+}
+
+void FlutterRenderTransform::Mirror(const Offset& center, const Offset& global)
+{
+    float angle = 180.0f;
+    if (!center.IsZero()) {
+        transform_ = FlutterRenderTransform::GetTransformByOffset(transform_, center);
+    }
+    Matrix4 rotate = Matrix4::CreateRotate(angle, 0.0f, 1.0f, 0.0f);
+    transform_ = rotate * transform_;
+
+    UpdateTransformLayer();
+    auto context = context_.Upgrade();
+    if (context) {
+        context->MarkForcedRefresh();
+    }
 }
 
 } // namespace OHOS::Ace

@@ -77,6 +77,11 @@ public:
         axis_ = axis;
     }
 
+    void SetScrollableNode(const WeakPtr<RenderNode>& node)
+    {
+        scrollableNode_ = node;
+    }
+
     double GetMainOffset(const Offset& offset) const
     {
         return axis_ == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
@@ -245,6 +250,7 @@ private:
     RefPtr<ScrollMotion> scrollMotion_;
     RefPtr<SpringProperty> spring_;
     WeakPtr<PipelineContext> context_;
+    WeakPtr<RenderNode> scrollableNode_;
     double currentPos_ = 0.0;
     double currentVelocity_ = 0.0;
     bool scrollPause_ = false;
@@ -255,6 +261,7 @@ private:
     bool needCenterFix_ = false;
     int32_t nodeId_ = 0;
     double slipFactor_ = 0.0;
+    double velocityRangeScale_ = 1.0;
     static double sFriction_;
     static double sVelocityScale_;
 };

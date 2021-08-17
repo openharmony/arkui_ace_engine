@@ -35,6 +35,8 @@ template("ace_core_pipeline_source_set") {
       "base/constants.cpp",
       "base/element.cpp",
       "base/flutter_render_context.cpp",
+      "base/multi_composed_component.cpp",
+      "base/multi_composed_element.cpp",
       "base/related_node.cpp",
       "base/render_element.cpp",
       "base/render_node.cpp",
@@ -59,14 +61,14 @@ template("ace_core_pipeline_source_set") {
 
     configs += [
       "$ace_root:ace_config",
-      "$flutter_root:flutter_config",
-      "$flutter_root:icu_config_$platform",
+      "$ace_flutter_engine_root:flutter_config",
+      "$ace_flutter_engine_root:icu_config_$platform",
     ]
 
     deps = [
+      "$ace_flutter_engine_root:ace_skia_$platform",
+      "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
       "$ace_root/frameworks/base:ace_base_$platform",
-      "$flutter_root:ace_skia_$platform",
-      "$flutter_root:third_party_flutter_engine_$platform",
     ]
 
     if (is_ohos_platform && enable_native_view) {

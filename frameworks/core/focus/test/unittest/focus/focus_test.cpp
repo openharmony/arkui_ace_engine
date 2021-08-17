@@ -17,6 +17,7 @@
 
 #define protected public
 #define private public
+#include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/render_element.h"
 
 using namespace testing;
@@ -101,6 +102,8 @@ bool ColNode::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
     return false;
 }
 
+void ComposedElement::ApplyChildren() {}
+
 void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node) {}
 void PipelineContext::AddDirtyLayoutNode(RefPtr<RenderNode> const& renderNode) {}
 void PipelineContext::AddDirtyRenderNode(const RefPtr<RenderNode>& renderNode, bool overlay) {}
@@ -112,6 +115,14 @@ void PipelineContext::PushShadow(const RefPtr<Element>& element) const {}
 void PipelineContext::PopShadow() const {}
 void PipelineContext::AddPredictLayoutNode(const RefPtr<RenderNode>& renderNode) {}
 void PipelineContext::RemoveScheduleTask(uint32_t id) {}
+void PipelineContext::AddDeactivateElement(int, RefPtr<Element> const&) {}
+void PipelineContext::AddNeedRebuildFocusElement(RefPtr<Element> const&) {}
+RefPtr<Element> PipelineContext::GetDeactivateElement(int) const { return nullptr; }
+
+const AnimationOption PipelineContext::GetExplicitAnimationOption() const
+{
+    return AnimationOption();
+}
 
 double PipelineContext::NormalizeToPx(const Dimension& dimension) const
 {
@@ -134,6 +145,11 @@ uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
 }
 
 RefPtr<AccessibilityManager> PipelineContext::GetAccessibilityManager() const
+{
+    return nullptr;
+}
+
+RefPtr<PageElement> PipelineContext::GetLastPage() const
 {
     return nullptr;
 }
@@ -207,7 +223,7 @@ HWTEST_F(FocusTest, FocusTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. focus moves to the right.
      */
-    KeyEvent keyEvent(KeyCode::TV_CONTROL_RIGHT, KeyAction::UP, 0, 0, 0);
+    KeyEvent keyEvent(KeyCode::TV_CONTROL_RIGHT, KeyAction::UP, 0, 0, 0, 0, 0, 0);
     root_->HandleKeyEvent(keyEvent);
 
     /**
@@ -253,7 +269,7 @@ HWTEST_F(FocusTest, FocusTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. focus moves down.
      */
-    KeyEvent keyEvent(KeyCode::TV_CONTROL_DOWN, KeyAction::UP, 0, 0, 0);
+    KeyEvent keyEvent(KeyCode::TV_CONTROL_DOWN, KeyAction::UP, 0, 0, 0, 0, 0, 0);
     root_->HandleKeyEvent(keyEvent);
 
     /**
@@ -299,7 +315,7 @@ HWTEST_F(FocusTest, FocusTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. set the key callback function.
      */
-    KeyEvent keyEvent(KeyCode::TV_CONTROL_RIGHT, KeyAction::UP, 0, 0, 0);
+    KeyEvent keyEvent(KeyCode::TV_CONTROL_RIGHT, KeyAction::UP, 0, 0, 0, 0, 0, 0);
     std::string keyCallback;
     firstNode_->SetOnKeyCallback([&keyCallback](const KeyEvent& keyEvent) {
         keyCallback = KEY_CALLBACK;
@@ -325,7 +341,7 @@ HWTEST_F(FocusTest, FocusTest004, TestSize.Level1)
     /**
      * @tc.steps: step1. set the click callback function.
      */
-    KeyEvent keyEvent(KeyCode::KEYBOARD_ENTER, KeyAction::CLICK, 0, 0, 0);
+    KeyEvent keyEvent(KeyCode::KEYBOARD_ENTER, KeyAction::CLICK, 0, 0, 0, 0, 0, 0);
     std::string clickCallback;
     firstNode_->SetOnClickCallback([&clickCallback]() { clickCallback = CLICK_CALLBACK; });
 
@@ -501,7 +517,7 @@ HWTEST_F(FocusTest, FocusTest009, TestSize.Level1)
      * @tc.expected: step2. the state of focus is correct.
      */
     secondNode_->RequestFocusImmediately();
-    KeyEvent keyEvent(KeyCode::TV_CONTROL_RIGHT, KeyAction::UP, 0, 0, 0);
+    KeyEvent keyEvent(KeyCode::TV_CONTROL_RIGHT, KeyAction::UP, 0, 0, 0, 0, 0, 0);
     root_->HandleKeyEvent(keyEvent);
     ASSERT_TRUE(fifthNode->IsCurrentFocus());
 

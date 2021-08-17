@@ -42,31 +42,31 @@ public:
         }
         void SetGutterWidth(const Dimension& gutterWidth)
         {
-            if (gutterWidth.Value() > 0.0) {
+            if (GreatOrEqual(gutterWidth.Value(), 0.0)) {
                 containerInfo_->gutterWidth_ = gutterWidth;
             }
         }
         void SetMarginLeft(const Dimension& marginLeft)
         {
-            if (marginLeft.Value() > 0.0) {
+            if (GreatOrEqual(marginLeft.Value(), 0.0)) {
                 containerInfo_->marginLeft_ = marginLeft;
             }
         }
         void SetMarginRight(const Dimension& marginRight)
         {
-            if (marginRight.Value() > 0.0) {
+            if (GreatOrEqual(marginRight.Value(), 0.0)) {
                 containerInfo_->marginRight_ = marginRight;
             }
         }
         void SetPaddingLeft(const Dimension& paddingLeft)
         {
-            if (paddingLeft.Value() > 0.0) {
+            if (GreatOrEqual(paddingLeft.Value(), 0.0)) {
                 containerInfo_->paddingLeft_ = paddingLeft;
             }
         }
         void SetPaddingRight(const Dimension& paddingRight)
         {
-            if (paddingRight.Value() > 0.0) {
+            if (GreatOrEqual(paddingRight.Value(), 0.0)) {
                 containerInfo_->paddingRight_ = paddingRight;
             }
         }
@@ -77,6 +77,10 @@ public:
         void SetColumnType(const GridColumnType& columnType)
         {
             containerInfo_->columnType_ = columnType;
+        }
+        void SetGridTemplateType(const GridTemplateType& templateType)
+        {
+            containerInfo_->templateType_ = templateType;
         }
         const RefPtr<GridContainerInfo>& Build() const
         {
@@ -99,17 +103,19 @@ public:
     }
     GridSizeType GetSizeType() const;
     int32_t GetColumns() const;
-    const Dimension& GetGutterWidth() const;
-    const Dimension& GetMarginLeft() const;
-    const Dimension& GetMarginRight() const;
+    Dimension ACE_EXPORT GetGutterWidth() const;
+    Dimension GetMarginLeft() const;
+    Dimension GetMarginRight() const;
+
     /*
      * Use system screen width build column width.
      */
-    void BuildColumnWidth();
+    void ACE_EXPORT BuildColumnWidth();
     void BuildColumnWidth(double width);
 
 private:
     GridContainerInfo() = default;
+    GridTemplateType templateType_ = GridTemplateType::NORMAL;
     // current used size type
     GridSizeType currentSizeType_ = GridSizeType::UNDEFINED;
     GridSizeType sizeType_ = GridSizeType::UNDEFINED;
@@ -121,6 +127,7 @@ private:
     Dimension paddingLeft_ = UNDEFINED_DIMENSION;
     Dimension paddingRight_ = UNDEFINED_DIMENSION;
 
+    double containerWidth_ = 0.0;
     double columnWidth_ = 0.0;
     GridColumnType columnType_ = GridColumnType::NONE;
 };

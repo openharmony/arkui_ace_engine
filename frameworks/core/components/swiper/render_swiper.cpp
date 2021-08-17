@@ -15,6 +15,7 @@
 
 #include "core/components/swiper/render_swiper.h"
 
+#include "base/utils/time_util.h"
 #include "core/animation/curve_animation.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/keyframe.h"
@@ -23,6 +24,7 @@
 #include "core/components/display/render_display.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/event/ace_event_helper.h"
+#include "core/pipeline/base/multi_child.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -45,9 +47,11 @@ constexpr uint8_t TARGET_END_OPACITY_VALUE = 255;
 constexpr float SWIPE_TO_ANIMATION_TIME = 500.0f;
 constexpr uint8_t TRANSLATE_RATIO = 10;
 constexpr int32_t COMPONENT_CHANGE_END_LISTENER_KEY = 1001;
-constexpr double THRESHOLD = 90.0;
-constexpr double SWIPER_ROTATION_SENSITIVITY_NORMAL = 1.4;
 constexpr double MIN_SCROLL_OFFSET = 0.20;
+
+// for watch rotation const param
+constexpr double ROTATION_SENSITIVITY_NORMAL = 1.4;
+constexpr uint64_t ROTATION_INTERVAL_MS = 200;
 
 // for indicator animation const param
 constexpr double SPRING_MASS = 1.0;
@@ -71,8 +75,8 @@ constexpr double OPACITY_MAX = 0.1;
 constexpr double ZOOM_DOT_MIN = 0.0;
 constexpr double ZOOM_DOT_MAX = 1.0;
 constexpr double ZOOM_HOTZONE_MAX_RATE = 1.33;
-constexpr double INDICATOR_DIRECT_RTL = 1.0;
-constexpr double INDICATOR_DIRECT_LTR = -1.0;
+constexpr double INDICATOR_DIRECT_FORWARD = 1.0;
+constexpr double INDICATOR_DIRECT_BACKWARD = -1.0;
 constexpr int32_t VIBRATE_DURATION = 30;
 constexpr int32_t ZOOM_IN_DURATION = 250;
 constexpr int32_t ZOOM_OUT_DURATION = 250;
@@ -89,8 +93,8 @@ const RefPtr<CubicCurve> INDICATOR_NORMAL_POINT = AceType::MakeRefPtr<CubicCurve
 const RefPtr<CubicCurve> INDICATOR_ZONE_STRETCH = AceType::MakeRefPtr<CubicCurve>(0.1f, 0.2f, 0.48f, 1.0f);
 
 // for indicator
-constexpr double DELAY_TIME_DEFAULT = 50;
-constexpr int32_t TIME_RATIO = 1000;
+constexpr double DELAY_TIME_DEFAULT = 250;
+constexpr int32_t MICROSEC_TO_NANOSEC = 1000;
 constexpr int32_t INDICATOR_INVALID_HOVER_INDEX = -1;
 constexpr Dimension INDICATOR_PADDING_TOP_DEFAULT = 9.0_vp;
 constexpr Dimension INDICATOR_DIGITAL_PADDING = 8.0_vp;
@@ -100,6 +104,13 @@ constexpr Dimension INDICATOR_FOCUS_RADIUS_DEL_SIZE = 3.0_vp;
 constexpr int32_t INDICATOR_FOCUS_COLOR = 0x0a59f7;
 
 } // namespace
+
+int64_t GetTickCount()
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (ts.tv_sec * MICROSEC_TO_NANOSEC + ts.tv_nsec / (MICROSEC_TO_NANOSEC * MICROSEC_TO_NANOSEC));
+}
 
 RenderSwiper::~RenderSwiper()
 {
@@ -123,30 +134,31 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
         MarkNeedRender();
         return;
     }
-    disableSwipe_ = swiper->GetDisableSwipe();
     scale_ = context->GetDipScale();
-    slideContinued_ = swiper->GetSlideContinue();
-    moveCallback_ = swiper->GetMoveCallback();
-    itemCount_ = swiper->GetChildren().size();
-    animationDuration_ = swiper->GetDuration();
+
+    // Get item count of swiper
+    const auto& children = swiper->GetChildren();
+    itemCount_ = children.size();
+    for (const auto& child : children) {
+        auto multiChild = AceType::DynamicCast<MultiChild>(child);
+        if (multiChild) {
+            --itemCount_;
+            itemCount_ += multiChild->Count();
+        }
+    }
+
     indicator_ = swiper->GetIndicator();
+    mainSwiperSize_ = swiper->GetMainSwiperSize();
     digitalIndicator_ = swiper->GetDigitalIndicator();
     changeEvent_ =
         AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(swiper->GetChangeEventId(), context_);
     rotationEvent_ = AceAsyncEvent<void(const std::string&)>::Create(swiper->GetRotationEventId(), context_);
-    clickEvent_ = AceAsyncEvent<void()>::Create(swiper->GetClickEventId(), context_);
+    clickEvent_ =
+        AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(swiper->GetClickEventId(), context_);
     RegisterChangeEndListener(COMPONENT_CHANGE_END_LISTENER_KEY, swiper->GetChangeEndListener());
-    autoPlay_ = swiper->IsAutoPlay();
-    if (context && context->IsJsCard()) {
-        autoPlay_ = false;
-    }
-    loop_ = swiper->IsLoop();
     show_ = swiper->IsShow();
-    autoPlayInterval_ = swiper->GetAutoPlayInterval();
     axis_ = swiper->GetAxis();
     needReverse_ = (swiper->GetTextDirection() == TextDirection::RTL) && (axis_ == Axis::HORIZONTAL);
-    animationCurve_ = swiper->GetAnimationCurve();
-    animationOpacity_ = swiper->IsAnimationOpacity();
     const auto& swiperController = swiper->GetSwiperController();
     if (swiperController) {
         auto weak = AceType::WeakClaim(this);
@@ -175,52 +187,77 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
         auto weak = AceType::WeakClaim(this);
         rotationController->SetRequestRotationImpl(weak, context_);
     }
-
-    childrenArray_.clear();
-    MarkNeedLayout();
-    if (currentIndex_ >= itemCount_) {
-        currentIndex_ = itemCount_ > 0 ? itemCount_ - 1 : 0;
-    }
+    disableSwipe_ = swiper->GetDisableSwipe();
+    disableRotation_ = swiper->GetDisableRotation();
+    autoPlay_ = (context && context->IsJsCard()) ? false : swiper->IsAutoPlay();
+    autoPlayInterval_ = swiper->GetAutoPlayInterval();
+    loop_ = swiper->IsLoop();
+    animationOpacity_ = swiper->IsAnimationOpacity();
+    items_.clear();
+    InitLazyItems(swiper); // include lazy itemCount_ init
     if (itemCount_ < LEAST_SLIDE_ITEM_COUNT) {
         LOGD("swiper item is less than least slide count");
         return;
     }
     UpdateIndex(swiper->GetIndex());
     Initialize(GetContext());
-    isSwiperInitialized_ = isSwiperInitialized_ || swiper;
+    swiper_ = swiper; // must after UpdateIndex
 }
 
 void RenderSwiper::UpdateTouchRect()
 {
     touchRect_.SetSize(GetLayoutSize());
     touchRect_.SetOffset(GetPosition());
+    ownTouchRect_ = touchRect_;
 }
 
 void RenderSwiper::PerformLayout()
 {
+    BuildNoLazyItem();
     // layout all children
-    const auto& children = GetChildren();
-    if (childrenArray_.empty()) {
-        childrenArray_ = std::vector<RefPtr<RenderNode>>(children.begin(), children.end());
-    }
-
     LayoutParam innerLayout = GetLayoutParam();
-    int32_t childrenSize = static_cast<int32_t>(childrenArray_.size());
     Size minSize = GetLayoutParam().GetMinSize();
     Size maxSize = GetLayoutParam().GetMaxSize();
+
     double maxWidth = minSize.Width();
     double maxHeight = minSize.Height();
-    for (int32_t i = 0; i < childrenSize; i++) {
-        const auto& childItem = childrenArray_[i];
+    if (mainSwiperSize_ == MainSwiperSize::MAX) {
+        maxWidth = maxSize.Width();
+        maxHeight = maxSize.Height();
+    } else if (mainSwiperSize_ == MainSwiperSize::MIN) {
+        maxWidth = 0.0;
+        maxHeight = 0.0;
+    } else if (mainSwiperSize_ == MainSwiperSize::MAX_X) {
+        maxWidth = maxSize.Width();
+        maxHeight = 0.0;
+    } else if (mainSwiperSize_ == MainSwiperSize::MAX_Y) {
+        maxWidth = 0.0;
+        maxHeight = maxSize.Height();
+    } else if (mainSwiperSize_ == MainSwiperSize::AUTO) {
+        LOGD("Use default MainSwiperSize");
+    } else {
+        LOGE("input wrong MainSwiperSize");
+    }
+
+    for (auto iter = items_.begin(); iter != items_.end(); iter++) {
+        const auto& childItem = iter->second;
+        if (!childItem) {
+            continue;
+        }
         childItem->Layout(innerLayout);
         maxWidth = std::max(maxWidth, childItem->GetLayoutSize().Width());
         maxHeight = std::max(maxHeight, childItem->GetLayoutSize().Height());
     }
-    if (maxSize.IsInfinite()) {
-        SetLayoutSize(Size(maxWidth, maxHeight));
+    if (mainSwiperSize_ == MainSwiperSize::AUTO) {
+        if (maxSize.IsInfinite()) {
+            SetLayoutSize(Size(maxWidth, maxHeight));
+        } else {
+            SetLayoutSize(maxSize);
+        }
     } else {
-        SetLayoutSize(maxSize);
+        SetLayoutSize(Size(maxWidth, maxHeight));
     }
+
     Size layoutSize = GetLayoutSize();
     swiperWidth_ = layoutSize.Width();
     swiperHeight_ = layoutSize.Height();
@@ -229,8 +266,17 @@ void RenderSwiper::PerformLayout()
     nextItemOffset_ = axis_ == Axis::HORIZONTAL ? (needReverse_ ? -swiperWidth_ : swiperWidth_) : swiperHeight_;
     Offset prevItemPosition = GetMainAxisOffset(prevItemOffset_);
     Offset nextItemPosition = GetMainAxisOffset(nextItemOffset_);
-    for (int32_t i = 0; i < childrenSize; i++) {
-        const auto& childItem = childrenArray_[i];
+    for (const auto& item : items_) {
+        int32_t i = item.first;
+        // Refuse update item position during animation unless quick trun item
+        if ((isIndicatorAnimationStart_ && !quickTrunItem_) &&
+            (i == currentIndex_ || i == targetIndex_)) {
+            continue;
+        }
+        const auto& childItem = item.second;
+        if (!childItem) {
+            continue;
+        }
         if (i < currentIndex_) {
             childItem->SetPosition(prevItemPosition);
         } else if (i == currentIndex_) {
@@ -239,6 +285,8 @@ void RenderSwiper::PerformLayout()
             childItem->SetPosition(nextItemPosition);
         }
     }
+    quickTrunItem_ = false;
+
     // layout indicator
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         LayoutIndicator(swiperIndicatorData_);
@@ -404,7 +452,7 @@ void RenderSwiper::UpdateIndex(int32_t index)
         if (index >= itemCount_) {
             index = itemCount_ - 1;
         }
-        if (isSwiperInitialized_) {
+        if (swiper_) {
             if (index_ != index) {
                 swipeToIndex_ = index; // swipe to animation need to start after perform layout
                 index_ = index;
@@ -447,7 +495,7 @@ void RenderSwiper::HandleTouchDown(const TouchEventInfo& info)
     GetIndicatorCurrentRect(swiperIndicatorData_);
     if (indicatorRect_.IsInRegion(touchPoint)) {
         fingerId_ = locationInfo.GetFingerId();
-        startTimeStamp_ = clock();
+        startTimeStamp_ = GetTickCount();
         if (isIndicatorAnimationStart_) {
             touchContentType_ = TouchContentType::TOUCH_NONE;
             return;
@@ -455,14 +503,14 @@ void RenderSwiper::HandleTouchDown(const TouchEventInfo& info)
         touchContentType_ = TouchContentType::TOUCH_INDICATOR;
     } else {
         touchContentType_ = TouchContentType::TOUCH_CONTENT;
-        if (hasDragAction_ && slideContinued_) {
+        if (hasDragAction_ && swiper_->GetSlideContinue()) {
             controller_->Finish();
             return;
         }
         // when is in item moving animation, touch event will break animation and stop in current position
         StopSwipeAnimation();
         StopIndicatorAnimation();
-        if (autoPlay_) {
+        if (autoPlay_ && scheduler_) {
             scheduler_->Stop();
         }
     }
@@ -505,7 +553,7 @@ void RenderSwiper::HandleTouchUp(const TouchEventInfo& info)
     }
 
     // content zone
-    if (slideContinued_) {
+    if (swiper_->GetSlideContinue()) {
         return;
     }
     if (hasDragAction_) {
@@ -546,18 +594,18 @@ void RenderSwiper::HandleTouchMove(const TouchEventInfo& info)
     Point touchPoint = Point(locationInfo.GetGlobalLocation().GetX(), locationInfo.GetGlobalLocation().GetY());
     GetIndicatorCurrentRect(swiperIndicatorData_);
     if (indicatorRect_.IsInRegion(touchPoint)) {
-        if (autoPlay_ && scheduler_->IsActive()) {
+        if (autoPlay_ && scheduler_ && scheduler_->IsActive()) {
             // forbid indicator operation on auto play period.
             return;
         }
         if (!swiperIndicatorData_.isHovered) {
-            int64_t endStartTime = clock();
+            int64_t endStartTime = GetTickCount();
             if (startTimeStamp_ == 0) {
                 // move into indicator rage
                 startTimeStamp_ = endStartTime;
                 return;
             }
-            double delayTime = static_cast<double>(endStartTime - startTimeStamp_) / TIME_RATIO;
+            double delayTime = static_cast<double>(endStartTime - startTimeStamp_);
             if (!swiperIndicatorData_.isPressed && delayTime >= DELAY_TIME_DEFAULT) {
                 swiperIndicatorData_.isPressed = true;
                 StartZoomInAnimation();
@@ -569,7 +617,7 @@ void RenderSwiper::HandleTouchMove(const TouchEventInfo& info)
 void RenderSwiper::HandleClick(const ClickInfo& clickInfo)
 {
     if (clickEvent_) {
-        clickEvent_();
+        clickEvent_(std::make_shared<ClickInfo>(clickInfo));
     }
     // for indicator
     if (!indicator_ || swiperIndicatorData_.isDigital) {
@@ -578,7 +626,8 @@ void RenderSwiper::HandleClick(const ClickInfo& clickInfo)
 
     if (swiperIndicatorData_.isHovered || swiperIndicatorData_.isPressed) {
         if (currentHoverIndex_ != INDICATOR_INVALID_HOVER_INDEX) {
-            StartIndicatorAnimation(currentIndex_, currentHoverIndex_);
+            auto toIndex = needReverse_ ? (itemCount_ - currentHoverIndex_ - 1) : currentHoverIndex_;
+            StartIndicatorAnimation(currentIndex_, toIndex);
             return;
         }
         // refuse click event
@@ -595,7 +644,7 @@ void RenderSwiper::HandleClick(const ClickInfo& clickInfo)
     if (!indicatorRect_.IsInRegion(clickPoint)) {
         return;
     }
-    if (autoPlay_ && scheduler_->IsActive()) {
+    if (autoPlay_ && scheduler_ && scheduler_->IsActive()) {
         // forbid indicator operation on auto play period.
         return;
     }
@@ -607,15 +656,24 @@ void RenderSwiper::HandleClick(const ClickInfo& clickInfo)
     Size size;
     Rect itemRect;
     if (axis_ == Axis::HORIZONTAL) {
+        int currentIndex = needReverse_ ? (itemCount_ - currentIndex_ - 1) : currentIndex_;
         offset = indicatorRect_.GetOffset() + Offset(
-            swiperIndicatorData_.indicatorItemData[currentIndex_].position.GetX(), 0);
-        size = Size(swiperIndicatorData_.indicatorItemData[currentIndex_].width,
+            swiperIndicatorData_.indicatorItemData[currentIndex].position.GetX(), 0);
+        size = Size(swiperIndicatorData_.indicatorItemData[currentIndex].width,
             swiperIndicatorData_.indicatorPaintData.height);
         itemRect = Rect(offset, size);
         if (clickPoint.GetX() < itemRect.GetOffset().GetX()) {
-            IndicatorSwipePrev();
+            if (needReverse_) {
+                IndicatorSwipeNext();
+            } else {
+                IndicatorSwipePrev();
+            }
         } else if (clickPoint.GetX() > itemRect.Right()) {
-            IndicatorSwipeNext();
+            if (needReverse_) {
+                IndicatorSwipePrev();
+            } else {
+                IndicatorSwipeNext();
+            }
         }
     } else {
         offset = indicatorRect_.GetOffset() + Offset(0,
@@ -654,18 +712,20 @@ void RenderSwiper::HandleDragStart(const DragStartInfo& info)
 
 void RenderSwiper::HandleDragUpdate(const DragUpdateInfo& info)
 {
-    Point touchPoint = Point(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
     GetIndicatorCurrentRect(swiperIndicatorData_);
     if (swiperIndicatorData_.isPressed) {
         if (swiperIndicatorData_.isDigital) {
             return;
         }
-        if (autoPlay_ && scheduler_->IsActive()) {
+        if (autoPlay_ && scheduler_ && scheduler_->IsActive()) {
             // forbid indicator operation on auto play period.
             return;
         }
         DragIndicator(std::clamp(info.GetMainDelta(), -MAX_VIEW_PORT_WIDTH, MAX_VIEW_PORT_WIDTH));
-    } else if (touchContentType_ == TouchContentType::TOUCH_CONTENT) {
+        return;
+    }
+
+    if (touchContentType_ == TouchContentType::TOUCH_CONTENT || rotationStatus_ == RotationStatus::ROTATION_UPDATE) {
         UpdateScrollPosition(info.GetMainDelta());
     }
 }
@@ -677,7 +737,7 @@ void RenderSwiper::HandleDragEnd(const DragEndInfo& info)
         return;
     }
 
-    if (touchContentType_ != TouchContentType::TOUCH_CONTENT) {
+    if (touchContentType_ != TouchContentType::TOUCH_CONTENT && rotationStatus_ != RotationStatus::ROTATION_UPDATE) {
         return;
     }
 
@@ -769,7 +829,12 @@ void RenderSwiper::MoveItems(double dragOffset, int32_t fromIndex, int32_t toInd
             swiper->MarkNeedLayout();
         }
     });
-    controller_->SetDuration(animationDuration_);
+
+    if (!needRestore) {
+        LoadLazyItems((fromIndex + 1) % itemCount_ == toIndex);
+    }
+
+    controller_->SetDuration(swiper_->GetDuration());
     controller_->AddInterpolator(translate_);
     controller_->Play();
     isAnimationAlreadyAdded_ = true;
@@ -806,10 +871,11 @@ void RenderSwiper::SwipeTo(int32_t index, bool reverse)
 
 void RenderSwiper::InitSwipeToAnimation(double start, double end)
 {
+    auto animationCurve = swiper_->GetAnimationCurve();
     auto curStartTranslateKeyframe = AceType::MakeRefPtr<Keyframe<double>>(CUR_START_TRANSLATE_TIME, start);
     auto curEndTranslateKeyframe = AceType::MakeRefPtr<Keyframe<double>>(CUR_END_TRANSLATE_TIME, end);
     curEndTranslateKeyframe->SetCurve(
-        animationCurve_ == AnimationCurve::FRICTION ? Curves::FRICTION : Curves::FAST_OUT_SLOW_IN);
+        animationCurve == AnimationCurve::FRICTION ? Curves::FRICTION : Curves::FAST_OUT_SLOW_IN);
     curTranslateAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<double>>();
     curTranslateAnimation_->AddKeyframe(curStartTranslateKeyframe);
     curTranslateAnimation_->AddKeyframe(curEndTranslateKeyframe);
@@ -817,7 +883,7 @@ void RenderSwiper::InitSwipeToAnimation(double start, double end)
     auto targetStartTranslateKeyframe = AceType::MakeRefPtr<Keyframe<double>>(TARGET_START_TRANSLATE_TIME, -end);
     auto targetEndTranslateKeyframe = AceType::MakeRefPtr<Keyframe<double>>(TARGET_END_TRANSLATE_TIME, start);
     targetEndTranslateKeyframe->SetCurve(
-        animationCurve_ == AnimationCurve::FRICTION ? Curves::FRICTION : Curves::FAST_OUT_SLOW_IN);
+        animationCurve == AnimationCurve::FRICTION ? Curves::FRICTION : Curves::FAST_OUT_SLOW_IN);
     targetTranslateAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<double>>();
     targetTranslateAnimation_->AddKeyframe(targetStartTranslateKeyframe);
     targetTranslateAnimation_->AddKeyframe(targetEndTranslateKeyframe);
@@ -828,7 +894,7 @@ void RenderSwiper::InitSwipeToAnimation(double start, double end)
         auto curEndOpacityKeyframe =
             AceType::MakeRefPtr<Keyframe<uint8_t>>(CUR_END_OPACITY_TIME, CUR_END_OPACITY_VALUE);
         curEndOpacityKeyframe->SetCurve(
-            animationCurve_ == AnimationCurve::FRICTION ? Curves::FRICTION : Curves::FAST_OUT_SLOW_IN);
+            animationCurve == AnimationCurve::FRICTION ? Curves::FRICTION : Curves::FAST_OUT_SLOW_IN);
         curOpacityAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<uint8_t>>();
         curOpacityAnimation_->AddKeyframe(curStartOpacityKeyframe);
         curOpacityAnimation_->AddKeyframe(curEndOpacityKeyframe);
@@ -838,7 +904,7 @@ void RenderSwiper::InitSwipeToAnimation(double start, double end)
         auto targetEndOpacityKeyframe =
             AceType::MakeRefPtr<Keyframe<uint8_t>>(TARGET_END_OPACITY_TIME, TARGET_END_OPACITY_VALUE);
         targetEndOpacityKeyframe->SetCurve(
-            animationCurve_ == AnimationCurve::FRICTION ? Curves::FRICTION : Curves::FAST_OUT_SLOW_IN);
+            animationCurve == AnimationCurve::FRICTION ? Curves::FRICTION : Curves::FAST_OUT_SLOW_IN);
         targetOpacityAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<uint8_t>>();
         targetOpacityAnimation_->AddKeyframe(targetStartOpacityKeyframe);
         targetOpacityAnimation_->AddKeyframe(targetEndOpacityKeyframe);
@@ -895,7 +961,10 @@ void RenderSwiper::AddSwipeToIndicatorListener(int32_t fromIndex, int32_t toInde
             swiper->UpdateIndicatorOffset(fromIndex, toIndex, value);
         }
     });
-    animationDirect_ = (fromIndex - toIndex <= 0) ? INDICATOR_DIRECT_RTL : INDICATOR_DIRECT_LTR;
+    animationDirect_ = (fromIndex - toIndex <= 0) ? INDICATOR_DIRECT_FORWARD : INDICATOR_DIRECT_BACKWARD;
+    if (needReverse_) {
+        animationDirect_ *= INDICATOR_DIRECT_BACKWARD;
+    }
     targetIndex_ = toIndex;
 }
 
@@ -979,8 +1048,6 @@ void RenderSwiper::DoSwipeToAnimation(int32_t fromIndex, int32_t toIndex, bool r
     swipeToController_->SetFillMode(FillMode::FORWARDS);
     swipeToController_->Play();
     isSwipeToAnimationAdded_ = true;
-
-    MarkNeedLayout();
 }
 
 void RenderSwiper::RedoSwipeToAnimation(int32_t toIndex, bool reverse)
@@ -1011,13 +1078,11 @@ void RenderSwiper::UpdateItemOpacity(uint8_t opacity, int32_t index)
     if (!animationOpacity_) {
         return;
     }
-    int32_t childrenCount = static_cast<int32_t>(childrenArray_.size());
-    if (index < 0 || index >= childrenCount) {
-        LOGE("index is error, index = %{public}d", index);
+    auto iter = items_.find(index);
+    if (iter == items_.end()) {
         return;
     }
-    auto child = childrenArray_[index];
-    auto display = AceType::DynamicCast<RenderDisplay>(child);
+    auto display = AceType::DynamicCast<RenderDisplay>(iter->second);
     if (!display) {
         return;
     }
@@ -1026,29 +1091,26 @@ void RenderSwiper::UpdateItemOpacity(uint8_t opacity, int32_t index)
 
 void RenderSwiper::UpdateItemPosition(double offset, int32_t index)
 {
-    int32_t childrenCount = static_cast<int32_t>(childrenArray_.size());
-    if (index < 0 || index >= childrenCount) {
-        LOGE("index is error, index = %{public}d", index);
-        return;
+    auto iter = items_.find(index);
+    if (iter != items_.end()) {
+        iter->second->SetPosition(GetMainAxisOffset(offset));
+        MarkNeedRender();
     }
-    const auto& childItem = childrenArray_[index];
-    childItem->SetPosition(GetMainAxisOffset(offset));
-    MarkNeedRender();
 }
 
 int32_t RenderSwiper::GetPrevIndex() const
 {
-    int32_t index = currentIndex_ - 1;
-    if (index < 0) {
-        index = loop_ ? itemCount_ - 1 : 0;
-    }
-    return index;
+    return GetPrevIndex(currentIndex_);
 }
 
 int32_t RenderSwiper::GetPrevIndexOnAnimation() const
 {
-    int32_t index = targetIndex_ - 1;
-    if (index < 0) {
+    return GetPrevIndex(targetIndex_);
+}
+
+int32_t RenderSwiper::GetPrevIndex(int32_t index) const
+{
+    if (--index < 0) {
         index = loop_ ? itemCount_ - 1 : 0;
     }
     return index;
@@ -1056,17 +1118,17 @@ int32_t RenderSwiper::GetPrevIndexOnAnimation() const
 
 int32_t RenderSwiper::GetNextIndex() const
 {
-    int32_t index = currentIndex_ + 1;
-    if (index >= itemCount_) {
-        index = loop_ ? 0 : itemCount_ - 1;
-    }
-    return index;
+    return GetNextIndex(currentIndex_);
 }
 
 int32_t RenderSwiper::GetNextIndexOnAnimation() const
 {
-    int32_t index = targetIndex_ + 1;
-    if (index >= itemCount_) {
+    return GetNextIndex(targetIndex_);
+}
+
+int32_t RenderSwiper::GetNextIndex(int32_t index) const
+{
+    if (++index >= itemCount_) {
         index = loop_ ? 0 : itemCount_ - 1;
     }
     return index;
@@ -1100,7 +1162,9 @@ void RenderSwiper::OnFocus()
 {
     if (autoPlay_) {
         LOGD("stop autoplay cause by on focus");
-        scheduler_->Stop();
+        if (scheduler_) {
+            scheduler_->Stop();
+        }
         StopSwipeAnimation();
         StopSwipeToAnimation();
         StopIndicatorAnimation();
@@ -1169,7 +1233,11 @@ void RenderSwiper::UpdateScrollPosition(double dragDelta)
             lastToIndex = scrollOffset_ > 0 ? GetPrevIndex() : GetNextIndex();
             toItemPosValue = scrollOffset_ > 0 ? prevItemOffset_ : nextItemOffset_;
         }
-        childrenArray_[lastToIndex]->SetPosition(GetMainAxisOffset(toItemPosValue));
+
+        auto iter = items_.find(lastToIndex);
+        if (iter != items_.end()) {
+            iter->second->SetPosition(GetMainAxisOffset(toItemPosValue));
+        }
     }
 
     UpdateChildPosition(newDragOffset, currentIndex_, toIndex);
@@ -1178,25 +1246,25 @@ void RenderSwiper::UpdateScrollPosition(double dragDelta)
 
 void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, int32_t toIndex)
 {
-    int32_t childrenCount = static_cast<int32_t>(childrenArray_.size());
-    if (fromIndex < 0 || fromIndex >= childrenCount || toIndex < 0 || toIndex >= childrenCount ||
-        fromIndex == toIndex) {
-        LOGE("index is error, toIndex = %{public}d, fromIndex = %{public}d, childrenCount = %{public}d", toIndex,
-            fromIndex, childrenCount);
+    if (fromIndex == toIndex) {
+        LOGD("from item is same with to item");
         return;
     }
     scrollOffset_ = offset;
-    const auto& fromItem = childrenArray_[fromIndex];
-    fromItem->SetPosition(GetMainAxisOffset(offset));
-    const auto& toItem = childrenArray_[toIndex];
-    double toItemPosValue = 0.0;
-    if (needReverse_) {
-        toItemPosValue = offset + (offset > 0 ? nextItemOffset_ : prevItemOffset_);
-    } else {
-        toItemPosValue = offset + (offset > 0 ? prevItemOffset_ : nextItemOffset_);
+    auto iter = items_.find(fromIndex);
+    if (iter != items_.end()) {
+        iter->second->SetPosition(GetMainAxisOffset(offset));
     }
-    Offset toItemPos = GetMainAxisOffset(toItemPosValue);
-    toItem->SetPosition(toItemPos);
+    iter = items_.find(toIndex);
+    if (iter != items_.end()) {
+        double toItemPosValue = 0.0;
+        if (needReverse_) {
+            toItemPosValue = offset + (offset > 0 ? nextItemOffset_ : prevItemOffset_);
+        } else {
+            toItemPosValue = offset + (offset > 0 ? prevItemOffset_ : nextItemOffset_);
+        }
+        iter->second->SetPosition(GetMainAxisOffset(toItemPosValue));
+    }
     MarkNeedRender();
 }
 
@@ -1204,10 +1272,11 @@ void RenderSwiper::Tick(uint64_t duration)
 {
     elapsedTime_ += duration;
     if (elapsedTime_ >= autoPlayInterval_) {
-        LOGD("Tick %{public}" PRIu64 " %{public}" PRIu64 " timeout", duration, elapsedTime_);
         if (currentIndex_ >= itemCount_ - 1 && !loop_) {
             LOGD("already last one, stop auto play because not loop");
-            scheduler_->Stop();
+            if (scheduler_) {
+                scheduler_->Stop();
+            }
         } else {
             if (swiperIndicatorData_.isPressed) {
                 // end drag operations on auto play.
@@ -1229,7 +1298,9 @@ void RenderSwiper::OnHiddenChanged(bool hidden)
     if (hidden) {
         if (autoPlay_) {
             LOGD("stop autoplay cause by hidden");
-            scheduler_->Stop();
+            if (scheduler_) {
+                scheduler_->Stop();
+            }
             StopSwipeAnimation();
         }
     } else {
@@ -1239,25 +1310,28 @@ void RenderSwiper::OnHiddenChanged(bool hidden)
 
 bool RenderSwiper::OnRotation(const RotationEvent& event)
 {
-    // Clockwise rotation switches to the next one, counterclockwise rotation switches to the previous one.
-    rotationStepValue_ += event.value * SWIPER_ROTATION_SENSITIVITY_NORMAL * (-1.0);
-    if (GreatOrEqual(rotationStepValue_, THRESHOLD)) {
-        if (rotationEvent_) {
-            std::string param =
-                std::string(R"("rotation",{"value":)").append(std::to_string(rotationStepValue_).append("},null"));
-            rotationEvent_(param);
-        }
-        ShowNext();
-        rotationStepValue_ = 0.0;
-    } else if (LessOrEqual(rotationStepValue_, -THRESHOLD)) {
-        if (rotationEvent_) {
-            std::string param =
-                std::string(R"("rotation",{"value":)").append(std::to_string(rotationStepValue_).append("},null"));
-            rotationEvent_(param);
-        }
-        ShowPrevious();
-        rotationStepValue_ = 0.0;
+    if (disableRotation_) {
+        return false;
     }
+    // Clockwise rotation switches to the next one, counterclockwise rotation switches to the previous one.
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        LOGE("context is null!");
+        return false;
+    }
+    double deltaPx = context->NormalizeToPx(Dimension(event.value, DimensionUnit::VP)) * ROTATION_SENSITIVITY_NORMAL;
+    switch (rotationStatus_) {
+        case RotationStatus::ROTATION_START:
+        case RotationStatus::ROTATION_UPDATE:
+            rotationStatus_ = RotationStatus::ROTATION_UPDATE;
+            HandleRotationUpdate(deltaPx);
+            break;
+        case RotationStatus::ROTATION_END:
+        default:
+            rotationStatus_ = RotationStatus::ROTATION_START;
+            HandleRotationStart();
+    }
+    ResetRotationEndListener();
     return true;
 }
 
@@ -1327,7 +1401,6 @@ double RenderSwiper::GetIndicatorWidth(SwiperIndicatorData& indicatorData)
 void RenderSwiper::LayoutIndicator(SwiperIndicatorData& indicatorData)
 {
     if (!indicator_) {
-        LOGW("swiper has not default indicator");
         return;
     }
 
@@ -1520,11 +1593,10 @@ void RenderSwiper::UpdateIndicatorItem(SwiperIndicatorData& indicatorData)
     double hoverIndex = currentHoverIndex_;
     if (needReverse_) {
         targetIndex = itemCount_ - currentIndex_ - 1;
-        hoverIndex = itemCount_ - currentHoverIndex_ - 1;
     }
 
     double itemRadius = 0.0;
-    for (int32_t i = 0; i < itemCount_; i++) {
+    for (int32_t i = 0; i < itemCount_; ++i) {
         bool isZoomInBackground = indicatorData.isHovered || indicatorData.isPressed;
         if (isZoomInBackground) {
             // indicator radius and point padding is dynamic changed on zoom and stretch
@@ -1587,9 +1659,10 @@ void RenderSwiper::UpdatePositionOnStretch(Offset& position, const SwiperIndicat
         if (zoomValue_ == ZOOM_MAX) {
             // stretch indicator and update start position
             if (axis_ == Axis::HORIZONTAL) {
-                if (currentIndex_ == itemCount_ - 1) {
+                auto currentIndex = needReverse_ ? (itemCount_ - currentIndex_ - 1) : currentIndex_;
+                if (currentIndex == itemCount_ - 1) {
                     position.SetX(indicatorZoomMaxPositionLT_.GetX());
-                } else if (currentIndex_ == 0) {
+                } else if (currentIndex == 0) {
                     position.SetX(indicatorZoomMaxPositionRB_.GetX() - indicatorData.indicatorPaintData.width);
                 }
             } else {
@@ -1602,10 +1675,11 @@ void RenderSwiper::UpdatePositionOnStretch(Offset& position, const SwiperIndicat
         } else if (zoomValue_ > ZOOM_MIN) {
             // restract indicator and update start position
             if (axis_ == Axis::HORIZONTAL) {
-                if (currentIndex_ == itemCount_ - 1) {
+                auto currentIndex = needReverse_ ? (itemCount_ - currentIndex_ - 1) : currentIndex_;
+                if (currentIndex == itemCount_ - 1) {
                     position.SetX(indicatorZoomMinPositionLT_.GetX() -
                         (indicatorZoomMinPositionLT_.GetX() - indicatorZoomMaxPositionLT_.GetX()) * zoomValue_);
-                } else if (currentIndex_ == 0) {
+                } else if (currentIndex == 0) {
                     position.SetX(indicatorZoomMinPositionRB_.GetX() - indicatorWidth +
                         (indicatorZoomMaxPositionRB_.GetX() - indicatorZoomMinPositionRB_.GetX()) * zoomValue_);
                 }
@@ -1665,7 +1739,7 @@ bool RenderSwiper::MouseHoverTest(const Point& parentLocalPoint)
     Point hoverPoint = parentLocalPoint + GetGlobalOffset();
     GetIndicatorCurrentRect(swiperIndicatorData_);
     if (indicatorRect_.IsInRegion(hoverPoint)) {
-        if (autoPlay_ && scheduler_->IsActive()) {
+        if (autoPlay_ && scheduler_ && scheduler_->IsActive()) {
             // forbid indicator operation on auto play period.
             return isInRegion;
         }
@@ -1880,7 +1954,10 @@ void RenderSwiper::MoveIndicator(int32_t toIndex, double offset, bool isAuto)
         return;
     }
     double dragRate = offset / dragRange;
-    animationDirect_ = (currentIndex_ <= toIndex) ? INDICATOR_DIRECT_RTL : INDICATOR_DIRECT_LTR;
+    animationDirect_ = (currentIndex_ <= toIndex) ? INDICATOR_DIRECT_FORWARD : INDICATOR_DIRECT_BACKWARD;
+    if (needReverse_) {
+        animationDirect_ *= INDICATOR_DIRECT_BACKWARD;
+    }
     dragRate = std::fabs(dragRate);
     if (dragRate >= DRAG_OFFSET_MAX) {
         // move to end, and index change
@@ -1941,8 +2018,10 @@ void RenderSwiper::DragIndicator(double offset)
         return;
     }
 
-    animationDirect_ = diffOffset >= 0 && !needReverse_ ? INDICATOR_DIRECT_RTL : INDICATOR_DIRECT_LTR;
-    if (currentIndex_ + animationDirect_ >= itemCount_ || currentIndex_ + animationDirect_ < 0) {
+    animationDirect_ = diffOffset >= 0 ? INDICATOR_DIRECT_FORWARD : INDICATOR_DIRECT_BACKWARD;
+
+    if ((!needReverse_ && (currentIndex_ + animationDirect_ >= itemCount_ || currentIndex_ + animationDirect_ < 0)) ||
+        (needReverse_ && (currentIndex_ - animationDirect_ >= itemCount_ || currentIndex_ - animationDirect_ < 0))) {
         // drag end and stretch background
         return DragEdgeStretch(fabsOffset);
     }
@@ -1951,7 +2030,11 @@ void RenderSwiper::DragIndicator(double offset)
         // focus switch and vibrate
         VibrateIndicator();
         outItemIndex_ = currentIndex_;
-        currentIndex_ += animationDirect_;
+        if (needReverse_) {
+            currentIndex_ -= animationDirect_;
+        } else {
+            currentIndex_ += animationDirect_;
+        }
         dragBaseOffset_ += longPressDragSwitchFocus * animationDirect_;
         ResetIndicatorPosition();
         MarkNeedLayout();
@@ -1984,6 +2067,7 @@ void RenderSwiper::DragIndicatorEnd()
 
 void RenderSwiper::DragEdgeStretch(double offset)
 {
+    // different with emui
     const double longPressDragStrechLongest = DRAG_STRETCH_LONGEST_DP * scale_;
     if (offset >= longPressDragStrechLongest) {
         UpdateEdgeStretchRate(DRAG_OFFSET_MAX);
@@ -2170,6 +2254,8 @@ void RenderSwiper::FinishAllSwipeAnimation()
     UpdateItemOpacity(MAX_OPACITY, currentIndex_);
     UpdateItemOpacity(MAX_OPACITY, targetIndex_);
     currentIndex_ = targetIndex_;
+    quickTrunItem_ = true;
+    MarkNeedLayout();
 }
 
 bool RenderSwiper::IsZoomAnimationStopped()
@@ -2296,10 +2382,14 @@ void RenderSwiper::StartIndicatorAnimation(int32_t fromIndex, int32_t toIndex, b
     ResetHoverZoomDot();
     targetIndex_ = toIndex;
     isIndicatorAnimationStart_ = true;
-    animationDirect_ = (fromIndex - toIndex <= 0) ? INDICATOR_DIRECT_RTL : INDICATOR_DIRECT_LTR;
+    animationDirect_ = (fromIndex - toIndex <= 0) ? INDICATOR_DIRECT_FORWARD : INDICATOR_DIRECT_BACKWARD;
+
     // the start offset of swiper content zone.
-    double contentOffset = (animationDirect_ == INDICATOR_DIRECT_RTL) ? (isLoop ? nextItemOffset_ : prevItemOffset_)
+    double contentOffset = (animationDirect_ == INDICATOR_DIRECT_FORWARD) ? (isLoop ? nextItemOffset_ : prevItemOffset_)
                                                                       : (isLoop ? prevItemOffset_ : nextItemOffset_);
+    if (needReverse_) {
+        animationDirect_ *= INDICATOR_DIRECT_BACKWARD;
+    }
     indicatorAnimation_ = AceType::MakeRefPtr<CurveAnimation<double>>(
         CUR_START_TRANSLATE_TIME, CUR_END_TRANSLATE_TIME, Curves::LINEAR);
     indicatorAnimation_->AddListener(
@@ -2369,4 +2459,202 @@ void RenderSwiper::InitIndicatorAnimation(const WeakPtr<PipelineContext>& contex
     }
     CalMaxStretch();
 }
+
+void RenderSwiper::HandleRotationStart()
+{
+    DragStartInfo info(0);
+    info.SetGlobalLocation(Offset(0.0, 0.0));
+    HandleDragStart(info);
+}
+
+void RenderSwiper::HandleRotationUpdate(double delta)
+{
+    DragUpdateInfo info(0);
+    info.SetMainDelta(delta).SetGlobalLocation(Offset(0.0, 0.0));
+    HandleDragUpdate(info);
+    if (rotationEvent_) {
+        std::string param =
+            std::string(R"("rotation",{"value":)").append(std::to_string(delta).append("},null"));
+        rotationEvent_(param);
+    }
+}
+
+void RenderSwiper::HandleRotationEnd()
+{
+    DragEndInfo info(0);
+    HandleDragEnd(info);
+    rotationStatus_ = RotationStatus::ROTATION_END;
+}
+
+void RenderSwiper::ResetRotationEndListener()
+{
+    auto&& callback = [weakPtr = AceType::WeakClaim(this)]() {
+        auto swiper = weakPtr.Upgrade();
+        if (swiper) {
+            swiper->HandleRotationEnd();
+        } else {
+            LOGE("fail to set rotation listener due to swiper weakPtr is nullptr");
+        }
+    };
+    rotationTimer_.Reset(callback);
+    auto context = GetContext().Upgrade();
+    if (context) {
+        auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        taskExecutor.PostDelayedTask(rotationTimer_, ROTATION_INTERVAL_MS);
+    }
+}
+
+void RenderSwiper::InitLazyItems(const RefPtr<SwiperComponent>& swiper)
+{
+    auto lazyComponent = swiper->GetLazyForEachComponent();
+    if (!lazyComponent) {
+        return;
+    }
+
+    itemCount_ = static_cast<int32_t>(lazyComponent->TotalCount());
+    if (itemCount_ <= lazyLoadCacheSize_) {
+        cacheStart_ = 0;
+        cacheEnd_ = itemCount_;
+    } else {
+        int32_t halfLazy = lazyLoadCacheSize_ / 2;
+        if (loop_) {
+            cacheStart_ = (itemCount_ + currentIndex_ - halfLazy) % itemCount_;
+            cacheEnd_ = (cacheStart_ + lazyLoadCacheSize_ - 1) % itemCount_;
+        } else {
+            if (currentIndex_ <= halfLazy) {
+                cacheStart_ = 0;
+                cacheEnd_ = lazyLoadCacheSize_ - 1;
+            } else if (currentIndex_ >= itemCount_ - halfLazy - 1) {
+                cacheEnd_ = itemCount_ - 1;
+                cacheStart_ = cacheEnd_ - lazyLoadCacheSize_ + 1;
+            } else {
+                cacheStart_ = currentIndex_ - halfLazy;
+                cacheEnd_ = cacheStart_ + lazyLoadCacheSize_ - 1;
+            }
+        }
+    }
+    LOGI("currentIndex_ = %d, init cached: %{public}d - %{public}d", currentIndex_, cacheStart_, cacheEnd_);
+    int32_t index = cacheStart_;
+    while ((index >= cacheStart_ && cacheStart_ > cacheEnd_) || index <= cacheEnd_) {
+        buildChildByIndex_(index);
+        index = (++index) % itemCount_;
+    }
+}
+
+void RenderSwiper::BuildNoLazyItem()
+{
+    if (items_.empty() && ((swiper_ && !swiper_->GetLazyForEachComponent()) || !swiper_)) {
+        auto children = GetChildren();
+        int32_t index = 0;
+        for (auto iter = children.begin(); iter != children.end(); ++iter, ++index) {
+            items_.emplace(std::make_pair(index, *iter));
+        }
+    }
+}
+
+void RenderSwiper::LoadLazyItems(bool swipeToNext)
+{
+    if (static_cast<int32_t>(items_.size()) == itemCount_) {
+        // all item in caches
+        return;
+    }
+    int32_t halfLazy = lazyLoadCacheSize_ / 2;
+    if (swipeToNext) {
+        if (!loop_) {
+            if (currentIndex_ >= halfLazy && currentIndex_ < itemCount_ - halfLazy - 1) {
+                buildChildByIndex_(++cacheEnd_);
+                deleteChildByIndex_(cacheStart_++);
+            }
+        } else {
+            if (++cacheEnd_ == itemCount_) {
+                cacheEnd_ = 0;
+            }
+            buildChildByIndex_(cacheEnd_);
+            deleteChildByIndex_(cacheStart_);
+            if (++cacheStart_ == itemCount_) {
+                cacheStart_ = 0;
+            }
+        }
+    } else {
+        if (!loop_) {
+            if (currentIndex_ > halfLazy && currentIndex_ < itemCount_ - halfLazy) {
+                buildChildByIndex_(--cacheStart_);
+                deleteChildByIndex_(cacheEnd_--);
+            }
+        } else {
+            if (--cacheStart_ < 0) {
+                cacheStart_ = itemCount_ - 1;
+            }
+            buildChildByIndex_(cacheStart_);
+            deleteChildByIndex_(cacheEnd_);
+            if (--cacheEnd_ < 0) {
+                cacheEnd_ = itemCount_ - 1;
+            }
+        }
+    }
+}
+
+void RenderSwiper::AddChildByIndex(int32_t index, const RefPtr<RenderNode>& renderNode)
+{
+    items_.try_emplace(index, renderNode);
+}
+
+void RenderSwiper::RemoveChildByIndex(int32_t index)
+{
+    auto item = items_.find(index);
+    if (item != items_.end()) {
+        items_.erase(item);
+    }
+}
+
+void RenderSwiper::OnReload()
+{
+    ClearChildren();
+    items_.clear();
+    InitLazyItems(swiper_);
+}
+
+void RenderSwiper::OnItemAdded(int32_t index)
+{
+    decltype(items_) items(std::move(items_));
+    for (const auto& item : items) {
+        if (item.first >= index) {
+            items_.emplace(std::make_pair(item.first + 1, item.second));
+        } else {
+            items_.emplace(std::make_pair(item.first, item.second));
+        }
+    }
+    buildChildByIndex_(index);
+    deleteChildByIndex_(cacheEnd_ + 1);
+    itemCount_++;
+}
+
+void RenderSwiper::OnItemDeleted(int32_t index)
+{
+    decltype(items_) items(std::move(items_));
+    for (const auto& item : items) {
+        if (item.first == index) {
+            buildChildByIndex_(cacheEnd_);
+        } else if (item.first > index) {
+            items_.emplace(std::make_pair(item.first - 1, item.second));
+        } else {
+            items_.emplace(std::make_pair(item.first, item.second));
+        }
+    }
+    itemCount_--;
+}
+
+void RenderSwiper::OnItemChanged(int32_t index)
+{
+    // do nothing
+}
+
+void RenderSwiper::OnItemMoved(int32_t from, int32_t to)
+{
+    auto fromItem = items_[from];
+    items_[from] = items_[to];
+    items_[to] = fromItem;
+    MarkNeedLayout();
+}
+
 } // namespace OHOS::Ace

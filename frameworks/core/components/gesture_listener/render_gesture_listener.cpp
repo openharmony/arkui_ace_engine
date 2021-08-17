@@ -21,6 +21,14 @@
 
 namespace OHOS::Ace {
 
+namespace {
+
+constexpr int32_t DOUBLE_CLICK = 2;
+constexpr int32_t DEFAULT_PINCH_FINGER = 2;
+constexpr double DEFAULT_PINCH_DISTANCE = 1.0;
+
+}
+
 #define SET_DRAG_CALLBACK(recognizer, type, component)                                                                 \
     do {                                                                                                               \
         auto& onDragStartId = component->GetOn##type##StartId();                                                       \
@@ -49,7 +57,12 @@ void RenderGestureListener::Update(const RefPtr<Component>& component)
     auto gestureComponent = AceType::DynamicCast<GestureListenerComponent>(component);
     ACE_DCHECK(gestureComponent);
     SetOnClickCallback(gestureComponent);
+    SetOnDoubleClickCallback(gestureComponent);
     SetOnLongPressCallback(gestureComponent);
+    SetOnPinchStartCallback(gestureComponent);
+    SetOnPinchUpdateCallback(gestureComponent);
+    SetOnPinchEndCallback(gestureComponent);
+    SetOnPinchCancelCallback(gestureComponent);
     isVisible_ = gestureComponent->IsVisible();
     SET_DRAG_CALLBACK(freeDragRecognizer_, FreeDrag, gestureComponent);
     if (!freeDragRecognizer_) {
@@ -68,13 +81,20 @@ bool RenderGestureListener::GetVisible() const
 void RenderGestureListener::UpdateTouchRect()
 {
     RenderNode::UpdateTouchRect();
-    if (!GetChildren().empty()) {
-        auto box = AceType::DynamicCast<RenderBox>(GetChildren().front());
+    auto child = GetFirstChild();
+    while (child) {
+        if (child->GetChildren().size() > 1) {
+            LOGI("render has more than one child, do not continue to search render box");
+            break;
+        }
+        auto box = AceType::DynamicCast<RenderBox>(child);
         // For exclude the margin area from touch area and the margin must not be less than zero.
         if (box) {
-            touchRect_.SetOffset(box->GetTouchArea().GetOffset() + GetPaintRect().GetOffset());
-            touchRect_.SetSize(box->GetTouchArea().GetSize());
+            ownTouchRect_.SetOffset(box->GetTouchArea().GetOffset() + GetPaintRect().GetOffset());
+            ownTouchRect_.SetSize(box->GetTouchArea().GetSize());
+            break;
         }
+        child = child->GetFirstChild();
     }
 }
 
@@ -85,10 +105,18 @@ void RenderGestureListener::OnTouchTestHit(
         clickRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(clickRecognizer_);
     }
+    if (doubleClickRecognizer_) {
+        doubleClickRecognizer_->SetCoordinateOffset(coordinateOffset);
+        result.emplace_back(doubleClickRecognizer_);
+    }
     if (longPressRecognizer_) {
         longPressRecognizer_->SetCoordinateOffset(coordinateOffset);
         longPressRecognizer_->SetTouchRestrict(touchRestrict);
         result.emplace_back(longPressRecognizer_);
+    }
+    if (pinchRecognizer_) {
+        pinchRecognizer_->SetCoordinateOffset(coordinateOffset);
+        result.emplace_back(pinchRecognizer_);
     }
     if (freeDragRecognizer_) {
         freeDragRecognizer_->SetCoordinateOffset(coordinateOffset);
@@ -113,6 +141,25 @@ void RenderGestureListener::SetOnClickCallback(const RefPtr<GestureListenerCompo
         return;
     }
     SetOnClickCallback(AceAsyncEvent<void(const ClickInfo&)>::Create(onClickId, context_));
+    if (!onClickId.GetCatchMode()) {
+        static const int32_t bubbleModeVersion = 6;
+        auto pipeline = context_.Upgrade();
+        if (pipeline && pipeline->GetMinPlatformVersion() >= bubbleModeVersion) {
+            clickRecognizer_->SetUseCatchMode(false);
+            return;
+        }
+    }
+    clickRecognizer_->SetUseCatchMode(true);
+    clickRecognizer_->SetIsExternalGesture(true);
+}
+
+void RenderGestureListener::SetOnDoubleClickCallback(const RefPtr<GestureListenerComponent>& component)
+{
+    const auto& onDoubleClickId = component->GetOnDoubleClickId();
+    if (onDoubleClickId.IsEmpty()) {
+        return;
+    }
+    SetOnDoubleClickCallback(AceAsyncEvent<void(const ClickInfo&)>::Create(onDoubleClickId, context_));
 }
 
 void RenderGestureListener::SetOnLongPressCallback(const RefPtr<GestureListenerComponent>& component)
@@ -122,6 +169,42 @@ void RenderGestureListener::SetOnLongPressCallback(const RefPtr<GestureListenerC
         return;
     }
     SetOnLongPressCallback(AceAsyncEvent<void(const LongPressInfo&)>::Create(onLongPressId, context_));
+}
+
+void RenderGestureListener::SetOnPinchStartCallback(const RefPtr<GestureListenerComponent>& component)
+{
+    const auto& onPinchStartId = component->GetOnPinchStartId();
+    if (onPinchStartId.IsEmpty()) {
+        return;
+    }
+    SetOnPinchStartCallback(AceAsyncEvent<void(const GestureEvent&)>::Create(onPinchStartId, context_));
+}
+
+void RenderGestureListener::SetOnPinchUpdateCallback(const RefPtr<GestureListenerComponent>& component)
+{
+    const auto& onPinchUpdateId = component->GetOnPinchUpdateId();
+    if (onPinchUpdateId.IsEmpty()) {
+        return;
+    }
+    SetOnPinchUpdateCallback(AceAsyncEvent<void(const GestureEvent&)>::Create(onPinchUpdateId, context_));
+}
+
+void RenderGestureListener::SetOnPinchEndCallback(const RefPtr<GestureListenerComponent>& component)
+{
+    const auto& onPinchEndId = component->GetOnPinchEndId();
+    if (onPinchEndId.IsEmpty()) {
+        return;
+    }
+    SetOnPinchEndCallback(AceAsyncEvent<void(const GestureEvent&)>::Create(onPinchEndId, context_));
+}
+
+void RenderGestureListener::SetOnPinchCancelCallback(const RefPtr<GestureListenerComponent>& component)
+{
+    const auto& onPinchCancelId = component->GetOnPinchCancelId();
+    if (onPinchCancelId.IsEmpty()) {
+        return;
+    }
+    SetOnPinchCancelCallback(AceAsyncEvent<void()>::Create(onPinchCancelId, context_));
 }
 
 void RenderGestureListener::SetOnClickCallback(const ClickCallback& callback)
@@ -136,6 +219,18 @@ void RenderGestureListener::SetOnClickCallback(const ClickCallback& callback)
     }
 }
 
+void RenderGestureListener::SetOnDoubleClickCallback(const ClickCallback& callback)
+{
+    if (callback) {
+        if (!doubleClickRecognizer_) {
+            doubleClickRecognizer_ = AceType::MakeRefPtr<ClickRecognizer>(GetContext(), 1, DOUBLE_CLICK);
+        }
+        doubleClickRecognizer_->SetOnClick(callback);
+    } else {
+        LOGE("fail to set double click callback due to callback is nullptr");
+    }
+}
+
 void RenderGestureListener::SetOnLongPressCallback(const OnLongPress& callback)
 {
     if (callback) {
@@ -145,6 +240,54 @@ void RenderGestureListener::SetOnLongPressCallback(const OnLongPress& callback)
         longPressRecognizer_->SetOnLongPress(callback);
     } else {
         LOGE("fail to set long press callback due to callback is nullptr");
+    }
+}
+
+void RenderGestureListener::SetOnPinchStartCallback(const GestureEventFunc& onPinchStart)
+{
+    if (onPinchStart) {
+        if (!pinchRecognizer_) {
+            pinchRecognizer_ = AceType::MakeRefPtr<PinchRecognizer>(DEFAULT_PINCH_FINGER, DEFAULT_PINCH_DISTANCE);
+        }
+        pinchRecognizer_->SetOnActionStart(onPinchStart);
+    } else {
+        LOGE("fail to set pinch start callback due to callback is nullptr");
+    }
+}
+
+void RenderGestureListener::SetOnPinchUpdateCallback(const GestureEventFunc& onPinchUpdate)
+{
+    if (onPinchUpdate) {
+        if (!pinchRecognizer_) {
+            pinchRecognizer_ = AceType::MakeRefPtr<PinchRecognizer>(DEFAULT_PINCH_FINGER, DEFAULT_PINCH_DISTANCE);
+        }
+        pinchRecognizer_->SetOnActionUpdate(onPinchUpdate);
+    } else {
+        LOGE("fail to set pinch update callback due to callback is nullptr");
+    }
+}
+
+void RenderGestureListener::SetOnPinchEndCallback(const GestureEventFunc& onPinchEnd)
+{
+    if (onPinchEnd) {
+        if (!pinchRecognizer_) {
+            pinchRecognizer_ = AceType::MakeRefPtr<PinchRecognizer>(DEFAULT_PINCH_FINGER, DEFAULT_PINCH_DISTANCE);
+        }
+        pinchRecognizer_->SetOnActionEnd(onPinchEnd);
+    } else {
+        LOGE("fail to set pinch end callback due to callback is nullptr");
+    }
+}
+
+void RenderGestureListener::SetOnPinchCancelCallback(const GestureEventNoParameter& onPinchCancel)
+{
+    if (onPinchCancel) {
+        if (!pinchRecognizer_) {
+            pinchRecognizer_ = AceType::MakeRefPtr<PinchRecognizer>(DEFAULT_PINCH_FINGER, DEFAULT_PINCH_DISTANCE);
+        }
+        pinchRecognizer_->SetOnActionCancel(onPinchCancel);
+    } else {
+        LOGE("fail to set pinch cancel callback due to callback is nullptr");
     }
 }
 

@@ -384,13 +384,13 @@ void FlutterRenderTextField::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     auto pipelineContext = context_.Upgrade();
-    if (!canvas || !(paragraph_ || placeholderParagraph_ || !pipelineContext) || IsInfiniteLayout()) {
+    if (!(paragraph_ || placeholderParagraph_ || !pipelineContext) || IsInfiniteLayout()) {
         LOGE("Paint canvas or paragraph is null");
         return;
     }
     auto viewScale = pipelineContext->GetViewScale();
     SkCanvas* skCanvas = canvas->canvas();
-    if (lastLayoutSize_ != GetLayoutSize()) {
+    if (lastLayoutSize_ != GetLayoutSize() || !magnifierCanvas_) {
         auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width() * viewScale * MAGNIFIER_GAIN,
             GetLayoutSize().Height() * viewScale * MAGNIFIER_GAIN, SkColorType::kRGBA_8888_SkColorType,
             SkAlphaType::kOpaque_SkAlphaType);

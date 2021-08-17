@@ -100,6 +100,19 @@ bool DomGridContainer::SetSpecializedAttr(const std::pair<std::string, std::stri
             [](const std::string& value, DomGridContainer& container) {
                 container.infoBuilder_.SetColumns(StringUtils::StringToInt(value));
             } },
+        { DOM_GRID_CONTAINER_TEMPLATE,
+            [](const std::string& value, DomGridContainer& container) {
+                auto templateType = GridTemplateType::NORMAL;
+                auto iter = GridTemplateMap.find(value);
+                if (iter != GridTemplateMap.end()) {
+                    templateType = iter->second;
+                }
+                container.infoBuilder_.SetGridTemplateType(templateType);
+            } },
+        { DOM_GRID_CONTAINER_GUTTER,
+            [](const std::string& value, DomGridContainer& container) {
+                container.infoBuilder_.SetGutterWidth(Dimension(StringUtils::StringToDouble(value), DimensionUnit::PX));
+            } },
         { DOM_GRID_CONTAINER_GUTTER_WIDTH,
             [](const std::string& value, DomGridContainer& container) {
                 container.infoBuilder_.SetGutterWidth(Dimension(StringUtils::StringToDouble(value), DimensionUnit::PX));

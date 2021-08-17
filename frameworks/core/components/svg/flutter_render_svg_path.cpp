@@ -54,7 +54,79 @@ void FlutterRenderSvgPath::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint skCanvas is null");
         return;
     }
+
+    if (transformLayer_) {
+        transformLayer_->UpdateTransformProperty(transformAttrs_, GetTransformOffset());
+    }
+    SkAutoCanvasRestore save(skCanvas, false);
+    PaintMaskLayer(context, offset, offset);
+
     SkPath out;
+    GetPath(out);
+    UpdateGradient(fillState_);
+
+    RenderInfo renderInfo = { AceType::Claim(this), offset, opacity_, true };
+    FlutterSvgPainter::SetFillStyle(skCanvas, out, fillState_, renderInfo);
+    FlutterSvgPainter::SetStrokeStyle(skCanvas, out, strokeState_, renderInfo);
+    RenderNode::Paint(context, offset);
+}
+
+void FlutterRenderSvgPath::PaintDirectly(RenderContext& context, const Offset& offset)
+{
+    if (d_.empty()) {
+        return;
+    }
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkCanvas* skCanvas = canvas->canvas();
+    if (!skCanvas) {
+        LOGE("Paint skCanvas is null");
+        return;
+    }
+    if (!transformAttrs_.empty()) {
+        auto matrix4 = TransformLayer::UpdateTransformAttr(transformAttrs_, GetTransformOffset());
+        skCanvas->save();
+        skCanvas->concat(FlutterSvgPainter::ToSkMatrix(matrix4));
+    }
+    SkPath out;
+    GetPath(out);
+    UpdateGradient(fillState_);
+    FlutterSvgPainter::SetFillStyle(skCanvas, out, fillState_, opacity_);
+    FlutterSvgPainter::SetStrokeStyle(skCanvas, out, strokeState_, opacity_);
+    if (!transformAttrs_.empty()) {
+        skCanvas->restore();
+    }
+}
+
+
+void FlutterRenderSvgPath::UpdateMotion(const std::string& path, const std::string& rotate, double percent)
+{
+    if (!transformLayer_) {
+        LOGE("transformLayer is null");
+        return;
+    }
+    bool isSuccess = true;
+    auto motionMatrix = FlutterSvgPainter::CreateMotionMatrix(path, rotate, percent, isSuccess);
+    if (isSuccess) {
+        auto transform = FlutterRenderTransform::GetTransformByOffset(motionMatrix, GetGlobalOffset());
+        transformLayer_->Update(transform);
+    }
+}
+
+Rect FlutterRenderSvgPath::GetPaintBounds(const Offset& offset)
+{
+    SkPath path;
+    GetPath(path);
+    auto& bounds = path.getBounds();
+    return Rect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
+}
+
+void FlutterRenderSvgPath::GetPath(SkPath& out)
+{
     if (paths_.empty()) {
         SkParsePath::FromSVGString(d_.c_str(), &out);
     } else {
@@ -62,52 +134,26 @@ void FlutterRenderSvgPath::Paint(RenderContext& context, const Offset& offset)
         SkPath ending;
         int32_t firstPart = (int)weight_;
         int32_t pathsSize = paths_.size();
+        bool ret = false;
         if (firstPart < 0 || firstPart > (pathsSize - 1)) {
-            return;
+            ret = false;
         } else if (firstPart == (pathsSize - 1)) {
             SkParsePath::FromSVGString(paths_[firstPart].c_str(), &path);
             SkParsePath::FromSVGString(paths_[firstPart - 1].c_str(), &ending);
-            ending.interpolate(path, 1.0f, &out);
+            ret = ending.interpolate(path, 1.0f, &out);
         } else {
             float newWeight = weight_ - firstPart;
             SkParsePath::FromSVGString(paths_[firstPart + 1].c_str(), &path);
             SkParsePath::FromSVGString(paths_[firstPart].c_str(), &ending);
-            ending.interpolate(path, newWeight, &out);
+            ret = ending.interpolate(path, newWeight, &out);
+        }
+        if (!ret) {
+            SkParsePath::FromSVGString(d_.c_str(), &out);
         }
     }
-
-    FlutterSvgPainter::SetFillStyle(skCanvas, out, fillState_, opacity_);
-    FlutterSvgPainter::SetStrokeStyle(skCanvas, out, strokeState_, opacity_);
-    RenderNode::Paint(context, offset);
-}
-
-void FlutterRenderSvgPath::UpdateMotion(const std::string& path, const std::string& rotate,
-    double percent, const Point& point)
-{
-    if (!transformLayer_) {
-        LOGE("transformLayer is null");
-        return;
+    if (fillState_.IsEvenodd()) {
+        out.setFillType(SkPath::FillType::kEvenOdd_FillType);
     }
-    bool isSuccess = true;
-    auto motionMatrix = FlutterSvgPainter::CreateMotionMatrix(path, rotate, point, percent, isSuccess);
-    if (isSuccess) {
-        auto transform = FlutterRenderTransform::GetTransformByOffset(motionMatrix, GetGlobalOffset());
-        transformLayer_->Update(transform);
-    }
-}
-
-bool FlutterRenderSvgPath::GetStartPoint(Point& point)
-{
-    if (paths_.empty()) {
-        return false;
-    }
-    SkPath out;
-    if (!SkParsePath::FromSVGString(d_.c_str(), &out)) {
-        return false;
-    }
-    SkPoint skPoint = out.getPoint(0);
-    point = Point(skPoint.x(), skPoint.y());
-    return true;
 }
 
 } // namespace OHOS::Ace

@@ -69,27 +69,23 @@ void RenderBadge::Update(const RefPtr<Component>& component)
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
-    badgeColor_ = badge_->GetBadgeColor();
-    badgePosition_ = badge_->GetBadgePosition();
-    messageCount_ = badge_->GetMessageCount();
     showMessage_ = badge_->IsShowMessage();
-    countLimit_ = badge_->GetMaxCount();
-    padding_ = badge_->GetPadding();
-    badgeCircleSizeDefined_ = badge_->IsBadgeCircleSizeDefined();
-    badgeCircleSize_ = badge_->GetBadgeCicleSize();
-    badgeChildInitialOffset_ = Offset(NormalizeToPx(padding_.Left()), NormalizeToPx(padding_.Top()));
+    auto padding = badge_->GetPadding();
+    auto badgeLabel = badge_->GetBadgeLabel();
+    auto messageCount = badge_->GetMessageCount();
+    auto countLimit = badge_->GetMaxCount();
+    badgeChildInitialOffset_ = Offset(NormalizeToPx(padding.Left()), NormalizeToPx(padding.Top()));
     onClick_ = AceAsyncEvent<void()>::Create(badge_->GetClickEvent(), context_);
-    badgeLabel_ = badge_->GetBadgeLabel();
-    if (badgeLabel_.empty()) {
-        if (messageCount_ > 0) {
-            if (messageCount_ > countLimit_) {
-                textData_ = std::to_string(countLimit_) + '+';
+    if (badgeLabel.empty()) {
+        if (messageCount > 0) {
+            if (messageCount > countLimit) {
+                textData_ = std::to_string(countLimit) + '+';
             } else {
-                textData_ = std::to_string(messageCount_);
+                textData_ = std::to_string(messageCount);
             }
         }
     } else {
-        textData_ = badgeLabel_;
+        textData_ = badgeLabel;
     }
     badgeTextComponent_ = AceType::MakeRefPtr<TextComponent>(textData_);
     if (!badgeRenderText_) {
@@ -100,6 +96,10 @@ void RenderBadge::Update(const RefPtr<Component>& component)
 
 void RenderBadge::PerformLayout()
 {
+    if (!badge_) {
+        return;
+    }
+
     if (!GetChildren().front()) {
         SetLayoutSize(Size());
         showMessage_ = false;
@@ -116,7 +116,7 @@ void RenderBadge::PerformLayout()
     Size minSize = layoutParam.GetMinSize();
     Size maxSize = layoutParam.GetMaxSize();
     LayoutParam innerLayoutParam = layoutParam;
-    Size paddingSize = padding_.GetLayoutSizeInPx(dipScale_);
+    Size paddingSize = badge_->GetPadding().GetLayoutSizeInPx(dipScale_);
     innerLayoutParam.SetMinSize(minSize - paddingSize);
     innerLayoutParam.SetMaxSize(maxSize - paddingSize);
     double maxWidth = minSize.Width();
@@ -163,14 +163,14 @@ void RenderBadge::UpdateBadgeText()
             fontManager->AddVariationNode(WeakClaim(this));
         }
     }
-    badgeTextColor_ = badge_->GetBadgeTextColor();
-    badgeFontSize_ = badge_->GetBadgeFontSize();
-    textStyle_.SetTextColor(badgeTextColor_);
-    textStyle_.SetFontSize(badgeFontSize_);
-    textStyle_.SetAllowScale(false);
-    badgeTextComponent_->SetData(textData_);
-    badgeTextComponent_->SetTextStyle(textStyle_);
-    badgeRenderText_->Update(badgeTextComponent_);
+    if (badge_) {
+        textStyle_.SetTextColor(badge_->GetBadgeTextColor());
+        textStyle_.SetFontSize(badge_->GetBadgeFontSize());
+        textStyle_.SetAllowScale(false);
+        badgeTextComponent_->SetData(textData_);
+        badgeTextComponent_->SetTextStyle(textStyle_);
+        badgeRenderText_->Update(badgeTextComponent_);
+    }
 }
 
 } // namespace OHOS::Ace

@@ -278,7 +278,7 @@ bool SelectPopupComponent::Initialize(const RefPtr<AccessibilityManager>& manage
     RefPtr<TweenComponent> tween = AceType::MakeRefPtr<TweenComponent>(tweenId, tweenId);
     tween->SetShadow(ShadowConfig::DefaultShadowM);
     tween->SetIsFirstFrameShow(false);
-    tween->SetTweenOperation(TweenOperation::PLAY);
+    tween->SetAnimationOperation(AnimationOperation::PLAY);
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     auto popupNode = manager->CreateSpecializedNode("select-popup", id, GetSelectPopupId());

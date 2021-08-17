@@ -80,6 +80,7 @@ ohos_unittest("RenderBoxPercentTest") {
   module_out_path = module_output_path
 
   sources = [
+    #declaration
     "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
     "box_test_utils.cpp",
@@ -87,9 +88,10 @@ ohos_unittest("RenderBoxPercentTest") {
   ]
 
   deps = [
+    "$ace_flutter_engine_root:ace_skia_ohos",
+    "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "$ace_root/frameworks/core:ace_core_ohos",
-    "$flutter_root:ace_skia_ohos",
     "//third_party/googletest:gtest_main",
     "//third_party/zlib:libz",
   ]
@@ -99,8 +101,8 @@ ohos_unittest("RenderBoxPercentTest") {
 
   configs = [
     "$ace_root:ace_test_config",
-    "$flutter_root:flutter_config",
-    "$flutter_root:icu_config_ohos",
+    "$ace_flutter_engine_root:flutter_config",
+    "$ace_flutter_engine_root:icu_config_ohos",
   ]
 
   if (is_standard_system) {

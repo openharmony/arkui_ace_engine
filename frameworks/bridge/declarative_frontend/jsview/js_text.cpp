@@ -15,136 +15,133 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 
-#include <map>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
+#include "core/components/declaration/text/text_declaration.h"
+#include "core/components/text/text_theme.h"
+#include "core/event/ace_event_handler.h"
+#include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
 
-const std::map<int, TextOverflow> textOverflowEnumMapping = {
-    { 0, TextOverflow::CLIP },
-    { 1, TextOverflow::ELLIPSIS },
-    { 2, TextOverflow::NONE },
-};
+constexpr Dimension DEFAULT_FONT_SZIE = 30.0_px;
+const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE, TextCase::UPPERCASE };
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE };
+const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::LEFT,
+    TextAlign::RIGHT, TextAlign::JUSTIFY };
 
-const std::map<int, TextAlign> textAlignEnumMapping = {
-    { 0, TextAlign::LEFT },
-    { 1, TextAlign::RIGHT },
-    { 2, TextAlign::CENTER },
-    { 3, TextAlign::JUSTIFY },
-    { 4, TextAlign::START },
-    { 5, TextAlign::END },
-};
-
-const std::map<int, FontStyle> fontStyleEnumMapping = {
-    { 0, FontStyle::NORMAL },
-    { 1, FontStyle::ITALIC },
-};
-
-JSText::JSText(const std::string& text)
-{
-    textComponent_ = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(text);
-}
-
-RefPtr<OHOS::Ace::Component> JSText::CreateSpecializedComponent()
-{
-    LOGD("Create component: Text");
-    return textComponent_;
-}
-
-std::vector<RefPtr<OHOS::Ace::SingleChild>> JSText::CreateInteractableComponents()
-{
-    return JSInteractableView::CreateComponents();
-}
-
-#ifdef USE_QUICKJS_ENGINE
-void JSText::MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc)
-{
-    LOGD("JSText => MarkGC: Mark value for GC start");
-    JSInteractableView::MarkGC(rt, markFunc);
-    LOGD("JSText => MarkGC: Mark value for GC end");
-}
-
-void JSText::ReleaseRT(JSRuntime* rt)
-{
-    LOGD("JSText => release start");
-    JSInteractableView::ReleaseRT(rt);
-    LOGD("JSText => release text: %s", textComponent_->GetData().c_str());
-    LOGD("JSText => release end");
-}
-#endif
+}; // namespace
 
 void JSText::SetFontSize(const std::string& value)
 {
-    Dimension dimension = TextAttr2Dimension(value, true);
-    if (GreatNotEqual(dimension.Value(), 0.0)) {
-        auto textStyle = GetTextStyle();
-        textStyle.SetFontSize(dimension);
-        SetTextStyle(std::move(textStyle));
-    } else {
-        LOGE("value %s is not positive", value.c_str());
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
     }
+
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetFontSize(StringToDimensionWithUnit(value, DimensionUnit::FP));
+    component->SetTextStyle(std::move(textStyle));
 }
 
 void JSText::SetFontWeight(const std::string& value)
 {
-    auto textStyle = GetTextStyle();
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    auto textStyle = component->GetTextStyle();
     textStyle.SetFontWeight(ConvertStrToFontWeight(value));
-    SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(std::move(textStyle));
 }
 
 void JSText::SetTextColor(const std::string& value)
 {
-    auto textStyle = GetTextStyle();
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    auto textStyle = component->GetTextStyle();
     textStyle.SetTextColor(Color::FromString(value));
-    SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(std::move(textStyle));
 }
 
-void JSText::SetTextOverflow(int value)
+void JSText::SetTextOverflow(const JSCallbackInfo& info)
 {
-    auto iter = textOverflowEnumMapping.find(value);
-    if (iter != textOverflowEnumMapping.end()) {
-        auto textStyle = GetTextStyle();
-        textStyle.SetTextOverflow(iter->second);
-        SetTextStyle(std::move(textStyle));
-    } else {
-        LOGE("Text: textOverflow(%d) illegal value", value);
+    auto component = GetComponent();
+    if (info[0]->IsObject() && component) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
+
+        if (overflowValue->IsNumber()) {
+            auto overflow = overflowValue->ToNumber<int32_t>();
+            if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+                auto textStyle = component->GetTextStyle();
+                textStyle.SetTextOverflow(TEXT_OVERFLOWS[overflow]);
+                component->SetTextStyle(std::move(textStyle));
+            } else {
+                LOGE("Text: textOverflow(%d) illegal value", overflow);
+            }
+        }
     }
+    info.SetReturnValue(info.This());
 }
 
-void JSText::SetMaxLines(int value)
+void JSText::SetMaxLines(int32_t value)
 {
-    if (value > 0) {
-        auto textStyle = GetTextStyle();
-        textStyle.SetMaxLines(value);
-        SetTextStyle(std::move(textStyle));
-    } else {
-        LOGE("Text: maxLines(%d) expected positive number", value);
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
     }
+
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetMaxLines(value);
+    component->SetTextStyle(std::move(textStyle));
 }
 
-void JSText::SetFontStyle(int value)
+void JSText::SetFontStyle(int32_t value)
 {
-    auto iter = fontStyleEnumMapping.find(value);
-    if (iter != fontStyleEnumMapping.end()) {
-        auto textStyle = GetTextStyle();
-        textStyle.SetFontStyle(FontStyle(value));
-        SetTextStyle(std::move(textStyle));
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
+        auto textStyle = component->GetTextStyle();
+        textStyle.SetFontStyle(FONT_STYLES[value]);
+        component->SetTextStyle(std::move(textStyle));
     } else {
         LOGE("Text fontStyle(%d) illega value", value);
     }
 }
 
-void JSText::SetTextAlign(int value)
+void JSText::SetTextAlign(int32_t value)
 {
-    auto iter = textAlignEnumMapping.find(value);
-    if (iter != textAlignEnumMapping.end()) {
-        auto textStyle = GetTextStyle();
-        textStyle.SetTextAlign(iter->second);
-        SetTextStyle(std::move(textStyle));
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
+        auto textStyle = component->GetTextStyle();
+        textStyle.SetTextAlign(TEXT_ALIGNS[value]);
+        component->SetTextStyle(std::move(textStyle));
     } else {
         LOGE("Text: TextAlign(%d) expected positive number", value);
     }
@@ -152,137 +149,200 @@ void JSText::SetTextAlign(int value)
 
 void JSText::SetLineHeight(const std::string& value)
 {
-    Dimension dimension = TextAttr2Dimension(value, true);
-    if (GreatNotEqual(dimension.Value(), 0.0)) {
-        auto textStyle = GetTextStyle();
-        textStyle.SetLineHeight(dimension);
-        SetTextStyle(std::move(textStyle));
-    } else {
-        LOGE("value %s is not positive", value.c_str());
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
     }
+
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetLineHeight(StringToDimensionWithUnit(value, DimensionUnit::FP));
+    component->SetTextStyle(std::move(textStyle));
 }
 
-void JSText::SetFontFamily(const std::string& fontFamiliy)
+void JSText::SetFontFamily(const std::string& value)
 {
-    std::vector<std::string> fontFamilies = ParseFontFamilies(fontFamiliy);
-    auto textStyle = GetTextStyle();
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    std::vector<std::string> fontFamilies = ConvertStrToFontFamilies(value);
+    auto textStyle = component->GetTextStyle();
     textStyle.SetFontFamilies(fontFamilies);
-    SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(std::move(textStyle));
 }
 
 void JSText::SetMinFontSize(const std::string& value)
 {
-    Dimension dimension = TextAttr2Dimension(value, true);
-    if (GreatNotEqual(dimension.Value(), 0.0)) {
-        auto textStyle = GetTextStyle();
-        textStyle.SetAdaptMinFontSize(dimension);
-        SetTextStyle(std::move(textStyle));
-    } else {
-        LOGE("value %s is not positive", value.c_str());
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
     }
+
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetAdaptMinFontSize(StringToDimensionWithUnit(value, DimensionUnit::FP));
+    component->SetTextStyle(std::move(textStyle));
 }
 
 void JSText::SetMaxFontSize(const std::string& value)
 {
-    Dimension dimension = TextAttr2Dimension(value, true);
-    if (GreatNotEqual(dimension.Value(), 0.0)) {
-        auto textStyle = GetTextStyle();
-        textStyle.SetAdaptMaxFontSize(dimension);
-        SetTextStyle(std::move(textStyle));
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetAdaptMaxFontSize(StringToDimensionWithUnit(value, DimensionUnit::FP));
+    component->SetTextStyle(std::move(textStyle));
+}
+
+void JSText::SetLetterSpacing(const std::string& value)
+{
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetLetterSpacing(StringToDimensionWithUnit(value, DimensionUnit::FP));
+    component->SetTextStyle(std::move(textStyle));
+}
+
+void JSText::SetTextCase(int32_t value)
+{
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    if (value >= 0 && value < static_cast<int32_t>(TEXT_CASES.size())) {
+        auto textStyle = component->GetTextStyle();
+        textStyle.SetTextCase(TEXT_CASES[value]);
+        component->SetTextStyle(std::move(textStyle));
     } else {
-        LOGE("value %s is not positive", value.c_str());
+        LOGE("Text textCase(%d) illega value", value);
     }
 }
 
-std::vector<std::string> JSText::ParseFontFamilies(const std::string& value) const
+void JSText::SetBaselineOffset(const std::string& value)
 {
-    std::vector<std::string> fontFamilies;
-    std::stringstream stream(value);
-    std::string fontFamily;
-    while (getline(stream, fontFamily, ',')) {
-        fontFamilies.push_back(fontFamily);
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
     }
-    return fontFamilies;
+
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetBaselineOffset(StringToDimensionWithUnit(value, DimensionUnit::FP));
+    component->SetTextStyle(std::move(textStyle));
 }
 
-Dimension JSText::TextAttr2Dimension(const std::string& value, bool usefp)
+void JSText::SetDecoration(const JSCallbackInfo& info)
 {
-    errno = 0;
-    char* pEnd = nullptr;
-    double result = std::strtod(value.c_str(), &pEnd);
-    if (pEnd == value.c_str() || errno == ERANGE) {
-        return Dimension(0.0, DimensionUnit::PX);
-    } else {
-        if ((pEnd) && (std::strcmp(pEnd, "%") == 0)) {
-            // Parse percent, transfer from [0, 100] to [0`, 1]
-            return Dimension(result / 100.0, DimensionUnit::PERCENT);
-        } else if ((pEnd) && (std::strcmp(pEnd, "px") == 0)) {
-            return Dimension(result, DimensionUnit::PX);
-        } else if ((pEnd) && (std::strcmp(pEnd, "vp") == 0)) {
-            return Dimension(result, DimensionUnit::VP);
-        } else if ((pEnd) && (std::strcmp(pEnd, "fp") == 0)) {
-            return Dimension(result, DimensionUnit::FP);
+    if (info[0]->IsObject()) {
+        auto component = GetComponent();
+        if (component) {
+            auto textStyle = component->GetTextStyle();
+
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+            JSRef<JSVal> typeValue = obj->GetProperty("type");
+            JSRef<JSVal> colorValue = obj->GetProperty("color");
+
+            if (typeValue->IsNumber()) {
+                textStyle.SetTextDecoration(TextDecoration(typeValue->ToNumber<int32_t>()));
+            }
+            if (colorValue->IsString()) {
+                textStyle.SetTextDecorationColor(Color::FromString(colorValue->ToString()));
+            }
+            component->SetTextStyle(std::move(textStyle));
         }
-        return Dimension(result, usefp ? DimensionUnit::FP : DimensionUnit::PX);
+    }
+    info.SetReturnValue(info.This());
+}
+
+void JSText::JsOnClick(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onClickId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)]
+            (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+            LOGD("About to call onclick method on js");
+            auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+            func->Execute(*clickInfo);
+        });
+        auto click = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();
+        if (click) {
+            click->SetOnClickId(onClickId);
+        }
+        auto component = GetComponent();
+        if (component) {
+            component->SetOnClick(onClickId);
+        }
     }
 }
-
-#ifdef USE_QUICKJS_ENGINE
-
-void JSText::QjsDestructor(JSRuntime* rt, JSText* view)
-{
-    LOGD("JSText(QjsDestructor) start");
-    if (!view)
-        return;
-
-    view->ReleaseRT(rt);
-    delete view;
-    LOGD("JSText(QjsDestructor) end");
-}
-
-void JSText::QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc)
-{
-    LOGD("JSText(QjsGcMark) start");
-
-    JSText* view = Unwrap<JSText>(val);
-    if (!view)
-        return;
-
-    view->MarkGC(rt, markFunc);
-    LOGD("JSText(QjsGcMark) end");
-}
-#endif
 
 void JSText::JSBind(BindingTarget globalObj)
 {
     JSClass<JSText>::Declare("Text");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSText>::StaticMethod("create", &JSText::Create, opt);
+    JSClass<JSText>::StaticMethod("fontColor", &JSText::SetTextColor, opt);
+    JSClass<JSText>::StaticMethod("fontSize", &JSText::SetFontSize, opt);
+    JSClass<JSText>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
+    JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
+    JSClass<JSText>::StaticMethod("textOverflow", &JSText::SetTextOverflow, opt);
+    JSClass<JSText>::StaticMethod("fontStyle", &JSText::SetFontStyle, opt);
+    JSClass<JSText>::StaticMethod("textAlign", &JSText::SetTextAlign, opt);
+    JSClass<JSText>::StaticMethod("lineHeight", &JSText::SetLineHeight, opt);
+    JSClass<JSText>::StaticMethod("fontFamily", &JSText::SetFontFamily, opt);
+    JSClass<JSText>::StaticMethod("minFontSize", &JSText::SetMinFontSize, opt);
+    JSClass<JSText>::StaticMethod("maxFontSize", &JSText::SetMaxFontSize, opt);
+    JSClass<JSText>::StaticMethod("letterSpacing", &JSText::SetLetterSpacing, opt);
+    JSClass<JSText>::StaticMethod("textCase", &JSText::SetTextCase, opt);
+    JSClass<JSText>::StaticMethod("baselineOffset", &JSText::SetBaselineOffset, opt);
+    JSClass<JSText>::StaticMethod("decoration", &JSText::SetDecoration);
+    JSClass<JSText>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSText>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSText>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
+    JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSText>::Inherit<JSContainerBase>();
     JSClass<JSText>::Inherit<JSViewAbstract>();
-
-    MethodOptions opt = MethodOptions::RETURN_SELF;
-    JSClass<JSText>::Method("color", &JSText::SetTextColor, opt);
-    JSClass<JSText>::Method("fontSize", &JSText::SetFontSize, opt);
-    JSClass<JSText>::Method("fontWeight", &JSText::SetFontWeight, opt);
-    JSClass<JSText>::Method("maxLines", &JSText::SetMaxLines, opt);
-    JSClass<JSText>::Method("textOverflow", &JSText::SetTextOverflow, opt);
-    JSClass<JSText>::Method("fontStyle", &JSText::SetFontStyle, opt);
-    JSClass<JSText>::Method("textAlign", &JSText::SetTextAlign, opt);
-    JSClass<JSText>::Method("lineHeight", &JSText::SetLineHeight, opt);
-    JSClass<JSText>::Method("fontFamily", &JSText::SetFontFamily, opt);
-    JSClass<JSText>::Method("minFontSize", &JSText::SetMinFontSize, opt);
-    JSClass<JSText>::Method("maxFontSize", &JSText::SetMaxFontSize, opt);
-    JSClass<JSText>::CustomMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSText>::CustomMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSText>::Bind<std::string>(globalObj);
+    JSClass<JSText>::Bind<>(globalObj);
 }
 
-TextStyle JSText::GetTextStyle() const
+void JSText::Create(const JSCallbackInfo& info)
 {
-    return textComponent_->GetTextStyle();
+    std::string data;
+    if (info.Length() > 0 && info[0]->IsString()) {
+        data = info[0]->ToString();
+    }
+    auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponentV2>(data);
+    ViewStackProcessor::GetInstance()->Push(textComponent);
+
+    // Init text style, allowScale is not supported in declarative.
+    auto textStyle = textComponent->GetTextStyle();
+    textStyle.SetAllowScale(false);
+    textStyle.SetFontSize(DEFAULT_FONT_SZIE);
+    textComponent->SetTextStyle(std::move(textStyle));
 }
 
-void JSText::SetTextStyle(TextStyle style)
+RefPtr<TextComponentV2> JSText::GetComponent()
 {
-    textComponent_->SetTextStyle(std::move(style));
+    auto stack = ViewStackProcessor::GetInstance();
+    if (!stack) {
+        return nullptr;
+    }
+    auto component = AceType::DynamicCast<TextComponentV2>(stack->GetMainComponent());
+    return component;
 }
 
 } // namespace OHOS::Ace::Framework

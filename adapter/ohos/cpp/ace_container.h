@@ -36,6 +36,10 @@ public:
         std::unique_ptr<PlatformEventCallback> callback);
     ~AceContainer() override = default;
 
+    void Initialize() override;
+
+    void Destroy() override;
+
     static bool Register();
 
     int32_t GetInstanceId() const override
@@ -88,6 +92,10 @@ public:
 
     void Dispatch(
         const std::string& group, std::vector<uint8_t>&& data, int32_t id, bool replyToComponent) const override;
+
+    void DispatchSync(
+        const std::string& group, std::vector<uint8_t>&& data, uint8_t** resData, long& position) const override
+    {}
 
     void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
 

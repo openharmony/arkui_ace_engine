@@ -27,6 +27,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
 #include "bridge/codec/codec_data.h"
+#include "core/components/calendar/calendar_theme.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -101,6 +102,12 @@ struct HashFunc {
     }
 };
 
+enum class MonthState {
+    CUR_MONTH,
+    PRE_MONTH,
+    NEXT_MONTH
+};
+
 struct CalendarDay {
     int32_t index = 0;
     int32_t day = 0;
@@ -155,17 +162,29 @@ struct CalendarDataRequest {
 
     int32_t selected = 0;
     CalendarMonth month;
+    MonthState state = MonthState::CUR_MONTH;
     int32_t indexOfContainer = 0;
 };
 
 struct CardCalendarAttr {
     int32_t startDayOfWeek = 0;
+    bool isV2Componenet = false;
     bool showLunar = true;
     bool showHoliday = true;
     bool cardCalendar = false;
     std::string offDays;
+    std::string holidays;
+    std::string workDays;
     EventMarker requestData;
+    CalendarThemeStructure calendarTheme;
     TextDirection textDirection = TextDirection::LTR;
+};
+
+struct ObtainedMonth {
+    int32_t year = 0;
+    int32_t month = 0;
+    int32_t firstDayIndex = CALENDAR_INVALID;
+    std::vector<CalendarDay> days;
 };
 
 using PendingRequestQueue = std::queue<CalendarDataRequest>;
@@ -179,6 +198,7 @@ public:
     virtual void OnSelectedDay(int32_t selected) = 0;
     virtual void OnFocusChanged(bool focusStatus) = 0;
     virtual void UpdateCardCalendarAttr(const CardCalendarAttr& attr) = 0;
+    virtual void OnSwiperMove() = 0;
 };
 
 struct DataAdapterAction {
@@ -230,6 +250,12 @@ public:
     {
         requestQueue_.emplace(month, indexOfContainer);
         indexMap_[indexOfContainer] = month;
+    }
+
+    void AddPendingRequest(const CalendarDataRequest& request)
+    {
+        requestQueue_.emplace(request);
+        indexMap_[request.indexOfContainer] = request.month;
     }
 
     void RequestData(const CalendarDataRequest& request);
@@ -327,7 +353,28 @@ public:
         offDays_ = offDays;
     }
 
+    const std::string& GetWorkDays() const
+    {
+        return workDays_;
+    }
+
+    const std::string& GetHolidays() const
+    {
+        return holidays_;
+    }
+
+    bool HasMoved() const
+    {
+        return hasMoved_;
+    }
+
+    void SetHasMoved(bool hasMoved)
+    {
+        hasMoved_ = hasMoved;
+    }
+
     void ParseCardCalendarData(const std::string& source);
+    void ParseCalendarData(std::queue<ObtainedMonth> months);
     void UpdateCardCalendarAttr(const CardCalendarAttr& attr);
     void SetOffDays(CalendarDay& dayInfo);
 
@@ -339,6 +386,18 @@ private:
     bool GetCacheData(const CalendarDataRequest& request);
 
     void ParseMonthData(const std::unique_ptr<JsonValue>& monthData);
+
+    void RequestDataInWatch(const CalendarDataRequest& request);
+
+    void NotifyDataChanged(const CalendarDaysOfMonth& data, int32_t indexOfContainer);
+
+    void FillMonthData(const CalendarDataRequest& request, CalendarDaysOfMonth& result);
+    void FillPreMonthData(
+        const CalendarMonth& currentMonth, int32_t indexOfContainer, int32_t& index, CalendarDaysOfMonth& result);
+    void FillCurrentMonthData(
+        const CalendarMonth& currentMonth, int32_t indexOfContainer, int32_t& index, CalendarDaysOfMonth& result);
+    void FillNextMonthData(
+        const CalendarMonth& currentMonth, int32_t indexOfContainer, int32_t& index, CalendarDaysOfMonth& result);
 
     void RequestNextData()
     {
@@ -364,21 +423,16 @@ private:
         }
     }
 
-    void NotifyDataChanged(const CalendarDaysOfMonth& data, int32_t indexOfContainer) const
-    {
-        int32_t listenersSize = allListeners_.size();
-        if (indexOfContainer >= 0 && indexOfContainer < listenersSize) {
-            auto& listener = allListeners_[indexOfContainer];
-            listener->OnDataChanged(data);
-        }
-    }
-
     bool cardCalendar_ = false;
     bool showLunar_ = true;
+    bool firstLoad_ = true;
+    bool hasMoved_ = false;
     int32_t selectedDay_ = 0;
     int32_t indexOfContainer_ = 0;
     int32_t startDayOfWeek_ = 0;
     std::string offDays_;
+    std::string workDays_;
+    std::string holidays_;
     CalendarDay today_;
     EventMarker requestData_;
     CalendarMonth currentMonth_;

@@ -39,8 +39,8 @@ public:
     void PerformLayout() override;
 
 private:
-    void DrawWeekAndDates(ScopedCanvas& canvas, const Offset& offset);
-    void DrawFocusedArea(ScopedCanvas& canvas, const Offset& offset, double x, double y) const;
+    void DrawWeekAndDates(ScopedCanvas& canvas, Offset offset);
+    void DrawFocusedArea(ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, double x, double y) const;
     void DrawWeek(ScopedCanvas& canvas, const Offset& offset) const;
     void DrawBlurArea(ScopedCanvas& canvas, const Offset& offset, double x, double y) const;
     void DrawTouchedArea(ScopedCanvas& canvas, const Offset& offset, double x, double y) const;
@@ -62,6 +62,7 @@ private:
     void SetWorkStateStyle(
         const CalendarDay& day, SkColor workColor, SkColor offColor, txt::TextStyle& workStateStyle) const;
     void SetCalendarTheme();
+    bool IsOffDay(const CalendarDay& day) const;
 
     bool needShrink_ = false;
     double weekFontSize_ = 0.0;
@@ -77,6 +78,7 @@ private:
     double workStateWidth_ = 0.0;
     double workStateHorizontalMovingDistance_ = 0.0;
     double workStateVerticalMovingDistance_ = 0.0;
+    double touchCircleStrokeWidth_ = 0.0;
 
     SkColor weekColor_;
     SkColor touchColor_;

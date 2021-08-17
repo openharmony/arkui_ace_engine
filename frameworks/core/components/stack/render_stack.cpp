@@ -87,7 +87,14 @@ void RenderStack::PerformLayout()
 
 void RenderStack::DetermineStackSize(bool hasNonPositioned)
 {
-    Size maxSize = GetLayoutParam().GetMaxSize().IsInfinite() ? viewPort_ : GetLayoutParam().GetMaxSize();
+    Size maxSize = GetLayoutParam().GetMaxSize();
+    if (maxSize.IsWidthInfinite()) {
+        maxSize.SetWidth(viewPort_.Width());
+    }
+    if (maxSize.IsHeightInfinite()) {
+        maxSize.SetHeight(viewPort_.Height());
+    }
+
     if (mainStackSize_ == MainStackSize::MAX && !maxSize.IsInfinite()) {
         SetLayoutSize(maxSize);
         return;
@@ -120,6 +127,16 @@ void RenderStack::DetermineStackSize(bool hasNonPositioned)
     }
     if (mainStackSize_ == MainStackSize::MATCH_CHILDREN) {
         SetLayoutSize(GetLayoutParam().Constrain(Size(maxX, maxY)));
+        return;
+    }
+    if (mainStackSize_ == MainStackSize::MAX_X) {
+        auto maxSizeX = maxSize.Width();
+        SetLayoutSize(Size(maxSizeX, maxY));
+        return;
+    }
+    if (mainStackSize_ == MainStackSize::MAX_Y) {
+        auto maxSizeY = maxSize.Height();
+        SetLayoutSize(Size(maxX, maxSizeY));
         return;
     }
     SetLayoutSize(Size(width, height));

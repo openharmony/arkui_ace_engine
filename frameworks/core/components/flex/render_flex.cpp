@@ -27,7 +27,7 @@ namespace {
 
 inline FlexDirection FlipAxis(FlexDirection direction)
 {
-    if (direction == FlexDirection::ROW) {
+    if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
         return FlexDirection::COLUMN;
     } else {
         return FlexDirection::ROW;
@@ -36,7 +36,12 @@ inline FlexDirection FlipAxis(FlexDirection direction)
 
 double GetMainAxisValue(const Size& size, FlexDirection direction)
 {
-    return direction == FlexDirection::ROW ? size.Width() : size.Height();
+    return direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE ? size.Width() : size.Height();
+}
+
+inline bool IsNonRelativePosition(PositionType pos)
+{
+    return ((pos != PositionType::RELATIVE) && (pos != PositionType::SEMI_RELATIVE));
 }
 
 } // namespace
@@ -60,7 +65,17 @@ void RenderFlex::Update(const RefPtr<Component>& component)
     stretchToParent_ = flex->IsStretchToParent();
     useViewPort_ = flex->GetUseViewPortFlag();
     containsNavigation_ = flex->ContainsNavigation();
+    overflow_ = flex->GetOverflow();
     SetTextDirection(flex->GetTextDirection());
+    alignPtr_ = flex->GetAlignDeclarationPtr();
+
+    auto context = GetContext().Upgrade();
+    if (context) {
+        space_ = context->NormalizeToPx(flex->GetSpace());
+        if (GreatNotEqual(space_, 0.0)) {
+            mainAxisAlign_ = FlexAlign::SPACE_CUSOMIZATION;
+        }
+    }
     UpdateAccessibilityAttr();
     MarkNeedLayout();
 }
@@ -139,8 +154,6 @@ void RenderFlex::OnPaintFinish()
             Rect clampRect = itemRect.Constrain(viewPortRect);
             if (clampRect != itemRect) {
                 item->SetAccessibilityRect(clampRect);
-            } else {
-                item->ClearAccessibilityRect();
             }
         } else {
             item->NotifyPaintFinish();
@@ -153,7 +166,7 @@ LayoutParam RenderFlex::MakeStretchInnerLayoutParam(const RefPtr<RenderNode>& it
     // must be called in the second time layout, so that crossSize_ is determined.
     LayoutParam innerLayout;
     double crossAxisLimit = GetStretchCrossLimit();
-    if (direction_ == FlexDirection::ROW) {
+    if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
         innerLayout.SetFixedSize(Size(GetMainSize(item), crossAxisLimit));
     } else {
         innerLayout.SetFixedSize(Size(crossAxisLimit, GetMainSize(item)));
@@ -165,13 +178,14 @@ LayoutParam RenderFlex::MakeLayoutParamWithLimit(double minMainLimit, double max
 {
     LayoutParam innerLayout;
     double minCrossLimit = 0.0;
-    double maxCrossLimit = (direction_ == FlexDirection::ROW) ? GetLayoutParam().GetMaxSize().Height()
-                                                              : GetLayoutParam().GetMaxSize().Width();
+    double maxCrossLimit = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)
+                               ? GetLayoutParam().GetMaxSize().Height()
+                               : GetLayoutParam().GetMaxSize().Width();
     if (isStretch) {
         minCrossLimit = GetStretchCrossLimit();
         maxCrossLimit = minCrossLimit;
     }
-    if (direction_ == FlexDirection::ROW) {
+    if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
         innerLayout.SetMinSize(Size(minMainLimit, minCrossLimit));
         innerLayout.SetMaxSize(Size(maxMainLimit, maxCrossLimit));
     } else {
@@ -204,9 +218,13 @@ double RenderFlex::GetStretchCrossLimit() const
     if (!stretchToParent_) {
         crossAxisLimit = crossSize_;
     } else if (!isCrossInfinite_ || !useViewPort_) {
-        crossAxisLimit = (direction_ == FlexDirection::ROW) ? maxLayoutParam.Height() : maxLayoutParam.Width();
+        crossAxisLimit = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)
+                             ? maxLayoutParam.Height()
+                             : maxLayoutParam.Width();
     } else {
-        crossAxisLimit = (direction_ == FlexDirection::ROW) ? viewPort_.Height() : viewPort_.Width();
+        crossAxisLimit = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)
+                             ? viewPort_.Height()
+                             : viewPort_.Width();
     }
     return crossAxisLimit;
 }
@@ -217,6 +235,15 @@ void RenderFlex::PerformLayout()
         SetLayoutSize(Size());
         return;
     }
+
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        return;
+    }
+    if (alignPtr_ != nullptr) {
+        context->AddAlignDeclarationNode(AceType::Claim(this));
+    }
+
     // init properties.
     InitFlexProperties();
     if (layoutMode_ == FlexLayoutMode::FLEX_WEIGHT_MODE) {
@@ -227,6 +254,11 @@ void RenderFlex::PerformLayout()
         PerformLayoutInItemMode();
     }
     ClearChildrenLists();
+
+    if (alignPtr_ != nullptr) {
+        auto& nodeList = context->GetAlignDeclarationNodeList();
+        PerformItemAlign(nodeList);
+    }
 }
 
 void RenderFlex::PerformLayoutInWeightMode()
@@ -281,7 +313,8 @@ void RenderFlex::PerformLayoutInWeightMode()
     Size layoutSize = GetConstrainedSize(maxMainSize);
     SetLayoutSize(layoutSize);
     mainSize_ = GetMainAxisValue(layoutSize, direction_);
-    crossSize_ = (direction_ == FlexDirection::ROW) ? layoutSize.Height() : layoutSize.Width();
+    crossSize_ = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? layoutSize.Height()
+                                                                                                : layoutSize.Width();
     DetermineItemsPosition(baselineProperties);
 }
 
@@ -369,7 +402,8 @@ void RenderFlex::PerformLayoutInIndexMode()
     Size layoutSize = GetConstrainedSize(maxMainSize);
     SetLayoutSize(layoutSize);
     mainSize_ = GetMainAxisValue(layoutSize, direction_);
-    crossSize_ = (direction_ == FlexDirection::ROW) ? layoutSize.Height() : layoutSize.Width();
+    crossSize_ = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? layoutSize.Height()
+                                                                                                : layoutSize.Width();
     BaselineProperties baselineProperties;
     DetermineItemsPosition(baselineProperties);
 }
@@ -394,10 +428,10 @@ void RenderFlex::RelayoutForStretchFlexNode(const FlexItemProperties& flexItemPr
             }
             continue;
         }
-        double flexSize = 0.0;
         if (GreatNotEqual(flexItem->GetFlexGrow(), 0.0)) {
+            double flexSize = 0.0;
             flexSize = flexItem == flexItemProperties.lastGrowChild ? remainSpace - allocatedFlexSpace
-                : spacePerFlex * flexItem->GetFlexGrow();
+                                                                    : spacePerFlex * flexItem->GetFlexGrow();
             RelayoutFlexItem(flexItem, flexSize, baselineProperties, allocatedFlexSpace);
         } else if (crossAxisAlign_ == FlexAlign::STRETCH && flexItem->GetStretchFlag()) {
             flexItem->Layout(
@@ -462,6 +496,11 @@ void RenderFlex::PerformLayoutInItemMode()
     } else if (allocatedSize_ >= mainViewPort && crossAxisAlign_ == FlexAlign::STRETCH) {
         // Children size larger than viewPort, second layout only do stretch.
         for (const auto& item : relativeNodes_) {
+            // If Item has set width/height in main axis, not need to stretch.
+            auto flexItem = AceType::DynamicCast<RenderFlexItem>(item);
+            if (flexItem && !flexItem->GetStretchFlag()) {
+                continue;
+            }
             item->Layout(MakeStretchInnerLayoutParam(item));
         }
     } else {
@@ -476,14 +515,17 @@ void RenderFlex::PerformLayoutInItemMode()
 void RenderFlex::ResizeItems(const FlexItemProperties& flexItemProps, BaselineProperties& baselineProps)
 {
     double availableMainSize = GetAvailableMainSize();
-    if (flexItemProps.totalGrow > 0 && availableMainSize > allocatedSize_) {
+    auto context = GetContext().Upgrade();
+    bool isDeclarative = context ? context->GetIsDeclarative() : false;
+    if (flexItemProps.totalGrow > 0 && availableMainSize > allocatedSize_ && !isDeclarative) {
         mainAxisSize_ = MainAxisSize::MAX;
     }
     // remainSpace should be (availableMainSize - allocatedSize_), and do not remain space when MainAxisSize::MIN.
     // Handle infinity children specially, because allocatedSize_ not include infinity child.
     double remainSpace =
         (mainAxisSize_ == MainAxisSize::MIN && availableMainSize >= allocatedSize_ && infinityLayoutNodes_.empty())
-            ? 0.0 : availableMainSize - allocatedSize_;
+            ? 0.0
+            : availableMainSize - allocatedSize_;
     double infiniteLayoutSize = availableMainSize;
     if (!infinityLayoutNodes_.empty()) {
         if (remainSpace > 0.0) {
@@ -521,7 +563,8 @@ void RenderFlex::ResizeItems(const FlexItemProperties& flexItemProps, BaselinePr
         }
         double itemFlex = getFlex(flexItem);
         double flexSize = (flexItem == lastChild) ? (remainSpace - allocatedFlexSpace)
-            : ((remainSpace > 0) ? spacePerFlex * itemFlex : spacePerFlex * itemFlex * GetMainSize(item));
+                                                  : ((remainSpace > 0) ? spacePerFlex * itemFlex
+                                                                       : spacePerFlex * itemFlex * GetMainSize(item));
         RelayoutFlexItem(flexItem, flexSize, baselineProps, allocatedFlexSpace);
     }
 }
@@ -535,15 +578,17 @@ void RenderFlex::DetermineSelfSize(MainAxisSize mainAxisSize, bool useViewPort)
         maxMainSize = allocatedSize_;
     }
     // useViewPort means that it is the root flex, should be as large as viewPort.
-    Size layoutSize = (mainAxisSize == MainAxisSize::MIN)
-                          ? GetConstrainedSize(allocatedSize_)
-                          : useViewPort ? GetConstrainedSize(mainViewPort) : GetConstrainedSize(maxMainSize);
+    Size layoutSize = (mainAxisSize == MainAxisSize::MIN) ? GetConstrainedSize(allocatedSize_)
+                      : useViewPort                       ? GetConstrainedSize(mainViewPort)
+                                                          : GetConstrainedSize(maxMainSize);
     if (useViewPort && !absoluteNodes_.empty()) {
         layoutSize = GetConstrainedSize(mainViewPort);
     }
+    isChildOverflow_ = allocatedSize_ > GetMainAxisValue(layoutSize, direction_);
     SetLayoutSize(layoutSize);
     mainSize_ = GetMainAxisValue(layoutSize, direction_);
-    crossSize_ = (direction_ == FlexDirection::ROW) ? layoutSize.Height() : layoutSize.Width();
+    crossSize_ = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? layoutSize.Height()
+                                                                                                : layoutSize.Width();
 }
 
 void RenderFlex::DetermineItemsPosition(const BaselineProperties& baselineProperties)
@@ -559,7 +604,7 @@ void RenderFlex::DetermineItemsPosition(const BaselineProperties& baselineProper
 
 void RenderFlex::CalculateSpace(double remainSpace, double& frontSpace, double& betweenSpace) const
 {
-    if (NearZero(remainSpace)) {
+    if (NearZero(remainSpace) && mainAxisAlign_ != FlexAlign::SPACE_CUSOMIZATION) {
         return;
     }
     switch (mainAxisAlign_) {
@@ -587,6 +632,10 @@ void RenderFlex::CalculateSpace(double remainSpace, double& frontSpace, double& 
             betweenSpace = validSizeCount_ > 0 ? remainSpace / (validSizeCount_ + 1) : 0.0;
             frontSpace = betweenSpace;
             break;
+        case FlexAlign::SPACE_CUSOMIZATION:
+            betweenSpace = space_;
+            frontSpace = 0.0;
+            break;
         default:
             break;
     }
@@ -594,7 +643,7 @@ void RenderFlex::CalculateSpace(double remainSpace, double& frontSpace, double& 
 
 void RenderFlex::PlaceChildren(double frontSpace, double betweenSpace, const BaselineProperties& baselineProperties)
 {
-    double childMainPos = IsStartTopLeft(direction_) ? frontSpace : mainSize_ - frontSpace;
+    double childMainPos = IsStartTopLeft(direction_, GetTextDirection()) ? frontSpace : mainSize_ - frontSpace;
     double childCrossPos = 0.0;
     for (const auto& item : GetChildren()) {
         if (item->IsIgnored()) {
@@ -604,27 +653,31 @@ void RenderFlex::PlaceChildren(double frontSpace, double betweenSpace, const Bas
         if (flexItem && flexItem->IsHidden() && !flexItem->GetLayoutSize().IsValid()) {
             continue;
         }
-        if (item->GetPositionType() == PositionType::ABSOLUTE) {
+        if (IsNonRelativePosition(item->GetPositionType())) {
             Offset absoluteOffset = PositionLayoutUtils::GetAbsoluteOffset(Claim(this), item);
             item->SetAbsolutePosition(absoluteOffset);
             continue;
         }
         auto alignItem = GetSelfAlign(item);
+        auto textDirection = AdjustTextDirectionByDir();
         switch (alignItem) {
             case FlexAlign::FLEX_START:
             case FlexAlign::FLEX_END:
-                childCrossPos = (IsStartTopLeft(FlipAxis(direction_))) == (alignItem == FlexAlign::FLEX_START)
-                    ? 0.0 : (crossSize_ - GetCrossSize(item));
+                childCrossPos =
+                    (IsStartTopLeft(FlipAxis(direction_), textDirection) == (alignItem == FlexAlign::FLEX_START))
+                        ? 0.0
+                        : (crossSize_ - GetCrossSize(item));
                 break;
             case FlexAlign::CENTER:
                 childCrossPos = (crossSize_ / 2.0) - (GetCrossSize(item) / 2.0);
                 break;
             case FlexAlign::STRETCH:
-                childCrossPos = IsStartTopLeft(FlipAxis(direction_)) ? 0.0 : (crossSize_ - GetCrossSize(item));
+                childCrossPos =
+                    IsStartTopLeft(FlipAxis(direction_), textDirection) ? 0.0 : (crossSize_ - GetCrossSize(item));
                 break;
             case FlexAlign::BASELINE:
                 childCrossPos = 0.0;
-                if (direction_ == FlexDirection::ROW) {
+                if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
                     double distance = item->GetBaselineDistance(textBaseline_);
                     childCrossPos = baselineProperties.maxBaselineDistance - distance;
                 }
@@ -632,10 +685,18 @@ void RenderFlex::PlaceChildren(double frontSpace, double betweenSpace, const Bas
             default:
                 break;
         }
-        Offset offset = (direction_ == FlexDirection::ROW) ? Offset(childMainPos, childCrossPos)
-                                                           : Offset(childCrossPos, childMainPos);
-        if (!IsStartTopLeft(direction_)) {
-            offset.SetX(offset.GetX() - GetMainSize(item));
+        Offset offset = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)
+                            ? Offset(childMainPos, childCrossPos)
+                            : Offset(childCrossPos, childMainPos);
+        if (item->GetPositionType() == PositionType::SEMI_RELATIVE) {
+            offset.SetX(0.0);
+        }
+        if (!IsStartTopLeft(direction_, GetTextDirection())) {
+            if (direction_ != FlexDirection::COLUMN_REVERSE) {
+                offset.SetX(offset.GetX() - GetMainSize(item));
+            } else {
+                offset.SetY(offset.GetY() - GetMainSize(item));
+            }
             item->SetPosition(offset);
             childMainPos -= GetMainSize(item) + betweenSpace;
         } else {
@@ -671,13 +732,30 @@ void RenderFlex::LayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, FlexItem
 void RenderFlex::RelayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, double flexSize,
     BaselineProperties& baselineProps, double& allocatedFlexSpace)
 {
-    bool canItemStretch = (GetSelfAlign(flexItem) == FlexAlign::STRETCH) && (flexItem->GetStretchFlag());
+    bool canItemStretch =
+        flexItem->MustStretch() || ((GetSelfAlign(flexItem) == FlexAlign::STRETCH) && (flexItem->GetStretchFlag()));
     if (NearZero(flexSize) && !canItemStretch) {
         return;
     }
+    auto mainFlexExtent = flexSize + GetMainSize(flexItem);
+    auto childMainContent = GetMainAxisValue(flexItem->GetContentSize(), direction_);
+    if (childMainContent > mainFlexExtent) {
+        mainFlexExtent = childMainContent;
+    }
     allocatedSize_ -= GetMainSize(flexItem);
-    auto innerLayout = MakeConstrainedLayoutParam(flexSize + GetMainSize(flexItem),
-        flexItem->GetNormalizedConstraints(), canItemStretch);
+    auto innerLayout = MakeConstrainedLayoutParam(mainFlexExtent, flexItem->GetNormalizedConstraints(), canItemStretch);
+    if (flexItem->MustStretch()) {
+        auto crossStretch = crossAxisSize_ == CrossAxisSize::MAX
+                             ? GetMainAxisValue(GetLayoutParam().GetMaxSize(), FlipAxis(direction_))
+                             : crossSize_;
+        auto innerMax = innerLayout.GetMaxSize();
+        if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
+            innerMax.SetHeight(crossStretch);
+        } else {
+            innerMax.SetWidth(crossStretch);
+        }
+        innerLayout.SetMaxSize(innerMax);
+    }
     flexItem->Layout(innerLayout);
     allocatedFlexSpace += flexSize;
     ResizeByItem(flexItem);
@@ -711,19 +789,23 @@ void RenderFlex::LayoutAbsoluteChildren()
 
 void RenderFlex::CheckBaselineProperties(const RefPtr<RenderNode>& item, BaselineProperties& baselineProperties)
 {
-    if (crossAxisAlign_ == FlexAlign::BASELINE) {
+    auto flexItem = AceType::DynamicCast<RenderFlexItem>(item);
+    bool isChildBaselineAlign = flexItem ? flexItem->GetAlignSelf() == FlexAlign::BASELINE : false;
+    if (crossAxisAlign_ == FlexAlign::BASELINE || isChildBaselineAlign) {
         double distance = item->GetBaselineDistance(textBaseline_);
         baselineProperties.maxBaselineDistance = std::max(baselineProperties.maxBaselineDistance, distance);
         baselineProperties.maxDistanceAboveBaseline = std::max(baselineProperties.maxDistanceAboveBaseline, distance);
         baselineProperties.maxDistanceBelowBaseline =
             std::max(baselineProperties.maxDistanceBelowBaseline, GetCrossSize(item) - distance);
-        crossSize_ = baselineProperties.maxDistanceAboveBaseline + baselineProperties.maxDistanceBelowBaseline;
+        if (crossAxisAlign_ == FlexAlign::BASELINE) {
+            crossSize_ = baselineProperties.maxDistanceAboveBaseline + baselineProperties.maxDistanceBelowBaseline;
+        }
     }
 }
 
 double RenderFlex::GetBaselineDistance(TextBaseline baseline)
 {
-    if (direction_ == FlexDirection::ROW) {
+    if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
         // in row, use default children baseline defined in render node.
         return GetHighestChildBaseline(baseline);
     } else {
@@ -737,7 +819,7 @@ Size RenderFlex::GetChildViewPort()
     if (containsNavigation_) {
         double width = viewPort_.Width();
         double height = viewPort_.Height();
-        if (direction_ == FlexDirection::ROW) {
+        if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
             width -= navigationMainSize_;
         } else {
             height -= navigationMainSize_;
@@ -773,7 +855,7 @@ void RenderFlex::TravelChildrenFlexProps()
 {
     for (const auto& child : GetChildren()) {
         child->SetVisible(true);
-        if (child->GetPositionType() != PositionType::RELATIVE) {
+        if (IsNonRelativePosition(child->GetPositionType())) {
             absoluteNodes_.insert(child);
             continue;
         }
@@ -821,16 +903,22 @@ void RenderFlex::ResizeByItem(const RefPtr<RenderNode>& item)
         // push infinite nodes
         infinityLayoutNodes_.insert(item);
     }
-    if (item->GetPositionType() != PositionType::RELATIVE) {
+    if (IsNonRelativePosition(item->GetPositionType())) {
         return;
     }
-    allocatedSize_ += mainSize;
+
     crossSize_ = std::max(crossSize_, GetCrossSize(item));
+    if ((item->GetPositionType() == PositionType::SEMI_RELATIVE) &&
+        (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)) {
+        allocatedSize_ = std::max(allocatedSize_, mainSize);
+    } else {
+        allocatedSize_ += mainSize;
+    }
 }
 
 void RenderFlex::CheckSizeValidity(const RefPtr<RenderNode>& item)
 {
-    if (item->IsIgnored() || item->GetPositionType() != PositionType::RELATIVE) {
+    if (item->IsIgnored() || IsNonRelativePosition(item->GetPositionType())) {
         return;
     }
     if (!item->GetLayoutSize().IsValid()) {
@@ -847,47 +935,73 @@ double RenderFlex::GetAvailableMainSize()
 {
     double maxMainSize = 0.0;
     if (!isMainInfinite_ || !useViewPort_) {
-        maxMainSize = (direction_ == FlexDirection::ROW) ? GetLayoutParam().GetMaxSize().Width()
-                                                         : GetLayoutParam().GetMaxSize().Height();
+        maxMainSize = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)
+                          ? GetLayoutParam().GetMaxSize().Width()
+                          : GetLayoutParam().GetMaxSize().Height();
     } else {
-        maxMainSize = (direction_ == FlexDirection::ROW) ? viewPort_.Width() : viewPort_.Height();
+        maxMainSize = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)
+                          ? viewPort_.Width()
+                          : viewPort_.Height();
     }
     return maxMainSize;
 }
 
 double RenderFlex::GetMainSize(const RefPtr<RenderNode>& item) const
 {
-    if (direction_ == FlexDirection::ROW) {
-        return item->GetPaintRect().Width();
+    double size;
+    if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
+        size = item->GetLayoutSize().Width();
+        if (item->GetPositionType() == PositionType::SEMI_RELATIVE) {
+            Offset absoluteOffset = PositionLayoutUtils::GetAbsoluteOffset(Claim(const_cast<RenderFlex*>(this)), item);
+            size += absoluteOffset.GetX();
+        }
     } else {
-        return item->GetPaintRect().Height();
+        size = item->GetLayoutSize().Height();
     }
+    return size;
 }
 
 double RenderFlex::GetCrossSize(const RefPtr<RenderNode>& item) const
 {
-    if (direction_ == FlexDirection::ROW) {
-        return item->GetPaintRect().Height();
+    double size;
+    if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
+        size = item->GetLayoutSize().Height();
     } else {
-        return item->GetPaintRect().Width();
+        size = item->GetLayoutSize().Width();
+        if (item->GetPositionType() == PositionType::SEMI_RELATIVE) {
+            Offset absoluteOffset = PositionLayoutUtils::GetAbsoluteOffset(Claim(const_cast<RenderFlex*>(this)), item);
+            size += absoluteOffset.GetX();
+        }
     }
+    return size;
 }
 
-bool RenderFlex::IsStartTopLeft(FlexDirection direction) const
+bool RenderFlex::IsStartTopLeft(FlexDirection direction, TextDirection textDirection) const
 {
-    return !(direction == FlexDirection::ROW && GetTextDirection() == TextDirection::RTL);
+    switch (direction) {
+        case FlexDirection::ROW:
+            return textDirection == TextDirection::LTR;
+        case FlexDirection::ROW_REVERSE:
+            return textDirection == TextDirection::RTL;
+        case FlexDirection::COLUMN:
+            return true;
+        case FlexDirection::COLUMN_REVERSE:
+            return false;
+        default:
+            return true;
+    }
 }
 
 Size RenderFlex::GetConstrainedSize(double mainSize)
 {
     if ((stretchToParent_ && crossAxisAlign_ == FlexAlign::STRETCH) || (crossAxisSize_ == CrossAxisSize::MAX)) {
-        if (direction_ == FlexDirection::ROW) {
+        if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
             return GetLayoutParam().Constrain(Size(mainSize, GetLayoutParam().GetMaxSize().Height()));
         } else {
             return GetLayoutParam().Constrain(Size(GetLayoutParam().GetMaxSize().Width(), mainSize));
         }
     }
-    if (direction_ == FlexDirection::ROW) {
+    if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
         return GetLayoutParam().Constrain(Size(mainSize, crossSize_));
     } else {
         return GetLayoutParam().Constrain(Size(crossSize_, mainSize));
@@ -904,8 +1018,21 @@ FlexAlign RenderFlex::GetSelfAlign(const RefPtr<RenderNode>& item) const
     return crossAxisAlign_;
 }
 
+TextDirection RenderFlex::AdjustTextDirectionByDir()
+{
+    auto textDir = GetTextDirection();
+    if (direction_ == FlexDirection::ROW_REVERSE) {
+        textDir = GetTextDirection() == TextDirection::RTL ? TextDirection::LTR : TextDirection::RTL;
+    }
+    return textDir;
+}
+
 void RenderFlex::OnChildRemoved(const RefPtr<RenderNode>& child)
 {
+    if (child) {
+        child->SetAccessibilityVisible(false);
+        child->ClearAccessibilityRect();
+    }
     MarkNeedLayout();
 }
 
@@ -938,6 +1065,9 @@ void RenderFlex::ClearRenderObject()
     validSizeCount_ = 0;
     totalFlexWeight_ = 0.0;
     maxDisplayIndex_ = 0;
+    space_ = 0.0;
+    alignPtr_ = nullptr;
+
 }
 
 bool RenderFlex::MaybeRelease()
@@ -948,6 +1078,69 @@ bool RenderFlex::MaybeRelease()
         return false;
     }
     return true;
+}
+
+bool RenderFlex::GetAlignDeclarationOffset(AlignDeclarationPtr alignDeclarationPtr, Offset& offset) const
+{
+    if (alignPtr_ != alignDeclarationPtr) {
+        return RenderNode::GetAlignDeclarationOffset(alignDeclarationPtr, offset);
+    }
+    if (alignDeclarationPtr->GetDeclarationType() == AlignDeclaration::DeclarationType::HORIZONTAL) {
+        switch (alignDeclarationPtr->GetHorizontalAlign()) {
+            case HorizontalAlign::START:
+                break;
+            case HorizontalAlign::CENTER: {
+                offset = offset + Offset(GetLayoutSize().Width() / 2, 0);
+                break;
+            }
+            case HorizontalAlign::END: {
+                offset = offset + Offset(GetLayoutSize().Width(), 0);
+                break;
+            }
+        }
+        offset.SetY(0.0);
+    } else {
+        switch (alignDeclarationPtr->GetVerticalAlign()) {
+            case VerticalAlign::TOP:
+                break;
+            case VerticalAlign::CENTER: {
+                offset = offset + Offset(0, GetLayoutSize().Height() / 2);
+                break;
+            }
+            case VerticalAlign::BOTTOM: {
+                offset = offset + Offset(0, GetLayoutSize().Height());
+                break;
+            }
+            case VerticalAlign::BASELINE:
+                return false;
+        }
+        offset.SetX(0.0);
+    }
+    return true;
+}
+
+void RenderFlex::PerformItemAlign(std::list<RefPtr<RenderNode>>& nodelist)
+{
+    auto item = nodelist.begin();
+
+    while (item != nodelist.end()) {
+        if (*item == AceType::Claim(this)) {
+            nodelist.erase(item);
+            return;
+        }
+        const RefPtr<RenderBox> box = AceType::DynamicCast<RenderBox>(*item);
+        if (!box) {
+            nodelist.clear();
+            LOGE("PerformItemAlign error");
+            return;
+        }
+        if (box->GetAlignDeclarationPtr() != alignPtr_) {
+            item++;
+            continue;
+        }
+        box->CalculateAlignDeclaration();
+        item = nodelist.erase(item);
+    }
 }
 
 void RenderFlex::Dump()

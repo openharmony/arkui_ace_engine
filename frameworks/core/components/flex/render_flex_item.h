@@ -49,14 +49,21 @@ public:
         flexShrink_ = flexShrink;
     }
 
+    // should not used in Update.
     double GetFlexBasis() const
     {
-        return flexBasis_;
+        auto basis = NormalizeToPx(flexBasis_);
+        return basis;
+    }
+
+    void SetFlexBasis(const Dimension& flexBasis)
+    {
+        flexBasis_ = flexBasis;
     }
 
     void SetFlexBasis(double flexBasis)
     {
-        flexBasis_ = flexBasis;
+        flexBasis_ = Dimension(flexBasis);
     }
 
     bool GetStretchFlag() const
@@ -96,6 +103,11 @@ public:
         return isHidden_;
     }
 
+    bool MustStretch() const
+    {
+        return mustStretch_;
+    }
+
 protected:
     virtual void ClearRenderObject() override;
     virtual bool MaybeRelease() override;
@@ -103,8 +115,9 @@ protected:
 private:
     double flexGrow_ = 0.0;
     double flexShrink_ = 0.0;
-    double flexBasis_ = 0.0;
+    Dimension flexBasis_ = 0.0_px;
     bool canStretch_ = true;
+    bool mustStretch_ = false;
     bool isHidden_ = false;
 
     Dimension minWidth_ = Dimension();

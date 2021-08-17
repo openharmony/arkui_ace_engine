@@ -57,7 +57,11 @@ public:
 
     void PaintBoxShadows(const SkRRect& rrect, const std::vector<Shadow>& shadows, SkCanvas* canvas);
 
-    void PaintBlur(const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& blurRadius);
+    void PaintBlur(const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& blurRadius, const Color& color);
+
+    void PaintGradient(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
+
+    bool GetGradientPaint(SkPaint& paint);
 
     flutter::RRect GetBoxOuterRRect(const Offset& offset);
 
@@ -91,67 +95,20 @@ public:
 protected:
     void PaintColorAndImage(const Offset& offset, SkCanvas* canvas, SkPaint& paint, RenderContext& context);
 
-    void PaintAllEqualBorder(const flutter::RRect& rrect, const Border& border, SkCanvas* canvas, SkPaint& paint);
-
-    void SetBorderStyle(const BorderEdge& borderEdge, SkPaint& paint, bool useDefaultColor = false);
+    void SetBorderStyle(const BorderEdge& borderEdge, SkPaint& paint,
+        bool useDefaultColor = false, double spaceBetweenDot = 0.0, double borderLength = 0.0);
 
     void PaintBorder(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint);
-
+    void PaintBorderWithLine(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint);
     void PaintImage(const Offset& offset, RenderContext& context);
-
-    void PaintGradient(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
-
-    void GetShaderForRepeat(const Offset& offset, const Gradient& gradient, SkPaint& paint);
-    void GetShaderForClamp(const Offset& offset, const Gradient& gradient, SkPaint& paint) const;
-
-    float GetShaderPercent(const Dimension& dimension, const Gradient& gradient) const;
-    SkPoint GetShaderStopPoint(const Offset& offset, const Dimension& dimension, const Gradient& gradient) const;
-
-    double GetShaderPercentByDirection(const Dimension& dimension, const Gradient& gradient) const;
-    double GetShaderPercentByAngle(const Dimension& dimension, double angle) const;
-    SkPoint GetShaderStopPointByAngle(const Offset& offset, const Dimension& dimension, double angle) const;
-    SkPoint GetBeginPointByAngle(const Offset& offset, double angle) const;
-    SkPoint GetBeginPointByDirection(const Offset& offset, const Gradient& gradient) const;
-    SkPoint GetShaderStopPointByDirection(
-        const Offset& offset, const Dimension& dimension, const Gradient& gradient) const;
-    SkPoint GetShaderStopPointLeftTop(const Offset& offset, const Dimension& dimension) const;
-    SkPoint GetShaderStopPointLeftBottom(const Offset& offset, const Dimension& dimension) const;
-    SkPoint GetShaderStopPointRightTop(const Offset& offset, const Dimension& dimension) const;
-    SkPoint GetShaderStopPointRightBottom(const Offset& offset, const Dimension& dimension) const;
-
-    double GetShaderPercentEq0Degrees(const Dimension& dimension) const;
-    double GetDiagonalAngle(double angle) const;
-    double GetShaderPercentForAngle(const Dimension& dimension, double diagonalAngle, double angle) const;
-    double GetShaderPercentEq90Degrees(const Dimension& dimension) const;
-
-    SkPoint GetShaderStopPointEq0Degrees(const Offset& offset, const Dimension& dimension) const;
-    SkPoint GetShaderStopPointEq90Degrees(const Offset& offset, const Dimension& dimension) const;
-    SkPoint GetShaderStopPointEq180Degrees(const Offset& offset, const Dimension& dimension) const;
-    SkPoint GetShaderStopPointEq270Degrees(const Offset& offset, const Dimension& dimension) const;
-    SkPoint GetShaderStopPointLT90Degrees(
-        const Offset& offset, const Dimension& dimension, double angle, double diagonalAngle) const;
-    SkPoint GetShaderStopPointLT180Degrees(
-        const Offset& offset, const Dimension& dimension, double angle, double diagonalAngle) const;
-    SkPoint GetShaderStopPointLT270Degrees(
-        const Offset& offset, const Dimension& dimension, double angle, double diagonalAngle) const;
-    SkPoint GetShaderStopPointLT360Degrees(
-        const Offset& offset, const Dimension& dimension, double angle, double diagonalAngle) const;
-
-    double GetLeftOffset(const Offset& offset) const;
-    double GetRightOffset(const Offset& offset) const;
-    double GetTopOffset(const Offset& offset) const;
-    double GetBottomOffset(const Offset& offset) const;
-
-    SkPoint GetGradientBeginPoint(const Offset& offset, const Gradient& gradient) const;
-    SkPoint GetGradientEndPoint(const Offset& offset, const Gradient& gradient) const;
-
-    double GetRectHypotenuse() const;
-    double GetHypotenuse(const Dimension& dimension, double diagonalAngle, double angle) const;
-    double GetHypotenuseAngle(double angle, double diagonalAngle) const;
-
-    void RecalculatePosition(float pos[], int32_t colorsSize) const;
-
-    bool CheckBorderAllEqual(const Border& border);
+    sk_sp<SkShader> CreateGradientShader(const Gradient& gradient, const SkSize& size);
+    flutter::RRect GetOuterRRect(const Offset& offset, const Border& border);
+    flutter::RRect GetInnerRRect(const Offset& offset, const Border& border);
+    flutter::RRect GetClipRRect(const Offset& offset, const Border& border);
+    bool CanUseFillStyle(const Border& border, SkPaint& paint);
+    bool CanUsePathRRect(const Border& border, SkPaint& paint);
+    bool CanUseInnerRRect(const Border& border);
+    bool CanUseFourLine(const Border& border);
 
     bool CheckBorderEdgeForRRect(const Border& border);
 

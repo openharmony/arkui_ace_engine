@@ -33,6 +33,7 @@ class VideoController : public virtual AceType {
 public:
     using StartImpl = std::function<void()>;
     using PauseImpl = std::function<void()>;
+    using StopImpl = std::function<void()>;
     using SeekToImpl = std::function<void(uint32_t)>;
     using RequestFullscreenImpl = std::function<void(bool)>;
     using ExitFullscreenImpl = std::function<void(bool)>;
@@ -48,6 +49,13 @@ public:
     {
         if (pauseImpl_) {
             pauseImpl_();
+        }
+    }
+
+    void Stop()
+    {
+        if (stopImpl_) {
+            stopImpl_();
         }
     }
 
@@ -82,6 +90,11 @@ public:
         pauseImpl_ = std::move(pauseImpl);
     }
 
+    void SetStopImpl(StopImpl&& stopImpl)
+    {
+        stopImpl_ = std::move(stopImpl);
+    }
+
     void SetSeekToImpl(SeekToImpl&& seekToImpl)
     {
         seekToImpl_ = std::move(seekToImpl);
@@ -100,13 +113,14 @@ public:
 private:
     StartImpl startImpl_;
     PauseImpl pauseImpl_;
+    StopImpl stopImpl_;
     SeekToImpl seekToImpl_;
     RequestFullscreenImpl requestFullscreenImpl_;
     ExitFullscreenImpl exitFullscreenImpl_;
 };
 
 // A component can show Video.
-class VideoComponent : public TextureComponent {
+class ACE_EXPORT VideoComponent : public TextureComponent {
     DECLARE_ACE_TYPE(VideoComponent, TextureComponent);
 
 public:
@@ -163,6 +177,50 @@ public:
         isMute_ = mute;
     }
 
+    bool IsLoop() const
+    {
+        return isLoop_;
+    }
+
+    void SetLoop(bool loop)
+    {
+        isLoop_ = loop;
+    }
+
+    void SetSpeed(float speed)
+    {
+        if (GreatOrEqual(speed, 0.1) && LessOrEqual(speed, 20.0)) {
+            speed_ = speed;
+        }
+    }
+
+    float GetSpeed() const
+    {
+        return speed_;
+    }
+
+    void SetDirection(const std::string& direction)
+    {
+        if (direction == "vertical" || direction == "horizontal" || direction == "adapt" || direction == "auto") {
+            direction_ = direction;
+        }
+    }
+
+    const std::string& GetDirection() const
+    {
+        return direction_;
+    }
+
+    int32_t GetStartTime() const
+    {
+        return startTime_;
+    }
+
+    void SetStartTime(int32_t startTime)
+    {
+        startTime_ = startTime;
+    }
+
     bool IsAutoPlay() const
     {
         return isAutoPlay_;
@@ -201,6 +259,16 @@ public:
     void SetPauseEventId(const EventMarker& eventId)
     {
         pauseEventId_ = eventId;
+    }
+
+    const EventMarker& GetStopEventId() const
+    {
+        return stopEventId_;
+    }
+
+    void SetStopEventId(const EventMarker& eventId)
+    {
+        stopEventId_ = eventId;
     }
 
     const EventMarker& GetFinishEventId() const
@@ -315,10 +383,15 @@ private:
     bool needControls_ = true;
     bool isMute_ = false;
     bool isFullscreen_ = false;
+    bool isLoop_ = false;
+    int32_t startTime_ = 0;
+    float speed_ = 1.0f;
+    std::string direction_ = "auto";
 
     EventMarker preparedEventId_;
     EventMarker startEventId_;
     EventMarker pauseEventId_;
+    EventMarker stopEventId_;
     EventMarker finishEventId_;
     EventMarker errorEventId_;
     EventMarker seekingEventId_;

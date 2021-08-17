@@ -34,25 +34,27 @@ public:
  * @tc.name: GIFSupport001
  * @tc.desc: if gif uri is right, loadImageData can get and decode the data.
  * @tc.type: FUNC
+ * @tc.require: AR000DAQ40 AR000DACKU
+ * @tc.author: lushi
  */
 HWTEST_F(ImageProviderTest, GIFSupport001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create FileImageProvider.
      */
-    auto imageProvider = FileImageProvider();
+    auto imageLoader = FileImageLoader();
     /**
      * @tc.steps: step2. Call LoadImageData.
      * @tc.expected: step2. data should not be nullptr.
      */
-    auto data = imageProvider.LoadImageData(FILE_GIF);
+    auto data = imageLoader.LoadImageData(FILE_GIF);
     ASSERT_TRUE(data);
 
     /**
      * @tc.steps: step3. Call GetCodec.
      * @tc.expected: step3. codec_ should not be nullptr.
      */
-    auto codec = imageProvider.GetCodec(data);
+    auto codec = ImageProvider::GetCodec(data);
     ASSERT_TRUE(codec);
 }
 
@@ -60,26 +62,28 @@ HWTEST_F(ImageProviderTest, GIFSupport001, TestSize.Level1)
  * @tc.name: GIFSupport002
  * @tc.desc: if gif uri is right, but the file is broken, cannot decode the data.
  * @tc.type: FUNC
+ * @tc.require: AR000DAQ40 AR000DACKU
+ * @tc.author: lushi
  */
 HWTEST_F(ImageProviderTest, GIFSupport002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create FileImageProvider.
      */
-    auto imageProvider = FileImageProvider();
+    auto imageLoader = FileImageLoader();
 
     /**
      * @tc.steps: step2. Call LoadImageData.
      * @tc.expected: step2. data should not be nullptr.
      */
-    auto data = imageProvider.LoadImageData(FILE_GIF_BROKEN);
+    auto data = imageLoader.LoadImageData(FILE_GIF_BROKEN);
     ASSERT_TRUE(data);
 
     /**
      * @tc.steps: step3. Call GetCodec.
      * @tc.expected: step3. codec_ should be nullptr.
      */
-    auto codec = imageProvider.GetCodec(data);
+    auto codec = ImageProvider::GetCodec(data);
     ASSERT_TRUE(!codec);
 }
 
@@ -87,6 +91,8 @@ HWTEST_F(ImageProviderTest, GIFSupport002, TestSize.Level1)
  * @tc.name: FileSupport001
  * @tc.desc: if file uri is right, test for loadImage can load and decode the image.
  * @tc.type: FUNC
+ * @tc.require: AR000DACKU
+ * @tc.author: lushi
  */
 HWTEST_F(ImageProviderTest, FileSupport001, TestSize.Level1)
 {
@@ -95,20 +101,20 @@ HWTEST_F(ImageProviderTest, FileSupport001, TestSize.Level1)
         /**
          * @tc.steps: step1. create FileImageProvider.
          */
-        auto imageProvider = FileImageProvider();
+        auto imageLoader = FileImageLoader();
 
         /**
          * @tc.steps: step2. Call LoadImageData.
          * @tc.expected: step2. data should not be nullptr.
          */
-        auto data = imageProvider.LoadImageData(file);
+        auto data = imageLoader.LoadImageData(file);
         ASSERT_TRUE(data);
 
         /**
          * @tc.steps: step3. Call GetCodec..
          * @tc.expected: step3. codec_ should not be nullptr.
          */
-        auto codec = imageProvider.GetCodec(data);
+        auto codec = ImageProvider::GetCodec(data);
         ASSERT_TRUE(codec);
     }
 }
@@ -117,19 +123,21 @@ HWTEST_F(ImageProviderTest, FileSupport001, TestSize.Level1)
  * @tc.name: FileSupport002
  * @tc.desc: if file uri is wrong, loadImageData can not load the image.
  * @tc.type: FUNC
+ * @tc.require: AR000DACKU
+ * @tc.author: lushi
  */
 HWTEST_F(ImageProviderTest, FileSupport002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create FileImageProvider.
      */
-    auto imageProvider = FileImageProvider();
+    auto imageLoader = FileImageLoader();
 
     /**
      * @tc.steps: step2. Call LoadImageData.
      * @tc.expected: step2. data should be nullptr.
      */
-    auto data = imageProvider.LoadImageData(NO_FILE);
+    auto data = imageLoader.LoadImageData(NO_FILE);
     ASSERT_TRUE(!data);
 }
 
@@ -137,6 +145,8 @@ HWTEST_F(ImageProviderTest, FileSupport002, TestSize.Level1)
  * @tc.name: MemorySupport001
  * @tc.desc: given right memory data, loadImageData can load and decode the image.
  * @tc.type: FUNC
+ * @tc.require: AR000DACL0
+ * @tc.author: lushi
  */
 HWTEST_F(ImageProviderTest, MemorySupport001, TestSize.Level1)
 {
@@ -145,24 +155,24 @@ HWTEST_F(ImageProviderTest, MemorySupport001, TestSize.Level1)
         /**
          * @tc.steps: step1. create MemoryImageProvider by reading right image file.
          */
-        std::string filePath = ImageProvider::RemovePathHead(fileImage);
+        std::string filePath = ImageLoader::RemovePathHead(fileImage);
         std::unique_ptr<FILE, decltype(&fclose)> file(fopen(filePath.c_str(), "rb"), fclose);
         std::vector<uint8_t> imageData = ReadFromFile(std::move(file));
-        auto imageProvider = AceType::MakeRefPtr<MemoryImageProvider>();
-        imageProvider->UpdateData(std::string(), imageData);
+        auto imageLoader = MemoryImageLoader(nullptr, nullptr);
+        imageLoader.UpdateData(std::string(), imageData);
 
         /**
          * @tc.steps: step2. Call LoadImageData.
          * @tc.expected: step2. data should not be nullptr.
          */
-        auto data = imageProvider->LoadImageData(std::string());
+        auto data = imageLoader.LoadImageData(std::string());
         ASSERT_TRUE(data);
 
         /**
          * @tc.steps: step3. Call GetCodec.
          * @tc.expected: step3. codec_ should not be nullptr.
          */
-        auto codec = imageProvider->GetCodec(data);
+        auto codec = ImageProvider::GetCodec(data);
         ASSERT_TRUE(codec);
     }
 }
@@ -171,6 +181,8 @@ HWTEST_F(ImageProviderTest, MemorySupport001, TestSize.Level1)
  * @tc.name: MemorySupport002
  * @tc.desc: given wrong memory data, loadImageData can not decode the image.
  * @tc.type: FUNC
+ * @tc.require: AR000DACL0
+ * @tc.author: lushi
  */
 HWTEST_F(ImageProviderTest, MemorySupport002, TestSize.Level1)
 {
@@ -178,21 +190,21 @@ HWTEST_F(ImageProviderTest, MemorySupport002, TestSize.Level1)
      * @tc.steps: step1. create MemoryImageProvider by a wrong memory data.
      */
     std::vector<uint8_t> emptyData(100, 0);
-    auto imageProvider = AceType::MakeRefPtr<MemoryImageProvider>();
-    imageProvider->UpdateData(std::string(), emptyData);
+    auto imageLoader = MemoryImageLoader(nullptr, nullptr);
+    imageLoader.UpdateData(std::string(), emptyData);
 
     /**
      * @tc.steps: step2. Call LoadImageData.
      * @tc.expected: step2. data should not be nullptr.
      */
-    auto data = imageProvider->LoadImageData(std::string());
+    auto data = imageLoader.LoadImageData(std::string());
     ASSERT_TRUE(data);
 
     /**
      * @tc.steps: step3. Call GetCodec.
      * @tc.expected: step3. codec_ should be nullptr.
      */
-    auto codec = imageProvider->GetCodec(data);
+    auto codec = ImageProvider::GetCodec(data);
     ASSERT_TRUE(!codec);
 }
 
@@ -200,6 +212,8 @@ HWTEST_F(ImageProviderTest, MemorySupport002, TestSize.Level1)
  * @tc.name: MemorySupport003
  * @tc.desc: given null memory data, loadImageData can not load the image.
  * @tc.type: FUNC
+ * @tc.require: AR000DACL0
+ * @tc.author: lushi
  */
 HWTEST_F(ImageProviderTest, MemorySupport003, TestSize.Level1)
 {
@@ -207,14 +221,14 @@ HWTEST_F(ImageProviderTest, MemorySupport003, TestSize.Level1)
      * @tc.steps: step1. create MemoryImageProvider by a null memory data.
      */
     std::vector<uint8_t> emptyData;
-    auto imageProvider = AceType::MakeRefPtr<MemoryImageProvider>();
-    imageProvider->UpdateData(std::string(), emptyData);
+    auto imageLoader = MemoryImageLoader(nullptr, nullptr);
+    imageLoader.UpdateData(std::string(), emptyData);
 
     /**
      * @tc.steps: step2. Call LoadImageData.
      * @tc.expected: step2. data should be nullptr.
      */
-    auto data = imageProvider->LoadImageData(std::string());
+    auto data = imageLoader.LoadImageData(std::string());
     ASSERT_TRUE(!data);
 }
 
@@ -222,6 +236,8 @@ HWTEST_F(ImageProviderTest, MemorySupport003, TestSize.Level1)
  * @tc.name: Create001
  * @tc.desc: given right uri, ImageProvider::Create can create an ImageProvider pointer.
  * @tc.type: FUNC
+ * @tc.require: AR000DACKT AR000DACKU AR000DACKV
+ * @tc.author: lushi
  */
 HWTEST_F(ImageProviderTest, Create001, TestSize.Level1)
 {
@@ -231,8 +247,8 @@ HWTEST_F(ImageProviderTest, Create001, TestSize.Level1)
          * @tc.steps: step1. create ImageProvider by calling Create().
          * @tc.expected: step1. imageProvider should not be nullptr.
          */
-        auto imageProvider = ImageProvider::Create(uri);
-        ASSERT_TRUE(imageProvider);
+        auto imageProvider = ImageProvider(uri);
+        ASSERT_TRUE(!imageProvider.Invalid());
     }
 }
 
@@ -240,6 +256,8 @@ HWTEST_F(ImageProviderTest, Create001, TestSize.Level1)
  * @tc.name: Create002
  * @tc.desc: given wrong uri, ImageProvider::Create cannot create an ImageProvider pointer.
  * @tc.type: FUNC
+ * @tc.require: AR000DACKT AR000DACKU AR000DACKV
+ * @tc.author: lushi
  */
 HWTEST_F(ImageProviderTest, Create002, TestSize.Level1)
 {
@@ -247,14 +265,16 @@ HWTEST_F(ImageProviderTest, Create002, TestSize.Level1)
      * @tc.steps: step1. create ImageProvider by calling Create().
      * @tc.expected: step1. imageProvider should be nullptr.
      */
-    auto imageProvider = ImageProvider::Create(WRONG_URI);
-    ASSERT_TRUE(!imageProvider);
+    auto imageProvider = ImageProvider(WRONG_URI);
+    ASSERT_TRUE(imageProvider.Invalid());
 }
 
 /**
  * @tc.name: WrongImageData001
  * @tc.desc: given right uri, but broken image. FileImageProvider cannot decode the data.
  * @tc.type: FUNC
+ * @tc.require: AR000DACKU
+ * @tc.author: lushi
  */
 HWTEST_F(ImageProviderTest, WrongImageData001, TestSize.Level1)
 {
@@ -263,20 +283,20 @@ HWTEST_F(ImageProviderTest, WrongImageData001, TestSize.Level1)
         /**
          * @tc.steps: step1. create FileImageProvider.
          */
-        auto imageProvider = FileImageProvider();
+        auto imageLoader = FileImageLoader();
 
         /**
          * @tc.steps: step2. Call LoadImageData.
          * @tc.expected: step2. data should not be nullptr.
          */
-        auto data = imageProvider.LoadImageData(brokenFile);
+        auto data = imageLoader.LoadImageData(brokenFile);
         ASSERT_TRUE(data);
 
         /**
          * @tc.steps: step3. Call GetCodec.
          * @tc.expected: step3. codec_ should be nullptr.
          */
-        auto codec = imageProvider.GetCodec(data);
+        auto codec = ImageProvider::GetCodec(data);
         ASSERT_TRUE(!codec);
     }
 }

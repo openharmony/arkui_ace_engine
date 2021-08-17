@@ -36,6 +36,8 @@ public:
 
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
 
+    void Destroy() override {}
+
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
@@ -140,6 +142,11 @@ public:
     }
 
     void LoadPluginJsCode(std::string&& jsCode) const override
+    {
+        LOGI("json frontend not support.");
+    }
+
+    void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const override
     {
         LOGI("json frontend not support.");
     }

@@ -32,6 +32,7 @@ QJSDeclarativeEngine::~QJSDeclarativeEngine()
 bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 {
     LOGD("QJSDeclarativeEngine initialize");
+
     engineInstance_ = AceType::MakeRefPtr<QJSDeclarativeEngineInstance>(delegate);
     bool res = engineInstance_->InitJSEnv();
     if (!res) {
@@ -127,7 +128,7 @@ void QJSDeclarativeEngine::RequestAnimationCallback(const std::string& callbackI
 
 void QJSDeclarativeEngine::JsCallback(const std::string& callbackId, const std::string& args)
 {
-    LOGD("Enter JsCallback");
+    LOGD("Enter JSCallback");
 }
 
 void QJSDeclarativeEngine::FireAsyncEvent(const std::string& eventId, const std::string& param)

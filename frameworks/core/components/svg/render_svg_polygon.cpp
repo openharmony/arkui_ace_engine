@@ -26,14 +26,14 @@ const char ATTR_NAME_POLYGON_POINTS[] = "points";
 
 void RenderSvgPolygon::Update(const RefPtr<Component> &component)
 {
-    const RefPtr<SvgPolygonComponent> polygonComponent = AceType::DynamicCast<SvgPolygonComponent>(component);
+    auto polygonComponent = AceType::DynamicCast<SvgPolygonComponent>(component);
     if (!polygonComponent) {
         LOGW("polygon component is null");
         return;
     }
     points_ = polygonComponent->GetPoints();
-    fillState_ = polygonComponent->GetFillState();
-    strokeState_ = polygonComponent->GetStrokeState();
+    isClose_ = polygonComponent->IsClose();
+    RenderSvgBase::SetPresentationAttrs(polygonComponent->GetDeclaration());
     PrepareAnimations(component);
     MarkNeedLayout();
 }
@@ -74,11 +74,10 @@ bool RenderSvgPolygon::PrepareSelfAnimation(const RefPtr<SvgAnimate>& component)
             return;
         }
         svgPath->SetWeight(value);
-        svgPath->MarkNeedLayout(true);
+        svgPath->MarkNeedRender(true);
     };
-    RefPtr<Evaluator<double>> evaluator = AceType::MakeRefPtr<LinearEvaluator<double>>();
     double originalValue = 0.0;
-    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback), evaluator);
+    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback));
     return true;
 }
 

@@ -46,6 +46,8 @@ public:
 
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
 
+    void Destroy() override;
+
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
@@ -73,6 +75,7 @@ public:
     void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
     void TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;
     void LoadPluginJsCode(std::string&& jsCode) const override;
+    void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const override;
 
     // application lifecycle.
     void UpdateState(Frontend::State state) override;
@@ -114,7 +117,7 @@ public:
     const WindowConfig& GetWindowConfig() const override;
 
     // navigator component call router
-    void NavigatePage(uint8_t type, const std::string& url) override;
+    void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) override;
 
     void SetJsEngine(const RefPtr<Framework::JsEngine>& jsEngine)
     {
@@ -191,6 +194,8 @@ public:
     void HandleSyncEvent(const EventMarker& eventMarker, const KeyEvent& info, bool& result) override;
 
     void HandleSyncEvent(const EventMarker& eventMarker, const std::string& param, std::string& result) override;
+
+    void HandleSyncEvent(const EventMarker& eventMarker, const std::shared_ptr<BaseEventInfo>& info) override;
 
 private:
     RefPtr<Framework::FrontendDelegateDeclarative> delegate_;

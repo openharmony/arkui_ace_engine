@@ -17,20 +17,17 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_INPUT_H
 
 #include "core/components/common/properties/border.h"
+#include "core/components/common/properties/input_option.h"
 #include "core/pipeline/base/component.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
 #include "frameworks/bridge/common/dom/dom_text.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
+#include "frameworks/bridge/common/dom/form_value.h"
 
 namespace OHOS::Ace::Framework {
 
-struct InputOption {
-    std::string image_;
-    std::string text_;
-};
-
-class DOMInput final : public DOMNode {
-    DECLARE_ACE_TYPE(DOMInput, DOMNode);
+class DOMInput final : public DOMNode, public FormValue {
+    DECLARE_ACE_TYPE(DOMInput, DOMNode, FormValue);
 
 public:
     DOMInput(NodeId nodeId, const std::string& nodeName);
@@ -46,6 +43,7 @@ public:
     }
 
 protected:
+    void OnMounted(const RefPtr<DOMNode>& parentNode) override;
     bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
     bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
     bool AddSpecializedEvent(int32_t pageId, const std::string& event) override;
@@ -54,6 +52,9 @@ protected:
 
     void ResetInitializedStyle() override;
 
+    void OnReset() override;
+
+protected:
     void UpdateSpecializedComponent();
 
     void CreateSpecializedComponent();
@@ -76,8 +77,11 @@ protected:
 
 private:
     void PrepareCheckedListener();
+    void CheckSubmitAndResetType();
+    void SetFormValueListener();
 
     RefPtr<Component> inputChild_;
+    WeakPtr<DOMNode> formNode_;
     std::pair<std::string, bool> type_ = { "text", false };
 
     std::map<std::string, std::string> inputAttrs_;

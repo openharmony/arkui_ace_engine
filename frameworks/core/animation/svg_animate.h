@@ -26,30 +26,14 @@ namespace OHOS::Ace {
 
 enum class Fill {
     FREEZE,
-    REMOVE
-};
-
-enum class Restart {
-    ALWAYS,
-    WHEN_NOT_ACTIVE,
-    NEVER
+    REMOVE,
 };
 
 enum class CalcMode {
     LINEAR,
     PACED,
     DISCRETE,
-    SPLINE
-};
-
-enum class Additive {
-    REPLACE,
-    SUM_ADD
-};
-
-enum class Accumulate {
-    NONE,
-    SUM_ACC
+    SPLINE,
 };
 
 enum class SvgAnimateType {
@@ -66,8 +50,8 @@ public:
     ~SvgAnimate() override = default;
 
     template<typename T>
-    bool CreatePropertyAnimate(std::function<void(T)>&& callback, const T& originalValue,
-        const RefPtr<Evaluator<T>>& evaluator, const RefPtr<Animator>& animator);
+    bool CreatePropertyAnimate(
+        std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator);
     bool CreateMotionAnimate(std::function<void(double)>&& callback, const RefPtr<Animator>& animator);
 
     RefPtr<Curve> GetCurve(const std::string& param = "") const
@@ -110,6 +94,10 @@ public:
     template<typename T>
     T GetStartValue(const T& originalValue) const
     {
+        if (svgAnimateType_ == SvgAnimateType::TRANSFORM) {
+            return 0.0;
+        }
+
         if (!from_.empty()) {
             return StringUtils::StringToDouble(from_);
         } else {
@@ -140,6 +128,10 @@ public:
     template<typename T>
     T GetEndValue(const T& startValue) const
     {
+        if (svgAnimateType_ == SvgAnimateType::TRANSFORM) {
+            return 1.0;
+        }
+
         if (!to_.empty()) {
             return StringUtils::StringToDouble(to_);
         } else if (!by_.empty()) {
@@ -211,29 +203,9 @@ public:
         end_ = end;
     }
 
-    void SetMin(int32_t min)
-    {
-        min_ = min;
-    }
-
-    void SetMax(int32_t max)
-    {
-        max_ = max;
-    }
-
-    void SetRestart(Restart restart)
-    {
-        restart_ = restart;
-    }
-
     void SetRepeatCount(int32_t repeatCount)
     {
         repeatCount_ = repeatCount;
-    }
-
-    void SetRepeatDur(int32_t repeatDur)
-    {
-        repeatDur_ = repeatDur;
     }
 
     void SetFillMode(Fill fillMode)
@@ -244,16 +216,6 @@ public:
     void SetCalcMode(CalcMode calcMode)
     {
         calcMode_ = calcMode;
-    }
-
-    void SetAdditive(Additive additive)
-    {
-        additive_ = additive;
-    }
-
-    void SetAccumulate(Accumulate accumulate)
-    {
-        accumulate_ = accumulate;
     }
 
     void SetValues(const std::vector<std::string>& values)
@@ -305,10 +267,7 @@ public:
         if (dur_ > 0) {
             return dur_;
         }
-        if (GetEnd() - GetBegin() > 0) {
-            return GetEnd() - GetBegin();
-        }
-        return 0;
+        return std::max((GetEnd() - GetBegin()), 0);
     }
 
     int32_t GetEnd() const
@@ -331,8 +290,11 @@ public:
         return by_;
     }
 
-    const std::string& GetAttributeName() const
+    const std::string GetAttributeName() const
     {
+        if (svgAnimateType_ == SvgAnimateType::TRANSFORM) {
+            return attributeName_ + "_" + transformType_;
+        }
         return attributeName_;
     }
 
@@ -399,6 +361,11 @@ public:
         transformType_ = transformType;
     }
 
+    const std::string& GetTransformType() const
+    {
+        return transformType_;
+    }
+
     SvgAnimateType GetSvgAnimateType() const
     {
         return svgAnimateType_;
@@ -423,15 +390,9 @@ public:
         svgAnimate->SetBegin(begin_);
         svgAnimate->SetDur(dur_);
         svgAnimate->SetEnd(end_);
-        svgAnimate->SetMin(min_);
-        svgAnimate->SetMax(max_);
-        svgAnimate->SetRestart(restart_);
         svgAnimate->SetRepeatCount(repeatCount_);
-        svgAnimate->SetRepeatDur(repeatDur_);
         svgAnimate->SetFillMode(fillMode_);
         svgAnimate->SetCalcMode(calcMode_);
-        svgAnimate->SetAdditive(additive_);
-        svgAnimate->SetAccumulate(accumulate_);
         svgAnimate->SetValues(values_);
         svgAnimate->SetKeyTimes(keyTimes_);
         svgAnimate->SetKeySplines(keySplines_);
@@ -439,22 +400,21 @@ public:
         svgAnimate->SetTo(to_);
         svgAnimate->SetBy(by_);
         svgAnimate->SetSvgAnimateType(svgAnimateType_);
+        svgAnimate->SetTransformType(transformType_);
     }
+
+    bool GetValuesRange(std::vector<float>& from, std::vector<float>& to, std::string& type);
+
+    bool GetFrames(std::vector<std::vector<float>>& frames, std::string& type);
 
 protected:
     std::string attributeName_;
     int32_t begin_ = 0;
     int32_t dur_ = 0;
     int32_t end_ = 0;
-    int32_t min_ = 0;
-    int32_t max_ = 0;
-    Restart restart_ = Restart::ALWAYS;
     int32_t repeatCount_ = 1;
-    int32_t repeatDur_ = 0;
     Fill fillMode_ = Fill::REMOVE;
     CalcMode calcMode_ = CalcMode::LINEAR;
-    Additive additive_ = Additive::REPLACE;
-    Accumulate accumulate_ = Accumulate::NONE;
     std::vector<std::string> values_;
     std::vector<double> keyTimes_;
     std::vector<std::string> keySplines_;
@@ -471,17 +431,17 @@ protected:
 
 private:
     template<typename T>
-    void CreateKeyframe(const RefPtr<KeyframeAnimation<T>>& animation, const T& value, float time,
-        const RefPtr<Curve>& curve);
+    void CreateKeyframe(
+        const RefPtr<KeyframeAnimation<T>>& animation, const T& value, float time, const RefPtr<Curve>& curve);
     template<typename T>
     void CreateFirstKeyframe(const RefPtr<KeyframeAnimation<T>>& animation, const T& value);
 
     template<typename T>
-    bool CreateDiscreteAnimate(std::function<void(T)>&& callback, const T& originalValue,
-        const RefPtr<Evaluator<T>>& evaluator, const RefPtr<Animator>& animator);
+    bool CreateDiscreteAnimate(
+        std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator);
     template<typename T>
-    bool DiscreteAnimate(const RefPtr<KeyframeAnimation<T>>& animation, const T& originalValue, const T& startValue,
-        const T& endValue);
+    bool DiscreteAnimate(
+        const RefPtr<KeyframeAnimation<T>>& animation, const T& originalValue, const T& startValue, const T& endValue);
     template<typename T>
     bool DiscreteAnimate(const RefPtr<KeyframeAnimation<T>>& animation, const T& originalValue);
     template<typename T>
@@ -490,11 +450,10 @@ private:
     bool DiscreteWithKeyTimes(const RefPtr<KeyframeAnimation<T>>& animation, const T& originalValue);
 
     template<typename T>
-    bool CreateLinearAnimate(std::function<void(T)>&& callback, const T& originalValue,
-        const RefPtr<Evaluator<T>>& evaluator, const RefPtr<Animator>& animator);
+    bool CreateLinearAnimate(
+        std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator);
     template<typename T>
-    bool LinearAnimate(std::function<void(T)>&& callback, const T& originalValue,
-        const RefPtr<Evaluator<T>>& evaluator, const RefPtr<Animator>& animator);
+    bool LinearAnimate(std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator);
     template<typename T>
     bool LinearAnimate(const RefPtr<KeyframeAnimation<T>>& animation);
     template<typename T>
@@ -503,15 +462,14 @@ private:
     bool LinearWithValues(const RefPtr<KeyframeAnimation<T>>& animation);
 
     template<typename T>
-    bool CreatePacedAnimate(std::function<void(T)>&& callback, const T& originalValue,
-        const RefPtr<Evaluator<T>>& evaluator, const RefPtr<Animator>& animator);
+    bool CreatePacedAnimate(
+        std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator);
 
     template<typename T>
-    bool CreateSplineAnimate(std::function<void(T)>&& callback, const T& originalValue,
-        const RefPtr<Evaluator<T>>& evaluator, const RefPtr<Animator>& animator);
+    bool CreateSplineAnimate(
+        std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator);
     template<typename T>
-    bool SplineAnimate(std::function<void(T)>&& callback, const T& originalValue,
-        const RefPtr<Evaluator<T>>& evaluator, const RefPtr<Animator>& animator);
+    bool SplineAnimate(std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator);
     template<typename T>
     bool SplineAnimate(const RefPtr<KeyframeAnimation<T>>& animation);
     template<typename T>

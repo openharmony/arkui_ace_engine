@@ -22,13 +22,20 @@
 
 #include "third_party/quickjs/quickjs.h"
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#include "adapter/preview/osal/request_data.h"
+#include "adapter/preview/osal/response_data.h"
+#endif
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_page.h"
 #include "core/common/js_message_dispatcher.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
-#include "native_engine/impl/quickjs/quickjs_native_engine.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/animation_bridge.h"
+#include "frameworks/bridge/js_frontend/engine/quickjs/animator_bridge.h"
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "native_engine/impl/quickjs/quickjs_native_engine.h"
+#endif
 
 namespace OHOS::Ace::Framework {
 
@@ -56,15 +63,14 @@ public:
 
     void CallJs(const std::string& callbackId, const std::string& args, bool keepAlive = false, bool isGlobal = false);
 
+    void CallAnimationStartJs(JSValue animationContext);
     void CallAnimationFinishJs(JSValue animationContext);
     void CallAnimationCancelJs(JSValue animationContext);
     void CallAnimationRepeatJs(JSValue animationContext);
+    void CallAnimationFrameJs(JSValue animationContext, const char* str);
 
     JSValue FireJsEvent(const std::string& param);
 
-    void AddAnimationBridge(const WeakPtr<AnimationBridge>& value);
-    void RemoveAnimationBridge();
-    void FreeAnimationBridges();
     void FreeGroupJsBridge();
 
     void SetRunningPage(const RefPtr<JsAcePage>& page)
@@ -119,6 +125,33 @@ public:
         }
     }
 
+    bool CallPlatformFunctionSync(
+        const std::string& channel, std::vector<uint8_t>&& data, uint8_t** resData, long& position)
+    {
+        auto dispatcher = dispatcher_.Upgrade();
+        if (dispatcher) {
+            dispatcher->DispatchSync(channel, std::move(data), resData, position);
+            return true;
+        } else {
+            LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+            return false;
+        }
+    }
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
+    {
+        auto dispatcher = dispatcher_.Upgrade();
+        if (dispatcher) {
+            dispatcher->CallCurlFunction(requestData, callbackId);
+            return true;
+        } else {
+            LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+            return false;
+        }
+    }
+#endif
+
     bool PluginErrorCallback(int32_t callbackId, int32_t errorCode, std::string&& errorMessage)
     {
         auto dispatcher = dispatcher_.Upgrade();
@@ -143,7 +176,6 @@ private:
     JSContext* context_ = nullptr;
     RefPtr<FrontendDelegate> frontendDelegate_;
     int32_t instanceId_;
-    std::vector<WeakPtr<AnimationBridge>> animations_;
 
     // runningPage_ is the page that is loaded and rendered successfully, while stagingPage_ is to
     // handle all page routing situation, which include two stages:
@@ -203,7 +235,9 @@ public:
     virtual void JsCallback(const std::string& callbackId, const std::string& args) override;
 
     // destroy application instance according packageName
-    void DestroyApplication(const std::string& packageName) override;
+    void DestroyApplication(const std::string& packageName) override {}
+
+    void UpdateApplicationState(const std::string& packageName, Frontend::State state) override;
 
     void RunGarbageCollection() override;
 
@@ -213,7 +247,9 @@ private:
     void GetLoadOptions(std::string& optionStr, bool isMainPage, const RefPtr<JsAcePage>& page);
     RefPtr<QjsEngineInstance> engineInstance_;
     int32_t instanceId_;
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     QuickJSNativeEngine* nativeEngine_ = nullptr;
+#endif
     ACE_DISALLOW_COPY_AND_MOVE(QjsEngine);
 };
 

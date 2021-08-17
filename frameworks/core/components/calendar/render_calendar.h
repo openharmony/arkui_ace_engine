@@ -40,9 +40,9 @@ public:
     void OnSelectedDay(int32_t selected) override;
     void OnFocusChanged(bool focusStatus) override;
     void HandleClick(const Offset& offset);
-    void HandleTouchDownEvent(const TouchEventInfo& info);
-    void HandleTouchUpEvent(const TouchEventInfo& info);
     void UpdateCardCalendarAttr(const CardCalendarAttr& attr) override;
+    void UpdateBreakInformation();
+    void OnSwiperMove() override;
 
     const RefPtr<CalendarController>& GetCalendarController() const
     {
@@ -55,9 +55,11 @@ protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     int32_t JudgeArea(const Offset& offset);
+    bool IsValid(int32_t index);
 
     std::vector<std::string> weekNumbers_;
     std::vector<CalendarDay> calendarDays_;
+    std::string offDays_;
     CalendarMonth currentMonth_;
     CalendarThemeStructure calendarTheme_;
     TextDirection textDirection_ = TextDirection::LTR;
@@ -79,6 +81,7 @@ protected:
     bool hasRequestFocus_ = false;
     bool hasTouched_ = false;
     bool showHoliday_ = true;
+    bool isV2Component_ = false;
     RefPtr<CalendarController> calendarController_;
     RefPtr<CalendarDataAdapter> dataAdapter_;
 

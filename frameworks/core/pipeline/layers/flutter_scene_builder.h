@@ -34,10 +34,14 @@ public:
         double dx, double dy, double width, double height, int64_t textureId, bool freeze, uint8_t opacity) override;
     void PushTransform(const Matrix4& matrix4) override;
     void PushClipRRect(const flutter::RRect& rrect, int32_t clipBehavior) override;
+    void PushClipPath(const flutter::CanvasPath* path, int32_t clipBehavior) override;
     void PushOpacity(int32_t alpha, double dx = 0, double dy = 0) override;
     void PushBackdropFilter(fml::RefPtr<flutter::ImageFilter> imageFilter) override;
     void PushShaderMask(fml::RefPtr<flutter::Shader> shader, double maskRectLeft, double maskRectRight,
         double maskRectTop, double maskRectBottom, int32_t blendMode) override;
+    void PushGradientColorMask(const SkPaint& maskPaint) override;
+    void PushSvgMask(const sk_sp<SkSVGDOM>& svgDom, double x, double y, double scaleX, double scaleY) override;
+    void PushPathMask(const SkPaint& maskPaint, const SkPath& maskPath) override;
     void Pop() override;
 
     fml::RefPtr<flutter::Scene> Build();

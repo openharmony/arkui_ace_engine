@@ -42,9 +42,13 @@ ACE_EXPORT extern const char ROUTE_PAGE_BACK[];
 ACE_EXPORT extern const char ROUTE_PAGE_CLEAR[];
 ACE_EXPORT extern const char ROUTE_PAGE_GET_LENGTH[];
 ACE_EXPORT extern const char ROUTE_PAGE_GET_STATE[];
+ACE_EXPORT extern const char ROUTE_PAGE_GET_PARAMS[];
 ACE_EXPORT extern const char ROUTE_KEY_URI[];
 ACE_EXPORT extern const char ROUTE_KEY_PATH[];
 ACE_EXPORT extern const char ROUTE_KEY_PARAMS[];
+ACE_EXPORT extern const char ROUTE_KEY_DONT_OVERWRITE[];
+ACE_EXPORT extern const char ROUTE_ENABLE_ALERT_BEFORE_BACK_PAGE[];
+ACE_EXPORT extern const char ROUTE_DISABLE_ALERT_BEFORE_BACK_PAGE[];
 
 // for prompt
 ACE_EXPORT extern const char PROMPT_SHOW_TOAST[];
@@ -55,6 +59,7 @@ ACE_EXPORT extern const char PROMPT_SHOW_DIALOG[];
 ACE_EXPORT extern const char PROMPT_KEY_TITLE[];
 ACE_EXPORT extern const char PROMPT_KEY_BUTTONS[];
 ACE_EXPORT extern const char PROMPT_DIALOG_AUTO_CANCEL[];
+ACE_EXPORT extern const char PROMPT_SHOW_ACTION_MENU[];
 
 // for callback
 ACE_EXPORT extern const char APP_DESTROY_FINISH[];
@@ -96,6 +101,15 @@ ACE_EXPORT extern const char APP_SCREEN_ON_VISIBLE_FLAG[];
 ACE_EXPORT extern const char ANIMATION_REQUEST_ANIMATION_FRAME[];
 ACE_EXPORT extern const char ANIMATION_CANCEL_ANIMATION_FRAME[];
 
+// for animator
+ACE_EXPORT extern const char ANIMATOR_CREATE_ANIMATOR[];
+
+// for curves
+ACE_EXPORT extern const char CURVES_INIT[];
+ACE_EXPORT extern const char CURVES_CUBIC_BEZIER[];
+ACE_EXPORT extern const char CURVES_SPRING[];
+ACE_EXPORT extern const char CURVE_INTERPOLATE[];
+
 // for grid
 ACE_EXPORT extern const char GRID_GET_SYSTEM_LAYOUT_INFO[];
 
@@ -103,6 +117,13 @@ ACE_EXPORT extern const char GRID_GET_SYSTEM_LAYOUT_INFO[];
 ACE_EXPORT extern const int32_t PLUGIN_REQUEST_SUCCESS;
 ACE_EXPORT extern const int32_t PLUGIN_REQUEST_FAIL;
 ACE_EXPORT extern const int32_t PLUGIN_CALLBACK_DESTROY;
+
+// for readResource
+ACE_EXPORT extern const char READ_TEXT[];
+ACE_EXPORT extern const char READ_ARRAY_BUFFER[];
+ACE_EXPORT extern const char READ_KEY_URI[];
+ACE_EXPORT extern const char READ_KEY_POSITION[];
+ACE_EXPORT extern const char READ_KEY_LENGTH[];
 } // namespace OHOS::Ace::Framework
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_COMMON_JS_CONSTANTS_H

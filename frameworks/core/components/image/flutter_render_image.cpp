@@ -17,7 +17,7 @@
 
 #include "flutter/common/task_runners.h"
 #include "third_party/skia/include/core/SkClipOp.h"
-#include "third_party/skia/include/core/SkGraphics.h"
+#include "third_party/skia/include/core/SkColorFilter.h"
 
 #include "core/common/frontend.h"
 #include "core/components/align/render_align.h"
@@ -28,6 +28,23 @@
 #include "core/pipeline/base/flutter_render_context.h"
 
 namespace OHOS::Ace {
+namespace {
+// The [GRAY_COLOR_MATRIX] is of dimension [4 x 5], which transforms a RGB source color (R, G, B, A) to the
+// destination color (R', G', B', A').
+//
+// A classic color image to grayscale conversion formula is [Gray = R * 0.3 + G * 0.59 + B * 0.11].
+// Hence we get the following conversion:
+//
+// | M11 M12 M13 M14 M15 |   | R |   | R' |
+// | M21 M22 M23 M24 M25 |   | G |   | G' |
+// | M31 M32 M33 M34 M35 | x | B | = | B' |
+// | M41 M42 M43 M44 M45 |   | A |   | A' |
+//                           | 1 |
+const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0,    0,  // red
+                                      0.30f, 0.59f, 0.11f, 0,    0,  // green
+                                      0.30f, 0.59f, 0.11f, 0,    0,  // blue
+                                      0,     0,     0,     1.0f, 0}; // alpha transparency
+}
 
 union SkColorEx {
     struct {
@@ -56,6 +73,12 @@ FlutterRenderImage::FlutterRenderImage()
 void FlutterRenderImage::Update(const RefPtr<Component>& component)
 {
     RenderImage::Update(component);
+    isSVG_ = IsSVG(imageSrc_, resourceId_);
+    if (proceedPreviousLoading_ && !forceReload_ && !isSVG_) {
+        LOGI("Proceed previous loading, imageSrc is %{private}s, image loading status: %{private}d",
+            imageSrc_.c_str(), imageLoadingStatus_);
+        return;
+    }
     UpdateImageProvider();
 }
 
@@ -71,7 +94,7 @@ void FlutterRenderImage::UpdateImageProvider()
     bool imageSourceChange = (imageSrc_ != curImageSrc_ && !curImageSrc_.empty()) ||
                              (resourceId_ != InternalResource::ResourceId::NO_ID && curResourceId_ != resourceId_);
     bool needAltImage = (imageLoadingStatus_ != ImageLoadingStatus::LOAD_SUCCESS);
-    if (imageSourceChange) {
+    if (imageSourceChange || forceReload_) {
         imageLoadingStatus_ = ImageLoadingStatus::UPDATING;
         rawImageSize_ = Size();
     } else if (!curImageSrc_.empty()) {
@@ -79,16 +102,15 @@ void FlutterRenderImage::UpdateImageProvider()
     }
     // when imageSrc empty and resourceId is changed to a valid ID, render internal image!
     // if the imageSrc is not empty, render the src image preferential.
-    bool validInternalSourceSet =
-        imageSrc_.empty() && resourceId_ != InternalResource::ResourceId::NO_ID && curResourceId_ != resourceId_;
-    bool validOuterSourceSet = !imageSrc_.empty() && (curImageSrc_ != imageSrc_);
-    isSVG_ = IsSVG(imageSrc_, resourceId_);
+    bool validInternalSourceSet = imageSrc_.empty() && resourceId_ != InternalResource::ResourceId::NO_ID &&
+        ((curResourceId_ != resourceId_) || forceReload_);
+    bool validOuterSourceSet = !imageSrc_.empty() && ((curImageSrc_ != imageSrc_) || forceReload_);
     bool selfOnly = false;
     if (validInternalSourceSet) {
-        imageProvider_ = AceType::MakeRefPtr<InternalImageProvider>(resourceId_);
+        imageProvider_ = MakeRefPtr<ImageProvider>(resourceId_);
     } else if (validOuterSourceSet) {
-        imageProvider_ = ImageProvider::Create(imageSrc_, sharedImageManager);
-        isNetworkSrc_ = (ImageProvider::ResolveURI(imageSrc_) == SrcType::NETWORK);
+        imageProvider_ = MakeRefPtr<ImageProvider>(imageSrc_, sharedImageManager);
+        isNetworkSrc_ = (ImageLoader::ResolveURI(imageSrc_) == SrcType::NETWORK);
         imageLoadingStatus_ = ImageLoadingStatus::UPDATING;
         UpdateRenderAltImage(needAltImage && isNetworkSrc_);
     } else if (isSVG_) {
@@ -98,18 +120,22 @@ void FlutterRenderImage::UpdateImageProvider()
         return;
     }
     MarkNeedLayout(selfOnly);
-    if (!imageProvider_) {
+    if (imageProvider_->Invalid()) {
         OnLoadFail(imageProvider_);
         LOGE("Create imageProvider fail! imageSrc is %{private}s", imageSrc_.c_str());
         return;
     }
     if (isSVG_) {
-        LoadSVGImage(imageProvider_, selfOnly);
+        if (useSkiaSvg_) {
+            LoadSVGImage(imageProvider_, selfOnly);
+        } else {
+            LoadSVGImageCustom(imageProvider_, selfOnly);
+        }
         return;
     }
     imageProvider_->AddListener(AceType::WeakClaim(this));
     rawImageSizeUpdated_ = false;
-    if (sharedImageManager && sharedImageManager->IsResourceToReload(ImageProvider::RemovePathHead(imageSrc_))) {
+    if (sharedImageManager && sharedImageManager->IsResourceToReload(ImageLoader::RemovePathHead(imageSrc_))) {
         // This case means that the imageSrc to load is a memory image and its data is not ready.
         // If run [GetImageSize] here, there will be an unexpected [OnLoadFail] callback from [ImageProvider].
         // When the data is ready, which is when [SharedImageManager] done [AddImageData], [GetImageSize] will be run.
@@ -121,22 +147,26 @@ void FlutterRenderImage::UpdateImageProvider()
         return;
     }
     bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD;
-    auto assetManager = context->GetAssetManager();
-    imageProvider_->GetImageSize(syncMode, assetManager, imageSrc_);
+    imageProvider_->GetImageSize(syncMode, context, imageSrc_);
 }
 
 void FlutterRenderImage::Paint(RenderContext& context, const Offset& offset)
 {
+    if (isSVG_ && !useSkiaSvg_) {
+        DrawSVGImageCustom(context, offset);
+        return;
+    }
     if (renderAltImage_) {
         renderAltImage_->RenderWithContext(context, offset);
     }
-    FetchImageData();
+    if (imageProvider_) {
+        FetchImageData();
+    }
     auto canvas = ScopedCanvas::Create(context);
     if (!canvas) {
         LOGE("Paint canvas is null");
         return;
     }
-
     if (!NearZero(rotate_)) {
         Offset center =
             offset + Offset(GetLayoutSize().Width() * SK_ScalarHalf, GetLayoutSize().Height() * SK_ScalarHalf);
@@ -151,10 +181,8 @@ void FlutterRenderImage::Paint(RenderContext& context, const Offset& offset)
     if (opacity_ != UINT8_MAX) {
         paint.paint()->setAlpha(opacity_);
     }
-    bool loadFail = (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL);
-    bool networkSrcLoading = (isNetworkSrc_ && (imageLoadingStatus_ == ImageLoadingStatus::LOADING));
-    // when the [networkSrcLoading] comes from network image resizing, do not need to draw alt color or alt image
-    if (loadFail || (networkSrcLoading && !resizeCallLoadImage_)) {
+    // draw alt color only when it fails to load image
+    if (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL) {
         if (renderAltImage_) {
             return;
         }
@@ -165,24 +193,64 @@ void FlutterRenderImage::Paint(RenderContext& context, const Offset& offset)
     }
     if (isSVG_) {
         DrawSVGImage(offset, canvas);
-    } else {
-        if (!image_) {
-            LOGI("Paint image is not ready, imageSrc is %{private}s", imageSrc_.c_str());
-            imageDataNotReady_ = true;
-            return;
-        }
-#ifdef USE_SYSTEM_SKIA
-        paint.paint()->setColorFilter(SkColorFilter::MakeModeFilter(
-            SkColorSetARGB(color_.GetAlpha(), color_.GetRed(), color_.GetGreen(), color_.GetBlue()),
-            SkBlendMode::kPlus));
-#else
-        paint.paint()->setColorFilter(SkColorFilters::Blend(
-            SkColorSetARGB(color_.GetAlpha(), color_.GetRed(), color_.GetGreen(), color_.GetBlue()),
-            SkBlendMode::kPlus));
-#endif
-        paint.paint()->setFilterQuality(SkFilterQuality::kLow_SkFilterQuality);
-        CanvasDrawImageRect(paint, paint_data, offset, canvas);
+        return;
     }
+    if (!image_) {
+        LOGI("Paint image is not ready, imageSrc is %{private}s, image size updated : %{private}d",
+            imageSrc_.c_str(), rawImageSizeUpdated_);
+        imageDataNotReady_ = true;
+        return;
+    }
+    // It can be guaranteed that the [SkImage] object (image_->image()) is not null.
+#ifdef USE_SYSTEM_SKIA
+    paint.paint()->setColor4f(paint.paint()->getColor4f(), image_->image()->colorSpace());
+#else
+    paint.paint()->setColor(paint.paint()->getColor4f(), image_->image()->colorSpace());
+#endif
+    ApplyColorFilter(paint);
+    ApplyInterpolation(paint);
+    CanvasDrawImageRect(paint, paint_data, offset, canvas);
+}
+
+void FlutterRenderImage::ApplyColorFilter(flutter::Paint& paint)
+{
+#ifdef USE_SYSTEM_SKIA
+    if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
+        paint.paint()->setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(GRAY_COLOR_MATRIX));
+        return;
+    }
+    paint.paint()->setColorFilter(SkColorFilter::MakeModeFilter(
+        SkColorSetARGB(color_.GetAlpha(), color_.GetRed(), color_.GetGreen(), color_.GetBlue()),
+        SkBlendMode::kPlus));
+#else
+    if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
+        paint.paint()->setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
+        return;
+    }
+    paint.paint()->setColorFilter(SkColorFilters::Blend(
+        SkColorSetARGB(color_.GetAlpha(), color_.GetRed(), color_.GetGreen(), color_.GetBlue()),
+        SkBlendMode::kPlus));
+#endif
+}
+
+void FlutterRenderImage::ApplyInterpolation(flutter::Paint& paint)
+{
+    auto skFilterQuality = SkFilterQuality::kNone_SkFilterQuality;
+    switch (imageInterpolation_) {
+        case ImageInterpolation::LOW:
+            skFilterQuality = SkFilterQuality::kLow_SkFilterQuality;
+            break;
+        case ImageInterpolation::MEDIUM:
+            skFilterQuality = SkFilterQuality::kMedium_SkFilterQuality;
+            break;
+        case ImageInterpolation::HIGH:
+            skFilterQuality = SkFilterQuality::kHigh_SkFilterQuality;
+            break;
+        case ImageInterpolation::NONE:
+        default:
+            break;
+    }
+    paint.paint()->setFilterQuality(skFilterQuality);
 }
 
 void FlutterRenderImage::CanvasDrawImageRect(
@@ -192,23 +260,21 @@ void FlutterRenderImage::CanvasDrawImageRect(
         PaintBgImage(paint, paint_data, offset, canvas);
         return;
     }
-    // Radius only takes effect when image does not need to repeat.
-    // HORIZONTAL_REPEAT is customized for rating component, hence exclude it as well.
     auto paintRectList = ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) && !resizeCallLoadImage_)
                              ? currentDstRectList_
                              : rectList_;
+    SetClipRadius();
+    flutter::RRect rrect;
     if (imageRepeat_ == ImageRepeat::NOREPEAT) {
         ACE_DCHECK(paintRectList.size() == 1);
         auto realDstRect = paintRectList.front() + offset;
-        SetClipRadius();
-        flutter::RRect rrect;
         rrect.sk_rrect.setRectRadii(
             SkRect::MakeXYWH(realDstRect.Left(), realDstRect.Top(), realDstRect.Width(), realDstRect.Height()), radii_);
-        canvas->clipRRect(rrect, true);
     } else {
-        canvas->clipRect(offset.GetX(), offset.GetY(), GetLayoutSize().Width() + offset.GetX(),
-            GetLayoutSize().Height() + offset.GetY(), SkClipOp::kIntersect, true);
+        rrect.sk_rrect.setRectRadii(
+            SkRect::MakeXYWH(offset.GetX(), offset.GetY(), GetLayoutSize().Width(), GetLayoutSize().Height()), radii_);
     }
+    canvas->clipRRect(rrect, true);
     double reverseFactor = 1.0;
     Offset drawOffset = offset;
     if (matchTextDirection_ && GetTextDirection() == TextDirection::RTL) {
@@ -282,17 +348,16 @@ void FlutterRenderImage::FetchImageData()
         resizeCallLoadImage_ =
             !sourceChange && NeedResize() && (imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS);
     }
-    if (newSourceCallLoadImage || resizeCallLoadImage_ || (needReload_ && rawImageSizeUpdated_)) {
+    if (newSourceCallLoadImage || resizeCallLoadImage_ || ((needReload_ || forceReload_) && rawImageSizeUpdated_)) {
         imageLoadingStatus_ = ImageLoadingStatus::LOADING;
         if (imageProvider_) {
             previousResizeTarget_ = resizeTarget_;
-            auto piplineContext = GetContext().Upgrade();
-            if (!piplineContext) {
-                return;
-            }
-            imageProvider_->LoadImage(piplineContext, imageSrc_, resizeTarget_);
+            imageProvider_->LoadImage(GetContext(), imageSrc_, resizeTarget_, forceResize_);
             if (needReload_) {
                 needReload_ = false;
+            }
+            if (forceReload_) {
+                forceReload_ = false;
             }
         }
     }
@@ -338,97 +403,77 @@ Size FlutterRenderImage::Measure()
     }
 }
 
-void FlutterRenderImage::UploadToGPUForRender(
-    const sk_sp<SkImage>& image,
-    const std::function<void(flutter::SkiaGPUObject<SkImage>)>& callback)
-{
-    // If want to dump draw command, should use CPU image.
-    callback({ image, unrefQueue_ });
-}
-
 void FlutterRenderImage::OnLoadSuccess(
-    const sk_sp<SkImage>& image,
-    const RefPtr<ImageProvider>& imageProvider,
-    const std::string& key)
-{
-    auto context = GetContext().Upgrade();
-    if (!context) {
-        return;
-    }
-    auto imageCache = context->GetImageCache();
-    auto taskExecutor = context->GetTaskExecutor();
-    auto callback = [renderImage = Claim(this), key, imageCache, imageProvider, taskExecutor](
-        flutter::SkiaGPUObject<SkImage> image) {
-        auto canvasImage = flutter::CanvasImage::Create();
-        canvasImage->set_image(std::move(image));
-        if (imageCache) {
-            imageCache->CacheImage(key, std::make_shared<CachedImage>(canvasImage));
-        }
-        ImageProvider::RemoveLoadingImage(key);
-        renderImage->OnLoadGPUImageSuccess(canvasImage, imageProvider);
-        // Trigger purge cpu bitmap resource, after image upload to gpu.
-        taskExecutor->PostTask([]() { SkGraphics::PurgeResourceCache(); }, TaskExecutor::TaskType::IO);
-    };
-    UploadToGPUForRender(image, callback);
-}
-
-void FlutterRenderImage::OnLoadGPUImageSuccess(
     const fml::RefPtr<flutter::CanvasImage>& image, const RefPtr<ImageProvider>& imageProvider)
 {
     auto context = GetContext().Upgrade();
     if (!context) {
         return;
     }
-    context->GetTaskExecutor()->PostTask(
-        [renderImage = Claim(this), image, imageProvider]() {
-            if (!renderImage->imageProvider_) {
-                LOGE("imageProvider is null!");
-                return;
+    auto weakRender = AceType::WeakClaim(this);
+    auto weakProvider = AceType::WeakClaim(AceType::RawPtr(imageProvider));
+    context->GetTaskExecutor()->PostTask([weakRender, image, weakProvider]() {
+        auto renderImage = weakRender.Upgrade();
+        auto imageProvider = weakProvider.Upgrade();
+        if (!renderImage || !imageProvider) {
+            LOGE("renderImage or imageProvider is null!");
+            return;
+        }
+        if (!renderImage->imageProvider_) {
+            LOGE("imageProvider in renderImage is null!");
+            return;
+        }
+        if (imageProvider != renderImage->imageProvider_) {
+            LOGI("Invalid imageProvider, src: %{private}s", renderImage->imageSrc_.c_str());
+            renderImage->imageLoadingStatus_ = ImageLoadingStatus::UPDATING;
+            return;
+        }
+        static constexpr double precision = 0.5;
+        int32_t dstWidth = static_cast<int32_t>(renderImage->previousResizeTarget_.Width() + precision);
+        int32_t dstHeight = static_cast<int32_t>(renderImage->previousResizeTarget_.Height() + precision);
+        bool isTargetSource = ((dstWidth == image->width()) && (dstHeight == image->height()));
+        if (!isTargetSource && (renderImage->imageProvider_->GetTotalFrames() <= 1) && !renderImage->background_) {
+            LOGW("The size of returned image is not as expected, rejecting it. imageSrc: %{private}s,"
+                "expected: [%{private}d x %{private}d], get [%{private}d x %{private}d]",
+                renderImage->imageSrc_.c_str(), dstWidth, dstHeight, image->width(), image->height());
+            return;
+        }
+        renderImage->UpdateLoadSuccessState();
+        renderImage->image_ = image;
+        if (renderImage->useSkiaSvg_) {
+            renderImage->skiaDom_ = nullptr;
+        } else {
+            renderImage->svgDom_ = nullptr;
+        }
+        if (renderImage->imageDataNotReady_) {
+            LOGI("Paint image is ready, imageSrc is %{private}s", renderImage->imageSrc_.c_str());
+            renderImage->imageDataNotReady_ = false;
+        }
+        if (renderImage->background_) {
+            renderImage->currentDstRectList_ = renderImage->rectList_;
+            if (renderImage->imageUpdateFunc_) {
+                renderImage->imageUpdateFunc_();
             }
-            if (imageProvider != renderImage->imageProvider_) {
-                LOGI(
-                    "OnLoadSuccess called from invalid imageProvider, src: %{private}s",
-                    renderImage->imageSrc_.c_str());
-                renderImage->imageLoadingStatus_ = ImageLoadingStatus::UPDATING;
-                return;
-            }
-            static constexpr double precision = 0.5;
-            int32_t dstWidth = static_cast<int32_t>(renderImage->previousResizeTarget_.Width() + precision);
-            int32_t dstHeight = static_cast<int32_t>(renderImage->previousResizeTarget_.Height() + precision);
-            bool isTargetSource = ((dstWidth == image->width()) && (dstHeight == image->height()));
-            if (!isTargetSource && (renderImage->imageProvider_->GetTotalFrames() <= 1) && !renderImage->background_) {
-                return;
-            }
-            renderImage->UpdateLoadSuccessState();
-            renderImage->image_ = image;
-            if (renderImage->imageDataNotReady_) {
-                LOGI("Paint image is ready, imageSrc is %{private}s", renderImage->imageSrc_.c_str());
-                renderImage->imageDataNotReady_ = false;
-            }
-            if (renderImage->background_) {
-                renderImage->currentDstRectList_ = renderImage->rectList_;
-                if (renderImage->imageUpdateFunc_) {
-                    renderImage->imageUpdateFunc_();
-                }
-            }
+        }
 
-            if (renderImage->GetHidden() && renderImage->frameCount_ > 1) {
-                renderImage->animatedPlayer_->Pause();
-            }
-        },
-        TaskExecutor::TaskType::UI);
+        if (renderImage->GetHidden() && renderImage->frameCount_ > 1) {
+            renderImage->animatedPlayer_->Pause();
+        }
+    }, TaskExecutor::TaskType::UI);
 }
 
 void FlutterRenderImage::OnAnimateImageSuccess(
-    const RefPtr<ImageProvider>& provider,
-    std::unique_ptr<SkCodec> codec)
+    const RefPtr<ImageProvider>& provider, std::unique_ptr<SkCodec> codec, bool forceResize)
 {
+    if (forceResize) {
+        int32_t dstWidth = static_cast<int32_t>(resizeTarget_.Width() + 0.5);
+        int32_t dstHeight = static_cast<int32_t>(resizeTarget_.Height() + 0.5);
+        animatedPlayer_ = MakeRefPtr<AnimatedImagePlayer>(
+            provider, GetContext(), ioManager_, unrefQueue_, std::move(codec), dstWidth, dstHeight);
+        return;
+    }
     animatedPlayer_ = MakeRefPtr<AnimatedImagePlayer>(
-        provider,
-        GetContext(),
-        ioManager_,
-        unrefQueue_,
-        std::move(codec));
+        provider, GetContext(), ioManager_, unrefQueue_, std::move(codec));
 }
 
 void FlutterRenderImage::OnLoadFail(const RefPtr<ImageProvider>& imageProvider)
@@ -437,21 +482,37 @@ void FlutterRenderImage::OnLoadFail(const RefPtr<ImageProvider>& imageProvider)
     if (!context) {
         return;
     }
-    context->GetTaskExecutor()->PostTask(
-        [imageProvider, renderImage = Claim(this)]() {
-            if (imageProvider != renderImage->imageProvider_) {
-                LOGW("OnLoadFail called from invalid imageProvider, src: %{private}s", renderImage->imageSrc_.c_str());
-                return;
-            }
-            renderImage->currentDstRectList_.clear();
-            renderImage->curImageSrc_ = renderImage->imageSrc_;
-            renderImage->curResourceId_ = renderImage->resourceId_;
-            renderImage->imageLoadingStatus_ = ImageLoadingStatus::LOAD_FAIL;
-            renderImage->FireLoadEvent(renderImage->Measure());
-            renderImage->MarkNeedLayout();
-            LOGW("Load image failed!, imageSrc is %{private}s", renderImage->imageSrc_.c_str());
-        },
-        TaskExecutor::TaskType::UI);
+    auto weakProvider = AceType::WeakClaim(AceType::RawPtr(imageProvider));
+    context->GetTaskExecutor()->PostTask([weakProvider, weakRender = AceType::WeakClaim(this)]() {
+        auto renderImage = weakRender.Upgrade();
+        auto imageProvider = weakProvider.Upgrade();
+        if (!renderImage || !imageProvider) {
+            LOGE("renderImage or imageProvider is null!");
+            return;
+        }
+        if (!renderImage->imageProvider_) {
+            LOGE("imageProvider in renderImage is null!");
+            return;
+        }
+        if (imageProvider != renderImage->imageProvider_) {
+            LOGW("OnLoadFail called from invalid imageProvider, src: %{private}s", renderImage->imageSrc_.c_str());
+            return;
+        }
+        if (renderImage->RetryLoading()) {
+            return;
+        }
+        renderImage->currentDstRectList_.clear();
+        renderImage->imageSizeForEvent_ = Size();
+        renderImage->renderAltImage_ = nullptr;
+        renderImage->image_ = nullptr;
+        renderImage->curImageSrc_ = renderImage->imageSrc_;
+        renderImage->curResourceId_ = renderImage->resourceId_;
+        renderImage->imageLoadingStatus_ = ImageLoadingStatus::LOAD_FAIL;
+        renderImage->proceedPreviousLoading_ = false;
+        renderImage->FireLoadEvent(renderImage->imageSizeForEvent_);
+        renderImage->MarkNeedLayout();
+        LOGW("Load image failed!, imageSrc is %{private}s", renderImage->imageSrc_.c_str());
+    }, TaskExecutor::TaskType::UI);
 }
 
 void FlutterRenderImage::OnChangeProvider(const RefPtr<ImageProvider>& provider)
@@ -460,11 +521,15 @@ void FlutterRenderImage::OnChangeProvider(const RefPtr<ImageProvider>& provider)
     if (!context) {
         return;
     }
-    context->GetTaskExecutor()->PostTask(
-        [renderImage = Claim(this), provider] {
-             renderImage->imageProvider_ = provider;
-        },
-        TaskExecutor::TaskType::UI);
+    auto weakProvider = AceType::WeakClaim(AceType::RawPtr(provider));
+    context->GetTaskExecutor()->PostTask([weakRender = AceType::WeakClaim(this), weakProvider] {
+        auto renderImage = weakRender.Upgrade();
+        if (renderImage == nullptr) {
+            LOGE("renderImage is null!");
+            return;
+        }
+        renderImage->imageProvider_ = weakProvider.Upgrade();
+    }, TaskExecutor::TaskType::UI);
 }
 
 void FlutterRenderImage::OnLoadImageSize(
@@ -473,7 +538,14 @@ void FlutterRenderImage::OnLoadImageSize(
     const RefPtr<ImageProvider>& imageProvider,
     bool syncMode)
 {
-    auto task = [renderImage = Claim(this), imageSize, imageSrc, imageProvider]() {
+    auto weakProvider = AceType::WeakClaim(AceType::RawPtr(imageProvider));
+    auto task = [weakRender = AceType::WeakClaim(this), imageSize, imageSrc, weakProvider]() {
+        auto renderImage = weakRender.Upgrade();
+        auto imageProvider = weakProvider.Upgrade();
+        if (renderImage == nullptr) {
+            LOGE("renderImage is null!");
+            return;
+        }
         if (imageSrc != renderImage->imageSrc_) {
             LOGW("imageSrc does not match. imageSrc from callback: %{private}s, imageSrc of now: %{private}s",
                 imageSrc.c_str(), renderImage->imageSrc_.c_str());
@@ -483,7 +555,14 @@ void FlutterRenderImage::OnLoadImageSize(
             LOGW("OnLoadImageSize called from invalid imageProvider, src: %{private}s", renderImage->imageSrc_.c_str());
             return;
         }
-        renderImage->rawImageSize_ = imageSize;
+        if (renderImage->sourceWidth_.IsValid() && renderImage->sourceHeight_.IsValid()) {
+            renderImage->rawImageSize_ = Size(renderImage->sourceWidth_.Value(), renderImage->sourceHeight_.Value());
+            renderImage->forceResize_ = true;
+        } else {
+            renderImage->rawImageSize_ = imageSize;
+            renderImage->forceResize_ = false;
+        }
+        renderImage->imageSizeForEvent_ = imageSize;
         renderImage->rawImageSizeUpdated_ = true;
         if (!renderImage->background_) {
             renderImage->currentDstRectList_ = renderImage->rectList_;
@@ -534,6 +613,8 @@ void FlutterRenderImage::LoadSVGImage(const RefPtr<ImageProvider>& imageProvider
     auto successCallback = [svgImage = Claim(this), onlyLayoutSelf](const sk_sp<SkSVGDOM>& svgDom) {
         if (svgDom) {
             svgImage->skiaDom_ = svgDom;
+            svgImage->image_ = nullptr;
+            svgImage->renderAltImage_ = nullptr;
             svgImage->UpdateLoadSuccessState();
             svgImage->FireLoadEvent(svgImage->Measure());
             svgImage->MarkNeedLayout(onlyLayoutSelf);
@@ -541,25 +622,58 @@ void FlutterRenderImage::LoadSVGImage(const RefPtr<ImageProvider>& imageProvider
     };
     auto failedCallback = [svgImage = Claim(this), providerWp = WeakClaim(RawPtr(imageProvider_))]() {
         svgImage->OnLoadFail(providerWp.Upgrade()); // if Upgrade fail, just callback with nullptr
-        svgImage->FireLoadEvent(svgImage->Measure());
+        svgImage->FireLoadEvent(Size());
+        svgImage->renderAltImage_ = nullptr;
+        svgImage->image_ = nullptr;
+        svgImage->skiaDom_ = nullptr;
         svgImage->MarkNeedLayout();
     };
 
-    auto piplineContext = GetContext().Upgrade();
-    if (!piplineContext) {
-        LOGE("piplinecontext is null!");
-        return;
-    }
-    auto taskExecutor = piplineContext->GetTaskExecutor();
-    auto assetManager = piplineContext->GetAssetManager();
     if (isColorSet_) {
         SkColorEx skColor;
         skColor.color = color_.GetValue();
         skColor.valid = 1;
         imageProvider->GetSVGImageDOMAsync(
-            imageSrc_, successCallback, failedCallback, taskExecutor, assetManager, skColor.value);
+            imageSrc_, successCallback, failedCallback, GetContext(), skColor.value);
     } else {
-        imageProvider->GetSVGImageDOMAsync(imageSrc_, successCallback, failedCallback, taskExecutor, assetManager);
+        imageProvider->GetSVGImageDOMAsync(imageSrc_, successCallback, failedCallback, GetContext());
+    }
+    MarkNeedLayout();
+}
+
+void FlutterRenderImage::LoadSVGImageCustom(const RefPtr<ImageProvider>& imageProvider, bool onlyLayoutSelf)
+{
+    imageLoadingStatus_ = ImageLoadingStatus::LOADING;
+    auto successCallback = [svgImageWeak = AceType::WeakClaim(this), onlyLayoutSelf](const RefPtr<SvgDom>& svgDom) {
+        auto svgImage = svgImageWeak.Upgrade();
+        if (svgImage && svgDom) {
+            svgImage->svgDom_ = svgDom;
+            svgImage->AddSvgChild();
+            svgImage->image_ = nullptr;
+            svgImage->renderAltImage_ = nullptr;
+            svgImage->UpdateLoadSuccessState();
+            svgImage->FireLoadEvent(svgImage->Measure());
+            svgImage->MarkNeedLayout(onlyLayoutSelf);
+        }
+    };
+    auto failedCallback = [svgImageWeak = AceType::WeakClaim(this), providerWp = WeakClaim(RawPtr(imageProvider_))]() {
+        auto svgImage = svgImageWeak.Upgrade();
+        if (svgImage) {
+            svgImage->OnLoadFail(providerWp.Upgrade()); // if Upgrade fail, just callback with nullptr
+            svgImage->FireLoadEvent(Size());
+            svgImage->renderAltImage_ = nullptr;
+            svgImage->image_ = nullptr;
+            svgImage->svgDom_ = nullptr;
+            svgImage->MarkNeedLayout();
+        }
+    };
+
+    if (isColorSet_) {
+        imageProvider->GetSVGImageDOMAsyncCustom(
+            imageSrc_, successCallback, failedCallback, GetContext(), std::make_optional(color_));
+    } else {
+        imageProvider->GetSVGImageDOMAsyncCustom(imageSrc_, successCallback, failedCallback,
+            GetContext(), std::nullopt);
     }
     MarkNeedLayout();
 }
@@ -569,15 +683,52 @@ void FlutterRenderImage::DrawSVGImage(const Offset& offset, ScopedCanvas& canvas
     if (!skiaDom_) {
         return;
     }
+    Size svgContainerSize = GetLayoutSize();
+    if (svgContainerSize.IsInfinite() || !svgContainerSize.IsValid()) {
+        // when layout size is invalid, try the container size of svg
+        svgContainerSize = Size(skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+        if (svgContainerSize.IsInfinite() || !svgContainerSize.IsValid()) {
+            LOGE("Invalid layout size: %{private}s, invalid svgContainerSize: %{private}s, stop draw svg. The max size"
+                 " of layout param is %{private}s", GetLayoutSize().ToString().c_str(),
+                 svgContainerSize.ToString().c_str(), GetLayoutParam().GetMaxSize().ToString().c_str());
+            return;
+        } else {
+            LOGE("Invalid layout size: %{private}s, valid svgContainerSize: %{private}s, use svg container size to draw"
+                 " svg. The max size of layout param is %{private}s", GetLayoutSize().ToString().c_str(),
+                 svgContainerSize.ToString().c_str(), GetLayoutParam().GetMaxSize().ToString().c_str());
+        }
+    }
     canvas->translate(static_cast<float>(offset.GetX()), static_cast<float>(offset.GetY()));
-    int32_t width = static_cast<int32_t>(imageComponentSize_.Width());
-    int32_t height = static_cast<int32_t>(imageComponentSize_.Height());
+    double width = svgContainerSize.Width();
+    double height = svgContainerSize.Height();
     if (matchTextDirection_ && GetTextDirection() == TextDirection::RTL) {
         canvas.FlipHorizontal(0.0, width);
     }
     skiaDom_->setContainerSize({ width, height });
     canvas->clipRect(0, 0, width, height, SkClipOp::kIntersect);
     skiaDom_->render(canvas.GetSkCanvas());
+}
+
+
+void FlutterRenderImage::DrawSVGImageCustom(RenderContext& context, const Offset& offset)
+{
+    if (svgDom_ && svgDom_->GetRootRenderNode()) {
+        svgDom_->GetRootRenderNode()->RenderWithContext(context, offset);
+    }
+}
+
+void FlutterRenderImage::AddSvgChild()
+{
+    if (!svgDom_) {
+        return;
+    }
+    svgDom_->SetFinishEvent(svgAnimatorFinishEvent_);
+    svgDom_->SetContainerSize(GetLayoutSize());
+    svgDom_->CreateRenderNode();
+    if (svgDom_->GetRootRenderNode()) {
+        ClearChildren();
+        AddChild(svgDom_->GetRootRenderNode());
+    }
 }
 
 void FlutterRenderImage::UpdateLoadSuccessState()
@@ -590,10 +741,10 @@ void FlutterRenderImage::UpdateLoadSuccessState()
         imageLoadingStatus_ == ImageLoadingStatus::LOADING ? ImageLoadingStatus::LOAD_SUCCESS : imageLoadingStatus_;
     auto currentFrameCount = imageProvider_->GetTotalFrames();
     if (!isSVG_ && currentFrameCount == 1) {
-        FireLoadEvent(Measure());
+        FireLoadEvent(imageSizeForEvent_);
     }
     if (currentFrameCount > 1 && imageSrc_ != curImageSrc_) {
-        FireLoadEvent(Measure());
+        FireLoadEvent(imageSizeForEvent_);
         auto parent = GetParent().Upgrade();
         if (parent) {
             parent->MarkNeedRender();
@@ -608,12 +759,15 @@ void FlutterRenderImage::UpdateLoadSuccessState()
         curImageSrc_ = imageSrc_;
         curResourceId_ = resourceId_;
         formerRawImageSize_ = rawImageSize_;
+        forceResize_ = false;
+        retryCnt_ = 0;
         currentResizeScale_ = resizeScale_;
         if (renderAltImage_) {
             renderAltImage_ = nullptr;
             MarkNeedLayout();
             return;
         }
+        proceedPreviousLoading_ = false;
         rawImageSizeUpdated_ = false;
         LOGD("Load image success!");
     }
@@ -657,6 +811,50 @@ void FlutterRenderImage::ClearRenderObject()
     imageProvider_ = nullptr;
     layer_ = nullptr;
     formerRawImageSize_ = { 0.0, 0.0 };
+}
+
+bool FlutterRenderImage::IsSourceWideGamut() const
+{
+    if (isSVG_ || !image_) {
+        return false;
+    }
+    return ImageProvider::IsWideGamut(image_->image()->refColorSpace());
+}
+
+bool FlutterRenderImage::RetryLoading()
+{
+    if (retryCnt_++ > 5) { // retry loading 5 times at most
+        LOGW("Retry time has reached 5, stop retry loading, please check fail reason. imageSrc: %{private}s",
+            imageSrc_.c_str());
+        return false;
+    }
+    if (!imageProvider_) {
+        LOGE("image provider is null while retrying loading. imageSrc: %{private}s", imageSrc_.c_str());
+        return false;
+    }
+    if (rawImageSizeUpdated_) { // case when image size is ready, only have to do loading again
+        imageProvider_->LoadImage(GetContext(), imageSrc_, resizeTarget_);
+        LOGW("Retry loading time: %{public}d, trigger by LoadImage fail, imageSrc: %{private}s", retryCnt_,
+            imageSrc_.c_str());
+        return true;
+    }
+    // case when the fail event is triggered by GetImageSize, do GetImageSize again
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        LOGE("pipeline context is null while trying to get image size again. imageSrc: %{private}s",
+            imageSrc_.c_str());
+        return false;
+    }
+    auto frontend = context->GetFrontend();
+    if (!frontend) {
+        LOGE("frontend is null while trying to get image size again. imageSrc: %{private}s", imageSrc_.c_str());
+        return false;
+    }
+    bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD;
+    imageProvider_->GetImageSize(syncMode, context, imageSrc_);
+    LOGW("Retry loading time: %{public}d, triggered by GetImageSize fail, imageSrc: %{private}s", retryCnt_,
+        imageSrc_.c_str());
+    return true;
 }
 
 } // namespace OHOS::Ace

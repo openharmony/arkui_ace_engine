@@ -16,6 +16,7 @@
 #include "core/components/page/page_element.h"
 
 #include "core/common/frontend.h"
+#include "core/common/text_field_manager.h"
 #include "core/components/transform/transform_element.h"
 
 namespace OHOS::Ace {
@@ -24,6 +25,18 @@ PageElement::PageElement(int32_t pageId, const ComposeId& id) : ComposedElement(
 
 PageElement::PageElement(int32_t pageId, const ComposeId& cardComposeId, const ComposeId& id)
     : ComposedElement(id), pageId_(pageId), cardComposeId_(cardComposeId) {}
+
+PageElement::~PageElement()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    auto textFieldManager = context->GetTextFieldManager();
+    if (textFieldManager) {
+        textFieldManager->RemovePageId(pageId_);
+    }
+}
 
 bool PageElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
 {

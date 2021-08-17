@@ -112,7 +112,6 @@ void RenderButton::InitAccessibilityEventListener()
     if (!refNode) {
         return;
     }
-    refNode->AddSupportAction(AceAction::ACTION_CLICK);
     refNode->AddSupportAction(AceAction::ACTION_ACCESSIBILITY_FOCUS);
 
     auto weakPtr = AceType::WeakClaim(this);
@@ -156,8 +155,8 @@ void RenderButton::UpdateAccessibility()
     Offset globalOffset = GetGlobalOffset();
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     if (isTv_ && isFocus_) {
-        Offset scaleCenter = Offset(globalOffset.GetX() + size.Width() / 2.0,
-                                    globalOffset.GetY() + size.Height() / 2.0);
+        Offset scaleCenter =
+            Offset(globalOffset.GetX() + size.Width() / 2.0, globalOffset.GetY() + size.Height() / 2.0);
         accessibilityNode->SetScaleCenter(scaleCenter);
         accessibilityNode->SetScale(TV_EXPAND_SCALE);
     }
@@ -172,9 +171,6 @@ void RenderButton::UpdateAccessibility()
 
 void RenderButton::HandleTouchEvent(bool isTouch)
 {
-    if (isDisabled_) {
-        return;
-    }
     isClicked_ = isTouch;
     if (isClicked_) {
         isMoveEventValid_ = true;
@@ -186,7 +182,7 @@ void RenderButton::HandleTouchEvent(bool isTouch)
 
 void RenderButton::HandleMoveEvent(const TouchEventInfo& info)
 {
-    if (isDisabled_ || (!isMoveEventValid_)) {
+    if (!isMoveEventValid_) {
         return;
     }
     if (info.GetTouches().empty()) {
@@ -204,22 +200,25 @@ void RenderButton::HandleMoveEvent(const TouchEventInfo& info)
 
 void RenderButton::HandleClickEvent(const ClickInfo& info)
 {
-    if (isDisabled_) {
+    if (!buttonComponent_) {
         return;
     }
-    if (onClickWithInfo_) {
-        onClickWithInfo_(info);
+    auto onClickWithInfo =
+        AceAsyncEvent<void(const ClickInfo&)>::Create(buttonComponent_->GetClickedEventId(), context_);
+    if (onClickWithInfo) {
+        onClickWithInfo(info);
     }
     PlayClickAnimation();
 }
 
 void RenderButton::HandleClickEvent()
 {
-    if (isDisabled_) {
+    if (!buttonComponent_) {
         return;
     }
-    if (onClick_) {
-        onClick_();
+    auto onClick = AceAsyncEvent<void()>::Create(buttonComponent_->GetClickedEventId(), context_);
+    if (onClick) {
+        onClick();
     }
     PlayClickAnimation();
 }
@@ -251,7 +250,11 @@ void RenderButton::DisplayFocusAnimation()
 
 void RenderButton::OnMouseHoverEnterTest()
 {
-    if (isPhone_ && ((type_ == ButtonType::TEXT) || (type_ == ButtonType::NORMAL))) {
+    if (!buttonComponent_) {
+        return;
+    }
+    ButtonType type = buttonComponent_->GetType();
+    if (isPhone_ && ((type == ButtonType::TEXT) || (type == ButtonType::NORMAL))) {
         needHoverColor_ = true;
         MarkNeedRender();
     } else {
@@ -360,34 +363,23 @@ void RenderButton::Update(const RefPtr<Component>& component)
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
+    buttonComponent_ = button;
     if (!controller_) {
         controller_ = AceType::MakeRefPtr<Animator>(GetContext());
     }
     auto theme = GetTheme<ButtonTheme>();
     if (theme) {
-        defaultRadius_ = theme->GetRadius();
         defaultClickedColor_ = theme->GetClickedColor();
     }
-
-    type_ = button->GetType();
+    if (type_ == ButtonType::ARC) {
+        width_ = ARC_BUTTON_WIDTH;
+        height_ = ARC_BUTTON_HEIGHT;
+    } else {
+        width_ = buttonComponent_->GetWidth();
+        height_ = buttonComponent_->GetHeight();
+    }
     layoutFlag_ = button->GetLayoutFlag();
-    width_ = (type_ == ButtonType::ARC) ? ARC_BUTTON_WIDTH : button->GetWidth();
-    height_ = (type_ == ButtonType::ARC) ? ARC_BUTTON_HEIGHT : button->GetHeight();
-    minWidth_ = button->GetMinWidth();
-    radius_ = button->GetRectRadius();
-    widthDefined_ = GreatOrEqual(button->GetWidth().Value(), 0.0);
-    heightDefined_ = GreatOrEqual(button->GetHeight().Value(), 0.0);
-    onClickWithInfo_ = AceAsyncEvent<void(const ClickInfo&)>::Create(button->GetClickedEventId(), context_);
-    onClick_ = AceAsyncEvent<void()>::Create(button->GetClickedEventId(), context_);
-    isDisabled_ = button->GetDisabledState();
-    backgroundColor_ = button->GetBackgroundColor();
     clickedColor_ = button->GetClickedColor();
-    disabledColor_ = button->GetDisabledColor();
-    focusColor_ = button->GetFocusColor();
-    hoverColor_ = button->GetHoverColor();
-    focusAnimationColor_ = button->GetFocusAnimationColor();
-    borderEdge_ = button->GetBorderEdge();
-    isInnerBorder_ = button->IsInnerBorder();
     isWatch_ = (SystemProperties::GetDeviceType() == DeviceType::WATCH);
     isTv_ = (SystemProperties::GetDeviceType() == DeviceType::TV);
     isPhone_ = (SystemProperties::GetDeviceType() == DeviceType::PHONE);
@@ -398,8 +390,16 @@ void RenderButton::Update(const RefPtr<Component>& component)
 
 void RenderButton::PerformLayout()
 {
+    if (!buttonComponent_) {
+        LOGE("Fail to perform layout due to buttonComponent is null");
+        return;
+    }
+    minWidth_ = buttonComponent_->GetMinWidth();
+    type_ = buttonComponent_->GetType();
+    widthDefined_ = GreatOrEqual(buttonComponent_->GetWidth().Value(), 0.0);
+    heightDefined_ = GreatOrEqual(buttonComponent_->GetHeight().Value(), 0.0);
     buttonSize_ = Size(NormalizeToPx(width_), NormalizeToPx(height_));
-    rrectRadius_ = NormalizeToPx(radius_);
+    rrectRadius_ = NormalizeToPx(buttonComponent_->GetRectRadius());
     layoutSize_ = Measure();
     SetChildrenLayoutSize();
     SetLayoutSize(CalculateLayoutSize());
@@ -426,24 +426,35 @@ void RenderButton::SetChildrenLayoutSize()
 
 Size RenderButton::CalculateLayoutSize()
 {
-    if (((type_ == ButtonType::TEXT) && isWatch_) || (type_ == ButtonType::ICON) || (type_ == ButtonType::NORMAL)) {
+    Size layoutSize;
+    if (NeedAdaptiveChild()) {
         double layoutWidth = widthDefined_ ? layoutSize_.Width() : childrenSize_.Width();
         double layoutHeight = heightDefined_ ? layoutSize_.Height() : childrenSize_.Height();
-        return Size(layoutWidth, layoutHeight);
-    }
-
-    Size layoutSize;
-    if (NearEqual(buttonSize_.Width(), 0.0)) {
-        double width =
-            (childrenSize_.Width() > NormalizeToPx(minWidth_)) ? childrenSize_.Width() : NormalizeToPx(minWidth_);
-        layoutSize = Size(width, buttonSize_.Height()) + Size(widthDelta_, widthDelta_);
+        layoutSize = Size(layoutWidth, layoutHeight);
     } else {
-        layoutSize = layoutSize_;
+        if (NearEqual(buttonSize_.Width(), 0.0)) {
+            double width =
+                (childrenSize_.Width() > NormalizeToPx(minWidth_)) ? childrenSize_.Width() : NormalizeToPx(minWidth_);
+            layoutSize = Size(width, buttonSize_.Height()) + Size(widthDelta_, widthDelta_);
+        } else {
+            layoutSize = layoutSize_;
+        }
     }
     if (NeedConstrain()) {
         layoutSize = GetLayoutParam().Constrain(layoutSize);
     }
     return layoutSize;
+}
+
+bool RenderButton::NeedAdaptiveChild()
+{
+    if ((type_ == ButtonType::TEXT) && isWatch_) {
+        return true;
+    }
+    if ((type_ == ButtonType::ICON) || (type_ == ButtonType::NORMAL)) {
+        return true;
+    }
+    return false;
 }
 
 bool RenderButton::NeedConstrain()
@@ -496,7 +507,7 @@ void RenderButton::SetProgress(uint32_t progress)
 
 void RenderButton::UpdateDownloadStyles(const RefPtr<ButtonComponent>& button)
 {
-    if (type_ != ButtonType::DOWNLOAD) {
+    if (button->GetType() != ButtonType::DOWNLOAD) {
         return;
     }
     auto pipelineContext = GetContext().Upgrade();
@@ -562,7 +573,7 @@ void RenderButton::UpdateAnimationParam(double value)
         return;
     }
 
-    if (isWatch_) {
+    if (isWatch_ || isTv_) {
         scale_ = value;
     }
     if (isOpacityAnimation_) {
@@ -592,16 +603,20 @@ void RenderButton::UpdateFocusAnimation(double value)
     Size layoutSize = GetLayoutSize() + sizeDelta;
     Offset buttonOffset = Offset(sizeDelta.Width() / 2.0, sizeDelta.Height() / 2.0);
     double radius = rrectRadius_;
-    if ((type_ == ButtonType::CIRCLE) || (type_ == ButtonType::CAPSULE)) {
-        radius = layoutSize.Height() / 2.0;
-    }
-    if (isPhone_ && ((type_ == ButtonType::TEXT) || (type_ == ButtonType::NORMAL))) {
-        context->ShowFocusAnimation(RRect::MakeRRect(Rect(Offset(0, 0), layoutSize), Radius(radius)),
-            focusAnimationColor_, GetGlobalOffset() - buttonOffset, true);
+    if (!buttonComponent_) {
         return;
     }
-    context->ShowFocusAnimation(RRect::MakeRRect(Rect(Offset(0, 0), layoutSize), Radius(radius)), focusAnimationColor_,
-        GetGlobalOffset() - buttonOffset);
+    ButtonType type = buttonComponent_->GetType();
+    if ((type == ButtonType::CIRCLE) || (type == ButtonType::CAPSULE)) {
+        radius = layoutSize.Height() / 2.0;
+    }
+    if (isPhone_ && ((type == ButtonType::TEXT) || (type == ButtonType::NORMAL))) {
+        context->ShowFocusAnimation(RRect::MakeRRect(Rect(Offset(0, 0), layoutSize), Radius(radius)),
+            buttonComponent_->GetFocusAnimationColor(), GetGlobalOffset() - buttonOffset, true);
+        return;
+    }
+    context->ShowFocusAnimation(RRect::MakeRRect(Rect(Offset(0, 0), layoutSize), Radius(radius)),
+        buttonComponent_->GetFocusAnimationColor(), GetGlobalOffset() - buttonOffset);
     context->ShowShadow(
         RRect::MakeRRect(Rect(Offset(0, 0), layoutSize), Radius(radius)), GetGlobalOffset() - buttonOffset);
 }

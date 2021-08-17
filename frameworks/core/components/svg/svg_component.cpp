@@ -20,6 +20,25 @@
 
 namespace OHOS::Ace {
 
+SvgComponent::SvgComponent()
+{
+    InitDeclaration();
+}
+
+SvgComponent::SvgComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children)
+{
+    InitDeclaration();
+}
+
+void SvgComponent::InitDeclaration()
+{
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<SvgDeclaration>();
+        declaration_->Init();
+        declaration_->InitializeStyle();
+    }
+}
+
 RefPtr<Element> SvgComponent::CreateElement()
 {
     return AceType::MakeRefPtr<SvgElement>();
@@ -28,6 +47,73 @@ RefPtr<Element> SvgComponent::CreateElement()
 RefPtr<RenderNode> SvgComponent::CreateRenderNode()
 {
     return RenderSvg::Create();
+}
+
+void SvgComponent::SetX(const Dimension& x)
+{
+    declaration_->SetX(x);
+}
+
+const Dimension& SvgComponent::GetX() const
+{
+    return declaration_->GetX();
+}
+
+void SvgComponent::SetY(const Dimension& y)
+{
+    declaration_->SetY(y);
+}
+
+const Dimension& SvgComponent::GetY() const
+{
+    return declaration_->GetY();
+}
+
+void SvgComponent::SetWidth(const Dimension& width)
+{
+    declaration_->SetWidth(width);
+}
+
+const Dimension& SvgComponent::GetWidth() const
+{
+    return declaration_->GetWidth();
+}
+
+void SvgComponent::SetHeight(const Dimension& height)
+{
+    declaration_->SetHeight(height);
+}
+
+const Dimension& SvgComponent::GetHeight() const
+{
+    return declaration_->GetHeight();
+}
+
+void SvgComponent::SetViewBox(const Rect& viewBox)
+{
+    declaration_->SetViewBox(viewBox);
+}
+
+const Rect& SvgComponent::GetViewBox() const
+{
+    return declaration_->GetViewBox();
+}
+
+void SvgComponent::SetAutoMirror(bool autoMirror)
+{
+    declaration_->SetAutoMirror(autoMirror);
+}
+
+bool SvgComponent::GetAutoMirror() const
+{
+    return declaration_->GetAutoMirror();
+}
+
+void SvgComponent::SetDeclaration(const RefPtr<SvgDeclaration>& declaration)
+{
+    if (declaration) {
+        declaration_ = declaration;
+    }
 }
 
 } // namespace OHOS::Ace

@@ -57,6 +57,32 @@ public:
         return height_;
     }
 
+    bool IsRoot() const
+    {
+        return isRoot_;
+    }
+
+    void AddMaskNode(const std::string& id, const RefPtr<RenderSvgBase>& mask)
+    {
+        if (id.empty() || mask == nullptr) {
+            return;
+        }
+        svgMaskNodes_[id] = mask;
+    }
+
+    RefPtr<RenderSvgBase> GetMaskNode(const std::string& id)
+    {
+        if (svgMaskNodes_.find(id) == svgMaskNodes_.end()) {
+            return nullptr;
+        }
+        return svgMaskNodes_[id];
+    }
+
+    void MarkIsFixSize(bool isFixSize)
+    {
+        isFixSize_ = isFixSize;
+    }
+
 protected:
     Rect viewBox_;
 
@@ -67,14 +93,19 @@ private:
     bool GetProperty(const std::string& attrName, Dimension& dimension) const;
     void SetOpacityCallback();
     bool OpacityAnimation(const RefPtr<SvgAnimate>& svgAnimate);
+    void UpdateTransform();
 
     Dimension x_;
     Dimension y_;
     Dimension width_ = Dimension(-1.0);
     Dimension height_ = Dimension(-1.0);
+    bool isRoot_ = false;
+    bool autoMirror_ = false;
     std::vector<RefPtr<SvgAnimate>> svgAnimates_;
     bool hasUpdated_ = false;
     std::function<void(double)> opacityCallback_;
+    std::map<std::string, RefPtr<RenderSvgBase>> svgMaskNodes_;
+    bool isFixSize_ = false;
 };
 
 } // namespace OHOS::Ace

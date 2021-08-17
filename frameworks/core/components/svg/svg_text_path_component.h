@@ -16,79 +16,36 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_SVG_TEXT_PATH_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_SVG_TEXT_PATH_COMPONENT_H
 
-#include "frameworks/core/components/svg/svg_sharp.h"
+#include "core/components/declaration/svg/svg_text_path_declaration.h"
 #include "frameworks/core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace {
 
-class SvgTextPathComponent : public ComponentGroup, public SvgSharp {
+class SvgTextPathComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(SvgTextPathComponent, ComponentGroup);
 
 public:
-    SvgTextPathComponent() = default;
-    explicit SvgTextPathComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children) {};
+    SvgTextPathComponent();
+    explicit SvgTextPathComponent(const std::list<RefPtr<Component>>& children);
     ~SvgTextPathComponent() override = default;
-
+    void InitDeclaration();
     RefPtr<RenderNode> CreateRenderNode() override;
-
     RefPtr<Element> CreateElement() override;
+    const std::string& GetTextData() const;
+    void SetTextData(const std::string& textData);
+    const std::string& GetPath() const;
+    void SetPath(const std::string& path);
+    void SetStartOffset(const Dimension& startOffset);
+    const Dimension& GetStartOffset() const;
+    void SetDeclaration(const RefPtr<SvgTextPathDeclaration>& declaration);
 
-    const std::string& GetTextData() const
+    const RefPtr<SvgTextPathDeclaration>& GetDeclaration() const
     {
-        return textData_;
-    }
-
-    void SetTextData(const std::string& textData)
-    {
-        textData_ = textData;
-    }
-
-    const std::string& GetPath() const
-    {
-        return path_;
-    }
-
-    void SetPath(const std::string& path)
-    {
-        path_ = path;
-    }
-
-    void SetStartOffset(const Dimension& startOffset)
-    {
-        startOffset_ = startOffset;
-    }
-
-    const Dimension& GetStartOffset() const
-    {
-        return startOffset_;
-    }
-
-    void SetTextLength(const Dimension& textLength)
-    {
-        textLength_ = textLength;
-    }
-
-    const Dimension& GetTextLength() const
-    {
-        return textLength_;
-    }
-
-    void SetLengthAdjust(const std::string& lengthAdjust)
-    {
-        lengthAdjust_ = lengthAdjust;
-    }
-
-    const std::string&  GetLengthAdjust() const
-    {
-        return lengthAdjust_;
+        return declaration_;
     }
 
 private:
-    Dimension textLength_ = Dimension(0.0);
-    Dimension startOffset_ = Dimension(0.0);
-    std::string lengthAdjust_ = "spacing"; // Value type: spacing | spacingAndGlyphs
-    std::string path_;
-    std::string textData_;
+    RefPtr<SvgTextPathDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

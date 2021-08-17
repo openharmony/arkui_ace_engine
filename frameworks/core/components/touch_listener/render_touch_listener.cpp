@@ -33,7 +33,7 @@ void RenderTouchListener::Update(const RefPtr<Component>& component)
     ACE_DCHECK(touchComponent);
     auto context = context_.Upgrade();
     if (context && context->GetIsDeclarative()) {
-        onTouchEventCallback_ = AceAsyncEvent<void(const std::shared_ptr<TouchCallBackInfo>&)>::Create(
+        onTouchEventCallback_ = AceSyncEvent<void(const std::shared_ptr<TouchEventInfo>&)>::Create(
             touchComponent->GetOnTouchId(), context_);
         return;
     }
@@ -95,19 +95,58 @@ bool RenderTouchListener::DispatchEvent(const TouchPoint& point)
 
 bool RenderTouchListener::HandleEvent(const TouchPoint& point)
 {
+    bool isPropagation = true;
     auto context = context_.Upgrade();
-    if (context && context->GetIsDeclarative() && onTouchEventCallback_) {
-        auto event = std::make_shared<TouchCallBackInfo>(point.type);
-        event->SetScreenX(point.x);
-        event->SetScreenY(point.y);
-        event->SetLocalX(point.x - coordinateOffset_.GetX());
-        event->SetLocalY(point.y - coordinateOffset_.GetY());
-        event->SetTimeStamp(point.time);
-        event->SetPressure(point.pressure);
-        event->SetDeviceId(point.deviceId);
-        onTouchEventCallback_(event);
+    if (context && context->GetIsDeclarative()) {
+        if (point.type == TouchType::DOWN) {
+            touchPointMap_[point.id] = point;
+            isPropagation = TriggerTouchCallBack(point);
+        } else if (point.type == TouchType::UP) {
+            isPropagation = TriggerTouchCallBack(point);
+            touchPointMap_.erase(point.id);
+        } else {
+            for (const auto& pointPair : touchPointMap_) {
+                if (pointPair.first == point.id && (pointPair.second.x != point.x || pointPair.second.y != point.y)) {
+                    touchPointMap_[point.id] = point;
+                    isPropagation = TriggerTouchCallBack(point);
+                    break;
+                }
+            }
+        }
     }
-    return true;
+    return isPropagation;
+}
+
+bool RenderTouchListener::TriggerTouchCallBack(const TouchPoint& changedPoint)
+{
+    if (!onTouchEventCallback_) {
+        return true;
+    }
+    auto event = std::make_shared<TouchEventInfo>("touchEvent");
+    event->SetTimeStamp(changedPoint.time);
+    TouchLocationInfo changedInfo(changedPoint.id);
+    float localX = changedPoint.x - coordinateOffset_.GetX();
+    float localY = changedPoint.y - coordinateOffset_.GetY();
+    changedInfo.SetLocalLocation(Offset(localX, localY));
+    changedInfo.SetGlobalLocation(Offset(changedPoint.x, changedPoint.y));
+    changedInfo.SetTouchType(changedPoint.type);
+    event->AddChangedTouchLocationInfo(std::move(changedInfo));
+
+    // all fingers collection
+    for (const auto& pointPair : touchPointMap_) {
+        float globalX = pointPair.second.x;
+        float globalY = pointPair.second.y;
+        float localX = pointPair.second.x - coordinateOffset_.GetX();
+        float localY = pointPair.second.y - coordinateOffset_.GetY();
+        TouchLocationInfo info(pointPair.second.id);
+        info.SetGlobalLocation(Offset(globalX, globalY));
+        info.SetLocalLocation(Offset(localX, localY));
+        info.SetTouchType(pointPair.second.type);
+        event->AddTouchLocationInfo(std::move(info));
+    }
+    onTouchEventCallback_(event);
+    LOGD("IsStopPropagation = %{public}d", event->IsStopPropagation());
+    return event->IsStopPropagation() ? false : true;
 }
 
 } // namespace OHOS::Ace

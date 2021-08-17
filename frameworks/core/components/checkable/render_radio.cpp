@@ -141,6 +141,9 @@ bool RenderRadio::UpdateGroupValue(const std::string& groupValue)
     if (changeEvent_) {
         changeEvent_(result);
     }
+    if (valueChangeEvent_) {
+        valueChangeEvent_(groupValue_);
+    }
     return needRender;
 }
 

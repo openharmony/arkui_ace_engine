@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-const int32_t FILE_SIZE = 15;
+const int32_t FILE_SIZE = 408907;
 const std::string CACHE_FILE_PATH = "/data/test/resource/imagecache/images";
 const std::string CACHE_IMAGE_FILE_1 = "/data/test/resource/imagecache/images/748621363886323660";
 const std::string CACHE_IMAGE_FILE_2 = "/data/test/resource/imagecache/images/8819493328252140263";

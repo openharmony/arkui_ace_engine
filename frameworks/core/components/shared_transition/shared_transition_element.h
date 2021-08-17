@@ -63,6 +63,7 @@ public:
     const RefPtr<SharedTransitionEffect>& GetEffect() const;
     Size GetSuitSize() const;
     Offset GetGlobalOffset() const;
+    float GetOpacity() const;
     RefPtr<Element> GetContentElement() const;
     bool IsEnablePopEnter() const;
     bool IsEnablePushEnter() const;
@@ -102,6 +103,7 @@ private:
     bool enablePushEnter_ = true;
     bool enablePushExit_ = true;
     SizeModifiedCallback sizeModifiedCallback_;
+    float opacity_ = 1.0f;
 };
 
 } // namespace OHOS::Ace

@@ -60,6 +60,7 @@ struct MouseEvent final {
     MouseButton button = MouseButton::NONE_BUTTON;
     int32_t pressedButtons = 0; // combined by MouseButtons
     TimeStamp time;
+    int64_t deviceId = 0;
 
     Offset GetOffset() const
     {
@@ -90,7 +91,8 @@ struct MouseEvent final {
                 .action = action,
                 .button = button,
                 .pressedButtons = pressedButtons,
-                .time = time };
+                .time = time,
+                .deviceId = deviceId };
         }
 
         return { .x = x / scale,
@@ -105,7 +107,8 @@ struct MouseEvent final {
             .action = action,
             .button = button,
             .pressedButtons = pressedButtons,
-            .time = time };
+            .time = time,
+            .deviceId = deviceId };
     }
 
     TouchPoint CreateTouchPoint() const
@@ -123,7 +126,7 @@ struct MouseEvent final {
 
         int32_t id = GetId();
 
-        return { .id = id, .x = x, .y = y, .type = type, .time = time, .size = 0.0 };
+        return { .id = id, .x = x, .y = y, .type = type, .time = time, .size = 0.0, .deviceId = deviceId };
     }
 
     MouseEvent operator-(const Offset& offset) const
@@ -140,7 +143,8 @@ struct MouseEvent final {
             .action = action,
             .button = button,
             .pressedButtons = pressedButtons,
-            .time = time };
+            .time = time,
+            .deviceId = deviceId };
     }
 };
 

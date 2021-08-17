@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ACE_APPLICATION_INFO_H
 
 #include <chrono>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -42,6 +43,9 @@ public:
     virtual void ChangeLocale(const std::string& language, const std::string& countryOrRegion) = 0;
     virtual std::vector<std::string> GetLocaleFallback(const std::vector<std::string>& localeList) const = 0;
     virtual std::vector<std::string> GetResourceFallback(const std::vector<std::string>& resourceList) const = 0;
+    virtual std::vector<std::string> GetStyleResourceFallback(const std::vector<std::string>& resourceList) const = 0;
+    virtual std::vector<std::string> GetDeclarativeResourceFallback(
+        const std::set<std::string>& resourceList) const = 0;
     virtual bool GetFiles(const std::string& filePath, std::vector<std::string>& fileList) const = 0;
     virtual bool GetFiles(int32_t instanceId, const std::string& filePath, std::vector<std::string>& fileList) const
     {
@@ -61,6 +65,8 @@ public:
     virtual double GetLifeTime() const = 0;
     virtual std::string GetJsEngineParam(const std::string& key) const = 0;
     virtual std::string GetCurrentDeviceResTag() const = 0;
+    virtual std::string GetCurrentDeviceDeclarativeResTag() const = 0;
+    virtual double GetTargetMediaScaleRatio(const std::string& targetResTag) const = 0;
     virtual void SetResourceManager(std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) = 0;
 
     const std::string& GetCountryOrRegion() const

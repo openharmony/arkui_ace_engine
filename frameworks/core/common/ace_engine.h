@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ACE_ENGINE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ACE_ENGINE_H
 
-#include <fstream>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 
 #include "base/utils/macros.h"
@@ -53,11 +53,14 @@ public:
     int32_t GetUid() const;
     void SetProcessName(const std::string& processName);
     const std::string& GetProcessName() const;
+    void TriggerGarbageCollection();
+    void NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback);
     const std::string GetAssetAbsolutePath(const std::string& path) const;
 
 private:
     AceEngine();
 
+    mutable std::mutex mutex_;
     std::unordered_map<int32_t, RefPtr<Container>> containerMap_;
     RefPtr<WatchDog> watchDog_;
     std::string packageName_;

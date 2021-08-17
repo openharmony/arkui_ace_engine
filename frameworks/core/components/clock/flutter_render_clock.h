@@ -44,7 +44,7 @@ public:
     ~FlutterRenderClockHand() override = default;
 
     void Paint(RenderContext& context, const Offset& offset) override;
-    void RequestRenderForNextSecond(long timeUsec, int32_t& second);
+    void RequestRenderForNextSecond();
     void RenderHand(RenderContext& context, const Offset& offset, const RefPtr<RenderImage>& renderHand,
         const Offset& rotateCenter, double rotateAngle);
 
@@ -67,11 +67,13 @@ public:
 
 protected:
     void OnAppShow() override;
+    void OnPreDraw() override;
 
 private:
     RefPtr<Flutter::OffsetLayer> layer_;
     int32_t curMinute_ = -1;
     int32_t curHour_ = -1;
+    bool onPreDraw_ = false;
 };
 
 } // namespace OHOS::Ace

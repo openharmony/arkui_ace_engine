@@ -35,10 +35,11 @@ class AnimatedImagePlayer : public virtual AceType {
 public:
     AnimatedImagePlayer(const WeakPtr<ImageProvider>& weakProvider, const WeakPtr<PipelineContext>& weakContext,
         const fml::WeakPtr<flutter::IOManager>& ioManager, const fml::RefPtr<flutter::SkiaUnrefQueue>& gpuQueue,
-        std::unique_ptr<SkCodec> codec)
+        std::unique_ptr<SkCodec> codec, int32_t dstWidth = -1, int32_t dstHeight = -1)
         : imageProvider_(weakProvider), context_(weakContext), ioManager_(ioManager), unrefQueue_(gpuQueue),
           codec_(std::move(codec)), frameCount_(codec_->getFrameCount()),
-          repetitionCount_(codec_->getRepetitionCount()), frameInfos_(codec_->getFrameInfo())
+          repetitionCount_(codec_->getRepetitionCount()), frameInfos_(codec_->getFrameInfo()),
+          dstWidth_(dstWidth), dstHeight_(dstHeight)
     {
         auto provider = imageProvider_.Upgrade();
         auto context = context_.Upgrade();
@@ -88,6 +89,8 @@ private:
     std::unique_ptr<SkBitmap> lastRequiredBitmap_;
     int32_t requiredFrameIndex_ = -1;
     RefPtr<Animator> animator_;
+    int32_t dstWidth_ = -1;
+    int32_t dstHeight_ = -1;
 };
 
 } // namespace OHOS::Ace

@@ -42,9 +42,9 @@ public:
     virtual void MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc);
     virtual void ReleaseRT(JSRuntime* rt);
 
-protected:
-    virtual JSValue executeJS(int argc = 0, JSValueConst* argv = nullptr) final;
+    JSValue executeJS(int argc = 0, JSValueConst* argv = nullptr);
 
+protected:
     JSValue jsFunction_;
     JSValue jsThis_;
     JSContext* ctx_;

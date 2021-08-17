@@ -72,6 +72,7 @@ void RenderTabBar::Update(const RefPtr<Component>& component)
 void RenderTabBar::UpdateTouchRect()
 {
     SetTouchRect(GetPaintRect());
+    ownTouchRect_ = touchRect_;
 }
 
 void RenderTabBar::PerformLayout()
@@ -85,7 +86,7 @@ void RenderTabBar::PerformLayout()
         }
         tabsSize_ = children.size() - 1;
     } else {
-        if (children.size() <= 0) {
+        if (children.empty()) {
             return;
         }
         tabsSize_ = children.size();
@@ -289,6 +290,7 @@ void RenderTabBar::Initialize()
         isVertical_ ? Axis::VERTICAL : Axis::HORIZONTAL);
     scrollable_->Initialize(GetContext());
     scrollable_->SetNodeId(GetAccessibilityNodeId());
+    scrollable_->SetScrollableNode(AceType::WeakClaim(this));
 
     if (!tabBarSizeAnimation_ && !indicator_) {
         tabBarSizeAnimation_ = AceType::MakeRefPtr<TabBarSizeAnimation>();

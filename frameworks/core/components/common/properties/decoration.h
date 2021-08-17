@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_DECORATION_H
 
 #include <memory>
+#include <optional>
+#include <regex>
 #include <vector>
 
 #include "base/geometry/dimension.h"
@@ -24,10 +26,13 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/animatable_color.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/pipeline/pipeline_context.h"
+#include "core/components/theme/theme_utils.h"
 
 namespace OHOS::Ace {
 
@@ -39,13 +44,14 @@ constexpr double PERCENT_TRANSLATE = 100.0;
 
 enum class GradientDirection {
     LEFT = 0,
-    LEFT_TOP,
     TOP,
-    RIGHT_TOP,
     RIGHT,
-    RIGHT_BOTTOM,
     BOTTOM,
+    LEFT_TOP,
     LEFT_BOTTOM,
+    RIGHT_TOP,
+    RIGHT_BOTTOM,
+    NONE,
     START_TO_END,
     END_TO_START,
 };
@@ -53,7 +59,43 @@ enum class GradientDirection {
 enum class GradientType {
     LINEAR,
     RADIAL,
+    SWEEP,
     CONIC,
+};
+
+enum class RadialSizeType {
+    CLOSEST_SIDE,
+    CLOSEST_CORNER,
+    FARTHEST_SIDE,
+    FARTHEST_CORNER,
+    NONE,
+};
+
+enum class RadialShapeType {
+    CIRCLE,
+    ELLIPSE,
+    NONE,
+};
+
+enum class SpreadMethod {
+    PAD,
+    REFLECT,
+    REPEAT,
+};
+
+struct LinearGradientInfo {
+    double x1 = 0.0;
+    double x2 = 0.0;
+    double y1 = 0.0;
+    double y2 = 0.0;
+};
+
+struct RadialGradientInfo {
+    double r = 0.0;
+    double cx = 0.0;
+    double cy = 0.0;
+    double fx = 0.0;
+    double fy = 0.0;
 };
 
 class GradientColor final {
@@ -113,10 +155,72 @@ public:
         return hasValue_;
     }
 
+    void SetOpacity(double opacity)
+    {
+        opacity_ = opacity;
+    }
+
+    double GetOpacity() const
+    {
+        return opacity_;
+    }
+
 private:
     bool hasValue_ = true;
     Color color_ { Color::TRANSPARENT };
     Dimension dimension_ { BOX_END_SIZE, DimensionUnit::PERCENT };
+    double opacity_ = 1.0;
+};
+
+struct ACE_EXPORT RadialGradient {
+    // size type
+    std::optional<RadialSizeType> radialSizeType;
+    // shape circle or ellipse
+    std::optional<RadialShapeType> radialShape;
+    // size in x-axis
+    std::optional<Dimension> radialHorizontalSize;
+    // size in y-axis
+    std::optional<Dimension> radialVerticalSize;
+    // center of shape
+    std::optional<Dimension> radialCenterX;
+    std::optional<Dimension> radialCenterY;
+
+    std::optional<Dimension> fRadialCenterX;
+    std::optional<Dimension> fRadialCenterY;
+};
+
+struct ACE_EXPORT LinearGradient {
+    // direction in x-axis
+    std::optional<GradientDirection> linearX;
+    // direction in y-axis
+    std::optional<GradientDirection> linearY;
+    // angle of gradient line in bearing angle
+    std::optional<float> angle;
+
+    std::optional<Dimension> x1;
+    std::optional<Dimension> y1;
+    std::optional<Dimension> x2;
+    std::optional<Dimension> y2;
+
+    // is direction in x-axis
+    static bool IsXAxis(GradientDirection direction)
+    {
+        return (direction == GradientDirection::LEFT || direction == GradientDirection::RIGHT ||
+                direction == GradientDirection::START_TO_END || direction == GradientDirection::END_TO_START);
+    }
+};
+
+struct ACE_EXPORT SweepGradient {
+    // center of x-axis
+    std::optional<Dimension> centerX;
+    // center of y-axis
+    std::optional<Dimension> centerY;
+    // startAngle in degree
+    std::optional<float> startAngle;
+    // endAngle in degree
+    std::optional<float> endAngle;
+    // rotation in degree
+    std::optional<float> rotation;
 };
 
 class ACE_EXPORT Gradient final {
@@ -130,44 +234,14 @@ public:
         return colors_.size() > 1;
     }
 
-    void SetDirection(GradientDirection direction)
-    {
-        direction_ = direction;
-    }
-
     void SetRepeat(bool repeat)
     {
         repeat_ = repeat;
     }
 
-    void SetAngle(double angle)
-    {
-        angle_ = angle;
-    }
-
-    void SetUseAngle(bool useAngle)
-    {
-        useAngle_ = useAngle;
-    }
-
-    GradientDirection GetDirection() const
-    {
-        return direction_;
-    }
-
     bool GetRepeat() const
     {
         return repeat_;
-    }
-
-    double GetAngle() const
-    {
-        return angle_;
-    }
-
-    bool GetUseAngle() const
-    {
-        return useAngle_;
     }
 
     const std::vector<GradientColor>& GetColors() const
@@ -229,27 +303,129 @@ public:
     {
         return std::string("Gradient (")
             .append(beginOffset_.ToString())
-            .append(",").append(std::to_string(innerRadius_))
+            .append(",")
+            .append(std::to_string(innerRadius_))
             .append(" --- ")
             .append(endOffset_.ToString())
-            .append(",").append(std::to_string(outerRadius_))
+            .append(",")
+            .append(std::to_string(outerRadius_))
             .append(")");
     }
 
+    SweepGradient& GetSweepGradient()
+    {
+        return sweepGradient_;
+    }
+
+    const SweepGradient& GetSweepGradient() const
+    {
+        return sweepGradient_;
+    }
+
+    void SetSweepGradient(const SweepGradient& sweepGradient)
+    {
+        sweepGradient_ = sweepGradient;
+    }
+
+    RadialGradient& GetRadialGradient()
+    {
+        return radialGradient_;
+    }
+
+    const RadialGradient& GetRadialGradient() const
+    {
+        return radialGradient_;
+    }
+
+    void SetRadialGradient(const RadialGradient& radialGradient)
+    {
+        radialGradient_ = radialGradient;
+    }
+
+    LinearGradient& GetLinearGradient()
+    {
+        return linearGradient_;
+    }
+
+    const LinearGradient& GetLinearGradient() const
+    {
+        return linearGradient_;
+    }
+
+    void SetLinearGradient(const LinearGradient& linearGradient)
+    {
+        linearGradient_ = linearGradient;
+    }
+
+    void SetDirection(const GradientDirection& direction)
+    {
+        if (LinearGradient::IsXAxis(direction)) {
+            linearGradient_.linearX = direction;
+        } else {
+            linearGradient_.linearY = direction;
+        }
+    }
+
+    void SetSpreadMethod(SpreadMethod spreadMethod)
+    {
+        spreadMethod_ = spreadMethod;
+    }
+
+    void SetGradientTransform(const std::string& gradientTransform)
+    {
+        gradientTransform_ = gradientTransform;
+    }
+
+    SpreadMethod GetSpreadMethod() const
+    {
+        return spreadMethod_;
+    }
+
+    const std::string& GetGradientTransform() const
+    {
+        return gradientTransform_;
+    }
+
+    const RadialGradientInfo& GetRadialGradientInfo() const
+    {
+        return radialGradientInfo_;
+    }
+
+    void SetRadialGradientInfo(const RadialGradientInfo& radialGradientInfo)
+    {
+        radialGradientInfo_ = radialGradientInfo;
+    }
+
+    const LinearGradientInfo& GetLinearGradientInfo() const
+    {
+        return linearGradientInfo_;
+    }
+
+    void SetLinearGradientInfo(const LinearGradientInfo& linearGradientInfo)
+    {
+        linearGradientInfo_ = linearGradientInfo;
+    }
+
 private:
-    GradientDirection direction_ { GradientDirection::LEFT };
-    double angle_ = 0.0;
+    GradientType type_ = GradientType::LINEAR;
     bool repeat_ = false;
     std::vector<GradientColor> colors_;
-    bool useAngle_ = false;
-
-    GradientType type_ = GradientType::LINEAR;
+    // for RadialGradient
+    RadialGradient radialGradient_;
+    // for LinearGradient
+    LinearGradient linearGradient_;
+    // for SweepGradient
+    SweepGradient sweepGradient_;
     // used for CanvasLinearGradient
     Offset beginOffset_;
     Offset endOffset_;
     // used for CanvasRadialGradient
     double innerRadius_ = 0.0;
     double outerRadius_ = 0.0;
+    SpreadMethod spreadMethod_ = SpreadMethod::PAD;
+    std::string gradientTransform_;
+    LinearGradientInfo linearGradientInfo_;
+    RadialGradientInfo radialGradientInfo_;
 };
 
 enum class ACE_EXPORT BackgroundImageSizeType {
@@ -265,7 +441,8 @@ public:
     BackgroundImageSize() = default;
     BackgroundImageSize(BackgroundImageSizeType type, double value) : typeX_(type), valueX_(value) {}
     BackgroundImageSize(BackgroundImageSizeType typeX, double valueX, BackgroundImageSizeType typeY, double valueY)
-        : typeX_(typeX), valueX_(valueX), typeY_(typeY), valueY_(valueY) {}
+        : typeX_(typeX), valueX_(valueX), typeY_(typeY), valueY_(valueY)
+    {}
     ~BackgroundImageSize() = default;
 
     void SetSizeTypeX(BackgroundImageSizeType type);
@@ -277,6 +454,10 @@ public:
     BackgroundImageSizeType GetSizeTypeY() const;
     double GetSizeValueX() const;
     double GetSizeValueY() const;
+
+    BackgroundImageSize operator+(const BackgroundImageSize& size) const;
+    BackgroundImageSize operator-(const BackgroundImageSize& size) const;
+    BackgroundImageSize operator*(double value) const;
 
     bool operator==(const BackgroundImageSize& size) const;
     bool operator!=(const BackgroundImageSize& size) const;
@@ -299,7 +480,8 @@ public:
     ~BackgroundImagePosition() = default;
     BackgroundImagePosition(
         BackgroundImagePositionType typeX, double valueX, BackgroundImagePositionType typeY, double valueY)
-        : typeX_(typeX), typeY_(typeY), valueX_(valueX), valueY_(valueY) {}
+        : typeX_(typeX), typeY_(typeY), valueX_(valueX), valueY_(valueY)
+    {}
 
     void SetSizeTypeX(BackgroundImagePositionType type)
     {
@@ -383,11 +565,6 @@ class BackgroundImage final : public AceType {
 
 public:
     BackgroundImage() = default;
-    explicit BackgroundImage(const std::string& src)
-    {
-        src_ = src;
-    }
-
     ~BackgroundImage() override = default;
 
     const BackgroundImageSize& GetImageSize() const
@@ -408,6 +585,11 @@ public:
     const std::string& GetSrc() const
     {
         return src_;
+    }
+
+    void SetImageSize(BackgroundImageSize imageSize)
+    {
+        imageSize_ = imageSize;
     }
 
     void SetImageSize(BackgroundImageSizeType type, double value = FULL_IMG_SIZE)
@@ -436,9 +618,12 @@ public:
         imageRepeat_ = imageRepeat;
     }
 
-    void SetSrc(const std::string& src)
+    void SetSrc(const std::string& src, const RefPtr<ThemeConstants>& themeConstants)
     {
-        src_ = src;
+        // If match the regex, src with the outer "url()" removed is returned.
+        // Otherwise return a copy of src directly.
+        auto imgSrc = std::regex_replace(src, std::regex(R"(^url\(\s*['"]?\s*([^()]+?)\s*['"]?\s*\)$)"), "$1");
+        src_ = ThemeUtils::ProcessImageSource(imgSrc, themeConstants);
     }
 
     bool operator==(const BackgroundImage& image) const
@@ -516,11 +701,19 @@ public:
     Decoration() = default;
     ~Decoration() override = default;
 
+    void SetContextAndCallback(
+        const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback);
+
     void AddShadow(const Shadow& shadow);
 
     void ClearAllShadow();
 
-    void SetBackgroundColor(const Color& backgroundColor)
+    void SetBackgroundColor(const Color& backgroundColor, const AnimationOption& option = AnimationOption())
+    {
+        backgroundColor_ = AnimatableColor(backgroundColor, option);
+    }
+
+    void SetBackgroundColor(const AnimatableColor& backgroundColor)
     {
         backgroundColor_ = backgroundColor;
     }
@@ -595,7 +788,7 @@ public:
         return gradient_;
     }
 
-    const Color& GetBackgroundColor() const
+    const AnimatableColor& GetBackgroundColor() const
     {
         return backgroundColor_;
     }
@@ -608,6 +801,11 @@ public:
     const std::vector<Shadow>& GetShadows() const
     {
         return shadows_;
+    }
+
+    void SetShadows(const std::vector<Shadow>& shadows)
+    {
+        shadows_.assign(shadows.begin(), shadows.end());
     }
 
     const RefPtr<ArcBackground>& GetArcBackground() const
@@ -658,7 +856,7 @@ private:
     // shadow vector is empty
     std::vector<Shadow> shadows_;
     // color is transparent
-    Color backgroundColor_ = Color::TRANSPARENT;
+    AnimatableColor backgroundColor_ { Color::TRANSPARENT };
     Color animationColor_ = Color::TRANSPARENT;
     // Gradient is not implemented
     Gradient gradient_ = Gradient();
@@ -767,8 +965,8 @@ public:
     void ArcTo(double x1, double y1, double x2, double y2, double radius);
     void QuadraticCurveTo(double cpx, double cpy, double x, double y);
     void BezierCurveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y);
-    void Ellipse(double x, double y, double radiusX, double radiusY,
-        double rotation, double startAngle, double endAngle, double ccw);
+    void Ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle,
+        double endAngle, double ccw);
     void Rect(double x, double y, double width, double height);
     void ClosePath();
     const std::vector<std::pair<PathCmd, PathArgs>>& GetCaches() const;

@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/edge.h"
 #include "core/pipeline/base/sole_child_component.h"
+#include "core/components/declaration/badge/badge_declaration.h"
 
 namespace OHOS::Ace {
 
@@ -32,140 +33,35 @@ public:
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
 
-    const Color& GetBadgeColor() const
-    {
-        return badgeColor_;
-    }
+    const Color& GetBadgeColor() const;
+    const Color& GetBadgeTextColor() const;
+    const Dimension& GetBadgeFontSize() const;
+    const EventMarker& GetClickEvent() const;
+    BadgePosition GetBadgePosition() const;
+    const Edge& GetPadding() const;
+    const Dimension& GetBadgeCicleSize() const;
+    const std::string& GetBadgeLabel() const;
+    void SetPadding(const Edge& padding);
+    int64_t GetMessageCount() const;
+    bool IsShowMessage() const;
+    int64_t GetMaxCount() const;
+    bool IsBadgeCircleSizeDefined() const;
+    void SetBadgeCircleSizeDefined(bool badgeCircleSizeDefined);
+    void SetMaxCount(int64_t maxCount);
+    void SetShowMessage(bool showMessage);
+    void SetMessageCount(int64_t messageCount);
+    void SetBadgePosition(BadgePosition badgePostion);
+    void SetBadgeTextColor(const Color& badgeTextColor);
+    void SetBadgeFontSize(const Dimension& badgeFontSize);
+    void SetBadgeColor(const Color& color);
+    void SetClickEvent(const EventMarker& event);
+    void SetBadgeCircleSize(const Dimension& badgeCircleSize);
+    void SetBadgeLabel(const std::string& badgeLabel);
 
-    const Color& GetBadgeTextColor() const
-    {
-        return badgeTextColor_;
-    }
-
-    const Dimension& GetBadgeFontSize() const
-    {
-        return badgeFontSize_;
-    }
-
-    const EventMarker& GetClickEvent() const
-    {
-        return clickEvent_;
-    }
-
-    BadgePosition GetBadgePosition() const
-    {
-        return badgePosition_;
-    }
-
-    const Edge& GetPadding() const
-    {
-        return padding_;
-    }
-
-    const Dimension& GetBadgeCicleSize() const
-    {
-        return badgeCircleSize_;
-    }
-
-    const std::string& GetBadgeLabel() const
-    {
-        return badgeLabel_;
-    }
-
-    void SetPadding(const Edge& padding)
-    {
-        padding_ = padding;
-    }
-
-    int32_t GetMessageCount() const
-    {
-        return messageCount_;
-    }
-
-    bool IsShowMessage() const
-    {
-        return showMessage_;
-    }
-
-    int32_t GetMaxCount() const
-    {
-        return maxCount_;
-    }
-
-    bool IsBadgeCircleSizeDefined() const
-    {
-        return badgeCircleSizeDefined_;
-    }
-
-    void SetBadgeCircleSizeDefined(bool badgeCircleSizeDefined)
-    {
-        badgeCircleSizeDefined_ = badgeCircleSizeDefined;
-    }
-
-    void SetMaxCount(int32_t maxCount)
-    {
-        maxCount_ = maxCount;
-    }
-
-    void SetShowMessage(bool showMessage)
-    {
-        showMessage_ = showMessage;
-    }
-
-    void SetMessageCount(int32_t messageCount)
-    {
-        messageCount_ = messageCount;
-    }
-
-    void SetBadgePosition(BadgePosition badgePostion)
-    {
-        badgePosition_ = badgePostion;
-    }
-
-    void SetBadgeTextColor(const Color& badgeTextColor)
-    {
-        badgeTextColor_ = badgeTextColor;
-    }
-
-    void SetBadgeFontSize(const Dimension& badgeFontSize)
-    {
-        badgeFontSize_ = badgeFontSize;
-    }
-
-    void SetBadgeColor(const Color& color)
-    {
-        badgeColor_ = color;
-    }
-
-    void SetClickEvent(const EventMarker& event)
-    {
-        clickEvent_ = event;
-    }
-
-    void SetBadgeCircleSize(const Dimension& badgeCircleSize)
-    {
-        badgeCircleSize_ = badgeCircleSize;
-        badgeCircleSizeDefined_ = true;
-    }
-
-    void SetBadgeLabel(const std::string& badgeLabel)
-    {
-        badgeLabel_ = badgeLabel;
-    }
+    void SetDeclaration(const RefPtr<BadgeDeclaration>& declaration);
 
 private:
-    Color badgeColor_;
-    Color badgeTextColor_;
-    Edge padding_;
-    EventMarker clickEvent_;
-    Dimension badgeFontSize_;
-    Dimension badgeCircleSize_;
-    BadgePosition badgePosition_ { BadgePosition::RIGHT_TOP };
-    int32_t messageCount_ = 0;
-    bool showMessage_ = false;
-    int32_t maxCount_ = 99;
-    bool badgeCircleSizeDefined_ = false;
-    std::string badgeLabel_;
+    RefPtr<BadgeDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

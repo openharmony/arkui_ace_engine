@@ -102,6 +102,7 @@ AccessibilityNode::AccessibilityNode(NodeId nodeId, const std::string& nodeName)
     // Initialize member variable in bitfield
     isEnabled_ = true;
     visible_ = true;
+    shown_ = true;
 }
 
 void AccessibilityNode::SetActionClickImpl(const ActionClickImpl& actionClickImpl)
@@ -243,8 +244,10 @@ void AccessibilityNode::AddEvent(int32_t pageId, const std::vector<std::string>&
             onAccessibilityEventId_ = EventMarker(std::to_string(nodeId_), event, pageId);
         } else if (event == CLICK) {
             onClickId_ = EventMarker(std::to_string(nodeId_), event, pageId);
+            SetClickableState(true);
         } else if (event == LONG_PRESS) {
             onLongPressId_ = EventMarker(std::to_string(nodeId_), event, pageId);
+            SetLongClickableState(true);
         } else if (event == FOCUS) {
             onFocusId_ = EventMarker(std::to_string(nodeId_), event, pageId);
         } else if (event == BLUR) {
@@ -367,15 +370,7 @@ void AccessibilityNode::SetOperableInfo()
     int64_t operateIter = BinarySearchFindIndex(nodeOperatorMap, ArraySize(nodeOperatorMap), tag_.c_str());
     if (operateIter != -1) {
         isCheckable_ = nodeOperatorMap[operateIter].value.checkable;
-        isClickable_ = nodeOperatorMap[operateIter].value.clickable;
-        if (isClickable_) {
-            AddSupportAction(AceAction::ACTION_CLICK);
-        }
         isScrollable_ = nodeOperatorMap[operateIter].value.scrollable;
-        isLongClickable_ = nodeOperatorMap[operateIter].value.longClickable;
-        if (isLongClickable_) {
-            AddSupportAction(AceAction::ACTION_LONG_CLICK);
-        }
         isFocusable_ = nodeOperatorMap[operateIter].value.focusable;
         if (isFocusable_) {
             AddSupportAction(AceAction::ACTION_FOCUS);

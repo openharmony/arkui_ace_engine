@@ -29,6 +29,11 @@ enum class GridSizeType {
     XL,
 };
 
+enum class GridTemplateType {
+    NORMAL = 0,
+    GRID,
+};
+
 enum class GridColumnType {
     NONE = 0,
     BUBBLE_TYPE,

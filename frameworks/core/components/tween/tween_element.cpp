@@ -15,10 +15,12 @@
 
 #include "core/components/tween/tween_element.h"
 
+#include "base/geometry/transform_util.h"
 #include "core/animation/curve_animation.h"
 #include "core/common/frontend.h"
 #include "core/components/clip/render_clip.h"
 #include "core/components/display/display_component.h"
+#include "core/components/positioned/positioned_element.h"
 #include "core/components/shared_transition/shared_transition_element.h"
 #include "core/components/transform/transform_component.h"
 #include "core/components/tween/tween_component.h"
@@ -78,6 +80,78 @@ void ResetController(RefPtr<Animator>& controller)
     controller->ClearInterpolators();
 }
 
+template<class T>
+void SetAnimationProperties(const RefPtr<Animation<T>>& animation, TweenOption& option)
+{
+    if (option.GetCurve()) {
+        animation->SetCurve(option.GetCurve());
+    }
+    if (!animation->HasInitValue()) {
+        animation->SetInitValue(T {});
+    }
+}
+
+void TransformUpdate(WeakPtr<RenderTransform>& weakPtr, const TransformOperation& value)
+{
+    auto renderTransformNode = weakPtr.Upgrade();
+    if (renderTransformNode) {
+        switch (value.type_) {
+            case TransformOperationType::TRANSLATE:
+                renderTransformNode->Translate(
+                    value.translateOperation_.dx, value.translateOperation_.dy, value.translateOperation_.dz);
+                break;
+            case TransformOperationType::SKEW:
+                renderTransformNode->Skew(value.skewOperation_.skewX, value.skewOperation_.skewY);
+                break;
+            case TransformOperationType::ROTATE:
+                renderTransformNode->Rotate(value.rotateOperation_.angle, value.rotateOperation_.dx,
+                    value.rotateOperation_.dy, value.rotateOperation_.dz);
+                break;
+            case TransformOperationType::MATRIX:
+                renderTransformNode->Matrix3D(value.matrix4_);
+                break;
+            case TransformOperationType::SCALE:
+                renderTransformNode->Scale(
+                    value.scaleOperation_.scaleX, value.scaleOperation_.scaleY, value.scaleOperation_.scaleZ);
+                break;
+            case TransformOperationType::PERSPECTIVE:
+                renderTransformNode->Perspective(value.perspectiveOperation_.distance);
+                break;
+            case TransformOperationType::UNDEFINED:
+                renderTransformNode->Translate(Dimension {}, Dimension {}, Dimension {});
+                break;
+            default:
+                LOGE("unsupported transform operation");
+                break;
+        }
+    }
+}
+
+void CreateTransformAnimation(const RefPtr<RenderTransform>& renderTransformNode, TweenOption& option)
+{
+    WeakPtr<RenderTransform> weak(renderTransformNode);
+
+    for (const auto& animation : option.GetTransformAnimations()) {
+        if (animation) {
+            SetAnimationProperties(animation, option);
+            animation->AddListener(std::bind(TransformUpdate, weak, std::placeholders::_1));
+        }
+    }
+}
+
+bool BindingTransformAnimationToController(RefPtr<Animator>& controller, TweenOption& option)
+{
+    bool needAnimation = false;
+    const auto& animations = option.GetTransformAnimations();
+    for (auto& animation : animations) {
+        if (animation) {
+            needAnimation = true;
+            controller->AddInterpolator(animation);
+        }
+    }
+    return needAnimation;
+}
+
 } // namespace
 
 const LinearEnumMapNode<AnimationType,
@@ -90,11 +164,7 @@ const LinearEnumMapNode<AnimationType,
                 scaleAnimation->AddListener([weakRender, scaleAnimation](float value) {
                     auto renderTransformNode = weakRender.Upgrade();
                     if (renderTransformNode) {
-                        if (scaleAnimation->ShouldSkipAnimation()) {
-                            renderTransformNode->Scale(scaleAnimation->GetEndValue());
-                        } else {
-                            renderTransformNode->Scale(value);
-                        }
+                        renderTransformNode->Scale(value);
                     }
                 });
             } },
@@ -110,11 +180,7 @@ const LinearEnumMapNode<AnimationType,
                 scaleXAnimation->AddListener([weakRender, scaleXAnimation](float value) {
                     auto renderTransformNode = weakRender.Upgrade();
                     if (renderTransformNode) {
-                        if (scaleXAnimation->ShouldSkipAnimation()) {
-                            renderTransformNode->Scale(scaleXAnimation->GetEndValue(), 1.0f);
-                        } else {
-                            renderTransformNode->Scale(value, 1.0f);
-                        }
+                        renderTransformNode->Scale(value, 1.0f);
                     }
                 });
             } },
@@ -125,11 +191,7 @@ const LinearEnumMapNode<AnimationType,
                 scaleYAnimation->AddListener([weakRender, scaleYAnimation](float value) {
                     auto renderTransformNode = weakRender.Upgrade();
                     if (renderTransformNode) {
-                        if (scaleYAnimation->ShouldSkipAnimation()) {
-                            renderTransformNode->Scale(1.0f, scaleYAnimation->GetEndValue());
-                        } else {
-                            renderTransformNode->Scale(1.0f, value);
-                        }
+                        renderTransformNode->Scale(1.0f, value);
                     }
                 });
             } },
@@ -140,11 +202,7 @@ const LinearEnumMapNode<AnimationType,
                 rotateZAnimation->AddListener([weakRender, rotateZAnimation](float value) {
                     auto renderTransformNode = weakRender.Upgrade();
                     if (renderTransformNode) {
-                        if (rotateZAnimation->ShouldSkipAnimation()) {
-                            renderTransformNode->RotateZ(rotateZAnimation->GetEndValue());
-                        } else {
-                            renderTransformNode->RotateZ(value);
-                        }
+                        renderTransformNode->RotateZ(value);
                     }
                 });
             } },
@@ -155,11 +213,7 @@ const LinearEnumMapNode<AnimationType,
                 rotateXAnimation->AddListener([weakRender, rotateXAnimation](float value) {
                     auto renderTransformNode = weakRender.Upgrade();
                     if (renderTransformNode) {
-                        if (rotateXAnimation->ShouldSkipAnimation()) {
-                            renderTransformNode->RotateX(rotateXAnimation->GetEndValue());
-                        } else {
-                            renderTransformNode->RotateX(value);
-                        }
+                        renderTransformNode->RotateX(value);
                     }
                 });
             } },
@@ -170,11 +224,7 @@ const LinearEnumMapNode<AnimationType,
                 rotateYAnimation->AddListener([weakRender, rotateYAnimation](float value) {
                     auto renderTransformNode = weakRender.Upgrade();
                     if (renderTransformNode) {
-                        if (rotateYAnimation->ShouldSkipAnimation()) {
-                            renderTransformNode->RotateY(rotateYAnimation->GetEndValue());
-                        } else {
-                            renderTransformNode->RotateY(value);
-                        }
+                        renderTransformNode->RotateY(value);
                     }
                 });
             } }
@@ -193,6 +243,10 @@ void TweenElement::Update()
     }
     shadow_ = tweenComponent->GetShadow();
     positionParam_ = tweenComponent->GetPositionParam();
+
+    if (tweenComponent->IsAnimationNameUpdated()) {
+        needUpdateKeyframes_ = true;
+    }
     if (tweenComponent->IsOptionCssChanged()) {
         needUpdateTweenOption_ = true;
         option_ = tweenComponent->GetTweenOption();
@@ -204,11 +258,11 @@ void TweenElement::Update()
         tweenComponent->SetOptionCustomChanged(false);
     }
     if (tweenComponent->IsOperationCssChanged()) {
-        operation_ = tweenComponent->GetTweenOperation();
+        operation_ = tweenComponent->GetAnimationOperation();
         tweenComponent->SetOperationCssChanged(false);
     }
     if (tweenComponent->IsOperationCustomChanged()) {
-        operationCustom_ = tweenComponent->GetCustomTweenOperation();
+        operationCustom_ = tweenComponent->GetCustomAnimationOperation();
         tweenComponent->SetOperationCustomChanged(false);
     }
     auto pipelineContext = context_.Upgrade();
@@ -225,10 +279,6 @@ void TweenElement::Update()
             isDelegatedController_ = false;
             controller_ = AceType::MakeRefPtr<Animator>(context_);
             LOGD("set animator to component when update.");
-
-            if (pipelineContext->GetIsDeclarative()) {
-                controller_->SetDeclarativeAnimator(true);
-            }
         }
 
         LOGD("add request to pipeline context.");
@@ -236,26 +286,38 @@ void TweenElement::Update()
     }
 }
 
-void TweenElement::ApplyOperation(RefPtr<Animator>& controller, TweenOperation& operation)
+TweenElement::~TweenElement()
+{
+    if (isComponentController_ && controllerCustom_) {
+        controllerCustom_->ClearInterpolators();
+        controllerCustom_->ClearAllListeners();
+        controllerCustom_->Stop();
+    }
+}
+
+void TweenElement::ApplyOperation(RefPtr<Animator>& controller, AnimationOperation& operation)
 {
     LOGD("apply operation: %{public}d", operation);
     switch (operation) {
-        case TweenOperation::PLAY:
+        case AnimationOperation::PLAY:
             controller->Play();
             break;
-        case TweenOperation::PAUSE:
+        case AnimationOperation::RUNNING:
+            controller->Play();
+            break;
+        case AnimationOperation::PAUSE:
             controller->Pause();
             break;
-        case TweenOperation::CANCEL:
+        case AnimationOperation::CANCEL:
             controller->Cancel();
             break;
-        case TweenOperation::FINISH:
+        case AnimationOperation::FINISH:
             controller->Finish();
             break;
-        case TweenOperation::REVERSE:
+        case AnimationOperation::REVERSE:
             controller->Reverse();
             break;
-        case TweenOperation::NONE:
+        case AnimationOperation::NONE:
         default:
             break;
     }
@@ -282,10 +344,14 @@ void TweenElement::OnPreFlush()
         return;
     }
 
-    if (needUpdateTweenOption_) {
+    if (needUpdateKeyframes_ || (operation_ == AnimationOperation::PLAY && needUpdateTweenOption_)) {
         ResetController(controller_);
         ApplyKeyframes();
-        ApplyOptions();
+        needUpdateKeyframes_ = false;
+    }
+
+    if (needUpdateTweenOption_) {
+        ApplyOptions(controller_, option_);
         needUpdateTweenOption_ = false;
     }
     if (needUpdateTweenOptionCustom_) {
@@ -294,7 +360,7 @@ void TweenElement::OnPreFlush()
         ApplyOptions(controllerCustom_, optionCustom_);
         needUpdateTweenOptionCustom_ = false;
     }
-    if (operation_ != TweenOperation::NONE || operationCustom_ != TweenOperation::NONE) {
+    if (operation_ != AnimationOperation::NONE || operationCustom_ != AnimationOperation::NONE) {
         auto pipelineContext = context_.Upgrade();
         if (!pipelineContext) {
             return;
@@ -310,8 +376,8 @@ void TweenElement::OnPreFlush()
     }
 
     // reset operation to none.
-    operation_ = TweenOperation::NONE;
-    operationCustom_ = TweenOperation::NONE;
+    operation_ = AnimationOperation::NONE;
+    operationCustom_ = AnimationOperation::NONE;
 }
 
 bool TweenElement::IsNeedAnimation(RefPtr<Animator>& controller, TweenOption& option)
@@ -337,6 +403,9 @@ bool TweenElement::IsNeedAnimation(RefPtr<Animator>& controller, TweenOption& op
             controller->AddInterpolator(animation);
         }
     }
+    if (BindingTransformAnimationToController(controller, option)) {
+        needAnimation = true;
+    }
     auto& opacityAnimation = option.GetOpacityAnimation();
     if (opacityAnimation) {
         LOGD("add opacity animation.");
@@ -349,13 +418,6 @@ bool TweenElement::IsNeedAnimation(RefPtr<Animator>& controller, TweenOption& op
         controller->AddInterpolator(colorAnimation);
         needAnimation = true;
     }
-    auto& backgroundPositionAnimation = option.GetBackgroundPositionAnimation();
-    if (backgroundPositionAnimation) {
-        LOGD("add background position animation.");
-        controller->AddInterpolator(backgroundPositionAnimation);
-        needAnimation = true;
-    }
-
     if (AddToAnimator(option.GetFloatPropertyAnimation(), controller, option)) {
         needAnimation = true;
     }
@@ -366,10 +428,6 @@ RefPtr<Component> TweenElement::BuildChild()
 {
     RefPtr<TweenComponent> tween = AceType::DynamicCast<TweenComponent>(component_);
     if (tween) {
-        if (tween->IsDeclarativeAnimation()) {
-            return ComposedElement::BuildChild();
-        }
-
         RefPtr<TransformComponent> transformComponent = AceType::MakeRefPtr<TransformComponent>();
         RefPtr<DisplayComponent> displayComponent = AceType::MakeRefPtr<DisplayComponent>(transformComponent);
         displayComponent->SetPositionType(positionParam_.type);
@@ -395,17 +453,17 @@ RefPtr<Component> TweenElement::BuildChild()
 
 void TweenElement::PerformBuild()
 {
-    auto pipelineContext = context_.Upgrade();
-    if (pipelineContext && !pipelineContext->GetIsDeclarative()) {
-        // if tween Option or child changes, need to do PerformBuild. These changes conflict with tween operation, so if
-        // there are any new operations, animate it first, just do not disturb child
-        if (((operation_ != TweenOperation::NONE) || (operationCustom_ != TweenOperation::NONE)) &&
-            !children_.empty()) {
-            LOGI("Just update self, do not disturb children.");
-            return;
-        }
-    }
     ComposedElement::PerformBuild();
+}
+
+bool TweenElement::CanUpdate(const RefPtr<Component>& newComponent)
+{
+    auto pipelineContext = context_.Upgrade();
+    if (pipelineContext && pipelineContext->GetIsDeclarative()) {
+        return ComposedElement::CanUpdate(newComponent);
+    }
+    // components of the same type are not updated.
+    return Element::CanUpdate(newComponent);
 }
 
 void TweenElement::CreateTranslateAnimation(const RefPtr<RenderTransform>& renderTransformNode, TweenOption& option)
@@ -423,17 +481,10 @@ void TweenElement::CreateTranslateAnimation(const RefPtr<RenderTransform>& rende
                 [](const RefPtr<Animation<DimensionOffset>>& translateAnimation,
                     WeakPtr<RenderTransform>& weakRender, TweenOption& option) {
                     SetTranslateProperties(translateAnimation, option);
-                    translateAnimation->AddListener([weakRender, translateAnimation](
-                                                        const DimensionOffset& value) {
+                    translateAnimation->AddListener([weakRender](const DimensionOffset& value) {
                         auto renderTransformNode = weakRender.Upgrade();
                         if (renderTransformNode) {
-                            if (translateAnimation->ShouldSkipAnimation()) {
-                                auto endValue = translateAnimation->GetEndValue();
-                                renderTransformNode->Translate(
-                                    endValue.GetX(), endValue.GetY());
-                            } else {
-                                renderTransformNode->Translate(value.GetX(), value.GetY());
-                            }
+                            renderTransformNode->Translate(value.GetX(), value.GetY());
                         }
                     });
                 } },
@@ -441,15 +492,10 @@ void TweenElement::CreateTranslateAnimation(const RefPtr<RenderTransform>& rende
                 [](const RefPtr<Animation<DimensionOffset>>& translateXAnimation, WeakPtr<RenderTransform>& weakRender,
                     TweenOption& option) {
                     SetTranslateProperties(translateXAnimation, option);
-                    translateXAnimation->AddListener([weakRender, translateXAnimation](const DimensionOffset& value) {
+                    translateXAnimation->AddListener([weakRender](const DimensionOffset& value) {
                         auto renderTransformNode = weakRender.Upgrade();
                         if (renderTransformNode) {
-                            if (translateXAnimation->ShouldSkipAnimation()) {
-                                auto endValue = translateXAnimation->GetEndValue();
-                                renderTransformNode->Translate(endValue.GetX(), 0.0_px);
-                            } else {
-                                renderTransformNode->Translate(value.GetX(), 0.0_px);
-                            }
+                            renderTransformNode->Translate(value.GetX(), 0.0_px);
                         }
                     });
                 } },
@@ -457,15 +503,10 @@ void TweenElement::CreateTranslateAnimation(const RefPtr<RenderTransform>& rende
                 [](const RefPtr<Animation<DimensionOffset>>& translateYAnimation, WeakPtr<RenderTransform>& weakRender,
                     TweenOption& option) {
                     SetTranslateProperties(translateYAnimation, option);
-                    translateYAnimation->AddListener([weakRender, translateYAnimation](const DimensionOffset& value) {
+                    translateYAnimation->AddListener([weakRender](const DimensionOffset& value) {
                         auto renderTransformNode = weakRender.Upgrade();
                         if (renderTransformNode) {
-                            if (translateYAnimation->ShouldSkipAnimation()) {
-                                auto endValue = translateYAnimation->GetEndValue();
-                                renderTransformNode->Translate(0.0_px, endValue.GetY());
-                            } else {
-                                renderTransformNode->Translate(0.0_px, value.GetY());
-                            }
+                            renderTransformNode->Translate(0.0_px, value.GetY());
                         }
                     });
                 } }
@@ -477,18 +518,7 @@ void TweenElement::CreateTranslateAnimation(const RefPtr<RenderTransform>& rende
             BinarySearchFindIndex(translateAnimationAddMap, mapSize, AnimationType::TRANSLATE);
         if (translateAnimationIter != -1) {
             auto& translateAnimation = iterTranslateAnimation->second;
-            if (!translateAnimation->ShouldSkipAnimation()) {
-                if (translateAnimation->IsDeclarativeAnimation()) {
-                    translateAnimation->SetStart(
-                        DimensionOffset(renderTransformNode->GetTranslateX(), renderTransformNode->GetTranslateY()));
-                }
-                translateAnimationAddMap[translateAnimationIter].value(translateAnimation, weakRender, option);
-            } else {
-                translateAnimation->SetStart(translateAnimation->GetEndValue());
-                translateAnimationAddMap[translateAnimationIter].value(translateAnimation, weakRender, option);
-                auto endValue = translateAnimation->GetEndValue();
-                renderTransformNode->Translate(endValue.GetX(), endValue.GetY());
-            }
+            translateAnimationAddMap[translateAnimationIter].value(translateAnimation, weakRender, option);
         }
     }
 
@@ -498,17 +528,7 @@ void TweenElement::CreateTranslateAnimation(const RefPtr<RenderTransform>& rende
             BinarySearchFindIndex(translateAnimationAddMap, mapSize, AnimationType::TRANSLATE_X);
         if (translateXAnimationIter != -1) {
             auto& translateXAnimation = iterTranslateXAnimation->second;
-            if (!translateXAnimation->ShouldSkipAnimation()) {
-                if (translateXAnimation->IsDeclarativeAnimation()) {
-                    translateXAnimation->SetStart(DimensionOffset(renderTransformNode->GetTranslateX(), Dimension()));
-                }
-                translateAnimationAddMap[translateXAnimationIter].value(translateXAnimation, weakRender, option);
-            } else {
-                translateXAnimation->SetStart(translateXAnimation->GetEndValue());
-                translateAnimationAddMap[translateXAnimationIter].value(translateXAnimation, weakRender, option);
-                auto endValue = translateXAnimation->GetEndValue();
-                renderTransformNode->Translate(endValue.GetX(), 0.0_px);
-            }
+            translateAnimationAddMap[translateXAnimationIter].value(translateXAnimation, weakRender, option);
         }
     }
 
@@ -518,17 +538,7 @@ void TweenElement::CreateTranslateAnimation(const RefPtr<RenderTransform>& rende
             BinarySearchFindIndex(translateAnimationAddMap, mapSize, AnimationType::TRANSLATE_Y);
         if (translateYAnimationIter != -1) {
             auto& translateYAnimation = iterTranslateYAnimation->second;
-            if (!translateYAnimation->ShouldSkipAnimation()) {
-                if (translateYAnimation->IsDeclarativeAnimation()) {
-                    translateYAnimation->SetStart(DimensionOffset(Dimension(), renderTransformNode->GetTranslateY()));
-                }
-                translateAnimationAddMap[translateYAnimationIter].value(translateYAnimation, weakRender, option);
-            } else {
-                translateYAnimation->SetStart(translateYAnimation->GetEndValue());
-                translateAnimationAddMap[translateYAnimationIter].value(translateYAnimation, weakRender, option);
-                auto endValue = translateYAnimation->GetEndValue();
-                renderTransformNode->Translate(0.0_px, endValue.GetY());
-            }
+            translateAnimationAddMap[translateYAnimationIter].value(translateYAnimation, weakRender, option);
         }
     }
 }
@@ -547,16 +557,7 @@ void TweenElement::CreateScaleAnimation(const RefPtr<RenderTransform>& renderTra
         auto scaleAnimationIter = BinarySearchFindIndex(transformFloatAnimationAddMap_, mapSize, AnimationType::SCALE);
         if (scaleAnimationIter != -1) {
             auto& scaleAnimation = iterScaleAnimation->second;
-            if (!scaleAnimation->ShouldSkipAnimation()) {
-                if (scaleAnimation->IsDeclarativeAnimation()) {
-                    scaleAnimation->SetStart(renderTransformNode->GetScaleX());
-                }
-                transformFloatAnimationAddMap_[scaleAnimationIter].value(scaleAnimation, weakRender, option);
-            } else {
-                scaleAnimation->SetStart(scaleAnimation->GetEndValue());
-                transformFloatAnimationAddMap_[scaleAnimationIter].value(scaleAnimation, weakRender, option);
-                renderTransformNode->Scale(scaleAnimation->GetEndValue());
-            }
+            transformFloatAnimationAddMap_[scaleAnimationIter].value(scaleAnimation, weakRender, option);
         }
     }
 
@@ -566,16 +567,7 @@ void TweenElement::CreateScaleAnimation(const RefPtr<RenderTransform>& renderTra
             BinarySearchFindIndex(transformFloatAnimationAddMap_, mapSize, AnimationType::SCALE_X);
         if (scaleXAnimationIter != -1) {
             auto& scaleXAnimation = iterScaleXAnimation->second;
-            if (!scaleXAnimation->ShouldSkipAnimation()) {
-                if (scaleXAnimation->IsDeclarativeAnimation()) {
-                    scaleXAnimation->SetStart(renderTransformNode->GetScaleX());
-                }
-                transformFloatAnimationAddMap_[scaleXAnimationIter].value(scaleXAnimation, weakRender, option);
-            } else {
-                scaleXAnimation->SetStart(scaleXAnimation->GetEndValue());
-                transformFloatAnimationAddMap_[scaleXAnimationIter].value(scaleXAnimation, weakRender, option);
-                renderTransformNode->Scale(scaleXAnimation->GetEndValue(), 1.0f);
-            }
+            transformFloatAnimationAddMap_[scaleXAnimationIter].value(scaleXAnimation, weakRender, option);
         }
     }
 
@@ -585,16 +577,7 @@ void TweenElement::CreateScaleAnimation(const RefPtr<RenderTransform>& renderTra
             BinarySearchFindIndex(transformFloatAnimationAddMap_, mapSize, AnimationType::SCALE_Y);
         if (scaleYAnimationIter != -1) {
             auto& scaleYAnimation = iterScaleYAnimation->second;
-            if (!scaleYAnimation->ShouldSkipAnimation()) {
-                if (scaleYAnimation->IsDeclarativeAnimation()) {
-                    scaleYAnimation->SetStart(renderTransformNode->GetScaleY());
-                }
-                transformFloatAnimationAddMap_[scaleYAnimationIter].value(scaleYAnimation, weakRender, option);
-            } else {
-                scaleYAnimation->SetStart(scaleYAnimation->GetEndValue());
-                transformFloatAnimationAddMap_[scaleYAnimationIter].value(scaleYAnimation, weakRender, option);
-                renderTransformNode->Scale(1.0f, scaleYAnimation->GetEndValue());
-            }
+            transformFloatAnimationAddMap_[scaleYAnimationIter].value(scaleYAnimation, weakRender, option);
         }
     }
 }
@@ -627,16 +610,6 @@ void TweenElement::CreateRotateAnimation(const RefPtr<RenderTransform>& renderTr
         if (rotateZAnimationIter != -1) {
             auto& rotateZAnimation = iterRotateZAnimation->second;
             transformFloatAnimationAddMap_[rotateZAnimationIter].value(rotateZAnimation, weakRender, option);
-            if (!rotateZAnimation->ShouldSkipAnimation()) {
-                if (rotateZAnimation->IsDeclarativeAnimation()) {
-                    rotateZAnimation->SetStart(renderTransformNode->GetRotateZ());
-                }
-                transformFloatAnimationAddMap_[rotateZAnimationIter].value(rotateZAnimation, weakRender, option);
-            } else {
-                rotateZAnimation->SetStart(rotateZAnimation->GetEndValue());
-                transformFloatAnimationAddMap_[rotateZAnimationIter].value(rotateZAnimation, weakRender, option);
-                renderTransformNode->RotateZ(rotateZAnimation->GetEndValue());
-            }
         }
     }
 
@@ -646,16 +619,7 @@ void TweenElement::CreateRotateAnimation(const RefPtr<RenderTransform>& renderTr
             BinarySearchFindIndex(transformFloatAnimationAddMap_, mapSize, AnimationType::ROTATE_X);
         if (rotateXAnimationIter != -1) {
             auto& rotateXAnimation = iterRotateXAnimation->second;
-            if (!rotateXAnimation->ShouldSkipAnimation()) {
-                if (rotateXAnimation->IsDeclarativeAnimation()) {
-                    rotateXAnimation->SetStart(renderTransformNode->GetRotateX());
-                }
-                transformFloatAnimationAddMap_[rotateXAnimationIter].value(rotateXAnimation, weakRender, option);
-            } else {
-                rotateXAnimation->SetStart(rotateXAnimation->GetEndValue());
-                transformFloatAnimationAddMap_[rotateXAnimationIter].value(rotateXAnimation, weakRender, option);
-                renderTransformNode->RotateX(rotateXAnimation->GetEndValue());
-            }
+            transformFloatAnimationAddMap_[rotateXAnimationIter].value(rotateXAnimation, weakRender, option);
         }
     }
 
@@ -665,16 +629,7 @@ void TweenElement::CreateRotateAnimation(const RefPtr<RenderTransform>& renderTr
             BinarySearchFindIndex(transformFloatAnimationAddMap_, mapSize, AnimationType::ROTATE_Y);
         if (rotateYAnimationIter != -1) {
             auto& rotateYAnimation = iterRotateYAnimation->second;
-            if (!rotateYAnimation->ShouldSkipAnimation()) {
-                if (rotateYAnimation->IsDeclarativeAnimation()) {
-                    rotateYAnimation->SetStart(renderTransformNode->GetRotateY());
-                }
-                transformFloatAnimationAddMap_[rotateYAnimationIter].value(rotateYAnimation, weakRender, option);
-            } else {
-                rotateYAnimation->SetStart(rotateYAnimation->GetEndValue());
-                transformFloatAnimationAddMap_[rotateYAnimationIter].value(rotateYAnimation, weakRender, option);
-                renderTransformNode->RotateY(rotateYAnimation->GetEndValue());
-            }
+            transformFloatAnimationAddMap_[rotateYAnimationIter].value(rotateYAnimation, weakRender, option);
         }
     }
 }
@@ -689,34 +644,20 @@ void TweenElement::CreateOpacityAnimation(const RefPtr<RenderDisplay>& renderDis
     if (!opacityAnimation->HasInitValue()) {
         opacityAnimation->SetInitValue(UINT8_MAX);
     }
-
-    if (!opacityAnimation->ShouldSkipAnimation()) {
-        if (opacityAnimation->IsDeclarativeAnimation()) {
-            opacityAnimation->SetStart(renderDisplayNode->GetOpacity() / (float)UINT8_MAX);
-        }
-
-        WeakPtr<RenderDisplay> weakRender = renderDisplayNode;
-        opacityAnimation->AddListener([weakRender, opacityAnimation](float value) {
-            auto opacity = static_cast<uint8_t>(std::round(value * UINT8_MAX));
-            if (value < 0.0f || value > 1.0f) {
-                opacity = UINT8_MAX;
-            }
-            auto renderDisplayNode = weakRender.Upgrade();
-            if (renderDisplayNode) {
-                renderDisplayNode->UpdateOpacity(opacity);
-            }
-        });
-
-        if (option.GetCurve()) {
-            opacityAnimation->SetCurve(option.GetCurve());
-        }
-    } else {
-        auto endValue = opacityAnimation->GetEndValue();
-        auto opacity = static_cast<uint8_t>(std::round(endValue * UINT8_MAX));
-        if (endValue < 0.0f || endValue > 1.0f) {
+    WeakPtr<RenderDisplay> weakRender = renderDisplayNode;
+    opacityAnimation->AddListener([weakRender](float value) {
+        auto opacity = static_cast<uint8_t>(std::round(value * UINT8_MAX));
+        if (value < 0.0f || value > 1.0f) {
             opacity = UINT8_MAX;
         }
-        renderDisplayNode->UpdateOpacity(opacity);
+        auto renderDisplayNode = weakRender.Upgrade();
+        if (renderDisplayNode) {
+            renderDisplayNode->UpdateOpacity(opacity);
+        }
+    });
+
+    if (option.GetCurve()) {
+        opacityAnimation->SetCurve(option.GetCurve());
     }
 }
 
@@ -728,7 +669,7 @@ void TweenElement::CreateColorAnimation(const RefPtr<PropertyAnimatable>& animat
     }
     auto& colorAnimation = option.GetColorAnimation();
     if (!colorAnimation) {
-        LOGD("create color animation with null. skip it.");
+        LOGE("create color animation with null. skip it.");
         return;
     }
     PropertyAnimatableType propertyType;
@@ -744,26 +685,22 @@ template<class U, class V>
 bool TweenElement::CreatePropertyAnimation(const RefPtr<PropertyAnimatable>& propertyAnimatable,
     PropertyAnimatableType propertyType, const TweenOption& option, RefPtr<Animation<V>>& animation)
 {
-    if (animation && !animation->ShouldSkipAnimation()) {
-        typename U::Type initValue;
-        bool created =
-            PropertyAnimatable::AddPropertyAnimation<U, V>(propertyAnimatable, propertyType, animation, initValue);
-        if (!created) {
-            LOGE("create property animation failed. property: %{public}d", propertyType);
-            return false;
-        }
-        if (option.GetCurve()) {
-            animation->SetCurve(option.GetCurve());
-        }
-        if (!animation->HasInitValue()) {
-            animation->SetInitValue(initValue);
-        }
-    } else {
-        bool propertySet = PropertyAnimatable::SetProperty<U, V>(propertyAnimatable, propertyType, animation);
-        if (!propertySet) {
-            LOGE("Cannot set property. property: %{public}d", propertyType);
-            return false;
-        }
+    if (!animation) {
+        LOGE("CreatePropertyAnimation failed, animation is null.");
+        return false;
+    }
+    typename U::Type initValue;
+    bool created =
+        PropertyAnimatable::AddPropertyAnimation<U, V>(propertyAnimatable, propertyType, animation, initValue);
+    if (!created) {
+        LOGE("create property animation failed. property: %{public}d", propertyType);
+        return false;
+    }
+    if (option.GetCurve()) {
+        animation->SetCurve(option.GetCurve());
+    }
+    if (!animation->HasInitValue()) {
+        animation->SetInitValue(initValue);
     }
     return true;
 }
@@ -781,22 +718,6 @@ bool TweenElement::AddToAnimator(
         }
     }
     return needAnimation;
-}
-
-void TweenElement::CreateBackgroundPositionAnimation(const RefPtr<PropertyAnimatable>& animatable, TweenOption& option)
-{
-    if (!animatable) {
-        LOGE("create background position animation failed. not a animatable child.");
-        return;
-    }
-    auto& backgroundPositionAnimation = option.GetBackgroundPositionAnimation();
-    if (!backgroundPositionAnimation) {
-        LOGD("create background position animation with null. skip it.");
-        return;
-    }
-
-    CreatePropertyAnimation<BackgroundPositionPropertyAnimatable, BackgroundImagePosition>(
-        animatable, PropertyAnimatableType::PROPERTY_BACKGROUND_POSITION, option, backgroundPositionAnimation);
 }
 
 void TweenElement::SetController(const RefPtr<Animator>& controller)
@@ -935,9 +856,7 @@ void TweenElement::AddPrepareListener(
             if (context && tween && transform) {
                 auto currentTimestamp = context->GetTimeFromExternalTimer();
                 if (tween->currentTimestamp_ != currentTimestamp || tween->currentTimestamp_ == 0) {
-                    if (!context->GetIsDeclarative() || tween->GetOption().IsValid()) {
-                        transform->ResetTransform();
-                    }
+                    transform->ResetTransform();
                     tween->currentTimestamp_ = currentTimestamp;
                 }
             }
@@ -961,14 +880,6 @@ bool TweenElement::ApplyKeyframes(RefPtr<Animator>& controller, TweenOption& opt
     }
     LOGD("TweenElement: ApplyKeyframes.");
 
-    auto pipelineContext = context_.Upgrade();
-    if (pipelineContext && pipelineContext->GetIsDeclarative()) {
-        if (shouldSkipAnimationOnCreation) {
-            option.SkipAllPendingAnimation();
-            shouldSkipAnimationOnCreation = false;
-        }
-    }
-
     const auto& displayRenderNode =
         AceType::DynamicCast<RenderDisplay>(AceType::DynamicCast<RenderElement>(child)->GetRenderNode());
     if (!displayRenderNode) {
@@ -990,26 +901,18 @@ bool TweenElement::ApplyKeyframes(RefPtr<Animator>& controller, TweenOption& opt
         transformRenderNode->SetShadow(shadow_);
     }
 
-    if (pipelineContext && pipelineContext->GetIsDeclarative()) {
-        displayRenderNode->SetDeclarativeAnimationActive(true);
-        transformRenderNode->SetDeclarativeAnimationActive(true);
-    }
-
     const auto& contentElement = AceType::DynamicCast<RenderElement>(transformElement)->GetFirstChild();
     auto animatable = GetAnimatable(contentElement);
     if (animatable) {
-        if (pipelineContext && pipelineContext->GetIsDeclarative()) {
-            contentElement->GetRenderNode()->SetDeclarativeAnimationActive(true);
-        }
         CreateColorAnimation(animatable, option);
-        CreateBackgroundPositionAnimation(animatable, option);
         CreatePropertyAnimationFloat(animatable, option);
     }
+    CreateTransformAnimation(transformRenderNode, option);
     CreateTranslateAnimation(transformRenderNode, option);
     CreateScaleAnimation(transformRenderNode, option);
     CreateRotateAnimation(transformRenderNode, option);
     CreateTransformOriginAnimation(transformRenderNode, option);
-    if (option.HasTransformOffsetChanged() || option.HasTransformFloatChanged()) {
+    if (option.HasTransformOffsetChanged() || option.HasTransformFloatChanged() || option.HasTransformChanged()) {
         AddPrepareListener(controller, transformRenderNode, prepareId);
     }
     CreateOpacityAnimation(displayRenderNode, option);
@@ -1027,7 +930,15 @@ void TweenElement::ApplyOptions(RefPtr<Animator>& controller, TweenOption& optio
     controller->SetIteration(option.GetIteration());
     controller->SetStartDelay(option.GetDelay());
     controller->SetFillMode(option.GetFillMode());
+    controller->SetTempo(option.GetTempo());
     controller->SetAnimationDirection(option.GetAnimationDirection());
+
+    for (const auto& [type, animation] : option.GetAnimatables()) {
+        if (option.GetCurve()) {
+            animation->SetCurve(option.GetCurve());
+        }
+        controller->AddInterpolator(animation);
+    }
 }
 
 void TweenElement::ApplyOptions()

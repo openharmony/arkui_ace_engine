@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_SVG_PAINT_STATE_H
 
 #include "base/memory/ace_type.h"
+#include "core/components/common/properties/animatable_double.h"
 #include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components/common/properties/color.h"
 #include "frameworks/core/components/common/properties/decoration.h"
@@ -35,10 +36,17 @@ const char ATTR_NAME_FILL_OPACITY[] = "fill-opacity";
 const char ATTR_NAME_STROKE_OPACITY[] = "stroke-opacity";
 const char ATTR_NAME_LETTER_SPACING[] = "letter-spacing";
 const char ANIMATOR_TYPE_MOTION[] = "motion";
+const char ATTR_NAME_FILL_RULE_EVENODD[] = "evenodd";
 
 class FillState {
 public:
-    const Color& GetColor() const
+    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+    {
+        color_.SetContextAndCallback(context, callback);
+        opacity_.SetContextAndCallback(context, callback);
+    }
+
+    const AnimatableColor& GetColor() const
     {
         return color_;
     }
@@ -48,31 +56,53 @@ public:
      * @param color
      * @param isSelf if false the color value inherited from the parent node, otherwise the value is setted by self
      */
-    void SetColor(const Color& color, bool isSelf = true)
+    void SetColor(const Color& color, bool isSelf = true, const AnimationOption& option = AnimationOption())
     {
-        color_ = color;
+        color_ = AnimatableColor(color, option);
         hasColor_ = isSelf;
     }
 
-    const Gradient& GetGradient() const
+    std::optional<Gradient>& GetGradient()
     {
         return gradient_;
     }
 
-    void SetGradient(const Gradient& gradient)
+    const std::optional<Gradient>& GetGradient() const
     {
-        gradient_ = gradient;
+        return gradient_;
     }
 
-    void SetOpacity(double opacity, bool isSelf = true)
+    void SetGradient(const Gradient& gradient, bool isSelf = true)
     {
-        opacity_ = opacity;
+        gradient_ = std::make_optional(gradient);
+        hasGradient_ = isSelf;
+    }
+
+    void SetOpacity(double opacity, bool isSelf = true, const AnimationOption& option = AnimationOption())
+    {
+        opacity_ = AnimatableDouble(opacity, option);
         hasOpacity_ = isSelf;
     }
 
-    double GetOpacity() const
+    AnimatableDouble GetOpacity() const
     {
         return opacity_;
+    }
+
+    void SetFillRule(const std::string& fillRule, bool isSelf = true)
+    {
+        fillRule_ = fillRule;
+        hasFillRule_ = isSelf;
+    }
+
+    const std::string& GetFillRule() const
+    {
+        return fillRule_;
+    }
+
+    bool IsEvenodd() const
+    {
+        return fillRule_ == ATTR_NAME_FILL_RULE_EVENODD;
     }
 
     void Inherit(const FillState& parent)
@@ -82,6 +112,12 @@ public:
         }
         if (!hasOpacity_) {
             opacity_ = parent.GetOpacity();
+        }
+        if (!hasFillRule_) {
+            fillRule_ = parent.GetFillRule();
+        }
+        if (!hasGradient_) {
+            gradient_ = parent.GetGradient();
         }
     }
 
@@ -95,34 +131,56 @@ public:
         return hasOpacity_;
     }
 
+    void SetHref(const std::string& href)
+    {
+        href_ = href;
+    }
+
+    const std::string& GetHref() const
+    {
+        return href_;
+    }
+
 protected:
-    Color color_ = Color::BLACK;
-    double opacity_ = 1.0;
-    Gradient gradient_;
+    AnimatableColor color_ = AnimatableColor(Color::BLACK);
+    AnimatableDouble opacity_ = AnimatableDouble(1.0);
+    std::string fillRule_;
+    std::optional<Gradient> gradient_;
     bool hasColor_ = false;
     bool hasOpacity_ = false;
+    bool hasFillRule_ = false;
+    bool hasGradient_ = false;
+    std::string href_;
 };
 
 class StrokeState {
 public:
-    const Color& GetColor() const
+    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+    {
+        lineWidth_.SetContextAndCallback(context, callback);
+        color_.SetContextAndCallback(context, callback);
+        opacity_.SetContextAndCallback(context, callback);
+        strokeDashOffset_.SetContextAndCallback(context, callback);
+    }
+
+    const AnimatableColor& GetColor() const
     {
         return color_;
     }
 
-    void SetColor(const Color& color, bool isSelf = true)
+    void SetColor(const Color& color, bool isSelf = true, const AnimationOption& option = AnimationOption())
     {
-        color_ = color;
+        color_ = AnimatableColor(color, option);
         hasColor_ = isSelf;
     }
 
-    void SetOpacity(double opacity, bool isSelf = true)
+    void SetOpacity(double opacity, bool isSelf = true, const AnimationOption& option = AnimationOption())
     {
-        opacity_ = opacity;
+        opacity_ = AnimatableDouble(opacity, option);
         hasOpacity_ = isSelf;
     }
 
-    double GetOpacity() const
+    AnimatableDouble GetOpacity() const
     {
         return opacity_;
     }
@@ -149,14 +207,14 @@ public:
         hasLineJoin_ = isSelf;
     }
 
-    const Dimension& GetLineWidth() const
+    const AnimatableDimension& GetLineWidth() const
     {
         return lineWidth_;
     }
 
-    void SetLineWidth(Dimension lineWidth, bool isSelf = true)
+    void SetLineWidth(Dimension lineWidth, bool isSelf = true, const AnimationOption& option = AnimationOption())
     {
-        lineWidth_ = lineWidth;
+        lineWidth_ = AnimatableDimension(lineWidth, option);
         hasLineWidth_ = isSelf;
     }
 
@@ -194,6 +252,29 @@ public:
         hasLineDash_ = isSelf;
     }
 
+    void SetStrokeDashOffset(const Dimension& offset, bool isSelf = true,
+                             const AnimationOption& option = AnimationOption())
+    {
+        strokeDashOffset_ = AnimatableDimension(offset, option);
+        hasStrokeDashOffset_ = isSelf;
+    }
+
+    void SetStrokeDashArray(const std::vector<Dimension>& segments, bool isSelf = true)
+    {
+        strokeDashArray_ = segments;
+        hasStrokeDashArray_ = isSelf;
+    }
+
+    const AnimatableDimension& GetStrokeDashOffset() const
+    {
+        return strokeDashOffset_;
+    }
+
+    const std::vector<Dimension>& GetStrokeDashArray() const
+    {
+        return strokeDashArray_;
+    }
+
     bool HasStroke() const
     {
         // The text outline is drawn only when stroke is set
@@ -226,6 +307,12 @@ public:
         if (!hasDashOffset_) {
             lineDash_.dashOffset = strokeState.GetLineDash().dashOffset;
         }
+        if (!hasStrokeDashArray_) {
+            strokeDashArray_ = strokeState.GetStrokeDashArray();
+        }
+        if (!hasStrokeDashOffset_) {
+            strokeDashOffset_ = strokeState.GetStrokeDashOffset();
+        }
     }
 
     bool HasColor() const
@@ -253,14 +340,27 @@ public:
         return hasDashOffset_;
     }
 
+    void SetHref(const std::string& href)
+    {
+        href_ = href;
+    }
+
+    const std::string& GetHref() const
+    {
+        return href_;
+    }
+
 private:
-    Color color_ = Color::TRANSPARENT;
-    double opacity_ = 1.0;
+    AnimatableColor color_ = AnimatableColor(Color::TRANSPARENT);
+    AnimatableDouble opacity_ = AnimatableDouble(1.0);
     LineCapStyle lineCap_ = LineCapStyle::BUTT;
     LineJoinStyle lineJoin_ = LineJoinStyle::MITER;
-    Dimension lineWidth_ = Dimension(1.0);
+    AnimatableDimension lineWidth_ = AnimatableDimension(1.0);
     double miterLimit_ = 4.0;
     LineDashParam lineDash_;
+    std::vector<Dimension> strokeDashArray_;
+    AnimatableDimension strokeDashOffset_;
+    std::string href_;
     bool hasColor_ = false;
     bool hasOpacity_ = false;
     bool hasLineCap_ = false;
@@ -269,6 +369,8 @@ private:
     bool hasMiterLimit_ = false;
     bool hasLineDash_ = false;
     bool hasDashOffset_ = false;
+    bool hasStrokeDashArray_ = false;
+    bool hasStrokeDashOffset_ = false;
 };
 
 class SvgTextStyle {
@@ -317,13 +419,13 @@ public:
         return textStyle_.GetFontWeight();
     }
 
-    void SetLetterSpacing(double letterSpacing, bool isSelf = true)
+    void SetLetterSpacing(const Dimension& letterSpacing, bool isSelf = true)
     {
         textStyle_.SetLetterSpacing(letterSpacing);
         hasLetterSpacing_ = isSelf;
     }
 
-    double GetLetterSpacing() const
+    const Dimension& GetLetterSpacing() const
     {
         return textStyle_.GetLetterSpacing();
     }
@@ -384,6 +486,52 @@ private:
     bool hasFontWeight_ = false;
     bool hasLetterSpacing_ = false;
     bool hasTextDecoration_ = false;
+};
+
+class ClipState {
+public:
+    void SetClipRule(const std::string& clipRule, bool isSelf = true)
+    {
+        clipRule_ = clipRule;
+        hasClipRule_ = isSelf;
+    }
+
+    const std::string& GetClipRule() const
+    {
+        return clipRule_;
+    }
+
+    bool IsEvenodd() const
+    {
+        return clipRule_ == ATTR_NAME_FILL_RULE_EVENODD;
+    }
+
+    void SetHref(const std::string& href, bool isSelf = true)
+    {
+        href_ = href;
+        hasHref_ = isSelf;
+    }
+
+    const std::string& GetHref() const
+    {
+        return href_;
+    }
+
+    void Inherit(const ClipState& clipState)
+    {
+        if (!hasClipRule_) {
+            clipRule_ = clipState.GetClipRule();
+        }
+        if (!hasHref_) {
+            href_ = clipState.GetHref();
+        }
+    }
+
+private:
+    std::string clipRule_;
+    std::string href_;
+    bool hasClipRule_ = false;
+    bool hasHref_ = false;
 };
 
 } // namespace OHOS::Ace

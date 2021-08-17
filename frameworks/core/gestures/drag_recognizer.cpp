@@ -156,15 +156,27 @@ void DragRecognizer::HandleTouchUpEvent(const TouchPoint& event)
 
     auto& dragInfo = iter->second;
     if (dragInfo.states_ == DetectState::DETECTED) {
-        LOGD("use animation to end drag");
-        if (onDragEnd_) {
-            DragEndInfo endInfo(event.id);
-            endInfo.SetVelocity(dragInfo.velocityTracker_.GetVelocity())
-                .SetMainVelocity(dragInfo.velocityTracker_.GetMainAxisVelocity())
-                .SetGlobalLocation(event.GetOffset())
-                .SetLocalLocation(event.GetOffset() - coordinateOffset_);
-            endInfo.SetTimeStamp(event.time);
-            onDragEnd_(endInfo);
+        bool upSuccess = true;
+        for (auto entry = dragFingers_.begin(); entry != dragFingers_.end(); ++entry) {
+            if (entry == iter) {
+                continue;
+            }
+            auto& otherDragInfo = entry->second;
+            if (otherDragInfo.states_ == DetectState::DETECTED) {
+                upSuccess = false;
+            }
+        }
+        if (upSuccess) {
+            LOGD("use animation to end drag");
+            if (onDragEnd_) {
+                DragEndInfo endInfo(event.id);
+                endInfo.SetVelocity(dragInfo.velocityTracker_.GetVelocity())
+                    .SetMainVelocity(dragInfo.velocityTracker_.GetMainAxisVelocity())
+                    .SetGlobalLocation(event.GetOffset())
+                    .SetLocalLocation(event.GetOffset() - coordinateOffset_);
+                endInfo.SetTimeStamp(event.time);
+                onDragEnd_(endInfo);
+            }
         }
     } else if (dragInfo.states_ == DetectState::DETECTING) {
         LOGD("this gesture is not drag, try to reject it");

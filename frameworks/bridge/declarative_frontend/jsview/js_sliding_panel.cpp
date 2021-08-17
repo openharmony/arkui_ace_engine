@@ -18,36 +18,15 @@
 #include <algorithm>
 #include <iterator>
 
-#include "core/components/foreach/foreach_component.h"
-#include "core/components/panel/sliding_panel_component.h"
+#include "core/components/panel/sliding_panel_component_v2.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
 
-#ifdef USE_QUICKJS_ENGINE
-JSValue SlidingPanelSizeChangeEventToJSValue(const SlidingPanelSizeChangeEvent& eventInfo, JSContext* ctx)
+JSRef<JSVal> SlidingPanelSizeChangeEventToJSValue(const SlidingPanelSizeChangeEvent& eventInfo)
 {
-    JSValue eventObj = JS_NewObject(ctx);
-    JS_SetPropertyStr(ctx, eventObj, "width", JS_NewFloat64(ctx, eventInfo.GetWidth()));
-    JS_SetPropertyStr(ctx, eventObj, "height", JS_NewFloat64(ctx, eventInfo.GetHeight()));
-
-    const PanelMode& mode = eventInfo.GetMode();
-    if (mode == PanelMode::FULL) {
-        JS_SetPropertyStr(ctx, eventObj, "mode", JS_NewString(ctx, "full"));
-    } else if (mode == PanelMode::MINI) {
-        JS_SetPropertyStr(ctx, eventObj, "mode", JS_NewString(ctx, "mini"));
-    } else {
-        JS_SetPropertyStr(ctx, eventObj, "mode", JS_NewString(ctx, "half"));
-    }
-    return eventObj;
-}
-#elif USE_V8_ENGINE
-v8::Local<v8::Value> SlidingPanelSizeChangeEventToJSValue(
-    const SlidingPanelSizeChangeEvent& eventInfo, v8::Isolate* isolate)
-{
-    ACE_DCHECK(isolate);
-    auto context = isolate->GetCurrentContext();
-    v8::Local<v8::Object> obj = v8::Object::New(isolate);
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
     std::string modeStr = "half";
     const PanelMode& mode = eventInfo.GetMode();
     if (mode == PanelMode::FULL) {
@@ -55,284 +34,349 @@ v8::Local<v8::Value> SlidingPanelSizeChangeEventToJSValue(
     } else if (mode == PanelMode::MINI) {
         modeStr = "mini";
     }
-    obj->Set(context, v8::String::NewFromUtf8(isolate, "mode").ToLocalChecked(),
-           v8::String::NewFromUtf8(isolate, modeStr.c_str()).ToLocalChecked())
-        .ToChecked();
-    obj->Set(context, v8::String::NewFromUtf8(isolate, "width").ToLocalChecked(),
-           v8::Number::New(isolate, eventInfo.GetWidth()))
-        .ToChecked();
-    obj->Set(context, v8::String::NewFromUtf8(isolate, "height").ToLocalChecked(),
-           v8::Number::New(isolate, eventInfo.GetHeight()))
-        .ToChecked();
-    return v8::Local<v8::Value>(obj);
+    obj->SetProperty<std::string>("mode", modeStr.c_str());
+    obj->SetProperty<double>("width", eventInfo.GetWidth());
+    obj->SetProperty<double>("height", eventInfo.GetHeight());
+    return JSRef<JSVal>::Cast(obj);
 }
-#endif
 
 } // namespace
 
-#ifdef USE_QUICKJS_ENGINE
-JSSlidingPanel::JSSlidingPanel(const std::list<JSViewAbstract*>& children, std::list<JSValue> jsChildren)
-    : JSContainerBase(children, jsChildren)
+void JSSlidingPanel::Create(const JSCallbackInfo& info)
 {
-    LOGD("JSSlidingPanel(children: [%lu])", children_.size());
-}
-#elif USE_V8_ENGINE
-JSSlidingPanel::JSSlidingPanel(const std::list<JSViewAbstract*>& children,
-    std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren)
-    : JSContainerBase(children, jsChildren)
-{
-    LOGD("JSSlidingPanel(children: [%lu])", children_.size());
-}
-#endif
-
-JSSlidingPanel::~JSSlidingPanel()
-{
-    LOGD("Destroy: JSSlidingPanel");
-};
-
-void JSSlidingPanel::Destroy(JSViewAbstract* parentCustomView)
-{
-    LOGD("JSSlidingPanel::Destroy start");
-    JSContainerBase::Destroy(parentCustomView);
-    LOGD("JSSlidingPanel::Destroy end");
-}
-
-RefPtr<OHOS::Ace::Component> JSSlidingPanel::CreateSpecializedComponent()
-{
-    std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
-    for (const auto& jsViewChild : children_) {
-        if (!jsViewChild) {
-            continue;
-        }
-        auto component = jsViewChild->CreateComponent();
-        if (AceType::TypeName<ForEachComponent>() == AceType::TypeName(component)) {
-            auto children = AceType::DynamicCast<ForEachComponent>(component)->GetChildren();
-            std::copy(children.begin(), children.end(), std::back_insert_iterator(componentChildren));
-        } else {
-            componentChildren.emplace_back(component);
-        }
+    auto slidingPanel = AceType::MakeRefPtr<SlidingPanelComponentV2>();
+    ViewStackProcessor::GetInstance()->Push(slidingPanel);
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        auto isShow = info[0]->ToBoolean();
+        auto component = ViewStackProcessor::GetInstance()->GetDisplayComponent();
+        auto display = AceType::DynamicCast<DisplayComponent>(component);
+        display->SetVisible(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     }
-    // support only one child
-    RefPtr<OHOS::Ace::Component> child;
-    if (!componentChildren.empty()) {
-        child = componentChildren.front();
-    }
-    RefPtr<OHOS::Ace::PanelComponent> panelComponent =
-        AceType::MakeRefPtr<OHOS::Ace::PanelComponent>("PanelComponent", "Wrapper", child);
-    PreparePanelComponent(panelComponent);
-
-    return SlidingPanelComponent::Create(panelComponent);
-}
-
-std::vector<RefPtr<OHOS::Ace::SingleChild>> JSSlidingPanel::CreateInteractableComponents()
-{
-    return JSInteractableView::CreateComponents();
 }
 
 void JSSlidingPanel::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSlidingPanel>::Declare("Panel");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSSlidingPanel>::StaticMethod("create", &JSSlidingPanel::Create, opt);
+    JSClass<JSSlidingPanel>::StaticMethod("dragBar", &JSSlidingPanel::SetHasDragBar, opt);
+    JSClass<JSSlidingPanel>::StaticMethod("show", &JSSlidingPanel::SetShow, opt);
+    JSClass<JSSlidingPanel>::StaticMethod("mode", &JSSlidingPanel::SetPanelMode, opt);
+    JSClass<JSSlidingPanel>::StaticMethod("type", &JSSlidingPanel::SetPanelType, opt);
+    JSClass<JSSlidingPanel>::StaticMethod("fullHeight", &JSSlidingPanel::SetFullHeight, opt);
+    JSClass<JSSlidingPanel>::StaticMethod("halfHeight", &JSSlidingPanel::SetHalfHeight, opt);
+    JSClass<JSSlidingPanel>::StaticMethod("miniHeight", &JSSlidingPanel::SetMiniHeight, opt);
+
+    // box style TODO: missing borderstyle in box.
+    JSClass<JSSlidingPanel>::StaticMethod("backgroundColor", JsBackgroundColor);
+    JSClass<JSSlidingPanel>::StaticMethod("border", JsPanelBorder);
+    JSClass<JSSlidingPanel>::StaticMethod("borderWidth", JsPanelBorderWidth);
+    JSClass<JSSlidingPanel>::StaticMethod("borderColor", JsPanelBorderColor);
+    JSClass<JSSlidingPanel>::StaticMethod("borderStyle", JsPanelBorderStyle);
+    JSClass<JSSlidingPanel>::StaticMethod("borderRadius", JsPanelBorderRadius);
+
+    JSClass<JSSlidingPanel>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSSlidingPanel>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSSlidingPanel>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSSlidingPanel>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSSlidingPanel>::StaticMethod("onChange", &JSSlidingPanel::SetOnSizeChange);
+
+    JSClass<JSSlidingPanel>::Inherit<JSContainerBase>();
     JSClass<JSSlidingPanel>::Inherit<JSViewAbstract>();
-    MethodOptions opt = MethodOptions::RETURN_SELF;
-    JSClass<JSSlidingPanel>::Method("dragBar", &JSSlidingPanel::SetHasDragBar, opt);
-    JSClass<JSSlidingPanel>::Method("show", &JSSlidingPanel::SetShow, opt);
-    JSClass<JSSlidingPanel>::Method("mode", &JSSlidingPanel::SetPanelMode, opt);
-    JSClass<JSSlidingPanel>::Method("type", &JSSlidingPanel::SetPanelType, opt);
-    JSClass<JSSlidingPanel>::Method("fullHeight", &JSSlidingPanel::SetFullHeight, opt);
-    JSClass<JSSlidingPanel>::Method("halfHeight", &JSSlidingPanel::SetHalfHeight, opt);
-    JSClass<JSSlidingPanel>::Method("miniHeight", &JSSlidingPanel::SetMiniHeight, opt);
-    JSClass<JSSlidingPanel>::CustomMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSSlidingPanel>::CustomMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSSlidingPanel>::CustomMethod("onChange", &JSSlidingPanel::SetOnSizeChange);
-    JSClass<JSSlidingPanel>::Bind(globalObj, ConstructorCallback);
+    JSClass<JSSlidingPanel>::Bind<>(globalObj);
 }
 
-#ifdef USE_V8_ENGINE
-void JSSlidingPanel::ConstructorCallback(const v8::FunctionCallbackInfo<v8::Value>& args)
+void JSSlidingPanel::JsBackgroundColor(const JSCallbackInfo& info)
 {
-    LOGD("ConstructorCallback");
-    std::list<JSViewAbstract*> children;
-    std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren;
-    V8ChildrenFromArgs(args, children, jsChildren);
-    auto instance = V8Object<JSSlidingPanel>::New(args.This(), children, jsChildren);
-    args.GetReturnValue().Set(instance->Get());
-}
-
-void JSSlidingPanel::SetOnSizeChange(const v8::FunctionCallbackInfo<v8::Value>& args)
-{
-    auto isolate = args.GetIsolate();
-    v8::HandleScope scp(isolate);
-    if (args[0]->IsFunction()) {
-        onSizeChangeFunc_ = AceType::MakeRefPtr<V8EventFunction<SlidingPanelSizeChangeEvent, 1>>(
-            v8::Local<v8::Function>::Cast(args[0]), SlidingPanelSizeChangeEventToJSValue);
-    }
-    args.GetReturnValue().Set(args.This());
-}
-#elif USE_QUICKJS_ENGINE
-void JSSlidingPanel::MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc)
-{
-    LOGD("JSSlidingPanel => MarkGC: start");
-    JSContainerBase::MarkGC(rt, markFunc);
-
-    LOGD("JSSlidingPanel => MarkGC: end");
-}
-
-void JSSlidingPanel::ReleaseRT(JSRuntime* rt)
-{
-    LOGD("JSSlidingPanel => release children: start");
-    JSContainerBase::ReleaseRT(rt);
-
-    LOGD("JSSlidingPanel => release children: end");
-}
-
-// STATIC qjs_class_bindings
-JSValue JSSlidingPanel::ConstructorCallback(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
-{
-    ACE_SCOPED_TRACE("JSSlidingPanel::ConstructorCallback");
-
-    QJSContext::Scope scope(ctx);
-
-    auto [children, jsChildren] = JsChildrenFromArgs(ctx, argc, argv);
-
-    JSSlidingPanel* panel = new JSSlidingPanel(children, jsChildren);
-
-    return Wrap(new_target, panel);
-}
-
-void JSSlidingPanel::QjsDestructor(JSRuntime* rt, JSSlidingPanel* view)
-{
-    LOGD("JSSlidingPanel(QjsDestructor) start");
-    if (!view) {
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
-    view->ReleaseRT(rt);
-    delete view;
-    LOGD("JSSlidingPanel(QjsDestructor) end");
-}
-
-void JSSlidingPanel::QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc)
-{
-    LOGD("JSSlidingPanel(QjsGcMark) start");
-    JSSlidingPanel* view = Unwrap<JSSlidingPanel>(val);
-    if (!view) {
+    if (!info[0]->IsString() && !info[0]->IsNumber()) {
+        LOGE("arg is not a string or number.");
         return;
     }
 
-    view->MarkGC(rt, markFunc);
-    LOGD("JSSlidingPanel(QjsGcMark) end");
+    Color color;
+    if (info[0]->IsString()) {
+        color = Color::FromString(info[0]->ToString());
+    } else if (info[0]->IsNumber()) {
+        color = Color(ColorAlphaAdapt(info[0]->ToNumber<uint32_t>()));
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
+    auto box = JSSlidingPanel::GetPanelBox();
+    if (!panel || !box) {
+        LOGE("Not valid type for SlidingPanel");
+        return;
+    }
+    box->SetColor(color);
+    panel->SetHasBgStyle(true);
+    panel->SetHasDecorationStyle(true);
 }
 
-JSValue JSSlidingPanel::SetOnSizeChange(JSContext* ctx, JSValue this_value, int32_t argc, JSValue* argv)
+RefPtr<BoxComponent> JSSlidingPanel::GetPanelBox()
 {
-    if ((argc != 1) || !JS_IsFunction(ctx, argv[0])) {
-        LOGE("sizeChange expects a function as parameter. Throwing exception.");
-        return JS_ThrowSyntaxError(ctx, "sizeChange() expect a function parameter. Throwing exception");
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
+    if (!panel) {
+        return nullptr;
     }
-
-    QJSContext::Scope scope(ctx);
-    // Dup and Free shoulj happen inside the QJSClickFunction
-
-    onSizeChangeFunc_ = AceType::MakeRefPtr<QJSEventFunction<SlidingPanelSizeChangeEvent, 1>>(
-        ctx, JS_DupValue(ctx, argv[0]), SlidingPanelSizeChangeEventToJSValue);
-
-    return JS_DupValue(ctx, this_value); // for call chaining
-}
-
-#endif
-
-void JSSlidingPanel::PreparePanelComponent(RefPtr<OHOS::Ace::PanelComponent>& panelComponent)
-{
-    // adjust panel mode
-    if (type_ == PanelType::TEMP_DISPLAY && mode_ == PanelMode::MINI) {
-        mode_ = PanelMode::HALF;
-    } else if (type_ == PanelType::MINI_BAR && mode_ == PanelMode::HALF) {
-        mode_ = PanelMode::MINI;
-    }
-    panelComponent->SetPanelMode(mode_);
-    panelComponent->SetPanelType(type_);
-    panelComponent->SetHasDragBar(hasDragBar_);
-    panelComponent->SetMiniHeight(miniHeight_);
-    panelComponent->SetHalfHeight(halfHeight_);
-    panelComponent->SetFullHeight(fullHeight_);
-
-    if (!displayComponent_) {
-        displayComponent_ = AceType::MakeRefPtr<DisplayComponent>();
-    }
-    displayComponent_->SetVisible(isShow_ ? VisibleType::VISIBLE : VisibleType::GONE);
-
-    if (onSizeChangeFunc_) {
-        auto onSizeChange = EventMarker([func = std::move(onSizeChangeFunc_)](const BaseEventInfo* param) {
-            auto sizeChange = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(param);
-            if (!sizeChange) {
-                LOGE("HandleSizeChangeEvent, sizeChange == nullptr");
-                return;
-            }
-            func->execute(*sizeChange);
-        });
-        panelComponent->SetOnSizeChanged(onSizeChange);
-    }
-
-    if (boxComponent_) {
-        panelComponent->SetHasBoxStyle(true);
-        panelComponent->SetHasDecorationStyle(true);
-        panelComponent->SetHasBackgroundColor(true);
-        panelComponent->SetHasBorderStyle(true);
-        panelComponent->SetBoxStyle(boxComponent_);
-        boxComponent_ = nullptr;
+    if (panel->HasBoxStyle()) {
+        return panel->GetBoxStyle();
     } else {
-        panelComponent->SetBoxStyle(AceType::MakeRefPtr<BoxComponent>());
+        panel->SetHasBoxStyle(true);
+        auto box = AceType::MakeRefPtr<BoxComponent>();
+        panel->SetBoxStyle(box);
+        return box;
     }
+}
+
+RefPtr<Decoration> JSSlidingPanel::GetPanelDecoration()
+{
+    auto box = JSSlidingPanel::GetPanelBox();
+    if (!box) {
+        return nullptr;
+    }
+    auto decoration = box->GetBackDecoration();
+    if (!decoration) {
+        decoration = AceType::MakeRefPtr<Decoration>();
+        box->SetBackDecoration(decoration);
+    }
+    return decoration;
+}
+
+void JSSlidingPanel::JsPanelBorderColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsString() && !info[0]->IsNumber()) {
+        LOGE("arg is not a string or number.");
+        return;
+    }
+
+    Color color;
+    if (info[0]->IsString()) {
+        color = Color::FromString(info[0]->ToString());
+    } else if (info[0]->IsNumber()) {
+        color = Color(ColorAlphaAdapt(info[0]->ToNumber<uint32_t>()));
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
+    auto decoration = JSSlidingPanel::GetPanelDecoration();
+    if (!panel || !decoration) {
+        return;
+    }
+    auto border = decoration->GetBorder();
+    border.SetColor(color);
+    decoration->SetBorder(border);
+    panel->SetHasBorderStyle(true);
+    panel->SetHasDecorationStyle(true);
+}
+
+void JSSlidingPanel::JsPanelBorderRadius(const JSCallbackInfo& info)
+{
+    auto radiusVal = JSViewAbstract::ParseDimension(info);
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
+    auto decoration = JSSlidingPanel::GetPanelDecoration();
+    if (!panel || !decoration) {
+        return;
+    }
+    auto border = decoration->GetBorder();
+    border.SetBorderRadius(Radius(radiusVal));
+    decoration->SetBorder(border);
+    panel->SetHasBorderStyle(true);
+    panel->SetHasDecorationStyle(true);
+}
+
+void JSSlidingPanel::JsPanelBorderWidth(const JSCallbackInfo& info)
+{
+    auto borderWidth = JSViewAbstract::ParseDimension(info);
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
+    auto decoration = JSSlidingPanel::GetPanelDecoration();
+    if (!panel || !decoration) {
+        return;
+    }
+    auto border = decoration->GetBorder();
+    border.SetWidth(borderWidth);
+    decoration->SetBorder(border);
+    panel->SetHasBorderStyle(true);
+    panel->SetHasDecorationStyle(true);
+}
+
+void JSSlidingPanel::JsPanelBorderStyle(int32_t style)
+{
+    BorderStyle borderStyle = BorderStyle::SOLID;
+    if (style > 0 && style < 4) {
+        borderStyle = (BorderStyle)style;
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
+    auto decoration = JSSlidingPanel::GetPanelDecoration();
+    if (!panel || !decoration) {
+        return;
+    }
+    auto border = decoration->GetBorder();
+    border.SetStyle(borderStyle);
+    decoration->SetBorder(border);
+    panel->SetHasBorderStyle(true);
+    panel->SetHasDecorationStyle(true);
+}
+
+void JSSlidingPanel::JsPanelBorder(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGE("arg is not a object.");
+        return;
+    }
+
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+        info.ReturnSelf();
+        return;
+    }
+    Dimension width = JSViewAbstract::GetDimension("width", argsPtrItem);
+    Dimension radius = JSViewAbstract::GetDimension("radius", argsPtrItem);
+    auto borderStyle = argsPtrItem->GetInt("style", static_cast<int32_t>(BorderStyle::SOLID));
+    auto style = (borderStyle > 0 && borderStyle < 4) ? (BorderStyle)borderStyle : BorderStyle::SOLID;
+    std::unique_ptr<JsonValue> colorValue = argsPtrItem->GetValue("color");
+    Color color;
+    if (colorValue->IsString()) {
+        color = Color::FromString(colorValue->GetString());
+    } else if (colorValue->IsNumber()) {
+        color = Color(ColorAlphaAdapt(colorValue->GetUInt()));
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
+    auto decoration = JSSlidingPanel::GetPanelDecoration();
+    if (!panel || !decoration) {
+        return;
+    }
+    auto border = decoration->GetBorder();
+    border.SetStyle(style);
+    border.SetWidth(width);
+    border.SetColor(color);
+    border.SetBorderRadius(Radius(radius));
+    decoration->SetBorder(border);
+    panel->SetHasBorderStyle(true);
+    panel->SetHasDecorationStyle(true);
+}
+
+void JSSlidingPanel::SetOnSizeChange(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onSizeChangeFunc = AceType::MakeRefPtr<JsEventFunction<SlidingPanelSizeChangeEvent, 1>>(
+            JSRef<JSFunc>::Cast(args[0]), SlidingPanelSizeChangeEventToJSValue);
+        auto onSizeChange = EventMarker(
+            [execCtx = args.GetExecutionContext(), func = std::move(onSizeChangeFunc)](const BaseEventInfo* param) {
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                auto sizeChange = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(param);
+                if (!sizeChange) {
+                    LOGE("HandleSizeChangeEvent, sizeChange == nullptr");
+                    return;
+                }
+                func->Execute(*sizeChange);
+            });
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
+        if (panel) {
+            panel->SetOnSizeChanged(onSizeChange);
+        }
+    }
+    args.ReturnSelf();
 }
 
 void JSSlidingPanel::SetHasDragBar(bool hasDragBar)
 {
-    hasDragBar_ = hasDragBar;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
+    if (panel) {
+        panel->SetHasDragBar(hasDragBar);
+    }
 }
 
 void JSSlidingPanel::SetShow(bool isShow)
 {
-    isShow_ = isShow;
+    auto component = ViewStackProcessor::GetInstance()->GetDisplayComponent();
+    auto display = AceType::DynamicCast<DisplayComponent>(component);
+    display->SetVisible(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
 }
 
 void JSSlidingPanel::SetPanelMode(int32_t mode)
 {
-    if (static_cast<int>(PanelMode::HALF) == mode) {
-        mode_ = PanelMode::HALF;
-    } else if (static_cast<int>(PanelMode::MINI) == mode) {
-        mode_ = PanelMode::MINI;
-    } else {
-        mode_ = PanelMode::FULL;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
+    if (panel) {
+        if (static_cast<int32_t>(PanelMode::HALF) == mode) {
+            panel->SetMode(PanelMode::HALF);
+        } else if (static_cast<int32_t>(PanelMode::MINI) == mode) {
+            panel->SetMode(PanelMode::MINI);
+        } else {
+            panel->SetMode(PanelMode::FULL);
+        }
     }
 }
 
 void JSSlidingPanel::SetPanelType(int32_t type)
 {
-    if (static_cast<int>(PanelType::MINI_BAR) == type) {
-        type_ = PanelType::MINI_BAR;
-    } else if (static_cast<int>(PanelType::TEMP_DISPLAY) == type) {
-        type_ = PanelType::TEMP_DISPLAY;
-    } else {
-        type_ = PanelType::FOLDABLE_BAR;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
+    if (panel) {
+        if (static_cast<int32_t>(PanelType::MINI_BAR) == type) {
+            panel->SetType(PanelType::MINI_BAR);
+        } else if (static_cast<int32_t>(PanelType::TEMP_DISPLAY) == type) {
+            panel->SetType(PanelType::TEMP_DISPLAY);
+        } else {
+            panel->SetType(PanelType::FOLDABLE_BAR);
+        }
     }
 }
 
 void JSSlidingPanel::SetMiniHeight(const std::string& height)
 {
-    miniHeight_.first = StringUtils::StringToDimension(height, true);
-    miniHeight_.second = true;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
+    std::pair<Dimension, bool> minHeight;
+    minHeight.first = StringUtils::StringToDimension(height, true);
+    minHeight.second = true;
+    if (panel) {
+        panel->SetMiniHeight(minHeight);
+    }
 }
 
 void JSSlidingPanel::SetHalfHeight(const std::string& height)
 {
-    halfHeight_.first = StringUtils::StringToDimension(height, true);
-    halfHeight_.second = true;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
+    std::pair<Dimension, bool> halfHeight;
+    halfHeight.first = StringUtils::StringToDimension(height, true);
+    halfHeight.second = true;
+    if (panel) {
+        panel->SetHalfHeight(halfHeight);
+    }
 }
 
 void JSSlidingPanel::SetFullHeight(const std::string& height)
 {
-    fullHeight_.first = StringUtils::StringToDimension(height, true);
-    fullHeight_.second = true;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
+    std::pair<Dimension, bool> fullHeight;
+    fullHeight.first = StringUtils::StringToDimension(height, true);
+    fullHeight.second = true;
+    if (panel) {
+        panel->SetFullHeight(fullHeight);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

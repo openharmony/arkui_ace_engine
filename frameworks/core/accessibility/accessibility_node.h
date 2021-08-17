@@ -302,6 +302,7 @@ public:
     void SetClickableState(bool state)
     {
         isClickable_ = state;
+        SetSupportAction(AceAction::ACTION_CLICK, state);
     }
 
     bool GetFocusableState() const
@@ -332,6 +333,7 @@ public:
     void SetLongClickableState(bool state)
     {
         isLongClickable_ = state;
+        SetSupportAction(AceAction::ACTION_LONG_CLICK, state);
     }
 
     bool GetIsMultiLine() const
@@ -360,6 +362,13 @@ public:
     {
         supportActions_ |= (1LL << static_cast<uint32_t>(action));
     }
+
+    void SetSupportAction(AceAction action, bool isEnable)
+    {
+        isEnable ? supportActions_ |= (1LL << static_cast<uint32_t>(action))
+                 : supportActions_ &= (~(0LL)) ^ (1LL << static_cast<uint32_t>(action));
+    }
+
 
     const std::string& GetAccessibilityLabel() const
     {
@@ -533,6 +542,11 @@ public:
         }
     }
 
+    void ClearRect()
+    {
+        rect_ = Rect(0, 0, 0, 0);
+    }
+
     bool IsValidRect() const
     {
         return isValidRect_;
@@ -676,6 +690,23 @@ public:
     {
         isAnimationNode_ = IsAnimationNode;
     }
+
+    int32_t GetZIndex() {
+        return zIndex_;
+    }
+
+    void SetZIndex(int32_t index) {
+        zIndex_ = index;
+    }
+
+    // only panel has ZIndex,others components is default value 0
+    void SetZIndexToChild(int32_t index)
+    {
+        for (auto& child : children_) {
+            child->SetZIndexToChild(index);
+        }
+        SetZIndex(index);
+    }
 #endif
 
 protected:
@@ -758,6 +789,7 @@ private:
     double rotateAngle_ = 0.0;
     RotateAxis rotateAxis_ = RotateAxis::AXIS_Z;
     bool isAnimationNode_ = false;
+    int32_t zIndex_ = 0;
 #endif
 };
 

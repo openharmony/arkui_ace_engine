@@ -64,7 +64,7 @@ constexpr FontStyle TEST_TEXT_FONT_STYLE = FontStyle::NORMAL;
 constexpr TextDecoration TEST_TEXT_DECORATION = TextDecoration::NONE;
 const double TEST_TEXT_PADDING = 12;
 constexpr double TEST_TEXT_FONT_SIZE = 30.0;
-constexpr double TEST_TEXT_LETTER_SPACING = 10.0;
+constexpr Dimension TEST_TEXT_LETTER_SPACING = 10.0_px;
 constexpr double TEST_TEXT_SIZE = 200.0;
 constexpr bool SHOW_TEXT = true;
 const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
@@ -108,6 +108,11 @@ private:
 };
 
 } // namespace
+
+flutter::Canvas* FlutterRenderContext::GetCanvas()
+{
+    return nullptr;
+}
 
 class MockRenderSwitch final : public RenderSwitch {
     DECLARE_ACE_TYPE(MockRenderSwitch, RenderSwitch);
@@ -182,7 +187,7 @@ void CheckableComponentTest::VerifyRenderSwitchUpdate(RefPtr<SwitchComponent>& s
     EXPECT_EQ(textStyle.GetFontStyle(), TEST_TEXT_FONT_STYLE);
     EXPECT_EQ(textStyle.GetTextDecoration(), TEST_TEXT_DECORATION);
     EXPECT_EQ(textStyle.GetFontSize().Value(), TEST_TEXT_FONT_SIZE);
-    EXPECT_EQ(textStyle.GetLetterSpacing(), TEST_TEXT_LETTER_SPACING);
+    ASSERT_TRUE(NearEqual(textStyle.GetLetterSpacing().Value(), TEST_TEXT_LETTER_SPACING.Value()));
     EXPECT_EQ(textStyle.GetFontFamilies()[0], TEST_TEXT_FONT_FAMILY);
     renderSwitch->PerformLayout();
     EXPECT_EQ(renderSwitch->textOnSize_, Size(TEST_TEXT_SIZE, TEST_TEXT_SIZE));

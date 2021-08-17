@@ -36,6 +36,14 @@ public:
 
     void SetChild(const RefPtr<Component>& child)
     {
+        SetChildDirectly(child);
+        if (child) {
+            OnChildAdded(child);
+        }
+    }
+
+    void SetChildDirectly(const RefPtr<Component>& child)
+    {
         // Clear preview child's parent.
         if (child_) {
             child_->SetParent(nullptr);
@@ -49,6 +57,8 @@ public:
             child->SetParent(WeakClaim(parent));
         }
     }
+
+    virtual void OnChildAdded(const RefPtr<Component>& child) {}
 
 private:
     RefPtr<Component> child_;

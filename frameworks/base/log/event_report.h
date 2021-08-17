@@ -22,20 +22,17 @@
 
 namespace OHOS::Ace {
 
-// eventType use int32_t type, no need enum class.
-enum {
-    EXCEPTION_FRAMEWORK_APP_START = 951004000,
-    EXCEPTION_FRAMEWORK_PAGE_ROUTER = 951004001,
-    EXCEPTION_COMPONENT = 951004002,
-    EXCEPTION_API_CHANNEL = 951004003,
-    EXCEPTION_RENDER = 951004004,
-    EXCEPTION_JS = 951004005,
-    EXCEPTION_ANIMATION = 951004006,
-    EXCEPTION_EVENT = 951004007,
-    EXCEPTION_INTERNATIONALIZATION = 951004009,
-    EXCEPTION_ACCESSIBILITY = 951004010,
-    EXCEPTION_FORM = 951004011,
-};
+const std::string EXCEPTION_FRAMEWORK_APP_START = "FrameworkAppStartException";
+const std::string EXCEPTION_FRAMEWORK_PAGE_ROUTER = "FrameworkPageRouterException";
+const std::string EXCEPTION_COMPONENT = "ComponentException";
+const std::string EXCEPTION_API_CHANNEL = "ApiChannelException";
+const std::string EXCEPTION_RENDER = "RenderException";
+const std::string EXCEPTION_JS = "JsException";
+const std::string EXCEPTION_ANIMATION = "AnimationException";
+const std::string EXCEPTION_EVENT = "EventException";
+const std::string EXCEPTION_INTERNATIONALIZATION = "InternationalizationException";
+const std::string EXCEPTION_ACCESSIBILITY = "AccessibilityException";
+const std::string EXCEPTION_FORM = "FormException";
 
 // EXCEPTION_FRAMEWORK_APP_START
 enum class AppStartExcepType {
@@ -141,7 +138,7 @@ enum class FormExcepType {
 enum class RawEventType { WARNING, FREEZE, RECOVER };
 
 struct EventInfo {
-    int32_t eventType = 0;
+    std::string eventType;
     int32_t errorType = 0;
     std::string pageUrl;
 };
@@ -149,6 +146,10 @@ struct EventInfo {
 class ACE_EXPORT EventReport {
 public:
     static void SendEvent(const EventInfo& eventInfo);
+    static void SendJsCardRenderTimeEvent(
+        const std::string& sessionID,
+        const std::string& timeType,
+        uint64_t timeDelay);
 
     static void SendAppStartException(AppStartExcepType type);
     static void SendPageRouterException(PageRouterExcepType type, const std::string& pageUrl = "");

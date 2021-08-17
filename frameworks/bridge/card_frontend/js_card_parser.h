@@ -36,36 +36,63 @@ public:
     {}
     ~JsCardParser() override = default;
 
+    void CreateDomNode(const RefPtr<Framework::JsAcePage>& page, const std::unique_ptr<JsonValue>& rootJson,
+        int32_t parentId, bool isNewNode = false)
+    {
+        CreateDomNode(page, rootJson, parentId, dataJson_, eventJson_, styleJson_, nullptr, isNewNode);
+    }
     void ParseAttributes(const std::unique_ptr<JsonValue>& rootJson, int32_t nodeId,
-        std::vector<std::pair<std::string, std::string>>& attrs, JsCommandDomElementOperator* command);
-    bool GetShownValue(std::string& value);
+        std::vector<std::pair<std::string, std::string>>& attrs, JsCommandDomElementOperator* command)
+    {
+        ParseAttributes(rootJson, nodeId, attrs, command, dataJson_, nullptr);
+    }
+    void ParseEvents(const std::unique_ptr<JsonValue>& rootJson, std::vector<std::string>& events,
+        const RefPtr<JsAcePage>& page, int32_t nodeId)
+    {
+        ParseEvents(rootJson, eventJson_, events, page, nodeId);
+    }
+    void UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const std::unique_ptr<JsonValue>& rootJson,
+        int32_t parentId, const std::vector<int>& idArray = std::vector<int>())
+    {
+        UpdateDomNode(page, rootJson, parentId, idArray, dataJson_, styleJson_, nullptr);
+    }
+    void ParseVariable(std::string& value)
+    {
+        ParseVariable(value, dataJson_, nullptr);
+    }
+    void ParseMultiVariable(std::string& value)
+    {
+        ParseMultiVariable(value, dataJson_);
+    }
+    void ParseStyles(const std::unique_ptr<JsonValue>& rootJson, int32_t nodeId,
+        std::vector<std::pair<std::string, std::string>>& styles)
+    {
+        ParseStyles(rootJson, nodeId, styles, styleJson_);
+    }
+
+    bool GetVariable(std::string& value)
+    {
+        return GetVariable(value, dataJson_);
+    }
+    bool GetShownValue(std::string& value)
+    {
+        return GetShownValue(value, dataJson_, nullptr);
+    }
+    bool GetShownValue(
+        std::string& value, const std::unique_ptr<JsonValue>& dataJson, const std::unique_ptr<JsonValue>& propsJson);
     bool GetRepeatData(std::unique_ptr<JsonValue>& repeatValue, std::string& key);
 
-    void ParseStyles(const std::unique_ptr<JsonValue>& rootJson, int32_t nodeId,
-        std::vector<std::pair<std::string, std::string>>& styles);
-    void ParseEvents(const std::unique_ptr<JsonValue>& rootJson, std::vector<std::string>& events,
-        const RefPtr<JsAcePage>& page, int32_t nodeId);
     void UpdatePageData(const std::string& dataList, const RefPtr<JsAcePage>& page);
     void LoadImageInfo();
     void UpdateStyle(const RefPtr<JsAcePage>& page);
-    void CreateDomNode(const RefPtr<Framework::JsAcePage>& page, const std::unique_ptr<JsonValue>& rootJson,
-        int32_t parentId, bool isNewNode = false);
-    void ParseVariable(std::string& value);
-    void ParseMultiVariable(std::string& value);
-
     void ParseRepeatIndexItem(const std::unique_ptr<JsonValue>& repeatValue);
     void SetRepeatItemValue(uint32_t index, const std::unique_ptr<JsonValue>& repeatValue, bool hasKeyValue);
     bool Initialize();
+    void SetColorMode(ColorMode colorMode);
 
     const WeakPtr<PipelineContext>& GetPipelineContext() const
     {
         return context_;
-    }
-
-    void SetColorMode(ColorMode colorMode)
-    {
-        colorMode_ = colorMode;
-        mediaQueryer_.SetColorMode(colorMode);
     }
 
     void SetDensity(double density)
@@ -99,21 +126,43 @@ private:
     void GetPlurals(std::string& value);
     void ParseInlineStyles(
         const std::unique_ptr<JsonValue>& rootJson, std::vector<std::pair<std::string, std::string>>& styles);
-    void SelectStyle(const std::string& className, const std::unique_ptr<JsonValue>& styleClass,
+    bool SelectStyle(const std::string& className, const std::unique_ptr<JsonValue>& styleClass,
         std::vector<std::pair<std::string, std::string>>& styles);
     void SelectMediaQueryStyle(const std::string& styleClass, std::vector<std::pair<std::string, std::string>>& styles);
     void LoadMediaQueryStyle();
     void LoadResImageUrl(const std::string& jsonFile, const std::string& splitStr, std::string& value);
     void RegisterFont(const std::string& fontFamily);
-    std::string GetEventAction(const std::string& action, const std::string& actionType, int32_t nodeId);
-    bool ParseComplexExpression(std::string& value);
-    bool ParseTernaryExpression(std::string& value);
-    bool ParseLogicalExpression(std::string& value);
-    bool ParseArrayExpression(const std::string& expression, std::stack<std::string>& keyStack);
-    void UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const std::unique_ptr<JsonValue>& rootJson,
-        int32_t parentId, const std::vector<int>& idArray = std::vector<int>());
+    std::string GetEventAction(const std::string& action, const std::string& actionType, int32_t nodeId = 0);
+    bool ParsePropsVariable(std::string& value, const std::unique_ptr<JsonValue>& propsJson);
+    bool ParsePropsArray(std::string& value, const std::unique_ptr<JsonValue>& propsJson);
+    bool ParseComplexExpression(std::string& value, const std::unique_ptr<JsonValue>& json);
+    bool ParseTernaryExpression(std::string& value, const std::unique_ptr<JsonValue>& propsJson = nullptr);
+    bool ParseLogicalExpression(std::string& value, const std::unique_ptr<JsonValue>& propsJson = nullptr);
+    bool ParseArrayExpression(
+        const std::string& expression, std::stack<std::string>& keyStack, const std::unique_ptr<JsonValue>& json);
     bool ParseSpecialVariable(std::string& value);
-    bool GetVariable(std::string& value);
+    void CreateDomNode(const RefPtr<Framework::JsAcePage>& page, const std::unique_ptr<JsonValue>& rootJson,
+        int32_t parentId, const std::unique_ptr<JsonValue>& dataJson, const std::unique_ptr<JsonValue>& actionJson,
+        const std::unique_ptr<JsonValue>& styleJson, const std::unique_ptr<JsonValue>& propsJson = nullptr,
+        bool isNewNode = false);
+    void PreUpdateMethodToAction(const std::unique_ptr<JsonValue>& rootJson);
+    void ParseAttributes(const std::unique_ptr<JsonValue>& rootJson, int32_t nodeId,
+        std::vector<std::pair<std::string, std::string>>& attrs, JsCommandDomElementOperator* command,
+        const std::unique_ptr<JsonValue>& dataJson, const std::unique_ptr<JsonValue>& propsJson);
+    void ParseStyles(const std::unique_ptr<JsonValue>& rootJson, int32_t nodeId,
+        std::vector<std::pair<std::string, std::string>>& styles, const std::unique_ptr<JsonValue>& styleJson);
+    void ParseVariable(std::string& value, const std::unique_ptr<JsonValue>& dataJson,
+        const std::unique_ptr<JsonValue>& propsJson = nullptr);
+    void ParseMultiVariable(std::string& value, const std::unique_ptr<JsonValue>& dataJson,
+        const std::unique_ptr<JsonValue>& propsJson = nullptr);
+    void UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const std::unique_ptr<JsonValue>& rootJson,
+        int32_t parentId, const std::vector<int>& idArray, const std::unique_ptr<JsonValue>& dataJson,
+        const std::unique_ptr<JsonValue>& styleJson, const std::unique_ptr<JsonValue>& propsJson);
+    void ParseEvents(const std::unique_ptr<JsonValue>& rootJson, const std::unique_ptr<JsonValue>& eventJson,
+        std::vector<std::string>& events, const RefPtr<Framework::JsAcePage>& page, int32_t nodeId);
+    void UpdateProps(const std::string& key, std::string value, const std::unique_ptr<JsonValue>& propsJson);
+    bool GetAndParseProps(std::string& value, const std::unique_ptr<JsonValue>& propsJson);
+    bool GetVariable(std::string& value, const std::unique_ptr<JsonValue>& dataJson);
     template<typename T>
     void ParseSpecialAttr(const std::function<void(const std::unique_ptr<JsonValue>&, std::vector<T>&)>& function,
         std::string& value, std::vector<T>& vector);
@@ -126,15 +175,21 @@ private:
         const RefPtr<Framework::JsAcePage>& page, const std::unique_ptr<JsonValue>& rootJson, int32_t parentId);
     void GetResourceValue(const std::string& path);
     void GetClockConfig(const std::unique_ptr<JsonValue>& jsonDataSets, ClockConfig& clockConfig);
-    void ProcessRepeatNode(const RefPtr<Framework::JsAcePage>& page,
-        const std::unique_ptr<JsonValue>& rootJson, const std::string& key, int32_t parentId, bool hasKeyValue,
-        std::unique_ptr<JsonValue>& repeatValue);
+    void ProcessRepeatNode(const RefPtr<Framework::JsAcePage>& page, const std::unique_ptr<JsonValue>& rootJson,
+        const std::string& key, int32_t parentId, bool hasKeyValue, std::unique_ptr<JsonValue>& repeatValue);
     void SetUpdateStatus(const RefPtr<Framework::JsAcePage>& page);
-    void GetShownAttr(const std::unique_ptr<JsonValue>& rootJson, bool& shouldShow, bool& hasShownAttr);
+    void GetShownAttr(const std::unique_ptr<JsonValue>& rootJson, const std::unique_ptr<JsonValue>& dataJson,
+        const std::unique_ptr<JsonValue>& propsJson, bool& shouldShow, bool& hasShownAttr);
     void CreateBlockNode(
         const RefPtr<Framework::JsAcePage>& page, const std::unique_ptr<JsonValue>& rootJson, int32_t parentId);
-    void GetBoolValue(
-        const std::unique_ptr<JsonValue>& rootJson, const std::string& key, bool& shouldShow, bool& hasShownAttr);
+    void GetBoolValue(const std::unique_ptr<JsonValue>& rootJson, const std::string& key, bool& value, bool& hasAttr)
+    {
+        GetBoolValue(rootJson, dataJson_, nullptr, key, value, hasAttr);
+    }
+    void GetBoolValue(const std::unique_ptr<JsonValue>& rootJson, const std::unique_ptr<JsonValue>& dataJson,
+        const std::unique_ptr<JsonValue>& propsJson, const std::string& key, bool& value, bool& hasAttr);
+    void ParseVersionAndUpdateData();
+    void ReplaceParam(const std::unique_ptr<JsonValue>& node);
 
     double density_ = 1.0;
     int32_t nodeId_ = 0;
@@ -154,9 +209,11 @@ private:
     std::unique_ptr<JsonValue> repeatJson_;
     std::unique_ptr<JsonValue> resourceJson_;
     std::unordered_map<std::string, std::string> imageUrlMap_;
+    std::unordered_map<std::string, std::string> methodToAction_;
     std::unordered_map<int32_t, std::pair<std::vector<int32_t>, int32_t>> listIdMap_;
     std::unordered_map<std::string, int32_t> singleLoopMap_;
     std::unordered_map<std::string, std::unique_ptr<JsonValue>> mediaQueryStyles_;
+    std::vector<std::pair<std::string, std::string>> customStyles_;
     MediaQueryer mediaQueryer_;
 
     // for repeat attr

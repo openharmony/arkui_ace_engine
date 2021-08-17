@@ -25,10 +25,12 @@ namespace {
 
 constexpr double NONE_SCROLL_POSITION = -1.0;
 constexpr double MIN_EXTENT = 5.0;
+constexpr double EXTENT_RATIO = 2.0;
 constexpr int32_t ANIMATION_DURATION = 200;
 constexpr double LIST_INCONTINUOUS_ROTATION_SENSITYVITY_NORMAL = 0.6;
 constexpr double LIST_CONTINUOUS_ROTATION_SENSITYVITY_NORMAL = 1.0;
 constexpr double LIST_ITEMCENTER_ROTATION_THRESHOLD = 0.7;
+constexpr int32_t COMPATIBLE_VERSION = 6;
 
 } // namespace
 
@@ -212,6 +214,16 @@ void RenderMultiChildScroll::Update(const RefPtr<Component>& component)
     if (!listComponent) {
         LOGE("component is not a ListComponent");
         return;
+    }
+
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        LOGE("context is nullptr");
+        return;
+    }
+    if (context->IsJsCard()) {
+        cacheExtent_ = (std::numeric_limits<double>::max)();
+        ResetScrollable();
     }
 
     if (listComponent->IsInRefresh()) {
@@ -420,12 +432,24 @@ void RenderMultiChildScroll::LayoutChild()
 
 void RenderMultiChildScroll::PerformLayout()
 {
-    viewPort_ = GetLayoutParam().GetMaxSize();
-    SetLayoutSize(viewPort_);
-    if (NearEqual(viewPort_.Width(), Size::INFINITE_SIZE) || NearEqual(viewPort_.Height(), Size::INFINITE_SIZE)) {
-        LOGW("The main or cross size is INFINITE, wait for the determined value");
-        return;
+    auto context = context_.Upgrade();
+    if (context && context->GetMinPlatformVersion() < COMPATIBLE_VERSION) {
+        // List Layout Screen Remaining Space
+        viewPort_ = GetLayoutParam().GetMaxSize();
+        SetLayoutSize(viewPort_);
+        if (NearEqual(viewPort_.Width(), Size::INFINITE_SIZE) || NearEqual(viewPort_.Height(), Size::INFINITE_SIZE)) {
+            LOGW("The main or cross size is INFINITE, wait for the determined value");
+            return;
+        }
+    } else {
+        // List determines its own layout size based on children.
+        if (GetLayoutParam().GetMaxSize().IsInfinite()) {
+            ExtendViewPort(); // Extend the view port for layout more items.
+        } else {
+            viewPort_ = GetLayoutParam().GetMaxSize();
+        }
     }
+
     LOGD("ViewPort:%{public}s Offset:%{public}s", viewPort_.ToString().c_str(), currentOffset_.ToString().c_str());
     offsetBeforeLayout_ = GetMainOffset(currentOffset_);
     LayoutChild();
@@ -449,6 +473,35 @@ void RenderMultiChildScroll::PerformLayout()
         ValidateOffset(SCROLL_FROM_NONE);
     } else {
         currentOffset_ = Offset::Zero();
+    }
+
+    if (!context || context->GetMinPlatformVersion() >= COMPATIBLE_VERSION) {
+        if (GetLayoutParam().GetMaxSize().IsInfinite()) {
+            // If not set the main axis length: wrap content.
+            Rect rect;
+            for (const auto& child : GetChildren()) {
+                rect.IsValid() ? rect.CombineRect(child->GetPaintRect()) : rect = child->GetPaintRect();
+            }
+            viewPort_ = rect.GetSize();
+        }
+        SetLayoutSize(viewPort_);
+    }
+}
+
+void RenderMultiChildScroll::ExtendViewPort()
+{
+    if (GreatNotEqual(GetMainSize(GetLayoutSize()), GetMainSize(viewPort_))) {
+        if (axis_ == Axis::HORIZONTAL) {
+            viewPort_.SetWidth(GetLayoutSize().Width() * EXTENT_RATIO);
+        } else {
+            viewPort_.SetHeight(GetLayoutSize().Height() * EXTENT_RATIO);
+        }
+    } else {
+        if (axis_ == Axis::HORIZONTAL) {
+            viewPort_.SetWidth(viewPort_.Width() * EXTENT_RATIO);
+        } else {
+            viewPort_.SetHeight(viewPort_.Height() * EXTENT_RATIO);
+        }
     }
 }
 
@@ -685,6 +738,11 @@ void RenderMultiChildScroll::HandleRotate(double rotateValue, bool isVertical)
     if (!listBase) {
         LOGE("no rotatable list");
         return;
+    }
+
+    if (listBase->GetOnRotateCallback()) {
+        RotationEvent event = {rotateValue};
+        (listBase->GetOnRotateCallback())(event);
     }
 
     double value = context->NormalizeToPx(Dimension(rotateValue, DimensionUnit::VP)) * (-1.0);

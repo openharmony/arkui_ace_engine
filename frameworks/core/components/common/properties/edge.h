@@ -48,6 +48,7 @@ public:
     static bool FromString(const std::string& value, Edge& edge);
 
     bool IsValid() const;
+    bool IsEffective() const;
     Size GetLayoutSizeInPx(double dipScale) const;
     Offset GetOffsetInPx(double dipScale) const;
     double HorizontalInPx(double dipScale) const;

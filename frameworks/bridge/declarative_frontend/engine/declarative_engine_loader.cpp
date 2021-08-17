@@ -17,13 +17,7 @@
 
 #include "base/utils/macros.h"
 
-#ifdef USE_V8_ENGINE
-#include "frameworks/bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
-#endif
-
-#ifdef USE_QUICKJS_ENGINE
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine.h"
-#endif
 
 namespace OHOS::Ace::Framework {
 
@@ -32,14 +26,7 @@ DeclarativeEngineLoader::~DeclarativeEngineLoader() = default;
 
 RefPtr<JsEngine> DeclarativeEngineLoader::CreateJsEngine(int32_t instanceId) const
 {
-    // TODO: add instanceId
-#ifdef USE_V8_ENGINE
-    return AceType::MakeRefPtr<V8DeclarativeEngine>(instanceId);
-#endif
-
-#ifdef USE_QUICKJS_ENGINE
     return AceType::MakeRefPtr<QJSDeclarativeEngine>(instanceId);
-#endif
 }
 
 RefPtr<BaseCanvasBridge> DeclarativeEngineLoader::CreateCanvasBridge() const

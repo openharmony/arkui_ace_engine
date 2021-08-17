@@ -17,6 +17,8 @@
 
 #include "core/components/grid_layout/grid_layout_element.h"
 #include "core/components/grid_layout/render_grid_layout.h"
+#include "core/components/grid_layout/render_grid_scroll_layout.h"
+#include "core/pipeline/base/multi_composed_component.h"
 
 namespace OHOS::Ace {
 
@@ -27,7 +29,30 @@ RefPtr<Element> GridLayoutComponent::CreateElement()
 
 RefPtr<RenderNode> GridLayoutComponent::CreateRenderNode()
 {
+    if (rowsArgs_.empty() || columnsArgs_.empty()) {
+        return RenderGridScrollLayout::Create();
+    }
+
     return RenderGridLayout::Create();
+}
+
+void GridLayoutComponent::AppendChild(const RefPtr<Component>& child)
+{
+    if (AceType::InstanceOf<V2::LazyForEachComponent>(child)) {
+        auto lazyForEach = AceType::DynamicCast<V2::LazyForEachComponent>(child);
+        lazyForEachComponent_ = lazyForEach;
+        return;
+    }
+
+    auto multiComposed = AceType::DynamicCast<MultiComposedComponent>(child);
+    if (!multiComposed) {
+        ComponentGroup::AppendChild(child);
+        return;
+    }
+
+    for (const auto& childComponent : multiComposed->GetChildren()) {
+        AppendChild(childComponent);
+    }
 }
 
 void GridLayoutComponent::SetDirection(FlexDirection direction)
@@ -94,19 +119,21 @@ void GridLayoutComponent::SetRowsArgs(const std::string& rowsArgs)
     rowsArgs_ = rowsArgs;
 }
 
-void GridLayoutComponent::SetColumnGap(double columnGap)
+void GridLayoutComponent::SetColumnGap(const Dimension& columnGap)
 {
-    if (columnGap < 0.0) {
-        LOGW("Invalid ColumnGap %{public}lf", columnGap);
+    if (columnGap.Value() < 0.0) {
+        LOGW("Invalid RowGap, use 0px");
+        columnGap_ = 0.0_px;
         return;
     }
     columnGap_ = columnGap;
 }
 
-void GridLayoutComponent::SetRowGap(double rowGap)
+void GridLayoutComponent::SetRowGap(const Dimension& rowGap)
 {
-    if (rowGap < 0.0) {
-        LOGW("Invalid RowGap %{public}lf", rowGap);
+    if (rowGap.Value() < 0.0) {
+        LOGW("Invalid RowGap, use 0px");
+        rowGap_ = 0.0_px;
         return;
     }
     rowGap_ = rowGap;

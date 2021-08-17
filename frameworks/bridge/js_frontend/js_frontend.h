@@ -47,6 +47,8 @@ public:
 
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
 
+    void Destroy() override;
+
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
@@ -76,9 +78,13 @@ public:
     void TransferComponentResponseData(int32_t callbackId, int32_t code,
         std::vector<uint8_t>&& data) const override;
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void TransferJsResponseDataPreview(int32_t callbackId, int32_t code, ResponseData responseData) const;
+#endif
     void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
     void TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;
     void LoadPluginJsCode(std::string&& jsCode) const override;
+    void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const override;
 
     // application lifecycle.
     void UpdateState(Frontend::State state) override;
@@ -147,13 +153,12 @@ public:
         }
     }
 
+    void RebuildAllPages() override;
+
     void SetAbility(void* ability)
     {
         ability_ = ability;
     }
-
-    void RebuildAllPages() override;
-
 
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
@@ -162,7 +167,6 @@ private:
     RefPtr<Framework::FrontendDelegateImpl> delegate_;
     RefPtr<AceEventHandler> handler_;
     RefPtr<Framework::JsEngine> jsEngine_;
-    RefPtr<AccessibilityManager> accessibilityManager_;
     bool foregroundFrontend_ = false;
     void* ability_ = nullptr;
 };
@@ -183,6 +187,10 @@ public:
     void HandleAsyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info) override;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const KeyEvent& info) override;
+
+    void HandleAsyncEvent(const EventMarker& eventMarker, const GestureEvent& info) override;
+
+    void HandleAsyncEvent(const EventMarker& eventMarker, const RotationEvent& info) override;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param) override;
 

@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GRID_LAYOUT_GRID_LAYOUT_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GRID_LAYOUT_GRID_LAYOUT_ELEMENT_H
 
+#include <unordered_map>
+
+#include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/pipeline/base/component_group_element.h"
 
 namespace OHOS::Ace {
@@ -26,10 +29,40 @@ class GridLayoutElement : public ComponentGroupElement, public FocusGroup {
 public:
     void Update() override;
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
+    void Prepare(const WeakPtr<Element>& parent) override;
+
+    bool BuildChildByIndex(int32_t index);
+    void DeleteChildByIndex(int32_t index);
+
+    void OnReload();
+    void OnItemAdded(int32_t index);
+    void OnItemDeleted(int32_t index);
+    void OnItemChanged(int32_t index);
+    void OnItemMoved(int32_t from, int32_t to);
 
 private:
     RefPtr<RenderNode> CreateRenderNode() override;
-    void Apply(const RefPtr<Element>&) override;
+    void ApplyRenderChild(const RefPtr<RenderElement>& renderChild) override;
+
+    std::unordered_map<int32_t, RefPtr<Element>> lazyChildItems_;
+
+    RefPtr<V2::LazyForEachComponent> lazyForEachComponent_;
+    RefPtr<V2::DataChangeListener> listener;
+    bool isUseLazyForEach_ = false;
+};
+
+class GridItemDataChangeListener : virtual public V2::DataChangeListener {
+public:
+    GridItemDataChangeListener(const WeakPtr<GridLayoutElement>& element) : element_(element) {}
+
+    void OnDataReloaded() override;
+    void OnDataAdded(size_t index) override;
+    void OnDataDeleted(size_t index) override;
+    void OnDataChanged(size_t index) override;
+    void OnDataMoved(size_t from, size_t to) override;
+
+private:
+    WeakPtr<GridLayoutElement> element_;
 };
 
 } // namespace OHOS::Ace

@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "base/utils/system_properties.h"
+#include "core/common/ime/text_selection.h"
 #include "core/components/common/layout/constants.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #define private public
@@ -56,6 +57,8 @@ constexpr double DEFAULT_PADDING_TOP_VALUE = 0.0;
 constexpr double DEFAULT_PADDING_RIGHT_VALUE = 40.0;
 constexpr double DEFAULT_PADDING_BOTTOM_VALUE = 0.0;
 constexpr double ERROR_PADDING_LEFT_VALUE = 0.0;
+const TextSelection TEST_SELECTION = TextSelection(2, 5);
+const TextSelection DEFAULT_SELECTION = TextSelection(-1, -1);
 
 const std::string SEARCH_JSON = "{                                                          "
                                 "  \"tag\": \"search\",                                     "
@@ -64,6 +67,15 @@ const std::string SEARCH_JSON = "{                                              
                                 "              },                                           "
                                 "              {                                            "
                                 "                \"hint\" : \"this is hint\"                "
+                                "              },                                           "
+                                "              {                                            "
+                                "                \"selectedstart\": \"2\"                   "
+                                "              },                                           "
+                                "              {                                            "
+                                "                \"selectedend\": \"5\"                     "
+                                "              },                                           "
+                                "              {                                            "
+                                "                \"softkeyboardenabled\": \"false\"         "
                                 "              },                                           "
                                 "              {                                            "
                                 "                \"value\" : \"this is value\"              "
@@ -79,6 +91,9 @@ const std::string SEARCH_JSON = "{                                              
                                 "           },                                              "
                                 "          {                                                "
                                 "           \"placeholderColor\":\"#0000ff\"                "
+                                "           },                                              "
+                                "          {                                                "
+                                "           \"caretColor\":\"#0000ff\"                      "
                                 "           },                                              "
                                 "           {                                               "
                                 "           \"fontFamily\":\"sans-serif\"                   "
@@ -112,6 +127,9 @@ const std::string INVALID_SEARCH_JSON = "{                                      
                                         "           },                                              "
                                         "          {                                                "
                                         "           \"placeholderColor\":\"abcd\"                   "
+                                        "           },                                              "
+                                        "          {                                                "
+                                        "           \"caretColor\":\"abcd\"                         "
                                         "           },                                              "
                                         "           {                                               "
                                         "           \"paddingLeft\":\"abcd\"                        "
@@ -186,6 +204,7 @@ HWTEST_F(DomSearchTest, CreateSearchFromDsl001, TestSize.Level1)
     EXPECT_EQ(textStyle.GetFontFamilies()[0], TEST_TEXT_FONT_FAMILY);
     EXPECT_EQ(textFieldComponent->GetFocusTextColor(), Color::FromString(TEST_TEXT_COLOR));
     EXPECT_EQ(textFieldComponent->GetPlaceholderColor(), Color::FromString(TEST_PLACEHOLDER_COLOR));
+    EXPECT_EQ(textFieldComponent->GetCursorColor(), Color::FromString(TEST_PLACEHOLDER_COLOR));
     EXPECT_EQ(textFieldComponent->GetBgColor(), Color::FromString(TEST_BACKGROUND_COLOR));
     EXPECT_EQ(textFieldComponent->GetIconImage(), (IsTv() ? "" : TEST_ICON_SRC));
     EXPECT_EQ(textFieldComponent->GetPlaceholder(), TEST_HINT);
@@ -194,6 +213,8 @@ HWTEST_F(DomSearchTest, CreateSearchFromDsl001, TestSize.Level1)
     EXPECT_EQ(textFieldComponent->GetDecoration()->GetPadding().Top().Value(), TEST_PADDING_TOP_VALUE);
     EXPECT_EQ(textFieldComponent->GetDecoration()->GetPadding().Right().Value(), TEST_PADDING_RIGHT_VALUE);
     EXPECT_EQ(textFieldComponent->GetDecoration()->GetPadding().Bottom().Value(), TEST_PADDING_BOTTOM_VALUE);
+    EXPECT_EQ(textFieldComponent->GetSelection(), TEST_SELECTION);
+    EXPECT_TRUE(!textFieldComponent->IsSoftKeyboardEnabled());
 }
 
 /**
@@ -235,6 +256,7 @@ HWTEST_F(DomSearchTest, CreateSearchFromDsl002, TestSize.Level1)
     EXPECT_EQ(textFieldComponent->GetDecoration()->GetPadding().Top().Value(), DEFAULT_PADDING_TOP_VALUE);
     EXPECT_EQ(textFieldComponent->GetDecoration()->GetPadding().Right().Value(), DEFAULT_PADDING_RIGHT_VALUE);
     EXPECT_EQ(textFieldComponent->GetDecoration()->GetPadding().Bottom().Value(), DEFAULT_PADDING_BOTTOM_VALUE);
+    EXPECT_EQ(textFieldComponent->GetSelection(), DEFAULT_SELECTION);
 }
 
 /**
@@ -275,6 +297,7 @@ HWTEST_F(DomSearchTest, CreateSearchFromDsl003, TestSize.Level1)
     EXPECT_EQ(textFieldComponent->GetIconImage(), EMPTY_STRING);
     EXPECT_EQ(textFieldComponent->GetPlaceholder(), EMPTY_STRING);
     EXPECT_EQ(textFieldComponent->GetTextEditController()->GetText(), EMPTY_STRING);
+    EXPECT_EQ(textFieldComponent->GetSelection(), DEFAULT_SELECTION);
 }
 
 /**

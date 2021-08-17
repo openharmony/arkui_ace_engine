@@ -36,6 +36,7 @@ void RenderGridLayoutItem::Update(const RefPtr<Component>& component)
     SetRowIndex(gridItem->GetRowIndex());
     SetColumnSpan(gridItem->GetColumnSpan());
     SetRowSpan(gridItem->GetRowSpan());
+    SetForceRebuild(gridItem->ForceRebuild());
     MarkNeedLayout();
 }
 

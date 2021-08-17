@@ -36,6 +36,8 @@ public:
  * @tc.name: MemoryCache001
  * @tc.desc: new image success insert into cache with LRU.
  * @tc.type: FUNC
+ * @tc.require: AR000DACKR
+ * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, MemoryCache001, TestSize.Level1)
 {
@@ -63,6 +65,8 @@ HWTEST_F(ImageCacheTest, MemoryCache001, TestSize.Level1)
  * @tc.name: MemoryCache002
  * @tc.desc: get image success in cache with LRU.
  * @tc.type: FUNC
+ * @tc.require: AR000DACKR
+ * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, MemoryCache002, TestSize.Level1)
 {
@@ -96,6 +100,8 @@ HWTEST_F(ImageCacheTest, MemoryCache002, TestSize.Level1)
  * @tc.name: MemoryCache003
  * @tc.desc: Set memory cache capacity success.
  * @tc.type: FUNC
+ * @tc.require: AR000DACKR
+ * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, MemoryCache003, TestSize.Level1)
 {
@@ -116,6 +122,8 @@ HWTEST_F(ImageCacheTest, MemoryCache003, TestSize.Level1)
  * @tc.name: FileCache001
  * @tc.desc: init cacheFilePath and cacheFileInfo success.
  * @tc.type: FUNC
+ * @tc.require: AR000DACKR AR000DACKP
+ * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, FileCache001, TestSize.Level1)
 {
@@ -145,6 +153,8 @@ HWTEST_F(ImageCacheTest, FileCache001, TestSize.Level1)
  * @tc.name: FileCache002
  * @tc.desc: write data into cacheFilePath success.
  * @tc.type: FUNC
+ * @tc.require: AR000DACKR AR000DACKP
+ * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, FileCache002, TestSize.Level1)
 {
@@ -158,7 +168,7 @@ HWTEST_F(ImageCacheTest, FileCache002, TestSize.Level1)
      * @tc.steps: step2. call WriteCacheFile().
      * @tc.expected: file write into filePath and file info update right.
      */
-    ImageCache::WriteCacheFile(url, imageData);
+    ImageCache::WriteCacheFile(url, imageData.data(), imageData.size());
     ASSERT_EQ(ImageCache::cacheFileSize_, static_cast<int32_t>(FILE_SIZE + imageData.size()));
     ASSERT_EQ(ImageCache::cacheFileInfo_.size(), TEST_COUNT + 1);
     auto iter = ImageCache::cacheFileInfo_.rbegin();
@@ -170,6 +180,8 @@ HWTEST_F(ImageCacheTest, FileCache002, TestSize.Level1)
  * @tc.name: FileCache003
  * @tc.desc: Get data from cacheFilePath success with right url. but null with wrong url.
  * @tc.type: FUNC
+ * @tc.require: AR000DACKR AR000DACKP
+ * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, FileCache003, TestSize.Level1)
 {
@@ -191,6 +203,8 @@ HWTEST_F(ImageCacheTest, FileCache003, TestSize.Level1)
  * @tc.name: FileCache004
  * @tc.desc: clear files from cacheFilePath success while write file exceed limit.
  * @tc.type: FUNC
+ * @tc.require: AR000DACKR AR000DACKP
+ * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, FileCache004, TestSize.Level1)
 {
@@ -204,9 +218,9 @@ HWTEST_F(ImageCacheTest, FileCache004, TestSize.Level1)
      * @tc.steps: step2. call WriteCacheFile().
      * @tc.expected: file write into filePath and file info update right.
      */
-    std::vector<uint8_t> imageData = { 1, 2, 3 };
+    std::vector<uint8_t> imageData = { 1, 2, 3, 4, 5, 6 };
     std::string url = "http:/testfilecache003/image";
-    ImageCache::WriteCacheFile(url, imageData);
+    ImageCache::WriteCacheFile(url, imageData.data(), imageData.size());
     float ratio = ImageCache::clearCacheFileRatio_;
     ASSERT_EQ(ImageCache::cacheFileInfo_.size(), static_cast<size_t>((TEST_COUNT + 2) * ratio + 1));
     ASSERT_LE(ImageCache::cacheFileSize_, FILE_SIZE);

@@ -16,41 +16,138 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_IMAGE_ANIMATOR_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_IMAGE_ANIMATOR_COMPONENT_H
 
-#include "core/components/common/properties/border.h"
+#include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/element.h"
 
 namespace OHOS::Ace {
 
-struct ImageProperties {
-    std::string src;
-    std::string width;
-    std::string height;
-    std::string top;
-    std::string left;
-    std::string duration;
+using AnimatorFunc = std::function<void(const std::string& method)>;
+using AnimatorGetStatusFunc = std::function<Animator::Status()>;
+
+class ImageAnimatorController : public virtual AceType {
+    DECLARE_ACE_TYPE(ImageAnimatorController, AceType);
+
+public:
+    void CallAnimationFunc(const std::string& method)
+    {
+        if (animatorFunc_) {
+            animatorFunc_(method);
+        }
+    }
+
+    void SetAnimationFunc(const AnimatorFunc& animatorFunc)
+    {
+        animatorFunc_ = animatorFunc;
+    }
+
+    void SetAnimatorGetStatusFunc(const AnimatorGetStatusFunc& animatorGetStatusFunc)
+    {
+        animatorGetStatusFunc_ = animatorGetStatusFunc;
+    }
+
+    Animator::Status CallAnimatorGetStatusFunc()
+    {
+        if (animatorGetStatusFunc_) {
+            return animatorGetStatusFunc_();
+        }
+        return Animator::Status::IDLE;
+    }
+
+    void SetStartEvent(const EventMarker& startEvent)
+    {
+        startEvent_ = startEvent;
+    }
+
+    const EventMarker& GetStartEvent() const
+    {
+        return startEvent_;
+    }
+
+    void SetStopEvent(const EventMarker& stopEvent)
+    {
+        stopEvent_ = stopEvent;
+    }
+
+    const EventMarker& GetStopEvent() const
+    {
+        return stopEvent_;
+    }
+
+    void SetPauseEvent(const EventMarker& pauseEvent)
+    {
+        pauseEvent_ = pauseEvent;
+    }
+
+    const EventMarker& GetPauseEvent() const
+    {
+        return pauseEvent_;
+    }
+
+    void SetResumeEvent(const EventMarker& resumeEvent)
+    {
+        resumeEvent_ = resumeEvent;
+    }
+
+    const EventMarker& GetResumeEvent() const
+    {
+        return resumeEvent_;
+    }
+
+    void SetRepeatEvent(const EventMarker& repeatEvent)
+    {
+        repeatEvent_ = repeatEvent;
+    }
+
+    const EventMarker& GetRepeatEvent() const
+    {
+        return repeatEvent_;
+    }
+
+    void SetCancelEvent(const EventMarker& cancelEvent)
+    {
+        cancelEvent_ = cancelEvent;
+    }
+
+    const EventMarker& GetCancelEvent() const
+    {
+        return cancelEvent_;
+    }
+
+private:
+    AnimatorFunc animatorFunc_;
+    AnimatorGetStatusFunc animatorGetStatusFunc_;
+
+    EventMarker startEvent_;
+    EventMarker stopEvent_;
+    EventMarker pauseEvent_;
+    EventMarker resumeEvent_;
+    EventMarker repeatEvent_;
+    EventMarker cancelEvent_;
 };
 
-class ImageAnimatorComponent : public ComposedComponent {
+class ACE_EXPORT ImageAnimatorComponent : public ComposedComponent {
     DECLARE_ACE_TYPE(ImageAnimatorComponent, ComposedComponent);
 
 public:
-    explicit ImageAnimatorComponent(const std::string& name) : ComposedComponent(GenerateComponentId(), name) {}
+    explicit ImageAnimatorComponent(const std::string& name);
     ~ImageAnimatorComponent() override = default;
 
     RefPtr<Element> CreateElement() override;
 
     static ComposeId GenerateComponentId();
 
+    void SetFillMode(FillMode fillMode);
     void SetIteration(int32_t iteration);
     void SetDuration(int32_t duration);
     void SetIsReverse(bool isReverse);
     void SetIsFixedSize(bool isFixedSize);
     void SetBorder(const Border& border);
     void SetImageProperties(const std::vector<ImageProperties>& images);
-    void SetAnimator(const RefPtr<Animator>& controller);
     void SetPreDecode(int32_t preDecode);
+    void SetStatus(Animator::Status status);
 
+    FillMode GetFillMode() const;
     int32_t GetIteration() const;
     int32_t GetDuration() const;
     int32_t GetPreDecode() const;
@@ -58,17 +155,16 @@ public:
     bool GetIsFixedSize() const;
     const Border& GetBorder() const;
     const std::vector<ImageProperties>& GetImageProperties() const;
-    RefPtr<Animator> GetAnimator() const;
+    Animator::Status GetStatus() const;
+
+    const RefPtr<ImageAnimatorController>& GetImageAnimatorController() const
+    {
+        return imageAnimatorController_;
+    }
 
 private:
-    RefPtr<Animator> controller_;
-    std::vector<ImageProperties> images_;
-    Border border_;
-    int32_t iteration_ = 1;
-    int32_t duration_ = 0; // Duration in millisecond.
-    int32_t preDecode_ = 1;
-    bool isReverse_ = false;
-    bool isFixedSize_ = true;
+    RefPtr<ImageAnimatorDeclaration> declaration_;
+    RefPtr<ImageAnimatorController> imageAnimatorController_;
 };
 
 } // namespace OHOS::Ace

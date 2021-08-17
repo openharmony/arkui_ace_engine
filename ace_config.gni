@@ -14,6 +14,7 @@
 import("//third_party/flutter/flutter_ace_config.gni")
 
 ace_root = "//foundation/ace/ace_engine"
+ace_flutter_engine_root = "//third_party/flutter"
 
 ace_test_output_root = "ace_engine_standard"
 
@@ -24,3 +25,4 @@ node_js_path = "//prebuilts/ace-toolkit/nodejs/node-v12.18.4-linux-x64/bin/"
 cjson_root = "//third_party/cJSON"
 
 use_js_debug = false
+enable_ace_debug = false

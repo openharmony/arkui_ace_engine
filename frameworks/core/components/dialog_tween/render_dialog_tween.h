@@ -58,6 +58,9 @@ private:
     void CallOnSuccess(int32_t successType);
     void InitAccessibilityEventListener();
     void RemoveBackendEvent(const RefPtr<DialogTweenComponent>& component);
+    void BindButtonEvent(const RefPtr<DialogTweenComponent>& component);
+    void ComputeInnerLayoutParam(LayoutParam& innerLayout);
+    Offset ComputeChildPosition(const Size& childSize) const;
 
     std::function<void(int32_t)> onSuccess_;
     std::function<void()> onCancel_;

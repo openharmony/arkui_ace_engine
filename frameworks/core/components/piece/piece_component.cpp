@@ -25,6 +25,14 @@
 
 namespace OHOS::Ace {
 
+PieceComponent::PieceComponent()
+{
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<PieceDeclaration>();
+        declaration_->Init();
+    }
+}
+
 RefPtr<Element> PieceComponent::CreateElement()
 {
     return AceType::MakeRefPtr<PieceElement>();
@@ -37,30 +45,31 @@ RefPtr<RenderNode> PieceComponent::CreateRenderNode()
 
 RefPtr<Component> PieceComponent::BuildChild()
 {
-    if (content_.empty()) {
+    if (GetContent().empty()) {
         return nullptr;
     }
     std::list<RefPtr<Component>> rowChildren;
     auto row = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, rowChildren);
     row->SetMainAxisSize(MainAxisSize::MIN);
-    auto text = MakeRefPtr<TextComponent>(content_);
-    text->SetTextStyle(textStyle_);
-    text->SetFocusColor(textStyle_.GetTextColor());
+    auto text = MakeRefPtr<TextComponent>(GetContent());
+    text->SetTextStyle(GetTextStyle());
+    text->SetFocusColor(GetTextStyle().GetTextColor());
     auto textFlex = MakeRefPtr<FlexItemComponent>(0, 1, 0.0, text);
     row->AppendChild(textFlex);
-    if (showDelete_) {
+    if (ShowDelete()) {
         RefPtr<ImageComponent> image =
-            icon_.empty() ? MakeRefPtr<ImageComponent>(iconResource_) : MakeRefPtr<ImageComponent>(icon_);
-        image->SetWidth(iconSize_);
-        image->SetHeight(iconSize_);
+            GetIcon().empty() ? MakeRefPtr<ImageComponent>(GetIconResource()) : MakeRefPtr<ImageComponent>(GetIcon());
+        image->SetWidth(GetIconSize());
+        image->SetHeight(GetIconSize());
+        image->SetImageFill(declaration_->GetImageFill());
         auto gestureListener = MakeRefPtr<GestureListenerComponent>();
-        gestureListener->SetOnClickId(onDelete_);
+        gestureListener->SetOnClickId(GetOnDelete());
         gestureListener->SetChild(image);
         auto padding = MakeRefPtr<PaddingComponent>();
         if (GetTextDirection() == TextDirection::RTL) {
-            padding->SetPadding(Edge(0.0_vp, 0.0_vp, interval_, 0.0_vp));
+            padding->SetPadding(Edge(0.0_vp, 0.0_vp, GetInterval(), 0.0_vp));
         } else {
-            padding->SetPadding(Edge(interval_, 0.0_vp, 0.0_vp, 0.0_vp));
+            padding->SetPadding(Edge(GetInterval(), 0.0_vp, 0.0_vp, 0.0_vp));
         }
         padding->SetChild(gestureListener);
         auto iconFlex = MakeRefPtr<FlexItemComponent>(0, 0, 0.0, padding);
@@ -68,6 +77,112 @@ RefPtr<Component> PieceComponent::BuildChild()
     }
     row->SetTextDirection(GetTextDirection());
     return row;
+}
+
+const std::string& PieceComponent::GetContent() const
+{
+    return declaration_->GetContent();
+}
+void PieceComponent::SetContent(const std::string& content)
+{
+    declaration_->SetContent(content);
+}
+
+const std::string& PieceComponent::GetIcon() const
+{
+    return declaration_->GetIcon();
+}
+void PieceComponent::SetIcon(const std::string& icon)
+{
+    declaration_->SetIcon(icon);
+}
+
+const TextStyle& PieceComponent::GetTextStyle() const
+{
+    return declaration_->GetTextStyle();
+}
+void PieceComponent::SetTextStyle(const TextStyle& textStyle)
+{
+    declaration_->SetTextStyle(textStyle);
+}
+
+const Dimension& PieceComponent::GetInterval() const
+{
+    return declaration_->GetInterval();
+}
+void PieceComponent::SetInterval(const Dimension& interval)
+{
+    declaration_->SetInterval(interval);
+}
+
+InternalResource::ResourceId PieceComponent::GetIconResource() const
+{
+    return declaration_->GetIconResource();
+}
+void PieceComponent::SetIconResource(InternalResource::ResourceId iconResource)
+{
+    declaration_->SetIconResource(iconResource);
+}
+
+const Dimension& PieceComponent::GetIconSize() const
+{
+    return declaration_->GetIconSize();
+}
+void PieceComponent::SetIconSize(const Dimension& iconSize)
+{
+    declaration_->SetIconSize(iconSize);
+}
+
+const EventMarker& PieceComponent::GetOnDelete() const
+{
+    return declaration_->GetOnDelete();
+}
+void PieceComponent::SetOnDelete(const EventMarker& onDelete)
+{
+    declaration_->SetOnDelete(onDelete);
+}
+
+bool PieceComponent::ShowDelete() const
+{
+    return declaration_->ShowDelete();
+}
+void PieceComponent::SetShowDelete(bool showDelete)
+{
+    declaration_->SetShowDelete(showDelete);
+}
+
+const Edge& PieceComponent::GetMargin() const
+{
+    return declaration_->GetMargin();
+}
+void PieceComponent::SetMargin(const Edge& margin)
+{
+    declaration_->SetMargin(margin);
+}
+
+const Border& PieceComponent::GetBorder() const
+{
+    return declaration_->GetBorder();
+}
+void PieceComponent::SetBorder(const Border& border)
+{
+    declaration_->SetBorder(border);
+}
+
+const Color& PieceComponent::GetHoverColor() const
+{
+    return declaration_->GetHoverColor();
+}
+void PieceComponent::SetHoverColor(const Color& hoverColor)
+{
+    declaration_->SetHoverColor(hoverColor);
+}
+
+void PieceComponent::SetDeclaration(const RefPtr<PieceDeclaration>& declaration)
+{
+    if (declaration) {
+        declaration_ = declaration;
+    }
 }
 
 } // namespace OHOS::Ace

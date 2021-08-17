@@ -24,7 +24,7 @@ const char ATTR_NAME_D[] = "d";
 
 } // namespace
 
-void RenderSvgPath::Update(const RefPtr<Component> &component)
+void RenderSvgPath::Update(const RefPtr<Component>& component)
 {
     const RefPtr<SvgPathComponent> pathComponent = AceType::DynamicCast<SvgPathComponent>(component);
     if (!pathComponent) {
@@ -32,9 +32,7 @@ void RenderSvgPath::Update(const RefPtr<Component> &component)
         return;
     }
     d_ = pathComponent->GetD();
-    fillState_ = pathComponent->GetFillState();
-    strokeState_ = pathComponent->GetStrokeState();
-
+    RenderSvgBase::SetPresentationAttrs(pathComponent->GetDeclaration());
     PrepareAnimations(component);
     MarkNeedLayout();
 }
@@ -45,14 +43,14 @@ void RenderSvgPath::PerformLayout()
     SetLayoutSize(layoutParam.GetMaxSize());
 }
 
-void RenderSvgPath::PrepareAnimations(const RefPtr<Component> &component)
+void RenderSvgPath::PrepareAnimations(const RefPtr<Component>& component)
 {
     const RefPtr<SvgPathComponent> pathComponent = AceType::DynamicCast<SvgPathComponent>(component);
     if (!pathComponent) {
         LOGW("path component is null");
         return;
     }
-    const auto &componentChildren = pathComponent->GetChildren();
+    const auto& componentChildren = pathComponent->GetChildren();
     RenderSvgBase::PrepareAnimation(componentChildren);
 }
 
@@ -73,11 +71,10 @@ bool RenderSvgPath::PrepareSelfAnimation(const RefPtr<SvgAnimate>& component)
             return;
         }
         svgPath->SetWeight(value);
-        svgPath->MarkNeedLayout(true);
+        svgPath->MarkNeedRender(true);
     };
-    RefPtr<Evaluator<double>> evaluator = AceType::MakeRefPtr<LinearEvaluator<double>>();
     double originalValue = 0.0;
-    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback), evaluator);
+    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback));
     return true;
 }
 

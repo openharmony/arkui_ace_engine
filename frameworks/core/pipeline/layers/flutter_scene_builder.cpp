@@ -59,6 +59,11 @@ void FlutterSceneBuilder::PushClipRRect(const flutter::RRect& rrect, int32_t cli
     sceneBuilder_->pushClipRRect(rrect, clipBehavior);
 }
 
+void FlutterSceneBuilder::PushClipPath(const flutter::CanvasPath* path, int32_t clipBehavior)
+{
+    sceneBuilder_->pushClipPath(path, clipBehavior);
+}
+
 void FlutterSceneBuilder::PushOpacity(int32_t alpha, double dx, double dy)
 {
     sceneBuilder_->pushOpacity(alpha, dx, dy);
@@ -81,6 +86,21 @@ void FlutterSceneBuilder::PushShaderMask(fml::RefPtr<flutter::Shader> shader, do
         return;
     }
     sceneBuilder_->pushShaderMask(shader.get(), maskRectLeft, maskRectRight, maskRectTop, maskRectBottom, blendMode);
+}
+
+void FlutterSceneBuilder::PushGradientColorMask(const SkPaint& maskPaint)
+{
+    sceneBuilder_->PushGradientColorMask(maskPaint);
+}
+
+void FlutterSceneBuilder::PushSvgMask(const sk_sp<SkSVGDOM>& svgDom, double x, double y, double scaleX, double scaleY)
+{
+    sceneBuilder_->PushSvgMask(svgDom, x, y, scaleX, scaleY);
+}
+
+void FlutterSceneBuilder::PushPathMask(const SkPaint& maskPaint, const SkPath& path)
+{
+    sceneBuilder_->PushPathMask(maskPaint, path);
 }
 
 void FlutterSceneBuilder::Pop()

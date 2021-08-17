@@ -31,6 +31,7 @@
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
 #include "core/common/manager_interface.h"
+#include "core/common/thread_checker.h"
 #include "core/components/checkable/render_checkable.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/dialog/dialog_component.h"
@@ -63,6 +64,7 @@ constexpr int32_t MOUSE_PRESS_LEFT = 1;
 constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
+
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -119,6 +121,11 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     UpdateFontWeightScale();
 }
 
+PipelineContext::~PipelineContext()
+{
+    LOG_DESTROY();
+}
+
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
     FlushBuild();
@@ -133,9 +140,13 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 void PipelineContext::FlushBuild()
 {
     ACE_FUNCTION_TRACE();
+    CHECK_RUN_ON(UI);
 
     if (dirtyElements_.empty()) {
         return;
+    }
+    if (isFirstLoaded_) {
+        LOGI("PipelineContext::FlushBuild()");
     }
     decltype(dirtyElements_) dirtyElements(std::move(dirtyElements_));
     for (const auto& elementWeak : dirtyElements) {
@@ -156,6 +167,7 @@ void PipelineContext::FlushBuild()
 
 void PipelineContext::FlushPredictLayout()
 {
+    CHECK_RUN_ON(UI);
     if (predictLayoutNodes_.empty()) {
         return;
     }
@@ -168,6 +180,7 @@ void PipelineContext::FlushPredictLayout()
 
 void PipelineContext::FlushFocus()
 {
+    CHECK_RUN_ON(UI);
     if (dirtyFocusNode_) {
         dirtyFocusNode_->RequestFocusImmediately();
         dirtyFocusNode_.Reset();
@@ -196,6 +209,7 @@ void PipelineContext::FlushFocus()
 
 void PipelineContext::RefreshStageFocus()
 {
+    CHECK_RUN_ON(UI);
     if (!rootElement_) {
         LOGE("Root element is null!");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
@@ -212,6 +226,7 @@ void PipelineContext::RefreshStageFocus()
 
 RefPtr<StageElement> PipelineContext::GetStageElement() const
 {
+    CHECK_RUN_ON(UI);
     auto overlay = GetOverlayElement();
     if (!overlay) {
         LOGE("Get stage element failed. overlay element is null!");
@@ -254,6 +269,7 @@ bool PipelineContext::IsLastPage()
 
 RefPtr<ComposedElement> PipelineContext::GetComposedElementById(const ComposeId& id)
 {
+    CHECK_RUN_ON(UI);
     const auto& it = composedElementMap_.find(id);
     if (it != composedElementMap_.end() && !it->second.empty()) {
         return it->second.front();
@@ -263,19 +279,36 @@ RefPtr<ComposedElement> PipelineContext::GetComposedElementById(const ComposeId&
 
 void PipelineContext::FlushLayout()
 {
+    CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
 
     if (dirtyLayoutNodes_.empty()) {
         return;
     }
+    if (isFirstLoaded_) {
+        LOGI("PipelineContext::FlushLayout()");
+    }
     decltype(dirtyLayoutNodes_) dirtyNodes(std::move(dirtyLayoutNodes_));
     for (const auto& dirtyNode : dirtyNodes) {
+        SaveExplicitAnimationOption(dirtyNode->GetExplicitAnimationOption());
         dirtyNode->OnLayout();
+        ClearExplicitAnimationOption();
     }
+    decltype(layoutTransitionNodeSet_) transitionNodes(std::move(layoutTransitionNodeSet_));
+    for (const auto& transitionNode : transitionNodes) {
+        transitionNode->CreateLayoutTransition();
+    }
+
+    for (const auto& dirtyNode : dirtyNodes) {
+        dirtyNode->ClearExplicitAnimationOption();
+    }
+
+    alignDeclarationNodeList_.clear();
 }
 
 void PipelineContext::FlushRender()
 {
+    CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
 
     if (dirtyRenderNodes_.empty() && dirtyRenderNodesInOverlay_.empty() && !needForcedRefresh_) {
@@ -325,12 +358,17 @@ void PipelineContext::FlushRender()
         curDirtyRect = curDirtyRect * viewScale_;
         renderRoot->FinishRender(drawDelegate_, dirtyRect_.CombineRect(curDirtyRect));
         dirtyRect_ = curDirtyRect;
+        if (isFirstLoaded_) {
+            LOGI("PipelineContext::FlushRender()");
+            isFirstLoaded_ = false;
+        }
     }
     needForcedRefresh_ = false;
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 {
+    CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
     flushAnimationTimestamp_ = nanoTimestamp;
     isFlushingAnimation_ = true;
@@ -349,6 +387,7 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 
 void PipelineContext::FlushPageUpdateTasks()
 {
+    CHECK_RUN_ON(UI);
     while (!pageUpdateTasks_.empty()) {
         const auto& task = pageUpdateTasks_.front();
         if (task) {
@@ -360,6 +399,7 @@ void PipelineContext::FlushPageUpdateTasks()
 
 void PipelineContext::FlushAnimationTasks()
 {
+    CHECK_RUN_ON(UI);
     if (animationCallback_) {
         taskExecutor_->PostTask(animationCallback_, TaskExecutor::TaskType::JS);
     }
@@ -391,6 +431,7 @@ void PipelineContext::ProcessPreFlush()
 
 void PipelineContext::ProcessPostFlush()
 {
+    CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
 
     if (postFlushListeners_.empty()) {
@@ -402,13 +443,30 @@ void PipelineContext::ProcessPostFlush()
     }
 }
 
+void PipelineContext::SetClipHole(double left, double top, double width, double height)
+{
+    if (!rootElement_) {
+        return;
+    }
+
+    transparentHole_.SetLeft(left);
+    transparentHole_.SetTop(top);
+    transparentHole_.SetWidth(width);
+    transparentHole_.SetHeight(height);
+}
+
 RefPtr<Element> PipelineContext::SetupRootElement()
 {
+    CHECK_RUN_ON(UI);
     RefPtr<StageComponent> rootStage = AceType::MakeRefPtr<StageComponent>(std::list<RefPtr<Component>>());
     if (isRightToLeft_) {
         rootStage->SetTextDirection(TextDirection::RTL);
     }
-    rootStage->SetMainStackSize(MainStackSize::LAST_CHILD);
+    if (GetIsDeclarative()) {
+        rootStage->SetMainStackSize(MainStackSize::MAX);
+    } else {
+        rootStage->SetMainStackSize(MainStackSize::LAST_CHILD);
+    }
     auto overlay = AceType::MakeRefPtr<OverlayComponent>(std::list<RefPtr<Component>>());
     overlay->AppendChild(rootStage);
     RefPtr<RootComponent> rootComponent;
@@ -488,9 +546,11 @@ void PipelineContext::Dump(const std::vector<std::string>& params) const
         DumpLog::GetInstance().Print(std::string("Set Scroll Friction. friction: ") + params[1]);
         Scrollable::SetFriction(StringUtils::StringToDouble(params[1]));
     } else if (params[0] == "-hiviewreport" && params.size() >= 3) {
-        DumpLog::GetInstance().Print("Report hiview event. EventID: " + params[1] + ", error type: " + params[2]);
-        EventInfo eventInfo = { .eventType = StringUtils::StringToInt(params[1]),
-            .errorType = StringUtils::StringToInt(params[2]) };
+        DumpLog::GetInstance().Print("Report hiview event. EventType: " + params[1] + ", error type: " + params[2]);
+        EventInfo eventInfo = {
+            .eventType = params[1],
+            .errorType = StringUtils::StringToInt(params[2])
+        };
         EventReport::SendEvent(eventInfo);
     } else if (params[0] == "-threadstuck" && params.size() >= 3) {
         MakeThreadStuck(params);
@@ -547,18 +607,35 @@ RefPtr<RenderNode> PipelineContext::GetLastPageRender() const
     return lastPage->GetRenderNode();
 }
 
+void PipelineContext::AddRouterChangeCallback(const OnRouterChangeCallback& onRouterChangeCallback)
+{
+    OnRouterChangeCallback_ = onRouterChangeCallback;
+}
+
+void PipelineContext::onRouterChange(const std::string url)
+{
+    if (OnRouterChangeCallback_ != nullptr) {
+        OnRouterChangeCallback_(url);
+    }
+}
+
 bool PipelineContext::CanPushPage()
 {
     auto stageElement = GetStageElement();
     return stageElement && stageElement->CanPushPage();
 }
 
-void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent)
+void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage)
 {
-    auto stageElement = GetStageElement();
+    CHECK_RUN_ON(UI);
+    auto stageElement = stage;
     if (!stageElement) {
-        LOGE("Get stage element failed!");
-        return;
+        // if not target stage, use root stage
+        stageElement = GetStageElement();
+        if (!stageElement) {
+            LOGE("Get stage element failed!");
+            return;
+        }
     }
     buildingFirstPage_ = isFirstPage_;
     isFirstPage_ = false;
@@ -573,6 +650,11 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent)
     FlushBuildAndLayoutBeforeSurfaceReady();
 }
 
+void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent)
+{
+    PushPage(pageComponent, nullptr);
+}
+
 void PipelineContext::GetBoundingRectData(int32_t nodeId, Rect& rect)
 {
     auto composeElement = GetComposedElementById(std::to_string(nodeId));
@@ -585,8 +667,9 @@ void PipelineContext::GetBoundingRectData(int32_t nodeId, Rect& rect)
     }
 }
 
-bool PipelineContext::ShowDialog(const DialogProperties& dialogProperties, bool isRightToLeft)
+bool PipelineContext::ShowDialog(const DialogProperties& dialogProperties, bool isRightToLeft, bool directBuild)
 {
+    CHECK_RUN_ON(UI);
     const auto& dialog = DialogBuilder::Build(dialogProperties, AceType::WeakClaim(this));
     if (!dialog) {
         return false;
@@ -596,7 +679,7 @@ bool PipelineContext::ShowDialog(const DialogProperties& dialogProperties, bool 
     if (!lastStack) {
         return false;
     }
-    lastStack->PushDialog(dialog);
+    lastStack->PushDialog(dialog, directBuild);
     return true;
 }
 
@@ -609,15 +692,18 @@ bool PipelineContext::CanPopPage()
 void PipelineContext::PopPage()
 {
     LOGD("PopPageComponent");
+    CHECK_RUN_ON(UI);
     auto stageElement = GetStageElement();
     if (stageElement) {
         stageElement->Pop();
     }
+    ExitAnimation();
 }
 
 void PipelineContext::PopToPage(int32_t pageId)
 {
     LOGD("PopToPageComponent: page-%{public}d", pageId);
+    CHECK_RUN_ON(UI);
     auto stageElement = GetStageElement();
     if (stageElement) {
         stageElement->PopToPage(pageId);
@@ -661,13 +747,17 @@ void PipelineContext::ClearPageTransitionListeners()
     }
 }
 
-void PipelineContext::ReplacePage(const RefPtr<PageComponent>& pageComponent)
+void PipelineContext::ReplacePage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage)
 {
     LOGD("ReplacePageComponent");
-    auto stageElement = GetStageElement();
-    if (!stageElement) {
-        LOGE("Get stage element failed!");
-        return;
+    CHECK_RUN_ON(UI);
+    auto stageElement = stage;
+    if (!stage) {
+        stageElement = GetStageElement();
+        if (!stageElement) {
+            LOGE("Get stage element failed!");
+            return;
+        }
     }
     if (PageTransitionComponent::HasTransitionComponent(AceType::DynamicCast<Component>(pageComponent))) {
         LOGD("replace page with transition.");
@@ -679,11 +769,39 @@ void PipelineContext::ReplacePage(const RefPtr<PageComponent>& pageComponent)
     }
 }
 
+void PipelineContext::ReplacePage(const RefPtr<PageComponent>& pageComponent)
+{
+    ReplacePage(pageComponent, nullptr);
+}
+
 bool PipelineContext::ClearInvisiblePages()
 {
     LOGD("ClearInvisiblePageComponents");
     auto stageElement = GetStageElement();
     return stageElement && stageElement->ClearOffStage();
+}
+
+void PipelineContext::ExitAnimation()
+{
+    CHECK_RUN_ON(UI);
+    if (IsLastPage()) {
+        // semi modal use translucent theme and will do exit animation by ACE itself.
+        if (windowModal_ == WindowModal::SEMI_MODAL || windowModal_ == WindowModal::SEMI_MODAL_FULL_SCREEN ||
+            windowModal_ == WindowModal::DIALOG_MODAL) {
+            taskExecutor_->PostTask(
+                [weak = AceType::WeakClaim(this)]() {
+                  auto context = weak.Upgrade();
+                  if (!context) {
+                      return;
+                  }
+                  context->Finish();
+                },
+                TaskExecutor::TaskType::UI);
+        } else {
+            // return back to desktop
+            Finish();
+        }
+    }
 }
 
 // return true if user accept or page is not last, return false if others condition
@@ -701,31 +819,13 @@ bool PipelineContext::CallRouterBackToPopPage()
         return true;
     } else {
         frontend->CallRouterBack();
-        if (IsLastPage()) {
-            // semi modal use translucent theme and will do exit animation by ACE itself.
-            if (windowModal_ == WindowModal::SEMI_MODAL || windowModal_ == WindowModal::SEMI_MODAL_FULL_SCREEN ||
-                windowModal_ == WindowModal::DIALOG_MODAL) {
-                taskExecutor_->PostTask(
-                    [weak = AceType::WeakClaim(this)]() {
-                        auto context = weak.Upgrade();
-                        if (!context) {
-                            return;
-                        }
-                        context->Finish();
-                    },
-                    TaskExecutor::TaskType::UI);
-                return true;
-            }
-            // return back to desktop
-            return false;
-        } else {
-            return true;
-        }
+        return true;
     }
 }
 
 void PipelineContext::ScheduleUpdate(const RefPtr<ComposedComponent>& compose)
 {
+    CHECK_RUN_ON(UI);
     ComposeId id = compose->GetId();
     LOGD("update compose for id:%{public}s", id.c_str());
     const auto& it = composedElementMap_.find(id);
@@ -741,6 +841,7 @@ void PipelineContext::ScheduleUpdate(const RefPtr<ComposedComponent>& compose)
 
 void PipelineContext::AddComposedElement(const ComposeId& id, const RefPtr<ComposedElement>& element)
 {
+    CHECK_RUN_ON(UI);
     LOGD("add new composed element id:%{public}s", id.c_str());
     auto it = composedElementMap_.find(id);
     if (it != composedElementMap_.end()) {
@@ -754,6 +855,7 @@ void PipelineContext::AddComposedElement(const ComposeId& id, const RefPtr<Compo
 
 void PipelineContext::RemoveComposedElement(const ComposeId& id, const RefPtr<ComposedElement>& element)
 {
+    CHECK_RUN_ON(UI);
     LOGD("remove composed element id:%{public}s", id.c_str());
     auto it = composedElementMap_.find(id);
     if (it != composedElementMap_.end()) {
@@ -766,6 +868,7 @@ void PipelineContext::RemoveComposedElement(const ComposeId& id, const RefPtr<Co
 
 void PipelineContext::AddDirtyElement(const RefPtr<Element>& dirtyElement)
 {
+    CHECK_RUN_ON(UI);
     if (!dirtyElement) {
         LOGW("dirtyElement is null");
         return;
@@ -778,6 +881,7 @@ void PipelineContext::AddDirtyElement(const RefPtr<Element>& dirtyElement)
 
 void PipelineContext::AddNeedRebuildFocusElement(const RefPtr<Element>& focusElement)
 {
+    CHECK_RUN_ON(UI);
     if (!focusElement) {
         LOGW("focusElement is null");
         return;
@@ -788,6 +892,7 @@ void PipelineContext::AddNeedRebuildFocusElement(const RefPtr<Element>& focusEle
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<RenderNode>& renderNode, bool overlay)
 {
+    CHECK_RUN_ON(UI);
     if (!renderNode) {
         LOGW("renderNode is null");
         return;
@@ -804,11 +909,13 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<RenderNode>& renderNode, b
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<RenderNode>& renderNode)
 {
+    CHECK_RUN_ON(UI);
     if (!renderNode) {
         LOGW("renderNode is null");
         return;
     }
-    LOGD("schedule layout for %{public}s", AceType::TypeName(renderNode));
+    LOGD("schedule layout for %{public}s", AceType::TypeName(AceType::RawPtr(renderNode)));
+    renderNode->SaveExplicitAnimationOption(explicitAnimationOption_);
     dirtyLayoutNodes_.emplace(renderNode);
     hasIdleTasks_ = true;
     window_->RequestFrame();
@@ -816,6 +923,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<RenderNode>& renderNode)
 
 void PipelineContext::AddPredictLayoutNode(const RefPtr<RenderNode>& renderNode)
 {
+    CHECK_RUN_ON(UI);
     if (!renderNode) {
         LOGW("renderNode is null");
         return;
@@ -828,18 +936,21 @@ void PipelineContext::AddPredictLayoutNode(const RefPtr<RenderNode>& renderNode)
 
 void PipelineContext::AddPreFlushListener(const RefPtr<FlushEvent>& listener)
 {
+    CHECK_RUN_ON(UI);
     preFlushListeners_.emplace_back(listener);
     window_->RequestFrame();
 }
 
 void PipelineContext::AddPostFlushListener(const RefPtr<FlushEvent>& listener)
 {
+    CHECK_RUN_ON(UI);
     postFlushListeners_.emplace_back(listener);
     window_->RequestFrame();
 }
 
 uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
 {
+    CHECK_RUN_ON(UI);
     scheduleTasks_.try_emplace(++nextScheduleTaskId_, task);
     window_->RequestFrame();
     return nextScheduleTaskId_;
@@ -864,21 +975,21 @@ void PipelineContext::RemoveRequestedRotationNode(const WeakPtr<RenderNode>& ren
 
 void PipelineContext::RemoveScheduleTask(uint32_t id)
 {
+    CHECK_RUN_ON(UI);
     scheduleTasks_.erase(id);
 }
 
 void PipelineContext::OnTouchEvent(const TouchPoint& point)
 {
+    CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
-
     if (!rootElement_) {
-        LOGE("the root element is nullptr on touch event");
-        EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
+        LOGE("root element is nullptr");
         return;
     }
-
     auto scalePoint = point.CreateScalePoint(viewScale_);
-    LOGI("OnTouchEvent: x = %f, y = %f, type = %zu", scalePoint.x, scalePoint.y, scalePoint.type);
+    LOGD("OnTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
+        scalePoint.type);
     if (scalePoint.type == TouchType::DOWN) {
         LOGD("receive touch down event, first use touch test to collect touch event target");
         TouchRestrict touchRestrict { TouchRestrict::NONE };
@@ -886,7 +997,11 @@ void PipelineContext::OnTouchEvent(const TouchPoint& point)
         if (frontEnd && (frontEnd->GetType() == FrontendType::JS_CARD)) {
             touchRestrict.UpdateForbiddenType(TouchRestrict::LONG_PRESS);
         }
-        eventManager_.TouchTest(scalePoint, rootElement_->GetRenderNode(), touchRestrict);
+        if (GetLastPageRender() == nullptr) {
+            eventManager_.TouchTest(scalePoint, rootElement_->GetRenderNode(), touchRestrict);
+        } else {
+            eventManager_.TouchTest(scalePoint, GetLastPageRender(), touchRestrict);
+        }
     }
     if (scalePoint.type == TouchType::MOVE) {
         isMoving_ = true;
@@ -899,6 +1014,7 @@ void PipelineContext::OnTouchEvent(const TouchPoint& point)
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
+    CHECK_RUN_ON(UI);
     if (!rootElement_) {
         LOGE("the root element is nullptr");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
@@ -922,6 +1038,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event)
 {
+    CHECK_RUN_ON(UI);
     LOGD("OnMouseEvent: x=%{public}f, y=%{public}f, type=%{public}d. button=%{public}d, pressbutton=%{public}d}",
         event.x, event.y, event.action, event.button, event.pressedButtons);
 
@@ -945,10 +1062,12 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
         // Send Hover Exit Animation event to preHoverNodes.
         for (const auto& exitNode : preHoverNodes) {
             exitNode->OnMouseHoverExitAnimation();
+            exitNode->HandleMouseHoverEvent(MouseState::NONE);
         }
         // Send Hover Enter Animation event to curHoverNodes.
         for (const auto& enterNode : hoverNodes_) {
             enterNode->OnMouseHoverEnterAnimation();
+            enterNode->HandleMouseHoverEvent(MouseState::HOVER);
         }
     } else {
         HandleMouseInputEvent(event);
@@ -986,6 +1105,7 @@ void PipelineContext::HandleMouseInputEvent(const MouseEvent& event)
 
 void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node)
 {
+    CHECK_RUN_ON(UI);
     int32_t nodeId = node->GetAccessibilityNodeId();
     if (nodeId == 0) {
         return;
@@ -1003,6 +1123,7 @@ void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node)
 
 bool PipelineContext::OnRotationEvent(const RotationEvent& event) const
 {
+    CHECK_RUN_ON(UI);
     if (!rootElement_) {
         LOGE("the root element is nullptr");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
@@ -1043,6 +1164,7 @@ void PipelineContext::SetCardViewAccessibilityParams(const std::string& key, boo
 
 void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
 {
+    CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
 
 #if defined(ENABLE_NATIVE_VIEW)
@@ -1068,6 +1190,7 @@ void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
 
 void PipelineContext::OnIdle(int64_t deadline)
 {
+    CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
     FlushPredictLayout();
     if (hasIdleTasks_) {
@@ -1081,12 +1204,21 @@ void PipelineContext::OnIdle(int64_t deadline)
     auto front = GetFrontend();
     if (front && GetIsDeclarative() && scheduleTasks_.empty()) {
         LOGD("Create GC task");
-        GetTaskExecutor()->PostTask([front]() { front->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
+        auto weak = AceType::WeakClaim(AceType::RawPtr(front));
+        GetTaskExecutor()->PostTask([weak]() {
+            auto front = weak.Upgrade();
+            if (front == nullptr) {
+                LOGE("front is nullptr");
+                return;
+            }
+            front->TriggerGarbageCollection();
+        }, TaskExecutor::TaskType::JS);
     }
 }
 
 void PipelineContext::OnActionEvent(const std::string& action)
 {
+    CHECK_RUN_ON(UI);
     if (actionEventHandler_) {
         actionEventHandler_(action);
     } else {
@@ -1096,6 +1228,7 @@ void PipelineContext::OnActionEvent(const std::string& action)
 
 void PipelineContext::FlushPipelineImmediately()
 {
+    CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
     if (isSurfaceReady_) {
         FlushPipelineWithoutAnimation();
@@ -1111,6 +1244,7 @@ RefPtr<Frontend> PipelineContext::GetFrontend() const
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
 {
+    CHECK_RUN_ON(UI);
     if (width_ == width && height_ == height) {
         return;
     }
@@ -1123,8 +1257,8 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
         double newRootHeight = height / viewScale_;
         double newRootWidth = width / viewScale_;
         double offsetHeight = rootHeight_ - newRootHeight;
-        if (textFieldManager_) {
-            textFieldManager_->MovePage(GetLastStack(), { newRootWidth, newRootHeight }, offsetHeight);
+        if (textFieldManager_ && GetLastPage()) {
+            textFieldManager_->MovePage(GetLastPage()->GetPageId(), { newRootWidth, newRootHeight }, offsetHeight);
         }
     }
     GridSystemManager::GetInstance().OnSurfaceChanged(width);
@@ -1142,7 +1276,6 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
             transitionElement->InitTransitionClip();
         }
     }
-
     SetRootSizeWithWidthHeight(width, height);
     if (isSurfaceReady_) {
         return;
@@ -1157,6 +1290,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
 {
+    CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnSurfaceDensityChanged(%lf)", density);
 
     density_ = density;
@@ -1167,6 +1301,7 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 
 void PipelineContext::OnSystemBarHeightChanged(double statusBar, double navigationBar)
 {
+    CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnSystemBarHeightChanged(%lf, %lf)", statusBar, navigationBar);
     double statusBarHeight = 0.0;
     double navigationBarHeight = 0.0;
@@ -1196,6 +1331,7 @@ void PipelineContext::OnSystemBarHeightChanged(double statusBar, double navigati
 
 void PipelineContext::OnSurfaceDestroyed()
 {
+    CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnSurfaceDestroyed");
     isSurfaceReady_ = false;
 }
@@ -1204,12 +1340,23 @@ double PipelineContext::NormalizeToPx(const Dimension& dimension) const
 {
     if ((dimension.Unit() == DimensionUnit::VP) || (dimension.Unit() == DimensionUnit::FP)) {
         return (dimension.Value() * dipScale_);
+    } else if (dimension.Unit() == DimensionUnit::LPX) {
+        return (dimension.Value() * designWidthScale_);
+    }
+    return dimension.Value();
+}
+
+double PipelineContext::ConvertPxToVp(const Dimension& dimension) const
+{
+    if (dimension.Unit() == DimensionUnit::PX) {
+        return dimension.Value() / dipScale_;
     }
     return dimension.Value();
 }
 
 void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height)
 {
+    CHECK_RUN_ON(UI);
     auto frontend = weakFrontend_.Upgrade();
     if (!frontend) {
         LOGE("the frontend is nullptr");
@@ -1223,6 +1370,7 @@ void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height)
     }
     if (GetIsDeclarative()) {
         viewScale_ = DEFAULT_VIEW_SCALE;
+        designWidthScale_ = static_cast<float>(width) / windowConfig.designWidth;
     } else {
         viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<float>(width) / windowConfig.designWidth;
         if (NearZero(viewScale_)) {
@@ -1241,12 +1389,22 @@ void PipelineContext::SetRootSize(double density, int32_t width, int32_t height)
 {
     ACE_SCOPED_TRACE("SetRootSize(%lf, %d, %d)", density, width, height);
 
-    density_ = density;
-    SetRootSizeWithWidthHeight(width, height);
+
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), density, width, height]() {
+            auto context = weak.Upgrade();
+            if (!context) {
+                return;
+            }
+            context->density_ = density;
+            context->SetRootSizeWithWidthHeight(width, height);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void PipelineContext::SetRootRect(double width, double height) const
 {
+    CHECK_RUN_ON(UI);
     if (NearZero(viewScale_) || !rootElement_) {
         LOGE("the view scale is zero or root element is nullptr");
         return;
@@ -1270,6 +1428,7 @@ void PipelineContext::SetRootRect(double width, double height) const
 
 void PipelineContext::Finish(bool autoFinish) const
 {
+    CHECK_RUN_ON(UI);
     LOGD("finish current pipeline context, auto: %{public}d, root empty: %{public}d", autoFinish, !!rootElement_);
     if (autoFinish && rootElement_ && onShow_) {
         if (windowModal_ == WindowModal::SEMI_MODAL || windowModal_ == WindowModal::SEMI_MODAL_FULL_SCREEN) {
@@ -1304,6 +1463,7 @@ void PipelineContext::Finish(bool autoFinish) const
 
 void PipelineContext::RequestFullWindow(int32_t duration)
 {
+    CHECK_RUN_ON(UI);
     LOGD("Request full window.");
     if (!rootElement_) {
         LOGE("Root element is null!");
@@ -1340,6 +1500,7 @@ void PipelineContext::RequestFullWindow(int32_t duration)
 
 void PipelineContext::NotifyStatusBarBgColor(const Color& color) const
 {
+    CHECK_RUN_ON(UI);
     LOGD("Notify StatusBar BgColor, color: %{public}x", color.GetValue());
     if (statusBarBgColorEventHandler_) {
         statusBarBgColorEventHandler_(color);
@@ -1350,6 +1511,7 @@ void PipelineContext::NotifyStatusBarBgColor(const Color& color) const
 
 void PipelineContext::NotifyPopupDismiss() const
 {
+    CHECK_RUN_ON(UI);
     if (popupEventHandler_) {
         popupEventHandler_();
     }
@@ -1359,6 +1521,26 @@ void PipelineContext::NotifyRouterBackDismiss() const
 {
     if (routerBackEventHandler_) {
         routerBackEventHandler_();
+    }
+}
+
+void PipelineContext::NotifyPopPageSuccessDismiss(const std::string& pageUrl, const int32_t pageId) const
+{
+    CHECK_RUN_ON(UI);
+    for (auto& iterPopSuccessHander : popPageSuccessEventHandler_) {
+        if (iterPopSuccessHander) {
+            iterPopSuccessHander(pageUrl, pageId);
+        }
+    }
+}
+
+void PipelineContext::NotifyIsPagePathInvalidDismiss(bool isPageInvalid) const
+{
+    CHECK_RUN_ON(UI);
+    for (auto& iterPathInvalidHandler : isPagePathInvalidEventHandler_) {
+        if (iterPathInvalidHandler) {
+            iterPathInvalidHandler(isPageInvalid);
+        }
     }
 }
 
@@ -1376,6 +1558,7 @@ void PipelineContext::ShowFocusAnimation(
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FocusNode>& node)
 {
+    CHECK_RUN_ON(UI);
     if (!node) {
         LOGW("node is null.");
         return;
@@ -1422,18 +1605,31 @@ RefPtr<ImageCache> PipelineContext::GetImageCache() const
 
 void PipelineContext::Destroy()
 {
+    CHECK_RUN_ON(UI);
+    LOGI("PipelineContext::Destroy begin.");
     ClearImageCache();
-    if (rootElement_) {
-        rootElement_.Reset();
-    }
+    rootElement_.Reset();
     composedElementMap_.clear();
     dirtyElements_.clear();
+    deactivateElements_.clear();
     dirtyRenderNodes_.clear();
     dirtyRenderNodesInOverlay_.clear();
     dirtyLayoutNodes_.clear();
     predictLayoutNodes_.clear();
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
+    postFlushListeners_.clear();
+    preFlushListeners_.clear();
+    sharedTransitionController_.Reset();
+    cardTransitionController_.Reset();
+    while (!pageUpdateTasks_.empty()) {
+        pageUpdateTasks_.pop();
+    }
+    alignDeclarationNodeList_.clear();
+    hoverNodes_.clear();
+    drawDelegate_.reset();
+    window_->Destroy();
+    LOGI("PipelineContext::Destroy end.");
 }
 
 void PipelineContext::SendCallbackMessageToFrontend(const std::string& callbackId, const std::string& data)
@@ -1494,6 +1690,7 @@ bool PipelineContext::AccessibilityRequestFocus(const ComposeId& id)
 
 bool PipelineContext::RequestFocus(const RefPtr<Element>& targetElement)
 {
+    CHECK_RUN_ON(UI);
     if (!targetElement) {
         return false;
     }
@@ -1574,10 +1771,9 @@ void PipelineContext::RegisterFont(const std::string& familyName, const std::str
     fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this));
 }
 
-void PipelineContext::TryLoadImageInfo(const std::string& src,
-    std::function<void(bool, int32_t, int32_t)>&& loadCallback)
+void PipelineContext::CanLoadImage(const std::string& src, const std::map<std::string, EventMarker>& callbacks)
 {
-    RenderImageProvider::TryLoadImageInfo(AceType::Claim(this), src, std::move(loadCallback));
+    RenderImageProvider::CanLoadImage(AceType::Claim(this), src, callbacks);
 }
 
 void PipelineContext::SetAnimationCallback(AnimationCallback&& callback)
@@ -1601,51 +1797,64 @@ void PipelineContext::OnShow()
     if (multiModalScene) {
         multiModalScene->Resume();
     }
-    if (rootElement_) {
-        const auto& renderRoot = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
-        if (renderRoot) {
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this)]() {
+            auto context = weak.Upgrade();
+            if (!context) {
+                return;
+            }
+            const auto& rootElement = context->rootElement_;
+            if (!rootElement) {
+                LOGE("render element is null!");
+                return;
+            }
+            const auto& renderRoot = AceType::DynamicCast<RenderRoot>(rootElement->GetRenderNode());
+            if (!renderRoot) {
+                LOGE("render root is null!");
+                return;
+            }
+            if ((context->windowModal_ == WindowModal::SEMI_MODAL) ||
+                (context->windowModal_ == WindowModal::DIALOG_MODAL)) {
+                renderRoot->SetDefaultBgColor();
+            }
             renderRoot->NotifyOnShow();
-        }
-    }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void PipelineContext::OnHide()
 {
-    NotifyPopupDismiss();
     onShow_ = false;
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Hide();
     }
-    if ((windowModal_ == WindowModal::SEMI_MODAL) || (windowModal_ == WindowModal::DIALOG_MODAL)) {
-        taskExecutor_->PostTask(
-            [weak = AceType::WeakClaim(this)]() {
-                auto context = weak.Upgrade();
-                if (!context) {
-                    return;
-                }
-                const auto& root = context->rootElement_;
-                if (!root) {
-                    return;
-                }
-                const auto& render = AceType::DynamicCast<RenderRoot>(root->GetRenderNode());
-                if (render) {
-                    render->SetDefaultBgColor();
-                }
-            },
-            TaskExecutor::TaskType::UI);
-    }
-    if (rootElement_) {
-        const auto& renderRoot = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
-        if (renderRoot) {
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this)]() {
+            auto context = weak.Upgrade();
+            if (!context) {
+                return;
+            }
+            context->NotifyPopupDismiss();
+            const auto& rootElement = context->rootElement_;
+            if (!rootElement) {
+                LOGE("render element is null!");
+                return;
+            }
+            const auto& renderRoot = AceType::DynamicCast<RenderRoot>(rootElement->GetRenderNode());
+            if (!renderRoot) {
+                LOGE("render root is null!");
+                return;
+            }
             renderRoot->NotifyOnHide();
-        }
-    }
+        },
+        TaskExecutor::TaskType::UI);
 }
 #endif
 
 void PipelineContext::RefreshRootBgColor() const
 {
+    CHECK_RUN_ON(UI);
     if (!rootElement_) {
         return;
     }
@@ -1653,18 +1862,6 @@ void PipelineContext::RefreshRootBgColor() const
     if (render) {
         render->SetDefaultBgColor();
     }
-}
-
-void PipelineContext::SetClipHole(double left, double top, double width, double height)
-{
-    if (!rootElement_) {
-        return;
-    }
-
-    transparentHole_.SetLeft(left);
-    transparentHole_.SetTop(top);
-    transparentHole_.SetWidth(width);
-    transparentHole_.SetHeight(height);
 }
 
 void PipelineContext::SetOnPageShow(OnPageShowCallBack&& onPageShowCallBack)
@@ -1678,6 +1875,7 @@ void PipelineContext::SetOnPageShow(OnPageShowCallBack&& onPageShowCallBack)
 
 void PipelineContext::OnPageShow()
 {
+    CHECK_RUN_ON(UI);
     if (onPageShowCallBack_) {
         onPageShowCallBack_();
     }
@@ -1717,6 +1915,36 @@ void PipelineContext::UpdateFontWeightScale()
 {
     if (fontManager_) {
         fontManager_->UpdateFontWeightScale();
+    }
+}
+
+void PipelineContext::LoadSystemFont(const std::function<void()>& onFondsLoaded)
+{
+    GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), fontManager = fontManager_, onFondsLoaded]() {
+            if (!fontManager) {
+                return;
+            }
+            fontManager->LoadSystemFont();
+            auto context = weak.Upgrade();
+            if (!context) {
+                return;
+            }
+            context->GetTaskExecutor()->PostTask(
+                [onFondsLoaded]() {
+                    if (onFondsLoaded) {
+                        onFondsLoaded();
+                    }
+                },
+                TaskExecutor::TaskType::UI);
+        },
+        TaskExecutor::TaskType::IO);
+}
+
+void PipelineContext::NotifyFontNodes()
+{
+    if (fontManager_) {
+        fontManager_->NotifyVariationNodes();
     }
 }
 
@@ -1788,6 +2016,7 @@ void PipelineContext::RootLostFocus() const
 
 void PipelineContext::AddPageUpdateTask(std::function<void()>&& task, bool directExecute)
 {
+    CHECK_RUN_ON(UI);
     pageUpdateTasks_.emplace(std::move(task));
     if (directExecute) {
         FlushPageUpdateTasks();
@@ -1804,13 +2033,14 @@ void PipelineContext::AddPageUpdateTask(std::function<void()>&& task, bool direc
 
 void PipelineContext::MovePage(const Offset& rootRect, double offsetHeight)
 {
-    if (textFieldManager_) {
-        textFieldManager_->MovePage(GetLastStack(), rootRect, offsetHeight);
+    if (textFieldManager_ && GetLastPage()) {
+        textFieldManager_->MovePage(GetLastPage()->GetPageId(), rootRect, offsetHeight);
     }
 }
 
 RefPtr<Element> PipelineContext::GetDeactivateElement(int32_t componentId) const
 {
+    CHECK_RUN_ON(UI);
     auto elementIter = deactivateElements_.find(componentId);
     if (elementIter != deactivateElements_.end()) {
         return elementIter->second;
@@ -1821,13 +2051,21 @@ RefPtr<Element> PipelineContext::GetDeactivateElement(int32_t componentId) const
 
 void PipelineContext::AddDeactivateElement(const int32_t id, const RefPtr<Element>& element)
 {
+    CHECK_RUN_ON(UI);
     deactivateElements_.emplace(id, element);
 }
 
 void PipelineContext::ClearDeactivateElements()
 {
-    if (!deactivateElements_.empty()) {
-        deactivateElements_.erase(deactivateElements_.begin(), deactivateElements_.end());
+    CHECK_RUN_ON(UI);
+    for (auto iter = deactivateElements_.begin(); iter != deactivateElements_.end();) {
+        auto element = iter->second;
+        RefPtr<RenderNode> render = element ? element->GetRenderNode() : nullptr;
+        if (!render || !render->IsDisappearing()) {
+            deactivateElements_.erase(iter++);
+        } else {
+            iter++;
+        }
     }
 }
 
@@ -1849,10 +2087,11 @@ void PipelineContext::DumpAccessibility(const std::vector<std::string>& params) 
 void PipelineContext::UpdateWindowBlurRegion(
     int32_t id, RRect rRect, float progress, WindowBlurStyle style, const std::vector<RRect>& coords)
 {
+    CHECK_RUN_ON(UI);
     auto pos = windowBlurRegions_.find(id);
     if (pos != windowBlurRegions_.end()) {
         const auto& old = pos->second;
-        if (NearEqual(progress, old.progress_) && rRect.NearEqual(old.innerRect_) && style == old.style_) {
+        if (NearEqual(progress, old.progress_) && rRect == old.innerRect_ && style == old.style_) {
             return;
         }
     }
@@ -1862,6 +2101,7 @@ void PipelineContext::UpdateWindowBlurRegion(
 
 void PipelineContext::ClearWindowBlurRegion(int32_t id)
 {
+    CHECK_RUN_ON(UI);
     auto pos = windowBlurRegions_.find(id);
     if (pos != windowBlurRegions_.end()) {
         windowBlurRegions_.erase(pos);
@@ -1871,6 +2111,7 @@ void PipelineContext::ClearWindowBlurRegion(int32_t id)
 
 void PipelineContext::FlushWindowBlur()
 {
+    CHECK_RUN_ON(UI);
     // js card not support window blur
     if (IsJsCard()) {
         return;
@@ -1964,14 +2205,29 @@ void PipelineContext::SetIsKeyEvent(bool isKeyEvent)
     }
 }
 
-void PipelineContext::NavigatePage(uint8_t type, const std::string& uri)
+void PipelineContext::NavigatePage(uint8_t type, const PageTarget& target, const std::string& params)
 {
     auto frontend = weakFrontend_.Upgrade();
     if (!frontend) {
         LOGE("frontend is nullptr");
         return;
     }
-    frontend->NavigatePage(type, uri);
+    frontend->NavigatePage(type, target, params);
+}
+
+void PipelineContext::SaveExplicitAnimationOption(const AnimationOption& option)
+{
+    explicitAnimationOption_ = option;
+}
+
+void PipelineContext::ClearExplicitAnimationOption()
+{
+    explicitAnimationOption_ = AnimationOption();
+}
+
+const AnimationOption PipelineContext::GetExplicitAnimationOption() const
+{
+    return explicitAnimationOption_;
 }
 
 bool PipelineContext::GetIsDeclarative() const
@@ -1981,6 +2237,79 @@ bool PipelineContext::GetIsDeclarative() const
         return front->GetType() == FrontendType::DECLARATIVE_JS;
     }
     return false;
+}
+
+void PipelineContext::AddLayoutTransitionNode(const RefPtr<RenderNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    layoutTransitionNodeSet_.insert(node);
+}
+
+void PipelineContext::AddAlignDeclarationNode(const RefPtr<RenderNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    alignDeclarationNodeList_.emplace_front(node);
+}
+
+std::list<RefPtr<RenderNode>>& PipelineContext::GetAlignDeclarationNodeList()
+{
+    CHECK_RUN_ON(UI);
+    return alignDeclarationNodeList_;
+}
+
+void PipelineContext::AddScreenOnEvent(std::function<void()>&& func)
+{
+    taskExecutor_->PostTask(
+        [wp = WeakClaim(this), screenOnFunc = std::move(func)]() mutable {
+            auto pipeline = wp.Upgrade();
+            if (pipeline && pipeline->screenOnCallback_) {
+                pipeline->screenOnCallback_(std::move(screenOnFunc));
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void PipelineContext::AddScreenOffEvent(std::function<void()>&& func)
+{
+    taskExecutor_->PostTask(
+        [wp = WeakClaim(this), screenOffFunc = std::move(func)]() mutable {
+            auto pipeline = wp.Upgrade();
+            if (pipeline && pipeline->screenOffCallback_) {
+                pipeline->screenOffCallback_(std::move(screenOffFunc));
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+bool PipelineContext::IsWindowInScreen()
+{
+    if (queryIfWindowInScreenCallback_) {
+        // We post an async task to do async query to avoid thread deadlock between UI thread and Platform thread
+        taskExecutor_->PostTask(
+            [wp = WeakClaim(this)] {
+                auto pipeline = wp.Upgrade();
+                if (!pipeline) {
+                    return;
+                }
+                pipeline->queryIfWindowInScreenCallback_();
+            },
+            TaskExecutor::TaskType::PLATFORM);
+    }
+    // Note that the result is not real-time result but the result from previous query
+    return isWindowInScreen_;
+}
+
+void PipelineContext::NotifyOnPreDraw()
+{
+    decltype(nodesToNotifyOnPreDraw_) nodesToNotifyOnPreDraw(std::move(nodesToNotifyOnPreDraw_));
+    for (const auto& node : nodesToNotifyOnPreDraw) {
+        node->OnPreDraw();
+    }
+}
+
+void PipelineContext::AddNodesToNotifyOnPreDraw(const RefPtr<RenderNode>& renderNode)
+{
+    nodesToNotifyOnPreDraw_.emplace(renderNode);
 }
 
 } // namespace OHOS::Ace

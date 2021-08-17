@@ -173,7 +173,7 @@ void ToastComponent::Show(const RefPtr<PipelineContext>& context, const std::str
         AceType::MakeRefPtr<TweenComponent>(TweenComponent::AllocTweenComponentId(), TOAST_TWEEN_NAME, box);
     InitToastAnimation();
     tween->SetTweenOption(tweenOption_);
-    tween->SetTweenOperation(TweenOperation::PLAY);
+    tween->SetAnimationOperation(AnimationOperation::PLAY);
     // to prevent flicking when play animation
     tween->SetIsFirstFrameShow(false);
 

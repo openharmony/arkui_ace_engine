@@ -47,15 +47,40 @@ bool DOMVideo::SetSpecializedAttr(const std::pair<std::string, std::string>& att
     // Operator map for attr
     static const std::unordered_map<std::string, void (*)(const RefPtr<VideoComponent>&, const std::string&)>
         attrOperators = {
-            { DOM_VIDEO_MUTED, [](const RefPtr<VideoComponent>& video,
-                               const std::string& val) { video->SetMute(StringToBool(val)); } },
-            { DOM_VIDEO_SRC, [](const RefPtr<VideoComponent>& video, const std::string& val) { video->SetSrc(val); } },
-            { DOM_VIDEO_AUTOPLAY, [](const RefPtr<VideoComponent>& video,
-                                  const std::string& val) { video->SetAutoPlay(StringToBool(val)); } },
+            { DOM_VIDEO_MUTED,
+                [](const RefPtr<VideoComponent>& video, const std::string& val) {
+                    video->SetMute(StringToBool(val));
+                } },
+            { DOM_VIDEO_SRC,
+                [](const RefPtr<VideoComponent>& video, const std::string& val) {
+                    video->SetSrc(val);
+                } },
+            { DOM_VIDEO_AUTOPLAY,
+                [](const RefPtr<VideoComponent>& video, const std::string& val) {
+                    video->SetAutoPlay(StringToBool(val));
+                } },
             { DOM_VIDEO_POSTER,
-                [](const RefPtr<VideoComponent>& video, const std::string& val) { video->SetPoster(val); } },
-            { DOM_VIDEO_CONTROLS, [](const RefPtr<VideoComponent>& video,
-                                  const std::string& val) { video->SetNeedControls(StringToBool(val)); } },
+                [](const RefPtr<VideoComponent>& video, const std::string& val) {
+                    video->SetPoster(val);
+                } },
+            { DOM_VIDEO_CONTROLS,
+                [](const RefPtr<VideoComponent>& video, const std::string& val) {
+                    video->SetNeedControls(StringToBool(val));
+                } },
+            { DOM_VIDEO_LOOP,
+                [](const RefPtr<VideoComponent>& video, const std::string& val) {
+                    video->SetLoop(StringToBool(val));
+                } },
+            { DOM_VIDEO_START_TIME,
+                [](const RefPtr<VideoComponent>& video, const std::string& val) {
+                    video->SetStartTime(StringToInt(val));
+                } },
+            { DOM_VIDEO_SPEED, [](const RefPtr<VideoComponent>& video, const std::string& val) {
+                    video->SetSpeed(StringUtils::StringToDouble(val));
+                } },
+            { DOM_VIDEO_DIRECTION, [](const RefPtr<VideoComponent>& video, const std::string& val) {
+                    video->SetDirection(val);
+                } },
         };
     auto operatorIter = attrOperators.find(attr.first);
     if (operatorIter != attrOperators.end()) {
@@ -93,6 +118,8 @@ bool DOMVideo::AddSpecializedEvent(int32_t pageId, const std::string& event)
                 [](const RefPtr<VideoComponent>& video, const EventMarker& event) { video->SetStartEventId(event); } },
             { DOM_VIDEO_EVENT_PAUSE,
                 [](const RefPtr<VideoComponent>& video, const EventMarker& event) { video->SetPauseEventId(event); } },
+            { DOM_VIDEO_EVENT_STOP,
+                [](const RefPtr<VideoComponent>& video, const EventMarker& event) { video->SetStopEventId(event); } },
             { DOM_VIDEO_EVENT_FINISH,
                 [](const RefPtr<VideoComponent>& video, const EventMarker& event) { video->SetFinishEventId(event); } },
             { DOM_VIDEO_EVENT_ERROR,
@@ -132,6 +159,12 @@ void DOMVideo::CallSpecializedMethod(const std::string& method, const std::strin
                     auto controller = video->GetVideoController();
                     ACE_DCHECK(controller);
                     controller->Pause();
+                } },
+            { DOM_VIDEO_METHOD_STOP,
+                [](const RefPtr<VideoComponent>& video, const std::string& args) {
+                  auto controller = video->GetVideoController();
+                  ACE_DCHECK(controller);
+                  controller->Stop();
                 } },
             { DOM_VIDEO_METHOD_SEEK_TO,
                 [](const RefPtr<VideoComponent>& video, const std::string& args) {
@@ -241,14 +274,18 @@ RefPtr<Component> DOMVideo::GetEventComponents(const RefPtr<Component>& videoChi
     for (int32_t idx = static_cast<int32_t>(components.size()) - 1; idx >= 1; --idx) {
         components[idx - 1]->SetChild(components[idx]);
     }
+
+    auto box = AceType::MakeRefPtr<BoxComponent>();
+    box->SetChild(videoChild);
+
     if (!components.empty()) {
         const auto& lastEventComponent = components.back();
         if (lastEventComponent) {
-            lastEventComponent->SetChild(videoChild);
+            lastEventComponent->SetChild(box);
             return components.front();
         }
     }
-    return videoChild;
+    return box;
 }
 
 ImageFit DOMVideo::ConvertStrToFit(const std::string& fit)

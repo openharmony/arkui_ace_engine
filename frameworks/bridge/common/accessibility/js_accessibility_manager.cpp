@@ -208,6 +208,14 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
         nodeInfo.height = node->GetHeight();
     }
 
+    auto scaleX = manager->GetScaleX();
+    auto scaleY = manager->GetScaleY();
+
+    nodeInfo.top *= scaleY;
+    nodeInfo.left *= scaleX;
+    nodeInfo.width *= scaleX;
+    nodeInfo.height *= scaleY;
+
     nodeInfo.isChecked = node->GetCheckedState();
     nodeInfo.isEnabled = node->GetEnabledState();
     nodeInfo.isFocused = node->GetFocusedState();
@@ -271,6 +279,7 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     }
 
     nodeInfo.supportAction = std::move(actions);
+
 #ifdef ACE_DEBUG
     std::string actionForLog;
     for (const auto& action : supportAceActions) {
@@ -416,11 +425,27 @@ void JsAccessibilityManager::InitializeCallback()
             LOGW("AccessibilityNodeInfo can't attach component by Id = %{public}d", nodeInfo.ID);
             return false;
         }
-        jsAccessibilityManager->UpdateNodeChildIds(node);
-        UpdateAccessibilityNodeInfo(node, nodeInfo, jsAccessibilityManager);
+
+        if (nodeInfo.ID == 0) {
+            jsAccessibilityManager->UpdateViewScale();
+        }
+        auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+        if (!context) {
+            return false;
+        }
+        context->GetTaskExecutor()->PostSyncTask(
+            [&jsAccessibilityManager, &node, &nodeInfo]() {
+                jsAccessibilityManager->UpdateNodeChildIds(node);
+                UpdateAccessibilityNodeInfo(node, nodeInfo, jsAccessibilityManager);
+            },
+            TaskExecutor::TaskType::UI);
         return true;
     };
-    AccessibilityAbilityClient::GetInstance().RegisterFetchNodeInfoCallback(fetchNodeInfoCallback);
+    if (callbackKey_.empty()) {
+        AccessibilityAbilityClient::GetInstance().RegisterFetchNodeInfoCallback(fetchNodeInfoCallback);
+    } else {
+        AccessibilityAbilityClient::GetInstance().RegisterFetchNodeInfoCallback(fetchNodeInfoCallback, callbackKey_);
+    }
 
     auto eventHandleCallback = [weak = WeakClaim(this)](AccessibilityActionInfo& actionInfo) {
         LOGD("AccessibilityActionInfo nodeId= %{public}d, action=%{public}d", actionInfo.ID, actionInfo.action);
@@ -451,7 +476,11 @@ void JsAccessibilityManager::InitializeCallback()
         }
         return ret;
     };
-    AccessibilityAbilityClient::GetInstance().RegisterEventHandleCallback(eventHandleCallback);
+    if (callbackKey_.empty()) {
+        AccessibilityAbilityClient::GetInstance().RegisterEventHandleCallback(eventHandleCallback);
+    } else {
+        AccessibilityAbilityClient::GetInstance().RegisterEventHandleCallback(eventHandleCallback, callbackKey_);
+    }
 }
 
 void JsAccessibilityManager::SendAccessibilitySyncEvent(const AccessibilityEvent& accessibilityEvent)
@@ -566,9 +595,10 @@ void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& par
     }
     auto context = GetPipelineContext().Upgrade();
     if (context) {
-        context->GetTaskExecutor()->PostTask(
-            [actionInfo, node, context]() { AccessibilityActionEvent(actionInfo, node, context); },
-            TaskExecutor::TaskType::UI);
+        auto weakContext = AceType::WeakClaim(AceType::RawPtr(context));
+        context->GetTaskExecutor()->PostTask([actionInfo, node, weakContext]() {
+            AccessibilityActionEvent(actionInfo, node, weakContext.Upgrade());
+        }, TaskExecutor::TaskType::UI);
     }
 }
 
@@ -684,6 +714,20 @@ void JsAccessibilityManager::SetCardViewParams(const std::string& key, bool focu
     callbackKey_ = key;
     if (!callbackKey_.empty()) {
         InitializeCallback();
+    }
+}
+
+void JsAccessibilityManager::UpdateViewScale()
+{
+    auto context = GetPipelineContext().Upgrade();
+    if (!context) {
+        return;
+    }
+    float scaleX = 1.0;
+    float scaleY = 1.0;
+    if (context->GetViewScale(scaleX, scaleY)) {
+        scaleX_ = scaleX;
+        scaleY_ = scaleY;
     }
 }
 

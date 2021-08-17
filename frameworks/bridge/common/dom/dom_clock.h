@@ -21,30 +21,6 @@
 
 namespace OHOS::Ace::Framework {
 
-struct ClockConfig final {
-    // ratio of digit-radius and half of side length of clock-face-image.
-    // digit-radius is used to calculate digit offset.
-    // e.g., when size of clock-face-image is 200 x 200, digit "3" is [200 / 2 x 0.7 = 70] right of the center.
-    double digitRadiusRatio_ = 0.7;
-    // ratio of digit-size and side length of clock-face-image, which is used to decide font-size of digit.
-    // e.g., when size of clock-face-image is 200 x 200, font-size of digit is 200 x 0.08 = 16
-    double digitSizeRatio_ = 0.08;
-
-    // image sources and color for day
-    std::string clockFaceSrc_;
-    std::string hourHandSrc_;
-    std::string minuteHandSrc_;
-    std::string secondHandSrc_;
-    Color digitColor_;
-
-    // image sources and color for night
-    std::string clockFaceNightSrc_;
-    std::string hourHandNightSrc_;
-    std::string minuteHandNightSrc_;
-    std::string secondHandNightSrc_;
-    Color digitColorNight_ = Color::TRANSPARENT;
-};
-
 class DOMClock final : public DOMNode {
     DECLARE_ACE_TYPE(DOMClock, DOMNode);
 
@@ -64,20 +40,19 @@ public:
     }
 
 protected:
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
-    bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
-    bool AddSpecializedEvent(int32_t pageId, const std::string& event) override;
     void PrepareSpecializedComponent() override;
 
     bool IsSubscriptEnable() const override
     {
+        if (declaration_) {
+            declaration_->SetIsSubscriptEnable(true);
+        }
         return true;
     }
 
 private:
     RefPtr<ClockComponent> clockChild_;
     ClockConfig clockConfig_;
-    EventMarker onHourCallback_;
 };
 
 } // namespace OHOS::Ace::Framework

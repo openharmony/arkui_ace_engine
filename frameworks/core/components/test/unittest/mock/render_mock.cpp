@@ -73,39 +73,7 @@ RefPtr<ImageCache> ImageCache::Create()
     return AceType::MakeRefPtr<MockImageCache>();
 }
 
-BackgroundPositionPropertyAnimatable::SetterMap MockRenderBox::GetBackgroundPositionPropertySetterMap()
-{
-    BackgroundPositionPropertyAnimatable::SetterMap map;
-    auto weak = AceType::WeakClaim(this);
-    map[PropertyAnimatableType::PROPERTY_BACKGROUND_POSITION] = [weak](BackgroundImagePosition position) {
-        auto box = weak.Upgrade();
-        if (!box) {
-            LOGE("Set background position failed. box is null.");
-            return;
-        }
-        LOGD("set background position: x: %{public}lf, y: %{public}lf.", position.GetSizeValueX(),
-            position.GetSizeValueY());
-        box->backgroundImagePosition_ = position;
-    };
-    return map;
-}
-
-BackgroundPositionPropertyAnimatable::GetterMap MockRenderBox::GetBackgroundPositionPropertyGetterMap()
-{
-    BackgroundPositionPropertyAnimatable::GetterMap map;
-    auto weak = AceType::WeakClaim(this);
-    map[PropertyAnimatableType::PROPERTY_BACKGROUND_POSITION] = [weak]() -> BackgroundImagePosition {
-        auto box = weak.Upgrade();
-        if (!box) {
-            LOGE("Get background position failed. box is null.");
-            return BackgroundImagePosition();
-        }
-        LOGD("get background position: x: %{public}lf, y: %{public}lf.", box->backgroundImagePosition_.GetSizeValueX(),
-            box->backgroundImagePosition_.GetSizeValueY());
-        return box->backgroundImagePosition_;
-    };
-    return map;
-}
+void ImageCache::Purge() {}
 
 RefPtr<RenderNode> RenderDropFilter::Create()
 {

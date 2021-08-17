@@ -42,7 +42,8 @@ const std::map<std::string, FlexAlign> FlexAlignItemsMap = {
     { DOM_ALIGN_ITEMS_STRETCH, FlexAlign::STRETCH },
     { DOM_ALIGN_ITEMS_START, FlexAlign::FLEX_START },
     { DOM_ALIGN_ITEMS_CENTER, FlexAlign::CENTER },
-    { DOM_ALIGN_ITEMS_END, FlexAlign::FLEX_END }
+    { DOM_ALIGN_ITEMS_END, FlexAlign::FLEX_END },
+    { DOM_ALIGN_ITEMS_BASELINE, FlexAlign::BASELINE },
 };
 
 const std::map<std::string, WrapDirection> WrapDirectionMap = {
@@ -79,6 +80,11 @@ const std::map<std::string, GridSizeType> GridSizeTypeMap = {
     { DOM_GRID_SIZE_TYPE_SM, GridSizeType::SM },
     { DOM_GRID_SIZE_TYPE_MD, GridSizeType::MD },
     { DOM_GRID_SIZE_TYPE_LG, GridSizeType::LG }
+};
+
+const std::map<std::string, GridTemplateType> GridTemplateMap = {
+    { DOM_GRID_TEMPLATE_TYPE_NORMAL, GridTemplateType::NORMAL },
+    { DOM_GRID_TEMPLATE_TYPE_GRID, GridTemplateType::GRID },
 };
 
 const std::map<std::string, GridColumnType> GridColumnTypeMap = {

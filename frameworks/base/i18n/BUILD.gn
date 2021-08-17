@@ -25,14 +25,14 @@ template("ace_base_i18n") {
   source_set(target_name) {
     defines += invoker.defines
     deps = [
+      "$ace_flutter_engine_root:ace_libicu_$platform",
       "$ace_root/frameworks/base/resource:ace_resource",
-      "$flutter_root:ace_libicu_$platform",
     ]
 
     configs += [
       ":ace_base_i18n_config",
       "$ace_root:ace_config",
-      "$flutter_root:icu_config_$platform",
+      "$ace_flutter_engine_root:icu_config_$platform",
     ]
 
     # add base source file here

@@ -42,10 +42,6 @@ DOMSearch::DOMSearch(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeI
     searchChild_ = AceType::MakeRefPtr<SearchComponent>();
     textFieldComponent_ = AceType::MakeRefPtr<TextFieldComponent>();
     DOMTextFieldUtil::InitController(textFieldComponent_);
-    if (IsRightToLeft()) {
-        searchChild_->SetTextDirection(TextDirection::RTL);
-        textFieldComponent_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 void DOMSearch::ResetInitializedStyle()
@@ -109,6 +105,9 @@ bool DOMSearch::SetSpecializedAttr(const std::pair<std::string, std::string>& at
 {
     static const LinearMapNode<void (*)(const std::string&, SearchComponent&, TextFieldComponent&, TextStyle&)>
         searchAttrOperators[] = {
+            { DOM_AUTO_FOCUS,
+                [](const std::string& val, SearchComponent& searchComponent, TextFieldComponent& textFieldComponent,
+                    TextStyle& textStyle) { textFieldComponent.SetAutoFocus(StringToBool(val)); } },
             { DOM_SEARCH_HINT,
                 [](const std::string& val, SearchComponent& searchComponent, TextFieldComponent& textFieldComponent,
                     TextStyle& textStyle) { textFieldComponent.SetPlaceholder(val); } },
@@ -123,6 +122,15 @@ bool DOMSearch::SetSpecializedAttr(const std::pair<std::string, std::string>& at
             { DOM_SEARCH_BUTTON,
                 [](const std::string& val, SearchComponent& searchComponent, TextFieldComponent& textFieldComponent,
                     TextStyle& textStyle) { searchComponent.SetSearchText(val); } },
+            { DOM_INPUT_SELECTED_END,
+                [](const std::string& val, SearchComponent& searchComponent, TextFieldComponent& textFieldComponent,
+                    TextStyle& textStyle) { textFieldComponent.SetSelectedEnd(StringToInt(val)); } },
+            { DOM_INPUT_SELECTED_START,
+                [](const std::string& val, SearchComponent& searchComponent, TextFieldComponent& textFieldComponent,
+                    TextStyle& textStyle) { textFieldComponent.SetSelectedStart(StringToInt(val)); } },
+            { DOM_INPUT_SOFT_KEYBOARD_ENABLED,
+                [](const std::string& val, SearchComponent& searchComponent, TextFieldComponent& textFieldComponent,
+                    TextStyle& textStyle) { textFieldComponent.SetSoftKeyboardEnabled(StringToBool(val)); } },
             { DOM_SEARCH_VALUE,
                 [](const std::string& val, SearchComponent& searchComponent, TextFieldComponent& textFieldComponent,
                     TextStyle& textStyle) {
@@ -143,14 +151,22 @@ bool DOMSearch::SetSpecializedStyle(const std::pair<std::string, std::string>& s
     // static linear map must be sorted by key.
     static const LinearMapNode<void (*)(const std::string&, StyleParseHolder&)> searchStyleSize[] = {
         { DOM_TEXT_ALLOW_SCALE, [](const std::string& val,
-                                StyleParseHolder& holder) { holder.textStyle.SetAllowScale(StringToBool(val)); } },
+                                    StyleParseHolder& holder) { holder.textStyle.SetAllowScale(StringToBool(val)); } },
         { DOM_BACKGROUND_COLOR,
             [](const std::string& val, StyleParseHolder& holder) {
                 holder.textField->SetBgColor(holder.node.ParseColor(val));
                 holder.textField->SetFocusBgColor(holder.node.ParseColor(val));
             } },
-        { DOM_COLOR, [](const std::string& val,
-                     StyleParseHolder& holder) { holder.textField->SetFocusTextColor(holder.node.ParseColor(val)); } },
+        { DOM_CARET_COLOR,
+            [](const std::string& val, StyleParseHolder& holder) {
+                holder.textField->SetCursorColor(holder.node.ParseColor(val));
+            } },
+        { DOM_COLOR,
+            [](const std::string& val, StyleParseHolder& holder) {
+                auto color = holder.node.ParseColor(val);
+                holder.textField->SetTextColor(color);
+                holder.textField->SetFocusTextColor(color);
+            } },
         { DOM_TEXT_FONT_FAMILY,
             [](const std::string& val, StyleParseHolder& holder) {
                 holder.textStyle.SetFontFamilies(holder.node.ParseFontFamilies(val));
@@ -219,18 +235,18 @@ bool DOMSearch::SetSpecializedStyle(const std::pair<std::string, std::string>& s
             } },
         { DOM_INPUT_PLACEHOLDER_COLOR,
             [](const std::string& val, StyleParseHolder& holder) {
-                holder.textField->SetPlaceholderColor(holder.node.ParseColor(val));
+                auto color = holder.node.ParseColor(val);
+                holder.textField->SetPlaceholderColor(color);
+                holder.textField->SetFocusPlaceholderColor(color);
             } },
     };
     auto operatorIter = BinarySearchFindIndex(searchStyleSize, ArraySize(searchStyleSize), style.first.c_str());
     if (operatorIter != -1) {
-        StyleParseHolder holder = {
-            .node = *this,
+        StyleParseHolder holder = { .node = *this,
             .search = searchChild_,
             .textField = textFieldComponent_,
             .textStyle = textStyle_,
-            .isPaddingChanged = isPaddingChanged_
-        };
+            .isPaddingChanged = isPaddingChanged_ };
         searchStyleSize[operatorIter].value(style.second, holder);
         return true;
     }
@@ -267,6 +283,10 @@ bool DOMSearch::AddSpecializedEvent(int32_t pageId, const std::string& event)
         EventMarker searchEvent = EventMarker(GetNodeIdForEvent(), event, pageId);
         textFieldComponent_->SetOnSearch(searchEvent);
         return true;
+    } else if (event == DOM_INPUT_EVENT_SELECT_CHANGE) {
+        EventMarker searchEvent = EventMarker(GetNodeIdForEvent(), event, pageId);
+        textFieldComponent_->SetOnSelectChange(searchEvent);
+        return true;
     } else {
         return false;
     }
@@ -295,9 +315,12 @@ void DOMSearch::PrepareSpecializedComponent()
     if (boxComponent_->GetBackDecoration()) {
         boxBorder = boxComponent_->GetBackDecoration()->GetBorder();
     }
+    searchChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+    textFieldComponent_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     // [textFieldComponent_] is created when [DomSearch] is constructed so it won't be null
     textFieldComponent_->SetTextStyle(textStyle_);
     textFieldComponent_->SetInputOptions(inputOptions_);
+    textFieldComponent_->SetImageFill(GetImageFill());
     DOMTextFieldUtil::UpdateDecorationStyle(boxComponent_, textFieldComponent_, boxBorder, hasBoxRadius_);
     if (GreatOrEqual(boxComponent_->GetHeightDimension().Value(), 0.0)) {
         textFieldComponent_->SetHeight(boxComponent_->GetHeightDimension());
@@ -317,7 +340,7 @@ void DOMSearch::PrepareSpecializedComponent()
 
 void DOMSearch::OnRequestFocus(bool shouldFocus)
 {
-    if (!textFieldComponent_) {
+    if (IsNodeDisabled() || !textFieldComponent_) {
         return;
     }
     auto textFieldController = textFieldComponent_->GetTextFieldController();

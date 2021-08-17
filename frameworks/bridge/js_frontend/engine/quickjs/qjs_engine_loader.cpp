@@ -35,7 +35,7 @@ RefPtr<BaseCanvasBridge> QjsEngineLoader::CreateCanvasBridge() const
 }
 
 #if defined(BUILT_IN_JS_ENGINE)
-JsEngineLoader& JsEngineLoader::Get()
+JsEngineLoader& JsEngineLoader::Get(bool isArkApp)
 {
     return QjsEngineLoader::GetInstance();
 }

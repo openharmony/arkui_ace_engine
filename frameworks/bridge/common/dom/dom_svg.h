@@ -33,15 +33,9 @@ protected:
     void OnMounted(const RefPtr<DOMNode>& parentNode) override;
     void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) override;
     void PrepareSpecializedComponent() override;
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
     RefPtr<Component> GetSpecializedComponent() override;
 
 private:
-    Dimension x_;
-    Dimension y_;
-    Dimension width_ = Dimension(-1.0);
-    Dimension height_ = Dimension(-1.0);
-    Rect viewBox_;
     RefPtr<SvgComponent> svgComponent_;
 };
 

@@ -20,6 +20,14 @@
 
 namespace OHOS::Ace {
 
+SearchComponent::SearchComponent()
+{
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<SearchDeclaration>();
+        declaration_->Init();
+    }
+}
+
 RefPtr<RenderNode> SearchComponent::CreateRenderNode()
 {
     return RenderSearch::Create();
@@ -28,6 +36,123 @@ RefPtr<RenderNode> SearchComponent::CreateRenderNode()
 RefPtr<Element> SearchComponent::CreateElement()
 {
     return AceType::MakeRefPtr<SearchElement>();
+}
+
+void SearchComponent::SetCloseIconSize(const Dimension& closeIconSize)
+{
+    declaration_->SetCloseIconSize(closeIconSize);
+}
+
+const Dimension& SearchComponent::GetCloseIconSize() const
+{
+    return declaration_->GetCloseIconSize();
+}
+
+void SearchComponent::SetCloseIconHotZoneHorizontal(const Dimension& closeIconHotZoneHorizontal)
+{
+    declaration_->SetCloseIconHotZoneHorizontal(closeIconHotZoneHorizontal);
+}
+
+const Dimension& SearchComponent::GetCloseIconHotZoneHorizontal() const
+{
+    return declaration_->GetCloseIconHotZoneHorizontal();
+}
+
+const std::string& SearchComponent::GetSearchText() const
+{
+    return declaration_->GetSearchText();
+}
+
+void SearchComponent::SetSearchText(const std::string& searchText)
+{
+    declaration_->SetSearchText(searchText);
+}
+
+const std::string& SearchComponent::GetCloseIconSrc() const
+{
+    return declaration_->GetCloseIconSrc();
+}
+
+void SearchComponent::SetCloseIconSrc(const std::string& closeIconSrc)
+{
+    declaration_->SetCloseIconSrc(closeIconSrc);
+}
+
+void SearchComponent::SetChangeEventId(const EventMarker& changeEventId)
+{
+    declaration_->SetChangeEventId(changeEventId);
+}
+
+const EventMarker& SearchComponent::GetChangeEventId() const
+{
+    return declaration_->GetChangeEventId();
+}
+
+void SearchComponent::SetSubmitEventId(const EventMarker& submitEventId)
+{
+    declaration_->SetSubmitEventId(submitEventId);
+}
+
+const EventMarker& SearchComponent::GetSubmitEventId() const
+{
+    return declaration_->GetSubmitEventId();
+}
+
+RefPtr<TextEditController> SearchComponent::GetTextEditController() const
+{
+    return declaration_->GetTextEditController();
+}
+
+void SearchComponent::SetTextEditController(const RefPtr<TextEditController>& controller)
+{
+    declaration_->SetTextEditController(controller);
+}
+
+void SearchComponent::SetSubmitEvent(const std::function<void(const std::string&)>& event)
+{
+    declaration_->SetSubmitEvent(event);
+}
+
+const std::function<void(const std::string&)>& SearchComponent::GetSubmitEvent() const
+{
+    return declaration_->GetSubmitEvent();
+}
+
+RefPtr<Decoration> SearchComponent::GetDecoration() const
+{
+    return declaration_->GetDecoration();
+}
+
+void SearchComponent::SetDecoration(const RefPtr<Decoration>& decoration)
+{
+    declaration_->SetDecoration(decoration);
+}
+
+const Color& SearchComponent::GetHoverColor() const
+{
+    return declaration_->GetHoverColor();
+}
+
+void SearchComponent::SetHoverColor(const Color& hoverColor)
+{
+    declaration_->SetHoverColor(hoverColor);
+}
+
+const Color& SearchComponent::GetPressColor() const
+{
+    return declaration_->GetPressColor();
+}
+
+void SearchComponent::SetPressColor(const Color& pressColor)
+{
+    declaration_->SetPressColor(pressColor);
+}
+
+void SearchComponent::SetDeclaration(const RefPtr<SearchDeclaration>& declaration)
+{
+    if (declaration) {
+        declaration_ = declaration;
+    }
 }
 
 } // namespace OHOS::Ace

@@ -27,9 +27,11 @@ template("js_framework") {
     defines += invoker.defines
 
     deps = [
+      "$ace_flutter_engine_root:ace_skia_$platform",
       "$ace_root/frameworks/base:ace_base_$platform",
       "$ace_root/frameworks/core:ace_core_$platform",
       "$ace_root/frameworks/core/accessibility:ace_accessibility_$platform",
+      "$ace_root/frameworks/core/components/theme:build_theme_code",
     ]
 
     # add common source file needed by all product platform here
@@ -49,6 +51,7 @@ template("js_framework") {
       "common/dom/dom_div.cpp",
       "common/dom/dom_divider.cpp",
       "common/dom/dom_document.cpp",
+      "common/dom/dom_form.cpp",
       "common/dom/dom_grid_column.cpp",
       "common/dom/dom_grid_container.cpp",
       "common/dom/dom_grid_row.cpp",
@@ -80,6 +83,7 @@ template("js_framework") {
       "common/dom/dom_svg_circle.cpp",
       "common/dom/dom_svg_ellipse.cpp",
       "common/dom/dom_svg_line.cpp",
+      "common/dom/dom_svg_mask.cpp",
       "common/dom/dom_svg_path.cpp",
       "common/dom/dom_svg_polygon.cpp",
       "common/dom/dom_svg_polyline.cpp",
@@ -108,6 +112,7 @@ template("js_framework") {
       "js_frontend/engine/common/base_animation_bridge.cpp",
       "js_frontend/engine/common/js_api_perf.cpp",
       "js_frontend/engine/common/js_constants.cpp",
+      "js_frontend/frontend_delegate.cpp",
       "js_frontend/frontend_delegate_impl.cpp",
       "js_frontend/js_ace_page.cpp",
       "js_frontend/js_command.cpp",
@@ -125,11 +130,16 @@ template("js_framework") {
 
       # utils
       "common/utils/source_map.cpp",
+      "common/utils/transform_convertor.cpp",
       "common/utils/utils.cpp",
 
       # declarative js
       "declarative_frontend/declarative_frontend.cpp",
       "declarative_frontend/frontend_delegate_declarative.cpp",
+
+      # pa backend
+      "pa_backend/pa_backend.cpp",
+      "pa_backend/backend_delegate_impl.cpp",
     ]
     if (!use_mingw_win && !use_mac) {
       sources += [ "common/dom/dom_qrcode.cpp" ]
@@ -161,12 +171,17 @@ template("js_framework") {
 
     # add sources needed by phone and TV. wearable like watch do not need them
     if (!is_wearable_product && !use_mingw_win && !use_mac) {
-      sources += [ "common/dom/dom_web.cpp" ]
+      sources += [
+        "common/dom/dom_rich_text.cpp",
+        "common/dom/dom_web.cpp",
+        "common/dom/dom_xcomponent.cpp",
+      ]
     }
 
     if (!is_wearable_product && !use_mingw_win &&
         !use_mac) {
-      sources += [ "js_frontend/engine/common/js_engine_loader.cpp" ]
+      sources += [ "js_frontend/engine/common/js_engine_loader.cpp",
+                   "pa_backend/engine/common/js_backend_engine_loader.cpp" ]
     }
 
     configs = [
@@ -194,12 +209,17 @@ template("js_framework") {
     } else if (use_mingw_win) {
       sources += [
         "common/accessibility/accessibility_node_manager.cpp",
+        "common/inspector/inspect_badge.cpp",
         "common/inspector/inspect_button.cpp",
         "common/inspector/inspect_canvas.cpp",
         "common/inspector/inspect_chart.cpp",
         "common/inspector/inspect_dialog.cpp",
         "common/inspector/inspect_div.cpp",
         "common/inspector/inspect_divider.cpp",
+        "common/inspector/inspect_form.cpp",
+        "common/inspector/inspect_grid_column.cpp",
+        "common/inspector/inspect_grid_container.cpp",
+        "common/inspector/inspect_grid_row.cpp",
         "common/inspector/inspect_image.cpp",
         "common/inspector/inspect_image_animator.cpp",
         "common/inspector/inspect_input.cpp",
@@ -211,10 +231,13 @@ template("js_framework") {
         "common/inspector/inspect_menu.cpp",
         "common/inspector/inspect_node.cpp",
         "common/inspector/inspect_option.cpp",
+        "common/inspector/inspect_panel.cpp",
         "common/inspector/inspect_picker.cpp",
         "common/inspector/inspect_picker_view.cpp",
+        "common/inspector/inspect_piece.cpp",
         "common/inspector/inspect_popup.cpp",
         "common/inspector/inspect_progress.cpp",
+        "common/inspector/inspect_qrcode.cpp",
         "common/inspector/inspect_rating.cpp",
         "common/inspector/inspect_refresh.cpp",
         "common/inspector/inspect_search.cpp",
@@ -222,6 +245,8 @@ template("js_framework") {
         "common/inspector/inspect_slider.cpp",
         "common/inspector/inspect_span.cpp",
         "common/inspector/inspect_stack.cpp",
+        "common/inspector/inspect_stepper.cpp",
+        "common/inspector/inspect_stepper_item.cpp",
         "common/inspector/inspect_swiper.cpp",
         "common/inspector/inspect_switch.cpp",
         "common/inspector/inspect_tab_bar.cpp",
@@ -229,6 +254,9 @@ template("js_framework") {
         "common/inspector/inspect_tabs.cpp",
         "common/inspector/inspect_text.cpp",
         "common/inspector/inspect_textarea.cpp",
+        "common/inspector/inspect_toggle.cpp",
+        "common/inspector/inspect_toolbar.cpp",
+        "common/inspector/inspect_toolbar_item.cpp",
         "common/inspector/inspect_video.cpp",
         "common/inspector/inspector_client.cpp",
         "common/inspector/js_inspector_manager.cpp",
@@ -340,6 +368,7 @@ template("js_engine") {
       sources += [
         #runtime
         "js_frontend/engine/quickjs/animation_bridge.cpp",
+        "js_frontend/engine/quickjs/animator_bridge.cpp",
         "js_frontend/engine/quickjs/badge_bridge.cpp",
         "js_frontend/engine/quickjs/canvas_bridge.cpp",
         "js_frontend/engine/quickjs/chart_bridge.cpp",
@@ -355,7 +384,44 @@ template("js_engine") {
         # utils
         "js_frontend/engine/quickjs/qjs_utils.cpp",
       ]
+      include_dirs = [
+        "//foundation/ace/napi",
+        "//foundation/ace/napi/native_engine/impl/quickjs",
+        "//third_party/libuv/include",
+        "//third_party/quickjs",
+        "//utils/native/base/include",
+      ]
       deps += [ "//foundation/ace/napi:ace_napi_quickjs" ]
+    }
+
+    # add ark engine support
+    use_ark_engine = false
+    if (use_ark_engine && !is_standard_system && !build_public_version) {
+      if (target_cpu == "arm64") {
+        defines += [ "APP_USE_ARM64" ]
+      } else if (target_cpu == "arm") {
+        defines += [ "APP_USE_ARM" ]
+      }
+
+      deps += [ "//third_party/jsframework:ark_build" ]
+
+      sources += [
+        "js_frontend/engine/jsi/jsi_animation_bridge.cpp",
+        "js_frontend/engine/jsi/jsi_animator_bridge.cpp",
+        "js_frontend/engine/jsi/jsi_badge_bridge.cpp",
+        "js_frontend/engine/jsi/jsi_canvas_bridge.cpp",
+        "js_frontend/engine/jsi/jsi_chart_bridge.cpp",
+        "js_frontend/engine/jsi/jsi_clock_bridge.cpp",
+        "js_frontend/engine/jsi/jsi_component_api_bridge.cpp",
+        "js_frontend/engine/jsi/jsi_engine.cpp",
+        "js_frontend/engine/jsi/jsi_engine_loader.cpp",
+        "js_frontend/engine/jsi/jsi_group_js_bridge.cpp",
+        "js_frontend/engine/jsi/jsi_image_animator_bridge.cpp",
+        "js_frontend/engine/jsi/jsi_input_bridge.cpp",
+        "js_frontend/engine/jsi/jsi_list_bridge.cpp",
+        "js_frontend/engine/jsi/jsi_stepper_bridge.cpp",
+        "js_frontend/engine/jsi/jsi_utils.cpp",
+      ]
     }
 
     configs += [ "$ace_root:ace_config" ]
@@ -427,7 +493,7 @@ template("gen_obj") {
       script = "$flutter_root/engine/flutter/sky/tools/objcopy_pc_mac.py"
     } else if (use_mac) {
       objcopy_tool = objcopy_clang
-      script = "$flutter_root/engine/flutter/sky/tools/objcopy_pc_mac.py"
+      script = "declarative_frontend/engine/tools/build_resource_to_bytecode.py"
     } else if (target_cpu == "x86_64") {
       objcopy_tool = objcopy_x86_64
       script = "$flutter_root/engine/flutter/sky/tools/objcopy.py"
@@ -462,13 +528,35 @@ template("gen_obj") {
 
 base_output_path = get_label_info(":js_proxyclass", "target_out_dir")
 jsproxyclass_obj_path = base_output_path + "/js_proxy_class.o"
+base_output_path = get_label_info(":js_enumstyle", "target_out_dir")
+jsenumstyle_obj_path = base_output_path + "/js_enum_style.o"
+base_output_path = get_label_info(":js_mocksystemplugin", "target_out_dir")
+jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
 
 gen_obj("js_proxyclass") {
-  input = "declarative_frontend/engine/jsproxyClass.js"
+  input = "declarative_frontend/engine/stateMgmt.js"
   if (use_mac) {
     jsproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
   }
   output = jsproxyclass_obj_path
+  snapshot_dep = []
+}
+
+gen_obj("js_enum_style") {
+  input = "declarative_frontend/engine/jsEnumStyle.js"
+  if (use_mac) {
+    jsenumstyle_obj_path = base_output_path + "/js_enum_style.c"
+  }
+  output = jsenumstyle_obj_path
+  snapshot_dep = []
+}
+
+gen_obj("js_mock_system_plugin") {
+  input = "declarative_frontend/engine/quickjs/jsMockSystemPlugin.js"
+  if (use_mac) {
+    jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.c"
+  }
+  output = jsmocksystemplugin_obj_path
   snapshot_dep = []
 }
 
@@ -482,32 +570,81 @@ template("declarative_js_engine") {
     deps = []
     configs = []
     is_separated_so = is_ohos_platform && !is_wearable_product
+
     sources = [
       "declarative_frontend/engine/declarative_engine_loader.cpp",
-      "declarative_frontend/engine/js_view_listeners.cpp",
-      "declarative_frontend/jsview/js_animation.cpp",
+      "declarative_frontend/engine/functions/js_animator_function.cpp",
+      "declarative_frontend/engine/functions/js_click_function.cpp",
+      "declarative_frontend/engine/functions/js_foreach_function.cpp",
+      "declarative_frontend/engine/functions/js_function.cpp",
+      "declarative_frontend/engine/functions/js_gesture_function.cpp",
+      "declarative_frontend/engine/functions/js_key_function.cpp",
+      "declarative_frontend/engine/functions/js_page_transition_function.cpp",
+      "declarative_frontend/engine/functions/js_pan_function.cpp",
+      "declarative_frontend/engine/functions/js_touch_function.cpp",
+      "declarative_frontend/engine/js_types.cpp",
+      "declarative_frontend/jsview/js_alert_dialog.cpp",
+      "declarative_frontend/jsview/js_animator.cpp",
+      "declarative_frontend/jsview/js_blank.cpp",
       "declarative_frontend/jsview/js_button.cpp",
+      "declarative_frontend/jsview/js_calendar.cpp",
+      "declarative_frontend/jsview/js_calendar_controller.cpp",
+      "declarative_frontend/jsview/js_circle.cpp",
       "declarative_frontend/jsview/js_column.cpp",
+      "declarative_frontend/jsview/js_column_split.cpp",
       "declarative_frontend/jsview/js_container_base.cpp",
-      "declarative_frontend/jsview/js_customview_base.cpp",
+      "declarative_frontend/jsview/js_counter.cpp",
       "declarative_frontend/jsview/js_divider.cpp",
+      "declarative_frontend/jsview/js_ellipse.cpp",
+      "declarative_frontend/jsview/js_environment.cpp",
+      "declarative_frontend/jsview/js_flex.cpp",
+      "declarative_frontend/jsview/js_flex_impl.cpp",
       "declarative_frontend/jsview/js_foreach.cpp",
+      "declarative_frontend/jsview/js_gesture.cpp",
       "declarative_frontend/jsview/js_grid.cpp",
+      "declarative_frontend/jsview/js_grid_container.cpp",
       "declarative_frontend/jsview/js_grid_item.cpp",
+      "declarative_frontend/jsview/js_if_else.cpp",
       "declarative_frontend/jsview/js_image.cpp",
+      "declarative_frontend/jsview/js_image_animator.cpp",
       "declarative_frontend/jsview/js_interactable_view.cpp",
+      "declarative_frontend/jsview/js_lazy_foreach.cpp",
       "declarative_frontend/jsview/js_list.cpp",
       "declarative_frontend/jsview/js_list_item.cpp",
+      "declarative_frontend/jsview/js_navigation_view.cpp",
       "declarative_frontend/jsview/js_navigator.cpp",
+      "declarative_frontend/jsview/js_page_transition.cpp",
+      "declarative_frontend/jsview/js_path.cpp",
+      "declarative_frontend/jsview/js_persistent.cpp",
+      "declarative_frontend/jsview/js_qrcode.cpp",
+      "declarative_frontend/jsview/js_rect.cpp",
       "declarative_frontend/jsview/js_row.cpp",
+      "declarative_frontend/jsview/js_row_split.cpp",
+      "declarative_frontend/jsview/js_scroll.cpp",
+      "declarative_frontend/jsview/js_scroller.cpp",
+      "declarative_frontend/jsview/js_shape.cpp",
+      "declarative_frontend/jsview/js_shape_abstract.cpp",
       "declarative_frontend/jsview/js_sliding_panel.cpp",
+      "declarative_frontend/jsview/js_span.cpp",
       "declarative_frontend/jsview/js_stack.cpp",
       "declarative_frontend/jsview/js_swiper.cpp",
+      "declarative_frontend/jsview/js_tab_content.cpp",
+      "declarative_frontend/jsview/js_tabs.cpp",
       "declarative_frontend/jsview/js_text.cpp",
+      "declarative_frontend/jsview/js_toggle.cpp",
       "declarative_frontend/jsview/js_touch_handler.cpp",
       "declarative_frontend/jsview/js_view.cpp",
       "declarative_frontend/jsview/js_view_abstract.cpp",
+      "declarative_frontend/jsview/js_view_context.cpp",
+      "declarative_frontend/view_stack_processor.cpp",
     ]
+
+    if (!is_wearable_product) {
+      sources += [
+        "declarative_frontend/jsview/js_camera.cpp",
+        "declarative_frontend/jsview/js_video.cpp",
+      ]
+    }
 
     #add quickjs engine support
     if (use_quickjs_engine) {
@@ -520,17 +657,17 @@ template("declarative_js_engine") {
       }
 
       sources += [
-        "declarative_frontend/engine/quickjs/functions/qjs_click_function.cpp",
-        "declarative_frontend/engine/quickjs/functions/qjs_foreach_function.cpp",
-        "declarative_frontend/engine/quickjs/functions/qjs_function.cpp",
-        "declarative_frontend/engine/quickjs/functions/qjs_touch_function.cpp",
-        "declarative_frontend/engine/quickjs/functions/qjs_view_function.cpp",
+        "declarative_frontend/engine/quickjs/modules/qjs_curves_module.cpp",
+        "declarative_frontend/engine/quickjs/modules/qjs_module_manager.cpp",
+        "declarative_frontend/engine/quickjs/modules/qjs_router_module.cpp",
         "declarative_frontend/engine/quickjs/qjs_bindings.cpp",
         "declarative_frontend/engine/quickjs/qjs_declarative_engine.cpp",
         "declarative_frontend/engine/quickjs/qjs_declarative_engine_instance.cpp",
         "declarative_frontend/engine/quickjs/qjs_function_list_entries_container.cpp",
         "declarative_frontend/engine/quickjs/qjs_helpers.cpp",
         "declarative_frontend/engine/quickjs/qjs_object_template.cpp",
+        "declarative_frontend/engine/quickjs/qjs_types.cpp",
+        "declarative_frontend/engine/quickjs/qjs_unwrap_any.cpp",
         "declarative_frontend/engine/quickjs/qjs_view_register.cpp",
       ]
 
@@ -560,10 +697,16 @@ template("declarative_js_engine") {
        ]
     }
 
+    deps += [
+      ":gen_obj_src_js_enum_style",
+      ":gen_obj_src_js_mock_system_plugin",
+      ":gen_obj_src_js_proxyclass",
+    ]
+
     if (use_mingw_win || use_mac) {
       deps += [
-        ":gen_obj_src_js_proxyclass",
         ":intl_qjs_preview",
+        ":js_framework_$platform",
       ]
 
       defines += [ "_USE_MATH_DEFINES" ]
@@ -573,7 +716,90 @@ template("declarative_js_engine") {
   }
 }
 
+declarative_js_engine("declarative_js_engine_windows") {
+  defines = ace_windows_defines
+  is_ohos_platform = false
+  use_quickjs_engine = true
+  platform = "windows"
+}
+
+declarative_js_engine("declarative_js_engine_mac") {
+  defines = ace_mac_defines
+  is_ohos_platform = false
+  use_quickjs_engine = true
+  platform = "mac"
+}
+
 declarative_js_engine("declarative_js_engine_qjs_ohos") {
+  defines = ace_ohos_defines
+  is_ohos_platform = true
+  use_quickjs_engine = true
+  platform = "ohos"
+}
+
+# build servie backend javascript engine library
+template("js_backend_engine") {
+  # get is_ohos_platform, use_quickjs_engine flag.
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+    deps = []
+    configs = []
+    sources = []
+
+    #add quickjs engine support
+    if (use_quickjs_engine) {
+      deps += [ "//third_party/jsframework:jsf" ]
+
+      if (use_js_debug) {
+        deps += [ "//third_party/quickjs:qjs_debugger" ]
+        defines += [ "ENABLE_JS_DEBUG" ]
+        configs += [ "//third_party/quickjs:qjs_debug_config" ]
+      } else {
+        deps += [ "//third_party/quickjs:qjs" ]
+      }
+
+      sources += [
+        #runtime
+        "pa_backend/engine/quickjs/qjs_pa_engine_loader.cpp",
+        "pa_backend/engine/quickjs/qjs_pa_engine.cpp",
+
+      ]
+      deps += [ "//foundation/ace/napi:ace_napi_quickjs" ]
+    }
+
+    configs += [ "$ace_root:ace_config" ]
+
+    print("platform: ${platform}")
+
+    if (is_ohos_platform) {
+      if (!is_wearable_product) {
+        deps += [ "$ace_root/adapter/common/cpp:libace" ]
+      } else {
+        deps += [ ":js_framework_$platform" ]
+        defines += [ "BUILT_IN_JS_ENGINE" ]
+      }
+      deps += [ ":intl_qjs" ]
+      if (is_standard_system) {
+        external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+      }
+    }
+
+    if (use_mingw_win || use_mac) {
+      deps += [
+        ":intl_qjs_preview",
+        ":js_framework_$platform",
+      ]
+
+      defines += [ "_USE_MATH_DEFINES" ]
+      defines += [ "BUILT_IN_JS_ENGINE" ]
+      cflags = [ "-std=c++17" ]
+    }
+  }
+}
+
+js_backend_engine("js_backend_engine_ohos") {
   defines = ace_ohos_defines
   is_ohos_platform = true
   use_quickjs_engine = true

@@ -43,6 +43,7 @@ void RenderDataPanel::Update(const RefPtr<Component>& component)
     useEffect_ = dataPanelComponent->GetEffects();
     backgroundTrack_ = dataPanelComponent->GetTrackColor();
     autoScale_ = dataPanelComponent->GetAutoScale();
+    userAnimationDuration_ = dataPanelComponent->GetAnimationDuration();
 
     if (animationInitialized_) {
         return;
@@ -64,9 +65,6 @@ const Size RenderDataPanel::Measure()
 {
     if (measureType_ == MeasureType::CONTENT) {
         return Size(NormalizeToPx(width_), NormalizeToPx(height_));
-    } else if (measureType_ == MeasureType::PARENT) {
-        Size maxSize = GetLayoutParam().GetMaxSize();
-        return Size(maxSize.Width(), maxSize.Height());
     } else {
         Size maxSize = GetLayoutParam().GetMaxSize();
         return Size(maxSize.Width(), maxSize.Height());
@@ -79,6 +77,7 @@ void RenderDataPanel::PerformLayout()
     SetLayoutSize(panelSize);
     if (type_ == ChartType::LOADING || (type_ == ChartType::RAINBOW && needReplayAnimation_)) {
         PlayAnimation();
+        AnimationChanged();
     }
     needReplayAnimation_ = false;
 }
@@ -95,7 +94,10 @@ void RenderDataPanel::OnHiddenChanged(bool hidden)
 
 void RenderDataPanel::AnimationChanged()
 {
-    if (type_ == ChartType::LOADING && GetVisible() && !GetHidden()) {
+    if (type_ != ChartType::LOADING) {
+        return;
+    }
+    if (GetVisible() && !GetHidden()) {
         if (animator_) {
             // when the dataPanel is visible, reset to user defined state.
             isUserSetPlay_ ? animator_->Play() : animator_->Pause();
@@ -156,6 +158,7 @@ void RenderProgressDataPanel::Update(const RefPtr<Component>& component)
         });
         PrepareAnimation();
         PlayAnimation();
+        AnimationChanged();
         animationInitialized_ = true;
     } else if (!isLoading_ && needUpdateAnimation) {
         animation_ = AceType::MakeRefPtr<CurveAnimation<double>>(0.0, 1.5, Curves::LINEAR);
@@ -176,6 +179,7 @@ void RenderProgressDataPanel::Update(const RefPtr<Component>& component)
         PrepareAnimation();
         StopAnimation();
         PlayAnimation();
+        AnimationChanged();
         animationInitialized_ = true;
     }
 }
@@ -210,7 +214,11 @@ void RenderProgressDataPanel::PrepareAnimation()
 void RenderPercentageDataPanel::PrepareAnimation()
 {
     if (animator_) {
-        animator_->SetDuration(3000);
+        if (GreatOrEqual(userAnimationDuration_, 0.0)) {
+            animator_->SetDuration(userAnimationDuration_);
+        } else {
+            animator_->SetDuration(3000);
+        }
         animator_->SetIteration(1);
     }
 }
@@ -235,9 +243,9 @@ void RenderPercentageDataPanel::Update(const RefPtr<Component>& component)
             MarkNeedRender();
         });
         animator_->AddInterpolator(springAnimation);
-        PrepareAnimation();
         animationInitialized_ = true;
     }
+    PrepareAnimation();
     needReplayAnimation_ = true;
     MarkNeedLayout();
 }

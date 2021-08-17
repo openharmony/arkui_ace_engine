@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_LONG_PRESS_RECOGNIZER_H
 
 #include "base/thread/cancelable_callback.h"
-#include "core/gestures/gesture_recognizer.h"
+#include "core/gestures/multi_fingers_recognizer.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -31,16 +31,23 @@ public:
 };
 
 using OnLongPress = std::function<void(const LongPressInfo&)>;
+using LongPressCallback = std::function<void(const GestureEvent&)>;
+using LongPressNoParamCallback = std::function<void()>;
 
-class LongPressRecognizer : public GestureRecognizer {
-    DECLARE_ACE_TYPE(LongPressRecognizer, GestureRecognizer);
+class LongPressRecognizer : public MultiFingersRecognizer {
+    DECLARE_ACE_TYPE(LongPressRecognizer, MultiFingersRecognizer);
 
 public:
     explicit LongPressRecognizer(const WeakPtr<PipelineContext>& context) : context_(context) {}
+    LongPressRecognizer(const WeakPtr<PipelineContext>& context, int32_t duration, int32_t fingers, bool repeat)
+        : context_(context), duration_(duration), repeat_(repeat)
+    {
+        fingers_ = fingers;
+    }
     ~LongPressRecognizer() override = default;
 
-    void OnAccepted(size_t touchId) override;
-    void OnRejected(size_t touchId) override;
+    void OnAccepted() override;
+    void OnRejected() override;
 
     void SetOnLongPress(const OnLongPress& onLongPress)
     {
@@ -52,12 +59,26 @@ private:
     void HandleTouchUpEvent(const TouchPoint& event) override;
     void HandleTouchMoveEvent(const TouchPoint& event) override;
     void HandleTouchCancelEvent(const TouchPoint& event) override;
+    bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
     void HandleOverdueDeadline();
+    void DeadlineTimer(int32_t time);
+    void DoRepeat();
+    void StartRepeatTimer();
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat);
+    void Reset();
 
     WeakPtr<PipelineContext> context_;
-    TouchPoint trackPoint_;
     OnLongPress onLongPress_;
     CancelableCallback<void()> deadlineTimer_;
+    CancelableCallback<void()> timer_;
+    int32_t duration_ = 500;
+    int32_t fingers_ = 1;
+    bool repeat_ = false;
+    std::map<int32_t, TouchPoint> touchMap_;
+    int32_t pointsCount_ = 0;
+    TimeStamp time_;
+    bool pendingEnd_ = false;
+    bool pendingCancel_ = false;
 };
 
 } // namespace OHOS::Ace

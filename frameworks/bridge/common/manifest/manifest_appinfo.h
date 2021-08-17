@@ -34,8 +34,11 @@ public:
     const std::string& GetAppName() const;
     const std::string& GetIcon() const;
     const std::string& GetVersionName() const;
-    const std::string& GetMinPlatformVersion() const;
     uint32_t GetVersionCode() const;
+    int32_t GetMinPlatformVersion() const
+    {
+        return minPlatformVersion_;
+    }
 
     // Global config information.
     const std::string& GetLogLevel() const;
@@ -49,7 +52,7 @@ private:
     std::string logLevel_;
     std::string icon_;
     std::string appID_;
-    std::string minPlatformVersion_;
+    int32_t minPlatformVersion_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(ManifestAppInfo);
 };

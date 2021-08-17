@@ -22,6 +22,7 @@
 #include "base/json/json_util.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
+#include "core/components/declaration/common/declaration.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/test/unittest/jsfrontend/dom_mock.h"
 #include "frameworks/bridge/test/unittest/jsfrontend/dom_test_constants.h"
@@ -59,8 +60,8 @@ const std::map<std::string, std::vector<std::string>> DOMATTRLIST = {
     { DOM_NODE_TAG_SWITCH, SWITCH_ATTR_LIST },
     { DOM_NODE_TAG_TEXT, TEXT_ATTR_LIST },
     { DOM_NODE_TAG_SVG_TEXT, SVG_TEXT_ATTR_LIST },
-    { DOM_NODE_TAG_TEXT_PATH, SVG_TEXT_PATH_ATTR_LIST},
-    { DOM_NODE_TAG_TSPAN, SVG_TSPAN_ATTR_LIST},
+    { DOM_NODE_TAG_TEXT_PATH, SVG_TEXT_PATH_ATTR_LIST },
+    { DOM_NODE_TAG_TSPAN, SVG_TSPAN_ATTR_LIST },
     { DOM_NODE_TAG_IMAGE, IMAGE_ATTR_LIST },
     { DOM_NODE_TAG_SPAN, SPAN_ATTR_LIST },
     { DOM_NODE_TAG_TABS, TABS_ATTR_LIST },
@@ -148,8 +149,12 @@ void AppendChildNode(const JsonValue& jsonValue, const RefPtr<DOMNode>& parentNo
     }
 }
 
-void SetStyleFromJson(const std::string& jsonStr, const RefPtr<DOMNode>& domNode)
+void SetStyleFromJson(
+    const std::string& jsonStr, const RefPtr<DOMNode>& domNode, const RefPtr<Declaration>& declaration)
 {
+    if (!declaration || !domNode) {
+        return;
+    }
     auto domJson = ParseJsonString(jsonStr);
     std::vector<std::pair<std::string, std::string>> styles;
     if (domJson->Contains(COMMON_STYLE)) {
@@ -184,11 +189,15 @@ void SetStyleFromJson(const std::string& jsonStr, const RefPtr<DOMNode>& domNode
             }
         }
     }
+    declaration->SetStyle(styles);
     domNode->SetStyle(styles);
 }
 
-void SetAttrFromJson(const std::string& jsonStr, const RefPtr<DOMNode>& domNode)
+void SetAttrFromJson(const std::string& jsonStr, const RefPtr<DOMNode>& domNode, const RefPtr<Declaration>& declaration)
 {
+    if (!declaration || !domNode) {
+        return;
+    }
     auto domJson = ParseJsonString(jsonStr);
     std::string type = domJson->GetValue(DOM_TAG)->GetString();
     if (DOMATTRLIST.find(type) == DOMATTRLIST.end()) {
@@ -210,11 +219,16 @@ void SetAttrFromJson(const std::string& jsonStr, const RefPtr<DOMNode>& domNode)
             }
         }
     }
+    declaration->SetAttr(attrs);
     domNode->SetAttr(attrs);
 }
 
-void SetEventFromJson(const std::string& jsonStr, const RefPtr<DOMNode>& domNode)
+void SetEventFromJson(
+    const std::string& jsonStr, const RefPtr<DOMNode>& domNode, const RefPtr<Declaration>& declaration)
 {
+    if (!declaration || !domNode) {
+        return;
+    }
     auto domJson = ParseJsonString(jsonStr);
     std::vector<std::string> events;
     if (domJson->Contains(COMMON_EVENT)) {
@@ -252,6 +266,7 @@ void SetEventFromJson(const std::string& jsonStr, const RefPtr<DOMNode>& domNode
             }
         }
     }
+    declaration->AddEvent(PAGE_ID, domNode->GetNodeIdForEvent(), events);
     domNode->AddEvent(PAGE_ID, events);
 }
 
@@ -277,9 +292,14 @@ RefPtr<DOMNode> DOMNodeFactory::CreateDOMNodeFromDsl(const std::string& jsonStr)
 
     domNodeRoot->SetPipelineContext(context_);
     domNodeRoot->InitializeStyle();
-    SetAttrFromJson(jsonStr, domNodeRoot);
-    SetStyleFromJson(jsonStr, domNodeRoot);
-    SetEventFromJson(jsonStr, domNodeRoot);
+    auto declaration = domNodeRoot->GetDeclaration();
+    if (declaration) {
+        declaration->BindPipelineContext(context_);
+        declaration->InitializeStyle();
+    }
+    SetAttrFromJson(jsonStr, domNodeRoot, declaration);
+    SetStyleFromJson(jsonStr, domNodeRoot, declaration);
+    SetEventFromJson(jsonStr, domNodeRoot, declaration);
     domNodeRoot->GenerateComponentNode();
 
     if (domJson->Contains(CHILD_TAG)) {

@@ -24,6 +24,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/pipeline/base/component_group.h"
 #include "core/pipeline/base/measurable.h"
+#include "frameworks/core/components/declaration/button/button_declaration.h"
 
 namespace OHOS::Ace {
 
@@ -31,26 +32,6 @@ namespace OHOS::Ace {
 constexpr int32_t LAYOUT_FLAG_EXTEND_TO_PARENT = 1;
 
 using ProgressCallback = std::function<void(uint32_t)>;
-
-class ButtonProgressController : public virtual AceType {
-    DECLARE_ACE_TYPE(ButtonProgressController, AceType);
-
-public:
-    void SetProgress(uint32_t progress)
-    {
-        if (progressCallback_) {
-            progressCallback_(progress);
-        }
-    }
-
-    void SetProgressCallback(const ProgressCallback& progressCallback)
-    {
-        progressCallback_ = progressCallback;
-    }
-
-private:
-    ProgressCallback progressCallback_;
-};
 
 class ACE_EXPORT ButtonComponent : public ComponentGroup, public LabelTarget, public Measurable {
     DECLARE_ACE_TYPE(ButtonComponent, ComponentGroup, LabelTarget, Measurable);
@@ -67,184 +48,58 @@ public:
         return type_;
     }
 
-    bool GetDisabledState() const
+    void SetType(ButtonType type)
     {
-        return isDisabled_;
+        type_ = type;
     }
 
-    bool GetWaitingState() const
-    {
-        return isWaiting_;
-    }
+    bool GetDisabledState() const;
+    bool GetWaitingState() const;
+    bool GetAutoFocusState() const;
+    bool GetRadiusState() const;
+    const Dimension& GetMinWidth() const;
+    const Dimension& GetRectRadius() const;
+    const Dimension& GetProgressDiameter() const;
+    const Color& GetBackgroundColor() const;
+    const Color& GetClickedColor() const;
+    const Color& GetDisabledColor() const;
+    const Color& GetFocusColor() const;
+    const Color& GetHoverColor() const;
+    const Color& GetProgressColor() const;
+    const Color& GetProgressFocusColor() const;
+    const Color& GetFocusAnimationColor() const;
+    const BorderEdge& GetBorderEdge() const;
+    const EventMarker& GetClickedEventId() const;
+    RefPtr<ButtonProgressController> GetButtonController() const;
 
-    const Dimension& GetMinWidth() const
-    {
-        return minWidth_;
-    }
-
-    const Dimension& GetRectRadius() const
-    {
-        return rrectRadius_;
-    }
-
-    const Dimension& GetProgressDiameter() const
-    {
-        return progressDiameter_;
-    }
-
-    const Color& GetBackgroundColor() const
-    {
-        return backgroundColor_;
-    }
-
-    const Color& GetClickedColor() const
-    {
-        return clickedColor_;
-    }
-
-    const Color& GetDisabledColor() const
-    {
-        return disabledColor_;
-    }
-
-    const Color& GetFocusColor() const
-    {
-        return focusColor_;
-    }
-
-    const Color& GetHoverColor() const
-    {
-        return hoverColor_;
-    }
-
-    const Color& GetProgressColor() const
-    {
-        return progressColor_;
-    }
-
-    const Color& GetProgressFocusColor() const
-    {
-        return progressFocusColor_;
-    }
-
-    const Color& GetFocusAnimationColor() const
-    {
-        return focusAnimationColor_;
-    }
-
-    const BorderEdge& GetBorderEdge() const
-    {
-        return borderEdge_;
-    }
-
-    const EventMarker& GetClickedEventId() const
-    {
-        return clickEventId_;
-    }
-
-    bool GetAutoFocusState() const
-    {
-        return isAutoFocus_;
-    }
+    void SetDisabledState(bool state);
+    void SetWaitingState(bool state);
+    void SetAutoFocusState(bool state);
+    void SetRadiusState(bool state);
+    void SetMinWidth(const Dimension& width);
+    void SetRectRadius(const Dimension& radius);
+    void SetProgressDiameter(const Dimension& diameter);
+    void SetBackgroundColor(const Color& color);
+    void SetClickedColor(const Color& color);
+    void SetDisabledColor(const Color& color);
+    void SetFocusColor(const Color& color);
+    void SetHoverColor(const Color& color);
+    void SetProgressColor(const Color& color);
+    void SetProgressFocusColor(const Color& color);
+    void SetFocusAnimationColor(const Color& color);
+    void SetBorderEdge(const BorderEdge& borderEdge);
+    void SetClickedEventId(const EventMarker& eventId);
+    void SetClickFunction(std::function<void()>&& clickCallback);
+    void SetDeclaration(const RefPtr<ButtonDeclaration>& declaration);
 
     bool GetFocusable() const
     {
         return focusable_;
     }
 
-    void SetType(ButtonType type)
-    {
-        type_ = type;
-    }
-
-    void SetDisabledState(bool state)
-    {
-        isDisabled_ = state;
-    }
-
-    void SetWaitingState(bool state)
-    {
-        isWaiting_ = state;
-    }
-
-    void SetMinWidth(const Dimension& width)
-    {
-        minWidth_ = width;
-    }
-
-    void SetRectRadius(const Dimension& radius)
-    {
-        rrectRadius_ = radius;
-    }
-
-    void SetProgressDiameter(const Dimension& diameter)
-    {
-        progressDiameter_ = diameter;
-    }
-
-    void SetBackgroundColor(const Color& color)
-    {
-        backgroundColor_ = color;
-    }
-
-    void SetClickedColor(const Color& color)
-    {
-        clickedColor_ = color;
-    }
-
-    void SetDisabledColor(const Color& color)
-    {
-        disabledColor_ = color;
-    }
-
-    void SetFocusColor(const Color& color)
-    {
-        focusColor_ = color;
-    }
-
-    void SetHoverColor(const Color& color)
-    {
-        hoverColor_ = color;
-    }
-
-    void SetProgressColor(const Color& color)
-    {
-        progressColor_ = color;
-    }
-
-    void SetProgressFocusColor(const Color& color)
-    {
-        progressFocusColor_ = color;
-    }
-
-    void SetFocusAnimationColor(const Color& color)
-    {
-        focusAnimationColor_ = color;
-    }
-
-    void SetBorderEdge(const BorderEdge& borderEdge)
-    {
-        borderEdge_ = borderEdge;
-    }
-
-    void SetClickedEventId(const EventMarker& eventId)
-    {
-        clickEventId_ = eventId;
-    }
-
-    void SetAutoFocusState(bool isAutoFocus)
-    {
-        isAutoFocus_ = isAutoFocus;
-    }
-
     void SetFocusable(bool focusable)
     {
         focusable_ = focusable;
-    }
-
-    RefPtr<ButtonProgressController> GetButtonController() const
-    {
-        return buttonController_;
     }
 
     uint32_t GetLayoutFlag() const
@@ -267,29 +122,46 @@ public:
         isInnerBorder_ = isInnerBorder;
     }
 
-private:
-    ButtonType type_ { ButtonType::NORMAL };
-    Color backgroundColor_;
-    Color clickedColor_;
-    Color disabledColor_;
-    Color focusColor_ = Color::WHITE;
-    Color focusAnimationColor_ = Color::WHITE;
-    Color hoverColor_;
-    Color progressColor_;
-    Color progressFocusColor_;
-    BorderEdge borderEdge_ { Color(0xff000000), Dimension(), BorderStyle::NONE };
-    EventMarker clickEventId_;
+    bool GetStateEffect() const
+    {
+        return stateEffect_;
+    }
 
+    void SetStateEffect(bool effect)
+    {
+        stateEffect_ = effect;
+    }
+
+    bool GetDeclarativeFlag() const
+    {
+        return isDeclarative_;
+    }
+
+    void SetDeclarativeFlag(bool flag)
+    {
+        isDeclarative_ = flag;
+    }
+
+    void SetRectRadii(const std::array<Radius, 4>& radii)
+    {
+        radii_ = radii;
+    }
+
+    const std::array<Radius, 4>& GetRectRadii() const
+    {
+        return radii_;
+    }
+
+private:
+    RefPtr<ButtonDeclaration> declaration_;
+    ButtonType type_ { ButtonType::NORMAL };
     bool isInnerBorder_ = false;
-    bool isDisabled_ = false;
-    bool isWaiting_ = false;
-    bool isAutoFocus_ = false;
     bool focusable_ = true;
-    Dimension minWidth_;
-    Dimension rrectRadius_;
-    Dimension progressDiameter_;
-    RefPtr<ButtonProgressController> buttonController_;
+    bool stateEffect_ = true;
+    bool isDeclarative_ = false;
     uint32_t layoutFlag_ = 0;
+    // for custom button type
+    std::array<Radius, 4> radii_ = { Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp) };
 };
 
 class ButtonBuilder {

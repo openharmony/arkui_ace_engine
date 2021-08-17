@@ -22,6 +22,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
 
@@ -46,6 +47,10 @@ public:
             }
             theme->bufferSize_ = Size(themeConstants->GetDimension(THEME_CAMERA_BUFFER_WIDTH).Value(),
                 themeConstants->GetDimension(THEME_CAMERA_BUFFER_HEIGHT).Value());
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+            theme->errorTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_VIDEO_TEXT_FONTSIZE));
+            theme->errorTextStyle_.SetTextColor(themeConstants->GetColor(THEME_VIDEO_ERROR_TEXT_COLOR));
+#endif
             return theme;
         }
     };
@@ -57,11 +62,22 @@ public:
         return bufferSize_;
     }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    const TextStyle& GetErrorTextStyle() const
+    {
+        return errorTextStyle_;
+    }
+#endif
+
 protected:
     CameraTheme() = default;
 
 private:
     Size bufferSize_;
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    TextStyle errorTextStyle_;
+#endif
 };
 
 } // namespace OHOS::Ace

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DISPLAY_DISPLAY_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DISPLAY_DISPLAY_COMPONENT_H
 
+#include "core/components/common/properties/animatable_double.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components/display/display_element.h"
 #include "core/pipeline/base/sole_child_component.h"
 
@@ -49,7 +51,12 @@ public:
 
     double GetOpacity() const
     {
-        return opacity_;
+        return opacity_.GetValue();
+    }
+
+    AnimationOption GetOpacityAnimationOption() const
+    {
+        return opacity_.GetAnimationOption();
     }
 
     void SetVisible(VisibleType visible)
@@ -57,9 +64,9 @@ public:
         visible_ = visible;
     }
 
-    void SetOpacity(double opacity)
+    void SetOpacity(double opacity, const AnimationOption& animationOption = AnimationOption())
     {
-        opacity_ = opacity;
+        opacity_ = AnimatableDouble(opacity, animationOption);
     }
 
     void DisableLayer(bool disable)
@@ -82,10 +89,42 @@ public:
         return shadow_;
     }
 
+    void SetTransition(TransitionType type, double opacity)
+    {
+        if (type == TransitionType::DISAPPEARING) {
+            hasDisappearTransition_ = true;
+            disappearingOpacity_ = opacity;
+        } else if (type == TransitionType::APPEARING) {
+            appearingOpacity_ = opacity;
+        } else {
+            hasDisappearTransition_ = true;
+            disappearingOpacity_ = opacity;
+            appearingOpacity_ = opacity;
+        }
+    }
+
+    bool HasDisappearTransition() const
+    {
+        return hasDisappearTransition_;
+    }
+
+    double GetAppearingOpacity() const
+    {
+        return appearingOpacity_;
+    }
+
+    double GetDisappearingOpacity() const
+    {
+        return disappearingOpacity_;
+    }
+
 private:
     VisibleType visible_ = VisibleType::VISIBLE;
     Shadow shadow_;
-    double opacity_ = 1.0;
+    AnimatableDouble opacity_ = AnimatableDouble(1.0);
+    double appearingOpacity_ = 0.0;
+    double disappearingOpacity_ = 0.0;
+    bool hasDisappearTransition_ = false;
     bool disableLayer_ = false;
 };
 

@@ -143,7 +143,11 @@ public:
 
     void SetTotalRatio(double ratio)
     {
-        totalRatio_ = ratio;
+        if (ratio > 1.0) {
+            totalRatio_ = 1.0;
+        } else {
+            totalRatio_ = ratio;
+        }
         if (showTips_) {
             UpdateTipText(totalRatio_);
         }
@@ -187,6 +191,7 @@ protected:
     void UpdateAccessibilityAttr();
     void InitAccessibilityEventListener();
     void HandleScrollUpdate(double delta);
+    void UpdateTouchRect() override;
 
     bool renderWholeNode_ = true;
 

@@ -61,6 +61,21 @@ inline void TrySaveTargetAndIdNode(const std::string& id, const std::string& tar
     }
 }
 
+// TODO delete this vector after declaration refactor if finished.
+std::vector<std::string> g_declarationNodes =
+{   DOM_NODE_TAG_BADGE,
+    DOM_NODE_TAG_BUTTON,
+    DOM_NODE_TAG_LABEL,
+    DOM_NODE_TAG_PIECE,
+    DOM_NODE_TAG_QRCODE,
+    DOM_NODE_TAG_SPAN,
+    DOM_NODE_TAG_SWIPER,
+    DOM_NODE_TAG_TEXT,
+    DOM_NODE_TAG_WEB,
+    DOM_NODE_TAG_CLOCK,
+    DOM_NODE_TAG_XCOMPONENT
+};
+
 } // namespace
 
 void JsCommandDomElementOperator::UpdateForChart(const RefPtr<DOMNode>& node) const
@@ -175,7 +190,6 @@ RefPtr<DOMNode> JsCommandDomElementCreator::CreateDomNode(const RefPtr<JsAcePage
     if (page->IsLiteStyle()) {
         node->AdjustParamInLiteMode();
     }
-    node->SetBoxWrap(page->IsUseBoxWrap());
 
     // supplement: set svg tag by parentNode.hasSvgTag_ or tagName_
     node->SetParentNode(parentNode);
@@ -184,8 +198,15 @@ RefPtr<DOMNode> JsCommandDomElementCreator::CreateDomNode(const RefPtr<JsAcePage
     node->SetShareId(shareId_);
     node->SetPipelineContext(pipelineContext_);
     node->SetIsCustomComponent(isCustomComponent_);
+    node->SetBoxWrap(page->IsUseBoxWrap());
     node->InitializeStyle();
+    auto declaration = node->GetDeclaration();
+    if (declaration) {
+        declaration->BindPipelineContext(pipelineContext_);
+        declaration->InitializeStyle();
+    }
     node->SetAttr(attrs_);
+
     if (animationStyles_) {
         node->SetAnimationStyle(*animationStyles_);
     }
@@ -209,7 +230,6 @@ RefPtr<DOMNode> JsCommandDomElementCreator::CreateDomNode(const RefPtr<JsAcePage
     UpdateForBadge(node);
     UpdateForStepperLabel(node);
     UpdateForInput(node);
-
     node->SetStyle(styles_);
     node->AddEvent(pageId, events_);
     return node;
@@ -427,7 +447,6 @@ void JsCommandUpdateDomElementAttrs::Execute(const RefPtr<JsAcePage>& page) cons
     if (page->IsLiteStyle()) {
         node->AdjustParamInLiteMode();
     }
-    node->SetBoxWrap(page->IsUseBoxWrap());
     if (page->CheckShowCommandConsumed()) {
         auto showAttr = std::find_if(std::begin(attrs_), std::end(attrs_),
             [](const std::pair<std::string, std::string>& attr) { return attr.first == DOM_SHOW; });
@@ -436,6 +455,7 @@ void JsCommandUpdateDomElementAttrs::Execute(const RefPtr<JsAcePage>& page) cons
         }
     }
     TrySaveTargetAndIdNode(id_, target_, page->GetDomDocument(), node);
+    node->SetBoxWrap(page->IsUseBoxWrap());
     node->SetAttr(attrs_);
     node->SetShareId(shareId_);
     UpdateForChart(node);
@@ -505,7 +525,13 @@ void JsCommandCallDomElementMethod::Execute(const RefPtr<JsAcePage>& page) const
     if (method_ == DOM_FOCUS) {
         page->UpdateShowAttr();
     }
-    node->CallMethod(method_, param_);
+    auto declaration = node->GetDeclaration();
+    if (declaration &&
+        std::find(g_declarationNodes.begin(), g_declarationNodes.end(), node->GetTag()) != g_declarationNodes.end()) {
+        declaration->CallMethod(method_, param_);
+    } else {
+        node->CallMethod(method_, param_);
+    }
 }
 
 void JsCommandContextOperation::Execute(const RefPtr<JsAcePage>& page) const
@@ -536,6 +562,17 @@ void JsCommandAnimation::Execute(const RefPtr<JsAcePage>& page) const
     }
     if (task_) {
         task_->AnimationBridgeTaskFunc(page, nodeId_);
+    }
+}
+
+void JsCommandAnimator::Execute(const RefPtr<JsAcePage>& page) const
+{
+    if (!page) {
+        LOGE("execute animation command failed. page is null.");
+        return;
+    }
+    if (task_) {
+        task_->AnimatorBridgeTaskFunc(page, bridgeId_);
     }
 }
 

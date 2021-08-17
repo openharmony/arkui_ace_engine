@@ -60,21 +60,19 @@ RenderToggle::RenderToggle()
 
 void RenderToggle::HandleClickEvent()
 {
-    auto toggle = toggleComponent_.Upgrade();
-    if (!toggle) {
-        LOGE("fail to perform click due to toggle is null");
-        return;
-    }
     if (onClick_) {
         onClick_();
     }
-    auto checkValue = toggle->GetCheckedState();
-    toggle->SetCheckedState(!checkValue);
+    auto checkValue = toggleComponent_->GetCheckedState();
+    toggleComponent_->SetCheckedState(!checkValue);
     MarkNeedRender();
     std::string checked = (!checkValue) ? "true" : "false";
     std::string result = std::string(R"("change",{"checked":)").append(checked.append("},null"));
     if (onChange_) {
         onChange_(result);
+    }
+    if (onChangeToggle_) {
+        onChangeToggle_(checkValue);
     }
 }
 
@@ -218,26 +216,19 @@ void RenderToggle::ResetController(RefPtr<Animator>& controller)
 
 void RenderToggle::Update(const RefPtr<Component>& component)
 {
-    auto toggle = AceType::DynamicCast<ToggleComponent>(component);
-    if (!toggle) {
-        LOGE("Update error, toggle component is null");
-        return;
+    toggleComponent_ = AceType::DynamicCast<ToggleComponent>(component);
+    widthDefined_ = !NearZero(toggleComponent_->GetWidth().Value());
+    onClick_ = AceAsyncEvent<void()>::Create(toggleComponent_->GetClickEvent(), context_);
+    onChange_ = AceAsyncEvent<void(const std::string)>::Create(toggleComponent_->GetChangeEvent(), context_);
+    if (toggleComponent_->GetOnChange()) {
+        onChangeToggle_ = *toggleComponent_->GetOnChange();
     }
-    toggleComponent_ = toggle;
-    widthDefined_ = !NearZero(toggle->GetWidth().Value());
-    onClick_ = AceAsyncEvent<void()>::Create(toggle->GetClickEvent(), context_);
-    onChange_ = AceAsyncEvent<void(const std::string)>::Create(toggle->GetChangeEvent(), context_);
     MarkNeedLayout();
 }
 
 void RenderToggle::PerformLayout()
 {
-    auto toggle = toggleComponent_.Upgrade();
-    if (!toggle) {
-        LOGE("fail to perform layout due to toggle is null");
-        return;
-    }
-    toggleSize_ = Size(NormalizeToPx(toggle->GetWidth()), NormalizeToPx(toggle->GetHeight()));
+    toggleSize_ = Size(NormalizeToPx(toggleComponent_->GetWidth()), NormalizeToPx(toggleComponent_->GetHeight()));
     Measure();
     LayoutParam innerLayoutParam;
     double maxWidth = widthDefined_ ? toggleSize_.Width() : GetLayoutParam().GetMaxSize().Width();

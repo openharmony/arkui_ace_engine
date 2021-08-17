@@ -55,6 +55,7 @@ protected:
     void PrepareSpecializedComponent() override;
     void CompositeComponents() override;
     bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
+    bool AddSpecializedEvent(int32_t pageId, const std::string& event) override;
 
     RefPtr<FlexComponent> flexChild_;
     RefPtr<WrapComponent> wrapChild_;
@@ -77,6 +78,7 @@ private:
     void SetFlexHeight(FlexAlign flexMainAlign);
     void SetCardThemeAttrs();
     void InitScrollBar();
+    void SetSpecializedOverflow();
 
     bool isFlexWrap_ = false;
     std::string justifyContent_ { DOM_JUSTIFY_CONTENT_START };
@@ -94,14 +96,20 @@ private:
     // for grid layout
     std::string columnsArgs_;
     std::string rowsArgs_;
-    double columnGap_ = 0.0;
-    double rowGap_ = 0.0;
+    Dimension columnGap_ = 0.0_px;
+    Dimension rowGap_ = 0.0_px;
 
     // for grid layout item
     int32_t columnStart_ = -1;
     int32_t columnEnd_ = -1;
     int32_t rowStart_ = -1;
     int32_t rowEnd_ = -1;
+
+    // for scroll reaching the edge event
+    EventMarker onReachStart_;
+    EventMarker onReachEnd_;
+    EventMarker onReachTop_;
+    EventMarker onReachBottom_;
 
     RefPtr<ScrollComponent> scroll_;
     RefPtr<GridLayoutComponent> grid_;

@@ -16,13 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_JS_ACE_PAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_JS_ACE_PAGE_H
 
+#include <mutex>
 #include <string>
 #include <unordered_set>
 #include <vector>
 
 #include "base/utils/macros.h"
+#include "core/animation/animator_info.h"
 #include "core/common/ace_page.h"
+#include "core/common/thread_checker.h"
 #include "core/components/checkable/radio_group_component.h"
+#include "core/components/page/page_target.h"
 #include "core/components/page_transition/page_transition_component.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/utils/source_map.h"
@@ -40,8 +44,10 @@ class ACE_EXPORT JsAcePage final : public AcePage {
     DECLARE_ACE_TYPE(JsAcePage, AcePage);
 
 public:
-    JsAcePage(int32_t pageId, const RefPtr<DOMDocument>& document, const std::string& url)
-        : AcePage(pageId), domDoc_(document), url_(url), radioGroups_(std::make_shared<JsPageRadioGroups>())
+    JsAcePage(int32_t pageId, const RefPtr<DOMDocument>& document, const std::string& url,
+        const WeakPtr<StageElement>& container = nullptr)
+        : AcePage(pageId), domDoc_(document), url_(url), container_(container),
+          radioGroups_(std::make_shared<JsPageRadioGroups>())
     {
         ACE_DCHECK(domDoc_);
     }
@@ -88,12 +94,14 @@ public:
 
     void PushNewNode(NodeId nodeId, NodeId parentNodeId)
     {
+        CHECK_RUN_ON(UI);
         dirtyNodes_.emplace(nodeId);
         PushDirtyNode(parentNodeId);
     }
 
     void PushDirtyNode(NodeId nodeId)
     {
+        CHECK_RUN_ON(UI);
         auto result = dirtyNodes_.emplace(nodeId);
         if (result.second) {
             dirtyNodesOrderedByTime_.emplace_back(nodeId);
@@ -102,12 +110,14 @@ public:
 
     void PopAllDirtyNodes(std::vector<NodeId>& dirtyNodes)
     {
+        CHECK_RUN_ON(UI);
         dirtyNodes = std::move(dirtyNodesOrderedByTime_);
         dirtyNodes_.clear();
     }
 
     void ClearAllDirtyNodes()
     {
+        CHECK_RUN_ON(UI);
         dirtyNodesOrderedByTime_.clear();
         dirtyNodes_.clear();
     }
@@ -115,12 +125,15 @@ public:
     void ReserveShowCommand(const RefPtr<JsCommand>& command)
     {
         if (command) {
+            std::unique_lock<std::mutex> lock(cmdMutex_);
             showCommands_.emplace_back(command);
         }
     }
 
     void UpdateShowAttr()
     {
+        CHECK_RUN_ON(UI);
+        std::unique_lock<std::mutex> lock(cmdMutex_);
         if (showCommands_.empty()) {
             return;
         }
@@ -138,6 +151,7 @@ public:
 
     void ClearShowCommand()
     {
+        std::unique_lock<std::mutex> lock(cmdMutex_);
         showCommands_.clear();
         showCommandConsumed_ = false;
     }
@@ -148,6 +162,18 @@ public:
     RefPtr<BaseAnimationBridge> GetAnimationBridge(NodeId nodeId);
     void RemoveAnimationBridge(NodeId nodeId);
     void AddAnimationBridge(NodeId nodeId, const RefPtr<BaseAnimationBridge>& animationBridge);
+
+    RefPtr<BaseAnimationBridge> GetAnimatorBridge(int32_t bridgeId);
+    void RemoveAnimatorBridge(int32_t bridgeId);
+    void AddAnimatorBridge(int32_t bridgeId, const RefPtr<BaseAnimationBridge>& animatorBridge);
+
+    RefPtr<Curve> GetCurve(const std::string& curveString);
+    void RemoveCurve(const std::string& curveString);
+    void AddCurve(const std::string& curveString, const RefPtr<Curve>& curve);
+
+    RefPtr<AnimatorInfo> GetAnimatorInfo(const std::string& animatorId);
+    void RemoveAnimatorInfo(const std::string& animatorId);
+    void AddAnimatorInfo(const std::string animatorId, const RefPtr<AnimatorInfo>& animatorInfo);
 
     void SetPageParams(const std::string& params)
     {
@@ -214,7 +240,7 @@ public:
 
     void AddNodeEvent(int32_t nodeId, const std::string& actionType, const std::string& eventAction);
 
-    std::string& GetNodeEventAction(int32_t nodeId, const std::string& actionType);
+    std::string GetNodeEventAction(int32_t nodeId, const std::string& actionType);
     std::shared_ptr<JsPageRadioGroups> GetRadioGroups();
 
     void SetRootComponent(const RefPtr<Component>& component)
@@ -244,8 +270,16 @@ public:
         return appMap_;
     }
 
+    RefPtr<StageElement> GetStageElement() const
+    {
+        return container_.Upgrade();
+    }
+
+    void OnJsEngineDestroy();
+
 private:
     void SwapBackgroundDecoration(const RefPtr<PageTransitionComponent>& transition);
+    std::string GetCardId() const;
 
     bool pageCreated_ = false;
     bool showCommandConsumed_ = false;
@@ -256,6 +290,7 @@ private:
     RefPtr<Component> component_;
     RefPtr<DOMDocument> domDoc_;
     std::string url_;
+    WeakPtr<StageElement> container_;
 
     RefPtr<RevSourceMap> pageMap_;
     RefPtr<RevSourceMap> appMap_;
@@ -265,12 +300,18 @@ private:
     std::vector<RefPtr<JsCommand>> jsCommands_;
     std::vector<NodeId> dirtyNodesOrderedByTime_;
     std::unordered_set<NodeId> dirtyNodes_;
+    std::mutex cmdMutex_;
     std::vector<RefPtr<JsCommand>> showCommands_;
     std::function<void(const RefPtr<JsAcePage>&)> flushCallback_;
     std::string pageParams_;
+    std::mutex eventMutex_;
     std::unordered_map<NodeId, std::unordered_map<std::string, std::string>> nodeEvent_;
+    std::mutex bridgeMutex_;
     std::unordered_map<NodeId, RefPtr<BaseAnimationBridge>> animationBridges_;
     std::unordered_map<NodeId, RefPtr<BaseCanvasBridge>> canvasBridges_;
+    std::unordered_map<int32_t, RefPtr<BaseAnimationBridge>> animatorBridges_;
+    std::unordered_map<std::string, RefPtr<Curve>> curves_;
+    std::unordered_map<std::string, RefPtr<AnimatorInfo>> animatorInfos_;
     std::shared_ptr<JsPageRadioGroups> radioGroups_;
 };
 

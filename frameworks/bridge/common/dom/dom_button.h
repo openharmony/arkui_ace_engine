@@ -23,6 +23,7 @@
 #include "core/components/text/text_component.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
+#include "frameworks/core/components/declaration/button/button_declaration.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -33,25 +34,19 @@ public:
     DOMButton(NodeId nodeId, const std::string& nodeName);
     ~DOMButton() override = default;
 
-    void InitializeStyle() override;
-
-    void CallSpecializedMethod(const std::string& method, const std::string& args) override;
-
     RefPtr<Component> GetSpecializedComponent() override
     {
         return buttonChild_;
     }
 
+    Dimension GetHeight() const override;
+    Dimension GetWidth() const override;
+
 protected:
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
-    bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
-    bool AddSpecializedEvent(int32_t pageId, const std::string& event) override;
     void PrepareSpecializedComponent() override;
     void ResetInitializedStyle() override;
 
 private:
-    void InitButtonStyle();
-    void InitTextStyle();
     void PrepareBoxSize();
     void PreparePseudoStyle();
     void PrepareUniversalButton();
@@ -83,31 +78,24 @@ private:
     RefPtr<ButtonTheme> buttonTheme_;
     RefPtr<Decoration> backDecoration_;
     RefPtr<PaddingComponent> innerPaddingChild_;
+    RefPtr<ButtonDeclaration> buttonDeclaration_;
 
     std::string buttonType_;
     std::string placement_;
     BorderEdge edge_;
     TextStyle textStyle_;
     Color focusColor_;
-    Color progressColor_;
     Color disabledColor_;
     Color textColor_;
-    Color disabledTextColor_;
-    Dimension innerLeftPadding_;
+    Color edgeColor_;
     Dimension diameter_;
     double blendOpacity_ = 0.0;
-    bool isWaiting_ = false;
     bool focusColorChanged_ = false;
     bool textColorChanged_ = false;
     bool isWatch_ = false;
     bool isTv_ = false;
     bool isCustomizedColor_ = false;
-    bool fontSizeDefined_ = false;
-    bool heightDefined_ = false;
     bool disabledColorEffected_ = false;
-    bool textColorDefined_ = false;
-    bool bgColorDefined_ = false;
-    bool radiusDefined_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

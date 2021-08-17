@@ -20,6 +20,7 @@
 
 #include "base/utils/macros.h"
 #include "core/focus/focus_node.h"
+#include "core/gestures/gesture_recognizer.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -30,6 +31,7 @@ class PipelineContext;
 
 // If no insertion location is specified, new child will be added to the end of children list by default.
 constexpr int32_t DEFAULT_ELEMENT_SLOT = -1;
+constexpr int32_t DEFAULT_RENDER_SLOT = -1;
 
 // Element is the key class in the UI framework, which presents a basic logic
 // unit to construct a view hierarchy.
@@ -43,21 +45,24 @@ public:
 
     void AddChild(const RefPtr<Element>& child, int32_t slot = DEFAULT_ELEMENT_SLOT);
     void RemoveChild(const RefPtr<Element>& child);
-    void InactivateChild(const RefPtr<Element>& child);
-    void DeactivateChild(const RefPtr<Element>& child);
+    void DeactivateChild(RefPtr<Element> child);
     void Rebuild();
 
     // create a new child element and mount to element tree.
-    RefPtr<Element> InflateComponent(const RefPtr<Component>& newComponent, int32_t slot);
-    virtual void Mount(const RefPtr<Element>& parent, int32_t slot = DEFAULT_ELEMENT_SLOT);
+    RefPtr<Element> InflateComponent(const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot);
+    virtual void Mount(
+        const RefPtr<Element>& parent, int32_t slot = DEFAULT_ELEMENT_SLOT, int32_t renderSlot = DEFAULT_RENDER_SLOT);
     void AddToFocus();
-    RefPtr<Element> UpdateChild(
-        const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot = DEFAULT_ELEMENT_SLOT);
+    virtual RefPtr<Element> UpdateChild(const RefPtr<Element>& child, const RefPtr<Component>& newComponent) = 0;
+    RefPtr<Element> UpdateChildWithSlot(
+        const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot);
+
     void DetachChild(const RefPtr<Element>&);
     RefPtr<Element> RetakeDeactivateElement(const RefPtr<Component>& newComponent);
 
     virtual void Detached() {}
     virtual void Deactivate() {}
+    virtual void UmountRender() {}
     virtual void Prepare(const WeakPtr<Element>& parent) {}
     virtual void PerformBuild() {}
     virtual void Update() {}
@@ -95,8 +100,6 @@ public:
         BASE_ELEMENT,
         RENDER_ELEMENT,
         COMPOSED_ELEMENT,
-        COMPONENT_ELEMENT,
-        FOREACH_ELEMENT,
     };
 
     virtual ElementType GetType() const
@@ -109,7 +112,8 @@ public:
         component_ = newComponent;
         if (newComponent) {
             retakeId_ = newComponent->GetRetakeId();
-            componentTypeName_ = AceType::TypeName(component_);
+            componentTypeId_ = AceType::TypeId(component_);
+            MarkNeedRebuild();
         }
     }
 
@@ -143,12 +147,27 @@ public:
         return context_;
     }
 
-    void SetSlot(int32_t slot);
+    void SetSlot(int32_t slot)
+    {
+        slot_ = slot;
+    }
 
     int32_t GetSlot() const
     {
         return slot_;
     }
+
+    void SetRenderSlot(int32_t slot)
+    {
+        renderSlot_ = slot;
+    }
+
+    int32_t GetRenderSlot() const
+    {
+        return renderSlot_;
+    }
+
+    virtual int32_t CountRenderNode() const = 0;
 
     const WeakPtr<Element>& GetElementParent() const
     {
@@ -186,18 +205,29 @@ public:
 
     RefPtr<FocusNode> RebuildFocusChild();
 
-protected:
-    inline RefPtr<Element> DoUpdateChildWithNewComponent(
-        const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot);
-
-    virtual void Apply(const RefPtr<Element>& child) = 0;
-
-    virtual void OnContextAttached() {}
-
     void SetParent(const WeakPtr<Element>& parent)
     {
         parent_ = parent;
     }
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    int32_t GetChildrenSize() {
+        return children_.size();
+    }
+#endif
+
+    void MarkNeedRebuild()
+    {
+        needRebuild_ = true;
+    }
+
+protected:
+    inline RefPtr<Element> DoUpdateChildWithNewComponent(
+        const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot);
+
+    virtual void Apply(const RefPtr<Element>& child) = 0;
+
+    virtual void OnContextAttached() {}
 
     RefPtr<ThemeManager> GetThemeManager() const
     {
@@ -212,13 +242,18 @@ protected:
     std::list<RefPtr<Element>> children_;
     RefPtr<Component> component_;
     WeakPtr<PipelineContext> context_;
-    const char* componentTypeName_ = nullptr;
+    IdType componentTypeId_ = 0;
 
 private:
+    void ChangeChildSlot(const RefPtr<Element>& child, int32_t slot);
+    void ChangeChildRenderSlot(const RefPtr<Element>& child, int32_t renderSlot, bool effectDescendant);
+
     WeakPtr<Element> parent_;
     int32_t depth_ = 0;
     int32_t slot_ = DEFAULT_ELEMENT_SLOT;
+    int32_t renderSlot_ = DEFAULT_RENDER_SLOT;
     bool autoAccessibility_ = true;
+    bool needRebuild_ = false;
     // One-to-one correspondence with component through retakeId
     int32_t retakeId_ = 0;
 };

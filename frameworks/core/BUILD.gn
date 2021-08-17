@@ -25,7 +25,11 @@ template("ace_core_source_set") {
     # add common source file needed by all product platform here
     sources = [
       # animation
+      "animation/animatable_data.cpp",
+      "animation/animatable_properties.cpp",
+      "animation/animation_util.cpp",
       "animation/animator.cpp",
+      "animation/animator_group.cpp",
       "animation/anticipate_curve.cpp",
       "animation/bilateral_spring_adapter.cpp",
       "animation/bilateral_spring_node.cpp",
@@ -33,6 +37,7 @@ template("ace_core_source_set") {
       "animation/cubic_curve.cpp",
       "animation/curves.cpp",
       "animation/friction_motion.cpp",
+      "animation/property_animation.cpp",
       "animation/scheduler.cpp",
       "animation/scroll_motion.cpp",
       "animation/shared_transition_controller.cpp",
@@ -41,6 +46,7 @@ template("ace_core_source_set") {
       "animation/simple_spring_chain.cpp",
       "animation/simple_spring_node.cpp",
       "animation/spring_animation.cpp",
+      "animation/spring_curve.cpp",
       "animation/spring_model.cpp",
       "animation/spring_motion.cpp",
       "animation/svg_animate.cpp",
@@ -49,26 +55,84 @@ template("ace_core_source_set") {
       "common/ace_application_info.cpp",
       "common/ace_engine.cpp",
       "common/clipboard/clipboard_proxy.cpp",
+      "common/container.cpp",
+      "common/environment/environment_proxy.cpp",
       "common/event_manager.cpp",
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
       "common/font_manager.cpp",
       "common/platform_bridge.cpp",
+      "common/storage/storage_proxy.cpp",
       "common/text_field_manager.cpp",
+      "common/thread_checker.cpp",
       "common/vibrator/vibrator_proxy.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
 
+      # declaration
+      "components/declaration/badge/badge_declaration.cpp",
+      "components/declaration/button/button_declaration.cpp",
+      "components/declaration/canvas/canvas_declaration.cpp",
+      "components/declaration/clock/clock_declaration.cpp",
+      "components/declaration/common/declaration.cpp",
+      "components/declaration/common/declaration_constants.cpp",
+      "components/declaration/common/declaration_creator_manager.cpp",
+      "components/declaration/common/event.cpp",
+      "components/declaration/div/div_declaration.cpp",
+      "components/declaration/image/image_animator_declaration.cpp",
+      "components/declaration/input/input_declaration.cpp",
+      "components/declaration/piece/piece_declaration.cpp",
+      "components/declaration/qrcode/qrcode_declaration.cpp",
+      "components/declaration/richtext/rich_text_declaration.cpp",
+      "components/declaration/search/search_declaration.cpp",
+      "components/declaration/span/span_declaration.cpp",
+      "components/declaration/svg/svg_animate_declaration.cpp",
+      "components/declaration/svg/svg_base_declaration.cpp",
+      "components/declaration/svg/svg_circle_declaration.cpp",
+      "components/declaration/svg/svg_declaration.cpp",
+      "components/declaration/svg/svg_ellipse_declaration.cpp",
+      "components/declaration/svg/svg_gradient_declaration.cpp",
+      "components/declaration/svg/svg_line_declaration.cpp",
+      "components/declaration/svg/svg_mask_declaration.cpp",
+      "components/declaration/svg/svg_path_declaration.cpp",
+      "components/declaration/svg/svg_pattern_declaration.cpp",
+      "components/declaration/svg/svg_polygon_declaration.cpp",
+      "components/declaration/svg/svg_rect_declaration.cpp",
+      "components/declaration/svg/svg_stop_declaration.cpp",
+      "components/declaration/svg/svg_text_declaration.cpp",
+      "components/declaration/svg/svg_text_path_declaration.cpp",
+      "components/declaration/swiper/swiper_declaration.cpp",
+      "components/declaration/text/text_declaration.cpp",
+      "components/declaration/textarea/textarea_declaration.cpp",
+      "components/declaration/textfield/textfield_declaration.cpp",
+      "components/declaration/web/web_declaration.cpp",
+      "components/declaration/xcomponent/xcomponent_declaration.cpp",
+
       # gestures
       "gestures/click_recognizer.cpp",
       "gestures/drag_recognizer.cpp",
+      "gestures/exclusive_recognizer.cpp",
       "gestures/gesture_recognizer.cpp",
       "gestures/gesture_referee.cpp",
       "gestures/long_press_recognizer.cpp",
+      "gestures/multi_fingers_recognizer.cpp",
+      "gestures/pan_recognizer.cpp",
+      "gestures/parallel_recognizer.cpp",
+      "gestures/pinch_recognizer.cpp",
       "gestures/press_recognizer.cpp",
       "gestures/raw_recognizer.cpp",
+      "gestures/rotation_recognizer.cpp",
+      "gestures/sequenced_recognizer.cpp",
       "gestures/swipe_recognizer.cpp",
       "gestures/velocity_tracker.cpp",
+
+      # declarative
+      "gestures/gesture_group.cpp",
+      "gestures/long_press_gesture.cpp",
+      "gestures/pan_gesture.cpp",
+      "gestures/pinch_gesture.cpp",
+      "gestures/rotation_gesture.cpp",
+      "gestures/tap_gesture.cpp",
 
       # event
       "event/back_end_event_manager.cpp",
@@ -83,6 +147,7 @@ template("ace_core_source_set") {
       "image/animated_image_player.cpp",
       "image/flutter_image_cache.cpp",
       "image/image_cache.cpp",
+      "image/image_loader.cpp",
       "image/image_provider.cpp",
 
       # textfield
@@ -105,17 +170,18 @@ template("ace_core_source_set") {
 
     configs = [
       "$ace_root:ace_config",
-      "$flutter_root:flutter_config",
-      "$flutter_root:icu_config_$platform",
+      "$ace_flutter_engine_root:flutter_config",
+      "$ace_flutter_engine_root:icu_config_$platform",
     ]
 
     deps = [
+      "$ace_flutter_engine_root:ace_skia_$platform",
       "$ace_root/frameworks/base:ace_base_$platform",
-      "$flutter_root:ace_skia_$platform",
       "pipeline:ace_core_pipeline_$platform",
     ]
 
     deps += [
+      "$ace_flutter_engine_root:ace_skia_$platform",
       "$ace_root/frameworks/core/components/align:ace_core_components_align_$platform",
       "$ace_root/frameworks/core/components/arc:ace_core_components_arc_$platform",
       "$ace_root/frameworks/core/components/badge:ace_core_components_badge_$platform",
@@ -126,8 +192,9 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/chart:ace_core_components_chart_$platform",
       "$ace_root/frameworks/core/components/checkable:ace_core_components_checkable_$platform",
       "$ace_root/frameworks/core/components/clip:ace_core_components_clip_$platform",
-      "$ace_root/frameworks/core/components/column_split:ace_core_components_column_split_$platform",
       "$ace_root/frameworks/core/components/common:ace_core_components_common_$platform",
+      "$ace_root/frameworks/core/components/counter:ace_core_components_counter_$platform",
+      "$ace_root/frameworks/core/components/coverage:ace_core_components_coverage_$platform",
       "$ace_root/frameworks/core/components/custom_dialog:ace_core_components_custom_dialog_$platform",
       "$ace_root/frameworks/core/components/custom_paint:ace_core_components_custom_paint_$platform",
       "$ace_root/frameworks/core/components/data_panel:ace_core_components_data_panel_$platform",
@@ -143,9 +210,11 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/focus_collaboration:ace_core_components_focus_collaboration_$platform",
       "$ace_root/frameworks/core/components/focusable:ace_core_components_focusable_$platform",
       "$ace_root/frameworks/core/components/font:ace_core_components_font_$platform",
+      "$ace_root/frameworks/core/components/foreach:ace_core_components_foreach_$platform",
       "$ace_root/frameworks/core/components/gesture_listener:ace_core_components_gesture_listener_$platform",
       "$ace_root/frameworks/core/components/grid:ace_core_components_grid_$platform",
       "$ace_root/frameworks/core/components/grid_layout:ace_core_components_grid_layout_$platform",
+      "$ace_root/frameworks/core/components/ifelse:ace_core_components_ifelse_$platform",
       "$ace_root/frameworks/core/components/image:ace_core_components_image_$platform",
       "$ace_root/frameworks/core/components/indexer:ace_core_components_indexer_$platform",
       "$ace_root/frameworks/core/components/list:ace_core_components_list_$platform",
@@ -171,8 +240,10 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/select_popup:ace_core_components_select_popup_$platform",
       "$ace_root/frameworks/core/components/semi_modal:ace_core_components_semi_modal_$platform",
       "$ace_root/frameworks/core/components/shadow:ace_core_components_shadow_$platform",
+      "$ace_root/frameworks/core/components/shape:ace_core_components_shape_$platform",
       "$ace_root/frameworks/core/components/shared_transition:ace_core_components_shared_transition_$platform",
       "$ace_root/frameworks/core/components/slider:ace_core_components_slider_$platform",
+      "$ace_root/frameworks/core/components/split_container:ace_core_components_split_container_$platform",
       "$ace_root/frameworks/core/components/stack:ace_core_components_stack_$platform",
       "$ace_root/frameworks/core/components/stage:ace_core_components_stage_$platform",
       "$ace_root/frameworks/core/components/stepper:ace_core_components_stepper_$platform",
@@ -194,7 +265,11 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/tween:ace_core_components_tween_$platform",
       "$ace_root/frameworks/core/components/watch_slider:ace_core_components_watch_slider_$platform",
       "$ace_root/frameworks/core/components/wrap:ace_core_components_wrap_$platform",
-      "$flutter_root:ace_skia_$platform",
+    ]
+
+    deps += [
+      "$ace_root/frameworks/core/components_v2/foreach:ace_core_components_foreach_v2_$platform",
+      "$ace_root/frameworks/core/components_v2/list:ace_core_components_list_v2_$platform",
     ]
 
     if (!use_mingw_win && !use_mac) {
@@ -202,7 +277,11 @@ template("ace_core_source_set") {
     }
 
     if (!use_mingw_win && !use_mac && !is_wearable_product) {
-      deps += [ "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform" ]
+      deps += [
+        "$ace_root/frameworks/core/components/rich_text:ace_core_components_rich_text_$platform",
+        "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform",
+        "$ace_root/frameworks/core/components/xcomponent:ace_core_components_xcomponent_$platform",
+      ]
     }
 
     if (!is_wearable_product) {

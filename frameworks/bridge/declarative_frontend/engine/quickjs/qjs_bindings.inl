@@ -16,6 +16,8 @@
 #include "qjs_bindings.h"
 
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_function_list_entries_container.h"
+#include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_ref.h"
+#include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_unwrap_any.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -24,19 +26,27 @@ JSValue QJSKlass<T>::proto_ = JS_UNDEFINED;
 template<typename T>
 std::unordered_map<std::string, JSCFunctionListEntry*> QJSKlass<T>::functions_;
 template<typename T>
-JSClassDef QJSKlass<T>::classDefinitions_ = { nullptr, .finalizer = QJSKlass<T>::Finalizer,
-    .gc_mark = QJSKlass<T>::GcMark, .exotic = nullptr, .call = nullptr };
+std::unordered_map<std::string, JSCFunctionListEntry*> QJSKlass<T>::staticFunctions_;
+template<typename T>
+JSClassDef QJSKlass<T>::classDefinitions_ = { .class_name = nullptr, .finalizer = QJSKlass<T>::Finalizer,
+    .gc_mark = QJSKlass<T>::GcMark, .call = nullptr, .exotic = nullptr };
 template<typename T>
 JSClassExoticMethods QJSKlass<T>::exoticMethods_;
 template<typename T>
 JSClassID QJSKlass<T>::classId_;
 template<typename T>
 FunctionCallback QJSKlass<T>::constructor_ = nullptr;
+template<typename T>
+JSFunctionCallback QJSKlass<T>::jsConstructor_ = nullptr;
+template<typename T>
+JSDestructorCallback<T> QJSKlass<T>::jsDestructor_ = nullptr;
+template<typename T>
+JSGCMarkCallback<T> QJSKlass<T>::gcMark_ = nullptr;
 
 template<typename T>
 JSValue Wrap(JSValueConst newTarget, T* thisPtr)
 {
-    JSContext* ctx = QJSContext::current();
+    JSContext* ctx = QJSContext::Current();
     JSValue proto = JS_GetPropertyStr(ctx, newTarget, "prototype");
     JSValue thisJs = QJSKlass<T>::NewObjectProtoClass(proto);
     JS_FreeValue(ctx, proto);
@@ -63,11 +73,13 @@ T* Unwrap(JSValueConst val)
 template<typename C>
 void QJSKlass<C>::Declare(const char* name)
 {
+    functions_.clear();
+    staticFunctions_.clear();
     classDefinitions_.class_name = name;
     JS_NewClassID(&classId_);
     g_classIds.push_back(classId_);
 
-    JSContext* ctx = QJSContext::current();
+    JSContext* ctx = QJSContext::Current();
     classDefinitions_.exotic = &exoticMethods_;
     JS_NewClass(JS_GetRuntime(ctx), classId_, &classDefinitions_);
 
@@ -123,6 +135,52 @@ void QJSKlass<C>::CustomMethod(const char* name, MemberFunctionCallback<T> cb, i
 }
 
 template<typename C>
+template<typename T>
+void QJSKlass<C>::CustomMethod(const char* name, JSMemberFunctionCallback<T> cb, int id)
+{
+    JSCFunctionListEntry* funcEntry = QJSFunctionListEntriesContainer::GetInstance().New(
+        name, JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE, JS_DEF_CFUNC, id);
+    funcEntry->u.func = { 0, JS_CFUNC_generic_magic };
+
+    funcEntry->u.func.cfunc.generic_magic = InternalJSMemberFunctionCallback<T>;
+    functions_.insert_or_assign(name, funcEntry);
+}
+
+template<typename C>
+template<typename R, typename... Args>
+void QJSKlass<C>::StaticMethod(const char* name, R (*func)(Args...), int id)
+{
+    JSCFunctionListEntry* funcEntry = QJSFunctionListEntriesContainer::GetInstance().New(
+        name, JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE, JS_DEF_CFUNC, id);
+    funcEntry->u.func = { sizeof...(Args), JS_CFUNC_generic_magic };
+
+    funcEntry->u.func.cfunc.generic_magic = StaticMethodCallback<C, R, Args...>;
+    staticFunctions_.insert_or_assign(name, funcEntry);
+}
+
+template<typename C>
+void QJSKlass<C>::StaticMethod(const char* name, JSFunctionCallback func, int id)
+{
+    JSCFunctionListEntry* funcEntry = QJSFunctionListEntriesContainer::GetInstance().New(
+        name, JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE, JS_DEF_CFUNC, id);
+    funcEntry->u.func = { 1, JS_CFUNC_generic_magic };
+
+    funcEntry->u.func.cfunc.generic_magic = JSStaticMethodCallback;
+    staticFunctions_.insert_or_assign(name, funcEntry);
+}
+
+template<typename C>
+void QJSKlass<C>::CustomStaticMethod(const char* name, FunctionCallback cb)
+{
+    JSCFunctionListEntry* funcEntry = QJSFunctionListEntriesContainer::GetInstance().New(
+        name, JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE, JS_DEF_CFUNC, 0);
+    funcEntry->u.func = { 1, JS_CFUNC_generic };
+
+    funcEntry->u.func.cfunc.generic = cb;
+    staticFunctions_.insert_or_assign(name, funcEntry);
+}
+
+template<typename C>
 void QJSKlass<C>::ExoticGetter(ExoticGetterCallback callback)
 {
     exoticMethods_.get_property = callback;
@@ -145,8 +203,10 @@ void QJSKlass<C>::ExoticIsArray(ExoticIsArrayCallback callback)
 
 template<typename C>
 template<typename... Args>
-void QJSKlass<C>::Bind(BindingTarget target)
+void QJSKlass<C>::Bind(BindingTarget target, JSDestructorCallback<C> dtor, JSGCMarkCallback<C> gcMark)
 {
+    jsDestructor_ = dtor;
+    gcMark_ = gcMark;
     BindInternal(target, QJSKlass<C>::InternalConstructor<Args...>, sizeof...(Args));
 }
 
@@ -158,11 +218,27 @@ void QJSKlass<C>::Bind(BindingTarget target, FunctionCallback ctor)
 }
 
 template<typename C>
+void QJSKlass<C>::Bind(
+    BindingTarget target, JSFunctionCallback ctor, JSDestructorCallback<C> dtor, JSGCMarkCallback<C> gcMark)
+{
+    jsConstructor_ = ctor;
+    jsDestructor_ = dtor;
+    gcMark_ = gcMark;
+    BindInternal(target, JSConstructorInterceptor, 0);
+}
+
+template<typename C>
 template<typename Base>
 void QJSKlass<C>::Inherit()
 {
     static_assert(std::is_base_of_v<Base, C> && "Trying to inherit from unrelated class!");
     functions_.insert(QJSKlass<Base>::functions_.begin(), QJSKlass<Base>::functions_.end());
+    for (auto func : QJSKlass<Base>::staticFunctions_) {
+        if (staticFunctions_.find(func.first) != staticFunctions_.end()) {
+            continue;
+        }
+        staticFunctions_.insert(func);
+    }
 }
 
 template<typename C>
@@ -174,13 +250,13 @@ C* QJSKlass<C>::Unwrap(JSValueConst val)
 template<typename C>
 JSValue QJSKlass<C>::NewObjectProtoClass(JSValue proto)
 {
-    return JS_NewObjectProtoClass(QJSContext::current(), proto, classId_);
+    return JS_NewObjectProtoClass(QJSContext::Current(), proto, classId_);
 }
 
 template<typename C>
 JSValue QJSKlass<C>::NewInstance()
 {
-    return JS_NewObjectClass(QJSContext::current(), classId_);
+    return JS_NewObjectClass(QJSContext::Current(), classId_);
 }
 
 template<typename C>
@@ -192,13 +268,13 @@ JSValue QJSKlass<C>::GetProto()
 template<typename C>
 int QJSKlass<C>::NumberOfInstances()
 {
-    return JS_CountClassInstances(JS_GetRuntime(QJSContext::current()), classId_);
+    return JS_CountClassInstances(JS_GetRuntime(QJSContext::Current()), classId_);
 }
 
 template<typename C>
 void QJSKlass<C>::BindInternal(BindingTarget target, FunctionCallback ctor, size_t length)
 {
-    JSContext* ctx = QJSContext::current();
+    JSContext* ctx = QJSContext::Current();
     if (!ctx || !JS_GetRuntime(ctx))
         return;
 
@@ -211,6 +287,10 @@ void QJSKlass<C>::BindInternal(BindingTarget target, FunctionCallback ctor, size
     JSValue proto = JS_GetClassProto(ctx, classId_);
     for (const auto& [k, val] : functions_) {
         JS_SetPropertyFunctionList(ctx, proto, val, 1);
+    }
+
+    for (const auto& [k, val] : staticFunctions_) {
+        JS_SetPropertyFunctionList(ctx, funcObj, val, 1);
     }
 
     JS_AceSetConstructor(ctx, funcObj, proto);
@@ -231,6 +311,38 @@ JSValue QJSKlass<C>::InternalMemberFunctionCallback(
 }
 
 template<typename C>
+template<typename T>
+JSValue QJSKlass<C>::InternalJSMemberFunctionCallback(
+    JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv, int magic)
+{
+    C* ptr = static_cast<C*>(Unwrap(thisObj));
+    T* instance = static_cast<T*>(ptr);
+    auto binding = ThisJSClass::GetFunctionBinding(magic);
+    LOGD("InternalmemberFunctionCallback: Calling %s::%s", ThisJSClass::JSName(), binding->Name());
+
+    auto fnPtr = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(binding)->Get();
+    QJSCallbackInfo info(ctx, thisObj, argc, argv);
+    (instance->*fnPtr)(info);
+
+    std::variant<void*, JSValue> retVal = info.GetReturnValue();
+    if (retVal.valueless_by_exception()) {
+        LOGD("Method %s::%s did not set a return value, returning 'undefined' by default", ThisJSClass::JSName(),
+            binding->Name());
+        return JS_UNDEFINED;
+    }
+
+    auto jsVal = std::get_if<JSValue>(&retVal);
+    if (jsVal) {
+        JSValue ret = *jsVal;
+        if (!JS_IsUndefined(ret)) {
+            return ret;
+        }
+    }
+
+    return JS_UNDEFINED;
+}
+
+template<typename C>
 template<typename Class, typename R, typename... Args>
 JSValue QJSKlass<C>::MethodCallback(JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv, int magic)
 {
@@ -240,7 +352,6 @@ JSValue QJSKlass<C>::MethodCallback(JSContext* ctx, JSValueConst thisObj, int ar
     auto iBind = ThisJSClass::GetFunctionBinding(magic);
     FunctionBinding<Class, R, Args...>* binding = static_cast<FunctionBinding<Class, R, Args...>*>(iBind);
 
-    LOGD("Calling method %s with %lu arguments", iBind->Name(), sizeof...(Args));
     auto fnPtr = binding->Get();
     auto tuple = __detail__::TupleConverter<std::decay_t<Args>...>()(argv);
 
@@ -259,12 +370,78 @@ JSValue QJSKlass<C>::MethodCallback(JSContext* ctx, JSValueConst thisObj, int ar
     } else if constexpr (!isVoid && hasArguments) {
         // T(Args...)
         auto result = FunctionUtils::CallMemberFunction(instance, fnPtr, tuple);
-        return __detail__::ToJSValue<R>(result);
+        return __detail__::toJSValue<R>(result);
     } else if constexpr (!isVoid && !hasArguments) {
         // T()
         auto result = (instance->*fnPtr)();
-        return __detail__::ToJSValue<R>(result);
+        return __detail__::toJSValue<R>(result);
     }
+}
+
+template<typename C>
+template<typename Class, typename R, typename... Args>
+JSValue QJSKlass<C>::StaticMethodCallback(JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv, int magic)
+{
+    QJSContext::Scope scp(ctx);
+    auto iBind = ThisJSClass::GetFunctionBinding(magic);
+    StaticFunctionBinding<R, Args...>* binding = static_cast<StaticFunctionBinding<R, Args...>*>(iBind);
+
+    LOGD("Calling method %{public}s with %{public}llu arguments", iBind->Name(), sizeof...(Args));
+    auto fnPtr = binding->Get();
+    auto tuple = __detail__::TupleConverter<std::decay_t<Args>...>()(argv);
+
+    constexpr bool isVoid = std::is_void_v<R>;
+    constexpr bool hasArguments = sizeof...(Args) != 0;
+    bool returnSelf = binding->Options() & MethodOptions::RETURN_SELF;
+
+    if constexpr (isVoid && hasArguments) {
+        // void(Args...)
+        FunctionUtils::CallStaticMemberFunction(fnPtr, tuple);
+        return returnSelf ? JS_DupValue(ctx, thisObj) : JS_UNDEFINED;
+    } else if constexpr (isVoid && !hasArguments) {
+        // void()
+        fnPtr();
+        return returnSelf ? JS_DupValue(ctx, thisObj) : JS_UNDEFINED;
+    } else if constexpr (!isVoid && hasArguments) {
+        // T(Args...)
+        auto result = FunctionUtils::CallStaticMemberFunction(fnPtr, tuple);
+        return __detail__::toJSValue<R>(result);
+    } else if constexpr (!isVoid && !hasArguments) {
+        // T()
+        auto result = fnPtr();
+        return __detail__::toJSValue<R>(result);
+    }
+}
+
+template<typename C>
+JSValue QJSKlass<C>::JSStaticMethodCallback(
+    JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv, int magic)
+{
+    QJSContext::Scope scp(ctx);
+    auto iBind = ThisJSClass::GetFunctionBinding(magic);
+
+    LOGD("Calling method %s", iBind->Name());
+
+    auto fnPtr = static_cast<StaticFunctionBinding<void, const JSCallbackInfo&>*>(iBind)->Get();
+
+    QJSCallbackInfo info(ctx, thisObj, argc, argv);
+    fnPtr(info);
+
+    std::variant<void*, JSValue> retVal = info.GetReturnValue();
+    if (retVal.valueless_by_exception()) {
+        LOGD("Method %s did not set a return value, returning 'undefined' by default", iBind->Name());
+        return JS_UNDEFINED;
+    }
+
+    auto jsVal = std::get_if<JSValue>(&retVal);
+    if (jsVal) {
+        JSValue retVal = *jsVal;
+        if (!JS_IsUndefined(retVal)) {
+            return retVal;
+        }
+    }
+
+    return JS_UNDEFINED;
 }
 
 template<typename C>
@@ -277,8 +454,8 @@ JSValue QJSKlass<C>::InternalConstructor(JSContext* ctx, JSValueConst thisObj, i
     }
 
     if (argc != sizeof...(Args)) {
-        return JS_ThrowSyntaxError(ctx, "Constructing %s requires %lu arguments, %d were provided",
-            ThisJSClass::JSName(), static_cast<unsigned long>(sizeof...(Args)), argc);
+        return JS_ThrowSyntaxError(ctx, "Constructing %s requires %zu arguments, %d were provided",
+            ThisJSClass::JSName(), sizeof...(Args), argc);
     }
 
     JSValue newTargetProto = JS_GetPropertyStr(ctx, thisObj, "prototype");
@@ -299,14 +476,65 @@ JSValue QJSKlass<C>::ConstructorInterceptor(JSContext* ctx, JSValueConst newTarg
 }
 
 template<typename C>
+JSValue QJSKlass<C>::JSConstructorInterceptor(JSContext* ctx, JSValueConst newTarget, int argc, JSValueConst* argv)
+{
+    if (JS_IsUndefined(newTarget)) {
+        return JS_ThrowSyntaxError(ctx, "Constructor of %s called without 'new'!", ThisJSClass::JSName());
+    }
+
+    JSValue proto = JS_GetPropertyStr(ctx, newTarget, "prototype");
+    if (JS_IsException(proto)) {
+        return JS_ThrowInternalError(
+            ctx, "Constructor of %s has no 'prototype' object in new.target!", ThisJSClass::JSName());
+    }
+
+    QJSContext::Scope scp(ctx);
+    QJSRef<QJSObject> thisJsRef = QJSRef<QJSObject>::Make(NewObjectProtoClass(proto));
+    JSValue thisJs = thisJsRef.Get().GetHandle();
+    QJSCallbackInfo info(ctx, thisJs, argc, argv);
+    jsConstructor_(info);
+    std::variant<void*, JSValue> retVal = info.GetReturnValue();
+    if (retVal.valueless_by_exception()) {
+        return JS_ThrowInternalError(ctx, "Constructor of %s must return a value!", ThisJSClass::JSName());
+    }
+
+    auto instance = std::get_if<void*>(&retVal);
+    if (instance) {
+        JS_SetOpaque(thisJs, *instance);
+        LOGD("Constructed %s", ThisJSClass::JSName());
+        return thisJs;
+    }
+
+    auto jsVal = std::get_if<JSValue>(&retVal);
+    if (jsVal) {
+        JSValue retVal = *jsVal;
+        if (JS_IsUndefined(retVal)) {
+            JS_ThrowInternalError(ctx, "Constructor for %s returned an undefined value!", ThisJSClass::JSName());
+        }
+        return retVal;
+    }
+
+    // It should not go here
+    // ACE_DCHECK(false && "This should not happen!");
+    return JS_ThrowInternalError(
+        ctx, "Constructor for %s returned an undefined value! This should not happen", ThisJSClass::JSName());
+}
+
+template<typename C>
 void QJSKlass<C>::Finalizer(JSRuntime* rt, JSValue val)
 {
+    C* instance = Unwrap(val);
+    // TODO(cvetan): Remove
     if constexpr (has_QjsDestructor<C>) {
-        LOGD("Finalizer for %s", ThisJSClass::JSName());
-        C* instance = Unwrap(val);
         C::QjsDestructor(rt, instance);
     } else {
-        LOGD("No finalizer installed for %s", ThisJSClass::JSName());
+        if (jsDestructor_) {
+            LOGD("Finalizer for %s", ThisJSClass::JSName());
+            jsDestructor_(instance);
+        } else {
+            LOGD("No finalizer installed for %s, will perform a normal delete", ThisJSClass::JSName());
+            delete instance;
+        }
     }
 }
 
@@ -316,6 +544,12 @@ void QJSKlass<C>::GcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc)
     LOGD("GC mark for %s", ThisJSClass::JSName());
     if constexpr (has_QjsGcMark<C>) {
         C::QjsGcMark(rt, val, markFunc);
+    } else {
+        if (gcMark_) {
+            C* instance = Unwrap(val);
+            QJSGCMarkCallbackInfo info(rt, markFunc);
+            gcMark_(instance, info);
+        }
     }
 }
 

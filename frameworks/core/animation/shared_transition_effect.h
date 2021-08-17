@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_SHARED_TRANSITION_EFFECT_H
 
 #include "base/memory/ace_type.h"
-#include "core/animation/animator.h"
 #include "core/animation/page_transition_listener.h"
 #include "core/components/common/properties/tween_option.h"
 #include "core/pipeline/base/component.h"
@@ -35,7 +34,7 @@ enum class SharedTransitionEffectType {
     SHARED_EFFECT_EXCHANGE,
 };
 
-class SharedTransitionEffect : public AceType {
+class ACE_EXPORT SharedTransitionEffect : public AceType {
     DECLARE_ACE_TYPE(SharedTransitionEffect, AceType);
 
 public:
@@ -57,6 +56,10 @@ public:
     const WeakPtr<SharedTransitionElement>& GetSrcSharedElement() const
     {
         return src_;
+    }
+    const RefPtr<Animator>& GetAnimator() const
+    {
+        return controller_;
     }
     virtual bool CreateAnimation(TweenOption& option, TransitionEvent event, bool isLazy) = 0;
     virtual bool ApplyAnimation(RefPtr<OverlayElement>& overlay, RefPtr<Animator>& controller,
@@ -95,6 +98,7 @@ public:
 private:
     bool CreateTranslateAnimation(TweenOption& option, TransitionEvent event, bool calledByLazyLoad);
     bool CreateSizeAnimation(TweenOption& option, TransitionEvent event, bool isLazy);
+    bool CreateOpacityAnimation(TweenOption& option, TransitionEvent event, bool isLazy);
     void AddLazyLoadCallback(TransitionEvent event);
     bool autoWidth_ = true;
     bool autoHeight_ = true;

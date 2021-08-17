@@ -6,8 +6,7 @@
         "phone"
       ],
       "module_list": [
-        "//foundation/ace/ace_engine:ace_packages",
-        "//foundation/ace/ace_engine/interfaces/kits/js/declaration:dts"
+        "//foundation/ace/ace_engine:ace_packages"
       ],
       "test_list": [
         "//foundation/ace/ace_engine/frameworks/base/test:unittest",

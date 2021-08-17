@@ -109,6 +109,11 @@ public:
     void PaintChild(const RefPtr<RenderNode>& child, const Offset& offset) override {};
 };
 
+RefPtr<RenderContext> RenderContext::Create()
+{
+    return AceType::MakeRefPtr<MockRenderContext>();
+}
+
 class MockRenderRoot : public RenderRoot {};
 class MockRenderStack : public RenderStack {};
 class MockRenderDisplay : public RenderDisplay {};

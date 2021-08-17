@@ -19,7 +19,7 @@ namespace OHOS::Ace::Framework {
 
 QJSObjectTemplate::QJSObjectTemplate()
 {
-    JSContext* ctx = QJSContext::current();
+    JSContext* ctx = QJSContext::Current();
     proto_ = JS_NewObject(ctx);
 }
 
@@ -32,7 +32,7 @@ JSValue QJSObjectTemplate::operator*() const
 
 JSValue QJSObjectTemplate::NewInstance() const
 {
-    JSContext* ctx = QJSContext::current();
+    JSContext* ctx = QJSContext::Current();
     return JS_NewObjectProto(ctx, proto_);
 }
 

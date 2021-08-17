@@ -152,6 +152,15 @@ public:
     void PerformLayout() override;
     void GenerateRepeatRects(const Rect& fundamentalRect, const Size& parentSize, const ImageRepeat& imageRepeat);
     virtual void UpdateImageProvider() {}
+    void Dump() override;
+    virtual bool IsSourceWideGamut() const
+    {
+        return false;
+    }
+    virtual bool RetryLoading()
+    {
+        return false;
+    }
 
 protected:
     void ApplyImageFit(Rect& srcRect, Rect& dstRect);
@@ -175,7 +184,7 @@ protected:
     void CalculateImageRenderPosition(const BackgroundImagePosition& imagePosition);
     void PrintImageLog(const Size& srcSize, const BackgroundImageSize& imageSize, ImageRepeat imageRepeat,
         const BackgroundImagePosition& imagePosition) const;
-    Size CalculateBackupImageSize(const Size& pictureSize) const;
+    Size CalculateBackupImageSize(const Size& pictureSize);
     virtual void ClearRenderObject() override;
 
     std::string imageSrc_;
@@ -184,6 +193,7 @@ protected:
     std::function<void(const std::string&)> loadFailEvent_;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> loadImgSuccessEvent_;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> loadImgFailEvent_;
+    EventMarker svgAnimatorFinishEvent_;
     bool fitMaxSize_ = false;
     bool isImageSizeSet_ = false;
     bool rawImageSizeUpdated_ = false;
@@ -199,8 +209,6 @@ protected:
     Rect dstRect_;
     Rect currentSrcRect_;
     std::list<Rect> currentDstRectList_;
-    ImageFit imageFit_ = ImageFit::COVER;
-    ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
     std::list<Rect> rectList_;
     Color color_ = Color::TRANSPARENT;
     bool isColorSet_ = false;
@@ -208,8 +216,6 @@ protected:
     double singleWidth_ = 0.0;
     double displaySrcWidth_ = 0.0;
     double scale_ = 1.0;
-    double paddingHorizontal_ = 0.0;
-    double paddingVertical_ = 0.0;
     double horizontalRepeatNum_ = 1.0;
     double rotate_ = 0.0;
     bool keepOffsetZero_ = false;
@@ -227,6 +233,7 @@ protected:
     Dimension height_;
     Size rawImageSize_;
     RefPtr<RenderImage> renderAltImage_;
+    bool proceedPreviousLoading_ = false;
 
     // background image
     ImageUpdateFunc imageUpdateFunc_;
@@ -238,6 +245,18 @@ protected:
     // result for background image
     Size imageRenderSize_;
     Offset imageRenderPosition_;
+
+    ImageFit imageFit_ = ImageFit::COVER;
+    ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
+    ImageRenderMode imageRenderMode_ = ImageRenderMode::ORIGINAL;
+    ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
+    Dimension sourceWidth_ = Dimension(-1);
+    Dimension sourceHeight_ = Dimension(-1);
+    bool forceResize_ = false;
+    bool forceReload_ = false;
+    Size imageSizeForEvent_;
+    bool useSkiaSvg_ = true;
+    int32_t retryCnt_ = 0;
 };
 
 } // namespace OHOS::Ace

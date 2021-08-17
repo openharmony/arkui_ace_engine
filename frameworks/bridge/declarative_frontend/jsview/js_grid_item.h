@@ -26,49 +26,17 @@
 namespace OHOS::Ace::Framework {
 
 class JSGridItem : public JSContainerBase {
-    DECLARE_ACE_TYPE(JSGridItem, JSContainerBase);
-
 public:
-    JSGridItem() = delete;
-#ifdef USE_QUICKJS_ENGINE
-    JSGridItem(const std::list<JSViewAbstract*>& children, std::list<JSValue> jsChildren);
-#else
-    JSGridItem(const std::list<JSViewAbstract*>& children,
-        std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren);
-#endif
-    ~JSGridItem();
-
-    virtual RefPtr<OHOS::Ace::Component> CreateSpecializedComponent() override;
-    virtual std::vector<RefPtr<OHOS::Ace::SingleChild>> CreateInteractableComponents() override;
-
     static void JSBind(BindingTarget globalObj);
-
-#ifdef USE_QUICKJS_ENGINE
-    virtual void MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc) override;
-    virtual void ReleaseRT(JSRuntime* rt) override;
-
-    static JSValue ConstructorCallback(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv);
-    static void QjsDestructor(JSRuntime* rt, JSGridItem* ptr);
-    static void QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc);
-#endif
-
-#ifdef USE_V8_ENGINE
-    static void ConstructorCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
-#endif
+    static void Create();
 
 protected:
-    void SetColumnStart(int32_t columnStart);
-    void SetColumnEnd(int32_t columnEnd);
-    void SetRowStart(int32_t rowStart);
-    void SetRowEnd(int32_t rowEnd);
-
-private:
-    int32_t columnStart_ = -1;
-    int32_t columnEnd_ = -1;
-    int32_t rowStart_ = -1;
-    int32_t rowEnd_ = -1;
+    static void SetColumnStart(int32_t columnStart);
+    static void SetColumnEnd(int32_t columnEnd);
+    static void SetRowStart(int32_t rowStart);
+    static void SetRowEnd(int32_t rowEnd);
+    static void ForceRebuild(bool forceRebuild);
 };
 
 } // namespace OHOS::Ace::Framework
-
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_GRID_ITEM_H

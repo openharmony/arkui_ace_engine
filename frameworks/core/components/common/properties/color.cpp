@@ -112,22 +112,24 @@ Color Color::FromString(std::string colorStr, uint32_t maskAlpha)
 
 Color Color::FromARGB(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue)
 {
-    ColorParam colorValue { { .alpha = alpha, .red = red, .green = green, .blue = blue } };
+    ColorParam colorValue {
+#if BIG_ENDIANNESS
+        .argb = { .alpha = alpha, .red = red, .green = green, .blue = blue }
+#else
+        .argb = { .blue = blue, .green = green, .red = red, .alpha = alpha }
+#endif
+    };
     return Color(colorValue);
 }
 
 Color Color::FromRGBO(uint8_t red, uint8_t green, uint8_t blue, double opacity)
 {
-    ColorParam colorValue {
-        { .alpha = static_cast<uint8_t>(round(opacity * 0xff)) & 0xff, .red = red, .green = green, .blue = blue }
-    };
-    return Color(colorValue);
+    return FromARGB(static_cast<uint8_t>(round(opacity * 0xff)) & 0xff, red, green, blue);
 }
 
 Color Color::FromRGB(uint8_t red, uint8_t green, uint8_t blue)
 {
-    ColorParam colorValue { { .alpha = 0xff, .red = red, .green = green, .blue = blue } };
-    return Color(colorValue);
+    return FromARGB(0xff, red, green, blue);
 }
 
 Color Color::BlendColor(const Color& overlayColor) const

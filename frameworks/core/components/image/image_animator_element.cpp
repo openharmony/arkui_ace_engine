@@ -18,6 +18,7 @@
 #include "base/utils/string_utils.h"
 #include "core/components/image/image_animator_component.h"
 #include "core/components/image/image_component.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 
@@ -36,15 +37,16 @@ void Ace::ImageAnimatorElement::Update()
         LOGE("ImageAnimator element update failed. imageAnimatorComponent is null.");
         return;
     }
-
-    if (controller_) {
-        controller_->ClearRepeatListeners();
+    if (!animator_) {
+        animator_ = AceType::MakeRefPtr<Animator>();
     }
-    controller_ = imageAnimatorComponent->GetAnimator();
-    if ((controller_) && (!controller_->HasScheduler())) {
-        controller_->AttachScheduler(context_);
+    UpdateCallbackAndFunc(imageAnimatorComponent);
+    if (!animator_->HasScheduler()) {
+        animator_->AttachScheduler(context_);
     }
-    iteration_ = imageAnimatorComponent->GetIteration();
+    animator_->SetFillMode(imageAnimatorComponent->GetFillMode());
+    animator_->SetIteration(imageAnimatorComponent->GetIteration());
+    status_ = imageAnimatorComponent->GetStatus();
     preDecode_ = imageAnimatorComponent->GetPreDecode();
     duration_ = imageAnimatorComponent->GetDuration();
     isReverse_ = imageAnimatorComponent->GetIsReverse();
@@ -64,21 +66,21 @@ void Ace::ImageAnimatorElement::Update()
     pageElement_ = pageElement;
     callbackId_ = pageElement->RegisterHiddenCallback([weak = AceType::WeakClaim(this)](bool hidden) {
         auto element = weak.Upgrade();
-        if (!element || !element->controller_) {
+        if (!element || !element->animator_) {
             return;
         }
 
         if (hidden) {
-            if (element->controller_->GetStatus() == Animator::Status::RUNNING) {
-                element->controller_->Pause();
+            if (element->animator_->GetStatus() == Animator::Status::RUNNING) {
+                element->animator_->Pause();
                 element->isPaused_ = true;
             }
         } else {
             if (element->isPaused_) {
                 if (element->isReverse_) {
-                    element->controller_->Backward();
+                    element->animator_->Backward();
                 } else {
-                    element->controller_->Forward();
+                    element->animator_->Forward();
                 }
                 element->isPaused_ = false;
             }
@@ -103,48 +105,51 @@ void ImageAnimatorElement::PerformBuild()
         UpdatePreLoadImages(boxComponent);
     }
     CreatePictureAnimation(size);
-    if (!controller_) {
-        LOGE("controller is null, need to get controller first.");
+    if (!animator_) {
+        LOGE("animator is null, need to get animator first.");
         return;
     }
     // update duration after a loop of animation.
     if (!isSetDuration_) {
-        if (durationTotal_ > 0.0f) {
-            controller_->SetDuration(durationTotal_);
-        } else {
-            controller_->SetDuration(duration_);
-        }
+        durationTotal_ > 0 ? animator_->SetDuration(durationTotal_) : animator_->SetDuration(duration_);
         isSetDuration_ = true;
     }
-    controller_->ClearInterpolators();
-    controller_->AddInterpolator(pictureAnimation_);
-    controller_->SetIteration(iteration_);
-    controller_->ClearRepeatListeners();
-    controller_->AddRepeatListener([weak = WeakClaim(this)]() {
+    animator_->ClearInterpolators();
+    animator_->AddInterpolator(pictureAnimation_);
+    animator_->RemoveRepeatListener(repeatCallbackId_);
+    repeatCallbackId_ = animator_->AddRepeatListener([weak = WeakClaim(this)]() {
         auto imageAnimator = weak.Upgrade();
-        if (imageAnimator) {
-            auto controller = imageAnimator->controller_;
-            if (controller) {
-                if (imageAnimator->durationTotal_ > 0.0f) {
-                    controller->SetDuration(imageAnimator->durationTotal_);
-                } else {
-                    controller->SetDuration(imageAnimator->duration_);
-                }
-            }
+        if (!imageAnimator) {
+            return;
+        }
+        if (imageAnimator->durationTotal_ > 0) {
+            imageAnimator->animator_->SetDuration(imageAnimator->durationTotal_);
+        } else {
+            imageAnimator->animator_->SetDuration(imageAnimator->duration_);
         }
     });
-    controller_->RemoveStopListener(stopCallbackId_);
-    stopCallbackId_ = controller_->AddStopListener([weak = WeakClaim(this)]() {
+    animator_->RemoveStopListener(stopCallbackId_);
+    stopCallbackId_ = animator_->AddStopListener([weak = WeakClaim(this)]() {
         auto imageAnimator = weak.Upgrade();
         if (imageAnimator) {
             imageAnimator->isSetDuration_ = false;
         }
     });
-    if (isReverse_) {
-        controller_->Backward();
-    } else {
-        controller_->Forward();
+
+    // for declarative frontend.
+    if (context_.Upgrade() && context_.Upgrade()->GetIsDeclarative()) {
+        if (status_ == Animator::Status::IDLE) {
+            CallAnimatorMethod(CANCEL);
+        } else if (status_ == Animator::Status::PAUSED) {
+            CallAnimatorMethod(PAUSE);
+        } else if (status_ == Animator::Status::STOPPED) {
+            CallAnimatorMethod(STOP);
+        } else {
+            CallAnimatorMethod(START);
+        }
+        return;
     }
+    isReverse_ ? animator_->Backward() : animator_->Forward();
 }
 
 RefPtr<Component> ImageAnimatorElement::BuildChild()
@@ -156,7 +161,7 @@ RefPtr<Component> ImageAnimatorElement::BuildChild()
     }
     auto boxComponent = AceType::MakeRefPtr<BoxComponent>();
     ImageProperties childImage;
-    if (durationTotal_ > 0.0f) {
+    if (durationTotal_ > 0) {
         childImage = (isReverse_ ? filterImages_.back() : filterImages_.front());
     } else {
         childImage = (isReverse_ ? images_.back() : images_.front());
@@ -202,11 +207,11 @@ void ImageAnimatorElement::CreatePictureAnimation(int32_t size)
 
     pictureAnimation_->ClearListeners();
     pictureAnimation_->ClearPictures();
-    if (durationTotal_ > 0.0f) {
+    if (durationTotal_ > 0) {
         int32_t filterImagesSize = filterImages_.size();
         for (int32_t index = 0; index < filterImagesSize; ++index) {
-            double imageDuration = StringUtils::StringToDouble(filterImages_[index].duration);
-            pictureAnimation_->AddPicture(imageDuration / durationTotal_, index);
+            int32_t imageDuration = filterImages_[index].duration;
+            pictureAnimation_->AddPicture((float)imageDuration / durationTotal_, index);
         }
     } else {
         for (int32_t index = 0; index < size; ++index) {
@@ -224,15 +229,11 @@ void ImageAnimatorElement::CreatePictureAnimation(int32_t size)
 void ImageAnimatorElement::UpdateFilterImages()
 {
     filterImages_.clear();
-    durationTotal_ = 0.0f;
+    durationTotal_ = 0;
     for (auto& childImage : images_) {
-        if (!childImage.src.empty() && !childImage.duration.empty()) {
-            durationNums_++;
-            double childDuration = StringUtils::StringToDouble(childImage.duration);
-            if (childDuration > 0.0) {
-                durationTotal_ += childDuration;
-                filterImages_.emplace_back(childImage);
-            }
+        if (!childImage.src.empty() && childImage.duration > 0) {
+            durationTotal_ += childImage.duration;
+            filterImages_.emplace_back(childImage);
         }
     }
 }
@@ -250,7 +251,7 @@ void ImageAnimatorElement::PlayImageAnimator(int32_t index)
         return;
     }
     ImageProperties childImage;
-    if (durationTotal_ > 0.0f) {
+    if (durationTotal_ > 0) {
         childImage = filterImages_[index];
     } else {
         childImage = images_[index];
@@ -276,19 +277,106 @@ void ImageAnimatorElement::PlayImageAnimator(int32_t index)
 void ImageAnimatorElement::UpdateImageBox(ImageProperties& imageProperties, const RefPtr<BoxComponent>& box)
 {
     auto edge = Edge();
-    if (!imageProperties.left.empty()) {
-        edge.SetLeft(StringUtils::StringToDimension(imageProperties.left));
+    if (imageProperties.left.IsValid()) {
+        edge.SetLeft(imageProperties.left);
     }
-    if (!imageProperties.top.empty()) {
-        edge.SetTop(StringUtils::StringToDimension(imageProperties.top));
+    if (imageProperties.top.IsValid()) {
+        edge.SetTop(imageProperties.top);
     }
     box->SetMargin(edge);
-    if (!imageProperties.width.empty()) {
-        box->SetWidth(StringUtils::StringToDouble(imageProperties.width));
+    if (imageProperties.width.IsValid()) {
+        box->SetWidth(imageProperties.width);
     }
-    if (!imageProperties.height.empty()) {
-        box->SetHeight(StringUtils::StringToDouble(imageProperties.height));
+    if (imageProperties.height.IsValid()) {
+        box->SetHeight(imageProperties.height);
     }
+}
+
+void ImageAnimatorElement::CallAnimatorMethod(const std::string& method)
+{
+    if (!animator_) {
+        LOGE("CallAnimatorMethod failed, animator is null.");
+        return;
+    }
+    if (method == START) {
+        isReverse_ ? animator_->Backward() : animator_->Forward();
+    } else if (method == PAUSE) {
+        animator_->Pause();
+    } else if (method == STOP) {
+        animator_->Finish();
+    } else if (method == RESUME) {
+        animator_->Resume();
+    } else if (method == CANCEL) {
+        animator_->Cancel();
+    } else {
+        LOGE("Unsupported method name : %s", method.c_str());
+    }
+}
+
+void ImageAnimatorElement::UpdateCallbackAndFunc(const RefPtr<ImageAnimatorComponent>& imageAnimatorComponent)
+{
+    const auto& imageAnimatorController = imageAnimatorComponent->GetImageAnimatorController();
+    if (!imageAnimatorController) {
+        LOGE("UpdateCallbackAndFunc failed, imageAnimatorController is null.");
+        return;
+    }
+
+    // start / stop / pause / resume method.
+    imageAnimatorController->SetAnimationFunc([weak = WeakClaim(this)](const std::string& method) {
+        auto element = weak.Upgrade();
+        if (element) {
+            element->CallAnimatorMethod(method);
+        }
+    });
+
+    // getStatus method.
+    imageAnimatorController->SetAnimatorGetStatusFunc([weak = WeakClaim(this)]() -> Animator::Status {
+        auto element = weak.Upgrade();
+        if (element) {
+            return element->GetAnimatorStatus();
+        }
+        return Animator::Status::IDLE;
+    });
+
+    animator_->ClearAllListeners();
+    auto startEvent = imageAnimatorController->GetStartEvent();
+    if (!startEvent.IsEmpty()) {
+        animator_->AddStartListener(
+            [startEvent, weakContext = context_] { AceAsyncEvent<void()>::Create(startEvent, weakContext)(); });
+    }
+    auto stopEvent = imageAnimatorController->GetStopEvent();
+    if (!stopEvent.IsEmpty()) {
+        animator_->AddStopListener(
+            [stopEvent, weakContext = context_] { AceAsyncEvent<void()>::Create(stopEvent, weakContext)(); });
+    }
+    auto pauseEvent = imageAnimatorController->GetPauseEvent();
+    if (!pauseEvent.IsEmpty()) {
+        animator_->AddPauseListener(
+            [pauseEvent, weakContext = context_] { AceAsyncEvent<void()>::Create(pauseEvent, weakContext)(); });
+    }
+    auto resumeEvent = imageAnimatorController->GetResumeEvent();
+    if (!resumeEvent.IsEmpty()) {
+        animator_->AddResumeListener(
+            [resumeEvent, weakContext = context_] { AceAsyncEvent<void()>::Create(resumeEvent, weakContext)(); });
+    }
+    auto repeatEvent = imageAnimatorController->GetRepeatEvent();
+    if (!repeatEvent.IsEmpty()) {
+        animator_->AddRepeatListener(
+            [repeatEvent, weakContext = context_] { AceAsyncEvent<void()>::Create(repeatEvent, weakContext)(); });
+    }
+    auto cancelEvent = imageAnimatorController->GetCancelEvent();
+    if (!cancelEvent.IsEmpty()) {
+        animator_->AddIdleListener(
+            [cancelEvent, weakContext = context_] { AceAsyncEvent<void()>::Create(cancelEvent, weakContext)(); });
+    }
+}
+
+Animator::Status ImageAnimatorElement::GetAnimatorStatus() const
+{
+    if (animator_) {
+        return animator_->GetStatus();
+    }
+    return Animator::Status::IDLE;
 }
 
 } // namespace OHOS::Ace

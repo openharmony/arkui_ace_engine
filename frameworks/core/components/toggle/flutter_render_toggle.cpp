@@ -84,15 +84,10 @@ void FlutterRenderToggle::DrawToggle(flutter::Canvas& canvas, const Offset& offs
 
 Color FlutterRenderToggle::GetStatusColor() const
 {
-    auto toggle = toggleComponent_.Upgrade();
-    if (!toggle) {
-        LOGE("fail to get status color due to toggle is null");
-        return Color::BLACK;
-    }
-    auto checkColor = toggle->GetCheckedColor();
-    auto pressedColor = toggle->GetPressedBlendColor();
-    auto backgroundColor = toggle->GetBackgroundColor();
-    if (toggle->GetCheckedState()) {
+    auto checkColor = toggleComponent_->GetCheckedColor();
+    auto pressedColor = toggleComponent_->GetPressedBlendColor();
+    auto backgroundColor = toggleComponent_->GetBackgroundColor();
+    if (toggleComponent_->GetCheckedState()) {
         if (isPressed_) {
             return checkColor.BlendColor(pressedColor);
         }

@@ -36,19 +36,11 @@ public:
 
 protected:
     std::string value_;
-    Color backgroundColor_;
-    Color qrcodeColor_;
-    QrcodeType qrcodeType_ { QrcodeType::RECT };
     double width_ = 0.0;
     double height_ = 0.0;
-    Dimension qrcodeWidth_;
-    Dimension qrcodeHeight_;
-    Size qrcodeSize_;
     RefPtr<QrcodeComponent> qrcode_;
     RefPtr<ImageComponent> qrcodeImageComponent_;
     RefPtr<RenderImage> qrcodeRenderImage_;
-    bool isWidthDefined_ = false;
-    bool isHeightDefined_ = false;
 };
 
 } // namespace OHOS::Ace

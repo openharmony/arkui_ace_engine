@@ -19,6 +19,7 @@
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/common/frontend.h"
+#include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/base/render_element.h"
 
@@ -27,12 +28,6 @@ namespace OHOS::Ace {
 ComposedElement::ComposedElement(const ComposeId& id) : id_(id)
 {
     type_ = COMPOSED_ELEMENT;
-}
-
-RefPtr<Element> ComposedElement::Create(const ComposeId& id)
-{
-    LOGD("ComposedElement::Create");
-    return AceType::MakeRefPtr<ComposedElement>(id);
 }
 
 void ComposedElement::Detached()
@@ -47,29 +42,32 @@ void ComposedElement::Detached()
 void ComposedElement::Deactivate()
 {
     Detached();
+    UmountRender();
+}
+
+void ComposedElement::UmountRender()
+{
+    for (const auto& child : children_) {
+        child->UmountRender();
+    }
 }
 
 void ComposedElement::PerformBuild()
 {
-    LOGD("ComposedComponent PerformBuild.");
     auto context = context_.Upgrade();
-    if (context && !addedToMap_) {
+    if (!context) {
+        LOGW("Invalid pipeline stop building");
+        return;
+    }
+
+    if (!addedToMap_) {
         context->AddComposedElement(id_, AceType::Claim(this));
         addedToMap_ = true;
     }
 
-    const auto& child = children_.empty() ? nullptr : children_.front();
-    if (HasRenderFunction()) {
-        const auto& component = CallRenderFunction();
-        UpdateChild(child, component, GetSlot());
-    } else {
-        const auto& component = BuildChild();
-        if (context && context->GetIsDeclarative()) {
-            UpdateChild(child, component, GetSlot());
-        } else {
-            UpdateChild(child, component);
-        }
-    }
+    auto component = HasRenderFunction() ? CallRenderFunction() : BuildChild();
+    auto child = children_.empty() ? nullptr : children_.front();
+    UpdateChild(child, component);
 }
 
 void ComposedElement::Update()
@@ -105,23 +103,27 @@ void ComposedElement::Apply(const RefPtr<Element>& child)
         return;
     }
 
-    if (!parentRenderNode_) {
-        LOGE("ComposedElement don't have a parent render node");
+    if (!applyFunction_) {
+        LOGE("No apply function");
         return;
     }
 
     if (child->GetType() == RENDER_ELEMENT) {
-        // Directly attach the RenderNode if child is ComposedElement
-        RefPtr<RenderElement> renderChild = AceType::DynamicCast<RenderElement>(child);
-        if (renderChild) {
-            parentRenderNode_->AddChild(renderChild->GetRenderNode(), GetSlot());
-        }
+        // Directly attach the RenderNode if child is RenderElement.
+        applyFunction_(AceType::DynamicCast<RenderElement>(child));
     } else if (child->GetType() == COMPOSED_ELEMENT) {
-        // if child is ComposedElement, just set parent render node
+        // If child is ComposedElement, just set apply function.
         RefPtr<ComposedElement> composeChild = AceType::DynamicCast<ComposedElement>(child);
         if (composeChild) {
-            composeChild->SetParentRenderNode(parentRenderNode_);
+            composeChild->ApplyComposed(applyFunction_);
         }
+    }
+}
+
+void ComposedElement::ApplyChildren()
+{
+    for (const auto& child : children_) {
+        Apply(child);
     }
 }
 
@@ -140,6 +142,13 @@ bool ComposedElement::CanUpdate(const RefPtr<Component>& newComponent)
     if (compose->GetId() == id_) {
         return true;
     }
+
+    // For declarative, IDs MUST equal
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        return false;
+    }
+
     if (children_.empty()) {
         return true;
     }
@@ -171,6 +180,24 @@ bool ComposedElement::NeedUpdateWithComponent(const RefPtr<Component>& newCompon
         }
     }
     return true;
+}
+
+RefPtr<Element> ComposedElement::UpdateChild(const RefPtr<Element>& child, const RefPtr<Component>& newComponent)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGW("Invalid pipeline stop updating");
+        return nullptr;
+    }
+
+    RefPtr<Element> newChild;
+    if (context->GetIsDeclarative()) {
+        newChild = UpdateChildWithSlot(child, newComponent, DEFAULT_ELEMENT_SLOT, GetRenderSlot());
+    } else {
+        newChild = UpdateChildWithSlot(child, newComponent, DEFAULT_ELEMENT_SLOT, DEFAULT_RENDER_SLOT);
+    }
+    countRenderNode_ = newChild ? newChild->CountRenderNode() : 0;
+    return newChild;
 }
 
 } // namespace OHOS::Ace

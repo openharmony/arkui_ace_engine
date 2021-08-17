@@ -18,11 +18,53 @@
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components/grid_layout/grid_layout_component.h"
+#include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/grid_layout/render_grid_layout.h"
+#include "core/components/grid_layout/render_grid_scroll_layout.h"
 #include "core/components/proxy/render_item_proxy.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {
+
+void GridItemDataChangeListener::OnDataReloaded()
+{
+    auto grid = element_.Upgrade();
+    if (grid) {
+        grid->OnReload();
+    }
+}
+
+void GridItemDataChangeListener::OnDataAdded(size_t index)
+{
+    auto grid = element_.Upgrade();
+    if (grid) {
+        grid->OnItemAdded(static_cast<int32_t>(index));
+    }
+}
+
+void GridItemDataChangeListener::OnDataDeleted(size_t index)
+{
+    auto grid = element_.Upgrade();
+    if (grid) {
+        grid->OnItemDeleted(static_cast<int32_t>(index));
+    }
+}
+
+void GridItemDataChangeListener::OnDataChanged(size_t index)
+{
+    auto grid = element_.Upgrade();
+    if (grid) {
+        grid->OnItemChanged(static_cast<int32_t>(index));
+    }
+}
+
+void GridItemDataChangeListener::OnDataMoved(size_t from, size_t to)
+{
+    auto grid = element_.Upgrade();
+    if (grid) {
+        grid->OnItemMoved(static_cast<int32_t>(from), static_cast<int32_t>(to));
+    }
+}
 
 RefPtr<RenderNode> GridLayoutElement::CreateRenderNode()
 {
@@ -31,7 +73,88 @@ RefPtr<RenderNode> GridLayoutElement::CreateRenderNode()
 
 void GridLayoutElement::Update()
 {
-    ComponentGroupElement::Update();
+    RenderElement::Update();
+
+    isUseLazyForEach_ = false;
+    lazyForEachComponent_ = nullptr;
+    lazyChildItems_.clear();
+    auto gridLayoutComponent = AceType::DynamicCast<GridLayoutComponent>(component_);
+    if (!gridLayoutComponent) {
+        return;
+    }
+    auto lazyForEach = gridLayoutComponent->GetLazyForEachComponent();
+    if (!lazyForEach) {
+        return;
+    }
+    if (!listener) {
+        listener = AceType::MakeRefPtr<GridItemDataChangeListener>(AceType::WeakClaim(this));
+    }
+    lazyForEach->RegiterDataChangeListener(listener);
+
+    RefPtr<RenderGridScrollLayout> grid = AceType::DynamicCast<RenderGridScrollLayout>(renderNode_);
+    if (!grid) {
+        return;
+    }
+
+    isUseLazyForEach_ = true;
+    lazyForEachComponent_ = lazyForEach;
+    grid->ClearItems();
+    grid->ClearLayout();
+    grid->SetBuildChildByIndex([weak = WeakClaim(this)](int32_t index) {
+        auto element = weak.Upgrade();
+        if (!element) {
+            return false;
+        }
+        return element->BuildChildByIndex(index);
+    });
+
+    grid->SetDeleteChildByIndex([weak = WeakClaim(this)](int32_t index) {
+        auto element = weak.Upgrade();
+        if (!element) {
+            return;
+        }
+        element->DeleteChildByIndex(index);
+    });
+}
+
+bool GridLayoutElement::BuildChildByIndex(int32_t index)
+{
+    if (index < 0) {
+        return false;
+    }
+
+    if (static_cast<size_t>(index) >= lazyForEachComponent_->TotalCount()) {
+        return false;
+    }
+    auto child = lazyForEachComponent_->GetChildByIndex(static_cast<size_t>(index));
+    auto item = lazyChildItems_.find(index);
+    if (item == lazyChildItems_.end()) {
+        auto element = UpdateChild(nullptr, child);
+        RefPtr<RenderGridScrollLayout> grid = AceType::DynamicCast<RenderGridScrollLayout>(renderNode_);
+        if (!grid) {
+            return false;
+        }
+        grid->AddChildByIndex(index, element->GetRenderNode());
+        lazyChildItems_[index] = element;
+    } else {
+        UpdateChild(item->second, child);
+    }
+    return true;
+}
+
+void GridLayoutElement::DeleteChildByIndex(int32_t index)
+{
+    auto item = lazyChildItems_.find(index);
+    if (item == lazyChildItems_.end()) {
+        return;
+    }
+    UpdateChild(item->second, nullptr);
+    lazyChildItems_.erase(item);
+}
+
+void GridLayoutElement::Prepare(const WeakPtr<Element>& parent)
+{
+    ComponentGroupElement::Prepare(parent);
 }
 
 bool GridLayoutElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
@@ -62,9 +185,9 @@ bool GridLayoutElement::RequestNextFocus(bool vertical, bool reverse, const Rect
     return ret;
 }
 
-void GridLayoutElement::Apply(const RefPtr<Element>& child)
+void GridLayoutElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChild)
 {
-    if (!child) {
+    if (!renderChild) {
         LOGE("Element child is null");
         return;
     }
@@ -74,22 +197,87 @@ void GridLayoutElement::Apply(const RefPtr<Element>& child)
         return;
     }
 
+    if (isUseLazyForEach_) {
+        return;
+    }
+
     auto proxy = RenderItemProxy::Create();
+    proxy->AddChild(renderChild->GetRenderNode());
     proxy->Attach(context_);
     renderNode_->AddChild(proxy);
-    if (child->GetType() == RENDER_ELEMENT) {
-        // Directly attach the RenderNode if child is RenderElement.
-        RefPtr<RenderElement> renderChild = AceType::DynamicCast<RenderElement>(child);
-        if (renderChild) {
-            proxy->AddChild(renderChild->GetRenderNode());
-        }
-    } else if (child->GetType() == COMPOSED_ELEMENT) {
-        // If child is ComposedElement, just set parent render node.
-        RefPtr<ComposedElement> composeChild = AceType::DynamicCast<ComposedElement>(child);
-        if (composeChild) {
-            composeChild->SetParentRenderNode(proxy);
+}
+
+void GridLayoutElement::OnReload()
+{
+    LOGD("GridLayoutElement::OnReload");
+    RefPtr<RenderGridScrollLayout> render = AceType::DynamicCast<RenderGridScrollLayout>(renderNode_);
+    if (!render) {
+        return;
+    }
+    for (const auto& item : lazyChildItems_) {
+        Element::RemoveChild(item.second);
+        render->RemoveChildByIndex(item.first);
+    }
+    lazyChildItems_.clear();
+    render->OnReload();
+}
+void GridLayoutElement::OnItemAdded(int32_t index)
+{
+    LOGD("GridLayoutElement::OnItemAdded");
+    decltype(lazyChildItems_) items(std::move(lazyChildItems_));
+    for (const auto& item : items) {
+        if (item.first >= index) {
+            lazyChildItems_.emplace(std::make_pair(item.first + 1, item.second));
+        } else {
+            lazyChildItems_.emplace(std::make_pair(item.first, item.second));
         }
     }
+    RefPtr<RenderGridScrollLayout> render = AceType::DynamicCast<RenderGridScrollLayout>(renderNode_);
+    if (!render) {
+        return;
+    }
+    render->OnItemAdded(index);
+}
+
+void GridLayoutElement::OnItemDeleted(int32_t index)
+{
+    LOGD("GridLayoutElement::OnItemDeleted");
+    decltype(lazyChildItems_) items(std::move(lazyChildItems_));
+    for (const auto& item : items) {
+        if (item.first == index) {
+            UpdateChild(item.second, nullptr);
+        } else if (item.first > index) {
+            lazyChildItems_.emplace(std::make_pair(item.first - 1, item.second));
+        } else {
+            lazyChildItems_.emplace(std::make_pair(item.first, item.second));
+        }
+    }
+    RefPtr<RenderGridScrollLayout> render = AceType::DynamicCast<RenderGridScrollLayout>(renderNode_);
+    if (!render) {
+        return;
+    }
+    render->OnItemDeleted(index);
+}
+
+void GridLayoutElement::OnItemChanged(int32_t index)
+{
+    LOGD("GridLayoutElement::OnItemChanged");
+    RefPtr<RenderGridScrollLayout> render = AceType::DynamicCast<RenderGridScrollLayout>(renderNode_);
+    if (!render) {
+        return;
+    }
+    render->OnItemChanged((index));
+}
+void GridLayoutElement::OnItemMoved(int32_t from, int32_t to)
+{
+    LOGD("GridLayoutElement::OnItemMoved");
+    DeleteChildByIndex(from);
+    DeleteChildByIndex(to);
+    RefPtr<RenderGridScrollLayout> render = AceType::DynamicCast<RenderGridScrollLayout>(renderNode_);
+    if (!render) {
+        return;
+    }
+    render->OnItemMoved(from, to);
 }
 
 } // namespace OHOS::Ace

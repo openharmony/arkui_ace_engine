@@ -54,13 +54,20 @@ void DOMPopup::InitializeStyle()
     backgroundColor_ = theme->GetBackgroundColor();
     popupChild_->GetPopupParam()->SetBackgroundColor(backgroundColor_);
 
-    border_.SetBorderRadius(theme->GetRadius());
-    paddingTop_ = theme->GetPadding().Top();
-    paddingRight_ = theme->GetPadding().Right();
-    paddingBottom_ = theme->GetPadding().Bottom();
-    paddingLeft_ = theme->GetPadding().Left();
-    hasBoxStyle_ = true;
-    hasDecorationStyle_ = true;
+    if (!declaration_) {
+        return;
+    }
+    auto& borderStyle = declaration_->MaybeResetStyle<CommonBorderStyle>(StyleTag::COMMON_BORDER_STYLE);
+    if (borderStyle.IsValid()) {
+        borderStyle.border.SetBorderRadius(theme->GetRadius());
+    }
+
+    auto& paddingStyle = declaration_->MaybeResetStyle<CommonPaddingStyle>(StyleTag::COMMON_PADDING_STYLE);
+    if (paddingStyle.IsValid()) {
+        paddingStyle.padding = theme->GetPadding();
+    }
+    declaration_->SetHasBoxStyle(true);
+    declaration_->SetHasDecorationStyle(true);
 }
 
 void DOMPopup::RemoveMarker()

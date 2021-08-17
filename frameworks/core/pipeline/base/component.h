@@ -16,15 +16,23 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_COMPONENT_H
 
+#include <array>
+#include <list>
+#include <map>
+#include <memory>
+#include <utility>
+
 #include "base/memory/ace_type.h"
+#include "core/animation/property_animation.h"
 #include "core/components/common/layout/constants.h"
+#include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace {
 
 class Element;
 class ComposedElement;
 
-using ElementFunction = std::function<void(ComposedElement*)>;
+using ElementFunction = std::function<void(const RefPtr<ComposedElement>&)>;
 
 enum class UpdateType {
     STYLE,
@@ -40,7 +48,7 @@ class ACE_EXPORT Component : public virtual AceType {
 
 public:
     Component();
-    ~Component() override = default;
+    ~Component() override;
 
     virtual RefPtr<Element> CreateElement() = 0;
 
@@ -100,7 +108,7 @@ public:
     }
 
     virtual void SetElementFunction(ElementFunction&& func) {}
-    virtual void CallElementFunction(Element* element) {}
+    virtual void CallElementFunction(const RefPtr<Element>& element) {}
 
     bool IsStatic()
     {
@@ -112,10 +120,48 @@ public:
         static_ = true;
     }
 
+    void AddAnimatable(AnimatableType type, const RefPtr<PropertyAnimation> animation)
+    {
+        propAnimations_[type] = animation;
+    }
+
+    void ClearAnimatables()
+    {
+        propAnimations_.clear();
+    }
+
+    const PropAnimationMap& GetAnimatables() const
+    {
+        return propAnimations_;
+    }
+
+    void SetOnAppearEventId(const EventMarker& appearEventId)
+    {
+        appearEventId_ = appearEventId;
+    }
+
+    const EventMarker& GetAppearEventMarker() const
+    {
+        return appearEventId_;
+    }
+
+    void SetOnDisappearEventId(const EventMarker& disappearEventId)
+    {
+        disappearEventId_ = disappearEventId;
+    }
+
+    const EventMarker& GetDisappearEventMarker() const
+    {
+        return disappearEventId_;
+    }
+
+    virtual void OnWrap() {}
+
 protected:
     TextDirection direction_ = TextDirection::LTR;
 
 private:
+    PropAnimationMap propAnimations_;
     UpdateType updateType_ = UpdateType::ALL;
     WeakPtr<Component> parent_;
     bool disabledStatus_ = false;
@@ -124,6 +170,10 @@ private:
     // Set the id for the component to identify the unique component.
     int32_t retakeId_ = 0;
     bool static_ = false;
+
+    // eventMarker used to handle component detach and attach to the render tree.
+    EventMarker appearEventId_;
+    EventMarker disappearEventId_;
 };
 
 } // namespace OHOS::Ace

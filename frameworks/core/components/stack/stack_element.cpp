@@ -69,7 +69,7 @@ void StackElement::PopToastComponent(int32_t toastPopId)
     MarkDirty();
 }
 
-bool StackElement::PushDialog(const RefPtr<Component>& newComponent)
+bool StackElement::PushDialog(const RefPtr<Component>& newComponent, bool directBuild)
 {
     // send event to accessibility when show dialog.
     auto context = context_.Upgrade();
@@ -88,6 +88,10 @@ bool StackElement::PushDialog(const RefPtr<Component>& newComponent)
     operation_ = Operation::DIALOG_PUSH;
     // dialog need to disable the touch event of all other children in stack
     disableTouchEvent_ = true;
+    if (directBuild) {
+        PerformBuild();
+        return true;
+    }
     MarkDirty();
     return true;
 }
@@ -396,7 +400,9 @@ void StackElement::OnFocus()
         return;
     }
     // Only focus on the top focusable child.
-    itLastFocusNode_ = focusNodes_.end();
+    if (itLastFocusNode_ != focusNodes_.end()) {
+        return;
+    }
     while (itLastFocusNode_ != focusNodes_.begin()) {
         --itLastFocusNode_;
         if ((*itLastFocusNode_)->RequestFocusImmediately()) {

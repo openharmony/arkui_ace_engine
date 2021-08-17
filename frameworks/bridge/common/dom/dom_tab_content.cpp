@@ -26,9 +26,6 @@ DOMTabContent::DOMTabContent(NodeId nodeId, const std::string& nodeName) : DOMNo
     std::list<RefPtr<Component>> tabContents;
     RefPtr<TabController> controller;
     tabContentChild_ = AceType::MakeRefPtr<TabContentComponent>(tabContents, controller);
-    if (IsRightToLeft()) {
-        tabContentChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 bool DOMTabContent::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
@@ -55,14 +52,20 @@ void DOMTabContent::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 void DOMTabContent::PrepareChangeListener(const RefPtr<DOMTabs>& parentNode)
 {
     auto weak = AceType::WeakClaim(this);
-    auto changeCallback = [weak, parentNode](uint32_t currentIndex) {
+    WeakPtr<DOMTabs> weakParent = parentNode;
+    auto changeCallback = [weak, weakParent](uint32_t currentIndex) {
         auto domNode = weak.Upgrade();
         if (!domNode) {
             LOGE("get dom node failed!");
             return;
         }
 
-        for (const auto& node : parentNode->GetChildList()) {
+        auto parentRef = weakParent.Upgrade();
+        if (!parentRef) {
+            LOGE("get parent node failed!");
+            return;
+        }
+        for (const auto& node : parentRef->GetChildList()) {
             if (node->GetTag() == DOM_NODE_TAG_TAB_BAR) {
                 const auto& tabBarNode = AceType::DynamicCast<DOMTabBar>(node);
                 if (tabBarNode) {
@@ -116,6 +119,11 @@ void DOMTabContent::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
     }
 }
 
-void DOMTabContent::PrepareSpecializedComponent() {}
+void DOMTabContent::PrepareSpecializedComponent()
+{
+    if (tabContentChild_) {
+        tabContentChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+    }
+}
 
 } // namespace OHOS::Ace::Framework

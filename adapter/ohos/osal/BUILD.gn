@@ -29,7 +29,7 @@ template("ace_osal_ohos_source_set") {
       configs = [
         "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config",
         "$ace_root:ace_config",
-        "$flutter_root:flutter_config",
+        "$ace_flutter_engine_root:flutter_config",
       ]
     }
     include_dirs = [ "//utils/native/base/include" ]

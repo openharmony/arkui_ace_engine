@@ -36,6 +36,8 @@ public:
     ~AssetManager() override = default;
 
     virtual RefPtr<Asset> GetAsset(const std::string& assetName) = 0;
+
+    virtual std::string GetAssetPath(const std::string& assetName) = 0;
 };
 
 } // namespace OHOS::Ace

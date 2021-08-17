@@ -31,6 +31,7 @@ public:
 
     void InitializeStyle() override;
 
+    void PrepareSpecializedComponent() override;
     RefPtr<Component> GetSpecializedComponent() override;
 
 protected:

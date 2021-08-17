@@ -22,12 +22,13 @@
 
 namespace OHOS::Ace::Framework {
 
-class CompoentApiBridge : virtual public AceType {
-    DECLARE_ACE_TYPE(CompoentApiBridge, AceType)
+class ComponentApiBridge : virtual public AceType {
+    DECLARE_ACE_TYPE(ComponentApiBridge, AceType)
 
 public:
     static JSValue JsGetScrollOffset(JSContext* ctx, NodeId nodeId);
     static JSValue JsGetBoundingRect(JSContext* ctx, NodeId nodeId);
+    static void JsScrollTo(JSContext* ctx, const std::string& args, NodeId nodeId);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -18,6 +18,7 @@
 #include <string>
 
 #include "base/log/event_report.h"
+#include "core/common/thread_checker.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -28,6 +29,12 @@ CardFrontendDelegate::CardFrontendDelegate()
 #else
     jsAccessibilityManager_ = AceType::MakeRefPtr<JsInspectorManager>();
 #endif
+}
+
+CardFrontendDelegate::~CardFrontendDelegate()
+{
+    CHECK_RUN_ON(JS);
+    LOG_DESTROY();
 }
 
 void CardFrontendDelegate::FireCardEvent(const EventMarker& eventMarker, const std::string& params)

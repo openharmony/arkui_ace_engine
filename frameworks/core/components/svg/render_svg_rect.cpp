@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace {
 
-void RenderSvgRect::Update(const RefPtr<Component> &component)
+void RenderSvgRect::Update(const RefPtr<Component>& component)
 {
     const RefPtr<SvgRectComponent> rectComponent = AceType::DynamicCast<SvgRectComponent>(component);
     if (!rectComponent) {
@@ -32,12 +32,12 @@ void RenderSvgRect::Update(const RefPtr<Component> &component)
     ry_ = rectComponent->GetRy();
     width_ = rectComponent->GetWidth();
     height_ = rectComponent->GetHeight();
-    RenderSvgBase::SetPresentationAttrs(rectComponent);
+    RenderSvgBase::SetPresentationAttrs(rectComponent->GetDeclaration());
     PrepareAnimations(component);
     MarkNeedLayout();
 }
 
-void RenderSvgRect::PrepareAnimations(const RefPtr<Component> &component)
+void RenderSvgRect::PrepareAnimations(const RefPtr<Component>& component)
 {
     const RefPtr<SvgRectComponent> rectComponent = AceType::DynamicCast<SvgRectComponent>(component);
     if (!rectComponent) {
@@ -55,8 +55,7 @@ bool RenderSvgRect::PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimate)
         return false;
     }
     std::function<void(Dimension)> callback;
-    callback = [weakRect = AceType::WeakClaim(this), attributeName = svgAnimate->GetAttributeName()](
-            Dimension value) {
+    callback = [weakRect = AceType::WeakClaim(this), attributeName = svgAnimate->GetAttributeName()](Dimension value) {
         auto rect = weakRect.Upgrade();
         if (!rect) {
             LOGE("rect is null");
@@ -64,11 +63,10 @@ bool RenderSvgRect::PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimate)
         }
         bool ret = rect->SetProperty(attributeName, value);
         if (ret) {
-            rect->MarkNeedLayout(true);
+            rect->MarkNeedRender(true);
         }
     };
-    RefPtr<Evaluator<Dimension>> evaluator = AceType::MakeRefPtr<LinearEvaluator<Dimension>>();
-    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback), evaluator);
+    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback));
     return true;
 }
 

@@ -37,28 +37,44 @@ void RenderQrcode::Update(const RefPtr<Component>& component)
     if (value_.size() > QRCODE_VALUE_MAX_LENGTH) {
         value_ = value_.substr(QRCODE_START_INDEX, QRCODE_VALUE_MAX_LENGTH);
     }
-    backgroundColor_ = qrcode_->GetBackgroundColor();
-    qrcodeColor_ = qrcode_->GetQrcodeColor();
-    qrcodeType_ = qrcode_->GetType();
-    qrcodeWidth_ = qrcode_->GetQrcodeWidth();
-    qrcodeHeight_ = qrcode_->GetQrcodeHeight();
-    isWidthDefined_ = qrcode_->IsWidthDefined();
-    isHeightDefined_ = qrcode_->IsHeightDefined();
 }
 
 void RenderQrcode::PerformLayout()
 {
-    width_ = NormalizePercentToPx(qrcodeWidth_, false);
-    height_ = NormalizePercentToPx(qrcodeHeight_, true);
-    if (isWidthDefined_ && !isHeightDefined_) {
+    if (!qrcode_) {
+        return;
+    }
+    width_ = NormalizePercentToPx(qrcode_->GetQrcodeWidth(), false);
+    height_ = NormalizePercentToPx(qrcode_->GetQrcodeHeight(), true);
+    auto isWidthDefined = qrcode_->IsWidthDefined();
+    auto isHeightDefined = qrcode_->IsHeightDefined();
+    if (isWidthDefined && !isHeightDefined) {
         height_ = width_;
-    } else if (isHeightDefined_ && !isWidthDefined_) {
+    } else if (isHeightDefined && !isWidthDefined) {
         width_ = height_;
-    } else if (isHeightDefined_ && isWidthDefined_) {
+    } else if (isHeightDefined && isWidthDefined) {
         if (LessOrEqual(width_, height_)) {
             height_ = width_;
         } else {
             width_ = height_;
+        }
+    }
+
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        LayoutParam layoutParam = GetLayoutParam();
+        Size maxSize = layoutParam.GetMaxSize();
+        if (maxSize.IsInfinite()) {
+            width_ = 0.0;
+            height_ = 0.0;
+        } else {
+            width_ = maxSize.Width();
+            height_ = maxSize.Height();
+            if (LessOrEqual(width_, height_)) {
+                height_ = width_;
+            } else {
+                width_ = height_;
+            }
         }
     }
     SetLayoutSize(Size(width_, height_));

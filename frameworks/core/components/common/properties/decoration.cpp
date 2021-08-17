@@ -17,6 +17,13 @@
 
 namespace OHOS::Ace {
 
+void Decoration::SetContextAndCallback(
+    const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+{
+    backgroundColor_.SetContextAndCallback(context, callback);
+    border_.SetContextAndCallback(context, callback);
+}
+
 void Decoration::AddShadow(const Shadow& shadow)
 {
     shadows_.push_back(shadow);
@@ -123,6 +130,52 @@ double BackgroundImageSize::GetSizeValueX() const
 double BackgroundImageSize::GetSizeValueY() const
 {
     return valueY_;
+}
+
+BackgroundImageSize BackgroundImageSize::operator+(const BackgroundImageSize& rhs) const
+{
+    if ((rhs.GetSizeTypeX() != GetSizeTypeX()) || (rhs.GetSizeTypeY() != GetSizeTypeY())) {
+        // error: unit not same, just return lhs value
+        return *this;
+    }
+    auto rhsX = rhs.GetSizeValueX();
+    auto rhsY = rhs.GetSizeValueY();
+    auto lhsX = GetSizeValueX();
+    auto lhsY = GetSizeValueY();
+    BackgroundImageSize size;
+    size.SetSizeValueX(rhsX + lhsX);
+    size.SetSizeTypeX(GetSizeTypeX());
+    size.SetSizeValueY(rhsY + lhsY);
+    size.SetSizeTypeY(GetSizeTypeY());
+    return size;
+}
+
+BackgroundImageSize BackgroundImageSize::operator-(const BackgroundImageSize& rhs) const
+{
+    auto rhsX = rhs.GetSizeValueX();
+    auto rhsY = rhs.GetSizeValueY();
+    auto lhsX = GetSizeValueX();
+    auto lhsY = GetSizeValueY();
+    if ((rhs.GetSizeTypeX() != GetSizeTypeX()) || (rhs.GetSizeTypeY() != GetSizeTypeY())) {
+        // error: unit not same, just return lhs value
+        return *this;
+    }
+    BackgroundImageSize size;
+    size.SetSizeValueX(lhsX - rhsX);
+    size.SetSizeTypeX(GetSizeTypeX());
+    size.SetSizeValueY(lhsY - rhsY);
+    size.SetSizeTypeY(GetSizeTypeY());
+    return size;
+}
+
+BackgroundImageSize BackgroundImageSize::operator*(double value) const
+{
+    BackgroundImageSize size;
+    size.SetSizeValueX(GetSizeValueX() * value);
+    size.SetSizeTypeX(GetSizeTypeX());
+    size.SetSizeValueY(GetSizeValueY() * value);
+    size.SetSizeTypeY(GetSizeTypeY());
+    return size;
 }
 
 bool BackgroundImageSize::operator==(const BackgroundImageSize& size) const
@@ -292,8 +345,8 @@ void CanvasPath2D::BezierCurveTo(double cp1x, double cp1y, double cp2x, double c
     caches_.emplace_back(PathCmd::BEZIER_CURVE_TO, args);
 }
 
-void CanvasPath2D::Ellipse(double x, double y, double radiusX, double radiusY,
-    double rotation, double startAngle, double endAngle, double ccw)
+void CanvasPath2D::Ellipse(
+    double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle, double ccw)
 {
     PathArgs args;
     args.para1 = x;

@@ -177,6 +177,26 @@ public:
         return isSetMargin_;
     }
 
+    void SetIsMenu(bool isMenu)
+    {
+        isMenu_ = isMenu;
+    }
+
+    bool IsMenu() const
+    {
+        return isMenu_;
+    }
+
+    void SetMenuSuccessId(const std::vector<EventMarker>& menuSuccessId)
+    {
+        menuSuccessId_ = menuSuccessId;
+    }
+
+    std::vector<EventMarker>& GetMenuSuccessId()
+    {
+        return menuSuccessId_;
+    }
+
 private:
     bool autoCancel_ = true;
     RefPtr<Animator> animator_;
@@ -187,6 +207,7 @@ private:
     EventMarker onPositiveSuccessId_;
     EventMarker onNegativeSuccessId_;
     EventMarker onNeutralSuccessId_;
+    std::vector<EventMarker> menuSuccessId_;
     int32_t composedId_ = 0;
     // used for inspector node in PC preview
     int32_t customDialogId_ = -1;
@@ -195,6 +216,7 @@ private:
     Edge margin_;
     bool isSetMargin_ = false;
     bool isLimit_ = true;
+    bool isMenu_ = false;
 };
 
 } // namespace OHOS::Ace

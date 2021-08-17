@@ -18,6 +18,7 @@
 #include "base/utils/string_utils.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/core/components/declaration/canvas/canvas_declaration.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -30,10 +31,18 @@ constexpr Dimension DEFAULT_HEIGHT = 150.0_px;
 DOMCanvas::DOMCanvas(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
     paintChild_ = AceType::MakeRefPtr<CustomPaintComponent>();
-    if (IsRightToLeft()) {
-        paintChild_->SetTextDirection(TextDirection::RTL);
-    }
     ResetInitializedStyle();
+}
+
+void DOMCanvas::PrepareSpecializedComponent()
+{
+    paintChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+    // This Func will be triggered when style/attr updated.
+    auto declaration = AceType::DynamicCast<CanvasDeclaration>(declaration_);
+    if (!declaration) {
+        LOGE("Get Canvas Declaration failed.");
+        return;
+    }
 }
 
 void DOMCanvas::ResetInitializedStyle()

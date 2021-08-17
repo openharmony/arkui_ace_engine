@@ -16,16 +16,19 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PAGE_TRANSITION_PAGE_TRANSITION_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PAGE_TRANSITION_PAGE_TRANSITION_COMPONENT_H
 
+#include <stack>
+
 #include "core/components/box/box_component.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/page_transition/page_transition_element.h"
+#include "core/components/page_transition/page_transition_info.h"
 #include "core/components/stack/stack_component.h"
 #include "core/components/tween/tween_component.h"
 
 namespace OHOS::Ace {
 
-class PageTransitionComponent : public StackComponent {
+class ACE_EXPORT PageTransitionComponent : public StackComponent {
     DECLARE_ACE_TYPE(PageTransitionComponent, StackComponent);
 
 public:
@@ -116,6 +119,55 @@ public:
         return isSetOption_;
     }
 
+    void PushPageTransition(const RefPtr<PageTransition>& pageTransition)
+    {
+        pageTransitionStack_.push(pageTransition);
+    }
+
+    void PopPageTransition()
+    {
+        if (pageTransitionStack_.empty()) {
+            return;
+        }
+        auto pageTransition = pageTransitionStack_.top();
+        pageTransitionStack_.pop();
+        if (pageTransition) {
+            PageTransition::ProcessPageTransitionType(pageTransition);
+            pageTransitions_[pageTransition->GetType()] = pageTransition;
+        }
+    }
+
+    void ClearPageTransitionStack()
+    {
+        while (!pageTransitionStack_.empty()) {
+            auto pageTransition = pageTransitionStack_.top();
+            if (pageTransition) {
+                PageTransition::ProcessPageTransitionType(pageTransition);
+                pageTransitions_[pageTransition->GetType()] = pageTransition;
+            }
+            pageTransitionStack_.pop();
+        }
+    }
+
+    void ClearPageTransition()
+    {
+        ClearPageTransitionStack();
+        pageTransitions_.clear();
+    }
+
+    RefPtr<PageTransition> GetTopPageTransition()
+    {
+        if (pageTransitionStack_.empty()) {
+            return nullptr;
+        }
+        return pageTransitionStack_.top();
+    }
+
+    const std::unordered_map<PageTransitionType, RefPtr<PageTransition>>& GetPageTransitions() const
+    {
+        return pageTransitions_;
+    }
+
 private:
     bool isSetOption_ = false;
     bool isSeparation_ = false;       // true means that the content of the page is separated from the background
@@ -123,6 +175,8 @@ private:
     RefPtr<BoxComponent> background_; // page background box, will be wrapped with animation component
     TweenOption contentInOption_;
     TweenOption contentOutOption_;
+    std::unordered_map<PageTransitionType, RefPtr<PageTransition>> pageTransitions_;
+    std::stack<RefPtr<PageTransition>> pageTransitionStack_;
 };
 
 } // namespace OHOS::Ace

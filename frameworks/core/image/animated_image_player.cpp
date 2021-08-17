@@ -42,13 +42,17 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
     }
     ACE_DCHECK(context->GetTaskExecutor());
     context->GetTaskExecutor()->PostTask(
-        [weak = AceType::WeakClaim(this), weakProvider = imageProvider_, index] {
+        [weak = AceType::WeakClaim(this),
+            weakProvider = imageProvider_, index, dstWidth = dstWidth_, dstHeight = dstHeight_] {
             auto player = weak.Upgrade();
             if (!player) {
                 return;
             }
             auto canvasImage = flutter::CanvasImage::Create();
             sk_sp<SkImage> skImage = player->DecodeFrameImage(index);
+            if (dstWidth > 0 && dstHeight > 0) {
+                skImage = ImageProvider::ApplySizeToSkImage(skImage, dstWidth, dstHeight);
+            }
             if (skImage) {
                 canvasImage->set_image({ skImage, player->unrefQueue_ });
             } else {
@@ -57,7 +61,7 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
             }
             auto provider = weakProvider.Upgrade();
             if (provider) {
-                provider->OnGPUImageReady(canvasImage);
+                provider->OnImageReady(canvasImage);
                 return;
             }
             LOGI("Image provider has been released.");

@@ -22,7 +22,7 @@ namespace OHOS::Ace {
 
 constexpr float DEFAULT_MULTIPLIER = 60.0f;
 
-class FrictionMotion : public Motion {
+class ACE_EXPORT FrictionMotion : public Motion {
 public:
     FrictionMotion(double friction, double initPosition, double initVelocity);
     ~FrictionMotion() override = default;

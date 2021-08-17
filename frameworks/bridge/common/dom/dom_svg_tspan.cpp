@@ -22,14 +22,6 @@ namespace OHOS::Ace::Framework {
 
 DOMSvgTspan::DOMSvgTspan(NodeId nodeId, const std::string& nodeName) : DOMSvgText(nodeId, nodeName) {}
 
-bool DOMSvgTspan::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    if (DOMSvgText::SetSpecializedAttr(attr)) {
-        return true;
-    }
-    return false;
-}
-
 void DOMSvgTspan::PrepareSpecializedComponent()
 {
     if (!textComponent_) {

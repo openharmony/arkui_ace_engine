@@ -39,8 +39,6 @@ struct WindowConfig {
     // Runtime design width should be considered together with autoDesignWidth.
     int32_t designWidth = DEFAULT_DESIGN_WIDTH;
     bool autoDesignWidth = false;
-    bool useLiteStyle = false;
-    int32_t minSdkVersion = 1;
     bool boxWrap = false;
 };
 
@@ -53,12 +51,14 @@ public:
     Frontend() = default;
     ~Frontend() override = default;
 
-    enum class State { ON_CREATE, ON_DESTROY };
+    enum class State { ON_CREATE, ON_DESTROY, ON_SHOW, ON_HIDE };
 
     static RefPtr<Frontend> Create();
     static RefPtr<Frontend> CreateDefault();
 
     virtual bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) = 0;
+
+    virtual void Destroy() = 0;
 
     virtual void AttachPipelineContext(const RefPtr<PipelineContext>& context) = 0;
 
@@ -106,6 +106,8 @@ public:
 
     // get js code from plugin and load in js engine
     virtual void LoadPluginJsCode(std::string&& jsCode) const = 0;
+
+    virtual void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const = 0;
 
     // when this is foreground frontend
     virtual bool IsForeground() = 0;
@@ -158,7 +160,7 @@ public:
     virtual void SetColorMode(ColorMode colorMode) {};
 
     // navigator component call router
-    virtual void NavigatePage(uint8_t type, const std::string& url) {};
+    virtual void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) {};
 };
 
 } // namespace OHOS::Ace

@@ -47,6 +47,18 @@ public:
     Size GetLayoutSize(double dipScale) const;
     BorderEdge GetValidEdge() const;
 
+    bool IsValid() const
+    {
+        return left_.IsValid() && right_.IsValid() && bottom_.IsValid() && top_.IsValid() && topLeftRadius_.IsValid() &&
+               bottomLeftRadius_.IsValid() && topRightRadius_.IsValid() && bottomRightRadius_.IsValid();
+    }
+
+    bool IsAllSolidStyle() const
+    {
+        return left_.GetBorderStyle() == BorderStyle::SOLID && bottom_.GetBorderStyle() == BorderStyle::SOLID &&
+               right_.GetBorderStyle() == BorderStyle::SOLID && top_.GetBorderStyle() == BorderStyle::SOLID;
+    }
+
     void SetBorderRadius(const Radius& radius)
     {
         topLeftRadius_ = radius;
@@ -147,6 +159,103 @@ public:
     void SetBottomEdge(const BorderEdge& edge)
     {
         bottom_ = edge;
+    }
+
+    void SetWidth(const Dimension& width, const AnimationOption& option = AnimationOption())
+    {
+        SetLeftWidth(width, option);
+        SetTopWidth(width, option);
+        SetRightWidth(width, option);
+        SetBottomWidth(width, option);
+    }
+
+    void SetLeftWidth(const Dimension& width, const AnimationOption& option = AnimationOption())
+    {
+        left_.SetWidth(width, option);
+    }
+
+    void SetTopWidth(const Dimension& width, const AnimationOption& option = AnimationOption())
+    {
+        top_.SetWidth(width, option);
+    }
+
+    void SetRightWidth(const Dimension& width, const AnimationOption& option = AnimationOption())
+    {
+        right_.SetWidth(width, option);
+    }
+
+    void SetBottomWidth(const Dimension& width, const AnimationOption& option = AnimationOption())
+    {
+        bottom_.SetWidth(width, option);
+    }
+
+    void SetStyle(BorderStyle style)
+    {
+        SetLeftStyle(style);
+        SetTopStyle(style);
+        SetRightStyle(style);
+        SetBottomStyle(style);
+    }
+
+    void SetLeftStyle(BorderStyle style)
+    {
+        left_.SetStyle(style);
+    }
+
+    void SetTopStyle(BorderStyle style)
+    {
+        top_.SetStyle(style);
+    }
+
+    void SetRightStyle(BorderStyle style)
+    {
+        right_.SetStyle(style);
+    }
+
+    void SetBottomStyle(BorderStyle style)
+    {
+        bottom_.SetStyle(style);
+    }
+
+    void SetColor(const Color& color, const AnimationOption& option = AnimationOption())
+    {
+        SetLeftColor(color, option);
+        SetTopColor(color, option);
+        SetRightColor(color, option);
+        SetBottomColor(color, option);
+    }
+
+    void SetLeftColor(const Color& color, const AnimationOption& option = AnimationOption())
+    {
+        left_.SetColor(color, option);
+    }
+
+    void SetTopColor(const Color& color, const AnimationOption& option = AnimationOption())
+    {
+        top_.SetColor(color, option);
+    }
+
+    void SetRightColor(const Color& color, const AnimationOption& option = AnimationOption())
+    {
+        right_.SetColor(color, option);
+    }
+
+    void SetBottomColor(const Color& color, const AnimationOption& option = AnimationOption())
+    {
+        bottom_.SetColor(color, option);
+    }
+
+    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+    {
+        left_.SetContextAndCallback(context, callback);
+        top_.SetContextAndCallback(context, callback);
+        right_.SetContextAndCallback(context, callback);
+        bottom_.SetContextAndCallback(context, callback);
+
+        topLeftRadius_.SetContextAndCallback(context, callback);
+        topRightRadius_.SetContextAndCallback(context, callback);
+        bottomLeftRadius_.SetContextAndCallback(context, callback);
+        bottomRightRadius_.SetContextAndCallback(context, callback);
     }
 
 private:

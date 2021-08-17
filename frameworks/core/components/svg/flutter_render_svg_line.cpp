@@ -52,39 +52,79 @@ void FlutterRenderSvgLine::Paint(RenderContext& context, const Offset& offset)
         return;
     }
 
-    SkPath path;
-    double width = GetLayoutSize().Width();
-    double height = GetLayoutSize().Height();
-    path.moveTo(ConvertDimensionToPx(x1_, width), ConvertDimensionToPx(y1_, height));
-    path.lineTo(ConvertDimensionToPx(x2_, width), ConvertDimensionToPx(y2_, height));
+    if (transformLayer_) {
+        transformLayer_->UpdateTransformProperty(transformAttrs_, GetTransformOffset());
+    }
 
+    SkAutoCanvasRestore save(skCanvas, false);
+    PaintMaskLayer(context, offset, offset);
+
+    SkPath path;
+    GetPath(path);
+    UpdateGradient(fillState_);
     FlutterSvgPainter::SetFillStyle(skCanvas, path, fillState_, opacity_);
     FlutterSvgPainter::SetStrokeStyle(skCanvas, path, strokeState_, opacity_);
 
     RenderNode::Paint(context, offset);
 }
 
-void FlutterRenderSvgLine::UpdateMotion(const std::string& path, const std::string& rotate,
-    double percent, const Point& point)
+void FlutterRenderSvgLine::PaintDirectly(RenderContext& context, const Offset& offset)
+{
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkCanvas* skCanvas = canvas->canvas();
+    if (!skCanvas) {
+        LOGE("Paint skCanvas is null");
+        return;
+    }
+
+    if (!transformAttrs_.empty()) {
+        auto matrix4 = TransformLayer::UpdateTransformAttr(transformAttrs_, GetTransformOffset());
+        skCanvas->save();
+        skCanvas->concat(FlutterSvgPainter::ToSkMatrix(matrix4));
+    }
+
+    SkPath path;
+    GetPath(path);
+    UpdateGradient(fillState_);
+    FlutterSvgPainter::SetFillStyle(skCanvas, path, fillState_, opacity_);
+    FlutterSvgPainter::SetStrokeStyle(skCanvas, path, strokeState_, opacity_);
+
+    if (!transformAttrs_.empty()) {
+        skCanvas->restore();
+    }
+}
+
+void FlutterRenderSvgLine::UpdateMotion(const std::string& path, const std::string& rotate, double percent)
 {
     if (!transformLayer_) {
         LOGE("transformLayer is null");
         return;
     }
     bool isSuccess = true;
-    auto motionMatrix = FlutterSvgPainter::CreateMotionMatrix(path, rotate, point, percent, isSuccess);
+    auto motionMatrix = FlutterSvgPainter::CreateMotionMatrix(path, rotate, percent, isSuccess);
     if (isSuccess) {
         auto transform = FlutterRenderTransform::GetTransformByOffset(motionMatrix, GetGlobalOffset());
         transformLayer_->Update(transform);
     }
 }
 
-bool FlutterRenderSvgLine::GetStartPoint(Point& point)
+Rect FlutterRenderSvgLine::GetPaintBounds(const Offset& offset)
 {
-    double width = GetLayoutSize().Width();
-    double height = GetLayoutSize().Height();
-    point = Point(ConvertDimensionToPx(x1_, width), ConvertDimensionToPx(y1_, height));
-    return true;
+    SkPath path;
+    GetPath(path);
+    auto& bounds = path.getBounds();
+    return Rect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
+}
+
+void FlutterRenderSvgLine::GetPath(SkPath& path)
+{
+    path.moveTo(ConvertDimensionToPx(x1_, LengthType::HORIZONTAL), ConvertDimensionToPx(y1_, LengthType::VERTICAL));
+    path.lineTo(ConvertDimensionToPx(x2_, LengthType::HORIZONTAL), ConvertDimensionToPx(y2_, LengthType::VERTICAL));
 }
 
 } // namespace OHOS::Ace

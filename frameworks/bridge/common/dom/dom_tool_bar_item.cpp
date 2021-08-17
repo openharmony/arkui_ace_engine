@@ -79,8 +79,11 @@ void DOMToolBarItem::InitializedToolBarItemChild()
     if (selectTheme) {
         toolBarItemChild_->SetMenuMinWidth(selectTheme->GetPopupMinWidth());
     }
-    backDecoration_->SetBackgroundColor(theme_->GetItemBackgroundColor());
-    hasDecorationStyle_ = true;
+    if (!declaration_) {
+        return;
+    }
+    declaration_->GetBackDecoration()->SetBackgroundColor(theme_->GetItemBackgroundColor());
+    declaration_->SetHasDecorationStyle(true);
 }
 
 bool DOMToolBarItem::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
@@ -108,6 +111,10 @@ bool DOMToolBarItem::SetSpecializedStyle(const std::pair<std::string, std::strin
         { DOM_TOOL_BAR_ITEM_ALLOW_SCALE,
             [](DOMToolBarItem& toolBarItem, const std::string& val) {
                 toolBarItem.textStyle_.SetAllowScale(StringToBool(val));
+            } },
+        { DOM_TOOL_BAR_ITEM_COLOR,
+            [](DOMToolBarItem& toolBarItem, const std::string& val) {
+                toolBarItem.textStyle_.SetTextColor(Color::FromString(val));
             } },
         { DOM_TOOL_BAR_ITEM_FONT_FAMILY,
             [](DOMToolBarItem& toolBarItem, const std::string& val) {
@@ -193,6 +200,7 @@ void DOMToolBarItem::BuildCommonComponent(std::list<RefPtr<Component>>& children
         }
         imageChild_->SetResourceId(InternalResource::ResourceId::NO_ID);
         imageChild_->SetSrc(icon_);
+        imageChild_->SetImageFill(GetImageFill());
         children.emplace_back(SetPadding(imageChild_, Edge(theme_->GetIconEdge())));
     }
 

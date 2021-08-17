@@ -27,8 +27,10 @@ class TransformLayer : public OffsetLayer {
 public:
     TransformLayer(const Matrix4& matrix, double x, double y) : OffsetLayer(x, y), matrix_(matrix) {}
     ~TransformLayer() override = default;
+    static Matrix4 UpdateTransformAttr(const std::map<std::string, std::vector<float>>& attrs, Offset offset);
 
     void Update(const Matrix4& matrix);
+    void UpdateTransformProperty(const std::map<std::string, std::vector<float>>& attrs, Offset offset);
     void AddToScene(SceneBuilder& builder, double x, double y) override;
     void Dump() override;
 

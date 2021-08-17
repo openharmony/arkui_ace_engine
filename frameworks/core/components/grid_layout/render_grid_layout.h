@@ -99,6 +99,8 @@ protected:
     double gridHeight_ = -1.0;
     int32_t colCount_ = 0;
     int32_t rowCount_ = 0;
+    Dimension userColGap_ = 0.0_px;
+    Dimension userRowGap_ = 0.0_px;
     double colGap_ = 0.0;
     double rowGap_ = 0.0;
     std::string colsArgs_;

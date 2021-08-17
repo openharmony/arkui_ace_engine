@@ -209,6 +209,11 @@ public:
     {
         return Size(0.0, 0.0);
     }
+
+    int32_t GetTouchPosition(const Offset& offset) override
+    {
+        return 0;
+    }
 };
 
 class IndexerTestUtils {

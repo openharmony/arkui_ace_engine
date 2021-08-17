@@ -48,6 +48,7 @@ public:
     void HandleDragUpdate(const DragUpdateInfo& info);
     void HandleDragEnd(const DragEndInfo& info);
     void MarkScrollRender();
+    void Reset();
 
     bool DispatchEvent(const TouchPoint& point) override
     {

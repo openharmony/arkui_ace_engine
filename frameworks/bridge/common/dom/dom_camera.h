@@ -39,7 +39,6 @@ protected:
     void CallSpecializedMethod(const std::string& method, const std::string& args) override;
 
     TakePhotoParams GetParamFromJson(const std::string& args) const;
-    std::string GetRecorderParam(const std::string& args) const;
 
     static FlashType GetFlashType(const std::string& val);
     static DevicePosition GetDevicePosition(const std::string& val);

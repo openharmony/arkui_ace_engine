@@ -21,20 +21,24 @@
 #include "base/memory/ace_type.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
+#include "core/event/rotation_event.h"
 
 namespace OHOS::Ace {
+
+class GestureEvent;
 
 class EventMarker final {
 public:
     using Function = std::function<void()>;
-    using strFunction = std::function<void(const std::string& info)>;
-    using ArgFunction = std::function<void(const BaseEventInfo* info)>;
-    using PreFunction = std::function<void()>;
+    using StrFunction = std::function<void(const std::string& info)>;
+    using ArgFunction = std::function<void(BaseEventInfo* info)>;
 
     struct Data final {
         Data() = default;
         explicit Data(const Data& other) = default;
         explicit Data(Data&& other) = default;
+        explicit Data(Function&& preFunc) : preFunction(std::move(preFunc)) {}
+        explicit Data(StrFunction&& func) : uiStrFunction(std::move(func)) {}
         Data(const std::string& eventId, const std::string& eventType, int32_t pageId, bool isFront)
             : eventId(eventId), eventType(eventType), pageId(pageId), isFront(isFront)
         {}
@@ -46,7 +50,7 @@ public:
             : uiArgFunction(std::move(func)), eventId("-1"), eventType(eventType), pageId(pageId), isFront(isFront),
               isDeclarativeUi(true)
         {}
-        Data(strFunction&& func, const std::string& eventType, int32_t pageId, bool isFront)
+        Data(StrFunction&& func, const std::string& eventType, int32_t pageId, bool isFront)
             : uiStrFunction(std::move(func)), eventId("-1"), eventType(eventType), pageId(pageId), isFront(isFront),
               isDeclarativeUi(true)
         {}
@@ -58,15 +62,16 @@ public:
             return std::string("\"").append(eventType).append("\",");
         }
 
+        Function preFunction;
         Function uiFunction;
         ArgFunction uiArgFunction;
-        strFunction uiStrFunction;
+        StrFunction uiStrFunction;
         std::string eventId;
         std::string eventType;
         int32_t pageId = -1;
         bool isFront = true;
         bool isDeclarativeUi = false;
-        PreFunction preFunction;
+        bool isCatchMode = true;
     };
 
     EventMarker() = default;
@@ -75,7 +80,7 @@ public:
         : data_(std::make_unique<Data>(eventId, eventType, pageId, isFront))
     {}
 
-    explicit EventMarker(EventMarker&& other) = default;
+    EventMarker(EventMarker&& other) = default;
     explicit EventMarker(
         Function&& func, const std::string& eventType = std::string(), int32_t pageId = -1, bool isFront = true)
         : data_(std::make_unique<Data>(std::move(func), eventType, pageId, isFront))
@@ -86,11 +91,10 @@ public:
         : data_(std::make_unique<Data>(std::move(func), eventType, pageId, isFront))
     {}
     explicit EventMarker(
-        strFunction&& func, const std::string& eventType = std::string(), int32_t pageId = -1, bool isFront = true)
+        StrFunction&& func, const std::string& eventType = std::string(), int32_t pageId = -1, bool isFront = true)
         : data_(std::make_unique<Data>(std::move(func), eventType, pageId, isFront))
     {}
-    explicit EventMarker(const EventMarker& other) : data_(other.data_ ? std::make_unique<Data>(*other.data_) : nullptr)
-    {}
+    EventMarker(const EventMarker& other) : data_(other.data_ ? std::make_unique<Data>(*other.data_) : nullptr) {}
     ~EventMarker() = default;
 
     EventMarker& operator=(EventMarker&& other) = default;
@@ -120,11 +124,42 @@ public:
         return !data_ || data_->eventId.empty();
     }
 
-    void SetPreFunction(PreFunction&& preFunc)
+    void SetPreFunction(Function&& preFunc)
     {
         if (data_) {
             data_->preFunction = std::move(preFunc);
+        } else {
+            data_ = std::make_unique<Data>(std::move(preFunc));
         }
+    }
+
+    void SetUiStrFunction(StrFunction&& uiStrFunction)
+    {
+        if (data_) {
+            data_->uiStrFunction = std::move(uiStrFunction);
+        } else {
+            data_ = std::make_unique<Data>(std::move(uiStrFunction));
+        }
+    }
+
+    StrFunction GetUiStrFunction() const
+    {
+        if (data_) {
+            return data_->uiStrFunction;
+        }
+        return nullptr;
+    }
+
+    void SetCatchMode(bool isCatchMode)
+    {
+        if (data_) {
+            data_->isCatchMode = isCatchMode;
+        }
+    }
+
+    bool GetCatchMode() const
+    {
+        return !data_ || data_->isCatchMode;
     }
 
     void CallPreFunction() const
@@ -134,6 +169,11 @@ public:
         }
     }
 
+    bool HasPreFunction() const
+    {
+        return data_ && data_->preFunction;
+    }
+
     void CallUiFunction() const
     {
         if (data_ && data_->uiFunction) {
@@ -141,7 +181,7 @@ public:
         }
     }
 
-    void CallUiArgFunction(const BaseEventInfo* info) const
+    void CallUiArgFunction(BaseEventInfo* info) const
     {
         if (data_ && data_->uiArgFunction) {
             data_->uiArgFunction(info);
@@ -153,6 +193,11 @@ public:
         if (data_ && data_->uiStrFunction) {
             data_->uiStrFunction(info);
         }
+    }
+
+    bool HasUiStrFunction() const
+    {
+        return data_ && (data_->uiStrFunction);
     }
 
     const Data& GetData() const
@@ -176,6 +221,8 @@ public:
     virtual void HandleAsyncEvent(const EventMarker& eventMarker, int32_t param) = 0;
     virtual void HandleAsyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info) = 0;
     virtual void HandleAsyncEvent(const EventMarker& eventMarker, const KeyEvent& info) = 0;
+    virtual void HandleAsyncEvent(const EventMarker& eventMarker, const GestureEvent& info) {};
+    virtual void HandleAsyncEvent(const EventMarker& eventMarker, const RotationEvent& info) {};
     // For json dsl event which has json format param.
     virtual void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param) = 0;
     virtual void HandleAsyncEvent(const EventMarker& eventMarker, const std::shared_ptr<BaseEventInfo>& info)
@@ -188,6 +235,11 @@ public:
     virtual void HandleSyncEvent(const EventMarker& eventMarker, const KeyEvent& info, bool& result) = 0;
     // For json dsl event which has json format param and json format result.
     virtual void HandleSyncEvent(const EventMarker& eventMarker, const std::string& param, std::string& result) = 0;
+    virtual void HandleSyncEvent(const EventMarker& eventMarker, const std::shared_ptr<BaseEventInfo>& info)
+    {
+        bool result = true;
+        HandleSyncEvent(eventMarker, *info, result);
+    }
 };
 
 } // namespace OHOS::Ace

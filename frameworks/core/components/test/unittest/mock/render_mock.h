@@ -64,19 +64,20 @@ class MockRenderBox : public RenderBox {
     DECLARE_ACE_TYPE(MockRenderBox, RenderBox);
 
 public:
-    BackgroundImagePosition GetBackgroundPositionPublic() const
-    {
-        return backgroundImagePosition_;
-    }
     int32_t GetPercentFlag() const
     {
         return percentFlag_;
     }
 
-private:
-    BackgroundImagePosition backgroundImagePosition_;
-    BackgroundPositionPropertyAnimatable::SetterMap GetBackgroundPositionPropertySetterMap() override;
-    BackgroundPositionPropertyAnimatable::GetterMap GetBackgroundPositionPropertyGetterMap() override;
+    const Edge& GetMarginOrigin() const
+    {
+        return marginOrigin_;
+    }
+
+    const Edge& GetPaddingOrigin() const
+    {
+        return paddingOrigin_;
+    }
 };
 
 class MockRenderClip : public RenderClip {

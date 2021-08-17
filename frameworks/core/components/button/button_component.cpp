@@ -26,7 +26,10 @@ namespace OHOS::Ace {
 
 ButtonComponent::ButtonComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children)
 {
-    buttonController_ = AceType::MakeRefPtr<ButtonProgressController>();
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<ButtonDeclaration>();
+        declaration_->Init();
+    }
 }
 
 RefPtr<RenderNode> ButtonComponent::CreateRenderNode()
@@ -80,6 +83,194 @@ RefPtr<ButtonComponent> ButtonBuilder::Build(const RefPtr<ThemeManager>& themeMa
     buttonComponent->SetFocusColor(buttonTheme->GetBgFocusColor());
     buttonComponent->SetFocusAnimationColor(buttonTheme->GetBgFocusColor());
     return buttonComponent;
+}
+
+bool ButtonComponent::GetDisabledState() const
+{
+    return declaration_->GetDisabledState();
+}
+
+bool ButtonComponent::GetWaitingState() const
+{
+    return declaration_->GetWaitingState();
+}
+
+bool ButtonComponent::GetAutoFocusState() const
+{
+    return declaration_->GetAutoFocusState();
+}
+
+bool ButtonComponent::GetRadiusState() const
+{
+    return declaration_->GetRadiusState();
+}
+
+const Dimension& ButtonComponent::GetMinWidth() const
+{
+    return declaration_->GetMinWidth();
+}
+
+const Dimension& ButtonComponent::GetRectRadius() const
+{
+    return declaration_->GetRectRadius();
+}
+
+const Dimension& ButtonComponent::GetProgressDiameter() const
+{
+    return declaration_->GetProgressDiameter();
+}
+
+const Color& ButtonComponent::GetBackgroundColor() const
+{
+    return declaration_->GetBackgroundColor();
+}
+
+const Color& ButtonComponent::GetClickedColor() const
+{
+    return declaration_->GetClickedColor();
+}
+
+const Color& ButtonComponent::GetDisabledColor() const
+{
+    return declaration_->GetDisabledColor();
+}
+
+const Color& ButtonComponent::GetFocusColor() const
+{
+    return declaration_->GetFocusColor();
+}
+
+const Color& ButtonComponent::GetHoverColor() const
+{
+    return declaration_->GetHoverColor();
+}
+
+const Color& ButtonComponent::GetProgressColor() const
+{
+    return declaration_->GetProgressColor();
+}
+
+const Color& ButtonComponent::GetProgressFocusColor() const
+{
+    return declaration_->GetProgressFocusColor();
+}
+
+const Color& ButtonComponent::GetFocusAnimationColor() const
+{
+    return declaration_->GetFocusAnimationColor();
+}
+
+const BorderEdge& ButtonComponent::GetBorderEdge() const
+{
+    return declaration_->GetBorderEdge();
+}
+
+const EventMarker& ButtonComponent::GetClickedEventId() const
+{
+    return declaration_->GetClickedEventId();
+}
+
+RefPtr<ButtonProgressController> ButtonComponent::GetButtonController() const
+{
+    return declaration_->GetButtonController();
+}
+
+void ButtonComponent::SetDisabledState(bool state)
+{
+    declaration_->SetDisabledState(state);
+}
+
+void ButtonComponent::SetWaitingState(bool state)
+{
+    declaration_->SetWaitingState(state);
+}
+
+void ButtonComponent::SetAutoFocusState(bool state)
+{
+    declaration_->SetAutoFocusState(state);
+}
+
+void ButtonComponent::SetRadiusState(bool state)
+{
+    declaration_->SetRadiusState(state);
+}
+
+void ButtonComponent::SetMinWidth(const Dimension& width)
+{
+    declaration_->SetMinWidth(width);
+}
+
+void ButtonComponent::SetRectRadius(const Dimension& radius)
+{
+    declaration_->SetRectRadius(radius);
+}
+
+void ButtonComponent::SetProgressDiameter(const Dimension& diameter)
+{
+    declaration_->SetProgressDiameter(diameter);
+}
+
+void ButtonComponent::SetBackgroundColor(const Color& color)
+{
+    declaration_->SetBackgroundColor(color);
+
+}
+
+void ButtonComponent::SetClickedColor(const Color& color)
+{
+    declaration_->SetClickedColor(color);
+}
+
+void ButtonComponent::SetDisabledColor(const Color& color)
+{
+    declaration_->SetDisabledColor(color);
+}
+
+void ButtonComponent::SetFocusColor(const Color& color)
+{
+    declaration_->SetFocusColor(color);
+}
+
+void ButtonComponent::SetHoverColor(const Color& color)
+{
+    declaration_->SetHoverColor(color);
+}
+
+void ButtonComponent::SetProgressColor(const Color& color)
+{
+    declaration_->SetProgressColor(color);
+}
+
+void ButtonComponent::SetProgressFocusColor(const Color& color)
+{
+    declaration_->SetProgressFocusColor(color);
+}
+
+void ButtonComponent::SetFocusAnimationColor(const Color& color)
+{
+    declaration_->SetFocusAnimationColor(color);
+}
+
+void ButtonComponent::SetBorderEdge(const BorderEdge& borderEdge)
+{
+    declaration_->SetBorderEdge(borderEdge);
+}
+
+void ButtonComponent::SetClickedEventId(const EventMarker& eventId)
+{
+    declaration_->SetClickedEventId(eventId);
+}
+
+void ButtonComponent::SetClickFunction(std::function<void()>&& clickCallback)
+{
+    declaration_->SetClickedFunction(std::move(clickCallback));
+}
+
+void ButtonComponent::SetDeclaration(const RefPtr<ButtonDeclaration>& declaration)
+{
+    if (declaration) {
+        declaration_ = declaration;
+    }
 }
 
 } // namespace OHOS::Ace

@@ -41,13 +41,13 @@ public:
 
     void SetTweenOption(const TweenOption& option);
     void SetCustomTweenOption(const TweenOption& option);
-    void SetTweenOperation(const TweenOperation& operation);
-    void SetCustomTweenOperation(const TweenOperation& operation);
+    void SetAnimationOperation(const AnimationOperation& operation);
+    void SetCustomAnimationOperation(const AnimationOperation& operation);
 
     const TweenOption& GetTweenOption() const;
     const TweenOption& GetCustomTweenOption() const;
-    const TweenOperation& GetTweenOperation() const;
-    const TweenOperation& GetCustomTweenOperation() const;
+    const AnimationOperation& GetAnimationOperation() const;
+    const AnimationOperation& GetCustomAnimationOperation() const;
 
     void SetOptionCssChanged(bool change)
     {
@@ -99,16 +99,6 @@ public:
 
     void SetAnimator(const RefPtr<Animator>& animator);
     RefPtr<Animator> GetAnimator() const;
-
-    void MarkDeclarativeAniamtion()
-    {
-        isDeclarativeAnimation_ = true;
-    }
-
-    bool IsDeclarativeAnimation() const
-    {
-        return isDeclarativeAnimation_;
-    }
 
     void SetLeafNode(bool isLeaf)
     {
@@ -184,18 +174,34 @@ public:
         return positionParam_;
     }
 
+    void UpdateAnimationName(const std::string& animationName)
+    {
+        if (animationName_ == animationName) {
+            isAnimationNameUpdated_ = false;
+        } else {
+            animationName_ = animationName;
+            isAnimationNameUpdated_ = true;
+        }
+    }
+
+    bool IsAnimationNameUpdated() const
+    {
+        return isAnimationNameUpdated_;
+    }
+
 private:
     TweenOption optionCss_;
     TweenOption optionCustom_;
-    TweenOperation operationCss_ = TweenOperation::PLAY;
-    TweenOperation operationCustom_ = TweenOperation::PLAY;
+    AnimationOperation operationCss_ = AnimationOperation::PLAY;
+    AnimationOperation operationCustom_ = AnimationOperation::PLAY;
+    std::string animationName_;
+    bool isAnimationNameUpdated_ = false;
     bool isFirstFrameShow_ = true;
     bool optionCssChanged_ = false;
     bool optionCustomChanged_ = false;
     bool operationCssChanged_ = false;
     bool operationCustomChanged_ = false;
     bool isLeaf_ = false;
-    bool isDeclarativeAnimation_ = false;
     RefPtr<Animator> animator_;
     Shadow shadow_;
     PositionParam positionParam_;

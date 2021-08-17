@@ -162,6 +162,9 @@ void PageTransitionElement::SetTransitionDirection(TransitionEvent event, Transi
         LOGD("set background transition option type: %{public}d", optionType);
         backgroundTransition_->SwitchTransitionOption(optionType);
     }
+    if (context && context->GetIsDeclarative() && floatAnimation_) {
+        controller_->AddInterpolator(std::move(floatAnimation_));
+    }
 }
 
 const RefPtr<Animator>& PageTransitionElement::GetTransitionController() const
@@ -185,6 +188,8 @@ void PageTransitionElement::UpdateTransitionOption()
     LOGI("Use user-defined transition parameters.");
     contentInOption_ = transitionComponent->GetContentTransitionInOption();
     contentOutOption_ = transitionComponent->GetContentTransitionOutOption();
+    pageTransitions_ = transitionComponent->GetPageTransitions();
+
     sharedInOption_ = contentInOption_;
     sharedOutOption_ = contentOutOption_;
     isCustomOptionIn_ = contentInOption_.IsValid();
@@ -291,8 +296,8 @@ RefPtr<Element> PageTransitionElement::GetContentElement() const
     return element;
 }
 
-void PageTransitionElement::SetTransition(DeviceType deviceType, TransitionEvent event,
-    TransitionDirection direction, const RRect& rrect)
+void PageTransitionElement::SetTransition(
+    DeviceType deviceType, TransitionEvent event, TransitionDirection direction, const RRect& rrect)
 {
     auto tweenOption =
         TransitionTweenOptionFactory::CreateTransitionTweenOption(deviceType, event, isRightToLeft_, rrect, context_);
@@ -302,6 +307,7 @@ void PageTransitionElement::SetTransition(DeviceType deviceType, TransitionEvent
     }
     bool isSetOutOption = false;
     int32_t duration = tweenOption->GetTransitionContentInOption().GetDuration();
+    int32_t delay = 0;
     if (direction == TransitionDirection::TRANSITION_OUT) {
         if (isCustomOptionOut_) {
             if (contentOutOption_.HasDurationChanged()) {
@@ -323,8 +329,38 @@ void PageTransitionElement::SetTransition(DeviceType deviceType, TransitionEvent
             sharedInOption_ = tweenOption->GetSharedInOption();
         }
     }
+    auto context = GetContext().Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        auto pageTransition = GetCurrentPageTransition(event, direction_);
+        isCustomOption_ = false;
+        isSetOutOption = true;
+        if (direction == TransitionDirection::TRANSITION_OUT) {
+            if (pageTransition) {
+                contentOutOption_ = ProcessPageTransition(pageTransition, event);
+                if (contentOutOption_.HasDurationChanged()) {
+                    duration = contentOutOption_.GetDuration();
+                }
+                delay = contentOutOption_.GetDelay();
+                isCustomOption_ = true;
+                sharedOutOption_ = contentOutOption_;
+            }
+        } else {
+            if (pageTransition) {
+                contentInOption_ = ProcessPageTransition(pageTransition, event);
+                if (contentInOption_.HasDurationChanged()) {
+                    duration = contentInOption_.GetDuration();
+                }
+                delay = contentInOption_.GetDelay();
+                isCustomOption_ = true;
+                sharedInOption_ = contentInOption_;
+            }
+        }
+    }
     if (controller_) {
         controller_->SetDuration(duration);
+        if (context && context->GetIsDeclarative() && delay >= 0) {
+            controller_->SetStartDelay(delay);
+        }
     }
     if (contentTransition_) {
         contentTransition_->SetTransition(contentInOption_, contentOutOption_);
@@ -426,6 +462,77 @@ const RefPtr<TransitionElement>& PageTransitionElement::GetContentTransitionElem
 const RefPtr<TransitionElement>& PageTransitionElement::GetBackgroundTransitionElement() const
 {
     return backgroundTransition_;
+}
+
+TweenOption PageTransitionElement::ProcessPageTransition(
+    const RefPtr<PageTransition>& pageTransition, TransitionEvent event)
+{
+    auto tweenOption = pageTransition->GetTweenOption();
+    // 1.SlideEffect
+    auto transitionDeclarativeTweenOption = TransitionDeclarativeTweenOption(isRightToLeft_, GetContext());
+    transitionDeclarativeTweenOption.CreateSlideEffectAnimation(
+        tweenOption, pageTransition->GetSlideEffect(), pageTransition->GetType(), direction_);
+    // 2. callback
+    auto onExitHandler = pageTransition->GetOnExitHandler();
+    auto onEnterHandler = pageTransition->GetOnEnterHandler();
+    RouteType type = RouteType::PUSH;
+    if (event == TransitionEvent::POP_START || event == TransitionEvent::POP_END) {
+        type = RouteType::POP;
+    }
+    if (onExitHandler || onEnterHandler) {
+        floatAnimation_ = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, 1.0f, pageTransition->GetCurve());
+        if (onExitHandler) {
+            floatAnimation_->AddListener(
+                [type, onExitHandler](const float& progress) { onExitHandler(type, progress); });
+        }
+        if (onEnterHandler) {
+            floatAnimation_->AddListener(
+                [type, onEnterHandler](const float& progress) { onEnterHandler(type, progress); });
+        }
+    }
+    // 3. delay curve
+    return tweenOption;
+}
+
+RefPtr<PageTransition> PageTransitionElement::GetCurrentPageTransition(
+    TransitionEvent event, TransitionDirection direction) const
+{
+    if (pageTransitions_.empty()) {
+        return nullptr;
+    }
+    auto type = GetPageTransitionType(event, direction);
+    auto pos = pageTransitions_.find(type);
+    if (pos != pageTransitions_.end()) {
+        return pos->second;
+    }
+
+    if (direction == TransitionDirection::TRANSITION_IN) {
+        type = PageTransitionType::ENTER;
+    } else {
+        type = PageTransitionType::EXIT;
+    }
+    pos = pageTransitions_.find(type);
+    if (pos != pageTransitions_.end()) {
+        return pos->second;
+    }
+    return nullptr;
+}
+
+PageTransitionType PageTransitionElement::GetPageTransitionType(TransitionEvent event, TransitionDirection direction)
+{
+    if (direction == TransitionDirection::TRANSITION_IN) {
+        if (event == TransitionEvent::POP_START) {
+            return PageTransitionType::ENTER_POP;
+        } else {
+            return PageTransitionType::ENTER_PUSH;
+        }
+    } else {
+        if (event == TransitionEvent::POP_START) {
+            return PageTransitionType::EXIT_POP;
+        } else {
+            return PageTransitionType::EXIT_PUSH;
+        }
+    }
 }
 
 } // namespace OHOS::Ace

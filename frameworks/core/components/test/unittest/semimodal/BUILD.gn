@@ -23,11 +23,14 @@ ohos_unittest("RenderSemiModalTest") {
     "$ace_root/frameworks/core/accessibility/accessibility_node.cpp",
 
     # animation
+    "$ace_root/frameworks/core/animation/animatable_data.cpp",
+    "$ace_root/frameworks/core/animation/animatable_properties.cpp",
     "$ace_root/frameworks/core/animation/animator.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/friction_motion.cpp",
+    "$ace_root/frameworks/core/animation/property_animation.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
     "$ace_root/frameworks/core/animation/scroll_motion.cpp",
     "$ace_root/frameworks/core/animation/shared_transition_controller.cpp",
@@ -36,6 +39,20 @@ ohos_unittest("RenderSemiModalTest") {
     "$ace_root/frameworks/core/animation/spring_model.cpp",
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
 
+    #base
+    "$ace_root/adapter/common/cpp/thread_util.cpp",
+    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
+    "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
+    "$ace_root/frameworks/base/geometry/matrix4.cpp",
+    "$ace_root/frameworks/base/geometry/quaternion.cpp",
+    "$ace_root/frameworks/base/geometry/transform_util.cpp",
+    "$ace_root/frameworks/base/json/json_util.cpp",
+    "$ace_root/frameworks/base/log/dump_log.cpp",
+    "$ace_root/frameworks/base/memory/memory_monitor.cpp",
+    "$ace_root/frameworks/base/thread/background_task_executor.cpp",
+    "$ace_root/frameworks/base/utils/base_id.cpp",
+
     # common
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/event_manager.cpp",
@@ -43,15 +60,8 @@ ohos_unittest("RenderSemiModalTest") {
     "$ace_root/frameworks/core/common/font_loader.cpp",
     "$ace_root/frameworks/core/common/font_manager.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
+    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
-
-    #base
-    "$ace_root/adapter/common/cpp/thread_util.cpp",
-    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/frameworks/base/geometry/matrix4.cpp",
-    "$ace_root/frameworks/base/log/dump_log.cpp",
-    "$ace_root/frameworks/base/thread/background_task_executor.cpp",
-    "$ace_root/frameworks/base/utils/base_id.cpp",
 
     # components
     "$ace_root/frameworks/core/components/box/box_component.cpp",
@@ -114,9 +124,13 @@ ohos_unittest("RenderSemiModalTest") {
     "$ace_root/frameworks/core/gestures/drag_recognizer.cpp",
     "$ace_root/frameworks/core/gestures/gesture_recognizer.cpp",
     "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
+    "$ace_root/frameworks/core/gestures/multi_fingers_recognizer.cpp",
     "$ace_root/frameworks/core/gestures/raw_recognizer.cpp",
 
     # gestures
+    "$ace_root/frameworks/core/gestures/long_press_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/pan_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/sequenced_recognizer.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
 
     # image
@@ -131,14 +145,17 @@ ohos_unittest("RenderSemiModalTest") {
     "$ace_root/frameworks/core/components/box/render_box.cpp",
     "$ace_root/frameworks/core/components/box/render_box_base.cpp",
     "$ace_root/frameworks/core/components/clip/render_clip.cpp",
+    "$ace_root/frameworks/core/components/common/painter/flutter_svg_painter.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/decoration.cpp",
     "$ace_root/frameworks/core/components/common/properties/edge.cpp",
+    "$ace_root/frameworks/core/components/common/properties/motion_path_evaluator.cpp",
     "$ace_root/frameworks/core/components/common/properties/page_transition_option.cpp",
     "$ace_root/frameworks/core/components/common/properties/scroll_bar.cpp",
+    "$ace_root/frameworks/core/components/common/properties/shadow.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
     "$ace_root/frameworks/core/components/dialog_modal/render_dialog_modal.cpp",
     "$ace_root/frameworks/core/components/display/render_display.cpp",
@@ -170,17 +187,15 @@ ohos_unittest("RenderSemiModalTest") {
     "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
     "$ace_root/frameworks/core/components/theme/theme_manager.cpp",
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
+    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
     "$root_out_dir/ace/framework/core/components/theme/theme_constants_default.cpp",
     "render_semi_modal_test.cpp",
 
-    #mock
+    # mock
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
-    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
-    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
   ]
 
   if (!is_wearable_product) {
@@ -198,10 +213,13 @@ ohos_unittest("RenderSemiModalTest") {
   configs = [
     ":config_render_semi_modal_test",
     "$ace_root:ace_test_config",
-    "$flutter_root:flutter_config",
+    "$ace_flutter_engine_root:flutter_config",
+    "//third_party/cJSON:cJSON_config",
   ]
 
   deps = [
+    "$ace_flutter_engine_root:ace_skia_ohos",
+    "$ace_root:third_party_cjson",
     "$ace_root/frameworks/base/resource:ace_resource",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
@@ -210,11 +228,7 @@ ohos_unittest("RenderSemiModalTest") {
 
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-    deps += [
-      "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr",
-      "$flutter_root:ace_skia_ohos",
-      "$flutter_root:third_party_flutter_engine_ohos",
-    ]
+    deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }

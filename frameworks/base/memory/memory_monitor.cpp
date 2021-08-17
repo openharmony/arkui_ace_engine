@@ -18,13 +18,25 @@
 #include <map>
 #include <mutex>
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include <malloc.h>
+#endif
+
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 
-#ifdef ACE_MEMORY_MONITOR
-
 namespace OHOS::Ace {
 
+void PurgeMallocCache()
+{
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if defined(__BIONIC__)
+    mallopt(M_PURGE, 0);
+#endif
+#endif
+}
+
+#ifdef ACE_MEMORY_MONITOR
 class MemoryMonitorImpl : public MemoryMonitor {
 public:
     void Add(void* ptr) final
@@ -114,7 +126,6 @@ MemoryMonitor& MemoryMonitor::GetInstance()
     static MemoryMonitorImpl instance;
     return instance;
 }
+#endif // ACE_MEMORY_MONITOR
 
 } // namespace OHOS::Ace
-
-#endif // ACE_MEMORY_MONITOR

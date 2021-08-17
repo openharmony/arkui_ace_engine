@@ -32,6 +32,8 @@ namespace OHOS::Ace::StringUtils {
 ACE_EXPORT extern const char DEFAULT_STRING[];
 ACE_EXPORT extern const std::wstring DEFAULT_WSTRING;
 ACE_EXPORT extern const std::u16string DEFAULT_USTRING;
+constexpr int32_t TEXT_CASE_LOWERCASR = 1;
+constexpr int32_t TEXT_CASE_UPPERCASR = 2;
 
 inline std::u16string Str8ToStr16(const std::string& str)
 {
@@ -106,6 +108,22 @@ inline int32_t StringToInt(const std::string& value)
     }
 }
 
+inline int64_t StringToLongInt(const std::string& value)
+{
+    errno = 0;
+    char* pEnd = nullptr;
+    int64_t result = std::strtoll(value.c_str(), &pEnd, 10);
+    if (pEnd == value.c_str() || errno == ERANGE) {
+        return 0;
+    } else if (result < INT64_MIN) {
+        return INT64_MIN;
+    } else if (result > INT64_MAX) {
+        return INT64_MAX;
+    } else {
+        return result;
+    }
+}
+
 inline uint32_t StringToUint(const std::string& value, uint32_t defaultErr = 0)
 {
     errno = 0;
@@ -120,7 +138,7 @@ inline uint32_t StringToUint(const std::string& value, uint32_t defaultErr = 0)
 
 inline double StringToDouble(const std::string& value)
 {
-    char* pEnd = NULL;
+    char* pEnd = nullptr;
     double result = std::strtod(value.c_str(), &pEnd);
     if (pEnd == value.c_str() || errno == ERANGE) {
         return 0.0;
@@ -129,26 +147,44 @@ inline double StringToDouble(const std::string& value)
     }
 }
 
-inline Dimension StringToDimension(const std::string& value, bool useVp = false)
+inline float StringToFloat(const std::string& value)
+{
+    char* pEnd = nullptr;
+    float result = std::strtof(value.c_str(), &pEnd);
+    if (pEnd == value.c_str() || errno == ERANGE) {
+        return 0.0f;
+    } else {
+        return result;
+    }
+}
+
+inline Dimension StringToDimensionWithUnit(const std::string& value, DimensionUnit defaultUnit = DimensionUnit::PX)
 {
     errno = 0;
     char* pEnd = nullptr;
     double result = std::strtod(value.c_str(), &pEnd);
     if (pEnd == value.c_str() || errno == ERANGE) {
-        return Dimension(0.0, DimensionUnit::PX);
-    } else {
-        if ((pEnd) && (std::strcmp(pEnd, "%") == 0)) {
+        return Dimension(0.0, defaultUnit);
+    } else if (pEnd != nullptr) {
+        if (std::strcmp(pEnd, "%") == 0) {
             // Parse percent, transfer from [0, 100] to [0, 1]
             return Dimension(result / 100.0, DimensionUnit::PERCENT);
-        } else if ((pEnd) && (std::strcmp(pEnd, "px") == 0)) {
+        } else if (std::strcmp(pEnd, "px") == 0) {
             return Dimension(result, DimensionUnit::PX);
-        } else if ((pEnd) && (std::strcmp(pEnd, "vp") == 0)) {
+        } else if (std::strcmp(pEnd, "vp") == 0) {
             return Dimension(result, DimensionUnit::VP);
-        } else if ((pEnd) && (std::strcmp(pEnd, "fp") == 0)) {
+        } else if (std::strcmp(pEnd, "fp") == 0) {
             return Dimension(result, DimensionUnit::FP);
+        } else if ((pEnd) && (std::strcmp(pEnd, "lpx") == 0)) {
+            return Dimension(result, DimensionUnit::LPX);
         }
-        return Dimension(result, useVp ? DimensionUnit::VP : DimensionUnit::PX);
     }
+    return Dimension(result, defaultUnit);
+}
+
+inline Dimension StringToDimension(const std::string& value, bool useVp = false)
+{
+    return StringToDimensionWithUnit(value, useVp ? DimensionUnit::VP : DimensionUnit::PX);
 }
 
 inline double StringToDegree(const std::string& value)
@@ -217,10 +253,24 @@ inline void StringSpliter(const std::string& source, char delimiter, std::vector
     StringSpliter(source, delimiter, func, out);
 }
 
+inline void StringSpliter(const std::string& source, char delimiter, std::vector<float>& out)
+{
+    using Func = float (*)(const std::string&);
+    Func func = [](const std::string& value) { return StringToFloat(value); };
+    StringSpliter(source, delimiter, func, out);
+}
+
 inline void StringSpliter(const std::string& source, char delimiter, std::vector<int>& out)
 {
     using Func = int32_t (*)(const std::string&);
     Func func = [](const std::string& value) { return StringToInt(value); };
+    StringSpliter(source, delimiter, func, out);
+}
+
+inline void StringSpliter(const std::string& source, char delimiter, std::vector<Dimension>& out)
+{
+    using Func = Dimension (*)(const std::string&);
+    Func func = [](const std::string& value) { return StringToDimension(value); };
     StringSpliter(source, delimiter, func, out);
 }
 
@@ -245,6 +295,22 @@ inline std::string TrimStr(const std::string& str, char cTrim = ' ')
     }
     auto endPos = str.find_last_not_of(cTrim);
     return str.substr(firstPos, endPos - firstPos + 1);
+}
+
+inline void TrimStrLeadingAndTrailing(std::string& str, char cTrim = ' ')
+{
+    auto firstIndexNotOfSpace = str.find_first_not_of(" ");
+    if (firstIndexNotOfSpace == std::string::npos) {
+        str = "";
+        return;
+    }
+    str.erase(0, firstIndexNotOfSpace);
+    auto lastIndexNotOfSpace = str.find_last_not_of(" ");
+    if (lastIndexNotOfSpace == std::string::npos) {
+        str = "";
+        return;
+    }
+    str.erase(lastIndexNotOfSpace + 1);
 }
 
 inline void SplitStr(
@@ -274,6 +340,35 @@ inline void SplitStr(
     }
 }
 
+inline void SplitStr(const std::string& str, const std::string& sep, std::vector<Dimension>& out, bool needTrim = true)
+{
+    out.erase(out.begin(), out.end());
+    if (str.empty() || sep.empty()) {
+        return;
+    }
+    std::string strPart;
+    std::string::size_type startPos = 0;
+    std::string::size_type pos = str.find_first_of(sep, startPos);
+    while (pos != std::string::npos) {
+        if (pos > startPos) {
+            strPart = needTrim ? TrimStr(str.substr(startPos, pos - startPos)) : str.substr(startPos, pos - startPos);
+            if (!strPart.empty()) {
+                out.emplace_back(StringToDimension(std::move(strPart)));
+            }
+        }
+        startPos = pos + sep.size();
+        pos = str.find_first_of(sep, startPos);
+    }
+    if (startPos < str.size()) {
+        strPart = needTrim ? TrimStr(str.substr(startPos)) : str.substr(startPos);
+        if (!strPart.empty()) {
+            out.emplace_back(StringToDimension(std::move(strPart)));
+        }
+    }
+}
+
+const std::string ACE_EXPORT FormatString(const char* fmt, ...);
+
 inline bool StartWith(const std::string& dst, const std::string& prefix)
 {
     return dst.compare(0, prefix.size(), prefix) == 0;
@@ -282,6 +377,24 @@ inline bool StartWith(const std::string& dst, const std::string& prefix)
 inline bool EndWith(const std::string& dst, const std::string& suffix)
 {
     return (dst.size() >= suffix.size()) && dst.compare(dst.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+inline void TransfromStrCase(std::string& str, int32_t textCase)
+{
+    if (str.empty()) {
+        return;
+    }
+
+    switch (textCase) {
+        case TEXT_CASE_LOWERCASR:
+            transform(str.begin(), str.end(), str.begin(), ::tolower);
+            break;
+        case TEXT_CASE_UPPERCASR:
+            transform(str.begin(), str.end(), str.begin(), ::toupper);
+            break;
+        default:
+            break;
+    }
 }
 
 } // namespace OHOS::Ace::StringUtils

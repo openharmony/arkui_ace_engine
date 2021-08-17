@@ -20,6 +20,8 @@ ohos_unittest("FocusTest") {
   module_out_path = module_output_path
 
   sources = [
+    "$ace_root/frameworks/core/animation/animatable_data.cpp",
+    "$ace_root/frameworks/core/animation/animatable_properties.cpp",
     "$ace_root/frameworks/core/animation/animator.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
@@ -27,8 +29,11 @@ ohos_unittest("FocusTest") {
     "$ace_root/frameworks/core/animation/scheduler.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
+    "$ace_root/frameworks/core/components/box/render_box.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components/common/properties/decoration.cpp",
     "$ace_root/frameworks/core/components/common/properties/scroll_bar.cpp",
+    "$ace_root/frameworks/core/components/common/properties/shadow.cpp",
     "$ace_root/frameworks/core/components/refresh/render_refresh.cpp",
     "$ace_root/frameworks/core/components/scroll/render_multi_child_scroll.cpp",
     "$ace_root/frameworks/core/components/scroll/render_scroll.cpp",
@@ -36,25 +41,34 @@ ohos_unittest("FocusTest") {
     "$ace_root/frameworks/core/components/scroll/scroll_bar_controller.cpp",
     "$ace_root/frameworks/core/event/key_event.cpp",
     "$ace_root/frameworks/core/focus/focus_node.cpp",
-    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
-    "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
-    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/pipeline/base/component.cpp",
     "$ace_root/frameworks/core/pipeline/base/element.cpp",
     "$ace_root/frameworks/core/pipeline/base/render_element.cpp",
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
     "focus_test.cpp",
-  ]
 
-  sources += [
+    #mock
+    "$ace_root/adapter/common/cpp/thread_util.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
+    "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
+    "$ace_root/frameworks/base/geometry/matrix4.cpp",
+    "$ace_root/frameworks/base/geometry/quaternion.cpp",
+    "$ace_root/frameworks/base/geometry/transform_util.cpp",
     "$ace_root/frameworks/base/log/dump_log.cpp",
+    "$ace_root/frameworks/base/memory/memory_monitor.cpp",
+    "$ace_root/frameworks/base/thread/background_task_executor.cpp",
+    "$ace_root/frameworks/base/utils/base_id.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
+    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
   ]
 
   configs = [
     "$ace_root:ace_test_config",
-    "$flutter_root:flutter_config",
+    "$ace_flutter_engine_root:flutter_config",
   ]
 
   deps = [
@@ -62,11 +76,6 @@ ohos_unittest("FocusTest") {
     "//utils/native/base:utils",
   ]
   if (is_standard_system) {
-    deps += [
-      "//third_party/curl:curl",
-      "$flutter_root:ace_skia_ohos",
-      "$flutter_root:third_party_flutter_engine_ohos",
-    ]
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     subsystem_name = "ace"
     part_name = "ace_engine_standard"

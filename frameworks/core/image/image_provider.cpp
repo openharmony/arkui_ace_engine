@@ -15,43 +15,27 @@
 
 #include "core/image/image_provider.h"
 
-#include <regex>
-
+#include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/skia/include/core/SkStream.h"
-#include "third_party/skia/include/utils/SkBase64.h"
 
-#include "base/network/download_manager.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/string_utils.h"
-#include "core/common/ace_engine.h"
 #include "core/event/ace_event_helper.h"
 #include "core/image/flutter_image_cache.h"
 
 namespace OHOS::Ace {
 namespace {
 
-constexpr size_t FILE_HEAD_LENGTH = 7;           // 7 is the size of "file://"
-constexpr size_t MEMORY_HEAD_LENGTH = 9;         // 9 is the size of "memory://"
-constexpr size_t INTERNAL_FILE_HEAD_LENGTH = 15; // 15 is the size of "internal://app/"
-
-#ifdef WINDOWS_PLATFORM
-char* realpath(const char* path, char* resolved_path)
-{
-    if (strcpy_s(resolved_path, PATH_MAX, path) != 0) {
-        return nullptr;
-    }
-    return resolved_path;
-}
-#endif
+constexpr double RESIZE_MAX_PROPORTION = 0.5 * 0.5; // Cache image when resize exceeds 25%
+RefPtr<ImageProvider> g_imageProvider = nullptr;
+// If a picture is a wide color gamut picture, its area value will be larger than this threshold.
+constexpr double SRGB_GAMUT_AREA = 0.104149;
 
 } // namespace
 
 std::mutex ImageProvider::loadingImageMutex_;
 std::unordered_map<std::string, WeakPtr<ImageProvider>> ImageProvider::loadingImage_;
 
-bool ImageProvider::TrySetLoadingImage(
-    const std::string& key,
-    const WeakPtr<ImageProvider>& provider)
+bool ImageProvider::TrySetLoadingImage(const std::string& key, const WeakPtr<ImageProvider>& provider)
 {
     std::lock_guard lock(loadingImageMutex_);
     if (key.empty()) {
@@ -86,172 +70,144 @@ void ImageProvider::RemoveLoadingImage(const std::string& key)
     loadingImage_.erase(key);
 }
 
-RefPtr<ImageProvider> ImageProvider::Create(const std::string& uri, RefPtr<SharedImageManager> sharedImageManager)
+ImageProvider::ImageProvider(const std::string& uri, RefPtr<SharedImageManager> sharedImageManager)
 {
-    SrcType srcType = ResolveURI(uri);
+    SrcType srcType = ImageLoader::ResolveURI(uri);
     switch (srcType) {
         case SrcType::INTERNAL:
         case SrcType::FILE: {
-            LOGD("File Image!");
-            return MakeRefPtr<FileImageProvider>();
+            imageLoader_ = MakeRefPtr<FileImageLoader>();
+            break;
         }
         case SrcType::NETWORK: {
-            LOGD("Network Image!");
-            return MakeRefPtr<NetworkImageProvider>();
+            imageLoader_ = MakeRefPtr<NetworkImageLoader>();
+            break;
         }
         case SrcType::ASSET: {
-            LOGD("Asset Image!");
-            return MakeRefPtr<AssetImageProvider>();
+            imageLoader_ = MakeRefPtr<AssetImageLoader>(false);
+            break;
+        }
+        case SrcType::RESOLUTIONASSETS: {
+            imageLoader_ = MakeRefPtr<AssetImageLoader>(true);
+            break;
         }
         case SrcType::BASE64: {
-            LOGD("Base64 Image!");
-            return MakeRefPtr<Base64ImageProvider>();
+            imageLoader_ = MakeRefPtr<Base64ImageLoader>();
+            break;
         }
         case SrcType::MEMORY: {
-            LOGD("Memory Image!");
             if (!sharedImageManager) {
                 LOGE("sharedImageManager is null, uri: %{private}s", uri.c_str());
-                return nullptr;
+                break;
             }
             // check whether the current picName is waiting to be read from shared memory, if found,
             // add to [ProviderMapToReload], and return [memoryImageProvider], waiting for call to load data
             // when image data done added to [SharedImageMap].
-            RefPtr<MemoryImageProvider> memoryImageProvider = MakeRefPtr<MemoryImageProvider>();
-            RefPtr<ImageProviderLoader> imageLoader = AceType::DynamicCast<ImageProviderLoader>(memoryImageProvider);
-            auto nameOfSharedImage = RemovePathHead(uri);
+
+            auto imageLoader = MakeRefPtr<MemoryImageLoader>(
+                [weakPtr = WeakClaim(this)](const std::string& uri) {
+                    auto provider = weakPtr.Upgrade();
+                    if (provider) {
+                        provider->loadingUri_ = uri;
+                    }
+                },
+                [weakPtr = WeakClaim(this)](const std::string& uri) {
+                    auto provider = weakPtr.Upgrade();
+                    if (!provider) {
+                        return;
+                    }
+                    std::lock_guard<std::mutex> lock(provider->listenersMutex_);
+                    for (const auto& weak : provider->listeners_) {
+                        auto listener = weak.Upgrade();
+                        if (listener) {
+                            listener->MarkNeedReload();
+                        }
+                    }
+                    provider->GetImageSize(false, nullptr, uri);
+                });
+            imageLoader_ = imageLoader;
+            auto nameOfSharedImage = ImageLoader::RemovePathHead(uri);
             if (sharedImageManager->AddProviderToReloadMap(nameOfSharedImage, imageLoader)) {
-                return memoryImageProvider;
+                break;
             }
             // this is when current picName is not found in [ProviderMapToReload], indicating that image data of this
             // image may have been written to [SharedImageMap], so return the [MemoryImageProvider] and start loading
             if (sharedImageManager->FindImageInSharedImageMap(nameOfSharedImage, imageLoader)) {
-                return memoryImageProvider;
+                break;
             }
+            imageLoader_ = nullptr;
             LOGE("memory image not found in SharedImageMap!, uri is %{private}s", uri.c_str());
-            return nullptr;
+            break;
+        }
+        case SrcType::RESOURCE: {
+            imageLoader_ = MakeRefPtr<ResourceImageLoader>();
+            break;
+        }
+        case SrcType::DATA_ABILITY: {
+            imageLoader_ = MakeRefPtr<DataProviderImageLoader>();
+            break;
         }
         default: {
             LOGE("Image source type not supported!");
-            return nullptr;
+            break;
         }
     }
 }
 
-SrcType ImageProvider::ResolveURI(const std::string& uri)
+ImageProvider::ImageProvider(InternalResource::ResourceId resourceId)
 {
-    if (uri.empty()) {
-        return SrcType::OTHER;
-    }
-    auto iter = uri.find_first_of(':');
-    if (iter == std::string::npos) {
-        return SrcType::ASSET;
-    }
-    std::string head = uri.substr(0, iter);
-    std::transform(head.begin(), head.end(), head.begin(), [](unsigned char c) { return std::tolower(c); });
-    if (head == "http" or head == "https") {
-        return SrcType::NETWORK;
-    } else if (head == "file") {
-        return SrcType::FILE;
-    } else if (head == "internal") {
-        return SrcType::INTERNAL;
-    } else if (head == "data") {
-        static constexpr char BASE64_PATTERN[] = "^data:image/(jpeg|jpg|png|ico|gif|bmp|webp);base64$";
-        if (IsValidBase64Head(uri, BASE64_PATTERN)) {
-            return SrcType::BASE64;
-        }
-        return SrcType::OTHER;
-    } else if (head == "memory") {
-        return SrcType::MEMORY;
-    } else {
-        return SrcType::OTHER;
-    }
-}
-
-bool ImageProvider::IsValidBase64Head(const std::string& uri, const std::string& pattern)
-{
-    auto iter = uri.find_first_of(',');
-    if (iter == std::string::npos) {
-        LOGE("wrong base64 head format.");
-        return false;
-    }
-    std::string base64Head = uri.substr(0, iter);
-    std::regex regular(pattern);
-    return std::regex_match(base64Head, regular);
-}
-
-std::string ImageProvider::RemovePathHead(const std::string& uri)
-{
-    auto iter = uri.find_first_of(':');
-    if (iter == std::string::npos) {
-        LOGE("No scheme, not a File or Memory path!");
-        return std::string();
-    }
-    std::string head = uri.substr(0, iter);
-    if ((head == "file" && uri.size() > FILE_HEAD_LENGTH) || (head == "memory" && uri.size() > MEMORY_HEAD_LENGTH) ||
-        (head == "internal" && uri.size() > INTERNAL_FILE_HEAD_LENGTH)) {
-        // the file uri format is like "file:///data/data...",
-        // the memory uri format is like "memory://imagename.png" for example,
-        // iter + 3 to get the absolutely file path substring : "/data/data..." or the image name: "imagename.png"
-        return uri.substr(iter + 3);
-    }
-    LOGE("Wrong scheme, not a File!");
-    return std::string();
-}
-
-// if do not override, return null string.
-std::string ImageProvider::GenerateKey(const std::string& src, Size targetSize) const
-{
-    return std::string();
+    imageLoader_ = MakeRefPtr<InternalImageLoader>(resourceId);
 }
 
 void ImageProvider::LoadImage(
-    const RefPtr<PipelineContext>& piplineContext,
-    const std::string& src,
-    Size imageSize)
+    const WeakPtr<PipelineContext> context, const std::string& src, Size imageSize, bool forceResize)
 {
+    auto currentDartState = flutter::UIDartState::Current();
+    if (!currentDartState) {
+        return;
+    }
+    unrefQueue_ = currentDartState->GetSkiaUnrefQueue();
+    ioManager_ = currentDartState->GetIOManager();
+    ioTaskRunner_ = currentDartState->GetTaskRunners().GetIOTaskRunner();
+
     // set image uri now loading!
     loadingUri_ = src;
     BackgroundTaskExecutor::GetInstance().PostTask(
-        [src, weak = AceType::WeakClaim(this), piplineContext, imageSize] {
-            auto provider = weak.Upgrade();
-            if (!provider) {
-                return;
-            }
-            // 1. if some other thread has loading the same url, get it from cache.
-            fml::RefPtr<flutter::CanvasImage> cachedFlutterImage;
-            auto imageCache = piplineContext->GetImageCache();
-            if (imageCache) {
-                auto cachedImage = imageCache->GetCacheImage(provider->GenerateKey(src, imageSize));
-                if (cachedImage) {
-                    cachedFlutterImage = cachedImage->imagePtr;
-                }
-            }
-            if (cachedFlutterImage) {
-                LOGD("find the image in cache successful.");
-                provider->OnGPUImageReady(cachedFlutterImage);
-                if (provider->imageSkData_) {
-                    provider->imageSkData_ = nullptr;
-                }
-                return;
-            } else {
-                // 2. load from real src.
-                provider->LoadFromRealSrc(src, imageSize, piplineContext);
-                return;
-            }
-        });
+        [src, weak = AceType::WeakClaim(this), context, imageSize, forceResize] {
+        auto provider = weak.Upgrade();
+        if (!provider || provider->Invalid()) {
+            return;
+        }
+        auto piplineContext = context.Upgrade();
+        if (!piplineContext) {
+            return;
+        }
+        // 1. load from real src.
+        provider->LoadFromRealSrc(src, imageSize, piplineContext, nullptr, forceResize);
+        return;
+    });
 }
 
-void ImageProvider::GetSVGImageDOMAsync(
-    const std::string& src,
-    std::function<void(const sk_sp<SkSVGDOM>&)> successCallback,
-    std::function<void()> failedCallback,
-    RefPtr<TaskExecutor>& taskExecutor,
-    const RefPtr<AssetManager> assetManager,
-    uint64_t svgThemeColor)
+void ImageProvider::GetSVGImageDOMAsync(const std::string& src,
+    std::function<void(const sk_sp<SkSVGDOM>&)> successCallback, std::function<void()> failedCallback,
+    const WeakPtr<PipelineContext> context, uint64_t svgThemeColor)
 {
+    if (Invalid()) {
+        LOGE("image provide invalid");
+        return;
+    }
     BackgroundTaskExecutor::GetInstance().PostTask(
-        [src, provider = Claim(this), taskExecutor, assetManager, successCallback, failedCallback, svgThemeColor] {
-            auto imageData = provider->LoadImageData(src, assetManager);
+        [src, weakProvider = AceType::WeakClaim(this), context, successCallback, failedCallback, svgThemeColor] {
+            auto pipelineContext = context.Upgrade();
+            auto provider = weakProvider.Upgrade();
+            if (!pipelineContext || !provider) {
+                return;
+            }
+            auto taskExecutor = pipelineContext->GetTaskExecutor();
+            if (!taskExecutor) {
+                return;
+            }
+            auto imageData = provider->imageLoader_->LoadImageData(src, pipelineContext);
             if (imageData) {
                 const auto svgStream = std::make_unique<SkMemoryStream>(std::move(imageData));
                 if (svgStream) {
@@ -268,12 +224,58 @@ void ImageProvider::GetSVGImageDOMAsync(
         });
 }
 
-void ImageProvider::GetImageSize(bool syncMode, const RefPtr<AssetManager> assetManager, const std::string& src)
+void ImageProvider::GetSVGImageDOMAsyncCustom(const std::string& src,
+    std::function<void(const RefPtr<SvgDom>&)> successCallback, std::function<void()> failedCallback,
+    const WeakPtr<PipelineContext> context, const std::optional<Color>& svgThemeColor)
 {
+    if (Invalid()) {
+        LOGE("image provide invalid");
+        return;
+    }
+    BackgroundTaskExecutor::GetInstance().PostTask(
+        [src, weakProvider = AceType::WeakClaim(this), context, successCallback, failedCallback, svgThemeColor] {
+            auto pipelineContext = context.Upgrade();
+            auto provider = weakProvider.Upgrade();
+            if (!pipelineContext || !provider) {
+                return;
+            }
+            auto taskExecutor = pipelineContext->GetTaskExecutor();
+            if (!taskExecutor) {
+                return;
+            }
+            auto imageData = provider->imageLoader_->LoadImageData(src, pipelineContext);
+            if (imageData) {
+                const auto svgStream = std::make_unique<SkMemoryStream>(std::move(imageData));
+                if (svgStream) {
+                    auto svgDom = SvgDom::CreateSvgDom(*svgStream, pipelineContext, svgThemeColor);
+                    if (svgDom) {
+                        taskExecutor->PostTask(
+                            [successCallback, svgDom] { successCallback(svgDom); }, TaskExecutor::TaskType::UI);
+                        return;
+                    }
+                }
+            }
+            LOGE("imageData is null! image source is %{private}s", src.c_str());
+            taskExecutor->PostTask([failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI);
+        });
+}
+
+void ImageProvider::GetImageSize(bool syncMode, const WeakPtr<PipelineContext> context, const std::string& src)
+{
+    if (Invalid()) {
+        LOGE("image provide invalid");
+        return;
+    }
     // set image uri now loading!
     loadingUri_ = src;
-    auto task = [src, provider = Claim(this), syncMode, assetManager] {
-        provider->imageSkData_ = provider->LoadImageData(src, assetManager);
+    auto task = [src, weakProvider = AceType::WeakClaim(this), syncMode, context] {
+        auto provider = weakProvider.Upgrade();
+        if (provider == nullptr) {
+            LOGE("GetImageSize::provider is null!");
+            return;
+        }
+        std::lock_guard<std::mutex> imageSkDataLock(provider->imageSkDataMutex_);
+        provider->imageSkData_ = provider->imageLoader_->LoadImageData(src, context);
         if (!provider->imageSkData_) {
             LOGE("GetImageSize call, fetch data failed, src: %{private}s", src.c_str());
             provider->OnImageFailed();
@@ -281,9 +283,17 @@ void ImageProvider::GetImageSize(bool syncMode, const RefPtr<AssetManager> asset
         }
         auto codec = provider->GetCodec(provider->imageSkData_);
         if (codec) {
+            auto resizedImageSize = provider->imageLoader_->CalculateOriImageMatchedResolutionSize(src,
+                codec->dimensions().fHeight, codec->dimensions().fWidth);
             provider->totalFrames_ = codec->getFrameCount();
             Size imageSize(codec->dimensions().fWidth, codec->dimensions().fHeight);
-            provider->OnImageSizeReady(imageSize, src, syncMode);
+            if (!resizedImageSize.IsEmpty()) {
+                provider->currentResolutionTargetSize_ = resizedImageSize;
+                provider->OnImageSizeReady(resizedImageSize, src, syncMode);
+            } else {
+                provider->currentResolutionTargetSize_ = Size(0.0, 0.0);
+                provider->OnImageSizeReady(imageSize, src, syncMode);
+            }
         } else {
             LOGE("decode image failed, src: %{private}s", src.c_str());
             provider->OnImageFailed();
@@ -297,22 +307,27 @@ void ImageProvider::GetImageSize(bool syncMode, const RefPtr<AssetManager> asset
     }
 }
 
-void ImageProvider::LoadFromRealSrc(
-    const std::string& src,
-    Size imageSize,
-    const RefPtr<PipelineContext>& piplineContext)
+void ImageProvider::UploadToGPUForRender(
+    const sk_sp<SkImage>& image, const std::function<void(flutter::SkiaGPUObject<SkImage>)>& callback)
 {
-    if (!imageSkData_) {
-        auto assertManager = piplineContext->GetAssetManager();
-        imageSkData_ = LoadImageData(src, assertManager);
+    // If want to dump draw command, should use CPU image.
+    callback({ image, unrefQueue_ });
+}
+
+void ImageProvider::LoadFromRealSrc(const std::string& src, Size imageSize,
+    const WeakPtr<PipelineContext> context, const RefPtr<ImageLoader> imageLoader, bool forceResize)
+{
+    auto loader = imageLoader ? imageLoader : imageLoader_;
+    if (!imageSkData_ && loader) {
+        imageSkData_ = loader->LoadImageData(src, context);
         if (!imageSkData_) {
             LOGE("LoadFromRealSrc call, fetch data failed, src: %{private}s", src.c_str());
-            ImageProvider::RemoveLoadingImage(GenerateKey(src, imageSize));
+            ImageProvider::RemoveLoadingImage(loader->GenerateKey(src, imageSize));
             OnImageFailed();
             return;
         }
     }
-    ConstructCanvasImageForRender(GenerateKey(src, imageSize), imageSkData_, imageSize);
+    ConstructCanvasImageForRender(loader->GenerateKey(src, imageSize), std::move(imageSkData_), imageSize, forceResize);
     imageSkData_ = nullptr;
 }
 
@@ -322,9 +337,7 @@ std::unique_ptr<SkCodec> ImageProvider::GetCodec(const sk_sp<SkData>& data)
 }
 
 void ImageProvider::ConstructCanvasImageForRender(
-    const std::string& key,
-    const sk_sp<SkData>& data,
-    Size imageSize)
+    const std::string& key, sk_sp<SkData> data, Size imageSize, bool forceResize)
 {
     auto codec = GetCodec(data);
     if (!codec) {
@@ -337,17 +350,15 @@ void ImageProvider::ConstructCanvasImageForRender(
     if (totalFrames_ > 1) {
         LOGD("Animate image! Frame count: %{public}d", totalFrames_);
         ImageProvider::RemoveLoadingImage(key);
-        OnAnimateImageReady(std::move(codec));
+        OnAnimateImageReady(std::move(codec), forceResize);
     } else {
         LOGD("Static image! Frame count: %{public}d", totalFrames_);
-        ConstructSingleCanvasImage(key, data, imageSize);
+        ConstructSingleCanvasImage(key, data, imageSize, forceResize);
     }
 }
 
 void ImageProvider::ConstructSingleCanvasImage(
-    const std::string& key,
-    const sk_sp<SkData>& data,
-    Size imageSize)
+    const std::string& key, const sk_sp<SkData>& data, Size imageSize, bool forceResize)
 {
     auto rawImage = SkImage::MakeFromEncoded(data);
     if (!rawImage) {
@@ -356,11 +367,26 @@ void ImageProvider::ConstructSingleCanvasImage(
         OnImageFailed();
         return;
     }
-    auto image = ResizeSkImage(rawImage, imageSize);
-    OnImageReady(image, key);
+
+    auto image = ResizeSkImage(rawImage, imageSize, forceResize);
+
+    auto callback = [provider = Claim(this), key](flutter::SkiaGPUObject<SkImage> image) {
+        auto canvasImage = flutter::CanvasImage::Create();
+        canvasImage->set_image(std::move(image));
+        ImageProvider::RemoveLoadingImage(key);
+        provider->OnImageReady(canvasImage);
+    };
+    UploadToGPUForRender(image, callback);
+
+    if (needCacheResizedImage && imageLoader_) {
+        imageLoader_->CacheResizedImage(image, key);
+    }
+    if (ioTaskRunner_) {
+        ioTaskRunner_->PostTask([]() { SkGraphics::PurgeResourceCache(); });
+    }
 }
 
-sk_sp<SkImage> ImageProvider::ResizeSkImage(const sk_sp<SkImage>& rawImage, Size imageSize)
+sk_sp<SkImage> ImageProvider::ResizeSkImage(const sk_sp<SkImage>& rawImage, Size imageSize, bool forceResize)
 {
     if (!imageSize.IsValid()) {
         LOGE("not valid size!, imageSize: %{private}s", imageSize.ToString().c_str());
@@ -370,46 +396,66 @@ sk_sp<SkImage> ImageProvider::ResizeSkImage(const sk_sp<SkImage>& rawImage, Size
     int32_t dstHeight = static_cast<int32_t>(imageSize.Height() + 0.5);
 
     bool needResize = false;
-    if (rawImage->width() > dstWidth) {
-        needResize = true;
-    } else {
-        dstWidth = rawImage->width();
-    }
-    if (rawImage->height() > dstHeight) {
-        needResize = true;
-    } else {
-        dstHeight = rawImage->height();
+
+    if (!forceResize) {
+        if (currentResolutionTargetSize_.IsEmpty()) {
+            if (rawImage->width() > dstWidth) {
+                needResize = true;
+            } else {
+                dstWidth = rawImage->width();
+            }
+            if (rawImage->height() > dstHeight) {
+                needResize = true;
+            } else {
+                dstHeight = rawImage->height();
+            }
+        } else {
+            if ((currentResolutionTargetSize_.Width() != dstWidth) ||
+                (currentResolutionTargetSize_.Height() != dstHeight) ||
+                (rawImage->width() != dstWidth) || (rawImage->height() != dstHeight)) {
+                needResize = true;
+            }
+        }
     }
 
-    if (needResize) {
-        const auto scaledImageInfo =
-            SkImageInfo::Make(dstWidth, dstHeight, rawImage->colorType(), rawImage->alphaType());
-        SkBitmap scaledBitmap;
-        if (!scaledBitmap.tryAllocPixels(scaledImageInfo)) {
-            LOGE("Could not allocate bitmap when attempting to scale.");
-            return rawImage;
-        }
-        if (!rawImage->scalePixels(scaledBitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint)) {
-            LOGE("Could not scale pixels");
-            return rawImage;
-        }
-        // Marking this as immutable makes the MakeFromBitmap call share the pixels instead of copying.
-        scaledBitmap.setImmutable();
-        auto scaledImage = SkImage::MakeFromBitmap(scaledBitmap);
-        if (!scaledImage) {
-            LOGE("Could not create a scaled image from a scaled bitmap.");
-            return rawImage;
-        }
-        return scaledImage;
-    } else {
+    if (!needResize && !forceResize) {
         return rawImage;
     }
+
+    if (1.0 * dstWidth * dstHeight / (rawImage->width() * rawImage->height()) < RESIZE_MAX_PROPORTION) {
+        needCacheResizedImage = true;
+    }
+    if (!currentResolutionTargetSize_.IsEmpty() &&
+        (1.0 * dstWidth * dstHeight) / (rawImage->width() * rawImage->height()) > (1 + RESIZE_MAX_PROPORTION)) {
+            needCacheResizedImage = true;
+    }
+    return ApplySizeToSkImage(rawImage, dstWidth, dstHeight);
 }
 
-void ImageProvider::OnImageSizeReady(
-    Size rawImageSize,
-    const std::string& imageSrc,
-    bool syncMode)
+sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(const sk_sp<SkImage>& rawImage, int32_t dstWidth, int32_t dstHeight)
+{
+    auto scaledImageInfo =
+        SkImageInfo::Make(dstWidth, dstHeight, rawImage->colorType(), rawImage->alphaType(), rawImage->refColorSpace());
+    SkBitmap scaledBitmap;
+    if (!scaledBitmap.tryAllocPixels(scaledImageInfo)) {
+        LOGE("Could not allocate bitmap when attempting to scale.");
+        return rawImage;
+    }
+    if (!rawImage->scalePixels(scaledBitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint)) {
+        LOGE("Could not scale pixels");
+        return rawImage;
+    }
+    // Marking this as immutable makes the MakeFromBitmap call share the pixels instead of copying.
+    scaledBitmap.setImmutable();
+    auto scaledImage = SkImage::MakeFromBitmap(scaledBitmap);
+    if (scaledImage) {
+        return scaledImage;
+    }
+    LOGE("Could not create a scaled image from a scaled bitmap.");
+    return rawImage;
+}
+
+void ImageProvider::OnImageSizeReady(Size rawImageSize, const std::string& imageSrc, bool syncMode)
 {
     std::lock_guard<std::mutex> lock(listenersMutex_);
     for (const auto& weak : listeners_) {
@@ -420,35 +466,24 @@ void ImageProvider::OnImageSizeReady(
     }
 }
 
-void ImageProvider::OnImageReady(const sk_sp<SkImage>& image, const std::string& key)
+void ImageProvider::OnImageReady(const fml::RefPtr<flutter::CanvasImage>& image)
 {
     std::lock_guard<std::mutex> lock(listenersMutex_);
     for (const auto& weak : listeners_) {
         auto listener = weak.Upgrade();
         if (listener) {
-            listener->OnLoadSuccess(image, Claim(this), key);
+            listener->OnLoadSuccess(image, Claim(this));
         }
     }
 }
 
-void ImageProvider::OnGPUImageReady(const fml::RefPtr<flutter::CanvasImage>& image)
+void ImageProvider::OnAnimateImageReady(std::unique_ptr<SkCodec> codec, bool forceResize)
 {
     std::lock_guard<std::mutex> lock(listenersMutex_);
     for (const auto& weak : listeners_) {
         auto listener = weak.Upgrade();
         if (listener) {
-            listener->OnLoadGPUImageSuccess(image, Claim(this));
-        }
-    }
-}
-
-void ImageProvider::OnAnimateImageReady(std::unique_ptr<SkCodec> codec)
-{
-    std::lock_guard<std::mutex> lock(listenersMutex_);
-    for (const auto& weak : listeners_) {
-        auto listener = weak.Upgrade();
-        if (listener) {
-            listener->OnAnimateImageSuccess(Claim(this), std::move(codec));
+            listener->OnAnimateImageSuccess(Claim(this), std::move(codec), forceResize);
         }
     }
 }
@@ -482,12 +517,15 @@ int32_t ImageProvider::GetTotalFrames() const
     return totalFrames_;
 }
 
-sk_sp<SkImage> ImageProvider::GetSkImage(
-    const std::string& src,
-    const RefPtr<AssetManager> assetManager,
+sk_sp<SkImage> ImageProvider::GetSkImage(const std::string& src, const WeakPtr<PipelineContext> context,
     Size targetSize)
 {
-    imageSkData_ = LoadImageData(src, assetManager);
+    if (Invalid()) {
+        LOGE("image provide invalid");
+        return nullptr;
+    }
+
+    imageSkData_ = imageLoader_->LoadImageData(src, context);
     if (!imageSkData_) {
         LOGE("fetch data failed");
         return nullptr;
@@ -501,234 +539,60 @@ sk_sp<SkImage> ImageProvider::GetSkImage(
     return image;
 }
 
-void RenderImageProvider::TryLoadImageInfo(const RefPtr<PipelineContext>& context, const std::string& src,
-        std::function<void(bool, int32_t, int32_t)>&& loadCallback)
+void RenderImageProvider::CanLoadImage(
+    const RefPtr<PipelineContext>& context, const std::string& src, const std::map<std::string, EventMarker>& callbacks)
 {
-    auto imageProvider = ImageProvider::Create(src, nullptr);
-    if (imageProvider) {
-        auto assetManager = context->GetAssetManager();
-        BackgroundTaskExecutor::GetInstance().PostTask(
-            [src, imageProvider, callback = std::move(loadCallback), assetManager]() {
-                auto image = imageProvider->GetSkImage(src, assetManager);
-                if (image) {
-                    callback(true, image->width(), image->height());
-                    return;
-                }
-                callback(false, 0, 0);
-            });
-    }
-}
-
-std::string FileImageProvider::GenerateKey(const std::string& src, Size targetImageSize) const
-{
-    return std::string(src) + std::to_string(static_cast<int32_t>(targetImageSize.Width())) +
-           std::to_string(static_cast<int32_t>(targetImageSize.Height()));
-}
-
-sk_sp<SkData> FileImageProvider::LoadImageData(const std::string& src, const RefPtr<AssetManager> assetManager)
-{
-    LOGD("File Image!");
-    bool isInternal = (ResolveURI(src) == SrcType::INTERNAL);
-    std::string filePath = RemovePathHead(src);
-    if (isInternal) {
-        // the internal source uri format is like "internal://app/imagename.png", the absolute path of which is like
-        // "/data/data/{bundleName}/files/imagename.png"
-        auto bundleName = AceEngine::Get().GetPackageName();
-        if (bundleName.empty()) {
-            LOGE("bundleName is empty, LoadImageData for internal source fail!");
-            return nullptr;
-        }
-        if (!StringUtils::StartWith(filePath, "app/")) { // "app/" is infix of internal path
-            LOGE("internal path format is wrong. path is %{private}s", src.c_str());
-            return nullptr;
-        }
-        filePath = std::string("/data/data/") // head of absolute path
-                       .append(bundleName)
-                       .append("/files/") // infix of absolute path
-                       .append(filePath.substr(4)); // 4 is the length of "app/" from "internal://app/"
-    }
-    if (filePath.length() > PATH_MAX) {
-        LOGE("src path is too long");
-        return nullptr;
-    }
-    char realPath[PATH_MAX] = { 0x00 };
-    if (realpath(filePath.c_str(), realPath) == nullptr) {
-        LOGE("realpath fail! filePath: %{private}s, fail reason: %{public}s", filePath.c_str(), strerror(errno));
-        return nullptr;
-    }
-    std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
-    if (!file) {
-        LOGE("open file failed, filePath: %{private}s, fail reason: %{public}s", filePath.c_str(), strerror(errno));
-        return nullptr;
-    }
-    return SkData::MakeFromFILE(file.get());
-}
-
-std::string AssetImageProvider::GenerateKey(const std::string& src, Size targetImageSize) const
-{
-    return std::string(src) + std::to_string(static_cast<int32_t>(targetImageSize.Width())) +
-           std::to_string(static_cast<int32_t>(targetImageSize.Height()));
-}
-
-sk_sp<SkData> AssetImageProvider::LoadImageData(const std::string& src, const RefPtr<AssetManager> assetManager)
-{
-    if (src.empty()) {
-        return nullptr;
-    }
-    std::string assetSrc(src);
-    if (assetSrc[0] == '/') {
-        assetSrc = assetSrc.substr(1); // get the asset src without '/'.
-    } else if (assetSrc[0] == '.' && assetSrc.size() > 2 && assetSrc[1] == '/') {
-        assetSrc = assetSrc.substr(2); // get the asset src without './'.
-    }
-    auto assetData = assetManager->GetAsset(assetSrc);
-    if (!assetData) {
-        LOGE("No asset data!");
-        return nullptr;
-    }
-    const uint8_t* data = assetData->GetData();
-    const size_t dataSize = assetData->GetSize();
-    return SkData::MakeWithCopy(data, dataSize);
-}
-
-std::string NetworkImageProvider::GenerateKey(const std::string& src, Size targetImageSize) const
-{
-    return std::string(src) + std::to_string(static_cast<int32_t>(targetImageSize.Width())) +
-           std::to_string(static_cast<int32_t>(targetImageSize.Height()));
-}
-
-sk_sp<SkData> NetworkImageProvider::LoadImageData(const std::string& url, const RefPtr<AssetManager> assetManager)
-{
-    // 1. find in cache file path.
-    LOGD("Network Image!");
-    std::string cacheFilePath = ImageCache::GetNetworkImageCacheFilePath(url);
-    if (cacheFilePath.length() > PATH_MAX) {
-        LOGE("cache file path is too long");
-        return nullptr;
-    }
-    bool cacheFileFound = ImageCache::GetFromCacheFile(cacheFilePath);
-    if (cacheFileFound) {
-        char realPath[PATH_MAX] = { 0x00 };
-        if (realpath(cacheFilePath.c_str(), realPath) == nullptr) {
-            LOGE("realpath fail! cacheFilePath: %{private}s, fail reason: %{public}s", cacheFilePath.c_str(),
-                strerror(errno));
-            return nullptr;
-        }
-        std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
-        if (file) {
-            LOGD("find network image in file cache!");
-            return SkData::MakeFromFILE(file.get());
-        }
-    }
-    // 2. if not found. download it.
-    std::vector<uint8_t> imageData;
-    if (!DownloadManager::GetInstance().Download(url, imageData) || imageData.empty()) {
-        LOGE("Download image %{private}s failed!", url.c_str());
-        return nullptr;
-    }
-    // 3. write it into file cache.
-    ImageCache::WriteCacheFile(url, imageData);
-    return SkData::MakeWithCopy(imageData.data(), imageData.size());
-}
-
-sk_sp<SkData> MemoryImageProvider::LoadImageData(const std::string& uri, const RefPtr<AssetManager> assetManager)
-{
-    loadingUri_ = uri;
-    return skData_;
-}
-
-void MemoryImageProvider::UpdateData(const std::string& uri, const std::vector<uint8_t>& memData)
-{
-    if (memData.empty()) {
-        LOGE("image data is null, uri: %{private}s", uri.c_str());
-        skData_ = nullptr;
+    if (callbacks.find("success") == callbacks.end() || callbacks.find("fail") == callbacks.end()) {
         return;
     }
-    skData_ = SkData::MakeWithCopy(memData.data(), memData.size());
-
-    std::lock_guard<std::mutex> lock(listenersMutex_);
-    for (const auto& weak : listeners_) {
-        auto listener = weak.Upgrade();
-        if (listener) {
-            listener->MarkNeedReload();
-        }
+    auto onSuccess = AceAsyncEvent<void()>::Create(callbacks.at("success"), context);
+    auto onFail = AceAsyncEvent<void()>::Create(callbacks.at("fail"), context);
+    g_imageProvider = AceType::MakeRefPtr<ImageProvider>(src, nullptr);
+    if (!g_imageProvider->Invalid()) {
+        auto weakProvider = AceType::WeakClaim(AceType::RawPtr(g_imageProvider));
+        BackgroundTaskExecutor::GetInstance().PostTask([src, weakProvider, onSuccess, onFail, context]() {
+            auto imageProvider = weakProvider.Upgrade();
+            if (imageProvider == nullptr) {
+                LOGE("CanLoadImage::imageProvider is null!");
+                return;
+            }
+            auto image = imageProvider->GetSkImage(src, context);
+            if (image) {
+                onSuccess();
+                return;
+            }
+            onFail();
+        });
     }
-    GetImageSize(false, nullptr, uri);
 }
 
-std::string MemoryImageProvider::GenerateKey(const std::string& src, Size targetImageSize) const
+bool ImageProvider::IsWideGamut(const sk_sp<SkColorSpace>& colorSpace)
 {
-    return std::string(src) + std::to_string(static_cast<int32_t>(targetImageSize.Width())) +
-           std::to_string(static_cast<int32_t>(targetImageSize.Height()));
-}
-
-std::string InternalImageProvider::GenerateKey(const std::string& src, Size targetImageSize) const
-{
-    return std::string("InterResource") + std::to_string(static_cast<int32_t>(resourceId_)) +
-           std::to_string(static_cast<int32_t>(targetImageSize.Width())) +
-           std::to_string(static_cast<int32_t>(targetImageSize.Height()));
-}
-
-sk_sp<SkData> InternalImageProvider::LoadImageData(const std::string& uri, const RefPtr<AssetManager> assetManager)
-{
-    size_t imageSize = 0;
-    const uint8_t* internalData = InternalResource::GetInstance().GetResource(resourceId_, imageSize);
-    if (internalData == nullptr) {
-        LOGE("data null, the resource id may be wrong.");
-        return nullptr;
+    skcms_ICCProfile encodedProfile;
+    colorSpace->toProfile(&encodedProfile);
+    if (!encodedProfile.has_toXYZD50) {
+        LOGI("This profile's gamut can not be represented by a 3x3 transform to XYZD50");
+        return false;
     }
-    return SkData::MakeWithCopy(internalData, imageSize);
-}
-
-sk_sp<SkData> Base64ImageProvider::LoadImageData(const std::string& url, const RefPtr<AssetManager> assetManager)
-{
-    SkBase64 base64Decoder;
-    size_t imageSize = 0;
-    std::string base64Code = GetBase64ImageCode(url, imageSize);
-    SkBase64::Error error = base64Decoder.decode(base64Code.c_str(), base64Code.size());
-    if (error != SkBase64::kNoError) {
-        LOGE("error base64 image code!");
-        return nullptr;
+    // Normalize gamut by 1.
+    // rgb[3] represents the point of Red, Green and Blue coordinate in color space diagram.
+    Point rgb[3];
+    auto xyzGamut = encodedProfile.toXYZD50;
+    for (int32_t i = 0; i < 3; i++) {
+        auto sum = xyzGamut.vals[i][0] + xyzGamut.vals[i][1] + xyzGamut.vals[i][2];
+        rgb[i].SetX(xyzGamut.vals[i][0] / sum);
+        rgb[i].SetY(xyzGamut.vals[i][1] / sum);
     }
-    auto base64Data = base64Decoder.getData();
-    const uint8_t* imageData = reinterpret_cast<uint8_t*>(base64Data);
-    auto resData = SkData::MakeWithCopy(imageData, imageSize);
-    // in SkBase64, the fData is not deleted after decoded.
-    if (base64Data != nullptr) {
-        delete[] base64Data;
-        base64Data = nullptr;
-    }
-    return resData;
-}
-
-std::string Base64ImageProvider::GetBase64ImageCode(const std::string& url, size_t& imageSize)
-{
-    auto iter = url.find_first_of(',');
-    if (iter == std::string::npos || iter == url.size() - 1) {
-        LOGE("wrong code format!");
-        imageSize = 0;
-        return std::string();
-    }
-    // iter + 1 to skip the ","
-    std::string code = url.substr(iter + 1);
-    imageSize = GetBase64ImageSize(code);
-    return code;
-}
-
-size_t Base64ImageProvider::GetBase64ImageSize(const std::string& code)
-{
-    // use base64 code size to calculate image byte size.
-    auto iter = code.rbegin();
-    int32_t count = 0;
-    // skip all '=' in the end.
-    while (*iter == '=') {
-        count++;
-        iter++;
-    }
-    // get the valid code length.
-    size_t codeSize = code.size() - count;
-    // compute the image byte size.
-    return codeSize - (codeSize / 8) * 2;
+    // Calculate the area enclosed by the coordinates of the three RGB points
+    Point red = rgb[0];
+    Point green = rgb[1];
+    Point blue = rgb[2];
+    // Assuming there is a triangle enclosed by three points: A(x1, y1), B(x2, y2), C(x3, y3),
+    // the formula for calculating the area of triangle ABC is as follows:
+    // S = (x1 * y2 + x2 * y3 + x3 * y1 - x1 * y3 - x2 * y1 - x3 * y2) / 2.0
+    auto areaOfPoint = std::fabs(red.GetX() * green.GetY() + green.GetX() * blue.GetY() + blue.GetX() * green.GetY() -
+        red.GetX() * blue.GetY() - blue.GetX() * green.GetY() - green.GetX() * red.GetY()) / 2.0;
+    return GreatNotEqual(areaOfPoint, SRGB_GAMUT_AREA);
 }
 
 } // namespace OHOS::Ace

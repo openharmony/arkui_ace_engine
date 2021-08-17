@@ -181,6 +181,16 @@ public:
         return backgroundTrackColor_;
     }
 
+    double GetAnimationDuration() const
+    {
+        return animationDuration_;
+    }
+
+    void SetAnimationDuration(double animationDuration)
+    {
+        animationDuration_ = animationDuration;
+    }
+
 protected:
     void SetDefaultHeight(const Dimension& height)
     {
@@ -193,6 +203,7 @@ protected:
     }
 
     ChartType type_ = ChartType::PROGRESS;
+    double animationDuration_ = -1.0;
 
 private:
     MeasureType measureType_ = MeasureType::DEFAULT;

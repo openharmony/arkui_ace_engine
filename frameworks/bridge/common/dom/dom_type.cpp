@@ -38,6 +38,7 @@ const char DOM_NODE_TAG_OPTION[] = "option";
 const char DOM_NODE_TAG_POPUP[] = "popup";
 const char DOM_NODE_TAG_PROGRESS[] = "progress";
 const char DOM_NODE_TAG_SELECT[] = "select";
+const char DOM_NODE_TAG_MASK[] = "mask";
 const char DOM_NODE_TAG_MENU[] = "menu";
 const char DOM_NODE_TAG_SLIDER[] = "slider";
 const char DOM_NODE_TAG_SPAN[] = "span";
@@ -80,21 +81,29 @@ const char DOM_NODE_TAG_QRCODE[] = "qrcode";
 const char DOM_NODE_TAG_SVG[] = "svg";
 const char DOM_NODE_TAG_RECT[] = "rect";
 const char DOM_NODE_TAG_ANIMATE[] = "animate";
+const char DOM_NODE_TAG_ANIMATE_TRANSFORM[] = "animatetransform";
 const char DOM_NODE_TAG_WEB[] = "web";
+const char DOM_NODE_TAG_RICH_TEXT[] = "richtext";
+const char DOM_NODE_TAG_XCOMPONENT[] = "xcomponent";
 const char DOM_NODE_TAG_PATH[] = "path";
 const char DOM_NODE_TAG_LINE[] = "line";
 const char DOM_NODE_TAG_POLYLINE[] = "polyline";
 const char DOM_NODE_TAG_POLYGON[] = "polygon";
 const char DOM_NODE_TAG_CIRCLE[] = "circle";
 const char DOM_NODE_TAG_ELLIPSE[] = "ellipse";
+const char DOM_NODE_TAG_FORM[] = "form";
 const char DOM_NODE_TAG_ANIMATE_MOTION[] = "animatemotion";
 const char DOM_NODE_TAG_CAMERA[] = "camera";
+const char DOM_NODE_TAG_STOP[] = "stop";
+const char DOM_NODE_TAG_LINEAR_GRADIENT[] = "linearGradient";
+const char DOM_NODE_TAG_RADIAL_GRADIENT[] = "radialGradient";
 
 // common attribute constants
 const char DOM_ID[] = "id";
 const char DOM_SHARE_ID[] = "shareid";
 const char DOM_SHOW[] = "show";
 const char DOM_DIR[] = "dir";
+const char DOM_AUTO_FOCUS[] = "autofocus";
 
 // common persudo class style constants
 const char DOM_PSEUDO_CLASS_SYMBOL[] = ":";
@@ -103,6 +112,7 @@ const char DOM_DISABLED_PSEUDO_CLASS[] = ":disabled";
 const char DOM_FOCUS_PSEUDO_CLASS[] = ":focus";
 const char DOM_CHECKED_PSEUDO_CLASS[] = ":checked";
 const char DOM_WAITING_PSEUDO_CLASS[] = ":waiting";
+const char DOM_HOVER_PSEUDO_CLASS[] = ":hover";
 
 // common style constants
 const char DOM_WIDTH[] = "width";
@@ -189,6 +199,8 @@ const char DOM_POSITION_TOP[] = "top";
 const char DOM_POSITION_RIGHT[] = "right";
 const char DOM_POSITION_BOTTOM[] = "bottom";
 const char DOM_POSITION_LEFT[] = "left";
+const char DOM_POSITION_START[] = "start";
+const char DOM_POSITION_END[] = "end";
 const char DOM_BACKGROUND_IMAGE_SIZE[] = "backgroundSize";
 const char DOM_BACKGROUND_IMAGE_SIZE_CONTAIN[] = "contain";
 const char DOM_BACKGROUND_IMAGE_SIZE_COVER[] = "cover";
@@ -205,21 +217,49 @@ const char DOM_GRADIENT_DIRECTION_TOP[] = "top";
 const char DOM_GRADIENT_DIRECTION_RIGHT[] = "right";
 const char DOM_GRADIENT_DIRECTION_BOTTOM[] = "bottom";
 const char DOM_GRADIENT_DIRECTION_LEFT[] = "left";
+const char DOM_GRADIENT_SIZE_CLOSEST_CORNER[] = "closest-corner";
+const char DOM_GRADIENT_SIZE_CLOSEST_SIDE[] = "closest-side";
+const char DOM_GRADIENT_SIZE_FARTHEST_CORNER[] = "farthest-corner";
+const char DOM_GRADIENT_SIZE_FARTHEST_SIDE[] = "farthest-side";
+const char DOM_GRADIENT_SHAPE_CIRCLE[] = "circle";
+const char DOM_GRADIENT_SHAPE_ELLIPSE[] = "ellipse";
 const char DOM_VALUES[] = "values";
 const char DOM_GRADIENT_VALUES[] = "values";
 const char DOM_GRADIENT_TYPE[] = "type";
 const char DOM_GRADIENT_DIRECTIONS[] = "directions";
+const char DOM_GRADIENT_SIZE[] = "size";
+const char DOM_GRADIENT_POSITION[] = "position";
+const char DOM_GRADIENT_SHAPE[] = "shape";
+const char DOM_GRADIENT_ANGLE[] = "angle";
+const char DOM_GRADIENT_ROTATION[] = "rotation";
+const char DOM_LINEAR_GRADIENT[] = "linearGradient";
 const char DOM_REPEATING_LINEAR_GRADIENT[] = "repeatingLinearGradient";
+const char DOM_RADIAL_GRADIENT[] = "radialGradient";
+const char DOM_REPEATING_RADIAL_GRADIENT[] = "repeatingRadialGradient";
+const char DOM_SWEEP_GRADIENT[] = "sweepGradient";
+const char DOM_REPEATING_SWEEP_GRADIENT[] = "repeatingSweepGradient";
 const char DOM_TRANSFORM[] = "transform";
 const char DOM_SCALE[] = "scale";
 const char DOM_SCALE_X[] = "scaleX";
 const char DOM_SCALE_Y[] = "scaleY";
+const char DOM_SCALE_Z[] = "scaleZ";
+const char DOM_SCALE_3D[] = "scale3d";
 const char DOM_TRANSLATE[] = "translate";
 const char DOM_TRANSLATE_X[] = "translateX";
 const char DOM_TRANSLATE_Y[] = "translateY";
+const char DOM_TRANSLATE_Z[] = "translateZ";
+const char DOM_TRANSLATE_3D[] = "translate3d";
 const char DOM_ROTATE[] = "rotate";
 const char DOM_ROTATE_X[] = "rotateX";
 const char DOM_ROTATE_Y[] = "rotateY";
+const char DOM_ROTATE_Z[] = "rotateZ";
+const char DOM_ROTATE_3D[] = "rotate3d";
+const char DOM_SKEW[] = "skew";
+const char DOM_SKEW_X[] = "skewX";
+const char DOM_SKEW_Y[] = "skewY";
+const char DOM_PERSPECTIVE[] = "perspective";
+const char DOM_MATRIX[] = "matrix";
+const char DOM_MATRIX_3D[] = "matrix3d";
 const char DOM_FOCUSABLE[] = "focusable";
 const char DOM_ANIMATION_WIDTH[] = "width";
 const char DOM_ANIMATION_HEIGHT[] = "height";
@@ -234,14 +274,22 @@ const char DOM_ANIMATION_DELAY[] = "animationDelay";
 const char DOM_ANIMATION_DURATION[] = "animationDuration";
 const char DOM_ANIMATION_FILL[] = "fill";
 const char DOM_ANIMATION_EASING[] = "easing";
+const char DOM_ANIMATION_BEGIN[] = "begin";
+const char DOM_ANIMATION_END[] = "end";
 const char DOM_ANIMATION_ITERATION_COUNT[] = "animationIterationCount";
 const char DOM_ANIMATION_TIMING_FUNCTION[] = "animationTimingFunction";
 const char DOM_ANIMATION_FILL_MODE[] = "animationFillMode";
 const char DOM_ANIMATION_DIRECTION[] = "animationDirection";
+const char DOM_ANIMATION_DIRECTION_API[] = "direction";
 const char DOM_ANIMATION_DIRECTION_NORMAL[] = "normal";
 const char DOM_ANIMATION_DIRECTION_ALTERNATE[] = "alternate";
 const char DOM_ANIMATION_DIRECTION_REVERSE[] = "reverse";
 const char DOM_ANIMATION_DIRECTION_ALTERNATE_REVERSE[] = "alternate-reverse";
+const char DOM_ANIMATION_PLAY_STATE[] = "animationPlayState";
+const char DOM_ANIMATION_PLAY_STATE_RUNNING[] = "running";
+const char DOM_ANIMATION_PLAY_STATE_PAUSED[] = "paused";
+const char DOM_ANIMATION_PLAY_STATE_IDLE[] = "idle";
+const char DOM_ANIMATION_PLAY_STATE_FINISHED[] = "finished";
 const char DOM_ANIMATION_TIMING_FUNCTION_EASE[] = "ease";
 const char DOM_ANIMATION_TIMING_FUNCTION_EASE_IN[] = "ease-in";
 const char DOM_ANIMATION_TIMING_FUNCTION_EASE_OUT[] = "ease-out";
@@ -257,6 +305,7 @@ const char DOM_ANIMATION_TIMING_FUNCTION_RHYTHM[] = "rhythm";
 const char DOM_ANIMATION_TIMING_FUNCTION_SMOOTH[] = "smooth";
 const char DOM_ANIMATION_TIMING_FUNCTION_STEPS[] = "steps";
 const char DOM_ANIMATION_TIMING_FUNCTION_CUBIC_BEZIER[] = "cubic-bezier";
+const char DOM_ANIMATION_TIMING_FUNCTION_SPRING[] = "spring";
 const char DOM_ANIMATION_FILL_MODE_NONE[] = "none";
 const char DOM_ANIMATION_FILL_MODE_FORWARDS[] = "forwards";
 const char DOM_ANIMATION_FILL_MODE_BACKWARDS[] = "backwards";
@@ -275,8 +324,22 @@ const char DOM_TRANSFORM_ORIGIN_LEFT_BOTTOM[] = "left bottom";
 const char DOM_FILTER[] = "filter";
 const char DOM_BACKDROP_FILTER[] = "backdropFilter";
 const char DOM_WINDOW_FILTER[] = "windowFilter";
+const char DOM_CARET_COLOR[] = "caretColor";
+const char DOM_CLIP_PATH[] = "clipPath";
+const char DOM_MASK_IMAGE[] = "maskImage";
+const char DOM_MASK_POSITION[] = "maskPosition";
+const char DOM_MASK_SIZE[] = "maskSize";
+const char DOM_IMAGE_FILL[] = "imageFill";
+const char DOM_BOX_SIZING[] = "boxSizing";
+const char DOM_AUTO[] = "auto";
 
 // transition style
+const char DOM_TRANSITION_NAME[] = "transition";
+const char DOM_TRANSITION_PROPERTY[] = "transitionProperty";
+const char DOM_TRANSITION_PROPERTY_DURATION[] = "transitionPropertyDuration";
+const char DOM_TRANSITION_PROPERTY_TIMING_FUNCTION[] = "transitionPropertyTimingFunction";
+const char DOM_TRANSITION_PROPERTY_DELAY[] = "transitionPropertyDelay";
+const char DOM_TRANSITION_BACKGROUND_COLOR[] = "background-color";
 const char DOM_TRANSITION_ENTER[] = "transitionEnter";
 const char DOM_TRANSITION_EXIT[] = "transitionExit";
 const char DOM_TRANSITION_DURATION[] = "transitionDuration";
@@ -323,13 +386,19 @@ const char DOM_FLEX_WRAP[] = "flexWrap";
 const char DOM_WRAP[] = "wrap";
 const char DOM_DIV_CARD_TYPE[] = "card";
 const char DOM_DIV_CARD_BLUR[] = "blureffect";
+const char DOM_DIV_EVENT_REACH_TOP[] = "reachtop";
+const char DOM_DIV_EVENT_REACH_BOTTOM[] = "reachbottom";
+const char DOM_DIV_EVENT_REACH_START[] = "reachstart";
+const char DOM_DIV_EVENT_REACH_END[] = "reachend";
 
 // image attribute and style constants
 const char DOM_SRC[] = "src";
+const char DOM_TOP[] = "top";
 const char DOM_IMAGE_FIT[] = "objectFit";
 const char DOM_IMAGE_ALT[] = "alt";
 const char DOM_IMAGE_MATCH_TEXT_DIRECTION[] = "matchTextDirection";
 const char DOM_IMAGE_FIT_ORIGINAL_SIZE[] = "fitOriginalSize";
+const char DOM_IMAGE_FILL_COLOR[] = "fill";
 
 // image animator attribute and style constants
 const char DOM_IMAGES[] = "images";
@@ -395,6 +464,8 @@ const char DOM_SCROLL_SHAPE_MODE_ROUND[] = "round";
 const char DOM_SCROLL_SCROLLBAR_COLOR[] = "scrollbarColor";
 const char DOM_SCROLL_SCROLLBAR_WIDTH[] = "scrollbarWidth";
 const char DOM_SCROLL_OVER_SCROLL_EFFECT[] = "overscrollEffect";
+const char DOM_SCROLL_SCROLLBAR_POSITION[] = "scrollbaroffset";
+const char DOM_SCROLL_SCROLLBAR_OFFSET[] = "scrollbarOffset";
 
 // list-items attribute and style constants
 const char DOM_LISTITEM_COLUMN_SPAN[] = "columnSpan";
@@ -408,6 +479,7 @@ const char DOM_LISTITEM_PRIMARY[] = "primary";
 const char DOM_LISTITEM_CARD_TYPE[] = "card";
 const char DOM_LISTITEM_CARD_BLUR[] = "blureffect";
 const char DOM_LISTITEM_ACTIVE[] = "active";
+const char DOM_LISTITEM_CLICK_COLOR[] = "clickColor";
 
 // list-items-group attribute and style constants
 const char DOM_LIST_ITEM_GROUP_EVENT_GROUPCLICK[] = "groupclick";
@@ -434,9 +506,12 @@ const char DOM_TEXT_FONT_SIZE_STEP[] = "fontSizeStep";
 const char DOM_TEXT_PREFER_FONT_SIZES[] = "preferFontSizes";
 const char DOM_TEXT_FONT_WEIGHT[] = "fontWeight";
 const char DOM_TEXT_DECORATION[] = "textDecoration";
+const char DOM_TEXT_DECORATION_COLOR[] = "textDecorationColor";
 const char DOM_TEXT_FONT_STYLE[] = "fontStyle";
 const char DOM_TEXT_ALLOW_SCALE[] = "allowScale";
 const char DOM_TEXT_ALIGN[] = "textAlign";
+const char DOM_TEXT_CASE[] = "textCase";
+const char DOM_TEXT_BASELINE_OFFSET[] = "baselineOffset";
 const char DOM_TEXT_OVERFLOW[] = "textOverflow";
 const char DOM_OVERFLOW_STYLE[] = "overflow";
 const char DOM_TEXT_LINE_HEIGHT[] = "lineHeight";
@@ -455,6 +530,9 @@ const char DOM_TEXT_DECORATION_NONE[] = "none";
 const char DOM_TEXT_FONT_STYLE_ITALIC[] = "italic";
 const char DOM_TEXT_FONT_STYLE_NORMAL[] = "normal";
 const char DOM_TEXT_WORD_BREAK[] = "wordBreak";
+const char DOM_TEXT_FONT_VARIANT[] = "fontVariant";
+const char DOM_TEXT_FONT_FEATURE_SETTINGS[] = "fontFeatureSettings";
+const char DOM_TEXT_ADAPT_HEIGHT[] = "adaptHeight";
 
 // popup attribute and style constants
 const char DOM_TARGET[] = "target";
@@ -504,6 +582,7 @@ const char DOM_COLORS_ARRAY[] = "colors";
 const char DOM_WEIGHTS_ARRAY[] = "weights";
 const char DOM_EFFECTS_ON[] = "effects";
 const char DOM_AUTO_SCALE[] = "autoscale";
+const char DOM_CHART_ANIMATION_DURATION[] = "animationduration";
 
 // slider attribute and style constants
 const char DOM_MIN[] = "min";
@@ -528,7 +607,7 @@ const char DOM_STEPPER_LABEL[] = "label";
 const char DOM_STEPPER_LEFT_LABEL[] = "prevLabel";
 const char DOM_STEPPER_RIGHT_LABEL[] = "nextLabel";
 const char DOM_STEPPER_INITIAL_STATUS[] = "status";
-const char DOM_STEPPER_TEXT_COLOR[] = "textColor";
+const char DOM_STEPPER_TEXT_COLOR[] = "color";
 const char DOM_STEPPER_FONT_SIZE[] = "fontSize";
 const char DOM_STEPPER_FONT_STYLE[] = "fontStyle";
 const char DOM_STEPPER_FONT_WEIGHT[] = "fontWeight";
@@ -660,7 +739,13 @@ const char DOM_CATCH_CAPTURE_TOUCH_MOVE[] = "catchcapturetouchmove";
 const char DOM_CATCH_CAPTURE_TOUCH_CANCEL[] = "catchcapturetouchcancel";
 const char DOM_CATCH_CAPTURE_TOUCH_END[] = "catchcapturetouchend";
 const char DOM_CLICK[] = "click";
+const char DOM_CATCH_BUBBLE_CLICK[] = "catchbubbleclick";
+const char DOM_DOUBLE_CLICK[] = "doubleclick";
 const char DOM_LONG_PRESS[] = "longpress";
+const char DOM_PINCH_START[] = "pinchstart";
+const char DOM_PINCH_UPDATE[] = "pinchupdate";
+const char DOM_PINCH_END[] = "pinchend";
+const char DOM_PINCH_CANCEL[] = "pinchcancel";
 const char DOM_COMPLETE[] = "complete";
 const char DOM_ERROR[] = "error";
 const char DOM_FOCUS[] = "focus";
@@ -670,6 +755,7 @@ const char DOM_SELECTED[] = "selected";
 const char DOM_CANCEL[] = "cancel";
 const char DOM_HIDE[] = "hide";
 const char DOM_MOUSE[] = "mouse";
+const char DOM_HOVER[] = "hover";
 const char DOM_SWIPE[] = "swipe";
 const char DOM_ROTATION[] = "rotation";
 
@@ -680,9 +766,12 @@ const char DOM_VIDEO_AUTOPLAY[] = "autoplay";
 const char DOM_VIDEO_POSTER[] = "poster";
 const char DOM_VIDEO_CONTROLS[] = "controls";
 const char DOM_VIDEO_FIT[] = "objectFit";
+const char DOM_VIDEO_LOOP[] = "loop";
+const char DOM_VIDEO_START_TIME[] = "starttime";
 const char DOM_VIDEO_EVENT_PREPARED[] = "prepared";
 const char DOM_VIDEO_EVENT_START[] = "start";
 const char DOM_VIDEO_EVENT_PAUSE[] = "pause";
+const char DOM_VIDEO_EVENT_STOP[] = "stop";
 const char DOM_VIDEO_EVENT_FINISH[] = "finish";
 const char DOM_VIDEO_EVENT_ERROR[] = "error";
 const char DOM_VIDEO_EVENT_SEEKING[] = "seeking";
@@ -691,9 +780,12 @@ const char DOM_VIDEO_EVENT_TIMEUPDATE[] = "timeupdate";
 const char DOM_VIDEO_EVENT_FULLSCREENCHANGE[] = "fullscreenchange";
 const char DOM_VIDEO_METHOD_START[] = "start";
 const char DOM_VIDEO_METHOD_PAUSE[] = "pause";
+const char DOM_VIDEO_METHOD_STOP[] = "stop";
 const char DOM_VIDEO_METHOD_SEEK_TO[] = "setCurrentTime";
 const char DOM_VIDEO_METHOD_REQUEST_FULLSCREEN[] = "requestFullscreen";
 const char DOM_VIDEO_METHOD_EXIT_FULLSCREEN[] = "exitFullscreen";
+const char DOM_VIDEO_SPEED[] = "speed";
+const char DOM_VIDEO_DIRECTION[] = "direction";
 
 // textarea attribute and style constants
 const char DOM_TEXTAREA_VALUE[] = "value";
@@ -722,6 +814,11 @@ const char DOM_INPUT_METHOD_DELETE[] = "delete";
 
 // input attribute and style constants
 const char DOM_INPUT_TYPE[] = "type";
+const char DOM_INPUT_TYPE_EMAIL[] = "email";
+const char DOM_INPUT_TYPE_DATE[] = "date";
+const char DOM_INPUT_TYPE_TIME[] = "time";
+const char DOM_INPUT_TYPE_NUMBER[] = "number";
+const char DOM_INPUT_TYPE_PASSWORD[] = "password";
 const char DOM_INPUT_CHECKED[] = "checked";
 const char DOM_INPUT_NAME[] = "name";
 const char DOM_INPUT_VALUE[] = "value";
@@ -741,8 +838,12 @@ const char DOM_INPUT_METHOD_FOCUS[] = "focus";
 const char DOM_ICON_SRC[] = "headericon";
 const char DOM_SHOW_ICON_SRC[] = "showicon";
 const char DOM_HIDE_ICON_SRC[] = "hideicon";
+const char DOM_INPUT_SHOW_PASSWORD_ICON[] = "showpasswordicon";
 const char DOM_INPUT_OPTION_ICON[] = "icon";
 const char DOM_INPUT_OPTION_CONTENT[] = "content";
+const char DOM_INPUT_SELECTED_START[] = "selectedstart";
+const char DOM_INPUT_SELECTED_END[] = "selectedend";
+const char DOM_INPUT_SOFT_KEYBOARD_ENABLED[] = "softkeyboardenabled";
 
 // input event constants
 const char DOM_INPUT_EVENT_NAME[] = "name";
@@ -753,6 +854,7 @@ const char DOM_INPUT_EVENT_OPTION_SELECT[] = "optionselect";
 const char DOM_INPUT_EVENT_TRANSLATE[] = "translate";
 const char DOM_INPUT_EVENT_SHARE[] = "share";
 const char DOM_INPUT_EVENT_SEARCH[] = "search";
+const char DOM_INPUT_EVENT_SELECT_CHANGE[] = "selectchange";
 
 // divider style extern constants
 const char DOM_DIVIDER_VERTICAL[] = "vertical";
@@ -833,6 +935,8 @@ const char DOM_CALENDAR_CARD_CALENDAR[] = "cardcalendar";
 const char DOM_CALENDAR_START_DAY_OF_WEEK[] = "startdayofweek";
 const char DOM_CALENDAR_EVENT_REQUEST_DATA[] = "requestdata";
 const char DOM_CALENDAR_OFF_DAYS[] = "offdays";
+const char DOM_CALENDAR_WORK_DAYS[] = "workdays";
+const char DOM_CALENDAR_HOLIDAYS[] = "holidays";
 
 // dialog
 const char DOM_DIALOG_METHOD_SHOW[] = "show";
@@ -902,6 +1006,10 @@ const char DOM_BADGE_TEXT_COLOR[] = "textColor";
 const char DOM_GRID_CONTAINER_COLUMNS[] = "columns";
 const char DOM_GRID_CONTAINER_GUTTER_WIDTH[] = "gutterwidth";
 const char DOM_GRID_CONTAINER_SIZE_TYPE[] = "sizetype";
+const char DOM_GRID_CONTAINER_GUTTER[] = "gutter";
+const char DOM_GRID_CONTAINER_TEMPLATE[] = "gridtemplate";
+const char DOM_GRID_TEMPLATE_TYPE_NORMAL[] = "normal";
+const char DOM_GRID_TEMPLATE_TYPE_GRID[] = "grid";
 const char DOM_GRID_CONTAINER_GET_COLUMNS[] = "getColumns";
 const char DOM_GRID_CONTAINER_GET_COLUMN_WIDTH[] = "getColumnWidth";
 const char DOM_GRID_CONTAINER_GET_GUTTER_WIDTH[] = "getGutterWidth";
@@ -921,6 +1029,7 @@ const char DOM_COLUMN_TYPE_CARD[] = "card";
 const char DOM_COLUMN_TYPE_CONTENT[] = "content";
 
 const char DOM_CLICK_EFFECT[] = "clickEffect";
+const char DOM_SPRING_EFFECT[] = "springeffect";
 // panel constants
 const char DOM_PANEL_METHOD_SHOW[] = "show";
 const char DOM_PANEL_METHOD_CLOSE[] = "close";
@@ -936,6 +1045,7 @@ const char DOM_PANEL_EVENT_SIZE_CHANGED[] = "sizechange";
 const char DOM_TOOL_BAR_ITEM_ICON[] = "icon";
 const char DOM_TOOL_BAR_ITEM_VALUE[] = "value";
 const char DOM_TOOL_BAR_ITEM_TEXT_COLOR[] = "textColor";
+const char DOM_TOOL_BAR_ITEM_COLOR[] = "color";
 const char DOM_TOOL_BAR_ITEM_FONT_SIZE[] = "fontSize";
 const char DOM_TOOL_BAR_ITEM_FONT_STYLE[] = "fontStyle";
 const char DOM_TOOL_BAR_ITEM_FONT_WEIGHT[] = "fontWeight";
@@ -946,6 +1056,7 @@ const char DOM_TOOL_BAR_ITEM_ALLOW_SCALE[] = "allowScale";
 // card transition
 const char DOM_TRANSITION_EFFECT[] = "transitionEffect";
 const char DOM_TRANSITION_CARD_COMPOSEID[] = "ref";
+const char DOM_TRANSITION_CARD_PARAMS[] = "paramsData";
 
 // qrcode
 const char DOM_QRCODE_BACKGROUND_COLOR[] = "backgroundColor";
@@ -992,6 +1103,7 @@ const char DOM_SVG_FONT_WEIGHT[] = "fontWeight";
 const char DOM_SVG_LETTER_SPACING[] = "letterSpacing";
 const char DOM_SVG_TEXT_DECORATION[] = "textDecoration";
 const char DOM_SVG_TEXT_LENGTH[] = "textlength";
+const char DOM_SVG_MASK[] = "mask";
 const char DOM_SVG_STROKE[] = "stroke";
 const char DOM_SVG_STROKE_DASHARRAY[] = "strokeDasharray";
 const char DOM_SVG_STROKE_DASHOFFSET[] = "strokeDashoffset";
@@ -1021,6 +1133,23 @@ const char DOM_SVG_CY[] = "cy";
 const char DOM_SVG_R[] = "r";
 const char DOM_SVG_ROTATE[] = "rotate";
 const char DOM_SVG_LENGTH_ADJUST[] = "lengthadjust";
+const char DOM_SVG_MIRROR[] = "automirror";
+const char DOM_SVG_MASK_CONTENT_UNITS[] = "maskcontentunits";
+const char DOM_SVG_MASK_UNITS[] = "maskunits";
+const char DOM_SVG_PATTERN_CONTENT_UNITS[] = "patterncontentunits";
+const char DOM_SVG_PATTERN_UNITS[] = "patternunits";
+const char DOM_SVG_PATTERN_TRANSFORM[] = "patterntransform";
+const char DOM_SVG_OFFSET[] = "offset";
+const char DOM_SVG_STOP_COLOR[] = "stopColor";
+const char DOM_SVG_STOP_OPACITY[] = "stopOpacity";
+const char DOM_SVG_GRADIENT_TRANSFORM[] = "gradienttransform";
+const char DOM_SVG_SPREAD_METHOD[] = "spreadmethod";
+const char DOM_SVG_FX[] = "fx";
+const char DOM_SVG_FY[] = "fy";
+const char DOM_SVG_FR[] = "fr";
+const char DOM_SVG_HREF[] = "href";
+const char DOM_SVG_XLINK_HREF[] = "xlink:href";
+const char DOM_SVG_CLIP_RULE[] = "clipRule";
 
 // web
 const char DOM_PAGESTART[] = "pagestart";
@@ -1028,14 +1157,29 @@ const char DOM_PAGEFINISH[] = "pagefinish";
 const char DOM_PAGEERROR[] = "error";
 const char DOM_WEB_WEBSRC[] = "src";
 const char DOM_METHOD_RELOAD[] = "reload";
+const char DOM_WEB_MESSAGE[] = "message";
 
+// rich-text
+const char DOM_RICH_TEXT_DATA[] = "value";
+const char DOM_LOAD_START[] = "start";
+const char DOM_LOAD_COMPLETE[] = "complete";
+
+// xcomponent
+const char DOM_XCOMPONENT_NAME[] = "name";
+
+// z-index
 const char DOM_ZINDEX[] = "zIndex";
 
 // camera
 const char DOM_TAKE_PHOTO[] = "takePhoto";
 const char DOM_CAMERA_FLASH[] = "flash";
 const char DOM_CAMERA_DEVICE_POSITION[] = "deviceposition";
-const char DOM_CAMERA_START_RECORD[] = "startRecorder";
-const char DOM_CAMERA_CLOSE_RECORDER[] = "closeRecorder";
+
+// form
+const char DOM_FORM_EVENT_SUBMIT[] = "submit";
+const char DOM_FORM_EVENT_RESET[] = "reset";
+
+// crown
+const char DOM_CROWN_ROTATE[] = "rotate";
 
 } // namespace OHOS::Ace

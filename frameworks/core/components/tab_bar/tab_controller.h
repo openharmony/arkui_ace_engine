@@ -24,7 +24,9 @@
 
 namespace OHOS::Ace {
 
-class TabController : public AceType {
+using TabBarChangeListener = std::function<void(int32_t)>;
+
+class ACE_EXPORT TabController : public AceType {
     DECLARE_ACE_TYPE(TabController, AceType);
 
 public:
@@ -36,6 +38,7 @@ public:
     void ValidateIndex(int32_t maxIndex);
     void SetPageReady(bool ready);
     void SetIndex(int32_t index);
+    void SetIndexByDom(int32_t index);
     void SetIndexByScrollContent(int32_t index);
     int32_t GetIndex() const;
     void SetContentElement(const RefPtr<Element>& contentElement);
@@ -43,12 +46,24 @@ public:
     int32_t GetId() const;
     void ChangeDispatch(int32_t index);
 
+    void OnTabBarChanged(int32_t index)
+    {
+        if (tabBarChangeListener_) {
+            tabBarChangeListener_(index);
+        }
+    }
+    void SetTabBarChangeListener(const TabBarChangeListener& listener)
+    {
+        tabBarChangeListener_ = listener;
+    }
+
 private:
     int32_t id_ = -1;
     int32_t index_ = 0;
     bool pageReady_ = false;
     WeakPtr<Element> contentElement_;
     WeakPtr<Element> barElement_;
+    TabBarChangeListener tabBarChangeListener_;
 };
 
 } // namespace OHOS::Ace

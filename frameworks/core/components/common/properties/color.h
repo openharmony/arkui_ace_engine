@@ -46,7 +46,7 @@ union ColorParam {
 };
 
 // A color value present by 32 bit.
-class ACE_EXPORT Color final {
+class ACE_EXPORT Color {
 public:
     Color() = default;
     constexpr explicit Color(uint32_t value) : colorValue_(ColorParam { .value = value }) {}
@@ -74,6 +74,11 @@ public:
     Color BlendOpacity(double opacityRatio) const;
     Color ChangeOpacity(double opacity) const;
     Color ChangeAlpha(uint8_t alpha) const;
+
+    void SetValue(uint32_t value)
+    {
+        colorValue_.value = value;
+    }
 
     uint32_t GetValue() const
     {

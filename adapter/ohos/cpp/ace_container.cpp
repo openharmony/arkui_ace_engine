@@ -51,11 +51,30 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, AceAbility* ac
     flutterTaskExecutor->InitPlatformThread();
     flutterTaskExecutor->InitJsThread();
     taskExecutor_ = flutterTaskExecutor;
-    if (type_ != FrontendType::DECLARATIVE_JS) {
-        InitializeFrontend();
+    taskExecutor_->PostTask([id = instanceId_]() { Container::InitForThread(id); }, TaskExecutor::TaskType::JS);
+    platformEventCallback_ = std::move(callback);
+}
+
+void AceContainer::Initialize()
+{
+    InitializeFrontend();
+}
+
+void AceContainer::Destroy()
+{
+    if (pipelineContext_ && taskExecutor_) {
+        if (taskExecutor_) {
+            taskExecutor_->PostTask([context = pipelineContext_]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
+        }
+    }
+    if (frontend_) {
+        frontend_->UpdateState(Frontend::State::ON_DESTROY);
     }
 
-    platformEventCallback_ = std::move(callback);
+    resRegister_.Reset();
+    assetManager_.Reset();
+    frontend_.Reset();
+    pipelineContext_.Reset();
 }
 
 void AceContainer::InitializeFrontend()
@@ -67,10 +86,15 @@ void AceContainer::InitializeFrontend()
         jsFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
         jsFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
         jsFrontend->SetAbility(aceAbility_);
+    } else if (type_ == FrontendType::JS_CARD) {
+        AceApplicationInfo::GetInstance().SetCardType();
+        frontend_ = AceType::MakeRefPtr<CardFrontend>();
     } else if (type_ == FrontendType::DECLARATIVE_JS) {
         frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
         declarativeFrontend->SetJsEngine(Framework::JsEngineLoader::GetDeclarative().CreateJsEngine(instanceId_));
+        declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
+        declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
     } else {
         LOGE("Frontend type not supported");
         EventReport::SendAppStartException(AppStartExcepType::FRONTEND_TYPE_ERR);
@@ -286,16 +310,6 @@ void AceContainer::InitializeCallback()
             [context, deadline]() { context->OnIdle(deadline); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterIdleCallback(idleCallback);
-
-    auto&& viewDestoryCallback = [context = pipelineContext_](AceView::ViewReleaseCallback&& callback) {
-        context->GetTaskExecutor()->PostTask(
-            [context, callback = std::move(callback)]() {
-                context->GetTaskExecutor()->PostTask(
-                    [callback = std::move(callback)]() { callback(); }, TaskExecutor::TaskType::PLATFORM);
-            },
-            TaskExecutor::TaskType::UI);
-    };
-    aceView_->RegisterViewDestroyCallback(viewDestoryCallback);
 }
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, AceAbility* aceAbility,
@@ -303,6 +317,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, AceAbi
 {
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, aceAbility, std::move(callback));
     AceEngine::Get().AddContainer(instanceId, aceContainer);
+    aceContainer->Initialize();
     auto front = aceContainer->GetFrontend();
     if (front) {
         front->UpdateState(Frontend::State::ON_CREATE);
@@ -312,24 +327,18 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, AceAbi
 
 void AceContainer::DestroyContainer(int32_t instanceId)
 {
-    LOGI("DestroyContainer with id %{private}d", instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
-        LOGE("no AceContainer with id %{private}d", instanceId);
+        LOGE("no AceContainer with id %{private}d in AceEngine", instanceId);
         return;
     }
-    auto context = container->GetPipelineContext();
-    if (context) {
-        auto taskExecutor = context->GetTaskExecutor();
-        if (taskExecutor) {
-            taskExecutor->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
-        }
+    container->Destroy();
+    auto taskExecutor = container->GetTaskExecutor();
+    if (taskExecutor) {
+        taskExecutor->PostSyncTask([] { LOGI("Wait UI thread..."); }, TaskExecutor::TaskType::UI);
+        taskExecutor->PostSyncTask([] { LOGI("Wait JS thread..."); }, TaskExecutor::TaskType::JS);
     }
     AceEngine::Get().RemoveContainer(instanceId);
-    auto front = container->GetFrontend();
-    if (front) {
-        front->UpdateState(Frontend::State::ON_DESTROY);
-    }
 }
 
 void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t height)
@@ -445,9 +454,7 @@ void AceContainer::AddAssetPath(
     } else {
         flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
         container->assetManager_ = flutterAssetManager;
-        if (container->type_ != FrontendType::DECLARATIVE_JS) {
-            container->frontend_->SetAssetManager(flutterAssetManager);
-        }
+        container->frontend_->SetAssetManager(flutterAssetManager);
     }
     if (flutterAssetManager && !packagePath.empty()) {
         auto assetProvider = std::make_unique<FileAssetProvider>();
@@ -467,19 +474,6 @@ void AceContainer::AttachView(
     ACE_DCHECK(state != nullptr);
     auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
     flutterTaskExecutor->InitOtherThreads(state->GetTaskRunners());
-
-    if (type_ == FrontendType::DECLARATIVE_JS) {
-        // For DECLARATIVE_JS or UJOINT_JS frontend display UI in JS thread temporarily.
-        flutterTaskExecutor->InitJsThread(false);
-        InitializeFrontend();
-        auto front = GetFrontend();
-        if (front) {
-            front->UpdateState(Frontend::State::ON_CREATE);
-            front->SetJsMessageDispatcher(AceType::Claim(this));
-            front->SetAssetManager(assetManager_);
-        }
-    }
-
     resRegister_ = aceView_->GetPlatformResRegister();
     pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(std::move(window),
                                                             taskExecutor_,

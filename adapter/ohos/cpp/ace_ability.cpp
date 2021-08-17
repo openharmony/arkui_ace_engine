@@ -15,6 +15,7 @@
 
 #include "adapter/ohos/cpp/ace_ability.h"
 
+#include "ability_process.h"
 #include "adapter/ohos/cpp/ace_container.h"
 #include "adapter/ohos/cpp/flutter_ace_view.h"
 #include "base/log/log.h"
@@ -65,6 +66,12 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr)
 
     std::string jsonString(jsonStream.get(), jsonStream.get() + size);
     auto rootJson = JsonUtil::ParseJsonString(jsonString);
+    auto mode = rootJson->GetObject("mode");
+    if (mode != nullptr) {
+        if (mode->GetString("syntax") == "ets" || mode->GetString("type") == "pageAbility") {
+            return FrontendType::DECLARATIVE_JS;
+        }
+    }
     std::string frontendType = rootJson->GetString("type");
     if (frontendType == "normal") {
         return FrontendType::JS;
@@ -201,9 +208,10 @@ void AceAbility::OnStart(const Want& want)
         parsedPageUrl = "";
     }
 
+    // set window id
     auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
     if (context != nullptr) {
-	    context->SetWindowId(window->GetWindowID());
+        context->SetWindowId(window->GetWindowID());
     }
 
     // run page.
@@ -293,6 +301,21 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
     LOGI("AceAbility::OnConfigurationUpdated called ");
     Ability::OnConfigurationUpdated(configuration);
     LOGI("AceAbility::OnConfigurationUpdated called End");
+}
+
+void AceAbility::OnAbilityResult(int requestCode, int resultCode, const OHOS::AAFwk::Want& resultData)
+{
+    LOGI("AceAbility::OnAbilityResult called ");
+    AbilityProcess::GetInstance()->OnAbilityResult(this, requestCode, resultCode, resultData);
+    LOGI("AceAbility::OnAbilityResult called End");
+}
+
+void AceAbility::OnRequestPermissionsFromUserResult(
+    int requestCode, const std::vector<std::string> &permissions, const std::vector<int> &grantResults)
+{
+    LOGI("AceAbility::OnRequestPermissionsFromUserResult called ");
+    AbilityProcess::GetInstance()->OnRequestPermissionsFromUserResult(this, requestCode, permissions, grantResults);
+    LOGI("AceAbility::OnRequestPermissionsFromUserResult called End");
 }
 
 }

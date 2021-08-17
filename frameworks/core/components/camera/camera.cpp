@@ -80,7 +80,6 @@ inline int32_t GetRecordFile(const std::string& filePath, std::string& path)
     return fd;
 }
 
-
 inline bool IsDirectory(const char *dirName)
 {
     struct stat statInfo {};
@@ -290,7 +289,6 @@ int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> c
     MakeDir(cacheFilePath_);
     return 0;
 }
-
 
 void CameraCallback::MakeDir(const std::string& path)
 {

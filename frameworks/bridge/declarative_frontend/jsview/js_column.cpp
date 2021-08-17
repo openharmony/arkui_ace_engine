@@ -16,96 +16,105 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 
 #include "base/log/ace_trace.h"
+#include "core/components/wrap/wrap_component.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
-template<>
-RefPtr<OHOS::Ace::FlexComponent> JSFlex<ColumnComponent>::ComponentForType(
-    FlexAlign mainAxisAlign, FlexAlign crossAxisAlign, const std::list<RefPtr<Component>>& children)
+void JSColumn::Create(const JSCallbackInfo& info)
 {
-    auto columnComponent = AceType::MakeRefPtr<ColumnComponent>(mainAxisAlign, crossAxisAlign, children);
-    if (columnComponent && GetIsDefWidth()) {
-        columnComponent->SetCrossAxisSize(CrossAxisSize::MAX);
+    std::list<RefPtr<Component>> children;
+    RefPtr<ColumnComponent> columnComponent =
+        AceType::MakeRefPtr<OHOS::Ace::ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, children);
+    columnComponent->SetMainAxisSize(MainAxisSize::MIN);
+    columnComponent->SetCrossAxisSize(CrossAxisSize::MIN);
+
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> space = obj->GetProperty("space");
+
+        Dimension value;
+        if (space->IsNumber()) {
+            value = Dimension(space->ToNumber<double>(), DimensionUnit::VP);
+        } else {
+            value = StringUtils::StringToDimension(space->ToString(), true);
+        }
+        columnComponent->SetSpace(value);
+
+        JSRef<JSVal> useAlign = obj->GetProperty("useAlign");
+        if (useAlign->IsObject()) {
+            HorizontalAlignDeclaration* declaration =
+                JSRef<JSObject>::Cast(useAlign)->Unwrap<HorizontalAlignDeclaration>();
+            if (declaration != nullptr) {
+                columnComponent->SetAlignDeclarationPtr(declaration);
+            }
+        }
     }
-    return columnComponent;
+
+    ViewStackProcessor::GetInstance()->Push(columnComponent);
+    JSInteractableView::SetFocusNode(true);
 }
 
-bool JSColumn::IsHorizontal() const
+void JSColumn::CreateWithWrap(const JSCallbackInfo& info)
 {
-    return false;
+    std::list<RefPtr<Component>> children;
+    RefPtr<OHOS::Ace::WrapComponent> component = AceType::MakeRefPtr<WrapComponent>(0.0, 0.0, children);
+
+    component->SetDirection(WrapDirection::VERTICAL);
+    component->SetMainAlignment(WrapAlignment::START);
+    component->SetCrossAlignment(WrapAlignment::START);
+    component->SetAlignment(WrapAlignment::START);
+    component->SetDialogStretch(false);
+
+    ViewStackProcessor::GetInstance()->Push(component);
 }
 
-void JSColumn::Destroy(JSViewAbstract* parentCustomView)
+void HorizontalAlignDeclaration::ConstructorCallback(const JSCallbackInfo& args)
 {
-    LOGD("JSColumn::Destroy start");
-    JSContainerBase::Destroy(parentCustomView);
-    LOGD("JSColumn::Destroy end");
+    auto align = HorizontalAlign::CENTER;
+    if (args.Length() > 0 && args[0]->IsNumber()) {
+        auto value = args[0]->ToNumber<int32_t>();
+        if (value >= static_cast<int32_t>(HorizontalAlign::START) &&
+            value <= static_cast<int32_t>(HorizontalAlign::END)) {
+            align = static_cast<HorizontalAlign>(value);
+        }
+    }
+    auto obj = new HorizontalAlignDeclaration(align);
+    args.SetReturnValue(obj);
 }
 
-#ifdef USE_QUICKJS_ENGINE
-// STATIC qjs_class_bindings
-JSValue JSColumn::ConstructorCallback(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+void HorizontalAlignDeclaration::DestructorCallback(HorizontalAlignDeclaration* obj)
 {
-    ACE_SCOPED_TRACE("JSColumn::ConstructorCallback");
-    auto flex = [](std::list<JSViewAbstract*> children, std::list<JSValue> jsChildren) {
-        return new JSColumn(children, jsChildren);
-    };
-    return JSFlex<ColumnComponent>::JsFlexConstructorInternal<JSColumn>(ctx, new_target, argc, argv, flex);
+    delete obj;
 }
-
-void JSColumn::QjsDestructor(JSRuntime* rt, JSColumn* view)
-{
-    LOGD("JSColumn(QjsDestructor) start");
-    if (!view)
-        return;
-    view->ReleaseRT(rt);
-    delete view;
-    LOGD("JSColumn(QjsDestructor) end");
-}
-
-void JSColumn::QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc)
-{
-    LOGD("JSColumn(QjsGcMark) start");
-    JSColumn* view = Unwrap<JSColumn>(val);
-    if (!view)
-        return;
-
-    view->MarkGC(rt, markFunc);
-    LOGD("JSColumn(QjsGcMark) end");
-}
-#endif // USE_QUICKJS_ENGINE
 
 void JSColumn::JSBind(BindingTarget globalObj)
 {
     JSClass<JSColumn>::Declare("Column");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSColumn>::StaticMethod("create", &JSColumn::Create, opt);
+    JSClass<JSColumn>::StaticMethod("createWithWrap", &JSColumn::CreateWithWrap, opt);
+    JSClass<JSColumn>::StaticMethod("fillParent", &JSFlex::SetFillParent, opt);
+    JSClass<JSColumn>::StaticMethod("wrapContent", &JSFlex::SetWrapContent, opt);
+    JSClass<JSColumn>::StaticMethod("justifyContent", &JSFlex::SetJustifyContent, opt);
+    JSClass<JSColumn>::StaticMethod("alignItems", &JSFlex::SetAlignItems, opt);
+    JSClass<JSColumn>::StaticMethod("alignContent", &JSFlex::SetAlignContent, opt);
+    JSClass<JSColumn>::StaticMethod("height", &JSFlex::JsHeight, opt);
+    JSClass<JSColumn>::StaticMethod("width", &JSFlex::JsWidth, opt);
+    JSClass<JSColumn>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSColumn>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSColumn>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSColumn>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSColumn>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSColumn>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSColumn>::StaticMethod("onPan", &JSInteractableView::JsOnPan);
+    JSClass<JSColumn>::Inherit<JSContainerBase>();
     JSClass<JSColumn>::Inherit<JSViewAbstract>();
+    JSClass<JSColumn>::Bind<>(globalObj);
 
-    MethodOptions opt = MethodOptions::RETURN_SELF;
-    JSClass<JSColumn>::Method("fillParent", &JSFlex::SetFillParent, opt);
-    JSClass<JSColumn>::Method("wrapContent", &JSFlex::SetWrapContent, opt);
-    JSClass<JSColumn>::Method("justifyContent", &JSFlex::SetJustifyContent, opt);
-    JSClass<JSColumn>::Method("alignItems", &JSFlex::SetAlignItems, opt);
-    JSClass<JSColumn>::Method("wrap", &JSFlex::SetWrap, opt);
-    JSClass<JSColumn>::Method("alignContent", &JSFlex::SetAlignContent, opt);
-    JSClass<JSColumn>::CustomMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSColumn>::CustomMethod("onClick", &JSInteractableView::JsOnClick);
-#ifdef USE_V8_ENGINE
-    JSClass<JSColumn>::CustomMethod("onPan", &JSInteractableView::JsOnPan);
-#endif
-    JSClass<JSColumn>::Bind(globalObj, ConstructorCallback);
+    JSClass<HorizontalAlignDeclaration>::Declare("HorizontalAlignDeclaration");
+    JSClass<HorizontalAlignDeclaration>::Bind(
+        globalObj, HorizontalAlignDeclaration::ConstructorCallback, HorizontalAlignDeclaration::DestructorCallback);
 }
-
-#ifdef USE_V8_ENGINE
-void JSColumn::ConstructorCallback(const v8::FunctionCallbackInfo<v8::Value>& args)
-{
-    LOGD("ConstructorCallback");
-    std::list<JSViewAbstract*> children;
-    std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren;
-    V8FlexConstructorInternal(args, children, jsChildren);
-    auto instance = V8Object<JSColumn>::New(args.This(), children, jsChildren);
-    args.GetReturnValue().Set(instance->Get());
-}
-
-#endif
 
 } // namespace OHOS::Ace::Framework

@@ -43,6 +43,11 @@ public:
     {
         return nullptr;
     }
+
+    std::string GetAssetPath(const std::string& assetName) override
+    {
+        return "";
+    }
 };
 
 } // namespace OHOS::Ace

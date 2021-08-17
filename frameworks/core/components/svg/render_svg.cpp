@@ -21,6 +21,15 @@
 
 namespace OHOS::Ace {
 
+namespace {
+
+const char TRANSFORM_ROTATE[] = "rotate";
+const char TRANSFORM_SCALE[] = "scale";
+const char TRANSFORM_SKEW[] = "skew";
+const char TRANSFORM_TRANSLATE[] = "translate";
+
+} // namespace
+
 RenderSvg::~RenderSvg()
 {
     svgAnimates_.clear();
@@ -39,8 +48,9 @@ void RenderSvg::Update(const RefPtr<Component>& component)
     width_ = svgComponent->GetWidth();
     height_ = svgComponent->GetHeight();
     viewBox_ = svgComponent->GetViewBox();
-    RenderSvgBase::SetPresentationAttrs(svgComponent);
-
+    isRoot_ = svgComponent->IsRoot();
+    autoMirror_ = svgComponent->GetAutoMirror();
+    RenderSvgBase::SetPresentationAttrs(svgComponent->GetDeclaration());
     AddSvgAnimations(svgComponent);
     MarkNeedLayout();
 }
@@ -54,7 +64,7 @@ void RenderSvg::AddSvgAnimations(const RefPtr<SvgComponent>& svgComponent)
     svgAnimates_.clear();
     hasUpdated_ = true;
     const auto& componentChildren = svgComponent->GetChildren();
-    for (const auto &childComponent : componentChildren) {
+    for (const auto& childComponent : componentChildren) {
         auto svgAnimateComponent = AceType::DynamicCast<SvgAnimate>(childComponent);
         if (!svgAnimateComponent || svgAnimateComponent->GetSvgAnimateType() == SvgAnimateType::MOTION) {
             continue;
@@ -97,8 +107,7 @@ bool RenderSvg::PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimate)
             svg->MarkNeedLayout(true);
         }
     };
-    RefPtr<Evaluator<Dimension>> evaluator = AceType::MakeRefPtr<LinearEvaluator<Dimension>>();
-    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback), evaluator);
+    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback));
     return true;
 }
 
@@ -110,8 +119,7 @@ bool RenderSvg::OpacityAnimation(const RefPtr<SvgAnimate>& svgAnimate)
     SetOpacityCallback();
     if (opacityCallback_) {
         double originalValue = opacity_ * (1.0 / UINT8_MAX);
-        RefPtr<Evaluator<double>> evaluator = AceType::MakeRefPtr<LinearEvaluator<double>>();
-        CreatePropertyAnimation(svgAnimate, originalValue, std::move(opacityCallback_), evaluator);
+        CreatePropertyAnimation(svgAnimate, originalValue, std::move(opacityCallback_));
     }
     return true;
 }
@@ -177,22 +185,80 @@ void RenderSvg::PerformLayout()
     LayoutParam layoutParam = GetLayoutParam();
     Size layoutSize;
     if (LessNotEqual(width_.Value(), 0.0)) {
+        if (layoutParam.GetMaxSize().IsWidthInfinite()) {
+            SetLayoutSize(Size(0.0, 0.0));
+            return;
+        }
         layoutSize.SetWidth(layoutParam.GetMaxSize().Width());
     } else {
-        layoutSize.SetWidth(std::clamp(ConvertDimensionToPx(width_, layoutParam.GetMaxSize().Width()),
-            layoutParam.GetMinSize().Width(), layoutParam.GetMaxSize().Width()));
+        if (isFixSize_) {
+            layoutSize.SetWidth(ConvertDimensionToPx(width_, LengthType::HORIZONTAL, isRoot_));
+        } else {
+            layoutSize.SetWidth(std::clamp(ConvertDimensionToPx(width_, LengthType::HORIZONTAL, isRoot_),
+                layoutParam.GetMinSize().Width(), layoutParam.GetMaxSize().Width()));
+        }
     }
     if (LessNotEqual(height_.Value(), 0.0)) {
+        if (layoutParam.GetMaxSize().IsHeightInfinite()) {
+            SetLayoutSize(Size(0.0, 0.0));
+            return;
+        }
         layoutSize.SetHeight(layoutParam.GetMaxSize().Height());
     } else {
-        layoutSize.SetHeight(std::clamp(ConvertDimensionToPx(height_, layoutParam.GetMaxSize().Height()),
-            layoutParam.GetMinSize().Height(), layoutParam.GetMaxSize().Height()));
+        if (isFixSize_) {
+            layoutSize.SetHeight(ConvertDimensionToPx(height_, LengthType::VERTICAL, isRoot_));
+        } else {
+            layoutSize.SetHeight(std::clamp(ConvertDimensionToPx(height_, LengthType::VERTICAL, isRoot_),
+                layoutParam.GetMinSize().Height(), layoutParam.GetMaxSize().Height()));
+        }
     }
     SetLayoutSize(layoutSize);
     for (const auto& child : children) {
-        child->Layout(LayoutParam(layoutSize, layoutSize));
+        child->Layout(LayoutParam(layoutSize, Size()));
     }
+    UpdateTransform();
     PrepareAnimations();
+}
+
+void RenderSvg::UpdateTransform()
+{
+    int32_t nodeId = GetNodeId();
+    RefPtr<RenderTransform> transform = nullptr;
+    auto parent = GetParent().Upgrade();
+    while (parent && parent->GetNodeId() == nodeId) {
+        transform = AceType::DynamicCast<RenderTransform>(parent);
+        if (transform) {
+            break;
+        }
+        parent = parent->GetParent().Upgrade();
+    }
+    if (!transform) {
+        LOGE("transform is null");
+        return;
+    }
+    if (!isRoot_ && (GreatNotEqual(x_.Value(), 0.0) || GreatNotEqual(y_.Value(), 0.0))) {
+        transform->Translate(Dimension(ConvertDimensionToPx(x_, LengthType::VERTICAL)),
+            Dimension(ConvertDimensionToPx(y_, LengthType::VERTICAL)));
+    }
+    for (auto& [type, values] : transformAttrs_) {
+        if (type == TRANSFORM_TRANSLATE && values.size() >= 2) {
+            transform->Translate(Dimension(values[0]), Dimension(values[1]));
+        } else if (type == TRANSFORM_SCALE && values.size() >= 2) {
+            transform->Scale(values[0], values[1]);
+        } else if (type == TRANSFORM_ROTATE && values.size() >= 1) {
+            transform->RotateZ(values[0]);
+        } else if (type == TRANSFORM_SKEW && values.size() >= 2) {
+            transform->Skew(values[0], values[1]);
+        }
+    }
+
+    if (isRoot_ && autoMirror_) {
+        auto context = context_.Upgrade();
+        if (context && context->IsRightToLeft()) {
+            Offset center = GetGlobalOffset() + GetLayoutSize() * 0.5;
+            transform->Mirror(center, GetGlobalOffset());
+        }
+    }
 }
 
 } // namespace OHOS::Ace

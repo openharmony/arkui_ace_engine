@@ -18,9 +18,12 @@
 
 #include <string>
 
+#include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
+
+class ThemeConstants;
 
 struct IdParseResult {
     bool parseSuccess = false;
@@ -36,10 +39,13 @@ public:
     ThemeUtils() = delete;
     ~ThemeUtils() = delete;
 
-    static IdParseResult ParseThemeIdReference(const std::string& str);
+    static IdParseResult ParseThemeIdReference(const std::string& str,
+        const RefPtr<ThemeConstants>& themeConstants = nullptr);
 
     static ResValueWrapper ParseStyleValue(
         uint32_t styleId, const ResValueWrapper& model, const std::string& value);
+
+    static std::string ProcessImageSource(const std::string& imageSrc, const RefPtr<ThemeConstants>& themeConstants);
 };
 
 } // namespace OHOS::Ace

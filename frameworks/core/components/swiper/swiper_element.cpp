@@ -26,6 +26,128 @@ constexpr int32_t INDICATOR_FOCUS_INDEX = 1;
 
 } // namespace
 
+void SwiperDataChangeListener::OnDataReloaded()
+{
+    auto swiper = element_.Upgrade();
+    if (swiper) {
+        swiper->OnReload();
+    }
+}
+
+void SwiperDataChangeListener::OnDataAdded(size_t index)
+{
+    auto swiper = element_.Upgrade();
+    if (swiper) {
+        swiper->OnItemAdded(static_cast<int32_t>(index));
+    }
+}
+
+void SwiperDataChangeListener::OnDataDeleted(size_t index)
+{
+    auto swiper = element_.Upgrade();
+    if (swiper) {
+        swiper->OnItemDeleted(static_cast<int32_t>(index));
+    }
+}
+
+void SwiperDataChangeListener::OnDataChanged(size_t index)
+{
+    auto swiper = element_.Upgrade();
+    if (swiper) {
+        swiper->OnItemChanged(static_cast<int32_t>(index));
+    }
+}
+
+void SwiperDataChangeListener::OnDataMoved(size_t from, size_t to)
+{
+    auto swiper = element_.Upgrade();
+    if (swiper) {
+        swiper->OnItemMoved(static_cast<int32_t>(from), static_cast<int32_t>(to));
+    }
+}
+
+void SwiperElement::Update()
+{
+    lazyChildItems_.clear();
+    lazyForEachComponent_ = nullptr;
+
+    auto swiperComponent = AceType::DynamicCast<SwiperComponent>(component_);
+    if (!swiperComponent) {
+        return;
+    }
+    auto lazyForEach = swiperComponent->GetLazyForEachComponent();
+    if (!lazyForEach) {
+        RenderElement::Update();
+        return;
+    }
+    if (!listener_) {
+        listener_ = AceType::MakeRefPtr<SwiperDataChangeListener>(AceType::WeakClaim(this));
+    }
+    lazyForEach->RegiterDataChangeListener(listener_);
+    lazyForEachComponent_ = lazyForEach;
+
+    auto swiper = AceType::DynamicCast<RenderSwiper>(renderNode_);
+    if (!swiper) {
+        return;
+    }
+    swiper->SetBuildChildByIndex([weak = WeakClaim(this)](int32_t index) {
+        auto element = weak.Upgrade();
+        if (!element) {
+            return false;
+        }
+        return element->BuildChildByIndex(index);
+    });
+
+    swiper->SetDeleteChildByIndex([weak = WeakClaim(this)](int32_t index) {
+        auto element = weak.Upgrade();
+        if (!element) {
+            return;
+        }
+        element->DeleteChildByIndex(index);
+    });
+    RenderElement::Update();
+}
+
+bool SwiperElement::BuildChildByIndex(int32_t index)
+{
+    if (index < 0) {
+        return false;
+    }
+
+    if (static_cast<size_t>(index) >= lazyForEachComponent_->TotalCount()) {
+        return false;
+    }
+    auto child = lazyForEachComponent_->GetChildByIndex(static_cast<size_t>(index));
+    auto item = lazyChildItems_.find(index);
+    if (item == lazyChildItems_.end()) {
+        auto element = UpdateChild(nullptr, child);
+        RefPtr<RenderSwiper> swiper = AceType::DynamicCast<RenderSwiper>(renderNode_);
+        if (!swiper) {
+            return false;
+        }
+        swiper->AddChildByIndex(index, element->GetRenderNode());
+        lazyChildItems_[index] = element;
+    } else {
+        UpdateChild(item->second, child);
+    }
+    return true;
+}
+
+void SwiperElement::DeleteChildByIndex(int32_t index)
+{
+    auto item = lazyChildItems_.find(index);
+    if (item == lazyChildItems_.end()) {
+        return;
+    }
+    Element::RemoveChild(item->second);
+    lazyChildItems_.erase(item);
+    RefPtr<RenderSwiper> swiper = AceType::DynamicCast<RenderSwiper>(renderNode_);
+    if (!swiper) {
+        return;
+    }
+    swiper->RemoveChildByIndex(index);
+}
+
 void SwiperElement::PerformBuild()
 {
     auto swiperComponent = AceType::DynamicCast<SwiperComponent>(component_);
@@ -266,6 +388,94 @@ bool SwiperElement::OnKeyEvent(const KeyEvent& keyEvent)
         default:
             return false;
     }
+}
+
+void SwiperElement::OnReload()
+{
+    LOGD("SwiperElement::OnReload");
+    RefPtr<RenderSwiper> render = AceType::DynamicCast<RenderSwiper>(renderNode_);
+    if (!render) {
+        return;
+    }
+
+    children_.clear();
+    lazyChildItems_.clear();
+    render->OnReload();
+}
+
+void SwiperElement::OnItemAdded(int32_t index)
+{
+    LOGD("SwiperElement::OnItemAdded");
+    auto item = lazyChildItems_.find(index);
+    if (item == lazyChildItems_.end()) {
+        return;
+    }
+    decltype(lazyChildItems_) items(std::move(lazyChildItems_));
+    for (const auto& item : items) {
+        if (item.first >= index) {
+            lazyChildItems_.emplace(std::make_pair(item.first + 1, item.second));
+        } else {
+            lazyChildItems_.emplace(std::make_pair(item.first, item.second));
+        }
+    }
+    RefPtr<RenderSwiper> render = AceType::DynamicCast<RenderSwiper>(renderNode_);
+    if (!render) {
+        return;
+    }
+    render->OnItemAdded(index);
+}
+
+void SwiperElement::OnItemDeleted(int32_t index)
+{
+    LOGD("SwiperElement::OnItemDeleted");
+    auto item = lazyChildItems_.find(index);
+    if (item == lazyChildItems_.end()) {
+        return;
+    }
+    decltype(lazyChildItems_) items(std::move(lazyChildItems_));
+    for (const auto& item : items) {
+        if (item.first == index) {
+            UpdateChild(item.second, nullptr);
+        } else if (item.first > index) {
+            lazyChildItems_.emplace(std::make_pair(item.first - 1, item.second));
+        } else {
+            lazyChildItems_.emplace(std::make_pair(item.first, item.second));
+        }
+    }
+    RefPtr<RenderSwiper> render = AceType::DynamicCast<RenderSwiper>(renderNode_);
+    if (!render) {
+        return;
+    }
+    render->OnItemDeleted(index);
+}
+
+void SwiperElement::OnItemChanged(int32_t index)
+{
+    LOGD("SwiperElement::OnItemChanged");
+    if (static_cast<size_t>(index) >= lazyForEachComponent_->TotalCount()) {
+        return;
+    }
+    RefPtr<RenderSwiper> render = AceType::DynamicCast<RenderSwiper>(renderNode_);
+    if (!render) {
+        return;
+    }
+    auto item = lazyChildItems_.find(index);
+    if (item == lazyChildItems_.end()) {
+        return;
+    }
+    auto element = UpdateChild(item->second, lazyForEachComponent_->GetChildByIndex(static_cast<size_t>(index)));
+    render->AddChildByIndex(index, element->GetRenderNode());
+    render->OnItemChanged(index);
+}
+
+void SwiperElement::OnItemMoved(int32_t from, int32_t to)
+{
+    LOGD("SwiperElement::OnItemMoved");
+    RefPtr<RenderSwiper> render = AceType::DynamicCast<RenderSwiper>(renderNode_);
+    if (!render) {
+        return;
+    }
+    render->OnItemMoved(from, to);
 }
 
 } // namespace OHOS::Ace

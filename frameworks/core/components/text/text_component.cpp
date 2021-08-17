@@ -20,7 +20,14 @@
 
 namespace OHOS::Ace {
 
-TextComponent::TextComponent(const std::string& data) : ComponentGroup(std::list<RefPtr<Component>>()), data_(data) {}
+TextComponent::TextComponent(const std::string& data) : ComponentGroup(std::list<RefPtr<Component>>())
+{
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<TextDeclaration>();
+        declaration_->Init();
+    }
+    SetData(data);
+}
 
 RefPtr<RenderNode> TextComponent::CreateRenderNode()
 {
@@ -30,6 +37,83 @@ RefPtr<RenderNode> TextComponent::CreateRenderNode()
 RefPtr<Element> TextComponent::CreateElement()
 {
     return AceType::MakeRefPtr<TextElement>();
+}
+
+const std::string& TextComponent::GetData() const
+{
+    return declaration_->GetData();
+}
+
+void TextComponent::SetData(const std::string& data)
+{
+    declaration_->SetData(data);
+}
+
+const TextStyle& TextComponent::GetTextStyle() const
+{
+    return declaration_->GetTextStyle();
+}
+
+void TextComponent::SetTextStyle(const TextStyle& textStyle)
+{
+    declaration_->SetTextStyle(textStyle);
+}
+
+const Color& TextComponent::GetFocusColor() const
+{
+    return declaration_->GetFocusColor();
+}
+
+void TextComponent::SetFocusColor(const Color& focusColor)
+{
+    declaration_->SetFocusColor(focusColor);
+}
+
+bool TextComponent::GetMaxWidthLayout() const
+{
+    return declaration_->IsMaxWidthLayout();
+}
+
+void TextComponent::SetMaxWidthLayout(bool isMaxWidthLayout)
+{
+    declaration_->SetIsMaxWidthLayout(isMaxWidthLayout);
+}
+
+bool TextComponent::GetAutoMaxLines() const
+{
+    return declaration_->GetAutoMaxLines();
+}
+
+void TextComponent::SetAutoMaxLines(bool autoMaxLines)
+{
+    declaration_->SetAutoMaxLines(autoMaxLines);
+}
+
+bool TextComponent::IsChanged() const
+{
+    return declaration_->IsChanged();
+}
+
+void TextComponent::SetIsChanged(bool isChanged)
+{
+    declaration_->SetIsChanged(isChanged);
+}
+
+void TextComponent::SetOnClick(const EventMarker& onClick)
+{
+    declaration_->SetClickEvent(onClick);
+}
+
+void TextComponent::SetDeclaration(const RefPtr<TextDeclaration>& declaration)
+{
+    if (declaration) {
+        declaration_ = declaration;
+    }
+}
+
+const RefPtr<TextDeclaration>& TextComponent::GetDeclaration() const
+{
+    return declaration_;
 }
 
 } // namespace OHOS::Ace

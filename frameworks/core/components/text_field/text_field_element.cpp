@@ -32,18 +32,25 @@ void TextFieldElement::Update()
             trigger->clickHandler_ = [weak]() {
                 auto textField = weak.Upgrade();
                 if (textField) {
-                    textField->RequestKeyboard();
+                    textField->RequestKeyboard(true);
                 }
             };
         }
     }
 
     auto textField = AceType::DynamicCast<TextFieldComponent>(component_);
-    if (textField) {
-        if (textField->GetTextFieldController()) {
-            textField->GetTextFieldController()->SetHandler(AceType::WeakClaim(this));
-        }
-        enabled_ = textField->IsEnabled();
+    if (!textField) {
+        return;
+    }
+
+    if (textField->GetTextFieldController()) {
+        textField->GetTextFieldController()->SetHandler(AceType::WeakClaim(this));
+    }
+    enabled_ = textField->IsEnabled();
+
+    // If auto focus, request keyboard immediately.
+    if (textField->GetAutoFocus()) {
+        RequestKeyboard(true);
     }
 }
 
@@ -70,12 +77,12 @@ RefPtr<RenderNode> TextFieldElement::CreateRenderNode()
                 }
                 sp->isNextAction_ = true;
 
-                KeyEvent keyEvent(KeyCode::KEYBOARD_DOWN, KeyAction::UP, 0, 0, 0);
+                KeyEvent keyEvent(KeyCode::KEYBOARD_DOWN, KeyAction::UP, 0, 0, 0, 0, 0, 0);
                 if (!pipeline->OnKeyEvent(keyEvent)) {
                     sp->CloseKeyboard();
                 } else {
                     // below textfield will auto open keyboard
-                    KeyEvent keyEventEnter(KeyCode::KEYBOARD_ENTER, KeyAction::UP, 0, 0, 0);
+                    KeyEvent keyEventEnter(KeyCode::KEYBOARD_ENTER, KeyAction::UP, 0, 0, 0, 0, 0, 0);
                     pipeline->OnKeyEvent(keyEventEnter);
                 }
             }
@@ -214,7 +221,7 @@ void TextFieldElement::Delete()
     if (editingMode_) {
         auto start = value.selection.GetStart();
         auto end = value.selection.GetEnd();
-        if (start > 0 && end > 0) {
+        if (start >= 0 && end > 0) {
             textField->Delete(start == end ? start - 1 : start, end);
         }
     } else {

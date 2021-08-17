@@ -44,7 +44,6 @@ DOMPickerBase::DOMPickerBase(NodeId nodeId, const std::string& nodeName, bool ha
             refPtr->HandleClickCallback();
         }
     });
-    valuePickerChild_->SetTextDirection((IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR));
     pickerId_ = nodeId;
 }
 
@@ -353,8 +352,8 @@ bool DOMPickerBase::SetTextStyleOperators(const std::pair<std::string, std::stri
                 } },
             { DOM_TEXT_LETTER_SPACING,
                 [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus) {
-                    normal.SetLetterSpacing(StringToDouble(val));
-                    focus.SetLetterSpacing(StringToDouble(val));
+                    normal.SetLetterSpacing(node.ParseDimension(val));
+                    focus.SetLetterSpacing(node.ParseDimension(val));
                 } },
             { DOM_TEXT_LINE_HEIGHT,
                 [](const DOMPickerBase& node, const std::string& val, TextStyle& normal, TextStyle& focus) {
@@ -414,6 +413,9 @@ void DOMPickerBase::CallSpecializedMethod(const std::string& method, const std::
 
 void DOMPickerBase::PrepareSpecializedComponent()
 {
+    if (valuePickerChild_) {
+        valuePickerChild_->SetTextDirection((IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR));
+    }
     if (CreatePicker()) {
         for (const auto& attribute : storeAttributes_) {
             SetSpecializedAttr(attribute);
@@ -510,7 +512,12 @@ bool DOMPickerBase::SetColumnHeight(const std::pair<std::string, std::string>& s
         return false;
     }
 
-    if (!hasValue_ || !basePickerChild_) {
+    if (!hasValue_) {
+        return false;
+    }
+
+    if (!basePickerChild_) {
+        storeStyles_.emplace_back(style);
         return false;
     }
 

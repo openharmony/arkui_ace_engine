@@ -30,9 +30,6 @@ void RenderDropFilter::Update(const RefPtr<Component>& component)
     sigmaX_ = dropFilter->GetSigmaX();
     sigmaY_ = dropFilter->GetSigmaY();
     usePanelTouchRect_ = dropFilter->UsePanelTouchRect();
-    if (usePanelTouchRect_) {
-        interceptTouchEvent_ = true;
-    }
     MarkNeedLayout();
 }
 
@@ -53,6 +50,7 @@ void RenderDropFilter::UpdateTouchRect()
         return;
     }
     touchRect_ = GetPaintRect();
+    ownTouchRect_ = touchRect_;
     auto box = GetChildren().front();
     if (!box) {
         return;
@@ -67,6 +65,7 @@ void RenderDropFilter::UpdateTouchRect()
     }
     panel->UpdateTouchRect();
     touchRect_ = panel->GetTouchRect();
+    ownTouchRect_ = touchRect_;
 }
 
 const Rect& RenderDropFilter::GetTouchRect()

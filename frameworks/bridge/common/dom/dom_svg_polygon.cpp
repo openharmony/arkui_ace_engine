@@ -21,18 +21,6 @@ namespace OHOS::Ace::Framework {
 
 DOMSvgPolygon::DOMSvgPolygon(NodeId nodeId, const std::string& nodeName) : DOMSvgBase(nodeId, nodeName) {}
 
-bool DOMSvgPolygon::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    if (DOMSvgBase::SetPresentationAttr(attr)) {
-        return true;
-    }
-    if (attr.first == DOM_SVG_POINTS) {
-        points_ = attr.second;
-        return true;
-    }
-    return false;
-}
-
 RefPtr<Component> DOMSvgPolygon::GetSpecializedComponent()
 {
     return polygonComponent_;
@@ -45,7 +33,7 @@ void DOMSvgPolygon::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 
 void DOMSvgPolygon::OnMounted(const RefPtr<DOMNode>& parentNode)
 {
-    DOMSvgBase::InheritCommonAttrs(polygonComponent_, parentNode);
+    DOMSvgBase::InheritAttrs(parentNode);
 }
 
 void DOMSvgPolygon::PrepareSpecializedComponent()
@@ -53,8 +41,10 @@ void DOMSvgPolygon::PrepareSpecializedComponent()
     if (!polygonComponent_) {
         polygonComponent_ = AceType::MakeRefPtr<SvgPolygonComponent>();
     }
-    polygonComponent_->SetPoints(points_);
-    DOMSvgBase::PrepareCommonAttrs(polygonComponent_);
+    auto declaration = AceType::DynamicCast<SvgPolygonDeclaration>(declaration_);
+    if (declaration) {
+        polygonComponent_->SetDeclaration(declaration);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

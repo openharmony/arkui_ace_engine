@@ -25,13 +25,11 @@ namespace OHOS::Ace::Framework {
 DOMDialog::DOMDialog(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
     dialogChild_ = AceType::MakeRefPtr<CustomDialogComponent>(std::to_string(nodeId), nodeName);
-    if (IsRightToLeft()) {
-        dialogChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 void DOMDialog::PrepareSpecializedComponent()
 {
+    dialogChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     if (dialogWidth_.second) {
         dialogChild_->SetWidth(dialogWidth_.first);
     }
@@ -154,6 +152,12 @@ bool DOMDialog::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
     if (event == DOM_DIALOG_EVENT_CANCEL) {
         dialogChild_->SetOnCancel(EventMarker(GetNodeIdForEvent(), event, pageId));
+        return true;
+    } else if (event == DOM_DIALOG_METHOD_SHOW) {
+        dialogChild_->SetOnShow(EventMarker(GetNodeIdForEvent(), event, pageId));
+        return true;
+    } else if (event == DOM_DIALOG_METHOD_CLOSE) {
+        dialogChild_->SetOnClose(EventMarker(GetNodeIdForEvent(), event, pageId));
         return true;
     }
 

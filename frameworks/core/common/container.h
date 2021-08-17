@@ -20,6 +20,7 @@
 #include "base/resource/asset_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/frontend.h"
 #include "core/common/platform_res_register.h"
@@ -35,12 +36,19 @@ using MouseEventCallback = std::function<void(const MouseEvent&)>;
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
 
-class Container : public virtual AceType {
+constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
+constexpr int32_t INSTANCE_ID_PLATFORM = -2;
+
+class ACE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
 
 public:
     Container() = default;
     ~Container() override = default;
+
+    virtual void Initialize() = 0;
+
+    virtual void Destroy() = 0;
 
     // Get the instance id of this container
     virtual int32_t GetInstanceId() const = 0;
@@ -72,7 +80,49 @@ public:
     // Dump container.
     virtual bool Dump(const std::vector<std::string>& params) = 0;
 
+    // Trigger garbage collection
+    virtual void TriggerGarbageCollection() {}
+
+    virtual void NotifyFontNodes() {}
+
+    // Get MutilModal ptr.
+    virtual uintptr_t GetMutilModalPtr() const
+    {
+        return 0;
+    }
+
+    virtual void ProcessScreenOnEvents() {}
+
+    virtual void ProcessScreenOffEvents() {}
+
+    void SetCreateTime(std::chrono::time_point<std::chrono::high_resolution_clock> time)
+    {
+        createTime_ = time;
+    }
+
+    bool IsFirstUpdate()
+    {
+        return firstUpateData_;
+    }
+
+    void AlreadyFirstUpdate()
+    {
+        firstUpateData_ = false;
+    }
+
+    virtual void SetViewFirstUpdating(std::chrono::time_point<std::chrono::high_resolution_clock> time) {}
+
+    static int32_t CurrentId();
+    static RefPtr<Container> Current();
+    static RefPtr<TaskExecutor> CurrentTaskExecutor();
+    static void InitForThread(int32_t id);
+
+protected:
+    std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
+    bool firstUpateData_ = true;
+
 private:
+    static thread_local int32_t currentId_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

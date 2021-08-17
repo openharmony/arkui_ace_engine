@@ -18,6 +18,7 @@
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
+#include "core/components/scroll/scroll_element.h"
 #include "core/components/stack/stack_element.h"
 
 namespace OHOS::Ace {
@@ -26,8 +27,10 @@ class ManagerInterface : public AceType {
     DECLARE_ACE_TYPE(ManagerInterface, AceType);
 
 public:
-    virtual void SetClickPosition(const Offset& position) = 0;
-    virtual void MovePage(const RefPtr<StackElement>& stackElement, const Offset& rootRect, double offsetHeight) = 0;
+    virtual void SetClickPosition(const Offset& position) {}
+    virtual void MovePage(int32_t pageId, const Offset& rootRect, double offsetHeight) {}
+    virtual void SetScrollElement(int32_t pageId, const WeakPtr<ScrollElement>& scrollElement) {}
+    virtual void RemovePageId(int32_t pageId) {}
 };
 
 } // namespace OHOS::Ace

@@ -18,6 +18,7 @@
 #include "base/utils/string_utils.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/stack/stack_element.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 
@@ -32,16 +33,24 @@ void CustomDialogElement::PerformBuild()
     if (!controller) {
         return;
     }
+    onShow_ = AceAsyncEvent<void()>::Create(dialog_->GetOnShow(), context_);
+    onClose_ = AceAsyncEvent<void()>::Create(dialog_->GetOnClose(), context_);
     controller->SetShowDialogImpl([weak = AceType::WeakClaim(this)]() {
         auto dialog = weak.Upgrade();
         if (dialog) {
             dialog->ShowDialog();
+            if (dialog->onShow_) {
+                dialog->onShow_();
+            }
         }
     });
     controller->SetCloseDialogImpl([weak = AceType::WeakClaim(this)]() {
         auto dialog = weak.Upgrade();
         if (dialog) {
             dialog->CloseDialog();
+            if (dialog->onClose_) {
+                dialog->onClose_();
+            }
         }
     });
 }

@@ -16,164 +16,76 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/core/components/foreach/foreach_component.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
-#ifdef USE_QUICKJS_ENGINE
-JSGrid::JSGrid(const std::list<JSViewAbstract*>& children, std::list<JSValue> jsChildren)
-    : JSContainerBase(children, jsChildren)
-{
-    LOGD("Grid(children: [%lu])", children_.size());
-}
-#else
-JSGrid::JSGrid(const std::list<JSViewAbstract*>& children,
-    std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren)
-    : JSContainerBase(children, jsChildren)
-{
-    LOGD("JSGrid(children: [%lu])", children_.size());
-}
-#endif
-
-JSGrid::~JSGrid()
-{
-    LOGD("Destroy: JSGrid");
-};
-
-RefPtr<OHOS::Ace::Component> JSGrid::CreateSpecializedComponent()
+void JSGrid::Create()
 {
     LOGD("Create component: Grid");
     std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
 
-    for (const auto& jsViewChild : children_) {
-        if (!jsViewChild) {
-            continue;
-        }
-        auto component = jsViewChild->CreateComponent();
-        if (AceType::TypeName<ForEachComponent>() == AceType::TypeName(component)) {
-            auto children = AceType::DynamicCast<ForEachComponent>(component)->GetChildren();
-            for (const auto& childComponent : children) {
-                componentChildren.emplace_back(childComponent);
-            }
-        } else {
-            componentChildren.emplace_back(component);
-        }
-    }
-
     RefPtr<OHOS::Ace::GridLayoutComponent> gridComponent = AceType::MakeRefPtr<GridLayoutComponent>(componentChildren);
-    gridComponent->SetColumnsArgs(columnsTemplate_);
-    gridComponent->SetRowsArgs(rowsTemplate_);
-    gridComponent->SetColumnGap(columnsGap_);
-    gridComponent->SetRowGap(rowsGap_);
-
-    return std::move(gridComponent);
-}
-
-std::vector<RefPtr<OHOS::Ace::SingleChild>> JSGrid::CreateInteractableComponents()
-{
-    return JSInteractableView::CreateComponents();
+    ViewStackProcessor::GetInstance()->Push(gridComponent);
 }
 
 void JSGrid::SetColumnsTemplate(std::string value)
 {
-    columnsTemplate_ = value;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid) {
+        grid->SetColumnsArgs(value);
+    }
 }
 
 void JSGrid::SetRowsTemplate(std::string value)
 {
-    rowsTemplate_ = value;
-}
-
-void JSGrid::SetColumnsGap(double value)
-{
-    columnsGap_ = value;
-}
-
-void JSGrid::SetRowsGap(double value)
-{
-    rowsGap_ = value;
-}
-
-#ifdef USE_QUICKJS_ENGINE
-void JSGrid::MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc)
-{
-    LOGD("JSGrid => MarkGC: Mark value for GC start");
-    JSContainerBase::MarkGC(rt, markFunc);
-    LOGD("JSGrid => MarkGC: Mark value for GC end");
-}
-
-void JSGrid::ReleaseRT(JSRuntime* rt)
-{
-    LOGD("JSGrid => release start");
-    JSContainerBase::ReleaseRT(rt);
-    LOGD("JSGrid => release end");
-}
-
-// STATIC qjs_class_bindings
-JSValue JSGrid::ConstructorCallback(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
-{
-    ACE_SCOPED_TRACE("JSGrid::ConstructorCallback");
-    QJSContext::Scope scope(ctx);
-    auto [children, jsChildren] = JsChildrenFromArgs(ctx, argc, argv);
-    JSGrid* grid = new JSGrid(children, jsChildren);
-    return Wrap<JSGrid>(new_target, grid);
-}
-
-void JSGrid::QjsDestructor(JSRuntime* rt, JSGrid* view)
-{
-    LOGD("JSGrid(QjsDestructor) start");
-
-    if (!view) {
-        return;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid) {
+        grid->SetRowsArgs(value);
     }
-
-    view->ReleaseRT(rt);
-    delete view;
-    view = nullptr;
-    LOGD("JSGrid(QjsDestructor) end");
 }
 
-void JSGrid::QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc)
+void JSGrid::SetColumnsGap(const std::string& value)
 {
-    LOGD("JSGrid(QjsGcMark) start");
-
-    JSGrid* grid = Unwrap<JSGrid>(val);
-    if (!grid) {
-        return;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid) {
+        grid->SetColumnGap(StringUtils::StringToDimension(value, true));
     }
-
-    grid->MarkGC(rt, markFunc);
-    LOGD("JSGrid(QjsGcMark) end");
 }
 
-#endif // USE_QUICKJS_ENGINE
+void JSGrid::SetRowsGap(const std::string& value)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid) {
+        grid->SetRowGap(StringUtils::StringToDimension(value, true));
+    }
+}
 
 void JSGrid::JSBind(BindingTarget globalObj)
 {
     LOGD("JSGrid:V8Bind");
     JSClass<JSGrid>::Declare("Grid");
+
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSGrid>::StaticMethod("create", &JSGrid::Create, opt);
+    JSClass<JSGrid>::StaticMethod("columnsTemplate", &JSGrid::SetColumnsTemplate, opt);
+    JSClass<JSGrid>::StaticMethod("rowsTemplate", &JSGrid::SetRowsTemplate, opt);
+    JSClass<JSGrid>::StaticMethod("columnsGap", &JSGrid::SetColumnsGap, opt);
+    JSClass<JSGrid>::StaticMethod("rowsGap", &JSGrid::SetRowsGap, opt);
+    JSClass<JSGrid>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSGrid>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSGrid>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSGrid>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSGrid>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSGrid>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+
+    JSClass<JSGrid>::Inherit<JSContainerBase>();
     JSClass<JSGrid>::Inherit<JSViewAbstract>();
-
-    MethodOptions opt = MethodOptions::RETURN_SELF;
-    JSClass<JSGrid>::Method("columnsTemplate", &JSGrid::SetColumnsTemplate, opt);
-    JSClass<JSGrid>::Method("rowsTemplate", &JSGrid::SetRowsTemplate, opt);
-    JSClass<JSGrid>::Method("columnsGap", &JSGrid::SetColumnsGap, opt);
-    JSClass<JSGrid>::Method("rowsGap", &JSGrid::SetRowsGap, opt);
-    JSClass<JSGrid>::CustomMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSGrid>::CustomMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSGrid>::Bind(globalObj, ConstructorCallback);
+    JSClass<JSGrid>::Bind<>(globalObj);
 }
-
-#ifdef USE_V8_ENGINE
-void JSGrid::ConstructorCallback(const v8::FunctionCallbackInfo<v8::Value>& args)
-{
-    LOGD("JSGrid:ConstructorCallback");
-    std::list<JSViewAbstract*> children;
-    std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren;
-    V8ChildrenFromArgs(args, children, jsChildren);
-    auto instance = V8Object<JSGrid>::New(args.This(), children, jsChildren);
-    args.GetReturnValue().Set(instance->Get());
-}
-#endif // USE_V8_ENGINE
 
 } // namespace OHOS::Ace::Framework

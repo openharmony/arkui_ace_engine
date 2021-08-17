@@ -38,8 +38,7 @@ void RenderSvgEllipse::Update(const RefPtr<Component>& component)
     cy_ = ellipseComponent->GetCy();
     rx_ = ellipseComponent->GetRx();
     ry_ = ellipseComponent->GetRy();
-    fillState_ = ellipseComponent->GetFillState();
-    strokeState_ = ellipseComponent->GetStrokeState();
+    RenderSvgBase::SetPresentationAttrs(ellipseComponent->GetDeclaration());
     PrepareAnimations(component);
     MarkNeedLayout();
 }
@@ -70,11 +69,10 @@ bool RenderSvgEllipse::PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimate
             return;
         }
         if (ellipse->SetProperty(attributeName, value)) {
-            ellipse->MarkNeedLayout(true);
+            ellipse->MarkNeedRender(true);
         }
     };
-    RefPtr<Evaluator<Dimension>> evaluator = AceType::MakeRefPtr<LinearEvaluator<Dimension>>();
-    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback), evaluator);
+    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback));
     return true;
 }
 

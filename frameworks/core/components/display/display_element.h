@@ -27,6 +27,7 @@ public:
     DisplayElement() = default;
     ~DisplayElement() override = default;
 
+    void Update() override;
     void PerformBuild() override;
 };
 

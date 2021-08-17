@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_DECLARATIVE_FRONTEND_ENGINE_BINDINGS_DEFINES_H
 #define FOUNDATION_ACE_FRAMEWORKS_DECLARATIVE_FRONTEND_ENGINE_BINDINGS_DEFINES_H
 
-enum class JavascriptEngine { NONE, QUICKJS, V8 };
+#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 
-#ifdef USE_QUICKJS_ENGINE
+enum class JavascriptEngine { NONE, QUICKJS };
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,23 +49,12 @@ using ExoticIsArrayCallback = int (*)(JSContext* ctx, JSValueConst obj);
 
 constexpr const JavascriptEngine cCurrentJSEngine = JavascriptEngine::QUICKJS;
 
-#elif USE_V8_ENGINE
-
-#include "third_party/v8/include/v8.h"
-
-using BindingTarget = v8::Local<v8::ObjectTemplate>;
-using FunctionCallback = void (*)(const v8::FunctionCallbackInfo<v8::Value>&);
+using JSFunctionCallback = void (*)(const OHOS::Ace::Framework::JSCallbackInfo&);
 template<typename T>
-using MemberFunctionCallback = void (T::*)(const v8::FunctionCallbackInfo<v8::Value>&);
-using ExoticGetterCallback = int;
-using ExoticSetterCallback = int;
-using ExoticHasPropertyCallback = int;
-using ExoticIsArrayCallback = int;
-
-constexpr const JavascriptEngine cCurrentJSEngine = JavascriptEngine::V8;
-
-#else
-#error "No engine selected"
-#endif
+using JSMemberFunctionCallback = void (T::*)(const OHOS::Ace::Framework::JSCallbackInfo&);
+template<typename T>
+using JSDestructorCallback = void (*)(T* instance);
+template<typename T>
+using JSGCMarkCallback = void (*)(T* instance, const OHOS::Ace::Framework::JSGCMarkCallbackInfo&);
 
 #endif

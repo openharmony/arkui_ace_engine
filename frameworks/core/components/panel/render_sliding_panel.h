@@ -66,6 +66,7 @@ class RenderSlidingPanel : public RenderNode {
 public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
+    void OnPaintFinish() override;
     void PerformLayout() override;
     bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
@@ -83,6 +84,17 @@ public:
         return dragBar_;
     }
 
+    // used for inspector node in PC preview
+    int32_t GetPanelId() const
+    {
+        return panelId_;
+    }
+
+    void SetPanelId(int32_t panelId)
+    {
+        panelId_ = panelId;
+    }
+
     void UpdateTouchRect() override;
 
     void Dump() override;
@@ -93,7 +105,7 @@ protected:
 
     RefPtr<RenderDragBar> dragBar_;
     double blankHeight_ = 0.0;
-    PanelMode mode_ = PanelMode::HALF;
+    PanelMode mode_ = PanelMode::FULL;
     PanelMode previousMode_ = PanelMode::HALF;
     PanelType type_ = PanelType::FOLDABLE_BAR;
     bool hasBoxStyle_ = false;
@@ -128,6 +140,8 @@ private:
     double fullHalfBoundary_ = 0.0;
     double halfMiniBoundary_ = 0.0;
     double fullMiniBoundary_ = 0.0;
+    // used for inspector node in PC preview
+    int32_t panelId_ = -1;
     std::pair<Dimension, bool> miniHeight_ = { 0.0_vp, false };
     std::pair<Dimension, bool> halfHeight_ = { 0.0_vp, false };
     std::pair<Dimension, bool> fullHeight_ = { 0.0_vp, false };

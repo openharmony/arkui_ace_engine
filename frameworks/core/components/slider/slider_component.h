@@ -134,7 +134,7 @@ public:
 
     void SetTextDirection(TextDirection direction) override
     {
-        Component::SetTextDirection(direction);
+        RenderComponent::SetTextDirection(direction);
         track_->SetTextDirection(direction);
     }
 

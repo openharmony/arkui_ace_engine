@@ -16,14 +16,35 @@
 #include "core/pipeline/layers/transform_layer.h"
 
 #include "flutter/lib/ui/dart_wrapper.h"
+#include "frameworks/core/components/svg/svg_transform.h"
+#include "frameworks/core/components/transform/flutter_render_transform.h"
 
 #include "base/log/dump_log.h"
 
 namespace OHOS::Ace::Flutter {
 
+Matrix4 TransformLayer::UpdateTransformAttr(const std::map<std::string, std::vector<float>>& attrs, Offset offset)
+{
+    auto transformInfo = SvgTransform::CreateMatrix4(attrs);
+    if (transformInfo.hasRotateCenter) {
+        transformInfo.matrix4 = FlutterRenderTransform::GetTransformByOffset(
+            transformInfo.matrix4, transformInfo.rotateCenter);
+    }
+    transformInfo.matrix4 = FlutterRenderTransform::GetTransformByOffset(
+        transformInfo.matrix4, offset);
+    return transformInfo.matrix4;
+}
+
 void TransformLayer::Update(const Matrix4& matrix)
 {
     matrix_ = matrix;
+}
+
+void TransformLayer::UpdateTransformProperty(const std::map<std::string, std::vector<float>>& attrs, Offset offset)
+{
+    if (!attrs.empty()) {
+        Update(UpdateTransformAttr(attrs, offset));
+    }
 }
 
 void TransformLayer::AddToScene(SceneBuilder& builder, double x, double y)

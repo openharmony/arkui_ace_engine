@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CURVE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CURVE_H
 
-#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
@@ -44,6 +43,10 @@ public:
 
     // Each subclass needs to override this method to implement motion in the 0.0 to 1.0 time range.
     virtual float MoveInternal(float time) = 0;
+    virtual const std::string ToString()
+    {
+        return "";
+    }
 };
 
 // The reverse curve is used to convert the direction of motion.
@@ -56,7 +59,6 @@ public:
     float MoveInternal(float time) final
     {
         if (!curve_) {
-            LOGE("Curve is null, illegal constructor input parameter");
             return 0.0f;
         }
 
@@ -78,7 +80,6 @@ public:
     float MoveInternal(float time) final
     {
         if (!curve_) {
-            LOGE("Curve is null, illegal constructor input parameter");
             return 0.0f;
         }
 

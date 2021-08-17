@@ -16,6 +16,7 @@
 #include "core/animation/scheduler.h"
 
 #include "base/log/log.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 

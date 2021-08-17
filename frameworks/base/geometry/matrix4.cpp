@@ -16,6 +16,7 @@
 #include "base/geometry/matrix4.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include "base/utils/utils.h"
 
@@ -23,6 +24,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr int32_t MATRIX_LENGTH = Matrix4::DIMENSION * Matrix4::DIMENSION;
+constexpr float ANGLE_UNIT = 0.017453f;    // PI / 180
 
 inline bool IsEqual(const float& left, const float& right)
 {
@@ -78,6 +80,33 @@ Matrix4 Matrix4::CreateRotate(float angle, float dx, float dy, float dz)
         cosValue + (y * y * (1.0f - cosValue)), (y * z * (1.0f - cosValue)) - (x * sinValue), 0.0f,
         (z * x * (1.0f - cosValue)) - (y * sinValue), (z * y * (1.0f - cosValue)) + (x * sinValue),
         cosValue + (z * z * (1.0f - cosValue)), 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+Matrix4 Matrix4::CreateMatrix2D(float m00, float m10, float m01, float m11, float m03, float m13)
+{
+    return Matrix4(
+        m00, m01, 0.0f, m03,
+        m10, m11, 0.0f, m13,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+Matrix4 Matrix4::CreateSkew(float x, float y)
+{
+    return Matrix4(
+        1.0f, std::tan(x * ANGLE_UNIT), 0.0f, 0.0f,
+        std::tan(y * ANGLE_UNIT), 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+Matrix4 Matrix4::CreatePerspective(float distance)
+{
+    auto result = CreateIdentity();
+    if (GreatNotEqual(distance, 0.0f)) {
+        result.matrix4x4_[2][3] = -1.0f / distance;
+    }
+    return result;
 }
 
 Matrix4 Matrix4::Invert(const Matrix4& matrix)
@@ -303,6 +332,87 @@ float Matrix4::operator()(int32_t row, int32_t col) const
 {
     // Caller guarantee row and col in range of [0, 3].
     return matrix4x4_[row][col];
+}
+
+double Matrix4::Determinant() const
+{
+    if (this->IsIdentityMatrix()) {
+        return 1.0;
+    }
+
+    double m00 = matrix4x4_[0][0];
+    double m01 = matrix4x4_[0][1];
+    double m02 = matrix4x4_[0][2];
+    double m03 = matrix4x4_[0][3];
+    double m10 = matrix4x4_[1][0];
+    double m11 = matrix4x4_[1][1];
+    double m12 = matrix4x4_[1][2];
+    double m13 = matrix4x4_[1][3];
+    double m20 = matrix4x4_[2][0];
+    double m21 = matrix4x4_[2][1];
+    double m22 = matrix4x4_[2][2];
+    double m23 = matrix4x4_[2][3];
+    double m30 = matrix4x4_[3][0];
+    double m31 = matrix4x4_[3][1];
+    double m32 = matrix4x4_[3][2];
+    double m33 = matrix4x4_[3][3];
+
+    double b00 = m00 * m11 - m01 * m10;
+    double b01 = m00 * m12 - m02 * m10;
+    double b02 = m00 * m13 - m03 * m10;
+    double b03 = m01 * m12 - m02 * m11;
+    double b04 = m01 * m13 - m03 * m11;
+    double b05 = m02 * m13 - m03 * m12;
+    double b06 = m20 * m31 - m21 * m30;
+    double b07 = m20 * m32 - m22 * m30;
+    double b08 = m20 * m33 - m23 * m30;
+    double b09 = m21 * m32 - m22 * m31;
+    double b10 = m21 * m33 - m23 * m31;
+    double b11 = m22 * m33 - m23 * m32;
+
+    return b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+}
+
+void Matrix4::Transpose()
+{
+    std::swap(matrix4x4_[0][1], matrix4x4_[1][0]);
+    std::swap(matrix4x4_[0][2], matrix4x4_[2][0]);
+    std::swap(matrix4x4_[0][3], matrix4x4_[3][0]);
+    std::swap(matrix4x4_[1][2], matrix4x4_[2][1]);
+    std::swap(matrix4x4_[1][3], matrix4x4_[3][1]);
+    std::swap(matrix4x4_[2][3], matrix4x4_[3][2]);
+}
+
+void Matrix4::MapScalars(const float src[DIMENSION], float dst[DIMENSION]) const
+{
+    float storage[DIMENSION];
+
+    float* result = (src == dst) ? storage : dst;
+
+    for (int i = 0; i < DIMENSION; i++) {
+        float value = 0;
+        for (int j = 0; j < DIMENSION; j++) {
+            value += matrix4x4_[j][i] * src[j];
+        }
+        result[i] = value;
+    }
+
+    if (storage == result) {
+        std::copy_n(result, DIMENSION, dst);
+    }
+}
+
+std::string Matrix4::ToString() const
+{
+    std::string out;
+    for (auto& i : matrix4x4_) {
+        for (float j : i) {
+            out += std::to_string(j);
+            out += ",";
+        }
+        out += "\n";
+    }
+    return out;
 }
 
 } // namespace OHOS::Ace

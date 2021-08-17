@@ -39,6 +39,8 @@ public:
 
     void VaryFontCollectionWithFontWeightScale(float fontWeightScale);
 
+    void LoadSystemFont();
+
 private:
     flutter::WindowClient* GetFlutterEngineWindowClient();
 

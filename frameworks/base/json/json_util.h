@@ -46,7 +46,7 @@ public:
 
     // get functions
     bool GetBool() const;
-    bool GetBool(const std::string& key, bool defaultValue) const;
+    bool GetBool(const std::string& key, bool defaultValue = false) const;
     int32_t GetInt() const;
     int32_t GetInt(const std::string& key, int32_t defaultVal = 0) const;
     uint32_t GetUInt() const;
@@ -78,6 +78,9 @@ public:
     bool Replace(const char* key, const char* value);
     bool Replace(const char* key, int32_t value);
     bool Replace(const char* key, const std::unique_ptr<JsonValue>& value);
+
+    // delete functions
+    bool Delete(const char* key);
 
     // serialize
     std::string ToString();

@@ -48,7 +48,6 @@ RefPtr<SharedTransitionEffect> GetSharedEffect(const ShareId& shareId, const Wea
 
 SharedTransitionController::SharedTransitionController(const WeakPtr<PipelineContext>& context) : context_(context)
 {
-    controller_ = AceType::MakeRefPtr<Animator>(context);
 };
 
 void SharedTransitionController::RegisterTransitionListener()
@@ -95,11 +94,16 @@ void SharedTransitionController::RegisterTransitionListener()
 void SharedTransitionController::StartSharedTransition()
 {
     // finish previous transition
-    controller_->Finish();
-    // clear controller
-    controller_->ClearAllListeners();
-    controller_->ClearInterpolators();
-    controller_->ClearProxyControllers();
+    for (const auto& controller : controllers_) {
+        if (controller) {
+            controller->Finish();
+            controller->ClearAllListeners();
+            controller->ClearInterpolators();
+        }
+    }
+    controllers_.clear();
+    stopControllerCount_ = 0;
+
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         LOGE("Start shared transition failed. pipeline is null.");
@@ -131,15 +135,28 @@ void SharedTransitionController::KickoffSharedTransition(TransitionEvent event, 
         LOGI("No shared elements found. event: %{public}d. dest page id: %{public}d", event_, pageId);
         return;
     }
-    controller_->AddStopListener([overlayWeak = WeakClaim(RawPtr(overlay))]() {
-        auto overlay = overlayWeak.Upgrade();
-        if (overlay) {
-            // shared element will be removed when get off shuttle, just make sure no shared left on the overlay
-            overlay->Clear();
+
+    for (const auto& controller : controllers_) {
+        if (controller) {
+            controller->SetFillMode(FillMode::FORWARDS);
+            controller->AddStopListener([effectWeak = WeakClaim(this), overlayWeak = WeakClaim(RawPtr(overlay))]() {
+                auto effect = effectWeak.Upgrade();
+                if (!effect) {
+                    LOGE("effect is null.");
+                    return;
+                }
+                effect->stopControllerCount_++;
+                if (static_cast<uint32_t>(effect->stopControllerCount_) >= effect->controllers_.size()) {
+                    auto overlay = overlayWeak.Upgrade();
+                    if (overlay) {
+                        // shared element will be removed when get off shuttle, just make sure no shared left on the
+                        // overlay
+                        overlay->Clear();
+                    }
+                }
+            });
         }
-    });
-    controller_->SetFillMode(FillMode::FORWARDS);
-    // Play together with page transition in stage element.
+    }
 }
 
 bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overlay, bool preCheck)
@@ -207,15 +224,22 @@ bool SharedTransitionController::PrepareEachTransition(
         LOGE("Create animation failed. event: %{public}d, share id: %{public}s", event_, shareId.c_str());
         return false;
     }
-    if (!effect->ApplyAnimation(overlay, controller_, option, event_)) {
+    auto tmp = AceType::MakeRefPtr<Animator>();
+    if (!effect->ApplyAnimation(overlay, tmp, option, event_)) {
         LOGE("Apply animation failed. event: %{public}d, share id: %{public}s", event_, shareId.c_str());
         return false;
     }
     LOGD("Prepare Shared Transition. event: %{public}d, share id: %{public}s", event_, shareId.c_str());
 
+    auto animator = effect->GetAnimator();
+    if (!animator) {
+        LOGE("GetAnimator failed. event: %{public}d, share id: %{public}s", event_, shareId.c_str());
+        return false;
+    }
     dest->SetVisible(false);
     auto weakDestShared = effect->GetDestSharedElement();
-    controller_->AddStopListener([destWeak, shareId, event = event_]() {
+    controllers_.push_back(animator);
+    animator->AddStopListener([destWeak, shareId, event = event_]() {
         auto dest = destWeak.Upgrade();
         if (!dest) {
             LOGE("Stop shared element failed. shared in element is null. event: %{public}d, shareId: %{public}s", event,

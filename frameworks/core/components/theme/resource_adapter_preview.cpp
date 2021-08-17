@@ -24,6 +24,7 @@
 namespace OHOS::Ace {
 namespace {
 
+constexpr uint32_t THEME_ID_DARK = 117440516;
 constexpr uint32_t SYSTEM_RES_ID_BASE = 0x7000000;
 const std::string FLOAT_REFERENCE_PREFIX = "$float:";
 const std::string STRING_REFERENCE_PREFIX = "$string:";
@@ -47,12 +48,12 @@ const std::string SYSTEM_RESOURCE_DARK_ELEMENT_DIR_SUFFIX = "/dark/element/";
 #endif
 const std::string BASE_FLOAT_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_BASE_ELEMENT_DIR_SUFFIX + "float.json";
 const std::string DARK_FLOAT_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_DARK_ELEMENT_DIR_SUFFIX + "float.json";
-const std::string BASE_STRINGS_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_BASE_ELEMENT_DIR_SUFFIX + "strings.json";
-const std::string BASE_COLORS_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_BASE_ELEMENT_DIR_SUFFIX + "colors.json";
-const std::string DARK_COLORS_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_DARK_ELEMENT_DIR_SUFFIX + "colors.json";
-const std::string BASE_DARK_COLORS_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_BASE_ELEMENT_DIR_SUFFIX + "colors_dark.json";
-const std::string BASE_PATTENS_LIGHT_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_BASE_ELEMENT_DIR_SUFFIX + "patterns_light.json";
-const std::string BASE_PATTENS_DARK_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_BASE_ELEMENT_DIR_SUFFIX + "patterns_dark.json";
+const std::string BASE_STRINGS_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_BASE_ELEMENT_DIR_SUFFIX + "string.json";
+const std::string BASE_COLORS_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_BASE_ELEMENT_DIR_SUFFIX + "color.json";
+const std::string DARK_COLORS_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_DARK_ELEMENT_DIR_SUFFIX + "color.json";
+const std::string BASE_DARK_COLORS_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_BASE_ELEMENT_DIR_SUFFIX + "color_dark.json";
+const std::string BASE_PATTENS_LIGHT_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_BASE_ELEMENT_DIR_SUFFIX + "pattern_light.json";
+const std::string BASE_PATTENS_DARK_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_BASE_ELEMENT_DIR_SUFFIX + "pattern_dark.json";
 const std::string BASE_THEME_LIGHT_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_BASE_ELEMENT_DIR_SUFFIX + "theme_light.json";
 const std::string BASE_THEME_DARK_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_BASE_ELEMENT_DIR_SUFFIX + "theme_dark.json";
 const std::string BASE_RECORD_JSON_FILE_SUFFIX = SYSTEM_RESOURCE_BASE_ELEMENT_DIR_SUFFIX + "id_defined.json";
@@ -93,8 +94,10 @@ bool ResourceAdapterPreview::ConvertFloatValToResValueWrapper(const std::string&
         doubleVal = floatVal.substr(0, floatVal.size() - DIMENSION_UNIT_LENGTH);
     } else if (strncmp(floatVal.c_str(), FLOAT_REFERENCE_PREFIX.c_str(), FLOAT_REFERENCE_PREFIX.length()) == 0) {
         auto iter = sysResFloat_.find(floatVal.substr(strlen(FLOAT_REFERENCE_PREFIX.c_str())));
-        resValWrapper = iter->second;
-        return true;
+        if (iter != sysResFloat_.end()) {
+            resValWrapper = iter->second;
+            return true;
+        }
     } else {
         doubleVal = floatVal;
     }
@@ -434,81 +437,73 @@ bool ResourceAdapterPreview::ParseRecordJsonFile(const std::string& jsonFile)
     return true;
 }
 
-bool ResourceAdapterPreview::LoadSystemResources(const std::string& sysResDir, const int32_t& themeId,
-                                                 const ColorMode& colorMode)
+void ResourceAdapterPreview::Init(const DeviceResourceInfo& resourceInfo)
 {
-    LOGI("loading system resources from %{private}s", sysResDir.c_str());
-    if (access(sysResDir.c_str(), F_OK) != 0) {
-        LOGE("load system resources failed, %{public}s does not exist!", sysResDir.c_str());
-        return false;
-    }
-    // The float/string/color json files are parsed first, then the pattern json files, finally the theme json files.
-    ParseFloatJsonFile(sysResDir + BASE_FLOAT_JSON_FILE_SUFFIX);
-    ParseStringJsonFile(sysResDir + BASE_STRINGS_JSON_FILE_SUFFIX);
-    ParseColorJsonFile(sysResDir + BASE_COLORS_JSON_FILE_SUFFIX);
-
-    // If dark color mode, parse the colors.json and float.json in dark directory.
-    if (colorMode == ColorMode::DARK) {
-        ParseFloatJsonFile(sysResDir + DARK_FLOAT_JSON_FILE_SUFFIX);
-        ParseColorJsonFile(sysResDir + DARK_COLORS_JSON_FILE_SUFFIX);
+    sysResDir_ = resourceInfo.packagePath;
+    LOGI("loading system resources from %{private}s", resourceInfo.packagePath.c_str());
+    if (access(sysResDir_.c_str(), F_OK) != 0) {
+        LOGE("load system resources failed, %{public}s does not exist!", sysResDir_.c_str());
+        return;
     }
 
-    ParsePatternJsonFile(sysResDir + BASE_PATTENS_LIGHT_JSON_FILE_SUFFIX);
-    ParseThemeJsonFile(sysResDir + BASE_THEME_LIGHT_JSON_FILE_SUFFIX);
-
-    // If dark theme, parse colors_dark.json, patterns_dark.json, theme_dark.json.
-    if (themeId == 1) {
-        ParseColorJsonFile(sysResDir + BASE_DARK_COLORS_JSON_FILE_SUFFIX);
-        ParsePatternJsonFile(sysResDir + BASE_PATTENS_DARK_JSON_FILE_SUFFIX);
-        ParseThemeJsonFile(sysResDir + BASE_THEME_DARK_JSON_FILE_SUFFIX);
-    }
-
-    PostprocessSystemResources();
-    // get the mapping relationship between system resources id and name.
-    ParseRecordJsonFile(sysResDir + BASE_RECORD_JSON_FILE_SUFFIX);
+    // Parse string.json first since there is no difference between light and dark colors.
+    ParseStringJsonFile(sysResDir_ + BASE_STRINGS_JSON_FILE_SUFFIX);
+    UpdateConfig(resourceInfo.deviceConfig);
+    // Get the mapping relationship between system resources id and name.
+    ParseRecordJsonFile(sysResDir_ + BASE_RECORD_JSON_FILE_SUFFIX);
     LOGI("load system resources from json, float size = %{public}zu, string size = %{public}zu, "
         "color size = %{public}zu, pattern size = %{public}zu, theme size = %{public}zu, record size = %{public}zu",
         sysResFloat_.size(), sysResString_.size(), sysResColor_.size(), sysResPattern_.size(), sysResTheme_.size(),
         sysResRecord_.size());
-    return true;
-}
 
-void ResourceAdapterPreview::Init(const DeviceResourceInfo& resourceInfo)
-{
-    LoadSystemResources(resourceInfo.packagePath, resourceInfo.themeId, resourceInfo.deviceConfig.colorMode);
+
 }
 
 void ResourceAdapterPreview::UpdateConfig(const DeviceConfig& config)
 {
-    // dynamic theme modification is not supported in PC Preview mode!
-    LOGE("ResourceAdapterPreview::UpdateConfig is not implemented yet");
+    LOGI("UpdateConfig color=%{public}d", config.colorMode);
+    sysResFloat_.clear();
+    sysResColor_.clear();
+    sysResPattern_.clear();
+    sysResTheme_.clear();
+
+    // color/float json of Dark Mode depends on Light Mode.
+    ParseFloatJsonFile(sysResDir_ + BASE_FLOAT_JSON_FILE_SUFFIX);
+    ParseColorJsonFile(sysResDir_ + BASE_COLORS_JSON_FILE_SUFFIX);
+
+    if (config.colorMode == ColorMode::DARK) {
+        ParseFloatJsonFile(sysResDir_ + DARK_FLOAT_JSON_FILE_SUFFIX);
+        ParseColorJsonFile(sysResDir_ + DARK_COLORS_JSON_FILE_SUFFIX);
+    }
+
+    ParsePatternJsonFile(sysResDir_ + BASE_PATTENS_LIGHT_JSON_FILE_SUFFIX);
+    ParseThemeJsonFile(sysResDir_ + BASE_THEME_LIGHT_JSON_FILE_SUFFIX);
+    PostprocessSystemResources();
 }
 
 RefPtr<ThemeStyle> ResourceAdapterPreview::GetTheme(int32_t themeId)
 {
-    if (themeId == 1) {
-        LOGD("ResourceAdapterPreview::GetTheme(themeId=%{public}d), theme style = theme_dark", themeId);
-        auto iter = sysResTheme_.find("theme_dark");
-        if (iter == sysResTheme_.end()) {
-            LOGE("ResourceAdapterPreview::GetTheme failed, can't find theme.");
-            return nullptr;
-        }
-        auto themeStyle = iter->second.GetValue<RefPtr<ThemeStyle>>(nullptr);
-        if (!themeStyle.first) {
-            LOGE("ResourceAdapterPreview::GetTheme failed, invalid theme style.");
-        }
-        return themeStyle.second;
+    LOGI("GetTheme resource(id=%{public}u)", themeId);
+    if (themeId == THEME_ID_DARK) {
+        ParseColorJsonFile(sysResDir_ + BASE_DARK_COLORS_JSON_FILE_SUFFIX);
+        ParsePatternJsonFile(sysResDir_ + BASE_PATTENS_DARK_JSON_FILE_SUFFIX);
+        ParseThemeJsonFile(sysResDir_ + BASE_THEME_DARK_JSON_FILE_SUFFIX);
+        PostprocessSystemResources();
     }
 
-    LOGD("ResourceAdapterPreview::GetTheme(themeId=%{public}d), theme style = theme_light", themeId);
-    auto iter = sysResTheme_.find("theme_light");
-    if (iter == sysResTheme_.end()) {
-        LOGE("ResourceAdapterPreview::GetTheme failed, can't find theme.");
+    auto recordIter = sysResRecord_.find(themeId);
+    if (recordIter == sysResRecord_.end()) {
+        LOGW("GetTheme can't find resource(id=%{public}u)", themeId);
         return nullptr;
     }
-    auto themeStyle = iter->second.GetValue<RefPtr<ThemeStyle>>(nullptr);
+    std::string themeName = recordIter->second.first;
+    auto resIter = sysResTheme_.find(themeName);
+    if (resIter == sysResTheme_.end()) {
+        LOGE("Get theme failed, cannot find %{public}s.", themeName.c_str());
+    }
+    auto themeStyle = resIter->second.GetValue<RefPtr<ThemeStyle>>(nullptr);
     if (!themeStyle.first) {
-        LOGE("ResourceAdapterPreview::GetTheme failed, invalid theme style.");
+        LOGW("Get Theme failed, invalid theme style.");
     }
     return themeStyle.second;
 }

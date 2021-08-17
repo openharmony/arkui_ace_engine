@@ -27,6 +27,7 @@ class FlutterRenderSvgPolygon : public RenderSvgPolygon {
 public:
     RenderLayer GetRenderLayer() override;
     void Paint(RenderContext& context, const Offset& offset) override;
+    void PaintDirectly(RenderContext& context, const Offset& offset) override;
 
     bool IsRepaintBoundary() const override
     {
@@ -41,10 +42,12 @@ public:
         return !transformLayer_->GetMatrix4().IsIdentityMatrix();
     }
 
-    void UpdateMotion(const std::string& path, const std::string& rotate, double percent, const Point& point) override;
-    bool GetStartPoint(Point& point) override;
+    void UpdateMotion(const std::string& path, const std::string& rotate, double percent) override;
 
 private:
+    Rect GetPaintBounds(const Offset& offset) override;
+    bool GetPath(SkPath* out);
+    bool GetPathWithoutAnimate(SkPath* out);
     bool CreateSkPath(const std::string& pointsStr, std::vector<SkPoint>& skPoints);
     bool CreateSkPaths(const std::string& points1, const std::string& points2, double weight, SkPath* out);
 

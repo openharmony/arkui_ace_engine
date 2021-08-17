@@ -18,12 +18,14 @@
 #include <string>
 
 #include "base/log/log.h"
+#include "base/memory/memory_monitor.h"
 #include "base/thread/thread_util.h"
 
 namespace OHOS::Ace {
 namespace {
 
-const size_t MAX_BACKGROUND_THREADS = 8;
+constexpr size_t MAX_BACKGROUND_THREADS = 8;
+constexpr uint32_t PURGE_FLAG_MASK = (1 << MAX_BACKGROUND_THREADS) - 1;
 
 void SetThreadName(uint32_t threadNo)
 {
@@ -141,10 +143,20 @@ void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo)
     SetThreadName(threadNo);
 
     Task task;
+    const uint32_t purgeFlag = (1 << (threadNo - 1));
     std::unique_lock<std::mutex> lock(mutex_);
     while (running_) {
         if (tasks_.empty()) {
-            condition_.wait(lock);
+            if ((purgeFlags_ & purgeFlag) != purgeFlag) {
+                condition_.wait(lock);
+                continue;
+            }
+
+            lock.unlock();
+            LOGD("Purge malloc cache for background thread %{public}u", threadNo);
+            PurgeMallocCache();
+            lock.lock();
+            purgeFlags_ &= ~purgeFlag;
             continue;
         }
 
@@ -159,6 +171,13 @@ void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo)
     }
 
     LOGD("Background thread is stopped");
+}
+
+void BackgroundTaskExecutor::TriggerGarbageCollection()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    purgeFlags_ = PURGE_FLAG_MASK;
+    condition_.notify_all();
 }
 
 } // namespace OHOS::Ace

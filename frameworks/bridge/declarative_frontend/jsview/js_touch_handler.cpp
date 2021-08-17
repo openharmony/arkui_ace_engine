@@ -15,117 +15,84 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+
 namespace OHOS::Ace::Framework {
 
-RefPtr<OHOS::Ace::SingleChild> JSTouchHandler::CreateComponent()
+RefPtr<OHOS::Ace::SingleChild> JSTouchHandler::CreateComponent(const JSCallbackInfo& args)
 {
     LOGD("JSTouchHandler wrapComponent");
-    auto touchComponent = AceType::MakeRefPtr<OHOS::Ace::TouchListenerComponent>();
+        auto touchComponent = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
+
+    if (jsOnDownFunc_) {
+        auto touchDownId = EventMarker(
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnDownFunc_)](BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                TouchEventInfo* touchInfo = static_cast<TouchEventInfo*>(info);
+                if (!touchInfo) {
+                    LOGE("Error processing event. Not an instance of TouchEventInfo");
+                    return;
+                }
+                func->Execute(*touchInfo);
+            },
+            "touchDown", 0);
+        touchComponent->SetOnTouchDownId(touchDownId);
+    }
+
+    if (jsOnUpFunc_) {
+        auto touchUpId = EventMarker(
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnUpFunc_)](BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                TouchEventInfo* touchInfo = static_cast<TouchEventInfo*>(info);
+                if (!touchInfo) {
+                    LOGE("Error processing event. Not an instance of TouchEventInfo");
+                    return;
+                }
+                func->Execute(*touchInfo);
+            },
+            "touchUp", 0);
+        touchComponent->SetOnTouchUpId(touchUpId);
+    }
+
+    if (jsOnMoveFunc_) {
+        auto touchMoveId = EventMarker(
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnMoveFunc_)](BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                TouchEventInfo* touchInfo = static_cast<TouchEventInfo*>(info);
+                if (!touchInfo) {
+                    LOGE("Error processing event. Not an instance of TouchEventInfo");
+                    return;
+                }
+                func->Execute(*touchInfo);
+            },
+            "touchMove", 0);
+        touchComponent->SetOnTouchMoveId(touchMoveId);
+    }
+
+    if (jsOnCancelFunc_) {
+        auto touchCancelId = EventMarker(
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnCancelFunc_)](BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                TouchEventInfo* touchInfo = static_cast<TouchEventInfo*>(info);
+                if (!touchInfo) {
+                    LOGE("Error processing event. Not an instance of TouchEventInfo");
+                    return;
+                }
+                func->Execute(*touchInfo);
+            },
+            "touchCancel", 0);
+        touchComponent->SetOnTouchCancel(touchCancelId);
+    }
+
     return touchComponent;
 }
 
-#ifdef USE_QUICKJS_ENGINE
-void JSTouchHandler::MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc)
+void JSTouchHandler::JsHandlerOnTouch(TouchEvent action, const JSCallbackInfo& args)
 {
-    LOGD("JSTouchHandler => MarkGC: start");
-    LOGD("JSTouchHandler => MarkGC: end");
-}
-
-void JSTouchHandler::ReleaseRT(JSRuntime* rt)
-{
-    LOGD("JSTouchHandler => release: start");
-    LOGD("JSTouchHandler => release: end");
-}
-
-// STATIC
-
-JSValue JSTouchHandler::JsHandlerOnTouch(
-    TouchEvent action, JSContext* ctx, JSValueConst jsObj, int argc, JSValueConst* argv)
-{
-    if ((argc != 1) || !JS_IsFunction(ctx, argv[0])) {
-        LOGE("onCick expects a function as parameter. Throwing exception.");
-        return JS_EXCEPTION;
-    }
-
-    QJSContext::Scope scope(ctx);
-    // Dup and Free shoulj happen inside the QJSTouchFunction
-    RefPtr<QJSTouchFunction> handlerFunc = AceType::MakeRefPtr<QJSTouchFunction>(ctx, JS_DupValue(ctx, argv[0]));
-
-    // TODO: Release previously allocated functions here
-    switch (action) {
-        case TouchEvent::DOWN:
-            jsOnDownFunc_ = handlerFunc;
-            break;
-        case TouchEvent::UP:
-            jsOnUpFunc_ = handlerFunc;
-            break;
-        case TouchEvent::MOVE:
-            jsOnMoveFunc_ = handlerFunc;
-            break;
-        case TouchEvent::CANCEL:
-            jsOnCancelFunc_ = handlerFunc;
-            break;
-    }
-    return JS_DupValue(ctx, jsObj); // for call chaining
-}
-
-JSValue JSTouchHandler::JsHandlerOnDown(JSContext* ctx, JSValueConst jsObj, int argc, JSValueConst* argv)
-{
-    return JSTouchHandler::JsHandlerOnTouch(TouchEvent::DOWN, ctx, jsObj, argc, argv);
-}
-
-JSValue JSTouchHandler::JsHandlerOnUp(JSContext* ctx, JSValueConst jsObj, int argc, JSValueConst* argv)
-{
-    return JSTouchHandler::JsHandlerOnTouch(TouchEvent::UP, ctx, jsObj, argc, argv);
-}
-
-JSValue JSTouchHandler::JsHandlerOnMove(JSContext* ctx, JSValueConst jsObj, int argc, JSValueConst* argv)
-{
-    return JSTouchHandler::JsHandlerOnTouch(TouchEvent::MOVE, ctx, jsObj, argc, argv);
-}
-
-JSValue JSTouchHandler::JsHandlerOnCancel(JSContext* ctx, JSValueConst jsObj, int argc, JSValueConst* argv)
-{
-    return JSTouchHandler::JsHandlerOnTouch(TouchEvent::CANCEL, ctx, jsObj, argc, argv);
-}
-
-// STATIC
-
-void JSTouchHandler::QjsDestructor(JSRuntime* rt, JSTouchHandler* handler)
-{
-    LOGD("JSTouchHandler(QjsDestructor) start");
-
-    if (!handler)
-        return;
-
-    handler->ReleaseRT(rt);
-    delete handler;
-    LOGD("JSTouchHandler(QjsDestructor) end");
-}
-
-void JSTouchHandler::QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc)
-{
-    LOGD("JSTouchHandler(QjsGcMark) start");
-
-    JSTouchHandler* handler = Unwrap<JSTouchHandler>(val);
-    if (!handler)
-        return;
-
-    handler->MarkGC(rt, markFunc);
-    LOGD("JSTouchHandler(QjsGcMark) end");
-}
-#endif
-
-#ifdef USE_V8_ENGINE
-
-void JSTouchHandler::JsHandlerOnTouch(TouchEvent action, const v8::FunctionCallbackInfo<v8::Value>& args)
-{
-    auto isolate = args.GetIsolate();
-    v8::HandleScope scp(isolate);
     LOGD("JSTouchHandler JsHandlerOnTouch");
     if (args[0]->IsFunction()) {
-        v8::Local<v8::Function> jsFunction = v8::Local<v8::Function>::Cast(args[0]);
-        RefPtr<V8TouchFunction> handlerFunc = AceType::MakeRefPtr<V8TouchFunction>(jsFunction);
+        JSRef<JSFunc> jsFunction = JSRef<JSFunc>::Cast(args[0]);
+        RefPtr<JsTouchFunction> handlerFunc = AceType::MakeRefPtr<JsTouchFunction>(jsFunction);
         switch (action) {
             case TouchEvent::DOWN:
                 jsOnDownFunc_ = handlerFunc;
@@ -141,30 +108,29 @@ void JSTouchHandler::JsHandlerOnTouch(TouchEvent action, const v8::FunctionCallb
                 break;
         }
     }
-    args.GetReturnValue().Set(args.This());
+    args.ReturnSelf();
 }
 
-void JSTouchHandler::JsHandlerOnDown(const v8::FunctionCallbackInfo<v8::Value>& args)
+void JSTouchHandler::JsHandlerOnDown(const JSCallbackInfo& args)
 {
     JSTouchHandler::JsHandlerOnTouch(TouchEvent::DOWN, args);
 }
 
-void JSTouchHandler::JsHandlerOnUp(const v8::FunctionCallbackInfo<v8::Value>& args)
+void JSTouchHandler::JsHandlerOnUp(const JSCallbackInfo& args)
 {
     JSTouchHandler::JsHandlerOnTouch(TouchEvent::UP, args);
 }
 
-void JSTouchHandler::JsHandlerOnMove(const v8::FunctionCallbackInfo<v8::Value>& args)
+void JSTouchHandler::JsHandlerOnMove(const JSCallbackInfo& args)
 {
     JSTouchHandler::JsHandlerOnTouch(TouchEvent::MOVE, args);
 }
 
-void JSTouchHandler::JsHandlerOnCancel(const v8::FunctionCallbackInfo<v8::Value>& args)
+void JSTouchHandler::JsHandlerOnCancel(const JSCallbackInfo& args)
 {
     JSTouchHandler::JsHandlerOnTouch(TouchEvent::CANCEL, args);
 }
 
-#endif
 void JSTouchHandler::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTouchHandler>::Declare("TouchHandler");

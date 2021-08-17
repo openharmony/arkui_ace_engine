@@ -44,9 +44,13 @@ void RenderCheckable::Update(const RefPtr<Component>& component)
     hotZoneVerticalPadding_ = checkable->GetHotZoneVerticalPadding();
     disabled_ = checkable->IsDisabled();
     changeEvent_ = AceAsyncEvent<void(const std::string)>::Create(checkable->GetChangeEvent(), context_);
+    valueChangeEvent_ = checkable->GetChangeEvent().GetUiStrFunction();
     clickEvent_ = AceAsyncEvent<void()>::Create(checkable->GetClickEvent(), context_);
     domChangeEvent_ = AceAsyncEvent<void(const std::string&)>::Create(checkable->GetDomChangeEvent(), context_);
     needFocus_ = checkable->GetNeedFocus();
+    if (checkable->GetOnChange()) {
+        onChange_ = *checkable->GetOnChange();
+    }
     InitClickRecognizer();
     AddAccessibilityAction();
     MarkNeedLayout();
@@ -151,12 +155,15 @@ void RenderCheckable::OnStatusChanged(RenderStatus renderStatus)
 
 void RenderCheckable::HandleClick()
 {
-    auto result = GetChangedResult();
+    auto result = UpdateChangedResult();
     if (!result.empty()) {
         MarkNeedRender();
         OnHandleChangedResult(result);
         if (changeEvent_) {
-            changeEvent_(result);
+            changeEvent_(std::string(R"("change",{"checked":)").append(result.append("},null")));
+        }
+        if (valueChangeEvent_) {
+            valueChangeEvent_(result);
         }
     }
     if (onChange_) {
@@ -175,15 +182,13 @@ void RenderCheckable::OnHandleChangedResult(const std::string& result)
     }
 }
 
-std::string RenderCheckable::GetChangedResult()
+std::string RenderCheckable::UpdateChangedResult()
 {
     LOGD("handle click");
     checked_ = !checked_;
     UpdateUIStatus();
 
-    std::string checked = checked_ ? "true" : "false";
-    std::string result = std::string("\"change\",{\"checked\":").append(checked.append("},null"));
-    return result;
+    return checked_ ? "true" : "false";
 }
 
 void RenderCheckable::OnTouchTestHit(

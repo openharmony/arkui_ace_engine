@@ -131,6 +131,7 @@ protected:
     Color lineColor_;
     bool isTv_ = SystemProperties::GetDeviceType() == DeviceType::TV;
     RefPtr<Animator> eventEffectController_;
+    bool hovered_ = false;
 };
 
 } // namespace OHOS::Ace

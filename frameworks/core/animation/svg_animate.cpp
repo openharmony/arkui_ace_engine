@@ -16,12 +16,52 @@
 #include "core/animation/svg_animate.h"
 
 #include "base/log/log.h"
+#include "base/utils/string_utils.h"
+#include "frameworks/core/components/svg/svg_transform.h"
 
 namespace OHOS::Ace {
 
+bool SvgAnimate::GetValuesRange(std::vector<float>& from, std::vector<float>& to, std::string& type)
+{
+    if (to_.empty() || from_ == to_) {
+        return false;
+    }
+
+    char tag = (from_.find(',') != std::string::npos) ? ',' : ' ';
+    StringUtils::StringSpliter(from_, tag, from);
+    tag = (to_.find(',') != std::string::npos) ? ',' : ' ';
+    StringUtils::StringSpliter(to_, tag, to);
+    if (to.empty()) {
+        return false;
+    }
+
+    if (!SvgTransform::AlignmentValues(transformType_, from, to)) {
+        return false;
+    }
+
+    type = transformType_;
+    return true;
+}
+
+bool SvgAnimate::GetFrames(std::vector<std::vector<float>>& frames, std::string& type)
+{
+    type = transformType_;
+    std::vector<float> frame;
+    for (const auto& value : values_) {
+        char tag = (value.find(',') != std::string::npos) ? ',' : ' ';
+        StringUtils::StringSpliter(value, tag, frame);
+        if (!SvgTransform::AlignmentFrame(type, frame)) {
+            return false;
+        }
+        frames.push_back(frame);
+    }
+
+    return true;
+}
+
 template<typename T>
-void SvgAnimate::CreateKeyframe(const RefPtr<KeyframeAnimation<T>>& animation, const T& value, float time,
-    const RefPtr<Curve>& curve)
+void SvgAnimate::CreateKeyframe(
+    const RefPtr<KeyframeAnimation<T>>& animation, const T& value, float time, const RefPtr<Curve>& curve)
 {
     if (!animation) {
         LOGE("create discrete calcMode animate failed, animation is null");
@@ -48,22 +88,22 @@ void SvgAnimate::CreateFirstKeyframe(const RefPtr<KeyframeAnimation<T>>& animati
 }
 
 template<typename T>
-bool SvgAnimate::CreatePropertyAnimate(std::function<void(T)>&& callback, const T& originalValue,
-    const RefPtr<Evaluator<T>>& evaluator, const RefPtr<Animator>& animator)
+bool SvgAnimate::CreatePropertyAnimate(
+    std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator)
 {
     bool ret = false;
     switch (calcMode_) {
         case CalcMode::DISCRETE:
-            ret = CreateDiscreteAnimate(std::move(callback), originalValue, evaluator, animator);
+            ret = CreateDiscreteAnimate(std::move(callback), originalValue, animator);
             break;
         case CalcMode::LINEAR:
-            ret = CreateLinearAnimate(std::move(callback), originalValue, evaluator, animator);
+            ret = CreateLinearAnimate(std::move(callback), originalValue, animator);
             break;
         case CalcMode::PACED:
-            ret = CreatePacedAnimate(std::move(callback), originalValue, evaluator, animator);
+            ret = CreatePacedAnimate(std::move(callback), originalValue, animator);
             break;
         case CalcMode::SPLINE:
-            ret = CreateSplineAnimate(std::move(callback), originalValue, evaluator, animator);
+            ret = CreateSplineAnimate(std::move(callback), originalValue, animator);
             break;
         default:
             LOGE("invalid calcMode");
@@ -74,10 +114,8 @@ bool SvgAnimate::CreatePropertyAnimate(std::function<void(T)>&& callback, const 
 
 bool SvgAnimate::CreateMotionAnimate(std::function<void(double)>&& callback, const RefPtr<Animator>& animator)
 {
-    RefPtr<Evaluator<double>> evaluator = AceType::MakeRefPtr<LinearEvaluator<double>>();
     if (keyPoints_.empty() || calcMode_ == CalcMode::PACED) {
         auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(0.0, 1.0, GetCurve());
-        animation->SetEvaluator(evaluator);
         animation->AddListener(callback);
         animator->AddInterpolator(animation);
         animator->SetDuration(GetDur());
@@ -91,13 +129,13 @@ bool SvgAnimate::CreateMotionAnimate(std::function<void(double)>&& callback, con
     double originalValue = 0.0;
     switch (calcMode_) {
         case CalcMode::DISCRETE:
-            ret = CreateDiscreteAnimate(std::move(callback), originalValue, evaluator, animator);
+            ret = CreateDiscreteAnimate(std::move(callback), originalValue, animator);
             break;
         case CalcMode::LINEAR:
-            ret = CreateLinearAnimate(std::move(callback), originalValue, evaluator, animator);
+            ret = CreateLinearAnimate(std::move(callback), originalValue, animator);
             break;
         case CalcMode::SPLINE:
-            ret = CreateSplineAnimate(std::move(callback), originalValue, evaluator, animator);
+            ret = CreateSplineAnimate(std::move(callback), originalValue, animator);
             break;
         default:
             LOGE("invalid calcMode");
@@ -107,8 +145,8 @@ bool SvgAnimate::CreateMotionAnimate(std::function<void(double)>&& callback, con
 }
 
 template<typename T>
-bool SvgAnimate::CreateDiscreteAnimate(std::function<void(T)>&& callback, const T& originalValue,
-    const RefPtr<Evaluator<T>>& evaluator, const RefPtr<Animator>& animator)
+bool SvgAnimate::CreateDiscreteAnimate(
+    std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator)
 {
     if (calcMode_ != CalcMode::DISCRETE) {
         LOGW("invalid calcMode");
@@ -129,7 +167,7 @@ bool SvgAnimate::CreateDiscreteAnimate(std::function<void(T)>&& callback, const 
             return false;
         }
     }
-    animation->SetEvaluator(evaluator);
+    animation->SetInitValue(originalValue);
     animation->AddListener(std::move(callback));
     animator->AddInterpolator(animation);
     animator->SetDuration(GetDur());
@@ -141,8 +179,8 @@ bool SvgAnimate::CreateDiscreteAnimate(std::function<void(T)>&& callback, const 
 }
 
 template<typename T>
-bool SvgAnimate::DiscreteAnimate(const RefPtr<KeyframeAnimation<T>>& animation,
-    const T& originalValue, const T& startValue, const T& endValue)
+bool SvgAnimate::DiscreteAnimate(
+    const RefPtr<KeyframeAnimation<T>>& animation, const T& originalValue, const T& startValue, const T& endValue)
 {
     if (startValue == endValue && startValue == originalValue) {
         LOGW("the start value and end value are the same as the original value");
@@ -167,8 +205,7 @@ bool SvgAnimate::DiscreteAnimate(const RefPtr<KeyframeAnimation<T>>& animation, 
         CreateKeyframe(animation, GetValue<T>(values.front()), 1.0f, GetCurve());
         return true;
     } else if (values.size() == 2) {
-        return DiscreteAnimate(animation, originalValue, GetValue<T>(values.front()),
-            GetValue<T>(values.back()));
+        return DiscreteAnimate(animation, originalValue, GetValue<T>(values.front()), GetValue<T>(values.back()));
     } else {
         if (!keyTimes_.empty()) {
             return DiscreteWithValues(animation, originalValue);
@@ -231,8 +268,8 @@ bool SvgAnimate::DiscreteWithKeyTimes(const RefPtr<KeyframeAnimation<T>>& animat
 }
 
 template<typename T>
-bool SvgAnimate::CreateLinearAnimate(std::function<void(T)>&& callback, const T& originalValue,
-    const RefPtr<Evaluator<T>>& evaluator, const RefPtr<Animator>& animator)
+bool SvgAnimate::CreateLinearAnimate(
+    std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator)
 {
     if (calcMode_ != CalcMode::LINEAR) {
         LOGW("invalid calcMode");
@@ -245,11 +282,11 @@ bool SvgAnimate::CreateLinearAnimate(std::function<void(T)>&& callback, const T&
             LOGW("create linear animate failed");
             return false;
         }
-        animation->SetEvaluator(evaluator);
+        animation->SetInitValue(originalValue);
         animation->AddListener(std::move(callback));
         animator->AddInterpolator(animation);
     } else {
-        if (!LinearAnimate(std::move(callback), originalValue, evaluator, animator)) {
+        if (!LinearAnimate(std::move(callback), originalValue, animator)) {
             LOGW("create linear animate failed");
             return false;
         }
@@ -263,8 +300,8 @@ bool SvgAnimate::CreateLinearAnimate(std::function<void(T)>&& callback, const T&
 }
 
 template<typename T>
-bool SvgAnimate::LinearAnimate(std::function<void(T)>&& callback, const T& originalValue,
-    const RefPtr<Evaluator<T>>& evaluator, const RefPtr<Animator>& animator)
+bool SvgAnimate::LinearAnimate(
+    std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator)
 {
     if (!animator) {
         LOGE("create linear calcMode animate failed, animation is null");
@@ -281,7 +318,7 @@ bool SvgAnimate::LinearAnimate(std::function<void(T)>&& callback, const T& origi
         startValue = originalValue;
     }
     auto animation = AceType::MakeRefPtr<CurveAnimation<T>>(startValue, endValue, GetCurve());
-    animation->SetEvaluator(evaluator);
+    animation->SetInitValue(originalValue);
     animation->AddListener(std::move(callback));
     animator->AddInterpolator(animation);
     return true;
@@ -356,8 +393,8 @@ bool SvgAnimate::LinearWithKeyTimes(const RefPtr<KeyframeAnimation<T>>& animatio
 }
 
 template<typename T>
-bool SvgAnimate::CreatePacedAnimate(std::function<void(T)>&& callback, const T& originalValue,
-    const RefPtr<Evaluator<T>>& evaluator, const RefPtr<Animator>& animator)
+bool SvgAnimate::CreatePacedAnimate(
+    std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator)
 {
     if (calcMode_ != CalcMode::PACED) {
         LOGW("invalid calcMode");
@@ -375,11 +412,11 @@ bool SvgAnimate::CreatePacedAnimate(std::function<void(T)>&& callback, const T& 
                 return false;
             }
         }
-        animation->SetEvaluator(evaluator);
+        animation->SetInitValue(originalValue);
         animation->AddListener(std::move(callback));
         animator->AddInterpolator(animation);
     } else {
-        if (!LinearAnimate(std::move(callback), originalValue, evaluator, animator)) {
+        if (!LinearAnimate(std::move(callback), originalValue, animator)) {
             LOGW("create linear animate failed");
             return false;
         }
@@ -393,26 +430,29 @@ bool SvgAnimate::CreatePacedAnimate(std::function<void(T)>&& callback, const T& 
 }
 
 template<typename T>
-bool SvgAnimate::CreateSplineAnimate(std::function<void(T)>&& callback, const T& originalValue,
-    const RefPtr<Evaluator<T>>& evaluator, const RefPtr<Animator>& animator)
+bool SvgAnimate::CreateSplineAnimate(
+    std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator)
 {
     if (calcMode_ != CalcMode::SPLINE) {
         LOGW("invalid calcMode");
         return false;
     }
     const auto& values = GetKeyValues();
-    if (values.empty() && !SplineAnimate(std::move(callback), originalValue, evaluator, animator)) {
-        LOGW("create spline animate failed");
-        return false;
+    if (values.empty()) {
+        if (!SplineAnimate(std::move(callback), originalValue, animator)) {
+            LOGW("create spline animate failed");
+            return false;
+        }
+    } else {
+        RefPtr<KeyframeAnimation<T>> animation = AceType::MakeRefPtr<KeyframeAnimation<T>>();
+        if (!SplineAnimate(animation)) {
+            LOGW("create spline animate failed");
+            return false;
+        }
+        animation->SetInitValue(originalValue);
+        animation->AddListener(std::move(callback));
+        animator->AddInterpolator(animation);
     }
-    RefPtr<KeyframeAnimation<T>> animation = AceType::MakeRefPtr<KeyframeAnimation<T>>();
-    if (!SplineAnimate(animation)) {
-        LOGW("create spline animate failed");
-        return false;
-    }
-    animation->SetEvaluator(evaluator);
-    animation->AddListener(std::move(callback));
-    animator->AddInterpolator(animation);
     animator->SetDuration(GetDur());
     animator->SetFillMode(GetFillMode());
     animator->SetIteration(repeatCount_);
@@ -422,8 +462,8 @@ bool SvgAnimate::CreateSplineAnimate(std::function<void(T)>&& callback, const T&
 }
 
 template<typename T>
-bool SvgAnimate::SplineAnimate(std::function<void(T)>&& callback, const T& originalValue,
-    const RefPtr<Evaluator<T>>& evaluator, const RefPtr<Animator>& animator)
+bool SvgAnimate::SplineAnimate(
+    std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator)
 {
     if (!animator) {
         LOGE("create linear calcMode animate failed, animation is null");
@@ -442,7 +482,7 @@ bool SvgAnimate::SplineAnimate(std::function<void(T)>&& callback, const T& origi
         startValue = originalValue;
     }
     auto animation = AceType::MakeRefPtr<CurveAnimation<T>>(startValue, endValue, GetCurve(keySplines_[0]));
-    animation->SetEvaluator(evaluator);
+    animation->SetInitValue(originalValue);
     animation->AddListener(std::move(callback));
     animator->AddInterpolator(animation);
     return true;
@@ -524,11 +564,11 @@ bool SvgAnimate::SplineWithKeyTimes(const RefPtr<KeyframeAnimation<T>>& animatio
     return true;
 }
 
-template bool SvgAnimate::CreatePropertyAnimate(std::function<void(double)>&& callback, const double& originalValue,
-    const RefPtr<Evaluator<double>>& evaluator, const RefPtr<Animator>& animator);
-template bool SvgAnimate::CreatePropertyAnimate(std::function<void(Dimension)>&& callback,
-    const Dimension& originalValue, const RefPtr<Evaluator<Dimension>>& evaluator, const RefPtr<Animator>& animator);
-template bool SvgAnimate::CreatePropertyAnimate(std::function<void(Color)>&& callback, const Color& originalValue,
-    const RefPtr<Evaluator<Color>>& evaluator, const RefPtr<Animator>& animator);
+template bool SvgAnimate::CreatePropertyAnimate(
+    std::function<void(double)>&& callback, const double& originalValue, const RefPtr<Animator>& animator);
+template bool SvgAnimate::CreatePropertyAnimate(
+    std::function<void(Dimension)>&& callback, const Dimension& originalValue, const RefPtr<Animator>& animator);
+template bool SvgAnimate::CreatePropertyAnimate(
+    std::function<void(Color)>&& callback, const Color& originalValue, const RefPtr<Animator>& animator);
 
 } // namespace OHOS::Ace

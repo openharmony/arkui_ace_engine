@@ -20,19 +20,38 @@
 #include "core/animation/keyframe_animation.h"
 #include "core/components/box/box_component.h"
 #include "core/components/box/render_box_base.h"
+#include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/image/render_image.h"
 
 namespace OHOS::Ace {
 
-class RenderBox : public RenderBoxBase {
+constexpr int32_t MAX_GESTURE_SIZE = 3;
+
+class ACE_EXPORT RenderBox : public RenderBoxBase {
     DECLARE_ACE_TYPE(RenderBox, RenderBoxBase);
 
 public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void OnPaintFinish() override;
+
+    void OnAttachContext() override
+    {
+        RenderBoxBase::OnAttachContext();
+        if (!backDecoration_) {
+            backDecoration_ = AceType::MakeRefPtr<Decoration>();
+        }
+        backDecoration_->SetContextAndCallback(context_, [weak = WeakClaim(this)] {
+            auto renderBox = weak.Upgrade();
+            if (renderBox) {
+                renderBox->OnAnimationCallback();
+            }
+        });
+    }
+
+    void UpdateStyleFromRenderNode(PropertyAnimatableType type) override;
 
     const Color& GetColor() const override
     {
@@ -87,23 +106,75 @@ public:
     void OnMouseHoverExitAnimation() override;
     void StopMouseHoverAnimation() override;
 
+    // add for animation
+    void SetBackgroundSize(const BackgroundImageSize& size);
+    BackgroundImagePosition GetBackgroundPosition() const;
+    void SetBackgroundPosition(const BackgroundImagePosition& position);
+    BackgroundImageSize GetBackgroundSize() const;
+    void SetShadow(const Shadow& shadow);
+    Shadow GetShadow() const;
+    void SetBorderWidth(double width, const BorderEdgeHelper& helper);
+    double GetBorderWidth(const BorderEdgeHelper& helper) const;
+    void SetBorderColor(const Color& color, const BorderEdgeHelper& helper);
+    Color GetBorderColor(const BorderEdgeHelper& helper) const;
+    void SetBorderStyle(BorderStyle borderStyle, const BorderEdgeHelper& helper);
+    BorderStyle GetBorderStyle(const BorderEdgeHelper& helper) const;
+    void SetBorderRadius(double radius, const BorderRadiusHelper& helper);
+    double GetBorderRadius(const BorderRadiusHelper& helper) const;
+    void SetBlurRadius(double radius);
+    double GetBlurRadius() const;
+    void SetBackdropRadius(double radius);
+    double GetBackdropRadius() const;
+    void SetWindowBlurProgress(double progress);
+    double GetWindowBlurProgress() const;
+
     Size GetBorderSize() const override;
     ColorPropertyAnimatable::SetterMap GetColorPropertySetterMap() override;
     ColorPropertyAnimatable::GetterMap GetColorPropertyGetterMap() override;
-    BackgroundPositionPropertyAnimatable::SetterMap GetBackgroundPositionPropertySetterMap() override;
-    BackgroundPositionPropertyAnimatable::GetterMap GetBackgroundPositionPropertyGetterMap() override;
+
+    void OnTouchTestHit(
+        const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
+
+    const OnDragFunc& GetOnDragEnter() const
+    {
+        return onDragEnter_;
+    }
+
+    const OnDragFunc& GetOnDragLeave() const
+    {
+        return onDragLeave_;
+    }
+
+    const OnDragFunc& GetOnDrop() const
+    {
+        return onDrop_;
+    }
+
+    void SetPreTargetRenderBox(const RefPtr<RenderBox>& preTargetRenderBox)
+    {
+        preTargetRenderBox_ = preTargetRenderBox;
+    }
+
+    const RefPtr<RenderBox> GetPreTargetRenderBox() const
+    {
+        return preTargetRenderBox_;
+    }
+
+    RefPtr<RenderBox> FindTargetRenderBox(const RefPtr<PipelineContext> context, const GestureEvent& info);
+
+    void AddRecognizerToResult(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
+        TouchTestResult& result);
 
 protected:
     void ClearRenderObject() override;
 
     Offset GetBorderOffset() const override;
+    void UpdateGestureRecognizer(const std::array<RefPtr<Gesture>, MAX_GESTURE_SIZE>& gestures);
+    bool ExistGestureRecognizer();
 
-    void SetBackgroundPosition(const BackgroundImagePosition& position);
-    BackgroundImagePosition GetBackgroundPosition() const;
-
+    // Remember clear all below members in ClearRenderObject().
     RefPtr<Decoration> backDecoration_;
     RefPtr<Decoration> frontDecoration_;
-    Overflow overflow_ = Overflow::OBSERVABLE;
     RefPtr<RenderImage> renderImage_;
     RefPtr<Animator> controllerEnter_;
     RefPtr<Animator> controllerExit_;
@@ -114,14 +185,27 @@ protected:
 
 private:
     void ResetController(RefPtr<Animator>& controller);
-    void CreateColorAnimation(RefPtr<KeyframeAnimation<Color>>& colorAnimation, const Color& beginValue,
-        const Color& endValue);
+    void CreateColorAnimation(
+        RefPtr<KeyframeAnimation<Color>>& colorAnimation, const Color& beginValue, const Color& endValue);
+    void UpdateBackDecoration(const RefPtr<Decoration>& newDecoration);
+    void CreateDragDropRecognizer();
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     void CalculateScale(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
     void CalculateRotate(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
     void CalculateTranslate(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
 #endif
+
+    // 0 - low priority gesture, 1 - high priority gesture, 2 - parallel priority gesture
+    std::array<RefPtr<GestureRecognizer>, MAX_GESTURE_SIZE> recognizers_;
+
+    RefPtr<GestureRecognizer> dragDropGesture_;
+    RefPtr<RenderBox> preTargetRenderBox_;
+    OnDragFunc onDrag_;
+    OnDragFunc onDragEnter_;
+    OnDragFunc onDragLeave_;
+    OnDragFunc onDrop_;
+    RefPtr<GestureRecognizer> onClick_;
 }; // class RenderBox
 
 } // namespace OHOS::Ace

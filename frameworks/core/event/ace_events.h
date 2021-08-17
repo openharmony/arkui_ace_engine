@@ -70,6 +70,22 @@ public:
         currentTarget_ = currentTarget;
         return *this;
     }
+    int64_t GetDeviceId() const
+    {
+        return deviceId_;
+    }
+    void SetDeviceId(int64_t deviceId)
+    {
+        deviceId_ = deviceId;
+    }
+    bool IsStopPropagation() const
+    {
+        return stopPropagation_;
+    }
+    void SetStopPropagation(bool stopPropagation)
+    {
+        stopPropagation_ = stopPropagation;
+    }
 
 private:
     // Event type like onTouchDown, onClick and so on.
@@ -78,6 +94,25 @@ private:
     TimeStamp timeStamp_;
     EventTarget target_;
     EventTarget currentTarget_;
+    int64_t deviceId_ = 0;
+    bool stopPropagation_ = false;
+};
+
+class PropagationEventInfo : public virtual TypeInfoBase {
+    DECLARE_RELATIONSHIP_OF_CLASSES(PropagationEventInfo, TypeInfoBase);
+
+public:
+    bool IsStopPropagation() const
+    {
+        return stopPropagation_;
+    }
+    void SetStopPropagation(bool stopPropagation)
+    {
+        stopPropagation_ = stopPropagation;
+    }
+
+private:
+    bool stopPropagation_ = false;
 };
 
 class EventToJSONStringAdapter : public virtual TypeInfoBase {

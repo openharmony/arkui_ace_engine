@@ -22,6 +22,10 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text_span/render_text_span.h"
 #include "core/components/text_span/text_span_component.h"
+#include "core/gestures/click_recognizer.h"
+#include "core/gestures/gesture_type.h"
+#include "core/gestures/long_press_recognizer.h"
+#include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -44,15 +48,13 @@ public:
 
     void OnPaintFinish() override;
 
-    const std::string& GetTextData() const
-    {
-        return textData_;
-    }
+    Size GetContentSize() override;
 
-    void SetTextData(const std::string& textData)
-    {
-        textData_ = textData;
-    }
+    bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
+        TouchTestResult& result) override;
+
+    std::string GetTextData() const;
+    void SetTextData(const std::string& textData);
 
     void SetTextStyle(const TextStyle& textStyle)
     {
@@ -67,8 +69,12 @@ public:
     virtual double GetTextWidth() = 0;
 
 protected:
+    void OnTouchTestHit(
+        const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
+
     virtual Size Measure() = 0;
     virtual uint32_t GetTextLines() = 0;
+    virtual int32_t GetTouchPosition(const Offset& offset) = 0;
     void UpdateAccessibilityText();
 
     template<class T>
@@ -80,9 +86,8 @@ protected:
         }
     }
 
-    void CheckIfNeedMeasure(const RefPtr<TextComponent>& text);
+    void CheckIfNeedMeasure();
     void ClearRenderObject() override;
-    std::string textData_;
     TextStyle textStyle_;
     TextDirection textDirection_ = TextDirection::LTR;
     Color focusColor_;
@@ -90,9 +95,26 @@ protected:
     double fontScale_ = 1.0;
     double dipScale_ = 1.0;
     bool isFocus_ = false;
-    bool isMaxWidthLayout_ = false;
     bool needMeasure_ = true;
     bool isCallbackCalled_ = false;
+    uint32_t maxLines_ = UINT32_MAX;
+    RefPtr<TextComponent> text_;
+    std::map<int32_t, std::map<GestureType, EventMarker>> touchRegions_; // key of map is end position of span.
+
+private:
+    void HandleTouchEvent(GestureType type, const Offset& touchPosition);
+    void HandleClick(const ClickInfo& info);
+    void HandleLongPress(const Offset& longPressPosition);
+    EventMarker GetEventMarker(int32_t position, GestureType type);
+    void FireEvent(const EventMarker& marker);
+
+    bool needClickDetector_ = false;
+    bool needLongPressDetector_ = false;
+    bool needTouchDetector_ = false;
+    int32_t touchStartPosition_ = 0;
+    RefPtr<RawRecognizer> rawRecognizer_;
+    RefPtr<ClickRecognizer> clickDetector_;
+    RefPtr<LongPressRecognizer> longPressRecognizer_;
 };
 
 } // namespace OHOS::Ace

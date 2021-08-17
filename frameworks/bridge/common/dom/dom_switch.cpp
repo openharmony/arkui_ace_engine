@@ -32,9 +32,6 @@ DOMSwitch::DOMSwitch(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeI
     switchChild_ = AceType::MakeRefPtr<SwitchComponent>(nullptr);
     switchChild_->SetTextOn(Localization::GetInstance()->GetEntryLetters("switch.on"));
     switchChild_->SetTextOff(Localization::GetInstance()->GetEntryLetters("switch.off"));
-    if (IsRightToLeft()) {
-        switchChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 void DOMSwitch::InitializeStyle()
@@ -92,8 +89,9 @@ bool DOMSwitch::SetSpecializedStyle(const std::pair<std::string, std::string>& s
                                    TextStyle& textStyle) { textStyle.SetFontStyle(ConvertStrToFontStyle(val)); } },
             { DOM_TEXT_FONT_WEIGHT, [](const std::string& val, const DOMSwitch& node, SwitchComponent& textSwitch,
                                     TextStyle& textStyle) { textStyle.SetFontWeight(ConvertStrToFontWeight(val)); } },
-            { DOM_TEXT_LETTER_SPACING, [](const std::string& val, const DOMSwitch& node, SwitchComponent& textSwitch,
-                                       TextStyle& textStyle) { textStyle.SetLetterSpacing(StringToDouble(val)); } },
+            { DOM_TEXT_LETTER_SPACING,
+                [](const std::string& val, const DOMSwitch& node, SwitchComponent& textSwitch, TextStyle& textStyle) {
+                    textStyle.SetLetterSpacing(node.ParseDimension(val)); } },
             { DOM_TEXT_DECORATION,
                 [](const std::string& val, const DOMSwitch& node, SwitchComponent& textSwitch, TextStyle& textStyle) {
                     textStyle.SetTextDecoration(ConvertStrToTextDecoration(val));
@@ -158,10 +156,15 @@ void DOMSwitch::PrepareSpecializedComponent()
     if (HasCheckedPseudo()) {
         PrepareCheckedListener();
     }
+    switchChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     switchChild_->SetTextStyle(textStyle_);
 #ifndef WEARABLE_PRODUCT
-    if (!multimodalProperties_.IsUnavailable() && multimodalProperties_.scene == SceneLabel::SWITCH) {
-        switchChild_->SetMultimodalProperties(multimodalProperties_);
+    if (declaration_) {
+        auto& multimodalAttr =
+            static_cast<CommonMultimodalAttribute&>(declaration_->GetAttribute(AttributeTag::COMMON_MULTIMODAL_ATTR));
+        if (multimodalAttr.IsValid() && !multimodalAttr.IsUnavailable() && multimodalAttr.scene == SceneLabel::SWITCH) {
+            switchChild_->SetMultimodalProperties(multimodalAttr);
+        }
     }
 #endif
     RefPtr<SwitchTheme> theme = GetTheme<SwitchTheme>();

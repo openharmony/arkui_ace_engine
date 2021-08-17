@@ -35,13 +35,14 @@ void RenderFlexItem::Update(const RefPtr<Component>& component)
     if (flexItem->GetFlexShrink() >= 0.0) {
         flexShrink_ = flexItem->GetFlexShrink();
     }
-    if (flexItem->GetFlexBasis() >= 0.0) {
+    if (flexItem->GetFlexBasis().Value() >= 0.0) {
         flexBasis_ = flexItem->GetFlexBasis();
     }
     if (flexItem->GetFlexGrow() >= 0.0) {
         flexGrow_ = flexItem->GetFlexGrow();
     }
     canStretch_ = flexItem->GetStretchFlag();
+    mustStretch_ = flexItem->MustStretch();
     alignSelf_ = flexItem->GetAlignSelf();
     minWidth_ = flexItem->GetMinWidth();
     minHeight_ = flexItem->GetMinHeight();
@@ -66,8 +67,9 @@ void RenderFlexItem::ClearRenderObject()
     RenderNode::ClearRenderObject();
     flexGrow_ = 0.0;
     flexShrink_ = 0.0;
-    flexBasis_ = 0.0;
+    flexBasis_ = 0.0_px;
     canStretch_ = true;
+    mustStretch_ = false;
     minWidth_ = Dimension();
     minHeight_ = Dimension();
     maxWidth_ = Dimension(Size::INFINITE_SIZE);

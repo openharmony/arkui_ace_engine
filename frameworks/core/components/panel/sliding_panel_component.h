@@ -104,13 +104,37 @@ public:
         type_ = type;
     }
 
-private:
+    // used for inspector node in PC preview
+    int32_t GetPanelId() const
+    {
+        return panelId_;
+    }
+
+    void SetPanelId(int32_t panelId)
+    {
+        panelId_ = panelId;
+    }
+
+    void SetHasDragBar(bool hasDrag)
+    {
+        hasDragBar_ = hasDrag;
+    }
+
+    bool HasDragBar() const
+    {
+        return hasDragBar_;
+    }
+
+protected:
     void BuildInnerChild(const RefPtr<BoxComponent>& boxStyle, const RefPtr<PanelComponent>& panel);
 
     PanelMode mode_ = PanelMode::HALF;
     PanelType type_ = PanelType::FOLDABLE_BAR;
     bool hasBoxStyle_ = false;
+    // used for inspector node in PC preview
+    int32_t panelId_ = -1;
     EventMarker onSizeChanged_;
+    bool hasDragBar_ = false;
     std::pair<Dimension, bool> miniHeight_ = { 0.0_vp, false };
     std::pair<Dimension, bool> halfHeight_ = { 0.0_vp, false };
     std::pair<Dimension, bool> fullHeight_ = { 0.0_vp, false };

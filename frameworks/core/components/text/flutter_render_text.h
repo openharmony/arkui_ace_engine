@@ -40,6 +40,8 @@ protected:
 
 private:
     Size Measure() override;
+    uint32_t GetTextLines() override;
+    int32_t GetTouchPosition(const Offset& offset) override;
     bool UpdateParagraph();
     bool UpdateParagraphAndLayout(double paragraphMaxWidth);
     Size GetSize();
@@ -49,14 +51,19 @@ private:
     bool AdaptPreferTextSize(double paragraphMaxWidth);
     bool AdaptPreferTextSizeGroup(double paragraphMaxWidth);
     bool CheckMeasureFlag();
-    uint32_t GetTextLines() override;
-    bool DidExceedMaxLines();
+    bool DidExceedMaxLines(double paragraphMaxWidth);
+    bool IsLongestLineVersion();
+    void EffectAutoMaxLines();
+    // Change text direction accroding to first strong direction letter when developer set direction auto.
+    void ChangeDirectionIfNeeded(const std::string& data);
 
     std::unique_ptr<txt::Paragraph> paragraph_;
 
     double paragraphNewWidth_ = 0.0;
     double lastLayoutMaxWidth_ = 0.0;
     double lastLayoutMinWidth_ = 0.0;
+    double lastLayoutMaxHeight_ = 0.0;
+    double lastLayoutMinHeight_ = 0.0;
 };
 
 } // namespace OHOS::Ace

@@ -26,11 +26,25 @@ class MockAceApplicationInfo : public AceApplicationInfo {
         std::vector<std::string> vector;
         return vector;
     };
+
     std::vector<std::string> GetResourceFallback(const std::vector<std::string>& resourceList) const override
     {
         std::vector<std::string> vector;
         return vector;
     };
+
+    std::vector<std::string> GetStyleResourceFallback(const std::vector<std::string>& resourceList) const override
+    {
+        std::vector<std::string> vector;
+        return vector;
+    };
+
+    std::vector<std::string> GetDeclarativeResourceFallback(const std::set<std::string>& resourceList) const override
+    {
+        std::vector<std::string> vector;
+        return vector;
+    }
+
     bool GetFiles(const std::string& filePath, std::vector<std::string>& fileList) const override
     {
         return false;
@@ -54,6 +68,21 @@ class MockAceApplicationInfo : public AceApplicationInfo {
     std::string GetCurrentDeviceResTag() const override
     {
         return "";
+    }
+
+    std::string GetCurrentDeviceDeclarativeResTag() const override
+    {
+        return "";
+    }
+
+    double GetTargetMediaScaleRatio(const std::string& targetResTag) const override
+    {
+        return 0.0;
+    }
+
+    bool IsRightToLeft() const
+    {
+        return true;
     }
 
 public:

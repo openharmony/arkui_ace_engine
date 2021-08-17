@@ -56,28 +56,30 @@ void FlutterRenderClock::Paint(RenderContext& context, const Offset& offset)
     // paint clock face and digit
     context.PaintChild(renderClockFace_, renderOffset);
     Offset rotateCenter = renderOffset + Offset(drawSize_.Width() / 2.0, drawSize_.Height() / 2.0);
-    if (showDigit_) {
+    if (declaration_->GetShowDigit()) {
         RenderDigit(context, rotateCenter);
     }
 
     // paint clock hand
     context.PaintChild(renderClockHand_, renderOffset);
+    auto flutterRenderClockHand = AceType::DynamicCast<FlutterRenderClockHand>(renderClockHand_);
+    flutterRenderClockHand->RequestRenderForNextSecond();
 }
 
 void FlutterRenderClock::RenderDigit(RenderContext& context, const Offset& center)
 {
-    if (radians_.size() == digitRenderNodes_.size()) {
-        double innerRadius = drawSize_.Width() * digitRadiusRatio_ / 2.0;
-        for (size_t i = 0; i < radians_.size(); i++) {
-            auto halfDigitWidth = digitRenderNodes_[i]->GetLayoutSize().Width() / 2.0;
-            auto halfDigitHeight = digitRenderNodes_[i]->GetLayoutSize().Height() / 2.0;
-            auto digitOffset = Offset(center.GetX() + sin(radians_[i]) * innerRadius - halfDigitWidth,
-                center.GetY() - cos(radians_[i]) * innerRadius - halfDigitHeight);
-            context.PaintChild(digitRenderNodes_[i], digitOffset);
-        }
+    if (radians_.size() != digitRenderNodes_.size()) {
+        LOGE("Size of [radians] and [digitRenderNodes] does not match! Please check!");
         return;
     }
-    LOGE("Size of [radians] and [digitRenderNodes] does not match! Please check!");
+    double innerRadius = drawSize_.Width() * digitRadiusRatio_ / 2.0;
+    for (size_t i = 0; i < radians_.size(); i++) {
+        auto halfDigitWidth = digitRenderNodes_[i]->GetLayoutSize().Width() / 2.0;
+        auto halfDigitHeight = digitRenderNodes_[i]->GetLayoutSize().Height() / 2.0;
+        auto digitOffset = Offset(center.GetX() + sin(radians_[i]) * innerRadius - halfDigitWidth,
+            center.GetY() - cos(radians_[i]) * innerRadius - halfDigitHeight);
+        context.PaintChild(digitRenderNodes_[i], digitOffset);
+    }
 }
 
 void FlutterRenderClockHand::RenderHand(RenderContext& context, const Offset& offset,
@@ -92,8 +94,10 @@ void FlutterRenderClockHand::RenderHand(RenderContext& context, const Offset& of
     context.PaintChild(renderHand, offset);
 }
 
-void FlutterRenderClockHand::RequestRenderForNextSecond(long timeUsec, int32_t& second)
+void FlutterRenderClockHand::RequestRenderForNextSecond()
 {
+    auto timeOfNow = GetTimeOfNow(hoursWest_);
+    auto timeUsec = timeOfNow.timeUsec_;
     // 1 second = 1000 millisecond = 1000000 microsecond.
     // Millisecond is abbreviated as msec. Microsecond is abbreviated as usec.
     // unit of [delayTime] is msec, unit of [tv_usec] is usec
@@ -104,16 +108,29 @@ void FlutterRenderClockHand::RequestRenderForNextSecond(long timeUsec, int32_t& 
     if (delayTime < HALF_SECOND) {
         // if current time has passed half second of current second, use next second
         delayTime += MILLISECONDS_OF_SECOND;
-        second += 1;
     }
     auto pipelineContext = GetContext().Upgrade();
     if (pipelineContext) {
         pipelineContext->GetTaskExecutor()->PostDelayedTask(
             [wp = WeakClaim(this)] {
                 auto renderClockHand = wp.Upgrade();
-                if (renderClockHand) {
-                    renderClockHand->MarkNeedRender();
+                if (!renderClockHand) {
+                    LOGE("RenderClockHand is null!");
+                    return;
                 }
+                auto pipelineContext = renderClockHand->GetContext().Upgrade();
+                if (!pipelineContext) {
+                    LOGE("PipelineContext is null when RequestRenderForNextSecond");
+                    return;
+                }
+                renderClockHand->RequestRenderForNextSecond();
+                bool needRender = !(renderClockHand->GetHidden() || !renderClockHand->GetVisible() ||
+                    !renderClockHand->isAppOnShow_ || renderClockHand->needStop_);
+                if (pipelineContext->IsWindowInScreen() && needRender) {
+                    renderClockHand->MarkNeedRender();
+                    return;
+                }
+                pipelineContext->AddNodesToNotifyOnPreDraw(renderClockHand);
             },
             TaskExecutor::TaskType::UI, delayTime);
     }
@@ -152,11 +169,13 @@ void FlutterRenderClockHand::Paint(RenderContext& context, const Offset& offset)
         }
     }
 
-    if (GetHidden() || !GetVisible() || !isAppOnShow_) {
+    if (GetHidden() || !GetVisible() || !isAppOnShow_ || needStop_) {
         return;
     }
-
-    RequestRenderForNextSecond(timeOfNow.timeUsec_, timeOfNow.second_);
+    if (onPreDraw_) {
+        LOGI("Paint clock hand due to onPreDraw, current second is : %{public}d", timeOfNow.second_);
+        onPreDraw_ = false;
+    }
     auto clockSize = GetLayoutSize();
     auto handOffset = offset + Offset((clockSize.Width() - renderHourHand_->GetLayoutSize().Width()) / 2.0, 0.0);
     Offset rotateCenter = offset + Offset(clockSize.Width() / 2.0, clockSize.Height() / 2.0);
@@ -170,6 +189,12 @@ void FlutterRenderClockHand::OnAppShow()
 {
     RenderNode::OnAppShow();
     MarkNeedRender();
+}
+
+void FlutterRenderClockHand::OnPreDraw()
+{
+    MarkNeedRender();
+    onPreDraw_ = true; // only for printing log
 }
 
 } // namespace OHOS::Ace

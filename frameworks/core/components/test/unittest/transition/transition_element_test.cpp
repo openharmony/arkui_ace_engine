@@ -88,8 +88,6 @@ RRect CardTransitionController::GetCardRect(const ComposeId& composeId) const
 class TransitionGroup {
 public:
     explicit TransitionGroup(const char* name) : name_(name) {}
-    ~TransitionGroup() = default;
-
     // only for test use.
     WeakPtr<MockRenderTransform> transformRenderContent_;
     WeakPtr<MockRenderTransform> transformRenderBackground_;
@@ -678,7 +676,7 @@ public:
         EXPECT_NEAR(offsetX.Value(), 138.98f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
         transitionA_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
-        EXPECT_NEAR(offsetX.Value(), -470.50f, TRANSITION_EPSILON);
+        EXPECT_NEAR(offsetX.Value(), 0.0f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
 
         /**
@@ -691,7 +689,7 @@ public:
         EXPECT_NEAR(offsetX.Value(), 0.0f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
         transitionA_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
-        EXPECT_NEAR(offsetX.Value(), -540.0f, TRANSITION_EPSILON);
+        EXPECT_NEAR(offsetX.Value(), 0.0f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
 
         EXPECT_EQ(1, transitionA_.stopCounter_);
@@ -709,10 +707,10 @@ public:
         Dimension offsetY;
         platformWindowRaw_->TriggerOneFrame();
         transitionB_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
-        EXPECT_NEAR(offsetX.Value(), 359.62f, TRANSITION_EPSILON);
+        EXPECT_NEAR(offsetX.Value(), 533.67f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
         transitionA_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
-        EXPECT_NEAR(offsetX.Value(), -360.18f, TRANSITION_EPSILON);
+        EXPECT_NEAR(offsetX.Value(), 0.0f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
 
         /**

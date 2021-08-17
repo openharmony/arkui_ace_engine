@@ -39,9 +39,16 @@ public:
 
     void Update(const RefPtr<Component>& component) override;
 
-    void SetDiameter(double diameter)
+    void SetDiameter(const Dimension& diameter)
     {
-        diameter_ = diameter;
+        // Refresh will set new diameter when window size changed.
+        if (!NearEqual(NormalizeToPx(diameter), diameter_)) {
+            diameterDimension_ = diameter;
+            ringController_ = nullptr;
+            cometController_ = nullptr;
+            usedScale_ = 0.0;
+            SetNeedLayout(true);
+        }
     }
 
     int32_t GetLoadingMode() const
@@ -77,6 +84,9 @@ protected:
 
     Offset center_;
     double diameter_ = 0.0;
+    Dimension diameterDimension_;
+    Dimension ringRadiusDimension_;
+    Dimension orbitRadiusDimension_;
     RefPtr<Animator> ringController_;
     RefPtr<Animator> cometController_;
 
@@ -90,7 +100,8 @@ protected:
     double exitScale_ = 1.0; // Scale effect for ring and comet when exit from refresh.
     double exitAlpha_ = 1.0; // Alpha effect for ring and comet when exit from refresh.
 
-    double scale_ = 1.0;
+    double scale_ = 0.0;
+    double usedScale_ = 0.0;
     double moveRatio_ = MOVE_RATIO;
     double ringWidth_ = 0.0;
     double ringRadius_ = 0.0;

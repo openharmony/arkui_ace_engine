@@ -15,6 +15,9 @@
 
 #include "core/components/scroll/render_single_child_scroll.h"
 
+#include "core/common/text_field_manager.h"
+#include "core/event/ace_event_helper.h"
+
 namespace OHOS::Ace {
 namespace {
 
@@ -47,6 +50,15 @@ void RenderSingleChildScroll::Update(const RefPtr<Component>& component)
         } else {
             currentOffset_.SetX(positionController_->GetInitialOffset());
         }
+        positionController_->SetScrollEvent(ScrollEvent::SCROLL_TOP,
+            AceAsyncEvent<void(std::shared_ptr<ScrollEventInfo>&)>::Create(scroll->GetOnScrollEdge(), GetContext()));
+        positionController_->SetScrollEvent(ScrollEvent::SCROLL_EDGE,
+            AceAsyncEvent<void(std::shared_ptr<ScrollEventInfo>&)>::Create(scroll->GetOnScrollEdge(), GetContext()));
+        positionController_->SetScrollEvent(ScrollEvent::SCROLL_END,
+            AceAsyncEvent<void(std::shared_ptr<ScrollEventInfo>&)>::Create(scroll->GetOnScrollEnd(), GetContext()));
+        positionController_->SetScrollEvent(ScrollEvent::SCROLL_POSITION,
+            AceAsyncEvent<void(std::shared_ptr<ScrollEventInfo>&)>::Create(scroll->GetOnScroll(), GetContext()));
+        positionController_->SetScrollNode(AceType::WeakClaim(this));
         LOGD("initial position: %{public}lf, %{public}lf", currentOffset_.GetX(), currentOffset_.GetY());
     }
     // In dialog, scroll is not takeBoundary, use this flag to determine.
@@ -132,6 +144,7 @@ void RenderSingleChildScroll::UpdateTouchRect()
 {
     touchRect_.SetSize(GetPaintRect().GetSize());
     touchRect_.SetOffset(GetPaintRect().GetOffset());
+    ownTouchRect_ = touchRect_;
 }
 
 void RenderSingleChildScroll::MoveChildToViewPort(
@@ -210,13 +223,17 @@ void RenderSingleChildScroll::PerformLayout()
 
     SetLayoutSize(GetLayoutParam().Constrain(itemSize > viewPort_ ? viewPort_ : itemSize));
 
-    if (moveStatus_.first && axis_ == Axis::VERTICAL) {
-        currentOffset_.SetY(currentBottomOffset_.GetY() - viewPort_.Height());
+    auto textFieldManager = AceType::DynamicCast<TextFieldManager>(context->GetTextFieldManager());
+    if (textFieldManager && moveStatus_.first && axis_ == Axis::VERTICAL) {
+        moveDistance_ = textFieldManager->GetClickPosition().GetY() - viewPort_.Height();
+        currentOffset_.SetY(moveDistance_);
+        moveStatus_.first = false;
     }
 
-    if (moveStatus_.second && !moveStatus_.first && axis_ == Axis::VERTICAL) {
-        currentOffset_.SetY(currentBottomOffset_.GetY() - viewPort_.Height());
+    if (textFieldManager && moveStatus_.second && !moveStatus_.first && axis_ == Axis::VERTICAL) {
+        currentOffset_.SetY(0 - moveDistance_);
         moveStatus_.second = false;
+        moveDistance_ = 0;
     }
     // Get main direction scrollable extent.
     bool isScrollable = CalculateMainScrollExtent(itemSize);

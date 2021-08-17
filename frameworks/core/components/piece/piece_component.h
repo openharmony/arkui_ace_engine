@@ -23,6 +23,7 @@
 #include "core/components/text/text_component.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/sole_child_component.h"
+#include "core/components/declaration/piece/piece_declaration.h"
 
 namespace OHOS::Ace {
 
@@ -30,7 +31,7 @@ class PieceComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(PieceComponent, SoleChildComponent);
 
 public:
-    PieceComponent() = default;
+    PieceComponent();
     ~PieceComponent() override = default;
 
     RefPtr<Element> CreateElement() override;
@@ -38,101 +39,43 @@ public:
 
     RefPtr<Component> BuildChild();
 
-    const std::string& GetContent() const
-    {
-        return content_;
-    }
-    void SetContent(const std::string& content)
-    {
-        content_ = content;
-    }
+    const std::string& GetContent() const;
+    void SetContent(const std::string& content);
 
-    const std::string& GetIcon() const
-    {
-        return icon_;
-    }
-    void SetIcon(const std::string& icon)
-    {
-        icon_ = icon;
-    }
+    const std::string& GetIcon() const;
+    void SetIcon(const std::string& icon);
 
-    void SetTextStyle(const TextStyle& textStyle)
-    {
-        textStyle_ = textStyle;
-    }
+    const TextStyle& GetTextStyle() const;
+    void SetTextStyle(const TextStyle& textStyle);
 
-    void SetInterval(const Dimension& interval)
-    {
-        interval_ = interval;
-    }
+    const Dimension& GetInterval() const;
+    void SetInterval(const Dimension& interval);
 
-    void SetIconResource(InternalResource::ResourceId iconResource)
-    {
-        iconResource_ = iconResource;
-    }
+    InternalResource::ResourceId GetIconResource() const;
+    void SetIconResource(InternalResource::ResourceId iconResource);
 
-    void SetIconSize(const Dimension& iconSize)
-    {
-        iconSize_ = iconSize;
-    }
+    const Dimension& GetIconSize() const;
+    void SetIconSize(const Dimension& iconSize);
 
-    const EventMarker& GetOnDelete() const
-    {
-        return onDelete_;
-    }
-    void SetOnDelete(const EventMarker& onDelete)
-    {
-        onDelete_ = onDelete;
-    }
+    const EventMarker& GetOnDelete() const;
+    void SetOnDelete(const EventMarker& onDelete);
 
-    bool ShowDelete() const
-    {
-        return showDelete_;
-    }
-    void SetShowDelete(bool showDelete)
-    {
-        showDelete_ = showDelete;
-    }
+    bool ShowDelete() const;
+    void SetShowDelete(bool showDelete);
 
-    const Edge& GetMargin() const
-    {
-        return margin_;
-    }
-    void SetMargin(const Edge& margin)
-    {
-        margin_ = margin;
-    }
+    const Edge& GetMargin() const;
+    void SetMargin(const Edge& margin);
 
-    const Border& GetBorder() const
-    {
-        return border_;
-    }
-    void SetBorder(const Border& border)
-    {
-        border_ = border;
-    }
+    const Border& GetBorder() const;
+    void SetBorder(const Border& border);
 
-    const Color& GetHoverColor() const
-    {
-        return hoverColor_;
-    }
-    void SetHoverColor(const Color& hoverColor)
-    {
-        hoverColor_ = hoverColor;
-    }
+    const Color& GetHoverColor() const;
+    void SetHoverColor(const Color& hoverColor);
+
+    void SetDeclaration(const RefPtr<PieceDeclaration>& declaration);
 
 private:
-    bool showDelete_ = false;
-    std::string content_;
-    std::string icon_;
-    Dimension interval_; // Interval between text and icon.
-    Dimension iconSize_;
-    TextStyle textStyle_;
-    EventMarker onDelete_;
-    Edge margin_;
-    Border border_;
-    Color hoverColor_;
-    InternalResource::ResourceId iconResource_ = InternalResource::ResourceId::NO_ID;
+    RefPtr<PieceDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

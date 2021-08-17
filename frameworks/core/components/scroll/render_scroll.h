@@ -55,7 +55,10 @@ public:
     // notify drag offset in global main axis
     virtual void NotifyDragUpdate(double dragOffset, int32_t source) {};
     virtual void ProcessScrollOverCallback(double velocity) {};
-    void AnimateTo(double position, float duration, const RefPtr<Curve>& curve);
+    void AnimateTo(double position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,
+        const std::function<void()>& onFinish = nullptr);
+    bool AnimateToTarget(const ComposeId& targetId, float duration, const RefPtr<Curve>& curve,
+        bool limitDuration = true, const std::function<void()>& onFinish = nullptr);
     void ScrollBy(double pixelX, double pixelY, bool smooth);
 
     double GetCurrentPosition() const;
@@ -63,6 +66,8 @@ public:
     bool ScrollPageByChild(Offset& delta, int32_t source) override;
     double GetEstimatedHeight();
     void OnChildAdded(const RefPtr<RenderNode>& child) override;
+
+    void UpdateTouchRect() override;
 
     virtual double GetFixPositionOnWatch(double destination, double current)
     {
@@ -208,6 +213,7 @@ protected:
     double mainScrollExtent_ = 0.0;
     double outBoundaryExtent_ = 0.0;
     double estimatedHeight_ = 0.0;
+    double moveDistance_ = 0.0;
     bool scrollPage_ = false;
     RefPtr<ScrollPositionController> positionController_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
@@ -250,6 +256,16 @@ private:
     void SetBarCallBack(bool isVertical);
     void HandleScrollBarEnd();
     void HandleScrollBarOutBoundary();
+    void OnReachStart() const;
+    void OnReachEnd() const;
+    void OnReachTop() const;
+    void OnReachBottom() const;
+
+    using OnReachFunc = std::function<void(const std::string&)>;
+    OnReachFunc onReachStart_;
+    OnReachFunc onReachEnd_;
+    OnReachFunc onReachTop_;
+    OnReachFunc onReachBottom_;
 
     RefPtr<Animator> animator_;
     RefPtr<RawRecognizer> touchRecognizer_;

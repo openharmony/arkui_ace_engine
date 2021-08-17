@@ -68,9 +68,16 @@ private:
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
     void OnPageError(const std::string& param);
+    void OnMessage(const std::string& param);
+    void OnRouterPush(const std::string& param);
     std::string GetUrlStringParam(const std::string& param, const std::string& name) const;
     void CallWebRouterBack();
+    void CallPopPageSuccessPageUrl(const std::string& url);
+    void CallIsPagePathInvalid(const bool& isPageInvalid);
+
     void BindRouterBackMethod();
+    void BindPopPageSuccessMethod();
+    void BindIsPagePathInvalidMethod();
 
     WeakPtr<WebComponent> webComponent_;
     std::list<CreatedCallback> createdCallbacks_;
@@ -78,9 +85,12 @@ private:
     EventCallback onPageStarted_;
     EventCallback onPageFinished_;
     EventCallback onPageError_;
+    EventCallback onMessage_;
     Method reloadMethod_;
     Method updateUrlMethod_;
     Method routerBackMethod_;
+    Method changePageUrlMethod_;
+    Method isPagePathInvalidMethod_;
     State state_ {State::WAITINGFORSIZE};
 };
 

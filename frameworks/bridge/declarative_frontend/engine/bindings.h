@@ -17,13 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_DECLARATIVE_FRONTEND_ENGINE_BINDINGS_H
 
 #include "bindings_implementation.h"
-
-#ifdef USE_QUICKJS_ENGINE
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_bindings.h"
-#elif USE_V8_ENGINE
-#include "frameworks/bridge/declarative_frontend/engine/v8/v8_bindings.h"
-#else
-#error "No engine selected"
-#endif
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_DECLARATIVE_FRONTEND_ENGINE_BINDINGS_H

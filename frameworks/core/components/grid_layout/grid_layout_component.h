@@ -18,6 +18,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace {
@@ -35,6 +36,8 @@ public:
 
     RefPtr<RenderNode> CreateRenderNode() override;
 
+    void AppendChild(const RefPtr<Component>& child) override;
+
     void SetDirection(FlexDirection direction);
     void SetFlexAlign(FlexAlign flexAlign);
     void SetColumnCount(int32_t count);
@@ -43,8 +46,8 @@ public:
     void SetHeight(double height);
     void SetColumnsArgs(const std::string& columnsArgs);
     void SetRowsArgs(const std::string& rowsArgs);
-    void SetColumnGap(double columnGap);
-    void SetRowGap(double rowGap);
+    void SetColumnGap(const Dimension& columnGap);
+    void SetRowGap(const Dimension& rowGap);
     void SetRightToLeft(bool rightToLeft);
 
     const std::string& GetColumnsArgs() const
@@ -57,12 +60,12 @@ public:
         return rowsArgs_;
     }
 
-    double GetColumnGap() const
+    const Dimension& GetColumnGap() const
     {
         return columnGap_;
     }
 
-    double GetRowGap() const
+    const Dimension& GetRowGap() const
     {
         return rowGap_;
     }
@@ -102,6 +105,11 @@ public:
         return rightToLeft_;
     }
 
+    RefPtr<V2::LazyForEachComponent> GetLazyForEachComponent() const
+    {
+        return lazyForEachComponent_;
+    }
+
 private:
     FlexDirection direction_ = FlexDirection::COLUMN;
     FlexAlign flexAlign_ = FlexAlign::CENTER;
@@ -112,9 +120,11 @@ private:
 
     std::string columnsArgs_;
     std::string rowsArgs_;
-    double columnGap_ = 0.0;
-    double rowGap_ = 0.0;
+    Dimension columnGap_ = 0.0_px;
+    Dimension rowGap_ = 0.0_px;
     bool rightToLeft_ = false;
+
+    RefPtr<V2::LazyForEachComponent> lazyForEachComponent_;
 };
 
 } // namespace OHOS::Ace

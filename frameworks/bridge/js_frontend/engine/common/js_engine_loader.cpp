@@ -50,7 +50,7 @@ public:
 DummyJsEngineLoader::DummyJsEngineLoader() = default;
 DummyJsEngineLoader::~DummyJsEngineLoader() = default;
 
-const char* GetSharedLibrary()
+const char* GetSharedLibrary(bool isArkApp)
 {
     return QUICK_JS_ENGINE_SHARED_LIB;
 }
@@ -82,9 +82,9 @@ JsEngineLoader& GetJsEngineLoader(const char* sharedLibrary)
 
 } // namespace
 
-JsEngineLoader& JsEngineLoader::Get()
+JsEngineLoader& JsEngineLoader::Get(bool isArkApp)
 {
-    static JsEngineLoader& instance = GetJsEngineLoader(GetSharedLibrary());
+    static JsEngineLoader& instance = GetJsEngineLoader(GetSharedLibrary(isArkApp));
     return instance;
 }
 

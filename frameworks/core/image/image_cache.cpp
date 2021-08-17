@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-std::mutex ImageCache::cacheFilePathMutex_;
+std::shared_mutex ImageCache::cacheFilePathMutex_;
 std::string ImageCache::cacheFilePath_;
 
 std::atomic<size_t> ImageCache::cacheFileLimit_ = 100 * 1024 * 1024; // the capacity is 100MB
@@ -70,14 +70,22 @@ std::shared_ptr<CachedImage> ImageCache::GetCacheImage(const std::string& key)
     }
 }
 
-void ImageCache::WriteCacheFile(const std::string& url, std::vector<uint8_t>& byteData)
+void ImageCache::WriteCacheFile(const std::string& url, const void * const data, const size_t size)
 {
     std::vector<std::string> removeVector;
     std::string cacheNetworkFilePath = GetNetworkImageCacheFilePath(url);
+
+#ifdef WINDOWS_PLATFORM
+    std::ofstream outFile(cacheNetworkFilePath, std::ios::binary);
+#else
+    std::ofstream outFile(cacheNetworkFilePath, std::fstream::out);
+#endif
+    outFile.write(reinterpret_cast<const char*>(data), size);
+
     {
-        std::scoped_lock lock(cacheFileSizeMutex_, cacheFileInfoMutex_);
-        cacheFileSize_ += byteData.size();
-        cacheFileInfo_.emplace_back(cacheNetworkFilePath, byteData.size(), time(nullptr));
+        std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
+        cacheFileSize_ += size;
+        cacheFileInfo_.emplace_back(cacheNetworkFilePath, size, time(nullptr));
         // check if cache files too big.
         if (cacheFileSize_ > static_cast<int32_t>(cacheFileLimit_)) {
             int32_t removeCount = cacheFileInfo_.size() * clearCacheFileRatio_;
@@ -95,13 +103,6 @@ void ImageCache::WriteCacheFile(const std::string& url, std::vector<uint8_t>& by
         }
     }
     ClearCacheFile(removeVector);
-
-#ifdef WINDOWS_PLATFORM
-    std::ofstream outFile(cacheNetworkFilePath, std::ios::binary);
-#else
-    std::ofstream outFile(cacheNetworkFilePath, std::fstream::out);
-#endif
-    outFile.write(reinterpret_cast<const char*>(byteData.data()), byteData.size());
 }
 
 void ImageCache::ClearCacheFile(const std::vector<std::string>& removeFiles)
@@ -117,7 +118,7 @@ void ImageCache::ClearCacheFile(const std::vector<std::string>& removeFiles)
 
 void ImageCache::SetCacheFileInfo()
 {
-    std::scoped_lock lock(cacheFileSizeMutex_, cacheFileInfoMutex_);
+    std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
     // Set cache file information only once.
     if (hasSetCacheFileInfo_) {
         return;

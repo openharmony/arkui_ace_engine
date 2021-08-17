@@ -40,6 +40,30 @@ ohos_unittest("AnimationDomTest") {
   }
 }
 
+ohos_unittest("AnimatorApiTest") {
+  module_out_path = module_output_path
+
+  sources = [ "animator_api_test.cpp" ]
+
+  configs = [
+    ":config_domnode_test",
+    "$ace_root:ace_test_config",
+  ]
+
+  deps = [
+    "$ace_root/frameworks/base:ace_base_ohos",
+    "$ace_root/frameworks/base/resource:ace_resource",
+    "$ace_root/frameworks/bridge:js_framework_ohos",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  if (is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_standard"
+  }
+}
+
 config("config_domnode_test") {
   visibility = [ ":*" ]
   include_dirs = [ "$ace_root" ]
@@ -50,4 +74,5 @@ group("unittest") {
   deps = []
 
   deps += [ ":AnimationDomTest" ]
+  deps += [ ":AnimatorApiTest" ]
 }

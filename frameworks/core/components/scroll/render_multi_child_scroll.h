@@ -105,6 +105,7 @@ private:
     double CalculateBeginPositionInViewPort(double position, double size, double effectOffset = 0.0);
     bool ScrollToPosition(double position, int32_t source, bool smooth);
     void ProcessScrollExtent();
+    void ExtendViewPort();
 
     double cacheExtent_ = 300.0;
     int32_t currentIndex_ = 0;

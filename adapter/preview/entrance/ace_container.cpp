@@ -39,6 +39,7 @@
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/card_frontend/card_frontend.h"
+#include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
 
@@ -50,14 +51,41 @@ namespace OHOS::Ace::Platform {
 
 std::once_flag AceContainer::onceFlag_;
 
-AceContainer::AceContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
+AceContainer::AceContainer(int32_t instanceId, FrontendType type)
+    : instanceId_(instanceId), messageBridge_(AceType::MakeRefPtr<PlatformBridge>()), type_(type)
 {
     ThemeConstants::InitDeviceType();
 
     auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
     taskExecutor_ = Referenced::MakeRefPtr<FlutterTaskExecutor>(state->GetTaskRunners());
+    taskExecutor_->PostTask([instanceId]() { Container::InitForThread(instanceId); }, TaskExecutor::TaskType::JS);
+}
 
+void AceContainer::Initialize()
+{
     InitializeFrontend();
+}
+
+void AceContainer::Destroy()
+{
+    if (pipelineContext_ && taskExecutor_) {
+        taskExecutor_->PostTask([context = pipelineContext_]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
+    }
+
+    if (frontend_ && taskExecutor_) {
+        taskExecutor_->PostTask(
+            [front = frontend_]() { front->UpdateState(Frontend::State::ON_DESTROY); }, TaskExecutor::TaskType::JS);
+    }
+
+    if (aceView_) {
+        aceView_->DecRefCount();
+    }
+
+    resRegister_.Reset();
+    assetManager_.Reset();
+    messageBridge_.Reset();
+    frontend_.Reset();
+    pipelineContext_.Reset();
 }
 
 void AceContainer::InitializeFrontend()
@@ -68,6 +96,10 @@ void AceContainer::InitializeFrontend()
         jsFrontend->SetJsEngine(Framework::JsEngineLoader::Get().CreateJsEngine(GetInstanceId()));
         jsFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
         jsFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+    } else if (type_ == FrontendType::DECLARATIVE_JS) {
+        frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
+        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+        declarativeFrontend->SetJsEngine(Framework::JsEngineLoader::GetDeclarative().CreateJsEngine(instanceId_));
     } else if (type_ == FrontendType::JS_CARD) {
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
@@ -159,16 +191,6 @@ void AceContainer::InitializeCallback()
             [context, deadline]() { context->OnIdle(deadline); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterIdleCallback(idleCallback);
-
-    auto&& viewDestoryCallback = [context = pipelineContext_](AceView::ViewReleaseCallback&& callback) {
-        context->GetTaskExecutor()->PostTask(
-            [context, callback = std::move(callback)]() {
-                context->GetTaskExecutor()->PostTask(
-                    [callback = std::move(callback)]() { callback(); }, TaskExecutor::TaskType::PLATFORM);
-            },
-            TaskExecutor::TaskType::UI);
-    };
-    aceView_->RegisterViewDestroyCallback(viewDestoryCallback);
 }
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type)
@@ -186,6 +208,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type)
 #endif
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type);
     AceEngine::Get().AddContainer(aceContainer->GetInstanceId(), aceContainer);
+    aceContainer->Initialize();
     auto front = aceContainer->GetFrontend();
     if (front) {
         front->UpdateState(Frontend::State::ON_CREATE);
@@ -200,26 +223,13 @@ void AceContainer::DestroyContainer(int32_t instanceId)
         LOGE("no AceContainer with id %{private}d in AceEngine", instanceId);
         return;
     }
-    auto context = container->GetPipelineContext();
-    if (context) {
-        context->Destroy();
+    container->Destroy();
+    auto taskExecutor = container->GetTaskExecutor();
+    if (taskExecutor) {
+        taskExecutor->PostSyncTask([] { LOGI("Wait UI thread..."); }, TaskExecutor::TaskType::UI);
+        taskExecutor->PostSyncTask([] { LOGI("Wait JS thread..."); }, TaskExecutor::TaskType::JS);
     }
     AceEngine::Get().RemoveContainer(instanceId);
-    auto front = container->GetFrontend();
-    if (front) {
-        front->UpdateState(Frontend::State::ON_DESTROY);
-    }
-
-    auto taskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(container->GetTaskExecutor());
-    if (taskExecutor) {
-        taskExecutor->DestroyJsThread();
-    }
-
-    auto aceView = AceType::DynamicCast<AceContainer>(container)->GetAceView();
-    if (aceView) {
-        LOGI("NotifyViewDestroyed");
-        aceView->NotifyViewDestroyed([aceView]() { aceView->DecRefCount(); });
-    }
 }
 
 bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string& url, const std::string& params)
@@ -233,7 +243,7 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
     auto front = container->GetFrontend();
     if (front) {
         auto type = front->GetType();
-        if ((type == FrontendType::JS) || (type == FrontendType::JS_CARD)) {
+        if ((type == FrontendType::JS) || (type == FrontendType::DECLARATIVE_JS) || (type == FrontendType::JS_CARD)) {
             front->RunPage(pageId, url, params);
             return true;
         } else {
@@ -249,7 +259,59 @@ void AceContainer::Dispatch(
     const std::string& group, std::vector<uint8_t>&& data, int32_t id, bool replyToComponent) const
 {}
 
-void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const {}
+void AceContainer::FetchResponse(const ResponseData responseData, const int32_t callbackId) const
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(0));
+    if (!container) {
+        LOGE("FetchResponse container is null!");
+        return;
+    }
+    auto front = container->GetFrontend();
+    auto type = container->GetType();
+    // todo Adapting to cards and 2.0
+    if (type == FrontendType::JS) {
+        auto jsFrontend = AceType::DynamicCast<JsFrontend>(front);
+        if (jsFrontend) {
+            // todo deal with code  success is 0;
+            jsFrontend->TransferJsResponseDataPreview(callbackId, ACTION_SUCCESS, responseData);
+        }
+    } else {
+        LOGE("Frontend type not supported");
+        return;
+    }
+}
+
+void AceContainer::CallCurlFunction(const RequestData requestData, const int32_t callbackId) const
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(ACE_INSTANCE_ID));
+    if (!container) {
+        LOGE("CallCurlFunction container is null!");
+        return;
+    }
+    taskExecutor_->PostTask(
+        [container, requestData, callbackId]() mutable {
+            ResponseData responseData;
+            if (FetchManager::GetInstance().Fetch(requestData, callbackId, responseData)) {
+                container->FetchResponse(responseData, callbackId);
+            }
+        },
+        TaskExecutor::TaskType::BACKGROUND);
+}
+
+void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const
+{
+    auto front = GetFrontend();
+    if (!front) {
+        LOGE("the front is nullptr");
+        return;
+    }
+
+    taskExecutor_->PostTask(
+        [front, callbackId, errorCode, errorMessage = std::move(errorMessage)]() mutable {
+            front->TransferJsPluginGetError(callbackId, errorCode, std::move(errorMessage));
+        },
+        TaskExecutor::TaskType::BACKGROUND);
+}
 
 bool AceContainer::Dump(const std::vector<std::string>& params)
 {
@@ -262,6 +324,19 @@ bool AceContainer::Dump(const std::vector<std::string>& params)
         return true;
     }
     return false;
+}
+
+void AceContainer::AddRouterChangeCallback(int32_t instanceId, const OnRouterChangeCallback& onRouterChangeCallback)
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    if (!container) {
+        return;
+    }
+    if (!container->pipelineContext_) {
+        LOGE("container pipelineContext not init");
+        return;
+    }
+    container->pipelineContext_->AddRouterChangeCallback(onRouterChangeCallback);
 }
 
 void AceContainer::AddAssetPath(
@@ -294,15 +369,56 @@ void AceContainer::AddAssetPath(
 }
 
 void AceContainer::SetResourcesPathAndThemeStyle(int32_t instanceId, const std::string& resourcesPath,
-                                                 const ThemeId& themeId, const ColorMode& colorMode)
+                                                 const int32_t& themeId, const ColorMode& colorMode)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     if (!container) {
         return;
     }
-    container->deviceResourceInfo_.deviceConfig.colorMode = static_cast<OHOS::Ace::ColorMode>(colorMode);
-    container->deviceResourceInfo_.packagePath = resourcesPath;
-    container->deviceResourceInfo_.themeId = static_cast<int32_t>(themeId);
+    container->resourceInfo_.deviceConfig.colorMode = static_cast<OHOS::Ace::ColorMode>(colorMode);
+    container->resourceInfo_.packagePath = resourcesPath;
+    container->resourceInfo_.themeId = themeId;
+}
+
+void AceContainer::UpdateColorMode(ColorMode newColorMode)
+{
+    auto& deviceConfig = resourceInfo_.deviceConfig;
+
+    OHOS::Ace::ColorMode colorMode = static_cast<OHOS::Ace::ColorMode>(newColorMode);
+    SystemProperties::SetColorMode(colorMode);
+    if (deviceConfig.colorMode == colorMode) {
+        return;
+    } else {
+        deviceConfig.colorMode = colorMode;
+        if (frontend_) {
+            frontend_->SetColorMode(colorMode);
+        }
+    }
+    if (!pipelineContext_) {
+        return;
+    }
+    auto themeManager = pipelineContext_->GetThemeManager();
+    if (!themeManager) {
+        return;
+    }
+    themeManager->UpdateConfig(deviceConfig);
+    taskExecutor_->PostTask(
+        [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_,
+            weakContext = WeakPtr<PipelineContext>(pipelineContext_)]() {
+            auto themeManager = weakThemeManager.Upgrade();
+            auto context = weakContext.Upgrade();
+            if (!themeManager || !context) {
+                return;
+            }
+            themeManager->ReloadThemes();
+            themeManager->ParseSystemTheme();
+            themeManager->SetColorScheme(colorScheme);
+            context->RefreshRootBgColor();
+        },
+        TaskExecutor::TaskType::UI);
+    if (frontend_) {
+        frontend_->RebuildAllPages();
+    }
 }
 
 void AceContainer::SetView(FlutterAceView* view, double density, int32_t width, int32_t height)
@@ -337,6 +453,7 @@ void AceContainer::AttachView(
     pipelineContext_->SetRootSize(density, width, height);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
+    pipelineContext_->SetMessageBridge(messageBridge_);
     pipelineContext_->SetWindowModal(windowModal_);
     pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     pipelineContext_->SetIsJsCard(type_ == FrontendType::JS_CARD);
@@ -346,16 +463,16 @@ void AceContainer::AttachView(
     auto themeManager = pipelineContext_->GetThemeManager();
     if (themeManager) {
         // Init resource, load theme map.
-        themeManager->InitResource(deviceResourceInfo_);
-        themeManager->LoadSystemTheme(deviceResourceInfo_.themeId);
-        // get background color from theme
-        aceView_->SetBackgroundColor(themeManager->GetBackgroundColor());
+        themeManager->InitResource(resourceInfo_);
+        themeManager->LoadSystemTheme(resourceInfo_.themeId);
 
         taskExecutor_->PostTask(
-            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_]() {
+            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {
                 themeManager->ParseSystemTheme();
                 themeManager->SetColorScheme(colorScheme);
                 themeManager->LoadCustomTheme(assetManager);
+                // get background color from theme
+                aceView->SetBackgroundColor(themeManager->GetBackgroundColor());
             },
             TaskExecutor::TaskType::UI);
     }

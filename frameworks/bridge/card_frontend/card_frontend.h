@@ -38,6 +38,9 @@ public:
     ~CardFrontend() override;
 
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
+
+    void Destroy() override;
+
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
@@ -56,6 +59,7 @@ public:
     void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override {}
 
     void LoadPluginJsCode(std::string&& jsCode) const override {}
+    void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const override {}
 
     // application lifecycle.
     void UpdateState(Frontend::State state) override {}
@@ -74,7 +78,6 @@ public:
         foregroundFrontend_ = false;
     }
 
-    // TODO(maxuchu): these life cycle function needs to be completed.
     void OnActive() override {}
     void OnInactive() override {}
     bool OnStartContinuation() override

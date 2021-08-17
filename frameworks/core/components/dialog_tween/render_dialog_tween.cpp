@@ -100,6 +100,45 @@ void RenderDialogTween::Update(const RefPtr<Component>& component)
     if (isSetMargin_) {
         margin_ = dialog->GetMargin();
     }
+
+    if (dialog->IsMenu()) {
+        auto menuSuccessId = dialog->GetMenuSuccessId();
+        for (size_t index = 0; index < menuSuccessId.size(); ++index) {
+            BackEndEventManager<void()>::GetInstance().BindBackendEvent(
+                menuSuccessId[index], [weak = WeakClaim(this), index]() {
+                    auto dialog = weak.Upgrade();
+                    dialog->CallOnSuccess(index);
+                });
+        }
+    }
+    BindButtonEvent(dialog);
+    MarkNeedLayout();
+}
+
+void RenderDialogTween::BindButtonEvent(const RefPtr<DialogTweenComponent>& dialog)
+{
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        BackEndEventManager<void(const ClickInfo&)>::GetInstance().BindBackendEvent(
+            dialog->GetOnPositiveSuccessId(), [weak = WeakClaim(this)](const ClickInfo& info) {
+                auto dialog = weak.Upgrade();
+                dialog->CallOnSuccess(POSITIVE_SUCCESS_ID);
+            });
+
+        BackEndEventManager<void(const ClickInfo&)>::GetInstance().BindBackendEvent(
+            dialog->GetOnNegativeSuccessId(), [weak = WeakClaim(this)](const ClickInfo& info) {
+                auto dialog = weak.Upgrade();
+                dialog->CallOnSuccess(NEGATIVE_SUCCESS_ID);
+            });
+
+        BackEndEventManager<void(const ClickInfo&)>::GetInstance().BindBackendEvent(
+            dialog->GetOnNeutralSuccessId(), [weak = WeakClaim(this)](const ClickInfo& info) {
+                auto dialog = weak.Upgrade();
+                dialog->CallOnSuccess(NEUTRAL_SUCCESS_ID);
+            });
+        return;
+    }
+
     BackEndEventManager<void()>::GetInstance().BindBackendEvent(
         dialog->GetOnPositiveSuccessId(), [weak = WeakClaim(this)]() {
             auto dialog = weak.Upgrade();
@@ -117,7 +156,6 @@ void RenderDialogTween::Update(const RefPtr<Component>& component)
             auto dialog = weak.Upgrade();
             dialog->CallOnSuccess(NEUTRAL_SUCCESS_ID);
         });
-    MarkNeedLayout();
 }
 
 void RenderDialogTween::CallOnSuccess(int32_t successType)
@@ -203,10 +241,23 @@ void RenderDialogTween::PerformLayout()
 {
     LayoutParam innerLayout = GetLayoutParam();
     auto maxSize = innerLayout.GetMaxSize();
-    auto theme = GetTheme<DialogTheme>();
-    if (!theme) {
+    ComputeInnerLayoutParam(innerLayout);
+    if (GetChildren().empty()) {
+        SetLayoutSize(maxSize);
         return;
     }
+    const auto& child = GetChildren().front();
+    child->Layout(innerLayout);
+    auto childSize = child->GetLayoutSize();
+    Offset topLeftPoint = ComputeChildPosition(childSize);
+    child->SetPosition(topLeftPoint);
+    UpdateTouchRegion(topLeftPoint, maxSize, childSize);
+    SetLayoutSize(maxSize);
+}
+
+void RenderDialogTween::ComputeInnerLayoutParam(LayoutParam& innerLayout)
+{
+    auto maxSize = innerLayout.GetMaxSize();
     // Set different layout param for different devices
     auto gridSizeType = GridSystemManager::GetInstance().GetCurrentSize();
     auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::DIALOG);
@@ -230,14 +281,23 @@ void RenderDialogTween::PerformLayout()
         innerLayout.SetMinSize(Size(width, 0.0));
         innerLayout.SetMaxSize(Size(width, maxSize.Height() * DIALOG_HEIGHT_RATIO));
     }
-    if (GetChildren().empty()) {
-        SetLayoutSize(maxSize);
-        return;
-    }
-    const auto& child = GetChildren().front();
-    child->Layout(innerLayout);
-    auto childSize = child->GetLayoutSize();
+}
+
+Offset RenderDialogTween::ComputeChildPosition(const Size& childSize) const
+{
     Offset topLeftPoint;
+    auto context = context_.Upgrade();
+    auto theme = GetTheme<DialogTheme>();
+    if (!theme || !context) {
+        return topLeftPoint;
+    }
+
+    auto maxSize = GetLayoutParam().GetMaxSize();
+    if (context->GetIsDeclarative()) {
+        topLeftPoint = Offset(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+        return topLeftPoint;
+    }
+
     // Set different positions for different devices
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
         SystemProperties::GetDevcieOrientation() == DeviceOrientation::PORTRAIT) {
@@ -247,10 +307,7 @@ void RenderDialogTween::PerformLayout()
         topLeftPoint =
             Offset((maxSize.Width() - childSize.Width()) / 2.0, (maxSize.Height() - childSize.Height()) / 2.0);
     }
-
-    child->SetPosition(topLeftPoint);
-    UpdateTouchRegion(topLeftPoint, maxSize, childSize);
-    SetLayoutSize(maxSize);
+    return topLeftPoint;
 }
 
 void RenderDialogTween::UpdateTouchRegion(const Offset& topLeftPoint, const Size& maxSize, const Size& childSize)
@@ -368,9 +425,22 @@ void RenderDialogTween::InitAccessibilityEventListener()
 
 void RenderDialogTween::RemoveBackendEvent(const RefPtr<DialogTweenComponent>& component)
 {
-    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(component->GetOnPositiveSuccessId());
-    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(component->GetOnNegativeSuccessId());
-    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(component->GetOnNeutralSuccessId());
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        BackEndEventManager<void(const ClickInfo&)>::GetInstance().RemoveBackEndEvent(
+            component->GetOnPositiveSuccessId());
+        BackEndEventManager<void(const ClickInfo&)>::GetInstance().RemoveBackEndEvent(
+            component->GetOnNegativeSuccessId());
+        BackEndEventManager<void(const ClickInfo&)>::GetInstance().RemoveBackEndEvent(
+            component->GetOnNeutralSuccessId());
+    } else {
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(component->GetOnPositiveSuccessId());
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(component->GetOnNegativeSuccessId());
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(component->GetOnNeutralSuccessId());
+    }
+    BackEndEventManager<void(int32_t)>::GetInstance().RemoveBackEndEvent(component->GetOnSuccessId());
+    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(component->GetOnCancelId());
+    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(component->GetOnCompleteId());
 }
 
 } // namespace OHOS::Ace

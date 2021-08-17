@@ -38,10 +38,8 @@ RenderLayer FlutterRenderSvgTextPath::GetRenderLayer()
 
 void FlutterRenderSvgTextPath::Paint(RenderContext& context, const Offset& offset)
 {
-    double length = FlutterSvgPainter::GetPathLength(path_);
-    double startOffset = ConvertDimensionToPx(startOffset_, length);
-    PathOffset pathOffset = { offset, startOffset, startOffset, path_};
-    DrawTextPath(context, pathOffset);
+    // The element text is the general entry for text rendering
+    return;
 }
 
 Offset FlutterRenderSvgTextPath::PaintTextPath(RenderContext& context, const Offset& offset)
@@ -54,12 +52,57 @@ Offset FlutterRenderSvgTextPath::PaintTextPath(RenderContext& context, const Off
     return FlutterSvgPainter::GetPathOffset(path_, pathOffset.current);
 }
 
+Offset FlutterRenderSvgTextPath::MeasureTextPathBounds(const Offset& offset, Rect& bounds)
+{
+    double length = FlutterSvgPainter::GetPathLength(path_);
+    double startOffset = ConvertDimensionToPx(startOffset_, length);
+    PathOffset pathOffset = { offset, startOffset, startOffset, path_};
+
+    if (!pathOffset.path.empty()) {
+        if (!textData_.empty()) {
+            pathOffset.current = OnMeasureTextPathBounds(pathOffset, bounds);
+        }
+        const auto& children = GetChildren();
+        if (!children.empty()) {
+            for (const auto& child : children) {
+                auto textSpan = AceType::DynamicCast<FlutterRenderSvgTspan>(child);
+                if (textSpan) {
+                    textSpan->MeasureTextPathBounds(pathOffset, bounds);
+                }
+            }
+        }
+    }
+
+    return FlutterSvgPainter::GetPathOffset(path_, pathOffset.current);
+}
+
+Rect FlutterRenderSvgTextPath::GetPaintBounds(const Offset& offset)
+{
+    Rect bounds;
+    MeasureTextPathBounds(Offset(), bounds);
+    return bounds;
+}
+
 void FlutterRenderSvgTextPath::DrawTextPath(RenderContext& context, PathOffset& pathOffset)
 {
     if (pathOffset.path.empty()) {
         LOGW("draw path is emtpy.");
         return;
     }
+
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkCanvas* skCanvas = canvas->canvas();
+    if (!skCanvas) {
+        LOGE("Paint skCanvas is null");
+        return;
+    }
+    SkAutoCanvasRestore save(skCanvas, false);
+    PaintMaskLayer(context, pathOffset.svg, pathOffset.svg);
 
     if (!textData_.empty()) {
         pathOffset.current = OnDrawTextPath(context, pathOffset);
@@ -94,6 +137,15 @@ double FlutterRenderSvgTextPath::OnDrawTextPath(RenderContext& context, const Pa
     SvgTextInfo svgTextInfo = { fillState_, strokeState_, textStyle_, textData_, opacity_ };
     PathDrawInfo pathDrawInfo = { pathOffset.path, pathOffset.current, 0.0 };
     offset = FlutterSvgPainter::UpdateTextPath(skCanvas, svgTextInfo, pathDrawInfo);
+    return offset;
+}
+
+double FlutterRenderSvgTextPath::OnMeasureTextPathBounds(const PathOffset& pathOffset, Rect& bounds)
+{
+    double offset = pathOffset.current;
+    SvgTextInfo svgTextInfo = { fillState_, strokeState_, textStyle_, textData_, opacity_ };
+    PathDrawInfo pathDrawInfo = { pathOffset.path, pathOffset.current, 0.0 };
+    offset = FlutterSvgPainter::MeasureTextPathBounds(svgTextInfo, pathDrawInfo, bounds);
     return offset;
 }
 

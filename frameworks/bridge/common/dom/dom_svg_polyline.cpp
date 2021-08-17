@@ -21,40 +21,30 @@ namespace OHOS::Ace::Framework {
 
 DOMSvgPolyline::DOMSvgPolyline(NodeId nodeId, const std::string& nodeName) : DOMSvgBase(nodeId, nodeName) {}
 
-bool DOMSvgPolyline::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    if (DOMSvgBase::SetPresentationAttr(attr)) {
-        return true;
-    }
-    if (attr.first == DOM_SVG_POINTS) {
-        points_ = attr.second;
-        return true;
-    }
-    return false;
-}
-
 RefPtr<Component> DOMSvgPolyline::GetSpecializedComponent()
 {
-    return polylineComponent_;
+    return polygonComponent_;
 }
 
 void DOMSvgPolyline::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 {
-    polylineComponent_->InsertChild(slot, child->GetSpecializedComponent());
+    polygonComponent_->InsertChild(slot, child->GetSpecializedComponent());
 }
 
 void DOMSvgPolyline::OnMounted(const RefPtr<DOMNode>& parentNode)
 {
-    DOMSvgBase::InheritCommonAttrs(polylineComponent_, parentNode);
+    DOMSvgBase::InheritAttrs(parentNode);
 }
 
 void DOMSvgPolyline::PrepareSpecializedComponent()
 {
-    if (!polylineComponent_) {
-        polylineComponent_ = AceType::MakeRefPtr<SvgPolylineComponent>();
+    if (!polygonComponent_) {
+        polygonComponent_ = AceType::MakeRefPtr<SvgPolygonComponent>(false);
     }
-    polylineComponent_->SetPoints(points_);
-    DOMSvgBase::PrepareCommonAttrs(polylineComponent_);
+    auto declaration = AceType::DynamicCast<SvgPolygonDeclaration>(declaration_);
+    if (declaration) {
+        polygonComponent_->SetDeclaration(declaration);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

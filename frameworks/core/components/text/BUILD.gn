@@ -18,5 +18,6 @@ build_component("text") {
     "flutter_render_text.cpp",
     "render_text.cpp",
     "text_component.cpp",
+    "text_component_v2.cpp",
   ]
 }

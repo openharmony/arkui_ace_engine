@@ -34,7 +34,8 @@ public:
         DOWN,
         NONE,
     };
-    explicit SwipeEventInfo(SwipeDirection swipeDirection) : BaseEventInfo("onswipe"), swipeDirection_(swipeDirection)
+    explicit SwipeEventInfo(SwipeDirection swipeDirection, float distance)
+        : BaseEventInfo("onswipe"), swipeDirection_(swipeDirection), distance_(distance)
     {}
     ~SwipeEventInfo() override = default;
 
@@ -42,6 +43,7 @@ public:
 
 private:
     SwipeDirection swipeDirection_ = SwipeDirection::LEFT;
+    float distance_ = 0.0f;
 };
 
 using SwipeCallback = std::function<void(const SwipeEventInfo&)>;

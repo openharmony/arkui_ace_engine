@@ -46,7 +46,9 @@ void FlutterRenderRoot::Paint(RenderContext& context, const Offset& offset)
     } else {
         canvas->canvas()->clear(skColor);
     }
-
+    if (pipelineContext) {
+        pipelineContext->SetRootBgColor(bgColor_);
+    }
     RenderNode::Paint(context, offset);
 }
 

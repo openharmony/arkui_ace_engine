@@ -19,6 +19,8 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/label_target.h"
 #include "core/components/checkable/checkable_theme.h"
+#include "core/components/declaration/common/attribute.h"
+#include "core/components_v2/common/common_def.h"
 #include "core/pipeline/base/render_component.h"
 #include "core/pipeline/base/render_node.h"
 #ifndef WEARABLE_PRODUCT
@@ -55,7 +57,7 @@ private:
     T value_;
 };
 
-class CheckableComponent : public RenderComponent {
+class ACE_EXPORT CheckableComponent : public RenderComponent {
     DECLARE_ACE_TYPE(CheckableComponent, RenderComponent);
 
 public:
@@ -67,7 +69,7 @@ public:
 
     void ApplyTheme(const RefPtr<CheckableTheme>& theme);
 
-    const EventMarker& GetChangeEvent() const
+    EventMarker& GetChangeEvent()
     {
         return changeEvent_;
     }
@@ -272,6 +274,8 @@ public:
         return hoverRadius_;
     }
 
+    ACE_DEFINE_COMPONENT_EVENT(OnChange, void(bool));
+
 protected:
     CheckableType checkableType_ = CheckableType::UNKNOWN;
     Dimension width_;
@@ -299,19 +303,19 @@ protected:
     double radioInnerSizeRatio_ = 0.5;
 };
 
-class CheckboxComponent : public CheckableComponent, public CheckableValue<bool>, public LabelTarget {
+class ACE_EXPORT CheckboxComponent : public CheckableComponent, public CheckableValue<bool>, public LabelTarget {
     DECLARE_ACE_TYPE(CheckboxComponent, CheckableComponent, LabelTarget);
 
 public:
-    CheckboxComponent(const RefPtr<CheckboxTheme>& theme);
+    explicit CheckboxComponent(const RefPtr<CheckboxTheme>& theme);
     ~CheckboxComponent() override = default;
 };
 
-class SwitchComponent : public CheckableComponent, public CheckableValue<bool> {
+class ACE_EXPORT SwitchComponent : public CheckableComponent, public CheckableValue<bool> {
     DECLARE_ACE_TYPE(SwitchComponent, CheckableComponent);
 
 public:
-    SwitchComponent(const RefPtr<SwitchTheme>& theme);
+    explicit SwitchComponent(const RefPtr<SwitchTheme>& theme);
     ~SwitchComponent() override = default;
 
     void SetTextStyle(const TextStyle& textStyle)
@@ -385,12 +389,12 @@ public:
     }
 
 #ifndef WEARABLE_PRODUCT
-    const MultimodalProperties& GetMultimodalProperties() const
+    const CommonMultimodalAttribute& GetMultimodalProperties() const
     {
         return multimodalProperties_;
     }
 
-    void SetMultimodalProperties(const MultimodalProperties& multimodalProperties)
+    void SetMultimodalProperties(const CommonMultimodalAttribute& multimodalProperties)
     {
         multimodalProperties_ = multimodalProperties;
     }
@@ -404,7 +408,7 @@ private:
     bool showText_ = false;
     TextStyle textStyle_;
 #ifndef WEARABLE_PRODUCT
-    MultimodalProperties multimodalProperties_;
+    CommonMultimodalAttribute multimodalProperties_;
 #endif
     Dimension textPadding_ { 0, DimensionUnit::PX };
 };
@@ -414,7 +418,7 @@ class RadioComponent : public CheckableComponent, public CheckableValue<VALUE_TY
     DECLARE_ACE_TYPE(RadioComponent<VALUE_TYPE>, CheckableComponent, LabelTarget);
 
 public:
-    RadioComponent(const RefPtr<RadioTheme>& theme) : CheckableComponent(CheckableType::RADIO, theme) {}
+    explicit RadioComponent(const RefPtr<RadioTheme>& theme) : CheckableComponent(CheckableType::RADIO, theme) {}
     ~RadioComponent() override = default;
 
     VALUE_TYPE GetGroupValue() const

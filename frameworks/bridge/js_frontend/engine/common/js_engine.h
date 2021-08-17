@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
@@ -37,6 +38,7 @@ class JsEngineInstance {
 public:
     JsEngineInstance() = default;
     virtual ~JsEngineInstance() = default;
+
     virtual void FlushCommandBuffer(void* context, const std::string& command);
 };
 
@@ -86,6 +88,9 @@ public:
 
     // destroy application instance according packageName
     virtual void DestroyApplication(const std::string& packageName) = 0;
+
+    // update application State according packageName
+    virtual void UpdateApplicationState(const std::string& packageName, Frontend::State state) {}
 
     virtual void MediaQueryCallback(const std::string& callbackId, const std::string& args) = 0;
 

@@ -38,6 +38,7 @@ public:
 
     void Repaint(const RefPtr<RenderNode>& node) override;
     void PaintChild(const RefPtr<RenderNode>& child, const Offset& offset) override;
+    bool IsIntersectWith(const RefPtr<RenderNode>& child, Offset& offset) override;
 
     void InitContext(RenderLayer layer, const Rect& rect);
     flutter::Canvas* GetCanvas();
@@ -51,6 +52,31 @@ public:
     bool IsRecording()
     {
         return !!canvas_;
+    }
+
+    sk_sp<SkPicture> FinishRecordingAsPicture()
+    {
+        if (recorder_) {
+            auto picture = recorder_->endRecording();
+            if (picture) {
+                return picture->picture();
+            }
+        }
+        return nullptr;
+    }
+
+    sk_sp<SkImage> FinishRecordingAsImage()
+    {
+        if (recorder_) {
+            auto picture = recorder_->endRecording();
+            if (picture) {
+                auto image = picture->toImage(estimatedRect_.Width(), estimatedRect_.Height());
+                if (image) {
+                    return image->image();
+                }
+            }
+        }
+        return nullptr;
     }
 
 private:

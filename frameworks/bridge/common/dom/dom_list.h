@@ -35,6 +35,7 @@ public:
     void OnPageLoadFinish() override;
     void OnScrollBy(double dx, double dy, bool isSmooth) override;
     Offset GetCurrentOffset() const;
+    void ScrollToMethod(int32_t index);
 
     RefPtr<Component> GetSpecializedComponent() override
     {
@@ -97,6 +98,11 @@ public:
 
     void AdjustSpecialParamInLiteMode() override;
 
+    void SetOnRotate(const EventMarker& eventMarker)
+    {
+        listComponent_->SetOnRotateId(eventMarker);
+    }
+
 protected:
     void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) override;
     void OnChildNodeRemoved(const RefPtr<DOMNode>& child) override;
@@ -106,6 +112,13 @@ protected:
     void PrepareSpecializedComponent() override;
     void ResetInitializedStyle() override;
     void OnMounted(const RefPtr<DOMNode>& parentNode) override;
+
+    const EventMarker& GetRotateId()
+    {
+        static EventMarker defaultMarker;
+        auto& crownEvent = static_cast<CommonCrownEvent&>(declaration_->GetEvent(EventTag::COMMON_CROWN_EVENT));
+        return crownEvent.IsValid() ? crownEvent.rotate.eventMarker : defaultMarker;
+    }
 
 private:
     void CreateOrUpdateList();
@@ -121,7 +134,6 @@ private:
     void SetChildActive();
 
     void ExpandGroup(const std::string& groupId, bool expand = true);
-    void ScrollToMethod(int32_t index);
     void ScrollByMethod(double x, double y, bool isSmooth);
     void ScrollArrowMethod(bool reverse, bool isSmooth);
     void ScrollToEdgeMethod(const std::string& method, const std::string& args);
@@ -151,6 +163,7 @@ private:
     Dimension itemExtent_;
     std::pair<bool, Dimension> scrollbarWidth_;
     std::pair<bool, Color> scrollbarColor_;
+    std::pair<bool, Dimension> scrollbarPosition_;
 
     EventMarker onRequestItem_;
 

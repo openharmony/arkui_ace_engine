@@ -19,6 +19,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
 
 namespace OHOS::Ace {
@@ -157,13 +158,18 @@ void SwipeInfoToString(const BaseEventInfo& info, std::string& eventParam)
 
 DeclarativeFrontend::~DeclarativeFrontend() noexcept
 {
+    LOG_DESTROY();
+}
+
+void DeclarativeFrontend::Destroy()
+{
+    CHECK_RUN_ON(JS);
+    LOGI("DeclarativeFrontend Destroy begin.");
     // To guarantee the jsEngine_ and delegate_ released in js thread
-    auto jsTaskExecutor = delegate_->GetAnimationJsTask();
-    RefPtr<Framework::JsEngine> jsEngine;
-    jsEngine.Swap(jsEngine_);
-    RefPtr<Framework::FrontendDelegateDeclarative> delegate;
-    delegate.Swap(delegate_);
-    jsTaskExecutor.PostTask([jsEngine, delegate] {});
+    jsEngine_.Reset();
+    delegate_.Reset();
+    handler_.Reset();
+    LOGI("DeclarativeFrontend Destroy end.");
 }
 
 bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
@@ -189,6 +195,9 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
 void DeclarativeFrontend::AttachPipelineContext(const RefPtr<PipelineContext>& context)
 {
     LOGI("DeclarativeFrontend AttachPipelineContext.");
+    if (!delegate_) {
+        return;
+    }
     handler_ = AceType::MakeRefPtr<DeclarativeEventHandler>(delegate_);
     context->RegisterEventHandler(handler_);
     delegate_->AttachPipelineContext(context);
@@ -197,7 +206,9 @@ void DeclarativeFrontend::AttachPipelineContext(const RefPtr<PipelineContext>& c
 void DeclarativeFrontend::SetAssetManager(const RefPtr<AssetManager>& assetManager)
 {
     LOGI("DeclarativeFrontend SetAssetManager.");
-    delegate_->SetAssetManager(assetManager);
+    if (delegate_) {
+        delegate_->SetAssetManager(assetManager);
+    }
 }
 
 void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor)
@@ -273,6 +284,15 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->DestroyApplication(packageName);
     };
 
+    const auto& updateApplicationStateCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+            const std::string& packageName, Frontend::State state) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->UpdateApplicationState(packageName, state);
+    };
+
     const auto& timerCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                     const std::string& callbackId, const std::string& delay, bool isInterval) {
         auto jsEngine = weakEngine.Upgrade();
@@ -310,8 +330,8 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     };
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
         setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
-        resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, timerCallback, mediaQueryCallback,
-        requestAnimationCallback, jsCallback);
+        resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
+        timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback);
     delegate_->SetAbility(ability_);
     if (jsEngine_) {
         delegate_->SetGroupJsBridge(jsEngine_->GetGroupJsBridge());
@@ -324,78 +344,116 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
 void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params)
 {
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarative.
-    delegate_->RunPage(url, params);
+    if (delegate_) {
+        delegate_->RunPage(url, params);
+    }
 }
 
 void DeclarativeFrontend::PushPage(const std::string& url, const std::string& params)
 {
-    delegate_->Push(url, params);
+    if (delegate_) {
+        delegate_->Push(url, params);
+    }
 }
 
 // navigator component call router
-void DeclarativeFrontend::NavigatePage(uint8_t type, const std::string& url)
+void DeclarativeFrontend::NavigatePage(uint8_t type, const PageTarget& target, const std::string& params)
 {
+    if (!delegate_) {
+        return;
+    }
     switch (static_cast<NavigatorType>(type)) {
         case NavigatorType::PUSH:
-            delegate_->Push(url, "");
+            delegate_->Push(target, params);
             break;
         case NavigatorType::REPLACE:
-            delegate_->Replace(url, "");
+            delegate_->Replace(target, params);
             break;
         case NavigatorType::BACK:
-            delegate_->Back(url);
+            delegate_->BackWithTarget(target, params);
             break;
         default:
             LOGE("Navigator type is invalid!");
-            delegate_->Back(url);
+            delegate_->BackWithTarget(target, params);
     }
 }
 
 void DeclarativeFrontend::SendCallbackMessage(const std::string& callbackId, const std::string& data) const
 {
-    delegate_->OnJSCallback(callbackId, data);
+    if (delegate_) {
+        delegate_->OnJSCallback(callbackId, data);
+    }
 }
 
 void DeclarativeFrontend::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const
 {
-    delegate_->SetJsMessageDispatcher(dispatcher);
+    if (delegate_) {
+        delegate_->SetJsMessageDispatcher(dispatcher);
+    }
 }
 
 void DeclarativeFrontend::TransferComponentResponseData(int callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
-    delegate_->TransferComponentResponseData(callbackId, code, std::move(data));
+    if (delegate_) {
+        delegate_->TransferComponentResponseData(callbackId, code, std::move(data));
+    }
 }
 
 void DeclarativeFrontend::TransferJsResponseData(int callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
-    delegate_->TransferJsResponseData(callbackId, code, std::move(data));
+    if (delegate_) {
+        delegate_->TransferJsResponseData(callbackId, code, std::move(data));
+    }
 }
 
 void DeclarativeFrontend::TransferJsPluginGetError(int callbackId, int32_t errorCode, std::string&& errorMessage) const
 {
-    delegate_->TransferJsPluginGetError(callbackId, errorCode, std::move(errorMessage));
+    if (delegate_) {
+        delegate_->TransferJsPluginGetError(callbackId, errorCode, std::move(errorMessage));
+    }
 }
 
 void DeclarativeFrontend::TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
-    delegate_->TransferJsEventData(callbackId, code, std::move(data));
+    if (delegate_) {
+        delegate_->TransferJsEventData(callbackId, code, std::move(data));
+    }
 }
 
 void DeclarativeFrontend::LoadPluginJsCode(std::string&& jsCode) const
 {
-    delegate_->LoadPluginJsCode(std::move(jsCode));
+    if (delegate_) {
+        delegate_->LoadPluginJsCode(std::move(jsCode));
+    }
+}
+
+void DeclarativeFrontend::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const
+{
+    if (delegate_) {
+        delegate_->LoadPluginJsByteCode(std::move(jsCode), std::move(jsCodeLen));
+    }
 }
 
 void DeclarativeFrontend::UpdateState(Frontend::State state)
 {
+    if (!delegate_) {
+        return;
+    }
     switch (state) {
         case Frontend::State::ON_CREATE:
+            break;
+        case Frontend::State::ON_SHOW:
+            delegate_->UpdateApplicationState(delegate_->GetAppID(), state);
+            break;
+        case Frontend::State::ON_HIDE:
+            delegate_->UpdateApplicationState(delegate_->GetAppID(), state);
             break;
         case Frontend::State::ON_DESTROY:
             delegate_->OnApplicationDestroy(delegate_->GetAppID());
             break;
         default:
             LOGE("error State: %d", state);
+            break;
     }
 }
 
@@ -410,73 +468,111 @@ RefPtr<AccessibilityManager> DeclarativeFrontend::GetAccessibilityManager() cons
 
 const WindowConfig& DeclarativeFrontend::GetWindowConfig() const
 {
+    if (!delegate_) {
+        static WindowConfig windowConfig;
+        LOGW("delegate is null, return default config");
+        return windowConfig;
+    }
     return delegate_->GetWindowConfig();
 }
 
 bool DeclarativeFrontend::OnBackPressed()
 {
+    if (!delegate_) {
+        LOGW("delegate is null, return false");
+        return false;
+    }
     return delegate_->OnPageBackPress();
 }
 
 void DeclarativeFrontend::OnShow()
 {
-    delegate_->OnForground();
+    if (delegate_) {
+        delegate_->OnForground();
+    }
 }
 
 void DeclarativeFrontend::OnHide()
 {
-    delegate_->OnBackGround();
-    foregroundFrontend_ = false;
+    if (delegate_) {
+        delegate_->OnBackGround();
+        foregroundFrontend_ = false;
+    }
 }
 
 void DeclarativeFrontend::OnActive()
 {
-    foregroundFrontend_ = true;
-    delegate_->InitializeAccessibilityCallback();
+    if (delegate_) {
+        foregroundFrontend_ = true;
+        delegate_->InitializeAccessibilityCallback();
+    }
 }
 
 void DeclarativeFrontend::OnInactive()
 {
-    delegate_->OnSuspended();
+    if (delegate_) {
+        delegate_->OnSuspended();
+    }
 }
 
 bool DeclarativeFrontend::OnStartContinuation()
 {
+    if (!delegate_) {
+        LOGW("delegate is null, return false");
+        return false;
+    }
     return delegate_->OnStartContinuation();
 }
 
 void DeclarativeFrontend::OnCompleteContinuation(int32_t code)
 {
-    delegate_->OnCompleteContinuation(code);
+    if (delegate_) {
+        delegate_->OnCompleteContinuation(code);
+    }
 }
 
 void DeclarativeFrontend::OnSaveData(std::string& data)
 {
-    delegate_->OnSaveData(data);
+    if (delegate_) {
+        delegate_->OnSaveData(data);
+    }
 }
 
 bool DeclarativeFrontend::OnRestoreData(const std::string& data)
 {
+    if (!delegate_) {
+        LOGW("delegate is null, return false");
+        return false;
+    }
     return delegate_->OnRestoreData(data);
 }
 
 void DeclarativeFrontend::OnNewRequest(const std::string& data)
 {
-    delegate_->OnNewRequest(data);
+    if (delegate_) {
+        delegate_->OnNewRequest(data);
+    }
 }
 
 void DeclarativeFrontend::CallRouterBack()
 {
-    delegate_->CallPopPage();
+    if (delegate_) {
+        delegate_->CallPopPage();
+    }
 }
 
 void DeclarativeFrontend::OnSurfaceChanged(int32_t width, int32_t height)
 {
-    delegate_->OnSurfaceChanged();
+    if (delegate_) {
+        delegate_->OnSurfaceChanged();
+    }
 }
 
 void DeclarativeFrontend::DumpFrontend() const
 {
+    if (!delegate_) {
+        return;
+    }
     int32_t routerIndex = 0;
     std::string routerName;
     std::string routerPath;
@@ -491,12 +587,16 @@ void DeclarativeFrontend::DumpFrontend() const
 
 void DeclarativeFrontend::TriggerGarbageCollection()
 {
-    jsEngine_->RunGarbageCollection();
+    if (jsEngine_) {
+        jsEngine_->RunGarbageCollection();
+    }
 }
 
 void DeclarativeFrontend::RebuildAllPages()
 {
-    delegate_->RebuildAllPages();
+    if (delegate_) {
+        delegate_->RebuildAllPages();
+    }
 }
 
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)
@@ -558,7 +658,7 @@ void DeclarativeEventHandler::HandleAsyncEvent(
 {
     if (eventMarker.GetData().isDeclarativeUi) {
         if (delegate_) {
-            delegate_->GetUiTask().PostTask([&eventMarker, info] { eventMarker.CallUiArgFunction(info.get()); });
+            delegate_->GetUiTask().PostTask([eventMarker, info] { eventMarker.CallUiArgFunction(info.get()); });
         }
     }
 }
@@ -641,6 +741,14 @@ void DeclarativeEventHandler::HandleSyncEvent(const EventMarker& eventMarker, bo
     accessibilityEvent.nodeId = StringUtils::StringToInt(eventMarker.GetData().eventId);
     accessibilityEvent.eventType = eventMarker.GetData().eventType;
     delegate_->FireAccessibilityEvent(accessibilityEvent);
+}
+
+void DeclarativeEventHandler::HandleSyncEvent(
+    const EventMarker& eventMarker, const std::shared_ptr<BaseEventInfo>& info)
+{
+    if (delegate_) {
+        delegate_->GetUiTask().PostSyncTask([eventMarker, info] { eventMarker.CallUiArgFunction(info.get()); });
+    }
 }
 
 void DeclarativeEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info, bool& result)

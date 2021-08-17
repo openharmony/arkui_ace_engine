@@ -52,8 +52,9 @@ private:
     void DrawCircleProgress(flutter::Canvas& canvas, const Offset& offset);
     void DrawDownloadButton(flutter::Canvas& canvas, const Offset& offset);
     void DrawButton(flutter::Canvas& canvas, const Offset& offset);
+    void ConvertToSkVector(const std::array<Radius, 4>& radii, SkVector* skRadii);
     uint32_t GetStateColor();
-
+    SkVector radii_[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
     RefPtr<Flutter::TransformLayer> transformLayer_;
     RefPtr<Flutter::OpacityLayer> opacityLayer_;
 };

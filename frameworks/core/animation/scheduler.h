@@ -19,9 +19,10 @@
 #include <functional>
 
 #include "core/animation/schedule_task.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
+
+class PipelineContext;
 
 class Scheduler : public ScheduleTask {
     DECLARE_ACE_TYPE(Scheduler, ScheduleTask);

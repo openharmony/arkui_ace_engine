@@ -20,6 +20,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
 
@@ -47,6 +48,7 @@ struct CalendarThemeStructure {
     Color titleTextColor;
     Color touchColor;
     Color markLunarColor;
+    Color clickEffectColor;
     Dimension weekFontSize;
     Dimension dayFontSize;
     Dimension lunarDayFontSize;
@@ -66,11 +68,25 @@ struct CalendarThemeStructure {
     Dimension dailyFiveRowSpace;
     Dimension dailySixRowSpace;
     Dimension gregorianCalendarHeight;
+    Dimension lunarHeight;
     Dimension arrowHeight;
     Dimension arrowWidth;
     Dimension buttonWidth;
     Dimension buttonHeight;
     Dimension titleFontSize;
+    Dimension workStateOffset;
+    Dimension dayYAxisOffset;
+    Dimension lunarDayYAxisOffset;
+    Dimension underscoreXAxisOffset;
+    Dimension underscoreYAxisOffset;
+    Dimension scheduleMarkerXAxisOffset;
+    Dimension scheduleMarkerYAxisOffset;
+    Dimension underscoreWidth;
+    Dimension underscoreLength;
+    Dimension scheduleMarkerRadius;
+    Dimension touchCircleStrokeWidth;
+    Dimension boundaryRowOffset;
+    Dimension boundaryColOffset;
 };
 
 class CalendarTheme : public virtual Theme {
@@ -140,6 +156,26 @@ public:
             theme->calendarTheme_.dayFontWeight = themeConstants->GetString(THEME_CALENDAR_DAY_FONT_WIGHT);
             theme->calendarTheme_.lunarDayFontWeight = themeConstants->GetString(THEME_CALENDAR_LUNAR_DAY_FONT_WIGHT);
             theme->calendarTheme_.workStateFontWeight = themeConstants->GetString(THEME_CALENDAR_WORK_STATE_FONT_WIGHT);
+            theme->calendarTheme_.workStateOffset =
+                themeConstants->GetDimension(THEME_CALENDAR_WORK_STATE_CENTER_ADJUSTMENT);
+            theme->calendarTheme_.dayYAxisOffset = themeConstants->GetDimension(THEME_CALENDAR_DAY_YAXIS_OFFSET);
+            theme->calendarTheme_.lunarDayYAxisOffset =
+                themeConstants->GetDimension(THEME_CALENDAR_LUNAR_DAY_YAXIS_OFFSET);
+            theme->calendarTheme_.underscoreXAxisOffset =
+                themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_XAXIS_OFFSET);
+            theme->calendarTheme_.underscoreYAxisOffset =
+                themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_YAXIS_OFFSET);
+            theme->calendarTheme_.scheduleMarkerXAxisOffset =
+                themeConstants->GetDimension(THEME_CALENDAR_SCHEDULE_MARKER_XAXIS_OFFSET);
+            theme->calendarTheme_.scheduleMarkerYAxisOffset =
+                themeConstants->GetDimension(THEME_CALENDAR_SCHEDULE_MARKER_YAXIS_OFFSET);
+            theme->calendarTheme_.touchCircleStrokeWidth =
+                themeConstants->GetDimension(THEME_CALENDAR_TOUCH_CIRCLE_STROKE_WIDTH);
+            theme->calendarTheme_.lunarHeight = themeConstants->GetDimension(THEME_CALENDAR_LUNAR_HEIGHT);
+            theme->calendarTheme_.underscoreWidth = themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_WIDTH);
+            theme->calendarTheme_.underscoreLength = themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_LENGTH);
+            theme->calendarTheme_.scheduleMarkerRadius =
+                themeConstants->GetDimension(THEME_CALENDAR_SCHEDULE_MARKER_RADIUS);
 
             theme->cardCalendarTheme_.titleTextColor = themeConstants->GetColor(THEME_CARD_CALENDAR_TITLE_TEXT_COLOR);
             theme->cardCalendarTheme_.arrowHeight = themeConstants->GetDimension(THEME_CARD_CALENDAR_ARROW_HEIGHT);
@@ -180,6 +216,24 @@ public:
                 themeConstants->GetDimension(THEME_CARD_CALENDAR_WEEK_AND_DAY_ROW_SPACE);
             theme->cardCalendarTheme_.dailyFiveRowSpace =
                 themeConstants->GetDimension(THEME_CARD_CALENDAR_DAILY_FIVE_ROW_SPACE);
+            theme->calendarTheme_.dayYAxisOffset = themeConstants->GetDimension(THEME_CALENDAR_DAY_YAXIS_OFFSET);
+            theme->cardCalendarTheme_.lunarDayYAxisOffset =
+                themeConstants->GetDimension(THEME_CALENDAR_LUNAR_DAY_YAXIS_OFFSET);
+            theme->cardCalendarTheme_.underscoreXAxisOffset =
+                themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_XAXIS_OFFSET);
+            theme->cardCalendarTheme_.underscoreYAxisOffset =
+                themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_YAXIS_OFFSET);
+            theme->cardCalendarTheme_.scheduleMarkerXAxisOffset =
+                themeConstants->GetDimension(THEME_CALENDAR_SCHEDULE_MARKER_XAXIS_OFFSET);
+            theme->cardCalendarTheme_.scheduleMarkerYAxisOffset =
+                themeConstants->GetDimension(THEME_CALENDAR_SCHEDULE_MARKER_YAXIS_OFFSET);
+            theme->cardCalendarTheme_.touchCircleStrokeWidth =
+                themeConstants->GetDimension(THEME_CALENDAR_TOUCH_CIRCLE_STROKE_WIDTH);
+            theme->cardCalendarTheme_.lunarHeight = themeConstants->GetDimension(THEME_CALENDAR_LUNAR_HEIGHT);
+            theme->cardCalendarTheme_.underscoreWidth = themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_WIDTH);
+            theme->cardCalendarTheme_.underscoreLength = themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_LENGTH);
+            theme->cardCalendarTheme_.scheduleMarkerRadius =
+                themeConstants->GetDimension(THEME_CALENDAR_SCHEDULE_MARKER_RADIUS);
 
             auto themeStyle = themeConstants->GetThemeStyle();
             if (themeStyle) {
@@ -190,13 +244,13 @@ public:
                 theme->cardCalendarTheme_.weekColor =
                     themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY, Color::BLACK);
                 theme->cardCalendarTheme_.nonCurrentMonthDayColor =
-                        themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_TERTIARY, Color::BLACK);
+                    themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_TERTIARY, Color::BLACK);
                 theme->cardCalendarTheme_.weekendDayColor =
                     themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_SECONDARY, Color::BLACK);
                 theme->cardCalendarTheme_.weekendLunarColor =
                     themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_SECONDARY, Color::BLACK);
                 theme->cardCalendarTheme_.nonCurrentMonthLunarColor =
-                        themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_FOURTH, Color::BLACK);
+                    themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_FOURTH, Color::BLACK);
                 theme->cardCalendarTheme_.todayColor =
                     themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY_INVERSE, Color::WHITE);
                 theme->cardCalendarTheme_.todayLunarColor =
@@ -204,9 +258,11 @@ public:
                 theme->cardCalendarTheme_.lunarColor =
                     themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_SECONDARY, Color::BLACK);
                 theme->cardCalendarTheme_.markLunarColor =
-                        themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_TEXT_PRIMARY_ACTIVATED, Color::BLUE);
+                    themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_TEXT_PRIMARY_ACTIVATED, Color::BLUE);
                 theme->cardCalendarTheme_.titleTextColor =
-                        themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY, Color::BLACK);
+                    themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY, Color::BLACK);
+                theme->cardCalendarTheme_.clickEffectColor =
+                    themeStyle->GetAttr<Color>(TEXTFIELD_PRESS_COLOR, Color::TRANSPARENT);
             }
             return theme;
         }

@@ -16,6 +16,7 @@
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_engine.h"
 
 #include <algorithm>
+#include <regex>
 #include <string>
 #include <unistd.h>
 #include <unordered_map>
@@ -66,6 +67,9 @@ const char BIN_EXT[] = ".bin";
 const char MAP_EXT[] = ".map";
 constexpr int32_t CUSTOM_FULL_WINDOW_LENGTH = 3;
 constexpr int32_t ARGS_FULL_WINDOW_LENGTH = 2;
+constexpr int32_t ARGS_READ_RESOURCE_LENGTH = 2;
+constexpr int32_t MAX_READ_TEXT_LENGTH = 4096;
+const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
 
 int32_t CallEvalBuf(
     JSContext* ctx, const char* buf, size_t bufLen, const char* filename, int32_t evalFlags, int32_t instanceId)
@@ -74,7 +78,7 @@ int32_t CallEvalBuf(
     int32_t ret = JS_CALL_SUCCESS;
     if (JS_IsException(val)) {
         LOGE("[Qjs Native] EvalBuf failed!");
-        QjsUtils::JsStdDumpErrorAce(ctx, JsErrorType::EVAL_BUFFER_ERROR, instanceId);
+        QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::EVAL_BUFFER_ERROR, instanceId);
         ret = JS_CALL_FAIL;
     }
     JS_FreeValue(ctx, val);
@@ -88,7 +92,7 @@ JSValue CallReadObject(JSContext* ctx, const uint8_t* buf, size_t bufLen, bool p
     JSValue obj = JS_ReadObject(ctx, buf, bufLen, flags);
     if (JS_IsException(obj)) {
         LOGE("[Qjs Native] ReadObject failed!");
-        QjsUtils::JsStdDumpErrorAce(ctx, JsErrorType::READ_OBJECT_ERROR, instanceId, pageUrl);
+        QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::READ_OBJECT_ERROR, instanceId, pageUrl);
         return obj;
     }
     return JS_EvalFunction(ctx, obj);
@@ -110,7 +114,7 @@ RefPtr<JsAcePage> GetStagingPage(JSContext* ctx)
 
 void GetArrayValue(JSContext* ctx, JSValueConst arrayVal, std::string& result)
 {
-    int32_t length = QjsUtils::JsGetArrayLength(ctx, arrayVal);
+    int32_t length = QJSUtils::JsGetArrayLength(ctx, arrayVal);
     for (int32_t i = 0; i < length; ++i) {
         if (i != 0) {
             result.append(1, DOM_PICKER_SPLIT_ARRAY); // only need one char to split.
@@ -124,7 +128,7 @@ void GetArrayValue(JSContext* ctx, JSValueConst arrayVal, std::string& result)
             continue;
         }
         if (JS_IsArray(ctx, itemVal)) {
-            int32_t subLength = QjsUtils::JsGetArrayLength(ctx, itemVal);
+            int32_t subLength = QJSUtils::JsGetArrayLength(ctx, itemVal);
             for (int32_t j = 0; j < subLength; ++j) {
                 if (j != 0) {
                     result.append(1, DOM_PICKER_SPLIT_ITEM); // only need one char to split
@@ -163,15 +167,15 @@ void GetAttrImage(JSContext* ctx, JSValueConst valObject, ImageProperties& image
             if (strcmp(key, "src") == 0) {
                 imageProperties.src = valStr;
             } else if (strcmp(key, "width") == 0) {
-                imageProperties.width = valStr;
+                imageProperties.width = StringToDimension(valStr);
             } else if (strcmp(key, "height") == 0) {
-                imageProperties.height = valStr;
+                imageProperties.height = StringToDimension(valStr);
             } else if (strcmp(key, "top") == 0) {
-                imageProperties.top = valStr;
+                imageProperties.top = StringToDimension(valStr);
             } else if (strcmp(key, "left") == 0) {
-                imageProperties.left = valStr;
+                imageProperties.left = StringToDimension(valStr);
             } else if (strcmp(key, "duration") == 0) {
-                imageProperties.duration = valStr;
+                imageProperties.duration = StringToInt(valStr);
             } else {
                 LOGD("key : %{public}s unsupported. Ignoring!", key);
             }
@@ -187,7 +191,7 @@ void GetAttrImage(JSContext* ctx, JSValueConst valObject, ImageProperties& image
 
 void GetAttrImages(JSContext* ctx, JSValueConst arrayVal, std::vector<ImageProperties>& images)
 {
-    int32_t length = QjsUtils::JsGetArrayLength(ctx, arrayVal);
+    int32_t length = QJSUtils::JsGetArrayLength(ctx, arrayVal);
     for (int32_t i = 0; i < length; ++i) {
         JSValue valArray = JS_GetPropertyUint32(ctx, arrayVal, i);
         ImageProperties imageProperties;
@@ -341,7 +345,7 @@ void GetAndRegisterFamily(JSContext* ctx, JSValueConst valArray, std::string& fa
 
 void GetStyleFamilyValue(JSContext* ctx, JSValueConst arrayVal, std::string& familyStyle)
 {
-    int32_t length = QjsUtils::JsGetArrayLength(ctx, arrayVal);
+    int32_t length = QJSUtils::JsGetArrayLength(ctx, arrayVal);
     for (int32_t i = 0; i < length; ++i) {
         // ValArray is one row of family array
         JSValue valArray = JS_GetPropertyUint32(ctx, arrayVal, i);
@@ -355,7 +359,7 @@ void GetStyleFamilyValue(JSContext* ctx, JSValueConst arrayVal, std::string& fam
 void GetStyleAnimationName(
     JSContext* ctx, JSValueConst arrayVal, std::vector<std::unordered_map<std::string, std::string>>& styleVec)
 {
-    int32_t length = QjsUtils::JsGetArrayLength(ctx, arrayVal);
+    int32_t length = QJSUtils::JsGetArrayLength(ctx, arrayVal);
     for (int32_t i = 0; i < length; ++i) {
         std::unordered_map<std::string, std::string> animationNameKeyFrame;
         JSValue valArray = JS_GetPropertyUint32(ctx, arrayVal, i);
@@ -465,7 +469,7 @@ void AddDomEvent(JSContext* ctx, JSValueConst fromArray, JsCommandDomElementOper
     ACE_SCOPED_TRACE("AddDomEvent");
 
     std::vector<std::string> eventsMap;
-    int32_t length = QjsUtils::JsGetArrayLength(ctx, fromArray);
+    int32_t length = QJSUtils::JsGetArrayLength(ctx, fromArray);
     for (int32_t i = 0; i < length; i++) {
         JSValue val = JS_GetPropertyUint32(ctx, fromArray, i);
         if (JS_IsString(val)) {
@@ -703,6 +707,21 @@ std::string JsParseRouteUrl(JSContext* ctx, JSValueConst argv, const std::string
     return pageRoute;
 }
 
+std::string JsParseRouteUrlSpecial(JSContext* ctx, JSValueConst argv)
+{
+    std::string pageRoute;
+    ScopedString args(ctx, argv);
+    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(args.get());
+
+    if (argsPtr->Contains(ROUTE_KEY_URI)) {
+        pageRoute = argsPtr->GetValue(ROUTE_KEY_URI)->GetString();
+    } else if (argsPtr->Contains(ROUTE_KEY_PATH)) {
+        pageRoute = argsPtr->GetValue(ROUTE_KEY_PATH)->GetString();
+    }
+    LOGI("JsParseRouteUrl pageRoute = %{private}s", pageRoute.c_str());
+    return pageRoute;
+}
+
 std::string JsParseRouteParams(JSContext* ctx, JSValueConst argv, const std::string& key)
 {
     std::string params;
@@ -713,6 +732,17 @@ std::string JsParseRouteParams(JSContext* ctx, JSValueConst argv, const std::str
         params = argsPtr->GetValue(key)->ToString();
     }
     return params;
+}
+
+bool JsParseRouteOverwrite(JSContext* ctx, JSValueConst argv, const std::string& key)
+{
+    ScopedString args(ctx, argv);
+
+    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(args.get());
+    if (argsPtr != nullptr && argsPtr->Contains(key)) {
+        return true;
+    }
+    return false;
 }
 
 std::vector<std::pair<std::string, std::string>> JsParseDialogButtons(
@@ -729,9 +759,10 @@ std::vector<std::pair<std::string, std::string>> JsParseDialogButtons(
             }
             std::string buttonText;
             std::string buttonColor;
-            if (button->GetValue("text")) {
-                buttonText = button->GetValue("text")->GetString();
+            if (!button->GetValue("text")->IsString()) {
+                continue;
             }
+            buttonText = button->GetValue("text")->GetString();
             if (button->GetValue("color")) {
                 buttonColor = button->GetValue("color")->GetString();
             }
@@ -741,13 +772,95 @@ std::vector<std::pair<std::string, std::string>> JsParseDialogButtons(
     return dialogButtons;
 }
 
+JSValue EnableAlertBeforeBackPage(JSContext* ctx, JSValueConst argv)
+{
+    ScopedString args(ctx, argv);
+    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(args.get());
+
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (argsPtr != nullptr && argsPtr->IsObject()) {
+        if (argsPtr->GetValue(PROMPT_KEY_MESSAGE) == nullptr || !argsPtr->GetValue(PROMPT_KEY_MESSAGE)->IsString()) {
+            LOGE("enableAlertBeforeBackPage message is null");
+            const std::string fail = JsParseRouteUrl(ctx, argv, COMMON_FAIL);
+            const std::string complete = JsParseRouteUrl(ctx, argv, COMMON_COMPLETE);
+            instance->CallJs(fail, R"({"errMsg":"enableAlertBeforeBackPage:massage is null"})", false);
+            instance->CallJs(complete, R"({"errMsg":"enableAlertBeforeBackPage:massage is null"})", false);
+            return JS_NULL;
+        }
+    } else {
+        LOGE("enableAlertBeforeBackPage message is null");
+        std::string callBackStr(args.get());
+        // Get callbackId and clear redundant symbols
+        if (callBackStr.size() > 2 && callBackStr.front() == '\"' && callBackStr.back() == '\"') {
+            callBackStr = callBackStr.substr(1, callBackStr.size() - 2);
+            instance->CallJs(callBackStr,
+                R"({"arguments":[{"errMsg":"enableAlertBeforeBackPage:massage is null"}],"method":"fail"})", false);
+        }
+        return JS_NULL;
+    }
+
+    const std::string message = JsParseRouteUrl(ctx, argv, PROMPT_KEY_MESSAGE);
+    const std::string success = JsParseRouteUrl(ctx, argv, COMMON_SUCCESS);
+    const std::string fail = JsParseRouteUrl(ctx, argv, COMMON_FAIL);
+    const std::string complete = JsParseRouteUrl(ctx, argv, COMMON_COMPLETE);
+    auto callback = [instance, success, fail, complete](int32_t callbackType) {
+        switch (callbackType) {
+            case 0:
+                instance->CallJs(success, R"({"errMsg":"enableAlertBeforeBackPage:ok"})", false);
+                instance->CallJs(complete, R"({"errMsg":"enableAlertBeforeBackPage:ok"})", false);
+                break;
+            case 1:
+                instance->CallJs(fail, R"({"errMsg":"enableAlertBeforeBackPage:fail cancel"})", false);
+                instance->CallJs(complete, R"({"errMsg":"enableAlertBeforeBackPage:fail cancel"})", false);
+                break;
+            default:
+                break;
+        }
+    };
+    instance->GetDelegate()->EnableAlertBeforeBackPage(message, std::move(callback));
+    return JS_NULL;
+}
+
+JSValue DisableAlertBeforeBackPage(JSContext* ctx, JSValueConst argv)
+{
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    instance->GetDelegate()->DisableAlertBeforeBackPage();
+
+    ScopedString args(ctx, argv);
+    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(args.get());
+    if (argsPtr->IsObject()) {
+        const std::string success = JsParseRouteUrl(ctx, argv, COMMON_SUCCESS);
+        const std::string complete = JsParseRouteUrl(ctx, argv, COMMON_COMPLETE);
+        instance->CallJs(success, R"({"errMsg":"disableAlertBeforeBackPage:ok"})", false);
+        instance->CallJs(complete, R"({"errMsg":"disableAlertBeforeBackPage:ok"})", false);
+        return JS_NULL;
+    }
+
+    std::string callBackStr(args.get());
+    // Get callbackId and clear redundant symbols
+    if (callBackStr.size() > 2 && callBackStr.front() == '\"' && callBackStr.back() == '\"') {
+        callBackStr = callBackStr.substr(1, callBackStr.size() - 2);
+        instance->CallJs(
+            callBackStr, R"({"arguments":[{"errMsg":"disableAlertBeforeBackPage:ok"}],"method":"success"})", false);
+    }
+    return JS_NULL;
+}
+
 JSValue JsHandlePageRoute(JSContext* ctx, JSValueConst argv, const std::string& methodName)
 {
-    std::string uri = JsParseRouteUrl(ctx, argv, ROUTE_KEY_URI);
+    std::string uri = "";
     if (methodName == ROUTE_PAGE_BACK) {
-        uri = JsParseRouteUrl(ctx, argv, ROUTE_KEY_PATH);
+        uri = JsParseRouteUrlSpecial(ctx, argv);
+    } else {
+        uri = JsParseRouteUrl(ctx, argv, ROUTE_KEY_URI);
     }
     std::string params = JsParseRouteParams(ctx, argv, ROUTE_KEY_PARAMS);
+    bool dontOverwrite = JsParseRouteOverwrite(ctx, argv, ROUTE_KEY_DONT_OVERWRITE);
+
+    std::unique_ptr<JsonValue> routerParamsData = JsonUtil::Create(true);
+    routerParamsData->Put("paramsData", JsonUtil::ParseJsonString(params));
+    routerParamsData->Put("dontOverwrite", dontOverwrite);
+    params = routerParamsData->ToString();
 
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     // Operator map for page route.
@@ -805,6 +918,10 @@ JSValue JsHandlePageRoute(JSContext* ctx, JSValueConst argv, const std::string& 
     auto operatorIter = BinarySearchFindIndex(pageRouteOperators, ArraySize(pageRouteOperators), methodName.c_str());
     if (operatorIter != -1) {
         return pageRouteOperators[operatorIter].value(uri, params, *instance);
+    } else if (methodName == ROUTE_ENABLE_ALERT_BEFORE_BACK_PAGE) {
+        return EnableAlertBeforeBackPage(ctx, argv);
+    } else if (methodName == ROUTE_DISABLE_ALERT_BEFORE_BACK_PAGE) {
+        return DisableAlertBeforeBackPage(ctx, argv);
     } else {
         LOGW("system.router not support method = %{private}s", methodName.c_str());
     }
@@ -829,8 +946,12 @@ JSValue JsShowToast(JSContext* ctx, JSValueConst argv)
         if (argsPtr->GetValue(PROMPT_KEY_DURATION) != nullptr && argsPtr->GetValue(PROMPT_KEY_DURATION)->IsNumber()) {
             duration = argsPtr->GetValue(PROMPT_KEY_DURATION)->GetInt();
         }
-        if (argsPtr->GetValue(PROMPT_KEY_BOTTOM) != nullptr && argsPtr->GetValue(PROMPT_KEY_BOTTOM)->IsString()) {
-            bottom = argsPtr->GetValue(PROMPT_KEY_BOTTOM)->GetString();
+        if (argsPtr->GetValue(PROMPT_KEY_BOTTOM) != nullptr) {
+            if (argsPtr->GetValue(PROMPT_KEY_BOTTOM)->IsString()) {
+                bottom = argsPtr->GetValue(PROMPT_KEY_BOTTOM)->GetString();
+            } else if (argsPtr->GetValue(PROMPT_KEY_BOTTOM)->IsNumber()) {
+                bottom = std::to_string(argsPtr->GetValue(PROMPT_KEY_BOTTOM)->GetInt());
+            }
         }
     }
     LOGD("JsShowToast message = %{private}s duration = %{private}d bottom = %{private}s", message.c_str(), duration,
@@ -890,12 +1011,72 @@ JSValue JsShowDialog(JSContext* ctx, JSValueConst argv)
     return JS_NULL;
 }
 
+JSValue JsShowActionMenu(JSContext* ctx, JSValueConst argv)
+{
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+
+    ScopedString args(ctx, argv);
+    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(args.get());
+    if (argsPtr == nullptr) {
+        LOGE("argsPtr is nullptr");
+        return JS_NULL;
+    }
+
+    std::vector<std::pair<std::string, std::string>> buttons = JsParseDialogButtons(ctx, argv, PROMPT_KEY_BUTTONS);
+    // The number of buttons cannot be zero or more than six
+    if (buttons.empty() || buttons.size() > 6) {
+        LOGE("buttons is invalid");
+        if (argsPtr->IsObject()) {
+            const std::string fail = JsParseRouteUrl(ctx, argv, COMMON_FAIL);
+            const std::string complete = JsParseRouteUrl(ctx, argv, COMMON_COMPLETE);
+            instance->CallJs(fail, R"({"errMsg":"enableAlertBeforeBackPage:buttons is invalid"})", false);
+            instance->CallJs(complete, R"({"errMsg":"enableAlertBeforeBackPage:buttons is invalid"})", false);
+        } else {
+            std::string callBackStr(args.get());
+            // Get callbackId and clear redundant symbols
+            if (callBackStr.size() > 2 && callBackStr.front() == '\"' && callBackStr.back() == '\"') {
+                callBackStr = callBackStr.substr(1, callBackStr.size() - 2);
+                instance->CallJs(callBackStr,
+                    R"({"arguments":[{"errMsg":"enableAlertBeforeBackPage:buttons is invalid"}],"method":"fail"})",
+                    false);
+            }
+        }
+        return JS_NULL;
+    }
+
+    const std::string title = JsParseRouteUrl(ctx, argv, PROMPT_KEY_TITLE);
+    const std::string success = JsParseRouteUrl(ctx, argv, COMMON_SUCCESS);
+    const std::string fail = JsParseRouteUrl(ctx, argv, COMMON_FAIL);
+    const std::string complete = JsParseRouteUrl(ctx, argv, COMMON_COMPLETE);
+    auto callback = [instance, success, fail, complete](int32_t callbackType, int32_t successType) {
+        switch (callbackType) {
+            case 0:
+                instance->CallJs(success.c_str(), std::string(R"({"errMsg":"showActionMenu:ok","tapIndex":)")
+                    .append(std::to_string(successType)).append("}").c_str(), false);
+                instance->CallJs(complete.c_str(), std::string(R"({"errMsg":"showActionMenu:ok","tapIndex":)")
+                    .append(std::to_string(successType)).append("}").c_str(), false);
+                break;
+            case 1:
+                instance->CallJs(fail, R"({"errMsg":"showActionMenu:fail cancel"})", false);
+                instance->CallJs(complete, R"({"errMsg":"showActionMenu:fail cancel"})", false);
+                break;
+            default:
+                LOGE("callbackType is invalid");
+                break;
+        }
+    };
+    instance->GetDelegate()->ShowActionMenu(title, buttons, std::move(callback));
+    return JS_NULL;
+}
+
 JSValue JsHandlePrompt(JSContext* ctx, JSValueConst argv, const std::string& methodName)
 {
     if (methodName == PROMPT_SHOW_TOAST) {
         return JsShowToast(ctx, argv);
     } else if (methodName == PROMPT_SHOW_DIALOG) {
         return JsShowDialog(ctx, argv);
+    } else if (methodName == PROMPT_SHOW_ACTION_MENU) {
+        return JsShowActionMenu(ctx, argv);
     } else {
         LOGW("system.prompt not support method = %{private}s", methodName.c_str());
     }
@@ -922,6 +1103,29 @@ JSValue JsHandleAnimationFrame(JSContext* ctx, JSValueConst argv, const std::str
     }
     JS_FreeCString(ctx, callbackIdJsStr);
     return JS_NULL;
+}
+
+JSValue JsHandleAnimator(JSContext* ctx, JSValueConst argv, const std::string& methodName)
+{
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        return JS_NULL;
+    }
+    const char* args = JS_ToCString(ctx, argv);
+    auto page = GetStagingPage(ctx);
+    if (!page) {
+        LOGE("JsHandleAnimator failed, page is null.");
+        return JS_NULL;
+    }
+    auto resultAnimator = JSValue();
+    if (methodName == ANIMATOR_CREATE_ANIMATOR) {
+        int32_t bridgeId = AnimatorBridgeUtils::JsCreateBridgeId();
+        resultAnimator = AnimatorBridgeUtils::CreateAnimatorContext(ctx, page->GetPageId(), bridgeId);
+        auto animatorBridge = AceType::MakeRefPtr<AnimatorBridge>(ctx, resultAnimator);
+        auto task = AceType::MakeRefPtr<AnimatorTaskCreate>(animatorBridge, args);
+        page->PushCommand(Referenced::MakeRefPtr<JsCommandAnimator>(bridgeId, task));
+    }
+    return resultAnimator;
 }
 
 JSValue JsAddListener(JSContext* ctx, JSValueConst argv)
@@ -995,20 +1199,226 @@ JSValue JsHandleImage(JSContext* ctx, JSValueConst argv)
     auto success = JsParseRouteUrl(ctx, argv, "success");
     auto fail = JsParseRouteUrl(ctx, argv, "fail");
 
+    std::set<std::string> callbacks;
+    if (!success.empty()) {
+        callbacks.emplace("success");
+    }
+    if (!fail.empty()) {
+        callbacks.emplace("fail");
+    }
+
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
         return JS_NULL;
     }
 
-    auto&& callback = [instance, success, fail](bool callbackType, int32_t width, int32_t height) {
-        if (callbackType) {
-            instance->CallJs(success.c_str(), std::string("{\"width\":").append(std::to_string(width))
-                .append(", \"height\":").append(std::to_string(height)).append("}").c_str(), false);
-        } else {
-            instance->CallJs(fail.c_str(), std::string("\"fail\",null").c_str(), false);
+    auto&& callback = [instance, success, fail](int32_t callbackType) {
+        switch (callbackType) {
+            case 0:
+                instance->CallJs(success.c_str(), std::string("\"success\",null").c_str(), false);
+                break;
+            case 1:
+                instance->CallJs(fail.c_str(), std::string("\"fail\",null").c_str(), false);
+                break;
+            default:
+                break;
         }
     };
-    instance->GetDelegate()->HandleImage(src, callback);
+    instance->GetDelegate()->HandleImage(src, callback, callbacks);
+    return JS_NULL;
+}
+
+bool ParseResourceStringParam(std::string& str, const char* paramName, JSContext* ctx, const JSValue& jsObject)
+{
+    if (JS_IsObject(jsObject)) {
+        JSValue strValue = JS_GetPropertyStr(ctx, jsObject, paramName);
+        if (JS_IsString(strValue)) {
+            ScopedString uriValueStr(ctx, strValue);
+            str = uriValueStr.get();
+            return true;
+        }
+        JS_FreeValue(ctx, strValue);
+    }
+    return false;
+}
+
+bool ParseResourceNumberParam(int32_t& num, const char* paramName, JSContext* ctx, const JSValue& jsObject)
+{
+    if (JS_IsObject(jsObject)) {
+        JSValue numValue = JS_GetPropertyStr(ctx, jsObject, paramName);
+        if (JS_IsUndefined(numValue)) {
+            JS_FreeValue(ctx, numValue);
+            return false;
+        }
+        ScopedString numValueStr(ctx, numValue);
+        num = ParseResourceInputNumberParam(numValueStr.get());
+        return true;
+    }
+    return false;
+}
+
+void ParseResourceParam(std::string& uri, int32_t& position, int32_t& length, JSContext* ctx, const JSValue& jsObject)
+{
+    ParseResourceStringParam(uri, READ_KEY_URI, ctx, jsObject);
+    ParseResourceNumberParam(position, READ_KEY_POSITION, ctx, jsObject);
+    ParseResourceNumberParam(length, READ_KEY_LENGTH, ctx, jsObject);
+}
+
+JSValue JsReadArrayBuffer(JSContext* ctx, JSValueConst argv)
+{
+    if (!JS_IsObject(argv) || !JS_IsArray(ctx, argv)) {
+        LOGE("JsReadArrayBuffer: argv is not illegal");
+        return JS_NULL;
+    }
+
+    JSPropertyEnum* pTab = nullptr;
+    uint32_t len = 0;
+    JS_GetOwnPropertyNames(ctx, &pTab, &len, argv, JS_GPN_STRING_MASK);
+    if (len < ARGS_READ_RESOURCE_LENGTH) {
+        LOGE("JsReadArrayBuffer: invalid callback value");
+        js_free(ctx, pTab);
+        return JS_EXCEPTION;
+    }
+
+    JSValue jsObject = JS_GetProperty(ctx, argv, pTab[0].atom);
+    std::string uri;
+    int32_t position = 1;
+    int32_t length = MAX_READ_TEXT_LENGTH;
+    ParseResourceParam(uri, position, length, ctx, jsObject);
+    JSValue jsCallbackId = JS_GetProperty(ctx, argv, pTab[1].atom);
+    JS_FreeValue(ctx, jsObject);
+    js_free(ctx, pTab);
+    ScopedString callbackId(ctx, jsCallbackId);
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    std::smatch result;
+    if (!std::regex_match(uri, result, URI_PARTTEN)) {
+        LOGE("JsReadArrayBuffer file uri pattern not correct");
+        instance->CallJs(callbackId.get(),
+            R"({"arguments":["file uri pattern not correct",202],"method":"fail"})");
+        JS_FreeValue(ctx, jsCallbackId);
+        return JS_NULL;
+    }
+
+    std::vector<uint8_t> binaryContent;
+    if (!(instance->GetDelegate()->GetResourceData(uri, binaryContent))) {
+        instance->CallJs(callbackId.get(),
+            R"({"arguments":["read file failed",301],"method":"fail"})");
+        JS_FreeValue(ctx, jsCallbackId);
+        return JS_NULL;
+    }
+
+    auto fileLength = static_cast<int32_t>(binaryContent.size());
+    if ((position > fileLength) || (position <= 0) || (length <= 0)) {
+        instance->CallJs(callbackId.get(),
+            R"({"arguments":["wrong start position or wrong read length", 202],"method":"fail"})");
+        JS_FreeValue(ctx, jsCallbackId);
+        return JS_NULL;
+    }
+
+    length = position + length - 1 > fileLength ? fileLength - position + 1 : length;
+    JSValue binaryData = JS_NewObject(ctx);
+    JSValue binaryArray = JS_NewArrayBufferCopy(ctx, &binaryContent[position - 1], length);
+    JS_SetPropertyStr(ctx, binaryData, "buffer", binaryArray);
+    instance->CallJs(callbackId.get(), R"({"arguments":["read array buffer success"],"method":"success"})");
+    return binaryData;
+}
+
+JSValue JsReadText(JSContext* ctx, JSValueConst argv)
+{
+    if (!JS_IsObject(argv) || !JS_IsArray(ctx, argv)) {
+        LOGE("JsReadText: argv is not illegal");
+        return JS_NULL;
+    }
+
+    JSPropertyEnum* pTab = nullptr;
+    uint32_t len = 0;
+    JS_GetOwnPropertyNames(ctx, &pTab, &len, argv, JS_GPN_STRING_MASK);
+    if (len < ARGS_READ_RESOURCE_LENGTH) {
+        LOGE("JsReadText: invalid callback value");
+        js_free(ctx, pTab);
+        return JS_EXCEPTION;
+    }
+
+    JSValue jsObject = JS_GetProperty(ctx, argv, pTab[0].atom);
+    std::string uri;
+    ParseResourceStringParam(uri, READ_KEY_URI, ctx, jsObject);
+    JSValue jsCallbackId = JS_GetProperty(ctx, argv, pTab[1].atom);
+    ScopedString callbackId(ctx, jsCallbackId);
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    std::smatch result;
+    if (!std::regex_match(uri, result, URI_PARTTEN)) {
+        instance->CallJs(callbackId.get(),
+            R"({"arguments":["file uri pattern not correct",202],"method":"fail"})");
+        JS_FreeValue(ctx, jsCallbackId);
+        JS_FreeValue(ctx, jsObject);
+        js_free(ctx, pTab);
+        return JS_NULL;
+    }
+
+    std::string fileText;
+    if (!(instance->GetDelegate()->GetResourceData(uri, fileText))) {
+        instance->CallJs(callbackId.get(), R"({"arguments":["read file failed",301],"method":"fail"})");
+        JS_FreeValue(ctx, jsCallbackId);
+        JS_FreeValue(ctx, jsObject);
+        js_free(ctx, pTab);
+        return JS_NULL;
+    }
+
+    int32_t position = 0;
+    int32_t length = 0;
+    auto fileLength = ParseUtf8TextLength(fileText);
+    if (!ParseResourceNumberParam(position, READ_KEY_POSITION, ctx, jsObject)) {
+        position = 1;
+    }
+
+    if (!ParseResourceNumberParam(length, READ_KEY_LENGTH, ctx, jsObject) || (length > fileLength - position + 1)) {
+        length = (fileLength - position + 1 <= 0) ? 0 : fileLength - position + 1;
+    }
+
+    if (fileLength == 0) {
+        if ((position <= 0) || (length < 0)) {
+            instance->CallJs(callbackId.get(),
+                R"({"arguments":["wrong start position or wrong read length",202],"method":"fail"})");
+            JS_FreeValue(ctx, jsCallbackId);
+            JS_FreeValue(ctx, jsObject);
+            js_free(ctx, pTab);
+            return JS_NULL;
+        }
+    } else {
+        if ((position > fileLength) || (position <= 0) || (length < 0)) {
+            instance->CallJs(callbackId.get(),
+                R"({"arguments":["wrong start position or wrong read length",202],"method":"fail"})");
+            JS_FreeValue(ctx, jsCallbackId);
+            JS_FreeValue(ctx, jsObject);
+            js_free(ctx, pTab);
+            return JS_NULL;
+        }
+
+        auto substrPos = ParseUtf8TextSubstrStartPos(fileText, position);
+        auto substrEndPos = ParseUtf8TextSubstrEndPos(fileText, position + length - 1);
+        fileText = fileText.substr(substrPos - 1, substrEndPos - substrPos + 1);
+        HandleEscapeCharaterInUtf8TextForJson(fileText);
+    }
+
+    instance->CallJs(callbackId.get(),
+        std::string("{\"arguments\":[").append("{\"text\":\"").append(fileText).append("\"}],\"method\":\"success\"}"),
+        false);
+    JS_FreeValue(ctx, jsCallbackId);
+    JS_FreeValue(ctx, jsObject);
+    js_free(ctx, pTab);
+    return JS_NULL;
+}
+
+JSValue JsHandleReadResource(JSContext* ctx, JSValueConst argv, const std::string& methodName)
+{
+    LOGD("JsHandleReadResource");
+    if (methodName == READ_TEXT) {
+        return JsReadText(ctx, argv);
+    } else if (methodName == READ_ARRAY_BUFFER) {
+        return JsReadArrayBuffer(ctx, argv);
+    } else {
+        LOGW("system.resource not support method = %{private}s", methodName.c_str());
+    }
     return JS_NULL;
 }
 
@@ -1123,11 +1533,13 @@ JSValue JsHandleMediaQuery(JSContext* ctx, JSValueConst argv, const std::string&
 JSValue GetAppInfo(JSContext* ctx)
 {
     QjsEngineInstance* instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    JSValue appID = JS_NewString(ctx, instance->GetDelegate()->GetAppID().c_str());
     JSValue appName = JS_NewString(ctx, instance->GetDelegate()->GetAppName().c_str());
     JSValue versionName = JS_NewString(ctx, instance->GetDelegate()->GetVersionName().c_str());
     JSValue versionCode = JS_NewInt32(ctx, instance->GetDelegate()->GetVersionCode());
 
     JSValue resData = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, resData, "appID", appID);
     JS_SetPropertyStr(ctx, resData, "appName", appName);
     JS_SetPropertyStr(ctx, resData, "versionName", versionName);
     JS_SetPropertyStr(ctx, resData, "versionCode", versionCode);
@@ -1522,9 +1934,11 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
         return JS_NULL;
     } else if (std::strcmp(methodName.get(), "getScrollOffset") == 0) {
         // handle getScrollOffset method of scroll view, like div, stack and list.
-        return CompoentApiBridge::JsGetScrollOffset(ctx, nodeId);
+        return ComponentApiBridge::JsGetScrollOffset(ctx, nodeId);
     } else if (std::strcmp(methodName.get(), "getBoundingClientRect") == 0) {
-        return CompoentApiBridge::JsGetBoundingRect(ctx, nodeId);
+        return ComponentApiBridge::JsGetBoundingRect(ctx, nodeId);
+    } else if (std::strcmp(methodName.get(), "scrollTo") == 0) {
+        ComponentApiBridge::JsScrollTo(ctx, args.get(), nodeId);
     }
 
     auto resultValue = JSValue();
@@ -1533,7 +1947,6 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
         resultValue = AnimationBridgeUtils::CreateAnimationContext(ctx, page->GetPageId(), nodeId);
         auto animationBridge = AceType::MakeRefPtr<AnimationBridge>(ctx, resultValue, nodeId);
         auto task = AceType::MakeRefPtr<AnimationBridgeTaskCreate>(animationBridge, args.get());
-        instance->AddAnimationBridge(animationBridge);
         page->PushCommand(Referenced::MakeRefPtr<JsCommandAnimation>(nodeId, task));
     } else if (std::strcmp(methodName.get(), "currentOffset") == 0) {
         // handle list currentOffset method
@@ -1546,8 +1959,6 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
     }
     // focus method should delayed util show attribute update.
     if (page->CheckPageCreated() && strcmp(DOM_FOCUS, methodName.get()) != 0) {
-        QjsEngineInstance* instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
-        ACE_DCHECK(instance);
         instance->GetDelegate()->TriggerPageUpdate(page->GetPageId(), true);
     }
     return resultValue;
@@ -1569,6 +1980,10 @@ JSValue JsHandleModule(std::string moduleName, std::string methodName, JSContext
         { "animation",
             [](JSContext* ctx, JSValueConst* argv, const std::string& methodName) {
                 return JsHandleAnimationFrame(ctx, argv[1], methodName);
+            } },
+        { "ohos.animator",
+            [](JSContext* ctx, JSValueConst* argv, const std::string& methodName) {
+                return JsHandleAnimator(ctx, argv[1], methodName);
             } },
         { "internal.jsResult",
             [](JSContext* ctx, JSValueConst* argv, const std::string& methodName) {
@@ -1596,6 +2011,8 @@ JSValue JsHandleModule(std::string moduleName, std::string methodName, JSContext
             } },
         { "system.prompt", [](JSContext* ctx, JSValueConst* argv,
                                const std::string& methodName) { return JsHandlePrompt(ctx, argv[1], methodName); } },
+        { "system.resource", [](JSContext* ctx, JSValueConst* argv, const std::string& methodName) {
+                return JsHandleReadResource(ctx, argv[1], methodName); } },
         { "system.router", [](JSContext* ctx, JSValueConst* argv,
                                const std::string& methodName) { return JsHandlePageRoute(ctx, argv[1], methodName); } },
         { "timer", [](JSContext* ctx, JSValueConst* argv,
@@ -1656,7 +2073,7 @@ JSValue JsCompileAndRunBundle(JSContext* ctx, JSValueConst thisVal, int argc, JS
 
     if (JS_IsException(CppToJSRet)) {
         LOGE("Qjs JsCompileAndRunBundle FAILED !!");
-        QjsUtils::JsStdDumpErrorAce(ctx, JsErrorType::COMPILE_AND_RUN_BUNDLE_ERROR);
+        QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::COMPILE_AND_RUN_BUNDLE_ERROR);
         return JS_NULL;
     }
 
@@ -1664,6 +2081,54 @@ JSValue JsCompileAndRunBundle(JSContext* ctx, JSValueConst thisVal, int argc, JS
     return CppToJSRet;
 }
 #endif
+
+std::string ParseLogContent(JSContext* ctx, int32_t argc, JSValueConst* argv)
+{
+    std::string formatStr = ScopedString(ctx, argv[0]).get();
+    if (argc == 1 || formatStr.empty()) {
+        return formatStr;
+    }
+    std::string ret;
+    int32_t len = formatStr.size();
+    int32_t pos = 0;
+    int32_t count = 1;
+    for (; pos < len; ++pos) {
+        if (count >= argc) {
+            break;
+        }
+        if (formatStr[pos] == '%') {
+            if (pos + 1 >= len) {
+                break;
+            }
+            switch (formatStr[pos + 1]) {
+                case 's':
+                case 'j':
+                case 'd':
+                case 'O':
+                case 'o':
+                case 'i':
+                case 'f':
+                case 'c':
+                    ret += ScopedString(ctx, argv[count++]).get();
+                    ++pos;
+                    break;
+                case '%':
+                    ret += formatStr[pos];
+                    ++pos;
+                    break;
+                default:
+                    ret += formatStr[pos];
+                    break;
+            }
+        } else {
+            ret += formatStr[pos];
+        }
+    }
+    if (pos < len) {
+        ret += formatStr.substr(pos, len - pos);
+    }
+    return ret;
+}
 
 JSValue AppLogPrint(JSContext* ctx, JsLogLevel level, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
@@ -1674,20 +2139,19 @@ JSValue AppLogPrint(JSContext* ctx, JsLogLevel level, JSValueConst value, int32_
         LOGE("the arg is error");
         return JS_EXCEPTION;
     }
-    ScopedString printLog(ctx, argv[0]);
-
+    std::string printLog = ParseLogContent(ctx, argc, argv);
     switch (level) {
         case JsLogLevel::DEBUG:
-            APP_LOGD("app Log: %{public}s", printLog.get());
+            APP_LOGD("app Log: %{public}s", printLog.c_str());
             break;
         case JsLogLevel::INFO:
-            APP_LOGI("app Log: %{public}s", printLog.get());
+            APP_LOGI("app Log: %{public}s", printLog.c_str());
             break;
         case JsLogLevel::WARNING:
-            APP_LOGW("app Log: %{public}s", printLog.get());
+            APP_LOGW("app Log: %{public}s", printLog.c_str());
             break;
         case JsLogLevel::ERROR:
-            APP_LOGE("app Log: %{public}s", printLog.get());
+            APP_LOGE("app Log: %{public}s", printLog.c_str());
             break;
         default:
             break;
@@ -1730,20 +2194,19 @@ JSValue JsLogPrint(JSContext* ctx, JsLogLevel level, JSValueConst value, int32_t
         LOGE("the arg is error");
         return JS_EXCEPTION;
     }
-    ScopedString printLog(ctx, argv[0]);
-
+    std::string printLog = ParseLogContent(ctx, argc, argv);
     switch (level) {
         case JsLogLevel::DEBUG:
-            LOGD("ace Log: %{public}s", printLog.get());
+            LOGD("ace Log: %{public}s", printLog.c_str());
             break;
         case JsLogLevel::INFO:
-            LOGI("ace Log: %{public}s", printLog.get());
+            LOGI("ace Log: %{public}s", printLog.c_str());
             break;
         case JsLogLevel::WARNING:
-            LOGW("ace Log: %{public}s", printLog.get());
+            LOGW("ace Log: %{public}s", printLog.c_str());
             break;
         case JsLogLevel::ERROR:
-            LOGE("ace Log: %{public}s", printLog.get());
+            LOGE("ace Log: %{public}s", printLog.c_str());
             break;
     }
 
@@ -1886,8 +2349,8 @@ JSValue JsLoadLocaleData(JSContext* ctx, JSValueConst value, int32_t argc, JSVal
     if (data.find(key) != data.end()) {
         std::vector<const void*> val = data[key];
         const uint32_t* len = static_cast<const uint32_t*>(val[0]);
-        const uint8_t* data = static_cast<const uint8_t*>(val[1]);
-        JSValue ret = CallReadObject(ctx, data, *len, true);
+        const uint8_t* rawData = static_cast<const uint8_t*>(val[1]);
+        JSValue ret = CallReadObject(ctx, rawData, *len, true);
         LOGI("load data: %s", key.c_str());
         return ret;
     } else {
@@ -2036,7 +2499,7 @@ JSValue LoadJsFramework(JSContext* ctx, const uint8_t buf[], const uint32_t bufS
     JSValue ret = CallReadObject(ctx, buf, bufSize, true, instanceId);
     if (JS_IsException(ret)) {
         LOGD("Qjs loading JSFramework failed!");
-        QjsUtils::JsStdDumpErrorAce(ctx, JsErrorType::LOAD_JS_FRAMEWORK_ERROR, instanceId);
+        QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::LOAD_JS_FRAMEWORK_ERROR, instanceId);
     }
 
     return ret;
@@ -2127,23 +2590,6 @@ bool QjsEngineInstance::InitJsEnv(JSRuntime* runtime, JSContext* context)
     return result;
 }
 
-void QjsEngineInstance::AddAnimationBridge(const WeakPtr<AnimationBridge>& value)
-{
-    animations_.emplace_back(value);
-}
-
-void QjsEngineInstance::RemoveAnimationBridge()
-{
-    for (auto it = animations_.begin(); it != animations_.end();) {
-        auto ref = it->Upgrade();
-        if (!ref) {
-            it = animations_.erase(it);
-        } else {
-            ++it;
-        }
-    }
-}
-
 void QjsEngineInstance::FreeGroupJsBridge()
 {
     // free JSValue reference of channel bridge and animation bridge
@@ -2161,22 +2607,16 @@ void QjsEngineInstance::FreeGroupJsBridge()
     groupJsBridge->Uninitialize();
 }
 
-void QjsEngineInstance::FreeAnimationBridges()
-{
-    for (auto& weak : animations_) {
-        auto ref = weak.Upgrade();
-        if (!ref) {
-            continue;
-        }
-        ref->Uninitialize();
-    }
-    animations_.clear();
-}
-
 QjsEngineInstance::~QjsEngineInstance()
 {
+    if (runningPage_) {
+        runningPage_->OnJsEngineDestroy();
+    }
+
+    if (stagingPage_) {
+        stagingPage_->OnJsEngineDestroy();
+    }
     FreeGroupJsBridge();
-    FreeAnimationBridges();
 
     if (context_) {
         JS_FreeContext(context_);
@@ -2191,9 +2631,9 @@ JSValue QjsEngineInstance::FireJsEvent(const std::string& param)
     LOGI("FireJsEvent");
     JSContext* ctx = GetQjsContext();
     ACE_DCHECK(ctx);
-    QjsHandleScope handleScope(ctx);
+    QJSHandleScope handleScope(ctx);
     JSValue globalObj = JS_GetGlobalObject(ctx);
-    JSValue callJsFunc = QjsUtils::GetPropertyStr(ctx, globalObj, "callJS");
+    JSValue callJsFunc = QJSUtils::GetPropertyStr(ctx, globalObj, "callJS");
     if (!JS_IsFunction(ctx, callJsFunc)) {
         LOGE("cannot find 'callJS' function from global object, this should not happen!");
         JS_FreeValue(ctx, globalObj);
@@ -2206,8 +2646,8 @@ JSValue QjsEngineInstance::FireJsEvent(const std::string& param)
         return JS_UNDEFINED;
     }
     JSValueConst argv[] = {
-        QjsUtils::NewString(ctx, std::to_string(runningPage_->GetPageId()).c_str()),
-        QjsUtils::ParseJSON(ctx, param.c_str(), param.size(), nullptr),
+        QJSUtils::NewString(ctx, std::to_string(runningPage_->GetPageId()).c_str()),
+        QJSUtils::ParseJSON(ctx, param.c_str(), param.size(), nullptr),
     };
 
     JSValue retVal = JS_Call(ctx, callJsFunc, globalObj, countof(argv), argv);
@@ -2234,9 +2674,9 @@ void QjsEngineInstance::CallJs(const std::string& callbackId, const std::string&
     LOGD("CallJs string: %{private}s", callBuff.c_str());
 
     JSContext* ctx = GetQjsContext();
-    QjsHandleScope handleScope(ctx);
+    QJSHandleScope handleScope(ctx);
     JSValue globalObj = JS_GetGlobalObject(ctx);
-    JSValue callJsFunc = QjsUtils::GetPropertyStr(ctx, globalObj, "callJS");
+    JSValue callJsFunc = QJSUtils::GetPropertyStr(ctx, globalObj, "callJS");
     if (!JS_IsFunction(ctx, callJsFunc)) {
         LOGE("cannot find 'callJS' function from global object, this should not happen!");
         JS_FreeValue(ctx, globalObj);
@@ -2245,52 +2685,123 @@ void QjsEngineInstance::CallJs(const std::string& callbackId, const std::string&
 
     int32_t instanceId = isGlobal ? DEFAULT_APP_ID : stagingPage_->GetPageId();
     JSValueConst argv[] = {
-        QjsUtils::NewString(ctx, std::to_string(instanceId).c_str()),
-        QjsUtils::ParseJSON(ctx, callBuff.c_str(), callBuff.size(), nullptr),
+        QJSUtils::NewString(ctx, std::to_string(instanceId).c_str()),
+        QJSUtils::ParseJSON(ctx, callBuff.c_str(), callBuff.size(), nullptr),
     };
-    QjsUtils::Call(ctx, callJsFunc, globalObj, countof(argv), argv);
+    JSValue retVal = QJSUtils::Call(ctx, callJsFunc, globalObj, countof(argv), argv);
 
+    if (JS_IsException(retVal)) {
+        LOGE("JS framework excute callback failed");
+        JS_FreeValue(ctx, globalObj);
+        QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::JS_CALLBACK_ERROR, instanceId_, stagingPage_->GetUrl().c_str(),
+            stagingPage_);
+        return;
+    }
     js_std_loop(ctx);
     JS_FreeValue(ctx, globalObj);
+}
+
+void QjsEngineInstance::CallAnimationStartJs(JSValue animationContext)
+{
+    JSContext* ctx = GetQjsContext();
+    QJSHandleScope handleScope(ctx);
+    auto proto = QJSUtils::GetPropertyStr(ctx, animationContext, "onstart");
+    if (!JS_IsFunction(ctx, proto)) {
+        LOGD("cannot find 'CallAnimationStartJs' function from global object, this should not happen!");
+        return;
+    }
+    LOGD("animation onstart event call");
+    JSValue retVal = QJSUtils::Call(ctx, proto, animationContext, 0, {});
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+
+    if (JS_IsException(retVal)) {
+        LOGE("JS framework excute callAnimationStart failed");
+        JS_FreeValue(ctx, globalObj);
+        QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::JS_CALLBACK_ERROR, instanceId_, stagingPage_->GetUrl().c_str(),
+            stagingPage_);
+        return;
+    }
 }
 
 void QjsEngineInstance::CallAnimationFinishJs(JSValue animationContext)
 {
     JSContext* ctx = GetQjsContext();
-    QjsHandleScope handleScope(ctx);
-    auto proto = QjsUtils::GetPropertyStr(ctx, animationContext, "onfinish");
+    QJSHandleScope handleScope(ctx);
+    auto proto = QJSUtils::GetPropertyStr(ctx, animationContext, "onfinish");
     if (!JS_IsFunction(ctx, proto)) {
         LOGD("cannot find 'CallAnimationFinishJs' function from global object, this should not happen!");
         return;
     }
     LOGD("animation onfinish event call");
-    QjsUtils::Call(ctx, proto, animationContext, 0, {});
+    JSValue retVal = QJSUtils::Call(ctx, proto, animationContext, 0, {});
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+
+    if (JS_IsException(retVal)) {
+        LOGE("JS framework excute callAnimationFininsh failed");
+        JS_FreeValue(ctx, globalObj);
+        QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::JS_CALLBACK_ERROR, instanceId_, stagingPage_->GetUrl().c_str(),
+            stagingPage_);
+        return;
+    }
 }
 
 void QjsEngineInstance::CallAnimationCancelJs(JSValue animationContext)
 {
     JSContext* ctx = GetQjsContext();
-    QjsHandleScope handleScope(ctx);
-    auto proto = QjsUtils::GetPropertyStr(ctx, animationContext, "oncancel");
+    QJSHandleScope handleScope(ctx);
+    auto proto = QJSUtils::GetPropertyStr(ctx, animationContext, "oncancel");
     if (!JS_IsFunction(ctx, proto)) {
         return;
     }
 
     LOGD("animation oncancel event call");
-    QjsUtils::Call(ctx, proto, animationContext, 0, {});
+    JSValue retVal = QJSUtils::Call(ctx, proto, animationContext, 0, {});
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+
+    if (JS_IsException(retVal)) {
+        LOGE("JS framework excute callAnimationCancel failed");
+        JS_FreeValue(ctx, globalObj);
+        QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::JS_CALLBACK_ERROR, instanceId_, stagingPage_->GetUrl().c_str(),
+            stagingPage_);
+        return;
+    }
 }
 
 void QjsEngineInstance::CallAnimationRepeatJs(JSValue animationContext)
 {
     JSContext* ctx = GetQjsContext();
-    QjsHandleScope handleScope(ctx);
-    auto proto = QjsUtils::GetPropertyStr(ctx, animationContext, "onrepeat");
+    QJSHandleScope handleScope(ctx);
+    auto proto = QJSUtils::GetPropertyStr(ctx, animationContext, "onrepeat");
     if (!JS_IsFunction(ctx, proto)) {
         return;
     }
 
     LOGD("animation onrepeat event call");
-    QjsUtils::Call(ctx, proto, animationContext, 0, {});
+    JSValue retVal = QJSUtils::Call(ctx, proto, animationContext, 0, {});
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+
+    if (JS_IsException(retVal)) {
+        LOGE("JS framework excute callAnimationRepeatJs failed");
+        JS_FreeValue(ctx, globalObj);
+        QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::JS_CALLBACK_ERROR, instanceId_, stagingPage_->GetUrl().c_str(),
+            stagingPage_);
+        return;
+    }
+}
+
+void QjsEngineInstance::CallAnimationFrameJs(JSValue animationContext, const char* str)
+{
+    JSContext* ctx = GetQjsContext();
+    QJSHandleScope handleScope(ctx);
+    auto proto = QJSUtils::GetPropertyStr(ctx, animationContext, "onframe");
+    if (!JS_IsFunction(ctx, proto)) {
+        return;
+    }
+
+    LOGD("animation onframe event call");
+    JSValue value = QJSUtils::NewString(ctx, str);
+    JSValueConst argv[] = { value };
+    QJSUtils::Call(ctx, proto, animationContext, 1, argv);
 }
 
 // -----------------------
@@ -2328,22 +2839,30 @@ bool QjsEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
     DBG_SetComponentName(componentName, strlen(componentName));
 #endif
-    nativeEngine_ = new QuickJSNativeEngine(runtime, context);
     ACE_DCHECK(delegate);
-    delegate->AddTaskObserver([nativeEngine = nativeEngine_](){
-        nativeEngine->Loop();
-    });
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    nativeEngine_ = new QuickJSNativeEngine(runtime, context);
+#endif
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    delegate->AddTaskObserver([nativeEngine = nativeEngine_](){
+        nativeEngine->Loop(LOOP_NOWAIT);
+    });
+#endif
     engineInstance_ = AceType::MakeRefPtr<QjsEngineInstance>(delegate, instanceId_);
-    return engineInstance_->InitJsEnv(runtime, context);
+    bool ret = engineInstance_->InitJsEnv(runtime, context);
+
+    return ret;
 }
 
 QjsEngine::~QjsEngine()
 {
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     if (nativeEngine_ != nullptr) {
         delete nativeEngine_;
     }
+#endif
     ACE_DCHECK(engineInstance_);
     JS_RunGC(engineInstance_->GetQjsRuntime());
 }
@@ -2367,6 +2886,7 @@ void QjsEngine::GetLoadOptions(std::string& optionStr, bool isMainPage, const Re
         renderOption->Put("roundScreen", SystemProperties::GetIsScreenRound());
         renderOption->Put("resolution", SystemProperties::GetResolution());
         renderOption->Put("bundleUrl", page->GetUrl().c_str());
+        renderOption->Put("darkMode", SystemProperties::GetColorMode() == ColorMode::DARK);
     }
     renderOption->Put("appInstanceId", "10002");
     renderOption->Put("pcPreview", PC_PREVIEW);
@@ -2417,13 +2937,13 @@ void QjsEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
     JSContext* ctx = engineInstance_->GetQjsContext();
 
     // Create a stack-allocated handle scope.
-    QjsHandleScope handleScope(ctx);
+    QJSHandleScope handleScope(ctx);
 
     // Memorize the context that this JSContext is working with.
     JS_SetContextOpaque(ctx, reinterpret_cast<void*>(AceType::RawPtr(engineInstance_)));
 
     JSValue globalObj = JS_GetGlobalObject(ctx);
-    JSValue createInstanceFunc = QjsUtils::GetPropertyStr(ctx, globalObj, "createInstance");
+    JSValue createInstanceFunc = QJSUtils::GetPropertyStr(ctx, globalObj, "createInstance");
     if (!JS_IsFunction(ctx, createInstanceFunc)) {
         LOGD("createInstance is not found, cannot load js!");
         JS_FreeValue(ctx, globalObj);
@@ -2446,10 +2966,10 @@ void QjsEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
                 CallReadObject(ctx, binContent.data(), binContent.size(), false, instanceId_, page->GetUrl().c_str());
             if (!JS_IsException(jsCode)) {
                 JS_FreeValue(ctx, jsCode);
-                jsCode = QjsUtils::GetPropertyStr(ctx, globalObj, JS_MAIN_ENTRY);
+                jsCode = QJSUtils::GetPropertyStr(ctx, globalObj, JS_MAIN_ENTRY);
                 JS_SetPropertyStr(ctx, globalObj, JS_MAIN_ENTRY, JS_UNDEFINED);
             } else {
-                QjsUtils::JsStdDumpErrorAce(ctx, JsErrorType::READ_OBJECT_ERROR, instanceId_, page->GetUrl().c_str(),
+                QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::READ_OBJECT_ERROR, instanceId_, page->GetUrl().c_str(),
                     page);
             }
         }
@@ -2464,7 +2984,7 @@ void QjsEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
             JS_FreeValue(ctx, globalObj);
             return;
         }
-        jsCode = QjsUtils::NewStringLen(ctx, jsContent.c_str(), jsContent.size());
+        jsCode = QJSUtils::NewStringLen(ctx, jsContent.c_str(), jsContent.size());
     }
 #endif
     std::string pageMap;
@@ -2479,22 +2999,22 @@ void QjsEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
     }
     std::string optionStr;
     GetLoadOptions(optionStr, isMainPage, page);
-    JSValue instanceId = QjsUtils::NewString(ctx, std::to_string(page->GetPageId()).c_str());
-    JSValue renderOptions = QjsUtils::ParseJSON(ctx, optionStr.c_str(), optionStr.size(), nullptr);
-    JSValue data = QjsUtils::ParseJSON(ctx, jsonData.c_str(), jsonData.size(), nullptr);
-    JSValue info = QjsUtils::NewObject(ctx);
+    JSValue instanceId = QJSUtils::NewString(ctx, std::to_string(page->GetPageId()).c_str());
+    JSValue renderOptions = QJSUtils::ParseJSON(ctx, optionStr.c_str(), optionStr.size(), nullptr);
+    JSValue data = QJSUtils::ParseJSON(ctx, jsonData.c_str(), jsonData.size(), nullptr);
+    JSValue info = QJSUtils::NewObject(ctx);
 #ifdef ENABLE_JS_DEBUG
-    JSValue jsSrc = QjsUtils::NewStringLen(ctx, jsContent.c_str(), jsContent.length());
+    JSValue jsSrc = QJSUtils::NewStringLen(ctx, jsContent.c_str(), jsContent.length());
     JSValueConst argv[] = { instanceId, jsSrc, renderOptions, data, info };
 #else
     JSValueConst argv[] = { instanceId, jsCode, renderOptions, data, info };
 #endif
-    JSValue retVal = QjsUtils::Call(ctx, createInstanceFunc, JS_UNDEFINED, countof(argv), argv);
+    JSValue retVal = QJSUtils::Call(ctx, createInstanceFunc, JS_UNDEFINED, countof(argv), argv);
 
     if (JS_IsException(retVal)) {
         LOGE("JS framework load js bundle failed!");
         JS_FreeValue(ctx, globalObj);
-        QjsUtils::JsStdDumpErrorAce(ctx, JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_, page->GetUrl().c_str(), page);
+        QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_, page->GetUrl().c_str(), page);
         return;
     }
 
@@ -2528,18 +3048,18 @@ void QjsEngine::DestroyPageInstance(int32_t pageId)
     JSContext* ctx = engineInstance_->GetQjsContext();
     ACE_DCHECK(ctx);
 
-    QjsHandleScope handleScope(ctx);
+    QJSHandleScope handleScope(ctx);
     JSValue globalObj = JS_GetGlobalObject(ctx);
-    JSValue destroyInstanceFunc = QjsUtils::GetPropertyStr(ctx, globalObj, "destroyInstance");
+    JSValue destroyInstanceFunc = QJSUtils::GetPropertyStr(ctx, globalObj, "destroyInstance");
     if (!JS_IsFunction(ctx, destroyInstanceFunc)) {
         LOGE("destroyInstance is not found, cannot destroy page instance!");
         JS_FreeValue(ctx, globalObj);
         return;
     }
 
-    JSValue instanceId = QjsUtils::NewString(ctx, std::to_string(pageId).c_str());
+    JSValue instanceId = QJSUtils::NewString(ctx, std::to_string(pageId).c_str());
     JSValueConst argv[] = { instanceId };
-    JSValue retVal = QjsUtils::Call(ctx, destroyInstanceFunc, JS_UNDEFINED, countof(argv), argv);
+    JSValue retVal = QJSUtils::Call(ctx, destroyInstanceFunc, JS_UNDEFINED, countof(argv), argv);
 
     if (JS_IsException(retVal)) {
         LOGE("Qjs DestroyPageInstance FAILED!");
@@ -2547,10 +3067,11 @@ void QjsEngine::DestroyPageInstance(int32_t pageId)
 
         auto page = engineInstance_->GetDelegate()->GetPage(pageId);
         if (page) {
-            QjsUtils::JsStdDumpErrorAce(ctx, JsErrorType::DESTROY_PAGE_ERROR, instanceId_, page->GetUrl().c_str(),
+            QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::DESTROY_PAGE_ERROR, instanceId_, page->GetUrl().c_str(),
                 page);
         } else {
-            QjsUtils::JsStdDumpErrorAce(ctx, JsErrorType::DESTROY_PAGE_ERROR, instanceId_);
+            QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::DESTROY_PAGE_ERROR, instanceId_,
+                engineInstance_->GetRunningPage()->GetUrl().c_str(), engineInstance_->GetRunningPage());
         }
         return;
     }
@@ -2559,28 +3080,46 @@ void QjsEngine::DestroyPageInstance(int32_t pageId)
     JS_FreeValue(ctx, globalObj);
 }
 
-void QjsEngine::DestroyApplication(const std::string& packageName)
+void QjsEngine::UpdateApplicationState(const std::string& packageName, Frontend::State state)
 {
-    LOGI("DestroyApplication: destroy app instance from jsfwk, packageName %{public}s", packageName.c_str());
+    LOGI("UpdateApplicationState: destroy app instance from jsfwk, packageName %{public}s", packageName.c_str());
     JSContext* ctx = engineInstance_->GetQjsContext();
     ACE_DCHECK(ctx);
 
-    QjsHandleScope handleScope(ctx);
+    std::string stateType;
+    switch (state) {
+        case Frontend::State::ON_CREATE:
+            break;
+        case Frontend::State::ON_DESTROY:
+            stateType = "appDestroy";
+            break;
+        case Frontend::State::ON_SHOW:
+            stateType = "appShow";
+            break;
+        case Frontend::State::ON_HIDE:
+            stateType = "appHide";
+            break;
+        default:
+            LOGE("error State: %d", state);
+            break;
+    }
+
+    QJSHandleScope handleScope(ctx);
     JSValue globalObj = JS_GetGlobalObject(ctx);
-    JSValue appDestroyFunc = QjsUtils::GetPropertyStr(ctx, globalObj, "appDestroy");
+    JSValue appDestroyFunc = QJSUtils::GetPropertyStr(ctx, globalObj, stateType.c_str());
     if (!JS_IsFunction(ctx, appDestroyFunc)) {
         LOGE("appDestroyFunc is not found, cannot destroy page instance!");
         JS_FreeValue(ctx, globalObj);
         return;
     }
 
-    JSValue name = QjsUtils::NewString(ctx, packageName.c_str());
+    JSValue name = QJSUtils::NewString(ctx, packageName.c_str());
     JSValueConst argv[] = { name };
-    JSValue retVal = QjsUtils::Call(ctx, appDestroyFunc, JS_UNDEFINED, countof(argv), argv);
+    JSValue retVal = QJSUtils::Call(ctx, appDestroyFunc, JS_UNDEFINED, countof(argv), argv);
 
     if (JS_IsException(retVal)) {
         LOGE("Qjs appDestroyFunc FAILED!");
-        QjsUtils::JsStdDumpErrorAce(ctx, JsErrorType::DESTROY_APP_ERROR, instanceId_, nullptr,
+        QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::DESTROY_APP_ERROR, instanceId_, nullptr,
             engineInstance_->GetRunningPage());
     }
 
@@ -2633,7 +3172,7 @@ void QjsEngine::FireAsyncEvent(const std::string& eventId, const std::string& pa
     JSValue cppToJsRet = engineInstance_->FireJsEvent(callBuf);
     if (JS_IsException(cppToJsRet)) {
         LOGE("Qjs FireAsyncEvent FAILED !! jsCall: %{private}s", callBuf.c_str());
-        QjsUtils::JsStdDumpErrorAce(engineInstance_->GetQjsContext(), JsErrorType::FIRE_EVENT_ERROR, instanceId_,
+        QJSUtils::JsStdDumpErrorAce(engineInstance_->GetQjsContext(), JsErrorType::FIRE_EVENT_ERROR, instanceId_,
             nullptr, engineInstance_->GetRunningPage());
     }
     JS_FreeValue(engineInstance_->GetQjsContext(), cppToJsRet);
@@ -2652,7 +3191,7 @@ void QjsEngine::FireSyncEvent(const std::string& eventId, const std::string& par
     JSValue cppToJsRet = engineInstance_->FireJsEvent(callBuf.c_str());
     if (JS_IsException(cppToJsRet)) {
         LOGE("Qjs FireSyncEvent FAILED !! jsCall: %{private}s", callBuf.c_str());
-        QjsUtils::JsStdDumpErrorAce(engineInstance_->GetQjsContext(), JsErrorType::FIRE_EVENT_ERROR, instanceId_,
+        QJSUtils::JsStdDumpErrorAce(engineInstance_->GetQjsContext(), JsErrorType::FIRE_EVENT_ERROR, instanceId_,
             nullptr, engineInstance_->GetRunningPage());
     }
     JS_FreeValue(engineInstance_->GetQjsContext(), cppToJsRet);

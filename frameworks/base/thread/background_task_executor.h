@@ -34,6 +34,8 @@ public:
     bool PostTask(Task&& task);
     bool PostTask(const Task& task);
 
+    void TriggerGarbageCollection();
+
 private:
     BackgroundTaskExecutor();
     ~BackgroundTaskExecutor();
@@ -48,6 +50,7 @@ private:
     size_t currentThreadNum_ { 0 };
     size_t maxThreadNum_ { 0 };
     bool running_ { true };
+    uint32_t purgeFlags_ { 0 };
 };
 
 } // namespace OHOS::Ace

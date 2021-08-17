@@ -38,10 +38,10 @@ constexpr int32_t TEXT_BASE_LINE_DEFAULT = 0;
 constexpr int32_t TEXT_DECORATION_JSON = 1;
 constexpr int32_t TEXT_DECORATION_DEFAULT = 0;
 constexpr uint32_t COLOR_VALUE_DEFAULT = 4278190080;
-constexpr double WORD_SPACING = 10.0;
-constexpr double WORD_SPACING_DEFAULT = 0.0;
-constexpr double LETTER_SPACING = 10.0;
-constexpr double LETTER_SPACING_DEFAULT = 0.0;
+constexpr Dimension WORD_SPACING = 10.0_px;
+constexpr Dimension WORD_SPACING_DEFAULT = 0.0_px;
+constexpr Dimension LETTER_SPACING = 10.0_px;
+constexpr Dimension LETTER_SPACING_DEFAULT = 0.0_px;
 constexpr double LINE_HEIGHT = 10.0;
 constexpr double LINE_HEIGHT_DEFAULT = 0.0;
 constexpr uint32_t TEXT_COLOR_VALUE = 255;
@@ -158,8 +158,10 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator001, TestSize.Level1)
     EXPECT_EQ(static_cast<int32_t>(textStyle.GetFontStyle()), FONT_STYLE);
     EXPECT_EQ(static_cast<int32_t>(textStyle.GetTextBaseline()), TEXT_BASE_LINE_JSON);
     EXPECT_EQ(static_cast<int32_t>(textStyle.GetTextDecoration()), TEXT_DECORATION_JSON);
-    EXPECT_TRUE(NearEqual(textStyle.GetWordSpacing(), WORD_SPACING));
-    EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing(), LETTER_SPACING));
+    EXPECT_EQ(textStyle.GetWordSpacing().Unit(), WORD_SPACING.Unit());
+    EXPECT_TRUE(NearEqual(textStyle.GetWordSpacing().Value(), WORD_SPACING.Value()));
+    EXPECT_EQ(textStyle.GetLetterSpacing().Unit(), LETTER_SPACING.Unit());
+    EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing().Value(), LETTER_SPACING.Value()));
     EXPECT_TRUE(NearEqual(textStyle.GetLineHeight().Value(), LINE_HEIGHT));
     EXPECT_EQ(textStyle.GetTextColor().GetValue(), TEXT_COLOR_VALUE);
 
@@ -221,8 +223,10 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator002, TestSize.Level1)
     EXPECT_EQ(static_cast<int32_t>(textStyle.GetFontStyle()), FONT_STYLE_DEFAULT);
     EXPECT_EQ(static_cast<int32_t>(textStyle.GetTextBaseline()), TEXT_BASE_LINE_DEFAULT);
     EXPECT_EQ(static_cast<int32_t>(textStyle.GetTextDecoration()), TEXT_DECORATION_DEFAULT);
-    EXPECT_TRUE(NearEqual(textStyle.GetWordSpacing(), WORD_SPACING));
-    EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing(), LETTER_SPACING));
+    EXPECT_EQ(textStyle.GetWordSpacing().Unit(), WORD_SPACING.Unit());
+    EXPECT_TRUE(NearEqual(textStyle.GetWordSpacing().Value(), WORD_SPACING.Value()));
+    EXPECT_EQ(textStyle.GetLetterSpacing().Unit(), LETTER_SPACING.Unit());
+    EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing().Value(), LETTER_SPACING.Value()));
     EXPECT_TRUE(NearEqual(textStyle.GetLineHeight().Value(), LINE_HEIGHT));
     EXPECT_TRUE(textStyle.GetFontFamilies() == FONT_FAMILIES);
 }
@@ -258,8 +262,10 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator003, TestSize.Level1)
     EXPECT_EQ(static_cast<int32_t>(textStyle.GetFontStyle()), FONT_STYLE_DEFAULT);
     EXPECT_EQ(static_cast<int32_t>(textStyle.GetTextBaseline()), TEXT_BASE_LINE_DEFAULT);
     EXPECT_EQ(static_cast<int32_t>(textStyle.GetTextDecoration()), TEXT_DECORATION_DEFAULT);
-    EXPECT_TRUE(NearEqual(textStyle.GetWordSpacing(), WORD_SPACING_DEFAULT));
-    EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing(), LETTER_SPACING_DEFAULT));
+    EXPECT_EQ(textStyle.GetWordSpacing().Unit(), WORD_SPACING_DEFAULT.Unit());
+    EXPECT_TRUE(NearEqual(textStyle.GetWordSpacing().Value(), WORD_SPACING_DEFAULT.Value()));
+    EXPECT_EQ(textStyle.GetLetterSpacing().Unit(), LETTER_SPACING_DEFAULT.Unit());
+    EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing().Value(), LETTER_SPACING_DEFAULT.Value()));
     EXPECT_TRUE(NearEqual(textStyle.GetLineHeight().Value(), LINE_HEIGHT_DEFAULT));
 
     const auto& textShadow = textStyle.GetShadow();

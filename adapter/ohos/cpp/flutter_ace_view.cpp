@@ -177,7 +177,7 @@ void FlutterAceView::SurfaceChanged(FlutterAceView* view, int32_t width, int32_t
 
     view->NotifySurfaceChanged(width, height);
     auto platformView = view->GetShellHolder()->GetPlatformView();
-    LOGI("FlutterAceView::SurfaceChanged GetPlatformView");
+    LOGI("FlutterAceView::SurfaceChanged, GetPlatformView");
     if (platformView) {
         LOGI("FlutterAceView::SurfaceChanged, call NotifyChanged");
         platformView->NotifyChanged(SkISize::Make(width, height));

@@ -32,6 +32,10 @@
 namespace OHOS::Ace::Platform {
 
 using SendRenderDataCallback = bool (*)(const void*, size_t);
+using SendCurrentRouterCallback = bool (*)(const std::string currentRouterPath);
+
+constexpr uint32_t THEME_ID_LIGHT = 117440515;
+constexpr uint32_t THEME_ID_DARK = 117440516;
 
 // Keep the same with definition in base/utils/system_properties.h
 enum class DeviceOrientation : int32_t {
@@ -39,9 +43,9 @@ enum class DeviceOrientation : int32_t {
     LANDSCAPE,
 };
 
-enum class ThemeId : int32_t {
-    THEME_ID_LIGHT,
-    THEME_ID_DARK,
+enum class AceVersion {
+    ACE_1_0,
+    ACE_2_0,
 };
 
 // Keep the same with definition in base/utils/system_properties.h
@@ -50,17 +54,33 @@ enum class ColorMode : int32_t {
     DARK,
 };
 
+// keep same with definition in base/utils/device_config.h
+struct DeviceConfig {
+    DeviceOrientation orientation { DeviceOrientation::PORTRAIT };
+    // resolution.
+    double density { 1.0 };
+    DeviceType deviceType { DeviceType::PHONE };
+    // Current user perference for scaling fator for fonts, relative to the base density.
+    // Set through by java interface, not support in previewer yet.
+    double fontRatio { 1.0 };
+    ColorMode colorMode { ColorMode::LIGHT };
+};
+
 struct ACE_PREVIEW_EXPORT AceRunArgs {
     // The absolute path end of "default".
     std::string assetPath;
     // The absolute path of system resources.
     std::string resourcesPath;
 
-    // Indecate light or dark theme. 0 is theme_light, 1 is theme_dark.
-    ThemeId themeId = ThemeId::THEME_ID_LIGHT;
+    // Indecate light or dark theme.
+    uint32_t themeId = THEME_ID_LIGHT;
 
-    // Light Theme contains light mode and dark mode. The dafault is light mode of light theme.
-    ColorMode colorMode = ColorMode::LIGHT;
+    DeviceConfig deviceConfig = {
+        .orientation = DeviceOrientation::PORTRAIT,
+        .density = 1.0,
+        .deviceType = DeviceType::PHONE,
+        .colorMode = ColorMode::LIGHT,
+    };
 
     // Set page path to launch directly, or launch the main page in default.
     std::string url;
@@ -72,19 +92,18 @@ struct ACE_PREVIEW_EXPORT AceRunArgs {
     int32_t viewHeight = 0;
     int32_t deviceWidth = 0;
     int32_t deviceHeight = 0;
-    double resolution = 1.0;
 
     // Locale
     std::string language = "zh";
     std::string region = "CN";
     std::string script = "";
 
-    DeviceOrientation orientation = DeviceOrientation::PORTRAIT;
-    DeviceType deviceType = DeviceType::PHONE;
+    AceVersion aceVersion = AceVersion::ACE_1_0;
 
     bool formsEnabled = false;
 
-    SendRenderDataCallback onRender;
+    SendRenderDataCallback onRender = nullptr;
+    SendCurrentRouterCallback onRouterChange = nullptr;
 };
 
 } // namespace OHOS::Ace::Platform
