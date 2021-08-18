@@ -164,8 +164,7 @@ template("js_framework") {
       sources += [ "common/dom/dom_web.cpp" ]
     }
 
-    if (!is_wearable_product && !use_mingw_win &&
-        !use_mac) {
+    if (!is_wearable_product && !use_mingw_win && !use_mac) {
       sources += [ "js_frontend/engine/common/js_engine_loader.cpp" ]
     }
 
@@ -422,17 +421,14 @@ template("gen_obj") {
   action("gen_obj_" + name) {
     visibility = [ ":*" ]  # Only targets in this file can depend on this.
 
+    objcopy_tool = objcopy_clang
     if (use_mingw_win) {
-      objcopy_tool = objcopy_mingw
       script = "$flutter_root/engine/flutter/sky/tools/objcopy_pc_mac.py"
     } else if (use_mac) {
-      objcopy_tool = objcopy_clang
       script = "$flutter_root/engine/flutter/sky/tools/objcopy_pc_mac.py"
     } else if (target_cpu == "x86_64") {
-      objcopy_tool = objcopy_x86_64
       script = "$flutter_root/engine/flutter/sky/tools/objcopy.py"
     } else {
-      objcopy_tool = objcopy_aarch64
       script = "$flutter_root/engine/flutter/sky/tools/objcopy.py"
     }
 
@@ -557,7 +553,7 @@ template("declarative_js_engine") {
       deps += [
         ":gen_obj_src_js_proxyclass",
         ":intl_qjs",
-       ]
+      ]
     }
 
     if (use_mingw_win || use_mac) {

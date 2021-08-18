@@ -133,17 +133,14 @@ action_foreach("objcopy_resource") {
 
   outputs = [ "$ace_resource_dir/{{source_name_part}}.o" ]
 
-  objcopy_tool = objcopy_aarch64
+  objcopy_tool = objcopy_clang
   script = "$flutter_root/engine/flutter/sky/tools/objcopy.py"
 
   if (use_mingw_win) {
-    objcopy_tool = objcopy_mingw
     script = "$flutter_root/engine/flutter/sky/tools/objcopy_pc_mac.py"
   } else if (use_mac) {
-    objcopy_tool = objcopy_clang
     script = "$flutter_root/engine/flutter/sky/tools/objcopy_pc_mac.py"
   } else if (target_cpu == "x86_64") {
-    objcopy_tool = objcopy_x86_64
   }
 
   args = [

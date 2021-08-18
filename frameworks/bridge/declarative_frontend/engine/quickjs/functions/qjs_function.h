@@ -72,7 +72,7 @@ public:
 
     void execute(const T& eventInfo)
     {
-        JSValue param = 0;
+        JSValue param = JS_UNDEFINED;
         if (parser_) {
             param = parser_(eventInfo, ctx_);
         }
