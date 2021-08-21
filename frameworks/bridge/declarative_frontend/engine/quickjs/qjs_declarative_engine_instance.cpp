@@ -372,7 +372,7 @@ bool QJSDeclarativeEngineInstance::InitJSEnv()
     // initialize native qjs engine.
     nativeEngine_ = new QuickJSNativeEngine(runtime_, context_);
     frontendDelegate_->AddTaskObserver([nativeEngine = nativeEngine_](){
-        nativeEngine->Loop();
+        nativeEngine->Loop(LOOP_NOWAIT);
     });
     return true;
 }

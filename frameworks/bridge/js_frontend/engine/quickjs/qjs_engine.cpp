@@ -21,6 +21,7 @@
 #include <unordered_map>
 
 #include "third_party/quickjs/message_server.h"
+#include "worker_init.h"
 
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
@@ -2331,11 +2332,62 @@ bool QjsEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     nativeEngine_ = new QuickJSNativeEngine(runtime, context);
     ACE_DCHECK(delegate);
     delegate->AddTaskObserver([nativeEngine = nativeEngine_](){
-        nativeEngine->Loop();
+        nativeEngine->Loop(LOOP_NOWAIT);
     });
 
     engineInstance_ = AceType::MakeRefPtr<QjsEngineInstance>(delegate, instanceId_);
+    RegisterWorker();
     return engineInstance_->InitJsEnv(runtime, context);
+}
+
+void QjsEngine::RegisterInitWorkerFunc()
+{
+    auto&& initWorkerFunc = [](NativeEngine* nativeEngine) {
+        LOGI("WorkerCore RegisterInitWorkerFunc called");
+        if (nativeEngine == nullptr) {
+            LOGE("nativeEngine is nullptr");
+            return;
+        }
+        auto qjsNativeEngine = static_cast<QuickJSNativeEngine*>(nativeEngine);
+        if (qjsNativeEngine == nullptr) {
+            LOGE("qjsNativeEngine is nullptr");
+            return;
+        }
+
+        JSContext* ctx = qjsNativeEngine->GetContext();
+        if (ctx == nullptr) {
+            LOGE("ctx is nullptr");
+            return;
+        }
+        // Note: default 256KB is not enough
+        JS_SetMaxStackSize(ctx, MAX_STACK_SIZE);
+
+        JSValue globalObj = JS_GetGlobalObject(ctx);
+        InitJsConsoleObject(ctx, globalObj);
+        JS_FreeValue(ctx, globalObj);
+    };
+    OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
+}
+
+void QjsEngine::RegisterAssetFunc()
+{
+    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
+    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content) {
+        LOGI("WorkerCore RegisterAssetFunc called");
+        auto delegate = weakDelegate.Upgrade();
+        if (delegate == nullptr) {
+            LOGE("delegate is nullptr");
+            return;
+        }
+        delegate->GetResourceData(uri, content);
+    };
+    OHOS::CCRuntime::Worker::WorkerCore::RegisterAssetFunc(assetFunc);
+}
+
+void QjsEngine::RegisterWorker()
+{
+    RegisterInitWorkerFunc();
+    RegisterAssetFunc();
 }
 
 QjsEngine::~QjsEngine()

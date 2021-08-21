@@ -214,6 +214,9 @@ private:
     RefPtr<QjsEngineInstance> engineInstance_;
     int32_t instanceId_;
     QuickJSNativeEngine* nativeEngine_ = nullptr;
+    void RegisterWorker();
+    void RegisterInitWorkerFunc();
+    void RegisterAssetFunc();
     ACE_DISALLOW_COPY_AND_MOVE(QjsEngine);
 };
 

@@ -52,7 +52,6 @@ public:
     ~FrontendDelegateDeclarative() override = default;
 
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
-    void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
     // JSFrontend delegate functions.
     void RunPage(const std::string& url, const std::string& params);
@@ -248,7 +247,6 @@ private:
     RefPtr<GroupJsBridge> groupJsBridge_;
 
     RefPtr<TaskExecutor> taskExecutor_;
-    RefPtr<AssetManager> assetManager_;
 
     PipelineContextHolder pipelineContextHolder_;
 
