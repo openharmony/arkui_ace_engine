@@ -108,6 +108,7 @@ template("js_framework") {
       "js_frontend/engine/common/base_animation_bridge.cpp",
       "js_frontend/engine/common/js_api_perf.cpp",
       "js_frontend/engine/common/js_constants.cpp",
+      "js_frontend/frontend_delegate.cpp",
       "js_frontend/frontend_delegate_impl.cpp",
       "js_frontend/js_ace_page.cpp",
       "js_frontend/js_command.cpp",
@@ -371,6 +372,7 @@ template("js_engine") {
       deps += [ ":intl_qjs" ]
       if (is_standard_system) {
         external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+        external_deps += [ "jsapi:worker_init" ]
       }
     }
 

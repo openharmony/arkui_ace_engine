@@ -64,6 +64,24 @@ bool GetAssetContentImpl(const RefPtr<AssetManager>& assetManager, const std::st
     return true;
 }
 
+template<class T>
+bool GetAssetContentAllowEmpty(const RefPtr<AssetManager>& assetManager, const std::string& url, T& content)
+{
+    if (!assetManager) {
+        LOGE("AssetManager is null");
+        return false;
+    }
+    auto jsAsset = assetManager->GetAsset(url);
+    if (jsAsset == nullptr) {
+        LOGE("uri:%{private}s Asset is null", url.c_str());
+        return false;
+    }
+    auto bufLen = jsAsset->GetSize();
+    auto buffer = jsAsset->GetData();
+    content.assign(buffer, buffer + bufLen);
+    return true;
+}
+
 inline std::unique_ptr<JsonValue> ParseFileData(const std::string& data)
 {
     const char* endMsg = nullptr;

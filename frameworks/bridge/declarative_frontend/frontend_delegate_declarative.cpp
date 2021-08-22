@@ -1307,12 +1307,6 @@ void FrontendDelegateDeclarative::AttachPipelineContext(const RefPtr<PipelineCon
     jsAccessibilityManager_->InitializeCallback();
 }
 
-void FrontendDelegateDeclarative::SetAssetManager(const RefPtr<AssetManager>& assetManager)
-{
-    LOGE("FrontendDelegateDeclarative SetAssetManager");
-    assetManager_ = assetManager;
-}
-
 RefPtr<PipelineContext> FrontendDelegateDeclarative::GetPipelineContext()
 {
     return pipelineContextHolder_.Get();

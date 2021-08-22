@@ -43,7 +43,7 @@ public:
     ~FrontendDelegate() override = default;
 
     virtual void AttachPipelineContext(const RefPtr<PipelineContext>& context) = 0;
-    virtual void SetAssetManager(const RefPtr<AssetManager>& assetManager) = 0;
+    void SetAssetManager(const RefPtr<AssetManager>& assetManager);
 
     // ----------------
     // system.router
@@ -139,8 +139,13 @@ public:
 
     virtual RefPtr<JsAcePage> GetPage(int32_t pageId) const = 0;
 
+    template<typename T>
+    bool ACE_EXPORT GetResourceData(const std::string& fileUri, T& content);
+
     virtual void* GetAbility() = 0;
 
+protected:
+    RefPtr<AssetManager> assetManager_;
     ACE_DISALLOW_COPY_AND_MOVE(FrontendDelegate);
 };
 
