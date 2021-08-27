@@ -79,7 +79,7 @@ void JSContainerBase::ReleaseRT(JSRuntime* rt)
         LOGD("JSContainerBase => release children: start");
         for (JSValue jsChild : jsChildren_) {
             JSViewAbstract* child = static_cast<JSViewAbstract*>(UnwrapAny(jsChild));
-            if (!child->IsCustomView()) {
+            if (child && !child->IsCustomView()) {
                 JS_FreeValueRT(rt, jsChild);
             }
         }
