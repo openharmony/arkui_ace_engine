@@ -50,6 +50,10 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr)
     }
 
     long size = std::ftell(file.get());
+    if (size == -1L) {
+        LOGE("ftell file failed, return default frontend: JS frontend.");
+        return FrontendType::JS;
+    }
     char* fileData = new (std::nothrow) char[size];
     if (fileData == nullptr) {
         LOGE("new json buff failed, return default frontend: JS frontend.");

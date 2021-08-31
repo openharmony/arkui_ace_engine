@@ -633,7 +633,7 @@ void CaptureListener::OnBufferAvailable()
     }
 }
 
-int32_t CameraCallback::SaveData(char *buffer, int32_t size, std::string& path)
+int32_t CameraCallback::SaveData(const char *buffer, int32_t size, std::string& path)
 {
     struct timeval tv = {};
     gettimeofday(&tv, nullptr);

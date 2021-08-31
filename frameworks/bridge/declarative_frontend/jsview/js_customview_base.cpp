@@ -22,6 +22,9 @@ namespace OHOS::Ace::Framework {
 JSCustomViewBase::JSCustomViewBase()
 {
     LOGD("JSCustomViewBase constructor");
+#ifdef USE_QUICKJS_ENGINE
+    ctx_ = nullptr;
+#endif
 };
 
 JSCustomViewBase::~JSCustomViewBase()

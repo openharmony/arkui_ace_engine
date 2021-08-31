@@ -75,7 +75,7 @@ public:
     int32_t PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> camManagerObj);
     int32_t PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> camManagerObj);
     int32_t PrepareCamera();
-    int32_t SaveData(char *buffer, int32_t size, std::string& path);
+    int32_t SaveData(const char *buffer, int32_t size, std::string& path);
     void OnTakePhoto(bool isSucces, std::string info);
     void AddTakePhotoListener(TakePhotoListener&& listener);
     void AddErrorListener(ErrorListener&& listener);
