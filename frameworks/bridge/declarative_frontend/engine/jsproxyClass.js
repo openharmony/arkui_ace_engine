@@ -138,10 +138,10 @@ var createLinkReference = function (sourceView, sourceProperty1) {
   return {
     get: function () {
       console.log(`${this.constructor.name}: get bound property '${sourceProperty}'`);
-      return this.hasOwnProperty(sourceProperty) ? this[sourceProperty] : /* should never happen */ undefined;
+      return Object.prototype.hasOwnProperty.call(this, sourceProperty) ? this[sourceProperty] : /* should never happen */ undefined;
     }.bind(sourceView),
     set: function (newValue) {
-      if (this.hasOwnProperty(sourceProperty)) {
+      if (Object.prototype.hasOwnProperty.call(this, sourceProperty)) {
         this[sourceProperty] = newValue;
         return true;
       } else {
@@ -265,10 +265,10 @@ class View extends NativeView {
 
       console.log(`${this.constructor.name}: createState '${propStr}' ...`);
 
-      if (!this.hasOwnProperty(propStr)) {
+      if (!Object.prototype.hasOwnProperty.call(this, propStr)) {
         throw new SyntaxError(`${this.constructor.name}: createState('${propStr}'): View lacks property '${propStr}'`);
       }
-      if (this.obsPropStore.hasOwnProperty(propStr)) {
+      if (Object.prototype.hasOwnProperty.call(this.obsPropStore, propStr)) {
         throw new SyntaxError(`${this.constructor.name}: createState('${propStr}'): View has observed property '${propStr}' already!`);
       }
 
@@ -447,10 +447,10 @@ class View extends NativeView {
         return;
       }
 
-      if (!this.hasOwnProperty(propStr)) {
+      if (!Object.prototype.hasOwnProperty.call(this, propStr)) {
         throw new SyntaxErro(`${this.constructor.name}: createProp('${propStr}'). View lacks property '${propStr}'. Ignoring`);
       }
-      if (this.obsPropStore.hasOwnProperty(propStr)) {
+      if (Object.prototype.hasOwnProperty.call(this.obsPropStore, propStr)) {
         throw new SyntaxError(`${this.constructor.name}: createProp('${propStr}'): View has observed property '${propStr}' already!`);
       }
 
