@@ -40,7 +40,7 @@ template("ace_base_platform_source_set") {
     deps = [
       "$flutter_root:ace_skia_$platform",
       "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-      "//foundation/graphic/standard:libwms_client",
+      "//foundation/graphic/standard:libwmclient",
       "//third_party/zlib:libz",
     ]
 

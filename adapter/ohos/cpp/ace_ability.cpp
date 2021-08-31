@@ -22,6 +22,7 @@
 #include "core/common/frontend.h"
 #include "init_data.h"
 #include "touch_event.h"
+#include "display_type.h"
 
 #include "res_config.h"
 #include "resource_manager.h"
@@ -156,29 +157,34 @@ void AceAbility::OnStart(const Want& want)
         }));
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
-    OHOS::Window* window = Ability::GetWindow().get();
+    OHOS::sptr<OHOS::Window> window = Ability::GetWindow();
 
     auto&& touchEventCallback = [aceView = flutterAceView](OHOS::TouchEvent event) -> bool {
         LOGD("RegistOnTouchCb touchEventCallback called");
         return aceView->DispatchTouchEvent(aceView, event);
     };
-    window->RegistOnTouchCb(touchEventCallback);
+    window->OnTouch(touchEventCallback);
     // register surface change callback
-    auto&& surfaceChangedCallBack = [flutterAceView](OHOS::WindowInfo& info) {
+    auto&& surfaceChangedCallBack = [flutterAceView](uint32_t width, uint32_t height) {
         LOGD("RegistWindowInfoChangeCb surfaceChangedCallBack called");
         flutter::ViewportMetrics metrics;
-        metrics.physical_width = info.width;
-        metrics.physical_height = info.height;
+        metrics.physical_width = width;
+        metrics.physical_height = height;
         Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-        Platform::FlutterAceView::SurfaceChanged(flutterAceView, info.width, info.height, 0);
+        Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
     };
-    window->RegistWindowInfoChangeCb(surfaceChangedCallBack);
+    window->OnSizeChange(surfaceChangedCallBack);
 
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window);
 
     // set metrics
-    BufferRequestConfig windowConfig;
-    window->GetRequestConfig(windowConfig);
+    BufferRequestConfig windowConfig = {
+        .width = window->GetSurface()->GetDefaultWidth(),
+        .height = window->GetSurface()->GetDefaultHeight(),
+        .strideAlignment = 0x8,
+        .format = PIXEL_FMT_RGBA_8888,
+        .usage = window->GetSurface()->GetDefaultUsage(),
+    };
     LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", windowConfig.width, windowConfig.height);
 
     flutter::ViewportMetrics metrics;
@@ -207,7 +213,7 @@ void AceAbility::OnStart(const Want& want)
 
     auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
     if (context != nullptr) {
-	    context->SetWindowId(window->GetWindowID());
+        context->SetWindowId(window->GetID());
     }
 
     // run page.
