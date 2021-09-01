@@ -161,13 +161,13 @@ private:
 
     FullscreenEvent fullscreenEvent_;
 
-    std::unique_ptr<OHOS::SubWindow> CreateSubWindow();
+    ::OHOS::sptr<::OHOS::Subwindow> CreateSubwindow();
     void RegistMediaPlayerEvent();
     void CreateMediaPlayer();
     void PreparePlayer();
 
     std::shared_ptr<OHOS::Media::Player> mediaPlayer_ = nullptr;
-    std::unique_ptr<OHOS::SubWindow> subWindow_ = nullptr;
+    ::OHOS::sptr<::OHOS::Subwindow> subwindow_ = nullptr;
     std::shared_ptr<MediaPlayerCallback> mediaPlayerCallback_ = nullptr;
 };
 

@@ -32,7 +32,7 @@ build_component("video") {
     ]
 
     deps = [
-      "//foundation/graphic/standard:libwms_client",
+      "//foundation/graphic/standard:libwmclient",
     ]
 
     external_deps = [ "ipc:ipc_core" ]
