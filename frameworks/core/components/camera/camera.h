@@ -108,7 +108,7 @@ private:
     int32_t recordFileId_ = -1;
     std::string recordPath_;
 
-    std::unique_ptr<OHOS::SubWindow> subWindow_;
+    ::OHOS::sptr<::OHOS::Subwindow> subwindow_ = nullptr;
     WeakPtr<RenderNode> renderNode_;
     WeakPtr<PipelineContext> context_;
     sptr<Surface> captureSurface_;
