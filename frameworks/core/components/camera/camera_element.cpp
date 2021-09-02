@@ -304,7 +304,7 @@ void CameraElement::OnTakePhotoCallBack(const std::map<std::string, std::string>
     if (GetStringFromMap(result, IS_SUCESS) == "1" && !callbackIds_.success.empty()) {
         std::string param = std::string("{\"")
                                 .append(PHOTO_PATH)
-                                .append("\":\"file://")
+                                .append("\":\"file:/")
                                 .append(GetStringFromMap(result, PHOTO_PATH))
                                 .append("\"}");
         ExecuteJsCallback(callbackIds_.success, param);
@@ -372,7 +372,7 @@ void CameraElement::OnRecorderCallBack(const std::map<std::string, std::string>&
     if (GetStringFromMap(result, IS_SUCESS) == "1") {
         param.append("{\"")
             .append(PHOTO_PATH)
-            .append("\":\"file://")
+            .append("\":\"file:/")
             .append(GetStringFromMap(result, PHOTO_PATH))
             .append("\"}],\"method\":\"success\"}");
         ExecuteJsCallback(recorderBackId_, param);
