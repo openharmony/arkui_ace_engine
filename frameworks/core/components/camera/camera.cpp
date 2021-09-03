@@ -28,14 +28,13 @@
 #include <unistd.h>
 
 #include "base/log/log.h"
-#include "window_manager.h"
 #include "display_type.h"
+#include "window_manager.h"
 
 #include "core/image/image_cache.h"
 
 namespace OHOS::Ace {
 namespace {
-
 const char IS_SUCESS[] = "isSucceed";
 const char ERROR_CODE[] = "errorcode";
 const char PHOTO_PATH[] = "uri";

@@ -20,9 +20,9 @@
 #include "base/log/log.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/frontend.h"
+#include "display_type.h"
 #include "init_data.h"
 #include "touch_event.h"
-#include "display_type.h"
 
 #include "res_config.h"
 #include "resource_manager.h"
@@ -159,13 +159,13 @@ void AceAbility::OnStart(const Want& want)
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
     OHOS::sptr<OHOS::Window> window = Ability::GetWindow();
 
-    auto&& touchEventCallback = [aceView = flutterAceView](OHOS::TouchEvent event) -> bool {
+    auto touchEventCallback = [aceView = flutterAceView](OHOS::TouchEvent event) -> bool {
         LOGD("RegistOnTouchCb touchEventCallback called");
         return aceView->DispatchTouchEvent(aceView, event);
     };
     window->OnTouch(touchEventCallback);
     // register surface change callback
-    auto&& surfaceChangedCallBack = [flutterAceView](uint32_t width, uint32_t height) {
+    auto surfaceChangedCallBack = [flutterAceView](uint32_t width, uint32_t height) {
         LOGD("RegistWindowInfoChangeCb surfaceChangedCallBack called");
         flutter::ViewportMetrics metrics;
         metrics.physical_width = width;
