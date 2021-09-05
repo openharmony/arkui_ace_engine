@@ -15,10 +15,12 @@
 
 #include "core/components/track/flutter_render_arc_track.h"
 
-#include "flutter/lib/ui/painting/path.h"
-#include "third_party/skia/include/core/SkClipOp.h"
-
+#include "core/components/font/flutter_font_collection.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
+#include "flutter/lib/ui/painting/path.h"
+#include "flutter/lib/ui/text/paragraph_builder.h"
+#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include "third_party/skia/include/core/SkClipOp.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -66,9 +68,40 @@ bool ShouldHighLight(const double start, const double interval, const double per
     return false;
 }
 
-void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo)
+void SetTextStyle(const ScopedCanvas& canvas, const RenderRingInfo& trackInfo,
+    const std::string markedText, const Color markedColor, const Rect dataRegion)
 {
-    auto canvas = ScopedCanvas::Create(context);
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    if (!fontCollection) {
+        LOGW("PaintText: fontCollection is null");
+        return;
+    }
+    double pathStartVertexX = trackInfo.center.GetX();
+    double pathStartVertexY = trackInfo.center.GetY() - trackInfo.radius + (trackInfo.thickness / 2);
+    txt::ParagraphStyle style;
+    txt::TextStyle txtStyle;
+    txtStyle.font_size = 80;
+    txtStyle.font_weight = txt::FontWeight::w400;
+    txtStyle.color = markedColor.GetValue();
+    std::unique_ptr<txt::ParagraphBuilder> builder;
+    style.max_lines = 1;
+    builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    builder->PushStyle(txtStyle);
+    builder->AddText(StringUtils::Str8ToStr16(markedText));
+    auto paragraph = builder->Build();
+    paragraph->Layout(dataRegion.Width());
+    paragraph->Paint(canvas->canvas(),pathStartVertexX - txtStyle.font_size,
+        pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
+}
+
+void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo,
+    const std::string markedText, const Color markedColor, const Rect dataRegion)
+{
+    ScopedCanvas canvas = ScopedCanvas::Create(context);
     if (!canvas) {
         LOGE("Paint canvas is null");
         return;
@@ -94,6 +127,7 @@ void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo)
     paint.paint()->setStrokeCap(SkPaint::kSquare_Cap);
     paint.paint()->setStrokeWidth(INDICATOR_STROKE_WIDTH);
     canvas->drawPath(path.get(), paint, paintData);
+    SetTextStyle(canvas, trackInfo, markedText, markedColor, dataRegion);
 
     paint.paint()->setStyle(SkPaint::kStroke_Style);
     paint.paint()->setColor(Color::BLACK.GetValue());
@@ -104,6 +138,9 @@ void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo)
 void FlutterRenderArcTrack::Paint(RenderContext& context, const Offset& offset)
 {
     RenderRingInfo data = paintData_;
+    Rect dataRegion_;
+    dataRegion_ = Rect(offset.GetX() + 20, offset.GetY() + 2,
+        GetLayoutSize().Width() - 40, GetLayoutSize().Height() - 4);
     // now depend on box to clip
     if (data.center.GetX() < 0.0 || data.center.GetY() < 0.0) {
         data.center = Offset(GetLayoutSize().Width() / 2, GetLayoutSize().Height() / 2);
@@ -158,7 +195,7 @@ void FlutterRenderArcTrack::Paint(RenderContext& context, const Offset& offset)
         DrawGauge(context, data);
         data.startDegree = paintData_.startDegree;
         data.sweepDegree = paintData_.sweepDegree * ratio;
-        DrawIndicator(context, data);
+        DrawIndicator(context, data, markedText_, markedTextColor_, dataRegion_);
     }
 }
 

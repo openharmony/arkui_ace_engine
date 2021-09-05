@@ -20,7 +20,6 @@
 #include "frameworks/bridge/common/dom/dom_node.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/core/components/common/properties/svg_paint_state.h"
-#include "frameworks/core/components/svg/svg_sharp.h"
 
 
 namespace OHOS::Ace::Framework {
@@ -31,29 +30,8 @@ public:
     DOMSvgBase(NodeId nodeId, const std::string& nodeName);
     ~DOMSvgBase() override = default;
 
-    bool SetPresentationAttr(const std::pair<std::string, std::string>& attr);
-
-    const FillState& GetFillState() const
-    {
-        return fillState_;
-    }
-
-    const StrokeState& GetStrokeState() const
-    {
-        return strokeState_;
-    }
-
-    const SvgTextStyle& GetTextStyle() const
-    {
-        return textStyle_;
-    }
-
 protected:
-    void InheritCommonAttrs(const RefPtr<SvgSharp>& svgSharp, const RefPtr<DOMNode>& parentNode);
-    void PrepareCommonAttrs(const RefPtr<SvgSharp>& svgSharp);
-    FillState fillState_;
-    StrokeState strokeState_;
-    SvgTextStyle textStyle_;
+    void InheritAttrs(const RefPtr<DOMNode>& parentNode);
 };
 
 } // namespace OHOS::Ace::Framework

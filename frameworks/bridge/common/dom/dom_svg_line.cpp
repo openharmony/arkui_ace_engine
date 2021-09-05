@@ -21,30 +21,6 @@ namespace OHOS::Ace::Framework {
 
 DOMSvgLine::DOMSvgLine(NodeId nodeId, const std::string& nodeName) : DOMSvgBase(nodeId, nodeName) {}
 
-bool DOMSvgLine::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    if (DOMSvgBase::SetPresentationAttr(attr)) {
-        return true;
-    }
-    if (attr.first == DOM_SVG_X1) {
-        x1_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_X2) {
-        x2_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_Y1) {
-        y1_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_Y2) {
-        y2_ = ParseDimension(attr.second);
-        return true;
-    }
-    return false;
-}
-
 RefPtr<Component> DOMSvgLine::GetSpecializedComponent()
 {
     return lineComponent_;
@@ -57,7 +33,7 @@ void DOMSvgLine::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 
 void DOMSvgLine::OnMounted(const RefPtr<DOMNode>& parentNode)
 {
-    DOMSvgBase::InheritCommonAttrs(lineComponent_, parentNode);
+    DOMSvgBase::InheritAttrs(parentNode);
 }
 
 void DOMSvgLine::PrepareSpecializedComponent()
@@ -65,11 +41,10 @@ void DOMSvgLine::PrepareSpecializedComponent()
     if (!lineComponent_) {
         lineComponent_ = AceType::MakeRefPtr<SvgLineComponent>();
     }
-    lineComponent_->SetX1(x1_);
-    lineComponent_->SetX2(x2_);
-    lineComponent_->SetY1(y1_);
-    lineComponent_->SetY2(y2_);
-    DOMSvgBase::PrepareCommonAttrs(lineComponent_);
+    auto declaration = AceType::DynamicCast<SvgLineDeclaration>(declaration_);
+    if (declaration) {
+        lineComponent_->SetDeclaration(declaration);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

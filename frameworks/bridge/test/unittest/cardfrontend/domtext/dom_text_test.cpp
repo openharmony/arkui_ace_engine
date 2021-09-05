@@ -188,11 +188,16 @@ HWTEST_F(DomCardTextTest, DomCardTextTest004, TestSize.Level1)
     ASSERT_TRUE(domText->GetTag() == "text");
     ASSERT_TRUE(static_cast<int32_t>(domText->GetHeight().Value()) == 300);
     ASSERT_TRUE(static_cast<int32_t>(domText->GetWidth().Value()) == 300);
-    ASSERT_TRUE(static_cast<int32_t>(domText->GetMarginTop().Value()) == 30);
-    ASSERT_TRUE(static_cast<int32_t>(domText->GetMarginBottom().Value()) == 30);
-    ASSERT_TRUE(static_cast<int32_t>(domText->GetMarginLeft().Value()) == 30);
-    ASSERT_TRUE(static_cast<int32_t>(domText->GetMarginRight().Value()) == 30);
     ASSERT_TRUE(CardTestFactory::GetInstance().GetNodeNumber() == 1);
+
+    auto declaration = domText->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    auto& marginStyle = static_cast<CommonMarginStyle&>(declaration->GetStyle(StyleTag::COMMON_MARGIN_STYLE));
+    ASSERT_TRUE(marginStyle.IsValid());
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Top().Value()) == 30);
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Bottom().Value()) == 30);
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Left().Value()) == 30);
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Right().Value()) == 30);
 }
 
 /**

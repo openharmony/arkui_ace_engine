@@ -21,8 +21,6 @@
 
 namespace OHOS::Ace {
 
-using ComponentFunction = std::function<RefPtr<Component>(int32_t index)>;
-
 class ACE_EXPORT ComponentGroupElement : public RenderElement {
     DECLARE_ACE_TYPE(ComponentGroupElement, RenderElement);
 
@@ -34,29 +32,9 @@ public:
 
     void PerformBuild() override;
 
-    bool IsComposed(const std::list<RefPtr<Component>>& newComponents);
-
-    std::list<RefPtr<Element>> UpdateCommonChildren(const std::list<RefPtr<Component>>& newComponents);
-    void UpdateCommonChildrenOptimized(const std::list<RefPtr<Component>>& newComponents);
-
-    std::list<RefPtr<Element>> UpdateComposedChildren(const std::list<RefPtr<Component>>& newComponents);
-
-    // Updating the foreach's component
-    // this will be called only when the foreach array is a observableobject and registers to foreach.
-    std::list<RefPtr<Element>> UpdateComposedChildrenForEach(std::string oldFirstChildKey, int32_t oldChildCount,
-        std::vector<std::string> newComponentsKeys, ComponentFunction&& func);
-
 private:
-    void UpdateComposedChildrenPreprocess(const std::vector<RefPtr<Element>>& oldChildren,
-        const std::list<RefPtr<Component>>& newComponents, size_t& topLength, size_t& bottomLength, int32_t& slot);
-
-    void UpdateComposedChildrenProcess(const std::vector<RefPtr<Element>>& oldChildren,
-        const std::list<RefPtr<Component>>& newComponents, size_t topLength, size_t bottomLength, int32_t& slot,
-        std::map<ComposeId, RefPtr<Element>>& oldKeyedChildren);
-
-    void UpdateComposedChildrenPostprocess(const std::vector<RefPtr<Element>>& oldChildren,
-        const std::list<RefPtr<Component>>& newComponents, size_t topLength, size_t bottomLength, int32_t& slot,
-        std::map<ComposeId, RefPtr<Element>>& oldKeyedChildren);
+    void UpdateChildren(const std::list<RefPtr<Component>>& newComponents);
+    void UpdateChildrenForDeclarative(const std::list<RefPtr<Component>>& newComponents);
 };
 
 } // namespace OHOS::Ace

@@ -17,6 +17,10 @@
 
 #include <cstdlib>
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(ENABLE_WORKER)
+#include "worker_init.h"
+#endif
+
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -26,21 +30,111 @@ namespace OHOS::Ace::Framework {
 
 QJSDeclarativeEngine::~QJSDeclarativeEngine()
 {
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (nativeEngine_ != nullptr) {
+        nativeEngine_->CancelCheckUVLoop();
+        delete nativeEngine_;
+    }
+#endif
     JS_RunGC(engineInstance_->GetQJSRuntime());
 }
 
 bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 {
     LOGD("QJSDeclarativeEngine initialize");
+    JSRuntime* runtime = nullptr;
+    JSContext* context = nullptr;
+
+    // put JS_NewContext as early as possible to make stack_top in context
+    // closer to the top stack frame pointer of JS thread.
+    runtime = JS_NewRuntime();
+    if (runtime != nullptr) {
+        context = JS_NewContext(runtime);
+    }
+
     engineInstance_ = AceType::MakeRefPtr<QJSDeclarativeEngineInstance>(delegate);
-    bool res = engineInstance_->InitJSEnv();
+    nativeEngine_ = new QuickJSNativeEngine(runtime, context, static_cast<void*>(this));
+    bool res = engineInstance_->InitJSEnv(runtime, context);
     if (!res) {
         LOGE("QJSDeclarativeEngine initialize failed: %{public}d", instanceId_);
         return false;
     }
 
+    SetPostTask(nativeEngine_);
+    nativeEngine_->CheckUVLoop();
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(ENABLE_WORKER)
+    RegisterWorker();
+#endif
     return true;
 }
+
+void QJSDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
+{
+    LOGI("SetPostTask");
+    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
+    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_](bool needSync) {
+        auto delegate = weakDelegate.Upgrade();
+        if (delegate == nullptr) {
+            LOGE("delegate is nullptr");
+            return;
+        }
+        delegate->PostJsTask([nativeEngine, needSync]() {
+            nativeEngine->Loop(LOOP_NOWAIT, needSync);
+        });
+    };
+    nativeEngine_->SetPostTask(postTask);
+}
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(ENABLE_WORKER)
+void QJSDeclarativeEngine::RegisterInitWorkerFunc()
+{
+    auto&& initWorkerFunc = [](NativeEngine* nativeEngine) {
+        LOGI("WorkerCore RegisterInitWorkerFunc called");
+        if (nativeEngine == nullptr) {
+            LOGE("nativeEngine is nullptr");
+            return;
+        }
+        auto qjsNativeEngine = static_cast<QuickJSNativeEngine*>(nativeEngine);
+        if (qjsNativeEngine == nullptr) {
+            LOGE("qjsNativeEngine is nullptr");
+            return;
+        }
+
+        JSContext* ctx = qjsNativeEngine->GetContext();
+        if (ctx == nullptr) {
+            LOGE("ctx is nullptr");
+            return;
+        }
+        // Note: default 256KB is not enough
+        JS_SetMaxStackSize(ctx, MAX_STACK_SIZE);
+
+        InitConsole(ctx);
+    };
+    OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
+}
+
+void QJSDeclarativeEngine::RegisterAssetFunc()
+{
+    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
+    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content) {
+        LOGI("WorkerCore RegisterAssetFunc called");
+        auto delegate = weakDelegate.Upgrade();
+        if (delegate == nullptr) {
+            LOGE("delegate is nullptr");
+            return;
+        }
+        delegate->GetResourceData(uri, content);
+    };
+    OHOS::CCRuntime::Worker::WorkerCore::RegisterAssetFunc(assetFunc);
+}
+
+void QJSDeclarativeEngine::RegisterWorker()
+{
+    RegisterInitWorkerFunc();
+    RegisterAssetFunc();
+}
+#endif
 
 void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
@@ -51,6 +145,27 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     engineInstance_->SetRunningPage(page);
     JSContext* ctx = engineInstance_->GetQJSContext();
     JS_SetContextOpaque(ctx, reinterpret_cast<void*>(AceType::RawPtr(engineInstance_)));
+
+    if (isMainPage) {
+        std::string appjsContent;
+        if (!engineInstance_->GetDelegate()->GetAssetContent("app.js", appjsContent)) {
+            LOGE("js file load failed!");
+            return;
+        }
+        std::string appMap;
+        if (engineInstance_->GetDelegate()->GetAssetContent("app.js.map", appMap)) {
+            page->SetAppMap(appMap);
+        } else {
+            LOGI("app map is missing!");
+        }
+        auto result = QJSDeclarativeEngineInstance::EvalBuf(
+            ctx, appjsContent.c_str(), appjsContent.length(), "app.js", JS_EVAL_TYPE_GLOBAL);
+        if (result == -1) {
+            LOGE("failed to execute Loadjs script");
+            return;
+        }
+        CallAppFunc("onCreate", 0, nullptr);
+    }
 
     std::string jsContent;
     if (!engineInstance_->GetDelegate()->GetAssetContent(url, jsContent)) {
@@ -99,9 +214,76 @@ void QJSDeclarativeEngine::DestroyPageInstance(int32_t pageId)
     LOGE("Not implemented!");
 }
 
+void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv)
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return;
+    }
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue exportobj = JS_GetPropertyStr(ctx, globalObj, "exports");
+    JSValue defaultobj = JS_GetPropertyStr(ctx, exportobj, "default");
+
+    JSValue appFunc = JS_GetPropertyStr(ctx, defaultobj, appFuncName.c_str());
+    if (!JS_IsFunction(ctx, appFunc)) {
+        LOGE("cannot find %s function", appFuncName.c_str());
+        return;
+    }
+    JS_Call(ctx, appFunc, JS_UNDEFINED, argc, argv);
+    JS_FreeValue(ctx, appFunc);
+    JS_FreeValue(ctx, defaultobj);
+    JS_FreeValue(ctx, exportobj);
+    JS_FreeValue(ctx, globalObj);
+}
+
 void QJSDeclarativeEngine::DestroyApplication(const std::string& packageName)
 {
-    LOGE("Not implemented!");
+    LOGI("Enter DestroyApplication: destroy, packageName %{public}s", packageName.c_str());
+    CallAppFunc("onDestroy", 0, nullptr);
+    js_std_loop(engineInstance_->GetQJSContext());
+}
+
+void QJSDeclarativeEngine::UpdateApplicationState(const std::string& packageName, Frontend::State state)
+{
+    LOGD("Enter UpdateApplicationState: destroy, packageName %{public}s", packageName.c_str());
+
+    if (state == Frontend::State::ON_SHOW) {
+        CallAppFunc("onShow", 0, nullptr);
+    } else if (state == Frontend::State::ON_HIDE) {
+        CallAppFunc("onHide", 0, nullptr);
+    }
+
+    js_std_loop(engineInstance_->GetQJSContext());
+}
+
+void QJSDeclarativeEngine::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return;
+    }
+
+    JSValueConst callBackResult[] = { callBackResult[0] = JS_NewBool(ctx, isShownInMultiWindow),
+        callBackResult[1] = JS_ParseJSON(ctx, data.c_str(), data.length(), "") };
+    CallAppFunc("onWindowDisplayModeChanged", 2, callBackResult);
+
+    js_std_loop(engineInstance_->GetQJSContext());
+}
+
+void QJSDeclarativeEngine::OnConfigurationUpdated(const std::string& data)
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return;
+    }
+
+    JSValueConst callBackResult[] = { JS_ParseJSON(ctx, data.c_str(), data.length(), "") };
+    CallAppFunc("onConfigurationUpdated", 1, callBackResult);
+
+    js_std_loop(engineInstance_->GetQJSContext());
 }
 
 void QJSDeclarativeEngine::TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval)
@@ -117,7 +299,7 @@ void QJSDeclarativeEngine::TimerCallback(const std::string& callbackId, const st
 
 void QJSDeclarativeEngine::MediaQueryCallback(const std::string& callbackId, const std::string& args)
 {
-    LOGE("Not implemented!");
+    JsEngine::MediaQueryCallback(callbackId, args);
 }
 
 void QJSDeclarativeEngine::RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp)
@@ -127,22 +309,22 @@ void QJSDeclarativeEngine::RequestAnimationCallback(const std::string& callbackI
 
 void QJSDeclarativeEngine::JsCallback(const std::string& callbackId, const std::string& args)
 {
-    LOGD("Enter JsCallback");
+    LOGD("Enter JSCallback");
 }
 
 void QJSDeclarativeEngine::FireAsyncEvent(const std::string& eventId, const std::string& param)
 {
-    LOGD("FireAsyncEvent params: %{private}s", param.c_str());
-
-    if (engineInstance_) {
-        LOGD("FireAsyncEvent engineInstance_ OK");
-        engineInstance_->FireAsyncEvent(eventId, param);
-    }
+    LOGW("QJSDeclarativeEngine FireAsyncEvent is unusable");
 }
 
 void QJSDeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::string& param)
 {
-    LOGE("Not implemented! eventId: %s param: %s ", eventId.c_str(), param.c_str());
+    LOGW("QJSDeclarativeEngine FireSyncEvent is unusable");
+}
+
+void QJSDeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
+{
+
 }
 
 void QJSDeclarativeEngine::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher)
@@ -159,7 +341,7 @@ void QJSDeclarativeEngine::RunGarbageCollection()
 
 RefPtr<GroupJsBridge> QJSDeclarativeEngine::GetGroupJsBridge()
 {
-    return nullptr;
+    return AceType::MakeRefPtr<QuickJsGroupJsBridge>();
 }
 
 } // namespace OHOS::Ace::Framework

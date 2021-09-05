@@ -21,18 +21,6 @@ namespace OHOS::Ace::Framework {
 
 DOMSvgPath::DOMSvgPath(NodeId nodeId, const std::string& nodeName) : DOMSvgBase(nodeId, nodeName) {}
 
-bool DOMSvgPath::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    if (DOMSvgBase::SetPresentationAttr(attr)) {
-        return true;
-    }
-    if (attr.first == DOM_SVG_D) {
-        d_ = attr.second;
-        return true;
-    }
-    return false;
-}
-
 RefPtr<Component> DOMSvgPath::GetSpecializedComponent()
 {
     return pathComponent_;
@@ -45,7 +33,7 @@ void DOMSvgPath::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 
 void DOMSvgPath::OnMounted(const RefPtr<DOMNode>& parentNode)
 {
-    DOMSvgBase::InheritCommonAttrs(pathComponent_, parentNode);
+    DOMSvgBase::InheritAttrs(parentNode);
 }
 
 void DOMSvgPath::PrepareSpecializedComponent()
@@ -53,8 +41,10 @@ void DOMSvgPath::PrepareSpecializedComponent()
     if (!pathComponent_) {
         pathComponent_ = AceType::MakeRefPtr<SvgPathComponent>();
     }
-    pathComponent_->SetD(d_);
-    DOMSvgBase::PrepareCommonAttrs(pathComponent_);
+    auto declaration = AceType::DynamicCast<SvgPathDeclaration>(declaration_);
+    if (declaration) {
+        pathComponent_->SetDeclaration(declaration);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

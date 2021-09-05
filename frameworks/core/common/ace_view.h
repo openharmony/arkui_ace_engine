@@ -18,6 +18,8 @@
 
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 
+#include <chrono>
+
 #include "base/resource/asset_manager.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/container.h"
@@ -38,6 +40,11 @@ public:
     AceView() = default;
     virtual ~AceView() = default;
 
+    virtual bool QueryIfWindowInScreen()
+    {
+        return true;
+    }
+    virtual void RegisterScreenBroadcast() {}
     virtual void RegisterTouchEventCallback(TouchEventCallback&& callback) = 0;
     virtual void RegisterKeyEventCallback(KeyEventCallback&& callback) = 0;
     virtual void RegisterMouseEventCallback(MouseEventCallback&& callback) = 0;
@@ -65,6 +72,9 @@ public:
     using IdleCallback = std::function<void(int64_t)>;
     virtual void RegisterIdleCallback(IdleCallback&& callback) = 0;
 
+    using PreDrawCallback = std::function<void()>;
+    virtual void RegisterPreDrawCallback(PreDrawCallback&& callback) {}
+
     using ViewReleaseCallback = std::function<void()>;
     using ViewDestoryCallback = std::function<void(ViewReleaseCallback&&)>;
     virtual void RegisterViewDestroyCallback(ViewDestoryCallback&& callback) = 0;
@@ -81,25 +91,81 @@ public:
     {
         return false;
     }
+    // Use to get native window handle by texture id
+    virtual const void* GetNativeWindowById(uint64_t textureId) = 0;
 
     virtual ViewType GetViewType() const = 0;
     virtual std::unique_ptr<DrawDelegate> GetDrawDelegate() = 0;
     virtual std::unique_ptr<PlatformWindow> GetPlatformWindow() = 0;
-    virtual void UpdateWindowBlurRegion(const std::vector<std::vector<float>>& blurRRects) {};
-    virtual void UpdateWindowblurDrawOp() {};
+    virtual void UpdateWindowBlurRegion(const std::vector<std::vector<float>>& blurRRects) {}
+    virtual void UpdateWindowblurDrawOp() {}
+    virtual void StartSystemDrag(const std::string& str, void* pixelMapManager, int32_t byteCount) {}
+    virtual void InitDragListener() {}
+    virtual bool GetScale(float& scaleX, float& scaleY)
+    {
+        return false;
+    }
 
     void SetBackgroundColor(const Color& color)
     {
+        std::lock_guard<std::mutex> lock(backgroundColorMutex_);
         backgroundColor_ = color;
     }
 
-    const Color& GetBackgroundColor() const
+    const Color& GetBackgroundColor()
     {
+        std::lock_guard<std::mutex> lock(backgroundColorMutex_);
         return backgroundColor_;
     }
 
+    void SetCachePath(const std::string& cachePath)
+    {
+        cachePath_ = cachePath;
+    }
+
+    const std::string& GetCachePath()
+    {
+        return cachePath_;
+    }
+
+    void SetCreateTime(std::chrono::time_point<std::chrono::high_resolution_clock> time)
+    {
+        createTime_ = time;
+    }
+
+    void SetFirstUpDating(std::chrono::time_point<std::chrono::high_resolution_clock> time)
+    {
+        firstUpdating_ = true;
+        firstUpdateBegin_ = time;
+    }
+
+    void SetSessionID(const std::string& sessionID)
+    {
+        sessionID_ = sessionID;
+    }
+
+    int32_t GetWidth() const
+    {
+        return width_;
+    }
+
+    int32_t GetHeight() const
+    {
+        return height_;
+    }
+
+protected:
+    std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
+    std::chrono::time_point<std::chrono::high_resolution_clock> firstUpdateBegin_;
+    std::string sessionID_;
+    bool firstUpdating_ = false;
+    int32_t width_ = 0;
+    int32_t height_ = 0;
+
 private:
+    std::mutex backgroundColorMutex_;
     Color backgroundColor_;
+    std::string cachePath_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceView);
 };

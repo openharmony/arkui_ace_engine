@@ -24,9 +24,6 @@ namespace OHOS::Ace::Framework {
 DOMRating::DOMRating(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
     ratingChild_ = AceType::MakeRefPtr<RatingComponent>();
-    if (IsRightToLeft()) {
-        ratingChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 void DOMRating::ResetInitializedStyle()
@@ -158,6 +155,7 @@ void DOMRating::SetThemeAttrs()
 void DOMRating::PrepareSpecializedComponent()
 {
     SetThemeAttrs();
+    ratingChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     if (starNum_.second) {
         ratingChild_->SetStarNum(starNum_.first);
     }

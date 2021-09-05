@@ -38,7 +38,7 @@ constexpr int64_t VSYNC_INTERVAL_MILLI = 16;
 constexpr int64_t VSYNC_INTERVAL_NANO = VSYNC_INTERVAL_MILLI * MILLI_TO_NANO;
 constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0;
 constexpr uint32_t LOOP_COUNT_FOREVER = 100;          // the loop count we treat as loop forever.
-constexpr double SCROLL_AMOUNT_EQUAL_EPSILON = 0.001; // the accuracy when check position.
+constexpr double SCROLL_AMOUNT_EQUAL_EPSILON = 3.001; // the accuracy when check position.
 
 const std::string CUSTOM_TEXT = "marqueeText";
 constexpr double CUSTOM_SCROLL_AMOUNT = 1000.0;
@@ -118,7 +118,7 @@ uint64_t CalculateLoopDuration(double scrollAmount)
 {
     ACE_DCHECK(scrollAmount > 0);
     ACE_DCHECK(!NearZero(scrollAmount));
-    double millisecond = static_cast<double>(SURFACE_WIDTH) * DEFAULT_MARQUEE_SCROLL_DELAY / scrollAmount;
+    double millisecond = static_cast<double>(SURFACE_WIDTH) * 2.0f * DEFAULT_MARQUEE_SCROLL_DELAY / scrollAmount;
     // Translate raw duration to vsync duration
     uint64_t vsyncCount = static_cast<uint64_t>(std::ceil(millisecond / VSYNC_INTERVAL_MILLI));
     return MILLI_TO_NANO * vsyncCount * VSYNC_INTERVAL_MILLI;

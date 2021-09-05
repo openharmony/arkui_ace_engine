@@ -29,77 +29,25 @@ DOMClock::DOMClock(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId,
     clockChild_ = AceType::MakeRefPtr<ClockComponent>();
 }
 
-bool DOMClock::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    // static linear map must be sorted by key.
-    static const LinearMapNode<void (*)(const std::string&, DOMClock&)> clockAttrOperators[] = {
-        { DOM_HOURS_WEST,
-            [](const std::string& val, DOMClock& clock) { clock.clockChild_->SetHoursWest(StringToDouble(val)); } },
-        { DOM_SHOW_DIGIT,
-            [](const std::string& val, DOMClock& clock) { clock.clockChild_->SetShowDigit(StringToBool(val)); } },
-
-    };
-    auto operatorIter = BinarySearchFindIndex(clockAttrOperators, ArraySize(clockAttrOperators), attr.first.c_str());
-    if (operatorIter != -1) {
-        clockAttrOperators[operatorIter].value(attr.second, *this);
-        return true;
-    }
-    return false;
-}
-
-bool DOMClock::SetSpecializedStyle(const std::pair<std::string, std::string>& style)
-{
-    // static linear map must be sorted by key.
-    static const LinearMapNode<void (*)(const std::string&, DOMClock&)> clockStylesOperators[] = {
-        { DOM_DIGIT_FONT_FAMILY,
-            [](const std::string& val, DOMClock& clock) {
-                clock.clockChild_->SetFontFamilies(ConvertStrToFontFamilies(val));
-            } },
-    };
-    auto operatorIter =
-        BinarySearchFindIndex(clockStylesOperators, ArraySize(clockStylesOperators), style.first.c_str());
-    if (operatorIter != -1) {
-        clockStylesOperators[operatorIter].value(style.second, *this);
-        return true;
-    }
-    return false;
-}
-
-bool DOMClock::AddSpecializedEvent(int32_t pageId, const std::string& event)
-{
-    if (event == "hour") {
-        onHourCallback_ = EventMarker(GetNodeIdForEvent(), event, pageId);
-        clockChild_->SetOnHourChangeEvent(onHourCallback_);
-        return true;
-    }
-    return false;
-}
-
 void DOMClock::PrepareSpecializedComponent()
 {
-    clockChild_->SetDigitRadiusRatio(clockConfig_.digitRadiusRatio_);
-    clockChild_->SetDigitSizeRatio(clockConfig_.digitSizeRatio_);
-    clockChild_->SetClockFaceSrc(clockConfig_.clockFaceSrc_);
-    clockChild_->SetClockFaceNightSrc(clockConfig_.clockFaceNightSrc_);
-    clockChild_->SetHourHandSrc(clockConfig_.hourHandSrc_);
-    clockChild_->SetHourHandNightSrc(clockConfig_.hourHandNightSrc_);
-    clockChild_->SetMinuteHandSrc(clockConfig_.minuteHandSrc_);
-    clockChild_->SetMinuteHandNightSrc(clockConfig_.minuteHandNightSrc_);
-    clockChild_->SetSecondHandSrc(clockConfig_.secondHandSrc_);
-    clockChild_->SetSecondHandNightSrc(clockConfig_.secondHandNightSrc_);
-    clockChild_->SetDigitColor(clockConfig_.digitColor_);
-    clockChild_->SetDigitColorNight(clockConfig_.digitColorNight_);
+    const auto& declaration = AceType::DynamicCast<ClockDeclaration>(declaration_);
+    if (!declaration) {
+        LOGE("clock declaration is null!");
+        return;
+    }
+    declaration->SetClockConfig(clockConfig_);
+    clockChild_->SetDeclaration(declaration);
 }
 
 void DOMClock::InitializeStyle()
 {
-    auto theme = GetTheme<ClockTheme>();
-    if (!theme) {
-        LOGE("ClockTheme is null!");
-        EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
+    auto declaration = AceType::DynamicCast<ClockDeclaration>(declaration_);
+    if (!declaration) {
+        LOGE("clock declaration is null!");
         return;
     }
-    clockChild_->SetDefaultSize(theme->GetDefaultSize());
+    declaration->InitializeStyle();
 }
 
 void DOMClock::ResetInitializedStyle()

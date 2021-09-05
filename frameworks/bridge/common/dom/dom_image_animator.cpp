@@ -32,48 +32,47 @@ const char* ITERATIONS_INFINITE = "infinite";
 DOMImageAnimator::DOMImageAnimator(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
     imageAnimator_ = AceType::MakeRefPtr<ImageAnimatorComponent>(nodeName);
-    controller_ = AceType::MakeRefPtr<Animator>();
-    controller_->SetFillMode(FillMode::FORWARDS);
-    imageAnimator_->SetAnimator(controller_);
 }
 
 bool DOMImageAnimator::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
 {
+    if (!imageAnimator_) {
+        LOGE("SetSpecializedAttr failed, The imageAnimator is not created.");
+        return false;
+    }
     if (attr.first == DOM_ITERATION) {
         if (attr.second == ITERATIONS_INFINITE) {
-            iteration_ = ANIMATION_REPEAT_INFINITE;
+            imageAnimator_->SetIteration(ANIMATION_REPEAT_INFINITE);
         } else {
-            iteration_ = StringToInt(attr.second);
+            imageAnimator_->SetIteration(StringToInt(attr.second));
         }
         return true;
     }
     if (attr.first == DOM_PREDECODE) {
-        preDecode_ = StringToInt(attr.second);
+        imageAnimator_->SetPreDecode(StringToInt(attr.second));
         return true;
     }
     if (attr.first == DOM_DURATION) {
         auto val = attr.second;
         if (val.find("ms") != std::string::npos) {
-            duration_ = StringToInt(val);
+            imageAnimator_->SetDuration(StringToInt(val));
         } else if (val.find('s') != std::string::npos) {
-            duration_ = StringToInt(val) * MS_TO_S;
+            imageAnimator_->SetDuration(StringToInt(val) * MS_TO_S);
         } else {
-            duration_ = StringToInt(val);
+            imageAnimator_->SetDuration(StringToInt(val));
         }
         return true;
     }
     if (attr.first == DOM_FIXEDSIZE) {
-        fixedSize_ = StringToBool(attr.second);
+        imageAnimator_->SetIsFixedSize(StringToBool(attr.second));
         return true;
     }
     if (attr.first == DOM_REVERSE) {
-        isReverse_ = StringToBool(attr.second);
+        imageAnimator_->SetIsReverse(StringToBool(attr.second));
         return true;
     }
     if (attr.first == DOM_FILLMODE) {
-        if (controller_) {
-            controller_->SetFillMode(StringToFillMode(attr.second));
-        }
+        imageAnimator_->SetFillMode(StringToFillMode(attr.second));
         return true;
     }
     return false;
@@ -81,51 +80,30 @@ bool DOMImageAnimator::SetSpecializedAttr(const std::pair<std::string, std::stri
 
 bool DOMImageAnimator::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
-    EventMarker eventMarker(GetNodeIdForEvent(), event, pageId);
-    auto weakContext = pipelineContext_;
+    if (!imageAnimator_) {
+        LOGE("AddSpecializedEvent failed, The imageAnimator is not created.");
+        return false;
+    }
+    const auto& controller = imageAnimator_->GetImageAnimatorController();
+    if (!controller) {
+        LOGE("AddSpecializedEvent failed, controller is null.");
+        return false;
+    }
     if (event == DOM_IMAGE_ANIMATOR_START) {
-        controller_->ClearStartListeners();
-        controller_->AddStartListener([eventMarker, weakContext] {
-            auto context = weakContext.Upgrade();
-            if (!context) {
-                LOGE("Start event: Context is null");
-                return;
-            }
-            AceAsyncEvent<void()>::Create(eventMarker, context)();
-        });
+        auto startEvent = EventMarker(GetNodeIdForEvent(), event, pageId);
+        controller->SetStartEvent(startEvent);
         return true;
     } else if (event == DOM_IMAGE_ANIMATOR_STOP) {
-        controller_->ClearStopListeners();
-        controller_->AddStopListener([eventMarker, weakContext] {
-            auto context = weakContext.Upgrade();
-            if (!context) {
-                LOGE("Stop event: Context is null");
-                return;
-            }
-            AceAsyncEvent<void()>::Create(eventMarker, context)();
-        });
+        auto stopEvent = EventMarker(GetNodeIdForEvent(), event, pageId);
+        controller->SetStopEvent(stopEvent);
         return true;
     } else if (event == DOM_IMAGE_ANIMATOR_PAUSE) {
-        controller_->ClearPauseListeners();
-        controller_->AddPauseListener([eventMarker, weakContext] {
-            auto context = weakContext.Upgrade();
-            if (!context) {
-                LOGE("Pause event: Context is null");
-                return;
-            }
-            AceAsyncEvent<void()>::Create(eventMarker, context)();
-        });
+        auto pauseEvent = EventMarker(GetNodeIdForEvent(), event, pageId);
+        controller->SetPauseEvent(pauseEvent);
         return true;
     } else if (event == DOM_IMAGE_ANIMATOR_RESUME) {
-        controller_->ClearResumeListeners();
-        controller_->AddResumeListener([eventMarker, weakContext] {
-            auto context = weakContext.Upgrade();
-            if (!context) {
-                LOGE("Resume event: Context is null");
-                return;
-            }
-            AceAsyncEvent<void()>::Create(eventMarker, context)();
-        });
+        auto resumeEvent = EventMarker(GetNodeIdForEvent(), event, pageId);
+        controller->SetResumeEvent(resumeEvent);
         return true;
     } else {
         return false;
@@ -134,40 +112,30 @@ bool DOMImageAnimator::AddSpecializedEvent(int32_t pageId, const std::string& ev
 
 void DOMImageAnimator::CallSpecializedMethod(const std::string& method, const std::string& args)
 {
-    if (!controller_) {
-        LOGE("The controller is not created.");
+    if (!imageAnimator_) {
+        LOGE("CallSpecializedMethod failed, The imageAnimator is not created.");
         return;
     }
-    auto nodeId = GetNodeId();
-    if (method == DOM_IMAGE_ANIMATOR_START) {
-        LOGI("JS call Start method, nodeId: %{public}d", nodeId);
-        if (isReverse_) {
-            controller_->Backward();
-        } else {
-            controller_->Forward();
-        }
-    } else if (method == DOM_IMAGE_ANIMATOR_STOP) {
-        LOGI("JS call Stop method, nodeId: %{public}d", nodeId);
-        controller_->Finish();
-    } else if (method == DOM_IMAGE_ANIMATOR_PAUSE) {
-        LOGI("JS call Pause method, nodeId: %{public}d", nodeId);
-        controller_->Pause();
-    } else if (method == DOM_IMAGE_ANIMATOR_RESUME) {
-        LOGI("JS call Resume method, nodeId: %{public}d", nodeId);
-        controller_->Resume();
-    } else {
-        LOGE("Do not support this method: %{public}s, nodeId: %{public}d.", method.c_str(), nodeId);
-        EventReport::SendComponentException(ComponentExcepType::IMAGE_ANIMATOR_ERR);
+    const auto& controller = imageAnimator_->GetImageAnimatorController();
+    if (!controller) {
+        LOGE("CallSpecializedMethod failed, controller is null.");
+        return;
     }
+    controller->CallAnimationFunc(method);
 }
 
 const char* DOMImageAnimator::GetState() const
 {
-    if (!controller_) {
-        LOGE("The controller is not created.");
-        return "";
+    if (!imageAnimator_) {
+        LOGE("GetState failed, The imageAnimator is not created.");
+        return STATE_STOPPED;
     }
-    auto currentStatus = controller_->GetStatus();
+    const auto& controller = imageAnimator_->GetImageAnimatorController();
+    if (!controller) {
+        LOGE("GetState failed, controller is null.");
+        return STATE_STOPPED;
+    }
+    auto currentStatus = controller->CallAnimatorGetStatusFunc();
     if (currentStatus == Animator::Status::PAUSED) {
         return STATE_PAUSED;
     } else if (currentStatus == Animator::Status::RUNNING) {
@@ -176,7 +144,7 @@ const char* DOMImageAnimator::GetState() const
         // IDLE and STOP
         return STATE_STOPPED;
     }
-};
+}
 
 void DOMImageAnimator::PrepareSpecializedComponent()
 {
@@ -185,15 +153,13 @@ void DOMImageAnimator::PrepareSpecializedComponent()
         EventReport::SendComponentException(ComponentExcepType::IMAGE_ANIMATOR_ERR);
         return;
     }
-    if (border_.HasRadius()) {
-        imageAnimator_->SetBorder(border_);
+    if (declaration_) {
+        auto& borderStyle = static_cast<CommonBorderStyle&>(declaration_->GetStyle(StyleTag::COMMON_BORDER_STYLE));
+        if (borderStyle.IsValid() && borderStyle.border.HasRadius()) {
+            imageAnimator_->SetBorder(borderStyle.border);
+        }
     }
-    imageAnimator_->SetDuration(duration_);
-    imageAnimator_->SetIteration(iteration_);
-    imageAnimator_->SetIsReverse(isReverse_);
     imageAnimator_->SetImageProperties(imagesAttr_);
-    imageAnimator_->SetIsFixedSize(fixedSize_);
-    imageAnimator_->SetPreDecode(preDecode_);
 }
 
 } // namespace OHOS::Ace::Framework

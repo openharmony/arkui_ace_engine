@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_INTERPOLATOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_INTERPOLATOR_H
 
-#include "base/log/log.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/time_event.h"
 
@@ -44,10 +43,6 @@ public:
     // Interpolator use OnNormalizedTimestampChanged instead.
     void OnTimestampChanged(float timestamp, float normalizedTime, bool reverse) final
     {
-        if (normalizedTime < NORMALIZED_DURATION_MIN || normalizedTime > NORMALIZED_DURATION_MAX) {
-            LOGE("Interpolator only accepts normalized time, invalid time: %{public}f", normalizedTime);
-            return;
-        }
         // just pass normalized time to subclass.
         OnNormalizedTimestampChanged(normalizedTime, reverse);
     }

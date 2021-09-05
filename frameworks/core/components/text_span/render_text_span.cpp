@@ -16,7 +16,6 @@
 #include "core/components/text_span/render_text_span.h"
 
 #include "core/common/font_manager.h"
-#include "core/components/text_span/text_span_component.h"
 
 namespace OHOS::Ace {
 
@@ -34,16 +33,13 @@ RenderTextSpan::~RenderTextSpan()
 
 void RenderTextSpan::Update(const RefPtr<Component>& component)
 {
-    auto textSpan = AceType::DynamicCast<TextSpanComponent>(component);
-    if (!textSpan) {
+    spanComponent_ = AceType::DynamicCast<TextSpanComponent>(component);
+    if (!spanComponent_) {
         return;
     }
-    spanData_ = textSpan->GetSpanData();
-    hasNewStyle_ = textSpan->HasNewStyle();
-    if (hasNewStyle_) {
-        spanStyle_ = textSpan->GetTextStyle();
+    if (spanComponent_->HasNewStyle()) {
+        spanStyle_ = spanComponent_->GetTextStyle();
     }
-    isShow_ = textSpan->IsShow();
 
     MarkNeedLayout();
 
@@ -79,7 +75,8 @@ const TextStyle& RenderTextSpan::GetSpanStyle() const
 
 const std::string& RenderTextSpan::GetSpanData() const
 {
-    return spanData_;
+    static std::string defaultData;
+    return spanComponent_ ? spanComponent_->GetSpanData() : defaultData;
 }
 
 } // namespace OHOS::Ace

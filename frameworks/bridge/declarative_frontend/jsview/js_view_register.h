@@ -17,24 +17,11 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_REGISTER_H
 
 #include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-
-#ifdef USE_QUICKJS_ENGINE
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include "third_party/quickjs/quickjs.h"
-#ifdef __cplusplus
-}
-#endif
-
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 
-#endif
 
 namespace OHOS::Ace::Framework {
-
-void RemoveViewById(ViewId viewId);
 
 /**
  * register C++ classes that are to be exposed to JS
@@ -42,5 +29,4 @@ void RemoveViewById(ViewId viewId);
 void JsRegisterViews(BindingTarget globalObj);
 
 } // namespace OHOS::Ace::Framework
-
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_REGISTER_H

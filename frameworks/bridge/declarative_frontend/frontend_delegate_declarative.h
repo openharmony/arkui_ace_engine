@@ -32,6 +32,7 @@
 #endif
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
+#include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
@@ -46,33 +47,49 @@ public:
         const JsMessageDispatcherSetterCallback& transferCallback, const EventCallback& asyncEventCallback,
         const EventCallback& syncEventCallback, const UpdatePageCallback& updatePageCallback,
         const ResetStagingPageCallback& resetLoadingPageCallback, const DestroyPageCallback& destroyPageCallback,
-        const DestroyApplicationCallback& destroyApplicationCallback, const TimerCallback& timerCallback,
+        const DestroyApplicationCallback& destroyApplicationCallback,
+        const UpdateApplicationStateCallback& updateApplicationStateCallback, const TimerCallback& timerCallback,
         const MediaQueryCallback& mediaQueryCallback, const RequestAnimationCallback& requestAnimationCallback,
-        const JsCallback& jsCallback);
-    ~FrontendDelegateDeclarative() override = default;
+        const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
+        const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack);
+    ~FrontendDelegateDeclarative() override;
 
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
+    void SetAssetManager(const RefPtr<AssetManager>& assetManager);
+    RefPtr<AssetManager> GetAssetManager() const override;
 
     // JSFrontend delegate functions.
     void RunPage(const std::string& url, const std::string& params);
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const;
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data);
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void TransferJsResponseDataPreview(int32_t callbackId, int32_t code, ResponseData responseData) const;
+#endif
     void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const;
     void TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const;
     void LoadPluginJsCode(std::string&& jsCode) const;
+    void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const;
     void OnJSCallback(const std::string& callbackId, const std::string& data);
     bool OnPageBackPress();
     void OnBackGround();
     void OnForground();
+    void OnConfigurationUpdated(const std::string& data);
     void OnSuspended();
     bool OnStartContinuation();
     void OnCompleteContinuation(int32_t code);
     void OnSaveData(std::string& data);
+    void GetPluginsUsed(std::string& data);
     bool OnRestoreData(const std::string& data);
     void OnNewRequest(const std::string& data);
+    void SetColorMode(ColorMode colorMode);
     void CallPopPage();
     void OnApplicationDestroy(const std::string& packageName);
+    void UpdateApplicationState(const std::string& packageName, Frontend::State state);
+    void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data);
+    void NotifyAppStorage(const WeakPtr<Framework::JsEngine>& jsEngineWeak,
+        const std::string& key, const std::string& value);
+
 
     // Accessibility delegate functions.
     RefPtr<Framework::AccessibilityNodeManager> GetJSAccessibilityManager() const
@@ -91,12 +108,16 @@ public:
         const std::string& eventId, const std::string& param, const std::string& jsonArgs, std::string& result);
 
     // FrontendDelegate overrides.
+    void Push(const PageTarget& target, const std::string& params);
+    void Replace(const PageTarget& target, const std::string& params);
+    void BackWithTarget(const PageTarget& target, const std::string& params);
     void Push(const std::string& uri, const std::string& params) override;
     void Replace(const std::string& uri, const std::string& params) override;
-    void Back(const std::string& uri) override;
+    void Back(const std::string& uri, const std::string& params) override;
     void Clear() override;
     int32_t GetStackSize() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
+    std::string GetParams() override;
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override;
 
     void PostJsTask(std::function<void()>&& task) override;
@@ -105,14 +126,27 @@ public:
     const std::string& GetAppName() const override;
     const std::string& GetVersionName() const override;
     int32_t GetVersionCode() const override;
-    const WindowConfig& GetWindowConfig() const;
+    WindowConfig& GetWindowConfig()
+    {
+        return manifestParser_->GetWindowConfig();
+    }
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
     void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<std::pair<std::string, std::string>>& buttons, bool autoCancel,
         std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks) override;
 
+    void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) override {}
+
+    void DisableAlertBeforeBackPage() override {}
+
+    void ShowActionMenu(const std::string& title, const std::vector<std::pair<std::string, std::string>>& button,
+        std::function<void(int32_t, int32_t)>&& callback) override {}
+
     Rect GetBoundingRectData(NodeId nodeId) override;
+
+    void PushJsCallbackToRenderNode(NodeId id, double ratio, std::function<void(bool, double)>&& callback) override;
+    void RemoveVisibleChangeNode(NodeId id) override;
     // For async event.
     void SetCallBackResult(const std::string& callBackId, const std::string& result) override;
 
@@ -125,6 +159,7 @@ public:
 
     bool GetAssetContent(const std::string& url, std::string& content) override;
     bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) override;
+    std::string GetAssetPath(const std::string& url) override;
 
     // i18n
     void GetI18nData(std::unique_ptr<JsonValue>& json) override;
@@ -133,11 +168,17 @@ public:
 
     void GetConfigurationCommon(const std::string& filePath, std::unique_ptr<JsonValue>& data) override;
 
+    int32_t GetMinPlatformVersion() override;
+
+    void LoadResourceConfiguration(std::map<std::string, std::string>& mediaResourceFileMap,
+        std::unique_ptr<JsonValue>& currentResourceData) override;
+
     void ChangeLocale(const std::string& language, const std::string& countryOrRegion) override;
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc) override;
 
-    void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
+    void HandleImage(const std::string& src, std::function<void(int32_t)>&& callback,
+        const std::set<std::string>& callbacks) override;
 
     void RequestAnimationFrame(const std::string& callbackId) override;
 
@@ -182,9 +223,11 @@ private:
     int32_t GenerateNextPageId();
     void RecyclePageId(int32_t pageId);
 
-    void LoadPage(int32_t pageId, const std::string& url, bool isMainPage, const std::string& params);
-    void OnPageReady(const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage);
-    void FlushPageCommand(const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage);
+    void LoadPage(int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params);
+    void OnPageReady(
+        const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage);
+    void FlushPageCommand(
+        const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage);
     void AddPageLocked(const RefPtr<JsAcePage>& page);
     void SetCurrentPage(int32_t pageId);
 
@@ -196,14 +239,15 @@ private:
 
     void PopPageTransitionListener(const TransitionEvent& event, int32_t destroyPageId);
 
-    void PopToPageTransitionListener(const TransitionEvent& event, const std::string& url, int32_t pageId);
+    void PopToPageTransitionListener(
+        const TransitionEvent& event, const std::string& url, int32_t pageId);
 
     int32_t OnClearInvisiblePagesSuccess();
     void ClearInvisiblePages();
 
     void OnReplacePageSuccess(const RefPtr<JsAcePage>& page, const std::string& url);
     void ReplacePage(const RefPtr<JsAcePage>& page, const std::string& url);
-    void LoadReplacePage(int32_t pageId, const std::string& url, const std::string& params);
+    void LoadReplacePage(int32_t pageId, const PageTarget& url, const std::string& params);
 
     uint64_t GetSystemRealTime();
 
@@ -221,11 +265,13 @@ private:
 
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;
+    int32_t pageId_ = -1;
     bool isRouteStackFull_ = false;
     bool isStagingPageExist_ = false;
     std::string mainPagePath_;
     std::vector<PageInfo> pageRouteStack_;
     std::unordered_map<int32_t, RefPtr<JsAcePage>> pageMap_;
+    std::unordered_map<int32_t, std::string> pageParamMap_;
     std::unordered_map<int32_t, std::string> jsCallBackResult_;
 
     LoadJsCallback loadJs_;
@@ -236,11 +282,14 @@ private:
     ResetStagingPageCallback resetStagingPage_;
     DestroyPageCallback destroyPage_;
     DestroyApplicationCallback destroyApplication_;
+    UpdateApplicationStateCallback updateApplicationState_;
     TimerCallback timer_;
     std::unordered_map<std::string, CancelableCallback<void()>> timeoutTaskMap_;
     MediaQueryCallback mediaQueryCallback_;
     RequestAnimationCallback requestAnimationCallback_;
     JsCallback jsCallback_;
+    OnWindowDisplayModeChangedCallBack onWindowDisplayModeChanged_;
+    OnConfigurationUpdatedCallBack onConfigurationUpdated_;
     RefPtr<Framework::ManifestParser> manifestParser_;
     RefPtr<Framework::AccessibilityNodeManager> jsAccessibilityManager_;
     RefPtr<MediaQueryInfo> mediaQueryInfo_;

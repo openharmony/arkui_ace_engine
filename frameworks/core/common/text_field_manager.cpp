@@ -26,17 +26,21 @@ void TextFieldManager::SetClickPosition(const Offset& position)
     position_ = position;
 }
 
-void TextFieldManager::MovePage(const RefPtr<StackElement>& stackElement, const Offset& rootRect, double offsetHeight)
+void TextFieldManager::SetScrollElement(int32_t pageId, const WeakPtr<ScrollElement>& scrollElement)
 {
-    if (!stackElement) {
-        return;
+    auto iter = scrollMap_.find(pageId);
+    if (iter == scrollMap_.end()) {
+        scrollMap_.try_emplace(pageId, scrollElement);
     }
+}
 
-    const auto& composedElement = AceType::DynamicCast<ComposedElement>(stackElement->GetChildren().front());
-    if (!composedElement) {
+void TextFieldManager::MovePage(int32_t pageId, const Offset& rootRect, double offsetHeight)
+{
+    auto iter = scrollMap_.find(pageId);
+    if (iter == scrollMap_.end()) {
         return;
     }
-    const auto& scrollElement = AceType::DynamicCast<ScrollElement>(composedElement->GetChildren().front());
+    auto scrollElement = iter->second.Upgrade();
     if (!scrollElement) {
         return;
     }
@@ -45,7 +49,6 @@ void TextFieldManager::MovePage(const RefPtr<StackElement>& stackElement, const 
     if (!scroll) {
         return;
     }
-
     if (GreatNotEqual(position_.GetY(), rootRect.GetY())) {
         hasMove_ = true;
         scroll->SetNeedMove(true);
@@ -55,6 +58,16 @@ void TextFieldManager::MovePage(const RefPtr<StackElement>& stackElement, const 
         scroll->SetNeedMove(false);
         hasMove_ = false;
     }
+}
+
+void TextFieldManager::RemovePageId(int32_t pageId)
+{
+    scrollMap_.erase(pageId);
+}
+
+const Offset& TextFieldManager::GetClickPosition()
+{
+    return position_;
 }
 
 }; // namespace OHOS::Ace

@@ -55,6 +55,12 @@ public:
     {
         return FocusNode::AcceptFocusByRectOfLastFocus(rect);
     }
+
+    RefPtr<RenderNode> CreateRenderNode() override
+    {
+        auto tabBarItemComponent = AceType::DynamicCast<TabBarItemComponent>(component_);
+        return tabBarItemComponent ? tabBarItemComponent->CreateRenderNode() : nullptr;
+    }
 };
 
 } // namespace OHOS::Ace

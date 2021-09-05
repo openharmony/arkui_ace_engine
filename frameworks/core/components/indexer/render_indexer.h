@@ -149,7 +149,7 @@ protected:
     RefPtr<RenderBox> bubbleBox_;                   // reference of the bubble box render node
     RefPtr<RenderDisplay> bubbleDisplay_;           // reference of the bubble box render node
     RefPtr<Animator> bubbleController_; // control bubble appear and disappear
-
+    Offset touchPostion_;
     std::list<RefPtr<RenderNode>> items_;
 };
 

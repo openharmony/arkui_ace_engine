@@ -15,9 +15,9 @@
 
 #include "core/components/image/render_image.h"
 
+#include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
-#include "core/components/align/render_align.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
 #include "core/event/ace_event_helper.h"
@@ -32,37 +32,58 @@ constexpr double RESIZE_AGAIN_THRESHOLD = 1.2;
 void RenderImage::Update(const RefPtr<Component>& component)
 {
     const RefPtr<ImageComponent> image = AceType::DynamicCast<ImageComponent>(component);
-    if (image) {
-        currentSrcRect_ = srcRect_;
-        currentDstRectList_ = rectList_;
-        imageSrc_ = image->GetSrc();
-        imageAlt_ = image->GetAlt();
-        resourceId_ = image->GetResourceId();
-
-        width_ = image->GetWidth();
-        height_ = image->GetHeight();
-        alignment_ = image->GetAlignment();
-        imageFit_ = image->GetImageFit();
-        fitMaxSize_ = image->GetFitMaxSize();
-        imageRepeat_ = image->GetImageRepeat();
-        color_ = image->GetColor();
-        isColorSet_ = image->IsColorSet();
-        previousLayoutSize_ = Size();
-        SetTextDirection(image->GetTextDirection());
-        matchTextDirection_ = image->IsMatchTextDirection();
-        SetRadius(image->GetBorder());
-        auto context = context_.Upgrade();
-        if (context && context->GetIsDeclarative()) {
-            loadImgSuccessEvent_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                image->GetLoadSuccessEventId(), context_);
-            loadImgFailEvent_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                image->GetLoadFailEventId(), context_);
-        } else {
-            loadSuccessEvent_ =
-                AceAsyncEvent<void(const std::string&)>::Create(image->GetLoadSuccessEventId(), context_);
-            loadFailEvent_ = AceAsyncEvent<void(const std::string&)>::Create(image->GetLoadFailEventId(), context_);
-        }
+    if (!image) {
+        LOGE("image component is null!");
+        return;
     }
+    currentSrcRect_ = srcRect_;
+    currentDstRectList_ = rectList_;
+
+    width_ = image->GetWidth();
+    height_ = image->GetHeight();
+    alignment_ = image->GetAlignment();
+    imageObjectPosition_ = image->GetImageObjectPosition();
+    fitMaxSize_ = image->GetFitMaxSize();
+    hasObjectPosition_ = image->GetHasObjectPosition();
+    color_ = image->GetColor();
+    isColorSet_ = image->IsColorSet();
+    previousLayoutSize_ = Size();
+    SetTextDirection(image->GetTextDirection());
+    matchTextDirection_ = image->IsMatchTextDirection();
+    SetRadius(image->GetBorder());
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        loadImgSuccessEvent_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            image->GetLoadSuccessEvent(), context_);
+        loadImgFailEvent_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            image->GetLoadFailEvent(), context_);
+    } else {
+        loadSuccessEvent_ =
+            AceAsyncEvent<void(const std::string&)>::Create(image->GetLoadSuccessEvent(), context_);
+        loadFailEvent_ = AceAsyncEvent<void(const std::string&)>::Create(image->GetLoadFailEvent(), context_);
+    }
+    svgAnimatorFinishEvent_ = image->GetSvgAnimatorFinishEvent();
+    imageFit_ = image->GetImageFit();
+    imageInterpolation_ = image->GetImageInterpolation();
+    imageRenderMode_ = image->GetImageRenderMode();
+    imageRepeat_ = image->GetImageRepeat();
+
+    useSkiaSvg_ = image->GetUseSkiaSvg();
+    autoResize_ = image->GetAutoResize();
+    pixmap_ = image->GetPixmap();
+    imageAlt_ = image->GetAlt();
+    auto inComingSrc = image->GetSrc();
+    ImageSourceInfo inComingSource(
+        inComingSrc,
+        image->GetImageSourceSize().first,
+        image->GetImageSourceSize().second,
+        inComingSrc.empty() ? image->GetResourceId() : InternalResource::ResourceId::NO_ID);
+    // this value is used for update frequency with same image source info.
+    LOGD("sourceInfo %{public}s", sourceInfo_.ToString().c_str());
+    LOGD("inComingSource %{public}s", inComingSource.ToString().c_str());
+    LOGD("imageLoadingStatus_: %{public}d", static_cast<int32_t>(imageLoadingStatus_));
+    proceedPreviousLoading_ = sourceInfo_.IsValid() && sourceInfo_ == inComingSource;
+    sourceInfo_ = inComingSource;
 }
 
 void RenderImage::PerformLayout()
@@ -101,24 +122,18 @@ void RenderImage::PerformLayout()
     ApplyImageFit(srcRect_, dstRect_);
     // Restore image size.
     srcRect_.ApplyScale(scale_);
-    if (paddingHorizontal_ > 0.0 || paddingVertical_ > 0.0) {
-        GenerateRepeatRects(dstRect_,
-            GetLayoutSize() - Size(paddingHorizontal_ * (horizontalRepeatNum_ * 2 - 1), paddingVertical_ * 2),
-            imageRepeat_);
-        ACE_DCHECK(!rectList_.empty());
-        auto iter = rectList_.begin();
-        iter->SetOffset(iter->GetOffset() + Offset(paddingHorizontal_, paddingVertical_));
-        for (int32_t index = 1; index < static_cast<int32_t>(rectList_.size()); index++) {
-            iter++;
-            iter->SetOffset(iter->GetOffset() + Offset(paddingHorizontal_ * (2 * index + 1), paddingVertical_));
-        }
-    } else {
-        GenerateRepeatRects(dstRect_, GetLayoutSize(), imageRepeat_);
-    }
+    GenerateRepeatRects(dstRect_, GetLayoutSize(), imageRepeat_);
     if (!imageComponentSize_.IsValid()) {
         SetLayoutSize(dstRect_.GetSize());
         std::for_each(
             rectList_.begin(), rectList_.end(), [offset = dstRect_.GetOffset()](Rect& rect) { rect -= offset; });
+    }
+    decltype(imageLayoutCallbacks_) imageLayoutCallbacks(std::move(imageLayoutCallbacks_));
+    std::for_each(
+        imageLayoutCallbacks.begin(), imageLayoutCallbacks.end(), [](std::function<void()> callback) { callback(); });
+    if (pixmap_) {
+        MarkNeedRender();
+        return;
     }
     if (renderAltImage_) {
         LayoutParam altLayoutParam;
@@ -126,11 +141,23 @@ void RenderImage::PerformLayout()
         renderAltImage_->Layout(altLayoutParam);
     }
     CalculateResizeTarget();
+    if (hasObjectPosition_) {
+        ApplyObjectPosition();
+    }
 }
 
-Size RenderImage::CalculateBackupImageSize(const Size& pictureSize) const
+Size RenderImage::CalculateBackupImageSize(const Size& pictureSize)
 {
-    if (!pictureSize.IsValid()) {
+    // Since the return value of this function is used to determine the layout size of Image Component, it is essential
+    // to guarantee that there is no infinite edge to avoid thread stuck that may occur.
+    //
+    // Generally speaking, the size of the picture will not be infinite, but the size of the svg picture is equal to the
+    // maximum value of the layout parameters, so there is the possibility of infinity.
+    //
+    // Note that [pictureSize] has been scaled by [scale_], so we need to obtain the original picture size via
+    // [Measure()] to verify whether or not it has infinite edge.
+    auto rawPicSize = Measure();
+    if (!rawPicSize.IsValid() || rawPicSize.IsInfinite()) {
         return Size();
     }
     uint8_t infiniteStatus = (static_cast<uint8_t>(imageComponentSize_.IsWidthInfinite()) << 1) |
@@ -176,6 +203,11 @@ bool RenderImage::NeedResize() const
 void RenderImage::CalculateResizeTarget()
 {
     if (!srcRect_.IsValid()) {
+        return;
+    }
+    if (!autoResize_) {
+        resizeTarget_ = rawImageSize_;
+        resizeScale_ = Size(1.0, 1.0);
         return;
     }
     double widthScale = dstRect_.Width() / srcRect_.Width() * scale_;
@@ -331,10 +363,13 @@ void RenderImage::FireLoadEvent(const Size& picSize) const
     auto context = context_.Upgrade();
     if (context && context->GetIsDeclarative()) {
         if (loadImgSuccessEvent_ && (imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS)) {
-            loadImgSuccessEvent_(std::make_shared<LoadImageSuccessEvent>(picSize.Width(), picSize.Height()));
+            // here the last param of [loadImgSuccessEvent_] is [1],
+            // which means the callback is triggered by [OnLoadSuccess]
+            loadImgSuccessEvent_(std::make_shared<LoadImageSuccessEvent>(picSize.Width(), picSize.Height(),
+                GetLayoutSize().Width(), GetLayoutSize().Height(), 1));
         }
         if (loadImgFailEvent_ && (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL)) {
-            loadImgFailEvent_(std::make_shared<LoadImageFailEvent>());
+            loadImgFailEvent_(std::make_shared<LoadImageFailEvent>(GetLayoutSize().Width(), GetLayoutSize().Height()));
         }
         return;
     }
@@ -371,8 +406,7 @@ void RenderImage::SetRadius(const Border& border)
 
 bool RenderImage::IsSVG(const std::string& src, InternalResource::ResourceId resourceId)
 {
-    // 4 is the length of ".svg".
-    return (src.size() > 4 && src.substr(src.size() - 4) == ".svg") ||
+    return ImageComponent::IsSvgSuffix(src) ||
            (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
                resourceId < InternalResource::ResourceId::SVG_END);
 }
@@ -391,6 +425,29 @@ void RenderImage::PerformLayoutBgImage()
     srcRect_.SetSize(rawImageSize_);
     dstRect_.SetOffset(Offset());
     dstRect_.SetSize(imageRenderSize_);
+}
+
+// objectPosition
+void RenderImage::ApplyObjectPosition()
+{
+    Size layoutSize = GetLayoutSize();
+    Offset offset;
+    if (imageObjectPosition_.GetSizeTypeX() == BackgroundImagePositionType::PX) {
+        offset.SetX((layoutSize.Width() - dstRect_.Width()) / 2 - imageObjectPosition_.GetSizeValueX());
+    } else {
+        offset.SetX(
+            (layoutSize.Width() - dstRect_.Width()) / 2 - imageObjectPosition_.GetSizeValueX() *
+            (layoutSize.Width() - dstRect_.Width()) / PERCENT_TRANSLATE);
+    }
+
+    if (imageObjectPosition_.GetSizeTypeY() == BackgroundImagePositionType::PX) {
+        offset.SetY((layoutSize.Height() - dstRect_.Height()) / 2 - imageObjectPosition_.GetSizeValueY());
+    } else {
+        offset.SetY(
+            (layoutSize.Height() - dstRect_.Height()) / 2 - imageObjectPosition_.GetSizeValueY() *
+            (layoutSize.Height() - dstRect_.Height()) / PERCENT_TRANSLATE);
+    }
+    imageRenderPosition_ = offset;
 }
 
 void RenderImage::GenerateImageRects(const Size& srcSize, const BackgroundImageSize& imageSize, ImageRepeat imageRepeat,
@@ -582,12 +639,10 @@ void RenderImage::ClearRenderObject()
     imageRepeat_ = ImageRepeat::NOREPEAT;
     rectList_.clear();
     color_ = Color::TRANSPARENT;
-    resourceId_ = InternalResource::ResourceId::NO_ID;
+    sourceInfo_.Reset();
     singleWidth_ = 0.0;
     displaySrcWidth_ = 0.0;
     scale_ = 1.0;
-    paddingHorizontal_ = 0.0;
-    paddingVertical_ = 0.0;
     horizontalRepeatNum_ = 1.0;
     rotate_ = 0.0;
     keepOffsetZero_ = false;
@@ -605,16 +660,21 @@ void RenderImage::ClearRenderObject()
     height_ = Dimension();
     rawImageSize_ = Size();
     renderAltImage_ = nullptr;
-
+    proceedPreviousLoading_ = false;
     imageUpdateFunc_ = nullptr;
     background_ = false;
     boxPaintSize_ = Size();
     boxMarginOffset_ = Offset();
     imageSize_ = BackgroundImageSize();
     imagePosition_ = BackgroundImagePosition();
-
+    imageObjectPosition_ = ImageObjectPosition();
     imageRenderSize_ = Size();
     imageRenderPosition_ = Offset();
+    forceResize_ = false;
+    forceReload_ = false;
+    imageSizeForEvent_ =  { 0.0, 0.0 };
+    retryCnt_ = 0;
+    pixmap_ = nullptr;
 }
 
 void RenderImage::PrintImageLog(const Size& srcSize, const BackgroundImageSize& imageSize, ImageRepeat imageRepeat,
@@ -631,6 +691,11 @@ void RenderImage::PrintImageLog(const Size& srcSize, const BackgroundImageSize& 
          "rect:%{public}s",
         GetDepth(), imageRenderSize_.Width(), imageRenderSize_.Height(), imageRenderPosition_.GetX(),
         imageRenderPosition_.GetY(), rectList_.front().ToString().c_str());
+}
+
+void RenderImage::Dump()
+{
+    DumpLog::GetInstance().AddDesc(std::string("UsingWideGamut: ").append(IsSourceWideGamut() ? "true" : "false"));
 }
 
 } // namespace OHOS::Ace

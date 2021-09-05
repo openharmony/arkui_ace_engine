@@ -95,6 +95,26 @@ public:
         onCancel_ = value;
     }
 
+    const EventMarker& GetOnShow() const
+    {
+        return onShow_;
+    }
+
+    void SetOnShow(const EventMarker& value)
+    {
+        onShow_ = value;
+    }
+
+    const EventMarker& GetOnClose() const
+    {
+        return onClose_;
+    }
+
+    void SetOnClose(const EventMarker& value)
+    {
+        onClose_ = value;
+    }
+
     const Dimension& GetHeight() const
     {
         return height_;
@@ -131,14 +151,27 @@ public:
         return isSetMargin_;
     }
 
+    void SetIsDragable(bool isDragable)
+    {
+        isDragable_ = isDragable;
+    }
+
+    bool IsDragable() const
+    {
+        return isDragable_;
+    }
+
 private:
     RefPtr<CustomDialogController> dialogController_;
     EventMarker onCancel_;
+    EventMarker onShow_;
+    EventMarker onClose_;
     // initialize height and width to default case
     Dimension height_;
     Dimension width_;
     Edge margin_;
     bool isSetMargin_ = false;
+    bool isDragable_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -20,6 +20,24 @@
 
 namespace OHOS::Ace {
 
+SvgTextPathComponent::SvgTextPathComponent()
+{
+    InitDeclaration();
+}
+
+SvgTextPathComponent::SvgTextPathComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children)
+{
+    InitDeclaration();
+}
+
+void SvgTextPathComponent::InitDeclaration()
+{
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<SvgTextPathDeclaration>();
+        declaration_->Init();
+    }
+}
+
 RefPtr<Element> SvgTextPathComponent::CreateElement()
 {
     return AceType::MakeRefPtr<SvgTextPathElement>();
@@ -28,6 +46,43 @@ RefPtr<Element> SvgTextPathComponent::CreateElement()
 RefPtr<RenderNode> SvgTextPathComponent::CreateRenderNode()
 {
     return FlutterRenderSvgTextPath::Create();
+}
+
+const std::string& SvgTextPathComponent::GetTextData() const
+{
+    return declaration_->GetTextData();
+}
+
+void SvgTextPathComponent::SetTextData(const std::string& textData)
+{
+    declaration_->SetTextData(textData);
+}
+
+const std::string& SvgTextPathComponent::GetPath() const
+{
+    return declaration_->GetPath();
+}
+
+void SvgTextPathComponent::SetPath(const std::string& path)
+{
+    declaration_->SetPath(path);
+}
+
+const Dimension& SvgTextPathComponent::GetStartOffset() const
+{
+    return declaration_->GetStartOffset();
+}
+
+void SvgTextPathComponent::SetStartOffset(const Dimension& startOffset)
+{
+    declaration_->SetStartOffset(startOffset);
+}
+
+void SvgTextPathComponent::SetDeclaration(const RefPtr<SvgTextPathDeclaration>& declaration)
+{
+    if (declaration) {
+        declaration_ = declaration;
+    }
 }
 
 } // namespace OHOS::Ace

@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/sole_child_component.h"
+#include "core/components/declaration/qrcode/qrcode_declaration.h"
 
 namespace OHOS::Ace {
 
@@ -32,95 +33,27 @@ public:
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
 
-    const std::string& GetValue() const
-    {
-        return value_;
-    }
+    const std::string& GetValue() const;
+    const Color& GetBackgroundColor() const;
+    const Color& GetQrcodeColor() const;
+    QrcodeType GetType() const;
+    const Dimension& GetQrcodeWidth() const;
+    const Dimension& GetQrcodeHeight() const;
+    bool IsWidthDefined() const;
+    bool IsHeightDefined() const;
+    void SetValue(const std::string& value);
+    void SetBackgroundColor(const Color& backgroundColor);
+    void SetQrcodeColor(const Color& qrcodeColor);
+    void SetQrcodeType(QrcodeType qrcodeType);
+    void SetQrcodeWidth(const Dimension& qrcodeWidth);
+    void SetQrcodeHeight(const Dimension& qrcodeHeight);
+    void SetWidthDefined(bool isWidthDefined);
+    void SetHeightDefined(bool isHeightDefined);
 
-    const Color& GetBackgroundColor() const
-    {
-        return backgroundColor_;
-    }
-
-    const Color& GetQrcodeColor() const
-    {
-        return qrcodeColor_;
-    }
-
-    QrcodeType GetType() const
-    {
-        return qrcodeType_;
-    }
-
-    const Dimension& GetQrcodeWidth() const
-    {
-        return qrcodeWidth_;
-    }
-
-    const Dimension& GetQrcodeHeight() const
-    {
-        return qrcodeHeight_;
-    }
-
-    bool IsWidthDefined() const
-    {
-        return isWidthDefined_;
-    }
-
-    bool IsHeightDefined() const
-    {
-        return isHeightDefined_;
-    }
-
-    void SetValue(const std::string& value)
-    {
-        value_ = value;
-    }
-
-    void SetBackgroundColor(const Color& backgroundColor)
-    {
-        backgroundColor_ = backgroundColor;
-    }
-
-    void SetQrcodeColor(const Color& qrcodeColor)
-    {
-        qrcodeColor_ = qrcodeColor;
-    }
-
-    void SetQrcodeType(QrcodeType qrcodeType)
-    {
-        qrcodeType_ = qrcodeType;
-    }
-
-    void SetQrcodeWidth(const Dimension& qrcodeWidth)
-    {
-        qrcodeWidth_ = qrcodeWidth;
-    }
-
-    void SetQrcodeHeight(const Dimension& qrcodeHeight)
-    {
-        qrcodeHeight_ = qrcodeHeight;
-    }
-
-    void SetWidthDefined(bool isWidthDefined)
-    {
-        isWidthDefined_ = isWidthDefined;
-    }
-
-    void SetHeightDefined(bool isHeightDefined)
-    {
-        isHeightDefined_ = isHeightDefined;
-    }
+    void SetDeclaration(const RefPtr<QrcodeDeclaration>& declaration);
 
 private:
-    std::string value_;
-    Color backgroundColor_;
-    Color qrcodeColor_;
-    QrcodeType qrcodeType_ { QrcodeType::RECT };
-    Dimension qrcodeWidth_;
-    Dimension qrcodeHeight_;
-    bool isWidthDefined_ = false;
-    bool isHeightDefined_ = false;
+    RefPtr<QrcodeDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

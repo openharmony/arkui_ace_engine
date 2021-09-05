@@ -21,50 +21,25 @@
 #include "flutter/lib/ui/painting/image.h"
 
 #include "core/components/image/render_image.h"
-#include "core/image/animated_image_player.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/offset_layer.h"
+#include "frameworks/core/components/svg/parse/svg_dom.h"
 
 namespace OHOS::Ace {
 
-class FlutterRenderImage final : public RenderImage, public LoadImageCallback {
+class FlutterRenderImage final : public RenderImage, public ImageProviderLoader {
     DECLARE_ACE_TYPE(FlutterRenderImage, RenderImage);
 
 public:
     FlutterRenderImage();
-    ~FlutterRenderImage() override = default;
+    ~FlutterRenderImage() override;
 
     void Update(const RefPtr<Component>& component) override;
     void Paint(RenderContext& context, const Offset& offset) override;
-
-    void OnLoadSuccess(
-        const sk_sp<SkImage>& image, const RefPtr<ImageProvider>& imageProvider, const std::string& key) override;
-
-    void OnLoadGPUImageSuccess(
-        const fml::RefPtr<flutter::CanvasImage>& image, const RefPtr<ImageProvider>& imageProvider) override;
-
-    void OnAnimateImageSuccess(const RefPtr<ImageProvider>& provider, const std::unique_ptr<SkCodec> codec) override;
-
-    void OnLoadFail(const RefPtr<ImageProvider>& imageProvider) override;
-
-    void OnLoadImageSize(
-        Size imageSize,
-        const std::string& imageSrc,
-        const RefPtr<ImageProvider>& imageProvider,
-        bool syncMode) override;
-
-    void OnChangeProvider(const RefPtr<ImageProvider>& provider) override;
-
-    void MarkNeedReload() override
-    {
-        needReload_ = true;
-    }
-
-    bool IsRepaintBoundary() const override
-    {
-        return imageProvider_ && (imageProvider_->GetTotalFrames() > 1);
-    }
+    void UpdateData(const std::string& uri, const std::vector<uint8_t>& memData) override;
+    void PerformLayout() override;
+    bool IsRepaintBoundary() const override;
 
     RenderLayer GetRenderLayer() override
     {
@@ -80,23 +55,34 @@ public:
 
     void OnHiddenChanged(bool hidden) override;
 
-    void FetchImageData();
+    void UpLoadImageDataForPaint();
 
     void PaintBgImage(const flutter::Paint& paint, const flutter::PaintData& paint_data, const Offset& offset,
-                      const ScopedCanvas& canvas) const;
+        const ScopedCanvas& canvas) const;
 
-    void UpdateImageProvider() override;
-
-    void UpdateResourceId(InternalResource::ResourceId resourceId, bool onlySelfLayout) override
-    {
-        resourceId_ = resourceId;
-        MarkNeedLayout(onlySelfLayout);
-        UpdateImageProvider();
-    }
+    void FetchImageObject() override;
 
     bool SupportOpacity() override
     {
         return true;
+    }
+    bool IsSourceWideGamut() const override;
+    virtual bool RetryLoading() override;
+    static SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap);
+    static SkAlphaType AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap);
+    static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
+    static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
+
+    void ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasImage>& image);
+    void ImageObjReady(const RefPtr<ImageObject>& imageObj);
+    void ImageObjFailed();
+
+    void SetFetchImageObjBackgroundTask(CancelableTask task)
+    {
+        if (fetchImageObjTask_) {
+            fetchImageObjTask_.Cancel(false);
+        }
+        fetchImageObjTask_ = task;
     }
 
 protected:
@@ -104,36 +90,47 @@ protected:
     virtual void ClearRenderObject() override;
 
 private:
+    void InitializeCallbacks();
     Size Measure() override;
-    void UpdateRenderAltImage(bool needAltImage);
+    void UpdateRenderAltImage();
     void SetSkRadii(const Radius& radius, SkVector& radii);
     void SetClipRadius();
     void CanvasDrawImageRect(const flutter::Paint& paint, const flutter::PaintData& paint_data, const Offset& offset,
-        const ScopedCanvas& canvas);
-    bool IsSVG(const std::string& src, InternalResource::ResourceId resourceId) const;
-    void LoadSVGImage(const RefPtr<ImageProvider>& imageProvider, bool onlyLayoutSelf = false);
+        const ScopedCanvas& canvas,  const std::list<Rect>& paintRectList);
+    void PaintSVGImage(const sk_sp<SkData>& skData, bool onlyLayoutSelf = false);
     void DrawSVGImage(const Offset& offset, ScopedCanvas& canvas);
+    void DrawSVGImageCustom(RenderContext& context, const Offset& offset);
     void UpdateLoadSuccessState();
     Rect RecalculateSrcRect(const Size& realImageSize);
-    void UploadToGPUForRender(
-        const sk_sp<SkImage>& image,
-        const std::function<void(flutter::SkiaGPUObject<SkImage>)>& callback);
+    void ApplyColorFilter(flutter::Paint& paint);
+    void ApplyInterpolation(flutter::Paint& paint);
+    void ApplyBorderRadius(const Offset& offset, const ScopedCanvas& canvas, const std::list<Rect>& paintRectList);
+    void AddSvgChild();
+    void CreateAnimatedPlayer(const RefPtr<ImageProvider>& provider, SkCodec* codecPtr, bool forceResize);
+    bool VerifySkImageDataFromPixmap();
+    void PerformLayoutSvgCustom();
+    void CancelBackgroundTasks();
+    void CacheImageObject();
 
     sk_sp<SkSVGDOM> skiaDom_;
-    bool isNetworkSrc_ = false;
-    bool isSVG_ = false;
-    bool needReload_ = false;
-    std::string curImageSrc_;
-    InternalResource::ResourceId curResourceId_ = InternalResource::ResourceId::NO_ID;
-    fml::RefPtr<flutter::CanvasImage> image_;
-    RefPtr<ImageProvider> imageProvider_;
-    RefPtr<AnimatedImagePlayer> animatedPlayer_;
+    RefPtr<SvgDom> svgDom_;
+    sk_sp<SkImage> image_;
+    bool loadSvgAfterLayout_ = false;
     RefPtr<Flutter::OffsetLayer> layer_;
     SkVector radii_[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
     Size formerRawImageSize_;
-    fml::RefPtr<flutter::SkiaUnrefQueue> unrefQueue_;
-    fml::WeakPtr<flutter::IOManager> ioManager_;
     bool imageDataNotReady_ = false;
+
+    ImageSourceInfo curSourceInfo_;
+    ImageObjSuccessCallback imageObjSuccessCallback_;
+    PaintSuccessCallback paintSuccessCallback_;
+    FailedCallback failedCallback_;
+    OnPostBackgroundTask onPostBackgroundTask_;
+    RefPtr<ImageObject> imageObj_;
+    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
+
+    CancelableTask fetchImageObjTask_;
+    bool backgroundTaskCancled_ = false;
 };
 
 } // namespace OHOS::Ace

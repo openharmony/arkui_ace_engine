@@ -124,6 +124,21 @@ void RenderStage::HandleDragUpdate(double deltaX)
     // calculate the time based on the drag distance
     tickTime_ = (rootWidth - fabs(dragOffsetX_)) / rootWidth * TRANSITION_WATCH_DURATION;
 
+    auto stageElement = GetStageElement(context_);
+    if (!stageElement) {
+        LOGE("stageElement is null.");
+        return;
+    }
+
+    auto children = stageElement->GetChildren();
+    if (children.size() < LEAST_DRAG_BACK_PAGES) {
+        LOGE("children size less than two.");
+        return;
+    }
+    auto childIter = children.rbegin();
+    auto topElement = *childIter++;
+    auto nextTopElement = *childIter++;
+    SetPageHidden(nextTopElement, NearEqual(tickTime_, TRANSITION_WATCH_DURATION));
     if (!controllerIn_ || !controllerOut_) {
         LOGE("HandleDragUpdate : controllerIn or controllerOut is null.");
         return;
@@ -159,7 +174,6 @@ void RenderStage::HandleDragStart()
     if (!stageElement->InitTransition(transitionIn, transitionOut, TransitionEvent::POP_START)) {
         LOGE("Notify drag back failed. Init transition failed.");
     }
-    SetPageHidden(nextTopElement, false);
 }
 
 void RenderStage::HandleDragEnd()

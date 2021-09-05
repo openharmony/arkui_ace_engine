@@ -58,8 +58,11 @@ void FlutterRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Off
         return;
     }
 
-    Rect rect = child->GetPaintRect() + offset;
-    if (!estimatedRect_.IsIntersectWith(rect)) {
+    Rect rect = child->GetTransitionPaintRect() + offset;
+    if (!child->IsPaintOutOfParent() && !estimatedRect_.IsIntersectWith(rect)) {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+        child->ClearAccessibilityRect();
+#endif
         return;
     }
 
@@ -101,6 +104,25 @@ void FlutterRenderContext::StopRecordingIfNeeded()
     currentLayer_ = nullptr;
     recorder_ = nullptr;
     canvas_ = nullptr;
+}
+
+bool FlutterRenderContext::IsIntersectWith(const RefPtr<RenderNode>& child, Offset& offset)
+{
+    if (!ShouldPaint(child)) {
+        LOGD("Node is not need to paint");
+        return false;
+    }
+
+    Rect rect = child->GetTransitionPaintRect() + offset;
+    if (!estimatedRect_.IsIntersectWith(rect)) {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+        child->ClearAccessibilityRect();
+#endif
+        return false;
+    }
+
+    offset = rect.GetOffset();
+    return true;
 }
 
 void FlutterRenderContext::InitContext(RenderLayer layer, const Rect& rect)

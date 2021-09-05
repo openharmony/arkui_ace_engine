@@ -37,7 +37,7 @@ public:
 
     void SetUpdateType(UpdateType updateType) override
     {
-        Component::SetUpdateType(updateType);
+        RenderComponent::SetUpdateType(updateType);
         auto child = GetChild();
         if (child) {
             child->SetUpdateType(updateType);
@@ -46,7 +46,7 @@ public:
 
     void SetDisabledStatus(bool disabledStatus) override
     {
-        Component::SetDisabledStatus(disabledStatus);
+        RenderComponent::SetDisabledStatus(disabledStatus);
         auto child = GetChild();
         if (child) {
             child->SetDisabledStatus(disabledStatus);
@@ -55,9 +55,10 @@ public:
 
     void SetTextDirection(TextDirection direction) override
     {
-        direction_ = direction;
-        if (GetChild()) {
-            GetChild()->SetTextDirection(direction);
+        RenderComponent::SetTextDirection(direction);
+        auto child = GetChild();
+        if (child) {
+            child->SetTextDirection(direction);
         }
     }
 };

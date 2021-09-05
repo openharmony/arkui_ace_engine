@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_EDGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_EDGE_H
 
+#include "base/geometry/animatable_dimension.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/size.h"
@@ -36,6 +37,10 @@ public:
           bottom_(Dimension(bottom, unit)) {};
     Edge(const Dimension& left, const Dimension& top, const Dimension& right, const Dimension& bottom)
         : left_(left), top_(top), right_(right), bottom_(bottom) {};
+    Edge(const Dimension& left, const Dimension& top, const Dimension& right, const Dimension& bottom,
+         const AnimationOption& option)
+        : left_(AnimatableDimension(left, option)), top_(AnimatableDimension(top, option)),
+          right_(AnimatableDimension(right, option)), bottom_(AnimatableDimension(bottom, option)) {};
     virtual ~Edge() = default;
 
     static const Edge NONE;
@@ -48,49 +53,70 @@ public:
     static bool FromString(const std::string& value, Edge& edge);
 
     bool IsValid() const;
+    bool IsEffective() const;
     Size GetLayoutSizeInPx(double dipScale) const;
     Offset GetOffsetInPx(double dipScale) const;
     double HorizontalInPx(double dipScale) const;
     double VerticalInPx(double dipScale) const;
 
-    const Dimension& Left() const
+    const AnimatableDimension& Left() const
     {
         return left_;
     }
 
-    virtual void SetLeft(const Dimension& left)
+    virtual void SetLeft(const AnimatableDimension& left)
     {
         left_ = left;
     }
 
-    const Dimension& Top() const
+    virtual void SetLeft(const Dimension& left)
+    {
+        left_ = AnimatableDimension(left);
+    }
+
+    const AnimatableDimension& Top() const
     {
         return top_;
     }
 
-    virtual void SetTop(const Dimension& top)
+    virtual void SetTop(const AnimatableDimension& top)
     {
         top_ = top;
     }
 
-    const Dimension& Right() const
+    virtual void SetTop(const Dimension& top)
+    {
+        top_ = AnimatableDimension(top);
+    }
+
+    const AnimatableDimension& Right() const
     {
         return right_;
     }
 
-    virtual void SetRight(const Dimension& right)
+    virtual void SetRight(const AnimatableDimension& right)
     {
         right_ = right;
     }
 
-    const Dimension& Bottom() const
+    virtual void SetRight(const Dimension& right)
+    {
+        right_ = AnimatableDimension(right);
+    }
+
+    const AnimatableDimension& Bottom() const
     {
         return bottom_;
     }
 
-    virtual void SetBottom(const Dimension& bottom)
+    virtual void SetBottom(const AnimatableDimension& bottom)
     {
         bottom_ = bottom;
+    }
+
+    virtual void SetBottom(const Dimension& bottom)
+    {
+        bottom_ = AnimatableDimension(bottom);
     }
 
     Edge operator+(const Edge& edge) const
@@ -121,11 +147,19 @@ public:
         return (edge.left_ == left_) && (edge.top_ == top_) && (edge.right_ == right_) && (edge.bottom_ == bottom_);
     }
 
+    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+    {
+        left_.SetContextAndCallback(context, callback);
+        top_.SetContextAndCallback(context, callback);
+        right_.SetContextAndCallback(context, callback);
+        bottom_.SetContextAndCallback(context, callback);
+    }
+
 protected:
-    Dimension left_;
-    Dimension top_;
-    Dimension right_;
-    Dimension bottom_;
+    AnimatableDimension left_;
+    AnimatableDimension top_;
+    AnimatableDimension right_;
+    AnimatableDimension bottom_;
 };
 
 class EdgePx : public Edge {
@@ -155,7 +189,7 @@ public:
         return bottom_.Value();
     }
 
-    void SetLeft(const Dimension& left) override
+    void SetLeft(const AnimatableDimension& left) override
     {
         if (left.Unit() != DimensionUnit::PX) {
             return;
@@ -163,7 +197,15 @@ public:
         left_ = left;
     }
 
-    void SetTop(const Dimension& top) override
+    void SetLeft(const Dimension& left) override
+    {
+        if (left.Unit() != DimensionUnit::PX) {
+            return;
+        }
+        left_ = AnimatableDimension(left);
+    }
+
+    void SetTop(const AnimatableDimension& top) override
     {
         if (top.Unit() != DimensionUnit::PX) {
             return;
@@ -171,7 +213,15 @@ public:
         top_ = top;
     }
 
-    void SetRight(const Dimension& right) override
+    void SetTop(const Dimension& top) override
+    {
+        if (top.Unit() != DimensionUnit::PX) {
+            return;
+        }
+        top_ = AnimatableDimension(top);
+    }
+
+    void SetRight(const AnimatableDimension& right) override
     {
         if (right.Unit() != DimensionUnit::PX) {
             return;
@@ -179,12 +229,28 @@ public:
         right_ = right;
     }
 
-    void SetBottom(const Dimension& bottom) override
+    void SetRight(const Dimension& right) override
+    {
+        if (right.Unit() != DimensionUnit::PX) {
+            return;
+        }
+        right_ = AnimatableDimension(right);
+    }
+
+    void SetBottom(const AnimatableDimension& bottom) override
     {
         if (bottom.Unit() != DimensionUnit::PX) {
             return;
         }
         bottom_ = bottom;
+    }
+
+    void SetBottom(const Dimension& bottom) override
+    {
+        if (bottom.Unit() != DimensionUnit::PX) {
+            return;
+        }
+        bottom_ = AnimatableDimension(bottom);
     }
 
     Size GetLayoutSize() const

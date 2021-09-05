@@ -27,6 +27,21 @@ MockRenderTransform::HookRenderTransform g_hookRenderTransform;
 
 } // namespace
 
+void RenderTransform::Translate(const Dimension& x, const Dimension& y, const Dimension& z) {}
+
+void RenderTransform::Scale(float x, float y, float z) {}
+
+void RenderTransform::Skew(float x, float y) {};
+
+void RenderTransform::Perspective(const Dimension& distance) {}
+
+void RenderTransform::Matrix3D(Matrix4 m) {}
+
+Offset RenderTransform::GetGlobalOffsetExternal() const
+{
+    return Offset(0.0, 0.0);
+}
+
 void RenderTransform::Translate(const Dimension& x, const Dimension& y)
 {
     LOGD("TransformMock Translate. x: %{public}lf, y: %{public}lf", x.Value(), y.Value());
@@ -125,6 +140,15 @@ void RenderTransform::PerformLayout()
         origin_ = Offset(child->GetLayoutSize().Width() / 2.0, child->GetLayoutSize().Height() / 2.0);
     }
 }
+
+void RenderTransform::OnTransition(OHOS::Ace::TransitionType, int) {}
+
+bool RenderTransform::HasDisappearingTransition(int)
+{
+    return false;
+}
+
+void RenderTransform::ClearRenderObject() {}
 
 void RenderTransform::SetTouchable(bool enable)
 {

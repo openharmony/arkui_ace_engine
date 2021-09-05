@@ -62,6 +62,7 @@ const std::string EVENT_TEST_003 = ""
                                    "                   ]                     "
                                    "}";
 
+#ifndef WEARABLE_PRODUCT
 const std::string EVENT_TEST_004 = ""
                                    "{                                    "
                                    "  \"tag\": \"rating\",               "
@@ -73,6 +74,7 @@ const std::string EVENT_TEST_004 = ""
                                    "                     \"click\"       "
                                    "                   ]                 "
                                    "}";
+#endif
 
 const std::string EVENT_TEST_005 = ""
                                    "{                         "
@@ -200,6 +202,7 @@ HWTEST_F(CommonEventTest, DomCommonEventTest003, TestSize.Level1)
     EXPECT_TRUE(gestureEventComponent->GetOnLongPressId() == std::to_string(text->GetNodeId()));
 }
 
+#ifndef WEARABLE_PRODUCT
 /**
  * @tc.name: DomCommonEventTest004
  * @tc.desc: Test private change event and common gesture event to dom rating successfully.
@@ -232,6 +235,7 @@ HWTEST_F(CommonEventTest, DomCommonEventTest004, TestSize.Level1)
     EXPECT_TRUE(ratingComponent->GetChangeEventId() == std::to_string(rating->GetNodeId()));
     EXPECT_TRUE(ratingComponent->GetChangeEventId().GetData().eventType == DOM_CHANGE);
 }
+#endif
 
 /**
  * @tc.name: DomCommonEventTest005

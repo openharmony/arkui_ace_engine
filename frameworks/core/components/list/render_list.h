@@ -29,10 +29,14 @@
 
 namespace OHOS::Ace {
 
+class ListComponent;
+
 constexpr int32_t RECYCLE_NO_LEFT = 0;
 constexpr int32_t RECYCLE_NO_RIGHT = 1;
 constexpr int32_t INVALID_INDEX = -1;
 constexpr int32_t ZERO_INDEX = 0;
+
+using RotationEventFunc = std::function<void(const RotationEvent& info)>;
 
 class RenderList : public RenderNode {
     DECLARE_ACE_TYPE(RenderList, RenderNode);
@@ -101,6 +105,16 @@ public:
     T MakeValue(double mainValue, double crossValue) const
     {
         return direction_ == FlexDirection::ROW ? T(mainValue, crossValue) : T(crossValue, mainValue);
+    }
+
+    void SetMainSize(Size& size, double mainValue)
+    {
+        direction_ == FlexDirection::ROW ? size.SetWidth(mainValue) : size.SetHeight(mainValue);
+    }
+
+    void SetCrossSize(Size& size, double crossValue)
+    {
+        direction_ == FlexDirection::ROW ? size.SetHeight(crossValue) : size.SetWidth(crossValue);
     }
 
     double GetMainSize(const Size& size) const
@@ -470,6 +484,24 @@ public:
         centerIndex_ = centerIndex;
     }
 
+    bool NeedRefresh() const
+    {
+        return needRefresh_;
+    }
+
+    void SetNeedRefresh(bool needRefresh)
+    {
+        needRefresh_ = needRefresh;
+    }
+
+    void OnChildRemoved(const RefPtr<RenderNode>& child) override;
+    void SetOnRotateCallback(const RefPtr<ListComponent>& component);
+
+    const RotationEventFunc& GetOnRotateCallback() const
+    {
+        return rotationEvent_;
+    }
+
 protected:
     RefPtr<RenderNode> GetStickyItem() const
     {
@@ -533,6 +565,7 @@ private:
     bool pageReady_ = false;
     bool itemScale_ = false;
     bool chainAnimation_ = false;
+    bool needRefresh_ = false;
 
     std::map<int32_t, RefPtr<RenderNode>> items_;
     RequestListDataFunc requestItems_;
@@ -551,6 +584,7 @@ private:
     Offset stickyItemOffset_;
     Offset stickyNextOffset_;
     Offset currentOffset_;
+    RotationEventFunc rotationEvent_;
 };
 
 } // namespace OHOS::Ace

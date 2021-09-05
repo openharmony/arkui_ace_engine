@@ -14,13 +14,5 @@
  */
 
 #include "qjs_bindings.h"
-namespace OHOS::Ace::Framework {
 
-std::vector<JSClassID> g_classIds;
-
-void* UnwrapAny(JSValueConst val)
-{
-    return JS_GetOpaqueA(val, g_classIds.data(), g_classIds.size());
-}
-
-}; // namespace OHOS::Ace::Framework
+namespace OHOS::Ace::Framework {}; // namespace OHOS::Ace::Framework

@@ -17,6 +17,7 @@
 
 #include "base/log/ace_trace.h"
 #include "core/gestures/gesture_referee.h"
+#include "core/pipeline/base/element.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -36,9 +37,9 @@ void EventManager::TouchTest(
     const Point point { touchPoint.x, touchPoint.y };
     // For root node, the parent local point is the same as global point.
     renderNode->TouchTest(point, point, touchRestrict, hitTestResult);
-    if (hitTestResult.empty()) {
-        LOGI("hit test result is empty");
-    }
+
+    LOGI("gesture hit test result size %{public}zu", hitTestResult.size());
+
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
 }
 
@@ -63,10 +64,10 @@ bool EventManager::DispatchTouchEvent(const TouchPoint& point)
                 }
             }
         }
-        if (point.type == TouchType::UP) {
-            GestureReferee::GetInstance().AdjudicateGestureSequence(point.id);
-        } else if (point.type == TouchType::CANCEL) {
+
+        if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
             GestureReferee::GetInstance().CleanGestureScope(point.id);
+            touchTestResults_.erase(point.id);
         }
         return true;
     }

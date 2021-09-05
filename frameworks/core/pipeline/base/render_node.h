@@ -23,15 +23,20 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/animation/animatable_properties.h"
 #include "core/animation/keyframe_animation.h"
+#include "core/animation/property_animatable.h"
 #include "core/common/draw_delegate.h"
+#include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/layout_param.h"
+#include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/gestures/touch_event.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline/base/render_layer.h"
 #include "core/pipeline/pipeline_context.h"
+#include "core/gestures/drag_recognizer.h"
 
 namespace OHOS::Ace {
 
@@ -47,35 +52,46 @@ constexpr int32_t HOVER_DURATION = 250;
 using HoverAndPressCallback = std::function<void(const Color&)>;
 
 // RenderNode is the base class for different render backend, represent a render unit for render pipeline.
-class ACE_EXPORT RenderNode : public virtual AceType {
-    DECLARE_ACE_TYPE(RenderNode, AceType);
+class ACE_EXPORT RenderNode : public PropertyAnimatable, public AnimatableProperties, public virtual AceType {
+    DECLARE_ACE_TYPE(RenderNode, PropertyAnimatable, AceType);
 
 public:
     using OpacityCallback = std::function<void(uint8_t)>;
     using SlipFactorSetting = std::function<void(double)>;
     ~RenderNode() override = default;
 
-    void SetZindex(int32_t zIndex)
+    void SetZIndex(int32_t zIndex)
     {
         zIndex_ = zIndex;
     }
 
-    int32_t GetZindex() const
+    int32_t GetZIndex() const
     {
         return zIndex_;
+    }
+
+    void SetIsPercentSize(bool isPercentSize)
+    {
+        isPercentSize_ = isPercentSize;
+    }
+
+    bool GetIsPercentSize() const
+    {
+        return isPercentSize_;
     }
 
     void AddChild(const RefPtr<RenderNode>& child, int32_t slot = DEFAULT_RENDER_NODE_SLOT);
 
     void RemoveChild(const RefPtr<RenderNode>& child);
 
+    void MovePosition(int32_t slot);
+
+    void ClearChildren();
+
     virtual void MoveWhenOutOfViewPort(bool hasEffect);
 
-    void Attach(const WeakPtr<PipelineContext>& context)
-    {
-        context_ = context;
-        OnAttachContext();
-    }
+    bool IsPointInBox(const TouchPoint& point);
+    void Attach(const WeakPtr<PipelineContext>& context);
 
     // unmount from render tree
     void Unmount()
@@ -127,11 +143,20 @@ public:
 
     void MarkNeedLayout(bool selfOnly = false, bool forceParent = false);
 
+    /**
+     * \brief check in mark need layout progress if parent need layout again.
+     * \return true if need layout agagin.
+     */
+    virtual bool CheckIfNeedLayoutAgain()
+    {
+        return true;
+    }
+
     void MarkNeedPredictLayout();
 
     void OnLayout();
 
-    virtual void OnPredictLayout() {}
+    virtual void OnPredictLayout(int64_t targetTimestamp) {}
 
     virtual Size GetChildViewPort()
     {
@@ -147,7 +172,7 @@ public:
             return;
         }
 
-        bool dipScaleChange = pipeline->GetDipScale() != dipScale_;
+        bool dipScaleChange = !NearEqual(pipeline->GetDipScale(), dipScale_);
         dipScale_ = pipeline->GetDipScale();
         if (dipScaleChange || layoutParam_ != layoutParam) {
             layoutParam_ = layoutParam;
@@ -204,40 +229,11 @@ public:
         hasShadow_ = true;
     }
 
-    void SetLayoutSize(const Size& size)
-    {
-        if (paintRect_.GetSize() != size) {
-            paintRect_.SetSize(size);
-            needUpdateTouchRect_ = true;
-            OnSizeChanged();
-        }
-    }
-
-    static bool SortZIndexCompartor(const WeakPtr<RenderNode>& left, const WeakPtr<RenderNode>& right)
-    {
-        auto leftChild = left.Upgrade();
-        auto rightChild = right.Upgrade();
-        if (!leftChild) {
-            return false;
-        } else if (!rightChild) {
-            return true;
-        }
-        return (leftChild->GetZindex() < rightChild->GetZindex());
-    }
-
-    void SortPaintChildrenBasedOnZIndex()
-    {
-        paintChildren_.clear();
-        for (const auto& child: children_) {
-            paintChildren_.emplace_back(WeakPtr<RenderNode>(child));
-        }
-        paintChildren_.sort(SortZIndexCompartor);
-    }
+    void SetLayoutSize(const Size& size);
 
     Rect GetRectBasedWindowTopLeft()
     {
-        Offset offset = GetGlobalOffset() + touchRect_.GetOffset();
-        return Rect(offset, touchRect_.GetSize());
+        return Rect(GetGlobalOffset(), paintRect_.GetSize());
     }
 
     virtual const Rect& GetTouchRect()
@@ -249,10 +245,30 @@ public:
         return touchRect_;
     }
 
-    const Rect& GetPaintRect() const
+    virtual const Rect& GetOwnTouchRect()
     {
-        return paintRect_;
+        if (needUpdateTouchRect_) {
+            needUpdateTouchRect_ = false;
+            UpdateTouchRect();
+        }
+        return ownTouchRect_;
     }
+
+    virtual Point GetTransformPoint(const Point& point)
+    {
+        return point;
+    }
+
+    virtual Rect GetTransformRect(const Rect& rect)
+    {
+        return rect;
+    }
+
+    const Rect& GetPaintRect() const;
+
+    Rect GetTransitionPaintRect() const;
+
+    Offset GetTransitionGlobalOffset() const;
 
     void SetPaintRect(const Rect& rect)
     {
@@ -264,6 +280,11 @@ public:
     {
         touchRect_ = rect;
         needUpdateTouchRect_ = false;
+    }
+
+    void MarkNeedUpdateTouchRect(bool needUpdateTouchRect)
+    {
+        needUpdateTouchRect_ = needUpdateTouchRect;
     }
 
     virtual void OnChildAdded(const RefPtr<RenderNode>& child)
@@ -302,16 +323,6 @@ public:
     }
 
     void MarkNeedRender(bool overlay = false);
-
-    void SetHasSubWindow(bool hasSubWindow)
-    {
-        hasSubWindow_ = hasSubWindow;
-    }
-
-    bool GetHasSubWindow() const
-    {
-        return hasSubWindow_;
-    }
 
     bool NeedRender() const
     {
@@ -353,6 +364,16 @@ public:
         return positionParam_.bottom.first;
     }
 
+    const Dimension& GetAnchorX() const
+    {
+        return positionParam_.anchor.first;
+    }
+
+    const Dimension& GetAnchorY() const
+    {
+        return positionParam_.anchor.second;
+    }
+
     virtual bool HasLeft() const
     {
         return positionParam_.left.second;
@@ -371,6 +392,38 @@ public:
     virtual bool HasBottom() const
     {
         return positionParam_.bottom.second;
+    }
+
+    virtual void SetLeft(const Dimension& left) // add for animation
+    {
+        if (positionParam_.left.first != left) {
+            positionParam_.left = std::make_pair(left, true);
+            MarkNeedLayout();
+        }
+    }
+
+    virtual void SetTop(const Dimension& top) // add for animation
+    {
+        if (positionParam_.top.first != top) {
+            positionParam_.top = std::make_pair(top, true);
+            MarkNeedLayout();
+        }
+    }
+
+    virtual void SetRight(const Dimension& right) // add for animation
+    {
+        if (positionParam_.right.first != right) {
+            positionParam_.top = std::make_pair(right, true);
+            MarkNeedLayout();
+        }
+    }
+
+    virtual void SetBottom(const Dimension& bottom) // add for animation
+    {
+        if (positionParam_.bottom.first != bottom) {
+            positionParam_.bottom = std::make_pair(bottom, true);
+            MarkNeedLayout();
+        }
     }
 
     WeakPtr<RenderNode> GetParent() const
@@ -417,6 +470,15 @@ public:
         }
     }
 
+    void SetSelfHidden(bool hidden)
+    {
+        if (hidden_ != hidden) {
+            hidden_ = hidden;
+            AddDirtyRenderBoundaryNode();
+            OnHiddenChanged(hidden);
+        }
+    }
+
     bool GetHidden() const
     {
         return hidden_;
@@ -432,23 +494,14 @@ public:
         return false;
     }
 
-    const std::list<RefPtr<RenderNode>>& GetChildren() const
+    virtual const std::list<RefPtr<RenderNode>>& GetChildren() const
     {
         return children_;
     }
 
-    void NotifyPaintFinish()
-    {
-        if (needUpdateAccessibility_) {
-            for (auto& child : children_) {
-                child->NotifyPaintFinish();
-            }
-            OnPaintFinish();
-        }
-    }
+    void NotifyPaintFinish();
 
     virtual void RenderWithContext(RenderContext& context, const Offset& offset);
-    virtual void ClipHole(RenderContext& context, const Offset& offset);
     virtual void Paint(RenderContext& context, const Offset& offset);
     virtual void PaintChild(const RefPtr<RenderNode>& child, RenderContext& context, const Offset& offset);
 
@@ -458,7 +511,10 @@ public:
         TouchTestResult& result);
 
     virtual void MouseTest(const Point& globalPoint, const Point& parentLocalPoint, MouseTestResult& result);
+
     virtual bool MouseHoverTest(const Point& parentLocalPoint);
+
+    virtual bool HandleMouseHoverEvent(MouseState mouseState);
 
     virtual bool RotationMatchTest(const RefPtr<RenderNode>& requestRenderNode);
 
@@ -467,6 +523,8 @@ public:
     virtual bool RotationTestForward(const RotationEvent& event);
 
     virtual double GetBaselineDistance(TextBaseline textBaseline);
+
+    virtual Size GetContentSize();
 
     virtual bool ScrollPageByChild(Offset& delta, int32_t source);
 
@@ -484,7 +542,9 @@ public:
 
     Offset GetOffsetFromOrigin(const Offset& offset) const;
 
-    Offset GetGlobalOffset() const;
+    virtual Offset GetGlobalOffset() const;
+
+    virtual Offset GetGlobalOffsetExternal() const;
 
     // Whether |rect| is in the paint rect of render tree recursively.
     bool IsVisible(const Rect& rect, bool totally = false) const;
@@ -519,7 +579,7 @@ public:
     double NormalizeToPx(Dimension dimension) const;
 
     // Mainly use this function to convert Percent to Px. Do not call this function in Update().
-    double NormalizePercentToPx(const Dimension& dimension, bool isVertical) const;
+    double NormalizePercentToPx(const Dimension& dimension, bool isVertical, bool referSelf = false) const;
 
     // for accessibility
     void SetAccessibilityNode(const WeakPtr<AccessibilityNode>& accessibilityNode)
@@ -545,54 +605,13 @@ public:
     {
         auto node = accessibilityNode_.Upgrade();
         if (node) {
-            node->SetRect(Rect());
+            node->ClearRect();
         }
         for (auto& child : children_) {
             child->ClearAccessibilityRect();
         }
     }
-
-    void SetAccessibilityRect(const Rect& rect)
-    {
-        Rect parentRect = rect;
-        if (!selfOffset_.IsZero()) {
-            parentRect.SetOffset(parentRect.GetOffset() + selfOffset_);
-        }
-        auto node = accessibilityNode_.Upgrade();
-        auto content = context_.Upgrade();
-        Rect currentRect = Rect(GetGlobalOffset(), GetLayoutSize());
-        Rect clampRect = currentRect.Constrain(parentRect);
-        if (node && content) {
-            if (clampRect.IsValid()) {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-                node->SetRect(clampRect * content->GetViewScale());
-#else
-                auto size = Size(clampRect.Width(), clampRect.Height()) * content->GetViewScale();
-                if (size.Width() > node->GetWidth() || size.Height() > node->GetHeight()) {
-                    // Same AccessibilityNode update the largest size.
-                    node->SetWidth(size.Width());
-                    node->SetHeight(size.Height());
-                    node->SetLeft(clampRect.Left() * content->GetViewScale());
-                    node->SetTop(clampRect.Top() * content->GetViewScale());
-                } else if (NearEqual(size.Width(), node->GetWidth()) && NearEqual(size.Height(), node->GetHeight())) {
-                    // Update the offset when same size.
-                    node->SetLeft(clampRect.Left() * content->GetViewScale());
-                    node->SetTop(clampRect.Top() * content->GetViewScale());
-                }
-                if (node->GetTag() == "tab-bar") {
-                    return;
-                }
-#endif
-            } else {
-                SetAccessibilityVisible(false);
-            }
-        }
-        if (clampRect.IsValid()) {
-            for (auto& child : children_) {
-                child->SetAccessibilityRect(clampRect);
-            }
-        }
-    }
+    void SetAccessibilityRect(const Rect& rect);
 
     void SetNeedUpdateAccessibility(bool needUpdate)
     {
@@ -661,6 +680,15 @@ public:
         interceptTouchEvent_ = interceptTouchEvent;
     }
 
+    void DispatchCancelPressAnimation()
+    {
+        OnCancelPressAnimation();
+        for (const auto& child : children_) {
+            child->DispatchCancelPressAnimation();
+        }
+    }
+
+    virtual void OnCancelPressAnimation() {}
     virtual void OnMouseHoverEnterAnimation() {}
     virtual void OnMouseHoverExitAnimation() {}
     virtual void OnMouseClickDownAnimation() {}
@@ -694,7 +722,7 @@ public:
         if (needWindowBlur_ != flag) {
             needWindowBlur_ = flag;
             if (!needWindowBlur_) {
-                SetWindowBlurProgress(0.0f);
+                UpdateWindowBlurProgress(0.0f);
                 SetWindowBlurStyle(WindowBlurStyle::STYLE_BACKGROUND_SMALL_LIGHT);
             }
             OnWindowBlurChanged();
@@ -706,7 +734,7 @@ public:
         return needWindowBlur_;
     }
 
-    void SetWindowBlurProgress(float progress)
+    void UpdateWindowBlurProgress(float progress)
     {
         windowBlurProgress_ = progress;
     }
@@ -746,14 +774,19 @@ public:
         isIgnored_ = ignore;
     }
 
-    bool IsDeclarativeAnimationActive() const
+    void SetGlobalPoint(Point point)
     {
-        return declarativeAnimationActive_;
+        globalPoint_ = point;
     }
 
-    void SetDeclarativeAnimationActive(bool active)
+    bool IsTouchable() const
     {
-        declarativeAnimationActive_ = active;
+        return touchable_;
+    }
+
+    bool IsDisabled() const
+    {
+        return disabled_;
     }
 
     virtual void OnAppShow()
@@ -772,6 +805,11 @@ public:
         }
     }
 
+    bool IsAppShow()
+    {
+        return isAppOnShow_;
+    }
+
     template<typename T>
     RefPtr<T> GetTheme() const
     {
@@ -788,11 +826,19 @@ public:
 
     virtual bool HasEffectiveTransform() const;
 
-    Rect GetDirtyRect() const;
+    virtual void OnTransition(TransitionType type, int32_t id) {}
 
-protected:
-    explicit RenderNode(bool takeBoundary = false);
-    virtual void ClearRenderObject();
+    bool IsDisappearing();
+    virtual bool HasDisappearingTransition(int32_t nodeId);
+    void NotifyTransition(TransitionType type, int32_t nodeId);
+
+    Rect GetDirtyRect() const;
+    std::function<void(const DragUpdateInfo&)> onDomDragEnter_ = nullptr;
+    std::function<void(const DragUpdateInfo&)> onDomDragOver_ = nullptr;
+    std::function<void(const DragUpdateInfo&)> onDomDragLeave_ = nullptr;
+    std::function<void(const DragEndInfo&)> onDomDragDrop_ = nullptr;
+    virtual bool GetAlignDeclarationOffset(AlignDeclarationPtr alignDeclarationPtr, Offset& offset) const;
+
     // Each subclass override this to return touch target object which is used to receive touch event.
     // For convenience, it is recommended to return directly to the corresponding gesture recognizer.
     // Sees gestures directory.
@@ -801,6 +847,60 @@ protected:
     virtual void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
     {}
+    virtual void OnPreDraw() {}
+
+    RefPtr<RenderNode> FindDropChild(const Point& globalPoint, const Point& parentLocalPoint);
+
+    void SaveExplicitAnimationOption(const AnimationOption& option);
+
+    const AnimationOption& GetExplicitAnimationOption() const;
+
+    void ClearExplicitAnimationOption();
+
+    void ClearDisappearingNode(RefPtr<RenderNode> child);
+
+    void CreateLayoutTransition();
+
+    void CreatePathAnimation();
+
+    bool IsExclusiveEventForChild() const
+    {
+        return exclusiveEventForChild_;
+    }
+    void SetExclusiveEventForChild(bool exclusiveEventForChild)
+    {
+        exclusiveEventForChild_ = exclusiveEventForChild;
+    }
+
+    void MarkUpdateType(const RefPtr<Component>& component);
+
+    virtual RefPtr<Component> GetComponent()
+    {
+        return nullptr;
+    }
+
+    virtual void NotifySizeTransition(const AnimationOption& option, Size fromSize, Size toSize, int32_t nodeId);
+    void CreateGeometryTransitionFrom(const RefPtr<RenderNode>& targetNode, AnimationOption& sharedOption);
+    void CreateGeometryTransitionTo(const RefPtr<RenderNode>& targetNode, AnimationOption& sharedOption);
+    void SetIsPaintGeometryTransition(bool isPaintGeometryTransition);
+    bool IsPaintOutOfParent();
+    void UpdatePosition();
+
+    virtual void ClipHole(RenderContext& context, const Offset& offset);
+
+    void SetHasSubWindow(bool hasSubWindow)
+    {
+        hasSubWindow_ = hasSubWindow;
+    }
+
+    bool GetHasSubWindow() const
+    {
+        return hasSubWindow_;
+    }
+
+protected:
+    explicit RenderNode(bool takeBoundary = false);
+    virtual void ClearRenderObject();
 
     virtual void OnMouseTestHit(const Offset& coordinateOffset, MouseTestResult& result) {}
     virtual void OnMouseHoverEnterTest() {}
@@ -842,7 +942,9 @@ protected:
 
     double GetHighestChildBaseline(TextBaseline baseline);
     double GetFirstChildBaseline(TextBaseline baseline);
+    Size GetLargestChildContentSize();
     void UpdateAccessibilityPosition();
+    void CheckIfNeedUpdateTouchRect();
 
     RefPtr<ThemeManager> GetThemeManager() const
     {
@@ -853,11 +955,18 @@ protected:
         return context->GetThemeManager();
     }
 
+    uint32_t GetUpdateType()
+    {
+        return updateType_;
+    }
+
+    bool hasSubWindow_ = false;
     WeakPtr<PipelineContext> context_;
     Size viewPort_;
     Point globalPoint_;
     WeakPtr<AccessibilityNode> accessibilityNode_;
-    Rect touchRect_;
+    Rect touchRect_;    // Self and all children combined touch rect
+    Rect ownTouchRect_; // Self touch rect.
     PositionParam positionParam_;
     uint8_t opacity_ = 255;
     Shadow shadow_;
@@ -869,6 +978,7 @@ protected:
     bool needWindowBlur_ = false;
     bool needUpdateAccessibility_ = true;
     bool disabled_ = false;
+    int32_t minPlatformVersion_ = 0;
 
     MouseState mouseState_ = MouseState::NONE;
     SlipFactorSetting slipFactorSetting_;
@@ -880,6 +990,8 @@ protected:
     std::function<void(const std::string&)> onLayoutReady_;
 
     bool isAppOnShow_ = true;
+    AnimationOption nonStrictOption_; // clear after transition done
+    MotionPathOption motionPathOption_;
 
 private:
     void AddDirtyRenderBoundaryNode()
@@ -894,21 +1006,21 @@ private:
     }
 
     void SetPositionInternal(const Offset& offset);
+    bool InLayoutTransition() const;
 
     std::list<RefPtr<RenderNode>> hoverChildren_;
-    std::list<WeakPtr<RenderNode>> paintChildren_;
     std::list<RefPtr<RenderNode>> children_;
     std::string accessibilityText_;
     LayoutParam layoutParam_;
     Rect paintRect_;
     WeakPtr<RenderNode> parent_;
     int32_t depth_ = 0;
-    bool hasSubWindow_ = false;
     bool needRender_ = false;
     bool needLayout_ = false;
     bool visible_ = true;
     bool takeBoundary_ = false;
     bool layoutParamChanged_ = false;
+    bool pendingDispatchLayoutReady_ = false;
     bool disableTouchEvent_ = false;
     bool needUpdateTouchRect_ = false;
     bool hasShadow_ = false;
@@ -923,11 +1035,24 @@ private:
 
     bool hidden_ = false;
     bool isIgnored_ = false;
-    bool declarativeAnimationActive_ = false;
     std::function<void()> onChangeCallback_;
-    ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
+    std::list<RefPtr<RenderNode>> disappearingNodes_;
+    AnimatableDimension paintX_;
+    AnimatableDimension paintY_;
+    AnimatableDimension paintW_;
+    AnimatableDimension paintH_;
+    Size transitionPaintRectSize_;
+    Rect nonStrictPaintRect_;
+    bool isFirstSizeAssign_ = true;
+    bool isFirstPositionAssign_ = true;
 
+    // for container, this flag controls only the last child in touch area is consuming event.
+    bool exclusiveEventForChild_ = false;
     int32_t zIndex_ = 0;
+    bool isPercentSize_ = false;
+    uint32_t updateType_ = 0;
+    ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
+    bool isPaintGeometryTransition_ = false;
 };
 
 } // namespace OHOS::Ace

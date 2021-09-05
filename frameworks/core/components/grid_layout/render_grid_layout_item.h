@@ -36,6 +36,36 @@ public:
     void SetRowIndex(int32_t rowIndex);
     void SetColumnSpan(int32_t columnSpan);
     void SetRowSpan(int32_t rowSpan);
+    void SetForceRebuild(bool forceRebuild)
+    {
+        forceRebuild_ = forceRebuild;
+    }
+
+    int32_t GetColumnStart() const
+    {
+        return columnIndex_;
+    }
+    int32_t GetRowStart() const
+    {
+        return rowIndex_;
+    }
+    int32_t GetColumnEnd() const
+    {
+        return columnIndex_ + columnSpan_;
+    }
+    int32_t GetRowEnd() const
+    {
+        return rowIndex_ + rowSpan_;
+    }
+    bool GetForceRebuild() const
+    {
+        return forceRebuild_;
+    }
+
+    void SetBoundary()
+    {
+        TakeBoundary();
+    }
 
     int32_t GetColumnIndex() const
     {
@@ -62,12 +92,23 @@ public:
         index_ = index;
     }
 
+    bool ForceRebuild() const
+    {
+        return forceRebuild_;
+    }
+
+    int32_t GetIndex() const
+    {
+        return index_;
+    }
+
 private:
     int32_t index_ = -1;
     int32_t columnIndex_ = -1;
     int32_t rowIndex_ = -1;
     int32_t columnSpan_ = 1;
     int32_t rowSpan_ = 1;
+    bool forceRebuild_ = false;
 };
 
 } // namespace OHOS::Ace

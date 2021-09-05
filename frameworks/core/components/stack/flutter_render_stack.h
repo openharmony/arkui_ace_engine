@@ -30,6 +30,10 @@ public:
 
     void Paint(RenderContext& context, const Offset& offset) override;
     RenderLayer GetRenderLayer() override;
+    void SetBoundary()
+    {
+        TakeBoundary();
+    }
 
 private:
     RefPtr<Flutter::ClipLayer> layer_;

@@ -16,6 +16,7 @@
 #include "core/gestures/gesture_recognizer.h"
 
 #include "base/log/log.h"
+#include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
 
@@ -41,4 +42,41 @@ bool GestureRecognizer::HandleEvent(const TouchPoint& point)
     return true;
 }
 
+void GestureRecognizer::AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer)
+{
+    auto gestureGroup = gestureGroup_.Upgrade();
+    if (gestureGroup) {
+        gestureGroup->AddToReferee(touchId, recognizer);
+        return;
+    }
+
+    GestureReferee::GetInstance().AddGestureRecognizer(touchId, recognizer);
+}
+
+void GestureRecognizer::DelFromReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer)
+{
+    auto gestureGroup = gestureGroup_.Upgrade();
+    if (gestureGroup) {
+        gestureGroup->DelFromReferee(touchId, recognizer);
+        return;
+    }
+
+    GestureReferee::GetInstance().DelGestureRecognizer(touchId, recognizer);
+}
+
+void GestureRecognizer::BatchAdjudicate(
+    const std::set<size_t>& touchIds, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
+{
+    auto gestureGroup = gestureGroup_.Upgrade();
+    if (gestureGroup) {
+        gestureGroup->BatchAdjudicate(touchIds, recognizer, disposal);
+        return;
+    }
+
+    std::set<size_t> copyIds = touchIds;
+    for (auto pointerId : copyIds) {
+        LOGD("Adjudicate gesture recognizer, touch id %{public}zu, disposal %{public}d", pointerId, disposal);
+        GestureReferee::GetInstance().Adjudicate(pointerId, recognizer, disposal);
+    }
+}
 } // namespace OHOS::Ace

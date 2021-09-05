@@ -24,16 +24,21 @@
 
 namespace OHOS::Ace::Framework {
 
+enum class AnimatorOperation {
+    NONE,
+    PLAY,
+    FINISH,
+    PAUSE,
+    CANCEL,
+    REVERSE,
+};
+
 class ACE_EXPORT BaseAnimationBridgeUtils {
 public:
     static constexpr int32_t TRANSFORM_ORIGIN_DEFAULT_SIZE = 2;
-    static constexpr const char PLAYSTATE_IDLE[] = "idle";
-    static constexpr const char PLAYSTATE_RUNNING[] = "running";
-    static constexpr const char PLAYSTATE_PAUSED[] = "paused";
-    static constexpr const char PLAYSTATE_FINISHED[] = "finished";
     static constexpr const char ITERATIONS_INFINITY[] = "Infinity";
     static constexpr const char ANIMATION_FROM[] = "0.0";
-    static constexpr const char ANIMATION_TO[] = "1.0";
+    static constexpr const char ANIMATION_TO[] = "100.0";
     // prefix id of TweenComponent, for differentiation from id of ComposedComponent
     static constexpr const char COMPONENT_PREFIX[] = "FrontendTween";
 
@@ -49,10 +54,21 @@ public:
     static void JsParseAnimationOptions(const std::string& content, int32_t& iterations,
         std::unordered_map<std::string, double>& animationDoubleOptions,
         std::unordered_map<std::string, std::string>& animationStringOptions);
+
+    static void JsParseAnimatorParams(const std::string& content, int32_t& iterations,
+        std::unordered_map<std::string, double>& animationDoubleParams,
+        std::unordered_map<std::string, std::string>& animationStringParams);
 };
 
 class BaseAnimationBridge : public virtual AceType {
     DECLARE_ACE_TYPE(BaseAnimationBridge, AceType);
+public:
+    virtual void OnJsEngineDestroy() {}
+
+    virtual RefPtr<Animator> JsGetAnimator()
+    {
+        return nullptr;
+    };
 };
 
 } // namespace OHOS::Ace::Framework

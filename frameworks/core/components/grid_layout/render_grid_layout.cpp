@@ -92,8 +92,8 @@ void RenderGridLayout::Update(const RefPtr<Component>& component)
     gridHeight_ = grid->GetHeight();
     colsArgs_ = grid->GetColumnsArgs();
     rowsArgs_ = grid->GetRowsArgs();
-    colGap_ = grid->GetColumnGap();
-    rowGap_ = grid->GetRowGap();
+    userColGap_ = grid->GetColumnGap();
+    userRowGap_ = grid->GetRowGap();
     rightToLeft_ = grid->GetRightToLeft();
 
     if (direction_ == FlexDirection::COLUMN) {
@@ -352,6 +352,8 @@ void RenderGridLayout::InitialGridProp()
     if (!updateFlag_) {
         return;
     }
+    rowGap_ = NormalizePercentToPx(userRowGap_, true);
+    colGap_ = NormalizePercentToPx(userColGap_, false);
 
     rowSize_ = ((gridHeight_ > 0.0) && (gridHeight_ < GetLayoutParam().GetMaxSize().Height())) ?
         gridHeight_ : GetLayoutParam().GetMaxSize().Height();
@@ -486,11 +488,12 @@ void RenderGridLayout::ConvertRepeatArgs(std::string& handledArg)
     } else {
         if (handledArg.size() > REPEAT_MIN_SIZE && std::regex_match(handledArg, matches, REPEAT_NUM_REGEX)) {
             auto count = StringUtils::StringToInt(matches[1].str());
-            handledArg = matches[2].str();
+            std::string repeatString = matches[2].str();
             while (count > 1) {
-                handledArg.append(matches[2].str());
+                repeatString.append(std::string(matches[2].str()));
                 --count;
             }
+            handledArg = repeatString;
         }
     }
 }

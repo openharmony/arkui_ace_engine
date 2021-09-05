@@ -29,7 +29,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_attributes.h"
-#include "core/components/theme/theme_constants_defines.h"
 #include "core/components/theme/theme_style.h"
 
 namespace OHOS::Ace {
@@ -46,14 +45,14 @@ public:
      */
     static void InitDeviceType();
 
-    void InitResource(const DeviceResourceInfo& resourceInfo)
+    void InitResource(const ResourceInfo& resourceInfo)
     {
         if (resAdapter_) {
             resAdapter_->Init(resourceInfo);
         }
     }
 
-    void UpdateConfig(const DeviceConfig& config)
+    void UpdateConfig(const ResourceConfiguration& config)
     {
         if (resAdapter_) {
             resAdapter_->UpdateConfig(config);
@@ -107,6 +106,19 @@ public:
      * NOTE: ResourceId::NO_ID will be returned if not found or value is not ResourceId.
      */
     InternalResource::ResourceId GetResourceId(uint32_t key) const;
+
+    std::vector<std::string> GetStringArray(uint32_t key) const;
+
+    template<class T>
+    bool GetMediaResource(T& resId, std::ostream& dest) const
+    {
+        if (!resAdapter_) {
+            return false;
+        }
+        return resAdapter_->GetResource(resId, dest);
+    }
+
+    bool GetResourceIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const;
 
     void LoadCustomStyle(const RefPtr<AssetManager>& assetManager);
 

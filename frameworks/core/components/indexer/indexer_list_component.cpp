@@ -43,7 +43,7 @@ void IndexerListComponent::AppendChild(const RefPtr<Component>& child)
         return;
     }
     RefPtr<ComposedComponent> composedItem = AceType::DynamicCast<ComposedComponent>(child);
-    if (composedItem) {
+    if (composedItem && !composedItem->IsInspector()) {
         RefPtr<ListItemComponent> listItem = AceType::DynamicCast<ListItemComponent>(composedItem->GetChild());
         if (listItem) {
             int32_t itemIndex = indexer_->AddItemIndexKey(listItem->GetIndexKey(), listItem->GetType());
@@ -60,7 +60,7 @@ void IndexerListComponent::RemoveChild(const RefPtr<Component>& child)
         return;
     }
     RefPtr<ComposedComponent> composedItem = AceType::DynamicCast<ComposedComponent>(child);
-    if (composedItem) {
+    if (composedItem && !composedItem->IsInspector()) {
         RefPtr<ListItemComponent> listItem = AceType::DynamicCast<ListItemComponent>(composedItem->GetChild());
         if (listItem) {
             indexer_->RemoveItemIndexKey(listItem->GetIndexKey());

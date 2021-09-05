@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+let global = globalThis;
+
 class Handler {
   constructor(publishedProperties1) {
     this.listeners = new Set();
@@ -54,11 +56,15 @@ class Handler {
 
     this.set = function (target, property, newValue) {
 
-      if (this.publishedProperties.has(property) && (target[property] != newValue)) {
+      if ((this.publishedProperties.has(property)
+        && (target[property] != newValue)) ||
+        Array.isArray(target)) {
         console.log(`ObservableObject: Publishd property '${property}' has been changed.`);
         this.notifyAllViews();
+      } else {
+        console.warn(`ObservableObject: property '${property}' NOT found! Change will be ignored and not be notified`);
       }
-      target[property] = newValue
+      target[property] = newValue;
       return true;
     }.bind(this);
 
@@ -138,10 +144,10 @@ var createLinkReference = function (sourceView, sourceProperty1) {
   return {
     get: function () {
       console.log(`${this.constructor.name}: get bound property '${sourceProperty}'`);
-      return Object.prototype.hasOwnProperty.call(this, sourceProperty) ? this[sourceProperty] : /* should never happen */ undefined;
+      return this.hasOwnProperty(sourceProperty) ? this[sourceProperty] : /* should never happen */ undefined;
     }.bind(sourceView),
     set: function (newValue) {
-      if (Object.prototype.hasOwnProperty.call(this, sourceProperty)) {
+      if (this.hasOwnProperty(sourceProperty)) {
         this[sourceProperty] = newValue;
         return true;
       } else {
@@ -265,10 +271,10 @@ class View extends NativeView {
 
       console.log(`${this.constructor.name}: createState '${propStr}' ...`);
 
-      if (!Object.prototype.hasOwnProperty.call(this, propStr)) {
+      if (!this.hasOwnProperty(propStr)) {
         throw new SyntaxError(`${this.constructor.name}: createState('${propStr}'): View lacks property '${propStr}'`);
       }
-      if (Object.prototype.hasOwnProperty.call(this.obsPropStore, propStr)) {
+      if (this.obsPropStore.hasOwnProperty(propStr)) {
         throw new SyntaxError(`${this.constructor.name}: createState('${propStr}'): View has observed property '${propStr}' already!`);
       }
 
@@ -447,10 +453,10 @@ class View extends NativeView {
         return;
       }
 
-      if (!Object.prototype.hasOwnProperty.call(this, propStr)) {
+      if (!this.hasOwnProperty(propStr)) {
         throw new SyntaxErro(`${this.constructor.name}: createProp('${propStr}'). View lacks property '${propStr}'. Ignoring`);
       }
-      if (Object.prototype.hasOwnProperty.call(this.obsPropStore, propStr)) {
+      if (this.obsPropStore.hasOwnProperty(propStr)) {
         throw new SyntaxError(`${this.constructor.name}: createProp('${propStr}'): View has observed property '${propStr}' already!`);
       }
 
@@ -461,8 +467,8 @@ class View extends NativeView {
       console.log(`${this.constructor.name}: View.createProp('${propStr}', ${JSON.stringify(value)}) by-value type value.`);
 
       // check and set the value type, and set value to View's obsPropStore
-      if ((typeof value != "number") && (typeof value != "bool") && (typeof value != "string")) {
-        throw new SyntaxError(`${this.constructor.name} Create @Prop('${propStr}'): ${value} must be a Bool, Number, or String.`);
+      if ((typeof value != "number") && (typeof value != "boolean") && (typeof value != "string")) {
+        throw new SyntaxError(`${this.constructor.name} Create @Prop('${propStr}'): ${value} must be a Boolean, Number, or String.`);
       }
       console.log(`${this.constructor.name}: Set @Prop '${propStr}' to ${JSON.stringify(value)}.`);
       this.obsPropStore[propStr] = value;
@@ -482,8 +488,8 @@ class View extends NativeView {
             return true;
           }
 
-          if ((typeof newValue != "number") && (typeof newValue != "bool") && (typeof newValue != "string")) {
-            throw new SyntaxError(`${this.constructor.name} set @Prop('${propStr}'): ${newValue} must be a Bool, Number, or String.`);
+          if ((typeof newValue != "number") && (typeof newValue != "boolean") && (typeof newValue != "string")) {
+            throw new SyntaxError(`${this.constructor.name} set @Prop('${propStr}'): ${newValue} must be a Boolean, Number, or String.`);
           }
           console.log(`${this.constructor.name}: Set @Prop '${propStr}' to ${JSON.stringify(newValue)}.`);
           this.obsPropStore[propStr] = newValue;

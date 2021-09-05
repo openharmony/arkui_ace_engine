@@ -134,15 +134,12 @@ void FlutterRenderTextOverlay::PaintMagnifier(RenderContext& context)
 {
     auto textField = weakTextField_.Upgrade();
     auto flutterTextField = AceType::DynamicCast<FlutterRenderTextField>(textField);
-    if (!flutterTextField) {
-        return;
-    }
-    auto bitMap = flutterTextField->GetBitmap();
     auto canvas = ScopedCanvas::Create(context);
-    if (!canvas) {
+    auto pipelineContext = context_.Upgrade();
+    if (!canvas || !flutterTextField || !pipelineContext) {
         return;
     }
-    auto pipelineContext = context_.Upgrade();
+    auto bitmap = flutterTextField->GetBitmap();
     double viewScale = pipelineContext->GetViewScale();
     SkCanvas* skCanvas = canvas->canvas();
     double globalX = 0.0;
@@ -201,7 +198,7 @@ void FlutterRenderTextOverlay::PaintMagnifier(RenderContext& context)
     paint.setAntiAlias(true);
     skCanvas->drawRRect(ScaleRrect, paint);
 
-    skCanvas->drawBitmapRect(bitMap,
+    skCanvas->drawBitmapRect(bitmap,
         SkRect::MakeXYWH(x * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET, y * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET,
             NormalizeToPx(MAGNIFIER_WIDTH) * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale),
         SkRect::MakeXYWH(globalX * viewScale, globalY * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale,

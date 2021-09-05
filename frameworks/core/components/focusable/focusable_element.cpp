@@ -22,6 +22,7 @@ namespace OHOS::Ace {
 
 void FocusableElement::Update()
 {
+    UpdateAccessibilityNode();
     auto focusableComponent = DynamicCast<FocusableComponent>(component_);
     if (!focusableComponent) {
         LOGE("Can not dynamicCast to focusableComponent!");
@@ -30,6 +31,9 @@ void FocusableElement::Update()
 
     // Save isNode
     isNode_ = focusableComponent->IsFocusNode();
+
+    // Save isDeleteDisabled
+    isDeleteDisabled_ = focusableComponent->IsDeleteDisabled();
 
     // Save focusable
     SetFocusable(focusableComponent->IsFocusable());
@@ -46,6 +50,7 @@ void FocusableElement::Update()
     const auto& onFocusId = focusableComponent->GetOnFocusId();
     const auto& onBlurId = focusableComponent->GetOnBlurId();
     const auto& onKeyId = focusableComponent->GetOnKeyId();
+    const auto& onDeleteId = focusableComponent->GetOnDeleteId();
 
     if (!onClickId.IsEmpty()) {
         SetOnClickCallback(AceAsyncEvent<void()>::Create(onClickId, context_));
@@ -57,12 +62,22 @@ void FocusableElement::Update()
         SetOnBlurCallback(AceAsyncEvent<void()>::Create(onBlurId, context_));
     }
     if (!onKeyId.IsEmpty()) {
-        SetOnKeyCallback(
-            [callback = AceSyncEvent<void(const KeyEvent&, bool&)>::Create(onKeyId, context_)](const KeyEvent& event) {
-                bool result = false;
-                callback(event, result);
-                return result;
-            });
+        auto context = context_.Upgrade();
+        if (context) {
+            if (context->GetIsDeclarative()) {
+                SetOnKeyCallback(AceSyncEvent<void(const std::shared_ptr<KeyEventInfo>&)>::Create(onKeyId, context_));
+            } else {
+                SetOnKeyCallback([callback = AceSyncEvent<void(const KeyEvent&, bool&)>::Create(onKeyId, context_)](
+                                     const KeyEvent& event) {
+                    bool result = false;
+                    callback(event, result);
+                    return result;
+                });
+            }
+        }
+    }
+    if (!onDeleteId.IsEmpty()) {
+        SetOnDeleteCallback(AceAsyncEvent<void()>::Create(onDeleteId, context_));
     }
 
     if (renderNode_) {

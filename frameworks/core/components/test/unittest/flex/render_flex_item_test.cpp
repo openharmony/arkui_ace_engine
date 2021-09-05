@@ -1027,8 +1027,7 @@ HWTEST_F(RenderFlexItemTest, RenderFlexItemUpdate002, TestSize.Level1)
 
 /**
  * @tc.name: FlexItemAlignSelf001
- * @tc.desc: verify the column with four flex children works fine,
- * where the flex alignSelf are set in the flex children.
+ * @tc.desc: verify the column with four flex children works fine, where the flex alignSelf are set in the flex children.
  * @tc.type: FUNC
  * @tc.require: AR000FL29E
  * @tc.author: wangzezhen
@@ -1742,8 +1741,7 @@ HWTEST_F(RenderFlexItemTest, FlexItemAlignSelf012, TestSize.Level1)
 
 /**
  * @tc.name: FlexItemAlignSelf013
- * @tc.desc: verify the column with three flex children works fine,
- * where the flex alignSelf are set in the flex children.
+ * @tc.desc: verify the column with three flex children works fine, where the flex alignSelf are set in the flex children.
  * @tc.type: FUNC
  * @tc.require: AR000FL29F
  * @tc.author: wangzezhen
@@ -1798,8 +1796,7 @@ HWTEST_F(RenderFlexItemTest, FlexItemAlignSelf013, TestSize.Level1)
 
 /**
  * @tc.name: FlexItemAlignSelf014
- * @tc.desc: verify the column with three flex children works fine,
- * where the flex alignSelf are set in the flex children.
+ * @tc.desc: verify the column with three flex children works fine, where the flex alignSelf are set in the flex children.
  * @tc.type: FUNC
  * @tc.require: AR000FL29F
  * @tc.author: wangzezhen
@@ -1854,8 +1851,7 @@ HWTEST_F(RenderFlexItemTest, FlexItemAlignSelf014, TestSize.Level1)
 
 /**
  * @tc.name: FlexItemAlignSelf015
- * @tc.desc: verify the column with three flex children works fine,
- * where the flex alignSelf are set in the flex children.
+ * @tc.desc: verify the column with three flex children works fine, where the flex alignSelf are set in the flex children.
  * @tc.type: FUNC
  * @tc.require: AR000FL29F
  * @tc.author: wangzezhen
@@ -1910,8 +1906,7 @@ HWTEST_F(RenderFlexItemTest, FlexItemAlignSelf015, TestSize.Level1)
 
 /**
  * @tc.name: FlexItemAlignSelf016
- * @tc.desc: verify the column with three flex children works fine,
- * where the flex alignSelf are set in the flex children.
+ * @tc.desc: verify the column with three flex children works fine, where the flex alignSelf are set in the flex children.
  * @tc.type: FUNC
  * @tc.require: AR000FL29F
  * @tc.author: wangzezhen
@@ -2351,8 +2346,7 @@ HWTEST_F(RenderFlexItemTest, FlexItemAlignSelf023, TestSize.Level1)
 
 /**
  * @tc.name: FlexItemAlignSelf024
- * @tc.desc: verify the column with three flex children works fine,
- * where the flex alignSelf are set in the flex children.
+ * @tc.desc: verify the column with three flex children works fine, where the flex alignSelf are set in the flex children.
  * @tc.type: FUNC
  * @tc.require: AR000FL29F
  * @tc.author: wangzezhen
@@ -2407,8 +2401,7 @@ HWTEST_F(RenderFlexItemTest, FlexItemAlignSelf024, TestSize.Level1)
 
 /**
  * @tc.name: FlexItemAlignSelf025
- * @tc.desc: verify the column with three flex children works fine,
- * where the flex alignSelf are set in the flex children.
+ * @tc.desc: verify the column with three flex children works fine, where the flex alignSelf are set in the flex children.
  * @tc.type: FUNC
  * @tc.require: AR000FL29F
  * @tc.author: wangzezhen
@@ -2463,8 +2456,7 @@ HWTEST_F(RenderFlexItemTest, FlexItemAlignSelf025, TestSize.Level1)
 
 /**
  * @tc.name: FlexItemAlignSelf026
- * @tc.desc: verify the column with three flex children works fine,
- * where the flex alignSelf are set in the flex children.
+ * @tc.desc: verify the column with three flex children works fine, where the flex alignSelf are set in the flex children.
  * @tc.type: FUNC
  * @tc.require: AR000FL29F
  * @tc.author: wangzezhen
@@ -2519,8 +2511,7 @@ HWTEST_F(RenderFlexItemTest, FlexItemAlignSelf026, TestSize.Level1)
 
 /**
  * @tc.name: FlexItemAlignSelf027
- * @tc.desc: verify the column with three flex children works fine,
- * where the flex alignSelf are set in the flex children.
+ * @tc.desc: verify the column with three flex children works fine, where the flex alignSelf are set in the flex children.
  * @tc.type: FUNC
  * @tc.require: AR000FL29F
  * @tc.author: wangzezhen
@@ -2575,8 +2566,7 @@ HWTEST_F(RenderFlexItemTest, FlexItemAlignSelf027, TestSize.Level1)
 
 /**
  * @tc.name: FlexItemAlignSelf028
- * @tc.desc: verify the column with three flex children works fine,
- * where the flex alignSelf are set in the flex children.
+ * @tc.desc: verify the column with three flex children works fine, where the flex alignSelf are set in the flex children.
  * @tc.type: FUNC
  * @tc.require: AR000FL29E
  * @tc.author: wangzezhen
@@ -2631,8 +2621,7 @@ HWTEST_F(RenderFlexItemTest, FlexItemAlignSelf028, TestSize.Level1)
 
 /**
  * @tc.name: FlexItemAlignSelf029
- * @tc.desc: verify the column with three flex children works fine,
- * where the flex alignSelf are set in the flex children.
+ * @tc.desc: verify the column with three flex children works fine, where the flex alignSelf are set in the flex children.
  * @tc.type: FUNC
  * @tc.require: AR000FL29E
  * @tc.author: wangzezhen
@@ -2687,8 +2676,7 @@ HWTEST_F(RenderFlexItemTest, FlexItemAlignSelf029, TestSize.Level1)
 
 /**
  * @tc.name: FlexItemAlignSelf030
- * @tc.desc: verify the column with three flex children works fine,
- * where the flex alignSelf are set in the flex children.
+ * @tc.desc: verify the column with three flex children works fine, where the flex alignSelf are set in the flex children.
  * @tc.type: FUNC
  * @tc.require: AR000FL29E
  * @tc.author: wangzezhen

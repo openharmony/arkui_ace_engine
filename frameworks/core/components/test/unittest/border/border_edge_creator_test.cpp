@@ -27,9 +27,9 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
 
-const double BORDER_EDGE_WIDTH = 1.0;
+const double BORDER_EDGE_WIDTH_VALUE = 1.0;
 const double BORDER_EDGE_WIDTH_DEFAULT = 0.0;
-const uint32_t BORDER_EDGE_COLOR = 0x000000ff;
+const uint32_t BORDER_EDGE_COLOR_VALUE = 0x000000ff;
 const uint32_t BORDER_EDGE_COLOR_DEFAULT = 0xff000000;
 
 }
@@ -84,8 +84,8 @@ HWTEST_F(BorderEdgeCreatorTest, BorderEdgeCreator001, TestSize.Level1)
      * @tc.expected: step2. properties are set correctly.
      */
     BorderEdge borderEdge = CreateFromDsl(jsonBorderEdgeStr);
-    EXPECT_EQ(borderEdge.GetWidth().Value(), BORDER_EDGE_WIDTH);
-    EXPECT_EQ(borderEdge.GetColor().GetValue(), BORDER_EDGE_COLOR);
+    EXPECT_EQ(borderEdge.GetWidth().Value(), BORDER_EDGE_WIDTH_VALUE);
+    EXPECT_EQ(borderEdge.GetColor().GetValue(), BORDER_EDGE_COLOR_VALUE);
     EXPECT_EQ(borderEdge.GetBorderStyle(), BorderStyle::SOLID);
 }
 

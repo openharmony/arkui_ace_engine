@@ -51,7 +51,7 @@ class AnimationBridge : public BaseAnimationBridge {
 public:
     AnimationBridge(JSContext* ctx, JSValue animationContext, NodeId nodeId);
     ~AnimationBridge() override;
-    void Uninitialize();
+    void OnJsEngineDestroy() override;
     JSValue GetJsObject()
     {
         return animationContext_;
@@ -67,7 +67,6 @@ private:
     NodeId nodeId_ = -1;
     IdType finishListenerId_ = 0;
     IdType idleListenerId_ = 0;
-    WeakPtr<FrontendDelegate> delegateWeak_;
 };
 
 class AnimationBridgeTaskCreate : public AnimationBridgeTask {
@@ -85,12 +84,12 @@ private:
 class AnimationBridgeTaskOperation : public AnimationBridgeTask {
     DECLARE_ACE_TYPE(AnimationBridgeTaskOperation, AnimationBridgeTask)
 public:
-    explicit AnimationBridgeTaskOperation(TweenOperation operation) : operation_(operation) {};
+    explicit AnimationBridgeTaskOperation(AnimationOperation operation) : operation_(operation) {};
     ~AnimationBridgeTaskOperation() override = default;
     void AnimationBridgeTaskFunc(const RefPtr<JsAcePage>& page, NodeId nodeId) override;
 
 private:
-    TweenOperation operation_ = TweenOperation::NONE;
+    AnimationOperation operation_ = AnimationOperation::NONE;
 };
 
 class AnimationBridgeTaskStartTime : public AnimationBridgeTask {

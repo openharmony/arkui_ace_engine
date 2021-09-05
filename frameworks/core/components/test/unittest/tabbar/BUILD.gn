@@ -51,6 +51,17 @@ ohos_unittest("RenderTabContentTest") {
   module_out_path = module_output_path
 
   sources = [
+    #declaration
+    "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
+    "$ace_root/frameworks/bridge/common/utils/utils.cpp",
+    "$ace_root/frameworks/core/components/declaration/common/declaration_constants.cpp",
+    "$ace_root/frameworks/core/components/declaration/common/declaration_creator_manager.cpp",
+    "$ace_root/frameworks/core/components/declaration/common/event.cpp",
+    "$ace_root/frameworks/core/components/declaration/span/span_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/text/text_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/textfield/textfield_declaration.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/declaration_mock.cpp",
+
     # accessibility
     "$ace_root/frameworks/core/accessibility/accessibility_node.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
@@ -60,7 +71,10 @@ ohos_unittest("RenderTabContentTest") {
     "$ace_root/frameworks/core/animation/scroll_motion.cpp",
 
     # animation
+    "$ace_root/frameworks/core/animation/animatable_data.cpp",
+    "$ace_root/frameworks/core/animation/animatable_properties.cpp",
     "$ace_root/frameworks/core/animation/animator.cpp",
+    "$ace_root/frameworks/core/animation/property_animation.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
     "$ace_root/frameworks/core/animation/spring_model.cpp",
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
@@ -87,6 +101,8 @@ ohos_unittest("RenderTabContentTest") {
     "$ace_root/frameworks/core/components/tab_bar/tab_content_component.cpp",
     "$ace_root/frameworks/core/components/tab_bar/tab_controller.cpp",
     "$ace_root/frameworks/core/components/text/text_component.cpp",
+    "$ace_root/frameworks/core/components/text_span/text_span_component.cpp",
+    "$ace_root/frameworks/core/components/tween/tween_component.cpp",
     "$ace_root/frameworks/core/pipeline/base/component.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",
 
@@ -122,7 +138,11 @@ ohos_unittest("RenderTabContentTest") {
     "$ace_root/frameworks/core/gestures/drag_recognizer.cpp",
     "$ace_root/frameworks/core/gestures/gesture_recognizer.cpp",
     "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
+    "$ace_root/frameworks/core/gestures/long_press_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/multi_fingers_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/pan_recognizer.cpp",
     "$ace_root/frameworks/core/gestures/raw_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/sequenced_recognizer.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
 
     # image
@@ -136,14 +156,17 @@ ohos_unittest("RenderTabContentTest") {
 
     # properties
     "$ace_root/frameworks/core/components/box/render_box.cpp",
+    "$ace_root/frameworks/core/components/common/painter/flutter_svg_painter.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/decoration.cpp",
     "$ace_root/frameworks/core/components/common/properties/edge.cpp",
+    "$ace_root/frameworks/core/components/common/properties/motion_path_evaluator.cpp",
     "$ace_root/frameworks/core/components/common/properties/page_transition_option.cpp",
     "$ace_root/frameworks/core/components/common/properties/scroll_bar.cpp",
+    "$ace_root/frameworks/core/components/common/properties/shadow.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
 
     # rendering
@@ -181,7 +204,6 @@ ohos_unittest("RenderTabContentTest") {
     "$ace_root/frameworks/core/components/theme/theme_manager.cpp",
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
     "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
     "$root_out_dir/ace/framework/core/components/theme/theme_constants_default.cpp",
     "render_tabcontent_test.cpp",
   ]
@@ -190,8 +212,13 @@ ohos_unittest("RenderTabContentTest") {
     sources += [
       "$ace_root/adapter/common/cpp/thread_util.cpp",
       "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+      "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
+      "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
       "$ace_root/frameworks/base/geometry/matrix4.cpp",
+      "$ace_root/frameworks/base/geometry/quaternion.cpp",
+      "$ace_root/frameworks/base/geometry/transform_util.cpp",
       "$ace_root/frameworks/base/log/dump_log.cpp",
+      "$ace_root/frameworks/base/memory/memory_monitor.cpp",
       "$ace_root/frameworks/base/thread/background_task_executor.cpp",
       "$ace_root/frameworks/base/utils/base_id.cpp",
       "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
@@ -216,20 +243,17 @@ ohos_unittest("RenderTabContentTest") {
   configs = [
     ":config_render_tabcontent_test",
     "$ace_root:ace_test_config",
-    "$flutter_root:flutter_config",
+    "$ace_flutter_engine_root:flutter_config",
   ]
 
   deps = [
+    "$ace_flutter_engine_root:ace_skia_ohos",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
 
   if (is_standard_system) {
-    deps += [
-      "$flutter_root:ace_skia_ohos",
-      "$flutter_root:third_party_flutter_engine_ohos",
-    ]
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
@@ -351,7 +375,7 @@ group("unittest") {
 
   deps = [
     ":RenderTabBarTest",
-    ":RenderTabContentTest",
+    #":RenderTabContentTest",
     ":TabBarCreatorTest",
     ":TabBarElementTest",
     ":TabContentCreatorTest",

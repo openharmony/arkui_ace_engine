@@ -56,13 +56,9 @@ public:
     RefPtr<Component> GetSpecializedComponent() override;
 
 protected:
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
-    bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
     void PrepareSpecializedComponent() override;
 
 private:
-    // input component id
-    std::string target_;
     // click event
     std::list<RefPtr<DOMNode>> children_;
     RefPtr<TouchListenerComponent> labelComponent_;

@@ -18,16 +18,16 @@
 #include <string>
 
 #include "base/log/event_report.h"
+#include "core/common/thread_checker.h"
 
 namespace OHOS::Ace::Framework {
 
-CardFrontendDelegate::CardFrontendDelegate()
+CardFrontendDelegate::CardFrontendDelegate() : jsAccessibilityManager_(AccessibilityNodeManager::Create()) {}
+
+CardFrontendDelegate::~CardFrontendDelegate()
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-    jsAccessibilityManager_ = AceType::MakeRefPtr<JsAccessibilityManager>();
-#else
-    jsAccessibilityManager_ = AceType::MakeRefPtr<JsInspectorManager>();
-#endif
+    CHECK_RUN_ON(JS);
+    LOG_DESTROY();
 }
 
 void CardFrontendDelegate::FireCardEvent(const EventMarker& eventMarker, const std::string& params)
@@ -85,6 +85,16 @@ RefPtr<JsAcePage>& CardFrontendDelegate::CreatePage(int32_t pageId, const std::s
     if (!page_) {
         auto document = AceType::MakeRefPtr<DOMDocument>(pageId);
         page_ = AceType::MakeRefPtr<Framework::JsAcePage>(pageId, document, url);
+    }
+    return page_;
+}
+
+RefPtr<JsAcePage>& CardFrontendDelegate::CreatePage(
+    int32_t pageId, const std::string& url, const WeakPtr<StageElement>& container)
+{
+    if (!page_) {
+        auto document = AceType::MakeRefPtr<DOMDocument>(pageId);
+        page_ = AceType::MakeRefPtr<Framework::JsAcePage>(pageId, document, url, container);
     }
     return page_;
 }

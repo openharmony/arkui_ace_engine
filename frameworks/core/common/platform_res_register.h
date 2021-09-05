@@ -24,6 +24,8 @@
 
 namespace OHOS::Ace {
 
+class PipelineContext;
+
 class PlatformResRegister : public Referenced {
 public:
     using EventCallback = std::function<void(const std::string&)>;
@@ -54,8 +56,19 @@ public:
     virtual int64_t CreateResource(const std::string& resourceType, const std::string& param) = 0;
     virtual bool ReleaseResource(const std::string& resourceHash) = 0;
 
+    void SetPipelineContext(const WeakPtr<PipelineContext>& pipelineContext)
+    {
+        pipelineContext_ = pipelineContext;
+    }
+
+    WeakPtr<PipelineContext> GetPipelineContext() const
+    {
+        return pipelineContext_;
+    }
+
 private:
     std::unordered_map<std::string, EventCallback> eventMap_;
+    WeakPtr<PipelineContext> pipelineContext_;
 };
 
 } // namespace OHOS::Ace

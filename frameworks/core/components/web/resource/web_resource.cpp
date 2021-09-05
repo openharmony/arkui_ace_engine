@@ -49,11 +49,18 @@ void WebResource::Release(const std::function<void(bool)>& onRelease)
 
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
                                                          TaskExecutor::TaskType::PLATFORM);
-    auto releaseTask = [this, resRegister, onRelease] {
-        bool ret = resRegister->ReleaseResource(hash_);
+    auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
+    auto releaseTask = [weakWeb = AceType::WeakClaim(this), weakRes, onRelease] {
+        auto webResource = weakWeb.Upgrade();
+        auto resRegister = weakRes.Upgrade();
+        if (webResource == nullptr || resRegister == nullptr) {
+            LOGE("webDelegate or resRegister is null!");
+            return;
+        }
+        bool ret = resRegister->ReleaseResource(webResource->hash_);
         if (ret) {
-            id_ = INVALID_ID;
-            hash_.clear();
+            webResource->id_ = INVALID_ID;
+            webResource->hash_.clear();
         }
 
         if (onRelease) {
@@ -156,8 +163,11 @@ void WebResource::CallResRegisterMethod(const std::string& method,
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
                                                          TaskExecutor::TaskType::PLATFORM);
 
-    platformTaskExecutor.PostTask([method, param, resRegister, callback] {
+    auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
+    platformTaskExecutor.PostTask([method, param, weakRes, callback] {
+        auto resRegister = weakRes.Upgrade();
         if (resRegister == nullptr) {
+            LOGE("resRegister is null!");
             return;
         }
         std::string result;

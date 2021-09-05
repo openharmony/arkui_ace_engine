@@ -31,7 +31,8 @@ public:
     explicit FlutterTaskExecutor(const flutter::TaskRunners& taskRunners);
     ~FlutterTaskExecutor() override = default;
 
-    void DestroyJsThread();
+    void AddTaskObserver(Task&& callback) override;
+    void RemoveTaskObserver() override;
     bool WillRunOnCurrentThread(TaskType type) const final;
 
 private:

@@ -18,8 +18,10 @@
 #include "base/i18n/localization.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/calendar/calendar_component.h"
+#include "core/components/calendar/calendar_component_v2.h"
 #include "core/components/calendar/render_calendar.h"
 #include "core/components/display/render_display.h"
+#include "core/components/swiper/swiper_element.h"
 #include "core/components/text/text_element.h"
 
 namespace OHOS::Ace {
@@ -36,7 +38,24 @@ void CalendarElement::PerformBuild()
         calendarController_ = AceType::MakeRefPtr<CalendarController>(calendar->GetDataAdapterAction(), context_);
         UpdateAttr(calendar);
         calendarController_->Initialize();
+        auto calendarV2 = AceType::DynamicCast<CalendarComponentV2>(calendar);
+        if (calendarV2) {
+            auto controllerV2 = calendarV2->GetControllerV2();
+            if (controllerV2) {
+                controllerV2->SetCalendarController(calendarController_);
+            }
+        }
     } else {
+        auto calendarV2 = AceType::DynamicCast<CalendarComponentV2>(calendar);
+        if (calendarV2) {
+            auto dataAdapter = calendarController_->GetDataAdapter();
+            dataAdapter->ParseCalendarData(calendarV2->GetObtainedMonths());
+            auto controllerV2 = calendarV2->GetControllerV2();
+            if (controllerV2) {
+                controllerV2->SetCalendarController(calendarController_);
+            }
+        }
+        calendarController_->UpdateTheme();
         UpdateAttr(calendar);
         return;
     }
@@ -75,65 +94,86 @@ void CalendarElement::BuildCardCalendar(const RefPtr<CalendarComponent>& calenda
     }
     auto children = element->GetChildren().front()->GetChildren();
     int32_t index = 0;
-    RefPtr<Element> box;
+    RefPtr<Element> flex;
     for (const auto& item : children) {
         if (index == 0) {
             SetArrowImage(item, true);
         }
         if (index == 1) {
-            box = item;
+            flex = item;
         }
         if (index == 2) {
             SetArrowImage(item, false);
         }
         ++index;
     }
-    auto text = AceType::DynamicCast<TextElement>(box->GetChildren().front());
-    if (text) {
-        auto renderText = AceType::DynamicCast<RenderText>(text->GetRenderNode());
-        calendarController_->SetCardTitle(renderText);
-        auto buttonCallback = [weak = WeakClaim(RawPtr(calendar)), text = WeakClaim(RawPtr(renderText)),
-                                  weakController = WeakClaim(RawPtr(calendarController_))](bool pre) {
-            auto calendar = weak.Upgrade();
-            auto controller = weakController.Upgrade();
-            if (controller) {
-                auto swiper = controller->GetRenderSwiper();
-                if (swiper && swiper->GetMoveStatus()) {
-                    return;
-                }
-            }
-            if (!calendar) {
+    auto text = GetTextElement(flex);
+    if (!text) {
+        LOGE("Get text element error");
+        return;
+    }
+    auto renderText = AceType::DynamicCast<RenderText>(text->GetRenderNode());
+    calendarController_->SetCardTitle(renderText);
+    auto buttonCallback = [weak = WeakClaim(RawPtr(calendar)), text = WeakClaim(RawPtr(renderText)),
+                              weakController = WeakClaim(RawPtr(calendarController_))](bool pre) {
+        auto calendar = weak.Upgrade();
+        auto controller = weakController.Upgrade();
+        if (!controller || !calendar) {
+            LOGE("build arrow callback error");
+            return;
+        }
+        auto swiper = controller->GetRenderSwiper();
+        if (swiper && swiper->GetMoveStatus()) {
+            return;
+        }
+        if (controller->GetCurrentIndex() != swiper->GetCurrentIndex()) {
+            return;
+        }
+        pre ? controller->GoToPrevMonth(1) : controller->GoToNextMonth(1);
+        auto renderText = text.Upgrade();
+        auto currentDate = controller->GetCurrentMonth();
+        if (renderText) {
+            DateTime dateTime;
+            dateTime.year = currentDate.year;
+            dateTime.month = currentDate.month;
+            auto date = Localization::GetInstance()->FormatDateTime(dateTime, "yyyyMMM");
+            auto textComponent = AceType::MakeRefPtr<TextComponent>(date);
+            auto cardTheme = renderText->GetTheme<CalendarTheme>();
+            if (!cardTheme) {
                 return;
             }
-            pre ? calendar->GetCalendarController()->GoToPrevMonth(1)
-                : calendar->GetCalendarController()->GoToNextMonth(1);
-            auto renderText = text.Upgrade();
-            if (renderText) {
-                DateTime dateTime;
-                dateTime.year = calendar->GetCalendarController()->GetCurrentMonth().year;
-                dateTime.month = calendar->GetCalendarController()->GetCurrentMonth().month;
-                auto date = Localization::GetInstance()->FormatDateTime(dateTime, "yyyyMMM");
-                auto textComponent = AceType::MakeRefPtr<TextComponent>(date);
-                auto cardTheme = renderText->GetTheme<CalendarTheme>();
-                if (!cardTheme) {
-                    return;
-                }
-                TextStyle style;
-                style.SetFontSize(cardTheme->GetCardCalendarTheme().titleFontSize);
-                style.SetTextColor(cardTheme->GetCardCalendarTheme().titleTextColor);
-                style.SetFontWeight(FontWeight::W500);
-                textComponent->SetTextStyle(style);
-                renderText->Update(textComponent);
-                renderText->MarkNeedLayout();
+            TextStyle style;
+            style.SetFontSize(cardTheme->GetCardCalendarTheme().titleFontSize);
+            style.SetTextColor(cardTheme->GetCardCalendarTheme().titleTextColor);
+            style.SetFontWeight(FontWeight::W500);
+            style.SetAllowScale(false);
+            textComponent->SetTextStyle(style);
+            renderText->Update(textComponent);
+            renderText->MarkNeedLayout();
+        }
+    };
+    BackEndEventManager<void()>::GetInstance().BindBackendEvent(calendar->GetPreClickId(), [buttonCallback]() {
+        AceApplicationInfo::GetInstance().IsRightToLeft() ? buttonCallback(false) : buttonCallback(true);
+    });
+    BackEndEventManager<void()>::GetInstance().BindBackendEvent(calendar->GetNextClickId(), [buttonCallback]() {
+        AceApplicationInfo::GetInstance().IsRightToLeft() ? buttonCallback(true) : buttonCallback(false);
+    });
+    dateEvent_ = AceAsyncEvent<void(const std::string&)>::Create(calendar->GetSelectedChangeEvent(), context_);
+    BackEndEventManager<void()>::GetInstance().BindBackendEvent(calendar->GetDateClickId(),
+        [date = dateEvent_, weakController = WeakPtr<CalendarController>(calendarController_)]() {
+            auto controller = weakController.Upgrade();
+            if (!controller) {
+                LOGE("build calendar title callback error");
+                return;
             }
-        };
-        BackEndEventManager<void()>::GetInstance().BindBackendEvent(calendar->GetPreClickId(), [buttonCallback]() {
-            AceApplicationInfo::GetInstance().IsRightToLeft() ? buttonCallback(false) : buttonCallback(true);
+            auto currentDate = controller->GetCurrentMonth();
+            auto today = controller->GetToday();
+            auto json = JsonUtil::Create(true);
+            today.month == currentDate ? json->Put("day", today.day) : json->Put("day", 1);
+            json->Put("month", currentDate.month);
+            json->Put("year", currentDate.year);
+            date(json->ToString());
         });
-        BackEndEventManager<void()>::GetInstance().BindBackendEvent(calendar->GetNextClickId(), [buttonCallback]() {
-            AceApplicationInfo::GetInstance().IsRightToLeft() ? buttonCallback(true) : buttonCallback(false);
-        });
-    }
 }
 
 void CalendarElement::UpdateAttr(const RefPtr<CalendarComponent>& calendar)
@@ -158,8 +198,19 @@ void CalendarElement::UpdateAttr(const RefPtr<CalendarComponent>& calendar)
     attr.cardCalendar = calendar->IsCardCalendar();
     attr.requestData = calendar->GetRequestDataEvent();
     attr.showHoliday = calendar->GetShowHoliday();
+    attr.needSlide = calendar->IsNeedSlide();
     attr.offDays = calendar->GetOffDays();
-    dataAdapter->UpdateCardCalendarAttr(attr);
+    attr.holidays = calendar->GetHolidays();
+    attr.workDays = calendar->GetWorkDays();
+    attr.axis = calendar->GetAxis();
+
+    auto calendarV2 = AceType::DynamicCast<CalendarComponentV2>(calendar);
+    if (calendarV2) {
+        attr.isV2Component = true;
+    }
+    attr.calendarTheme = calendar->GetCalendarTheme();
+    attr.type = calendar->GetCalendarType();
+    dataAdapter->UpdateCardCalendarAttr(std::move(attr));
 }
 
 void CalendarElement::SetArrowImage(const RefPtr<Element>& element, bool isLeft)
@@ -175,6 +226,15 @@ void CalendarElement::SetArrowImage(const RefPtr<Element>& element, bool isLeft)
     if (image) {
         isLeft ? calendarController_->SetLeftRowImage(image) : calendarController_->SetRightRowImage(image);
     }
+}
+
+RefPtr<TextElement> CalendarElement::GetTextElement(const RefPtr<Element>& flex)
+{
+    auto element = flex;
+    while (element && element->GetChildren().front()) {
+        element = element->GetChildren().front();
+    }
+    return AceType::DynamicCast<TextElement>(element);
 }
 
 void CalendarMonthElement::Update()

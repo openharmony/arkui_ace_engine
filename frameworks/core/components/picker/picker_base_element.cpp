@@ -42,12 +42,16 @@ void PickerBaseElement::OnPostFlush()
 void PickerBaseElement::PerformBuild()
 {
     auto context = context_.Upgrade();
-    auto picker = AceType::DynamicCast<PickerBaseComponent>(component_);
-    if (picker && context && context->GetAccessibilityManager()) {
-        picker->Initialize(context->GetAccessibilityManager(), GetThemeManager());
-    } else {
-        LOGE("can not get accessibility manager or picker is null.");
+    if (context) {
+        auto picker = AceType::DynamicCast<PickerBaseComponent>(component_);
+        auto accessibilityManager = context->GetAccessibilityManager();
+        if (picker && accessibilityManager) {
+            picker->Initialize(accessibilityManager, GetThemeManager());
+        } else {
+            LOGE("can not get accessibility manager or picker is null.");
+        }
     }
+
     SoleChildElement::PerformBuild();
     auto render = AceType::DynamicCast<RenderPickerBase>(renderNode_);
     if (render) {

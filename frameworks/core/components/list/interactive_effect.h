@@ -49,6 +49,7 @@ public:
     void ShowAnimation(ItemState state);
     void TouchDownAnimation();
     void TouchUpAnimation();
+    void CancelTouchAnimation();
     void Initialize(const RefPtr<ThemeManager>& themeManager);
     void UpdateContext(const WeakPtr<PipelineContext>& context);
     void FinishPreviousAnimation();
@@ -113,7 +114,7 @@ protected:
     void BuildClickAlphaAnimation(const RefPtr<KeyframeAnimation<double>>& alphaAnimation);
     void CreateDoubleAnimation(RefPtr<KeyframeAnimation<double>>& doubleAnimation, double beginValue, double endValue);
     void StartTouchAnimation(RefPtr<Animator> controller,
-        RefPtr<KeyframeAnimation<double>>& doubleAnimation);
+        RefPtr<KeyframeAnimation<double>>& doubleAnimation, int32_t startDelay = 0);
 
     double focusDuration_ = DEFAULT_FOCUS_DURATION; // focus animation duration, ms
     double clickDuration_ = DEFAULT_CLICK_DURATION; // click animation duration, ms

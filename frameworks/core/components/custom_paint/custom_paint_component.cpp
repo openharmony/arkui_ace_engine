@@ -46,6 +46,39 @@ std::string CanvasTaskPool::ToDataURL(const std::string& args)
     }
     return paint->ToDataURL(args);
 }
+void CanvasTaskPool::TransferFromImageBitmap(const RefPtr<OffscreenCanvas>& offscreenCanvas)
+{
+    auto task = [offscreenCanvas](RenderCustomPaint& interface, const Offset&) {
+        interface.TransferFromImageBitmap(offscreenCanvas);
+    };
+    PushTask(task);
+}
+
+void CanvasTaskPool::SetWebGLInstance(CanvasRenderContextBase* context)
+{
+    auto paint = renderNode_.Upgrade();
+    if (!paint) {
+        LOGE("CanvasTaskPool::SetWebGLInstance invalid renderNode");
+        return;
+    }
+    paint->SetWebGLInstance(context);
+}
+
+void CanvasTaskPool::WebGLInit(CanvasRenderContextBase* context)
+{
+    auto paint = renderNode_.Upgrade();
+    if (!paint) {
+        LOGE("CanvasTaskPool::SetWebGLInstance invalid renderNode");
+        return;
+    }
+    paint->WebGLInit(context);
+}
+
+void CanvasTaskPool::WebGLUpdate()
+{
+    auto task = [](RenderCustomPaint& interface, const Offset& offset) { interface.WebGLUpdate(); };
+    PushTask(task);
+}
 
 void CanvasTaskPool::SetAntiAlias(bool isEnabled)
 {

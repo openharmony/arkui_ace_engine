@@ -30,7 +30,7 @@ namespace OHOS::Ace {
 // Note that this class is not thread-safe, and is processed on the UI thread of ACE uniformly.
 // Uses BackEndEventManager to get available id.
 // This class is only used by BackEndEventManager.
-class BackEndEventIdManager final : public Singleton<BackEndEventIdManager> {
+class ACE_EXPORT BackEndEventIdManager final : public Singleton<BackEndEventIdManager> {
     DECLARE_SINGLETON(BackEndEventIdManager);
 
 public:

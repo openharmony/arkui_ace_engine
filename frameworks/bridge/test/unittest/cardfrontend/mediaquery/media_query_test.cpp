@@ -15,7 +15,7 @@
 
 #include "gtest/gtest.h"
 
-#include "frameworks/bridge/card_frontend/media_queryer.h"
+#include "frameworks/bridge/common/media_query/media_queryer.h"
 
 using namespace testing;
 using namespace testing::ext;

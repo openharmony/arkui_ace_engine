@@ -38,7 +38,6 @@ DOMSelect::DOMSelect(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeI
     selectComponent_ = AceType::MakeRefPtr<SelectComponent>();
     tipText_ = AceType::MakeRefPtr<TextComponent>("");
     selectComponent_->SetTipText(tipText_);
-    selectComponent_->SetTextDirection((IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR));
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     selectComponent_->SetNodeId(nodeId);
 #endif
@@ -207,6 +206,13 @@ void DOMSelect::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
     }
 
     selectComponent_->RemoveSelectOption(option);
+}
+
+void DOMSelect::PrepareSpecializedComponent()
+{
+    if (selectComponent_) {
+        selectComponent_->SetTextDirection((IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR));
+    }
 }
 
 } // namespace OHOS::Ace::Framework

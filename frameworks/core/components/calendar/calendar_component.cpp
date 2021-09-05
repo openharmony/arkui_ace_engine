@@ -18,11 +18,13 @@
 #include "base/i18n/localization.h"
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
+#include "core/components/button/render_button.h"
 #include "core/components/calendar/calendar_element.h"
 #include "core/components/calendar/render_calendar.h"
 #include "core/components/display/display_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/image/image_component.h"
+#include "core/components/padding/padding_component.h"
 #include "core/components/text/text_component.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/back_end_event_manager.h"
@@ -36,8 +38,9 @@ constexpr int32_t DISTANCE_FORM_LAST = MAX_MONTH_CACHE_NUM - 1;
 constexpr int32_t TODAY_MONTH_INDEX_OF_CONTAINER = 1;
 constexpr int32_t NEXT_TO_TODAY_MONTH_INDEX_OF_CONTAINER = 2;
 constexpr int32_t LAST_TO_TODAY_MONTH_INDEX_OF_CONTAINER = 0;
-constexpr Dimension UPPER_AND_LOWER_MARGIN = 16.0_vp;
-constexpr Dimension LEFT_AND_RIGHT_MARGIN = 24.0_vp;
+constexpr Dimension CALENDAR_BOX_TOP_AND_BOTTOM_MARGIN = 4.0_vp;
+constexpr Dimension CALENDAR_BOX_LEFT_AND_RIGHT_MARGIN = 24.0_vp;
+constexpr Dimension CALENDAR_BUTTON_RADIUS = 4.0_vp;
 
 } // namespace
 
@@ -50,11 +53,17 @@ void CalendarController::Initialize()
     currentCalendarMonth_ = dataAdapter_->GetToday().month;
     dataAdapter_->SetCurrentMonth(currentCalendarMonth_);
     dataAdapter_->SetSelectedChanged(dataAdapter_->GetToday().day, TODAY_MONTH_INDEX_OF_CONTAINER);
-    dataAdapter_->RequestData({ currentCalendarMonth_, TODAY_MONTH_INDEX_OF_CONTAINER });
-    dataAdapter_->AddPendingRequest(
-        CalendarMonth::GetNextMonth(currentCalendarMonth_), NEXT_TO_TODAY_MONTH_INDEX_OF_CONTAINER);
-    dataAdapter_->AddPendingRequest(
-        CalendarMonth::GetLastMonth(currentCalendarMonth_), LAST_TO_TODAY_MONTH_INDEX_OF_CONTAINER);
+    CalendarDataRequest requestMonth(currentCalendarMonth_, TODAY_MONTH_INDEX_OF_CONTAINER);
+    requestMonth.state = MonthState::CUR_MONTH;
+    dataAdapter_->RequestData(requestMonth);
+    requestMonth.month = CalendarMonth::GetNextMonth(currentCalendarMonth_);
+    requestMonth.indexOfContainer = NEXT_TO_TODAY_MONTH_INDEX_OF_CONTAINER;
+    requestMonth.state = MonthState::NEXT_MONTH;
+    dataAdapter_->AddPendingRequest(requestMonth);
+    requestMonth.month = CalendarMonth::GetLastMonth(currentCalendarMonth_);
+    requestMonth.indexOfContainer = LAST_TO_TODAY_MONTH_INDEX_OF_CONTAINER;
+    requestMonth.state = MonthState::PRE_MONTH;
+    dataAdapter_->AddPendingRequest(requestMonth);
 }
 
 void CalendarController::GoToPrevMonth(int32_t selected)
@@ -95,6 +104,7 @@ void CalendarController::GoToMonth(SwipeDirection direction, int32_t selected)
 
     swiperReverseCache_.push({ currentMonthIndex_, reverse });
     dataAdapter_->SetSelectedChanged(selected, currentMonthIndex_);
+    dataAdapter_->NotifySelectedChanged();
     currentCalendarMonth_ = calendarMonth;
     dataAdapter_->SetCurrentMonth(currentCalendarMonth_);
     dataAdapter_->RequestData({ cacheMonth, index });
@@ -189,19 +199,25 @@ void CalendarController::RequestMonthData(int32_t index)
         cacheMonth = CalendarMonth::GetNextMonth(calendarMonth);
 
         dataAdapter_->SetSelectedChanged(selectedDay, currentMonthIndex_);
-        dataAdapter_->RequestData({ cacheMonth, tmpNextIndex });
+        CalendarDataRequest requestMonth(cacheMonth, tmpNextIndex);
+        requestMonth.state = MonthState::NEXT_MONTH;
+        currentCalendarMonth_ = calendarMonth;
+        dataAdapter_->SetCurrentMonth(currentCalendarMonth_);
+        dataAdapter_->RequestData(requestMonth);
     } else if (preIndex == index) {
         currentMonthIndex_ = preIndex;
         calendarMonth = CalendarMonth::GetLastMonth(currentCalendarMonth_);
         cacheMonth = CalendarMonth::GetLastMonth(calendarMonth);
 
         dataAdapter_->SetSelectedChanged(selectedDay, currentMonthIndex_);
-        dataAdapter_->RequestData({ cacheMonth, tmpPreIndex });
+        CalendarDataRequest requestMonth(cacheMonth, tmpPreIndex);
+        requestMonth.state = MonthState::PRE_MONTH;
+        currentCalendarMonth_ = calendarMonth;
+        dataAdapter_->SetCurrentMonth(currentCalendarMonth_);
+        dataAdapter_->RequestData(requestMonth);
     } else {
         return;
     }
-    currentCalendarMonth_ = calendarMonth;
-    dataAdapter_->SetCurrentMonth(currentCalendarMonth_);
 }
 
 void CalendarController::CalculateNextIndex(int32_t index)
@@ -228,18 +244,34 @@ void CalendarController::UpdateTheme()
         return;
     }
     TextStyle style;
-    style.SetFontSize(theme->GetCardCalendarTheme().titleFontSize);
-    style.SetTextColor(theme->GetCardCalendarTheme().titleTextColor);
+    auto cardTheme = theme->GetCardCalendarTheme();
+    style.SetFontSize(cardTheme.titleFontSize);
+    style.SetTextColor(cardTheme.titleTextColor);
     style.SetFontWeight(FontWeight::W500);
+    style.SetAllowScale(false);
     renderText_->SetTextStyle(style);
     renderText_->MarkNeedMeasure();
     renderText_->MarkNeedLayout();
-    leftImageComponent_->SetColor(theme->GetCardCalendarTheme().titleTextColor);
+    leftImageComponent_->SetColor(cardTheme.titleTextColor);
     leftImage_->Update(leftImageComponent_);
     leftImage_->MarkNeedLayout();
-    rightImageComponent_->SetColor(theme->GetCardCalendarTheme().titleTextColor);
+    rightImageComponent_->SetColor(cardTheme.titleTextColor);
     rightImage_->Update(rightImageComponent_);
     rightImage_->MarkNeedLayout();
+    SetButtonClickColor(renderText_, cardTheme.clickEffectColor);
+    SetButtonClickColor(leftImage_, cardTheme.clickEffectColor);
+    SetButtonClickColor(rightImage_, cardTheme.clickEffectColor);
+}
+
+void CalendarController::SetButtonClickColor(const RefPtr<RenderNode>& node, const Color& clickColor) const
+{
+    auto button = AceType::DynamicCast<RenderButton>(node->GetParent().Upgrade());
+    if (!button) {
+        LOGE("this node is not button");
+        return;
+    }
+    button->SetClickedColor(clickColor);
+    button->MarkNeedLayout();
 }
 
 void CalendarController::UpdateTitle(const CalendarDay& today)
@@ -266,49 +298,57 @@ RefPtr<Component> CalendarComponent::Build(
         return nullptr;
     }
     calendarController_ = calendarController;
-    auto themeManager = context->GetThemeManager();
-    if (!themeManager) {
-        return nullptr;
-    }
-    auto calendarTheme = themeManager->GetTheme<CalendarTheme>();
-    if (!calendarTheme) {
-        return nullptr;
-    }
 
     auto direction = GetTextDirection();
+
+    if (!theme_) {
+        auto themeManager = context->GetThemeManager();
+        if (!themeManager) {
+            return nullptr;
+        }
+        theme_ = themeManager->GetTheme<CalendarTheme>();
+    }
 
     std::list<RefPtr<Component>> monthChildren;
     for (int32_t index = 0; index < MAX_MONTH_CACHE_NUM; index++) {
         auto calendarMonth = AceType::MakeRefPtr<CalendarMonthComponent>(index, calendarController_);
         auto display = AceType::MakeRefPtr<DisplayComponent>(calendarMonth);
         calendarMonth->SetSelectedChangeEvent(selectedChangeEvent_);
-        calendarMonth->SetCalendarTheme(calendarTheme);
+        calendarMonth->SetCalendarTheme(theme_);
         calendarMonth->SetCardCalendar(cardCalendar_);
         calendarMonth->SetTextDirection(direction);
+        calendarMonth->SetCalendarType(type_);
         display->SetOpacity(MAX_OPACITY);
         monthChildren.emplace_back(display);
     }
     if (!swiperContainer_) {
-        swiperContainer_ = AceType::MakeRefPtr<SwiperComponent>(monthChildren);
+        swiperContainer_ = AceType::MakeRefPtr<SwiperComponent>(monthChildren, false);
     }
-    swiperContainer_->SetLoop(false);
     swiperContainer_->SetAxis(axis_);
     swiperContainer_->SetIndex(TODAY_MONTH_INDEX_OF_CONTAINER);
     swiperContainer_->SetTextDirection(direction);
     swiperContainer_->SetSlideContinue(true);
     calendarController_->SetSwiperController(swiperContainer_->GetSwiperController());
-    swiperContainer_->SetMoveCallback([calendarComponent = AceType::WeakClaim(this)](int32_t index) {
-        auto calendar = calendarComponent.Upgrade();
-        if (calendar && calendar->calendarController_) {
-            calendar->calendarController_->RequestMonthData(index);
+    swiperContainer_->SetMoveCallback([controller = WeakPtr<CalendarController>(calendarController_)](int32_t index) {
+        auto calendarController = controller.Upgrade();
+        if (calendarController) {
+            calendarController->SetHasMoved(true);
+            calendarController->RequestMonthData(index);
         }
     });
+    if (type_ == CalendarType::SIMPLE) {
+        swiperContainer_->SetDisabledStatus(true);
+    }
+    if (!needSlide_) {
+        swiperContainer_->SetLoop(false);
+        swiperContainer_->DisableSwipe(true);
+        swiperContainer_->SetDisableRotation(true);
+    }
     if (!cardCalendar_) {
         return swiperContainer_;
     } else {
-        swiperContainer_->DisableSwipe(true);
         RefPtr<ColumnComponent> colComponent;
-        BuildCardCalendarTitle(calendarTheme, colComponent);
+        BuildCardCalendarTitle(colComponent);
         return colComponent;
     }
 }
@@ -328,32 +368,49 @@ void CalendarComponent::GoTo(int32_t year, int32_t month, int32_t day)
     }
 }
 
-void CalendarComponent::BuildCardCalendarTitle(const RefPtr<CalendarTheme>& theme, RefPtr<ColumnComponent>& col)
+void CalendarComponent::BuildCardCalendarTitle(RefPtr<ColumnComponent>& col)
 {
-    auto preButton = InitCardButton(theme, true);
-    auto nextButton = InitCardButton(theme, false);
+    auto preButton = InitCardButton(true);
+    auto nextButton = InitCardButton(false);
     DateTime dateTime;
     dateTime.year = calendarController_->GetCurrentMonth().year;
     dateTime.month = calendarController_->GetCurrentMonth().month;
     auto date = Localization::GetInstance()->FormatDateTime(dateTime, "yyyyMMM");
     auto text = AceType::MakeRefPtr<TextComponent>(date);
     TextStyle style;
-    auto calendarTheme = theme->GetCardCalendarTheme();
+    auto calendarTheme = theme_->GetCardCalendarTheme();
     style.SetFontSize(calendarTheme.titleFontSize);
     style.SetTextColor(calendarTheme.titleTextColor);
     style.SetFontWeight(FontWeight::W500);
+    style.SetAllowScale(false);
     text->SetTextStyle(style);
 
     auto box = AceType::MakeRefPtr<BoxComponent>();
-    Edge edge(LEFT_AND_RIGHT_MARGIN, UPPER_AND_LOWER_MARGIN, LEFT_AND_RIGHT_MARGIN, UPPER_AND_LOWER_MARGIN);
-    box->SetMargin(edge);
-    box->SetChild(text);
+    Edge edge(CALENDAR_BOX_LEFT_AND_RIGHT_MARGIN, CALENDAR_BOX_TOP_AND_BOTTOM_MARGIN,
+        CALENDAR_BOX_LEFT_AND_RIGHT_MARGIN, CALENDAR_BOX_TOP_AND_BOTTOM_MARGIN);
+
+    std::list<RefPtr<Component>> children;
+    auto padding = AceType::MakeRefPtr<PaddingComponent>();
+    padding->SetChild(text);
+    padding->SetPadding(edge);
+    children.emplace_back(padding);
+    auto button = AceType::MakeRefPtr<ButtonComponent>(children);
+    button->SetHeight(calendarTheme.buttonHeight);
+    button->SetType(ButtonType::TEXT);
+    button->SetBackgroundColor(Color::TRANSPARENT);
+    button->SetClickedColor(calendarTheme.clickEffectColor);
+    button->SetRectRadius(CALENDAR_BUTTON_RADIUS);
+    dateClickId_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+    button->SetClickedEventId(dateClickId_);
+    box->SetChild(button);
+    auto flexItem = AceType::MakeRefPtr<FlexItemComponent>(0.0, 0.0, 0.0, box);
 
     std::list<RefPtr<Component>> rowChildren;
     rowChildren.emplace_back(preButton);
-    rowChildren.emplace_back(box);
+    rowChildren.emplace_back(flexItem);
     rowChildren.emplace_back(nextButton);
     auto rowComponent = AceType::MakeRefPtr<RowComponent>(FlexAlign::CENTER, FlexAlign::CENTER, rowChildren);
+    rowComponent->SetTextDirection(TextDirection::LTR);
     std::list<RefPtr<Component>> colChildren;
     colChildren.emplace_back(rowComponent);
     colChildren.emplace_back(swiperContainer_);
@@ -399,21 +456,22 @@ void CalendarComponent::SetCalendarData(const std::string& value)
     }
 }
 
-RefPtr<ButtonComponent> CalendarComponent::InitCardButton(const RefPtr<CalendarTheme>& theme, bool isPreArrow)
+RefPtr<ButtonComponent> CalendarComponent::InitCardButton(bool isPreArrow)
 {
     auto Arrow = isPreArrow ? AceType::MakeRefPtr<ImageComponent>(InternalResource::ResourceId::LEFT_ARROW_SVG)
                             : AceType::MakeRefPtr<ImageComponent>(InternalResource::ResourceId::RIGHT_ARROW_SVG);
     isPreArrow ? calendarController_->SetLeftRowImage(Arrow) : calendarController_->SetRightRowImage(Arrow);
-    auto calendarTheme = theme->GetCardCalendarTheme();
+    auto calendarTheme = theme_->GetCardCalendarTheme();
     Arrow->SetWidth(calendarTheme.arrowWidth);
     Arrow->SetHeight(calendarTheme.arrowHeight);
     std::list<RefPtr<Component>> children;
     children.emplace_back(Arrow);
     auto button = AceType::MakeRefPtr<ButtonComponent>(children);
     button->SetBackgroundColor(Color::TRANSPARENT);
-    button->SetClickedColor(Color::TRANSPARENT);
+    button->SetClickedColor(calendarTheme.clickEffectColor);
     button->SetWidth(calendarTheme.buttonWidth);
     button->SetHeight(calendarTheme.buttonHeight);
+    button->SetRectRadius(CALENDAR_BUTTON_RADIUS);
     isPreArrow ? preClickId_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker()
                : nextClickId_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
     isPreArrow ? button->SetClickedEventId(preClickId_) : button->SetClickedEventId(nextClickId_);

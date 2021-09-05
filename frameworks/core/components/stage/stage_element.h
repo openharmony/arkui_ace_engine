@@ -32,10 +32,10 @@ class StageElement : public StackElement, public PageTransitionListenable, publi
 public:
     void PerformBuild() override;
 
-    void PushPage(const RefPtr<Component>& newComponent);
+    virtual void PushPage(const RefPtr<Component>& newComponent);
     void Pop();
     void PopToPage(int32_t pageId);
-    void Replace(const RefPtr<Component>& newComponent);
+    virtual void Replace(const RefPtr<Component>& newComponent);
     bool ClearOffStage();
     bool CanPopPage();
     bool CanPushPage();
@@ -45,6 +45,31 @@ public:
     bool IsFocusable() const override;
     bool InitTransition(const RefPtr<PageTransitionElement>& transitionIn,
         const RefPtr<PageTransitionElement>& transitionOut, TransitionEvent event);
+
+    void SetForCard()
+    {
+        isForMountCard_ = true;
+    }
+
+    bool IsForCard()
+    {
+        return isForMountCard_;
+    }
+
+    WeakPtr<PipelineContext> GetCardContext() const
+    {
+        return cardContext_;
+    }
+
+    void SetCardContext(const WeakPtr<PipelineContext>& context)
+    {
+        cardContext_ = context;
+    }
+
+    StackOperation GetStackOperation() const
+    {
+        return operation_;
+    }
 
 protected:
     void MarkDirty() override;
@@ -76,6 +101,7 @@ private:
     // Page transition parameters depend on the existence of shared element transitions,
     // Only after PerformBuild can we determine if there is a shared element transition.
     void OnPostFlush() override;
+    void MakeTopPageTouchable();
 
     StackOperation operation_ { StackOperation::NONE };
     StackOperation pendingOperation_ { StackOperation::NONE };
@@ -85,6 +111,20 @@ private:
     RefPtr<Animator> controllerOut_; // Controller for transition out.
     int32_t directedPageId_ = 0;
     bool isWaitingForBuild_ = false;
+
+    bool isForMountCard_ = false;
+    WeakPtr<PipelineContext> cardContext_;
+};
+
+class SectionStageElement : public StageElement {
+    DECLARE_ACE_TYPE(SectionStageElement, StageElement);
+
+public:
+    void PushPage(const RefPtr<Component>& newComponent) override;
+    void Replace(const RefPtr<Component>& newComponent) override;
+
+private:
+    void AddAsOnlyPage(const RefPtr<Component>& newComponent);
 };
 
 } // namespace OHOS::Ace

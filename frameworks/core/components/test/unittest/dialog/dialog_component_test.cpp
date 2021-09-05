@@ -152,7 +152,9 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild001, TestSize.Level1)
     EXPECT_TRUE(row != nullptr);
     RefPtr<PaddingComponent> padding = AceType::DynamicCast<PaddingComponent>(row->GetChildren().front());
     EXPECT_TRUE(padding != nullptr);
-    RefPtr<TextComponent> textComponent = AceType::DynamicCast<TextComponent>(padding->GetChild());
+    RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(padding->GetChild());
+    EXPECT_TRUE(box != nullptr);
+    RefPtr<TextComponent> textComponent = AceType::DynamicCast<TextComponent>(box->GetChild());
     EXPECT_TRUE(textComponent != nullptr);
     EXPECT_EQ(textComponent->GetData(), TEXT_VALUE_DEFAULT);
 }
@@ -251,7 +253,9 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild004, TestSize.Level1)
     EXPECT_TRUE(row != nullptr);
     RefPtr<PaddingComponent> titlePadding = AceType::DynamicCast<PaddingComponent>(row->GetChildren().front());
     EXPECT_TRUE(titlePadding != nullptr);
-    RefPtr<TextComponent> titleComponent = AceType::DynamicCast<TextComponent>(titlePadding->GetChild());
+    RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(titlePadding->GetChild());
+    EXPECT_TRUE(box != nullptr);
+    RefPtr<TextComponent> titleComponent = AceType::DynamicCast<TextComponent>(box->GetChild());
     EXPECT_TRUE(titleComponent != nullptr);
     EXPECT_EQ(titleComponent->GetData(), TEXT_VALUE_DEFAULT);
     RefPtr<FlexItemComponent> contentFlex = AceType::DynamicCast<FlexItemComponent>(column->GetChildren().back());
@@ -295,7 +299,9 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild005, TestSize.Level1)
     EXPECT_TRUE(titleRow != nullptr);
     RefPtr<PaddingComponent> titlePadding = AceType::DynamicCast<PaddingComponent>(titleRow->GetChildren().front());
     EXPECT_TRUE(titlePadding != nullptr);
-    RefPtr<TextComponent> titleComponent = AceType::DynamicCast<TextComponent>(titlePadding->GetChild());
+    RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(titlePadding->GetChild());
+    EXPECT_TRUE(box != nullptr);
+    RefPtr<TextComponent> titleComponent = AceType::DynamicCast<TextComponent>(box->GetChild());
     EXPECT_TRUE(titleComponent != nullptr);
     EXPECT_EQ(titleComponent->GetData(), TEXT_VALUE_DEFAULT);
     RefPtr<FlexItemComponent> actionsFlex = AceType::DynamicCast<FlexItemComponent>(column->GetChildren().back());
@@ -386,7 +392,9 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild007, TestSize.Level1)
             RefPtr<PaddingComponent> titlePadding =
                 AceType::DynamicCast<PaddingComponent>(titleRow->GetChildren().front());
             EXPECT_TRUE(titlePadding != nullptr);
-            RefPtr<TextComponent> text = AceType::DynamicCast<TextComponent>(titlePadding->GetChild());
+            RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(titlePadding->GetChild());
+            EXPECT_TRUE(box != nullptr);
+            RefPtr<TextComponent> text = AceType::DynamicCast<TextComponent>(box->GetChild());
             EXPECT_TRUE(text != nullptr);
             EXPECT_EQ(text->GetData(), TEXT_VALUE_DEFAULT);
         } else if (index == 2) {
@@ -451,7 +459,9 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild008, TestSize.Level1)
             RefPtr<PaddingComponent> titlePadding =
                 AceType::DynamicCast<PaddingComponent>(titleRow->GetChildren().front());
             EXPECT_TRUE(titlePadding != nullptr);
-            RefPtr<TextComponent> text = AceType::DynamicCast<TextComponent>(titlePadding->GetChild());
+            RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(titlePadding->GetChild());
+            EXPECT_TRUE(box != nullptr);
+            RefPtr<TextComponent> text = AceType::DynamicCast<TextComponent>(box->GetChild());
             EXPECT_TRUE(text != nullptr);
             EXPECT_EQ(text->GetData(), TEXT_VALUE_DEFAULT);
         } else if (index == 2) {

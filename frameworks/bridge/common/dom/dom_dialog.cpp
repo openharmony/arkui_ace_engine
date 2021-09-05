@@ -25,19 +25,18 @@ namespace OHOS::Ace::Framework {
 DOMDialog::DOMDialog(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
     dialogChild_ = AceType::MakeRefPtr<CustomDialogComponent>(std::to_string(nodeId), nodeName);
-    if (IsRightToLeft()) {
-        dialogChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 void DOMDialog::PrepareSpecializedComponent()
 {
+    dialogChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     if (dialogWidth_.second) {
         dialogChild_->SetWidth(dialogWidth_.first);
     }
     if (dialogHeight_.second) {
         dialogChild_->SetHeight(dialogHeight_.first);
     }
+    dialogChild_->SetIsDragable(dragable_);
     if (display_) {
         display_->SetVisible(isShow_ ? VisibleType::VISIBLE : VisibleType::GONE);
     }
@@ -113,6 +112,9 @@ bool DOMDialog::SetSpecializedAttr(const std::pair<std::string, std::string>& at
     if (attr.first == DOM_SHOW) {
         isShow_ = StringToBool(attr.second);
         return true;
+    } else if (attr.first == DOM_DIALOG_STYLE_DRAGABLE) {
+        dragable_ = StringToBool(attr.second);
+        return true;
     }
     return false;
 }
@@ -154,6 +156,12 @@ bool DOMDialog::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
     if (event == DOM_DIALOG_EVENT_CANCEL) {
         dialogChild_->SetOnCancel(EventMarker(GetNodeIdForEvent(), event, pageId));
+        return true;
+    } else if (event == DOM_DIALOG_METHOD_SHOW) {
+        dialogChild_->SetOnShow(EventMarker(GetNodeIdForEvent(), event, pageId));
+        return true;
+    } else if (event == DOM_DIALOG_METHOD_CLOSE) {
+        dialogChild_->SetOnClose(EventMarker(GetNodeIdForEvent(), event, pageId));
         return true;
     }
 

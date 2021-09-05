@@ -26,7 +26,7 @@ void TextFieldController::Focus(bool focus)
         return;
     }
     if (focus) {
-        textField->RequestKeyboard();
+        textField->RequestKeyboard(true);
     } else {
         textField->LostSelfFocus();
     }

@@ -118,6 +118,15 @@ public:
         }
     }
 
+    void HandleSyncEvent(
+        const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId) override
+    {
+        if (syncCallBack_) {
+            bool resultTmp = false;
+            syncCallBack_(eventMarker, resultTmp);
+        }
+    }
+
 private:
     AsyncEventCallBack asyncCallBack_ = nullptr;
     SyncEventCallBack syncCallBack_ = nullptr;

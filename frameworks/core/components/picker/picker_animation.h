@@ -32,11 +32,8 @@ public:
     ~PickerAnimation() = default;
     PickerAnimation(const WeakPtr<PipelineContext>& pipe, double start, double end, int delay, int duration,
         const RefPtr<Curve>& curve, const std::function<void(double)>& callback)
-        : start_(start), end_(end), delay_(delay), duration_(duration)
+        : start_(start), end_(end), delay_(delay), duration_(duration), pipe_(pipe), curve_(curve), callback_(callback)
     {
-        curve_ = curve;
-        callback_ = callback;
-        pipe_ = pipe;
         Init();
     }
 

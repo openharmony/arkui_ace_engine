@@ -25,13 +25,13 @@ ohos_unittest("TaskExecutorsTest") {
 
   configs = [
     "$ace_root:ace_test_config",
-    "$flutter_root:flutter_config",
+    "$ace_flutter_engine_root:flutter_config",
   ]
 
   deps = [
+    "$ace_flutter_engine_root:ace_libicu_ohos",
+    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
-    "$flutter_root:ace_libicu_ohos",
-    "$flutter_root:third_party_flutter_engine_ohos",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]

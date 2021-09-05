@@ -38,8 +38,8 @@ const std::string TRANSFORM_TRANSLATE_DEFAULT_TO = "100";
 const std::string TRANSFORM_ROTATE_DEFAULT_TO = "360";
 const std::string ANIMATION_HEIGHT_DEFAULT = "150";
 const std::string ANIMATION_OFFSET_FROM = "0.0";
-const std::string ANIMATION_OFFSET_MIDDLE = "0.5";
-const std::string ANIMATION_OFFSET_TO = "1.0";
+const std::string ANIMATION_OFFSET_MIDDLE = "50.0";
+const std::string ANIMATION_OFFSET_TO = "100.0";
 const std::string ANIMATION_WIDTH_DEFAULT = "200";
 const std::string ANIMATION_OPACITY_DEFAULT = "1";
 const std::string ANIMATION_COLOR_DEFAULT = "#ff0000";
@@ -109,20 +109,21 @@ const std::string OPACITY_COLOR_TEST = ""
                                        "]";
 
 const std::string OPTIONS_TEST = ""
-                                 "[                                  "
-                                 "    [                              "
-                                 "        {                          "
-                                 "        },                         "
-                                 "        {                          "
-                                 "        }                          "
-                                 "    ],                             "
-                                 "    {                              "
-                                 "        \"duration\": 3000,        "
-                                 "        \"easing\": \"linear\",    "
-                                 "        \"delay\": 1000,           "
-                                 "        \"fill\": \"forwards\",    "
-                                 "        \"iterations\": 1          "
-                                 "    }                              "
+                                 "[                                       "
+                                 "    [                                   "
+                                 "        {                               "
+                                 "        },                              "
+                                 "        {                               "
+                                 "        }                               "
+                                 "    ],                                  "
+                                 "    {                                   "
+                                 "        \"duration\": 3000,             "
+                                 "        \"easing\": \"linear\",         "
+                                 "        \"delay\": 1000,                "
+                                 "        \"fill\": \"forwards\",         "
+                                 "        \"iterations\": 1,              "
+                                 "        \"direction\": \"alternate\"    "
+                                 "    }                                   "
                                  "]";
 
 const std::string ANTICIPATE_CURVE_TEST = ""
@@ -307,23 +308,17 @@ HWTEST_F(AnimationDomTest, AnimationDomTest002, TestSize.Level1)
     /**
      * @tc.steps: step2. get the transform from the map.
      */
-    auto transformScaleForm = animationFrames[0].find(SCALE)->second;
-    auto transformTranslateForm = animationFrames[0].find(DOM_TRANSLATE)->second;
-    auto transformRotateForm = animationFrames[0].find(DOM_ROTATE)->second;
-    auto transformScaleTo = animationFrames[1].find(SCALE)->second;
-    auto transformTranslateTo = animationFrames[1].find(DOM_TRANSLATE)->second;
-    auto transformRotateTo = animationFrames[1].find(DOM_ROTATE)->second;
+
+    EXPECT_TRUE(animationFrames.size() == 2);
+    auto transformFrom = animationFrames[0].find(DOM_TRANSFORM);
+    auto transformTo = animationFrames[1].find(DOM_TRANSFORM);
 
     /**
      * @tc.steps: step3. Judge whether the parameter resolution is successful.
      * @tc.expected: step3. The value of transform is as expected.
      */
-    EXPECT_EQ(TRANSFORM_SCALE_DEFAULT_FROM, transformScaleForm);
-    EXPECT_EQ(TRANSFORM_TRANSLATE_DEFAULT_FROM, transformTranslateForm);
-    EXPECT_EQ(TRANSFORM_ROTATE_DEFAULT_FROM, transformRotateForm);
-    EXPECT_EQ(TRANSFORM_SCALE_DEFAULT_TO, transformScaleTo);
-    EXPECT_EQ(TRANSFORM_TRANSLATE_DEFAULT_TO, transformTranslateTo);
-    EXPECT_EQ(TRANSFORM_ROTATE_DEFAULT_TO, transformRotateTo);
+    EXPECT_TRUE(transformFrom != animationFrames[0].end());
+    EXPECT_TRUE(transformTo != animationFrames[1].end());
 }
 
 /**
@@ -456,9 +451,10 @@ HWTEST_F(AnimationDomTest, AnimationDomTest006, TestSize.Level1)
      * @tc.expected: step3. The value of the params are as expected.
      */
     EXPECT_EQ(ANIMATION_HEIGHT_DEFAULT, heightForm);
-    EXPECT_EQ(ANIMATION_OFFSET_FROM, offsetFrom);
+
+    EXPECT_TRUE(NearEqual(StringToDouble(ANIMATION_OFFSET_FROM), StringToDouble(offsetFrom)));
     EXPECT_EQ(ANIMATION_HEIGHT_DEFAULT, heightTo);
-    EXPECT_EQ(ANIMATION_OFFSET_TO, offsetTo);
+    EXPECT_TRUE(NearEqual(StringToDouble(ANIMATION_OFFSET_TO), StringToDouble(offsetTo)));
 }
 
 /**
@@ -495,13 +491,13 @@ HWTEST_F(AnimationDomTest, AnimationDomTest007, TestSize.Level1)
      */
     EXPECT_EQ(ANIMATION_HEIGHT_DEFAULT, heightForm);
     EXPECT_EQ(ANIMATION_OPACITY_DEFAULT, opacityFrom);
-    EXPECT_EQ(ANIMATION_OFFSET_FROM, offsetFrom);
+    EXPECT_TRUE(NearEqual(StringToDouble(ANIMATION_OFFSET_FROM), StringToDouble(offsetFrom)));
     EXPECT_EQ(ANIMATION_HEIGHT_DEFAULT, heightMiddle);
     EXPECT_EQ(ANIMATION_OPACITY_DEFAULT, opacityMiddle);
-    EXPECT_EQ(ANIMATION_OFFSET_MIDDLE, offsetMiddle);
+    EXPECT_TRUE(NearEqual(StringToDouble(ANIMATION_OFFSET_MIDDLE), StringToDouble(offsetMiddle)));
     EXPECT_EQ(ANIMATION_HEIGHT_DEFAULT, heightTo);
     EXPECT_EQ(ANIMATION_OPACITY_DEFAULT, opacityTo);
-    EXPECT_EQ(ANIMATION_OFFSET_TO, offsetTo);
+    EXPECT_TRUE(NearEqual(StringToDouble(ANIMATION_OFFSET_TO), StringToDouble(offsetTo)));
 }
 
 /**
@@ -534,11 +530,11 @@ HWTEST_F(AnimationDomTest, AnimationDomTest008, TestSize.Level1)
      * @tc.expected: step3. The value of the params are as expected.
      */
     EXPECT_EQ(ANIMATION_HEIGHT_DEFAULT, heightForm);
-    EXPECT_EQ(ANIMATION_OFFSET_FROM, offsetFrom);
+    EXPECT_TRUE(NearEqual(StringToDouble(ANIMATION_OFFSET_FROM), StringToDouble(offsetFrom)));
     EXPECT_EQ(ANIMATION_HEIGHT_DEFAULT, heightMiddle);
-    EXPECT_EQ(ANIMATION_OFFSET_MIDDLE, offsetMiddle);
+    EXPECT_TRUE(NearEqual(StringToDouble(ANIMATION_OFFSET_MIDDLE), StringToDouble(offsetMiddle)));
     EXPECT_EQ(ANIMATION_HEIGHT_DEFAULT, heightTo);
-    EXPECT_EQ(ANIMATION_OFFSET_TO, offsetTo);
+    EXPECT_TRUE(NearEqual(StringToDouble(ANIMATION_OFFSET_TO), StringToDouble(offsetTo)));
 }
 
 /**
@@ -569,9 +565,9 @@ HWTEST_F(AnimationDomTest, AnimationDomTest009, TestSize.Level1)
      * @tc.expected: step3. The value of the params are as expected.
      */
     EXPECT_EQ(ANIMATION_HEIGHT_DEFAULT, heightForm);
-    EXPECT_EQ(ANIMATION_OFFSET_FROM, offsetFrom);
+    EXPECT_TRUE(NearEqual(StringToDouble(ANIMATION_OFFSET_FROM), StringToDouble(offsetFrom)));
     EXPECT_EQ(ANIMATION_HEIGHT_DEFAULT, heightTo);
-    EXPECT_EQ(ANIMATION_OFFSET_TO, offsetTo);
+    EXPECT_TRUE(NearEqual(StringToDouble(ANIMATION_OFFSET_TO), StringToDouble(offsetTo)));
 }
 
 /**
@@ -592,25 +588,18 @@ HWTEST_F(AnimationDomTest, AnimationDomTest010, TestSize.Level1)
     /**
      * @tc.steps: step2. get the params from the map.
      */
-    auto transformScaleForm = animationFrames[0].find(SCALE)->second;
-    auto transformTranslateForm = animationFrames[0].find(DOM_TRANSLATE)->second;
-    auto offsetFrom = animationFrames[0].find(DOM_ANIMATION_OFFSET)->second;
-
-    auto transformScaleTo = animationFrames[1].find(SCALE)->second;
-    auto transformTranslateTo = animationFrames[1].find(DOM_TRANSLATE)->second;
-    auto offsetTo = animationFrames[1].find(DOM_ANIMATION_OFFSET)->second;
+    EXPECT_TRUE(animationFrames.size() == 2);
+    auto offsetFrom = animationFrames[0].find(DOM_ANIMATION_OFFSET);
+    EXPECT_TRUE(offsetFrom != animationFrames[0].end());
+    auto offsetTo = animationFrames[1].find(DOM_ANIMATION_OFFSET);
+    EXPECT_TRUE(offsetTo != animationFrames[1].end());
 
     /**
      * @tc.steps: step3. Judge whether the parameter resolution is successful.
      * @tc.expected: step3. The value of the params are as expected.
      */
-    EXPECT_EQ(TRANSFORM_SCALE_DEFAULT_FROM, transformScaleForm);
-    EXPECT_EQ(TRANSFORM_TRANSLATE_DEFAULT_FROM, transformTranslateForm);
-    EXPECT_EQ(ANIMATION_OFFSET_FROM, offsetFrom);
-
-    EXPECT_EQ(TRANSFORM_SCALE_DEFAULT_TO, transformScaleTo);
-    EXPECT_EQ(TRANSFORM_TRANSLATE_DEFAULT_TO, transformTranslateTo);
-    EXPECT_EQ(ANIMATION_OFFSET_TO, offsetTo);
+    EXPECT_EQ(StringToDouble(offsetFrom->second), StringToDouble(ANIMATION_OFFSET_FROM));
+    EXPECT_EQ(StringToDouble(offsetTo->second), StringToDouble(ANIMATION_OFFSET_TO));
 }
 
 /**
@@ -645,13 +634,13 @@ HWTEST_F(AnimationDomTest, AnimationDomTest011, TestSize.Level1)
      * @tc.expected: step3. The value of the params are as expected.
      */
     EXPECT_EQ(ANIMATION_HEIGHT_DEFAULT, heightForm);
-    EXPECT_EQ(ANIMATION_OFFSET_FROM, offsetFrom);
+    EXPECT_TRUE(NearEqual(StringToDouble(ANIMATION_OFFSET_FROM), StringToDouble(offsetFrom)));
 
     EXPECT_EQ(ANIMATION_HEIGHT_DEFAULT, heightMiddle);
-    EXPECT_EQ(ANIMATION_OFFSET_MIDDLE, offsetMiddle);
+    EXPECT_TRUE(NearEqual(StringToDouble(ANIMATION_OFFSET_MIDDLE), StringToDouble(offsetMiddle)));
 
     EXPECT_EQ(ANIMATION_HEIGHT_DEFAULT, heightTo);
-    EXPECT_EQ(ANIMATION_OFFSET_TO, offsetTo);
+    EXPECT_TRUE(NearEqual(StringToDouble(ANIMATION_OFFSET_TO), StringToDouble(offsetTo)));
 }
 
 /**
@@ -696,9 +685,9 @@ HWTEST_F(AnimationDomTest, AnimationDomTest013, TestSize.Level1)
     EXPECT_EQ(BackgroundImagePositionType::PERCENT, backgroundImagePosition.GetSizeTypeY());
 
     /**
-    * @tc.steps: step3. parse the param.
-    * @tc.expected: step4. The value of the params are as expected.
-    */
+     * @tc.steps: step3. parse the param.
+     * @tc.expected: step4. The value of the params are as expected.
+     */
     EXPECT_TRUE(ParseBackgroundImagePosition("10% 100px", backgroundImagePosition));
     EXPECT_EQ(10, backgroundImagePosition.GetSizeValueX());
     EXPECT_EQ(BackgroundImagePositionType::PERCENT, backgroundImagePosition.GetSizeTypeX());
@@ -706,9 +695,9 @@ HWTEST_F(AnimationDomTest, AnimationDomTest013, TestSize.Level1)
     EXPECT_EQ(BackgroundImagePositionType::PX, backgroundImagePosition.GetSizeTypeY());
 
     /**
-    * @tc.steps: step5. parse the param.
-    * @tc.expected: step6. The value of the params are as expected.
-    */
+     * @tc.steps: step5. parse the param.
+     * @tc.expected: step6. The value of the params are as expected.
+     */
     EXPECT_TRUE(ParseBackgroundImagePosition(" 30px   45% ", backgroundImagePosition));
     EXPECT_EQ(30, backgroundImagePosition.GetSizeValueX());
     EXPECT_EQ(BackgroundImagePositionType::PX, backgroundImagePosition.GetSizeTypeX());
@@ -727,9 +716,9 @@ HWTEST_F(AnimationDomTest, AnimationDomTest014, TestSize.Level1)
 {
     BackgroundImagePosition backgroundImagePosition;
     /**
-    * @tc.steps: step1. parse the param.
-    * @tc.expected: step2. The value of the params are as expected.
-    */
+     * @tc.steps: step1. parse the param.
+     * @tc.expected: step2. The value of the params are as expected.
+     */
     EXPECT_TRUE(ParseBackgroundImagePosition("left", backgroundImagePosition));
     EXPECT_EQ(0, backgroundImagePosition.GetSizeValueX());
     EXPECT_EQ(BackgroundImagePositionType::PERCENT, backgroundImagePosition.GetSizeTypeX());
@@ -737,9 +726,9 @@ HWTEST_F(AnimationDomTest, AnimationDomTest014, TestSize.Level1)
     EXPECT_EQ(BackgroundImagePositionType::PERCENT, backgroundImagePosition.GetSizeTypeY());
 
     /**
-    * @tc.steps: step3. parse the param.
-    * @tc.expected: step4. The value of the params are as expected.
-    */
+     * @tc.steps: step3. parse the param.
+     * @tc.expected: step4. The value of the params are as expected.
+     */
     EXPECT_TRUE(ParseBackgroundImagePosition("bottom", backgroundImagePosition));
     EXPECT_EQ(50, backgroundImagePosition.GetSizeValueX());
     EXPECT_EQ(BackgroundImagePositionType::PERCENT, backgroundImagePosition.GetSizeTypeX());
@@ -747,9 +736,9 @@ HWTEST_F(AnimationDomTest, AnimationDomTest014, TestSize.Level1)
     EXPECT_EQ(BackgroundImagePositionType::PERCENT, backgroundImagePosition.GetSizeTypeY());
 
     /**
-    * @tc.steps: step5. parse the param.
-    * @tc.expected: step6. The value of the params are as expected.
-    */
+     * @tc.steps: step5. parse the param.
+     * @tc.expected: step6. The value of the params are as expected.
+     */
     EXPECT_TRUE(ParseBackgroundImagePosition("right bottom", backgroundImagePosition));
     EXPECT_EQ(100, backgroundImagePosition.GetSizeValueX());
     EXPECT_EQ(BackgroundImagePositionType::PERCENT, backgroundImagePosition.GetSizeTypeX());
@@ -757,9 +746,9 @@ HWTEST_F(AnimationDomTest, AnimationDomTest014, TestSize.Level1)
     EXPECT_EQ(BackgroundImagePositionType::PERCENT, backgroundImagePosition.GetSizeTypeY());
 
     /**
-    * @tc.steps: step7. parse the param.
-    * @tc.expected: step8. The value of the params are as expected.
-    */
+     * @tc.steps: step7. parse the param.
+     * @tc.expected: step8. The value of the params are as expected.
+     */
     EXPECT_TRUE(ParseBackgroundImagePosition("bottom right", backgroundImagePosition));
     EXPECT_EQ(100, backgroundImagePosition.GetSizeValueX());
     EXPECT_EQ(BackgroundImagePositionType::PERCENT, backgroundImagePosition.GetSizeTypeX());
@@ -767,9 +756,9 @@ HWTEST_F(AnimationDomTest, AnimationDomTest014, TestSize.Level1)
     EXPECT_EQ(BackgroundImagePositionType::PERCENT, backgroundImagePosition.GetSizeTypeY());
 
     /**
-    * @tc.steps: step9. parse the param.
-    * @tc.expected: step10. The value of the params are as expected.
-    */
+     * @tc.steps: step9. parse the param.
+     * @tc.expected: step10. The value of the params are as expected.
+     */
     EXPECT_TRUE(ParseBackgroundImagePosition("center 50px", backgroundImagePosition));
     EXPECT_EQ(50, backgroundImagePosition.GetSizeValueX());
     EXPECT_EQ(BackgroundImagePositionType::PERCENT, backgroundImagePosition.GetSizeTypeX());
@@ -777,14 +766,43 @@ HWTEST_F(AnimationDomTest, AnimationDomTest014, TestSize.Level1)
     EXPECT_EQ(BackgroundImagePositionType::PX, backgroundImagePosition.GetSizeTypeY());
 
     /**
-    * @tc.steps: step11. parse the param.
-    * @tc.expected: step12. The value of the params are as expected.
-    */
+     * @tc.steps: step11. parse the param.
+     * @tc.expected: step12. The value of the params are as expected.
+     */
     EXPECT_TRUE(ParseBackgroundImagePosition("70px bottom", backgroundImagePosition));
     EXPECT_EQ(70, backgroundImagePosition.GetSizeValueX());
     EXPECT_EQ(BackgroundImagePositionType::PX, backgroundImagePosition.GetSizeTypeX());
     EXPECT_EQ(100, backgroundImagePosition.GetSizeValueY());
     EXPECT_EQ(BackgroundImagePositionType::PERCENT, backgroundImagePosition.GetSizeTypeY());
+}
+
+/**
+ * @tc.name: AnimationDomTest015
+ * @tc.desc: Animation JS api parse
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0U7
+ * @tc.author: zhouzebin
+ */
+HWTEST_F(AnimationDomTest, AnimationDomTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. parse the param of options.
+     */
+    int32_t iterations = 0;
+    std::unordered_map<std::string, double> animationDoubleOptions;
+    std::unordered_map<std::string, std::string> animationStringOptions;
+    JsParseAnimationOptions(OPTIONS_TEST, iterations, animationDoubleOptions, animationStringOptions);
+
+    /**
+     * @tc.steps: step2. get the params from the map.
+     */
+    auto direction = animationStringOptions.find(DOM_ANIMATION_DIRECTION_API)->second;
+
+    /**
+     * @tc.steps: step3. Judge whether the parameter resolution is successful.
+     * @tc.expected: step3. The value of the params are as expected.
+     */
+    EXPECT_EQ(DOM_ANIMATION_DIRECTION_ALTERNATE, direction);
 }
 
 /**
@@ -862,4 +880,4 @@ HWTEST_F(AnimationDomTest, AnimationDomCurveTest004, TestSize.Level1)
     EXPECT_EQ(curve->MoveInternal(0.0), 0.5);
 }
 
-}
+} // namespace OHOS::Ace::Framework

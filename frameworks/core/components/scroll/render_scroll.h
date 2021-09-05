@@ -46,23 +46,31 @@ class RenderScroll : public RenderNode {
 public:
     ~RenderScroll() override = default;
 
+    static double CalculateFriction(double gamma);
+    static double CalculateOffsetByFriction(double extentOffset, double delta, double friction);
+
     virtual void JumpToIndex(int32_t index, int32_t source = SCROLL_FROM_JUMP);
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
-    virtual bool ScrollPage(bool reverse, bool smooth);
+    virtual bool ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish = nullptr);
     virtual void JumpToPosition(double position, int32_t source = SCROLL_FROM_JUMP);
     // notify start position in global main axis
     virtual void NotifyDragStart(double startPosition) {};
     // notify drag offset in global main axis
     virtual void NotifyDragUpdate(double dragOffset, int32_t source) {};
     virtual void ProcessScrollOverCallback(double velocity) {};
-    void AnimateTo(double position, float duration, const RefPtr<Curve>& curve);
-    void ScrollBy(double pixelX, double pixelY, bool smooth);
+    void AnimateTo(double position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,
+        const std::function<void()>& onFinish = nullptr);
+    bool AnimateToTarget(const ComposeId& targetId, float duration, const RefPtr<Curve>& curve,
+        bool limitDuration = true, const std::function<void()>& onFinish = nullptr);
+    void ScrollBy(double pixelX, double pixelY, bool smooth, const std::function<void()>& onFinish = nullptr);
 
     double GetCurrentPosition() const;
     bool UpdateOffset(Offset& delta, int32_t source);
     bool ScrollPageByChild(Offset& delta, int32_t source) override;
     double GetEstimatedHeight();
     void OnChildAdded(const RefPtr<RenderNode>& child) override;
+
+    void UpdateTouchRect() override;
 
     virtual double GetFixPositionOnWatch(double destination, double current)
     {
@@ -208,6 +216,7 @@ protected:
     double mainScrollExtent_ = 0.0;
     double outBoundaryExtent_ = 0.0;
     double estimatedHeight_ = 0.0;
+    double moveDistance_ = 0.0;
     bool scrollPage_ = false;
     RefPtr<ScrollPositionController> positionController_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
@@ -230,9 +239,6 @@ protected:
     RefPtr<SpringProperty> springProperty_;
 
 private:
-    static double CalculateFriction(double gamma);
-    static double CalculateOffsetByFriction(double extentOffset, double delta, double friction);
-
     bool IsOutOfBoundary();
     bool IsCrashBottom();
     bool IsCrashTop();
@@ -250,6 +256,16 @@ private:
     void SetBarCallBack(bool isVertical);
     void HandleScrollBarEnd();
     void HandleScrollBarOutBoundary();
+    void OnReachStart() const;
+    void OnReachEnd() const;
+    void OnReachTop() const;
+    void OnReachBottom() const;
+
+    using OnReachFunc = std::function<void(const std::string&)>;
+    OnReachFunc onReachStart_;
+    OnReachFunc onReachEnd_;
+    OnReachFunc onReachTop_;
+    OnReachFunc onReachBottom_;
 
     RefPtr<Animator> animator_;
     RefPtr<RawRecognizer> touchRecognizer_;

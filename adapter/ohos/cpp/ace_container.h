@@ -32,9 +32,13 @@ class AceContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
 public:
-    AceContainer(int32_t instanceId, FrontendType type, AceAbility* aceAbility,
+    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, AceAbility* aceAbility,
         std::unique_ptr<PlatformEventCallback> callback);
     ~AceContainer() override = default;
+
+    void Initialize() override;
+
+    void Destroy() override;
 
     static bool Register();
 
@@ -71,9 +75,24 @@ public:
         return pipelineContext_;
     }
 
+    int32_t GetViewWidth() const override
+    {
+        return aceView_ ? aceView_->GetWidth() : 0;
+    }
+
+    int32_t GetViewHeight() const override
+    {
+        return aceView_ ? aceView_->GetHeight() : 0;
+    }
+
     AceView* GetAceView() const
     {
         return aceView_;
+    }
+
+    void* GetView() const override
+    {
+        return static_cast<void*>(aceView_);
     }
 
     void SetWindowModal(WindowModal windowModal)
@@ -88,6 +107,10 @@ public:
 
     void Dispatch(
         const std::string& group, std::vector<uint8_t>&& data, int32_t id, bool replyToComponent) const override;
+
+    void DispatchSync(
+        const std::string& group, std::vector<uint8_t>&& data, uint8_t** resData, long& position) const override
+    {}
 
     void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
 
@@ -110,7 +133,7 @@ public:
         return "";
     }
 
-    static void CreateContainer(int32_t instanceId, FrontendType type, AceAbility* aceAbility,
+    static void CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, AceAbility* aceAbility,
         std::unique_ptr<PlatformEventCallback> callback);
     static void DestroyContainer(int32_t instanceId);
     static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& content, const std::string& params);
@@ -144,6 +167,7 @@ private:
     RefPtr<PipelineContext> pipelineContext_;
     RefPtr<Frontend> frontend_;
     FrontendType type_ = FrontendType::JS;
+    bool isArkApp_ = false;
     std::unique_ptr<PlatformEventCallback> platformEventCallback_;
     WindowModal windowModal_ { WindowModal::NORMAL };
     ColorScheme colorScheme_ { ColorScheme::FIRST_VALUE };

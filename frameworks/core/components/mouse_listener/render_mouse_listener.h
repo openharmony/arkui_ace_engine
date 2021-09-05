@@ -40,6 +40,22 @@ public:
         }
     }
 
+    void SetOnMouseHover(const MouseHoverCallback& onMouseHover)
+    {
+        if (onMouseHover) {
+            recognizer_->SetOnMouseHover(onMouseHover);
+        }
+    }
+
+    void SetOnMouseHoverExit(const MouseHoverCallback& onMouseHoverExit)
+    {
+        if (onMouseHoverExit) {
+            recognizer_->SetOnMouseHoverExit(onMouseHoverExit);
+        }
+    }
+
+    bool HandleMouseHoverEvent(MouseState mouseState) override;
+
 protected:
     void OnMouseTestHit(const Offset& coordinateOffset, MouseTestResult& result) override;
 

@@ -24,6 +24,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr int64_t SEC_TO_MICROSEC = 1000000;
+constexpr int64_t SEC_TO_NANOSEC = 1000000000;
 constexpr int64_t MICROSEC_TO_NANOSEC = 1000;
 constexpr int32_t HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT = -12;
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
@@ -45,6 +46,14 @@ int64_t GetMicroTickCount()
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (ts.tv_sec * SEC_TO_MICROSEC + ts.tv_nsec / MICROSEC_TO_NANOSEC);
 }
+
+int64_t GetSysTimestamp()
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec * SEC_TO_NANOSEC + ts.tv_nsec;
+}
+
 
 TimeOfNow GetTimeOfNow(double hoursWest)
 {

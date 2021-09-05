@@ -69,6 +69,14 @@ struct TextSelection {
         return std::max(baseOffset, extentOffset);
     }
 
+    /**
+     * @brief Whether selection is valid.
+     */
+    inline bool IsValid() const
+    {
+        return baseOffset > -1 && extentOffset > -1;
+    }
+
     // May larger than, smaller than or equal to extentOffset.
     int32_t baseOffset = -1;
 

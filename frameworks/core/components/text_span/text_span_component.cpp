@@ -20,9 +20,14 @@
 
 namespace OHOS::Ace {
 
-TextSpanComponent::TextSpanComponent(const std::string& spanData)
-    : ComponentGroup(std::list<RefPtr<Component>>()), spanData_(spanData)
-{}
+TextSpanComponent::TextSpanComponent(const std::string& spanData) : ComponentGroup(std::list<RefPtr<Component>>())
+{
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<SpanDeclaration>();
+        declaration_->Init();
+    }
+    SetSpanData(spanData);
+}
 
 RefPtr<Element> TextSpanComponent::CreateElement()
 {
@@ -32,6 +37,54 @@ RefPtr<Element> TextSpanComponent::CreateElement()
 RefPtr<RenderNode> TextSpanComponent::CreateRenderNode()
 {
     return RenderTextSpan::Create();
+}
+
+const std::string& TextSpanComponent::GetSpanData() const
+{
+    return declaration_->GetSpanData();
+}
+
+void TextSpanComponent::SetSpanData(const std::string& data)
+{
+    declaration_->SetSpanData(data);
+}
+
+const TextStyle& TextSpanComponent::GetTextStyle() const
+{
+    return declaration_->GetSpanStyle();
+}
+
+void TextSpanComponent::SetTextStyle(const TextStyle& spanStyle)
+{
+    declaration_->SetTextStyle(spanStyle);
+    hasNewStyle_ = true;
+}
+
+bool TextSpanComponent::IsShow() const
+{
+    return declaration_->IsShow();
+}
+
+void TextSpanComponent::SetIsShow(bool isShow)
+{
+    declaration_->SetIsShow(isShow);
+}
+
+void TextSpanComponent::SetOnClick(const EventMarker& onClick)
+{
+    declaration_->SetClickEvent(onClick);
+}
+
+void TextSpanComponent::SetDeclaration(const RefPtr<SpanDeclaration>& declaration)
+{
+    if (declaration) {
+        declaration_ = declaration;
+    }
+}
+
+const RefPtr<SpanDeclaration>& TextSpanComponent::GetDeclaration() const
+{
+    return declaration_;
 }
 
 } // namespace OHOS::Ace

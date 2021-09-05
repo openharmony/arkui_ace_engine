@@ -27,6 +27,7 @@ void DialogElement::PerformBuild()
     if (!dialog) {
         return;
     }
+    dialogId_ = dialog->GetDialogId();
     dialog->BuildChild(GetThemeManager());
     const auto& child = children_.empty() ? nullptr : children_.front();
     UpdateChild(child, dialog->GetChild());

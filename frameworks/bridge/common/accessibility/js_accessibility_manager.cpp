@@ -174,6 +174,18 @@ int32_t ConvertToCardAccessibilityId(int32_t nodeId, int32_t cardId, int32_t roo
     return result;
 }
 
+void UpdateDeclarativeAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node,
+    AccessibilityNodeInfo& nodeInfo, const RefPtr<JsAccessibilityManager>& manager)
+{
+    if (!node->GetAccessibilityLabel().empty()) {
+        nodeInfo.text = node->GetAccessibilityLabel();
+    }
+
+    if (!node->GetAccessibilityHint().empty()) {
+        nodeInfo.text = nodeInfo.text + "," + node->GetAccessibilityLabel();
+    }
+}
+
 void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, AccessibilityNodeInfo& nodeInfo,
     const RefPtr<JsAccessibilityManager>& manager)
 {
@@ -207,6 +219,14 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
         nodeInfo.width = node->GetWidth();
         nodeInfo.height = node->GetHeight();
     }
+
+    auto scaleX = manager->GetScaleX();
+    auto scaleY = manager->GetScaleY();
+
+    nodeInfo.top *= scaleY;
+    nodeInfo.left *= scaleX;
+    nodeInfo.width *= scaleX;
+    nodeInfo.height *= scaleY;
 
     nodeInfo.isChecked = node->GetCheckedState();
     nodeInfo.isEnabled = node->GetEnabledState();
@@ -271,6 +291,7 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     }
 
     nodeInfo.supportAction = std::move(actions);
+
 #ifdef ACE_DEBUG
     std::string actionForLog;
     for (const auto& action : supportAceActions) {
@@ -281,6 +302,10 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     }
     LOGD("Support action is %{public}s", actionForLog.c_str());
 #endif
+
+    if (manager->IsDeclarative()) {
+        UpdateDeclarativeAccessibilityNodeInfo(node, nodeInfo, manager);
+    }
 }
 
 std::string PrepareCustomEventParam(const std::vector<std::pair<std::string, std::string>>& actionParam)
@@ -416,11 +441,27 @@ void JsAccessibilityManager::InitializeCallback()
             LOGW("AccessibilityNodeInfo can't attach component by Id = %{public}d", nodeInfo.ID);
             return false;
         }
-        jsAccessibilityManager->UpdateNodeChildIds(node);
-        UpdateAccessibilityNodeInfo(node, nodeInfo, jsAccessibilityManager);
+
+        if (nodeInfo.ID == 0) {
+            jsAccessibilityManager->UpdateViewScale();
+        }
+        auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+        if (!context) {
+            return false;
+        }
+        context->GetTaskExecutor()->PostSyncTask(
+            [&jsAccessibilityManager, &node, &nodeInfo]() {
+                jsAccessibilityManager->UpdateNodeChildIds(node);
+                UpdateAccessibilityNodeInfo(node, nodeInfo, jsAccessibilityManager);
+            },
+            TaskExecutor::TaskType::UI);
         return true;
     };
-    AccessibilityAbilityClient::GetInstance().RegisterFetchNodeInfoCallback(fetchNodeInfoCallback);
+    if (callbackKey_.empty()) {
+        AccessibilityAbilityClient::GetInstance().RegisterFetchNodeInfoCallback(fetchNodeInfoCallback);
+    } else {
+        AccessibilityAbilityClient::GetInstance().RegisterFetchNodeInfoCallback(fetchNodeInfoCallback, callbackKey_);
+    }
 
     auto eventHandleCallback = [weak = WeakClaim(this)](AccessibilityActionInfo& actionInfo) {
         LOGD("AccessibilityActionInfo nodeId= %{public}d, action=%{public}d", actionInfo.ID, actionInfo.action);
@@ -451,7 +492,11 @@ void JsAccessibilityManager::InitializeCallback()
         }
         return ret;
     };
-    AccessibilityAbilityClient::GetInstance().RegisterEventHandleCallback(eventHandleCallback);
+    if (callbackKey_.empty()) {
+        AccessibilityAbilityClient::GetInstance().RegisterEventHandleCallback(eventHandleCallback);
+    } else {
+        AccessibilityAbilityClient::GetInstance().RegisterEventHandleCallback(eventHandleCallback, callbackKey_);
+    }
 }
 
 void JsAccessibilityManager::SendAccessibilitySyncEvent(const AccessibilityEvent& accessibilityEvent)
@@ -566,9 +611,10 @@ void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& par
     }
     auto context = GetPipelineContext().Upgrade();
     if (context) {
-        context->GetTaskExecutor()->PostTask(
-            [actionInfo, node, context]() { AccessibilityActionEvent(actionInfo, node, context); },
-            TaskExecutor::TaskType::UI);
+        auto weakContext = AceType::WeakClaim(AceType::RawPtr(context));
+        context->GetTaskExecutor()->PostTask([actionInfo, node, weakContext]() {
+            AccessibilityActionEvent(actionInfo, node, weakContext.Upgrade());
+        }, TaskExecutor::TaskType::UI);
     }
 }
 
@@ -647,6 +693,8 @@ void JsAccessibilityManager::DumpProperty(const std::vector<std::string>& params
     DumpLog::GetInstance().AddDesc("collection item info, row: ", node->GetCollectionItemInfo().row);
     DumpLog::GetInstance().AddDesc("collection item info, column: ", node->GetCollectionItemInfo().column);
     DumpLog::GetInstance().AddDesc("chart has value: ", BoolToString(charValue && !charValue->empty()));
+    DumpLog::GetInstance().AddDesc("accessibilityGroup: ", BoolToString(node->GetAccessible()));
+    DumpLog::GetInstance().AddDesc("accessibilityImportance: ", node->GetImportantForAccessibility());
     DumpLog::GetInstance().AddDesc("support action: ", actionForDump);
 
     DumpLog::GetInstance().Print(0, node->GetTag(), node->GetChildList().size());
@@ -685,6 +733,58 @@ void JsAccessibilityManager::SetCardViewParams(const std::string& key, bool focu
     if (!callbackKey_.empty()) {
         InitializeCallback();
     }
+}
+
+void JsAccessibilityManager::UpdateViewScale()
+{
+    auto context = GetPipelineContext().Upgrade();
+    if (!context) {
+        return;
+    }
+    float scaleX = 1.0;
+    float scaleY = 1.0;
+    if (context->GetViewScale(scaleX, scaleY)) {
+        scaleX_ = scaleX;
+        scaleY_ = scaleY;
+    }
+}
+
+void JsAccessibilityManager::HandleComponentPostBinding()
+{
+    for (auto targetIter = nodeWithTargetMap_.begin(); targetIter != nodeWithTargetMap_.end();) {
+        auto nodeWithTarget = targetIter->second.Upgrade();
+        if (nodeWithTarget) {
+            if (nodeWithTarget->GetTag() == ACCESSIBILITY_TAG_POPUP) {
+                auto idNodeIter = nodeWithIdMap_.find(targetIter->first);
+                if (idNodeIter != nodeWithIdMap_.end()) {
+                    auto nodeWithId = idNodeIter->second.Upgrade();
+                    if (nodeWithId) {
+                        nodeWithId->SetAccessibilityHint(nodeWithTarget->GetText());
+                    } else {
+                        nodeWithIdMap_.erase(idNodeIter);
+                    }
+                }
+            }
+            ++targetIter;
+        } else {
+            // clear the disabled node in the maps
+            nodeWithTargetMap_.erase(targetIter++);
+        }
+    }
+
+    // clear the disabled node in the maps
+    for (auto idItem = nodeWithIdMap_.begin(); idItem != nodeWithIdMap_.end();) {
+        if (!idItem->second.Upgrade()) {
+            nodeWithIdMap_.erase(idItem++);
+        } else {
+            ++idItem;
+        }
+    }
+}
+
+RefPtr<AccessibilityNodeManager> AccessibilityNodeManager::Create()
+{
+    return AceType::MakeRefPtr<JsAccessibilityManager>();
 }
 
 } // namespace OHOS::Ace::Framework

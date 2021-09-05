@@ -16,68 +16,43 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_SVG_ELLIPSE_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_SVG_ELLIPSE_COMPONENT_H
 
-#include "frameworks/core/components/svg/svg_sharp.h"
+#include "core/components/declaration/svg/svg_ellipse_declaration.h"
 #include "frameworks/core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace {
 
-class SvgEllipseComponent : public ComponentGroup, public SvgSharp {
-    DECLARE_ACE_TYPE(SvgEllipseComponent, ComponentGroup, SvgSharp);
+class SvgEllipseComponent : public ComponentGroup {
+    DECLARE_ACE_TYPE(SvgEllipseComponent, ComponentGroup);
 
 public:
-    SvgEllipseComponent() = default;
-    explicit SvgEllipseComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children) {};
+    SvgEllipseComponent();
+    explicit SvgEllipseComponent(const std::list<RefPtr<Component>>& children);
     ~SvgEllipseComponent() override = default;
-
+    void InitDeclaration();
     RefPtr<RenderNode> CreateRenderNode() override;
-
     RefPtr<Element> CreateElement() override;
+    void SetCx(const Dimension& cx);
+    const Dimension& GetCx() const;
+    void SetCy(const Dimension& cy);
+    const Dimension& GetCy() const;
+    void SetRx(const Dimension& rx);
+    const Dimension& GetRx() const;
+    void SetRy(const Dimension& ry);
+    const Dimension& GetRy() const;
+    void SetDeclaration(const RefPtr<SvgEllipseDeclaration>& declaration);
 
-    void SetCx(const Dimension& cx)
+    const RefPtr<SvgEllipseDeclaration>& GetDeclaration() const
     {
-        cx_ = cx;
+        return declaration_;
     }
 
-    const Dimension& GetCx() const
+    void Inherit(const RefPtr<SvgBaseDeclaration>& parent)
     {
-        return cx_;
-    }
-
-    void SetCy(const Dimension& cy)
-    {
-        cy_ = cy;
-    }
-
-    const Dimension& GetCy() const
-    {
-        return cy_;
-    }
-
-    void SetRx(const Dimension& rx)
-    {
-        rx_ = rx;
-    }
-
-    const Dimension& GetRx() const
-    {
-        return rx_;
-    }
-
-    void SetRy(const Dimension& ry)
-    {
-        ry_ = ry;
-    }
-
-    const Dimension& GetRy() const
-    {
-        return ry_;
+        declaration_->Inherit(parent);
     }
 
 private:
-    Dimension cx_;
-    Dimension cy_;
-    Dimension rx_;
-    Dimension ry_;
+    RefPtr<SvgEllipseDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

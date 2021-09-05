@@ -15,15 +15,19 @@
 
 #include "core/common/ace_engine.h"
 
-#include <thread>
+#include "base/log/log.h"
+#include "base/memory/memory_monitor.h"
+#include "base/thread/background_task_executor.h"
+#include "core/common/ace_page.h"
+#include "core/image/image_cache.h"
 #include "unistd.h"
 
-#include "base/log/log.h"
-#include "core/common/ace_page.h"
-
 namespace OHOS::Ace {
+namespace {
 
-static std::unique_ptr<AceEngine> g_aceEngine;
+std::unique_ptr<AceEngine> g_aceEngine;
+
+}
 
 AceEngine::AceEngine()
 {
@@ -41,6 +45,8 @@ AceEngine& AceEngine::Get()
 
 void AceEngine::AddContainer(int32_t instanceId, const RefPtr<Container>& container)
 {
+    LOGI("AddContainer %{public}d", instanceId);
+    std::lock_guard<std::mutex> lock(mutex_);
     const auto result = containerMap_.try_emplace(instanceId, container);
     if (!result.second) {
         LOGW("already have container of this instance id: %{public}d", instanceId);
@@ -49,7 +55,12 @@ void AceEngine::AddContainer(int32_t instanceId, const RefPtr<Container>& contai
 
 void AceEngine::RemoveContainer(int32_t instanceId)
 {
-    auto num = containerMap_.erase(instanceId);
+    LOGI("RemoveContainer %{public}d", instanceId);
+    size_t num = 0;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        num = containerMap_.erase(instanceId);
+    }
     if (num == 0) {
         LOGW("container not found with instance id: %{public}d", instanceId);
     }
@@ -58,7 +69,12 @@ void AceEngine::RemoveContainer(int32_t instanceId)
 
 void AceEngine::Dump(const std::vector<std::string>& params) const
 {
-    for (const auto& container : containerMap_) {
+    std::unordered_map<int32_t, RefPtr<Container>> copied;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        copied = containerMap_;
+    }
+    for (const auto& container : copied) {
         auto pipelineContext = container.second->GetPipelineContext();
         pipelineContext->GetTaskExecutor()->PostSyncTask(
             [params, container = container.second]() { container->Dump(params); }, TaskExecutor::TaskType::UI);
@@ -67,6 +83,7 @@ void AceEngine::Dump(const std::vector<std::string>& params) const
 
 RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     auto container = containerMap_.find(instanceId);
     if (container != containerMap_.end()) {
         return container->second;
@@ -78,6 +95,16 @@ RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
 void AceEngine::RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor)
 {
     watchDog_->Register(instanceId, taskExecutor);
+}
+
+void AceEngine::BuriedBomb(int32_t instanceId, uint64_t bombId)
+{
+    watchDog_->BuriedBomb(instanceId, bombId);
+}
+
+void AceEngine::DefusingBomb(int32_t instanceId)
+{
+    watchDog_->DefusingBomb(instanceId);
 }
 
 void AceEngine::SetPackageName(const std::string& packageName)
@@ -112,6 +139,7 @@ const std::set<std::string>& AceEngine::GetAssetBasePath() const
 
 RefPtr<Frontend> AceEngine::GetForegroundFrontend() const
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     for (const auto& [first, second] : containerMap_) {
         auto frontend = second->GetFrontend();
         if (frontend && (frontend->GetType() == FrontendType::JS)) {
@@ -142,6 +170,45 @@ void AceEngine::SetProcessName(const std::string& processName)
 const std::string& AceEngine::GetProcessName() const
 {
     return processName_;
+}
+
+void AceEngine::TriggerGarbageCollection()
+{
+    std::unordered_map<int32_t, RefPtr<Container>> copied;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (containerMap_.empty()) {
+            return;
+        }
+        copied = containerMap_;
+    }
+
+    auto taskExecutor = copied.begin()->second->GetTaskExecutor();
+    taskExecutor->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::PLATFORM);
+#if defined(OHOS_PLATFORM) && defined(ENABLE_NATIVE_VIEW)
+    // GPU and IO thread is shared while enable native view
+    taskExecutor->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::GPU);
+    taskExecutor->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::IO);
+#endif
+
+    for (const auto& container : copied) {
+        container.second->TriggerGarbageCollection();
+    }
+
+    ImageCache::Purge();
+    BackgroundTaskExecutor::GetInstance().TriggerGarbageCollection();
+    PurgeMallocCache();
+}
+
+void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback)
+{
+    if (!callback) {
+        return;
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (const auto& [first, second] : containerMap_) {
+        callback(second);
+    }
 }
 
 const std::string AceEngine::GetAssetAbsolutePath(const std::string& path) const

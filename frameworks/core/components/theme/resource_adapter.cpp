@@ -20,6 +20,7 @@
 #include "ResourceManager.h"
 #include "TypeAttribute.h"
 
+#include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/theme/theme_attributes.h"
@@ -44,7 +45,9 @@ void CheckThemeId(int32_t& themeId)
         return;
     }
     auto deviceType = SystemProperties::GetDeviceType();
-    themeId = (deviceType == DeviceType::PHONE || deviceType == DeviceType::UNKNOWN) ? THEME_ID_LIGHT : THEME_ID_DARK;
+    themeId = (deviceType == DeviceType::PHONE || deviceType == DeviceType::UNKNOWN || deviceType == DeviceType::CAR)
+                  ? THEME_ID_LIGHT
+                  : THEME_ID_DARK;
 }
 
 DimensionUnit ParseDimensionUnit(const std::string& unit)
@@ -104,17 +107,17 @@ Global::Resource::COLOR_MODE ConvertColorMode(ColorMode colorMode)
                                          : Global::Resource::COLOR_MODE::COLOR_MODE_DARK;
 }
 
-Global::Resource::Configuration ConvertConfig(const DeviceConfig& config)
+Global::Resource::Configuration ConvertConfig(const ResourceConfiguration& config)
 {
     Global::Resource::Configuration::Locale locale(AceApplicationInfo::GetInstance().GetLanguage(),
         AceApplicationInfo::GetInstance().GetCountryOrRegion(), AceApplicationInfo::GetInstance().GetScript());
     Global::Resource::Configuration globalConfig = {
         .locales_ = { locale },
-        .orientation_ = ConvertOrientation(config.orientation),
-        .resolution_ = ConvertResolution(config.density),
-        .deviceType_ = ConvertDeviceType(config.deviceType),
-        .fontRatio_ = config.fontRatio,
-        .colorMode_ = ConvertColorMode(config.colorMode),
+        .orientation_ = ConvertOrientation(config.GetOrientation()),
+        .resolution_ = ConvertResolution(config.GetDensity()),
+        .deviceType_ = ConvertDeviceType(config.GetDeviceType()),
+        .fontRatio_ = config.GetFontRatio(),
+        .colorMode_ = ConvertColorMode(config.GetColorMode()),
     };
     return globalConfig;
 }
@@ -176,18 +179,23 @@ public:
     ResourceAdapterImpl() = default;
     ~ResourceAdapterImpl() override = default;
 
-    void Init(const DeviceResourceInfo& resourceInfo) override;
-    void UpdateConfig(const DeviceConfig& config) override;
+    void Init(const ResourceInfo& resourceInfo) override;
+    void UpdateConfig(const ResourceConfiguration& config) override;
 
     RefPtr<ThemeStyle> GetTheme(int32_t themeId) override;
 
     Color GetColor(uint32_t resId) override;
     Dimension GetDimension(uint32_t resId) override;
     std::string GetString(uint32_t resId) override;
+    std::vector<std::string> GetStringArray(uint32_t resId) const override;
     double GetDouble(uint32_t resId) override;
     int32_t GetInt(uint32_t resId) override;
+    bool GetResource(uint32_t resId, std::ostream& dest) const override;
+    bool GetResource(const std::string& path, std::ostream& dest) const override;
+    bool GetIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const override;
 
 private:
+    bool ConvertToGlobalResourceType(const std::string& resTypeName, Global::Resource::ResourceType& resType) const;
     Global::Resource::ResourceManager resourceManger_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImpl);
@@ -272,11 +280,12 @@ RefPtr<ResourceAdapter> ResourceAdapter::Create()
     return AceType::MakeRefPtr<ResourceAdapterImpl>();
 }
 
-void ResourceAdapterImpl::Init(const DeviceResourceInfo& resourceInfo)
+void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 {
-    std::vector<std::string> hapFiles = { resourceInfo.packagePath };
-    auto configuration = ConvertConfig(resourceInfo.deviceConfig);
-    auto handlers = resourceInfo.resourcehandlers;
+    std::vector<std::string> hapFiles;
+    hapFiles.emplace_back(resourceInfo.GetPackagePath());
+    auto configuration = ConvertConfig(resourceInfo.GetResourceConfiguration());
+    auto handlers = resourceInfo.GetResourceHandlers();
     bool initRet = false;
     if (handlers.empty()) {
         initRet = resourceManger_.Init(hapFiles, configuration);
@@ -290,7 +299,7 @@ void ResourceAdapterImpl::Init(const DeviceResourceInfo& resourceInfo)
         configuration.fontRatio_, configuration.colorMode_);
 }
 
-void ResourceAdapterImpl::UpdateConfig(const DeviceConfig& config)
+void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
 {
     auto configuration = ConvertConfig(config);
     LOGI("UpdateConfig ori=%{public}d, dpi=%{public}d, device=%{public}d, font=%{public}f, color=%{public}d",
@@ -348,6 +357,16 @@ std::string ResourceAdapterImpl::GetString(uint32_t resId)
     return strResult;
 }
 
+std::vector<std::string> ResourceAdapterImpl::GetStringArray(uint32_t resId) const
+{
+    std::vector<std::string> strResults;
+    auto ret = resourceManger_.GetStringArray(static_cast<int32_t>(resId), strResults);
+    if (!ret) {
+        LOGE("GetStringArray error, id=%{public}u", resId);
+    }
+    return strResults;
+}
+
 double ResourceAdapterImpl::GetDouble(uint32_t resId)
 {
     float result = 0.0f;
@@ -366,6 +385,54 @@ int32_t ResourceAdapterImpl::GetInt(uint32_t resId)
         LOGE("GetInt error, id=%{public}u", resId);
     }
     return result;
+}
+
+bool ResourceAdapterImpl::GetResource(uint32_t resId, std::ostream& dest) const
+{
+    return resourceManger_.GetResource(static_cast<int32_t>(resId), dest);
+}
+
+bool ResourceAdapterImpl::GetResource(const std::string& path, std::ostream& dest) const
+{
+    return resourceManger_.GetResource(path, dest);
+}
+
+bool ResourceAdapterImpl::ConvertToGlobalResourceType(const std::string& resTypeName,
+    Global::Resource::ResourceType& resType) const
+{
+    if (resTypeName == "color") {
+        resType = Global::Resource::ResourceType::COLOR;
+        return true;
+    }
+    if (resTypeName == "float") {
+        resType = Global::Resource::ResourceType::FLOAT;
+        return true;
+    }
+    if (resTypeName == "string") {
+        resType = Global::Resource::ResourceType::STRING;
+        return true;
+    }
+    if (resTypeName == "media") {
+        resType = Global::Resource::ResourceType::MEDIA;
+        return true;
+    }
+    LOGE("unsupported resource type(=%{public}s)", resTypeName.c_str());
+    return false;
+}
+
+bool ResourceAdapterImpl::GetIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const
+{
+    Global::Resource::ResourceType globalResType;
+    if (!ConvertToGlobalResourceType(resType, globalResType)) {
+        return false;
+    }
+    int32_t globalResId = 0;
+    if (!resourceManger_.GetIdByName("", resName, globalResType, globalResId)) {
+        LOGE("get resource id failed.(name=%{publid}s, type=%{public}s)", resName.c_str(), resType.c_str());
+        return false;
+    }
+    resId = static_cast<uint32_t>(globalResId);
+    return true;
 }
 
 } // namespace OHOS::Ace

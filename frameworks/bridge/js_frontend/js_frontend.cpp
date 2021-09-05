@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "core/common/thread_checker.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -41,11 +42,14 @@ void TouchInfoToString(const BaseEventInfo& info, std::string& eventParam)
                 .append(std::to_string(localLocation.GetY()))
                 .append(",");
             eventParam.append("\"size\":").append(std::to_string(location.GetSize())).append(",");
+            eventParam.append("\"force\":").append(std::to_string(location.GetForce())).append(",");
         }
         if (eventParam.back() == ',') {
             eventParam.pop_back();
         }
-        eventParam.append("}],\"changedTouches\":[{");
+        eventParam.append("}],");
+        eventParam.append("\"deviceId\":").append(std::to_string(touchInfo->GetDeviceId())).append(",");
+        eventParam.append("\"changedTouches\":[{");
         auto changeTouch = touchInfo->GetChangedTouches();
         for (const auto& change : changeTouch) {
             auto globalLocation = change.GetGlobalLocation();
@@ -61,12 +65,125 @@ void TouchInfoToString(const BaseEventInfo& info, std::string& eventParam)
                 .append(std::to_string(localLocation.GetY()))
                 .append(",");
             eventParam.append("\"size\":").append(std::to_string(change.GetSize())).append(",");
+            eventParam.append("\"force\":").append(std::to_string(change.GetForce())).append(",");
         }
         if (eventParam.back() == ',') {
             eventParam.pop_back();
         }
     }
     eventParam.append("}]}");
+}
+
+void DragStartInfoToString(const BaseEventInfo& info, std::string& eventParam, std::string& eventType)
+{
+    eventParam.append("{\"dragevent\":{");
+    const auto touchInfo = TypeInfoHelper::DynamicCast<DragStartInfo>(&info);
+    if (touchInfo) {
+        auto globalLocation = touchInfo->GetGlobalLocation();
+        eventParam.append("\"globalX\":")
+            .append(std::to_string(globalLocation.GetX()))
+            .append(",\"globalY\":")
+            .append(std::to_string(globalLocation.GetY()))
+            .append(",\"timestamp\":")
+            .append(std::to_string(static_cast<double>(touchInfo->GetTimeStamp().time_since_epoch().count())));
+    }
+    eventParam.append("}}");
+}
+
+void DragUpdateInfoToString(const BaseEventInfo& info, std::string& eventParam, std::string& eventType)
+{
+    eventParam.append("{\"dragevent\":{");
+    const auto touchInfo = TypeInfoHelper::DynamicCast<DragUpdateInfo>(&info);
+    if (touchInfo) {
+        auto globalLocation = touchInfo->GetGlobalLocation();
+        eventParam.append("\"globalX\":")
+            .append(std::to_string(globalLocation.GetX()))
+            .append(",\"globalY\":")
+            .append(std::to_string(globalLocation.GetY()))
+            .append(",\"timestamp\":")
+            .append(std::to_string(static_cast<double>(touchInfo->GetTimeStamp().time_since_epoch().count())));
+    }
+    eventParam.append("}}");
+}
+
+void DragEnterInfoToString(const BaseEventInfo& info, std::string& eventParam, std::string& eventType)
+{
+    eventParam.append("{\"dragevent\":{");
+    const auto touchInfo = TypeInfoHelper::DynamicCast<DragUpdateInfo>(&info);
+    if (touchInfo) {
+        auto globalLocation = touchInfo->GetGlobalLocation();
+        eventParam.append("\"globalX\":")
+            .append(std::to_string(globalLocation.GetX()))
+            .append(",\"globalY\":")
+            .append(std::to_string(globalLocation.GetY()))
+            .append(",\"timestamp\":")
+            .append(std::to_string(static_cast<double>(touchInfo->GetTimeStamp().time_since_epoch().count())));
+    }
+    eventParam.append("}}");
+}
+
+void DragOverInfoToString(const BaseEventInfo& info, std::string& eventParam, std::string& eventType)
+{
+    eventParam.append("{\"dragevent\":{");
+    const auto touchInfo = TypeInfoHelper::DynamicCast<DragUpdateInfo>(&info);
+    if (touchInfo) {
+        auto globalLocation = touchInfo->GetGlobalLocation();
+        eventParam.append("\"globalX\":")
+            .append(std::to_string(globalLocation.GetX()))
+            .append(",\"globalY\":")
+            .append(std::to_string(globalLocation.GetY()))
+            .append(",\"timestamp\":")
+            .append(std::to_string(static_cast<double>(touchInfo->GetTimeStamp().time_since_epoch().count())));
+    }
+    eventParam.append("}}");
+}
+
+void DragLeaveInfoToString(const BaseEventInfo& info, std::string& eventParam, std::string& eventType)
+{
+    eventParam.append("{\"dragevent\":{");
+    const auto touchInfo = TypeInfoHelper::DynamicCast<DragUpdateInfo>(&info);
+    if (touchInfo) {
+        auto globalLocation = touchInfo->GetGlobalLocation();
+        eventParam.append("\"globalX\":")
+            .append(std::to_string(globalLocation.GetX()))
+            .append(",\"globalY\":")
+            .append(std::to_string(globalLocation.GetY()))
+            .append(",\"timestamp\":")
+            .append(std::to_string(static_cast<double>(touchInfo->GetTimeStamp().time_since_epoch().count())));
+    }
+    eventParam.append("}}");
+}
+
+void DragDropInfoToString(const BaseEventInfo& info, std::string& eventParam, std::string& eventType)
+{
+    eventParam.append("{\"dragevent\":{");
+    const auto touchInfo = TypeInfoHelper::DynamicCast<DragEndInfo>(&info);
+    if (touchInfo) {
+        auto globalLocation = touchInfo->GetGlobalLocation();
+        eventParam.append("\"globalX\":")
+            .append(std::to_string(globalLocation.GetX()))
+            .append(",\"globalY\":")
+            .append(std::to_string(globalLocation.GetY()))
+            .append(",\"timestamp\":")
+            .append(std::to_string(static_cast<double>(touchInfo->GetTimeStamp().time_since_epoch().count())));
+    }
+    eventParam.append("}}");
+}
+
+void DragEndInfoToString(const BaseEventInfo& info, std::string& eventParam, std::string& eventType)
+{
+    eventParam.append("{\"dragevent\":{");
+    const auto touchInfo = TypeInfoHelper::DynamicCast<DragEndInfo>(&info);
+    if (touchInfo) {
+        auto globalLocation = touchInfo->GetGlobalLocation();
+        eventParam.append("\"globalX\":")
+            .append(std::to_string(globalLocation.GetX()))
+            .append(",\"globalY\":")
+            .append(std::to_string(globalLocation.GetY()))
+            .append(",\"timestamp\":")
+            .append(std::to_string(static_cast<double>(touchInfo->GetTimeStamp().time_since_epoch().count())));
+    }
+    eventParam.append("}}");
 }
 
 void MouseInfoToString(const BaseEventInfo& info, std::string& eventParam)
@@ -104,9 +221,14 @@ void MouseInfoToString(const BaseEventInfo& info, std::string& eventParam)
             .append(",\"button\":")
             .append(std::to_string(static_cast<int32_t>(globalMouse.button)))
             .append(",\"pressedButtons\":")
-            .append(std::to_string(globalMouse.pressedButtons));
+            .append(std::to_string(globalMouse.pressedButtons))
+            .append("},")
+            .append("\"deviceId\":")
+            .append(std::to_string(mouseInfo->GetDeviceId()))
+            .append("}");
+    } else {
+        eventParam.append("}}");
     }
-    eventParam.append("}}");
 }
 
 void SwipeInfoToString(const BaseEventInfo& info, std::string& eventParam)
@@ -124,13 +246,18 @@ RefPtr<Frontend> Frontend::Create()
 
 JsFrontend::~JsFrontend() noexcept
 {
+    LOG_DESTROY();
+}
+
+void JsFrontend::Destroy()
+{
+    CHECK_RUN_ON(JS);
+    LOGI("JsFrontend Destroy begin.");
     // To guarantee the jsEngine_ and delegate_ released in js thread
-    auto jsTaskExecutor = delegate_->GetAnimationJsTask();
-    RefPtr<Framework::JsEngine> jsEngine;
-    jsEngine.Swap(jsEngine_);
-    RefPtr<Framework::FrontendDelegateImpl> delegate;
-    delegate.Swap(delegate_);
-    jsTaskExecutor.PostTask([jsEngine, delegate] {});
+    jsEngine_.Reset();
+    delegate_.Reset();
+    handler_.Reset();
+    LOGI("JsFrontend Destroy end.");
 }
 
 bool JsFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
@@ -139,22 +266,24 @@ bool JsFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskE
     type_ = type;
     ACE_DCHECK(type_ == FrontendType::JS);
     InitializeFrontendDelegate(taskExecutor);
-    taskExecutor->PostTask(
-        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_), delegate = delegate_] {
-            auto jsEngine = weakEngine.Upgrade();
-            if (!jsEngine) {
-                return;
-            }
-            jsEngine->Initialize(delegate);
-        },
-        TaskExecutor::TaskType::JS);
-
+    auto weakEngine = AceType::WeakClaim(AceType::RawPtr(jsEngine_));
+    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(delegate_));
+    taskExecutor->PostTask([weakEngine, weakDelegate] {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->Initialize(weakDelegate.Upgrade());
+    }, TaskExecutor::TaskType::JS);
     LOGI("JsFrontend initialize end.");
     return true;
 }
 
 void JsFrontend::AttachPipelineContext(const RefPtr<PipelineContext>& context)
 {
+    if (!delegate_) {
+        return;
+    }
     handler_ = AceType::MakeRefPtr<JsEventHandler>(delegate_);
     context->RegisterEventHandler(handler_);
     delegate_->AttachPipelineContext(context);
@@ -162,7 +291,9 @@ void JsFrontend::AttachPipelineContext(const RefPtr<PipelineContext>& context)
 
 void JsFrontend::SetAssetManager(const RefPtr<AssetManager>& assetManager)
 {
-    delegate_->SetAssetManager(assetManager);
+    if (delegate_) {
+        delegate_->SetAssetManager(assetManager);
+    }
 }
 
 void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor)
@@ -204,6 +335,15 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
         jsEngine->FireSyncEvent(eventId, param);
     };
 
+    builder.externalEventCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                        const std::string& componentId, const uint32_t nodeId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->FireExternalEvent(componentId, nodeId);
+    };
+
     builder.updatePageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                          const RefPtr<Framework::JsAcePage>& jsPage) {
         auto jsEngine = weakEngine.Upgrade();
@@ -237,6 +377,15 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
             return;
         }
         jsEngine->DestroyApplication(packageName);
+    };
+
+    builder.updateApplicationStateCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                                 const std::string& packageName, Frontend::State state) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->UpdateApplicationState(packageName, state);
     };
 
     builder.timerCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
@@ -277,6 +426,9 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
     builder.taskExecutor = taskExecutor;
     builder.ability = ability_;
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateImpl>(builder);
+    if (disallowPopLastPage_) {
+        delegate_->DisallowPopLastPage();
+    }
     if (jsEngine_) {
         delegate_->SetGroupJsBridge(jsEngine_->GetGroupJsBridge());
     } else {
@@ -288,142 +440,232 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
 void JsFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params)
 {
     // Not use this pageId from backend, manage it in FrontendDelegateImpl.
-    delegate_->RunPage(url, params);
+    if (delegate_) {
+        delegate_->RunPage(url, params);
+    }
 }
 
 void JsFrontend::PushPage(const std::string& url, const std::string& params)
 {
-    delegate_->Push(url, params);
+    if (delegate_) {
+        delegate_->Push(url, params);
+    }
+}
+
+void JsFrontend::ReplacePage(const std::string& url, const std::string& params)
+{
+    if (delegate_) {
+        delegate_->Replace(url, params);
+    }
 }
 
 void JsFrontend::SendCallbackMessage(const std::string& callbackId, const std::string& data) const
 {
-    delegate_->OnJsCallback(callbackId, data);
+    if (delegate_) {
+        delegate_->OnJsCallback(callbackId, data);
+    }
 }
 
 void JsFrontend::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const
 {
-    delegate_->SetJsMessageDispatcher(dispatcher);
+    if (delegate_) {
+        delegate_->SetJsMessageDispatcher(dispatcher);
+    }
 }
 
 void JsFrontend::TransferComponentResponseData(int callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
-    delegate_->TransferComponentResponseData(callbackId, code, std::move(data));
+    if (delegate_) {
+        delegate_->TransferComponentResponseData(callbackId, code, std::move(data));
+    }
 }
 
 void JsFrontend::TransferJsResponseData(int callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
-    delegate_->TransferJsResponseData(callbackId, code, std::move(data));
+    if (delegate_) {
+        delegate_->TransferJsResponseData(callbackId, code, std::move(data));
+    }
 }
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+void JsFrontend::TransferJsResponseDataPreview(int callbackId, int32_t code, ResponseData responseData) const
+{
+    if (delegate_) {
+        delegate_->TransferJsResponseDataPreview(callbackId, code, responseData);
+    }
+}
+#endif
 
 void JsFrontend::TransferJsPluginGetError(int callbackId, int32_t errorCode, std::string&& errorMessage) const
 {
-    delegate_->TransferJsPluginGetError(callbackId, errorCode, std::move(errorMessage));
+    if (delegate_) {
+        delegate_->TransferJsPluginGetError(callbackId, errorCode, std::move(errorMessage));
+    }
 }
 
 void JsFrontend::TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
-    delegate_->TransferJsEventData(callbackId, code, std::move(data));
+    if (delegate_) {
+        delegate_->TransferJsEventData(callbackId, code, std::move(data));
+    }
 }
 
 void JsFrontend::LoadPluginJsCode(std::string&& jsCode) const
 {
-    delegate_->LoadPluginJsCode(std::move(jsCode));
+    if (delegate_) {
+        delegate_->LoadPluginJsCode(std::move(jsCode));
+    }
+}
+
+void JsFrontend::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const
+{
+    if (delegate_) {
+        delegate_->LoadPluginJsByteCode(std::move(jsCode), std::move(jsCodeLen));
+    }
 }
 
 void JsFrontend::UpdateState(Frontend::State state)
 {
+    if (!delegate_) {
+        return;
+    }
     switch (state) {
         case Frontend::State::ON_CREATE:
             break;
         case Frontend::State::ON_DESTROY:
+            LOGI("UpdateState ON_DESTROY");
             delegate_->OnApplicationDestroy(delegate_->GetAppID());
+            delegate_->OnApplicationUpdateState(delegate_->GetAppID(), Frontend::State::ON_DESTROY);
+            break;
+        case Frontend::State::ON_SHOW:
+            delegate_->OnApplicationUpdateState(delegate_->GetAppID(), Frontend::State::ON_SHOW);
+            break;
+        case Frontend::State::ON_HIDE:
+            delegate_->OnApplicationUpdateState(delegate_->GetAppID(), Frontend::State::ON_HIDE);
             break;
         default:
             LOGE("error State: %d", state);
+            break;
     }
 }
 
 RefPtr<AccessibilityManager> JsFrontend::GetAccessibilityManager() const
 {
     if (!delegate_) {
-        LOGE("GetAccessibilityManager delegate is null");
+        LOGD("GetAccessibilityManager delegate is null");
         return nullptr;
     }
     return delegate_->GetJsAccessibilityManager();
 }
 
-const WindowConfig& JsFrontend::GetWindowConfig() const
+WindowConfig& JsFrontend::GetWindowConfig()
 {
+    if (!delegate_) {
+        static WindowConfig windowConfig;
+        LOGW("delegate is null, return default config");
+        return windowConfig;
+    }
     return delegate_->GetWindowConfig();
 }
 
 bool JsFrontend::OnBackPressed()
 {
+    if (!delegate_) {
+        LOGW("delegate is null, return false");
+        return false;
+    }
     return delegate_->OnPageBackPress();
 }
 
 void JsFrontend::OnShow()
 {
-    delegate_->OnForground();
-    foregroundFrontend_ = true;
+    if (delegate_) {
+        delegate_->OnForground();
+        foregroundFrontend_ = true;
+    }
 }
 
 void JsFrontend::OnHide()
 {
-    delegate_->OnBackGround();
-    foregroundFrontend_ = false;
+    if (delegate_) {
+        delegate_->OnBackGround();
+        foregroundFrontend_ = false;
+    }
 }
 
 void JsFrontend::OnConfigurationUpdated(const std::string& data)
 {
-    delegate_->OnConfigurationUpdated(data);
+    if (delegate_) {
+        delegate_->OnConfigurationUpdated(data);
+    }
 }
 
 void JsFrontend::OnActive()
 {
-    delegate_->InitializeAccessibilityCallback();
-    delegate_->OnActive();
+    if (delegate_) {
+        delegate_->InitializeAccessibilityCallback();
+        delegate_->OnActive();
+    }
 }
 
 void JsFrontend::OnInactive()
 {
-    delegate_->OnInactive();
+    if (delegate_) {
+        delegate_->OnInactive();
+    }
 }
 
 bool JsFrontend::OnStartContinuation()
 {
+    if (!delegate_) {
+        LOGW("delegate is null, return false");
+        return false;
+    }
     return delegate_->OnStartContinuation();
 }
 
 void JsFrontend::OnCompleteContinuation(int32_t code)
 {
-    delegate_->OnCompleteContinuation(code);
+    if (delegate_) {
+        delegate_->OnCompleteContinuation(code);
+    }
 }
 
 void JsFrontend::OnSaveData(std::string& data)
 {
-    delegate_->OnSaveData(data);
+    if (delegate_) {
+        delegate_->OnSaveData(data);
+    }
 }
 
 bool JsFrontend::OnRestoreData(const std::string& data)
 {
+    if (!delegate_) {
+        LOGW("delegate is null, return false");
+        return false;
+    }
     return delegate_->OnRestoreData(data);
 }
 
 void JsFrontend::OnNewRequest(const std::string& data)
 {
-    delegate_->OnNewRequest(data);
+    if (delegate_) {
+        delegate_->OnNewRequest(data);
+    }
 }
 
 void JsFrontend::CallRouterBack()
 {
-    delegate_->CallPopPage();
+    if (delegate_) {
+        delegate_->CallPopPage();
+    }
 }
 
 void JsFrontend::OnSurfaceChanged(int32_t width, int32_t height)
 {
-    delegate_->OnSurfaceChanged();
+    if (delegate_) {
+        delegate_->OnSurfaceChanged();
+    }
 }
 
 void JsFrontend::DumpFrontend() const
@@ -431,7 +673,9 @@ void JsFrontend::DumpFrontend() const
     int32_t routerIndex = 0;
     std::string routerName;
     std::string routerPath;
-    delegate_->GetState(routerIndex, routerName, routerPath);
+    if (delegate_) {
+        delegate_->GetState(routerIndex, routerName, routerPath);
+    }
 
     if (DumpLog::GetInstance().GetDumpFile()) {
         DumpLog::GetInstance().AddDesc("Path: " + routerPath);
@@ -442,17 +686,23 @@ void JsFrontend::DumpFrontend() const
 
 void JsFrontend::TriggerGarbageCollection()
 {
-    jsEngine_->RunGarbageCollection();
+    if (jsEngine_) {
+        jsEngine_->RunGarbageCollection();
+    }
 }
 
 void JsFrontend::RebuildAllPages()
 {
-    delegate_->RebuildAllPages();
+    if (delegate_) {
+        delegate_->RebuildAllPages();
+    }
 }
 
 void JsFrontend::SetColorMode(ColorMode colorMode)
 {
-    delegate_->SetColorMode(colorMode);
+    if (delegate_) {
+        delegate_->SetColorMode(colorMode);
+    }
 }
 
 void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)
@@ -477,6 +727,27 @@ void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const Base
         MouseInfoToString(info, eventParam);
     } else if (eventMarker.GetData().eventType == "swipe") {
         SwipeInfoToString(info, eventParam);
+    } else if (eventMarker.GetData().eventType == "dragstart") {
+        std::string eventType = eventMarker.GetData().eventType;
+        DragStartInfoToString(info, eventParam, eventType);
+    } else if (eventMarker.GetData().eventType == "drag") {
+        std::string eventType = eventMarker.GetData().eventType;
+        DragUpdateInfoToString(info, eventParam, eventType);
+    } else if (eventMarker.GetData().eventType == "dragend") {
+        std::string eventType = eventMarker.GetData().eventType;
+        DragEndInfoToString(info, eventParam, eventType);
+    } else if (eventMarker.GetData().eventType == "dragenter") {
+        std::string eventType = eventMarker.GetData().eventType;
+        DragEnterInfoToString(info, eventParam, eventType);
+    } else if (eventMarker.GetData().eventType == "dragover") {
+        std::string eventType = eventMarker.GetData().eventType;
+        DragOverInfoToString(info, eventParam, eventType);
+    } else if (eventMarker.GetData().eventType == "dragleave") {
+        std::string eventType = eventMarker.GetData().eventType;
+        DragLeaveInfoToString(info, eventParam, eventType);
+    } else if (eventMarker.GetData().eventType == "drop") {
+        std::string eventType = eventMarker.GetData().eventType;
+        DragDropInfoToString(info, eventParam, eventType);
     }
 
     LOGD("HandleAsyncEvent pageId: %{public}d, eventId: %{public}s, eventType: %{public}s",
@@ -528,6 +799,52 @@ void JsEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const KeyEv
     AccessibilityEvent accessibilityEvent;
     accessibilityEvent.nodeId = StringUtils::StringToInt(eventMarker.GetData().eventId);
     accessibilityEvent.eventType = std::to_string(static_cast<int32_t>(info.code));
+    delegate_->FireAccessibilityEvent(accessibilityEvent);
+}
+
+void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const GestureEvent& info)
+{
+    LOGD("HandleASyncEvent pageId: %{public}d, eventId: %{public}s, eventType: %{public}s",
+        eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str(), eventMarker.GetData().eventType.c_str());
+    std::string eventParam = std::string("");
+    if (eventMarker.GetData().eventType.find("pinch") != std::string::npos) {
+        eventParam.append("\"")
+                .append(eventMarker.GetData().eventType)
+                .append("\",{\"scale\":")
+                .append(std::to_string(info.GetScale()))
+                .append(",\"pinchCenterX\":")
+                .append(std::to_string(info.GetPinchCenter().GetX()))
+                .append(",\"pinchCenterY\":")
+                .append(std::to_string(info.GetPinchCenter().GetY()))
+                .append("}");
+    }
+
+    delegate_->FireAsyncEvent(eventMarker.GetData().eventId, eventParam, "");
+
+    AccessibilityEvent accessibilityEvent;
+    accessibilityEvent.nodeId = StringUtils::StringToInt(eventMarker.GetData().eventId);
+    accessibilityEvent.eventType = eventMarker.GetData().eventType;
+    delegate_->FireAccessibilityEvent(accessibilityEvent);
+}
+
+void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const RotationEvent& info)
+{
+    LOGD("HandleAsyncEvent pageId: %{public}d, eventId: %{public}s, eventType: %{public}s",
+        eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str(), eventMarker.GetData().eventType.c_str());
+    std::string eventParam = std::string("");
+    if (eventMarker.GetData().eventType == "rotate") {
+        eventParam.append("\"")
+                .append(eventMarker.GetData().eventType)
+                .append("\",{\"value\":")
+                .append(std::to_string(info.value))
+                .append("}");
+    }
+
+    delegate_->FireAsyncEvent(eventMarker.GetData().eventId, eventParam, "");
+
+    AccessibilityEvent accessibilityEvent;
+    accessibilityEvent.nodeId = StringUtils::StringToInt(eventMarker.GetData().eventId);
+    accessibilityEvent.eventType = eventMarker.GetData().eventType;
     delegate_->FireAccessibilityEvent(accessibilityEvent);
 }
 
@@ -589,4 +906,9 @@ void JsEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const std::
     delegate_->FireSyncEvent(eventMarker.GetData().eventId, param, std::string(""), result);
 }
 
+void JsEventHandler::HandleSyncEvent(
+    const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId)
+{
+    delegate_->FireExternalEvent(eventMarker.GetData().eventId, componentId, nodeId);
+}
 } // namespace OHOS::Ace

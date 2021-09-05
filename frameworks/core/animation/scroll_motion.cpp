@@ -47,6 +47,11 @@ ScrollMotion::ScrollMotion(double position, double velocity, const ExtentPair& e
     }
 }
 
+bool ScrollMotion::IsValid() const
+{
+    return springMotion_ != nullptr;
+}
+
 void ScrollMotion::Move(float offsetTime)
 {
     // SpringMotion is null when not OverScoll&UnderScroll.

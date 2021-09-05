@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_TEXT_STYLE_H
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "base/geometry/dimension.h"
@@ -44,6 +45,8 @@ enum class FontWeight {
     NORMAL,
     BOLDER,
     LIGHTER,
+    MEDIUM,
+    REGULAR,
 };
 
 enum class FontStyle {
@@ -60,11 +63,13 @@ enum class TextBaseline {
     HANGING,
 };
 
-enum class WordBreak {
+enum class TextCase {
     NORMAL = 0,
-    BREAK_ALL,
-    BREAK_WORD
+    LOWERCASE,
+    UPPERCASE,
 };
+
+enum class WordBreak { NORMAL = 0, BREAK_ALL, BREAK_WORD };
 
 struct TextSizeGroup {
     Dimension fontSize = 14.0_px;
@@ -85,6 +90,16 @@ public:
     TextBaseline GetTextBaseline() const
     {
         return textBaseline_;
+    }
+
+    const Dimension& GetBaselineOffset() const
+    {
+        return baselineOffset_;
+    }
+
+    void SetBaselineOffset(const Dimension& baselineOffset)
+    {
+        baselineOffset_ = baselineOffset;
     }
 
     void SetTextBaseline(TextBaseline baseline)
@@ -110,6 +125,16 @@ public:
     const Dimension& GetFontSize() const
     {
         return fontSize_;
+    }
+
+    WhiteSpace GetWhiteSpace() const
+    {
+        return whiteSpace_;
+    }
+
+    void SetWhiteSpace(WhiteSpace whiteSpace)
+    {
+        whiteSpace_ = whiteSpace;
     }
 
     void SetFontSize(const Dimension& fontSize)
@@ -142,14 +167,24 @@ public:
         return textDecoration_;
     }
 
-    double GetWordSpacing() const
+    const Dimension& GetWordSpacing() const
     {
         return wordSpacing_;
     }
 
-    void SetWordSpacing(double wordSpacing)
+    void SetWordSpacing(const Dimension& wordSpacing)
     {
         wordSpacing_ = wordSpacing;
+    }
+
+    const Color& GetTextDecorationColor() const
+    {
+        return textDecorationColor_;
+    }
+
+    void SetTextDecorationColor(const Color& textDecorationColor)
+    {
+        textDecorationColor_ = textDecorationColor;
     }
 
     const std::vector<std::string>& GetFontFamilies() const
@@ -160,6 +195,26 @@ public:
     void SetFontFamilies(const std::vector<std::string>& fontFamilies)
     {
         fontFamilies_ = fontFamilies;
+    }
+
+    Dimension GetTextIndent() const
+    {
+        return textIndent_;
+    }
+
+    void SetTextIndent(const Dimension& textIndent)
+    {
+        textIndent_ = textIndent;
+    }
+
+    const std::unordered_map<std::string, int32_t>& GetFontFeatures() const
+    {
+        return fontFeatures_;
+    }
+
+    void SetFontFeatures(const std::unordered_map<std::string, int32_t>& fontFeatures)
+    {
+        fontFeatures_ = fontFeatures;
     }
 
     const Dimension& GetLineHeight() const
@@ -188,12 +243,12 @@ public:
         shadow_ = shadow;
     }
 
-    double GetLetterSpacing() const
+    const Dimension& GetLetterSpacing() const
     {
         return letterSpacing_;
     }
 
-    void SetLetterSpacing(double letterSpacing)
+    void SetLetterSpacing(const Dimension& letterSpacing)
     {
         letterSpacing_ = letterSpacing;
     }
@@ -205,6 +260,16 @@ public:
 
     void SetAdaptTextSize(
         const Dimension& maxFontSize, const Dimension& minFontSize, const Dimension& fontSizeStep = 1.0_px);
+
+    bool GetAdaptHeight() const
+    {
+        return adaptHeight_;
+    }
+
+    void SetAdaptHeight(bool adaptHeight)
+    {
+        adaptHeight_ = adaptHeight;
+    }
 
     void DisableAdaptTextSize()
     {
@@ -301,6 +366,15 @@ public:
     {
         textAlign_ = textAlign;
     }
+    void SetTextVerticalAlign(VerticalAlign verticalAlign)
+    {
+        verticalAlign_ = verticalAlign;
+    }
+
+    VerticalAlign GetTextVerticalAlign() const
+    {
+        return verticalAlign_;
+    }
 
     WordBreak GetWordBreak() const
     {
@@ -312,8 +386,19 @@ public:
         wordBreak_ = wordBreak;
     }
 
+    TextCase GetTextCase() const
+    {
+        return textCase_;
+    }
+
+    void SetTextCase(TextCase textCase)
+    {
+        textCase_ = textCase;
+    }
+
 private:
     std::vector<std::string> fontFamilies_;
+    std::unordered_map<std::string, int32_t> fontFeatures_;
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
     // use 14px for normal font size.
@@ -326,17 +411,24 @@ private:
     FontWeight fontWeight_ { FontWeight::NORMAL };
     FontStyle fontStyle_ { FontStyle::NORMAL };
     TextBaseline textBaseline_ { TextBaseline::ALPHABETIC };
+    Dimension baselineOffset_;
     TextOverflow textOverflow_ { TextOverflow::CLIP };
+    VerticalAlign verticalAlign_ { VerticalAlign::NONE };
     TextAlign textAlign_ { TextAlign::START };
     Color textColor_ { Color::BLACK };
+    Color textDecorationColor_ { Color::TRANSPARENT };
     TextDecoration textDecoration_ { TextDecoration::NONE };
     Shadow shadow_;
-    double wordSpacing_ = 0.0;
-    double letterSpacing_ = 0.0;
+    WhiteSpace whiteSpace_{ WhiteSpace::PRE };
+    Dimension wordSpacing_;
+    Dimension textIndent_ { 0.0f, DimensionUnit::PX };
+    Dimension letterSpacing_;
     uint32_t maxLines_ = UINT32_MAX;
     bool adaptTextSize_ = false;
+    bool adaptHeight_ = false; // whether adjust text size with height.
     bool allowScale_ = true;
     WordBreak wordBreak_ { WordBreak::BREAK_WORD };
+    TextCase textCase_ { TextCase::NORMAL };
 };
 
 namespace StringUtils {
@@ -356,6 +448,8 @@ inline FontWeight StringToFontWeight(const std::string& weight)
         { "bold", FontWeight::BOLD },
         { "bolder", FontWeight::BOLDER },
         { "lighter", FontWeight::LIGHTER },
+        { "medium", FontWeight::MEDIUM },
+        { "regular", FontWeight::REGULAR },
     };
     auto weightIter = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), weight.c_str());
     return weightIter != -1 ? fontWeightTable[weightIter].value : FontWeight::NORMAL;

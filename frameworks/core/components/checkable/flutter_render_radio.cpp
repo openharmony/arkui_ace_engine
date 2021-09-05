@@ -35,6 +35,7 @@ void FlutterRenderRadio::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     flutter::Paint paint;
+    paint.paint()->setAntiAlias(true);
     auto* skPaint = paint.paint();
     if (skPaint == nullptr) {
         LOGE("the sk paint is nullptr");

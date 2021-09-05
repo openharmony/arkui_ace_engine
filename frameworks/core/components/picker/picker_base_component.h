@@ -26,6 +26,7 @@
 #include "core/components/text/text_component.h"
 #include "core/event/back_end_event_manager.h"
 #include "core/pipeline/base/sole_child_component.h"
+#include "core/components_v2/common/common_def.h"
 
 namespace OHOS::Ace {
 
@@ -168,7 +169,7 @@ private:
     PickerTime time_;
 };
 
-class PickerBaseComponent : public SoleChildComponent {
+class ACE_EXPORT PickerBaseComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(PickerBaseComponent, SoleChildComponent);
 
 public:
@@ -268,11 +269,6 @@ public:
     void SetOnCancel(const EventMarker& value)
     {
         onCancel_ = value;
-    }
-
-    void SetDisabledStatus(bool value) override
-    {
-        Component::SetDisabledStatus(value);
     }
 
     void ClearColumns();
@@ -448,6 +444,10 @@ public:
     {
         return pickerId_;
     }
+
+    ACE_DEFINE_COMPONENT_EVENT(OnTextCancel, void(void));
+    ACE_DEFINE_COMPONENT_EVENT(OnTextAccept, void(const std::string&,double));
+    ACE_DEFINE_COMPONENT_EVENT(OnTextChange, void(const std::string&,double));
 
     static const char PICKER_YEAR_COLUMN[];
     static const char PICKER_MONTH_COLUMN[];

@@ -17,10 +17,12 @@ build_component("navigation_bar") {
   sources = [
     "navigation_bar_component.cpp",
     "navigation_bar_element.cpp",
+    "navigation_container_component.cpp",
   ]
 
   if (!is_wearable_product) {
     sources += [
+      "navigation_container_element.cpp",
       "render_collapsing_navigation_bar.cpp",
       "render_navigation_container.cpp",
     ]

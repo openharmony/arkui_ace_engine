@@ -74,6 +74,8 @@ public:
     void HandleSyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info, bool& result) override {};
     void HandleSyncEvent(const EventMarker& eventMarker, const std::string& param, std::string& result) override {};
     void HandleSyncEvent(const EventMarker& eventMarker, const KeyEvent& keyEvent, bool& result) override {};
+    void HandleSyncEvent(
+        const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId) override {};
 
 private:
     PulldownEventCallback eventCallback_;

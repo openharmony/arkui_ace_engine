@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -45,6 +46,8 @@ void RenderTrack::Update(const RefPtr<Component>& component)
     colors_ = track->GetSectionsColors();
     weights_ = track->GetSectionsWeights();
     showIndicator_ = track->GetIndicatorFlag();
+    markedText_ = track->GetLableMarkedText();
+    markedTextColor_ = track->GetLableMarkedColor();
 
     leftToRight_ = track->GetTextDirection() == TextDirection::LTR;
 

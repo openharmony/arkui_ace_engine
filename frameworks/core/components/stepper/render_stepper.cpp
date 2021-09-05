@@ -95,6 +95,7 @@ void RenderStepper::Initialize()
     rightButtonData_.isLeft = false;
     InitButton(rightButtonData_);
     InitProgress(renderProgress_);
+    InitAccessibilityEventListener();
 }
 
 void RenderStepper::InitAttr()
@@ -123,6 +124,33 @@ void RenderStepper::InitAttr()
     for (auto& textStyle : textStyles_) {
         textColors_.emplace_back(textStyle.GetTextColor());
     }
+}
+
+void RenderStepper::InitAccessibilityEventListener()
+{
+    auto refNode = accessibilityNode_.Upgrade();
+    if (!refNode) {
+        return;
+    }
+    refNode->AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+    refNode->AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+    auto weakPtr = AceType::WeakClaim(this);
+    refNode->SetActionScrollForward([weakPtr]() {
+        auto stepper = weakPtr.Upgrade();
+        if (stepper) {
+            stepper->StepperNext();
+            return true;
+        }
+        return false;
+    });
+    refNode->SetActionScrollBackward([weakPtr]() {
+        auto stepper = weakPtr.Upgrade();
+        if (stepper) {
+            stepper->StepperPrev();
+            return true;
+        }
+        return false;
+    });
 }
 
 void RenderStepper::InitRecognizer()
@@ -394,15 +422,13 @@ void RenderStepper::UpdateTouchRect()
 {
     touchRect_.SetSize(GetLayoutSize());
     touchRect_.SetOffset(GetPosition());
+    ownTouchRect_ = touchRect_;
 }
 
 void RenderStepper::PerformLayout()
 {
     // layout stepper item
-    const auto& children = GetChildren();
-    if (childrenArray_.empty()) {
-        childrenArray_ = std::vector<RefPtr<RenderNode>>(children.begin(), children.end());
-    }
+    InitChildrenArr();
     if (!isAnimation_) {
         LayoutParam innerLayout = GetLayoutParam();
         Size minSize = GetLayoutParam().GetMinSize();
@@ -430,6 +456,11 @@ void RenderStepper::PerformLayout()
                 childItem->SetPosition(prevItemPosition);
             } else if (i == currentIndex_) {
                 childItem->SetPosition(Offset::Zero());
+                auto display = AceType::DynamicCast<RenderDisplay>(childItem->GetFirstChild());
+                if (!display) {
+                    return;
+                }
+                display->UpdateOpacity(255.0);
             } else {
                 childItem->SetPosition(nextItemPosition);
             }
@@ -679,6 +710,19 @@ void RenderStepper::UpdateItemOpacity(uint8_t opacity, int32_t index)
         return;
     }
     display->UpdateOpacity(opacity);
+}
+
+void RenderStepper::InitChildrenArr()
+{
+    if (!childrenArray_.empty()) {
+        return;
+    }
+    const auto& children = GetChildren();
+    for (const auto& child : children) {
+        if (AceType::DynamicCast<RenderStepperItem>(child)) {
+            childrenArray_.emplace_back(child);
+        }
+    }
 }
 
 void RenderStepper::UpdateItemPosition(double offset, int32_t index)

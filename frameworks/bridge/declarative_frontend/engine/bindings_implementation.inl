@@ -32,20 +32,27 @@ void JSClassImpl<C, ImplDetail>::Declare(const char* name)
 }
 
 template<typename C, template<typename> typename ImplDetail>
-template<typename R, typename... Args>
-void JSClassImpl<C, ImplDetail>::Method(const char* name, R (C::*func)(Args...), MethodOptions options)
-{
-    functions_.emplace(nextFreeId_, new FunctionBinding(name, options, func));
-    ImplDetail<C>::Method(name, func, nextFreeId_++);
-}
-
-template<typename C, template<typename> typename ImplDetail>
 template<typename Base, typename R, typename... Args>
 void JSClassImpl<C, ImplDetail>::Method(const char* name, R (Base::*func)(Args...), MethodOptions options)
 {
     static_assert(std::is_base_of_v<Base, C>, "Trying to bind an unrelated method!");
     functions_.emplace(nextFreeId_, new FunctionBinding(name, options, func));
     ImplDetail<C>::Method(name, func, nextFreeId_++);
+}
+
+template<typename C, template<typename> typename ImplDetail>
+template<typename R, typename... Args>
+void JSClassImpl<C, ImplDetail>::StaticMethod(const char* name, R (*func)(Args...), MethodOptions options)
+{
+    functions_.emplace(nextFreeId_, new StaticFunctionBinding(name, options, func));
+    ImplDetail<C>::StaticMethod(name, func, nextFreeId_++);
+}
+
+template<typename C, template<typename> typename ImplDetail>
+void JSClassImpl<C, ImplDetail>::StaticMethod(const char* name, JSFunctionCallback func)
+{
+    functions_.emplace(nextFreeId_, new StaticFunctionBinding(name, MethodOptions::NONE, func));
+    ImplDetail<C>::StaticMethod(name, func, nextFreeId_++);
 }
 
 template<typename C, template<typename> typename ImplDetail>
@@ -61,6 +68,20 @@ template<typename C, template<typename> typename ImplDetail>
 void JSClassImpl<C, ImplDetail>::CustomMethod(const char* name, FunctionCallback callback)
 {
     ImplDetail<C>::CustomMethod(name, callback);
+}
+
+template<typename C, template<typename> typename ImplDetail>
+template<typename T>
+void JSClassImpl<C, ImplDetail>::CustomMethod(const char* name, JSMemberFunctionCallback<T> callback)
+{
+    functions_.emplace(nextFreeId_, new FunctionBinding(name, MethodOptions::NONE, callback));
+    ImplDetail<C>::CustomMethod(name, callback, nextFreeId_++);
+}
+
+template<typename C, template<typename> typename ImplDetail>
+void JSClassImpl<C, ImplDetail>::CustomStaticMethod(const char* name, FunctionCallback callback)
+{
+    ImplDetail<C>::CustomStaticMethod(name, callback);
 }
 
 template<typename C, template<typename> typename ImplDetail>
@@ -95,10 +116,18 @@ void JSClassImpl<C, ImplDetail>::Bind(BindingTarget bindTarget, FunctionCallback
 }
 
 template<typename C, template<typename> typename ImplDetail>
-template<typename... Args>
-void JSClassImpl<C, ImplDetail>::Bind(BindingTarget bindTarget)
+void JSClassImpl<C, ImplDetail>::Bind(
+    BindingTarget bindTarget, JSFunctionCallback ctor, JSDestructorCallback<C> dtor, JSGCMarkCallback<C> gcMark)
 {
-    ImplDetail<C>::template Bind<Args...>(bindTarget);
+    ImplDetail<C>::Bind(bindTarget, ctor, dtor, gcMark);
+}
+
+template<typename C, template<typename> typename ImplDetail>
+template<typename... Args>
+void JSClassImpl<C, ImplDetail>::Bind(
+    BindingTarget bindTarget, JSDestructorCallback<C> dtor, JSGCMarkCallback<C> gcMark)
+{
+    ImplDetail<C>::template Bind<Args...>(bindTarget, dtor, gcMark);
 }
 
 template<typename C, template<typename> typename ImplDetail>
@@ -119,6 +148,12 @@ template<typename C, template<typename> typename ImplDetail>
 const char* JSClassImpl<C, ImplDetail>::JSName()
 {
     return jsName.c_str();
+}
+
+template<typename C, template<typename> typename ImplDetail>
+JSRef<JSObject> JSClassImpl<C, ImplDetail>::NewInstance()
+{
+    return JSRef<JSObject>::Make(ImplDetail<C>::NewInstance());
 }
 
 }; // namespace OHOS::Ace::Framework

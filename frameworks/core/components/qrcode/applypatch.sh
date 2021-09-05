@@ -28,4 +28,4 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-patch -p 2 -i $PATCH_FILE -d "$2"
+patch -p 2 -i $PATCH_FILE -d "$2" -N

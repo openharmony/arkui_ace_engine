@@ -71,10 +71,11 @@ void TabContentElement::ChangeByContent(int32_t index)
     UpdateLastFocusNode();
 }
 
-void TabContentElement::ChangeByBar(int32_t index)
+void TabContentElement::ChangeByBar(int32_t index, bool isFromController)
 {
     LOGD("change content by tab bar index:%{public}d", index);
     newBarIndex_ = index;
+    fromController_ = isFromController;
     MarkDirty();
 }
 
@@ -157,11 +158,12 @@ void TabContentElement::PerformBuild()
     }
     // process for new content requested by tab bar
     if (target == newBarIndex_) {
-        tabContent->ChangeScroll(newBarIndex_);
+        tabContent->ChangeScroll(newBarIndex_, fromController_);
         UpdateLastFocusNode();
         newBarIndex_ = -1;
     }
     lastIndex_ = target;
+    fromController_ = false;
 }
 
 void TabContentElement::OnFocus()
@@ -205,6 +207,10 @@ RefPtr<FocusNode> TabContentElement::GetCurrentFocusNode() const
 
     auto focusIndexIter = focusIndexMap_.find(controller_->GetIndex());
     if (focusIndexIter == focusIndexMap_.end()) {
+        return nullptr;
+    }
+
+    if (focusNodes_.size() <= size_t(focusIndexIter->second)) {
         return nullptr;
     }
     auto pos = focusNodes_.begin();

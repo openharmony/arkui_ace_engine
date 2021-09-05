@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_OPTION_RENDER_OPTION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_OPTION_RENDER_OPTION_H
 
+#include "base/utils/system_properties.h"
 #include "core/components/box/render_box.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/image/render_image.h"
@@ -131,6 +132,7 @@ protected:
     Color lineColor_;
     bool isTv_ = SystemProperties::GetDeviceType() == DeviceType::TV;
     RefPtr<Animator> eventEffectController_;
+    bool hovered_ = false;
 };
 
 } // namespace OHOS::Ace

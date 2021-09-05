@@ -28,6 +28,8 @@ class BubbleComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(BubbleComponent, SoleChildComponent);
 
 public:
+    using StateChangeEvent = std::function<void(bool)>;
+
     explicit BubbleComponent(const RefPtr<Component>& child) : SoleChildComponent(child) {}
     ~BubbleComponent() override = default;
 
@@ -64,10 +66,21 @@ public:
         return weakStack_;
     }
 
+    const StateChangeEvent& GetStateChangeEvent() const
+    {
+        return stateChangeEvent_;
+    }
+
+    void SetStateChangeEvent(StateChangeEvent&& stateChangeEvent)
+    {
+        stateChangeEvent_ = std::move(stateChangeEvent);
+    }
+
 private:
     ComposeId id_;
     RefPtr<PopupParam> popupParam_;
     WeakPtr<StackElement> weakStack_;
+    StateChangeEvent stateChangeEvent_;
 };
 
 } // namespace OHOS::Ace

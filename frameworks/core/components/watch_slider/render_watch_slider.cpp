@@ -112,18 +112,20 @@ void RenderWatchSlider::Update(const RefPtr<Component>& component)
     minIconComponent->SetHeight(ICON_SIZE);
     maxIconComponent->SetHeight(ICON_SIZE);
     maxIconComponent->SetWidth(ICON_SIZE);
+    if (!topIcon_) {
+        topIcon_ = AceType::DynamicCast<RenderImage>(maxIconComponent->CreateRenderNode());
+        topIcon_->Attach(GetContext());
+        AddChild(topIcon_);
+    }
 
-    topIcon_ = AceType::DynamicCast<RenderImage>(maxIconComponent->CreateRenderNode());
-    bottomIcon_ = AceType::DynamicCast<RenderImage>(minIconComponent->CreateRenderNode());
-
-    topIcon_->Attach(GetContext());
-    bottomIcon_->Attach(GetContext());
+    if (!bottomIcon_) {
+        bottomIcon_ = AceType::DynamicCast<RenderImage>(minIconComponent->CreateRenderNode());
+        bottomIcon_->Attach(GetContext());
+        AddChild(bottomIcon_);
+    }
 
     topIcon_->Update(maxIconComponent);
     bottomIcon_->Update(minIconComponent);
-
-    AddChild(topIcon_);
-    AddChild(bottomIcon_);
 
     const auto& rotationController = sliderComponent->GetRotationController();
     if (rotationController) {

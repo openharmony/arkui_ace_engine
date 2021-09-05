@@ -43,6 +43,7 @@ RefPtr<RenderNode> ListItemGroupElement::CreateRenderNode()
             [weakElement = AceType::WeakClaim(this)]() {
                 auto groupElement = weakElement.Upgrade();
                 if (groupElement) {
+                    groupElement->MarkNeedRebuild();
                     groupElement->Rebuild();
                 }
             });
@@ -90,9 +91,9 @@ void ListItemGroupElement::PerformBuild()
     }
 }
 
-void ListItemGroupElement::Apply(const RefPtr<Element>& child)
+void ListItemGroupElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChild)
 {
-    if (!child) {
+    if (!renderChild) {
         LOGE("Element child is null");
         return;
     }
@@ -103,32 +104,15 @@ void ListItemGroupElement::Apply(const RefPtr<Element>& child)
     }
 
     RefPtr<RenderNode> proxy;
-    if (child->GetType() == RENDER_ELEMENT) {
+    auto listItemElement = ListItemElement::GetListItem(renderChild);
+    if (listItemElement) {
+        proxy = listItemElement->GetProxyRenderNode();
+    }
+    if (!proxy) {
         proxy = RenderItemProxy::Create();
-        // Directly attach the RenderNode if child is RenderElement.
-        RefPtr<RenderElement> renderChild = AceType::DynamicCast<RenderElement>(child);
-        if (renderChild) {
-            proxy->AddChild(renderChild->GetRenderNode());
-        }
-    } else if (child->GetType() == COMPOSED_ELEMENT) {
-        auto listItemElement = ListItemElement::GetListItem(child);
-        if (listItemElement) {
-            proxy = listItemElement->GetProxyRenderNode();
-        }
-        if (!proxy) {
-            proxy = RenderItemProxy::Create();
-        }
-        // If child is ComposedElement, just set parent render node.
-        RefPtr<ComposedElement> composeChild = AceType::DynamicCast<ComposedElement>(child);
-        if (composeChild) {
-            composeChild->SetParentRenderNode(proxy);
-        }
     }
 
-    if (!proxy) {
-        LOGE("proxy is not created");
-        return;
-    }
+    proxy->AddChild(renderChild->GetRenderNode());
     proxy->Attach(context_);
     renderNode_->AddChild(proxy);
 }
@@ -300,6 +284,9 @@ void ListItemGroupElement::OnFocus()
     do {
         if (itLastFocusNode_ == focusNodes_.end()) {
             itLastFocusNode_ = focusNodes_.begin();
+            if (itLastFocusNode_ == itFocusNode) {
+                break;
+            }
         }
         auto element = AceType::DynamicCast<Element>(*itLastFocusNode_);
         auto itemElement = ListItemElement::GetListItem(element);

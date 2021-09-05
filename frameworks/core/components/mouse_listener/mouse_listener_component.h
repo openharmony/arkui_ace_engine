@@ -52,8 +52,30 @@ public:
         return onMouseId_;
     }
 
+    void SetOnMouseHoverId(const EventMarker& onMouseHoverId)
+    {
+        onMouseHoverId_ = onMouseHoverId;
+    }
+
+    const EventMarker& GetOnMouseHoverId() const
+    {
+        return onMouseHoverId_;
+    }
+
+    void SetOnMouseHoverExitId(const EventMarker& onMouseHoverExitId)
+    {
+        onMouseHoverExitId_ = onMouseHoverExitId;
+    }
+
+    const EventMarker& GetOnMouseHoverExitId() const
+    {
+        return onMouseHoverExitId_;
+    }
+
 private:
     EventMarker onMouseId_;
+    EventMarker onMouseHoverId_;
+    EventMarker onMouseHoverExitId_;
 };
 
 } // namespace OHOS::Ace

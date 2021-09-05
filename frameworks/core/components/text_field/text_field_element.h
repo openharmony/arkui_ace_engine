@@ -27,6 +27,8 @@ class TextFieldElement : public RenderElement, public FocusNode {
     DECLARE_ACE_TYPE(TextFieldElement, RenderElement, FocusNode);
 
 public:
+    ~TextFieldElement() override;
+
     RefPtr<RenderNode> CreateRenderNode() override;
 
     void Update() override;
@@ -40,11 +42,13 @@ public:
 
 private:
     void CloseKeyboard();
+    void OnSurfaceChanged(int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight);
 
     bool enabled_ = true;
     bool editingMode_ = false;
     bool isNextAction_ = false;
     bool isRequestFocus_ = false;
+    int32_t callbackId_ = 0;
 };
 
 } // namespace OHOS::Ace

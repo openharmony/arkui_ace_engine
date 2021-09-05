@@ -48,6 +48,7 @@ RefPtr<RenderNode> ListItemElement::CreateRenderNode()
 void ListItemElement::Update()
 {
     auto item = AceType::DynamicCast<ListItemComponent>(component_);
+    listItemComponent_ = item;
     if (item) {
         type_ = item->GetType();
         flags_ = item->GetFlags();
@@ -63,10 +64,9 @@ void ListItemElement::Update()
 
 void ListItemElement::PerformBuild()
 {
-    RefPtr<ListItemComponent> component = AceType::DynamicCast<ListItemComponent>(component_);
-    if (component) {
+    if (listItemComponent_) {
         const auto& child = children_.empty() ? nullptr : children_.front();
-        UpdateChild(child, component->GetChild());
+        UpdateChild(child, listItemComponent_->GetChild());
     }
 }
 

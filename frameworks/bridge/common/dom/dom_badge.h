@@ -44,12 +44,7 @@ public:
         return badgeChild_;
     }
 
-    void InitializeStyle() override;
-
 protected:
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
-    bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
-    bool AddSpecializedEvent(int32_t pageId, const std::string& event) override;
     void PrepareSpecializedComponent() override;
     void ResetInitializedStyle() override;
     void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) override;
@@ -57,8 +52,6 @@ protected:
 
 private:
     RefPtr<BadgeComponent> badgeChild_;
-    RefPtr<BadgeTheme> badgeTheme_;
-    EventMarker badgeClickEvent_;
 };
 
 } // namespace OHOS::Ace::Framework

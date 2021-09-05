@@ -21,6 +21,7 @@
 #include "base/geometry/offset.h"
 #include "base/geometry/size.h"
 #include "base/utils/macros.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
 
@@ -62,12 +63,13 @@ public:
 
     std::string ToString() const
     {
-        return std::string("Alignment (")
-            .append(std::to_string(horizontal_))
-            .append(", ")
-            .append(std::to_string(vertical_))
-            .append(")");
+        std::stringstream ss;
+        ss << "Alignment (" << std::fixed << std::setprecision(1) << horizontal_ << ", " << vertical_ << ")";
+        std::string output = ss.str();
+        return output;
     }
+
+    std::string GetAlignmentStr(TextDirection direction) const;
 
 private:
     friend class AlignCreator;

@@ -111,11 +111,7 @@ HWTEST_F(RenderListTest, RenderListTest001, TestSize.Level1)
     layoutParam.SetMaxSize(Size(1000.0, 1000.0));
     renderList_->SetLayoutParam(layoutParam);
     renderList_->PerformLayout();
-    if (renderList_->IsWatch()) {
-        ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Width(), renderList_->GetViewPortSize()));
-    } else {
-        ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Width(), 400.0));
-    }
+    ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Width(), 400.0));
 }
 
 /**
@@ -159,11 +155,8 @@ HWTEST_F(RenderListTest, RenderListTest002, TestSize.Level1)
     layoutParam.SetMaxSize(Size(900.0, 900.0));
     renderList_->SetLayoutParam(layoutParam);
     renderList_->PerformLayout();
-    if (renderList_->IsWatch()) {
-        ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Width(), renderList_->GetViewPortSize()));
-    } else {
-        ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Height(), 500.0));
-    }
+    ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Height(), 500.0));
+
 }
 
 /**
@@ -866,6 +859,7 @@ HWTEST_F(RenderListTest, ListInteractionTest001, TestSize.Level1)
         ASSERT_FALSE(controller == nullptr);
         auto animator = controller->GetAnimator();
         ASSERT_FALSE(animator == nullptr);
+        animator->SetStartDelay(0);
         animator->TriggerFrame(17);
         auto alpha01 = controller->GetAlpha();
         animator->TriggerFrame(57);
@@ -1643,11 +1637,7 @@ HWTEST_F(RenderListTest, AceListExpansion001, TestSize.Level1)
     layoutParam.SetMaxSize(Size(900.0, 900.0));
     renderList_->SetLayoutParam(layoutParam);
     renderList_->PerformLayout();
-    if (renderList_->IsWatch()) {
-        ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Width(), renderList_->GetViewPortSize()));
-    } else {
-        ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Height(), 200.0));
-    }
+    ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Height(), 200.0));
 }
 
 /**
@@ -1697,11 +1687,7 @@ HWTEST_F(RenderListTest, AceListExpansion002, TestSize.Level1)
     renderList_->SetLayoutParam(layoutParam);
     renderList_->GetLayoutManager()->SetExpandAll(true);
     renderList_->PerformLayout();
-    if (renderList_->IsWatch()) {
-        ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Width(), renderList_->GetViewPortSize()));
-    } else {
-        ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Height(), 400.0));
-    }
+    ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Height(), 400.0));
 }
 
 /**
@@ -1751,11 +1737,7 @@ HWTEST_F(RenderListTest, AceListExpansion003, TestSize.Level1)
     renderList_->SetLayoutParam(layoutParam);
     renderList_->GetLayoutManager()->SetExpandAll(true);
     renderList_->PerformLayout();
-    if (renderList_->IsWatch()) {
-        ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Width(), renderList_->GetViewPortSize()));
-    } else {
-        ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Height(), 400.0));
-    }
+    ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Height(), 400.0));
 }
 
 /**
@@ -2017,9 +1999,7 @@ HWTEST_F(RenderListTest, AceListExpansion010, TestSize.Level1)
     layoutParam.SetMaxSize(Size(900.0, 900.0));
     renderList_->SetLayoutParam(layoutParam);
     renderList_->PerformLayout();
-    if (renderList_->IsWatch()) {
-        ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Width(), renderList_->GetViewPortSize()));
-    }
+    ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Height(), 200.0));
 }
 
 /**

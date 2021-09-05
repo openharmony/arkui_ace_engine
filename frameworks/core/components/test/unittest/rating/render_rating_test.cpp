@@ -53,9 +53,9 @@ constexpr uint32_t TEST_DEFAULT_RATING_STAR_NUM = 5;
 constexpr double TEST_DEFAULT_RATING_SCORE = 0.0;
 constexpr double TEST_DEFAULT_RATING_STEP_SIZE = 0.5;
 
-const KeyEvent KEY_EVENT_RIGHT(KeyCode::KEYBOARD_RIGHT, KeyAction::CLICK, 0, 0, 0);
-const KeyEvent KEY_EVENT_LEFT(KeyCode::KEYBOARD_LEFT, KeyAction::CLICK, 0, 0, 0);
-const KeyEvent KEY_EVENT_ENTER(KeyCode::KEYBOARD_ENTER, KeyAction::CLICK, 0, 0, 0);
+const KeyEvent KEY_EVENT_RIGHT(KeyCode::KEYBOARD_RIGHT, KeyAction::CLICK, 0, 0, 0, 0, 0, 0);
+const KeyEvent KEY_EVENT_LEFT(KeyCode::KEYBOARD_LEFT, KeyAction::CLICK, 0, 0, 0, 0, 0, 0);
+const KeyEvent KEY_EVENT_ENTER(KeyCode::KEYBOARD_ENTER, KeyAction::CLICK, 0, 0, 0, 0, 0, 0);
 
 const TouchPoint MOCK_DOWN_TOUCH_EVENT { 10, 648, 20, TouchType::DOWN };
 const TouchPoint MOCK_MOVE_TOUCH_EVENT { 10, 648, 20, TouchType::MOVE };
@@ -98,6 +98,8 @@ RefPtr<ImageCache> ImageCache::Create()
 {
     return AceType::MakeRefPtr<MockImageCache>();
 }
+
+void ImageCache::Purge() {}
 
 bool IsTv()
 {
@@ -583,8 +585,7 @@ HWTEST_F(RatingComponentTest, RatingUpdate003, TestSize.Level1)
      * @tc.expected: step2. Params are as expected.
      */
     // stepsize is limited to starNum on phone (stepsize remains to be 1 on tv)
-    ASSERT_TRUE(renderRating->stepSize_ ==
-                (IsTv() ? TEST_RATING_STEP_SIZE_FOR_TV : TEST_RATING_STAR_NUM));
+    ASSERT_TRUE(renderRating->stepSize_ == (IsTv() ? TEST_RATING_STEP_SIZE_FOR_TV : TEST_RATING_STAR_NUM));
     ASSERT_TRUE(renderRating->starNum_ == TEST_RATING_STAR_NUM);
     ASSERT_TRUE(renderRating->ratingScore_ == TEST_RATING_STAR_NUM); // ratingScore is limited to starNum
 }

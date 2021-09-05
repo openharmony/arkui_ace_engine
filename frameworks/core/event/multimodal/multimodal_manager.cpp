@@ -116,8 +116,15 @@ void MultiModalManager::OpenChannel(const RefPtr<PipelineContext>& context)
             LOGE("fail to get current multi modal scene");
             return;
         }
-        context->GetTaskExecutor()->PostTask(
-            [event, scene]() { scene->OnNotifyMultimodalEvent(event); }, TaskExecutor::TaskType::UI);
+        auto weakScene = AceType::WeakClaim(AceType::RawPtr(scene));
+        context->GetTaskExecutor()->PostSyncTask([event, weakScene]() {
+            auto scene = weakScene.Upgrade();
+            if (scene == nullptr) {
+                LOGE("scene is null!");
+                return;
+            }
+            scene->OnNotifyMultimodalEvent(event);
+        }, TaskExecutor::TaskType::UI);
     };
     subscriber_->RegisterCallback(callback, [weak = WeakClaim(this)]() {
         auto manager = weak.Upgrade();

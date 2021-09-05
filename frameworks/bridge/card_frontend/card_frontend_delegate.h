@@ -32,9 +32,10 @@ class CardFrontendDelegate : public AceType {
 
 public:
     CardFrontendDelegate();
-    ~CardFrontendDelegate() override = default;
+    ~CardFrontendDelegate() override;
     void FireCardEvent(const EventMarker& eventMarker, const std::string& params = "");
     RefPtr<JsAcePage>& CreatePage(int32_t pageId, const std::string& url);
+    RefPtr<JsAcePage>& CreatePage(int32_t pageId, const std::string& url, const WeakPtr<StageElement>& container);
     RefPtr<JsAcePage>& GetPage();
 
     RefPtr<AccessibilityNodeManager> GetJsAccessibilityManager() const

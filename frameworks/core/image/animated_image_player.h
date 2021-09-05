@@ -23,32 +23,45 @@
 #include "base/memory/ace_type.h"
 #include "core/animation/animator.h"
 #include "core/animation/picture_animation.h"
+#include "core/image/image_source_info.h"
+#include "core/image/image_provider.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
-
-class ImageProvider;
 
 class AnimatedImagePlayer : public virtual AceType {
     DECLARE_ACE_TYPE(AnimatedImagePlayer, AceType);
 
 public:
-    AnimatedImagePlayer(const WeakPtr<ImageProvider>& weakProvider, const WeakPtr<PipelineContext>& weakContext,
-        const fml::WeakPtr<flutter::IOManager>& ioManager, const fml::RefPtr<flutter::SkiaUnrefQueue>& gpuQueue,
-        std::unique_ptr<SkCodec> codec)
-        : imageProvider_(weakProvider), context_(weakContext), ioManager_(ioManager), unrefQueue_(gpuQueue),
-          codec_(std::move(codec)), frameCount_(codec_->getFrameCount()),
-          repetitionCount_(codec_->getRepetitionCount()), frameInfos_(codec_->getFrameInfo())
+    AnimatedImagePlayer(
+        ImageSourceInfo source,
+        PaintSuccessCallback successCallback,
+        const WeakPtr<PipelineContext>& weakContext,
+        const fml::WeakPtr<flutter::IOManager>& ioManager,
+        const fml::RefPtr<flutter::SkiaUnrefQueue>& gpuQueue,
+        std::unique_ptr<SkCodec> codec,
+        int32_t dstWidth = -1,
+        int32_t dstHeight = -1)
+        : imageSource_(source), successCallback_(successCallback), context_(weakContext), ioManager_(ioManager),
+          unrefQueue_(gpuQueue), codec_(std::move(codec)), frameCount_(codec_->getFrameCount()),
+          repetitionCount_(codec_->getRepetitionCount()), frameInfos_(codec_->getFrameInfo()),
+          dstWidth_(dstWidth), dstHeight_(dstHeight)
     {
-        auto provider = imageProvider_.Upgrade();
+        LOGD("animated image frameCount_ : %{public}d, repetitionCount_ : %{public}d", frameCount_, repetitionCount_);
         auto context = context_.Upgrade();
-        if (provider && context) {
+        if (context) {
             animator_ = AceType::MakeRefPtr<Animator>(context);
             auto pictureAnimation = AceType::MakeRefPtr<PictureAnimation<int32_t>>();
             float totalFrameDuration = 0.0f;
             for (int32_t index = 0; index < frameCount_; index++) {
+                LOGD("frame[%{public}d] duration is %{public}d", index, frameInfos_[index].fDuration);
+                // if frame duration is 0, set this frame duration as 100ms
+                if (frameInfos_[index].fDuration <= 0) {
+                    frameInfos_[index].fDuration = 100;
+                }
                 totalFrameDuration += frameInfos_[index].fDuration;
             }
+            LOGD("animatied image total duration: %{public}f", totalFrameDuration);
             for (int32_t index = 0; index < frameCount_; index++) {
                 pictureAnimation->AddPicture(
                     static_cast<float>(frameInfos_[index].fDuration) / totalFrameDuration, index);
@@ -77,7 +90,8 @@ private:
     sk_sp<SkImage> DecodeFrameImage(const int32_t& index);
     static bool CopyTo(SkBitmap* dst, SkColorType dstColorType, const SkBitmap& src);
 
-    WeakPtr<ImageProvider> imageProvider_;
+    ImageSourceInfo imageSource_;
+    PaintSuccessCallback successCallback_;
     WeakPtr<PipelineContext> context_;
     fml::WeakPtr<flutter::IOManager> ioManager_;
     fml::RefPtr<flutter::SkiaUnrefQueue> unrefQueue_;
@@ -88,6 +102,8 @@ private:
     std::unique_ptr<SkBitmap> lastRequiredBitmap_;
     int32_t requiredFrameIndex_ = -1;
     RefPtr<Animator> animator_;
+    int32_t dstWidth_ = -1;
+    int32_t dstHeight_ = -1;
 };
 
 } // namespace OHOS::Ace

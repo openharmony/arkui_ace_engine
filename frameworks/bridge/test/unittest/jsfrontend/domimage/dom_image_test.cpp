@@ -60,8 +60,7 @@ HWTEST_F(DomImageTest, SetImageAttributes001, TestSize.Level1)
     /**
      * @tc.steps: step1. the json string of DomImage with all attributes set, object-fit is "none".
      */
-    const std::string jsonImageStr = ""
-                                     "{                                            "
+    const std::string jsonImageStr = "{                                            "
                                      "  \"tag\": \"image\",                        "
                                      "  \"attr\": [{                               "
                                      "                \"src\" : \"/example/src\"   "
@@ -73,7 +72,6 @@ HWTEST_F(DomImageTest, SetImageAttributes001, TestSize.Level1)
                                      "                \"objectFit\":\"none\"       "
                                      "          }],                                "
                                      "  \"event\": [ \"error\", \"complete\" ]     "
-                                     "          }]                                 "
                                      "}";
 
     /**
@@ -90,8 +88,8 @@ HWTEST_F(DomImageTest, SetImageAttributes001, TestSize.Level1)
     ASSERT_TRUE(imageComponent->GetSrc() == IMAGE_SRC_VALUE);
     ASSERT_TRUE(imageComponent->GetAlt() == IMAGE_ALT_VALUE);
     ASSERT_TRUE(imageComponent->GetImageFit() == IMAGE_FIT_NONE);
-    ASSERT_TRUE(imageComponent->GetLoadSuccessEventId() == std::to_string(domNodeRoot->GetNodeId()));
-    ASSERT_TRUE(imageComponent->GetLoadFailEventId() == std::to_string(domNodeRoot->GetNodeId()));
+    ASSERT_TRUE(imageComponent->GetLoadSuccessEvent() == std::to_string(domNodeRoot->GetNodeId()));
+    ASSERT_TRUE(imageComponent->GetLoadFailEvent() == std::to_string(domNodeRoot->GetNodeId()));
 }
 
 /**
@@ -128,8 +126,8 @@ HWTEST_F(DomImageTest, SetImageAttributes002, TestSize.Level1)
     ASSERT_TRUE(imageComponent->GetSrc().empty());
     ASSERT_TRUE(imageComponent->GetAlt().empty());
     ASSERT_TRUE(imageComponent->GetImageFit() == IMAGE_FIT_COVER);
-    ASSERT_TRUE(imageComponent->GetLoadSuccessEventId().IsEmpty());
-    ASSERT_TRUE(imageComponent->GetLoadFailEventId().IsEmpty());
+    ASSERT_TRUE(imageComponent->GetLoadSuccessEvent().IsEmpty());
+    ASSERT_TRUE(imageComponent->GetLoadFailEvent().IsEmpty());
 }
 
 /**

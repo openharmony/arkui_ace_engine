@@ -57,15 +57,15 @@ namespace {
 
 #define CHECK_RETURN(status, ret)                                      \
     do {                                                               \
-        if (status > U_ZERO_ERROR) {                                   \
+        if ((status) > U_ZERO_ERROR) {                                   \
             LOGE("status = %{public}d", static_cast<int32_t>(status)); \
-            return ret;                                                \
+            return (ret);                                                \
         }                                                              \
     } while (0)
 
 #define CHECK_NO_RETURN(status)                                        \
     do {                                                               \
-        if (status > U_ZERO_ERROR) {                                   \
+        if ((status) > U_ZERO_ERROR) {                                   \
             LOGE("status = %{public}d", static_cast<int32_t>(status)); \
         }                                                              \
     } while (0)
@@ -74,6 +74,7 @@ const char JSON_PATH_CARVE = '.';
 const char DEFAULT_LANGUAGE[] = "en-US";
 constexpr uint32_t SEXAGENARY_CYCLE_SIZE = 60;
 constexpr uint32_t GUIHAI_YEAR_RECENT = 3;
+constexpr uint32_t SECONDS_IN_HOUR = 3600;
 
 const char CHINESE_LEAP[] = u8"\u95f0";
 const char CHINESE_FIRST[] = u8"\u521d";
@@ -209,7 +210,7 @@ void Localization::SetLocaleImpl(const std::string& language, const std::string&
     }
     languageTag_.append("-").append(countryOrRegion);
     fontLocale_ = languageTag_;
-    // Smiple chinese
+    // Simple chinese
     if (languageTag_ == "zh-Hans-CN") {
         languageTag_ = "zh-CN";
         fontLocale_ = "";
@@ -257,7 +258,7 @@ const std::string Localization::FormatDuration(uint32_t duration, bool needShowH
     WaitingForInit();
     UErrorCode status = U_ZERO_ERROR;
     // duration greater than 1 hour, use hh:mm:ss;
-    if (!needShowHour && duration > 3600) {
+    if (!needShowHour && duration > SECONDS_IN_HOUR) {
         needShowHour = true;
     }
     const char* engTimeFormat = needShowHour ? "hh:mm:ss" : "mm:ss";
@@ -771,7 +772,7 @@ std::string Localization::GetErrorDescription(const std::string& errorIndex)
         return "";
     }
 
-    if (localJsonError && localJsonError->Contains(errorIndex)) {
+    if (localJsonError->Contains(errorIndex)) {
         localJsonError = localJsonError->GetValue(errorIndex);
     } else {
         LOGE("read error json failed. error path: %{private}s.", errorIndex.c_str());
@@ -890,17 +891,52 @@ void Localization::SetLocale(const std::string& language, const std::string& cou
 {
     if (instance_) {
         instance_->HandleOnChange();
+        instance_->HandleOnMymrChange(script == "Qaag");
     }
     std::shared_ptr<Localization> instance;
     {
         std::lock_guard<std::mutex> lock(mutex_);
         if (!firstInstance_ || !instance_) {
-            instance_ = std::make_shared<Localization>();
+            if (instance_) {
+                auto onMymrChange = instance_->GetOnMymrChange();
+                instance_ = std::make_shared<Localization>();
+                instance_->SetOnMymrChange(onMymrChange);
+            } else {
+                instance_ = std::make_shared<Localization>();
+            }
         }
         firstInstance_ = false;
         instance = instance_;
     }
     instance->SetLocaleImpl(language, countryOrRegion, script, selectLanguage, keywordsAndValues);
+}
+
+std::string Localization::ComputeScript(const std::string& language, const std::string& region)
+{
+    icu::Locale locale(language.c_str(), region.c_str());
+    UErrorCode status = U_ZERO_ERROR;
+    locale.addLikelySubtags(status);
+    if (status != U_ZERO_ERROR) {
+        return std::string();
+    }
+    return locale.getScript();
+}
+
+void Localization::ParseLocaleTag(
+    const std::string& localeTag, std::string& language, std::string& script, std::string& region, bool needAddSubtags)
+{
+    UErrorCode status = U_ZERO_ERROR;
+    icu::Locale locale = icu::Locale::forLanguageTag(icu::StringPiece(localeTag.c_str()), status);
+    if (needAddSubtags) {
+        locale.addLikelySubtags(status);
+    }
+    if (status != U_ZERO_ERROR) {
+        LOGE("This localeTag is not valid.");
+        return;
+    }
+    language = locale.getLanguage();
+    script = locale.getScript();
+    region = locale.getCountry();
 }
 
 } // namespace OHOS::Ace

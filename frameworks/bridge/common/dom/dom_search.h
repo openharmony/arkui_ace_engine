@@ -54,8 +54,6 @@ protected:
 private:
     bool hasBoxRadius_ = false;
     TextStyle textStyle_;
-    EventMarker changeEvent_;
-    EventMarker submitEvent_;
     RefPtr<SearchComponent> searchChild_;
     RefPtr<TextFieldComponent> textFieldComponent_;
     bool isPaddingChanged_ = true;

@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_DECLARATIVE_FRONTEND_ENGINE_BINDINGS_DEFINES_H
 #define FOUNDATION_ACE_FRAMEWORKS_DECLARATIVE_FRONTEND_ENGINE_BINDINGS_DEFINES_H
 
-enum class JavascriptEngine { NONE, QUICKJS, V8 };
+#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
+
+enum class JavascriptEngine { NONE, QUICKJS, V8, ARK };
 
 #ifdef USE_QUICKJS_ENGINE
 
@@ -64,8 +66,33 @@ using ExoticIsArrayCallback = int;
 
 constexpr const JavascriptEngine cCurrentJSEngine = JavascriptEngine::V8;
 
+#elif USE_ARK_ENGINE
+
+#include "frameworks/bridge/declarative_frontend/engine/jsi/panda_dummy/include/jsnapi.h"
+
+using BindingTarget = panda::Local<panda::ObjectRef>;
+using FunctionCallback = panda::Local<panda::JSValueRef>(*)(
+    panda::EcmaVM*, panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef> [], int32_t, void*);
+template<typename T>
+using MemberFunctionCallback = panda::Local<panda::JSValueRef>(T::*)(
+    panda::EcmaVM*, panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef> [], int32_t, void*);
+using ExoticGetterCallback = int;
+using ExoticSetterCallback = int;
+using ExoticHasPropertyCallback = int;
+using ExoticIsArrayCallback = int;
+
+constexpr const JavascriptEngine cCurrentJSEngine = JavascriptEngine::ARK;
+
 #else
 #error "No engine selected"
 #endif
+
+using JSFunctionCallback = void (*)(const OHOS::Ace::Framework::JSCallbackInfo&);
+template<typename T>
+using JSMemberFunctionCallback = void (T::*)(const OHOS::Ace::Framework::JSCallbackInfo&);
+template<typename T>
+using JSDestructorCallback = void (*)(T* instance);
+template<typename T>
+using JSGCMarkCallback = void (*)(T* instance, const OHOS::Ace::Framework::JSGCMarkCallbackInfo&);
 
 #endif

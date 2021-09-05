@@ -158,7 +158,9 @@ void DOMSlider::PrepareSpecializedComponent()
     max_ = (max_ < min) ? min : max_;
     sliderChild_->SetMaxValue(max_);
     sliderChild_->SetMinValue(min_);
-    sliderChild_->SetDisable(GetDisable());
+    if (declaration_) {
+        sliderChild_->SetDisable(declaration_->IsDisabled());
+    }
     if (val_ < min_ || val_ > max_) {
         val_ = (val_ < min_) ? min_ : max_;
     }

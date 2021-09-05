@@ -23,6 +23,7 @@ group("ace_packages") {
 
   # core library for Ability Cross-platform Environment(ACE) JS
   deps += [
+    "$ace_root/adapter/ohos/interfaces/napi/kits:napi_group",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "adapter/common/cpp:libace",
   ]
@@ -33,9 +34,11 @@ group("ace_packages") {
 
   if (!is_wearable_product) {
     deps += [
+      "adapter/common/cpp:libace_engine_ark",
       "adapter/common/cpp:libace_engine_qjs",
       "adapter/common/cpp:libace_engine_qjs_debug",
-      "adapter/common/cpp:libace_engine_declarative_qjs"
+      "adapter/common/cpp:libace_engine_declarative_qjs",
+      "adapter/common/cpp:libace_engine_pa_qjs"
     ]
   }
 }
@@ -102,6 +105,14 @@ config("ace_config") {
     cflags += [ "-std=c++17" ]
     defines += [ "_USE_MATH_DEFINES" ]
   }
+
+  if (enable_worker) {
+    defines += [ "ENABLE_WORKER" ]
+  }
+
+  if (enable_ace_debug) {
+    defines += [ "ACE_DEBUG" ]
+  }
 }
 
 config("ace_test_config") {
@@ -110,13 +121,10 @@ config("ace_test_config") {
     "$ace_root",
     "$ace_root/frameworks",
     "$root_out_dir/ace/framework",
+    "//base/global/resmgr_standard/interfaces/innerkits/include",
+    "//third_party/icu/icu4c/source/common",
+    "//third_party/flutter/engine",
   ]
-  if (is_standard_system) {
-    include_dirs += [
-      "//base/global/resmgr_standard/interfaces/innerkits/include",
-      "//third_party/icu/icu4c/source/common",
-    ]
-  }
   defines = ace_common_defines
   defines += ace_ohos_defines
 

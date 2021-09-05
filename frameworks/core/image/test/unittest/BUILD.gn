@@ -22,6 +22,7 @@ ohos_unittest("ImageCacheTest") {
   module_out_path = module_output_path
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_node.cpp",
+    "$ace_root/frameworks/core/common/ace_application_info.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
     "$ace_root/frameworks/core/common/watch_dog.cpp",
@@ -42,6 +43,7 @@ ohos_unittest("ImageCacheTest") {
     "$ace_root/frameworks/core/components/stage/stage_element.cpp",
     "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
+    "$ace_root/frameworks/core/components/tween/tween_component.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
     "$ace_root/frameworks/core/event/multimodal/multimodal_manager.cpp",
     "$ace_root/frameworks/core/event/multimodal/multimodal_scene.cpp",
@@ -49,6 +51,7 @@ ohos_unittest("ImageCacheTest") {
     "$ace_root/frameworks/core/gestures/drag_recognizer.cpp",
     "$ace_root/frameworks/core/image/flutter_image_cache.cpp",
     "$ace_root/frameworks/core/image/image_cache.cpp",
+    "$ace_root/frameworks/core/image/image_loader.cpp",
     "$ace_root/frameworks/core/image/image_provider.cpp",
     "$ace_root/frameworks/core/pipeline/base/component_group_element.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",
@@ -58,30 +61,26 @@ ohos_unittest("ImageCacheTest") {
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
     "$ace_root/frameworks/core/pipeline/base/sole_child_element.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
     "image_cache_test.cpp",
   ]
 
   configs = [
     ":config_image_cache_test",
     "$ace_root:ace_test_config",
-    "$flutter_root:flutter_config",
-    "$flutter_root:icu_config_ohos",
+    "$ace_flutter_engine_root:flutter_config",
+    "$ace_flutter_engine_root:icu_config_ohos",
   ]
 
   deps = [
+    "$ace_flutter_engine_root:ace_skia_ohos",
+    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+    "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
 
   if (is_standard_system) {
-    deps += [
-      "//third_party/curl:curl",
-      "$ace_root/frameworks/base:ace_base_ohos",
-      "$flutter_root:ace_skia_ohos",
-      "$flutter_root:third_party_flutter_engine_ohos",
-    ]
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -95,7 +94,8 @@ config("config_image_cache_test") {
 ohos_unittest("ImageProviderTest") {
   module_out_path = module_output_path
   sources = [
-    "$ace_root/adapter/preview/osal/download_manager.cpp",
+    "$ace_root/frameworks/core/accessibility/accessibility_node.cpp",
+    "$ace_root/frameworks/core/common/ace_application_info.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/focus_animation_manager.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
@@ -118,6 +118,8 @@ ohos_unittest("ImageProviderTest") {
     "$ace_root/frameworks/core/components/stage/stage_element.cpp",
     "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
     "$ace_root/frameworks/core/components/test/unittest/image/image_test_utils.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
+    "$ace_root/frameworks/core/components/tween/tween_component.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
     "$ace_root/frameworks/core/event/multimodal/multimodal_manager.cpp",
     "$ace_root/frameworks/core/event/multimodal/multimodal_scene.cpp",
@@ -125,7 +127,10 @@ ohos_unittest("ImageProviderTest") {
     "$ace_root/frameworks/core/gestures/drag_recognizer.cpp",
     "$ace_root/frameworks/core/image/flutter_image_cache.cpp",
     "$ace_root/frameworks/core/image/image_cache.cpp",
+    "$ace_root/frameworks/core/image/image_loader.cpp",
     "$ace_root/frameworks/core/image/image_provider.cpp",
+    "$ace_root/frameworks/core/image/image_source_info.cpp",
+    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/pipeline/base/component_group_element.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_element.cpp",
@@ -134,18 +139,23 @@ ohos_unittest("ImageProviderTest") {
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
     "$ace_root/frameworks/core/pipeline/base/sole_child_element.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
+
+    # test source
+    "$ace_root/frameworks/core/mock/mock_download_manager.cpp",
     "image_provider_test.cpp",
   ]
 
   configs = [
     ":config_image_provider_test",
     "$ace_root:ace_test_config",
-    "$flutter_root:flutter_config",
-    "$flutter_root:icu_config_ohos",
+    "$ace_flutter_engine_root:flutter_config",
+    "$ace_flutter_engine_root:icu_config_ohos",
   ]
 
   deps = [
+    "$ace_flutter_engine_root:ace_skia_ohos",
+    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+    "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
@@ -153,12 +163,7 @@ ohos_unittest("ImageProviderTest") {
 
   if (is_standard_system) {
     configs += [ "//third_party/curl:curl_config" ]
-    deps += [
-      "//third_party/curl:curl",
-      "$ace_root/frameworks/base:ace_base_ohos",
-      "$flutter_root:ace_skia_ohos",
-      "$flutter_root:third_party_flutter_engine_ohos",
-    ]
+    deps += [ "//third_party/curl:curl" ]
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }

@@ -35,6 +35,7 @@ namespace OHOS::Ace::Framework {
 
 enum class JsErrorType {
     JS_CRASH = 0,
+    JS_CALLBACK_ERROR,
     FIRE_EVENT_ERROR,
     EVAL_BUFFER_ERROR,
     READ_OBJECT_ERROR,
@@ -73,7 +74,7 @@ private:
     const char* stringValue_ = nullptr;
 };
 
-class QjsUtils {
+class QJSUtils {
 public:
     using FilterFunction = bool (*)(std::string);
 
@@ -84,10 +85,15 @@ public:
     static JSValue Call(JSContext* ctx, JSValueConst funcObj, JSValueConst thisObj, int32_t argc, JSValueConst* argv);
     static JSValue Eval(JSContext* ctx, const char* input, size_t inputLen, const char* filename, int32_t evalFlags);
     static JSValue GetPropertyStr(JSContext* ctx, JSValueConst thisObj, const char* prop);
-    static int32_t JsGetArrayLength(JSContext* ctx, JSValueConst arrayObject);
     static void JsStdDumpErrorAce(JSContext* ctx, JsErrorType errorType = JsErrorType::JS_CRASH, int32_t instanceId = 0,
         const char* pageUrl = nullptr, const RefPtr<JsAcePage>& page = nullptr);
+    static void ExtractEachInfo(const std::string& tempStack, std::vector<std::string>& res);
+    static void GetPosInfo(const std::string& temp, int32_t start, std::string& line);
+    static std::string GetSourceInfo(const std::string& line, const RefPtr<RevSourceMap>& pageMap,
+        const RefPtr<RevSourceMap>& appMap, bool isAppPage);
     static void JsDumpMemoryStats(JSContext* ctx);
+    static int32_t JsGetArrayLength(JSContext* ctx, JSValueConst arrayObject);
+
     static std::vector<std::string> GetObjectKeys(JSContext* ctx, JSValueConst obj, int flags = JS_GPN_STRING_MASK);
     static std::vector<std::string> GetObjectKeys(JSValueConst obj, int flags = JS_GPN_STRING_MASK);
     static std::vector<std::string> GetFilteredObjectKeys(
@@ -107,7 +113,7 @@ public:
 class QJSContext {
 public:
     /**
-     * @brief A class that acquires a JSContext to be retrieved further in a call stack by QJSContext::current().
+     * @brief A class that acquires a JSContext to be retrieved further in a call stack by QJSContext::Current().
      *
      * This is used to relieve the QJS embedder of passing JSContext* as an argument.
      *
@@ -131,7 +137,7 @@ public:
      *
      * @return JSContext*
      */
-    static JSContext* current();
+    static JSContext* Current();
 
     static void* operator new(size_t) = delete;
     static void* operator new[](size_t) = delete;
@@ -141,13 +147,17 @@ public:
     void operator=(const QJSContext&) = delete;
 
 private:
+#ifdef USE_CLANG_COVERAGE
+    static std::stack<JSContext*> s_qjsContextStack;
+#else
     static thread_local std::stack<JSContext*> s_qjsContextStack;
+#endif
 };
 
-class QjsHandleScope {
+class QJSHandleScope {
 public:
-    QjsHandleScope(JSContext* ctx);
-    ~QjsHandleScope();
+    QJSHandleScope(JSContext* ctx);
+    ~QJSHandleScope();
 
     static void* operator new(size_t) = delete;
     static void* operator new[](size_t) = delete;
@@ -155,8 +165,12 @@ public:
     static void operator delete[](void*) = delete;
 
 private:
-    friend class QjsUtils;
-    static thread_local std::stack<QjsHandleScope*> qjsHandleScopeStack;
+    friend class QJSUtils;
+    friend class QJSValue;
+    static std::stack<QJSHandleScope*> qjsHandleScopeStack;
+
+    static QJSHandleScope* GetCurrent();
+    void Push(JSValue val);
 
     int32_t scopeId_ = 0;
     std::vector<JSValueConst> jsValues_;

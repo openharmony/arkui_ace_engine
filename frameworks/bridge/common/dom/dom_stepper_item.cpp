@@ -44,6 +44,10 @@ bool DOMStepperItem::SetSpecializedStyle(const std::pair<std::string, std::strin
             [](const std::string& value, DOMStepperItem& stepperItem) {
               stepperItem.textStyle_.SetAllowScale(StringToBool(value));
             } },
+        { DOM_STEPPER_TEXT_COLOR,
+            [](const std::string& value, DOMStepperItem& stepperItem) {
+              stepperItem.textStyle_.SetTextColor(stepperItem.ParseColor(value));
+            } },
         { DOM_FLEX_DIRECTION, [](const std::string& val,
             DOMStepperItem& stepperItem) { stepperItem.flexDirection_ = ConvertStrToFlexDirection(val); } },
         { DOM_STEPPER_FONT_FAMILY,
@@ -64,10 +68,6 @@ bool DOMStepperItem::SetSpecializedStyle(const std::pair<std::string, std::strin
             } },
         { DOM_JUSTIFY_CONTENT, [](const std::string& val,
             DOMStepperItem& stepperItem) { stepperItem.flexMainAlign_ = ConvertStrToFlexAlign(val); } },
-        { DOM_STEPPER_TEXT_COLOR,
-            [](const std::string& value, DOMStepperItem& stepperItem) {
-              stepperItem.textStyle_.SetTextColor(stepperItem.ParseColor(value));
-            } },
         { DOM_STEPPER_TEXT_DECORATION,
             [](const std::string& value, DOMStepperItem& stepperItem) {
               stepperItem.textStyle_.SetTextDecoration(ConvertStrToTextDecoration(value));

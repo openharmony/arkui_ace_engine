@@ -34,6 +34,12 @@ public:
         y_ = y;
     }
 
+    void SetStaticOffset(double x, double y)
+    {
+        staticX_ = x;
+        staticY_ = y;
+    }
+
     void AddToScene(SceneBuilder& builder, double x, double y) override;
 
     void Dump() override;
@@ -41,6 +47,9 @@ public:
 protected:
     double x_ = 0.0;
     double y_ = 0.0;
+
+    double staticX_ = 0.0;
+    double staticY_ = 0.0;
 };
 
 } // namespace OHOS::Ace::Flutter

@@ -66,21 +66,21 @@ public:
 
     void SetUp() override
     {
-        ImageProperties image1 = { "image1", "220", "220", "100", "100" };
-        ImageProperties image2 = { "image2", "240", "240", "110", "110" };
-        ImageProperties image3 = { "image3", "260", "260", "120", "120" };
+        ImageProperties image1 = { "image1", Dimension(220), Dimension(220), Dimension(100), Dimension(100) };
+        ImageProperties image2 = { "image2", Dimension(240), Dimension(240), Dimension(110), Dimension(110) };
+        ImageProperties image3 = { "image3", Dimension(260), Dimension(260), Dimension(120), Dimension(120) };
         g_images.emplace_back(image1);
         g_images.emplace_back(image2);
         g_images.emplace_back(image3);
-        ImageProperties secondImage1 = { "image1", "220", "220", "100", "100", "30" };
-        ImageProperties secondImage2 = { "image2", "240", "240", "110", "110", "30" };
-        ImageProperties secondImage3 = { "image3", "260", "260", "120", "120", "30" };
+        ImageProperties secondImage1 = { "image1", Dimension(220), Dimension(220), Dimension(100), Dimension(100), 30 };
+        ImageProperties secondImage2 = { "image2", Dimension(240), Dimension(240), Dimension(110), Dimension(110), 30 };
+        ImageProperties secondImage3 = { "image3", Dimension(260), Dimension(260), Dimension(120), Dimension(120), 30 };
         g_secondImages.emplace_back(secondImage1);
         g_secondImages.emplace_back(secondImage2);
         g_secondImages.emplace_back(secondImage3);
-        ImageProperties thirdImage1 = { "image1", "220", "220", "100", "100" };
-        ImageProperties thirdImage2 = { "image2", "240", "240", "110", "110", "30" };
-        ImageProperties thirdImage3 = { "image3", "260", "260", "120", "120", "30" };
+        ImageProperties thirdImage1 = { "image1", Dimension(220), Dimension(220), Dimension(100), Dimension(100) };
+        ImageProperties thirdImage2 = { "image2", Dimension(240), Dimension(240), Dimension(110), Dimension(110), 30 };
+        ImageProperties thirdImage3 = { "image3", Dimension(260), Dimension(260), Dimension(120), Dimension(120), 30 };
         g_thirdImages.emplace_back(thirdImage1);
         g_thirdImages.emplace_back(thirdImage2);
         g_thirdImages.emplace_back(thirdImage3);
@@ -161,7 +161,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest001, TestSize.Level1)
         imageAnimator->SetIsReverse(false);
         imageAnimator->SetIsFixedSize(false);
         imageAnimator->SetImageProperties(g_images);
-        imageAnimator->SetAnimator(AceType::MakeRefPtr<Animator>());
     };
     InitImageAnimatorComponent();
 
@@ -171,9 +170,11 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest001, TestSize.Level1)
      */
     auto box = imageAnimatorElement_->GetFirstChild();
     EXPECT_TRUE(box);
-    auto renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    auto render = AceType::DynamicCast<MockRenderBox>(renderBox);
+    auto image = box->GetFirstChild();
+    EXPECT_TRUE(image);
+    auto renderImage = image->GetRenderNode();
+    EXPECT_TRUE(renderImage);
+    auto render = AceType::DynamicCast<MockRenderImage>(renderImage);
     EXPECT_TRUE(render);
     EXPECT_EQ(220, render->GetWidth());
     EXPECT_EQ(220, render->GetHeight());
@@ -183,12 +184,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest001, TestSize.Level1)
      * @tc.expected: step3. value is correct
      */
     platformWindowRaw_->TriggerOneFrame();
-    box = imageAnimatorElement_->GetFirstChild();
-    EXPECT_TRUE(box);
-    renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    render = AceType::DynamicCast<MockRenderBox>(renderBox);
-    EXPECT_TRUE(render);
     EXPECT_EQ(240, render->GetWidth());
     EXPECT_EQ(240, render->GetHeight());
 }
@@ -213,7 +208,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest002, TestSize.Level1)
         // go back.
         imageAnimator->SetIsReverse(true);
         imageAnimator->SetImageProperties(g_images);
-        imageAnimator->SetAnimator(AceType::MakeRefPtr<Animator>());
     };
     InitImageAnimatorComponent();
 
@@ -223,9 +217,11 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest002, TestSize.Level1)
      */
     auto box = imageAnimatorElement_->GetFirstChild();
     EXPECT_TRUE(box);
-    auto renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    auto render = AceType::DynamicCast<MockRenderBox>(renderBox);
+    auto image = box->GetFirstChild();
+    EXPECT_TRUE(image);
+    auto renderImage = image->GetRenderNode();
+    EXPECT_TRUE(renderImage);
+    auto render = AceType::DynamicCast<MockRenderImage>(renderImage);
     EXPECT_TRUE(render);
     EXPECT_EQ(260, render->GetWidth());
     EXPECT_EQ(260, render->GetHeight());
@@ -235,12 +231,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest002, TestSize.Level1)
      * @tc.expected: step3. value is correct
      */
     platformWindowRaw_->TriggerOneFrame();
-    box = imageAnimatorElement_->GetFirstChild();
-    EXPECT_TRUE(box);
-    renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    render = AceType::DynamicCast<MockRenderBox>(renderBox);
-    EXPECT_TRUE(render);
     EXPECT_EQ(240, render->GetWidth());
     EXPECT_EQ(240, render->GetHeight());
 }
@@ -265,7 +255,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest003, TestSize.Level1)
         imageAnimator->SetIsReverse(false);
         imageAnimator->SetIsFixedSize(false);
         imageAnimator->SetImageProperties(g_images);
-        imageAnimator->SetAnimator(AceType::MakeRefPtr<Animator>());
     };
     InitImageAnimatorComponent();
 
@@ -276,9 +265,11 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest003, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     auto box = imageAnimatorElement_->GetFirstChild();
     EXPECT_TRUE(box);
-    auto renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    auto render = AceType::DynamicCast<MockRenderBox>(renderBox);
+    auto image = box->GetFirstChild();
+    EXPECT_TRUE(image);
+    auto renderImage = image->GetRenderNode();
+    EXPECT_TRUE(renderImage);
+    auto render = AceType::DynamicCast<MockRenderImage>(renderImage);
     EXPECT_TRUE(render);
     EXPECT_EQ(240, render->GetWidth());
     EXPECT_EQ(240, render->GetHeight());
@@ -289,12 +280,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest003, TestSize.Level1)
      */
     platformWindowRaw_->TriggerOneFrame();
     platformWindowRaw_->TriggerOneFrame();
-    box = imageAnimatorElement_->GetFirstChild();
-    EXPECT_TRUE(box);
-    renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    render = AceType::DynamicCast<MockRenderBox>(renderBox);
-    EXPECT_TRUE(render);
     EXPECT_EQ(240, render->GetWidth());
     EXPECT_EQ(240, render->GetHeight());
 }
@@ -318,7 +303,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest004, TestSize.Level1)
         imageAnimator->SetIsReverse(false);
         imageAnimator->SetIsFixedSize(false);
         imageAnimator->SetImageProperties(g_secondImages);
-        imageAnimator->SetAnimator(AceType::MakeRefPtr<Animator>());
     };
     InitImageAnimatorComponent();
 
@@ -328,9 +312,11 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest004, TestSize.Level1)
      */
     auto box = imageAnimatorElement_->GetFirstChild();
     EXPECT_TRUE(box);
-    auto renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    auto render = AceType::DynamicCast<MockRenderBox>(renderBox);
+    auto image = box->GetFirstChild();
+    EXPECT_TRUE(image);
+    auto renderImage = image->GetRenderNode();
+    EXPECT_TRUE(renderImage);
+    auto render = AceType::DynamicCast<MockRenderImage>(renderImage);
     EXPECT_TRUE(render);
     EXPECT_EQ(220, render->GetWidth());
     EXPECT_EQ(220, render->GetHeight());
@@ -340,12 +326,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest004, TestSize.Level1)
      * @tc.expected: step3. value is correct
      */
     platformWindowRaw_->TriggerOneFrame();
-    box = imageAnimatorElement_->GetFirstChild();
-    EXPECT_TRUE(box);
-    renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    render = AceType::DynamicCast<MockRenderBox>(renderBox);
-    EXPECT_TRUE(render);
     EXPECT_EQ(220, render->GetWidth());
     EXPECT_EQ(220, render->GetHeight());
 }
@@ -370,7 +350,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest005, TestSize.Level1)
         // go back.
         imageAnimator->SetIsReverse(true);
         imageAnimator->SetImageProperties(g_secondImages);
-        imageAnimator->SetAnimator(AceType::MakeRefPtr<Animator>());
     };
     InitImageAnimatorComponent();
 
@@ -380,9 +359,11 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest005, TestSize.Level1)
      */
     auto box = imageAnimatorElement_->GetFirstChild();
     EXPECT_TRUE(box);
-    auto renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    auto render = AceType::DynamicCast<MockRenderBox>(renderBox);
+    auto image = box->GetFirstChild();
+    EXPECT_TRUE(image);
+    auto renderImage = image->GetRenderNode();
+    EXPECT_TRUE(renderImage);
+    auto render = AceType::DynamicCast<MockRenderImage>(renderImage);
     EXPECT_TRUE(render);
     EXPECT_EQ(260, render->GetWidth());
     EXPECT_EQ(260, render->GetHeight());
@@ -392,12 +373,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest005, TestSize.Level1)
      * @tc.expected: step3. value is correct
      */
     platformWindowRaw_->TriggerOneFrame();
-    box = imageAnimatorElement_->GetFirstChild();
-    EXPECT_TRUE(box);
-    renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    render = AceType::DynamicCast<MockRenderBox>(renderBox);
-    EXPECT_TRUE(render);
     EXPECT_EQ(260, render->GetWidth());
     EXPECT_EQ(260, render->GetHeight());
 }
@@ -422,7 +397,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest006, TestSize.Level1)
         imageAnimator->SetIsReverse(false);
         imageAnimator->SetIsFixedSize(false);
         imageAnimator->SetImageProperties(g_secondImages);
-        imageAnimator->SetAnimator(AceType::MakeRefPtr<Animator>());
     };
     InitImageAnimatorComponent();
 
@@ -433,9 +407,11 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest006, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     auto box = imageAnimatorElement_->GetFirstChild();
     EXPECT_TRUE(box);
-    auto renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    auto render = AceType::DynamicCast<MockRenderBox>(renderBox);
+    auto image = box->GetFirstChild();
+    EXPECT_TRUE(image);
+    auto renderImage = image->GetRenderNode();
+    EXPECT_TRUE(renderImage);
+    auto render = AceType::DynamicCast<MockRenderImage>(renderImage);
     EXPECT_TRUE(render);
     EXPECT_EQ(220, render->GetWidth());
     EXPECT_EQ(220, render->GetHeight());
@@ -446,12 +422,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest006, TestSize.Level1)
      */
     platformWindowRaw_->TriggerOneFrame();
     platformWindowRaw_->TriggerOneFrame();
-    box = imageAnimatorElement_->GetFirstChild();
-    EXPECT_TRUE(box);
-    renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    render = AceType::DynamicCast<MockRenderBox>(renderBox);
-    EXPECT_TRUE(render);
     EXPECT_EQ(240, render->GetWidth());
     EXPECT_EQ(240, render->GetHeight());
 }
@@ -475,7 +445,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest007, TestSize.Level1)
         imageAnimator->SetIsReverse(false);
         imageAnimator->SetIsFixedSize(false);
         imageAnimator->SetImageProperties(g_thirdImages);
-        imageAnimator->SetAnimator(AceType::MakeRefPtr<Animator>());
     };
     InitImageAnimatorComponent();
 
@@ -485,9 +454,11 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest007, TestSize.Level1)
      */
     auto box = imageAnimatorElement_->GetFirstChild();
     EXPECT_TRUE(box);
-    auto renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    auto render = AceType::DynamicCast<MockRenderBox>(renderBox);
+    auto image = box->GetFirstChild();
+    EXPECT_TRUE(image);
+    auto renderImage = image->GetRenderNode();
+    EXPECT_TRUE(renderImage);
+    auto render = AceType::DynamicCast<MockRenderImage>(renderImage);
     EXPECT_TRUE(render);
     EXPECT_EQ(240, render->GetWidth());
     EXPECT_EQ(240, render->GetHeight());
@@ -497,12 +468,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest007, TestSize.Level1)
      * @tc.expected: step3. value is correct
      */
     platformWindowRaw_->TriggerOneFrame();
-    box = imageAnimatorElement_->GetFirstChild();
-    EXPECT_TRUE(box);
-    renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    render = AceType::DynamicCast<MockRenderBox>(renderBox);
-    EXPECT_TRUE(render);
     EXPECT_EQ(240, render->GetWidth());
     EXPECT_EQ(240, render->GetHeight());
 }
@@ -527,7 +492,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest008, TestSize.Level1)
         // go back.
         imageAnimator->SetIsReverse(true);
         imageAnimator->SetImageProperties(g_thirdImages);
-        imageAnimator->SetAnimator(AceType::MakeRefPtr<Animator>());
     };
     InitImageAnimatorComponent();
 
@@ -537,9 +501,11 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest008, TestSize.Level1)
      */
     auto box = imageAnimatorElement_->GetFirstChild();
     EXPECT_TRUE(box);
-    auto renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    auto render = AceType::DynamicCast<MockRenderBox>(renderBox);
+    auto image = box->GetFirstChild();
+    EXPECT_TRUE(image);
+    auto renderImage = image->GetRenderNode();
+    EXPECT_TRUE(renderImage);
+    auto render = AceType::DynamicCast<MockRenderImage>(renderImage);
     EXPECT_TRUE(render);
     EXPECT_EQ(260, render->GetWidth());
     EXPECT_EQ(260, render->GetHeight());
@@ -549,12 +515,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest008, TestSize.Level1)
      * @tc.expected: step3. value is correct
      */
     platformWindowRaw_->TriggerOneFrame();
-    box = imageAnimatorElement_->GetFirstChild();
-    EXPECT_TRUE(box);
-    renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    render = AceType::DynamicCast<MockRenderBox>(renderBox);
-    EXPECT_TRUE(render);
     EXPECT_EQ(260, render->GetWidth());
     EXPECT_EQ(260, render->GetHeight());
 }
@@ -579,7 +539,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest009, TestSize.Level1)
         imageAnimator->SetIsReverse(false);
         imageAnimator->SetIsFixedSize(false);
         imageAnimator->SetImageProperties(g_thirdImages);
-        imageAnimator->SetAnimator(AceType::MakeRefPtr<Animator>());
     };
     InitImageAnimatorComponent();
 
@@ -590,9 +549,11 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest009, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     auto box = imageAnimatorElement_->GetFirstChild();
     EXPECT_TRUE(box);
-    auto renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    auto render = AceType::DynamicCast<MockRenderBox>(renderBox);
+    auto image = box->GetFirstChild();
+    EXPECT_TRUE(image);
+    auto renderImage = image->GetRenderNode();
+    EXPECT_TRUE(renderImage);
+    auto render = AceType::DynamicCast<MockRenderImage>(renderImage);
     EXPECT_TRUE(render);
     EXPECT_EQ(240, render->GetWidth());
     EXPECT_EQ(240, render->GetHeight());
@@ -603,12 +564,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest009, TestSize.Level1)
      */
     platformWindowRaw_->TriggerOneFrame();
     platformWindowRaw_->TriggerOneFrame();
-    box = imageAnimatorElement_->GetFirstChild();
-    EXPECT_TRUE(box);
-    renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    render = AceType::DynamicCast<MockRenderBox>(renderBox);
-    EXPECT_TRUE(render);
     EXPECT_EQ(260, render->GetWidth());
     EXPECT_EQ(260, render->GetHeight());
 }
@@ -632,7 +587,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest010, TestSize.Level1)
         imageAnimator->SetIsReverse(false);
         imageAnimator->SetIsFixedSize(false);
         imageAnimator->SetImageProperties(g_thirdImages);
-        imageAnimator->SetAnimator(AceType::MakeRefPtr<Animator>());
     };
     InitImageAnimatorComponent();
 
@@ -642,9 +596,11 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest010, TestSize.Level1)
      */
     auto box = imageAnimatorElement_->GetFirstChild();
     EXPECT_TRUE(box);
-    auto renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    auto render = AceType::DynamicCast<MockRenderBox>(renderBox);
+    auto image = box->GetFirstChild();
+    EXPECT_TRUE(image);
+    auto renderImage = image->GetRenderNode();
+    EXPECT_TRUE(renderImage);
+    auto render = AceType::DynamicCast<MockRenderImage>(renderImage);
     EXPECT_TRUE(render);
     EXPECT_EQ(240, render->GetWidth());
     EXPECT_EQ(240, render->GetHeight());
@@ -656,12 +612,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest010, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     platformWindowRaw_->TriggerOneFrame();
     platformWindowRaw_->TriggerOneFrame();
-    box = imageAnimatorElement_->GetFirstChild();
-    EXPECT_TRUE(box);
-    renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    render = AceType::DynamicCast<MockRenderBox>(renderBox);
-    EXPECT_TRUE(render);
     EXPECT_EQ(260, render->GetWidth());
     EXPECT_EQ(260, render->GetHeight());
 
@@ -672,12 +622,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest010, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     platformWindowRaw_->TriggerOneFrame();
     platformWindowRaw_->TriggerOneFrame();
-    box = imageAnimatorElement_->GetFirstChild();
-    EXPECT_TRUE(box);
-    renderBox = box->GetRenderNode();
-    EXPECT_TRUE(renderBox);
-    render = AceType::DynamicCast<MockRenderBox>(renderBox);
-    EXPECT_TRUE(render);
     // verify the animation duration is 60, not 20.
     EXPECT_EQ(240, render->GetWidth());
     EXPECT_EQ(240, render->GetHeight());

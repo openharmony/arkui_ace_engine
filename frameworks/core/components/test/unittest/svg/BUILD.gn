@@ -24,6 +24,13 @@ ohos_unittest("RenderSvgTest") {
   sources = [
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
     "render_svg_test.cpp",
+    "svg_fe_colormatrix_test.cpp",
+    "svg_fe_component_transfer_test.cpp",
+    "svg_fe_flood_test.cpp",
+    "svg_fe_func_test.cpp",
+    "svg_fe_gaussianblur_test.cpp",
+    "svg_fe_offset_test.cpp",
+    "svg_transform_test.cpp",
   ]
 
   configs = [
@@ -32,6 +39,7 @@ ohos_unittest("RenderSvgTest") {
   ]
 
   deps = [
+    "$ace_flutter_engine_root:ace_skia_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "$ace_root/frameworks/core:ace_core_ohos",

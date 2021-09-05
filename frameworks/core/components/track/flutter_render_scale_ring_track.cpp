@@ -19,6 +19,7 @@
 #include "third_party/skia/include/effects/Sk1DPathEffect.h"
 
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 
 namespace OHOS::Ace {

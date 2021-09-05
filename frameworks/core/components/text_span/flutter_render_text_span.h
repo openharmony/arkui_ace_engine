@@ -19,6 +19,7 @@
 #include "flutter/lib/ui/text/paragraph_builder.h"
 
 #include "core/components/text_span/render_text_span.h"
+#include "core/gestures/gesture_type.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -31,7 +32,11 @@ public:
     ~FlutterRenderTextSpan() override = default;
 
     // Called by parent to add text with style to builder.
-    void UpdateTextContent(txt::ParagraphBuilder& builder);
+    void UpdateText(
+        txt::ParagraphBuilder& builder, std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions);
+
+private:
+    void UpdateTouchRegions(std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions);
 };
 
 } // namespace OHOS::Ace

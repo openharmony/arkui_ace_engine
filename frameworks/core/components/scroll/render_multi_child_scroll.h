@@ -47,7 +47,7 @@ public:
 
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
 
-    bool ScrollPage(bool reverse, bool smooth) override;
+    bool ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish = nullptr) override;
 
     void HandleRotate(double rotateValue, bool isVertical) override;
 
@@ -84,7 +84,7 @@ public:
     double GetFixPositionOnWatch(double final, double current) override;
 
 protected:
-    void OnPredictLayout() override;
+    void OnPredictLayout(int64_t targetTimestamp) override;
     void PerformLayout() override;
     void Update(const RefPtr<Component>& component) override;
     bool ReachMaxCount() const override;
@@ -105,6 +105,7 @@ private:
     double CalculateBeginPositionInViewPort(double position, double size, double effectOffset = 0.0);
     bool ScrollToPosition(double position, int32_t source, bool smooth);
     void ProcessScrollExtent();
+    void ExtendViewPort();
 
     double cacheExtent_ = 300.0;
     int32_t currentIndex_ = 0;

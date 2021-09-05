@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_SPAN_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_SPAN_H
 
+#include "core/components/declaration/span/span_declaration.h"
 #include "core/components/text_span/text_span_component.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
@@ -31,32 +32,60 @@ public:
 
     bool HasSetFontStyle() const
     {
-        return isSetFontStyle_;
+        auto declaration = AceType::DynamicCast<SpanDeclaration>(declaration_);
+        return declaration ? declaration->HasSetFontStyle() : false;
     }
 
     bool HasSetFontColor() const
     {
-        return isSetFontColor_;
+        auto declaration = AceType::DynamicCast<SpanDeclaration>(declaration_);
+        return declaration ? declaration->HasSetFontColor() : false;
     }
 
     bool HasSetFontWeight() const
     {
-        return isSetFontWeight_;
+        auto declaration = AceType::DynamicCast<SpanDeclaration>(declaration_);
+        return declaration ? declaration->HasSetFontWeight() : false;
     }
 
     bool HasSetFontSize() const
     {
-        return isSetFontSize_;
+        auto declaration = AceType::DynamicCast<SpanDeclaration>(declaration_);
+        return declaration ? declaration->HasSetFontSize() : false;
     }
 
     bool HasSetFontFamily() const
     {
-        return isSetFontFamily_;
+        auto declaration = AceType::DynamicCast<SpanDeclaration>(declaration_);
+        return declaration ? declaration->HasSetFontFamily() : false;
     }
 
     bool HasSetTextDecoration() const
     {
-        return isSetTextDecoration_;
+        auto declaration = AceType::DynamicCast<SpanDeclaration>(declaration_);
+        return declaration ? declaration->HasSetTextDecoration() : false;
+    }
+
+    bool HasSetAllowScale() const
+    {
+        auto declaration = AceType::DynamicCast<SpanDeclaration>(declaration_);
+        return declaration ? declaration->HasSetAllowScale() : false;
+    }
+
+    bool HasSetFontFeatures() const
+    {
+        auto declaration = AceType::DynamicCast<SpanDeclaration>(declaration_);
+        return declaration ? declaration->HasSetFontFeatures() : false;
+    }
+
+    void SetTextStyle(const TextStyle& spanStyle)
+    {
+        if (declaration_) {
+            auto& specializedStyle = declaration_->MaybeResetStyle<SpanStyle>(StyleTag::SPECIALIZED_STYLE);
+            if (specializedStyle.IsValid()) {
+                specializedStyle.spanStyle = spanStyle;
+            }
+        }
     }
 
     RefPtr<Component> GetSpecializedComponent() override
@@ -64,36 +93,15 @@ public:
         return textSpanChild_;
     }
 
-    bool HasSetAllowScale() const
-    {
-        return isSetAllowScale_;
-    }
-
-    void SetTextStyle(const TextStyle& spanStyle)
-    {
-        spanStyle_ = spanStyle;
-    }
-
 protected:
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
-    bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
     void PrepareSpecializedComponent() override;
-
     void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) override;
     void OnChildNodeRemoved(const RefPtr<DOMNode>& child) override;
 
 private:
-    void CheckAndSetCurrentSpanStyle(const RefPtr<DOMSpan>& domSpan, TextStyle& currentStyle,
-        const TextStyle& parentStyle);
+    void CheckAndSetCurrentSpanStyle(
+        const RefPtr<DOMSpan>& domSpan, TextStyle& currentStyle, const TextStyle& parentStyle);
 
-    TextStyle spanStyle_;
-    bool isSetFontStyle_ = false;
-    bool isSetFontColor_ = false;
-    bool isSetFontWeight_ = false;
-    bool isSetFontSize_ = false;
-    bool isSetFontFamily_ = false;
-    bool isSetTextDecoration_ = false;
-    bool isSetAllowScale_ = false;
     std::list<RefPtr<DOMNode>> children_;
     RefPtr<TextSpanComponent> textSpanChild_;
 };

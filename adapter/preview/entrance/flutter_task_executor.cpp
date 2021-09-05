@@ -96,9 +96,12 @@ bool FlutterTaskExecutor::WillRunOnCurrentThread(TaskType type) const
     }
 }
 
-void FlutterTaskExecutor::DestroyJsThread()
+void FlutterTaskExecutor::AddTaskObserver(Task&& callback)
 {
-    jsThread_.reset();
+}
+
+void FlutterTaskExecutor::RemoveTaskObserver()
+{
 }
 
 } // namespace OHOS::Ace

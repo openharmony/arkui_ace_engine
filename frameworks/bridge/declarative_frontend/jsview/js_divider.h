@@ -25,35 +25,15 @@
 namespace OHOS::Ace::Framework {
 
 class JSDivider : public JSViewAbstract, public JSInteractableView {
-    DECLARE_ACE_TYPE(JSDivider, JSViewAbstract);
-
 public:
-    JSDivider() = default;
-    ~JSDivider() override = default;
-    void SetDividerColor(const std::string& color);
-    void SetVertical(bool isVertical);
-    void SetLineCap(int lineCap);
-    void SetStrokeWidth(const std::string& width);
-
-public:
-    RefPtr<OHOS::Ace::Component> CreateSpecializedComponent() override;
-#ifdef USE_QUICKJS_ENGINE
-    virtual void MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc) override;
-    virtual void ReleaseRT(JSRuntime* rt) override;
-
-    static void QjsDestructor(JSRuntime* rt, JSDivider* ptr);
-    static void QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc);
-#endif
+    static void SetDividerColor(const JSCallbackInfo& info);
+    static void SetVertical(bool isVertical);
+    static void SetLineCap(int lineCap);
+    static void SetStrokeWidth(const JSCallbackInfo& info);
 
     static void JSBind(BindingTarget globalObj);
-
-private:
-    LineCap lineCap_ = LineCap::BUTT;
-    Dimension strokeWidth_ = Dimension(1.0);
-    bool isVertical_ = false;
-    Color dividerColor_ = Color(0x51000000);
+    static void Create(const std::string& src);
 };
 
 } // namespace OHOS::Ace::Framework
-
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_DIVIDER_H

@@ -44,6 +44,8 @@ protected:
     bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
     bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
     bool AddSpecializedEvent(int32_t pageId, const std::string& event) override;
+
+    void PrepareSpecializedComponent() override;
     void ResetInitializedStyle() override;
 
 private:

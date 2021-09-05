@@ -37,7 +37,6 @@ const Dimension SVG_OFFSET_Y = Dimension(20.0);
 const Dimension SVG_OFFSET_DX = Dimension(30.0);
 const Dimension SVG_OFFSET_DY = Dimension(40.0);
 const Dimension SVG_START_OFFSET_VALUE = Dimension(50.0);
-const Dimension SVG_TEXT_LENGTH_VALUE = Dimension(100.0);
 const Dimension SVG_STROKE_WIDTH_VALUE = Dimension(2.0);
 const Color SVG_FILL_COLOR = Color::FromString("#0x0000ff");
 const Color SVG_STROKE_COLOR = Color::FromString("#0x0000ee");
@@ -192,13 +191,11 @@ HWTEST_F(DomSvgTextTest, DomSvgTextTest002, TestSize.Level1)
     /**
      * @tc.steps: step2. call JsonUtil interface, create DomSvgText and set its attr.
      */
-    auto domSvgText = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonTextStr);
-    ASSERT_TRUE(domSvgText != nullptr);
-
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonTextStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
     RefPtr<SvgTextComponent> svgText =
-            AceType::DynamicCast<SvgTextComponent>(domSvgText->GetSpecializedComponent());
+            AceType::DynamicCast<SvgTextComponent>(domNodeRoot->GetSpecializedComponent());
     ASSERT_TRUE(svgText != nullptr);
-
     /**
      * @tc.steps: step3. Check all the attributes matched.
      * @tc.expected: step3. All the attributes are matched.
@@ -209,14 +206,12 @@ HWTEST_F(DomSvgTextTest, DomSvgTextTest002, TestSize.Level1)
     EXPECT_EQ(svgText->GetDx().Value(), SVG_OFFSET_DX.Value());
     EXPECT_EQ(svgText->GetDy().Value(), SVG_OFFSET_DY.Value());
     EXPECT_EQ(svgText->GetRotate(), SVG_ROTATE_VALUE);
-    EXPECT_EQ(svgText->GetLengthAdjust(), SVG_LENGTH_ADJUST_VALUE);
-    EXPECT_EQ(svgText->GetTextLength().Value(), SVG_TEXT_LENGTH_VALUE.Value());
-    EXPECT_EQ(svgText->GetTextStyle().GetFontSize().Value(), SVG_TEXT_FONT_SIZE.Value());
-    EXPECT_EQ(svgText->GetFillState().GetColor().GetValue(), SVG_FILL_COLOR.GetValue());
-    EXPECT_EQ(svgText->GetFillState().GetOpacity(), SVG_FILL_OPACITY_VALUE);
-    EXPECT_EQ(svgText->GetStrokeState().GetColor().GetValue(), SVG_STROKE_COLOR.GetValue());
-    EXPECT_EQ(svgText->GetStrokeState().GetOpacity(), SVG_STROKE_OPACITY_VALUE);
-    EXPECT_EQ(svgText->GetStrokeState().GetLineWidth().Value(), SVG_STROKE_WIDTH_VALUE.Value());
+    EXPECT_EQ(svgText->GetDeclaration()->GetSvgTextStyle().GetFontSize().Value(), SVG_TEXT_FONT_SIZE.Value());
+    EXPECT_EQ(svgText->GetDeclaration()->GetFillState().GetColor().GetValue(), SVG_FILL_COLOR.GetValue());
+    EXPECT_EQ(svgText->GetDeclaration()->GetFillState().GetOpacity().GetValue(), SVG_FILL_OPACITY_VALUE);
+    EXPECT_EQ(svgText->GetDeclaration()->GetStrokeState().GetColor().GetValue(), SVG_STROKE_COLOR.GetValue());
+    EXPECT_EQ(svgText->GetDeclaration()->GetStrokeState().GetOpacity().GetValue(), SVG_STROKE_OPACITY_VALUE);
+    EXPECT_EQ(svgText->GetDeclaration()->GetStrokeState().GetLineWidth().Value(), SVG_STROKE_WIDTH_VALUE.Value());
 }
 
 /**
@@ -263,11 +258,11 @@ HWTEST_F(DomSvgTextTest, DomSvgTspanTest002, TestSize.Level1)
     /**
      * @tc.steps: step2. call JsonUtil interface, create DomSvgTspan and set its attr.
      */
-    auto domSvgTspan = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonTextStr);
-    ASSERT_TRUE(domSvgTspan != nullptr);
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonTextStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
 
     RefPtr<SvgTspanComponent> svgTspan =
-            AceType::DynamicCast<SvgTspanComponent>(domSvgTspan->GetSpecializedComponent());
+            AceType::DynamicCast<SvgTspanComponent>(domNodeRoot->GetSpecializedComponent());
     ASSERT_TRUE(svgTspan != nullptr);
 
     /**
@@ -280,14 +275,12 @@ HWTEST_F(DomSvgTextTest, DomSvgTspanTest002, TestSize.Level1)
     EXPECT_EQ(svgTspan->GetDx().Value(), SVG_OFFSET_DX.Value());
     EXPECT_EQ(svgTspan->GetDy().Value(), SVG_OFFSET_DY.Value());
     EXPECT_EQ(svgTspan->GetRotate(), SVG_ROTATE_VALUE);
-    EXPECT_EQ(svgTspan->GetLengthAdjust(), SVG_LENGTH_ADJUST_VALUE);
-    EXPECT_EQ(svgTspan->GetTextLength().Value(), SVG_TEXT_LENGTH_VALUE.Value());
-    EXPECT_EQ(svgTspan->GetTextStyle().GetFontSize().Value(), SVG_TEXT_FONT_SIZE.Value());
-    EXPECT_EQ(svgTspan->GetFillState().GetColor().GetValue(), SVG_FILL_COLOR.GetValue());
-    EXPECT_EQ(svgTspan->GetFillState().GetOpacity(), SVG_FILL_OPACITY_VALUE);
-    EXPECT_EQ(svgTspan->GetStrokeState().GetColor().GetValue(), SVG_STROKE_COLOR.GetValue());
-    EXPECT_EQ(svgTspan->GetStrokeState().GetOpacity(), SVG_STROKE_OPACITY_VALUE);
-    EXPECT_EQ(svgTspan->GetStrokeState().GetLineWidth().Value(), SVG_STROKE_WIDTH_VALUE.Value());
+    EXPECT_EQ(svgTspan->GetDeclaration()->GetSvgTextStyle().GetFontSize().Value(), SVG_TEXT_FONT_SIZE.Value());
+    EXPECT_EQ(svgTspan->GetDeclaration()->GetFillState().GetColor().GetValue(), SVG_FILL_COLOR.GetValue());
+    EXPECT_EQ(svgTspan->GetDeclaration()->GetFillState().GetOpacity().GetValue(), SVG_FILL_OPACITY_VALUE);
+    EXPECT_EQ(svgTspan->GetDeclaration()->GetStrokeState().GetColor().GetValue(), SVG_STROKE_COLOR.GetValue());
+    EXPECT_EQ(svgTspan->GetDeclaration()->GetStrokeState().GetOpacity().GetValue(), SVG_STROKE_OPACITY_VALUE);
+    EXPECT_EQ(svgTspan->GetDeclaration()->GetStrokeState().GetLineWidth().Value(), SVG_STROKE_WIDTH_VALUE.Value());
 }
 
 /**
@@ -336,7 +329,6 @@ HWTEST_F(DomSvgTextTest, DomSvgTextPathTest002, TestSize.Level1)
      */
     auto domNode = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonTextStr);
     ASSERT_TRUE(domNode != nullptr);
-
     RefPtr<SvgTextPathComponent> svgTextPath =
             AceType::DynamicCast<SvgTextPathComponent>(domNode->GetSpecializedComponent());
     ASSERT_TRUE(svgTextPath != nullptr);
@@ -348,14 +340,12 @@ HWTEST_F(DomSvgTextTest, DomSvgTextPathTest002, TestSize.Level1)
     EXPECT_EQ(svgTextPath->GetTextData(), TEXT_DATA);
     EXPECT_EQ(svgTextPath->GetPath(), SVG_PATH_VALUE);
     EXPECT_EQ(svgTextPath->GetStartOffset().Value(), SVG_START_OFFSET_VALUE.Value());
-    EXPECT_EQ(svgTextPath->GetLengthAdjust(), SVG_LENGTH_ADJUST_VALUE);
-    EXPECT_EQ(svgTextPath->GetTextLength().Value(), SVG_TEXT_LENGTH_VALUE.Value());
-    EXPECT_EQ(svgTextPath->GetTextStyle().GetFontSize().Value(), SVG_TEXT_FONT_SIZE.Value());
-    EXPECT_EQ(svgTextPath->GetFillState().GetColor().GetValue(), SVG_FILL_COLOR.GetValue());
-    EXPECT_EQ(svgTextPath->GetFillState().GetOpacity(), SVG_FILL_OPACITY_VALUE);
-    EXPECT_EQ(svgTextPath->GetStrokeState().GetColor().GetValue(), SVG_STROKE_COLOR.GetValue());
-    EXPECT_EQ(svgTextPath->GetStrokeState().GetOpacity(), SVG_STROKE_OPACITY_VALUE);
-    EXPECT_EQ(svgTextPath->GetStrokeState().GetLineWidth().Value(), SVG_STROKE_WIDTH_VALUE.Value());
+    EXPECT_EQ(svgTextPath->GetDeclaration()->GetSvgTextStyle().GetFontSize().Value(), SVG_TEXT_FONT_SIZE.Value());
+    EXPECT_EQ(svgTextPath->GetDeclaration()->GetFillState().GetColor().GetValue(), SVG_FILL_COLOR.GetValue());
+    EXPECT_EQ(svgTextPath->GetDeclaration()->GetFillState().GetOpacity().GetValue(), SVG_FILL_OPACITY_VALUE);
+    EXPECT_EQ(svgTextPath->GetDeclaration()->GetStrokeState().GetColor().GetValue(), SVG_STROKE_COLOR.GetValue());
+    EXPECT_EQ(svgTextPath->GetDeclaration()->GetStrokeState().GetOpacity().GetValue(), SVG_STROKE_OPACITY_VALUE);
+    EXPECT_EQ(svgTextPath->GetDeclaration()->GetStrokeState().GetLineWidth().Value(), SVG_STROKE_WIDTH_VALUE.Value());
 }
 
 } // namespace OHOS::Ace::Framework

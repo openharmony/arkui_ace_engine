@@ -445,6 +445,66 @@ public:
         return overSpringProperty_;
     }
 
+    bool NeedDivider() const
+    {
+        return needDivider_;
+    }
+
+    void MarkNeedDivider(bool needDivider)
+    {
+        needDivider_ = needDivider;
+    }
+
+    const Dimension& GetDividerOrigin() const
+    {
+        return dividerOrigin_;
+    }
+
+    void SetDividerOrigin(const Dimension& origin)
+    {
+        dividerOrigin_ = origin;
+    }
+
+    const Dimension& GetDividerLength() const
+    {
+        return dividerLength_;
+    }
+
+    void SetDividerLength(const Dimension& length)
+    {
+        dividerLength_ = length;
+    }
+
+    const Color& GetDividerColor() const
+    {
+        return dividerColor_;
+    }
+
+    void SetDividerColor(const Color& color)
+    {
+        dividerColor_ = color;
+    }
+
+    const Dimension& GetDividerHeight() const
+    {
+        return dividerHeight_;
+    }
+
+    void SetDividerHeight(const Dimension& dividerHeight)
+    {
+        dividerHeight_ = dividerHeight;
+    }
+
+    const EventMarker& GetOnRotateId() const
+    {
+        return onRotateId_;
+    }
+
+    void SetOnRotateId(const EventMarker& onRotateId)
+    {
+        onRotateId_ = onRotateId;
+    }
+
 private:
     EventMarker onRequestItem_;
     EventMarker onScroll_;
@@ -452,6 +512,7 @@ private:
     EventMarker onScrollTop_;
     EventMarker onScrollEnd_;
     EventMarker onScrollTouchUp_;
+    EventMarker onRotateId_;
     Dimension gradientWidth_;
     Color backgroundColor_ = Color::WHITE;
     FlexDirection direction_ = FlexDirection::COLUMN;
@@ -485,6 +546,13 @@ private:
     SpringChainProperty chainProperty_;
     RefPtr<SpringProperty> overSpringProperty_;
     WeakPtr<ListElement> listElement_;
+
+    // divider style
+    Dimension dividerOrigin_;
+    Dimension dividerLength_;
+    Dimension dividerHeight_ = DIVIDER_DEFAULT_HEIGHT;
+    Color dividerColor_;
+    bool needDivider_ = false;
 };
 
 } // namespace OHOS::Ace

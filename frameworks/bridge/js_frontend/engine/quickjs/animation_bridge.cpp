@@ -50,7 +50,7 @@ inline int32_t GetJsInt32Val(JSContext* ctx, JSValueConst value)
     return val;
 }
 
-void HandleJsAnimationContext(JSContext* ctx, int32_t pageId, int32_t nodeId, TweenOperation operation)
+void HandleJsAnimationContext(JSContext* ctx, int32_t pageId, int32_t nodeId, AnimationOperation operation)
 {
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     auto page = GetPageById(instance, pageId);
@@ -126,41 +126,31 @@ AnimationBridge::AnimationBridge(JSContext* ctx, JSValue animationContext, NodeI
     if (instance == nullptr) {
         return;
     }
-    delegateWeak_ = instance->GetDelegate();
 }
 
 AnimationBridge::~AnimationBridge()
 {
     // when last page exit, js engine will destruct first, so do not free JSObject again.
-    auto ref = delegateWeak_.Upgrade();
-    if (!ref) {
-        return;
-    }
-    LOGI("Destruct AnimationBridge, nodeId: %{public}d", nodeId_);
-    JS_FreeValue(ctx_, animationContext_);
-    QjsEngineInstance* instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx_));
-    if (instance == nullptr) {
-        LOGE("qjs engine instance is null.");
-    } else {
-        instance->RemoveAnimationBridge();
+    if (ctx_ != nullptr) {
+        JS_FreeValue(ctx_, animationContext_);
+        ctx_ = nullptr;
     }
 }
 
-void AnimationBridge::Uninitialize()
+void AnimationBridge::OnJsEngineDestroy()
 {
-    auto ref = delegateWeak_.Upgrade();
-    if (!ref) {
-        return;
+    LOGI("Destruct OnJsEngineDestroy, nodeId: %{public}d", nodeId_);
+    if (ctx_ != nullptr) {
+        JS_FreeValue(ctx_, animationContext_);
+        ctx_ = nullptr;
     }
-    LOGI("Destruct AnimationBridge, nodeId: %{public}d", nodeId_);
-    JS_FreeValue(ctx_, animationContext_);
 }
 
 JSValue AnimationBridgeUtils::JsAnimationStartTimeGet(JSContext* ctx, JSValueConst value)
 {
-    QjsHandleScope handleScope(ctx);
-    int32_t nodeId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__nodeId"));
-    int32_t pageId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__pageId"));
+    QJSHandleScope handleScope(ctx);
+    int32_t nodeId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__nodeId"));
+    int32_t pageId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__pageId"));
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
         LOGE("QjsEngineInstance is null. nodeId is: %{public}d", nodeId);
@@ -192,16 +182,16 @@ JSValue AnimationBridgeUtils::JsAnimationStartTimeGet(JSContext* ctx, JSValueCon
 
 JSValue AnimationBridgeUtils::JsAnimationStartTimeSet(JSContext* ctx, JSValueConst value, JSValueConst startTime)
 {
-    QjsHandleScope handleScope(ctx);
+    QJSHandleScope handleScope(ctx);
     int32_t startDelay = 0;
     JS_ToInt32(ctx, &startDelay, startTime);
-    int32_t nodeId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__nodeId"));
+    int32_t nodeId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__nodeId"));
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
         LOGE("QjsEngineInstance is null. nodeID is: %{public}d", nodeId);
         return JS_NULL;
     }
-    int32_t pageId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__pageId"));
+    int32_t pageId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__pageId"));
     auto page = GetPageById(instance, pageId);
     if (page == nullptr) {
         LOGE("no page found for nodeId: %{public}d", nodeId);
@@ -214,14 +204,14 @@ JSValue AnimationBridgeUtils::JsAnimationStartTimeSet(JSContext* ctx, JSValueCon
 
 JSValue AnimationBridgeUtils::JsAnimationPendingGet(JSContext* ctx, JSValueConst value)
 {
-    QjsHandleScope handleScope(ctx);
-    int32_t nodeId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__nodeId"));
+    QJSHandleScope handleScope(ctx);
+    int32_t nodeId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__nodeId"));
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
         LOGE("QjsEngineInstance is null. nodeID is: %{public}d", nodeId);
         return JS_NULL;
     }
-    int32_t pageId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__pageId"));
+    int32_t pageId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__pageId"));
     auto page = GetPageById(instance, pageId);
     if (page == nullptr) {
         LOGE("no page found for nodeId: %{public}d", nodeId);
@@ -261,23 +251,23 @@ JSValue AnimationBridgeUtils::JsAnimationPlayStateGet(JSContext* ctx, JSValueCon
 JSValue AnimationBridgeUtils::JsAnimationPlayStateSet(JSContext* ctx, JSValueConst value, JSValueConst proto)
 {
     ScopedString playState(ctx, proto);
-    TweenOperation operation = TweenOperation::NONE;
-    if (std::strcmp(playState.get(), BaseAnimationBridgeUtils::PLAYSTATE_IDLE) == 0) {
-        operation = TweenOperation::CANCEL;
-    } else if (std::strcmp(playState.get(), BaseAnimationBridgeUtils::PLAYSTATE_RUNNING) == 0) {
-        operation = TweenOperation::PLAY;
-    } else if (std::strcmp(playState.get(), BaseAnimationBridgeUtils::PLAYSTATE_PAUSED) == 0) {
-        operation = TweenOperation::PAUSE;
-    } else if (std::strcmp(playState.get(), BaseAnimationBridgeUtils::PLAYSTATE_FINISHED) == 0) {
-        operation = TweenOperation::FINISH;
+    AnimationOperation operation = AnimationOperation::NONE;
+    if (std::strcmp(playState.get(), DOM_ANIMATION_PLAY_STATE_IDLE) == 0) {
+        operation = AnimationOperation::CANCEL;
+    } else if (std::strcmp(playState.get(), DOM_ANIMATION_PLAY_STATE_RUNNING) == 0) {
+        operation = AnimationOperation::PLAY;
+    } else if (std::strcmp(playState.get(), DOM_ANIMATION_PLAY_STATE_PAUSED) == 0) {
+        operation = AnimationOperation::PAUSE;
+    } else if (std::strcmp(playState.get(), DOM_ANIMATION_PLAY_STATE_FINISHED) == 0) {
+        operation = AnimationOperation::FINISH;
     } else {
-        operation = TweenOperation::NONE;
+        operation = AnimationOperation::NONE;
     }
 
-    QjsHandleScope handleScope(ctx);
-    int32_t nodeId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__nodeId"));
+    QJSHandleScope handleScope(ctx);
+    int32_t nodeId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__nodeId"));
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
-    int32_t pageId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__pageId"));
+    int32_t pageId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__pageId"));
     auto page = GetPageById(instance, pageId);
     if (page == nullptr) {
         LOGE("no page found for nodeId: %{public}d", nodeId);
@@ -298,13 +288,10 @@ void AnimationBridge::JsCreateAnimation(const RefPtr<JsAcePage>& page, const std
     BaseAnimationBridgeUtils::JsParseAnimationOptions(
         param, iterations, animationDoubleOptions, animationStringOptions);
     auto tweenOption = TweenOption();
-    RefPtr<Curve> curve;
-    std::string curveString;
     auto iterEasing = animationStringOptions.find(DOM_ANIMATION_EASING);
     if (iterEasing != animationStringOptions.end()) {
-        curveString = iterEasing->second;
+        tweenOption.SetCurve(CreateCurve(iterEasing->second));
     }
-    curve = CreateCurve(curveString);
     std::vector<Dimension> transformOrigin = BaseAnimationBridgeUtils::HandleTransformOrigin(animationFrames);
     if (transformOrigin.size() == BaseAnimationBridgeUtils::TRANSFORM_ORIGIN_DEFAULT_SIZE) {
         tweenOption.SetTransformOrigin(transformOrigin.front(), transformOrigin.back());
@@ -316,6 +303,10 @@ void AnimationBridge::JsCreateAnimation(const RefPtr<JsAcePage>& page, const std
     auto iterFill = animationStringOptions.find(DOM_ANIMATION_FILL);
     if (iterFill != animationStringOptions.end()) {
         tweenOption.SetFillMode(StringToFillMode(iterFill->second));
+    }
+    auto iterDirection = animationStringOptions.find(DOM_ANIMATION_DIRECTION_API);
+    if (iterDirection != animationStringOptions.end()) {
+        tweenOption.SetAnimationDirection(StringToAnimationDirection(iterDirection->second));
     }
     auto iterDelay = animationDoubleOptions.find(DOM_ANIMATION_DELAY_API);
     if (iterDelay != animationDoubleOptions.end()) {
@@ -336,6 +327,11 @@ void AnimationBridge::JsCreateAnimation(const RefPtr<JsAcePage>& page, const std
         LOGE("JsCreateAnimation failed, DomNode is null.");
         return;
     }
+    domNode->ParseAnimationStyle(animationFrames);
+    domNode->TweenOptionSetKeyframes(tweenOption);
+    if (tweenOption.IsValid()) {
+        domNode->SetCustomAnimationStyleUpdate(true);
+    }
     RefPtr<Animator> animator = AceType::MakeRefPtr<Animator>();
     auto tweenComponent = domNode->GetTweenComponent();
     if (!tweenComponent) {
@@ -345,7 +341,7 @@ void AnimationBridge::JsCreateAnimation(const RefPtr<JsAcePage>& page, const std
     }
     LOGD("parse animate parameters for nodeId: %d", nodeId_);
     tweenComponent->SetAnimator(animator);
-    BaseAnimationBridgeUtils::SetTweenComponentParams(curve, animationFrames, tweenComponent, tweenOption);
+    BaseAnimationBridgeUtils::SetTweenComponentParams(nullptr, animationFrames, tweenComponent, tweenOption);
     AddListenerForEventCallback(AceType::WeakClaim(this), animator, ctx_);
     domNode->GenerateComponentNode();
     page->PushDirtyNode(nodeId_);
@@ -368,7 +364,7 @@ void AnimationBridge::SetPlayStateCallbacksWithListenerId(RefPtr<Animator>& anim
                 return;
             }
             JS_SetPropertyStr(ctx, bridge->GetJsObject(), "__playState",
-                JS_NewString(ctx, BaseAnimationBridgeUtils::PLAYSTATE_FINISHED));
+                JS_NewString(ctx, DOM_ANIMATION_PLAY_STATE_FINISHED));
         });
     });
     animator->RemoveIdleListener(idleListenerId_);
@@ -380,7 +376,7 @@ void AnimationBridge::SetPlayStateCallbacksWithListenerId(RefPtr<Animator>& anim
                 return;
             }
             JS_SetPropertyStr(
-                ctx, bridge->GetJsObject(), "__playState", JS_NewString(ctx, BaseAnimationBridgeUtils::PLAYSTATE_IDLE));
+                ctx, bridge->GetJsObject(), "__playState", JS_NewString(ctx, DOM_ANIMATION_PLAY_STATE_IDLE));
         });
     });
 }
@@ -403,7 +399,7 @@ void AnimationBridge::SetPlayStateCallbacks(RefPtr<Animator>& animator)
                 return;
             }
             JS_SetPropertyStr(ctx, bridge->GetJsObject(), "__playState",
-                JS_NewString(ctx, BaseAnimationBridgeUtils::PLAYSTATE_PAUSED));
+                JS_NewString(ctx, DOM_ANIMATION_PLAY_STATE_PAUSED));
         });
     });
     animator->ClearStartListeners();
@@ -414,8 +410,9 @@ void AnimationBridge::SetPlayStateCallbacks(RefPtr<Animator>& animator)
             if (!bridge) {
                 return;
             }
+            instance->CallAnimationStartJs(bridge->GetJsObject());
             JS_SetPropertyStr(ctx, bridge->GetJsObject(), "__playState",
-                JS_NewString(ctx, BaseAnimationBridgeUtils::PLAYSTATE_RUNNING));
+                JS_NewString(ctx, DOM_ANIMATION_PLAY_STATE_RUNNING));
         });
     });
     animator->ClearResumeListeners();
@@ -427,7 +424,7 @@ void AnimationBridge::SetPlayStateCallbacks(RefPtr<Animator>& animator)
                 return;
             }
             JS_SetPropertyStr(ctx, bridge->GetJsObject(), "__playState",
-                JS_NewString(ctx, BaseAnimationBridgeUtils::PLAYSTATE_RUNNING));
+                JS_NewString(ctx, DOM_ANIMATION_PLAY_STATE_RUNNING));
         });
     });
 }
@@ -439,10 +436,10 @@ JSValue AnimationBridgeUtils::JsAnimationPlay(JSContext* ctx, JSValueConst value
         return JS_NULL;
     }
 
-    QjsHandleScope handleScope(ctx);
-    int32_t nodeId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__nodeId"));
-    int32_t pageId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__pageId"));
-    HandleJsAnimationContext(ctx, pageId, nodeId, TweenOperation::PLAY);
+    QJSHandleScope handleScope(ctx);
+    int32_t nodeId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__nodeId"));
+    int32_t pageId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__pageId"));
+    HandleJsAnimationContext(ctx, pageId, nodeId, AnimationOperation::PLAY);
     return JS_NULL;
 }
 
@@ -453,10 +450,10 @@ JSValue AnimationBridgeUtils::JsAnimationFinish(JSContext* ctx, JSValueConst val
         return JS_NULL;
     }
 
-    QjsHandleScope handleScope(ctx);
-    int32_t nodeId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__nodeId"));
-    int32_t pageId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__pageId"));
-    HandleJsAnimationContext(ctx, pageId, nodeId, TweenOperation::FINISH);
+    QJSHandleScope handleScope(ctx);
+    int32_t nodeId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__nodeId"));
+    int32_t pageId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__pageId"));
+    HandleJsAnimationContext(ctx, pageId, nodeId, AnimationOperation::FINISH);
     return JS_NULL;
 }
 
@@ -467,10 +464,10 @@ JSValue AnimationBridgeUtils::JsAnimationPause(JSContext* ctx, JSValueConst valu
         return JS_NULL;
     }
 
-    QjsHandleScope handleScope(ctx);
-    int32_t nodeId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__nodeId"));
-    int32_t pageId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__pageId"));
-    HandleJsAnimationContext(ctx, pageId, nodeId, TweenOperation::PAUSE);
+    QJSHandleScope handleScope(ctx);
+    int32_t nodeId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__nodeId"));
+    int32_t pageId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__pageId"));
+    HandleJsAnimationContext(ctx, pageId, nodeId, AnimationOperation::PAUSE);
     return JS_NULL;
 }
 
@@ -481,10 +478,10 @@ JSValue AnimationBridgeUtils::JsAnimationCancel(JSContext* ctx, JSValueConst val
         return JS_NULL;
     }
 
-    QjsHandleScope handleScope(ctx);
-    int32_t nodeId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__nodeId"));
-    int32_t pageId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__pageId"));
-    HandleJsAnimationContext(ctx, pageId, nodeId, TweenOperation::CANCEL);
+    QJSHandleScope handleScope(ctx);
+    int32_t nodeId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__nodeId"));
+    int32_t pageId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__pageId"));
+    HandleJsAnimationContext(ctx, pageId, nodeId, AnimationOperation::CANCEL);
     return JS_NULL;
 }
 
@@ -495,25 +492,25 @@ JSValue AnimationBridgeUtils::JsAnimationReverse(JSContext* ctx, JSValueConst va
         return JS_NULL;
     }
 
-    QjsHandleScope handleScope(ctx);
-    int32_t nodeId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__nodeId"));
-    int32_t pageId = GetJsInt32Val(ctx, QjsUtils::GetPropertyStr(ctx, value, "__pageId"));
-    HandleJsAnimationContext(ctx, pageId, nodeId, TweenOperation::REVERSE);
+    QJSHandleScope handleScope(ctx);
+    int32_t nodeId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__nodeId"));
+    int32_t pageId = GetJsInt32Val(ctx, QJSUtils::GetPropertyStr(ctx, value, "__pageId"));
+    HandleJsAnimationContext(ctx, pageId, nodeId, AnimationOperation::REVERSE);
     return JS_NULL;
 }
 
 JSValue AnimationBridgeUtils::CreateAnimationContext(JSContext* ctx, int32_t pageId, NodeId nodeId)
 {
     auto animationContext = JS_NewObject(ctx);
-    JS_SetPropertyStr(ctx, animationContext, "play", JS_NewCFunction(ctx, JsAnimationPlay, "play", 4));
-    JS_SetPropertyStr(ctx, animationContext, "finish", JS_NewCFunction(ctx, JsAnimationFinish, "finish", 4));
-    JS_SetPropertyStr(ctx, animationContext, "pause", JS_NewCFunction(ctx, JsAnimationPause, "pause", 4));
-    JS_SetPropertyStr(ctx, animationContext, "cancel", JS_NewCFunction(ctx, JsAnimationCancel, "cancel", 4));
-    JS_SetPropertyStr(ctx, animationContext, "reverse", JS_NewCFunction(ctx, JsAnimationReverse, "reverse", 4));
+    JS_SetPropertyStr(ctx, animationContext, "play", JS_NewCFunction(ctx, JsAnimationPlay, "play", 0));
+    JS_SetPropertyStr(ctx, animationContext, "finish", JS_NewCFunction(ctx, JsAnimationFinish, "finish", 0));
+    JS_SetPropertyStr(ctx, animationContext, "pause", JS_NewCFunction(ctx, JsAnimationPause, "pause", 0));
+    JS_SetPropertyStr(ctx, animationContext, "cancel", JS_NewCFunction(ctx, JsAnimationCancel, "cancel", 0));
+    JS_SetPropertyStr(ctx, animationContext, "reverse", JS_NewCFunction(ctx, JsAnimationReverse, "reverse", 0));
     JS_SetPropertyStr(ctx, animationContext, "__pageId", JS_NewInt32(ctx, pageId));
     JS_SetPropertyStr(ctx, animationContext, "__nodeId", JS_NewInt32(ctx, nodeId));
     JS_SetPropertyStr(
-        ctx, animationContext, "__playState", JS_NewString(ctx, BaseAnimationBridgeUtils::PLAYSTATE_IDLE));
+        ctx, animationContext, "__playState", JS_NewString(ctx, DOM_ANIMATION_PLAY_STATE_IDLE));
     JS_SetPropertyStr(ctx, animationContext, "finished", JS_NewBool(ctx, 0));
     JS_SetPropertyFunctionList(ctx, animationContext, JS_ANIMATION_FUNCS, countof(JS_ANIMATION_FUNCS));
     return animationContext;
@@ -557,7 +554,7 @@ void AnimationBridgeTaskOperation::AnimationBridgeTaskFunc(const RefPtr<JsAcePag
     }
     auto tweenComponent = domNode->GetTweenComponent();
     if (tweenComponent) {
-        tweenComponent->SetCustomTweenOperation(operation_);
+        tweenComponent->SetCustomAnimationOperation(operation_);
     }
 
     RefPtr<Animator> animator;

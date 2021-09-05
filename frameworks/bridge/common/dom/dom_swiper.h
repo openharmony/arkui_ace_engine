@@ -30,8 +30,6 @@ public:
 
     void InitializeStyle() override;
 
-    void CallSpecializedMethod(const std::string& method, const std::string& args) override;
-
     RefPtr<Component> GetSpecializedComponent() override
     {
         return swiperChild_;
@@ -41,18 +39,9 @@ public:
 protected:
     void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) override;
     void OnChildNodeRemoved(const RefPtr<DOMNode>& child) override;
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
-    bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
-    bool AddSpecializedEvent(int32_t pageId, const std::string& event) override;
     void PrepareSpecializedComponent() override;
-    void ResetInitializedStyle() override;
 
 private:
-    bool showIndicator_ = true;
-    RefPtr<SwiperIndicator> indicator_;
-    EventMarker changeEventId_;
-    EventMarker rotationEventId_;
-    EventMarker clickEventId_;
     RefPtr<SwiperComponent> swiperChild_;
 };
 

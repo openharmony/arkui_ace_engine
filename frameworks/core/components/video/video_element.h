@@ -59,6 +59,8 @@ public:
     void FullScreen();
     void ExitFullScreen();
     void SetVolume(float volume);
+protected:
+    virtual void InitStatus(const RefPtr<VideoComponent>& videoComponent);
 
 private:
     void OnError(const std::string& errorId, const std::string& param);
@@ -79,7 +81,6 @@ private:
     void CreatePlayer(int64_t id, ErrorCallback&& errorCallback);
     void ReleasePlatformResource();
     void UpdataChild(const RefPtr<Component>& childComponent);
-    void InitStatus(const RefPtr<VideoComponent>& videoComponent);
     void InitListener();
     void ResetStatus();
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
@@ -161,13 +162,13 @@ private:
 
     FullscreenEvent fullscreenEvent_;
 
-    std::unique_ptr<OHOS::SubWindow> CreateSubWindow();
+    ::OHOS::sptr<::OHOS::Subwindow> CreateSubwindow();
     void RegistMediaPlayerEvent();
     void CreateMediaPlayer();
     void PreparePlayer();
 
     std::shared_ptr<OHOS::Media::Player> mediaPlayer_ = nullptr;
-    std::unique_ptr<OHOS::SubWindow> subWindow_ = nullptr;
+    ::OHOS::sptr<::OHOS::Subwindow> subwindow_ = nullptr;
     std::shared_ptr<MediaPlayerCallback> mediaPlayerCallback_ = nullptr;
 };
 

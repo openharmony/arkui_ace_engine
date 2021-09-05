@@ -115,4 +115,24 @@ void SharedTransitionComponent::SetShareId(const ShareId& shareId)
     shareId_ = shareId;
 }
 
+void SharedTransitionComponent::SetOpacity(float opacity)
+{
+    opacity_ = opacity;
+}
+
+float SharedTransitionComponent::GetOpacity() const
+{
+    return opacity_;
+}
+
+void SharedTransitionComponent::SetZIndex(int32_t index)
+{
+    zIndex_ = index;
+}
+
+int32_t SharedTransitionComponent::GetZIndex() const
+{
+    return zIndex_;
+}
+
 } // namespace OHOS::Ace

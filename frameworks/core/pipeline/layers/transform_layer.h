@@ -32,6 +32,9 @@ public:
     void AddToScene(SceneBuilder& builder, double x, double y) override;
     void Dump() override;
 
+    void SetFilter(const SkPaint& paint);
+    void SetOpacityLayer(int32_t alpha);
+
     const Matrix4& GetMatrix4() const
     {
         return matrix_;
@@ -39,6 +42,8 @@ public:
 
 private:
     Matrix4 matrix_;
+    std::optional<int32_t> alpha_ = std::nullopt;
+    std::optional<SkPaint> filterPaint_ = std::nullopt;
 };
 
 } // namespace OHOS::Ace::Flutter

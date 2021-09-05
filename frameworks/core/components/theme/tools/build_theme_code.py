@@ -193,6 +193,7 @@ def build_cpp(file_path, platform):
         ' */\n'\
         '\n'\
         '#include \"core/components/theme/theme_constants.h\"\n'\
+        '#include \"core/components/theme/theme_constants_defines.h\"\n'\
         '\n'\
         '#include \"core/components/common/properties/scroll_bar.h\"\n'\
         '\n'\

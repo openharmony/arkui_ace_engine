@@ -15,6 +15,7 @@
 
 #include "adapter/ohos/cpp/ace_ability.h"
 
+#include "ability_process.h"
 #include "adapter/ohos/cpp/ace_container.h"
 #include "adapter/ohos/cpp/flutter_ace_view.h"
 #include "base/log/log.h"
@@ -22,6 +23,7 @@
 #include "core/common/frontend.h"
 #include "init_data.h"
 #include "touch_event.h"
+#include "display_type.h"
 
 #include "res_config.h"
 #include "resource_manager.h"
@@ -50,10 +52,6 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr)
     }
 
     long size = std::ftell(file.get());
-    if (size == -1L) {
-        LOGE("ftell file failed, return default frontend: JS frontend.");
-        return FrontendType::JS;
-    }
     char* fileData = new (std::nothrow) char[size];
     if (fileData == nullptr) {
         LOGE("new json buff failed, return default frontend: JS frontend.");
@@ -69,6 +67,12 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr)
 
     std::string jsonString(jsonStream.get(), jsonStream.get() + size);
     auto rootJson = JsonUtil::ParseJsonString(jsonString);
+    auto mode = rootJson->GetObject("mode");
+    if (mode != nullptr) {
+        if (mode->GetString("syntax") == "ets" || mode->GetString("type") == "pageAbility") {
+            return FrontendType::DECLARATIVE_JS;
+        }
+    }
     std::string frontendType = rootJson->GetString("type");
     if (frontendType == "normal") {
         return FrontendType::JS;
@@ -81,6 +85,49 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr)
         return FrontendType::JS;
     }
 }
+
+bool GetIsArkFromConfig(const std::string &packagePathStr)
+{
+    auto configPath = packagePathStr + std::string("config.json");
+    char realPath[PATH_MAX] = {0x00};
+    if (realpath(configPath.c_str(), realPath) == nullptr) {
+        LOGE("realpath fail! filePath: %{private}s, fail reason: %{public}s", configPath.c_str(), strerror(errno));
+        LOGE("return not arkApp.");
+        return false;
+    }
+    std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
+    if (!file) {
+        LOGE("open file failed, filePath: %{private}s, fail reason: %{public}s", configPath.c_str(), strerror(errno));
+        LOGE("return not arkApp.");
+        return false;
+    }
+    if (std::fseek(file.get(), 0, SEEK_END) != 0) {
+        LOGE("seek file tail error, return not arkApp.");
+        return false;
+    }
+
+    long size = std::ftell(file.get());
+    char *fileData = new (std::nothrow) char[size];
+    if (fileData == nullptr) {
+        LOGE("new json buff failed, return not arkApp.");
+        return false;
+    }
+    rewind(file.get());
+    std::unique_ptr<char[]> jsonStream(fileData);
+    size_t result = std::fread(jsonStream.get(), 1, size, file.get());
+    if (result != (size_t)size) {
+        LOGE("read file failed, return not arkApp.");
+        return false;
+    }
+
+    std::string jsonString(jsonStream.get(), jsonStream.get() + size);
+    auto rootJson = JsonUtil::ParseJsonString(jsonString);
+    auto module = rootJson->GetValue("module");
+    auto distro = module->GetValue("distro");
+    std::string virtualMachine = distro->GetString("virtualMachine");
+    return virtualMachine.find("ark") != std::string::npos;
+}
+
 }
 
 using namespace OHOS::AAFwk;
@@ -147,38 +194,44 @@ void AceAbility::OnStart(const Want& want)
         packagePathStr += "/" + moduleInfo->name + "/";
     }
     FrontendType frontendType = GetFrontendTypeFromManifest(packagePathStr);
+    bool isArkApp = GetIsArkFromConfig(packagePathStr);
 
     // create container
     Platform::AceContainer::CreateContainer(
-        abilityId_, frontendType, this,
+        abilityId_, frontendType, isArkApp, this,
         std::make_unique<AcePlatformEventCallback>([this]() {
             TerminateAbility();
         }));
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
-    OHOS::Window* window = Ability::GetWindow().get();
+    OHOS::sptr<OHOS::Window> window = Ability::GetWindow();
 
     auto&& touchEventCallback = [aceView = flutterAceView](OHOS::TouchEvent event) -> bool {
         LOGD("RegistOnTouchCb touchEventCallback called");
         return aceView->DispatchTouchEvent(aceView, event);
     };
-    window->RegistOnTouchCb(touchEventCallback);
+    window->OnTouch(touchEventCallback);
     // register surface change callback
-    auto&& surfaceChangedCallBack = [flutterAceView](OHOS::WindowInfo& info) {
+    auto&& surfaceChangedCallBack = [flutterAceView](uint32_t width, uint32_t height) {
         LOGD("RegistWindowInfoChangeCb surfaceChangedCallBack called");
         flutter::ViewportMetrics metrics;
-        metrics.physical_width = info.width;
-        metrics.physical_height = info.height;
+        metrics.physical_width = width;
+        metrics.physical_height = height;
         Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-        Platform::FlutterAceView::SurfaceChanged(flutterAceView, info.width, info.height, 0);
+        Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
     };
-    window->RegistWindowInfoChangeCb(surfaceChangedCallBack);
+    window->OnSizeChange(surfaceChangedCallBack);
 
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window);
 
     // set metrics
-    BufferRequestConfig windowConfig;
-    window->GetRequestConfig(windowConfig);
+    BufferRequestConfig windowConfig = {
+        .width = window->GetSurface()->GetDefaultWidth(),
+        .height = window->GetSurface()->GetDefaultHeight(),
+        .strideAlignment = 0x8,
+        .format = PIXEL_FMT_RGBA_8888,
+        .usage = window->GetSurface()->GetDefaultUsage(),
+    };
     LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", windowConfig.width, windowConfig.height);
 
     flutter::ViewportMetrics metrics;
@@ -186,12 +239,20 @@ void AceAbility::OnStart(const Want& want)
     metrics.physical_height = windowConfig.height;
     Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
 
-    // add asset path.
     auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
-    Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+    if (frontendType != FrontendType::DECLARATIVE_JS) {
+        // Add asset path before SetView when not DECLARATIVE_JS.
+        Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+    }
+
     // set view
     Platform::AceContainer::SetView(flutterAceView, density_, windowConfig.width, windowConfig.height);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, windowConfig.width, windowConfig.height, 0);
+
+    if (frontendType == FrontendType::DECLARATIVE_JS) {
+        // Add asset path after SetView when DECLARATIVE_JS.
+        Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+    }
 
     // get url
     std::string parsedPageUrl;
@@ -205,9 +266,10 @@ void AceAbility::OnStart(const Want& want)
         parsedPageUrl = "";
     }
 
+    // set window id
     auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
     if (context != nullptr) {
-	    context->SetWindowId(window->GetWindowID());
+        context->SetWindowId(window->GetID());
     }
 
     // run page.
@@ -297,6 +359,21 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
     LOGI("AceAbility::OnConfigurationUpdated called ");
     Ability::OnConfigurationUpdated(configuration);
     LOGI("AceAbility::OnConfigurationUpdated called End");
+}
+
+void AceAbility::OnAbilityResult(int requestCode, int resultCode, const OHOS::AAFwk::Want& resultData)
+{
+    LOGI("AceAbility::OnAbilityResult called ");
+    AbilityProcess::GetInstance()->OnAbilityResult(this, requestCode, resultCode, resultData);
+    LOGI("AceAbility::OnAbilityResult called End");
+}
+
+void AceAbility::OnRequestPermissionsFromUserResult(
+    int requestCode, const std::vector<std::string> &permissions, const std::vector<int> &grantResults)
+{
+    LOGI("AceAbility::OnRequestPermissionsFromUserResult called ");
+    AbilityProcess::GetInstance()->OnRequestPermissionsFromUserResult(this, requestCode, permissions, grantResults);
+    LOGI("AceAbility::OnRequestPermissionsFromUserResult called End");
 }
 
 }

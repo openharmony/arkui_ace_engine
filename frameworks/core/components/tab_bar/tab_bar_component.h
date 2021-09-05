@@ -31,18 +31,12 @@
 
 namespace OHOS::Ace {
 
-enum class TabBarMode {
-    FIXED,
-    SCROLLABEL,
-    FIXED_START,
-};
-
 enum class TabBarIndicatorType {
     TAB,
     LABEL,
 };
 
-class TabBarComponent : public ComponentGroup {
+class ACE_EXPORT TabBarComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(TabBarComponent, ComponentGroup);
 
 public:
@@ -174,7 +168,17 @@ public:
         domChangeEventId_ = domChangeEventId;
     }
 
+    void SetBarPosition(BarPosition barPosition)
+    {
+        barPosition_ = barPosition;
+    }
+    BarPosition GetBarPosition() const
+    {
+        return barPosition_;
+    }
+
     void InitNavigationBarStyle();
+    void InitBottomTabStyle(const RefPtr<TabTheme>& theme);
     void BuildItems(std::list<RefPtr<TabBarItemComponent>>& items);
 
 private:
@@ -199,6 +203,7 @@ private:
     TextStyle inactiveTextStyle_;
     Alignment itemAlignment_ = Alignment::CENTER;
     EventMarker domChangeEventId_;
+    BarPosition barPosition_ = BarPosition::START;
 };
 
 } // namespace OHOS::Ace

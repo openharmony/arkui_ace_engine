@@ -29,11 +29,11 @@ ohos_unittest("ProgressCreatorTest") {
   ]
 
   deps = [
+    "$ace_flutter_engine_root:ace_skia_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "$ace_root/frameworks/core:ace_core_ohos",
     "$ace_root/frameworks/core/components/test:json",
-    "$flutter_root:ace_skia_ohos",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]

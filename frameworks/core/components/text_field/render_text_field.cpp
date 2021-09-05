@@ -75,6 +75,12 @@ RenderTextField::~RenderTextField()
         fontManager->UnRegisterCallback(AceType::WeakClaim(this));
         fontManager->RemoveVariationNode(WeakClaim(this));
     }
+
+    // If soft keyboard is still exist, close it.
+    if (HasConnection()) {
+        connection_->Close(GetInstanceId());
+        connection_ = nullptr;
+    }
 }
 
 void RenderTextField::Update(const RefPtr<Component>& component)
@@ -84,10 +90,14 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         return;
     }
 
+    // Clear children to avoid children increase.
+    ClearChildren();
+
     if (textField->IsTextLengthLimited()) {
         maxLength_ = textField->GetMaxLength();
     }
 
+    selection_ = textField->GetSelection();
     placeholder_ = textField->GetPlaceholder();
     inactivePlaceholderColor_ = textField->GetPlaceholderColor();
     focusPlaceholderColor_ = textField->GetFocusPlaceholderColor();
@@ -113,8 +123,20 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     inactiveTextColor_ = style_.GetTextColor();
     maxLines_ = textField->GetTextMaxLines();
     onTextChangeEvent_ = AceAsyncEvent<void(const std::string&)>::Create(textField->GetOnTextChange(), context_);
+    onValueChangeEvent_ = textField->GetOnTextChange().GetUiStrFunction();
+    onSelectChangeEvent_ = AceAsyncEvent<void(const std::string&)>::Create(textField->GetOnSelectChange(), context_);
     onFinishInputEvent_ = AceAsyncEvent<void(const std::string&)>::Create(textField->GetOnFinishInput(), context_);
     onTapEvent_ = AceAsyncEvent<void()>::Create(textField->GetOnTap(), context_);
+    catchMode_ = textField->GetOnTap().IsEmpty() || textField->GetOnTap().GetCatchMode();
+    static const int32_t bubbleModeVersion = 6;
+    auto pipeline = context_.Upgrade();
+    if (!catchMode_) {
+        if (pipeline && pipeline->GetMinPlatformVersion() >= bubbleModeVersion) {
+            catchMode_ = false;
+        } else {
+            catchMode_ = true;
+        }
+    }
     onLongPressEvent_ = AceAsyncEvent<void()>::Create(textField->GetOnLongPress(), context_);
     textAlign_ = textField->GetTextAlign();
     textDirection_ = textField->GetTextDirection();
@@ -125,7 +147,8 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     widthReserved_ = textField->GetWidthReserved();
     blockRightShade_ = textField->GetBlockRightShade();
     isVisible_ = textField->IsVisible();
-    if (textField->GetUpdateType() == UpdateType::ALL) {
+    showPasswordIcon_ = textField->ShowPasswordIcon();
+    if (textField->HasSetResetToStart() && textField->GetUpdateType() == UpdateType::ALL) {
         resetToStart_ = textField->GetResetToStart();
     }
     if (keyboard_ != textField->GetTextInputType()) {
@@ -151,10 +174,14 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         controller_ = textField->GetTextEditController();
         controller_->AddObserver(WeakClaim(this));
     }
-    if (controller_ && textField->IsValueUpdated()) {
-        controller_->SetText(textField->GetValue(), false);
+    if (controller_) {
+        controller_->SetHint(placeholder_);
+        if (textField->IsValueUpdated()) {
+            controller_->SetText(textField->GetValue(), false);
+        }
     }
     extend_ = textField->IsExtend();
+    softKeyboardEnabled_ = textField->IsSoftKeyboardEnabled();
     showEllipsis_ = textField->ShowEllipsis();
     auto context = context_.Upgrade();
     if (!clipboard_ && context) {
@@ -230,14 +257,19 @@ void RenderTextField::PerformLayout()
         renderHideIcon_->Layout(layoutParam);
     }
 
-    if (needNotifyChangeEvent_ && onTextChangeEvent_) {
+    if (needNotifyChangeEvent_ && (onTextChangeEvent_ || onValueChangeEvent_)) {
         needNotifyChangeEvent_ = false;
-        auto jsonResult = JsonUtil::Create(true);
-        jsonResult->Put("text", GetEditingValue().text.c_str());
-        jsonResult->Put("value", GetEditingValue().text.c_str());
-        jsonResult->Put("lines", textLines_);
-        jsonResult->Put("height", textHeight_);
-        onTextChangeEvent_(std::string(R"("change",)").append(jsonResult->ToString()));
+        if (onValueChangeEvent_) {
+            onValueChangeEvent_(GetEditingValue().text);
+        }
+        if (onTextChangeEvent_) {
+            auto jsonResult = JsonUtil::Create(true);
+            jsonResult->Put("text", GetEditingValue().text.c_str());
+            jsonResult->Put("value", GetEditingValue().text.c_str());
+            jsonResult->Put("lines", textLines_);
+            jsonResult->Put("height", textHeight_);
+            onTextChangeEvent_(std::string(R"("change",)").append(jsonResult->ToString()));
+        }
     }
 
     HandleDeviceOrientationChange();
@@ -251,6 +283,7 @@ void RenderTextField::OnTouchTestHit(
     }
     if (!clickRecognizer_) {
         clickRecognizer_ = AceType::MakeRefPtr<ClickRecognizer>();
+        clickRecognizer_->SetUseCatchMode(catchMode_);
         auto weak = WeakClaim(this);
         clickRecognizer_->SetOnClick([weak](const ClickInfo& info) {
             auto client = weak.Upgrade();
@@ -325,12 +358,15 @@ void RenderTextField::StartPressAnimation(bool pressDown)
 
 void RenderTextField::OnClick(const ClickInfo& clickInfo)
 {
+    // Handle click on password icon when password icon is valid, switch between show and hide icon.
     Point clickPoint = Point(clickInfo.GetLocalLocation().GetX(), clickInfo.GetLocalLocation().GetY());
-    if (passwordIconRect_.IsInRegion(clickPoint)) {
+    if (showPasswordIcon_ && passwordIconRect_.IsInRegion(clickPoint)) {
         obscure_ = !obscure_;
+        PopTextOverlay();
         MarkNeedLayout();
         return;
     }
+
     isValueFromRemote_ = false;
     auto globalPosition = clickInfo.GetGlobalLocation();
     auto globalOffset = GetGlobalOffset();
@@ -424,7 +460,7 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
     isSingleHandle_ = isSingleHandle;
 
     auto selStart = GetEditingValue().selection.GetStart();
-    auto selEnd = GetEditingValue().selection.GetStart();
+    auto selEnd = GetEditingValue().selection.GetEnd();
 
     Offset startHandleOffset = GetHandleOffset(selStart);
     Offset endHandleOffset = isSingleHandle ? startHandleOffset : GetHandleOffset(selEnd);
@@ -459,7 +495,7 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
     // Pop text overlay before push.
     auto lastStack = GetLastStack();
     if (lastStack) {
-        lastStack->PopTextOverlay(true);
+        lastStack->PopTextOverlay();
     }
 
     // If there is no text, don't show overlay.
@@ -481,6 +517,7 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
     textOverlay_->SetIsPassword(keyboard_ == TextInputType::VISIBLE_PASSWORD);
     textOverlay_->SetStartHandleOffset(startHandleOffset);
     textOverlay_->SetEndHandleOffset(endHandleOffset);
+    textOverlay_->SetImageFill(imageFill_);
     textOverlay_->SetOptions(inputOptions_);
     textOverlay_->SetOptionsClickMarker(onOptionsClick_);
     textOverlay_->SetTranslateButtonMarker(onTranslate_);
@@ -623,7 +660,7 @@ void RenderTextField::PushTextOverlayToStack()
         return;
     }
     isOverlayShowed_ = true;
-    lastStack->PushComponent(textOverlay_, true, false);
+    lastStack->PushComponent(textOverlay_, false);
     stackElement_ = WeakClaim(RawPtr(lastStack));
     MarkNeedRender();
 }
@@ -635,15 +672,17 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         return false;
     }
 
-    if (!HasConnection()) {
-        AttachIme();
+    if (softKeyboardEnabled_) {
         if (!HasConnection()) {
-            LOGE("Get TextInput connection error");
-            return false;
+            AttachIme();
+            if (!HasConnection()) {
+                LOGE("Get TextInput connection error");
+                return false;
+            }
+            connection_->SetEditingState(GetEditingValue(), GetInstanceId());
         }
-        connection_->SetEditingState(GetEditingValue(), GetInstanceId());
+        connection_->Show(isFocusViewChanged, GetInstanceId());
     }
-    connection_->Show(isFocusViewChanged, GetInstanceId());
     if (keyboard_ != TextInputType::MULTILINE) {
         resetToStart_ = false;
         MarkNeedLayout();
@@ -656,7 +695,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
 
 bool RenderTextField::CloseKeyboard(bool forceClose)
 {
-    if (!isOverlayShowed_ || (isOverlayShowed_ && !isOverlayFocus_) || forceClose) {
+    if (!isOverlayShowed_ || !isOverlayFocus_ || forceClose) {
         StopTwinkling();
         if (HasConnection()) {
             connection_->Close(GetInstanceId());
@@ -728,6 +767,11 @@ void RenderTextField::StopTwinkling()
 const TextEditingValue& RenderTextField::GetEditingValue() const
 {
     return controller_->GetValue();
+}
+
+const TextEditingValue& RenderTextField::GetPreEditingValue() const
+{
+    return controller_->GetPreValue();
 }
 
 void RenderTextField::SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent)
@@ -824,6 +868,7 @@ void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>
     }
 
     lastKnownRemoteEditingValue_ = value;
+    lastKnownRemoteEditingValue_->hint = placeholder_;
     TextEditingValue temp = *lastKnownRemoteEditingValue_;
     ChangeCounterStyle(temp);
     for (const auto& formatter : textInputFormatters_) {
@@ -928,10 +973,7 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
     if (event.action == KeyAction::UP &&
         (event.code == KeyCode::KEYBOARD_BACK || event.code == KeyCode::KEYBOARD_ESCAPE)) {
         if (isOverlayShowed_) {
-            auto stack = stackElement_.Upgrade();
-            if (stack) {
-                stack->PopTextOverlay(true);
-            }
+            PopTextOverlay();
             return false;
         }
     }
@@ -1014,9 +1056,10 @@ void RenderTextField::UpdateIcon(const RefPtr<TextFieldComponent>& textField)
     UpdatePasswordIcon(textField);
 
     double widthReserved = NormalizeToPx(widthReserved_);
-    if (textField->GetIconImage() == iconSrc_ && widthReserved <= 0.0) {
+    if (textField->GetIconImage() == iconSrc_ && textField->GetImageFill() == imageFill_ && widthReserved <= 0.0) {
         return;
     }
+    imageFill_ = textField->GetImageFill();
     iconSrc_ = textField->GetIconImage();
     if (!iconSrc_.empty() || widthReserved > 0.0) {
         RefPtr<ImageComponent> imageComponent;
@@ -1024,6 +1067,7 @@ void RenderTextField::UpdateIcon(const RefPtr<TextFieldComponent>& textField)
             imageComponent = AceType::MakeRefPtr<ImageComponent>(InternalResource::ResourceId::SEARCH_SVG);
         } else {
             imageComponent = AceType::MakeRefPtr<ImageComponent>(iconSrc_);
+            imageComponent->SetImageFill(imageFill_);
         }
         imageComponent->SetWidth(textField->GetIconSize());
         imageComponent->SetHeight(textField->GetIconSize());
@@ -1047,6 +1091,12 @@ void RenderTextField::UpdatePasswordIcon(const RefPtr<TextFieldComponent>& textF
     if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
         return;
     }
+    if (!showPasswordIcon_) {
+        renderShowIcon_.Reset();
+        renderHideIcon_.Reset();
+        return;
+    }
+
     showIconSrc_ = textField->GetShowIconImage();
     hideIconSrc_ = textField->GetHideIconImage();
 
@@ -1097,8 +1147,10 @@ void RenderTextField::UpdateOverlay()
         Rect caretEnd;
         bool startHandleVisible =
             GetCaretRect(selStart, caretStart) ? IsVisible(caretStart + textOffsetForShowCaret_) : false;
-        bool endHandleVisible = (selStart == selEnd) ? startHandleVisible
-            : (GetCaretRect(selEnd, caretEnd) ? IsVisible(caretEnd + textOffsetForShowCaret_) : false);
+        bool endHandleVisible =
+            (selStart == selEnd)
+                ? startHandleVisible
+                : (GetCaretRect(selEnd, caretEnd) ? IsVisible(caretEnd + textOffsetForShowCaret_) : false);
 
         OverlayShowOption option { .showMenu = isOverlayShowed_,
             .showStartHandle = startHandleVisible,
@@ -1155,7 +1207,7 @@ void RenderTextField::OnStatusChanged(OHOS::Ace::RenderStatus renderStatus)
     }
 }
 
-void RenderTextField::OnValueChanged(bool needFireChangeEvent)
+void RenderTextField::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent)
 {
     TextEditingValue temp = GetEditingValue();
     for (const auto& formatter : textInputFormatters_) {
@@ -1166,9 +1218,20 @@ void RenderTextField::OnValueChanged(bool needFireChangeEvent)
     if (cursorPositionType_ == CursorPositionType::NORMAL && temp.selection.GetStart() == temp.selection.GetEnd()) {
         temp.selection.Update(AdjustCursorAndSelection(temp.selection.GetEnd()));
     }
+    FireSelectChangeIfNeeded(temp, needFireSelectChangeEvent);
     SetEditingValue(std::move(temp), needFireChangeEvent);
     UpdateRemoteEditingIfNeeded(needFireChangeEvent);
     MarkNeedLayout();
+}
+
+void RenderTextField::FireSelectChangeIfNeeded(const TextEditingValue& newValue, bool needFireSelectChangeEvent) const
+{
+    if (needFireSelectChangeEvent && onSelectChangeEvent_ && newValue.selection != GetPreEditingValue().selection) {
+        auto jsonResult = JsonUtil::Create(true);
+        jsonResult->Put("start", newValue.selection.GetStart());
+        jsonResult->Put("end", newValue.selection.GetEnd());
+        onSelectChangeEvent_(std::string(R"("selectchange",)").append(jsonResult->ToString()));
+    }
 }
 
 void RenderTextField::CursorMoveLeft(const CursorMoveSkip skip)
@@ -1233,7 +1296,7 @@ void RenderTextField::CursorMoveOnClick(const Offset& offset)
     SetEditingValue(std::move(value));
 
     if (!GetEditingValue().text.empty() && position == GetEditingValue().selection.GetEnd()) {
-        OnValueChanged();
+        OnValueChanged(true, false);
     }
 }
 
@@ -1276,7 +1339,6 @@ void RenderTextField::UpdateRemoteEditingIfNeeded(bool needFireChangeEvent)
 void RenderTextField::ShowError(const std::string& errorText, bool resetToStart)
 {
     errorText_ = errorText;
-    resetToStart_ = resetToStart;
     if (!errorText.empty()) {
         auto refPtr = accessibilityNode_.Upgrade();
         if (refPtr) {
@@ -1528,8 +1590,13 @@ void RenderTextField::UpdateStartSelection(int32_t end, const Offset& pos, bool 
     int32_t extend = GetCursorPositionForClick(pos);
     int32_t extendEnd = GetEditingValue().selection.GetEnd();
     if (isLongPress) {
-        extendEnd = extend + GetGraphemeClusterLength(extend, false);
-        UpdateSelection(extend, extendEnd);
+        // Use custom selection if exist, otherwise select content near finger.
+        if (selection_.IsValid()) {
+            UpdateSelection(selection_.baseOffset, selection_.extentOffset);
+        } else {
+            extendEnd = extend + GetGraphemeClusterLength(extend, false);
+            UpdateSelection(extend, extendEnd);
+        }
         return;
     }
     if (isSingleHandle) {
@@ -1619,7 +1686,7 @@ void RenderTextField::HandleDeviceOrientationChange()
         const auto& stackElement = stackElement_.Upgrade();
         if (stackElement && isOverlayShowed_) {
             onKeyboardClose_ = nullptr;
-            stackElement->PopTextOverlay(true);
+            stackElement->PopTextOverlay();
             StartTwinkling();
             isOverlayShowed_ = false;
         }
@@ -1632,7 +1699,7 @@ void RenderTextField::OnHiddenChanged(bool hidden)
         CloseKeyboard();
         const auto& stackElement = stackElement_.Upgrade();
         if (stackElement) {
-            stackElement->PopTextOverlay(true);
+            stackElement->PopTextOverlay();
             isOverlayShowed_ = false;
         }
     }
@@ -1662,6 +1729,14 @@ void RenderTextField::Delete(int32_t start, int32_t end)
     SetEditingValue(std::move(value));
     if (onValueChange_) {
         onValueChange_();
+    }
+}
+
+void RenderTextField::PopTextOverlay() const
+{
+    const auto& stackElement = stackElement_.Upgrade();
+    if (stackElement) {
+        stackElement->PopTextOverlay();
     }
 }
 

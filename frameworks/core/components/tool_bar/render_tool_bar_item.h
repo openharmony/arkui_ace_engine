@@ -97,7 +97,6 @@ protected:
     bool onFocus_ = false;
     bool onHover_ = false;
     bool onTouch_ = false;
-
     EventCallback onClick_;
     RefPtr<RenderFocusAnimation> focusAnimation_;
 
@@ -107,7 +106,7 @@ private:
     void ResetController(RefPtr<Animator>& controller);
     void CreateColorAnimation(RefPtr<KeyframeAnimation<Color>>& colorAnimation, const Color& beginValue,
         const Color& endValue, bool hover);
-
+    void InitAccessibilityEventListener();
     RefPtr<RawRecognizer> touchRecognizer_;
     RefPtr<ClickRecognizer> clickRecognizer_;
     RefPtr<Animator> controllerEnter_;

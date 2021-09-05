@@ -29,7 +29,7 @@ template("ace_osal_ohos_source_set") {
       configs = [
         "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config",
         "$ace_root:ace_config",
-        "$flutter_root:flutter_config",
+        "$ace_flutter_engine_root:flutter_config",
       ]
     }
     include_dirs = [ "//utils/native/base/include" ]
@@ -38,6 +38,7 @@ template("ace_osal_ohos_source_set") {
       "$ace_root/adapter/ohos/osal/ace_trace.cpp",
       "$ace_root/adapter/ohos/osal/event_report.cpp",
       "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+      #"$ace_root/adapter/ohos/osal/pixel_map_ohos.cpp",
       "$ace_root/adapter/ohos/osal/system_properties.cpp",
     ]
     external_deps += [ "hisysevent_native:libhisysevent" ]

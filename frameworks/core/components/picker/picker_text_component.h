@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 
-class PickerTextComponent : public PickerBaseComponent {
+class ACE_EXPORT PickerTextComponent : public PickerBaseComponent {
     DECLARE_ACE_TYPE(PickerTextComponent, PickerBaseComponent);
 
 public:
@@ -71,6 +71,17 @@ public:
         }
 
         column->SetSuffix(value);
+    }
+
+    void SetDefaultPickerItemHeight(const Dimension& value)
+    {
+        auto column = GetColumn(PICKER_TEXT_COLUMN);
+        if (!column) {
+            LOGE("can not get column of text");
+            return;
+        }
+
+        column->SetFixHeight(value);
     }
 
     void OnTitleBuilding() override;

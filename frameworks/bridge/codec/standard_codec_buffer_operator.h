@@ -24,13 +24,14 @@
 
 namespace OHOS::Ace::Framework {
 
-class StandardCodecBufferReader final {
+class ACE_EXPORT StandardCodecBufferReader final {
 public:
     explicit StandardCodecBufferReader(const std::vector<uint8_t>& buffer) : byteBufferReader_(buffer) {};
     ~StandardCodecBufferReader() = default;
 
     bool ReadData(CodecData& resultData);
     bool ReadDataList(std::vector<CodecData>& resultDataList);
+    bool ReadMapSize(int32_t& size);
 
 private:
     bool ReadType(BufferDataType& type);

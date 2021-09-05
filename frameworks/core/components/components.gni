@@ -49,8 +49,8 @@ template("build_component") {
       configs = []
       configs += [
         "$ace_root:ace_config",
-        "$flutter_root:flutter_config",
-        "$flutter_root:icu_config_$platform",
+        "$ace_flutter_engine_root:flutter_config",
+        "$ace_flutter_engine_root:icu_config_$platform",
       ]
       if (defined(invoker.configs)) {
         configs += invoker.configs
@@ -59,8 +59,8 @@ template("build_component") {
       deps = []
       deps += extra_deps
       deps += [
+        "$ace_flutter_engine_root:ace_skia_$platform",
         "$ace_root/frameworks/core/components/theme:build_theme_code",
-        "$flutter_root:ace_skia_$platform",
       ]
 
       if (defined(invoker.public_configs)) {

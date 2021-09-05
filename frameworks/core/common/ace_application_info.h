@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ACE_APPLICATION_INFO_H
 
 #include <chrono>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -33,7 +34,7 @@ struct AceBundleInfo {
     std::string versionName;
 };
 
-class ACE_EXPORT AceApplicationInfo : public NonCopyable {
+class ACE_FORCE_EXPORT AceApplicationInfo : public NonCopyable {
 public:
     ACE_EXPORT static AceApplicationInfo& GetInstance();
 
@@ -42,6 +43,9 @@ public:
     virtual void ChangeLocale(const std::string& language, const std::string& countryOrRegion) = 0;
     virtual std::vector<std::string> GetLocaleFallback(const std::vector<std::string>& localeList) const = 0;
     virtual std::vector<std::string> GetResourceFallback(const std::vector<std::string>& resourceList) const = 0;
+    virtual std::vector<std::string> GetStyleResourceFallback(const std::vector<std::string>& resourceList) const = 0;
+    virtual std::vector<std::string> GetDeclarativeResourceFallback(
+        const std::set<std::string>& resourceList) const = 0;
     virtual bool GetFiles(const std::string& filePath, std::vector<std::string>& fileList) const = 0;
     virtual bool GetFiles(int32_t instanceId, const std::string& filePath, std::vector<std::string>& fileList) const
     {
@@ -57,11 +61,23 @@ public:
         return userId_;
     }
 
+    void SetPackageName(const std::string& packageName);
+    const std::string& GetPackageName() const;
+
+    void SetUid(int32_t uid);
+    int32_t GetUid() const;
+
+    void SetProcessName(const std::string& processName);
+    const std::string& GetProcessName() const;
+
     virtual bool GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo) = 0;
     virtual double GetLifeTime() const = 0;
     virtual std::string GetJsEngineParam(const std::string& key) const = 0;
     virtual std::string GetCurrentDeviceResTag() const = 0;
+    virtual std::string GetCurrentDeviceDeclarativeResTag() const = 0;
+    virtual double GetTargetMediaScaleRatio(const std::string& targetResTag) const = 0;
     virtual void SetResourceManager(std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) = 0;
+    virtual std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() = 0;
 
     const std::string& GetCountryOrRegion() const
     {
@@ -76,6 +92,11 @@ public:
     const std::string& GetScript() const
     {
         return script_;
+    }
+
+    const std::string& GetLocaleTag() const
+    {
+        return localeTag_;
     }
 
     std::string GetUnicodeSetting() const;
@@ -105,6 +126,15 @@ public:
         return isCardType_;
     }
 
+    void SetAccessibilityEnabled(bool isEnabled)
+    {
+        isAccessibilityEnabled_ = isEnabled;
+    }
+    bool IsAccessibilityEnabled() const
+    {
+        return isAccessibilityEnabled_;
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -112,12 +142,17 @@ protected:
     std::string localeTag_;
     std::string keywordsAndValues_;
 
+    std::string packageName_;
+    std::string processName_;
+    int32_t uid_;
+
     bool isRightToLeft_ = false;
     bool isDebugVersion_ = false;
     bool needDebugBreakpoint_ = false;
     bool isCardType_ = false;
 
     int userId_ = 0;
+    bool isAccessibilityEnabled_ = false;
 };
 
 } // namespace OHOS::Ace

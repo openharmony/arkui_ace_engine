@@ -38,6 +38,10 @@ public:
     void SetRowIndex(int32_t rowIndex);
     void SetColumnSpan(int32_t columnSpan);
     void SetRowSpan(int32_t rowSpan);
+    void SetForceRebuild(bool forceRebuild)
+    {
+        forceRebuild_ = forceRebuild;
+    }
 
     void SetClickedEventId(const EventMarker& eventId)
     {
@@ -69,12 +73,18 @@ public:
         return rowSpan_;
     }
 
+    bool ForceRebuild() const
+    {
+        return forceRebuild_;
+    }
+
 private:
     EventMarker clickEventId_;
     int32_t columnIndex_ = -1;
     int32_t rowIndex_ = -1;
     int32_t columnSpan_ = 1;
     int32_t rowSpan_ = 1;
+    bool forceRebuild_ = false;
 };
 
 } // namespace OHOS::Ace

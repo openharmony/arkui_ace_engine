@@ -24,7 +24,6 @@ namespace {
 const char ATTR_NAME_DX[] = "dx";
 const char ATTR_NAME_DY[] = "dy";
 const char ATTR_NAME_ROTATE[] = "rotate";
-const char ATTR_NAME_TEXT_LENGTH[] = "textLength";
 
 } // namespace
 
@@ -41,11 +40,9 @@ void RenderSvgText::Update(const RefPtr<Component> &component)
     dy_ = textComponent->GetDy();
     hasX_ = textComponent->GetHasX();
     hasY_ = textComponent->GetHasY();
-    textLength_ = textComponent->GetTextLength();
-    lengthAdjust_ = textComponent->GetLengthAdjust();
     textData_ = textComponent->GetTextData();
     rotate_ = textComponent->GetRotate();
-    RenderSvgBase::SetPresentationAttrs(textComponent);
+    RenderSvgBase::SetPresentationAttrs(textComponent->GetDeclaration());
     PrepareAnimations(component);
     MarkNeedLayout();
 }
@@ -80,8 +77,7 @@ bool RenderSvgText::PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimate)
             text->OnNotifyRender();
         }
     };
-    RefPtr<Evaluator<Dimension>> evaluator = AceType::MakeRefPtr<LinearEvaluator<Dimension>>();
-    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback), evaluator);
+    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback));
     return true;
 }
 
@@ -99,8 +95,6 @@ bool RenderSvgText::SetProperty(const std::string& attrName, const Dimension& va
         dy_ = value;
     } else if (attrName == ATTR_NAME_ROTATE) {
         rotate_ = value.Value();
-    } else if (attrName == ATTR_NAME_TEXT_LENGTH) {
-        textLength_ = value;
     } else {
         return false;
     }
@@ -119,8 +113,6 @@ bool RenderSvgText::GetProperty(const std::string& attrName, Dimension& dimensio
         dimension = dy_;
     } else if (attrName == ATTR_NAME_ROTATE) {
         dimension = Dimension(rotate_);
-    } else if (attrName == ATTR_NAME_TEXT_LENGTH) {
-        dimension = textLength_;
     } else {
         return false;
     }

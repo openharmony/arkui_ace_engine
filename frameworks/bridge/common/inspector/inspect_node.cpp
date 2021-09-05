@@ -76,17 +76,21 @@ void InspectNode::InitCommonStyles()
     styles_.insert(std::make_pair("position", "relative"));
 }
 
-void InspectNode::SetAllAttr(std::unique_ptr<JsonValue>& jsonNode)
+void InspectNode::SetAllAttr(std::unique_ptr<JsonValue>& jsonNode, const char* attrsTag)
 {
+    auto attrJsonNode = JsonUtil::Create(true);
     for (auto iter = attrs_.begin(); iter != attrs_.end(); iter++) {
-        jsonNode->Put(iter->first.c_str(), iter->second.c_str());
+        attrJsonNode->Put(iter->first.c_str(), iter->second.c_str());
     }
+    jsonNode->Put(attrsTag, attrJsonNode);
 }
 
-void InspectNode::SetAllStyle(std::unique_ptr<JsonValue>& jsonNode)
+void InspectNode::SetAllStyle(std::unique_ptr<JsonValue>& jsonNode, const char* stylesTag)
 {
+    auto styleJsonNode = JsonUtil::Create(true);
     for (auto iter = styles_.begin(); iter != styles_.end(); iter++) {
-        jsonNode->Put(iter->first.c_str(), iter->second.c_str());
+        styleJsonNode->Put(iter->first.c_str(), iter->second.c_str());
     }
+    jsonNode->Put(stylesTag, styleJsonNode);
 }
 } // namespace OHOS::Ace::Framework

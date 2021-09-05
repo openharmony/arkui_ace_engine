@@ -20,6 +20,25 @@
 
 namespace OHOS::Ace {
 
+SvgPathComponent::SvgPathComponent()
+{
+    InitDeclaration();
+}
+
+SvgPathComponent::SvgPathComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children)
+{
+    InitDeclaration();
+}
+
+void SvgPathComponent::InitDeclaration()
+{
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<SvgPathDeclaration>();
+        declaration_->Init();
+        declaration_->InitializeStyle();
+    }
+}
+
 RefPtr<Element> SvgPathComponent::CreateElement()
 {
     return AceType::MakeRefPtr<SvgPathElement>();
@@ -28,6 +47,23 @@ RefPtr<Element> SvgPathComponent::CreateElement()
 RefPtr<RenderNode> SvgPathComponent::CreateRenderNode()
 {
     return RenderSvgPath::Create();
+}
+
+const std::string& SvgPathComponent::GetD() const
+{
+    return declaration_->GetD();
+}
+
+void SvgPathComponent::SetD(const std::string& d)
+{
+    declaration_->SetD(d);
+}
+
+void SvgPathComponent::SetDeclaration(const RefPtr<SvgPathDeclaration>& declaration)
+{
+    if (declaration) {
+        declaration_ = declaration;
+    }
 }
 
 } // namespace OHOS::Ace

@@ -14,11 +14,18 @@
 import("//third_party/flutter/flutter_ace_config.gni")
 
 ace_root = "//foundation/ace/ace_engine"
+ace_flutter_engine_root = "//third_party/flutter"
 
 ace_test_output_root = "ace_engine_standard"
 
+objcopy_aarch64 = "//prebuilts/gcc/linux-x86/arm/gcc-linaro-7.5.0-arm-linux-gnueabi/arm-linux-gnueabi/bin/objcopy"
+objcopy_x86_64 = ""
 ark_tools_root = "//prebuilts/ace-toolkit/ace-loader/panda"
 node_js_path = "//prebuilts/ace-toolkit/nodejs/node-v12.18.4-linux-x64/bin/"
 cjson_root = "//third_party/cJSON"
 
 use_js_debug = false
+enable_worker = false
+declare_args() {
+  enable_ace_debug = false
+}

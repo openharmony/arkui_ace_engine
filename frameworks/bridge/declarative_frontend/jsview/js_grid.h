@@ -22,53 +22,19 @@
 namespace OHOS::Ace::Framework {
 
 class JSGrid : public JSContainerBase {
-    DECLARE_ACE_TYPE(JSGrid, JSContainerBase);
-
 public:
-    JSGrid() = delete;
-#ifdef USE_QUICKJS_ENGINE
-    JSGrid(const std::list<JSViewAbstract*>& children, std::list<JSValue> jsChildren);
-#else
-    JSGrid(const std::list<JSViewAbstract*>& children,
-        std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren);
-#endif
-    ~JSGrid();
-
-    virtual RefPtr<OHOS::Ace::Component> CreateSpecializedComponent() override;
-    std::vector<RefPtr<OHOS::Ace::SingleChild>> CreateInteractableComponents() override;
+    static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
-#ifdef USE_QUICKJS_ENGINE
-    virtual void MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc) override;
-    virtual void ReleaseRT(JSRuntime* rt) override;
-
-    static JSValue ConstructorCallback(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv);
-    static void QjsDestructor(JSRuntime* rt, JSGrid* ptr);
-    static void QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc);
-
-    static JSValue JsColumnsTemplate(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-    static JSValue JsColumnsGap(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-    static JSValue JsRowsTemplate(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-    static JSValue JsRowsGap(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-#endif
-
-#ifdef USE_V8_ENGINE
-    static void ConstructorCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
-#endif
-
-protected:
-    void SetColumnsTemplate(std::string value);
-    void SetRowsTemplate(std::string value);
-    void SetColumnsGap(double value);
-    void SetRowsGap(double value);
-
-private:
-    std::string columnsTemplate_;
-    std::string rowsTemplate_;
-    double columnsGap_ = 0.0;
-    double rowsGap_ = 0.0;
+    static void SetColumnsTemplate(const std::string& value);
+    static void SetRowsTemplate(const std::string& value);
+    static void SetColumnsGap(const JSCallbackInfo& info);
+    static void SetRowsGap(const JSCallbackInfo& info);
+    static void SetScrollBar(int32_t displayMode);
+    static void SetScrollBarColor(const std::string& color);
+    static void SetScrollBarWidth(const std::string& scrollWidth);
+    static void JsOnScrollIndex(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
-
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_GRID_H

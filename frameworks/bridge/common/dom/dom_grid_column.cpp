@@ -19,7 +19,10 @@
 
 namespace OHOS::Ace::Framework {
 
-DomGridColumn::DomGridColumn(NodeId nodeId, const std::string& nodeName) : DOMDiv(nodeId, nodeName) {}
+DomGridColumn::DomGridColumn(NodeId nodeId, const std::string& nodeName) : DOMDiv(nodeId, nodeName)
+{
+    infoBuilder_.SetColumns(1); // default span 1 column
+}
 
 RefPtr<Component> DomGridColumn::GetSpecializedComponent()
 {
@@ -61,8 +64,20 @@ bool DomGridColumn::SetSpecializedAttr(const std::pair<std::string, std::string>
             } },
         { DOM_GRID_COLUMN_OFFSET,
             [](const std::string& value, DomGridColumn& column) {
-                column.SetPosition(
-                    PositionType::ABSOLUTE, Dimension(0.0, DimensionUnit::PX), column.ParseDimension(value));
+                auto declaration = column.GetDeclaration();
+                if (!declaration) {
+                    return;
+                }
+                auto& positionStyle =
+                    declaration->MaybeResetStyle<CommonPositionStyle>(StyleTag::COMMON_POSITION_STYLE);
+                if (positionStyle.IsValid()) {
+                    positionStyle.position = PositionType::ABSOLUTE;
+                    positionStyle.top = Dimension(0.0, DimensionUnit::PX);
+                    positionStyle.left = column.ParseDimension(value);
+                    declaration->SetHasLeft(true);
+                    declaration->SetHasTop(true);
+                    declaration->SetHasPositionStyle(true);
+                }
             } },
         { DOM_GRID_SIZE_TYPE_SM,
             [](const std::string& value, DomGridColumn& column) {

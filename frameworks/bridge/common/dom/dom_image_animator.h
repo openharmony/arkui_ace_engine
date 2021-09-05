@@ -40,7 +40,7 @@ public:
         return imageAnimator_;
     }
 
-    void SetImagesAttr(const std::vector<ImageProperties>& imagesAttr)
+    void SetImagesAttr(std::vector<ImageProperties>& imagesAttr)
     {
         imagesAttr_ = std::move(imagesAttr);
     }
@@ -51,14 +51,8 @@ protected:
     void PrepareSpecializedComponent() override;
 
 private:
-    RefPtr<Animator> controller_;
     RefPtr<ImageAnimatorComponent> imageAnimator_;
     std::vector<ImageProperties> imagesAttr_;
-    int32_t iteration_ = ANIMATION_REPEAT_INFINITE; // infinite as default.
-    int32_t duration_ = 0; // Duration in millisecond.
-    int32_t preDecode_ = 1;
-    bool isReverse_ = false;
-    bool fixedSize_ = true;
 };
 
 } // namespace OHOS::Ace::Framework

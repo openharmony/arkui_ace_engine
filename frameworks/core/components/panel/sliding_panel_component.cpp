@@ -52,6 +52,7 @@ RefPtr<Component> SlidingPanelComponent::Create(const RefPtr<PanelComponent>& co
     slidingPanel->SetHalfHeight(component->GetHalfHeight());
     slidingPanel->SetMiniHeight(component->GetMiniHeight());
     slidingPanel->BuildInnerChild(boxStyle, component);
+    slidingPanel->SetPanelId(StringUtils::StringToInt(component->GetId()));
     auto box = AceType::MakeRefPtr<BoxComponent>();
     box->SetChild(slidingPanel);
     auto decoration = AceType::MakeRefPtr<Decoration>();
@@ -65,6 +66,7 @@ RefPtr<Component> SlidingPanelComponent::Create(const RefPtr<PanelComponent>& co
     if (component->GetPanelType() == PanelType::TEMP_DISPLAY) {
         dropFilter->SetSigmaX(0.5);
         dropFilter->SetSigmaY(0.5);
+        dropFilter->SetInterceptEvent(true);
     }
     dropFilter->SetUsePanelTouchRect(true);
     return dropFilter;
@@ -96,8 +98,12 @@ void SlidingPanelComponent::BuildInnerChild(const RefPtr<BoxComponent>& boxStyle
     auto backDecoration = AceType::MakeRefPtr<Decoration>();
     auto frontDecoration = AceType::MakeRefPtr<Decoration>();
     if (hasDecoration) {
-        backDecoration = boxStyle->GetBackDecoration();
-        frontDecoration = boxStyle->GetFrontDecoration();
+        if (boxStyle->GetBackDecoration()) {
+            backDecoration = boxStyle->GetBackDecoration();
+        }
+        if (boxStyle->GetFrontDecoration()) {
+            frontDecoration = boxStyle->GetFrontDecoration();
+        }
     }
     if (!panel->HasBorderStyle()) {
         Border border;

@@ -45,6 +45,11 @@ constexpr uint32_t LOG_DOMAINS[] = {
     0xD003B00,
 };
 
+constexpr LogType LOG_TYPES[] = {
+    LOG_CORE,
+    LOG_APP,
+};
+
 }
 
 // initial static member object
@@ -57,8 +62,8 @@ char LogWrapper::GetSeparatorCharacter()
 
 void LogWrapper::PrintLog(LogDomain domain, LogLevel level, const char* fmt, va_list args)
 {
-    HiLogPrintArgs(LOG_CORE, LOG_LEVELS[static_cast<uint32_t>(level)], LOG_DOMAINS[static_cast<uint32_t>(domain)],
-        LOG_TAGS[static_cast<uint32_t>(domain)], fmt, args);
+    HiLogPrintArgs(LOG_TYPES[static_cast<uint32_t>(domain)], LOG_LEVELS[static_cast<uint32_t>(level)],
+        LOG_DOMAINS[static_cast<uint32_t>(domain)], LOG_TAGS[static_cast<uint32_t>(domain)], fmt, args);
 }
 
 } // namespace OHOS::Ace
