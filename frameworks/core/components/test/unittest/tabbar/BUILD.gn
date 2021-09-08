@@ -175,13 +175,13 @@ ohos_unittest("RenderTabContentTest") {
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
 
     # theme
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
     "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
     "$ace_root/frameworks/core/components/theme/theme_manager.cpp",
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
     "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
     "$root_out_dir/ace/framework/core/components/theme/theme_constants_default.cpp",
     "render_tabcontent_test.cpp",
   ]

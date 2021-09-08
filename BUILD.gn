@@ -33,9 +33,9 @@ group("ace_packages") {
 
   if (!is_wearable_product) {
     deps += [
+      "adapter/common/cpp:libace_engine_declarative_qjs",
       "adapter/common/cpp:libace_engine_qjs",
       "adapter/common/cpp:libace_engine_qjs_debug",
-      "adapter/common/cpp:libace_engine_declarative_qjs"
     ]
   }
 }

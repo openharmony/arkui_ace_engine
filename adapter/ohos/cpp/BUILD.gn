@@ -44,9 +44,8 @@ template("ace_base_platform_source_set") {
       "//third_party/zlib:libz",
     ]
 
-    public_deps = [
-      "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr",
-    ]
+    public_deps =
+        [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
 
     external_deps = [
       "aafwk_standard:ability_manager",

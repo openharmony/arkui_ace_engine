@@ -77,8 +77,8 @@ template("libace_shared_library") {
         deps += [ "$ace_root/frameworks/bridge:js_engine_debug_$platform" ]
       } else {
         deps += [
-          "$ace_root/frameworks/bridge:js_engine_$platform",
           "$ace_root/frameworks/bridge:declarative_js_engine_qjs_$platform",
+          "$ace_root/frameworks/bridge:js_engine_$platform",
         ]
       }
     }
@@ -135,9 +135,11 @@ template("ace_platform_engine") {
       if (use_js_debug) {
         deps += [ "$ace_root/frameworks/bridge:js_engine_debug_$platform" ]
       } else if (is_declarative) {
-        deps += [ "$ace_root/frameworks/bridge:declarative_js_engine_qjs_$platform" ]
+        deps += [
+          "$ace_root/frameworks/bridge:declarative_js_engine_qjs_$platform",
+        ]
       } else {
-        deps += [ "$ace_root/frameworks/bridge:js_engine_$platform"]
+        deps += [ "$ace_root/frameworks/bridge:js_engine_$platform" ]
       }
     }
 

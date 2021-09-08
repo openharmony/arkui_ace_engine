@@ -265,11 +265,11 @@ ohos_unittest("SharedTransitionElementTest") {
   deps = [
     "$ace_root:third_party_cjson",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "$flutter_root:ace_skia_ohos",
+    "$flutter_root:third_party_flutter_engine_ohos",
     "//third_party/googletest:gtest_main",
     "//third_party/zlib:libz",
     "//utils/native/base:utils",
-    "$flutter_root:ace_skia_ohos",
-    "$flutter_root:third_party_flutter_engine_ohos",
   ]
 
   if (is_standard_system) {

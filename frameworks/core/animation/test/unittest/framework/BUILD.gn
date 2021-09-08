@@ -189,9 +189,9 @@ ohos_unittest("AnimationTest") {
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     deps += [
-      "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr",
       "$flutter_root:ace_skia_ohos",
       "$flutter_root:third_party_flutter_engine_ohos",
+      "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr",
     ]
     subsystem_name = "ace"
     part_name = "ace_engine_standard"

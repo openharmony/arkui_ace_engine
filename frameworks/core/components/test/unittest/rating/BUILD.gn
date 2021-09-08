@@ -178,10 +178,10 @@ ohos_unittest("RatingComponentTest") {
     #mock
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
     "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
   ]
 
   # add sources only needed by wearable like watch.

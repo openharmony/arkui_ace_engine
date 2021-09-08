@@ -41,6 +41,7 @@ ohos_unittest("ImageCacheTest") {
     "$ace_root/frameworks/core/components/stage/render_stage.cpp",
     "$ace_root/frameworks/core/components/stage/stage_element.cpp",
     "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
     "$ace_root/frameworks/core/event/multimodal/multimodal_manager.cpp",
@@ -58,7 +59,6 @@ ohos_unittest("ImageCacheTest") {
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
     "$ace_root/frameworks/core/pipeline/base/sole_child_element.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
     "image_cache_test.cpp",
   ]
 
@@ -77,10 +77,10 @@ ohos_unittest("ImageCacheTest") {
 
   if (is_standard_system) {
     deps += [
-      "//third_party/curl:curl",
       "$ace_root/frameworks/base:ace_base_ohos",
       "$flutter_root:ace_skia_ohos",
       "$flutter_root:third_party_flutter_engine_ohos",
+      "//third_party/curl:curl",
     ]
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
@@ -118,6 +118,7 @@ ohos_unittest("ImageProviderTest") {
     "$ace_root/frameworks/core/components/stage/stage_element.cpp",
     "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
     "$ace_root/frameworks/core/components/test/unittest/image/image_test_utils.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
     "$ace_root/frameworks/core/event/multimodal/multimodal_manager.cpp",
     "$ace_root/frameworks/core/event/multimodal/multimodal_scene.cpp",
@@ -134,7 +135,6 @@ ohos_unittest("ImageProviderTest") {
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
     "$ace_root/frameworks/core/pipeline/base/sole_child_element.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
     "image_provider_test.cpp",
   ]
 
@@ -154,10 +154,10 @@ ohos_unittest("ImageProviderTest") {
   if (is_standard_system) {
     configs += [ "//third_party/curl:curl_config" ]
     deps += [
-      "//third_party/curl:curl",
       "$ace_root/frameworks/base:ace_base_ohos",
       "$flutter_root:ace_skia_ohos",
       "$flutter_root:third_party_flutter_engine_ohos",
+      "//third_party/curl:curl",
     ]
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
