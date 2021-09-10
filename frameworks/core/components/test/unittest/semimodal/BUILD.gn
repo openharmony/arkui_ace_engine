@@ -177,10 +177,10 @@ ohos_unittest("RenderSemiModalTest") {
     #mock
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
     "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_render_context.cpp",
   ]
 
   if (!is_wearable_product) {
@@ -211,9 +211,9 @@ ohos_unittest("RenderSemiModalTest") {
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     deps += [
-      "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr",
       "$flutter_root:ace_skia_ohos",
       "$flutter_root:third_party_flutter_engine_ohos",
+      "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr",
     ]
     subsystem_name = "ace"
     part_name = "ace_engine_standard"

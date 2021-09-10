@@ -40,13 +40,12 @@ template("ace_base_platform_source_set") {
     deps = [
       "$flutter_root:ace_skia_$platform",
       "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-      "//foundation/graphic/standard:libwms_client",
+      "//foundation/graphic/standard:libwmclient",
       "//third_party/zlib:libz",
     ]
 
-    public_deps = [
-      "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr",
-    ]
+    public_deps =
+        [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
 
     external_deps = [
       "aafwk_standard:ability_manager",

@@ -31,9 +31,7 @@ build_component("video") {
       "//foundation/multimedia/media_standard/interfaces/innerkits/native/include",
     ]
 
-    deps = [
-      "//foundation/graphic/standard:libwms_client",
-    ]
+    deps = [ "//foundation/graphic/standard:libwmclient" ]
 
     external_deps = [ "ipc:ipc_core" ]
   }

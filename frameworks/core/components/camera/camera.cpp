@@ -29,12 +29,12 @@
 
 #include "base/log/log.h"
 #include "display_type.h"
+#include "window_manager.h"
 
 #include "core/image/image_cache.h"
 
 namespace OHOS::Ace {
 namespace {
-
 const char IS_SUCESS[] = "isSucceed";
 const char ERROR_CODE[] = "errorcode";
 const char PHOTO_PATH[] = "uri";
@@ -225,21 +225,33 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
         return nullptr;
     }
 
-    if (!subWindow_) {
-        OHOS::WindowConfig config;
-        memset_s(&config, sizeof(OHOS::WindowConfig), 0, sizeof(OHOS::WindowConfig));
-        config.height = windowSize_.Height();
-        config.width = windowSize_.Width();
-        config.format = PIXEL_FMT_YCRCB_420_SP;
-        config.pos_x = windowOffset_.GetX();
-        config.pos_y = windowOffset_.GetY();
-        config.subwindow = true;
-        config.type = WINDOW_TYPE_VIDEO;
+    if (subwindow_ == nullptr) {
+        const auto &wmi = ::OHOS::WindowManager::GetInstance();
+        if (wmi == nullptr) {
+            LOGE("Camera:fail to get window manager to create Camera");
+            return nullptr;
+        }
 
-        subWindow_ = OHOS::WindowManager::GetInstance()->CreateSubWindow(context->GetWindowId(), &config);
-        subWindow_->GetSurface()->SetQueueSize(10);
+        auto option = ::OHOS::SubwindowOption::Get();
+        option->SetWidth(windowSize_.Width());
+        option->SetHeight(windowSize_.Height());
+        option->SetX(windowOffset_.GetX());
+        option->SetY(windowOffset_.GetY());
+        option->SetWindowType(SUBWINDOW_TYPE_VIDEO);
+        auto window = wmi->GetWindowByID(context->GetWindowId());
+        if (window == nullptr) {
+            LOGE("Camera:fail to get window to create Camera");
+            return nullptr;
+        }
+
+        auto wret = ::OHOS::WindowManager::GetInstance()->CreateSubwindow(subwindow_, window, option);
+        if (wret != WM_OK) {
+            LOGE("Camera:create subwindow failed, because %{public}s", WMErrorStr(wret).c_str());
+            return nullptr;
+        }
+        subwindow_->GetSurface()->SetQueueSize(10);
     }
-    previewSurface_ = subWindow_->GetSurface();
+    previewSurface_ = subwindow_->GetSurface();
     previewSurface_->SetUserData(SURFACE_STRIDE_ALIGNMENT, std::to_string(SURFACE_STRIDE_ALIGNMENT_VAL));
     previewSurface_->SetUserData(SURFACE_FORMAT, std::to_string(PIXEL_FMT_YCRCB_420_SP));
     previewSurface_->SetUserData(SURFACE_WIDTH, std::to_string(PREVIEW_SURFACE_WIDTH));
@@ -466,9 +478,9 @@ void CameraCallback::Release()
         capSession_ = nullptr;
     }
 
-    if (subWindow_) {
+    if (subwindow_ != nullptr) {
         LOGI("CameraCallback: Destroy subWindow.");
-        subWindow_.reset();
+        subwindow_ = nullptr;
         auto context = context_.Upgrade();
         context->SetClipHole(0, 0, 0, 0);
         auto renderNode = renderNode_.Upgrade();
@@ -536,8 +548,15 @@ void CameraCallback::OnCameraSizeChange(double width, double height)
         return;
     }
 
-    int32_t maxWidth = OHOS::WindowManager::GetInstance()->GetMaxWidth();
-    int32_t maxHeight = OHOS::WindowManager::GetInstance()->GetMaxHeight();
+    std::vector<struct ::OHOS::WMDisplayInfo> displays;
+    ::OHOS::WindowManager::GetInstance()->GetDisplays(displays);
+    if (displays.size() <= 0) {
+        LOGE("WindowManager::GetDisplays return no screen.");
+        return;
+    }
+
+    auto maxWidth = displays[0].width;
+    auto maxHeight = displays[0].height;
     if (width + windowOffset_.GetX() > maxWidth) {
         windowSize_.SetWidth(maxWidth - windowOffset_.GetX());
     } else {
@@ -550,9 +569,9 @@ void CameraCallback::OnCameraSizeChange(double width, double height)
         windowSize_.SetHeight(height);
     }
 
-    if (subWindow_) {
+    if (subwindow_) {
         LOGE("CameraCallback::OnCameraSizeChange: %{public}lf  %{public}lf.", width, height);
-        subWindow_->SetSubWindowSize(windowSize_.Width(), windowSize_.Height());
+        subwindow_->Resize(windowSize_.Width(), windowSize_.Height());
         context->SetClipHole(windowOffset_.GetX(), windowOffset_.GetY(),
             windowSize_.Width(), windowSize_.Height());
         auto renderNode = renderNode_.Upgrade();
@@ -572,9 +591,16 @@ void CameraCallback::OnCameraOffsetChange(double x, double y)
         return;
     }
 
+    std::vector<struct ::OHOS::WMDisplayInfo> displays;
+    ::OHOS::WindowManager::GetInstance()->GetDisplays(displays);
+    if (displays.size() <= 0) {
+        LOGE("WindowManager::GetDisplays return no screen.");
+        return;
+    }
+
     bool sizeChange = false;
-    int32_t maxWidth = OHOS::WindowManager::GetInstance()->GetMaxWidth();
-    int32_t maxHeight = OHOS::WindowManager::GetInstance()->GetMaxHeight();
+    auto maxWidth = displays[0].width;
+    auto maxHeight = displays[0].height;
     if (x + windowSize_.Width() > maxWidth) {
         windowSize_.SetWidth(maxWidth - x);
         sizeChange = true;
@@ -592,9 +618,9 @@ void CameraCallback::OnCameraOffsetChange(double x, double y)
     windowOffset_.SetX(x);
     windowOffset_.SetY(y);
 
-    if (subWindow_) {
+    if (subwindow_) {
         LOGE("CameraCallback::OnCameraOffsetChange: %{public}lf  %{public}lf.", x, y);
-        subWindow_->Move(windowOffset_.GetX(), windowOffset_.GetY());
+        subwindow_->Move(windowOffset_.GetX(), windowOffset_.GetY());
         context->SetClipHole(windowOffset_.GetX(), windowOffset_.GetY(),
             windowSize_.Width(), windowSize_.Height());
         auto renderNode = renderNode_.Upgrade();

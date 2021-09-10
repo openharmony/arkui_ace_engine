@@ -146,9 +146,9 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId)
     return aceSurface;
 }
 
-void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::Window* window)
+void FlutterAceView::SurfaceCreated(FlutterAceView* view, const OHOS::sptr<OHOS::Window> &window)
 {
-    LOGI(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", window);
+    LOGI(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", window.GetRefPtr());
     if (window == nullptr) {
         LOGE("FlutterAceView::SurfaceCreated, window is nullptr");
         return;
