@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "base/image/pixel_map.h"
 #include "base/resource/internal_resource.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
@@ -29,6 +30,7 @@
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/measurable.h"
 #include "core/pipeline/base/render_component.h"
+#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
 // A component can show image.
@@ -42,147 +44,80 @@ public:
 
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
+    void SetSrc(const std::string& src);
+    void SetAlt(const std::string& alt);
+    void SetAlignment(const Alignment& alignment);
+    void SetColor(const Color& color);
+    void SetLoadSuccessEvent(const EventMarker& loadSuccessEvent);
+    void SetLoadFailEvent(const EventMarker& loadFailEvent);
+    void SetSvgAnimatorFinishEvent(const EventMarker& svgAnimatorFinishEvent);
+    void SetResourceId(InternalResource::ResourceId resourceId);
+    void SetBorder(const Border& border);
+    void SetFitMaxSize(bool fitMaxSize);
+    void SetMatchTextDirection(bool matchTextDirection);
+    void SetImageFill(const std::optional<Color>& color);
+    void SetImageFit(ImageFit imageFit);
+    void SetImageInterpolation(ImageInterpolation imageInterpolation);
+    void SetImageRenderMode(ImageRenderMode imageRenderMode);
+    void SetImageRepeat(ImageRepeat imageRepeat);
+    void SetImageSourceSize(const std::pair<Dimension, Dimension>& sourceSize);
+    void SetUseSkiaSvg(bool useSkiaSvg);
+    void SetPixmap(const RefPtr<PixelMap>& pixmap);
+    void SetAutoResize(bool autoResize);
 
-    void SetSrc(const std::string& src)
-    {
-        src_ = src;
-    }
-
-    const std::string& GetSrc() const
-    {
-        return src_;
-    }
-
-    void SetAlt(const std::string& alt)
-    {
-        alt_ = alt;
-    }
-
-    const std::string& GetAlt() const
-    {
-        return alt_;
-    }
-
-    void SetImageRepeat(ImageRepeat imageRepeat)
-    {
-        imageRepeat_ = imageRepeat;
-    }
-
-    ImageRepeat GetImageRepeat() const
-    {
-        return imageRepeat_;
-    }
-
-    void SetAlignment(const Alignment& alignment)
-    {
-        alignment_ = alignment;
-    }
-
-    const Alignment& GetAlignment() const
-    {
-        return alignment_;
-    }
-
-    void SetImageFit(ImageFit imageFit)
-    {
-        imageFit_ = imageFit;
-    }
-
-    ImageFit GetImageFit() const
-    {
-        return imageFit_;
-    }
-
-    void SetColor(const Color& color)
-    {
-        color_ = color;
-        isColorSet_ = true;
-    }
-
-    const Color& GetColor() const
-    {
-        return color_;
-    }
-
-    void SetLoadSuccessEventId(const EventMarker& loadSuccessEventId)
-    {
-        loadSuccessEventId_ = loadSuccessEventId;
-    }
-
-    const EventMarker& GetLoadSuccessEventId() const
-    {
-        return loadSuccessEventId_;
-    }
-
-    void SetLoadFailEventId(const EventMarker& loadFailEventId)
-    {
-        loadFailEventId_ = loadFailEventId;
-    }
-
-    const EventMarker& GetLoadFailEventId() const
-    {
-        return loadFailEventId_;
-    }
-
-    InternalResource::ResourceId GetResourceId() const
-    {
-        return resourceId_;
-    }
-
-    void SetResourceId(InternalResource::ResourceId resourceId)
-    {
-        resourceId_ = resourceId;
-    }
-
-    void SetBorder(const Border& border)
-    {
-        border_ = border;
-    }
-
-    const Border& GetBorder() const
-    {
-        return border_;
-    }
-
-    bool GetFitMaxSize() const
-    {
-        return fitMaxSize_;
-    }
-
-    void SetFitMaxSize(bool fitMaxSize)
-    {
-        fitMaxSize_ = fitMaxSize;
-    }
-
-    bool IsMatchTextDirection() const
-    {
-        return matchTextDirection_;
-    }
-
-    void SetMatchTextDirection(bool matchTextDirection)
-    {
-        matchTextDirection_ = matchTextDirection;
-    }
-
-    bool IsColorSet() const
-    {
-        return isColorSet_;
-    }
-
+    const std::string& GetAlt() const;
+    const Alignment& GetAlignment() const;
+    const std::string& GetSrc() const;
+    const Color& GetColor() const;
+    const Border& GetBorder() const;
+    const EventMarker& GetLoadSuccessEvent() const;
+    const EventMarker& GetLoadFailEvent() const;
+    const EventMarker& GetSvgAnimatorFinishEvent() const;
+    InternalResource::ResourceId GetResourceId() const;
+    bool GetFitMaxSize() const;
+    bool IsColorSet() const;
+    bool IsMatchTextDirection() const;
+    bool IsSrcSvgImage() const;
+    ImageFit GetImageFit() const;
+    ImageInterpolation GetImageInterpolation() const;
+    ImageRenderMode GetImageRenderMode() const;
+    ImageRepeat GetImageRepeat() const;
+    const std::pair<Dimension, Dimension>& GetImageSourceSize() const;
+    bool GetUseSkiaSvg() const;
+    bool GetAutoResize() const;
+    static bool IsSvgSuffix(const std::string& src);
+    const RefPtr<PixelMap>& GetPixmap() const;
+    void SetHasObjectPosition(bool hasObjectPosition);
+    bool GetHasObjectPosition() const;
+    void SetImageObjectPosition(const ImageObjectPosition& imageObjectPosition);
+    const ImageObjectPosition& GetImageObjectPosition() const;
 private:
     std::string src_;
     std::string alt_;
     Alignment alignment_ = Alignment::CENTER;
-    ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
-    ImageFit imageFit_ = ImageFit::COVER;
+    ImageObjectPosition imageObjectPosition_;
     Color color_ = Color::TRANSPARENT;
+    Color fillColor_ = Color::TRANSPARENT;
     bool isColorSet_ = false;
-    EventMarker loadSuccessEventId_;
-    EventMarker loadFailEventId_;
+    bool isFillSet_ = false;
+    EventMarker loadSuccessEvent_;
+    EventMarker loadFailEvent_;
+    EventMarker svgAnimatorFinishEvent_;
     InternalResource::ResourceId resourceId_ = InternalResource::ResourceId::NO_ID;
     Border border_;
-    bool fitMaxSize_ = false;
+    bool fitMaxSize_ = true;
+    bool hasObjectPosition_ = false;
     bool matchTextDirection_ = false;
+    bool useSkiaSvg_ = true;
+    bool autoResize_ = true;
+
+    ImageFit imageFit_ = ImageFit::COVER;
+    // set default value to [ImageInterpolation::LOW] to keep consistent for the old frontend
+    ImageInterpolation imageInterpolation_ = ImageInterpolation::LOW;
+    ImageRenderMode imageRenderMode_ = ImageRenderMode::ORIGINAL;
+    ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
+    std::pair<Dimension, Dimension> imageSourceSize_ = std::pair<Dimension, Dimension>(Dimension(-1), Dimension(-1));
+    RefPtr<PixelMap> pixmap_ = nullptr;
 };
 
 } // namespace OHOS::Ace

@@ -16,35 +16,37 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_SVG_PATH_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_SVG_PATH_COMPONENT_H
 
-#include "frameworks/core/components/svg/svg_sharp.h"
+#include "core/components/declaration/svg/svg_path_declaration.h"
 #include "frameworks/core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace {
 
-class SvgPathComponent : public ComponentGroup, public SvgSharp {
-    DECLARE_ACE_TYPE(SvgPathComponent, ComponentGroup, SvgSharp);
+class SvgPathComponent : public ComponentGroup {
+    DECLARE_ACE_TYPE(SvgPathComponent, ComponentGroup);
 
 public:
-    SvgPathComponent() = default;
-    explicit SvgPathComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children) {};
+    SvgPathComponent();
+    explicit SvgPathComponent(const std::list<RefPtr<Component>>& children);
     ~SvgPathComponent() override = default;
-
+    void InitDeclaration();
     RefPtr<RenderNode> CreateRenderNode() override;
-
     RefPtr<Element> CreateElement() override;
+    void SetD(const std::string& d);
+    const std::string& GetD() const;
+    void SetDeclaration(const RefPtr<SvgPathDeclaration>& declaration);
 
-    void SetD(const std::string& d)
+    const RefPtr<SvgPathDeclaration>& GetDeclaration() const
     {
-        d_ = d;
+        return declaration_;
     }
 
-    const std::string& GetD() const
+    void Inherit(const RefPtr<SvgBaseDeclaration>& parent)
     {
-        return d_;
+        declaration_->Inherit(parent);
     }
 
 private:
-    std::string d_;
+    RefPtr<SvgPathDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

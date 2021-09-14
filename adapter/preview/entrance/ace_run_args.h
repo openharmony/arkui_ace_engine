@@ -20,6 +20,7 @@
 #include <string>
 
 #include "base/utils/device_type.h"
+#include "base/utils/device_config.h"
 
 #ifndef ACE_PREVIEW_EXPORT
 #ifdef _WIN32
@@ -31,23 +32,15 @@
 
 namespace OHOS::Ace::Platform {
 
-using SendRenderDataCallback = bool (*)(const void*, size_t);
+using SendRenderDataCallback = bool (*)(const void*, const size_t, const int32_t, const int32_t);
+using SendCurrentRouterCallback = bool (*)(const std::string currentRouterPath);
 
-// Keep the same with definition in base/utils/system_properties.h
-enum class DeviceOrientation : int32_t {
-    PORTRAIT,
-    LANDSCAPE,
-};
+constexpr uint32_t THEME_ID_LIGHT = 117440515;
+constexpr uint32_t THEME_ID_DARK = 117440516;
 
-enum class ThemeId : int32_t {
-    THEME_ID_LIGHT,
-    THEME_ID_DARK,
-};
-
-// Keep the same with definition in base/utils/system_properties.h
-enum class ColorMode : int32_t {
-    LIGHT = 0,
-    DARK,
+enum class AceVersion {
+    ACE_1_0,
+    ACE_2_0,
 };
 
 struct ACE_PREVIEW_EXPORT AceRunArgs {
@@ -56,11 +49,15 @@ struct ACE_PREVIEW_EXPORT AceRunArgs {
     // The absolute path of system resources.
     std::string resourcesPath;
 
-    // Indecate light or dark theme. 0 is theme_light, 1 is theme_dark.
-    ThemeId themeId = ThemeId::THEME_ID_LIGHT;
+    // Indecate light or dark theme.
+    uint32_t themeId = THEME_ID_LIGHT;
 
-    // Light Theme contains light mode and dark mode. The dafault is light mode of light theme.
-    ColorMode colorMode = ColorMode::LIGHT;
+    OHOS::Ace::DeviceConfig deviceConfig = {
+        .orientation = DeviceOrientation::PORTRAIT,
+        .density = 1.0,
+        .deviceType = DeviceType::PHONE,
+        .colorMode = ColorMode::LIGHT,
+    };
 
     // Set page path to launch directly, or launch the main page in default.
     std::string url;
@@ -72,19 +69,20 @@ struct ACE_PREVIEW_EXPORT AceRunArgs {
     int32_t viewHeight = 0;
     int32_t deviceWidth = 0;
     int32_t deviceHeight = 0;
-    double resolution = 1.0;
 
     // Locale
     std::string language = "zh";
     std::string region = "CN";
     std::string script = "";
 
-    DeviceOrientation orientation = DeviceOrientation::PORTRAIT;
-    DeviceType deviceType = DeviceType::PHONE;
+    std::string configChanges;
+
+    AceVersion aceVersion = AceVersion::ACE_1_0;
 
     bool formsEnabled = false;
 
-    SendRenderDataCallback onRender;
+    SendRenderDataCallback onRender = nullptr;
+    SendCurrentRouterCallback onRouterChange = nullptr;
 };
 
 } // namespace OHOS::Ace::Platform

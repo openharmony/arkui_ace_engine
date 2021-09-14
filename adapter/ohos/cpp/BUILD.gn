@@ -26,7 +26,11 @@ template("ace_base_platform_source_set") {
       "$ace_root/adapter/ohos/cpp/ace_ability.cpp",
       "$ace_root/adapter/ohos/cpp/ace_application_info.cpp",
       "$ace_root/adapter/ohos/cpp/ace_container.cpp",
+      "$ace_root/adapter/ohos/cpp/ace_data_ability.cpp",
+      "$ace_root/adapter/ohos/cpp/ace_form_ability.cpp",
+      "$ace_root/adapter/ohos/cpp/ace_service_ability.cpp",
       "$ace_root/adapter/ohos/cpp/flutter_ace_view.cpp",
+      "$ace_root/adapter/ohos/cpp/pa_container.cpp",
     ]
 
     configs = [
@@ -35,11 +39,20 @@ template("ace_base_platform_source_set") {
       "$flutter_root:icu_config_$platform",
     ]
 
-    include_dirs = [ "//utils/native/base/include" ]
+    include_dirs = [
+      "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/featureAbility",
+      "//foundation/ace/napi/interfaces/kits",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability/include",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include",
+      "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
+      "//third_party/node/src",
+      "//utils/native/base/include",
+    ]
 
     deps = [
       "$flutter_root:ace_skia_$platform",
       "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
+      "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
       "//foundation/graphic/standard:libwmclient",
       "//third_party/zlib:libz",
     ]
@@ -49,12 +62,16 @@ template("ace_base_platform_source_set") {
 
     external_deps = [
       "aafwk_standard:ability_manager",
+      "aafwk_standard:base",
       "aafwk_standard:want",
       "appexecfwk_standard:appexecfwk_base",
       "appexecfwk_standard:appexecfwk_core",
+      "appexecfwk_standard:fmskit_native",
       "appexecfwk_standard:libeventhandler",
       "ipc:ipc_core",
       "multimodalinput_base:mmi_event",
+      "native_appdatamgr:native_dataability",
+      "native_appdatamgr:native_rdb",
     ]
   }
 }

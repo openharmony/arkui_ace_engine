@@ -79,8 +79,11 @@ void DOMToolBarItem::InitializedToolBarItemChild()
     if (selectTheme) {
         toolBarItemChild_->SetMenuMinWidth(selectTheme->GetPopupMinWidth());
     }
-    backDecoration_->SetBackgroundColor(theme_->GetItemBackgroundColor());
-    hasDecorationStyle_ = true;
+    if (!declaration_) {
+        return;
+    }
+    declaration_->GetBackDecoration()->SetBackgroundColor(theme_->GetItemBackgroundColor());
+    declaration_->SetHasDecorationStyle(true);
 }
 
 bool DOMToolBarItem::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
@@ -108,6 +111,10 @@ bool DOMToolBarItem::SetSpecializedStyle(const std::pair<std::string, std::strin
         { DOM_TOOL_BAR_ITEM_ALLOW_SCALE,
             [](DOMToolBarItem& toolBarItem, const std::string& val) {
                 toolBarItem.textStyle_.SetAllowScale(StringToBool(val));
+            } },
+        { DOM_TOOL_BAR_ITEM_COLOR,
+            [](DOMToolBarItem& toolBarItem, const std::string& val) {
+                toolBarItem.textStyle_.SetTextColor(Color::FromString(val));
             } },
         { DOM_TOOL_BAR_ITEM_FONT_FAMILY,
             [](DOMToolBarItem& toolBarItem, const std::string& val) {
@@ -146,8 +153,18 @@ bool DOMToolBarItem::SetSpecializedStyle(const std::pair<std::string, std::strin
 bool DOMToolBarItem::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
     static const LinearMapNode<void (*)(DOMToolBarItem&, const EventMarker&)> toolBarItemEventOperators[] = {
-        { DOM_CLICK, [](DOMToolBarItem& toolBarItem,
-                     const EventMarker& event) { toolBarItem.clickEventId_ = std::move(event); } },
+        { DOM_CATCH_BUBBLE_CLICK,
+            [](DOMToolBarItem& toolBarItem, const EventMarker& event) {
+                EventMarker eventMarker(event);
+                eventMarker.SetCatchMode(true);
+                toolBarItem.clickEventId_ = eventMarker;
+            } },
+        { DOM_CLICK,
+            [](DOMToolBarItem& toolBarItem, const EventMarker& event) {
+                EventMarker eventMarker(event);
+                eventMarker.SetCatchMode(false);
+                toolBarItem.clickEventId_ = eventMarker;
+            } },
     };
     auto operatorIter =
         BinarySearchFindIndex(toolBarItemEventOperators, ArraySize(toolBarItemEventOperators), event.c_str());
@@ -193,6 +210,7 @@ void DOMToolBarItem::BuildCommonComponent(std::list<RefPtr<Component>>& children
         }
         imageChild_->SetResourceId(InternalResource::ResourceId::NO_ID);
         imageChild_->SetSrc(icon_);
+        imageChild_->SetImageFill(GetImageFill());
         children.emplace_back(SetPadding(imageChild_, Edge(theme_->GetIconEdge())));
     }
 

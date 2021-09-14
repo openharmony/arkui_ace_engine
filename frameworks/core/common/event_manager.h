@@ -23,11 +23,12 @@
 #include "core/event/mouse_event.h"
 #include "core/event/rotation_event.h"
 #include "core/focus/focus_node.h"
-#include "core/gestures/touch_event.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace {
 
 class RenderNode;
+class Element;
 
 class EventManager {
 public:
@@ -44,8 +45,8 @@ public:
 
     // Distribute the rotation event to the corresponding render tree or requested render node. If the render is not
     // processed, return false and the platform will handle it.
-    static bool DispatchRotationEvent(const RotationEvent& event, const RefPtr<RenderNode>& renderNode,
-        const RefPtr<RenderNode>& requestFocusNode);
+    static bool DispatchRotationEvent(
+        const RotationEvent& event, const RefPtr<RenderNode>& renderNode, const RefPtr<RenderNode>& requestFocusNode);
 
     // mouse event target list.
     void MouseTest(const MouseEvent& touchPoint, const RefPtr<RenderNode>& renderNode);

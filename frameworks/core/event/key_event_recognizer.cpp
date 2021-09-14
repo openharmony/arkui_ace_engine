@@ -27,16 +27,17 @@ constexpr int32_t LONG_PRESS_DURATION = 1;
 }
 
 std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(
-    int32_t keyCode, int32_t keyAction, int32_t repeatTime, int64_t timeStamp, int64_t timeStampStart)
+    int32_t keyCode, int32_t keyAction, int32_t repeatTime, int64_t timeStamp, int64_t timeStampStart, int32_t metaKey,
+    int32_t keySource, int32_t deviceId)
 {
     if (timeStamp == 0) {
         timeStamp = clock();
         timeStampStart = timeStamp;
     }
-
     std::vector<KeyEvent> keyEvents;
     keyEvents.emplace_back(
-        static_cast<KeyCode>(keyCode), static_cast<KeyAction>(keyAction), repeatTime, timeStamp, timeStampStart);
+        static_cast<KeyCode>(keyCode), static_cast<KeyAction>(keyAction), repeatTime, timeStamp, timeStampStart,
+        metaKey, keySource, deviceId);
     auto result = keyMap_.try_emplace(keyCode, false);
     auto iter = result.first;
 
@@ -46,7 +47,8 @@ std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(
         LOGD("this event is long press, key code is %{public}d", keyCode);
         iter->second = true;
         keyEvents.emplace_back(
-            static_cast<KeyCode>(keyCode), KeyAction::LONG_PRESS, repeatTime, timeStamp, timeStampStart);
+            static_cast<KeyCode>(keyCode), KeyAction::LONG_PRESS, repeatTime, timeStamp, timeStampStart, metaKey,
+            keySource, deviceId);
     }
     // Recognize click event.
     if (keyAction == static_cast<int32_t>(KeyAction::UP)) {
@@ -55,7 +57,8 @@ std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(
         } else {
             LOGD("this event is click, key code is %{public}d", keyCode);
             keyEvents.emplace_back(
-                static_cast<KeyCode>(keyCode), KeyAction::CLICK, repeatTime, timeStamp, timeStampStart);
+                static_cast<KeyCode>(keyCode), KeyAction::CLICK, repeatTime, timeStamp, timeStampStart, metaKey,
+                keySource, deviceId);
         }
     }
     return keyEvents;

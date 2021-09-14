@@ -21,6 +21,7 @@
 #include "core/components/test/json/component_factory.h"
 #include "core/components/test/json/select_creator.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 
 using namespace testing;
 using namespace testing::ext;

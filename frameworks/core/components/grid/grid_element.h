@@ -32,7 +32,7 @@ public:
 
 private:
     RefPtr<RenderNode> CreateRenderNode() override;
-    void Apply(const RefPtr<Element>& child) override;
+    void ApplyRenderChild(const RefPtr<RenderElement>& renderChild) override;
 
     void BuildGridData(int32_t index, int32_t count);
 

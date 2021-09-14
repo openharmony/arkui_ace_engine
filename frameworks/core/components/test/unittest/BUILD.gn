@@ -36,10 +36,8 @@ group("unittest") {
     "image_animator:unittest",
     "indexer:unittest",
     "list:unittest",
-    "marquee:unittest",
     "padding:unittest",
     "progress:unittest",
-    "rating:unittest",
     "refresh:unittest",
     "rotation:unittest",
     "scroll:unittest",
@@ -50,8 +48,8 @@ group("unittest") {
     "stage:unittest",
     "svg:unittest",
     "swiper:unittest",
-    "tabbar:unittest",
     "text:unittest",
+    "theme:unittest",
     "transform:unittest",
     "transition:unittest",
     "tween:unittest",
@@ -65,11 +63,13 @@ group("unittest") {
       "menu:unittest",
       "picker:unittest",
       "piece:unittest",
+      "rating:unittest",
       "select:unittest",
       "tabbar:unittest",
       "text_field:unittest",
       "text_select:unittest",
-      "video:unittest",
+
+      # "video:unittest",
     ]
   }
 }

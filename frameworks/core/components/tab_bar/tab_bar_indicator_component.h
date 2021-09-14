@@ -29,7 +29,7 @@ enum class TabBarIndicatorStyle {
     CUSTOM,
 };
 
-class TabBarIndicatorComponent : public BoxComponent {
+class ACE_EXPORT TabBarIndicatorComponent : public BoxComponent {
     DECLARE_ACE_TYPE(TabBarIndicatorComponent, BoxComponent);
 
 public:

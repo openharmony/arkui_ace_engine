@@ -63,9 +63,4 @@ void RenderWeb::PerformLayout()
     MarkNeedRender();
 }
 
-void RenderWeb::MarkNeedRender(bool overlay)
-{
-    RenderNode::MarkNeedRender(overlay);
-}
-
 } // namespace OHOS::Ace

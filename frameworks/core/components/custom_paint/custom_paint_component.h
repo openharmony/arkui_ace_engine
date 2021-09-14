@@ -23,8 +23,10 @@
 #include "base/geometry/rect.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components/custom_paint/canvas_render_context_base.h"
 #include "core/pipeline/base/render_component.h"
 #include "core/pipeline/base/render_context.h"
+#include "core/components/custom_paint/offscreen_canvas.h"
 
 namespace OHOS::Ace {
 
@@ -63,6 +65,9 @@ public:
 
     void SetRenderNode(const WeakPtr<RenderCustomPaint>& paint);
     std::string ToDataURL(const std::string& args);
+    void SetWebGLInstance(CanvasRenderContextBase* context);
+    void WebGLInit(CanvasRenderContextBase* context);
+    void WebGLUpdate();
     void SetAntiAlias(bool isEnabled);
     void FillRect(const Rect& rect);
     void StrokeRect(const Rect& rect);
@@ -121,6 +126,7 @@ public:
     void UpdateCompositeOperation(CompositeOperation type);
     void UpdateSmoothingEnabled(bool enabled);
     void UpdateSmoothingQuality(const std::string& quality);
+    void TransferFromImageBitmap(const RefPtr<OffscreenCanvas>& offscreenCanvas);
 
 private:
     PushTaskFunc pushToRenderNodeFunc_;

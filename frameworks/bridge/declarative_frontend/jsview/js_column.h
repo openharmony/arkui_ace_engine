@@ -20,40 +20,37 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSColumn : public JSFlex<ColumnComponent> {
-    DECLARE_ACE_TYPE(JSColumn, JSContainerBase);
-
+class JSColumn : public JSFlex {
 public:
-    JSColumn() = delete;
-#ifdef USE_V8_ENGINE
-    JSColumn(const std::list<JSViewAbstract*>& children,
-        std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren)
-#else
-    JSColumn(const std::list<JSViewAbstract*>& children, std::list<JSValue> jsChildren)
-#endif
-        : JSFlex<ColumnComponent>(children, jsChildren) {};
-
-    ~JSColumn()
-    {
-        LOGD("Destroy: JSColumn");
-    };
-
-    virtual void Destroy(JSViewAbstract* parentCustomView) override;
-
-protected:
-    bool IsHorizontal() const override;
-
-public:
+    static void Create(const JSCallbackInfo& info);
+    static void CreateWithWrap(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
-#ifdef USE_QUICKJS_ENGINE
-    static JSValue ConstructorCallback(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv);
-    static void QjsDestructor(JSRuntime* rt, JSColumn* ptr);
-    static void QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc);
-#elif USE_V8_ENGINE
-    static void ConstructorCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
-#endif
+};
+
+class HorizontalAlignDeclaration : public AlignDeclaration {
+    DECLARE_ACE_TYPE(HorizontalAlignDeclaration, AlignDeclaration);
+
+public:
+    explicit HorizontalAlignDeclaration(HorizontalAlign align) : align_(align) {}
+    ~HorizontalAlignDeclaration() override = default;
+
+    static void ConstructorCallback(const JSCallbackInfo& args);
+    static void DestructorCallback(HorizontalAlignDeclaration* obj);
+
+    virtual HorizontalAlign GetHorizontalAlign() const override
+    {
+        return align_;
+    }
+
+    DeclarationType GetDeclarationType() override
+    {
+        return DeclarationType::HORIZONTAL;
+    }
+
+private:
+    HorizontalAlignDeclaration() = default;
+    HorizontalAlign align_ { HorizontalAlign::CENTER };
 };
 
 } // namespace OHOS::Ace::Framework
-
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_COLUMN_H

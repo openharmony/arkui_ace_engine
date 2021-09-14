@@ -34,7 +34,11 @@ public:
         return true;
     }
 
+protected:
+    void OnGlobalPositionChanged() override;
+
 private:
+    void UpdateTransformByGlobalOffset();
     RefPtr<Flutter::ClipLayer> layer_;
     RefPtr<Flutter::TransformLayer> transformLayer_;
 };

@@ -312,7 +312,7 @@ bool PickerBaseComponent::HideDialog()
         return false;
     }
 
-    if (!stack_->PopDialog(true)) {
+    if (!stack_->PopDialog()) {
         LOGE("pop dialog failed!");
         return false;
     }
@@ -481,8 +481,6 @@ void PickerBaseComponent::InitializeLunar(
             lunarStyle.SetLineHeight(theme_->GetLunarHeight());
         }
         lunarText->SetTextStyle(lunarStyle);
-        auto lunarTextComposed = GenerateAccessibilityComposed("lunar-text", lunarText, lunarAccessibility_);
-
         auto checkboxTheme = themeManager->GetTheme<CheckboxTheme>();
         lunar_ = AceType::MakeRefPtr<CheckboxComponent>(checkboxTheme);
         lunar_->SetHorizontalPadding(Dimension(0.0));

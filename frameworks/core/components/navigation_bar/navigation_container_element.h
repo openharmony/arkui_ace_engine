@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATION_BAR_NAVIGATION_CONTAINER_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATION_BAR_NAVIGATION_CONTAINER_ELEMENT_H
 
+#include "core/components/tab_bar/tab_controller.h"
 #include "core/pipeline/base/component_group_element.h"
 
 namespace OHOS::Ace {
@@ -24,10 +25,16 @@ class NavigationContainerElement : public ComponentGroupElement, public FocusGro
     DECLARE_ACE_TYPE(NavigationContainerElement, ComponentGroupElement, FocusGroup);
 
 public:
+    void PerformBuild() override;
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override
     {
         return GoToNextFocus(reverse, rect);
     }
+
+private:
+    void ConnectNavigator(const RefPtr<StageElement>& targetContainer);
+
+    TabBarChangeListener tabBarChangeListener_;
 };
 
 } // namespace OHOS::Ace

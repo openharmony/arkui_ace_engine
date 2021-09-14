@@ -88,8 +88,6 @@ RRect CardTransitionController::GetCardRect(const ComposeId& composeId) const
 class TransitionGroup {
 public:
     explicit TransitionGroup(const char* name) : name_(name) {}
-    ~TransitionGroup() = default;
-
     // only for test use.
     WeakPtr<MockRenderTransform> transformRenderContent_;
     WeakPtr<MockRenderTransform> transformRenderBackground_;
@@ -423,9 +421,9 @@ public:
         platformWindowRaw_->TriggerOneFrame();
         float scale = 0.0f;
         transitionB_.transformRenderContent_.Upgrade()->GetScaleSetting(scale);
-        EXPECT_NEAR(scale, 0.839325f, TRANSITION_EPSILON);
+        EXPECT_NEAR(scale, 0.789714f, TRANSITION_EPSILON);
         Rect clipRect = clipRender->GetClipRect(Offset());
-        EXPECT_NEAR(clipRect.Height(), 922.876, TRANSITION_EPSILON);
+        EXPECT_NEAR(clipRect.Height(), 899.063, TRANSITION_EPSILON);
         EXPECT_NEAR(clipRect.Width(), 540.0, TRANSITION_EPSILON);
         EXPECT_NEAR(clipRect.Top(), 0.0, TRANSITION_EPSILON);
         EXPECT_NEAR(clipRect.Left(), 0.0, TRANSITION_EPSILON);
@@ -436,9 +434,9 @@ public:
          */
         platformWindowRaw_->TriggerFrames(4);
         transitionB_.transformRenderContent_.Upgrade()->GetScaleSetting(scale);
-        EXPECT_NEAR(scale, 0.209137f, TRANSITION_EPSILON);
+        EXPECT_NEAR(scale, 0.180093f, TRANSITION_EPSILON);
         clipRect = clipRender->GetClipRect(Offset());
-        EXPECT_NEAR(clipRect.Height(), 620.386, TRANSITION_EPSILON);
+        EXPECT_NEAR(clipRect.Height(), 606.445, TRANSITION_EPSILON);
         EXPECT_NEAR(clipRect.Width(), 540.0, TRANSITION_EPSILON);
         EXPECT_NEAR(clipRect.Top(), 0.0, TRANSITION_EPSILON);
         EXPECT_NEAR(clipRect.Left(), 0.0, TRANSITION_EPSILON);
@@ -464,11 +462,9 @@ public:
         auto display = transitionB_.displayRenderContent_.Upgrade();
         EXPECT_TRUE(display);
         platformWindowRaw_->TriggerFrames(4);
-        EXPECT_NEAR(display->GetOpacity(), 1, TRANSITION_EPSILON);
+        EXPECT_NEAR(display->GetOpacity(), 0.870, TRANSITION_EPSILON);
         platformWindowRaw_->TriggerOneFrame();
-        EXPECT_NEAR(display->GetOpacity(), 0.741176, TRANSITION_EPSILON);
-        platformWindowRaw_->TriggerOneFrame();
-        EXPECT_NEAR(display->GetOpacity(), 0.258824, TRANSITION_EPSILON);
+        EXPECT_NEAR(display->GetOpacity(), 0.337254, TRANSITION_EPSILON);
         platformWindowRaw_->TriggerOneFrame();
         EXPECT_NEAR(display->GetOpacity(), 0.0, TRANSITION_EPSILON);
     }
@@ -532,10 +528,10 @@ public:
         platformWindowRaw_->TriggerOneFrame();
         EXPECT_EQ(VisibleType::VISIBLE, transitionB_.displayRenderContent_.Upgrade()->GetVisibleType());
         transitionB_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
-        EXPECT_NEAR(offsetX.Value(), 69.49f, TRANSITION_EPSILON);
+        EXPECT_NEAR(offsetX.Value(), 38.84f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
         transitionA_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
-        EXPECT_NEAR(offsetX.Value(), -188.20f, TRANSITION_EPSILON);
+        EXPECT_NEAR(offsetX.Value(), -200.46f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
 
         /**
@@ -610,10 +606,10 @@ public:
         Dimension offsetY;
         platformWindowRaw_->TriggerOneFrame();
         transitionB_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
-        EXPECT_NEAR(offsetX.Value(), 179.81f, TRANSITION_EPSILON);
+        EXPECT_NEAR(offsetX.Value(), 292.13f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
         transitionA_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
-        EXPECT_NEAR(offsetX.Value(), -144.07f, TRANSITION_EPSILON);
+        EXPECT_NEAR(offsetX.Value(), -99.15f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
 
         /**
@@ -642,7 +638,7 @@ public:
         Dimension offsetY;
         platformWindowRaw_->TriggerOneFrame();
         transitionB_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
-        EXPECT_NEAR(offsetX.Value(), -1011.98, TRANSITION_EPSILON); // -1011.9884336590767
+        EXPECT_NEAR(offsetX.Value(), -1012, TRANSITION_EPSILON); // -1011.9884336590767
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
         transitionA_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
         EXPECT_NEAR(offsetX.Value(), 0.0f, TRANSITION_EPSILON);
@@ -675,10 +671,10 @@ public:
         platformWindowRaw_->TriggerOneFrame();
         EXPECT_EQ(VisibleType::VISIBLE, transitionB_.displayRenderContent_.Upgrade()->GetVisibleType());
         transitionB_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
-        EXPECT_NEAR(offsetX.Value(), 138.98f, TRANSITION_EPSILON);
+        EXPECT_NEAR(offsetX.Value(), 77.67f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
         transitionA_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
-        EXPECT_NEAR(offsetX.Value(), -470.50f, TRANSITION_EPSILON);
+        EXPECT_NEAR(offsetX.Value(), 0.0f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
 
         /**
@@ -691,7 +687,7 @@ public:
         EXPECT_NEAR(offsetX.Value(), 0.0f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
         transitionA_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
-        EXPECT_NEAR(offsetX.Value(), -540.0f, TRANSITION_EPSILON);
+        EXPECT_NEAR(offsetX.Value(), 0.0f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
 
         EXPECT_EQ(1, transitionA_.stopCounter_);
@@ -709,10 +705,10 @@ public:
         Dimension offsetY;
         platformWindowRaw_->TriggerOneFrame();
         transitionB_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
-        EXPECT_NEAR(offsetX.Value(), 359.62f, TRANSITION_EPSILON);
+        EXPECT_NEAR(offsetX.Value(), 738.28f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
         transitionA_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
-        EXPECT_NEAR(offsetX.Value(), -360.18f, TRANSITION_EPSILON);
+        EXPECT_NEAR(offsetX.Value(), 0.0f, TRANSITION_EPSILON);
         EXPECT_NEAR(offsetY.Value(), 0.0f, TRANSITION_EPSILON);
 
         /**
@@ -905,7 +901,7 @@ HWTEST_F(TransitionElementTest, PushPageTest001, TestSize.Level1)
         &(*transitionB_.displayRenderContent_.Upgrade()), &(*transitionB_.transformRenderContent_.Upgrade()));
     LOGD("transition out: content display render %{public}p, transform render %{public}p",
         &(*transitionA_.displayRenderContent_.Upgrade()), &(*transitionA_.transformRenderContent_.Upgrade()));
-    EXPECT_EQ(VisibleType::INVISIBLE, transitionB_.displayRenderContent_.Upgrade()->GetVisibleType());
+    EXPECT_TRUE(transitionB_.displayRenderContent_.Upgrade()->GetHidden());
     EXPECT_EQ(VisibleType::VISIBLE, transitionA_.displayRenderContent_.Upgrade()->GetVisibleType());
 
     /**
@@ -1001,7 +997,7 @@ HWTEST_F(TransitionElementTest, TransitionUIStandardTest001, TestSize.Level1)
         &(*transitionB_.displayRenderContent_.Upgrade()), &(*transitionB_.transformRenderContent_.Upgrade()));
     LOGD("transition out: content display render %p, transform render %p",
         &(*transitionA_.displayRenderContent_.Upgrade()), &(*transitionA_.transformRenderContent_.Upgrade()));
-    EXPECT_EQ(VisibleType::INVISIBLE, transitionB_.displayRenderContent_.Upgrade()->GetVisibleType());
+    EXPECT_TRUE(transitionB_.displayRenderContent_.Upgrade()->GetHidden());
     EXPECT_EQ(VisibleType::VISIBLE, transitionA_.displayRenderContent_.Upgrade()->GetVisibleType());
 
     /**
@@ -1054,7 +1050,7 @@ HWTEST_F(TransitionElementTest, TransitionUIStandardTest002, TestSize.Level1)
     GetTransitionGroupFromTransition(transitionB_);
     GetTransitionGroupFromTransition(transitionA_);
     EXPECT_NE(transitionA_.pageTransitionElement_, transitionB_.pageTransitionElement_);
-    EXPECT_EQ(VisibleType::INVISIBLE, transitionB_.displayRenderContent_.Upgrade()->GetVisibleType());
+    EXPECT_TRUE(transitionB_.displayRenderContent_.Upgrade()->GetHidden());
     EXPECT_EQ(VisibleType::VISIBLE, transitionA_.displayRenderContent_.Upgrade()->GetVisibleType());
 
     /**
@@ -1107,7 +1103,7 @@ HWTEST_F(TransitionElementTest, TransitionUIStandardTest003, TestSize.Level1)
     GetTransitionGroupFromTransition(transitionB_);
     GetTransitionGroupFromTransition(transitionA_);
     EXPECT_NE(transitionA_.pageTransitionElement_, transitionB_.pageTransitionElement_);
-    EXPECT_EQ(VisibleType::INVISIBLE, transitionB_.displayRenderContent_.Upgrade()->GetVisibleType());
+    EXPECT_TRUE(transitionB_.displayRenderContent_.Upgrade()->GetHidden());
     EXPECT_EQ(VisibleType::VISIBLE, transitionA_.displayRenderContent_.Upgrade()->GetVisibleType());
 
     /**
@@ -1211,14 +1207,14 @@ HWTEST_F(TransitionElementTest, OneShotTransitionTest001, TestSize.Level1)
     GetTransitionGroupFromTransition(transitionB_);
     GetTransitionGroupFromTransition(transitionA_);
     auto& children = overlay_->GetChildren();
-    EXPECT_EQ(2UL, children.size()); // Stage + SharedElement.
+    EXPECT_EQ(1UL, children.size()); // SharedElement.
 
     /**
      * @tc.steps: step4. do custom scale transition
      * @tc.expected: step4. check custom scale transition and shared element removed from overlay
      */
     CheckCustomScaleTransitionFrames();
-    EXPECT_EQ(1UL, children.size()); // Stage + SharedElement.
+    EXPECT_EQ(0UL, children.size()); // Null.
 }
 
 /**
@@ -1245,9 +1241,9 @@ HWTEST_F(TransitionElementTest, OneShotTransitionTest002, TestSize.Level1)
     context_->PopPage();
     platformWindowRaw_->TriggerOneFrame();
     auto& children = overlay_->GetChildren();
-    EXPECT_EQ(2UL, children.size()); // Stage + SharedElement.
+    EXPECT_EQ(1UL, children.size()); // SharedElement.
     CheckPhonePopSharedTransitionFrame();
-    EXPECT_EQ(1UL, children.size()); // Stage.
+    EXPECT_EQ(0UL, children.size()); // Null.
 }
 
 /**
@@ -1273,10 +1269,10 @@ HWTEST_F(TransitionElementTest, OneShotTransitionTest003, TestSize.Level1)
     EXPECT_TRUE(context_->CanPopPage());
     context_->PopPage();
     auto& children = overlay_->GetChildren();
-    EXPECT_EQ(1UL, children.size()); // Stage + SharedElement.
+    EXPECT_EQ(0UL, children.size()); // SharedElement.
     platformWindowRaw_->TriggerOneFrame();
     CheckWatchPopTransitionFrame();
-    EXPECT_EQ(1UL, children.size()); // Stage.
+    EXPECT_EQ(0UL, children.size()); // Null.
 }
 
 /**

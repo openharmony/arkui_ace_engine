@@ -39,6 +39,10 @@ public:
 
     void VaryFontCollectionWithFontWeightScale(float fontWeightScale);
 
+    void LoadSystemFont();
+
+    void SetIsZawgyiMyanmar(bool isZawgyiMyanmar);
+
 private:
     flutter::WindowClient* GetFlutterEngineWindowClient();
 
@@ -50,6 +54,7 @@ private:
     bool isInit_ = false;
     bool isCompleted_ = false;
     bool isUseFlutterEngine = true;
+    bool isZawgyiMyanmar_ = false;
 
     static FlutterFontCollection instance;
 };

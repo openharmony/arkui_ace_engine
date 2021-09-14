@@ -41,11 +41,11 @@ void ClockBridge::ParseClockConfig(JSContext* ctx, JSValueConst valObject)
             static const LinearMapNode<void (*)(const char*, ClockBridge&)> clockConfigOperators[] = {
                 { DOM_DIGIT_COLOR,
                     [](const char* valStr, ClockBridge& clockBridge) {
-                        clockBridge.clockConfig_.digitColor_ = Color::FromString(valStr);
+                        clockBridge.clockConfig_.digitColor_ = valStr;
                     } },
                 { DOM_DIGIT_COLOR_NIGHT,
                     [](const char* valStr, ClockBridge& clockBridge) {
-                        clockBridge.clockConfig_.digitColorNight_ = Color::FromString(valStr);
+                        clockBridge.clockConfig_.digitColorNight_ = valStr;
                     } },
                 { DOM_DIGIT_RADIUS_RATIO,
                     [](const char* valStr, ClockBridge& clockBridge) {

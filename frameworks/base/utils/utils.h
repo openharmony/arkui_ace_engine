@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UTILS_H
 
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 
@@ -91,6 +92,20 @@ inline double Round(double rawNum)
 inline bool InRegion(double lowerBound, double upperBound, double destNum)
 {
     return LessOrEqual(lowerBound, destNum) && LessOrEqual(destNum, upperBound);
+}
+
+inline uint64_t GetMilliseconds()
+{
+    auto now = std::chrono::system_clock::now();
+    auto millisecs = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    return millisecs.count();
+}
+
+inline uint64_t GetNanoseconds()
+{
+    auto now = std::chrono::system_clock::now();
+    auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch());
+    return nanoseconds.count();
 }
 
 } // namespace OHOS::Ace

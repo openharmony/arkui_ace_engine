@@ -16,6 +16,8 @@
 #include "core/animation/animator.h"
 
 #include "base/utils/utils.h"
+#include "core/animation/scheduler.h"
+#include "core/common/thread_checker.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -59,6 +61,7 @@ Animator::Animator(const WeakPtr<PipelineContext>& context)
 
 Animator::~Animator()
 {
+    CHECK_RUN_ON(UI);
     LOGD("Animator destructor. id:%{public}d", controllerId_);
     // Clear all listeners first to make its destruction silently.
     ClearAllListeners();
@@ -88,6 +91,7 @@ bool Animator::HasScheduler() const
 
 void Animator::AddInterpolator(const RefPtr<Interpolator>& animation)
 {
+    CHECK_RUN_ON(UI);
     if (animation) {
         interpolators_.emplace_back(animation);
     }
@@ -95,16 +99,19 @@ void Animator::AddInterpolator(const RefPtr<Interpolator>& animation)
 
 void Animator::RemoveInterpolator(const RefPtr<Interpolator>& animation)
 {
+    CHECK_RUN_ON(UI);
     interpolators_.remove(animation);
 }
 
 void Animator::ClearInterpolators()
 {
+    CHECK_RUN_ON(UI);
     interpolators_.clear();
 }
 
 void Animator::AddProxyController(const RefPtr<Animator>& proxy)
 {
+    CHECK_RUN_ON(UI);
     if (!proxy) {
         LOGE("Add Proxy Controller failed. controller is null.");
         return;
@@ -118,11 +125,13 @@ void Animator::AddProxyController(const RefPtr<Animator>& proxy)
 
 void Animator::RemoveProxyController(const RefPtr<Animator>& proxy)
 {
+    CHECK_RUN_ON(UI);
     proxyControllers_.remove(proxy);
 }
 
 void Animator::ClearProxyControllers()
 {
+    CHECK_RUN_ON(UI);
     proxyControllers_.clear();
 }
 
@@ -158,6 +167,7 @@ int32_t Animator::GetDuration() const
 
 void Animator::SetDuration(int32_t duration)
 {
+    CHECK_RUN_ON(UI);
     if (duration < 0) {
         LOGE("invalid duration time, keep the old. id: %{public}d", controllerId_);
         return;
@@ -167,16 +177,6 @@ void Animator::SetDuration(int32_t duration)
         // Need to update elapsedTime when animation running or paused.
         elapsedTime_ = (duration_ / duration) * elapsedTime_;
     }
-
-    if (isDeclarativeAnimator) {
-        // if status is not idle, finish current animation and init animation
-        if (isLastAnimationInterrupted_) {
-            duration = elapsedTime_ - startDelay_;
-            isLastAnimationInterrupted_ = false;
-        }
-        elapsedTime_ = 0;
-    }
-
     duration_ = duration;
     for (auto& controller : proxyControllers_) {
         controller->SetDuration(duration);
@@ -185,6 +185,7 @@ void Animator::SetDuration(int32_t duration)
 
 bool Animator::SetIteration(int32_t iteration)
 {
+    CHECK_RUN_ON(UI);
     if (iteration_ == iteration) {
         return true;
     }
@@ -207,6 +208,7 @@ bool Animator::SetIteration(int32_t iteration)
 
 void Animator::SetStartDelay(int32_t startDelay)
 {
+    CHECK_RUN_ON(UI);
     if (startDelay < 0) {
         LOGE("invalid startDelay time, keep the old. id: %{public}d", controllerId_);
         return;
@@ -220,14 +222,29 @@ void Animator::SetStartDelay(int32_t startDelay)
 
 void Animator::SetFillMode(FillMode fillMode)
 {
+    CHECK_RUN_ON(UI);
     fillMode_ = fillMode;
     for (auto& controller : proxyControllers_) {
         controller->SetFillMode(fillMode);
     }
 }
 
+void Animator::SetTempo(float tempo)
+{
+    CHECK_RUN_ON(UI);
+    if (tempo < 0.0f) {
+        return;
+    }
+    if (NearZero(tempo)) {
+        scaledStartDelay_ = 0;
+        scaledDuration_ = 0;
+    }
+    tempo_ = tempo;
+}
+
 void Animator::SetAnimationDirection(AnimationDirection direction)
 {
+    CHECK_RUN_ON(UI);
     direction_ = direction;
     for (auto& controller : proxyControllers_) {
         controller->SetAnimationDirection(direction);
@@ -264,12 +281,15 @@ void Animator::UpdatePlayedTime(int32_t playedTime)
     isReverse_ = false;
     isCurDirection_ = false;
     float scale = GetDurationScale();
-    int32_t scaledPlayedTime = playedTime * scale;
-    elapsedTime_ = scaledPlayedTime;
+    if (!NearZero(tempo_)) {
+        int32_t scaledPlayedTime = playedTime * scale / tempo_;
+        elapsedTime_ = scaledPlayedTime;
+    }
 }
 
 void Animator::TriggerFrame(int32_t playedTime)
 {
+    CHECK_RUN_ON(UI);
     if (playedTime < 0 || playedTime > duration_) {
         LOGE("TriggerFrame failed. Invalid playedTime:%{public}d", playedTime);
         return;
@@ -286,6 +306,7 @@ void Animator::TriggerFrame(int32_t playedTime)
 
 void Animator::PlayMotion(const RefPtr<Motion>& motion)
 {
+    CHECK_RUN_ON(UI);
     if (!motion) {
         LOGE("PlayMotion failed, motion is null.");
         return;
@@ -298,6 +319,7 @@ void Animator::PlayMotion(const RefPtr<Motion>& motion)
 
 void Animator::Play()
 {
+    CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
         LOGD("no need to play animation, iteration is zero.");
         return;
@@ -309,6 +331,7 @@ void Animator::Play()
 
 void Animator::Reverse()
 {
+    CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
         LOGD("no need to reverse animation, iteration is zero.");
         return;
@@ -321,6 +344,7 @@ void Animator::Reverse()
 
 void Animator::Forward()
 {
+    CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
         LOGD("no need to play animation forward, iteration is zero.");
         return;
@@ -333,6 +357,7 @@ void Animator::Forward()
 
 void Animator::Backward()
 {
+    CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
         LOGD("no need to play animation backward, iteration is zero.");
         return;
@@ -345,6 +370,7 @@ void Animator::Backward()
 
 void Animator::Pause()
 {
+    CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
         LOGD("no need to pause animation, iteration is zero.");
         return;
@@ -369,6 +395,7 @@ void Animator::Pause()
 
 void Animator::Resume()
 {
+    CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
         LOGD("no need to resume animation, iteration is zero.");
         return;
@@ -391,6 +418,7 @@ void Animator::Resume()
 
 void Animator::Stop()
 {
+    CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
         LOGD("no need to stop animation, iteration is zero.");
         return;
@@ -400,10 +428,8 @@ void Animator::Stop()
         return;
     }
     LOGD("animation stop. id: %{public}d", controllerId_);
-    if (!isDeclarativeAnimator) {
-        elapsedTime_ = 0;
-    }
 
+    elapsedTime_ = 0;
     repeatTimesLeft_ = repeatTimes_;
     isBothBackwards = false;
     UpdateScaledTime();
@@ -419,6 +445,7 @@ void Animator::Stop()
 
 void Animator::Finish()
 {
+    CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
         LOGD("no need to finish animation, iteration is zero.");
         return;
@@ -435,17 +462,12 @@ void Animator::Finish()
     }
     repeatTimesLeft_ = 0;
     UpdateScaledTime();
-    if (isDeclarativeAnimator) {
-        Stop();
-        repeatTimesLeft_ = 0;
-        isLastAnimationInterrupted_ = true;
-    } else {
-        OnFrame(((int64_t)scaledStartDelay_) + scaledDuration_);
-    }
+    OnFrame(((int64_t)scaledStartDelay_) + scaledDuration_);
 }
 
 void Animator::Cancel()
 {
+    CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
         LOGD("no need to cancel animation, iteration is zero.");
         return;
@@ -473,6 +495,7 @@ void Animator::Cancel()
 // Private Functions.
 void Animator::OnFrame(int64_t duration)
 {
+    CHECK_RUN_ON(UI);
     // notify child first
     for (auto& controller : proxyControllers_) {
         controller->OnFrame(duration);
@@ -507,6 +530,7 @@ void Animator::OnFrame(int64_t duration)
 
 void Animator::NotifyInterpolator(int32_t playedTime)
 {
+    CHECK_RUN_ON(UI);
     bool needStop = false;
     bool notifyRepeat = false;
     // do not notify user when handling playedTime, because users may be change duration or repeat times in callback.
@@ -549,7 +573,7 @@ void Animator::NotifyInterpolator(int32_t playedTime)
         StatusListenable::NotifyRepeatListener();
     }
     for (const auto& interpolator : interpolators_) {
-        if (needStop && (fillMode_ == FillMode::NONE || fillMode_ == FillMode::BACKWARDS) && !isDeclarativeAnimator) {
+        if (needStop && (fillMode_ == FillMode::NONE || fillMode_ == FillMode::BACKWARDS)) {
             // notify init value set by user.
             interpolator->OnInitNotify(normalizedTime, isReverse_);
         } else {
@@ -566,6 +590,7 @@ void Animator::NotifyInterpolator(int32_t playedTime)
 
 void Animator::NotifyMotion(int32_t playedTime)
 {
+    CHECK_RUN_ON(UI);
     // motion do not have normalized time, because no exact duration in motion.
     // just pass actual time to motion, normalized time always zero.
     motion_->OnTimestampChanged(playedTime, 0.0f, false);
@@ -576,10 +601,11 @@ void Animator::NotifyMotion(int32_t playedTime)
 
 void Animator::StartInner(bool alwaysNotify)
 {
+    CHECK_RUN_ON(UI);
     if (status_ == Status::RUNNING) {
         LOGW("controller already running, do not need start again. skip it. id: %{public}d", controllerId_);
-        if (directionChange_) {
-            directionChange_ = !directionChange_;
+        if (toggleDirectionPending_) {
+            toggleDirectionPending_ = false;
             isCurDirection_ = !isCurDirection_;
         }
 
@@ -591,6 +617,7 @@ void Animator::StartInner(bool alwaysNotify)
         }
         return;
     }
+    toggleDirectionPending_ = false;
     if (scheduler_ && !scheduler_->IsActive()) {
         scheduler_->Start();
     }
@@ -633,7 +660,8 @@ void Animator::ToggleDirection()
 {
     isReverse_ = !isReverse_;
     LOGD("change direction. isReverse change to: %{public}d, id: %{public}d", isReverse_, controllerId_);
-    directionChange_ = !directionChange_;
+    // if toggleDirectionPending_ is true, it will be cleared in StartInner
+    toggleDirectionPending_ = !toggleDirectionPending_;
     if (status_ == Status::IDLE || status_ == Status::STOPPED) {
         LOGD("toggle an idle controller, do not change time related params. id: %{public}d", controllerId_);
         return;
@@ -653,27 +681,23 @@ float Animator::GetNormalizedTime(float playedTime, bool needStop) const
     float normalizedTime = 0.0f;
     if (needStop) {
         LOGD("animation stop. set played time to the end value according to fill mode. id: %{public}d", controllerId_);
-        if (!isDeclarativeAnimator) {
-            switch (fillMode_) {
-                case FillMode::FORWARDS:
-                    // Fall through.
-                case FillMode::BOTH:
-                    LOGD("fill mode is FORWARDS or BOTH. id: %{public}d", controllerId_);
-                    normalizedTime = 1.0f;
-                    break;
-                case FillMode::NONE:
-                    // Fall through.
-                case FillMode::BACKWARDS:
-                    LOGD("fill mode is NONE or BACKWARDS. id: %{public}d", controllerId_);
-                    normalizedTime = 0.0f;
-                    break;
-                default:
-                    LOGD("unknown fill mode, use default mode. id: %{public}d", controllerId_);
-                    normalizedTime = 1.0f;
-                    break;
-            }
-        } else {
-            normalizedTime = scaledDuration_ == 0 ? 1.0f : std::min(1.0f, (1.0f * playedTime) / scaledDuration_);
+        switch (fillMode_) {
+            case FillMode::FORWARDS:
+                // Fall through.
+            case FillMode::BOTH:
+                LOGD("fill mode is FORWARDS or BOTH. id: %{public}d", controllerId_);
+                normalizedTime = 1.0f;
+                break;
+            case FillMode::NONE:
+                // Fall through.
+            case FillMode::BACKWARDS:
+                LOGD("fill mode is NONE or BACKWARDS. id: %{public}d", controllerId_);
+                normalizedTime = 0.0f;
+                break;
+            default:
+                LOGD("unknown fill mode, use default mode. id: %{public}d", controllerId_);
+                normalizedTime = 1.0f;
+                break;
         }
     } else {
         normalizedTime = scaledDuration_ == 0 ? 1.0f : (1.0f * playedTime) / scaledDuration_;
@@ -684,8 +708,10 @@ float Animator::GetNormalizedTime(float playedTime, bool needStop) const
 void Animator::UpdateScaledTime()
 {
     float scale = GetDurationScale();
-    scaledDuration_ = duration_ * scale;
-    scaledStartDelay_ = startDelay_ * scale;
+    if (!NearZero(tempo_)) {
+        scaledDuration_ = duration_ * scale / tempo_;
+        scaledStartDelay_ = startDelay_ * scale / tempo_;
+    }
 }
 
 void Animator::UpdateIteration(int32_t iteration)
@@ -708,7 +734,7 @@ void Animator::Copy(const RefPtr<Animator>& controller)
     fillMode_ = controller->fillMode_;
     direction_ = controller->direction_;
     isCurDirection_ = controller->isCurDirection_;
-    directionChange_ = controller->directionChange_;
+    toggleDirectionPending_ = controller->toggleDirectionPending_;
     duration_ = controller->duration_;
     elapsedTime_ = controller->elapsedTime_;
     startDelay_ = controller->startDelay_;

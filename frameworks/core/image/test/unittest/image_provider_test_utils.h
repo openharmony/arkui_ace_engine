@@ -21,6 +21,7 @@
 #include "core/components/display/render_display.h"
 #include "core/components/stack/render_stack.h"
 #define private public
+#include "core/image/image_loader.h"
 #include "core/image/image_provider.h"
 
 namespace OHOS::Ace {

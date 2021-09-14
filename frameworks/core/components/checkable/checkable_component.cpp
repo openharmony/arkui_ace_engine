@@ -55,6 +55,7 @@ void CheckableComponent::ApplyTheme(const RefPtr<CheckableTheme>& theme)
         shadowColor_ = theme->GetShadowColor();
         shadowWidth_ = theme->GetShadowWidth();
         hoverRadius_ = theme->GetHoverRadius();
+        borderWidth_ = theme->GetBorderWidth();
     }
 }
 

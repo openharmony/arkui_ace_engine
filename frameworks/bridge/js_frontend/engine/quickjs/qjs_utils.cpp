@@ -29,6 +29,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const char JS_CRASH[] = "Js Crash";
+const char JS_CALLBACK_FAILED[] = "JS framework execute callback failed";
 const char DESTROY_APP_ERROR[] = "Destroy application failed";
 const char DESTROY_PAGE_FAILED[] = "Destroy page instance failed";
 const char LOAD_JS_BUNDLE_FAILED[] = "JS framework load js bundle failed";
@@ -38,12 +39,23 @@ const char COMPILE_AND_RUN_BUNDLE_FAILED[] = "Js compile and run bundle failed";
 const char LOAD_JS_FRAMEWORK_FAILED[] = "Loading JS framework failed";
 const char FIRE_EVENT_FAILED[] = "Fire event failed";
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+/* JS Bundle is added several lines before input to qjs-engine.
+ * When we need to output dump info in previewer,
+ * the offset must be considered to ensure the accuracy of dump info.
+ */
+const int32_t OFFSET_PREVIEW = 9;
+#endif
+
 std::string GetReason(JsErrorType errorType)
 {
     std::string reasonStr;
     switch (errorType) {
         case OHOS::Ace::Framework::JsErrorType::JS_CRASH:
             reasonStr = JS_CRASH;
+            break;
+        case OHOS::Ace::Framework::JsErrorType::JS_CALLBACK_ERROR:
+            reasonStr = JS_CALLBACK_FAILED;
             break;
         case OHOS::Ace::Framework::JsErrorType::EVAL_BUFFER_ERROR:
             reasonStr = EVAL_BUFFER_FAILED;
@@ -117,7 +129,7 @@ std::string GenerateSummaryBody(
 
 } // namespace
 
-thread_local std::stack<QjsHandleScope*> QjsHandleScope::qjsHandleScopeStack;
+std::stack<QJSHandleScope*> QJSHandleScope::qjsHandleScopeStack;
 
 ScopedString::ScopedString(JSContext* ctx, JSValueConst val) : context_(ctx)
 {
@@ -131,12 +143,12 @@ ScopedString::ScopedString(JSContext* ctx, JSAtom atom) : context_(ctx)
     stringValue_ = JS_AtomToCString(ctx, atom);
 }
 
-ScopedString::ScopedString(JSValueConst val) : context_(QJSContext::current())
+ScopedString::ScopedString(JSValueConst val) : context_(QJSContext::Current())
 {
     stringValue_ = JS_ToCString(context_, val);
 }
 
-ScopedString::ScopedString(JSAtom atom) : context_(QJSContext::current())
+ScopedString::ScopedString(JSAtom atom) : context_(QJSContext::Current())
 {
     stringValue_ = JS_AtomToCString(context_, atom);
 }
@@ -171,7 +183,7 @@ std::string ScopedString::str()
 
 std::string ScopedString::Stringify(JSValueConst val)
 {
-    JSContext* ctx = QJSContext::current();
+    JSContext* ctx = QJSContext::Current();
     JSValue globalObj = JS_GetGlobalObject(ctx);
     JSValue thisObj = JS_GetPropertyStr(ctx, globalObj, "JSON");
     JSValue funcObj = JS_GetPropertyStr(ctx, thisObj, "stringify");
@@ -189,75 +201,283 @@ ScopedString::operator std::string() const
     return stringValue_;
 }
 
-JSValue QjsUtils::NewStringLen(JSContext* ctx, const char* str, size_t len)
+JSValue QJSUtils::NewStringLen(JSContext* ctx, const char* str, size_t len)
 {
-    ACE_DCHECK(!QjsHandleScope::qjsHandleScopeStack.empty());
-    QjsHandleScope* scope = QjsHandleScope::qjsHandleScopeStack.top();
+    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack.empty());
+    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
     JSValue retVal = JS_NewStringLen(ctx, str, len);
     scope->jsValues_.push_back(retVal);
     return retVal;
 }
 
-JSValue QjsUtils::NewString(JSContext* ctx, const char* str)
+JSValue QJSUtils::NewString(JSContext* ctx, const char* str)
 {
-    ACE_DCHECK(!QjsHandleScope::qjsHandleScopeStack.empty());
-    QjsHandleScope* scope = QjsHandleScope::qjsHandleScopeStack.top();
+    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack.empty());
+    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
     JSValue retVal = JS_NewString(ctx, str);
     scope->jsValues_.push_back(retVal);
     return retVal;
 }
 
-JSValue QjsUtils::ParseJSON(JSContext* ctx, const char* buf, size_t bufLen, const char* filename)
+JSValue QJSUtils::ParseJSON(JSContext* ctx, const char* buf, size_t bufLen, const char* filename)
 {
-    ACE_DCHECK(!QjsHandleScope::qjsHandleScopeStack.empty());
-    QjsHandleScope* scope = QjsHandleScope::qjsHandleScopeStack.top();
+    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack.empty());
+    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
     JSValue retVal = JS_ParseJSON(ctx, buf, bufLen, filename);
     scope->jsValues_.push_back(retVal);
     return retVal;
 }
 
-JSValue QjsUtils::NewObject(JSContext* ctx)
+JSValue QJSUtils::NewObject(JSContext* ctx)
 {
-    ACE_DCHECK(!QjsHandleScope::qjsHandleScopeStack.empty());
-    QjsHandleScope* scope = QjsHandleScope::qjsHandleScopeStack.top();
+    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack.empty());
+    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
     JSValue retVal = JS_NewObject(ctx);
     scope->jsValues_.push_back(retVal);
     return retVal;
 }
 
-JSValue QjsUtils::Call(JSContext* ctx, JSValueConst funcObj, JSValueConst thisObj, int32_t argc, JSValueConst* argv)
+JSValue QJSUtils::Call(JSContext* ctx, JSValueConst funcObj, JSValueConst thisObj, int32_t argc, JSValueConst* argv)
 {
-    ACE_DCHECK(!QjsHandleScope::qjsHandleScopeStack.empty());
-    QjsHandleScope* scope = QjsHandleScope::qjsHandleScopeStack.top();
+    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack.empty());
+    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
     JSValue retVal = JS_Call(ctx, funcObj, thisObj, argc, argv);
     scope->jsValues_.push_back(retVal);
     return retVal;
 }
 
-JSValue QjsUtils::Eval(JSContext* ctx, const char* input, size_t inputLen, const char* filename, int32_t evalFlags)
+JSValue QJSUtils::Eval(JSContext* ctx, const char* input, size_t inputLen, const char* filename, int32_t evalFlags)
 {
-    ACE_DCHECK(!QjsHandleScope::qjsHandleScopeStack.empty());
-    QjsHandleScope* scope = QjsHandleScope::qjsHandleScopeStack.top();
+    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack.empty());
+    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
     JSValue retVal = JS_Eval(ctx, input, inputLen, filename, evalFlags);
     scope->jsValues_.push_back(retVal);
     return retVal;
 }
 
-JSValue QjsUtils::GetPropertyStr(JSContext* ctx, JSValueConst thisObj, const char* prop)
+JSValue QJSUtils::GetPropertyStr(JSContext* ctx, JSValueConst thisObj, const char* prop)
 {
-    ACE_DCHECK(!QjsHandleScope::qjsHandleScopeStack.empty());
-    QjsHandleScope* scope = QjsHandleScope::qjsHandleScopeStack.top();
+    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack.empty());
+    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
     JSValue retVal = JS_GetPropertyStr(ctx, thisObj, prop);
     scope->jsValues_.push_back(retVal);
     return retVal;
 }
 
-int32_t QjsUtils::JsGetArrayLength(JSContext* ctx, JSValueConst arrayObject)
+void QJSUtils::JsStdDumpErrorAce(JSContext* ctx, JsErrorType errorType, int32_t instanceId, const char* pageUrl,
+    const RefPtr<JsAcePage>& page)
+{
+    RefPtr<RevSourceMap> pageMap;
+    RefPtr<RevSourceMap> appMap;
+    if (page) {
+        pageMap = page->GetPageMap();
+        appMap = page->GetAppMap();
+    }
+    JSValue exceptionVal = JS_GetException(ctx);
+    BOOL isError = JS_IsError(ctx, exceptionVal);
+    if (!isError) {
+        LOGE("Throw: ");
+    }
+    ScopedString printLog(ctx, exceptionVal);
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    LOGE("[Engine Log] [DUMP] %{public}s", printLog.get());
+#else
+    LOGE("[DUMP] %{public}s", printLog.get());
+#endif
+    QJSHandleScope handleScope(ctx);
+    if (isError) {
+        JSValue val = QJSUtils::GetPropertyStr(ctx, exceptionVal, "stack");
+        if (!JS_IsUndefined(val)) {
+            const char* stackTrace = JS_ToCString(ctx, val);
+            const char* stack = stackTrace;
+            if (stack != nullptr) {
+                if (pageMap || appMap) {
+                    stack = const_cast<char *>(JsDumpSourceFile(stack, pageMap, appMap).c_str());
+                }
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+                LOGE("[Engine Log] %{public}s", stack);
+#else
+                LOGE("%{public}s", stack);
+#endif
+                std::string reasonStr = GetReason(errorType);
+                std::string summaryBody = GenerateSummaryBody(printLog.get(), stack, instanceId, pageUrl);
+                EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), reasonStr, summaryBody);
+                JS_FreeValue(ctx, exceptionVal);
+                JS_FreeCString(ctx, stackTrace);
+            }
+        }
+    }
+}
+
+std::string QJSUtils::JsDumpSourceFile(const char* stack, const RefPtr<RevSourceMap>& pageMap,
+    const RefPtr<RevSourceMap>& appMap)
+{
+    const std::string closeBrace = ")";
+    const std::string openBrace = "(";
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    const std::string suffix = ".js";
+#else
+    const std::string suffix = ".jtc";
+#endif
+    std::string ans = "";
+    std::string tempStack = stack;
+    int32_t appFlag = tempStack.find("app.js");
+    bool isAppPage = appFlag > 0 && appMap;
+
+    // find per line of stack
+    std::vector<std::string> res;
+    ExtractEachInfo(tempStack, res);
+
+    for (uint32_t i = 0; i < res.size(); i++) {
+        std::string temp = res[i];
+        int32_t closeBracePos = temp.find(closeBrace);
+        int32_t openBracePos = temp.find(openBrace);
+
+        std::string line = "";
+        GetPosInfo(temp, closeBracePos, line);
+        // becasue the function can be called by jsfw or native, but the same
+        // is that the line is empty. So, this can be the terminal judgement
+        if (line == "") {
+            LOGI("the stack without line info");
+            break;
+        }
+
+        // if the page is end with ".jtc", push into stack
+        if (temp.find(suffix) != suffix.npos) {
+            const std::string sourceInfo = GetSourceInfo(line, pageMap, appMap, isAppPage);
+            if (sourceInfo == "") {
+                break;
+            }
+            temp.replace(openBracePos, closeBracePos - openBracePos + 1, sourceInfo);
+        }
+        ans = ans + temp + "\n";
+    }
+    if (ans == "") {
+        return tempStack;
+    }
+    return ans;
+}
+
+void QJSUtils::ExtractEachInfo(const std::string& tempStack, std::vector<std::string>& res)
+{
+    std::string tempStr = "";
+    for (uint32_t i = 0; i < tempStack.length(); i++) {
+        if (tempStack[i] == '\n') {
+            res.push_back(tempStr);
+            tempStr = "";
+        } else {
+            tempStr += tempStack[i];
+        }
+    }
+    // that's for only one line in the error stack
+    res.push_back(tempStr);
+}
+
+void QJSUtils::GetPosInfo(const std::string& temp, int32_t start, std::string& line)
+{
+    // find line, column
+    for (int32_t i = start - 1; i > 0; i--) {
+        if (temp[i] >= '0' && temp[i] <= '9') {
+            line = temp[i] + line;
+        } else {
+            break;
+        }
+    }
+}
+
+std::string QJSUtils::GetSourceInfo(const std::string& line, const RefPtr<RevSourceMap>& pageMap,
+    const RefPtr<RevSourceMap>& appMap, bool isAppPage)
+{
+    std::string sourceInfo;
+    MappingInfo mapInfo;
+    if (isAppPage) {
+        mapInfo = appMap->Find(StringToInt(line), 1);
+    } else {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+        mapInfo = pageMap->Find(StringToInt(line) + OFFSET_PREVIEW, 1);
+#else
+        mapInfo = pageMap->Find(StringToInt(line), 1);
+#endif
+    }
+    if (mapInfo.row == 0) {
+        return "";
+    }
+    sourceInfo = "(" + mapInfo.sources + ":" + std::to_string(mapInfo.row) + ")";
+    return sourceInfo;
+}
+
+void QJSUtils::JsDumpMemoryStats(JSContext* ctx)
+{
+#if ACE_DEBUG
+    LOGD("JS Memory ---------------------");
+    JSMemoryUsage s;
+    JSRuntime* rt = JS_GetRuntime(ctx);
+    if (!rt) {
+        return;
+    }
+
+    JS_ComputeMemoryUsage(rt, &s);
+
+    LOGD("malloc limit: %" PRId64 " ------------", (int64_t)(ssize_t)s.malloc_limit);
+
+    LOGD("   COUNT      SIZE");
+
+    if (s.malloc_count) {
+        LOGD("%8" PRId64 "  %8" PRId64 " Bytes  Memory allocated (%0.1f per block)", s.malloc_count, s.malloc_size,
+            (double)s.malloc_size / s.malloc_count);
+        LOGD("%8" PRId64 "  %8" PRId64 " Bytes  Memory used (%d overhead, %0.1f average slack)", s.memory_used_count,
+            s.memory_used_size, 8, ((double)(s.malloc_size - s.memory_used_size) / s.memory_used_count));
+    }
+    if (s.atom_count) {
+        LOGD("%8" PRId64 "  %8" PRId64 " Bytes Atoms (%0.1f per atom)", s.atom_count, s.atom_size,
+            (double)s.atom_size / s.atom_count);
+    }
+    if (s.str_count) {
+        LOGD("%8" PRId64 "  %8" PRId64 " Bytes Strings (%0.1f per string)", s.str_count, s.str_size,
+            (double)s.str_size / s.str_count);
+    }
+    if (s.obj_count) {
+        LOGD("%8" PRId64 "  %8" PRId64 " Bytes Objects (%0.1f per object)", s.obj_count, s.obj_size,
+            (double)s.obj_size / s.obj_count);
+        LOGD("%8" PRId64 "  %8" PRId64 " Bytes Properties (%0.1f per object)", s.prop_count, s.prop_size,
+            (double)s.prop_count / s.obj_count);
+        LOGD("%8" PRId64 "  %8" PRId64 " Bytes Shapes (%0.1f per shape)", s.shape_count, s.shape_size,
+            (double)s.shape_size / s.shape_count);
+    }
+    if (s.js_func_count) {
+        LOGD("%8" PRId64 "  %8" PRId64 " Bytes Bytecode functions", s.js_func_count, s.js_func_size);
+        LOGD("%8" PRId64 "  %8" PRId64 " Bytes Bytecode (%0.1f per function) ", s.js_func_count, s.js_func_code_size,
+            (double)s.js_func_code_size / s.js_func_count);
+        if (s.js_func_pc2line_count) {
+            LOGD("%8" PRId64 "  %8" PRId64 " Bytes Pc2line (%0.1f per function)", s.js_func_pc2line_count,
+                s.js_func_pc2line_size, (double)s.js_func_pc2line_size / s.js_func_pc2line_count);
+        }
+    }
+    if (s.c_func_count) {
+        LOGD("%8" PRId64 " C functions", s.c_func_count);
+    }
+    if (s.array_count) {
+        LOGD("%8" PRId64 " arrays", s.array_count);
+        if (s.fast_array_count) {
+            LOGD("%8" PRId64 " fast arrays", s.fast_array_count);
+            LOGD("%8" PRId64 "  %8" PRId64 " (%0.1f per fast array) elements", s.fast_array_elements,
+                s.fast_array_elements * (int)sizeof(JSValue), (double)s.fast_array_elements / s.fast_array_count);
+        }
+    }
+    if (s.binary_object_count) {
+        LOGD("%8" PRId64 "  %8" PRId64 " binary objects", s.binary_object_count, s.binary_object_size);
+    }
+#endif
+
+    LOGD("JS Memory ---------------------");
+}
+
+int32_t QJSUtils::JsGetArrayLength(JSContext* ctx, JSValueConst arrayObject)
 {
     int32_t result = JS_IsArray(ctx, arrayObject);
     if (result == TRUE) {
-        QjsHandleScope handleScope(ctx);
-        JSValue propLength = QjsUtils::GetPropertyStr(ctx, arrayObject, "length");
+        QJSHandleScope handleScope(ctx);
+        JSValue propLength = QJSUtils::GetPropertyStr(ctx, arrayObject, "length");
         int32_t length = -1;
 
         if (JS_ToInt32(ctx, &length, propLength) < 0) {
@@ -273,142 +493,9 @@ int32_t QjsUtils::JsGetArrayLength(JSContext* ctx, JSValueConst arrayObject)
     return -1;
 }
 
-void QjsUtils::JsStdDumpErrorAce(JSContext* ctx, JsErrorType errorType, int32_t instanceId, const char* pageUrl,
-    const RefPtr<JsAcePage>& page)
+std::vector<std::string> QJSUtils::GetObjectKeys(JSValueConst obj, int flags)
 {
-    RefPtr<RevSourceMap> pageMap;
-    RefPtr<RevSourceMap> appMap;
-    if (page != nullptr) {
-        pageMap = page->GetPageMap();
-        appMap = page->GetAppMap();
-    }
-    JSValue exceptionVal = JS_GetException(ctx);
-    BOOL isError = JS_IsError(ctx, exceptionVal);
-    if (!isError) {
-        LOGE("Throw: ");
-    }
-    ScopedString printLog(ctx, exceptionVal);
-    LOGE("[DUMP] %{public}s", printLog.get());
-    QjsHandleScope handleScope(ctx);
-    if (isError) {
-        JSValue val = QjsUtils::GetPropertyStr(ctx, exceptionVal, "stack");
-        if (!JS_IsUndefined(val)) {
-            const char* stack = JS_ToCString(ctx, val);
-            if (stack != nullptr) {
-                if (pageMap || appMap) {
-                    const std::string& standardStack = JsDumpSourceFile(stack, pageMap, appMap);
-                    LOGE("%{public}s", standardStack.c_str());
-                } else {
-                    LOGE("%{public}s", stack);
-                }
-                std::string reasonStr = GetReason(errorType);
-                std::string summaryBody = GenerateSummaryBody(printLog.get(), stack, instanceId, pageUrl);
-                EventReport::JsErrReport(
-                    AceEngine::Get().GetUid(), AceEngine::Get().GetPackageName(), reasonStr, summaryBody);
-                JS_FreeValue(ctx, exceptionVal);
-                JS_FreeCString(ctx, stack);
-            }
-        }
-    }
-}
-
-std::string QjsUtils::JsDumpSourceFile(const char* stack, const RefPtr<RevSourceMap>& pageMap,
-    const RefPtr<RevSourceMap>& appMap)
-{
-    const std::string closeBrace = ")";
-    const std::string openBrace = "(";
-    const std::string appFile = "app.js";
-    std::string tempStack = stack;
-    std::string sourceInfo;
-    std::string line = "";
-
-    int32_t appFlag = tempStack.find(appFile);
-    int32_t closeBracePos = tempStack.find(closeBrace);
-    int32_t openBracePos = tempStack.find(openBrace);
-
-    for (int32_t i = closeBracePos - 1; i > 0; i--) {
-        if (tempStack[i] >= '0' && tempStack[i] <= '9') {
-            line = tempStack[i] + line;
-        } else {
-            break;
-        }
-    }
-    if (!line.empty()) {
-        if (appFlag > 0 && appMap) {
-            sourceInfo = appMap->Find(std::stoi(line), 1).ToString();
-        } else {
-            sourceInfo = pageMap->Find(std::stoi(line), 1).ToString();
-        }
-    }
-    tempStack.replace(openBracePos, closeBracePos - openBracePos + 1, sourceInfo);
-    return tempStack;
-}
-
-void QjsUtils::JsDumpMemoryStats(JSContext* ctx)
-{
-#if ACE_DEBUG
-    LOGD("JS Memory ---------------------");
-    JSMemoryUsage s;
-    JSRuntime* rt = JS_GetRuntime(ctx);
-    if (!rt) {
-        return;
-    }
-
-    JS_ComputeMemoryUsage(rt, &s);
-
-    LOGD("malloc limit: %ld ------------", (int64_t)(ssize_t)s.malloc_limit);
-
-    LOGD("   COUNT      SIZE");
-
-    if (s.malloc_count) {
-        LOGD("%8ld  %8ld Bytes  Memory allocated (%0.1f per block)", s.malloc_count, s.malloc_size,
-            (double)s.malloc_size / s.malloc_count);
-        LOGD("%8ld  %8ld Bytes  Memory used (%d overhead, %0.1f average slack)", s.memory_used_count,
-            s.memory_used_size, 8, ((double)(s.malloc_size - s.memory_used_size) / s.memory_used_count));
-    }
-    if (s.atom_count) {
-        LOGD("%8ld  %8ld Bytes Atoms (%0.1f per atom)", s.atom_count, s.atom_size, (double)s.atom_size / s.atom_count);
-    }
-    if (s.str_count) {
-        LOGD("%8ld  %8ld Bytes Strings (%0.1f per string)", s.str_count, s.str_size, (double)s.str_size / s.str_count);
-    }
-    if (s.obj_count) {
-        LOGD("%8ld  %8ld Bytes Objects (%0.1f per object)", s.obj_count, s.obj_size, (double)s.obj_size / s.obj_count);
-        LOGD("%8ld  %8ld Bytes Properties (%0.1f per object)", s.prop_count, s.prop_size,
-            (double)s.prop_count / s.obj_count);
-        LOGD("%8ld  %8ld Bytes Shapes (%0.1f per shape)", s.shape_count, s.shape_size,
-            (double)s.shape_size / s.shape_count);
-    }
-    if (s.js_func_count) {
-        LOGD("%8ld  %8ld Bytes Bytecode functions", s.js_func_count, s.js_func_size);
-        LOGD("%8ld  %8ld Bytes Bytecode (%0.1f per function) ", s.js_func_count, s.js_func_code_size,
-            (double)s.js_func_code_size / s.js_func_count);
-        if (s.js_func_pc2line_count) {
-            LOGD("%8ld  %8ld Bytes Pc2line (%0.1f per function)", s.js_func_pc2line_count, s.js_func_pc2line_size,
-                (double)s.js_func_pc2line_size / s.js_func_pc2line_count);
-        }
-    }
-    if (s.c_func_count) {
-        LOGD("%8ld C functions", s.c_func_count);
-    }
-    if (s.array_count) {
-        LOGD("%8ld arrays", s.array_count);
-        if (s.fast_array_count) {
-            LOGD("%8ld fast arrays", s.fast_array_count);
-            LOGD("%8ld  %8ld (%0.1f per fast array) elements", s.fast_array_elements,
-                s.fast_array_elements * (int)sizeof(JSValue), (double)s.fast_array_elements / s.fast_array_count);
-        }
-    }
-    if (s.binary_object_count) {
-        LOGD("%8ld  %8ld binary objects", s.binary_object_count, s.binary_object_size);
-    }
-#endif
-    LOGD("JS Memory ---------------------");
-}
-
-std::vector<std::string> QjsUtils::GetObjectKeys(JSValueConst obj, int flags)
-{
-    return QjsUtils::GetObjectKeys(QJSContext::current(), obj, flags);
+    return QJSUtils::GetObjectKeys(QJSContext::Current(), obj, flags);
 }
 
 bool AlwaysMatch(std::string)
@@ -416,12 +503,12 @@ bool AlwaysMatch(std::string)
     return true;
 }
 
-std::vector<std::string> QjsUtils::GetObjectKeys(JSContext* ctx, JSValueConst obj, int flags)
+std::vector<std::string> QJSUtils::GetObjectKeys(JSContext* ctx, JSValueConst obj, int flags)
 {
-    return QjsUtils::GetFilteredObjectKeys(ctx, obj, AlwaysMatch, flags);
+    return QJSUtils::GetFilteredObjectKeys(ctx, obj, AlwaysMatch, flags);
 }
 
-std::vector<std::string> QjsUtils::GetFilteredObjectKeys(
+std::vector<std::string> QJSUtils::GetFilteredObjectKeys(
     JSContext* ctx, JSValueConst obj, bool (*matcherFunc)(std::string), int flags)
 {
     std::vector<std::string> result;
@@ -461,7 +548,7 @@ std::vector<std::string> QjsUtils::GetFilteredObjectKeys(
  * @param len: length of the result array
  * NOTE: caller needs to free pTab array after use
  */
-bool QjsUtils::CheckAndGetJsProperty(JSContext* ctx, JSValueConst jsObj, JSPropertyEnum** pTab, uint32_t* len)
+bool QJSUtils::CheckAndGetJsProperty(JSContext* ctx, JSValueConst jsObj, JSPropertyEnum** pTab, uint32_t* len)
 {
     int err = JS_GetOwnPropertyNames(ctx, pTab, len, jsObj, JS_GPN_STRING_MASK);
     if (err < 0) {
@@ -473,9 +560,9 @@ bool QjsUtils::CheckAndGetJsProperty(JSContext* ctx, JSValueConst jsObj, JSPrope
 
 // get the top -level registered variable types
 // this function  is called during the initial variable registration process
-std::string QjsUtils::typeAsString(JSValueConst targetValue)
+std::string QJSUtils::typeAsString(JSValueConst targetValue)
 {
-    JSContext* ctx = QJSContext::current();
+    JSContext* ctx = QJSContext::Current();
     if (JS_IsNumber(targetValue) || JS_IsInteger(targetValue) || JS_IsBigFloat(targetValue)) {
         return "number";
     } else if (JS_IsBool(targetValue)) {
@@ -499,7 +586,7 @@ std::string QjsUtils::typeAsString(JSValueConst targetValue)
     return "undefined";
 }
 
-JSValue QjsUtils::GetArgvSafe(int idx, int argc, JSValueConst* argv)
+JSValue QJSUtils::GetArgvSafe(int idx, int argc, JSValueConst* argv)
 {
     if (idx < 0 || idx >= argc) {
         return JS_UNDEFINED;
@@ -508,7 +595,7 @@ JSValue QjsUtils::GetArgvSafe(int idx, int argc, JSValueConst* argv)
     return argv[idx];
 }
 
-void QjsUtils::DefineGlobalFunction(JSContext* ctx, JSCFunction cFunc, const char* name, const int paramNum)
+void QJSUtils::DefineGlobalFunction(JSContext* ctx, JSCFunction cFunc, const char* name, const int paramNum)
 {
     JSValue global = JS_GetGlobalObject(ctx);
     JSValue jsFuncVal = JS_NewCFunction2(ctx, cFunc, name, paramNum, JS_CFUNC_generic, 0);
@@ -516,13 +603,20 @@ void QjsUtils::DefineGlobalFunction(JSContext* ctx, JSCFunction cFunc, const cha
     JS_FreeValue(ctx, global);
 }
 
+#ifdef USE_CLANG_COVERAGE
+std::stack<JSContext*> QJSContext::s_qjsContextStack;
+#else
 thread_local std::stack<JSContext*> QJSContext::s_qjsContextStack;
+#endif
 
-JSContext* QJSContext::current()
+JSContext* QJSContext::Current()
 {
     ACE_DCHECK(s_qjsContextStack.size() > 0 &&
-               "QJSContext::current() called outside of the lifetime of a QJSContext::Scope "
+               "QJSContext::Current() called outside of the lifetime of a QJSContext::Scope "
                "object. Did you forget QJSContext::Scope scope(ctx); ?");
+    if (s_qjsContextStack.empty()) {
+        return nullptr;
+    }
     return s_qjsContextStack.top();
 }
 
@@ -536,7 +630,7 @@ QJSContext::Scope::~Scope()
     s_qjsContextStack.pop();
 }
 
-QjsHandleScope::QjsHandleScope(JSContext* ctx)
+QJSHandleScope::QJSHandleScope(JSContext* ctx)
 {
     ACE_DCHECK(ctx != nullptr);
     static int scopeId = 0;
@@ -545,12 +639,25 @@ QjsHandleScope::QjsHandleScope(JSContext* ctx)
     qjsHandleScopeStack.push(this);
 }
 
-QjsHandleScope::~QjsHandleScope()
+QJSHandleScope::~QJSHandleScope()
 {
     qjsHandleScopeStack.pop();
     for (const auto& val : jsValues_) {
         JS_FreeValue(context_, val);
     }
+}
+
+QJSHandleScope* QJSHandleScope::GetCurrent()
+{
+    if (qjsHandleScopeStack.empty()) {
+        return nullptr;
+    }
+    return qjsHandleScopeStack.top();
+}
+
+void QJSHandleScope::Push(JSValue val)
+{
+    jsValues_.push_back(val);
 }
 
 } // namespace OHOS::Ace::Framework

@@ -15,11 +15,6 @@
 
 #include "core/components/web/flutter_render_web.h"
 
-#include "flutter/fml/memory/ref_counted.h"
-#include "flutter/lib/ui/painting/canvas.h"
-#include "flutter/lib/ui/painting/picture_recorder.h"
-#include "flutter/lib/ui/ui_dart_state.h"
-
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 

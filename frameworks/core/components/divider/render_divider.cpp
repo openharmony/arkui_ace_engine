@@ -28,7 +28,6 @@ void RenderDivider::Update(const RefPtr<Component>& component)
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
-
     dividerColor_ = divider->GetDividerColor();
     strokeWidth_ = divider->GetStrokeWidth();
     vertical_ = divider->IsVertical();

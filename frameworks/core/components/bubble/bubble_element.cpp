@@ -25,6 +25,7 @@ void BubbleElement::PerformBuild()
     RefPtr<BubbleComponent> bubble = AceType::DynamicCast<BubbleComponent>(component_);
     if (bubble) {
         id_ = bubble->GetId();
+        stateChangeEvent_ = bubble->GetStateChangeEvent();
         const auto& child = children_.empty() ? nullptr : children_.front();
         UpdateChild(child, bubble->GetChild());
     }
@@ -53,6 +54,20 @@ void BubbleElement::FirePopEvent()
     if (bubble) {
         bubble->FirePopEvent();
     }
+
+    if (IsDeclarative() && stateChangeEvent_) {
+        stateChangeEvent_(false);
+    }
+}
+
+bool BubbleElement::IsDeclarative()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return false;
+    }
+
+    return context->GetIsDeclarative();
 }
 
 } // namespace OHOS::Ace

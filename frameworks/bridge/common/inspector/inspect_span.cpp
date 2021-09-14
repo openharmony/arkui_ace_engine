@@ -33,7 +33,5 @@ void InspectSpan::PackAttrAndStyle()
     styles_.insert(std::make_pair("font-weight", "normal"));
     styles_.insert(std::make_pair("text-decoration", "none"));
     styles_.insert(std::make_pair("font-family", "sans-serif"));
-    styles_.insert(std::make_pair("disabled", "false"));
-    styles_.insert(std::make_pair("focusable", "false"));
 }
 } // namespace OHOS::Ace::Framework

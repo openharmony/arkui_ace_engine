@@ -16,6 +16,7 @@
 #include "frameworks/bridge/common/dom/dom_span.h"
 
 #include "core/common/ace_application_info.h"
+#include "core/components/declaration/span/span_declaration.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
@@ -25,67 +26,6 @@ DOMSpan::DOMSpan(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, n
     textSpanChild_ = AceType::MakeRefPtr<TextSpanComponent>("");
     // span has no box component.
     boxComponent_.Reset();
-}
-
-bool DOMSpan::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    if (attr.first == DOM_VALUE) {
-        textSpanChild_->SetSpanData(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SHOW) {
-        textSpanChild_->SetIsShow(StringToBool(attr.second));
-        return true;
-    }
-    return false;
-}
-
-bool DOMSpan::SetSpecializedStyle(const std::pair<std::string, std::string>& style)
-{
-    static const LinearMapNode<void (*)(const std::string&, DOMSpan&)> spanStyleOperators[] = {
-        { DOM_TEXT_ALLOW_SCALE,
-            [](const std::string& val, DOMSpan& span) {
-                span.spanStyle_.SetAllowScale(StringToBool(val));
-                span.isSetAllowScale_ = true;
-            } },
-        { DOM_TEXT_COLOR,
-            [](const std::string& val, DOMSpan& span) {
-                span.spanStyle_.SetTextColor(span.ParseColor(val));
-                span.isSetFontColor_ = true;
-            } },
-        { DOM_TEXT_FONT_FAMILY,
-            [](const std::string& val, DOMSpan& span) {
-                span.spanStyle_.SetFontFamilies(span.ParseFontFamilies(val));
-                span.isSetFontFamily_ = true;
-            } },
-        { DOM_TEXT_FONT_SIZE,
-            [](const std::string& val, DOMSpan& span) {
-                span.spanStyle_.SetFontSize(span.ParseDimension(val));
-                span.isSetFontSize_ = true;
-            } },
-        { DOM_TEXT_FONT_STYLE,
-            [](const std::string& val, DOMSpan& span) {
-                span.spanStyle_.SetFontStyle(ConvertStrToFontStyle(val));
-                span.isSetFontStyle_ = true;
-            } },
-        { DOM_TEXT_FONT_WEIGHT,
-            [](const std::string& val, DOMSpan& span) {
-                span.spanStyle_.SetFontWeight(ConvertStrToFontWeight(val));
-                span.isSetFontWeight_ = true;
-            } },
-        { DOM_TEXT_DECORATION,
-            [](const std::string& val, DOMSpan& span) {
-                span.spanStyle_.SetTextDecoration(ConvertStrToTextDecoration(val));
-                span.isSetTextDecoration_ = true;
-            } },
-    };
-    auto spanStyleIter = BinarySearchFindIndex(spanStyleOperators, ArraySize(spanStyleOperators), style.first.c_str());
-    if (spanStyleIter != -1) {
-        spanStyleOperators[spanStyleIter].value(style.second, *this);
-    }
-
-    // span has no box component, set true to prevent setting style to box (empty object).
-    return true;
 }
 
 void DOMSpan::CheckAndSetCurrentSpanStyle(
@@ -111,6 +51,9 @@ void DOMSpan::CheckAndSetCurrentSpanStyle(
     }
     if (!domSpan->HasSetAllowScale()) {
         currentStyle.SetAllowScale(parentStyle.IsAllowScale());
+    }
+    if (!domSpan->HasSetFontFeatures()) {
+        currentStyle.SetFontFeatures(parentStyle.GetFontFeatures());
     }
     currentStyle.SetLetterSpacing(parentStyle.GetLetterSpacing());
     currentStyle.SetLineHeight(parentStyle.GetLineHeight(), parentStyle.HasHeightOverride());
@@ -153,14 +96,22 @@ void DOMSpan::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 
 void DOMSpan::PrepareSpecializedComponent()
 {
-    bool isCard = AceApplicationInfo::GetInstance().GetIsCardType();
-    if (isCard) {
-        spanStyle_.SetAllowScale(false);
-        if (spanStyle_.GetFontSize().Unit() == DimensionUnit::FP) {
-            spanStyle_.SetAllowScale(true);
+    auto spanDeclaration = AceType::DynamicCast<SpanDeclaration>(declaration_);
+    if (!spanDeclaration) {
+        return;
+    }
+    auto& specializedStyle = declaration_->MaybeResetStyle<SpanStyle>(StyleTag::SPECIALIZED_STYLE);
+    if (specializedStyle.IsValid()) {
+        bool isCard = AceApplicationInfo::GetInstance().GetIsCardType();
+        if (isCard) {
+            specializedStyle.spanStyle.SetAllowScale(false);
+            if (specializedStyle.spanStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+                specializedStyle.spanStyle.SetAllowScale(true);
+            }
         }
     }
-    textSpanChild_->SetTextStyle(spanStyle_);
+
+    textSpanChild_->SetDeclaration(spanDeclaration);
 }
 
 } // namespace OHOS::Ace::Framework

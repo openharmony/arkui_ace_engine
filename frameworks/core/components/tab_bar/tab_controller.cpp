@@ -15,6 +15,7 @@
 
 #include "core/components/tab_bar/tab_controller.h"
 
+#include "core/components/tab_bar/render_tab_bar.h"
 #include "core/components/tab_bar/tab_bar_element.h"
 #include "core/components/tab_bar/tab_content_element.h"
 
@@ -63,6 +64,33 @@ void TabController::SetIndex(int32_t index)
     }
 }
 
+void TabController::SetIndexByController(int32_t index, bool blockEvent)
+{
+    if (index_ == index || index < 0) {
+        LOGW("Input index is not valid.");
+        return;
+    }
+    if (barElement_.Upgrade()) {
+        auto tabBar = AceType::DynamicCast<TabBarElement>(barElement_.Upgrade());
+        if (tabBar) {
+            auto renderTabBar = AceType::DynamicCast<RenderTabBar>(tabBar->GetRenderNode());
+            if (renderTabBar && renderTabBar->GetTabsSize() < index) {
+                LOGW("Input index is not valid.");
+                return;
+            }
+            tabBar->UpdateIndex(index);
+        }
+    }
+
+    index_ = index;
+    if (contentElement_.Upgrade()) {
+        auto tabContent = AceType::DynamicCast<TabContentElement>(contentElement_.Upgrade());
+        if (tabContent) {
+            tabContent->ChangeByBar(index, blockEvent);
+        }
+    }
+}
+
 void TabController::ChangeDispatch(int32_t index)
 {
     if (contentElement_.Upgrade()) {
@@ -106,6 +134,16 @@ int32_t TabController::GetId() const
 int32_t TabController::GetIndex() const
 {
     return index_;
+}
+
+int32_t TabController::GetInitialIndex() const
+{
+    return initialIndex_;
+}
+
+void TabController::SetInitialIndex(int32_t initIndex)
+{
+    initialIndex_ = initIndex;
 }
 
 } // namespace OHOS::Ace

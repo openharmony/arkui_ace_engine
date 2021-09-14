@@ -40,6 +40,7 @@ const double ITEM_SCALE_BASE = 1.12;
 const double ITEM_OPACITY_BASE = 1.0;
 const double ITEM_RATIO = -0.34; // 0.78 - 1.12  // 0.66 - 1.0
 const double DISTANCE_EPSILON = 1.0;
+constexpr int32_t MIN_COMPATITABLE_VERSION = 5;
 
 #ifdef WEARABLE_PRODUCT
 const int32_t VIBRATE_DURATION = 5;
@@ -64,19 +65,19 @@ void RenderListItem::Initialize()
     touchRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
     touchRecognizer_->SetOnTouchDown([weakItem = AceType::WeakClaim(this)](const TouchEventInfo&) {
         auto item = weakItem.Upgrade();
-        if (item) {
+        if (item && item->GetSupportClick()) {
             item->PlayPressDownAnimation();
         }
     });
     touchRecognizer_->SetOnTouchUp([weakItem = AceType::WeakClaim(this)](const TouchEventInfo&) {
         auto item = weakItem.Upgrade();
-        if (item) {
+        if (item && item->GetSupportClick()) {
             item->PlayPressUpAnimation();
         }
     });
     touchRecognizer_->SetOnTouchCancel([weakItem = AceType::WeakClaim(this)](const TouchEventInfo&) {
         auto item = weakItem.Upgrade();
-        if (item) {
+        if (item && item->GetSupportClick()) {
             item->PlayPressUpAnimation();
         }
     });
@@ -177,6 +178,7 @@ void RenderListItem::Update(const RefPtr<Component>& component)
         isTitle_ = item->IsTitle();
         sticky_ = item->GetSticky();
         stickyMode_ = item->GetStickyMode();
+        clickColor_ = item->GetClickColor();
         selfAlign_ = item->GetAlignSelf();
         Dimension radius = item->GetStickyRadius();
         if (radius.IsValid()) {
@@ -195,8 +197,17 @@ void RenderListItem::Update(const RefPtr<Component>& component)
         dividerHeight_ = item->GetDividerHeight();
         dividerOrigin_ = item->GetDividerOrigin();
         dividerColor_ = item->GetDividerColor();
-
-        clickEvent_ = AceAsyncEvent<void()>::Create(item->GetClickEventId(), GetContext());
+        auto onClickId = item->GetClickEventId();
+        clickEvent_ = AceAsyncEvent<void()>::Create(onClickId, GetContext());
+        clickRecognizer_->SetUseCatchMode(true);
+        if (!onClickId.GetCatchMode()) {
+            static const int32_t bubbleModeVersion = 6;
+            auto pipeline = context_.Upgrade();
+            if (pipeline && pipeline->GetMinPlatformVersion() >= bubbleModeVersion) {
+                clickRecognizer_->SetUseCatchMode(false);
+                return;
+            }
+        }
         stickyEvent_ = AceAsyncEvent<void(const std::string&)>::Create(item->GetStickyEventId(), GetContext());
         transitionEffect_ = item->GetTransitionEffect();
         UpdateAccessibilityAttr();
@@ -305,6 +316,7 @@ void RenderListItem::PlayPressDownAnimation()
     if (!focusController_) {
         ResetFocusEffect();
     }
+    pressAnimation_ = true;
     focusController_->TouchDownAnimation();
 }
 
@@ -313,7 +325,19 @@ void RenderListItem::PlayPressUpAnimation()
     if (!focusController_) {
         ResetFocusEffect();
     }
+    pressAnimation_ = false;
     focusController_->TouchUpAnimation();
+}
+
+void RenderListItem::OnCancelPressAnimation()
+{
+    if (!pressAnimation_) {
+        return;
+    }
+    if (!focusController_) {
+        ResetFocusEffect();
+    }
+    focusController_->CancelTouchAnimation();
 }
 
 void RenderListItem::HandleStickyEvent(bool sticky)
@@ -331,8 +355,13 @@ void RenderListItem::OnTouchTestHit(
     if (!GetVisible() && !GetClonedBySticky()) {
         return;
     }
-
-    if ((!touchRecognizer_) || (!clickRecognizer_) || (!supportClick_)) {
+    // supportClick means show click effect
+    bool supportClick = supportClick_;
+    auto pipeline = context_.Upgrade();
+    if (pipeline && pipeline->GetMinPlatformVersion() > MIN_COMPATITABLE_VERSION) {
+        supportClick = true;
+    }
+    if ((!touchRecognizer_) || (!clickRecognizer_) || (!supportClick)) {
         return;
     }
     touchRecognizer_->SetCoordinateOffset(coordinateOffset);
@@ -491,7 +520,6 @@ void RenderListItem::UpdateAccessibilityAttr()
             item->MoveToViewPort();
         }
     });
-    refPtr->AddSupportAction(AceAction::ACTION_CLICK);
     refPtr->AddSupportAction(AceAction::ACTION_ACCESSIBILITY_FOCUS);
 }
 

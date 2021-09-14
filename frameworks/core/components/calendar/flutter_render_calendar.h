@@ -21,6 +21,7 @@
 
 #include "core/components/calendar/render_calendar.h"
 #include "core/pipeline/layers/clip_layer.h"
+#include "core/pipeline/layers/picture_layer.h"
 
 namespace OHOS::Ace {
 
@@ -39,13 +40,13 @@ public:
     void PerformLayout() override;
 
 private:
-    void DrawWeekAndDates(ScopedCanvas& canvas, const Offset& offset);
-    void DrawFocusedArea(ScopedCanvas& canvas, const Offset& offset, double x, double y) const;
+    void DrawWeekAndDates(ScopedCanvas& canvas, Offset offset);
+    void DrawFocusedArea(ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, double x, double y) const;
     void DrawWeek(ScopedCanvas& canvas, const Offset& offset) const;
     void DrawBlurArea(ScopedCanvas& canvas, const Offset& offset, double x, double y) const;
-    void DrawTouchedArea(ScopedCanvas& canvas, const Offset& offset, double x, double y) const;
+    void DrawTouchedArea(RenderContext& context, Offset offset) const;
     void PaintDay(
-        ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, const txt::TextStyle& textStyle) const;
+        ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, txt::TextStyle& textStyle) const;
     void PaintLunarDay(
         ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, const txt::TextStyle& textStyle) const;
     void SetNonFocusStyle(const CalendarDay& day, txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle);
@@ -54,7 +55,6 @@ private:
     void DrawTvCalendar(ScopedCanvas& canvas, const Offset& offset, const Offset& dayOffset, const CalendarDay& day,
         int32_t dateNumber);
     void InitTextStyle(txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle);
-    bool IsToday(const CalendarDay& day) const;
     void PaintUnderscore(ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day);
     void PaintScheduleMarker(ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day);
     void InitWorkStateStyle(
@@ -62,6 +62,8 @@ private:
     void SetWorkStateStyle(
         const CalendarDay& day, SkColor workColor, SkColor offColor, txt::TextStyle& workStateStyle) const;
     void SetCalendarTheme();
+    bool IsOffDay(const CalendarDay& day) const;
+    void AddContentLayer();
 
     bool needShrink_ = false;
     double weekFontSize_ = 0.0;
@@ -77,6 +79,7 @@ private:
     double workStateWidth_ = 0.0;
     double workStateHorizontalMovingDistance_ = 0.0;
     double workStateVerticalMovingDistance_ = 0.0;
+    double touchCircleStrokeWidth_ = 0.0;
 
     SkColor weekColor_;
     SkColor touchColor_;
@@ -99,6 +102,7 @@ private:
     SkColor markLunarColor_;
 
     RefPtr<Flutter::ClipLayer> layer_;
+    RefPtr<Flutter::PictureLayer> contentLayer_;
     Size lastLayoutSize_;
     FontWeight dayFontWeight_ = FontWeight::W500;
     FontWeight lunarDayFontWeight_ = FontWeight::W500;

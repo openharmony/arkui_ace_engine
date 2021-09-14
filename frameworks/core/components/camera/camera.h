@@ -37,6 +37,12 @@ enum State : int32_t {
     STATE_BUTT
 };
 
+enum ReadyMode : int32_t {
+    NONE,
+    PHOTO,
+    VIDEO
+};
+
 class CaptureListener;
 
 class CameraCallback {
@@ -74,8 +80,8 @@ public:
     sptr<Surface> createSubWindowSurface();
     int32_t PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> camManagerObj);
     int32_t PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> camManagerObj);
-    int32_t PrepareCamera();
-    int32_t SaveData(const char *buffer, int32_t size, std::string& path);
+    int32_t PrepareCamera(bool bIsRecorder);
+    int32_t SaveData(char *buffer, int32_t size, std::string& path);
     void OnTakePhoto(bool isSucces, std::string info);
     void AddTakePhotoListener(TakePhotoListener&& listener);
     void AddErrorListener(ErrorListener&& listener);
@@ -89,6 +95,18 @@ public:
     }
     friend class CaptureListener;
 
+    void SetLayoutOffset(double x, double y)
+    {
+        layoutOffset_.SetX(x);
+        layoutOffset_.SetY(y);
+    }
+
+    void SetLayoutSize(double width, double height)
+    {
+        layoutSize_.SetWidth(width);
+        layoutSize_.SetHeight(height);
+    }
+
 protected:
     void CloseRecorder();
 
@@ -99,8 +117,12 @@ private:
     void onRecord(bool isSucces, std::string info);
     void MakeDir(const std::string& path);
 
+    void MarkTreeRender(const RefPtr<RenderNode>& root);
+    void MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak);
+
     std::shared_ptr<Media::Recorder> recorder_ = nullptr;
     int32_t videoSourceId_ = -1;
+    int32_t PreviousReadyMode_ = ReadyMode::NONE;
     sptr<Surface> previewSurface_;
 
     ErrorListener onErrorListener_;
@@ -114,6 +136,10 @@ private:
     sptr<Surface> captureSurface_;
     Size windowSize_ = Size(TEMPORARY_WINDOW_SIZE, TEMPORARY_WINDOW_SIZE);
     Offset windowOffset_ = Offset(0, 0);
+    Size layoutSize_;
+    Offset layoutOffset_;
+    bool sizeInitSucceeded_ = false;
+    bool offsetInitSucceeded_ = false;
 
     bool isReady_ = false;
     bool hasCallPreView_ = false;
@@ -136,7 +162,8 @@ class CaptureListener : public IBufferConsumerListener {
 public:
     explicit CaptureListener(CameraCallback *cameraCallback) : cameraCallback_(cameraCallback) {
     }
-    ~CaptureListener() {
+    ~CaptureListener()
+    {
         cameraCallback_->photoListener_ = nullptr;
         cameraCallback_ = nullptr;
     }
@@ -189,7 +216,6 @@ private:
     std::unique_ptr<OHOS::Window> window_;
     sptr<OHOS::CameraStandard::CaptureInput> camInput_;
 };
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CAMERA_CAMERA_H

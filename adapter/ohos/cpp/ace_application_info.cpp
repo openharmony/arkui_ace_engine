@@ -15,21 +15,20 @@
 
 #include "adapter/ohos/cpp/ace_application_info.h"
 
-#include <iostream>
 #include <dirent.h>
+#include <iostream>
 #include <sys/stat.h>
 
 #include "contrib/minizip/unzip.h"
+#include "init_data.h"
 #include "unicode/locid.h"
 
-#include "adapter/common/cpp/ace_res_config.h"
-#include "adapter/common/cpp/ace_res_data_struct.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/resource/ace_res_config.h"
+#include "base/resource/ace_res_data_struct.h"
 #include "core/common/ace_engine.h"
-
-#include "init_data.h"
 
 namespace OHOS::Ace::Platform {
 
@@ -99,7 +98,7 @@ std::string AceApplicationInfoImpl::GetCurrentDeviceResTag() const
     AceResConfig deviceResConfig = AceResConfig(SystemProperties::GetMcc(), SystemProperties::GetMnc(),
         SystemProperties::GetDevcieOrientation(), SystemProperties::GetColorMode(), SystemProperties::GetDeviceType(),
         resolutionType);
-    return AceResConfig::ConvertResConfigToTag(deviceResConfig);
+    return AceResConfig::ConvertResConfigToTag(deviceResConfig, false);
 }
 
 void AceApplicationInfoImpl::SetLocale(

@@ -31,10 +31,13 @@ constexpr uint32_t RGB_SUB_MATCH_SIZE = 4;
 constexpr uint32_t RGBA_SUB_MATCH_SIZE = 5;
 
 const std::regex COLOR_WITH_MAGIC("#[0-9A-Fa-f]{6,8}");
+const std::regex COLOR_WITH_MAGIC_MINI("#[0-9A-Fa-f]{3,4}");
 const std::regex COLOR_WITH_RGB(R"(rgb\(([0-9]{1,3})\,([0-9]{1,3})\,([0-9]{1,3})\))", std::regex::icase);
 const std::regex COLOR_WITH_RGBA(R"(rgba\(([0-9]{1,3})\,([0-9]{1,3})\,([0-9]{1,3})\,(\d+\.?\d*)\))", std::regex::icase);
 constexpr double GAMMA_FACTOR = 2.2;
 constexpr float MAX_ALPHA = 255.0f;
+constexpr char HEX[] = "0123456789ABCDEF";
+constexpr uint8_t BIT_LENGTH_INT32 = 8;
 
 } // namespace
 
@@ -62,6 +65,22 @@ Color Color::FromString(std::string colorStr, uint32_t maskAlpha)
         colorStr.erase(0, 1);
         auto value = stoul(colorStr, nullptr, COLOR_STRING_BASE);
         if (colorStr.length() < COLOR_STRING_SIZE_STANDARD) {
+            // no alpha specified, set alpha to 0xff
+            value |= maskAlpha;
+        }
+        return Color(value);
+    }
+    // Regex match for #rgb or #rgba.
+    if (std::regex_match(colorStr, matches, COLOR_WITH_MAGIC_MINI)) {
+        colorStr.erase(0, 1);
+        std::string newColorStr;
+        // translate #rgb or #rgba to #rrggbb or #rrggbbaa
+        for (auto& c : colorStr) {
+            newColorStr += c;
+            newColorStr += c;
+        }
+        auto value = stoul(newColorStr, nullptr, COLOR_STRING_BASE);
+        if (newColorStr.length() < COLOR_STRING_SIZE_STANDARD) {
             // no alpha specified, set alpha to 0xff
             value |= maskAlpha;
         }
@@ -110,24 +129,39 @@ Color Color::FromString(std::string colorStr, uint32_t maskAlpha)
     return Color::BLACK;
 }
 
+std::string Color::ColorToString() const
+{
+    std::string colorStr;
+    int count = 0;
+    uint32_t value = GetValue();
+    while (count++ < BIT_LENGTH_INT32) {
+        colorStr = HEX[(value & 0xf)] + colorStr;
+        value >>= 4;
+    }
+    colorStr = "#" + colorStr;
+    return colorStr;
+}
+
 Color Color::FromARGB(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue)
 {
-    ColorParam colorValue { { .alpha = alpha, .red = red, .green = green, .blue = blue } };
+    ColorParam colorValue {
+#if BIG_ENDIANNESS
+        .argb = { .alpha = alpha, .red = red, .green = green, .blue = blue }
+#else
+        .argb = { .blue = blue, .green = green, .red = red, .alpha = alpha }
+#endif
+    };
     return Color(colorValue);
 }
 
 Color Color::FromRGBO(uint8_t red, uint8_t green, uint8_t blue, double opacity)
 {
-    ColorParam colorValue {
-        { .alpha = static_cast<uint8_t>(round(opacity * 0xff)) & 0xff, .red = red, .green = green, .blue = blue }
-    };
-    return Color(colorValue);
+    return FromARGB(static_cast<uint8_t>(round(opacity * 0xff)) & 0xff, red, green, blue);
 }
 
 Color Color::FromRGB(uint8_t red, uint8_t green, uint8_t blue)
 {
-    ColorParam colorValue { { .alpha = 0xff, .red = red, .green = green, .blue = blue } };
-    return Color(colorValue);
+    return FromARGB(0xff, red, green, blue);
 }
 
 Color Color::BlendColor(const Color& overlayColor) const

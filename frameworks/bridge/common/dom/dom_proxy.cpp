@@ -36,7 +36,10 @@ void DOMProxy::SetShowAttr(const std::string& showValue)
     if (!targetNode) {
         return;
     }
-    targetNode->SetHasDisplayStyleFlag(true);
+    auto targetDeclaration = targetNode->GetDeclaration();
+    if (targetDeclaration) {
+        targetDeclaration->SetHasDisplayStyle(true);
+    }
     targetNode->SetShowAttr(showValue);
     targetNode->GetRootComponent()->SetUpdateType(UpdateType::ALL);
     targetNode->GenerateComponentNode();

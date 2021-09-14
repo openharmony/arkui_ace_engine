@@ -25,20 +25,6 @@ void ManifestWindow::WindowParse(const std::unique_ptr<JsonValue>& root)
         LOGE("the root manifest is nullptr");
         return;
     }
-    windowConfig_.minSdkVersion = root->GetInt("minPlatformVersion");
-    windowConfig_.boxWrap = root->GetBool("boxWrap", false);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    auto deviceTypes = root->GetValue("deviceType");
-    if (deviceTypes && deviceTypes->IsArray()) {
-        for (int32_t index = 0; index < deviceTypes->GetArraySize(); ++index) {
-            auto device = deviceTypes->GetArrayItem(index);
-            if (device && device->IsString() && device->GetString() == "liteWearable") {
-                windowConfig_.useLiteStyle = true;
-                break;
-            }
-        }
-    }
-#endif
     auto window = root->GetObject("window");
     if (!window || window->IsNull()) {
         LOGD("No window config found.");

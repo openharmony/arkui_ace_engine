@@ -26,11 +26,25 @@ class MockAceApplicationInfo : public AceApplicationInfo {
         std::vector<std::string> vector;
         return vector;
     };
+
     std::vector<std::string> GetResourceFallback(const std::vector<std::string>& resourceList) const override
     {
         std::vector<std::string> vector;
         return vector;
     };
+
+    std::vector<std::string> GetStyleResourceFallback(const std::vector<std::string>& resourceList) const override
+    {
+        std::vector<std::string> vector;
+        return vector;
+    };
+
+    std::vector<std::string> GetDeclarativeResourceFallback(const std::set<std::string>& resourceList) const override
+    {
+        std::vector<std::string> vector;
+        return vector;
+    }
+
     bool GetFiles(const std::string& filePath, std::vector<std::string>& fileList) const override
     {
         return false;
@@ -56,6 +70,26 @@ class MockAceApplicationInfo : public AceApplicationInfo {
         return "";
     }
 
+    std::string GetCurrentDeviceDeclarativeResTag() const override
+    {
+        return "";
+    }
+
+    double GetTargetMediaScaleRatio(const std::string& targetResTag) const override
+    {
+        return 0.0;
+    }
+
+    bool IsRightToLeft() const
+    {
+        return true;
+    }
+
+    const std::string& GetPackageName() const
+    {
+        return packageName_;
+    }
+
 public:
     static MockAceApplicationInfo& GetInstance()
     {
@@ -64,6 +98,11 @@ public:
     }
 
     void SetResourceManager(std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override {}
+
+    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() override { return nullptr; }
+
+private:
+    std::string packageName_;
 };
 
 AceApplicationInfo& AceApplicationInfo::GetInstance()

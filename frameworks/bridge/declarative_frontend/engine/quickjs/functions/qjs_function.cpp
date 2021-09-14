@@ -45,9 +45,8 @@ JSValue QJSFunction::executeJS(int argc, JSValueConst* argv)
 
     ACE_FUNCTION_TRACE();
 
-    const char* jsFunctionStr = JS_ToCString(ctx_, jsFunction_);
-    LOGD("JS_CALL: %s", jsFunctionStr);
-    JS_FreeCString(ctx_, jsFunctionStr);
+    QJSContext::Scope scp(ctx_);
+    LOGD("JS_CALL: %s", ScopedString(jsFunction_).get());
 
     // The function might delete itself or the object in a callback. Safe to duplicate before execution
     JSValue jsTmpFunc = JS_DupValue(ctx_, jsFunction_);

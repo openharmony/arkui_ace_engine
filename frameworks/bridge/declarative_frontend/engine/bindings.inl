@@ -49,6 +49,23 @@ void JSClassImpl<C, ImplDetail>::Method(const char* name, R (Base::*func)(Args..
 }
 
 template<typename C, template<typename> typename ImplDetail>
+template<typename R, typename... Args>
+void JSClassImpl<C, ImplDetail>::StaticMethod(const char* name, R (C::*func)(Args...), MethodOptions options)
+{
+    functions_.emplace(nextFreeId, new FunctionBinding(name, options, func));
+    ImplDetail<C>::StaticMethod(name, func, nextFreeId++);
+}
+
+template<typename C, template<typename> typename ImplDetail>
+template<typename Base, typename R, typename... Args>
+void JSClassImpl<C, ImplDetail>::StaticMethod(const char* name, R (Base::*func)(Args...), MethodOptions options)
+{
+    static_assert(std::is_base_of_v<Base, C>, "Trying to bind an unrelated method!");
+    functions_.emplace(nextFreeId, new FunctionBinding(name, options, func));
+    ImplDetail<C>::StaticMethod(name, func, nextFreeId++);
+}
+
+template<typename C, template<typename> typename ImplDetail>
 template<typename T>
 void JSClassImpl<C, ImplDetail>::CustomMethod(
     const char* name, typename ImplDetail<C>::template MemberFunctionCallback<T> callback)
@@ -62,6 +79,22 @@ template<typename C, template<typename> typename ImplDetail>
 void JSClassImpl<C, ImplDetail>::CustomMethod(const char* name, typename ImplDetail<C>::FunctionCallback callback)
 {
     ImplDetail<C>::CustomMethod(name, callback);
+}
+
+template<typename C, template<typename> typename ImplDetail>
+template<typename T>
+void JSClassImpl<C, ImplDetail>::StaticMethod(
+    const char* name, typename ImplDetail<C>::template MemberFunctionCallback<T> callback)
+{
+    static_assert(std::is_base_of_v<T, C>, "Trying to bind an unrelated method!");
+    functions_.emplace(nextFreeId, new FunctionBinding(name, MethodOptions::NONE, callback));
+    ImplDetail<C>::StaticMethod(name, callback, nextFreeId++);
+}
+
+template<typename C, template<typename> typename ImplDetail>
+void JSClassImpl<C, ImplDetail>::StaticMethod(const char* name, typename ImplDetail<C>::FunctionCallback callback)
+{
+    ImplDetail<C>::StaticMethod(name, callback);
 }
 
 template<typename C, template<typename> typename ImplDetail>

@@ -210,7 +210,7 @@ void RenderOption::OnTouch(bool down)
     Color endColor;
     if (down) {
         endColor = clickedColor_;
-    } else if (data_ && data_->GetHovered()) {
+    } else if (hovered_) {
         endColor = hoveredColor_;
     } else {
         endColor = Color::TRANSPARENT;
@@ -224,7 +224,7 @@ void RenderOption::OnMouseHoverEnterTest()
         return;
     }
 
-    data_->SetHovered(true);
+    hovered_ = true;
     UpdateStatus();
     PlayEventEffectAnimation(hoveredColor_, HOVER_DURATION);
 }
@@ -235,7 +235,7 @@ void RenderOption::OnMouseHoverExitTest()
         return;
     }
 
-    data_->SetHovered(false);
+    hovered_ = false;
     UpdateStatus();
     PlayEventEffectAnimation(Color::TRANSPARENT, HOVER_DURATION, true);
 }
@@ -260,7 +260,7 @@ void RenderOption::UpdateSelfStatus()
         UpdateClickedStatus();
         return;
     }
-    if (data_->GetHovered()) {
+    if (hovered_) {
         UpdateHoveredStatus();
         return;
     }
@@ -372,7 +372,7 @@ bool RenderOption::IsNormalStatus() const
         return false;
     }
 
-    return (!data_->GetClicked() && !data_->GetHovered() && !data_->GetSelected() &&
+    return (!data_->GetClicked() && !hovered_ && !data_->GetSelected() &&
         !(data_->GetFocused() && pipe->IsKeyEvent()));
 }
 

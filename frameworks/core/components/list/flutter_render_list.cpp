@@ -56,7 +56,7 @@ void FlutterRenderList::PaintChild(const RefPtr<RenderNode>& child, RenderContex
 {
     // sticky items paint individually by PaintStickyItem
     RefPtr<RenderListItem> listItem = RenderListItem::GetRenderListItem(child);
-    if (!listItem->GetClonedBySticky() && listItem->GetVisible()) {
+    if (listItem && !listItem->GetClonedBySticky() && listItem->GetVisible()) {
         context.PaintChild(child, offset);
     }
 }

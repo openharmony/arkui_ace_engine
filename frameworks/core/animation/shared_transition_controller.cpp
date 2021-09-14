@@ -48,7 +48,6 @@ RefPtr<SharedTransitionEffect> GetSharedEffect(const ShareId& shareId, const Wea
 
 SharedTransitionController::SharedTransitionController(const WeakPtr<PipelineContext>& context) : context_(context)
 {
-    controller_ = AceType::MakeRefPtr<Animator>(context);
 };
 
 void SharedTransitionController::RegisterTransitionListener()
@@ -95,11 +94,16 @@ void SharedTransitionController::RegisterTransitionListener()
 void SharedTransitionController::StartSharedTransition()
 {
     // finish previous transition
-    controller_->Finish();
-    // clear controller
-    controller_->ClearAllListeners();
-    controller_->ClearInterpolators();
-    controller_->ClearProxyControllers();
+    for (const auto& controller : controllers_) {
+        if (controller) {
+            controller->Finish();
+            controller->ClearAllListeners();
+            controller->ClearInterpolators();
+        }
+    }
+    controllers_.clear();
+    stopControllerCount_ = 0;
+
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         LOGE("Start shared transition failed. pipeline is null.");
@@ -131,15 +135,44 @@ void SharedTransitionController::KickoffSharedTransition(TransitionEvent event, 
         LOGI("No shared elements found. event: %{public}d. dest page id: %{public}d", event_, pageId);
         return;
     }
-    controller_->AddStopListener([overlayWeak = WeakClaim(RawPtr(overlay))]() {
-        auto overlay = overlayWeak.Upgrade();
-        if (overlay) {
-            // shared element will be removed when get off shuttle, just make sure no shared left on the overlay
-            overlay->Clear();
+
+    if (!controllers_.empty()) {
+        controllers_.front()->AddStartListener([overlayWeak = WeakClaim(RawPtr(overlay))]() {
+            auto overlay = overlayWeak.Upgrade();
+            if (overlay) {
+                auto overlayRender = overlay->GetRenderNode();
+                if (overlayRender) {
+                    overlayRender->SetVisible(true);
+                }
+            }
+        });
+    }
+
+    for (const auto& controller : controllers_) {
+        if (controller) {
+            controller->SetFillMode(FillMode::FORWARDS);
+            controller->AddStopListener([effectWeak = WeakClaim(this), overlayWeak = WeakClaim(RawPtr(overlay))]() {
+                auto effect = effectWeak.Upgrade();
+                if (!effect) {
+                    LOGE("effect is null.");
+                    return;
+                }
+                effect->stopControllerCount_++;
+                if (static_cast<uint32_t>(effect->stopControllerCount_) >= effect->controllers_.size()) {
+                    auto overlay = overlayWeak.Upgrade();
+                    if (overlay) {
+                        // shared element will be removed when get off shuttle, just make sure no shared left on the
+                        // overlay
+                        overlay->Clear();
+                        auto overlayRender = overlay->GetRenderNode();
+                        if (overlayRender) {
+                            overlayRender->SetVisible(false);
+                        }
+                    }
+                }
+            });
         }
-    });
-    controller_->SetFillMode(FillMode::FORWARDS);
-    // Play together with page transition in stage element.
+    }
 }
 
 bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overlay, bool preCheck)
@@ -155,14 +188,16 @@ bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overla
     const auto& srcMap = pageSrc->GetSharedTransitionMap();
     const auto& destMap = pageDest->GetSharedTransitionMap();
     bool hasShared = false;
-    WeakPtr<SharedTransitionElement> srcWeak;
+    std::vector<RefPtr<SharedTransitionEffect>> effects;
+
+    // find out all exchange effect or static effect in dest page
     for (auto& item : destMap) {
         auto shareId = item.first;
         auto& destWeak = item.second;
         auto srcSharedIter = srcMap.find(shareId);
+        WeakPtr<SharedTransitionElement> srcWeak;
         if (srcSharedIter == srcMap.end()) {
             LOGD("Shared src not found, maybe the effect do not need it. share id: %{public}s", shareId.c_str());
-            srcWeak.Reset();
         } else {
             srcWeak = srcSharedIter->second;
         }
@@ -171,14 +206,44 @@ bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overla
             LOGE("Shared effect is null, maybe no shared element at all. share id: %{public}s", shareId.c_str());
             continue;
         }
-        effect->SetSharedElement(srcWeak, destWeak);
-        if (!effect->Allow(event_)) {
-            LOGD("Shared transition not allowed, event: %{public}d, share id: %{public}s", event_, shareId.c_str());
-            continue;
-        }
         if (preCheck) {
             // Return true, when find the first shared transition.
             return true;
+        }
+        effect->SetSharedElement(srcWeak, destWeak);
+        effect->setCurrentSharedElement(destWeak);
+        effects.push_back(effect);
+    }
+
+    // find out all static effect in source page only in ace declarative
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        for (auto& item : srcMap) {
+            auto sharedId = item.first;
+            auto& sourceWeak = item.second;
+            RefPtr<SharedTransitionEffect> effect = GetSharedEffect(sharedId, nullptr, sourceWeak);
+            if (!effect || effect->GetType() != SharedTransitionEffectType::SHARED_EFFECT_STATIC) {
+                LOGE(
+                    "Shared effect is null or type is not static, maybe no shared element at all. share id: %{public}s",
+                    sharedId.c_str());
+                continue;
+            }
+            if (preCheck) {
+                // Return true, when find the first shared transition.
+                return true;
+            }
+            effect->SetSharedElement(sourceWeak, nullptr);
+            effect->setCurrentSharedElement(sourceWeak);
+            effects.push_back(effect);
+        }
+    }
+
+    // prepare each sharedTransition effect
+    for (auto& effect : effects) {
+        const auto& shareId = effect->GetShareId();
+        if (!effect->Allow(event_)) {
+            LOGE("Shared transition not allowed, event: %{public}d, share id: %{public}s", event_, shareId.c_str());
+            continue;
         }
         if (!PrepareEachTransition(shareId, effect, overlay)) {
             LOGE("Prepare shared transition failed. share id: %{public}s", shareId.c_str());
@@ -186,6 +251,7 @@ bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overla
         }
         hasShared = true;
     }
+
     if (!hasShared) {
         LOGD("No shared elements found. event: %{public}d. Shared size: dest: %{public}zu, src: %{public}zu", event_,
             destMap.size(), srcMap.size());
@@ -196,33 +262,39 @@ bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overla
 bool SharedTransitionController::PrepareEachTransition(
     const ShareId& shareId, RefPtr<SharedTransitionEffect>& effect, RefPtr<OverlayElement>& overlay)
 {
-    auto destWeak = effect->GetDestSharedElement();
-    auto dest = destWeak.Upgrade();
-    if (!dest) {
+    auto currentWeak = effect->GetCurrentSharedElement();
+    auto current = currentWeak.Upgrade();
+    if (!current) {
         LOGE("Prepare each transition failed. dest is null. share id: %{public}s", shareId.c_str());
         return false;
     }
-    auto option = dest->GetOption();
+    auto option = current->GetOption();
     if (!effect->CreateAnimation(option, event_, false)) {
         LOGE("Create animation failed. event: %{public}d, share id: %{public}s", event_, shareId.c_str());
         return false;
     }
-    if (!effect->ApplyAnimation(overlay, controller_, option, event_)) {
+    auto tmp = AceType::MakeRefPtr<Animator>();
+    if (!effect->ApplyAnimation(overlay, tmp, option, event_)) {
         LOGE("Apply animation failed. event: %{public}d, share id: %{public}s", event_, shareId.c_str());
         return false;
     }
     LOGD("Prepare Shared Transition. event: %{public}d, share id: %{public}s", event_, shareId.c_str());
 
-    dest->SetVisible(false);
-    auto weakDestShared = effect->GetDestSharedElement();
-    controller_->AddStopListener([destWeak, shareId, event = event_]() {
-        auto dest = destWeak.Upgrade();
-        if (!dest) {
+    auto animator = effect->GetAnimator();
+    if (!animator) {
+        LOGE("GetAnimator failed. event: %{public}d, share id: %{public}s", event_, shareId.c_str());
+        return false;
+    }
+    controllers_.push_back(animator);
+    current->SetVisible(false);
+    animator->AddStopListener([currentWeak, shareId, event = event_]() {
+        auto current = currentWeak.Upgrade();
+        if (!current) {
             LOGE("Stop shared element failed. shared in element is null. event: %{public}d, shareId: %{public}s", event,
                 shareId.c_str());
             return;
         }
-        dest->SetVisible(true);
+        current->SetVisible(true);
     });
     return true;
 }

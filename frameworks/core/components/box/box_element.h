@@ -20,8 +20,13 @@
 
 namespace OHOS::Ace {
 
+class PageElement;
+
 class BoxElement : public BoxBaseElement {
     DECLARE_ACE_TYPE(BoxElement, BoxBaseElement);
+
+public:
+    void PerformBuild() override;
 
 protected:
     RefPtr<RenderNode> GetCachedRenderNode() override
@@ -32,6 +37,9 @@ protected:
         }
         return nullptr;
     }
+
+private:
+    std::string geometryTransitionId_;
 };
 
 } // namespace OHOS::Ace

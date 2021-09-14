@@ -16,181 +16,71 @@
 #include "frameworks/bridge/common/dom/dom_svg_animate.h"
 
 #include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/core/components/declaration/svg/svg_animate_declaration.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
 
-const char ANIMATION_RESTART_ALWAYS[] = "always";
-const char ANIMATION_RESTART_WHENNOTACTIVE[] = "whenNotActive";
-const char ANIMATION_RESTART_NEVER[] = "never";
-const char ANIMATION_VALUE_INDEFINITE[] = "indefinite";
 const char ANIMATION_FILL_MODE_FREEZE[] = "freeze";
 const char ANIMATION_CALC_MODE_DISCRETE[] = "discrete";
-const char ANIMATION_CALC_MODE_LINEAR[] = "linear";
 const char ANIMATION_CALC_MODE_PACED[] = "paced";
 const char ANIMATION_CALC_MODE_SPLINE[] = "spline";
-const char ANIMATION_ADDITIVE_REPLACE[] = "replace";
-const char ANIMATION_ADDITIVE_SUM[] = "sum";
-const char ANIMATION_ACCUMULATE_NONE[] = "none";
-const char ANIMATION_ACCUMULATE_SUM[] = "sum";
 
 } // namespace
 
 DOMSvgAnimate::DOMSvgAnimate(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName) {}
-
-void DOMSvgAnimate::OnMounted(const RefPtr<DOMNode>& parentNode) {}
 
 void DOMSvgAnimate::PrepareSpecializedComponent()
 {
     if (!animateComponent_) {
         animateComponent_ = AceType::MakeRefPtr<SvgAnimateComponent>(std::to_string(GetNodeId()), GetTag());
     }
-    PrepareSpecializedComponent(animateComponent_);
+    SetAnimateAttrs();
 }
 
-void DOMSvgAnimate::PrepareSpecializedComponent(const RefPtr<SvgAnimateComponent>& animateComponent)
+void DOMSvgAnimate::SetAnimateAttrs()
 {
-    animateComponent->SetSvgId(svgId_);
-    animateComponent->SetBegin(begin_);
-    animateComponent->SetDur(dur_);
-    animateComponent->SetEnd(end_);
-    animateComponent->SetMin(min_);
-    animateComponent->SetMax(max_);
-    animateComponent->SetRestart(restart_);
-    animateComponent->SetRepeatCount(repeatCount_);
-    animateComponent->SetRepeatDur(repeatDur_);
-    animateComponent->SetFillMode(fillMode_);
-    animateComponent->SetCalcMode(calcMode_);
-    animateComponent->SetValues(values_);
-    animateComponent->SetKeyTimes(keyTimes_);
-    animateComponent->SetKeySplines(keySplines_);
-    animateComponent->SetFrom(from_);
-    animateComponent->SetTo(to_);
-    animateComponent->SetBy(by_);
-    animateComponent->SetAttributeName(attributeName_);
-    animateComponent->SetAdditive(additive_);
-    animateComponent->SetAccumulate(accumulate_);
+    auto declaration = AceType::DynamicCast<SvgAnimateDeclaration>(declaration_);
+    if (!declaration) {
+        return;
+    }
+    animateComponent_->SetBegin(declaration->GetBegin());
+    animateComponent_->SetDur(declaration->GetDur());
+    animateComponent_->SetEnd(declaration->GetEnd());
+    animateComponent_->SetRepeatCount(declaration->GetRepeatCount());
+    Fill fillMode = (declaration->GetFillMode() == ANIMATION_FILL_MODE_FREEZE ? Fill::FREEZE : Fill::REMOVE);
+    animateComponent_->SetFillMode(fillMode);
+    animateComponent_->SetCalcMode(ConvertCalcMode(declaration->GetCalcMode()));
+    animateComponent_->SetValues(declaration->GetValues());
+    animateComponent_->SetKeyTimes(declaration->GetKeyTimes());
+    animateComponent_->SetKeySplines(declaration->GetKeySplines());
+    animateComponent_->SetFrom(declaration->GetFrom());
+    animateComponent_->SetTo(declaration->GetTo());
+    animateComponent_->SetAttributeName(declaration->GetAttributeName());
+
+    if (animateComponent_->GetSvgAnimateType() == SvgAnimateType::MOTION) {
+        animateComponent_->SetKeyPoints(declaration->GetKeyPoints());
+        animateComponent_->SetPath(declaration->GetPath());
+        animateComponent_->SetRotate(declaration->GetRotate());
+    }
+    if (animateComponent_->GetSvgAnimateType() == SvgAnimateType::TRANSFORM) {
+        animateComponent_->SetTransformType(declaration->GetTransformType());
+    }
 }
 
-bool DOMSvgAnimate::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
+CalcMode DOMSvgAnimate::ConvertCalcMode(const std::string& val) const
 {
-    if (attr.first == DOM_SVG_ID) {
-        svgId_ = attr.second;
-        return true;
+    CalcMode calcMode;
+    if (val == ANIMATION_CALC_MODE_DISCRETE) {
+        calcMode = CalcMode::DISCRETE;
+    } else if (val == ANIMATION_CALC_MODE_PACED) {
+        calcMode = CalcMode::PACED;
+    } else if (val == ANIMATION_CALC_MODE_SPLINE) {
+        calcMode = CalcMode::SPLINE;
+    } else {
+        calcMode = CalcMode::LINEAR;
     }
-
-    if (attr.first == DOM_SVG_ANIMATION_BEGIN) {
-        begin_ = ConvertTimeStr(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_DUR) {
-        if (attr.second == ANIMATION_VALUE_INDEFINITE) {
-            dur_ = 0;
-        } else {
-            dur_ = ConvertTimeStr(attr.second);
-        }
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_END) {
-        end_ = ConvertTimeStr(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_MIN) {
-        min_ = ConvertTimeStr(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_MAX) {
-        max_ = ConvertTimeStr(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_RESTART) {
-        if (attr.second == ANIMATION_RESTART_ALWAYS) {
-            restart_ = Restart::ALWAYS;
-        } else if (attr.second == ANIMATION_RESTART_WHENNOTACTIVE) {
-            restart_ = Restart::WHEN_NOT_ACTIVE;
-        } else if (attr.second == ANIMATION_RESTART_NEVER) {
-            restart_ = Restart::NEVER;
-        }
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_REPEAT_COUNT) {
-        if (attr.second == ANIMATION_VALUE_INDEFINITE) {
-            repeatCount_ = -1;
-        } else {
-            repeatCount_ = StringToInt(attr.second);
-        }
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_REPEAT_DUR) {
-        repeatDur_ = ConvertTimeStr(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_FILL) {
-        if (attr.second == ANIMATION_FILL_MODE_FREEZE) {
-            fillMode_ = Fill::FREEZE;
-        } else {
-            fillMode_ = Fill::REMOVE;
-        }
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_CALC_MODE) {
-        if (attr.second == ANIMATION_CALC_MODE_DISCRETE) {
-            calcMode_ = CalcMode::DISCRETE;
-        } else if (attr.second == ANIMATION_CALC_MODE_LINEAR) {
-            calcMode_ = CalcMode::LINEAR;
-        } else if (attr.second == ANIMATION_CALC_MODE_PACED) {
-            calcMode_ = CalcMode::PACED;
-        } else if (attr.second == ANIMATION_CALC_MODE_SPLINE) {
-            calcMode_ = CalcMode::SPLINE;
-        }
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_VALUES) {
-        StringUtils::SplitStr(attr.second, ";", values_);
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_KEY_TIMES) {
-        StringUtils::StringSpliter(attr.second, ';', keyTimes_);
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_KEY_SPLINES) {
-        StringUtils::SplitStr(attr.second, ";", keySplines_);
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_FROM) {
-        from_ = attr.second;
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_TO) {
-        to_ = attr.second;
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_BY) {
-        by_ = attr.second;
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_ATTRIBUTE_NAME) {
-        attributeName_ = attr.second;
-        return true;
-    }
-
-    if (attr.first == DOM_SVG_ANIMATION_ADDITIVE) {
-        if (attr.second == ANIMATION_ADDITIVE_REPLACE) {
-            additive_ = Additive::REPLACE;
-        } else if (attr.second == ANIMATION_ADDITIVE_SUM) {
-            additive_ = Additive::SUM_ADD;
-        }
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_ACCUMULATE) {
-        if (attr.second == ANIMATION_ACCUMULATE_NONE) {
-            accumulate_ = Accumulate::NONE;
-        } else if (attr.second == ANIMATION_ACCUMULATE_SUM) {
-            accumulate_ = Accumulate::SUM_ACC;
-        }
-        return true;
-    }
-    return false;
+    return calcMode;
 }
 
 } // namespace OHOS::Ace::Framework

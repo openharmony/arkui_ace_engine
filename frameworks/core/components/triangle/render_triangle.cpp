@@ -145,6 +145,7 @@ void RenderTriangle::OnTouchTestHit(const Offset&, const TouchRestrict&, TouchTe
         });
     }
     if (onClick_) {
+        click_->SetIsExternalGesture(true);
         result.emplace_back(click_);
     }
 }

@@ -176,7 +176,13 @@ void RenderMarquee::Update(const RefPtr<Component>& component)
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
-    scrollAmount_ = marquee->GetScrollAmount();
+    auto context = GetContext().Upgrade();
+    if (context && context->UseLiteStyle()) {
+        // lite loop time is 1000ms, while default marquee loop is 85ms.
+        scrollAmount_ = marquee->GetScrollAmount() * DEFAULT_MARQUEE_SCROLL_DELAY / 1000;
+    } else {
+        scrollAmount_ = marquee->GetScrollAmount();
+    }
     if (LessOrEqual(scrollAmount_, 0.0)) {
         scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT;
     }
@@ -185,7 +191,6 @@ void RenderMarquee::Update(const RefPtr<Component>& component)
         loop_ = ANIMATION_REPEAT_INFINITE;
     }
     auto textDir = GetTextDirection(marquee->GetValue());
-    auto context = GetContext().Upgrade();
     bool systemRTL = context != nullptr ? context->IsRightToLeft() : false;
     bool isRTL = textDir == TextDirection::INHERIT ? systemRTL : (textDir == TextDirection::RTL);
     direction_ =
@@ -259,6 +264,10 @@ void RenderMarquee::PerformLayout()
     SetLayoutSize(layoutSize);
     LOGD("layoutSize: %{public}s, child: %{public}s", layoutSize.ToString().c_str(),
         childText_->GetLayoutSize().ToString().c_str());
+    if (childText_->GetLayoutSize().Width() <= layoutSize.Width()) {
+        childText_->SetPosition(Offset(0.0, 0.0));
+        return;
+    }
     if (lastLayoutSize != layoutSize && IsPlayingAnimation(controller_)) {
         UpdateAnimation();
     }

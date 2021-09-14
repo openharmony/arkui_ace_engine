@@ -15,112 +15,136 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 
+#include "core/components/box/box_component.h"
+#include "core/components/navigator/navigator_component.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+
 namespace OHOS::Ace::Framework {
 
-#ifdef USE_QUICKJS_ENGINE
-JSNavigator::JSNavigator(const std::list<JSViewAbstract*>& children, std::list<JSValue> jsChildren)
-    : JSContainerBase(children, jsChildren)
-#else
-JSNavigator::JSNavigator(const std::list<JSViewAbstract*>& children,
-    std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren)
-    : JSContainerBase(children, jsChildren)
-#endif
-{}
-
-RefPtr<OHOS::Ace::Component> JSNavigator::CreateSpecializedComponent()
+void JSNavigator::Create(const JSCallbackInfo& info)
 {
     LOGD("Create component: JSNavigator");
-    auto child = children_.front();
-    if (!child) {
-        LOGE("JSNavigator children is null");
-        return nullptr;
+    // when the navigator is created, we don't know the child. so I use an empty box here
+    RefPtr<OHOS::Ace::Component> child;
+    auto navigatorComponent = AceType::MakeRefPtr<OHOS::Ace::NavigatorComponent>(child);
+
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> target = obj->GetProperty("target");
+        if (target->IsString()) {
+            navigatorComponent->SetUri(target->ToString());
+        }
+
+        JSRef<JSVal> type = obj->GetProperty("type");
+        if (type->IsNumber()) {
+            NavigatorType navigatorType = NavigatorType(type->ToNumber<uint32_t>());
+            if (navigatorType == NavigatorType::DEFAULT) {
+                navigatorComponent->SetType(NavigatorType::PUSH);
+            } else {
+                navigatorComponent->SetType(navigatorType);
+            }
+        }
+    } else {
+        navigatorComponent->SetType(NavigatorType::BACK);
     }
-    auto component = child->CreateComponent();
-    auto navigatorComponent = AceType::MakeRefPtr<OHOS::Ace::NavigatorComponent>(component);
 
-    navigatorComponent->SetUri(uri_);
-    navigatorComponent->SetType(type_);
-    navigatorComponent->SetActive(active_);
-
-    return navigatorComponent;
+    ViewStackProcessor::GetInstance()->Push(navigatorComponent);
 }
 
 void JSNavigator::JSBind(BindingTarget globalObj)
 {
     JSClass<JSNavigator>::Declare("Navigator");
+
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSNavigator>::StaticMethod("create", &JSNavigator::Create, opt);
+    JSClass<JSNavigator>::StaticMethod("active", &JSNavigator::SetActive, opt);
+    JSClass<JSNavigator>::StaticMethod("params", &JSNavigator::SetParams, opt);
+    JSClass<JSNavigator>::StaticMethod("width", &JSNavigator::JsWidth);
+    JSClass<JSNavigator>::StaticMethod("height", &JSNavigator::JsHeight);
+    JSClass<JSNavigator>::StaticMethod("size", &JSNavigator::JsSize);
+    JSClass<JSNavigator>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSNavigator>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSNavigator>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSNavigator>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSNavigator>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSNavigator>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSNavigator>::Inherit<JSContainerBase>();
     JSClass<JSNavigator>::Inherit<JSViewAbstract>();
-    MethodOptions opt = MethodOptions::RETURN_SELF;
-    JSClass<JSNavigator>::Method("target", &JSNavigator::SetUri, opt);
-    JSClass<JSNavigator>::Method("type", &JSNavigator::SetType, opt);
-    JSClass<JSNavigator>::Method("active", &JSNavigator::SetActive, opt);
-    JSClass<JSNavigator>::CustomMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSNavigator>::CustomMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSNavigator>::Bind(globalObj, ConstructorCallback);
+    JSClass<JSNavigator>::Bind<>(globalObj);
 }
 
-#ifdef USE_QUICKJS_ENGINE
-void JSNavigator::MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc)
+void JSNavigator::SetActive(bool active)
 {
-    LOGD("JSNavigator => MarkGC: start");
-    JSContainerBase::MarkGC(rt, markFunc);
-    JSInteractableView::MarkGC(rt, markFunc);
-    LOGD("JSNavigator => MarkGC: end");
+    auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (navigator) {
+        navigator->SetActive(active);
+    }
 }
 
-void JSNavigator::ReleaseRT(JSRuntime* rt)
+void JSNavigator::SetParams(const JSCallbackInfo& args)
 {
-    LOGD("JSNavigator => release children: start");
-    JSContainerBase::ReleaseRT(rt);
-    JSInteractableView::ReleaseRT(rt);
-    LOGD("JSNavigator => release children: end");
+    auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (navigator) {
+        if (args.Length() > 0 && args[0]->IsObject()) {
+            JSRef<JSVal> val = JSRef<JSVal>::Cast(args[0]);
+            navigator->SetParams(val->ToString());
+        }
+    }
 }
 
-void JSNavigator::QjsDestructor(JSRuntime* rt, JSNavigator* view)
+void JSNavigator::JsWidth(const JSCallbackInfo& info)
 {
-    LOGD("JSNavigator(QjsDestructor) start");
-    if (!view) {
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
-    view->ReleaseRT(rt);
-    delete view;
-    view = nullptr;
-    LOGD("JSNavigator(QjsDestructor) end");
+    JsWidth(info[0]);
 }
 
-void JSNavigator::QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc)
+void JSNavigator::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    LOGD("JSNavigator(QjsGcMark) start");
-    JSNavigator* view = Unwrap<JSNavigator>(val);
-    if (!view) {
+    auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (navigator) {
+        navigator->SetIsDefWidth(true);
+    }
+    JSViewAbstract::JsWidth(jsValue);
+}
+
+void JSNavigator::JsHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
-    view->MarkGC(rt, markFunc);
-    LOGD("JSNavigator(QjsGcMark) end");
+    JsHeight(info[0]);
 }
 
-// STATIC qjs_class_bindings
-JSValue JSNavigator::ConstructorCallback(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+void JSNavigator::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    ACE_SCOPED_TRACE("JSNavigator::ConstructorCallback");
-    QJSContext::Scope scope(ctx);
-    auto [children, jsChildren] = JsChildrenFromArgs(ctx, argc, argv);
-    JSNavigator* navigator = new JSNavigator(children, jsChildren);
-    return Wrap<JSNavigator>(new_target, navigator);
+    auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (navigator) {
+        navigator->SetIsDefHeight(true);
+    }
+    JSViewAbstract::JsHeight(jsValue);
 }
-#endif
 
-#ifdef USE_V8_ENGINE
-void JSNavigator::ConstructorCallback(const v8::FunctionCallbackInfo<v8::Value>& args)
+void JSNavigator::JsSize(const JSCallbackInfo& info)
 {
-    LOGD("ConstructorCallback");
-    std::list<JSViewAbstract*> children;
-    std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren;
-    V8ChildrenFromArgs(args, children, jsChildren);
-    auto instance = V8Object<JSNavigator>::New(args.This(), children, jsChildren);
-    args.GetReturnValue().Set(instance->Get());
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        LOGE("arg is not Object or String.");
+        return;
+    }
+
+    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+    JsWidth(sizeObj->GetProperty("width"));
+    JsHeight(sizeObj->GetProperty("height"));
 }
-#endif
 
 } // namespace OHOS::Ace::Framework

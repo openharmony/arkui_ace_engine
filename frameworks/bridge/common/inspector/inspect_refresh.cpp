@@ -37,9 +37,6 @@ void InspectRefresh::PackAttrAndStyle()
     attrs_.insert(std::make_pair("focusable", "true"));
 
     // add for the styles
-    // clear all the common styles for refresh
-    std::unordered_map<std::string, std::string>().swap(styles_);
-    styles_.clear();
     if (deviceType == DeviceType::PHONE) {
         styles_.insert(std::make_pair("background-color", "white"));
         styles_.insert(std::make_pair("progress-color", "black"));

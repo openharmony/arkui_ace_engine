@@ -13,128 +13,58 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
+#include "bridge/declarative_frontend/jsview/js_list_item.h"
 
-#include "core/components/box/box_base_component.h"
-#include "core/components/flex/flex_component.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_v2/list/list_item_component.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
 
-#ifdef USE_QUICKJS_ENGINE
-JSListItem::JSListItem(const std::list<JSViewAbstract*>& children, std::list<JSValue> jsChildren)
-    : JSContainerBase(children, jsChildren)
-#else
-JSListItem::JSListItem(const std::list<JSViewAbstract*>& children,
-    std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren)
-    : JSContainerBase(children, jsChildren)
-#endif
-{
-    LOGD("JSListItem, children size is %{public}lu", children_.size());
-}
+const V2::StickyMode STICKY_MODE_TABLE[] = { V2::StickyMode::NONE, V2::StickyMode::NORMAL, V2::StickyMode::OPACITY };
 
-JSListItem::~JSListItem()
-{
-    LOGI("Destroy: JSListItem");
-};
+} // namespace
 
-RefPtr<OHOS::Ace::Component> JSListItem::CreateSpecializedComponent()
+void JSListItem::Create(const JSCallbackInfo& args)
 {
-    LOGD("Create component: ListItem");
-    auto child = children_.front();
-    if (!child) {
-        LOGE("ListItem children is null");
-        return nullptr;
+    auto listItemComponent = AceType::MakeRefPtr<V2::ListItemComponent>();
+    if (args.Length() >= 1 && args[0]->IsString()) {
+        listItemComponent->SetType(args[0]->ToString());
     }
-    auto component = child->CreateComponent();
-    RefPtr<ListItemComponent> listItemComponent =
-        AceType::MakeRefPtr<ListItemComponent>("default", RefPtr<Component>());
-    RefPtr<FlexComponent> flexComponent = AceType::MakeRefPtr<FlexComponent>(
-        FlexDirection::COLUMN, FlexAlign::FLEX_START, FlexAlign::FLEX_START, std::list<RefPtr<Component>>());
-    flexComponent->AppendChild(component);
-    listItemComponent->SetChild(flexComponent);
-    listItemComponent->SetSupportClick(false);
-    return AceType::MakeRefPtr<ComposedComponent>(GetUniqueKey(), "wrapper", std::move(listItemComponent));
+    ViewStackProcessor::GetInstance()->Push(listItemComponent);
+    JSInteractableView::SetFocusNode(true);
+    args.ReturnSelf();
 }
 
-std::vector<RefPtr<OHOS::Ace::SingleChild>> JSListItem::CreateInteractableComponents()
+void JSListItem::SetSticky(int32_t sticky)
 {
-    return JSInteractableView::CreateComponents();
+    JSViewSetProperty(&V2::ListItemComponent::SetSticky, sticky, STICKY_MODE_TABLE, V2::StickyMode::NONE);
 }
 
-#ifdef USE_QUICKJS_ENGINE
-
-void JSListItem::MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc)
+void JSListItem::SetEditable(bool editable)
 {
-    LOGD("JSListItem => MarkGC: Mark value for GC start");
-    JSContainerBase::MarkGC(rt, markFunc);
-    LOGD("JSListItem => MarkGC: Mark value for GC end");
+    JSViewSetProperty(&V2::ListItemComponent::SetEditable, editable);
 }
-
-void JSListItem::ReleaseRT(JSRuntime* rt)
-{
-    LOGD("JSListItem => release start");
-    for (JSValue const& jsChild : jsChildren_) {
-        JS_FreeValueRT(rt, jsChild);
-    }
-    jsChildren_.clear();
-    LOGD("JSListItem => release end");
-}
-
-// STATIC qjs_class_bindings
-JSValue JSListItem::ConstructorCallback(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
-{
-    ACE_SCOPED_TRACE("JSList::ConstructorCallback");
-    QJSContext::Scope scope(ctx);
-    auto [children, jsChildren] = JsChildrenFromArgs(ctx, argc, argv);
-    JSListItem* item = new JSListItem(children, jsChildren);
-    return Wrap<JSListItem>(new_target, item);
-}
-
-void JSListItem::QjsDestructor(JSRuntime* rt, JSListItem* view)
-{
-    LOGD("JSListItem(QjsDestructor) start");
-    if (!view) {
-        return;
-    }
-    view->ReleaseRT(rt);
-    delete view;
-    view = nullptr;
-    LOGD("JSListItem(QjsDestructor) end");
-}
-
-void JSListItem::QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc)
-{
-    LOGD("JSListItem(QjsGcMark) start");
-    JSListItem* item = Unwrap<JSListItem>(val);
-    if (!item) {
-        return;
-    }
-    item->MarkGC(rt, markFunc);
-    LOGD("JSListItem(QjsGcMark) end");
-}
-
-#endif // USE_QUICKJS_ENGINE
 
 void JSListItem::JSBind(BindingTarget globalObj)
 {
     JSClass<JSListItem>::Declare("ListItem");
+    JSClass<JSListItem>::StaticMethod("create", &JSListItem::Create);
+
+    JSClass<JSListItem>::StaticMethod("sticky", &JSListItem::SetSticky);
+    JSClass<JSListItem>::StaticMethod("editable", &JSListItem::SetEditable);
+
+    JSClass<JSListItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSListItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSListItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSListItem>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSListItem>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSListItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+
+    JSClass<JSListItem>::Inherit<JSContainerBase>();
     JSClass<JSListItem>::Inherit<JSViewAbstract>();
-    JSClass<JSListItem>::CustomMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSListItem>::CustomMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSListItem>::Bind(globalObj, ConstructorCallback);
+    JSClass<JSListItem>::Bind<>(globalObj);
 }
-
-#ifdef USE_V8_ENGINE
-void JSListItem::ConstructorCallback(const v8::FunctionCallbackInfo<v8::Value>& args)
-{
-    LOGD("ConstructorCallback");
-    std::list<JSViewAbstract*> children;
-    std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren;
-    V8ChildrenFromArgs(args, children, jsChildren);
-    auto instance = V8Object<JSListItem>::New(args.This(), children, jsChildren);
-    args.GetReturnValue().Set(instance->Get());
-}
-
-#endif
 
 } // namespace OHOS::Ace::Framework

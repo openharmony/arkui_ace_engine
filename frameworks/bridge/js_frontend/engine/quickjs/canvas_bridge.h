@@ -88,6 +88,7 @@ public:
     static JSValue JsCreateImageData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv);
     static JSValue JsPutImageData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv);
     static JSValue JsGetImageData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv);
+    static JSValue JsTransferFromImageBitmap(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv);
 
     // getter and setter
     static JSValue JsFillStyleGetter(JSContext* ctx, JSValueConst value);

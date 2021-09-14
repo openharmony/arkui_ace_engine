@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace {
 
-CubicCurve::CubicCurve(const float x0, const float y0, const float x1, const float y1)
+CubicCurve::CubicCurve(float x0, float y0, float x1, float y1)
     : x0_(x0), y0_(y0), x1_(x1), y1_(y1)
 {}
 
@@ -40,6 +40,15 @@ float CubicCurve::MoveInternal(float time)
             end = midpoint;
         }
     }
+}
+
+const std::string CubicCurve::ToString()
+{
+    std::string curveString("cubic-bezier");
+    std::string comma(",");
+    curveString.append(std::string("(") + std::to_string(x0_) + comma + std::to_string(y0_)
+        + comma + std::to_string(x1_) + comma + std::to_string(y1_) + std::string(")"));
+    return curveString;
 }
 
 float CubicCurve::CalculateCubic(float a, float b, float m)

@@ -30,14 +30,17 @@ const char FLUSH_ON[] = "on";
 const char FLUSH_OFF[] = "off";
 const char FLUSH_TORCH[] = "torch";
 const char FLUSH_AUTO[] = "auto";
-const char START_STR[] = "[\"";
 
 } // namespace
 
 DOMCamera::DOMCamera(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
     cameraComponent_ = AceType::MakeRefPtr<CameraComponent>();
-    cameraComponent_->SetFit(ImageFit::FILL);
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    if (IsRightToLeft()) {
+        cameraComponent_->SetTextDirection(TextDirection::RTL);
+    }
+#endif
 }
 
 bool DOMCamera::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
@@ -88,20 +91,6 @@ void DOMCamera::CallSpecializedMethod(const std::string& method, const std::stri
             controller->TakePhoto(GetParamFromJson(args));
         }
     }
-
-    if (method == DOM_CAMERA_START_RECORD) {
-        auto controller = cameraComponent_->GetCameraController();
-        if (controller) {
-            controller->StartRecord();
-        }
-    }
-
-    if (method == DOM_CAMERA_CLOSE_RECORDER) {
-        auto controller = cameraComponent_->GetCameraController();
-        if (controller) {
-            controller->CloseRecorder(GetRecorderParam(args));
-        }
-    }
 }
 
 TakePhotoParams DOMCamera::GetParamFromJson(const std::string& args) const
@@ -135,23 +124,6 @@ TakePhotoParams DOMCamera::GetParamFromJson(const std::string& args) const
     }
 
     return takePhotoParams;
-}
-
-std::string DOMCamera::GetRecorderParam(const std::string& args) const
-{
-    size_t len = args.length();
-    size_t pos = args.find(START_STR);
-    size_t strLen = sizeof(START_STR) - 1;
-    int32_t result = 0;
-
-    if (pos == std::string::npos || (pos + strLen) >= len) {
-        return std::string();
-    }
-    std::stringstream ss;
-    ss << args.substr(pos + strLen);
-    ss >> result;
-
-    return std::to_string(result);
 }
 
 FlashType DOMCamera::GetFlashType(const std::string& val)

@@ -66,6 +66,7 @@ struct TextEditingValue {
     void Delete(int32_t start, int32_t end);
 
     std::string text;
+    std::string hint;
     TextSelection selection;
 };
 

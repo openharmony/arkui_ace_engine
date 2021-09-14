@@ -89,6 +89,7 @@ public:
     void UpdateTouchRect() override
     {
         touchRect_ = GetPaintRect();
+        ownTouchRect_ = touchRect_;
     }
 
     void UpdateToss(double y);
@@ -145,7 +146,7 @@ private:
     bool nodeHandlerSetted_ = false;
 
     RefPtr<RawRecognizer> rawRecognizer_;
-    RefPtr<FreeDragRecognizer> dragRecognizer_;
+    RefPtr<VerticalDragRecognizer> dragRecognizer_;
     double xOffset_ = 0.0;
     double yOffset_ = 0.0;
     double yLast_ = 0.0;

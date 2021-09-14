@@ -109,12 +109,12 @@ public:
         idleCallback_ = std::move(callback);
     }
 
+    void RegisterViewDestroyCallback(ViewDestoryCallback&& callback) override {}
+
     void SetPlatformResRegister(const RefPtr<PlatformResRegister>& resRegister)
     {
         resRegister_ = resRegister;
     }
-
-    void RegisterViewDestroyCallback(ViewDestoryCallback&& callback) override {}
 
     const RefPtr<PlatformResRegister>& GetPlatformResRegister() const override
     {
@@ -129,6 +129,7 @@ public:
     std::unique_ptr<DrawDelegate> GetDrawDelegate() override;
     std::unique_ptr<PlatformWindow> GetPlatformWindow() override;
     bool Dump(const std::vector<std::string>& params) override;
+    const void* GetNativeWindowById(uint64_t textureId) override;
 
 private:
     void NotifySurfaceChanged(int width, int height) const

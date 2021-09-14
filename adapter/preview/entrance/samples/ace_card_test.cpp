@@ -38,25 +38,27 @@ constexpr int32_t CARD_DEFAULT_HEIGHT = 344;
 
 int main()
 {
-    auto&& renderCallback = [](const void*, size_t bufferSize) -> bool { return true; };
+    auto&& renderCallback = [](const void*, const size_t bufferSize, const int32_t width,
+                                const int32_t height) -> bool { return true; };
 
 #ifdef MAC_PLATFORM
     std::string assetPath = "/Volumes/SSD2T/daily-test/preview/js/default_card";
     std::string resourcesPath = "/Volumes/SSD2T/daily-test/preview/js/resources";
-    constexpr double resolution = 2;
+    constexpr double density = 2;
 #else
     std::string assetPath = "D:\\Workspace\\preview\\js\\default_card";
     std::string resourcesPath = "D:\\Workspace\\preview\\js\\resources";
-    constexpr double resolution = 1;
+    constexpr double density = 1;
 #endif
 
     OHOS::Ace::Platform::AceRunArgs args = {
         .assetPath = assetPath,
         .resourcesPath = resourcesPath,
+        .deviceConfig.density = density,
+        .deviceConfig.colorMode = OHOS::Ace::ColorMode::DARK,
+        .windowTitle = "ACE card",
         .deviceWidth = CARD_DEFAULT_WIDTH,
         .deviceHeight = CARD_DEFAULT_HEIGHT,
-        .windowTitle = "ACE card",
-        .resolution = resolution,
         .formsEnabled = true,
         .onRender = std::move(renderCallback),
     };

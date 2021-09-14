@@ -50,6 +50,7 @@ protected:
     float weight_ = 0.0f;
     std::vector<std::string> pointsVector_;
     bool isBy_ = false;
+    bool isClose_ = true;
 
 private:
     void PrepareAnimations(const RefPtr<Component>& component);

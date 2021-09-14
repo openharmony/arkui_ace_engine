@@ -25,12 +25,14 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr Dimension COLUMN_2_AND_4_BREAKPOINT = 320.0_vp;
-constexpr Dimension COLUMN_4_AND_8_BREAKPOINT = 480.0_vp;
+constexpr Dimension COLUMN_4_AND_8_BREAKPOINT = 600.0_vp;
 constexpr Dimension COLUMN_8_AND_12_BREAKPOINT = 840.0_vp;
 constexpr Dimension SMALL_GUTTER = 12.0_vp;
 constexpr Dimension SMALL_MARGIN = 12.0_vp;
 constexpr Dimension LARGE_GUTTER = 24.0_vp;
 constexpr Dimension LARGE_MARGIN = 24.0_vp;
+constexpr Dimension CAR_SMALL_GUTTER = 16.0_vp;
+constexpr Dimension CAR_SMALL_MARGIN = 32.0_vp;
 constexpr uint32_t COLUMN_SM = 0;
 constexpr uint32_t COLUMN_MD = 1;
 constexpr uint32_t COLUMN_LG = 2;
@@ -39,6 +41,10 @@ const SystemGridInfo GRID_COLUMNS_2(GridSizeType::XS, SMALL_GUTTER, SMALL_MARGIN
 const SystemGridInfo GRID_COLUMNS_4(GridSizeType::SM, LARGE_GUTTER, LARGE_MARGIN, 4);
 const SystemGridInfo GRID_COLUMNS_8(GridSizeType::MD, LARGE_GUTTER, 32.0_vp, 8);
 const SystemGridInfo GRID_COLUMNS_12(GridSizeType::LG, LARGE_GUTTER, 48.0_vp, 12);
+
+const SystemGridInfo GRID_TEMPLATE_COLUMNS_4(GridSizeType::SM, SMALL_GUTTER, LARGE_MARGIN, 4);
+const SystemGridInfo GRID_TEMPLATE_COLUMNS_8(GridSizeType::MD, SMALL_GUTTER, 32.0_vp, 8);
+const SystemGridInfo GRID_TEMPLATE_COLUMNS_12(GridSizeType::LG, SMALL_GUTTER, 48.0_vp, 12);
 
 const std::map<GridColumnType, std::vector<SystemGridInfo>> SYSTEM_GRID_TYPES = {
     { GridColumnType::BUBBLE_TYPE, { SystemGridInfo(GridSizeType::SM, LARGE_GUTTER, LARGE_MARGIN, 4),
@@ -68,6 +74,9 @@ const std::map<GridColumnType, std::vector<SystemGridInfo>> SYSTEM_GRID_TYPES = 
     { GridColumnType::DIALOG, { SystemGridInfo(GridSizeType::SM, SMALL_GUTTER, SMALL_MARGIN, 3),
                                   SystemGridInfo(GridSizeType::MD, SMALL_GUTTER, SMALL_MARGIN, 4),
                                   SystemGridInfo(GridSizeType::LG, SMALL_GUTTER, SMALL_MARGIN, 5) } },
+    { GridColumnType::CAR_DIALOG, { SystemGridInfo(GridSizeType::SM, CAR_SMALL_GUTTER, CAR_SMALL_MARGIN, 4),
+                                      SystemGridInfo(GridSizeType::MD, CAR_SMALL_GUTTER, CAR_SMALL_MARGIN, 8),
+                                      SystemGridInfo(GridSizeType::LG, CAR_SMALL_GUTTER, CAR_SMALL_MARGIN, 12) } },
 };
 
 } // namespace
@@ -123,7 +132,9 @@ RefPtr<GridColumnInfo> GridSystemManager::GetInfoByType(const GridColumnType& co
 
 SystemGridInfo GridSystemManager::GetSystemGridInfo(const GridSizeType& sizeType)
 {
-    if (sizeType == GridSizeType::SM) {
+    if (sizeType == GridSizeType::XS) {
+        return GRID_COLUMNS_2;
+    } else if (sizeType == GridSizeType::SM) {
         return GRID_COLUMNS_4;
     } else if (sizeType == GridSizeType::MD) {
         return GRID_COLUMNS_8;
@@ -153,6 +164,29 @@ void GridSystemManager::OnSurfaceChanged(double width)
     currentSize_ = systemGridInfo_.sizeType;
 
     LOGD("OnSurfaceChanged: %{public}f: sizeType = %{public}d", width, systemGridInfo_.sizeType);
+}
+
+SystemGridInfo GridSystemManager::GetSystemGridInfo(const GridTemplateType& templateType, double width)
+{
+    // Input width is normalized in px.
+    if (templateType == GridTemplateType::NORMAL) {
+        if (width < COLUMN_2_AND_4_BREAKPOINT.Value() * dipScale_) {
+            return GRID_COLUMNS_2;
+        } else if (width < COLUMN_4_AND_8_BREAKPOINT.Value() * dipScale_) {
+            return GRID_COLUMNS_4;
+        } else if (width < COLUMN_8_AND_12_BREAKPOINT.Value() * dipScale_) {
+            return GRID_COLUMNS_8;
+        } else {
+            return GRID_COLUMNS_12;
+        }
+    }
+    if (width < COLUMN_4_AND_8_BREAKPOINT.Value() * dipScale_) {
+        return GRID_TEMPLATE_COLUMNS_4;
+    } else if (width < COLUMN_8_AND_12_BREAKPOINT.Value() * dipScale_) {
+        return GRID_TEMPLATE_COLUMNS_8;
+    } else {
+        return GRID_TEMPLATE_COLUMNS_12;
+    }
 }
 
 } // namespace OHOS::Ace

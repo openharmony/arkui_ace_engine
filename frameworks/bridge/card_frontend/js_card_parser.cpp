@@ -18,6 +18,7 @@
 #include <array>
 
 #include "base/i18n/localization.h"
+#include "base/resource/ace_res_config.h"
 #include "core/common/ace_application_info.h"
 #include "frameworks/base/log/event_report.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -35,6 +36,39 @@ const std::string REPEAT_INDEX = "$idx";
 const std::string REPEAT_ITEM = "$item";
 const std::string TRUE_STR = "true";
 const std::string FALSE_STR = "false";
+
+class VersionData {
+public:
+    void AddRecord(const std::string& key, const std::string& value)
+    {
+        records_.emplace_back(StringUtils::StringToInt(key), value);
+    }
+
+    std::vector<std::string> GetVersionPatch()
+    {
+        std::vector<std::string> result;
+        int32_t sysApiVersion = StringUtils::StringToInt(SystemProperties::GetApiVersion());
+        if (sysApiVersion <= 0) {
+            LOGE("get system api version failed!");
+            return result;
+        }
+        std::sort(records_.begin(), records_.end(),
+            [](const std::pair<uint32_t, std::string>& recordA, const std::pair<uint32_t, std::string>& recordB) {
+                return recordA.first > recordB.first;
+            });
+        for (const auto& record : records_) {
+            if (record.first <= sysApiVersion) {
+                result.emplace_back(record.second);
+            }
+        }
+        // prepare patches in order of api version from smallest to largest.
+        std::reverse(result.begin(), result.end());
+        return result;
+    }
+
+private:
+    std::vector<std::pair<int32_t, std::string>> records_;
+};
 
 std::unique_ptr<JsonValue> GetJsonValue(
     const std::vector<std::string>& keys, const std::unique_ptr<JsonValue>& fileData)
@@ -92,7 +126,7 @@ void GetAttrOptionsSeriesPoint(const std::unique_ptr<JsonValue>& jsonPoint, Poin
             { "fillColor",
                 [](std::unique_ptr<JsonValue>& child, PointInfo& pointInfo) {
                     const auto& valStr = child->GetString();
-                    pointInfo.SetFillColor(Color::FromString(valStr));
+                    pointInfo.SetFillColorString(valStr);
                 } },
             { "shape",
                 [](std::unique_ptr<JsonValue>& child, PointInfo& pointInfo) {
@@ -110,7 +144,7 @@ void GetAttrOptionsSeriesPoint(const std::unique_ptr<JsonValue>& jsonPoint, Poin
             { "strokeColor",
                 [](std::unique_ptr<JsonValue>& child, PointInfo& pointInfo) {
                     auto valStr = child->GetString();
-                    pointInfo.SetStrokeColor(Color::FromString(valStr));
+                    pointInfo.SetStrokeColorString(valStr);
                 } },
             { "strokeWidth",
                 [](std::unique_ptr<JsonValue>& child, PointInfo& pointInfo) {
@@ -277,7 +311,7 @@ void GetAttrOptions(const std::unique_ptr<JsonValue>& jsonOption, ChartOptions& 
     }
 }
 
-void ParseLineDash(const std::string val, SegmentInfo& segmentInfo)
+void ParseLineDash(const std::string& val, SegmentInfo& segmentInfo)
 {
     std::vector<std::string> dash;
     StringUtils::StringSpliter(val, ',', dash);
@@ -292,7 +326,7 @@ void ParseLineDash(const std::string val, SegmentInfo& segmentInfo)
     }
 }
 
-void ParseTextPlacement(const std::string val, TextInfo& textInfo)
+void ParseTextPlacement(const std::string& val, TextInfo& textInfo)
 {
     if (val == "top") {
         textInfo.SetPlacement(Placement::TOP);
@@ -328,9 +362,9 @@ void GetAttrDataSetData(const std::unique_ptr<JsonValue>& jsonData, MainChart& d
                 } else if (key == "lineDash") {
                     ParseLineDash(val, segmentInfo);
                 } else if (key == "lineColor") {
-                    segmentInfo.SetSegmentColor(Color::FromString(val));
+                    segmentInfo.SetColorString(val);
                 } else if (key == "textColor") {
-                    textInfo.SetColor(Color::FromString(val));
+                    textInfo.SetColorString(val);
                 } else if (key == "value" && data->IsNumber()) {
                     pointInfo.SetX(static_cast<double>(i));
                     pointInfo.SetY(data->GetDouble());
@@ -509,6 +543,53 @@ bool IsVariable(const std::string& value)
     return StartWith(value, "{{") && EndWith(value, "}}");
 }
 
+bool IsJsonObject(const std::string& value)
+{
+    if (!StartWith(value, "{") || !EndWith(value, "}")) {
+        return false;
+    }
+
+    if (IsVariable(value)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool IsJsonArray(const std::string& value)
+{
+    return StartWith(value, "[") && EndWith(value, "]");
+}
+
+std::vector<std::string> GetVecFromArrStr(const std::string& value)
+{
+    if (value.empty() || value.length() < 2) {
+        return {};
+    }
+    std::string tmp = value.substr(1, value.length() - 2);
+    tmp.erase(std::remove(tmp.begin(), tmp.end(), '"'), tmp.end());
+    tmp.erase(std::remove(tmp.begin(), tmp.end(), ' '), tmp.end());
+    std::regex strDivider(",");
+    std::vector<std::string> strVec(std::sregex_token_iterator(tmp.begin(), tmp.end(), strDivider, -1),
+        std::sregex_token_iterator());
+    return strVec;
+}
+
+std::string GetArrStrFromVec(const std::vector<std::string>& vec)
+{
+    std::string res = "[";
+    for (auto iter = vec.begin(); iter != vec.end(); ++iter) {
+        res += "\"";
+        res += *iter;
+        res += "\",";
+    }
+    if (res.length() > 1) {
+        res = res.substr(0, res.length() - 1);
+    }
+    res += "]";
+    return res;
+}
+
 bool IsMultiVariable(const std::string& value)
 {
     return StartWith(value, "$f(") && EndWith(value, ")");
@@ -516,8 +597,28 @@ bool IsMultiVariable(const std::string& value)
 
 } // namespace
 
+void JsCardParser::UpdateProps(const std::string& key, std::string value, const std::unique_ptr<JsonValue>& propsJson)
+{
+    if (!propsJson) {
+        return;
+    }
+    auto propsObject = propsJson->GetValue(key);
+    if (!propsObject || !propsObject->IsValid()) {
+        return;
+    }
+    if (IsVariable(value)) {
+        ParseVariable(value);
+    }
+    if (!propsObject->Contains("value")) {
+        propsObject->Put("value", propsObject->GetValue("default")->ToString().c_str());
+    } else {
+        propsObject->Replace("value", value.c_str());
+    }
+}
+
 void JsCardParser::ParseAttributes(const std::unique_ptr<JsonValue>& rootJson, int32_t nodeId,
-    std::vector<std::pair<std::string, std::string>>& attrs, JsCommandDomElementOperator* command)
+    std::vector<std::pair<std::string, std::string>>& attrs, JsCommandDomElementOperator* command,
+    const std::unique_ptr<JsonValue>& dataJson, const std::unique_ptr<JsonValue>& propsJson)
 {
     auto attrList = rootJson->GetValue("attr");
     if (!attrList || !attrList->IsValid()) {
@@ -570,31 +671,31 @@ void JsCardParser::ParseAttributes(const std::unique_ptr<JsonValue>& rootJson, i
             continue;
         }
         if (IsVariable(value)) {
-            ParseVariable(value);
+            ParseVariable(value, dataJson, propsJson);
         } else if (IsMultiVariable(value)) {
-            ParseMultiVariable(value);
+            ParseMultiVariable(value, dataJson, propsJson);
         }
         attrs.emplace_back(std::make_pair(key, value));
         attr = attr->GetNext();
     }
 }
 
-bool JsCardParser::GetShownValue(std::string& value)
+bool JsCardParser::GetShownValue(
+    std::string& value, const std::unique_ptr<JsonValue>& datajson, const std::unique_ptr<JsonValue>& propsjson)
 {
     std::vector<std::string> splitResult;
     StringUtils::SplitStr(value, "&&", splitResult);
     bool showValue = true;
-    std::vector<std::pair<std::string, bool>> shownVariable;
     for (const auto& splitStr : splitResult) {
         if (IsVariable(splitStr)) {
             auto key = splitStr;
-            ParseVariable(key);
-            showValue &= StringToBool(key);
+            ParseVariable(key, datajson, propsjson);
+            showValue = showValue && StringToBool(key);
         } else if (StartWith(splitStr, "!{{") && EndWith(splitStr, "}}")) {
             // !{{value}} --> {{value}}
             auto key = splitStr.substr(1, splitStr.size() - 1);
-            ParseVariable(key);
-            showValue &= !StringToBool(key);
+            ParseVariable(key, datajson, propsjson);
+            showValue = showValue && !StringToBool(key);
         } else {
             return false;
         }
@@ -670,6 +771,11 @@ void JsCardParser::ResetRepeatIndexItem()
 
 void JsCardParser::LoadResImageUrl(const std::string& jsonFile, const std::string& splitStr, std::string& value)
 {
+    if (!resourceJson_->Contains(jsonFile)) {
+        return;
+    }
+    // Path only print relative path
+    LOGI("load res image file is %{public}s", jsonFile.c_str());
     auto content = resourceJson_->GetValue(jsonFile);
     if (!content || !content->IsValid()) {
         LOGE("LoadResImageUrl failed, content is invalid.");
@@ -694,7 +800,6 @@ void JsCardParser::GetResImageUrl(std::string& value)
         value = iter->second;
         return;
     }
-    auto assetManager = assetManager_.Upgrade();
     std::string imagePath;
     auto jsonFile = std::string(RESOURCES_FOLDER) + "res-" + themeArray[mode] + (themeArray[mode].empty() ? "" : "-") +
                     GetDeviceDpi(density_) + std::string(FILE_TYPE_JSON);
@@ -703,6 +808,12 @@ void JsCardParser::GetResImageUrl(std::string& value)
     if (!themeArray[mode].empty() && imagePath.empty()) {
         jsonFile =
             std::string(RESOURCES_FOLDER) + "res-" + themeArray[mode] + "-" + "defaults" + std::string(FILE_TYPE_JSON);
+        LoadResImageUrl(jsonFile, splitStr, imagePath);
+    }
+
+    if (!themeArray[mode].empty() && imagePath.empty()) {
+        jsonFile =
+            std::string(RESOURCES_FOLDER) + "res-" + themeArray[mode] + std::string(FILE_TYPE_JSON);
         LoadResImageUrl(jsonFile, splitStr, imagePath);
     }
 
@@ -724,7 +835,13 @@ bool JsCardParser::GetI18nData(std::string& value)
         return false;
     }
 
-    if (!AceApplicationInfo::GetInstance().GetFiles(context->GetInstanceId(), I18N_FOLDER, files)) {
+    auto assetManager = assetManager_.Upgrade();
+    if (!assetManager) {
+        LOGE("Get i18n files fail!");
+        return false;
+    }
+    //assetManager->GetAssetList(I18N_FOLDER, files);
+    if (!AceApplicationInfo::GetInstance().GetFiles(I18N_FOLDER, files)) {
         LOGE("Get i18n files fail!");
         return false;
     }
@@ -735,11 +852,11 @@ bool JsCardParser::GetI18nData(std::string& value)
             fileNameList.emplace_back(file.substr(0, file.size() - (sizeof(FILE_TYPE_JSON) - 1)));
         }
     }
-    auto priorityFileName = AceApplicationInfo::GetInstance().GetLocaleFallback(fileNameList);
+    auto localeTag = AceApplicationInfo::GetInstance().GetLocaleTag();
+    auto priorityFileName = AceResConfig::GetLocaleFallback(localeTag, fileNameList);
     for (const auto& fileName : priorityFileName) {
         auto filePath = std::string(I18N_FOLDER) + fileName + std::string(FILE_TYPE_JSON);
         std::string content;
-        auto assetManager = assetManager_.Upgrade();
         if (GetAssetContentImpl(assetManager, filePath, content)) {
             auto fileData = ParseFileData(content);
             auto result = GetJsonValue(keys, fileData);
@@ -775,7 +892,7 @@ void JsCardParser::GetPlurals(std::string& value)
 }
 
 void JsCardParser::ParseStyles(const std::unique_ptr<JsonValue>& rootJson, int32_t nodeId,
-    std::vector<std::pair<std::string, std::string>>& styles)
+    std::vector<std::pair<std::string, std::string>>& styles, const std::unique_ptr<JsonValue>& styleJson)
 {
     // parse class style
     auto classList = rootJson->GetValue("classList");
@@ -787,7 +904,7 @@ void JsCardParser::ParseStyles(const std::unique_ptr<JsonValue>& rootJson, int32
                 ParseVariable(value);
             }
             std::string styleClass("." + value);
-            SelectStyle(styleClass, styleJson_, styles);
+            SelectStyle(styleClass, styleJson, styles);
             SelectMediaQueryStyle(styleClass, styles);
             styleList = styleList->GetNext();
         }
@@ -800,7 +917,7 @@ void JsCardParser::ParseStyles(const std::unique_ptr<JsonValue>& rootJson, int32
             ParseVariable(value);
         }
         std::string idStyle("#" + value);
-        SelectStyle(idStyle, styleJson_, styles);
+        SelectStyle(idStyle, styleJson, styles);
         SelectMediaQueryStyle(idStyle, styles);
     }
 
@@ -830,12 +947,12 @@ void JsCardParser::ParseInlineStyles(
     }
 }
 
-void JsCardParser::SelectStyle(const std::string& className, const std::unique_ptr<JsonValue>& styleClass,
+bool JsCardParser::SelectStyle(const std::string& className, const std::unique_ptr<JsonValue>& styleClass,
     std::vector<std::pair<std::string, std::string>>& styles)
 {
     auto styleDetail = styleClass->GetValue(className);
     if (!styleDetail || !styleDetail->IsValid()) {
-        return;
+        return false;
     }
     auto style = styleDetail->GetChild();
     while (style && style->IsValid()) {
@@ -847,6 +964,7 @@ void JsCardParser::SelectStyle(const std::string& className, const std::unique_p
         styles.emplace_back(std::make_pair(key, styleValue));
         style = style->GetNext();
     }
+    return true;
 }
 
 void JsCardParser::SelectMediaQueryStyle(
@@ -857,7 +975,11 @@ void JsCardParser::SelectMediaQueryStyle(
         if (mediaQueryer_.MatchCondition(iter.first, mediaFeature)) {
             auto mediaIter = mediaQueryStyles_.find(iter.first);
             if (mediaIter != mediaQueryStyles_.end()) {
-                SelectStyle(styleClass, mediaIter->second, styles);
+                if (!SelectStyle(styleClass, mediaIter->second, styles)) {
+                    continue;
+                }
+                LOGI("current condition is %{public}s, style class is %{public}s", mediaIter->first.c_str(),
+                    styleClass.c_str());
             }
         }
     }
@@ -887,8 +1009,7 @@ void JsCardParser::RegisterFont(const std::string& fontFamily)
     }
 }
 
-void JsCardParser::ParseEvents(const std::unique_ptr<JsonValue>& rootJson, std::vector<std::string>& events,
-    const RefPtr<Framework::JsAcePage>& page, int32_t nodeId)
+void JsCardParser::PreUpdateMethodToAction(const std::unique_ptr<JsonValue>& rootJson)
 {
     auto eventList = rootJson->GetValue("events");
     if (!eventList || !eventList->IsValid()) {
@@ -898,10 +1019,37 @@ void JsCardParser::ParseEvents(const std::unique_ptr<JsonValue>& rootJson, std::
     while (event && event->IsValid()) {
         auto key = event->GetKey();
         auto value = event->GetString();
+        auto actionJson = eventJson_->GetValue(value);
+        auto eventAction = actionJson->ToString();
+        methodToAction_[key] = eventAction;
+        event = event->GetNext();
+    }
+}
+
+void JsCardParser::ParseEvents(const std::unique_ptr<JsonValue>& rootJson, const std::unique_ptr<JsonValue>& eventJson,
+    std::vector<std::string>& events, const RefPtr<Framework::JsAcePage>& page, int32_t nodeId)
+{
+    LOGD("ParseEvents json:%{public}s", eventJson->ToString().c_str());
+    auto eventList = rootJson->GetValue("events");
+    if (!eventList || !eventList->IsValid()) {
+        LOGI("ParseEvents eventList is empty or eventList->IsValid()");
+        return;
+    }
+    auto event = eventList->GetChild();
+    while (event && event->IsValid()) {
+        auto key = event->GetKey();
+        auto value = event->GetString();
         events.emplace_back(key);
-        auto action = eventJson_->GetValue(value)->ToString();
-        auto eventAction = GetEventAction(action, key, nodeId);
-        page->AddNodeEvent(nodeId, key, eventAction);
+        auto actionJson = eventJson->GetValue(value);
+        auto eventAction = GetEventAction(actionJson->ToString(), key, nodeId);
+        if (actionJson->Contains("action") && actionJson->GetString("action") == "proxy") {
+            auto linkedEventKey = actionJson->GetString("method");
+            eventAction = methodToAction_[linkedEventKey];
+            eventJson_->Put(value.c_str(), JsonUtil::ParseJsonString(eventAction));
+        }
+        if (!key.empty() && !eventAction.empty()) {
+            page->AddNodeEvent(nodeId, key, eventAction);
+        }
         event = event->GetNext();
     }
 }
@@ -913,36 +1061,36 @@ std::string JsCardParser::GetEventAction(const std::string& action, const std::s
         LOGE("GetEventAction: action detail is invalid");
         return "";
     }
-    auto child = actionDetail->GetChild();
+    ReplaceParam(actionDetail);
+    return actionDetail->ToString();
+}
+
+void JsCardParser::ReplaceParam(const std::unique_ptr<JsonValue>& node)
+{
+    auto child = node->GetChild();
     while (child && child->IsValid()) {
         auto key = child->GetKey();
         auto value = child->IsString() ? child->GetString() : child->ToString();
-        child = child->GetNext();
-        if (key != "params") {
-            auto originValue = value;
-            if (IsVariable(value)) {
-                ParseVariable(value);
-                actionDetail->Replace(key.c_str(), value.c_str());
-            }
-        } else {
-            auto jsonParamDetail = actionDetail->GetValue("params");
-            if (jsonParamDetail->IsValid()) {
-                auto pChild = jsonParamDetail->GetChild();
-                while (pChild->IsValid()) {
-                    auto paramKey = pChild->GetKey();
-                    auto paramValue = pChild->IsString() ? pChild->GetString() : child->ToString();
-                    pChild = pChild->GetNext();
-                    auto originParamValue = paramValue;
-                    if (IsVariable(paramValue)) {
-                        ParseVariable(paramValue);
-                        jsonParamDetail->Replace(paramKey.c_str(), paramValue.c_str());
-                    }
+        auto oldChild = std::move(child);
+        child = oldChild->GetNext();
+
+        if (IsVariable(value)) {
+            ParseVariable(value);
+            node->Replace(key.c_str(), value.c_str());
+        } else if (IsJsonArray(value)) {
+            auto strVec = GetVecFromArrStr(value);
+            for (auto iter = strVec.begin(); iter != strVec.end(); ++iter) {
+                if (IsVariable(*iter)) {
+                    ParseVariable(*iter);
                 }
             }
-            actionDetail->Replace("params", jsonParamDetail);
+            value = GetArrStrFromVec(strVec);
+            node->Replace(key.c_str(), value.c_str());
+        } else if (IsJsonObject(value)) {
+            ReplaceParam(oldChild);
+            node->Replace(key.c_str(), oldChild);
         }
     }
-    return actionDetail->ToString();
 }
 
 void JsCardParser::LoadMediaQueryStyle()
@@ -951,19 +1099,29 @@ void JsCardParser::LoadMediaQueryStyle()
     if (!media || !media->IsValid()) {
         return;
     }
+    static const std::string CONDITION_KEY = "condition";
     auto mediaChild = media->GetChild();
     while (mediaChild && mediaChild->IsValid()) {
-        auto condition = mediaChild->GetString("condition", "");
+        auto condition = mediaChild->GetString(CONDITION_KEY, "");
         if (condition.empty()) {
             mediaChild = mediaChild->GetNext();
             continue;
         }
 
         // record media query style
-        auto mediaQueryStyle = JsonUtil::Create(true);
+        std::unique_ptr<JsonValue> mediaQueryStyle;
+        auto iter = mediaQueryStyles_.find(condition);
+        if (iter != mediaQueryStyles_.end()) {
+            // already exist same media condition
+            mediaQueryStyle = std::move(iter->second);
+        } else {
+            mediaQueryStyle = JsonUtil::Create(true);
+        }
         auto child = mediaChild->GetChild();
         while (child && child->IsValid()) {
-            mediaQueryStyle->Put(child->GetKey().c_str(), child);
+            if (child->GetKey() != CONDITION_KEY) {
+                mediaQueryStyle->Put(child->GetKey().c_str(), child);
+            }
             child = child->GetNext();
         }
 
@@ -1033,14 +1191,14 @@ void JsCardParser::UpdateStyle(const RefPtr<JsAcePage>& page)
     SetUpdateStatus(page);
 }
 
-bool JsCardParser::ParseComplexExpression(std::string& value)
+bool JsCardParser::ParseComplexExpression(std::string& value, const std::unique_ptr<JsonValue>& json)
 {
     if (value.find('[') == std::string::npos && value.find('.') == std::string::npos) {
         return false;
     }
     std::stack<std::string> keyStack;
     auto key = value;
-    if (!ParseArrayExpression(key, keyStack) || keyStack.size() != 1) {
+    if (!ParseArrayExpression(key, keyStack, json) || keyStack.size() != 1) {
         return false;
     }
     auto result = keyStack.top();
@@ -1049,9 +1207,10 @@ bool JsCardParser::ParseComplexExpression(std::string& value)
     return true;
 }
 
-bool JsCardParser::ParseArrayExpression(const std::string& expression, std::stack<std::string>& keyStack)
+bool JsCardParser::ParseArrayExpression(
+    const std::string& expression, std::stack<std::string>& keyStack, const std::unique_ptr<JsonValue>& json)
 {
-    auto dataJson = isRepeat_ ? repeatJson_->ToString() : dataJson_->ToString();
+    auto dataJson = isRepeat_ ? repeatJson_->ToString() : json->ToString();
     auto dataValue = JsonUtil::ParseJsonString(dataJson);
     std::string tmpKey;
     for (char i : expression) {
@@ -1110,10 +1269,12 @@ bool JsCardParser::ParseArrayExpression(const std::string& expression, std::stac
 }
 
 void JsCardParser::UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const std::unique_ptr<JsonValue>& rootJson,
-    int32_t parentId, const std::vector<int>& idArray)
+    int32_t parentId, const std::vector<int>& idArray, const std::unique_ptr<JsonValue>& dataJson,
+    const std::unique_ptr<JsonValue>& styleJson, const std::unique_ptr<JsonValue>& propsJson)
 {
+    LOGD("UpdateDomNode root json: %{public}s", rootJson->ToString().c_str());
     if (!page || !rootJson->IsValid()) {
-        LOGE("fail to CreateDomNode due to page or root is invalid");
+        LOGE("fail to UpdateDomNode due to page or root is invalid");
         return;
     }
     if (rootJson->Contains("repeat") && !isRepeat_) {
@@ -1137,23 +1298,45 @@ void JsCardParser::UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     }
     bool shouldShow = true;
     bool hasShownAttr = false;
-    GetShownAttr(rootJson, shouldShow, hasShownAttr);
-
+    GetShownAttr(rootJson, dataJson, propsJson, shouldShow, hasShownAttr);
+    type = rootJson->GetValue("type")->GetString();
+    if (rootBody_->Contains(type)) {
+        // if rootBody contains this type, it must be a customer component.
+        auto customJson = rootBody_->GetValue(type);
+        auto customJsonTemplate = customJson->GetValue("template");
+        auto customJsonData = customJson->GetValue("data");
+        auto customJsonProps = customJson->GetValue("props");
+        auto customJsonStyle = customJson->GetValue("styles");
+        auto attrList = rootJson->GetValue("attr");
+        if (!attrList || !attrList->IsValid()) {
+            return;
+        }
+        auto attr = attrList->GetChild();
+        while (attr && attr->IsValid()) {
+            auto key = attr->GetKey();
+            auto value = attr->IsString() ? attr->GetString() : attr->ToString();
+            UpdateProps(key, value, customJsonProps);
+            attr = attr->GetNext();
+        }
+        ParseStyles(rootJson, selfId, customStyles_, styleJson);
+        UpdateDomNode(page, customJsonTemplate, parentId, idArray, customJsonData, customJsonStyle, customJsonProps);
+        return;
+    }
     std::vector<std::pair<std::string, std::string>> attrs;
-    std::vector<std::pair<std::string, std::string>> styles;
+    std::vector<std::pair<std::string, std::string>> styles(customStyles_);
+    customStyles_.clear();
     std::vector<std::string> events;
-
     auto styleCommand = Referenced::MakeRefPtr<JsCommandUpdateDomElementStyles>(selfId);
     auto attrCommand = Referenced::MakeRefPtr<JsCommandUpdateDomElementAttrs>(selfId);
     auto ptr = Referenced::RawPtr(attrCommand);
     if (shouldShow && hasShownAttr) {
         attrs.emplace_back(std::make_pair("show", TRUE_STR));
     }
-    ParseAttributes(rootJson, selfId, attrs, (JsCommandDomElementOperator*)ptr);
+    ParseAttributes(rootJson, selfId, attrs, (JsCommandDomElementOperator*)ptr, dataJson, propsJson);
     if (!shouldShow && hasShownAttr) {
         attrs.emplace_back(std::make_pair("show", FALSE_STR));
     }
-    ParseStyles(rootJson, selfId, styles);
+    ParseStyles(rootJson, selfId, styles, styleJson);
     ParseEvents(rootJson, events, page, selfId);
     attrCommand->SetAttributes(std::move(attrs));
     styleCommand->SetStyles(std::move(styles));
@@ -1164,42 +1347,59 @@ void JsCardParser::UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     if (childList && childList->IsValid()) {
         auto child = childList->GetChild();
         while (child && child->IsValid()) {
-            UpdateDomNode(page, child, selfId, idArray);
+            UpdateDomNode(page, child, selfId, idArray, dataJson, styleJson, propsJson);
             child = child->GetNext();
         }
     }
 }
 
-void JsCardParser::ParseVariable(std::string& value)
+void JsCardParser::ParseVariable(
+    std::string& value, const std::unique_ptr<JsonValue>& dataJson, const std::unique_ptr<JsonValue>& propsJson)
 {
     // {{value}} --> value
     auto variable = value.substr(2, value.size() - 4);
-    if (ParseComplexExpression(variable) || GetVariable(variable) || ParseSpecialVariable(variable) ||
-        ParseTernaryExpression(variable) || ParseLogicalExpression(variable)) {
+    if (GetAndParseProps(variable, propsJson) || ParseComplexExpression(variable, dataJson) ||
+        GetVariable(variable, dataJson) || ParseSpecialVariable(variable) ||
+        ParseTernaryExpression(variable, propsJson) || ParseLogicalExpression(variable, propsJson)) {
         value = variable;
+
+        if (IsVariable(value)) {
+            ParseVariable(value, dataJson, propsJson);
+        }
     }
 }
 
-void JsCardParser::ParseMultiVariable(std::string& value)
+void JsCardParser::ParseMultiVariable(
+    std::string& value, const std::unique_ptr<JsonValue>& dataJson, const std::unique_ptr<JsonValue>& propsJson)
 {
     if (value.size() < 4) {
         return;
     }
     // $f({{key1}} {{key2}}) --> {{key1}} {{key2}}
     auto variable = value.substr(3, value.size() - 4);
-    std::vector<std::string> splitStr;
-    StringUtils::SplitStr(variable, ".", splitStr);
-    std::string resultStr;
-    for (auto& split : splitStr) {
-        if (IsVariable(split)) {
-            ParseVariable(split);
+
+    value = "";
+    // Splicing Between Variables and constants,like variable = "my name is {{name}}, and i am from {{city}}."
+    while (variable.find("{{") != std::string::npos && variable.find("}}") != std::string::npos) {
+        int32_t startPos = variable.find("{{");
+        int32_t endPos = variable.find("}}");
+        if (endPos < startPos) {
+            break;
         }
-        resultStr += (split + '.');
+        // var = {{name}}, after parsing, var = "tom".
+        std::string var = variable.substr(startPos, endPos - startPos + 2);
+        ParseVariable(var, dataJson, propsJson);
+
+        // after parsing, value = "my name is tom".
+        value += variable.substr(0, startPos) + var;
+
+        // variable = ", and i am from {{city}}."
+        variable = variable.substr(endPos + 2, variable.size() - endPos - 2);
     }
-    value = resultStr.substr(0, resultStr.size() - 1);
+    value += variable;
 }
 
-bool JsCardParser::ParseTernaryExpression(std::string& value)
+bool JsCardParser::ParseTernaryExpression(std::string& value, const std::unique_ptr<JsonValue>& propsJson)
 {
     if (value.find('?') == std::string::npos || value.find(':') == std::string::npos) {
         return false;
@@ -1210,14 +1410,25 @@ bool JsCardParser::ParseTernaryExpression(std::string& value)
     if (flagStr.size() != 2) {
         return false;
     }
-    GetVariable(flagStr[0]);
-    auto flag = flagStr[0] == TRUE_STR;
+    bool flag = false;
+    if (GetAndParseProps(flagStr[0], propsJson) || GetVariable(flagStr[0])) {
+        flag = flagStr[0] == TRUE_STR;
+    }
 
     std::vector<std::string> keyStr;
     StringUtils::SplitStr(flagStr[1], ":", keyStr);
     if (keyStr.size() != 2) {
         return false;
     }
+    for (auto& key : keyStr) {
+        if (StartWith(key, "\'") && EndWith(key, "\'")) {
+            key = key.substr(1, key.size() - 2);
+        }
+        if (StartWith(key, "\"") && EndWith(key, "\"")) {
+            key = key.substr(1, key.size() - 2);
+        }
+    }
+
     // parse key1 and key2.
     GetVariable(keyStr[0]);
     GetVariable(keyStr[1]);
@@ -1225,7 +1436,7 @@ bool JsCardParser::ParseTernaryExpression(std::string& value)
     return true;
 }
 
-bool JsCardParser::ParseLogicalExpression(std::string& value)
+bool JsCardParser::ParseLogicalExpression(std::string& value, const std::unique_ptr<JsonValue>& propsJson)
 {
     std::vector<std::string> splitStr;
     if (value.find("&&") != std::string::npos) {
@@ -1234,28 +1445,103 @@ bool JsCardParser::ParseLogicalExpression(std::string& value)
         if (splitStr.size() != 2) {
             return false;
         }
-        GetVariable(splitStr[0]);
-        GetVariable(splitStr[1]);
-        value = (splitStr[0] == TRUE_STR && splitStr[1] == TRUE_STR) ? TRUE_STR : FALSE_STR;
-        return true;
+        if ((GetAndParseProps(splitStr[0], propsJson) || GetVariable(splitStr[0])) &&
+            (GetAndParseProps(splitStr[1], propsJson) || GetVariable(splitStr[1]))) {
+            value = (splitStr[0] == TRUE_STR && splitStr[1] == TRUE_STR) ? TRUE_STR : FALSE_STR;
+            return true;
+        }
     } else if (value.find("||") != std::string::npos) {
         // for {{flag1 || flag2}}.
         StringUtils::SplitStr(value, "||", splitStr);
         if (splitStr.size() != 2) {
             return false;
         }
-        GetVariable(splitStr[0]);
-        GetVariable(splitStr[1]);
-        value = (splitStr[0] == TRUE_STR || splitStr[1] == TRUE_STR) ? TRUE_STR : FALSE_STR;
-        return true;
+        if ((GetAndParseProps(splitStr[0], propsJson) || GetVariable(splitStr[0])) &&
+            (GetAndParseProps(splitStr[1], propsJson) || GetVariable(splitStr[1]))) {
+            value = (splitStr[0] == TRUE_STR || splitStr[1] == TRUE_STR) ? TRUE_STR : FALSE_STR;
+            return true;
+        }
     } else if (value.find('!') != std::string::npos) {
         // for {{!flag1}}.
         StringUtils::SplitStr(value, "!", splitStr);
         if (splitStr.size() != 1) {
             return false;
         }
-        GetVariable(splitStr[0]);
-        value = splitStr[0] == TRUE_STR ? FALSE_STR : TRUE_STR;
+        if (GetAndParseProps(splitStr[0], propsJson) || GetVariable(splitStr[0])) {
+            value = splitStr[0] == TRUE_STR ? FALSE_STR : TRUE_STR;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool JsCardParser::GetAndParseProps(std::string& value, const std::unique_ptr<JsonValue>& propsJson)
+{
+    if (!propsJson) {
+        return false;
+    }
+    if (ParsePropsArray(value, propsJson) || ParsePropsVariable(value, propsJson)) {
+        return true;
+    }
+    return false;
+}
+
+bool JsCardParser::ParsePropsVariable(std::string& value, const std::unique_ptr<JsonValue>& propsJson)
+{
+    auto propsObject = propsJson->GetValue(value);
+    if (!propsObject || !propsObject->IsValid()) {
+        LOGI("GetAndParseProps propsObject is empty or propsObject->IsValid()");
+        return false;
+    }
+    auto propValueJson = propsObject->GetValue("value");
+    auto defaultJson = propsObject->GetValue("default");
+    if (propValueJson && propValueJson->IsValid()) {
+        value = propValueJson->IsString() ? propValueJson->GetString() : propValueJson->ToString();
+    } else {
+        // no need to check valid, the json will recover from error state
+        value = defaultJson->IsString() ? defaultJson->GetString() : defaultJson->ToString();
+    }
+    // after user use current value in json, need to reset back to default
+
+    propsObject->Replace(
+        "value", defaultJson->IsString() ? defaultJson->GetString().c_str() : defaultJson->ToString().c_str());
+    return true;
+}
+
+std::string GetArrayItemSubstring(const std::string& s)
+{
+    std::string result;
+    auto endIndex = s.find("[");
+    if (endIndex != std::string::npos) {
+        result = s.substr(0, endIndex);
+    }
+    return result;
+}
+
+bool JsCardParser::ParsePropsArray(std::string& value, const std::unique_ptr<JsonValue>& propsJson)
+{
+    const auto arrayParam = GetArrayItemSubstring(value);
+    if (arrayParam.empty()) {
+        return false;
+    }
+    auto propsObject = propsJson->GetValue(arrayParam);
+    if (!propsObject || !propsObject->IsValid()) {
+        LOGI("GetAndParseProps propsObject is empty or propsObject->IsValid()");
+        return false;
+    }
+    auto propValueJson = propsObject->GetValue("value");
+    auto defaultJson = propsObject->GetValue("default");
+    auto arrayPropJson = JsonUtil::Create(true);
+    if (propValueJson && propValueJson->IsValid()) {
+        arrayPropJson->Put(arrayParam.c_str(), propValueJson);
+    } else {
+        arrayPropJson->Put(arrayParam.c_str(), defaultJson);
+    }
+
+    if (ParseComplexExpression(value, arrayPropJson)) {
+        // after user use current value in json, need to reset back to default
+        propsObject->Replace(
+            "value", defaultJson->IsString() ? defaultJson->GetString().c_str() : defaultJson->ToString().c_str());
         return true;
     }
     return false;
@@ -1277,13 +1563,18 @@ bool JsCardParser::ParseSpecialVariable(std::string& value)
     return false;
 }
 
-bool JsCardParser::GetVariable(std::string& value)
+bool JsCardParser::GetVariable(std::string& value, const std::unique_ptr<JsonValue>& dataJson)
 {
+    LOGD("GetVariable value :%{private}s dataJson:%{private}s", value.c_str(), dataJson->ToString().c_str());
     auto key = value;
-    if (!repeatJson_->Contains(key)) {
+    if (!repeatJson_->Contains(key) && isRepeat_) {
         return false;
     }
-    auto dataValue = dataJson_->GetValue(key);
+
+    if (!dataJson) {
+        return false;
+    }
+    auto dataValue = dataJson->GetValue(key);
     if (isRepeat_) {
         dataValue = repeatJson_->GetValue(key);
     }
@@ -1292,8 +1583,9 @@ bool JsCardParser::GetVariable(std::string& value)
     }
     value = dataValue->IsString() ? dataValue->GetString() : dataValue->ToString();
     if (IsVariable(value)) {
-        ParseVariable(value);
+        ParseVariable(value, dataJson);
     }
+    LOGD("return value :%{private}s", value.c_str());
     return true;
 }
 
@@ -1351,7 +1643,8 @@ bool JsCardParser::ParsePointOperator(
 }
 
 void JsCardParser::CreateDomNode(const RefPtr<Framework::JsAcePage>& page, const std::unique_ptr<JsonValue>& rootJson,
-    int32_t parentId, bool isNewNode)
+    int32_t parentId, const std::unique_ptr<JsonValue>& dataJson, const std::unique_ptr<JsonValue>& actionJson,
+    const std::unique_ptr<JsonValue>& styleJson, const std::unique_ptr<JsonValue>& propsJson, bool isNewNode)
 {
     if (!page || !rootJson->IsValid()) {
         LOGE("fail to CreateDomNode due to page or root is invalid");
@@ -1379,12 +1672,37 @@ void JsCardParser::CreateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     }
     bool shouldShow = true;
     bool hasShownAttr = false;
-    GetShownAttr(rootJson, shouldShow, hasShownAttr);
-
+    GetShownAttr(rootJson, dataJson, propsJson, shouldShow, hasShownAttr);
+    type = rootJson->GetValue("type")->GetString();
+    if (rootBody_->Contains(type)) {
+        // if rootBody contains this type, it must be a customer component.
+        auto customJson = rootBody_->GetValue(type);
+        auto customJsonTemplate = customJson->GetValue("template");
+        auto customJsonData = customJson->GetValue("data");
+        auto customJsonProps = customJson->GetValue("props");
+        auto customJsonActions = customJson->GetValue("actions");
+        auto customJsonStyle = customJson->GetValue("styles");
+        auto attrList = rootJson->GetValue("attr");
+        if (!attrList || !attrList->IsValid()) {
+            return;
+        }
+        auto attr = attrList->GetChild();
+        while (attr && attr->IsValid()) {
+            auto key = attr->GetKey();
+            auto value = attr->IsString() ? attr->GetString() : attr->ToString();
+            UpdateProps(key, value, customJsonProps);
+            attr = attr->GetNext();
+        }
+        ParseStyles(rootJson, nodeId, customStyles_, styleJson);
+        PreUpdateMethodToAction(rootJson);
+        CreateDomNode(page, customJsonTemplate, parentId, customJsonData, customJsonActions, customJsonStyle,
+            customJsonProps, isNewNode);
+        return;
+    }
     std::vector<std::pair<std::string, std::string>> attrs;
-    std::vector<std::pair<std::string, std::string>> styles;
+    std::vector<std::pair<std::string, std::string>> styles(customStyles_);
+    customStyles_.clear();
     std::vector<std::string> events;
-
     RefPtr<Framework::JsCommandDomElementCreator> command;
     if (parentId < 0) {
         command = Referenced::MakeRefPtr<Framework::JsCommandCreateDomBody>(type, nodeId);
@@ -1396,13 +1714,12 @@ void JsCardParser::CreateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     if (shouldShow && hasShownAttr) {
         attrs.emplace_back(std::make_pair("show", TRUE_STR));
     }
-    ParseAttributes(rootJson, nodeId, attrs, (Framework::JsCommandDomElementOperator*)ptr);
+    ParseAttributes(rootJson, nodeId, attrs, (Framework::JsCommandDomElementOperator*)ptr, dataJson, propsJson);
     if (!shouldShow && hasShownAttr) {
         attrs.emplace_back(std::make_pair("show", FALSE_STR));
     }
-    LOGD("card nodeId: %d, parentId: %d, type: %s", nodeId, parentId, type.c_str());
-    ParseStyles(rootJson, nodeId, styles);
-    ParseEvents(rootJson, events, page, nodeId);
+    ParseStyles(rootJson, nodeId, styles, styleJson);
+    ParseEvents(rootJson, actionJson, events, page, nodeId);
     command->SetAttributes(std::move(attrs));
     command->SetStyles(std::move(styles));
     command->AddEvents(std::move(events));
@@ -1412,7 +1729,7 @@ void JsCardParser::CreateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     if (childList && childList->IsValid()) {
         auto child = childList->GetChild();
         while (child && child->IsValid()) {
-            CreateDomNode(page, child, nodeId, isNewNode);
+            CreateDomNode(page, child, nodeId, dataJson, actionJson, styleJson, propsJson, isNewNode);
             child = child->GetNext();
         }
     }
@@ -1450,7 +1767,7 @@ void JsCardParser::CreateRepeatDomNode(
             return;
         }
         ParseRepeatIndexItem(repeatValue);
-        ProcessRepeatNode(page, rootJson, key, parentId, true, repeatValue);
+        ProcessRepeatNode(page, rootJson, key, parentId, true, expValue);
         ResetRepeatIndexItem();
     }
     isRepeat_ = false;
@@ -1466,11 +1783,13 @@ void JsCardParser::GetClockConfig(const std::unique_ptr<JsonValue>& jsonDataSets
         auto key = data->GetKey();
         auto valStr = data->IsString() ? data->GetString() : data->ToString();
         static const LinearMapNode<void (*)(std::string&, ClockConfig&, JsCardParser&)> clockConfigOperators[] = {
-            { DOM_DIGIT_COLOR, [](std::string& valStr, ClockConfig& clockConfig,
-                               JsCardParser& jsCardParser) { clockConfig.digitColor_ = Color::FromString(valStr); } },
+            { DOM_DIGIT_COLOR,
+                [](std::string& valStr, ClockConfig& clockConfig, JsCardParser& jsCardParser) {
+                    clockConfig.digitColor_ = valStr;
+                } },
             { DOM_DIGIT_COLOR_NIGHT,
                 [](std::string& valStr, ClockConfig& clockConfig, JsCardParser& jsCardParser) {
-                    clockConfig.digitColorNight_ = Color::FromString(valStr);
+                    clockConfig.digitColorNight_ = valStr;
                 } },
             { DOM_DIGIT_RADIUS_RATIO,
                 [](std::string& valStr, ClockConfig& clockConfig, JsCardParser& jsCardParser) {
@@ -1614,15 +1933,53 @@ void JsCardParser::SetUpdateStatus(const RefPtr<Framework::JsAcePage>& page)
     page->FlushCommands();
 }
 
-void JsCardParser::GetShownAttr(const std::unique_ptr<JsonValue>& rootJson, bool& shouldShow, bool& hasShownAttr)
+void JsCardParser::GetShownAttr(const std::unique_ptr<JsonValue>& rootJson, const std::unique_ptr<JsonValue>& dataJson,
+    const std::unique_ptr<JsonValue>& propsJson, bool& shouldShow, bool& hasShownAttr)
 {
-    GetBoolValue(rootJson, "shown", shouldShow, hasShownAttr);
+    GetBoolValue(rootJson, dataJson, propsJson, "shown", shouldShow, hasShownAttr);
     bool blockValue = false;
     bool hasBlock = false;
     GetBoolValue(rootJson, BLOCK_VALUE, blockValue, hasBlock);
     if (hasBlock) {
-        shouldShow &= blockValue;
+        shouldShow = shouldShow && blockValue;
         hasShownAttr = true;
+    }
+}
+
+void JsCardParser::ParseVersionAndUpdateData()
+{
+    LOGI("parse version info and update data field");
+    auto versionJson = rootBody_->GetValue("apiVersion");
+    if (!versionJson || !versionJson->IsValid()) {
+        return;
+    }
+    auto child = versionJson->GetChild();
+    VersionData versionData;
+    while (child && child->IsValid()) {
+        if (child->IsObject()) {
+            auto key = child->GetKey();
+            auto value = child->IsString() ? child->GetString() : child->ToString();
+            versionData.AddRecord(key, value);
+        }
+        child = child->GetNext();
+    }
+    auto versionPatch = versionData.GetVersionPatch();
+    for (const auto& patchInfo : versionPatch) {
+        auto patchJson = JsonUtil::ParseJsonString(patchInfo);
+        if (!patchJson || !patchJson->IsValid()) {
+            LOGW("parse version patch failed, patchInfo = %{public}s", patchInfo.c_str());
+            continue;
+        }
+        auto patchItem = patchJson->GetChild();
+        while (patchItem && patchItem->IsValid()) {
+            auto key = patchItem->GetKey();
+            if (dataJson_->Contains(key)) {
+                dataJson_->Replace(key.c_str(), patchItem);
+            } else {
+                dataJson_->Put(key.c_str(), patchItem);
+            }
+            patchItem = patchItem->GetNext();
+        }
     }
 }
 
@@ -1641,6 +1998,8 @@ bool JsCardParser::Initialize()
         LOGE("the json template is error");
         return false;
     }
+
+    ParseVersionAndUpdateData();
     // repeatJson contains dataJson.
     repeatJson_ = JsonUtil::ParseJsonString(dataJson_->ToString());
     LoadMediaQueryStyle();
@@ -1659,13 +2018,14 @@ void JsCardParser::CreateBlockNode(const OHOS::Ace::RefPtr<OHOS::Ace::Framework:
     bool shouldShow = true;
     bool hasShownAttr = false;
     GetBoolValue(rootJson, "shown", shouldShow, hasShownAttr);
+    const char* value = shouldShow ? "true" : "false";
     if (blockChild && blockChild->IsValid()) {
         auto child = blockChild->GetChild();
         while (child && child->IsValid()) {
             if (child->Contains(BLOCK_VALUE)) {
-                shouldShow ? child->Replace(BLOCK_VALUE, "true") : child->Replace(BLOCK_VALUE, "false");
+                child->Replace(BLOCK_VALUE, value);
             } else {
-                shouldShow ? child->Put(BLOCK_VALUE, "true") : child->Put(BLOCK_VALUE, "false");
+                child->Put(BLOCK_VALUE, value);
             }
             parsingStatus_ == ParsingStatus::UPDATE ? UpdateDomNode(page, child, parentId)
                                                     : CreateDomNode(page, child, parentId);
@@ -1674,21 +2034,31 @@ void JsCardParser::CreateBlockNode(const OHOS::Ace::RefPtr<OHOS::Ace::Framework:
     }
 }
 
-void JsCardParser::GetBoolValue(
-    const std::unique_ptr<JsonValue>& rootJson, const std::string& key, bool& shouldShow, bool& hasShownAttr)
+void JsCardParser::GetBoolValue(const std::unique_ptr<JsonValue>& rootJson, const std::unique_ptr<JsonValue>& dataJson,
+    const std::unique_ptr<JsonValue>& propsJson, const std::string& key, bool& value, bool& hasAttr)
 {
-    auto shown = rootJson->GetValue(key);
-    if (shown && shown->IsValid()) {
-        if (shown->IsString()) {
-            auto shownValue = shown->GetString();
-            GetShownValue(shownValue);
-            shouldShow = shownValue == "true";
-            hasShownAttr = true;
-        } else if (shown->IsBool()) {
-            shouldShow = shown->GetBool();
-            hasShownAttr = true;
+    auto result = rootJson->GetValue(key);
+    if (result && result->IsValid()) {
+        if (result->IsString()) {
+            auto strValue = result->GetString();
+            GetShownValue(strValue, dataJson, propsJson);
+            value = strValue == "true";
+            hasAttr = true;
+            return;
+        } else if (result->IsBool()) {
+            value = result->GetBool();
+            hasAttr = true;
+            return;
         }
     }
+    hasAttr = false;
+}
+
+void JsCardParser::SetColorMode(ColorMode colorMode)
+{
+    LOGI("current color mode is %{public}d", colorMode);
+    colorMode_ = colorMode;
+    mediaQueryer_.SetColorMode(colorMode);
 }
 
 } // namespace OHOS::Ace::Framework

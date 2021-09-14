@@ -85,6 +85,7 @@ protected:
 
 private:
     static uint32_t GetGlobalTabControllerId();
+    RefPtr<FlexComponent> CreateChild() const;
 
     RefPtr<FlexComponent> flexChild_;
     RefPtr<TabController> tabController_;
@@ -96,7 +97,7 @@ private:
     std::string tabEventId_;
     std::string tabEventType_;
 
-    // Record the tab is verical or horizontal
+    // Record the tab is vertical or horizontal
     bool vertical_ = false;
 };
 

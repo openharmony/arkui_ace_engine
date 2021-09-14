@@ -17,6 +17,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/dom/dom_marquee.h"
 #include "frameworks/bridge/test/unittest/jsfrontend/dom_node_factory.h"

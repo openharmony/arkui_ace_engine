@@ -59,10 +59,10 @@ RefPtr<Component> ImageCreator::CreateFromJson(const JsonValue& componentJson, c
         auto color = ColorCreator::CreateFromJson(*colorJson);
         image->SetColor(color);
     }
-    auto loadSuccessEventId = componentJson.GetString(IMAGE_ON_LOAD_SUCCESS);
-    image->SetLoadSuccessEventId(EventMarker(loadSuccessEventId));
-    auto loadFailEventId = componentJson.GetString(IMAGE_ON_LOAD_FAIL);
-    image->SetLoadFailEventId(EventMarker(loadFailEventId));
+    auto loadSuccessEvent = componentJson.GetString(IMAGE_ON_LOAD_SUCCESS);
+    image->SetLoadSuccessEvent(EventMarker(loadSuccessEvent));
+    auto loadFailEvent = componentJson.GetString(IMAGE_ON_LOAD_FAIL);
+    image->SetLoadFailEvent(EventMarker(loadFailEvent));
     return image;
 }
 

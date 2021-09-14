@@ -21,9 +21,9 @@
 #include "core/animation/animator.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/scroll_motion.h"
+#include "core/event/touch_event.h"
 #include "core/gestures/drag_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
-#include "core/gestures/touch_event.h"
 #include "core/pipeline/base/related_node.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -77,6 +77,11 @@ public:
         axis_ = axis;
     }
 
+    void SetScrollableNode(const WeakPtr<RenderNode>& node)
+    {
+        scrollableNode_ = node;
+    }
+
     double GetMainOffset(const Offset& offset) const
     {
         return axis_ == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
@@ -124,6 +129,8 @@ public:
     void HandleDragStart(const DragStartInfo& info);
     void HandleDragUpdate(const DragUpdateInfo& info);
     void HandleDragEnd(const DragEndInfo& info);
+
+    void ProcessScrollMotionStop();
 
     bool DispatchEvent(const TouchPoint& point) override
     {
@@ -224,7 +231,6 @@ private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
     void ProcessScrollMotion(double position);
-    void ProcessScrollMotionStop();
     void FixScrollMotion(double position);
 
     ScrollPositionCallback callback_;
@@ -245,6 +251,7 @@ private:
     RefPtr<ScrollMotion> scrollMotion_;
     RefPtr<SpringProperty> spring_;
     WeakPtr<PipelineContext> context_;
+    WeakPtr<RenderNode> scrollableNode_;
     double currentPos_ = 0.0;
     double currentVelocity_ = 0.0;
     bool scrollPause_ = false;
@@ -255,6 +262,7 @@ private:
     bool needCenterFix_ = false;
     int32_t nodeId_ = 0;
     double slipFactor_ = 0.0;
+    double velocityRangeScale_ = 1.0;
     static double sFriction_;
     static double sVelocityScale_;
 };

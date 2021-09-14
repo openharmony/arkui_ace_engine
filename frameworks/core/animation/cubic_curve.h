@@ -26,22 +26,23 @@ namespace OHOS::Ace {
 // so Bx(m) = 3m(1-m)^2*x0_ + 3m^2*x1_ + m^3
 //    By(m) = 3m(1-m)^2*y0_ + 3m^2*y1_ + m^3
 // in function MoveInternal, assume time as Bx(m), we let Bx(m) approaching time, and we can get m and the output By(m)
-class CubicCurve : public Curve {
+class ACE_EXPORT CubicCurve : public Curve {
 public:
     CubicCurve(float x0, float y0, float x1, float y1);
     ~CubicCurve() override = default;
 
     float MoveInternal(float time) override;
+    const std::string ToString() override;
 
 private:
     // Bx(m) or By(m) = 3m(1-m)^2*a + 3m^2*b + m^3, where a = x0_ ,b = x1_ or a = y0_ ,b = y1_
     static float CalculateCubic(float a, float b, float m);
 
-    const float cubicErrorBound_ = 0.001f; // Control curve accuracy
-    const float x0_;                       // X-axis of the first point (P1)
-    const float y0_;                       // Y-axis of the first point (P1)
-    const float x1_;                       // X-axis of the second point (P2)
-    const float y1_;                       // Y-axis of the second point (P2)
+    float cubicErrorBound_ = 0.001f; // Control curve accuracy
+    float x0_;                       // X-axis of the first point (P1)
+    float y0_;                       // Y-axis of the first point (P1)
+    float x1_;                       // X-axis of the second point (P2)
+    float y1_;                       // Y-axis of the second point (P2)
 };
 
 } // namespace OHOS::Ace

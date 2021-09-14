@@ -65,15 +65,59 @@ public:
         return active_;
     }
 
+    void SetParams(const std::string& params)
+    {
+        params_ = params;
+    }
+
+    const std::string& GetParams() const
+    {
+        return params_;
+    }
+
     void SetActive(bool active)
     {
         active_ = active;
     }
 
+    bool IsDefHeight() const
+    {
+        return isDefHeight_;
+    }
+
+    void SetIsDefHeight(bool isDefHeight)
+    {
+        isDefHeight_ = isDefHeight;
+    }
+
+    bool IsDefWidth() const
+    {
+        return isDefWidth_;
+    }
+
+    void SetIsDefWidth(bool isDefWidth)
+    {
+        isDefWidth_ = isDefWidth;
+    }
+
+    const EventMarker& GetClickedEventId() const
+    {
+        return clickEventId_;
+    }
+
+    void SetClickedEventId(const EventMarker& eventId)
+    {
+        clickEventId_ = eventId;
+    }
+
 private:
     std::string uri_;
-    NavigatorType type_ = NavigatorType::DEFAULT;
+    std::string params_;
+    NavigatorType type_ = NavigatorType::PUSH;
     bool active_ = false;
+    bool isDefHeight_ = false;
+    bool isDefWidth_ = false;
+    EventMarker clickEventId_;
 };
 
 } // namespace OHOS::Ace

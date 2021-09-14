@@ -22,35 +22,11 @@ namespace OHOS::Ace::Framework {
 void DOMSvgAnimateMotion::PrepareSpecializedComponent()
 {
     if (!animateComponent_) {
-        animateComponent_ = AceType::MakeRefPtr<SvgAnimateComponent>(std::to_string(GetNodeId()),
-            GetTag(), SvgAnimateType::MOTION);
+        animateComponent_ =
+            AceType::MakeRefPtr<SvgAnimateComponent>(std::to_string(GetNodeId()), GetTag(), SvgAnimateType::MOTION);
+        animateComponent_->SetCalcMode(CalcMode::PACED);
     }
-    DOMSvgAnimate::PrepareSpecializedComponent(animateComponent_);
-    animateComponent_->SetKeyPoints(keyPoints_);
-    animateComponent_->SetPath(path_);
-    animateComponent_->SetRotate(rotate_);
-}
-
-bool DOMSvgAnimateMotion::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    if (DOMSvgAnimate::SetSpecializedAttr(attr)) {
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_KEY_POINTS) {
-        StringUtils::StringSpliter(attr.second, ';', keyPoints_);
-        return true;
-    }
-
-    if (attr.first == DOM_SVG_ANIMATION_PATH) {
-        path_ = attr.second;
-        return true;
-    }
-
-    if (attr.first == DOM_SVG_ANIMATION_ROTATE) {
-        rotate_ = attr.second;
-        return true;
-    }
-    return false;
+    DOMSvgAnimate::SetAnimateAttrs();
 }
 
 } // namespace OHOS::Ace::Framework

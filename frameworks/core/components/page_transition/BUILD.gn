@@ -14,5 +14,8 @@
 import("//foundation/ace/ace_engine/frameworks/core/components/components.gni")
 
 build_component("page_transition") {
-  sources = [ "page_transition_element.cpp" ]
+  sources = [
+    "page_transition_component.cpp",
+    "page_transition_element.cpp",
+  ]
 }

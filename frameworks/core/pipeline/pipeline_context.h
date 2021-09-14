@@ -26,8 +26,10 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/rect.h"
+#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
+#include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
@@ -42,9 +44,11 @@
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components/page/page_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/event/event_trigger.h"
+#include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/base/factories/render_factory.h"
@@ -55,6 +59,7 @@
 
 namespace OHOS::Ace {
 
+class OffscreenCanvas;
 class CardTransitionController;
 class ComposedElement;
 class FontManager;
@@ -68,11 +73,12 @@ class SharedTransitionController;
 class StageElement;
 class StackElement;
 class Window;
-class StageElement;
 class Animator;
 class ManagerInterface;
 class AccessibilityManager;
-struct DialogProperties;
+class RenderContext;
+struct PageTarget;
+class DialogComponent;
 
 struct WindowBlurInfo {
     float progress_;
@@ -80,6 +86,8 @@ struct WindowBlurInfo {
     RRect innerRect_;
     std::vector<RRect> coords_;
 };
+
+using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 
 class ACE_EXPORT PipelineContext final : public AceType {
     DECLARE_ACE_TYPE(PipelineContext, AceType);
@@ -89,17 +97,30 @@ public:
     using TimeProvider = std::function<int64_t(void)>;
     using OnPageShowCallBack = std::function<void()>;
     using AnimationCallback = std::function<void()>;
+    using GetViewScaleCallback = std::function<bool(float&, float&)>;
+    using SurfaceChangedCallbackMap =
+        std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
+
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
-    ~PipelineContext() override = default;
+    PipelineContext(RefPtr<TaskExecutor>& taskExecutor, RefPtr<AssetManager> assetManager,
+        const RefPtr<Frontend>& frontend, bool isSub = true);
+
+    ~PipelineContext() override;
 
     RefPtr<Element> SetupRootElement();
 
-    bool ShowDialog(const DialogProperties& dialogProperties, bool isRightToLeft);
+    RefPtr<DialogComponent> ShowDialog(const DialogProperties& dialogProperties, bool isRightToLeft);
 
     void GetBoundingRectData(int32_t nodeId, Rect& rect);
 
+    RefPtr<OffscreenCanvas> CreateOffscreenCanvas(int32_t width, int32_t height);
+
+    void PushVisibleCallback(int32_t nodeId, double ratio, std::function<void(bool, double)>&& callback);
+    void RemoveVisibleChangeNode(int32_t nodeId);
+
+    void PushPage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage);
     void PushPage(const RefPtr<PageComponent>& pageComponent);
 
     bool CanPushPage();
@@ -110,6 +131,7 @@ public:
 
     bool CanPopPage();
 
+    void ReplacePage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage);
     void ReplacePage(const RefPtr<PageComponent>& pageComponent);
 
     bool CanReplacePage();
@@ -118,6 +140,8 @@ public:
 
     bool CallRouterBackToPopPage();
 
+    void NotifyAppStorage(const std::string& key, const std::string& value);
+
     void Dump(const std::vector<std::string>& params) const;
 
     RefPtr<StackElement> GetLastStack() const;
@@ -125,6 +149,10 @@ public:
     RefPtr<PageElement> GetLastPage() const;
 
     RefPtr<RenderNode> GetLastPageRender() const;
+
+    void AddRouterChangeCallback(const OnRouterChangeCallback& onRouterChangeCallback);
+
+    void onRouterChange(const std::string url);
 
     void ScheduleUpdate(const RefPtr<ComposedComponent>& composed);
 
@@ -137,6 +165,8 @@ public:
     void AddNeedRebuildFocusElement(const RefPtr<Element>& focusElement);
 
     void AddDirtyRenderNode(const RefPtr<RenderNode>& renderNode, bool overlay = false);
+
+    void AddNeedRenderFinishNode(const RefPtr<RenderNode>& renderNode);
 
     void AddDirtyLayoutNode(const RefPtr<RenderNode>& renderNode);
 
@@ -288,6 +318,34 @@ public:
     }
     void NotifyRouterBackDismiss() const;
 
+    using PopPageSuccessEventHandler = std::function<void(const std::string& pageUrl, const int32_t pageId)>;
+    void SetPopPageSuccessEventHandler(PopPageSuccessEventHandler&& listener)
+    {
+        popPageSuccessEventHandler_.push_back(std::move(listener));
+    }
+    void NotifyPopPageSuccessDismiss(const std::string& pageUrl, const int32_t pageId) const;
+
+    using IsPagePathInvalidEventHandler = std::function<void(bool& isPageInvalid)>;
+    void SetIsPagePathInvalidEventHandler(IsPagePathInvalidEventHandler&& listener)
+    {
+        isPagePathInvalidEventHandler_.push_back(std::move(listener));
+    }
+    void NotifyIsPagePathInvalidDismiss(bool isPageInvalid) const;
+
+    using DispatchTouchEventHandler = std::function<void(const TouchPoint& event)>;
+    void SetDispatchTouchEventHandler(DispatchTouchEventHandler&& listener)
+    {
+        dispatchTouchEventHandler_.push_back(std::move(listener));
+    }
+    void NotifyDispatchTouchEventDismiss(const TouchPoint& event) const;
+
+    using KeyEventHandler = std::function<void()>;
+    void SetKeyHandler(KeyEventHandler&& listener)
+    {
+        keyEventHandler_.push_back(std::move(listener));
+    }
+    void NotifyKeyEventDismiss() const;
+
     float GetViewScale() const
     {
         return viewScale_;
@@ -303,6 +361,8 @@ public:
     {
         return rootHeight_;
     }
+    RefPtr<RenderNode> DragTestAll(const TouchPoint& point);
+    RefPtr<RenderNode> DragTest(const TouchPoint& point, const RefPtr<RenderNode>& renderNode, int32_t deep);
 
     double GetRootWidth() const
     {
@@ -325,36 +385,13 @@ public:
         return isSurfaceReady_;
     }
 
-    bool GetHasMeetSubWindowNode() const
-    {
-        return hasMeetSubWindowNode_;
-    }
-
-    void SetHasMeetSubWindowNode(bool hasMeetSubWindowNode)
-    {
-        hasMeetSubWindowNode_ = hasMeetSubWindowNode;
-    }
-
-    bool GetHasClipHole() const
-    {
-        return hasClipHole_;
-    }
-
-    void SetHasClipHole(bool hasClipHole)
-    {
-        hasClipHole_ = hasClipHole;
-    }
-
-    bool GetIsHoleValid() const
-    {
-        return isHoleValid_;
-    }
-
     void ClearImageCache();
 
     RefPtr<ImageCache> GetImageCache() const;
 
     double NormalizeToPx(const Dimension& dimension) const;
+
+    double ConvertPxToVp(const Dimension& dimension) const;
 
     void ShowFocusAnimation(
         const RRect& rrect, const Color& color, const Offset& offset, bool isIndented = false) const;
@@ -422,7 +459,7 @@ public:
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc);
 
-    void TryLoadImageInfo(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& loadCallback);
+    void CanLoadImage(const std::string& src, const std::map<std::string, EventMarker>& callbacks);
 
     void SetAnimationCallback(AnimationCallback&& callback);
 
@@ -476,6 +513,10 @@ public:
 
     void UpdateFontWeightScale();
 
+    void LoadSystemFont(const std::function<void()>& onFondsLoaded);
+
+    void NotifyFontNodes();
+
     const RefPtr<SharedTransitionController>& GetSharedTransitionController() const
     {
         return sharedTransitionController_;
@@ -525,6 +566,16 @@ public:
     double GetNavigationBarHeight() const
     {
         return navigationBarHeight_;
+    }
+
+    void SetAppearingDuration(int32_t duration)
+    {
+        cardAppearingDuration_ = duration;
+    }
+
+    int32_t GetAppearingDuration() const
+    {
+        return cardAppearingDuration_;
     }
 
     void SetWindowModal(WindowModal modal)
@@ -577,7 +628,6 @@ public:
     }
 
     void RefreshRootBgColor() const;
-    void SetClipHole(double left, double top, double width, double height);
     void AddToHoverList(const RefPtr<RenderNode>& node);
 
     using UpdateWindowBlurRegionHandler = std::function<void(const std::vector<std::vector<float>>&)>;
@@ -585,6 +635,20 @@ public:
     void SetUpdateWindowBlurRegionHandler(UpdateWindowBlurRegionHandler handler)
     {
         updateWindowBlurRegionHandler_ = std::move(handler);
+    }
+
+    using DragEventHandler = std::function<void(const std::string&, const RefPtr<PixelMap>& pixmap)>;
+
+    void SetDragEventHandler(DragEventHandler&& callback)
+    {
+        dragEventHandler_ = callback;
+    }
+
+    using InitDragEventListener = std::function<void()>;
+
+    void SetInitDragListener(InitDragEventListener&& callback)
+    {
+        initDragEventListener_ = callback;
     }
 
     void UpdateWindowBlurRegion(
@@ -616,7 +680,15 @@ public:
         updateWindowBlurDrawOpHandler_ = std::move(handler);
     }
 
-    void NavigatePage(uint8_t type, const std::string& uri);
+    void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params);
+
+    void SaveExplicitAnimationOption(const AnimationOption& option);
+
+    void ClearExplicitAnimationOption();
+
+    const AnimationOption GetExplicitAnimationOption() const;
+
+    void FlushBuild();
 
     int32_t GetInstanceId() const
     {
@@ -638,11 +710,6 @@ public:
         return dirtyRect_;
     }
 
-    const Rect& GetTransparentHole() const
-    {
-        return transparentHole_;
-    }
-
     bool GetIsDeclarative() const;
 
     bool IsForbidePlatformQuit() const
@@ -655,6 +722,110 @@ public:
         forbidePlatformQuit_ = forbidePlatformQuit;
     }
 
+    void SetRootBgColor(const Color& color)
+    {
+        rootBgColor_ = color;
+    }
+
+    const Color& GetRootBgColor() const
+    {
+        return rootBgColor_;
+    }
+
+    void SetPhotoCachePath(const std::string& photoCachePath)
+    {
+        photoCachePath_ = photoCachePath;
+    }
+
+    const std::string& GetPhotoCachePath()
+    {
+        return photoCachePath_;
+    }
+
+    int32_t GetMinPlatformVersion() const
+    {
+        return minPlatformVersion_;
+    }
+    void SetMinPlatformVersion(int32_t minPlatformVersion)
+    {
+        minPlatformVersion_ = minPlatformVersion;
+    }
+
+    void SetGetViewScaleCallback(GetViewScaleCallback&& callback)
+    {
+        getViewScaleCallback_ = callback;
+    }
+
+    bool GetViewScale(float& scaleX, float& scaleY)
+    {
+        if (getViewScaleCallback_) {
+            return getViewScaleCallback_(scaleX, scaleY);
+        }
+        return false;
+    }
+
+    void SetScreenOnCallback(std::function<void(std::function<void()>&& func)>&& screenOnCallback)
+    {
+        screenOnCallback_ = std::move(screenOnCallback);
+    }
+
+    void SetScreenOffCallback(std::function<void(std::function<void()>&& func)>&& screenOffCallback)
+    {
+        screenOffCallback_ = std::move(screenOffCallback);
+    }
+
+    const RefPtr<ManagerInterface>& GetTextFieldManager()
+    {
+        return textFieldManager_;
+    }
+
+    void AddScreenOnEvent(std::function<void()>&& func);
+    void AddScreenOffEvent(std::function<void()>&& func);
+    void AddAlignDeclarationNode(const RefPtr<RenderNode>& node);
+    void AddLayoutTransitionNode(const RefPtr<RenderNode>& node);
+    std::list<RefPtr<RenderNode>>& GetAlignDeclarationNodeList();
+    void SetQueryIfWindowInScreenCallback(std::function<void()>&& func)
+    {
+        queryIfWindowInScreenCallback_ = std::move(func);
+    }
+    void SetIsWindowInScreen(bool isWindowInScreen)
+    {
+        isWindowInScreen_ = isWindowInScreen;
+    }
+    // This interface posts an async task to do async query and returns the result from previous query.
+    bool IsWindowInScreen();
+    void NotifyOnPreDraw();
+    void AddNodesToNotifyOnPreDraw(const RefPtr<RenderNode>& renderNode);
+
+    void NotifyDrawOnPiexlMap();
+    void UpdateNodesNeedDrawOnPixelMap(const RefPtr<RenderNode>& renderNode);
+
+    const RefPtr<RootElement>& GetRootElement() const
+    {
+        return rootElement_;
+    }
+
+    const RefPtr<DataProviderManager>& GetDataProviderManager() const
+    {
+        return dataProviderManager_;
+    }
+    void SetDataProviderManager(const RefPtr<DataProviderManager>& dataProviderManager)
+    {
+        dataProviderManager_ = dataProviderManager;
+    }
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void SetCurrentUrl(const std::string& url)
+    {
+        currentUrl_ = url;
+    }
+
+    const std::string& GetCurrentUrl()
+    {
+        return currentUrl_;
+    }
+#endif
+
     int32_t GetWindowId() const
     {
         return windowId_;
@@ -665,12 +836,106 @@ public:
         windowId_ = windowId;
     }
 
+    void SetAccessibilityEnabled(bool isEnabled)
+    {
+        isAccessibilityEnabled_ = isEnabled;
+    }
+    bool IsAccessibilityEnabled() const
+    {
+        return isAccessibilityEnabled_ || IsVisibleChangeNodeExists(-1);
+    }
+
+    bool IsVisibleChangeNodeExists(NodeId index) const;
+
+    int32_t RegisterSurfaceChangedCallback(std::function<void(int32_t, int32_t, int32_t, int32_t)>&& callback)
+    {
+        if (callback) {
+            surfaceChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterSurfaceChangedCallback(int32_t callbackId)
+    {
+        surfaceChangedCallbackMap_.erase(callbackId);
+    }
+    void StartSystemDrag(const std::string &str, const RefPtr<PixelMap>& pixmap);
+    void InitDragListener();
+    bool ProcessDragEvent(int action, double windowX, double windowY, const std::string& data);
+    void SetPreTargetRenderNode(const RefPtr<RenderNode>& preTargetRenderNode);
+    const RefPtr<RenderNode> GetPreTargetRenderNode() const;
+
+    void FlushPipelineWithoutAnimation(const RefPtr<RenderContext>& ctx = nullptr);
+
+    double GetDensity() const
+    {
+        return density_;
+    }
+
+    void SetCardPipelineContext(RefPtr<PipelineContext> context)
+    {
+        innerPipelineContexts.push_back(context);
+    }
+
+    void RemoveCardPipelineContext(RefPtr<PipelineContext> context)
+    {
+        auto it = find(innerPipelineContexts.begin(), innerPipelineContexts.end(), context);
+        if (it != innerPipelineContexts.end()) {
+            innerPipelineContexts.erase(it);
+        }
+    }
+
+    void SetMainPipelineContext(RefPtr<PipelineContext> context)
+    {
+        mainPipelineContexts = context;
+    }
+
+    const RefPtr<PipelineContext>& GetMainPipelineContext() const
+    {
+        return mainPipelineContexts;
+    }
+
+    void RequestFrame();
+
+    void SetClipHole(double left, double top, double width, double height);
+
+    const Rect& GetTransparentHole() const
+    {
+        return transparentHole_;
+    }
+
+    bool GetHasMeetSubWindowNode() const
+    {
+        return hasMeetSubWindowNode_;
+    }
+
+    void SetHasMeetSubWindowNode(bool hasMeetSubWindowNode)
+    {
+        hasMeetSubWindowNode_ = hasMeetSubWindowNode;
+    }
+
+    bool GetHasClipHole() const
+    {
+        return hasClipHole_;
+    }
+
+    void SetHasClipHole(bool hasClipHole)
+    {
+        hasClipHole_ = hasClipHole;
+    }
+
+    bool GetIsHoleValid() const
+    {
+        return isHoleValid_;
+    }
+
 private:
-    void FlushPipelineWithoutAnimation();
-    void FlushBuild();
     void FlushLayout();
-    void FlushRender();
-    void FlushPredictLayout();
+    void FlushRender(const RefPtr<RenderContext>& ctx = nullptr);
+    void FlushRenderFinish();
+    void FireVisibleChangeEvent();
+    void FlushPredictLayout(int64_t targetTimestamp);
     void FlushAnimation(uint64_t nanoTimestamp);
     void FlushPageUpdateTasks();
     void ProcessPreFlush();
@@ -684,6 +949,9 @@ private:
     void MakeThreadStuck(const std::vector<std::string>& params) const;
     void DumpFrontend() const;
     void HandleMouseInputEvent(const MouseEvent& event);
+    void ExitAnimation();
+    void CreateGeometryTransition();
+    void CorrectPosition();
 
     template<typename T>
     struct NodeCompare {
@@ -722,13 +990,16 @@ private:
     std::set<RefPtr<RenderNode>, NodeCompare<RefPtr<RenderNode>>> dirtyRenderNodesInOverlay_;
     std::set<RefPtr<RenderNode>, NodeCompare<RefPtr<RenderNode>>> dirtyLayoutNodes_;
     std::set<RefPtr<RenderNode>, NodeCompare<RefPtr<RenderNode>>> predictLayoutNodes_;
+    std::set<RefPtr<RenderNode>, NodeCompare<RefPtr<RenderNode>>> needPaintFinishNodes_;
+    std::set<RefPtr<RenderNode>> nodesToNotifyOnPreDraw_;
+    std::set<RefPtr<RenderNode>> nodesNeedDrawOnPixelMap_;
     std::list<RefPtr<FlushEvent>> postFlushListeners_;
     std::list<RefPtr<FlushEvent>> preFlushListeners_;
-    Rect transparentHole_;
     std::unique_ptr<Window> window_;
     RefPtr<FocusAnimationManager> focusAnimationManager_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
+    RefPtr<DataProviderManager> dataProviderManager_;
     RefPtr<PlatformResRegister> platformResRegister_;
     RefPtr<RootElement> rootElement_;
     RefPtr<FocusNode> dirtyFocusNode_;
@@ -742,6 +1013,17 @@ private:
     RefPtr<RenderFactory> renderFactory_;
     UpdateWindowBlurRegionHandler updateWindowBlurRegionHandler_;
     UpdateWindowBlurDrawOpHandler updateWindowBlurDrawOpHandler_;
+    DragEventHandler dragEventHandler_;
+    InitDragEventListener initDragEventListener_;
+    GetViewScaleCallback getViewScaleCallback_;
+
+    Rect transparentHole_;
+    // use for traversing cliping hole
+    bool hasMeetSubWindowNode_ = false;
+    // use for judge clip hole status
+    bool hasClipHole_ = false;
+    // judge hole is valid
+    bool isHoleValid_ = false;
 
 #ifndef WEARABLE_PRODUCT
     RefPtr<MultiModalManager> multiModalManager_ = MakeRefPtr<MultiModalManager>();
@@ -755,6 +1037,10 @@ private:
     StatusBarEventHandler statusBarBgColorEventHandler_;
     PopupEventHandler popupEventHandler_;
     RouterBackEventHandler routerBackEventHandler_;
+    std::list<PopPageSuccessEventHandler> popPageSuccessEventHandler_;
+    std::list<IsPagePathInvalidEventHandler> isPagePathInvalidEventHandler_;
+    std::list<DispatchTouchEventHandler> dispatchTouchEventHandler_;
+    std::list<KeyEventHandler> keyEventHandler_;
     RefPtr<ManagerInterface> textFieldManager_;
     RefPtr<PlatformBridge> messageBridge_;
     WeakPtr<RenderNode> requestedRenderNode_;
@@ -769,18 +1055,23 @@ private:
     // window blur region
     std::unordered_map<int32_t, WindowBlurInfo> windowBlurRegions_;
 
+    std::list<RefPtr<RenderNode>> alignDeclarationNodeList_;
+    std::set<RefPtr<RenderNode>> layoutTransitionNodeSet_;
+
+    std::function<void()> queryIfWindowInScreenCallback_;
+    std::atomic<bool> isWindowInScreen_ = true;
+
+    RefPtr<RenderNode> preTargetRenderNode_;
+
     bool isRightToLeft_ = false;
     bool isSurfaceReady_ = false;
-    // use for traversing cliping hole
-    bool hasMeetSubWindowNode_ = false;
-    // use for judge clip hole status
-    bool hasClipHole_ = false;
-    // judge hole is valid
-    bool isHoleValid_ = false;
     float viewScale_ = 1.0f;
     float fontScale_ = 1.0f;
     double density_ = 1.0;
     double dipScale_ = 1.0;
+    float designWidthScale_ = 1.0;
+
+    int32_t cardAppearingDuration_ = 0;
     double statusBarHeight_ = 0.0;     // dp
     double navigationBarHeight_ = 0.0; // dp
     double rootHeight_ = 0.0;
@@ -789,11 +1080,12 @@ private:
     bool isFlushingAnimation_ = false;
     bool hasIdleTasks_ = false;
     bool isMoving_ = false;
-    bool onShow_ = true;
+    std::atomic<bool> onShow_ = true;
     bool isKeyEvent_ = false;
     bool needWindowBlurRegionRefresh_ = false;
     bool isJsCard_ = false;
     bool useLiteStyle_ = false;
+    bool isFirstLoaded_ = true;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
     OnPageShowCallBack onPageShowCallBack_;
@@ -804,10 +1096,13 @@ private:
     bool isFullWindow_ = false;
     std::list<RefPtr<RenderNode>> hoverNodes_;
     std::unique_ptr<DrawDelegate> drawDelegate_;
+    std::function<void(std::function<void()>&&)> screenOffCallback_;
+    std::function<void(std::function<void()>&&)> screenOnCallback_;
 #if defined(ENABLE_NATIVE_VIEW)
     int32_t frameCount_ = 0;
 #endif
 
+    Color rootBgColor_ = Color::WHITE;
     int32_t width_ = 0;
     int32_t height_ = 0;
     bool isFirstPage_ = true;
@@ -815,7 +1110,21 @@ private:
     bool forbidePlatformQuit_ = false;
     FrontendType frontendType_;
     int32_t instanceId_ = 0;
+    int32_t minPlatformVersion_ = 0;
+    std::string photoCachePath_;
+    AnimationOption explicitAnimationOption_;
+    OnRouterChangeCallback OnRouterChangeCallback_ = nullptr;
+    bool isAccessibilityEnabled_ = false;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    std::string currentUrl_;
+#endif
     int32_t windowId_ = 0;
+
+    int32_t callbackId_ = 0;
+    SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
+    bool isSub_ = false;
+    std::vector<RefPtr<PipelineContext>> innerPipelineContexts;
+    RefPtr<PipelineContext> mainPipelineContexts;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

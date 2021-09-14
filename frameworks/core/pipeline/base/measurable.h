@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_MEASURABLE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_MEASURABLE_H
+#ifndef ACE_ANDROID_SRC_FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_MEASURABLE_H
+#define ACE_ANDROID_SRC_FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_MEASURABLE_H
 
 #include "base/memory/ace_type.h"
-#include "frameworks/base/geometry/dimension.h"
+#include "frameworks/base/geometry/animatable_dimension.h"
 
 namespace OHOS::Ace {
 
@@ -25,41 +25,51 @@ class Measurable : public virtual AceType {
     DECLARE_ACE_TYPE(Measurable, AceType);
 
 public:
-    virtual const Dimension& GetWidth() const
+    virtual const AnimatableDimension& GetWidth() const
     {
         return width_;
     }
 
-    virtual void SetWidth(const Dimension& dimension)
+    virtual void SetWidth(const Dimension& dimension, const AnimationOption& option = AnimationOption())
     {
-        width_ = dimension;
+        width_ = AnimatableDimension(dimension, option);
     }
 
     virtual void SetWidth(double width, DimensionUnit unit = DimensionUnit::PX)
     {
-        width_ = Dimension(width, unit);
+        width_ = AnimatableDimension(width, unit);
     }
 
-    virtual const Dimension& GetHeight() const
+    virtual void SetWidth(const AnimatableDimension& dimension)
+    {
+        width_ = dimension;
+    }
+
+    virtual const AnimatableDimension& GetHeight() const
     {
         return height_;
     }
 
-    virtual void SetHeight(const Dimension& dimension)
+    virtual void SetHeight(const Dimension& dimension, const AnimationOption& option = AnimationOption())
     {
-        height_ = dimension;
+        height_ = AnimatableDimension(dimension, option);
     }
 
     virtual void SetHeight(double height, DimensionUnit unit = DimensionUnit::PX)
     {
-        height_ = Dimension(height, unit);
+        height_ = AnimatableDimension(height, unit);
+    }
+
+    virtual void SetHeight(const AnimatableDimension& dimension)
+    {
+        height_ = dimension;
     }
 
 protected:
-    Dimension width_ {-1.0, DimensionUnit::PX};
-    Dimension height_ {-1.0, DimensionUnit::PX};
+    AnimatableDimension width_ {-1.0, DimensionUnit::PX};
+    AnimatableDimension height_ {-1.0, DimensionUnit::PX};
 };
 
 }  // namespace OHOS::Ace
 
-#endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_MEASURABLE_H
+#endif  // ACE_ANDROID_SRC_FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_MEASURABLE_H

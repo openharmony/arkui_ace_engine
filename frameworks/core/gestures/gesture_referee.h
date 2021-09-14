@@ -19,14 +19,17 @@
 #include <list>
 #include <unordered_map>
 
+#include "base/memory/ace_type.h"
 #include "base/utils/singleton.h"
-#include "core/gestures/gesture_recognizer.h"
 
 namespace OHOS::Ace {
+
+class GestureRecognizer;
 
 enum class GestureDisposal {
     ACCEPT = 0,
     REJECT,
+    PENDING,
 };
 
 class GestureScope {
@@ -37,8 +40,7 @@ public:
     GestureScope& operator=(GestureScope&&) = default;
 
     void AddMember(const RefPtr<GestureRecognizer>& recognizer);
-
-    void ForceSelectRecipient();
+    void DelMember(const RefPtr<GestureRecognizer>& recognizer);
 
     void ForceClose();
 
@@ -46,12 +48,28 @@ public:
 
     bool IsEmpty() const
     {
-        return recognizers_.empty();
+        return highRecognizers_.empty() && lowRecognizers_.empty() && parallelRecognizers_.empty();
     }
 
+    bool IsPending() const;
+
 private:
+    bool Existed(const RefPtr<GestureRecognizer>& recognizer);
+    const std::list<RefPtr<GestureRecognizer>>& GetMembersByRecognizer(const RefPtr<GestureRecognizer>& recognizer);
+    bool CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer);
+    void AcceptGesture(const RefPtr<GestureRecognizer>& recognizer);
+    void UnBlockGesture(std::list<RefPtr<GestureRecognizer>>& members);
+    void HandleParallelDisposal(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
+    void HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer);
+    void HandlePendingDisposal(const RefPtr<GestureRecognizer>& recognizer);
+    void HandleRejectDisposal(const RefPtr<GestureRecognizer>& recognizer);
+    void RemoveAndUnBlockGesture(bool isPrevPending, const RefPtr<GestureRecognizer>& recognizer);
+
     size_t touchId_ = 0;
-    std::list<RefPtr<GestureRecognizer>> recognizers_;
+
+    std::list<RefPtr<GestureRecognizer>> highRecognizers_;
+    std::list<RefPtr<GestureRecognizer>> lowRecognizers_;
+    std::list<RefPtr<GestureRecognizer>> parallelRecognizers_;
 };
 
 class GestureReferee : public Singleton<GestureReferee> {
@@ -60,8 +78,9 @@ public:
     // (touch down event) for gesture adjudicating.
     void AddGestureRecognizer(size_t touchId, const RefPtr<GestureRecognizer>& recognizer);
 
-    // Adjudicates which gesture recognizer owns the gesture sequence when the gesture sequence ends (touch up event).
-    void AdjudicateGestureSequence(size_t touchId);
+    // In multi finger recognizers, touch up one finger does not result to the whole gesture failed. Recognizer should
+    // remove the recognizer out of the referee.
+    void DelGestureRecognizer(size_t touchId, const RefPtr<GestureRecognizer>& recognizer);
 
     // Try to clean gesture scope when receive cancel event.
     void CleanGestureScope(size_t touchId);

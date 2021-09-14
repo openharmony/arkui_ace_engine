@@ -28,23 +28,65 @@ DOMTabBar::DOMTabBar(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeI
     RefPtr<TabController> controller;
     tabBarIndicator_ = AceType::MakeRefPtr<TabBarIndicatorComponent>();
     tabBarChild_ = AceType::MakeRefPtr<TabBarComponent>(tabBars, controller, tabBarIndicator_);
-    if (IsRightToLeft()) {
-        tabBarChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 void DOMTabBar::InitializeStyle()
 {
     RefPtr<TabTheme> theme = GetTheme<TabTheme>();
-    if (theme && boxComponent_) {
+    if (!theme) {
+        return;
+    }
+    if (boxComponent_) {
         boxComponent_->SetColor(theme->GetBackgroundColor());
     }
+    auto paddingDimension = theme->GetPadding();
+    padding_ = Edge(paddingDimension.Value(), 0.0, paddingDimension.Value(), 0.0, paddingDimension.Unit());
 }
 
 bool DOMTabBar::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
 {
     if (attr.first == DOM_TAB_BAR_MODE) {
-        tabBarMode_ = attr.second == "fixed" ? TabBarMode::FIXED : TabBarMode::SCROLLABEL;
+        tabBarMode_ = ConvertStrToTabBarMode(attr.second);
+        return true;
+    }
+    return false;
+}
+
+bool DOMTabBar::SetSpecializedStyle(const std::pair<std::string, std::string>& style)
+{
+    static const std::unordered_map<std::string, void (*)(const std::string&, DOMTabBar&)> styleOperators = {
+        { DOM_PADDING,
+            [](const std::string& val, DOMTabBar& node) {
+                node.padding_ = node.ParseEdge(val);
+            } },
+        { DOM_PADDING_END,
+            [](const std::string& val, DOMTabBar& node) {
+                if (node.IsRightToLeft()) {
+                    node.padding_.SetLeft(node.ParseDimension(val));
+                } else {
+                    node.padding_.SetRight(node.ParseDimension(val));
+                }
+            } },
+        { DOM_PADDING_LEFT,
+            [](const std::string& val, DOMTabBar& node) {
+                node.padding_.SetLeft(node.ParseDimension(val));
+            } },
+        { DOM_PADDING_RIGHT,
+            [](const std::string& val, DOMTabBar& node) {
+                node.padding_.SetRight(node.ParseDimension(val));
+            } },
+        { DOM_PADDING_START,
+            [](const std::string& val, DOMTabBar& node) {
+                if (node.IsRightToLeft()) {
+                    node.padding_.SetRight(node.ParseDimension(val));
+                } else {
+                    node.padding_.SetLeft(node.ParseDimension(val));
+                }
+            } },
+    };
+    auto operatorIter = styleOperators.find(style.first);
+    if (operatorIter != styleOperators.end()) {
+        operatorIter->second(style.second, *this);
         return true;
     }
     return false;
@@ -132,6 +174,7 @@ void DOMTabBar::ResetInitializedStyle()
 
 void DOMTabBar::PrepareSpecializedComponent()
 {
+    tabBarChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     tabBarChild_->SetMode(tabBarMode_);
     const auto& parentNodeTmp = AceType::DynamicCast<DOMTabs>(parentNode_.Upgrade());
     if (parentNodeTmp) {
@@ -139,6 +182,7 @@ void DOMTabBar::PrepareSpecializedComponent()
     }
     tabBarChild_->SetVertical(vertical_);
     ResetInitializedStyle();
+    tabBarChild_->SetPadding(padding_);
 }
 
 void DOMTabBar::PrepareChangeListener()
@@ -164,6 +208,42 @@ void DOMTabBar::OnChildActive(const RefPtr<DOMNode>& node, bool active)
     for (const auto& childNode : node->GetChildList()) {
         childNode->OnActive(active);
     }
+}
+
+Edge DOMTabBar::ParseEdge(const std::string& value) const
+{
+    Edge edge;
+    std::vector<std::string> offsets;
+    StringUtils::StringSpliter(value, ' ', offsets);
+    switch (offsets.size()) {
+        case 1:
+            edge.SetLeft(ParseDimension(offsets[0]));
+            edge.SetRight(ParseDimension(offsets[0]));
+            edge.SetTop(ParseDimension(offsets[0]));
+            edge.SetBottom(ParseDimension(offsets[0]));
+            break;
+        case 2:
+            edge.SetLeft(ParseDimension(offsets[0]));
+            edge.SetRight(ParseDimension(offsets[1]));
+            edge.SetTop(ParseDimension(offsets[0]));
+            edge.SetBottom(ParseDimension(offsets[0]));
+            break;
+        case 3:
+            edge.SetLeft(ParseDimension(offsets[1]));
+            edge.SetRight(ParseDimension(offsets[1]));
+            edge.SetTop(ParseDimension(offsets[0]));
+            edge.SetBottom(ParseDimension(offsets[2]));
+            break;
+        case 4:
+            edge.SetLeft(ParseDimension(offsets[3]));
+            edge.SetRight(ParseDimension(offsets[1]));
+            edge.SetTop(ParseDimension(offsets[0]));
+            edge.SetBottom(ParseDimension(offsets[2]));
+            break;
+        default:
+            break;
+    }
+    return edge;
 }
 
 } // namespace OHOS::Ace::Framework

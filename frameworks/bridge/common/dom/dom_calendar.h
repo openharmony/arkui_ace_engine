@@ -34,6 +34,7 @@ public:
     }
 
 protected:
+    bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
     bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
     void CallSpecializedMethod(const std::string& method, const std::string& args) override;
     bool AddSpecializedEvent(int32_t pageId, const std::string& event) override;

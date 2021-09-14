@@ -36,8 +36,18 @@ constexpr uint8_t MIN_OPACITY = 0;
 SharedTransitionElement::~SharedTransitionElement()
 {
     auto page = pageElement_.Upgrade();
-    if (page) {
-        page->RemoveSharedTransition(shareId_);
+    if (!page) {
+        return;
+    }
+
+    // shared transition may be updated by other element
+    auto& sharedTransitionMap = page->GetSharedTransitionMap();
+    auto pos = sharedTransitionMap.find(shareId_);
+    if (pos != sharedTransitionMap.end()) {
+        auto ptr = pos->second.Upgrade();
+        if (ptr == this) {
+            page->RemoveSharedTransition(shareId_);
+        }
     }
 }
 
@@ -57,6 +67,8 @@ void SharedTransitionElement::Update()
     enablePopExit_ = sharedComponent->IsEnablePopExit();
     enablePushEnter_ = sharedComponent->IsEnablePushEnter();
     enablePushExit_ = sharedComponent->IsEnablePushExit();
+    opacity_ = sharedComponent->GetOpacity();
+    zIndex_ = sharedComponent->GetZIndex();
 }
 
 RefPtr<RenderBox> SharedTransitionElement::GetRenderPassengerWithPajamas() const
@@ -71,6 +83,23 @@ RefPtr<RenderBox> SharedTransitionElement::GetRenderPassengerWithPajamas() const
         return nullptr;
     }
     return AceType::DynamicCast<RenderBox>(passenger->GetRenderNode());
+}
+
+RefPtr<RenderBox> SharedTransitionElement::GetRenderBox()
+{
+    const auto& parent = GetElementParent().Upgrade();
+    if (!parent) {
+        LOGE("GetRenderBox failed, parent is nullptr");
+        return nullptr;
+    }
+
+    auto box = AceType::DynamicCast<BoxElement>(parent);
+    if (!box) {
+        LOGE("GetRenderBox failed, parent is not box");
+        return nullptr;
+    }
+
+    return AceType::DynamicCast<RenderBox>(box->GetRenderNode());
 }
 
 Size SharedTransitionElement::GetSuitSize() const
@@ -91,6 +120,16 @@ Offset SharedTransitionElement::GetGlobalOffset() const
         return Offset();
     }
     return renderBox->GetGlobalOffset();
+}
+
+float SharedTransitionElement::GetOpacity() const
+{
+    return opacity_;
+}
+
+int32_t SharedTransitionElement::GetZIndex() const
+{
+    return zIndex_;
 }
 
 bool SharedTransitionElement::AboardShuttle(Offset& ticket)
@@ -116,6 +155,11 @@ bool SharedTransitionElement::AboardShuttle(Offset& ticket)
     auto suitSize = GetSuitSize();
     passengerComponent_->SetWidth(suitSize.Width());
     passengerComponent_->SetHeight(suitSize.Height());
+
+    auto parent = GetRenderBox();
+    if (parent && parent->GetBackDecoration() != nullptr) {
+        passengerComponent_->SetBackDecoration(parent->GetBackDecoration());
+    }
 
     passengerElement_ = AceType::DynamicCast<BoxElement>(GetContentElement());
     if (!passengerElement_) {
@@ -163,6 +207,7 @@ void SharedTransitionElement::GetOffShuttle()
     // save origin width/height in AboardShuttle and recover it when GetOffShuttle
     passengerComponent_->SetWidth(passengerWidth_.Value(), passengerWidth_.Unit());
     passengerComponent_->SetHeight(passengerHeight_.Value(), passengerHeight_.Unit());
+    passengerComponent_->SetBackDecoration(nullptr);
     passengerElement_->SetRenderNode(passengerRender_);
     passengerElement_->SetNewComponent(passengerComponent_);
     passengerElement_->Mount(GetFirstChild());
@@ -225,7 +270,7 @@ void SharedTransitionElement::Register()
     LOGD("SharedTransitionElement Register shareId: %{public}s, id: %{public}s", shareId_.c_str(), GetId().c_str());
     pageElement_ = page;
     if (!oldShareId_.empty()) {
-        auto sharedTransitionElementMap = page->GetSharedTransitionMap();
+        auto& sharedTransitionElementMap = page->GetSharedTransitionMap();
         auto oldSharedIter = sharedTransitionElementMap.find(oldShareId_);
         if (oldSharedIter != sharedTransitionElementMap.end()) {
             auto oldWeak = oldSharedIter->second;

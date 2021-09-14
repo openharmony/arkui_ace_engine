@@ -45,6 +45,8 @@ void InspectPickerView::PackAttrAndStyle()
     styles_.insert(std::make_pair("selected-font-size", "38px"));
     styles_.insert(std::make_pair("focus-color", "#ffffff"));
     styles_.insert(std::make_pair("focus-font-size", "38px"));
+    styles_.insert(std::make_pair("disappear-color", "#ffffff"));
+    styles_.insert(std::make_pair("disappear-font-size", "14px"));
     styles_.insert(std::make_pair("font-family", "sans-serif"));
 }
 } // namespace OHOS::Ace::Framework

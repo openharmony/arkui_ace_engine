@@ -61,8 +61,22 @@ bool DomCalendar::SetSpecializedAttr(const std::pair<std::string, std::string>& 
                 return false;
             } },
         { DOM_CALENDAR_DATE_ADAPTER,
+            [](const std::string& value, DomCalendar& calendar) { return calendar.ParseDataAdapter(value); } },
+        { DOM_CALENDAR_DIRECTION,
             [](const std::string& value, DomCalendar& calendar) {
-                return calendar.ParseDataAdapter(value);
+              if (value == "vertical") {
+                  calendar.calendarComponent_->SetAxis(Axis::VERTICAL);
+              } else if (value == "horizontal") {
+                  calendar.calendarComponent_->SetAxis(Axis::HORIZONTAL);
+              } else {
+                  LOGE("input do not match any direction");
+              }
+              return true;
+            } },
+        { DOM_CALENDAR_HOLIDAYS,
+            [](const std::string& value, DomCalendar& calendar) {
+                calendar.calendarComponent_->SetHolidays(value);
+                return true;
             } },
         { DOM_CALENDAR_OFF_DAYS,
             [](const std::string& value, DomCalendar& calendar) {
@@ -88,9 +102,18 @@ bool DomCalendar::SetSpecializedAttr(const std::pair<std::string, std::string>& 
                 }
                 return false;
             } },
-        { DOM_VERTICAL,
+        { DOM_CALENDAR_TYPE,
             [](const std::string& value, DomCalendar& calendar) {
-                calendar.calendarComponent_->SetAxis(StringToBool(value) ? Axis::VERTICAL : Axis::HORIZONTAL);
+                if (value == "normal") {
+                    calendar.calendarComponent_->SetCalendarType(CalendarType::NORMAL);
+                } else if (value == "simple") {
+                    calendar.calendarComponent_->SetCalendarType(CalendarType::SIMPLE);
+                }
+                return true;
+            } },
+        { DOM_CALENDAR_WORK_DAYS,
+            [](const std::string& value, DomCalendar& calendar) {
+                calendar.calendarComponent_->SetWorkDays(value);
                 return true;
             } },
     };
@@ -190,4 +213,173 @@ void DomCalendar::HandleGoTo(const std::string& args)
     }
     calendarComponent_->GoTo(year, month, day);
 }
+
+bool DomCalendar::SetSpecializedStyle(const std::pair<std::string, std::string>& style)
+{
+    static const LinearMapNode<void (*)(const std::string&, CalendarThemeStructure&, const DomCalendar&)>
+        calendarStyleOperators[] = {
+            { "boundaryColumnOffset",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.boundaryColOffset = node.ParseDimension(value);
+                } },
+            { "boundaryRowOffset",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.boundaryRowOffset = node.ParseDimension(value);
+                } },
+            { "columnSpace", [](const std::string& value, CalendarThemeStructure& theme,
+                                 const DomCalendar& node) { theme.colSpace = node.ParseDimension(value); } },
+            { "dailyFiveRowSpace",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.dailyFiveRowSpace = node.ParseDimension(value);
+                } },
+            { "dailySixRowSpace",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.dailySixRowSpace = node.ParseDimension(value);
+                } },
+            { "dayColor", [](const std::string& value, CalendarThemeStructure& theme,
+                              const DomCalendar& node) { theme.dayColor = node.ParseColor(value); } },
+            { "dayFontSize", [](const std::string& value, CalendarThemeStructure& theme,
+                                 const DomCalendar& node) { theme.dayFontSize = node.ParseDimension(value); } },
+            { "dayHeight", [](const std::string& value, CalendarThemeStructure& theme,
+                               const DomCalendar& node) { theme.dayHeight = node.ParseDimension(value); } },
+            { "dayWidth", [](const std::string& value, CalendarThemeStructure& theme,
+                              const DomCalendar& node) { theme.dayWidth = node.ParseDimension(value); } },
+            { "dayYAxisOffset", [](const std::string& value, CalendarThemeStructure& theme,
+                                    const DomCalendar& node) { theme.dayYAxisOffset = node.ParseDimension(value); } },
+            { "focusedAreaBackgroundColor",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.focusedAreaBackgroundColor = node.ParseColor(value);
+                } },
+            { "focusedAreaRadius",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.focusedAreaRadius = node.ParseDimension(value);
+                } },
+            { "focusedDayColor", [](const std::string& value, CalendarThemeStructure& theme,
+                                     const DomCalendar& node) { theme.focusedDayColor = node.ParseColor(value); } },
+            { "focusedLunarColor", [](const std::string& value, CalendarThemeStructure& theme,
+                                       const DomCalendar& node) { theme.focusedLunarColor = node.ParseColor(value); } },
+            { "gregorianCalendarHeight",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.gregorianCalendarHeight = node.ParseDimension(value);
+                } },
+            { "lunarColor", [](const std::string& value, CalendarThemeStructure& theme,
+                                const DomCalendar& node) { theme.lunarColor = node.ParseColor(value); } },
+            { "lunarDayFontSize",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.lunarDayFontSize = node.ParseDimension(value);
+                } },
+            { "lunarDayYAxisOffset",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.lunarDayYAxisOffset = node.ParseDimension(value);
+                } },
+            { "lunarHeight", [](const std::string& value, CalendarThemeStructure& theme,
+                                 const DomCalendar& node) { theme.lunarHeight = node.ParseDimension(value); } },
+            { "markLunarColor", [](const std::string& value, CalendarThemeStructure& theme,
+                                    const DomCalendar& node) { theme.markLunarColor = node.ParseColor(value); } },
+            { "nonCurrentMonthDayColor",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.nonCurrentMonthDayColor = node.ParseColor(value);
+                } },
+            { "nonCurrentMonthLunarColor",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.nonCurrentMonthLunarColor = node.ParseColor(value);
+                } },
+            { "nonCurrentMonthOffDayMarkColor",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.nonCurrentMonthOffDayMarkColor = node.ParseColor(value);
+                } },
+            { "nonCurrentMonthWorkDayMarkColor",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.nonCurrentMonthWorkDayMarkColor = node.ParseColor(value);
+                } },
+            { "offDayMarkColor", [](const std::string& value, CalendarThemeStructure& theme,
+                                     const DomCalendar& node) { theme.offDayMarkColor = node.ParseColor(value); } },
+            { "offDayMarkSize", [](const std::string& value, CalendarThemeStructure& theme,
+                                    const DomCalendar& node) { theme.offDayMarkSize = node.ParseDimension(value); } },
+            { "scheduleMarkerRadius",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.scheduleMarkerRadius = node.ParseDimension(value);
+                } },
+            { "scheduleMarkerXAxisOffset",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.scheduleMarkerXAxisOffset = node.ParseDimension(value);
+                } },
+            { "scheduleMarkerYAxisOffset",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.scheduleMarkerYAxisOffset = node.ParseDimension(value);
+                } },
+            { "simpleOffTextColor",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.simpleOffTextColor = node.ParseColor(value);
+                } },
+            { "simpleWorkTextColor",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.simpleWorkTextColor = node.ParseColor(value);
+                } },
+            { "underscoreLength",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.underscoreLength = node.ParseDimension(value);
+                } },
+            { "underscoreWidth", [](const std::string& value, CalendarThemeStructure& theme,
+                                     const DomCalendar& node) { theme.underscoreWidth = node.ParseDimension(value); } },
+            { "underscoreXAxisOffset",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.underscoreXAxisOffset = node.ParseDimension(value);
+                } },
+            { "underscoreYAxisOffset",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.underscoreYAxisOffset = node.ParseDimension(value);
+                } },
+            { "weekAndDayRowSpace",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.weekAndDayRowSpace = node.ParseDimension(value);
+                } },
+            { "weekColor", [](const std::string& value, CalendarThemeStructure& theme,
+                               const DomCalendar& node) { theme.weekColor = node.ParseColor(value); } },
+            { "weekFontSize", [](const std::string& value, CalendarThemeStructure& theme,
+                                  const DomCalendar& node) { theme.weekFontSize = node.ParseDimension(value); } },
+            { "weekHeight", [](const std::string& value, CalendarThemeStructure& theme,
+                                const DomCalendar& node) { theme.weekHeight = node.ParseDimension(value); } },
+            { "weekWidth", [](const std::string& value, CalendarThemeStructure& theme,
+                               const DomCalendar& node) { theme.weekWidth = node.ParseDimension(value); } },
+            { "weekendDayColor", [](const std::string& value, CalendarThemeStructure& theme,
+                                     const DomCalendar& node) { theme.weekendDayColor = node.ParseColor(value); } },
+            { "weekendLunarColor", [](const std::string& value, CalendarThemeStructure& theme,
+                                       const DomCalendar& node) { theme.weekendLunarColor = node.ParseColor(value); } },
+            { "workDayMarkColor", [](const std::string& value, CalendarThemeStructure& theme,
+                                      const DomCalendar& node) { theme.workDayMarkColor = node.ParseColor(value); } },
+            { "workDayMarkSize", [](const std::string& value, CalendarThemeStructure& theme,
+                                     const DomCalendar& node) { theme.workDayMarkSize = node.ParseDimension(value); } },
+            { "workStateHorizontalMovingDistance",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.workStateHorizontalMovingDistance = node.ParseDimension(value);
+                } },
+            { "workStateOffset", [](const std::string& value, CalendarThemeStructure& theme,
+                                     const DomCalendar& node) { theme.workStateOffset = node.ParseDimension(value); } },
+            { "workStateVerticalMovingDistance",
+                [](const std::string& value, CalendarThemeStructure& theme, const DomCalendar& node) {
+                    theme.workStateVerticalMovingDistance = node.ParseDimension(value);
+                } },
+            { "workStateWidth", [](const std::string& value, CalendarThemeStructure& theme,
+                                    const DomCalendar& node) { theme.workStateWidth = node.ParseDimension(value); } },
+        };
+    auto context = GetPipelineContext().Upgrade();
+    if (!context) {
+        return false;
+    }
+    auto theme = calendarComponent_->GetCalendarTheme();
+    if (!theme) {
+        theme = GetTheme<CalendarTheme>();
+        calendarComponent_->SetCalendarTheme(theme);
+    }
+    auto operatorIter =
+        BinarySearchFindIndex(calendarStyleOperators, ArraySize(calendarStyleOperators), style.first.c_str());
+    if (operatorIter != -1) {
+        auto& calendarTheme = context->IsJsCard() ? theme->GetCardCalendarTheme() : theme->GetCalendarTheme();
+        calendarStyleOperators[operatorIter].value(style.second, calendarTheme, *this);
+        return true;
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace::Framework

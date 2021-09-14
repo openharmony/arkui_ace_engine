@@ -235,7 +235,7 @@ public:
     }
 };
 
-class MockClipboard final {
+class MockClipboardJni final {
 public:
     static bool MockGetData(
         const std::function<void(const std::string&)>& callback, const WeakPtr<TaskExecutor>& taskExecutor)
@@ -254,8 +254,8 @@ public:
     };
 
 private:
-    MockClipboard() = delete;
-    ~MockClipboard() = delete;
+    MockClipboardJni() = delete;
+    ~MockClipboardJni() = delete;
 };
 
 class MockClipboardImpl : public Clipboard {
@@ -270,7 +270,7 @@ public:
         if (taskExecutor_) {
             taskExecutor_->PostTask(
                 [callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_))] {
-                    MockClipboard::MockGetData(callback, taskExecutor);
+                    MockClipboardJni::MockGetData(callback, taskExecutor);
                 },
                 TaskExecutor::TaskType::BACKGROUND);
         }

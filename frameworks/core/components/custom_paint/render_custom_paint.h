@@ -17,10 +17,19 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_RENDER_CUSTOM_PAINT_H
 
 #include "core/components/common/properties/paint_state.h"
+#include "core/components/custom_paint/canvas_render_context_base.h"
 #include "core/components/custom_paint/custom_paint_component.h"
+#include "core/components/custom_paint/offscreen_canvas.h"
+
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
+
+class RenderOffscreenCanvas : public OffscreenCanvas {
+    DECLARE_ACE_TYPE(RenderOffscreenCanvas, OffscreenCanvas);
+public:
+    static RefPtr<OffscreenCanvas> Create(const WeakPtr<PipelineContext>& context, int32_t width, int32_t height);
+};
 
 class RenderCustomPaint : public RenderNode {
     DECLARE_ACE_TYPE(RenderCustomPaint, RenderNode);
@@ -51,6 +60,7 @@ public:
 
     void FlushPipelineImmediately();
 
+    virtual void TransferFromImageBitmap(const RefPtr<OffscreenCanvas>& offscreenCanvas) = 0;
     virtual std::string ToDataURL(const std::string& args) = 0;
     virtual void SetAntiAlias(bool isEnabled) = 0;
     virtual void FillRect(const Offset& offset, const Rect& rect) = 0;
@@ -89,6 +99,9 @@ public:
     virtual void DrawImage(const Offset& offset, const CanvasImage& image, double width, double height) = 0;
     virtual void PutImageData(const Offset& offset, const ImageData& imageData) = 0;
     virtual std::unique_ptr<ImageData> GetImageData(double left, double top, double width, double height) = 0;
+
+    virtual void WebGLInit(CanvasRenderContextBase* context) = 0;
+    virtual void WebGLUpdate() = 0;
 
     bool IsRepaintBoundary() const override
     {
@@ -261,6 +274,16 @@ public:
         saveStates_.pop();
     }
 
+    void SetWebGLInstance(CanvasRenderContextBase* context)
+    {
+        webGLContext_ = context;
+    }
+
+    CanvasRenderContextBase* GetWebGLInstance() const
+    {
+        return webGLContext_;
+    }
+
 protected:
     RenderCustomPaint();
 
@@ -281,6 +304,7 @@ protected:
     std::list<TaskFunc> tasks_;
 
     ContextType type_ = ContextType::RENDER_2D;
+    CanvasRenderContextBase* webGLContext_ = nullptr;
 
 private:
     Dimension width_;

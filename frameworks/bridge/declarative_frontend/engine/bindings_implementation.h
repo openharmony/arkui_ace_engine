@@ -25,6 +25,8 @@
 #include "base/memory/ace_type.h"
 #include "bindings_defines.h"
 #include "frameworks/bridge/common/utils/function_traits.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -37,14 +39,14 @@ enum MethodOptions : uint8_t {
 class IFunctionBinding {
 public:
     IFunctionBinding(const char* name, MethodOptions options) : name_(name), options_(options) {}
-    ~IFunctionBinding() = default;
+    virtual ~IFunctionBinding() {}
 
-    const char* Name()
+    const char* Name() const
     {
         return name_;
     }
 
-    MethodOptions Options()
+    MethodOptions Options() const
     {
         return options_;
     }
@@ -62,9 +64,29 @@ public:
     FunctionBinding(const char* name, MethodOptions options, FunctionPtr func)
         : IFunctionBinding(name, options), func_(func)
     {}
-    ~FunctionBinding() = default;
 
-    const FunctionPtr Get()
+    ~FunctionBinding() override = default;
+
+    FunctionPtr Get()
+    {
+        return func_;
+    }
+
+private:
+    FunctionPtr func_;
+};
+
+template<typename ReturnType, typename... Args>
+class StaticFunctionBinding : public IFunctionBinding {
+    using FunctionPtr = ReturnType (*)(Args...);
+
+public:
+    StaticFunctionBinding(const char* name, MethodOptions options, FunctionPtr func)
+        : IFunctionBinding(name, options), func_(func)
+    {}
+    ~StaticFunctionBinding() override = default;
+
+    FunctionPtr Get()
     {
         return func_;
     }
@@ -82,16 +104,25 @@ private:
  *
  *  Methods and member variables registered to javascript are equivalent to a property in a javascript object.
  *  \p Method(...) is used to register methods. If a member function is registered directly, the ESI should take care of
- *  the value conversion between Javascript and C++ types. If complete control is required when calling from Javascript,
- *  member functions and callbacks with engine-specific signatures can be registered to Javascript.
- *  Additional options can be passed to \p Method(...) when binding member functions, such as the object can return
- *  itself in case of functions that do not return a value, so that in Javascript one can do so-called "chaining":
+ *  the value conversion between Javascript and C++ types.
+ *
+ *  If more control is required than just mere conversions between JS and C++ (such as error checks, weak types, storing
+ * JS objects etc.), methods can be bound to a signature that enables this control. The signautre is <tt> void(*)(const
+ * JSCallbackInfo&)</tt>. This is done to work regardless of the engine underneath. See \p JSRef , \p JSRefPtr for more
+ * info on usage.
+ *
+ *  If a direct communication with the engine is required when communicating with javascript, member functions and
+ * callbacks with engine-specific signatures can be registered to Javascript and the embedder can access the engine APIs
+ * directly. Additional options can be passed to \p Method(...) when binding member functions, such as the object can
+ * return itself in case of functions that do not return a value, so that in Javascript one can do so-called "chaining":
  *  \code{.js}
  *  object.width(10).height(10).top(0).left(20)
  *  \endcode
  *
  *  There is a general constructor for every bound class. When calling \p Bind however, the constructor argument types
  *  must be passes as template arguments (see example) so that the automatic conversion checks and converts the values.
+ *
+ *
  *
  *  Engine-specific implementation guide:
  *  This code is using the curiously recurring template pattern (CRTP) idiom as neither function templates nor static
@@ -145,9 +176,29 @@ private:
  *      void SetY(float y) { y_ = y; }
  *      virtual void Print() { std::cout << "Point(" << x_ << ", " << y_ << ")" << std::endl; }
  *
+ *      static void Parse(const JSCallbackInfo& info) {
+ *          JSRef<JSVal> arg = info[0];
+ *          if (arg->IsString()) {
+ *              std::string strArg = arg->ToString();
+ *              TwoDPoint* instance = ParseFromString();
+ *              if (instance) {
+ *                  info.SetReturnValue(instance);
+ *              } else {
+ *                  JSException::Throw("Error parsing Point2(%s)", strArg.c_str());
+ *              }
+ *          } else {
+ *              JSException::Throw("Point2.Parse: Argument is not a string!");
+ *          }
+ *      }
+ *
  *      float GetX() { return x_; }
  *      float GetY() { return y_; }
  *  private:
+ *      static TwoDPoint* ParseFromString(const std::string& str) {
+ *          // some parsing code:
+ *          auto [x,y] = Parse(str);
+ *          return new TwoDPoint(x,y);
+ *      }
  *      float x_;
  *      float y_;
  *  };
@@ -176,6 +227,7 @@ private:
  *  JSClass<TwoDPoint>::Method("setY", &TwoDPoint::SetY, MethodOptions::RETURN_SELF);
  *  JSClass<TwoDPoint>::Method("getY", &TwoDPoint::GetY);
  *  JSClass<TwoDPoint>::Method("print", &TwoDPoint::Print);
+ *  JSClass<TwoDPoint>::StaticMethod("parse", &TwoDPoint::Parse);
  *  JSClass<TwoDPoint>::Bind<float, float>(globalObject);   // Note the template arguments. Here we are specifying
  *                                                          // that we're expecting the JS constructor to accept
  *                                                          // two "float" arguments
@@ -191,21 +243,25 @@ private:
  *  \endcode
  *
  * \code{.js}
- * let point = new Point2(1,2);               // V8Class<TwoDPoint>::internalConstructor<float, float> called
- * point.print();                             // V8Class<TwoDPoint>::internalMethodCallback<void> called
- *                                            // Output: "Point(1,2)"
- * console.log("Point.x is " + point.getX()); // V8Class<TwoDPoint>::internalMethodCallback<float> called
- *                                            // Output: "Point.x is 1"
- * point.setX(5).setY(10);                    // V8Class<TwoDPoint>::internalMethodCallback<void, float> called
- *                                            // V8Class<TwoDPoint>::internalMethodCallback<void, float> called
- * point.print();                             // V8Class<TwoDPoint>::internalMethodCallback<void> called
- *                                            // Output: "Point(5,10)"
- * let anotherPoint = new Point3(1,2,3);      // V8Class<ThreeDPoint>::internalConstructor<float, float, float> called
- * anotherPoint.setX(5).setY(6).setZ(7)       // V8Class<TwoDPoint>::internalMethodCallback<void, float> called
- *                                            // V8Class<TwoDPoint>::internalMethodCallback<void, float> called
- *                                            // V8Class<ThreeDPoint>::internalMethodCallback<void, float> called
- * anotherpoint.print();                      // V8Class<ThreeDPoint>::internalMethodCalled<void> called
- *                                            // Output: "Point(5,6,7)"
+ *                                            // C++ call tree
+ * let point = new Point2(1,2);               // V8Class<TwoDPoint>::InternalConstructor<float, float>
+ * point.print();                             // V8Class<TwoDPoint>::InternalMethodCallback<void>
+ *                                            //     "Point(1,2)"
+ * let other = Point2.parse("(3,4)");         // V8Class<TwoDPoint>::JSStaticMethodCallback
+ * console.log("point.x is " + point.getX()); // V8Class<TwoDPoint>::InternalMethodCallback<float>
+ *                                            //     "point.x is 1"
+ * console.log("other.x is " + other.getX()); // V8Class<TwoDPoint>::InternalMethodCallback<float>
+ *                                            //     "other.x is 3"
+ * point.setX(5).setY(10);                    // V8Class<TwoDPoint>::InternalMethodCallback<void, float>
+ *                                            // V8Class<TwoDPoint>::InternalMethodCallback<void, float>
+ * point.print();                             // V8Class<TwoDPoint>::InternalMethodCallback<void>
+ *                                            //     "Point(5,10)"
+ * let anotherPoint = new Point3(1,2,3);      // V8Class<ThreeDPoint>::InternalConstructor<float, float, float>
+ * anotherPoint.setX(5).setY(6).setZ(7)       // V8Class<TwoDPoint>::InternalMethodCallback<void, float>
+ *                                            // V8Class<TwoDPoint>::InternalMethodCallback<void, float>
+ *                                            // V8Class<ThreeDPoint>::InternalMethodCallback<void, float>
+ * anotherpoint.print();                      // V8Class<ThreeDPoint>::InternalMethodCallback<void>
+ *                                            //     "Point(5,6,7)"
  * \endcode
  * \class JSClassImpl
  */
@@ -224,22 +280,7 @@ public:
     static void Declare(const char* name);
 
     /**
-     *  Register a method that is a member of class C
-     *  \param name The name of the method that will be exposed as in Javascript
-     *  \param func A member-function pointer belonging to class C
-     *  \param options Method options flags, default value is NONE
-     *
-     *  \tparam R The return type of \p func . No need to specify, since it will be deducted from the function pointer
-     *  \tparam Args... Types of function arguments of \p func . No need to specify, since they will be deducted from
-     * the function pointer
-     *  \static
-     */
-    // OPTIMIZE(cvetan): Pass method options as template parameter, that way we can check on compile-time what to do
-    template<typename R, typename... Args>
-    static void Method(const char* name, R (C::*func)(Args...), MethodOptions options = MethodOptions::NONE);
-
-    /**
-     *  Register a method that is a member of a base of class C.
+     *  Register a method that is a member of a class C or its base class.
      *  \note Trying to bind a method of unrelated classes will result in a compile error
      *  \param name The name of the method that will be exposed as in Javascript
      *  \param func A member-function pointer belonging to class C's base class
@@ -255,8 +296,29 @@ public:
     static void Method(const char* name, R (Base::*func)(Args...), MethodOptions options = MethodOptions::NONE);
 
     /**
-     *  Register a method that is a member of a related class T with a signature equivalent to the underlying engine's
-     *  requirements for callback signatures.
+     *  Register a static method of class C.
+     *  \param name The name of the method that will be exposed as in Javascript
+     *  \param func A static function
+     *  \param options Method options flags, default value is NONE
+     *
+     *  \tparam R The return type of \p func . No need to specify, since it will be deducted from the function pointer
+     *  \tparam Args... Types of function arguments of \p func . No need to specify, since they will be deducted from
+     * the function pointer
+     *  \static
+     */
+    template<typename R, typename... Args>
+    static void StaticMethod(const char* name, R (*func)(Args...), MethodOptions options = MethodOptions::NONE);
+
+    /**
+     *  Register a static method of class C with a void(*)(const JSCallbackInfo&) signature.
+     *  \param name The name of the method that will be exposed as in Javascript
+     *  \param func A static function with void(*)(const JSCallbackInfo&) signature
+     *  \static
+     */
+    static void StaticMethod(const char* name, JSFunctionCallback func);
+
+    /**
+     *  Register a method that is a member of a related class T with an engine-specific callback signature
      *
      *  \tparam T A class that is either equivalent or a base to C
      *  \param name The name of the method that will be exposed as in Javascript
@@ -267,8 +329,7 @@ public:
     static void CustomMethod(const char* name, MemberFunctionCallback<T> callback);
 
     /**
-     *  Register a method with a signature equivalent to the underlying engine's
-     *  requirements for callback signatures.
+     *  Register a method with an engine-specific callback signature
      *
      *  \param name The name of the method that will be exposed as in Javascript
      *  \param callback A function pointer with the engine-specific signature
@@ -276,15 +337,34 @@ public:
      */
     static void CustomMethod(const char* name, FunctionCallback callback);
 
+    /**
+     *  Register a method with an generic callback signature
+     *
+     *  \param name The name of the method that will be exposed as in Javascript
+     *  \param callback A function pointer with the engine-specific signature
+     *  \static
+     */
+    template<typename T>
+    static void CustomMethod(const char* name, JSMemberFunctionCallback<T> callback);
+
+    /**
+     *  Register a static method with an engine-specific callback signature
+     *
+     *  \param name The name of the method that will be exposed as in Javascript
+     *  \param callback A function pointer with the engine-specific signature
+     *  \static
+     */
+    static void CustomStaticMethod(const char* name, FunctionCallback callback);
+
     static void ExoticGetter(ExoticGetterCallback callback);
     static void ExoticSetter(ExoticSetterCallback callback);
     static void ExoticHasProperty(ExoticHasPropertyCallback callback);
 
     template<typename T>
     static void StaticConstant(const char* name, T value);
+
     /**
-     *  Bind the class to Javascript with a custom constructor with a signature specified by the engine-specific
-     * implementation.
+     *  Bind the class to Javascript with a custom constructor that has engine-specific callback signature
      *
      *  \param bindTarget An object template to bind this class to.
      *  \param ctor Constructor
@@ -293,13 +373,31 @@ public:
     static void Bind(BindingTarget bindTarget, FunctionCallback ctor);
 
     /**
-     *  Bind the class to Javascript.
+     *  Bind the class to Javascript with custom constructor, destructor and GC mark callbacks.
+     *  If no destructor callback is specified, the C++ instance is simply "delete"-d on garbage collection sweeps.
+     *
+     *  \param bindTarget An object template to bind this class to
+     *  \param ctor Constructor with void(*)(const JSCallbackInfo&) signature
+     *  \param dtor Destructor with void(*)(C* instance) signature (optional)
+     *  \param gcMark A GC mark callback with void(*)(C* instance, const JSGCMarkCallbackInfo&) signature (optional)
+     *  \static
+     */
+    static void Bind(BindingTarget bindTarget, JSFunctionCallback ctor, JSDestructorCallback<C> dtor = nullptr,
+        JSGCMarkCallback<C> gcMark = nullptr);
+
+    /**
+     *  Bind the class to Javascript with optional destructor and GC mark callbacks.
+     *  If no destructor callback is specified, the C++ instance is simply "delete"-d on garbage collection sweeps.
+     *
      *  \tparam Args... A list of argument types that the constructor of class C accepts.
      *  \param bindTarget An object template to bind this class to.
+     *  \param dtor Destructor with void(*)(C* instance) signature (optional)
+     *  \param gcMark A GC mark callback with void(*)(C* instance, const JSGCMarkCallbackInfo&) signature (optional)
      *  \static
      */
     template<typename... Args>
-    static void Bind(BindingTarget bindTarget);
+    static void Bind(
+        BindingTarget bindTarget, JSDestructorCallback<C> dtor = nullptr, JSGCMarkCallback<C> gcMark = nullptr);
 
     /**
      *  Inherit all bound methods and properties from \p Base
@@ -318,6 +416,12 @@ public:
      *  \return The javascript name
      */
     static const char* JSName();
+
+    /**
+     *  Create new instance of declared class
+     *  \return new JS object instance
+     */
+    static JSRef<JSObject> NewInstance();
 
 private:
     static std::string jsName;

@@ -22,71 +22,65 @@
 namespace OHOS::Ace::Framework {
 
 class JSSwiper : public JSContainerBase {
-    DECLARE_ACE_TYPE(JSSwiper, JSContainerBase);
-
 public:
-    JSSwiper() = delete;
-#ifdef USE_QUICKJS_ENGINE
-    JSSwiper(const std::list<JSViewAbstract*>& children, std::list<JSValue> jsChildren);
-#elif USE_V8_ENGINE
-    JSSwiper(const std::list<JSViewAbstract*>& children,
-        std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren);
-#endif
-
-    ~JSSwiper();
-    virtual void Destroy(JSViewAbstract* parentCustomView) override;
     static void JSBind(BindingTarget globalObj);
-
-#ifdef USE_QUICKJS_ENGINE
-    static JSValue ConstructorCallback(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv);
-    static void QjsDestructor(JSRuntime* rt, JSSwiper* ptr);
-    static void QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc);
-    static JSValue SetIndicatorStyle(JSContext* ctx, JSValueConst jsSwiper, int argc, JSValueConst* argv);
-    void MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc) override;
-    void ReleaseRT(JSRuntime* rt) override;
-#elif USE_V8_ENGINE
-    static void ConstructorCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
-#endif
+    static void Create(const JSCallbackInfo& info);
 
 protected:
-    RefPtr<OHOS::Ace::Component> CreateSpecializedComponent() override;
-    std::vector<RefPtr<OHOS::Ace::SingleChild>> CreateInteractableComponents() override;
-    void SetAutoplay(bool autoPlay);
-    void SetDigital(bool digitalIndicator);
-    void SetDuration(double duration);
-    void SetIndex(uint32_t index);
-    void SetInterval(double interval);
-    void SetLoop(bool loop);
-    void SetVertical(bool isVertical);
-    void SetIndicator(bool showIndicator);
-#ifdef USE_V8_ENGINE
-    void SetIndicatorStyle(const v8::FunctionCallbackInfo<v8::Value>& info);
-    void SetOnChange(const v8::FunctionCallbackInfo<v8::Value>& args);
-#elif USE_QUICKJS_ENGINE
-    JSValue SetOnChange(JSContext* ctx, JSValueConst this_value, int32_t argc, JSValueConst* argv);
-#endif
+    static void SetAutoplay(bool autoPlay);
+    static void SetDigital(bool digitalIndicator);
+    static void SetDuration(double duration);
+    static void SetIndex(uint32_t index);
+    static void SetInterval(double interval);
+    static void SetLoop(bool loop);
+    static void SetVertical(bool isVertical);
+    static void SetIndicator(bool showIndicator);
+    static void SetCancelSwipeOnOtherAxis(bool cancel);
+    static void SetWidth(const JSCallbackInfo& info);
+    static void SetHeight(const JSCallbackInfo& info);
+    static void SetWidth(const JSRef<JSVal>& jsValue);
+    static void SetHeight(const JSRef<JSVal>& jsValue);
+    static void SetSize(const JSCallbackInfo& info);
+    static RefPtr<OHOS::Ace::SwiperIndicator> InitIndicatorStyle();
+    static void SetIndicatorStyle(const JSCallbackInfo& info);
+    static void SetItemSpace(const JSCallbackInfo& info);
+    static void SetOnChange(const JSCallbackInfo& info);
+    static void SetOnClick(const JSCallbackInfo& info);
+};
+
+class JSSwiperController final : public Referenced {
+public:
+    JSSwiperController() = default;
+    ~JSSwiperController() override = default;
+
+    static void JSBind(BindingTarget globalObj);
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSSwiperController* scroller);
+
+    void ShowNext(const JSCallbackInfo& args)
+    {
+        if (controller_) {
+            controller_->ShowNext();
+        }
+    }
+
+    void ShowPrevious(const JSCallbackInfo& args)
+    {
+        if (controller_) {
+            controller_->ShowPrevious();
+        }
+    }
+
+    void SetController(const RefPtr<SwiperController>& controller)
+    {
+        controller_ = controller;
+    }
 
 private:
-    void InitIndicatorStyle();
-    void HandleChangeEvent(const BaseEventInfo& param);
+    RefPtr<SwiperController> controller_;
 
-    uint32_t index_ = DEFAULT_SWIPER_CURRENT_INDEX;
-    double duration_ = DEFAULT_SWIPER_ANIMATION_DURATION;
-    double autoPlayInterval_ = DEFAULT_SWIPER_AUTOPLAY_INTERVAL;
-    bool autoPlay_ = false;
-    bool digitalIndicator_ = false;
-    bool loop_ = true;
-    bool showIndicator_ = true;
-    Axis axis_ = Axis::HORIZONTAL;
-    // indicator
-    RefPtr<SwiperIndicator> indicator_;
-#ifdef USE_V8_ENGINE
-    RefPtr<V8EventFunction<SwiperChangeEvent, 1>> onChangeFunc_;
-#elif USE_QUICKJS_ENGINE
-    RefPtr<QJSEventFunction<SwiperChangeEvent, 1>> onChangeFunc_;
-#endif
+    ACE_DISALLOW_COPY_AND_MOVE(JSSwiperController);
 };
 
 } // namespace OHOS::Ace::Framework
-
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SWIPER_H

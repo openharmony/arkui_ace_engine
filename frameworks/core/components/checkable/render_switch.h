@@ -85,7 +85,8 @@ protected:
     Size textOffSize_;
     Color textColorOn_ = Color::BLACK;
     Color textColorOff_ = Color::BLACK;
-    RefPtr<TextComponent> textComponent_;
+    RefPtr<TextComponent> textOnComponent_;
+    RefPtr<TextComponent> textOffComponent_;
 #ifndef WEARABLE_PRODUCT
     bool isSubscribeMultimodal_ = false;
     VoiceEvent switchEvent_;

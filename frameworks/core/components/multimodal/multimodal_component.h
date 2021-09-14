@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MULTIMODAL_MULTIMODAL_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MULTIMODAL_MULTIMODAL_COMPONENT_H
 
+#include "core/components/declaration/common/attribute.h"
 #include "core/components/multimodal/multimodal_element.h"
 #include "core/components/multimodal/render_multimodal.h"
 #include "core/event/multimodal/multimodal_properties.h"
@@ -30,11 +31,11 @@ public:
     explicit MultimodalComponent(int32_t pageId) : pageId_(pageId) {};
     ~MultimodalComponent() override = default;
 
-    const MultimodalProperties& GetMultimodalProperties() const
+    const CommonMultimodalAttribute& GetMultimodalProperties() const
     {
         return multimodalProperties_;
     }
-    void SetMultimodalProperties(const MultimodalProperties& multimodalProperties)
+    void SetMultimodalProperties(const CommonMultimodalAttribute& multimodalProperties)
     {
         multimodalProperties_ = multimodalProperties;
     }
@@ -64,7 +65,7 @@ public:
     }
 
 private:
-    MultimodalProperties multimodalProperties_;
+    CommonMultimodalAttribute multimodalProperties_;
     EventMarker onClickId_;
     int32_t pageId_ = -1;
 };

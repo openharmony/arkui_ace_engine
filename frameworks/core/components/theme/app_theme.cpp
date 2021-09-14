@@ -15,6 +15,8 @@
 
 #include "core/components/theme/app_theme.h"
 
+#include "core/components/theme/theme_constants_defines.h"
+
 namespace OHOS::Ace {
 
 RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const

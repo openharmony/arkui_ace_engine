@@ -20,58 +20,30 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/core/pipeline/base/component.h"
-
-#ifdef USE_QUICKJS_ENGINE
-#include "frameworks/bridge/declarative_frontend/engine/quickjs/functions/qjs_click_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/quickjs/functions/qjs_function.h"
-#elif USE_V8_ENGINE
-#include "frameworks/bridge/declarative_frontend/engine/v8/functions/v8_click_function.h"
-#endif
+#include "frameworks/core/gestures/tap_gesture.h"
 
 namespace OHOS::Ace::Framework {
+
 class JSInteractableView {
 public:
-#ifdef USE_QUICKJS_ENGINE
-    using ClickFunction = QJSClickFunction;
-    using TouchFunction = QJSTouchFunction;
-#elif USE_V8_ENGINE
-    using ClickFunction = V8ClickFunction;
-    using TouchFunction = V8TouchFunction;
-#endif
+    static void JsOnTouch(const JSCallbackInfo& args);
+    static void JsOnPan(const JSCallbackInfo& args);
+    static void JsOnClick(const JSCallbackInfo& info);
+    static EventMarker GetClickEventMarker(const JSCallbackInfo& info);
+    static RefPtr<Gesture> GetTapGesture(const JSCallbackInfo& info);
+    static void JsOnKey(const JSCallbackInfo& args);
+    static void SetFocusable(bool focusable);
+    static void SetFocusNode(bool isFocusNode);
 
-    JSInteractableView() = default;
-    ~JSInteractableView();
+    static void JsOnAppear(const JSCallbackInfo& info);
+    static void JsOnDisAppear(const JSCallbackInfo& info);
 
-    std::vector<RefPtr<OHOS::Ace::SingleChild>> CreateComponents();
+    static void JsOnDelete(const JSCallbackInfo& info);
+    static void JsOnAccessibility(const JSCallbackInfo& info);
 
-#ifdef USE_QUICKJS_ENGINE
-    void MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc);
-    void ReleaseRT(JSRuntime* rt);
-
-    void AttachJSTouchHandler(JSValueConst jsHandler);
-#endif
-    void SetTouchHandler(JSTouchHandler* handler);
-    void SetPanHandler(JSPanHandler* handler);
-    void SetClickHandler(RefPtr<ClickFunction>& clickHandler);
-
-#ifdef USE_QUICKJS_ENGINE
-    virtual JSValue JsOnTouch(JSContext* ctx, JSValueConst this_value, int32_t argc, JSValueConst* argv);
-    virtual JSValue JsOnClick(JSContext* ctx, JSValueConst this_value, int32_t argc, JSValueConst* argv);
-#elif USE_V8_ENGINE
-    virtual void JsOnTouch(const v8::FunctionCallbackInfo<v8::Value>& args);
-    virtual void JsOnPan(const v8::FunctionCallbackInfo<v8::Value>& args);
-    virtual void JsOnClick(const v8::FunctionCallbackInfo<v8::Value>& args);
-#endif
-
-protected:
-    JSTouchHandler* touchHandler_ = nullptr;
-    JSPanHandler* panHandler_ = nullptr;
-    RefPtr<ClickFunction> onClickFunc_;
-    RefPtr<TouchFunction> jsOnTouchFunc_;
-
-#ifdef USE_QUICKJS_ENGINE
-    JSValue jsHandler_ = JS_NULL;
-#endif
+private:
+    static EventMarker GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys);
 }; // class JSInteractableView
+
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_INTERACTABLE_VIEW_H

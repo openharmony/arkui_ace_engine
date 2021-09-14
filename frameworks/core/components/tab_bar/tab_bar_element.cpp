@@ -47,6 +47,7 @@ void TabBarElement::UpdateElement(int32_t index)
             LOGD("TabBar change from %{public}d to %{public}d", preIndex, curIndex);
             controller_->ChangeDispatch(curIndex);
         }
+        controller_->OnTabBarChanged(index);
         UpdateIndex(curIndex);
     }
 }

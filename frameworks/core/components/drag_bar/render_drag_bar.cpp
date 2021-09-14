@@ -420,7 +420,6 @@ void RenderDragBar::OnPaintFinish()
         Size size = Size(NormalizeToPx(PAINT_WIDTH), NormalizeToPx(PAINT_HEIGHT));
         auto alignOffset = Alignment::GetAlignPosition(GetLayoutSize(), size, Alignment::CENTER);
         Offset globalOffset = GetGlobalOffset() + alignOffset;
-        auto parent = GetParent().Upgrade();
         RRect rrect = RRect::MakeRect(Rect(offset, size));
         auto radius = Radius(size.Height() / 2);
         rrect.SetCorner({ radius, radius, radius, radius });

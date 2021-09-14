@@ -51,7 +51,6 @@ extern const char IMAGE_SIZE_TYPE[];
 extern const char IMAGE_REPEAT[];
 extern const char IMAGE_FIT[];
 extern const char IMAGE_COLOR[];
-extern const char SRC_TYPE[];
 extern const char IMAGE_ON_LOAD_SUCCESS[];
 extern const char IMAGE_ON_LOAD_FAIL[];
 extern const char IMAGE_ALT_BLANK[];
@@ -75,7 +74,6 @@ extern const char TEXT_WORD_SPACING[];
 extern const char TEXT_LINE_HEIGHT[];
 extern const char TEXT_LETTER_SPACING[];
 extern const char TEXT_STYLE[];
-extern const char TEXT_SPAN[];
 extern const char TEXT_SPAN_NAME[];
 extern const char TEXT_ADAPT[];
 extern const char TEXT_ADAPT_MIN_FONTSIZE[];
@@ -114,8 +112,6 @@ extern const char COLOR_ALPHA[];
 extern const char COLOR_OPACITY[];
 
 // shadow constants
-extern const char SHADOW_CLASSNAME[];
-extern const char OFFSET_CLASSNAME[];
 extern const char SHADOW[];
 extern const char OFFSET[];
 extern const char HORIZONTAL_OFFSET[];
@@ -131,12 +127,8 @@ extern const char COMPOSE_DATA[];
 
 // box constants
 extern const char BOX_NAME[];
-extern const char BOX_CONSTRAINTS[];
 extern const char BOX_BACK_DECORATION[];
 extern const char BOX_FRONT_DECORATION[];
-extern const char BOX_MARGIN[];
-extern const char BOX_PADDING[];
-extern const char BOX_DELIVER_MIN_TO_CHILD[];
 
 // flex constants
 extern const char COLUMN_NAME[];
@@ -232,7 +224,6 @@ extern const char EDGE_RIGHT[];
 extern const char EDGE_BOTTOM[];
 
 // border constants
-extern const char BORDER[];
 extern const char BORDER_NAME[];
 extern const char BORDER_VALUE[];
 extern const char BORDER_LEFT[];
@@ -264,12 +255,10 @@ extern const char BACKGROUND_IMAGE[];
 extern const char BACKGROUND_COLOR[];
 extern const char DECORATION_BORDER[];
 extern const char DECORATION_PADDING[];
-extern const char DECORATION_GRADIENT[];
 
 // backgroundImage constants
 extern const char BACKGROUND_IMAGE_NAME[];
 extern const char BACKGROUND_SRC[];
-extern const char DECORATION_IMAGE_ALIGNMENT[];
 
 // gradient constants
 extern const char GRADIENT_NAME[];
@@ -312,7 +301,6 @@ extern const char OPTION_TRANSLATE_Y[];
 extern const char OPTION_ROTATE_Z[];
 extern const char OPTION_ROTATE_X[];
 extern const char OPTION_ROTATE_Y[];
-extern const char OPTION_OPACITY[];
 
 // slider constants
 extern const char SLIDER_NAME[];
@@ -320,15 +308,9 @@ extern const char VALUE[];
 extern const char SLIDER_MIN[];
 extern const char SLIDER_MAX[];
 extern const char SLIDER_STEP[];
-extern const char SLIDER_BAR_HEIGHT[];
-extern const char SLIDER_BAR_WIDTH[];
-extern const char SLIDER_BLOCK_RADIUS[];
 extern const char SLIDER_SELECTED_COLOR[];
 extern const char SLIDER_BAR_BACKGROUND_COLOR[];
 extern const char SLIDER_BLOCK_COLOR[];
-extern const char SLIDER_PADDING[];
-extern const char ON_MOVE_END_ID[];
-extern const char ON_CLICKED_ID[];
 
 // swiper constants
 extern const char SWIPER_NAME[];
@@ -348,6 +330,7 @@ extern const char SWIPER_INDICATOR_TOP[];
 extern const char SWIPER_INDICATOR_LEFT[];
 extern const char SWIPER_INDICATOR_BOTTOM[];
 extern const char SWIPER_INDICATOR_RIGHT[];
+extern const char ON_MOVE_END_ID[];
 
 // button constants
 extern const char BUTTON_NAME[];
@@ -425,10 +408,6 @@ extern const char TAB_CONTENT_SCROLLABEL[];
 extern const char TAB_INDICATOR_COLOR[];
 extern const char TAB_INDICATOR_PADDING[];
 extern const char TAB_INDICATOR_SIZE[];
-extern const char TAB_LABEL_COLOR[];
-extern const char TAB_UNSELECTED_LABEL_COLOR[];
-extern const char TAB_LABEL_STYLE[];
-extern const char TAB_UNSELECTED_LABEL_STYLE[];
 extern const char TAB_LABEL_PADDING[];
 extern const char TAB_MODE[];
 extern const char TAB_ITEM_TEXT[];
@@ -442,8 +421,6 @@ extern const char DIALOG_CONTENT[];
 extern const char DIALOG_CONTENT_PADDING[];
 extern const char DIALOG_BACKGROUND_COLOR[];
 extern const char DIALOG_ACTIONS[];
-extern const char DIALOG_ACTION_TEXT[];
-extern const char DIALOG_ACTION_COLOR[];
 extern const char DIALOG_AUTO_CANCEL[];
 
 // scroll constants
@@ -524,7 +501,6 @@ extern const char MARQUEE_START[];
 // rating constants
 extern const char RATING_NAME[];
 extern const char RATING_SCORE[];
-extern const char RATING_BOTTOM_SCORE[];
 extern const char RATING_FOREGROUND_SRC[];
 extern const char RATING_SECONDARY_SRC[];
 extern const char RATING_BACKGROUND_SRC[];
@@ -585,8 +561,6 @@ extern const char SELECT_OPTION_TEXT[];
 extern const char SELECT_OPTION_SELECTED[];
 extern const uint32_t SELECT_DEFAULT_OPTION_SIZE;
 extern const uint32_t SELECT_INVALID_INDEX;
-extern const double SELECT_DEFAULT_POPUP_SHADOW_WIDTH;
-extern const double SELECT_DEFAULT_POPUP_BORDER_WIDTH;
 
 // clip constants
 extern const char CLIP_NAME[];
@@ -597,8 +571,15 @@ extern const char DIVIDER_STROKE_WIDTH[];
 extern const char DIVIDER_COLOR[];
 extern const char DIVIDER_VERTICAL[];
 
-// columSplit constants
+// columnSplit constants
 extern const double DEFAULT_SPLIT_HEIGHT;
+
+// animator constants
+extern const char START[];
+extern const char PAUSE[];
+extern const char STOP[];
+extern const char RESUME[];
+extern const char CANCEL[];
 
 } // namespace OHOS::Ace
 

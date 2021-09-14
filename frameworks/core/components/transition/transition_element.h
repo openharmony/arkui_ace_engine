@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TRANSITION_TRANSITION_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TRANSITION_TRANSITION_ELEMENT_H
 
+#include "core/animation/property_animatable.h"
+#include "core/components/box/box_base_element.h"
 #include "core/components/common/properties/page_transition_option.h"
 #include "core/components/common/properties/tween_option.h"
 #include "core/components/display/display_component.h"
@@ -41,10 +43,11 @@ public:
     ~TransitionElement() override = default;
 
     void Update() override;
+    void PerformBuild() override;
     void SetController(const RefPtr<Animator>& controller);
     RefPtr<Animator> GetController() const;
     void SetTouchable(bool enable);
-    void SetVisible(VisibleType visible);
+    void SetWrapHidden(bool hidden);
     void SwitchTransitionOption(TransitionOptionType direction, bool needApplyOption = false);
     void SetTransition(const TweenOption& inOption, const TweenOption& outOption);
     void SetSharedTransition(const TweenOption& inOption, const TweenOption& outOption);
@@ -55,6 +58,14 @@ protected:
 
 private:
     RefPtr<TweenElement> GetChildTween() const;
+    RefPtr<BoxBaseElement> GetChildBox() const;
+    RefPtr<DisplayElement> GetChildDisplay() const;
+    void ReplaceAnimation(TweenOption& transitionOption);
+    void ApplyAnimation(TweenOption& transitionOption);
+
+    RefPtr<Animator> controller_;
+    TweenOption transitionOption_;
+    bool hasBuildChild_ = false;
 
     std::map<TransitionOptionType, TweenOption> optionMap_;
 };

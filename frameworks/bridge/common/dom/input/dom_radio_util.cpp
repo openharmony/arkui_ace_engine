@@ -52,7 +52,7 @@ std::shared_ptr<JsPageRadioGroups> GetRadioGroups(const DOMNode& node)
     return jsPage->GetRadioGroups();
 }
 
-}
+} // namespace
 
 void DOMRadioUtil::InitDefaultValue(const RefPtr<RadioComponent<std::string>>& component) {}
 
@@ -108,6 +108,7 @@ void DOMRadioUtil::SetChildAttr(const DOMInput& node, const RefPtr<RadioComponen
     }
     if (checked) {
         component->SetGroupValue(component->GetValue());
+        component->SetOriginChecked(checked);
     } else {
         component->SetGroupValue("");
     }
@@ -144,7 +145,13 @@ void DOMRadioUtil::AddChildEvent(const RefPtr<RadioComponent<std::string>>& comp
         if (event == DOM_CHANGE) {
             component->SetChangeEvent(EventMarker(nodeId, event, pageId));
         } else if (event == DOM_CLICK) {
-            component->SetClickEvent(EventMarker(nodeId, event, pageId));
+            EventMarker eventMarker(nodeId, event, pageId);
+            eventMarker.SetCatchMode(false);
+            component->SetClickEvent(eventMarker);
+        } else if (event == DOM_CATCH_BUBBLE_CLICK) {
+            EventMarker eventMarker(nodeId, event, pageId);
+            eventMarker.SetCatchMode(true);
+            component->SetClickEvent(eventMarker);
         }
     }
 }

@@ -21,6 +21,7 @@
 #include "base/utils/macros.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/base/element.h"
+#include "core/pipeline/base/render_element.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -31,28 +32,31 @@ class ACE_EXPORT ComposedElement : public Element {
 
 public:
     using RenderFunction = std::function<RefPtr<Component>()>;
+    using ApplyFunction = std::function<void(const RefPtr<RenderElement>&)>;
     explicit ComposedElement(const ComposeId& id);
     ~ComposedElement() override = default;
 
-    static RefPtr<Element> Create(const ComposeId& id);
     void Detached() override;
     void Deactivate() override;
     void PerformBuild() override;
     void Update() override;
+    RefPtr<Element> UpdateChild(const RefPtr<Element>& child, const RefPtr<Component>& newComponent) final;
 
     void Dump() override;
 
     bool CanUpdate(const RefPtr<Component>& newComponent) override;
     bool NeedUpdateWithComponent(const RefPtr<Component>& newComponent) override;
 
-    void SetParentRenderNode(const RefPtr<RenderNode>& renderNode)
+    void ApplyComposed(ApplyFunction&& applyFunction)
     {
-        parentRenderNode_ = renderNode;
+        applyFunction_ = std::move(applyFunction);
+        ApplyChildren();
     }
 
-    const RefPtr<RenderNode>& GetParentRenderNode() const
+    void ApplyComposed(const ApplyFunction& applyFunction)
     {
-        return parentRenderNode_;
+        applyFunction_ = applyFunction;
+        ApplyChildren();
     }
 
     const ComposeId& GetId() const
@@ -77,18 +81,36 @@ public:
         }
         return false;
     }
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void SetDebugLine(std::string debugLine)
+    {
+        debugLine_ = debugLine;
+    }
+
+    std::string GetDebugLine()
+    {
+        return debugLine_;
+    }
+#endif
 
 protected:
     virtual RefPtr<Component> BuildChild();
     void Apply(const RefPtr<Element>& child) override;
+    void UmountRender() override;
+    void ApplyChildren();
+    int32_t CountRenderNode() const override
+    {
+        return countRenderNode_;
+    }
 
-    RefPtr<RenderNode> parentRenderNode_;
-
-protected:
     ComposeId id_;
     std::string name_;
+    std::string debugLine_;
     bool addedToMap_ = false;
+    int32_t countRenderNode_ = -1;
     RenderFunction renderFunction_;
+
+    ApplyFunction applyFunction_;
 };
 
 } // namespace OHOS::Ace

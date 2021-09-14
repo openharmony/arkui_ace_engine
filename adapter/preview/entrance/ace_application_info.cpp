@@ -17,19 +17,19 @@
 
 #include "unicode/locid.h"
 
-#include "adapter/common/cpp/ace_res_config.h"
-#include "adapter/common/cpp/ace_res_data_struct.h"
-#include "base/i18n/localization.h"
-#include "base/log/ace_trace.h"
-#include "base/log/log.h"
-#include "core/common/ace_engine.h"
-
 #ifdef WINDOWS_PLATFORM
 #include <windows.h>
 #else
 #include <dirent.h>
 #include <sys/types.h>
 #endif
+
+#include "base/i18n/localization.h"
+#include "base/log/ace_trace.h"
+#include "base/log/log.h"
+#include "base/resource/ace_res_config.h"
+#include "base/resource/ace_res_data_struct.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::Platform {
 
@@ -50,13 +50,74 @@ std::vector<std::string> AceApplicationInfoImpl::GetResourceFallback(const std::
     return fileList;
 }
 
+std::vector<std::string> AceApplicationInfoImpl::GetStyleResourceFallback(
+    const std::vector<std::string>& resourceList) const
+{
+    std::vector<std::string> fileList;
+    std::string deviceConfigTag = GetCurrentDeviceResTag();
+    AceResConfig::MatchAndSortStyleResConfigs(resourceList, deviceConfigTag, fileList);
+    return fileList;
+}
+
+std::vector<std::string> AceApplicationInfoImpl::GetDeclarativeResourceFallback(
+    const std::set<std::string>& resourceFolderList) const
+{
+    std::string deviceConfigTag = GetCurrentDeviceDeclarativeResTag();
+    std::vector<std::string> folderList;
+    AceResConfig::MatchAndSortDeclarativeResConfigs(resourceFolderList, deviceConfigTag, folderList);
+    return folderList;
+}
+
 std::string AceApplicationInfoImpl::GetCurrentDeviceResTag() const
 {
     ResolutionType resolutionType = AceResConfig::GetResolutionType(SystemProperties::GetResolution());
     AceResConfig deviceResConfig = AceResConfig(SystemProperties::GetMcc(), SystemProperties::GetMnc(),
-        SystemProperties::GetDevcieOrientation(), SystemProperties::GetColorMode(), SystemProperties::GetDeviceType(),
+        SystemProperties::GetDevcieOrientation(), SystemProperties::GetColorMode(),
+        SystemProperties::GetParamDeviceType() == "tablet" ? DeviceType::TABLET : SystemProperties::GetDeviceType(),
         resolutionType);
-    return AceResConfig::ConvertResConfigToTag(deviceResConfig);
+    return AceResConfig::ConvertResConfigToTag(deviceResConfig, false);
+}
+
+std::string AceApplicationInfoImpl::GetCurrentDeviceDeclarativeResTag() const
+{
+    UErrorCode status = U_ZERO_ERROR;
+    icu::Locale locale = icu::Locale::forLanguageTag(icu::StringPiece(localeTag_), status);
+    ResolutionType resolutionType = AceResConfig::GetResolutionType(SystemProperties::GetResolution());
+    LongScreenType longScreenType = AceResConfig::GetLongScreenType(SystemProperties::GetResolution());
+    AceResConfig deviceResConfig;
+    if (status != U_ZERO_ERROR) {
+        LOGE("This localeTag is not valid.");
+        deviceResConfig = AceResConfig("", "", "", longScreenType, SystemProperties::GetScreenShape(),
+            SystemProperties::GetDevcieOrientation(), SystemProperties::GetColorMode(),
+            SystemProperties::GetParamDeviceType() == "tablet" ? DeviceType::TABLET : SystemProperties::GetDeviceType(),
+            resolutionType);
+    } else {
+        deviceResConfig = AceResConfig(locale.getLanguage(), locale.getScript(), locale.getCountry(),
+            longScreenType, SystemProperties::GetScreenShape(), SystemProperties::GetDevcieOrientation(),
+            SystemProperties::GetColorMode(), SystemProperties::GetParamDeviceType() == "tablet" ? DeviceType::TABLET :
+            SystemProperties::GetDeviceType(), resolutionType);
+    }
+
+    return AceResConfig::ConvertDeclarativeResConfigToTag(deviceResConfig);
+}
+
+double AceApplicationInfoImpl::GetTargetMediaScaleRatio(const std::string& targetResTag) const
+{
+    std::string deviceConfigTag = GetCurrentDeviceDeclarativeResTag();
+    auto deviceConfig = AceResConfig::ConvertDeclarativeResTagToConfig(deviceConfigTag);
+    ResolutionType deviceResolution = (deviceConfig.resolution_ != ResolutionType::RESOLUTION_NONE) ?
+        deviceConfig.resolution_ : ResolutionType::RESOLUTION_MDPI;
+
+    ResolutionType targetResolution;
+    if (targetResTag == "default") {
+        targetResolution = ResolutionType::RESOLUTION_MDPI;
+    } else {
+        AceResConfig targetConfig = AceResConfig::ConvertDeclarativeResTagToConfig(targetResTag);
+        targetResolution = (targetConfig.resolution_ != ResolutionType::RESOLUTION_NONE) ?
+            targetConfig.resolution_ : ResolutionType::RESOLUTION_MDPI;
+    }
+
+    return static_cast<double>(deviceResolution) / static_cast<double>(targetResolution);
 }
 
 void AceApplicationInfoImpl::SetLocale(const std::string& language, const std::string& countryOrRegion,
@@ -125,6 +186,12 @@ bool AceApplicationInfoImpl::GetFiles(const std::string& filePath, std::vector<s
     }
 #endif
     return true;
+}
+
+bool AceApplicationInfoImpl::GetFiles(
+    int32_t instanceId, const std::string& filePath, std::vector<std::string>& fileList) const
+{
+    return GetFiles(filePath, fileList);
 }
 
 bool AceApplicationInfoImpl::GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo)

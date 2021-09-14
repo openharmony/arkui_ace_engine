@@ -22,40 +22,40 @@
 
 // Generate 'TypeInfo' for each classes.
 // And using hash code of its name for 'TypeId'.
-#define DECLARE_CLASS_TYPE_INFO(classname)                              \
-public:                                                                 \
-    static const char* TypeName()                                       \
-    {                                                                   \
-        return #classname;                                              \
-    }                                                                   \
-    static IdType TypeId()                                              \
-    {                                                                   \
-        static IdType myTypeId = std::hash<std::string> {}(TypeName()); \
-        return myTypeId;                                                \
-    }                                                                   \
+#define DECLARE_CLASS_TYPE_INFO(classname)                                              \
+public:                                                                                 \
+    static const char* TypeName()                                                       \
+    {                                                                                   \
+        return #classname;                                                              \
+    }                                                                                   \
+    static TypeInfoBase::IdType TypeId()                                                \
+    {                                                                                   \
+        static TypeInfoBase::IdType myTypeId = std::hash<std::string> {}(TypeName());   \
+        return myTypeId;                                                                \
+    }                                                                                   \
     DECLARE_CLASS_TYPE_SIZE(classname)
 
 // Integrate it into class declaration to support 'DynamicCast'.
 #define DECLARE_RELATIONSHIP_OF_CLASSES(classname, ...) DECLARE_CLASS_TYPE_INFO(classname)            \
 protected:                                                                                            \
     template<class __T, class __O, class... __V>                                                      \
-    uintptr_t TrySafeCastById(IdType id) const                                                        \
+    uintptr_t TrySafeCastById(TypeInfoBase::IdType id) const                                          \
     {                                                                                                 \
         VERIFY_DECLARED_CLASS(__T);                                                                   \
         uintptr_t ptr = __T::SafeCastById(id);                                                        \
         return ptr != 0 ? ptr : TrySafeCastById<__O, __V...>(id);                                     \
     }                                                                                                 \
     template<class __T>                                                                               \
-    uintptr_t TrySafeCastById(IdType id) const                                                        \
+    uintptr_t TrySafeCastById(TypeInfoBase::IdType id) const                                          \
     {                                                                                                 \
         VERIFY_DECLARED_CLASS(__T);                                                                   \
         return __T::SafeCastById(id);                                                                 \
     }                                                                                                 \
-    uintptr_t SafeCastById(IdType id) const override                                                  \
+    uintptr_t SafeCastById(TypeInfoBase::IdType id) const override                                    \
     {                                                                                                 \
         return id == TypeId() ? reinterpret_cast<uintptr_t>(this) : TrySafeCastById<__VA_ARGS__>(id); \
     }                                                                                                 \
-    IdType GetTypeId() const override                                                                 \
+    TypeInfoBase::IdType GetTypeId() const override                                                   \
     {                                                                                                 \
         return TypeId();                                                                              \
     }                                                                                                 \

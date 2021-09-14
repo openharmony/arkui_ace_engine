@@ -22,6 +22,7 @@
 #include "hisysevent.h"
 
 #include "base/json/json_util.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 
 namespace OHOS::Ace {
@@ -29,21 +30,18 @@ namespace {
 
 constexpr char EVENT_KEY_ERROR_TYPE[] = "ERROR_TYPE";
 constexpr char EVENT_KEY_UID[] = "UID";
+constexpr char EVENT_KEY_PID[] = "PID";
+constexpr char EVENT_KEY_SESSIONID[] = "SESSION_ID";
 constexpr char EVENT_KEY_PACKAGE_NAME[] = "PACKAGE_NAME";
 constexpr char EVENT_KEY_PROCESS_NAME[] = "PROCESS_NAME";
-constexpr char EVENT_KEY_MESSAGE[] = "MESSAGE";
+constexpr char EVENT_KEY_MESSAGE[] = "MSG";
 constexpr char EVENT_KEY_CMD[] = "CMD";
-constexpr char EVENT_KEY_TIME[] = "TIME";
-constexpr char EVENT_KEY_JS_ERR_RAW_CODE[] = "JS_ERR_RAW_CODE";
 constexpr char EVENT_KEY_REASON[] = "REASON";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
+constexpr char EVENT_NAME_JS_ERROR[] = "JS_ERROR";
+constexpr char STATISTIC_DURATION[] = "DURATION";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
-constexpr int32_t JS_CRASH_RAW_EVENT_ID = 5002;
-constexpr int32_t JS_ERR_RAW_CODE = 3;
-constexpr int32_t UIP_WARNING_EVENT_ID = 10257;
-constexpr int32_t UIP_FREEZE_EVENT_ID = 10258;
-constexpr int32_t UIP_RECOVER_EVENT_ID = 10280;
 
 constexpr char DUMP_LOG_COMMAND[] = "B";
 
@@ -58,14 +56,25 @@ void StrTrim(std::string& str)
 
 void EventReport::SendEvent(const EventInfo& eventInfo)
 {
-    auto packageName = AceEngine::Get().GetPackageName();
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
     if (packageName.size() > MAX_PACKAGE_NAME_LENGTH) {
         StrTrim(packageName);
     }
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, std::to_string(eventInfo.eventType),
+    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventInfo.eventType,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
         EVENT_KEY_PACKAGE_NAME, packageName);
+}
+
+void EventReport::SendJsCardRenderTimeEvent(
+    const std::string& sessionID,
+    const std::string& timeType,
+    uint64_t timeDelay)
+{
+    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, timeType,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        EVENT_KEY_SESSIONID, sessionID,
+        STATISTIC_DURATION, timeDelay);
 }
 
 void EventReport::SendAppStartException(AppStartExcepType type)
@@ -188,13 +197,10 @@ void EventReport::JsEventReport(int32_t eventType, const std::string& jsonStr)
 }
 
 void EventReport::JsErrReport(
-    int32_t uid, const std::string& packageName, const std::string& reason, const std::string& summary)
+    const std::string& packageName, const std::string& reason, const std::string& summary)
 {
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, std::to_string(JS_CRASH_RAW_EVENT_ID),
+    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_NAME_JS_ERROR,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_TIME, std::to_string((int32_t)std::time(nullptr)),
-        EVENT_KEY_UID, std::to_string(uid),
-        EVENT_KEY_JS_ERR_RAW_CODE, std::to_string(JS_ERR_RAW_CODE),
         EVENT_KEY_PACKAGE_NAME, packageName,
         EVENT_KEY_REASON, reason,
         EVENT_KEY_SUMMARY, summary);
@@ -204,20 +210,19 @@ void EventReport::ANRRawReport(RawEventType type, int32_t uid, const std::string
     const std::string& processName, const std::string& msg)
 {
     int32_t pid = getpid();
-    int32_t eventId = 0;
     std::string cmd = " ";
+    std::string eventName = "";
     if (type == RawEventType::WARNING) {
-        eventId = UIP_WARNING_EVENT_ID;
+        eventName = "UI_BLOCK_3S";
         cmd = "p=" + std::to_string(pid);
     } else if (type == RawEventType::FREEZE) {
-        eventId = UIP_FREEZE_EVENT_ID;
+        eventName = "UI_BLOCK_6S";
         cmd = DUMP_LOG_COMMAND;
     } else {
-        eventId = UIP_RECOVER_EVENT_ID;
+        eventName = "UI_BLOCK_RECOVERED";
     }
-    std::string eventIdStr = std::to_string(eventId);
     std::string uidStr = std::to_string(uid);
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventIdStr,
+    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_UID, uidStr,
         EVENT_KEY_PACKAGE_NAME, packageName,
@@ -226,11 +231,27 @@ void EventReport::ANRRawReport(RawEventType type, int32_t uid, const std::string
         EVENT_KEY_CMD, cmd);
 }
 
+void EventReport::ANRShowDialog(int32_t uid, const std::string& packageName,
+    const std::string& processName, const std::string& msg)
+{
+    int32_t pid = getpid();
+    std::string eventName = "UI_BLOCK_DIALOG";
+    std::string uidStr = std::to_string(uid);
+    std::string pidStr = std::to_string(pid);
+    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_UID, uidStr,
+        EVENT_KEY_PID, pidStr,
+        EVENT_KEY_PACKAGE_NAME, packageName,
+        EVENT_KEY_PROCESS_NAME, processName,
+        EVENT_KEY_MESSAGE, msg);
+}
+
 void EventReport::SendEventInner(const EventInfo& eventInfo)
 {
-    auto packageName = AceEngine::Get().GetPackageName();
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
     StrTrim(packageName);
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, std::to_string(eventInfo.eventType),
+    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventInfo.eventType,
             OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
             EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
             EVENT_KEY_PACKAGE_NAME, packageName);

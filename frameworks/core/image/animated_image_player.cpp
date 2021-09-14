@@ -19,6 +19,7 @@
 #include "third_party/skia/include/core/SkPixelRef.h"
 
 #include "base/log/log.h"
+#include "core/components/image/flutter_render_image.h"
 #include "core/image/image_provider.h"
 
 namespace OHOS::Ace {
@@ -40,27 +41,27 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
         LOGW("Context may be destroyed!");
         return;
     }
-    ACE_DCHECK(context->GetTaskExecutor());
-    context->GetTaskExecutor()->PostTask(
-        [weak = AceType::WeakClaim(this), weakProvider = imageProvider_, index] {
+    auto taskExecutor = context->GetTaskExecutor();
+    taskExecutor->PostTask(
+        [weak = AceType::WeakClaim(this), index, dstWidth = dstWidth_, dstHeight = dstHeight_, taskExecutor] {
             auto player = weak.Upgrade();
             if (!player) {
                 return;
             }
             auto canvasImage = flutter::CanvasImage::Create();
             sk_sp<SkImage> skImage = player->DecodeFrameImage(index);
+            if (dstWidth > 0 && dstHeight > 0) {
+                skImage = ImageProvider::ApplySizeToSkImage(skImage, dstWidth, dstHeight);
+            }
             if (skImage) {
                 canvasImage->set_image({ skImage, player->unrefQueue_ });
             } else {
-                LOGW("cannot get skImage!");
+                LOGW("animated player cannot get the %{public}d skImage!", index);
                 return;
             }
-            auto provider = weakProvider.Upgrade();
-            if (provider) {
-                provider->OnGPUImageReady(canvasImage);
-                return;
-            }
-            LOGI("Image provider has been released.");
+            taskExecutor->PostTask([callback = player->successCallback_, canvasImage,
+                                       source = player->imageSource_] { callback(source, canvasImage); },
+                TaskExecutor::TaskType::UI);
         },
         TaskExecutor::TaskType::IO);
 }
@@ -75,7 +76,7 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
     const int32_t requiredFrame = frameInfos_[index].fRequiredFrame;
     if (requiredFrame != SkCodec::kNoFrame) {
         if (lastRequiredBitmap_ == nullptr) {
-            LOGE("no required frames are cached!");
+            LOGW("no required frames are cached!");
             return nullptr;
         }
         if (lastRequiredBitmap_->getPixels() &&
@@ -84,7 +85,7 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
         }
     }
     if (SkCodec::kSuccess != codec_->getPixels(info, bitmap.getPixels(), bitmap.rowBytes(), &options)) {
-        LOGE("Could not getPixels for frame %{public}i:", index);
+        LOGW("Could not getPixels for frame %{public}i:", index);
         return nullptr;
     }
     if (frameInfos_[index].fDisposalMethod == SkCodecAnimation::DisposalMethod::kKeep) {

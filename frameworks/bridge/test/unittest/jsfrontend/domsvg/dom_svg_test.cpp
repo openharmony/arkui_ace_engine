@@ -42,7 +42,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    void CheckPresentationAttrs(const RefPtr<SvgSharp>& svgSharp);
+    void CheckPresentationAttrs(const RefPtr<SvgBaseDeclaration>& baseDeclaration);
 };
 
 void DomSvgTest::SetUpTestCase() {}
@@ -50,24 +50,24 @@ void DomSvgTest::TearDownTestCase() {}
 void DomSvgTest::SetUp() {}
 void DomSvgTest::TearDown() {}
 
-void DomSvgTest::CheckPresentationAttrs(const RefPtr<SvgSharp>& svgSharp)
+void DomSvgTest::CheckPresentationAttrs(const RefPtr<SvgBaseDeclaration>& baseDeclaration)
 {
     /**
      * @tc.steps: step1. Check styles and attributes of created node.
      * @tc.expected: step1. The styles and attributes are as expected.
      */
-    EXPECT_NEAR(svgSharp->GetOpacity(), 0.8, FLT_EPSILON);
-    ASSERT_TRUE(svgSharp->GetFillState().GetColor() == Color::RED);
-    EXPECT_NEAR(svgSharp->GetFillState().GetOpacity(), 0.5, FLT_EPSILON);
-    ASSERT_TRUE(svgSharp->GetStrokeState().GetColor() == Color::BLUE);
-    EXPECT_NEAR(svgSharp->GetStrokeState().GetOpacity(), 0.3, FLT_EPSILON);
-    EXPECT_NEAR(svgSharp->GetStrokeState().GetLineDash().dashOffset, 2.0, FLT_EPSILON);
-    ASSERT_TRUE(svgSharp->GetStrokeState().GetLineDash().lineDash.size() == 2);
-    EXPECT_NEAR(svgSharp->GetStrokeState().GetLineDash().lineDash.at(0), 8.0, FLT_EPSILON);
-    EXPECT_NEAR(svgSharp->GetStrokeState().GetLineDash().lineDash.at(1), 4.0, FLT_EPSILON);
-    ASSERT_TRUE(svgSharp->GetStrokeState().GetLineCap() == LineCapStyle::BUTT);
-    ASSERT_TRUE(svgSharp->GetStrokeState().GetLineJoin() == LineJoinStyle::MITER);
-    EXPECT_NEAR(svgSharp->GetStrokeState().GetMiterLimit(), 2.0, FLT_EPSILON);
+    EXPECT_NEAR(baseDeclaration->GetOpacity(), 0.8, FLT_EPSILON);
+    ASSERT_TRUE(baseDeclaration->GetFillState().GetColor() == Color::RED);
+    EXPECT_NEAR(baseDeclaration->GetFillState().GetOpacity().GetValue(), 0.5, FLT_EPSILON);
+    ASSERT_TRUE(baseDeclaration->GetStrokeState().GetColor() == Color::BLUE);
+    EXPECT_NEAR(baseDeclaration->GetStrokeState().GetOpacity().GetValue(), 0.3, FLT_EPSILON);
+    EXPECT_NEAR(baseDeclaration->GetStrokeState().GetLineDash().dashOffset, 2.0, FLT_EPSILON);
+    ASSERT_TRUE(baseDeclaration->GetStrokeState().GetLineDash().lineDash.size() == 2);
+    EXPECT_NEAR(baseDeclaration->GetStrokeState().GetLineDash().lineDash.at(0), 8.0, FLT_EPSILON);
+    EXPECT_NEAR(baseDeclaration->GetStrokeState().GetLineDash().lineDash.at(1), 4.0, FLT_EPSILON);
+    ASSERT_TRUE(baseDeclaration->GetStrokeState().GetLineCap() == LineCapStyle::BUTT);
+    ASSERT_TRUE(baseDeclaration->GetStrokeState().GetLineJoin() == LineJoinStyle::MITER);
+    EXPECT_NEAR(baseDeclaration->GetStrokeState().GetMiterLimit(), 2.0, FLT_EPSILON);
 }
 
 /**
@@ -178,7 +178,7 @@ HWTEST_F(DomSvgTest, DomSvgTest002, TestSize.Level1)
      * @tc.steps: step2. Check styles and attributes of created svg node.
      * @tc.expected: step2. The styles and attributes are as expected.
      */
-    CheckPresentationAttrs(svgComponent);
+    CheckPresentationAttrs(svgComponent->GetDeclaration());
 }
 
 /**
@@ -422,7 +422,7 @@ HWTEST_F(DomSvgTest, DomSvgTest008, TestSize.Level1)
     auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonStr);
     ASSERT_TRUE(domNodeRoot != nullptr);
     auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeRoot);
-    RefPtr<SvgPolylineComponent> component = AceType::DynamicCast<SvgPolylineComponent>(boxChild->GetChild());
+    RefPtr<SvgPolygonComponent> component = AceType::DynamicCast<SvgPolygonComponent>(boxChild->GetChild());
     ASSERT_TRUE(component != nullptr);
     /**
      * @tc.steps: step2. Check styles and attributes of created polyline node.

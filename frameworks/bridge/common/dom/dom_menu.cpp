@@ -32,7 +32,6 @@ namespace OHOS::Ace::Framework {
 DOMMenu::DOMMenu(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
     menuChild_ = AceType::MakeRefPtr<MenuComponent>(std::to_string(nodeId), nodeName);
-    menuChild_->SetTextDirection((IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR));
 }
 
 void DOMMenu::InitializeStyle()
@@ -62,6 +61,7 @@ void DOMMenu::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 
 void DOMMenu::PrepareSpecializedComponent()
 {
+    menuChild_->SetTextDirection((IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR));
     menuChild_->SetTitleStyle(titleStyle_);
 }
 
@@ -93,7 +93,7 @@ bool DOMMenu::SetSpecializedStyle(const std::pair<std::string, std::string>& sty
         { DOM_TEXT_FONT_WEIGHT, [](TextStyle& textStyle, const std::string& val,
                                 const DOMMenu&) { textStyle.SetFontWeight(ConvertStrToFontWeight(val)); } },
         { DOM_TEXT_LETTER_SPACING, [](TextStyle& textStyle, const std::string& val,
-                                   const DOMMenu&) { textStyle.SetLetterSpacing(StringToDouble(val)); } },
+                                   const DOMMenu& node) { textStyle.SetLetterSpacing(node.ParseDimension(val)); } },
         { DOM_PICKER_TEXT_COLOR, // use define of picker which is the same "text-color"
             [](TextStyle& textStyle, const std::string& val, const DOMMenu& node) {
                 textStyle.SetTextColor(node.ParseColor(val));

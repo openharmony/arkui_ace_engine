@@ -134,9 +134,10 @@ public:
     void SetRealTextDirection(TextDirection realTextDirection);
     TextDirection GetRealTextDirection() const;
 
-    void SetOptions(const std::vector<Framework::InputOption>& options);
-    const std::vector<Framework::InputOption>& GetOptions() const;
+    void SetOptions(const std::vector<InputOption>& options);
+    const std::vector<InputOption>& GetOptions() const;
 
+    void SetImageFill(const std::optional<Color>& imageFill);
     void SetOptionsClickMarker(const EventMarker& onOptionsClick);
     void SetTranslateButtonMarker(const EventMarker& onTranslate);
     void SetShareButtonMarker(const EventMarker& onShare);
@@ -173,6 +174,7 @@ private:
     Rect clipRect_;
     Color handleColor_;
     Color handleColorInner_;
+    std::optional<Color> imageFill_ = std::nullopt;
     Dimension handleDiameter_;
     Dimension handleDiameterInner_;
     Dimension menuSpacingWithText_;
@@ -201,7 +203,7 @@ private:
     EventMarker copyAllButtonMarker_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
     EventMarker moreButtonMarker_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
 
-    std::vector<Framework::InputOption> options_; // Options for menu.
+    std::vector<InputOption> options_; // Options for menu.
 };
 
 } // namespace OHOS::Ace

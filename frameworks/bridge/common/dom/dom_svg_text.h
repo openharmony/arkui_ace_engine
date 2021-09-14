@@ -32,28 +32,10 @@ protected:
     void OnMounted(const RefPtr<DOMNode>& parentNode) override;
     void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) override;
     void PrepareSpecializedComponent() override;
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
     RefPtr<Component> GetSpecializedComponent() override;
+    double GetRotate() const;
 
     RefPtr<SvgTextComponent> textComponent_;
-
-    double GetRotate() const
-    {
-        return rotate_;
-    }
-
-private:
-    Dimension x_ = Dimension(0.0);
-    Dimension y_ = Dimension(0.0);
-    Dimension dx_ = Dimension(0.0);
-    Dimension dy_ = Dimension(0.0);
-    Dimension textLength_ = Dimension(0.0);
-    bool hasX_ = false;
-    bool hasY_ = false;
-    bool hasRotate_ = false;
-    double rotate_ = 0.0;
-    std::string lengthAdjust_ = "spacing"; // Value type: spacing|spacingAndGlyphs
-    std::string textData_;
 };
 
 } // namespace OHOS::Ace::Framework

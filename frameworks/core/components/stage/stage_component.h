@@ -30,11 +30,19 @@ public:
     explicit StageComponent(const std::list<RefPtr<Component>>& children)
         : StackComponent(Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, children)
     {}
+    StageComponent(const std::list<RefPtr<Component>>& children, bool isSectionStage)
+        : StackComponent(Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, children),
+          isSectionStage_(isSectionStage)
+    {}
     ~StageComponent() override = default;
 
     RefPtr<Element> CreateElement() override
     {
-        return AceType::MakeRefPtr<StageElement>();
+        if (isSectionStage_) {
+            return AceType::MakeRefPtr<SectionStageElement>();
+        } else {
+            return AceType::MakeRefPtr<StageElement>();
+        }
     }
 
     RefPtr<RenderNode> CreateRenderNode() override
@@ -45,6 +53,9 @@ public:
         }
         return RenderStack::Create();
     }
+
+private:
+    bool isSectionStage_ = false;
 };
 
 } // namespace OHOS::Ace

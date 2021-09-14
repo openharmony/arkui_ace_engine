@@ -40,9 +40,8 @@ protected:
     bool MouseHoverTest(const Point& parentLocalPoint) override;
     void OnMouseHoverEnterTest() override;
     void OnMouseHoverExitTest() override;
-    Edge margin_;
-    Border border_;
-    Color hoverColor_;
+
+    RefPtr<PieceComponent> pieceComponent_;
 
 private:
     RenderStatus renderStatus_ = RenderStatus::DEFAULT;

@@ -16,6 +16,7 @@
 #include "core/animation/scheduler.h"
 
 #include "base/log/log.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 
@@ -59,14 +60,14 @@ void Scheduler::OnFrame(uint64_t nanoTimestamp)
     }
 
     // Refresh the startup time every frame.
-    uint64_t elapsedTime = nanoTimestamp - startupTimestamp_;
-    startupTimestamp_ = nanoTimestamp;
+    uint64_t elapsedTimeMs = (nanoTimestamp - startupTimestamp_) / 1000000;
+    startupTimestamp_ += elapsedTimeMs * 1000000;
 
     // Consume previous schedule as default.
     scheduleId_ = 0;
     if (callback_) {
         // Need to convert nanoseconds to milliseconds
-        callback_(elapsedTime / 1000000);
+        callback_(elapsedTimeMs);
     }
 
     // Schedule next frame task.

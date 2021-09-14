@@ -42,7 +42,7 @@ void FlutterRenderBadge::Paint(RenderContext& context, const Offset& offset)
     context.PaintChild(badgeChild, offset + badgeChildInitialOffset_);
     if (showMessage_) {
         DrawBadge(context, offset);
-        if ((!textData_.empty() || messageCount_ > 0) && showMessage_ &&
+        if ((!textData_.empty() || badge_->GetMessageCount() > 0) && showMessage_ &&
             (LessOrEqual(textSize_.Height(), badgeHeight_))) {
             PaintText(offset + textInitialOffset_, context);
         }
@@ -51,20 +51,26 @@ void FlutterRenderBadge::Paint(RenderContext& context, const Offset& offset)
 
 void FlutterRenderBadge::DrawCircleBadge(flutter::Canvas& canvas, const Offset& offset)
 {
+    if (!badge_) {
+        return;
+    }
+
     flutter::Paint paint;
-    paint.paint()->setColor(badgeColor_.GetValue());
+    paint.paint()->setColor(badge_->GetBadgeColor().GetValue());
     paint.paint()->setStyle(SkPaint::Style::kFill_Style);
     paint.paint()->setAntiAlias(true);
     flutter::RRect rRect;
     flutter::PaintData paintData;
-    badgeCircleDiameter_ = badgeCircleSizeDefined_ ? (badgeCircleSize_.IsValid() ? NormalizeToPx(badgeCircleSize_) : 0)
-                                                   : NormalizeToPx(CIRCLE_BADGE_SIZE);
+    auto circleSize = badge_->GetBadgeCicleSize();
+    auto badgePosition = badge_->GetBadgePosition();
+    badgeCircleDiameter_ = badge_->IsBadgeCircleSizeDefined() ? (circleSize.IsValid() ? NormalizeToPx(circleSize) : 0)
+                                                              : NormalizeToPx(CIRCLE_BADGE_SIZE);
     badgeCircleRadius_ = badgeCircleDiameter_ / 2;
     rRect.sk_rrect.setRectXY(
         SkRect::MakeIWH(badgeCircleDiameter_, badgeCircleDiameter_), badgeCircleRadius_, badgeCircleRadius_);
-    if (badgePosition_ == BadgePosition::RIGHT_TOP) {
+    if (badgePosition == BadgePosition::RIGHT_TOP) {
         rRect.sk_rrect.offset(offset.GetX() + width_ - badgeCircleDiameter_, offset.GetY());
-    } else if (badgePosition_ == BadgePosition::RIGHT) {
+    } else if (badgePosition == BadgePosition::RIGHT) {
         rRect.sk_rrect.offset(
             offset.GetX() + width_ - badgeCircleDiameter_, offset.GetY() + height_ / 2 - badgeCircleRadius_);
     } else {
@@ -75,31 +81,39 @@ void FlutterRenderBadge::DrawCircleBadge(flutter::Canvas& canvas, const Offset& 
 
 void FlutterRenderBadge::DrawNumericalBadge(flutter::Canvas& canvas, const Offset& offset)
 {
+    if (!badge_) {
+        return;
+    }
+
     flutter::Paint paint;
-    paint.paint()->setColor(badgeColor_.GetValue());
+    paint.paint()->setColor(badge_->GetBadgeColor().GetValue());
     paint.paint()->setStyle(SkPaint::Style::kFill_Style);
     paint.paint()->setAntiAlias(true);
     flutter::RRect rRect;
     flutter::PaintData paintData;
     textSize_ = CalculateTextSize(textData_, textStyle_, badgeRenderText_);
-    badgeCircleDiameter_ = badgeCircleSizeDefined_ ? (badgeCircleSize_.IsValid() ? NormalizeToPx(badgeCircleSize_) : 0)
-                                                   : NormalizeToPx(NUMERICAL_BADGE_CIRCLE_SIZE);
+    auto circleSize = badge_->GetBadgeCicleSize();
+    badgeCircleDiameter_ = badge_->IsBadgeCircleSizeDefined() ? (circleSize.IsValid() ? NormalizeToPx(circleSize) : 0)
+                                                              : NormalizeToPx(NUMERICAL_BADGE_CIRCLE_SIZE);
     badgeHeight_ = badgeCircleDiameter_;
-    if (!textData_.empty() || messageCount_ > 0) {
+    auto messageCount = badge_->GetMessageCount();
+    auto countLimit = badge_->GetMaxCount();
+    if (!textData_.empty() || messageCount > 0) {
         if ((textData_.size() <= 1 && textData_.size() > 0) ||
-            ((messageCount_ < 10 && messageCount_ <= countLimit_) && textData_.empty())) {
+            ((messageCount < 10 && messageCount <= countLimit) && textData_.empty())) {
             badgeCircleRadius_ = badgeCircleDiameter_ / 2;
             badgeWidth_ = badgeCircleDiameter_;
-        } else if (textData_.size() > 1 || messageCount_ > countLimit_) {
+        } else if (textData_.size() > 1 || messageCount > countLimit) {
             badgeWidth_ = textSize_.Width() + NormalizeToPx(NUMERICAL_BADGE_PADDING) * 2;
             badgeCircleRadius_ = badgeCircleDiameter_ / 2;
         }
     }
+    auto badgePosition = badge_->GetBadgePosition();
     rRect.sk_rrect.setRectXY(SkRect::MakeIWH(badgeWidth_, badgeHeight_), badgeCircleRadius_, badgeCircleRadius_);
-    if (badgePosition_ == BadgePosition::RIGHT_TOP) {
+    if (badgePosition == BadgePosition::RIGHT_TOP) {
         textInitialOffset_ = Offset(width_ - badgeCircleDiameter_ + NormalizeToPx(2.0_vp), 0 - NormalizeToPx(2.0_vp));
         rRect.sk_rrect.offset(offset.GetX() + textInitialOffset_.GetX(), offset.GetY() + textInitialOffset_.GetY());
-    } else if (badgePosition_ == BadgePosition::RIGHT) {
+    } else if (badgePosition == BadgePosition::RIGHT) {
         textInitialOffset_ = Offset(width_ - badgeCircleDiameter_, height_ / 2 - badgeCircleRadius_);
         rRect.sk_rrect.offset(offset.GetX() + textInitialOffset_.GetX(), offset.GetY() + textInitialOffset_.GetY());
     } else {
@@ -111,12 +125,16 @@ void FlutterRenderBadge::DrawNumericalBadge(flutter::Canvas& canvas, const Offse
 
 void FlutterRenderBadge::DrawBadge(RenderContext& context, const Offset& offset)
 {
+    if (!badge_) {
+        return;
+    }
+
     flutter::Canvas* canvas = static_cast<FlutterRenderContext&>(context).GetCanvas();
     if (canvas == nullptr) {
         LOGE("Paint canvas is null");
         return;
     }
-    if (!textData_.empty() || messageCount_ > 0) {
+    if (!textData_.empty() || badge_->GetMessageCount() > 0) {
         DrawNumericalBadge(*canvas, offset);
     } else {
         DrawCircleBadge(*canvas, offset);

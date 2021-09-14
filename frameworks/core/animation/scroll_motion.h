@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class ExtentPair {
+class ACE_EXPORT ExtentPair {
 public:
     ExtentPair(double leading, double trailing) : leading_(leading), trailing_(trailing) {}
     ExtentPair() = delete;
@@ -43,7 +43,7 @@ private:
     double trailing_ = 0.0;
 };
 
-class ScrollMotion : public Motion {
+class ACE_EXPORT ScrollMotion : public Motion {
 public:
     ScrollMotion(double position, double velocity, const ExtentPair& extent, const ExtentPair& initExtent,
         const RefPtr<SpringProperty>& spring);
@@ -55,6 +55,8 @@ public:
 
     // Perform motion in each timestamp
     void Move(float offsetTime) override;
+
+    bool IsValid() const;
 
 private:
     RefPtr<ScrollSpringMotion> MakeUnderScrollMotion(double position, double velocity)

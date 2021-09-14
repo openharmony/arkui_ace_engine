@@ -34,4 +34,11 @@ void JsAccessibilityManager::DumpTree(int32_t depth, NodeId nodeID) {};
 
 void JsAccessibilityManager::SetCardViewParams(const std::string& key, bool focus) {};
 
+void JsAccessibilityManager::HandleComponentPostBinding() {};
+
+RefPtr<AccessibilityNodeManager> AccessibilityNodeManager::Create()
+{
+    return AceType::MakeRefPtr<JsAccessibilityManager>();
+}
+
 } // namespace OHOS::Ace::Framework

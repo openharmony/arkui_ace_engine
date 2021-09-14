@@ -141,6 +141,16 @@ public:
         return customDialogId_;
     }
 
+    void SetDialogId(int32_t dialogId)
+    {
+        dialogId_ = dialogId;
+    }
+
+    int32_t GetDialogId()
+    {
+        return dialogId_;
+    }
+
     void SetData(const std::string& data)
     {
         data_ = data;
@@ -177,6 +187,46 @@ public:
         return isSetMargin_;
     }
 
+    void SetDragable(bool dragable)
+    {
+        isDragable_ = dragable;
+    }
+
+    bool IsDragable() const
+    {
+        return isDragable_;
+    }
+
+    void SetIsMenu(bool isMenu)
+    {
+        isMenu_ = isMenu;
+    }
+
+    bool IsMenu() const
+    {
+        return isMenu_;
+    }
+
+    void SetMenuSuccessId(const std::vector<EventMarker>& menuSuccessId)
+    {
+        menuSuccessId_ = menuSuccessId;
+    }
+
+    std::vector<EventMarker>& GetMenuSuccessId()
+    {
+        return menuSuccessId_;
+    }
+
+    void SetOnStatusChanged(const std::function<void(bool)>& onStatusChanged)
+    {
+        onStatusChanged_ = onStatusChanged;
+    }
+
+    const std::function<void(bool)>& GetOnStatusChanged() const
+    {
+        return onStatusChanged_;
+    }
+
 private:
     bool autoCancel_ = true;
     RefPtr<Animator> animator_;
@@ -187,14 +237,20 @@ private:
     EventMarker onPositiveSuccessId_;
     EventMarker onNegativeSuccessId_;
     EventMarker onNeutralSuccessId_;
+    std::vector<EventMarker> menuSuccessId_;
     int32_t composedId_ = 0;
     // used for inspector node in PC preview
     int32_t customDialogId_ = -1;
+    // Used when pop dialog.
+    int32_t dialogId_ = -1;
     std::string data_;
+    std::function<void(bool)> onStatusChanged_;
 
     Edge margin_;
     bool isSetMargin_ = false;
     bool isLimit_ = true;
+    bool isMenu_ = false;
+    bool isDragable_ = false;
 };
 
 } // namespace OHOS::Ace

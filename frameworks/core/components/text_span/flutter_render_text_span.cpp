@@ -26,27 +26,80 @@ RefPtr<RenderNode> RenderTextSpan::Create()
     return AceType::MakeRefPtr<FlutterRenderTextSpan>();
 }
 
-void FlutterRenderTextSpan::UpdateTextContent(txt::ParagraphBuilder& builder)
+void FlutterRenderTextSpan::UpdateText(
+    txt::ParagraphBuilder& builder, std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions)
 {
-    if (!isShow_) {
+    if (!spanComponent_) {
+        return;
+    }
+
+    if (!spanComponent_->IsShow()) {
         LOGD("the span is not show");
         return;
     }
-    if (hasNewStyle_) {
+    if (spanComponent_->HasNewStyle()) {
         LOGD("test span has new style");
         txt::TextStyle style;
         Constants::ConvertTxtStyle(spanStyle_, context_, style);
         builder.PushStyle(style);
     }
-    builder.AddText(StringUtils::Str8ToStr16(spanData_));
+    UpdateTouchRegions(touchRegions);
+    auto displayText = spanComponent_->GetSpanData();
+    StringUtils::TransfromStrCase(displayText, (int32_t)spanStyle_.GetTextCase());
+    builder.AddText(StringUtils::Str8ToStr16(displayText));
     for (const auto& child : GetChildren()) {
         auto flutterRenderTextSpan = AceType::DynamicCast<FlutterRenderTextSpan>(child);
         if (flutterRenderTextSpan) {
-            flutterRenderTextSpan->UpdateTextContent(builder);
+            flutterRenderTextSpan->UpdateText(builder, touchRegions);
         }
     }
-    if (hasNewStyle_) {
+    if (spanComponent_->HasNewStyle()) {
         builder.Pop();
+    }
+}
+
+void FlutterRenderTextSpan::UpdateTouchRegions(std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions)
+{
+    auto spanData = StringUtils::Str8ToStr16(spanComponent_->GetSpanData());
+    if (spanData.empty()) {
+        LOGD("FlutterRenderTextSpan::UpdateTouchRegions spanData is empty");
+        return;
+    }
+
+    std::map<GestureType, EventMarker> markersMap;
+    auto declaration = spanComponent_->GetDeclaration();
+    if (declaration) {
+        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+        if (gestureEvent.IsValid()) {
+            if (!gestureEvent.click.eventMarker.IsEmpty()) {
+                markersMap.try_emplace(GestureType::CLICK, gestureEvent.click.eventMarker);
+            }
+            if (!gestureEvent.longPress.eventMarker.IsEmpty()) {
+                markersMap.try_emplace(GestureType::LONG_PRESS, gestureEvent.longPress.eventMarker);
+            }
+        }
+
+        auto& rawEvent = static_cast<CommonRawEvent&>(declaration->GetEvent(EventTag::COMMON_RAW_EVENT));
+        if (rawEvent.IsValid()) {
+            if (!rawEvent.touchStart.eventMarker.IsEmpty()) {
+                markersMap.try_emplace(GestureType::TOUCH_START, rawEvent.touchStart.eventMarker);
+            }
+            if (!rawEvent.touchMove.eventMarker.IsEmpty()) {
+                markersMap.try_emplace(GestureType::TOUCH_MOVE, rawEvent.touchMove.eventMarker);
+            }
+            if (!rawEvent.touchCancel.eventMarker.IsEmpty()) {
+                markersMap.try_emplace(GestureType::TOUCH_CANCEL, rawEvent.touchCancel.eventMarker);
+            }
+            if (!rawEvent.touchEnd.eventMarker.IsEmpty()) {
+                markersMap.try_emplace(GestureType::TOUCH_END, rawEvent.touchEnd.eventMarker);
+            }
+        }
+    }
+
+    if (touchRegions.empty()) {
+        touchRegions.try_emplace(int32_t(spanData.length()), markersMap);
+    } else {
+        touchRegions.try_emplace(int32_t(touchRegions.rbegin()->first + spanData.length()), markersMap);
     }
 }
 

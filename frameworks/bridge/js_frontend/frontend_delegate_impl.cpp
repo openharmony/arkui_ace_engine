@@ -12,19 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 
 #include <atomic>
+#include <regex>
 #include <string>
 
-#include "ability.h"
 #include "ability_info.h"
+#include "ability.h"
+
+#include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
+#include "base/resource/ace_res_config.h"
+#include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/platform_bridge.h"
-#include "core/components/dialog/dialog_component.h"
+#include "core/common/thread_checker.h"
 #include "core/components/toast/toast_component.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -40,12 +46,16 @@ constexpr int32_t TOAST_TIME_DEFAULT = 1500; // ms
 constexpr int32_t MAX_PAGE_ID_SIZE = sizeof(uint64_t) * 8;
 constexpr int32_t NANO_TO_MILLI = 1000000; // nanosecond to millisecond
 constexpr int32_t TO_MILLI = 1000;         // second to millisecond
-constexpr int32_t COMPATIBLE_VERSION = 4;
+constexpr int32_t COMPATIBLE_VERSION = 5;
+constexpr int32_t WEB_FEATURE_VERSION = 6;
 
 const char MANIFEST_JSON[] = "manifest.json";
 const char FILE_TYPE_JSON[] = ".json";
 const char I18N_FOLDER[] = "i18n/";
 const char RESOURCES_FOLDER[] = "resources/";
+const char STYLES_FOLDER[] = "styles/";
+const char I18N_FILE_SUFFIX[] = "/properties/i18n.json";
+
 } // namespace
 
 int32_t FrontendDelegateImpl::GenerateNextPageId()
@@ -71,19 +81,23 @@ void FrontendDelegateImpl::RecyclePageId(int32_t pageId)
 FrontendDelegateImpl::FrontendDelegateImpl(const FrontendDelegateImplBuilder& builder)
     : loadJs_(builder.loadCallback), dispatcherCallback_(builder.transferCallback),
       asyncEvent_(builder.asyncEventCallback), syncEvent_(builder.syncEventCallback),
+      externalEvent_(builder.externalEventCallback),
       updatePage_(builder.updatePageCallback), resetStagingPage_(builder.resetStagingPageCallback),
       destroyPage_(builder.destroyPageCallback), destroyApplication_(builder.destroyApplicationCallback),
+      updateApplicationState_(builder.updateApplicationStateCallback),
       timer_(builder.timerCallback), mediaQueryCallback_(builder.mediaQueryCallback),
       requestAnimationCallback_(builder.requestAnimationCallback), jsCallback_(builder.jsCallback),
       manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-      jsAccessibilityManager_(AceType::MakeRefPtr<JsAccessibilityManager>()),
-#else
-      jsAccessibilityManager_(AceType::MakeRefPtr<JsInspectorManager>()),
-#endif
+      jsAccessibilityManager_(AccessibilityNodeManager::Create()),
       ability_(builder.ability),
       mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()), taskExecutor_(builder.taskExecutor)
 {}
+
+FrontendDelegateImpl::~FrontendDelegateImpl()
+{
+    CHECK_RUN_ON(JS);
+    LOG_DESTROY();
+}
 
 void FrontendDelegateImpl::ParseManifest()
 {
@@ -102,10 +116,44 @@ void FrontendDelegateImpl::RunPage(const std::string& url, const std::string& pa
 {
     ACE_SCOPED_TRACE("FrontendDelegateImpl::RunPage");
 
+    auto routerBackCallback = [weak = WeakClaim(this)](const std::string& urlPath) {
+        auto delegate = weak.Upgrade();
+        if (!delegate) {
+            return false;
+        }
+        delegate->Push(urlPath, "");
+        return true;
+    };
+    DelegateClient::GetInstance().RegisterRouterPushCallback(routerBackCallback);
+
+    auto getWebPageUrlCallback = [weak = WeakClaim(this)](std::string& pageUrl, int32_t& pageId) {
+        auto delegate = weak.Upgrade();
+        if (!delegate) {
+            return false;
+        }
+        pageUrl = delegate->GetRunningPageUrl();
+        pageId = delegate->GetRunningPageId();
+        return true;
+    };
+    DelegateClient::GetInstance().RegisterGetWebPageUrlCallback(getWebPageUrlCallback);
+
+    auto isPagePathInvalidCallback = [weak = WeakClaim(this)](bool& isPageEmpty) {
+        auto delegate = weak.Upgrade();
+        if (!delegate) {
+            return false;
+        }
+        isPageEmpty = delegate->GetPagePathInvalidFlag();
+        return true;
+    };
+    DelegateClient::GetInstance().RegisterIsPagePathInvalidCallback(isPagePathInvalidCallback);
+
     LOGD("FrontendDelegateImpl RunPage url=%{private}s", url.c_str());
     ParseManifest();
     if (!url.empty()) {
         mainPagePath_ = manifestParser_->GetRouter()->GetPagePath(url);
+        if (mainPagePath_.empty()) {
+            mainPagePath_ = manifestParser_->GetRouter()->GetEntry();
+        }
     } else {
         mainPagePath_ = manifestParser_->GetRouter()->GetEntry();
     }
@@ -139,6 +187,9 @@ void FrontendDelegateImpl::GetResourceConfiguration(std::unique_ptr<JsonValue>& 
 void FrontendDelegateImpl::GetConfigurationCommon(const std::string& filePath, std::unique_ptr<JsonValue>& data)
 {
     std::vector<std::string> files;
+    //if (assetManager_) {
+    //    assetManager_->GetAssetList(filePath, files);
+    //}
     if (!AceApplicationInfo::GetInstance().GetFiles(filePath, files)) {
         LOGE("Get resources files fail!");
         return;
@@ -146,16 +197,17 @@ void FrontendDelegateImpl::GetConfigurationCommon(const std::string& filePath, s
 
     std::vector<std::string> fileNameList;
     for (const auto& file : files) {
-        if (EndWith(file, FILE_TYPE_JSON)) {
+        if (EndWith(file, FILE_TYPE_JSON) && !StartWith(file, STYLES_FOLDER)) {
             fileNameList.emplace_back(file.substr(0, file.size() - (sizeof(FILE_TYPE_JSON) - 1)));
         }
     }
 
     std::vector<std::string> priorityFileName;
     if (filePath.compare(I18N_FOLDER) == 0) {
-        priorityFileName = AceApplicationInfo::GetInstance().GetLocaleFallback(fileNameList);
+        auto localeTag = AceApplicationInfo::GetInstance().GetLocaleTag();
+        priorityFileName = AceResConfig::GetLocaleFallback(localeTag, fileNameList);
     } else {
-        priorityFileName = AceApplicationInfo::GetInstance().GetResourceFallback(fileNameList);
+        priorityFileName = AceResConfig::GetResourceFallback(fileNameList);
     }
 
     for (const auto& fileName : priorityFileName) {
@@ -213,48 +265,75 @@ void FrontendDelegateImpl::TransferComponentResponseData(int32_t callbackId, int
 void FrontendDelegateImpl::TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
     LOGD("JsFrontend TransferJsResponseData");
-    taskExecutor_->PostTask(
-        [callbackId, code, data = std::move(data), groupJsBridge = groupJsBridge_]() mutable {
-            if (groupJsBridge) {
-                groupJsBridge->TriggerModuleJsCallback(callbackId, code, std::move(data));
-            }
-        },
-        TaskExecutor::TaskType::JS);
+    auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
+    taskExecutor_->PostTask([callbackId, code, data = std::move(data), weak]() mutable {
+        auto groupJsBridge = weak.Upgrade();
+        if (groupJsBridge) {
+            groupJsBridge->TriggerModuleJsCallback(callbackId, code, std::move(data));
+        }
+    }, TaskExecutor::TaskType::JS);
 }
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+void FrontendDelegateImpl::TransferJsResponseDataPreview(
+    int32_t callbackId, int32_t code, ResponseData responseData) const
+{
+    LOGI("JsFrontend TransferJsResponseDataPreview");
+    auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
+    taskExecutor_->PostTask([callbackId, code, responseData, weak]() mutable {
+        auto groupJsBridge = weak.Upgrade();
+        if (groupJsBridge) {
+            groupJsBridge->TriggerModuleJsCallbackPreview(callbackId, code, responseData);
+        }
+    }, TaskExecutor::TaskType::JS);
+}
+#endif
 
 void FrontendDelegateImpl::TransferJsPluginGetError(
     int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const
 {
     LOGD("JsFrontend TransferJsPluginGetError");
-    taskExecutor_->PostTask(
-        [callbackId, errorCode, errorMessage = std::move(errorMessage), groupJsBridge = groupJsBridge_]() mutable {
-            if (groupJsBridge) {
-                groupJsBridge->TriggerModulePluginGetErrorCallback(callbackId, errorCode, std::move(errorMessage));
-            }
-        },
-        TaskExecutor::TaskType::JS);
+    auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
+    taskExecutor_->PostTask([callbackId, errorCode, errorMessage = std::move(errorMessage), weak]() mutable {
+        auto groupJsBridge = weak.Upgrade();
+        if (groupJsBridge) {
+            groupJsBridge->TriggerModulePluginGetErrorCallback(callbackId, errorCode, std::move(errorMessage));
+        }
+    }, TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateImpl::TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
-    taskExecutor_->PostTask(
-        [callbackId, code, data = std::move(data), groupJsBridge = groupJsBridge_]() mutable {
-            if (groupJsBridge) {
-                groupJsBridge->TriggerEventJsCallback(callbackId, code, std::move(data));
-            }
-        },
-        TaskExecutor::TaskType::JS);
+    auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
+    taskExecutor_->PostTask([callbackId, code, data = std::move(data), weak]() mutable {
+        auto groupJsBridge = weak.Upgrade();
+        if (groupJsBridge) {
+            groupJsBridge->TriggerEventJsCallback(callbackId, code, std::move(data));
+        }
+    }, TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateImpl::LoadPluginJsCode(std::string&& jsCode) const
 {
-    taskExecutor_->PostTask(
-        [jsCode = std::move(jsCode), groupJsBridge = groupJsBridge_]() mutable {
-            if (groupJsBridge) {
-                groupJsBridge->LoadPluginJsCode(std::move(jsCode));
-            }
-        },
-        TaskExecutor::TaskType::JS);
+    auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
+    taskExecutor_->PostTask([jsCode = std::move(jsCode), weak]() mutable {
+        auto groupJsBridge = weak.Upgrade();
+        if (groupJsBridge) {
+            groupJsBridge->LoadPluginJsCode(std::move(jsCode));
+        }
+    }, TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateImpl::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const
+{
+    LOGD("JsFrontend LoadPluginJsByteCode");
+    auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
+    taskExecutor_->PostTask([jsCode = std::move(jsCode), jsCodeLen = std::move(jsCodeLen), weak]() mutable {
+        auto groupJsBridge = weak.Upgrade();
+        if (groupJsBridge) {
+            groupJsBridge->LoadPluginJsByteCode(std::move(jsCode), std::move(jsCodeLen));
+        }
+    }, TaskExecutor::TaskType::JS);
 }
 
 bool FrontendDelegateImpl::OnPageBackPress()
@@ -298,6 +377,11 @@ void FrontendDelegateImpl::OnCompleteContinuation(int32_t code)
     FireSyncEvent("_root", std::string("\"onCompleteContinuation\","), std::to_string(code));
 }
 
+void FrontendDelegateImpl::OnRemoteTerminated()
+{
+    FireSyncEvent("_root", std::string("\"onRemoteTerminated\","), std::string(""));
+}
+
 void FrontendDelegateImpl::OnSaveData(std::string& data)
 {
     std::string savedData;
@@ -319,7 +403,21 @@ void FrontendDelegateImpl::OnNewRequest(const std::string& data)
 
 void FrontendDelegateImpl::CallPopPage()
 {
-    PopPage();
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto& currentPage = pageRouteStack_.back();
+    if (!pageRouteStack_.empty() && currentPage.isAlertBeforeBackPage) {
+        backUri_ = "";
+        taskExecutor_->PostTask(
+            [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
+                isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
+              if (context) {
+                  context->ShowDialog(dialogProperties, isRightToLeft);
+              }
+            },
+            TaskExecutor::TaskType::UI);
+    } else {
+        PopPage();
+    }
 }
 
 void FrontendDelegateImpl::ResetStagingPage()
@@ -331,6 +429,13 @@ void FrontendDelegateImpl::OnApplicationDestroy(const std::string& packageName)
 {
     taskExecutor_->PostSyncTask(
         [destroyApplication = destroyApplication_, packageName] { destroyApplication(packageName); },
+        TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateImpl::OnApplicationUpdateState(const std::string& packageName, Frontend::State state)
+{
+    taskExecutor_->PostSyncTask(
+        [updateApplication = updateApplicationState_, packageName, state] { updateApplication(packageName, state); },
         TaskExecutor::TaskType::JS);
 }
 
@@ -384,6 +489,19 @@ void FrontendDelegateImpl::FireSyncEvent(
     jsCallBackResult_.erase(callbackId);
 }
 
+void FrontendDelegateImpl::FireExternalEvent(
+    const std::string& eventId, const std::string& componentId, const uint32_t nodeId)
+{
+    taskExecutor_->PostSyncTask(
+        [weak = AceType::WeakClaim(this), componentId, nodeId] {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->externalEvent_(componentId, nodeId);
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
 void FrontendDelegateImpl::FireAccessibilityEvent(const AccessibilityEvent& accessibilityEvent)
 {
     jsAccessibilityManager_->SendAccessibilityAsyncEvent(accessibilityEvent);
@@ -407,11 +525,23 @@ void FrontendDelegateImpl::Push(const std::string& uri, const std::string& param
         return;
     }
     std::string pagePath = manifestParser_->GetRouter()->GetPagePath(uri);
-    LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
+    LOGD("router.Push pagePath = %{public}s", pagePath.c_str());
     if (!pagePath.empty()) {
+        isPagePathInvalid_ = true;
         LoadPage(GenerateNextPageId(), pagePath, false, params);
     } else {
+        isPagePathInvalid_ = false;
         LOGW("this uri not support in route push.");
+    }
+
+    if (taskExecutor_) {
+        taskExecutor_->PostTask(
+            [context = pipelineContextHolder_.Get(), isPagePathInvalid = isPagePathInvalid_]() {
+                if (context) {
+                    context->NotifyIsPagePathInvalidDismiss(isPagePathInvalid);
+                }
+            },
+            TaskExecutor::TaskType::UI);
     }
 }
 
@@ -430,7 +560,26 @@ void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& pa
     }
 }
 
-void FrontendDelegateImpl::Back(const std::string& uri)
+void FrontendDelegateImpl::Back(const std::string& uri, const std::string& params)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto& currentPage = pageRouteStack_.back();
+    if (!pageRouteStack_.empty() && currentPage.isAlertBeforeBackPage) {
+        backUri_ = uri;
+        taskExecutor_->PostTask(
+            [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
+                isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
+                if (context) {
+                    context->ShowDialog(dialogProperties, isRightToLeft);
+                }
+            },
+            TaskExecutor::TaskType::UI);
+    } else {
+        BackImplement(uri);
+    }
+}
+
+void FrontendDelegateImpl::BackImplement(const std::string& uri)
 {
     LOGD("router.Back path = %{private}s", uri.c_str());
     if (uri.empty()) {
@@ -511,14 +660,10 @@ void FrontendDelegateImpl::TriggerPageUpdate(int32_t pageId, bool directExecute)
             EventReport::SendPageRouterException(PageRouterExcepType::UPDATE_PAGE_ERR);
             return;
         }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-        bool useLiteStyle = delegate->GetWindowConfig().minSdkVersion < COMPATIBLE_VERSION && context->UseLiteStyle();
-#else
-        bool useLiteStyle =
-            delegate->GetWindowConfig().minSdkVersion < COMPATIBLE_VERSION && delegate->GetWindowConfig().useLiteStyle;
-#endif
+        bool useLiteStyle = delegate->GetMinPlatformVersion() < COMPATIBLE_VERSION && delegate->IsUseLiteStyle();
+        context->SetUseLiteStyle(useLiteStyle);
         jsPage->SetUseLiteStyle(useLiteStyle);
-        jsPage->SetUseBoxWrap(delegate->GetWindowConfig().boxWrap);
+        jsPage->SetUseBoxWrap(delegate->GetMinPlatformVersion() >= WEB_FEATURE_VERSION);
         // Flush all JS commands.
         for (const auto& command : *jsCommands) {
             command->Execute(jsPage);
@@ -526,8 +671,9 @@ void FrontendDelegateImpl::TriggerPageUpdate(int32_t pageId, bool directExecute)
         if (jsPage->GetDomDocument()) {
             jsPage->GetDomDocument()->HandleComponentPostBinding();
         }
-        if (context->GetAccessibilityManager()) {
-            context->GetAccessibilityManager()->HandleComponentPostBinding();
+        auto accessibilityManager = context->GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->HandleComponentPostBinding();
         }
 
         jsPage->ClearShowCommand();
@@ -540,17 +686,24 @@ void FrontendDelegateImpl::TriggerPageUpdate(int32_t pageId, bool directExecute)
             }
         }
     };
-
-    taskExecutor_->PostTask(
-        [updateTask, pipelineContext, directExecute]() {
+    auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext));
+    taskExecutor_->PostTask([updateTask, weakContext, directExecute]() {
+        auto pipelineContext = weakContext.Upgrade();
+        if (pipelineContext) {
             pipelineContext->AddPageUpdateTask(std::move(updateTask), directExecute);
-        },
-        TaskExecutor::TaskType::UI);
+        }
+    }, TaskExecutor::TaskType::UI);
 }
 
 void FrontendDelegateImpl::PostJsTask(std::function<void()>&& task)
 {
     taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateImpl::RemoveVisibleChangeNode(NodeId id)
+{
+    auto task = [nodeId = id, pipeline = pipelineContextHolder_.Get()]() { pipeline->RemoveVisibleChangeNode(nodeId); };
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
 const std::string& FrontendDelegateImpl::GetAppID() const
@@ -573,10 +726,28 @@ int32_t FrontendDelegateImpl::GetVersionCode() const
     return manifestParser_->GetAppInfo()->GetVersionCode();
 }
 
-const WindowConfig& FrontendDelegateImpl::GetWindowConfig()
+WindowConfig& FrontendDelegateImpl::GetWindowConfig()
 {
     ParseManifest();
     return manifestParser_->GetWindowConfig();
+}
+
+int32_t FrontendDelegateImpl::GetMinPlatformVersion()
+{
+    ParseManifest();
+    return manifestParser_->GetMinPlatformVersion();
+}
+
+bool FrontendDelegateImpl::IsUseLiteStyle()
+{
+    ParseManifest();
+    return manifestParser_->IsUseLiteStyle();
+}
+
+bool FrontendDelegateImpl::IsWebFeature()
+{
+    ParseManifest();
+    return manifestParser_->IsWebFeature();
 }
 
 void FrontendDelegateImpl::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
@@ -585,11 +756,10 @@ void FrontendDelegateImpl::ShowToast(const std::string& message, int32_t duratio
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     auto pipelineContext = pipelineContextHolder_.Get();
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    taskExecutor_->PostTask(
-        [durationTime, message, bottom, isRightToLeft, context = pipelineContext] {
-            ToastComponent::GetInstance().Show(context, message, durationTime, bottom, isRightToLeft);
-        },
-        TaskExecutor::TaskType::UI);
+    auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext));
+    taskExecutor_->PostTask([durationTime, message, bottom, isRightToLeft, weak] {
+        ToastComponent::GetInstance().Show(weak.Upgrade(), message, durationTime, bottom, isRightToLeft);
+    }, TaskExecutor::TaskType::UI);
 }
 
 Rect FrontendDelegateImpl::GetBoundingRectData(NodeId nodeId)
@@ -647,14 +817,123 @@ void FrontendDelegateImpl::ShowDialog(const std::string& title, const std::strin
         .buttons = buttons,
         .callbacks = std::move(callbackMarkers),
     };
-    taskExecutor_->PostTask(
-        [context = pipelineContextHolder_.Get(), dialogProperties,
-            isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
-            if (context) {
-                context->ShowDialog(dialogProperties, isRightToLeft);
-            }
-        },
-        TaskExecutor::TaskType::UI);
+    auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContextHolder_.Get()));
+    taskExecutor_->PostTask([weak, dialogProperties,
+        isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
+        auto context = weak.Upgrade();
+        if (context) {
+            context->ShowDialog(dialogProperties, isRightToLeft);
+        }
+    }, TaskExecutor::TaskType::UI);
+}
+
+void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
+    const std::vector<std::pair<std::string, std::string>>& button, std::function<void(int32_t, int32_t)>&& callback)
+{
+    if (!taskExecutor_) {
+        LOGE("task executor is null.");
+        return;
+    }
+
+    std::unordered_map<std::string, EventMarker> callbackMarkers;
+
+    auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
+    BackEndEventManager<void(int32_t)>::GetInstance().BindBackendEvent(
+        successEventMarker, [callback, number = button.size(), taskExecutor = taskExecutor_](int32_t successType) {
+            taskExecutor->PostTask(
+                [callback, number, successType]() {
+                    // if callback index is larger than button's number, cancel button is selected
+                    if (static_cast<size_t>(successType) == number) {
+                        callback(1, 0);
+                    } else {
+                        callback(0, successType);
+                    }
+                },
+                TaskExecutor::TaskType::JS);
+        });
+    callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
+
+    auto cancelEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+    BackEndEventManager<void()>::GetInstance().BindBackendEvent(
+        cancelEventMarker, [callback, taskExecutor = taskExecutor_] {
+            taskExecutor->PostTask([callback]() { callback(1, 0); }, TaskExecutor::TaskType::JS);
+        });
+    callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
+
+    DialogProperties dialogProperties = {
+        .title = title,
+        .autoCancel = true,
+        .isMenu = true,
+        .buttons = button,
+        .callbacks = std::move(callbackMarkers),
+    };
+    dialogProperties.buttons.emplace_back(Localization::GetInstance()->GetEntryLetters("common.cancel"), "#000000");
+    auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContextHolder_.Get()));
+    taskExecutor_->PostTask([weak, dialogProperties,
+        isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
+        auto context = weak.Upgrade();
+        if (context) {
+            context->ShowDialog(dialogProperties, isRightToLeft);
+        }
+    }, TaskExecutor::TaskType::UI);
+}
+
+void FrontendDelegateImpl::EnableAlertBeforeBackPage(
+    const std::string& message, std::function<void(int32_t)>&& callback)
+{
+    if (!taskExecutor_) {
+        LOGE("task executor is null.");
+        return;
+    }
+
+    std::unordered_map<std::string, EventMarker> callbackMarkers;
+    auto pipelineContext = pipelineContextHolder_.Get();
+    auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
+    BackEndEventManager<void(int32_t)>::GetInstance().BindBackendEvent(successEventMarker,
+        [weak = AceType::WeakClaim(this), callback, taskExecutor = taskExecutor_](int32_t successType) {
+            taskExecutor->PostTask(
+                [weak, callback, successType]() {
+                    callback(successType);
+                    if (!successType) {
+                        LOGI("dialog choose cancel button, can not back");
+                        return;
+                    }
+                    auto delegate = weak.Upgrade();
+                    if (!delegate) {
+                        return;
+                    }
+                    delegate->BackImplement(delegate->backUri_);
+                },
+                TaskExecutor::TaskType::JS);
+        });
+    callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (pageRouteStack_.empty()) {
+        LOGE("page stack is null.");
+        return;
+    }
+
+    auto& currentPage = pageRouteStack_.back();
+    currentPage.isAlertBeforeBackPage = true;
+    currentPage.dialogProperties = {
+        .content = message,
+        .autoCancel = false,
+        .buttons = { { Localization::GetInstance()->GetEntryLetters("common.cancel"), "" },
+            { Localization::GetInstance()->GetEntryLetters("common.ok"), "" } },
+        .callbacks = std::move(callbackMarkers),
+    };
+}
+
+void FrontendDelegateImpl::DisableAlertBeforeBackPage()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (pageRouteStack_.empty()) {
+        LOGE("page stack is null.");
+        return;
+    }
+    auto& currentPage = pageRouteStack_.back();
+    currentPage.isAlertBeforeBackPage = false;
 }
 
 void FrontendDelegateImpl::SetCallBackResult(const std::string& callBackId, const std::string& result)
@@ -699,6 +978,7 @@ void FrontendDelegateImpl::ClearTimer(const std::string& callbackId)
 void FrontendDelegateImpl::PostSyncTaskToPage(std::function<void()>&& task)
 {
     pipelineContextHolder_.Get(); // Wait until Pipeline Context is attached.
+    TriggerPageUpdate(GetRunningPageId(), true);
     taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::UI);
 }
 
@@ -722,6 +1002,11 @@ bool FrontendDelegateImpl::GetAssetContent(const std::string& url, std::vector<u
     return GetAssetContentImpl(assetManager_, url, content);
 }
 
+std::string FrontendDelegateImpl::GetAssetPath(const std::string& url)
+{
+    return GetAssetPathImpl(assetManager_, url);
+}
+
 void FrontendDelegateImpl::LoadPage(int32_t pageId, const std::string& url, bool isMainPage, const std::string& params)
 {
     LOGD("FrontendDelegateImpl LoadPage[%{private}d]: %{private}s.", pageId, url.c_str());
@@ -730,15 +1015,10 @@ void FrontendDelegateImpl::LoadPage(int32_t pageId, const std::string& url, bool
         EventReport::SendPageRouterException(PageRouterExcepType::LOAD_PAGE_ERR, url);
         return;
     }
-
-    std::unique_lock<std::mutex> lock(loadPageMutex_);
     if (isStagingPageExist_) {
-        if (condition_.wait_for(lock, std::chrono::seconds(1)) == std::cv_status::timeout) {
-            LOGE("FrontendDelegateImpl, load page failed, waiting for current page loading finish.");
-            return;
-        }
+        LOGE("FrontendDelegateImpl, load page failed, waiting for current page loading finish.");
+        return;
     }
-
     isStagingPageExist_ = true;
     auto document = AceType::MakeRefPtr<DOMDocument>(pageId);
     auto page = AceType::MakeRefPtr<JsAcePage>(pageId, document, url);
@@ -753,12 +1033,18 @@ void FrontendDelegateImpl::LoadPage(int32_t pageId, const std::string& url, bool
         [weak = AceType::WeakClaim(this), page, url, isMainPage] {
             auto delegate = weak.Upgrade();
             if (!delegate) {
+                LOGE("the delegate context is nullptr");
                 return;
             }
             delegate->loadJs_(url, page, isMainPage);
             page->FlushCommands();
             // just make sure the pipelineContext is created.
-            delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            if (!pipelineContext) {
+                LOGE("the pipeline context is nullptr");
+                return;
+            }
+            pipelineContext->SetMinPlatformVersion(delegate->GetMinPlatformVersion());
             delegate->taskExecutor_->PostTask(
                 [weak, page] {
                     auto delegate = weak.Upgrade();
@@ -806,9 +1092,6 @@ void FrontendDelegateImpl::OnMediaQueryUpdate()
 
             // request js mediaquery
             const auto& listenerId = delegate->mediaQueryInfo_->GetListenerId();
-            if (listenerId.empty()) {
-                return;
-            }
             delegate->mediaQueryCallback_(listenerId, info);
             delegate->mediaQueryInfo_->ResetListenerId();
         },
@@ -830,18 +1113,12 @@ void FrontendDelegateImpl::OnPageReady(const RefPtr<JsAcePage>& page, const std:
             if (!delegate) {
                 return;
             }
-            std::unique_lock<std::mutex> lock(delegate->loadPageMutex_);
             delegate->SetCurrentReadyPage(page);
             auto pipelineContext = delegate->pipelineContextHolder_.Get();
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-            bool useLiteStyle =
-                delegate->GetWindowConfig().minSdkVersion < COMPATIBLE_VERSION && pipelineContext->UseLiteStyle();
-#else
-            bool useLiteStyle = delegate->GetWindowConfig().minSdkVersion < COMPATIBLE_VERSION &&
-                                delegate->GetWindowConfig().useLiteStyle;
-#endif
+            bool useLiteStyle = delegate->GetMinPlatformVersion() < COMPATIBLE_VERSION && delegate->IsUseLiteStyle();
+            pipelineContext->SetUseLiteStyle(useLiteStyle);
             page->SetUseLiteStyle(useLiteStyle);
-            page->SetUseBoxWrap(delegate->GetWindowConfig().boxWrap);
+            page->SetUseBoxWrap(delegate->GetMinPlatformVersion() >= WEB_FEATURE_VERSION);
             // Flush all JS commands.
             for (const auto& command : *jsCommands) {
                 command->Execute(page);
@@ -869,7 +1146,6 @@ void FrontendDelegateImpl::OnPageReady(const RefPtr<JsAcePage>& page, const std:
                 delegate->ResetStagingPage();
             }
             delegate->isStagingPageExist_ = false;
-            delegate->condition_.notify_one();
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
             if (isMainPage) {
                 delegate->OnPageShow();
@@ -921,6 +1197,11 @@ void FrontendDelegateImpl::OnPushPageSuccess(const RefPtr<JsAcePage>& page, cons
         isRouteStackFull_ = true;
         EventReport::SendPageRouterException(PageRouterExcepType::PAGE_STACK_OVERFLOW_ERR, page->GetUrl());
     }
+    auto pipelineContext = pipelineContextHolder_.Get();
+    if (pipelineContext) {
+        pipelineContext->onRouterChange(url);
+        pipelineContext->NotifyPopPageSuccessDismiss(url, pageRouteStack_.back().pageId);
+    }
     LOGI("OnPushPageSuccess size=%{private}zu,pageId=%{private}d,url=%{private}s", pageRouteStack_.size(),
         pageRouteStack_.back().pageId, pageRouteStack_.back().url.c_str());
 }
@@ -938,6 +1219,11 @@ void FrontendDelegateImpl::OnPopToPageSuccess(const std::string& url)
     }
     if (isRouteStackFull_) {
         isRouteStackFull_ = false;
+    }
+    auto pipelineContext = pipelineContextHolder_.Get();
+    if (pipelineContext) {
+        pipelineContext->onRouterChange(url);
+        pipelineContext->NotifyPopPageSuccessDismiss(url, pageRouteStack_.back().pageId);
     }
 }
 
@@ -977,7 +1263,7 @@ void FrontendDelegateImpl::PopToPage(const std::string& url)
 void FrontendDelegateImpl::PopToPageTransitionListener(
     const TransitionEvent& event, const std::string& url, int32_t pageId)
 {
-    if (event == TransitionEvent::POP_END) {
+    if (event == TransitionEvent::POP_START) {
         OnPopToPageSuccess(url);
         SetCurrentPage(pageId);
         OnPageShow();
@@ -994,6 +1280,12 @@ int32_t FrontendDelegateImpl::OnPopPageSuccess()
         isRouteStackFull_ = false;
     }
     if (!pageRouteStack_.empty()) {
+        auto context = pipelineContextHolder_.Get();
+        if (context) {
+            context->NotifyPopPageSuccessDismiss(pageRouteStack_.back().url, pageRouteStack_.back().pageId);
+            context->onRouterChange(pageRouteStack_.back().url);
+        }
+
         return pageRouteStack_.back().pageId;
     }
     return INVALID_PAGE_ID;
@@ -1009,6 +1301,10 @@ void FrontendDelegateImpl::PopPage()
             }
             auto pipelineContext = delegate->pipelineContextHolder_.Get();
             if (delegate->GetStackSize() == 1) {
+                if (delegate->disallowPopLastPage_) {
+                    LOGW("Not allow back because this is the last page!");
+                    return;
+                }
                 auto ability = static_cast<AppExecFwk::Ability*>(delegate->ability_);
                 std::shared_ptr<AppExecFwk::AbilityInfo> info = ability->GetAbilityInfo();
                 if (info != nullptr && info->isLauncherAbility) {
@@ -1046,7 +1342,7 @@ void FrontendDelegateImpl::PopPage()
 
 void FrontendDelegateImpl::PopPageTransitionListener(const TransitionEvent& event, int32_t destroyPageId)
 {
-    if (event == TransitionEvent::POP_END) {
+    if (event == TransitionEvent::POP_START) {
         OnPageDestroy(destroyPageId);
         auto pageId = OnPopPageSuccess();
         SetCurrentPage(pageId);
@@ -1102,6 +1398,11 @@ void FrontendDelegateImpl::OnReplacePageSuccess(const RefPtr<JsAcePage>& page, c
         pageRouteStack_.pop_back();
     }
     pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
+    auto pipelineContext = pipelineContextHolder_.Get();
+    if (pipelineContext) {
+        pipelineContext->onRouterChange(url);
+        pipelineContext->NotifyPopPageSuccessDismiss(url, pageRouteStack_.back().pageId);
+    }
 }
 
 void FrontendDelegateImpl::ReplacePage(const RefPtr<JsAcePage>& page, const std::string& url)
@@ -1119,17 +1420,12 @@ void FrontendDelegateImpl::ReplacePage(const RefPtr<JsAcePage>& page, const std:
             if (!delegate) {
                 return;
             }
-            std::unique_lock<std::mutex> lock(delegate->loadPageMutex_);
+            delegate->SetCurrentReadyPage(page);
             auto pipelineContext = delegate->pipelineContextHolder_.Get();
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-            bool useLiteStyle =
-                delegate->GetWindowConfig().minSdkVersion < COMPATIBLE_VERSION && pipelineContext->UseLiteStyle();
-#else
-            bool useLiteStyle = delegate->GetWindowConfig().minSdkVersion < COMPATIBLE_VERSION &&
-                                delegate->GetWindowConfig().useLiteStyle;
-#endif
+            bool useLiteStyle = delegate->GetMinPlatformVersion() < COMPATIBLE_VERSION && delegate->IsUseLiteStyle();
+            pipelineContext->SetUseLiteStyle(useLiteStyle);
             page->SetUseLiteStyle(useLiteStyle);
-            page->SetUseBoxWrap(delegate->GetWindowConfig().boxWrap);
+            page->SetUseBoxWrap(delegate->GetMinPlatformVersion() >= WEB_FEATURE_VERSION);
             // Flush all JS commands.
             for (const auto& command : *jsCommands) {
                 command->Execute(page);
@@ -1137,7 +1433,9 @@ void FrontendDelegateImpl::ReplacePage(const RefPtr<JsAcePage>& page, const std:
             // Just clear all dirty nodes.
             page->ClearAllDirtyNodes();
             page->GetDomDocument()->HandleComponentPostBinding();
-            pipelineContext->GetAccessibilityManager()->HandleComponentPostBinding();
+            if (pipelineContext->GetAccessibilityManager()) {
+                pipelineContext->GetAccessibilityManager()->HandleComponentPostBinding();
+            }
             if (pipelineContext->CanReplacePage()) {
                 delegate->OnPageHide();
                 delegate->OnPageDestroy(delegate->GetRunningPageId());
@@ -1152,7 +1450,6 @@ void FrontendDelegateImpl::ReplacePage(const RefPtr<JsAcePage>& page, const std:
                 delegate->ResetStagingPage();
             }
             delegate->isStagingPageExist_ = false;
-            delegate->condition_.notify_one();
         },
         TaskExecutor::TaskType::UI);
 }
@@ -1165,14 +1462,10 @@ void FrontendDelegateImpl::LoadReplacePage(int32_t pageId, const std::string& ur
         EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, url);
         return;
     }
-
-    std::unique_lock<std::mutex> lock(loadPageMutex_);
     if (isStagingPageExist_) {
-        if (condition_.wait_for(lock, std::chrono::seconds(1)) == std::cv_status::timeout) {
-            LOGE("FrontendDelegateImpl, replace page failed, waiting for current page loading finish.");
-            EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, url);
-            return;
-        }
+        LOGE("FrontendDelegateImpl, replace page failed, waiting for current page loading finish.");
+        EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, url);
+        return;
     }
     isStagingPageExist_ = true;
     auto document = AceType::MakeRefPtr<DOMDocument>(pageId);
@@ -1296,19 +1589,29 @@ void FrontendDelegateImpl::RegisterFont(const std::string& familyName, const std
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
 }
 
-void FrontendDelegateImpl::HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback)
+void FrontendDelegateImpl::HandleImage(
+    const std::string& src, std::function<void(int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
     if (src.empty() || !callback) {
         return;
     }
+    std::map<std::string, EventMarker> callbackMarkers;
+    if (callbacks.find("success") != callbacks.end()) {
+        auto successEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+        successEventMarker.SetPreFunction([callback, taskExecutor = taskExecutor_]() {
+            taskExecutor->PostTask([callback] { callback(0); }, TaskExecutor::TaskType::JS);
+        });
+        callbackMarkers.emplace("success", successEventMarker);
+    }
 
-    auto loadCallback = [jsCallback = std::move(callback),taskExecutor = taskExecutor_](bool success,
-        int32_t width, int32_t height) {
-        taskExecutor->PostTask([callback = std::move(jsCallback), success, width, height] {
-            callback(success, width, height);
-        }, TaskExecutor::TaskType::JS);
-    };
-    pipelineContextHolder_.Get()->TryLoadImageInfo(src, std::move(loadCallback));
+    if (callbacks.find("fail") != callbacks.end()) {
+        auto failEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+        failEventMarker.SetPreFunction([callback, taskExecutor = taskExecutor_]() {
+            taskExecutor->PostTask([callback] { callback(1); }, TaskExecutor::TaskType::JS);
+        });
+        callbackMarkers.emplace("fail", failEventMarker);
+    }
+    pipelineContextHolder_.Get()->CanLoadImage(src, callbackMarkers);
 }
 
 void FrontendDelegateImpl::RequestAnimationFrame(const std::string& callbackId)
@@ -1354,6 +1657,16 @@ void FrontendDelegateImpl::FlushAnimationTasks()
         }
         animationFrameTaskIds_.pop();
     }
+
+    auto pageId = GetRunningPageId();
+    auto page = GetPage(pageId);
+    if (!page) {
+        return;
+    }
+    auto jsPage = AceType::DynamicCast<Framework::JsAcePage>(page);
+    if (jsPage && jsPage->GetCommandSize() > 0) {
+        TriggerPageUpdate(pageId);
+    }
 }
 
 SingleTaskExecutor FrontendDelegateImpl::GetAnimationJsTask()
@@ -1385,6 +1698,16 @@ void FrontendDelegateImpl::AttachPipelineContext(const RefPtr<PipelineContext>& 
     jsAccessibilityManager_->InitializeCallback();
 }
 
+void FrontendDelegateImpl::SetAssetManager(const RefPtr<AssetManager>& assetManager)
+{
+    assetManager_ = assetManager;
+}
+
+RefPtr<AssetManager> FrontendDelegateImpl::GetAssetManager() const
+{
+    return assetManager_;
+}
+
 RefPtr<PipelineContext> FrontendDelegateImpl::GetPipelineContext()
 {
     return pipelineContextHolder_.Get();
@@ -1393,6 +1716,85 @@ RefPtr<PipelineContext> FrontendDelegateImpl::GetPipelineContext()
 void FrontendDelegateImpl::SetColorMode(ColorMode colorMode)
 {
     OnMediaQueryUpdate();
+}
+
+void FrontendDelegateImpl::LoadResourceConfiguration(std::map<std::string, std::string>& mediaResourceFileMap,
+    std::unique_ptr<JsonValue>& currentResourceData)
+{
+    std::vector<std::string> files;
+    //if (assetManager_) {
+    //    assetManager_->GetAssetList(RESOURCES_FOLDER, files);
+    //}
+    if (!AceApplicationInfo::GetInstance().GetFiles(RESOURCES_FOLDER, files)) {
+        LOGE("Get configuration files fail!");
+        return;
+    }
+
+    std::set<std::string> resourceFolderName;
+    for (const auto& file : files) {
+        resourceFolderName.insert(file.substr(0, file.find_first_of("/")));
+    }
+
+    std::vector<std::string> sortedResourceFolderPath =
+        AceResConfig::GetDeclarativeResourceFallback(resourceFolderName);
+    for (const auto& folderName : sortedResourceFolderPath) {
+        auto fileFullPath = std::string(RESOURCES_FOLDER) + folderName + std::string(I18N_FILE_SUFFIX);
+        std::string content;
+        if (GetAssetContent(fileFullPath, content)) {
+            auto fileData = ParseFileData(content);
+            if (fileData == nullptr) {
+                LOGW("parse %{private}s i18n content failed", fileFullPath.c_str());
+            } else {
+                currentResourceData->Put(fileData);
+            }
+        }
+    }
+
+    std::set<std::string> mediaFileName;
+    for (const auto& file : files) {
+        auto mediaPathName = file.substr(file.find_first_of("/"));
+        std::regex mediaPartten("^\\/media\\/\\w*(\\.jpg|\\.png|\\.gif|\\.svg|\\.webp|\\.bmp)$");
+        std::smatch result;
+        if (std::regex_match(mediaPathName, result, mediaPartten)) {
+            mediaFileName.insert(mediaPathName.substr(mediaPathName.find_first_of("/")));
+        }
+    }
+
+    auto currentResTag = AceResConfig::GetCurrentDeviceResTag();
+    auto currentResolutionTag = currentResTag.substr(currentResTag.find_last_of("-") + 1);
+    for (auto folderName : sortedResourceFolderPath) {
+        for (auto fileName : mediaFileName) {
+            if (mediaResourceFileMap.find(fileName) != mediaResourceFileMap.end()) {
+                continue;
+            }
+            auto fullFileName = folderName + fileName;
+            if (std::find(files.begin(), files.end(), fullFileName) != files.end()) {
+                mediaResourceFileMap.emplace(fileName.substr(fileName.find_last_of("/") + 1),
+                    std::string(RESOURCES_FOLDER).append(fullFileName));
+            }
+        }
+        if (mediaResourceFileMap.size() == mediaFileName.size()) {
+            break;
+        }
+    }
+}
+
+void FrontendDelegateImpl::PushJsCallbackToRenderNode(NodeId id, double ratio,
+    std::function<void(bool, double)>&& callback)
+{
+    auto visibleCallback = [jsCallback = std::move(callback), excutor = taskExecutor_] (bool visible, double ratio) {
+        excutor->PostTask([task = std::move(jsCallback), visible, ratio] {
+            if (task) {
+                task(visible, ratio);
+            }
+        }, TaskExecutor::TaskType::JS);
+    };
+    auto uiPushTask = [id, ratio, visibleCallback, pipeline = pipelineContextHolder_.Get()]() {
+        if (pipeline) {
+            pipeline->PushVisibleCallback(id, ratio, visibleCallback);
+        }
+    };
+    taskExecutor_->PostTask(uiPushTask, TaskExecutor::TaskType::UI);
 }
 
 } // namespace OHOS::Ace::Framework

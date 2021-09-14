@@ -13,21 +13,33 @@
  * limitations under the License.
  */
 
+#include "core/components/page/page_element.h"
 #include "core/components/box/box_element.h"
-
-#include "core/components/box/box_component.h"
 
 namespace OHOS::Ace {
 
 void BoxElement::PerformBuild()
 {
-    RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(component_);
-    if (box) {
-        RefPtr<Component> newComponent = box->GetChild();
-        if (newComponent) {
-            const auto& child = children_.empty() ? nullptr : children_.front();
-            UpdateChild(child, newComponent);
-        }
+    SoleChildElement::PerformBuild();
+    const RefPtr<Component> component = Element::GetComponent();
+    const RefPtr<BoxComponent> boxComponent = AceType::DynamicCast<BoxComponent>(component);
+    if (!boxComponent) {
+        return;
+    }
+    std::string id = boxComponent->GetGeometryTransitionId();
+    geometryTransitionId_ = id;
+    if (geometryTransitionId_.empty()) {
+        return;
+    }
+    const RefPtr<PageElement> pageElement = GetPageElement();
+    WeakPtr<BoxElement> boxElementWeak = AceType::WeakClaim(this);
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    AnimationOption option = context->GetExplicitAnimationOption();
+    if (pageElement) {
+        pageElement->AddGeometryTransition(id, boxElementWeak, option);
     }
 }
 

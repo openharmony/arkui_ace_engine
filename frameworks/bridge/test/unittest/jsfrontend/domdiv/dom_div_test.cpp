@@ -189,8 +189,8 @@ HWTEST_F(DomDivTest, DomDivTest003, TestSize.Level1)
     EXPECT_TRUE(mainAxisAlign == TEST_MAIN_ALIGN);
     EXPECT_TRUE(grid->GetColumnsArgs() == "100px 200px 300px");
     EXPECT_TRUE(grid->GetRowsArgs() == "20% 30% 30% 20%");
-    EXPECT_TRUE(static_cast<int32_t>(grid->GetColumnGap()) == 10);
-    EXPECT_TRUE(static_cast<int32_t>(grid->GetRowGap()) == 20);
+    EXPECT_TRUE(static_cast<int32_t>(grid->GetColumnGap().Value()) == 10);
+    EXPECT_TRUE(static_cast<int32_t>(grid->GetRowGap().Value()) == 20);
 }
 
 } // namespace OHOS::Ace::Framework

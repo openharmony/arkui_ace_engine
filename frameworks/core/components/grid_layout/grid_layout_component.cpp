@@ -17,16 +17,26 @@
 
 #include "core/components/grid_layout/grid_layout_element.h"
 #include "core/components/grid_layout/render_grid_layout.h"
+#include "core/components_v2/grid/grid_element.h"
+#include "core/components_v2/grid/render_grid_scroll.h"
+#include "core/pipeline/base/multi_composed_component.h"
 
 namespace OHOS::Ace {
 
 RefPtr<Element> GridLayoutComponent::CreateElement()
 {
+    if (isDeclarative_ && useScroll_ && (rowsArgs_.empty() || columnsArgs_.empty())) {
+        return AceType::MakeRefPtr<V2::GridElement>();
+    }
     return AceType::MakeRefPtr<GridLayoutElement>();
 }
 
 RefPtr<RenderNode> GridLayoutComponent::CreateRenderNode()
 {
+    if (isDeclarative_ && useScroll_ && (rowsArgs_.empty() || columnsArgs_.empty())) {
+        return V2::RenderGridScroll::Create();
+    }
+
     return RenderGridLayout::Create();
 }
 
@@ -94,19 +104,21 @@ void GridLayoutComponent::SetRowsArgs(const std::string& rowsArgs)
     rowsArgs_ = rowsArgs;
 }
 
-void GridLayoutComponent::SetColumnGap(double columnGap)
+void GridLayoutComponent::SetColumnGap(const Dimension& columnGap)
 {
-    if (columnGap < 0.0) {
-        LOGW("Invalid ColumnGap %{public}lf", columnGap);
+    if (columnGap.Value() < 0.0) {
+        LOGW("Invalid RowGap, use 0px");
+        columnGap_ = 0.0_px;
         return;
     }
     columnGap_ = columnGap;
 }
 
-void GridLayoutComponent::SetRowGap(double rowGap)
+void GridLayoutComponent::SetRowGap(const Dimension& rowGap)
 {
-    if (rowGap < 0.0) {
-        LOGW("Invalid RowGap %{public}lf", rowGap);
+    if (rowGap.Value() < 0.0) {
+        LOGW("Invalid RowGap, use 0px");
+        rowGap_ = 0.0_px;
         return;
     }
     rowGap_ = rowGap;
@@ -116,6 +128,21 @@ void GridLayoutComponent::SetRightToLeft(bool rightToLeft)
 {
     LOGD("SetRightToLeft to %{public}d.", rightToLeft);
     rightToLeft_ = rightToLeft;
+}
+
+void GridLayoutComponent::SetScrollBarColor(const std::string& color)
+{
+    scrollBarColor_ = color;
+}
+
+void GridLayoutComponent::SetScrollBarWidth(const std::string& width)
+{
+    scrollBarWidth_ = width;
+}
+
+void GridLayoutComponent::SetScrollBar(DisplayMode displayMode)
+{
+    displayMode_ = displayMode;
 }
 
 } // namespace OHOS::Ace

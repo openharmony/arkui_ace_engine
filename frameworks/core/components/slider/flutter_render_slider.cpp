@@ -232,7 +232,6 @@ void FlutterRenderSlider::OnMouseHoverEnterTest()
         controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
     }
     colorAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-    colorAnimationEnter_->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
     CreateColorAnimation(colorAnimationEnter_, Color::TRANSPARENT, Color::FromRGBO(0, 0, 0, 0.05), true);
     colorAnimationEnter_->SetCurve(Curves::FRICTION);
     StartHoverAnimation(controllerEnter_, colorAnimationEnter_);
@@ -245,7 +244,6 @@ void FlutterRenderSlider::OnMouseHoverExitTest()
         controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
     }
     colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-    colorAnimationExit_->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
     auto renderBlock = AceType::DynamicCast<RenderBlock>(block_);
     if (!renderBlock) {
         return;
@@ -318,9 +316,6 @@ void FlutterRenderSlider::Paint(RenderContext& context, const Offset& offset)
         LOGE("paint canvas is null");
         return;
     }
-    Size layoutConstrainMax = GetLayoutParam().GetMaxSize();
-    canvas->clipRect(offset.GetX(), offset.GetY(), offset.GetX() + layoutConstrainMax.Width(),
-        offset.GetY() + layoutConstrainMax.Height(), SkClipOp::kIntersect, true);
     if ((!showTips_ && tip_) || (tip_ && !isDraging_)) {
         tip_->SetVisible(false);
     }

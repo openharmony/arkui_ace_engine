@@ -21,12 +21,11 @@
 namespace OHOS::Ace {
 namespace {
 
-const char ATTR_NAME_TEXT_LENGTH[] = "textLength";
 const char ATTR_NAME_START_OFFSET[] = "startOffset";
 
 } // namespace
 
-void RenderSvgTextPath::Update(const RefPtr<Component> &component)
+void RenderSvgTextPath::Update(const RefPtr<Component>& component)
 {
     const RefPtr<SvgTextPathComponent> textPathComponent = AceType::DynamicCast<SvgTextPathComponent>(component);
     if (!textPathComponent) {
@@ -34,16 +33,15 @@ void RenderSvgTextPath::Update(const RefPtr<Component> &component)
         return;
     }
 
-    textLength_ = textPathComponent->GetTextLength();
     startOffset_ = textPathComponent->GetStartOffset();
     path_ = textPathComponent->GetPath();
     textData_ = textPathComponent->GetTextData();
-    RenderSvgBase::SetPresentationAttrs(textPathComponent);
+    RenderSvgBase::SetPresentationAttrs(textPathComponent->GetDeclaration());
     PrepareAnimations(component);
     MarkNeedLayout();
 }
 
-void RenderSvgTextPath::PrepareAnimations(const RefPtr<Component> &component)
+void RenderSvgTextPath::PrepareAnimations(const RefPtr<Component>& component)
 {
     const RefPtr<SvgTextPathComponent> textPathComponent = AceType::DynamicCast<SvgTextPathComponent>(component);
     if (!textPathComponent) {
@@ -61,8 +59,7 @@ bool RenderSvgTextPath::PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimat
         return false;
     }
     std::function<void(Dimension)> callback;
-    callback = [weakText = AceType::WeakClaim(this), attributeName = svgAnimate->GetAttributeName()](
-            Dimension value) {
+    callback = [weakText = AceType::WeakClaim(this), attributeName = svgAnimate->GetAttributeName()](Dimension value) {
         auto textPath = weakText.Upgrade();
         if (!textPath) {
             LOGE("svg text path is null");
@@ -73,16 +70,13 @@ bool RenderSvgTextPath::PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimat
             textPath->OnNotifyRender();
         }
     };
-    RefPtr<Evaluator<Dimension>> evaluator = AceType::MakeRefPtr<LinearEvaluator<Dimension>>();
-    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback), evaluator);
+    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback));
     return true;
 }
 
 bool RenderSvgTextPath::SetProperty(const std::string& attrName, const Dimension& value)
 {
-    if (attrName == ATTR_NAME_TEXT_LENGTH) {
-        textLength_ = value;
-    } else if (attrName == ATTR_NAME_START_OFFSET) {
+    if (attrName == ATTR_NAME_START_OFFSET) {
         startOffset_ = value;
     } else {
         return false;
@@ -92,9 +86,7 @@ bool RenderSvgTextPath::SetProperty(const std::string& attrName, const Dimension
 
 bool RenderSvgTextPath::GetProperty(const std::string& attrName, Dimension& dimension) const
 {
-    if (attrName == ATTR_NAME_TEXT_LENGTH) {
-        dimension = textLength_;
-    } else if (attrName == ATTR_NAME_START_OFFSET) {
+    if (attrName == ATTR_NAME_START_OFFSET) {
         dimension = startOffset_;
     } else {
         return false;

@@ -63,16 +63,6 @@ public:
         return dy_;
     }
 
-    const Dimension& GetTextLength() const
-    {
-        return textLength_;
-    }
-
-    const std::string& GetLengthAdjust() const
-    {
-        return lengthAdjust_;
-    }
-
     double GetRotate() const
     {
         return rotate_;
@@ -83,8 +73,6 @@ protected:
     Dimension y_ = Dimension(0.0);
     Dimension dx_ = Dimension(0.0);
     Dimension dy_ = Dimension(0.0);
-    Dimension textLength_ = Dimension(0.0);
-    std::string lengthAdjust_ = "spacing"; // Value type: spacing | spacingAndGlyphs
     std::string textData_;
     double rotate_ = 0.0;
     bool hasX_ = false;

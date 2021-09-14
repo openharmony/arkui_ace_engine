@@ -16,11 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_POSITIONED_RENDER_POSITIONED_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_POSITIONED_RENDER_POSITIONED_H
 
+#include "core/animation/property_animatable.h"
 #include "core/components/proxy/render_proxy.h"
 
 namespace OHOS::Ace {
 
-class RenderPositioned : public RenderProxy {
+class ACE_EXPORT RenderPositioned : public RenderProxy {
     DECLARE_ACE_TYPE(RenderPositioned, RenderProxy);
 
 public:
@@ -78,9 +79,13 @@ public:
         return hasBottom_;
     }
 
-    void SetLeft(const Dimension& left);
+    void SetLeft(const Dimension& left) override; // add for animation
 
-    void SetTop(const Dimension& left);
+    void SetTop(const Dimension& top) override; // add for animation
+
+    void SetRight(const Dimension& right) override; // add for animation
+
+    void SetBottom(const Dimension& bottom) override; // add for animation
 
 private:
     Dimension bottom_;

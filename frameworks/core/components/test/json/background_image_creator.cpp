@@ -46,7 +46,8 @@ RefPtr<BackgroundImage> BackgroundImageCreator::CreateFromJson(const JsonValue& 
         return nullptr;
     }
     std::string src = json.GetValue(BACKGROUND_SRC)->GetString();
-    RefPtr<BackgroundImage> backgroundImage = AceType::MakeRefPtr<BackgroundImage>(src);
+    RefPtr<BackgroundImage> backgroundImage = AceType::MakeRefPtr<BackgroundImage>();
+    backgroundImage->SetSrc(src, nullptr);
     if (json.Contains(IMAGE_REPEAT) && json.GetValue(IMAGE_REPEAT)->IsNumber()) {
         backgroundImage->SetImageRepeat(
             ConvertIntToEnum(json.GetValue(IMAGE_REPEAT)->GetInt(), IMAGE_REPEATS, ImageRepeat::NOREPEAT));

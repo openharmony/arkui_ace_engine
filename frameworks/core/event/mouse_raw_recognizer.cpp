@@ -33,13 +33,22 @@ void MouseRawRecognizer::HandleEvent(const MouseEvent& event)
     lastEvent_ = event;
 }
 
+void MouseRawRecognizer::HandleHoverEvent(MouseState mouseState)
+{
+    if (onMouseHover_ && mouseState == MouseState::HOVER) {
+        onMouseHover_();
+    } else if (onMouseHoverExit_ && mouseState == MouseState::NONE) {
+        onMouseHoverExit_();
+    }
+}
+
 MouseEventInfo MouseRawRecognizer::CreateMouseEventInfo(const MouseEvent& event) const
 {
     MouseEventInfo info(ON_MOUSE_EVENT);
     info.SetMouseGlobalInfo(event);
     info.SetMouseLocationInfo(event - coordinateOffset_);
     info.SetTimeStamp(event.time);
-
+    info.SetDeviceId(event.deviceId);
     return info;
 }
 

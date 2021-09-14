@@ -43,8 +43,28 @@ public:
     // Support to grid element response focus event.
     int32_t RequestNextFocus(bool vertical, bool reverse);
 
+    const std::string& GetColumnsTemplate() const
+    {
+        return colsArgs_;
+    }
+
+    const std::string& GetRowTemplate() const
+    {
+        return rowsArgs_;
+    }
+
+    double GetColumnsGap() const
+    {
+        return colGap_;
+    }
+
+    double GetRowGaps() const
+    {
+        return rowGap_;
+    }
+
 protected:
-    LayoutParam MakeInnerLayoutParam(int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan) const;
+    virtual LayoutParam MakeInnerLayoutParam(int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan) const;
 
     void SetItemIndex(const RefPtr<RenderNode>& child, int32_t index);
 
@@ -54,14 +74,15 @@ protected:
 
     int32_t GetItemSpan(const RefPtr<RenderNode>& child, bool isRow) const;
 
-    void GetNextGird(int32_t& curRow, int32_t& curCol) const;
+    virtual void GetNextGird(int32_t& curRow, int32_t& curCol) const;
 
-    bool CheckGridPlaced(int32_t index, int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan);
+    virtual bool CheckGridPlaced(int32_t index, int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan);
 
     int32_t GetIndexByGrid(int32_t row, int32_t column) const;
 
     // Sets child position, the mainAxis does not contain the offset.
-    void SetChildPosition(const RefPtr<RenderNode>& child, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan);
+    virtual void SetChildPosition(
+        const RefPtr<RenderNode>& child, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan);
 
     void DisableChild(const RefPtr<RenderNode>& child, int32_t index);
 
@@ -76,7 +97,7 @@ protected:
 
     std::string PreParseCols();
 
-    void InitialGridProp();
+    virtual void InitialGridProp();
 
     void UpdateAccessibilityAttr();
 
@@ -99,6 +120,8 @@ protected:
     double gridHeight_ = -1.0;
     int32_t colCount_ = 0;
     int32_t rowCount_ = 0;
+    Dimension userColGap_ = 0.0_px;
+    Dimension userRowGap_ = 0.0_px;
     double colGap_ = 0.0;
     double rowGap_ = 0.0;
     std::string colsArgs_;

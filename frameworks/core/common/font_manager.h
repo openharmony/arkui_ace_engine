@@ -35,6 +35,8 @@ public:
 
     virtual void VaryFontCollectionWithFontWeightScale() = 0;
 
+    virtual void LoadSystemFont() = 0;
+
     static RefPtr<FontManager> Create();
 
     void RegisterFont(

@@ -16,6 +16,11 @@
 #ifndef FOUNDATION_ACE_ADAPTER_CPP_FLUTTER_TASK_EXECUTOR_H
 #define FOUNDATION_ACE_ADAPTER_CPP_FLUTTER_TASK_EXECUTOR_H
 
+#ifdef ACE_DEBUG
+#include <thread>
+#include <unordered_map>
+#endif
+
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/thread.h"
 
@@ -40,6 +45,27 @@ public:
 
 private:
     bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const final;
+
+#ifdef ACE_DEBUG
+    bool OnPreSyncTask(TaskType type) const final;
+    void OnPostSyncTask() const final;
+
+    void DumpDeadSyncTask(TaskType from, TaskType to) const;
+
+    void FillTaskTypeTable(TaskType type);
+    static void FillTaskTypeTable(const WeakPtr<FlutterTaskExecutor>& weak, TaskType type);
+
+    struct ThreadInfo {
+        std::thread::id threadId;
+        int32_t tid = 0;
+        std::string threadName;
+    };
+
+    mutable std::mutex tableMutex_;
+    mutable std::unordered_map<std::thread::id, std::thread::id> syncTaskTable_;
+    std::unordered_map<TaskType, ThreadInfo> taskTypeTable_;
+    static thread_local TaskType localTaskType;
+#endif
 
     std::unique_ptr<fml::Thread> jsThread_;
 

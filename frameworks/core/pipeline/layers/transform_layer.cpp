@@ -16,6 +16,8 @@
 #include "core/pipeline/layers/transform_layer.h"
 
 #include "flutter/lib/ui/dart_wrapper.h"
+#include "frameworks/core/components/svg/svg_transform.h"
+#include "frameworks/core/components/transform/flutter_render_transform.h"
 
 #include "base/log/dump_log.h"
 
@@ -29,8 +31,20 @@ void TransformLayer::Update(const Matrix4& matrix)
 void TransformLayer::AddToScene(SceneBuilder& builder, double x, double y)
 {
     builder.PushTransform(matrix_);
+    if (filterPaint_ != std::nullopt) {
+        builder.PushFilter(filterPaint_.value());
+    }
+    if (alpha_ != std::nullopt && alpha_.value() != UINT8_MAX) {
+        builder.PushOpacity(alpha_.value());
+    }
     AddChildToScene(builder, x_ + x, y_ + y);
     builder.Pop();
+    if (filterPaint_ != std::nullopt) {
+        builder.Pop();
+    }
+    if (alpha_ != std::nullopt && alpha_.value() != UINT8_MAX) {
+        builder.Pop();
+    }
 }
 
 void TransformLayer::Dump()
@@ -43,6 +57,16 @@ void TransformLayer::Dump()
         DumpLog::GetInstance().AddDesc("[", matrix_[8], matrix_[9], matrix_[10], matrix_[11], "]");
         DumpLog::GetInstance().AddDesc("[", matrix_[12], matrix_[13], matrix_[14], matrix_[15], "]");
     }
+}
+
+void TransformLayer::SetFilter(const SkPaint& skPaint)
+{
+    filterPaint_ = skPaint;
+}
+
+void TransformLayer::SetOpacityLayer(int32_t alpha)
+{
+    alpha_ = alpha;
 }
 
 } // namespace OHOS::Ace::Flutter

@@ -45,7 +45,7 @@ public:
     virtual void OnMouseHoverExitTest() override;
     virtual void HandleClick();
     void ApplyAspectRatio(Size& drawSize) const;
-    void InitClickRecognizer();
+    void InitClickRecognizer(bool catchMode);
     void AddAccessibilityAction();
     bool GetChecked() const
     {
@@ -95,7 +95,7 @@ protected:
     {
         return dragPosition_;
     }
-    virtual std::string GetChangedResult();
+    std::string UpdateChangedResult();
     virtual void OnHandleChangedResult(const std::string& result);
 
     double width_ = -1.0;
@@ -126,6 +126,7 @@ protected:
     RefPtr<DragRecognizer> dragRecognizer_;
     RefPtr<ClickRecognizer> clickRecognizer_;
     std::function<void(const std::string&)> changeEvent_;
+    std::function<void(const std::string&)> valueChangeEvent_;
     std::function<void()> clickEvent_;
     std::function<void(const std::string&)> domChangeEvent_;
     std::function<void(bool)> onChange_;

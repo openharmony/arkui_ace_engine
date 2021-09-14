@@ -22,8 +22,8 @@
 
 namespace OHOS::Ace {
 
-class RenderClip : public RenderNode, public PropertyAnimatable {
-    DECLARE_ACE_TYPE(RenderClip, RenderNode, PropertyAnimatable);
+class RenderClip : public RenderNode {
+    DECLARE_ACE_TYPE(RenderClip, RenderNode);
 
 public:
     static RefPtr<RenderNode> Create();

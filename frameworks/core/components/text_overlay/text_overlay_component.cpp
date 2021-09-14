@@ -304,7 +304,7 @@ RefPtr<Component> TextOverlayComponent::BuildMenu()
         int32_t index = 0;
         for (const auto& option : options_) {
             auto optionComponent =
-                BuildMenuOption(option.image_, InternalResource::ResourceId::NO_ID, option.text_, false);
+                BuildMenuOption(option.image, InternalResource::ResourceId::NO_ID, option.text, false);
             EventMarker clickEvent = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
             optionComponent->SetClickEvent(clickEvent);
             BackEndEventManager<void()>::GetInstance().BindBackendEvent(clickEvent, [weak = WeakClaim(this), index]() {
@@ -337,6 +337,9 @@ RefPtr<OptionComponent> TextOverlayComponent::BuildMenuOption(
         }
     } else {
         image = AceType::MakeRefPtr<ImageComponent>(imageSrc);
+        if (image) {
+            image->SetImageFill(imageFill_);
+        }
     }
     optionComponent->SetIcon(image);
     auto textComponent = AceType::MakeRefPtr<TextComponent>(text);
@@ -644,14 +647,19 @@ TextDirection TextOverlayComponent::GetRealTextDirection() const
     return realTextDirection_;
 }
 
-void TextOverlayComponent::SetOptions(const std::vector<Framework::InputOption>& options)
+void TextOverlayComponent::SetOptions(const std::vector<InputOption>& options)
 {
     options_ = options;
 }
 
-const std::vector<Framework::InputOption>& TextOverlayComponent::GetOptions() const
+const std::vector<InputOption>& TextOverlayComponent::GetOptions() const
 {
     return options_;
+}
+
+void TextOverlayComponent::SetImageFill(const std::optional<Color>& imageFill)
+{
+    imageFill_ = imageFill;
 }
 
 void TextOverlayComponent::SetOptionsClickMarker(const EventMarker& onOptionsClick)

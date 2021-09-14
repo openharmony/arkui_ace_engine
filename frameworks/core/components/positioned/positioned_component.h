@@ -156,6 +156,16 @@ public:
         hasBottom_ = hasBottom;
     }
 
+    bool HasPositionStyle() const
+    {
+        return hasPositionStyle_;
+    }
+
+    void SetHasPositionStyle(bool hasPositionStyle)
+    {
+        hasPositionStyle_ = hasPositionStyle;
+    }
+
 private:
     Dimension bottom_;
     Dimension left_;
@@ -168,6 +178,7 @@ private:
     bool hasTop_ = false;
     bool hasRight_ = false;
     bool hasBottom_ = false;
+    bool hasPositionStyle_ = false;
 
     bool isAutoFocus_ = false;
 };

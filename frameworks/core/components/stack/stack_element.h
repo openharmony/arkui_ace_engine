@@ -23,64 +23,75 @@ namespace OHOS::Ace {
 class ACE_EXPORT StackElement : public ComponentGroupElement, public FocusGroup {
     DECLARE_ACE_TYPE(StackElement, ComponentGroupElement, FocusGroup);
 
-enum class Operation {
-    NONE,
-    TOAST_PUSH,
-    TOAST_POP,
-    DIALOG_PUSH,
-    DIALOG_POP,
-    TEXT_OVERLAY_POP,
-    POPUP_POP,
-    PANEL_PUSH,
-    PANEL_POP,
-};
+    enum class Operation {
+        NONE,
+        DIRECT_PUSH,
+        TOAST_PUSH,
+        TOAST_POP,
+        DIALOG_PUSH,
+        DIALOG_POP,
+        TEXT_OVERLAY_POP,
+        POPUP_POP,
+        PANEL_PUSH,
+        PANEL_POP,
+        DIRECT_POP,
+        MENU_POP,
+    };
 
-struct ToastInfo {
-    int32_t toastId = -1;
-    RefPtr<Element> child;
-};
+    struct ToastInfo {
+        int32_t toastId = -1;
+        RefPtr<Element> child;
+    };
+
+    struct PopupComponentInfo {
+        int32_t popId = -1;
+        ComposeId id = "-1";
+        Operation operation = Operation::NONE;
+        RefPtr<Component> component;
+        bool IsValid()
+        {
+            return component != nullptr;
+        }
+    };
 
 public:
     void PerformBuild() override;
-    void PushComponent(const RefPtr<Component>& newComponent, bool directBuild = false, bool disableTouchEvent = true);
-    void PopComponent(bool directBuild = false);
-    void PushPanel(const RefPtr<Component>& newComponent, bool disableTouch);
-    void PopPanel(bool direct = false);
+    void PushComponent(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
+    void PopComponent();
     void PushToastComponent(const RefPtr<Component>& newComponent, int32_t toastId);
     void PopToastComponent(int32_t toastPopId);
+    void PushPanel(const RefPtr<Component>& newComponent, bool disableTouchEvent = false);
+    void PopPanel();
     bool PushDialog(const RefPtr<Component>& newComponent);
-    bool PopDialog(bool directBuild = false);
-    void PopTextOverlay(bool directBuild = false);
+    bool PopDialog(int32_t id = -1);
+    void PopTextOverlay();
     void PopPopup(const ComposeId& id);
+    void PopMenu();
+    void PopInstant();
+    void PushInstant(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
 
 protected:
     void OnFocus() override;
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
 
 private:
-    void PerformPushToast(int32_t toastId);
+    void PerformPopupChild(PopupComponentInfo& popupComponentInfo);
+    void PerformPushChild(PopupComponentInfo& popupComponentInfo);
+    void PerformPushToast(PopupComponentInfo& popupComponentInfo);
     void PerformPopToastById(int32_t toastId);
     void PerformPopToast();
-    void PerformPushChild();
-    void PerformPushPanel();
-    void PerformPopDialog();
+    void PerformPopDialog(int32_t id = -1);
+    void PerformPopDialogById(int32_t id);
     void PerformPopTextOverlay();
     void PerformPopPopup(const ComposeId& id);
-    void ResetBuildOperation();
-    void PerformOperationBuild();
-
+    void PerformPopMenu();
+    void PerformDirectPop();
+    void PerformPopupChild();
     void EnableTouchEventAndRequestFocus();
 
-    RefPtr<Component> newComponent_;
-    bool isPop_ { false };
-    Operation operation_ { Operation::NONE };
-    RefPtr<Component> newToastComponent_;
-    int32_t toastId_ { 0 };
-    int32_t toastPopId_ { 0 };
+    std::list<PopupComponentInfo> popupComponentInfos_;
     std::vector<ToastInfo> toastStack_;
-    bool isWaitingForBuild_ = false;
     bool disableTouchEvent_ = true;
-    ComposeId popupId_;
 };
 
 } // namespace OHOS::Ace

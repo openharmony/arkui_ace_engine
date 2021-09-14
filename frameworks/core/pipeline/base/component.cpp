@@ -15,13 +15,18 @@
 
 #include "core/pipeline/base/component.h"
 
+#include "core/common/ace_application_info.h"
+
 namespace OHOS::Ace {
 std::atomic<int32_t> Component::key_ = 1;
 
 Component::Component()
 {
     SetRetakeId(key_++);
+    direction_ = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
 }
+
+Component::~Component() = default;
 
 void Component::SetRetakeId(int32_t retakeId)
 {

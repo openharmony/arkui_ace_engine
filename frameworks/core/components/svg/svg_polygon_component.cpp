@@ -20,6 +20,30 @@
 
 namespace OHOS::Ace {
 
+SvgPolygonComponent::SvgPolygonComponent()
+{
+    InitDeclaration();
+}
+
+SvgPolygonComponent::SvgPolygonComponent(bool isClose) : isClose_(isClose)
+{
+    InitDeclaration();
+}
+
+SvgPolygonComponent::SvgPolygonComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children)
+{
+    InitDeclaration();
+}
+
+void SvgPolygonComponent::InitDeclaration()
+{
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<SvgPolygonDeclaration>();
+        declaration_->Init();
+        declaration_->InitializeStyle();
+    }
+}
+
 RefPtr<Element> SvgPolygonComponent::CreateElement()
 {
     return AceType::MakeRefPtr<SvgPolygonElement>();
@@ -28,6 +52,23 @@ RefPtr<Element> SvgPolygonComponent::CreateElement()
 RefPtr<RenderNode> SvgPolygonComponent::CreateRenderNode()
 {
     return RenderSvgPolygon::Create();
+}
+
+const std::string& SvgPolygonComponent::GetPoints() const
+{
+    return declaration_->GetPoints();
+}
+
+void SvgPolygonComponent::SetPoints(const std::string& points)
+{
+    declaration_->SetPoints(points);
+}
+
+void SvgPolygonComponent::SetDeclaration(const RefPtr<SvgPolygonDeclaration>& declaration)
+{
+    if (declaration) {
+        declaration_ = declaration;
+    }
 }
 
 } // namespace OHOS::Ace

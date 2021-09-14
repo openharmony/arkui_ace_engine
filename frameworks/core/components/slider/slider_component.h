@@ -28,13 +28,14 @@
 #include "core/pipeline/base/component_group.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/render_component.h"
+#include "core/components_v2/common/common_def.h"
 
 namespace OHOS::Ace {
 
 constexpr double HALF = 0.5;
 
 // The slider component manages the step, value, min, max, selectColor and padding.
-class SliderComponent : public RenderComponent {
+class ACE_EXPORT SliderComponent : public RenderComponent {
     DECLARE_ACE_TYPE(SliderComponent, RenderComponent);
 
 public:
@@ -134,7 +135,7 @@ public:
 
     void SetTextDirection(TextDirection direction) override
     {
-        Component::SetTextDirection(direction);
+        RenderComponent::SetTextDirection(direction);
         track_->SetTextDirection(direction);
     }
 
@@ -182,6 +183,8 @@ public:
     {
         return showSteps_;
     }
+
+    ACE_DEFINE_COMPONENT_EVENT(OnChange, void(double,int));
 
 private:
     ProgressData data_;

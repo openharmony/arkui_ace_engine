@@ -76,6 +76,10 @@ public:
     {
         onKeyCallback_ = std::move(onKeyCallback);
     }
+    void SetOnKeyCallback(std::function<void(const std::shared_ptr<KeyEventInfo>&)>&& onKeyCallback)
+    {
+        onKeyEventCallback_ = std::move(onKeyCallback);
+    }
     void SetOnClickCallback(std::function<void()>&& onClickCallback)
     {
         onClickCallback_ = std::move(onClickCallback);
@@ -91,6 +95,10 @@ public:
     void SetFocusMoveCallback(std::function<void()>&& focusMoveCallback)
     {
         focusMoveCallback_ = std::move(focusMoveCallback);
+    }
+    void SetOnDeleteCallback(std::function<void()>&& onDeleteCallback)
+    {
+        onDeleteCallback_ = std::move(onDeleteCallback);
     }
 
     void SetFocusIndex(int32_t focusIndex)
@@ -138,17 +146,16 @@ public:
 
     virtual void RefreshParentFocusable(bool focusable);
 
-protected:
-    virtual bool OnKeyEvent(const KeyEvent& keyEvent)
-    {
-        return onKeyCallback_ ? onKeyCallback_(keyEvent) : false;
-    }
     virtual void OnClick()
     {
         if (onClickCallback_) {
             onClickCallback_();
         }
     }
+
+protected:
+    virtual bool OnKeyEvent(const KeyEvent& keyEvent);
+
     virtual void OnFocus()
     {
         if (onFocusCallback_) {
@@ -170,16 +177,30 @@ protected:
         OnFocus();
     }
 
+    virtual void OnDeleteEvent()
+    {
+        if (onDeleteCallback_) {
+            onDeleteCallback_();
+        }
+    }
+
+    virtual bool IsDeleteDisabled()
+    {
+        return false;
+    }
+
 private:
     static int32_t GenerateFocusIndex();
 
     WeakPtr<FocusGroup> parent_;
 
     std::function<bool(const KeyEvent&)> onKeyCallback_;
+    std::function<void(const std::shared_ptr<KeyEventInfo>&)> onKeyEventCallback_;
     std::function<void()> onClickCallback_;
     std::function<void()> onFocusCallback_;
     std::function<void()> onBlurCallback_;
     std::function<void()> focusMoveCallback_;
+    std::function<void()> onDeleteCallback_;
 
     int32_t focusIndex_ { GenerateFocusIndex() };
     bool autoFocusIndex_ { true };

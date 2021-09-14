@@ -32,17 +32,9 @@ protected:
     void OnMounted(const RefPtr<DOMNode>& parentNode) override;
     void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) override;
     void PrepareSpecializedComponent() override;
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
     RefPtr<Component> GetSpecializedComponent() override;
 
     RefPtr<SvgTextPathComponent> textPathComponent_;
-
-private:
-    Dimension textLength_ = Dimension(0.0);
-    Dimension startOffset_ = Dimension(0.0);
-    std::string lengthAdjust_ = "spacing"; // Value type: spacing | spacingAndGlyphs
-    std::string path_;
-    std::string textData_;
 };
 
 } // namespace OHOS::Ace::Framework

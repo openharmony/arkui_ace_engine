@@ -38,8 +38,11 @@ private:
     void AssembleJSONTree(std::string& jsonStr);
     void AssembleDefaultJSONTree(std::string& jsonStr);
     void GetNodeJSONStrMap();
+    void GetAttrsAndStyles(std::unique_ptr<JsonValue>& jsonNode, const RefPtr<AccessibilityNode>& node);
+    void GetAttrsAndStylesV2(std::unique_ptr<JsonValue>& jsonNode, const RefPtr<AccessibilityNode>& node);
     void ClearContainer();
-    std::string UpdateNodeRectStrInfo(RefPtr<AccessibilityNode> node);
+    std::string UpdateNodeRectStrInfo(const RefPtr<AccessibilityNode> node);
+    std::string UpdateNodeRectStrInfoV2(const RefPtr<AccessibilityNode> node);
     void DumpNodeTreeInfo(int32_t depth, NodeId nodeID);
     void GetChildrenJSONArray(
             int32_t depth, RefPtr<AccessibilityNode> node, std::unique_ptr<JsonValue>& childJSONArray);

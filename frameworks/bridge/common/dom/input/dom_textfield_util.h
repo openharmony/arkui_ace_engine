@@ -57,8 +57,6 @@ public:
     static bool IsRadiusStyle(const std::string& style);
 
 private:
-    static TextInputAction ConvertStrToTextInputAction(const std::string& action);
-    static TextInputType ConvertStrToTextInputType(const std::string& type);
     static Radius defaultRadius_;
 };
 

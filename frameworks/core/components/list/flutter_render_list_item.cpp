@@ -222,6 +222,9 @@ void FlutterRenderListItem::PaintWithFocusEffect(RenderContext& context, const O
         if (itemTheme) {
             decorationColor = itemTheme->GetClickColor();
         }
+        if (clickColor_ != Color::TRANSPARENT) {
+            decorationColor = clickColor_;
+        }
         auto frontDecoration = AceType::MakeRefPtr<Decoration>();
         frontDecoration->SetBackgroundColor(decorationColor.BlendOpacity(decorationAlpha_));
 

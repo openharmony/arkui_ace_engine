@@ -18,6 +18,7 @@
 #include "core/components/marquee/marquee_component.h"
 #include "core/components/test/json/marquee_creator.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 
 using namespace testing;
 using namespace testing::ext;

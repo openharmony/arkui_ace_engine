@@ -70,7 +70,7 @@ void RenderMultimodal::Update(const RefPtr<Component>& component)
     MarkNeedLayout();
 }
 
-void RenderMultimodal::PrepareMultimodalEvent(const MultimodalProperties& multimodalProperties)
+void RenderMultimodal::PrepareMultimodalEvent(const CommonMultimodalAttribute& multimodalProperties)
 {
     auto multiModalScene = multiModalScene_.Upgrade();
     if (!multiModalScene) {

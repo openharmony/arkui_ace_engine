@@ -806,7 +806,7 @@ void RenderTextOverlay::PopOverlay()
     auto stack = textField->GetStackElement().Upgrade();
     if (stack) {
         hasPoped_ = true;
-        stack->PopTextOverlay(true);
+        stack->PopTextOverlay();
     }
     textField->SetIsOverlayShowed(false, needStartTwinkling_);
     textField->SetTextOverlayPushed(false);

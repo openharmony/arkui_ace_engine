@@ -24,6 +24,7 @@
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/pipeline/base/component_group.h"
+#include "core/components/declaration/text/text_declaration.h"
 
 namespace OHOS::Ace {
 
@@ -37,52 +38,33 @@ public:
 
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
+    uint32_t Compare(const RefPtr<Component>& component) const override;
 
-    const std::string& GetData() const
-    {
-        return data_;
-    }
+    const std::string& GetData() const;
+    void SetData(const std::string& data);
 
-    void SetData(const std::string& data)
-    {
-        data_ = data;
-    }
+    const TextStyle& GetTextStyle() const;
+    void SetTextStyle(const TextStyle& textStyle);
 
-    const TextStyle& GetTextStyle() const
-    {
-        return textStyle_;
-    }
+    const Color& GetFocusColor() const;
+    void SetFocusColor(const Color& focusColor);
 
-    void SetTextStyle(const TextStyle& textStyle)
-    {
-        textStyle_ = textStyle;
-    }
+    bool GetMaxWidthLayout() const;
+    void SetMaxWidthLayout(bool isMaxWidthLayout);
 
-    void SetFocusColor(const Color& focusColor)
-    {
-        focusColor_ = focusColor;
-    }
+    bool GetAutoMaxLines() const;
+    void SetAutoMaxLines(bool autoMaxLines);
 
-    const Color& GetFocusColor() const
-    {
-        return focusColor_;
-    }
+    bool IsChanged() const;
+    void SetIsChanged(bool isChanged);
 
-    void SetMaxWidthLayout(bool isMaxWidthLayout)
-    {
-        isMaxWidthLayout_ = isMaxWidthLayout;
-    }
+    void SetOnClick(const EventMarker& onClick);
 
-    bool GetMaxWidthLayout() const
-    {
-        return isMaxWidthLayout_;
-    }
-
+    const RefPtr<TextDeclaration>& GetDeclaration() const;
+    void SetDeclaration(const RefPtr<TextDeclaration>& declaration);
+    Dimension GetDeclarationHeight() const;
 private:
-    std::string data_;
-    TextStyle textStyle_;
-    Color focusColor_;
-    bool isMaxWidthLayout_ = false;
+    RefPtr<TextDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

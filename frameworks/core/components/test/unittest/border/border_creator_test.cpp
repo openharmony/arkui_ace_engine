@@ -38,7 +38,7 @@ const BorderEdge BORDER_EDGE_TOP = BorderEdge(Color(200), Dimension(10.0, Dimens
 const BorderEdge BORDER_EDGE_RIGHT = BorderEdge(Color(300), Dimension(15.0, DimensionUnit::PX), BorderStyle::DOTTED);
 const BorderEdge BORDER_EDGE_BOTTOM = BorderEdge(Color(400), Dimension(20.0, DimensionUnit::PX), BorderStyle::DASHED);
 const Radius BORDER_RADIUS_DEFAULT = Radius(0.0);
-const Radius BORDER_RADIUS_VALUE = Radius(50.0);
+const Radius BORDER_RADIUS_NORMAL = Radius(50.0);
 const Radius BORDER_RADIUS_TOPLEFT = Radius(10.0);
 const Radius BORDER_RADIUS_TOPRIGHT = Radius(20.0);
 const Radius BORDER_RADIUS_BOTTOMLEFT = Radius(30.0);
@@ -266,10 +266,10 @@ HWTEST_F(BorderCreatorTest, BorderCreator005, TestSize.Level1)
     ASSERT_TRUE(border->Top() == BORDER_EDGE_VALUE);
     ASSERT_TRUE(border->Right() == BORDER_EDGE_VALUE);
     ASSERT_TRUE(border->Bottom() == BORDER_EDGE_VALUE);
-    ASSERT_TRUE(border->TopLeftRadius() == BORDER_RADIUS_VALUE);
-    ASSERT_TRUE(border->TopRightRadius() == BORDER_RADIUS_VALUE);
-    ASSERT_TRUE(border->BottomLeftRadius() == BORDER_RADIUS_VALUE);
-    ASSERT_TRUE(border->BottomRightRadius() == BORDER_RADIUS_VALUE);
+    ASSERT_TRUE(border->TopLeftRadius() == BORDER_RADIUS_NORMAL);
+    ASSERT_TRUE(border->TopRightRadius() == BORDER_RADIUS_NORMAL);
+    ASSERT_TRUE(border->BottomLeftRadius() == BORDER_RADIUS_NORMAL);
+    ASSERT_TRUE(border->BottomRightRadius() == BORDER_RADIUS_NORMAL);
 }
 
 /**

@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class FocusableElement final : public SoleChildElement, public FocusGroup {
+class ACE_EXPORT FocusableElement final : public SoleChildElement, public FocusGroup {
     DECLARE_ACE_TYPE(FocusableElement, SoleChildElement, FocusGroup);
 
 public:
@@ -49,12 +49,17 @@ protected:
         }
         return nullptr;
     }
+    bool IsDeleteDisabled() override
+    {
+        return isDeleteDisabled_;
+    }
 
 private:
     // Deprecated
     RefPtr<BoxComponent> boxStyle_;
     RefPtr<BoxComponent> focusedBoxStyle_;
-    bool isNode_ { false };
+    bool isNode_{false};
+    bool isDeleteDisabled_{false};
 };
 
 } // namespace OHOS::Ace

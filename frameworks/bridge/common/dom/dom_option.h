@@ -38,6 +38,7 @@ public:
 
     void InitializeStyle() override;
 
+    void PrepareSpecializedComponent() override;
     void ResetInitializedStyle() override;
 
 protected:
@@ -50,7 +51,6 @@ protected:
 private:
     RefPtr<SelectTheme> theme_;
     RefPtr<OptionComponent> selectOptionComponent_;
-    std::list<RefPtr<DOMNode>> children_;
     RefPtr<TextComponent> content_;
     RefPtr<ImageComponent> icon_;
     // used for inspector node in PC preview

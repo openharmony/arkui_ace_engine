@@ -20,12 +20,32 @@
 #include "flutter/lib/ui/painting/image.h"
 
 #include "core/image/image_cache.h"
+#include "core/image/image_object.h"
 
 namespace OHOS::Ace {
 
 struct CachedImage {
     CachedImage(const fml::RefPtr<flutter::CanvasImage>& image) : imagePtr(image) {}
     fml::RefPtr<flutter::CanvasImage> imagePtr;
+};
+
+struct SkiaCachedImageData : public CachedImageData {
+    DECLARE_ACE_TYPE(SkiaCachedImageData, CachedImageData);
+public:
+    SkiaCachedImageData(const sk_sp<SkData>& data) : imageData(data) {}
+    ~SkiaCachedImageData() override = default;
+
+    size_t GetSize() override
+    {
+        return imageData ? imageData->size() : 0;
+    }
+
+    const uint8_t* GetData() override
+    {
+        return imageData ? imageData->bytes() : nullptr;
+    }
+
+    sk_sp<SkData> imageData;
 };
 
 class FlutterImageCache : public ImageCache {

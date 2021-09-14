@@ -85,8 +85,7 @@ void ScrollBarController::Initialize(const WeakPtr<PipelineContext>& context)
 void ScrollBarController::HandleTouchDown()
 {
     LOGI("handle touch down");
-    auto scroll = AceType::DynamicCast<RenderScroll>(scroll_.Upgrade());
-    if (scroll) {
+    if (CheckScroll()) {
         isActive_ = true;
         if (vibrator_) {
             vibrator_->Vibrate(VIBRATE_DURATION);
@@ -193,6 +192,12 @@ void ScrollBarController::HandleDragEnd(const DragEndInfo& info)
 
     currentPos_ = mainPosition;
     dragEndAnimator_->ClearStopListeners();
+    dragEndAnimator_->AddStopListener([weakScroll = AceType::WeakClaim(this)]() {
+        auto scrollBarController = weakScroll.Upgrade();
+        if (scrollBarController) {
+            scrollBarController->SetActive(false);
+        }
+    });
     dragEndAnimator_->PlayMotion(dragEndMotion_);
 }
 
@@ -213,7 +218,7 @@ void ScrollBarController::ProcessScrollMotion(double position)
     currentPos_ = position;
 }
 
-bool ScrollBarController::UpdateScrollPosition(const double offset, int32_t source) const
+bool ScrollBarController::UpdateScrollPosition(const double offset, int32_t source)
 {
     bool ret = true;
     if (callback_) {
@@ -262,4 +267,20 @@ void ScrollBarController::HandleScrollBarEnd()
     }
 }
 
+void ScrollBarController::Reset()
+{
+    if (scrollEndAnimator_) {
+        if (!scrollEndAnimator_->IsStopped()) {
+            scrollEndAnimator_->Stop();
+        }
+        scrollEndAnimator_->ClearInterpolators();
+    }
+}
+
+bool ScrollBarController::CheckScroll()
+{
+    auto scroll = AceType::DynamicCast<RenderScroll>(scroll_.Upgrade());
+    return scroll != nullptr;
+
+}
 } // namespace OHOS::Ace

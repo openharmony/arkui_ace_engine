@@ -20,7 +20,6 @@
 #include "core/pipeline/layers/clip_layer.h"
 
 namespace OHOS::Ace {
-
 struct IndicatorOffsetInfo {
     double focusStart; // start of focus
     double focusEnd;   // end of focus
@@ -46,6 +45,8 @@ private:
     void PaintMask(RenderContext& context, const Offset& offset) const;
     void LayoutDigitalIndicator();
     void CanvasDrawIndicator(RenderContext& context, const Offset& offset);
+    void PaintFade(RenderContext& context, const Offset& offset);
+    void PaintShadow(flutter::Canvas* canvas, const Offset& offset);
     IndicatorProperties PrepareIndicatorProperties() const;
 
     void DrawIndicator(RenderContext& context, const Offset& offset);

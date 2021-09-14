@@ -47,11 +47,6 @@ const std::string& ManifestAppInfo::GetLogLevel() const
     return logLevel_;
 }
 
-const std::string& ManifestAppInfo::GetMinPlatformVersion() const
-{
-    return minPlatformVersion_;
-}
-
 void ManifestAppInfo::AppInfoParse(const std::unique_ptr<JsonValue>& root)
 {
     if (!root) {
@@ -64,7 +59,7 @@ void ManifestAppInfo::AppInfoParse(const std::unique_ptr<JsonValue>& root)
     logLevel_ = root->GetString("logLevel");
     icon_ = root->GetString("icon");
     appID_ = root->GetString("appID");
-    minPlatformVersion_ = root->GetString("minPlatformVersion");
+    minPlatformVersion_ = root->GetInt("minPlatformVersion", 0);
 }
 
 } // namespace OHOS::Ace::Framework

@@ -33,7 +33,6 @@ void InspectList::PackAttrAndStyle()
     attrs_.insert(std::make_pair("divider", "false"));
     attrs_.insert(std::make_pair("shapemode", "default"));
     attrs_.insert(std::make_pair("itemscale", "true"));
-    attrs_.insert(std::make_pair("itemopacity", "true"));
     attrs_.insert(std::make_pair("itemcenter", "false"));
     attrs_.insert(std::make_pair("updateeffect", "false"));
     attrs_.insert(std::make_pair("chainanimation", "false"));
@@ -49,6 +48,7 @@ void InspectList::PackAttrAndStyle()
     styles_.insert(std::make_pair("divider-origin", "0"));
     styles_.insert(std::make_pair("flex-direction", "column"));
     styles_.insert(std::make_pair("columns", "1"));
+    styles_.insert(std::make_pair("align-items", "stretch"));
     styles_.insert(std::make_pair("fade-color", "grey"));
 }
 } // namespace OHOS::Ace::Framework

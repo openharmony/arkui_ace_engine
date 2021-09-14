@@ -30,7 +30,7 @@ public:
     void WindowParse(const std::unique_ptr<JsonValue>& root);
     void PrintInfo();
 
-    const WindowConfig& GetWindowConfig() const
+    WindowConfig& GetWindowConfig()
     {
         return windowConfig_;
     }

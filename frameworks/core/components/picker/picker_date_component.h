@@ -101,7 +101,7 @@ private:
     static std::vector<std::string> tagOrder_; // year month day tag order
 };
 
-class PickerDateComponent : public PickerBaseComponent {
+class ACE_EXPORT PickerDateComponent : public PickerBaseComponent {
     DECLARE_ACE_TYPE(PickerDateComponent, PickerBaseComponent);
 
 public:

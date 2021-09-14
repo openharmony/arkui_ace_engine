@@ -44,6 +44,12 @@ std::string BuildEventParam(int32_t beginIndex, int32_t endIndex)
 
 RefPtr<RenderNode> ListElement::CreateRenderNode()
 {
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("context is nullptr!");
+        return nullptr;
+    }
+    isJsCard_ = context->IsJsCard();
     RefPtr<RenderNode> node = ComponentGroupElement::CreateRenderNode();
     renderList_ = AceType::DynamicCast<RenderList>(node);
     auto multiChildScroll = AceType::DynamicCast<RenderMultiChildScroll>(RenderMultiChildScroll::Create());
@@ -59,11 +65,12 @@ RefPtr<RenderNode> ListElement::CreateRenderNode()
     renderList_->RegisterRecycleByRangeCallback(
         [weakListElement = AceType::WeakClaim(this)](int32_t& from, int32_t& to) -> bool {
             auto listElement = weakListElement.Upgrade();
-            if (listElement) {
-                listElement->RecycleByRange(from, to);
-                return true;
+            if (!listElement) {
+                LOGE("list element is nullptr");
+                return false;
             }
-            return false;
+            listElement->RecycleByRange(from, to);
+            return true;
         });
 
     renderList_->RegisterRecycleByItemsCallback(
@@ -304,15 +311,18 @@ void ListElement::UpdateListItemElement(const RefPtr<Component>& component)
 
     // Update New Component to Element.
     int32_t index = itemComponent->GetIndex();
+    RefPtr<Element> element;
     auto item = itemElements_.find(index);
     if (item != itemElements_.end() && item->second) {
-        item->second->SetNewComponent(component);
+        element = item->second;
+    }
+    if (element) {
+        UpdateChild(element, component);
     }
 }
 
 bool ListElement::BuildListComponent(const RefPtr<Component>& component)
 {
-    int32_t slot = -1;
     auto itemComponent = ListItemComponent::GetListItem(component);
     if (!itemComponent) {
         LOGE("itemComponent exist but is null");
@@ -334,7 +344,7 @@ bool ListElement::BuildListComponent(const RefPtr<Component>& component)
     }
 
     if (element) {
-        Element::AddChild(element, slot);
+        Element::AddChild(element);
         if (!element->GetRenderNode()) {
             LOGW("no render node in this recycled element");
             element = nullptr;
@@ -342,7 +352,7 @@ bool ListElement::BuildListComponent(const RefPtr<Component>& component)
     }
 
     LOGD("build item index:%{public}d type:%{public}s", index, itemComponent->GetType().c_str());
-    element = UpdateChild(element, component, slot);
+    element = UpdateChild(element, component);
     if (itemComponent->TestFlag(LIST_ITEM_FLAG_DYNAMIC)) {
         RemoveComposedChildFromMap(element);
     }
@@ -369,6 +379,10 @@ bool ListElement::BuildListComponent(const RefPtr<Component>& component)
     itemElements_[index] = element;
     renderList_->AddListItem(index, itemProxy);
     itemProxy->SetHidden(false);
+    // recover visible state.
+    if (itemProxy->GetVisible() != GetRenderNode()->GetVisible()) {
+        itemProxy->SetVisible(GetRenderNode()->GetVisible());
+    }
 
     // refresh focus
     auto pipelineContext = context_.Upgrade();
@@ -412,15 +426,14 @@ void ListElement::ReleaseRecycledListItem(int32_t from, int32_t to)
             continue;
         }
 
-        auto compose = AceType::DynamicCast<ComposedElement>(item->second);
-        if (!compose) {
-            LOGW("not composed element(%{public}s)", AceType::TypeName(item->second));
-            continue;
+        RefPtr<RenderNode> proxyNode;
+        auto renderNode = item->second->GetRenderNode();
+        if (renderNode) {
+            proxyNode = renderNode->GetParent().Upgrade();
         }
 
-        auto proxyNode = compose->GetParentRenderNode();
         if (!proxyNode) {
-            LOGW("composed ParentRenderNode is null.");
+            LOGW("Proxy node is null.");
             continue;
         }
 
@@ -584,7 +597,7 @@ void ListElement::OnRefreshed()
     }
 }
 
-inline int32_t ListElement::AddToCache(RefPtr<Component> item, int32_t index, bool isDynamic)
+inline int32_t ListElement::AddToCache(const RefPtr<Component>& item, int32_t index, bool isDynamic)
 {
     auto listItemComponent = ListItemComponent::GetListItem(item);
     if (listItemComponent && listItemComponent->GetOperation() != LIST_ITEM_OP_REMOVE) {
@@ -676,8 +689,8 @@ void ListElement::GetRefreshItems(bool& rebuild, int32_t& tailIndex)
     int32_t currentMax = renderList_->GetCurrentMaxIndex() + 1;
     const auto& components = group->GetChildren();
 
-    LOGD("currentMin: %{public}d, currentMax: %{public}d, components.size(): %{public}lu",
-        currentMin, currentMax, components.size());
+    LOGD("currentMin: %{public}d, currentMax: %{public}d, components.size(): %{public}d",
+        currentMin, currentMax, static_cast<int>(components.size()));
     int32_t head = 0;
     bool needRefresh = true;
     bool inRange = false;
@@ -726,6 +739,9 @@ void ListElement::GetRefreshItems(bool& rebuild, int32_t& tailIndex)
             }
         }
     }
+    if (isJsCard_) {
+        rebuild = true;
+    }
     maxCount_ = itemComponents_.size();
 }
 
@@ -762,20 +778,23 @@ void ListElement::RebuildElements(int32_t tailIndex)
             // Get item proxy.
             auto parent = updatedChild->GetRenderNode()->GetParent();
             auto itemProxy = parent.Upgrade();
-            if (!itemProxy) {
+            if (itemProxy) {
+                // Add list item element to focus tree.
+                auto itemElement = ListItemElement::GetListItem(updatedChild);
+                if (itemElement) {
+                    itemElement->AddToFocus();
+                }
+
+                itemElements_[index] = updatedChild;
+                renderList_->AddListItem(index, itemProxy);
+                itemProxy->SetHidden(false);
+                // recover visible state.
+                if (itemProxy->GetVisible() != GetRenderNode()->GetVisible()) {
+                    itemProxy->SetVisible(GetRenderNode()->GetVisible());
+                }
+            } else {
                 LOGE("itemProxy is null");
-                continue;
             }
-
-            // Add list item element to focus tree.
-            auto itemElement = ListItemElement::GetListItem(updatedChild);
-            if (itemElement) {
-                itemElement->AddToFocus();
-            }
-
-            itemElements_[index] = updatedChild;
-            renderList_->AddListItem(index, itemProxy);
-            itemProxy->SetHidden(false);
         }
         --index;
         ++riter;
@@ -863,7 +882,7 @@ void ListElement::Update()
         ComponentGroupElement::Update();
     } else {
         ComponentGroupElement::Update();
-        if (list->NeedUpdateElement()) {
+        if (list->NeedUpdateElement() || isJsCard_) {
             LOGD("update list element");
             UpdateListElement();
             list->MarkNeedUpdateElement(false);
@@ -879,42 +898,29 @@ void ListElement::Update()
     }
 }
 
-void ListElement::Apply(const RefPtr<Element>& child)
+void ListElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChild)
 {
-    if (!child) {
+    if (!renderChild) {
         LOGE("Element child is null");
         return;
     }
 
-    if (!renderNode_) {
-        LOGE("RenderElement don't have a render node");
+    if (!renderList_) {
+        LOGE("ListElement don't have a render list");
         return;
     }
 
     RefPtr<RenderNode> proxy;
-    if (child->GetType() == RENDER_ELEMENT) {
-        proxy = RenderItemProxy::Create();
-        // Directly attach the RenderNode if child is RenderElement.
-        RefPtr<RenderElement> renderChild = AceType::DynamicCast<RenderElement>(child);
-        if (renderChild) {
-            proxy->AddChild(renderChild->GetRenderNode());
-        }
-    } else if (child->GetType() == COMPOSED_ELEMENT) {
-        auto listItemElement = ListItemElement::GetListItem(child);
-        if (listItemElement) {
-            proxy = listItemElement->GetProxyRenderNode();
-        }
-        if (!proxy) {
-            proxy = RenderItemProxy::Create();
-        }
-        // If child is ComposedElement, just set parent render node.
-        RefPtr<ComposedElement> composeChild = AceType::DynamicCast<ComposedElement>(child);
-        if (composeChild) {
-            composeChild->SetParentRenderNode(proxy);
-        }
+    auto listItemElement = ListItemElement::GetListItem(renderChild);
+    if (listItemElement) {
+        proxy = listItemElement->GetProxyRenderNode();
     }
-    proxy->Attach(context_);
+    if (!proxy) {
+        proxy = RenderItemProxy::Create();
+    }
 
+    proxy->AddChild(renderChild->GetRenderNode());
+    proxy->Attach(context_);
     renderList_->AddChild(proxy);
 }
 

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CLOCK_RENDER_CLOCK_H
 
 #include "base/utils/time_util.h"
+#include "core/components/declaration/clock/clock_declaration.h"
 #include "core/components/image/render_image.h"
 #include "core/components/text/render_text.h"
 #include "core/components/text/text_component.h"
@@ -79,6 +80,12 @@ public:
     {
         return isDay_;
     }
+    void SetNeedStop(bool needStop)
+    {
+        needStop_ = needStop;
+    }
+
+    virtual void RequestRenderForNextSecond() {}
 
 protected:
     RefPtr<RenderImage> renderHourHand_;
@@ -92,6 +99,7 @@ protected:
     OnHourCallback onHourCallback_;
     AccessibilityTimeCallback accessibilityTimeCallback_;
     bool isDay_ = true;
+    bool needStop_ = false;
 };
 
 class RenderClock : public RenderNode {
@@ -111,22 +119,11 @@ public:
     void UseNightConfig();
     void UseDayConfig();
     void CheckNightConfig();
-    void UseDaySourceIfEmpty(std::string& nightSource, const std::string& daySource);
 
 protected:
     RenderClock();
 
-    // hours west of Greenwich, for e.g., [hoursWest] is [-8] in  UTC+8.
-    // Valid range of [hoursWest] is [-14, 12]. Set default value to DBL_MAX to use current time zone by default.
-    double hoursWest_ = DBL_MAX;
-    std::vector<std::string> fontFamilies_;
-
-    std::string clockFaceSrc_;
-    std::string hourHandSrc_;
-    std::string minuteHandSrc_;
-    std::string secondHandSrc_;
-    Color digitColor_;
-
+    bool setScreenCallback_ = false;
     std::string clockFaceNightSrc_;
     std::string hourHandNightSrc_;
     std::string minuteHandNightSrc_;
@@ -139,19 +136,20 @@ protected:
     RefPtr<RenderImage> renderMinuteHand_;
     RefPtr<RenderImage> renderSecondHand_;
     std::vector<RefPtr<RenderText>> digitRenderNodes_;
-    std::vector<std::string> digits_;
+    std::vector<RefPtr<TextComponent>> digitComponentNodes_;
     std::vector<double> radians_;
     Offset paintOffset_;
     Dimension defaultSize_;
     // ratio of digit-radius and half of side length of clock-face-image.
-    // digit-radius is used to calculate digit offset.
+    // digit-radius is used to calculate digit offset whose range is (0, 1].
     // e.g., when size of clock-face-image is 200 x 200, digit "3" is [200 / 2 x 0.7 = 70] right of the center.
     double digitRadiusRatio_ = 0.7;
     // ratio of digit-size and side length of clock-face-image, which is used to decide font-size of digit.
     // e.g., when size of clock-face-image is 200 x 200, font-size of digit is 200 x 0.08 = 16
+    // its range is (0, 1.0 / 7.0].
     double digitSizeRatio_ = 0.08;
     Size drawSize_;
-    bool showDigit_ = true;
+    RefPtr<ClockDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

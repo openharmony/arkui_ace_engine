@@ -25,6 +25,8 @@
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/base/composed_element.h"
 
+#include "core/components/test/json/json_frontend.h"
+
 using namespace testing;
 using namespace testing::ext;
 using namespace std;
@@ -78,6 +80,8 @@ private:
     RefPtr<ComposedComponent> newComposedComponent_;
     vector<NodeInfo> newElementTree_;
     vector<NodeInfo> newRenderTree_;
+
+    RefPtr<PipelineContext> pipelineContext_;
 };
 
 void ViewUpdateTest::SetUp()
@@ -87,10 +91,16 @@ void ViewUpdateTest::SetUp()
         AceType::MakeRefPtr<ComposedComponent>(ROOT_COMPOSE_ID, ROOT_COMPOSE_NAME, nullptr);
     RefPtr<RootComponent> rootComponent = AceType::MakeRefPtr<RootComponent>(rootCompose);
 
+    auto platformWindow = PlatformWindow::Create(nullptr);
+    auto window = std::make_unique<Window>(std::move(platformWindow));
+    auto frontend = Frontend::CreateDefault();
+    pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), nullptr, nullptr, nullptr, frontend, 0);
+
     // setup element tree and render tree
     rootElement_ = AceType::MakeRefPtr<RootElement>();
     ASSERT_TRUE(rootElement_);
-    rootElement_->SetPipelineContext(nullptr);
+    rootElement_->SetPipelineContext(pipelineContext_);
     rootElement_->SetNewComponent(rootComponent);
     rootElement_->Mount(nullptr);
     ASSERT_FALSE(rootElement_->GetChildren().empty());

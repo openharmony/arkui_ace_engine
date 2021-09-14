@@ -20,6 +20,11 @@
 #include "core/components/wrap/wrap_component.h"
 
 namespace OHOS::Ace {
+namespace {
+
+constexpr int32_t MIN_COMPATIBLE_VERSION = 6;
+
+}
 
 RefPtr<RenderNode> RenderWrap::Create()
 {
@@ -43,6 +48,8 @@ void RenderWrap::Update(const RefPtr<Component>& component)
     spacing_ = wrap->GetSpacing();
     contentSpace_ = wrap->GetContentSpacing();
     dialogStretch_ = wrap->GetDialogStretch();
+    horizontalMeasure_ = wrap->GetHorizontalMeasure();
+    verticalMeasure_ = wrap->GetVerticalMeasure();
     SetTextDirection(wrap->GetTextDirection());
     isLeftToRight_ = (wrap->GetTextDirection() == TextDirection::LTR);
     contentList_.clear();
@@ -77,6 +84,8 @@ void RenderWrap::PerformLayout()
         double currentCrossLength = 0.0;
         // number of item in content
         int32_t count = 0;
+        // max baseline of each line
+        double baselineDistance = 0.0;
         std::list<RefPtr<RenderNode>> itemsList;
         for (auto& item : GetChildren()) {
             item->Layout(layoutParam);
@@ -85,30 +94,45 @@ void RenderWrap::PerformLayout()
                 currentMainLength += GetMainItemLength(item);
                 currentMainLength += spacing;
                 currentCrossLength = std::max(currentCrossLength, GetCrossItemLength(item));
+                if (crossAlignment_ == WrapAlignment::BASELINE) {
+                    baselineDistance = std::max(baselineDistance, item->GetBaselineDistance(TextBaseline::ALPHABETIC));
+                }
                 itemsList.push_back(item);
                 count += 1;
             } else {
                 currentMainLength -= spacing;
-                if (direction_ == WrapDirection::HORIZONTAL && !isLeftToRight_) {
+                if ((direction_ == WrapDirection::HORIZONTAL && !isLeftToRight_) ||
+                    (direction_ == WrapDirection::HORIZONTAL_REVERSE && isLeftToRight_) ||
+                    direction_ == WrapDirection::VERTICAL_REVERSE) {
                     itemsList.reverse();
                 }
-                contentList_.emplace_back(ContentInfo(currentMainLength, currentCrossLength, count, itemsList));
+                auto contentInfo = ContentInfo(currentMainLength, currentCrossLength, count, itemsList);
+                contentInfo.maxBaselineDistance = baselineDistance;
+                contentList_.emplace_back(contentInfo);
                 itemsList.clear();
                 totalMainLength_ = std::max(currentMainLength, totalMainLength_);
                 totalCrossLength_ += currentCrossLength + contentSpace;
                 currentMainLength = GetMainItemLength(item) + spacing;
                 currentCrossLength = GetCrossItemLength(item);
+                if (crossAlignment_ == WrapAlignment::BASELINE) {
+                    baselineDistance = item->GetBaselineDistance(TextBaseline::ALPHABETIC);
+                }
                 itemsList.push_back(item);
                 count = 1;
             }
         }
         // Add last content into list
         currentMainLength -= spacing;
-        if (direction_ == WrapDirection::HORIZONTAL && !isLeftToRight_) {
+        if ((direction_ == WrapDirection::HORIZONTAL && !isLeftToRight_) ||
+            (direction_ == WrapDirection::HORIZONTAL_REVERSE && isLeftToRight_) ||
+            (direction_ == WrapDirection::VERTICAL_REVERSE)) {
             itemsList.reverse();
         }
-        contentList_.emplace_back(ContentInfo(currentMainLength, currentCrossLength, count, itemsList));
-        if (direction_ == WrapDirection::VERTICAL && !isLeftToRight_) {
+        auto contentInfo = ContentInfo(currentMainLength, currentCrossLength, count, itemsList);
+        contentInfo.maxBaselineDistance = baselineDistance;
+        contentList_.emplace_back(contentInfo);
+        if ((direction_ == WrapDirection::VERTICAL || direction_ == WrapDirection::VERTICAL_REVERSE) &&
+            !isLeftToRight_) {
             contentList_.reverse();
         }
         totalMainLength_ = std::max(currentMainLength, totalMainLength_);
@@ -186,17 +210,21 @@ void RenderWrap::HandleDialogStretch(const LayoutParam& layoutParam)
 
 double RenderWrap::GetMainItemLength(const RefPtr<RenderNode>& item) const
 {
-    return direction_ == WrapDirection::HORIZONTAL ? item->GetLayoutSize().Width() : item->GetLayoutSize().Height();
+    return direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE
+               ? item->GetLayoutSize().Width()
+               : item->GetLayoutSize().Height();
 }
 
 double RenderWrap::GetCrossItemLength(const RefPtr<RenderNode>& item) const
 {
-    return direction_ == WrapDirection::VERTICAL ? item->GetLayoutSize().Width() : item->GetLayoutSize().Height();
+    return direction_ == WrapDirection::VERTICAL || direction_ == WrapDirection::VERTICAL_REVERSE
+               ? item->GetLayoutSize().Width()
+               : item->GetLayoutSize().Height();
 }
 
 void RenderWrap::PerformLayoutInitialize()
 {
-    if (direction_ == WrapDirection::HORIZONTAL) {
+    if (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE) {
         mainLengthLimit_ = GetLayoutParam().GetMaxSize().Width();
         crossLengthLimit_ = GetLayoutParam().GetMaxSize().Height();
     } else {
@@ -208,7 +236,7 @@ void RenderWrap::PerformLayoutInitialize()
 
 Size RenderWrap::GetLeftSize(double crossLength, double mainLeftLength, double crossLeftLength) const
 {
-    if (direction_ == WrapDirection::HORIZONTAL) {
+    if (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE) {
         return Size(mainLeftLength, crossLeftLength - crossLength);
     } else {
         return Size(crossLeftLength - crossLength, mainLeftLength);
@@ -223,51 +251,76 @@ void RenderWrap::LayoutWholeWrap()
         return;
     }
     Offset startPosition;
+    Offset betweenPosition;
+    bool isHorizontal = direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE;
 
     switch (alignment_) {
         case WrapAlignment::START: {
             startPosition = Offset(0.0, 0.0);
+            betweenPosition = Offset();
             break;
         }
         case WrapAlignment::END: {
             startPosition = GetContentOffset(totalCrossLength_);
+            betweenPosition = Offset();
             break;
         }
         case WrapAlignment::CENTER: {
             // divided the space by two
             startPosition = GetContentOffset(totalCrossLength_) / 2;
+            betweenPosition = Offset();
             break;
         }
         case WrapAlignment::SPACE_BETWEEN: {
             startPosition = Offset(0.0, 0.0);
+            double crossSpace = contentNum > 1 ? (crossLengthLimit_ - totalCrossLength_) / (contentNum - 1) : 0.0;
+            betweenPosition = isHorizontal ? Offset(0.0, crossSpace) : Offset(crossSpace, 0.0);
+            break;
+        }
+        case WrapAlignment::SPACE_EVENLY: {
+            double leftSpace = crossLengthLimit_ - totalCrossLength_;
+            double crossSpace = leftSpace / (contentNum + 1);
+            startPosition = isHorizontal ? Offset(0.0, crossSpace) : Offset(crossSpace, 0.0);
+            betweenPosition = isHorizontal ? Offset(0.0, crossSpace) : Offset(crossSpace, 0.0);
             break;
         }
         case WrapAlignment::SPACE_AROUND: {
             double leftSpace = crossLengthLimit_ - totalCrossLength_;
             double crossSpace = leftSpace / contentNum;
-            startPosition = Offset(direction_ == WrapDirection::HORIZONTAL ? 0.0 : crossSpace / 2,
-                direction_ == WrapDirection::HORIZONTAL ? crossSpace / 2 : 0.0);
+            startPosition = isHorizontal ? Offset(0.0, crossSpace / 2) : Offset(crossSpace / 2, 0.0);
+            betweenPosition = isHorizontal ? Offset(0.0, crossSpace) : Offset(crossSpace, 0.0);
             break;
         }
         default: {
             LOGE("Wrap::alignment setting error.");
             startPosition = Offset(0.0, 0.0);
+            betweenPosition = Offset();
             break;
         }
     }
-    TraverseContent(startPosition);
+    auto context = context_.Upgrade();
+    bool applyNewOffset = context ? context->GetMinPlatformVersion() >= MIN_COMPATIBLE_VERSION : false;
+    if (applyNewOffset) {
+        // In content type, wrap is as large as children, no need to set alignment_.
+        if ((!isHorizontal && horizontalMeasure_ == MeasureType::CONTENT) ||
+            (isHorizontal && verticalMeasure_ == MeasureType::CONTENT)) {
+            startPosition = Offset();
+            betweenPosition = Offset();
+        }
+    }
+    TraverseContent(startPosition, betweenPosition);
 }
 
 Offset RenderWrap::GetContentOffset(double totalCrossLength) const
 {
-    if (direction_ == WrapDirection::HORIZONTAL) {
+    if (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE) {
         return Offset(0.0, crossLengthLimit_ - totalCrossLength);
     } else {
         return Offset(crossLengthLimit_ - totalCrossLength, 0.0);
     }
 }
 
-void RenderWrap::TraverseContent(const Offset& startPosition) const
+void RenderWrap::TraverseContent(const Offset& startPosition, const Offset& betweenPosition) const
 {
     // determine the content start position by main axis
     Offset accumulateOffset = startPosition;
@@ -284,7 +337,9 @@ void RenderWrap::TraverseContent(const Offset& startPosition) const
 
         switch (mainAlignment_) {
             case WrapAlignment::START: {
-                if (direction_ == WrapDirection::HORIZONTAL && !isLeftToRight_) {
+                if ((direction_ == WrapDirection::HORIZONTAL && !isLeftToRight_) ||
+                    (direction_ == WrapDirection::HORIZONTAL_REVERSE && isLeftToRight_) ||
+                    (direction_ == WrapDirection::VERTICAL_REVERSE)) {
                     PositionedItem(0.0, content, accumulateOffset + GetItemMainOffset(currentMainSpaceLength),
                         content.crossLength_);
                 } else {
@@ -293,7 +348,9 @@ void RenderWrap::TraverseContent(const Offset& startPosition) const
                 break;
             }
             case WrapAlignment::END: {
-                if (direction_ == WrapDirection::HORIZONTAL && !isLeftToRight_) {
+                if ((direction_ == WrapDirection::HORIZONTAL && !isLeftToRight_) ||
+                    (direction_ == WrapDirection::HORIZONTAL_REVERSE && isLeftToRight_) ||
+                    direction_ == WrapDirection::VERTICAL_REVERSE) {
                     PositionedItem(0.0, content, accumulateOffset, content.crossLength_);
                 } else {
                     PositionedItem(0.0, content, accumulateOffset + GetItemMainOffset(currentMainSpaceLength),
@@ -318,6 +375,12 @@ void RenderWrap::TraverseContent(const Offset& startPosition) const
                     content.crossLength_);
                 break;
             }
+            case WrapAlignment::SPACE_EVENLY: {
+                double itemMainSpace = currentMainSpaceLength / (itemNum + 1);
+                PositionedItem(
+                    itemMainSpace, content, accumulateOffset + GetItemMainOffset(itemMainSpace), content.crossLength_);
+                break;
+            }
             default: {
                 LOGE("Wrap::mainAlignment setting error. Now using START");
                 PositionedItem(0.0, content, accumulateOffset, content.crossLength_);
@@ -326,7 +389,8 @@ void RenderWrap::TraverseContent(const Offset& startPosition) const
         }
         auto contentSpace = NormalizeToPx(contentSpace_);
         startItemIndex += itemNum;
-        accumulateOffset += (direction_ == WrapDirection::HORIZONTAL)
+        accumulateOffset += betweenPosition;
+        accumulateOffset += (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE)
                                 ? Offset(0.0, content.crossLength_ + contentSpace)
                                 : Offset(content.crossLength_ + contentSpace, 0.0);
     }
@@ -335,7 +399,7 @@ void RenderWrap::TraverseContent(const Offset& startPosition) const
 Offset RenderWrap::GetItemMainOffset(double mainSpace) const
 {
     // calculate the offset of each item in content
-    if (direction_ == WrapDirection::HORIZONTAL) {
+    if (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE) {
         return Offset(mainSpace, 0.0);
     } else {
         return Offset(0.0, mainSpace);
@@ -345,12 +409,13 @@ Offset RenderWrap::GetItemMainOffset(double mainSpace) const
 void RenderWrap::PositionedItem(
     double betweenSpace, const ContentInfo& content, const Offset& position, double totalCrossSpace) const
 {
-    Offset itemPositionOffset = Offset(0.0, 0.0);
+    Offset itemPositionOffset;
     // iterate every item in content
     for (const auto& item : content.itemList_) {
         switch (crossAlignment_) {
             case WrapAlignment::START: {
-                if (direction_ == WrapDirection::VERTICAL && !isLeftToRight_) {
+                if ((direction_ == WrapDirection::VERTICAL && !isLeftToRight_) ||
+                    (direction_ == WrapDirection::VERTICAL_REVERSE && !isLeftToRight_)) {
                     HandleEndAlignment(totalCrossSpace, item, position, betweenSpace, itemPositionOffset);
                 } else {
                     HandleStartAlignment(item, position, betweenSpace, itemPositionOffset);
@@ -362,7 +427,7 @@ void RenderWrap::PositionedItem(
                 // stretch the component in wrap
                 LayoutParam layoutParam;
                 auto spacing = NormalizeToPx(spacing_);
-                if (direction_ == WrapDirection::HORIZONTAL) {
+                if (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE) {
                     itemPositionOffset += Offset(item->GetLayoutSize().Width() + betweenSpace + spacing, 0.0);
                     layoutParam.SetFixedSize(Size(item->GetLayoutSize().Width(), totalCrossSpace));
                 } else {
@@ -373,7 +438,8 @@ void RenderWrap::PositionedItem(
                 break;
             }
             case WrapAlignment::END: {
-                if (direction_ == WrapDirection::VERTICAL && !isLeftToRight_) {
+                if ((direction_ == WrapDirection::VERTICAL && !isLeftToRight_) ||
+                    (direction_ == WrapDirection::VERTICAL_REVERSE && !isLeftToRight_)) {
                     HandleStartAlignment(item, position, betweenSpace, itemPositionOffset);
                 } else {
                     HandleEndAlignment(totalCrossSpace, item, position, betweenSpace, itemPositionOffset);
@@ -385,9 +451,23 @@ void RenderWrap::PositionedItem(
                 HandleCenterAlignment(totalCrossSpace, item, position, betweenSpace, itemPositionOffset);
                 break;
             }
+            case WrapAlignment::BASELINE: {
+                if (direction_ == WrapDirection::VERTICAL || direction_ == WrapDirection::VERTICAL_REVERSE) {
+                    if (isLeftToRight_) {
+                        HandleStartAlignment(item, position, betweenSpace, itemPositionOffset);
+                    } else {
+                        HandleEndAlignment(totalCrossSpace, item, position, betweenSpace, itemPositionOffset);
+                    }
+                } else {
+                    HandleBaselineAlignment(
+                        content.maxBaselineDistance, item, position, betweenSpace, itemPositionOffset);
+                }
+                break;
+            }
             default: {
                 LOGW("Wrap::crossAlignment setting error. Now using START");
-                if (direction_ == WrapDirection::VERTICAL && !isLeftToRight_) {
+                if ((direction_ == WrapDirection::VERTICAL && !isLeftToRight_) ||
+                    (direction_ == WrapDirection::VERTICAL_REVERSE && !isLeftToRight_)) {
                     HandleEndAlignment(totalCrossSpace, item, position, betweenSpace, itemPositionOffset);
                 } else {
                     HandleStartAlignment(item, position, betweenSpace, itemPositionOffset);
@@ -410,7 +490,7 @@ void RenderWrap::HandleCenterAlignment(double totalCrossSpace, const RefPtr<Rend
     // itemPositionOffset will change in this function
     Offset crossOffset;
     auto spacing = NormalizeToPx(spacing_);
-    if (direction_ == WrapDirection::HORIZONTAL) {
+    if (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE) {
         crossOffset = Offset(0.0, (totalCrossSpace - item->GetLayoutSize().Height()) / 2.0);
         PlaceItemAndLog(item, position + itemPositionOffset + crossOffset, "CENTER");
         itemPositionOffset += Offset(item->GetLayoutSize().Width() + betweenSpace + spacing, 0.0);
@@ -427,7 +507,7 @@ void RenderWrap::HandleEndAlignment(double totalCrossSpace, const RefPtr<RenderN
     // itemPositionOffset will change in this function
     Offset crossOffset;
     auto spacing = NormalizeToPx(spacing_);
-    if (direction_ == WrapDirection::HORIZONTAL) {
+    if (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE) {
         crossOffset = Offset(0.0, totalCrossSpace - item->GetLayoutSize().Height());
         PlaceItemAndLog(item, position + itemPositionOffset + crossOffset, "END");
         itemPositionOffset += Offset(item->GetLayoutSize().Width() + betweenSpace + spacing, 0.0);
@@ -438,15 +518,25 @@ void RenderWrap::HandleEndAlignment(double totalCrossSpace, const RefPtr<RenderN
     }
 }
 
+void RenderWrap::HandleBaselineAlignment(double totalCrossSpace, const RefPtr<RenderNode>& item, const Offset& position,
+    double betweenSpace, Offset& itemPositionOffset) const
+{
+    Offset crossOffset;
+    auto spacing = NormalizeToPx(spacing_);
+    crossOffset = Offset(0.0, totalCrossSpace - item->GetBaselineDistance(TextBaseline::ALPHABETIC));
+    PlaceItemAndLog(item, position + itemPositionOffset + crossOffset, "Baseline");
+    itemPositionOffset += Offset(item->GetLayoutSize().Width() + betweenSpace + spacing, 0.0);
+}
+
 void RenderWrap::HandleStartAlignment(
     const RefPtr<RenderNode>& item, const Offset& position, double betweenSpace, Offset& itemPositionOffset) const
 {
     PlaceItemAndLog(item, position + itemPositionOffset, "START");
     // Decide content offset position
     auto spacing = NormalizeToPx(spacing_);
-    itemPositionOffset +=
-        Offset(direction_ == WrapDirection::HORIZONTAL ? item->GetLayoutSize().Width() + betweenSpace + spacing : 0.0,
-            direction_ == WrapDirection::HORIZONTAL ? 0.0 : item->GetLayoutSize().Height() + betweenSpace + spacing);
+    bool isHorizontal = direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE;
+    itemPositionOffset += Offset(isHorizontal ? item->GetLayoutSize().Width() + betweenSpace + spacing : 0.0,
+        isHorizontal ? 0.0 : item->GetLayoutSize().Height() + betweenSpace + spacing);
 }
 
 void RenderWrap::ClearRenderObject()
@@ -471,7 +561,7 @@ void RenderWrap::ClearRenderObject()
 bool RenderWrap::MaybeRelease()
 {
     auto context = GetContext().Upgrade();
-    if (context && context->GetRenderFactory()->GetRenderWrapFactory()->Recycle(this)) {
+    if (context && context->GetRenderFactory() && context->GetRenderFactory()->GetRenderWrapFactory()->Recycle(this)) {
         ClearRenderObject();
         return false;
     }

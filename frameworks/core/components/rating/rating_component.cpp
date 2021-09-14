@@ -49,4 +49,20 @@ RefPtr<Element> RatingComponent::CreateElement()
     return AceType::MakeRefPtr<RatingElement>();
 }
 
+void RatingComponent::SetThemeStyle(const RefPtr<RatingTheme>& theme)
+{
+    if (!theme) {
+        return;
+    }
+    SetStarNum(theme->GetStarNum());
+    SetStepSize(theme->GetStepSize());
+    SetDefaultHeight(theme->GetRatingHeight());
+    SetDesignedStarAspectRatio(theme->GetDesignedStarAspectRatio());
+    SetFocusBorderWidth(theme->GetFocusBorderWidth());
+    SetFocusBorderRadius(theme->GetFocusBorderRadius());
+    SetHoverColor(theme->GetHoverColor());
+    SetStarColorActive(theme->GetStarColorActive());
+    SetStarColorInactive(theme->GetStarColorInactive());
+}
+
 } // namespace OHOS::Ace

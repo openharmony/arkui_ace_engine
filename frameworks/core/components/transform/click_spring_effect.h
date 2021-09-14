@@ -21,7 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "core/animation/animator.h"
 #include "core/animation/spring_motion.h"
-#include "core/gestures/touch_event.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/pipeline/pipeline_context.h"
 

@@ -15,6 +15,8 @@
 
 #include "core/components/dialog/dialog_component.h"
 
+#include <atomic>
+
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
@@ -29,8 +31,10 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/dialog/alert_dialog_component.h"
 #include "core/components/dialog/dialog_element.h"
 #include "core/components/dialog/render_dialog.h"
+#include "core/components/drag_bar/drag_bar_component.h"
 #include "core/components/focus_collaboration/focus_collaboration_component.h"
 #include "core/components/focusable/focusable_component.h"
 #include "core/components/image/image_component.h"
@@ -47,9 +51,11 @@ constexpr double PHONE_ENTER_CURVE_Y0 = 1.33;
 constexpr double PHONE_ENTER_CURVE_X1 = 0.60;
 constexpr double PHONE_ENTER_CURVE_Y1 = 1.0;
 constexpr double PHONE_OPACITY_MIDDLE_IN = 0.375;
-constexpr double PHONE_OPACITY_MIDDLE_OUT = 0.682;
+constexpr Dimension CAR_TITLE_MIN_HEIGHT = 64.0_vp;
 
 } // namespace
+
+static std::atomic<int32_t> g_dialogId(0);
 
 const char CALLBACK_SUCCESS[] = "success";
 const char CALLBACK_CANCEL[] = "cancel";
@@ -60,6 +66,11 @@ const char DIALOG_OK[] = "common.ok";
 const char DIALOG_CANCEL[] = "common.cancel";
 const char SEPARATE[] = " ";
 
+DialogComponent::DialogComponent()
+{
+    dialogId_ = GenerateDialogId();
+}
+
 RefPtr<Element> DialogComponent::CreateElement()
 {
     return AceType::MakeRefPtr<DialogElement>();
@@ -68,6 +79,11 @@ RefPtr<Element> DialogComponent::CreateElement()
 RefPtr<RenderNode> DialogComponent::CreateRenderNode()
 {
     return RenderDialog::Create();
+}
+
+int32_t DialogComponent::GenerateDialogId()
+{
+    return g_dialogId.fetch_add(1, std::memory_order_relaxed);
 }
 
 void DialogComponent::BuildChild(const RefPtr<ThemeManager>& themeManager)
@@ -82,19 +98,55 @@ void DialogComponent::BuildChild(const RefPtr<ThemeManager>& themeManager)
     if (!isDeviceTypeSet_) {
         deviceType_ = SystemProperties::GetDeviceType();
     }
+    bool isLimit = true;
+    auto box = BuildBox(isLimit);
+    auto transition = BuildAnimation(box);
+    BuildDialogTween(transition, isLimit, margin_);
+
+    auto focusCollaboration = AceType::MakeRefPtr<FocusCollaborationComponent>();
+    if (!HasCustomChild()) {
+        std::list<RefPtr<Component>> columnChildren;
+        auto column = AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, columnChildren);
+        column->SetMainAxisSize(MainAxisSize::MIN);
+        BuildTitle(column);
+        BuildContent(column);
+        if (isMenu_) {
+            BuildMenu(column);
+        } else {
+            BuildActions(themeManager, column);
+        }
+        BuildFocusChild(column, focusCollaboration);
+    } else {
+        // build custom child
+        BuildFocusChild(customComponent_, focusCollaboration);
+        if (IsDragable()) {
+            BuildDragBar(focusCollaboration);
+        }
+    }
+    if (deviceType_ == DeviceType::WATCH) {
+        auto scroll = AceType::MakeRefPtr<ScrollComponent>(focusCollaboration);
+        box->SetChild(scroll);
+    } else {
+        box->SetChild(focusCollaboration);
+    }
+    box->SetTextDirection(GetTextDirection());
+}
+
+RefPtr<BoxComponent> DialogComponent::BuildBox(bool& isLimit)
+{
     auto box = AceType::MakeRefPtr<BoxComponent>();
     auto backDecoration = AceType::MakeRefPtr<Decoration>();
     backDecoration->SetBackgroundColor(backgroundColor_);
     Border border;
     border.SetBorderRadius(dialogTheme_->GetRadius());
     backDecoration->SetBorder(border);
+
     if (deviceType_ == DeviceType::WATCH) {
         box->SetFlex(BoxFlex::FLEX_XY);
     } else {
         box->SetFlex(BoxFlex::FLEX_X);
     }
     box->SetBackDecoration(backDecoration);
-    bool isLimit = true;
     if (height_.IsValid()) {
         box->SetHeight(height_.Value(), height_.Unit());
         isLimit = false;
@@ -106,29 +158,7 @@ void DialogComponent::BuildChild(const RefPtr<ThemeManager>& themeManager)
     if (isSetMargin_) {
         box->SetMargin(margin_);
     }
-    auto transition = BuildAnimation(box);
-    BuildDialogTween(transition, isLimit, margin_);
-
-    auto focusCollaboration = AceType::MakeRefPtr<FocusCollaborationComponent>();
-    if (!HasCustomChild()) {
-        std::list<RefPtr<Component>> columnChildren;
-        auto column = AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, columnChildren);
-        column->SetMainAxisSize(MainAxisSize::MIN);
-        BuildTitle(column);
-        BuildContent(column);
-        BuildActions(themeManager, column);
-        BuildFocusChild(column, focusCollaboration);
-    } else {
-        // build custom child
-        BuildFocusChild(customComponent_, focusCollaboration);
-    }
-    if (deviceType_ == DeviceType::WATCH) {
-        auto scroll = AceType::MakeRefPtr<ScrollComponent>(focusCollaboration);
-        box->SetChild(scroll);
-    } else {
-        box->SetChild(focusCollaboration);
-    }
-    box->SetTextDirection(GetTextDirection());
+    return box;
 }
 
 void DialogComponent::BuildDialogTween(const RefPtr<TransitionComponent>& transition, bool isLimit, Edge margin)
@@ -146,11 +176,18 @@ void DialogComponent::BuildDialogTween(const RefPtr<TransitionComponent>& transi
     dialogTween->SetOnSuccessId(onSuccessId_);
     dialogTween->SetOnCancelId(onCancelId_);
     dialogTween->SetOnCompleteId(onCompleteId_);
+    dialogTween->SetOnStatusChanged(properties_.onStatusChanged);
+    dialogTween->SetDialogId(dialogId_);
+    if (isMenu_) {
+        dialogTween->SetIsMenu(true);
+        dialogTween->SetMenuSuccessId(menuSuccessId_);
+    }
     dialogTween->SetOnPositiveSuccessId(onPositiveSuccessId_);
     dialogTween->SetOnNegativeSuccessId(onNegativeSuccessId_);
     dialogTween->SetOnNeutralSuccessId(onNeutralSuccessId_);
     dialogTween->SetData(data_);
     dialogTween->SetDialogLimit(isLimit);
+    dialogTween->SetDragable(dragable_);
     if (isSetMargin_) {
         dialogTween->SetMargin(margin);
     }
@@ -178,6 +215,21 @@ void DialogComponent::BuildFocusChild(
     }
 }
 
+void DialogComponent::BuildDragBar(const RefPtr<FocusCollaborationComponent>& collaboration)
+{
+    auto dragBar = AceType::MakeRefPtr<DragBarComponent>();
+    auto boxForContent = AceType::MakeRefPtr<BoxComponent>();
+    boxForContent->SetFlex(BoxFlex::FLEX_X);
+    auto column =
+        AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, std::list<RefPtr<Component>>());
+    column->SetCrossAxisSize(CrossAxisSize::MAX);
+    auto mode = PanelMode::HALF;
+    dragBar->SetPanelMode(mode);
+    dragBar->SetHasDragBar(dragable_);
+    column->AppendChild(dragBar);
+    collaboration->InsertChild(1, column);
+}
+
 void DialogComponent::BuildTitle(const RefPtr<ColumnComponent>& column)
 {
     if (!title_) {
@@ -188,17 +240,28 @@ void DialogComponent::BuildTitle(const RefPtr<ColumnComponent>& column)
         titlePadding_ = (!content_ && actions_.empty()) ? dialogTheme_->GetTitleDefaultPadding()
                                                         : dialogTheme_->GetTitleAdjustPadding();
     }
+    auto textBox = AceType::MakeRefPtr<BoxComponent>();
+    textBox->SetDeliverMinToChild(false);
+    textBox->SetChild(title_);
     titlePadding->SetPadding(std::move(titlePadding_));
-    titlePadding->SetChild(title_);
+    titlePadding->SetChild(textBox);
     std::list<RefPtr<Component>> rowChildren;
     RefPtr<RowComponent> row;
-    if (deviceType_ == DeviceType::PHONE) {
+    if (deviceType_ == DeviceType::PHONE && !isMenu_) {
         row = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, rowChildren);
     } else {
         row = AceType::MakeRefPtr<RowComponent>(FlexAlign::CENTER, FlexAlign::CENTER, rowChildren);
     }
     row->SetStretchToParent(true);
-    row->AppendChild(titlePadding);
+    if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
+        auto box = AceType::MakeRefPtr<BoxComponent>();
+        box->SetMinHeight(CAR_TITLE_MIN_HEIGHT);
+        box->SetChild(titlePadding);
+        row->AppendChild(box);
+    } else {
+        row->AppendChild(titlePadding);
+    }
+
     auto titleFlex = AceType::MakeRefPtr<FlexItemComponent>(0, 0, 0.0, row);
     column->AppendChild(GenerateComposed("dialogTitle", titleFlex, true));
 }
@@ -228,6 +291,27 @@ void DialogComponent::BuildContent(const RefPtr<ColumnComponent>& column)
         contentFlex = AceType::MakeRefPtr<FlexItemComponent>(0, 1, 0.0, contentPadding);
     }
     column->AppendChild(GenerateComposed("dialogContent", contentFlex, true));
+}
+
+void DialogComponent::BuildMenu(const RefPtr<ColumnComponent>& column)
+{
+    if (actions_.empty()) {
+        LOGW("the action is empty");
+        return;
+    }
+
+    std::list<RefPtr<Component>> columnChildren;
+    auto actionIter = actions_.begin();
+    for (size_t index = 0; index < actions_.size(); ++index) {
+        std::list<RefPtr<Component>> rowChildren;
+        auto buttonRow = AceType::MakeRefPtr<RowComponent>(FlexAlign::CENTER, FlexAlign::CENTER, rowChildren);
+        auto rowItem = AceType::MakeRefPtr<FlexItemComponent>(
+            1, 1, 0.0, BuildButton(*actionIter, menuSuccessId_[index], Edge::NONE, false));
+        buttonRow->AppendChild(rowItem);
+        auto columnItem = AceType::MakeRefPtr<FlexItemComponent>(1, 1, 0.0, buttonRow);
+        column->AppendChild(columnItem);
+        ++actionIter;
+    }
 }
 
 void DialogComponent::BuildActions(const RefPtr<ThemeManager>& themeManager, const RefPtr<ColumnComponent>& column)
@@ -387,8 +471,8 @@ RefPtr<TransitionComponent> DialogComponent::BuildAnimationForPhone(const RefPtr
     auto scaleAnimationIn = AceType::MakeRefPtr<KeyframeAnimation<float>>();
     scaleAnimationIn->AddKeyframe(scaleFrameStart);
     scaleAnimationIn->AddKeyframe(scaleFrameEnd);
-    auto dialogCurve = AceType::MakeRefPtr<CubicCurve>(PHONE_ENTER_CURVE_X0, PHONE_ENTER_CURVE_Y0, PHONE_ENTER_CURVE_X1,
-        PHONE_ENTER_CURVE_Y1);
+    auto dialogCurve = AceType::MakeRefPtr<CubicCurve>(
+        PHONE_ENTER_CURVE_X0, PHONE_ENTER_CURVE_Y0, PHONE_ENTER_CURVE_X1, PHONE_ENTER_CURVE_Y1);
     scaleAnimationIn->SetCurve(dialogCurve);
     // Build opacity animation for in.
     auto opacityKeyframeStart =
@@ -411,8 +495,6 @@ RefPtr<TransitionComponent> DialogComponent::BuildAnimationForPhone(const RefPtr
     // Build scale animation for out.
     auto scaleFrameStartOut =
         AceType::MakeRefPtr<Keyframe<float>>(dialogTheme_->GetFrameStart(), dialogTheme_->GetScaleEnd());
-    auto opacityKeyframeMiddleOut =
-        AceType::MakeRefPtr<Keyframe<float>>(PHONE_OPACITY_MIDDLE_OUT, dialogTheme_->GetOpacityEnd());
     auto scaleFrameEndOut =
         AceType::MakeRefPtr<Keyframe<float>>(dialogTheme_->GetFrameEnd(), dialogTheme_->GetScaleStart());
     auto scaleAnimationOut = AceType::MakeRefPtr<KeyframeAnimation<float>>();
@@ -472,8 +554,7 @@ RefPtr<Component> DialogComponent::BuildDivider(const RefPtr<ThemeManager>& them
         return nullptr;
     }
     auto padding = AceType::MakeRefPtr<PaddingComponent>();
-    auto dialogTheme =
-        AceType::DynamicCast<DialogTheme>(themeManager->GetTheme(DialogTheme::TypeId()));
+    auto dialogTheme = AceType::DynamicCast<DialogTheme>(themeManager->GetTheme(DialogTheme::TypeId()));
     if (!dialogTheme) {
         return nullptr;
     }
@@ -496,21 +577,21 @@ RefPtr<Component> DialogComponent::BuildDivider(const RefPtr<ThemeManager>& them
 RefPtr<DialogComponent> DialogBuilder::Build(
     const DialogProperties& dialogProperties, const WeakPtr<PipelineContext>& context)
 {
+    auto dialog = BuildDialogWithType(dialogProperties.type);
+    dialog->SetDialogProperties(dialogProperties);
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
-        return RefPtr<DialogComponent>();
+        return dialog;
     }
     auto themeManager = pipelineContext->GetThemeManager();
     if (!themeManager) {
-        return RefPtr<DialogComponent>();
+        return dialog;
     }
-    auto dialogTheme =
-        AceType::DynamicCast<DialogTheme>(themeManager->GetTheme(DialogTheme::TypeId()));
+    auto dialogTheme = AceType::DynamicCast<DialogTheme>(themeManager->GetTheme(DialogTheme::TypeId()));
     if (!dialogTheme) {
-        return RefPtr<DialogComponent>();
+        return dialog;
     }
     std::string data;
-    auto dialog = AceType::MakeRefPtr<DialogComponent>();
     dialog->SetContext(context);
     dialog->SetBackgroundColor(dialogTheme->GetBackgroundColor());
     // Set title and content of dialog
@@ -536,7 +617,31 @@ RefPtr<DialogComponent> DialogBuilder::Build(
             }
         }
     }
+    // Set menu evenMarker
+    if (dialogProperties.isMenu) {
+        dialog->SetIsMenu(true);
+        for (size_t index = 0; index < dialogProperties.buttons.size(); ++index) {
+            dialog->GetMenuSuccessId().emplace_back(BackEndEventManager<void()>::GetInstance().GetAvailableMarker());
+        }
+    }
     return BuildAnimation(dialog, dialogTheme);
+}
+
+RefPtr<DialogComponent> DialogBuilder::BuildDialogWithType(DialogType type)
+{
+    RefPtr<DialogComponent> dialog;
+    // Create different dialog according to type.
+    switch (type) {
+        case DialogType::ALERT_DIALOG: {
+            dialog = AceType::MakeRefPtr<AlertDialogComponent>();
+            dialog->SetOnSuccessId(BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker());
+            break;
+        }
+        default:
+            dialog = AceType::MakeRefPtr<DialogComponent>();
+            break;
+    }
+    return dialog;
 }
 
 void DialogBuilder::BuildTitleAndContent(const RefPtr<DialogComponent>& dialog,
@@ -586,32 +691,57 @@ void DialogBuilder::BuildButtons(const RefPtr<ThemeManager>& themeManager, const
     if (!buttonTheme) {
         return;
     }
+    int32_t buttonIndex = 0;
     std::list<RefPtr<ButtonComponent>> buttonComponents;
     for (const auto& button : buttons) {
         if (button.first.empty()) {
             continue;
         }
         data += button.first + SEPARATE;
+
+        // Init text style in button.
         TextStyle buttonTextStyle = buttonTheme->GetTextStyle();
-        RefPtr<ButtonComponent> buttonComponent;
-        if (!button.second.empty()) {
-            buttonTextStyle.SetTextColor(Color::FromString(button.second));
-            buttonComponent = ButtonBuilder::Build(themeManager, button.first, buttonTextStyle,
-                Color::FromString(button.second), true);
-        } else {
-            const Color TEXT_COLOR = Color::FromString("#0a59f4");
-            buttonTextStyle.SetTextColor(TEXT_COLOR);
-            buttonComponent = ButtonBuilder::Build(themeManager, button.first, buttonTextStyle, TEXT_COLOR, true);
-        }
+        const Color TEXT_COLOR = Color::FromString("#0a59f4");
+        buttonTextStyle.SetTextColor(TEXT_COLOR);
         buttonTextStyle.SetAdaptTextSize(buttonTheme->GetMaxFontSize(), buttonTheme->GetMinFontSize());
         buttonTextStyle.SetMaxLines(1);
         buttonTextStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+        if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
+            buttonTextStyle.SetAdaptTextSize(dialogTheme->GetButtonTextSize(), dialogTheme->GetMinButtonTextSize());
+            buttonTextStyle.SetFontWeight(FontWeight::MEDIUM);
+            buttonTextStyle.SetFontSize(dialogTheme->GetButtonTextSize());
+            buttonTextStyle.SetAdaptTextSize(dialogTheme->GetButtonTextSize(), dialogTheme->GetMinButtonTextSize());
+            if (buttonIndex != static_cast<int32_t>(buttons.size()) - 1) {
+                buttonTextStyle.SetTextColor(dialogTheme->GetCommonButtonTextColor());
+            } else {
+                buttonTextStyle.SetTextColor(dialogTheme->GetEmphasizeButtonTextColor());
+            }
+        }
+
+        RefPtr<ButtonComponent> buttonComponent;
+        if (!button.second.empty()) {
+            buttonTextStyle.SetTextColor(Color::FromString(button.second));
+            buttonComponent = ButtonBuilder::Build(
+                themeManager, button.first, buttonTextStyle, Color::FromString(button.second), true);
+        } else {
+            buttonComponent =
+                ButtonBuilder::Build(themeManager, button.first, buttonTextStyle, buttonTextStyle.GetTextColor(), true);
+        }
         buttonComponent->SetBackgroundColor(dialogTheme->GetButtonBackgroundColor());
-        static const Color buttonHoverColor = Color::FromString("#0C000000");
-        buttonComponent->SetHoverColor(buttonHoverColor);
+        if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
+            buttonComponent->SetHeight(dialogTheme->GetButtonHeight());
+            buttonComponent->SetRectRadius(dialogTheme->GetButtonHeight() / 2.0);
+            if (buttonIndex != static_cast<int32_t>(buttons.size()) - 1) {
+                buttonComponent->SetBackgroundColor(dialogTheme->GetCommonButtonBgColor());
+            } else {
+                buttonComponent->SetBackgroundColor(dialogTheme->GetEmphasizeButtonBgColor());
+            }
+        }
+        buttonComponent->SetHoverColor(Color::FromString("#0C000000"));
         buttonComponent->SetClickedColor(dialogTheme->GetButtonClickedColor());
         buttonComponent->SetType(ButtonType::TEXT);
         buttonComponents.emplace_back(buttonComponent);
+        ++buttonIndex;
     }
     dialog->SetActions(buttonComponents);
 }
@@ -619,10 +749,8 @@ void DialogBuilder::BuildButtons(const RefPtr<ThemeManager>& themeManager, const
 void DialogBuilder::BuildButtonsForWatch(
     const RefPtr<ThemeManager>& themeManager, const RefPtr<DialogComponent>& dialog, std::string& data)
 {
-    auto buttonTheme =
-        AceType::DynamicCast<ButtonTheme>(themeManager->GetTheme(ButtonTheme::TypeId()));
-    auto dialogTheme =
-        AceType::DynamicCast<DialogTheme>(themeManager->GetTheme(DialogTheme::TypeId()));
+    auto buttonTheme = AceType::DynamicCast<ButtonTheme>(themeManager->GetTheme(ButtonTheme::TypeId()));
+    auto dialogTheme = AceType::DynamicCast<DialogTheme>(themeManager->GetTheme(DialogTheme::TypeId()));
     if (!buttonTheme || !dialogTheme) {
         return;
     }
@@ -672,7 +800,6 @@ RefPtr<DialogComponent> DialogBuilder::BuildAnimation(
     tweenBox->SetBackDecoration(decoration);
     const auto& colorAnimation = AceType::MakeRefPtr<CurveAnimation<Color>>(
         dialogTheme->GetMaskColorStart(), dialogTheme->GetMaskColorEnd(), Curves::LINEAR);
-    colorAnimation->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
     // Build tween option of in
     TweenOption tweenOptionIn;
     tweenOptionIn.SetColorAnimation(colorAnimation);
@@ -681,7 +808,6 @@ RefPtr<DialogComponent> DialogBuilder::BuildAnimation(
     // Build tween option of out
     const auto& colorAnimationOut = AceType::MakeRefPtr<CurveAnimation<Color>>(
         dialogTheme->GetMaskColorEnd(), dialogTheme->GetMaskColorStart(), Curves::LINEAR);
-    colorAnimationOut->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
     TweenOption tweenOptionOut;
     tweenOptionOut.SetColorAnimation(colorAnimationOut);
     tweenOptionOut.SetDuration(dialogTheme->GetAnimationDurationOut());

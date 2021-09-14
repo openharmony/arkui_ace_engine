@@ -56,7 +56,7 @@ void GradientLayer::AddToScene(SceneBuilder& builder, double x, double y)
         gradientShader->initLinear(endPoints, colorList, colorStops, SkTileMode::kClamp, matrix);
 #endif
         builder.PushShaderMask(gradientShader, x + x_ + rect_.Left(), x + x_ + rect_.Right(), y + y_ + rect_.Top(),
-            y + y_ + rect_.Bottom(), static_cast<int>(blendMode_));
+            y + y_ + rect_.Bottom(), static_cast<int32_t>(blendMode_));
         pushSuccess = true;
     }
     builder.PushOpacity(alpha_, 0, 0);
