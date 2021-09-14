@@ -458,11 +458,14 @@ void JsiDeclarativeEngineInstance::RootViewHandle(const shared_ptr<JsRuntime>& r
         LOGE("jsRuntime is nullptr");
         return;
     }
-    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-    panda::Global<panda::ObjectRef> globalValue = panda::Global<ObjectRef>(arkRuntime->GetEcmaVm(), value);
     RefPtr<JsAcePage> page = JsiDeclarativeEngineInstance::GetStagingPage(runtime);
     if (page != nullptr) {
-        rootViewMap_.emplace(page->GetPageId(), globalValue);
+        auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+        if (!arkRuntime) {
+            LOGE("ark engine is null");
+            return;
+        }
+        rootViewMap_.emplace(page->GetPageId(), panda::Global<panda::ObjectRef>(arkRuntime->GetEcmaVm(), value));
     }
 }
 
@@ -470,7 +473,12 @@ void JsiDeclarativeEngineInstance::DestroyRootViewHandle(int32_t pageId)
 {
     CHECK_RUN_ON(JS);
     if (rootViewMap_.count(pageId) != 0) {
-        panda::Global<panda::ObjectRef> rootView = rootViewMap_[pageId];
+        auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+        if (!arkRuntime) {
+            LOGE("ark engine is null");
+            return;
+        }
+        panda::Local<panda::ObjectRef> rootView = rootViewMap_[pageId].ToLocal(arkRuntime->GetEcmaVm());
         JSView* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
         jsView->Destroy(nullptr);
         rootViewMap_.erase(pageId);
@@ -483,8 +491,13 @@ void JsiDeclarativeEngineInstance::DestroyAllRootViewHandle()
     if (rootViewMap_.size() > 0) {
         LOGI("DestroyAllRootViewHandle release left %{private}zu views ", rootViewMap_.size());
     }
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+    if (!arkRuntime) {
+        LOGE("ark engine is null");
+        return;
+    }
     for (const auto& pair : rootViewMap_) {
-        panda::Global<panda::ObjectRef> rootView = pair.second;
+        panda::Local<panda::ObjectRef> rootView = pair.second.ToLocal(arkRuntime->GetEcmaVm());
         JSView* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
         jsView->Destroy(nullptr);
     }
@@ -635,7 +648,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
     ACE_DCHECK(delegate);
     delegate->AddTaskObserver([nativeEngine = nativeEngine_](){
-        nativeEngine->Loop(LOOP_DEFAULT);
+        nativeEngine->Loop(LOOP_NOWAIT);
     });
 
     return result;

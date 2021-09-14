@@ -23,6 +23,8 @@
 #include "want.h"
 
 namespace OHOS::Ace {
+using DialogCallback = std::function<void(std::string event, std::string param)>;
+void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBoudle, std::string param, DialogCallback callback);
 
 class AceAbility final : public OHOS::AppExecFwk::Ability {
 public:

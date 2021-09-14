@@ -18,8 +18,7 @@ ace_flutter_engine_root = "//third_party/flutter"
 
 ace_test_output_root = "ace_engine_standard"
 
-objcopy_arm = "//prebuilts/gcc/linux-x86/arm/gcc-linaro-7.5.0-arm-linux-gnueabi/arm-linux-gnueabi/bin/objcopy"
-objcopy_aarch64 = "//prebuilts/gcc/linux-x86/aarch64/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu/aarch64-linux-gnu/bin/objcopy"
+objcopy_aarch64 = "//prebuilts/gcc/linux-x86/arm/gcc-linaro-7.5.0-arm-linux-gnueabi/arm-linux-gnueabi/bin/objcopy"
 objcopy_x86_64 = ""
 ark_tools_root = "//prebuilts/ace-toolkit/ace-loader/panda"
 node_js_path = "//prebuilts/ace-toolkit/nodejs/node-v12.18.4-linux-x64/bin/"

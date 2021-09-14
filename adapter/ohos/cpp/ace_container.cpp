@@ -666,4 +666,16 @@ void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, C
     container->SetWindowModal(windowModal);
     container->SetColorScheme(colorScheme);
 }
+
+void AceContainer::SetDialogCallback(int32_t instanceId, DialogCallback callback)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        return;
+    }
+    auto front = container->GetFrontend();
+    if (front && front->GetType() == FrontendType::JS) {
+        front->SetDialogCallback(callback);
+    }
+}
 } // namespace OHOS::Ace::Platform

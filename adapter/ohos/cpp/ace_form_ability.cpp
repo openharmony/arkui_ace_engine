@@ -51,11 +51,37 @@ private:
     FormPlatformFinish onFinish_;
 };
 
-int64_t AceFormAbility::instanceId_ = 0;
-const std::string AceFormAbility::START_PARAMS_KEY = "__startParams";
 const std::string AceFormAbility::URI = "url";
 
 REGISTER_AA(AceFormAbility)
+
+void AceFormAbility::OnStart(const OHOS::AAFwk::Want &want)
+{
+    LOGI("AceFormAbility::OnStart start");
+    Ability::OnStart(want);
+    return;
+}
+
+void AceFormAbility::OnStop()
+{
+    LOGI("AceFormAbility::OnStop start ");
+    Ability::OnStop();
+    return;
+}
+
+sptr<IRemoteObject> AceFormAbility::OnConnect(const Want &want)
+{
+    LOGI("AceFormAbility::OnConnect start");
+    Ability::OnConnect(want);
+    return GetFormRemoteObject();
+}
+
+void AceFormAbility::OnDisconnect(const Want &want)
+{
+    LOGI("AceFormAbility::OnDisconnect start");
+    Ability::OnDisconnect(want);
+    return;
+}
 
 OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::Want& want)
 {
@@ -128,34 +154,6 @@ void AceFormAbility::OnVisibilityChanged(const std::map<int64_t, int32_t>& formE
 void AceFormAbility::OnAcquireState(const OHOS::AAFwk::Want& want)
 {
     Platform::PaContainer::OnAcquireState(want);
-}
-
-void AceFormAbility::OnStart(const OHOS::AAFwk::Want &want)
-{
-    LOGI("AceFormAbility::OnStart start");
-    Ability::OnStart(want);
-    return;
-}
-
-void AceFormAbility::OnStop()
-{
-    LOGI("AceFormAbility::OnStop start ");
-    Ability::OnStop();
-    return;
-}
-
-sptr<IRemoteObject> AceFormAbility::OnConnect(const Want &want)
-{
-    LOGI("AceFormAbility::OnConnect start");
-    Ability::OnConnect(want);
-    return GetFormRemoteObject();
-}
-
-void AceFormAbility::OnDisconnect(const Want &want)
-{
-    LOGI("AceFormAbility::OnDisconnect start");
-    Ability::OnDisconnect(want);
-    return;
 }
 
 } // namespace OHOS::Ace

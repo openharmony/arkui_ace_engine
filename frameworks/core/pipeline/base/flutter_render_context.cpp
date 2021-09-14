@@ -71,19 +71,12 @@ void FlutterRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Off
         if (child->NeedRender()) {
             FlutterRenderContext context;
             auto pipelineContext = child->GetContext().Upgrade();
-            LOGE("Hole: child canvas render");
-            if (clipHole_.IsValid() && !pipelineContext->GetHasMeetSubWindowNode()) {
-                auto transparentHole = pipelineContext->GetTransparentHole();
-                if (transparentHole.IsValid()) {
-                    Offset childOffset = rect.GetOffset();
-                    Rect hole = transparentHole - childOffset;
-                    LOGE("Hole: FlutterRenderContext::PaintChild %{public}p: hole:%{public}s, offset:%{public}s", &context, hole.ToString().c_str(), childOffset.ToString().c_str());
-                    context.SetClipHole(hole);
-                } else {
-                    LOGE("Hole: FlutterRenderContext::PaintChild:hole is invalid");
-                }
-            } else {
-                LOGE("Hole: clipHole_ is not valid or has meed subwindownode");
+            LOGI("Hole: child canvas render");
+            auto transparentHole = pipelineContext->GetTransparentHole();
+            if (transparentHole.IsValid()) {
+                Offset childOffset = rect.GetOffset();
+                Rect hole = transparentHole - childOffset;
+                context.SetClipHole(hole);
             }
             context.Repaint(child);
         } else {
@@ -109,7 +102,8 @@ void FlutterRenderContext::StartRecording()
     if (clipHole_.IsValid()) {
         canvas_->save();
         needRestoreHole_ = true;
-        canvas_->clipRect(clipHole_.Left(), clipHole_.Top(), clipHole_.Right(), clipHole_.Bottom(), SkClipOp::kDifference);
+        canvas_->clipRect(clipHole_.Left(), clipHole_.Top(),
+            clipHole_.Right(), clipHole_.Bottom(), SkClipOp::kDifference);
     }
     containerLayer_->AddChildren(currentLayer_);
 }

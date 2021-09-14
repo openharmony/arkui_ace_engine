@@ -428,7 +428,7 @@ void PipelineContext::FlushRender(const RefPtr<RenderContext>& ctx)
 
     RefPtr<RenderContext> context = isSub_ ? ctx : RenderContext::Create();
     if (transparentHole_.IsValid()) {
-        LOGE("Hole: set transparentHole_ in FlushRender");
+        LOGI("Hole: set transparentHole_ in FlushRender");
         context->SetClipHole(transparentHole_);
     }
     if (!dirtyRenderNodes_.empty()) {
@@ -543,10 +543,6 @@ void PipelineContext::ProcessPreFlush()
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
 
-    LOGI("Hole: set before flush.");
-    if (transparentHole_.IsValid()) {
-        hasMeetSubWindowNode_ = false;
-    }
     if (preFlushListeners_.empty()) {
         return;
     }
