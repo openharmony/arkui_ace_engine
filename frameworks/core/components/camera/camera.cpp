@@ -82,6 +82,13 @@ inline bool IsDirectory(const char *dirName)
 void CameraCallback::PrepareCameraInput(sptr<OHOS::CameraStandard::CaptureInput> InCamInput_)
 {
     camInput_ = InCamInput_;
+    int32_t ret = 0;
+    ret = PrepareCamera(false);
+    if (ret != ERR_OK) {
+        LOGE("Prepare Preview Failed");
+        return;
+    }
+
     if (prepareEventListener_) {
         prepareEventListener_();
     }
@@ -149,22 +156,17 @@ int CameraCallback::PrepareRecorder()
 
 void CameraCallback::CloseRecorder()
 {
-    if (recordState_ == State::STATE_RUNNING) {
-        if (videoOutput_ != nullptr) {
-            ((sptr<OHOS::CameraStandard::VideoOutput> &)(videoOutput_))->Stop();
-            ((sptr<OHOS::CameraStandard::VideoOutput> &)(videoOutput_))->Release();
-        }
-        if (recorder_ != nullptr) {
-            recorder_->Stop(false);
-            recorder_ = nullptr;
-        }
-
-        if (recordFileId_ != -1) {
-            onRecord(true, recordPath_);
-        }
-        recordFileId_ = -1;
-        recordState_ = State::STATE_IDLE;
+    if (videoOutput_ != nullptr) {
+        ((sptr<OHOS::CameraStandard::VideoOutput> &)(videoOutput_))->Stop();
+        ((sptr<OHOS::CameraStandard::VideoOutput> &)(videoOutput_))->Release();
+        videoOutput_ = nullptr;
     }
+    if (recorder_ != nullptr) {
+        recorder_->Stop(false);
+        recorder_->Release();
+        recorder_ = nullptr;
+    }
+    recordState_ = State::STATE_IDLE;
 }
 
 sptr<Surface> CameraCallback::createSubWindowSurface()
@@ -210,8 +212,6 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
     previewSurface_->SetUserData(REGION_HEIGHT, std::to_string(windowSize_.Height()));
     previewSurface_->SetUserData(REGION_POSITION_X, std::to_string(windowOffset_.GetX()));
     previewSurface_->SetUserData(REGION_POSITION_Y, std::to_string(windowOffset_.GetY()));
-
-    previewSurface_->SetDefaultWidthAndHeight(PREVIEW_SURFACE_HEIGHT, PREVIEW_SURFACE_WIDTH);
     context->SetClipHole(layoutOffset_.GetX(), layoutOffset_.GetY(), layoutSize_.Width(), layoutSize_.Height());
     auto renderNode = renderNode_.Upgrade();
     if (renderNode) {
@@ -238,7 +238,7 @@ void CameraCallback::MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak)
         LOGE("Hole: MarkWholeRender node is null");
         return;
     }
-    
+
     auto parentWeak = node->GetParent();
     auto parent = parentWeak.Upgrade();
     if (!parent) {
@@ -368,7 +368,9 @@ int32_t CameraCallback::PrepareCamera(bool bIsRecorder)
 
     sptr<OHOS::CameraStandard::CameraManager> camManagerObj = OHOS::CameraStandard::CameraManager::GetInstance();
     if (capSession_ != nullptr) {
-        capSession_->Release();
+        LOGI("Recreating the Session");
+        Stop(true);
+        hasCallPreView_ = true;
     }
     capSession_ = camManagerObj->CreateCaptureSession();
     if (capSession_ == nullptr) {
@@ -382,8 +384,10 @@ int32_t CameraCallback::PrepareCamera(bool bIsRecorder)
         return -1;
     }
     surface = createSubWindowSurface();
-    previewOutput_ = camManagerObj->CreateCustomPreviewOutput(surface, surface->GetDefaultHeight(), 
-		                                              surface->GetDefaultWidth());
+    LOGI("Preview surface width: %{public}d, height: %{public}d", surface->GetDefaultWidth(),
+        surface->GetDefaultHeight());
+    previewOutput_ = camManagerObj->CreateCustomPreviewOutput(surface, PREVIEW_SURFACE_WIDTH,
+                                                              PREVIEW_SURFACE_HEIGHT);
     if (previewOutput_ == nullptr) {
         LOGE("Failed to create PreviewOutput");
         return -1;
@@ -532,17 +536,17 @@ void CameraCallback::Release()
 
 void CameraCallback::Stop(bool isClosePreView)
 {
-    if (capSession_ != nullptr) {
-        capSession_->Stop();
-    }
-
-    if (recordState_ == State::STATE_RUNNING) {
-        CloseRecorder();
-    }
+    CloseRecorder();
+    PreviousReadyMode_ = ReadyMode::NONE;
     recordState_ = State::STATE_IDLE;
     if (isClosePreView) {
+        if (capSession_ != nullptr) {
+            capSession_->Stop();
+            capSession_->Release();
+            capSession_ = nullptr;
+        }
         previewState_ = State::STATE_IDLE;
-        PreviousReadyMode_ = ReadyMode::NONE;
+        isReady_ = false;
     }
 }
 
@@ -616,7 +620,7 @@ void CameraCallback::OnCameraSizeChange(double width, double height)
 
     sizeInitSucceeded_ = true;
     LOGE("CameraCallback::OnCameraSizeChange success: %{public}lf  %{public}lf.", width, height);
-    PrepareCamera(true);
+    PrepareCamera(false);
 }
 
 void CameraCallback::OnCameraOffsetChange(double x, double y)
@@ -651,7 +655,7 @@ void CameraCallback::OnCameraOffsetChange(double x, double y)
 
     offsetInitSucceeded_ = true;
     LOGE("CameraCallback::OnCameraOffsetChange success: %{public}lf  %{public}lf.", x, y);
-    PrepareCamera(true);
+    PrepareCamera(false);
 }
 
 void CaptureListener::OnBufferAvailable()
@@ -698,7 +702,6 @@ int32_t CameraCallback::SaveData(char *buffer, int32_t size, std::string& path)
 
 void CameraCallback::OnTakePhoto(bool isSucces, std::string info)
 {
-
     LOGI("Camera:SurfaceListener OnTakePhoto %{public}d  %{public}s--", isSucces, info.c_str());
     if (!takePhotoListener_) {
         return;
