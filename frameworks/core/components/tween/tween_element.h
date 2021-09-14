@@ -34,17 +34,18 @@ class TweenElement : public ComposedElement, public FlushEvent {
 
 public:
     explicit TweenElement(const ComposeId& id) : ComposedElement(id) {}
-    ~TweenElement() override = default;
+    ~TweenElement() override;
 
     void PerformBuild() override;
     void Update() override;
+    bool CanUpdate(const RefPtr<Component>& newComponent) override;
     void OnPostFlush() override;
     void OnPreFlush() override;
     bool ApplyKeyframes();
     void ApplyOptions();
     const TweenOption& GetOption() const;
     void SetOption(const TweenOption& option);
-    void SetVisible(VisibleType visible);
+    void SetWrapHidden(bool hidden);
     void SetOpacity(uint8_t opacity);
     void SetController(const RefPtr<Animator>& controller);
     RefPtr<RenderNode> GetContentRender() const;
@@ -70,9 +71,8 @@ private:
     void CreateTransformOriginAnimation(const RefPtr<RenderTransform>& renderTransformNode, TweenOption& option);
     void CreateOpacityAnimation(const RefPtr<RenderDisplay>& renderDisplayNode, TweenOption& option);
     void CreateColorAnimation(const RefPtr<PropertyAnimatable>& animatable, TweenOption& option);
-    void CreateBackgroundPositionAnimation(const RefPtr<PropertyAnimatable>& animatable, TweenOption& option);
     void CreatePropertyAnimationFloat(const RefPtr<PropertyAnimatable>& animatable, TweenOption& option);
-    void ApplyOperation(RefPtr<Animator>& controller, TweenOperation& operation);
+    void ApplyOperation(RefPtr<Animator>& controller, AnimationOperation& operation);
     template<class U, class V>
     static bool CreatePropertyAnimation(const RefPtr<PropertyAnimatable>& propertyAnimatable,
         PropertyAnimatableType propertyType, const TweenOption& option, RefPtr<Animation<V>>& animation);
@@ -83,13 +83,14 @@ private:
     bool isDelegatedController_ = false;
     bool isComponentController_ = false;
     bool needUpdateTweenOption_ = false;
+    bool needUpdateKeyframes_ = false;
     bool needUpdateTweenOptionCustom_ = false;
     RefPtr<Animator> controller_;
     RefPtr<Animator> controllerCustom_;
     BaseId::IdType prepareIdCustom_ = -1;
     BaseId::IdType prepareId_ = -1;
-    TweenOperation operation_ = TweenOperation::NONE;
-    TweenOperation operationCustom_ = TweenOperation::NONE;
+    AnimationOperation operation_ = AnimationOperation::NONE;
+    AnimationOperation operationCustom_ = AnimationOperation::NONE;
     TweenOption option_;
     TweenOption optionCustom_;
     uint64_t currentTimestamp_ = 0;
@@ -97,7 +98,6 @@ private:
         void (*)(const RefPtr<Animation<float>>&, WeakPtr<RenderTransform>&, TweenOption&)>
         transformFloatAnimationAddMap_[];
     Shadow shadow_;
-    bool shouldSkipAnimationOnCreation = false;
     PositionParam positionParam_;
 };
 

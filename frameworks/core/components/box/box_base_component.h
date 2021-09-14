@@ -18,9 +18,14 @@
 
 #include <string>
 
-#include "base/geometry/dimension.h"
+#include "base/geometry/animatable_dimension.h"
+#include "base/image/pixel_map.h"
+#include "core/components/box/mask.h"
+#include "core/components/common/layout/align_declaration.h"
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/edge.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/component_group.h"
@@ -56,17 +61,17 @@ public:
         return margin_;
     }
 
-    const Edge& GetAdditionalMargin() const
+    const Edge& GetAdditionalPadding() const
     {
-        return additionalMargin_;
+        return additionalPadding_;
     }
 
-    const Dimension& GetWidthDimension() const
+    const AnimatableDimension& GetWidthDimension() const
     {
         return GetWidth();
     }
 
-    const Dimension& GetHeightDimension() const
+    const AnimatableDimension& GetHeightDimension() const
     {
         return GetHeight();
     }
@@ -109,18 +114,20 @@ public:
         constraints_ = constraints;
     }
 
-    void SetPadding(const Edge& padding)
+    void SetMargin(const Edge& margin)
     {
-        if (padding.IsValid()) {
-            padding_ = padding;
-        }
+        // Margin need to support negative number.
+        margin_ = margin;
     }
 
-    void SetMargin(const Edge& margin, const Edge& additionalMargin = Edge())
+    void SetPadding(const Edge& padding, const Edge& additionalPadding = Edge())
     {
-        margin_ = margin;
-        if (additionalMargin.IsValid()) {
-            additionalMargin_ = additionalMargin;
+        if (padding.IsValid()) {
+            // Padding not support negative number.
+            padding_ = padding;
+        }
+        if (additionalPadding.IsValid()) {
+            additionalPadding_ = additionalPadding;
         }
     }
 
@@ -151,10 +158,15 @@ public:
 
     void SetAspectRatio(double aspectRatio)
     {
-        aspectRatio_ = aspectRatio;
+        aspectRatio_ = AnimatableDimension(aspectRatio);
     }
 
-    double GetAspectRatio() const
+    void SetAspectRatio(double aspectRatio, AnimationOption option)
+    {
+        aspectRatio_ = AnimatableDimension(aspectRatio, DimensionUnit::PX, option);
+    }
+
+    AnimatableDimension GetAspectRatio() const
     {
         return aspectRatio_;
     }
@@ -209,6 +221,22 @@ public:
         gridLayoutInfo_ = gridLayoutInfo;
     }
 
+    RefPtr<GridColumnInfo::Builder> GetGridColumnInfoBuilder()
+    {
+        if (!gridColumnInfoBuilder_) {
+            gridColumnInfoBuilder_ = AceType::MakeRefPtr<GridColumnInfo::Builder>();
+        }
+        return gridColumnInfoBuilder_;
+    }
+
+    void OnWrap() override
+    {
+        if (gridColumnInfoBuilder_) {
+            SetGridLayoutInfo(gridColumnInfoBuilder_->Build());
+            gridColumnInfoBuilder_ = nullptr;
+        }
+    }
+
     void SetUseLiteStyle(bool flag)
     {
         useLiteStyle_ = flag;
@@ -219,24 +247,148 @@ public:
         return useLiteStyle_;
     }
 
+    void SetOverflow(Overflow overflow)
+    {
+        overflow_ = overflow;
+    }
+
+    Overflow GetOverflow() const
+    {
+        return overflow_;
+    }
+
+    const RefPtr<ClipPath>& GetClipPath() const
+    {
+        return clipPath_;
+    }
+
+    void SetClipPath(const RefPtr<ClipPath>& clipPath)
+    {
+        clipPath_ = clipPath;
+    }
+    const RefPtr<Mask>& GetMask() const
+    {
+        return mask_;
+    }
+
+    void SetMask(const std::string& image, const BackgroundImageSize& size, const BackgroundImagePosition& position)
+    {
+        if (!image.empty()) {
+            if (!mask_) {
+                mask_ = Mask::Create();
+            }
+            if (mask_) {
+                mask_->SetMaskImage(image);
+                mask_->SetMaskSize(size);
+                mask_->SetMaskPosition(position);
+            }
+        }
+    }
+
+    void SetMask(const RefPtr<MaskPath>& maskPath)
+    {
+        if (!mask_) {
+            mask_ = Mask::Create();
+        }
+        if (mask_) {
+            mask_->SetMask(maskPath);
+        }
+    }
+
+    BoxSizing GetBoxSizing() const
+    {
+        return boxSizing_;
+    }
+
+    void SetBoxSizing(BoxSizing boxSizing)
+    {
+        boxSizing_ = boxSizing;
+    }
+
+    void SetAlignDeclarationPtr(AlignDeclarationPtr alignPtr)
+    {
+        alignPtr_ = alignPtr;
+    }
+
+    AlignDeclarationPtr GetAlignDeclarationPtr() const
+    {
+        return alignPtr_;
+    }
+
+    void SetUseAlignSide(AlignDeclaration::Edge side)
+    {
+        alignSide_ = side;
+    }
+
+    AlignDeclaration::Edge GetUseAlignSide() const
+    {
+        return alignSide_;
+    }
+
+    void SetUseAlignOffset(const Dimension& offset)
+    {
+        alignOffset_ = offset;
+    }
+
+    const Dimension& GetUseAlignOffset() const
+    {
+        return alignOffset_;
+    }
+
+    bool IsUseAlign() const
+    {
+        return alignPtr_ != nullptr && alignSide_ != AlignDeclaration::Edge::AUTO;
+    }
+
+    void SetBoxClipFlag(bool boxClipFlag)
+    {
+        boxClipFlag_ = boxClipFlag;
+    }
+
+    bool GetBoxClipFlag() const
+    {
+        return boxClipFlag_;
+    }
+
+    void SetPixelMap(const RefPtr<PixelMap>& pixelMap)
+    {
+        pixelMap_ = pixelMap;
+    }
+
+    const RefPtr<PixelMap>& GetPixelMap() const
+    {
+        return pixelMap_;
+    }
+
 private:
     Alignment align_;
     LayoutParam constraints_ = LayoutParam(Size(), Size()); // no constraints when init
     Edge padding_;
     Edge margin_;
-    Edge additionalMargin_;
+    Edge additionalPadding_;
     BoxFlex flex_ { BoxFlex::FLEX_NO };
     bool deliverMinToChild_ = true;
     bool scrollPage_ = false;
     uint32_t percentFlag_ = 1;
     bool layoutInBox_ = false;
-    double aspectRatio_ = 0.0;
+    AnimatableDimension aspectRatio_ = AnimatableDimension();
     Dimension minWidth_ = Dimension();
     Dimension minHeight_ = Dimension();
     Dimension maxWidth_ = Dimension();
     Dimension maxHeight_ = Dimension();
     RefPtr<GridLayoutInfo> gridLayoutInfo_;
+    RefPtr<GridColumnInfo::Builder> gridColumnInfoBuilder_;
     bool useLiteStyle_ = false;
+    Overflow overflow_ = Overflow::OBSERVABLE;
+    RefPtr<ClipPath> clipPath_;
+    RefPtr<Mask> mask_;
+    BoxSizing boxSizing_ = BoxSizing::BORDER_BOX;
+    bool boxClipFlag_ = false;
+    RefPtr<PixelMap> pixelMap_ = nullptr;
+
+    AlignDeclarationPtr alignPtr_ = nullptr;
+    AlignDeclaration::Edge alignSide_ { AlignDeclaration::Edge::AUTO };
+    Dimension alignOffset_;
 };
 
 } // namespace OHOS::Ace

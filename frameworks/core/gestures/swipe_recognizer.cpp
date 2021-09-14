@@ -39,6 +39,22 @@ SwipeEventInfo::SwipeDirection GetSwipeDirection(const TouchPoint& firstPoint, c
     }
 }
 
+float GetSwipeDistance(
+    SwipeEventInfo::SwipeDirection direction, const TouchPoint& firstPoint, const TouchPoint& lastPoint)
+{
+    if (direction == SwipeEventInfo::SwipeDirection::RIGHT) {
+        return (lastPoint.x - firstPoint.x);
+    } else if (direction == SwipeEventInfo::SwipeDirection::LEFT) {
+        return (firstPoint.x - lastPoint.x);
+    } else if (direction == SwipeEventInfo::SwipeDirection::UP) {
+        return (firstPoint.y - lastPoint.y);
+    } else if (direction == SwipeEventInfo::SwipeDirection::DOWN) {
+        return (lastPoint.y - firstPoint.y);
+    } else {
+        return 0;
+    }
+}
+
 } // namespace
 
 std::string SwipeEventInfo::ToJsonParamInfo() const
@@ -53,6 +69,7 @@ std::string SwipeEventInfo::ToJsonParamInfo() const
     jsonValue->Put("type", GetType().c_str());
     jsonValue->Put("timestamp", static_cast<double>(GetTimeStamp().time_since_epoch().count()));
     jsonValue->Put("direction", conventMap[swipeDirection_].c_str());
+    jsonValue->Put("distance", distance_);
     return jsonValue->ToString();
 }
 
@@ -73,7 +90,7 @@ bool SwipeRecognizer::HandleEvent(const TouchPoint& point)
                 if (direction == SwipeEventInfo::SwipeDirection::NONE) {
                     return true;
                 }
-                swipeCallback_(SwipeEventInfo(direction));
+                swipeCallback_(SwipeEventInfo(direction, GetSwipeDistance(direction, status.first, point)));
             }
             break;
         }

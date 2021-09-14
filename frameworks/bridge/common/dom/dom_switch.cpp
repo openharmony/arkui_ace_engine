@@ -32,9 +32,6 @@ DOMSwitch::DOMSwitch(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeI
     switchChild_ = AceType::MakeRefPtr<SwitchComponent>(nullptr);
     switchChild_->SetTextOn(Localization::GetInstance()->GetEntryLetters("switch.on"));
     switchChild_->SetTextOff(Localization::GetInstance()->GetEntryLetters("switch.off"));
-    if (IsRightToLeft()) {
-        switchChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 void DOMSwitch::InitializeStyle()
@@ -54,23 +51,29 @@ void DOMSwitch::ResetInitializedStyle()
 
 bool DOMSwitch::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
 {
-    static const LinearMapNode<void (*)(const std::string&, SwitchComponent&, TextStyle&)>
+    static const LinearMapNode<void (*)(const std::string&, SwitchComponent&, std::string&, std::string&)>
         switchAttrOperators[] = {
-            { DOM_CHECKED, [](const std::string& val, SwitchComponent& textSwitch,
-                           TextStyle& textStyle) { textSwitch.SetValue(StringToBool(val)); } },
-            { DOM_DISABLED, [](const std::string& val, SwitchComponent& textSwitch,
-                            TextStyle& textStyle) { textSwitch.SetDisabled(StringToBool(val)); } },
-            { DOM_SHOW_TEXT, [](const std::string& val, SwitchComponent& textSwitch,
-                             TextStyle& textStyle) { textSwitch.SetShowText(StringToBool(val)); } },
-            { DOM_TEXT_OFF, [](const std::string& val, SwitchComponent& textSwitch,
-                        TextStyle& textStyle) { textSwitch.SetTextOff(val); } },
-            { DOM_TEXT_ON, [](const std::string& val, SwitchComponent& textSwitch,
-                           TextStyle& textStyle) { textSwitch.SetTextOn(val); } },
+            { DOM_CHECKED, [](const std::string& val, SwitchComponent& textSwitch, std::string& textOn,
+                               std::string& textOff) { textSwitch.SetValue(StringToBool(val)); } },
+            { DOM_DISABLED, [](const std::string& val, SwitchComponent& textSwitch, std::string& textOn,
+                                std::string& textOff) { textSwitch.SetDisabled(StringToBool(val)); } },
+            { DOM_SHOW_TEXT, [](const std::string& val, SwitchComponent& textSwitch, std::string& textOn,
+                                 std::string& textOff) { textSwitch.SetShowText(StringToBool(val)); } },
+            { DOM_TEXT_OFF,
+                [](const std::string& val, SwitchComponent& textSwitch, std::string& textOn, std::string& textOff) {
+                    textSwitch.SetTextOff(val);
+                    textOff = val;
+                } },
+            { DOM_TEXT_ON,
+                [](const std::string& val, SwitchComponent& textSwitch, std::string& textOn, std::string& textOff) {
+                    textSwitch.SetTextOn(val);
+                    textOn = val;
+                } },
         };
     auto operatorIter = BinarySearchFindIndex(
         switchAttrOperators, ArraySize(switchAttrOperators), attr.first.c_str());
     if (operatorIter != -1) {
-        switchAttrOperators[operatorIter].value(attr.second, *switchChild_, textStyle_);
+        switchAttrOperators[operatorIter].value(attr.second, *switchChild_, textOn_, textOff_);
         return true;
     }
     return false;
@@ -92,8 +95,9 @@ bool DOMSwitch::SetSpecializedStyle(const std::pair<std::string, std::string>& s
                                    TextStyle& textStyle) { textStyle.SetFontStyle(ConvertStrToFontStyle(val)); } },
             { DOM_TEXT_FONT_WEIGHT, [](const std::string& val, const DOMSwitch& node, SwitchComponent& textSwitch,
                                     TextStyle& textStyle) { textStyle.SetFontWeight(ConvertStrToFontWeight(val)); } },
-            { DOM_TEXT_LETTER_SPACING, [](const std::string& val, const DOMSwitch& node, SwitchComponent& textSwitch,
-                                       TextStyle& textStyle) { textStyle.SetLetterSpacing(StringToDouble(val)); } },
+            { DOM_TEXT_LETTER_SPACING,
+                [](const std::string& val, const DOMSwitch& node, SwitchComponent& textSwitch, TextStyle& textStyle) {
+                    textStyle.SetLetterSpacing(node.ParseDimension(val)); } },
             { DOM_TEXT_DECORATION,
                 [](const std::string& val, const DOMSwitch& node, SwitchComponent& textSwitch, TextStyle& textStyle) {
                     textStyle.SetTextDecoration(ConvertStrToTextDecoration(val));
@@ -120,7 +124,13 @@ bool DOMSwitch::AddSpecializedEvent(int32_t pageId, const std::string& event)
         switchChild_->SetChangeEvent(changeEvent_);
         return true;
     } else if (event == DOM_CLICK) {
-        switchChild_->SetClickEvent(EventMarker(GetNodeIdForEvent(), event, pageId));
+        EventMarker eventMarker(GetNodeIdForEvent(), event, pageId);
+        eventMarker.SetCatchMode(false);
+        switchChild_->SetClickEvent(eventMarker);
+    } else if (event == DOM_CATCH_BUBBLE_CLICK) {
+        EventMarker eventMarker(GetNodeIdForEvent(), event, pageId);
+        eventMarker.SetCatchMode(true);
+        switchChild_->SetClickEvent(eventMarker);
     }
     return false;
 }
@@ -158,10 +168,21 @@ void DOMSwitch::PrepareSpecializedComponent()
     if (HasCheckedPseudo()) {
         PrepareCheckedListener();
     }
+    switchChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     switchChild_->SetTextStyle(textStyle_);
+    if (!textOn_.empty()) {
+        switchChild_->SetTextOn(textOn_);
+    }
+    if (!textOff_.empty()) {
+        switchChild_->SetTextOff(textOff_);
+    }
 #ifndef WEARABLE_PRODUCT
-    if (!multimodalProperties_.IsUnavailable() && multimodalProperties_.scene == SceneLabel::SWITCH) {
-        switchChild_->SetMultimodalProperties(multimodalProperties_);
+    if (declaration_) {
+        auto& multimodalAttr =
+            static_cast<CommonMultimodalAttribute&>(declaration_->GetAttribute(AttributeTag::COMMON_MULTIMODAL_ATTR));
+        if (multimodalAttr.IsValid() && !multimodalAttr.IsUnavailable() && multimodalAttr.scene == SceneLabel::SWITCH) {
+            switchChild_->SetMultimodalProperties(multimodalAttr);
+        }
     }
 #endif
     RefPtr<SwitchTheme> theme = GetTheme<SwitchTheme>();

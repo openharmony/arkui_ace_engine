@@ -16,18 +16,37 @@
 #include "core/components/navigator/navigator_element.h"
 
 #include "core/components/navigator/render_navigator.h"
+#include "core/components/stage/stage_element.h"
 
 namespace OHOS::Ace {
 
 void NavigatorElement::PerformBuild()
 {
     SoleChildElement::PerformBuild();
+
+    auto parent = GetParent().Upgrade();
+    while (parent) {
+        auto stage = AceType::DynamicCast<SectionStageElement>(parent);
+        if (stage) {
+            SetTargetContainer(stage);
+            return;
+        }
+        parent = parent->GetParent().Upgrade();
+    }
 }
 
 void NavigatorElement::OnClick()
 {
     auto renderNode = AceType::DynamicCast<RenderNavigator>(renderNode_);
     renderNode->NavigatePage();
+}
+
+void NavigatorElement::SetTargetContainer(const WeakPtr<StageElement>& targetContainer)
+{
+    auto renderNode = AceType::DynamicCast<RenderNavigator>(renderNode_);
+    if (renderNode) {
+        renderNode->SetTargetContainer(targetContainer);
+    }
 }
 
 } // namespace OHOS::Ace

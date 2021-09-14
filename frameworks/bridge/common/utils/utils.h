@@ -16,10 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_UTILS_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_UTILS_UTILS_H
 
+#include <algorithm>
+#include <cctype>
 #include <climits>
 #include <cmath>
+#include <cstring>
+#include <iomanip>
 #include <map>
+#include <optional>
 #include <sstream>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -33,7 +39,11 @@
 #include "core/animation/animation_pub.h"
 #include "core/animation/curve.h"
 #include "core/animation/curves.h"
+#include "core/animation/spring_curve.h"
+#include "core/common/ime/text_input_action.h"
+#include "core/common/ime/text_input_type.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/text_style.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
@@ -41,6 +51,29 @@
 namespace OHOS::Ace::Framework {
 
 constexpr int32_t OFFSET_VALUE_NUMBER = 2;
+constexpr uint8_t UTF8_CHARATER_HEAD = 0xc0;
+constexpr uint8_t UTF8_CHARATER_BODY = 0x80;
+constexpr int32_t UNICODE_LENGTH = 4;
+constexpr int32_t STRTOL_BASE = 10;
+constexpr int32_t INVALID_PARAM = -1;
+constexpr int32_t PLACE_HOLDER_LENGTH = 3;
+
+constexpr char INPUT_ACTION_NEXT[] = "next";
+constexpr char INPUT_ACTION_GO[] = "go";
+constexpr char INPUT_ACTION_DONE[] = "done";
+constexpr char INPUT_ACTION_SEND[] = "send";
+constexpr char INPUT_ACTION_SEARCH[] = "search";
+constexpr char PLURAL_COUNT_POS[] = "{count}";
+constexpr char DEFAULT_PLURAL_CHOICE[] = "other";
+
+const char DOUBLE_QUOTATION = '"';
+const char BACKSLASH = '\\';
+const char ESCAPE_CHARATER_START = '\x00';
+const char ESCAPE_CHARATER_END = '\x1f';
+const char UNICODE_BODY = '0';
+const char UNICODE_HEAD[] = "\\u";
+const char LEFT_CURLY_BRACES = '{';
+const char RIGHT_CURLY_BRACES = '}';
 
 template<class T>
 bool GetAssetContentImpl(const RefPtr<AssetManager>& assetManager, const std::string& url, T& content)
@@ -82,6 +115,15 @@ bool GetAssetContentAllowEmpty(const RefPtr<AssetManager>& assetManager, const s
     return true;
 }
 
+inline std::string GetAssetPathImpl(const RefPtr<AssetManager>& assetManager, const std::string& url)
+{
+    if (!assetManager) {
+        LOGE("AssetManager is null");
+        return "";
+    }
+    return assetManager->GetAssetPath(url);
+}
+
 inline std::unique_ptr<JsonValue> ParseFileData(const std::string& data)
 {
     const char* endMsg = nullptr;
@@ -101,6 +143,11 @@ inline double StringToDouble(const std::string& value)
 inline Dimension StringToDimension(const std::string& value)
 {
     return StringUtils::StringToDimension(value);
+}
+
+inline Dimension StringToDimensionWithUnit(const std::string& value, DimensionUnit defaultUnit = DimensionUnit::PX)
+{
+    return StringUtils::StringToDimensionWithUnit(value, defaultUnit);
 }
 
 inline int32_t StringToInt(const std::string& value)
@@ -125,6 +172,18 @@ inline BorderStyle ConvertStrToBorderStyle(const std::string& style)
     return index < 0 ? BorderStyle::NONE : borderStyleTable[index].value;
 }
 
+inline BorderImageRepeat ConvertStrToBorderImageRepeat(const std::string& repeat)
+{
+    static const LinearMapNode<BorderImageRepeat> borderImageRepeatTable[] = {
+        { "repeat", BorderImageRepeat::REPEAT },
+        { "round", BorderImageRepeat::ROUND },
+        { "stretch", BorderImageRepeat::STRETCH },
+    };
+
+    auto index = BinarySearchFindIndex(borderImageRepeatTable, ArraySize(borderImageRepeatTable), repeat.c_str());
+    return index < 0 ? BorderImageRepeat::STRETCH : borderImageRepeatTable[index].value;
+}
+
 inline BadgePosition ConvertStrToBadgePosition(const std::string& badgePosition)
 {
     static const LinearMapNode<BadgePosition> badgePositionTable[] = {
@@ -134,6 +193,16 @@ inline BadgePosition ConvertStrToBadgePosition(const std::string& badgePosition)
     };
     auto index = BinarySearchFindIndex(badgePositionTable, ArraySize(badgePositionTable), badgePosition.c_str());
     return index < 0 ? BadgePosition::RIGHT_TOP : badgePositionTable[index].value;
+}
+
+inline BoxSizing ConvertStrToBoxSizing(const std::string& value)
+{
+    static const LinearMapNode<BoxSizing> boxSizingTable[] = {
+        { "border-box", BoxSizing::BORDER_BOX },
+        { "content-box", BoxSizing::CONTENT_BOX },
+    };
+    auto index = BinarySearchFindIndex(boxSizingTable, ArraySize(boxSizingTable), value.c_str());
+    return index < 0 ? BoxSizing::BORDER_BOX : boxSizingTable[index].value;
 }
 
 inline ImageRepeat ConvertStrToImageRepeat(const std::string& repeat)
@@ -169,6 +238,33 @@ inline TextDecoration ConvertStrToTextDecoration(const std::string& textDecorati
     return index < 0 ? TextDecoration::NONE : textDecorationTable[index].value;
 }
 
+inline WhiteSpace ConvertStrToWhiteSpace(const std::string& whiteSpace)
+{
+    // this map should be sorted bu key.
+    static const LinearMapNode<WhiteSpace> whiteSpaceTable[] = {
+        { DOM_WHITE_SPACE_INHERIT, WhiteSpace::INHERIT },
+        { DOM_WHITE_SPACE_NORMAL, WhiteSpace::NORMAL },
+        { DOM_WHITE_SPACE_NOWRAP, WhiteSpace::NOWRAP },
+        { DOM_WHITE_SPACE_PRE, WhiteSpace::PRE },
+        { DOM_WHITE_SPACE_PRELINE, WhiteSpace::PRE_LINE },
+        { DOM_WHITE_SPACE_PREWRAP, WhiteSpace::PRE_WRAP },
+    };
+
+    auto index = BinarySearchFindIndex(whiteSpaceTable, ArraySize(whiteSpaceTable), whiteSpace.c_str());
+    return index < 0 ? WhiteSpace::NORMAL : whiteSpaceTable[index].value;
+}
+
+inline VerticalAlign ConvertStrToTextVerticalAlign(const std::string& align)
+{
+    static const LinearMapNode<VerticalAlign> textVerticalAlignTable[] = {
+        {DOM_BOTTOM, VerticalAlign::BOTTOM},
+        {DOM_MIDDLE, VerticalAlign::CENTER},
+        {DOM_TOP, VerticalAlign::TOP},
+    };
+    auto index = BinarySearchFindIndex(textVerticalAlignTable, ArraySize(textVerticalAlignTable), align.c_str());
+    return index < 0 ? VerticalAlign::NONE : textVerticalAlignTable[index].value;
+}
+
 inline FontStyle ConvertStrToFontStyle(const std::string& fontStyle)
 {
     return fontStyle == DOM_TEXT_FONT_STYLE_ITALIC ? FontStyle::ITALIC : FontStyle::NORMAL;
@@ -196,14 +292,25 @@ inline TextOverflow ConvertStrToTextOverflow(const std::string& overflow)
 inline Overflow ConvertStrToOverflow(const std::string& val)
 {
     const LinearMapNode<Overflow> overflowTable[] = {
-        { "hidden", Overflow::CLIP },
+        { "auto", Overflow::SCROLL },
+        { "hidden", Overflow::FORCE_CLIP },
         { "scroll", Overflow::SCROLL },
         { "visible", Overflow::OBSERVABLE },
     };
     auto index = BinarySearchFindIndex(overflowTable, ArraySize(overflowTable), val.c_str());
-    return index < 0 ? Overflow::OBSERVABLE : overflowTable[index].value;
+    return index < 0 ? Overflow::CLIP : overflowTable[index].value;
 }
 
+inline TextDirection ConvertStrToTextDirection(const std::string& val)
+{
+    const LinearMapNode<TextDirection> textDirectionTable[] = {
+        { "ltr", TextDirection::LTR },
+        { "rtl", TextDirection::RTL },
+        { "inherit", TextDirection::INHERIT },
+    };
+    auto index = BinarySearchFindIndex(textDirectionTable, ArraySize(textDirectionTable), val.c_str());
+    return index < 0 ? TextDirection::LTR : textDirectionTable[index].value;
+}
 inline std::vector<std::string> ConvertStrToFontFamilies(const std::string& family)
 {
     std::vector<std::string> fontFamilies;
@@ -262,11 +369,58 @@ inline AnimationCurve ConvertStrToAnimationCurve(const std::string& value)
     return value == "standard" ? AnimationCurve::STANDARD : AnimationCurve::FRICTION;
 }
 
+inline TextInputAction ConvertStrToTextInputAction(const std::string& action)
+{
+    TextInputAction inputAction;
+    if (action == INPUT_ACTION_NEXT) {
+        inputAction = TextInputAction::NEXT;
+    } else if (action == INPUT_ACTION_GO) {
+        inputAction = TextInputAction::GO;
+    } else if (action == INPUT_ACTION_DONE) {
+        inputAction = TextInputAction::DONE;
+    } else if (action == INPUT_ACTION_SEND) {
+        inputAction = TextInputAction::SEND;
+    } else if (action == INPUT_ACTION_SEARCH) {
+        inputAction = TextInputAction::SEARCH;
+    } else {
+        inputAction = TextInputAction::UNSPECIFIED;
+    }
+    return inputAction;
+}
+
+inline TextInputType ConvertStrToTextInputType(const std::string& type)
+{
+    TextInputType inputType;
+    if (type == DOM_INPUT_TYPE_NUMBER) {
+        inputType = TextInputType::NUMBER;
+    } else if (type == DOM_INPUT_TYPE_DATE || type == DOM_INPUT_TYPE_TIME) {
+        inputType = TextInputType::DATETIME;
+    } else if (type == DOM_INPUT_TYPE_EMAIL) {
+        inputType = TextInputType::EMAIL_ADDRESS;
+    } else if (type == DOM_INPUT_TYPE_PASSWORD) {
+        inputType = TextInputType::VISIBLE_PASSWORD;
+    } else {
+        inputType = TextInputType::TEXT;
+    }
+    return inputType;
+}
+
+inline TabBarMode ConvertStrToTabBarMode(const std::string& value)
+{
+    std::string temp = value;
+    transform(temp.begin(), temp.end(), temp.begin(), tolower);
+    return temp == "fixed" ? TabBarMode::FIXED : TabBarMode::SCROLLABEL;
+}
+
 RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc);
 
 RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc);
 
 ACE_EXPORT RefPtr<Curve> CreateCurve(const std::string& aniTimFunc);
+
+ACE_EXPORT TransitionType ParseTransitionType(const std::string& transitionType);
+
+ACE_EXPORT RefPtr<ClipPath> CreateClipPath(const std::string& value);
 
 inline FillMode StringToFillMode(const std::string& fillMode)
 {
@@ -294,6 +448,21 @@ inline AnimationDirection StringToAnimationDirection(const std::string& directio
     }
 }
 
+inline AnimationOperation StringToAnimationOperation(const std::string& direction)
+{
+    if (direction == DOM_ANIMATION_PLAY_STATE_IDLE) {
+        return AnimationOperation::CANCEL;
+    } else if (direction == DOM_ANIMATION_PLAY_STATE_RUNNING) {
+        return AnimationOperation::RUNNING;
+    } else if (direction == DOM_ANIMATION_PLAY_STATE_PAUSED) {
+        return AnimationOperation::PAUSE;
+    } else if (direction == DOM_ANIMATION_PLAY_STATE_FINISHED) {
+        return AnimationOperation::FINISH;
+    } else {
+        return AnimationOperation::NONE;
+    }
+}
+
 inline void RemoveHeadTailSpace(std::string& value)
 {
     if (!value.empty()) {
@@ -312,15 +481,20 @@ inline GradientDirection StrToGradientDirection(const std::string& direction)
         { DOM_GRADIENT_DIRECTION_LEFT, GradientDirection::LEFT },
         { DOM_GRADIENT_DIRECTION_RIGHT, GradientDirection::RIGHT },
         { DOM_GRADIENT_DIRECTION_TOP, GradientDirection::TOP },
+        { DOM_GRADIENT_DIRECTION_BOTTOM, GradientDirection::BOTTOM },
     };
 
     auto index = BinarySearchFindIndex(gradientDirectionTable, ArraySize(gradientDirectionTable), direction.c_str());
     return index < 0 ? GradientDirection::BOTTOM : gradientDirectionTable[index].value;
 }
 
-GradientDirection StrToGradientDirectionCorner(const std::string& horizontal, const std::string& vertical);
-
 bool ParseBackgroundImagePosition(const std::string& value, BackgroundImagePosition& backgroundImagePosition);
+
+bool ParseBackgroundImageSize(const std::string& value, BackgroundImageSize& backgroundImageSize);
+
+ImageObjectPosition ParseImageObjectPosition(const std::string& value);
+
+std::optional<RadialSizeType> ParseRadialGradientSize(const std::string& value);
 
 inline bool StartWith(const std::string& dst, const std::string& prefix)
 {
@@ -387,6 +561,129 @@ inline std::pair<bool, Dimension> ConvertStrToTransformOrigin(const std::string&
     }
 
     return std::make_pair(false, Dimension {});
+}
+
+inline int32_t ParseUtf8TextLength(std::string& text)
+{
+    int32_t trueLength = 0;
+    int32_t stringLength = 0;
+    while (stringLength < static_cast<int32_t>(text.length())) {
+        uint8_t stringChar = static_cast<uint8_t>(text[stringLength++]);
+        if ((stringChar & UTF8_CHARATER_HEAD) != UTF8_CHARATER_BODY) {
+            trueLength++;
+        }
+    }
+    return trueLength;
+}
+
+inline int32_t ParseUtf8TextSubstrStartPos(std::string& text, int32_t targetPos)
+{
+    int32_t truePos = 0;
+    int32_t stringPos = 0;
+    while ((stringPos < static_cast<int32_t>(text.length())) && (truePos < targetPos)) {
+        uint8_t stringChar = static_cast<uint8_t>(text[stringPos++]);
+        if ((stringChar & UTF8_CHARATER_HEAD) != UTF8_CHARATER_BODY) {
+            truePos++;
+        }
+    }
+
+    return stringPos;
+}
+
+inline int32_t ParseUtf8TextSubstrEndPos(std::string& text, int32_t targetPos)
+{
+    auto stringPos = ParseUtf8TextSubstrStartPos(text, targetPos);
+    while (stringPos < static_cast<int32_t>(text.length())) {
+        uint8_t stringChar = static_cast<uint8_t>(text[stringPos]);
+        if ((stringChar & UTF8_CHARATER_HEAD) != UTF8_CHARATER_BODY) {
+            break;
+        }
+        stringPos++;
+    }
+
+    return stringPos;
+}
+
+inline void HandleEscapeCharaterInUtf8TextForJson(std::string& text)
+{
+    for (size_t pos = 0; pos < text.size(); pos++) {
+        if ((text.at(pos) == DOUBLE_QUOTATION) || (text.at(pos) == BACKSLASH) ||
+            ((text.at(pos) >= ESCAPE_CHARATER_START) && (text.at(pos) <= ESCAPE_CHARATER_END))) {
+            std::ostringstream is;
+            is << UNICODE_HEAD << std::hex << std::setw(UNICODE_LENGTH) << std::setfill(UNICODE_BODY)
+                << int(text.at(pos));
+            text.replace(pos, 1, is.str());
+        }
+    }
+}
+
+inline int32_t ParseResourceInputNumberParam(const std::string& param)
+{
+    if (!StringUtils::IsNumber(param) || param.empty()) {
+        return INVALID_PARAM;
+    } else {
+        errno = 0;
+        char* pEnd = nullptr;
+        int64_t result = std::strtol(param.c_str(), &pEnd, STRTOL_BASE);
+        if ((result < INT_MIN || result > INT_MAX) || errno == ERANGE) {
+            return INT_MAX;
+        } else {
+            return static_cast<int32_t>(result);
+        }
+    }
+}
+
+inline void ReplacePlaceHolderArray(std::string& resultStr, const std::vector<std::string>& arrayResult)
+{
+    auto size = arrayResult.size();
+    size_t startPos = 0;
+    for (size_t i = 0; i < size; i++) {
+        std::string placeHolder;
+        placeHolder += LEFT_CURLY_BRACES;
+        placeHolder += (i + '0');
+        placeHolder += RIGHT_CURLY_BRACES;
+        if (startPos < resultStr.length()) {
+            auto pos = resultStr.find(placeHolder, startPos);
+            if (pos != std::string::npos) {
+                resultStr.replace(pos, PLACE_HOLDER_LENGTH, arrayResult[i]);
+                startPos = pos + arrayResult[i].length();
+            }
+        }
+    }
+}
+
+inline void ReplacePlaceHolder(std::string& resultStr, const std::unique_ptr<JsonValue>& argsPtr)
+{
+    auto placeHolderKey = argsPtr->GetChild()->GetKey();
+    std::string placeHolder;
+    placeHolder += LEFT_CURLY_BRACES;
+    placeHolder += placeHolderKey;
+    placeHolder += RIGHT_CURLY_BRACES;
+    auto pos = resultStr.find(placeHolder);
+    if (pos != std::string::npos) {
+        resultStr.replace(pos, placeHolder.length(), argsPtr->GetChild()->GetString());
+    }
+}
+
+inline std::string ParserPluralResource(const std::unique_ptr<JsonValue>& argsPtr, const std::string& choice,
+    const std::string& count)
+{
+    std::string valueStr;
+    std::string defaultPluralStr(DEFAULT_PLURAL_CHOICE);
+    if (argsPtr->Contains(choice)) {
+        valueStr = argsPtr->GetValue(choice)->GetString();
+    } else if (argsPtr->Contains(defaultPluralStr)) {
+        valueStr = argsPtr->GetValue(defaultPluralStr)->GetString();
+    } else {
+        return std::string();
+    }
+
+    std::string pluralStr(PLURAL_COUNT_POS);
+    auto pos = valueStr.find(pluralStr);
+    if (pos != std::string::npos) {
+        valueStr.replace(pos, pluralStr.length(), count);
+    }
+    return valueStr;
 }
 
 } // namespace OHOS::Ace::Framework

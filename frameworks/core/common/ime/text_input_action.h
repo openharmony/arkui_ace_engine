@@ -37,6 +37,7 @@ enum class TextInputAction {
     END = PREVIOUS,
 };
 
+// For convenience of convert int value from Java
 TextInputAction CastToTextInputAction(int32_t value);
 
 } // namespace OHOS::Ace

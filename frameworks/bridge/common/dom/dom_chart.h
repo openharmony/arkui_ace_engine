@@ -129,7 +129,7 @@ public:
 private:
     AxisOption xAxis_;
     AxisOption yAxis_;
-    double lineWidth_ = 3.0;
+    double lineWidth_ = 1.0;
     bool smoothFlag_ = false;
     PointInfo headPoint_;
     PointInfo topPoint_;
@@ -201,6 +201,7 @@ private:
     std::vector<std::string> fontFamily_;
     bool showEffect_ = false;
     bool autoScale_ = false;
+    double animationDuration_ = -1.0;
 };
 
 } // namespace OHOS::Ace::Framework

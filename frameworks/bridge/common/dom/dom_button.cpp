@@ -17,6 +17,7 @@
 
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
+#include "frameworks/bridge/common/dom/dom_div.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
@@ -52,7 +53,6 @@ constexpr Dimension TEXT_FONT_MIN_SIZE = 12.0_fp;
 constexpr double TEXT_FOCUS_HEIGHT = 24.0;
 
 constexpr uint32_t TRANSPARENT_COLOR = 0x00000000;
-constexpr uint32_t METHOD_SET_PROGRESS_ARGS_SIZE = 1;
 constexpr double FLEX_ITEM_SHRINK = 1.0;
 constexpr double INIT_HEIGHT = -1.0;
 constexpr Dimension DOWNLOAD_BORDER_WIDTH = Dimension(1.0, DimensionUnit::VP);
@@ -61,22 +61,6 @@ constexpr Dimension ICON_BUTTON_RADIUS = 0.0_vp;
 constexpr Dimension INNER_PADDING = 4.0_vp;
 
 } // namespace
-
-void DOMButton::ResetInitializedStyle()
-{
-    buttonTheme_ = GetTheme<ButtonTheme>();
-    if (!buttonTheme_) {
-        return;
-    }
-    paddingChild_->SetPadding(buttonTheme_->GetPadding());
-    blendOpacity_ = buttonTheme_->GetBgDisabledAlpha();
-    edge_.SetColor(buttonTheme_->GetDownloadBorderColor());
-    progressColor_ = buttonTheme_->GetProgressColor();
-    diameter_ = buttonTheme_->GetProgressDiameter();
-    innerLeftPadding_ = buttonTheme_->GetInnerPadding();
-    InitButtonStyle();
-    InitTextStyle();
-}
 
 DOMButton::DOMButton(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
@@ -88,217 +72,36 @@ DOMButton::DOMButton(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeI
     buttonChild_->AppendChild(paddingChild_);
     isWatch_ = (SystemProperties::GetDeviceType() == DeviceType::WATCH);
     isTv_ = (SystemProperties::GetDeviceType() == DeviceType::TV);
-    if (IsRightToLeft()) {
-        textChild_->SetTextDirection(TextDirection::RTL);
-        imageChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
-void DOMButton::InitializeStyle()
+void DOMButton::ResetInitializedStyle()
 {
-    ResetInitializedStyle();
-}
-
-void DOMButton::InitButtonStyle()
-{
-    if (!buttonChild_) {
-        return;
-    }
-    buttonChild_->SetLayoutFlag(LAYOUT_FLAG_EXTEND_TO_PARENT);
-    buttonChild_->SetRectRadius(buttonTheme_->GetRadius());
-    buttonChild_->SetMinWidth(buttonTheme_->GetMinWidth());
-    buttonChild_->SetBackgroundColor(buttonTheme_->GetBgColor());
-    buttonChild_->SetClickedColor(buttonTheme_->GetClickedColor());
-    buttonChild_->SetFocusColor(buttonTheme_->GetBgFocusColor());
-    buttonChild_->SetHoverColor(buttonTheme_->GetHoverColor());
-    buttonChild_->SetFocusAnimationColor(buttonTheme_->GetBgFocusColor());
-    buttonChild_->SetProgressFocusColor(buttonTheme_->GetProgressFocusColor());
-}
-
-void DOMButton::InitTextStyle()
-{
-    textStyle_ = buttonTheme_->GetTextStyle();
-    textStyle_.SetAdaptTextSize(textStyle_.GetFontSize(), buttonTheme_->GetMinFontSize());
-    textStyle_.SetMaxLines(buttonTheme_->GetTextMaxLines());
-    textStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
-    textStyle_.SetTextAlign(TextAlign::LEFT);
-    if (textChild_) {
-        textChild_->SetTextStyle(textStyle_);
-        textChild_->SetFocusColor(buttonTheme_->GetTextFocusColor());
-    }
-}
-
-bool DOMButton::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    static const LinearMapNode<void (*)(DOMButton&, const std::string&)> buttonAttrOperators[] = {
-        { DOM_BUTTON_AUTO_FOCUS,
-            [](DOMButton& button, const std::string& value) {
-                button.buttonChild_->SetAutoFocusState(StringToBool(value));
-            } },
-        { DOM_DISABLED, [](DOMButton& button,
-                    const std::string& value) { button.buttonChild_->SetDisabledState(StringToBool(value)); } },
-        { DOM_BUTTON_ICON, [](DOMButton& button, const std::string& value) { button.imageChild_->SetSrc(value); } },
-        { DOM_PLACEMENT, [](DOMButton& button, const std::string& value) { button.placement_ = value; } },
-        { DOM_BUTTON_TYPE, [](DOMButton& button, const std::string& value) { button.buttonType_ = value; } },
-        { DOM_BUTTON_TEXT_DATA,
-            [](DOMButton& button, const std::string& value) { button.textChild_->SetData(value); } },
-        { DOM_BUTTON_WAITING,
-            [](DOMButton& button, const std::string& value) { button.isWaiting_ = StringToBool(value); } },
-    };
-    auto operatorIter = BinarySearchFindIndex(buttonAttrOperators, ArraySize(buttonAttrOperators), attr.first.c_str());
-    if (operatorIter != -1) {
-        LOGD("Button attrs : %{public}s = %{public}s", attr.first.c_str(), attr.second.c_str());
-        buttonAttrOperators[operatorIter].value(*this, attr.second);
-        return true;
-    }
-    return false;
-}
-
-bool DOMButton::SetSpecializedStyle(const std::pair<std::string, std::string>& style)
-{
-    // Static linear map should be sorted by key.
-    const static LinearMapNode<void (*)(DOMButton&, const std::string&)> buttonStyleOperators[] = {
-        { DOM_TEXT_ALLOW_SCALE,
-            [](DOMButton& button, const std::string& value) { button.textStyle_.SetAllowScale(StringToBool(value)); } },
-        { DOM_BUTTON_DEFAULT_COLOR,
-            [](DOMButton& button, const std::string& value) {
-                button.buttonChild_->SetBackgroundColor(button.ParseColor(value));
-                button.bgColorDefined_ = true;
-            } },
-        { DOM_BUTTON_BORDER_COLOR,
-            [](DOMButton& button, const std::string& value) { button.edge_.SetColor(button.ParseColor(value)); } },
-        { DOM_BUTTON_BORDER_WIDTH,
-            [](DOMButton& button, const std::string& value) { button.edge_.SetWidth(button.ParseDimension(value)); } },
-        { DOM_BUTTON_ICON_DIRECTION,
-            [](DOMButton& button, const std::string& value) {
-                button.imageChild_->SetMatchTextDirection(StringToBool(value));
-            } },
-        { DOM_BUTTON_CLICKED_COLOR,
-            [](DOMButton& button, const std::string& value) {
-                button.buttonChild_->SetClickedColor(button.ParseColor(value));
-            } },
-        { DOM_BUTTON_PROGRESS_DIAMETER,
-            [](DOMButton& button, const std::string& value) { button.diameter_ = button.ParseDimension(value); } },
-        { DOM_BUTTON_DISABLE_COLOR,
-            [](DOMButton& button, const std::string& value) { button.disabledColor_ = button.ParseColor(value); } },
-        { DOM_BUTTON_TEXT_DISABLE_COLOR,
-            [](DOMButton& button, const std::string& value) { button.disabledTextColor_ = button.ParseColor(value); } },
-        { DOM_BUTTON_FOCUS_COLOR,
-            [](DOMButton& button, const std::string& value) {
-                button.buttonChild_->SetFocusColor(button.ParseColor(value));
-            } },
-        { DOM_BUTTON_FONT_FAMILY,
-            [](DOMButton& button, const std::string& value) {
-                button.textStyle_.SetFontFamilies(button.ParseFontFamilies(value));
-            } },
-        { DOM_BUTTON_FONT_SIZE,
-            [](DOMButton& button, const std::string& value) {
-                button.textStyle_.SetFontSize(button.ParseDimension(value));
-                button.fontSizeDefined_ = true;
-            } },
-        { DOM_BUTTON_FONT_STYLE,
-            [](DOMButton& button, const std::string& value) {
-                button.textStyle_.SetFontStyle(ConvertStrToFontStyle(value));
-            } },
-        { DOM_BUTTON_FONT_WEIGHT,
-            [](DOMButton& button, const std::string& value) {
-                button.textStyle_.SetFontWeight(ConvertStrToFontWeight(value));
-            } },
-        { DOM_BUTTON_HEIGHT,
-            [](DOMButton& button, const std::string& value) {
-                button.SetHeight(button.ParseDimension(value));
-                button.buttonChild_->SetHeight(button.ParseDimension(value));
-                button.heightDefined_ = true;
-            } },
-        { DOM_BUTTON_ICON_HEIGHT,
-            [](DOMButton& button, const std::string& value) {
-                button.imageChild_->SetHeight(button.ParseDimension(value));
-            } },
-        { DOM_BUTTON_ICON_WIDTH,
-            [](DOMButton& button, const std::string& value) {
-                button.imageChild_->SetWidth(button.ParseDimension(value));
-            } },
-        { DOM_BUTTON_INNER_PADDING,
-            [](DOMButton& button, const std::string& value) {
-                button.innerLeftPadding_ = button.ParseDimension(value);
-            } },
-        { DOM_BUTTON_MIN_WIDTH,
-            [](DOMButton& button, const std::string& value) {
-                button.buttonChild_->SetMinWidth(button.ParseDimension(value));
-            } },
-        { DOM_BUTTON_PROGRESS_COLOR,
-            [](DOMButton& button, const std::string& value) { button.progressColor_ = button.ParseColor(value); } },
-        { DOM_BUTTON_PROGRESS_FOCUS_COLOR,
-            [](DOMButton& button, const std::string& value) {
-                button.buttonChild_->SetProgressFocusColor(button.ParseColor(value));
-            } },
-        { DOM_BUTTON_RRECT_RADIUS,
-            [](DOMButton& button, const std::string& value) {
-                button.buttonChild_->SetRectRadius(button.ParseDimension(value));
-                button.radiusDefined_ = true;
-            } },
-        { DOM_BUTTON_TEXT_COLOR,
-            [](DOMButton& button, const std::string& value) {
-                button.textStyle_.SetTextColor(button.ParseColor(value));
-                button.textColorDefined_ = true;
-            } },
-        { DOM_BUTTON_WIDTH,
-            [](DOMButton& button, const std::string& value) {
-                auto width = button.ParseDimension(value);
-                button.SetWidth(width);
-                button.buttonChild_->SetWidth(width);
-            } },
-    };
-    auto operatorIter =
-        BinarySearchFindIndex(buttonStyleOperators, ArraySize(buttonStyleOperators), style.first.c_str());
-    if (operatorIter != -1) {
-        LOGD("Button styles : %{public}s = %{public}s", style.first.c_str(), style.second.c_str());
-        buttonStyleOperators[operatorIter].value(*this, style.second);
-        return true;
-    }
-    return false;
-}
-
-bool DOMButton::AddSpecializedEvent(int32_t pageId, const std::string& event)
-{
-    // Note! this map should be sorted by key.
-    static const LinearMapNode<void (*)(DOMButton&, const EventMarker&)> buttonEventOperators[] = {
-        { DOM_CLICK,
-            [](DOMButton& button, const EventMarker& event) { button.buttonChild_->SetClickedEventId(event); } },
-    };
-    auto operatorIter = BinarySearchFindIndex(buttonEventOperators, ArraySize(buttonEventOperators), event.c_str());
-    if (operatorIter != -1) {
-        LOGD("Button events : %{public}s", event.c_str());
-        buttonEventOperators[operatorIter].value(*this, EventMarker(GetNodeIdForEvent(), event, pageId));
-        return true;
-    }
-    return false;
-}
-
-void DOMButton::CallSpecializedMethod(const std::string& method, const std::string& args)
-{
-    auto controller = buttonChild_->GetButtonController();
-    if (!controller) {
-        LOGE("Get button controller error");
-        EventReport::SendComponentException(ComponentExcepType::BUTTON_COMPONENT_ERR);
-        return;
-    }
-    if (method == DOM_BUTTON_METHOD_SET_PROGRESS) {
-        std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
-        if ((!argsValue) || (!argsValue->IsArray()) || (argsValue->GetArraySize() != METHOD_SET_PROGRESS_ARGS_SIZE)) {
-            return;
-        }
-        std::unique_ptr<JsonValue> progressValue = argsValue->GetArrayItem(0)->GetValue("progress");
-        if ((!progressValue) || (!progressValue->IsNumber())) {
-            return;
-        }
-        uint32_t progress = progressValue->GetUInt();
-        controller->SetProgress(progress);
+    if (declaration_) {
+        declaration_->InitializeStyle();
     }
 }
 
 void DOMButton::PrepareSpecializedComponent()
 {
+    buttonTheme_ = GetTheme<ButtonTheme>();
+    buttonDeclaration_ = AceType::DynamicCast<ButtonDeclaration>(declaration_);
+    if (!buttonDeclaration_ || !buttonTheme_) {
+        return;
+    }
+    textChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+    imageChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+    buttonChild_->SetLayoutFlag(LAYOUT_FLAG_EXTEND_TO_PARENT);
+    buttonType_ = buttonDeclaration_->GetType();
+    textStyle_ = buttonDeclaration_->GetTextStyle();
+    edge_ = buttonDeclaration_->GetBorderEdge();
+    blendOpacity_ = buttonDeclaration_->GetBlendOpacity();
+    diameter_ = buttonDeclaration_->GetProgressDiameter();
+    imageChild_->SetSrc(buttonDeclaration_->GetIconSrc());
+    imageChild_->SetImageFill(GetImageFill());
+    imageChild_->SetWidth(buttonDeclaration_->GetIconWidth());
+    imageChild_->SetHeight(buttonDeclaration_->GetIconHeight());
+    paddingChild_->SetPadding(buttonDeclaration_->GetPadding());
+    textChild_->SetData(buttonDeclaration_->GetTextData());
     bool isCard = AceApplicationInfo::GetInstance().GetIsCardType();
     if (isCard) {
         textStyle_.SetAllowScale(false);
@@ -307,9 +110,8 @@ void DOMButton::PrepareSpecializedComponent()
         }
     }
     if (!focusColorChanged_) {
-        focusColor_ = buttonChild_->GetFocusColor();
+        focusColor_ = buttonDeclaration_->GetFocusColor();
     }
-    buttonChild_->SetWaitingState(false);
     paddingChild_->SetChild(textChild_);
     PrepareBoxSize();
     PrepareUniversalButton();
@@ -323,11 +125,12 @@ void DOMButton::PrepareSpecializedComponent()
             PrepareClickedColor();
         }
     }
-    if (fontSizeDefined_) {
+    if (buttonDeclaration_->GetFontSizeState()) {
         textStyle_.SetAdaptTextSize(textStyle_.GetFontSize(), textStyle_.GetFontSize());
     }
     textChild_->SetTextStyle(textStyle_);
-    buttonChild_->SetBorderEdge(edge_);
+    buttonDeclaration_->SetBorderEdge(edge_);
+    buttonChild_->SetDeclaration(buttonDeclaration_);
     AddPadding();
 }
 
@@ -341,6 +144,8 @@ void DOMButton::PrepareBoxSize()
     if (buttonType_ == BUTTON_TYPE_ARC) {
         return;
     }
+    buttonChild_->SetWidth(buttonDeclaration_->GetWidth());
+    buttonChild_->SetHeight(buttonDeclaration_->GetHeight());
     if (GreatOrEqual(buttonChild_->GetWidth().Value(), 0.0)) {
         boxComponent_->SetWidth(buttonChild_->GetWidth().Value(), buttonChild_->GetWidth().Unit());
     }
@@ -364,10 +169,10 @@ void DOMButton::PreparePseudoStyle()
         return;
     }
     if (HasActivePseudo()) {
-        buttonChild_->SetClickedColor(buttonChild_->GetBackgroundColor());
+        buttonDeclaration_->SetClickedColor(buttonDeclaration_->GetBackgroundColor());
     }
     if (HasFocusPseudo()) {
-        buttonChild_->SetFocusColor(buttonChild_->GetBackgroundColor());
+        buttonDeclaration_->SetFocusColor(buttonDeclaration_->GetBackgroundColor());
     }
 }
 
@@ -394,7 +199,7 @@ void DOMButton::PrepareUniversalButton()
 void DOMButton::PrepareDefaultButton()
 {
     paddingChild_->SetPadding(Edge());
-    if (!heightDefined_) {
+    if (!buttonDeclaration_->GetHeightState()) {
         ResetBoxHeight(INIT_HEIGHT);
     }
     if (!imageChild_->GetSrc().empty()) {
@@ -410,7 +215,7 @@ void DOMButton::PrepareDefaultButton()
 void DOMButton::PrepareIconButton()
 {
     buttonChild_->SetType(ButtonType::ICON);
-    buttonChild_->SetRectRadius(ICON_BUTTON_RADIUS);
+    buttonDeclaration_->SetRectRadius(ICON_BUTTON_RADIUS);
     paddingChild_->SetChild(imageChild_);
     paddingChild_->SetPadding(Edge(ICON_BUTTON_PADDING));
     ResetBoxHeight(INIT_HEIGHT);
@@ -419,15 +224,15 @@ void DOMButton::PrepareIconButton()
 void DOMButton::PrepareCapsuleButton()
 {
     buttonChild_->SetType(ButtonType::CAPSULE);
-    if (!radiusDefined_) {
+    if (!buttonDeclaration_->GetRadiusState()) {
         if (!NearZero(buttonChild_->GetHeight().Value())) {
-            buttonChild_->SetRectRadius(buttonChild_->GetHeight() / 2.0);
+            buttonDeclaration_->SetRectRadius(buttonChild_->GetHeight() / 2.0);
         }
     } else {
-        ResetBoxHeight(buttonChild_->GetRectRadius().Value() * 2.0, buttonChild_->GetRectRadius().Unit());
+        ResetBoxHeight(buttonDeclaration_->GetRectRadius().Value() * 2.0, buttonDeclaration_->GetRectRadius().Unit());
     }
     if (isCustomizedColor_ && isTv_) {
-        buttonChild_->SetFocusColor(buttonChild_->GetBackgroundColor());
+        buttonDeclaration_->SetFocusColor(buttonDeclaration_->GetBackgroundColor());
         textChild_->SetFocusColor(textStyle_.GetTextColor());
     }
 }
@@ -436,21 +241,21 @@ void DOMButton::PrepareTextButton()
 {
     buttonChild_->SetType(ButtonType::TEXT);
     if (!isCustomizedColor_) {
-        buttonChild_->SetBackgroundColor(Color(TRANSPARENT_COLOR));
+        buttonDeclaration_->SetBackgroundColor(Color(TRANSPARENT_COLOR));
     }
     textStyle_.SetTextAlign(TextAlign::CENTER);
     if (isTv_) {
         textStyle_.SetAdaptTextSize(textStyle_.GetFontSize(), TEXT_FONT_MIN_SIZE);
         paddingChild_->SetPadding(Edge(TEXT_PADDING_HORIZONTAL, TEXT_PADDING_VERTICAL,
             TEXT_PADDING_HORIZONTAL, TEXT_PADDING_VERTICAL));
-        if (!fontSizeDefined_) {
+        if (!buttonDeclaration_->GetFontSizeState()) {
             ResetBoxHeight(TEXT_FOCUS_HEIGHT, DimensionUnit::VP);
-            buttonChild_->SetRectRadius(Dimension(TEXT_FOCUS_HEIGHT / 2.0, DimensionUnit::VP));
+            buttonDeclaration_->SetRectRadius(Dimension(TEXT_FOCUS_HEIGHT / 2.0, DimensionUnit::VP));
         }
         return;
     }
     if (isWatch_) {
-        if (!fontSizeDefined_) {
+        if (!buttonDeclaration_->GetFontSizeState()) {
             std::vector<TextSizeGroup> preferTextSizeGroups;
             preferTextSizeGroups.push_back({ buttonTheme_->GetTextStyle().GetFontSize(), 1 });
             preferTextSizeGroups.push_back({ buttonTheme_->GetMinFontSize(), MAX_LINES, TextOverflow::ELLIPSIS });
@@ -458,10 +263,10 @@ void DOMButton::PrepareTextButton()
         }
         ResetBoxHeight(INIT_HEIGHT);
         paddingChild_->SetPadding(Edge(WATCH_TEXT_PADDING));
-        buttonChild_->SetRectRadius(WATCH_TEXT_RADIUS);
+        buttonDeclaration_->SetRectRadius(WATCH_TEXT_RADIUS);
         return;
     }
-    if (!textColorDefined_) {
+    if (!buttonDeclaration_->GetTextColorState()) {
         textStyle_.SetTextColor(buttonTheme_->GetNormalTextColor());
     }
 }
@@ -474,7 +279,7 @@ void DOMButton::PrepareCircleButton()
         paddingChild_->SetChild(imageChild_);
     }
     if (isCustomizedColor_ && isTv_) {
-        buttonChild_->SetFocusColor(buttonChild_->GetBackgroundColor());
+        buttonDeclaration_->SetFocusColor(buttonDeclaration_->GetBackgroundColor());
     }
 }
 
@@ -483,32 +288,32 @@ void DOMButton::PrepareDownloadButton()
     buttonChild_->SetType(ButtonType::DOWNLOAD);
     if (!isWatch_) {
         edge_.SetWidth(DOWNLOAD_BORDER_WIDTH);
-        buttonChild_->SetProgressColor(buttonTheme_->GetDownloadProgressColor());
+        buttonDeclaration_->SetProgressColor(buttonTheme_->GetDownloadProgressColor());
         if (!isTv_) {
-            if (!radiusDefined_) {
-                buttonChild_->SetRectRadius(buttonTheme_->GetDownloadHeight() / 2.0);
+            if (!buttonDeclaration_->GetRadiusState()) {
+                buttonDeclaration_->SetRectRadius(buttonTheme_->GetDownloadHeight() / 2.0);
             }
-            if (!bgColorDefined_) {
-                buttonChild_->SetBackgroundColor(buttonTheme_->GetDownloadBackgroundColor());
+            if (!buttonDeclaration_->GetBgColorState()) {
+                buttonDeclaration_->SetBackgroundColor(buttonTheme_->GetDownloadBackgroundColor());
             }
-            if (!textColorDefined_) {
+            if (!buttonDeclaration_->GetTextColorState()) {
                 textStyle_.SetTextColor(buttonTheme_->GetDownloadTextColor());
             }
-            if (!fontSizeDefined_) {
+            if (!buttonDeclaration_->GetFontSizeState()) {
                 textStyle_.SetFontSize(buttonTheme_->GetDownloadFontSize());
             }
         }
         return;
     }
     if (!isCustomizedColor_) {
-        buttonChild_->SetBackgroundColor(Color(TRANSPARENT_COLOR));
+        buttonDeclaration_->SetBackgroundColor(Color(TRANSPARENT_COLOR));
     }
     if (!imageChild_->GetSrc().empty()) {
         paddingChild_->SetChild(imageChild_);
     }
     paddingChild_->SetPadding(Edge());
-    buttonChild_->SetProgressDiameter(diameter_);
-    buttonChild_->SetProgressColor(progressColor_);
+    buttonDeclaration_->SetProgressDiameter(diameter_);
+    buttonDeclaration_->SetProgressColor(buttonDeclaration_->GetProgressColor());
     ResetBoxHeight(INIT_HEIGHT);
 }
 
@@ -523,21 +328,25 @@ void DOMButton::PrepareArcButton()
 void DOMButton::PrepareButtonState()
 {
     UpdateCustomizedColorFlag();
-    if (isWaiting_) {
+    if (buttonDeclaration_->GetWaitingState()) {
         PrepareWaiting();
     } else {
         if (!textColorChanged_) {
             textColor_ = textStyle_.GetTextColor();
         }
         textStyle_.SetTextColor(textColor_);
+        if (!disabledColorEffected_) {
+            edgeColor_ = edge_.GetColor();
+            disabledColor_ = buttonDeclaration_->GetDisabledColor();
+        }
+        edge_.SetColor(edgeColor_);
         if (focusColorChanged_) {
-            buttonChild_->SetFocusColor(focusColor_);
+            buttonDeclaration_->SetFocusColor(focusColor_);
         }
     }
-
-    if (buttonChild_->GetDisabledState()) {
+    if (buttonDeclaration_->GetDisabledState()) {
         if (HasDisabledPseudo()) {
-            buttonChild_->SetDisabledColor(buttonChild_->GetBackgroundColor());
+            buttonDeclaration_->SetDisabledColor(buttonDeclaration_->GetBackgroundColor());
         } else {
             PrepareDisabledBackgroundColor();
             PrepareDisabledChildStyle();
@@ -547,21 +356,18 @@ void DOMButton::PrepareButtonState()
 
 void DOMButton::PrepareDisabledBackgroundColor()
 {
-    if (disabledColorEffected_) {
-        return;
-    }
     edge_.SetColor(edge_.GetColor().BlendOpacity(blendOpacity_));
     if ((SystemProperties::GetDeviceType() == DeviceType::PHONE) && (buttonType_ == BUTTON_TYPE_DOWNLOAD)) {
-        buttonChild_->SetProgressColor(buttonChild_->GetProgressColor().BlendOpacity(blendOpacity_));
+        buttonDeclaration_->SetProgressColor(buttonDeclaration_->GetProgressColor().BlendOpacity(blendOpacity_));
     }
 
     // Disabled background color not defined by user.
     if (disabledColor_ == Color()) {
-        Color bgColor = buttonChild_->GetBackgroundColor();
+        Color bgColor = buttonDeclaration_->GetBackgroundColor();
         Color customizedColor = (isWatch_ ? bgColor : bgColor.BlendOpacity(blendOpacity_));
-        buttonChild_->SetDisabledColor(isCustomizedColor_ ? customizedColor : buttonTheme_->GetDisabledColor());
+        buttonDeclaration_->SetDisabledColor(isCustomizedColor_ ? customizedColor : buttonTheme_->GetDisabledColor());
     } else {
-        buttonChild_->SetDisabledColor(disabledColor_);
+        buttonDeclaration_->SetDisabledColor(disabledColor_);
     }
     disabledColorEffected_ = true;
 }
@@ -569,7 +375,7 @@ void DOMButton::PrepareDisabledBackgroundColor()
 void DOMButton::PrepareDisabledChildStyle()
 {
     bool isWatchDownload = isWatch_ && (buttonType_ == BUTTON_TYPE_DOWNLOAD);
-    if ((buttonType_ == BUTTON_TYPE_CIRCLE) || isWatchDownload || isWaiting_) {
+    if ((buttonType_ == BUTTON_TYPE_CIRCLE) || isWatchDownload || buttonDeclaration_->GetWaitingState()) {
         auto displayChild = AceType::MakeRefPtr<DisplayComponent>(paddingChild_->GetChild());
         displayChild->SetOpacity(blendOpacity_);
         paddingChild_->SetChild(displayChild);
@@ -577,22 +383,23 @@ void DOMButton::PrepareDisabledChildStyle()
     }
 
     // Disabled text color not defined by user.
-    if (disabledTextColor_ == Color()) {
+    Color disabledTextColor = buttonDeclaration_->GetDisabledTextColor();
+    if (disabledTextColor == Color()) {
         Color textColor = textStyle_.GetTextColor().BlendOpacity(blendOpacity_);
         textStyle_.SetTextColor(isCustomizedColor_ ? textColor : buttonTheme_->GetTextDisabledColor());
     } else {
-        textStyle_.SetTextColor(disabledTextColor_);
+        textStyle_.SetTextColor(disabledTextColor);
     }
     textColorChanged_ = true;
 }
 
 void DOMButton::PrepareClickedColor()
 {
-    if (buttonChild_->GetClickedColor() != buttonTheme_->GetClickedColor()) {
+    if (buttonDeclaration_->GetClickedColor() != buttonTheme_->GetClickedColor()) {
         return;
     }
-    Color defaultClickedColor = buttonChild_->GetBackgroundColor().BlendColor(buttonTheme_->GetClickedColor());
-    buttonChild_->SetClickedColor(defaultClickedColor);
+    Color defaultClickedColor = buttonDeclaration_->GetBackgroundColor().BlendColor(buttonTheme_->GetClickedColor());
+    buttonDeclaration_->SetClickedColor(defaultClickedColor);
 }
 
 void DOMButton::PrepareWaiting()
@@ -600,18 +407,17 @@ void DOMButton::PrepareWaiting()
     if ((!buttonTheme_) || isWatch_ || (buttonType_ == BUTTON_TYPE_DOWNLOAD)) {
         return;
     }
-    buttonChild_->SetWaitingState(true);
-    buttonChild_->SetFocusColor(focusColor_.BlendOpacity(blendOpacity_));
-    buttonChild_->SetFocusAnimationColor(buttonTheme_->GetBgFocusColor().BlendOpacity(blendOpacity_));
+    buttonDeclaration_->SetFocusColor(focusColor_.BlendOpacity(blendOpacity_));
+    buttonDeclaration_->SetFocusAnimationColor(buttonTheme_->GetBgFocusColor().BlendOpacity(blendOpacity_));
     focusColorChanged_ = true;
     if (buttonType_ == BUTTON_TYPE_CIRCLE) {
         diameter_ = LessNotEqual(buttonChild_->GetWidth().Value(), 0.0)
-                        ? buttonChild_->GetRectRadius()
-                        : std::min(buttonChild_->GetHeight(), buttonChild_->GetWidth()) / 2.0;
+                    ? buttonDeclaration_->GetRectRadius()
+                    : std::min(buttonChild_->GetHeight(), buttonChild_->GetWidth()) / 2.0;
     }
     auto progressComponent = AceType::MakeRefPtr<LoadingProgressComponent>();
     progressComponent->SetDiameter(diameter_);
-    progressComponent->SetProgressColor(progressColor_);
+    progressComponent->SetProgressColor(buttonDeclaration_->GetProgressColor());
     if ((buttonType_ == BUTTON_TYPE_CIRCLE) || (buttonType_ == BUTTON_TYPE_TEXT) || textChild_->GetData().empty()) {
         paddingChild_->SetChild(progressComponent);
         return;
@@ -631,7 +437,7 @@ void DOMButton::PrepareWaitingWithText(const RefPtr<LoadingProgressComponent>& p
     textStyle_.DisableAdaptTextSize();
     auto innerPadding = AceType::MakeRefPtr<PaddingComponent>();
     Edge edge;
-    edge.SetLeft(innerLeftPadding_);
+    edge.SetLeft(buttonDeclaration_->GetInnerPadding());
     innerPadding->SetChild(textChild_);
     innerPadding->SetPadding(edge);
     auto flexItemProgress = AceType::MakeRefPtr<FlexItemComponent>(0.0, 0.0, 0.0, progressComponent);
@@ -661,22 +467,28 @@ void DOMButton::PrepareBackDecorationStyle()
         return;
     }
     if (backDecoration_->GetImage() || backDecoration_->GetGradient().IsValid()) {
-        buttonChild_->SetBackgroundColor(Color(TRANSPARENT_COLOR));
+        buttonDeclaration_->SetBackgroundColor(Color(TRANSPARENT_COLOR));
     }
     if (buttonChild_->GetType() == ButtonType::CIRCLE) {
         return;
     }
     auto border = backDecoration_->GetBorder();
-    if (!HasBorderRadiusStyle() || radiusDefined_) {
-        backDecoration_->SetBorderRadius(Radius(buttonChild_->GetRectRadius() + border.Top().GetWidth()));
+    if (!HasBorderRadiusStyle() || buttonDeclaration_->GetRadiusState()) {
+        // TODO: only check dimension unit now, should refactor calculate dimension in render.
+        if (buttonDeclaration_->GetRectRadius().Unit() == border.Top().GetWidth().Unit()) {
+            backDecoration_->SetBorderRadius(Radius(buttonDeclaration_->GetRectRadius() + border.Top().GetWidth()));
+        }
     } else {
-        buttonChild_->SetRectRadius(border.TopLeftRadius().GetX() - border.Top().GetWidth());
+        if (border.TopLeftRadius().GetX().Unit() == border.Top().GetWidth().Unit()) {
+            buttonDeclaration_->SetRectRadius(border.TopLeftRadius().GetX() - border.Top().GetWidth());
+        }
     }
 }
 
 void DOMButton::PrepareChildren()
 {
     Edge edge;
+    placement_ = buttonDeclaration_->GetPlacement();
     if (placement_ == PLACEMENT_BOTTOM) {
         edge.SetBottom(INNER_PADDING);
     } else if (placement_ == PLACEMENT_TOP) {
@@ -717,16 +529,15 @@ void DOMButton::PrepareChildrenLayout()
 
 void DOMButton::AddPadding()
 {
-    RefPtr<BoxComponent> boxComponent = GetBoxComponent();
-    if (!boxComponent) {
+    if (!boxComponent_) {
         return;
     }
-    auto edge = boxComponent->GetPadding();
+    auto edge = boxComponent_->GetPadding();
     if (edge == Edge::NONE) {
         return;
     }
     paddingChild_->SetPadding(edge);
-    boxComponent->SetPadding(Edge());
+    boxComponent_->SetPadding(Edge());
 }
 
 void DOMButton::ResetBoxHeight(double height, DimensionUnit unit)
@@ -739,7 +550,25 @@ void DOMButton::ResetBoxHeight(double height, DimensionUnit unit)
 
 void DOMButton::UpdateCustomizedColorFlag()
 {
-    isCustomizedColor_ = buttonChild_->GetBackgroundColor() != buttonTheme_->GetBgColor();
+    isCustomizedColor_ = buttonDeclaration_->GetBackgroundColor() != buttonTheme_->GetBgColor();
+}
+
+Dimension DOMButton::GetHeight() const
+{
+    Dimension height = Dimension(-1.0, DimensionUnit::PX);
+    if (buttonDeclaration_) {
+        height = buttonDeclaration_->GetHeight();
+    }
+    return height;
+}
+
+Dimension DOMButton::GetWidth() const
+{
+    Dimension width = Dimension(-1.0, DimensionUnit::PX);
+    if (buttonDeclaration_) {
+        width = buttonDeclaration_->GetWidth();
+    }
+    return width;
 }
 
 } // namespace OHOS::Ace::Framework

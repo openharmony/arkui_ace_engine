@@ -22,6 +22,8 @@
 #include "third_party/skia/include/core/SkPath.h"
 
 #include "core/components/custom_paint/render_custom_paint.h"
+#include "core/components/custom_paint/offscreen_canvas.h"
+
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/clip_layer.h"
 
@@ -36,6 +38,7 @@ public:
 
     void Paint(RenderContext& context, const Offset& offset) override;
 
+    void TransferFromImageBitmap(const RefPtr<OffscreenCanvas>& offscreenCanvas) override;
     std::string ToDataURL(const std::string& args) override;
     void SetAntiAlias(bool isEnabled) override;
     void FillRect(const Offset& offset, const Rect& rect) override;
@@ -68,7 +71,8 @@ public:
     void DrawImage(const Offset& offset, const CanvasImage& canvasImage, double width, double height) override;
     void PutImageData(const Offset& offset, const ImageData& imageData) override;
     std::unique_ptr<ImageData> GetImageData(double left, double top, double width, double height) override;
-
+    void WebGLInit(CanvasRenderContextBase* context) override;
+    void WebGLUpdate() override;
     RenderLayer GetRenderLayer() override;
 
 private:
@@ -107,6 +111,7 @@ private:
     SkPaint cachePaint_;
     SkBitmap cacheBitmap_;
     SkBitmap canvasCache_;
+    SkBitmap webglBitmap_;
     std::unique_ptr<SkCanvas> skCanvas_;
     std::unique_ptr<SkCanvas> cacheCanvas_;
 };

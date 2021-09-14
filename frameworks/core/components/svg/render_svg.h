@@ -57,8 +57,47 @@ public:
         return height_;
     }
 
+    bool IsRoot() const
+    {
+        return isRoot_;
+    }
+
+    void AddHrefNode(const std::string& id, const RefPtr<RenderSvgBase>& mask)
+    {
+        if (id.empty() || mask == nullptr) {
+            return;
+        }
+        svgHrefNodes_[id] = mask;
+    }
+
+    RefPtr<RenderSvgBase> GetHrefNode(const std::string& id)
+    {
+        if (svgHrefNodes_.find(id) == svgHrefNodes_.end()) {
+            return nullptr;
+        }
+        return svgHrefNodes_[id].Upgrade();
+    }
+
+    void MarkIsFixSize(bool isFixSize)
+    {
+        isFixSize_ = isFixSize;
+    }
+
+    void SetRootOpacity(uint8_t alpha)
+    {
+        rootOpacity_ = alpha;
+    }
+
+    void SetRootRotate(double rotate)
+    {
+        rootRotate_ = rotate;
+    }
+
 protected:
     Rect viewBox_;
+    bool isRoot_ = false;
+    uint8_t rootOpacity_ = 255;
+    double rootRotate_ = 0.0;
 
 private:
     void PrepareAnimations();
@@ -67,14 +106,18 @@ private:
     bool GetProperty(const std::string& attrName, Dimension& dimension) const;
     void SetOpacityCallback();
     bool OpacityAnimation(const RefPtr<SvgAnimate>& svgAnimate);
+    void UpdateTransform();
 
     Dimension x_;
     Dimension y_;
     Dimension width_ = Dimension(-1.0);
     Dimension height_ = Dimension(-1.0);
+    bool autoMirror_ = false;
     std::vector<RefPtr<SvgAnimate>> svgAnimates_;
     bool hasUpdated_ = false;
     std::function<void(double)> opacityCallback_;
+    std::map<std::string, WeakPtr<RenderSvgBase>> svgHrefNodes_;
+    bool isFixSize_ = false;
 };
 
 } // namespace OHOS::Ace

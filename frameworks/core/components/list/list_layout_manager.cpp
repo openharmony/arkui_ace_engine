@@ -112,6 +112,12 @@ LayoutParam ListLayoutManager::MakeInnerLayoutParam(FlexAlign crossAxisAlign) co
             }
         }
     }
+    if (NearEqual(renderList_.GetCrossSize(minSize), Size::INFINITE_SIZE)) {
+        renderList_.SetCrossSize(minSize, renderList_.GetCrossSize(viewPort_));
+    }
+    if (NearEqual(renderList_.GetCrossSize(maxSize), Size::INFINITE_SIZE)) {
+        renderList_.SetCrossSize(maxSize, renderList_.GetCrossSize(viewPort_));
+    }
     innerLayout.SetMaxSize(maxSize);
     innerLayout.SetMinSize(minSize);
     return innerLayout;

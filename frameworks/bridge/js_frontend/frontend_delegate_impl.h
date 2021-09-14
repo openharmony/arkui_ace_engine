@@ -22,7 +22,9 @@
 
 #include "base/memory/ace_type.h"
 #include "base/thread/cancelable_callback.h"
+#include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
+#include "core/components/dialog/dialog_component.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
@@ -40,22 +42,42 @@ namespace OHOS::Ace::Framework {
 using LoadJsCallback = std::function<void(const std::string&, const RefPtr<JsAcePage>&, bool isMainPage)>;
 using JsMessageDispatcherSetterCallback = std::function<void(const RefPtr<JsMessageDispatcher>&)>;
 using EventCallback = std::function<void(const std::string&, const std::string&)>;
+using ExternalEventCallback = std::function<void(const std::string&, const uint32_t&)>;
 using UpdatePageCallback = std::function<void(const RefPtr<JsAcePage>&)>;
 using ResetStagingPageCallback = std::function<void()>;
 using MediaQueryCallback = std::function<void(const std::string& callbackId, const std::string& args)>;
 using DestroyPageCallback = std::function<void(int32_t pageId)>;
 using DestroyApplicationCallback = std::function<void(const std::string& packageName)>;
+using UpdateApplicationStateCallback = std::function<void(const std::string& packageName, Frontend::State state)>;
 using TimerCallback = std::function<void(const std::string& callbackId, const std::string& delay, bool isInterval)>;
 using RequestAnimationCallback = std::function<void(const std::string& callbackId, uint64_t timeStamp)>;
 using JsCallback = std::function<void(const std::string& callbackId, const std::string& args)>;
+using OnWindowDisplayModeChangedCallBack = std::function<void(bool isShownInMultiWindow, const std::string& data)>;
+using OnConfigurationUpdatedCallBack = std::function<void(const std::string& data)>;
 
 struct PageInfo {
     int32_t pageId = -1;
     std::string url;
+    bool isAlertBeforeBackPage = false;
+    DialogProperties dialogProperties;
 };
 
 class PipelineContextHolder {
 public:
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    ~PipelineContextHolder()
+    {
+        if (pipelineContext_) {
+            auto taskExecutor = pipelineContext_->GetTaskExecutor();
+            // To guarantee the pipelineContext_ destruct in platform thread
+            auto context = AceType::RawPtr(pipelineContext_);
+            context->IncRefCount();
+            pipelineContext_.Reset();
+            taskExecutor->PostTask([context] { context->DecRefCount(); }, TaskExecutor::TaskType::PLATFORM);
+        }
+    }
+#endif
+
     void Attach(const RefPtr<PipelineContext>& context)
     {
         if (attached_ || !context) {
@@ -88,15 +110,76 @@ struct FrontendDelegateImplBuilder {
     JsMessageDispatcherSetterCallback transferCallback;
     EventCallback asyncEventCallback;
     EventCallback syncEventCallback;
+    ExternalEventCallback externalEventCallback;
     UpdatePageCallback updatePageCallback;
     ResetStagingPageCallback resetStagingPageCallback;
     DestroyPageCallback destroyPageCallback;
     DestroyApplicationCallback destroyApplicationCallback;
+    UpdateApplicationStateCallback updateApplicationStateCallback;
     TimerCallback timerCallback;
     MediaQueryCallback mediaQueryCallback;
     RequestAnimationCallback requestAnimationCallback;
     JsCallback jsCallback;
+    OnWindowDisplayModeChangedCallBack onWindowDisplayModeChangedCallBack;
     void* ability;
+};
+
+class DelegateClient {
+public:
+    using RouterPushCallback = std::function<void(const std::string& url)>;
+    using GetWebPageUrlCallback = std::function<void(std::string& url, int32_t& id)>;
+    using IsPagePathInvalidCallback = std::function<void(bool& isPageInvalid)>;
+    DelegateClient &operator = (const DelegateClient &) = delete;
+    DelegateClient(const DelegateClient &) = delete;
+    ~DelegateClient() = default;
+
+    static DelegateClient& GetInstance()
+    {
+        static DelegateClient instance;
+        return instance;
+    }
+
+    void RegisterRouterPushCallback(RouterPushCallback &&callback)
+    {
+        routerPushCallback_ = callback;
+    }
+
+    void RouterPush(const std::string& url)
+    {
+        if (routerPushCallback_) {
+            return routerPushCallback_(url);
+        }
+    }
+
+    void RegisterGetWebPageUrlCallback(GetWebPageUrlCallback &&callback)
+    {
+        getWebPageUrlCallback_ = callback;
+    }
+
+    void GetWebPageUrl(std::string& pageUrl, int32_t& pageId)
+    {
+        if (getWebPageUrlCallback_) {
+            return getWebPageUrlCallback_(pageUrl, pageId);
+        }
+    }
+
+    void RegisterIsPagePathInvalidCallback(IsPagePathInvalidCallback &&callback)
+    {
+        isPagePathInvalidCallback_ = callback;
+    }
+
+    void GetIsPagePathInvalid(bool& isPageInvalid)
+    {
+        if (isPagePathInvalidCallback_) {
+            return isPagePathInvalidCallback_(isPageInvalid);
+        }
+    }
+
+private:
+    DelegateClient() = default;
+    RouterPushCallback routerPushCallback_;
+    GetWebPageUrlCallback getWebPageUrlCallback_;
+    IsPagePathInvalidCallback isPagePathInvalidCallback_;
 };
 
 class FrontendDelegateImpl : public FrontendDelegate {
@@ -104,18 +187,24 @@ class FrontendDelegateImpl : public FrontendDelegate {
 
 public:
     explicit FrontendDelegateImpl(const FrontendDelegateImplBuilder& builder);
-    ~FrontendDelegateImpl() override = default;
+    ~FrontendDelegateImpl() override;
 
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
+    void SetAssetManager(const RefPtr<AssetManager>& assetManager);
+    RefPtr<AssetManager> GetAssetManager() const override;
 
     // JsFrontend delegate functions.
     void RunPage(const std::string& url, const std::string& params);
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const;
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data);
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void TransferJsResponseDataPreview(int32_t callbackId, int32_t code, ResponseData responseData) const;
+#endif
     void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const;
     void TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const;
     void LoadPluginJsCode(std::string&& jsCode) const;
+    void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const;
     void OnJsCallback(const std::string& callbackId, const std::string& data);
     bool OnPageBackPress();
     void OnBackGround();
@@ -125,11 +214,13 @@ public:
     void OnInactive();
     bool OnStartContinuation();
     void OnCompleteContinuation(int32_t code);
+    void OnRemoteTerminated();
     void OnSaveData(std::string& data);
     bool OnRestoreData(const std::string& data);
     void OnNewRequest(const std::string& data);
     void CallPopPage();
     void OnApplicationDestroy(const std::string& packageName);
+    void OnApplicationUpdateState(const std::string& packageName, Frontend::State state);
     void SetColorMode(ColorMode colorMode);
 
     // Accessibility delegate functions.
@@ -147,11 +238,12 @@ public:
     bool FireSyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);
     void FireSyncEvent(
         const std::string& eventId, const std::string& param, const std::string& jsonArgs, std::string& result);
+    void FireExternalEvent(const std::string& eventId, const std::string& componentId, const uint32_t nodeId);
 
     // FrontendDelegate overrides.
     void Push(const std::string& uri, const std::string& params) override;
     void Replace(const std::string& uri, const std::string& params) override;
-    void Back(const std::string& uri) override;
+    void Back(const std::string& uri, const std::string& params = "") override;
     void Clear() override;
     int32_t GetStackSize() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
@@ -163,14 +255,28 @@ public:
     const std::string& GetAppName() const override;
     const std::string& GetVersionName() const override;
     int32_t GetVersionCode() const override;
-    const WindowConfig& GetWindowConfig();
+    WindowConfig& GetWindowConfig();
+    int32_t GetMinPlatformVersion() override;
+    bool IsUseLiteStyle();
+    bool IsWebFeature();
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
     void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<std::pair<std::string, std::string>>& buttons, bool autoCancel,
         std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks) override;
 
+    void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) override;
+
+    void DisableAlertBeforeBackPage() override;
+
+    void ShowActionMenu(const std::string& title, const std::vector<std::pair<std::string, std::string>>& button,
+        std::function<void(int32_t, int32_t)>&& callback) override;
+
     Rect GetBoundingRectData(NodeId nodeId) override;
+
+    void PushJsCallbackToRenderNode(NodeId id, double ratio, std::function<void(bool, double)>&& callback) override;
+    void RemoveVisibleChangeNode(NodeId id) override;
+
     // For async event.
     void SetCallBackResult(const std::string& callBackId, const std::string& result) override;
 
@@ -183,6 +289,7 @@ public:
 
     bool GetAssetContent(const std::string& url, std::string& content) override;
     bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) override;
+    std::string GetAssetPath(const std::string& url) override;
 
     // i18n
     void GetI18nData(std::unique_ptr<JsonValue>& json) override;
@@ -195,7 +302,8 @@ public:
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc) override;
 
-    void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
+    void HandleImage(const std::string& src, std::function<void(int32_t)>&& callback,
+        const std::set<std::string>& callbacks) override;
 
     void RequestAnimationFrame(const std::string& callbackId) override;
 
@@ -204,6 +312,9 @@ public:
     SingleTaskExecutor GetAnimationJsTask() override;
 
     SingleTaskExecutor GetUiTask() override;
+
+    void LoadResourceConfiguration(std::map<std::string, std::string>& sortedResourcePath,
+        std::unique_ptr<JsonValue>& currentResourceData) override;
 
     const RefPtr<MediaQueryInfo>& GetMediaQueryInfoInstance() override
     {
@@ -228,6 +339,11 @@ public:
     WeakPtr<JsAcePage> GetCurrentReadyPage() const
     {
         return currentReadyPage_;
+    }
+
+    bool GetPagePathInvalidFlag() const
+    {
+        return isPagePathInvalid_;
     }
 
     void* GetAbility() override
@@ -283,11 +399,14 @@ private:
     void FlushAnimationTasks();
     void ParseManifest();
 
+    void BackImplement(const std::string& uri);
+
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;
     bool isRouteStackFull_ = false;
     bool isStagingPageExist_ = false;
     std::string mainPagePath_;
+    std::string backUri_;
     std::vector<PageInfo> pageRouteStack_;
     std::unordered_map<int32_t, RefPtr<JsAcePage>> pageMap_;
     std::unordered_map<int32_t, std::string> jsCallBackResult_;
@@ -297,10 +416,12 @@ private:
     JsMessageDispatcherSetterCallback dispatcherCallback_;
     EventCallback asyncEvent_;
     EventCallback syncEvent_;
+    ExternalEventCallback externalEvent_;
     UpdatePageCallback updatePage_;
     ResetStagingPageCallback resetStagingPage_;
     DestroyPageCallback destroyPage_;
     DestroyApplicationCallback destroyApplication_;
+    UpdateApplicationStateCallback updateApplicationState_;
     TimerCallback timer_;
     std::unordered_map<std::string, CancelableCallback<void()>> timeoutTaskMap_;
     MediaQueryCallback mediaQueryCallback_;
@@ -308,7 +429,7 @@ private:
     JsCallback jsCallback_;
     RefPtr<Framework::ManifestParser> manifestParser_;
     RefPtr<Framework::AccessibilityNodeManager> jsAccessibilityManager_;
-    void* ability_;
+    void* ability_ = nullptr;
     RefPtr<MediaQueryInfo> mediaQueryInfo_;
     RefPtr<GroupJsBridge> groupJsBridge_;
 
@@ -323,8 +444,7 @@ private:
     mutable std::mutex mutex_;
     mutable std::once_flag onceFlag_;
 
-    std::mutex loadPageMutex_;
-    std::condition_variable condition_;
+    bool isPagePathInvalid_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

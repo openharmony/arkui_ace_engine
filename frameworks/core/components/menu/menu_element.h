@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MENU_MENU_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MENU_MENU_ELEMENT_H
 
+#include "core/components/box/render_box.h"
 #include "core/components/menu/menu_component.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -34,6 +35,7 @@ private:
     void OnTargetCallback(const ComposeId& id, const Offset& point);
     void OnOptionCallback(std::size_t index);
     void OnCanceledCallback();
+    RefPtr<RenderBox> GetBoxRenderChild(const RefPtr<Element>& element);
 
     RefPtr<MenuComponent> data_;
     std::function<void(const std::string&)> jsSuccessCallback_;

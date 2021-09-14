@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_SHARED_TRANSITION_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_SHARED_TRANSITION_CONTROLLER_H
 
+#include <list>
+
 #include "base/memory/ace_type.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/page/page_element.h"
@@ -35,9 +37,9 @@ public:
     ~SharedTransitionController() override = default;
     void RegisterTransitionListener();
     bool HasSharedTransition(TransitionEvent event);
-    const RefPtr<Animator>& GetAnimator() const
+    const std::list<RefPtr<Animator>>& GetAnimators() const
     {
-        return controller_;
+        return controllers_;
     }
 
 private:
@@ -49,7 +51,8 @@ private:
     WeakPtr<PipelineContext> context_;
     WeakPtr<PageElement> pageDest_;
     WeakPtr<PageElement> pageSrc_;
-    RefPtr<Animator> controller_;
+    std::list<RefPtr<Animator>> controllers_;
+    int32_t stopControllerCount_ = 0;
     TransitionEvent event_ { TransitionEvent::PUSH_START };
     bool hasSharedTransition_ = { false };
 };

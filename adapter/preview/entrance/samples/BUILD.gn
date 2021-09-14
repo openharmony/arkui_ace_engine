@@ -39,6 +39,8 @@ template("ace_test") {
       sources = [ "ace_tablet_test.cpp" ]
     } else if (device == "card") {
       sources = [ "ace_card_test.cpp" ]
+    } else if (device == "car") {
+      sources = [ "ace_car_test.cpp" ]
     }
 
     configs = [ ":ace_pc_preview_config" ]
@@ -79,6 +81,12 @@ ace_test("ace_test_windows_card") {
   device = "card"
 }
 
+ace_test("ace_test_windows_car") {
+  defines = ace_windows_defines
+  platform = "windows"
+  device = "car"
+}
+
 ace_test("ace_test_mac_phone") {
   defines = ace_mac_defines
   platform = "mac"
@@ -107,4 +115,10 @@ ace_test("ace_test_mac_card") {
   defines = ace_mac_defines
   platform = "mac"
   device = "card"
+}
+
+ace_test("ace_test_mac_car") {
+  defines = ace_mac_defines
+  platform = "mac"
+  device = "car"
 }

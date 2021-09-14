@@ -73,6 +73,7 @@ public:
 
     bool DispatchEvent(const TouchPoint& point) override;
     bool HandleEvent(const TouchPoint& point) override;
+    bool TriggerTouchCallBack(const TouchPoint& changedPoint);
 
 protected:
     void OnTouchTestHit(
@@ -84,7 +85,8 @@ private:
 
     bool isVisible_ = true;
     Offset coordinateOffset_;
-    std::function<void(const std::shared_ptr<TouchCallBackInfo>&)> onTouchEventCallback_;
+    std::function<void(const std::shared_ptr<TouchEventInfo>&)> onTouchEventCallback_;
+    std::map<int, TouchPoint> touchPointMap_;
 };
 
 } // namespace OHOS::Ace

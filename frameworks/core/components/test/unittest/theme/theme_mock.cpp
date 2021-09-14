@@ -17,6 +17,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/theme/theme_attributes.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -156,6 +157,12 @@ std::string ResourceAdapterMock::GetString(uint32_t resId)
     return findIter->second.GetValue<std::string>("").second;
 }
 
+
+std::vector<std::string> ResourceAdapterMock::GetStringArray(uint32_t resId) const
+{
+    return {};
+}
+
 double ResourceAdapterMock::GetDouble(uint32_t resId)
 {
     auto findIter = RESOURCES.find(resId);
@@ -172,6 +179,25 @@ int32_t ResourceAdapterMock::GetInt(uint32_t resId)
         return ERROR_VALUE_INT;
     }
     return findIter->second.GetValue<int32_t>(ERROR_VALUE_INT).second;
+}
+
+const AnimationOption PipelineContext::GetExplicitAnimationOption() const
+{
+    return AnimationOption();
+}
+
+uint64_t PipelineContext::GetTimeFromExternalTimer()
+{
+    return 0;
+}
+
+uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
+{
+    return 0;
+}
+
+void PipelineContext::RemoveScheduleTask(uint32_t id)
+{
 }
 
 } // namespace OHOS::Ace

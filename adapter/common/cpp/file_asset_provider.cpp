@@ -15,7 +15,9 @@
 
 #include "adapter/common/cpp/file_asset_provider.h"
 
+#include <dirent.h>
 #include <limits>
+#include <sys/types.h>
 
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
@@ -108,13 +110,36 @@ std::unique_ptr<fml::Mapping> FileAssetProvider::GetAsMapping(const std::string&
 
 std::string FileAssetProvider::GetAssetPath(const std::string& assetName)
 {
-    auto filePath = filePathMap_.find(assetName);
-    if (filePath == filePathMap_.end()) {
-        return "";
+    for (const auto& basePath: assetBasePaths_) {
+        std::string assetBasePath = packagePath_ + basePath;
+        std::string fileName = assetBasePath + assetName;
+        std::FILE* fp = std::fopen(fileName.c_str(), "r");
+        if (fp == nullptr) {
+            continue;
+        }
+        std::fclose(fp);
+        return assetBasePath;
     }
-    std::string assetPath;
-    assetPath.append(packagePath_).append("!/").append(filePath->second);
-    return assetPath;
+    LOGE("Cannot find base path of %{public}s", assetName.c_str());
+    return "";
+}
+
+void FileAssetProvider::GetAssetList(const std::string& path, std::vector<std::string>& assetList)
+{
+    for (const auto& basePath : assetBasePaths_) {
+        DIR* dp = nullptr;
+        auto openDir = packagePath_ + basePath + path;
+        if (nullptr == (dp = opendir(openDir.c_str()))) {
+            continue;
+        }
+        struct dirent* dptr = nullptr;
+        while ((dptr = readdir(dp)) != nullptr) {
+            if (strcmp(dptr->d_name, ".") != 0 && strcmp(dptr->d_name, "..") != 0) {
+                assetList.push_back(dptr->d_name);
+            }
+        }
+        closedir(dp);
+    }
 }
 
 } // namespace OHOS::Ace

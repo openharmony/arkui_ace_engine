@@ -59,27 +59,4 @@ HWTEST_F(RenderDialogTest, RenderDialogUpdate001, TestSize.Level1)
     EXPECT_TRUE(!renderDialogTween->GetAutoCancel());
 }
 
-/**
- * @tc.name: RenderDialogUpdate002
- * @tc.desc: Verify the Update Interface of RenderDialog work correctly with wrong component type.
- * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
- */
-HWTEST_F(RenderDialogTest, RenderDialogUpdate002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct TextComponent and RenderDialog.
-     */
-    RefPtr<TextComponent> text = AceType::MakeRefPtr<TextComponent>("HiAce");
-    RefPtr<MockRenderDialogTween> renderDialogTween = AceType::MakeRefPtr<MockRenderDialogTween>();
-
-    /**
-     * @tc.steps: step2. call the Update interface of RenderDialog.
-     * @tc.expected: step2. renderDialog is set as not needLayout.
-     */
-    renderDialogTween->Update(text);
-    EXPECT_TRUE(!renderDialogTween->NeedLayout());
-}
-
 } // namespace OHOS::Ace

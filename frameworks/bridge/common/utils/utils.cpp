@@ -27,6 +27,7 @@ using CustomCurveCreator = RefPtr<Curve> (*)(const std::vector<std::string>&);
 
 const size_t STEPS_PARAMS_SIZE = 2;
 const size_t CUBIC_PARAMS_SIZE = 4;
+const size_t SPRING_PARAMS_SIZE = 4;
 
 static const std::unordered_set<std::string> HORIZON_SET = {
     DOM_BACKGROUND_IMAGE_POSITION_LEFT,
@@ -35,6 +36,14 @@ static const std::unordered_set<std::string> HORIZON_SET = {
 static const std::unordered_set<std::string> VERTICAL_SET = {
     DOM_BACKGROUND_IMAGE_POSITION_TOP,
     DOM_BACKGROUND_IMAGE_POSITION_BOTTOM,
+};
+static const std::unordered_set<std::string> OBJECT_HORIZON_SET = {
+    DOM_IMAGE_POSITION_LEFT,
+    DOM_IMAGE_POSITION_RIGHT,
+};
+static const std::unordered_set<std::string> OBJECT_VERTICAL_SET = {
+    DOM_IMAGE_POSITION_TOP,
+    DOM_IMAGE_POSITION_BOTTOM,
 };
 
 RefPtr<Curve> StepsCurveCreator(const std::vector<std::string>& params)
@@ -73,6 +82,19 @@ RefPtr<Curve> CubicCurveCreator(const std::vector<std::string>& params)
     double x2 = StringToDouble(params.at(2));
     double y2 = StringToDouble(params.at(3));
     return AceType::MakeRefPtr<CubicCurve>(x1, y1, x2, y2);
+}
+
+RefPtr<Curve> SpringCurveCreator(const std::vector<std::string>& params)
+{
+    if (params.size() != SPRING_PARAMS_SIZE) {
+        LOGE("spring curve accept 4 parameters");
+        return nullptr;
+    }
+    double velocity = StringToDouble(params.at(0));
+    double mass = StringToDouble(params.at(1));
+    double stiffness = StringToDouble(params.at(2));
+    double damping = StringToDouble(params.at(3));
+    return AceType::MakeRefPtr<SpringCurve>(velocity, mass, stiffness, damping);
 }
 
 void SetBgImgPositionX(
@@ -116,6 +138,28 @@ void GetOffsetValue(std::vector<std::string> offsets, std::string& posX, std::st
     }
 }
 
+// object-position check msg number
+void GetOffsetValueObjectPosition(std::vector<std::string> offsets, std::string& posX, std::string& posY)
+{
+    if (offsets.size() == 1) {
+        posX = offsets.front();
+        if (OBJECT_VERTICAL_SET.find(posX) != OBJECT_VERTICAL_SET.end()) {
+            posY = offsets.front();
+            posX = DOM_IMAGE_POSITION_CENTER;
+        } else {
+            posY = DOM_IMAGE_POSITION_CENTER;
+        }
+    } else {
+        posX = offsets.front();
+        posY = offsets.back();
+        if (OBJECT_VERTICAL_SET.find(posX) != OBJECT_VERTICAL_SET.end()
+            && OBJECT_HORIZON_SET.find(posY) != OBJECT_HORIZON_SET.end()) {
+            posY = offsets.front();
+            posX = offsets.back();
+        }
+    }
+}
+
 bool BgImgPositionIsValid(const std::string& posX, const std::string& posY)
 {
     if ((posX == DOM_BACKGROUND_IMAGE_POSITION_CENTER) || (posY == DOM_BACKGROUND_IMAGE_POSITION_CENTER)) {
@@ -131,6 +175,31 @@ bool BgImgPositionIsValid(const std::string& posX, const std::string& posY)
         }
     }
     return VERTICAL_SET.find(posX) != VERTICAL_SET.end() && HORIZON_SET.find(posY) != HORIZON_SET.end();
+}
+
+// objectPosition
+bool ObjectImgPositionIsValid(const std::string& posX, const std::string& posY)
+{
+    if (posX.find("px") != std::string::npos || posX.find('%') != std::string::npos ||
+        OBJECT_HORIZON_SET.find(posX) != OBJECT_HORIZON_SET.end() || posX != DOM_IMAGE_POSITION_CENTER) {
+        if (posY.find("px") != std::string::npos || posY.find('%') != std::string::npos ||
+            OBJECT_VERTICAL_SET.find(posY) != OBJECT_VERTICAL_SET.end() || posY != DOM_IMAGE_POSITION_CENTER) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void SetBgImgSizeX(BackgroundImageSizeType type, double value, BackgroundImageSize& bgImgSize)
+{
+    bgImgSize.SetSizeTypeX(type);
+    bgImgSize.SetSizeValueX(value);
+}
+
+void SetBgImgSizeY(BackgroundImageSizeType type, double value, BackgroundImageSize& bgImgSize)
+{
+    bgImgSize.SetSizeTypeY(type);
+    bgImgSize.SetSizeValueY(value);
 }
 
 } // namespace
@@ -181,6 +250,7 @@ RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc)
     }
     static const LinearMapNode<CustomCurveCreator> customCurveMap[] = {
         { DOM_ANIMATION_TIMING_FUNCTION_CUBIC_BEZIER, CubicCurveCreator },
+        { DOM_ANIMATION_TIMING_FUNCTION_SPRING, SpringCurveCreator },
         { DOM_ANIMATION_TIMING_FUNCTION_STEPS, StepsCurveCreator },
     };
     int64_t index = BinarySearchFindIndex(customCurveMap, ArraySize(customCurveMap), aniTimFuncName.c_str());
@@ -204,24 +274,18 @@ RefPtr<Curve> CreateCurve(const std::string& aniTimFunc)
     return Curves::EASE;
 }
 
-GradientDirection StrToGradientDirectionCorner(const std::string& horizontal, const std::string& vertical)
+// used for declarative only
+TransitionType ParseTransitionType(const std::string& transitionType)
 {
-    static const std::vector<std::tuple<std::string, std::string, GradientDirection>> directionCornerVec = {
-        std::make_tuple(DOM_GRADIENT_DIRECTION_TOP, DOM_GRADIENT_DIRECTION_LEFT, GradientDirection::LEFT_TOP),
-        std::make_tuple(DOM_GRADIENT_DIRECTION_LEFT, DOM_GRADIENT_DIRECTION_TOP, GradientDirection::LEFT_TOP),
-        std::make_tuple(DOM_GRADIENT_DIRECTION_TOP, DOM_GRADIENT_DIRECTION_RIGHT, GradientDirection::RIGHT_TOP),
-        std::make_tuple(DOM_GRADIENT_DIRECTION_RIGHT, DOM_GRADIENT_DIRECTION_TOP, GradientDirection::RIGHT_TOP),
-        std::make_tuple(DOM_GRADIENT_DIRECTION_BOTTOM, DOM_GRADIENT_DIRECTION_LEFT, GradientDirection::LEFT_BOTTOM),
-        std::make_tuple(DOM_GRADIENT_DIRECTION_LEFT, DOM_GRADIENT_DIRECTION_BOTTOM, GradientDirection::LEFT_BOTTOM),
-        std::make_tuple(DOM_GRADIENT_DIRECTION_BOTTOM, DOM_GRADIENT_DIRECTION_RIGHT, GradientDirection::RIGHT_BOTTOM),
-        std::make_tuple(DOM_GRADIENT_DIRECTION_RIGHT, DOM_GRADIENT_DIRECTION_BOTTOM, GradientDirection::RIGHT_BOTTOM),
-    };
-
-    auto iter =
-        find_if(directionCornerVec.begin(), directionCornerVec.end(), [&horizontal, &vertical](const auto& item) {
-            return std::get<0>(item) == horizontal && std::get<1>(item) == vertical;
-        });
-    return iter != directionCornerVec.end() ? std::get<GradientDirection>(*iter) : GradientDirection::BOTTOM;
+    if (transitionType == "All") {
+        return TransitionType::ALL;
+    } else if (transitionType == "Insert") {
+        return TransitionType::APPEARING;
+    } else if (transitionType == "Delete") {
+        return TransitionType::DISAPPEARING;
+    } else {
+        return TransitionType::ALL;
+    }
 }
 
 // Support keyword values / percentage/px values. Do not support multiple images and edge offsets values.
@@ -297,5 +361,144 @@ bool ParseBackgroundImagePosition(const std::string& value, BackgroundImagePosit
     }
     return true;
 }
+
+bool ParseBackgroundImageSize(const std::string& value, BackgroundImageSize& bgImgSize)
+{
+    static const LinearMapNode<BackgroundImageSizeType> bgImageSizeType[] = {
+        { DOM_BACKGROUND_IMAGE_SIZE_AUTO, BackgroundImageSizeType::AUTO },
+        { DOM_BACKGROUND_IMAGE_SIZE_CONTAIN, BackgroundImageSizeType::CONTAIN },
+        { DOM_BACKGROUND_IMAGE_SIZE_COVER, BackgroundImageSizeType::COVER },
+    };
+    auto spaceIndex = value.find(' ', 0);
+    if (spaceIndex != std::string::npos) {
+        std::string valueX = value.substr(0, spaceIndex);
+        std::string valueY = value.substr(spaceIndex + 1, value.size() - spaceIndex - 1);
+        if (valueX.find("px") != std::string::npos) {
+            SetBgImgSizeX(BackgroundImageSizeType::LENGTH, StringToDouble(valueX), bgImgSize);
+        } else if (valueX.find('%') != std::string::npos) {
+            SetBgImgSizeX(BackgroundImageSizeType::PERCENT, StringToDouble(valueX), bgImgSize);
+        } else {
+            bgImgSize.SetSizeTypeX(BackgroundImageSizeType::AUTO);
+        }
+        if (valueY.find("px") != std::string::npos) {
+            SetBgImgSizeY(BackgroundImageSizeType::LENGTH, StringToDouble(valueY), bgImgSize);
+        } else if (valueY.find('%') != std::string::npos) {
+            SetBgImgSizeY(BackgroundImageSizeType::PERCENT, StringToDouble(valueY), bgImgSize);
+        } else {
+            bgImgSize.SetSizeTypeY(BackgroundImageSizeType::AUTO);
+        }
+    } else {
+        auto sizeTypeIter = BinarySearchFindIndex(bgImageSizeType, ArraySize(bgImageSizeType), value.c_str());
+        if (sizeTypeIter != -1) {
+            bgImgSize.SetSizeTypeX(bgImageSizeType[sizeTypeIter].value);
+            bgImgSize.SetSizeTypeY(bgImageSizeType[sizeTypeIter].value);
+        } else if (value.find("px") != std::string::npos) {
+            SetBgImgSizeX(BackgroundImageSizeType::LENGTH, StringToDouble(value), bgImgSize);
+            bgImgSize.SetSizeTypeY(BackgroundImageSizeType::AUTO);
+        } else if (value.find('%') != std::string::npos) {
+            SetBgImgSizeX(BackgroundImageSizeType::PERCENT, StringToDouble(value), bgImgSize);
+            bgImgSize.SetSizeTypeY(BackgroundImageSizeType::AUTO);
+        } else {
+            bgImgSize.SetSizeTypeX(BackgroundImageSizeType::AUTO);
+            bgImgSize.SetSizeTypeY(BackgroundImageSizeType::AUTO);
+        }
+    }
+    return true;
+}
+
+RefPtr<ClipPath> CreateClipPath(const std::string& value)
+{
+    if (value.empty()) {
+        return nullptr;
+    }
+    auto clipPath = ClipPath::CreateShape(value);
+    GeometryBoxType geometryBoxType = ClipPath::GetGeometryBoxType(value);
+    if (geometryBoxType != GeometryBoxType::NONE) {
+        if (!clipPath) {
+            clipPath = AceType::MakeRefPtr<ClipPath>();
+        }
+    }
+    if (clipPath) {
+        clipPath->SetGeometryBoxType(geometryBoxType);
+    }
+    return clipPath;
+}
+
+std::optional<RadialSizeType> ParseRadialGradientSize(const std::string& value)
+{
+    const static std::unordered_map<std::string, RadialSizeType> sizeTypes = {
+        { DOM_GRADIENT_SIZE_CLOSEST_CORNER, RadialSizeType::CLOSEST_CORNER },
+        { DOM_GRADIENT_SIZE_CLOSEST_SIDE, RadialSizeType::CLOSEST_SIDE },
+        { DOM_GRADIENT_SIZE_FARTHEST_CORNER, RadialSizeType::FARTHEST_CORNER },
+        { DOM_GRADIENT_SIZE_FARTHEST_SIDE, RadialSizeType::FARTHEST_SIDE },
+    };
+    if (!value.empty()) {
+        auto pos = sizeTypes.find(value);
+        if (pos != sizeTypes.end()) {
+            return std::make_optional(pos->second);
+        }
+    }
+    return std::nullopt;
+}
+
+// ObjectPosiotion
+ImageObjectPosition ParseImageObjectPosition(const std::string& value)
+{
+    ImageObjectPosition imageObjectPosition;
+    static const LinearMapNode<void (*)(ImageObjectPosition&)> backGroundPositionOperators[] = {
+        { DOM_IMAGE_POSITION_BOTTOM,
+            [](ImageObjectPosition& imageObjectPosition) {
+                SetBgImgPositionY(BackgroundImagePositionType::PERCENT, 100.0, imageObjectPosition);
+            } },
+        { DOM_IMAGE_POSITION_LEFT,
+            [](ImageObjectPosition& imageObjectPosition) {
+                SetBgImgPositionX(BackgroundImagePositionType::PERCENT, 0.0, imageObjectPosition);
+            } },
+        { DOM_IMAGE_POSITION_RIGHT,
+            [](ImageObjectPosition& imageObjectPosition) {
+                SetBgImgPositionX(BackgroundImagePositionType::PERCENT, 100.0, imageObjectPosition);
+            } },
+        { DOM_IMAGE_POSITION_TOP,
+            [](ImageObjectPosition& imageObjectPosition) {
+                SetBgImgPositionY(BackgroundImagePositionType::PERCENT, 0.0, imageObjectPosition);
+            } },
+    };
+
+    std::vector<std::string> offsets;
+    StringUtils::StringSpliter(value, ' ', offsets);
+    if (!offsets.empty()) {
+        std::string valueX = "";
+        std::string valueY = "";
+        GetOffsetValueObjectPosition(offsets, valueX, valueY);
+        SetBgImgPosition(BackgroundImagePositionType::PERCENT, 50.0, imageObjectPosition);
+        if (ObjectImgPositionIsValid(valueX, valueY)) {
+            if (valueX.find("px") != std::string::npos) {
+                SetBgImgPositionX(BackgroundImagePositionType::PX, StringToDouble(valueX), imageObjectPosition);
+            } else if (valueX.find('%') != std::string::npos) {
+                SetBgImgPositionX(BackgroundImagePositionType::PERCENT, StringToDouble(valueX), imageObjectPosition);
+            } else {
+                auto operatorIterX = BinarySearchFindIndex(
+                    backGroundPositionOperators, ArraySize(backGroundPositionOperators), valueX.c_str());
+                if (operatorIterX != -1) {
+                    backGroundPositionOperators[operatorIterX].value(imageObjectPosition);
+                }
+            }
+            if (valueY.find("px") != std::string::npos) {
+                SetBgImgPositionY(BackgroundImagePositionType::PX, StringToDouble(valueY), imageObjectPosition);
+            } else if (valueY.find('%') != std::string::npos) {
+                SetBgImgPositionY(BackgroundImagePositionType::PERCENT, StringToDouble(valueY), imageObjectPosition);
+            } else {
+                auto operatorIterY = BinarySearchFindIndex(
+                    backGroundPositionOperators, ArraySize(backGroundPositionOperators), valueY.c_str());
+                if (operatorIterY != -1) {
+                    backGroundPositionOperators[operatorIterY].value(imageObjectPosition);
+                }
+            }
+        }
+    }
+
+    return imageObjectPosition;
+}
+
 
 } // namespace OHOS::Ace::Framework

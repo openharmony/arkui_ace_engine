@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class TabBarItemComponent : public BoxComponent {
+class ACE_EXPORT TabBarItemComponent : public BoxComponent {
     DECLARE_ACE_TYPE(TabBarItemComponent, BoxComponent);
 
 public:

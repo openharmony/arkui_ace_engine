@@ -45,12 +45,8 @@ public:
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
-    void OnValueChanged(bool needFireChangeEvent = true) override;
+    void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
     void FireSubmitEvent(const std::string& searchKey);
-    void SetShowCloseIcon(bool showCloseIcon)
-    {
-        showCloseIcon_ = showCloseIcon;
-    }
 
     bool HandleEnterEvent();
     bool HandleFocusEvent(bool vertical, bool reverse);

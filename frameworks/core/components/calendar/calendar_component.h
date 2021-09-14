@@ -21,6 +21,7 @@
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/image/image_component.h"
+#include "core/components/swiper/render_swiper.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/base/render_component.h"
@@ -29,7 +30,7 @@ namespace OHOS::Ace {
 
 using CalenderRequestFocusImpl = std::function<void()>;
 
-class CalendarController : public AceType {
+class ACE_EXPORT CalendarController : public AceType {
     DECLARE_ACE_TYPE(CalendarController, AceType);
 
 public:
@@ -55,6 +56,11 @@ public:
     void SetToday(const CalendarDay& today)
     {
         dataAdapter_->SetToday(today);
+    }
+
+    const CalendarDay& GetToday()
+    {
+        return dataAdapter_->GetToday();
     }
 
     void RequestFocus()
@@ -164,6 +170,47 @@ public:
         leftImageComponent_ = leftRowImage;
     }
 
+    void SetHasMoved(bool hasMoved)
+    {
+        dataAdapter_->SetHasMoved(hasMoved);
+    }
+
+    bool HasMoved()
+    {
+        return dataAdapter_->HasMoved();
+    }
+
+    void SetFirstSetToday(bool firstSetToday)
+    {
+        firstSetToday_ = firstSetToday;
+    }
+
+    bool FirstSetToday()
+    {
+        return firstSetToday_;
+    }
+
+    void SetCrossMonthDay(const CalendarDay& crossMonthDay)
+    {
+        dataAdapter_->SetCrossMonth(true);
+        crossMonthDay_ = crossMonthDay;
+    }
+
+    const CalendarDay& GetCrossMonthDay()
+    {
+        return crossMonthDay_;
+    }
+
+    void SetCrossMonth(bool isCrossMonth)
+    {
+        dataAdapter_->SetCrossMonth(isCrossMonth);
+    }
+
+    bool IsCrossMonth()
+    {
+        return dataAdapter_->IsCrossMonth();
+    }
+
 private:
     enum class SwipeDirection {
         NEXT,
@@ -172,16 +219,19 @@ private:
 
     void GoToMonth(SwipeDirection direction, int32_t selected);
     void JumpToMonth(const CalendarMonth& calendarMonth, int32_t selected, SwipeDirection direction);
+    void SetButtonClickColor(const RefPtr<RenderNode>& node, const Color& clickColor) const;
 
     RefPtr<SwiperController> swiperController_;
     RefPtr<RenderSwiper> renderSwiper_;
     RefPtr<CalendarDataAdapter> dataAdapter_;
     CalendarMonth currentCalendarMonth_;
-    int32_t currentMonthIndex_ = 1;
+    CalendarDay crossMonthDay_;
     CalenderRequestFocusImpl requestFocusImpl_;
+    int32_t currentMonthIndex_ = 1;
     bool firstEnter_ = true;
     bool needFocus_ = false;
     bool firstLoad_ = true;
+    bool firstSetToday_ = true;
     std::queue<std::pair<int32_t, bool>> swiperReverseCache_;
 
     RefPtr<RenderText> renderText_;
@@ -191,7 +241,7 @@ private:
     RefPtr<ImageComponent> rightImageComponent_;
 };
 
-class CalendarComponent : public ComposedComponent {
+class ACE_EXPORT CalendarComponent : public ComposedComponent {
     DECLARE_ACE_TYPE(CalendarComponent, ComposedComponent);
 
 public:
@@ -241,6 +291,11 @@ public:
         axis_ = axis;
     }
 
+    Axis GetAxis() const
+    {
+        return axis_;
+    }
+
     void SetShowLunar(bool showLunar)
     {
         showLunar_ = showLunar;
@@ -254,6 +309,11 @@ public:
     const EventMarker& GetNextClickId() const
     {
         return nextClickId_;
+    }
+
+    const EventMarker& GetDateClickId() const
+    {
+        return dateClickId_;
     }
 
     void SetCardCalendar(bool cardCalendar)
@@ -316,27 +376,96 @@ public:
         return offDays_;
     }
 
+    const std::string& GetHolidays() const
+    {
+        return holidays_;
+    }
+
+    void SetHolidays(const std::string& holidays)
+    {
+        holidays_ = holidays;
+    }
+
+    const std::string& GetWorkDays() const
+    {
+        return workDays_;
+    }
+
+    void SetWorkDays(const std::string& workDays)
+    {
+        workDays_ = workDays;
+    }
+
+    void SetNeedSlide(bool needSlide)
+    {
+        needSlide_ = needSlide;
+    }
+
+    bool IsNeedSlide() const
+    {
+        return needSlide_;
+    }
+
+    bool IsV2Componenet() const
+    {
+        return isV2Component_;
+    }
+
+    void SetV2Componenet(bool isV2Component)
+    {
+        isV2Component_ = isV2Component;
+    }
+
+    void SetCalendarTheme(const RefPtr<CalendarTheme>& theme)
+    {
+        theme_ = theme;
+    }
+
+    const RefPtr<CalendarTheme>& GetCalendarTheme()
+    {
+        return theme_;
+    }
+
+    void SetCalendarType(CalendarType type)
+    {
+        type_ = type;
+    }
+
+    CalendarType GetCalendarType() const
+    {
+        return type_;
+    }
+
     void SetCalendarData(const std::string& value);
-    void BuildCardCalendarTitle(const RefPtr<CalendarTheme>& theme, RefPtr<ColumnComponent>& col);
+    void BuildCardCalendarTitle(RefPtr<ColumnComponent>& col);
     const EventMarker& GetSelectedChangeEvent() const;
     const EventMarker& GetRequestDataEvent() const;
-    RefPtr<ButtonComponent> InitCardButton(const RefPtr<CalendarTheme>& theme, bool isPreArrow);
+    RefPtr<ButtonComponent> InitCardButton(bool isPreArrow);
+
+protected:
+    RefPtr<CalendarTheme> theme_;
 
 private:
     Axis axis_ { Axis::HORIZONTAL };
+    CalendarType type_ { CalendarType::NORMAL };
     int32_t startDayOfWeek_ = 6; // the default is Sunday
     bool showHoliday_ = true;
     bool showLunar_ = true;
     bool isSetToday_ = false;
     bool cardCalendar_ = false;
+    bool needSlide_ = false;
+    bool isV2Component_ = false;
     std::string calendarData_;
     std::string offDays_ = "5, 6"; // The default day of rest is Saturday and Sunday
+    std::string holidays_;
+    std::string workDays_;
     ColorMode colorMode_ = ColorMode::LIGHT;
     CalendarDay date_;
     EventMarker selectedChangeEvent_;
     EventMarker requestDataEvent_;
     EventMarker preClickId_;
     EventMarker nextClickId_;
+    EventMarker dateClickId_;
     CalendarDataAdapterAction dataAdapterAction_;
     RefPtr<CalendarController> calendarController_;
     RefPtr<SwiperComponent> swiperContainer_;
@@ -392,12 +521,23 @@ public:
         return cardCalendar_;
     }
 
+    void SetCalendarType(CalendarType type)
+    {
+        type_ = type;
+    }
+
+    CalendarType GetCalendarType() const
+    {
+        return type_;
+    }
+
 private:
     bool cardCalendar_ = false;
     int32_t indexOfContainer_ = 0;
     EventMarker selectedChangeEvent_;
     RefPtr<CalendarController> calendarController_;
     RefPtr<CalendarTheme> calendarTheme_;
+    CalendarType type_ { CalendarType::NORMAL };
 };
 
 } // namespace OHOS::Ace

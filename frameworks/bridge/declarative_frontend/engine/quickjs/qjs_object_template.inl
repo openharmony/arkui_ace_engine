@@ -28,7 +28,7 @@ void QJSObjectTemplate::Constant(const char* name, T value)
 template<typename T>
 void QJSObjectTemplate::RegisterPropertyWithValue(const char* name, T value, int flags)
 {
-    JSContext* ctx = QJSContext::current();
+    JSContext* ctx = QJSContext::Current();
     if constexpr (std::is_same_v<T, int32_t>) {
         JSCFunctionListEntry* funcEntry =
             QJSFunctionListEntriesContainer::GetInstance().New(name, flags, JS_DEF_PROP_INT32, 0);

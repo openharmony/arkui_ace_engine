@@ -86,7 +86,11 @@ RefPtr<ButtonComponent> DOMButtonUtil::CreateComponentAndSetChildAttr(
         padding->SetPadding(Edge());
         component->SetWidth(boxComponent->GetWidthDimension());
     }
-    component->SetRectRadius(component->GetHeight() / 2);
+    if (component->GetHeight().Unit() == DimensionUnit::PERCENT) {
+        component->SetInputButton(true);
+    } else {
+        component->SetRectRadius(component->GetHeight() / 2);
+    }
     SetChildAttr(component, attrs, theme);
     return component;
 }
@@ -230,10 +234,11 @@ void DOMButtonUtil::SetChildStyle(const RefPtr<BoxComponent>& boxComponent, cons
         const auto& border = backDecoration->GetBorder();
         if (node.HasBorderRadiusStyle()) {
             component->SetRectRadius(border.TopLeftRadius().GetX() - border.Top().GetWidth());
+            component->SetRadiusState(true);
         } else {
             backDecoration->SetBorderRadius(Radius(component->GetRectRadius()));
         }
-        if (backDecoration->GetImage()) {
+        if (node.CheckPseduo(backDecoration)) {
             component->SetType(ButtonType::ICON);
         }
     }
@@ -247,14 +252,23 @@ void DOMButtonUtil::AddChildEvent(const RefPtr<ButtonComponent>& component, int3
         LOGE("fail to add child event due to button component is null");
         return;
     }
-    static const LinearMapNode<void (*)(const RefPtr<ButtonComponent>&, const EventMarker&)> eventOperators[] = {
-        { DOM_CLICK, [](const RefPtr<ButtonComponent>& component,
-                     const EventMarker& event) { component->SetClickedEventId(event); } },
+    static const LinearMapNode<void (*)(const RefPtr<ButtonComponent>&, EventMarker&)> eventOperators[] = {
+        { DOM_CATCH_BUBBLE_CLICK,
+            [](const RefPtr<ButtonComponent>& component, EventMarker& event) {
+                event.SetCatchMode(true);
+                component->SetClickedEventId(event);
+            } },
+        { DOM_CLICK,
+            [](const RefPtr<ButtonComponent>& component, EventMarker& event) {
+                event.SetCatchMode(false);
+                component->SetClickedEventId(event);
+            } },
     };
     for (const auto& event : events) {
         auto operatorIter = BinarySearchFindIndex(eventOperators, ArraySize(eventOperators), event.c_str());
         if (operatorIter != -1) {
-            eventOperators[operatorIter].value(component, EventMarker(nodeId, event, pageId));
+            EventMarker eventMarker(nodeId, event, pageId);
+            eventOperators[operatorIter].value(component, eventMarker);
         }
     }
 }

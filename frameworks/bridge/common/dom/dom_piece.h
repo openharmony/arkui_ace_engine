@@ -33,18 +33,11 @@ public:
 
     RefPtr<Component> GetSpecializedComponent() override;
 
-    void InitializeStyle() override;
-
 protected:
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
-    bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
     void PrepareSpecializedComponent() override;
-    bool AddSpecializedEvent(int32_t pageId, const std::string& event) override;
     void ResetInitializedStyle() override;
 
 private:
-    bool hasContent_ = false;
-    bool hasBackGround_ = false;
     RefPtr<PieceComponent> pieceChild_;
 };
 

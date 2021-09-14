@@ -37,17 +37,34 @@ RenderLayer FlutterRenderSvg::GetRenderLayer()
 
 void FlutterRenderSvg::Paint(RenderContext& context, const Offset& offset)
 {
+    if (transformLayer_ && isRoot_) {
+        transformLayer_->SetOpacityLayer(rootOpacity_);
+    }
+    UpdateTransformByGlobalOffset();
+    RenderNode::Paint(context, offset);
+}
+
+void FlutterRenderSvg::OnGlobalPositionChanged()
+{
+    UpdateTransformByGlobalOffset();
+    RenderSvg::OnGlobalPositionChanged();
+}
+
+void FlutterRenderSvg::UpdateTransformByGlobalOffset()
+{
     if (GreatNotEqual(viewBox_.Width(), 0.0) && GreatNotEqual(viewBox_.Height(), 0.0)) {
         double scale = std::min(GetLayoutSize().Width() / viewBox_.Width(),
-            GetLayoutSize().Height() / viewBox_.Height());
-        double tx = (GetLayoutSize().Width() - (viewBox_.Width() + viewBox_.Left()) * scale) * 0.5;
-        double ty = (GetLayoutSize().Height() - (viewBox_.Height() + viewBox_.Top()) * scale) * 0.5;
-        auto transform = Matrix4::CreateScale(scale, scale, 1.0f);
-        transform = FlutterRenderTransform::GetTransformByOffset(transform, GetGlobalOffset());
-        transform = Matrix4::CreateTranslate(tx, ty, 0.0f) * transform;
+                                GetLayoutSize().Height() / viewBox_.Height());
+        double tx = GetLayoutSize().Width() * 0.5 - (viewBox_.Width() * 0.5 + viewBox_.Left()) * scale;
+        double ty = GetLayoutSize().Height() * 0.5 - (viewBox_.Height() * 0.5 + viewBox_.Top()) * scale;
+        auto transform = Matrix4::CreateScale(static_cast<float>(scale), static_cast<float>(scale), 1.0f);
+        transform = FlutterRenderTransform::GetTransformByOffset(transform, GetTransformOffset(true));
+        transform = Matrix4::CreateTranslate(static_cast<float>(tx), static_cast<float>(ty), 0.0f) * transform;
+        if (transformLayer_ == nullptr) {
+            transformLayer_ = AceType::MakeRefPtr<Flutter::TransformLayer>(Matrix4::CreateIdentity(), 0.0, 0.0);
+        }
         transformLayer_->Update(transform);
     }
-    RenderNode::Paint(context, offset);
 }
 
 } // namespace OHOS::Ace

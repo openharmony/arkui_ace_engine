@@ -39,7 +39,9 @@ void DOMStack::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
     LOGD("DOMStack Add Child");
     // If child has absolute position, the stack should be as large as the box component, so that the position is
     // correct in front-end.
-    if (child->HasPositionStyle() && stackChild_->GetMainStackSize() != MainStackSize::MAX) {
+    auto childDeclaration = child->GetDeclaration();
+    if (childDeclaration && childDeclaration->HasPositionStyle() &&
+        stackChild_->GetMainStackSize() != MainStackSize::MAX) {
         stackChild_->SetMainStackSize(MainStackSize::MATCH_CHILDREN);
     }
     stackChild_->InsertChild(slot, child->GetRootComponent());
@@ -57,31 +59,31 @@ bool DOMStack::GetAxisOffset(const std::pair<std::string, std::string>& style)
     static const LinearMapNode<void (*)(const std::string&, DOMStack&)> stackStyleOperators[] = {
         { DOM_ALIGN_ITEMS,
             [](const std::string& val, DOMStack& stack) {
-                if (val == DOM_ALIGN_ITEMS_END) {
-                    stack.crossAxisAlign_ = END;
-                } else if (val == DOM_ALIGN_ITEMS_CENTER) {
-                    stack.crossAxisAlign_ = CENTER;
-                } else {
-                    stack.crossAxisAlign_ = START;
-                }
+              if (val == DOM_ALIGN_ITEMS_END) {
+                  stack.crossAxisAlign_ = END;
+              } else if (val == DOM_ALIGN_ITEMS_CENTER) {
+                  stack.crossAxisAlign_ = CENTER;
+              } else {
+                  stack.crossAxisAlign_ = START;
+              }
             } },
         { DOM_FLEX_DIRECTION,
             [](const std::string& val, DOMStack& stack) {
-                if (val == DOM_FLEX_COLUMN) {
-                    stack.direction_ = FlexDirection::COLUMN;
-                } else {
-                    stack.direction_ = FlexDirection::ROW;
-                }
+              if (val == DOM_FLEX_COLUMN) {
+                  stack.direction_ = FlexDirection::COLUMN;
+              } else {
+                  stack.direction_ = FlexDirection::ROW;
+              }
             } },
         { DOM_JUSTIFY_CONTENT,
             [](const std::string& val, DOMStack& stack) {
-                if (val == DOM_JUSTIFY_CONTENT_END) {
-                    stack.mainAxisAlign_ = END;
-                } else if (val == DOM_JUSTIFY_CONTENT_CENTER || val == DOM_JUSTIFY_CONTENT_AROUND) {
-                    stack.mainAxisAlign_ = CENTER;
-                } else {
-                    stack.mainAxisAlign_ = START;
-                }
+              if (val == DOM_JUSTIFY_CONTENT_END) {
+                  stack.mainAxisAlign_ = END;
+              } else if (val == DOM_JUSTIFY_CONTENT_CENTER || val == DOM_JUSTIFY_CONTENT_AROUND) {
+                  stack.mainAxisAlign_ = CENTER;
+              } else {
+                  stack.mainAxisAlign_ = START;
+              }
             } },
     };
     auto operatorIter = BinarySearchFindIndex(stackStyleOperators, ArraySize(stackStyleOperators), style.first.c_str());
@@ -105,25 +107,47 @@ void DOMStack::PrepareSpecializedComponent()
         alignment_ = AlignArray[crossAxisAlign_][mainAxisAlign_];
     }
     LOGD("DOMStack Vertical:%{private}lf ,Horizontal:%{private}lf", alignment_.GetVertical(),
-        alignment_.GetHorizontal());
+         alignment_.GetHorizontal());
     if (boxComponent_->GetWidthDimension().IsValid() && boxComponent_->GetHeightDimension().IsValid()) {
         stackChild_->SetMainStackSize(MainStackSize::MAX);
+    } else if (boxComponent_->GetWidthDimension().IsValid()) {
+        stackChild_->SetMainStackSize(MainStackSize::MAX_X);
+    } else if (boxComponent_->GetHeightDimension().IsValid()) {
+        stackChild_->SetMainStackSize(MainStackSize::MAX_Y);
     }
     stackChild_->SetAlignment(alignment_);
     SetAlignment(alignment_);
+    auto& overflowStyle = static_cast<CommonOverflowStyle&>(declaration_->GetStyle(StyleTag::COMMON_OVERFLOW_STYLE));
+    if (!overflowStyle.IsValid()) {
+        return;
+    }
+    if (overflowStyle.overflow == Overflow::SCROLL) {
+        stackChild_->SetMainStackSize(MainStackSize::MATCH_CHILDREN);
+    }
 }
 
 void DOMStack::CompositeComponents()
 {
     DOMNode::CompositeComponents();
 
+    if (!declaration_) {
+        return;
+    }
     scroll_.Reset();
-    bool isRootScroll = isRootNode_ && (!hasOverflowStyle_ || overflow_ == Overflow::SCROLL);
+    auto& overflowStyle = static_cast<CommonOverflowStyle&>(declaration_->GetStyle(StyleTag::COMMON_OVERFLOW_STYLE));
+    if (!overflowStyle.IsValid()) {
+        return;
+    }
+
+    bool isRootScroll =
+        isRootNode_ && (!declaration_->HasOverflowStyle() || overflowStyle.overflow == Overflow::SCROLL);
     bool isCard = AceApplicationInfo::GetInstance().GetIsCardType();
     if (isRootScroll && !isCard) {
         auto rootChild = rootComponent_->GetChild();
         scroll_ = AceType::MakeRefPtr<ScrollComponent>(rootChild);
-        scroll_->InitScrollBar(GetTheme<ScrollBarTheme>(), scrollBarColor_, scrollBarWidth_, edgeEffect_);
+        scroll_->InitScrollBar(GetTheme<ScrollBarTheme>(), overflowStyle.scrollBarColor, overflowStyle.scrollBarWidth,
+                               overflowStyle.edgeEffect);
+        declaration_->SetPositionController(scroll_->GetScrollPositionController());
         rootComponent_->SetChild(scroll_);
     }
 }

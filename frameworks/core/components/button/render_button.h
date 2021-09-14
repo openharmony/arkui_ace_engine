@@ -48,6 +48,22 @@ public:
     void PerformLayout() override;
     void OnPaintFinish() override;
 
+    void OnAttachContext() override
+    {
+        width_.SetContextAndCallback(context_, [weak = WeakClaim(this)] {
+            auto renderButton = weak.Upgrade();
+            if (renderButton) {
+                renderButton->MarkNeedLayout();
+            }
+        });
+        height_.SetContextAndCallback(context_, [weak = WeakClaim(this)] {
+            auto renderButton = weak.Upgrade();
+            if (renderButton) {
+                renderButton->MarkNeedLayout();
+            }
+        });
+    }
+
     void HandleFocusEvent(bool isFocus);
     void HandleClickEvent(const ClickInfo& info);
     void HandleClickEvent();
@@ -57,6 +73,26 @@ public:
     bool IsDisabled() const
     {
         return isDisabled_;
+    }
+
+    void SetClickedColor(const Color& clickColor)
+    {
+        clickedColor_ = clickColor;
+        setClickColor_ = true;
+    }
+
+    ButtonType GetButtonType() const
+    {
+        return type_;
+    }
+
+    bool GetStateEffect() const
+    {
+        return stateEffect_;
+    }
+    RefPtr<Component> GetComponent() override
+    {
+        return buttonComponent_;
     }
 
 protected:
@@ -81,6 +117,7 @@ protected:
         return (layoutFlag_ & LAYOUT_FLAG_EXTEND_TO_PARENT) == LAYOUT_FLAG_EXTEND_TO_PARENT;
     }
 
+    RefPtr<ButtonComponent> buttonComponent_;
     RefPtr<RawRecognizer> touchRecognizer_;
     RefPtr<ClickRecognizer> clickRecognizer_;
     RefPtr<Animator> progressController_;
@@ -88,7 +125,6 @@ protected:
     ButtonType type_;
     Size buttonSize_;
     Offset offsetDelta_;
-    Dimension defaultRadius_;
     double rrectRadius_ = 0.0;
     double widthDelta_ = 0.0;
     double progressWidth_ = 0.0;
@@ -100,6 +136,7 @@ protected:
     double previousValue_ = 0.0;
     double percentChange_ = 0.0;
     float scale_ = 1.0f;
+    bool stateEffect_ = true;
 
     bool needUpdateAnimation_ = false;
     bool isInnerBorder_ = false;
@@ -120,17 +157,14 @@ protected:
     bool needFocusColor_ = false;
     bool needHoverColor_ = false;
     bool isMoveEventValid_ = false;
+    bool setClickColor_ = false;
     uint32_t layoutFlag_ = 0;
 
-    Color backgroundColor_;
-    Color clickedColor_;
-    Color disabledColor_;
-    Color focusColor_;
-    Color hoverColor_;
     Color focusAnimationColor_;
     Color progressColor_;
     Color progressFocusColor_;
     Color defaultClickedColor_;
+    Color clickedColor_;
     BorderEdge borderEdge_;
     std::function<void(const ClickInfo&)> onClickWithInfo_;
     std::function<void()> onClick_;
@@ -149,12 +183,13 @@ private:
     void SetChildrenLayoutSize();
     void SetChildrenAlignment();
     Size CalculateLayoutSize();
+    bool NeedAdaptiveChild();
     bool NeedConstrain();
     void ResetController(RefPtr<Animator>& controller);
     void CreateFloatAnimation(RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue);
 
-    Dimension width_;
-    Dimension height_;
+    AnimatableDimension width_;
+    AnimatableDimension height_;
     Dimension radius_;
     Dimension minWidth_;
     bool valueChanged_ = false;

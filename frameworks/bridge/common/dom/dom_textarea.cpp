@@ -34,9 +34,6 @@ DOMTextarea::DOMTextarea(NodeId nodeId, const std::string& nodeName) : DOMNode(n
     textAreaChild_->SetTextInputType(TextInputType::MULTILINE);
     textAreaChild_->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     textAreaChild_->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
-    if (IsRightToLeft()) {
-        textAreaChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 void DOMTextarea::ResetInitializedStyle()
@@ -100,10 +97,16 @@ void DOMTextarea::InitializeStyle()
 bool DOMTextarea::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
 {
     static const DOMTextareaMap textAreaAttrMap = {
+        { DOM_AUTO_FOCUS, [](const std::string& val,
+                              DOMTextarea& textarea) { textarea.textAreaChild_->SetAutoFocus(StringToBool(val)); } },
         { DOM_TEXTAREA_VALUE,
             [](const std::string& val, DOMTextarea& textarea) { textarea.textAreaChild_->SetValue(val); } },
         { DOM_DISABLED, [](const std::string& val,
                         DOMTextarea& textarea) { textarea.textAreaChild_->SetEnabled(!StringToBool(val)); } },
+        { DOM_INPUT_ENTERKEYTYPE,
+            [](const std::string& val, DOMTextarea& textarea) {
+                textarea.textAreaChild_->SetAction(ConvertStrToTextInputAction(val));
+            } },
         { DOM_TEXTAREA_PLACEHOLDER,
             [](const std::string& val, DOMTextarea& textarea) { textarea.textAreaChild_->SetPlaceholder(val); } },
         { DOM_TEXTAREA_MAXLENGTH,
@@ -116,8 +119,10 @@ bool DOMTextarea::SetSpecializedAttr(const std::pair<std::string, std::string>& 
             [](const std::string& val, DOMTextarea& textarea) {
                 textarea.textAreaChild_->SetTextMaxLines(std::max(StringToInt(val), 1));
             } },
-        { DOM_TEXTAREA_OBSCURE, [](const std::string& val,
-                                DOMTextarea& textarea) { textarea.textAreaChild_->SetObscure(StringToBool(val)); } },
+        { DOM_TEXTAREA_OBSCURE,
+            [](const std::string& val, DOMTextarea& textarea) {
+                textarea.textAreaChild_->SetObscure(StringToBool(val));
+            } },
         { DOM_TEXTAREA_EXTEND, [](const std::string& val,
                                DOMTextarea& textarea) { textarea.textAreaChild_->SetExtend(StringToBool(val)); } },
         { DOM_TEXTAREA_SHOW_COUNTER,
@@ -126,6 +131,17 @@ bool DOMTextarea::SetSpecializedAttr(const std::pair<std::string, std::string>& 
             } },
         { DOM_ICON_SRC,
             [](const std::string& val, DOMTextarea& textarea) { textarea.textAreaChild_->SetIconImage(val); } },
+        { DOM_INPUT_SELECTED_START,
+            [](const std::string& val, DOMTextarea& textarea) {
+                textarea.textAreaChild_->SetSelectedStart(StringToInt(val));
+            } },
+        { DOM_INPUT_SELECTED_END,
+            [](const std::string& val, DOMTextarea& textarea) {
+                textarea.textAreaChild_->SetSelectedEnd(StringToInt(val)); } },
+        { DOM_INPUT_SOFT_KEYBOARD_ENABLED,
+            [](const std::string& val, DOMTextarea& textarea) {
+                textarea.textAreaChild_->SetSoftKeyboardEnabled(StringToBool(val));
+            } },
     };
     auto textareaAttrIter = textAreaAttrMap.find(attr.first);
     if (textareaAttrIter != textAreaAttrMap.end()) {
@@ -171,6 +187,10 @@ bool DOMTextarea::SetSpecializedStyle(const std::pair<std::string, std::string>&
         { DOM_TEXT_ALLOW_SCALE, [](const std::string& val,
                                 DOMTextarea& textarea) { textarea.textStyle_.SetAllowScale(StringToBool(val)); } },
         { DOM_TEXTAREA_CURSOR_COLOR,
+            [](const std::string& val, DOMTextarea& textarea) {
+                textarea.textAreaChild_->SetCursorColor(textarea.ParseColor(val));
+            } },
+        { DOM_CARET_COLOR,
             [](const std::string& val, DOMTextarea& textarea) {
                 textarea.textAreaChild_->SetCursorColor(textarea.ParseColor(val));
             } },
@@ -232,16 +252,28 @@ bool DOMTextarea::SetSpecializedStyle(const std::pair<std::string, std::string>&
 bool DOMTextarea::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
     static const LinearMapNode<void (*)(const RefPtr<TextFieldComponent>&, const EventMarker&)> eventOperators[] = {
+        { DOM_CATCH_BUBBLE_CLICK,
+            [](const RefPtr<TextFieldComponent>& component, const EventMarker& event) {
+                EventMarker eventMarker(event);
+                eventMarker.SetCatchMode(true);
+                component->SetOnTap(eventMarker);
+            } },
         { DOM_CHANGE, [](const RefPtr<TextFieldComponent>& component,
                       const EventMarker& event) { component->SetOnTextChange(event); } },
         { DOM_CLICK,
-            [](const RefPtr<TextFieldComponent>& component, const EventMarker& event) { component->SetOnTap(event); } },
+            [](const RefPtr<TextFieldComponent>& component, const EventMarker& event) {
+                EventMarker eventMarker(event);
+                eventMarker.SetCatchMode(false);
+                component->SetOnTap(eventMarker);
+            } },
         { DOM_LONG_PRESS, [](const RefPtr<TextFieldComponent>& component,
                           const EventMarker& event) { component->SetOnLongPress(event); } },
         { DOM_INPUT_EVENT_OPTION_SELECT, [](const RefPtr<TextFieldComponent>& component,
                                          const EventMarker& event) { component->SetOnOptionsClick(event); } },
         { DOM_INPUT_EVENT_SEARCH, [](const RefPtr<TextFieldComponent>& component,
                                   const EventMarker& event) { component->SetOnSearch(event); } },
+        { DOM_INPUT_EVENT_SELECT_CHANGE, [](const RefPtr<TextFieldComponent>& component,
+                                             const EventMarker& event) { component->SetOnSelectChange(event); } },
         { DOM_INPUT_EVENT_SHARE, [](const RefPtr<TextFieldComponent>& component,
                                  const EventMarker& event) { component->SetOnShare(event); } },
         { DOM_INPUT_EVENT_TRANSLATE, [](const RefPtr<TextFieldComponent>& component,
@@ -284,6 +316,7 @@ void DOMTextarea::OnRequestFocus(bool shouldFocus)
 
 void DOMTextarea::PrepareSpecializedComponent()
 {
+    textAreaChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     RefPtr<BoxComponent> boxComponent = GetBoxComponent();
     if (!boxComponent || !textAreaChild_) {
         return;
@@ -291,6 +324,7 @@ void DOMTextarea::PrepareSpecializedComponent()
     boxComponent_->SetMouseAnimationType(HoverAnimationType::OPACITY);
     textAreaChild_->SetTextStyle(textStyle_);
     textAreaChild_->SetInputOptions(inputOptions_);
+    textAreaChild_->SetImageFill(GetImageFill());
     UpdateDecoration();
     boxComponent->SetPadding(Edge());
     boxComponent->SetDeliverMinToChild(true);
@@ -344,7 +378,7 @@ void DOMTextarea::UpdateDecoration()
             }
             backDecoration->SetBorder(border);
         } else {
-            RefPtr<Decoration> backDecoration = AceType::MakeRefPtr<Decoration>();
+            backDecoration = AceType::MakeRefPtr<Decoration>();
             backDecoration->SetBorderRadius(Radius(BOX_HOVER_RADIUS));
             boxComponent->SetBackDecoration(backDecoration);
         }

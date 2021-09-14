@@ -38,9 +38,7 @@ void RenderSvgLine::Update(const RefPtr<Component> &component)
     x2_ = lineComponent->GetX2();
     y1_ = lineComponent->GetY1();
     y2_ = lineComponent->GetY2();
-    fillState_ = lineComponent->GetFillState();
-    strokeState_ = lineComponent->GetStrokeState();
-
+    RenderSvgBase::SetPresentationAttrs(lineComponent->GetDeclaration());
     PrepareAnimations(component);
     MarkNeedLayout();
 }
@@ -77,11 +75,10 @@ bool RenderSvgLine::PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimate)
             return;
         }
         if (line->SetProperty(attrName, value)) {
-            line->MarkNeedLayout(true);
+            line->MarkNeedRender(true);
         }
     };
-    RefPtr<Evaluator<Dimension>> evaluator = AceType::MakeRefPtr<LinearEvaluator<Dimension>>();
-    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback), evaluator);
+    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback));
     return true;
 }
 

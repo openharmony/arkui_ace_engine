@@ -24,6 +24,7 @@ InspectImageAnimator::InspectImageAnimator(NodeId nodeId, const std::string& nod
 void InspectImageAnimator::PackAttrAndStyle()
 {
     // add for the attrs
+    attrs_.insert(std::make_pair("predecode", "0"));
     attrs_.insert(std::make_pair("iteration", "infinite"));
     attrs_.insert(std::make_pair("reverse", "false"));
     attrs_.insert(std::make_pair("fixedsize", "true"));

@@ -48,6 +48,7 @@ struct AxisOption {
     int32_t tickNumber = 10;
     bool display = false;
     Color color = Color::GRAY;
+    std::string colorString;
 };
 
 class TextInfo final {
@@ -82,10 +83,21 @@ public:
         return color_;
     }
 
+    void SetColorString(std::string color)
+    {
+        colorString_ = color;
+    }
+
+    std::string GetColorString() const
+    {
+        return colorString_;
+    }
+
 private:
     std::string value_ = "";
     Placement placement_ = Placement::BOTTOM;
     Color color_ = Color::WHITE;
+    std::string colorString_;
 };
 
 enum class LineType {
@@ -146,8 +158,19 @@ public:
         return !operator==(segmentInfo);
     }
 
+    std::string GetColorString() const
+    {
+        return colorString_;
+    }
+
+    void SetColorString(const std::string color)
+    {
+        colorString_ = color;
+    }
+
 private:
     Color color_ = Color::TRANSPARENT;
+    std::string colorString_;
     double solidWidth_ = 5.0;
     double spaceWidth_ = 5.0;
     LineType type_ = LineType::SOLID;
@@ -242,12 +265,34 @@ public:
         return pointStrokeWidth_;
     }
 
+    void SetStrokeColorString(const std::string colorString)
+    {
+        strokeColorString_ = colorString;
+    }
+
+    std::string GetStrokeColorString() const
+    {
+        return strokeColorString_;
+    }
+
+    void SetFillColorString(const std::string colorString)
+    {
+        fillColorString_ = colorString;
+    }
+
+    std::string GetFillColorString() const
+    {
+        return fillColorString_;
+    }
+
 private:
     PointShape pointShape_ = PointShape::CIRCLE;
     Dimension pointStrokeWidth_ = Dimension(1.0, DimensionUnit::PX);
     Dimension pointSize_ = Dimension(5.0, DimensionUnit::PX);
     Color strokeColor_ = Color::FromString("#ff0000");
+    std::string strokeColorString_;
     Color fillColor_ = Color::FromString("#ff0000");
+    std::string fillColorString_;
     Point coordinate_;
     bool display_ = false;
 };

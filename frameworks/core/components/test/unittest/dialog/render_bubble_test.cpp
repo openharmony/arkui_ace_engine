@@ -94,29 +94,6 @@ HWTEST_F(RenderBubbleTest, RenderBubbleUpdate001, TestSize.Level1)
 }
 
 /**
- * @tc.name: RenderBubbleUpdate002
- * @tc.desc: Verify the Update Interface of RenderBubble work correctly with wrong component type.
- * @tc.type: FUNC
- * @tc.require: AR000DBAOV AR000DBAP0 AR000DBAP1 AR000DBAP2
- * @tc.author: caocan
- */
-HWTEST_F(RenderBubbleTest, RenderBubbleUpdate002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct TextComponent and RenderBubble.
-     */
-    RefPtr<TextComponent> text = AceType::MakeRefPtr<TextComponent>("HiAce");
-    RefPtr<MockRenderBubble> renderBubble = AceType::MakeRefPtr<MockRenderBubble>();
-
-    /**
-     * @tc.steps: step2. call the Update interface of RenderBubble.
-     * @tc.expected: step2. renderBubble is set as not needLayout.
-     */
-    renderBubble->Update(text);
-    EXPECT_TRUE(!renderBubble->NeedLayout());
-}
-
-/**
  * @tc.name: RenderBubblePerformLayout001
  * @tc.desc: Verify PerformLayout interface of RenderBubble works correctly with left placement.
  * @tc.type: FUNC

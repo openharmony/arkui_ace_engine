@@ -89,7 +89,7 @@ HWTEST_F(DomCardChartTest, DomCardChartDataParse001, TestSize.Level1)
     auto fillColor = mainChart.GetFillColor();
     ASSERT_EQ(fillColor, Color::FromString("#cce5ff"));
     auto lineWidth = mainChart.GetLineWidth();
-    ASSERT_EQ(lineWidth, 3);
+    ASSERT_EQ(lineWidth, 1);
     auto smoothFlag = mainChart.GetSmoothFlag();
     ASSERT_EQ(smothFlag, true);
 

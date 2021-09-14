@@ -35,31 +35,10 @@ public:
     }
 
 protected:
-    void OnMounted(const RefPtr<DOMNode>& parentNode) override;
     void PrepareSpecializedComponent() override;
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
-    void PrepareSpecializedComponent(const RefPtr<SvgAnimateComponent>& animateComponent);
+    void SetAnimateAttrs();
+    CalcMode ConvertCalcMode(const std::string& val) const;
 
-    std::string svgId_;
-    std::string attributeName_;
-    int32_t begin_ = 0;
-    int32_t dur_ = 0;
-    int32_t end_ = 0;
-    int32_t min_ = 0;
-    int32_t max_ = 0;
-    Restart restart_ = Restart::ALWAYS;
-    int32_t repeatCount_ = 1;
-    int32_t repeatDur_ = 0;
-    Fill fillMode_ = Fill::REMOVE;
-    CalcMode calcMode_ = CalcMode::LINEAR;
-    Additive additive_ = Additive::REPLACE;
-    Accumulate accumulate_ = Accumulate::NONE;
-    std::vector<std::string> values_;
-    std::vector<double> keyTimes_;
-    std::vector<std::string> keySplines_;
-    std::string from_;
-    std::string to_;
-    std::string by_;
     RefPtr<SvgAnimateComponent> animateComponent_;
 };
 

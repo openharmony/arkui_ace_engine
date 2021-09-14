@@ -28,13 +28,14 @@
 #include <unistd.h>
 
 #include "base/log/log.h"
-#include "display_type.h"
 #include "window_manager.h"
+#include "display_type.h"
 
 #include "core/image/image_cache.h"
 
 namespace OHOS::Ace {
 namespace {
+
 const char IS_SUCESS[] = "isSucceed";
 const char ERROR_CODE[] = "errorcode";
 const char PHOTO_PATH[] = "uri";
@@ -49,37 +50,22 @@ const char REGION_POSITION_X[] = "region_position_x";
 const char REGION_POSITION_Y[] = "region_position_y";
 const char REGION_WIDTH[] = "region_width";
 const char REGION_HEIGHT[] = "region_height";
-constexpr int32_t DEFAULT_WIDTH = 1920;
-constexpr int32_t DEFAULT_HEIGHT = 1080;
+constexpr int32_t DEFAULT_WIDTH = 1280;
+constexpr int32_t DEFAULT_HEIGHT = 720;
 constexpr int32_t SURFACE_STRIDE_ALIGNMENT_VAL = 8;
 constexpr int32_t PREVIEW_SURFACE_WIDTH = 640;
 constexpr int32_t PREVIEW_SURFACE_HEIGHT = 480;
+constexpr int32_t PHOTO_SURFACE_WIDTH = 1280;
+constexpr int32_t PHOTO_SURFACE_HEIGHT = 960;
 constexpr int32_t MAX_DURATION = 36000;
-constexpr int32_t SAMPLE_RATE = 48000;
 constexpr int32_t FRAME_RATE = 30;
-constexpr int32_t RATE = 4096;
+constexpr int32_t RATE = 48000;
+constexpr int32_t QUEUE_SIZE = 10;
 constexpr double FPS = 30;
 const uid_t CHOWN_OWNER_ID = -1;
 const gid_t CHOWN_GROUP_ID = 1023;
 const mode_t MKDIR_RWX_USR_GRP_DIR = 0770;
 const mode_t MKDIR_RWX_USR_GRP_FILE = 0660;
-
-inline int32_t GetRecordFile(const std::string& filePath, std::string& path)
-{
-    LOGI("Camera GetRecordFile.");
-    struct timeval tv = {};
-    gettimeofday(&tv, nullptr);
-    struct tm *ltm = localtime(&tv.tv_sec);
-    int32_t fd = -1;
-    if (ltm != nullptr) {
-        std::ostringstream ss("Capture_");
-        ss << "Record" << ltm->tm_hour << "-" << ltm->tm_min << "-" << ltm->tm_sec << ".mp4";
-        path = filePath + ss.str();
-        fd = open(path.c_str(), O_WRONLY | O_CREAT | O_CLOEXEC | O_TRUNC, S_IRUSR | S_IWUSR);
-    }
-    return fd;
-}
-
 
 inline bool IsDirectory(const char *dirName)
 {
@@ -91,41 +77,28 @@ inline bool IsDirectory(const char *dirName)
     }
     return false;
 }
-
 }
 
 void CameraCallback::PrepareCameraInput(sptr<OHOS::CameraStandard::CaptureInput> InCamInput_)
 {
     camInput_ = InCamInput_;
-    int32_t intResult = 0;
-    intResult = PrepareCamera();
-    if (intResult != 0) {
-        LOGE("Prepare Camera Failed");
-        return;
+    if (prepareEventListener_) {
+        prepareEventListener_();
     }
 }
 std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
 {
     LOGI("Camera CreateRecorder start.");
     int ret = 0;
-    int32_t channelCount = 1;
-    Media::AudioCodecFormat audioFormat = Media::AAC_LC;
-    Media::AudioSourceType inputSource = Media::AUDIO_MIC;
-    int32_t audioEncodingBitRate = SAMPLE_RATE;
     Media::VideoSourceType source = Media::VIDEO_SOURCE_SURFACE_ES;
     int32_t sourceId = 0;
-    int32_t audioSourceId = 0;
     int32_t width = DEFAULT_WIDTH;
     int32_t height = DEFAULT_HEIGHT;
-    Media::VideoCodecFormat encoder = Media::HEVC;
+    Media::VideoCodecFormat encoder = Media::H264;
 
     std::shared_ptr<Media::Recorder> recorder = Media::RecorderFactory::CreateRecorder();
     if ((ret = recorder->SetVideoSource(source, sourceId)) != ERR_OK) {
         LOGE("SetVideoSource failed. ret= %{private}d.", ret);
-        return nullptr;
-    }
-    if ((ret = recorder->SetAudioSource(inputSource, audioSourceId)) != ERR_OK) {
-        LOGE("SetAudioSource failed. ret= %{private}d.", ret);
         return nullptr;
     }
     if ((ret = recorder->SetOutputFormat(Media::FORMAT_MPEG_4)) != ERR_OK) {
@@ -152,22 +125,6 @@ std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
         LOGE("SetCaptureRate failed. ret= %{private}d.", ret);
         return nullptr;
     }
-    if ((ret = recorder->SetAudioEncoder(audioSourceId, audioFormat)) != ERR_OK) {
-        LOGE("SetAudioEncoder failed. ret= %{private}d.", ret);
-        return nullptr;
-    }
-    if ((ret = recorder->SetAudioSampleRate(audioSourceId, SAMPLE_RATE)) != ERR_OK) {
-        LOGE("SetAudioSampleRate failed. ret= %{private}d.", ret);
-        return nullptr;
-    }
-    if ((ret = recorder->SetAudioChannels(audioSourceId, channelCount)) != ERR_OK) {
-        LOGE("SetAudioChannels failed. ret= %{private}d.", ret);
-        return nullptr;
-    }
-    if ((ret = recorder->SetAudioEncodingBitRate(audioSourceId, audioEncodingBitRate)) != ERR_OK) {
-        LOGE("SetAudioEncodingBitRate failed. ret= %{private}d.", ret);
-        return nullptr;
-    }
     if ((ret = recorder->SetMaxDuration(MAX_DURATION)) != ERR_OK) { // 36000s=10h
         LOGE("SetAudioEncodingBitRate failed. ret= %{private}d.", ret);
         return nullptr;
@@ -187,13 +144,6 @@ int CameraCallback::PrepareRecorder()
         LOGE("Camera: Recorder not available.");
         return -1;
     }
-    if (recordFileId_ == -1) {
-        recordFileId_ = GetRecordFile(cacheFilePath_, recordPath_);
-    }
-    if (recordFileId_ == -1) {
-        LOGE("Camera: Create fd failed.");
-        return -1;
-    }
     return ERR_OK;
 }
 
@@ -205,7 +155,7 @@ void CameraCallback::CloseRecorder()
             ((sptr<OHOS::CameraStandard::VideoOutput> &)(videoOutput_))->Release();
         }
         if (recorder_ != nullptr) {
-            recorder_->Stop(true);
+            recorder_->Stop(false);
             recorder_ = nullptr;
         }
 
@@ -249,7 +199,7 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
             LOGE("Camera:create subwindow failed, because %{public}s", WMErrorStr(wret).c_str());
             return nullptr;
         }
-        subwindow_->GetSurface()->SetQueueSize(10);
+        subwindow_->GetSurface()->SetQueueSize(QUEUE_SIZE);
     }
     previewSurface_ = subwindow_->GetSurface();
     previewSurface_->SetUserData(SURFACE_STRIDE_ALIGNMENT, std::to_string(SURFACE_STRIDE_ALIGNMENT_VAL));
@@ -261,13 +211,50 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
     previewSurface_->SetUserData(REGION_POSITION_X, std::to_string(windowOffset_.GetX()));
     previewSurface_->SetUserData(REGION_POSITION_Y, std::to_string(windowOffset_.GetY()));
 
-    // call context to create hole
-    context->SetClipHole(windowOffset_.GetX(), windowOffset_.GetY(), windowSize_.Width(), windowSize_.Height());
+    previewSurface_->SetDefaultWidthAndHeight(PREVIEW_SURFACE_HEIGHT, PREVIEW_SURFACE_WIDTH);
+    context->SetClipHole(layoutOffset_.GetX(), layoutOffset_.GetY(), layoutSize_.Width(), layoutSize_.Height());
     auto renderNode = renderNode_.Upgrade();
     if (renderNode) {
+        LOGE("Hole: renderNode from weak to normal success.");
         renderNode->SetHasSubWindow(true);
     }
+    MarkWholeRender(renderNode_);
     return previewSurface_;
+}
+
+void CameraCallback::MarkTreeRender(const RefPtr<RenderNode>& root)
+{
+    root->MarkNeedRender();
+    LOGE("Hole: MarkTreeRender %{public}s", AceType::TypeName(Referenced::RawPtr(root)));
+    for (auto child: root->GetChildren()){
+        MarkTreeRender(child);
+    }
+}
+
+void CameraCallback::MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak)
+{
+    auto node = nodeWeak.Upgrade();
+    if (!node) {
+        LOGE("Hole: MarkWholeRender node is null");
+        return;
+    }
+    
+    auto parentWeak = node->GetParent();
+    auto parent = parentWeak.Upgrade();
+    if (!parent) {
+        node->MarkNeedRender();
+        return;
+    }
+
+    for(auto child: parent->GetChildren()) {
+        if (child == node){
+            LOGE("Hole: MarkWholeRender meet barrier");
+            break;
+        }
+        MarkTreeRender(child);
+    }
+
+    MarkWholeRender(parentWeak);
 }
 
 int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> camManagerObj)
@@ -278,6 +265,7 @@ int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> c
         LOGE("Camera CreateSurface failed.");
         return -1;
     }
+    captureConsumerSurface_->SetDefaultWidthAndHeight(PHOTO_SURFACE_WIDTH, PHOTO_SURFACE_HEIGHT);
     if (photoListener_ == nullptr) {
         photoListener_ = new CaptureListener(this);
     }
@@ -302,7 +290,6 @@ int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> c
     MakeDir(cacheFilePath_);
     return 0;
 }
-
 
 void CameraCallback::MakeDir(const std::string& path)
 {
@@ -330,7 +317,9 @@ int32_t CameraCallback::PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> c
         onRecord(false, NULL_STRING);
         return -1;
     }
-    ret = recorder_->SetOutputFile(recordFileId_);
+
+    MakeDir(DEFAULT_CATCH_PATH);
+    ret = recorder_->SetOutputPath(DEFAULT_CATCH_PATH);
     if (ret != ERR_OK) {
         LOGE("Camera SetOutputPath failed. ret= %{private}d", ret);
         CloseRecorder();
@@ -350,17 +339,40 @@ int32_t CameraCallback::PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> c
         LOGE("Create Video Output Failed");
         return -1;
     }
+    int intResult = 0;
+    intResult = capSession_->AddOutput(videoOutput_);
+    if (intResult != 0) {
+        LOGE("Failed to add Video Output");
+        return -1;
+    }
+
     return 0;
 }
-int32_t CameraCallback::PrepareCamera()
+
+int32_t CameraCallback::PrepareCamera(bool bIsRecorder)
 {
+    if (camInput_ == nullptr) {
+        LOGE("Prepare Camera: camInput is not Init Succeeded and wait.");
+        return -1;
+    }
+
+    if (!sizeInitSucceeded_ || !offsetInitSucceeded_) {
+        LOGE("Prepare Camera: size or offset is not Init Succeeded and wait, %{public}d, %{public}d.",
+            sizeInitSucceeded_, offsetInitSucceeded_);
+        return -1;
+    }
+
     int32_t intResult = 0;
+    sptr<OHOS::Surface> surface = nullptr;
     LOGI("Prepare Camera start.");
 
     sptr<OHOS::CameraStandard::CameraManager> camManagerObj = OHOS::CameraStandard::CameraManager::GetInstance();
+    if (capSession_ != nullptr) {
+        capSession_->Release();
+    }
     capSession_ = camManagerObj->CreateCaptureSession();
-    if ((capSession_ == nullptr) || (camInput_ == nullptr)) {
-        LOGE("Create was not Proper!");
+    if (capSession_ == nullptr) {
+        LOGE("CameraCallback: Create was not Proper, capSession is null!");
         return -1;
     }
     capSession_->BeginConfig();
@@ -369,7 +381,9 @@ int32_t CameraCallback::PrepareCamera()
         LOGE("AddInput Failed!");
         return -1;
     }
-    previewOutput_ = camManagerObj->CreatePreviewOutput(createSubWindowSurface());
+    surface = createSubWindowSurface();
+    previewOutput_ = camManagerObj->CreateCustomPreviewOutput(surface, surface->GetDefaultHeight(), 
+		                                              surface->GetDefaultWidth());
     if (previewOutput_ == nullptr) {
         LOGE("Failed to create PreviewOutput");
         return -1;
@@ -379,10 +393,20 @@ int32_t CameraCallback::PrepareCamera()
         LOGE("Failed to Add Preview Output");
         return -1;
     }
-    intResult = PreparePhoto(camManagerObj);
-    if (intResult != 0) {
-        LOGE("Failed to Prepare Photo");
-        return -1;
+    if (!bIsRecorder) {
+        intResult = PreparePhoto(camManagerObj);
+        if (intResult != 0) {
+            LOGE("Failed to Prepare Photo");
+            return -1;
+        }
+        PreviousReadyMode_ = ReadyMode::PHOTO;
+    } else {
+        intResult = PrepareVideo(camManagerObj);
+        if (intResult != 0) {
+            LOGE("Failed to Prepare Video");
+            return -1;
+        }
+        PreviousReadyMode_ = ReadyMode::VIDEO;
     }
     intResult = capSession_->CommitConfig();
     if (intResult != 0) {
@@ -395,9 +419,6 @@ int32_t CameraCallback::PrepareCamera()
         StartPreview();
     }
 
-    if (prepareEventListener_) {
-        prepareEventListener_();
-    }
     LOGI("Prepare Camera end.");
     return 0;
 }
@@ -437,6 +458,16 @@ void CameraCallback::StartRecord()
         LOGE("Camera is already recording.");
         return;
     }
+    LOGI("Prepare Recorder Start");
+    ret = PrepareCamera(true);
+    if (ret != ERR_OK) {
+        LOGE("Prepare Recording Failed");
+        return;
+    }
+
+    LOGI("Video Output Start");
+    ((sptr<OHOS::CameraStandard::VideoOutput> &)(videoOutput_))->Start();
+    LOGI("Recorder Start");
     ret = recorder_->Start();
     if (ret != ERR_OK) {
         LOGE("recorder start failed. ret= %{private}d", ret);
@@ -444,8 +475,6 @@ void CameraCallback::StartRecord()
         onRecord(false, NULL_STRING);
         return;
     }
-
-    ((sptr<OHOS::CameraStandard::VideoOutput> &)(videoOutput_))->Start();
 
     recordState_ = State::STATE_RUNNING;
     LOGI("Camera start recording succeed.");
@@ -455,6 +484,14 @@ void CameraCallback::Capture(Size photoSize)
 {
     LOGI("Camera capture start.");
     int32_t intResult = 0;
+    if (PreviousReadyMode_ != PHOTO) {
+        LOGI("Photo was not prepared, so need to prepare");
+        intResult = PrepareCamera(false);
+        if (intResult != 0) {
+            LOGE("Prepare Camera Failed");
+            return;
+        }
+    }
 
     if (!isReady_ || (photoOutput_ == nullptr)) {
         LOGE("Camera is not ready for Take Photo");
@@ -477,16 +514,18 @@ void CameraCallback::Release()
         capSession_->Release();
         capSession_ = nullptr;
     }
-
+    PreviousReadyMode_ = ReadyMode::NONE;
     if (subwindow_ != nullptr) {
         LOGI("CameraCallback: Destroy subWindow.");
         subwindow_ = nullptr;
         auto context = context_.Upgrade();
+        LOGE("Hole: Release x=0, y=0, w=0, h=0");
         context->SetClipHole(0, 0, 0, 0);
         auto renderNode = renderNode_.Upgrade();
         if (renderNode) {
             renderNode->SetHasSubWindow(false);
         }
+        context->MarkForcedRefresh();
     }
     LOGI("CameraCallback: Release end.");
 }
@@ -497,7 +536,14 @@ void CameraCallback::Stop(bool isClosePreView)
         capSession_->Stop();
     }
 
-    previewState_ = State::STATE_IDLE;
+    if (recordState_ == State::STATE_RUNNING) {
+        CloseRecorder();
+    }
+    recordState_ = State::STATE_IDLE;
+    if (isClosePreView) {
+        previewState_ = State::STATE_IDLE;
+        PreviousReadyMode_ = ReadyMode::NONE;
+    }
 }
 
 void CameraCallback::AddTakePhotoListener(TakePhotoListener&& listener)
@@ -542,9 +588,8 @@ void CameraCallback::onRecord(bool isSucces, std::string info)
 
 void CameraCallback::OnCameraSizeChange(double width, double height)
 {
-    auto context = context_.Upgrade();
-    if (!context) {
-        LOGE("Camera::CameraCallback: context is null.");
+    if (sizeInitSucceeded_) {
+        LOGE("Camera::CameraCallback: size has Init Succeeded.");
         return;
     }
 
@@ -569,25 +614,15 @@ void CameraCallback::OnCameraSizeChange(double width, double height)
         windowSize_.SetHeight(height);
     }
 
-    if (subwindow_) {
-        LOGE("CameraCallback::OnCameraSizeChange: %{public}lf  %{public}lf.", width, height);
-        subwindow_->Resize(windowSize_.Width(), windowSize_.Height());
-        context->SetClipHole(windowOffset_.GetX(), windowOffset_.GetY(),
-            windowSize_.Width(), windowSize_.Height());
-        auto renderNode = renderNode_.Upgrade();
-        if (renderNode) {
-            renderNode->SetHasSubWindow(true);
-        }
-    } else {
-        LOGE("CameraCallback::OnCameraSizeChange: subwindow is null.");
-    }
+    sizeInitSucceeded_ = true;
+    LOGE("CameraCallback::OnCameraSizeChange success: %{public}lf  %{public}lf.", width, height);
+    PrepareCamera(true);
 }
 
 void CameraCallback::OnCameraOffsetChange(double x, double y)
 {
-    auto context = context_.Upgrade();
-    if (!context) {
-        LOGE("Camera::CameraCallback: context is null.");
+    if (offsetInitSucceeded_) {
+        LOGE("Camera::CameraCallback: offset has Init Succeeded.");
         return;
     }
 
@@ -611,25 +646,12 @@ void CameraCallback::OnCameraOffsetChange(double x, double y)
         sizeChange = true;
     }
 
-    if (sizeChange) {
-        OnCameraSizeChange(windowSize_.Width(), windowSize_.Height());
-    }
-
     windowOffset_.SetX(x);
     windowOffset_.SetY(y);
 
-    if (subwindow_) {
-        LOGE("CameraCallback::OnCameraOffsetChange: %{public}lf  %{public}lf.", x, y);
-        subwindow_->Move(windowOffset_.GetX(), windowOffset_.GetY());
-        context->SetClipHole(windowOffset_.GetX(), windowOffset_.GetY(),
-            windowSize_.Width(), windowSize_.Height());
-        auto renderNode = renderNode_.Upgrade();
-        if (renderNode) {
-            renderNode->SetHasSubWindow(true);
-        }
-    } else {
-        LOGE("CameraCallback::OnCameraOffsetChange: subwindow is null.");
-    }
+    offsetInitSucceeded_ = true;
+    LOGE("CameraCallback::OnCameraOffsetChange success: %{public}lf  %{public}lf.", x, y);
+    PrepareCamera(true);
 }
 
 void CaptureListener::OnBufferAvailable()
@@ -653,7 +675,7 @@ void CaptureListener::OnBufferAvailable()
     }
 }
 
-int32_t CameraCallback::SaveData(const char *buffer, int32_t size, std::string& path)
+int32_t CameraCallback::SaveData(char *buffer, int32_t size, std::string& path)
 {
     struct timeval tv = {};
     gettimeofday(&tv, nullptr);
@@ -676,6 +698,7 @@ int32_t CameraCallback::SaveData(const char *buffer, int32_t size, std::string& 
 
 void CameraCallback::OnTakePhoto(bool isSucces, std::string info)
 {
+
     LOGI("Camera:SurfaceListener OnTakePhoto %{public}d  %{public}s--", isSucces, info.c_str());
     if (!takePhotoListener_) {
         return;
@@ -708,7 +731,8 @@ void Camera::CreateCamera()
         LOGE("Get Camera Manager Failed");
         return;
     }
-    std::vector<sptr<OHOS::CameraStandard::CameraInfo>> cameraObjList = camManagerObj->GetCameras();
+    std::vector<sptr<OHOS::CameraStandard::CameraInfo>> cameraObjList;
+    cameraObjList = camManagerObj->GetCameras();
     if (cameraObjList.empty()) {
         LOGE("Get Cameras Failed");
         return;
@@ -761,7 +785,8 @@ void Camera::StartPreview()
 
 void Camera::StartRecord()
 {
-    LOGI("Camera:StartRecord (suspended temporarily)");
+    LOGI("Camera:StartRecord");
+    cameraCallback_.StartRecord();
 }
 
 void Camera::AddTakePhotoListener(TakePhotoListener&& listener)
@@ -789,6 +814,7 @@ void Camera::OnCameraSizeChange(double width, double height)
     float viewScale = context->GetViewScale();
 
     LOGI("Camera::OnCameraSizeChange:viewScale %{public}f .", viewScale);
+    cameraCallback_.SetLayoutSize(width, height);
     cameraCallback_.OnCameraSizeChange(width * viewScale, height * viewScale);
 }
 
@@ -802,6 +828,7 @@ void Camera::OnCameraOffsetChange(double x, double y)
     float viewScale = context->GetViewScale();
 
     LOGI("Camera::OnCameraOffsetChange:viewScale %{public}f .", viewScale);
+    cameraCallback_.SetLayoutOffset(x, y);
     cameraCallback_.OnCameraOffsetChange(x * viewScale, y * viewScale);
 }
 } // namespace OHOS::Ace

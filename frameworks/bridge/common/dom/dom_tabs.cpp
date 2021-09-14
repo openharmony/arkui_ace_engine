@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/common/dom/dom_tabs.h"
 
+#include "frameworks/bridge/common/dom/dom_tab_bar.h"
+#include "frameworks/bridge/common/dom/dom_tab_content.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
@@ -29,10 +31,27 @@ uint32_t DOMTabs::GetGlobalTabControllerId()
 
 DOMTabs::DOMTabs(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
-    flexChild_ = AceType::MakeRefPtr<ColumnComponent>(
-        FlexAlign::FLEX_START, FlexAlign::CENTER, std::list<RefPtr<Component>>());
+    flexChild_ = CreateChild();
     tabControllerId_ = GetGlobalTabControllerId();
     tabController_ = TabController::GetController(tabControllerId_);
+}
+
+RefPtr<FlexComponent> DOMTabs::CreateChild() const
+{
+    RefPtr<FlexComponent> child;
+    if (vertical_) {
+        child = AceType::MakeRefPtr<RowComponent>(
+            FlexAlign::FLEX_START, FlexAlign::CENTER, std::list<RefPtr<Component>>());
+    } else {
+        child = AceType::MakeRefPtr<ColumnComponent>(
+            FlexAlign::FLEX_START, FlexAlign::CENTER, std::list<RefPtr<Component>>());
+    }
+    if (IsRightToLeft()) {
+        child->SetTextDirection(TextDirection::RTL);
+    } else {
+        child->SetTextDirection(TextDirection::LTR);
+    }
+    return child;
 }
 
 bool DOMTabs::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
@@ -40,14 +59,31 @@ bool DOMTabs::SetSpecializedAttr(const std::pair<std::string, std::string>& attr
     if (attr.first == TAB_INDEX) {
         tabIndex_ = std::max(0, StringToInt(attr.second));
         LOGD("DOMTabs Index: %{public}u ControllerId: %{public}u", tabIndex_, tabControllerId_);
+        if (tabController_) {
+            tabController_->SetIndexByController(tabIndex_);
+        }
+        for (const auto& domChild : GetChildList()) {
+            if (AceType::InstanceOf<DOMTabBar>(domChild)) {
+                AceType::DynamicCast<DOMTabBar>(domChild)->UpdateIndex(tabIndex_);
+                break;
+            }
+        }
         return true;
     } else if (attr.first == TAB_IS_VERTICAL) {
-        vertical_ = StringToBool(attr.second);
-        if (vertical_) {
-            flexChild_ = AceType::MakeRefPtr<RowComponent>(
-                FlexAlign::FLEX_START, FlexAlign::CENTER, std::list<RefPtr<Component>>());
-            if (IsRightToLeft()) {
-                flexChild_->SetTextDirection(TextDirection::RTL);
+        if (vertical_ != StringToBool(attr.second)) {
+            vertical_ = StringToBool(attr.second);
+            auto newChild = CreateChild();
+            for (const auto& child : flexChild_->GetChildren()) {
+                newChild->AppendChild(child);
+            }
+            flexChild_ = newChild;
+            for (const auto& domChild : GetChildList()) {
+                if (AceType::InstanceOf<DOMTabBar>(domChild)) {
+                    AceType::DynamicCast<DOMTabBar>(domChild)->SetVertical(vertical_);
+                }
+                if (AceType::InstanceOf<DOMTabContent>(domChild)) {
+                    AceType::DynamicCast<DOMTabContent>(domChild)->SetVertical(vertical_);
+                }
             }
         }
         return true;

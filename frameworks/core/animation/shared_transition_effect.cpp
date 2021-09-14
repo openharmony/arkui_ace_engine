@@ -16,8 +16,10 @@
 #include "core/animation/shared_transition_effect.h"
 
 #include "core/animation/animation_pub.h"
+#include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
 #include "core/animation/keyframe.h"
+#include "core/components/common/properties/motion_path_evaluator.h"
 #include "core/components/common/properties/page_transition_option.h"
 #include "core/components/overlay/overlay_element.h"
 #include "core/components/positioned/positioned_component.h"
@@ -102,8 +104,13 @@ bool SharedTransitionEffect::TakeOff(TransitionEvent event, RefPtr<OverlayElemen
         ticket.GetX(), ticket.GetY());
     seat->SetLeft(Dimension(ticket.GetX(), DimensionUnit::PX));
     seat->SetTop(Dimension(ticket.GetY(), DimensionUnit::PX));
+    // set zIndex
+    auto zIndex = shared->GetZIndex();
+    if (zIndex != 0) {
+        seat->SetZIndex(zIndex);
+    }
     // Take Off,
-    overlay->PushComponent(seat, true);
+    overlay->PushInstant(seat);
     auto seatElement = AceType::DynamicCast<PositionedElement>(overlay->GetLastChild());
     if (!seatElement) {
         LOGE("TakeOff failed. seat not found. event: %{public}d, share id: %{public}s.", event, shareId_.c_str());
@@ -144,6 +151,7 @@ bool SharedTransitionEffect::TakeOffTween(const RefPtr<Element>& tweenElement,
     tweenSeatElement->SetController(controller_);
     tweenSeatElement->SetOption(option);
     tweenSeatElement->ApplyKeyframes();
+    tweenSeatElement->ApplyOptions();
     tweenSeatElement_ = tweenSeatElement;
     return true;
 }
@@ -166,17 +174,11 @@ RefPtr<SharedTransitionEffect> SharedTransitionEffect::GetSharedTransitionEffect
     }
 }
 
-bool SharedTransitionEffect::ApplyAnimation(RefPtr<OverlayElement>& overlay, RefPtr<Animator>& controller,
-    TweenOption& option, TransitionEvent event)
+bool SharedTransitionEffect::ApplyAnimation(
+    RefPtr<OverlayElement>& overlay, RefPtr<Animator>& controller, TweenOption& option, TransitionEvent event)
 {
-    if (!controller) {
-        LOGE("Add proxy controller failed. controller is null. event: %{public}d, share id: %{public}s", event,
-            shareId_.c_str());
-        return false;
-    }
     controller_->ClearAllListeners();
     controller_->ClearInterpolators();
-    controller->AddProxyController(controller_);
     return true;
 }
 
@@ -259,6 +261,17 @@ bool SharedTransitionExchange::CreateTranslateAnimation(
         if (destOffset != srcOffset) {
             auto translateAnimation = AceType::MakeRefPtr<CurveAnimation<DimensionOffset>>(
                 Offset(0, 0), destOffset - srcOffset, Curves::FRICTION);
+            const auto& motionPathOption = option.GetMotionPathOption();
+            if (motionPathOption.IsValid()) {
+                auto motionPathEvaluator =
+                    AceType::MakeRefPtr<MotionPathEvaluator>(motionPathOption, Offset(0, 0), destOffset - srcOffset);
+                translateAnimation->SetEvaluator(motionPathEvaluator->CreateDimensionOffstEvaluator());
+                if (motionPathOption.GetRotate()) {
+                    auto rotateAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, 1.0f, option.GetCurve());
+                    rotateAnimation->SetEvaluator(motionPathEvaluator->CreateRotateEvaluator());
+                    option.SetTransformFloatAnimation(AnimationType::ROTATE_Z, rotateAnimation);
+                }
+            }
             option.SetTranslateAnimations(AnimationType::TRANSLATE, translateAnimation);
             autoTranslate_ = true;
             LOGD("Create shared exchange animation for translate. event: %{public}d, share id: %{public}s", event,
@@ -307,6 +320,28 @@ bool SharedTransitionExchange::CreateSizeAnimation(TweenOption& option, Transiti
     return true;
 }
 
+bool SharedTransitionExchange::CreateOpacityAnimation(TweenOption& option, TransitionEvent event, bool isLazy)
+{
+    auto src = src_.Upgrade();
+    auto dest = dest_.Upgrade();
+    if (!dest || !src) {
+        LOGE("Create exchange animation failed. dest or src is null. event: %{public}d, share id: %{public}s", event,
+            shareId_.c_str());
+        return false;
+    }
+    auto destOpacity = dest->GetOpacity();
+    auto srcOpacity = src->GetOpacity();
+
+    LOGD("Get Opacity for event: %{public}d, share id: %{public}s. dest: %{public}f; src: %{public}f", event,
+        shareId_.c_str(), destOpacity, srcOpacity);
+
+    if (!NearEqual(destOpacity, srcOpacity) && !option.GetOpacityAnimation()) {
+        auto opacityAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(srcOpacity, destOpacity, Curves::FRICTION);
+        option.SetOpacityAnimation(opacityAnimation);
+    }
+    return true;
+}
+
 bool SharedTransitionExchange::CreateAnimation(TweenOption& option, TransitionEvent event, bool isLazy)
 {
     auto src = src_.Upgrade();
@@ -327,6 +362,9 @@ bool SharedTransitionExchange::CreateAnimation(TweenOption& option, TransitionEv
         return false;
     }
     if (!CreateSizeAnimation(option, event, isLazy)) {
+        return false;
+    }
+    if (!CreateOpacityAnimation(option, event, isLazy)) {
         return false;
     }
     AddLazyLoadCallback(event);
@@ -350,18 +388,19 @@ bool SharedTransitionExchange::ApplyAnimation(RefPtr<OverlayElement>& overlay, R
 
 bool SharedTransitionStatic::Allow(TransitionEvent event)
 {
-    auto dest = dest_.Upgrade();
-    if (!dest) {
-        LOGD("Check allow static failed. dest null. event: %{public}d, share id: %{public}s", event, shareId_.c_str());
+    auto current = GetCurrentSharedElement().Upgrade();
+    if (!current) {
+        LOGD("Check allow static failed. current null. event: %{public}d, share id: %{public}s", event,
+            shareId_.c_str());
         return false;
     }
     bool allow = false;
     if (event == TransitionEvent::PUSH_START) {
         // In Push Scene, dest means Enter and Source means Exit
-        allow = dest->IsEnablePushEnter();
+        allow = current->IsEnablePushEnter();
     } else if (event == TransitionEvent::POP_START) {
         // In Pop Scene, dest means Enter and Source means Exit
-        allow = dest->IsEnablePopEnter();
+        allow = current->IsEnablePopEnter();
     }
     LOGD("Static Allow status: %{public}d, event: %{public}d, share id: %{public}s", allow, event, shareId_.c_str());
     return allow;
@@ -369,37 +408,48 @@ bool SharedTransitionStatic::Allow(TransitionEvent event)
 
 bool SharedTransitionStatic::CreateAnimation(TweenOption& option, TransitionEvent event, bool isLazy)
 {
-    auto opacityAnimation = option.GetOpacityAnimation();
-    if (!opacityAnimation) {
-        TransitionTweenOptionFactory::CreateSharedTweenOption(SharedTransitionEffectType::SHARED_EFFECT_STATIC, option);
+    if (event == TransitionEvent::PUSH_START) {
+        // push page opacity 0 to 1
+        auto opacityAnimation = option.GetOpacityAnimation();
+        if (!opacityAnimation) {
+            TransitionTweenOptionFactory::CreateSharedTweenOption(
+                SharedTransitionEffectType::SHARED_EFFECT_STATIC, option);
+        }
+    } else {
+        // pop page opacity 1 to 0
+        if (!option.GetOpacityAnimation()) {
+            auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(1.0f, 0.0f, option.GetCurve());
+            option.SetOpacityAnimation(animation);
+        }
     }
     return true;
 }
 
-bool SharedTransitionStatic::ApplyAnimation(RefPtr<OverlayElement>& overlay, RefPtr<Animator>& controller,
-    TweenOption& option, TransitionEvent event)
+bool SharedTransitionStatic::ApplyAnimation(
+    RefPtr<OverlayElement>& overlay, RefPtr<Animator>& controller, TweenOption& option, TransitionEvent event)
 {
     if (!SharedTransitionEffect::ApplyAnimation(overlay, controller, option, event)) {
         return false;
     }
     Offset ticket;
-    // Currently only the dest page elements are in effect
-    if (!CheckIn(event, dest_, ticket)) {
+    // the dest page and source page elements are in effect
+    auto current = GetCurrentSharedElement();
+    if (!CheckIn(event, current, ticket)) {
         LOGE("Apply static fail. check in failed. event: %{public}d, share id: %{public}s", event, shareId_.c_str());
         return false;
     }
     AddLazyLoadCallback();
-    return TakeOff(event, overlay, dest_, ticket, option);
+    return TakeOff(event, overlay, current, ticket, option);
 }
 
 void SharedTransitionStatic::AddLazyLoadCallback()
 {
-    auto dest = dest_.Upgrade();
-    if (!dest) {
-        LOGE("Add Lazy load Callback failed. dest is null.");
+    auto current = GetCurrentSharedElement().Upgrade();
+    if (!current) {
+        LOGE("Add Lazy load Callback failed. current is null.");
         return;
     }
-    dest->SetSizeModified([effectWeak = WeakClaim(this)]() {
+    current->SetSizeModified([effectWeak = WeakClaim(this)]() {
         auto effect = effectWeak.Upgrade();
         if (!effect) {
             LOGE("Fix static shared element position failed. effect is null");
@@ -421,7 +471,7 @@ void SharedTransitionStatic::AddLazyLoadCallback()
             LOGE("Fix static shared element position failed. positioned render is null");
             return;
         }
-        auto dest = effect->dest_.Upgrade();
+        auto dest = effect->currentWorking_.Upgrade();
         if (!dest) {
             return;
         }

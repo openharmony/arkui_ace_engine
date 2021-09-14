@@ -16,14 +16,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_DIMENSION_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_DIMENSION_H
 
+#include <string>
+
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+
+#define NEAR_ZERO(value) ((value > 0.0) ? ((value - 0.0) <= 0.000001f) : ((0.0 - value) <= 0.000001f))
 
 namespace OHOS::Ace {
 
 enum class DimensionUnit {
     /*
-     * Logical pixel used in Ace. It's based on frontend design width.
+     * Logical pixel used in Ace1.0. It's based on frontend design width.
      * For example, when a frontend with 750px design width running on a
      * device with 1080 pixels width, 1px represents 1.44 pixels.
      */
@@ -33,7 +37,7 @@ enum class DimensionUnit {
      */
     VP,
     /*
-     * scale independent pixels, this is like VP but will be scaled by
+     * Scale independent pixels. This is like VP but will be scaled by
      * user's font size preference.
      */
     FP,
@@ -42,6 +46,10 @@ enum class DimensionUnit {
      * another property of the element itself.
      */
     PERCENT,
+    /*
+     * logic pixels used in ACE2.0 instead of PX, and PX is the physical pixels in ACE2.0
+     */
+    LPX,
 };
 
 /*
@@ -54,7 +62,7 @@ public:
     ~Dimension() = default;
     constexpr explicit Dimension(double value, DimensionUnit unit = DimensionUnit::PX) : value_(value), unit_(unit) {}
 
-    double Value() const
+    constexpr double Value() const
     {
         return value_;
     }
@@ -64,9 +72,14 @@ public:
         value_ = value;
     }
 
-    DimensionUnit Unit() const
+    constexpr DimensionUnit Unit() const
     {
         return unit_;
+    }
+
+    void SetUnit(DimensionUnit unit)
+    {
+        unit_ = unit;
     }
 
     bool IsValid() const
@@ -91,7 +104,7 @@ public:
     constexpr Dimension operator/(double value) const
     {
         // NearZero cannot be used in a constant expression
-        if (value > 0.0 ? value - 0.0 <= 0.000001f : 0.0 - value <= 0.000001f) {
+        if (NEAR_ZERO(value)) {
             return Dimension();
         }
         return Dimension(value_ / value, unit_);
@@ -112,6 +125,9 @@ public:
      */
     constexpr Dimension operator+(const Dimension& dimension) const
     {
+        if (NEAR_ZERO(dimension.Value())) {
+            return *this;
+        }
         ACE_DCHECK(unit_ == dimension.unit_);
         return Dimension(value_ + dimension.value_, unit_);
     }
@@ -131,6 +147,9 @@ public:
      */
     constexpr Dimension operator-(const Dimension& dimension) const
     {
+        if (NEAR_ZERO(dimension.Value())) {
+            return *this;
+        }
         ACE_DCHECK(unit_ == dimension.unit_);
         return Dimension(value_ - dimension.value_, unit_);
     }
@@ -163,6 +182,12 @@ public:
     {
         ACE_DCHECK(unit_ == dimension.unit_);
         return (value_ < dimension.value_);
+    }
+
+    std::string ToString() const
+    {
+        static std::string units[5] = {"px", "vp", "fp", "%", "lpx"};
+        return std::to_string(value_).append(units[static_cast<int>(unit_)]);
     }
 
 private:

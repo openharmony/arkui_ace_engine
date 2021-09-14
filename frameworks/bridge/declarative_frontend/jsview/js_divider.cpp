@@ -16,111 +16,101 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 
 #include "core/components/box/box_component.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
-
-RefPtr<OHOS::Ace::Component> JSDivider::CreateSpecializedComponent()
+void JSDivider::Create(const std::string& src)
 {
-    auto dividerComponent = AceType::MakeRefPtr<DividerComponent>();
-    dividerComponent->SetVertical(isVertical_);
-    dividerComponent->SetStrokeWidth(strokeWidth_);
-    dividerComponent->SetLineCap(lineCap_);
-    dividerComponent->SetDividerColor(dividerColor_);
-    return std::move(dividerComponent);
+    RefPtr<Component> dividerComponent = AceType::MakeRefPtr<OHOS::Ace::DividerComponent>();
+    ViewStackProcessor::GetInstance()->Push(dividerComponent);
 }
 
 void JSDivider::SetVertical(bool isVertical)
 {
-    isVertical_ = isVertical;
-
-    if (!boxComponent_) {
-        boxComponent_ = AceType::MakeRefPtr<BoxComponent>();
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::DividerComponent>(stack->GetMainComponent());
+    if (component) {
+        component->SetVertical(isVertical);
     }
 
-    if (isVertical_) {
-        boxComponent_->SetFlex(BoxFlex::FLEX_Y);
+    auto box = stack->GetBoxComponent();
+    if (isVertical) {
+        box->SetFlex(BoxFlex::FLEX_Y);
     } else {
-        boxComponent_->SetFlex(BoxFlex::FLEX_X);
+        box->SetFlex(BoxFlex::FLEX_X);
     }
 }
 
 void JSDivider::SetLineCap(int lineCap)
 {
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::DividerComponent>(stack->GetMainComponent());
+    auto lineCapStyle = LineCap::BUTT;
+
     if (static_cast<int>(LineCap::SQUARE) == lineCap) {
-        lineCap_ = LineCap::SQUARE;
+        lineCapStyle = LineCap::SQUARE;
     } else if (static_cast<int>(LineCap::ROUND) == lineCap) {
-        lineCap_ = LineCap::ROUND;
+        lineCapStyle = LineCap::ROUND;
     } else {
         // default linecap of divider
-        lineCap_ = LineCap::BUTT;
+        lineCapStyle = LineCap::BUTT;
+    }
+    if (component) {
+        component->SetLineCap(lineCapStyle);
     }
 }
 
-void JSDivider::SetDividerColor(const std::string& color)
+void JSDivider::SetDividerColor(const JSCallbackInfo& info)
 {
-    dividerColor_ = Color::FromString(color);
-}
-
-void JSDivider::SetStrokeWidth(const std::string& width)
-{
-    strokeWidth_ = StringUtils::StringToDimension(width, true);
-}
-
-#ifdef USE_QUICKJS_ENGINE
-void JSDivider::MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc)
-{
-    LOGD("JSDivider => markGC: Mark value for GC start");
-    JSInteractableView::MarkGC(rt, markFunc);
-    LOGD("JSDivider => markGC: Mark value for GC end");
-}
-
-void JSDivider::ReleaseRT(JSRuntime* rt)
-{
-    LOGD("JSDivider => release start");
-    JSInteractableView::ReleaseRT(rt);
-    LOGD("JSDivider => release divider");
-    LOGD("JSDivider => release end");
-}
-
-void JSDivider::QjsDestructor(JSRuntime* rt, JSDivider* view)
-{
-    if (!view) {
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-
-    view->ReleaseRT(rt);
-    delete view;
-    LOGD("JSDivider(qjs_destructor) end");
-}
-
-void JSDivider::QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc)
-{
-    LOGD("JSDivider(qjs_gc_mark) start");
-
-    JSDivider* view = Unwrap<JSDivider>(val);
-    if (!view) {
+    Color dividerColor;
+    if (!ParseJsColor(info[0], dividerColor)) {
         return;
     }
-
-    view->MarkGC(rt, markFunc);
-    LOGD("JSDivider(qjs_gc_mark) end");
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::DividerComponent>(stack->GetMainComponent());
+    if (component) {
+        component->SetDividerColor(dividerColor);
+    }
 }
 
-#endif
+void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Dimension strokeWidth;
+    if (!ParseJsDimensionVp(info[0], strokeWidth)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::DividerComponent>(stack->GetMainComponent());
+    if (component) {
+        component->SetStrokeWidth(strokeWidth);
+    }
+}
 
 void JSDivider::JSBind(BindingTarget globalObj)
 {
     JSClass<JSDivider>::Declare("Divider");
-    JSClass<JSDivider>::Inherit<JSViewAbstract>();
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSDivider>::StaticMethod("create", &JSDivider::Create, opt);
+    JSClass<JSDivider>::StaticMethod("color", &JSDivider::SetDividerColor, opt);
+    JSClass<JSDivider>::StaticMethod("vertical", &JSDivider::SetVertical, opt);
+    JSClass<JSDivider>::StaticMethod("strokeWidth", &JSDivider::SetStrokeWidth, opt);
+    JSClass<JSDivider>::StaticMethod("lineCap", &JSDivider::SetLineCap, opt);
+    JSClass<JSDivider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSDivider>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSDivider>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSDivider>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSDivider>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSDivider>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
-    MethodOptions opt = MethodOptions::RETURN_SELF;
-    JSClass<JSDivider>::Method("color", &JSDivider::SetDividerColor, opt);
-    JSClass<JSDivider>::Method("vertical", &JSDivider::SetVertical, opt);
-    JSClass<JSDivider>::Method("strokeWidth", &JSDivider::SetStrokeWidth, opt);
-    JSClass<JSDivider>::Method("lineCap", &JSDivider::SetLineCap, opt);
-    JSClass<JSDivider>::CustomMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSDivider>::CustomMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSDivider>::Inherit<JSViewAbstract>();
     JSClass<JSDivider>::Bind<>(globalObj);
 }
-
 } // namespace OHOS::Ace::Framework

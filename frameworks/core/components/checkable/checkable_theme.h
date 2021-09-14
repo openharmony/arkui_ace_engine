@@ -16,8 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHECKABLE_CHECKABLE_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHECKABLE_CHECKABLE_THEME_H
 
+#include "base/utils/system_properties.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
 
@@ -202,6 +204,15 @@ public:
             theme->hoverColor_ = checkboxPattern->GetAttr<Color>(HOVER_EFFECT_COLOR, Color::RED);
             theme->inactivePointColor_ = checkboxPattern->GetAttr<Color>(FG_COLOR_UNCHECKED, Color::RED);
             theme->hoverRadius_ = checkboxPattern->GetAttr<Dimension>(HOVER_EFFECT_RADIUS, 0.0_vp);
+            if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
+                return;
+            }
+            theme->width_ = checkboxPattern->GetAttr<Dimension>(CHECKBOX_WIDTH, 26.0_vp);
+            theme->height_ = theme->width_;
+            theme->borderRadius_ = checkboxPattern->GetAttr<Dimension>(CHECKBOX_BORDER_RADIUS, 4.0_vp);
+            theme->hotZoneHorizontalPadding_ =
+                checkboxPattern->GetAttr<Dimension>(CHECKBOX_PADDING, 11.0_vp);
+            theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
         }
     };
 
@@ -277,6 +288,14 @@ public:
             theme->hoverColor_ = switchPattern->GetAttr<Color>(HOVER_EFFECT_COLOR, Color::RED);
             theme->hoverRadius_ = switchPattern->GetAttr<Dimension>(HOVER_EFFECT_RADIUS, 0.0_vp);
             theme->inactivePointColor_ = switchPattern->GetAttr<Color>(FG_COLOR_UNCHECKED, Color::RED);
+            if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
+                return;
+            }
+            theme->width_ = switchPattern->GetAttr<Dimension>(SWITCH_WIDTH, 40.0_vp);
+            theme->height_ = switchPattern->GetAttr<Dimension>(SWITCH_HEIGHT, 26.0_vp);
+            theme->shadowWidth_ = switchPattern->GetAttr<Dimension>(SWITCH_SHADOW_WIDTH, 2.0_vp);
+            theme->hotZoneHorizontalPadding_ = switchPattern->GetAttr<Dimension>(SWITCH_HORIZONTAL_PADDING, 4.0_vp);
+            theme->hotZoneVerticalPadding_ = switchPattern->GetAttr<Dimension>(SWITCH_VERTICAL_PADDING, 13.0_vp);
         }
     };
 };
@@ -335,6 +354,13 @@ public:
             theme->inactivePointColor_ = radioPattern->GetAttr<Color>(FG_COLOR_UNCHECKED, Color::RED);
             theme->focusColor_ = radioPattern->GetAttr<Color>(BG_COLOR_UNCHECKED, Color::RED);
             theme->hoverColor_ = radioPattern->GetAttr<Color>(HOVER_EFFECT_COLOR, Color::RED);
+            if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
+                return;
+            }
+            theme->width_ = radioPattern->GetAttr<Dimension>(RADIO_WIDTH, 26.0_vp);
+            theme->height_ = theme->width_;
+            theme->hotZoneHorizontalPadding_ = radioPattern->GetAttr<Dimension>(RADIO_PADDING, 11.0_vp);
+            theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
         }
     };
 };

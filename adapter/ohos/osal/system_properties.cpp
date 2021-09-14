@@ -48,8 +48,6 @@ void SystemProperties::InitDeviceType(DeviceType)
 
 bool SystemProperties::traceEnabled_ = system::GetParameter("persist.ace.trace.enabled", "0") == "1";
 bool SystemProperties::isRound_ = false;
-int32_t SystemProperties::width_ = 0;
-int32_t SystemProperties::height_ = 0;
 int32_t SystemProperties::deviceWidth_ = 0;
 int32_t SystemProperties::deviceHeight_ = 0;
 double SystemProperties::resolution_ = 1.0;
@@ -65,12 +63,8 @@ std::string SystemProperties::paramDeviceType_ = INVALID_PARAM;
 int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
 int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
 ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
-
-void SystemProperties::UpdateSurfaceStatus(int32_t width, int32_t height)
-{
-    width_ = width;
-    height_ = height;
-}
+ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
+LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 
 DeviceType SystemProperties::GetDeviceType()
 {
@@ -101,7 +95,7 @@ void SystemProperties::InitDeviceTypeBySystemProperty()
 void SystemProperties::InitDeviceInfo(int32_t deviceWidth, int32_t deviceHeight, int32_t orientation,
     double resolution, bool isRound)
 {
-    // SetDeviceOrientation should be eralier than deviceWidth/deviceHeight init.
+    // SetDeviceOrientation should be earlier than deviceWidth/deviceHeight init.
     SetDeviceOrientation(orientation);
 
     isRound_ = isRound;
@@ -115,6 +109,12 @@ void SystemProperties::InitDeviceInfo(int32_t deviceWidth, int32_t deviceHeight,
     apiVersion_ = system::GetParameter("hw_sc.build.os.apiversion", INVALID_PARAM);
     releaseType_ = system::GetParameter("hw_sc.build.os.releasetype", INVALID_PARAM);
     paramDeviceType_ = system::GetParameter("hw_sc.build.os.devicetype", INVALID_PARAM);
+
+    if (isRound_) {
+        screenShape_ = ScreenShape::ROUND;
+    } else {
+        screenShape_ = ScreenShape::NOT_ROUND;
+    }
 
     InitDeviceTypeBySystemProperty();
 }

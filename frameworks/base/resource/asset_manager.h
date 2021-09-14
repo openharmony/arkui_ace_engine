@@ -29,13 +29,36 @@ public:
     virtual const uint8_t* GetData() const = 0;
 };
 
+class AssetProvider : public AceType {
+    DECLARE_ACE_TYPE(AssetProvider, AceType);
+
+public:
+    virtual std::string GetAssetPath(const std::string& assetName) = 0;
+
+    virtual void GetAssetList(const std::string& path, std::vector<std::string>& assetList) = 0;
+
+    virtual bool IsValid() const = 0;
+};
+
 class AssetManager : public AceType {
     DECLARE_ACE_TYPE(AssetManager, AceType);
 
 public:
     ~AssetManager() override = default;
 
+    virtual void PushFront(RefPtr<AssetProvider> provider) = 0;
+
+    virtual void PushBack(RefPtr<AssetProvider> provider) = 0;
+
     virtual RefPtr<Asset> GetAsset(const std::string& assetName) = 0;
+
+    virtual std::string GetAssetPath(const std::string& assetName) = 0;
+
+    virtual void SetPackagePath(const std::string& packagePath) = 0;
+
+    virtual std::string GetPackagePath() const = 0;
+
+    virtual void GetAssetList(const std::string& path, std::vector<std::string>& assetList) const = 0;
 };
 
 } // namespace OHOS::Ace

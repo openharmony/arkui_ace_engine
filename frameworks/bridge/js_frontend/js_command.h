@@ -33,6 +33,7 @@
 #include "frameworks/bridge/common/dom/dom_proxy.h"
 #include "frameworks/bridge/common/dom/dom_stepper.h"
 #include "frameworks/bridge/common/dom/dom_stepper_item.h"
+#include "frameworks/bridge/common/dom/dom_xcomponent.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -224,6 +225,8 @@ protected:
 
     void ScheduleUpdateForFixedNode(const RefPtr<DOMDocument>& domDocument) const;
 
+    RefPtr<DOMNode> CreateDomElement(const RefPtr<JsAcePage>& page) const;
+
     std::string tagName_;
 };
 
@@ -236,6 +239,15 @@ public:
     void Execute(const RefPtr<JsAcePage>& page) const final;
 };
 
+// JS command, which used to create a new element
+class ACE_EXPORT JsCommandCreateDomElement final : public JsCommandDomElementCreator {
+public:
+    JsCommandCreateDomElement(const std::string& tagName, NodeId nodeId)
+        : JsCommandDomElementCreator(tagName, nodeId){}
+    ~JsCommandCreateDomElement() override = default;
+
+    void Execute(const RefPtr<JsAcePage>& page) const final;
+};
 // JS command, which used to create and add new element into DOM tree.
 class ACE_EXPORT JsCommandAddDomElement final : public JsCommandDomElementCreator {
 public:
@@ -243,6 +255,19 @@ public:
         : JsCommandDomElementCreator(tagName, nodeId), parentNodeId_(parentNodeId)
     {}
     ~JsCommandAddDomElement() override = default;
+
+    void Execute(const RefPtr<JsAcePage>& page) const final;
+
+private:
+    NodeId parentNodeId_ = -1;
+};
+
+class ACE_EXPORT JsCommandAppendElement final : public JsCommandDomElementCreator {
+public:
+JsCommandAppendElement(const std::string& tagName, NodeId nodeId, NodeId parentNodeId)
+    : JsCommandDomElementCreator(tagName, nodeId), parentNodeId_(parentNodeId)
+    {}
+    ~JsCommandAppendElement() override = default;
 
     void Execute(const RefPtr<JsAcePage>& page) const final;
 
@@ -309,6 +334,19 @@ private:
     std::function<void(const RefPtr<CanvasTaskPool>&)> task_;
 };
 
+class ACE_EXPORT JsCommandXComponentOperation final : public JsCommand {
+public:
+    JsCommandXComponentOperation(NodeId nodeId, std::function<void(const RefPtr<XComponentTaskPool>&)> task)
+        : nodeId_(nodeId), task_(std::move(task))
+    {}
+    ~JsCommandXComponentOperation() final = default;
+    void Execute(const RefPtr<JsAcePage>& page) const final;
+
+private:
+    NodeId nodeId_ = -1;
+    std::function<void(const RefPtr<XComponentTaskPool>&)> task_;
+};
+
 class ACE_EXPORT AnimationBridgeTask : public AceType {
     DECLARE_ACE_TYPE(AnimationBridgeTask, AceType)
 
@@ -328,6 +366,28 @@ public:
 private:
     NodeId nodeId_ = -1;
     RefPtr<AnimationBridgeTask> task_;
+};
+
+class ACE_EXPORT AnimatorBridgeTask : public AceType {
+    DECLARE_ACE_TYPE(AnimatorBridgeTask, AceType)
+
+public:
+    AnimatorBridgeTask() = default;
+    ~AnimatorBridgeTask() override = default;
+    virtual void AnimatorBridgeTaskFunc(const RefPtr<JsAcePage>& page, int32_t bridgeId) = 0;
+};
+
+class ACE_EXPORT JsCommandAnimator final : public JsCommand {
+public:
+    JsCommandAnimator(int32_t bridgeId, RefPtr<AnimatorBridgeTask> task) : bridgeId_(bridgeId),
+    task_(std::move(task)) {}
+    ~JsCommandAnimator() final = default;
+
+    void Execute(const RefPtr<JsAcePage>& page) const final;
+
+private:
+    int32_t bridgeId_ = -1;
+    RefPtr<AnimatorBridgeTask> task_;
 };
 
 } // namespace OHOS::Ace::Framework

@@ -26,7 +26,7 @@ class ListItemGroupElement : public ListItemElement {
 
 public:
     void PerformBuild() override;
-    void Apply(const RefPtr<Element>& child) override;
+    void ApplyRenderChild(const RefPtr<RenderElement>& renderChild) override;
 
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
     void HandleOnFocus() override;

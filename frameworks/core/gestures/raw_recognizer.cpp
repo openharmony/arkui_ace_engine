@@ -120,17 +120,21 @@ TouchEventInfo RawRecognizer::CreateTouchEventInfo(
         lastTouchLocationInfo.SetGlobalLocation(lastPoint_.GetOffset())
             .SetLocalLocation(lastPoint_.GetOffset() - coordinateOffset_)
             .SetSize(lastPoint_.size);
+        lastTouchLocationInfo.SetForce(lastPoint_.force);
         info.AddChangedTouchLocationInfo(std::move(lastTouchLocationInfo));
+        info.SetDeviceId(lastPoint_.deviceId);
         if (ignoreCurrent) {
             info.SetTimeStamp(lastPoint_.time);
             return info;
         }
     }
     info.SetTimeStamp(point.time);
+    info.SetDeviceId(point.deviceId);
     TouchLocationInfo currentTouchLocationInfo(point.id);
     currentTouchLocationInfo.SetGlobalLocation(point.GetOffset())
         .SetLocalLocation(point.GetOffset() - coordinateOffset_)
         .SetSize(point.size);
+    currentTouchLocationInfo.SetForce(point.force);
     info.AddTouchLocationInfo(std::move(currentTouchLocationInfo));
     return info;
 }

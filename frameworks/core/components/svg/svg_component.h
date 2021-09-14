@@ -16,79 +16,58 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_SVG_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_SVG_COMPONENT_H
 
-#include "frameworks/core/components/svg/svg_sharp.h"
+#include "core/components/declaration/svg/svg_declaration.h"
 #include "frameworks/core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace {
 
-class SvgComponent : public ComponentGroup, public SvgSharp {
-    DECLARE_ACE_TYPE(SvgComponent, ComponentGroup, SvgSharp);
+class SvgComponent : public ComponentGroup {
+    DECLARE_ACE_TYPE(SvgComponent, ComponentGroup);
 
 public:
-    SvgComponent() = default;
-    explicit SvgComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children) {};
+    SvgComponent();
+    explicit SvgComponent(const std::list<RefPtr<Component>>& children);
     ~SvgComponent() override = default;
-
+    void InitDeclaration();
     RefPtr<RenderNode> CreateRenderNode() override;
-
     RefPtr<Element> CreateElement() override;
+    void SetX(const Dimension& x);
+    const Dimension& GetX() const;
+    void SetY(const Dimension& y);
+    const Dimension& GetY() const;
+    void SetWidth(const Dimension& width);
+    const Dimension& GetWidth() const;
+    void SetHeight(const Dimension& height);
+    const Dimension& GetHeight() const;
+    void SetViewBox(const Rect& viewBox);
+    const Rect& GetViewBox() const;
+    void SetAutoMirror(bool autoMirror);
+    bool GetAutoMirror() const;
+    void SetDeclaration(const RefPtr<SvgDeclaration>& declaration);
 
-    void SetX(const Dimension& x)
+    void MarkIsRoot(bool isRoot)
     {
-        x_ = x;
+        isRoot_ = isRoot;
     }
 
-    const Dimension& GetX() const
+    bool IsRoot() const
     {
-        return x_;
+        return isRoot_;
     }
 
-    void SetY(const Dimension& y)
+    const RefPtr<SvgDeclaration>& GetDeclaration() const
     {
-        y_ = y;
+        return declaration_;
     }
 
-    const Dimension& GetY() const
+    void Inherit(const RefPtr<SvgBaseDeclaration>& parent)
     {
-        return y_;
-    }
-
-    void SetWidth(const Dimension& width)
-    {
-        width_ = width;
-    }
-
-    const Dimension& GetWidth() const
-    {
-        return width_;
-    }
-
-    void SetHeight(const Dimension& height)
-    {
-        height_ = height;
-    }
-
-    const Dimension& GetHeight() const
-    {
-        return height_;
-    }
-
-    void SetViewBox(const Rect& viewBox)
-    {
-        viewBox_ = viewBox;
-    }
-
-    const Rect& GetViewBox() const
-    {
-        return viewBox_;
+        declaration_->Inherit(parent);
     }
 
 private:
-    Dimension x_;
-    Dimension y_;
-    Dimension width_ = Dimension(-1.0);
-    Dimension height_ = Dimension(-1.0);
-    Rect viewBox_;
+    RefPtr<SvgDeclaration> declaration_;
+    bool isRoot_ = false;
 };
 
 } // namespace OHOS::Ace

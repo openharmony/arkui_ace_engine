@@ -63,13 +63,7 @@ public:
         return startOffset_;
     }
 
-    const Dimension& GetTextLength() const
-    {
-        return textLength_;
-    }
-
 protected:
-    Dimension textLength_ = Dimension(0.0);
     Dimension startOffset_ = Dimension(0.0);
     std::string path_;
     std::string textData_;

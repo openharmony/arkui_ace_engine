@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-class SpringMotion : public Motion {
+class ACE_EXPORT SpringMotion : public Motion {
     DECLARE_ACE_TYPE(SpringMotion, Motion);
 
 public:

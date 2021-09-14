@@ -16,144 +16,65 @@
 #include "frameworks/bridge/common/dom/dom_text.h"
 
 #include "core/common/ace_application_info.h"
-#include "core/components/text/text_theme.h"
+#include "core/components/declaration/text/text_declaration.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
-namespace {
-
-constexpr double DEFAULT_LETTER_SPACING = 0; // unit is px
-constexpr double DEFAULT_LINE_HEIGHT = 0;    // unit is px
-const char DEFAULT_FONT_FAMILY[] = "sans-serif";
-
-} // namespace
 
 DOMText::DOMText(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
     textChild_ = AceType::MakeRefPtr<TextComponent>("");
-    if (IsRightToLeft()) {
-        textChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 void DOMText::ResetInitializedStyle()
 {
-    InitializeStyle();
-}
-
-bool DOMText::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    if (attr.first == DOM_VALUE) {
-        textChild_->SetData(attr.second);
-        return true;
+    if (declaration_) {
+        declaration_->InitializeStyle();
     }
-    LOGD("Use default text attribute");
-    return false;
-}
-
-bool DOMText::SetSpecializedStyle(const std::pair<std::string, std::string>& style)
-{
-    // static linear map must be sorted by key.
-    static const LinearMapNode<void (*)(const std::string&, const DOMText&, TextComponent&, TextStyle&)>
-        textStyleOperators[] = {
-            { DOM_TEXT_ALLOW_SCALE, [](const std::string& val, const DOMText& node, TextComponent& text,
-                                    TextStyle& textStyle) { textStyle.SetAllowScale(StringToBool(val)); } },
-            { DOM_TEXT_COLOR, [](const std::string& val, const DOMText& node, TextComponent& text,
-                              TextStyle& textStyle) { textStyle.SetTextColor(node.ParseColor(val)); } },
-            { DOM_TEXT_FONT_FAMILY, [](const std::string& val, const DOMText& node, TextComponent& text,
-                                    TextStyle& textStyle) { textStyle.SetFontFamilies(node.ParseFontFamilies(val)); } },
-            { DOM_TEXT_FONT_SIZE, [](const std::string& val, const DOMText& node, TextComponent& text,
-                                  TextStyle& textStyle) { textStyle.SetFontSize(node.ParseDimension(val)); } },
-            { DOM_TEXT_FONT_SIZE_STEP,
-                [](const std::string& val, const DOMText& node, TextComponent& text, TextStyle& textStyle) {
-                    textStyle.SetAdaptFontSizeStep(node.ParseDimension(val));
-                } },
-            { DOM_TEXT_FONT_STYLE, [](const std::string& val, const DOMText& node, TextComponent& text,
-                                   TextStyle& textStyle) { textStyle.SetFontStyle(ConvertStrToFontStyle(val)); } },
-            { DOM_TEXT_FONT_WEIGHT, [](const std::string& val, const DOMText& node, TextComponent& text,
-                                    TextStyle& textStyle) { textStyle.SetFontWeight(ConvertStrToFontWeight(val)); } },
-            { DOM_TEXT_LETTER_SPACING, [](const std::string& val, const DOMText& node, TextComponent& text,
-                                       TextStyle& textStyle) { textStyle.SetLetterSpacing(StringToDouble(val)); } },
-            { DOM_TEXT_LINE_HEIGHT, [](const std::string& val, const DOMText& node, TextComponent& text,
-                                    TextStyle& textStyle) { textStyle.SetLineHeight(node.ParseLineHeight(val)); } },
-            { DOM_TEXT_LINES, [](const std::string& val, const DOMText& node, TextComponent& text,
-                              TextStyle& textStyle) { textStyle.SetMaxLines(StringUtils::StringToInt(val)); } },
-            { DOM_TEXT_MAX_FONT_SIZE,
-                [](const std::string& val, const DOMText& node, TextComponent& text, TextStyle& textStyle) {
-                    textStyle.SetAdaptMaxFontSize(node.ParseDimension(val));
-                } },
-            { DOM_TEXT_MAX_LINES, [](const std::string& val, const DOMText& node, TextComponent& text,
-                                  TextStyle& textStyle) { textStyle.SetMaxLines(StringUtils::StringToInt(val)); } },
-            { DOM_TEXT_MIN_FONT_SIZE,
-                [](const std::string& val, const DOMText& node, TextComponent& text, TextStyle& textStyle) {
-                    textStyle.SetAdaptMinFontSize(node.ParseDimension(val));
-                } },
-            { DOM_TEXT_PREFER_FONT_SIZES,
-                [](const std::string& val, const DOMText& node, TextComponent& text, TextStyle& textStyle) {
-                    textStyle.SetPreferFontSizes(node.ParsePreferFontSizes(val));
-                } },
-            { DOM_TEXT_ALIGN, [](const std::string& val, const DOMText& node, TextComponent& text,
-                              TextStyle& textStyle) { textStyle.SetTextAlign(ConvertStrToTextAlign(val)); } },
-            { DOM_TEXT_DECORATION,
-                [](const std::string& val, const DOMText& node, TextComponent& text, TextStyle& textStyle) {
-                    textStyle.SetTextDecoration(ConvertStrToTextDecoration(val));
-                } },
-            { DOM_TEXT_OVERFLOW,
-                [](const std::string& val, const DOMText& node, TextComponent& text,
-                    TextStyle& textStyle) { textStyle.SetTextOverflow(ConvertStrToTextOverflow(val));
-                } },
-            { DOM_TEXT_WORD_BREAK,
-                [](const std::string& val, const DOMText& node, TextComponent& text,
-                    TextStyle& textStyle) { textStyle.SetWordBreak(ConvertStrToWordBreak(val));
-                } },
-        };
-    auto operatorIter = BinarySearchFindIndex(textStyleOperators, ArraySize(textStyleOperators), style.first.c_str());
-    if (operatorIter != -1) {
-        textStyleOperators[operatorIter].value(style.second, *this, *textChild_, textStyle_);
-        if (style.first == DOM_TEXT_COLOR) {
-            hasSetTextColor_ = true;
-        } else if (style.first == DOM_TEXT_FONT_SIZE) {
-            hasSetTextFontSize_ = true;
-        } else {
-            LOGD("DOMText has no font-size and color");
-        }
-        return true;
-    }
-    return false;
 }
 
 void DOMText::CheckAndSetSpanStyle(const RefPtr<DOMSpan>& dmoSpan, TextStyle& spanStyle)
 {
+    auto textDeclaration = AceType::DynamicCast<TextDeclaration>(declaration_);
+    if (!textDeclaration) {
+        return;
+    }
+
+    const auto& textStyle = textDeclaration->GetTextStyle();
     if (!dmoSpan->HasSetFontSize()) {
         LOGD("Set Text Font Size to Span");
-        spanStyle.SetFontSize(textStyle_.GetFontSize());
+        spanStyle.SetFontSize(textStyle.GetFontSize());
     }
     if (!dmoSpan->HasSetFontStyle()) {
         LOGD("Set Text Font Style to Span");
-        spanStyle.SetFontStyle(textStyle_.GetFontStyle());
+        spanStyle.SetFontStyle(textStyle.GetFontStyle());
     }
     if (!dmoSpan->HasSetFontColor()) {
         LOGD("Set Text Font Color to Span");
-        spanStyle.SetTextColor(textStyle_.GetTextColor());
+        spanStyle.SetTextColor(textStyle.GetTextColor());
     }
     if (!dmoSpan->HasSetFontWeight()) {
         LOGD("Set Text Font Weight to Span");
-        spanStyle.SetFontWeight(textStyle_.GetFontWeight());
+        spanStyle.SetFontWeight(textStyle.GetFontWeight());
     }
     if (!dmoSpan->HasSetTextDecoration()) {
         LOGD("Set Text Decoration to Span");
-        spanStyle.SetTextDecoration(textStyle_.GetTextDecoration());
+        spanStyle.SetTextDecoration(textStyle.GetTextDecoration());
     }
     if (!dmoSpan->HasSetFontFamily()) {
         LOGD("Set Text Font Family to Span");
-        spanStyle.SetFontFamilies(textStyle_.GetFontFamilies());
+        spanStyle.SetFontFamilies(textStyle.GetFontFamilies());
     }
     if (!dmoSpan->HasSetAllowScale()) {
         LOGD("Set Allow Scale to Span");
-        spanStyle.SetAllowScale(textStyle_.IsAllowScale());
+        spanStyle.SetAllowScale(textStyle.IsAllowScale());
     }
-    spanStyle.SetLetterSpacing(textStyle_.GetLetterSpacing());
-    spanStyle.SetLineHeight(textStyle_.GetLineHeight(), textStyle_.HasHeightOverride());
+    if (!dmoSpan->HasSetFontFeatures()) {
+        LOGD("Set Font Feature Settings to Span");
+        spanStyle.SetFontFeatures(textStyle.GetFontFeatures());
+    }
+    spanStyle.SetLetterSpacing(textStyle.GetLetterSpacing());
+    spanStyle.SetLineHeight(textStyle.GetLineHeight(), textStyle.HasHeightOverride());
 }
 
 void DOMText::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
@@ -183,27 +104,39 @@ void DOMText::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 
 void DOMText::PrepareSpecializedComponent()
 {
+    textChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+
+    auto textDeclaration = AceType::DynamicCast<TextDeclaration>(declaration_);
+    if (!textDeclaration) {
+        return;
+    }
     bool isCard = AceApplicationInfo::GetInstance().GetIsCardType();
     if (isCard) {
-        textStyle_.SetAllowScale(false);
-        if (textStyle_.GetFontSize().Unit() == DimensionUnit::FP) {
-            textStyle_.SetAllowScale(true);
+        auto& style = textDeclaration->MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
+        if (style.IsValid()) {
+            style.textStyle.SetAllowScale(false);
+            if (style.textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+                style.textStyle.SetAllowScale(true);
+            }
         }
     }
-    textChild_->SetTextStyle(textStyle_);
-    // Text focus color is same as text style color.
-    textChild_->SetFocusColor(textStyle_.GetTextColor());
-    textChild_->SetMaxWidthLayout(boxComponent_->GetWidthDimension().IsValid());
+    textDeclaration->SetIsMaxWidthLayout(boxComponent_->GetWidthDimension().IsValid());
+    textChild_->SetDeclaration(textDeclaration);
 
     // set box align
-    if (!textChild_->GetMaxWidthLayout()) {
+    if (!textDeclaration->IsMaxWidthLayout()) {
         SetBoxAlignForText();
     }
 }
 
 void DOMText::SetBoxAlignForText()
 {
-    switch (textStyle_.GetTextAlign()) {
+    auto textDeclaration = AceType::DynamicCast<TextDeclaration>(declaration_);
+    if (!textDeclaration) {
+        return;
+    }
+
+    switch (textDeclaration->GetTextStyle().GetTextAlign()) {
         case TextAlign::LEFT:
             SetAlignment(Alignment::CENTER_LEFT);
             break;
@@ -221,19 +154,6 @@ void DOMText::SetBoxAlignForText()
             break;
         default:
             break;
-    }
-}
-
-void DOMText::InitializeStyle()
-{
-    RefPtr<TextTheme> theme = GetTheme<TextTheme>();
-    if (theme) {
-        textStyle_ = theme->GetTextStyle();
-        std::vector<std::string> defaultFontFamilis;
-        defaultFontFamilis.emplace_back(DEFAULT_FONT_FAMILY);
-        textStyle_.SetFontFamilies(defaultFontFamilis);
-        textStyle_.SetLetterSpacing(DEFAULT_LETTER_SPACING);
-        textStyle_.SetLineHeight(Dimension(DEFAULT_LINE_HEIGHT, DimensionUnit::PX), false);
     }
 }
 

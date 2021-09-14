@@ -15,324 +15,96 @@
 
 #include "frameworks/bridge/js_frontend/engine/common/base_animation_bridge.h"
 
+#include <functional>
+#include <unordered_map>
+#include <utility>
+
 #include "base/json/json_util.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/animation/keyframe_animation.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
+#include "frameworks/bridge/common/utils/transform_convertor.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
 
-constexpr double PI = 3.14;
-constexpr double RAD_CONVERT = 180.0;
 constexpr int32_t MIN_SIZE = 2;
 constexpr Dimension HALF = 0.5_pct;
 constexpr Dimension FULL = 1.0_pct;
 constexpr Dimension ZERO = 0.0_pct;
-const char ROTATE_RAD[] = "rad";
-
-RefPtr<KeyframeAnimation<float>> CreateFloatAnimation(const std::string& type, const RefPtr<Curve>& curve,
-    const std::vector<std::unordered_map<std::string, std::string>>& animationFrames)
-{
-    RefPtr<KeyframeAnimation<float>> floatAnimation;
-    for (const auto& frame : animationFrames) {
-        std::string floatString;
-        std::string offsetString;
-        auto floatValue = frame.find(type);
-        auto offset = frame.find(DOM_ANIMATION_OFFSET);
-        if (floatValue != frame.end()) {
-            floatString = floatValue->second;
-        }
-        if (offset != frame.end()) {
-            offsetString = offset->second;
-        }
-        if (!floatString.empty() && !offsetString.empty()) {
-            if (!floatAnimation) {
-                floatAnimation = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-            }
-            double keyValue = 0.0;
-            if (floatString.find(ROTATE_RAD) != std::string::npos) {
-                keyValue = RAD_CONVERT * StringToDouble(floatString) / PI;
-            } else {
-                keyValue = StringToDouble(floatString);
-            }
-
-            auto keyframe = AceType::MakeRefPtr<Keyframe<float>>(StringToDouble(offsetString), keyValue);
-            keyframe->SetCurve(curve);
-            floatAnimation->AddKeyframe(keyframe);
-        }
-    }
-    return floatAnimation;
-}
-
-RefPtr<KeyframeAnimation<BackgroundImagePosition>> CreateBackgroundPositionAnimation(
-    const RefPtr<Curve>& curve, const std::vector<std::unordered_map<std::string, std::string>>& animationFrames)
-{
-    RefPtr<KeyframeAnimation<BackgroundImagePosition>> animation;
-    for (const auto& frame : animationFrames) {
-        std::string backgroundImageString;
-        std::string offsetString;
-        auto backgroundImage = frame.find(DOM_BACKGROUND_IMAGE_POSITION);
-        auto offset = frame.find(DOM_ANIMATION_OFFSET);
-        if (backgroundImage != frame.end()) {
-            backgroundImageString = backgroundImage->second;
-        }
-        if (offset != frame.end()) {
-            offsetString = offset->second;
-        }
-        if (!backgroundImageString.empty() && !offsetString.empty()) {
-            BackgroundImagePosition backgroundImagePosition;
-            if (!ParseBackgroundImagePosition(backgroundImageString, backgroundImagePosition)) {
-                LOGW("parse frame failed.");
-                continue;
-            }
-            if (!animation) {
-                animation = AceType::MakeRefPtr<KeyframeAnimation<BackgroundImagePosition>>();
-            }
-            auto keyframe = AceType::MakeRefPtr<Keyframe<BackgroundImagePosition>>(
-                StringToDouble(offsetString), backgroundImagePosition);
-            keyframe->SetCurve(curve);
-            animation->AddKeyframe(keyframe);
-        }
-    }
-    return animation;
-}
-
-DimensionOffset ParseTranslateProperties(const std::string& type, const std::string& translateString)
-{
-    if (type == TRANSLATE) {
-        std::vector<std::string> values;
-        StringUtils::StringSpliter(translateString, ' ', values);
-        if (values.empty() || values.size() > OFFSET_VALUE_NUMBER) {
-            return DimensionOffset();
-        } else if (values.size() == OFFSET_VALUE_NUMBER) {
-            return DimensionOffset(StringToDimension(values.front()), StringToDimension(values.back()));
-        } else {
-            return DimensionOffset(StringToDimension(translateString), ZERO);
-        }
-    } else if (type == DOM_TRANSLATE_X) {
-        return DimensionOffset(StringToDimension(translateString), ZERO);
-    } else if (type == DOM_TRANSLATE_Y) {
-        return DimensionOffset(ZERO, StringToDimension(translateString));
-    }
-    return DimensionOffset();
-}
-
-RefPtr<KeyframeAnimation<DimensionOffset>> CreateTranslateAnimation(const std::string& type, const RefPtr<Curve>& curve,
-    const std::vector<std::unordered_map<std::string, std::string>>& animationFrames)
-{
-    RefPtr<KeyframeAnimation<DimensionOffset>> translateAnimation;
-    for (const auto& frame : animationFrames) {
-        std::string translateString;
-        std::string offsetString;
-        auto translate = frame.find(type);
-        auto offset = frame.find(DOM_ANIMATION_OFFSET);
-        if (translate != frame.end()) {
-            translateString = translate->second;
-        }
-        if (offset != frame.end()) {
-            offsetString = offset->second;
-        }
-        if (!translateString.empty() && !offsetString.empty()) {
-            if (!translateAnimation) {
-                translateAnimation = AceType::MakeRefPtr<KeyframeAnimation<DimensionOffset>>();
-            }
-            DimensionOffset keyValue = ParseTranslateProperties(type, translateString);
-            auto keyframe = AceType::MakeRefPtr<Keyframe<DimensionOffset>>(StringToDouble(offsetString), keyValue);
-            keyframe->SetCurve(curve);
-            translateAnimation->AddKeyframe(keyframe);
-        }
-    }
-    return translateAnimation;
-}
-
-RefPtr<KeyframeAnimation<Color>> CreateColorAnimation(
-    const RefPtr<Curve>& curve, const std::vector<std::unordered_map<std::string, std::string>>& animationFrames)
-{
-    RefPtr<KeyframeAnimation<Color>> colorAnimation;
-    for (const auto& frame : animationFrames) {
-        std::string colorString;
-        std::string offsetString;
-        auto color = frame.find(DOM_ANIMATION_COLOR);
-        auto offset = frame.find(DOM_ANIMATION_OFFSET);
-        if (color != frame.end()) {
-            colorString = color->second;
-        }
-        if (offset != frame.end()) {
-            offsetString = offset->second;
-        }
-        if (!colorString.empty() && !offsetString.empty()) {
-            if (!colorAnimation) {
-                colorAnimation = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-                colorAnimation->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
-            }
-            auto keyframe =
-                AceType::MakeRefPtr<Keyframe<Color>>(StringToDouble(offsetString), Color::FromString(colorString));
-            keyframe->SetCurve(curve);
-            colorAnimation->AddKeyframe(keyframe);
-        }
-    }
-    return colorAnimation;
-}
-
-void SetScaleAnimation(TweenOption& tweenOption, const RefPtr<Curve>& curve,
-    const std::vector<std::unordered_map<std::string, std::string>>& animationFrames)
-{
-    RefPtr<KeyframeAnimation<float>> scaleXAnimation;
-    RefPtr<KeyframeAnimation<float>> scaleYAnimation;
-    bool sameScale = true;
-    for (const auto& frame : animationFrames) {
-        std::string scaleValue;
-        std::string offsetString;
-        auto floatValue = frame.find(SCALE);
-        auto offset = frame.find(DOM_ANIMATION_OFFSET);
-        if (floatValue != frame.end()) {
-            scaleValue = floatValue->second;
-        }
-        if (offset != frame.end()) {
-            offsetString = offset->second;
-        }
-        if (scaleValue.empty() || offsetString.empty()) {
-            continue;
-        }
-        std::vector<std::string> values;
-        StringUtils::StringSpliter(scaleValue, ' ', values);
-        if (values.empty() || values.size() > OFFSET_VALUE_NUMBER) {
-            continue;
-        }
-
-        if (!scaleXAnimation) {
-            scaleXAnimation = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-            scaleYAnimation = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-        }
-
-        double keyValueX = StringToDouble(values.front());
-        double keyValueY = StringToDouble(values.back());
-        if (!NearEqual(keyValueX, keyValueY)) {
-            sameScale = false;
-        }
-        auto scaleXKeyframe = AceType::MakeRefPtr<Keyframe<float>>(StringToDouble(offsetString), keyValueX);
-        scaleXKeyframe->SetCurve(curve);
-        auto scaleYKeyframe = AceType::MakeRefPtr<Keyframe<float>>(StringToDouble(offsetString), keyValueY);
-        scaleYKeyframe->SetCurve(curve);
-        scaleXAnimation->AddKeyframe(scaleXKeyframe);
-        scaleYAnimation->AddKeyframe(scaleYKeyframe);
-    }
-    if (scaleXAnimation) {
-        if (sameScale) {
-            tweenOption.SetTransformFloatAnimation(AnimationType::SCALE, scaleXAnimation);
-        } else {
-            tweenOption.SetTransformFloatAnimation(AnimationType::SCALE_X, scaleXAnimation);
-            tweenOption.SetTransformFloatAnimation(AnimationType::SCALE_Y, scaleYAnimation);
-        }
-    }
-}
-
-void SetFramesFloatAnimation(TweenOption& tweenOption, const RefPtr<Curve>& curve,
-    const std::vector<std::unordered_map<std::string, std::string>>& animationFrames)
-{
-    static const LinearMapNode<AnimationType> floatTransformAnimations[] = {
-        { DOM_ROTATE, AnimationType::ROTATE_Z },
-        { DOM_ROTATE_X, AnimationType::ROTATE_X },
-        { DOM_ROTATE_Y, AnimationType::ROTATE_Y },
-        { DOM_SCALE, AnimationType::SCALE },
-        { DOM_SCALE_X, AnimationType::SCALE_X },
-        { DOM_SCALE_Y, AnimationType::SCALE_Y },
-    };
-    for (size_t idx = 0; idx < ArraySize(floatTransformAnimations); ++idx) {
-        if (strcmp(floatTransformAnimations[idx].key, SCALE) == 0) {
-            SetScaleAnimation(tweenOption, curve, animationFrames);
-        } else {
-            auto transformAnimation = CreateFloatAnimation(floatTransformAnimations[idx].key, curve, animationFrames);
-            if (transformAnimation) {
-                tweenOption.SetTransformFloatAnimation(floatTransformAnimations[idx].value, transformAnimation);
-            }
-        }
-    }
-    static const char* floatAnimations[] = { DOM_ANIMATION_WIDTH, DOM_ANIMATION_HEIGHT, DOM_ANIMATION_OPACITY };
-    for (size_t idx = 0; idx < ArraySize(floatAnimations); ++idx) {
-        auto floatAnimation = CreateFloatAnimation(floatAnimations[idx], curve, animationFrames);
-        if (!floatAnimation) {
-            continue;
-        }
-        if (strcmp(floatAnimations[idx], DOM_ANIMATION_WIDTH) == 0) {
-            tweenOption.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_WIDTH, floatAnimation);
-        } else if (strcmp(floatAnimations[idx], DOM_ANIMATION_HEIGHT) == 0) {
-            tweenOption.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_HEIGHT, floatAnimation);
-        } else if (strcmp(floatAnimations[idx], DOM_ANIMATION_OPACITY) == 0) {
-            tweenOption.SetOpacityAnimation(floatAnimation);
-        }
-    }
-}
-
-void SetFramesTranslateAnimation(TweenOption& tweenOption, const RefPtr<Curve>& curve,
-    const std::vector<std::unordered_map<std::string, std::string>>& animationFrames)
-{
-    static const LinearMapNode<AnimationType> translateAnimations[] = {
-        { DOM_TRANSLATE, AnimationType::TRANSLATE },
-        { DOM_TRANSLATE_X, AnimationType::TRANSLATE_X },
-        { DOM_TRANSLATE_Y, AnimationType::TRANSLATE_Y },
-    };
-    for (size_t idx = 0; idx < ArraySize(translateAnimations); ++idx) {
-        auto translateAnimation = CreateTranslateAnimation(translateAnimations[idx].key, curve, animationFrames);
-        if (translateAnimation) {
-            tweenOption.SetTranslateAnimations(translateAnimations[idx].value, translateAnimation);
-        }
-    }
-}
-
-void JsParseAnimationTransformInternal(
-    const std::unique_ptr<JsonValue>& argsPtrTransform, std::unordered_map<std::string, std::string>& animationFrames)
-{
-    static const char* transformValue[] = {
-        DOM_SCALE,
-        DOM_SCALE_X,
-        DOM_SCALE_Y,
-        DOM_TRANSLATE,
-        DOM_TRANSLATE_X,
-        DOM_TRANSLATE_Y,
-        DOM_ROTATE,
-        DOM_ROTATE_X,
-        DOM_ROTATE_Y,
-    };
-
-    for (size_t idx = 0; idx < ArraySize(transformValue); ++idx) {
-        auto argsPtrTransformValue = argsPtrTransform->GetValue(transformValue[idx]);
-        if (argsPtrTransformValue) {
-            animationFrames[transformValue[idx]] = argsPtrTransformValue->GetString();
-        }
-    }
-}
 
 void JsParseAnimationFramesInternal(
     const std::unique_ptr<JsonValue>& argsPtrAnimation, std::unordered_map<std::string, std::string>& animationFrames)
 {
-    static const char* framesValue[] = {
-        DOM_TRANSFORM,
-        DOM_ANIMATION_WIDTH,
-        DOM_ANIMATION_HEIGHT,
-        DOM_ANIMATION_COLOR,
-        DOM_ANIMATION_OPACITY,
-        DOM_TRANSFORM_ORIGIN,
-        DOM_BACKGROUND_IMAGE_POSITION,
-        DOM_ANIMATION_OFFSET,
-    };
+    if (!argsPtrAnimation || argsPtrAnimation->IsNull()) {
+        LOGE("args is null");
+        return;
+    }
 
-    for (size_t idx = 0; idx < ArraySize(framesValue); ++idx) {
-        if (strcmp(framesValue[idx], TRANSFORM) == 0) {
-            auto argsPtrTransform = argsPtrAnimation->GetValue(framesValue[idx]);
-            if (argsPtrTransform) {
-                JsParseAnimationTransformInternal(argsPtrTransform, animationFrames);
-            }
-        } else {
-            auto value = argsPtrAnimation->GetValue(framesValue[idx]);
-            if (value) {
-                animationFrames[framesValue[idx]] = value->IsString() ? value->GetString() : value->ToString();
-            }
+    for (auto i = 0; i < argsPtrAnimation->GetArraySize(); i++) {
+        auto item = argsPtrAnimation->GetArrayItem(i);
+        if (!item || item->IsNull()) {
+            continue;
         }
+        auto key = item->GetKey();
+        auto value = item->IsString() ? item->GetString() : item->ToString();
+
+        if (!key.empty() && !value.empty()) {
+            // in js api offset in range in [0, 1], but keyframe time range in range [0, 100]
+            if (key == DOM_ANIMATION_OFFSET) {
+                auto time = StringUtils::StringToDouble(value);
+                value = std::to_string(time * 100.0);
+            }
+            animationFrames[key] = value;
+        }
+    }
+}
+
+int32_t JsParseIterations(const std::unique_ptr<JsonValue>& argsPtrIterations)
+{
+    if (!argsPtrIterations) {
+        LOGE("Parse animation iterations failed, argsPtrIterations is null");
+        return 0;
+    }
+    int32_t iterations = 0;
+    if (argsPtrIterations->IsString()) {
+        std::string iterationsString = argsPtrIterations->GetString();
+        if (iterationsString == BaseAnimationBridgeUtils::ITERATIONS_INFINITY) {
+            iterations = ANIMATION_REPEAT_INFINITE;
+        } else {
+            iterations = StringToInt(iterationsString);
+        }
+    } else if (argsPtrIterations->IsNumber()) {
+        iterations = argsPtrIterations->GetInt();
+    } else {
+        iterations = 1;
+    }
+    return iterations;
+}
+
+void JsParseDoubleParams(const std::unique_ptr<JsonValue>& argsPtrDuration,
+    const std::unique_ptr<JsonValue>& argsPtrDelay, std::unordered_map<std::string, double>& animationDoubleParams)
+{
+    if (argsPtrDelay) {
+        double delay = 0.0;
+        if (argsPtrDelay->IsString()) {
+            delay = StringToDouble(argsPtrDelay->GetString());
+        } else {
+            delay = argsPtrDelay->GetDouble();
+        }
+        animationDoubleParams[DOM_ANIMATION_DELAY_API] = delay;
+    }
+    if (argsPtrDuration) {
+        double duration = 0.0;
+        if (argsPtrDuration->IsString()) {
+            duration = StringToDouble(argsPtrDuration->GetString());
+        } else {
+            duration = argsPtrDuration->GetDouble();
+        }
+        animationDoubleParams[DOM_ANIMATION_DURATION_API] = duration;
     }
 }
 
@@ -389,20 +161,8 @@ void BaseAnimationBridgeUtils::SetTweenComponentParams(const RefPtr<Curve>& curv
     const std::vector<std::unordered_map<std::string, std::string>>& animationFrames,
     RefPtr<TweenComponent>& tweenComponent, TweenOption& tweenOption)
 {
-    SetFramesFloatAnimation(tweenOption, curve, animationFrames);
-    SetFramesTranslateAnimation(tweenOption, curve, animationFrames);
-
-    auto colorAnimation = CreateColorAnimation(curve, animationFrames);
-    if (colorAnimation) {
-        tweenOption.SetColorAnimation(colorAnimation);
-    }
-
-    auto backgroundPositionAnimation = CreateBackgroundPositionAnimation(curve, animationFrames);
-    if (backgroundPositionAnimation) {
-        tweenOption.SetBackgroundPositionAnimation(backgroundPositionAnimation);
-    }
     tweenComponent->SetCustomTweenOption(tweenOption);
-    tweenComponent->SetCustomTweenOperation(TweenOperation::NONE);
+    tweenComponent->SetCustomAnimationOperation(AnimationOperation::NONE);
 }
 
 void BaseAnimationBridgeUtils::JsParseAnimationFrames(
@@ -417,9 +177,9 @@ void BaseAnimationBridgeUtils::JsParseAnimationFrames(
         LOGE("Animation frames are null.");
         return;
     }
-
     // Parse the arguments to each item in the frame
-    for (int32_t idx = 0; idx < argsPtrItem->GetArraySize(); ++idx) {
+    auto size = argsPtrItem->GetArraySize();
+    for (int32_t idx = 0; idx < size; ++idx) {
         auto argsPtrAnimation = argsPtrItem->GetArrayItem(idx);
         if (!argsPtrAnimation) {
             continue;
@@ -427,10 +187,9 @@ void BaseAnimationBridgeUtils::JsParseAnimationFrames(
         std::unordered_map<std::string, std::string> animationFrame;
         JsParseAnimationFramesInternal(argsPtrAnimation, animationFrame);
         if (idx == 0) {
-            animationFrame[DOM_ANIMATION_OFFSET] = BaseAnimationBridgeUtils::ANIMATION_FROM;
-        }
-        if (idx == (argsPtrItem->GetArraySize() - 1)) {
-            animationFrame[DOM_ANIMATION_OFFSET] = BaseAnimationBridgeUtils::ANIMATION_TO;
+            animationFrame[DOM_ANIMATION_OFFSET] = ANIMATION_FROM;
+        } else if (idx == size - 1) {
+            animationFrame[DOM_ANIMATION_OFFSET] = ANIMATION_TO;
         }
         animationFrames.emplace_back(animationFrame);
     }
@@ -457,44 +216,60 @@ void BaseAnimationBridgeUtils::JsParseAnimationOptions(const std::string& conten
     auto argsPtrItemDuration = argsPtrItem->GetValue(DOM_ANIMATION_DURATION_API);
     auto argsPtrItemEasing = argsPtrItem->GetValue(DOM_ANIMATION_EASING);
     auto argsPtrItemFill = argsPtrItem->GetValue(DOM_ANIMATION_FILL);
+    auto argsPtrItemDirection = argsPtrItem->GetValue(DOM_ANIMATION_DIRECTION_API);
 
-    if (argsPtrItemIterations) {
-        if (argsPtrItemIterations->IsString()) {
-            std::string iterationsString = argsPtrItemIterations->GetString();
-            if (iterationsString == BaseAnimationBridgeUtils::ITERATIONS_INFINITY) {
-                iterations = ANIMATION_REPEAT_INFINITE;
-            } else {
-                iterations = StringToInt(iterationsString);
-            }
-        } else if (argsPtrItemIterations->IsNumber()) {
-            iterations = argsPtrItemIterations->GetInt();
-        } else {
-            iterations = 1;
-        }
-    }
-    if (argsPtrItemDelay) {
-        double delay = 0.0;
-        if (argsPtrItemDelay->IsString()) {
-            delay = StringToDouble(argsPtrItemDelay->GetString());
-        } else {
-            delay = argsPtrItemDelay->GetDouble();
-        }
-        animationDoubleOptions[DOM_ANIMATION_DELAY_API] = delay;
-    }
-    if (argsPtrItemDuration) {
-        double duration = 0.0;
-        if (argsPtrItemDuration->IsString()) {
-            duration = StringToDouble(argsPtrItemDuration->GetString());
-        } else {
-            duration = argsPtrItemDuration->GetDouble();
-        }
-        animationDoubleOptions[DOM_ANIMATION_DURATION_API] = duration;
-    }
+    iterations = JsParseIterations(argsPtrItemIterations);
+    JsParseDoubleParams(argsPtrItemDuration, argsPtrItemDelay, animationDoubleOptions);
     if (argsPtrItemEasing) {
         animationStringOptions[DOM_ANIMATION_EASING] = argsPtrItemEasing->GetString();
     }
     if (argsPtrItemFill) {
         animationStringOptions[DOM_ANIMATION_FILL] = argsPtrItemFill->GetString();
+    }
+    if (argsPtrItemDirection) {
+        animationStringOptions[DOM_ANIMATION_DIRECTION_API] = argsPtrItemDirection->GetString();
+    }
+}
+
+void BaseAnimationBridgeUtils::JsParseAnimatorParams(const std::string& content, int32_t& iterations,
+    std::unordered_map<std::string, double>& animationDoubleParams,
+    std::unordered_map<std::string, std::string>& animationStringParams)
+{
+    auto argsPtr = JsonUtil::ParseJsonString(content);
+    if (!argsPtr) {
+        LOGE("Js Parse animator params failed. argsPtr is null.");
+        return;
+    }
+
+    auto argsPtrIterations = argsPtr->GetValue(DOM_ANIMATION_ITERATIONS);
+    auto argsPtrDelay = argsPtr->GetValue(DOM_ANIMATION_DELAY_API);
+    auto argsPtrDuration = argsPtr->GetValue(DOM_ANIMATION_DURATION_API);
+    auto argsPtrEasing = argsPtr->GetValue(DOM_ANIMATION_EASING);
+    auto argsPtrFill = argsPtr->GetValue(DOM_ANIMATION_FILL);
+    auto argsPtrFrom = argsPtr->GetValue(DOM_ANIMATION_BEGIN);
+    auto argsPtrTo = argsPtr->GetValue(DOM_ANIMATION_END);
+    auto argsPtrDirection = argsPtr->GetValue(DOM_ANIMATION_DIRECTION_API);
+
+    iterations = JsParseIterations(argsPtrIterations);
+    JsParseDoubleParams(argsPtrDuration, argsPtrDelay, animationDoubleParams);
+    if (argsPtrEasing) {
+        animationStringParams[DOM_ANIMATION_EASING] = argsPtrEasing->GetString();
+    }
+    if (argsPtrFill) {
+        animationStringParams[DOM_ANIMATION_FILL] = argsPtrFill->GetString();
+    }
+    if (argsPtrDirection) {
+        animationStringParams[DOM_ANIMATION_DIRECTION_API] = argsPtrDirection->GetString();
+    }
+    if (argsPtrFrom) {
+        double from = 0.0;
+        from = argsPtrFrom->GetDouble();
+        animationDoubleParams[DOM_ANIMATION_BEGIN] = from;
+    }
+    if (argsPtrTo) {
+        double to = 1.0;
+        to = argsPtrTo->GetDouble();
+        animationDoubleParams[DOM_ANIMATION_END] = to;
     }
 }
 } // namespace OHOS::Ace::Framework

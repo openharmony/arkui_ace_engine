@@ -194,7 +194,10 @@ void RenderListItemGroup::GetPrimaryItem()
 
 void RenderListItemGroup::LayoutExpandableList(double mainSize)
 {
-    double primarySize = GetMainSize(primary_->GetLayoutSize());
+    double primarySize = 0.0;
+    if (primary_) {
+        primarySize = GetMainSize(primary_->GetLayoutSize());
+    }
     if (NearEqual(mainSize, primarySize)) {
         ResetChildVisibleState();
         return;
@@ -492,6 +495,22 @@ void RenderListItemGroup::Update(const RefPtr<Component>& component)
     }
     LOGD("RenderListItemGroup::Update");
     RenderListItem::Update(component);
+    InitAccessibilityEventListener();
+}
+
+void RenderListItemGroup::InitAccessibilityEventListener()
+{
+    const auto& accessibilityNode = GetAccessibilityNode().Upgrade();
+    if (!accessibilityNode) {
+        return;
+    }
+    accessibilityNode->AddSupportAction(AceAction::ACTION_CLICK);
+    accessibilityNode->SetActionClickImpl([weakPtr = WeakClaim(this)]() {
+        const auto& list = weakPtr.Upgrade();
+        if (list) {
+            list->HandleClicked();
+        }
+    });
 }
 
 void RenderListItemGroup::InitialImage()
@@ -667,6 +686,7 @@ int32_t RenderListItemGroup::GetNextFocusIndex(int32_t lastFocusIndex, bool vert
 void RenderListItemGroup::UpdateTouchRect()
 {
     SetTouchRect(GetPaintRect());
+    ownTouchRect_ = touchRect_;
 }
 
 void RenderListItemGroup::ItemPrimaryChange(int32_t index)

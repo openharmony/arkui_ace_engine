@@ -36,6 +36,7 @@ public:
         } else {
             deltaX = 0.0;
         }
+        deltaX = deltaX - selfNode->NormalizePercentToPx(selfNode->GetAnchorX(), false, true);
         double deltaY = 0.0;
         if (selfNode->HasTop()) {
             deltaY = selfNode->NormalizePercentToPx(selfNode->GetTop(), true);
@@ -45,6 +46,7 @@ public:
         } else {
             deltaY = 0.0;
         }
+        deltaY = deltaY - selfNode->NormalizePercentToPx(selfNode->GetAnchorY(), true, true);
         return Offset(deltaX, deltaY);
     }
 };

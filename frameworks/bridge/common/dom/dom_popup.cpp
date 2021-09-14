@@ -54,13 +54,20 @@ void DOMPopup::InitializeStyle()
     backgroundColor_ = theme->GetBackgroundColor();
     popupChild_->GetPopupParam()->SetBackgroundColor(backgroundColor_);
 
-    border_.SetBorderRadius(theme->GetRadius());
-    paddingTop_ = theme->GetPadding().Top();
-    paddingRight_ = theme->GetPadding().Right();
-    paddingBottom_ = theme->GetPadding().Bottom();
-    paddingLeft_ = theme->GetPadding().Left();
-    hasBoxStyle_ = true;
-    hasDecorationStyle_ = true;
+    if (!declaration_) {
+        return;
+    }
+    auto& borderStyle = declaration_->MaybeResetStyle<CommonBorderStyle>(StyleTag::COMMON_BORDER_STYLE);
+    if (borderStyle.IsValid()) {
+        borderStyle.border.SetBorderRadius(theme->GetRadius());
+    }
+
+    auto& paddingStyle = declaration_->MaybeResetStyle<CommonPaddingStyle>(StyleTag::COMMON_PADDING_STYLE);
+    if (paddingStyle.IsValid()) {
+        paddingStyle.padding = theme->GetPadding();
+    }
+    declaration_->SetHasBoxStyle(true);
+    declaration_->SetHasDecorationStyle(true);
 }
 
 void DOMPopup::RemoveMarker()
@@ -212,8 +219,14 @@ void DOMPopup::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 void DOMPopup::PrepareSpecializedComponent()
 {
     if (boxComponent_->GetBackDecoration()) {
-        popupChild_->GetPopupParam()->SetBorder(boxComponent_->GetBackDecoration()->GetBorder());
-        boxComponent_->GetBackDecoration()->SetBorder(Border());
+        auto boxBorder = boxComponent_->GetBackDecoration()->GetBorder();
+        popupChild_->GetPopupParam()->SetBorder(boxBorder);
+        Border border;
+        border.SetTopLeftRadius(boxBorder.TopLeftRadius());
+        border.SetTopRightRadius(boxBorder.TopRightRadius());
+        border.SetBottomLeftRadius(boxBorder.BottomLeftRadius());
+        border.SetBottomRightRadius(boxBorder.BottomRightRadius());
+        boxComponent_->GetBackDecoration()->SetBorder(border);
         boxComponent_->GetBackDecoration()->SetBackgroundColor(Color::TRANSPARENT);
     }
     popupChild_->GetPopupParam()->SetIsShow(IsShow());

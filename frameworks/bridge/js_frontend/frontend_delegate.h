@@ -44,6 +44,7 @@ public:
 
     virtual void AttachPipelineContext(const RefPtr<PipelineContext>& context) = 0;
     void SetAssetManager(const RefPtr<AssetManager>& assetManager);
+    virtual RefPtr<AssetManager> GetAssetManager() const = 0;
 
     // ----------------
     // system.router
@@ -53,18 +54,25 @@ public:
     // Jump to the specified page, but current page will be removed from the stack.
     virtual void Replace(const std::string& uri, const std::string& params) = 0;
     // Back to specified page or the previous page if url not set.
-    virtual void Back(const std::string& uri) = 0;
+    virtual void Back(const std::string& uri, const std::string& params = "") = 0;
     // Clear all the pages in stack except the top page, that is current page.
     virtual void Clear() = 0;
     // Gets the number of pages in the page stack.
     virtual int32_t GetStackSize() const = 0;
     // Gets current page's states
     virtual void GetState(int32_t& index, std::string& name, std::string& path) = 0;
+    // Gets current page's params
+    virtual std::string GetParams()
+    {
+        return "";
+    }
 
     virtual void TriggerPageUpdate(int32_t pageId, bool directExecute = false) = 0;
 
     // posting js task from jsengine
     virtual void PostJsTask(std::function<void()>&& task) = 0;
+
+    virtual void RemoveVisibleChangeNode(NodeId id) = 0;
 
     // ----------------
     // system.app
@@ -82,7 +90,16 @@ public:
         const std::vector<std::pair<std::string, std::string>>& buttons, bool autoCancel,
         std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks) = 0;
 
+    virtual void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) = 0;
+    virtual void DisableAlertBeforeBackPage() = 0;
+
+    virtual void ShowActionMenu(const std::string& title,
+        const std::vector<std::pair<std::string, std::string>>& button,
+        std::function<void(int32_t, int32_t)>&& callback) = 0;
+
     virtual Rect GetBoundingRectData(NodeId nodeId) = 0;
+
+    virtual void PushJsCallbackToRenderNode(NodeId id, double ratio, std::function<void(bool, double)>&& callback) = 0;
 
     // ----------------
     // system.configuration
@@ -92,7 +109,8 @@ public:
     // ----------------
     // system.image
     // ----------------
-    virtual void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) = 0;
+    virtual void HandleImage(
+        const std::string& src, std::function<void(int32_t)>&& callback, const std::set<std::string>& callbacks) = 0;
 
     // ----------------
     // internal.jsResult
@@ -107,6 +125,7 @@ public:
 
     virtual bool GetAssetContent(const std::string& url, std::string& content) = 0;
     virtual bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) = 0;
+    virtual std::string GetAssetPath(const std::string& url) = 0;
 
     virtual void WaitTimer(const std::string& callbackId, const std::string& delay, bool isInterval, bool isFirst) = 0;
     virtual void ClearTimer(const std::string& callbackId) = 0;
@@ -139,13 +158,25 @@ public:
 
     virtual RefPtr<JsAcePage> GetPage(int32_t pageId) const = 0;
 
+    virtual int32_t GetMinPlatformVersion() = 0;
+
     template<typename T>
     bool ACE_EXPORT GetResourceData(const std::string& fileUri, T& content);
+
+    virtual void LoadResourceConfiguration(std::map<std::string, std::string>& sortedResourcePath,
+        std::unique_ptr<JsonValue>& currentResourceData) = 0;
+
+    void DisallowPopLastPage()
+    {
+        disallowPopLastPage_ = true;
+    }
 
     virtual void* GetAbility() = 0;
 
 protected:
     RefPtr<AssetManager> assetManager_;
+    bool disallowPopLastPage_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(FrontendDelegate);
 };
 

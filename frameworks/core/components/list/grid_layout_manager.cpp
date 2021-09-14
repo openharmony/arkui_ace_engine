@@ -217,6 +217,9 @@ void GridLayoutManager::CalculateAxisSize()
     }
 
     // Initialize the column length
+    if (NearEqual(crossSize_, Size::INFINITE_SIZE)) {
+        crossSize_ = renderList_.GetCrossSize(viewPort_);
+    }
     gridLen_ = crossSize_ / columnCount_;
 }
 

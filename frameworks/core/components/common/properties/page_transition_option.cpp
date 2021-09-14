@@ -17,6 +17,7 @@
 
 #include "base/utils/device_type.h"
 #include "base/utils/system_properties.h"
+#include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
 #include "core/animation/property_animatable.h"
 
@@ -26,7 +27,6 @@ namespace {
 constexpr float TRANSITION_FACTOR = 0.8f;
 constexpr float TRANSITION_FACTOR_IN = 0.5f;
 constexpr float TRANSITION_FACTOR_OUT = 0.2f;
-constexpr float TRANSITION_FACTOR_WATCH = 0.5f;
 constexpr float BLACK_OPACITY = 0.3f;
 constexpr float SHARED_TRANSITION_ENTER_START_OFFSET_X = 68.0f;
 
@@ -97,8 +97,8 @@ void CreateSharedStaticOption(TweenOption& option)
 
 } // namespace
 
-constexpr int32_t TRANSITION_PHONE_DURATION = 350; // 0.35s
-constexpr int32_t TRANSITION_WATCH_DURATION = 350; // 0.35s
+constexpr int32_t TRANSITION_PHONE_DURATION = 300; // 0.3s
+constexpr int32_t TRANSITION_WATCH_DURATION = 300; // 0.3s
 constexpr int32_t TRANSITION_TV_DURATION = 1000;   // 1s
 constexpr double TRANSITION_DEFAULT_WIDTH = 750.0;
 constexpr double TRANSITION_DEFAULT_HEIGHT = 1900.0;
@@ -476,42 +476,24 @@ void TransitionWatchTweenOption::CreateTransitionInOption(TransitionEvent event)
     contentInOption_.SetDuration(TRANSITION_WATCH_DURATION);
 
     if (event == TransitionEvent::POP_START) {
-        contentInOption_.SetCurve(Curves::FAST_OUT_SLOW_IN);
+        contentInOption_.SetCurve(Curves::SMOOTH);
     }
 }
 
 void TransitionWatchTweenOption::CreateTransitionOutOption(TransitionEvent event)
 {
-    RefPtr<CurveAnimation<DimensionOffset>> translateAnimation;
     if (isRightToLeft_) {
-        translateAnimation =
-            AceType::MakeRefPtr<CurveAnimation<DimensionOffset>>(DimensionOffset(Dimension(), Dimension()),
-                DimensionOffset(Dimension(deviceWidth_ * TRANSITION_FACTOR_WATCH, DimensionUnit::PX), Dimension()),
-                Curves::FRICTION);
-        auto offsetXAnimation =
-            AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, deviceWidth_ * TRANSITION_FACTOR_WATCH, Curves::FRICTION);
+        auto offsetXAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, deviceWidth_, Curves::FRICTION);
         contentOutOption_.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_OFFSET_X, offsetXAnimation);
     } else {
-        translateAnimation =
-            AceType::MakeRefPtr<CurveAnimation<DimensionOffset>>(DimensionOffset(Dimension(), Dimension()),
-                DimensionOffset(Dimension(-(deviceWidth_ * TRANSITION_FACTOR_WATCH), DimensionUnit::PX), Dimension()),
-                Curves::FRICTION);
-        auto widthAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(
-            deviceWidth_, deviceWidth_ * TRANSITION_FACTOR_WATCH, Curves::FRICTION);
+        auto widthAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(deviceWidth_, 0.0f, Curves::FRICTION);
         contentOutOption_.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_WIDTH, widthAnimation);
     }
-    contentOutOption_.SetTranslateAnimations(AnimationType::TRANSLATE_X, translateAnimation);
-    auto opacityAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(1.0f, 1.0f, Curves::LINEAR);
+    auto opacityAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(1.0f, 1.0f, Curves::FRICTION);
     contentOutOption_.SetOpacityAnimation(opacityAnimation);
 
-    auto colorAnimation = AceType::MakeRefPtr<CurveAnimation<Color>>(
-        Color::FromRGBO(0, 0, 0, 0.0), Color::FromRGBO(0, 0, 0, BLACK_OPACITY), Curves::FRICTION);
-    frontDecorationOption_.SetColorAnimation(colorAnimation);
-    frontDecorationOption_.SetIsBackground(false);
-
     if (event == TransitionEvent::POP_START) {
-        contentOutOption_.SetCurve(Curves::FAST_OUT_SLOW_IN);
-        frontDecorationOption_.SetCurve(Curves::FAST_OUT_SLOW_IN);
+        contentOutOption_.SetCurve(Curves::SMOOTH);
     }
 }
 
@@ -522,7 +504,6 @@ void TransitionPhoneTweenOption::CreateCardTransitionOutOption(TransitionEvent e
     if (event == TransitionEvent::POP_START) {
         auto colorAnimation = AceType::MakeRefPtr<CurveAnimation<Color>>(Color::FromRGBO(0, 0, 0, 0.2),
             Color::FromRGBO(0, 0, 0, 0.0), Curves::FRICTION);
-        colorAnimation->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
         frontDecorationOption_.SetColorAnimation(colorAnimation);
     } else {
         auto colorAnimation = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
@@ -614,6 +595,54 @@ void TransitionPhoneTweenOption::CreateCardOpacityAnimationInOption(TransitionEv
         opacityAnimation->AddKeyframe(opacityKeyframe3);
     }
     contentInOption_.SetOpacityAnimation(opacityAnimation);
+}
+
+void TransitionDeclarativeTweenOption::CreateSlideEffectAnimation(
+    TweenOption& tweenOption, SlideEffect effect, PageTransitionType type, TransitionDirection direction)
+{
+    bool exitFlag = false;
+    if (type == PageTransitionType::EXIT || type == PageTransitionType::EXIT_POP ||
+        type == PageTransitionType::EXIT_PUSH) {
+        exitFlag = true;
+    }
+
+    if (effect == SlideEffect::LEFT) {
+        auto init = DimensionOffset(Dimension(-deviceWidth_, DimensionUnit::PX), Dimension());
+        auto target = DimensionOffset(Dimension(), Dimension());
+        if (exitFlag) {
+            std::swap(init, target);
+        }
+        auto translateAnimation =
+            AceType::MakeRefPtr<CurveAnimation<DimensionOffset>>(init, target, tweenOption.GetCurve());
+        tweenOption.SetTranslateAnimations(AnimationType::TRANSLATE_X, translateAnimation);
+    } else if (effect == SlideEffect::RIGHT) {
+        auto init = DimensionOffset(Dimension(deviceWidth_, DimensionUnit::PX), Dimension());
+        auto target = DimensionOffset(Dimension(), Dimension());
+        if (exitFlag) {
+            std::swap(init, target);
+        }
+        auto translateAnimation =
+            AceType::MakeRefPtr<CurveAnimation<DimensionOffset>>(init, target, tweenOption.GetCurve());
+        tweenOption.SetTranslateAnimations(AnimationType::TRANSLATE_X, translateAnimation);
+    } else if (effect == SlideEffect::TOP) {
+        auto init = DimensionOffset(Dimension(), Dimension(-deviceHeight_, DimensionUnit::PX));
+        auto target = DimensionOffset(Dimension(), Dimension());
+        if (exitFlag) {
+            std::swap(init, target);
+        }
+        auto translateAnimation =
+            AceType::MakeRefPtr<CurveAnimation<DimensionOffset>>(init, target, tweenOption.GetCurve());
+        tweenOption.SetTranslateAnimations(AnimationType::TRANSLATE_Y, translateAnimation);
+    } else if (effect == SlideEffect::BOTTOM) {
+        auto init = DimensionOffset(Dimension(), Dimension(deviceHeight_, DimensionUnit::PX));
+        auto target = DimensionOffset(Dimension(), Dimension());
+        if (exitFlag) {
+            std::swap(init, target);
+        }
+        auto translateAnimation =
+            AceType::MakeRefPtr<CurveAnimation<DimensionOffset>>(init, target, tweenOption.GetCurve());
+        tweenOption.SetTranslateAnimations(AnimationType::TRANSLATE_Y, translateAnimation);
+    }
 }
 
 } // namespace OHOS::Ace

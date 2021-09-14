@@ -18,6 +18,7 @@
 
 #include "core/components/clip/clip_component.h"
 #include "core/components/image/image_component.h"
+#include "core/components/image/image_theme.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
 
 namespace OHOS::Ace::Framework {
@@ -28,6 +29,8 @@ class DOMImage final : public DOMNode {
 public:
     DOMImage(NodeId nodeId, const std::string& nodeName);
     ~DOMImage() override = default;
+
+    void InitializeStyle() override;
 
     RefPtr<Component> GetSpecializedComponent() override
     {
@@ -45,16 +48,20 @@ protected:
     bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
     bool AddSpecializedEvent(int32_t pageId, const std::string& event) override;
     void PrepareSpecializedComponent() override;
-
+    ImageObjectPosition ParseImageObjectPosition(const std::string& value);
     bool IsSubscriptEnable() const override
     {
+        if (declaration_) {
+            declaration_->SetIsSubscriptEnable(true);
+        }
         return true;
     }
 
 private:
     RefPtr<ImageComponent> imageChild_;
-    EventMarker loadSuccessEventId_;
-    EventMarker loadFailEventId_;
+    EventMarker loadSuccessEvent_;
+    EventMarker loadFailEvent_;
+    RefPtr<ImageTheme> theme_;
 };
 
 } // namespace OHOS::Ace::Framework

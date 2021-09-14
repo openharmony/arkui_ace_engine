@@ -62,11 +62,13 @@ struct IconImage {
         image->SetWidth(width);
         image->SetHeight(height);
     };
-    IconImage(const std::string& src, const Dimension& width, const Dimension& height)
+    IconImage(const std::string& src, const Dimension& width, const Dimension& height,
+        std::optional<Color> imageFill = std::nullopt)
         : src(src), width(width), height(height), image(AceType::MakeRefPtr<ImageComponent>(src))
     {
         image->SetWidth(width);
         image->SetHeight(height);
+        image->SetImageFill(imageFill);
     };
     ~IconImage() = default;
 
@@ -218,7 +220,7 @@ void TitleBarMenuBuilder::MoveMenuItemsToBar(const RefPtr<ComponentGroup>& conta
                 continue;
             }
 
-            IconImage menuIcon(menuItemIcon->GetSrc(), menuIconSize_, menuIconSize_);
+            IconImage menuIcon(menuItemIcon->GetSrc(), menuIconSize_, menuIconSize_, imageFill_);
             auto optionButton = BuildIconButton(theme_, menuZoneSize_, menuZoneSize_, menuIcon);
             if (theme_->GetMenuItemPadding().Value() > 0.0 && needAddPadding) {
                 container->AppendChild(BuildPadding(theme_->GetMenuItemPadding().Value()));
@@ -315,7 +317,7 @@ RefPtr<Component> EmphasizeTitleBarBuilder::Build()
 void NormalTitleBarBuilder::BuildStartZone(const RefPtr<RowComponent>& parent)
 {
     if (!startIconSrc_.empty()) {
-        IconImage startIcon(startIconSrc_, menuIconSize_, menuIconSize_);
+        IconImage startIcon(startIconSrc_, menuIconSize_, menuIconSize_, imageFill_);
         auto startButton = BuildIconButton(theme_, menuZoneSize_, menuZoneSize_, startIcon, startClickMarker_);
         parent->AppendChild(GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "startButton", startButton));
         parent->AppendChild(BuildPadding(theme_->GetTitleMinPadding().Value()));
@@ -336,7 +338,7 @@ void NormalTitleBarBuilder::BuildLogo(const RefPtr<RowComponent>& parent)
 {
     if (!logoSrc_.empty()) {
         auto logoSize = theme_->GetLogoIconSize();
-        IconImage logoIconImage(logoSrc_, logoSize, logoSize);
+        IconImage logoIconImage(logoSrc_, logoSize, logoSize, imageFill_);
         parent->AppendChild(GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "image", logoIconImage.image));
         parent->AppendChild(BuildPadding(LOGO_PADDING_RIGHT_VALUE));
         padding_.SetLeft(theme_->GetDefaultPaddingStart());
@@ -347,7 +349,7 @@ void NormalTitleBarBuilder::BuildEndZone(const RefPtr<RowComponent>& parent)
 {
     parent->AppendChild(BuildPadding(theme_->GetTitleMinPadding().Value()));
     if (!endIconSrc_.empty()) {
-        IconImage endIcon(endIconSrc_, menuIconSize_, menuIconSize_);
+        IconImage endIcon(endIconSrc_, menuIconSize_, menuIconSize_, imageFill_);
         auto endButton = BuildIconButton(theme_, menuZoneSize_, menuZoneSize_, endIcon, endClickMarker_);
         parent->AppendChild(GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "endButton", endButton));
         padding_.SetRight(theme_->GetDefaultPaddingEnd());
@@ -380,6 +382,23 @@ RefPtr<Component> NormalTitleBarBuilder::Build()
     BuildTitleZone(container);
     BuildEndZone(container);
     return TitleBarBuilder::BuildContainer(container);
+}
+
+void NormalTitleBarBuilder::BindDefaultBackEvent(const WeakPtr<PipelineContext>& weakContext)
+{
+    if (!backClickMarker_.IsEmpty()) {
+        return;
+    }
+    backClickMarker_ = BackEndEventManager<void(const ClickInfo&)>::GetInstance().GetAvailableMarker();
+    BackEndEventManager<void(const ClickInfo&)>::GetInstance().BindBackendEvent(
+        backClickMarker_, [weakContext](const ClickInfo& clickInfo) {
+            auto context = weakContext.Upgrade();
+            if (!context) {
+                LOGW("context is empty");
+                return;
+            }
+            context->CallRouterBackToPopPage();
+        });
 }
 
 void TVTitleBarBuilder::BuildTitle(const RefPtr<ComponentGroup>& parent)
@@ -540,7 +559,9 @@ RefPtr<Component> NavigationBarComponent::Build(const WeakPtr<PipelineContext>& 
             if (data_->type == NavigationBarType::EMPHASIZE) {
                 builder = AceType::MakeRefPtr<EmphasizeTitleBarBuilder>(data_);
             } else {
-                builder = AceType::MakeRefPtr<NormalTitleBarBuilder>(data_);
+                auto normalBuilder = AceType::MakeRefPtr<NormalTitleBarBuilder>(data_);
+                normalBuilder->BindDefaultBackEvent(context);
+                builder = normalBuilder;
             }
             break;
 #endif

@@ -79,8 +79,13 @@ Offset FlutterRenderChart::ConvertDataToPosition(const Rect& paintRegion, const 
 
 void FlutterRenderChart::Paint(RenderContext& context, const Offset& offset)
 {
-    if (vertical_.min >= vertical_.max || horizontal_.min >= horizontal_.max) {
-        return;
+    if (LessOrEqual(vertical_.max, vertical_.min)) {
+        vertical_.min = 0.0;
+        vertical_.max = 100.0;
+    }
+    if (LessOrEqual(horizontal_.max, horizontal_.min)) {
+        horizontal_.min = 0.0;
+        horizontal_.max = 100.0;
     }
     Rect verticalPaintRegion =
         Rect(offset.GetX(), offset.GetY(), GetLayoutSize().Width() * 0.1, GetLayoutSize().Height());
@@ -196,8 +201,7 @@ void FlutterRenderChart::PaintPoint(const ScopedCanvas& canvas, const Offset& of
             break;
         }
         case PointShape::SQUARE: {
-            canvas->drawRect(offset.GetX() - innerRadius,
-                offset.GetY() - innerRadius, offset.GetX() + innerRadius,
+            canvas->drawRect(offset.GetX() - innerRadius, offset.GetY() - innerRadius, offset.GetX() + innerRadius,
                 offset.GetY() + innerRadius, paint, paintData);
             SetEdgeStyle(point, paint);
             canvas->drawRect(offset.GetX() - pointSize / 2, offset.GetY() - pointSize / 2,

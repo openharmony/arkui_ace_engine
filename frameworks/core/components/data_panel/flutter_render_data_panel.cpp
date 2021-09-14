@@ -362,11 +362,7 @@ void PaintRainbowFilterMask(ScopedCanvas& canvas, double factor, const std::vect
 void FlutterRenderProgressDataPanel::Paint(RenderContext& context, const Offset& offset)
 {
     if (type_ == ChartType::LOADING) {
-        if (useEffect_) {
-            PaintEffectedLoadingProgress(context, offset);
-        } else {
-            PaintEffectedLoadingProgress(context, offset);
-        }
+        PaintEffectedLoadingProgress(context, offset);
     } else {
         PaintRingProgress(context, offset);
     }
@@ -511,14 +507,18 @@ void FlutterRenderPercentageDataPanel::Paint(RenderContext& context, const Offse
     arcData.startAngle = GetStartDegree();
     double totalValue = GetTotalValue();
     auto segments = GetSegments();
+    auto maxValue = GetMaxValue();
     auto canvas = ScopedCanvas::Create(context);
     if (!canvas) {
         return;
     }
     PaintTrackBackground(canvas, arcData.center, arcData.thickness, backgroundTrack_, arcData.radius * 2);
     double factor = 1.0;
-    if (GreatNotEqual(totalValue, 100.0)) {
-        factor = 100.0 / totalValue;
+    if (LessOrEqual(maxValue, 0.0)) {
+        maxValue = 100.0;
+    }
+    if (GreatNotEqual(totalValue, maxValue)) {
+        factor = maxValue / totalValue;
     }
     if (useEffect_ && GreatNotEqual(totalValue, 0.0)) {
         PaintRainbowFilterMask(canvas, factor * animationPercent_, segments, arcData);

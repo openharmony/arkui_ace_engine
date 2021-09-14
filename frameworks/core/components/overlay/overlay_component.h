@@ -30,6 +30,8 @@ public:
     ~OverlayComponent() override = default;
 
     RefPtr<Element> CreateElement() override;
+
+    RefPtr<RenderNode> CreateRenderNode() override;
 };
 
 } // namespace OHOS::Ace

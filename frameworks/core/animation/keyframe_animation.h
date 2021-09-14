@@ -18,6 +18,7 @@
 
 #include <list>
 
+#include "base/utils/utils.h"
 #include "core/animation/animation.h"
 #include "core/animation/curve.h"
 #include "core/animation/curves.h"
@@ -28,10 +29,22 @@ namespace OHOS::Ace {
 
 template<typename T>
 class KeyframeAnimation : public Animation<T> {
+    DECLARE_ACE_TYPE(KeyframeAnimation, Animation<T>);
 public:
     KeyframeAnimation() = default;
 
     ~KeyframeAnimation() override = default;
+
+    void AddKeyframe(const std::list<RefPtr<Keyframe<T>>>& keyframes)
+    {
+        for (const auto& keyframe : keyframes) {
+            AddKeyframe(keyframe);
+        }
+        // in order by time;
+        keyframes_.sort([](const RefPtr<Keyframe<T>>& a, const RefPtr<Keyframe<T>>& b) {
+            return a->GetKeyTime() < b->GetKeyTime();
+        });
+    }
 
     void AddKeyframe(const RefPtr<Keyframe<T>>& keyframe)
     {
@@ -48,6 +61,23 @@ public:
         ++keyframeNum_;
     }
 
+    void ReplaceKeyframe(const RefPtr<Keyframe<T>>& keyframeReplace)
+    {
+        if (!keyframeReplace) {
+            LOGE("add key frame failed. empty keyframe.");
+            return;
+        }
+        if (!keyframeReplace->IsValid()) {
+            LOGE("add key frame failed. invalid keyframe.");
+            return;
+        }
+        for (auto& keyframe : keyframes_) {
+            if (NearEqual(keyframe->GetKeyTime(), keyframeReplace->GetKeyTime())) {
+                keyframe = keyframeReplace;
+            }
+        }
+    }
+
     const T& GetValue() const override
     {
         return currentValue_;
@@ -56,15 +86,6 @@ public:
     const std::list<RefPtr<Keyframe<T>>>& GetKeyframes() const
     {
         return keyframes_;
-    }
-
-    void SetEvaluator(const RefPtr<Evaluator<T>>& evaluator)
-    {
-        if (!evaluator) {
-            LOGE("input evaluator is null, use linear evaluator as default.");
-            return;
-        }
-        evaluator_ = evaluator;
     }
 
     void SetCurve(const RefPtr<Curve>& curve) override
@@ -76,27 +97,6 @@ public:
         for (auto& keyframe : keyframes_) {
             keyframe->SetCurve(curve);
         }
-    }
-
-    void SetStart(const T& value) override
-    {
-        auto keyframe = AceType::MakeRefPtr<Keyframe<T>>(0.0f, value);
-        if (!keyframe) {
-            LOGE("add key frame failed. empty keyframe.");
-            return;
-        }
-        if (!keyframe->IsValid()) {
-            LOGE("add key frame failed. invalid keyframe.");
-            return;
-        }
-
-        keyframes_.emplace_front(keyframe);
-        ++keyframeNum_;
-    }
-
-    T GetEndValue() override
-    {
-        return keyframes_.back()->GetKeyValue();
     }
 
 private:

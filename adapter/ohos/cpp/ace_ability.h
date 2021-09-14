@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CPP_ACE_ABILITY_H
 #define FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CPP_ACE_ABILITY_H
 
+#include <string>
+#include <vector>
 #include "ability.h"
 #include "ability_loader.h"
 #include "want.h"
@@ -42,6 +44,15 @@ public:
     void OnRestoreAbilityState(const OHOS::AppExecFwk::PacMap& inState) override;
     void OnSaveAbilityState(OHOS::AppExecFwk::PacMap& outState) override;
     void OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& configuration) override;
+    void OnAbilityResult(int requestCode, int resultCode, const OHOS::AAFwk::Want& resultData) override;
+    void OnRequestPermissionsFromUserResult(
+        int requestCode, const std::vector<std::string> &permissions, const std::vector<int> &grantResults) override;
+
+    bool OnStartContinuation() override;
+    bool OnSaveData(OHOS::AAFwk::WantParams &saveData) override;
+    bool OnRestoreData(OHOS::AAFwk::WantParams &restoreData) override;
+    void OnCompleteContinuation(int result) override;
+    void OnRemoteTerminated() override;
 
 private:
     static int32_t instanceId_;

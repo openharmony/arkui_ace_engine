@@ -39,77 +39,6 @@ JSValueConst JS_NewGlobalCConstructor(
 }
 #endif
 
-// FIXME(cvetan) Move to appropriate file and if possibly consolidate this with V8 conversions
-namespace __detail__ {
-
-template<typename T>
-struct IsSignedInt {
-    static constexpr bool value =
-        std::is_integral<T>::value && std::is_signed<T>::value && !std::is_same<T, bool>::value;
-};
-
-template<typename T>
-static constexpr bool is_signed_int_v = IsSignedInt<T>::value;
-
-template<typename T>
-T FromJSValue(JSValueConst val)
-{
-    static_assert(!std::is_const_v<T> && !std::is_reference_v<T>, //
-        "Cannot convert values to reference or cv-qualified types!");
-
-    JSContext* ctx = OHOS::Ace::Framework::QJSContext::current();
-    if constexpr (is_signed_int_v<T>) {
-        int64_t res;
-        JS_ToInt64(ctx, &res, val);
-        return res;
-    } else if constexpr (std::is_unsigned_v<T>) {
-        uint32_t res;
-        JS_ToUint32(ctx, &res, val);
-        return res;
-    } else if constexpr (std::is_floating_point_v<T>) {
-        double res;
-        JS_ToFloat64(ctx, &res, val);
-        return res;
-    } else if constexpr (std::is_same_v<T, std::string>) {
-        OHOS::Ace::Framework::ScopedString str(val);
-        return str.str();
-    }
-
-    return T();
-}
-
-template<typename T>
-JSValue ToJSValue(T val)
-{
-    JSContext* ctx = OHOS::Ace::Framework::QJSContext::current();
-    if constexpr (is_signed_int_v<T>) {
-        return JS_NewInt64(ctx, val);
-    } else if constexpr (std::is_unsigned_v<T>) {
-        return JS_NewInt64(ctx, val);
-    } else if constexpr (std::is_floating_point_v<T>) {
-        return JS_NewFloat64(ctx, val);
-    } else if constexpr (std::is_same_v<T, std::string>) {
-        return JS_NewStringLen(ctx, val.c_str(), val.size());
-    } else if constexpr (std::is_same_v<T, const char*>) {
-        return JS_NewStringLen(ctx, val, strlen(val));
-    }
-
-    return JS_ThrowInternalError(ctx, "Conversion failure...");
-}
-
-template<typename... Types>
-struct TupleConverter {
-    std::tuple<Types...> operator()(JSValueConst* argv)
-    {
-        int index = 0;
-        return {
-            __detail__::FromJSValue<Types>(argv[index++])...,
-        };
-    }
-};
-
-}; // namespace __detail__
-
 namespace OHOS::Ace::Framework {
 
 extern std::vector<JSClassID> g_classIds;
@@ -131,6 +60,7 @@ class QJSKlass {
 
 public:
     QJSKlass() = delete;
+    ~QJSKlass() = default;
 
     static void Declare(const char* name);
 
@@ -145,15 +75,28 @@ public:
     template<typename T>
     static void CustomMethod(const char* name, MemberFunctionCallback<T> cb, int id);
 
+    template<typename T>
+    static void CustomMethod(const char* name, JSMemberFunctionCallback<T> callback, int id);
+
+    template<typename R, typename... Args>
+    static void StaticMethod(const char* name, R (*func)(Args...), int id);
+
+    static void StaticMethod(const char* name, JSFunctionCallback func, int id);
+
+    static void CustomStaticMethod(const char* name, FunctionCallback cb);
+
     static void ExoticGetter(ExoticGetterCallback callback);
     static void ExoticSetter(ExoticSetterCallback callback);
     static void ExoticHasProperty(ExoticHasPropertyCallback callback);
     static void ExoticIsArray(ExoticIsArrayCallback callback);
 
     template<typename... Args>
-    static void Bind(BindingTarget target);
+    static void Bind(
+        BindingTarget target, JSDestructorCallback<C> dtor = nullptr, JSGCMarkCallback<C> gcMark = nullptr);
 
     static void Bind(BindingTarget target, FunctionCallback ctor);
+    static void Bind(
+        BindingTarget target, JSFunctionCallback ctor, JSDestructorCallback<C> dtor, JSGCMarkCallback<C> gcMark);
 
     template<typename Base>
     static void Inherit();
@@ -162,7 +105,8 @@ public:
 
     static JSValue NewObjectProtoClass(JSValue proto);
 
-    static JSValue NewInstance();
+    template<typename... Args>
+    static JSValue NewInstance(Args... args);
     static JSValue GetProto();
 
     static int NumberOfInstances();
@@ -178,24 +122,38 @@ private:
     template<typename T>
     static JSValue InternalMemberFunctionCallback(
         JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv, int magic);
+    template<typename T>
+    static JSValue InternalJSMemberFunctionCallback(
+        JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv, int magic);
 
     template<typename Class, typename R, typename... Args>
     static JSValue MethodCallback(JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv, int magic);
+
+    template<typename Class, typename R, typename... Args>
+    static JSValue StaticMethodCallback(JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv, int magic);
+
+    static JSValue JSStaticMethodCallback(
+        JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv, int magic);
 
     template<typename... Args>
     static JSValue InternalConstructor(JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv);
 
     static JSValue ConstructorInterceptor(JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv);
+    static JSValue JSConstructorInterceptor(JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv);
 
     static void Finalizer(JSRuntime* rt, JSValue val);
     static void GcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc);
 
     static JSValue proto_;
     static std::unordered_map<std::string, JSCFunctionListEntry*> functions_;
+    static std::unordered_map<std::string, JSCFunctionListEntry*> staticFunctions_;
     static JSClassID classId_;
     static JSClassExoticMethods exoticMethods_;
     static JSClassDef classDefinitions_;
-    static FunctionCallback constructor_;
+    static FunctionCallback constructor_; // TODO(cvetan) remove
+    static JSFunctionCallback jsConstructor_;
+    static JSDestructorCallback<C> jsDestructor_;
+    static JSGCMarkCallback<C> gcMark_;
 
     template<typename U>
     friend class QJSKlass;

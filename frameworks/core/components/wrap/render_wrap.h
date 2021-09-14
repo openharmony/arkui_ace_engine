@@ -33,6 +33,7 @@ struct ContentInfo {
     double crossLength_ = 0.0;
     int32_t count_ = 0;
     std::list<RefPtr<RenderNode>> itemList_;
+    double maxBaselineDistance = 0.0;
 };
 
 class ACE_EXPORT RenderWrap : public RenderNode {
@@ -51,7 +52,7 @@ public:
 
     Offset GetContentOffset(double totalCrossLength) const;
 
-    void TraverseContent(const Offset& startPosition) const;
+    void TraverseContent(const Offset& startPosition, const Offset& betweenPosition) const;
 
     void PositionedItem(
         double betweenSpace, const ContentInfo& content, const Offset& position, double crossSpace) const;
@@ -60,26 +61,45 @@ public:
 
     void SetWrapLayoutSize(double mainLength, double crossLength)
     {
+        Size wrapSize;
         if (direction_ == WrapDirection::HORIZONTAL) {
-            SetLayoutSize(GetLayoutParam().Constrain(Size(mainLength, crossLength)));
+            wrapSize = GetLayoutParam().Constrain(Size(mainLength, crossLength));
         } else {
-            SetLayoutSize(GetLayoutParam().Constrain(Size(crossLength, mainLength)));
+            wrapSize = GetLayoutParam().Constrain(Size(crossLength, mainLength));
         }
+        if (horizontalMeasure_ == MeasureType::PARENT) {
+            wrapSize.SetWidth(GetLayoutParam().GetMaxSize().Width());
+        }
+        if (verticalMeasure_ == MeasureType::PARENT) {
+            wrapSize.SetHeight(GetLayoutParam().GetMaxSize().Height());
+        }
+        SetLayoutSize(wrapSize);
         LOGD("wrap::wrap layout size width:%lf, height:%lf", GetLayoutSize().Width(), GetLayoutSize().Height());
-    }
-
-    void Paint(RenderContext& context, const Offset& offset) override
-    {
-        for (const auto& item : GetChildren()) {
-            if (item->GetLayoutParam().GetMaxSize().IsValid()) {
-                context.PaintChild(item, offset);
-            }
-        }
     }
 
     WrapDirection GetDialogDirection() const
     {
         return dialogDirection_;
+    }
+
+    WrapDirection GetDirection() const
+    {
+        return direction_;
+    }
+
+    WrapAlignment GetJustifyContent() const
+    {
+        return mainAlignment_;
+    }
+
+    WrapAlignment GetAlignItems() const
+    {
+        return crossAlignment_;
+    }
+
+    WrapAlignment GetAlignContent() const
+    {
+        return alignment_;
     }
 
 protected:
@@ -91,14 +111,16 @@ protected:
         double betweenSpace, Offset& itemPositionOffset) const;
     void HandleStartAlignment(
         const RefPtr<RenderNode>& item, const Offset& position, double betweenSpace, Offset& itemPositionOffset) const;
+    void HandleBaselineAlignment(double totalCrossSpace, const RefPtr<RenderNode>& node, const Offset& position,
+        double betweenSpace, Offset& itemPositionOffset) const;
     double GetMainItemLength(const RefPtr<RenderNode>& item) const;
     double GetCrossItemLength(const RefPtr<RenderNode>& item) const;
 
     void HandleDialogStretch(const LayoutParam& layoutParam);
     std::list<ContentInfo> contentList_;
 
-    virtual void ClearRenderObject() override;
-    virtual bool MaybeRelease() override;
+    void ClearRenderObject() override;
+    bool MaybeRelease() override;
 
 private:
     WrapDirection direction_ = WrapDirection::VERTICAL;
@@ -111,6 +133,8 @@ private:
     double crossLengthLimit_ = 0.0;
     double totalMainLength_ = 0.0;
     double totalCrossLength_ = 0.0;
+    MeasureType horizontalMeasure_ = MeasureType::CONTENT;
+    MeasureType verticalMeasure_ = MeasureType::CONTENT;
 
     WrapDirection dialogDirection_ = WrapDirection::HORIZONTAL;
     bool dialogStretch_ = false;

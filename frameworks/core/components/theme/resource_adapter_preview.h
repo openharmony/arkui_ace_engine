@@ -27,14 +27,15 @@ public:
     ResourceAdapterPreview() = default;
     ~ResourceAdapterPreview() override = default;
 
-    void Init(const DeviceResourceInfo& resourceInfo) override;
-    void UpdateConfig(const DeviceConfig& config) override;
+    void Init(const ResourceInfo& resourceInfo) override;
+    void UpdateConfig(const ResourceConfiguration& config) override;
 
     RefPtr<ThemeStyle> GetTheme(int32_t themeId) override;
 
     Color GetColor(uint32_t resId) override;
     Dimension GetDimension(uint32_t resId) override;
     std::string GetString(uint32_t resId) override;
+    std::vector<std::string> GetStringArray(uint32_t resId) const override;
     double GetDouble(uint32_t resId) override;
     int32_t GetInt(uint32_t resId) override;
 
@@ -50,7 +51,6 @@ private:
     bool ParsePatternJsonFile(const std::string& jsonFile);
     bool ParseThemeJsonFile(const std::string& jsonFile);
     bool ParseRecordJsonFile(const std::string& jsonFile);
-    bool LoadSystemResources(const std::string& sysResDir, const int32_t& themeId, const ColorMode& colorMode);
     bool PostprocessSystemResources();
 
 private:
@@ -61,6 +61,8 @@ private:
     std::unordered_map<std::string, ResValueWrapper> sysResTheme_;
     // record for mapping relationship between system resources id and name.(<resId, <resName, resType>>)
     std::unordered_map<uint32_t, std::pair<std::string, std::string>> sysResRecord_;
+
+    std::string sysResDir_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterPreview);
 };

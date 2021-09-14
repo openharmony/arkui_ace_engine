@@ -30,7 +30,7 @@
 
 namespace OHOS::Ace {
 
-class ScrollComponent : public SoleChildComponent {
+class ACE_EXPORT ScrollComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(ScrollComponent, SoleChildComponent);
 
 public:
@@ -127,6 +127,103 @@ public:
         return isEffectSetted_;
     }
 
+    void SetOnReachStart(const EventMarker& onReachStart)
+    {
+        onReachStart_ = onReachStart;
+    }
+
+    void SetOnReachEnd(const EventMarker& onReachEnd)
+    {
+        onReachEnd_ = onReachEnd;
+    }
+
+    void SetOnReachTop(const EventMarker& onReachTop)
+    {
+        onReachTop_ = onReachTop;
+    }
+
+    void SetOnReachBottom(const EventMarker& onReachBottom)
+    {
+        onReachBottom_ = onReachBottom;
+    }
+
+    const EventMarker& GetOnReachStart() const
+    {
+        return onReachStart_;
+    }
+
+    const EventMarker& GetOnReachEnd() const
+    {
+        return onReachEnd_;
+    }
+
+    const EventMarker& GetOnReachTop() const
+    {
+        return onReachTop_;
+    }
+
+    const EventMarker& GetOnReachBottom() const
+    {
+        return onReachBottom_;
+    }
+
+    const EventMarker& GetOnScroll() const
+    {
+        return onScroll_;
+    }
+
+    void SetOnScroll(const EventMarker& onScroll)
+    {
+        onScroll_ = onScroll;
+    }
+
+    const EventMarker& GetOnScrollEdge() const
+    {
+        return onScrollEdge_;
+    }
+
+    void SetOnScrollEdge(const EventMarker& onScrollEdge)
+    {
+        onScrollEdge_ = onScrollEdge;
+    }
+
+    const EventMarker& GetOnScrollEnd() const
+    {
+        return onScrollEnd_;
+    }
+
+    void SetOnScrollEnd(const EventMarker& onScrollEnd)
+    {
+        onScrollEnd_ = onScrollEnd;
+    }
+
+    void SetDisplayMode(DisplayMode displayMode)
+    {
+        if (!scrollBar_) {
+            return;
+        }
+        scrollBar_->SetDisplayMode(displayMode);
+    }
+
+    void SetScrollBarColor(const Color& scrollBarColor)
+    {
+        if (!scrollBar_) {
+            return;
+        }
+        scrollBar_->SetForegroundColor(scrollBarColor);
+    }
+
+    void SetScrollBarWidth(const Dimension& scrollBarWidth)
+    {
+        if (!scrollBar_) {
+            return;
+        }
+        scrollBar_->SetInactiveWidth(scrollBarWidth);
+        scrollBar_->SetNormalWidth(scrollBarWidth);
+        scrollBar_->SetActiveWidth(scrollBarWidth);
+        scrollBar_->SetTouchWidth(scrollBarWidth);
+    }
+
 private:
     Edge padding_;
     Axis axisDirection_ = Axis::VERTICAL;
@@ -136,6 +233,16 @@ private:
     bool enable_ = true;
     bool isEffectSetted_ = false;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
+
+    // for scroll reaching the edge event
+    EventMarker onReachStart_;
+    EventMarker onReachEnd_;
+    EventMarker onReachTop_;
+    EventMarker onReachBottom_;
+
+    EventMarker onScroll_;
+    EventMarker onScrollEdge_;
+    EventMarker onScrollEnd_;
 };
 
 } // namespace OHOS::Ace

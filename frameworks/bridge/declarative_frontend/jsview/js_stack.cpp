@@ -16,130 +16,23 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
 
 #include "base/log/ace_trace.h"
-#include "core/components/foreach/foreach_component.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
-#ifdef USE_QUICKJS_ENGINE
-JSStack::JSStack(const std::list<JSViewAbstract*>& children, std::list<JSValue> jsChildren)
-    : JSContainerBase(children, jsChildren)
-{
-    LOGD("Stack(children: [%lu])", children_.size());
-}
-#else
-JSStack::JSStack(const std::list<JSViewAbstract*>& children,
-    std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren)
-    : JSContainerBase(children, jsChildren)
-{
-    LOGD("Stack(children: [%lu])", children_.size());
-}
-#endif
-
-JSStack::~JSStack()
-{
-    LOGD("Destroy: JSStack");
-};
-
-RefPtr<OHOS::Ace::Component> JSStack::CreateSpecializedComponent()
-{
-    LOGD("Create with align: %s", alignment_.ToString().c_str());
-
-    std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
-
-    for (auto jsViewChild : children_) {
-        auto component = jsViewChild->CreateComponent();
-        if (AceType::TypeName<ForEachComponent>() == AceType::TypeName(component)) {
-            auto children = AceType::DynamicCast<ForEachComponent>(component)->GetChildren();
-            for (auto childComponent : children) {
-                componentChildren.emplace_back(childComponent);
-            }
-        } else {
-            componentChildren.emplace_back(component);
-        }
-    }
-
-    LOGD("Create component: Stack");
-    RefPtr<OHOS::Ace::StackComponent> component =
-        AceType::MakeRefPtr<StackComponent>(alignment_, stackFit_, overflow_, componentChildren);
-
-    // Refresh component
-    component->SetAlignment(alignment_);
-    component->SetStackFit(stackFit_);
-    component->SetOverflow(overflow_);
-
-    return component;
-}
-
-std::vector<RefPtr<OHOS::Ace::SingleChild>> JSStack::CreateInteractableComponents()
-{
-    return JSInteractableView::CreateComponents();
-}
-
-void JSStack::Destroy(JSViewAbstract* parentCustomView)
-{
-    LOGD("JSStack::Destroy start");
-    JSContainerBase::Destroy(parentCustomView);
-    LOGD("JSStack::Destroy end");
-}
-
-#ifdef USE_QUICKJS_ENGINE
-void JSStack::MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc)
-{
-    LOGD("JSStack => MarkGC: start");
-    JSContainerBase::MarkGC(rt, markFunc);
-    LOGD("JSStack => MarkGC: end");
-}
-
-void JSStack::ReleaseRT(JSRuntime* rt)
-{
-    LOGD("JSStack => release children: start");
-    JSContainerBase::ReleaseRT(rt);
-    LOGD("JSStack => release children: end");
-}
-
-// STATIC qjs_class_bindings
-JSValue JSStack::ConstructorCallback(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
-{
-    ACE_SCOPED_TRACE("JSStack::ConstructorCallback");
-
-    QJSContext::Scope scope(ctx);
-
-    auto [children, jsChildren] = JsChildrenFromArgs(ctx, argc, argv);
-
-    JSStack* stack = new JSStack(children, jsChildren);
-
-    return Wrap(new_target, stack);
-}
-
-void JSStack::QjsDestructor(JSRuntime* rt, JSStack* view)
-{
-    LOGD("JSStack(QjsDestructor) start");
-    if (!view) {
-        return;
-    }
-
-    view->ReleaseRT(rt);
-    delete view;
-    LOGD("JSStack(QjsDestructor) end");
-}
-
-void JSStack::QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc)
-{
-    LOGD("JSStack(QjsGcMark) start");
-    JSStack* view = Unwrap<JSStack>(val);
-    if (!view) {
-        return;
-    }
-
-    view->MarkGC(rt, markFunc);
-    LOGD("JSStack(QjsGcMark) end");
-}
-#endif
+const static std::array<Alignment, 9> ALIGNMENT_ARR { Alignment::TOP_LEFT, Alignment::TOP_CENTER, Alignment::TOP_RIGHT,
+    Alignment::CENTER_LEFT, Alignment::CENTER, Alignment::CENTER_RIGHT, Alignment::BOTTOM_LEFT,
+    Alignment::BOTTOM_CENTER, Alignment::BOTTOM_RIGHT };
 
 void JSStack::SetStackFit(int value)
 {
     if (value >= (int)StackFit::KEEP && value <= (int)StackFit::FIRST_CHILD) {
-        stackFit_ = (StackFit)value;
+        auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        if (stack) {
+            stack->SetStackFit((StackFit)value);
+        }
     } else {
         LOGE("Invaild value for stackfit");
     }
@@ -148,7 +41,10 @@ void JSStack::SetStackFit(int value)
 void JSStack::SetOverflow(int value)
 {
     if (value >= (int)Overflow::CLIP && value <= (int)Overflow::OBSERVABLE) {
-        overflow_ = (Overflow)value;
+        auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        if (stack) {
+            stack->SetOverflow((Overflow)value);
+        }
     } else {
         LOGE("Invaild value for overflow");
     }
@@ -191,34 +87,142 @@ void JSStack::SetAlignment(int value)
             return;
     }
 
-    alignment_ = alignment;
+    auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (stack) {
+        stack->SetAlignment(alignment);
+    }
+}
+
+void JSStack::SetWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    SetWidth(info[0]);
+}
+
+void JSStack::SetWidth(const JSRef<JSVal>& jsValue)
+{
+    Dimension value;
+    if (!ConvertFromJSValue(jsValue, value)) {
+        LOGE("args can not set width");
+        return;
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        return;
+    }
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    box->SetWidth(value, option);
+
+    auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (stack) {
+        if (stack->GetMainStackSize() == MainStackSize::MAX || stack->GetMainStackSize() == MainStackSize::MAX_Y) {
+            stack->SetMainStackSize(MainStackSize::MAX);
+        } else {
+            stack->SetMainStackSize(MainStackSize::MAX_X);
+        }
+    }
+}
+
+void JSStack::SetHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    SetHeight(info[0]);
+}
+
+void JSStack::SetHeight(const JSRef<JSVal>& jsValue)
+{
+    Dimension value;
+    if (!ConvertFromJSValue(jsValue, value)) {
+        LOGE("args can not set width");
+        return;
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        return;
+    }
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    box->SetHeight(value, option);
+
+    auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (stack) {
+        if (stack->GetMainStackSize() == MainStackSize::MAX || stack->GetMainStackSize() == MainStackSize::MAX_X) {
+            stack->SetMainStackSize(MainStackSize::MAX);
+        } else {
+            stack->SetMainStackSize(MainStackSize::MAX_Y);
+        }
+    }
+}
+
+void JSStack::SetSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        LOGE("arg is not Object or String.");
+        return;
+    }
+
+    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+    SetWidth(sizeObj->GetProperty("width"));
+    SetHeight(sizeObj->GetProperty("height"));
 }
 
 void JSStack::JSBind(BindingTarget globalObj)
 {
     JSClass<JSStack>::Declare("Stack");
+
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSStack>::StaticMethod("create", &JSStack::Create, opt);
+    JSClass<JSStack>::StaticMethod("stackFit", &JSStack::SetStackFit, opt);
+    JSClass<JSStack>::StaticMethod("overflow", &JSStack::SetOverflow, opt);
+    JSClass<JSStack>::StaticMethod("alignContent", &JSStack::SetAlignment, opt);
+    JSClass<JSStack>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSStack>::StaticMethod("width", SetWidth);
+    JSClass<JSStack>::StaticMethod("height", SetHeight);
+    JSClass<JSStack>::StaticMethod("size", SetSize);
+    JSClass<JSStack>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSStack>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSStack>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSStack>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSStack>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSStack>::Inherit<JSContainerBase>();
     JSClass<JSStack>::Inherit<JSViewAbstract>();
-
-    MethodOptions opt = MethodOptions::RETURN_SELF;
-    JSClass<JSStack>::Method("stackFit", &JSStack::SetStackFit, opt);
-    JSClass<JSStack>::Method("overflow", &JSStack::SetOverflow, opt);
-    JSClass<JSStack>::Method("alignment", &JSStack::SetAlignment, opt);
-    JSClass<JSStack>::CustomMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSStack>::CustomMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSStack>::Bind(globalObj, ConstructorCallback);
+    JSClass<JSStack>::Bind<>(globalObj);
 }
 
-#ifdef USE_V8_ENGINE
-void JSStack::ConstructorCallback(const v8::FunctionCallbackInfo<v8::Value>& args)
+void JSStack::Create(const JSCallbackInfo& info)
 {
-    LOGD("ConstructorCallback");
-    std::list<JSViewAbstract*> children;
-    std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren;
-    V8ChildrenFromArgs(args, children, jsChildren);
-    auto instance = V8Object<JSStack>::New(args.This(), children, jsChildren);
-    args.GetReturnValue().Set(instance->Get());
-}
+    Alignment alignment = Alignment::CENTER;
 
-#endif
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> stackAlign = obj->GetProperty("alignContent");
+        if (stackAlign->IsNumber()) {
+            int32_t value = stackAlign->ToNumber<int32_t>();
+            alignment = (value >= 0 && value < static_cast<int>(ALIGNMENT_ARR.size()))
+                        ? ALIGNMENT_ARR[value]
+                        : Alignment::CENTER;
+        }
+    }
+
+    std::list<RefPtr<Component>> children;
+    RefPtr<OHOS::Ace::StackComponent> component =
+        AceType::MakeRefPtr<StackComponent>(alignment, StackFit::KEEP, Overflow::OBSERVABLE, children);
+    ViewStackProcessor::GetInstance()->Push(component);
+    JSInteractableView::SetFocusNode(true);
+}
 
 } // namespace OHOS::Ace::Framework

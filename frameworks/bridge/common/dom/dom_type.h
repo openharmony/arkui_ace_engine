@@ -41,6 +41,7 @@ ACE_EXPORT extern const char DOM_NODE_TAG_OPTION[];
 ACE_EXPORT extern const char DOM_NODE_TAG_POPUP[];
 ACE_EXPORT extern const char DOM_NODE_TAG_PROGRESS[];
 ACE_EXPORT extern const char DOM_NODE_TAG_SELECT[];
+ACE_EXPORT extern const char DOM_NODE_TAG_MASK[];
 ACE_EXPORT extern const char DOM_NODE_TAG_MENU[];
 ACE_EXPORT extern const char DOM_NODE_TAG_SLIDER[];
 ACE_EXPORT extern const char DOM_NODE_TAG_SPAN[];
@@ -83,21 +84,29 @@ ACE_EXPORT extern const char DOM_NODE_TAG_QRCODE[];
 ACE_EXPORT extern const char DOM_NODE_TAG_SVG[];
 ACE_EXPORT extern const char DOM_NODE_TAG_RECT[];
 ACE_EXPORT extern const char DOM_NODE_TAG_ANIMATE[];
+ACE_EXPORT extern const char DOM_NODE_TAG_ANIMATE_TRANSFORM[];
 ACE_EXPORT extern const char DOM_NODE_TAG_WEB[];
+ACE_EXPORT extern const char DOM_NODE_TAG_RICH_TEXT[];
+ACE_EXPORT extern const char DOM_NODE_TAG_XCOMPONENT[];
 ACE_EXPORT extern const char DOM_NODE_TAG_PATH[];
 ACE_EXPORT extern const char DOM_NODE_TAG_LINE[];
 ACE_EXPORT extern const char DOM_NODE_TAG_POLYLINE[];
 ACE_EXPORT extern const char DOM_NODE_TAG_POLYGON[];
 ACE_EXPORT extern const char DOM_NODE_TAG_CIRCLE[];
+ACE_EXPORT extern const char DOM_NODE_TAG_FORM[];
 ACE_EXPORT extern const char DOM_NODE_TAG_ELLIPSE[];
 ACE_EXPORT extern const char DOM_NODE_TAG_ANIMATE_MOTION[];
 ACE_EXPORT extern const char DOM_NODE_TAG_CAMERA[];
+ACE_EXPORT extern const char DOM_NODE_TAG_STOP[];
+ACE_EXPORT extern const char DOM_NODE_TAG_LINEAR_GRADIENT[];
+ACE_EXPORT extern const char DOM_NODE_TAG_RADIAL_GRADIENT[];
 
 // common attribute constants
 ACE_EXPORT extern const char DOM_ID[];
 ACE_EXPORT extern const char DOM_SHARE_ID[];
 ACE_EXPORT extern const char DOM_SHOW[];
 ACE_EXPORT extern const char DOM_DIR[];
+ACE_EXPORT extern const char DOM_AUTO_FOCUS[];
 
 // common persudo class style constants
 ACE_EXPORT extern const char DOM_PSEUDO_CLASS_SYMBOL[];
@@ -106,6 +115,7 @@ ACE_EXPORT extern const char DOM_DISABLED_PSEUDO_CLASS[];
 ACE_EXPORT extern const char DOM_FOCUS_PSEUDO_CLASS[];
 ACE_EXPORT extern const char DOM_CHECKED_PSEUDO_CLASS[];
 ACE_EXPORT extern const char DOM_WAITING_PSEUDO_CLASS[];
+ACE_EXPORT extern const char DOM_HOVER_PSEUDO_CLASS[];
 
 // common style constants
 ACE_EXPORT extern const char DOM_WIDTH[];
@@ -156,6 +166,7 @@ ACE_EXPORT extern const char DOM_MAX_HEIGHT[];
 ACE_EXPORT extern const char DOM_DISPLAY_INDEX[];
 ACE_EXPORT extern const char DOM_ASPECT_RATIO[];
 ACE_EXPORT extern const char DOM_OPACITY[];
+ACE_EXPORT extern const char DOM_APPEARING_DURATION[];
 ACE_EXPORT extern const char DOM_DISPLAY[];
 ACE_EXPORT extern const char DOM_VISIBILITY[];
 ACE_EXPORT extern const char DOM_DISPLAY_GRID[];
@@ -184,6 +195,12 @@ ACE_EXPORT extern const char DOM_BORDER_TOP_LEFT_RADIUS[];
 ACE_EXPORT extern const char DOM_BORDER_TOP_RIGHT_RADIUS[];
 ACE_EXPORT extern const char DOM_BORDER_BOTTOM_RIGHT_RADIUS[];
 ACE_EXPORT extern const char DOM_BORDER_BOTTOM_LEFT_RADIUS[];
+ACE_EXPORT extern const char DOM_BORDER_IMAGE[];
+ACE_EXPORT extern const char DOM_BORDER_IMAGE_SOURCE[];
+ACE_EXPORT extern const char DOM_BORDER_IMAGE_WIDTH[];
+ACE_EXPORT extern const char DOM_BORDER_IMAGE_SLICE[];
+ACE_EXPORT extern const char DOM_BORDER_IMAGE_OUTSET[];
+ACE_EXPORT extern const char DOM_BORDER_IMAGE_REPEAT[];
 ACE_EXPORT extern const char DOM_POSITION[];
 ACE_EXPORT extern const char DOM_POSITION_RELATIVE[];
 ACE_EXPORT extern const char DOM_POSITION_FIXED[];
@@ -192,6 +209,8 @@ ACE_EXPORT extern const char DOM_POSITION_TOP[];
 ACE_EXPORT extern const char DOM_POSITION_RIGHT[];
 ACE_EXPORT extern const char DOM_POSITION_BOTTOM[];
 ACE_EXPORT extern const char DOM_POSITION_LEFT[];
+ACE_EXPORT extern const char DOM_POSITION_START[];
+ACE_EXPORT extern const char DOM_POSITION_END[];
 ACE_EXPORT extern const char DOM_BACKGROUND_IMAGE_SIZE[];
 ACE_EXPORT extern const char DOM_BACKGROUND_IMAGE_SIZE_CONTAIN[];
 ACE_EXPORT extern const char DOM_BACKGROUND_IMAGE_SIZE_COVER[];
@@ -208,21 +227,49 @@ ACE_EXPORT extern const char DOM_GRADIENT_DIRECTION_TOP[];
 ACE_EXPORT extern const char DOM_GRADIENT_DIRECTION_RIGHT[];
 ACE_EXPORT extern const char DOM_GRADIENT_DIRECTION_BOTTOM[];
 ACE_EXPORT extern const char DOM_GRADIENT_DIRECTION_LEFT[];
+ACE_EXPORT extern const char DOM_GRADIENT_SIZE_CLOSEST_CORNER[];
+ACE_EXPORT extern const char DOM_GRADIENT_SIZE_CLOSEST_SIDE[];
+ACE_EXPORT extern const char DOM_GRADIENT_SIZE_FARTHEST_CORNER[];
+ACE_EXPORT extern const char DOM_GRADIENT_SIZE_FARTHEST_SIDE[];
+ACE_EXPORT extern const char DOM_GRADIENT_SHAPE_CIRCLE[];
+ACE_EXPORT extern const char DOM_GRADIENT_SHAPE_ELLIPSE[];
 ACE_EXPORT extern const char DOM_VALUES[];
 ACE_EXPORT extern const char DOM_GRADIENT_VALUES[];
 ACE_EXPORT extern const char DOM_GRADIENT_TYPE[];
 ACE_EXPORT extern const char DOM_GRADIENT_DIRECTIONS[];
+ACE_EXPORT extern const char DOM_GRADIENT_SIZE[];
+ACE_EXPORT extern const char DOM_GRADIENT_POSITION[];
+ACE_EXPORT extern const char DOM_GRADIENT_SHAPE[];
+ACE_EXPORT extern const char DOM_GRADIENT_ANGLE[];
+ACE_EXPORT extern const char DOM_GRADIENT_ROTATION[];
+ACE_EXPORT extern const char DOM_LINEAR_GRADIENT[];
 ACE_EXPORT extern const char DOM_REPEATING_LINEAR_GRADIENT[];
+ACE_EXPORT extern const char DOM_RADIAL_GRADIENT[];
+ACE_EXPORT extern const char DOM_REPEATING_RADIAL_GRADIENT[];
+ACE_EXPORT extern const char DOM_SWEEP_GRADIENT[];
+ACE_EXPORT extern const char DOM_REPEATING_SWEEP_GRADIENT[];
 ACE_EXPORT extern const char DOM_TRANSFORM[];
 ACE_EXPORT extern const char DOM_SCALE[];
 ACE_EXPORT extern const char DOM_SCALE_X[];
 ACE_EXPORT extern const char DOM_SCALE_Y[];
+ACE_EXPORT extern const char DOM_SCALE_Z[];
+ACE_EXPORT extern const char DOM_SCALE_3D[];
 ACE_EXPORT extern const char DOM_TRANSLATE[];
 ACE_EXPORT extern const char DOM_TRANSLATE_X[];
 ACE_EXPORT extern const char DOM_TRANSLATE_Y[];
+ACE_EXPORT extern const char DOM_TRANSLATE_Z[];
+ACE_EXPORT extern const char DOM_TRANSLATE_3D[];
 ACE_EXPORT extern const char DOM_ROTATE[];
 ACE_EXPORT extern const char DOM_ROTATE_X[];
 ACE_EXPORT extern const char DOM_ROTATE_Y[];
+ACE_EXPORT extern const char DOM_ROTATE_Z[];
+ACE_EXPORT extern const char DOM_ROTATE_3D[];
+ACE_EXPORT extern const char DOM_SKEW[];
+ACE_EXPORT extern const char DOM_SKEW_X[];
+ACE_EXPORT extern const char DOM_SKEW_Y[];
+ACE_EXPORT extern const char DOM_PERSPECTIVE[];
+ACE_EXPORT extern const char DOM_MATRIX[];
+ACE_EXPORT extern const char DOM_MATRIX_3D[];
 ACE_EXPORT extern const char DOM_FOCUSABLE[];
 ACE_EXPORT extern const char DOM_ANIMATION_WIDTH[];
 ACE_EXPORT extern const char DOM_ANIMATION_HEIGHT[];
@@ -237,14 +284,22 @@ ACE_EXPORT extern const char DOM_ANIMATION_DELAY[];
 ACE_EXPORT extern const char DOM_ANIMATION_DURATION[];
 ACE_EXPORT extern const char DOM_ANIMATION_FILL[];
 ACE_EXPORT extern const char DOM_ANIMATION_EASING[];
+ACE_EXPORT extern const char DOM_ANIMATION_BEGIN[];
+ACE_EXPORT extern const char DOM_ANIMATION_END[];
 ACE_EXPORT extern const char DOM_ANIMATION_ITERATION_COUNT[];
 ACE_EXPORT extern const char DOM_ANIMATION_TIMING_FUNCTION[];
 ACE_EXPORT extern const char DOM_ANIMATION_FILL_MODE[];
 ACE_EXPORT extern const char DOM_ANIMATION_DIRECTION[];
+ACE_EXPORT extern const char DOM_ANIMATION_DIRECTION_API[];
 ACE_EXPORT extern const char DOM_ANIMATION_DIRECTION_NORMAL[];
 ACE_EXPORT extern const char DOM_ANIMATION_DIRECTION_ALTERNATE[];
 ACE_EXPORT extern const char DOM_ANIMATION_DIRECTION_REVERSE[];
 ACE_EXPORT extern const char DOM_ANIMATION_DIRECTION_ALTERNATE_REVERSE[];
+ACE_EXPORT extern const char DOM_ANIMATION_PLAY_STATE[];
+ACE_EXPORT extern const char DOM_ANIMATION_PLAY_STATE_RUNNING[];
+ACE_EXPORT extern const char DOM_ANIMATION_PLAY_STATE_PAUSED[];
+ACE_EXPORT extern const char DOM_ANIMATION_PLAY_STATE_IDLE[];
+ACE_EXPORT extern const char DOM_ANIMATION_PLAY_STATE_FINISHED[];
 ACE_EXPORT extern const char DOM_ANIMATION_TIMING_FUNCTION_EASE[];
 ACE_EXPORT extern const char DOM_ANIMATION_TIMING_FUNCTION_EASE_IN[];
 ACE_EXPORT extern const char DOM_ANIMATION_TIMING_FUNCTION_EASE_OUT[];
@@ -260,6 +315,7 @@ ACE_EXPORT extern const char DOM_ANIMATION_TIMING_FUNCTION_RHYTHM[];
 ACE_EXPORT extern const char DOM_ANIMATION_TIMING_FUNCTION_SMOOTH[];
 ACE_EXPORT extern const char DOM_ANIMATION_TIMING_FUNCTION_STEPS[];
 ACE_EXPORT extern const char DOM_ANIMATION_TIMING_FUNCTION_CUBIC_BEZIER[];
+ACE_EXPORT extern const char DOM_ANIMATION_TIMING_FUNCTION_SPRING[];
 ACE_EXPORT extern const char DOM_ANIMATION_FILL_MODE_NONE[];
 ACE_EXPORT extern const char DOM_ANIMATION_FILL_MODE_FORWARDS[];
 ACE_EXPORT extern const char DOM_ANIMATION_FILL_MODE_BACKWARDS[];
@@ -278,8 +334,22 @@ ACE_EXPORT extern const char DOM_TRANSFORM_ORIGIN_LEFT_BOTTOM[];
 ACE_EXPORT extern const char DOM_FILTER[];
 ACE_EXPORT extern const char DOM_BACKDROP_FILTER[];
 ACE_EXPORT extern const char DOM_WINDOW_FILTER[];
+ACE_EXPORT extern const char DOM_CARET_COLOR[];
+ACE_EXPORT extern const char DOM_CLIP_PATH[];
+ACE_EXPORT extern const char DOM_MASK_IMAGE[];
+ACE_EXPORT extern const char DOM_MASK_POSITION[];
+ACE_EXPORT extern const char DOM_MASK_SIZE[];
+ACE_EXPORT extern const char DOM_IMAGE_FILL[];
+ACE_EXPORT extern const char DOM_BOX_SIZING[];
+ACE_EXPORT extern const char DOM_AUTO[];
 
 // transition style
+ACE_EXPORT extern const char DOM_TRANSITION_NAME[];
+ACE_EXPORT extern const char DOM_TRANSITION_PROPERTY[];
+ACE_EXPORT extern const char DOM_TRANSITION_PROPERTY_DURATION[];
+ACE_EXPORT extern const char DOM_TRANSITION_PROPERTY_TIMING_FUNCTION[];
+ACE_EXPORT extern const char DOM_TRANSITION_PROPERTY_DELAY[];
+ACE_EXPORT extern const char DOM_TRANSITION_BACKGROUND_COLOR[];
 ACE_EXPORT extern const char DOM_TRANSITION_ENTER[];
 ACE_EXPORT extern const char DOM_TRANSITION_EXIT[];
 ACE_EXPORT extern const char DOM_TRANSITION_DURATION[];
@@ -326,13 +396,27 @@ ACE_EXPORT extern const char DOM_FLEX_WRAP[];
 ACE_EXPORT extern const char DOM_WRAP[];
 ACE_EXPORT extern const char DOM_DIV_CARD_TYPE[];
 ACE_EXPORT extern const char DOM_DIV_CARD_BLUR[];
+ACE_EXPORT extern const char DOM_DIV_EVENT_REACH_TOP[];
+ACE_EXPORT extern const char DOM_DIV_EVENT_REACH_BOTTOM[];
+ACE_EXPORT extern const char DOM_DIV_EVENT_REACH_START[];
+ACE_EXPORT extern const char DOM_DIV_EVENT_REACH_END[];
 
 // image attribute and style constants
 ACE_EXPORT extern const char DOM_SRC[];
+ACE_EXPORT extern const char DOM_TOP[];
 ACE_EXPORT extern const char DOM_IMAGE_FIT[];
 ACE_EXPORT extern const char DOM_IMAGE_ALT[];
 ACE_EXPORT extern const char DOM_IMAGE_MATCH_TEXT_DIRECTION[];
 ACE_EXPORT extern const char DOM_IMAGE_FIT_ORIGINAL_SIZE[];
+ACE_EXPORT extern const char DOM_IMAGE_FILL_COLOR[];
+
+// objectPosition
+ACE_EXPORT extern const char DOM_IMAGE_POSITION[];
+ACE_EXPORT extern const char DOM_IMAGE_POSITION_LEFT[];
+ACE_EXPORT extern const char DOM_IMAGE_POSITION_CENTER[];
+ACE_EXPORT extern const char DOM_IMAGE_POSITION_RIGHT[];
+ACE_EXPORT extern const char DOM_IMAGE_POSITION_TOP[];
+ACE_EXPORT extern const char DOM_IMAGE_POSITION_BOTTOM[];
 
 // image animator attribute and stytle constants
 ACE_EXPORT extern const char DOM_IMAGES[];
@@ -398,6 +482,8 @@ ACE_EXPORT extern const char DOM_SCROLL_SHAPE_MODE_ROUND[];
 ACE_EXPORT extern const char DOM_SCROLL_SCROLLBAR_COLOR[];
 ACE_EXPORT extern const char DOM_SCROLL_SCROLLBAR_WIDTH[];
 ACE_EXPORT extern const char DOM_SCROLL_OVER_SCROLL_EFFECT[];
+ACE_EXPORT extern const char DOM_SCROLL_SCROLLBAR_POSITION[];
+ACE_EXPORT extern const char DOM_SCROLL_SCROLLBAR_OFFSET[];
 
 // list-items attribute and style constants
 ACE_EXPORT extern const char DOM_LISTITEM_COLUMN_SPAN[];
@@ -411,6 +497,7 @@ ACE_EXPORT extern const char DOM_LISTITEM_PRIMARY[];
 ACE_EXPORT extern const char DOM_LISTITEM_CARD_TYPE[];
 ACE_EXPORT extern const char DOM_LISTITEM_CARD_BLUR[];
 ACE_EXPORT extern const char DOM_LISTITEM_ACTIVE[];
+ACE_EXPORT extern const char DOM_LISTITEM_CLICK_COLOR[];
 
 // list-items-group attribute and style constants
 ACE_EXPORT extern const char DOM_LIST_ITEM_GROUP_EVENT_GROUPCLICK[];
@@ -437,9 +524,12 @@ ACE_EXPORT extern const char DOM_TEXT_FONT_SIZE_STEP[];
 ACE_EXPORT extern const char DOM_TEXT_PREFER_FONT_SIZES[];
 ACE_EXPORT extern const char DOM_TEXT_FONT_WEIGHT[];
 ACE_EXPORT extern const char DOM_TEXT_DECORATION[];
+ACE_EXPORT extern const char DOM_TEXT_DECORATION_COLOR[];
 ACE_EXPORT extern const char DOM_TEXT_FONT_STYLE[];
 ACE_EXPORT extern const char DOM_TEXT_ALLOW_SCALE[];
 ACE_EXPORT extern const char DOM_TEXT_ALIGN[];
+ACE_EXPORT extern const char DOM_TEXT_CASE[];
+ACE_EXPORT extern const char DOM_TEXT_BASELINE_OFFSET[];
 ACE_EXPORT extern const char DOM_TEXT_OVERFLOW[];
 ACE_EXPORT extern const char DOM_OVERFLOW_STYLE[];
 ACE_EXPORT extern const char DOM_TEXT_LINE_HEIGHT[];
@@ -458,6 +548,22 @@ ACE_EXPORT extern const char DOM_TEXT_DECORATION_NONE[];
 ACE_EXPORT extern const char DOM_TEXT_FONT_STYLE_ITALIC[];
 ACE_EXPORT extern const char DOM_TEXT_FONT_STYLE_NORMAL[];
 ACE_EXPORT extern const char DOM_TEXT_WORD_BREAK[];
+ACE_EXPORT extern const char DOM_TEXT_FONT_VARIANT[];
+ACE_EXPORT extern const char DOM_TEXT_FONT_FEATURE_SETTINGS[];
+ACE_EXPORT extern const char DOM_TEXT_ADAPT_HEIGHT[];
+ACE_EXPORT extern const char DOM_TEXT_VERTICAL_ALIGN[];
+ACE_EXPORT extern const char DOM_TOP[];
+ACE_EXPORT extern const char DOM_MIDDLE[];
+ACE_EXPORT extern const char DOM_BOTTOM[];
+ACE_EXPORT extern const char DOM_TEXT_INDENT[];
+ACE_EXPORT extern const char DOM_TEXT_WORD_SPACING[];
+ACE_EXPORT extern const char DOM_TEXT_WHITE_SPACE[];
+ACE_EXPORT extern const char DOM_WHITE_SPACE_NORMAL[];
+ACE_EXPORT extern const char DOM_WHITE_SPACE_PRELINE[];
+ACE_EXPORT extern const char DOM_WHITE_SPACE_PREWRAP[];
+ACE_EXPORT extern const char DOM_WHITE_SPACE_NOWRAP[];
+ACE_EXPORT extern const char DOM_WHITE_SPACE_PRE[];
+ACE_EXPORT extern const char DOM_WHITE_SPACE_INHERIT[];
 
 // popup attribute and style constants
 ACE_EXPORT extern const char DOM_TARGET[];
@@ -507,6 +613,7 @@ ACE_EXPORT extern const char DOM_COLORS_ARRAY[];
 ACE_EXPORT extern const char DOM_WEIGHTS_ARRAY[];
 ACE_EXPORT extern const char DOM_EFFECTS_ON[];
 ACE_EXPORT extern const char DOM_AUTO_SCALE[];
+ACE_EXPORT extern const char DOM_CHART_ANIMATION_DURATION[];
 
 // slider attribute and style constants
 ACE_EXPORT extern const char DOM_MIN[];
@@ -552,6 +659,7 @@ ACE_EXPORT extern const char DOM_STEPPER_ITEM_EVENT_DISAPPEAR[];
 ACE_EXPORT extern const char DOM_INDEX[];
 ACE_EXPORT extern const char DOM_SWIPER_ANIMATION_OPACITY[];
 ACE_EXPORT extern const char DOM_AUTOPLAY[];
+ACE_EXPORT extern const char DOM_CACHED_SIZE[];
 ACE_EXPORT extern const char DOM_INTERVAL[];
 ACE_EXPORT extern const char DOM_INDICATOR[];
 ACE_EXPORT extern const char DOM_LOOP[];
@@ -572,6 +680,8 @@ ACE_EXPORT extern const char DOM_METHOD_APPEND[];
 ACE_EXPORT extern const char DOM_METHOD_SHOW_PREVIOUS[];
 ACE_EXPORT extern const char DOM_METHOD_SHOW_NEXT[];
 ACE_EXPORT extern const char DOM_DIGITAL_INDICATOR[];
+ACE_EXPORT extern const char DOM_PREVIOUS_MARGIN[];
+ACE_EXPORT extern const char DOM_NEXT_MARGIN[];
 
 // switch attribute and style constants
 ACE_EXPORT extern const char DOM_CHECKED[];
@@ -663,7 +773,20 @@ ACE_EXPORT extern const char DOM_CATCH_CAPTURE_TOUCH_MOVE[];
 ACE_EXPORT extern const char DOM_CATCH_CAPTURE_TOUCH_CANCEL[];
 ACE_EXPORT extern const char DOM_CATCH_CAPTURE_TOUCH_END[];
 ACE_EXPORT extern const char DOM_CLICK[];
+ACE_EXPORT extern const char DOM_DRAG_START[];
+ACE_EXPORT extern const char DOM_DRAG[];
+ACE_EXPORT extern const char DOM_DRAG_END[];
+ACE_EXPORT extern const char DOM_DRAG_ENTER[];
+ACE_EXPORT extern const char DOM_DRAG_OVER[];
+ACE_EXPORT extern const char DOM_DRAG_LEAVE[];
+ACE_EXPORT extern const char DOM_DRAG_DROP[];
+ACE_EXPORT extern const char DOM_CATCH_BUBBLE_CLICK[];
+ACE_EXPORT extern const char DOM_DOUBLE_CLICK[];
 ACE_EXPORT extern const char DOM_LONG_PRESS[];
+ACE_EXPORT extern const char DOM_PINCH_START[];
+ACE_EXPORT extern const char DOM_PINCH_UPDATE[];
+ACE_EXPORT extern const char DOM_PINCH_END[];
+ACE_EXPORT extern const char DOM_PINCH_CANCEL[];
 ACE_EXPORT extern const char DOM_COMPLETE[];
 ACE_EXPORT extern const char DOM_ERROR[];
 ACE_EXPORT extern const char DOM_FOCUS[];
@@ -673,8 +796,10 @@ ACE_EXPORT extern const char DOM_SELECTED[];
 ACE_EXPORT extern const char DOM_CANCEL[];
 ACE_EXPORT extern const char DOM_HIDE[];
 ACE_EXPORT extern const char DOM_MOUSE[];
+ACE_EXPORT extern const char DOM_HOVER[];
 ACE_EXPORT extern const char DOM_SWIPE[];
 ACE_EXPORT extern const char DOM_ROTATION[];
+ACE_EXPORT extern const char DOM_ANIMATION_FINISH[];
 
 // video constants
 ACE_EXPORT extern const char DOM_VIDEO_MUTED[];
@@ -683,9 +808,12 @@ ACE_EXPORT extern const char DOM_VIDEO_AUTOPLAY[];
 ACE_EXPORT extern const char DOM_VIDEO_POSTER[];
 ACE_EXPORT extern const char DOM_VIDEO_CONTROLS[];
 ACE_EXPORT extern const char DOM_VIDEO_FIT[];
+ACE_EXPORT extern const char DOM_VIDEO_LOOP[];
+ACE_EXPORT extern const char DOM_VIDEO_START_TIME[];
 ACE_EXPORT extern const char DOM_VIDEO_EVENT_PREPARED[];
 ACE_EXPORT extern const char DOM_VIDEO_EVENT_START[];
 ACE_EXPORT extern const char DOM_VIDEO_EVENT_PAUSE[];
+ACE_EXPORT extern const char DOM_VIDEO_EVENT_STOP[];
 ACE_EXPORT extern const char DOM_VIDEO_EVENT_FINISH[];
 ACE_EXPORT extern const char DOM_VIDEO_EVENT_ERROR[];
 ACE_EXPORT extern const char DOM_VIDEO_EVENT_SEEKING[];
@@ -694,9 +822,18 @@ ACE_EXPORT extern const char DOM_VIDEO_EVENT_TIMEUPDATE[];
 ACE_EXPORT extern const char DOM_VIDEO_EVENT_FULLSCREENCHANGE[];
 ACE_EXPORT extern const char DOM_VIDEO_METHOD_START[];
 ACE_EXPORT extern const char DOM_VIDEO_METHOD_PAUSE[];
+ACE_EXPORT extern const char DOM_VIDEO_METHOD_STOP[];
 ACE_EXPORT extern const char DOM_VIDEO_METHOD_SEEK_TO[];
 ACE_EXPORT extern const char DOM_VIDEO_METHOD_REQUEST_FULLSCREEN[];
 ACE_EXPORT extern const char DOM_VIDEO_METHOD_EXIT_FULLSCREEN[];
+ACE_EXPORT extern const char DOM_VIDEO_SPEED[];
+ACE_EXPORT extern const char DOM_VIDEO_DIRECTION[];
+ACE_EXPORT extern const char DOM_VIDEO_POSITION[];
+ACE_EXPORT extern const char DOM_VIDEO_POSITION_LEFT[];
+ACE_EXPORT extern const char DOM_VIDEO_POSITION_CENTER[];
+ACE_EXPORT extern const char DOM_VIDEO_POSITION_RIGHT[];
+ACE_EXPORT extern const char DOM_VIDEO_POSITION_TOP[];
+ACE_EXPORT extern const char DOM_VIDEO_POSITION_BOTTOM[];
 
 // textarea attribute and style constants
 ACE_EXPORT extern const char DOM_TEXTAREA_VALUE[];
@@ -716,6 +853,11 @@ ACE_EXPORT extern const char DOM_TEXTAREA_SHOW_COUNTER[];
 
 // input attribute and style extern constants
 ACE_EXPORT extern const char DOM_INPUT_TYPE[];
+ACE_EXPORT extern const char DOM_INPUT_TYPE_EMAIL[];
+ACE_EXPORT extern const char DOM_INPUT_TYPE_DATE[];
+ACE_EXPORT extern const char DOM_INPUT_TYPE_TIME[];
+ACE_EXPORT extern const char DOM_INPUT_TYPE_NUMBER[];
+ACE_EXPORT extern const char DOM_INPUT_TYPE_PASSWORD[];
 ACE_EXPORT extern const char DOM_INPUT_CHECKED[];
 ACE_EXPORT extern const char DOM_INPUT_NAME[];
 ACE_EXPORT extern const char DOM_INPUT_VALUE[];
@@ -741,9 +883,13 @@ ACE_EXPORT extern const char DOM_INPUT_METHOD_FOCUS[];
 ACE_EXPORT extern const char DOM_ICON_SRC[];
 ACE_EXPORT extern const char DOM_SHOW_ICON_SRC[];
 ACE_EXPORT extern const char DOM_HIDE_ICON_SRC[];
+ACE_EXPORT extern const char DOM_INPUT_SHOW_PASSWORD_ICON[];
 ACE_EXPORT extern const char DOM_INPUT_SHOW_COUNTER[];
 ACE_EXPORT extern const char DOM_INPUT_OPTION_ICON[];
 ACE_EXPORT extern const char DOM_INPUT_OPTION_CONTENT[];
+ACE_EXPORT extern const char DOM_INPUT_SELECTED_START[];
+ACE_EXPORT extern const char DOM_INPUT_SELECTED_END[];
+ACE_EXPORT extern const char DOM_INPUT_SOFT_KEYBOARD_ENABLED[];
 ACE_EXPORT extern const char DOM_INPUT_METHOD_SHOW_ERROR[];
 ACE_EXPORT extern const char DOM_INPUT_METHOD_DELETE[];
 
@@ -756,6 +902,7 @@ ACE_EXPORT extern const char DOM_INPUT_EVENT_OPTION_SELECT[];
 ACE_EXPORT extern const char DOM_INPUT_EVENT_TRANSLATE[];
 ACE_EXPORT extern const char DOM_INPUT_EVENT_SHARE[];
 ACE_EXPORT extern const char DOM_INPUT_EVENT_SEARCH[];
+ACE_EXPORT extern const char DOM_INPUT_EVENT_SELECT_CHANGE[];
 
 // divider style extern constants
 ACE_EXPORT extern const char DOM_DIVIDER_VERTICAL[];
@@ -828,19 +975,24 @@ ACE_EXPORT extern const char DOM_PICKER_COLUMN_HEIGHT[];
 ACE_EXPORT extern const char DOM_CALENDAR_DATA[];
 ACE_EXPORT extern const char DOM_CALENDAR_DATE[];
 ACE_EXPORT extern const char DOM_CALENDAR_DATE_ADAPTER[];
+ACE_EXPORT extern const char DOM_CALENDAR_DIRECTION[];
 ACE_EXPORT extern const char DOM_CALENDAR_METHOD_GO_TO[];
 ACE_EXPORT extern const char DOM_CALENDAR_EVENT_SELECTED_CHANGE[];
 ACE_EXPORT extern const char DOM_CALENDAR_SHOW_HOLIDAY[];
 ACE_EXPORT extern const char DOM_CALENDAR_SHOW_LUNAR[];
 ACE_EXPORT extern const char DOM_CALENDAR_CARD_CALENDAR[];
 ACE_EXPORT extern const char DOM_CALENDAR_START_DAY_OF_WEEK[];
+ACE_EXPORT extern const char DOM_CALENDAR_TYPE[];
 ACE_EXPORT extern const char DOM_CALENDAR_EVENT_REQUEST_DATA[];
 ACE_EXPORT extern const char DOM_CALENDAR_OFF_DAYS[];
+ACE_EXPORT extern const char DOM_CALENDAR_WORK_DAYS[];
+ACE_EXPORT extern const char DOM_CALENDAR_HOLIDAYS[];
 
 // dialog
 ACE_EXPORT extern const char DOM_DIALOG_METHOD_SHOW[];
 ACE_EXPORT extern const char DOM_DIALOG_METHOD_CLOSE[];
 ACE_EXPORT extern const char DOM_DIALOG_EVENT_CANCEL[];
+ACE_EXPORT extern const char DOM_DIALOG_STYLE_DRAGABLE[];
 
 // multi modal event
 ACE_EXPORT extern const char DOM_VOICE_LABEL[];
@@ -905,6 +1057,10 @@ ACE_EXPORT extern const char DOM_BADGE_TEXT_COLOR[];
 ACE_EXPORT extern const char DOM_GRID_CONTAINER_COLUMNS[];
 ACE_EXPORT extern const char DOM_GRID_CONTAINER_SIZE_TYPE[];
 ACE_EXPORT extern const char DOM_GRID_CONTAINER_GUTTER_WIDTH[];
+ACE_EXPORT extern const char DOM_GRID_CONTAINER_GUTTER[];
+ACE_EXPORT extern const char DOM_GRID_CONTAINER_TEMPLATE[];
+ACE_EXPORT extern const char DOM_GRID_TEMPLATE_TYPE_NORMAL[];
+ACE_EXPORT extern const char DOM_GRID_TEMPLATE_TYPE_GRID[];
 ACE_EXPORT extern const char DOM_GRID_CONTAINER_GET_COLUMNS[];
 ACE_EXPORT extern const char DOM_GRID_CONTAINER_GET_COLUMN_WIDTH[];
 ACE_EXPORT extern const char DOM_GRID_CONTAINER_GET_GUTTER_WIDTH[];
@@ -925,6 +1081,7 @@ ACE_EXPORT extern const char DOM_COLUMN_TYPE_CARD[];
 ACE_EXPORT extern const char DOM_COLUMN_TYPE_CONTENT[];
 
 ACE_EXPORT extern const char DOM_CLICK_EFFECT[];
+ACE_EXPORT extern const char DOM_SPRING_EFFECT[];
 // panel attribute and style constants
 ACE_EXPORT extern const char DOM_PANEL_METHOD_SHOW[];
 ACE_EXPORT extern const char DOM_PANEL_METHOD_CLOSE[];
@@ -940,6 +1097,7 @@ ACE_EXPORT extern const char DOM_PANEL_EVENT_SIZE_CHANGED[];
 ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_ICON[];
 ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_VALUE[];
 ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_TEXT_COLOR[];
+ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_COLOR[];
 ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_FONT_SIZE[];
 ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_FONT_STYLE[];
 ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_FONT_WEIGHT[];
@@ -950,6 +1108,7 @@ ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_ALLOW_SCALE[];
 // card transition
 ACE_EXPORT extern const char DOM_TRANSITION_EFFECT[];
 ACE_EXPORT extern const char DOM_TRANSITION_CARD_COMPOSEID[];
+ACE_EXPORT extern const char DOM_TRANSITION_CARD_PARAMS[];
 
 // qrcode
 ACE_EXPORT extern const char DOM_QRCODE_BACKGROUND_COLOR[];
@@ -989,11 +1148,13 @@ ACE_EXPORT extern const char DOM_SVG_START_OFFSET[];
 ACE_EXPORT extern const char DOM_SVG_FILL[];
 ACE_EXPORT extern const char DOM_SVG_FILL_OPACITY[];
 ACE_EXPORT extern const char DOM_SVG_FILL_RULE[];
+ACE_EXPORT extern const char DOM_SVG_FILTER[];
 ACE_EXPORT extern const char DOM_SVG_FONT_FAMILY[];
 ACE_EXPORT extern const char DOM_SVG_FONT_SIZE[];
 ACE_EXPORT extern const char DOM_SVG_FONT_STYLE[];
 ACE_EXPORT extern const char DOM_SVG_FONT_WEIGHT[];
 ACE_EXPORT extern const char DOM_SVG_LETTER_SPACING[];
+ACE_EXPORT extern const char DOM_SVG_MASK[];
 ACE_EXPORT extern const char DOM_SVG_TEXT_DECORATION[];
 ACE_EXPORT extern const char DOM_SVG_TEXT_LENGTH[];
 ACE_EXPORT extern const char DOM_SVG_STROKE[];
@@ -1025,6 +1186,37 @@ ACE_EXPORT extern const char DOM_SVG_CY[];
 ACE_EXPORT extern const char DOM_SVG_R[];
 ACE_EXPORT extern const char DOM_SVG_ROTATE[];
 ACE_EXPORT extern const char DOM_SVG_LENGTH_ADJUST[];
+ACE_EXPORT extern const char DOM_SVG_MIRROR[];
+ACE_EXPORT extern const char DOM_SVG_MASK_CONTENT_UNITS[];
+ACE_EXPORT extern const char DOM_SVG_MASK_UNITS[];
+ACE_EXPORT extern const char DOM_SVG_PATTERN_CONTENT_UNITS[];
+ACE_EXPORT extern const char DOM_SVG_PATTERN_UNITS[];
+ACE_EXPORT extern const char DOM_SVG_PATTERN_TRANSFORM[];
+ACE_EXPORT extern const char DOM_SVG_OFFSET[];
+ACE_EXPORT extern const char DOM_SVG_STOP_COLOR[];
+ACE_EXPORT extern const char DOM_SVG_STOP_OPACITY[];
+ACE_EXPORT extern const char DOM_SVG_GRADIENT_TRANSFORM[];
+ACE_EXPORT extern const char DOM_SVG_SPREAD_METHOD[];
+ACE_EXPORT extern const char DOM_SVG_FX[];
+ACE_EXPORT extern const char DOM_SVG_FY[];
+ACE_EXPORT extern const char DOM_SVG_FR[];
+ACE_EXPORT extern const char DOM_SVG_HREF[];
+ACE_EXPORT extern const char DOM_SVG_XLINK_HREF[];
+ACE_EXPORT extern const char DOM_SVG_CLIP_RULE[];
+ACE_EXPORT extern const char DOM_SVG_FE_IN[];
+ACE_EXPORT extern const char DOM_SVG_FE_RESULT[];
+ACE_EXPORT extern const char DOM_SVG_FE_COLOR_INTERPOLATION_FILTERS[];
+ACE_EXPORT extern const char DOM_SVG_FE_TYPE[];
+ACE_EXPORT extern const char DOM_SVG_FE_VALUES[];
+ACE_EXPORT extern const char DOM_SVG_FE_FLOOD_COLOR[];
+ACE_EXPORT extern const char DOM_SVG_FE_FLOOD_OPACITY[];
+ACE_EXPORT extern const char DOM_SVG_FE_EDGE_MODE[];
+ACE_EXPORT extern const char DOM_SVG_FE_STD_DEVIATION[];
+ACE_EXPORT extern const char DOM_SVG_FE_AMPLITUDE[];
+ACE_EXPORT extern const char DOM_SVG_FE_EXPONENT[];
+ACE_EXPORT extern const char DOM_SVG_FE_INTERCEPT[];
+ACE_EXPORT extern const char DOM_SVG_FE_SLOPE[];
+ACE_EXPORT extern const char DOM_SVG_FE_TABLE_VALUES[];
 
 // web
 ACE_EXPORT extern const char DOM_PAGESTART[];
@@ -1032,7 +1224,19 @@ ACE_EXPORT extern const char DOM_PAGEFINISH[];
 ACE_EXPORT extern const char DOM_PAGEERROR[];
 ACE_EXPORT extern const char DOM_WEB_WEBSRC[];
 ACE_EXPORT extern const char DOM_METHOD_RELOAD[];
+ACE_EXPORT extern const char DOM_WEB_MESSAGE[];
 
+// richtext
+ACE_EXPORT extern const char DOM_RICH_TEXT_DATA[];
+ACE_EXPORT extern const char DOM_LOAD_START[];
+ACE_EXPORT extern const char DOM_LOAD_COMPLETE[];
+
+// xcomponent
+ACE_EXPORT extern const char DOM_XCOMPONENT_NAME[];
+ACE_EXPORT extern const char DOM_XCOMPONENT_TYPE[];
+ACE_EXPORT extern const char DOM_XCOMPONENT_LIBRARYNAME[];
+ACE_EXPORT extern const char DOM_XCOMPONENT_INIT[];
+ACE_EXPORT extern const char DOM_XCOMPONENT_DESTROY[];
 // z-index
 ACE_EXPORT extern const char DOM_ZINDEX[];
 
@@ -1040,8 +1244,13 @@ ACE_EXPORT extern const char DOM_ZINDEX[];
 ACE_EXPORT extern const char DOM_TAKE_PHOTO[];
 ACE_EXPORT extern const char DOM_CAMERA_FLASH[];
 ACE_EXPORT extern const char DOM_CAMERA_DEVICE_POSITION[];
-ACE_EXPORT extern const char DOM_CAMERA_START_RECORD[];
-ACE_EXPORT extern const char DOM_CAMERA_CLOSE_RECORDER[];
+
+// form
+ACE_EXPORT extern const char DOM_FORM_EVENT_SUBMIT[];
+ACE_EXPORT extern const char DOM_FORM_EVENT_RESET[];
+
+// crown
+ACE_EXPORT extern const char DOM_CROWN_ROTATE[];
 
 } // namespace OHOS::Ace
 

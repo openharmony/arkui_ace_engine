@@ -34,6 +34,7 @@ public:
     void Update() override;
     void Detached() override;
     void Deactivate() override;
+    RefPtr<Element> UpdateChild(const RefPtr<Element>& child, const RefPtr<Component>& newComponent) final;
 
     RefPtr<RenderNode> GetRenderNode() const override
     {
@@ -50,20 +51,31 @@ public:
     void SetAccessibilityNodeById(const ComposeId& id);
 
 protected:
+    void UpdateAccessibilityNode();
     virtual RefPtr<RenderNode> CreateRenderNode();
     virtual RefPtr<RenderNode> GetCachedRenderNode()
     {
         return nullptr;
     }
     void Apply(const RefPtr<Element>& child) override;
+    void UmountRender() override;
+    int32_t CountRenderNode() const override
+    {
+        return renderNode_ ? 1 : 0;
+    }
+
+    virtual void ApplyRenderChild(const RefPtr<RenderElement>& renderChild);
 
     RefPtr<RenderNode> renderNode_;
 
 private:
     void SetAccessibilityNode(const WeakPtr<Element>& parent);
-    void UpdateAccessibilityNode();
 
     ComposeId composeId_;
+    // detach and attach event marker
+    using DisappearCallback = std::function<void()>;
+    DisappearCallback disappearCallback_;
+    bool nodeMounted_ = false;
 };
 
 } // namespace OHOS::Ace

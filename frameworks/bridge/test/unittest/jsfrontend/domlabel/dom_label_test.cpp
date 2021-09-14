@@ -40,7 +40,7 @@ constexpr double TEST_LINE_HEIGHT = 11.0;
 constexpr int32_t TEST_FONT_STYLE = 1;
 constexpr int32_t TEST_TEXT_DECORATION = 2;
 constexpr uint32_t TEST_MAX_LINE = 10;
-constexpr double TEST_LETTER_SPACING = 11.0;
+constexpr Dimension TEST_LETTER_SPACING = 11.0_px;
 constexpr int32_t TEST_TEXT_ALIGN = 1;
 const std::string TEST_FONT_FAMILY = "serif";
 constexpr int32_t DEFAULT_OVER_FLOW = 0;
@@ -100,7 +100,8 @@ HWTEST_F(DomLabelTest, DomLabelTest001, TestSize.Level1)
     EXPECT_EQ(textStyle.GetLineHeight(), theme->GetTextStyle().GetLineHeight());
     EXPECT_EQ(textStyle.GetFontStyle(), theme->GetTextStyle().GetFontStyle());
     EXPECT_EQ(textStyle.GetTextDecoration(), theme->GetTextStyle().GetTextDecoration());
-    EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing(), theme->GetTextStyle().GetLetterSpacing()));
+    EXPECT_EQ(textStyle.GetLetterSpacing().Unit(), theme->GetTextStyle().GetLetterSpacing().Unit());
+    EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing().Value(), theme->GetTextStyle().GetLetterSpacing().Value()));
     EXPECT_EQ(static_cast<int32_t>(textChild->GetTextStyle().GetTextAlign()), DEFAULT_TEXT_ALIGN);
 }
 
@@ -178,7 +179,8 @@ HWTEST_F(DomLabelTest, DomLabelTest002, TestSize.Level1)
     EXPECT_TRUE(NearEqual(static_cast<int32_t>(textStyle.GetFontStyle()), TEST_FONT_STYLE));
     EXPECT_TRUE(NearEqual(static_cast<int32_t>(textStyle.GetTextDecoration()), TEST_TEXT_DECORATION));
     EXPECT_TRUE(NearEqual(textChild->GetTextStyle().GetMaxLines(), TEST_MAX_LINE));
-    EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing(), TEST_LETTER_SPACING));
+    EXPECT_EQ(textStyle.GetLetterSpacing().Unit(), TEST_LETTER_SPACING.Unit());
+    EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing().Value(), TEST_LETTER_SPACING.Value()));
     EXPECT_EQ(static_cast<int32_t>(textChild->GetTextStyle().GetTextAlign()), TEST_TEXT_ALIGN);
     EXPECT_EQ(textStyle.GetFontFamilies()[0], TEST_FONT_FAMILY);
 }

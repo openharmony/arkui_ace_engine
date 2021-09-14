@@ -34,6 +34,7 @@ public:
     }
 
 protected:
+    void PrepareSpecializedComponent() override;
     void ResetInitializedStyle() override;
 
 private:

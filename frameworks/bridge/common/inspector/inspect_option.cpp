@@ -24,6 +24,7 @@ InspectOption::InspectOption(NodeId nodeId, const std::string& nodeName) : Inspe
 void InspectOption::PackAttrAndStyle()
 {
     // add for the attrs
+    attrs_.insert(std::make_pair("action", "show"));
     attrs_.insert(std::make_pair("focusable", "true"));
     attrs_.insert(std::make_pair("disabled", "false"));
 

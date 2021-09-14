@@ -40,12 +40,27 @@ public:
     void DumpProperty(const std::vector<std::string>& params) override;
     void DumpTree(int32_t depth, NodeId nodeID) override;
     void SetCardViewParams(const std::string& key, bool focus) override;
+    void HandleComponentPostBinding() override;
+
+    void UpdateViewScale();
+
+    float GetScaleX() const
+    {
+        return scaleX_;
+    }
+
+    float GetScaleY() const
+    {
+        return scaleY_;
+    }
 
 private:
     void UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node);
     void SendAccessibilitySyncEvent(const AccessibilityEvent& accessibilityEvent);
 
     std::string callbackKey_;
+    float scaleX_ = 1.0f;
+    float scaleY_ = 1.0f;
 };
 
 } // namespace OHOS::Ace::Framework

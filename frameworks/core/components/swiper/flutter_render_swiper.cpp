@@ -17,6 +17,7 @@
 
 #include "third_party/skia/include/effects/SkGradientShader.h"
 
+#include "base/utils/system_properties.h"
 #include "core/components/align/render_align.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/decoration.h"
@@ -58,13 +59,98 @@ void FlutterRenderSwiper::Paint(RenderContext& context, const Offset& offset)
         LOGD("swiper has not default indicator");
         return;
     }
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
+        SystemProperties::GetDeviceType() == DeviceType::CAR) {
         DrawIndicator(context, offset);
     } else {
         if (indicator_->GetIndicatorMask()) {
             PaintMask(context, offset);
         }
         PaintIndicator(context, offset);
+    }
+
+    if (isPaintedFade_) {
+        PaintFade(context, offset);
+    }
+}
+
+void FlutterRenderSwiper::PaintFade(RenderContext& context, const Offset& offset)
+{
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    if (!renderContext) {
+        return;
+    }
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (canvas == nullptr) {
+        return;
+    }
+    canvas->save();
+    canvas->translate(offset.GetX(), offset.GetY());
+    PaintShadow(canvas, offset);
+    canvas->restore();
+}
+
+void FlutterRenderSwiper::PaintShadow(flutter::Canvas* canvas, const Offset& offset)
+{
+    static constexpr double FADE_MAX_DISTANCE = 2000.0f;
+    static constexpr double FADE_MAX_TRANSLATE = 40.0f;
+    static constexpr double FADE_MAX_RADIUS = 2.0f;
+    static constexpr double FADE_ALPHA = 0.45f;
+    static constexpr double FADE_SCALE_RATE = 0.2f;
+
+    bool isVertical = axis_ == Axis::VERTICAL;
+    double height = swiperHeight_;
+    double width = swiperWidth_;
+    double centerX = 0.0;
+    double centerY = 0.0;
+    double fadeTranslate = dragDelta_ * FADE_SCALE_RATE;
+    double radius = 0.0;
+    if (GreatNotEqual(dragDelta_, 0.0)) {
+        fadeTranslate = fadeTranslate > FADE_MAX_TRANSLATE ? FADE_MAX_TRANSLATE : fadeTranslate;
+        if (isVertical) {
+            centerY = -FADE_MAX_DISTANCE + dragDelta_ / FADE_SCALE_RATE;
+            if (centerY > (-width * FADE_MAX_RADIUS)) {
+                centerY = -width * FADE_MAX_RADIUS;
+            }
+            centerX = width / 2;
+        } else {
+            centerX = -FADE_MAX_DISTANCE + dragDelta_ / FADE_SCALE_RATE;
+            if (centerX > (-FADE_MAX_RADIUS * height)) {
+                centerX = (-FADE_MAX_RADIUS * height);
+            }
+            centerY = height / 2;
+        }
+        radius = sqrt(pow(centerX, 2) + pow(centerY, 2));
+
+    } else {
+        fadeTranslate = fadeTranslate > -FADE_MAX_TRANSLATE ? fadeTranslate : -FADE_MAX_TRANSLATE;
+        if (isVertical) {
+            centerY = height + FADE_MAX_DISTANCE + dragDelta_ / FADE_SCALE_RATE;
+            if (centerY < (height + width * FADE_MAX_RADIUS)) {
+                centerY = height + width * FADE_MAX_RADIUS;
+            }
+            centerX = width / 2;
+            radius = sqrt(pow(centerY - height, 2) + pow(centerX, 2));
+        } else {
+            centerX = width + FADE_MAX_DISTANCE + dragDelta_ / FADE_SCALE_RATE;
+            if (centerX < (width + FADE_MAX_RADIUS * height)) {
+                centerX = width + FADE_MAX_RADIUS * height;
+            }
+            centerY = height / 2;
+            radius = sqrt(pow(centerX - width, 2) + pow(centerY, 2));
+        }
+    }
+
+    Offset center = Offset(centerX, centerY);
+    flutter::Paint painter;
+    flutter::PaintData paintData;
+    painter.paint()->setColor(fadeColor_.GetValue());
+    painter.paint()->setAlphaf(FADE_ALPHA);
+    painter.paint()->setBlendMode(SkBlendMode::kSrcOver);
+    if (isVertical) {
+        canvas->drawCircle(center.GetX(), center.GetY() + fadeTranslate, radius, painter, paintData);
+    } else {
+        canvas->drawCircle(center.GetX() + fadeTranslate, center.GetY(), radius, painter, paintData);
     }
 }
 

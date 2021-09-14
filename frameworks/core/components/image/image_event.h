@@ -22,8 +22,9 @@ class ACE_EXPORT LoadImageSuccessEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadImageSuccessEvent, BaseEventInfo);
 
 public:
-    LoadImageSuccessEvent(double width, double height)
-        : BaseEventInfo("LoadImageSuccessEvent"), width_(width), height_(height) {}
+    LoadImageSuccessEvent(double width, double height, double componentWidth, double componentHeight,
+        int32_t loadingStatus = 1) : BaseEventInfo("LoadImageSuccessEvent"), width_(width), height_(height),
+        componentWidth_(componentWidth), componentHeight_(componentHeight), loadingStatus_(loadingStatus) {}
 
     ~LoadImageSuccessEvent() = default;
 
@@ -37,17 +38,50 @@ public:
         return height_;
     }
 
+    double GetComponentWidth() const
+    {
+        return componentWidth_;
+    }
+
+    double GetComponentHeight() const
+    {
+        return componentHeight_;
+    }
+
+    int32_t GetLoadingStatus() const
+    {
+        return loadingStatus_;
+    }
+
 private:
-    double width_ = 0;
-    double height_ = 0;
+    double width_ = 0.0;
+    double height_ = 0.0;
+    double componentWidth_ = 0.0;
+    double componentHeight_ = 0.0;
+    int32_t loadingStatus_ = 1; // [0] means [done layout], [1] means [load success]
 };
 
 class ACE_EXPORT LoadImageFailEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadImageFailEvent, BaseEventInfo);
 
 public:
-    LoadImageFailEvent() : BaseEventInfo("LoadImageFailEvent") {}
+    LoadImageFailEvent(double componentWidth, double componentHeight)
+        : BaseEventInfo("LoadImageFailEvent"), componentWidth_(componentWidth), componentHeight_(componentHeight) {}
     ~LoadImageFailEvent() = default;
+
+    double GetComponentWidth() const
+    {
+        return componentWidth_;
+    }
+
+    double GetComponentHeight() const
+    {
+        return componentHeight_;
+    }
+
+private:
+    double componentWidth_ = 0.0;
+    double componentHeight_ = 0.0;
 };
 
 } // namespace OHOS::Ace

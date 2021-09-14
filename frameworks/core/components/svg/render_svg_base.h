@@ -20,8 +20,9 @@
 #include "frameworks/core/animation/keyframe_animation.h"
 #include "frameworks/core/animation/svg_animate.h"
 #include "frameworks/core/components/common/properties/svg_paint_state.h"
+#include "frameworks/core/components/declaration/svg/svg_base_declaration.h"
 #include "frameworks/core/components/svg/svg_animate_component.h"
-#include "frameworks/core/components/svg/svg_sharp.h"
+#include "frameworks/core/components/svg/svg_transform.h"
 #include "frameworks/core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -34,22 +35,31 @@ const char ATTR_NAME_RX[] = "rx";
 const char ATTR_NAME_RY[] = "ry";
 const char ATTR_NAME_OPACITY[] = "opacity";
 
+enum class LengthType {
+    HORIZONTAL,
+    VERTICAL,
+    OTHER,
+};
+
 class RenderSvgBase : public RenderNode {
     DECLARE_ACE_TYPE(RenderSvgBase, RenderNode);
 
 public:
     ~RenderSvgBase() override;
-    virtual void UpdateMotion(const std::string& path, const std::string& rotate,
-        double percent, const Point& point) {};
 
-    virtual bool GetStartPoint(Point& point)
-    {
-        return false;
-    }
+    virtual void PaintDirectly(RenderContext& context, const Offset& offset);
+
+    virtual void UpdateMotion(const std::string& path, const std::string& rotate, double percent) {};
 
     virtual bool PrepareSelfAnimation(const RefPtr<SvgAnimate>& SvgAnimate)
     {
         return false;
+    }
+
+    // return paint bounds of svg element path
+    virtual Rect GetPaintBounds(const Offset& offset)
+    {
+        return GetPaintRect();
     }
 
     const FillState& GetFillState() const
@@ -67,22 +77,53 @@ public:
         return textStyle_;
     }
 
+    const ClipState GetClipState() const
+    {
+        return clipState_;
+    }
+
     bool IsSvgNode() const
     {
         return isSvgNode_;
     }
 
+    bool NeedTransform() const
+    {
+        return (!animateTransformAttrs_.empty() || !transform_.empty());
+    }
+
+    const std::unordered_map<std::string, RefPtr<Animator>>& GetAnimators() const
+    {
+        return animators_;
+    }
+
+    void SetSvgRoot(const RefPtr<RenderSvgBase>& svgRoot)
+    {
+        rootSvgNode_ = svgRoot;
+    }
+
+    RefPtr<RenderSvgBase> GetMaskFromRoot(const std::string& id);
+
+    RefPtr<RenderSvgBase> GetPatternFromRoot(const std::string& id);
+
+    RefPtr<RenderSvgBase> GetFilterFromRoot(const std::string& id);
+
 protected:
     bool PrepareBaseAnimation(const RefPtr<SvgAnimate>& animateComponent);
     template<typename T>
-    bool CreatePropertyAnimation(const RefPtr<SvgAnimate>& component, const T& originalValue,
-        std::function<void(T value)>&& callback, const RefPtr<Evaluator<T>>& evaluator);
+    bool CreatePropertyAnimation(
+        const RefPtr<SvgAnimate>& component, const T& originalValue, std::function<void(T value)>&& callback);
     template<typename T>
     bool SetPresentationProperty(const std::string& attrName, const T& val, bool isSelf = true);
 
-    double ConvertDimensionToPx(const Dimension& value,  double baseValue);
+    bool SetTransformProperty(
+        const std::string& type, const std::vector<float>& from, const std::vector<float>& to, double value);
 
-    void SetPresentationAttrs(const RefPtr<SvgSharp>& svgSharp);
+    double ConvertDimensionToPx(const Dimension& value, double baseValue);
+
+    double ConvertDimensionToPx(const Dimension& value, LengthType type, bool isRoot = false);
+
+    void SetPresentationAttrs(const RefPtr<SvgBaseDeclaration>& baseDeclaration);
 
     void PrepareWeightAnimate(const RefPtr<SvgAnimate>& svgAnimate, std::vector<std::string>& valueVector,
         const std::string& originalValue, bool& isBy);
@@ -90,11 +131,36 @@ protected:
     void PrepareAnimation(const std::list<RefPtr<Component>>& componentChildren);
     bool PreparePropertyAnimation(const RefPtr<SvgAnimate>& svgAnimate);
 
+    const Matrix4 GetTransformMatrix4();
+    const Matrix4 UpdateTransformMatrix4();
+
+    void AddMaskToRoot(const std::string& id, const RefPtr<RenderSvgBase>& mask);
+    void AddPatternToRoot(const std::string& id, const RefPtr<RenderSvgBase>& pattern);
+    void AddFilterToRoot(const std::string& id, const RefPtr<RenderSvgBase>& filter);
+    const Rect GetViewBoxFromRoot();
+
+    void PaintMaskLayer(RenderContext& context, const Offset& svg, const Offset& current);
+    void PaintMaskLayer(RenderContext& context, const Offset& svg, const Rect& bounds); // used for tspan on textpath
+    void UpdateGradient(FillState& fillState);
+    std::pair<Dimension, Dimension> CreateTransformOrigin(const std::string& transformOrigin_) const;
+    Offset GetTransformOffset(bool isRoot = false);
+
     FillState fillState_;
     StrokeState strokeState_;
     SvgTextStyle textStyle_;
+    ClipState clipState_;
     std::unordered_map<std::string, RefPtr<Animator>> animators_;
     bool isSvgNode_ = false;
+    Size svgViewPort_;
+    std::string maskId_;
+    std::string filterId_;
+    std::string transform_;
+    std::pair<Dimension, Dimension> transformOrigin_;
+    std::map<std::string, std::vector<float>> transformAttrs_;
+    std::map<std::string, std::vector<float>> animateTransformAttrs_;
+    std::optional<TransformInfo> transformInfo_ = std::nullopt;
+    WeakPtr<RenderSvgBase> rootSvgNode_ = nullptr;
+    std::optional<Rect> svgViewBox_ = std::nullopt; // which contains viewBox
 
     virtual void OnNotifyRender()
     {
@@ -103,13 +169,16 @@ protected:
 
 private:
     template<typename T>
-    void PreparePresentationAnimation(const RefPtr<SvgAnimate>& svgAnimate, const T& originalValue,
-        const RefPtr<Evaluator<T>>& evaluator);
+    void PreparePresentationAnimation(const RefPtr<SvgAnimate>& svgAnimate, const T& originalValue);
     bool PrepareAnimateMotion(const RefPtr<SvgAnimate>& svgAnimate);
+    void PrepareTransformAnimation(const RefPtr<SvgAnimate>& svgAnimate, double originalValue);
+    void PrepareTransformValueAnimation(const RefPtr<SvgAnimate>& svgAnimate, double originalValue);
+    void PrepareTransformFrameAnimation(const RefPtr<SvgAnimate>& svgAnimate, double originalValue);
     template<typename T>
     void ChangeChildInheritValue(const RefPtr<RenderNode>& svgBase, const std::string& attrName, T value);
     bool IsSelfValue(const std::string& attrName);
     bool HasAnimator(const std::string& attrName);
+    std::string ParseIdFromUrl(const std::string& url);
 };
 
 } // namespace OHOS::Ace

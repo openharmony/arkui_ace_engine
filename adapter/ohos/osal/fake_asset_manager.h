@@ -39,10 +39,36 @@ class FakeAssetManager final : public AssetManager {
 public:
     ~FakeAssetManager() override = default;
 
+    void PushFront(RefPtr<AssetProvider> provider) override {}
+
+    void PushBack(RefPtr<AssetProvider> provider) override {}
+
     RefPtr<Asset> GetAsset(const std::string& assetName) override
     {
         return nullptr;
     }
+
+    std::string GetAssetPath(const std::string& assetName) override
+    {
+        return "";
+    }
+
+    void GetAssetList(const std::string& path, std::vector<std::string>& assetList) const override
+    {
+    }
+
+    void SetPackagePath(const std::string& packagePath) override
+    {
+        packagePath_ = packagePath;
+    }
+
+    std::string GetPackagePath() const override
+    {
+        return packagePath_;
+    }
+
+private:
+    std::string packagePath_;
 };
 
 } // namespace OHOS::Ace

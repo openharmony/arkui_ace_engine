@@ -29,7 +29,7 @@ public:
 
 private:
     RefPtr<RenderNode> CreateRenderNode() override;
-    void Apply(const RefPtr<Element>&) override;
+    void ApplyRenderChild(const RefPtr<RenderElement>& renderChild) override;
 };
 
 } // namespace OHOS::Ace

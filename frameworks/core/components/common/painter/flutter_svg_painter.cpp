@@ -20,8 +20,11 @@
 #include "include/core/SkRSXform.h"
 #include "include/core/SkTextBlob.h"
 #include "include/effects/SkDashPathEffect.h"
+#include "include/effects/SkLumaColorFilter.h"
 #include "include/utils/SkParsePath.h"
+#include "third_party/skia/include/effects/SkGradientShader.h"
 
+#include "frameworks/core/components/svg/flutter_render_svg_pattern.h"
 #include "frameworks/core/components/transform/flutter_render_transform.h"
 
 namespace OHOS::Ace {
@@ -42,26 +45,124 @@ const char FONT_TYPE_DROIDSANS[] = "/system/fonts/DroidSans.ttf";
 sk_sp<SkTypeface> FlutterSvgPainter::fontTypeChinese_ = SkTypeface::MakeFromFile(FONT_TYPE_HWCHINESE);
 sk_sp<SkTypeface> FlutterSvgPainter::fontTypeNormal_ = SkTypeface::MakeFromFile(FONT_TYPE_DROIDSANS);
 
-void FlutterSvgPainter::SetFillStyle(SkPaint& skPaint, const FillState& fillState, uint8_t opacity)
+void FlutterSvgPainter::SetMask(SkCanvas* canvas)
 {
+    SkPaint mask_filter;
+#ifdef USE_SYSTEM_SKIA
+    auto outerFilter = SkLumaColorFilter::Make();
+    auto innerFilter = SkColorFilter::MakeSRGBToLinearGamma();
+    auto filter = SkColorFilter::MakeComposeFilter(outerFilter, std::move(innerFilter));
+    mask_filter.setColorFilter(filter);
+#else
+    auto outerFilter = SkLumaColorFilter::Make();
+    auto innerFilter = SkColorFilters::SRGBToLinearGamma();
+    auto filter = SkColorFilters::Compose(outerFilter, std::move(innerFilter));
+    mask_filter.setColorFilter(filter);
+#endif
+    canvas->saveLayer(nullptr, &mask_filter);
+}
+
+void FlutterSvgPainter::SetFillStyle(SkPaint& skPaint, const FillState& fillState, uint8_t opacity, bool antiAlias)
+{
+    double curOpacity = fillState.GetOpacity().GetValue() * opacity * (1.0f / UINT8_MAX);
     skPaint.setStyle(SkPaint::Style::kFill_Style);
-    skPaint.setColor(fillState.GetColor().GetValue());
-    skPaint.setAlphaf(fillState.GetOpacity() * opacity * (1.0f / UINT8_MAX));
-    skPaint.setAntiAlias(true);
+    skPaint.setAntiAlias(antiAlias);
+    if (fillState.GetGradient()) {
+        SetGradientStyle(skPaint, fillState, curOpacity);
+    } else {
+        skPaint.setColor(fillState.GetColor().BlendOpacity(curOpacity).GetValue());
+    }
 }
 
 void FlutterSvgPainter::SetFillStyle(
-    SkCanvas* skCanvas, const SkPath& skPath, const FillState& fillState, uint8_t opacity)
+    SkCanvas* skCanvas, const SkPath& skPath, const FillState& fillState, uint8_t opacity, bool antiAlias)
 {
+    if (fillState.GetColor() == Color::TRANSPARENT && !fillState.GetGradient()) {
+        return;
+    }
     SkPaint paint;
-    SetFillStyle(paint, fillState, opacity);
+    SetFillStyle(paint, fillState, opacity, antiAlias);
     skCanvas->drawPath(skPath, paint);
 }
 
-void FlutterSvgPainter::SetStrokeStyle(SkPaint& skPaint, const StrokeState& strokeState, uint8_t opacity)
+void FlutterSvgPainter::SetGradientStyle(SkPaint& skPaint, const FillState& fillState, double opacity)
+{
+    auto gradient = fillState.GetGradient();
+    if (!gradient) {
+        return;
+    }
+    auto gradientColors = gradient->GetColors();
+    if (gradientColors.empty()) {
+        return;
+    }
+    std::vector<SkScalar> pos;
+    std::vector<SkColor> colors;
+    for (const auto& gradientColor : gradientColors) {
+        pos.push_back(gradientColor.GetDimension().Value());
+        colors.push_back(
+            gradientColor.GetColor().BlendOpacity(gradientColor.GetOpacity()).BlendOpacity(opacity).GetValue());
+    }
+    if (gradient->GetType() == GradientType::LINEAR) {
+        auto info = gradient->GetLinearGradientInfo();
+        SkPoint pts[2] = { SkPoint::Make(info.x1, info.y1), SkPoint::Make(info.x2, info.y2) };
+#ifdef USE_SYSTEM_SKIA
+        skPaint.setShader(SkGradientShader::MakeLinear(pts, &colors[0], &pos[0], gradientColors.size(),
+            static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr));
+#else
+        skPaint.setShader(SkGradientShader::MakeLinear(pts, &colors[0], &pos[0], gradientColors.size(),
+            static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr));
+#endif
+    }
+    if (gradient->GetType() == GradientType::RADIAL) {
+        auto info = gradient->GetRadialGradientInfo();
+        auto center = SkPoint::Make(info.cx, info.cy);
+        auto focal = SkPoint::Make(info.fx, info.fx);
+#ifdef USE_SYSTEM_SKIA
+        return center == focal ? skPaint.setShader(SkGradientShader::MakeRadial(center, info.r, &colors[0], &pos[0],
+                                     gradientColors.size(),
+                                     static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr))
+                               : skPaint.setShader(SkGradientShader::MakeTwoPointConical(focal, 0, center, info.r,
+                                     &colors[0], &pos[0], gradientColors.size(),
+                                     static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr));
+#else
+        return center == focal
+                   ? skPaint.setShader(SkGradientShader::MakeRadial(center, info.r, &colors[0], &pos[0],
+                         gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr))
+                   : skPaint.setShader(
+                         SkGradientShader::MakeTwoPointConical(focal, 0, center, info.r, &colors[0], &pos[0],
+                             gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr));
+#endif
+    }
+}
+
+void FlutterSvgPainter::SetFillStyle(
+    SkCanvas* canvas, const SkPath& skPath, const FillState& fillState, RenderInfo& renderInfo)
+{
+    const auto& fillHref = fillState.GetHref();
+    if (fillHref.empty() || fillState.GetGradient() || !renderInfo.node) {
+        return SetFillStyle(canvas, skPath, fillState, renderInfo.opacity, renderInfo.antiAlias);
+    }
+
+    SkPaint skPaint;
+    skPaint.reset();
+    auto pattern = AceType::DynamicCast<FlutterRenderSvgPattern>(renderInfo.node->GetPatternFromRoot(fillHref));
+    if (!pattern) {
+        return;
+    }
+    if (!pattern->OnAsPaint(renderInfo.offset, renderInfo.node->GetPaintBounds(renderInfo.offset), skPaint)) {
+        return;
+    }
+    skPaint.setAlphaf(fillState.GetOpacity().GetValue() * renderInfo.opacity * (1.0f / UINT8_MAX));
+    skPaint.setAntiAlias(renderInfo.antiAlias);
+    canvas->drawPath(skPath, skPaint);
+}
+
+void FlutterSvgPainter::SetStrokeStyle(SkPaint& skPaint, const StrokeState& strokeState, uint8_t opacity,
+    bool antiAlias)
 {
     skPaint.setStyle(SkPaint::Style::kStroke_Style);
-    skPaint.setColor(strokeState.GetColor().GetValue());
+    double curOpacity = strokeState.GetOpacity().GetValue() * opacity * (1.0f / UINT8_MAX);
+    skPaint.setColor(strokeState.GetColor().BlendOpacity(curOpacity).GetValue());
     if (strokeState.GetLineCap() == LineCapStyle::ROUND) {
         skPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
     } else if (strokeState.GetLineCap() == LineCapStyle::SQUARE) {
@@ -78,17 +179,43 @@ void FlutterSvgPainter::SetStrokeStyle(SkPaint& skPaint, const StrokeState& stro
     }
     skPaint.setStrokeWidth(static_cast<SkScalar>(strokeState.GetLineWidth().Value()));
     skPaint.setStrokeMiter(static_cast<SkScalar>(strokeState.GetMiterLimit()));
-    skPaint.setAlphaf(strokeState.GetOpacity() * opacity * (1.0f / UINT8_MAX));
-    skPaint.setAntiAlias(true);
+    skPaint.setAntiAlias(antiAlias);
     UpdateLineDash(skPaint, strokeState);
 }
 
 void FlutterSvgPainter::SetStrokeStyle(
-    SkCanvas* skCanvas, const SkPath& skPath, const StrokeState& strokeState, uint8_t opacity)
+    SkCanvas* skCanvas, const SkPath& skPath, const StrokeState& strokeState, uint8_t opacity, bool antiAlias)
 {
-    SkPaint paint;
-    SetStrokeStyle(paint, strokeState, opacity);
-    skCanvas->drawPath(skPath, paint);
+    if (strokeState.GetColor() == Color::TRANSPARENT) {
+        return;
+    }
+    if (GreatNotEqual(strokeState.GetLineWidth().Value(), 0.0)) {
+        SkPaint paint;
+        SetStrokeStyle(paint, strokeState, opacity, antiAlias);
+        skCanvas->drawPath(skPath, paint);
+    }
+}
+
+void FlutterSvgPainter::SetStrokeStyle(
+    SkCanvas* skCanvas, const SkPath& skPath, const StrokeState& strokeState, RenderInfo& renderInfo)
+{
+    const auto& strokeHref = strokeState.GetHref();
+    if (strokeHref.empty() || !renderInfo.node) {
+        return SetStrokeStyle(skCanvas, skPath, strokeState, renderInfo.opacity, renderInfo.antiAlias);
+    }
+
+    if (GreatNotEqual(strokeState.GetLineWidth().Value(), 0.0)) {
+        SkPaint paint;
+        SetStrokeStyle(paint, strokeState, renderInfo.opacity, renderInfo.antiAlias);
+        auto pattern = AceType::DynamicCast<FlutterRenderSvgPattern>(renderInfo.node->GetPatternFromRoot(strokeHref));
+        if (!pattern) {
+            return;
+        }
+        if (!pattern->OnAsPaint(renderInfo.offset, renderInfo.node->GetPaintBounds(renderInfo.offset), paint)) {
+            return;
+        }
+        skCanvas->drawPath(skPath, paint);
+    }
 }
 
 void FlutterSvgPainter::UpdateLineDash(SkPaint& paint, const StrokeState& strokeState)
@@ -133,6 +260,26 @@ Offset FlutterSvgPainter::GetPathOffset(const std::string& path, double current)
         return Offset(0.0, 0.0);
     }
     return Offset(position.fX, position.fY);
+}
+
+bool FlutterSvgPainter::GetMotionPathPosition(const std::string& path, double percent, MotionPathPosition& result)
+{
+    if (path.empty()) {
+        return false;
+    }
+    SkPath motion;
+    SkParsePath::FromSVGString(path.c_str(), &motion);
+    SkPathMeasure pathMeasure(motion, false);
+    SkPoint position;
+    SkVector tangent;
+    bool ret = pathMeasure.getPosTan(pathMeasure.getLength() * percent, &position, &tangent);
+    if (!ret) {
+        return false;
+    }
+    result.rotate = SkRadiansToDegrees(std::atan2(tangent.y(), tangent.x()));
+    result.offset.SetX(position.x());
+    result.offset.SetY(position.y());
+    return true;
 }
 
 Offset FlutterSvgPainter::UpdateText(SkCanvas* canvas, const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo)
@@ -247,6 +394,74 @@ double FlutterSvgPainter::UpdateTextPath(
     return offset;
 }
 
+Offset FlutterSvgPainter::MeasureTextBounds(
+    const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo, Rect& bounds)
+{
+    Offset offset = textDrawInfo.offset;
+    SkFont font;
+
+    font.setSize(svgTextInfo.textStyle.GetFontSize().Value());
+    font.setScaleX(1.0);
+    double space = 0.0;
+    SkScalar x = SkDoubleToScalar(offset.GetX());
+    SkScalar y = SkDoubleToScalar(offset.GetY());
+    std::wstring data = StringUtils::ToWstring(svgTextInfo.data);
+
+    for (int i = 0; i < (int)data.size(); i++) {
+        wchar_t temp = data[i];
+        if (temp >= 0x4e00 && temp <= 0x9fa5) {
+            // range of chinese
+            font.setTypeface(fontTypeChinese_);
+        } else {
+            font.setTypeface(fontTypeNormal_);
+        }
+        auto width = font.measureText(&temp, sizeof(temp), SkTextEncoding::kUTF16);
+        x = x + width + space;
+    }
+    bounds.SetWidth(fmax(x, bounds.Width()));
+    bounds.SetHeight(fmax(y, bounds.Height()));
+
+    return Offset(x, y);
+}
+
+double FlutterSvgPainter::MeasureTextPathBounds(
+    const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo, Rect& bounds)
+{
+    double offset = pathDrawInfo.offset;
+
+    SkFont font;
+    font.setSize(svgTextInfo.textStyle.GetFontSize().Value());
+    font.setScaleX(1.0);
+    double space = 0.0;
+    std::wstring data = StringUtils::ToWstring(svgTextInfo.data);
+
+    SkPath path;
+    SkParsePath::FromSVGString(pathDrawInfo.path.c_str(), &path);
+    SkPathMeasure pathMeasure(path, false);
+    SkScalar length = pathMeasure.getLength();
+
+    for (int i = 0; i < (int)data.size(); i++) {
+        wchar_t temp = data[i];
+        if (temp >= 0x4e00 && temp <= 0x9fa5) {
+            font.setTypeface(fontTypeChinese_);
+        } else {
+            font.setTypeface(fontTypeNormal_);
+        }
+        auto width = font.measureText(&temp, sizeof(temp), SkTextEncoding::kUTF16);
+        if (length < offset + width + space) {
+            LOGD("path length is not enough, length:%{public}lf, next offset:%{public}lf",
+                length, offset + width + space);
+            break;
+        }
+        offset = offset + width + space;
+    }
+
+    auto& pathBounds = path.getBounds();
+    bounds.SetWidth(fmax(pathBounds.right(), bounds.Width()));
+    bounds.SetHeight(fmax(pathBounds.bottom(), bounds.Height()));
+    return offset;
+}
+
 static const char* SkipSpace(const char str[])
 {
     if (!str) {
@@ -303,7 +518,7 @@ void FlutterSvgPainter::StringToPoints(const char str[], std::vector<SkPoint>& p
 }
 
 Matrix4 FlutterSvgPainter::CreateMotionMatrix(const std::string& path, const std::string& rotate,
-    const Point& startPoint, double percent, bool& isSuccess)
+    double percent, bool& isSuccess)
 {
     if (path.empty()) {
         isSuccess = false;
@@ -327,16 +542,39 @@ Matrix4 FlutterSvgPainter::CreateMotionMatrix(const std::string& path, const std
     } else {
         degrees = StringUtils::StringToDouble(rotate);
     }
-    auto transform = Matrix4::CreateIdentity();
-    auto translate = Matrix4::CreateTranslate(position.x() - startPoint.GetX(),
-        position.y() - startPoint.GetY(), 0.0);
-    transform = translate * transform;
+    auto transform = Matrix4::CreateTranslate(position.x(), position.y(), 0.0);
     Matrix4 rotateMatrix;
     rotateMatrix.SetEntry(ROW_INDEX, COL_INDEX, ROTATE_VALUE);
     rotateMatrix.Rotate(degrees, 0.0f, 0.0f, 1.0f);
     transform = rotateMatrix * transform;
     isSuccess = true;
     return FlutterRenderTransform::GetTransformByOffset(transform, Offset(position.x(), position.y()));
+}
+
+SkMatrix FlutterSvgPainter::ToSkMatrix(const Matrix4& matrix4)
+{
+    // Mappings from SkMatrix-index to input-index.
+    static const int32_t K_SK_MATRIX_INDEX_TO_MATRIX4_INDEX[] = {
+        0,
+        4,
+        12,
+        1,
+        5,
+        13,
+        3,
+        7,
+        15,
+    };
+
+    SkMatrix skMatrix;
+    for (std::size_t i = 0; i < ArraySize(K_SK_MATRIX_INDEX_TO_MATRIX4_INDEX); ++i) {
+        int32_t matrixIndex = K_SK_MATRIX_INDEX_TO_MATRIX4_INDEX[i];
+        if (matrixIndex < matrix4.Count())
+            skMatrix[i] = matrix4[matrixIndex];
+        else
+            skMatrix[i] = 0.0;
+    }
+    return skMatrix;
 }
 
 } // namespace OHOS::Ace

@@ -81,6 +81,7 @@ HWTEST_F(RenderPaddingTest, RenderPaddingTest001, TestSize.Level1)
     button->SetWidth(Dimension(40.0));
     padding->SetPadding(Edge(40.0, 50.0, 60.0, 50.0));
     padding->SetChild(button);
+
     /**
      * @tc.steps: step2. Verify that the properties are calculated correctly.
      * @tc.expected: step2. Properties are calculated correctly.

@@ -15,6 +15,9 @@
 
 #include "core/components/navigator/render_navigator.h"
 
+#include "base/log/event_report.h"
+#include "core/components/common/properties/alignment.h"
+#include "core/components/page/page_target.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
@@ -33,13 +36,34 @@ void RenderNavigator::Initialize()
 {
     auto wp = AceType::WeakClaim(this);
     clickRecognizer_ = AceType::MakeRefPtr<ClickRecognizer>();
-    clickRecognizer_->SetOnClick([wp](const ClickInfo&) {
+    clickRecognizer_->SetOnClick([wp](const ClickInfo& info) {
+        LOGI("navigator OnClick called");
         auto navigator = wp.Upgrade();
-        if (navigator) {
-            LOGI("navigator OnClick called");
-            navigator->NavigatePage();
+        if (!navigator) {
+            return;
         }
+        const auto context = navigator->GetContext().Upgrade();
+        if (context && context->GetIsDeclarative()) {
+            navigator->HandleClickEvent(info);
+        } else {
+            navigator->HandleClickEvent();
+        }
+        navigator->NavigatePage();
     });
+}
+
+void RenderNavigator::HandleClickEvent(const ClickInfo& info)
+{
+    if (onClickWithInfo_) {
+        onClickWithInfo_(info);
+    }
+}
+
+void RenderNavigator::HandleClickEvent()
+{
+    if (onClick_) {
+        onClick_();
+    }
 }
 
 void RenderNavigator::NavigatePage()
@@ -49,18 +73,29 @@ void RenderNavigator::NavigatePage()
         LOGE("pipelineContext is null");
         return;
     }
-    pipelineContext->NavigatePage(static_cast<uint8_t>(type_), uri_);
+
+    pipelineContext->NavigatePage(static_cast<uint8_t>(type_), PageTarget(uri_, targetContainer_), params_);
 }
 
 void RenderNavigator::Update(const RefPtr<Component>& component)
 {
     const RefPtr<NavigatorComponent> navigator = AceType::DynamicCast<NavigatorComponent>(component);
-    if (navigator) {
-        LOGI("navigator Update uri = %{public}s", navigator->GetUri().c_str());
-        uri_ = navigator->GetUri();
-        type_ = navigator->GetType();
-        active_ = navigator->GetActive();
+    if (!navigator) {
+        LOGE("Update error, navigator component is null");
+        EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
+        return;
     }
+
+    uri_ = navigator->GetUri();
+    params_ = navigator->GetParams();
+    type_ = navigator->GetType();
+    active_ = navigator->GetActive();
+    isDefHeight_ = navigator->IsDefHeight();
+    isDefWidth_ = navigator->IsDefWidth();
+    onClickWithInfo_ = AceAsyncEvent<void(const ClickInfo&)>::Create(navigator->GetClickedEventId(), context_);
+    onClick_ = AceAsyncEvent<void()>::Create(navigator->GetClickedEventId(), context_);
+    LOGI("navigator Update uri = %{public}s type = %{public}d", uri_.c_str(), type_);
+
     if (active_ == true) {
         NavigatePage();
     }
@@ -71,9 +106,22 @@ void RenderNavigator::PerformLayout()
 {
     LOGD("RenderNavigator PerformLayout");
     if (!GetChildren().empty()) {
+        LayoutParam innerLayout = GetLayoutParam();
         auto child = GetChildren().front();
-        child->Layout(GetLayoutParam());
-        SetLayoutSize(child->GetLayoutSize());
+        child->Layout(innerLayout);
+        Size maxSize = innerLayout.GetMaxSize();
+        double maxWidth = maxSize.Width();
+        double maxHeight = maxSize.Height();
+        if (!isDefHeight_) {
+            maxHeight = child->GetLayoutSize().Height();
+        }
+        if (!isDefWidth_) {
+            maxWidth = child->GetLayoutSize().Width();
+        }
+        SetLayoutSize(Size(maxWidth, maxHeight));
+        child->SetPosition(Alignment::GetAlignPosition(GetLayoutSize(), child->GetLayoutSize(), Alignment::CENTER));
+    } else {
+        SetLayoutSize(GetLayoutParam().GetMaxSize());
     }
 }
 

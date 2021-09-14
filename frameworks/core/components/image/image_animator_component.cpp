@@ -26,83 +26,104 @@ uint32_t g_componentId = 0;
 
 } // namespace
 
+ImageAnimatorComponent::ImageAnimatorComponent(const std::string& name) : ComposedComponent(GenerateComponentId(), name)
+{
+    if (!imageAnimatorController_) {
+        imageAnimatorController_ = AceType::MakeRefPtr<ImageAnimatorController>();
+    }
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<ImageAnimatorDeclaration>();
+        declaration_->Init();
+    }
+}
+
 RefPtr<Element> ImageAnimatorComponent::CreateElement()
 {
     return AceType::MakeRefPtr<ImageAnimatorElement>(GetId());
 }
 
-RefPtr<Animator> ImageAnimatorComponent::GetAnimator() const
+void ImageAnimatorComponent::SetFillMode(FillMode fillMode)
 {
-    return controller_;
+    declaration_->SetFillMode(fillMode);
 }
 
-void ImageAnimatorComponent::SetAnimator(const RefPtr<Animator>& controller)
+FillMode ImageAnimatorComponent::GetFillMode() const
 {
-    controller_ = controller;
+    return declaration_->GetFillMode();
+}
+
+void ImageAnimatorComponent::SetStatus(Animator::Status status)
+{
+    declaration_->SetStatus(status);
+}
+
+Animator::Status ImageAnimatorComponent::GetStatus() const
+{
+    return declaration_->GetStatus();
 }
 
 void ImageAnimatorComponent::SetIteration(int32_t iteration)
 {
-    iteration_ = iteration;
+    declaration_->SetIteration(iteration);
 }
 
 int32_t ImageAnimatorComponent::GetIteration() const
 {
-    return iteration_;
+    return declaration_->GetIteration();
 }
 
 void ImageAnimatorComponent::SetPreDecode(int32_t preDecode)
 {
-    preDecode_ = preDecode;
+    declaration_->SetPreDecode(preDecode);
 }
 
 int32_t ImageAnimatorComponent::GetPreDecode() const
 {
-    return preDecode_;
+    return declaration_->GetPreDecode();
 }
 
 void ImageAnimatorComponent::SetDuration(int32_t duration)
 {
     if (duration <= 0) {
-        duration_ = 0;
+        declaration_->SetDuration(0);
         return;
     }
-    duration_ = duration;
+    declaration_->SetDuration(duration);
 }
 
 int32_t ImageAnimatorComponent::GetDuration() const
 {
-    return duration_;
+    return declaration_->GetDuration();
 }
 
 void ImageAnimatorComponent::SetBorder(const Border& border)
 {
-    border_ = border;
+    declaration_->SetBorder(border);
 }
 
 const Border& ImageAnimatorComponent::GetBorder() const
 {
-    return border_;
+    return declaration_->GetBorder();
 }
 
 void ImageAnimatorComponent::SetIsReverse(bool isReverse)
 {
-    isReverse_ = isReverse;
+    declaration_->SetIsReverse(isReverse);
 }
 
 bool ImageAnimatorComponent::GetIsReverse() const
 {
-    return isReverse_;
+    return declaration_->GetIsReverse();
 }
 
 void ImageAnimatorComponent::SetIsFixedSize(bool isFixedSize)
 {
-    isFixedSize_ = isFixedSize;
+    declaration_->SetIsFixedSize(isFixedSize);
 }
 
 bool ImageAnimatorComponent::GetIsFixedSize() const
 {
-    return isFixedSize_;
+    return declaration_->GetIsFixedSize();
 }
 
 void ImageAnimatorComponent::SetImageProperties(const std::vector<ImageProperties>& images)
@@ -111,12 +132,12 @@ void ImageAnimatorComponent::SetImageProperties(const std::vector<ImagePropertie
         LOGW("Images are empty.");
         return;
     }
-    images_ = images;
+    declaration_->SetImageProperties(images);
 }
 
 const std::vector<ImageProperties>& ImageAnimatorComponent::GetImageProperties() const
 {
-    return images_;
+    return declaration_->GetImageProperties();
 }
 
 ComposeId ImageAnimatorComponent::GenerateComponentId()

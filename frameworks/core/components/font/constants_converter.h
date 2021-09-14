@@ -39,6 +39,7 @@ enum class TextBaseline;
 enum class TextAlign;
 enum class TextDirection;
 enum class TextDecoration;
+enum class WhiteSpace;
 class Color;
 
 namespace Constants {

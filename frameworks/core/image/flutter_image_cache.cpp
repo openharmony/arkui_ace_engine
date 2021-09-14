@@ -15,6 +15,8 @@
 
 #include "core/image/flutter_image_cache.h"
 
+#include "third_party/skia/include/core/SkGraphics.h"
+
 namespace OHOS::Ace {
 
 RefPtr<ImageCache> ImageCache::Create()
@@ -24,9 +26,16 @@ RefPtr<ImageCache> ImageCache::Create()
 
 void FlutterImageCache::Clear()
 {
-    std::scoped_lock clearLock(cacheListMutex_, imageCacheMutex_);
+    std::scoped_lock clearLock(cacheListMutex_, imageCacheMutex_, dataCacheListMutex_, imageDataCacheMutex_);
     cacheList_.clear();
     imageCache_.clear();
+    dataCacheList_.clear();
+    imageDataCache_.clear();
+}
+
+void ImageCache::Purge()
+{
+    SkGraphics::PurgeResourceCache();
 }
 
 } // namespace OHOS::Ace

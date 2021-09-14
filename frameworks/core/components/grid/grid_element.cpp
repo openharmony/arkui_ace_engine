@@ -175,9 +175,9 @@ void GridElement::HandleOnBlur()
     grid->HandleOnBlur();
 }
 
-void GridElement::Apply(const RefPtr<Element>& child)
+void GridElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChild)
 {
-    if (!child) {
+    if (!renderChild) {
         LOGE("Element child is null");
         return;
     }
@@ -188,21 +188,9 @@ void GridElement::Apply(const RefPtr<Element>& child)
     }
 
     auto proxy = RenderItemProxy::Create();
+    proxy->AddChild(renderChild->GetRenderNode());
     proxy->Attach(context_);
-    renderNode_->AddChild(proxy, child->GetSlot());
-    if (child->GetType() == RENDER_ELEMENT) {
-        // Directly attach the RenderNode if child is RenderElement.
-        RefPtr<RenderElement> renderChild = AceType::DynamicCast<RenderElement>(child);
-        if (renderChild) {
-            proxy->AddChild(renderChild->GetRenderNode());
-        }
-    } else if (child->GetType() == COMPOSED_ELEMENT) {
-        // If child is ComposedElement, just set parent render node.
-        RefPtr<ComposedElement> composeChild = AceType::DynamicCast<ComposedElement>(child);
-        if (composeChild) {
-            composeChild->SetParentRenderNode(proxy);
-        }
-    }
+    renderNode_->AddChild(proxy);
 }
 
 } // namespace OHOS::Ace

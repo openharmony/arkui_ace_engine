@@ -56,5 +56,5 @@ group("unittest") {
   testonly = true
   deps = []
 
-  deps += [ ":GroupMessageCodecTest" ]
+  #deps += [ ":GroupMessageCodecTest" ]
 }

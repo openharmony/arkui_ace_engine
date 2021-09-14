@@ -15,7 +15,7 @@
 
 #include "core/components/menu/menu_element.h"
 
-#include "core/components/box/render_box.h"
+#include "core/components/box/box_element.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
@@ -88,26 +88,34 @@ void MenuElement::OnTargetCallback(const ComposeId& id, const Offset& point)
         return;
     }
 
-    const auto& targetElement = context->GetComposedElementById(id);
-    if (!targetElement) {
-        return;
-    }
-    const auto& targetRender = targetElement->GetRenderNode();
+    auto targetRender = GetBoxRenderChild(context->GetComposedElementById(id));
     if (!targetRender) {
+        LOGE("OnTargetCallback: targetRender is null.");
         return;
     }
-    Size targetSize = targetRender->GetLayoutSize();
-    Offset targetGlobalOffset = targetRender->GetOffsetToStage();
-    RefPtr<RenderBox> box = AceType::DynamicCast<RenderBox>(targetRender);
-    if (box) {
-        targetGlobalOffset += box->GetPaintPosition();
-        targetSize = box->GetPaintSize();
-    }
+
+    Size targetSize = targetRender->GetPaintSize();
+    Offset targetGlobalOffset = targetRender->GetOffsetToStage() + targetRender->GetPaintPosition();
 
     Offset targetRightBottom(targetGlobalOffset.GetX() + targetSize.Width(),
         targetGlobalOffset.GetY() + targetSize.Height());
 
     popup->ShowDialog(stack, targetGlobalOffset, targetRightBottom, true);
+}
+
+RefPtr<RenderBox> MenuElement::GetBoxRenderChild(const RefPtr<Element>& element)
+{
+    auto targetElement = element;
+    RefPtr<RenderNode> targetRender;
+    while (targetElement) {
+        auto boxElement = AceType::DynamicCast<BoxElement>(targetElement);
+        if (boxElement) {
+            targetRender = boxElement->GetRenderNode();
+            break;
+        }
+        targetElement =  targetElement->GetChildren().front();
+    }
+    return AceType::DynamicCast<RenderBox>(targetRender);
 }
 
 void MenuElement::OnOptionCallback(std::size_t index)

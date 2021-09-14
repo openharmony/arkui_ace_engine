@@ -20,6 +20,11 @@
 #include "core/components/list/render_list_item.h"
 
 namespace OHOS::Ace {
+namespace {
+
+constexpr int32_t TOUCH_START_DELAY = 100; // Unit: milliseconds.
+
+} // namespace
 
 InteractiveEffect::InteractiveEffect(const WeakPtr<PipelineContext>& context)
 {
@@ -90,7 +95,7 @@ void InteractiveEffect::TouchDownAnimation()
     }
     RefPtr<KeyframeAnimation<double>> alphaAnimation = AceType::MakeRefPtr<KeyframeAnimation<double>>();
     CreateDoubleAnimation(alphaAnimation, alphaBegin_, alphaEnd_);
-    StartTouchAnimation(controller_, alphaAnimation);
+    StartTouchAnimation(controller_, alphaAnimation, TOUCH_START_DELAY);
 }
 
 void InteractiveEffect::TouchUpAnimation()
@@ -102,18 +107,37 @@ void InteractiveEffect::TouchUpAnimation()
         return;
     }
     RefPtr<KeyframeAnimation<double>> alphaAnimation = AceType::MakeRefPtr<KeyframeAnimation<double>>();
-    auto currentAlpha = GetAlpha();
+    CreateDoubleAnimation(alphaAnimation, GetAlpha(), alphaBegin_);
+    StartTouchAnimation(controller_, alphaAnimation);
+}
+
+void InteractiveEffect::CancelTouchAnimation()
+{
+    if (!theme_) {
+        LOGE("theme is invalid, stop build animation");
+        EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
+        return;
+    }
+    if (controller_ && !controller_->IsStopped()) {
+        controller_->Stop();
+    }
+    double currentAlpha = GetAlpha();
+    if (NearEqual(currentAlpha, alphaBegin_)) {
+        return;
+    }
+    RefPtr<KeyframeAnimation<double>> alphaAnimation = AceType::MakeRefPtr<KeyframeAnimation<double>>();
     CreateDoubleAnimation(alphaAnimation, currentAlpha, alphaBegin_);
     StartTouchAnimation(controller_, alphaAnimation);
 }
 
 void InteractiveEffect::StartTouchAnimation(RefPtr<Animator> controller,
-    RefPtr<KeyframeAnimation<double>>& doubleAnimation)
+    RefPtr<KeyframeAnimation<double>>& doubleAnimation, int32_t startDelay)
 {
     if (!controller || !doubleAnimation) {
         return;
     }
     controller->ClearInterpolators();
+    controller->SetStartDelay(startDelay);
     controller->AddInterpolator(doubleAnimation);
     controller->SetDuration(PRESS_ANIMATION_DURATION);
     controller->SetFillMode(FillMode::FORWARDS);

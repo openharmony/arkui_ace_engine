@@ -24,6 +24,7 @@
 #include "core/animation/page_transition_listener.h"
 #include "core/animation/shared_transition_effect.h"
 #include "core/components/common/properties/tween_option.h"
+#include "core/components/page_transition/page_transition_info.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -109,6 +110,17 @@ public:
 private:
     void CreateTransitionInOption(TransitionEvent event);
     void CreateTransitionOutOption(TransitionEvent event);
+};
+
+class TransitionDeclarativeTweenOption final : public TransitionTweenOption {
+public:
+    TransitionDeclarativeTweenOption(bool isRightToLeft, const WeakPtr<PipelineContext>& context)
+        : TransitionTweenOption(isRightToLeft, context)
+    {}
+    virtual ~TransitionDeclarativeTweenOption() = default;
+
+    void CreateSlideEffectAnimation(
+        TweenOption& tweenOption, SlideEffect effect, PageTransitionType type, TransitionDirection direction);
 };
 
 class TransitionTweenOptionFactory {

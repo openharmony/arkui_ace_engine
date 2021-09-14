@@ -19,7 +19,12 @@
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "napi/native_api.h"
+#include "native_engine/native_engine.h"
+#endif
 
 #ifdef USE_QUICKJS_ENGINE
 #ifdef __cplusplus
@@ -32,62 +37,79 @@ extern "C" {
 #endif
 
 namespace OHOS::Ace::Framework {
-
 class JSImage : public JSViewAbstract, public JSInteractableView {
-    DECLARE_ACE_TYPE(JSImage, JSViewAbstract);
-
 public:
-    JSImage() = delete;
-    JSImage(const std::string& src) : src_(src) {}
-    ~JSImage();
-
-    RefPtr<OHOS::Ace::Component> CreateSpecializedComponent() override;
-    std::vector<RefPtr<OHOS::Ace::SingleChild>> CreateInteractableComponents() override;
-    void HandleLoadImageSuccess(const BaseEventInfo& param);
-    void HandleLoadImageFail(const BaseEventInfo& param);
-    void SetAlt(std::string& value);
-    void SetObjectFit(int32_t value);
-    void SetMatchTextDirection(bool value);
-    void SetFitOriginalSize(bool value);
-
-#ifdef USE_QUICKJS_ENGINE
-    void MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc) override;
-    void ReleaseRT(JSRuntime* rt) override;
-    JSValue QjsOnComplete(JSContext* ctx, JSValueConst jsObject, int argc, JSValueConst* argv);
-    JSValue QjsOnError(JSContext* ctx, JSValueConst jsObject, int argc, JSValueConst* argv);
-#endif // USE_QUICKJS_ENGINE
-
-#ifdef USE_V8_ENGINE
-    void V8OnComplete(const v8::FunctionCallbackInfo<v8::Value>& args);
-    void V8OnError(const v8::FunctionCallbackInfo<v8::Value>& args);
-#endif // USE_V8_ENGINE
-
-public:
+    static void Create(const JSCallbackInfo& info);
+    static void HandleLoadImageSuccess(const BaseEventInfo& param);
+    static void HandleLoadImageFail(const BaseEventInfo& param);
+    static void SetAlt(const JSCallbackInfo& args);
+    static void SetMatchTextDirection(bool value);
+    static void SetFitOriginalSize(bool value);
+    static void SetSourceSize(const JSCallbackInfo& info);
+    static void SetObjectFit(int32_t value);
+    static void SetImageFill(const JSCallbackInfo& info);
+    static void SetImageInterpolation(int32_t imageInterpolation);
+    static void SetImageRenderMode(int32_t imageRenderMode);
+    static void SetImageRepeat(int32_t imageRepeat);
     static void JSBind(BindingTarget globalObj);
+    static void OnComplete(const JSCallbackInfo& args);
+    static void OnError(const JSCallbackInfo& args);
+    static void OnFinish(const JSCallbackInfo& info);
 
-#ifdef USE_QUICKJS_ENGINE
-    static void QjsDestructor(JSRuntime* rt, JSImage* ptr);
-    static void QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc);
-#endif // USE_QUICKJS_ENGINE
+    static void JsBorderColor(const JSCallbackInfo& info);
+    static void JsPadding(const JSCallbackInfo& info);
+    static void JsMargin(const JSCallbackInfo& info);
+    static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
+    static void JsBorder(const JSCallbackInfo& info);
+    static void JsBorderWidth(const JSCallbackInfo& info);
+    static void JsBorderRadius(const JSCallbackInfo& info);
+    static void SetBorderWidth(const Dimension& value);
+    static void SetLeftBorderWidth(const Dimension& value);
+    static void SetTopBorderWidth(const Dimension& value);
+    static void SetRightBorderWidth(const Dimension& value);
+    static void SetBottomBorderWidth(const Dimension& value);
+    static void SetBorderRadius(const Dimension& value);
+    static void JsOpacity(const JSCallbackInfo& info);
+    static void JsTransition(const JSCallbackInfo& info);
 
-private:
-    const std::string src_;
-    std::string alt_;
-    ImageFit objectFit_ = ImageFit::COVER;
-    bool matchTextDirection_ = false;
-    bool fitOriginalSize_ = false;
+protected:
+    /**
+     * box properties setter
+     */
+    static RefPtr<Decoration> GetFrontDecoration();
+    static const Border& GetBorder();
+    static BorderEdge GetLeftBorderEdge();
+    static BorderEdge GetTopBorderEdge();
+    static BorderEdge GetRightBorderEdge();
+    static BorderEdge GetBottomBorderEdge();
+    static void SetBorderEdge(const BorderEdge& edge);
+    static void SetLeftBorderEdge(const BorderEdge& edge);
+    static void SetTopBorderEdge(const BorderEdge& edge);
+    static void SetRightBorderEdge(const BorderEdge& edge);
+    static void SetBottomBorderEdge(const BorderEdge& edge);
+    static void SetBorder(const Border& border);
+    static void SetWidth(const Dimension& width);
+    static void SetHeight(const Dimension& height);
+    static void SetMarginTop(const std::string& value);
+    static void SetMarginBottom(const std::string& value);
+    static void SetMarginLeft(const std::string& value);
+    static void SetMarginRight(const std::string& value);
+    static void SetMargin(const std::string& value);
+    static void SetPaddingTop(const std::string& value);
+    static void SetPaddingBottom(const std::string& value);
+    static void SetPaddingLeft(const std::string& value);
+    static void SetPaddingRight(const std::string& value);
+    static void SetPadding(const std::string& value);
+    static void SetBackgroundColor(const Color& color);
+    static void SetBorderStyle(int32_t style);
+    static void SetBorderColor(const Color& color);
+    static void SetLeftBorderColor(const Color& color);
+    static void SetTopBorderColor(const Color& color);
+    static void SetRightBorderColor(const Color& color);
+    static void SetBottomBorderColor(const Color& color);
+    static void SetAutoResize(bool autoResize);
 
-#ifdef USE_QUICKJS_ENGINE
-    RefPtr<QJSEventFunction<LoadImageSuccessEvent, 2>> jsLoadSuccFunc_;
-    RefPtr<QJSEventFunction<LoadImageFailEvent, 0>> jsLoadFailFunc_;
-#endif // USE_QUICKJS_ENGINE
-
-#ifdef USE_V8_ENGINE
-    RefPtr<V8EventFunction<LoadImageSuccessEvent, 2>> jsLoadSuccFunc_;
-    RefPtr<V8EventFunction<LoadImageFailEvent, 0>> jsLoadFailFunc_;
-#endif // USE_V8_ENGINE
 };
 
 } // namespace OHOS::Ace::Framework
-
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_H

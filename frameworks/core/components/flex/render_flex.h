@@ -56,6 +56,21 @@ public:
         return direction_;
     }
 
+    FlexAlign GetJustifyContent() const
+    {
+        return mainAxisAlign_;
+    }
+
+    FlexAlign GetAlignItems() const
+    {
+        return crossAxisAlign_;
+    }
+
+    double GetSpace() const
+    {
+        return space_;
+    }
+
     TextBaseline GetBaseline() const
     {
         return textBaseline_;
@@ -66,6 +81,11 @@ public:
         return stretchToParent_;
     }
 
+    FlexAlign GetAlignItem() const
+    {
+        return crossAxisAlign_;
+    }
+
     double GetBaselineDistance(TextBaseline baseline) override;
 
     Size GetChildViewPort() override;
@@ -74,9 +94,21 @@ public:
 
     void Dump() override;
 
+    bool IsChildOverflow() const
+    {
+        return isChildOverflow_;
+    }
+
+    bool GetAlignDeclarationOffset(AlignDeclarationPtr alignDeclarationPtr, Offset& offset) const override;
+
+    bool CheckIfNeedLayoutAgain() override;
+
 protected:
-    virtual void ClearRenderObject() override;
-    virtual bool MaybeRelease() override;
+    void ClearRenderObject() override;
+    bool MaybeRelease() override;
+
+    Overflow overflow_ = Overflow::CLIP;
+    bool isChildOverflow_ = false;
 
 private:
     void PerformLayoutInWeightMode();
@@ -142,7 +174,7 @@ private:
     LayoutParam MakeLayoutParamWithLimit(double minMainLimit, double maxMainLimit, bool isStretch) const;
     LayoutParam MakeConstrainedLayoutParam(double mainFlexExtent, const LayoutParam& constraint, bool isStretch) const;
 
-    void ResizeByItem(const RefPtr<RenderNode>& item);
+    void ResizeByItem(const RefPtr<RenderNode>& item, double &allocatedSize);
     void CheckSizeValidity(const RefPtr<RenderNode>& item);
     Size GetConstrainedSize(double mainSize);
     double GetAvailableMainSize();
@@ -153,10 +185,13 @@ private:
     void TravelChildrenFlexProps();
     void ClearChildrenLists();
     FlexAlign GetSelfAlign(const RefPtr<RenderNode>& item) const;
+    TextDirection AdjustTextDirectionByDir();
     void UpdateAccessibilityAttr();
     void OnPaintFinish() override;
 
-    bool IsStartTopLeft(FlexDirection direction) const;
+    bool IsStartTopLeft(FlexDirection direction, TextDirection textDir) const;
+
+    void PerformItemAlign(std::list<RefPtr<RenderNode>>& nodelist);
 
     FlexDirection direction_ = FlexDirection::ROW;
     FlexAlign mainAxisAlign_ = FlexAlign::FLEX_START;
@@ -171,13 +206,15 @@ private:
     double crossSize_ = 0.0;
     double allocatedSize_ = 0.0;
 
+    double space_ = 0.0;
+
     std::set<RefPtr<RenderNode>> infinityLayoutNodes_;
     std::set<RefPtr<RenderNode>> absoluteNodes_;
     std::list<RefPtr<RenderNode>> relativeNodes_;
     // use map to order the magic Nodes
     std::map<int32_t, std::list<MagicLayoutNode>> magicNodes_;
     std::map<int32_t, double> magicWeightMaps_;
-    std::set<RefPtr<RenderNode>> displayNodes_;  // displayNodes_ used to record all display nodes in magic layout
+    std::set<RefPtr<RenderNode>> displayNodes_; // displayNodes_ used to record all display nodes in magic layout
 
     RefPtr<RenderNode> scrollNode;
     bool isMainInfinite_ = false;
@@ -188,6 +225,8 @@ private:
     int32_t validSizeCount_ = 0;
     double totalFlexWeight_ = 0.0;
     int32_t maxDisplayIndex_ = 0;
+
+    AlignDeclarationPtr alignPtr_ = nullptr;
 };
 
 } // namespace OHOS::Ace

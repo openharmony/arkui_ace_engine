@@ -35,8 +35,8 @@ constexpr double MIN_VELOCITY = -8000.0;
 constexpr double ADJUSTABLE_VELOCITY = 3000.0;
 #else
 constexpr double DISTANCE_EPSILON = 1.0;
-constexpr double FRICTION = 1.2;
-constexpr double VELOCITY_SCALE = 0.6;
+constexpr double FRICTION = 0.9;
+constexpr double VELOCITY_SCALE = 0.8;
 constexpr double MAX_VELOCITY = 5000.0;
 constexpr double MIN_VELOCITY = -5000.0;
 constexpr double ADJUSTABLE_VELOCITY = 0.0;
@@ -137,6 +137,11 @@ void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
 
     spring_ = GetDefaultOverSpringProperty();
     available_ = true;
+
+    auto pipelineContext = context_.Upgrade();
+    if (pipelineContext && pipelineContext->GetIsDeclarative()) {
+        velocityRangeScale_ = 3.0;
+    }
 }
 
 void Scrollable::HandleTouchDown()
@@ -193,6 +198,10 @@ void Scrollable::HandleDragStart(const OHOS::Ace::DragStartInfo& info)
         info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
     UpdateScrollPosition(dragPositionInMainAxis, SCROLL_FROM_START);
     RelatedEventStart();
+    auto node = scrollableNode_.Upgrade();
+    if (node) {
+        node->DispatchCancelPressAnimation();
+    }
 }
 
 void Scrollable::HandleDragUpdate(const DragUpdateInfo& info)
@@ -223,7 +232,8 @@ void Scrollable::HandleDragEnd(const DragEndInfo& info)
     springController_->ClearAllListeners();
     touchUp_ = false;
     scrollPause_ = false;
-    double correctVelocity = std::clamp(info.GetMainVelocity(), MIN_VELOCITY + slipFactor_, MAX_VELOCITY - slipFactor_);
+    double correctVelocity = std::clamp(info.GetMainVelocity(), MIN_VELOCITY * velocityRangeScale_ + slipFactor_,
+        MAX_VELOCITY * velocityRangeScale_ - slipFactor_);
     correctVelocity = correctVelocity * sVelocityScale_;
     currentVelocity_ = correctVelocity;
     if (dragEndCallback_) {
@@ -311,6 +321,10 @@ void Scrollable::StartSpringMotion(
          "initMinExtent(%{public}lf), initMaxExtent(%{public}lf",
         mainPosition, mainVelocity, extent.Leading(), extent.Trailing(), initExtent.Leading(), initExtent.Trailing());
     scrollMotion_ = AceType::MakeRefPtr<ScrollMotion>(mainPosition, mainVelocity, extent, initExtent, spring_);
+    if (!scrollMotion_->IsValid()) {
+        LOGE("scrollMotion is invalid, no available spring motion.");
+        return;
+    }
     scrollMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double position) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {

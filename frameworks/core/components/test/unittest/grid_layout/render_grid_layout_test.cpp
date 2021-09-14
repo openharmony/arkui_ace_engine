@@ -647,8 +647,8 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest012, TestSize.Level1)
     std::string colArgs = "1fr 2fr";
     auto component = GridLayoutTestUtils::CreateComponent(FlexDirection::ROW, rowArgs, colArgs);
     auto gridcomponent = AceType::DynamicCast<GridLayoutComponent>(component);
-    gridcomponent->SetRowGap(80.0);
-    gridcomponent->SetColumnGap(60.0);
+    gridcomponent->SetRowGap(80.0_px);
+    gridcomponent->SetColumnGap(60.0_px);
     renderNode_->Update(component);
     int32_t count = 4;
     for (int32_t i = 0; i < count; ++i) {
@@ -707,8 +707,8 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest013, TestSize.Level1)
     std::string colArgs = "600px 700px";
     auto component = GridLayoutTestUtils::CreateComponent(FlexDirection::COLUMN, rowArgs, colArgs);
     auto gridcomponent = AceType::DynamicCast<GridLayoutComponent>(component);
-    gridcomponent->SetRowGap(60.0);
-    gridcomponent->SetColumnGap(80.0);
+    gridcomponent->SetRowGap(60.0_px);
+    gridcomponent->SetColumnGap(80.0_px);
     renderNode_->Update(component);
     int32_t count = 6;
     for (int32_t i = 0; i < count; ++i) {
@@ -775,8 +775,8 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest014, TestSize.Level1)
     std::string colArgs = "600px 700px";
     auto component = GridLayoutTestUtils::CreateComponent(FlexDirection::COLUMN, rowArgs, colArgs);
     auto gridcomponent = AceType::DynamicCast<GridLayoutComponent>(component);
-    gridcomponent->SetRowGap(60.0);
-    gridcomponent->SetColumnGap(80.0);
+    gridcomponent->SetRowGap(60.0_px);
+    gridcomponent->SetColumnGap(80.0_px);
     gridcomponent->SetRightToLeft(true);
     renderNode_->Update(component);
     int32_t count = 4;
@@ -893,8 +893,8 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest016, TestSize.Level1)
     std::string colArgs = "600px 700px";
     auto component = GridLayoutTestUtils::CreateComponent(FlexDirection::COLUMN, rowArgs, colArgs);
     auto gridcomponent = AceType::DynamicCast<GridLayoutComponent>(component);
-    gridcomponent->SetRowGap(60.0);
-    gridcomponent->SetColumnGap(80.0);
+    gridcomponent->SetRowGap(60.0_px);
+    gridcomponent->SetColumnGap(80.0_px);
     renderNode_->Update(component);
     RefPtr<RenderNode> item1 = GridLayoutTestUtils::CreateRenderItem(2, 0, 1, 1);
     item1->GetChildren().front()->Attach(mockContext_);

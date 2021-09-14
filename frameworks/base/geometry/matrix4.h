@@ -20,11 +20,11 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT Matrix4 final {
+class ACE_EXPORT Matrix4 {
 public:
     // Matrix dimension is 4X4.
     static constexpr int32_t DIMENSION = 4;
-    // Crate an identity matrix.
+    // Create an identity matrix.
     static Matrix4 CreateIdentity();
     // Multiplies this matrix by another that translates coordinates by the vector (x, y, z).
     static Matrix4 CreateTranslate(float x, float y, float z);
@@ -32,6 +32,13 @@ public:
     static Matrix4 CreateScale(float x, float y, float z);
     // Multiplies this matrix by another that rotates coordinates through angle degrees about the vector (dx, dy, dz).
     static Matrix4 CreateRotate(float angle, float dx, float dy, float dz);
+
+    static Matrix4 CreateMatrix2D(float m00, float m10, float m01, float m11, float m03, float m13);
+    // Multiplies this matrix by another that skew through angle degrees.
+    static Matrix4 CreateSkew(float x, float y);
+    // Create an perspective matrix, the distance value represents the distance between the user and the z=0 plane. not
+    // support percent
+    static Matrix4 CreatePerspective(float distance);
     // Returns the inverse of this matrix. Returns the identity if this matrix cannot be inverted;
     static Matrix4 Invert(const Matrix4& matrix);
 
@@ -58,6 +65,28 @@ public:
     Point operator*(const Point& point);
     Matrix4& operator=(const Matrix4& matrix);
     float operator[](int32_t index) const;
+    inline float Get(int32_t row, int32_t col) const
+    {
+        ACE_DCHECK((unsigned)row < DIMENSION);
+        ACE_DCHECK((unsigned)col < DIMENSION);
+        return matrix4x4_[col][row];
+    }
+    inline void Set(int32_t row, int32_t col, float value)
+    {
+        ACE_DCHECK((unsigned)row < DIMENSION);
+        ACE_DCHECK((unsigned)col < DIMENSION);
+        matrix4x4_[col][row] = value;
+    }
+    double Determinant() const;
+    void Transpose();
+    void MapScalars(const float src[DIMENSION], float dst[DIMENSION]) const;
+    inline void MapScalars(float vec[DIMENSION], int length = DIMENSION) const
+    {
+        if (length == DIMENSION) {
+            this->MapScalars(vec, vec);
+        }
+    }
+    std::string ToString() const;
 
 private:
     static Matrix4 CreateInvert(const Matrix4& matrix);

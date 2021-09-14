@@ -19,10 +19,11 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text_span/text_span_element.h"
 #include "core/pipeline/base/component_group.h"
+#include "core/components/declaration/span/span_declaration.h"
 
 namespace OHOS::Ace {
 
-class TextSpanComponent : public ComponentGroup {
+class ACE_EXPORT TextSpanComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(TextSpanComponent, ComponentGroup);
 
 public:
@@ -32,47 +33,28 @@ public:
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
 
-    const std::string& GetSpanData() const
-    {
-        return spanData_;
-    }
+    const std::string& GetSpanData() const;
+    void SetSpanData(const std::string& data);
 
-    void SetSpanData(const std::string& data)
-    {
-        spanData_ = data;
-    }
+    const TextStyle& GetTextStyle() const;
+    void SetTextStyle(const TextStyle& spanStyle);
 
-    const TextStyle& GetTextStyle() const
-    {
-        return spanStyle_;
-    }
+    bool IsShow() const;
+    void SetIsShow(bool isShow);
 
-    void SetTextStyle(const TextStyle& spanStyle)
-    {
-        hasNewStyle_ = true;
-        spanStyle_ = spanStyle;
-    }
+    void SetOnClick(const EventMarker& onClick);
 
     bool HasNewStyle() const
     {
         return hasNewStyle_;
     }
 
-    bool IsShow() const
-    {
-        return isShow_;
-    }
-
-    void SetIsShow(bool isShow)
-    {
-        isShow_ = isShow;
-    }
+    const RefPtr<SpanDeclaration>& GetDeclaration() const;
+    void SetDeclaration(const RefPtr<SpanDeclaration>& declaration);
 
 private:
-    std::string spanData_;
-    TextStyle spanStyle_;
     bool hasNewStyle_ = false;
-    bool isShow_ = true;
+    RefPtr<SpanDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

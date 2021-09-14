@@ -39,7 +39,7 @@ const RefPtr<ManifestWidgetGroup>& ManifestParser::GetWidget() const
     return manifestWidget_;
 }
 
-const WindowConfig& ManifestParser::GetWindowConfig() const
+WindowConfig& ManifestParser::GetWindowConfig()
 {
     return manifestWindow_->GetWindowConfig();
 }
@@ -47,10 +47,25 @@ const WindowConfig& ManifestParser::GetWindowConfig() const
 void ManifestParser::Parse(const std::string& contents)
 {
     auto rootJson = JsonUtil::ParseJsonString(contents);
+    if (!rootJson || !rootJson->IsValid()) {
+        LOGE("the manifest is illegal");
+        return;
+    }
     manifestAppInfo_->AppInfoParse(rootJson);
     manifestRouter_->RouterParse(rootJson);
     manifestWidget_->WidgetParse(rootJson);
     manifestWindow_->WindowParse(rootJson);
+    webFeature_ = rootJson->GetBool("webFeature", false);
+    auto deviceTypes = rootJson->GetValue("deviceType");
+    if (deviceTypes && deviceTypes->IsArray()) {
+        for (int32_t index = 0; index < deviceTypes->GetArraySize(); ++index) {
+            auto device = deviceTypes->GetArrayItem(index);
+            if (device && device->IsString() && device->GetString() == "liteWearable") {
+                useLiteStyle_ = true;
+                break;
+            }
+        }
+    }
 }
 
 void ManifestParser::Printer()
@@ -63,7 +78,7 @@ void ManifestParser::Printer()
     LOGD("  AppID:%{public}s", manifestAppInfo_->GetAppID().c_str());
     LOGD("  VersionCode:%{public}d", manifestAppInfo_->GetVersionCode());
     LOGD("  VersionName:%{public}s", manifestAppInfo_->GetVersionName().c_str());
-    LOGD("  minPlatformVersion:%{public}s", manifestAppInfo_->GetMinPlatformVersion().c_str());
+    LOGD("  minPlatformVersion:%{public}d", manifestAppInfo_->GetMinPlatformVersion());
     LOGD("}");
 
     LOGD("router:{");

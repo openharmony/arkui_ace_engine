@@ -22,10 +22,11 @@
 #include "base/memory/type_info_base.h"
 #include "base/utils/macros.h"
 
-#ifdef ACE_MEMORY_MONITOR
-
 namespace OHOS::Ace {
 
+void PurgeMallocCache();
+
+#ifdef ACE_MEMORY_MONITOR
 class ACE_EXPORT MemoryMonitor {
 public:
     static MemoryMonitor& GetInstance();
@@ -75,9 +76,8 @@ private:
         }
     };
 };
+#endif // ACE_MEMORY_MONITOR
 
 } // namespace OHOS::Ace
-
-#endif // ACE_MEMORY_MONITOR
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_MEMORY_MONITOR_H

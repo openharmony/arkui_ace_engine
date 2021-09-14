@@ -26,11 +26,6 @@ const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = {
 };
 
 constexpr Dimension BOX_HOVER_RADIUS = 18.0_vp;
-constexpr char INPUT_TYPE_EMAIL[] = "email";
-constexpr char INPUT_TYPE_DATE[] = "date";
-constexpr char INPUT_TYPE_TIME[] = "time";
-constexpr char INPUT_TYPE_NUMBER[] = "number";
-constexpr char INPUT_TYPE_PASSWORD[] = "password";
 
 } // namespace
 
@@ -142,9 +137,11 @@ void DOMTextFieldUtil::SetChildAttr(const RefPtr<TextFieldComponent>& component,
         return;
     }
     component->SetTextInputType(ConvertStrToTextInputType(type));
-    component->SetObscure(type == INPUT_TYPE_PASSWORD);
+    component->SetObscure(type == DOM_INPUT_TYPE_PASSWORD);
     // this static map should be sorted by key.
     static const LinearMapNode<void (*)(const RefPtr<TextFieldComponent>&, const std::string&)> attrOperators[] = {
+        { DOM_AUTO_FOCUS, [](const RefPtr<TextFieldComponent>& component,
+                              const std::string& value) { component->SetAutoFocus(StringToBool(value)); } },
         { DOM_DISABLED, [](const RefPtr<TextFieldComponent>& component,
                         const std::string& value) { component->SetEnabled(!StringToBool(value)); } },
         { DOM_INPUT_ENTERKEYTYPE,
@@ -164,10 +161,24 @@ void DOMTextFieldUtil::SetChildAttr(const RefPtr<TextFieldComponent>& component,
                              const std::string& value) { component->SetObscure(StringToBool(value)); } },
         { DOM_INPUT_PLACEHOLDER, [](const RefPtr<TextFieldComponent>& component,
                                  const std::string& value) { component->SetPlaceholder(value); } },
+        { DOM_INPUT_SELECTED_END, [](const RefPtr<TextFieldComponent>& component,
+                                      const std::string& value) { component->SetSelectedEnd(StringToInt(value)); } },
+        { DOM_INPUT_SELECTED_START,
+            [](const RefPtr<TextFieldComponent>& component, const std::string& value) {
+                component->SetSelectedStart(StringToInt(value));
+            } },
         { DOM_INPUT_SHOW_COUNTER, [](const RefPtr<TextFieldComponent>& component,
                                   const std::string& value) { component->SetShowCounter(StringToBool(value)); } },
         { DOM_SHOW_ICON_SRC, [](const RefPtr<TextFieldComponent>& component,
                              const std::string& value) { component->SetShowIconImage(value); } },
+        { DOM_INPUT_SHOW_PASSWORD_ICON,
+            [](const RefPtr<TextFieldComponent>& component, const std::string& value) {
+                component->SetShowPasswordIcon(StringToBool(value));
+            } },
+        { DOM_INPUT_SOFT_KEYBOARD_ENABLED,
+            [](const RefPtr<TextFieldComponent>& component, const std::string& value) {
+                component->SetSoftKeyboardEnabled(StringToBool(value));
+            } },
         { DOM_INPUT_VALUE,
             [](const RefPtr<TextFieldComponent>& component, const std::string& value) { component->SetValue(value); } },
     };
@@ -208,6 +219,9 @@ void DOMTextFieldUtil::SetChildStyle(const RefPtr<BoxComponent>& boxComponent,
                     component->SetBgColor(node.ParseColor(value));
                     component->SetFocusBgColor(node.ParseColor(value));
                 } },
+            { DOM_CARET_COLOR,
+                [](const RefPtr<TextFieldComponent>& component, TextStyle& style, const std::string& value,
+                    const DOMInput& node) { component->SetCursorColor(node.ParseColor(value)); } },
             { DOM_INPUT_COLOR,
                 [](const RefPtr<TextFieldComponent>& component, TextStyle& style, const std::string& value,
                     const DOMInput& node) {
@@ -356,10 +370,20 @@ void DOMTextFieldUtil::AddChildEvent(const RefPtr<TextFieldComponent>& component
     const std::string& nodeId, const std::vector<std::string>& events)
 {
     static const LinearMapNode<void (*)(const RefPtr<TextFieldComponent>&, const EventMarker&)> eventOperators[] = {
+        { DOM_CATCH_BUBBLE_CLICK,
+            [](const RefPtr<TextFieldComponent>& component, const EventMarker& event) {
+                EventMarker eventMarker(event);
+                eventMarker.SetCatchMode(true);
+                component->SetOnTap(eventMarker);
+            } },
         { DOM_CHANGE, [](const RefPtr<TextFieldComponent>& component,
                       const EventMarker& event) { component->SetOnTextChange(event); } },
         { DOM_CLICK,
-            [](const RefPtr<TextFieldComponent>& component, const EventMarker& event) { component->SetOnTap(event); } },
+            [](const RefPtr<TextFieldComponent>& component, const EventMarker& event) {
+                EventMarker eventMarker(event);
+                eventMarker.SetCatchMode(false);
+                component->SetOnTap(eventMarker);
+            } },
         { DOM_INPUT_EVENT_ENTERKEYCLICK, [](const RefPtr<TextFieldComponent>& component,
                                          const EventMarker& event) { component->SetOnFinishInput(event); } },
         { DOM_LONG_PRESS, [](const RefPtr<TextFieldComponent>& component,
@@ -368,6 +392,8 @@ void DOMTextFieldUtil::AddChildEvent(const RefPtr<TextFieldComponent>& component
                                          const EventMarker& event) { component->SetOnOptionsClick(event); } },
         { DOM_INPUT_EVENT_SEARCH, [](const RefPtr<TextFieldComponent>& component,
                                         const EventMarker& event) { component->SetOnSearch(event); } },
+        { DOM_INPUT_EVENT_SELECT_CHANGE, [](const RefPtr<TextFieldComponent>& component,
+                                             const EventMarker& event) { component->SetOnSelectChange(event); } },
         { DOM_INPUT_EVENT_SHARE, [](const RefPtr<TextFieldComponent>& component,
                                  const EventMarker& event) { component->SetOnShare(event); } },
         { DOM_INPUT_EVENT_TRANSLATE, [](const RefPtr<TextFieldComponent>& component,
@@ -386,42 +412,6 @@ bool DOMTextFieldUtil::IsRadiusStyle(const std::string& style)
     return (style == DOM_BORDER_TOP_LEFT_RADIUS || style == DOM_BORDER_TOP_RIGHT_RADIUS ||
             style == DOM_BORDER_BOTTOM_LEFT_RADIUS || style == DOM_BORDER_BOTTOM_RIGHT_RADIUS ||
             style == DOM_BORDER_RADIUS);
-}
-
-TextInputAction DOMTextFieldUtil::ConvertStrToTextInputAction(const std::string& action)
-{
-    TextInputAction inputAction;
-    if (action == "next") {
-        inputAction = TextInputAction::NEXT;
-    } else if (action == "go") {
-        inputAction = TextInputAction::GO;
-    } else if (action == "done") {
-        inputAction = TextInputAction::DONE;
-    } else if (action == "send") {
-        inputAction = TextInputAction::SEND;
-    } else if (action == "search") {
-        inputAction = TextInputAction::SEARCH;
-    } else {
-        inputAction = TextInputAction::UNSPECIFIED;
-    }
-    return inputAction;
-}
-
-TextInputType DOMTextFieldUtil::ConvertStrToTextInputType(const std::string& type)
-{
-    TextInputType inputType;
-    if (type == INPUT_TYPE_NUMBER) {
-        inputType = TextInputType::NUMBER;
-    } else if (type == INPUT_TYPE_DATE || type == INPUT_TYPE_TIME) {
-        inputType = TextInputType::DATETIME;
-    } else if (type == INPUT_TYPE_EMAIL) {
-        inputType = TextInputType::EMAIL_ADDRESS;
-    } else if (type == INPUT_TYPE_PASSWORD) {
-        inputType = TextInputType::VISIBLE_PASSWORD;
-    } else {
-        inputType = TextInputType::TEXT;
-    }
-    return inputType;
 }
 
 } // namespace OHOS::Ace::Framework

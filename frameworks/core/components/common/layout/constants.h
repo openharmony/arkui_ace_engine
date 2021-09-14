@@ -34,6 +34,7 @@ enum class ButtonType {
     ARC,
     DOWNLOAD,
     ICON,
+    CUSTOM,
 };
 
 // Flex Styles
@@ -70,6 +71,9 @@ enum class FlexAlign {
 
     // align the child with space evenly, only used in MainAxisAlign.
     SPACE_EVENLY,
+
+    // User-defined space, only used in MainAxisAlign.
+    SPACE_CUSOMIZATION,
 };
 
 enum class MainAxisSize {
@@ -111,6 +115,14 @@ enum class BoxFlex {
     FLEX_XY,
 };
 
+enum class BoxSizing {
+    // The width and height properties includes only the content. Border and padding are not included.
+    CONTENT_BOX,
+
+    // The width and height properties includes content, padding and border.
+    BORDER_BOX,
+};
+
 // Stack Styles
 enum class StackFit {
     // keep the child component's size as it is.
@@ -135,20 +147,35 @@ enum class Overflow {
 
     // when the size overflows, scroll the exceeding.
     SCROLL,
+
+    // force clip the exceeding.
+    FORCE_CLIP,
 };
 
 enum class MainStackSize {
     MAX,
     MIN,
     NORMAL,
-    LAST_CHILD,
+    LAST_CHILD_HEIGHT,
     MATCH_CHILDREN,
+    MAX_X,
+    MAX_Y
+};
+
+enum class MainSwiperSize {
+    MAX,
+    MAX_X,
+    MAX_Y,
+    MIN,
+    AUTO
 };
 
 enum class PositionType {
     RELATIVE = 0,
     FIXED,
     ABSOLUTE,
+    OFFSET, // percetage layout based on RELATIVE
+    SEMI_RELATIVE, // absolute offset based on RELATIVE
 };
 
 enum class TextAlign {
@@ -175,6 +202,16 @@ enum class TextAlign {
     END,
 };
 
+
+enum class WhiteSpace {
+    NORMAL,
+    PRE,
+    PRE_WRAP,
+    NOWRAP,
+    PRE_LINE,
+    INHERIT,
+};
+
 enum class TextOverflow {
     CLIP,
     ELLIPSIS,
@@ -185,6 +222,7 @@ enum class TextDirection {
     LTR,
     RTL,
     INHERIT,
+    AUTO,
 };
 
 enum class TextDecoration {
@@ -201,10 +239,10 @@ enum class MarqueeDirection {
 };
 
 enum class ImageRepeat {
-    REPEAT,
+    NOREPEAT = 0,
     REPEATX,
     REPEATY,
-    NOREPEAT,
+    REPEAT,
 };
 
 enum class ImageFit {
@@ -215,6 +253,18 @@ enum class ImageFit {
     FITHEIGHT,
     NONE,
     SCALEDOWN,
+};
+
+enum class ImageRenderMode {
+    ORIGINAL = 0,
+    TEMPLATE,
+};
+
+enum class ImageInterpolation {
+    NONE = 0,
+    LOW,
+    MEDIUM,
+    HIGH,
 };
 
 enum class EdgeEffect {
@@ -230,14 +280,29 @@ enum class BorderStyle {
     NONE,
 };
 
+enum class BorderImageRepeat {
+    STRETCH,
+    REPEAT,
+    ROUND,
+};
+
+enum class BorderImageDirection {
+    TOP,
+    LEFT,
+    RIGHT,
+    BOTTOM,
+};
+
 enum class SrcType {
+    UNSUPPORTED = -1,
     FILE = 0,
     ASSET,
     NETWORK,
     MEMORY,
     BASE64,
     INTERNAL,
-    OTHER,
+    RESOURCE,
+    DATA_ABILITY,
 };
 
 enum class WrapAlignment {
@@ -247,11 +312,21 @@ enum class WrapAlignment {
     SPACE_AROUND,
     SPACE_BETWEEN,
     STRETCH,
+    SPACE_EVENLY,
+    BASELINE,
 };
 
 enum class WrapDirection {
     HORIZONTAL,
     VERTICAL,
+    HORIZONTAL_REVERSE,
+    VERTICAL_REVERSE,
+};
+
+enum class FlexWrap {
+    NO_WRAP,
+    WRAP,
+    WRAP_REVERSE,
 };
 
 enum class KeyDirection {
@@ -266,14 +341,6 @@ const ImageRepeat IMAGE_REPEATS[] = {
     ImageRepeat::REPEATX,
     ImageRepeat::REPEATY,
     ImageRepeat::NOREPEAT,
-};
-
-const SrcType SRC_TYPES[] = {
-    SrcType::FILE,
-    SrcType::ASSET,
-    SrcType::NETWORK,
-    SrcType::MEMORY,
-    SrcType::OTHER,
 };
 
 enum class WindowModal : int32_t {
@@ -293,8 +360,9 @@ enum class PanelType {
 
 enum class PanelMode {
     MINI,
-    FULL,
     HALF,
+    FULL,
+    AUTO,
 };
 
 enum class ColorScheme : int32_t {
@@ -340,6 +408,59 @@ enum class WindowBlurStyle {
     STYLE_BACKGROUND_MEDIUM_DARK = 105,
     STYLE_BACKGROUND_LARGE_DARK = 106,
     STYLE_BACKGROUND_XLARGE_DARK = 107,
+};
+
+enum class DisplayType {
+    NO_SETTING = 0,
+    FLEX,
+    GRID,
+    NONE,
+};
+
+enum class VisibilityType {
+    NO_SETTING = 0,
+    VISIBLE,
+    HIDDEN,
+};
+
+enum class RefreshType {
+    AUTO,
+    PULL_DOWN,
+};
+
+enum class TabBarMode {
+    FIXED,
+    SCROLLABEL,
+    FIXED_START,
+};
+
+enum class ShowInNavigationBar {
+    SHOW = 0,
+    POPUP,
+};
+
+enum class HorizontalAlign {
+    START = 1,
+    CENTER,
+    END,
+};
+
+enum class VerticalAlign {
+    TOP = 1,
+    CENTER,
+    BOTTOM,
+    BASELINE,
+    NONE,
+};
+
+enum class BarPosition {
+    START,
+    END,
+};
+
+enum class CalendarType {
+    NORMAL = 0,
+    SIMPLE,
 };
 
 inline constexpr uint32_t STATE_NORMAL = 0;

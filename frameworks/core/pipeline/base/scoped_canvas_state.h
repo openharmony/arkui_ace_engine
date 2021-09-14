@@ -37,6 +37,13 @@ public:
         return ScopedCanvas(canvas);
     }
 
+    explicit ScopedCanvas(flutter::Canvas* canvas) : canvas_(canvas)
+    {
+        if (canvas_ != nullptr) {
+            canvas_->save();
+        }
+    }
+
     ~ScopedCanvas()
     {
         if (canvas_) {
@@ -72,13 +79,6 @@ public:
     }
 
 private:
-    explicit ScopedCanvas(flutter::Canvas* canvas) : canvas_(canvas)
-    {
-        if (canvas_ != nullptr) {
-            canvas_->save();
-        }
-    }
-
     flutter::Canvas* canvas_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(ScopedCanvas);

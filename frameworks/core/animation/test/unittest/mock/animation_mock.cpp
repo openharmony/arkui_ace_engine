@@ -15,12 +15,8 @@
 
 #include "core/animation/test/unittest/mock/animation_mock.h"
 
-#include "base/log/ace_trace.h"
-#include "base/log/event_report.h"
 #include "base/log/log.h"
-#include "base/utils/system_properties.h"
 #include "core/components/dialog_modal/dialog_modal_component.h"
-#include "core/components/list/render_list_item.h"
 #include "core/components/semi_modal/semi_modal_component.h"
 
 namespace OHOS::Ace {
@@ -41,22 +37,22 @@ void AnimationMock::OnPostFlush()
 void AnimationMock::ExecuteOperation()
 {
     switch (operation_) {
-        case TweenOperation::PLAY:
+        case AnimationOperation::PLAY:
             animator_->Play();
             break;
-        case TweenOperation::REVERSE:
+        case AnimationOperation::REVERSE:
             animator_->Reverse();
             break;
-        case TweenOperation::FINISH:
+        case AnimationOperation::FINISH:
             animator_->Finish();
             break;
-        case TweenOperation::PAUSE:
+        case AnimationOperation::PAUSE:
             animator_->Pause();
             break;
-        case TweenOperation::CANCEL:
+        case AnimationOperation::CANCEL:
             animator_->Cancel();
             break;
-        case TweenOperation::NONE:
+        case AnimationOperation::NONE:
         default:
             break;
     }
@@ -200,47 +196,6 @@ RefPtr<Component> SemiModalComponent::Create(
 RefPtr<Component> DialogModalComponent::Create(RefPtr<Component> child)
 {
     return nullptr;
-}
-
-AceScopedTrace::AceScopedTrace(const char* format, ...)
-{
-    traceEnabled_ = false;
-}
-
-AceScopedTrace::~AceScopedTrace()
-{
-}
-
-void EventReport::SendAppStartException(AppStartExcepType type)
-{
-}
-
-void EventReport::SendRenderException(RenderExcepType type)
-{
-}
-
-float SystemProperties::GetFontWeightScale()
-{
-    // Default value of font weight scale is 1.0.
-    return 1.0;
-}
-
-DeviceType SystemProperties::GetDeviceType()
-{
-    return DeviceType::PHONE;
-}
-
-RRect RenderListItem::GetRRect() const
-{
-    return RRect();
-}
-
-void RenderListItem::RunCardTransitionAnimation(double shiftHeight)
-{
-}
-
-void RenderListItem::StopCardTransitionAnimation()
-{
 }
 
 } // namespace OHOS::Ace

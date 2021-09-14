@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FLEX_FLEX_COMPONENT_H
 
 #include "base/utils/macros.h"
+#include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/flex/flex_element.h"
 #include "core/components/flex/render_flex.h"
@@ -31,7 +32,8 @@ public:
     FlexComponent(FlexDirection direction, FlexAlign mainAxisAlign, FlexAlign crossAxisAlign,
         const std::list<RefPtr<Component>>& children)
         : ComponentGroup(children), direction_(direction), mainAxisAlign_(mainAxisAlign),
-          crossAxisAlign_(crossAxisAlign) {}
+          crossAxisAlign_(crossAxisAlign)
+    {}
     ~FlexComponent() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override
@@ -134,13 +136,47 @@ public:
         containsNavigation_ = containsNavigation;
     }
 
+    Overflow GetOverflow() const
+    {
+        return overflow_;
+    }
+
+    void SetOverflow(Overflow overflow)
+    {
+        overflow_ = overflow;
+    }
+
+    void SetSpace(const Dimension& space)
+    {
+        space_ = space;
+    }
+
+    const Dimension& GetSpace() const
+    {
+        return space_;
+    }
+
+    void SetAlignDeclarationPtr(AlignDeclaration* alignPtr)
+    {
+        alignPtr_ = alignPtr;
+    }
+
+    AlignDeclarationPtr GetAlignDeclarationPtr() const
+    {
+        return alignPtr_;
+    }
+
 private:
-    FlexDirection direction_ { FlexDirection::ROW };
-    FlexAlign mainAxisAlign_ { FlexAlign::FLEX_START };
-    FlexAlign crossAxisAlign_ { FlexAlign::FLEX_START };
-    MainAxisSize mainAxisSize_ { MainAxisSize::MAX };
-    CrossAxisSize crossAxisSize_ { CrossAxisSize::MIN };
-    TextBaseline baseline_ { TextBaseline::ALPHABETIC };
+    FlexDirection direction_ = FlexDirection::ROW;
+    FlexAlign mainAxisAlign_ = FlexAlign::FLEX_START;
+    FlexAlign crossAxisAlign_ = FlexAlign::FLEX_START;
+    MainAxisSize mainAxisSize_ = MainAxisSize::MAX;
+    CrossAxisSize crossAxisSize_ = CrossAxisSize::MIN;
+    TextBaseline baseline_ = TextBaseline::ALPHABETIC;
+    Overflow overflow_ = Overflow::CLIP;
+    Dimension space_;
+
+    AlignDeclarationPtr alignPtr_ = nullptr;
 
     bool stretchToParent_ = false;
     bool useViewPort_ = false;
@@ -152,7 +188,8 @@ class RowComponent : public FlexComponent {
 
 public:
     RowComponent(FlexAlign mainAxisAlign, FlexAlign crossAxisAlign, const std::list<RefPtr<Component>>& children)
-        : FlexComponent(FlexDirection::ROW, mainAxisAlign, crossAxisAlign, children) {}
+        : FlexComponent(FlexDirection::ROW, mainAxisAlign, crossAxisAlign, children)
+    {}
     ~RowComponent() override = default;
 
     RefPtr<Element> CreateElement() override
@@ -166,7 +203,8 @@ class ColumnComponent : public FlexComponent {
 
 public:
     ColumnComponent(FlexAlign mainAxisAlign, FlexAlign crossAxisAlign, const std::list<RefPtr<Component>>& children)
-        : FlexComponent(FlexDirection::COLUMN, mainAxisAlign, crossAxisAlign, children) {}
+        : FlexComponent(FlexDirection::COLUMN, mainAxisAlign, crossAxisAlign, children)
+    {}
     ~ColumnComponent() override = default;
 
     RefPtr<Element> CreateElement() override

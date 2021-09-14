@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-const int32_t FILE_SIZE = 15;
+const int32_t FILE_SIZE = 408907;
 const std::string CACHE_FILE_PATH = "/data/test/resource/imagecache/images";
 const std::string CACHE_IMAGE_FILE_1 = "/data/test/resource/imagecache/images/748621363886323660";
 const std::string CACHE_IMAGE_FILE_2 = "/data/test/resource/imagecache/images/8819493328252140263";
@@ -38,6 +38,7 @@ const std::string KEY_2 = "key2";
 const std::string KEY_3 = "key3";
 const std::string KEY_4 = "key4";
 const std::string KEY_5 = "key5";
+const std::string KEY_6 = "key6";
 const std::vector<std::string> FILE_KEYS = { KEY_1, KEY_2, KEY_3, KEY_4, KEY_5 };
 
 } // namespace OHOS::Ace

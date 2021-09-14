@@ -21,6 +21,12 @@ Border::Border(const BorderEdge& left, const BorderEdge& top, const BorderEdge& 
     : left_(left), top_(top), right_(right), bottom_(bottom)
 {}
 
+Border::Border(const BorderImageEdge& leftImage, const BorderImageEdge& topImage,
+    const BorderImageEdge& rightImage, const BorderImageEdge& bottomImage)
+    : borderImageLeft_(leftImage), borderImageTop_(topImage),
+    borderImageRight_(rightImage), borderImageBottom_(bottomImage)
+{}
+
 bool Border::IsAllEqual() const
 {
     return (left_ == top_) && (top_ == right_) && (right_ == bottom_);

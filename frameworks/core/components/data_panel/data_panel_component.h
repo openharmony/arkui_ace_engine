@@ -31,7 +31,7 @@ enum class SegmentStyleType {
     NONE, // user hasn't set color in css.
 };
 
-class Segment final {
+class ACE_EXPORT Segment final {
 public:
     Segment() = default;
     ~Segment() = default;
@@ -181,6 +181,16 @@ public:
         return backgroundTrackColor_;
     }
 
+    double GetAnimationDuration() const
+    {
+        return animationDuration_;
+    }
+
+    void SetAnimationDuration(double animationDuration)
+    {
+        animationDuration_ = animationDuration;
+    }
+
 protected:
     void SetDefaultHeight(const Dimension& height)
     {
@@ -193,6 +203,7 @@ protected:
     }
 
     ChartType type_ = ChartType::PROGRESS;
+    double animationDuration_ = -1.0;
 
 private:
     MeasureType measureType_ = MeasureType::DEFAULT;
@@ -276,7 +287,7 @@ private:
     bool isLoading_ = false;
 };
 
-class PercentageDataPanelComponent : public DataPanelComponent {
+class ACE_EXPORT PercentageDataPanelComponent : public DataPanelComponent {
     DECLARE_ACE_TYPE(PercentageDataPanelComponent, DataPanelComponent);
 
 public:
@@ -340,11 +351,22 @@ public:
         return totalValue_;
     }
 
+    void SetMaxValue(double maxValue)
+    {
+        maxValue_ = maxValue;
+    }
+
+    double GetMaxValue() const
+    {
+        return maxValue_;
+    }
+
 private:
     double startDegree_ = 0.0;
     double sweepDegree_ = 360.0;
     std::vector<Segment> segments_;
     double totalValue_ = 0.0;
+    double maxValue_ = 100.0;
 };
 
 } // namespace OHOS::Ace

@@ -18,6 +18,7 @@
 
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
 
@@ -54,7 +55,7 @@ public:
             theme->focusAnimationDuration_ = themeConstants->GetDouble(THEME_ITEM_FOCUS_ANIMATION_DURATION);
             theme->clickAnimationDuration_ = themeConstants->GetDouble(THEME_ITEM_CLICK_ANIMATION_DURATION);
             theme->itemSize_ = themeConstants->GetDimension(THEME_ITEM_SIZE);
-            theme->marginInPercent_ = themeConstants->GetDouble(THEME_ITEM_MARGIN_IN_PERCENT);
+            theme->paddingInPercent_ = themeConstants->GetDouble(THEME_ITEM_PADDING_IN_PERCENT);
             theme->groupImageSize_ = themeConstants->GetDimension(THEME_ITEM_GROUP_IMAGE_SIZE);
             return theme;
         }
@@ -118,9 +119,9 @@ public:
     {
         return itemSize_;
     }
-    double GetItemMarginInPercent() const
+    double GetItemPaddingInPercent() const
     {
-        return marginInPercent_;
+        return paddingInPercent_;
     }
     Dimension GetGroupImageSize() const
     {
@@ -144,7 +145,7 @@ private:
     double focusOpacityLittle_ = 1.0;
     double focusAnimationDuration_ = 100.0;
     double clickAnimationDuration_ = 200.0;
-    double marginInPercent_ = 0.0;
+    double paddingInPercent_ = 0.0;
     Dimension itemSize_;
     Dimension groupImageSize_;
 };

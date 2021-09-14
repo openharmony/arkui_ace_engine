@@ -36,6 +36,7 @@ void RenderGridLayoutItem::Update(const RefPtr<Component>& component)
     SetRowIndex(gridItem->GetRowIndex());
     SetColumnSpan(gridItem->GetColumnSpan());
     SetRowSpan(gridItem->GetRowSpan());
+    SetForceRebuild(gridItem->ForceRebuild());
     MarkNeedLayout();
 }
 
@@ -68,7 +69,7 @@ void RenderGridLayoutItem::HandleOnFocus()
 void RenderGridLayoutItem::SetColumnIndex(int32_t columnIndex)
 {
     if (columnIndex < 0) {
-        LOGW("Invalid columnIndex %{public}d", columnIndex);
+        LOGD("Invalid columnIndex %{public}d, use default", columnIndex);
         return;
     }
     columnIndex_ = columnIndex;
@@ -77,7 +78,7 @@ void RenderGridLayoutItem::SetColumnIndex(int32_t columnIndex)
 void RenderGridLayoutItem::SetRowIndex(int32_t rowIndex)
 {
     if (rowIndex < 0) {
-        LOGW("Invalid rowIndex %{public}d", rowIndex);
+        LOGD("Invalid rowIndex %{public}d, use default", rowIndex);
         return;
     }
     rowIndex_ = rowIndex;

@@ -61,6 +61,7 @@ RenderLayer FlutterRenderButton::GetRenderLayer()
 void FlutterRenderButton::OnGlobalPositionChanged()
 {
     UpdateLayer();
+    RenderNode::OnGlobalPositionChanged();
 }
 
 void FlutterRenderButton::UpdateLayer()
@@ -68,8 +69,9 @@ void FlutterRenderButton::UpdateLayer()
     float translateX = GetLayoutSize().Width() / 2 * (INIT_SCALE - scale_);
     // The bottom of the component must be close to the bottom of the circle when the type is arc.
     // The center point deviates 2 times downward.
-    float translateY = (type_ == ButtonType::ARC) ? GetLayoutSize().Height() * (INIT_SCALE - scale_) * 2
-                                                  : GetLayoutSize().Height() / 2 * (1.0 - scale_);
+    float translateY = (buttonComponent_->GetType() == ButtonType::ARC)
+                        ? GetLayoutSize().Height() * (INIT_SCALE - scale_) * 2
+                        : GetLayoutSize().Height() / 2 * (1.0 - scale_);
     Matrix4 translateMatrix = Matrix4::CreateTranslate(translateX, translateY, 0.0);
     Matrix4 scaleMatrix = Matrix4::CreateScale(scale_, scale_, 1.0);
     Matrix4 transformMatrix = translateMatrix * scaleMatrix;
@@ -85,7 +87,10 @@ void FlutterRenderButton::UpdateLayer()
 
 void FlutterRenderButton::Paint(RenderContext& context, const Offset& offset)
 {
-    LOGD("Paint button type : %{public}d", type_);
+    if (!buttonComponent_) {
+        return;
+    }
+    LOGD("Paint button type : %{public}d", buttonComponent_->GetType());
     if (isHover_) {
         UpdateLayer();
         isHover_ = false;
@@ -96,7 +101,7 @@ void FlutterRenderButton::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
-    if (type_ == ButtonType::ICON) {
+    if (buttonComponent_->GetType() == ButtonType::ICON) {
         RenderNode::Paint(context, offset);
         return;
     }
@@ -126,37 +131,48 @@ Size FlutterRenderButton::Measure()
 {
     // Layout size need includes border width, the border width is half outside of button,
     // total width and height needs to add border width defined by user.
-    widthDelta_ = NormalizeToPx(borderEdge_.GetWidth());
+    if (!buttonComponent_) {
+        return Size();
+    }
+    widthDelta_ = NormalizeToPx(buttonComponent_->GetBorderEdge().GetWidth());
     double delta = widthDelta_ / 2;
     offsetDelta_ = Offset(delta, delta);
-    if (type_ == ButtonType::ARC) {
+    if (buttonComponent_->GetType() == ButtonType::ARC) {
         return buttonSize_ + Size(widthDelta_, widthDelta_);
     }
     if (NeedLayoutExtendToParant()) {
         buttonSize_ = GetLayoutParam().GetMaxSize();
     }
     MeasureButtonSize();
+    if (buttonComponent_->GetType() == ButtonType::NORMAL) {
+        if (buttonComponent_->GetDeclarativeFlag()) {
+            ResetBoxRadius();
+        }
+        if (!buttonComponent_->GetRadiusState() && buttonComponent_->IsInputButton()) {
+            rrectRadius_ = buttonSize_.Height() / 2.0;
+        }
+    }
     return buttonSize_ + Size(widthDelta_, widthDelta_);
 }
 
 void FlutterRenderButton::MeasureButtonSize()
 {
-    if (type_ == ButtonType::ICON) {
+    if (buttonComponent_->GetType() == ButtonType::ICON) {
         return;
     }
     if (NearEqual(GetLayoutParam().GetMaxSize().Width(), Size::INFINITE_SIZE) || (!widthDefined_)) {
         buttonSize_.SetWidth(0.0);
     }
-    if (type_ == ButtonType::CAPSULE) {
+    if (buttonComponent_->GetType() == ButtonType::CAPSULE) {
         MeasureCapsule();
         return;
     }
-    if (type_ == ButtonType::CIRCLE) {
+    if (buttonComponent_->GetType() == ButtonType::CIRCLE) {
         MeasureCircle();
         return;
     }
-    if (isWatch_ && (type_ == ButtonType::DOWNLOAD)) {
-        if (!NearEqual(rrectRadius_, NormalizeToPx(defaultRadius_)) || widthDefined_ || heightDefined_) {
+    if (isWatch_ && (buttonComponent_->GetType() == ButtonType::DOWNLOAD)) {
+        if (buttonComponent_->GetRadiusState() || widthDefined_ || heightDefined_) {
             MeasureCircle();
             progressDiameter_ = rrectRadius_ * 2 - NormalizeToPx(WATCH_DOWNLOAD_SIZE_DELTA);
         } else {
@@ -168,7 +184,7 @@ void FlutterRenderButton::MeasureButtonSize()
 
 void FlutterRenderButton::MeasureCapsule()
 {
-    if (GreatOrEqual(rrectRadius_, buttonSize_.Height() / 2.0)) {
+    if (GreatNotEqual(rrectRadius_, buttonSize_.Height() / 2.0)) {
         return;
     }
     rrectRadius_ = buttonSize_.Height() / 2.0;
@@ -177,10 +193,12 @@ void FlutterRenderButton::MeasureCapsule()
 
 void FlutterRenderButton::MeasureCircle()
 {
-    if (NearEqual(rrectRadius_, NormalizeToPx(defaultRadius_))) {
-        if ((widthDefined_) || (heightDefined_)) {
-            double min = std::min(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height());
-            rrectRadius_ = (min - widthDelta_) / 2.0;
+    if (!buttonComponent_->GetRadiusState()) {
+        if (widthDefined_ || heightDefined_) {
+            double minSize = buttonComponent_->GetDeclarativeFlag()
+                ? std::min(buttonSize_.Width(), buttonSize_.Height())
+                : std::min(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height());
+            rrectRadius_ = (minSize - widthDelta_) / 2.0;
         }
     } else {
         auto constrainedSize =
@@ -194,6 +212,9 @@ void FlutterRenderButton::MeasureCircle()
 
 void FlutterRenderButton::ResetBoxRadius()
 {
+    if (!buttonComponent_->GetRadiusState() && buttonComponent_->GetDeclarativeFlag()) {
+        return;
+    }
     auto parent = GetParent().Upgrade();
     if (!parent) {
         return;
@@ -212,7 +233,9 @@ void FlutterRenderButton::DrawShape(flutter::Canvas& canvas, const Offset& offse
 {
     flutter::Paint paint;
     if (isStroke) {
-        paint.paint()->setColor(needFocusColor_ ? focusColor_.GetValue() : borderEdge_.GetColor().GetValue());
+        uint32_t focusColorValue = buttonComponent_->GetFocusColor().GetValue();
+        uint32_t borderColorValue = buttonComponent_->GetBorderEdge().GetColor().GetValue();
+        paint.paint()->setColor(needFocusColor_ ? focusColorValue : borderColorValue);
         paint.paint()->setStyle(SkPaint::Style::kStroke_Style);
         paint.paint()->setStrokeWidth(NormalizeToPx(borderEdge_.GetWidth()));
     } else {
@@ -222,7 +245,14 @@ void FlutterRenderButton::DrawShape(flutter::Canvas& canvas, const Offset& offse
     paint.paint()->setAntiAlias(true);
     flutter::RRect rRect;
     flutter::PaintData paintData;
-    rRect.sk_rrect.setRectXY(SkRect::MakeIWH(buttonSize_.Width(), buttonSize_.Height()), rrectRadius_, rrectRadius_);
+
+    if (buttonComponent_->GetType() == ButtonType::CUSTOM) {
+        ConvertToSkVector(buttonComponent_->GetRectRadii(), radii_);
+        rRect.sk_rrect.setRectRadii(SkRect::MakeIWH(buttonSize_.Width(), buttonSize_.Height()), radii_);
+    } else {
+        rRect.sk_rrect.setRectXY(
+            SkRect::MakeIWH(buttonSize_.Width(), buttonSize_.Height()), rrectRadius_, rrectRadius_);
+    }
     rRect.sk_rrect.offset(offset.GetX(), offset.GetY());
     canvas.drawRRect(rRect, paint, paintData);
 }
@@ -342,17 +372,17 @@ void FlutterRenderButton::DrawDownloadButton(flutter::Canvas& canvas, const Offs
 void FlutterRenderButton::DrawButton(flutter::Canvas& canvas, const Offset& inOffset)
 {
     Offset offset = inOffset + offsetDelta_;
-    if (type_ == ButtonType::ARC) {
+    if (buttonComponent_->GetType() == ButtonType::ARC) {
         DrawArc(canvas, offset);
         return;
     }
-    if (type_ == ButtonType::DOWNLOAD) {
+    if (buttonComponent_->GetType() == ButtonType::DOWNLOAD) {
         DrawDownloadButton(canvas, offset);
         return;
     }
 
     // Paint button with border
-    if (NormalizeToPx(borderEdge_.GetWidth()) > 0.0) {
+    if (NormalizeToPx(buttonComponent_->GetBorderEdge().GetWidth()) > 0.0) {
         DrawShape(canvas, offset);
         DrawShape(canvas, offset, true);
         return;
@@ -362,28 +392,50 @@ void FlutterRenderButton::DrawButton(flutter::Canvas& canvas, const Offset& inOf
 
 uint32_t FlutterRenderButton::GetStateColor()
 {
-    if (needHoverColor_) {
-        return hoverColor_.GetValue();
+    if (!buttonComponent_) {
+        return Color().GetValue();
     }
-    if (isDisabled_) {
-        return disabledColor_.GetValue();
+    if (!buttonComponent_->GetStateEffect()) {
+        return buttonComponent_->GetBackgroundColor().GetValue();
+    }
+    if (needHoverColor_) {
+        return buttonComponent_->GetHoverColor().GetValue();
+    }
+    if (buttonComponent_->GetDisabledState()) {
+        return buttonComponent_->GetDisabledColor().GetValue();
     }
     if (needFocusColor_) {
-        return focusColor_.GetValue();
+        return buttonComponent_->GetFocusColor().GetValue();
     }
-    if (clickedColor_ != defaultClickedColor_) {
-        return isClicked_ ? clickedColor_.GetValue() : backgroundColor_.GetValue();
+    Color backgroundColor = buttonComponent_->GetBackgroundColor();
+    if (NeedClickedColor(backgroundColor)) {
+        return isClicked_ ? clickedColor_.GetValue() : backgroundColor.GetValue();
     }
     if (!isMoveEventValid_) {
         maskingOpacity_ = 0.0;
     }
     uint32_t animationColor;
     if (isWatch_) {
-        animationColor = backgroundColor_.BlendColor(Color::WHITE.ChangeOpacity(maskingOpacity_)).GetValue();
+        animationColor = backgroundColor.BlendColor(Color::WHITE.ChangeOpacity(maskingOpacity_)).GetValue();
     } else {
-        animationColor = backgroundColor_.BlendColor(Color::BLACK.ChangeOpacity(maskingOpacity_)).GetValue();
+        animationColor = backgroundColor.BlendColor(Color::BLACK.ChangeOpacity(maskingOpacity_)).GetValue();
     }
     return animationColor;
+}
+
+bool FlutterRenderButton::NeedClickedColor(const Color& backgroundColor)
+{
+    if (setClickColor_) {
+        return true;
+    }
+    if (clickedColor_ != defaultClickedColor_) {
+        return true;
+    } else {
+        if (backgroundColor == Color::TRANSPARENT) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool FlutterRenderButton::HasEffectiveTransform() const
@@ -392,6 +444,19 @@ bool FlutterRenderButton::HasEffectiveTransform() const
         return false;
     }
     return !transformLayer_->GetMatrix4().IsIdentityMatrix();
+}
+
+void FlutterRenderButton::ConvertToSkVector(const std::array<Radius, 4>& radii, SkVector* skRadii)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    double dipScale = context->GetDipScale();
+    for (int32_t i = 0; i < 4; ++i) {
+        skRadii[i].set(SkDoubleToScalar(std::max(radii[i].GetX().ConvertToPx(dipScale), 0.0)),
+            SkDoubleToScalar(std::max(radii[i].GetY().ConvertToPx(dipScale), 0.0)));
+    }
 }
 
 } // namespace OHOS::Ace

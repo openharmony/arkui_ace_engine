@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_LAYERS_SCENE_BUILDER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_LAYERS_SCENE_BUILDER_H
 
+#include "experimental/svg/model/SkSVGDOM.h"
 #include "flutter/lib/ui/painting/image_filter.h"
+#include "flutter/lib/ui/painting/path.h"
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/rrect.h"
 #include "flutter/lib/ui/painting/shader.h"
@@ -37,10 +39,15 @@ public:
         double dx, double dy, double width, double height, int64_t textureId, bool freeze, uint8_t opacity) = 0;
     virtual void PushTransform(const Matrix4& matrix4) = 0;
     virtual void PushClipRRect(const flutter::RRect& rrect, int32_t clipBehavior) = 0;
+    virtual void PushClipPath(const flutter::CanvasPath* path, int32_t clipBehavior) = 0;
     virtual void PushOpacity(int32_t alpha, double dx = 0, double dy = 0) = 0;
     virtual void PushBackdropFilter(fml::RefPtr<flutter::ImageFilter> imageFilter) = 0;
     virtual void PushShaderMask(fml::RefPtr<flutter::Shader> shader, double maskRectLeft, double maskRectRight,
         double maskRectTop, double maskRectBottom, int32_t blendMode) = 0;
+    virtual void PushGradientColorMask(const SkPaint& maskPaint) = 0;
+    virtual void PushSvgMask(const sk_sp<SkSVGDOM>& svgDom, double x, double y, double scaleX, double scaleY) = 0;
+    virtual void PushPathMask(const SkPaint& maskPaint, const SkPath& maskPath) = 0;
+    virtual void PushFilter(const SkPaint& filterPaint) = 0;
     virtual void Pop() = 0;
 };
 

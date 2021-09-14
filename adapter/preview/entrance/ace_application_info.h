@@ -29,7 +29,11 @@ public:
     void ChangeLocale(const std::string& language, const std::string& countryOrRegion) override;
     std::vector<std::string> GetLocaleFallback(const std::vector<std::string>& localeList) const override;
     std::vector<std::string> GetResourceFallback(const std::vector<std::string>& resourceList) const override;
+    std::vector<std::string> GetStyleResourceFallback(const std::vector<std::string>& resourceList) const override;
+    std::vector<std::string> GetDeclarativeResourceFallback(
+        const std::set<std::string>& resourceList) const override;
     bool GetFiles(const std::string& filePath, std::vector<std::string>& fileList) const override;
+    bool GetFiles(int32_t instanceId, const std::string& filePath, std::vector<std::string>& fileList) const override;
 
     bool GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo) override;
     double GetLifeTime() const override;
@@ -37,6 +41,10 @@ public:
     std::string GetJsEngineParam(const std::string& key) const override;
 
     std::string GetCurrentDeviceResTag() const override;
+
+    std::string GetCurrentDeviceDeclarativeResTag() const override;
+
+    double GetTargetMediaScaleRatio(const std::string& targetResTag) const override;
 };
 
 } // namespace OHOS::Ace::Platform

@@ -20,9 +20,11 @@
 #include "flutter/third_party/txt/src/minikin/FontLanguageListCache.h"
 
 #include "base/i18n/localization.h"
+#include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace {
 
@@ -87,6 +89,13 @@ void FlutterFontCollection::LoadFontFromList(const uint8_t* fontData, size_t len
 
 void FlutterFontCollection::CreateFontCollection(const fml::RefPtr<fml::TaskRunner>& ioTaskRunner)
 {
+    Localization::GetInstance()->SetOnMymrChange([ioTaskRunner](bool isZawgyiMyanmar) {
+        if (ioTaskRunner) {
+            ioTaskRunner->PostTask(
+                [isZawgyiMyanmar]() { FlutterFontCollection::GetInstance().SetIsZawgyiMyanmar(isZawgyiMyanmar); });
+        }
+    });
+
     if (isInit_ || !ioTaskRunner) {
         return;
     }
@@ -103,9 +112,8 @@ void FlutterFontCollection::CreateFontCollection(const fml::RefPtr<fml::TaskRunn
             }
 
             auto locale = Localization::GetInstance()->GetFontLocale();
-            uint32_t langListId = locale.empty() ?
-                                    minikin::FontLanguageListCache::kEmptyListId
-                                    : minikin::FontStyle::registerLanguageList(locale);
+            uint32_t langListId = locale.empty() ? minikin::FontLanguageListCache::kEmptyListId
+                                                 : minikin::FontStyle::registerLanguageList(locale);
             const minikin::FontLanguages& langs = minikin::FontLanguageListCache::getById(langListId);
             locale = langs.size() ? langs[0].getString() : "";
             // 0x4e2d is unicode for '中'.
@@ -150,6 +158,74 @@ void FlutterFontCollection::VaryFontCollectionWithFontWeightScale(float fontWeig
 
     auto& fontCollection = window->client()->GetFontCollection();
     fontCollection.GetFontCollection()->VaryFontCollectionWithFontWeightScale(fontWeightScale);
+}
+
+void FlutterFontCollection::LoadSystemFont()
+{
+    ACE_FUNCTION_TRACE();
+    if (!isUseFlutterEngine) {
+        if (!isCompleted_) {
+            return;
+        }
+        if (fontCollection_ && fontCollection_->GetFontCollection()) {
+            fontCollection_->GetFontCollection()->LoadSystemFont();
+        }
+        return;
+    }
+
+    if (!flutter::UIDartState::Current()) {
+        LOGE("uiDartState is null");
+        return;
+    }
+
+    auto* window = flutter::UIDartState::Current()->window();
+    if (window == nullptr || window->client() == nullptr) {
+        LOGW("UpdateParagraph: window or client is null");
+        return;
+    }
+
+    auto& fontCollection = window->client()->GetFontCollection();
+    fontCollection.GetFontCollection()->LoadSystemFont();
+}
+
+void FlutterFontCollection::SetIsZawgyiMyanmar(bool isZawgyiMyanmar)
+{
+    ACE_FUNCTION_TRACE();
+
+    if (isZawgyiMyanmar_ == isZawgyiMyanmar) {
+        return;
+    }
+    isZawgyiMyanmar_ = isZawgyiMyanmar;
+
+    if (!isUseFlutterEngine) {
+        if (!isCompleted_) {
+            isCompleted_ = future_.get();
+        }
+        if (fontCollection_ && fontCollection_->GetFontCollection()) {
+            fontCollection_->GetFontCollection()->SetIsZawgyiMyanmar(isZawgyiMyanmar);
+        }
+        return;
+    }
+
+    if (!flutter::UIDartState::Current()) {
+        LOGE("uiDartState is null");
+        return;
+    }
+
+    auto* window = flutter::UIDartState::Current()->window();
+    if (window == nullptr || window->client() == nullptr) {
+        LOGW("UpdateParagraph: window or client is null");
+        return;
+    }
+
+    auto& fontCollection = window->client()->GetFontCollection();
+    fontCollection.GetFontCollection()->SetIsZawgyiMyanmar(isZawgyiMyanmar);
+
+    AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
+        if (container) {
+            container->NotifyFontNodes();
+        }
+    });
 }
 
 } // namespace OHOS::Ace

@@ -60,9 +60,8 @@ public:
     void SetIndex(int32_t index)
     {
         index_ = index;
-        auto item = ListItemComponent::GetListItem(component_);
-        if (item) {
-            item->SetIndex(index);
+        if (listItemComponent_) {
+            listItemComponent_->SetIndex(index);
         }
     }
 
@@ -105,6 +104,7 @@ private:
     Radius bottomRightRadius_;
 
     RefPtr<RenderNode> proxyNode_;
+    RefPtr<ListItemComponent> listItemComponent_;
 };
 
 } // namespace OHOS::Ace

@@ -43,21 +43,49 @@ enum class AnimationDirection {
     ALTERNATE_REVERSE,
 };
 
+enum class AnimationOperation {
+    NONE,
+    PLAY,
+    RUNNING,
+    FINISH,
+    PAUSE,
+    CANCEL,
+    REVERSE,
+};
+
 enum class AnimationType {
     TRANSLATE,
     TRANSLATE_X,
     TRANSLATE_Y,
+    TRANSLATE_Z,
+    TRANSLATE_3D,
     SCALE,
     SCALE_X,
     SCALE_Y,
+    SCALE_Z,
+    SCALE_3D,
     ROTATE_Z,
     ROTATE_X,
     ROTATE_Y,
+    ROTATE,
+    ROTATE_3D,
+    SKEW,
+    SKEW_X,
+    SKEW_Y,
+    MATRIX_3D,
+    MATRIX_2D,
+    PERSPECTIVE
 };
 
 enum class TransitionEffect {
     NONE,
     UNFOLD,
+};
+
+enum class TransitionType {
+    ALL,
+    APPEARING,
+    DISAPPEARING
 };
 
 using ShareId = std::string;

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_COMMON_JS_ENGINE_LOADER_H
 
 #include "frameworks/bridge/js_frontend/engine/common/base_canvas_bridge.h"
+#include "frameworks/bridge/js_frontend/engine/common/base_xcomponent_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Framework {
@@ -25,11 +26,12 @@ class JsEngineLoader {
 public:
     virtual ~JsEngineLoader() = default;
 
-    static JsEngineLoader& Get();
-    static JsEngineLoader& GetDeclarative();
+    static JsEngineLoader& Get(bool isArkApp = false);
+    static JsEngineLoader& GetDeclarative(bool isArkApp = false);
 
     virtual RefPtr<JsEngine> CreateJsEngine(int32_t instanceId) const = 0;
     virtual RefPtr<BaseCanvasBridge> CreateCanvasBridge() const = 0;
+    virtual RefPtr<BaseXComponentBridge> CreateXComponentBridge() const = 0;
 };
 
 } // namespace OHOS::Ace::Framework

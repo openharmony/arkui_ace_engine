@@ -22,20 +22,17 @@ namespace OHOS::Ace::Framework {
 DOMToolBar::DOMToolBar(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
     toolBarChild_ = AceType::MakeRefPtr<ToolBarComponent>(std::list<RefPtr<Component>>());
-    if (IsRightToLeft()) {
-        toolBarChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 void DOMToolBar::InitializeStyle()
 {
     RefPtr<ToolBarTheme> theme = GetTheme<ToolBarTheme>();
-    if (!theme) {
-        LOGE("ToolBarTheme is null");
+    if (!theme || !declaration_) {
+        LOGE("ToolBarTheme or declaration is null");
         return;
     }
-    backDecoration_->SetBackgroundColor(theme->GetToolBarBgColor());
-    hasDecorationStyle_ = true;
+    declaration_->GetBackDecoration()->SetBackgroundColor(theme->GetToolBarBgColor());
+    declaration_->SetHasDecorationStyle(true);
 }
 
 void DOMToolBar::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
@@ -109,6 +106,13 @@ void DOMToolBar::AddChildNode(const RefPtr<DOMNode>& child, int32_t slot, bool i
         toolBarChild_->InsertChild(slot, child->GetRootComponent());
     }
     preToolBarItem_ = child;
+}
+
+void DOMToolBar::PrepareSpecializedComponent()
+{
+    if (toolBarChild_) {
+        toolBarChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+    }
 }
 
 } // namespace

@@ -29,7 +29,6 @@ public:
 
 protected:
     void PrepareSpecializedComponent() override;
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
 };
 
 } // namespace OHOS::Ace::Framework

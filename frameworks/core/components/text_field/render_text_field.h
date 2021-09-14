@@ -78,7 +78,7 @@ public:
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void OnStatusChanged(RenderStatus renderStatus) override;
-    void OnValueChanged(bool needFireChangeEvent = true) override;
+    void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
     void OnPaintFinish() override;
 
     bool OnKeyEvent(const KeyEvent& event);
@@ -96,6 +96,7 @@ public:
     void SetIsOverlayShowed(bool isOverlayShowed, bool needStartTwinkling = true);
     void UpdateFocusAnimation();
     const TextEditingValue& GetEditingValue() const;
+    const TextEditingValue& GetPreEditingValue() const;
     void Delete(int32_t start, int32_t end);
     void SetOnOverlayFocusChange(const std::function<void(bool)>& onOverlayFocusChange)
     {
@@ -340,6 +341,7 @@ protected:
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
     DirectionStatus directionStatus_ = DirectionStatus::LEFT_LEFT;
 
+    bool showPasswordIcon_ = true; // Whether show password icon, effect only type is password.
     bool showCounter_ = false; // Whether show counter, 10/100 means maxlength is 100 and 10 has inputed.
     bool overCount_ = false;   // Whether count of text is over limit.
     bool obscure_ = false;     // Obscure the text, for example, password.
@@ -349,7 +351,7 @@ protected:
     bool isValueFromRemote_ = false;          // Remote value coming form typing, other is from clopboard.
     bool existStrongDirectionLetter_ = false; // Whether exist strong direction letter in text.
     bool isVisible_ = true;
-    bool needNotifyChangeEvent_ = true;
+    bool needNotifyChangeEvent_ = false;
     bool resetToStart_ = true;      // When finish inputting text, whether show header of text.
     bool showEllipsis_ = false;     // When text is overflow, whether show ellipsis.
     bool extend_ = false;           // Whether input support extend, this attribute is worked in textarea.
@@ -366,6 +368,7 @@ protected:
     Dimension iconSizeInDimension_;
     Dimension iconHotZoneSizeInDimension_;
     Dimension widthReserved_;
+    std::optional<Color> imageFill_ = std::nullopt;
     std::string iconSrc_;
     std::string showIconSrc_;
     std::string hideIconSrc_;
@@ -424,7 +427,9 @@ private:
     void ChangeBorderToErrorStyle();
     void HandleDeviceOrientationChange();
     void OnOverlayFocusChange(bool isFocus, bool needCloseKeyboard);
+    void FireSelectChangeIfNeeded(const TextEditingValue& newValue, bool needFireSelectChangeEvent) const;
     int32_t GetInstanceId() const;
+    void PopTextOverlay() const;
 
     /**
      * @brief Update remote editing value only if text or selection is changed.
@@ -440,7 +445,9 @@ private:
     double fontScale_ = 1.0;
     bool isSingleHandle_ = false;
     bool hasTextOverlayPushed_ = false;
+    bool softKeyboardEnabled_ = true;
     Color pressColor_;
+    TextSelection selection_; // Selection from custom.
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     std::function<void()> onValueChange_;
     std::function<void(bool)> onKeyboardClose_;
@@ -449,6 +456,11 @@ private:
     std::function<void(const double&)> updateHandleDiameter_;
     std::function<void(const double&)> updateHandleDiameterInner_;
     std::function<void(const std::string&)> onTextChangeEvent_;
+    std::function<void(std::string)> onChange_;
+    std::function<void(bool)> onEditChanged_;
+    std::function<void(int32_t)> onSubmit_;
+    std::function<void(const std::string&)> onValueChangeEvent_;
+    std::function<void(const std::string&)> onSelectChangeEvent_;
     std::function<void(const std::string&)> onFinishInputEvent_;
     std::function<void(const std::string&)> onSubmitEvent_;
     std::function<void()> onTapEvent_;
@@ -459,11 +471,11 @@ private:
     EventMarker onTranslate_;
     EventMarker onShare_;
     EventMarker onSearch_;
-
+    bool catchMode_ = true;
     TapCallback tapCallback_;
     CancelableCallback<void()> cursorTwinklingTask_;
 
-    std::vector<Framework::InputOption> inputOptions_;
+    std::vector<InputOption> inputOptions_;
     std::list<std::unique_ptr<TextInputFormatter>> textInputFormatters_;
     RefPtr<TextEditController> controller_;
     RefPtr<TextInputConnection> connection_;

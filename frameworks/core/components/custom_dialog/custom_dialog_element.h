@@ -36,7 +36,10 @@ private:
     void CloseDialog();
 
     RefPtr<CustomDialogComponent> dialog_;
+    int32_t dialogId_ = -1;
     WeakPtr<Animator> animator_;
+    std::function<void()> onShow_;
+    std::function<void()> onClose_;
     // used for inspector node in PC preview
     bool isPopDialog_ = false;
 };

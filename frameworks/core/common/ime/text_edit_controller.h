@@ -34,6 +34,13 @@ public:
         SetValue(std::move(value), needFireChangeEvent);
     }
 
+    void SetHint(const std::string& hint)
+    {
+        auto value = GetValue();
+        value.hint = hint;
+        SetValue(std::move(value));
+    }
+
     void SetSelection(const TextSelection& selection)
     {
         auto value = GetValue();

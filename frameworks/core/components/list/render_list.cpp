@@ -42,6 +42,8 @@ void RenderList::Update(const RefPtr<Component>& component)
         return;
     }
 
+    needRefresh_ = true;
+    int32_t preColumnCount = columnCount_;
     direction_ = list->GetDirection();
     maxCount_ = list->GetTotalCount();
     itemsCount_ = list->GetItemsCount();
@@ -73,7 +75,7 @@ void RenderList::Update(const RefPtr<Component>& component)
         chainProperty_ = list->GetChainProperty();
     }
 
-    if (!layoutManager_) {
+    if (!layoutManager_ || preColumnCount != columnCount_) {
         if (columnCount_ <= 1) {
             if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
                 layoutManager_ = AceType::MakeRefPtr<ListWatchLayoutManager>(*this);
@@ -90,6 +92,7 @@ void RenderList::Update(const RefPtr<Component>& component)
         // list parent is scroll
         rotationController->SetRequestRotationImpl(GetParent(), context_);
     }
+    SetOnRotateCallback(list);
 
     UpdateAccessibilityAttr();
     layoutManager_->Update();
@@ -100,6 +103,7 @@ void RenderList::UpdateTouchRect()
 {
     touchRect_.SetSize(viewPort_);
     touchRect_.SetOffset(GetPosition());
+    ownTouchRect_ = touchRect_;
 }
 
 void RenderList::MarkNeedRefresh()
@@ -171,14 +175,8 @@ void RenderList::OnPaintFinish()
         }
         listItem->SetAccessibilityVisible(visible);
         if (visible) {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
             Rect clampRect = listItemRect.Constrain(viewPortRect);
-            if (clampRect != listItemRect) {
-                listItem->SetAccessibilityRect(clampRect);
-            } else {
-                listItem->ClearAccessibilityRect();
-        }
-#endif
+            listItem->SetAccessibilityRect(clampRect);
         } else {
             listItem->NotifyPaintFinish();
         }
@@ -689,6 +687,14 @@ void RenderList::ResetGroupItem(const RefPtr<RenderNode>& renderNode)
     }
 }
 
+void RenderList::OnChildRemoved(const RefPtr<RenderNode>& child)
+{
+    if (child) {
+        child->SetAccessibilityVisible(false);
+        child->ClearAccessibilityRect();
+    }
+}
+
 void RenderList::SetGroupState(int32_t index, bool expand)
 {
     if (index >= 0) {
@@ -758,6 +764,15 @@ void RenderList::NotifyScrollOver(double velocity, bool isCrashTop, bool isCrash
         LOGW("ScrollOver but neither top nor bottom crashed. velocity: %{public}f", velocity);
     }
     LOGD("NotifyScrollOver. velocity: %{public}.1lf, dragStartIndex_: %{public}d", velocity, dragStartIndexPending_);
+}
+
+void RenderList::SetOnRotateCallback(const RefPtr<ListComponent>& component)
+{
+    const auto& onRotateId = component->GetOnRotateId();
+    if (onRotateId.IsEmpty()) {
+        return;
+    }
+    rotationEvent_ = AceAsyncEvent<void(const RotationEvent&)>::Create(onRotateId, context_);
 }
 
 } // namespace OHOS::Ace

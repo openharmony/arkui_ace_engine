@@ -430,7 +430,13 @@ HWTEST_F(DomNodeTest, DomNodeTest007, TestSize.Level1)
      */
     auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
     ASSERT_TRUE(domNodeRoot != nullptr);
-    auto weight = domNodeRoot->GetFlexWeight();
+    auto declaration = domNodeRoot->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    double weight = 0.0;
+    auto& flexStyle = static_cast<CommonFlexStyle&>(declaration->GetStyle(StyleTag::COMMON_FLEX_STYLE));
+    if (flexStyle.IsValid()) {
+        weight = flexStyle.flexWeight;
+    }
 
     /**
      * @tc.steps: step3. Verify the DomNode's bordrt radius common styles can be set correctly.
@@ -870,7 +876,7 @@ HWTEST_F(DomNodeTest, WindowBlurTest004, TestSize.Level1) {
  * @tc.name: TransformOriginTest001
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
+ * @tc.require: AR000FQJGO
  * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest001, TestSize.Level1)
@@ -897,8 +903,12 @@ HWTEST_F(DomNodeTest, TransformOriginTest001, TestSize.Level1)
      * @tc.steps: step3. Verify the DomNode's transform-origin common styles can be set correctly.
      * @tc.expected: step3. 50% 50%
      */
-    auto originOffsetX = domNodeRoot->GetTweenOption().GetTransformOriginX();
-    auto originOffsetY = domNodeRoot->GetTweenOption().GetTransformOriginY();
+    auto declaration = domNodeRoot->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    auto& animationStyle = static_cast<CommonAnimationStyle&>(declaration->GetStyle(StyleTag::COMMON_ANIMATION_STYLE));
+    ASSERT_TRUE(animationStyle.IsValid());
+    auto originOffsetX = animationStyle.tweenOption.GetTransformOriginX();
+    auto originOffsetY = animationStyle.tweenOption.GetTransformOriginY();
     ASSERT_TRUE(originOffsetX.Unit() == DimensionUnit::PERCENT);
     ASSERT_EQ(originOffsetX.Value(), 0.5);
     ASSERT_TRUE(originOffsetY.Unit() == DimensionUnit::PERCENT);
@@ -909,7 +919,7 @@ HWTEST_F(DomNodeTest, TransformOriginTest001, TestSize.Level1)
  * @tc.name: TransformOriginTest002
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
+ * @tc.require: AR000FQJGO
  * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest002, TestSize.Level1)
@@ -936,8 +946,12 @@ HWTEST_F(DomNodeTest, TransformOriginTest002, TestSize.Level1)
      * @tc.steps: step3. Verify the DomNode's transform-origin common styles can be set correctly.
      * @tc.expected: step3. 0% 50%
      */
-    auto originOffsetX = domNodeRoot->GetTweenOption().GetTransformOriginX();
-    auto originOffsetY = domNodeRoot->GetTweenOption().GetTransformOriginY();
+    auto declaration = domNodeRoot->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    auto& animationStyle = static_cast<CommonAnimationStyle&>(declaration->GetStyle(StyleTag::COMMON_ANIMATION_STYLE));
+    ASSERT_TRUE(animationStyle.IsValid());
+    auto originOffsetX = animationStyle.tweenOption.GetTransformOriginX();
+    auto originOffsetY = animationStyle.tweenOption.GetTransformOriginY();
     ASSERT_TRUE(originOffsetX.Unit() == DimensionUnit::PERCENT);
     ASSERT_EQ(originOffsetX.Value(), 0.0);
     ASSERT_TRUE(originOffsetY.Unit() == DimensionUnit::PERCENT);
@@ -975,8 +989,12 @@ HWTEST_F(DomNodeTest, TransformOriginTest003, TestSize.Level1)
      * @tc.steps: step3. Verify the DomNode's transform-origin common styles can be set correctly.
      * @tc.expected: step3. 50% 100%
      */
-    auto originOffsetX = domNodeRoot->GetTweenOption().GetTransformOriginX();
-    auto originOffsetY = domNodeRoot->GetTweenOption().GetTransformOriginY();
+    auto declaration = domNodeRoot->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    auto& animationStyle = static_cast<CommonAnimationStyle&>(declaration->GetStyle(StyleTag::COMMON_ANIMATION_STYLE));
+    ASSERT_TRUE(animationStyle.IsValid());
+    auto originOffsetX = animationStyle.tweenOption.GetTransformOriginX();
+    auto originOffsetY = animationStyle.tweenOption.GetTransformOriginY();
     ASSERT_TRUE(originOffsetX.Unit() == DimensionUnit::PERCENT);
     ASSERT_EQ(originOffsetX.Value(), 0.5);
     ASSERT_TRUE(originOffsetY.Unit() == DimensionUnit::PERCENT);
@@ -987,7 +1005,7 @@ HWTEST_F(DomNodeTest, TransformOriginTest003, TestSize.Level1)
  * @tc.name: TransformOriginTest004
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
+ * @tc.require: AR000FQJGO
  * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest004, TestSize.Level1)
@@ -1014,8 +1032,12 @@ HWTEST_F(DomNodeTest, TransformOriginTest004, TestSize.Level1)
      * @tc.steps: step3. Verify the DomNode's transform-origin common styles can be set correctly.
      * @tc.expected: step3. 50% 0%
      */
-    auto originOffsetX = domNodeRoot->GetTweenOption().GetTransformOriginX();
-    auto originOffsetY = domNodeRoot->GetTweenOption().GetTransformOriginY();
+    auto declaration = domNodeRoot->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    auto& animationStyle = static_cast<CommonAnimationStyle&>(declaration->GetStyle(StyleTag::COMMON_ANIMATION_STYLE));
+    ASSERT_TRUE(animationStyle.IsValid());
+    auto originOffsetX = animationStyle.tweenOption.GetTransformOriginX();
+    auto originOffsetY = animationStyle.tweenOption.GetTransformOriginY();
     ASSERT_TRUE(originOffsetX.Unit() == DimensionUnit::PERCENT);
     ASSERT_EQ(originOffsetX.Value(), 0.5);
     ASSERT_TRUE(originOffsetY.Unit() == DimensionUnit::PERCENT);
@@ -1026,7 +1048,7 @@ HWTEST_F(DomNodeTest, TransformOriginTest004, TestSize.Level1)
  * @tc.name: TransformOriginTest005
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
+ * @tc.require: AR000FQJGO
  * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest005, TestSize.Level1)
@@ -1053,8 +1075,12 @@ HWTEST_F(DomNodeTest, TransformOriginTest005, TestSize.Level1)
      * @tc.steps: step3. Verify the DomNode's transform-origin common styles can be set correctly.
      * @tc.expected: step3. 50% 100%
      */
-    auto originOffsetX = domNodeRoot->GetTweenOption().GetTransformOriginX();
-    auto originOffsetY = domNodeRoot->GetTweenOption().GetTransformOriginY();
+    auto declaration = domNodeRoot->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    auto& animationStyle = static_cast<CommonAnimationStyle&>(declaration->GetStyle(StyleTag::COMMON_ANIMATION_STYLE));
+    ASSERT_TRUE(animationStyle.IsValid());
+    auto originOffsetX = animationStyle.tweenOption.GetTransformOriginX();
+    auto originOffsetY = animationStyle.tweenOption.GetTransformOriginY();
     ASSERT_TRUE(originOffsetX.Unit() == DimensionUnit::PERCENT);
     ASSERT_EQ(originOffsetX.Value(), 0.5);
     ASSERT_TRUE(originOffsetY.Unit() == DimensionUnit::PERCENT);
@@ -1065,7 +1091,7 @@ HWTEST_F(DomNodeTest, TransformOriginTest005, TestSize.Level1)
  * @tc.name: TransformOriginTest006
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
+ * @tc.require: AR000FQJGO
  * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest006, TestSize.Level1)
@@ -1092,8 +1118,12 @@ HWTEST_F(DomNodeTest, TransformOriginTest006, TestSize.Level1)
      * @tc.steps: step3. Verify the DomNode's transform-origin common styles can be set correctly.
      * @tc.expected: step3. 40px 50%
      */
-    auto originOffsetX = domNodeRoot->GetTweenOption().GetTransformOriginX();
-    auto originOffsetY = domNodeRoot->GetTweenOption().GetTransformOriginY();
+    auto declaration = domNodeRoot->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    auto& animationStyle = static_cast<CommonAnimationStyle&>(declaration->GetStyle(StyleTag::COMMON_ANIMATION_STYLE));
+    ASSERT_TRUE(animationStyle.IsValid());
+    auto originOffsetX = animationStyle.tweenOption.GetTransformOriginX();
+    auto originOffsetY = animationStyle.tweenOption.GetTransformOriginY();
     ASSERT_TRUE(originOffsetX.Unit() == DimensionUnit::PX);
     ASSERT_EQ(originOffsetX.Value(), 40);
     ASSERT_TRUE(originOffsetY.Unit() == DimensionUnit::PERCENT);
@@ -1104,7 +1134,7 @@ HWTEST_F(DomNodeTest, TransformOriginTest006, TestSize.Level1)
  * @tc.name: TransformOriginTest007
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
+ * @tc.require: AR000FQJGO
  * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest007, TestSize.Level1)
@@ -1131,8 +1161,12 @@ HWTEST_F(DomNodeTest, TransformOriginTest007, TestSize.Level1)
      * @tc.steps: step3. Verify the DomNode's transform-origin common styles can be set correctly.
      * @tc.expected: step3. 30% 50%
      */
-    auto originOffsetX = domNodeRoot->GetTweenOption().GetTransformOriginX();
-    auto originOffsetY = domNodeRoot->GetTweenOption().GetTransformOriginY();
+    auto declaration = domNodeRoot->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    auto& animationStyle = static_cast<CommonAnimationStyle&>(declaration->GetStyle(StyleTag::COMMON_ANIMATION_STYLE));
+    ASSERT_TRUE(animationStyle.IsValid());
+    auto originOffsetX = animationStyle.tweenOption.GetTransformOriginX();
+    auto originOffsetY = animationStyle.tweenOption.GetTransformOriginY();
     ASSERT_TRUE(originOffsetX.Unit() == DimensionUnit::PERCENT);
     ASSERT_EQ(originOffsetX.Value(), 0.3);
     ASSERT_TRUE(originOffsetY.Unit() == DimensionUnit::PERCENT);
@@ -1143,7 +1177,7 @@ HWTEST_F(DomNodeTest, TransformOriginTest007, TestSize.Level1)
  * @tc.name: TransformOriginTest008
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
+ * @tc.require: AR000FQJGO
  * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest008, TestSize.Level1)
@@ -1170,8 +1204,12 @@ HWTEST_F(DomNodeTest, TransformOriginTest008, TestSize.Level1)
      * @tc.steps: step3. Verify the DomNode's transform-origin common styles can be set correctly.
      * @tc.expected: step3. 0% 0px
      */
-    auto originOffsetX = domNodeRoot->GetTweenOption().GetTransformOriginX();
-    auto originOffsetY = domNodeRoot->GetTweenOption().GetTransformOriginY();
+    auto declaration = domNodeRoot->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    auto& animationStyle = static_cast<CommonAnimationStyle&>(declaration->GetStyle(StyleTag::COMMON_ANIMATION_STYLE));
+    ASSERT_TRUE(animationStyle.IsValid());
+    auto originOffsetX = animationStyle.tweenOption.GetTransformOriginX();
+    auto originOffsetY = animationStyle.tweenOption.GetTransformOriginY();
     ASSERT_TRUE(originOffsetX.Unit() == DimensionUnit::PERCENT);
     ASSERT_EQ(originOffsetX.Value(), 0.0);
     ASSERT_TRUE(originOffsetY.Unit() == DimensionUnit::PX);
@@ -1182,7 +1220,7 @@ HWTEST_F(DomNodeTest, TransformOriginTest008, TestSize.Level1)
  * @tc.name: TransformOriginTest009
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
+ * @tc.require: AR000FQJGO
  * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest009, TestSize.Level1)
@@ -1209,8 +1247,12 @@ HWTEST_F(DomNodeTest, TransformOriginTest009, TestSize.Level1)
      * @tc.steps: step3. Verify the DomNode's transform-origin common styles can be set correctly.
      * @tc.expected: step3. 0% 30px
      */
-    auto originOffsetX = domNodeRoot->GetTweenOption().GetTransformOriginX();
-    auto originOffsetY = domNodeRoot->GetTweenOption().GetTransformOriginY();
+    auto declaration = domNodeRoot->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    auto& animationStyle = static_cast<CommonAnimationStyle&>(declaration->GetStyle(StyleTag::COMMON_ANIMATION_STYLE));
+    ASSERT_TRUE(animationStyle.IsValid());
+    auto originOffsetX = animationStyle.tweenOption.GetTransformOriginX();
+    auto originOffsetY = animationStyle.tweenOption.GetTransformOriginY();
     ASSERT_TRUE(originOffsetX.Unit() == DimensionUnit::PERCENT);
     ASSERT_EQ(originOffsetX.Value(), 0.0);
     ASSERT_TRUE(originOffsetY.Unit() == DimensionUnit::PX);
@@ -1221,7 +1263,7 @@ HWTEST_F(DomNodeTest, TransformOriginTest009, TestSize.Level1)
  * @tc.name: TransformOriginTest010
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
+ * @tc.require: AR000FQJGO
  * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest010, TestSize.Level1)
@@ -1248,8 +1290,12 @@ HWTEST_F(DomNodeTest, TransformOriginTest010, TestSize.Level1)
      * @tc.steps: step3. Verify the DomNode's transform-origin common styles can be set correctly.
      * @tc.expected: step3. 0% 100%
      */
-    auto originOffsetX = domNodeRoot->GetTweenOption().GetTransformOriginX();
-    auto originOffsetY = domNodeRoot->GetTweenOption().GetTransformOriginY();
+    auto declaration = domNodeRoot->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    auto& animationStyle = static_cast<CommonAnimationStyle&>(declaration->GetStyle(StyleTag::COMMON_ANIMATION_STYLE));
+    ASSERT_TRUE(animationStyle.IsValid());
+    auto originOffsetX = animationStyle.tweenOption.GetTransformOriginX();
+    auto originOffsetY = animationStyle.tweenOption.GetTransformOriginY();
     ASSERT_TRUE(originOffsetX.Unit() == DimensionUnit::PERCENT);
     ASSERT_EQ(originOffsetX.Value(), 0.0);
     ASSERT_TRUE(originOffsetY.Unit() == DimensionUnit::PERCENT);
@@ -1260,7 +1306,7 @@ HWTEST_F(DomNodeTest, TransformOriginTest010, TestSize.Level1)
  * @tc.name: TransformOriginTest011
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
+ * @tc.require: AR000FQJGO
  * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest011, TestSize.Level1)
@@ -1287,12 +1333,673 @@ HWTEST_F(DomNodeTest, TransformOriginTest011, TestSize.Level1)
      * @tc.steps: step3. Verify the DomNode's transform-origin common styles can be set correctly.
      * @tc.expected: step3. 50% 100%
      */
-    auto originOffsetX = domNodeRoot->GetTweenOption().GetTransformOriginX();
-    auto originOffsetY = domNodeRoot->GetTweenOption().GetTransformOriginY();
+    auto declaration = domNodeRoot->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    auto& animationStyle = static_cast<CommonAnimationStyle&>(declaration->GetStyle(StyleTag::COMMON_ANIMATION_STYLE));
+    ASSERT_TRUE(animationStyle.IsValid());
+    auto originOffsetX = animationStyle.tweenOption.GetTransformOriginX();
+    auto originOffsetY = animationStyle.tweenOption.GetTransformOriginY();
     ASSERT_TRUE(originOffsetX.Unit() == DimensionUnit::PERCENT);
     ASSERT_EQ(originOffsetX.Value(), 0.5);
     ASSERT_TRUE(originOffsetY.Unit() == DimensionUnit::PERCENT);
     ASSERT_EQ(originOffsetY.Value(), 1.0);
+}
+
+/*
+ * @tc.name: MaskImageTest001
+ * @tc.desc: Verify mask on dom created.
+ * @tc.type: FUNC
+ * @tc.require: SR000FQK77
+ * @tc.author: huye
+ */
+HWTEST_F(DomNodeTest, MaskImageTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * maskImage.
+     */
+    const std::string jsonDivStr = R"({"tag":"div","commonStyle":[{"maskImage":"common/mask.svg"}]})";
+
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its maskImage.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the DomNode's maskImage common styles can be set correctly.
+     * @tc.expected: step3. Type is svg image.
+     */
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeRoot);
+    ASSERT_TRUE(boxChild != nullptr);
+
+    const auto& mask = boxChild->GetMask();
+    ASSERT_TRUE(mask != nullptr);
+    ASSERT_TRUE(mask->IsSvgImage());
+}
+
+/*
+ * @tc.name: MaskImageTest002
+ * @tc.desc: Verify mask on dom created.
+ * @tc.type: FUNC
+ * @tc.require: AR000FRTPJ
+ * @tc.author: huye
+ */
+HWTEST_F(DomNodeTest, MaskImageTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * maskImage.
+     */
+    const std::string jsonDivStr = R"({"tag":"div","commonStyle":[{"maskImage":"linearGradient"}]})";
+
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its maskImage.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the DomNode's maskImage common styles can be set correctly.
+     * @tc.expected: step3. Type is color gradient.
+     */
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeRoot);
+    ASSERT_TRUE(boxChild != nullptr);
+
+    const auto& mask = boxChild->GetMask();
+    ASSERT_TRUE(mask != nullptr);
+    ASSERT_TRUE(mask->IsColorGradient());
+}
+
+/*
+ * @tc.name: MaskImageTest003
+ * @tc.desc: Verify mask on dom created.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK78
+ * @tc.author: huye
+ */
+HWTEST_F(DomNodeTest, MaskImageTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * maskImage.
+     */
+    const std::string jsonDivStr =
+        R"({"tag":"div","commonStyle":[{"maskImage":"m.svg"},{"maskPosition":"center"},{"maskSize":"cover"}]})";
+
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its maskImage.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the DomNode's maskImage common styles can be set correctly.
+     * @tc.expected: step3. Type is svg image. position and size is correctly.
+     */
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeRoot);
+    ASSERT_TRUE(boxChild != nullptr);
+
+    const auto& mask = boxChild->GetMask();
+    ASSERT_TRUE(mask != nullptr);
+    ASSERT_TRUE(mask->IsSvgImage());
+
+    auto size = mask->GetMaskSize();
+    ASSERT_EQ(size.GetSizeTypeX(), BackgroundImageSizeType::COVER);
+
+    auto position = mask->GetMaskPosition();
+    ASSERT_EQ(position.GetSizeTypeX(), BackgroundImagePositionType::PERCENT);
+    ASSERT_EQ(position.GetSizeTypeY(), BackgroundImagePositionType::PERCENT);
+    ASSERT_EQ(position.GetSizeValueX(), 50.0f);
+    ASSERT_EQ(position.GetSizeValueY(), 50.0f);
+}
+
+/*
+ * @tc.name: MaskImageTest004
+ * @tc.desc: Verify mask on dom created.
+ * @tc.type: FUNC
+ * @tc.require: AR000FRTPJ
+ * @tc.author: huye
+ */
+HWTEST_F(DomNodeTest, MaskImageTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * maskImage.
+     */
+    const std::string jsonDivStr =
+        R"({"tag":"div","commonStyle":[{"maskImage":"m.svg"},{"maskPosition":"20%"},{"maskSize":"30%"}]})";
+
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its maskImage.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the DomNode's maskImage common styles can be set correctly.
+     * @tc.expected: step3. Type is svg image. position and size is correctly.
+     */
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeRoot);
+    ASSERT_TRUE(boxChild != nullptr);
+
+    const auto& mask = boxChild->GetMask();
+    ASSERT_TRUE(mask != nullptr);
+    ASSERT_TRUE(mask->IsSvgImage());
+
+    auto position = mask->GetMaskPosition();
+    ASSERT_EQ(position.GetSizeTypeX(), BackgroundImagePositionType::PERCENT);
+    ASSERT_EQ(position.GetSizeTypeY(), BackgroundImagePositionType::PERCENT);
+    ASSERT_EQ(position.GetSizeValueX(), 20.0f);
+    ASSERT_EQ(position.GetSizeValueY(), 50.0f);
+
+    auto size = mask->GetMaskSize();
+    ASSERT_EQ(size.GetSizeTypeX(), BackgroundImageSizeType::PERCENT);
+    ASSERT_EQ(size.GetSizeTypeY(), BackgroundImageSizeType::AUTO);
+    ASSERT_EQ(size.GetSizeValueX(), 30.0f);
+    ASSERT_EQ(size.GetSizeValueY(), 0.0f);
+}
+
+/*
+ * @tc.name: MaskImageTest005
+ * @tc.desc: Verify mask on dom created.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK79
+ * @tc.author: huye
+ */
+HWTEST_F(DomNodeTest, MaskImageTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * maskImage.
+     */
+    const std::string jsonDivStr =
+        R"({"tag":"div","commonStyle":[{"maskImage":"m.svg"},{"maskPosition":"30px 20%"},{"maskSize":"30% 50px"}]})";
+
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its maskImage.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the DomNode's maskImage common styles can be set correctly.
+     * @tc.expected: step3. Type is svg image. position and size is correctly.
+     */
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeRoot);
+    ASSERT_TRUE(boxChild != nullptr);
+
+    const auto& mask = boxChild->GetMask();
+    ASSERT_TRUE(mask != nullptr);
+    ASSERT_TRUE(mask->IsSvgImage());
+
+    auto position = mask->GetMaskPosition();
+    ASSERT_EQ(position.GetSizeTypeX(), BackgroundImagePositionType::PX);
+    ASSERT_EQ(position.GetSizeTypeY(), BackgroundImagePositionType::PERCENT);
+    ASSERT_EQ(position.GetSizeValueX(), 30.0f);
+    ASSERT_EQ(position.GetSizeValueY(), 20.0f);
+
+    auto size = mask->GetMaskSize();
+    ASSERT_EQ(size.GetSizeTypeX(), BackgroundImageSizeType::PERCENT);
+    ASSERT_EQ(size.GetSizeTypeY(), BackgroundImageSizeType::LENGTH);
+    ASSERT_EQ(size.GetSizeValueX(), 30.0f);
+    ASSERT_EQ(size.GetSizeValueY(), 50.0f);
+}
+
+/*
+ * @tc.name: MaskImageTest006
+ * @tc.desc: Verify mask on dom created.
+ * @tc.type: FUNC
+ * @tc.require: AR000FR073
+ * @tc.author: huye
+ */
+HWTEST_F(DomNodeTest, MaskImageTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * maskImage.
+     */
+    const std::string jsonDivStr =
+        R"({"tag":"div","commonStyle":[{"maskImage":"m.svg"},{"maskPosition":"left top"},{"maskSize":"contain"}]})";
+
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its maskImage.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the DomNode's maskImage common styles can be set correctly.
+     * @tc.expected: step3. Type is svg image. position and size is correctly.
+     */
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeRoot);
+    ASSERT_TRUE(boxChild != nullptr);
+
+    const auto& mask = boxChild->GetMask();
+    ASSERT_TRUE(mask != nullptr);
+    ASSERT_TRUE(mask->IsSvgImage());
+
+    auto position = mask->GetMaskPosition();
+    ASSERT_EQ(position.GetSizeTypeX(), BackgroundImagePositionType::PERCENT);
+    ASSERT_EQ(position.GetSizeTypeY(), BackgroundImagePositionType::PERCENT);
+    ASSERT_EQ(position.GetSizeValueX(), 0.0f);
+    ASSERT_EQ(position.GetSizeValueY(), 0.0f);
+
+    auto size = mask->GetMaskSize();
+    ASSERT_EQ(size.GetSizeTypeX(), BackgroundImageSizeType::CONTAIN);
+}
+
+/*
+ * @tc.name: MaskImageTest007
+ * @tc.desc: Verify mask on dom created.
+ * @tc.type: FUNC
+ * @tc.require: AR000FR073
+ * @tc.author: huye
+ */
+HWTEST_F(DomNodeTest, MaskImageTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * maskImage.
+     */
+    const std::string jsonDivStr =
+        R"({"tag":"div","commonStyle":[{"maskImage":"m.svg"},{"maskPosition":"right bottom"},{"maskSize":"auto"}]})";
+
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its maskImage.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the DomNode's maskImage common styles can be set correctly.
+     * @tc.expected: step3. Type is svg image. position and size is correctly.
+     */
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeRoot);
+    ASSERT_TRUE(boxChild != nullptr);
+
+    const auto& mask = boxChild->GetMask();
+    ASSERT_TRUE(mask != nullptr);
+    ASSERT_TRUE(mask->IsSvgImage());
+
+    auto position = mask->GetMaskPosition();
+    ASSERT_EQ(position.GetSizeTypeX(), BackgroundImagePositionType::PERCENT);
+    ASSERT_EQ(position.GetSizeTypeY(), BackgroundImagePositionType::PERCENT);
+    ASSERT_EQ(position.GetSizeValueX(), 100.0f);
+    ASSERT_EQ(position.GetSizeValueY(), 100.0f);
+
+    auto size = mask->GetMaskSize();
+    ASSERT_EQ(size.GetSizeTypeX(), BackgroundImageSizeType::AUTO);
+}
+
+/*
+ * @tc.name: AngleTest001
+ * @tc.desc: Verify angle with unit deg.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQJGQ
+ * @tc.author: jiangtao
+ */
+HWTEST_F(DomNodeTest, AngleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * transform.
+     */
+    const std::string jsonDivStr = R"({"tag":"div","commonStyle":[{"transform":"{\"rotate\":\"30deg\"}"}]})";
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its transform.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the DomNode's transform common styles can be set correctly.
+     * @tc.expected: step3. rotateZ 30deg
+     */
+
+    auto transformComponent = domNodeRoot->GetTransformComponent();
+    ASSERT_TRUE(transformComponent != nullptr);
+    const auto& effects = transformComponent->GetTransformEffects();
+    const auto& operations = effects.GetOperations();
+    ASSERT_TRUE(operations.size() == 1);
+    ASSERT_TRUE(operations.front().type_ == TransformOperationType::ROTATE);
+    ASSERT_TRUE(NearEqual(operations.front().rotateOperation_.angle, 30.0));
+}
+
+/*
+ * @tc.name: AngleTest002
+ * @tc.desc: Verify angle with unit grad.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQJGQ
+ * @tc.author: jiangtao
+ */
+HWTEST_F(DomNodeTest, AngleTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * transform.
+     */
+    const std::string jsonDivStr = R"({"tag":"div","commonStyle":[{"transform":"{\"rotate\":\"200grad\"}"}]})";
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its transform.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the DomNode's transform common styles can be set correctly.
+     * @tc.expected: step3. rotateZ 30deg
+     */
+
+    auto transformComponent = domNodeRoot->GetTransformComponent();
+    ASSERT_TRUE(transformComponent != nullptr);
+    const auto& effects = transformComponent->GetTransformEffects();
+    const auto& operations = effects.GetOperations();
+    ASSERT_TRUE(operations.size() == 1);
+    ASSERT_TRUE(operations.front().type_ == TransformOperationType::ROTATE);
+    ASSERT_TRUE(NearEqual(operations.front().rotateOperation_.angle, 180.0));
+}
+
+/*
+ * @tc.name: AngleTest003
+ * @tc.desc: Verify angle with unit rad.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQJGQ
+ * @tc.author: jiangtao
+ */
+HWTEST_F(DomNodeTest, AngleTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * transform.
+     */
+    const std::string jsonDivStr = R"({"tag":"div","commonStyle":[{"transform":"{\"rotate\":\"6.2832rad\"}"}]})";
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its transform.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the DomNode's transform common styles can be set correctly.
+     * @tc.expected: step3. rotateZ 30deg
+     */
+
+    auto transformComponent = domNodeRoot->GetTransformComponent();
+    ASSERT_TRUE(transformComponent != nullptr);
+    const auto& effects = transformComponent->GetTransformEffects();
+
+    const auto& operations = effects.GetOperations();
+    ASSERT_TRUE(operations.size() == 1);
+    ASSERT_TRUE(operations.front().type_ == TransformOperationType::ROTATE);
+    const double epsilon = 0.1;
+    ASSERT_TRUE(NearEqual(operations.front().rotateOperation_.angle, 360.0, epsilon));
+}
+
+/*
+ * @tc.name: AngleTest004
+ * @tc.desc: Verify angle with unit turn.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQJGQ
+ * @tc.author: jiangtao
+ */
+HWTEST_F(DomNodeTest, AngleTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * transform.
+     */
+    const std::string jsonDivStr = R"({"tag":"div","commonStyle":[{"transform":"{\"rotate\":\"0.5turn\"}"}]})";
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its transform.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the DomNode's transform common styles can be set correctly.
+     * @tc.expected: step3. rotateZ 30deg
+     */
+
+    auto transformComponent = domNodeRoot->GetTransformComponent();
+    ASSERT_TRUE(transformComponent != nullptr);
+    const auto& effects = transformComponent->GetTransformEffects();
+    const auto& operations = effects.GetOperations();
+    ASSERT_TRUE(operations.size() == 1);
+    ASSERT_TRUE(operations.front().type_ == TransformOperationType::ROTATE);
+    const double epsilon = 0.1;
+    ASSERT_TRUE(NearEqual(operations.front().rotateOperation_.angle, 180.0, epsilon));
+}
+
+/*
+ * @tc.name: ClipPathTest001
+ * @tc.desc: Verify clippath with circle shape.
+ * @tc.type: FUNC
+ * @tc.require: AR000FL292
+ * @tc.author: chenlien
+ */
+HWTEST_F(DomNodeTest, ClipPathTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * transform.
+     */
+    const std::string jsonDivStr = "{"
+                                   "    \"tag\": \"div\","
+                                   "    \"commonStyle\": ["
+                                   "        {"
+                                   "            \"clipPath\": \"margin-box circle(60% at 50% 50%)\""
+                                   "        }"
+                                   "    ]"
+                                   "}";
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its clip path.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the DomNode's clip path common styles can be set correctly.
+     * @tc.expected: step3. margin-box circle
+     */
+
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeRoot);
+    ASSERT_TRUE(boxChild != nullptr);
+    const auto& clippath =  boxChild->GetClipPath();
+    ASSERT_TRUE(clippath != nullptr);
+    ASSERT_TRUE(clippath->GetGeometryBoxType() == GeometryBoxType::MARGIN_BOX);
+    ASSERT_TRUE(clippath->GetBasicShape() != nullptr);
+    ASSERT_TRUE(clippath->GetBasicShape()->GetBasicShapeType() == BasicShapeType::CIRCLE);
+    const auto& circle = AceType::DynamicCast<Circle>(clippath->GetBasicShape());
+    ASSERT_TRUE(NearEqual(circle->GetRadius().Value(), 0.6));
+    ASSERT_TRUE(NearEqual(circle->GetAxisX().Value(), 0.5));
+    ASSERT_TRUE(NearEqual(circle->GetAxisX().Value(), 0.5));
+}
+
+/*
+ * @tc.name: ClipPathTest002
+ * @tc.desc: Verify clippath with Inset shape.
+ * @tc.type: FUNC
+ * @tc.require: AR000FL292
+ * @tc.author: chenlien
+ */
+HWTEST_F(DomNodeTest, ClipPathTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * transform.
+     */
+    const std::string jsonDivStr = "{"
+                                   "    \"tag\": \"div\","
+                                   "    \"commonStyle\": ["
+                                   "        {"
+                                   "            \"clipPath\": \"padding-box inset(30% 10% 90% round 10 25% / 20% 15%)\""
+                                   "        }"
+                                   "    ]"
+                                   "}";
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its clip path.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the DomNode's clip path common styles can be set correctly.
+     * @tc.expected: step3. padding-box inset
+     */
+
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeRoot);
+    ASSERT_TRUE(boxChild != nullptr);
+    const auto& clippath =  boxChild->GetClipPath();
+    ASSERT_TRUE(clippath != nullptr);
+    ASSERT_TRUE(clippath->GetGeometryBoxType() == GeometryBoxType::PADDING_BOX);
+    ASSERT_TRUE(clippath->GetBasicShape() != nullptr);
+    ASSERT_TRUE(clippath->GetBasicShape()->GetBasicShapeType() == BasicShapeType::INSET);
+    const auto& inset = AceType::DynamicCast<Inset>(clippath->GetBasicShape());
+    ASSERT_TRUE(NearEqual(inset->GetTop().Value(), 0.3));
+    ASSERT_TRUE(NearEqual(inset->GetRight().Value(), 0.1));
+    ASSERT_TRUE(NearEqual(inset->GetBottom().Value(), 0.9));
+    ASSERT_TRUE(NearEqual(inset->GetLeft().Value(), 0.1));
+    ASSERT_TRUE(NearEqual(inset->GetTopLeftRadius().GetX().Value(), 10.0));
+    ASSERT_TRUE(NearEqual(inset->GetTopLeftRadius().GetY().Value(), 0.2));
+    ASSERT_TRUE(NearEqual(inset->GetTopRightRadius().GetX().Value(), 0.25));
+    ASSERT_TRUE(NearEqual(inset->GetTopRightRadius().GetY().Value(), 0.15));
+    ASSERT_TRUE(NearEqual(inset->GetBottomLeftRadius().GetX().Value(), 0.25));
+    ASSERT_TRUE(NearEqual(inset->GetBottomLeftRadius().GetY().Value(), 0.15));
+    ASSERT_TRUE(NearEqual(inset->GetBottomRightRadius().GetX().Value(), 10.0));
+    ASSERT_TRUE(NearEqual(inset->GetBottomRightRadius().GetY().Value(), 0.2));
+}
+
+/*
+ * @tc.name: ClipPathTest003
+ * @tc.desc: Verify clippath with ellipse shape.
+ * @tc.type: FUNC
+ * @tc.require: AR000FL292
+ * @tc.author: chenlien
+ */
+HWTEST_F(DomNodeTest, ClipPathTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * transform.
+     */
+    const std::string jsonDivStr = "{"
+                                   "    \"tag\": \"div\","
+                                   "    \"commonStyle\": ["
+                                   "        {"
+                                   "            \"clipPath\": \"border-box ellipse(25% 10% at 50% 60%)\""
+                                   "        }"
+                                   "    ]"
+                                   "}";
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its clip path.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the DomNode's clip path common styles can be set correctly.
+     * @tc.expected: step3. border-box ellipse
+     */
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeRoot);
+    ASSERT_TRUE(boxChild != nullptr);
+    const auto& clippath =  boxChild->GetClipPath();
+    ASSERT_TRUE(clippath != nullptr);
+    ASSERT_TRUE(clippath->GetGeometryBoxType() == GeometryBoxType::BORDER_BOX);
+    ASSERT_TRUE(clippath->GetBasicShape() != nullptr);
+    ASSERT_TRUE(clippath->GetBasicShape()->GetBasicShapeType() == BasicShapeType::ELLIPSE);
+    const auto& ellipse = AceType::DynamicCast<Ellipse>(clippath->GetBasicShape());
+    ASSERT_TRUE(NearEqual(ellipse->GetRadiusX().Value(),0.25));
+    ASSERT_TRUE(NearEqual(ellipse->GetRadiusY().Value(), 0.1));
+    ASSERT_TRUE(NearEqual(ellipse->GetAxisX().Value(), 0.5));
+    ASSERT_TRUE(NearEqual(ellipse->GetAxisY().Value(), 0.6));
+}
+
+/*
+ * @tc.name: ClipPathTest004
+ * @tc.desc: Verify clippath with polygon shape.
+ * @tc.type: FUNC
+ * @tc.require: AR000FL292
+ * @tc.author: chenlien
+ */
+HWTEST_F(DomNodeTest, ClipPathTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * transform.
+     */
+    const std::string jsonDivStr = "{"
+                                   "    \"tag\": \"div\","
+                                   "    \"commonStyle\": ["
+                                   "        {"
+                                   "            \"clipPath\": \"content-box polygon(50% 10, 8% 50%, 50% 100%, 0 50%)\""
+                                   "        }"
+                                   "    ]"
+                                   "}";
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its clip path.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+    /**
+     * @tc.steps: step3. Verify the DomNode's clip path common styles can be set correctly.
+     * @tc.expected: step3. content-box polygon
+     */
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeRoot);
+    ASSERT_TRUE(boxChild != nullptr);
+    const auto& clippath =  boxChild->GetClipPath();
+    ASSERT_TRUE(clippath != nullptr);
+    ASSERT_TRUE(clippath->GetGeometryBoxType() == GeometryBoxType::CONTENT_BOX);
+    ASSERT_TRUE(clippath->GetBasicShape() != nullptr);
+    ASSERT_TRUE(clippath->GetBasicShape()->GetBasicShapeType() == BasicShapeType::POLYGON);
+    const auto& polygon = AceType::DynamicCast<Polygon>(clippath->GetBasicShape());
+    const auto& points = polygon->GetPoints();
+    ASSERT_TRUE(points.size() == 4);
+    ASSERT_TRUE(NearEqual(points.at(0).first.Value(), 0.5));
+    ASSERT_TRUE(NearEqual(points.at(0).second.Value(), 10.0));
+    ASSERT_TRUE(NearEqual(points.at(2).first.Value(), 0.5));
+    ASSERT_TRUE(NearEqual(points.at(2).second.Value(), 1.0));
+}
+
+/*
+ * @tc.name: ClipPathTest005
+ * @tc.desc: Verify clippath with path shape.
+ * @tc.type: FUNC
+ * @tc.require: AR000FL292
+ * @tc.author: chenlien
+ */
+HWTEST_F(DomNodeTest, ClipPathTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the json string of DomNode with constraint attributes:
+     * transform.
+     */
+    const std::string jsonDivStr = "{"
+                                   "    \"tag\": \"div\","
+                                   "    \"commonStyle\": ["
+                                   "        {"
+                                   "            \"clipPath\": \"path('M150 20 L75 220 L225 220 Z')\""
+                                   "        }"
+                                   "    ]"
+                                   "}";
+    /**
+     * @tc.steps: step2. call JsonUtil interface, create DomNode and set its clip path.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonDivStr);
+    ASSERT_TRUE(domNodeRoot != nullptr);
+    /**
+     * @tc.steps: step3. Verify the DomNode's clip path common styles can be set correctly.
+     * @tc.expected: step3. border-box path
+     */
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeRoot);
+    ASSERT_TRUE(boxChild != nullptr);
+    const auto& clippath =  boxChild->GetClipPath();
+    ASSERT_TRUE(clippath != nullptr);
+    ASSERT_TRUE(clippath->GetGeometryBoxType() == GeometryBoxType::NONE);
+    ASSERT_TRUE(clippath->GetBasicShape() != nullptr);
+    ASSERT_TRUE(clippath->GetBasicShape()->GetBasicShapeType() == BasicShapeType::PATH);
+    const auto& path = AceType::DynamicCast<Path>(clippath->GetBasicShape());
+    ASSERT_TRUE(path->GetValue() == "M150 20 L75 220 L225 220 Z");
 }
 
 } // namespace OHOS::Ace::Framework

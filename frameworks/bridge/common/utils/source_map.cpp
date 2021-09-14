@@ -29,6 +29,7 @@ const char SOURCE_ROOT[] = "sourceRoot";
 const char DELIMITER_COMMA = ',';
 const char DELIMITER_SEMICOLON = ';';
 const char DOUBLE_SLASH = '\\';
+const char WEBPACK[] = "webpack:///";
 
 MappingInfo RevSourceMap::Find(int32_t row, int32_t col)
 {
@@ -47,17 +48,23 @@ MappingInfo RevSourceMap::Find(int32_t row, int32_t col)
     }
     while (right - left >= 0) {
         int32_t mid = (right + left) / 2;
-        if (afterPos_[mid].afterRow == row && (afterPos_[mid].afterColumn > col || afterPos_[mid].afterRow > row)) {
+        if ((afterPos_[mid].afterRow == row && afterPos_[mid].afterColumn > col) || afterPos_[mid].afterRow > row) {
             right = mid - 1;
         } else {
             res = mid;
             left = mid + 1;
         }
     }
+    std::string sources = sources_[afterPos_[res].sourcesVal];
+    auto pos = sources.find(WEBPACK);
+    if (pos != std::string::npos) {
+        sources.replace(pos, sizeof(WEBPACK) - 1, "");
+    }
+
     return MappingInfo {
         .row = afterPos_[res].beforeRow + 1,
         .col = afterPos_[res].beforeColumn + 1,
-        .sources = sources_[afterPos_[res].sourcesVal]
+        .sources = sources,
     };
 };
 
@@ -123,7 +130,7 @@ void RevSourceMap::Init(const std::string& sourceMap)
     // the third bit: the row before transfering.
     // the fourth bit: the column before transfering.
     // the fifth bit: the variable name.
-    for (const auto mapping : mappings_) {
+    for (const auto& mapping : mappings_) {
         if (mapping == ";") {
             // plus a line for each semicolon
             nowPos_.afterRow++,

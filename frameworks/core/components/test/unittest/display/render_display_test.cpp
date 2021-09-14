@@ -190,29 +190,6 @@ HWTEST_F(RenderDisplayTest, RenderDisplayUpdate005, TestSize.Level1)
 }
 
 /**
- * @tc.name: RenderDisplayUpdate006
- * @tc.desc: Verify the Update Interface of RenderDisplay work correctly with wrong component type.
- * @tc.type: FUNC
- * @tc.require: AR000DAUL8 AR000DAUL9
- * @tc.author: caocan
- */
-HWTEST_F(RenderDisplayTest, RenderDisplayUpdate006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct TextComponent and RenderDisplay.
-     */
-    RefPtr<TextComponent> text = AceType::MakeRefPtr<TextComponent>("HiAce");
-    RefPtr<MockRenderDisplay> renderDisplay = AceType::MakeRefPtr<MockRenderDisplay>();
-
-    /**
-     * @tc.steps: step2. call the Update interface of RenderDisplay.
-     * @tc.expected: step2. renderDisplay is set as not needLayout.
-     */
-    renderDisplay->Update(text);
-    EXPECT_TRUE(!renderDisplay->NeedLayout());
-}
-
-/**
  * @tc.name: RenderDisplayPerformLayout001
  * @tc.desc: Verify PerformLayout interface of RenderDisplay works correctly.
  * @tc.type: FUNC

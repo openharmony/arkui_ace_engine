@@ -35,16 +35,12 @@ public:
         return qrcodeChild_;
     }
 
-    void InitializeStyle() override;
-
 protected:
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
-    bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
     void ResetInitializedStyle() override;
+    void PrepareSpecializedComponent() override;
 
 private:
     RefPtr<QrcodeComponent> qrcodeChild_;
-    RefPtr<QrcodeTheme> qrcodeTheme_;
 };
 
 } // namespace OHOS::Ace::Framework

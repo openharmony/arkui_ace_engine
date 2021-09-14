@@ -42,9 +42,13 @@ const char ROUTE_PAGE_BACK[] = "back";
 const char ROUTE_PAGE_CLEAR[] = "clear";
 const char ROUTE_PAGE_GET_LENGTH[] = "getLength";
 const char ROUTE_PAGE_GET_STATE[] = "getState";
+const char ROUTE_PAGE_GET_PARAMS[] = "getParams";
 const char ROUTE_KEY_URI[] = "uri";
 const char ROUTE_KEY_PATH[] = "path";
 const char ROUTE_KEY_PARAMS[] = "params";
+const char ROUTE_KEY_DONT_OVERWRITE[] = "dontOverwrite";
+const char ROUTE_ENABLE_ALERT_BEFORE_BACK_PAGE[] = "enableAlertBeforeBackPage";
+const char ROUTE_DISABLE_ALERT_BEFORE_BACK_PAGE[] = "disableAlertBeforeBackPage";
 
 // for prompt
 const char PROMPT_SHOW_TOAST[] = "showToast";
@@ -55,6 +59,7 @@ const char PROMPT_SHOW_DIALOG[] = "showDialog";
 const char PROMPT_KEY_TITLE[] = "title";
 const char PROMPT_KEY_BUTTONS[] = "buttons";
 const char PROMPT_DIALOG_AUTO_CANCEL[] = "autocancel";
+const char PROMPT_SHOW_ACTION_MENU[] = "showActionMenu";
 
 // for callback
 const char APP_DESTROY_FINISH[] = "appDestroyFinish";
@@ -91,10 +96,21 @@ const char APP_SCREEN_ON_VISIBLE[] = "screenOnVisible";
 const char APP_SET_SWIPE_TO_DISMISS[] = "setSwipeToDismiss";
 const char APP_REQUEST_FULL_WINDOW_DUATION[] = "duration";
 const char APP_SCREEN_ON_VISIBLE_FLAG[] = "visible";
+const char APP_SET_IMAGE_CACHE_COUNT[] = "setImageCacheCount";
+const char APP_SET_IMAGE_RAWDATA_CACHE_SIZE[] = "setImageRawDataCacheSize";
 
 // for animation
 const char ANIMATION_REQUEST_ANIMATION_FRAME[] = "requestAnimationFrame";
 const char ANIMATION_CANCEL_ANIMATION_FRAME[] = "cancelAnimationFrame";
+
+// for animator
+const char ANIMATOR_CREATE_ANIMATOR[] = "createAnimator";
+
+// for curves
+const char CURVES_INIT[] = "init";
+const char CURVES_CUBIC_BEZIER[] = "cubicBezier";
+const char CURVES_SPRING[] = "spring";
+const char CURVE_INTERPOLATE[] = "interpolate";
 
 // for grid
 const char GRID_GET_SYSTEM_LAYOUT_INFO[] = "getSystemLayoutInfo";
@@ -102,4 +118,26 @@ const char GRID_GET_SYSTEM_LAYOUT_INFO[] = "getSystemLayoutInfo";
 const int32_t PLUGIN_REQUEST_SUCCESS = 0;
 const int32_t PLUGIN_REQUEST_FAIL = 200;
 const int32_t PLUGIN_CALLBACK_DESTROY = 3;
+
+// for offscreenCanvas
+const char OFFSCERRN_CANVAS_CREATE[] = "create";
+
+// for readResource
+const char READ_TEXT[] = "readText";
+const char READ_ARRAY_BUFFER[] = "readArrayBuffer";
+const char READ_KEY_URI[] = "uri";
+const char READ_KEY_POSITION[] = "position";
+const char READ_KEY_LENGTH[] = "length";
+
+// for matrix
+const char MATRIX_INIT[] = "init";
+const char MATRIX_IDENTITY[] = "identity";
+const char MATRIX_COPY[] = "copy";
+const char MATRIX_COMBINE[] = "combine";
+const char MATRIX_INVERT[] = "invert";
+const char MATRIX_TRANSLATE[] = "translate";
+const char MATRIX_SCALE[] = "scale";
+const char MATRIX_ROTATE[] = "rotate";
+const char MATRIX_TRANSFORM_POINT[] = "transformPoint";
+const char MATRIX_4X4[] = "matrix4x4";
 } // namespace OHOS::Ace::Framework

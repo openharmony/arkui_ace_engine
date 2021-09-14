@@ -28,6 +28,8 @@ public:
     ~FlutterFontManager() override = default;
 
     void VaryFontCollectionWithFontWeightScale() override;
+
+    void LoadSystemFont() override;
 };
 
 } // namespace OHOS::Ace

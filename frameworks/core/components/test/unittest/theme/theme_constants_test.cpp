@@ -35,6 +35,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_attributes.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components/video/video_theme.h"

@@ -26,9 +26,6 @@ DOMToggle::DOMToggle(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeI
     paddingChild_ = AceType::MakeRefPtr<PaddingComponent>();
     paddingChild_->SetChild(textChild_);
     toggleChild_->SetChild(paddingChild_);
-    if (IsRightToLeft()) {
-        textChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 void DOMToggle::InitializeStyle()
@@ -130,8 +127,19 @@ bool DOMToggle::SetSpecializedStyle(const std::pair<std::string, std::string>& s
 bool DOMToggle::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
     static const LinearMapNode<void (*)(DOMToggle&, const EventMarker&)> toggleEventOperators[] = {
+        { DOM_CATCH_BUBBLE_CLICK,
+            [](DOMToggle& toggle, const EventMarker& event) {
+                EventMarker eventMarker(event);
+                eventMarker.SetCatchMode(true);
+                toggle.toggleChild_->SetClickEvent(eventMarker);
+            } },
         { DOM_CHANGE, [](DOMToggle& toggle, const EventMarker& event) { toggle.toggleChild_->SetChangeEvent(event); } },
-        { DOM_CLICK, [](DOMToggle& toggle, const EventMarker& event) { toggle.toggleChild_->SetClickEvent(event); } },
+        { DOM_CLICK,
+            [](DOMToggle& toggle, const EventMarker& event) {
+                EventMarker eventMarker(event);
+                eventMarker.SetCatchMode(false);
+                toggle.toggleChild_->SetClickEvent(eventMarker);
+            } },
     };
     auto operatorIter = BinarySearchFindIndex(toggleEventOperators, ArraySize(toggleEventOperators), event.c_str());
     if (operatorIter != -1) {
@@ -143,6 +151,7 @@ bool DOMToggle::AddSpecializedEvent(int32_t pageId, const std::string& event)
 
 void DOMToggle::PrepareSpecializedComponent()
 {
+    textChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     ResetColorStyle();
     if (isDisabled_) {
         PrepareDisabledStyle();

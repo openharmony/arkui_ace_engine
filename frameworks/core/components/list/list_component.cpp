@@ -15,6 +15,9 @@
 
 #include "core/components/list/list_component.h"
 
+#include "frameworks/core/components/foreach/for_each_component.h"
+#include "frameworks/core/components/ifelse/if_else_component.h"
+
 namespace OHOS::Ace {
 
 ListComponent::ListComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children)
@@ -150,15 +153,36 @@ void ListComponent::AppendChild(const RefPtr<Component>& child)
 {
     auto item = ListItemComponent::GetListItem(child);
     if (!item) {
-        LOGE("AppendChild: no list item in child");
+        auto multiComposed = AceType::DynamicCast<MultiComposedComponent>(child);
+        if (!multiComposed) {
+            return;
+        }
+
+        for (const auto& childComponent : multiComposed->GetChildren()) {
+            AppendChild(childComponent);
+        }
         return;
+    }
+    if (needDivider_) {
+        item->MarkNeedDivider(needDivider_);
+        item->SetDividerColor(dividerColor_);
+        item->SetDividerHeight(dividerHeight_);
+        item->SetDividerLength(dividerLength_);
+        item->SetDividerOrigin(dividerOrigin_);
     }
 
     item->SetIndex(GetChildren().size());
     LOGD("AppendChild: index: %{public}d, type: %{public}s", item->GetIndex(), item->GetType().c_str());
     item->SetOperation(LIST_ITEM_OP_ADD);
+
     needUpdateElement_ = true;
-    ComponentGroup::AppendChild(child);
+    // Version 1.0 will wrap ComposedComponent for ListItem by DomNode.
+    if (AceType::InstanceOf<ComposedComponent>(child)) {
+        ComponentGroup::AppendChild(child);
+    } else {
+        ComponentGroup::AppendChild(
+            AceType::MakeRefPtr<ComposedComponent>((const char*)&item, "ListItemWrapper", child));
+    }
 }
 
 void ListComponent::RemoveChild(const RefPtr<Component>& child)

@@ -160,7 +160,17 @@ RefPtr<OverlayElement> SemiModalElement::GetOverlayElement() const
         LOGE("Get overlay element failed. clip is null!");
         return RefPtr<OverlayElement>();
     }
-    return AceType::DynamicCast<OverlayElement>(clip->GetFirstChild());
+    auto stack = clip->GetFirstChild();
+    if (!stack) {
+        return RefPtr<OverlayElement>();
+    }
+    auto child = stack->GetChildren();
+    if (child.size() > 1) {
+        auto it = child.begin();
+        it++;
+        return AceType::DynamicCast<OverlayElement>(*it);
+    }
+    return RefPtr<OverlayElement>();
 }
 
 void SemiModalElement::AnimateToExitApp() const

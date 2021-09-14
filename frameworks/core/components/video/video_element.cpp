@@ -44,9 +44,9 @@
 #include "core/event/back_end_event_manager.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/pipeline_context.h"
+#include "window_manager.h"
 #include "display_type.h"
 #include "surface.h"
-#include "window_manager.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1286,7 +1286,7 @@ void VideoElement::ExitFullScreen()
         if (!stackElement) {
             return;
         }
-        stackElement->PopComponent(true);
+        stackElement->PopComponent();
         isFullScreen_ = false;
         if (onFullScreenChange_) {
             std::string param =

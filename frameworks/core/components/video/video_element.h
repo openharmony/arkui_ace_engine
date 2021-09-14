@@ -59,6 +59,8 @@ public:
     void FullScreen();
     void ExitFullScreen();
     void SetVolume(float volume);
+protected:
+    virtual void InitStatus(const RefPtr<VideoComponent>& videoComponent);
 
 private:
     void OnError(const std::string& errorId, const std::string& param);
@@ -79,7 +81,6 @@ private:
     void CreatePlayer(int64_t id, ErrorCallback&& errorCallback);
     void ReleasePlatformResource();
     void UpdataChild(const RefPtr<Component>& childComponent);
-    void InitStatus(const RefPtr<VideoComponent>& videoComponent);
     void InitListener();
     void ResetStatus();
     bool OnKeyEvent(const KeyEvent& keyEvent) override;

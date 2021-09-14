@@ -15,6 +15,8 @@
 
 #include "core/components/transition/transition_element.h"
 
+#include "core/components/box/render_box_base.h"
+#include "core/components/transform/transform_element.h"
 #include "core/components/transition/transition_component.h"
 #include "core/components/tween/tween_component.h"
 #include "core/components/tween/tween_element.h"
@@ -35,6 +37,142 @@ void TransitionElement::Update()
     }
     optionMap_[TransitionOptionType::TRANSITION_IN] = transitionComponent->GetTransitionInOption();
     optionMap_[TransitionOptionType::TRANSITION_OUT] = transitionComponent->GetTransitionOutOption();
+
+    if (transitionComponent->IsOptionChanged()) {
+        transitionOption_ = transitionComponent->GetTransitionOption();
+        transitionComponent->MarkOptionChanged(false);
+    }
+
+    auto pipelineContext = context_.Upgrade();
+    if (pipelineContext) {
+        if (!controller_) {
+            controller_ = AceType::MakeRefPtr<Animator>(context_);
+            LOGD("set simulation controller to transition component when update.");
+        } else {
+            controller_->Stop();
+            controller_->ClearInterpolators();
+        }
+    }
+}
+
+void TransitionElement::PerformBuild()
+{
+    bool build = true;
+    if (!hasBuildChild_) {
+        ComposedElement::PerformBuild();
+        hasBuildChild_ = true;
+        build = false;
+    }
+
+    if (transitionOption_.IsValid()) {
+        ReplaceAnimation(transitionOption_);
+    } else {
+        transitionOption_ = TweenOption();
+        if (build) {
+            ComposedElement::PerformBuild();
+        }
+        return;
+    }
+
+    if (controller_) {
+        SetController(controller_);
+        ApplyAnimation(transitionOption_);
+        controller_->Play();
+    }
+    transitionOption_ = TweenOption();
+    if (build) {
+        ComposedElement::PerformBuild();
+    }
+}
+
+void TransitionElement::ReplaceAnimation(TweenOption& transitionOption)
+{
+    auto& propertyAnimationMap = transitionOption.GetFloatPropertyAnimation();
+    auto& colorAniamtion = transitionOption.GetColorAnimation();
+    auto& opacityAniamtion = transitionOption.GetOpacityAnimation();
+    auto elementBox = GetChildBox();
+    if (!elementBox) {
+        LOGE("box element get failed.");
+        return;
+    }
+    auto renderBox = AceType::DynamicCast<RenderBoxBase>(elementBox->GetRenderNode());
+    if (!renderBox) {
+        LOGE("box render get failed.");
+        return;
+    }
+    for (auto&& [propertyAnimatableType, propertyAnimation] : propertyAnimationMap) {
+        if (propertyAnimatableType == PropertyAnimatableType::PROPERTY_WIDTH) {
+            renderBox->UpdateStyleFromRenderNode(propertyAnimatableType);
+            float width = renderBox->GetWidth();
+            auto keyframeWidthBegin = AceType::MakeRefPtr<Keyframe<float>>(0.0f, width);
+            AceType::DynamicCast<KeyframeAnimation<float>>
+                (propertyAnimationMap[PropertyAnimatableType::PROPERTY_WIDTH])->ReplaceKeyframe(keyframeWidthBegin);
+        }
+        if (propertyAnimatableType == PropertyAnimatableType::PROPERTY_HEIGHT) {
+            renderBox->UpdateStyleFromRenderNode(propertyAnimatableType);
+            float height = renderBox->GetHeight();
+            auto keyframeHeightBegin = AceType::MakeRefPtr<Keyframe<float>>(0.0f, height);
+            AceType::DynamicCast<KeyframeAnimation<float>>
+                (propertyAnimationMap[PropertyAnimatableType::PROPERTY_HEIGHT])->ReplaceKeyframe(keyframeHeightBegin);
+        }
+    }
+    if (colorAniamtion) {
+        renderBox->UpdateStyleFromRenderNode(PropertyAnimatableType::PROPERTY_BACK_DECORATION_COLOR);
+        Color color = renderBox->GetColor();
+        auto keyframeColorBegin = AceType::MakeRefPtr<Keyframe<Color>>(0.0f, color);
+        AceType::DynamicCast<KeyframeAnimation<Color>>(colorAniamtion)->ReplaceKeyframe(keyframeColorBegin);
+    }
+
+    auto display = GetChildDisplay();
+    if (display && opacityAniamtion) {
+        auto renderDisplay = AceType::DynamicCast<RenderDisplay>(display->GetRenderNode());
+        if (renderDisplay) {
+            renderDisplay->UpdateOpacity();
+            auto opacity = renderDisplay->GetOpacity() * (1.0 / UINT8_MAX);
+            auto keyframeOpacityBegin = AceType::MakeRefPtr<Keyframe<float>>(0.0f, opacity);
+            AceType::DynamicCast<KeyframeAnimation<float>>(opacityAniamtion)->ReplaceKeyframe(keyframeOpacityBegin);
+        }
+    }
+}
+
+RefPtr<DisplayElement> TransitionElement::GetChildDisplay() const
+{
+    auto tween = GetChildTween();
+    if (!tween) {
+        LOGE("transition option get failed. no tween found.");
+        return nullptr;
+    }
+    return AceType::DynamicCast<DisplayElement>(tween->GetFirstChild());
+}
+
+RefPtr<BoxBaseElement> TransitionElement::GetChildBox() const
+{
+    auto elementDisplay = GetChildDisplay();
+    if (!elementDisplay) {
+        LOGE("display element get failed.");
+        return nullptr;
+    }
+    auto elementTransform = AceType::DynamicCast<TransformElement>(elementDisplay->GetFirstChild());
+    if (!elementTransform) {
+        LOGE("transform element get failed.");
+        return nullptr;
+    }
+    return AceType::DynamicCast<BoxBaseElement>(elementTransform->GetFirstChild());
+}
+
+void TransitionElement::ApplyAnimation(TweenOption& transitionOption)
+{
+    auto tween = GetChildTween();
+    if (!tween) {
+        LOGE("transition option get failed. no tween found.");
+        return;
+    }
+
+    tween->SetOption(transitionOption);
+    if (!tween->ApplyKeyframes()) {
+        LOGW("Apply transition option failed. tween apply option fail.");
+    }
+    tween->ApplyOptions();
 }
 
 void TransitionElement::SetController(const RefPtr<Animator>& controller)
@@ -100,14 +238,14 @@ RefPtr<Component> TransitionElement::BuildChild()
     }
 }
 
-void TransitionElement::SetVisible(VisibleType visible)
+void TransitionElement::SetWrapHidden(bool hidden)
 {
     auto tween = GetChildTween();
     if (!tween) {
-        LOGE("set visible failed. no tween found. visible: %{public}d", visible);
+        LOGE("set wrap hidden failed. no tween found. hidden: %{public}d", hidden);
         return;
     }
-    tween->SetVisible(visible);
+    tween->SetWrapHidden(hidden);
 }
 
 RefPtr<TweenElement> TransitionElement::GetChildTween() const

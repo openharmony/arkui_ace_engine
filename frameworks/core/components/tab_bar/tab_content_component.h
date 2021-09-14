@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TAB_BAR_TAB_CONTENT_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TAB_BAR_TAB_CONTENT_COMPONENT_H
 
+#include "core/components/tab_bar/tab_bar_component.h"
 #include "core/components/tab_bar/tab_controller.h"
 #include "core/pipeline/base/component_group.h"
 #include "core/pipeline/base/element.h"
@@ -25,6 +26,23 @@ namespace OHOS::Ace {
 
 // The default interval for scrolling content in ms.
 inline constexpr float DEFAULT_TABCONTENT_ANIMATION_DURATION = 200.0f;
+
+class ACE_EXPORT TabContentChangeEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(TabContentChangeEvent, BaseEventInfo);
+
+public:
+    explicit TabContentChangeEvent(int32_t index) : BaseEventInfo("TabContentChangeEvent"), index_(index) {}
+
+    ~TabContentChangeEvent() = default;
+
+    int32_t GetIndex() const
+    {
+        return index_;
+    }
+
+private:
+    int32_t index_ = 0;
+};
 
 class TabContentComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(TabContentComponent, ComponentGroup);

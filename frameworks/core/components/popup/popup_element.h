@@ -30,9 +30,11 @@ public:
 
     void PerformBuild() override;
 
-private:
-    void ShowPopup();
-    void CancelPopup();
+    virtual void OnStateChange(bool isVisible) {}
+
+protected:
+    bool ShowPopup();
+    bool CancelPopup(const ComposeId& id);
 
     WeakPtr<StackElement> weakStack_;
     RefPtr<PopupComponent> popup_;

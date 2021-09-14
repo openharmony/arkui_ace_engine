@@ -31,8 +31,6 @@ public:
     ~FlutterRenderTransform() override = default;
     RenderLayer GetRenderLayer() override;
     void Paint(RenderContext& context, const Offset& offset) override;
-    bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
-        TouchTestResult& result) override;
     void OnGlobalPositionChanged() override;
 
     bool IsRepaintBoundary() const override
@@ -42,7 +40,12 @@ public:
 
     bool HasEffectiveTransform() const override;
 
+    Point GetTransformPoint(const Point& point) override;
+    Rect GetTransformRect(const Rect& rect) override;
+
     void UpdateTransformLayer() override;
+
+    void Mirror(const Offset& center, const Offset& global) override;
 
 private:
     Matrix4 GetEffectiveTransform(const Offset& offset);

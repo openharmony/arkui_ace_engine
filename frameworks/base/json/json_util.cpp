@@ -311,6 +311,15 @@ bool JsonValue::Replace(const char* key, const std::unique_ptr<JsonValue>& value
     return true;
 }
 
+bool JsonValue::Delete(const char* key)
+{
+    if (key == nullptr) {
+        return false;
+    }
+    cJSON_DeleteItemFromObject(object_, key);
+    return true;
+}
+
 std::string JsonValue::ToString()
 {
     std::string result;

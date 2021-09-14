@@ -42,6 +42,7 @@ const int32_t REPEATX_LIST_LENGTH = 2;
 const int32_t REPEATY_LIST_LENGTH = 2;
 const int32_t NOREPEAT_LIST_LENGTH = 1;
 const Size PARENT_SIZE = Size(300.0, 300.0);
+const bool FIT_MAX_SIZE = true;
 
 class MockRenderImage final : public RenderImage {
     DECLARE_ACE_TYPE(MockRenderImage, RenderImage);
@@ -112,7 +113,7 @@ void VerifyImageFit(ImageFitConfig&& imageFitConfig, const Rect& expectSrcRect, 
 void VerifyRectSize(const std::list<Rect>& rectList, const Size& expectRectSize);
 std::list<Rect> GetRectList(const ImageRepeat&& imageRepeat, const Size& parentSize);
 RefPtr<RenderRoot> CreateRenderRoot(const Size& maxSize);
-RefPtr<RenderImage> CreateRenderImage(double width, double height);
+RefPtr<RenderImage> CreateRenderImage(double width, double height, bool fitMaxSize = false);
 RefPtr<PipelineContext> GetMockContext();
 } // namespace OHOS::Ace
 

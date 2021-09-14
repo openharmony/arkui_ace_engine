@@ -21,7 +21,7 @@ namespace OHOS::Ace::Flutter {
 
 void OffsetLayer::AddToScene(SceneBuilder& builder, double x, double y)
 {
-    AddChildToScene(builder, x_ + x, y_ + y);
+    AddChildToScene(builder, staticX_ + x_ + x, staticY_ + y_ + y);
 }
 
 void OffsetLayer::Dump()
