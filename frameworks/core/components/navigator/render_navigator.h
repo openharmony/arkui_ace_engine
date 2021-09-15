@@ -37,16 +37,49 @@ public:
 
     void NavigatePage();
 
+    void SetTargetContainer(const WeakPtr<StageElement>& targetContainer)
+    {
+        targetContainer_ = targetContainer;
+    }
+
+    bool GetActive() const
+    {
+        return active_;
+    }
+
+    const std::string& GetTarget() const
+    {
+        return uri_;
+    }
+
+    NavigatorType GetType() const
+    {
+        return type_;
+    }
+
+    const std::string& GetParam() const
+    {
+        return params_;
+    }
+
 private:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     void Initialize();
+    void HandleClickEvent(const ClickInfo& info);
+    void HandleClickEvent();
 
     RefPtr<ClickRecognizer> clickRecognizer_;
 
+    WeakPtr<StageElement> targetContainer_;
     std::string uri_;
+    std::string params_;
     NavigatorType type_ = NavigatorType::DEFAULT;
     bool active_ = false;
+    bool isDefHeight_ = false;
+    bool isDefWidth_ = false;
+    std::function<void(const ClickInfo&)> onClickWithInfo_;
+    std::function<void()> onClick_;
 };
 
 } // namespace OHOS::Ace

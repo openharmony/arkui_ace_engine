@@ -121,6 +121,7 @@ private:
     void ResetChildVisibleState();
     void UpdateGroupComponentStatus(bool expand);
     void FireExpandEvent();
+    void InitAccessibilityEventListener();
 
     RebuildFunc rebuild_;
     FlexDirection direction_ = FlexDirection::COLUMN;

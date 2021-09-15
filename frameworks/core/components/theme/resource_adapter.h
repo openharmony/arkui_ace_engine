@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_RESOURCE_ADAPTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_RESOURCE_ADAPTER_H
 
-#include "base/utils/device_config.h"
+#include "base/utils/resource_configuration.h"
 #include "core/components/theme/theme_style.h"
 
 namespace OHOS::Ace {
@@ -30,16 +30,29 @@ public:
 
     static RefPtr<ResourceAdapter> Create();
 
-    virtual void Init(const DeviceResourceInfo& resourceInfo) {};
-    virtual void UpdateConfig(const DeviceConfig& config) {};
+    virtual void Init(const ResourceInfo& resourceInfo) {};
+    virtual void UpdateConfig(const ResourceConfiguration& config) {};
 
     virtual RefPtr<ThemeStyle> GetTheme(int32_t themeId) = 0;
 
     virtual Color GetColor(uint32_t resId) = 0;
     virtual Dimension GetDimension(uint32_t resId) = 0;
     virtual std::string GetString(uint32_t resId) = 0;
+    virtual std::vector<std::string> GetStringArray(uint32_t resId) const = 0;
     virtual double GetDouble(uint32_t resId) = 0;
     virtual int32_t GetInt(uint32_t resId) = 0;
+    virtual bool GetResource(uint32_t resId, std::ostream& dest) const
+    {
+        return false;
+    };
+    virtual bool GetResource(const std::string& resId, std::ostream& dest) const
+    {
+        return false;
+    };
+    virtual bool GetIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const
+    {
+        return false;
+    }
 };
 
 } // namespace OHOS::Ace

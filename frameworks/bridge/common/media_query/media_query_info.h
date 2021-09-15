@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -25,13 +26,14 @@
 
 namespace OHOS::Ace::Framework {
 
-class ACE_EXPORT MediaQueryInfo : public AceType {
+class ACE_FORCE_EXPORT MediaQueryInfo : public AceType {
     DECLARE_ACE_TYPE(MediaQueryInfo, AceType);
 
 public:
     MediaQueryInfo() = default;
     ~MediaQueryInfo() override = default;
 
+    std::unique_ptr<JsonValue> GetMediaQueryJsonInfo() const;
     std::string GetMediaQueryInfo() const;
 
     std::string GetDeviceType() const;

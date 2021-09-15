@@ -34,6 +34,11 @@ public:
         return tabContentChild_;
     }
 
+    void SetVertical(bool vertical_)
+    {
+        tabContentChild_->SetVertical(vertical_);
+    }
+
 protected:
     void OnMounted(const RefPtr<DOMNode>& parentNode) override;
     void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) override;

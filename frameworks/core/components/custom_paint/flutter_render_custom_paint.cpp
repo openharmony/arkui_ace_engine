@@ -266,6 +266,16 @@ void FlutterRenderCustomPaint::SetAntiAlias(bool isEnabled)
     antiAlias_ = isEnabled;
 }
 
+void FlutterRenderCustomPaint::TransferFromImageBitmap(const RefPtr<OffscreenCanvas>& offscreenCanvas)
+{
+    std::unique_ptr<ImageData> imageData = offscreenCanvas->GetImageData(0, 0,
+        offscreenCanvas->GetWidth(), offscreenCanvas->GetHeight());
+    ImageData* imageDataPtr = imageData.get();
+    if (imageData != nullptr) {
+        PutImageData(Offset(0, 0), *imageDataPtr);
+    }
+}
+
 void FlutterRenderCustomPaint::FillRect(const Offset& offset, const Rect& rect)
 {
     SkPaint paint;
@@ -682,6 +692,7 @@ void FlutterRenderCustomPaint::Stroke(const Offset& offset, const RefPtr<CanvasP
         }
     }
     Path2DStroke(offset);
+    strokePath_.reset();
 }
 
 void FlutterRenderCustomPaint::Path2DAddPath(const Offset& offset, const PathArgs& args)
@@ -1090,46 +1101,41 @@ void FlutterRenderCustomPaint::DrawImage(
     if (!context) {
         return;
     }
-    auto sharedImageManager = context->GetSharedImageManager();
-    auto imageProvider = ImageProvider::Create(canvasImage.src, sharedImageManager);
-    if (imageProvider) {
-        auto assetManager = context->GetAssetManager();
-        auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                         ? imageProvider->GetSkImage(canvasImage.src, assetManager, Size(width, height))
-                         : imageProvider->GetSkImage(canvasImage.src, assetManager);
+    auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
+                        ? ImageProvider::GetSkImage(canvasImage.src, context, Size(width, height))
+                        : ImageProvider::GetSkImage(canvasImage.src, context);
 
-        if (!image) {
-            LOGE("image is null");
-            return;
+    if (!image) {
+        LOGE("image is null");
+        return;
+    }
+    InitCachePaint();
+    const auto skCanvas =
+        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+    InitImagePaint();
+    switch (canvasImage.flag) {
+        case 0:
+            skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
+            break;
+        case 1: {
+            SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            skCanvas->drawImageRect(image, rect, &imagePaint_);
+            break;
         }
-        InitCachePaint();
-        const auto skCanvas =
-            globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
-        InitImagePaint();
-        switch (canvasImage.flag) {
-            case 0:
-                skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
-                break;
-            case 1: {
-                SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-                skCanvas->drawImageRect(image, rect, &imagePaint_);
-                break;
-            }
-            case 2: {
-                SkRect dstRect =
-                    SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-                SkRect srcRect =
-                    SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
-                skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
-                break;
-            }
-            default:
-                break;
+        case 2: {
+            SkRect dstRect =
+                SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect =
+                SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+            skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+            break;
         }
-        if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
-            skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
-            cacheBitmap_.eraseColor(0);
-        }
+        default:
+            break;
+    }
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
     }
 }
 
@@ -1143,58 +1149,54 @@ void FlutterRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint
     if (!context) {
         return;
     }
-    auto sharedImageManager = context->GetSharedImageManager();
-    auto imageProvider = ImageProvider::Create(pattern.GetImgSrc(), sharedImageManager);
-    if (imageProvider) {
-        auto width = pattern.GetImageWidth();
-        auto height = pattern.GetImageHeight();
-        auto assetManager = context->GetAssetManager();
-        auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                         ? imageProvider->GetSkImage(pattern.GetImgSrc(), assetManager, Size(width, height))
-                         : imageProvider->GetSkImage(pattern.GetImgSrc(), assetManager);
-        if (!image) {
-            LOGE("image is null");
-            return;
-        }
-        static const LinearMapNode<void (*)(sk_sp<SkImage>, SkPaint&)> staticPattern[] = {
-            { "no-repeat",
-                [](sk_sp<SkImage> image, SkPaint& paint) {
+
+    auto width = pattern.GetImageWidth();
+    auto height = pattern.GetImageHeight();
+    auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
+                        ? ImageProvider::GetSkImage(pattern.GetImgSrc(), context, Size(width, height))
+                        : ImageProvider::GetSkImage(pattern.GetImgSrc(), context);
+    if (!image) {
+        LOGE("image is null");
+        return;
+    }
+    static const LinearMapNode<void (*)(sk_sp<SkImage>, SkPaint&)> staticPattern[] = {
+        { "no-repeat",
+            [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA
-                    paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kDecal_TileMode, nullptr));
+                paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kDecal_TileMode, nullptr));
 #else
-                    paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, nullptr));
+                paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, nullptr));
 #endif
-                } },
-            { "repeat",
-                [](sk_sp<SkImage> image, SkPaint& paint) {
+            } },
+        { "repeat",
+            [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA
-                    paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, nullptr));
+                paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, nullptr));
 #else
-                    paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, nullptr));
+                paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, nullptr));
 #endif
-                } },
-            { "repeat-x",
-                [](sk_sp<SkImage> image, SkPaint& paint) {
+            } },
+        { "repeat-x",
+            [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA
-                    paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kDecal_TileMode, nullptr));
+                paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kDecal_TileMode, nullptr));
 #else
-                    paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, nullptr));
+                paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, nullptr));
 #endif
-                } },
-            { "repeat-y",
-                [](sk_sp<SkImage> image, SkPaint& paint) {
+            } },
+        { "repeat-y",
+            [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA
-                    paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kRepeat_TileMode, nullptr));
+                paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kRepeat_TileMode, nullptr));
 #else
-                    paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, nullptr));
+                paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, nullptr));
 #endif
-                } },
-        };
-        auto operatorIter =
-            BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
-        if (operatorIter != -1) {
-            staticPattern[operatorIter].value(image, paint);
-        }
+            } },
+    };
+    auto operatorIter =
+        BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
+    if (operatorIter != -1) {
+        staticPattern[operatorIter].value(image, paint);
     }
 }
 
@@ -1258,6 +1260,40 @@ std::unique_ptr<ImageData> FlutterRenderCustomPaint::GetImageData(double left, d
         imageData->data.emplace_back(Color::FromARGB(alpha, red, green, blue));
     }
     return imageData;
+}
+
+void FlutterRenderCustomPaint::WebGLInit(CanvasRenderContextBase* context)
+{
+    webGLContext_ = context;
+    if (webGLContext_) {
+        auto pipeline = context_.Upgrade();
+        if (!pipeline) {
+            return;
+        }
+        double viewScale = pipeline->GetViewScale();
+        if (!webglBitmap_.readyToDraw()) {
+            auto imageInfo =
+                SkImageInfo::Make(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale,
+                    SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+            webglBitmap_.allocPixels(imageInfo);
+#ifdef USE_SYSTEM_SKIA
+            webglBitmap_.eraseColor(SK_ColorTRANSPARENT);
+#endif
+        }
+        webGLContext_->SetBitMapPtr(reinterpret_cast<char*>(webglBitmap_.getPixels()));
+    }
+}
+
+void FlutterRenderCustomPaint::WebGLUpdate()
+{
+    LOGD("FlutterRenderCustomPaint::WebGLUpdate");
+    if (skCanvas_ && webglBitmap_.readyToDraw()) {
+        skCanvas_->save();
+        /* Do mirror flip */
+        skCanvas_->setMatrix(SkMatrix::MakeScale(1.0, -1.0));
+        skCanvas_->drawBitmap(webglBitmap_, 0, -webglBitmap_.height());
+        skCanvas_->restore();
+    }
 }
 
 } // namespace OHOS::Ace

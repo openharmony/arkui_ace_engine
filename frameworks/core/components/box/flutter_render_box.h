@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_FLUTTER_RENDER_BOX_H
 
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "include/core/SkPath.h"
 
 #include "core/components/box/render_box.h"
 #include "core/components/common/layout/constants.h"
@@ -25,6 +26,7 @@
 #include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/layers/clip_layer.h"
 #include "core/pipeline/layers/container_layer.h"
+#include "core/pipeline/layers/offset_layer.h"
 
 namespace OHOS::Ace {
 
@@ -39,11 +41,11 @@ public:
     void PerformLayout() override;
     void Paint(RenderContext& context, const Offset& offset) override;
     RenderLayer GetRenderLayer() override;
-
     bool SupportOpacity() override
     {
         return true;
     }
+    void DrawOnPixelMap() override;
 
 protected:
     virtual bool MaybeRelease() override;
@@ -97,11 +99,30 @@ private:
     SkVector GetSkRadii(const Radius& radius, double shrinkFactor, double borderWidth);
     void UpdateBackgroundImage(const RefPtr<BackgroundImage>& image);
     void UpdateBlurRRect(const flutter::RRect& rRect, const Offset& offset);
+    void UpdateBorderImageProvider(const RefPtr<BorderImage>& bImage);
     void DrawLayerForBlur(SkCanvas* canvas, Flutter::ContainerLayer* containerLayer);
     flutter::RRect GetBoxRRect(const Offset& offset, const Border& border, double shrinkFactor, bool isRound);
+    float DimensionToPx(const Dimension& value, const Size& size, LengthMode type) const;
+    void GetSizeAndPosition(GeometryBoxType geometryBoxType, Size& size, Offset& position);
+    float GetFloatRadiusValue(const Dimension& src, const Dimension& dest, const Size& size, LengthMode type);
+
+    bool CreateSkPath(const RefPtr<BasicShape>& basicShape, GeometryBoxType geometryBoxType, SkPath *skPath);
+    bool CreateInset(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
+    bool CreateCircle(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
+    bool CreateEllipse(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
+    bool CreatePolygon(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
+    bool CreatePath(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
+    bool CreateRect(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
+
+    RefPtr<Flutter::ClipLayer> GetClipLayer();
 
     RefPtr<Flutter::ClipLayer> clipLayer_;
+    RefPtr<Flutter::OffsetLayer> offsetLayer_;
+    RefPtr<Flutter::OffsetLayer> renderLayer_;
     RRect windowBlurRRect_;
+    void FetchImageData();
+    std::string borderSrc_;
+    sk_sp<SkImage> image_;
 };
 
 } // namespace OHOS::Ace

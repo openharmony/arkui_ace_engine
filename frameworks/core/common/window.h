@@ -32,6 +32,11 @@ public:
 
     void RequestFrame();
 
+    void Destroy()
+    {
+        platformWindow_.reset();
+    }
+
     void SetRootRenderNode(const RefPtr<RenderNode>& root);
 
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);

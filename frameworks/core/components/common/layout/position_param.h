@@ -16,16 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_POSITION_PARAM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_POSITION_PARAM_H
 
-#include "base/geometry/dimension.h"
+#include "base/geometry/animatable_dimension.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
 
 struct PositionParam {
-    std::pair<Dimension, bool> left = { 0.0_px, false };
-    std::pair<Dimension, bool> right = { 0.0_px, false };
-    std::pair<Dimension, bool> top = { 0.0_px, false };
-    std::pair<Dimension, bool> bottom = { 0.0_px, false };
+    std::pair<AnimatableDimension, bool> left = { AnimatableDimension(0.0, DimensionUnit::PX), false };
+    std::pair<AnimatableDimension, bool> right = { AnimatableDimension(0.0, DimensionUnit::PX), false };
+    std::pair<AnimatableDimension, bool> top = { AnimatableDimension(0.0, DimensionUnit::PX), false };
+    std::pair<AnimatableDimension, bool> bottom = { AnimatableDimension(0.0, DimensionUnit::PX), false };
+    std::pair<Dimension, Dimension> anchor = {0.0_px, 0.0_px};
     PositionType type = PositionType::RELATIVE;
 };
 

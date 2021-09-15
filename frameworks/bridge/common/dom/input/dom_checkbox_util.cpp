@@ -93,7 +93,13 @@ void DOMCheckboxUtil::AddChildEvent(const RefPtr<CheckboxComponent>& component, 
         if (event == DOM_CHANGE) {
             component->SetChangeEvent(EventMarker(nodeId, event, pageId));
         } else if (event == DOM_CLICK) {
-            component->SetClickEvent(EventMarker(nodeId, event, pageId));
+            EventMarker eventMarker(nodeId, event, pageId);
+            eventMarker.SetCatchMode(false);
+            component->SetClickEvent(eventMarker);
+        } else if (event == DOM_CATCH_BUBBLE_CLICK) {
+            EventMarker eventMarker(nodeId, event, pageId);
+            eventMarker.SetCatchMode(true);
+            component->SetClickEvent(eventMarker);
         }
     }
 }

@@ -62,9 +62,9 @@ bool GridLayoutElement::RequestNextFocus(bool vertical, bool reverse, const Rect
     return ret;
 }
 
-void GridLayoutElement::Apply(const RefPtr<Element>& child)
+void GridLayoutElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChild)
 {
-    if (!child) {
+    if (!renderChild) {
         LOGE("Element child is null");
         return;
     }
@@ -75,21 +75,9 @@ void GridLayoutElement::Apply(const RefPtr<Element>& child)
     }
 
     auto proxy = RenderItemProxy::Create();
+    proxy->AddChild(renderChild->GetRenderNode());
     proxy->Attach(context_);
     renderNode_->AddChild(proxy);
-    if (child->GetType() == RENDER_ELEMENT) {
-        // Directly attach the RenderNode if child is RenderElement.
-        RefPtr<RenderElement> renderChild = AceType::DynamicCast<RenderElement>(child);
-        if (renderChild) {
-            proxy->AddChild(renderChild->GetRenderNode());
-        }
-    } else if (child->GetType() == COMPOSED_ELEMENT) {
-        // If child is ComposedElement, just set parent render node.
-        RefPtr<ComposedElement> composeChild = AceType::DynamicCast<ComposedElement>(child);
-        if (composeChild) {
-            composeChild->SetParentRenderNode(proxy);
-        }
-    }
 }
 
 } // namespace OHOS::Ace

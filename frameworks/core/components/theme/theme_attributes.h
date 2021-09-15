@@ -66,6 +66,13 @@ extern const char THEME_ATTR_COLOR_CONTROL_ACTIVE[];
 extern const char THEME_ATTR_COLOR_TEXT_PRIMARY_ACTIVATED[];
 extern const char THEME_ATTR_COLOR_TERTIARY[];
 extern const char THEME_ATTR_COLOR_FOURTH[];
+extern const char THEME_ATTR_TEXT_SIZE_HEAD_LINE8[];
+extern const char THEME_ATTR_MARGIN_HORIZONTAL_L[];
+extern const char THEME_ATTR_BUTTON_NORMAL_COLOR[];
+extern const char THEME_ATTR_CARD_BG[];
+extern const char THEME_ATTR_CORNER_RADIUS_LOOSE[];
+extern const char THEME_ATTR_DIALOG_RADIUS[];
+extern const char THEME_ATTR_COLOR_FOREGROUND_CONTRARY[];
 // component patterns
 extern const char THEME_PATTERN_BUTTON[];
 extern const char THEME_PATTERN_CHECKBOX[];
@@ -75,6 +82,7 @@ extern const char THEME_PATTERN_SWIPER[];
 extern const char THEME_PATTERN_SWITCH[];
 extern const char THEME_PATTERN_TOOLBAR[];
 extern const char THEME_PATTERN_TOGGLE[];
+extern const char THEME_DIALOG_TOGGLE[];
 
 // pattern general attributes
 extern const char PATTERN_BG_COLOR[];
@@ -135,6 +143,16 @@ extern const char FG_COLOR_CHECKED[];
 extern const char BG_COLOR_CHECKED[];
 extern const char FG_COLOR_UNCHECKED[];
 extern const char BG_COLOR_UNCHECKED[];
+extern const char CHECKBOX_WIDTH[];
+extern const char CHECKBOX_PADDING[];
+extern const char CHECKBOX_BORDER_RADIUS[];
+extern const char RADIO_WIDTH[];
+extern const char SWITCH_WIDTH[];
+extern const char SWITCH_HEIGHT[];
+extern const char SWITCH_SHADOW_WIDTH[];
+extern const char SWITCH_HORIZONTAL_PADDING[];
+extern const char SWITCH_VERTICAL_PADDING[];
+extern const char RADIO_PADDING[];
 
 // pattern attributes for swiper
 extern const char INDICATOR_MASK_COLOR[];
@@ -183,6 +201,18 @@ extern const char TEXT_OVERLAY_MENU_ICON_COLOR[];
 extern const char TOGGLE_BACKGROUND_COLOR[];
 extern const char TOGGLE_CHECKED_COLOR[];
 extern const char TOGGLE_TEXT_COLOR[];
+
+// pattern attributes for dialog
+extern const char DIALOG_CONTENT_TOP_PADDING[];
+extern const char DIALOG_TITLE_TOP_PADDING[];
+extern const char DIALOG_BUTTON_HEIGHT[];
+extern const char DIALOG_TITLE_MAX_LINES[];
+extern const char DIALOG_COMMON_BUTTON_TEXT_COLOR[];
+extern const char DIALOG_MIN_BUTTON_TEXT_SIZE[];
+extern const char DIALOG_MAX_BUTTON_WIDTH[];
+extern const char DIALOG_MIN_BUTTON_WIDTH[];
+extern const char DIALOG_ACTIONS_TOP_PADDING[];
+extern const char DIALOG_MASK_COLOR_END[];
 
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H

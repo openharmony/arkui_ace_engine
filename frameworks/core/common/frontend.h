@@ -23,7 +23,7 @@
 #include "core/common/js_message_dispatcher.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_context.h"
-#include "frameworks/base/utils/device_config.h"
+#include "frameworks/base/utils/resource_configuration.h"
 
 namespace OHOS::Ace {
 
@@ -32,6 +32,7 @@ constexpr int32_t DEFAULT_DESIGN_WIDTH = 720;
 #else
 constexpr int32_t DEFAULT_DESIGN_WIDTH = 454;
 #endif
+using DialogCallback = std::function<void(std::string event, std::string param)>;
 
 // Window config of frontend.
 struct WindowConfig {
@@ -39,9 +40,8 @@ struct WindowConfig {
     // Runtime design width should be considered together with autoDesignWidth.
     int32_t designWidth = DEFAULT_DESIGN_WIDTH;
     bool autoDesignWidth = false;
-    bool useLiteStyle = false;
-    int32_t minSdkVersion = 1;
     bool boxWrap = false;
+    double designWidthScale = 0.0;
 };
 
 enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS };
@@ -53,12 +53,14 @@ public:
     Frontend() = default;
     ~Frontend() override = default;
 
-    enum class State { ON_CREATE, ON_DESTROY };
+    enum class State { ON_CREATE, ON_DESTROY, ON_SHOW, ON_HIDE };
 
     static RefPtr<Frontend> Create();
     static RefPtr<Frontend> CreateDefault();
 
     virtual bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) = 0;
+
+    virtual void Destroy() = 0;
 
     virtual void AttachPipelineContext(const RefPtr<PipelineContext>& context) = 0;
 
@@ -70,13 +72,15 @@ public:
 
     virtual void RunPage(int32_t pageId, const std::string& content, const std::string& params) = 0;
 
+    virtual void ReplacePage(const std::string& url, const std::string& params) = 0;
+
     virtual void PushPage(const std::string& url, const std::string& params) = 0;
 
     // Gets front-end event handler to handle ace event.
     virtual RefPtr<AceEventHandler> GetEventHandler() = 0;
 
     // Get window config of front end, which is used to calculate the pixel ratio of the real device.
-    virtual const WindowConfig& GetWindowConfig() const = 0;
+    virtual WindowConfig& GetWindowConfig() = 0;
 
     virtual FrontendType GetType() = 0;
 
@@ -104,8 +108,13 @@ public:
     // transfer event data from platform side to js side
     virtual void TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const = 0;
 
+    // get system plugin used in application
+    virtual void GetPluginsUsed(std::string& data) {};
+
     // get js code from plugin and load in js engine
     virtual void LoadPluginJsCode(std::string&& jsCode) const = 0;
+
+    virtual void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const = 0;
 
     // when this is foreground frontend
     virtual bool IsForeground() = 0;
@@ -137,6 +146,9 @@ public:
     // when front on a local ability migration is complete
     virtual void OnCompleteContinuation(int32_t code) = 0;
 
+    // Used to notify the local Ability that the remote Ability has been destroyed
+    virtual void OnRemoteTerminated() {};
+
     // interface to save the user data
     virtual void OnSaveData(std::string& data) = 0;
 
@@ -158,7 +170,18 @@ public:
     virtual void SetColorMode(ColorMode colorMode) {};
 
     // navigator component call router
-    virtual void NavigatePage(uint8_t type, const std::string& url) {};
+    virtual void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) {};
+    virtual void SetDialogCallback(DialogCallback callback) {};
+    virtual void NotifyAppStorage(const std::string& key, const std::string& value) {};
+
+    // Disallow pop last page
+    void DisallowPopLastPage()
+    {
+        disallowPopLastPage_ = true;
+    }
+
+protected:
+    bool disallowPopLastPage_ = false;
 };
 
 } // namespace OHOS::Ace

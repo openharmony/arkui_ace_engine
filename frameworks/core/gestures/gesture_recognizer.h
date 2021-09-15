@@ -16,14 +16,23 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_RECOGNIZER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_RECOGNIZER_H
 
-#include "core/gestures/touch_event.h"
+#include <map>
+#include <memory>
+#include <set>
+
+#include "gesture_referee.h"
+
+#include "core/event/touch_event.h"
+#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace {
 
 enum class DetectState { READY, DETECTING, DETECTED };
 
+enum class RefereeState { DETECTING, PENDING, BLOCKED, SUCCEED, FAIL };
+
 class GestureRecognizer : public TouchEventTarget {
-    DECLARE_ACE_TYPE(GestureRecognizer, TouchEventTarget);
+    DECLARE_ACE_TYPE(GestureRecognizer, TouchEventTarget)
 
 public:
     // Called when request of handling gesture sequence is accepted by gesture referee.
@@ -32,11 +41,23 @@ public:
     // Called when request of handling gesture sequence is rejected by gesture referee.
     virtual void OnRejected(size_t touchId) = 0;
 
+    // Called when request of handling gesture sequence is rejected by gesture referee.
+    virtual void OnPending(size_t touchId) {}
+
+    // Reconiciles the state from the given recognizer into this. The
+    // implementation must check that the given recognizer type matches the
+    // current one. The return value should be false if the reconciliation fails
+    // and true if it succeeds
+    virtual bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
+    {
+        return true;
+    }
+
     bool DispatchEvent(const TouchPoint& point) override
     {
         return true;
     }
-    bool HandleEvent(const TouchPoint& point) final;
+    bool HandleEvent(const TouchPoint& point) override;
 
     // Coordinate offset is used to calculate the local location of the touch point in the render node.
     void SetCoordinateOffset(const Offset& coordinateOffset)
@@ -50,14 +71,116 @@ public:
         return coordinateOffset_;
     }
 
+    GesturePriority GetPriority() const
+    {
+        return priority_;
+    }
+
+    void SetPriority(GesturePriority priority)
+    {
+        priority_ = priority;
+    }
+
+    GestureMask GetPriorityMask() const
+    {
+        return priorityMask_;
+    }
+
+    void SetPriorityMask(GestureMask priorityMask)
+    {
+        priorityMask_ = priorityMask;
+    }
+
+    RefereeState GetRefereeState() const
+    {
+        return refereeState_;
+    }
+
+    void SetRefereeState(RefereeState refereeState)
+    {
+        refereeState_ = refereeState;
+    }
+
+    DetectState GetDetectState() const
+    {
+        return state_;
+    }
+
+    void SetGestureGroup(const WeakPtr<GestureRecognizer>& gestureGroup)
+    {
+        gestureGroup_ = gestureGroup;
+    }
+
+    void SetOnAction(const GestureEventFunc& onAction)
+    {
+        onAction_ = std::make_unique<GestureEventFunc>(onAction);
+    }
+
+    void SetOnActionStart(const GestureEventFunc& onActionStart)
+    {
+        onActionStart_ = std::make_unique<GestureEventFunc>(onActionStart);
+    }
+
+    void SetOnActionUpdate(const GestureEventFunc& onActionUpdate)
+    {
+        onActionUpdate_ = std::make_unique<GestureEventFunc>(onActionUpdate);
+    }
+
+    void SetOnActionEnd(const GestureEventFunc& onActionEnd)
+    {
+        onActionEnd_ = std::make_unique<GestureEventFunc>(onActionEnd);
+    }
+
+    void SetOnActionCancel(const GestureEventNoParameter& onActionCancel)
+    {
+        onActionCancel_ = std::make_unique<GestureEventNoParameter>(onActionCancel);
+    }
+
+    inline void SendCancelMsg()
+    {
+        if (onActionCancel_ && *onActionCancel_) {
+            (*onActionCancel_)();
+        }
+    }
+
+    void SetIsExternalGesture(bool isExternalGesture)
+    {
+        isExternalGesture_ = isExternalGesture;
+    }
+
+    bool GetIsExternalGesture() const
+    {
+        return isExternalGesture_;
+    }
+
 protected:
     virtual void HandleTouchDownEvent(const TouchPoint& event) = 0;
     virtual void HandleTouchUpEvent(const TouchPoint& event) = 0;
     virtual void HandleTouchMoveEvent(const TouchPoint& event) = 0;
     virtual void HandleTouchCancelEvent(const TouchPoint& event) = 0;
 
+    virtual void AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer);
+    virtual void DelFromReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer);
+    virtual void BatchAdjudicate(
+        const std::set<size_t>& touchIds, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
+
     Offset coordinateOffset_;
     DetectState state_ { DetectState::READY };
+    RefereeState refereeState_ { RefereeState::DETECTING };
+    GesturePriority priority_ = GesturePriority::Low;
+    GestureMask priorityMask_ = GestureMask::Normal;
+
+    int32_t fingers_ = 1;
+    bool isExternalGesture_ = false;
+
+    std::unique_ptr<GestureEventFunc> onAction_;
+    std::unique_ptr<GestureEventFunc> onActionStart_;
+    std::unique_ptr<GestureEventFunc> onActionUpdate_;
+    std::unique_ptr<GestureEventFunc> onActionEnd_;
+    std::unique_ptr<GestureEventNoParameter> onActionCancel_;
+
+private:
+    WeakPtr<GestureRecognizer> gestureGroup_;
 };
 
 } // namespace OHOS::Ace

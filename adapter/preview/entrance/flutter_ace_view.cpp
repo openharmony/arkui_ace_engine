@@ -24,7 +24,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/event/mouse_event.h"
-#include "core/gestures/touch_event.h"
+#include "core/event/touch_event.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline/layers/flutter_scene_builder.h"
 
@@ -183,4 +183,8 @@ std::unique_ptr<PlatformWindow> FlutterAceView::GetPlatformWindow()
     return nullptr;
 }
 
+const void* FlutterAceView::GetNativeWindowById(uint64_t textureId)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::Platform

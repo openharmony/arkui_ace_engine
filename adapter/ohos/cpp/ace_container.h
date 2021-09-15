@@ -25,6 +25,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
+#include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
 
 namespace OHOS::Ace::Platform {
@@ -32,9 +33,13 @@ class AceContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
 public:
-    AceContainer(int32_t instanceId, FrontendType type, AceAbility* aceAbility,
+    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, AceAbility* aceAbility,
         std::unique_ptr<PlatformEventCallback> callback);
     ~AceContainer() override = default;
+
+    void Initialize() override;
+
+    void Destroy() override;
 
     static bool Register();
 
@@ -71,9 +76,24 @@ public:
         return pipelineContext_;
     }
 
+    int32_t GetViewWidth() const override
+    {
+        return aceView_ ? aceView_->GetWidth() : 0;
+    }
+
+    int32_t GetViewHeight() const override
+    {
+        return aceView_ ? aceView_->GetHeight() : 0;
+    }
+
     AceView* GetAceView() const
     {
         return aceView_;
+    }
+
+    void* GetView() const override
+    {
+        return static_cast<void*>(aceView_);
     }
 
     void SetWindowModal(WindowModal windowModal)
@@ -88,6 +108,10 @@ public:
 
     void Dispatch(
         const std::string& group, std::vector<uint8_t>&& data, int32_t id, bool replyToComponent) const override;
+
+    void DispatchSync(
+        const std::string& group, std::vector<uint8_t>&& data, uint8_t** resData, long& position) const override
+    {}
 
     void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
 
@@ -110,7 +134,7 @@ public:
         return "";
     }
 
-    static void CreateContainer(int32_t instanceId, FrontendType type, AceAbility* aceAbility,
+    static void CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, AceAbility* aceAbility,
         std::unique_ptr<PlatformEventCallback> callback);
     static void DestroyContainer(int32_t instanceId);
     static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& content, const std::string& params);
@@ -120,8 +144,12 @@ public:
     static void OnHide(int32_t instanceId);
     static void OnActive(int32_t instanceId);
     static void OnInactive(int32_t instanceId);
+    static bool OnStartContinuation(int32_t instanceId);
     static std::string OnSaveData(int32_t instanceId);
     static bool OnRestoreData(int32_t instanceId, const std::string& data);
+    static void OnCompleteContinuation(int32_t instanceId, int result);
+    static void OnRemoteTerminated(int32_t instanceId);
+    static void OnConfigurationUpdated(int32_t instanceId, const std::string& configuration);
     static void OnNewRequest(int32_t instanceId, const std::string& data);
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
     static void SetView(AceView* view, double density, int32_t width, int32_t height);
@@ -130,7 +158,7 @@ public:
 
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
-
+    static void SetDialogCallback(int32_t instanceId, DialogCallback callback);
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -144,6 +172,7 @@ private:
     RefPtr<PipelineContext> pipelineContext_;
     RefPtr<Frontend> frontend_;
     FrontendType type_ = FrontendType::JS;
+    bool isArkApp_ = false;
     std::unique_ptr<PlatformEventCallback> platformEventCallback_;
     WindowModal windowModal_ { WindowModal::NORMAL };
     ColorScheme colorScheme_ { ColorScheme::FIRST_VALUE };

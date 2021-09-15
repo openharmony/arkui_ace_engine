@@ -62,10 +62,8 @@ void FlutterRenderSearch::Paint(RenderContext& context, const Offset& offset)
             canvas->drawRect(SkRect::MakeXYWH(rect.Left(), rect.Top(), rect.Width(), rect.Height()), paint);
             canvas->restore();
         }
-    }
 
-    // Paint search text.
-    if (renderSearchBox_) {
+        // Paint search text.
         searchBoxOffset_ =
             searchTextRect_.GetOffset() + Offset(NormalizeToPx(SEARCH_SPACING) + SEARCH_DIVIDER_WIDTH, 0.0);
         if (needReverse_) {

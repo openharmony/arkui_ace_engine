@@ -151,7 +151,6 @@ void RenderIndexerItem::OnMouseHoverEnterTest()
             controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
         }
         colorAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-        colorAnimationEnter_->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
         CreateColorAnimation(colorAnimationEnter_, Color::TRANSPARENT, Color::FromString("#0C000000"));
         colorAnimationEnter_->SetCurve(Curves::FRICTION);
         StartHoverAnimation(controllerEnter_, colorAnimationEnter_);
@@ -166,7 +165,6 @@ void RenderIndexerItem::OnMouseHoverExitTest()
             controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
         }
         colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-        colorAnimationExit_->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
         RefPtr<RenderBox> box = AceType::DynamicCast<RenderBox>(GetChildren().front());
         if (!box) {
             return;

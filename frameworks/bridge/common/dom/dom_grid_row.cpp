@@ -28,8 +28,8 @@ void DomGridRow::SetParentGridInfo(const RefPtr<GridContainerInfo>& parent)
 {
     if (columnType_ != GridColumnType::NONE) {
         auto info = GridSystemManager::GetInstance().GetInfoByType(columnType_);
-        boxComponent_->SetGridLayoutInfo(info);
         gridContainerInfo_ = info->GetParent();
+        boxComponent_->SetGridLayoutInfo(gridContainerInfo_);
     } else {
         gridContainerInfo_ = parent;
     }

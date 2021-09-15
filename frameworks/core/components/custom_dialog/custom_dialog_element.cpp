@@ -18,6 +18,7 @@
 #include "base/utils/string_utils.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/stack/stack_element.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 
@@ -32,16 +33,24 @@ void CustomDialogElement::PerformBuild()
     if (!controller) {
         return;
     }
+    onShow_ = AceAsyncEvent<void()>::Create(dialog_->GetOnShow(), context_);
+    onClose_ = AceAsyncEvent<void()>::Create(dialog_->GetOnClose(), context_);
     controller->SetShowDialogImpl([weak = AceType::WeakClaim(this)]() {
         auto dialog = weak.Upgrade();
         if (dialog) {
             dialog->ShowDialog();
+            if (dialog->onShow_) {
+                dialog->onShow_();
+            }
         }
     });
     controller->SetCloseDialogImpl([weak = AceType::WeakClaim(this)]() {
         auto dialog = weak.Upgrade();
         if (dialog) {
             dialog->CloseDialog();
+            if (dialog->onClose_) {
+                dialog->onClose_();
+            }
         }
     });
 }
@@ -66,10 +75,12 @@ void CustomDialogElement::ShowDialog()
     baseDialog->SetOnCancelId(dialog_->GetOnCancel());
     baseDialog->SetHeight(dialog_->GetHeight());
     baseDialog->SetWidth(dialog_->GetWidth());
+    baseDialog->SetIsDragable(dialog_->IsDragable());
     if (dialog_->IsSetMargin()) {
         baseDialog->SetMargin(dialog_->GetMargin());
     }
     animator_ = baseDialog->GetAnimator();
+    dialogId_ = baseDialog->GetDialogId();
     stackElement->PushDialog(baseDialog);
     isPopDialog_ = false;
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
@@ -94,15 +105,15 @@ void CustomDialogElement::CloseDialog()
     }
     auto animator = animator_.Upgrade();
     if (animator) {
-        animator->AddStopListener([weakStack = AceType::WeakClaim(AceType::RawPtr(lastStack))] {
+        animator->AddStopListener([weakStack = AceType::WeakClaim(AceType::RawPtr(lastStack)), dialogId = dialogId_] {
             auto lastStack = weakStack.Upgrade();
             if (lastStack) {
-                lastStack->PopDialog(true);
+                lastStack->PopDialog(dialogId);
             }
         });
         animator->Play();
     } else {
-        lastStack->PopDialog(true);
+        lastStack->PopDialog(dialogId_);
     }
     isPopDialog_ = true;
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)

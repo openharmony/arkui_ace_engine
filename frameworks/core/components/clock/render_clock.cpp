@@ -32,16 +32,24 @@ constexpr double DIGIT_RADIUS_RATIO_UPPER_BOUND = 1.0;
 constexpr double EPSILON = 0.000001;
 constexpr int32_t TOTAL_HOURS_OF_ANALOG_CLOCK = 12;
 
+void UseDaySourceIfEmpty(const std::string& daySource, std::string& nightSource)
+{
+    if (nightSource.empty()) {
+        nightSource = daySource;
+    }
+}
+
 } // namespace
 
 RenderClock::RenderClock()
 {
     for (int32_t i = 1; i <= TOTAL_HOURS_OF_ANALOG_CLOCK; i++) {
         auto digitStr = Localization::GetInstance()->NumberFormat(i);
-        digits_.emplace_back(digitStr);
+        auto textComponent = AceType::MakeRefPtr<TextComponent>(digitStr);
         auto renderDigit = AceType::DynamicCast<RenderText>(RenderText::Create());
         AddChild(renderDigit);
         digitRenderNodes_.emplace_back(renderDigit);
+        digitComponentNodes_.emplace_back(textComponent);
         radians_.emplace_back(i * RADIAN_FOR_ONE_HOUR);
     }
 
@@ -77,56 +85,71 @@ RenderClock::RenderClock()
 
 void RenderClock::Update(const RefPtr<Component>& component)
 {
-    RefPtr<ClockComponent> clock = AceType::DynamicCast<ClockComponent>(component);
-    if (clock) {
-        hoursWest_ = clock->GetHoursWest();
-        defaultSize_ = clock->GetDefaultSize();
-        auto inputDigitSizeRatio = clock->GetDigitSizeRatio();
-        digitSizeRatio_ = InRegion(EPSILON, DIGIT_SIZE_RATIO_UPPER_BOUND, inputDigitSizeRatio) ? inputDigitSizeRatio
-                                                                                               : digitSizeRatio_;
-        auto inputDigitRadiusRatio = clock->GetDigitRadiusRatio();
-        digitRadiusRatio_ = InRegion(EPSILON, DIGIT_RADIUS_RATIO_UPPER_BOUND, inputDigitRadiusRatio)
-                                ? inputDigitRadiusRatio
-                                : digitRadiusRatio_;
-        fontFamilies_ = clock->GetFontFamilies();
-        showDigit_ = clock->GetShowDigit();
+    RefPtr<ClockComponent> clockComponent = AceType::DynamicCast<ClockComponent>(component);
+    if (clockComponent == nullptr) {
+        LOGE("clock component is null!");
+        return;
+    }
+    declaration_ = clockComponent->GetDeclaration();
+    if (declaration_ == nullptr) {
+        LOGE("clock declaration is null!");
+        return;
+    }
+    auto inputDigitSizeRatio = declaration_->GetDigitSizeRatio();
+    digitSizeRatio_ = InRegion(EPSILON, DIGIT_SIZE_RATIO_UPPER_BOUND, inputDigitSizeRatio) ? inputDigitSizeRatio
+                                                                                           : digitSizeRatio_;
+    auto inputDigitRadiusRatio = declaration_->GetDigitRadiusRatio();
+    digitRadiusRatio_ = InRegion(EPSILON, DIGIT_RADIUS_RATIO_UPPER_BOUND, inputDigitRadiusRatio)
+                            ? inputDigitRadiusRatio
+                            : digitRadiusRatio_;
 
-        // update attributes and styles for day mode
-        clockFaceSrc_ = clock->GetClockFaceSrc();
-        hourHandSrc_ = clock->GetHourHandSrc();
-        minuteHandSrc_ = clock->GetMinuteHandSrc();
-        secondHandSrc_ = clock->GetSecondHandSrc();
-        digitColor_ = clock->GetDigitColor();
+    // update attributes and styles for night mode
+    clockFaceNightSrc_ = declaration_->GetClockFaceNightSrc();
+    hourHandNightSrc_ = declaration_->GetHourHandNightSrc();
+    minuteHandNightSrc_ = declaration_->GetMinuteHandNightSrc();
+    secondHandNightSrc_ = declaration_->GetSecondHandNightSrc();
+    digitColorNight_ = declaration_->GetDigitColorNight();
 
-        // update attributes and styles for night mode
-        clockFaceNightSrc_ = clock->GetClockFaceNightSrc();
-        hourHandNightSrc_ = clock->GetHourHandNightSrc();
-        minuteHandNightSrc_ = clock->GetMinuteHandNightSrc();
-        secondHandNightSrc_ = clock->GetSecondHandNightSrc();
-        digitColorNight_ = clock->GetDigitColorNight();
+    CheckNightConfig();
 
-        CheckNightConfig();
+    auto timeOfNow = GetTimeOfNow(declaration_->GetHoursWest());
+    IsDayTime(timeOfNow) ? UseDayConfig() : UseNightConfig();
 
-        auto timeOfNow = GetTimeOfNow(hoursWest_);
-        IsDayTime(timeOfNow) ? UseDayConfig() : UseNightConfig();
-
-        renderClockHand_->SetHoursWest(hoursWest_);
-        renderClockHand_->Attach(GetContext());
-        renderClockHand_->SetOnHourCallback(
-            AceAsyncEvent<void(const std::string&)>::Create(clock->GetOnHourChangeEvent(), context_));
+    renderClockHand_->SetHoursWest(declaration_->GetHoursWest());
+    renderClockHand_->Attach(GetContext());
+    renderClockHand_->SetOnHourCallback(
+        AceAsyncEvent<void(const std::string&)>::Create(declaration_->GetOnHourChangeEvent(), context_));
+    if (!setScreenCallback_) {
+        auto context = context_.Upgrade();
+        if (!context) {
+            return;
+        }
+        context->AddScreenOnEvent([wp = WeakPtr<RenderClockHand>(renderClockHand_)]() {
+            auto renderClockHand = wp.Upgrade();
+            if (renderClockHand) {
+                renderClockHand->SetNeedStop(false);
+            }
+        });
+        context->AddScreenOffEvent([wp = WeakPtr<RenderClockHand>(renderClockHand_)]() {
+            auto renderClockHand = wp.Upgrade();
+            if (renderClockHand) {
+                renderClockHand->SetNeedStop(true);
+            }
+        });
+        setScreenCallback_ = true;
     }
     MarkNeedLayout();
 }
 
 void RenderClock::UseDayConfig()
 {
-    UpdateRenderImage(renderClockFace_, clockFaceSrc_);
+    UpdateRenderImage(renderClockFace_, declaration_->GetClockFaceSrc());
 
-    UpdateRenderImage(renderHourHand_, hourHandSrc_);
+    UpdateRenderImage(renderHourHand_, declaration_->GetHourHandSrc());
     renderClockHand_->SetHourHand(renderHourHand_);
-    UpdateRenderImage(renderMinuteHand_, minuteHandSrc_);
+    UpdateRenderImage(renderMinuteHand_, declaration_->GetMinuteHandSrc());
     renderClockHand_->SetMinuteHand(renderMinuteHand_);
-    UpdateRenderImage(renderSecondHand_, secondHandSrc_);
+    UpdateRenderImage(renderSecondHand_, declaration_->GetSecondHandSrc());
     renderClockHand_->SetSecondHand(renderSecondHand_);
     renderClockHand_->SetIsDay(true);
 }
@@ -146,19 +169,12 @@ void RenderClock::UseNightConfig()
 
 void RenderClock::CheckNightConfig()
 {
-    UseDaySourceIfEmpty(clockFaceNightSrc_, clockFaceSrc_);
-    UseDaySourceIfEmpty(hourHandNightSrc_, hourHandSrc_);
-    UseDaySourceIfEmpty(minuteHandNightSrc_, minuteHandSrc_);
-    UseDaySourceIfEmpty(secondHandNightSrc_, secondHandSrc_);
+    UseDaySourceIfEmpty(declaration_->GetClockFaceSrc(), clockFaceNightSrc_);
+    UseDaySourceIfEmpty(declaration_->GetHourHandSrc(), hourHandNightSrc_);
+    UseDaySourceIfEmpty(declaration_->GetMinuteHandSrc(), minuteHandNightSrc_);
+    UseDaySourceIfEmpty(declaration_->GetSecondHandSrc(), secondHandNightSrc_);
     if (digitColorNight_ == Color::TRANSPARENT) {
-        digitColorNight_ = digitColor_;
-    }
-}
-
-void RenderClock::UseDaySourceIfEmpty(std::string& nightSource, const std::string& daySource)
-{
-    if (nightSource.empty()) {
-        nightSource = daySource;
+        digitColorNight_ = declaration_->GetDigitColor();
     }
 }
 
@@ -184,24 +200,23 @@ void RenderClock::UpdateAccessibilityInfo(double hour, double minute)
 
 void RenderClock::UpdateRenderText(double digitSize, const Color& digitColor)
 {
-    if (digits_.size() == digitRenderNodes_.size()) {
-        RefPtr<TextComponent> textComponent = AceType::MakeRefPtr<TextComponent>("");
-        TextStyle textStyle;
-        textStyle.SetAllowScale(false);
-        textStyle.SetTextColor(digitColor);
-        textStyle.SetFontSize(Dimension(digitSize));
-        textStyle.SetFontFamilies(fontFamilies_);
-        textComponent->SetTextStyle(textStyle);
-        textComponent->SetFocusColor(digitColor);
-
-        for (size_t i = 0; i < digitRenderNodes_.size(); i++) {
-            textComponent->SetData(digits_[i]);
-            digitRenderNodes_[i]->Attach(GetContext());
-            digitRenderNodes_[i]->Update(textComponent);
-        }
+    if (digitComponentNodes_.size() != digitRenderNodes_.size()) {
+        LOGE("Size of [digitComponentNodes] and [digitRenderNodes] does not match! Please check!");
         return;
     }
-    LOGE("Size of [digits] and [digitRenderNodes] does not match! Please check!");
+    TextStyle textStyle;
+    textStyle.SetAllowScale(false);
+    textStyle.SetTextColor(digitColor);
+    textStyle.SetFontSize(Dimension(digitSize));
+    textStyle.SetFontFamilies(declaration_->GetFontFamilies());
+
+    for (size_t i = 0; i < digitRenderNodes_.size(); i++) {
+        const auto& textComponent = digitComponentNodes_[i];
+        textComponent->SetTextStyle(textStyle);
+        textComponent->SetFocusColor(digitColor);
+        digitRenderNodes_[i]->Attach(GetContext());
+        digitRenderNodes_[i]->Update(textComponent);
+    }
 }
 
 void RenderClock::UpdateRenderImage(RefPtr<RenderImage>& renderImage, const std::string& imageSrc)
@@ -217,8 +232,8 @@ void RenderClock::PerformLayout()
     CalculateLayoutSize();
     SetLayoutSize(GetLayoutParam().Constrain(drawSize_));
     LayoutClockImage(renderClockFace_, drawSize_);
-    auto textColor = renderClockHand_->GetIsDay() ? digitColor_ : digitColorNight_;
-    if (showDigit_) {
+    auto textColor = renderClockHand_->GetIsDay() ? declaration_->GetDigitColor() : digitColorNight_;
+    if (declaration_->GetShowDigit()) {
         LayoutParam textLayoutParam = GetLayoutParam();
         textLayoutParam.SetMinSize(Size());
         UpdateRenderText(drawSize_.Width() * digitSizeRatio_, textColor);

@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "core/common/frontend.h"
+#include "core/common/text_field_manager.h"
 #include "core/components/focus_animation/focus_animation_element.h"
 #include "core/components/page/page_element.h"
 #include "core/components/shadow/shadow_element.h"
@@ -36,19 +37,22 @@ Element::~Element()
 
 void Element::AddChild(const RefPtr<Element>& child, int32_t slot)
 {
-    if (child != nullptr) {
-        const auto& it = std::find(children_.begin(), children_.end(), child);
-        if (it == children_.end()) {
-            auto pos = children_.begin();
-            std::advance(pos, slot);
-            children_.insert(pos, child);
-            child->SetParent(AceType::WeakClaim(this));
-            child->SetSlot(slot);
-            Apply(child);
-        } else {
-            LOGW("Element exist AddChild failed");
-        }
+    if (!child) {
+        return;
     }
+
+    auto it = std::find(children_.begin(), children_.end(), child);
+    if (it != children_.end()) {
+        LOGW("Child element is already existed");
+        return;
+    }
+
+    it = children_.begin();
+    std::advance(it, slot);
+    children_.insert(it, child);
+
+    child->SetSlot(slot);
+    Apply(child);
 }
 
 void Element::RemoveChild(const RefPtr<Element>& child)
@@ -59,12 +63,63 @@ void Element::RemoveChild(const RefPtr<Element>& child)
     }
 }
 
-void Element::DeactivateChild(const RefPtr<Element>& child)
+void Element::ChangeChildSlot(const RefPtr<Element>& child, int32_t slot)
 {
-    if (child) {
+    child->SetSlot(slot);
+
+    if (slot < 0) {
+        return;
+    }
+
+    auto it = children_.end();
+    if (static_cast<size_t>(slot) < children_.size()) {
+        it = children_.begin();
+        std::advance(it, slot);
+        if (*it == child) {
+            // Already at the right place
+            return;
+        }
+
+        auto itChild = std::find(it, children_.end(), child);
+        if (itChild != children_.end()) {
+            children_.erase(itChild);
+        } else {
+            LOGW("Should NOT be here");
+            children_.remove(child);
+            ++it;
+        }
+    } else {
+        children_.remove(child);
+    }
+    children_.insert(it, child);
+}
+
+void Element::ChangeChildRenderSlot(const RefPtr<Element>& child, int32_t renderSlot, bool effectDescendant)
+{
+    child->SetRenderSlot(renderSlot);
+
+    if (renderSlot < 0) {
+        return;
+    }
+
+    if (child->GetType() == RENDER_ELEMENT) {
+        auto renderNode = child->GetRenderNode();
+        renderNode->MovePosition(renderSlot);
+    } else if (child->GetType() == COMPOSED_ELEMENT && effectDescendant) {
+        int32_t newRenderSlot = renderSlot;
+        for (const auto& grandChild : child->children_) {
+            child->ChangeChildRenderSlot(grandChild, newRenderSlot, effectDescendant);
+            newRenderSlot += grandChild->CountRenderNode();
+        }
+    }
+}
+
+void Element::DeactivateChild(RefPtr<Element> child)
+{
+    if (child && !child->parent_.Invalid()) {
+        child->parent_ = nullptr;
         RefPtr<PipelineContext> context = context_.Upgrade();
         if (context) {
-            child->parent_ = nullptr;
             context->AddDeactivateElement(child->GetRetakeId(), child);
         }
         auto focusNode = AceType::DynamicCast<FocusNode>(child);
@@ -72,6 +127,7 @@ void Element::DeactivateChild(const RefPtr<Element>& child)
             focusNode->RemoveSelf();
         }
         child->Deactivate();
+        child->MarkActive(false);
         children_.remove(child);
     }
 }
@@ -87,6 +143,12 @@ void Element::DetachChild(const RefPtr<Element>& child)
 
 void Element::Rebuild()
 {
+    if (!needRebuild_) {
+        return;
+    }
+
+    needRebuild_ = false;
+
     // When rebuild comes, newComponent_ should not be null, and will go to these 3 steps:
     // 1. Update self using new component
     // 2. PerformBuild will build and update child recursively
@@ -101,6 +163,7 @@ void Element::DumpTree(int32_t depth)
     if (DumpLog::GetInstance().GetDumpFile()) {
         Dump();
         DumpLog::GetInstance().AddDesc(std::string("retakeID: ").append(std::to_string(GetRetakeId())));
+        DumpLog::GetInstance().AddDesc(std::string("Active: ").append(IsActive() ? "Y" : "N"));
         DumpLog::GetInstance().Print(depth, AceType::TypeName(this), children_.size());
     }
 
@@ -114,96 +177,93 @@ void Element::Dump() {}
 bool Element::CanUpdate(const RefPtr<Component>& newComponent)
 {
     // The raw ptr is persistent during app process.
-    return componentTypeName_ == AceType::TypeName(newComponent);
+    return componentTypeId_ == AceType::TypeId(newComponent);
 }
 
 inline RefPtr<Element> Element::DoUpdateChildWithNewComponent(
-    const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot)
+    const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot)
 {
+    ChangeChildSlot(child, slot);
+    // Only change render slot for itself, the descendant node will update by 'Rebuild'
+    ChangeChildRenderSlot(child, renderSlot, false);
     child->SetNewComponent(newComponent);
-    child->SetSlot(slot);
-    child->Update();
-    child->PerformBuild();
+    child->Rebuild();
     return child;
 }
 
-RefPtr<Element> Element::UpdateChild(const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot)
+RefPtr<Element> Element::UpdateChildWithSlot(
+    const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot)
 {
+    LOGD("%{public}p->%{public}s::UpdateChildWithSlot(%{public}s, %{public}s, %{public}d, %{public}d)",
+        this, AceType::TypeName(this), AceType::TypeName(child), AceType::TypeName(newComponent), slot, renderSlot);
+
     // Considering 4 cases:
     // 1. child == null && newComponent == null  -->  do nothing
     // 2. child == null && newComponent != null  -->  create new child configured with newComponent
+    if (!child) {
+        return !newComponent ? nullptr : InflateComponent(newComponent, slot, renderSlot);
+    }
+
     // 3. child != null && newComponent == null  -->  remove old child
+    if (!newComponent) {
+        DeactivateChild(child);
+        return nullptr;
+    }
+
     // 4. child != null && newComponent != null  -->  update old child with new configuration if possible(determined by
     //    [Element::CanUpdate]), or remove the old child and create new one configured with newComponent.
-    if (!child) {
-        if (!newComponent) {
-            return nullptr;
-        } else {
-            return InflateComponent(newComponent, slot);
+    auto context = context_.Upgrade();
+    if (!child->CanUpdate(newComponent)) {
+        // Can not update
+
+        auto needRebuildFocusElement = AceType::DynamicCast<Element>(GetFocusScope());
+        if (context && needRebuildFocusElement) {
+            context->AddNeedRebuildFocusElement(needRebuildFocusElement);
         }
-    } else {
-        if (!newComponent) {
-            DeactivateChild(child);
-            return nullptr;
-        } else {
-            if (child->CanUpdate(newComponent)) {
-                auto context = context_.Upgrade();
-                bool declarative = context ? context->GetIsDeclarative() : false;
-                if (!declarative) {
-                    // old, non-declarative code path
-                    return DoUpdateChildWithNewComponent(child, newComponent, slot);
-                } else {
-                    // Declarative path
-                    if (!newComponent->IsStatic()) {
-                        // non static component
-                        if (newComponent->HasElementFunction()) {
-                            newComponent->CallElementFunction(AceType::RawPtr(child));
-                        }
-                        DoUpdateChildWithNewComponent(child, newComponent, slot);
-                        child->SetNewComponent(nullptr);
-                        return child;
-                    } else {
-                        // Declarative && Component marked as static
-                        child->SetSlot(slot);
-                        auto traverseChild = child;
-                        while (AceType::TypeName<ComposedElement>() == AceType::TypeName(traverseChild)) {
-                            // this child is a composedelement
-                            // update its only child slot
-                            // if the child is again composed component
-                            // do the same until we hit a renderelement
-                            traverseChild = traverseChild->GetFirstChild();
-                            traverseChild->SetSlot(slot);
-                        }
-                        LOGD("skipping update for static child: %s", child->GetTag());
-                        child->SetSlot(slot);
-                        return child;
-                    }
-                }
-            } else {
-                // Can not update
-                RefPtr<PipelineContext> context = context_.Upgrade();
-                auto needRebuildFocusElement = AceType::DynamicCast<Element>(GetFocusScope());
-                if (context && needRebuildFocusElement) {
-                    context->AddNeedRebuildFocusElement(needRebuildFocusElement);
-                }
-                DeactivateChild(child);
-                return InflateComponent(newComponent, slot);
-            }
-        }
+        DeactivateChild(child);
+        return InflateComponent(newComponent, slot, renderSlot);
     }
+
+    if (!context || !context->GetIsDeclarative()) {
+        // Non-declarative code path
+        return DoUpdateChildWithNewComponent(child, newComponent, slot, renderSlot);
+    }
+
+    // Declarative path
+    if (newComponent->IsStatic()) {
+        // Declarative && Component marked as static
+        ChangeChildSlot(child, slot);
+        // Not need to rebuild child, but should change render slot for all descendant
+        ChangeChildRenderSlot(child, renderSlot, true);
+        return child;
+    }
+
+    // Non-static component
+    if (newComponent->HasElementFunction()) {
+        newComponent->CallElementFunction(child);
+    }
+    return DoUpdateChildWithNewComponent(child, newComponent, slot, renderSlot);
 }
 
-void Element::Mount(const RefPtr<Element>& parent, int32_t slot)
+void Element::Mount(const RefPtr<Element>& parent, int32_t slot, int32_t renderSlot)
 {
     SetParent(parent);
     SetDepth(parent != nullptr ? parent->GetDepth() + 1 : 1);
     SetPipelineContext(parent != nullptr ? parent->context_ : context_);
     Prepare(parent);
+    SetRenderSlot(renderSlot);
     if (parent) {
         parent->AddChild(AceType::Claim(this), slot);
         AddToFocus();
     }
     Rebuild();
+    auto context = context_.Upgrade();
+    auto scrollElemet = AceType::DynamicCast<ScrollElement>(AceType::Claim(this));
+    if (scrollElemet && context && context->GetTextFieldManager() && context->GetLastPage()) {
+        auto textFeildManager = context->GetTextFieldManager();
+        textFeildManager->SetScrollElement(context->GetLastPage()->GetPageId(), WeakPtr<ScrollElement>(scrollElemet));
+    }
+    MarkActive(true);
 }
 
 void Element::AddToFocus()
@@ -260,6 +320,7 @@ void Element::MarkDirty()
     RefPtr<PipelineContext> context = context_.Upgrade();
     if (context) {
         context->AddDirtyElement(AceType::Claim(this));
+        MarkNeedRebuild();
     }
 }
 
@@ -299,20 +360,19 @@ void Element::SetPipelineContext(const WeakPtr<PipelineContext>& context)
     OnContextAttached();
 }
 
-RefPtr<Element> Element::InflateComponent(const RefPtr<Component>& newComponent, int32_t slot)
+RefPtr<Element> Element::InflateComponent(const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot)
 {
     // confirm whether there is a reuseable element.
     auto retakeElement = RetakeDeactivateElement(newComponent);
     if (retakeElement) {
         retakeElement->SetNewComponent(newComponent);
-        retakeElement->SetSlot(slot);
-        retakeElement->Mount(AceType::Claim(this), slot);
+        retakeElement->Mount(AceType::Claim(this), slot, renderSlot);
         return retakeElement;
     }
 
     RefPtr<Element> newChild = newComponent->CreateElement();
     newChild->SetNewComponent(newComponent);
-    newChild->Mount(AceType::Claim(this), slot);
+    newChild->Mount(AceType::Claim(this), slot, renderSlot);
     return newChild;
 }
 
@@ -334,39 +394,6 @@ RefPtr<FocusGroup> Element::GetFocusScope()
     }
 
     return nullptr;
-}
-
-void Element::SetSlot(int32_t slot)
-{
-    auto context = context_.Upgrade();
-    if (context && context->GetIsDeclarative()) {
-        bool layoutNeeded = slot_ != slot;
-        slot_ = slot;
-        if (GetType() == RENDER_ELEMENT) {
-            auto renderNode = GetRenderNode();
-            if (!renderNode) {
-                return;
-            }
-
-            auto parentNode = renderNode->GetParent().Upgrade();
-            if (!parentNode) {
-                return;
-            }
-            if (parentNode->GetFirstChild() == parentNode->GetLastChild()) {
-                // This means it has only one child, no need to update position
-                // of the rendernode
-                return;
-            }
-
-            parentNode->RemoveChild(renderNode);
-            parentNode->AddChild(renderNode, slot);
-            if (layoutNeeded) {
-                parentNode->MarkNeedLayout();
-            }
-        }
-    } else {
-        slot_ = slot;
-    }
 }
 
 RefPtr<PageElement> Element::GetPageElement()
@@ -422,6 +449,14 @@ RefPtr<FocusNode> Element::RebuildFocusChild()
         return item->RebuildFocusChild();
     }
     return nullptr;
+}
+
+void Element::MarkActive(bool active)
+{
+    active_ = active;
+    for (auto& item : children_) {
+        item->MarkActive(active);
+    }
 }
 
 } // namespace OHOS::Ace

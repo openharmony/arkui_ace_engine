@@ -21,6 +21,9 @@
 namespace OHOS::Ace::Framework {
 class BaseCanvasBridge : public virtual AceType {
     DECLARE_ACE_TYPE(BaseCanvasBridge, AceType);
+
+public:
+    virtual void OnJsEngineDestroy() {}
 };
 } // namespace OHOS::Ace::Framework
 

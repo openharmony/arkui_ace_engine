@@ -47,6 +47,7 @@ public:
 protected:
     void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) override;
     void OnChildNodeRemoved(const RefPtr<DOMNode>& child) override;
+    void PrepareSpecializedComponent() override;
 
 private:
     void AddChildNode(const RefPtr<DOMNode>& child, int32_t slot, bool isRebuild);

@@ -27,17 +27,9 @@ public:
     DOMSvgAnimateTransform(NodeId nodeId, const std::string& nodeName) : DOMSvgAnimate(nodeId, nodeName) {};
     ~DOMSvgAnimateTransform() override = default;
 
-    RefPtr<Component> GetSpecializedComponent() override
-    {
-        return animateComponent_;
-    }
-
 protected:
     void PrepareSpecializedComponent() override;
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
 
-private:
-    std::string transformType_;
 };
 
 } // namespace OHOS::Ace::Framework

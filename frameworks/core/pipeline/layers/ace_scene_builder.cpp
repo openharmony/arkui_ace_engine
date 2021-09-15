@@ -78,6 +78,15 @@ void AceSceneBuilder::PushClipRRect(const flutter::RRect& rrect, int32_t clipBeh
     layerTreeBuilder_->PushClipRRect(rrect.sk_rrect, clipBehavior);
 }
 
+void AceSceneBuilder::PushClipPath(const flutter::CanvasPath* path, int32_t clipBehavior)
+{
+    if (!path) {
+        LOGE("AceSceneBuilder:can't create clip path");
+        return;
+    }
+    layerTreeBuilder_->PushClipPath(path->path(), clipBehavior);
+}
+
 void AceSceneBuilder::PushOpacity(int32_t alpha, double dx, double dy)
 {
     layerTreeBuilder_->PushOpacity(alpha, dx, dy);
@@ -101,6 +110,26 @@ void AceSceneBuilder::PushShaderMask(fml::RefPtr<flutter::Shader> shader, double
     }
     layerTreeBuilder_->PushShaderMask(
         shader.get()->shader(), maskRectLeft, maskRectRight, maskRectTop, maskRectBottom, blendMode);
+}
+
+void AceSceneBuilder::PushSvgMask(const sk_sp<SkSVGDOM>& svgDom, double x, double y, double scaleX, double scaleY)
+{
+    layerTreeBuilder_->PushSvgMask(svgDom, x, y, scaleX, scaleY);
+}
+
+void AceSceneBuilder::PushGradientColorMask(const SkPaint& maskPaint)
+{
+    layerTreeBuilder_->PushGradientColorMask(maskPaint);
+}
+
+void AceSceneBuilder::PushPathMask(const SkPaint& maskPaint, const SkPath& maskPath)
+{
+    layerTreeBuilder_->PushPathMask(maskPaint, maskPath);
+}
+
+void AceSceneBuilder::PushFilter(const SkPaint& filterPaint)
+{
+    layerTreeBuilder_->PushFilter(filterPaint);
 }
 
 void AceSceneBuilder::Pop()

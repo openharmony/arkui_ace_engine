@@ -33,22 +33,23 @@ public:
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
+    const std::string& GetValue() const
+    {
+        return value_;
+    }
+    const Color& GetQrcodeColor() const
+    {
+        return color_;
+    }
 
 protected:
     std::string value_;
-    Color backgroundColor_;
-    Color qrcodeColor_;
-    QrcodeType qrcodeType_ { QrcodeType::RECT };
+    Color color_ = Color::BLACK;
     double width_ = 0.0;
     double height_ = 0.0;
-    Dimension qrcodeWidth_;
-    Dimension qrcodeHeight_;
-    Size qrcodeSize_;
     RefPtr<QrcodeComponent> qrcode_;
     RefPtr<ImageComponent> qrcodeImageComponent_;
     RefPtr<RenderImage> qrcodeRenderImage_;
-    bool isWidthDefined_ = false;
-    bool isHeightDefined_ = false;
 };
 
 } // namespace OHOS::Ace

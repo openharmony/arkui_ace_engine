@@ -20,6 +20,7 @@
 
 #include "adapter/common/cpp/flutter_task_executor.h"
 #include "adapter/ohos/osal/fake_task_executor.h"
+#include "base/json/json_util.h"
 #include "base/thread/task_executor.h"
 #include "core/common/frontend.h"
 #include "core/common/platform_window.h"
@@ -118,6 +119,8 @@ public:
         return false;
     }
 
+    void Destroy() override {}
+
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override {}
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override {}
 
@@ -133,7 +136,7 @@ public:
 
     void DumpFrontend() const override {}
 
-    const WindowConfig& GetWindowConfig() const override
+    WindowConfig& GetWindowConfig() override
     {
         return windowConfig_;
     }
@@ -156,6 +159,7 @@ public:
     void AddPage(const RefPtr<AcePage>& page) override {}
     void RunPage(int32_t pageId, const std::string& content, const std::string& params) override {}
     void PushPage(const std::string& content, const std::string& params) override {}
+    void ReplacePage(const std::string& url, const std::string& params) override {}
     void UpdateState(State state) override {}
     void SendCallbackMessage(const std::string& callbackId, const std::string& data) const override {}
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& transfer) const override {}
@@ -164,6 +168,7 @@ public:
     void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override {}
     void TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
     void LoadPluginJsCode(std::string&& jsCode) const override {}
+    void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const override {}
     bool OnBackPressed() override
     {
         return false;

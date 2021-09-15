@@ -15,8 +15,9 @@
 
 #include "frameworks/bridge/common/media_query/media_query_info.h"
 
-#include "base/json/json_util.h"
 #include "base/log/log.h"
+#include "core/common/container.h"
+#include "core/common/thread_checker.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -52,9 +53,11 @@ std::string MediaQueryInfo::GetOrientation() const
 
 std::string MediaQueryInfo::GetMediaQueryInfo() const
 {
+    CHECK_RUN_ON(JS);
     auto json = JsonUtil::Create(true);
-    int32_t width = SystemProperties::GetWidth();
-    int32_t height = SystemProperties::GetHeight();
+    auto container = Container::Current();
+    int32_t width = container ? container->GetViewWidth() : 0;
+    int32_t height = container ? container->GetViewHeight() : 0;
     double aspectRatio = (height != 0) ? (static_cast<double>(width) / height) : 1.0;
     json->Put("width", width);
     json->Put("height", height);
@@ -68,6 +71,27 @@ std::string MediaQueryInfo::GetMediaQueryInfo() const
     json->Put("isInit", false);
     json->Put("darkMode", SystemProperties::GetColorMode() == ColorMode::DARK);
     return json->ToString();
+}
+
+std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo() const
+{
+    CHECK_RUN_ON(JS);
+    auto json = JsonUtil::Create(true);
+    auto container = Container::Current();
+    int32_t width = container ? container->GetViewWidth() : 0;
+    int32_t height = container ? container->GetViewHeight() : 0;
+    double aspectRatio = (height != 0) ? (static_cast<double>(width) / height) : 1.0;
+    json->Put("width", width);
+    json->Put("height", height);
+    json->Put("aspect-ratio", aspectRatio);
+    json->Put("round-screen", SystemProperties::GetIsScreenRound());
+    json->Put("device-width", SystemProperties::GetDeviceWidth());
+    json->Put("device-height", SystemProperties::GetDeviceHeight());
+    json->Put("resolution", SystemProperties::GetResolution());
+    json->Put("orientation", GetOrientation().c_str());
+    json->Put("device-type", GetDeviceType().c_str());
+    json->Put("dark-mode", SystemProperties::GetColorMode() == ColorMode::DARK);
+    return json;
 }
 
 } // namespace OHOS::Ace::Framework

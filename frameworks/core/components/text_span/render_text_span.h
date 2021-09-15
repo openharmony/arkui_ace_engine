@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_SPAN_RENDER_TEXT_SPAN_H
 
 #include "core/components/common/properties/text_style.h"
+#include "core/components/text_span/text_span_component.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -36,15 +37,12 @@ public:
 
     bool IsCallbackCalled() const;
     const TextStyle& GetSpanStyle() const;
-
     const std::string& GetSpanData() const;
 
 protected:
-    std::string spanData_;
     TextStyle spanStyle_;
-    bool hasNewStyle_ = false;
     bool isCallbackCalled_ = false;
-    bool isShow_ = true;
+    RefPtr<TextSpanComponent> spanComponent_;
 };
 
 } // namespace OHOS::Ace

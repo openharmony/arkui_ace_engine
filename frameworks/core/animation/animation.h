@@ -50,40 +50,11 @@ public:
         return inited_;
     }
 
-    bool ShouldSkipAnimation() const
-    {
-        return skipAnimation_;
-    }
-
-    void SetSkipAnimation(bool skipAnimation)
-    {
-        skipAnimation_ = skipAnimation;
-    }
-
-    bool IsDeclarativeAnimation() const
-    {
-        return declarativeAnimation_;
-    }
-
-    void SetDeclarativeAnimation(bool declarative)
-    {
-        declarativeAnimation_ = declarative;
-    }
-
     virtual void SetCurve(const RefPtr<Curve>& curve) {}
-
-    virtual void SetStart(const T& value) {}
-
-    virtual T GetEndValue()
-    {
-        return T();
-    }
 
 private:
     T initValue_ {};
     bool inited_ = false;
-    bool declarativeAnimation_ = false;
-    bool skipAnimation_ = false;
 };
 
 } // namespace OHOS::Ace

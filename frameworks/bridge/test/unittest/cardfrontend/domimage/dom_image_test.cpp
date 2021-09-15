@@ -141,11 +141,16 @@ HWTEST_F(DomCardImageTest, DomCardImageTest003, TestSize.Level1)
     ASSERT_TRUE(domImage->GetTag() == "image");
     ASSERT_TRUE(static_cast<int32_t>(domImage->GetHeight().Value()) == 300);
     ASSERT_TRUE(static_cast<int32_t>(domImage->GetWidth().Value()) == 300);
-    ASSERT_TRUE(static_cast<int32_t>(domImage->GetMarginTop().Value()) == 30);
-    ASSERT_TRUE(static_cast<int32_t>(domImage->GetMarginBottom().Value()) == 30);
-    ASSERT_TRUE(static_cast<int32_t>(domImage->GetMarginLeft().Value()) == 30);
-    ASSERT_TRUE(static_cast<int32_t>(domImage->GetMarginRight().Value()) == 30);
     ASSERT_TRUE(CardTestFactory::GetInstance().GetNodeNumber() == 1);
+
+    auto declaration = domImage->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    auto& marginStyle = static_cast<CommonMarginStyle&>(declaration->GetStyle(StyleTag::COMMON_MARGIN_STYLE));
+    ASSERT_TRUE(marginStyle.IsValid());
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Top().Value()) == 30);
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Bottom().Value()) == 30);
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Left().Value()) == 30);
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Right().Value()) == 30);
 }
 
 /**

@@ -270,8 +270,12 @@ void DOMList::ResetInitializedStyle()
     RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
     if (listTheme) {
         listComponent_->InitStyle(listTheme);
-        if (hasBackGroundColor_) {
-            listComponent_->SetBackgroundColor(backgroundColor_);
+        if (declaration_) {
+            auto& backgroundStyle =
+                static_cast<CommonBackgroundStyle&>(declaration_->GetStyle(StyleTag::COMMON_BACKGROUND_STYLE));
+            if (declaration_->HasBackGroundColor() && backgroundStyle.IsValid()) {
+                listComponent_->SetBackgroundColor(backgroundStyle.backgroundColor);
+            }
         }
         scrollDistance_ = listTheme->GetScrollDistance();
     }
@@ -361,8 +365,15 @@ void DOMList::CreateOrUpdateList()
     if (!listComponent_->GetPositionController()) {
         listComponent_->SetPositionController(AceType::MakeRefPtr<ScrollPositionController>());
     }
+    if (declaration_) {
+        declaration_->SetPositionController(listComponent_->GetPositionController());
+    }
     listComponent_->GetPositionController()->SetInitialIndex(initialIndex_);
     listComponent_->GetPositionController()->SetInitialOffset(initialOffset_);
+
+    if (declaration_ && !GetRotateId().IsEmpty()) {
+        listComponent_->SetOnRotateId(GetRotateId());
+    }
 
     SetScrollBar();
     ResetInitializedStyle();
@@ -399,9 +410,7 @@ void DOMList::SetScrollBar()
         } else {
             scrollBar_ = AceType::MakeRefPtr<ScrollBar>(displayMode_, ShapeMode::DEFAULT);
         }
-        if (IsRightToLeft()) {
-            scrollBar_->SetPositionMode(PositionMode::LEFT);
-        }
+        scrollBar_->SetPositionMode(IsRightToLeft() ? PositionMode::LEFT : PositionMode::RIGHT);
     } else {
         scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF, ShapeMode::DEFAULT);
     }
@@ -422,6 +431,9 @@ void DOMList::InitScrollBarWithSpecializedStyle()
         scrollBar_->SetNormalWidth(scrollbarWidth_.second);
         scrollBar_->SetActiveWidth(scrollbarWidth_.second);
         scrollBar_->SetTouchWidth(scrollbarWidth_.second);
+    }
+    if (scrollbarPosition_.first) {
+        scrollBar_->SetPosition(scrollbarPosition_.second);
     }
 }
 
@@ -521,11 +533,25 @@ bool DOMList::SetSpecializedStyle(const std::pair<std::string, std::string>& sty
                 list.scrollbarColor_.second = list.ParseColor(val);
                 return true;
             } },
+        { DOM_SCROLL_SCROLLBAR_OFFSET,
+            [](const std::string& val, DOMList& list) {
+                list.scrollbarPosition_.first = true;
+                auto position = list.ParseDimension(val);
+                list.scrollbarPosition_.second = position.IsValid() ? position : Dimension();
+                return true;
+            } },
         { DOM_SCROLL_SCROLLBAR_WIDTH,
             [](const std::string& val, DOMList& list) {
                 list.scrollbarWidth_.first = true;
                 auto width = list.ParseDimension(val);
                 list.scrollbarWidth_.second = width.IsValid() ? width : Dimension();
+                return true;
+            } },
+        { DOM_SCROLL_SCROLLBAR_POSITION,
+            [](const std::string& val, DOMList& list) {
+                list.scrollbarPosition_.first = true;
+                auto position = list.ParseDimension(val);
+                list.scrollbarPosition_.second = position.IsValid() ? position : Dimension();
                 return true;
             } },
     };

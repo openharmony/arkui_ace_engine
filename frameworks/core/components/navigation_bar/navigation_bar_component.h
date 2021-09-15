@@ -87,6 +87,7 @@ public:
     EventMarker endClickMarker;
     Color titleColor;
     Color subTitleColor;
+    std::optional<Color> imageFill = std::nullopt;
     NavigationBarType type = NavigationBarType::NORMAL;
 
 #ifndef WEARABLE_PRODUCT
@@ -250,7 +251,8 @@ class TitleBarMenuBuilder : public virtual AceType, public virtual CommonBuilder
 
 public:
     explicit TitleBarMenuBuilder(const RefPtr<NavigationBarData>& data)
-        : CommonBuilder(data->theme), menu_(data->menu), allMenuItems_(data->allMenuItems) {};
+        : CommonBuilder(data->theme), menu_(data->menu), imageFill_(data->imageFill),
+        allMenuItems_(data->allMenuItems) {};
     ~TitleBarMenuBuilder() = default;
 
     const std::map<std::string, NavigationBarComponent::MenuItemInBar>& GetMenuItemsInBar() const
@@ -270,6 +272,7 @@ protected:
     bool AddMenu(const RefPtr<ComponentGroup>& container, bool canCollapse = true);
 
     RefPtr<MenuComponent> menu_;
+    std::optional<Color> imageFill_;
 
 private:
     void MoveMenuItemsToBar(const RefPtr<ComponentGroup>& container);
@@ -354,11 +357,13 @@ public:
     explicit NormalTitleBarBuilder(const RefPtr<NavigationBarData>& data)
         : CommonBuilder(data->theme), PhoneTitleBarBuilder(data), backEnabled_(data->backEnabled),
           backClickMarker_(data->backClickMarker), logoSrc_(data->logo), startIconSrc_(data->startIcon),
-          startClickMarker_(data->startClickMarker), endIconSrc_(data->endIcon), endClickMarker_(data->endClickMarker)
+          startClickMarker_(data->startClickMarker), endIconSrc_(data->endIcon), endClickMarker_(data->endClickMarker),
+          imageFill_(data->imageFill)
     {}
     ~NormalTitleBarBuilder() = default;
 
     RefPtr<Component> Build() override;
+    void BindDefaultBackEvent(const WeakPtr<PipelineContext>& context);
 
 private:
     void BuildStartZone(const RefPtr<RowComponent>& parent);
@@ -372,6 +377,7 @@ private:
     EventMarker startClickMarker_;
     std::string endIconSrc_;
     EventMarker endClickMarker_;
+    std::optional<Color> imageFill_;
 };
 
 class CollapsingNavigationBarComponent : public ComponentGroup {

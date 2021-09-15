@@ -16,28 +16,23 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_TWEEN_OPTION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_TWEEN_OPTION_H
 
+#include <list>
 #include <map>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/dimension_offset.h"
+#include "base/geometry/transform_util.h"
 #include "core/animation/animation.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/curve.h"
 #include "core/animation/curves.h"
 #include "core/animation/property_animatable.h"
+#include "core/animation/property_animation.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/motion_path_option.h"
 
 namespace OHOS::Ace {
-
-enum class TweenOperation {
-    NONE,
-    PLAY,
-    FINISH,
-    PAUSE,
-    CANCEL,
-    REVERSE,
-};
 
 class TweenOption final {
 public:
@@ -85,6 +80,19 @@ public:
         return fillMode_;
     }
 
+    void SetTempo(float tempo)
+    {
+        if (tempo < 0.0f) {
+            return;
+        }
+        tempo_ = tempo;
+    }
+
+    float GetTempo() const
+    {
+        return tempo_;
+    }
+
     void SetDuration(int32_t duration)
     {
         duration_ = duration;
@@ -105,6 +113,16 @@ public:
     AnimationDirection GetAnimationDirection() const
     {
         return direction_;
+    }
+
+    void SetAnimatables(const PropAnimationMap& animatables)
+    {
+        propAnimations_ = animatables;
+    }
+
+    const PropAnimationMap& GetAnimatables() const
+    {
+        return propAnimations_;
     }
 
     void SetTransformOrigin(const Dimension& originX, const Dimension& originY)
@@ -132,6 +150,16 @@ public:
     bool GetIsBackground() const
     {
         return isBackground_;
+    }
+
+    const MotionPathOption& GetMotionPathOption() const
+    {
+        return motionPathOption_;
+    }
+
+    void SetMotioPathOption(const MotionPathOption& option)
+    {
+        motionPathOption_ = option;
     }
 
     void SetTranslateAnimations(AnimationType type, const RefPtr<Animation<DimensionOffset>>& transformOffsetAnimation)
@@ -200,15 +228,6 @@ public:
         return colorAnimation_;
     }
 
-    void SetBackgroundPositionAnimation(const RefPtr<Animation<BackgroundImagePosition>>& backgroundPositionAnimation)
-    {
-        if (!backgroundPositionAnimation) {
-            LOGE("input backgroundPositionAnimation is null.");
-            return;
-        }
-        backgroundPositionAnimation_ = backgroundPositionAnimation;
-    }
-
     void SetPropertyAnimationFloat(PropertyAnimatableType property, const RefPtr<Animation<float>>& animation)
     {
         if (!animation) {
@@ -219,14 +238,21 @@ public:
         floatAnimationMap_[property] = animation;
     }
 
+    void AddTransformAnimation(const RefPtr<Animation<TransformOperation>>& transformAnimation)
+    {
+        if (transformAnimation) {
+            transformAnimations_.push_back(transformAnimation);
+        }
+    }
+
+    std::list<RefPtr<Animation<TransformOperation>>>& GetTransformAnimations()
+    {
+        return transformAnimations_;
+    }
+
     PropertyAnimationFloatMap& GetFloatPropertyAnimation()
     {
         return floatAnimationMap_;
-    }
-
-    RefPtr<Animation<BackgroundImagePosition>>& GetBackgroundPositionAnimation()
-    {
-        return backgroundPositionAnimation_;
     }
 
     void SetTransformOriginChanged(bool change)
@@ -249,6 +275,11 @@ public:
         return !transformFloatAnimations_.empty();
     }
 
+    bool HasTransformChanged() const
+    {
+        return !transformAnimations_.empty();
+    }
+
     bool HasDurationChanged() const
     {
         return changeDuration_;
@@ -256,39 +287,9 @@ public:
 
     bool IsValid() const
     {
-        return (opacityAnimation_ || colorAnimation_ || backgroundPositionAnimation_ || !floatAnimationMap_.empty() ||
-                !transformFloatAnimations_.empty() || !transformOffsetAnimations_.empty());
-    }
-
-    void SkipAllPendingAnimation()
-    {
-        if (opacityAnimation_) {
-            opacityAnimation_->SetSkipAnimation(true);
-        }
-
-        if (colorAnimation_) {
-            colorAnimation_->SetSkipAnimation(true);
-        }
-
-        if (backgroundPositionAnimation_) {
-            backgroundPositionAnimation_->SetSkipAnimation(true);
-        }
-
-        for (auto&& [type, animation] : floatAnimationMap_) {
-            if (animation) {
-                animation->SetSkipAnimation(true);
-            }
-        }
-        for (auto&& [type, animation] : transformOffsetAnimations_) {
-            if (animation) {
-                animation->SetSkipAnimation(true);
-            }
-        }
-        for (auto&& [type, animation] : transformFloatAnimations_) {
-            if (animation) {
-                animation->SetSkipAnimation(true);
-            }
-        }
+        return (opacityAnimation_ || colorAnimation_ || !floatAnimationMap_.empty() ||
+                !transformFloatAnimations_.empty() || !transformOffsetAnimations_.empty() ||
+                !transformAnimations_.empty() || !propAnimations_.empty());
     }
 
     void ClearListeners()
@@ -299,18 +300,19 @@ public:
         if (colorAnimation_) {
             colorAnimation_->ClearListeners();
         }
-        if (backgroundPositionAnimation_) {
-            backgroundPositionAnimation_->ClearListeners();
-        }
-
         ClearListeners(floatAnimationMap_);
-
         for (auto&& [type, animation] : transformOffsetAnimations_) {
             if (animation) {
                 animation->ClearListeners();
             }
         }
         for (auto&& [type, animation] : transformFloatAnimations_) {
+            if (animation) {
+                animation->ClearListeners();
+            }
+        }
+
+        for (auto&& animation : transformAnimations_) {
             if (animation) {
                 animation->ClearListeners();
             }
@@ -334,11 +336,11 @@ private:
     RefPtr<Curve> curve_; // use animation's curve as default.
     RefPtr<Animation<float>> opacityAnimation_;
     RefPtr<Animation<Color>> colorAnimation_;
-    RefPtr<Animation<BackgroundImagePosition>> backgroundPositionAnimation_;
+    PropAnimationMap propAnimations_;
     PropertyAnimationFloatMap floatAnimationMap_;
     std::unordered_map<AnimationType, RefPtr<Animation<DimensionOffset>>> transformOffsetAnimations_;
     std::unordered_map<AnimationType, RefPtr<Animation<float>>> transformFloatAnimations_;
-
+    std::list<RefPtr<Animation<TransformOperation>>> transformAnimations_;
     int32_t duration_ = 0;
     int32_t delay_ = 0;
     int32_t iteration_ = 1;
@@ -346,8 +348,10 @@ private:
     bool changeTransformOrigin_ = false;
     bool changeDuration_ = false;
     double maxScaleXY_ = -1.0;
+    float tempo_ = 1.0f;
     Dimension originX_;
     Dimension originY_;
+    MotionPathOption motionPathOption_;
 };
 
 } // namespace OHOS::Ace

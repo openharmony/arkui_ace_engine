@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_BORDER_EDGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_BORDER_EDGE_H
 
+#include "base/geometry/animatable_dimension.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/animatable_color.h"
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
@@ -32,7 +34,7 @@ public:
 
     bool HasValue() const;
 
-    const Color& GetColor() const
+    const AnimatableColor& GetColor() const
     {
         return color_;
     }
@@ -42,7 +44,7 @@ public:
         return style_;
     }
 
-    const Dimension& GetWidth() const
+    const AnimatableDimension& GetWidth() const
     {
         return width_;
     }
@@ -58,12 +60,30 @@ public:
                (borderEdge.GetWidth().Unit() == width_.Unit()) && (borderEdge.GetBorderStyle() == style_);
     }
 
-    void SetWidth(const Dimension& width)
+    void SetWidth(const Dimension& width, const AnimationOption& option = AnimationOption())
     {
+        if (width.Value() < 0.0) {
+            width_.SetValue(0.0);
+            return;
+        }
+        width_ = AnimatableDimension(width, option);
+    }
+
+    void SetWidth(const AnimatableDimension& width)
+    {
+        if (width.Value() < 0.0) {
+            width_.SetValue(0.0);
+            return;
+        }
         width_ = width;
     }
 
-    void SetColor(const Color& color)
+    void SetColor(const Color& color, const AnimationOption& option = AnimationOption())
+    {
+        color_ = AnimatableColor(color, option);
+    }
+
+    void SetColor(const AnimatableColor& color)
     {
         color_ = color;
     }
@@ -73,9 +93,32 @@ public:
         style_ = style;
     }
 
+    bool IsValid() const
+    {
+        return width_.IsValid();
+    }
+
+    std::string ToString() const
+    {
+        return std::string("BorderEdge(")
+            .append("width:")
+            .append(std::to_string(width_.Value()))
+            .append(" color:")
+            .append(std::to_string(color_.GetValue()))
+            .append(" style:")
+            .append(std::to_string((int)style_))
+            .append(")");
+    }
+
+    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+    {
+        width_.SetContextAndCallback(context, callback);
+        color_.SetContextAndCallback(context, callback);
+    }
+
 private:
-    Color color_;
-    Dimension width_;
+    AnimatableColor color_;
+    AnimatableDimension width_;
     BorderStyle style_ { BorderStyle::NONE };
 };
 

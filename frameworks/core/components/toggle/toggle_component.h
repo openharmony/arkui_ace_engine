@@ -18,6 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/pipeline/base/sole_child_component.h"
+#include "core/components_v2/common/common_def.h"
 
 namespace OHOS::Ace {
 
@@ -35,6 +36,8 @@ public:
     {
         return isChecked_;
     }
+
+    ACE_DEFINE_COMPONENT_EVENT(OnChange, void(bool));
 
     const Dimension& GetWidth() const
     {

@@ -15,4 +15,6 @@
 
 #include "bindings_implementation.h"
 
-namespace OHOS::Ace::Framework {}; // namespace OHOS::Ace::Framework
+namespace OHOS::Ace::Framework {
+
+}; // namespace OHOS::Ace::Framework

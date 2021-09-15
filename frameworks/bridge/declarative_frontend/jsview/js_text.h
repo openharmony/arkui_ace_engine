@@ -16,62 +16,39 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXT_H
 
-#include "core/components/text/text_component.h"
-#include "core/components/text/text_theme.h"
-#include "core/event/ace_event_handler.h"
-#include "frameworks/bridge/common/utils/utils.h"
+#include "core/components/text/text_component_v2.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 
-class JSText : public JSViewAbstract, public JSInteractableView {
-    DECLARE_ACE_TYPE(JSText, JSViewAbstract);
-
+class JSText : public JSContainerBase {
 public:
-    JSText() = delete;
-    JSText(const std::string& text);
-
-    ~JSText()
-    {
-        LOGD("Destroy: JSText");
-    };
-
-    virtual RefPtr<OHOS::Ace::Component> CreateSpecializedComponent() override;
-    virtual std::vector<RefPtr<OHOS::Ace::SingleChild>> CreateInteractableComponents() override;
-
-#ifdef USE_QUICKJS_ENGINE
-    virtual void MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc) override;
-    virtual void ReleaseRT(JSRuntime* rt) override;
-
-    static void QjsDestructor(JSRuntime* rt, JSText* ptr);
-    static void QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc);
-#endif
-
     static void JSBind(BindingTarget globalObj);
-
-protected:
-    void SetFontSize(const std::string& value);
-    void SetFontWeight(const std::string& value);
-    void SetTextColor(const std::string& value);
-    void SetTextOverflow(int value);
-    void SetMaxLines(int value);
-    void SetFontStyle(int value);
-    void SetTextAlign(int value);
-    void SetLineHeight(const std::string& value);
-    void SetFontFamily(const std::string& fontFamiliy);
-    void SetMinFontSize(const std::string& value);
-    void SetMaxFontSize(const std::string& value);
-    std::vector<std::string> ParseFontFamilies(const std::string& value) const;
-    Dimension TextAttr2Dimension(const std::string& value, bool usefp);
-
-    TextStyle GetTextStyle() const;
-    void SetTextStyle(TextStyle);
+    static void Create(const JSCallbackInfo& info);
+    static void SetWidth(const JSCallbackInfo& info);
+    static void SetHeight(const JSCallbackInfo& info);
+    static void SetFontSize(const JSCallbackInfo& info);
+    static void SetFontWeight(const std::string& value);
+    static void SetTextColor(const JSCallbackInfo& info);
+    static void SetTextOverflow(const JSCallbackInfo& info);
+    static void SetMaxLines(int32_t value);
+    static void SetFontStyle(int32_t value);
+    static void SetTextAlign(int32_t value);
+    static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetFontFamily(const JSCallbackInfo& info);
+    static void SetMinFontSize(const JSCallbackInfo& info);
+    static void SetMaxFontSize(const JSCallbackInfo& info);
+    static void SetLetterSpacing(const JSCallbackInfo& info);
+    static void SetTextCase(int32_t value);
+    static void SetBaselineOffset(const JSCallbackInfo& info);
+    static void SetDecoration(const JSCallbackInfo& info);
+    static void JsOnClick(const JSCallbackInfo& info);
 
 private:
-    RefPtr<TextComponent> textComponent_;
+    static RefPtr<TextComponentV2> GetComponent();
 };
 
 } // namespace OHOS::Ace::Framework
-
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXT_H

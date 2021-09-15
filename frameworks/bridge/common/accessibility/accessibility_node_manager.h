@@ -21,15 +21,25 @@
 #include <vector>
 
 #include "base/memory/ace_type.h"
+#include "base/utils/macros.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
+#include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace::Framework {
 
-class AccessibilityNodeManager : public AccessibilityManager {
+struct VisibleCallbackInfo {
+    VisibleRatioCallback callback;
+    double visibleRatio = 1.0;
+    bool currentVisibleType = false;
+};
+
+class ACE_EXPORT AccessibilityNodeManager : public AccessibilityManager {
     DECLARE_ACE_TYPE(AccessibilityNodeManager, AccessibilityManager);
 
 public:
+    static RefPtr<AccessibilityNodeManager> Create();
+
     AccessibilityNodeManager() = default;
     ~AccessibilityNodeManager() override;
 
@@ -42,8 +52,20 @@ public:
     void AddNodeWithTarget(const std::string& key, const RefPtr<AccessibilityNode>& node);
     RefPtr<AccessibilityNode> GetAccessibilityNodeFromPage(NodeId nodeId) const;
     void ClearNodeRectInfo(RefPtr<AccessibilityNode>& node, bool isPopDialog) override;
+    void AddComposedElement(const std::string& key, const RefPtr<ComposedElement>& node) override;
+    WeakPtr<ComposedElement> GetComposedElementFromPage(NodeId nodeId) override;
+    void TriggerVisibleChangeEvent() override;
+    void AddVisibleChangeNode(NodeId nodeId, double ratio, VisibleRatioCallback callback) override;
+    void RemoveVisibleChangeNode(NodeId nodeId) override;
+    bool IsVisibleChangeNodeExists(NodeId index) override
+    {
+        if (index == -1) {
+            return !visibleChangeNodes_.empty();
+        }
+        return visibleChangeNodes_.find(index) != visibleChangeNodes_.end();
+    }
 
-    int32_t GetRootNodeId()
+    int32_t GetRootNodeId() const
     {
         return rootNodeId_;
     }
@@ -53,23 +75,23 @@ public:
         return cardOffset_;
     }
 
-    int32_t GetCardId()
+    int32_t GetCardId() const
     {
         return cardId_;
     }
 
-    bool isOhosHostCard()
+    bool isOhosHostCard() const
     {
         return isOhosHostCard_;
     }
 
-    const WeakPtr<PipelineContext> GetPipelineContext()
+    WeakPtr<PipelineContext> GetPipelineContext()
     {
         return context_;
     }
 
     // AccessibilityNodeManager overrides functions.
-    virtual void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) override;
+    void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) override;
     int32_t GenerateNextAccessibilityId() override;
     RefPtr<AccessibilityNode> CreateSpecializedNode(
         const std::string& tag, int32_t nodeId, int32_t parentNodeId) override;
@@ -87,23 +109,36 @@ public:
 
     void TrySaveTargetAndIdNode(
         const std::string& id, const std::string& target, const RefPtr<AccessibilityNode>& node) override;
-    void HandleComponentPostBinding() override;
-    virtual void DumpHandleEvent(const std::vector<std::string>& params) override;
-    virtual void DumpProperty(const std::vector<std::string>& params) override;
-    virtual void DumpTree(int32_t depth, NodeId nodeID) override;
-    virtual void SetCardViewParams(const std::string& key, bool focus) override;
+    void HandleComponentPostBinding() override {}
+    void DumpHandleEvent(const std::vector<std::string>& params) override;
+    void DumpProperty(const std::vector<std::string>& params) override;
+    void DumpTree(int32_t depth, NodeId nodeID) override;
+    std::unique_ptr<JsonValue> DumpComposedElementsToJson() const;
+    std::unique_ptr<JsonValue> DumpComposedElementToJson(NodeId nodeId);
+    void SetCardViewParams(const std::string& key, bool focus) override;
     void SetCardViewPosition(int id, float offsetX, float offsetY) override;
 
-private:
+    bool IsDeclarative();
+
+protected:
+    mutable std::mutex mutex_;
     std::unordered_map<NodeId, RefPtr<AccessibilityNode>> accessibilityNodes_;
     std::unordered_map<std::string, WeakPtr<AccessibilityNode>> nodeWithIdMap_;
     std::unordered_map<std::string, WeakPtr<AccessibilityNode>> nodeWithTargetMap_;
+    std::unordered_map<std::string, WeakPtr<ComposedElement>> composedElementIdMap_;
+    std::unordered_map<NodeId, std::list<VisibleCallbackInfo>> visibleChangeNodes_;
     WeakPtr<PipelineContext> context_;
     WeakPtr<JsAcePage> indexPage_;
     int32_t rootNodeId_ = -1;
     Offset cardOffset_;
     int32_t cardId_ = 0;
     bool isOhosHostCard_ = false;
+
+private:
+    RefPtr<AccessibilityNode> CreateCommonAccessibilityNode(
+        const std::string& tag, int32_t nodeId, int32_t parentNodeId, int32_t itemIndex);
+    RefPtr<AccessibilityNode> CreateDeclarativeAccessibilityNode(
+        const std::string& tag, int32_t nodeId, int32_t parentNodeId, int32_t itemIndex);
 };
 
 } // namespace OHOS::Ace::Framework

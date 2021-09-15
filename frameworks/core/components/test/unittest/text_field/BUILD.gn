@@ -102,7 +102,7 @@ group("unittest") {
   deps = []
 
   deps += [
-    ":RenderTextFieldTest",
-    ":TextFieldCreatorTest",
+    #":RenderTextFieldTest",
+    #":TextFieldCreatorTest",
   ]
 }

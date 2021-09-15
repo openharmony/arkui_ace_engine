@@ -771,19 +771,19 @@ HWTEST_F(CardFrontendTest, CardFrontendTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: CardFrontendTest015
- * @tc.desc: Test data binding for {{key1}}.{{key2}.
+ * @tc.name: CardFrontendDataBindingTest001
+ * @tc.desc: Test data binding for {{key1}}.{{key2}
  * @tc.type: FUNC
  * @tc.require: AR000FLCJU
  * @tc.author: jiangdayuan
  */
-HWTEST_F(CardFrontendTest, CardFrontendTest015, TestSize.Level1)
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest001, TestSize.Level1)
 {
     const std::string rootJson = "{\n"
                                  "\t\"template\": {\n"
                                  "\t\t\"attr\": {\n"
                                  "\t\t\t\"value\": \"$f({{aaa}}.{{ddd}})\",\n"
-                                 "\t\t\t\"index\": \"$f({{aaa}}.{{bbb}}.{{ccc}})\"\n"
+                                 "\t\t\t\"index\": \"$f({{bbb}}.{{ccc}})\"\n"
                                  "\t\t},\n"
                                  "\t\t\"type\": \"text\"\n"
                                  "\t},\n"
@@ -808,26 +808,70 @@ HWTEST_F(CardFrontendTest, CardFrontendTest015, TestSize.Level1)
     jsCardParser->ParseMultiVariable(value);
     ASSERT_EQ(value, "abc.123");
 
-    // {{aaa}}.{{bbb}}.{{ccc}} = abc.true.false
+    // {{bbb}}.{{ccc}} = true.false
     value = attrValue->GetValue("index")->GetString();
     jsCardParser->ParseMultiVariable(value);
-    ASSERT_EQ(value, "abc.true.false");
+    ASSERT_EQ(value, "true.false");
 }
 
 /**
- * @tc.name: CardFrontendTest016
+ * @tc.name: CardFrontendDataBindingTest002
+ * @tc.desc: Test data binding for {{key1}}.{{key2}.{{key3}}
+ * @tc.type: FUNC
+ * @tc.require: AR000FLCJU
+ * @tc.author: jiangdayuan
+ */
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest002, TestSize.Level1)
+{
+    const std::string rootJson = "{\n"
+                                 "\t\"template\": {\n"
+                                 "\t\t\"attr\": {\n"
+                                 "\t\t\t\"value\": \"$f({{aaa}}.{{bbb}}.{{ccc}})\",\n"
+                                 "\t\t\t\"index\": \"$f({{aaa}}.{{bbb}}.{{ccc}}.{{ddd}})\"\n"
+                                 "\t\t},\n"
+                                 "\t\t\"type\": \"text\"\n"
+                                 "\t},\n"
+                                 "\t\"styles\": {},\n"
+                                 "\t\"actions\": {},\n"
+                                 "\t\"data\": {\n"
+                                 "\t\t\"aaa\": \"abc\",\n"
+                                 "\t\t\"bbb\": \"true\",\n"
+                                 "\t\t\"ccc\": \"false\",\n"
+                                 "\t\t\"ddd\": \"123\"\n"
+                                 "\t}\n"
+                                 "}";
+    auto rootBody = JsonUtil::ParseJsonString(rootJson);
+    auto rootTemplate = rootBody->GetValue("template");
+    auto jsCardParser = AceType::MakeRefPtr<JsCardParser>(nullptr, nullptr, std::move(rootBody));
+    jsCardParser->Initialize();
+
+    auto attrValue = rootTemplate->GetValue("attr");
+    auto value = attrValue->GetValue("value")->GetString();
+
+    // {{aaa}}.{{bbb}}.{{ccc}} == abc.true.false
+    jsCardParser->ParseMultiVariable(value);
+    ASSERT_EQ(value, "abc.true.false");
+
+    // {{aaa}}.{{bbb}}.{{ccc}}.{{ddd}} = abc.true.false.123
+    value = attrValue->GetValue("index")->GetString();
+    jsCardParser->ParseMultiVariable(value);
+    ASSERT_EQ(value, "abc.true.false.123");
+}
+
+/**
+ * @tc.name: CardFrontendDataBindingTest003
  * @tc.desc: Test data binding for {{flag1 ? key1 : key2}}.
  * @tc.type: FUNC
  * @tc.require: AR000FLCKP
  * @tc.author: jiangdayuan
  */
-HWTEST_F(CardFrontendTest, CardFrontendTest016, TestSize.Level1)
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest003, TestSize.Level1)
 {
     const std::string rootJson = "{\n"
                                  "\t\"template\": {\n"
                                  "\t\t\"attr\": {\n"
                                  "\t\t\t\"value\": \"{{bbb ? aaa : bbb}}\",\n"
-                                 "\t\t\t\"index\": \"{{ccc ? ddd : eee}}\"\n"
+                                 "\t\t\t\"index\": \"{{ccc ? aaa : ddd}}\"\n"
                                  "\t\t},\n"
                                  "\t\t\"type\": \"text\"\n"
                                  "\t},\n"
@@ -852,20 +896,64 @@ HWTEST_F(CardFrontendTest, CardFrontendTest016, TestSize.Level1)
     jsCardParser->ParseVariable(value);
     ASSERT_EQ(value, "abc");
 
-    // ccc = false, value = {{eee}}, eee dose not belong to the data field.
+    // ccc = false, value = {{ddd}}
+    value = attrValue->GetValue("index")->GetString();
+    jsCardParser->ParseVariable(value);
+    ASSERT_EQ(value, "123");
+}
+
+/**
+ * @tc.name: CardFrontendDataBindingTest004
+ * @tc.desc: Test data binding for illegal {{flag1 ? key1 : key2}}.
+ * @tc.type: FUNC
+ * @tc.require: AR000FLCKP
+ * @tc.author: jiangdayuan
+ */
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest004, TestSize.Level1)
+{
+    const std::string rootJson = "{\n"
+                                 "\t\"template\": {\n"
+                                 "\t\t\"attr\": {\n"
+                                 "\t\t\t\"value\": \"{{aaa ? bbb : ccc}}\",\n"
+                                 "\t\t\t\"index\": \"{{ccc ? aaa : eee}}\"\n"
+                                 "\t\t},\n"
+                                 "\t\t\"type\": \"text\"\n"
+                                 "\t},\n"
+                                 "\t\"styles\": {},\n"
+                                 "\t\"actions\": {},\n"
+                                 "\t\"data\": {\n"
+                                 "\t\t\"aaa\": \"abc\",\n"
+                                 "\t\t\"bbb\": \"true\",\n"
+                                 "\t\t\"ccc\": \"false\",\n"
+                                 "\t\t\"ddd\": \"123\"\n"
+                                 "\t}\n"
+                                 "}";
+    auto rootBody = JsonUtil::ParseJsonString(rootJson);
+    auto rootTemplate = rootBody->GetValue("template");
+    auto jsCardParser = AceType::MakeRefPtr<JsCardParser>(nullptr, nullptr, std::move(rootBody));
+    jsCardParser->Initialize();
+
+    auto attrValue = rootTemplate->GetValue("attr");
+    auto value = attrValue->GetValue("value")->GetString();
+
+    // aaa if not a bool value, set aaa = false, and value = {{ccc}}
+    jsCardParser->ParseVariable(value);
+    ASSERT_EQ(value, "false");
+
+    // ccc = false, value = {{eee}}, eee does not belong to the data domain.
     value = attrValue->GetValue("index")->GetString();
     jsCardParser->ParseVariable(value);
     ASSERT_EQ(value, "eee");
 }
 
 /**
- * @tc.name: CardFrontendTest017
+ * @tc.name: CardFrontendDataBindingTest005
  * @tc.desc: Test data binding for {{flag1 && flag2}}.
  * @tc.type: FUNC
  * @tc.require: AR000FLCK0
  * @tc.author: jiangdayuan
  */
-HWTEST_F(CardFrontendTest, CardFrontendTest017, TestSize.Level1)
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest005, TestSize.Level1)
 {
     const std::string rootJson = "{\n"
                                  "\t\"template\": {\n"
@@ -903,13 +991,13 @@ HWTEST_F(CardFrontendTest, CardFrontendTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: CardFrontendTest018
+ * @tc.name: CardFrontendDataBindingTest006
  * @tc.desc: Test data binding for {{flag1 || flag2}}.
  * @tc.type: FUNC
  * @tc.require: AR000FLCK0
  * @tc.author: jiangdayuan
  */
-HWTEST_F(CardFrontendTest, CardFrontendTest018, TestSize.Level1)
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest006, TestSize.Level1)
 {
     const std::string rootJson = "{\n"
                                  "\t\"template\": {\n"
@@ -947,13 +1035,13 @@ HWTEST_F(CardFrontendTest, CardFrontendTest018, TestSize.Level1)
 }
 
 /**
- * @tc.name: CardFrontendTest019
+ * @tc.name: CardFrontendDataBindingTest007
  * @tc.desc: Test data binding for {{!flag1}}.
  * @tc.type: FUNC
  * @tc.require: AR000FLCK0
  * @tc.author: jiangdayuan
  */
-HWTEST_F(CardFrontendTest, CardFrontendTest019, TestSize.Level1)
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest007, TestSize.Level1)
 {
     const std::string rootJson = "{\n"
                                  "\t\"template\": {\n"
@@ -991,13 +1079,354 @@ HWTEST_F(CardFrontendTest, CardFrontendTest019, TestSize.Level1)
 }
 
 /**
- * @tc.name: CardFrontendTest020
+ * @tc.name: CardFrontendDataBindingTest008
+ * @tc.desc: Test data binding for {{flag1 && flag2 && flag3}} (not support now).
+ * @tc.type: FUNC
+ * @tc.require: AR000FLCK0
+ * @tc.author: jiangdayuan
+ */
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest008, TestSize.Level1)
+{
+    const std::string rootJson = "{\n"
+                                 "\t\"template\": {\n"
+                                 "\t\t\"attr\": {\n"
+                                 "\t\t\t\"value\": \"{{bbb && ccc && aaa}}\",\n"
+                                 "\t\t\t\"index\": \"{{bbb && bbb && ccc}}\"\n"
+                                 "\t\t},\n"
+                                 "\t\t\"type\": \"text\"\n"
+                                 "\t},\n"
+                                 "\t\"styles\": {},\n"
+                                 "\t\"actions\": {},\n"
+                                 "\t\"data\": {\n"
+                                 "\t\t\"aaa\": \"abc\",\n"
+                                 "\t\t\"bbb\": \"true\",\n"
+                                 "\t\t\"ccc\": \"false\",\n"
+                                 "\t\t\"ddd\": \"123\"\n"
+                                 "\t}\n"
+                                 "}";
+    auto rootBody = JsonUtil::ParseJsonString(rootJson);
+    auto rootTemplate = rootBody->GetValue("template");
+    auto jsCardParser = AceType::MakeRefPtr<JsCardParser>(nullptr, nullptr, std::move(rootBody));
+    jsCardParser->Initialize();
+
+    auto attrValue = rootTemplate->GetValue("attr");
+    auto value = attrValue->GetValue("value")->GetString();
+
+    // When more than two variables want to &&, return itself.
+    jsCardParser->ParseVariable(value);
+    ASSERT_EQ(value, "{{bbb && ccc && aaa}}");
+
+    value = attrValue->GetValue("index")->GetString();
+    jsCardParser->ParseVariable(value);
+    ASSERT_EQ(value, "{{bbb && bbb && ccc}}");
+}
+
+/**
+ * @tc.name: CardFrontendDataBindingTest009
+ * @tc.desc: Test data binding for {{flag1 || flag2 || flag3}} (not support now).
+ * @tc.type: FUNC
+ * @tc.require: AR000FLCK0
+ * @tc.author: jiangdayuan
+ */
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest009, TestSize.Level1)
+{
+    const std::string rootJson = "{\n"
+                                 "\t\"template\": {\n"
+                                 "\t\t\"attr\": {\n"
+                                 "\t\t\t\"value\": \"{{bbb || ccc || aaa}}\",\n"
+                                 "\t\t\t\"index\": \"{{bbb || bbb || ccc}}\"\n"
+                                 "\t\t},\n"
+                                 "\t\t\"type\": \"text\"\n"
+                                 "\t},\n"
+                                 "\t\"styles\": {},\n"
+                                 "\t\"actions\": {},\n"
+                                 "\t\"data\": {\n"
+                                 "\t\t\"aaa\": \"abc\",\n"
+                                 "\t\t\"bbb\": \"true\",\n"
+                                 "\t\t\"ccc\": \"false\",\n"
+                                 "\t\t\"ddd\": \"123\"\n"
+                                 "\t}\n"
+                                 "}";
+    auto rootBody = JsonUtil::ParseJsonString(rootJson);
+    auto rootTemplate = rootBody->GetValue("template");
+    auto jsCardParser = AceType::MakeRefPtr<JsCardParser>(nullptr, nullptr, std::move(rootBody));
+    jsCardParser->Initialize();
+
+    auto attrValue = rootTemplate->GetValue("attr");
+    auto value = attrValue->GetValue("value")->GetString();
+
+    // When more than two variables want to ||, return itself.
+    jsCardParser->ParseVariable(value);
+    ASSERT_EQ(value, "{{bbb || ccc || aaa}}");
+
+    value = attrValue->GetValue("index")->GetString();
+    jsCardParser->ParseVariable(value);
+    ASSERT_EQ(value, "{{bbb || bbb || ccc}}");
+}
+
+/**
+ * @tc.name: CardFrontendDataBindingTest010
+ * @tc.desc: Test data binding for {{flag1 && flag2 || flag3}} (not support now).
+ * @tc.type: FUNC
+ * @tc.require: AR000FLCK0
+ * @tc.author: jiangdayuan
+ */
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest010, TestSize.Level1)
+{
+    const std::string rootJson = "{\n"
+                                 "\t\"template\": {\n"
+                                 "\t\t\"attr\": {\n"
+                                 "\t\t\t\"value\": \"{{bbb && ccc || aaa}}\",\n"
+                                 "\t\t\t\"index\": \"{{bbb || bbb && ccc}}\"\n"
+                                 "\t\t},\n"
+                                 "\t\t\"type\": \"text\"\n"
+                                 "\t},\n"
+                                 "\t\"styles\": {},\n"
+                                 "\t\"actions\": {},\n"
+                                 "\t\"data\": {\n"
+                                 "\t\t\"aaa\": \"abc\",\n"
+                                 "\t\t\"bbb\": \"true\",\n"
+                                 "\t\t\"ccc\": \"false\",\n"
+                                 "\t\t\"ddd\": \"123\"\n"
+                                 "\t}\n"
+                                 "}";
+    auto rootBody = JsonUtil::ParseJsonString(rootJson);
+    auto rootTemplate = rootBody->GetValue("template");
+    auto jsCardParser = AceType::MakeRefPtr<JsCardParser>(nullptr, nullptr, std::move(rootBody));
+    jsCardParser->Initialize();
+
+    auto attrValue = rootTemplate->GetValue("attr");
+    auto value = attrValue->GetValue("value")->GetString();
+
+    // When more than two variables want to || or &&, return itself.
+    jsCardParser->ParseVariable(value);
+    ASSERT_EQ(value, "{{bbb && ccc || aaa}}");
+
+    value = attrValue->GetValue("index")->GetString();
+    jsCardParser->ParseVariable(value);
+    ASSERT_EQ(value, "{{bbb || bbb && ccc}}");
+}
+
+/**
+ * @tc.name: CardFrontendDataBindingTest011
+ * @tc.desc: Test data binding for {{!flag1 && flag2}} (not support now).
+ * @tc.type: FUNC
+ * @tc.require: AR000FLCK0
+ * @tc.author: jiangdayuan
+ */
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest011, TestSize.Level1)
+{
+    const std::string rootJson = "{\n"
+                                 "\t\"template\": {\n"
+                                 "\t\t\"attr\": {\n"
+                                 "\t\t\t\"value\": \"{{!bbb && ccc}}\",\n"
+                                 "\t\t\t\"index\": \"{{!ccc || bbb}}\"\n"
+                                 "\t\t},\n"
+                                 "\t\t\"type\": \"text\"\n"
+                                 "\t},\n"
+                                 "\t\"styles\": {},\n"
+                                 "\t\"actions\": {},\n"
+                                 "\t\"data\": {\n"
+                                 "\t\t\"aaa\": \"abc\",\n"
+                                 "\t\t\"bbb\": \"true\",\n"
+                                 "\t\t\"ccc\": \"false\",\n"
+                                 "\t\t\"ddd\": \"123\"\n"
+                                 "\t}\n"
+                                 "}";
+    auto rootBody = JsonUtil::ParseJsonString(rootJson);
+    auto rootTemplate = rootBody->GetValue("template");
+    auto jsCardParser = AceType::MakeRefPtr<JsCardParser>(nullptr, nullptr, std::move(rootBody));
+    jsCardParser->Initialize();
+
+    auto attrValue = rootTemplate->GetValue("attr");
+    auto value = attrValue->GetValue("value")->GetString();
+
+    jsCardParser->ParseVariable(value);
+    ASSERT_EQ(value, "{{!bbb && ccc}}");
+
+    value = attrValue->GetValue("index")->GetString();
+    jsCardParser->ParseVariable(value);
+    ASSERT_EQ(value, "{{!ccc || bbb}}");
+}
+
+/**
+ * @tc.name: CardFrontendDataBindingTest012
+ * @tc.desc: Test data binding for {{!flag1}}.{{!flag2}}.
+ * @tc.type: FUNC
+ * @tc.require: AR000FLCK0
+ * @tc.author: jiangdayuan
+ */
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest012, TestSize.Level1)
+{
+    const std::string rootJson = "{\n"
+                                 "\t\"template\": {\n"
+                                 "\t\t\"attr\": {\n"
+                                 "\t\t\t\"value\": \"$f({{!bbb}}.{{!ccc}})\",\n"
+                                 "\t\t\t\"index\": \"$f({{!aaa}}.{{!ccc}})\"\n"
+                                 "\t\t},\n"
+                                 "\t\t\"type\": \"text\"\n"
+                                 "\t},\n"
+                                 "\t\"styles\": {},\n"
+                                 "\t\"actions\": {},\n"
+                                 "\t\"data\": {\n"
+                                 "\t\t\"aaa\": \"abc\",\n"
+                                 "\t\t\"bbb\": \"true\",\n"
+                                 "\t\t\"ccc\": \"false\",\n"
+                                 "\t\t\"ddd\": \"123\"\n"
+                                 "\t}\n"
+                                 "}";
+    auto rootBody = JsonUtil::ParseJsonString(rootJson);
+    auto rootTemplate = rootBody->GetValue("template");
+    auto jsCardParser = AceType::MakeRefPtr<JsCardParser>(nullptr, nullptr, std::move(rootBody));
+    jsCardParser->Initialize();
+
+    auto attrValue = rootTemplate->GetValue("attr");
+    auto value = attrValue->GetValue("value")->GetString();
+
+    // !bbb = false, !ccc = true.
+    jsCardParser->ParseMultiVariable(value);
+    ASSERT_EQ(value, "false.true");
+
+    // aaa is not bool value, so aaa = false, !aaa = true.
+    value = attrValue->GetValue("index")->GetString();
+    jsCardParser->ParseMultiVariable(value);
+    ASSERT_EQ(value, "true.true");
+}
+
+/**
+ * @tc.name: CardFrontendDataBindingTest013
+ * @tc.desc: Test data binding for {{key1}}.{{!flag1}}.
+ * @tc.type: FUNC
+ * @tc.require: AR000FLCK0
+ * @tc.author: jiangdayuan
+ */
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest013, TestSize.Level1)
+{
+    const std::string rootJson = "{\n"
+                                 "\t\"template\": {\n"
+                                 "\t\t\"attr\": {\n"
+                                 "\t\t\t\"value\": \"$f({{bbb}}.{{!ccc}})\",\n"
+                                 "\t\t\t\"index\": \"$f({{aaa}}.{{!ccc}})\"\n"
+                                 "\t\t},\n"
+                                 "\t\t\"type\": \"text\"\n"
+                                 "\t},\n"
+                                 "\t\"styles\": {},\n"
+                                 "\t\"actions\": {},\n"
+                                 "\t\"data\": {\n"
+                                 "\t\t\"aaa\": \"abc\",\n"
+                                 "\t\t\"bbb\": \"true\",\n"
+                                 "\t\t\"ccc\": \"false\",\n"
+                                 "\t\t\"ddd\": \"123\"\n"
+                                 "\t}\n"
+                                 "}";
+    auto rootBody = JsonUtil::ParseJsonString(rootJson);
+    auto rootTemplate = rootBody->GetValue("template");
+    auto jsCardParser = AceType::MakeRefPtr<JsCardParser>(nullptr, nullptr, std::move(rootBody));
+    jsCardParser->Initialize();
+
+    auto attrValue = rootTemplate->GetValue("attr");
+    auto value = attrValue->GetValue("value")->GetString();
+
+    jsCardParser->ParseMultiVariable(value);
+    ASSERT_EQ(value, "true.true");
+
+    value = attrValue->GetValue("index")->GetString();
+    jsCardParser->ParseMultiVariable(value);
+    ASSERT_EQ(value, "abc.true");
+}
+
+/**
+ * @tc.name: CardFrontendDataBindingTest014
+ * @tc.desc: Test data binding for constant + variable.
+ * @tc.type: FUNC
+ * @tc.require: AR000FLCK0
+ * @tc.author: jiangdayuan
+ */
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest014, TestSize.Level1)
+{
+    const std::string rootJson = "{\n"
+                                 "\t\"template\": {\n"
+                                 "\t\t\"attr\": {\n"
+                                 "\t\t\t\"value\": \"$f(value1 is : {{aaa}})\",\n"
+                                 "\t\t\t\"index\": \"$f(ccc is: {{ccc}}, bbb is {{bbb}}.)\"\n"
+                                 "\t\t},\n"
+                                 "\t\t\"type\": \"text\"\n"
+                                 "\t},\n"
+                                 "\t\"styles\": {},\n"
+                                 "\t\"actions\": {},\n"
+                                 "\t\"data\": {\n"
+                                 "\t\t\"aaa\": \"abc\",\n"
+                                 "\t\t\"bbb\": \"true\",\n"
+                                 "\t\t\"ccc\": \"false\",\n"
+                                 "\t\t\"ddd\": \"123\"\n"
+                                 "\t}\n"
+                                 "}";
+    auto rootBody = JsonUtil::ParseJsonString(rootJson);
+    auto rootTemplate = rootBody->GetValue("template");
+    auto jsCardParser = AceType::MakeRefPtr<JsCardParser>(nullptr, nullptr, std::move(rootBody));
+    jsCardParser->Initialize();
+
+    auto attrValue = rootTemplate->GetValue("attr");
+    auto value = attrValue->GetValue("value")->GetString();
+
+    jsCardParser->ParseMultiVariable(value);
+    ASSERT_EQ(value, "value1 is : abc");
+
+    value = attrValue->GetValue("index")->GetString();
+    jsCardParser->ParseMultiVariable(value);
+    ASSERT_EQ(value, "ccc is: false, bbb is true.");
+}
+
+/**
+ * @tc.name: CardFrontendDataBindingTest015
+ * @tc.desc: Test data binding for {{!flag1}}.{{flag2 && flag3}}
+ * @tc.type: FUNC
+ * @tc.require: AR000FLCK0
+ * @tc.author: jiangdayuan
+ */
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest015, TestSize.Level1)
+{
+    const std::string rootJson = "{\n"
+                                 "\t\"template\": {\n"
+                                 "\t\t\"attr\": {\n"
+                                 "\t\t\t\"value\": \"$f({{!bbb}}.{{bbb && ccc}})\",\n"
+                                 "\t\t\t\"index\": \"$f({{aaa}}.{{bbb || ccc}})\"\n"
+                                 "\t\t},\n"
+                                 "\t\t\"type\": \"text\"\n"
+                                 "\t},\n"
+                                 "\t\"styles\": {},\n"
+                                 "\t\"actions\": {},\n"
+                                 "\t\"data\": {\n"
+                                 "\t\t\"aaa\": \"abc\",\n"
+                                 "\t\t\"bbb\": \"true\",\n"
+                                 "\t\t\"ccc\": \"false\",\n"
+                                 "\t\t\"ddd\": \"123\"\n"
+                                 "\t}\n"
+                                 "}";
+    auto rootBody = JsonUtil::ParseJsonString(rootJson);
+    auto rootTemplate = rootBody->GetValue("template");
+    auto jsCardParser = AceType::MakeRefPtr<JsCardParser>(nullptr, nullptr, std::move(rootBody));
+    jsCardParser->Initialize();
+
+    auto attrValue = rootTemplate->GetValue("attr");
+    auto value = attrValue->GetValue("value")->GetString();
+
+    jsCardParser->ParseMultiVariable(value);
+    ASSERT_EQ(value, "false.false");
+
+    value = attrValue->GetValue("index")->GetString();
+    jsCardParser->ParseMultiVariable(value);
+    ASSERT_EQ(value, "abc.true");
+}
+
+/**
+ * @tc.name: CardFrontendDataBindingTest016
  * @tc.desc: Test data binding for error expression.
  * @tc.type: FUNC
  * @tc.require: SR000FLCGT
  * @tc.author: jiangdayuan
  */
-HWTEST_F(CardFrontendTest, CardFrontendTest020, TestSize.Level1)
+HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest016, TestSize.Level1)
 {
     const std::string rootJson = "{\n"
                                  "\t\"template\": {\n"

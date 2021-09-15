@@ -22,7 +22,9 @@ build_component("video") {
     "resource/texture.cpp",
     "texture_component.cpp",
     "video_component.cpp",
+    "video_component_v2.cpp",
     "video_element.cpp",
+    "video_element_v2.cpp",
   ]
 
   if (is_standard_system && !use_mingw_win && !use_mac) {
@@ -31,9 +33,7 @@ build_component("video") {
       "//foundation/multimedia/media_standard/interfaces/innerkits/native/include",
     ]
 
-    deps = [
-      "//foundation/graphic/standard:libwms_client",
-    ]
+    deps = [ "//foundation/graphic/standard:libwmclient" ]
 
     external_deps = [ "ipc:ipc_core" ]
   }

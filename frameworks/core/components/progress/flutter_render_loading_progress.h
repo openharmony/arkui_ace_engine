@@ -51,7 +51,6 @@ private:
 
     RefPtr<Flutter::ContainerLayer> layer_ = nullptr;
     Sk3DView* camera_ = nullptr;
-    double usedScale_ = 1.0;
     double locationOffsetY_ = 0.0;
     Offset cometCenter_;
 };

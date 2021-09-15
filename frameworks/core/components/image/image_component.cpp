@@ -14,7 +14,7 @@
  */
 
 #include "core/components/image/image_component.h"
-
+#include "core/components/common/properties/decoration.h"
 #include "core/components/image/image_element.h"
 #include "core/components/image/render_image.h"
 
@@ -30,6 +30,242 @@ RefPtr<RenderNode> ImageComponent::CreateRenderNode()
 RefPtr<Element> ImageComponent::CreateElement()
 {
     return AceType::MakeRefPtr<ImageElement>();
+}
+
+void ImageComponent::SetSrc(const std::string& src)
+{
+    src_ = src;
+}
+
+void ImageComponent::SetImageFill(const std::optional<Color>& color)
+{
+    if (color != std::nullopt) {
+        fillColor_ = color.value();
+        isFillSet_ = true;
+    }
+}
+
+void ImageComponent::SetAlignment(const Alignment& alignment)
+{
+    alignment_ = alignment;
+}
+
+const Alignment& ImageComponent::GetAlignment() const
+{
+    return alignment_;
+}
+
+const Border& ImageComponent::GetBorder() const
+{
+    return border_;
+}
+
+const std::string& ImageComponent::GetSrc() const
+{
+    return src_;
+}
+
+void ImageComponent::SetAlt(const std::string& alt)
+{
+    alt_ = alt;
+}
+
+const std::string& ImageComponent::GetAlt() const
+{
+    return alt_;
+}
+
+void ImageComponent::SetColor(const Color& color)
+{
+    color_ = color;
+    isColorSet_ = true;
+}
+
+bool ImageComponent::IsColorSet() const
+{
+    return IsSrcSvgImage() ? isFillSet_ : isColorSet_;
+}
+
+bool ImageComponent::IsMatchTextDirection() const
+{
+    return matchTextDirection_;
+}
+
+bool ImageComponent::IsSrcSvgImage() const
+{
+    return IsSvgSuffix(src_);
+}
+
+const Color& ImageComponent::GetColor() const
+{
+    return IsSrcSvgImage() ? fillColor_ : color_;
+}
+
+void ImageComponent::SetLoadSuccessEvent(const EventMarker& loadSuccessEvent)
+{
+    loadSuccessEvent_ = loadSuccessEvent;
+}
+
+const EventMarker& ImageComponent::GetLoadSuccessEvent() const
+{
+    return loadSuccessEvent_;
+}
+
+void ImageComponent::SetLoadFailEvent(const EventMarker& loadFailEvent)
+{
+    loadFailEvent_ = loadFailEvent;
+}
+
+const EventMarker& ImageComponent::GetLoadFailEvent() const
+{
+    return loadFailEvent_;
+}
+
+void ImageComponent::SetSvgAnimatorFinishEvent(const EventMarker& svgAnimatorFinishEvent)
+{
+    svgAnimatorFinishEvent_ = svgAnimatorFinishEvent;
+}
+
+const EventMarker& ImageComponent::GetSvgAnimatorFinishEvent() const
+{
+    return svgAnimatorFinishEvent_;
+}
+
+InternalResource::ResourceId ImageComponent::GetResourceId() const
+{
+    return resourceId_;
+}
+
+void ImageComponent::SetResourceId(InternalResource::ResourceId resourceId)
+{
+    resourceId_ = resourceId;
+}
+
+void ImageComponent::SetBorder(const Border& border)
+{
+    border_ = border;
+}
+
+void ImageComponent::SetMatchTextDirection(bool matchTextDirection)
+{
+    matchTextDirection_ = matchTextDirection;
+}
+
+void ImageComponent::SetFitMaxSize(bool fitMaxSize)
+{
+    fitMaxSize_ = fitMaxSize;
+}
+
+void ImageComponent::SetImageFit(ImageFit imageFit)
+{
+    imageFit_ = imageFit;
+}
+
+void ImageComponent::SetImageInterpolation(ImageInterpolation imageInterpolation)
+{
+    imageInterpolation_ = imageInterpolation;
+}
+
+void ImageComponent::SetImageRenderMode(ImageRenderMode imageRenderMode)
+{
+    imageRenderMode_ = imageRenderMode;
+}
+
+void ImageComponent::SetImageRepeat(ImageRepeat imageRepeat)
+{
+    imageRepeat_ = imageRepeat;
+}
+
+void ImageComponent::SetImageSourceSize(const std::pair<Dimension, Dimension>& sourceSize)
+{
+    imageSourceSize_ = sourceSize;
+}
+
+void ImageComponent::SetUseSkiaSvg(bool useSkiaSvg)
+{
+    useSkiaSvg_ = useSkiaSvg;
+}
+
+void ImageComponent::SetAutoResize(bool autoResize)
+{
+    autoResize_ = autoResize;
+}
+
+bool ImageComponent::GetFitMaxSize() const
+{
+    return fitMaxSize_;
+}
+
+ImageFit ImageComponent::GetImageFit() const
+{
+    return imageFit_;
+}
+
+ImageInterpolation ImageComponent::GetImageInterpolation() const
+{
+    return imageInterpolation_;
+}
+
+ImageRenderMode ImageComponent::GetImageRenderMode() const
+{
+    return imageRenderMode_;
+}
+
+ImageRepeat ImageComponent::GetImageRepeat() const
+{
+    return imageRepeat_;
+}
+
+const std::pair<Dimension, Dimension>& ImageComponent::GetImageSourceSize() const
+{
+    return imageSourceSize_;
+}
+
+bool ImageComponent::GetUseSkiaSvg() const
+{
+    return useSkiaSvg_;
+}
+
+bool ImageComponent::GetAutoResize() const
+{
+    return autoResize_;
+}
+
+bool ImageComponent::IsSvgSuffix(const std::string& src)
+{
+    // 4 is the length of ".svg".
+    return (src.size() > 4 && src.substr(src.size() - 4) == ".svg");
+}
+
+void ImageComponent::SetPixmap(const RefPtr<PixelMap>& pixmap)
+{
+    pixmap_ = pixmap;
+}
+
+const RefPtr<PixelMap>& ImageComponent::GetPixmap() const
+{
+    return pixmap_;
+}
+
+void ImageComponent::SetHasObjectPosition(bool hasObjectPosition)
+{
+    hasObjectPosition_ = hasObjectPosition;
+}
+
+bool ImageComponent::GetHasObjectPosition() const
+{
+    return hasObjectPosition_;
+}
+
+void ImageComponent::SetImageObjectPosition(const ImageObjectPosition& imageObjectPosition)
+{
+    imageObjectPosition_ = imageObjectPosition;
+    SetHasObjectPosition(true);
+}
+
+const ImageObjectPosition& ImageComponent::GetImageObjectPosition() const
+{
+    return imageObjectPosition_;
 }
 
 } // namespace OHOS::Ace

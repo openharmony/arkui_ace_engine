@@ -144,8 +144,8 @@ public:
 
     bool IsInRegion(const Point& point) const
     {
-        return (point.GetX() > x_) && (point.GetX() < (x_ + width_)) && (point.GetY() > y_) &&
-               (point.GetY() < (y_ + height_));
+        return (point.GetX() > x_) && (point.GetX() <= (x_ + width_)) && (point.GetY() > y_) &&
+               (point.GetY() <= (y_ + height_));
     }
 
     bool IsWrappedBy(const Rect& other) const
@@ -361,15 +361,22 @@ public:
 
     std::string ToString() const
     {
-        return std::string("Rect (")
-            .append(std::to_string(x_))
-            .append(", ")
-            .append(std::to_string(y_))
-            .append(") - [")
-            .append(NearEqual(width_, Size::INFINITE_SIZE) ? "INFINITE" : std::to_string(width_))
-            .append(" x ")
-            .append(NearEqual(height_, Size::INFINITE_SIZE) ? "INFINITE" : std::to_string(height_))
-            .append("]");
+        std::stringstream ss;
+        ss << "Rect (" << std::fixed << std::setprecision(2) << x_ << ", " << y_ << ") - [";
+        if (NearEqual(width_, Size::INFINITE_SIZE)) {
+            ss << "INFINITE";
+        } else {
+            ss << width_;
+        }
+        ss << " x ";
+        if (NearEqual(height_, Size::INFINITE_SIZE)) {
+            ss << "INFINITE";
+        } else {
+            ss << height_;
+        }
+        ss << "]";
+        std::string output = ss.str();
+        return output;
     }
 
     Offset Center() const

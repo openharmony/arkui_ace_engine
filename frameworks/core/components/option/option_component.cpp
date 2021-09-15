@@ -119,7 +119,7 @@ void OptionComponent::CheckOptionModify()
         return;
     }
     if (!modifiedCallback_) {
-        LOGE("modify callback of option component is null.");
+        LOGD("modify callback of option component is null.");
         return;
     }
     if (text_->GetData() == lastText_) {

@@ -65,6 +65,13 @@ const char THEME_ATTR_COLOR_CONTROL_ACTIVE[] = "attr_color_control_actived";
 const char THEME_ATTR_COLOR_TEXT_PRIMARY_ACTIVATED[] = "attribute_color_text_primary_activated";
 const char THEME_ATTR_COLOR_TERTIARY[] = "attribute_color_tertiary";
 const char THEME_ATTR_COLOR_FOURTH[] = "attribute_color_fourth";
+const char THEME_ATTR_TEXT_SIZE_HEAD_LINE8[] = "attribute_text_size_headline8";
+const char THEME_ATTR_MARGIN_HORIZONTAL_L[] = "attribute_elements_margin_horizontal_l";
+const char THEME_ATTR_BUTTON_NORMAL_COLOR[] = "attribute_color_button_normal";
+const char THEME_ATTR_CARD_BG[] = "attribute_color_card_bg";
+const char THEME_ATTR_CORNER_RADIUS_LOOSE[] = "attribute_corner_radius_clicked_loose";
+const char THEME_ATTR_DIALOG_RADIUS[] = "attribute_corner_radius_dialog";
+const char THEME_ATTR_COLOR_FOREGROUND_CONTRARY[] = "attribute_color_foreground_contrary";
 
 // component patterns
 const char THEME_PATTERN_BUTTON[] = "button_pattern";
@@ -75,6 +82,7 @@ const char THEME_PATTERN_SWIPER[] = "swiper_pattern";
 const char THEME_PATTERN_SWITCH[] = "switch_pattern";
 const char THEME_PATTERN_TOOLBAR[] = "toolbar_pattern";
 const char THEME_PATTERN_TOGGLE[] = "toggle_pattern";
+const char THEME_DIALOG_TOGGLE[] = "dialog_pattern";
 
 // pattern general attributes
 const char PATTERN_BG_COLOR[] = "background_color";
@@ -135,6 +143,16 @@ const char FG_COLOR_CHECKED[] = "fg_color_checked";
 const char BG_COLOR_CHECKED[] = "bg_color_checked";
 const char FG_COLOR_UNCHECKED[] = "fg_color_unchecked";
 const char BG_COLOR_UNCHECKED[] = "bg_color_unchecked";
+const char CHECKBOX_WIDTH[] = "checkbox_width";
+const char CHECKBOX_PADDING[] = "checkbox_padding";
+const char CHECKBOX_BORDER_RADIUS[] = "checkbox_border_radius";
+const char SWITCH_WIDTH[] = "switch_width";
+const char SWITCH_HEIGHT[] = "switch_height";
+const char SWITCH_SHADOW_WIDTH[] = "switch_shadow_width";
+const char RADIO_WIDTH[] = "radio_width";
+const char SWITCH_HORIZONTAL_PADDING[] = "switch_horizontal_padding";
+const char SWITCH_VERTICAL_PADDING[] = "switch_vertical_padding";
+const char RADIO_PADDING[] = "radio_padding";
 
 // pattern attributes for swiper
 const char INDICATOR_MASK_COLOR[] = "indicator_mask_color";
@@ -183,5 +201,17 @@ const char TEXT_OVERLAY_MENU_ICON_COLOR[] = "attribute_color_secondary";
 const char TOGGLE_BACKGROUND_COLOR[] = "attribute_color_button_normal";
 const char TOGGLE_CHECKED_COLOR[] = "toggle_checked_color";
 const char TOGGLE_TEXT_COLOR[] = "toggle_text_color";
+
+// pattern attributes for toggle
+const char DIALOG_CONTENT_TOP_PADDING[] = "dialog_content_top_padding";
+const char DIALOG_TITLE_TOP_PADDING[] = "dialog_title_top_padding";
+const char DIALOG_BUTTON_HEIGHT[] = "dialog_button_height";
+const char DIALOG_TITLE_MAX_LINES[] = "dialog_title_max_lines";
+const char DIALOG_COMMON_BUTTON_TEXT_COLOR[] = "dialog_common_button_text_color";
+const char DIALOG_MIN_BUTTON_TEXT_SIZE[] = "dialog_min_button_text_size";
+const char DIALOG_MAX_BUTTON_WIDTH[] = "dialog_max_button_width";
+const char DIALOG_MIN_BUTTON_WIDTH[] = "dialog_min_button_width";
+const char DIALOG_ACTIONS_TOP_PADDING[] = "dialog_actions_top_padding";
+const char DIALOG_MASK_COLOR_END[] = "dialog_mask_color_end";
 
 } // namespace OHOS::Ace

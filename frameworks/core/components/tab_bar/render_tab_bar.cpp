@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/log/event_report.h"
+#include "base/utils/system_properties.h"
 #include "core/components/common/properties/alignment.h"
 
 namespace OHOS::Ace {
@@ -40,15 +41,28 @@ void RenderTabBar::Update(const RefPtr<Component>& component)
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
-    auto barIndicator = tabBar->GetIndicator();
-    if (barIndicator && initialUpdate_) {
-        indicator_ = barIndicator->CreateRenderNode();
-        if (indicator_) {
-            AddChild(indicator_);
-            indicator_->Attach(GetContext());
-            indicator_->Update(barIndicator);
-            indicatorPadding_ = barIndicator->GetPadding();
-            indicatorStyle_ = GetIndicatorStyle(barIndicator);
+    int32_t index = tabBar->GetIndex();
+    tabsSize_ = tabBar->GetChildren().size();
+    index_ = (index >= 0 && index < tabsSize_) ? index : 0;
+    if (initialUpdate_) {
+        auto barIndicator = tabBar->GetIndicator();
+        if (barIndicator) {
+            indicator_ = barIndicator->CreateRenderNode();
+            if (indicator_) {
+                AddChild(indicator_);
+                indicator_->Attach(GetContext());
+                indicator_->Update(barIndicator);
+                indicatorPadding_ = barIndicator->GetPadding();
+                indicatorStyle_ = GetIndicatorStyle(barIndicator);
+            }
+        }
+        auto context = context_.Upgrade();
+        if (context && context->GetIsDeclarative()) {
+            auto tabController = tabBar->GetController();
+            if (tabController) {
+                index_ = tabController->GetInitialIndex();
+                tabController->SetIndexByController(tabController->GetInitialIndex());
+            }
         }
         initialUpdate_ = false;
     }
@@ -56,14 +70,12 @@ void RenderTabBar::Update(const RefPtr<Component>& component)
     mode_ = tabBar->GetMode();
     isVertical_ = tabBar->IsVertical();
     indicatorSize_ = tabBar->GetIndicatorSize();
-    tabsSize_ = tabBar->GetChildren().size();
-    int32_t index = tabBar->GetIndex();
-    index_ = (index >= 0 && index < tabsSize_) ? index : 0;
     padding_ = tabBar->GetPadding();
     activeIndicatorMinWidth_ = tabBar->GetActiveIndicatorMinWidth();
     focusAnimationColor_ = tabBar->GetFocusAnimationColor();
     focusRadiusDimension_ = tabBar->GetFocusRadiusDimension();
     gradientWidth_ = tabBar->GetGradientWidth();
+    barPosition_ = tabBar->GetBarPosition();
     SetTextDirection(tabBar->GetTextDirection());
     Initialize();
     MarkNeedLayout();
@@ -72,6 +84,7 @@ void RenderTabBar::Update(const RefPtr<Component>& component)
 void RenderTabBar::UpdateTouchRect()
 {
     SetTouchRect(GetPaintRect());
+    ownTouchRect_ = touchRect_;
 }
 
 void RenderTabBar::PerformLayout()
@@ -85,13 +98,21 @@ void RenderTabBar::PerformLayout()
         }
         tabsSize_ = children.size() - 1;
     } else {
-        if (children.size() <= 0) {
+        if (children.empty()) {
             return;
         }
         tabsSize_ = children.size();
     }
 
     index_ = std::clamp(index_, 0, std::max(0, tabsSize_ - 1));
+    if (!IsRightToLeft()) {
+        if (tabBarWidth_ > 0 && !NearEqual(tabBarWidth_, GetLayoutParam().GetMaxSize().Width())) {
+            if (!isVertical_ && actualWidth_ > GetLayoutSize().Width() && GreatNotEqual(
+                GetLayoutParam().GetMaxSize().Width(), actualWidth_ - std::abs(scrollableOffset_.GetX()))) {
+                scrollableOffset_.SetX(scrollableOffset_.GetX() + GetLayoutParam().GetMaxSize().Width() - tabBarWidth_);
+            }
+        }
+    }
     tabBarWidth_ = GetLayoutParam().GetMaxSize().Width();
     // Layout children and indicator
     LayoutChildren();
@@ -289,10 +310,71 @@ void RenderTabBar::Initialize()
         isVertical_ ? Axis::VERTICAL : Axis::HORIZONTAL);
     scrollable_->Initialize(GetContext());
     scrollable_->SetNodeId(GetAccessibilityNodeId());
+    scrollable_->SetScrollableNode(AceType::WeakClaim(this));
 
     if (!tabBarSizeAnimation_ && !indicator_) {
         tabBarSizeAnimation_ = AceType::MakeRefPtr<TabBarSizeAnimation>();
         tabBarSizeAnimation_->Initialize(GetContext());
+    }
+    InitAccessibilityEventListener();
+}
+
+void RenderTabBar::InitAccessibilityEventListener()
+{
+    auto refNode = accessibilityNode_.Upgrade();
+    if (!refNode) {
+        return;
+    }
+
+    refNode->AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+    refNode->AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+    refNode->AddSupportAction(AceAction::ACTION_CLICK);
+
+    auto weakPtr = AceType::WeakClaim(this);
+    refNode->SetActionClickImpl([weakPtr]() {
+        auto tabBar = weakPtr.Upgrade();
+        if (tabBar) {
+            tabBar->AccessibilityClick();
+            return true;
+        }
+        return false;
+    });
+
+    refNode->SetActionScrollForward([weakPtr]() {
+        auto tabBar = weakPtr.Upgrade();
+        if (tabBar) {
+            tabBar->AccessibilityScroll(true);
+            return true;
+        }
+        return false;
+    });
+
+    refNode->SetActionScrollBackward([weakPtr]() {
+        auto tabBar = weakPtr.Upgrade();
+        if (tabBar) {
+            tabBar->AccessibilityScroll(false);
+            return true;
+        }
+        return false;
+    });
+}
+
+void RenderTabBar::AccessibilityScroll(bool isAdd)
+{
+    if (tabItemOffsets_.empty()) {
+        return;
+    }
+    if (isAdd) {
+        accessibilityIndex_++;
+    } else {
+        accessibilityIndex_--;
+    }
+}
+
+void RenderTabBar::AccessibilityClick()
+{
+    if (callback_) {
+        callback_(accessibilityIndex_);
     }
 }
 

@@ -384,13 +384,13 @@ void FlutterRenderTextField::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     auto pipelineContext = context_.Upgrade();
-    if (!canvas || !(paragraph_ || placeholderParagraph_ || !pipelineContext) || IsInfiniteLayout()) {
+    if (!(paragraph_ || placeholderParagraph_ || !pipelineContext) || IsInfiniteLayout()) {
         LOGE("Paint canvas or paragraph is null");
         return;
     }
     auto viewScale = pipelineContext->GetViewScale();
     SkCanvas* skCanvas = canvas->canvas();
-    if (lastLayoutSize_ != GetLayoutSize()) {
+    if (lastLayoutSize_ != GetLayoutSize() || !magnifierCanvas_) {
         auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width() * viewScale * MAGNIFIER_GAIN,
             GetLayoutSize().Height() * viewScale * MAGNIFIER_GAIN, SkColorType::kRGBA_8888_SkColorType,
             SkAlphaType::kOpaque_SkAlphaType);
@@ -448,8 +448,14 @@ Size FlutterRenderTextField::Measure()
     // Get height of text
     auto paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
     if (paragraphTxt != nullptr) {
-        textHeight_ = paragraphTxt->GetHeight();
-        textLines_ = paragraphTxt->GetLineCount();
+        auto textHeight = paragraphTxt->GetHeight();
+        auto textLines = paragraphTxt->GetLineCount();
+        // If height or lines is changed, make needNotifyChangeEvent_ true to notify change event.
+        if (!NearEqual(textHeight_, textHeight) || textLines_ != textLines) {
+            needNotifyChangeEvent_ = true;
+        }
+        textHeight_ = textHeight;
+        textLines_ = textLines;
     } else {
         textHeight_ = 0.0;
         textLines_ = 0;
@@ -594,7 +600,8 @@ void FlutterRenderTextField::ComputeOffsetAfterLayout()
     if (GetCaretRect(GetEditingValue().selection.extentOffset, caretRect_, CARET_HEIGHT_OFFSET)) {
         caretRect_ += innerRect_.GetOffset();
         textOffsetForShowCaret_ = caretRect_.MagneticAttractedBy(innerRect_);
-        if (resetToStart_) {
+        // Only single line input support reset to start.
+        if (resetToStart_ && keyboard_ != TextInputType::MULTILINE) {
             caretRect_ -= textOffsetForShowCaret_;
             textOffsetForShowCaret_ = Offset();
         }
@@ -1022,7 +1029,8 @@ int32_t FlutterRenderTextField::GetCursorPositionForMoveUp()
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() - PreferredLineHeight();
     return static_cast<int32_t>(
-        paragraph_->GetGlyphPositionAtCoordinate(caretRect_.Left(), caretRect_.Top() + verticalOffset).position - 1);
+        paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.Left(), caretRect_.Top() + verticalOffset)
+            .position - 1);
 }
 
 int32_t FlutterRenderTextField::GetCursorPositionForMoveDown()
@@ -1032,7 +1040,8 @@ int32_t FlutterRenderTextField::GetCursorPositionForMoveDown()
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() + PreferredLineHeight();
     return static_cast<int32_t>(
-        paragraph_->GetGlyphPositionAtCoordinate(caretRect_.Left(), caretRect_.Top() + verticalOffset).position - 1);
+        paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.Left(), caretRect_.Top() + verticalOffset)
+            .position - 1);
 }
 
 int32_t FlutterRenderTextField::GetCursorPositionForClick(const Offset& offset)
@@ -1046,12 +1055,12 @@ int32_t FlutterRenderTextField::GetCursorPositionForClick(const Offset& offset)
     double rightBoundary = GetBoundaryOfParagraph(false);
     if (GreatOrEqual(clickOffset_.GetX(), rightBoundary)) {
         int32_t rightBoundaryPosition =
-            static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(
+            static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(
                 rightBoundary - NormalizeToPx(CURSOR_WIDTH), clickOffset_.GetY()).position);
         return realTextDirection_ == TextDirection::RTL ? 0 : rightBoundaryPosition;
     }
     return static_cast<int32_t>(
-        paragraph_->GetGlyphPositionAtCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).position);
+        paragraph_->GetGlyphPositionAtCoordinateWithCluster(clickOffset_.GetX(), clickOffset_.GetY()).position);
 }
 
 int32_t FlutterRenderTextField::AdjustCursorAndSelection(int32_t currentCursorPosition)

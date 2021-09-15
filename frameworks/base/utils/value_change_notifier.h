@@ -27,7 +27,7 @@ class ValueChangeObserver : public virtual AceType {
     DECLARE_ACE_TYPE(ValueChangeObserver, AceType);
 
 public:
-    virtual void OnValueChanged(bool needFireChangeEvent = true) = 0;
+    virtual void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) = 0;
 
 protected:
     ValueChangeObserver() = default;
@@ -65,6 +65,7 @@ public:
             return;
         }
 
+        preValue_ = value_;
         value_ = std::move(newValue);
         Notify(needFireChangeEvent);
     }
@@ -75,6 +76,7 @@ public:
             return;
         }
 
+        preValue_ = value_;
         value_ = newValue;
         Notify(needFireChangeEvent);
     }
@@ -82,6 +84,11 @@ public:
     const U& GetValue() const
     {
         return value_;
+    }
+
+    const U& GetPreValue() const
+    {
+        return preValue_;
     }
 
 private:
@@ -102,6 +109,7 @@ private:
     std::list<WeakPtr<ValueChangeObserver>> observers_;
 
     U value_;
+    U preValue_;
 };
 
 }  // namespace OHOS::Ace

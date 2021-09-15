@@ -24,10 +24,10 @@
 namespace OHOS::Ace {
 namespace {
 
-const KeyEvent RIGHT_KEY { KeyCode::TV_CONTROL_RIGHT, KeyAction::UP, 0, 0, 0};
-const KeyEvent LEFT_KEY { KeyCode::TV_CONTROL_LEFT, KeyAction::UP, 0, 0, 0};
-const KeyEvent UP_KEY { KeyCode::TV_CONTROL_UP, KeyAction::UP, 0, 0, 0};
-const KeyEvent DOWN_KEY { KeyCode::TV_CONTROL_DOWN, KeyAction::UP, 0, 0, 0};
+const KeyEvent RIGHT_KEY { KeyCode::TV_CONTROL_RIGHT, KeyAction::UP, 0, 0, 0, 0, 0, 0};
+const KeyEvent LEFT_KEY { KeyCode::TV_CONTROL_LEFT, KeyAction::UP, 0, 0, 0, 0, 0, 0};
+const KeyEvent UP_KEY { KeyCode::TV_CONTROL_UP, KeyAction::UP, 0, 0, 0, 0, 0, 0};
+const KeyEvent DOWN_KEY { KeyCode::TV_CONTROL_DOWN, KeyAction::UP, 0, 0, 0, 0, 0, 0};
 
 } // namespace
 

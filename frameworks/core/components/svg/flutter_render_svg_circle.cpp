@@ -16,6 +16,8 @@
 #include "frameworks/core/components/svg/flutter_render_svg_circle.h"
 
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
+#include "frameworks/core/components/svg/flutter_render_svg_filter.h"
+#include "frameworks/core/components/svg/flutter_render_svg_pattern.h"
 #include "frameworks/core/components/transform/flutter_render_transform.h"
 #include "frameworks/core/pipeline/base/flutter_render_context.h"
 
@@ -49,41 +51,94 @@ void FlutterRenderSvgCircle::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint skCanvas is null");
         return;
     }
+
+    if (transformLayer_) {
+        if (NeedTransform()) {
+            transformLayer_->Update(GetTransformMatrix4());
+        }
+        if (!filterId_.empty()) {
+            auto filter = AceType::DynamicCast<FlutterRenderSvgFilter>(GetPatternFromRoot(filterId_));
+            if (filter != nullptr) {
+                SkPaint skPaint = filter->OnAsPaint();
+                transformLayer_->SetFilter(skPaint);
+            }
+        }
+    }
+
+    SkAutoCanvasRestore save(skCanvas, false);
+    PaintMaskLayer(context, offset, offset);
+
     SkPath path;
-    double lineWidth = NormalizeToPx(strokeState_.GetLineWidth());
-    path.addCircle(ConvertDimensionToPx(cx_, GetLayoutSize().Width()),
-        ConvertDimensionToPx(cy_, GetLayoutSize().Width()),
-        ConvertDimensionToPx(r_, GetLayoutSize().Height()) - lineWidth);
-    FlutterSvgPainter::SetFillStyle(skCanvas, path, fillState_, opacity_);
-    path.reset();
-    path.addCircle(ConvertDimensionToPx(cx_, GetLayoutSize().Width()),
-        ConvertDimensionToPx(cy_, GetLayoutSize().Width()),
-        ConvertDimensionToPx(r_, GetLayoutSize().Height()) - lineWidth * SK_ScalarHalf);
-    FlutterSvgPainter::SetStrokeStyle(skCanvas, path, strokeState_, opacity_);
-    RenderNode::Paint(context, offset);
+    path.addCircle(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL),
+        ConvertDimensionToPx(cy_, LengthType::VERTICAL), ConvertDimensionToPx(r_, LengthType::OTHER));
+
+    UpdateGradient(fillState_);
+
+    RenderInfo renderInfo = { AceType::Claim(this), offset, opacity_, true };
+    FlutterSvgPainter::SetFillStyle(skCanvas, path, fillState_, renderInfo);
+    FlutterSvgPainter::SetStrokeStyle(skCanvas, path, strokeState_, renderInfo);
 }
 
-void FlutterRenderSvgCircle::UpdateMotion(const std::string& path, const std::string& rotate,
-    double percent, const Point& point)
+void FlutterRenderSvgCircle::PaintDirectly(RenderContext& context, const Offset& offset)
+{
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkCanvas* skCanvas = canvas->canvas();
+    if (!skCanvas) {
+        LOGE("Paint skCanvas is null");
+        return;
+    }
+
+    if (NeedTransform()) {
+        skCanvas->save();
+        skCanvas->concat(FlutterSvgPainter::ToSkMatrix(GetTransformMatrix4()));
+    }
+
+    SkPath path;
+    path.addCircle(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL),
+        ConvertDimensionToPx(cy_, LengthType::VERTICAL), ConvertDimensionToPx(r_, LengthType::OTHER));
+    UpdateGradient(fillState_);
+    FlutterSvgPainter::SetFillStyle(skCanvas, path, fillState_, opacity_);
+    FlutterSvgPainter::SetStrokeStyle(skCanvas, path, strokeState_, opacity_);
+
+    if (NeedTransform()) {
+        skCanvas->restore();
+    }
+}
+
+void FlutterRenderSvgCircle::UpdateMotion(const std::string& path, const std::string& rotate, double percent)
 {
     if (!transformLayer_) {
         LOGE("transformLayer is null");
         return;
     }
     bool isSuccess = true;
-    auto motionMatrix = FlutterSvgPainter::CreateMotionMatrix(path, rotate, point, percent, isSuccess);
+    auto motionMatrix = FlutterSvgPainter::CreateMotionMatrix(path, rotate, percent, isSuccess);
     if (isSuccess) {
         auto transform = FlutterRenderTransform::GetTransformByOffset(motionMatrix, GetGlobalOffset());
         transformLayer_->Update(transform);
     }
 }
 
-bool FlutterRenderSvgCircle::GetStartPoint(Point& point)
+Rect FlutterRenderSvgCircle::GetPaintBounds(const Offset& offset)
 {
-    double width = GetLayoutSize().Width();
-    double height = GetLayoutSize().Height();
-    point = Point(ConvertDimensionToPx(cx_, width), ConvertDimensionToPx(cy_, height));
-    return true;
+    SkPath path;
+    path.addCircle(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL),
+        ConvertDimensionToPx(cy_, LengthType::VERTICAL), ConvertDimensionToPx(r_, LengthType::OTHER));
+    auto& bounds = path.getBounds();
+    return Rect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
+}
+
+void FlutterRenderSvgCircle::OnGlobalPositionChanged()
+{
+    if (transformLayer_ && NeedTransform()) {
+        transformLayer_->Update(UpdateTransformMatrix4());
+    }
+    RenderNode::OnGlobalPositionChanged();
 }
 
 } // namespace OHOS::Ace

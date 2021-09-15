@@ -18,9 +18,12 @@
 #include <cstdint>
 
 #include "base/json/json_util.h"
+#include "base/resource/ace_res_config.h"
 #include "base/utils/device_type.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
+#include "core/common/ace_application_info.h"
+#include "core/components/theme/theme_constants_defines.h"
 #include "core/components/theme/theme_utils.h"
 
 namespace OHOS::Ace {
@@ -34,15 +37,13 @@ constexpr int32_t ERROR_VALUE_INT = 0;
 constexpr double ERROR_VALUE_DOUBLE = 0.0;
 constexpr double BLEND_ALPHA_MAX = 1.0;
 constexpr InternalResource::ResourceId ERROR_VALUE_RESOURCE_ID = InternalResource::ResourceId::NO_ID;
-const char STYLE_FILE_PATH[] = "resources/styles/default.json";
-const char PHONE_STYLE_FILE_PATH[] = "resources/styles/phone.json";
-const char WEARABLE_STYLE_FILE_PATH[] = "resources/styles/wearable.json";
-const char TV_STYLE_FILE_PATH[] = "resources/styles/tv.json";
+const char STYLES_FOLDER_PATH[] = "resources/styles/";
+const char FILE_TYPE_JSON[] = ".json";
 const char CUSTOM_STYLE_ROOT_NAME[] = "style";
 const Color TRANSPARENT_BG_COLOR = Color::FromRGBO(0, 0, 0, 0.2);
-// Same with global resource define.
-constexpr uint32_t SYSTEM_RES_ID_START = 0x7000000;
-constexpr uint32_t SYSTEM_RES_ID_END = 0x7ffffff;
+// For global resource manager system, system resource id is in [0x7000000, 0x7ffffff],
+// and the id of resource defined by developer in the "resource" directory is greater than or equal to 0x1000000.
+constexpr uint32_t GLOBAL_RESOURCE_ID_START = 0x1000000;
 
 DeviceType g_deviceType = DeviceType::PHONE;
 
@@ -60,9 +61,9 @@ bool ValueTypeMatch(const ResValueWrapper& valueWrapper, uint32_t key, const The
     return true;
 }
 
-bool IsSystemResource(uint32_t resId)
+bool IsGlobalResource(uint32_t resId)
 {
-    return resId >= SYSTEM_RES_ID_START && resId <= SYSTEM_RES_ID_END;
+    return resId >= GLOBAL_RESOURCE_ID_START;
 }
 
 } // namespace
@@ -94,7 +95,7 @@ const ResValueWrapper* ThemeConstants::GetPlatformConstants(uint32_t key)
 
 Color ThemeConstants::GetColor(uint32_t key) const
 {
-    if (IsSystemResource(key)) {
+    if (IsGlobalResource(key)) {
         if (!resAdapter_) {
             return ERROR_VALUE_COLOR;
         }
@@ -113,7 +114,7 @@ Color ThemeConstants::GetColor(uint32_t key) const
 
 Dimension ThemeConstants::GetDimension(uint32_t key) const
 {
-    if (IsSystemResource(key)) {
+    if (IsGlobalResource(key)) {
         if (!resAdapter_) {
             return ERROR_VALUE_DIMENSION;
         }
@@ -132,7 +133,7 @@ Dimension ThemeConstants::GetDimension(uint32_t key) const
 
 int32_t ThemeConstants::GetInt(uint32_t key) const
 {
-    if (IsSystemResource(key)) {
+    if (IsGlobalResource(key)) {
         if (!resAdapter_) {
             return ERROR_VALUE_INT;
         }
@@ -151,7 +152,7 @@ int32_t ThemeConstants::GetInt(uint32_t key) const
 
 double ThemeConstants::GetDouble(uint32_t key) const
 {
-    if (IsSystemResource(key)) {
+    if (IsGlobalResource(key)) {
         if (!resAdapter_) {
             return ERROR_VALUE_DOUBLE;
         }
@@ -170,7 +171,7 @@ double ThemeConstants::GetDouble(uint32_t key) const
 
 std::string ThemeConstants::GetString(uint32_t key) const
 {
-    if (IsSystemResource(key)) {
+    if (IsGlobalResource(key)) {
         if (!resAdapter_) {
             return "";
         }
@@ -185,6 +186,25 @@ std::string ThemeConstants::GetString(uint32_t key) const
         LOGE("GetString error: %{public}u, type: %{public}u", key, valueWrapper.type);
     }
     return stringPair.second;
+}
+
+std::vector<std::string> ThemeConstants::GetStringArray(uint32_t key) const
+{
+    if (IsGlobalResource(key)) {
+        if (!resAdapter_) {
+            return {};
+        }
+        return resAdapter_->GetStringArray(key);
+    }
+    return {};
+}
+
+bool ThemeConstants::GetResourceIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->GetIdByName(resName, resType, resId);
 }
 
 InternalResource::ResourceId ThemeConstants::GetResourceId(uint32_t key) const
@@ -273,23 +293,25 @@ void ThemeConstants::LoadCustomStyle(const RefPtr<AssetManager>& assetManager)
         LOGE("AssetManager is null, load custom style failed!");
         return;
     }
-    auto asset = assetManager->GetAsset(STYLE_FILE_PATH);
-    ThemeConstants::LoadFile(asset);
-    RefPtr<Asset> deviceAsset;
-    switch (g_deviceType) {
-        case DeviceType::PHONE:
-            deviceAsset = assetManager->GetAsset(PHONE_STYLE_FILE_PATH);
-            break;
-        case DeviceType::TV:
-            deviceAsset = assetManager->GetAsset(TV_STYLE_FILE_PATH);
-            break;
-        case DeviceType::WATCH:
-            deviceAsset = assetManager->GetAsset(WEARABLE_STYLE_FILE_PATH);
-            break;
-        default:
-            return;
+
+    std::vector<std::string> files;
+
+    assetManager->GetAssetList(STYLES_FOLDER_PATH, files);
+
+    std::vector<std::string> fileNameList;
+    for (const auto& file : files) {
+        if (StringUtils::EndWith(file, FILE_TYPE_JSON)) {
+            fileNameList.emplace_back(file.substr(0, file.size() - (sizeof(FILE_TYPE_JSON) - 1)));
+        }
     }
-    ThemeConstants::LoadFile(deviceAsset);
+
+    std::vector<std::string> priorityFileList;
+    priorityFileList = AceResConfig::GetStyleResourceFallback(fileNameList);
+    for (auto fileIter = priorityFileList.rbegin(); fileIter != priorityFileList.rend(); ++fileIter) {
+        auto fileFullPath = STYLES_FOLDER_PATH + *fileIter + std::string(FILE_TYPE_JSON);
+        auto asset = assetManager->GetAsset(fileFullPath);
+        ThemeConstants::LoadFile(asset);
+    }
 }
 
 void ThemeConstants::ParseCustomStyle(const std::string& content)

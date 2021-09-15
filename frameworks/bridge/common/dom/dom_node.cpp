@@ -19,8 +19,10 @@
 #include <unordered_set>
 
 #include "base/log/ace_trace.h"
+#include "core/animation/animatable_data.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/frontend.h"
+#include "core/components/declaration/common/declaration_creator_manager.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scroll_fade_effect.h"
 #include "core/components/scroll/scroll_spring_effect.h"
@@ -32,11 +34,12 @@ namespace {
 
 constexpr uint32_t TRANSFORM_SINGLE = 1;
 constexpr uint32_t TRANSFORM_DUAL = 2;
+constexpr uint32_t TRANSFORM_SIX = 6;
+constexpr uint32_t TRANSFORM_SIXTEEN = 16;
 constexpr uint32_t COMMON_METHOD_FOCUS_ARGS_SIZE = 1;
-constexpr uint32_t SINGLE_VALUE = 1;
-constexpr uint32_t TWO_VALUES = 2;
 constexpr uint32_t THREE_VALUES = 3;
 constexpr uint32_t FOUR_VALUES = 4;
+constexpr int32_t MS_TO_S = 1000;
 const char COMMON_METHOD_FOCUS[] = "focus";
 
 // focusable support list, this list should be updated after the other nodes(checkbox/radio/switch/
@@ -48,151 +51,68 @@ const std::unordered_set<std::string> UNFOCUSABLED_NODE = {
     DOM_NODE_TAG_SPAN,
 };
 
+static const std::unordered_set<std::string> TRANSITION_PROPERTIES = {
+    DOM_WIDTH,
+    DOM_HEIGHT,
+    DOM_PADDING_TOP,
+    DOM_PADDING_RIGHT,
+    DOM_PADDING_BOTTOM,
+    DOM_PADDING_LEFT,
+    DOM_MARGIN_TOP,
+    DOM_MARGIN_RIGHT,
+    DOM_MARGIN_BOTTOM,
+    DOM_MARGIN_LEFT,
+    DOM_BACKGROUND_COLOR,
+    DOM_OPACITY,
+    DOM_BORDER_LEFT_WIDTH,
+    DOM_BORDER_TOP_WIDTH,
+    DOM_BORDER_RIGHT_WIDTH,
+    DOM_BORDER_BOTTOM_WIDTH,
+    DOM_BORDER_LEFT_COLOR,
+    DOM_BORDER_TOP_COLOR,
+    DOM_BORDER_RIGHT_COLOR,
+    DOM_BORDER_BOTTOM_COLOR
+};
+
 // default flex value
 constexpr double DEFAULT_FLEX_GROW = 0.0;
 constexpr double DEFAULT_FLEX_SHRINK = 1.0;
 constexpr double DEFAULT_FLEX_BASIS = -1.0;
-constexpr int32_t DIRECTION_ANGLE = 1;
-constexpr int32_t DIRECTION_SIDE = 2;
-constexpr int32_t DIRECTION_CORNER = 3;
-constexpr int32_t MS_TO_S = 1000;
-constexpr int32_t PERCENTAGE = 100;
-constexpr Dimension TRANSFORM_ORIGIN_DEFAULT = 0.5_pct;
+constexpr int32_t TRANSITION_NAME_LENGTH = 4;
 
 // prefix id of TweenComponent, for differentiation from id of ComposedComponent
 constexpr char COMPONENT_PREFIX[] = "FrontendTween";
-
-// Shared Transition Effect FrontendType String
-constexpr char SHARED_TRANSITION_EFFECT_STATIC[] = "static";
-constexpr char SHARED_TRANSITION_EFFECT_EXCHANGE[] = "exchange";
-
-constexpr PropertyAnimatableType PROPERTY_ANIMATIONABLE_FLOAT_TYPES[] = {
-    PropertyAnimatableType::PROPERTY_PADDING_LEFT,
-    PropertyAnimatableType::PROPERTY_PADDING_TOP,
-    PropertyAnimatableType::PROPERTY_PADDING_RIGHT,
-    PropertyAnimatableType::PROPERTY_PADDING_BOTTOM,
-    PropertyAnimatableType::PROPERTY_MARGIN_LEFT,
-    PropertyAnimatableType::PROPERTY_MARGIN_TOP,
-    PropertyAnimatableType::PROPERTY_MARGIN_RIGHT,
-    PropertyAnimatableType::PROPERTY_MARGIN_BOTTOM,
-};
-
-RefPtr<SharedTransitionEffect> ParseSharedEffect(const std::string& effect, DOMNode& node)
-{
-    std::string effectTrim = effect;
-    RemoveHeadTailSpace(effectTrim);
-    if (effectTrim == SHARED_TRANSITION_EFFECT_STATIC) {
-        return SharedTransitionEffect::GetSharedTransitionEffect(
-            SharedTransitionEffectType::SHARED_EFFECT_STATIC, node.GetShareId());
-    } else if (effectTrim == SHARED_TRANSITION_EFFECT_EXCHANGE) {
-        return SharedTransitionEffect::GetSharedTransitionEffect(
-            SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE, node.GetShareId());
-    } else {
-        LOGE("Parse shared effect failed. unknown effect: %{public}s, share id: %{public}s", effect.c_str(),
-            node.GetShareId().c_str());
-        return nullptr;
-    }
-}
-
-ClickSpringEffectType ParseClickEffect(const std::string& effect)
-{
-    static std::unordered_map<std::string, ClickSpringEffectType> types = {
-        { "spring-small", ClickSpringEffectType::SMALL },
-        { "spring-medium", ClickSpringEffectType::MEDIUM },
-        { "spring-large", ClickSpringEffectType::LARGE },
-    };
-    auto pos = types.find(effect);
-    if (pos != types.end()) {
-        return pos->second;
-    }
-    return ClickSpringEffectType::NONE;
-}
-
-TransitionEffect ParseTransitionEffect(const std::string& option)
-{
-    static std::unordered_map<std::string, TransitionEffect> types = {
-        { "unfold", TransitionEffect::UNFOLD },
-        { "none", TransitionEffect::NONE },
-    };
-    auto pos = types.find(option);
-    if (pos != types.end()) {
-        return pos->second;
-    }
-    return TransitionEffect::NONE;
-}
-
-inline WindowBlurStyle StrToWindowBlurStyle(const std::string& value)
-{
-    static std::unordered_map<std::string, WindowBlurStyle> types = {
-        { "small_light", WindowBlurStyle::STYLE_BACKGROUND_SMALL_LIGHT },
-        { "medium_light", WindowBlurStyle::STYLE_BACKGROUND_MEDIUM_LIGHT },
-        { "large_light", WindowBlurStyle::STYLE_BACKGROUND_LARGE_LIGHT },
-        { "xlarge_light", WindowBlurStyle::STYLE_BACKGROUND_XLARGE_LIGHT },
-        { "small_dark", WindowBlurStyle::STYLE_BACKGROUND_SMALL_DARK },
-        { "medium_dark", WindowBlurStyle::STYLE_BACKGROUND_MEDIUM_DARK },
-        { "large_dark", WindowBlurStyle::STYLE_BACKGROUND_LARGE_DARK },
-        { "xlarge_dark", WindowBlurStyle::STYLE_BACKGROUND_XLARGE_DARK },
-    };
-    auto pos = types.find(value);
-    if (pos != types.end()) {
-        return pos->second;
-    }
-    return WindowBlurStyle::STYLE_BACKGROUND_SMALL_LIGHT;
-}
-
-template<class T>
-T ParseFunctionValue(const std::string& line, const std::string& key, std::function<T(const std::string&)> parser)
-{
-    std::vector<std::string> strs;
-    StringUtils::SplitStr(line, " ", strs, true);
-    for (const auto& str : strs) {
-        if (str.empty()) {
-            continue;
-        }
-        auto leftIndex = str.find('(');
-        auto rightIndex = str.find(')');
-        if (leftIndex == std::string::npos || rightIndex == std::string::npos) {
-            continue;
-        }
-        if (leftIndex + 1 >= rightIndex) {
-            continue;
-        }
-        if (str.substr(0, leftIndex) != key) {
-            continue;
-        }
-
-        auto valueStr = str.substr(leftIndex + 1, rightIndex - leftIndex - 1);
-        return parser(valueStr);
-    }
-    return T {};
-}
+constexpr char TRANSITION_COMPONENT_PREFIX[] = "FrontendTransition";
 
 } // namespace
 
 DOMNode::DOMNode(NodeId nodeId, const std::string& nodeName) : nodeId_(nodeId), tag_(nodeName)
 {
     rootComponent_ = AceType::MakeRefPtr<ComposedComponent>(std::to_string(nodeId), nodeName);
-    backDecoration_ = AceType::MakeRefPtr<Decoration>();
-    backgroundImage_ = AceType::MakeRefPtr<BackgroundImage>();
     boxComponent_ = AceType::MakeRefPtr<BoxComponent>();
-    isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
+    CreateDeclaration(nodeName);
 }
 
 DOMNode::~DOMNode()
 {
-    if (!onFocusId_.IsEmpty()) {
-        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(onFocusId_);
-    }
-    if (!onBlurId_.IsEmpty()) {
-        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(onBlurId_);
-    }
+    if (declaration_) {
+        auto& focusEvent = static_cast<CommonFocusEvent&>(declaration_->GetEvent(EventTag::COMMON_FOCUS_EVENT));
+        if (focusEvent.IsValid()) {
+            if (!focusEvent.focus.eventMarker.IsEmpty()) {
+                BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(focusEvent.focus.eventMarker);
+            }
+            if (!focusEvent.blur.eventMarker.IsEmpty()) {
+                BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(focusEvent.blur.eventMarker);
+            }
+        }
 
-    for (uint32_t eventAction = 0; eventAction < EventAction::SIZE; eventAction++) {
-        for (uint32_t eventStage = 0; eventStage < EventStage::SIZE; eventStage++) {
-            for (uint32_t touchEventType = 0; touchEventType < EventType::SIZE; touchEventType++) {
-                const auto& eventMarker = onTouchIds_[eventAction][eventStage][touchEventType];
-                if (!eventMarker.IsEmpty()) {
-                    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(eventMarker);
+        for (uint32_t eventAction = 0; eventAction < EventAction::SIZE; eventAction++) {
+            for (uint32_t eventStage = 0; eventStage < EventStage::SIZE; eventStage++) {
+                for (uint32_t touchEventType = 0; touchEventType < EventType::SIZE; touchEventType++) {
+                    const auto& eventMarker = GetTouchId(eventAction, eventStage, touchEventType);
+                    if (!eventMarker.IsEmpty()) {
+                        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(eventMarker);
+                    }
                 }
             }
         }
@@ -238,216 +158,30 @@ void DOMNode::Mount(int32_t slot)
 
 void DOMNode::AddEvent(int32_t pageId, const std::vector<std::string>& events)
 {
-    ACE_SCOPED_TRACE("DOMNode::AddEvent");
-    static const LinearMapNode<void (*)(int32_t, DOMNode&)> eventSetters[] = {
-        { DOM_BLUR,
-            [](int32_t pageId, DOMNode& node) {
-                node.onBlurId_ = EventMarker(node.GetNodeIdForEvent(), DOM_BLUR, pageId);
-            } },
-        { DOM_CAPTURE_TOUCH_CANCEL,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::ON][EventStage::CAPTURE][EventType::TOUCH_CANCEL] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_CAPTURE_TOUCH_CANCEL, pageId);
-            } },
-        { DOM_CAPTURE_TOUCH_END,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::ON][EventStage::CAPTURE][EventType::TOUCH_UP] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_CAPTURE_TOUCH_END, pageId);
-            } },
-        { DOM_CAPTURE_TOUCH_MOVE,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::ON][EventStage::CAPTURE][EventType::TOUCH_MOVE] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_CAPTURE_TOUCH_MOVE, pageId);
-            } },
-        { DOM_CAPTURE_TOUCH_START,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::ON][EventStage::CAPTURE][EventType::TOUCH_DOWN] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_CAPTURE_TOUCH_START, pageId);
-            } },
-        { DOM_CATCH_BUBBLE_TOUCH_CANCEL,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::CATCH][EventStage::BUBBLE][EventType::TOUCH_CANCEL] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_CATCH_BUBBLE_TOUCH_CANCEL, pageId);
-            } },
-        { DOM_CATCH_BUBBLE_TOUCH_END,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::CATCH][EventStage::BUBBLE][EventType::TOUCH_UP] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_CATCH_BUBBLE_TOUCH_END, pageId);
-            } },
-        { DOM_CATCH_BUBBLE_TOUCH_MOVE,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::CATCH][EventStage::BUBBLE][EventType::TOUCH_MOVE] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_CATCH_BUBBLE_TOUCH_MOVE, pageId);
-            } },
-        { DOM_CATCH_BUBBLE_TOUCH_START,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::CATCH][EventStage::BUBBLE][EventType::TOUCH_DOWN] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_CATCH_BUBBLE_TOUCH_START, pageId);
-            } },
-        { DOM_CATCH_CAPTURE_TOUCH_CANCEL,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::CATCH][EventStage::CAPTURE][EventType::TOUCH_CANCEL] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_CATCH_CAPTURE_TOUCH_CANCEL, pageId);
-            } },
-        { DOM_CATCH_CAPTURE_TOUCH_END,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::CATCH][EventStage::CAPTURE][EventType::TOUCH_UP] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_CATCH_CAPTURE_TOUCH_END, pageId);
-            } },
-        { DOM_CATCH_CAPTURE_TOUCH_MOVE,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::CATCH][EventStage::CAPTURE][EventType::TOUCH_MOVE] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_CATCH_CAPTURE_TOUCH_MOVE, pageId);
-            } },
-        { DOM_CATCH_CAPTURE_TOUCH_START,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::CATCH][EventStage::CAPTURE][EventType::TOUCH_DOWN] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_CATCH_CAPTURE_TOUCH_START, pageId);
-            } },
-        { DOM_CLICK,
-            [](int32_t pageId, DOMNode& node) {
-                node.onClickId_ = EventMarker(node.GetNodeIdForEvent(), DOM_CLICK, pageId);
-            } },
-        { DOM_FOCUS,
-            [](int32_t pageId, DOMNode& node) {
-                node.onFocusId_ = EventMarker(node.GetNodeIdForEvent(), DOM_FOCUS, pageId);
-            } },
-        { DOM_KEY,
-            [](int32_t pageId, DOMNode& node) {
-                node.onKeyId_ = EventMarker(node.GetNodeIdForEvent(), DOM_KEY, pageId);
-            } },
-        { DOM_LONG_PRESS,
-            [](int32_t pageId, DOMNode& node) {
-                node.onLongPressId_ = EventMarker(node.GetNodeIdForEvent(), DOM_LONG_PRESS, pageId);
-            } },
-        { DOM_MOUSE,
-            [](int32_t pageId, DOMNode& node) {
-                node.onMouseId_ = EventMarker(node.GetNodeIdForEvent(), DOM_MOUSE, pageId);
-            } },
-        { DOM_SWIPE,
-            [](int32_t pageId, DOMNode& node) {
-                node.onSwipeId_ = EventMarker(node.GetNodeIdForEvent(), DOM_SWIPE, pageId);
-            } },
-        { DOM_TOUCH_CANCEL,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::ON][EventStage::BUBBLE][EventType::TOUCH_CANCEL] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_TOUCH_CANCEL, pageId);
-            } },
-        { DOM_TOUCH_END,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::ON][EventStage::BUBBLE][EventType::TOUCH_UP] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_TOUCH_END, pageId);
-            } },
-        { DOM_TOUCH_MOVE,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::ON][EventStage::BUBBLE][EventType::TOUCH_MOVE] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_TOUCH_MOVE, pageId);
-            } },
-        { DOM_TOUCH_START,
-            [](int32_t pageId, DOMNode& node) {
-                node.onTouchIds_[EventAction::ON][EventStage::BUBBLE][EventType::TOUCH_DOWN] =
-                    EventMarker(node.GetNodeIdForEvent(), DOM_TOUCH_START, pageId);
-            } },
-    };
+    std::vector<std::string> tempEvents;
     for (const auto& event : events) {
-        if (AddSpecializedEvent(pageId, event)) {
-            continue;
+        if (!AddSpecializedEvent(pageId, event)) {
+            tempEvents.emplace_back(event);
         }
-        auto setterIter = BinarySearchFindIndex(eventSetters, ArraySize(eventSetters), event.c_str());
-        if (setterIter != -1) {
-            eventSetters[setterIter].value(pageId, *this);
-        }
+    }
+    if (declaration_) {
+        declaration_->AddEvent(pageId, GetNodeIdForEvent(), tempEvents);
     }
 }
 
 void DOMNode::SetAttr(const std::vector<std::pair<std::string, std::string>>& attrs)
 {
-    rootComponent_->SetUpdateType(UpdateType::ALL);
-    static const std::string flagOn = "on";
-    static const std::string flagOff = "off";
-    static const std::string flagAuto = "auto";
-    // static linear map must be sorted by key.
-    static const LinearMapNode<void (*)(const std::string&, DOMNode&)> attrSetters[] = {
-        { DOM_CLICK_EFFECT,
-            [](const std::string &val, DOMNode &node) {
-                 if (!node.transformComponent_) {
-                     node.transformComponent_ = AceType::MakeRefPtr<TransformComponent>();
-                 }
-                 node.hasClickEffect_ = true;
-                 node.transformComponent_->SetClickSpringEffectType(ParseClickEffect(val));
-            } },
-        { DOM_DIR,
-            [](const std::string& val, DOMNode& node) {
-                if (val == "rtl") {
-                    node.isRightToLeft_ = true;
-                } else if (val == "ltr") {
-                    node.isRightToLeft_ = false;
-                }
-            } },
-        { DOM_FOCUSABLE,
-            [](const std::string& value, DOMNode& node) {
-                node.focusable_.first = StringToBool(value);
-                node.focusable_.second = true; // Tag whether user defined focusable.
-            } },
-        { DOM_ID, [](const std::string& value, DOMNode& node) { node.hasIdAttr_ = true; } },
-#ifndef WEARABLE_PRODUCT
-        { DOM_SCENE_LABEL,
-            [](const std::string& value, DOMNode& node) {
-                static const LinearMapNode<SceneLabel> multimodalSceneMap[] = {
-                    { "audio", SceneLabel::AUDIO }, { "common", SceneLabel::COMMON },
-                    { "page", SceneLabel::PAGE }, { "switch", SceneLabel::SWITCH },
-                    { "video", SceneLabel::VIDEO },
-                };
-                auto iter = BinarySearchFindIndex(
-                    multimodalSceneMap, ArraySize(multimodalSceneMap), value.c_str());
-                if (iter != -1) {
-                    node.multimodalProperties_.scene = multimodalSceneMap[iter].value;
-                }
-            } },
-#endif
-        { DOM_SHOW,
-            [](const std::string& value, DOMNode& node) {
-                if (node.useLiteStyle_) {
-                    node.visibility_ = value == "true" ? VisibilityType::VISIBLE : VisibilityType::HIDDEN;
-                } else {
-                    node.SetShowAttr(value);
-                }
-                node.hasDisplayStyle_ = true;
-            } },
-#ifndef WEARABLE_PRODUCT
-        { DOM_SUBSCRIPT_FLAG,
-            [](const std::string& value, DOMNode& node) {
-                node.multimodalProperties_.useSubscript =
-                    (value == flagOn) || (value == flagAuto && node.IsSubscriptEnable());
-            } },
-        { DOM_SUBSCRIPT_LABEL,
-            [](const std::string& value, DOMNode& node) { node.multimodalProperties_.subscriptLabel = value; } },
-        { DOM_TOUCHABLE, [](const std::string& value, DOMNode& node) { node.touchable_ = StringToBool(value); } },
-        { DOM_VOICE_LABEL,
-            [](const std::string& value, DOMNode& node) { node.multimodalProperties_.voiceLabel = value; } },
-#endif
-    };
-
+    std::vector<std::pair<std::string, std::string>> tempAttrs;
     for (const auto& attr : attrs) {
-        if (attr.first == DOM_DISABLED) {
-            nodeDisabled_ = StringToBool(attr.second);
-        }
-
-        if (attr.first == DOM_BUTTON_WAITING) {
-            isWaiting_ = StringToBool(attr.second);
-        }
-
-        if (attr.first == DOM_CHECKED) {
-            isChecked_ = StringToBool(attr.second);
-        }
-
         if (SetSpecializedAttr(attr)) {
             continue;
+        } else {
+            tempAttrs.emplace_back(attr);
         }
-        auto operatorIter = BinarySearchFindIndex(attrSetters, ArraySize(attrSetters), attr.first.c_str());
-        if (operatorIter != -1) {
-            attrSetters[operatorIter].value(attr.second, *this);
-        }
+    }
+    if (declaration_) {
+        IsSubscriptEnable();
+        declaration_->SetAttr(tempAttrs);
     }
 }
 
@@ -509,12 +243,179 @@ void DOMNode::OnScrollBy(double dx, double dy, bool isSmooth)
 
 void DOMNode::SetShowAttr(const std::string& showValue)
 {
-    showAttr_ = showValue;
-    if (showValue == "false") {
-        display_ = DisplayType::NONE;
-    } else {
-        display_ = DisplayType::NO_SETTING;
+    if (!declaration_) {
+        return;
     }
+
+    auto& renderAttr = declaration_->MaybeResetAttribute<CommonRenderAttribute>(AttributeTag::COMMON_RENDER_ATTR);
+    if (renderAttr.IsValid()) {
+        renderAttr.show = showValue;
+    }
+    if (showValue == "false") {
+        SetDisplay(DisplayType::NONE);
+    } else {
+        SetDisplay(DisplayType::NO_SETTING);
+    }
+}
+
+bool DOMNode::ParseTransitionPropertyStyle(const std::string& transitionProperty)
+{
+    if (TRANSITION_PROPERTIES.find(transitionProperty) == TRANSITION_PROPERTIES.end()) {
+        return false;
+    }
+    transitionPropertyName_ = transitionProperty;
+    CreatePropertyAnimation(transitionPropertyName_);
+    return true;
+}
+
+bool DOMNode::ParseTransitionNameStyle(const std::string& transitionName)
+{
+    std::vector<std::string> transitions;
+    StringUtils::StringSpliter(transitionName, ' ', transitions);
+    if (transitions.size() != TRANSITION_NAME_LENGTH) {
+        LOGE("transition length is invalid");
+        return false;
+    }
+    transitionPropertyName_ = transitions[0];
+    transitionDuration_ = StringUtils::StringToDouble(transitions[1]) * MS_TO_S;
+    transitionTimeFunction_ = transitions[2];
+    transitionDelay_ = StringUtils::StringToDouble(transitions[3]) * MS_TO_S;
+
+    CreatePropertyAnimation(transitionPropertyName_);
+    return true;
+}
+
+void DOMNode::CreatePropertyAnimation(const std::string& property)
+{
+    propertyWidthAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
+    propertyHeightAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
+    propertyColorAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
+    static const std::unordered_map<std::string, void (*)(DOMNode&)> propertyAnimationMap = {
+        { DOM_WIDTH, [](DOMNode& node) {
+            float widthBegin = 0.0f;
+            float widthEnd = node.GetWidth().Value();
+            node.propertyWidthAnimation_ = node.SetPropertyFloatAnimationKeyframe(widthBegin, widthEnd);
+        } },
+        { DOM_HEIGHT, [](DOMNode& node) {
+            float heightBegin = 0.0f;
+            float heightEnd = node.GetHeight().Value();
+            node.propertyHeightAnimation_ = node.SetPropertyFloatAnimationKeyframe(heightBegin, heightEnd);
+        } },
+        { DOM_TRANSITION_BACKGROUND_COLOR, [](DOMNode& node) {
+            Color backgroundColorBegin = Color::TRANSPARENT;
+            Color backgroundColorEnd = node.GetBackGroundColor();
+            node.propertyColorAnimation_ =
+                    node.SetPropertyColorAnimationKeyframe(backgroundColorBegin, backgroundColorEnd);
+        } },
+    };
+
+    auto animationIter = propertyAnimationMap.find(property);
+    if (animationIter != propertyAnimationMap.end()) {
+        animationIter->second(*this);
+    }
+    if (property == "all") {
+        for (auto propertyAnimation : propertyAnimationMap) {
+            propertyAnimation.second(*this);
+        }
+    }
+}
+
+RefPtr<KeyframeAnimation<float>> DOMNode::SetPropertyFloatAnimationKeyframe(float begin, float end)
+{
+    auto propertyDimensionAnimation = AceType::MakeRefPtr<KeyframeAnimation<float>>();
+    auto keyframeBegin = AceType::MakeRefPtr<Keyframe<float>>(0.0f, begin);
+    auto keyframeEnd = AceType::MakeRefPtr<Keyframe<float>>(1.0f, end);
+    propertyDimensionAnimation->AddKeyframe(keyframeBegin);
+    propertyDimensionAnimation->AddKeyframe(keyframeEnd);
+    return propertyDimensionAnimation;
+}
+
+RefPtr<KeyframeAnimation<Color>> DOMNode::SetPropertyColorAnimationKeyframe(const Color& begin, const Color& end)
+{
+    auto propertyColorAnimation = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
+    auto keyframeBegin = AceType::MakeRefPtr<Keyframe<Color>>(0.0f, begin);
+    auto keyframeEnd = AceType::MakeRefPtr<Keyframe<Color>>(1.0f, end);
+    propertyColorAnimation->AddKeyframe(keyframeBegin);
+    propertyColorAnimation->AddKeyframe(keyframeEnd);
+    return propertyColorAnimation;
+}
+
+void DOMNode::TransitionOptionSetKeyframes(TweenOption& transitionOption)
+{
+    transitionOption.SetDuration(transitionDuration_);
+    transitionOption.SetFillMode(FillMode::FORWARDS);
+    transitionOption.SetCurve(CreateCurve(transitionTimeFunction_));
+    transitionOption.SetDelay(transitionDelay_);
+    if (propertyWidthAnimation_ && !propertyWidthAnimation_->GetKeyframes().empty()) {
+        transitionOption.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_WIDTH, propertyWidthAnimation_);
+    }
+    if (propertyHeightAnimation_ && !propertyHeightAnimation_->GetKeyframes().empty()) {
+        transitionOption.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_HEIGHT,
+            propertyHeightAnimation_);
+    }
+    if (propertyColorAnimation_ && !propertyColorAnimation_->GetKeyframes().empty()) {
+        transitionOption.SetColorAnimation(propertyColorAnimation_);
+    }
+}
+
+void DOMNode::SetStyle(const std::vector<std::pair<std::string, std::string>>& styles)
+{
+    std::vector<std::pair<std::string, std::string>> tempStyles;
+    for (const auto& style : styles) {
+        if ((style.first == DOM_TRANSITION_NAME) || (style.first == DOM_TRANSITION_PROPERTY_DURATION)) {
+            transitionStyleUpdated_ = true;
+        }
+        if (style.first == DOM_BACKGROUND_COLOR) {
+            isTransitionColor_ = true;
+        }
+        CachePseudoClassStyle(style);
+        if (style.first.find(DOM_PSEUDO_CLASS_SYMBOL) == std::string::npos) {
+            if (!SetCurrentStyle(style)) {
+                tempStyles.emplace_back(style);
+            }
+        } else {
+            tempStyles.emplace_back(style);
+        }
+    }
+    if (declaration_) {
+        declaration_->SetStyle(tempStyles);
+    }
+    OnSetStyleFinished();
+}
+
+bool DOMNode::SetCurrentStyle(const std::pair<std::string, std::string>& style)
+{
+    if (SetSpecializedStyle(style)) {
+        // If the subclass consumes this property, it will no longer look in the general property.
+        return true;
+    }
+    // Operator map for styles
+    static const std::unordered_map<std::string, void (*)(const std::string&, DOMNode&)> styleOperators = {
+        // Set width and height
+        { DOM_TRANSFORM, &DOMNode::SetTransform },
+        { DOM_TRANSITION_PROPERTY,
+            [](const std::string& val, DOMNode& node) {
+                node.ParseTransitionPropertyStyle(val);
+            } },
+        { DOM_TRANSITION_PROPERTY_DURATION,
+            [](const std::string& val, DOMNode& node) {
+                node.transitionDuration_ = StringUtils::StringToInt(val) * MS_TO_S;
+            } },
+        { DOM_TRANSITION_PROPERTY_TIMING_FUNCTION,
+            [](const std::string& val, DOMNode& node) {
+                node.transitionTimeFunction_ = val;
+            } },
+        { DOM_TRANSITION_PROPERTY_DELAY,
+            [](const std::string& val, DOMNode& node) {
+                node.transitionDelay_ = StringUtils::StringToInt(val) * MS_TO_S;
+            } },
+    };
+    auto operatorIter = styleOperators.find(style.first);
+    if (operatorIter != styleOperators.end()) {
+        operatorIter->second(style.second, *this);
+        return true;
+    }
+    return false;
 }
 
 void DOMNode::OnActive(bool isActive)
@@ -531,7 +432,17 @@ void DOMNode::OnFocus(bool isFocus)
 
 void DOMNode::OnChecked(bool isChecked)
 {
-    isChecked_ = isChecked;
+    if (declaration_) {
+        declaration_->SetIsChecked(isChecked);
+    }
+    UpdatePseudoStyle(true);
+}
+
+void DOMNode::OnHover(bool isHover)
+{
+    if (declaration_) {
+        declaration_->SetIsHover(isHover);
+    }
     UpdatePseudoStyle(true);
 }
 
@@ -557,59 +468,16 @@ void DOMNode::SetOnFocusClick(const EventMarker& eventMarker)
 
 bool DOMNode::IsNodeDisabled() const
 {
-    return nodeDisabled_;
+    return declaration_ ? declaration_->IsDisabled() : false;
 }
 
 void DOMNode::ResetDefaultStyles()
 {
-    width_ = Dimension(-1.0, DimensionUnit::PX);
-    height_ = Dimension(-1.0, DimensionUnit::PX);
-
-    paddingLeft_ = Dimension(0.0, DimensionUnit::PX);
-    paddingRight_ = Dimension(0.0, DimensionUnit::PX);
-    paddingTop_ = Dimension(0.0, DimensionUnit::PX);
-    paddingBottom_ = Dimension(0.0, DimensionUnit::PX);
-
-    marginLeft_ = Dimension(0.0, DimensionUnit::PX);
-    marginRight_ = Dimension(0.0, DimensionUnit::PX);
-    marginTop_ = Dimension(0.0, DimensionUnit::PX);
-    marginBottom_ = Dimension(0.0, DimensionUnit::PX);
-
-    flexGrow_ = 0.0;
-    flexShrink_ = 1.0;
-    flexBasis_ = 0.0;
-    flexWeight_ = 0.0;
-
-    minWidth_ = Dimension(0.0);
-    minHeight_ = Dimension(0.0);
-    maxWidth_ = Dimension(Size::INFINITE_SIZE);
-    maxHeight_ = Dimension(Size::INFINITE_SIZE);
-    displayIndex_ = 1;
-    aspectRatio_ = -1.0;
-
-    opacity_ = 1.0;
-
-    display_ = DisplayType::NO_SETTING;
-    hasDisplayStyle_ = false;
-    displayComponent_.Reset();
-    visibility_ = VisibilityType::NO_SETTING;
-    if (!showAttr_.empty()) {
-        hasDisplayStyle_ = true;
-        SetShowAttr(showAttr_);
+    if (declaration_) {
+        declaration_->ResetDefaultStyles();
     }
 
-    borderLeftEdge_ = BorderEdge(Color::BLACK, Dimension(), BorderStyle::SOLID);
-    borderTopEdge_ = BorderEdge(Color::BLACK, Dimension(), BorderStyle::SOLID);
-    borderRightEdge_ = BorderEdge(Color::BLACK, Dimension(), BorderStyle::SOLID);
-    borderBottomEdge_ = BorderEdge(Color::BLACK, Dimension(), BorderStyle::SOLID);
-    border_ = Border(borderLeftEdge_, borderTopEdge_, borderRightEdge_, borderBottomEdge_);
-
-    backDecoration_ = AceType::MakeRefPtr<Decoration>();
-    frontDecoration_ = AceType::MakeRefPtr<Decoration>();
-    gradient_ = Gradient();
-
-    backgroundImage_ = AceType::MakeRefPtr<BackgroundImage>();
-
+    displayComponent_.Reset();
     if (transformComponent_) {
         transformComponent_->ResetTransform();
     }
@@ -648,11 +516,39 @@ void DOMNode::UpdatePseudoStyleByStatus(int32_t status, bool isBackendChange)
     auto nonePseudoStylesIter = pseudoClassStyleMap_.find(STATE_NORMAL);
     if (status != STATE_NORMAL && nonePseudoStylesIter != pseudoClassStyleMap_.end()) {
         for (const auto& noneTypeStyle : nonePseudoStylesIter->second) {
-            SetCurrentStyle(noneTypeStyle);
+            if (!SetCurrentStyle(noneTypeStyle)) {
+                declaration_->SetCurrentStyle(noneTypeStyle);
+            }
         }
     }
     for (const auto& style : matchedStyleMap) {
-        SetCurrentStyle(style);
+        if (!SetCurrentStyle(style)) {
+            declaration_->SetCurrentStyle(style);
+        }
+    }
+
+    // do not move this for block into the up one
+    for (const auto& style : matchedStyleMap) {
+        if (style.first == DOM_TRANSITION_NAME) {
+            if (isTransitionNameUpdateFirst_) {
+                isTransitionNameUpdateFirst_ = false;
+            } else {
+                ParseTransitionNameStyle(style.second);
+                propTransitionOption_ = TweenOption();
+                TransitionOptionSetKeyframes(propTransitionOption_);
+                transitionStyleUpdated_ = true;
+            }
+        }
+        if (style.first == DOM_TRANSITION_PROPERTY_DURATION) {
+            if (isTransitionDurationUpdateFirst_) {
+                isTransitionDurationUpdateFirst_ = false;
+            } else {
+                CreatePropertyAnimation(transitionPropertyName_);
+                propTransitionOption_ = TweenOption();
+                TransitionOptionSetKeyframes(propTransitionOption_);
+                transitionStyleUpdated_ = true;
+            }
+        }
     }
     if (isBackendChange) {
         auto pipelineContext = pipelineContext_.Upgrade();
@@ -663,6 +559,7 @@ void DOMNode::UpdatePseudoStyleByStatus(int32_t status, bool isBackendChange)
         if (GetTag() != DOM_NODE_TAG_SPAN) {
             UpdateUiComponents();
         }
+        UpdateSpecializedComponentWithDeclaration();
         PrepareSpecializedComponent();
         CompositeComponents();
         rootComponent_->MarkNeedUpdate();
@@ -674,20 +571,26 @@ void DOMNode::UpdatePseudoStyleByStatus(int32_t status, bool isBackendChange)
 uint32_t DOMNode::CalculatePseudoStatus() const
 {
     uint32_t status = STATE_NORMAL;
+    if (!declaration_) {
+        return STATE_NORMAL;
+    }
     if (isActive_) {
         status |= STATE_ACTIVE;
     }
-    if (nodeDisabled_) {
+    if (declaration_->IsDisabled()) {
         status |= STATE_DISABLED;
     }
     if (isFocus_) {
         status |= STATE_FOCUS;
     }
-    if (isChecked_) {
+    if (declaration_->IsChecked()) {
         status |= STATE_CHECKED;
     }
-    if (isWaiting_) {
+    if (declaration_->IsWaiting()) {
         status |= STATE_WAITING;
+    }
+    if (declaration_->IsHover()) {
+        status |= STATE_HOVERED;
     }
     return status;
 }
@@ -732,19 +635,6 @@ void DOMNode::UpdatePseudoStyle(bool isBackendChange)
         TaskExecutor::TaskType::UI);
 }
 
-void DOMNode::SetStyle(const std::vector<std::pair<std::string, std::string>>& styles)
-{
-    ACE_SCOPED_TRACE("DOMNode::SetStyle");
-
-    for (const auto& style : styles) {
-        CachePseudoClassStyle(style);
-        if (style.first.find(DOM_PSEUDO_CLASS_SYMBOL) == std::string::npos) {
-            SetCurrentStyle(style);
-        }
-    }
-    OnSetStyleFinished();
-}
-
 void DOMNode::CachePseudoClassStyle(const std::pair<std::string, std::string>& pseudoClassStyle)
 {
     uint32_t pseudoClassType = STATE_NORMAL;
@@ -770,6 +660,10 @@ void DOMNode::CachePseudoClassStyle(const std::pair<std::string, std::string>& p
         pseudoClassType |= STATE_WAITING;
     }
 
+    if (styleKey.find(DOM_HOVER_PSEUDO_CLASS) != std::string::npos) {
+        pseudoClassType |= STATE_HOVERED;
+    }
+
     cachedPseudoType_ |= pseudoClassType;
 
     auto pseudoSymbolLocation = styleKey.find(DOM_PSEUDO_CLASS_SYMBOL);
@@ -790,508 +684,6 @@ void DOMNode::CachePseudoClassStyle(const std::pair<std::string, std::string>& p
     pseudoClassStyleMap_.emplace(pseudoClassType, newPseudoMap);
 }
 
-void DOMNode::SetCurrentStyle(const std::pair<std::string, std::string>& style)
-{
-    if (SetSpecializedStyle(style)) {
-        // If the subclass consumes this property, it will no longer look in the general property.
-        return;
-    }
-    // Operator map for styles
-    static const std::unordered_map<std::string, void (*)(const std::string&, DOMNode&)> styleOperators = {
-        // Set width and height
-        { DOM_WIDTH, [](const std::string& val, DOMNode& node) {
-                    node.width_ = node.ParseDimension(val);
-                    node.hasBoxStyle_ = true;
-                } },
-        { DOM_HEIGHT, [](const std::string& val, DOMNode& node) {
-                    node.height_ = node.ParseDimension(val);
-                    node.hasBoxStyle_ = true;
-                } },
-
-        // Set padding
-        { DOM_PADDING, &DOMNode::SetPaddingOverall},
-        { DOM_PADDING_LEFT, [](const std::string& val, DOMNode& node) {
-                            node.paddingLeft_ = node.ParseDimension(val);
-                            node.hasBoxStyle_ = true;
-                        } },
-        { DOM_PADDING_RIGHT, [](const std::string& val, DOMNode& node) {
-                            node.paddingRight_ = node.ParseDimension(val);
-                            node.hasBoxStyle_ = true;
-                        } },
-        { DOM_PADDING_TOP, [](const std::string& val, DOMNode& node) {
-                            node.paddingTop_ = node.ParseDimension(val);
-                            node.hasBoxStyle_ = true;
-                        } },
-        { DOM_PADDING_BOTTOM, [](const std::string& val, DOMNode& node) {
-                            node.paddingBottom_ = node.ParseDimension(val);
-                            node.hasBoxStyle_ = true;
-                        } },
-        { DOM_PADDING_START, [](const std::string& val, DOMNode& node) {
-                            if (node.IsRightToLeft()) {
-                                node.paddingRight_ = node.ParseDimension(val);
-                            } else {
-                                node.paddingLeft_ = node.ParseDimension(val);
-                            }
-                            node.hasBoxStyle_ = true;
-                        } },
-        { DOM_PADDING_END, [](const std::string& val, DOMNode& node) {
-                            if (node.IsRightToLeft()) {
-                                node.paddingLeft_ = node.ParseDimension(val);
-                            } else {
-                                node.paddingRight_ = node.ParseDimension(val);
-                            }
-                            node.hasBoxStyle_ = true;
-                        } },
-        // Set margin
-        { DOM_MARGIN, &DOMNode::SetMarginOverall},
-        { DOM_MARGIN_LEFT, [](const std::string& val, DOMNode& node) {
-                            node.marginLeft_ = node.ParseDimension(val);
-                            node.hasBoxStyle_ = true;
-                        } },
-        { DOM_MARGIN_RIGHT, [](const std::string& val, DOMNode& node) {
-                            node.marginRight_ = node.ParseDimension(val);
-                            node.hasBoxStyle_ = true;
-                        } },
-        { DOM_MARGIN_TOP, [](const std::string& val, DOMNode& node) {
-                            node.marginTop_ = node.ParseDimension(val);
-                            node.hasBoxStyle_ = true;
-                        } },
-        { DOM_MARGIN_BOTTOM, [](const std::string& val, DOMNode& node) {
-                            node.marginBottom_ = node.ParseDimension(val);
-                            node.hasBoxStyle_ = true;
-                        } },
-        { DOM_MARGIN_START, [](const std::string& val, DOMNode& node) {
-                            if (node.IsRightToLeft()) {
-                                node.marginRight_ = node.ParseDimension(val);
-                            } else {
-                                node.marginLeft_ = node.ParseDimension(val);
-                            }
-                            node.hasBoxStyle_ = true;
-                        } },
-        { DOM_MARGIN_END, [](const std::string& val, DOMNode& node) {
-                            if (node.IsRightToLeft()) {
-                                node.marginLeft_ = node.ParseDimension(val);
-                            } else {
-                                node.marginRight_ = node.ParseDimension(val);
-                            }
-                            node.hasBoxStyle_ = true;
-                        } },
-        { DOM_LAYOUT_IN_BOX, [](const std::string& val, DOMNode& node) {
-                            node.layoutInBox_ = StringToBool(val);
-                            node.hasBoxStyle_ = true;
-                        } },
-        // Set flex
-        { DOM_FLEX, [](const std::string& val, DOMNode& node) { node.flexGrow_ = StringToDouble(val); } },
-        { DOM_FLEX_GROW, [](const std::string& val, DOMNode& node) { node.flexGrow_ = StringToDouble(val); } },
-        { DOM_FLEX_SHRINK, [](const std::string& val, DOMNode& node) { node.flexShrink_ = StringToDouble(val); } },
-        { DOM_FLEX_BASIS, [](const std::string& val, DOMNode& node) { node.flexBasis_ = StringToDouble(val); } },
-        { DOM_FLEX_WEIGHT, [](const std::string& val, DOMNode& node) { node.flexWeight_ = StringToDouble(val); } },
-        { DOM_MIN_WIDTH, [](const std::string& val, DOMNode& node) { node.minWidth_ = node.ParseDimension(val); } },
-        { DOM_MIN_HEIGHT, [](const std::string& val, DOMNode& node) { node.minHeight_ = node.ParseDimension(val); } },
-        { DOM_MAX_WIDTH, [](const std::string& val, DOMNode& node) { node.maxWidth_ = node.ParseDimension(val); } },
-        { DOM_MAX_HEIGHT, [](const std::string& val, DOMNode& node) { node.maxHeight_ = node.ParseDimension(val); } },
-        { DOM_DISPLAY_INDEX, [](const std::string& val, DOMNode& node) { node.displayIndex_ = StringToInt(val); } },
-        { DOM_ASPECT_RATIO, [](const std::string& val, DOMNode& node) { node.aspectRatio_ = StringToDouble(val); } },
-        { DOM_ALIGN_SELF, [](const std::string& val, DOMNode& node) { node.alignSelf_ = val; } },
-        // Set display
-        { DOM_OPACITY, [](const std::string& val, DOMNode& node) {
-                        node.opacity_ = node.ParseDouble(val);
-                        node.hasDisplayStyle_ = true;
-                    } },
-        { DOM_OVERFLOW_STYLE, [](const std::string& val, DOMNode& node) {
-                node.overflow_ = ConvertStrToOverflow(val);
-                node.hasOverflowStyle_ = true;
-            } },
-        { DOM_DISPLAY,
-            [](const std::string& val, DOMNode& node) {
-                node.display_ = (val == DOM_DISPLAY_NONE)
-                                    ? DisplayType::NONE
-                                    : (val == DOM_DISPLAY_GRID) ? DisplayType::GRID : DisplayType::FLEX;
-                node.hasDisplayStyle_ = true;
-            } },
-        { DOM_VISIBILITY,
-            [](const std::string& val, DOMNode& node) {
-                node.visibility_ = (val == DOM_VISIBILITY_HIDDEN) ? VisibilityType::HIDDEN : VisibilityType::VISIBLE;
-                node.hasDisplayStyle_ = true;
-            } },
-        // Set border
-        { BORDER, &DOMNode::SetBorderOverall},
-        // Set border width
-        { DOM_BORDER_WIDTH, &DOMNode::SetBorderWidthForFourEdges},
-        { DOM_BORDER_LEFT_WIDTH, [](const std::string& val, DOMNode& node) {
-                                node.borderLeftEdge_.SetWidth(node.ParseDimension(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasBorderStyle_ = true;
-                            } },
-        { DOM_BORDER_RIGHT_WIDTH, [](const std::string& val, DOMNode& node) {
-                                node.borderRightEdge_.SetWidth(node.ParseDimension(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasBorderStyle_ = true;
-                            } },
-        { DOM_BORDER_TOP_WIDTH, [](const std::string& val, DOMNode& node) {
-                                node.borderTopEdge_.SetWidth(node.ParseDimension(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasBorderStyle_ = true;
-                            } },
-        { DOM_BORDER_BOTTOM_WIDTH, [](const std::string& val, DOMNode& node) {
-                                node.borderBottomEdge_.SetWidth(node.ParseDimension(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasBorderStyle_ = true;
-                            } },
-        // Set border color
-        { DOM_BORDER_COLOR, &DOMNode::SetBorderColorForFourEdges},
-        { DOM_BORDER_LEFT_COLOR, [](const std::string& val, DOMNode& node) {
-                                node.borderLeftEdge_.SetColor(node.ParseColor(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasBorderStyle_ = true;
-                            } },
-        { DOM_BORDER_RIGHT_COLOR, [](const std::string& val, DOMNode& node) {
-                                node.borderRightEdge_.SetColor(node.ParseColor(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasBorderStyle_ = true;
-                            } },
-        { DOM_BORDER_TOP_COLOR, [](const std::string& val, DOMNode& node) {
-                                node.borderTopEdge_.SetColor(node.ParseColor(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasBorderStyle_ = true;
-                            } },
-        { DOM_BORDER_BOTTOM_COLOR, [](const std::string& val, DOMNode& node) {
-                                    node.borderBottomEdge_.SetColor(node.ParseColor(val));
-                                    node.hasDecorationStyle_ = true;
-                                    node.hasBorderStyle_ = true;
-                                } },
-        // Set border radius
-        { DOM_BORDER_TOP_LEFT_RADIUS, [](const std::string& val, DOMNode& node) {
-                                        node.border_.SetTopLeftRadius(Radius(node.ParseDimension(val)));
-                                        node.hasDecorationStyle_ = true;
-                                        node.hasBorderStyle_ = true;
-                                        node.hasBorderRadiusStyle_ = true;
-                                    } },
-        { DOM_BORDER_TOP_RIGHT_RADIUS, [](const std::string& val, DOMNode& node) {
-                                        node.border_.SetTopRightRadius(Radius(node.ParseDimension(val)));
-                                        node.hasDecorationStyle_ = true;
-                                        node.hasBorderStyle_ = true;
-                                        node.hasBorderRadiusStyle_ = true;
-                                    } },
-        { DOM_BORDER_BOTTOM_LEFT_RADIUS, [](const std::string& val, DOMNode& node) {
-                                        node.border_.SetBottomLeftRadius(Radius(node.ParseDimension(val)));
-                                        node.hasDecorationStyle_ = true;
-                                        node.hasBorderRadiusStyle_ = true;
-                                    } },
-        { DOM_BORDER_BOTTOM_RIGHT_RADIUS, [](const std::string& val, DOMNode& node) {
-                                        node.border_.SetBottomRightRadius(Radius(node.ParseDimension(val)));
-                                        node.hasDecorationStyle_ = true;
-                                        node.hasBorderStyle_ = true;
-                                        node.hasBorderRadiusStyle_ = true;
-                                    } },
-        { DOM_BORDER_RADIUS, [](const std::string& val, DOMNode& node) {
-                            node.border_.SetBorderRadius(Radius(node.ParseDimension(val)));
-                            node.hasDecorationStyle_ = true;
-                            node.hasBorderStyle_ = true;
-                            node.hasBorderRadiusStyle_ = true;
-                        } },
-        // Set border style
-        { DOM_BORDER_LEFT_STYLE, [](const std::string& val, DOMNode& node) {
-                                node.borderLeftEdge_.SetStyle(ConvertStrToBorderStyle(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasBorderStyle_ = true;
-                            } },
-        { DOM_BORDER_RIGHT_STYLE, [](const std::string& val, DOMNode& node) {
-                                    node.borderRightEdge_.SetStyle(ConvertStrToBorderStyle(val));
-                                    node.hasDecorationStyle_ = true;
-                                    node.hasBorderStyle_ = true;
-                                } },
-        { DOM_BORDER_TOP_STYLE, [](const std::string& val, DOMNode& node) {
-                                node.borderTopEdge_.SetStyle(ConvertStrToBorderStyle(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasBorderStyle_ = true;
-                            } },
-        { DOM_BORDER_BOTTOM_STYLE, [](const std::string& val, DOMNode& node) {
-                                    node.borderBottomEdge_.SetStyle(ConvertStrToBorderStyle(val));
-                                    node.hasDecorationStyle_ = true;
-                                    node.hasBorderStyle_ = true;
-                                } },
-        { DOM_BORDER_STYLE, &DOMNode::SetBorderStyleForFourEdges},
-        // Set position
-        { DOM_POSITION,
-            [](const std::string& val, DOMNode& node) {
-                node.position_ = val == DOM_POSITION_FIXED
-                                     ? PositionType::FIXED
-                                     : val == DOM_POSITION_ABSOLUTE ? PositionType::ABSOLUTE : PositionType::RELATIVE;
-                node.hasPositionStyle_ = true;
-            } },
-        { DOM_POSITION_LEFT,
-            [](const std::string& val, DOMNode& node) {
-                if (!val.empty()) {
-                    node.left_ = node.ParseDimension(val);
-                    node.hasPositionStyle_ = true;
-                    node.hasLeft_ = true;
-                }
-            } },
-        { DOM_POSITION_RIGHT,
-            [](const std::string& val, DOMNode& node) {
-                if (!val.empty()) {
-                    node.right_ = node.ParseDimension(val);
-                    node.hasPositionStyle_ = true;
-                    node.hasRight_ = true;
-                }
-            } },
-        { DOM_POSITION_TOP,
-            [](const std::string& val, DOMNode& node) {
-                if (!val.empty()) {
-                    node.top_ = node.ParseDimension(val);
-                    node.hasPositionStyle_ = true;
-                    node.hasTop_ = true;
-                }
-            } },
-        { DOM_POSITION_BOTTOM,
-            [](const std::string& val, DOMNode& node) {
-                if (!val.empty()) {
-                    node.bottom_ = node.ParseDimension(val);
-                    node.hasPositionStyle_ = true;
-                    node.hasBottom_ = true;
-                }
-            } },
-        // Set background color and image
-        { DOM_BACKGROUND_COLOR, [](const std::string& val, DOMNode& node) {
-                                node.backDecoration_->SetBackgroundColor(node.ParseColor(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasBackGroundColor_ = true;
-                            } },
-        { DOM_BACKGROUND_IMAGE, [](const std::string& val, DOMNode& node) {
-                                node.backgroundImage_->SetSrc(val);
-                                node.backDecoration_->SetImage(node.backgroundImage_);
-                                node.hasDecorationStyle_ = true;
-                            } },
-        // Set background color and image
-        { DOM_BOX_SHADOW_H, [](const std::string& val, DOMNode& node) {
-                                node.shadow_.SetOffsetX(StringToDouble(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasShadowStyle_ = true;
-                            } },
-        { DOM_BOX_SHADOW_V, [](const std::string& val, DOMNode& node) {
-                                node.shadow_.SetOffsetY(StringToDouble(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasShadowStyle_ = true;
-                            } },
-        { DOM_BOX_SHADOW_BLUR, [](const std::string& val, DOMNode& node) {
-                                node.shadow_.SetBlurRadius(StringToDouble(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasShadowStyle_ = true;
-                            } },
-        { DOM_BOX_SHADOW_SPREAD, [](const std::string& val, DOMNode& node) {
-                                node.shadow_.SetSpreadRadius(StringToDouble(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasShadowStyle_ = true;
-                            } },
-        { DOM_BOX_SHADOW_COLOR, [](const std::string& val, DOMNode& node) {
-                                if (val.empty()) {
-                                    node.shadow_.SetColor(Color::BLACK);
-                                    return;
-                                }
-                                node.shadow_.SetColor(node.ParseColor(val));
-                                node.hasDecorationStyle_ = true;
-                                node.hasShadowStyle_ = true;
-                            } },
-
-        { DOM_BACKGROUND_IMAGE_SIZE, &DOMNode::SetBackgroundImageSize },
-        { DOM_BACKGROUND_IMAGE_POSITION, &DOMNode::SetBackgroundImagePosition },
-        { DOM_BACKGROUND_IMAGE_REPEAT, [](const std::string& val, DOMNode& node) {
-                                        node.backgroundImage_->SetImageRepeat(ConvertStrToImageRepeat(val));
-                                        node.hasDecorationStyle_ = true;
-                                    } },
-        { DOM_BACKGROUND, &DOMNode::SetBackground },
-        { DOM_TRANSFORM, &DOMNode::SetTransform },
-        { DOM_TRANSFORM_ORIGIN,
-            [](const std::string& val, DOMNode& node) {
-                if (!node.transformComponent_) {
-                    node.transformComponent_ = AceType::MakeRefPtr<TransformComponent>();
-                }
-                std::vector<std::string> offsets;
-                StringUtils::StringSpliter(val, ' ', offsets);
-                if (offsets.size() == TRANSFORM_SINGLE) {
-                    Dimension originDimensionX = TRANSFORM_ORIGIN_DEFAULT;
-                    Dimension originDimensionY = TRANSFORM_ORIGIN_DEFAULT;
-                    // for Enum
-                    if (CheckTransformEnum(val)) {
-                        auto resultX = ConvertStrToTransformOrigin(val, Axis::HORIZONTAL);
-                        if (resultX.first) {
-                            originDimensionX = resultX.second;
-                        }
-                        auto resultY = ConvertStrToTransformOrigin(val, Axis::VERTICAL);
-                        if (resultY.first) {
-                            originDimensionY = resultY.second;
-                        }
-                    } else {
-                        // for Dimension
-                        originDimensionX = node.ParseDimension(val);
-                    }
-                    node.tweenOption_.SetTransformOrigin(originDimensionX, originDimensionY);
-                    node.transformComponent_->SetOriginDimension(DimensionOffset(originDimensionX, originDimensionY));
-                } else if (offsets.size() == TRANSFORM_DUAL) {
-                    Dimension originDimensionX = TRANSFORM_ORIGIN_DEFAULT;
-                    Dimension originDimensionY = TRANSFORM_ORIGIN_DEFAULT;
-                    if (CheckTransformEnum(offsets[0])) {
-                        auto result = ConvertStrToTransformOrigin(offsets[0], Axis::HORIZONTAL);
-                        if (result.first) {
-                            originDimensionX = result.second;
-                        }
-                    } else {
-                        originDimensionX = node.ParseDimension(offsets[0]);
-                    }
-
-                    if (CheckTransformEnum(offsets[1])) {
-                        auto result = ConvertStrToTransformOrigin(offsets[1], Axis::VERTICAL);
-                        if (result.first) {
-                            originDimensionY = result.second;
-                        }
-                    } else {
-                        originDimensionY = node.ParseDimension(offsets[1]);
-                    }
-                    node.tweenOption_.SetTransformOrigin(originDimensionX, originDimensionY);
-                    node.transformComponent_->SetOriginDimension(DimensionOffset(originDimensionX, originDimensionY));
-                }
-            } },
-        { DOM_ANIMATION_DELAY, [](const std::string& val, DOMNode& node) {
-                if (val.find("ms") != std::string::npos) {
-                    node.tweenOption_.SetDelay(StringUtils::StringToInt(val));
-                } else {
-                    node.tweenOption_.SetDelay(StringUtils::StringToInt(val) * MS_TO_S);
-                }
-            } },
-        { DOM_ANIMATION_DURATION, [](const std::string& val, DOMNode& node) {
-                if (val.find("ms") != std::string::npos) {
-                    node.tweenOption_.SetDuration(StringUtils::StringToInt(val));
-                } else {
-                    node.tweenOption_.SetDuration(StringUtils::StringToInt(val) * MS_TO_S);
-                }
-            } },
-        { DOM_ANIMATION_ITERATION_COUNT,
-            [](const std::string& val, DOMNode& node) {
-                node.tweenOption_.SetIteration(StringUtils::StringToInt(val));
-            } },
-        { DOM_ANIMATION_TIMING_FUNCTION,
-            [](const std::string& val, DOMNode& node) { node.tweenOption_.SetCurve(CreateCurve(val)); } },
-        { DOM_ANIMATION_FILL_MODE,
-            [](const std::string& val, DOMNode& node) { node.tweenOption_.SetFillMode(StringToFillMode(val)); } },
-        { DOM_ANIMATION_DIRECTION,
-          [](const std::string& val, DOMNode& node) {
-                node.tweenOption_.SetAnimationDirection(StringToAnimationDirection(val));
-          } },
-
-        { DOM_TRANSITION_DURATION, [](const std::string& val, DOMNode& node) {
-                if (val.find("ms") != std::string::npos) {
-                    node.transitionEnterOption_.SetDuration(StringUtils::StringToInt(val));
-                    node.transitionExitOption_.SetDuration(StringUtils::StringToInt(val));
-                } else {
-                    node.transitionEnterOption_.SetDuration(StringUtils::StringToInt(val) * MS_TO_S);
-                    node.transitionExitOption_.SetDuration(StringUtils::StringToInt(val) * MS_TO_S);
-                }
-            } },
-        { DOM_TRANSITION_TIMING_FUNCTION, [](const std::string& val, DOMNode& node) {
-                node.transitionEnterOption_.SetCurve(CreateCurve(val));
-                node.transitionExitOption_.SetCurve(CreateCurve(val));
-            } },
-        { DOM_SHARED_TRANSITION_TIMING_FUNCTION,
-            [](const std::string& val, DOMNode& node) { node.sharedTransitionOption_.SetCurve(CreateCurve(val)); } },
-        { DOM_SHARED_TRANSITION_EFFECT,
-            [](const std::string& val, DOMNode& node) { node.sharedEffect_ = ParseSharedEffect(val, node); } },
-        // set filter
-        { DOM_FILTER,
-            [](const std::string& val, DOMNode& node) {
-                node.hasFrontDecorationStyle_ = true;
-                if (!node.frontDecoration_) {
-                    node.frontDecoration_ = AceType::MakeRefPtr<Decoration>();
-                }
-                auto radius = ParseFunctionValue<Dimension>(val, DOM_BLUR, StringToDimension);
-                if (radius.IsValid()) {
-                    node.frontDecoration_->SetBlurRadius(radius);
-                } else {
-                    node.frontDecoration_->SetBlurRadius(Dimension {});
-                }
-            } },
-        // set backdrop-filter
-        { DOM_BACKDROP_FILTER,
-            [](const std::string& val, DOMNode& node) {
-                node.hasDecorationStyle_ = true;
-                auto radius = ParseFunctionValue<Dimension>(val, DOM_BLUR, StringToDimension);
-                if (radius.IsValid()) {
-                    node.backDecoration_->SetBlurRadius(radius);
-                } else {
-                    node.backDecoration_->SetBlurRadius(Dimension {});
-                }
-            } },
-        // card transition
-        { DOM_TRANSITION_EFFECT,
-            [](const std::string& val, DOMNode& node) {
-                node.hasTransitionAnimation_ = true;
-                if (!node.transformComponent_) {
-                    node.transformComponent_ = AceType::MakeRefPtr<TransformComponent>();
-                }
-                node.transformComponent_->SetTransitionEffect(ParseTransitionEffect(val));
-            } },
-        { DOM_WINDOW_FILTER,
-            [](const std::string& val, DOMNode& node) {
-                node.hasDecorationStyle_ = true;
-
-                std::vector<std::string> offsets;
-                StringUtils::StringSpliter(val, ' ', offsets);
-                // progress
-                if (offsets.size() >= SINGLE_VALUE) {
-                    auto value = ParseFunctionValue<Dimension>(offsets[0], DOM_BLUR, StringToDimension);
-                    if (value.Unit() == DimensionUnit::PERCENT) {
-                        auto progress = value.Value();
-                        if (GreatNotEqual(progress, 0.0) && LessOrEqual(progress, 1.0)) {
-                            node.backDecoration_->SetWindowBlurProgress(static_cast<float>(progress));
-                        }
-                    } else {
-                        node.backDecoration_->SetWindowBlurProgress(static_cast<float>(0.0f));
-                    }
-                }
-                // style
-                if (offsets.size() >= TWO_VALUES) {
-                    auto value = StrToWindowBlurStyle(offsets[1]);
-                    node.backDecoration_->SetWindowBlurStyle(value);
-                }
-            } },
-        { DOM_ZINDEX,
-            [](const std::string& val, DOMNode& node) {
-                node.zIndex_ = StringToInt(val);
-            } },
-        // scroll bar
-        { DOM_SCROLL_OVER_SCROLL_EFFECT,
-            [](const std::string& val, DOMNode& node) {
-                if (val == DOM_SCROLL_EFFECT_SPRING) {
-                    node.edgeEffect_ = EdgeEffect::SPRING;
-                } else if (val == DOM_SCROLL_EFFECT_FADE) {
-                    node.edgeEffect_ = EdgeEffect::FADE;
-                } else {
-                    node.edgeEffect_ = EdgeEffect::NONE;
-                }
-            } },
-        { DOM_SCROLL_SCROLLBAR_COLOR,
-            [](const std::string& val, DOMNode& node) {
-                node.scrollBarColor_.first = true;
-                node.scrollBarColor_.second = node.ParseColor(val);
-            } },
-        { DOM_SCROLL_SCROLLBAR_WIDTH,
-            [](const std::string& val, DOMNode& node) {
-                node.scrollBarWidth_.first = true;
-                auto width = node.ParseDimension(val);
-                node.scrollBarWidth_.second = width.IsValid() ? width : Dimension();
-            } },
-    };
-    auto operatorIter = styleOperators.find(style.first);
-    if (operatorIter != styleOperators.end()) {
-        operatorIter->second(style.second, *this);
-    }
-    static const std::unordered_set<std::string> displayStyleSet = { DOM_OPACITY, DOM_DISPLAY, DOM_VISIBILITY };
-    if (displayStyleSet.find(style.first) != displayStyleSet.end() &&
-        AceApplicationInfo::GetInstance().GetIsCardType() && showAttr_ == "false") {
-        SetShowAttr(showAttr_);
-    }
-}
-
 void DOMNode::GenerateComponentNode()
 {
     UpdatePseudoStyle(false);
@@ -1308,6 +700,7 @@ void DOMNode::GenerateComponentNode()
         PrepareScrollComponent();
 #endif
     }
+    UpdateSpecializedComponentWithDeclaration();
     PrepareSpecializedComponent();
     CompositeComponents();
     // Relative and absolute position needs to update the top component props.
@@ -1320,7 +713,14 @@ void DOMNode::GenerateComponentNode()
         }
     }
     if (rootChild) {
-        rootChild->SetZIndex(zIndex_);
+        int32_t zIndex = 0;
+        if (declaration_) {
+            auto& commonStyle = static_cast<CommonStyle&>(declaration_->GetStyle(StyleTag::COMMON_STYLE));
+            if (commonStyle.IsValid()) {
+                zIndex = commonStyle.zIndex;
+            }
+        }
+        rootChild->SetZIndex(zIndex);
     }
     rootComponent_->MarkNeedUpdate();
 }
@@ -1339,8 +739,8 @@ void DOMNode::AddNode(const RefPtr<DOMNode>& node, int32_t slot)
     auto pos = children_.begin();
     std::advance(pos, slot);
     children_.insert(pos, node);
-    if (node->position_ != PositionType::FIXED) {
-        if (!node->IsProxy() && display_ == DisplayType::NONE) {
+    if (node->GetPosition() != PositionType::FIXED) {
+        if (!node->IsProxy() && GetDisplay() == DisplayType::NONE) {
             node->GenerateComponentNode();
         }
         OnChildNodeAdded(node, slot);
@@ -1353,343 +753,56 @@ void DOMNode::RemoveNode(const RefPtr<DOMNode>& node)
         return;
     }
     children_.remove_if([node](const RefPtr<DOMNode>& child) { return node->GetNodeId() == child->GetNodeId(); });
-    if (node->position_ != PositionType::FIXED) {
+    if (node->GetPosition() != PositionType::FIXED) {
         OnChildNodeRemoved(node);
     }
 }
 
 void DOMNode::SetDisplayStyle()
 {
-    switch (display_) {
+    switch (GetDisplay()) {
         case DisplayType::NONE:
             visible_ = VisibleType::GONE;
             break;
         case DisplayType::GRID:
         case DisplayType::FLEX:
         default:
-            visible_ = (visibility_ == VisibilityType::HIDDEN) ? VisibleType::INVISIBLE : VisibleType::VISIBLE;
+            VisibilityType visibility = VisibilityType::NO_SETTING;
+            if (declaration_) {
+                auto& visibilityStyle =
+                    static_cast<CommonVisibilityStyle&>(declaration_->GetStyle(StyleTag::COMMON_VISIBILITY_STYLE));
+                if (visibilityStyle.IsValid()) {
+                    visibility = visibilityStyle.visibility;
+                }
+            }
+            visible_ = (visibility == VisibilityType::HIDDEN) ? VisibleType::INVISIBLE : VisibleType::VISIBLE;
             break;
     }
-}
-
-void SetBgImgSizeX(const BackgroundImageSizeType type, const double value, BackgroundImageSize& bgImgSize)
-{
-    bgImgSize.SetSizeTypeX(type);
-    bgImgSize.SetSizeValueX(value);
-}
-
-void SetBgImgSizeY(const BackgroundImageSizeType type, const double value, BackgroundImageSize& bgImgSize)
-{
-    bgImgSize.SetSizeTypeY(type);
-    bgImgSize.SetSizeValueY(value);
 }
 
 const RefPtr<PageTransitionComponent>& DOMNode::BuildTransitionComponent()
 {
     transitionComponent_ = AceType::MakeRefPtr<PageTransitionComponent>();
-    if (isRightToLeft_) {
-        transitionComponent_->SetTextDirection(TextDirection::RTL);
+    if (!declaration_) {
+        return transitionComponent_;
     }
-    if (transitionEnterOption_.IsValid() || transitionExitOption_.IsValid()) {
-        if (!transitionEnterOption_.GetCurve()) {
+
+    transitionComponent_->SetTextDirection(declaration_->IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+    auto& pageTransitionStyle =
+        declaration_->MaybeResetStyle<CommonPageTransitionStyle>(StyleTag::COMMON_PAGE_TRANSITION_STYLE);
+    if (!pageTransitionStyle.IsValid()) {
+        return transitionComponent_;
+    }
+    if (pageTransitionStyle.transitionEnterOption.IsValid() || pageTransitionStyle.transitionExitOption.IsValid()) {
+        if (!pageTransitionStyle.transitionEnterOption.GetCurve()) {
             // use FRICTION as transition default curve.
-            transitionEnterOption_.SetCurve(Curves::FRICTION);
-            transitionExitOption_.SetCurve(Curves::FRICTION);
+            pageTransitionStyle.transitionEnterOption.SetCurve(Curves::FRICTION);
+            pageTransitionStyle.transitionExitOption.SetCurve(Curves::FRICTION);
         }
-        transitionComponent_->SetContentTransitionOption(transitionEnterOption_, transitionExitOption_);
+        transitionComponent_->SetContentTransitionOption(
+            pageTransitionStyle.transitionEnterOption, pageTransitionStyle.transitionExitOption);
     }
     return transitionComponent_;
-}
-
-void DOMNode::SetBackgroundImageSize(const std::string& value, DOMNode& node)
-{
-    static const LinearMapNode<BackgroundImageSizeType> bgImageSizeType[] = {
-        { DOM_BACKGROUND_IMAGE_SIZE_AUTO, BackgroundImageSizeType::AUTO },
-        { DOM_BACKGROUND_IMAGE_SIZE_CONTAIN, BackgroundImageSizeType::CONTAIN },
-        { DOM_BACKGROUND_IMAGE_SIZE_COVER, BackgroundImageSizeType::COVER },
-    };
-    BackgroundImageSize bgImgSize;
-    auto spaceIndex = value.find(' ', 0);
-    if (spaceIndex != std::string::npos) {
-        std::string valueX = value.substr(0, spaceIndex);
-        std::string valueY = value.substr(spaceIndex + 1, value.size() - spaceIndex - 1);
-        if (valueX.find("px") != std::string::npos) {
-            SetBgImgSizeX(BackgroundImageSizeType::LENGTH, StringToDouble(valueX), bgImgSize);
-        } else if (valueX.find('%') != std::string::npos) {
-            SetBgImgSizeX(BackgroundImageSizeType::PERCENT, StringToDouble(valueX), bgImgSize);
-        } else {
-            bgImgSize.SetSizeTypeX(BackgroundImageSizeType::AUTO);
-        }
-        if (valueY.find("px") != std::string::npos) {
-            SetBgImgSizeY(BackgroundImageSizeType::LENGTH, StringToDouble(valueY), bgImgSize);
-        } else if (valueY.find('%') != std::string::npos) {
-            SetBgImgSizeY(BackgroundImageSizeType::PERCENT, StringToDouble(valueY), bgImgSize);
-        } else {
-            bgImgSize.SetSizeTypeY(BackgroundImageSizeType::AUTO);
-        }
-    } else {
-        auto sizeTypeIter = BinarySearchFindIndex(bgImageSizeType, ArraySize(bgImageSizeType), value.c_str());
-        if (sizeTypeIter != -1) {
-            bgImgSize.SetSizeTypeX(bgImageSizeType[sizeTypeIter].value);
-            bgImgSize.SetSizeTypeY(bgImageSizeType[sizeTypeIter].value);
-        } else if (value.find("px") != std::string::npos) {
-            SetBgImgSizeX(BackgroundImageSizeType::LENGTH, StringToDouble(value), bgImgSize);
-            bgImgSize.SetSizeTypeY(BackgroundImageSizeType::AUTO);
-        } else if (value.find('%') != std::string::npos) {
-            SetBgImgSizeX(BackgroundImageSizeType::PERCENT, StringToDouble(value), bgImgSize);
-            bgImgSize.SetSizeTypeY(BackgroundImageSizeType::AUTO);
-        } else {
-            bgImgSize.SetSizeTypeX(BackgroundImageSizeType::AUTO);
-            bgImgSize.SetSizeTypeY(BackgroundImageSizeType::AUTO);
-        }
-    }
-    node.backgroundImage_->SetImageSize(
-        bgImgSize.GetSizeTypeX(), bgImgSize.GetSizeValueX(), bgImgSize.GetSizeTypeY(), bgImgSize.GetSizeValueY());
-    node.hasDecorationStyle_ = true;
-}
-
-void DOMNode::SetBackgroundImagePosition(const std::string& value, DOMNode& node)
-{
-    BackgroundImagePosition backgroundImagePosition;
-    if (!ParseBackgroundImagePosition(value, backgroundImagePosition)) {
-        LOGE("Invalid background image position.");
-        return;
-    }
-    node.backgroundImage_->SetImagePosition(backgroundImagePosition.GetSizeTypeX(),
-        backgroundImagePosition.GetSizeValueX(), backgroundImagePosition.GetSizeTypeY(),
-        backgroundImagePosition.GetSizeValueY());
-    node.hasDecorationStyle_ = true;
-}
-
-void DOMNode::SetBackground(const std::string& value, DOMNode& node)
-{
-    LOGD("DOMNode::SetBackground value:%{private}s", value.c_str());
-    auto backgroundJson = JsonUtil::ParseJsonString(value);
-    if (!backgroundJson->IsObject()) {
-        LOGE("background json is not Object");
-        return;
-    }
-    if (backgroundJson->Contains(DOM_VALUES) && backgroundJson->GetValue(DOM_VALUES)->IsArray() &&
-        backgroundJson->GetValue(DOM_VALUES)->GetArraySize() > 0) {
-        node.gradient_ = Gradient();
-        auto values = backgroundJson->GetValue(DOM_VALUES)->GetArrayItem(0);
-        if (values->Contains(DOM_GRADIENT_TYPE) && values->GetValue(DOM_GRADIENT_TYPE)->IsString()) {
-            SetGradientType(values->GetValue(DOM_GRADIENT_TYPE)->GetString(), node);
-        }
-        if (values->Contains(DOM_GRADIENT_DIRECTIONS) && values->GetValue(DOM_GRADIENT_DIRECTIONS)->IsArray()) {
-            SetGradientDirections(values->GetValue(DOM_GRADIENT_DIRECTIONS), node);
-        }
-        if (values->Contains(DOM_GRADIENT_VALUES) && values->GetValue(DOM_GRADIENT_VALUES)->IsArray()) {
-            SetGradientColor(values->GetValue(DOM_GRADIENT_VALUES), node);
-        }
-    }
-    node.hasDecorationStyle_ = true;
-    node.hasBackGroundColor_ = true;
-}
-
-void DOMNode::SetBorderColorForFourEdges(const std::string& value, DOMNode& node)
-{
-    node.borderLeftEdge_.SetColor(node.ParseColor(value));
-    node.borderRightEdge_.SetColor(node.ParseColor(value));
-    node.borderTopEdge_.SetColor(node.ParseColor(value));
-    node.borderBottomEdge_.SetColor(node.ParseColor(value));
-    node.hasDecorationStyle_ = true;
-    node.hasBorderStyle_ = true;
-}
-
-void DOMNode::SetBorderStyleForFourEdges(const std::string& value, DOMNode& node)
-{
-    node.borderLeftEdge_.SetStyle(ConvertStrToBorderStyle(value));
-    node.borderRightEdge_.SetStyle(ConvertStrToBorderStyle(value));
-    node.borderTopEdge_.SetStyle(ConvertStrToBorderStyle(value));
-    node.borderBottomEdge_.SetStyle(ConvertStrToBorderStyle(value));
-    node.hasDecorationStyle_ = true;
-    node.hasBorderStyle_ = true;
-}
-
-void DOMNode::SetBorderWidthForFourEdges(const std::string& value, DOMNode& node)
-{
-    node.borderLeftEdge_.SetWidth(node.ParseDimension(value));
-    node.borderRightEdge_.SetWidth(node.ParseDimension(value));
-    node.borderTopEdge_.SetWidth(node.ParseDimension(value));
-    node.borderBottomEdge_.SetWidth(node.ParseDimension(value));
-    node.hasDecorationStyle_ = true;
-    node.hasBorderStyle_ = true;
-}
-
-void DOMNode::SetBorderOverall(const std::string& value, DOMNode& node)
-{
-    std::vector<std::string> offsets;
-    StringUtils::StringSpliter(value, ' ', offsets);
-    switch (offsets.size()) {
-        case SINGLE_VALUE:
-            if (offsets[0].find("px") != std::string::npos) {
-                SetBorderWidthForFourEdges(offsets[0], node);
-            } else if (offsets[0] == "solid" || offsets[0] == "dotted" || offsets[0] == "dashed") {
-                SetBorderStyleForFourEdges(offsets[0], node);
-            } else {
-                SetBorderColorForFourEdges(offsets[0], node);
-            }
-            break;
-        case TWO_VALUES:
-            SetBorderWidthForFourEdges(offsets[0], node);
-            SetBorderStyleForFourEdges(offsets[1], node);
-            break;
-        case THREE_VALUES:
-            SetBorderWidthForFourEdges(offsets[0], node);
-            SetBorderStyleForFourEdges(offsets[1], node);
-            SetBorderColorForFourEdges(offsets[2], node);
-            break;
-        default:
-            break;
-    }
-}
-
-void DOMNode::SetGradientType(const std::string& gradientType, DOMNode& node)
-{
-    if (gradientType == DOM_REPEATING_LINEAR_GRADIENT) {
-        node.gradient_.SetRepeat(true);
-        node.hasDecorationStyle_ = true;
-    }
-}
-
-void DOMNode::SetGradientDirections(const std::unique_ptr<JsonValue>& gradientDirections, DOMNode& node)
-{
-    std::unique_ptr<JsonValue> angleItem;
-    std::unique_ptr<JsonValue> sideItem;
-    std::unique_ptr<JsonValue> cornerItem;
-    GradientDirection direction;
-    switch (gradientDirections->GetArraySize()) {
-        case DIRECTION_ANGLE:
-            angleItem = gradientDirections->GetArrayItem(0);
-            if (angleItem->IsString()) {
-                node.gradient_.SetUseAngle(true);
-                node.gradient_.SetAngle(StringToDouble(angleItem->GetString()));
-                node.hasDecorationStyle_ = true;
-            }
-            break;
-        case DIRECTION_SIDE:
-            sideItem = gradientDirections->GetArrayItem(1);
-            if (sideItem->IsString()) {
-                direction = StrToGradientDirection(sideItem->GetString());
-                node.gradient_.SetDirection(direction);
-                node.hasDecorationStyle_ = true;
-            }
-            break;
-        case DIRECTION_CORNER:
-            sideItem = gradientDirections->GetArrayItem(1);
-            cornerItem = gradientDirections->GetArrayItem(2);
-            if (sideItem->IsString() && cornerItem->IsString()) {
-                direction = StrToGradientDirectionCorner(sideItem->GetString(), cornerItem->GetString());
-                node.gradient_.SetDirection(direction);
-                node.hasDecorationStyle_ = true;
-            }
-            break;
-        default:
-            LOGE("gradientDirectionsLength error");
-            break;
-    }
-}
-
-void DOMNode::SetGradientColor(const std::unique_ptr<JsonValue>& gradientColorValues, DOMNode& node)
-{
-    node.gradient_.ClearColors();
-    int32_t gradientColorValuesLength = gradientColorValues->GetArraySize();
-    for (int32_t i = 0; i < gradientColorValuesLength; i++) {
-        std::string gradientColorValue = gradientColorValues->GetArrayItem(i)->GetString();
-        GradientColor gradientColor;
-        RemoveHeadTailSpace(gradientColorValue);
-        auto index = gradientColorValue.find(' ');
-        if (index != std::string::npos && index != 0) {
-            std::string color = gradientColorValue.substr(0, index);
-            std::string area = gradientColorValue.substr(index + 1, gradientColorValue.size() - index - 1);
-            gradientColor.SetColor(node.ParseColor(color));
-            gradientColor.SetHasValue(true);
-            if (area.find("px") != std::string::npos) {
-                gradientColor.SetDimension(StringToDouble(area), DimensionUnit::PX);
-            } else if (area.find('%') != std::string::npos) {
-                gradientColor.SetDimension(StringToDouble(area), DimensionUnit::PERCENT);
-            } else {
-                LOGW("gradientColor DimensionUnit is incorrect)");
-                gradientColor.SetHasValue(false);
-            }
-        } else {
-            gradientColor.SetHasValue(false);
-            gradientColor.SetColor(node.ParseColor(gradientColorValue));
-        }
-        node.gradient_.AddColor(gradientColor);
-        node.hasDecorationStyle_ = true;
-    }
-}
-
-void DOMNode::SetMarginOverall(const std::string& value, DOMNode& node)
-{
-    std::vector<std::string> offsets;
-    StringUtils::StringSpliter(value, ' ', offsets);
-    switch (offsets.size()) {
-        case SINGLE_VALUE:
-            node.marginLeft_ = node.ParseDimension(offsets[0]);
-            node.marginRight_ = node.ParseDimension(offsets[0]);
-            node.marginTop_ = node.ParseDimension(offsets[0]);
-            node.marginBottom_ = node.ParseDimension(offsets[0]);
-            break;
-        case TWO_VALUES:
-            node.marginLeft_ = node.ParseDimension(offsets[1]);
-            node.marginRight_ = node.ParseDimension(offsets[1]);
-            node.marginTop_ = node.ParseDimension(offsets[0]);
-            node.marginBottom_ = node.ParseDimension(offsets[0]);
-            break;
-        case THREE_VALUES:
-            node.marginLeft_ = node.ParseDimension(offsets[1]);
-            node.marginRight_ = node.ParseDimension(offsets[1]);
-            node.marginTop_ = node.ParseDimension(offsets[0]);
-            node.marginBottom_ = node.ParseDimension(offsets[2]);
-            break;
-        case FOUR_VALUES:
-            node.marginLeft_ = node.ParseDimension(offsets[3]);
-            node.marginRight_ = node.ParseDimension(offsets[1]);
-            node.marginTop_ = node.ParseDimension(offsets[0]);
-            node.marginBottom_ = node.ParseDimension(offsets[2]);
-            break;
-        default:
-            break;
-    }
-    node.hasBoxStyle_ = true;
-}
-
-void DOMNode::SetPaddingOverall(const std::string& value, DOMNode& node)
-{
-    std::vector<std::string> offsets;
-    StringUtils::StringSpliter(value, ' ', offsets);
-    switch (offsets.size()) {
-        case SINGLE_VALUE:
-            node.paddingLeft_ = node.ParseDimension(offsets[0]);
-            node.paddingRight_ = node.ParseDimension(offsets[0]);
-            node.paddingTop_ = node.ParseDimension(offsets[0]);
-            node.paddingBottom_ = node.ParseDimension(offsets[0]);
-            break;
-        case TWO_VALUES:
-            node.paddingLeft_ = node.ParseDimension(offsets[1]);
-            node.paddingRight_ = node.ParseDimension(offsets[1]);
-            node.paddingTop_ = node.ParseDimension(offsets[0]);
-            node.paddingBottom_ = node.ParseDimension(offsets[0]);
-            break;
-        case THREE_VALUES:
-            node.paddingLeft_ = node.ParseDimension(offsets[1]);
-            node.paddingRight_ = node.ParseDimension(offsets[1]);
-            node.paddingTop_ = node.ParseDimension(offsets[0]);
-            node.paddingBottom_ = node.ParseDimension(offsets[2]);
-            break;
-        case FOUR_VALUES:
-            node.paddingLeft_ = node.ParseDimension(offsets[3]);
-            node.paddingRight_ = node.ParseDimension(offsets[1]);
-            node.paddingTop_ = node.ParseDimension(offsets[0]);
-            node.paddingBottom_ = node.ParseDimension(offsets[2]);
-            break;
-        default:
-            break;
-    }
-    node.hasBoxStyle_ = true;
 }
 
 std::string DOMNode::GetTransformType(const std::unique_ptr<JsonValue>& transformJson)
@@ -1733,6 +846,18 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
                     [](const std::string& typeValue, DOMNode& node) {
                         node.transformComponent_->RotateZ(StringUtils::StringToDegree(typeValue));
                     } },
+                { DOM_ROTATE_3D,
+                    [](const std::string& typeValue, DOMNode& node) {
+                        std::vector<std::string> offsets;
+                        StringUtils::StringSpliter(typeValue, ' ', offsets);
+                        if (offsets.size() == FOUR_VALUES) {
+                            auto dx = StringToDouble(offsets[0]);
+                            auto dy = StringToDouble(offsets[1]);
+                            auto dz = StringToDouble(offsets[2]);
+                            auto degree = StringUtils::StringToDegree(offsets[3]);
+                            node.transformComponent_->Rotate(dx, dy, dz, degree);
+                        }
+                    } },
                 { DOM_ROTATE_X,
                     [](const std::string& typeValue, DOMNode& node) {
                         node.transformComponent_->RotateX(StringUtils::StringToDegree(typeValue));
@@ -1740,6 +865,10 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
                 { DOM_ROTATE_Y,
                     [](const std::string& typeValue, DOMNode& node) {
                         node.transformComponent_->RotateY(StringUtils::StringToDegree(typeValue));
+                    } },
+                { DOM_ROTATE_Z,
+                    [](const std::string& typeValue, DOMNode& node) {
+                        node.transformComponent_->RotateZ(StringUtils::StringToDegree(typeValue));
                     } },
                 { SCALE,
                     [](const std::string& typeValue, DOMNode& node) {
@@ -1751,10 +880,23 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
                             node.transformComponent_->Scale(scaleValue, scaleValue);
                         }
                     } },
+                { DOM_SCALE_3D,
+                    [](const std::string& typeValue, DOMNode& node) {
+                        std::vector<std::string> offsets;
+                        StringUtils::StringSpliter(typeValue, ' ', offsets);
+                        if (offsets.size() == THREE_VALUES) {
+                            auto scaleX = StringToDouble(offsets[0]);
+                            auto scaleY = StringToDouble(offsets[1]);
+                            auto scaleZ = StringToDouble(offsets[2]);
+                            node.transformComponent_->Scale(scaleX, scaleY, scaleZ);
+                        }
+                    } },
                 { DOM_SCALE_X, [](const std::string& typeValue,
-                               DOMNode& node) { node.transformComponent_->ScaleX(StringToDouble(typeValue)); } },
+                                   DOMNode& node) { node.transformComponent_->ScaleX(StringToDouble(typeValue)); } },
                 { DOM_SCALE_Y, [](const std::string& typeValue,
-                               DOMNode& node) { node.transformComponent_->ScaleY(StringToDouble(typeValue)); } },
+                                   DOMNode& node) { node.transformComponent_->ScaleY(StringToDouble(typeValue)); } },
+                { DOM_SCALE_Z, [](const std::string& typeValue,
+                                   DOMNode& node) { node.transformComponent_->ScaleZ(StringToDouble(typeValue)); } },
                 { DOM_TRANSLATE,
                     [](const std::string& typeValue, DOMNode& node) {
                         std::vector<std::string> offsets;
@@ -1766,6 +908,17 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
                             node.transformComponent_->TranslateX(node.ParseDimension(offsets[0]));
                         }
                     } },
+                { DOM_TRANSLATE_3D,
+                    [](const std::string& typeValue, DOMNode& node) {
+                        std::vector<std::string> offsets;
+                        StringUtils::StringSpliter(typeValue, ' ', offsets);
+                        if (offsets.size() == THREE_VALUES) {
+                            auto dx = node.ParseDimension(offsets[0]);
+                            auto dy = node.ParseDimension(offsets[1]);
+                            auto dz = node.ParseDimension(offsets[2]);
+                            node.transformComponent_->Translate(dx, dy, dz);
+                        }
+                    } },
                 { DOM_TRANSLATE_X,
                     [](const std::string& typeValue, DOMNode& node) {
                         node.transformComponent_->TranslateX(node.ParseDimension(typeValue));
@@ -1773,6 +926,63 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
                 { DOM_TRANSLATE_Y,
                     [](const std::string& typeValue, DOMNode& node) {
                         node.transformComponent_->TranslateY(node.ParseDimension(typeValue));
+                    } },
+                { DOM_TRANSLATE_Z,
+                    [](const std::string& typeValue, DOMNode& node) {
+                        node.transformComponent_->TranslateZ(node.ParseDimension(typeValue));
+                    } },
+                { DOM_SKEW,
+                    [](const std::string& typeValue, DOMNode& node) {
+                        std::vector<std::string> offsets;
+                        StringUtils::StringSpliter(typeValue, ' ', offsets);
+                        if (offsets.size() == TRANSFORM_DUAL) {
+                            auto degreeX = StringUtils::StringToDegree(offsets[0]);
+                            auto degreeY = StringUtils::StringToDegree(offsets[1]);
+                            node.transformComponent_->Skew(degreeX, degreeY);
+                        } else if (offsets.size() == TRANSFORM_SINGLE) {
+                            auto degree = StringUtils::StringToDegree(typeValue);
+                            node.transformComponent_->Skew(degree, 0.0f);
+                        }
+                    } },
+                { DOM_SKEW_X,
+                    [](const std::string& typeValue, DOMNode& node) {
+                        node.transformComponent_->SkewX(StringUtils::StringToDegree(typeValue));
+                    } },
+                { DOM_SKEW_Y,
+                    [](const std::string& typeValue, DOMNode& node) {
+                        node.transformComponent_->SkewY(StringUtils::StringToDegree(typeValue));
+                    } },
+                { DOM_MATRIX,
+                    [](const std::string& typeValue, DOMNode& node) {
+                        std::vector<std::string> offsets;
+                        StringUtils::StringSpliter(typeValue, ' ', offsets);
+                        if (offsets.size() == TRANSFORM_SIX) {
+                            double scaleX = StringToDouble(offsets[0]);
+                            double skewY = StringToDouble(offsets[1]);
+                            double skewX = StringToDouble(offsets[2]);
+                            double scaleY = StringToDouble(offsets[3]);
+                            double translateX = StringToDouble(offsets[4]);
+                            double translateY = StringToDouble(offsets[5]);
+                            node.transformComponent_->Matrix(scaleX, skewY, skewX, scaleY, translateX, translateY);
+                        }
+                    } },
+                { DOM_MATRIX_3D,
+                    [](const std::string& typeValue, DOMNode& node) {
+                        std::vector<std::string> offsets;
+                        StringUtils::StringSpliter(typeValue, ' ', offsets);
+                        if (offsets.size() == TRANSFORM_SIXTEEN) {
+                            std::vector<double> matrix;
+                            for (const auto& offset : offsets) {
+                                matrix.push_back(StringToDouble(offset));
+                            }
+                            node.transformComponent_->Matrix3d(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4],
+                                matrix[5], matrix[6], matrix[7], matrix[8], matrix[9], matrix[10], matrix[11],
+                                matrix[12], matrix[13], matrix[14], matrix[15]);
+                        }
+                    } },
+                { DOM_PERSPECTIVE,
+                    [](const std::string& typeValue, DOMNode& node) {
+                        node.transformComponent_->Perspective(node.ParseDimension(typeValue));
                     } },
             };
 
@@ -1800,8 +1010,7 @@ std::string DOMNode::GetTransformJsonValue(const std::string& value)
     return jsonValue;
 }
 
-void DOMNode::AddKeyframe(
-    double time, double typeValue, RefPtr<KeyframeAnimation<float>>& transformKeyframes)
+void DOMNode::AddKeyframe(double time, double typeValue, RefPtr<KeyframeAnimation<float>>& transformKeyframes)
 {
     auto keyframe = AceType::MakeRefPtr<Keyframe<float>>(time, typeValue);
     transformKeyframes->AddKeyframe(keyframe);
@@ -1813,54 +1022,22 @@ void DOMNode::AddKeyframe(
     DOMNode::AddKeyframe(time, StringToDouble(typeValue), transformKeyframes);
 }
 
-void DOMNode::AddKeyframeOffset(const std::string& keyValue, double time, const std::string& typeValue,
-    RefPtr<KeyframeAnimation<DimensionOffset>>& transformKeyframes)
-{
-    DimensionOffset dimensionOffset;
-    if (std::strcmp(keyValue.c_str(), DOM_TRANSLATE) == 0) {
-        if (typeValue.find(' ', 0) != std::string::npos) {
-            std::vector<std::string> offsetValues;
-            StringUtils::StringSpliter(typeValue, ' ', offsetValues);
-            if (offsetValues.size() == OFFSET_VALUE_NUMBER) {
-                auto translateXDimension = ParseDimension(offsetValues[0]);
-                auto translateYDimension = ParseDimension(offsetValues[1]);
-                dimensionOffset = DimensionOffset(translateXDimension, translateYDimension);
-            }
-        } else {
-            if (typeValue.find('%') != std::string::npos) {
-                dimensionOffset =
-                    DimensionOffset(ParseDimension(typeValue), Dimension(0.0, DimensionUnit::PERCENT));
-            } else {
-                dimensionOffset = DimensionOffset(ParseDimension(typeValue), Dimension(0.0));
-            }
-        }
-    }
-    if (std::strcmp(keyValue.c_str(), DOM_TRANSLATE_X) == 0) {
-        if (typeValue.find('%') != std::string::npos) {
-            dimensionOffset = DimensionOffset(ParseDimension(typeValue), Dimension(0.0, DimensionUnit::PERCENT));
-        } else {
-            dimensionOffset = DimensionOffset(ParseDimension(typeValue), Dimension(0.0));
-        }
-    }
-    if (std::strcmp(keyValue.c_str(), DOM_TRANSLATE_Y) == 0) {
-        if (typeValue.find('%') != std::string::npos) {
-            dimensionOffset = DimensionOffset(Dimension(0.0, DimensionUnit::PERCENT), ParseDimension(typeValue));
-        } else {
-            dimensionOffset = DimensionOffset(Dimension(0.0), ParseDimension(typeValue));
-        }
-    }
-    auto keyframe = AceType::MakeRefPtr<Keyframe<DimensionOffset>>(time, dimensionOffset);
-    transformKeyframes->AddKeyframe(keyframe);
-}
-
 void DOMNode::SetSharedTransitionStyle(
     const std::vector<std::unordered_map<std::string, std::string>>& animationKeyframes)
 {
+    if (!declaration_) {
+        return;
+    }
+    auto& shareTransitionStyle =
+        declaration_->MaybeResetStyle<CommonShareTransitionStyle>(StyleTag::COMMON_SHARE_TRANSITION_STYLE);
+    if (!shareTransitionStyle.IsValid()) {
+        return;
+    }
     if (!ParseAnimationStyle(animationKeyframes)) {
         return;
     }
-    sharedTransitionOption_ = TweenOption();
-    TweenOptionSetKeyframes(sharedTransitionOption_);
+    shareTransitionStyle.sharedTransitionOption = TweenOption();
+    TweenOptionSetKeyframes(shareTransitionStyle.sharedTransitionOption);
 }
 
 bool DOMNode::ParseAnimationStyle(const std::vector<std::unordered_map<std::string, std::string>>& animationKeyframes)
@@ -1868,45 +1045,13 @@ bool DOMNode::ParseAnimationStyle(const std::vector<std::unordered_map<std::stri
     if (animationKeyframes.empty()) {
         return false;
     }
+    animationUtil_.ParseAnimationStyle(animationKeyframes, declaration_, GetThemeConstants());
+    propAnimations_ = animationUtil_.GetPropAnimationMap();
+    animationName_ = animationUtil_.GetAnimationName();
 
-    for (auto& type : PROPERTY_ANIMATIONABLE_FLOAT_TYPES) {
-        propertyFloatAnimations[type] = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    }
-
-    bgPositionAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<BackgroundImagePosition>>();
-    colorAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-    colorAnimation_->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
-    opacityAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    widthAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    heightAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    translateAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<DimensionOffset>>();
-    translateXAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<DimensionOffset>>();
-    translateYAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<DimensionOffset>>();
-    scaleAnimationX_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    scaleAnimationY_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    scaleXAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    scaleYAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    rotateZAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    rotateXAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    rotateYAnimation_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    sameScale_ = true;
-
-    for (const auto& animationNameKeyframe : animationKeyframes) {
-        auto keyframeTime = animationNameKeyframe.find(DOM_ANIMATION_NAME_TIME);
-        // if keyframeTime not exist in animationNameKeyframe, animationNameKeyframe have no meaning of existence.
-        if (keyframeTime == animationNameKeyframe.end()) {
-            LOGE(" DOMNode::SetAnimationStyle keyframeTime not exist");
-            continue;
-        }
-
-        double time = StringToDouble(keyframeTime->second) / PERCENTAGE;
-        for (const auto& [keyStyle, value] : animationNameKeyframe) {
-            // key style = DOM_ANIMATION_NAME_TIME is time,
-            // just need to pass the time into the function KeyframesAddKeyFrame
-            if (keyStyle == DOM_ANIMATION_NAME_TIME) {
-                continue;
-            }
-            KeyframesAddKeyFrame(keyStyle, value, time);
+    if (propAnimations_.find(AnimatableType::PROPERTY_OPACITY) != propAnimations_.end()) {
+        if (declaration_) {
+            declaration_->SetHasDisplayStyle(true);
         }
     }
     return true;
@@ -1914,337 +1059,148 @@ bool DOMNode::ParseAnimationStyle(const std::vector<std::unordered_map<std::stri
 
 void DOMNode::SetAnimationStyle(const std::vector<std::unordered_map<std::string, std::string>>& animationKeyframes)
 {
-    if (!ParseAnimationStyle(animationKeyframes)) {
+    if (!declaration_ || !ParseAnimationStyle(animationKeyframes)) {
         return;
     }
     if (isTransition_) {
-        if (isEnter_) {
-            TweenOptionSetKeyframes(transitionEnterOption_);
-        } else {
-            TweenOptionSetKeyframes(transitionExitOption_);
+        auto& pageTransitionStyle =
+            declaration_->MaybeResetStyle<CommonPageTransitionStyle>(StyleTag::COMMON_PAGE_TRANSITION_STYLE);
+        if (pageTransitionStyle.IsValid()) {
+            if (isEnter_) {
+                TweenOptionSetKeyframes(pageTransitionStyle.transitionEnterOption);
+            } else {
+                TweenOptionSetKeyframes(pageTransitionStyle.transitionExitOption);
+            }
         }
     } else {
-        tweenOption_ = TweenOption();
-        TweenOptionSetKeyframes(tweenOption_);
-        animationStyleUpdated_ = true;
+        auto& animationStyle = declaration_->MaybeResetStyle<CommonAnimationStyle>(StyleTag::COMMON_ANIMATION_STYLE);
+        if (animationStyle.IsValid()) {
+            animationStyle.tweenOption = TweenOption();
+            TweenOptionSetKeyframes(animationStyle.tweenOption);
+            animationStyleUpdated_ = true;
+        }
     }
 }
 
-void DOMNode::SetTweenComponent(const RefPtr<TweenComponent>& tweenComponent)
+void DOMNode::UpdatePropAnimations(const PropAnimationMap& animations)
 {
-    tweenComponent_ = tweenComponent;
-}
-
-RefPtr<TweenComponent> DOMNode::GetTweenComponent() const
-{
-    return tweenComponent_;
-}
-
-void DOMNode::KeyframesAddKeyFrame(const std::string& keyStyle, const std::string& value, double time)
-{
-    static const std::unordered_map<std::string, void(*)(const std::string&, const double&, DOMNode&)>
-        keyFrameAddMap = {
-            { DOM_BACKGROUND_COLOR,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    auto keyframe = AceType::MakeRefPtr<Keyframe<Color>>(time, node.ParseColor(value));
-                    node.colorAnimation_->AddKeyframe(keyframe);
-                } },
-            { DOM_BACKGROUND_IMAGE_POSITION,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                  BackgroundImagePosition backgroundImagePosition;
-                  if (!ParseBackgroundImagePosition(value, backgroundImagePosition)) {
-                      LOGW("parse frame failed.");
-                      return;
-                  }
-                  auto keyframe = AceType::MakeRefPtr<Keyframe<BackgroundImagePosition>>(time, backgroundImagePosition);
-                  node.bgPositionAnimation_->AddKeyframe(keyframe);
-                } },
-            { DOM_HEIGHT, [](const std::string& value, const double& time,
-                          DOMNode& node) { node.AddKeyframe(time, value, node.heightAnimation_); } },
-            { DOM_OPACITY, [](const std::string& value, const double& time,
-                           DOMNode& node) { node.AddKeyframe(time, value, node.opacityAnimation_); } },
-            // margin
-            { DOM_MARGIN_LEFT,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_MARGIN_LEFT]);
-                } },
-            { DOM_MARGIN_RIGHT,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_MARGIN_RIGHT]);
-                } },
-            { DOM_MARGIN_TOP,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_MARGIN_TOP]);
-                } },
-            { DOM_MARGIN_BOTTOM,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_MARGIN_BOTTOM]);
-                } },
-            { DOM_MARGIN_START,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    if (node.IsRightToLeft()) {
-                        node.AddKeyframe(
-                            time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_MARGIN_RIGHT]);
-                    } else {
-                        node.AddKeyframe(
-                            time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_MARGIN_LEFT]);
-                    }
-                } },
-            { DOM_MARGIN_END,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    if (node.IsRightToLeft()) {
-                        node.AddKeyframe(
-                            time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_MARGIN_LEFT]);
-                    } else {
-                        node.AddKeyframe(
-                            time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_MARGIN_RIGHT]);
-                    }
-                } },
-            { DOM_MARGIN,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_MARGIN_LEFT]);
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_MARGIN_RIGHT]);
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_MARGIN_TOP]);
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_MARGIN_BOTTOM]);
-                } },
-            // padding
-            { DOM_PADDING_LEFT,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_PADDING_LEFT]);
-                } },
-            { DOM_PADDING_RIGHT,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_PADDING_RIGHT]);
-                } },
-            { DOM_PADDING_TOP,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_PADDING_TOP]);
-                } },
-            { DOM_PADDING_BOTTOM,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_PADDING_BOTTOM]);
-                } },
-            { DOM_PADDING_START,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    if (node.IsRightToLeft()) {
-                        node.AddKeyframe(
-                            time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_PADDING_RIGHT]);
-                    } else {
-                        node.AddKeyframe(
-                            time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_PADDING_LEFT]);
-                    }
-                } },
-            { DOM_PADDING_END,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    if (node.IsRightToLeft()) {
-                        node.AddKeyframe(
-                            time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_PADDING_LEFT]);
-                    } else {
-                        node.AddKeyframe(
-                            time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_PADDING_RIGHT]);
-                    }
-                } },
-            { DOM_PADDING,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_PADDING_LEFT]);
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_PADDING_RIGHT]);
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_PADDING_TOP]);
-                    node.AddKeyframe(
-                        time, value, node.propertyFloatAnimations[PropertyAnimatableType::PROPERTY_PADDING_BOTTOM]);
-                } },
-            { DOM_TRANSFORM,
-                [](const std::string& value, const double& time, DOMNode& node) {
-                  std::unique_ptr<JsonValue> transformJson = JsonUtil::ParseJsonString(value);
-                  for (int32_t index = 0; index < transformJson->GetArraySize(); ++index) {
-                      std::string typeKey = node.GetTransformType(transformJson->GetArrayItem(index));
-                      std::string typeValue = node.GetTransformTypeValue(transformJson->GetArrayItem(index));
-                      LOGD("DOMNode::SetAnimationStyle DOM_TRANSFORM typeKey:  %{private}s  typeValue:  %{private}s",
-                           typeKey.c_str(), typeValue.c_str());
-                      if ((!typeKey.empty()) && (!typeValue.empty())) {
-                          node.TransformAnimationAddKeyframe(typeKey, typeValue, time);
-                      }
-                  }
-                } },
-            { DOM_WIDTH, [](const std::string& value, const double& time,
-                         DOMNode& node) { node.AddKeyframe(time, value, node.widthAnimation_); } },
-        };
-
-    auto pos = keyFrameAddMap.find(keyStyle);
-    if (pos != keyFrameAddMap.end()) {
-        pos->second(value, time, *this);
+    if (boxComponent_ != nullptr) {
+        boxComponent_->ClearAnimatables();
     }
-
+    if (displayComponent_ != nullptr) {
+        displayComponent_->ClearAnimatables();
+    }
+    for (const auto& [type, animation] : animations) {
+        switch (type) {
+            case AnimatableType::PROPERTY_WIDTH:
+            case AnimatableType::PROPERTY_HEIGHT:
+            case AnimatableType::PROPERTY_BG_COLOR:
+            case AnimatableType::PROPERTY_MARGIN_LEFT:
+            case AnimatableType::PROPERTY_MARGIN_TOP:
+            case AnimatableType::PROPERTY_MARGIN_RIGHT:
+            case AnimatableType::PROPERTY_MARGIN_BOTTOM:
+            case AnimatableType::PROPERTY_PADDING_LEFT:
+            case AnimatableType::PROPERTY_PADDING_TOP:
+            case AnimatableType::PROPERTY_PADDING_RIGHT:
+            case AnimatableType::PROPERTY_PADDING_BOTTOM:
+            case AnimatableType::PROPERTY_BACKGROUND_POSITION:
+            case AnimatableType::PROPERTY_BACKGROUND_SIZE:
+            case AnimatableType::PROPERTY_BORDER_LEFT_WIDTH:
+            case AnimatableType::PROPERTY_BORDER_TOP_WIDTH:
+            case AnimatableType::PROPERTY_BORDER_RIGHT_WIDTH:
+            case AnimatableType::PROPERTY_BORDER_BOTTOM_WIDTH:
+            case AnimatableType::PROPERTY_BORDER_LEFT_COLOR:
+            case AnimatableType::PROPERTY_BORDER_TOP_COLOR:
+            case AnimatableType::PROPERTY_BORDER_RIGHT_COLOR:
+            case AnimatableType::PROPERTY_BORDER_BOTTOM_COLOR:
+            case AnimatableType::PROPERTY_BORDER_TOP_LEFT_RADIUS:
+            case AnimatableType::PROPERTY_BORDER_TOP_RIGHT_RADIUS:
+            case AnimatableType::PROPERTY_BORDER_BOTTOM_LEFT_RADIUS:
+            case AnimatableType::PROPERTY_BORDER_BOTTOM_RIGHT_RADIUS:
+            case AnimatableType::PROPERTY_BORDER_LEFT_STYLE:
+            case AnimatableType::PROPERTY_BORDER_RIGHT_STYLE:
+            case AnimatableType::PROPERTY_BORDER_TOP_STYLE:
+            case AnimatableType::PROPERTY_BORDER_BOTTOM_STYLE:
+            case AnimatableType::PROPERTY_FILTER_BLUR:
+            case AnimatableType::PROPERTY_BACKDROP_FILTER_BLUR:
+            case AnimatableType::PROPERTY_WINDOW_FILTER_BLUR:
+            case AnimatableType::PROPERTY_BOX_SHADOW: {
+                if (boxComponent_ != nullptr) {
+                    boxComponent_->AddAnimatable(type, animation);
+                }
+                break;
+            }
+            case AnimatableType::PROPERTY_OPACITY: {
+                if (displayComponent_ != nullptr) {
+                    displayComponent_->AddAnimatable(type, animation);
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    }
 }
 
-void DOMNode::TransformAnimationAddKeyframe(const std::string& typeKey, const std::string& typeValue, double time)
+void DOMNode::UpdatePositionAnimations(const RefPtr<Component> componet)
 {
-    static const LinearMapNode<void (*)(const std::string&, const std::string&, const double&, DOMNode&)>
-        translateAddMap[] = {
-            { DOM_TRANSLATE,
-                [](const std::string& typeKey, const std::string& typeValue, const double& time, DOMNode& node) {
-                    node.AddKeyframeOffset(typeKey, time, typeValue, node.translateAnimation_);
-                } },
-            { DOM_TRANSLATE_X,
-                [](const std::string& typeKey, const std::string& typeValue, const double& time, DOMNode& node) {
-                    node.AddKeyframeOffset(typeKey, time, typeValue, node.translateXAnimation_);
-                } },
-            { DOM_TRANSLATE_Y,
-                [](const std::string& typeKey, const std::string& typeValue, const double& time, DOMNode& node) {
-                    node.AddKeyframeOffset(typeKey, time, typeValue, node.translateYAnimation_);
-                } },
-        };
-    auto translateAddKeyframeIter = BinarySearchFindIndex(translateAddMap, ArraySize(translateAddMap), typeKey.c_str());
-    if (translateAddKeyframeIter != -1) {
-        translateAddMap[translateAddKeyframeIter].value(typeKey, typeValue, time, *this);
-    }
-    static const LinearMapNode<void (*)(const std::string&, const double&, DOMNode&)>
-        transformAniAddKeyFrameMap[] = {
-            { DOM_ROTATE,
-                [](const std::string& typeValue, const double& time, DOMNode& node) {
-                    node.AddKeyframe(time, StringUtils::StringToDegree(typeValue), node.rotateZAnimation_);
-                } },
-            { DOM_ROTATE_X,
-                [](const std::string& typeValue, const double& time, DOMNode& node) {
-                    node.AddKeyframe(time, StringUtils::StringToDegree(typeValue), node.rotateXAnimation_);
-                } },
-            { DOM_ROTATE_Y,
-                [](const std::string& typeValue, const double& time, DOMNode& node) {
-                    node.AddKeyframe(time, StringUtils::StringToDegree(typeValue), node.rotateYAnimation_);
-                } },
-            { SCALE,
-                [](const std::string& typeValue, const double& time, DOMNode& node) {
-                    if (typeValue.find(' ') != std::string::npos) {
-                        std::vector<std::string> values;
-                        StringUtils::StringSpliter(typeValue, ' ', values);
-                        if (values.size() == OFFSET_VALUE_NUMBER) {
-                            double scaleValueX = StringToDouble(values[0]);
-                            double scaleValueY = StringToDouble(values[1]);
-                            node.AddKeyframe(time, scaleValueX, node.scaleAnimationX_);
-                            node.AddKeyframe(time, scaleValueY, node.scaleAnimationY_);
-                            node.maxScaleXY_ = std::max(scaleValueX, scaleValueY);
-                            if (!NearEqual(scaleValueY, scaleValueX)) {
-                                node.sameScale_ = false;
-                            }
-                        }
-                    } else {
-                        node.AddKeyframe(time, typeValue, node.scaleAnimationX_);
-                        node.AddKeyframe(time, typeValue, node.scaleAnimationY_);
-                        node.maxScaleXY_ =  StringToDouble(typeValue);
-                    }
-                } },
-            { DOM_SCALE_X,
-                [](const std::string& typeValue, const double& time, DOMNode& node) {
-                    node.sameScale_ = false;
-                    node.AddKeyframe(time, typeValue, node.scaleXAnimation_);
-                    double scaleValueX = StringToDouble(typeValue);
-                    node.maxScaleXY_ = std::max(scaleValueX, node.maxScaleXY_);
-                } },
-            { DOM_SCALE_Y,
-                [](const std::string& typeValue, const double& time, DOMNode& node) {
-                    node.sameScale_ = false;
-                    node.AddKeyframe(time, typeValue, node.scaleYAnimation_);
-                    double scaleValueY = StringToDouble(typeValue);
-                    node.maxScaleXY_ = std::max(scaleValueY, node.maxScaleXY_);
-                } },
+    if (componet != nullptr) {
+        static const AnimatableType positionAnimatableType[] = {
+            AnimatableType::PROPERTY_POSITION_LEFT,
+            AnimatableType::PROPERTY_POSITION_TOP,
+            AnimatableType::PROPERTY_POSITION_RIGHT,
+            AnimatableType::PROPERTY_POSITION_BOTTOM,
         };
 
-    auto traFloatAniAddKeyframeIter = BinarySearchFindIndex(
-        transformAniAddKeyFrameMap, ArraySize(transformAniAddKeyFrameMap), typeKey.c_str());
-    if (traFloatAniAddKeyframeIter != -1) {
-        transformAniAddKeyFrameMap[traFloatAniAddKeyframeIter].value(typeValue, time, *this);
+        for (const auto& type : positionAnimatableType) {
+            const auto& animation = propAnimations_[type];
+            if (animation) {
+                componet->AddAnimatable(type, animation);
+            }
+        }
     }
 }
 
 void DOMNode::TweenOptionSetKeyframes(TweenOption& tweenOption)
 {
-    if (!bgPositionAnimation_->GetKeyframes().empty()) {
-        tweenOption.SetBackgroundPositionAnimation(bgPositionAnimation_);
+    auto pos = propAnimations_.find(AnimatableType::PROPERTY_OPACITY);
+    if (pos != propAnimations_.end()) {
+        auto opacityAnimation = AceType::MakeRefPtr<KeyframeAnimation<float>>();
+        for (auto& item : pos->second->GetAnimatable()) {
+            auto opacityAnimatable = AceType::DynamicCast<AnimatableData<float>>(item);
+            if (opacityAnimatable) {
+                opacityAnimation->AddKeyframe(
+                    AceType::MakeRefPtr<Keyframe<float>>(item->GetTimePoint(), opacityAnimatable->GetValue()));
+            }
+        }
+        tweenOption.SetOpacityAnimation(opacityAnimation);
+        propAnimations_.erase(pos);
     }
-    if (!colorAnimation_->GetKeyframes().empty()) {
-        tweenOption.SetColorAnimation(colorAnimation_);
+    if (!propAnimations_.empty()) {
+        tweenOption.SetAnimatables(propAnimations_);
     }
-    if (!opacityAnimation_->GetKeyframes().empty()) {
-        tweenOption.SetOpacityAnimation(opacityAnimation_);
-    }
-    if (!widthAnimation_->GetKeyframes().empty()) {
-        tweenOption.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_WIDTH, widthAnimation_);
-    }
-    if (!heightAnimation_->GetKeyframes().empty()) {
-        tweenOption.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_HEIGHT, heightAnimation_);
-    }
+    animationUtil_.GetTransformConvertor().AddAnimationToTweenOption(tweenOption);
+}
 
-    for (auto& [type, animation] : propertyFloatAnimations) {
-        if (!animation->GetKeyframes().empty()) {
-            tweenOption.SetPropertyAnimationFloat(type, animation);
-        }
-    }
-
-    if (!translateAnimation_->GetKeyframes().empty()) {
-        tweenOption.SetTranslateAnimations(AnimationType::TRANSLATE, translateAnimation_);
-    }
-    if (!translateXAnimation_->GetKeyframes().empty()) {
-        tweenOption.SetTranslateAnimations(AnimationType::TRANSLATE_X, translateXAnimation_);
-    }
-    if (!translateYAnimation_->GetKeyframes().empty()) {
-        tweenOption.SetTranslateAnimations(AnimationType::TRANSLATE_Y, translateYAnimation_);
-    }
-    if (sameScale_ && (!scaleAnimationX_->GetKeyframes().empty())) {
-        tweenOption.SetTransformFloatAnimation(AnimationType::SCALE, scaleAnimationX_);
-        tweenOption.SetMaxScaleXY(maxScaleXY_);
-    } else {
-        if (!scaleAnimationX_->GetKeyframes().empty()) {
-            tweenOption.SetTransformFloatAnimation(AnimationType::SCALE_X, scaleAnimationX_);
-        }
-        if (!scaleAnimationY_->GetKeyframes().empty()) {
-            tweenOption.SetTransformFloatAnimation(AnimationType::SCALE_Y, scaleAnimationY_);
-        }
-        tweenOption.SetMaxScaleXY(maxScaleXY_);
-    }
-    if (!scaleXAnimation_->GetKeyframes().empty()) {
-        tweenOption.SetTransformFloatAnimation(AnimationType::SCALE_X, scaleXAnimation_);
-        tweenOption.SetMaxScaleXY(maxScaleXY_);
-    }
-    if (!scaleYAnimation_->GetKeyframes().empty()) {
-        tweenOption.SetTransformFloatAnimation(AnimationType::SCALE_Y, scaleYAnimation_);
-        tweenOption.SetMaxScaleXY(maxScaleXY_);
-    }
-    if (!rotateZAnimation_->GetKeyframes().empty()) {
-        tweenOption.SetTransformFloatAnimation(AnimationType::ROTATE_Z, rotateZAnimation_);
-    }
-    if (!rotateXAnimation_->GetKeyframes().empty()) {
-        tweenOption.SetTransformFloatAnimation(AnimationType::ROTATE_X, rotateXAnimation_);
-    }
-    if (!rotateYAnimation_->GetKeyframes().empty()) {
-        tweenOption.SetTransformFloatAnimation(AnimationType::ROTATE_Y, rotateYAnimation_);
-    }
+void DOMNode::SetCustomAnimationStyleUpdate(bool enable)
+{
+    customAnimationStyleUpdated_ = enable;
 }
 
 void DOMNode::CompositeComponents()
 {
     std::vector<RefPtr<SingleChild>> components;
     // Only fixed position has position component
-    if (positionComponent_ && position_ == PositionType::FIXED) {
+    if (positionComponent_ && GetPosition() == PositionType::FIXED) {
         components.emplace_back(positionComponent_);
     }
     if (flexItemComponent_) {
         // Update flex item after PrepareSpecializedComponent to make sure sub class has finished prepare.
         UpdateFlexItemComponent();
         components.emplace_back(flexItemComponent_);
+    }
+    if (transformComponent_) {
+        components.emplace_back(transformComponent_);
     }
     if (focusableEventComponent_) {
         components.emplace_back(focusableEventComponent_);
@@ -2270,13 +1226,12 @@ void DOMNode::CompositeComponents()
         displayComponent_->DisableLayer(IsLeafNode());
         components.emplace_back(displayComponent_);
         if (focusableEventComponent_) {
-            bool show = (display_ != DisplayType::NONE);
-            focusableEventComponent_->SetShow(show);
+            focusableEventComponent_->SetShow(GetDisplay() != DisplayType::NONE);
         }
     }
 
-    if (transformComponent_) {
-        components.emplace_back(transformComponent_);
+    if (propTransitionComponent_) {
+        components.emplace_back(propTransitionComponent_);
     }
     if (tweenComponent_) {
         tweenComponent_->SetLeafNode(IsLeafNode());
@@ -2300,23 +1255,35 @@ void DOMNode::CompositeComponents()
     // At last add to composite component.
     rootComponent_->SetChild(compositeComponent);
     // final set disabled status.
-    rootComponent_->SetDisabledStatus(nodeDisabled_);
+    rootComponent_->SetDisabledStatus(declaration_ ? declaration_->IsDisabled() : false);
 }
 
 void DOMNode::UpdateFlexItemComponent()
 {
-    flexItemComponent_->SetFlexGrow(flexGrow_);
-    flexItemComponent_->SetFlexShrink(flexShrink_);
-    flexItemComponent_->SetFlexBasis(flexBasis_);
-    flexItemComponent_->SetFlexWeight(flexWeight_);
-    flexItemComponent_->SetDisplayIndex(displayIndex_);
+    if (!declaration_ || !flexItemComponent_) {
+        return;
+    }
+
+    auto& flexStyle = static_cast<CommonFlexStyle&>(declaration_->GetStyle(StyleTag::COMMON_FLEX_STYLE));
+    if (flexStyle.IsValid()) {
+        flexItemComponent_->SetFlexGrow(flexStyle.flexGrow);
+        flexItemComponent_->SetFlexShrink(flexStyle.flexShrink);
+        flexItemComponent_->SetFlexBasis(flexStyle.flexBasis);
+        flexItemComponent_->SetFlexWeight(flexStyle.flexWeight);
+        flexItemComponent_->SetDisplayIndex(flexStyle.displayIndex);
+    }
     const LinearMapNode<FlexAlign> ALIGN_SELF_TABLE[] = {
-        { "center", FlexAlign::CENTER },
-        { "flex-end", FlexAlign::FLEX_END },
-        { "flex-start", FlexAlign::FLEX_START },
-        { "stretch", FlexAlign::STRETCH },
+        { DOM_ALIGN_ITEMS_BASELINE, FlexAlign::BASELINE },
+        { DOM_ALIGN_ITEMS_CENTER, FlexAlign::CENTER },
+        { DOM_ALIGN_ITEMS_END, FlexAlign::FLEX_END },
+        { DOM_ALIGN_ITEMS_START, FlexAlign::FLEX_START },
+        { DOM_ALIGN_ITEMS_STRETCH, FlexAlign::STRETCH },
     };
-    int64_t index = BinarySearchFindIndex(ALIGN_SELF_TABLE, ArraySize(ALIGN_SELF_TABLE), alignSelf_.c_str());
+    auto& commonStyle = static_cast<CommonStyle&>(declaration_->GetStyle(StyleTag::COMMON_STYLE));
+    int64_t index = -1;
+    if (commonStyle.IsValid()) {
+        index = BinarySearchFindIndex(ALIGN_SELF_TABLE, ArraySize(ALIGN_SELF_TABLE), commonStyle.alignSelf.c_str());
+    }
     if (index != -1) {
         flexItemComponent_->SetAlignSelf(ALIGN_SELF_TABLE[index].value);
     } else {
@@ -2327,24 +1294,27 @@ void DOMNode::UpdateFlexItemComponent()
         (parentNode->GetTag() == DOM_NODE_TAG_DIV || parentNode->GetTag() == DOM_NODE_TAG_GRID_COLUMN)) {
         auto parent = AceType::DynamicCast<DOMDiv>(parentNode);
         // Stretch flag means that if the child's main size is determined, it can not be stretched.
-        if (((parent->GetFlexDirection() == FlexDirection::ROW && GreatOrEqual(height_.Value(), 0.0)) ||
-            (parent->GetFlexDirection() == FlexDirection::COLUMN && GreatOrEqual(width_.Value(), 0.0)))) {
+        if (((parent->GetFlexDirection() == FlexDirection::ROW && GreatOrEqual(GetHeight().Value(), 0.0)) ||
+                (parent->GetFlexDirection() == FlexDirection::COLUMN && GreatOrEqual(GetWidth().Value(), 0.0)))) {
             flexItemComponent_->SetStretchFlag(false);
         } else {
             flexItemComponent_->SetStretchFlag(true);
         }
     }
-    // Make sure input layout constraint is valid
-    flexItemComponent_->SetMaxHeight(maxHeight_);
-    flexItemComponent_->SetMaxWidth(maxWidth_);
-    flexItemComponent_->SetMinHeight(minHeight_);
-    flexItemComponent_->SetMinWidth(minWidth_);
-    // If set aspect Ratio, it cannot be stretch
-    if (GreatNotEqual(aspectRatio_, 0.0)) {
-        flexItemComponent_->SetStretchFlag(false);
+    auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
+    if (sizeStyle.IsValid()) {
+        // Make sure input layout constraint is valid
+        flexItemComponent_->SetMaxHeight(sizeStyle.maxHeight);
+        flexItemComponent_->SetMaxWidth(sizeStyle.maxWidth);
+        flexItemComponent_->SetMinHeight(sizeStyle.minHeight);
+        flexItemComponent_->SetMinWidth(sizeStyle.minWidth);
+        // If set aspect Ratio, it cannot be stretch
+        if (GreatNotEqual(sizeStyle.aspectRatio, 0.0)) {
+            flexItemComponent_->SetStretchFlag(false);
+        }
     }
     // If set display, this flexItem is ignored.
-    flexItemComponent_->SetIsHidden(display_ == DisplayType::NONE);
+    flexItemComponent_->SetIsHidden(GetDisplay() == DisplayType::NONE);
 }
 
 void DOMNode::UpdateUiComponents()
@@ -2367,115 +1337,237 @@ void DOMNode::UpdateBoxPadding(const Edge& padding)
 
 void DOMNode::UpdateBoxBorder(const Border& border)
 {
-    backDecoration_->SetBorder(border);
+    if (declaration_ && declaration_->GetBackDecoration()) {
+        declaration_->GetBackDecoration()->SetBorder(border);
+    }
 }
 
 void DOMNode::UpdateBoxComponent()
 {
-    if (hasBoxStyle_) {
-        UpdateBoxSize(width_, height_);
-        UpdateBoxPadding(Edge(paddingLeft_, paddingTop_, paddingRight_, paddingBottom_));
-        boxComponent_->SetMargin(Edge(marginLeft_, marginTop_, marginRight_, marginBottom_));
-        boxComponent_->SetLayoutInBoxFlag(layoutInBox_);
+    if (!declaration_) {
+        return;
     }
+
+    if (declaration_->HasBoxStyle()) {
+        UpdateBoxSize(GetWidth(), GetHeight());
+        auto& paddingStyle = static_cast<CommonPaddingStyle&>(declaration_->GetStyle(StyleTag::COMMON_PADDING_STYLE));
+        if (paddingStyle.IsValid()) {
+            UpdateBoxPadding(paddingStyle.padding);
+        }
+        auto& marginStyle = static_cast<CommonMarginStyle&>(declaration_->GetStyle(StyleTag::COMMON_MARGIN_STYLE));
+        if (marginStyle.IsValid()) {
+            boxComponent_->SetMargin(marginStyle.margin);
+        }
+        auto& commonStyle = static_cast<CommonStyle&>(declaration_->GetStyle(StyleTag::COMMON_STYLE));
+        if (commonStyle.IsValid()) {
+            boxComponent_->SetLayoutInBoxFlag(commonStyle.layoutInBox);
+        }
+    }
+
     if (flexItemComponent_) {
         boxComponent_->SetDeliverMinToChild(false);
-        boxComponent_->SetAspectRatio(aspectRatio_);
-        boxComponent_->SetMinWidth(minWidth_);
-        boxComponent_->SetMinHeight(minHeight_);
-        boxComponent_->SetMaxWidth(maxWidth_);
-        boxComponent_->SetMaxHeight(maxHeight_);
+        auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
+        if (sizeStyle.IsValid()) {
+            boxComponent_->SetAspectRatio(sizeStyle.aspectRatio);
+            boxComponent_->SetMinWidth(sizeStyle.minWidth);
+            boxComponent_->SetMinHeight(sizeStyle.minHeight);
+            boxComponent_->SetMaxWidth(sizeStyle.maxWidth);
+            boxComponent_->SetMaxHeight(sizeStyle.maxHeight);
+            boxComponent_->SetBoxSizing(sizeStyle.boxSizing);
+        }
     }
 
-    if (hasDecorationStyle_) {
-        border_.SetLeftEdge(borderLeftEdge_);
-        border_.SetRightEdge(borderRightEdge_);
-        border_.SetTopEdge(borderTopEdge_);
-        border_.SetBottomEdge(borderBottomEdge_);
-        // Do not support drawing a different border when there are rounded corners
-        if (border_.HasRadius() && !border_.IsAllEqual()) {
-            border_.SetBorderEdge(BorderEdge(Color::BLACK, Dimension(), BorderStyle::SOLID));
+    if (declaration_->HasDecorationStyle()) {
+        auto& borderStyle = declaration_->MaybeResetStyle<CommonBorderStyle>(StyleTag::COMMON_BORDER_STYLE);
+        if (borderStyle.IsValid()) {
+            UpdateBoxBorder(borderStyle.border);
         }
-        UpdateBoxBorder(border_);
-        if (gradient_.IsValid()) {
-            backDecoration_->SetGradient(gradient_);
+        auto& backDecoration = declaration_->GetBackDecoration();
+        auto& backgroundStyle =
+            static_cast<CommonBackgroundStyle&>(declaration_->GetStyle(StyleTag::COMMON_BACKGROUND_STYLE));
+        if (backgroundStyle.IsValid() && backgroundStyle.gradient.IsValid()) {
+            backDecoration->SetGradient(backgroundStyle.gradient);
         }
-        if (hasShadowStyle_) {
-            backDecoration_->ClearAllShadow();
-            backDecoration_->AddShadow(shadow_);
+        if (backgroundStyle.IsValid() && backgroundStyle.gradientBorderImage.IsValid()) {
+            backDecoration->SetGradientBorderImage(backgroundStyle.gradientBorderImage);
         }
-        boxComponent_->SetBackDecoration(backDecoration_);
+
+        if (declaration_->HasShadowStyle()) {
+            auto& shadowStyle = static_cast<CommonShadowStyle&>(declaration_->GetStyle(StyleTag::COMMON_SHADOW_STYLE));
+            if (shadowStyle.IsValid()) {
+                backDecoration->ClearAllShadow();
+                backDecoration->AddShadow(shadowStyle.shadow);
+            }
+        }
+        boxComponent_->SetBackDecoration(backDecoration);
     }
 
-    if (hasFrontDecorationStyle_) {
-        boxComponent_->SetFrontDecoration(frontDecoration_);
+    if (declaration_->HasFrontDecorationStyle()) {
+        boxComponent_->SetFrontDecoration(declaration_->GetFrontDecoration());
     }
-    boxComponent_->SetOverflow(overflow_);
+    auto& overflowStyle = static_cast<CommonOverflowStyle&>(declaration_->GetStyle(StyleTag::COMMON_OVERFLOW_STYLE));
+    if (overflowStyle.IsValid()) {
+        boxComponent_->SetOverflow(overflowStyle.overflow);
+    }
+
+    boxComponent_->SetOnDomDragEnter(GetDragEnterId());
+    boxComponent_->SetOnDomDragOver(GetDragOverId());
+    boxComponent_->SetOnDomDragLeave(GetDragLeaveId());
+    boxComponent_->SetOnDomDragDrop(GetDragDropId());
+
+    auto& clipPathStyle = static_cast<CommonClipPathStyle&>(declaration_->GetStyle(StyleTag::COMMON_CLIP_PATH_STYLE));
+    if (clipPathStyle.IsValid() && clipPathStyle.clipPath != nullptr) {
+        boxComponent_->SetClipPath(clipPathStyle.clipPath);
+    }
+
+    auto& maskStyle = static_cast<CommonMaskStyle&>(declaration_->GetStyle(StyleTag::COMMON_MASK_STYLE));
+    if (maskStyle.IsValid() && !maskStyle.maskImage.empty()) {
+        BackgroundImagePosition position;
+        if (!maskStyle.maskPosition.empty()) {
+            ParseBackgroundImagePosition(maskStyle.maskPosition, position);
+        }
+
+        BackgroundImageSize size;
+        if (!maskStyle.maskSize.empty()) {
+            ParseBackgroundImageSize(maskStyle.maskSize, size);
+        }
+        boxComponent_->SetMask(maskStyle.maskImage, size, position);
+    }
 }
 
 void DOMNode::PrepareScrollComponent()
 {
-    // div and stack is specially handled.
-    if (GetTag() == DOM_NODE_TAG_DIV || GetTag() == DOM_NODE_TAG_STACK) {
+    if (!declaration_) {
         return;
     }
-    if (!hasOverflowStyle_ || overflow_ != Overflow::SCROLL) {
+
+    // div is specially handled.
+    if (GetTag() == DOM_NODE_TAG_DIV) {
+        return;
+    }
+    auto& overflowStyle = static_cast<CommonOverflowStyle&>(declaration_->GetStyle(StyleTag::COMMON_OVERFLOW_STYLE));
+    if (!declaration_->HasOverflowStyle() || !overflowStyle.IsValid() || overflowStyle.overflow != Overflow::SCROLL) {
         return;
     }
     if (boxComponent_->GetWidthDimension().IsValid() && boxComponent_->GetHeightDimension().IsValid()) {
         if (!scrollComponent_) {
             scrollComponent_ = AceType::MakeRefPtr<ScrollComponent>(nullptr);
         }
-        scrollComponent_->InitScrollBar(GetTheme<ScrollBarTheme>(), scrollBarColor_, scrollBarWidth_, edgeEffect_);
+        scrollComponent_->InitScrollBar(GetTheme<ScrollBarTheme>(), overflowStyle.scrollBarColor,
+            overflowStyle.scrollBarWidth, overflowStyle.edgeEffect);
+        declaration_->SetPositionController(scrollComponent_->GetScrollPositionController());
     }
 }
 
 void DOMNode::UpdateDisplayComponent()
 {
-    if (hasDisplayStyle_) {
-        if (!displayComponent_) {
-            displayComponent_ = AceType::MakeRefPtr<DisplayComponent>(rootComponent_->GetChild());
-        }
-        displayComponent_->SetOpacity(opacity_);
-        SetDisplayStyle();
-        displayComponent_->SetVisible(visible_);
-        bool show = (display_ != DisplayType::NONE);
-        if (!focusableEventComponent_ && !show) {
-            focusableEventComponent_ = AceType::MakeRefPtr<FocusableComponent>();
-            focusableEventComponent_->SetFocusable(true);
-        }
-        if (focusableEventComponent_) {
-            focusableEventComponent_->SetShow(show);
-        }
-        if (hasShadowStyle_) {
-            displayComponent_->SetShadow(shadow_);
+    if (!declaration_ || !declaration_->HasDisplayStyle()) {
+        return;
+    }
+
+    if (!displayComponent_) {
+        displayComponent_ = AceType::MakeRefPtr<DisplayComponent>(rootComponent_->GetChild());
+    }
+    auto& opacityStyle = static_cast<CommonOpacityStyle&>(declaration_->GetStyle(StyleTag::COMMON_OPACITY_STYLE));
+    if (opacityStyle.IsValid()) {
+        displayComponent_->SetOpacity(opacityStyle.opacity);
+        displayComponent_->SetAppearingDuration(opacityStyle.appearingDuration);
+    }
+    auto context = pipelineContext_.Upgrade();
+    if (!context) {
+        return;
+    }
+    SetDisplayStyle();
+    displayComponent_->SetVisible(visible_);
+    bool show = (GetDisplay() != DisplayType::NONE);
+    if (!focusableEventComponent_ && !show && !context->IsJsCard()) {
+        focusableEventComponent_ = AceType::MakeRefPtr<FocusableComponent>();
+        focusableEventComponent_->SetFocusable(true);
+        declaration_->SetFocusableController(focusableEventComponent_->GetFocusableController());
+    }
+    if (focusableEventComponent_) {
+        focusableEventComponent_->SetShow(show);
+    }
+    if (declaration_->HasShadowStyle()) {
+        auto& shadowStyle = static_cast<CommonShadowStyle&>(declaration_->GetStyle(StyleTag::COMMON_SHADOW_STYLE));
+        if (shadowStyle.IsValid()) {
+            displayComponent_->SetShadow(shadowStyle.shadow);
         }
     }
 }
 
 void DOMNode::UpdateTweenComponent()
 {
-    if (transformComponent_ && hasShadowStyle_) {
-        transformComponent_->SetShadow(shadow_);
+    if (transitionStyleUpdated_) {
+        if (!propTransitionComponent_) {
+            propTransitionComponent_ = AceType::MakeRefPtr<TransitionComponent>(TRANSITION_COMPONENT_PREFIX
+                + std::to_string(nodeId_), tag_);
+        }
+        propTransitionComponent_->SetTransitionOption(propTransitionOption_);
+        transitionStyleUpdated_ = false;
     }
+    if (!declaration_) {
+        return;
+    }
+    if (declaration_->HasTransformStyle() && !transformComponent_) {
+        transformComponent_ = AceType::MakeRefPtr<TransformComponent>();
+    }
+    auto& animationStyle = static_cast<CommonAnimationStyle&>(declaration_->GetStyle(StyleTag::COMMON_ANIMATION_STYLE));
+    auto& shadowStyle = static_cast<CommonShadowStyle&>(declaration_->GetStyle(StyleTag::COMMON_SHADOW_STYLE));
+    auto& clickEffectAttr =
+        static_cast<CommonClickEffectAttribute&>(declaration_->GetAttribute(AttributeTag::COMMON_CLICK_EFFECT_ATTR));
+    if (transformComponent_) {
+        if (clickEffectAttr.IsValid()) {
+            transformComponent_->SetClickSpringEffectType(clickEffectAttr.clickEffect);
+        }
+        if (animationStyle.IsValid()) {
+            // Set transform style.
+            if (declaration_->HasTransformOriginStyle()) {
+                transformComponent_->SetOriginDimension(
+                    DimensionOffset(animationStyle.transformOriginX, animationStyle.transformOriginY));
+            }
+        }
+
+        if (declaration_->HasShadowStyle() && shadowStyle.IsValid()) {
+            transformComponent_->SetShadow(shadowStyle.shadow);
+        }
+
+        auto& cardTransitionStyle =
+            static_cast<CommonCardTransitionStyle&>(declaration_->GetStyle(StyleTag::COMMON_CARD_TRANSITION_STYLE));
+        if (cardTransitionStyle.IsValid()) {
+            transformComponent_->SetTransitionEffect(cardTransitionStyle.transitionEffect);
+        }
+    }
+
     // Only check animation style here.
-    if (tweenOption_.IsValid() && animationStyleUpdated_) {
+    if (animationStyle.IsValid() && animationStyle.tweenOption.IsValid() && animationStyleUpdated_) {
         if (!tweenComponent_) {
             tweenComponent_ = AceType::MakeRefPtr<TweenComponent>(COMPONENT_PREFIX + std::to_string(nodeId_), tag_);
         }
-        tweenComponent_->SetTweenOption(tweenOption_);
-        tweenComponent_->SetTweenOperation(TweenOperation::PLAY);
-        if (hasShadowStyle_) {
-            tweenComponent_->SetShadow(shadow_);
+        tweenComponent_->SetTweenOption(animationStyle.tweenOption);
+        tweenComponent_->UpdateAnimationName(animationName_);
+        tweenComponent_->SetAnimationOperation(animationStyle.animationOperation);
+        if (declaration_->HasShadowStyle() && shadowStyle.IsValid()) {
+            tweenComponent_->SetShadow(shadowStyle.shadow);
         }
+        UpdatePropAnimations(propAnimations_);
         animationStyleUpdated_ = false;
+    }
+    // for custom animation
+    if (customAnimationStyleUpdated_) {
+        UpdatePropAnimations(propAnimations_);
+        customAnimationStyleUpdated_ = false;
     }
     if (!shareId_.empty()) {
         if (!sharedTransitionComponent_) {
             sharedTransitionComponent_ = AceType::MakeRefPtr<SharedTransitionComponent>(
                 "FrontendShared" + std::to_string(nodeId_), tag_, shareId_);
-            sharedTransitionComponent_->SetOption(sharedTransitionOption_);
-            sharedTransitionComponent_->SetEffect(sharedEffect_);
+            auto& sharedTransitionStyle = static_cast<CommonShareTransitionStyle&>(
+                declaration_->GetStyle(StyleTag::COMMON_SHARE_TRANSITION_STYLE));
+            if (sharedTransitionStyle.IsValid()) {
+                sharedTransitionComponent_->SetOption(sharedTransitionStyle.sharedTransitionOption);
+                sharedTransitionComponent_->SetEffect(sharedTransitionStyle.sharedEffect);
+            }
         } else {
             sharedTransitionComponent_->SetShareId(shareId_);
         }
@@ -2531,16 +1623,63 @@ void DOMNode::PrepareTouchEvent(EventMarker& eventMarker, uint32_t type)
     });
 }
 
+void DOMNode::PrepareMouseHoverEvent()
+{
+    if (!declaration_) {
+        return;
+    }
+    auto& mouseEvent = declaration_->MaybeResetEvent<CommonMouseEvent>(EventTag::COMMON_MOUSE_EVENT);
+    if (!mouseEvent.IsValid()) {
+        return;
+    }
+    auto weak = AceType::WeakClaim(this);
+    if (mouseEvent.mouseHover.eventMarker.IsEmpty()) {
+        mouseEvent.mouseHover.eventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+        mouseEvent.mouseHover.isRefreshed = true;
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(mouseEvent.mouseHover.eventMarker, []() {});
+    }
+    mouseEvent.mouseHover.eventMarker.SetPreFunction([weak]() {
+        auto domNode = weak.Upgrade();
+        if (!domNode) {
+            LOGE("get dom node failed!");
+            return;
+        }
+        domNode->OnHover(true);
+    });
+
+    if (mouseEvent.mouseHoverExit.eventMarker.IsEmpty()) {
+        mouseEvent.mouseHoverExit.eventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+        mouseEvent.mouseHoverExit.isRefreshed = true;
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(mouseEvent.mouseHoverExit.eventMarker, []() {});
+    }
+    mouseEvent.mouseHoverExit.eventMarker.SetPreFunction([weak]() {
+        auto domNode = weak.Upgrade();
+        if (!domNode) {
+            LOGE("get dom node failed!");
+            return;
+        }
+        domNode->OnHover(false);
+    });
+}
+
 void DOMNode::PrepareFocusableEventId()
 {
-    auto weak = AceType::WeakClaim(this);
-
-    if (onFocusId_.IsEmpty()) {
-        onFocusId_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
-        BackEndEventManager<void()>::GetInstance().BindBackendEvent(onFocusId_, []() {});
+    if (!declaration_) {
+        return;
+    }
+    auto& focusEvent = declaration_->MaybeResetEvent<CommonFocusEvent>(EventTag::COMMON_FOCUS_EVENT);
+    if (!focusEvent.IsValid()) {
+        return;
     }
 
-    onFocusId_.SetPreFunction([weak]() {
+    auto weak = AceType::WeakClaim(this);
+    if (focusEvent.focus.eventMarker.IsEmpty()) {
+        focusEvent.focus.eventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+        focusEvent.focus.isRefreshed = true;
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(focusEvent.focus.eventMarker, []() {});
+    }
+
+    focusEvent.focus.eventMarker.SetPreFunction([weak]() {
         auto domNode = weak.Upgrade();
         if (!domNode) {
             LOGE("get dom node failed!");
@@ -2549,12 +1688,13 @@ void DOMNode::PrepareFocusableEventId()
         domNode->OnFocus(true);
     });
 
-    if (onBlurId_.IsEmpty()) {
-        onBlurId_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
-        BackEndEventManager<void()>::GetInstance().BindBackendEvent(onBlurId_, []() {});
+    if (focusEvent.blur.eventMarker.IsEmpty()) {
+        focusEvent.blur.eventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+        focusEvent.blur.isRefreshed = true;
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(focusEvent.blur.eventMarker, []() {});
     }
 
-    onBlurId_.SetPreFunction([weak]() {
+    focusEvent.blur.eventMarker.SetPreFunction([weak]() {
         auto domNode = weak.Upgrade();
         if (!domNode) {
             LOGE("get dom node failed!");
@@ -2566,10 +1706,35 @@ void DOMNode::PrepareFocusableEventId()
 
 void DOMNode::UpdateTouchEventComponent()
 {
+    if (!declaration_) {
+        return;
+    }
+
+    auto& swipeEvent = static_cast<CommonSwipeEvent&>(declaration_->GetEvent(EventTag::COMMON_SWIPE_EVENT));
+    if (swipeEvent.IsValid() && !swipeEvent.swipe.eventMarker.IsEmpty()) {
+        if (!touchEventComponent_) {
+            touchEventComponent_ = AceType::MakeRefPtr<TouchListenerComponent>();
+        }
+        touchEventComponent_->SetOnSwipeId(swipeEvent.swipe.eventMarker);
+    }
+
+    auto& touchableAttr =
+        static_cast<CommonTouchableAttribute&>(declaration_->GetAttribute(AttributeTag::COMMON_TOUCHABLE_ATTR));
+    if (touchableAttr.IsValid() && !touchableAttr.touchable) {
+        if (!touchEventComponent_) {
+            touchEventComponent_ = AceType::MakeRefPtr<TouchListenerComponent>();
+        }
+        touchEventComponent_->SetTouchable(touchableAttr.touchable);
+    }
+
+    auto& rawEvent = static_cast<CommonRawEvent&>(declaration_->GetEvent(EventTag::COMMON_RAW_EVENT));
+    if (!rawEvent.IsValid()) {
+        return;
+    }
     for (uint32_t eventAction = 0; eventAction < EventAction::SIZE; eventAction++) {
         for (uint32_t eventStage = 0; eventStage < EventStage::SIZE; eventStage++) {
             for (uint32_t touchEventType = 0; touchEventType < EventType::SIZE; touchEventType++) {
-                EventMarker& eventMarker = onTouchIds_[eventAction][eventStage][touchEventType];
+                EventMarker& eventMarker = GetTouchId(eventAction, eventStage, touchEventType);
                 if (!eventMarker.IsEmpty() || HasActivePseudo()) {
                     if (!touchEventComponent_) {
                         touchEventComponent_ = AceType::MakeRefPtr<TouchListenerComponent>();
@@ -2583,72 +1748,109 @@ void DOMNode::UpdateTouchEventComponent()
             }
         }
     }
-    if (!onSwipeId_.IsEmpty()) {
-        if (!touchEventComponent_) {
-            touchEventComponent_ = AceType::MakeRefPtr<TouchListenerComponent>();
-        }
-        touchEventComponent_->SetOnSwipeId(onSwipeId_);
-    }
-    if (!touchable_) {
-        if (!touchEventComponent_) {
-            touchEventComponent_ = AceType::MakeRefPtr<TouchListenerComponent>();
-        }
-        touchEventComponent_->SetTouchable(touchable_);
-    }
 }
 
 void DOMNode::UpdateMouseEventComponent()
 {
-    if (!onMouseId_.IsEmpty()) {
+    if (!declaration_) {
+        return;
+    }
+    auto& mouseEvent = declaration_->MaybeResetEvent<CommonMouseEvent>(EventTag::COMMON_MOUSE_EVENT);
+    if (!mouseEvent.IsValid()) {
+        return;
+    }
+    if (!mouseEvent.mouse.eventMarker.IsEmpty()) {
         if (!mouseEventComponent_) {
             mouseEventComponent_ = AceType::MakeRefPtr<MouseListenerComponent>();
         }
-        mouseEventComponent_->SetOnMouseId(onMouseId_);
+        mouseEventComponent_->SetOnMouseId(mouseEvent.mouse.eventMarker);
+    }
+
+    PrepareMouseHoverEvent();
+    if (!mouseEvent.mouseHover.eventMarker.IsEmpty()) {
+        if (!mouseEventComponent_) {
+            mouseEventComponent_ = AceType::MakeRefPtr<MouseListenerComponent>();
+        }
+        mouseEventComponent_->SetOnMouseHoverId(mouseEvent.mouseHover.eventMarker);
+    }
+    if (!mouseEvent.mouseHoverExit.eventMarker.IsEmpty()) {
+        if (!mouseEventComponent_) {
+            mouseEventComponent_ = AceType::MakeRefPtr<MouseListenerComponent>();
+        }
+        mouseEventComponent_->SetOnMouseHoverExitId(mouseEvent.mouseHoverExit.eventMarker);
     }
 }
 
 void DOMNode::UpdateGestureEventComponent()
 {
-    if (!onClickId_.IsEmpty() || !onLongPressId_.IsEmpty() || hasIdAttr_) {
+    if (!declaration_) {
+        return;
+    }
+
+    if (!GetClickId().IsEmpty() || !GetDoubleClickId().IsEmpty() || !GetLongPressId().IsEmpty() ||
+        !GetPinchStartId().IsEmpty() || !GetPinchUpdateId().IsEmpty() || !GetPinchEndId().IsEmpty() ||
+        !GetPinchCancelId().IsEmpty() || declaration_->HasIdAttr() || !GetDragStartId().IsEmpty() ||
+        !GetDragId().IsEmpty() || !GetDragEndId().IsEmpty()) {
         if (!gestureEventComponent_) {
             gestureEventComponent_ = AceType::MakeRefPtr<GestureListenerComponent>();
         }
-        gestureEventComponent_->SetOnClickId(onClickId_);
-        gestureEventComponent_->SetOnLongPressId(onLongPressId_);
+        gestureEventComponent_->SetOnClickId(GetClickId());
+        gestureEventComponent_->SetOnDoubleClickId(GetDoubleClickId());
+        gestureEventComponent_->SetOnLongPressId(GetLongPressId());
+        gestureEventComponent_->SetOnPinchStartId(GetPinchStartId());
+        gestureEventComponent_->SetOnPinchUpdateId(GetPinchUpdateId());
+        gestureEventComponent_->SetOnPinchEndId(GetPinchEndId());
+        gestureEventComponent_->SetOnPinchCancelId(GetPinchCancelId());
+        gestureEventComponent_->SetOnFreeDragStartId(GetDragStartId());
+        gestureEventComponent_->SetOnFreeDragUpdateId(GetDragId());
+        gestureEventComponent_->SetOnFreeDragEndId(GetDragEndId());
     }
 }
 
 void DOMNode::UpdateFocusableEventComponents()
 {
-    if (UNFOCUSABLED_NODE.find(tag_) != UNFOCUSABLED_NODE.end()) {
+    if (!declaration_ || (UNFOCUSABLED_NODE.find(tag_) != UNFOCUSABLED_NODE.end())) {
         return;
     }
 
-    if (!focusable_.second && onClickId_.IsEmpty() && onBlurId_.IsEmpty() && onFocusId_.IsEmpty() &&
-        onKeyId_.IsEmpty() && !HasFocusPseudo()) {
+    auto& focusableAttr =
+        static_cast<CommonFocusableAttribute&>(declaration_->GetAttribute(AttributeTag::COMMON_FOCUSABLE_ATTR));
+    auto& focusEvent = declaration_->MaybeResetEvent<CommonFocusEvent>(EventTag::COMMON_FOCUS_EVENT);
+    auto& keyEvent = static_cast<CommonKeyEvent&>(declaration_->GetEvent(EventTag::COMMON_KEY_EVENT));
+    bool focusable = focusableAttr.IsValid() && focusableAttr.focusable.second;
+    bool supportFocus = focusEvent.IsValid() && !focusEvent.focus.eventMarker.IsEmpty();
+    bool supportBlur = focusEvent.IsValid() && !focusEvent.blur.eventMarker.IsEmpty();
+    bool supportKey = keyEvent.IsValid() && !keyEvent.key.eventMarker.IsEmpty();
+
+    if (!focusable && GetClickId().IsEmpty() && !supportFocus && !supportBlur && !supportKey && !HasFocusPseudo()) {
         return;
     }
-
     if (!focusableEventComponent_) {
         focusableEventComponent_ = AceType::MakeRefPtr<FocusableComponent>();
+        declaration_->SetFocusableController(focusableEventComponent_->GetFocusableController());
     }
-    if (focusable_.second) {
-        focusableEventComponent_->SetFocusable(focusable_.first);
+    if (focusableAttr.IsValid() && focusableAttr.focusable.second) {
+        focusableEventComponent_->SetFocusable(focusableAttr.focusable.first);
     } else {
         focusableEventComponent_->SetFocusable(true);
     }
 
-    focusableEventComponent_->SetOnClickId(onClickId_);
+    focusableEventComponent_->SetOnClickId(GetClickId());
 
     PrepareFocusableEventId();
 
-    focusableEventComponent_->SetOnBlurId(onBlurId_);
-    focusableEventComponent_->SetOnFocusId(onFocusId_);
-    focusableEventComponent_->SetOnKeyId(onKeyId_);
+    if (focusEvent.IsValid()) {
+        focusableEventComponent_->SetOnBlurId(focusEvent.blur.eventMarker);
+        focusableEventComponent_->SetOnFocusId(focusEvent.focus.eventMarker);
+    }
+    if (keyEvent.IsValid()) {
+        focusableEventComponent_->SetOnKeyId(keyEvent.key.eventMarker);
+    }
     if (g_focusableNode.empty()) {
         g_focusableNode = std::unordered_set<std::string>({
             DOM_NODE_TAG_BUTTON,
             DOM_NODE_TAG_DIV,
+            DOM_NODE_TAG_FORM,
             DOM_NODE_TAG_LIST,
             DOM_NODE_TAG_LIST_ITEM,
             DOM_NODE_TAG_REFRESH,
@@ -2685,96 +1887,120 @@ void DOMNode::UpdateFocusableEventComponents()
 
 void DOMNode::UpdatePositionProps()
 {
-    if (!hasPositionStyle_ || position_ == PositionType::FIXED) {
+    if (!declaration_ || !declaration_->HasPositionStyle() || GetPosition() == PositionType::FIXED) {
         return;
     }
-    hasPositionStyle_ = false;
+
+    declaration_->SetHasPositionStyle(false);
     auto tweenComponent = AceType::DynamicCast<TweenComponent>(rootComponent_->GetChild());
     if (tweenComponent) {
         UpdateTweenPosition(tweenComponent);
+        UpdatePositionAnimations(tweenComponent);
     } else {
         // Set position props to first RenderComponent of node
         auto compositeComponent = AceType::DynamicCast<RenderComponent>(rootComponent_->GetChild());
         if (!compositeComponent) {
             return;
         }
-        compositeComponent->SetHasLeft(hasLeft_);
-        compositeComponent->SetHasTop(hasTop_);
-        compositeComponent->SetHasBottom(hasBottom_);
-        compositeComponent->SetHasRight(hasRight_);
-        if (hasLeft_) {
-            compositeComponent->SetLeft(left_);
-            // reset value
-            hasLeft_ = false;
+        compositeComponent->SetHasLeft(declaration_->HasLeft());
+        compositeComponent->SetHasTop(declaration_->HasTop());
+        compositeComponent->SetHasBottom(declaration_->HasBottom());
+        compositeComponent->SetHasRight(declaration_->HasRight());
+        auto& positionStyle =
+            static_cast<CommonPositionStyle&>(declaration_->GetStyle(StyleTag::COMMON_POSITION_STYLE));
+        if (positionStyle.IsValid()) {
+            if (declaration_->HasLeft()) {
+                compositeComponent->SetLeft(positionStyle.left);
+                // reset value
+                declaration_->SetHasLeft(false);
+            }
+            if (declaration_->HasRight()) {
+                compositeComponent->SetRight(positionStyle.right);
+                declaration_->SetHasRight(false);
+            }
+            if (declaration_->HasTop()) {
+                compositeComponent->SetTop(positionStyle.top);
+                declaration_->SetHasTop(false);
+            }
+            if (declaration_->HasBottom()) {
+                compositeComponent->SetBottom(positionStyle.bottom);
+                declaration_->SetHasBottom(false);
+            }
+            compositeComponent->SetPositionType(positionStyle.position);
         }
-        if (hasRight_) {
-            compositeComponent->SetRight(right_);
-            hasRight_ = false;
-        }
-        if (hasTop_) {
-            compositeComponent->SetTop(top_);
-            hasTop_ = false;
-        }
-        if (hasBottom_) {
-            compositeComponent->SetBottom(bottom_);
-            hasBottom_ = false;
-        }
-        compositeComponent->SetPositionType(position_);
+        UpdatePositionAnimations(compositeComponent);
     }
 }
 
 void DOMNode::UpdateTweenPosition(const RefPtr<TweenComponent> tweenComponent)
 {
-    if (!tweenComponent) {
+    if (!declaration_ || !tweenComponent) {
         return;
     }
-    tweenComponent->SetHasLeft(hasLeft_);
-    tweenComponent->SetHasTop(hasTop_);
-    tweenComponent->SetHasBottom(hasBottom_);
-    tweenComponent->SetHasRight(hasRight_);
-    if (hasLeft_) {
-        tweenComponent->SetLeft(left_);
+    tweenComponent->SetHasLeft(declaration_->HasLeft());
+    tweenComponent->SetHasTop(declaration_->HasTop());
+    tweenComponent->SetHasBottom(declaration_->HasBottom());
+    tweenComponent->SetHasRight(declaration_->HasRight());
+
+    auto& positionStyle = static_cast<CommonPositionStyle&>(declaration_->GetStyle(StyleTag::COMMON_POSITION_STYLE));
+    if (!positionStyle.IsValid()) {
+        return;
+    }
+    if (declaration_->HasLeft()) {
+        tweenComponent->SetLeft(positionStyle.left);
         // reset value
-        hasLeft_ = false;
+        declaration_->SetHasLeft(false);
     }
-    if (hasRight_) {
-        tweenComponent->SetRight(right_);
-        hasRight_ = false;
+    if (declaration_->HasRight()) {
+        tweenComponent->SetRight(positionStyle.right);
+        declaration_->SetHasRight(false);
     }
-    if (hasTop_) {
-        tweenComponent->SetTop(top_);
-        hasTop_ = false;
+    if (declaration_->HasTop()) {
+        tweenComponent->SetTop(positionStyle.top);
+        declaration_->SetHasTop(false);
     }
-    if (hasBottom_) {
-        tweenComponent->SetBottom(bottom_);
-        hasBottom_ = false;
+    if (declaration_->HasBottom()) {
+        tweenComponent->SetBottom(positionStyle.bottom);
+        declaration_->SetHasBottom(false);
     }
-    tweenComponent->SetPositionType(position_);
+    tweenComponent->SetPositionType(positionStyle.position);
 }
 
 void DOMNode::UpdatePositionComponent()
 {
-    if (!hasPositionStyle_ || position_ != PositionType::FIXED) {
+    if (!declaration_ || !declaration_->HasPositionStyle() || GetPosition() != PositionType::FIXED) {
         return;
     }
     if (!positionComponent_) {
         positionComponent_ = AceType::MakeRefPtr<PositionedComponent>();
     }
-    positionComponent_->SetTop(top_);
-    positionComponent_->SetRight(right_);
-    positionComponent_->SetBottom(bottom_);
-    positionComponent_->SetLeft(left_);
-    positionComponent_->SetHasLeft(hasLeft_);
-    positionComponent_->SetHasRight(hasRight_);
-    positionComponent_->SetHasBottom(hasBottom_);
-    positionComponent_->SetHasTop(hasTop_);
+    auto& positionStyle = static_cast<CommonPositionStyle&>(declaration_->GetStyle(StyleTag::COMMON_POSITION_STYLE));
+    if (positionStyle.IsValid()) {
+        positionComponent_->SetTop(positionStyle.top);
+        positionComponent_->SetRight(positionStyle.right);
+        positionComponent_->SetBottom(positionStyle.bottom);
+        positionComponent_->SetLeft(positionStyle.left);
+        positionComponent_->SetHasLeft(declaration_->HasLeft());
+        positionComponent_->SetHasRight(declaration_->HasRight());
+        positionComponent_->SetHasBottom(declaration_->HasBottom());
+        positionComponent_->SetHasTop(declaration_->HasTop());
+    }
+    UpdatePositionAnimations(positionComponent_);
 }
 
 RefPtr<Component> DOMNode::CompositeSpecializedComponent(const std::vector<RefPtr<SingleChild>>& components)
 {
     const auto& specializedComponent = GetSpecializedComponent();
     if (specializedComponent) {
-        specializedComponent->SetTouchable(touchable_);
+        bool touchable = true;
+        if (declaration_) {
+            auto& touchableAttr =
+                static_cast<CommonTouchableAttribute&>(declaration_->GetAttribute(AttributeTag::COMMON_TOUCHABLE_ATTR));
+            if (touchableAttr.IsValid()) {
+                touchable = touchableAttr.touchable;
+            }
+        }
+        specializedComponent->SetTouchable(touchable);
     }
     if (components.empty()) {
         return specializedComponent;
@@ -2786,19 +2012,22 @@ RefPtr<Component> DOMNode::CompositeSpecializedComponent(const std::vector<RefPt
         return AceType::DynamicCast<Component>(components.front());
     }
 }
+
 #ifndef WEARABLE_PRODUCT
 void DOMNode::UpdateMultimodalComponent()
 {
-    if (GetClickId().IsEmpty()) {
+    if (!declaration_ || GetClickId().IsEmpty()) {
         return;
     }
-    if (multimodalProperties_.IsUnavailable() || multimodalProperties_.scene == SceneLabel::SWITCH) {
+    auto& multimodalAttr =
+        static_cast<CommonMultimodalAttribute&>(declaration_->GetAttribute(AttributeTag::COMMON_MULTIMODAL_ATTR));
+    if (!multimodalAttr.IsValid() || multimodalAttr.IsUnavailable() || multimodalAttr.scene == SceneLabel::SWITCH) {
         return;
     }
     if (!multimodalComponent_) {
         multimodalComponent_ = AceType::MakeRefPtr<MultimodalComponent>(pageId_);
     }
-    multimodalComponent_->SetMultimodalProperties(multimodalProperties_);
+    multimodalComponent_->SetMultimodalProperties(multimodalAttr);
     multimodalComponent_->SetOnClickId(GetClickId());
 }
 #endif
@@ -2838,11 +2067,11 @@ Dimension DOMNode::ParseDimension(const std::string& value) const
 
 Dimension DOMNode::ParseLineHeight(const std::string& value) const
 {
-    const auto& parseResult = ThemeUtils::ParseThemeIdReference(value);
+    auto themeConstants = GetThemeConstants();
+    const auto& parseResult = ThemeUtils::ParseThemeIdReference(value, GetThemeConstants());
     if (!parseResult.parseSuccess) {
         return StringUtils::StringToDimension(value);
     }
-    auto themeConstants = GetThemeConstants();
     auto&& noRefFunc = [&value]() { return StringUtils::StringToDouble(value); };
     auto&& idRefFunc = [constants = themeConstants](uint32_t refId) { return constants->GetDouble(refId); };
     auto lineHeightScale = ParseThemeReference<double>(value, noRefFunc, idRefFunc, 1.0);
@@ -2880,16 +2109,56 @@ std::vector<Dimension> DOMNode::ParsePreferFontSizes(const std::string& value) c
     return prefers;
 }
 
+std::string DOMNode::ParseImageSrc(const std::string& imgSrc) const
+{
+    return ThemeUtils::ProcessImageSource(imgSrc, GetThemeConstants());
+}
+
 void DOMNode::AdjustParamInLiteMode()
 {
-    useLiteStyle_ = true;
+    if (!declaration_) {
+        return;
+    }
+
+    declaration_->SetUseLiteStyle(true);
     // Change default value
     if (boxComponent_) {
         boxComponent_->SetUseLiteStyle(true);
         boxComponent_->SetAlignment(Alignment::TOP_CENTER);
     }
-    flexShrink_ = 0.0;
+    auto& flexStyle = declaration_->MaybeResetStyle<CommonFlexStyle>(StyleTag::COMMON_FLEX_STYLE);
+    if (flexStyle.IsValid()) {
+        flexStyle.flexShrink = 0.0;
+    }
     AdjustSpecialParamInLiteMode();
+}
+
+void DOMNode::CreateDeclaration(const std::string& tag)
+{
+    declaration_ = DeclarationCreatorManager::GetInstance().CreateDeclaration(tag);
+    if (!declaration_) {
+        LOGE("node %{public}s doesn't support", tag.c_str());
+        return;
+    }
+    declaration_->SetCachePseudoClassStyle(
+        [weak = WeakClaim(this)](const std::pair<std::string, std::string>& pseudoClassStyle) {
+            auto node = weak.Upgrade();
+            if (node) {
+                node->CachePseudoClassStyle(pseudoClassStyle);
+            }
+        });
+    declaration_->SetOnSetStyleFinished([weak = WeakClaim(this)]() {
+        auto node = weak.Upgrade();
+        if (node) {
+            node->OnSetStyleFinished();
+        }
+    });
+    declaration_->SetOnSetAttribute([weakComponent = WeakPtr<ComposedComponent>(rootComponent_)]() {
+        auto rootComponent = weakComponent.Upgrade();
+        if (rootComponent) {
+            rootComponent->SetUpdateType(UpdateType::ALL);
+        }
+    });
 }
 
 } // namespace OHOS::Ace::Framework

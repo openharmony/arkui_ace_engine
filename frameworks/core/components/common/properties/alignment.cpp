@@ -49,4 +49,32 @@ const Offset Alignment::GetAlignPosition(const Size& parentSize, const Size& chi
     return offset;
 }
 
+std::string Alignment::GetAlignmentStr(TextDirection direction) const
+{
+    std::string result = "";
+    Alignment alignment = Alignment(horizontal_, vertical_);
+    if (alignment == TOP_LEFT) {
+        result = direction == TextDirection::RTL ? "Alignment.TopEnd" : "Alignment.TopStart";
+    } else if (alignment == TOP_CENTER) {
+        result = "Alignment.TopCenter";
+    } else if (alignment == TOP_RIGHT) {
+        result = direction == TextDirection::RTL ? "Alignment.TopStart" : "Alignment.TopEnd";
+    } else if (alignment == CENTER_LEFT) {
+        result = direction == TextDirection::RTL ? "Alignment.End" : "Alignment.Start";
+    } else if (alignment == CENTER) {
+        result = "Alignment.Center";
+    } else if (alignment == CENTER_RIGHT) {
+        result = direction == TextDirection::RTL ? "Alignment.Start" : "Alignment.End";
+    } else if (alignment == BOTTOM_LEFT) {
+        result = direction == TextDirection::RTL ? "Alignment.BottomEnd" : "Alignment.BottomStart";
+    } else if (alignment == BOTTOM_CENTER) {
+        result = "Alignment.BottomCenter";
+    } else if (alignment == BOTTOM_RIGHT) {
+        result = direction == TextDirection::RTL ? "Alignment.BottomStart" : "Alignment.BottomEnd";
+    } else {
+        result = "Alignment.Center";
+    }
+    return result;
+}
+
 } // namespace OHOS::Ace

@@ -23,6 +23,7 @@
 
 #include "adapter/preview/entrance/ace_run_args.h"
 #include "adapter/preview/entrance/flutter_ace_view.h"
+#include "adapter/preview/osal/fetch_manager.h"
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
@@ -32,6 +33,14 @@
 #include "core/common/platform_bridge.h"
 
 namespace OHOS::Ace::Platform {
+
+namespace {
+// Different with mobile, we don't support multi-instances in Windows, because we only want
+// preivew UI effect, it doesn't make scense to create multi ability in one process.
+constexpr int32_t ACE_INSTANCE_ID = 0;
+}
+
+using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 
 // AceContainer is the instance have its own pipeline and thread models, it can contains multiple pages.
 class AceContainer : public Container, public JsMessageDispatcher {
@@ -43,13 +52,19 @@ public:
 
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
     static void SetResourcesPathAndThemeStyle(int32_t instanceId, const std::string& resourcesPath,
-                                              const ThemeId& themeId, const ColorMode& colorMode);
+                                              const int32_t& themeId, const ColorMode& colorMode);
     static void SetView(FlutterAceView* view, double density, int32_t width, int32_t height);
     static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& url, const std::string& params);
     static RefPtr<AceContainer> GetContainerInstance(int32_t instanceId);
+    static void AddRouterChangeCallback(int32_t instanceId, const OnRouterChangeCallback& onRouterChangeCallback);
+    static void NativeOnConfigurationUpdated(int32_t instanceId);
 
     AceContainer(int32_t instanceId, FrontendType type);
     ~AceContainer() override = default;
+
+    void Initialize() override;
+
+    void Destroy() override;
 
     int32_t GetInstanceId() const override
     {
@@ -64,6 +79,11 @@ public:
     RefPtr<Frontend> GetFrontend() const override
     {
         return frontend_;
+    }
+
+    RefPtr<PlatformBridge> GetMessageBridge() const
+    {
+        return messageBridge_;
     }
 
     RefPtr<TaskExecutor> GetTaskExecutor() const override
@@ -86,9 +106,24 @@ public:
         return pipelineContext_;
     }
 
+    int32_t GetViewWidth() const override
+    {
+        return aceView_ ? aceView_->GetWidth() : 0;
+    }
+
+    int32_t GetViewHeight() const override
+    {
+        return aceView_ ? aceView_->GetHeight() : 0;
+    }
+
     FlutterAceView* GetAceView() const
     {
         return aceView_;
+    }
+
+    void* GetView() const override
+    {
+        return static_cast<void*>(aceView_);
     }
 
     void SetWindowModal(WindowModal windowModal)
@@ -101,12 +136,39 @@ public:
         colorScheme_ = colorScheme;
     }
 
+    FrontendType GetType() const
+    {
+        return type_;
+    }
+
+    ResourceConfiguration GetResourceConfiguration() const
+    {
+        return resourceInfo_.GetResourceConfiguration();
+    }
+
+    void SetResourceConfiguration(const ResourceConfiguration& config)
+    {
+        resourceInfo_.SetResourceConfiguration(config);
+    }
+
+    void UpdateResourceConfiguration(const std::string& jsonStr) override;
+
+    void FetchResponse(const ResponseData responseData, const int32_t callbackId) const;
+
+    void CallCurlFunction(const RequestData requestData, const int32_t callbackId) const override;
+
     void Dispatch(
         const std::string& group, std::vector<uint8_t>&& data, int32_t id, bool replyToComponent) const override;
+
+    void DispatchSync(
+        const std::string& group, std::vector<uint8_t>&& data, uint8_t** resData, long& position) const override
+    {}
 
     void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
 
     bool Dump(const std::vector<std::string>& params) override;
+
+    void UpdateColorMode(ColorMode newColorMode);
 
 private:
     void InitializeFrontend();
@@ -122,10 +184,11 @@ private:
     RefPtr<PlatformResRegister> resRegister_;
     RefPtr<PipelineContext> pipelineContext_;
     RefPtr<Frontend> frontend_;
+    RefPtr<PlatformBridge> messageBridge_;
     FrontendType type_ { FrontendType::JSON };
     WindowModal windowModal_ { WindowModal::NORMAL };
     ColorScheme colorScheme_ { ColorScheme::SCHEME_LIGHT };
-    DeviceResourceInfo deviceResourceInfo_;
+    ResourceInfo resourceInfo_;
     static std::once_flag onceFlag_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);

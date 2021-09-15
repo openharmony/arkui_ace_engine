@@ -40,7 +40,7 @@ constexpr double TEST_LINE_HEIGHT = 11.0;
 constexpr int32_t TEST_FONT_STYLE = 1;
 constexpr int32_t TEST_TEXT_DECORATION = 2;
 constexpr uint32_t TEST_MAX_LINE = 10;
-constexpr double TEST_LETTER_SPACING = 11.0;
+constexpr Dimension TEST_LETTER_SPACING = 11.0_px;
 constexpr int32_t TEST_TEXT_ALIGN = 1;
 const std::string TEST_FONT_FAMILY = "serif";
 constexpr int32_t DEFAULT_OVER_FLOW = 0;
@@ -50,59 +50,65 @@ const Dimension TEST_MIN_FONT_SIZE = Dimension(10.0);
 const Dimension TEST_MAX_FONT_SIZE = Dimension(20.0);
 const Dimension TEST_FONT_SIZE_STEP = Dimension(2.0);
 constexpr uint32_t TEST_PREFER_FONT_SIZES_SIZE = 3;
+constexpr uint32_t TEST_FONT_FEATURES_SIZE = 6;
+constexpr uint32_t TEST_FONT_FEATURES_NONE_SIZE = 5;
 const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
 const std::string JSON_TEXT_STR = ""
-                                    "{                                         "
-                                    "  \"tag\": \"text\",                      "
-                                    "  \"attr\" : [{                           "
-                                    "           \"value\" : \"ohos1234@?!\"  "
-                                    "            }],                           "
-                                    "  \"style\": [{                           "
-                                    "           \"textOverflow\":\"ellipsis\"  "
-                                    "          },"
-                                    "          { "
-                                    "           \"fontSize\":\"50.0\"          "
-                                    "          },                              "
-                                    "          {"
-                                    "           \"fontWeight\":\"200\"         "
-                                    "           },"
-                                    "          {"
-                                    "           \"color\":\"#0x0000ff\"        "
-                                    "           },"
-                                    "          {"
-                                    "           \"lineHeight\":\"11.0\"        "
-                                    "           },"
-                                    "          {"
-                                    "           \"fontStyle\":\"italic\"       "
-                                    "           },"
-                                    "          {"
-                                    "           \"textDecoration\":\"overline\""
-                                    "           },"
-                                    "           { "
-                                    "           \"maxLines\":\"10\"            "
-                                    "           },"
-                                    "          {"
-                                    "           \"letterSpacing\":\"11.0\"     "
-                                    "           },"
-                                    "          {"
-                                    "           \"minFontSize\":\"10.0px\"       "
-                                    "           },"
-                                    "          {"
-                                    "           \"maxFontSize\":\"20.0px\"       "
-                                    "           },"
-                                    "          {"
-                                    "           \"fontSizeStep\":\"2px\"         "
-                                    "           },"
-                                    "          {"
-                                    "           \"preferFontSizes\":\"20px, 18px, 16px\"  "
-                                    "           },"
-                                    "           { "
-                                    "           \"textAlign\":\"right\"        "
-                                    "            },"
-                                    "           { "
-                                    "           \"fontFamily\":\"serif\"       "
-                                    "            }]"
-                                    "}";
+                                  "{                                                       "
+                                  "  \"tag\": \"text\",                                    "
+                                  "  \"attr\" : [{                                         "
+                                  "           \"value\" : \"ohos1234@?!\"                "
+                                  "            }],                                         "
+                                  "  \"style\": [{                                         "
+                                  "           \"textOverflow\":\"ellipsis\"                "
+                                  "          },                                            "
+                                  "          {                                             "
+                                  "           \"fontSize\":\"50.0\"                        "
+                                  "          },                                            "
+                                  "          {                                             "
+                                  "           \"fontWeight\":\"200\"                       "
+                                  "           },                                           "
+                                  "          {                                             "
+                                  "           \"color\":\"#0x0000ff\"                      "
+                                  "           },                                           "
+                                  "          {                                             "
+                                  "           \"lineHeight\":\"11.0\"                      "
+                                  "           },                                           "
+                                  "          {                                             "
+                                  "           \"fontStyle\":\"italic\"                     "
+                                  "           },                                           "
+                                  "          {                                             "
+                                  "           \"textDecoration\":\"overline\"              "
+                                  "           },                                           "
+                                  "           {                                            "
+                                  "           \"maxLines\":\"10\"                          "
+                                  "           },                                           "
+                                  "          {                                             "
+                                  "           \"letterSpacing\":\"11.0\"                   "
+                                  "           },                                           "
+                                  "          {                                             "
+                                  "           \"minFontSize\":\"10.0px\"                   "
+                                  "           },                                           "
+                                  "          {                                             "
+                                  "           \"maxFontSize\":\"20.0px\"                   "
+                                  "           },                                           "
+                                  "          {                                             "
+                                  "           \"fontSizeStep\":\"2px\"                     "
+                                  "           },                                           "
+                                  "          {                                             "
+                                  "           \"preferFontSizes\":\"20px, 18px, 16px\"     "
+                                  "           },                                           "
+                                  "           {                                            "
+                                  "           \"textAlign\":\"right\"                      "
+                                  "            },                                          "
+                                  "           {                                                                  "
+                                  "           \"fontVariant\":\"small-caps slashed-zero common-ligatures ruby    "
+                                  "stylistic(2) \"                                                               "
+                                  "            },                                          "
+                                  "           {                                            "
+                                  "           \"fontFamily\":\"serif\"                     "
+                                  "            }]                                          "
+                                  "}";
 
 } // namespace
 
@@ -149,7 +155,7 @@ HWTEST_F(DomTextTest, DomTextTest001, TestSize.Level1)
  * @tc.name: DomTextTest002
  * @tc.desc: Verify that DomText can be set styles.
  * @tc.type: FUNC
- * @tc.require: AR000DD66E
+ * @tc.require: AR000DD66E AR000FRTPP
  * @tc.author: liwenzhen
  */
 HWTEST_F(DomTextTest, DomTextTest002, TestSize.Level1)
@@ -180,7 +186,8 @@ HWTEST_F(DomTextTest, DomTextTest002, TestSize.Level1)
     EXPECT_TRUE(NearEqual(static_cast<int32_t>(textStyle.GetFontStyle()), TEST_FONT_STYLE));
     EXPECT_TRUE(NearEqual(static_cast<int32_t>(textStyle.GetTextDecoration()), TEST_TEXT_DECORATION));
     EXPECT_TRUE(NearEqual(textChild->GetTextStyle().GetMaxLines(), TEST_MAX_LINE));
-    EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing(), TEST_LETTER_SPACING));
+    EXPECT_EQ(textStyle.GetLetterSpacing().Unit(), TEST_LETTER_SPACING.Unit());
+    EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing().Value(), TEST_LETTER_SPACING.Value()));
     EXPECT_EQ(static_cast<int32_t>(textChild->GetTextStyle().GetTextAlign()), TEST_TEXT_ALIGN);
     EXPECT_EQ(textStyle.GetFontFamilies()[0], TEST_FONT_FAMILY);
     EXPECT_EQ(textStyle.GetMaxLines(), TEST_MAX_LINE);
@@ -188,6 +195,7 @@ HWTEST_F(DomTextTest, DomTextTest002, TestSize.Level1)
     EXPECT_EQ(textStyle.GetAdaptMaxFontSize(), TEST_MAX_FONT_SIZE);
     EXPECT_EQ(textStyle.GetAdaptFontSizeStep(), TEST_FONT_SIZE_STEP);
     EXPECT_EQ(textStyle.GetPreferFontSizes().size(), TEST_PREFER_FONT_SIZES_SIZE);
+    EXPECT_EQ(textStyle.GetFontFeatures().size(), TEST_FONT_FEATURES_SIZE);
 }
 
 /**
@@ -207,19 +215,22 @@ HWTEST_F(DomTextTest, DomTextTest003, TestSize.Level1)
                                     "  \"tag\": \"text\",                              "
                                     "  \"style\": [{                                   "
                                     "           \"textOverflow\":\"invalidValue\"      "
-                                    "          },"
-                                    "          {"
+                                    "          },                                      "
+                                    "          {                                       "
                                     "           \"fontWeight\":\"invalidValue\"        "
-                                    "           },"
-                                    "          {"
-                                    "           \"fontStyle\":\"invalidValue\"          "
-                                    "           },"
-                                    "          {"
-                                    "           \"textDecoration\":\"invalidValue\"     "
-                                    "           },"
-                                    "           { "
-                                    "           \"textAlign\":\"invalidValue\"           "
-                                    "            }]"
+                                    "           },                                     "
+                                    "          {                                       "
+                                    "           \"fontStyle\":\"invalidValue\"         "
+                                    "           },                                     "
+                                    "          {                                       "
+                                    "           \"textDecoration\":\"invalidValue\"    "
+                                    "           },                                     "
+                                    "          {                                       "
+                                    "           \"fontVariant\":\"invalidValue\"       "
+                                    "           },                                     "
+                                    "           {                                      "
+                                    "           \"textAlign\":\"invalidValue\"         "
+                                    "            }]                                    "
                                     "}";
 
     /**
@@ -241,6 +252,7 @@ HWTEST_F(DomTextTest, DomTextTest003, TestSize.Level1)
     EXPECT_EQ(textStyle.GetFontStyle(), theme->GetTextStyle().GetFontStyle());
     EXPECT_EQ(static_cast<int32_t>(textChild->GetTextStyle().GetTextAlign()), DEFAULT_TEXT_ALIGN_INVALIDVALUE);
     EXPECT_EQ(textStyle.GetTextDecoration(), theme->GetTextStyle().GetTextDecoration());
+    EXPECT_TRUE(textChild->GetTextStyle().GetFontFeatures().empty());
 }
 
 /**
@@ -282,8 +294,74 @@ HWTEST_F(DomTextTest, DomTextTest004, TestSize.Level1)
     EXPECT_EQ(textStyle.GetLineHeight(), theme->GetTextStyle().GetLineHeight());
     EXPECT_EQ(textStyle.GetFontStyle(), theme->GetTextStyle().GetFontStyle());
     EXPECT_EQ(textStyle.GetTextDecoration(), theme->GetTextStyle().GetTextDecoration());
-    EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing(), theme->GetTextStyle().GetLetterSpacing()));
+    EXPECT_EQ(textStyle.GetLetterSpacing().Unit(), theme->GetTextStyle().GetLetterSpacing().Unit());
+    EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing().Value(), theme->GetTextStyle().GetLetterSpacing().Value()));
     EXPECT_EQ(static_cast<int32_t>(textChild->GetTextStyle().GetTextAlign()), DEFAULT_TEXT_ALIGN);
+    EXPECT_TRUE(textStyle.GetFontFeatures().empty());
+}
+
+/**
+ * @tc.name: DomTextTest005
+ * @tc.desc: Verify that DomText can be created.
+ * @tc.type: FUNC
+ * @tc.require: AR000FRTPP
+ * @tc.author: caocan
+ */
+HWTEST_F(DomTextTest, DomTextTest005, TestSize.Level1)
+{
+    const std::string jsonTextStr = ""
+                                    "{                                          "
+                                    "  \"tag\": \"text\",                       "
+                                    "  \"style\": [{                            "
+                                    "               \"fontVariant\":\"normal\"  "
+                                    "            }]                             "
+                                    "}";
+
+    /**
+     * @tc.steps: step1. call JsonUtil interface and create DomText.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonTextStr);
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeRoot);
+    RefPtr<TextComponent> textChild = AceType::DynamicCast<TextComponent>(boxChild->GetChild());
+    const auto textStyle = textChild->GetTextStyle();
+
+    /**
+     * @tc.steps: step3. Check font features is correct.
+     * @tc.expected: step3. Font featrues is empty.
+     */
+    EXPECT_TRUE(textStyle.GetFontFeatures().empty());
+}
+
+/**
+ * @tc.name: DomTextTest006
+ * @tc.desc: Verify that DomText can be created.
+ * @tc.type: FUNC
+ * @tc.require: AR000FRTPP
+ * @tc.author: caocan
+ */
+HWTEST_F(DomTextTest, DomTextTest006, TestSize.Level1)
+{
+    const std::string jsonTextStr = ""
+                                    "{                                     "
+                                    "  \"tag\": \"text\",                  "
+                                    "  \"style\": [{                       "
+                                    "           \"fontVariant\":\"none\"   "
+                                    "            }]                        "
+                                    "}";
+
+    /**
+     * @tc.steps: step1. call JsonUtil interface and create DomText.
+     */
+    auto domNodeText = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonTextStr);
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeText);
+    RefPtr<TextComponent> textChild = AceType::DynamicCast<TextComponent>(boxChild->GetChild());
+    const auto textStyle = textChild->GetTextStyle();
+
+    /**
+     * @tc.steps: step3. Check font features is correct.
+     * @tc.expected: step3. Font feature is correct.
+     */
+    EXPECT_EQ(textStyle.GetFontFeatures().size(), TEST_FONT_FEATURES_NONE_SIZE);
 }
 
 } // namespace OHOS::Ace::Framework

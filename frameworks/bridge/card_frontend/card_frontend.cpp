@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "base/log/event_report.h"
+#include "core/common/thread_checker.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace {
@@ -27,9 +28,19 @@ namespace {
 const char MANIFEST_JSON[] = "manifest.json";
 const char FILE_TYPE_JSON[] = ".json";
 
+static int32_t g_pageId = 0;
+
+static int32_t GetPageId()
+{
+    return g_pageId++;
+}
+
 } // namespace
 
-CardFrontend::~CardFrontend() = default;
+CardFrontend::~CardFrontend()
+{
+    LOG_DESTROY();
+}
 
 bool CardFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
 {
@@ -40,8 +51,26 @@ bool CardFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& tas
     return true;
 }
 
+void CardFrontend::SetSelfTaskExectuor(const RefPtr<TaskExecutor>& taskExecutor)
+{
+    selfTaskExecutor_ = taskExecutor;
+}
+
+void CardFrontend::Destroy()
+{
+    CHECK_RUN_ON(JS);
+    LOGI("CardFrontend Destroy begin.");
+    parseJsCard_.Reset();
+    delegate_.Reset();
+    eventHandler_.Reset();
+    LOGI("CardFrontend Destroy end.");
+}
+
 void CardFrontend::AttachPipelineContext(const RefPtr<PipelineContext>& context)
 {
+    if (!delegate_) {
+        return;
+    }
     eventHandler_ = AceType::MakeRefPtr<CardEventHandler>(delegate_);
     context->RegisterEventHandler(eventHandler_);
     holder_.Attach(context);
@@ -64,6 +93,9 @@ void CardFrontend::ParseManifest() const
             return;
         }
         manifestParser_->Parse(jsonContent);
+        if (noDependentContainer_ && onGotWindowConfigCallback_) {
+            onGotWindowConfigCallback_(manifestParser_->GetWindowConfig());
+        }
     });
 }
 
@@ -82,7 +114,8 @@ void CardFrontend::RunPage(int32_t pageId, const std::string& url, const std::st
         EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
         return;
     }
-    taskExecutor_->PostTask(
+
+    GetTaskExecutor()->PostTask(
         [weak = AceType::WeakClaim(this), urlPath, params] {
             auto frontend = weak.Upgrade();
             if (frontend) {
@@ -100,7 +133,7 @@ RefPtr<AcePage> CardFrontend::GetPage(int32_t pageId) const
     return delegate_->GetPage();
 }
 
-const WindowConfig& CardFrontend::GetWindowConfig() const
+WindowConfig& CardFrontend::GetWindowConfig()
 {
     ParseManifest();
     return manifestParser_->GetWindowConfig();
@@ -108,7 +141,14 @@ const WindowConfig& CardFrontend::GetWindowConfig() const
 
 void CardFrontend::LoadPage(const std::string& urlPath, const std::string& params)
 {
-    auto page = delegate_->CreatePage(0, urlPath);
+    CHECK_RUN_ON(JS);
+    if (!delegate_) {
+        return;
+    }
+    auto stage = AceType::DynamicCast<StageElement>(parentElement_);
+    auto page = noDependentContainer_ ?
+        delegate_->CreatePage(GetPageId(), urlPath, AceType::WeakClaim(AceType::RawPtr(stage))) :
+        delegate_->CreatePage(GetPageId(), urlPath);
     page->SetPageParams(params);
     page->SetFlushCallback([weak = WeakClaim(this)](const RefPtr<Framework::JsAcePage>& page) {
         auto front = weak.Upgrade();
@@ -129,6 +169,7 @@ void CardFrontend::LoadPage(const std::string& urlPath, const std::string& param
 void CardFrontend::ParsePage(const RefPtr<PipelineContext>& context, const std::string& pageContent,
     const std::string& params, const RefPtr<Framework::JsAcePage>& page)
 {
+    CHECK_RUN_ON(JS);
     auto rootBody = Framework::ParseFileData(pageContent);
     if (!rootBody) {
         LOGE("parse index json error");
@@ -154,6 +195,7 @@ void CardFrontend::ParsePage(const RefPtr<PipelineContext>& context, const std::
 
 void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
 {
+    CHECK_RUN_ON(JS);
     // Pop all JS command and execute them in UI thread.
     auto jsCommands = std::make_shared<std::vector<RefPtr<Framework::JsCommand>>>();
     page->PopAllCommands(*jsCommands);
@@ -196,6 +238,7 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
                         }
                     }
                 }
+                LOGI("card update finish");
                 return;
             }
 
@@ -207,10 +250,30 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
             if (pipelineContext->GetAccessibilityManager()) {
                 pipelineContext->GetAccessibilityManager()->HandleComponentPostBinding();
             }
-            if (pipelineContext->CanPushPage()) {
-                pipelineContext->PushPage(page->BuildPage(page->GetUrl()));
+
+            if (!frontend->noDependentContainer_) {
+                if (pipelineContext->CanPushPage()) {
+                    pipelineContext->PushPage(page->BuildPage(page->GetUrl()));
+
+                    frontend->pageLoaded_ = true;
+                    if (frontend->delegate_) {
+                        frontend->delegate_->GetJsAccessibilityManager()->SetRunningPage(page);
+                    }
+                }
+            } else {
+                auto rootComponent = page->BuildPage(page->GetUrl());
+                RefPtr<StageElement> stage = AceType::DynamicCast<StageElement>(frontend->parentElement_);
+                if (!stage) {
+                    LOGW("could not get card mount stage element, maybe will show error");
+                }
+                auto mainPipelineCtx = pipelineContext->GetMainPipelineContext();
+                if (mainPipelineCtx) {
+                    mainPipelineCtx->PushPage(rootComponent, stage);
+                }
                 frontend->pageLoaded_ = true;
-                frontend->delegate_->GetJsAccessibilityManager()->SetRunningPage(page);
+                if (frontend->delegate_) {
+                    frontend->delegate_->GetJsAccessibilityManager()->SetRunningPage(page);
+                }
             }
         },
         TaskExecutor::TaskType::UI);
@@ -218,7 +281,7 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
 
 void CardFrontend::UpdateData(const std::string& dataList)
 {
-    taskExecutor_->PostTask(
+    GetTaskExecutor()->PostTask(
         [weak = AceType::WeakClaim(this), dataList] {
             auto frontend = weak.Upgrade();
             if (frontend) {
@@ -230,6 +293,7 @@ void CardFrontend::UpdateData(const std::string& dataList)
 
 void CardFrontend::UpdatePageData(const std::string& dataList)
 {
+    CHECK_RUN_ON(JS);
     if (!delegate_ || !parseJsCard_) {
         LOGE("the delegate or parseJsCard is null");
         EventReport::SendFormException(FormExcepType::UPDATE_PAGE_ERR);
@@ -240,13 +304,22 @@ void CardFrontend::UpdatePageData(const std::string& dataList)
 
 void CardFrontend::SetColorMode(ColorMode colorMode)
 {
-    colorMode_ = colorMode;
-    if (!delegate_ || !parseJsCard_) {
-        LOGI("the delegate is null");
-        return;
-    }
-    parseJsCard_->SetColorMode(colorMode);
-    OnMediaFeatureUpdate();
+    GetTaskExecutor()->PostTask(
+        [weak = AceType::WeakClaim(this), colorMode]() {
+            auto frontend = weak.Upgrade();
+            if (frontend) {
+                frontend->colorMode_ = colorMode;
+                if (!frontend->delegate_ || !frontend->parseJsCard_) {
+                    LOGI("the delegate is null");
+                    return;
+                }
+                frontend->parseJsCard_->SetColorMode(frontend->colorMode_);
+                frontend->OnMediaFeatureUpdate();
+            } else {
+                LOGE("card frontend is nullptr");
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void CardFrontend::RebuildAllPages()
@@ -277,7 +350,7 @@ void CardFrontend::RebuildAllPages()
 
 void CardFrontend::OnSurfaceChanged(int32_t width, int32_t height)
 {
-    taskExecutor_->PostTask(
+    GetTaskExecutor()->PostTask(
         [weak = AceType::WeakClaim(this), width, height] {
             auto frontend = weak.Upgrade();
             if (frontend) {
@@ -289,6 +362,7 @@ void CardFrontend::OnSurfaceChanged(int32_t width, int32_t height)
 
 void CardFrontend::HandleSurfaceChanged(int32_t width, int32_t height)
 {
+    CHECK_RUN_ON(JS);
     if (!parseJsCard_) {
         LOGE("the parser is null");
         return;
@@ -299,11 +373,21 @@ void CardFrontend::HandleSurfaceChanged(int32_t width, int32_t height)
 
 void CardFrontend::OnMediaFeatureUpdate()
 {
+    CHECK_RUN_ON(JS);
     if (!delegate_ || !parseJsCard_) {
         LOGE("the delegate or parser is null");
         return;
     }
     parseJsCard_->UpdateStyle(delegate_->GetPage());
+}
+
+const RefPtr<TaskExecutor>& CardFrontend::GetTaskExecutor() const
+{
+    if (noDependentContainer_) {
+        return selfTaskExecutor_;
+    } else {
+        return taskExecutor_;
+    }
 }
 
 } // namespace OHOS::Ace

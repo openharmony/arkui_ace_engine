@@ -27,11 +27,6 @@ DOMRefresh::DOMRefresh(NodeId nodeId, const std::string& nodeName) : DOMNode(nod
     refreshChild_ = AceType::MakeRefPtr<RefreshComponent>();
     columnChild_ = AceType::MakeRefPtr<ColumnComponent>(
         FlexAlign::FLEX_START, FlexAlign::FLEX_START, std::list<RefPtr<Component>>());
-
-    if (IsRightToLeft()) {
-        refreshChild_->SetTextDirection(TextDirection::RTL);
-        columnChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 void DOMRefresh::InitializeStyle()
@@ -143,6 +138,12 @@ RefPtr<Component> DOMRefresh::GetSpecializedComponent()
         refreshChild_->SetProgressColor(progressColor_.first);
     }
     return refreshChild_;
+}
+
+void DOMRefresh::PrepareSpecializedComponent()
+{
+    refreshChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+    columnChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
 }
 
 } // namespace OHOS::Ace::Framework

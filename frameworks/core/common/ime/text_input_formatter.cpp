@@ -29,7 +29,8 @@ void BlackListCharsFormatter::Format(const TextEditingValue& oldValue, TextEditi
         [this](std::wstring& manipulateText) { manipulateText = std::regex_replace(manipulateText, regex_, L""); });
 }
 
-NumberFormatter::NumberFormatter() : BlackListCharsFormatter(std::wregex(L"\\D")) {}
+// Only allow \d.-e
+NumberFormatter::NumberFormatter() : BlackListCharsFormatter(std::wregex(L"[^\\d.\\-e]+")) {}
 
 // Only allow \d-+
 PhoneNumberFormatter::PhoneNumberFormatter() : BlackListCharsFormatter(std::wregex(L"[^\\d\\-\\+]+")) {}

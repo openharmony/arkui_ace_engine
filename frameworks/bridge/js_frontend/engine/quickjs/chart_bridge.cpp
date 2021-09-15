@@ -381,14 +381,14 @@ void ParseAttrDataStyle(JSContext* ctx, JSValueConst valObject, LineInfo& line, 
 
 void GetAttrDataSetData(JSContext* ctx, JSValueConst dataArrayVal, MainChart& dataSet)
 {
-    int32_t length = QjsUtils::JsGetArrayLength(ctx, dataArrayVal);
+    int32_t length = QJSUtils::JsGetArrayLength(ctx, dataArrayVal);
     std::vector<LineInfo> line;
     for (int32_t j = 0; j < length; ++j) {
         JSValue dataArrayItemVal = JS_GetPropertyUint32(ctx, dataArrayVal, j);
         LineInfo lineInfo;
         PointInfo pointInfo;
         if (JS_IsArray(ctx, dataArrayItemVal)) { // Coordinates are two-dimensional arrays
-            int32_t dataArrayIterLen = QjsUtils::JsGetArrayLength(ctx, dataArrayItemVal);
+            int32_t dataArrayIterLen = QJSUtils::JsGetArrayLength(ctx, dataArrayItemVal);
             if (dataArrayIterLen != VALID_ARRAY_LENGTH) { // Check coordinates are not two-dimensional arrays
                 LOGW("Attr Datasets data type unsupported!");
                 JS_FreeValue(ctx, dataArrayItemVal);
@@ -560,7 +560,7 @@ void ChartBridge::GetAttrOptionsObject(JSContext* ctx, JSValueConst valObject)
 
 void ChartBridge::GetAttrDatasets(JSContext* ctx, JSValueConst valArray)
 {
-    int32_t len = QjsUtils::JsGetArrayLength(ctx, valArray);
+    int32_t len = QJSUtils::JsGetArrayLength(ctx, valArray);
     for (int32_t i = 0; i < len; ++i) {
         JSValue itemVal = JS_GetPropertyUint32(ctx, valArray, i);
         MainChart chart;
@@ -574,7 +574,7 @@ void ChartBridge::GetAttrDatasets(JSContext* ctx, JSValueConst valArray)
 
 void ChartBridge::ParseAttrSegmentArray(JSContext* ctx, JSValueConst valArray)
 {
-    int32_t len = QjsUtils::JsGetArrayLength(ctx, valArray);
+    int32_t len = QJSUtils::JsGetArrayLength(ctx, valArray);
     for (int32_t i = 0; i < len; ++i) {
         JSValue itemVal = JS_GetPropertyUint32(ctx, valArray, i);
         if (JS_IsObject(itemVal)) {

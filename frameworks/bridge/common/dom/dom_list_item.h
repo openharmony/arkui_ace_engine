@@ -73,10 +73,12 @@ protected:
     void PrepareSpecializedComponent() override;
     RefPtr<Component> CompositeSpecializedComponent(const std::vector<RefPtr<SingleChild>>& components) override;
     void ResetInitializedStyle() override;
-    const EventMarker& GetClickId() override;
 
     bool IsSubscriptEnable() const override
     {
+        if (declaration_) {
+            declaration_->SetIsSubscriptEnable(true);
+        }
         return true;
     }
 
@@ -115,6 +117,7 @@ private:
     bool clickEffect_ = true;
     bool primary_ = false;
     bool isActive_ = false;
+    Color clickColor_ = Color::TRANSPARENT;
 
     EventMarker clickEventId_;
     EventMarker stickyEventId_;

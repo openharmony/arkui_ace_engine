@@ -23,6 +23,7 @@
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/sole_child_component.h"
+#include "core/components/declaration/search/search_declaration.h"
 
 namespace OHOS::Ace {
 
@@ -30,134 +31,49 @@ class SearchComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(SearchComponent, SoleChildComponent);
 
 public:
-    SearchComponent() = default;
+    SearchComponent();
     ~SearchComponent() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
 
-    void SetCloseIconSize(const Dimension& closeIconSize)
-    {
-        closeIconSize_ = closeIconSize;
-    }
+    void SetCloseIconSize(const Dimension& closeIconSize);
+    const Dimension& GetCloseIconSize() const;
 
-    const Dimension& GetCloseIconSize() const
-    {
-        return closeIconSize_;
-    }
+    void SetCloseIconHotZoneHorizontal(const Dimension& closeIconHotZoneHorizontal);
+    const Dimension& GetCloseIconHotZoneHorizontal() const;
 
-    void SetCloseIconHotZoneHorizontal(const Dimension& closeIconHotZoneHorizontal)
-    {
-        closeIconHotZoneHorizontal_ = closeIconHotZoneHorizontal;
-    }
+    const std::string& GetSearchText() const;
+    void SetSearchText(const std::string& searchText);
 
-    const Dimension& GetCloseIconHotZoneHorizontal() const
-    {
-        return closeIconHotZoneHorizontal_;
-    }
+    const std::string& GetCloseIconSrc() const;
+    void SetCloseIconSrc(const std::string& closeIconSrc);
 
-    const std::string& GetSearchText() const
-    {
-        return searchText_;
-    }
+    void SetChangeEventId(const EventMarker& changeEventId);
+    const EventMarker& GetChangeEventId() const;
 
-    void SetSearchText(const std::string& searchText)
-    {
-        searchText_ = searchText;
-    }
+    void SetSubmitEventId(const EventMarker& submitEventId);
+    const EventMarker& GetSubmitEventId() const;
 
-    const std::string& GetCloseIconSrc() const
-    {
-        return closeIconSrc_;
-    }
+    RefPtr<TextEditController> GetTextEditController() const;
+    void SetTextEditController(const RefPtr<TextEditController>& controller);
 
-    void SetCloseIconSrc(const std::string& closeIconSrc)
-    {
-        closeIconSrc_ = closeIconSrc;
-    }
+    void SetSubmitEvent(const std::function<void(const std::string&)>& event);
+    const std::function<void(const std::string&)>& GetSubmitEvent() const;
 
-    void SetChangeEventId(const EventMarker& changeEventId)
-    {
-        changeEventId_ = changeEventId;
-    }
+    RefPtr<Decoration> GetDecoration() const;
+    void SetDecoration(const RefPtr<Decoration>& decoration);
 
-    const EventMarker& GetChangeEventId() const
-    {
-        return changeEventId_;
-    }
+    const Color& GetHoverColor() const;
+    void SetHoverColor(const Color& hoverColor);
 
-    void SetSubmitEventId(const EventMarker& submitEventId)
-    {
-        submitEventId_ = submitEventId;
-    }
+    const Color& GetPressColor() const;
+    void SetPressColor(const Color& pressColor);
 
-    const EventMarker& GetSubmitEventId() const
-    {
-        return submitEventId_;
-    }
-
-    const RefPtr<TextEditController>& GetTextEditController() const
-    {
-        return textEditController_;
-    }
-
-    void SetTextEditController(const RefPtr<TextEditController>& controller)
-    {
-        textEditController_ = controller;
-    }
-
-    void SetSubmitEvent(const std::function<void(const std::string&)>& event)
-    {
-        submitEvent_ = event;
-    }
-
-    const std::function<void(const std::string&)>& GetSubmitEvent() const
-    {
-        return submitEvent_;
-    }
-
-    RefPtr<Decoration> GetDecoration() const
-    {
-        return decoration_;
-    }
-
-    void SetDecoration(const RefPtr<Decoration>& decoration)
-    {
-        decoration_ = decoration;
-    }
-
-    const Color& GetHoverColor() const
-    {
-        return hoverColor_;
-    }
-
-    void SetHoverColor(const Color& hoverColor)
-    {
-        hoverColor_ = hoverColor;
-    }
-
-    const Color& GetPressColor() const
-    {
-        return pressColor_;
-    }
-
-    void SetPressColor(const Color& pressColor)
-    {
-        pressColor_ = pressColor;
-    }
+    void SetDeclaration(const RefPtr<SearchDeclaration>& declaration);
 
 private:
-    Dimension closeIconSize_;
-    Dimension closeIconHotZoneHorizontal_;
-    std::string searchText_;
-    std::string closeIconSrc_;
-    EventMarker changeEventId_;
-    EventMarker submitEventId_;
-    RefPtr<TextEditController> textEditController_;
-    std::function<void(const std::string&)> submitEvent_;
-    RefPtr<Decoration> decoration_;
-    Color hoverColor_;
-    Color pressColor_;
+    RefPtr<SearchDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

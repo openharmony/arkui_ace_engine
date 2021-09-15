@@ -20,6 +20,7 @@
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/drag_recognizer.h"
 #include "core/gestures/long_press_recognizer.h"
+#include "core/gestures/pinch_recognizer.h"
 
 namespace OHOS::Ace {
 
@@ -36,7 +37,12 @@ public:
     bool GetVisible() const override;
 
     void SetOnClickCallback(const ClickCallback& callback);
+    void SetOnDoubleClickCallback(const ClickCallback& callback);
     void SetOnLongPressCallback(const OnLongPress& callback);
+    void SetOnPinchStartCallback(const GestureEventFunc& callback);
+    void SetOnPinchUpdateCallback(const GestureEventFunc& callback);
+    void SetOnPinchEndCallback(const GestureEventFunc& callback);
+    void SetOnPinchCancelCallback(const GestureEventNoParameter& callback);
 
 protected:
     void OnTouchTestHit(
@@ -44,14 +50,23 @@ protected:
 
 private:
     void SetOnClickCallback(const RefPtr<GestureListenerComponent>& component);
+    void SetOnDoubleClickCallback(const RefPtr<GestureListenerComponent>& component);
     void SetOnLongPressCallback(const RefPtr<GestureListenerComponent>& component);
+    void SetOnPinchStartCallback(const RefPtr<GestureListenerComponent>& component);
+    void SetOnPinchUpdateCallback(const RefPtr<GestureListenerComponent>& component);
+    void SetOnPinchEndCallback(const RefPtr<GestureListenerComponent>& component);
+    void SetOnPinchCancelCallback(const RefPtr<GestureListenerComponent>& component);
 
     RefPtr<ClickRecognizer> clickRecognizer_;
+    RefPtr<ClickRecognizer> doubleClickRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
+    RefPtr<PinchRecognizer> pinchRecognizer_;
     RefPtr<FreeDragRecognizer> freeDragRecognizer_;
     RefPtr<VerticalDragRecognizer> verticalDragRecognizer_;
     RefPtr<HorizontalDragRecognizer> horizontalDragRecognizer_;
     bool isVisible_ = true;
+    TouchPoint touchpoint_;
+    RefPtr<RenderNode> dragTarget_ = nullptr;
 };
 
 } // namespace OHOS::Ace

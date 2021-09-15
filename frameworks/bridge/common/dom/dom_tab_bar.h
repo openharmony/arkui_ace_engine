@@ -45,17 +45,24 @@ public:
         OnMounted(tabsNode);
     }
 
+    void SetVertical(bool vertical_)
+    {
+        tabBarChild_->SetVertical(vertical_);
+    }
+
 protected:
     void OnMounted(const RefPtr<DOMNode>& parentNode) override;
     void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) override;
     void OnChildNodeRemoved(const RefPtr<DOMNode>& child) override;
     bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
+    bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
     void PrepareSpecializedComponent() override;
     void ResetInitializedStyle() override;
 
 private:
     void PrepareChangeListener();
     void OnChildActive(const RefPtr<DOMNode>& node, bool active);
+    Edge ParseEdge(const std::string& value) const;
 
     RefPtr<TabBarComponent> tabBarChild_;
     RefPtr<TabBarIndicatorComponent> tabBarIndicator_;
@@ -63,6 +70,7 @@ private:
     uint32_t controllerId_ = 0;
     bool vertical_ = false;
     TabBarMode tabBarMode_ = TabBarMode::SCROLLABEL;
+    Edge padding_;
 };
 
 } // namespace OHOS::Ace::Framework

@@ -30,11 +30,6 @@ inline constexpr int32_t DEFAULT_FRICTION_RATIO = 62;
 inline constexpr int32_t DEFAULT_FRICTION_RATIO = 42;
 #endif
 
-enum class RefreshType {
-    AUTO,
-    PULL_DOWN,
-};
-
 class RefreshComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(RefreshComponent, SoleChildComponent);
 

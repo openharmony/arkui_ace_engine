@@ -32,6 +32,16 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
+
+CardTransitionController::CardTransitionController(const WeakPtr<PipelineContext>& context) {};
+
+void CardTransitionController::RegisterTransitionListener() {};
+
+RRect CardTransitionController::GetCardRect(const ComposeId& composeId) const
+{
+    return RRect();
+}
+
 namespace {
 
 constexpr int32_t NANOSECOND_TO_MILLISECOND = 1000000;
@@ -79,31 +89,31 @@ public:
 
     void TearDown() override {}
 
-    void TriggerAndCheckBasicPropertyFirstFrame(TweenOperation operation, float init)
+    void TriggerAndCheckBasicPropertyFirstFrame(AnimationOperation operation, float init) const
     {
         /**
          * @tc.steps: step2. trigger one frame to make prepare animation work
          */
         platformWindowRaw_->TriggerOneFrame();
         switch (operation) {
-            case TweenOperation::PLAY:
-            case TweenOperation::REVERSE: {
+            case AnimationOperation::PLAY:
+            case AnimationOperation::REVERSE: {
                 EXPECT_EQ(init - 1, flushEventMock_->animationIntValue_);
                 EXPECT_TRUE(flushEventMock_->animationStartStatus_);
                 EXPECT_FALSE(flushEventMock_->animationStopStatus_);
                 break;
             }
-            case TweenOperation::PAUSE: {
+            case AnimationOperation::PAUSE: {
                 EXPECT_TRUE(flushEventMock_->animationStartStatus_);
                 EXPECT_TRUE(flushEventMock_->animationPauseStatus_);
                 EXPECT_FALSE(flushEventMock_->animationStopStatus_);
                 break;
             }
-            case TweenOperation::FINISH: {
+            case AnimationOperation::FINISH: {
                 EXPECT_TRUE(flushEventMock_->animationStopStatus_);
                 break;
             }
-            case TweenOperation::CANCEL: {
+            case AnimationOperation::CANCEL: {
                 EXPECT_FALSE(flushEventMock_->animationIdleStatus_);
                 EXPECT_FALSE(flushEventMock_->animationStartStatus_);
                 EXPECT_FALSE(flushEventMock_->animationPauseStatus_);
@@ -116,7 +126,7 @@ public:
     }
 
     void InitBasicAnimationDirectionPropertyTest(int32_t duration, int32_t iteration,
-        AnimationDirection animationDirection, TweenOperation operation, FillMode fillMode)
+        AnimationDirection animationDirection, AnimationOperation operation, FillMode fillMode)
     {
         /**
          * @tc.steps: step1. init animation and simulation controller
@@ -156,7 +166,7 @@ public:
     }
 
     void InitBasicPropertyTest(
-        int32_t duration, int32_t iteration, TweenOperation operation, FillMode fillMode, bool setInit)
+        int32_t duration, int32_t iteration, AnimationOperation operation, FillMode fillMode, bool setInit)
     {
         /**
          * @tc.steps: step1. init animation and animator
@@ -240,11 +250,11 @@ public:
         }
 
         switch (flushEventMock_->operation_) {
-            case TweenOperation::REVERSE: {
+            case AnimationOperation::REVERSE: {
                 RunAndCheckBasicPropertyTestInterpolateValueReverse(endValue);
                 break;
             }
-            case TweenOperation::PLAY: {
+            case AnimationOperation::PLAY: {
                 RunAndCheckBasicPropertyTestInterpolateValueForward(endValue);
                 break;
             }
@@ -292,7 +302,7 @@ public:
         } else {
             // iteration is 3
             switch (flushEventMock_->operation_) {
-                case TweenOperation::REVERSE: {
+                case AnimationOperation::REVERSE: {
                     RunAndCheckBasicAnimationDirectionPropertyTestReverse();
 
                     /**
@@ -308,7 +318,7 @@ public:
                     RunAndCheckBasicPropertyTestInterpolateValueReverse(endValue);
                     break;
                 }
-                case TweenOperation::PLAY: {
+                case AnimationOperation::PLAY: {
                     RunAndCheckBasicAnimationDirectionPropertyTestForward();
 
                     /**
@@ -498,7 +508,6 @@ HWTEST_F(AnimationFrameworkTest, AnimationFrameworkTest004, TestSize.Level1)
     int32_t duration = 30;
     flushEventMock_->animationColor_ =
         AceType::MakeRefPtr<CurveAnimation<Color>>(Color::BLACK, Color::WHITE, Curves::LINEAR);
-    flushEventMock_->animationColor_->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
     flushEventMock_->animationDuration_ = duration;
     context_->AddPostFlushListener(flushEventMock_);
 
@@ -2178,7 +2187,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(0, 1, TweenOperation::REVERSE, FillMode::NONE, true);
+    InitBasicPropertyTest(0, 1, AnimationOperation::REVERSE, FillMode::NONE, true);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2200,7 +2209,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(20, 1, TweenOperation::REVERSE, FillMode::NONE, true);
+    InitBasicPropertyTest(20, 1, AnimationOperation::REVERSE, FillMode::NONE, true);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2222,7 +2231,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(0, 1, TweenOperation::REVERSE, FillMode::FORWARDS, true);
+    InitBasicPropertyTest(0, 1, AnimationOperation::REVERSE, FillMode::FORWARDS, true);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2244,7 +2253,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest004, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(20, 1, TweenOperation::REVERSE, FillMode::FORWARDS, true);
+    InitBasicPropertyTest(20, 1, AnimationOperation::REVERSE, FillMode::FORWARDS, true);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2266,7 +2275,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest005, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(0, 1, TweenOperation::PLAY, FillMode::NONE, true);
+    InitBasicPropertyTest(0, 1, AnimationOperation::PLAY, FillMode::NONE, true);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2288,7 +2297,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(20, 1, TweenOperation::PLAY, FillMode::NONE, true);
+    InitBasicPropertyTest(20, 1, AnimationOperation::PLAY, FillMode::NONE, true);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2310,7 +2319,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(0, 1, TweenOperation::PLAY, FillMode::FORWARDS, true);
+    InitBasicPropertyTest(0, 1, AnimationOperation::PLAY, FillMode::FORWARDS, true);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2332,7 +2341,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest008, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(20, 1, TweenOperation::PLAY, FillMode::FORWARDS, true);
+    InitBasicPropertyTest(20, 1, AnimationOperation::PLAY, FillMode::FORWARDS, true);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2354,7 +2363,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest009, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(0, 2, TweenOperation::REVERSE, FillMode::NONE, false);
+    InitBasicPropertyTest(0, 2, AnimationOperation::REVERSE, FillMode::NONE, false);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2376,7 +2385,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest010, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(20, 2, TweenOperation::REVERSE, FillMode::NONE, false);
+    InitBasicPropertyTest(20, 2, AnimationOperation::REVERSE, FillMode::NONE, false);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2426,7 +2435,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest011, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(0, 2, TweenOperation::REVERSE, FillMode::FORWARDS, false);
+    InitBasicPropertyTest(0, 2, AnimationOperation::REVERSE, FillMode::FORWARDS, false);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2449,7 +2458,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest012, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(20, 2, TweenOperation::REVERSE, FillMode::FORWARDS, false);
+    InitBasicPropertyTest(20, 2, AnimationOperation::REVERSE, FillMode::FORWARDS, false);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2498,7 +2507,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest013, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(0, 2, TweenOperation::PLAY, FillMode::NONE, false);
+    InitBasicPropertyTest(0, 2, AnimationOperation::PLAY, FillMode::NONE, false);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2520,7 +2529,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest014, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(20, 2, TweenOperation::PLAY, FillMode::NONE, false);
+    InitBasicPropertyTest(20, 2, AnimationOperation::PLAY, FillMode::NONE, false);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2570,7 +2579,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest015, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(0, 2, TweenOperation::PLAY, FillMode::FORWARDS, false);
+    InitBasicPropertyTest(0, 2, AnimationOperation::PLAY, FillMode::FORWARDS, false);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2593,7 +2602,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest016, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(20, 2, TweenOperation::PLAY, FillMode::FORWARDS, false);
+    InitBasicPropertyTest(20, 2, AnimationOperation::PLAY, FillMode::FORWARDS, false);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2749,7 +2758,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationPlayTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(20, 1, TweenOperation::PLAY, FillMode::NONE, true);
+    InitBasicPropertyTest(20, 1, AnimationOperation::PLAY, FillMode::NONE, true);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2779,7 +2788,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationPlayTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(20, 1, TweenOperation::REVERSE, FillMode::NONE, true);
+    InitBasicPropertyTest(20, 1, AnimationOperation::REVERSE, FillMode::NONE, true);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2809,7 +2818,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationPlayTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(20, 1, TweenOperation::FINISH, FillMode::FORWARDS, true);
+    InitBasicPropertyTest(20, 1, AnimationOperation::FINISH, FillMode::FORWARDS, true);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2841,7 +2850,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationPlayTest004, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(20, 1, TweenOperation::PAUSE, FillMode::FORWARDS, true);
+    InitBasicPropertyTest(20, 1, AnimationOperation::PAUSE, FillMode::FORWARDS, true);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2874,7 +2883,7 @@ HWTEST_F(AnimationFrameworkTest, AnimationPlayTest005, TestSize.Level1)
     /**
      * @tc.steps: step1. init animation and animator
      */
-    InitBasicPropertyTest(20, 1, TweenOperation::CANCEL, FillMode::FORWARDS, true);
+    InitBasicPropertyTest(20, 1, AnimationOperation::CANCEL, FillMode::FORWARDS, true);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2895,20 +2904,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationPlayTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest017
+ * @tc.name: AnimationDirectionTest001
  * @tc.desc: Test combination for no delay, no repeat. init: 0, from 1 -> 9; reverse, fill-mode: forwards,
  * AnimationDirection: alternate, duration: 0
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest017, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        0, 1, AnimationDirection::ALTERNATE, TweenOperation::REVERSE, FillMode::FORWARDS);
+        0, 1, AnimationDirection::ALTERNATE, AnimationOperation::REVERSE, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2918,20 +2927,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest018
+ * @tc.name: AnimationDirectionTest002
  * @tc.desc: Test combination for no delay, no repeat. init: 0, from 1 -> 9; reverse, fill-mode: forward,
  * AnimationDirection: alternate, duration: 20
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest018, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        20, 1, AnimationDirection::ALTERNATE, TweenOperation::REVERSE, FillMode::FORWARDS);
+        20, 1, AnimationDirection::ALTERNATE, AnimationOperation::REVERSE, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2941,20 +2950,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest018, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest019
+ * @tc.name: AnimationDirectionTest003
  * @tc.desc: Test combination for no delay, no repeat. init: 0, from 1 -> 9; normal, fill-mode: forward,
  * AnimationDirection: alternate, duration: 20
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest019, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        20, 1, AnimationDirection::ALTERNATE, TweenOperation::PLAY, FillMode::FORWARDS);
+        20, 1, AnimationDirection::ALTERNATE, AnimationOperation::PLAY, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2964,20 +2973,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest019, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest020
+ * @tc.name: AnimationDirectionTest004
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; reverse, fill-mode: forward, AnimationDirection:
  * alternate, duration: 0, repeat: 2
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest020, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        0, 2, AnimationDirection::ALTERNATE, TweenOperation::REVERSE, FillMode::FORWARDS);
+        0, 2, AnimationDirection::ALTERNATE, AnimationOperation::REVERSE, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -2987,44 +2996,43 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest020, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest021
+ * @tc.name: AnimationDirectionTest005
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; reverse, fill-mode: forward, AnimationDirection:
  * alternate, duration: 20, repeat: 2
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest021, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        20, 2, AnimationDirection::ALTERNATE, TweenOperation::REVERSE, FillMode::FORWARDS);
+        20, 2, AnimationDirection::ALTERNATE, AnimationOperation::REVERSE, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
      * @tc.expected: step2. check interpolateValue and end value is correct
      */
     RunAndCheckBasicAnimationDirectionPropertyTest(1.0f, 2);
-    GTEST_LOG_(INFO) << "AnimationFrameworkTest AnimationBasicPropertyTest021 start";
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest022
+ * @tc.name: AnimationDirectionTest006
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; normal, fill-mode: forward, AnimationDirection:
  * alternate, duration: 20, repeat: 2
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest022, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        20, 2, AnimationDirection::ALTERNATE, TweenOperation::PLAY, FillMode::FORWARDS);
+        20, 2, AnimationDirection::ALTERNATE, AnimationOperation::PLAY, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3034,19 +3042,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest022, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest023
+ * @tc.name: AnimationDirectionTest007
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; normal, fill-mode: forward, AnimationDirection:
  * normal, duration: 0, repeat: 2
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest023, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
-    InitBasicAnimationDirectionPropertyTest(0, 2, AnimationDirection::NORMAL, TweenOperation::PLAY, FillMode::FORWARDS);
+    InitBasicAnimationDirectionPropertyTest(
+        0, 2, AnimationDirection::NORMAL, AnimationOperation::PLAY, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3056,20 +3065,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest023, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest024
+ * @tc.name: AnimationDirectionTest008
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; reverse, fill-mode: forward, AnimationDirection:
  * alternate, duration: 0, repeat: 3
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest024, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        0, 3, AnimationDirection::ALTERNATE, TweenOperation::REVERSE, FillMode::FORWARDS);
+        0, 3, AnimationDirection::ALTERNATE, AnimationOperation::REVERSE, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3079,20 +3088,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest024, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest025
+ * @tc.name: AnimationDirectionTest009
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; reverse, fill-mode: forward, AnimationDirection:
  * alternate, duration: 20, repeat: 3
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest025, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        20, 3, AnimationDirection::ALTERNATE, TweenOperation::REVERSE, FillMode::FORWARDS);
+        20, 3, AnimationDirection::ALTERNATE, AnimationOperation::REVERSE, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3102,39 +3111,39 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest025, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest026
+ * @tc.name: AnimationDirectionTest010
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; normal, fill-mode: forward, AnimationDirection:
  * alternate, duration: 20, repeat: 3
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest026, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        20, 3, AnimationDirection::ALTERNATE, TweenOperation::PLAY, FillMode::FORWARDS);
+        20, 3, AnimationDirection::ALTERNATE, AnimationOperation::PLAY, FillMode::FORWARDS);
 
     RunAndCheckBasicAnimationDirectionPropertyTest(9.0f, 3);
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest027
+ * @tc.name: AnimationDirectionTest011
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; normal, fill-mode: forward, AnimationDirection:
  * alternate, duration: 0, repeat: 3
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest027, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        0, 3, AnimationDirection::ALTERNATE, TweenOperation::PLAY, FillMode::FORWARDS);
+        0, 3, AnimationDirection::ALTERNATE, AnimationOperation::PLAY, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3144,20 +3153,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest027, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest028
+ * @tc.name: AnimationDirectionTest012
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; reverse, fill-mode: forward, AnimationDirection:
  * alternate, duration: 20, repeat: infinite
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest028, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        20, -1, AnimationDirection::ALTERNATE, TweenOperation::REVERSE, FillMode::FORWARDS);
+        20, -1, AnimationDirection::ALTERNATE, AnimationOperation::REVERSE, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3185,20 +3194,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest028, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest029
+ * @tc.name: AnimationDirectionTest013
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; normal, fill-mode: forward, AnimationDirection:
  * alternate, duration: 20, repeat: infinite
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest029, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        20, -1, AnimationDirection::ALTERNATE, TweenOperation::PLAY, FillMode::FORWARDS);
+        20, -1, AnimationDirection::ALTERNATE, AnimationOperation::PLAY, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3226,20 +3235,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest029, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest030
+ * @tc.name: AnimationDirectionTest014
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; normal, fill-mode: forward, AnimationDirection:
  * alternate, duration: 40, repeat: 3
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest030, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        40, -1, AnimationDirection::ALTERNATE, TweenOperation::PLAY, FillMode::FORWARDS);
+        40, -1, AnimationDirection::ALTERNATE, AnimationOperation::PLAY, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3303,19 +3312,19 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest030, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest031
+ * @tc.name: AnimationDirectionTest015
  * @tc.desc: Test combination for no delay, no repeat. init: 0, from 1 -> 9; normal, fill-mode: none,
  * AnimationDirection: normal, duration: 0
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: wanyanglan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest031, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest015, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
-    InitBasicAnimationDirectionPropertyTest(0, 1, AnimationDirection::NORMAL, TweenOperation::PLAY, FillMode::NONE);
+    InitBasicAnimationDirectionPropertyTest(0, 1, AnimationDirection::NORMAL, AnimationOperation::PLAY, FillMode::NONE);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3325,20 +3334,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest031, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest032
+ * @tc.name: AnimationDirectionTest016
  * @tc.desc: Test combination for no delay, no repeat. init: 0, from 1 -> 9; normal, fill-mode: forwards,
  * AnimationDirection: alternate-reverse, duration: 0
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: jiangdayuan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest032, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest016, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        0, 1, AnimationDirection::ALTERNATE_REVERSE, TweenOperation::PLAY, FillMode::FORWARDS);
+        0, 1, AnimationDirection::ALTERNATE_REVERSE, AnimationOperation::PLAY, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3348,20 +3357,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest032, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest033
+ * @tc.name: AnimationDirectionTest017
  * @tc.desc: Test combination for no delay, no repeat. init: 0, from 1 -> 9; normal, fill-mode: forwards,
  * AnimationDirection: alternate-reverse, duration: 20
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: jiangdayuan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest033, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest017, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        20, 1, AnimationDirection::ALTERNATE_REVERSE, TweenOperation::PLAY, FillMode::FORWARDS);
+        20, 1, AnimationDirection::ALTERNATE_REVERSE, AnimationOperation::PLAY, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3371,20 +3380,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest033, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest034
+ * @tc.name: AnimationDirectionTest018
  * @tc.desc: Test combination for no delay, no repeat. init: 0, from 1 -> 9; normal, fill-mode: none,
  * AnimationDirection: alternate-reverse, duration: 20
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: jiangdayuan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest034, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest018, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        20, 1, AnimationDirection::ALTERNATE_REVERSE, TweenOperation::PLAY, FillMode::NONE);
+        20, 1, AnimationDirection::ALTERNATE_REVERSE, AnimationOperation::PLAY, FillMode::NONE);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3394,20 +3403,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest034, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest035
+ * @tc.name: AnimationDirectionTest019
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; reverse, fill-mode: forwards, AnimationDirection:
  * alternate-reverse, duration: 0, repeat: 2
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: jiangdayuan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest035, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest019, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        0, 2, AnimationDirection::ALTERNATE_REVERSE, TweenOperation::PLAY, FillMode::FORWARDS);
+        0, 2, AnimationDirection::ALTERNATE_REVERSE, AnimationOperation::PLAY, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3417,20 +3426,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest035, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest036
+ * @tc.name: AnimationDirectionTest020
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; reverse, fill-mode: forwards, AnimationDirection:
  * alternate-reverse, duration: 20, repeat: 2
  * @tc.type: FUNC
  * @tc.require: AR000FL0VN
  * @tc.author: jiangdayuan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest036, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest020, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        20, 2, AnimationDirection::ALTERNATE_REVERSE, TweenOperation::PLAY, FillMode::FORWARDS);
+        20, 2, AnimationDirection::ALTERNATE_REVERSE, AnimationOperation::PLAY, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3442,20 +3451,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest036, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest037
+ * @tc.name: AnimationDirectionTest021
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; reverse, fill-mode: forwards, AnimationDirection:
  * alternate-reverse, duration: 20, repeat: 3
  * @tc.type: FUNC
- * @tc.require: AR000FL0VN
+ * @tc.require: AR000FL0VK
  * @tc.author: jiangdayuan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest037, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest021, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        20, 3, AnimationDirection::ALTERNATE_REVERSE, TweenOperation::PLAY, FillMode::FORWARDS);
+        20, 3, AnimationDirection::ALTERNATE_REVERSE, AnimationOperation::PLAY, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3469,20 +3478,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest037, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest038
+ * @tc.name: AnimationDirectionTest022
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; reverse, fill-mode: none, AnimationDirection:
  * alternate-reverse, duration: 20, repeat: 3
  * @tc.type: FUNC
- * @tc.require: AR000FL0VN
+ * @tc.require: AR000FL0VJ
  * @tc.author: jiangdayuan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest038, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest022, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        20, 3, AnimationDirection::ALTERNATE_REVERSE, TweenOperation::PLAY, FillMode::NONE);
+        20, 3, AnimationDirection::ALTERNATE_REVERSE, AnimationOperation::PLAY, FillMode::NONE);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3496,20 +3505,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest038, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest039
+ * @tc.name: AnimationDirectionTest023
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; reverse, fill-mode: forwards, AnimationDirection:
  * reverse, duration: 0, repeat: 2
  * @tc.type: FUNC
- * @tc.require: AR000FL0VN
+ * @tc.require: AR000FL0VI
  * @tc.author: jiangdayuan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest039, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest023, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        0, 2, AnimationDirection::REVERSE, TweenOperation::PLAY, FillMode::FORWARDS);
+        0, 2, AnimationDirection::REVERSE, AnimationOperation::PLAY, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3519,20 +3528,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest039, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest040
+ * @tc.name: AnimationDirectionTest024
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; normal, fill-mode: forwards, AnimationDirection:
  * reverse, duration: 20, repeat: 2
  * @tc.type: FUNC
- * @tc.require: AR000FL0VN
+ * @tc.require: AR000FL0VH
  * @tc.author: jiangdayuan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest040, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest024, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
     InitBasicAnimationDirectionPropertyTest(
-        20, 2, AnimationDirection::REVERSE, TweenOperation::PLAY, FillMode::FORWARDS);
+        20, 2, AnimationDirection::REVERSE, AnimationOperation::PLAY, FillMode::FORWARDS);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3560,19 +3569,20 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest040, TestSize.Level1)
 }
 
 /**
- * @tc.name: AnimationBasicPropertyTest041
+ * @tc.name: AnimationDirectionTest025
  * @tc.desc: Test combination for no delay. init: 0, from 1 -> 9; normal, fill-mode: none, AnimationDirection:
  * reverse, duration: 20, repeat: 2
  * @tc.type: FUNC
- * @tc.require: AR000FL0VN
+ * @tc.require: AR000FL0VM
  * @tc.author: jiangdayuan
  */
-HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest041, TestSize.Level1)
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest025, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init animation and simulation controller
      */
-    InitBasicAnimationDirectionPropertyTest(20, 2, AnimationDirection::REVERSE, TweenOperation::PLAY, FillMode::NONE);
+    InitBasicAnimationDirectionPropertyTest(
+        20, 2, AnimationDirection::REVERSE, AnimationOperation::PLAY, FillMode::NONE);
 
     /**
      * @tc.steps: step2. trigger frames to make animation done
@@ -3597,6 +3607,128 @@ HWTEST_F(AnimationFrameworkTest, AnimationBasicPropertyTest041, TestSize.Level1)
     EXPECT_EQ(0, flushEventMock_->animationIntValue_);
     EXPECT_NEAR(0.0f, flushEventMock_->keyframeAnimationValue_, FLT_EPSILON);
     EXPECT_TRUE(flushEventMock_->animationStopStatus_);
+}
+
+/**
+ * @tc.name: AnimationDirectionTest026
+ * @tc.desc: Test for Forward and Backward twice
+ * reverse, duration: 40, repeat: 2
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0VM
+ * @tc.author: zhouzebin
+ */
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init animation and simulation controller
+     */
+    InitBasicAnimationDirectionPropertyTest(
+        40, 1, AnimationDirection::NORMAL, AnimationOperation::NONE, FillMode::FORWARDS);
+
+    /**
+     * @tc.steps: step2. first round. trigger forward and backward
+     * @tc.expected: step2. check interpolateValue and end value is correct
+     */
+    auto controller = flushEventMock_->GetAnimator();
+    controller->Forward();
+    platformWindowRaw_->TriggerOneFrame();
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_EQ(5, flushEventMock_->animationIntValue_);
+    EXPECT_NEAR(5.0f, flushEventMock_->keyframeAnimationValue_, FLT_EPSILON);
+    EXPECT_FALSE(flushEventMock_->animationStopStatus_);
+
+    controller->Backward();
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_EQ(3, flushEventMock_->animationIntValue_);
+    EXPECT_NEAR(3.0f, flushEventMock_->keyframeAnimationValue_, FLT_EPSILON);
+
+    /**
+     * @tc.steps: step3. second round. trigger forward and backward
+     * @tc.expected: step3. check interpolateValue and end value is correct
+     */
+    controller->Forward();
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_EQ(5, flushEventMock_->animationIntValue_);
+    EXPECT_NEAR(5.0f, flushEventMock_->keyframeAnimationValue_, FLT_EPSILON);
+
+    controller->Backward();
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_EQ(3, flushEventMock_->animationIntValue_);
+    EXPECT_NEAR(3.0f, flushEventMock_->keyframeAnimationValue_, FLT_EPSILON);
+}
+
+/**
+ * @tc.name: AnimationDirectionTest027
+ * @tc.desc: Test for play / Forward
+ * normal, duration: 40, repeat: 0
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0VM
+ * @tc.author: zhouzebin
+ */
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init animation and simulation controller
+     */
+    InitBasicAnimationDirectionPropertyTest(
+        40, 1, AnimationDirection::NORMAL, AnimationOperation::NONE, FillMode::FORWARDS);
+
+    /**
+     * @tc.steps: step2. first round. trigger play and forward
+     * @tc.expected: step2. check interpolateValue and end value is correct
+     */
+    auto controller = flushEventMock_->GetAnimator();
+    controller->Play();
+    platformWindowRaw_->TriggerOneFrame();
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_EQ(5, flushEventMock_->animationIntValue_);
+    EXPECT_NEAR(5.0f, flushEventMock_->keyframeAnimationValue_, FLT_EPSILON);
+    EXPECT_FALSE(flushEventMock_->animationStopStatus_);
+
+    controller->Forward();
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_EQ(7, flushEventMock_->animationIntValue_);
+    EXPECT_NEAR(7.0f, flushEventMock_->keyframeAnimationValue_, FLT_EPSILON);
+}
+
+/**
+ * @tc.name: AnimationDirectionTest028
+ * @tc.desc: Test for Reverse / Backward
+ * normal, duration: 40, repeat: 0
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0VM
+ * @tc.author: zhouzebin
+ */
+HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init animation and simulation controller
+     */
+    InitBasicAnimationDirectionPropertyTest(
+        40, 1, AnimationDirection::NORMAL, AnimationOperation::NONE, FillMode::FORWARDS);
+
+    /**
+     * @tc.steps: step2. first round. trigger reverse and backward
+     * @tc.expected: step2. check interpolateValue and end value is correct
+     */
+    auto controller = flushEventMock_->GetAnimator();
+    controller->Reverse();
+    platformWindowRaw_->TriggerOneFrame();
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_EQ(5, flushEventMock_->animationIntValue_);
+    EXPECT_NEAR(5.0f, flushEventMock_->keyframeAnimationValue_, FLT_EPSILON);
+    EXPECT_FALSE(flushEventMock_->animationStopStatus_);
+
+    controller->Backward();
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_EQ(3, flushEventMock_->animationIntValue_);
+    EXPECT_NEAR(3.0f, flushEventMock_->keyframeAnimationValue_, FLT_EPSILON);
+
+    controller->Reverse();
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_EQ(5, flushEventMock_->animationIntValue_);
+    EXPECT_NEAR(5.0f, flushEventMock_->keyframeAnimationValue_, FLT_EPSILON);
+    EXPECT_FALSE(flushEventMock_->animationStopStatus_);
 }
 
 } // namespace OHOS::Ace

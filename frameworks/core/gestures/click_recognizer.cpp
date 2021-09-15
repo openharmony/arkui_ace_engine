@@ -17,75 +17,248 @@
 
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
-#include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
 namespace {
 
+constexpr int32_t MULTI_FINGER_TIMEOUT = 300;
+constexpr int32_t MULTI_TAP_TIMEOUT = 300;
+constexpr int32_t MULTI_TAP_SLOP = 100;
 constexpr double MAX_THRESHOLD = 20.0;
+constexpr int32_t MAX_TAP_FINGERS = 10;
 
 } // namespace
 
-void ClickRecognizer::OnAccepted(size_t touchId)
+void ClickRecognizer::OnAccepted()
 {
-    LOGD("click gesture has been accepted! the touch id is %{public}zu", touchId);
-    state_ = DetectState::DETECTED;
+    LOGI("Click gesture has been accepted!");
     if (onClick_) {
-        ClickInfo info(touchId);
-        info.SetTimeStamp(touchPoint_.time);
-        info.SetGlobalLocation(touchPoint_.GetOffset()).SetLocalLocation(touchPoint_.GetOffset() - coordinateOffset_);
+        TouchPoint touchPoint = {};
+        if (!touchPoints_.empty()) {
+            touchPoint = touchPoints_.begin()->second;
+        }
+
+        ClickInfo info(touchPoint.id);
+        info.SetTimeStamp(touchPoint.time);
+        info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
         onClick_(info);
     }
+
+    SendCallbackMsg(onAction_);
+    Reset();
 }
 
-void ClickRecognizer::OnRejected(size_t touchId)
+void ClickRecognizer::OnRejected()
 {
-    LOGD("click gesture has been rejected! the touch id is %{public}zu", touchId);
-    state_ = DetectState::READY;
+    LOGD("click gesture has been rejected!");
+    Reset();
 }
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchPoint& event)
 {
     LOGD("click recognizer receives touch down event, begin to detect click event");
+    if (fingers_ > MAX_TAP_FINGERS) {
+        return;
+    }
+
+    // If number of fingers which put on the screen more than fingers_,
+    // the gesture will be rejected when one of them touch up.
+    if (pointsCount_ == fingers_) {
+        pointsCount_++;
+        return;
+    }
+
     if (state_ == DetectState::READY) {
-        GestureReferee::GetInstance().AddGestureRecognizer(event.id, AceType::Claim(this));
-        touchPoint_ = event;
+        if (tappedCount_ > 0 && pointsCount_ == 0) {
+            tapDeadlineTimer_.Cancel();
+        }
+        AddToReferee(event.id, AceType::Claim(this));
+        touchPoints_[event.id] = event;
+        pointsCount_++;
+        if (fingers_ > 1 && pointsCount_ == 1) {
+            // waiting for multi-finger press
+            DeadlineTimer(fingerDeadlineTimer_, MULTI_FINGER_TIMEOUT);
+        }
+    }
+
+    if (pointsCount_ == fingers_) {
+        // Turn off the multi-finger press deadline timer
+        fingerDeadlineTimer_.Cancel();
         state_ = DetectState::DETECTING;
-    } else {
-        LOGW("the state is not ready for detecting click event");
+        equalsToFingers_ = true;
+        if (ExceedSlop()) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
     }
 }
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchPoint& event)
 {
     LOGD("click recognizer receives touch up event");
-    if (state_ == DetectState::DETECTING) {
-        LOGD("this gesture is click, try to accept it");
-        GestureReferee::GetInstance().Adjudicate(event.id, AceType::Claim(this), GestureDisposal::ACCEPT);
+    if (pointsCount_ > fingers_) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
     }
-    state_ = DetectState::READY;
+
+    auto itr = touchPoints_.find(event.id);
+    if (itr == touchPoints_.end()) {
+        return;
+    }
+
+    if (state_ == DetectState::READY) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+
+    if (state_ == DetectState::DETECTED) {
+        return;
+    }
+
+    touchPoints_[event.id] = event;
+    pointsCount_--;
+
+    // Check whether multi-finger taps are completed in count_ times
+    if (pointsCount_ == 0 && equalsToFingers_) {
+        // Turn off the multi-finger lift deadline timer
+        fingerDeadlineTimer_.Cancel();
+        focusPoint_ = ComputeFocusPoint();
+        tappedCount_++;
+
+        if (tappedCount_ == count_) {
+            LOGI("this gesture is click, try to accept it");
+            time_ = event.time;
+            state_ = DetectState::DETECTED;
+            if (useCatchMode_) {
+                Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+            } else {
+                OnAccepted();
+            }
+            return;
+        }
+        equalsToFingers_ = false;
+        state_ = DetectState::READY;
+        // waiting for multi-finger lift
+        DeadlineTimer(tapDeadlineTimer_, MULTI_TAP_TIMEOUT);
+    }
+
+    Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
+    if (pointsCount_ < fingers_ && equalsToFingers_) {
+        DeadlineTimer(fingerDeadlineTimer_, MULTI_FINGER_TIMEOUT);
+    }
 }
 
 void ClickRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
 {
     LOGD("click recognizer receives touch move event");
-    if (state_ == DetectState::DETECTING) {
-        Offset offset = event.GetOffset() - touchPoint_.GetOffset();
-        if (offset.GetDistance() > MAX_THRESHOLD) {
-            LOGD("this gesture is not click, try to reject it");
-            GestureReferee::GetInstance().Adjudicate(event.id, AceType::Claim(this), GestureDisposal::REJECT);
-        }
+    auto itr = touchPoints_.find(event.id);
+    if (itr == touchPoints_.end()) {
+        return;
+    }
+
+    Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
+    if (offset.GetDistance() > MAX_THRESHOLD) {
+        LOGD("this gesture is not click, try to reject it");
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
 }
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchPoint& event)
 {
     LOGD("click recognizer receives touch cancel event");
-    if (state_ == DetectState::DETECTING) {
-        LOGD("cancel click gesture detect, try to reject it");
-        GestureReferee::GetInstance().Adjudicate(event.id, AceType::Claim(this), GestureDisposal::REJECT);
+    Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+}
+
+void ClickRecognizer::HandleOverdueDeadline()
+{
+    if (pointsCount_ < fingers_) {
+        LOGD("the state is not detecting for accept multi-finger tap gesture");
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
+}
+
+void ClickRecognizer::DeadlineTimer(CancelableCallback<void()>& deadlineTimer, int32_t time)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("fail to detect tap gesture due to context is nullptr");
+        return;
+    }
+    auto&& callback = [weakPtr = AceType::WeakClaim(this)]() {
+        auto refPtr = weakPtr.Upgrade();
+        if (refPtr) {
+            refPtr->HandleOverdueDeadline();
+        } else {
+            LOGE("fail to handle overdue deadline due to context is nullptr");
+        }
+    };
+
+    deadlineTimer.Reset(callback);
+    auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    taskExecutor.PostDelayedTask(deadlineTimer, time);
+}
+
+void ClickRecognizer::Reset()
+{
+    touchPoints_.clear();
+    pointsCount_ = 0;
+    equalsToFingers_ = false;
+    tappedCount_ = 0;
     state_ = DetectState::READY;
+}
+
+Offset ClickRecognizer::ComputeFocusPoint()
+{
+    Offset sumOfPoints;
+    for (auto& element : touchPoints_) {
+        sumOfPoints = sumOfPoints + element.second.GetOffset();
+    }
+    Offset focusPoint = sumOfPoints / touchPoints_.size();
+    return focusPoint;
+}
+
+bool ClickRecognizer::ExceedSlop()
+{
+    if (tappedCount_ > 0 && tappedCount_ < count_) {
+        Offset currentFocusPoint = ComputeFocusPoint();
+        Offset slop = currentFocusPoint - focusPoint_;
+        if (GreatOrEqual(slop.GetDistance(), MULTI_TAP_SLOP)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& onAction)
+{
+    if (onAction && *onAction) {
+        GestureEvent info;
+        info.SetTimeStamp(time_);
+        TouchPoint touchPoint = {};
+        if (!touchPoints_.empty()) {
+            touchPoint = touchPoints_.begin()->second;
+        }
+        info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
+        (*onAction)(info);
+    }
+}
+
+bool ClickRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
+{
+    RefPtr<ClickRecognizer> curr = AceType::DynamicCast<ClickRecognizer>(recognizer);
+    if (!curr) {
+        Reset();
+        return false;
+    }
+
+    if (curr->count_ != count_ || curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_) {
+        Reset();
+        return false;
+    }
+
+    context_ = curr->context_;
+    onAction_ = std::move(curr->onAction_);
+
+    return true;
 }
 
 } // namespace OHOS::Ace

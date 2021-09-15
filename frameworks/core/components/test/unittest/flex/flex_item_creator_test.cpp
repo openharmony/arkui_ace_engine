@@ -76,7 +76,7 @@ RefPtr<Component> FlexItemCreatorTest::CreateComponent(const std::string& testJs
 
 void FlexItemCreatorTest::CheckItemProperties(const RefPtr<FlexItemComponent>& flexItem, bool isDefault)
 {
-    double basis = flexItem->GetFlexBasis();
+    double basis = flexItem->GetFlexBasis().Value();
     double grow = flexItem->GetFlexGrow();
     double shrink = flexItem->GetFlexShrink();
     if (isDefault) {
@@ -306,7 +306,7 @@ HWTEST_F(FlexItemCreatorTest, FlexItemChild003, TestSize.Level1)
     ASSERT_TRUE(component != nullptr);
     RefPtr<FlexItemComponent> flexItem = AceType::DynamicCast<FlexItemComponent>(component);
     ASSERT_TRUE(flexItem != nullptr);
-    double basis = flexItem->GetFlexBasis();
+    double basis = flexItem->GetFlexBasis().Value();
     int32_t grow = flexItem->GetFlexGrow();
     int32_t shrink = flexItem->GetFlexShrink();
     EXPECT_TRUE(NearEqual(basis, DEFAULT_FLEX_BASIS));

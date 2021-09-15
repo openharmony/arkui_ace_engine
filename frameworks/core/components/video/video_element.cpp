@@ -44,6 +44,7 @@
 #include "core/event/back_end_event_manager.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/pipeline_context.h"
+#include "window_manager.h"
 #include "display_type.h"
 #include "surface.h"
 
@@ -134,10 +135,10 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
     }
 }
 
-std::unique_ptr<OHOS::SubWindow> VideoElement::CreateSubWindow()
+::OHOS::sptr<::OHOS::Subwindow> VideoElement::CreateSubwindow()
 {
-    OHOS::WindowManager* windowManager = OHOS::WindowManager::GetInstance();
-    if (windowManager == nullptr) {
+    const auto &wmi = ::OHOS::WindowManager::GetInstance();
+    if (wmi == nullptr) {
         LOGE("Window manager get instance failed");
         return nullptr;
     }
@@ -148,17 +149,25 @@ std::unique_ptr<OHOS::SubWindow> VideoElement::CreateSubWindow()
         return nullptr;
     }
 
-    int32_t windowId = context->GetWindowId();
-    OHOS::WindowConfig windowConfig;
-    memset_s(&windowConfig, sizeof(OHOS::WindowConfig), 0, sizeof(OHOS::WindowConfig));
-    windowConfig.height = WINDOW_HEIGHT_DEFAULT;
-    windowConfig.width = WINDOW_WIDTH_DEFAULT;
-    windowConfig.pos_x = 0;
-    windowConfig.pos_y = 0;
-    windowConfig.type = WINDOW_TYPE_NORMAL;
-    windowConfig.format = PIXEL_FMT_RGBA_8888;
-    windowConfig.subwindow = true;
-    return windowManager->CreateSubWindow(windowId, &windowConfig);
+    auto option = SubwindowOption::Get();
+    option->SetWidth(WINDOW_WIDTH_DEFAULT);
+    option->SetHeight(WINDOW_HEIGHT_DEFAULT);
+    option->SetX(0);
+    option->SetY(0);
+    option->SetWindowType(SUBWINDOW_TYPE_NORMAL);
+    auto window = wmi->GetWindowByID(context->GetWindowId());
+    if (window == nullptr) {
+        LOGE("window is nullptr");
+        return nullptr;
+    }
+
+    ::OHOS::sptr<::OHOS::Subwindow> ret = nullptr;
+    auto wret = wmi->CreateSubwindow(ret, window, option);
+    if (wret != WM_OK) {
+        LOGE("create subwindow failed, because %{public}s", WMErrorStr(wret).c_str());
+        return nullptr;
+    }
+    return ret;
 }
 
 void VideoElement::RegistMediaPlayerEvent()
@@ -213,8 +222,8 @@ void VideoElement::CreateMediaPlayer()
     if (mediaPlayer_ != nullptr) {
         return;
     }
-    subWindow_ = CreateSubWindow();
-    if (subWindow_ == nullptr) {
+    subwindow_ = CreateSubwindow();
+    if (subwindow_ == nullptr) {
         LOGE("Create subwindow failed");
         return;
     }
@@ -249,7 +258,7 @@ void VideoElement::PreparePlayer()
         return;
     }
     RegistMediaPlayerEvent();
-    sptr<Surface> producerSurface = subWindow_->GetSurface();
+    auto producerSurface = subwindow_->GetSurface();
     if (producerSurface == nullptr) {
         LOGE("producerSurface is nullptr");
         return;
@@ -350,7 +359,7 @@ void VideoElement::Prepare(const WeakPtr<Element>& parent)
 
 void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
-    if (subWindow_ != nullptr) {
+    if (subwindow_ != nullptr) {
         auto context = context_.Upgrade();
         if (context == nullptr) {
             LOGE("context is nullptr");
@@ -366,12 +375,12 @@ void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_
             height = textureHeight;
         }
         float viewScale = context->GetViewScale();
-        subWindow_->SetSubWindowSize(textureWidth * viewScale, height * viewScale);
+        subwindow_->Resize(textureWidth * viewScale, height * viewScale);
         LOGI("SetSubWindowSize width: %{public}f, height: %{public}f", textureWidth * viewScale, height * viewScale);
 
         if (renderNode_ != nullptr) {
             Offset offset = renderNode_->GetGlobalOffset();
-            subWindow_->Move(offset.GetX() * viewScale, offset.GetY() * viewScale);
+            subwindow_->Move(offset.GetX() * viewScale, offset.GetY() * viewScale);
             LOGI("SubWindow move X: %{public}f, Y: %{public}f", offset.GetX() * viewScale, offset.GetY() * viewScale);
         }
     }
@@ -1277,7 +1286,7 @@ void VideoElement::ExitFullScreen()
         if (!stackElement) {
             return;
         }
-        stackElement->PopComponent(true);
+        stackElement->PopComponent();
         isFullScreen_ = false;
         if (onFullScreenChange_) {
             std::string param =

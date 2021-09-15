@@ -34,6 +34,7 @@ public:
     Color GetColor(uint32_t resId) override;
     Dimension GetDimension(uint32_t resId) override;
     std::string GetString(uint32_t resId) override;
+    std::vector<std::string> GetStringArray(uint32_t resId) const override;
     double GetDouble(uint32_t resId) override;
     int32_t GetInt(uint32_t resId) override;
 

@@ -64,6 +64,22 @@ void RenderPickerBase::Update(const RefPtr<Component>& component)
     onCancelCallback_ = AceAsyncEvent<void()>::Create(data_->GetOnCancel(), context_);
     onChangeCallback_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetOnChange(), context_);
     onColumnChangeCallback_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetOnColumnChange(), context_);
+
+    auto context = context_.Upgrade();
+    if (context->GetIsDeclarative()) {
+    if (picker->GetOnTextCancel()) {
+        onTextCancel_ = *picker->GetOnTextCancel();
+    }
+
+    if (picker->GetOnTextAccept()) {
+        onTextAccept_ = *picker->GetOnTextAccept();
+    }
+
+    if (picker->GetOnTextChange()) {
+        onTextChange_ = *picker->GetOnTextChange();
+    }
+    }
+
     data_->SetFinishCallback([weak = WeakClaim(this)](bool success) {
         auto refPtr = weak.Upgrade();
         if (refPtr) {
@@ -469,6 +485,10 @@ void RenderPickerBase::HandleFinish(bool success)
         onCancelCallback_();
     }
 
+    if (onTextCancel_) {
+        onTextCancel_();
+    }
+
     data_->HideDialog();
 }
 
@@ -501,6 +521,10 @@ void RenderPickerBase::HandleColumnChange(const std::string& tag, bool isAdd, ui
         onColumnChangeCallback_(std::string("\"columnchange\",") + data_->GetSelectedObject(true, tag) + ",null");
     }
 
+    if (onTextAccept_) {
+        onTextAccept_(tag, index);
+    }
+
     std::vector<std::string> tags;
     data_->OnDataLinking(tag, isAdd, index, tags);
     for (const auto& tag : tags) {
@@ -513,6 +537,9 @@ void RenderPickerBase::HandleColumnChange(const std::string& tag, bool isAdd, ui
 
     if (!data_->GetIsDialog()) {
         HandleFinish(true);
+        if (onTextChange_) {
+            onTextChange_(tag, index);
+        }
         return;
     }
 

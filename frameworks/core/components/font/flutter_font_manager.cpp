@@ -32,4 +32,9 @@ void FlutterFontManager::VaryFontCollectionWithFontWeightScale()
     }
 }
 
+void FlutterFontManager::LoadSystemFont()
+{
+    FlutterFontCollection::GetInstance().LoadSystemFont();
+}
+
 } // namespace OHOS::Ace

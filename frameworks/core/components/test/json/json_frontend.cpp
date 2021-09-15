@@ -132,8 +132,15 @@ void JsonFrontend::UpdateState(Frontend::State state)
         case Frontend::State::ON_DESTROY:
             LOGD("update state in JsonFrontend with state ON_DESTROY");
             break;
+        case Frontend::State::ON_SHOW:
+            LOGD("update state in JsonFrontend with state ON_SHOW");
+            break;
+        case Frontend::State::ON_HIDE:
+            LOGD("update state in JsonFrontend with state ON_HIDE");
+            break;
         default:
             LOGE("error State: %{public}d", state);
+            break;
     }
 }
 

@@ -35,14 +35,6 @@ public:
 
     SvgAnimateComponent(const ComposeId& id, const std::string& name) : ComposedComponent(id, name) {};
     ~SvgAnimateComponent() override = default;
-
-    void SetSvgId(const std::string& svgId)
-    {
-        svgId_ = svgId;
-    }
-
-private:
-    std::string svgId_;
 };
 
 } // namespace OHOS::Ace

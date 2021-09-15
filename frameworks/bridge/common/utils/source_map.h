@@ -38,10 +38,6 @@ struct MappingInfo {
     int32_t row = 0;
     int32_t col = 0;
     std::string sources;
-    const std::string ToString()
-    {
-        return "(" + sources + ":" + std::to_string(row) + ")";
-    }
 };
 
 class ACE_EXPORT RevSourceMap final : public Referenced {

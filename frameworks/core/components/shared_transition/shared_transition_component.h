@@ -24,7 +24,7 @@ namespace OHOS::Ace {
 
 class SharedTransitionEffect;
 
-class SharedTransitionComponent : public ComposedComponent {
+class ACE_EXPORT SharedTransitionComponent : public ComposedComponent {
     DECLARE_ACE_TYPE(SharedTransitionComponent, ComposedComponent);
 
 public:
@@ -47,6 +47,10 @@ public:
     bool IsEnablePushExit() const;
     void SetEnablePushExit(bool enablePushExit);
     void SetShareId(const ShareId& shareId);
+    void SetOpacity(float opacity);
+    float GetOpacity() const;
+    void SetZIndex(int32_t index);
+    int32_t GetZIndex() const;
 
 private:
     void InitEnableStatus();
@@ -58,6 +62,8 @@ private:
     bool enablePopExit_ = true;
     bool enablePushEnter_ = true;
     bool enablePushExit_ = true;
+    float opacity_ = 1.0;
+    int32_t zIndex_ = 0;
 };
 
 } // namespace OHOS::Ace

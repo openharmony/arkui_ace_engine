@@ -75,6 +75,11 @@ std::list<Rect> GetRectList(const ImageRepeat&& imageRepeat, const Size& parentS
     return renderImage->GetRectList();
 }
 
+RefPtr<RenderContext> RenderContext::Create()
+{
+    return AceType::MakeRefPtr<MockRenderContext>();
+}
+
 RefPtr<RenderNode> RenderImage::Create()
 {
     return AceType::MakeRefPtr<MockRenderImage>();
@@ -108,12 +113,13 @@ RefPtr<RenderRoot> CreateRenderRoot(const Size& maxSize)
     return root;
 }
 
-RefPtr<RenderImage> CreateRenderImage(double width, double height)
+RefPtr<RenderImage> CreateRenderImage(double width, double height, bool fitMaxSize)
 {
     RefPtr<RenderImage> renderImage = AceType::MakeRefPtr<MockRenderImage>();
     RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<ImageComponent>("");
     imageComponent->SetWidth(Dimension(width));
     imageComponent->SetHeight(Dimension(height));
+    imageComponent->SetFitMaxSize(fitMaxSize);
     auto mockContext = GetMockContext();
     renderImage->Attach(mockContext);
     renderImage->Update(imageComponent);

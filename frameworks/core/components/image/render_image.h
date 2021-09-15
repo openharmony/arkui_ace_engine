@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_RENDER_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_RENDER_IMAGE_H
 
+#include "base/image/pixel_map.h"
 #include "base/resource/internal_resource.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
@@ -23,6 +24,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/radius.h"
+#include "core/image/image_source_info.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -54,12 +56,24 @@ public:
     {
         imageFit_ = imageFit;
     }
+    ImageFit GetImageFit() const
+    {
+        return imageFit_;
+    }
     void SetImageSrc(const std::string& imageSrc)
     {
-        if (imageSrc != imageSrc_) {
-            imageSrc_ = imageSrc;
-            UpdateImageProvider();
+        if (imageSrc != sourceInfo_.GetSrc()) {
+            sourceInfo_.SetSrc(imageSrc);
+            FetchImageObject();
         }
+    }
+    const std::string& GetImageSrc() const
+    {
+        return sourceInfo_.GetSrc();
+    }
+    const std::string& GetImageAlt() const
+    {
+        return imageAlt_;
     }
     const std::list<Rect>& GetRectList() const
     {
@@ -80,6 +94,26 @@ public:
             imageRepeat_ = imageRepeat;
             MarkNeedLayout();
         }
+    }
+
+    ImageRepeat GetImageRepeat() const
+    {
+        return imageRepeat_;
+    }
+
+    Size GetImageSourceSize() const
+    {
+        return sourceInfo_.GetSourceSize();
+    }
+
+    ImageInterpolation GetImageInterpolation() const
+    {
+        return imageInterpolation_;
+    }
+
+    ImageRenderMode GetImageRenderMode() const
+    {
+        return imageRenderMode_;
     }
 
     void SetBgImageSize(BackgroundImageSizeType type, double value = FULL_IMG_SIZE, double directionX = true)
@@ -142,16 +176,19 @@ public:
         }
     }
 
-    virtual void UpdateResourceId(InternalResource::ResourceId resourceId, bool onlySelfLayout)
-    {
-        resourceId_ = resourceId;
-        MarkNeedLayout(onlySelfLayout);
-    }
-
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void GenerateRepeatRects(const Rect& fundamentalRect, const Size& parentSize, const ImageRepeat& imageRepeat);
-    virtual void UpdateImageProvider() {}
+    virtual void FetchImageObject() {}
+    void Dump() override;
+    virtual bool IsSourceWideGamut() const
+    {
+        return false;
+    }
+    virtual bool RetryLoading()
+    {
+        return false;
+    }
 
 protected:
     void ApplyImageFit(Rect& srcRect, Rect& dstRect);
@@ -167,24 +204,26 @@ protected:
 
     // background image
     void PerformLayoutBgImage();
+    void ApplyObjectPosition();
     void GenerateImageRects(const Size& srcSize, const BackgroundImageSize& imageSize, ImageRepeat imageRepeat,
-                            const BackgroundImagePosition& imagePosition);
+        const BackgroundImagePosition& imagePosition);
     Size CalculateImageRenderSize(const Size& srcSize, const BackgroundImageSize& imageSize) const;
     Size CalculateImageRenderSizeWithSingleParam(const Size& srcSize, const BackgroundImageSize& imageSize) const;
     Size CalculateImageRenderSizeWithDoubleParam(const Size& srcSize, const BackgroundImageSize& imageSize) const;
     void CalculateImageRenderPosition(const BackgroundImagePosition& imagePosition);
     void PrintImageLog(const Size& srcSize, const BackgroundImageSize& imageSize, ImageRepeat imageRepeat,
         const BackgroundImagePosition& imagePosition) const;
-    Size CalculateBackupImageSize(const Size& pictureSize) const;
+    Size CalculateBackupImageSize(const Size& pictureSize);
     virtual void ClearRenderObject() override;
 
-    std::string imageSrc_;
     std::string imageAlt_;
     std::function<void(const std::string&)> loadSuccessEvent_;
     std::function<void(const std::string&)> loadFailEvent_;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> loadImgSuccessEvent_;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> loadImgFailEvent_;
+    EventMarker svgAnimatorFinishEvent_;
     bool fitMaxSize_ = false;
+    bool hasObjectPosition_ = false;
     bool isImageSizeSet_ = false;
     bool rawImageSizeUpdated_ = false;
     bool matchTextDirection_ = false;
@@ -199,17 +238,13 @@ protected:
     Rect dstRect_;
     Rect currentSrcRect_;
     std::list<Rect> currentDstRectList_;
-    ImageFit imageFit_ = ImageFit::COVER;
-    ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
+    ImageObjectPosition imageObjectPosition_;
     std::list<Rect> rectList_;
     Color color_ = Color::TRANSPARENT;
     bool isColorSet_ = false;
-    InternalResource::ResourceId resourceId_ = InternalResource::ResourceId::NO_ID;
     double singleWidth_ = 0.0;
     double displaySrcWidth_ = 0.0;
     double scale_ = 1.0;
-    double paddingHorizontal_ = 0.0;
-    double paddingVertical_ = 0.0;
     double horizontalRepeatNum_ = 1.0;
     double rotate_ = 0.0;
     bool keepOffsetZero_ = false;
@@ -238,6 +273,24 @@ protected:
     // result for background image
     Size imageRenderSize_;
     Offset imageRenderPosition_;
+
+    ImageFit imageFit_ = ImageFit::COVER;
+    ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
+    ImageRenderMode imageRenderMode_ = ImageRenderMode::ORIGINAL;
+    ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
+
+    bool autoResize_ = true;
+
+    bool forceResize_ = false;
+    bool forceReload_ = false;
+    Size imageSizeForEvent_;
+    bool useSkiaSvg_ = true;
+    int32_t retryCnt_ = 0;
+    RefPtr<PixelMap> pixmap_ = nullptr;
+    std::list<std::function<void()>> imageLayoutCallbacks_;
+    bool proceedPreviousLoading_ = false;
+    ImageSourceInfo sourceInfo_;
+    void* pixmapRawPtr_ = nullptr;
 };
 
 } // namespace OHOS::Ace

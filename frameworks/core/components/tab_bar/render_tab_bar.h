@@ -55,6 +55,21 @@ public:
 
     void OnPaintFinish() override;
 
+    int32_t GetTabsSize() const
+    {
+        return tabsSize_;
+    }
+
+    TabBarMode GetBarMode() const
+    {
+        return mode_;
+    }
+
+    BarPosition GetBarPosition() const
+    {
+        return barPosition_;
+    }
+
 protected:
     RenderTabBar();
     void OnTouchTestHit(
@@ -108,6 +123,9 @@ private:
     void LayoutChildren();
     void UpdatePosition();
     void HandleClickedEvent(const ClickInfo& info);
+    void AccessibilityScroll(const bool isAdd);
+    void AccessibilityClick();
+    void InitAccessibilityEventListener();
     bool HandleScrollablePosition(double);
     bool IsScrollable() const
     {
@@ -119,6 +137,8 @@ private:
 
     UpdateIndexFunc callback_;
     RefPtr<TabBarSizeAnimation> tabBarSizeAnimation_;
+    int accessibilityIndex_ = -1;
+    BarPosition barPosition_ = BarPosition::START;
 };
 
 } // namespace OHOS::Ace

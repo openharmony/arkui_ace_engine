@@ -48,7 +48,7 @@ public:
     bool animationStopStatus_ { false };
     bool animationIdleStatus_ { false };
     bool animationPauseStatus_ { false };
-    TweenOperation operation_ { TweenOperation::PLAY };
+    AnimationOperation operation_ { AnimationOperation::PLAY };
 
     bool setRepeatSucc_ { false };
     int32_t postFlushCallTimes_ { 0 };

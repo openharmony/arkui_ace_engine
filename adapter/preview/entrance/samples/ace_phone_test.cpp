@@ -26,34 +26,48 @@ namespace {
 constexpr int32_t GET_INSPECTOR_TREE_TIMES = 12;
 constexpr int32_t GET_INSPECTOR_TREE_INTERVAL = 5000;
 constexpr char FILE_NAME[] = "InspectorTree.txt";
+constexpr char ACE_VERSION_2[] = "2.0";
+constexpr char MAX_ARGS_COUNT = 2;
 
-}
+auto&& renderCallback = [](const void*, const size_t bufferSize, const int32_t width, const int32_t height) -> bool {
+    return true;
+};
 
-int main()
+auto&& pageCallback = [](const std::string currentPagePath) -> bool {
+    printf("callback currentPage:%s", currentPagePath.c_str());
+    return true;
+};
+
+} // namespace
+
+int main(int argc, const char* argv[])
 {
-    auto&& renderCallback = [](const void*, size_t bufferSize) -> bool {
-        return true;
-    };
-
 #ifdef MAC_PLATFORM
     std::string assetPath = "/Volumes/SSD2T/daily-test/preview/js/default";
+    std::string assetPath2 = "/Volumes/SSD2T/daily-test/preview/js/default_2.0";
     std::string resourcesPath = "/Volumes/SSD2T/daily-test/preview/js/resources";
-    constexpr double resolution = 2;
+    constexpr double density = 2;
 #else
     std::string assetPath = "D:\\Workspace\\preview\\js\\default";
+    std::string assetPath2 = "D:\\Workspace\\preview\\js\\default_2.0";
     std::string resourcesPath = "D:\\Workspace\\preview\\js\\resources";
-    constexpr double resolution = 1;
+    constexpr double density = 1;
 #endif
-
     OHOS::Ace::Platform::AceRunArgs args = {
         .assetPath = assetPath,
         .resourcesPath = resourcesPath,
+        .deviceConfig.density = density,
+        .windowTitle = "ACE phone",
         .deviceWidth = 360,
         .deviceHeight = 750,
-        .windowTitle = "ACE phone",
-        .resolution = resolution,
         .onRender = std::move(renderCallback),
+        .onRouterChange = std::move(pageCallback),
     };
+
+    if (argc == MAX_ARGS_COUNT && !std::strcmp(argv[1], ACE_VERSION_2)) {
+        args.assetPath = assetPath2;
+        args.aceVersion = OHOS::Ace::Platform::AceVersion::ACE_2_0;
+    }
 
     auto ability = OHOS::Ace::Platform::AceAbility::CreateInstance(args);
     if (!ability) {

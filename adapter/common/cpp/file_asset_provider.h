@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_ADAPTER_COMMON_CPP_FILE_ASSET_PROVIDER_H
 #define FOUNDATION_ACE_ADAPTER_COMMON_CPP_FILE_ASSET_PROVIDER_H
 
+#include <map>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -24,27 +25,39 @@
 #include "flutter/assets/asset_resolver.h"
 #include "flutter/fml/mapping.h"
 
+#include "base/resource/asset_manager.h"
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT FileAssetProvider : public flutter::AssetResolver {
+class FlutterAssetProvider : public AssetProvider {
+    DECLARE_ACE_TYPE(FlutterAssetProvider, AssetProvider);
+
+public:
+    virtual std::unique_ptr<fml::Mapping> GetAsMapping(const std::string& assetName) const = 0;
+};
+
+class ACE_EXPORT FileAssetProvider : public FlutterAssetProvider {
+    DECLARE_ACE_TYPE(FileAssetProvider, FlutterAssetProvider);
+
 public:
     FileAssetProvider() = default;
     ~FileAssetProvider() override;
 
     bool Initialize(const std::string& packagePath, const std::vector<std::string>& assetBasePaths);
 
-    bool IsValid() const override;
-
     std::unique_ptr<fml::Mapping> GetAsMapping(const std::string& assetName) const override;
 
-    std::string GetAssetPath(const std::string& assetName);
+    bool IsValid() const override;
+
+    std::string GetAssetPath(const std::string& assetName) override;
+
+    void GetAssetList(const std::string& path, std::vector<std::string>& assetList) override;
 
 private:
     std::unordered_map<std::string, uint64_t> fileMap_;
     mutable std::mutex mutex_;
-    std::unordered_map<std::string, std::string> filePathMap_;
+    std::map<std::string, std::string> filePathMap_;
     std::string packagePath_;
     std::vector<std::string> assetBasePaths_;
 };

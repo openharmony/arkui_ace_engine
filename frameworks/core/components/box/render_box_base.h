@@ -18,15 +18,18 @@
 
 #include "base/geometry/size.h"
 #include "core/animation/property_animatable.h"
+#include "core/animation/property_animatable_helper.h"
 #include "core/components/box/box_base_component.h"
+#include "core/components/box/box_component.h"
+#include "core/components/box/mask.h"
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/properties/edge.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 
-class RenderBoxBase : public RenderNode, public PropertyAnimatable {
-    DECLARE_ACE_TYPE(RenderBoxBase, RenderNode, PropertyAnimatable);
+class RenderBoxBase : public RenderNode {
+    DECLARE_ACE_TYPE(RenderBoxBase, RenderNode);
 
 public:
     using LayoutCallback = std::function<void()>;
@@ -40,13 +43,74 @@ public:
     void SetPaintSize(const Size& paintSize);
     virtual Size GetBorderSize() const;
     double CalculateHeightPercent(double percent) const; // add for text filed
+    virtual void DrawOnPixelMap() {}
 
     FloatPropertyAnimatable::SetterMap GetFloatPropertySetterMap() override;
     FloatPropertyAnimatable::GetterMap GetFloatPropertyGetterMap() override;
 
+    void OnAttachContext() override
+    {
+        width_.SetContextAndCallback(context_, [weak = WeakClaim(this)] {
+            auto renderBox = weak.Upgrade();
+            if (renderBox) {
+                renderBox->OnAnimationCallback();
+            }
+        });
+        height_.SetContextAndCallback(context_, [weak = WeakClaim(this)] {
+            auto renderBox = weak.Upgrade();
+            if (renderBox) {
+                renderBox->OnAnimationCallback();
+            }
+        });
+        marginOrigin_.SetContextAndCallback(context_, [weak = WeakClaim(this)] {
+            auto renderBox = weak.Upgrade();
+            if (renderBox) {
+                renderBox->OnAnimationCallback();
+            }
+        });
+        paddingOrigin_.SetContextAndCallback(context_, [weak = WeakClaim(this)] {
+            auto renderBox = weak.Upgrade();
+            if (renderBox) {
+                renderBox->OnAnimationCallback();
+            }
+        });
+        aspectRatio_.SetContextAndCallback(context_, [weak = WeakClaim(this)] {
+            auto renderBox = weak.Upgrade();
+            if (renderBox) {
+                renderBox->OnAnimationCallback();
+            }
+        });
+    }
+
     virtual const Color& GetColor() const
     {
         return Color::TRANSPARENT;
+    }
+
+    virtual void UpdateStyleFromRenderNode(PropertyAnimatableType type) {}
+
+    AnimatableDimension GetMargin(const DimensionHelper& helper) const
+    {
+        return helper.Get(marginOrigin_);
+    }
+
+    void SetMargin(const AnimatableDimension& value, const DimensionHelper& helper) // add for animation
+    {
+        if (helper.Set(value, &marginOrigin_)) {
+            MarkNeedLayout();
+        }
+    }
+
+    AnimatableDimension GetPadding(const DimensionHelper& helper) const
+    {
+        return helper.Get(paddingOrigin_);
+    }
+
+    void SetPadding(const AnimatableDimension& value, const DimensionHelper& helper) // add for animation
+    {
+        if (helper.Set(value, &paddingOrigin_)) {
+            MarkNeedLayout();
+        }
     }
 
     double GetWidth() const // add for animation
@@ -75,9 +139,40 @@ public:
         }
     }
 
+    void SetWidth(const Dimension& width) // add for animation
+    {
+        if (width_ != width) {
+            width_ = width;
+            MarkNeedLayout();
+        }
+    }
+
+    Dimension GetWidthDimension() const
+    {
+        return static_cast<Dimension>(width_);
+    }
+
+    void SetHeight(const Dimension& height) // add for animation
+    {
+        if (height_ != height) {
+            height_ = height;
+            MarkNeedLayout();
+        }
+    }
+
+    Dimension GetHeightDimension() const
+    {
+        return static_cast<Dimension>(height_);
+    }
+
     EdgePx GetMargin() const
     {
         return margin_;
+    }
+
+    EdgePx GetPadding() const
+    {
+        return padding_;
     }
 
     Size GetMarginSize() const
@@ -105,10 +200,71 @@ public:
         constraints_ = constraints;
         MarkNeedLayout();
     }
+    const LayoutParam& GetConstraints()
+    {
+        return constraints_;
+    }
 
     void SetBoxFlex(BoxFlex flex)
     {
         flex_ = flex;
+    }
+
+    AlignDeclarationPtr GetAlignDeclarationPtr() const
+    {
+        return alignPtr_;
+    }
+
+    AlignDeclaration::Edge GetUseAlignSide() const
+    {
+        return alignSide_;
+    }
+
+    const Dimension& GetUseAlignOffset() const
+    {
+        return alignItemOffset_;
+    }
+
+    void CalculateAlignDeclaration();
+
+    const Alignment& GetAlign() const
+    {
+        return align_;
+    }
+
+    double GetAspectRatio() const
+    {
+        return aspectRatio_.Value();
+    }
+
+    const RefPtr<ClipPath>& GetClipPath() const
+    {
+        return clipPath_;
+    }
+
+    bool GetBoxClipFlag() const
+    {
+        return boxClipFlag_;
+    }
+
+    const RefPtr<Mask>& GetMask() const
+    {
+        return mask_;
+    }
+
+    const RefPtr<GridColumnInfo>& GetGridColumnInfo() const
+    {
+        return gridColumnInfo_;
+    }
+
+    const RefPtr<GridContainerInfo>& GetGridContainerInfo() const
+    {
+        return gridContainerInfo_;
+    }
+
+    const RefPtr<PixelMap>& GetPixelMap() const
+    {
+        return pixelMap_;
     }
 
 protected:
@@ -132,9 +288,11 @@ protected:
     void CalculateChildPosition();
     void AdjustSizeByAspectRatio();
     void PerformLayoutInLiteMode();
+    void OnAnimationCallback();
 
-    Dimension width_ = Dimension(-1.0, DimensionUnit::PX);  // exclude margin
-    Dimension height_ = Dimension(-1.0, DimensionUnit::PX); // exclude margin
+    AnimatableDimension width_ { AnimatableDimension(-1.0, DimensionUnit::PX) };  // exclude margin
+    AnimatableDimension height_ { AnimatableDimension(-1.0, DimensionUnit::PX) }; // exclude margin
+
     BoxFlex flex_ = BoxFlex::FLEX_NO;
     LayoutParam constraints_ = LayoutParam(Size(), Size()); // exclude margin
     EdgePx padding_;
@@ -147,14 +305,28 @@ protected:
     uint32_t percentFlag_ = 0;
     bool layoutInBox_ = false;
     Edge paddingOrigin_;
+    Edge marginOrigin_;
     LayoutCallback layoutCallback_;
     bool useLiteStyle_ = false;
+    Overflow overflow_ = Overflow::OBSERVABLE;
+    bool isChildOverflow_ = false;
+    RefPtr<ClipPath> clipPath_;
+    RefPtr<Mask> mask_;
+    BoxSizing boxSizing_ = BoxSizing::BORDER_BOX;
+    WeakPtr<BoxComponent> boxComponent_;
+
+    bool isUseAlign_ = false;
+    AlignDeclarationPtr alignPtr_ = nullptr;
+    AlignDeclaration::Edge alignSide_ { AlignDeclaration::Edge::AUTO };
+    Dimension alignItemOffset_;
+    Offset alignOffset_;
+    bool boxClipFlag_ = false;
+    RefPtr<PixelMap> pixelMap_ = nullptr;
 
 private:
     bool IsSizeValid(const Dimension& value, double maxLimit);
 
-    Edge marginOrigin_;
-    Edge additionalMargin_;
+    Edge additionalPadding_;
     bool useFlexWidth_ = false;
     bool useFlexHeight_ = false;
     bool selfDefineWidth_ = false;
@@ -163,7 +335,7 @@ private:
     double selfMinWidth_ = 0.0;                  // exclude margin
     double selfMaxHeight_ = Size::INFINITE_SIZE; // exclude margin
     double selfMinHeight_ = 0.0;                 // exclude margin
-    double aspectRatio_ = 0.0;
+    AnimatableDimension aspectRatio_ = AnimatableDimension();
     Dimension minWidth_ = Dimension();
     Dimension minHeight_ = Dimension();
     Dimension maxWidth_ = Dimension();

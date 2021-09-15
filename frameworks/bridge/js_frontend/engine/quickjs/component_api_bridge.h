@@ -22,12 +22,46 @@
 
 namespace OHOS::Ace::Framework {
 
-class CompoentApiBridge : virtual public AceType {
-    DECLARE_ACE_TYPE(CompoentApiBridge, AceType)
+class ComponentApiBridge : virtual public AceType {
+    DECLARE_ACE_TYPE(ComponentApiBridge, AceType)
 
 public:
     static JSValue JsGetScrollOffset(JSContext* ctx, NodeId nodeId);
     static JSValue JsGetBoundingRect(JSContext* ctx, NodeId nodeId);
+    static void JsScrollTo(JSContext* ctx, const std::string& args, NodeId nodeId);
+    static JSValue JsCreateObserver(JSContext* ctx, const std::string& args, NodeId nodeId);
+
+    static JSValue JsObserverOn(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv);
+    static JSValue JsObserverOff(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv);
+};
+
+class QJSVisibleListenerCallback : virtual public AceType {
+    DECLARE_ACE_TYPE(QJSVisibleListenerCallback, AceType)
+
+public:
+    QJSVisibleListenerCallback(JSContext* ctx, JSValue callback, NodeId nodeId);
+
+    ~QJSVisibleListenerCallback() override;
+
+    JSValue GetJsObject()
+    {
+        return listenCallback_;
+    }
+
+    JSContext* GetContext() const
+    {
+        return ctx_;
+    }
+
+    NodeId GetNodeId() const
+    {
+        return nodeId_;
+    }
+
+private:
+    JSContext* ctx_ = nullptr;
+    JSValue listenCallback_;
+    NodeId nodeId_ = -1;
 };
 
 } // namespace OHOS::Ace::Framework

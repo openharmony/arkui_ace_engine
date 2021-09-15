@@ -88,7 +88,6 @@ void RenderSearch::PerformLayout()
             auto renderSearch = weak.Upgrade();
             if (renderSearch) {
                 renderSearch->FireSubmitEvent(searchKey);
-                renderSearch->SetShowCloseIcon(false);
             }
         });
 
@@ -148,7 +147,7 @@ void RenderSearch::InitRect(const RefPtr<RenderTextField>& renderTextField)
     renderTextField->MarkNeedLayout();
 
     // Compute rect of close icon.
-    if (showCloseIcon_ && renderCloseIcon_) {
+    if (renderCloseIcon_) {
         double iconVerticalOffset =
             topBorderWidth + (searchInnerHeight - renderCloseIcon_->GetLayoutSize().Height()) / 2.0;
         double iconHotzonOffset = (NormalizeToPx(closeIconHotZoneHorizontal_) - NormalizeToPx(closeIconSize_)) / 2.0;
@@ -174,7 +173,7 @@ void RenderSearch::InitRect(const RefPtr<RenderTextField>& renderTextField)
     }
 }
 
-void RenderSearch::OnValueChanged(bool needFireChangeEvent)
+void RenderSearch::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent)
 {
     if (textEditController_) {
         const auto& currentText = textEditController_->GetValue().text;

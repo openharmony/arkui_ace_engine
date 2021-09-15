@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MULTIMODAL_RENDER_MULTIMODAL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MULTIMODAL_RENDER_MULTIMODAL_H
 
+#include "core/components/declaration/common/attribute.h"
 #include "core/event/multimodal/multimodal_properties.h"
 #include "core/event/multimodal/multimodal_scene.h"
 #include "core/gestures/click_recognizer.h"
@@ -43,7 +44,7 @@ protected:
     VoiceEvent subscript_;
 
 private:
-    void PrepareMultimodalEvent(const MultimodalProperties& multimodalProperties);
+    void PrepareMultimodalEvent(const CommonMultimodalAttribute& multimodalProperties);
     void OnEventTrigger();
     void OnSubscriptSwitchChange(bool isOn);
 

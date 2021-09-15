@@ -18,423 +18,359 @@
 #include <algorithm>
 #include <iterator>
 
-#include "core/components/foreach/foreach_component.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/swiper/swiper_component.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
 
-#ifdef USE_QUICKJS_ENGINE
-JSValue SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo, JSContext* ctx)
+JSRef<JSVal> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo)
 {
-    JSValue eventObj = JS_NewObject(ctx);
-    JS_SetPropertyStr(ctx, eventObj, "index", JS_NewInt32(ctx, eventInfo.GetIndex()));
-    return eventObj;
+    return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetIndex()));
 }
-#elif USE_V8_ENGINE
-v8::Local<v8::Value> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo, v8::Isolate* isolate)
-{
-    ACE_DCHECK(isolate);
-    auto context = isolate->GetCurrentContext();
-    v8::Local<v8::Object> obj = v8::Object::New(isolate);
-    obj->Set(context, v8::String::NewFromUtf8(isolate, "index").ToLocalChecked(),
-           v8::Number::New(isolate, eventInfo.GetIndex()))
-        .ToChecked();
-    return v8::Local<v8::Value>(obj);
-}
-#endif
+
 } // namespace
 
-#ifdef USE_QUICKJS_ENGINE
-JSSwiper::JSSwiper(const std::list<JSViewAbstract*>& children, std::list<JSValue> jsChildren)
-    : JSContainerBase(children, jsChildren)
-{
-    LOGD("Swiper(children: [%lu])", children.size());
-}
-#else
-JSSwiper::JSSwiper(const std::list<JSViewAbstract*>& children,
-    std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren)
-    : JSContainerBase(children, jsChildren)
-{
-    LOGD("Swiper(children: [%lu])", children_.size());
-}
-#endif
-
-JSSwiper::~JSSwiper()
-{
-    LOGD("Destroy: JSSwiper");
-}
-
-RefPtr<OHOS::Ace::Component> JSSwiper::CreateSpecializedComponent()
+void JSSwiper::Create(const JSCallbackInfo& info)
 {
     std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
-
-    for (const auto& jsViewChild : children_) {
-        if (!jsViewChild) {
-            continue;
-        }
-        auto component = jsViewChild->CreateComponent();
-        if (AceType::TypeName<ForEachComponent>() == AceType::TypeName(component)) {
-            auto children = AceType::DynamicCast<ForEachComponent>(component)->GetChildren();
-            std::copy(children.begin(), children.end(), std::back_insert_iterator(componentChildren));
-        } else {
-            componentChildren.emplace_back(component);
-        }
-    }
     RefPtr<OHOS::Ace::SwiperComponent> component = AceType::MakeRefPtr<OHOS::Ace::SwiperComponent>(componentChildren);
-    component->SetAutoPlay(autoPlay_);
-    component->SetDigitalIndicator(digitalIndicator_);
-    component->SetDuration(duration_);
-    component->SetIndex(index_);
-    component->SetAutoPlayInterval(autoPlayInterval_);
-    component->SetLoop(loop_);
-    component->SetAxis(axis_);
-    if (onChangeFunc_) {
-        auto onChange = EventMarker([func = std::move(onChangeFunc_)](const BaseEventInfo* info) {
-            auto swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
-            if (!swiperInfo) {
-                LOGE("HandleChangeEvent swiperInfo == nullptr");
-                return;
-            }
-            func->execute(*swiperInfo);
-        });
-        component->SetChangeEventId(onChange);
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        JSSwiperController* jsController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSwiperController>();
+        if (jsController) {
+            jsController->SetController(component->GetSwiperController());
+        }
     }
-    if (!indicator_) {
-        InitIndicatorStyle();
-    }
-    component->SetIndicator(showIndicator_ ? indicator_ : nullptr);
-
-    return component;
-}
-
-std::vector<RefPtr<OHOS::Ace::SingleChild>> JSSwiper::CreateInteractableComponents()
-{
-    return JSInteractableView::CreateComponents();
-}
-
-void JSSwiper::Destroy(JSViewAbstract* parentCustomView)
-{
-    LOGD("JSSwiper::Destroy start");
-    JSContainerBase::Destroy(parentCustomView);
-    LOGD("JSSwiper::Destroy end");
+    component->SetIndicator(InitIndicatorStyle());
+    component->SetMainSwiperSize(MainSwiperSize::MIN);
+    ViewStackProcessor::GetInstance()->Push(component);
+    JSInteractableView::SetFocusNode(true);
 }
 
 void JSSwiper::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSwiper>::Declare("Swiper");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSSwiper>::StaticMethod("create", &JSSwiper::Create, opt);
+    JSClass<JSSwiper>::StaticMethod("autoPlay", &JSSwiper::SetAutoplay, opt);
+    JSClass<JSSwiper>::StaticMethod("digital", &JSSwiper::SetDigital, opt);
+    JSClass<JSSwiper>::StaticMethod("duration", &JSSwiper::SetDuration, opt);
+    JSClass<JSSwiper>::StaticMethod("index", &JSSwiper::SetIndex, opt);
+    JSClass<JSSwiper>::StaticMethod("interval", &JSSwiper::SetInterval, opt);
+    JSClass<JSSwiper>::StaticMethod("loop", &JSSwiper::SetLoop, opt);
+    JSClass<JSSwiper>::StaticMethod("vertical", &JSSwiper::SetVertical, opt);
+    JSClass<JSSwiper>::StaticMethod("indicator", &JSSwiper::SetIndicator, opt);
+    JSClass<JSSwiper>::StaticMethod("cancelSwipeOnOtherAxis", &JSSwiper::SetCancelSwipeOnOtherAxis, opt);
+    JSClass<JSSwiper>::StaticMethod("itemSpace", &JSSwiper::SetItemSpace);
+    JSClass<JSSwiper>::StaticMethod("onChange", &JSSwiper::SetOnChange);
+    JSClass<JSSwiper>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSSwiper>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSSwiper>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSSwiper>::StaticMethod("onClick", &JSSwiper::SetOnClick);
+    JSClass<JSSwiper>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSwiper>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSSwiper>::StaticMethod("indicatorStyle", &JSSwiper::SetIndicatorStyle);
+    JSClass<JSSwiper>::StaticMethod("height", &JSSwiper::SetHeight);
+    JSClass<JSSwiper>::StaticMethod("width", &JSSwiper::SetWidth);
+    JSClass<JSSwiper>::StaticMethod("size", &JSSwiper::SetSize);
+    JSClass<JSSwiper>::Inherit<JSContainerBase>();
     JSClass<JSSwiper>::Inherit<JSViewAbstract>();
-    MethodOptions opt = MethodOptions::RETURN_SELF;
-    JSClass<JSSwiper>::Method("autoPlay", &JSSwiper::SetAutoplay, opt);
-    JSClass<JSSwiper>::Method("digital", &JSSwiper::SetDigital, opt);
-    JSClass<JSSwiper>::Method("duration", &JSSwiper::SetDuration, opt);
-    JSClass<JSSwiper>::Method("index", &JSSwiper::SetIndex, opt);
-    JSClass<JSSwiper>::Method("interval", &JSSwiper::SetInterval, opt);
-    JSClass<JSSwiper>::Method("loop", &JSSwiper::SetLoop, opt);
-    JSClass<JSSwiper>::Method("vertical", &JSSwiper::SetVertical, opt);
-    JSClass<JSSwiper>::Method("indicator", &JSSwiper::SetIndicator, opt);
-    JSClass<JSSwiper>::CustomMethod("onChange", &JSSwiper::SetOnChange);
-    JSClass<JSSwiper>::CustomMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSSwiper>::CustomMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSSwiper>::CustomMethod("indicatorStyle", &JSSwiper::SetIndicatorStyle);
-    JSClass<JSSwiper>::Bind(globalObj, ConstructorCallback);
+    JSClass<JSSwiper>::Bind<>(globalObj);
 }
 
 void JSSwiper::SetAutoplay(bool autoPlay)
 {
-    autoPlay_ = autoPlay;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetAutoPlay(autoPlay);
+    }
 }
 
 void JSSwiper::SetDigital(bool digitalIndicator)
 {
-    digitalIndicator_ = digitalIndicator;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetDigitalIndicator(digitalIndicator);
+    }
 }
 
 void JSSwiper::SetDuration(double duration)
 {
-    duration_ = duration;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetDuration(duration);
+    }
 }
 
 void JSSwiper::SetIndex(uint32_t index)
 {
-    index_ = index;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetIndex(index);
+    }
 }
 
 void JSSwiper::SetInterval(double interval)
 {
-    autoPlayInterval_ = interval;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetAutoPlayInterval(interval);
+    }
 }
 
 void JSSwiper::SetLoop(bool loop)
 {
-    loop_ = loop;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetLoop(loop);
+    }
 }
 
 void JSSwiper::SetVertical(bool isVertical)
 {
-    axis_ = isVertical ? Axis::VERTICAL : Axis::HORIZONTAL;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetAxis(isVertical ? Axis::VERTICAL : Axis::HORIZONTAL);
+    }
 }
 
 void JSSwiper::SetIndicator(bool showIndicator)
 {
-    showIndicator_ = showIndicator;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    swiper->SetShowIndicator(showIndicator);
+    if (!showIndicator && swiper) {
+        swiper->SetIndicator(nullptr);
+    }
 }
 
-#ifdef USE_QUICKJS_ENGINE
-void JSSwiper::MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc)
+void JSSwiper::SetCancelSwipeOnOtherAxis(bool cancel)
 {
-    LOGD("JSSwiper => MarkGC: start");
-    JSContainerBase::MarkGC(rt, markFunc);
-    LOGD("JSSwiper => MarkGC: end");
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    // TODO: swiper->SetCancelSwipeOnOtherAxis(cancel) is no longer supported. check whether need this method
 }
 
-void JSSwiper::ReleaseRT(JSRuntime* rt)
+void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
 {
-    LOGD("JSSwiper => release children: start");
-    JSContainerBase::ReleaseRT(rt);
-    LOGD("JSSwiper => release children: end");
-}
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        auto indictor = swiper->GetIndicator();
+        if (!indictor) {
+            return;
+        }
 
-JSValue JSSwiper::ConstructorCallback(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
-{
-    ACE_SCOPED_TRACE("JSSwiper::QjsConstructor");
+        if (info[0]->IsObject()) {
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
+            JSRef<JSVal> leftValue = obj->GetProperty("left");
+            JSRef<JSVal> topValue = obj->GetProperty("top");
+            JSRef<JSVal> rightValue = obj->GetProperty("right");
+            JSRef<JSVal> bottomValue = obj->GetProperty("bottom");
+            JSRef<JSVal> sizeValue = obj->GetProperty("size");
+            JSRef<JSVal> maskValue = obj->GetProperty("mask");
+            JSRef<JSVal> colorValue = obj->GetProperty("color");
+            JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColor");
 
-    QJSContext::Scope scope(ctx);
-
-    auto [children, jsChildren] = JsChildrenFromArgs(ctx, argc, argv);
-
-    JSSwiper* stack = new JSSwiper(children, jsChildren);
-
-    return Wrap<JSSwiper>(stack);
-}
-
-JSValue JSSwiper::SetIndicatorStyle(JSContext* ctx, JSValue jsSwiper, int argc, JSValue* argv)
-{
-    if ((argc != 1) || !JS_IsObject(argv[0]) || JS_IsArray(ctx, argv[0]) || JS_IsFunction(ctx, argv[0])) {
-        LOGE("indicatorStyle expects a object as parameter. Throwing exception.");
-        return JS_ThrowSyntaxError(ctx, "indicatorStyle expects a object as parameter");
-    }
-    JSSwiper* swiper = Unwrap<JSSwiper>(jsSwiper);
-
-    if (swiper == nullptr) {
-        LOGE("indicatorStyle must be called on a JSSwiper. Throwing exception.");
-        return JS_ThrowSyntaxError(ctx, "indicatorStyle must be called on a JSSwiper");
-    }
-
-    if (swiper->indicator_ == nullptr) {
-        swiper->InitIndicatorStyle();
-    }
-
-    JSValue leftValue = JS_GetPropertyStr(ctx, argv[0], "left");
-    JSValue rightValue = JS_GetPropertyStr(ctx, argv[0], "right");
-    JSValue topValue = JS_GetPropertyStr(ctx, argv[0], "top");
-    JSValue bottomValue = JS_GetPropertyStr(ctx, argv[0], "bottom");
-    JSValue sizeValue = JS_GetPropertyStr(ctx, argv[0], "size");
-    JSValue maskValue = JS_GetPropertyStr(ctx, argv[0], "mask");
-    JSValue colorValue = JS_GetPropertyStr(ctx, argv[0], "color");
-    JSValue selectedColorValue = JS_GetPropertyStr(ctx, argv[0], "selectedColor");
-
-    if (JS_IsNumber(leftValue)) {
-        double left = 0.0;
-        JS_ToFloat64(ctx, &left, leftValue);
-        swiper->indicator_->SetLeft(Dimension(left));
-    }
-
-    if (JS_IsNumber(rightValue)) {
-        double right = 0.0;
-        JS_ToFloat64(ctx, &right, rightValue);
-        swiper->indicator_->SetRight(Dimension(right));
-    }
-
-    if (JS_IsNumber(topValue)) {
-        double top = 0.0;
-        JS_ToFloat64(ctx, &top, topValue);
-        swiper->indicator_->SetTop(Dimension(top));
-    }
-
-    if (JS_IsNumber(bottomValue)) {
-        double bottom = 0.0;
-        JS_ToFloat64(ctx, &bottom, bottomValue);
-        swiper->indicator_->SetBottom(Dimension(bottom));
-    }
-
-    if (JS_IsNumber(sizeValue)) {
-        double size = 0.0;
-        JS_ToFloat64(ctx, &size, sizeValue);
-        swiper->indicator_->SetSize(Dimension(size));
-    }
-
-    if (JS_IsBool(maskValue)) {
-        bool mask = JS_ToBool(ctx, maskValue) == 1 ? true : false;
-        swiper->indicator_->SetIndicatorMask(mask);
-    }
-
-    if (JS_IsString(colorValue)) {
-        const char* colorStr = JS_ToCString(ctx, JS_ToString(ctx, colorValue));
-        if (colorStr != nullptr) {
-            std::string color(colorStr);
-            swiper->indicator_->SetColor(Color::FromString(color));
+            Dimension dimLeft;
+            if (ParseJsDimensionPx(leftValue, dimLeft)) {
+                indictor->SetLeft(dimLeft);
+            }
+            Dimension dimTop;
+            if (ParseJsDimensionPx(topValue, dimTop)) {
+                indictor->SetTop(dimTop);
+            }
+            Dimension dimRight;
+            if (ParseJsDimensionPx(rightValue, dimRight)) {
+                indictor->SetRight(dimRight);
+            }
+            Dimension dimBottom;
+            if (ParseJsDimensionPx(bottomValue, dimBottom)) {
+                indictor->SetBottom(dimBottom);
+            }
+            Dimension dimSize;
+            if (ParseJsDimensionPx(sizeValue, dimSize)) {
+                indictor->SetSize(dimSize);
+            }
+            if (maskValue->IsBoolean()) {
+                auto mask = maskValue->ToBoolean();
+                indictor->SetIndicatorMask(mask);
+            }
+            Color colorVal;
+            if (ParseJsColor(colorValue, colorVal)) {
+                indictor->SetColor(colorVal);
+            }
+            Color selectedColorVal;
+            if (ParseJsColor(selectedColorValue, selectedColorVal)) {
+                indictor->SetSelectedColor(selectedColorVal);
+            }
         }
     }
-
-    if (JS_IsString(selectedColorValue)) {
-        const char* colorStr = JS_ToCString(ctx, JS_ToString(ctx, selectedColorValue));
-        if (colorStr != nullptr) {
-            std::string color(colorStr);
-            swiper->indicator_->SetSelectedColor(Color::FromString(color));
-        }
-    }
-
-    JS_FreeValue(ctx, leftValue);
-    JS_FreeValue(ctx, rightValue);
-    JS_FreeValue(ctx, bottomValue);
-    JS_FreeValue(ctx, topValue);
-    JS_FreeValue(ctx, sizeValue);
-    JS_FreeValue(ctx, maskValue);
-    JS_FreeValue(ctx, colorValue);
-    JS_FreeValue(ctx, selectedColorValue);
-    return JS_DupValue(ctx, jsSwiper);
+    info.ReturnSelf();
 }
 
-void JSSwiper::QjsDestructor(JSRuntime* rt, JSSwiper* ptr)
+void JSSwiper::SetItemSpace(const JSCallbackInfo& info)
 {
-    LOGD("JSSwiper(QjsDestructor) start");
-    if (!ptr) {
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
-    ptr->ReleaseRT(rt);
-    delete ptr;
-    LOGD("JSSwiper(QjsDestructor) end");
-}
-
-void JSSwiper::QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc)
-{
-    LOGD("JSStack(QjsGcMark) start");
-    JSSwiper* view = Unwrap<JSSwiper>(val);
-    if (!view) {
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
 
-    view->MarkGC(rt, markFunc);
-    LOGD("JSStack(QjsGcMark) end");
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetItemSpace(value);
+    }
 }
 
-JSValue JSSwiper::SetOnChange(JSContext* ctx, JSValue this_value, int32_t argc, JSValue* argv)
+void JSSwiper::SetOnChange(const JSCallbackInfo& args)
 {
-    if ((argc != 1) || !JS_IsFunction(ctx, argv[0])) {
-        LOGE("change expects a function as parameter. Throwing exception.");
-        return JS_ThrowSyntaxError(ctx, "change() expect a function parameter. Throwing exception");
-    }
-
-    QJSContext::Scope scope(ctx);
-    // Dup and Free shoulj happen inside the QJSClickFunction
-
-    auto changeHandler = AceType::MakeRefPtr<QJSEventFunction<SwiperChangeEvent, 1>>(
-        ctx, JS_DupValue(ctx, argv[0]), SwiperChangeEventToJSValue);
-
-    onChangeFunc_ = changeHandler;
-
-    return JS_DupValue(ctx, this_value); // for call chaining
-}
-#elif USE_V8_ENGINE
-void JSSwiper::ConstructorCallback(const v8::FunctionCallbackInfo<v8::Value>& args)
-{
-    LOGD("ConstructorCallback");
-    std::list<JSViewAbstract*> children;
-    std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren;
-    V8ChildrenFromArgs(args, children, jsChildren);
-    auto instance = V8Object<JSSwiper>::New(args.This(), children, jsChildren);
-    args.GetReturnValue().Set(instance->Get());
-}
-
-void JSSwiper::SetIndicatorStyle(const v8::FunctionCallbackInfo<v8::Value>& info)
-{
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    ACE_DCHECK(isolate);
-    v8::Local<v8::Context> context = isolate->GetCurrentContext();
-    if (context.IsEmpty()) {
-        LOGE("Context Is Empty");
-        return;
-    }
-
-    if (!indicator_) {
-        InitIndicatorStyle();
-    }
-    if (info[0]->IsObject()) {
-        v8::Local<v8::Object> obj = info[0]->ToObject(context).ToLocalChecked();
-        v8::MaybeLocal<v8::Value> leftValue =
-            obj->Get(context, v8::String::NewFromUtf8(isolate, "left").ToLocalChecked());
-        v8::MaybeLocal<v8::Value> topValue =
-            obj->Get(context, v8::String::NewFromUtf8(isolate, "top").ToLocalChecked());
-        v8::MaybeLocal<v8::Value> rightValue =
-            obj->Get(context, v8::String::NewFromUtf8(isolate, "right").ToLocalChecked());
-        v8::MaybeLocal<v8::Value> bottomValue =
-            obj->Get(context, v8::String::NewFromUtf8(isolate, "bottom").ToLocalChecked());
-        v8::MaybeLocal<v8::Value> sizeValue =
-            obj->Get(context, v8::String::NewFromUtf8(isolate, "size").ToLocalChecked());
-        v8::MaybeLocal<v8::Value> maskValue =
-            obj->Get(context, v8::String::NewFromUtf8(isolate, "mask").ToLocalChecked());
-        v8::MaybeLocal<v8::Value> colorValue =
-            obj->Get(context, v8::String::NewFromUtf8(isolate, "color").ToLocalChecked());
-        v8::MaybeLocal<v8::Value> selectedColorValue =
-            obj->Get(context, v8::String::NewFromUtf8(isolate, "selectedColor").ToLocalChecked());
-
-        if (leftValue.ToLocalChecked()->IsNumber()) {
-            auto left = V8ValueConvertor::fromV8Value<float>(leftValue.ToLocalChecked());
-            indicator_->SetLeft(Dimension(left));
-        }
-        if (topValue.ToLocalChecked()->IsNumber()) {
-            auto top = V8ValueConvertor::fromV8Value<float>(topValue.ToLocalChecked());
-            indicator_->SetTop(Dimension(top));
-        }
-        if (rightValue.ToLocalChecked()->IsNumber()) {
-            auto right = V8ValueConvertor::fromV8Value<float>(rightValue.ToLocalChecked());
-            indicator_->SetRight(Dimension(right));
-        }
-        if (bottomValue.ToLocalChecked()->IsNumber()) {
-            auto bottom = V8ValueConvertor::fromV8Value<float>(bottomValue.ToLocalChecked());
-            indicator_->SetBottom(Dimension(bottom));
-        }
-        if (sizeValue.ToLocalChecked()->IsNumber()) {
-            auto size = V8ValueConvertor::fromV8Value<float>(sizeValue.ToLocalChecked());
-            indicator_->SetSize(Dimension(size));
-        }
-        if (maskValue.ToLocalChecked()->IsBoolean()) {
-            auto mask = V8ValueConvertor::fromV8Value<bool>(maskValue.ToLocalChecked());
-            indicator_->SetIndicatorMask(mask);
-        }
-        if (colorValue.ToLocalChecked()->IsString()) {
-            auto colorString = V8ValueConvertor::fromV8Value<std::string>(colorValue.ToLocalChecked());
-            indicator_->SetColor(Color::FromString(colorString));
-        }
-        if (selectedColorValue.ToLocalChecked()->IsString()) {
-            auto selectedColorString = V8ValueConvertor::fromV8Value<std::string>(selectedColorValue.ToLocalChecked());
-            indicator_->SetSelectedColor(Color::FromString(selectedColorString));
-        }
-    }
-    info.GetReturnValue().Set(info.This());
-}
-
-void JSSwiper::SetOnChange(const v8::FunctionCallbackInfo<v8::Value>& args)
-{
-    auto isolate = args.GetIsolate();
-    v8::HandleScope scp(isolate);
     if (args[0]->IsFunction()) {
-        onChangeFunc_ = AceType::MakeRefPtr<V8EventFunction<SwiperChangeEvent, 1>>(
-            v8::Local<v8::Function>::Cast(args[0]), SwiperChangeEventToJSValue);
-    }
-    args.GetReturnValue().Set(args.This());
-}
-#endif
-
-void JSSwiper::InitIndicatorStyle()
-{
-    if (!indicator_) {
-        indicator_ = AceType::MakeRefPtr<OHOS::Ace::SwiperIndicator>();
-        auto indicatorTheme = GetTheme<SwiperIndicatorTheme>();
-        if (indicatorTheme) {
-            indicator_->InitStyle(indicatorTheme);
+        auto changeHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
+            JSRef<JSFunc>::Cast(args[0]), SwiperChangeEventToJSValue);
+        auto onChange = EventMarker([executionContext = args.GetExecutionContext(), func = std::move(changeHandler)](
+                                        const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+            auto swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+            if (!swiperInfo) {
+                LOGE("HandleChangeEvent swiperInfo == nullptr");
+                return;
+            }
+            func->Execute(*swiperInfo);
+        });
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+        if (swiper) {
+            swiper->SetChangeEventId(onChange);
         }
+    }
+    args.ReturnSelf();
+}
+
+void JSSwiper::SetOnClick(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+        if (swiper) {
+            swiper->SetClickEventId(JSInteractableView::GetClickEventMarker(args));
+        }
+    }
+    args.SetReturnValue(args.This());
+}
+
+RefPtr<OHOS::Ace::SwiperIndicator> JSSwiper::InitIndicatorStyle()
+{
+    auto indicator = AceType::MakeRefPtr<OHOS::Ace::SwiperIndicator>();
+    auto indicatorTheme = GetTheme<SwiperIndicatorTheme>();
+    if (indicatorTheme) {
+        indicator->InitStyle(indicatorTheme);
+    }
+    return indicator;
+}
+
+void JSSwiper::SetWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    SetWidth(info[0]);
+}
+
+void JSSwiper::SetWidth(const JSRef<JSVal>& jsValue)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        JSViewAbstract::JsWidth(jsValue);
+        if (swiper->GetMainSwiperSize() == MainSwiperSize::MAX ||
+            swiper->GetMainSwiperSize() == MainSwiperSize::MAX_Y) {
+            swiper->SetMainSwiperSize(MainSwiperSize::MAX);
+        } else {
+            swiper->SetMainSwiperSize(MainSwiperSize::MAX_X);
+        }
+    }
+}
+
+void JSSwiper::SetHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    SetHeight(info[0]);
+}
+
+void JSSwiper::SetHeight(const JSRef<JSVal>& jsValue)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        JSViewAbstract::JsHeight(jsValue);
+        if (swiper->GetMainSwiperSize() == MainSwiperSize::MAX ||
+            swiper->GetMainSwiperSize() == MainSwiperSize::MAX_X) {
+            swiper->SetMainSwiperSize(MainSwiperSize::MAX);
+        } else {
+            swiper->SetMainSwiperSize(MainSwiperSize::MAX_Y);
+        }
+    }
+}
+
+void JSSwiper::SetSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        LOGE("arg is not Object or String.");
+        return;
+    }
+
+    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+    SetWidth(sizeObj->GetProperty("width"));
+    SetHeight(sizeObj->GetProperty("height"));
+}
+
+void JSSwiperController::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSSwiperController>::Declare("SwiperController");
+    JSClass<JSSwiperController>::CustomMethod("showNext", &JSSwiperController::ShowNext);
+    JSClass<JSSwiperController>::CustomMethod("showPrevious", &JSSwiperController::ShowPrevious);
+    JSClass<JSSwiperController>::Bind(globalObj, JSSwiperController::Constructor, JSSwiperController::Destructor);
+}
+
+void JSSwiperController::Constructor(const JSCallbackInfo& args)
+{
+    auto scroller = Referenced::MakeRefPtr<JSSwiperController>();
+    scroller->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(scroller));
+}
+
+void JSSwiperController::Destructor(JSSwiperController* scroller)
+{
+    if (scroller != nullptr) {
+        scroller->DecRefCount();
     }
 }
 

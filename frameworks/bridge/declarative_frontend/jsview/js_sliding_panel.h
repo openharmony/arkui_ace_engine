@@ -25,64 +25,28 @@
 namespace OHOS::Ace::Framework {
 
 class JSSlidingPanel : public JSContainerBase {
-    DECLARE_ACE_TYPE(JSSlidingPanel, JSContainerBase);
-
 public:
-    JSSlidingPanel() = delete;
-#ifdef USE_QUICKJS_ENGINE
-    JSSlidingPanel(const std::list<JSViewAbstract*>& children, std::list<JSValue> jsChildren);
-#elif USE_V8_ENGINE
-    JSSlidingPanel(const std::list<JSViewAbstract*>& children,
-        std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren);
-#endif
-    virtual ~JSSlidingPanel();
-    virtual void Destroy(JSViewAbstract* parentCustomView) override;
-
     static void JSBind(BindingTarget globalObj);
-
-#ifdef USE_QUICKJS_ENGINE
-    void MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc) override;
-    void ReleaseRT(JSRuntime* rt) override;
-    static JSValue ConstructorCallback(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv);
-    static void QjsDestructor(JSRuntime* rt, JSSlidingPanel* ptr);
-    static void QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc);
-#elif USE_V8_ENGINE
-    static void ConstructorCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
-#endif
+    static void Create(const JSCallbackInfo& info);
+    static void SetHasDragBar(bool hasDragBar);
+    static void SetShow(bool isShow);
+    static void SetPanelMode(int32_t mode);
+    static void SetPanelType(int32_t type);
+    static void SetMiniHeight(const JSCallbackInfo& info);
+    static void SetHalfHeight(const JSCallbackInfo& info);
+    static void SetFullHeight(const JSCallbackInfo& info);
+    static void SetOnSizeChange(const JSCallbackInfo& info);
+    static void JsBackgroundColor(const JSCallbackInfo& info);
+    static void JsPanelBorder(const JSCallbackInfo& info);
+    static void JsPanelBorderColor(const JSCallbackInfo& info);
+    static void JsPanelBorderStyle(int32_t style);
+    static void JsPanelBorderWidth(const JSCallbackInfo& info);
+    static void JsPanelBorderRadius(const JSCallbackInfo& info);
 
 protected:
-    RefPtr<OHOS::Ace::Component> CreateSpecializedComponent() override;
-    std::vector<RefPtr<OHOS::Ace::SingleChild>> CreateInteractableComponents() override;
-    void SetHasDragBar(bool hasDragBar);
-    void SetShow(bool isShow);
-    void SetPanelMode(int32_t mode);
-    void SetPanelType(int32_t type);
-    void SetMiniHeight(const std::string& height);
-    void SetHalfHeight(const std::string& height);
-    void SetFullHeight(const std::string& height);
-#ifdef USE_V8_ENGINE
-    void SetOnSizeChange(const v8::FunctionCallbackInfo<v8::Value>& args);
-#elif USE_QUICKJS_ENGINE
-    JSValue SetOnSizeChange(JSContext* ctx, JSValueConst this_value, int32_t argc, JSValueConst* argv);
-#endif
-
-private:
-    void PreparePanelComponent(RefPtr<OHOS::Ace::PanelComponent>& panelComponent);
-
-    bool hasDragBar_ = true;
-    bool isShow_ = true;
-    PanelMode mode_ = PanelMode::FULL;
-    PanelType type_ = PanelType::FOLDABLE_BAR;
-    std::pair<Dimension, bool> miniHeight_ = { 0.0_px, false };
-    std::pair<Dimension, bool> halfHeight_ = { 0.0_px, false };
-    std::pair<Dimension, bool> fullHeight_ = { 0.0_px, false };
-#ifdef USE_V8_ENGINE
-    RefPtr<V8EventFunction<SlidingPanelSizeChangeEvent, 1>> onSizeChangeFunc_;
-#elif USE_QUICKJS_ENGINE
-    RefPtr<QJSEventFunction<SlidingPanelSizeChangeEvent, 1>> onSizeChangeFunc_;
-#endif
+    static RefPtr<BoxComponent> GetPanelBox();
+    static RefPtr<Decoration> GetPanelDecoration();
 };
 
 } // namespace OHOS::Ace::Framework
-
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SLIDING_PANEL_H

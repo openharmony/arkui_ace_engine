@@ -14,6 +14,36 @@
 import("//build/ohos.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
 
+template("utilsecurec_source") {
+  # get is_ohos_platform
+  forward_variables_from(invoker, "*")
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+    sources = [ "//utils/native/base/src/securec/vsnprintf_s_p.c" ]
+    if (platform == "windows") {
+      sources += [
+        "//utils/native/base/src/securec/memset_s.c",
+        "//utils/native/base/src/securec/securecutil.c",
+        "//utils/native/base/src/securec/secureinput_w.c",
+        "//utils/native/base/src/securec/secureprintoutput_a.c",
+        "//utils/native/base/src/securec/secureprintoutput_w.c",
+      ]
+      cflags = [ "-Wno-inconsistent-dllimport" ]
+    }
+    configs = [ "//utils/native/base:utils_config" ]
+  }
+}
+
+utilsecurec_source("utilsecurec_source_windows") {
+  defines = ace_windows_defines
+  platform = "windows"
+}
+
+utilsecurec_source("utilsecurec_source_mac") {
+  defines = ace_windows_defines
+  platform = "mac"
+}
+
 # build static
 template("ace_osal_preview_source_set") {
   # get is_ohos_platform
@@ -39,10 +69,13 @@ template("ace_osal_preview_source_set") {
 
     configs = [
       "$ace_root:ace_config",
-      "$flutter_root:flutter_config",
+      "$ace_flutter_engine_root:flutter_config",
     ]
 
-    deps = [ "//third_party/zlib:libz" ]
+    deps = [
+      ":utilsecurec_source_$platform",
+      "//third_party/zlib:libz",
+    ]
   }
 }
 

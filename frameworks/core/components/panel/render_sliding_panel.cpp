@@ -36,6 +36,7 @@ namespace {
 constexpr int32_t ANIMATION_BASE_DURATION = 256;
 constexpr uint32_t FIND_MAX_COUNT = 64;
 constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
+constexpr Dimension DRAG_BAR_HEIGHT = 8.0_vp;
 constexpr Dimension DRAG_UP_THRESHOLD = 48.0_vp;
 constexpr double CONTENT_MIN_TOLERANCE = 0.01;
 constexpr double VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
@@ -112,14 +113,51 @@ void RenderSlidingPanel::Update(const RefPtr<Component>& component)
         animator_ = AceType::MakeRefPtr<Animator>(GetContext());
     }
     hasBoxStyle_ = slidingPanel->HasBoxStyle();
-    mode_ = slidingPanel->GetMode();
+    previousMode_ = mode_;
+    if ((slidingPanel->GetMode() != PanelMode::AUTO && previousMode_ != slidingPanel->GetMode()) ||
+        type_ != slidingPanel->GetType()) {
+        isFirstLayout_ = true;
+    }
+    mode_ = slidingPanel->GetMode() == PanelMode::AUTO ? PanelMode::FULL : slidingPanel->GetMode();
     type_ = slidingPanel->GetType();
     fullHeight_ = slidingPanel->GetFullHeight();
     halfHeight_ = slidingPanel->GetHalfHeight();
     miniHeight_ = slidingPanel->GetMiniHeight();
+    panelId_ = slidingPanel->GetPanelId();
     onSizeChange_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         slidingPanel->GetOnSizeChanged(), context_);
     MarkNeedLayout();
+}
+
+void RenderSlidingPanel::OnPaintFinish()
+{
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    auto manager = context->GetAccessibilityManager();
+    if (manager) {
+        auto node = manager->GetAccessibilityNodeById(panelId_);
+        if (!node) {
+            LOGE("node is null");
+            return;
+        }
+
+        auto viewScale = context->GetViewScale();
+        Size size = GetLayoutSize() * viewScale;
+        Offset globalOffset = GetGlobalOffset() * viewScale;
+        double height = blankHeight_ * viewScale;
+
+        // blankHeight_ is the height from screen top to panel top
+        node->SetWidth(size.Width());
+        node->SetHeight(size.Height() - height);
+        node->SetLeft(globalOffset.GetX());
+        node->SetTop(height);
+        node->SetVisible(true);
+    }
+#endif
 }
 
 void RenderSlidingPanel::PerformLayout()
@@ -129,10 +167,17 @@ void RenderSlidingPanel::PerformLayout()
     }
     auto maxSize = GetLayoutParam().GetMaxSize();
     // SlidingPanelComponent's size is as large as the root's.
-    SetLayoutSize(maxSize);
+    if (maxSize.IsInfinite()) {
+        SetLayoutSize(viewPort_);
+    } else {
+        SetLayoutSize(maxSize);
+    }
     if (isFirstLayout_) {
         blankHeight_ = GetLayoutParam().GetMaxSize().Height();
         AnimateTo(defaultBlankHeights_[mode_], mode_);
+        if (previousMode_ != mode_) {
+            FireSizeChangeEvent();
+        }
     } else {
         InnerLayout();
     }
@@ -181,16 +226,11 @@ bool RenderSlidingPanel::InitializeLayoutProps()
 
 void RenderSlidingPanel::CheckHeightValidity()
 {
-    auto minHeight = NormalizeToPx(BLANK_MIN_HEIGHT);
-    if (LessOrEqual(defaultBlankHeights_[PanelMode::MINI], minHeight)) {
-        defaultBlankHeights_[PanelMode::MINI] = minHeight;
-    }
-    if (LessOrEqual(defaultBlankHeights_[PanelMode::HALF], minHeight)) {
-        defaultBlankHeights_[PanelMode::HALF] = minHeight;
-    }
-    if (LessOrEqual(defaultBlankHeights_[PanelMode::FULL], minHeight)) {
-        defaultBlankHeights_[PanelMode::FULL] = minHeight;
-    }
+    auto minBlank = NormalizeToPx(BLANK_MIN_HEIGHT);
+    auto maxBlank = GetLayoutParam().GetMaxSize().Height() - NormalizeToPx(DRAG_BAR_HEIGHT);
+    defaultBlankHeights_[PanelMode::MINI] = std::clamp(defaultBlankHeights_[PanelMode::MINI], minBlank, maxBlank);
+    defaultBlankHeights_[PanelMode::HALF] = std::clamp(defaultBlankHeights_[PanelMode::HALF], minBlank, maxBlank);
+    defaultBlankHeights_[PanelMode::FULL] = std::clamp(defaultBlankHeights_[PanelMode::FULL], minBlank, maxBlank);
 }
 
 void RenderSlidingPanel::SetDragBarCallBack()
@@ -234,7 +274,7 @@ void RenderSlidingPanel::InnerLayout()
     auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::PANEL);
     columnInfo->GetParent()->BuildColumnWidth();
     auto maxWidth = columnInfo->GetWidth() + 2 * NormalizeToPx(columnInfo->GetParent()->GetGutterWidth());
-    if (GridSystemManager::GetInstance().GetCurrentSize() == GridSizeType::SM) {
+    if (GridSystemManager::GetInstance().GetCurrentSize() <= GridSizeType::SM) {
         maxWidth = maxSize.Width();
     }
     innerLayout.SetFixedSize(Size(maxWidth, blankHeight_));
@@ -315,10 +355,12 @@ void RenderSlidingPanel::OnTouchTestHit(
 void RenderSlidingPanel::UpdateTouchRect()
 {
     touchRect_ = GetPaintRect();
+    ownTouchRect_ = touchRect_;
     if (GetChildren().size() < 2) {
         return;
     }
     touchRect_ = GetChildren().back()->GetPaintRect();
+    ownTouchRect_ = touchRect_;
 }
 
 void RenderSlidingPanel::HandleDragStart(const Offset& startPoint)

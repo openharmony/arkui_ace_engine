@@ -20,6 +20,25 @@
 
 namespace OHOS::Ace {
 
+SvgEllipseComponent::SvgEllipseComponent()
+{
+    InitDeclaration();
+}
+
+SvgEllipseComponent::SvgEllipseComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children)
+{
+    InitDeclaration();
+}
+
+void SvgEllipseComponent::InitDeclaration()
+{
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<SvgEllipseDeclaration>();
+        declaration_->Init();
+        declaration_->InitializeStyle();
+    }
+}
+
 RefPtr<Element> SvgEllipseComponent::CreateElement()
 {
     return AceType::MakeRefPtr<SvgEllipseElement>();
@@ -28,6 +47,53 @@ RefPtr<Element> SvgEllipseComponent::CreateElement()
 RefPtr<RenderNode> SvgEllipseComponent::CreateRenderNode()
 {
     return RenderSvgEllipse::Create();
+}
+
+void SvgEllipseComponent::SetCx(const Dimension& cx)
+{
+    declaration_->SetCx(cx);
+}
+
+const Dimension& SvgEllipseComponent::GetCx() const
+{
+    return declaration_->GetCx();
+}
+
+void SvgEllipseComponent::SetCy(const Dimension& cy)
+{
+    declaration_->SetCy(cy);
+}
+
+const Dimension& SvgEllipseComponent::GetCy() const
+{
+    return declaration_->GetCy();
+}
+
+void SvgEllipseComponent::SetRx(const Dimension& rx)
+{
+    declaration_->SetRx(rx);
+}
+
+const Dimension& SvgEllipseComponent::GetRx() const
+{
+    return declaration_->GetRx();
+}
+
+void SvgEllipseComponent::SetRy(const Dimension& ry)
+{
+    declaration_->SetRy(ry);
+}
+
+const Dimension& SvgEllipseComponent::GetRy() const
+{
+    return declaration_->GetRy();
+}
+
+void SvgEllipseComponent::SetDeclaration(const RefPtr<SvgEllipseDeclaration>& declaration)
+{
+    if (declaration) {
+        declaration_ = declaration;
+    }
 }
 
 } // namespace OHOS::Ace

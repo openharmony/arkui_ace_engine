@@ -34,9 +34,18 @@ public:
     using SharedTransitionMap = std::unordered_map<ShareId, WeakPtr<SharedTransitionElement>>;
     using HiddenCallbackMap = std::unordered_map<int32_t, std::function<void(bool)>>;
     using CardTransitionMap = std::unordered_map<int32_t, WeakPtr<TransformElement>>;
+
+    // Use this to store geometryTransition matched renderNodes and animation option
+    struct GeometryTransitionInfo {
+        AnimationOption sharedAnimationOption;
+        WeakPtr<BoxElement> appearElement;
+        WeakPtr<BoxElement> disappearElement;
+        bool isNeedCreate;
+    };
+    using GeometryTransitionMap = std::unordered_map<std::string, GeometryTransitionInfo>;
     PageElement(int32_t pageId, const ComposeId& id);
     PageElement(int32_t pageId, const ComposeId& cardComposeId, const ComposeId& id);
-    ~PageElement() override = default;
+    ~PageElement();
 
     int32_t GetPageId()
     {
@@ -71,6 +80,12 @@ public:
     void AddCardTransition(const RefPtr<TransformElement>& transform);
     const CardTransitionMap& GetCardTransitionMap() const;
 
+    void AddGeometryTransition(const std::string& id, WeakPtr<BoxElement>& boxElement, AnimationOption& option);
+    const GeometryTransitionMap& GetGeometryTransition() const;
+    void RemoveGeometryTransition(const std::string& id);
+    void FinishCreateGeometryTransition(const std::string& id);
+    void Dump() override;
+
 protected:
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
 
@@ -81,6 +96,7 @@ private:
     SharedTransitionMap sharedTransitionElementMap_;
     HiddenCallbackMap hiddenCallbackMap_;
     CardTransitionMap cardTransitionMap_;
+    GeometryTransitionMap geometryTransitionMap_;
 };
 
 } // namespace OHOS::Ace

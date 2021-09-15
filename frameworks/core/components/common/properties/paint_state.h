@@ -179,6 +179,16 @@ public:
         textAlign_ = textAlign;
     }
 
+    TextDirection GetOffTextDirection() const
+    {
+        return textDirection_;
+    }
+
+    void SetOffTextDirection(TextDirection textDirection)
+    {
+        textDirection_ = textDirection;
+    }
+
     void SetTextColor(const Color& color)
     {
         textStyle_.SetTextColor(color);
@@ -224,6 +234,7 @@ protected:
     Gradient gradient_;
     TextStyle textStyle_;
     TextAlign textAlign_ = TextAlign::LEFT;
+    TextDirection textDirection_ = TextDirection::LTR;
 
     Pattern pattern_;
 };
@@ -294,11 +305,7 @@ private:
     LineCapStyle lineCap_ = LineCapStyle::BUTT;
     LineJoinStyle lineJoin_ = LineJoinStyle::MITER;
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    double lineWidth_ = 2.0; // default lineWidth for pcpreview
-#else
     double lineWidth_ = 1.0; // default lineWidth
-#endif
 
     double miterLimit_ = 10.0; // default miterLimit
     LineDashParam lineDash_;

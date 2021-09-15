@@ -16,12 +16,23 @@
 #include "core/components/overlay/overlay_component.h"
 
 #include "core/components/overlay/overlay_element.h"
+#include "core/components/stack/flutter_render_stack.h"
 
 namespace OHOS::Ace {
 
 RefPtr<Element> OverlayComponent::CreateElement()
 {
     return AceType::MakeRefPtr<OverlayElement>();
+}
+
+RefPtr<RenderNode> OverlayComponent::CreateRenderNode()
+{
+    auto renderNode = AceType::DynamicCast<FlutterRenderStack>(StackComponent::CreateRenderNode());
+    if (renderNode) {
+        renderNode->SetVisible(false);
+        renderNode->SetBoundary();
+    }
+    return renderNode;
 }
 
 } // namespace OHOS::Ace

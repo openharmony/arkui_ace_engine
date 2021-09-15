@@ -60,21 +60,19 @@ RenderToggle::RenderToggle()
 
 void RenderToggle::HandleClickEvent()
 {
-    auto toggle = toggleComponent_.Upgrade();
-    if (!toggle) {
-        LOGE("fail to perform click due to toggle is null");
-        return;
-    }
     if (onClick_) {
         onClick_();
     }
-    auto checkValue = toggle->GetCheckedState();
-    toggle->SetCheckedState(!checkValue);
+    auto checkValue = toggleComponent_->GetCheckedState();
+    toggleComponent_->SetCheckedState(!checkValue);
     MarkNeedRender();
     std::string checked = (!checkValue) ? "true" : "false";
     std::string result = std::string(R"("change",{"checked":)").append(checked.append("},null"));
     if (onChange_) {
         onChange_(result);
+    }
+    if (onChangeToggle_) {
+        onChangeToggle_(!checkValue);
     }
 }
 
@@ -218,26 +216,30 @@ void RenderToggle::ResetController(RefPtr<Animator>& controller)
 
 void RenderToggle::Update(const RefPtr<Component>& component)
 {
-    auto toggle = AceType::DynamicCast<ToggleComponent>(component);
-    if (!toggle) {
-        LOGE("Update error, toggle component is null");
-        return;
+    toggleComponent_ = AceType::DynamicCast<ToggleComponent>(component);
+    widthDefined_ = !NearZero(toggleComponent_->GetWidth().Value());
+    onClick_ = AceAsyncEvent<void()>::Create(toggleComponent_->GetClickEvent(), context_);
+    auto catchMode = toggleComponent_->GetClickEvent().IsEmpty() || toggleComponent_->GetClickEvent().GetCatchMode();
+    static const int32_t bubbleModeVersion = 6;
+    auto pipeline = context_.Upgrade();
+    if (!catchMode) {
+        if (pipeline && pipeline->GetMinPlatformVersion() >= bubbleModeVersion) {
+            catchMode = false;
+        } else {
+            catchMode = true;
+        }
     }
-    toggleComponent_ = toggle;
-    widthDefined_ = !NearZero(toggle->GetWidth().Value());
-    onClick_ = AceAsyncEvent<void()>::Create(toggle->GetClickEvent(), context_);
-    onChange_ = AceAsyncEvent<void(const std::string)>::Create(toggle->GetChangeEvent(), context_);
+    clickRecognizer_->SetUseCatchMode(catchMode);
+    onChange_ = AceAsyncEvent<void(const std::string)>::Create(toggleComponent_->GetChangeEvent(), context_);
+    if (toggleComponent_->GetOnChange()) {
+        onChangeToggle_ = *toggleComponent_->GetOnChange();
+    }
     MarkNeedLayout();
 }
 
 void RenderToggle::PerformLayout()
 {
-    auto toggle = toggleComponent_.Upgrade();
-    if (!toggle) {
-        LOGE("fail to perform layout due to toggle is null");
-        return;
-    }
-    toggleSize_ = Size(NormalizeToPx(toggle->GetWidth()), NormalizeToPx(toggle->GetHeight()));
+    toggleSize_ = Size(NormalizeToPx(toggleComponent_->GetWidth()), NormalizeToPx(toggleComponent_->GetHeight()));
     Measure();
     LayoutParam innerLayoutParam;
     double maxWidth = widthDefined_ ? toggleSize_.Width() : GetLayoutParam().GetMaxSize().Width();

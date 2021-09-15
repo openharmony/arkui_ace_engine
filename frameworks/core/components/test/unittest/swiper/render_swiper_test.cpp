@@ -20,6 +20,7 @@
 #include "base/log/log.h"
 #include "core/components/test/json/json_frontend.h"
 #include "core/components/test/unittest/mock/mock_render_depend.h"
+#include "core/components_v2/swiper/swiper_element.h"
 #include "core/mock/mock_resource_register.h"
 
 using namespace testing;
@@ -46,6 +47,7 @@ constexpr int32_t SECOND_CHILD_INDEX = FIRST_CHILD_INDEX + 1;
 constexpr int32_t LAST_CHILD_INDEX = SWIPER_CHILD_COUNT - 1;
 constexpr int32_t PENULTIMATE_CHILD_INDEX = LAST_CHILD_INDEX - 1;
 constexpr int64_t SWIPETO_ANIMATION_TIME = 500;
+constexpr int64_t SPRING_ANIMATION_TIME = 2000;
 
 constexpr double SWIPER_WIDTH = 1080;
 constexpr double SWIPER_HEIGHT = 1920;
@@ -86,6 +88,52 @@ private:
 };
 
 } // namespace
+
+// mock
+namespace V2 {
+
+void SwiperElement::PerformBuild() {}
+
+bool SwiperElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
+{
+    return false;
+}
+
+RefPtr<RenderNode> SwiperElement::CreateRenderNode()
+{
+    return nullptr;
+}
+
+void SwiperElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChild) {}
+
+RefPtr<Element> SwiperElement::OnUpdateElement(const RefPtr<Element>& element, const RefPtr<Component>& component)
+{
+    return nullptr;
+}
+
+RefPtr<Component> SwiperElement::OnMakeEmptyComponent()
+{
+    return nullptr;
+}
+
+void SwiperElement::OnDataSourceUpdated(size_t startIndex) {}
+
+} // namespace V2
+
+size_t V2::LazyForEachComponent::TotalCount()
+{
+    return 0;
+}
+
+RefPtr<Component> V2::LazyForEachComponent::GetChildByIndex(size_t index)
+{
+    return nullptr;
+}
+
+size_t V2::ElementProxyHost::GetReloadedCheckNum()
+{
+    return 0;
+}
 
 class SwiperComponentTest : public testing::Test {
 public:
@@ -160,7 +208,6 @@ public:
         swiperHeight_ = SWIPER_HEIGHT;
         scale_ = 1.0;
     }
-    ~SwiperIndicatorTest() = default;
 
     static RefPtr<SwiperIndicatorTest> CreateIndicatorTest(const RefPtr<PipelineContext>& context)
     {
@@ -200,6 +247,11 @@ public:
     void SetCurrentIndex(int32_t index)
     {
         currentIndex_ = index;
+    }
+
+    bool GetQuickTrunItem() const
+    {
+        return quickTrunItem_;
     }
 
     SwiperIndicatorData& GetSwiperIndicatorData()
@@ -248,7 +300,7 @@ void SwiperComponentTest::DragSwiper(const DragDirection& dragDirection)
 {
     context_->OnTouchEvent(MOCK_DOWN_TOUCH_EVENT);
     TouchPoint touchPoint = MOCK_MOVE_TOUCH_EVENT;
-    double dragOffset = SWIPER_WIDTH * 0.1; // 0.1 mean darg 10% of the swiper width
+    double dragOffset = SWIPER_WIDTH * 0.3; // 0.3 mean darg 30% of the swiper width
     for (int i = 0; i < 3; i++) {
         context_->OnTouchEvent(touchPoint);
         if (dragDirection == DragDirection::LEFT) {
@@ -366,7 +418,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper004, TestSize.Level1)
         swiper->SetIndex(initIndex);
         swiperController = swiper->GetSwiperController();
     });
-    ASSERT_NE(swiperController, nullptr);
     swiperController->SwipeTo(initIndex);
     WaitAndMockVsync(SWIPETO_ANIMATION_TIME);
     EXPECT_EQ(swiperChildren_[initIndex]->GetPosition().GetX(), 0);
@@ -495,7 +546,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper008, TestSize.Level1)
      * @tc.steps: step2. Swipe left from the first one to the last.
      * @tc.expected: step2. Swipe success.
      */
-    ASSERT_NE(swiperController, nullptr);
     swiperController->SwipeTo(LAST_CHILD_INDEX);
     WaitAndMockVsync(SWIPETO_ANIMATION_TIME);
     DragSwiper(DragDirection::LEFT);
@@ -528,6 +578,7 @@ HWTEST_F(SwiperComponentTest, RenderSwiper009, TestSize.Level1)
      * @tc.expected: step2. Swipe failed.
      */
     DragSwiper(DragDirection::RIGHT);
+    WaitAndMockVsync(SPRING_ANIMATION_TIME);
     EXPECT_EQ(swiperChildren_[FIRST_CHILD_INDEX]->GetPosition().GetX(), 0);
     GTEST_LOG_(INFO) << "SwiperComponentTest RenderSwiper009 stop";
 }
@@ -556,10 +607,10 @@ HWTEST_F(SwiperComponentTest, RenderSwiper010, TestSize.Level1)
      * @tc.steps: step2. Swipe left.
      * @tc.expected: step2. Swipe failed.
      */
-    ASSERT_NE(swiperController, nullptr);
     swiperController->SwipeTo(LAST_CHILD_INDEX);
     WaitAndMockVsync(SWIPETO_ANIMATION_TIME);
     DragSwiper(DragDirection::LEFT);
+    WaitAndMockVsync(SPRING_ANIMATION_TIME);
     EXPECT_EQ(swiperChildren_[LAST_CHILD_INDEX]->GetPosition().GetX(), 0);
     GTEST_LOG_(INFO) << "SwiperComponentTest RenderSwiper010 stop";
 }
@@ -656,7 +707,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper013, TestSize.Level1)
     /**
      * @tc.steps: step2. Get swiperController and call the controller's swipeTo interface to jump to the last page.
      */
-    ASSERT_NE(swiperController, nullptr);
     swiperController->SwipeTo(LAST_CHILD_INDEX);
     WaitAndMockVsync(SWIPETO_ANIMATION_TIME);
     /**
@@ -687,7 +737,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper014, TestSize.Level1)
     /**
      * @tc.steps: step2. Get swiperController and call the controller's showNext interface to jump to the last page.
      */
-    ASSERT_NE(swiperController, nullptr);
     swiperController->SwipeTo(PENULTIMATE_CHILD_INDEX);
     WaitAndMockVsync(SWIPETO_ANIMATION_TIME);
     swiperController->ShowNext();
@@ -730,7 +779,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper015, TestSize.Level1)
      * @tc.steps: step2. Get swiperController and call the controller's showPrevious interface to jump to the first
      * page.
      */
-    ASSERT_NE(swiperController, nullptr);
     swiperController->SwipeTo(SECOND_CHILD_INDEX);
     WaitAndMockVsync(SWIPETO_ANIMATION_TIME);
     swiperController->ShowPrevious();
@@ -1098,7 +1146,6 @@ HWTEST_F(SwiperComponentTest, Indicator010, TestSize.Level0)
     EXPECT_EQ(currentIndex2, 3);
 }
 
-
 /**
  * @tc.name: Indicator011
  * @tc.desc: Test the twice click event can't start new animation when indicator is in moving animation.
@@ -1161,6 +1208,52 @@ HWTEST_F(SwiperComponentTest, Indicator012, TestSize.Level0)
     EXPECT_TRUE(NearZero(offsetPoint2 - offsetPoint1));
     EXPECT_TRUE(NearZero(offsetTail2 - 3 * offsetTail1));
     EXPECT_TRUE(NearZero(offsetHead2 - 3 * offsetHead1));
+}
+
+/**
+ * @tc.name: Indicator013
+ * @tc.desc: Test the swiper refuse layout during animation unless forced.
+ * @tc.type: FUNC
+ * @tc.require: DTS2021042001065
+ */
+HWTEST_F(SwiperComponentTest, Indicator013, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Build a swiper render, set current index.
+     */
+    RefPtr<SwiperIndicatorTest> swiperIndicator = SwiperIndicatorTest::CreateIndicatorTest(context_);
+    swiperIndicator->SetCurrentIndex(2);
+
+    /**
+     * @tc.steps: step2. Layout swiper without animation.
+     */
+    swiperIndicator->PerformLayout();
+
+    /**
+     * @tc.steps: step3. Start animation to the next index.
+     * @tc.expected: step3. Quick trun item tag is false.
+     */
+    swiperIndicator->ShowNext();
+    EXPECT_FALSE(swiperIndicator->GetQuickTrunItem());
+
+    /**
+     * @tc.steps: step4. Layout swiper with animation.
+     */
+    swiperIndicator->PerformLayout();
+
+    /**
+     * @tc.steps: step5. Start a new animation to the new index.
+     * @tc.expected: step5. Quick trun item tag is true.
+     */
+    swiperIndicator->ShowNext();
+    EXPECT_TRUE(swiperIndicator->GetQuickTrunItem());
+
+    /**
+     * @tc.steps: step6. Layout swiper with a new animation.
+     * @tc.expected: step6. Quick trun item tag is false.
+     */
+    swiperIndicator->PerformLayout();
+    EXPECT_FALSE(swiperIndicator->GetQuickTrunItem());
 }
 
 } // namespace OHOS::Ace

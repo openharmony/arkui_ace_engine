@@ -25,6 +25,8 @@ class BubbleElement : public SoleChildElement, public FocusGroup {
     DECLARE_ACE_TYPE(BubbleElement, SoleChildElement, FocusGroup);
 
 public:
+    using StateChangeEvent = std::function<void(bool)>;
+
     BubbleElement() = default;
     ~BubbleElement() override = default;
 
@@ -36,6 +38,7 @@ public:
     }
 
     void FirePopEvent();
+    bool IsDeclarative();
 
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
@@ -43,6 +46,7 @@ protected:
 
 private:
     ComposeId id_;
+    StateChangeEvent stateChangeEvent_;
 };
 
 } // namespace OHOS::Ace

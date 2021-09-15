@@ -141,11 +141,16 @@ HWTEST_F(DomCardProgressTest, DomCardProgressTest003, TestSize.Level1)
     ASSERT_TRUE(domProgress->GetTag() == "progress");
     ASSERT_TRUE(static_cast<int32_t>(domProgress->GetHeight().Value()) == 300);
     ASSERT_TRUE(static_cast<int32_t>(domProgress->GetWidth().Value()) == 300);
-    ASSERT_TRUE(static_cast<int32_t>(domProgress->GetMarginTop().Value()) == 30);
-    ASSERT_TRUE(static_cast<int32_t>(domProgress->GetMarginBottom().Value()) == 30);
-    ASSERT_TRUE(static_cast<int32_t>(domProgress->GetMarginLeft().Value()) == 30);
-    ASSERT_TRUE(static_cast<int32_t>(domProgress->GetMarginRight().Value()) == 30);
     ASSERT_TRUE(CardTestFactory::GetInstance().GetNodeNumber() == 1);
+
+    auto declaration = domProgress->GetDeclaration();
+    ASSERT_TRUE(declaration != nullptr);
+    auto& marginStyle = static_cast<CommonMarginStyle&>(declaration->GetStyle(StyleTag::COMMON_MARGIN_STYLE));
+    ASSERT_TRUE(marginStyle.IsValid());
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Top().Value()) == 30);
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Bottom().Value()) == 30);
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Left().Value()) == 30);
+    ASSERT_TRUE(static_cast<int32_t>(marginStyle.margin.Right().Value()) == 30);
 }
 
 /**

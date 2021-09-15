@@ -188,7 +188,7 @@ HWTEST_F(DecorationCreatorTest, DecorationCreator004, TestSize.Level1)
      * @tc.expected: step2. decoration properties are set correctly.
      */
     RefPtr<Decoration> decoration = CreateFromDsl(content);
-    ASSERT_TRUE(decoration->GetGradient().GetAngle() == TEST_GRADIENT_ANGLE);
+    ASSERT_TRUE(decoration->GetGradient().GetLinearGradient().angle.value() == TEST_GRADIENT_ANGLE);
     ASSERT_TRUE(decoration->GetGradient().GetRepeat() == TEST_GRADIENT_REPEAT);
 }
 
@@ -306,7 +306,6 @@ HWTEST_F(DecorationCreatorTest, DecorationCreator008, TestSize.Level1)
                                 "    \"border\": {                       "
                                 "      \"className\": \"Border\"         "
                                 "      }                                 "
-                                "    }                                   "
                                 "}";
 
     /**

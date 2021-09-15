@@ -24,26 +24,11 @@ class ACE_EXPORT DOMSvgAnimateMotion final : public DOMSvgAnimate {
     DECLARE_ACE_TYPE(DOMSvgAnimateMotion, DOMSvgAnimate);
 
 public:
-    DOMSvgAnimateMotion(NodeId nodeId, const std::string& nodeName) : DOMSvgAnimate(nodeId, nodeName)
-    {
-        calcMode_ = CalcMode::PACED;
-    }
-
+    DOMSvgAnimateMotion(NodeId nodeId, const std::string& nodeName) : DOMSvgAnimate(nodeId, nodeName) {}
     ~DOMSvgAnimateMotion() override = default;
-
-    RefPtr<Component> GetSpecializedComponent() override
-    {
-        return animateComponent_;
-    }
 
 protected:
     void PrepareSpecializedComponent() override;
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
-
-private:
-    std::vector<std::string> keyPoints_;
-    std::string path_;
-    std::string rotate_;
 };
 
 } // namespace OHOS::Ace::Framework

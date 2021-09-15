@@ -102,6 +102,8 @@ public:
     void SetUndisplay();
     Size GetRootSize() const;
 
+    void Reset();
+
     ShapeMode GetShapeMode() const
     {
         return shapeMode_;
@@ -282,6 +284,21 @@ public:
         return barController_;
     }
 
+    void SetPosition(const Dimension& position)
+    {
+        position_ = position;
+    }
+
+    const Dimension& GetPosition() const
+    {
+        return position_;
+    }
+
+    void SetScrollBarController(RefPtr<ScrollBarController> controller)
+    {
+        barController_ = controller;
+    }
+
 private:
     void SetBarRegion(const Offset& offset, const Size& size);
     void SetTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
@@ -303,6 +320,8 @@ private:
     Dimension activeWidth_;
     Dimension normalWidth_;
     Dimension touchWidth_;
+
+    Dimension position_;
 
     double trickStartAngle_ = 0.0;
     double trickSweepAngle_ = 0.0;

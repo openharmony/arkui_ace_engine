@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 #include "frameworks/bridge/common/dom/dom_slider.h"
 #include "frameworks/bridge/test/unittest/jsfrontend/dom_node_factory.h"
 

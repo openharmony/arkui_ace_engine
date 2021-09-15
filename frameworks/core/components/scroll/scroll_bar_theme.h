@@ -19,6 +19,7 @@
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
 
@@ -52,7 +53,19 @@ public:
             theme->foregroundColor_ = themeConstants->GetColor(THEME_SCROLL_BAR_FOREGROUND_COLOR);
             Dimension paddingRight = themeConstants->GetDimension(THEME_SCROLL_BAR_PADDING_RIGHT);
             theme->padding_ = Edge(0.0, 0.0, paddingRight.Value(), 0.0, paddingRight.Unit());
+            ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
+        }
+
+    private:
+        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ScrollBarTheme>& theme) const
+        {
+            if (!themeStyle) {
+                LOGI("scroll bar theme style is null");
+                return;
+            }
+            theme->foregroundColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_FOREGROUND,
+                Color::TRANSPARENT).BlendOpacity(0.4);
         }
     };
 

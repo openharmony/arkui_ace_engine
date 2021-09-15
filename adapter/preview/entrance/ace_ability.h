@@ -21,7 +21,7 @@
 #include "flutter/shell/platform/glfw/public/flutter_glfw.h"
 
 #include "adapter/preview/entrance/ace_run_args.h"
-#include "core/gestures/touch_event.h"
+#include "core/event/touch_event.h"
 
 #ifndef ACE_PREVIEW_EXPORT
 #ifdef _WIN32
@@ -33,8 +33,15 @@
 
 namespace OHOS::Ace::Platform {
 
-class ACE_PREVIEW_EXPORT AceAbility {
+struct ConfigChanges {
+    bool watchLocale = false;
+    bool watchLayout = false;
+    bool watchFontSize = false;
+    bool watchOrientation = false;
+    bool watchDensity = false;
+};
 
+class ACE_PREVIEW_EXPORT AceAbility {
 public:
     static std::unique_ptr<AceAbility> CreateInstance(AceRunArgs& runArgs);
 
@@ -42,6 +49,7 @@ public:
     static void Stop();
     static bool DispatchTouchEvent(const TouchPoint& event);
     static bool DispatchBackPressedEvent();
+    void OnConfigurationChanged(const DeviceConfig& newConfig);
 
     explicit AceAbility(const AceRunArgs& runArgs);
     ~AceAbility();
@@ -49,12 +57,15 @@ public:
     void InitEnv();
     void Start();
     void SurfaceChanged(
-        const DeviceOrientation& orientation, const int32_t& width, const int32_t& height, const double& resolution);
+        const DeviceOrientation& orientation, const double& resolution, int32_t& width, int32_t& height);
+    void ReplacePage(const std::string& url, const std::string& params);
     std::string GetJSONTree();
     std::string GetDefaultJSONTree();
 
 private:
     void RunEventLoop();
+
+    void SetConfigChanges(const std::string& configChanges);
 
     void SetGlfwWindowController(const FlutterDesktopWindowControllerRef& controller)
     {
@@ -65,6 +76,7 @@ private:
     static std::atomic<bool> loopRunning_;
 
     AceRunArgs runArgs_;
+    ConfigChanges configChanges_;
     FlutterDesktopWindowControllerRef controller_ = nullptr;
 };
 

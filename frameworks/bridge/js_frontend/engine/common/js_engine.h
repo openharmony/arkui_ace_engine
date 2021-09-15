@@ -17,11 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_COMMON_JS_ENGINE_H
 
 #include <string>
+#include <unordered_map>
 
+#include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
+class NativeEngine;
 namespace OHOS::Ace::Framework {
 struct JsModule {
     const std::string moduleName;
@@ -37,6 +40,7 @@ class JsEngineInstance {
 public:
     JsEngineInstance() = default;
     virtual ~JsEngineInstance() = default;
+
     virtual void FlushCommandBuffer(void* context, const std::string& command);
 };
 
@@ -78,6 +82,9 @@ public:
     // Fire SyncEvent on JS
     virtual void FireSyncEvent(const std::string& eventId, const std::string& param) = 0;
 
+    // Fire external event on JS thread
+    virtual void FireExternalEvent(const std::string& componentId, const uint32_t nodeId) = 0;
+
     // Timer callback on JS
     virtual void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) = 0;
 
@@ -87,7 +94,19 @@ public:
     // destroy application instance according packageName
     virtual void DestroyApplication(const std::string& packageName) = 0;
 
-    virtual void MediaQueryCallback(const std::string& callbackId, const std::string& args) = 0;
+    // update application State according packageName
+    virtual void UpdateApplicationState(const std::string& packageName, Frontend::State state) {}
+
+    virtual void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data) {}
+
+    virtual void OnConfigurationUpdated(const std::string& data) {}
+
+    virtual void MediaQueryCallback(const std::string& callbackId, const std::string& args)
+    {
+        if (mediaUpdateCallback_) {
+            mediaUpdateCallback_(this);
+        }
+    }
 
     virtual void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) = 0;
 
@@ -95,7 +114,13 @@ public:
 
     virtual void RunGarbageCollection() = 0;
 
+    virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
+
     virtual RefPtr<GroupJsBridge> GetGroupJsBridge() = 0;
+
+    virtual ACE_EXPORT FrontendDelegate* GetFrontend() {
+        return nullptr;
+    }
 
     bool IsDebugVersion() const
     {
@@ -127,6 +152,47 @@ public:
         instanceName_ = name;
     }
 
+    void SetDialogCallback(const DialogCallback callback)
+    {
+        dialogCallback_ = callback;
+    }
+    DialogCallback GetDialogCallback() const
+    {
+        return dialogCallback_;
+    }
+
+    void AddExtraNativeObject(const std::string& key, void* value)
+    {
+        extraNativeObject_[key] = value;
+    }
+
+    const std::unordered_map<std::string, void*>& GetExtraNativeObject() const
+    {
+        return extraNativeObject_;
+    }
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    static NativeEngine* GetNativeEngine()
+    {
+        return nativeEngine_;
+    }
+
+    void ACE_EXPORT RegistMediaUpdateCallback(std::function<void(JsEngine*)> cb)
+    {
+        mediaUpdateCallback_ = cb;
+    }
+
+    void ACE_EXPORT UnregistMediaUpdateCallback()
+    {
+        mediaUpdateCallback_ = nullptr;
+    }
+
+protected:
+    static thread_local NativeEngine* nativeEngine_;
+#endif
+protected:
+    std::function<void(JsEngine*)> mediaUpdateCallback_;
+
 private:
     // weather the app has debugger.so.
     bool isDebugVersion_ = false;
@@ -135,6 +201,10 @@ private:
     bool needDebugBreakPoint_ = false;
 
     std::string instanceName_;
+
+    std::unordered_map<std::string, void*> extraNativeObject_;
+    DialogCallback dialogCallback_;
 };
+
 } // namespace OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_COMMON_JS_ENGINE_H

@@ -47,7 +47,12 @@ void RenderStack::PerformLayout()
     LayoutParam innerLayout;
     // layout children
     RefPtr<RenderNode> firstChild;
+    std::list<RefPtr<RenderNode>> percentChild;
     for (const auto& item : GetChildren()) {
+        if (item->GetIsPercentSize()) {
+            percentChild.emplace_back(item);
+            continue;
+        }
         auto positionedItem = AceType::DynamicCast<RenderPositioned>(item);
         if (!positionedItem) {
             hasNonPositionedItem = true;
@@ -63,6 +68,20 @@ void RenderStack::PerformLayout()
     }
     // determine the stack size
     DetermineStackSize(hasNonPositionedItem);
+
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        auto layoutParam = GetLayoutParam();
+        layoutParam.SetMaxSize(GetLayoutSize());
+        SetLayoutParam(layoutParam);
+    }
+
+    // secondnary layout for percentchild
+    for (const auto& item : percentChild) {
+        innerLayout.SetMaxSize(GetLayoutSize());
+        item->Layout(innerLayout);
+    }
+
     // place children
     for (const auto& item : GetChildren()) {
         auto positionedItem = AceType::DynamicCast<RenderPositioned>(item);
@@ -87,7 +106,14 @@ void RenderStack::PerformLayout()
 
 void RenderStack::DetermineStackSize(bool hasNonPositioned)
 {
-    Size maxSize = GetLayoutParam().GetMaxSize().IsInfinite() ? viewPort_ : GetLayoutParam().GetMaxSize();
+    Size maxSize = GetLayoutParam().GetMaxSize();
+    if (maxSize.IsWidthInfinite()) {
+        maxSize.SetWidth(viewPort_.Width());
+    }
+    if (maxSize.IsHeightInfinite()) {
+        maxSize.SetHeight(viewPort_.Height());
+    }
+
     if (mainStackSize_ == MainStackSize::MAX && !maxSize.IsInfinite()) {
         SetLayoutSize(maxSize);
         return;
@@ -99,6 +125,9 @@ void RenderStack::DetermineStackSize(bool hasNonPositioned)
     double lastChildWidth = width;
     double lastChildHeight = height;
     for (const auto& item : GetChildren()) {
+        if (item->GetIsPercentSize()) {
+            continue;
+        }
         double constrainedWidth = std::clamp(item->GetLayoutSize().Width(), GetLayoutParam().GetMinSize().Width(),
             GetLayoutParam().GetMaxSize().Width());
         double constrainedHeight = std::clamp(item->GetLayoutSize().Height(), GetLayoutParam().GetMinSize().Height(),
@@ -114,12 +143,23 @@ void RenderStack::DetermineStackSize(bool hasNonPositioned)
         SetLayoutSize(maxSize);
         return;
     }
-    if (mainStackSize_ == MainStackSize::LAST_CHILD) {
-        SetLayoutSize(Size(lastChildWidth, lastChildHeight));
+    // Usually used in SemiModal for determining current height.
+    if (mainStackSize_ == MainStackSize::LAST_CHILD_HEIGHT) {
+        SetLayoutSize(Size(maxSize.Width(), lastChildHeight));
         return;
     }
     if (mainStackSize_ == MainStackSize::MATCH_CHILDREN) {
         SetLayoutSize(GetLayoutParam().Constrain(Size(maxX, maxY)));
+        return;
+    }
+    if (mainStackSize_ == MainStackSize::MAX_X) {
+        auto maxSizeX = maxSize.Width();
+        SetLayoutSize(Size(maxSizeX, maxY));
+        return;
+    }
+    if (mainStackSize_ == MainStackSize::MAX_Y) {
+        auto maxSizeY = maxSize.Height();
+        SetLayoutSize(Size(maxX, maxSizeY));
         return;
     }
     SetLayoutSize(Size(width, height));
@@ -199,6 +239,15 @@ Offset RenderStack::GetPositionedChildOffset(const RefPtr<RenderPositioned>& ite
         deltaY = GetNonPositionedChildOffset(item->GetLayoutSize()).GetY();
     }
     return Offset(deltaX, deltaY);
+}
+
+void RenderStack::OnAttachContext()
+{
+    RenderNode::OnAttachContext();
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        SetExclusiveEventForChild(true);
+    }
 }
 
 } // namespace OHOS::Ace

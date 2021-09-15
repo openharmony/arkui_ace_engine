@@ -21,8 +21,8 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/offset.h"
+#include "core/event/touch_event.h"
 #include "core/gestures/gesture_recognizer.h"
-#include "core/gestures/touch_event.h"
 #include "core/gestures/velocity.h"
 #include "core/gestures/velocity_tracker.h"
 
@@ -108,6 +108,8 @@ using DragStartCallback = std::function<void(const DragStartInfo&)>;
 using DragUpdateCallback = std::function<void(const DragUpdateInfo&)>;
 using DragEndCallback = std::function<void(const DragEndInfo&)>;
 using DragCancelCallback = std::function<void()>;
+using DragUpdateNotifyCallback = std::function<void(double x, double y, const DragUpdateInfo& updateInfo)>;
+using DragEndNotifyCallback = std::function<void(double x, double y, const DragEndInfo& endInfo)>;
 
 class DragRecognizer : public GestureRecognizer {
     DECLARE_ACE_TYPE(DragRecognizer, GestureRecognizer);
@@ -139,6 +141,16 @@ public:
         onDragCancel_ = onDragCancel;
     }
 
+    void SetDragUpdateNotify(const DragUpdateNotifyCallback& onDragNotifyCall)
+    {
+        onDragUpdateNotifyCall_ = onDragNotifyCall;
+    }
+
+    void SetDragEndNotify(const DragEndNotifyCallback& onDragNotifyCall)
+    {
+        onDragEndNotifyCall_ = onDragNotifyCall;
+    }
+
     const TouchRestrict& GetTouchRestrict() const
     {
         return touchRestrict_;
@@ -168,6 +180,8 @@ private:
     DragUpdateCallback onDragUpdate_;
     DragEndCallback onDragEnd_;
     DragCancelCallback onDragCancel_;
+    DragUpdateNotifyCallback onDragUpdateNotifyCall_;
+    DragEndNotifyCallback onDragEndNotifyCall_;
 };
 
 class VerticalDragRecognizer : public DragRecognizer {

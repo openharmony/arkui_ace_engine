@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/cpp/flutter_ace_view.h"
+
 #include <fstream>
 
 #include "base/log/dump_log.h"
@@ -23,11 +24,11 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/event/mouse_event.h"
-#include "core/gestures/touch_event.h"
-#include "core/image/image_cache.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/event/mouse_event.h"
+#include "core/event/touch_event.h"
+#include "core/image/image_cache.h"
 #include "core/pipeline/layers/flutter_scene_builder.h"
 
 namespace OHOS::Ace::Platform {
@@ -146,9 +147,9 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId)
     return aceSurface;
 }
 
-void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::Window* window)
+void FlutterAceView::SurfaceCreated(FlutterAceView* view, const OHOS::sptr<OHOS::Window> &window)
 {
-    LOGI(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", window);
+    LOGI(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", window.GetRefPtr());
     if (window == nullptr) {
         LOGE("FlutterAceView::SurfaceCreated, window is nullptr");
         return;
@@ -177,7 +178,7 @@ void FlutterAceView::SurfaceChanged(FlutterAceView* view, int32_t width, int32_t
 
     view->NotifySurfaceChanged(width, height);
     auto platformView = view->GetShellHolder()->GetPlatformView();
-    LOGI("FlutterAceView::SurfaceChanged GetPlatformView");
+    LOGI("FlutterAceView::SurfaceChanged, GetPlatformView");
     if (platformView) {
         LOGI("FlutterAceView::SurfaceChanged, call NotifyChanged");
         platformView->NotifyChanged(SkISize::Make(width, height));
@@ -329,6 +330,11 @@ void FlutterAceView::ProcessIdleEvent(int64_t deadline)
     }
 }
 
+const void* FlutterAceView::GetNativeWindowById(uint64_t textureId)
+{
+    return nullptr;
+}
+
 bool FlutterAceView::ProcessRotationEvent(float rotationValue)
 {
     if (!rotationEventCallBack_) {
@@ -347,11 +353,11 @@ bool FlutterAceView::Dump(const std::vector<std::string>& params)
         return false;
     }
 #ifdef DUMP_DRAW_CMD
-    static int32_t count = 0;
     if (shell_holder_) {
         auto screenShot = shell_holder_->Screenshot(flutter::Rasterizer::ScreenshotType::SkiaPicture, false);
         if (screenShot.data->data() != nullptr) {
             auto byteData = screenShot.data;
+            static int32_t count = 0;
             auto path = ImageCache::GetImageCacheFilePath() + "/picture_" + std::to_string(count++) + ".mskp";
             if (DumpLog::GetInstance().GetDumpFile()) {
                 DumpLog::GetInstance().AddDesc("Dump draw command to path: " + path);

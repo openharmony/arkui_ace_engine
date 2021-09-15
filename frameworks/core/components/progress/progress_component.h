@@ -33,7 +33,7 @@ enum class ProgressType {
     MOON = 7,
 };
 
-class ProgressComponent : public RenderComponent {
+class ACE_EXPORT ProgressComponent : public RenderComponent {
     DECLARE_ACE_TYPE(ProgressComponent, RenderComponent);
 
 public:
@@ -108,6 +108,61 @@ public:
     bool GetAnimationPlay() const
     {
         return playAnimation_;
+    }
+
+    const Color& GetSelectColor() const
+    {
+        return track_->GetSelectColor();
+    }
+
+    void SetSelectColor(const Color& color)
+    {
+        return track_->SetSelectColor(color);
+    }
+
+    const Dimension& GetTrackThickness() const
+    {
+        return track_->GetTrackThickness();
+    }
+
+    void SetTrackThickness(const Dimension& thickness)
+    {
+        return track_->SetTrackThickness(thickness);
+    }
+
+    void SetScaleNumber(int32_t number)
+    {
+        return track_->SetScaleNumber(number);
+    }
+
+    const Dimension& GetScaleWidth() const
+    {
+        return track_->GetScaleWidth();
+    }
+
+    void SetScaleWidth(const Dimension& width)
+    {
+        return track_->SetScaleWidth(width);
+    }
+
+    void SetLableMarkedText(const std::string markedValue)
+    {
+        track_->SetLableMarkedText(markedValue);
+    }
+
+    void SetMarkedTextColor(const Color& color)
+    {
+        track_->SetLableMarkedColor(color);
+    }
+
+    void SetIndicatorFlag(bool flag)
+    {
+        track_->SetIndicatorFlag(flag);
+    }
+
+    void SetSectionsStyle(const std::vector<Color>& colors, const std::vector<double>& weights)
+    {
+        track_->SetSectionsStyle(colors, weights);
     }
 
 private:

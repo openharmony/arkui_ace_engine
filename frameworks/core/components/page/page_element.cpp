@@ -14,8 +14,9 @@
  */
 
 #include "core/components/page/page_element.h"
-
+#include "base/log/dump_log.h"
 #include "core/common/frontend.h"
+#include "core/common/text_field_manager.h"
 #include "core/components/transform/transform_element.h"
 
 namespace OHOS::Ace {
@@ -24,6 +25,18 @@ PageElement::PageElement(int32_t pageId, const ComposeId& id) : ComposedElement(
 
 PageElement::PageElement(int32_t pageId, const ComposeId& cardComposeId, const ComposeId& id)
     : ComposedElement(id), pageId_(pageId), cardComposeId_(cardComposeId) {}
+
+PageElement::~PageElement()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    auto textFieldManager = context->GetTextFieldManager();
+    if (textFieldManager) {
+        textFieldManager->RemovePageId(pageId_);
+    }
+}
 
 bool PageElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
 {
@@ -85,6 +98,58 @@ void PageElement::AddCardTransition(const RefPtr<TransformElement>& transform)
 const PageElement::CardTransitionMap& PageElement::GetCardTransitionMap() const
 {
     return cardTransitionMap_;
+}
+
+void PageElement::AddGeometryTransition(const std::string& id, WeakPtr<BoxElement>& boxElement,
+    AnimationOption& option)
+{
+    if (geometryTransitionMap_.find(id) == geometryTransitionMap_.end()) {
+        GeometryTransitionInfo sharedInfo;
+        sharedInfo.sharedAnimationOption = option;
+        sharedInfo.appearElement = boxElement;
+        sharedInfo.isNeedCreate = false;
+        geometryTransitionMap_.emplace(id, sharedInfo);
+    } else {
+        if (geometryTransitionMap_[id].appearElement != boxElement &&
+            !geometryTransitionMap_[id].isNeedCreate) {
+            geometryTransitionMap_[id].disappearElement = geometryTransitionMap_[id].appearElement;
+            geometryTransitionMap_[id].appearElement = boxElement;
+            geometryTransitionMap_[id].sharedAnimationOption = option;
+            geometryTransitionMap_[id].isNeedCreate = true;
+        }
+    }
+}
+
+const PageElement::GeometryTransitionMap& PageElement::GetGeometryTransition() const
+{
+    return geometryTransitionMap_;
+}
+
+void PageElement::RemoveGeometryTransition(const std::string& id)
+{
+    if (geometryTransitionMap_.find(id) != geometryTransitionMap_.end()) {
+        geometryTransitionMap_.erase(id);
+    }
+}
+
+void PageElement::FinishCreateGeometryTransition(const std::string& id)
+{
+    geometryTransitionMap_[id].isNeedCreate = false;
+}
+
+void PageElement::Dump()
+{
+    if (DumpLog::GetInstance().GetDumpFile()) {
+        for (const auto& item : geometryTransitionMap_) {
+            DumpLog::GetInstance().AddDesc(std::string("geometryTransitionID: ").append(item.first));
+            auto element = item.second.appearElement.Upgrade();
+            if (!element) {
+                continue;
+            }
+            std::string retakeId = std::to_string(element->GetRetakeId());
+            DumpLog::GetInstance().AddDesc(std::string("RetakeId: ").append(retakeId));
+        }
+    }
 }
 
 } // namespace OHOS::Ace

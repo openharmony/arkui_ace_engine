@@ -27,6 +27,7 @@ class DeclarativeEngineLoader : public JsEngineLoader, public Singleton<Declarat
 public:
     RefPtr<JsEngine> CreateJsEngine(int32_t instanceId) const final;
     RefPtr<BaseCanvasBridge> CreateCanvasBridge() const final;
+    RefPtr<BaseXComponentBridge> CreateXComponentBridge() const final;
 };
 
 } // namespace OHOS::Ace::Framework

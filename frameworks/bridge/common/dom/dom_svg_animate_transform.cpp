@@ -25,20 +25,7 @@ void DOMSvgAnimateTransform::PrepareSpecializedComponent()
         animateComponent_ = AceType::MakeRefPtr<SvgAnimateComponent>(std::to_string(GetNodeId()),
             GetTag(), SvgAnimateType::TRANSFORM);
     }
-    DOMSvgAnimate::PrepareSpecializedComponent(animateComponent_);
-    animateComponent_->SetTransformType(transformType_);
-}
-
-bool DOMSvgAnimateTransform::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    if (DOMSvgAnimate::SetSpecializedAttr(attr)) {
-        return true;
-    }
-    if (attr.first == DOM_SVG_ANIMATION_TYPE) {
-        transformType_ = attr.second;
-        return true;
-    }
-    return false;
+    DOMSvgAnimate::SetAnimateAttrs();
 }
 
 } // namespace OHOS::Ace::Framework

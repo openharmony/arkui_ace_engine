@@ -32,6 +32,11 @@ class MockRenderBox final : public RenderBox {
 public:
     MockRenderBox() = default;
     ~MockRenderBox() override = default;
+
+    Size GetContentSize() override
+    {
+        return Size();
+    }
 };
 
 class MockRenderRoot final : public RenderRoot {
@@ -57,6 +62,11 @@ public:
     void SetFontSize(double fontSize)
     {
         textStyle_.SetFontSize(Dimension(fontSize, DimensionUnit::PX));
+    }
+
+    int32_t GetTouchPosition(const Offset& offset) override
+    {
+        return 0;
     }
 
     double GetTextWidth() override;

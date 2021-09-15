@@ -34,8 +34,8 @@ public:
     InspectNode(NodeId nodeId, const std::string& nodeName);
     ~InspectNode() override;
 
-    void SetAllAttr(std::unique_ptr<JsonValue>& jsonNode);
-    void SetAllStyle(std::unique_ptr<JsonValue>& jsonNode);
+    void SetAllAttr(std::unique_ptr<JsonValue>& jsonNode, const char* attrsTag);
+    void SetAllStyle(std::unique_ptr<JsonValue>& jsonNode, const char* stylesTag);
     void InitCommonStyles();
     virtual void PackAttrAndStyle();
 protected:

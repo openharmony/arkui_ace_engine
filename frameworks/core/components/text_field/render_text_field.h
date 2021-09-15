@@ -23,10 +23,9 @@
 #include "base/geometry/rect.h"
 #include "base/geometry/size.h"
 #include "base/utils/system_properties.h"
+#include "input_method_controller.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
-#include "core/common/ime/text_input_client.h"
-#include "core/common/ime/text_input_connection.h"
 #include "core/common/ime/text_input_formatter.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
@@ -46,6 +45,7 @@ namespace OHOS::Ace {
 class ClickRecognizer;
 class ClickInfo;
 class TextOverlayComponent;
+class RenderTextField;
 struct TextEditingValue;
 
 enum class DirectionStatus : uint8_t {
@@ -62,8 +62,19 @@ enum class CursorPositionType {
     NORMAL,
 };
 
-class RenderTextField : public RenderNode, public TextInputClient, public ValueChangeObserver {
-    DECLARE_ACE_TYPE(RenderTextField, RenderNode, TextInputClient, ValueChangeObserver);
+
+class OnTextChangedListenerImpl : public MiscServices::OnTextChangedListener {
+public:
+    OnTextChangedListenerImpl(const WeakPtr<RenderTextField>& field ) : field_(field) {}
+    void InsertText(const std::u16string& text) override;
+    void DeleteBackward(int32_t length) override;
+    void SetKeyboardStatus(bool status) override;
+private:
+    WeakPtr<RenderTextField> field_;
+};
+
+class RenderTextField : public RenderNode, public ValueChangeObserver {
+    DECLARE_ACE_TYPE(RenderTextField, RenderNode, ValueChangeObserver);
 
 public:
     ~RenderTextField() override;
@@ -75,10 +86,10 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     // Override TextInputClient
-    void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
-    void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
+    void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true);
+    void PerformAction(TextInputAction action, bool forceCloseKeyboard = false);
     void OnStatusChanged(RenderStatus renderStatus) override;
-    void OnValueChanged(bool needFireChangeEvent = true) override;
+    void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
     void OnPaintFinish() override;
 
     bool OnKeyEvent(const KeyEvent& event);
@@ -96,6 +107,7 @@ public:
     void SetIsOverlayShowed(bool isOverlayShowed, bool needStartTwinkling = true);
     void UpdateFocusAnimation();
     const TextEditingValue& GetEditingValue() const;
+    const TextEditingValue& GetPreEditingValue() const;
     void Delete(int32_t start, int32_t end);
     void SetOnOverlayFocusChange(const std::function<void(bool)>& onOverlayFocusChange)
     {
@@ -207,6 +219,11 @@ public:
         needNotifyChangeEvent_ = needNotifyChangeEvent;
     }
 
+    void SetInputMethodStatus(bool imeAttached)
+    {
+        imeAttached_ = imeAttached;
+    }
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -261,7 +278,7 @@ protected:
 
     bool HasConnection() const
     {
-        return connection_;
+        return imeAttached_;
     }
 
     bool ShowCounter() const;
@@ -340,6 +357,7 @@ protected:
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
     DirectionStatus directionStatus_ = DirectionStatus::LEFT_LEFT;
 
+    bool showPasswordIcon_ = true; // Whether show password icon, effect only type is password.
     bool showCounter_ = false; // Whether show counter, 10/100 means maxlength is 100 and 10 has inputed.
     bool overCount_ = false;   // Whether count of text is over limit.
     bool obscure_ = false;     // Obscure the text, for example, password.
@@ -349,7 +367,7 @@ protected:
     bool isValueFromRemote_ = false;          // Remote value coming form typing, other is from clopboard.
     bool existStrongDirectionLetter_ = false; // Whether exist strong direction letter in text.
     bool isVisible_ = true;
-    bool needNotifyChangeEvent_ = true;
+    bool needNotifyChangeEvent_ = false;
     bool resetToStart_ = true;      // When finish inputting text, whether show header of text.
     bool showEllipsis_ = false;     // When text is overflow, whether show ellipsis.
     bool extend_ = false;           // Whether input support extend, this attribute is worked in textarea.
@@ -366,6 +384,7 @@ protected:
     Dimension iconSizeInDimension_;
     Dimension iconHotZoneSizeInDimension_;
     Dimension widthReserved_;
+    std::optional<Color> imageFill_ = std::nullopt;
     std::string iconSrc_;
     std::string showIconSrc_;
     std::string hideIconSrc_;
@@ -424,14 +443,14 @@ private:
     void ChangeBorderToErrorStyle();
     void HandleDeviceOrientationChange();
     void OnOverlayFocusChange(bool isFocus, bool needCloseKeyboard);
+    void FireSelectChangeIfNeeded(const TextEditingValue& newValue, bool needFireSelectChangeEvent) const;
     int32_t GetInstanceId() const;
+    void PopTextOverlay() const;
 
     /**
      * @brief Update remote editing value only if text or selection is changed.
      */
     void UpdateRemoteEditingIfNeeded(bool needFireChangeEvent = true);
-
-    void AttachIme();
 
     int32_t initIndex_ = 0;
     bool isOverlayFocus_ = false;
@@ -440,7 +459,10 @@ private:
     double fontScale_ = 1.0;
     bool isSingleHandle_ = false;
     bool hasTextOverlayPushed_ = false;
+    bool softKeyboardEnabled_ = true;
+    bool imeAttached_ = false;
     Color pressColor_;
+    TextSelection selection_; // Selection from custom.
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     std::function<void()> onValueChange_;
     std::function<void(bool)> onKeyboardClose_;
@@ -449,6 +471,11 @@ private:
     std::function<void(const double&)> updateHandleDiameter_;
     std::function<void(const double&)> updateHandleDiameterInner_;
     std::function<void(const std::string&)> onTextChangeEvent_;
+    std::function<void(std::string)> onChange_;
+    std::function<void(bool)> onEditChanged_;
+    std::function<void(int32_t)> onSubmit_;
+    std::function<void(const std::string&)> onValueChangeEvent_;
+    std::function<void(const std::string&)> onSelectChangeEvent_;
     std::function<void(const std::string&)> onFinishInputEvent_;
     std::function<void(const std::string&)> onSubmitEvent_;
     std::function<void()> onTapEvent_;
@@ -459,11 +486,11 @@ private:
     EventMarker onTranslate_;
     EventMarker onShare_;
     EventMarker onSearch_;
-
+    bool catchMode_ = true;
     TapCallback tapCallback_;
     CancelableCallback<void()> cursorTwinklingTask_;
 
-    std::vector<Framework::InputOption> inputOptions_;
+    std::vector<InputOption> inputOptions_;
     std::list<std::unique_ptr<TextInputFormatter>> textInputFormatters_;
     RefPtr<TextEditController> controller_;
     RefPtr<TextInputConnection> connection_;
@@ -475,6 +502,7 @@ private:
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<Animator> pressController_;
     RefPtr<Animator> animator_;
+    sptr<MiscServices::OnTextChangedListener> listener_;
 };
 
 } // namespace OHOS::Ace

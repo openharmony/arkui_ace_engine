@@ -34,9 +34,6 @@ constexpr int32_t METHOD_TO_ARGS_SIZE = 1;
 DOMStepper::DOMStepper(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
     stepperComponent_ = AceType::MakeRefPtr<StepperComponent>(std::list<RefPtr<Component>>());
-    if (IsRightToLeft()) {
-        stepperComponent_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 bool DOMStepper::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
@@ -196,6 +193,11 @@ void DOMStepper::ResetInitializedStyle()
     stepperComponent_->SetFocusBorderWidth(theme->GetFocusBorderWidth());
     stepperComponent_->SetMouseHoverColor(theme->GetMouseHoverColor());
     stepperComponent_->SetDisabledAlpha(theme->GetDisabledAlpha());
+}
+
+void DOMStepper::PrepareSpecializedComponent()
+{
+    stepperComponent_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
 }
 
 } // namespace OHOS::Ace::Framework

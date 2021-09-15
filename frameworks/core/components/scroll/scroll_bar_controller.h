@@ -22,9 +22,9 @@
 #include "core/animation/friction_motion.h"
 #include "core/animation/scroll_motion.h"
 #include "core/common/vibrator/vibrator.h"
+#include "core/event/touch_event.h"
 #include "core/gestures/drag_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
-#include "core/gestures/touch_event.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -47,7 +47,8 @@ public:
     void HandleTouchUp();
     void HandleDragUpdate(const DragUpdateInfo& info);
     void HandleDragEnd(const DragEndInfo& info);
-    void MarkScrollRender();
+    virtual void MarkScrollRender();
+    void Reset();
 
     bool DispatchEvent(const TouchPoint& point) override
     {
@@ -134,10 +135,12 @@ public:
         return activeWidth_;
     }
 
-private:
-    bool UpdateScrollPosition(double offset, int32_t source) const;
+protected:
+    virtual bool UpdateScrollPosition(double offset, int32_t source);
 
-    void ProcessScrollMotion(double position);
+    virtual void ProcessScrollMotion(double position);
+
+    virtual bool CheckScroll();
 
     WeakPtr<RenderNode> scroll_;
     ScrollBarPositionCallback callback_;

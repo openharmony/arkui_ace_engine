@@ -459,9 +459,9 @@ HWTEST_F(RenderMagicLayoutTest, FlexWeight010, TestSize.Level1)
     root->PerformLayout();
     EXPECT_TRUE(firstItem->GetPosition() == Offset(0.0, 0.0));
     EXPECT_TRUE(secondItem->GetPosition() == Offset(500.0, 0.0));
-    EXPECT_TRUE(thirdItem->GetPosition() == Offset(500, 0.0));
+    EXPECT_TRUE(thirdItem->GetPosition() == Offset(1000, 0.0));
     EXPECT_TRUE(firstItem->GetLayoutSize() == Size(500, 500.0));
-    EXPECT_TRUE(secondItem->GetLayoutSize() == Size(0.0, 0.0));
+    EXPECT_TRUE(secondItem->GetLayoutSize() == Size(500.0, 500.0));
     EXPECT_TRUE(thirdItem->GetLayoutSize() == Size(500.0, 500));
     EXPECT_TRUE(row->GetLayoutSize() == Size(1080.0, 500.0));
 }

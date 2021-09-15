@@ -15,13 +15,22 @@
 
 #include <gtest/gtest.h>
 
+#include "adapter/ohos/osal/fake_asset_manager.h"
+#include "adapter/ohos/osal/fake_task_executor.h"
+#include "core/common/platform_window.h"
+#include "core/common/window.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/drag_recognizer.h"
 #include "core/gestures/gesture_referee.h"
 #include "core/gestures/long_press_recognizer.h"
+#include "core/gestures/pan_recognizer.h"
+#include "core/gestures/pinch_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
+#include "core/gestures/rotation_recognizer.h"
 #include "core/gestures/velocity_tracker.h"
+#include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
+#include "mock/gesture_mock.h"
 
 using namespace testing::ext;
 
@@ -30,11 +39,19 @@ namespace {
 
 constexpr double LOCATION_X = 200.0;
 constexpr double LOCATION_Y = 400.0;
+constexpr double LOCATION_X1 = 400.0;
+constexpr double LOCATION_Y1 = 200.0;
+constexpr double LOCATION_X2 = 600.0;
+constexpr double LOCATION_Y2 = 600.0;
 constexpr double LOCATION_STATIC = 0.0;
 constexpr int32_t TIME_MILLISECOND = 1000;
 constexpr int32_t TIME_COUNTS = 500;
 
 constexpr double MAX_THRESHOLD = 20.0;
+constexpr double MIN_PAN_DISTANCE = 15.0;
+constexpr double MIN_PINCH_DISTANCE = 10.0;
+constexpr double MIN_ROTATION_ANGLE = 1.0;
+constexpr double DEFAULT_LONGPRESS_DURATION = 500;
 
 const std::string TOUCH_DOWN_TYPE = "onTouchDown";
 const std::string TOUCH_UP_TYPE = "onTouchUp";
@@ -180,6 +197,145 @@ private:
     DragUpdateInfo dragUpdateInfo_;
     DragEndInfo dragEndInfo_;
     bool dragCancel_ = false;
+};
+
+class TapEventResult {
+public:
+    TapEventResult() = default;
+    ~TapEventResult() = default;
+
+    const GestureEvent& GetTapInfo() const
+    {
+        return tapInfo_;
+    }
+
+    void SetTapInfo(const GestureEvent& tapInfo)
+    {
+        tapInfo_ = tapInfo;
+    }
+
+private:
+    GestureEvent tapInfo_;
+};
+
+class PanEventResult {
+public:
+    PanEventResult() = default;
+    ~PanEventResult() = default;
+
+    const GestureEvent& GetPanInfo() const
+    {
+        return panInfo_;
+    }
+
+    void SetPanInfo(const GestureEvent& panInfo)
+    {
+        panInfo_ = panInfo;
+    }
+
+    void SetPanCancel(bool panCancel)
+    {
+        panCancel_ = panCancel;
+    }
+
+    bool GetPanCancel() const
+    {
+        return panCancel_;
+    }
+
+private:
+    GestureEvent panInfo_;
+    bool panCancel_ = false;
+};
+
+class PinchEventResult {
+public:
+    PinchEventResult() = default;
+    ~PinchEventResult() = default;
+
+    const GestureEvent& GetPinchInfo() const
+    {
+        return pinchInfo_;
+    }
+
+    void SetPinchInfo(const GestureEvent& pinchInfo)
+    {
+        pinchInfo_ = pinchInfo;
+    }
+
+    void SetPinchCancel(bool pinchCancel)
+    {
+        pinchCancel_ = pinchCancel;
+    }
+
+    bool GetPinchCancel() const
+    {
+        return pinchCancel_;
+    }
+
+private:
+    GestureEvent pinchInfo_;
+    bool pinchCancel_ = false;
+};
+
+class RotationEventResult {
+public:
+    RotationEventResult() = default;
+    ~RotationEventResult() = default;
+
+    const GestureEvent& GetRotationInfo() const
+    {
+        return rotationInfo_;
+    }
+
+    void SetRotationInfo(const GestureEvent& rotationInfo)
+    {
+        rotationInfo_ = rotationInfo;
+    }
+
+    void SetRotationCancel(bool rotationCancel)
+    {
+        rotationCancel_ = rotationCancel;
+    }
+
+    bool GetRotationCancel() const
+    {
+        return rotationCancel_;
+    }
+
+private:
+    GestureEvent rotationInfo_;
+    bool rotationCancel_ = false;
+};
+
+class MultiLongPressEventResult {
+public:
+    MultiLongPressEventResult() = default;
+    ~MultiLongPressEventResult() = default;
+
+    const GestureEvent& GetMultiLongPressInfo() const
+    {
+        return multiLongPressInfo_;
+    }
+
+    void SetMultiLongPressInfo(const GestureEvent& multiLongPressInfo)
+    {
+        multiLongPressInfo_ = multiLongPressInfo;
+    }
+
+    void SetMultiLongPressCancel(bool multiLongPressCancel)
+    {
+        multiLongPressCancel_ = multiLongPressCancel;
+    }
+
+    bool GetMultiLongPressCancel() const
+    {
+        return multiLongPressCancel_;
+    }
+
+private:
+    GestureEvent multiLongPressInfo_;
+    bool multiLongPressCancel_ = false;
 };
 
 class GesturesTest : public testing::Test {
@@ -752,7 +908,7 @@ HWTEST_F(GesturesTest, ClickRecognizer002, TestSize.Level1)
     pointEnd.type = TouchType::UP;
     clickRecognizer->HandleEvent(pointEnd);
     ASSERT_FALSE(onClick.GetClickInfo().GetGlobalLocation().IsZero());
-    ASSERT_EQ(onClick.GetClickInfo().GetGlobalLocation(), pointStart.GetOffset());
+    ASSERT_EQ(onClick.GetClickInfo().GetGlobalLocation(), pointEnd.GetOffset());
 }
 
 /**
@@ -827,9 +983,9 @@ HWTEST_F(GesturesTest, GestureReferee001, TestSize.Level1)
         [&refereeResult](const ClickInfo& info) { refereeResult.SetGestureName("clickRecognizerC"); });
 
     int32_t eventId = 2;
-    GestureReferee::GetInstance().AddGestureRecognizer(eventId, clickRecognizerA);
-    GestureReferee::GetInstance().AddGestureRecognizer(eventId, clickRecognizerB);
-    GestureReferee::GetInstance().AddGestureRecognizer(eventId, clickRecognizerC);
+    clickRecognizerA->AddToReferee(eventId, clickRecognizerA);
+    clickRecognizerB->AddToReferee(eventId, clickRecognizerB);
+    clickRecognizerC->AddToReferee(eventId, clickRecognizerC);
 
     /**
      * @tc.steps: step2. send accept to gesture arbiter.
@@ -1122,6 +1278,1273 @@ HWTEST_F(GesturesTest, DragRecognizer005, TestSize.Level1)
     pointEnd.type = TouchType::CANCEL;
     dragRecognizer->HandleEvent(pointEnd);
     ASSERT_TRUE(onDrag.GetDragCancel());
+}
+
+/**
+ * @tc.name: TapRecognizer001
+ * @tc.desc: Verify the tap recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK51
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, TapRecognizer001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create tap recognizer and set touch tap event callback.
+     * Test one-finger one-tap.
+     */
+    TapEventResult onTap;
+    WeakPtr<PipelineContext> context;
+    int32_t fingers = 1;
+    int32_t count = 1;
+    auto tapRecognizer = AceType::MakeRefPtr<ClickRecognizer>(context, fingers, count);
+    tapRecognizer->SetOnAction([&onTap](const GestureEvent& info) { onTap.SetTapInfo(info); });
+
+    /**
+     * @tc.steps: step2. send touch down event.
+     * @tc.expected: step2. receive touch down callback and touch point result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+
+    tapRecognizer->HandleEvent(point);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point.time);
+
+    /**
+     * @tc.steps: step3. check the touch up event.
+     * @tc.expected: step3. the touch timestamp info is right.
+     */
+    point.type = TouchType::UP;
+    tapRecognizer->HandleEvent(point);
+    ASSERT_EQ(onTap.GetTapInfo().GetTimeStamp(), point.time);
+}
+
+/**
+ * @tc.name: TapRecognizer002
+ * @tc.desc: Verify the tap recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK51
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, TapRecognizer002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create tap recognizer and set touch tap event callback.
+     * Test one-finger double-tap.
+     */
+    TapEventResult onTap;
+    WeakPtr<PipelineContext> context;
+    int32_t fingers = 1;
+    int32_t count = 2;
+    auto tapRecognizer = AceType::MakeRefPtr<ClickRecognizer>(context, fingers, count);
+    tapRecognizer->SetOnAction([&onTap](const GestureEvent& info) { onTap.SetTapInfo(info); });
+
+    /**
+     * @tc.steps: step2. send touch down event.
+     * @tc.expected: step2. receive touch down callback and touch point result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+
+    tapRecognizer->HandleEvent(point);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point.time);
+
+    /**
+     * @tc.steps: step3. check the touch up event.
+     * @tc.expected: step3. the touch timestamp info is right.
+     */
+    point.type = TouchType::UP;
+    tapRecognizer->HandleEvent(point);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point.time);
+
+    /**
+     * @tc.steps: step4. send touch down event.
+     * @tc.expected: step4. receive touch down callback and touch point result is right.
+     */
+    TouchPoint point1 { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+
+    tapRecognizer->HandleEvent(point1);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point.time);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point1.time);
+
+    /**
+     * @tc.steps: step5. check the touch up event.
+     * @tc.expected: step5. the touch timestamp info is right.
+     */
+    point1.type = TouchType::UP;
+    tapRecognizer->HandleEvent(point1);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point.time);
+    ASSERT_EQ(onTap.GetTapInfo().GetTimeStamp(), point1.time);
+}
+
+/**
+ * @tc.name: TapRecognizer003
+ * @tc.desc: Verify the tap recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK51
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, TapRecognizer003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create tap recognizer and set touch tap event callback.
+     * Test double-finger one-tap.
+     */
+    TapEventResult onTap;
+    WeakPtr<PipelineContext> context;
+    int32_t fingers = 2;
+    int32_t count = 1;
+    auto tapRecognizer = AceType::MakeRefPtr<ClickRecognizer>(context, fingers, count);
+    tapRecognizer->SetOnAction([&onTap](const GestureEvent& info) { onTap.SetTapInfo(info); });
+
+    /**
+     * @tc.steps: step2. send touch down event.
+     * @tc.expected: step2. receive touch down callback and touch point result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+
+    tapRecognizer->HandleEvent(point);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point.time);
+
+    TouchPoint point1 { .id = 1,
+        .x = LOCATION_X1,
+        .y = LOCATION_Y1,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+
+    tapRecognizer->HandleEvent(point1);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point1.time);
+
+    /**
+     * @tc.steps: step3. check the touch up event.
+     * @tc.expected: step3. the touch timestamp info is right.
+     */
+    point.type = TouchType::UP;
+    tapRecognizer->HandleEvent(point);
+    point1.type = TouchType::UP;
+    tapRecognizer->HandleEvent(point1);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point.time);
+    ASSERT_EQ(onTap.GetTapInfo().GetTimeStamp(), point1.time);
+}
+
+/**
+ * @tc.name: TapRecognizer004
+ * @tc.desc: Verify the tap recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK51
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, TapRecognizer004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create tap recognizer and set touch tap event callback.
+     * Test double-finger double-tap.
+     */
+    TapEventResult onTap;
+    WeakPtr<PipelineContext> context;
+    int32_t fingers = 2;
+    int32_t count = 2;
+    auto tapRecognizer = AceType::MakeRefPtr<ClickRecognizer>(context, fingers, count);
+    tapRecognizer->SetOnAction([&onTap](const GestureEvent& info) { onTap.SetTapInfo(info); });
+
+    /**
+     * @tc.steps: step2. send touch down event.
+     * @tc.expected: step2. receive touch down callback and touch point result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+
+    tapRecognizer->HandleEvent(point);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point.time);
+
+    TouchPoint point1 { .id = 1,
+        .x = LOCATION_X1,
+        .y = LOCATION_Y1,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+
+    tapRecognizer->HandleEvent(point1);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point1.time);
+
+    /**
+     * @tc.steps: step3. check the touch up event.
+     * @tc.expected: step3. the touch timestamp info is right.
+     */
+    point.type = TouchType::UP;
+    tapRecognizer->HandleEvent(point);
+    point1.type = TouchType::UP;
+    tapRecognizer->HandleEvent(point1);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point.time);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point1.time);
+
+    /**
+     * @tc.steps: step4. send touch down event.
+     * @tc.expected: step4. receive touch down callback and touch point result is right.
+     */
+    TouchPoint point2 { .id = 1,
+        .x = LOCATION_X1,
+        .y = LOCATION_Y1,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+
+    tapRecognizer->HandleEvent(point2);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point2.time);
+
+    TouchPoint point3 { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+
+    tapRecognizer->HandleEvent(point3);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point3.time);
+
+    /**
+     * @tc.steps: step5. check the touch up event.
+     * @tc.expected: step5. the touch timestamp info is right.
+     */
+    point2.type = TouchType::UP;
+    tapRecognizer->HandleEvent(point2);
+    point3.type = TouchType::UP;
+    tapRecognizer->HandleEvent(point3);
+    ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point2.time);
+    ASSERT_EQ(onTap.GetTapInfo().GetTimeStamp(), point3.time);
+}
+
+/**
+ * @tc.name: PanRecognizer001
+ * @tc.desc: Verify the pan recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK59
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, PanRecognizer001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pan recognizer and set touch pan event callback.
+     * Test one-finger pan, direction is all.
+     */
+    std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
+    auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
+    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
+    auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
+
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), taskExecutor, assetManager, resRegister, fakeFrontend, 0);
+
+    PanEventResult onPan;
+    int32_t fingers = 1;
+    PanDirection direction;
+    double distance = MIN_PAN_DISTANCE;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(pipelineContext, fingers, direction, distance);
+    panRecognizer->SetOnActionStart([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionUpdate([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionEnd([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionCancel([&onPan]() { onPan.SetPanCancel(true); });
+
+    /**
+     * @tc.steps: step2. send down event and all move event.
+     * @tc.expected: step2. receive event callback and result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    panRecognizer->HandleEvent(point);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetX(), point.x);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetY(), point.y);
+
+    // onActionStart
+    point.type = TouchType::MOVE;
+    point.x += (MIN_PAN_DISTANCE * 4);
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), MIN_PAN_DISTANCE * 4);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    // onActionUpdate
+    point.x += 200;
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), 200 + MIN_PAN_DISTANCE * 4);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    /**
+     * @tc.steps: step3. send up event, check touch point result is right
+     * @tc.expected: step3. touch point result is right.
+     */
+    // onActionEnd
+    point.type = TouchType::UP;
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), 200 + MIN_PAN_DISTANCE * 4);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    /**
+     * @tc.steps: step4. send cancel event, check touch point result is right
+     * @tc.expected: step4. touch point result is right.
+     */
+    // onActionCancel
+    point.type = TouchType::CANCEL;
+    onPan.SetPanCancel(true);
+    point.x *= 2;
+    point.y *= 2;
+    panRecognizer->HandleEvent(point);
+    ASSERT_TRUE(onPan.GetPanCancel());
+}
+
+/**
+ * @tc.name: PanRecognizer002
+ * @tc.desc: Verify the pan recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK59
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, PanRecognizer002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pan recognizer and set touch pan event callback.
+     * Test one-finger pan, direction is horizontal.
+     */
+    std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
+    auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
+    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
+    auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
+
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), taskExecutor, assetManager, resRegister, fakeFrontend, 0);
+
+    PanEventResult onPan;
+    int32_t fingers = 1;
+    PanDirection direction;
+    direction.type = PanDirection::HORIZONTAL;
+    double distance = MIN_PAN_DISTANCE;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(pipelineContext, fingers, direction, distance);
+    panRecognizer->SetOnActionStart([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionUpdate([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionEnd([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionCancel([&onPan]() { onPan.SetPanCancel(true); });
+
+    /**
+     * @tc.steps: step2. send down event and all move event.
+     * @tc.expected: step2. receive event callback and result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    panRecognizer->HandleEvent(point);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetX(), point.x);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetY(), point.y);
+
+    // onActionStart
+    point.type = TouchType::MOVE;
+    point.x += (MIN_PAN_DISTANCE * 4);
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), MIN_PAN_DISTANCE * 4);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    // onActionUpdate
+    point.y += 200;
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), MIN_PAN_DISTANCE * 4);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    /**
+     * @tc.steps: step3. send up event, check touch point result is right
+     * @tc.expected: step3. touch point result is right.
+     */
+    // onActionEnd
+    point.type = TouchType::UP;
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), MIN_PAN_DISTANCE * 4);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    /**
+     * @tc.steps: step4. send cancel event, check touch point result is right
+     * @tc.expected: step4. touch point result is right.
+     */
+    // onActionCancel
+    point.type = TouchType::CANCEL;
+    onPan.SetPanCancel(true);
+    point.x *= 2;
+    point.y *= 2;
+    panRecognizer->HandleEvent(point);
+    ASSERT_TRUE(onPan.GetPanCancel());
+}
+
+/**
+ * @tc.name: PanRecognizer003
+ * @tc.desc: Verify the pan recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK59
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, PanRecognizer003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pan recognizer and set touch pan event callback.
+     * Test one-finger pan, direction is vertical.
+     */
+    std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
+    auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
+    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
+    auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
+
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), taskExecutor, assetManager, resRegister, fakeFrontend, 0);
+
+    PanEventResult onPan;
+    int32_t fingers = 1;
+    PanDirection direction;
+    direction.type = PanDirection::VERTICAL;
+    double distance = MIN_PAN_DISTANCE;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(pipelineContext, fingers, direction, distance);
+    panRecognizer->SetOnActionStart([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionUpdate([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionEnd([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionCancel([&onPan]() { onPan.SetPanCancel(true); });
+
+    /**
+     * @tc.steps: step2. send down event and all move event.
+     * @tc.expected: step2. receive event callback and result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    panRecognizer->HandleEvent(point);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetX(), point.x);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetY(), point.y);
+
+    // onActionStart
+    point.type = TouchType::MOVE;
+    point.y += (MIN_PAN_DISTANCE * 4);
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), 0);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), MIN_PAN_DISTANCE * 4);
+
+    // onActionUpdate
+    point.x += 200;
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), 0);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), MIN_PAN_DISTANCE * 4);
+
+    /**
+     * @tc.steps: step3. send up event, check touch point result is right
+     * @tc.expected: step3. touch point result is right.
+     */
+    // onActionEnd
+    point.type = TouchType::UP;
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), 0);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), MIN_PAN_DISTANCE * 4);
+
+    /**
+     * @tc.steps: step4. send cancel event, check touch point result is right
+     * @tc.expected: step4. touch point result is right.
+     */
+    // onActionCancel
+    point.type = TouchType::CANCEL;
+    onPan.SetPanCancel(true);
+    point.x *= 2;
+    point.y *= 2;
+    panRecognizer->HandleEvent(point);
+    ASSERT_TRUE(onPan.GetPanCancel());
+}
+
+/**
+ * @tc.name: PanRecognizer004
+ * @tc.desc: Verify the pan recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK59
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, PanRecognizer004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pan recognizer and set touch pan event callback.
+     * Test double-finger pan, direction is all.
+     */
+    std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
+    auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
+    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
+    auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
+
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), taskExecutor, assetManager, resRegister, fakeFrontend, 0);
+
+    PanEventResult onPan;
+    int32_t fingers = 2;
+    PanDirection direction;
+    double distance = MIN_PAN_DISTANCE;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(pipelineContext, fingers, direction, distance);
+    panRecognizer->SetOnActionStart([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionUpdate([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionEnd([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionCancel([&onPan]() { onPan.SetPanCancel(true); });
+
+    /**
+     * @tc.steps: step2. send down event and all move event.
+     * @tc.expected: step2. receive event callback and result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    panRecognizer->HandleEvent(point);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetX(), point.x);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetY(), point.y);
+
+    point.type = TouchType::MOVE;
+    point.x += (MIN_PAN_DISTANCE * 4);
+    panRecognizer->HandleEvent(point);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetX(), MIN_PAN_DISTANCE * 4);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    TouchPoint point1 { .id = 1,
+        .x = LOCATION_X1,
+        .y = LOCATION_Y1,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    panRecognizer->HandleEvent(point1);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetX(), point1.x);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetY(), point1.y);
+
+    // onActionStart
+    point1.type = TouchType::MOVE;
+    point1.x += (MIN_PAN_DISTANCE * 4);
+    panRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), MIN_PAN_DISTANCE * 2);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    // onActionUpdate
+    point.x += 200;
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), 100 + MIN_PAN_DISTANCE * 2);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    /**
+     * @tc.steps: step3. send up event, check touch point result is right
+     * @tc.expected: step3. touch point result is right.
+     */
+    // onActionEnd
+    point.type = TouchType::UP;
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), 100 + MIN_PAN_DISTANCE * 2);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    point1.type = TouchType::UP;
+    panRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), 100 + MIN_PAN_DISTANCE * 2);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    /**
+     * @tc.steps: step4. send cancel event, check touch point result is right
+     * @tc.expected: step4. touch point result is right.
+     */
+    // onActionCancel
+    point.type = TouchType::CANCEL;
+    onPan.SetPanCancel(true);
+    point.x *= 2;
+    point.y *= 2;
+    panRecognizer->HandleEvent(point);
+    ASSERT_TRUE(onPan.GetPanCancel());
+}
+
+/**
+ * @tc.name: PanRecognizer005
+ * @tc.desc: Verify the pan recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK59
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, PanRecognizer005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pan recognizer and set touch pan event callback.
+     * Set to one-finger pan gesture, but actually we use a double-finger pan gesture.
+     */
+    std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
+    auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
+    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
+    auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
+
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), taskExecutor, assetManager, resRegister, fakeFrontend, 0);
+
+    PanEventResult onPan;
+    int32_t fingers = 1;
+    PanDirection direction;
+    double distance = MIN_PAN_DISTANCE;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(pipelineContext, fingers, direction, distance);
+    panRecognizer->SetOnActionStart([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionUpdate([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionEnd([&onPan](const GestureEvent& info) { onPan.SetPanInfo(info); });
+    panRecognizer->SetOnActionCancel([&onPan]() { onPan.SetPanCancel(true); });
+
+    /**
+     * @tc.steps: step2. send down event and all move event.
+     * @tc.expected: step2. receive event callback and result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    panRecognizer->HandleEvent(point);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetX(), point.x);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetY(), point.y);
+
+    point.type = TouchType::MOVE;
+    point.x += (MIN_PAN_DISTANCE * 4);
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), MIN_PAN_DISTANCE * 4);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    TouchPoint point1 { .id = 1,
+        .x = LOCATION_X1,
+        .y = LOCATION_Y1,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    panRecognizer->HandleEvent(point1);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetX(), point1.x);
+    ASSERT_NE(onPan.GetPanInfo().GetOffsetY(), point1.y);
+
+    // onActionStart
+    point1.type = TouchType::MOVE;
+    point1.x += (MIN_PAN_DISTANCE * 4);
+    panRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), MIN_PAN_DISTANCE * 4 + MIN_PAN_DISTANCE * 2);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    // onActionUpdate
+    point.x += 200;
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), 100 + MIN_PAN_DISTANCE * 4 + MIN_PAN_DISTANCE * 2);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    point1.type = TouchType::UP;
+    panRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), 100 + MIN_PAN_DISTANCE * 4 + MIN_PAN_DISTANCE * 2);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    point.x += 200;
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), 300 + MIN_PAN_DISTANCE * 4 + MIN_PAN_DISTANCE * 2);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    /**
+     * @tc.steps: step3. send up event, check touch point result is right
+     * @tc.expected: step3. touch point result is right.
+     */
+    // onActionEnd
+    point.type = TouchType::UP;
+    panRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), 300 + MIN_PAN_DISTANCE * 4 + MIN_PAN_DISTANCE * 2);
+    ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
+
+    /**
+     * @tc.steps: step4. send cancel event, check touch point result is right
+     * @tc.expected: step4. touch point result is right.
+     */
+    // onActionCancel
+    point.type = TouchType::CANCEL;
+    onPan.SetPanCancel(true);
+    point.x *= 2;
+    point.y *= 2;
+    panRecognizer->HandleEvent(point);
+    ASSERT_TRUE(onPan.GetPanCancel());
+}
+
+/**
+ * @tc.name: PinchRecognizer001
+ * @tc.desc: Verify the pinch recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK5D
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, PinchRecognizer001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pinch recognizer and set touch pinch event callback.
+     * Test double-finger pinch.
+     */
+    std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
+    auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
+    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
+    auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
+
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), taskExecutor, assetManager, resRegister, fakeFrontend, 0);
+
+    PinchEventResult onPinch;
+    int32_t fingers = 2;
+    double distance = MIN_PINCH_DISTANCE;
+    auto pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(fingers, distance);
+    pinchRecognizer->SetOnActionStart([&onPinch](const GestureEvent& info) { onPinch.SetPinchInfo(info); });
+    pinchRecognizer->SetOnActionUpdate([&onPinch](const GestureEvent& info) { onPinch.SetPinchInfo(info); });
+    pinchRecognizer->SetOnActionEnd([&onPinch](const GestureEvent& info) { onPinch.SetPinchInfo(info); });
+    pinchRecognizer->SetOnActionCancel([&onPinch]() { onPinch.SetPinchCancel(true); });
+
+    /**
+     * @tc.steps: step2. send down event and all move event.
+     * @tc.expected: step2. receive event callback and result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    pinchRecognizer->HandleEvent(point);
+
+    TouchPoint point1 { .id = 1,
+        .x = LOCATION_X1,
+        .y = LOCATION_Y1,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    pinchRecognizer->HandleEvent(point1);
+
+    ASSERT_EQ(onPinch.GetPinchInfo().GetScale(), 1.0);
+
+    // onActionStart
+    point.type = TouchType::MOVE;
+    point.x -= 200;
+    point.y += 200;
+    pinchRecognizer->HandleEvent(point);
+    ASSERT_EQ(onPinch.GetPinchInfo().GetScale(), 2.0);
+
+    point1.type = TouchType::MOVE;
+    point1.x += 200;
+    point1.y -= 200;
+    pinchRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onPinch.GetPinchInfo().GetScale(), 3.0);
+
+    // onActionUpdate
+    point.x -= 100;
+    point.y += 100;
+    point1.x += 100;
+    point1.y -= 100;
+    pinchRecognizer->HandleEvent(point);
+    pinchRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onPinch.GetPinchInfo().GetScale(), 4.0);
+
+    /**
+     * @tc.steps: step3. send up event, check touch point result is right
+     * @tc.expected: step3. touch point result is right.
+     */
+    // onActionEnd
+    point.type = TouchType::UP;
+    point1.type = TouchType::UP;
+    pinchRecognizer->HandleEvent(point);
+    pinchRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onPinch.GetPinchInfo().GetScale(), 4.0);
+
+    /**
+     * @tc.steps: step4. send cancel event, check touch point result is right
+     * @tc.expected: step4. touch point result is right.
+     */
+    // onActionCancel
+    point.type = TouchType::CANCEL;
+    point1.type = TouchType::CANCEL;
+    onPinch.SetPinchCancel(true);
+    pinchRecognizer->HandleEvent(point);
+    pinchRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onPinch.GetPinchInfo().GetScale(), 4.0);
+    ASSERT_TRUE(onPinch.GetPinchCancel());
+}
+
+/**
+ * @tc.name: PinchRecognizer002
+ * @tc.desc: Verify the pinch recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK5D
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, PinchRecognizer002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pinch recognizer and set touch pinch event callback.
+     * Test four-finger pinch.
+     */
+    std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
+    auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
+    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
+    auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
+
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), taskExecutor, assetManager, resRegister, fakeFrontend, 0);
+
+    PinchEventResult onPinch;
+    int32_t fingers = 4;
+    double distance = MIN_PINCH_DISTANCE;
+    auto pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(fingers, distance);
+    pinchRecognizer->SetOnActionStart([&onPinch](const GestureEvent& info) { onPinch.SetPinchInfo(info); });
+    pinchRecognizer->SetOnActionUpdate([&onPinch](const GestureEvent& info) { onPinch.SetPinchInfo(info); });
+    pinchRecognizer->SetOnActionEnd([&onPinch](const GestureEvent& info) { onPinch.SetPinchInfo(info); });
+    pinchRecognizer->SetOnActionCancel([&onPinch]() { onPinch.SetPinchCancel(true); });
+
+    /**
+     * @tc.steps: step2. send down event and all move event.
+     * @tc.expected: step2. receive event callback and result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    pinchRecognizer->HandleEvent(point);
+
+    TouchPoint point1 { .id = 1,
+        .x = LOCATION_X1,
+        .y = LOCATION_Y1,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    pinchRecognizer->HandleEvent(point1);
+
+    ASSERT_EQ(onPinch.GetPinchInfo().GetScale(), 1.0);
+
+    point.type = TouchType::MOVE;
+    point.x -= 200;
+    point.y += 200;
+    pinchRecognizer->HandleEvent(point);
+    ASSERT_NE(onPinch.GetPinchInfo().GetScale(), 2.0);
+
+    point1.type = TouchType::MOVE;
+    point1.x += 200;
+    point1.y -= 200;
+    pinchRecognizer->HandleEvent(point1);
+    ASSERT_NE(onPinch.GetPinchInfo().GetScale(), 3.0);
+
+    TouchPoint point2 { .id = 2,
+        .x = LOCATION_X2,
+        .y = LOCATION_Y2,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    pinchRecognizer->HandleEvent(point2);
+
+    TouchPoint point3 {
+        .id = 3, .x = 0, .y = 0, .type = TouchType::DOWN, .time = std::chrono::high_resolution_clock::now()
+    };
+    pinchRecognizer->HandleEvent(point3);
+
+    ASSERT_EQ(onPinch.GetPinchInfo().GetScale(), 1.0);
+
+    // onActionStart && on ActionUpdate
+    point2.type = TouchType::MOVE;
+    point3.type = TouchType::MOVE;
+    point.x += 150;
+    point.y -= 150;
+    point1.x -= 150;
+    point1.y += 150;
+    point2.x -= 150;
+    point2.y -= 150;
+    point3.x += 150;
+    point3.y += 150;
+    pinchRecognizer->HandleEvent(point);
+    pinchRecognizer->HandleEvent(point1);
+    pinchRecognizer->HandleEvent(point2);
+    pinchRecognizer->HandleEvent(point3);
+    ASSERT_EQ(onPinch.GetPinchInfo().GetScale(), 0.5);
+
+    /**
+     * @tc.steps: step3. send up event, check touch point result is right
+     * @tc.expected: step3. touch point result is right.
+     */
+    // onActionEnd
+    point.type = TouchType::UP;
+    point1.type = TouchType::UP;
+    point2.type = TouchType::UP;
+    pinchRecognizer->HandleEvent(point);
+    pinchRecognizer->HandleEvent(point1);
+    pinchRecognizer->HandleEvent(point2);
+    ASSERT_EQ(onPinch.GetPinchInfo().GetScale(), 0.5);
+
+    /**
+     * @tc.steps: step4. send cancel event, check touch point result is right
+     * @tc.expected: step4. touch point result is right.
+     */
+    // onActionCancel
+    point.type = TouchType::CANCEL;
+    point1.type = TouchType::CANCEL;
+    point2.type = TouchType::CANCEL;
+    onPinch.SetPinchCancel(true);
+    pinchRecognizer->HandleEvent(point);
+    pinchRecognizer->HandleEvent(point1);
+    pinchRecognizer->HandleEvent(point2);
+    ASSERT_EQ(onPinch.GetPinchInfo().GetScale(), 0.5);
+    ASSERT_TRUE(onPinch.GetPinchCancel());
+}
+
+/**
+ * @tc.name: RotationRecognizer001
+ * @tc.desc: Verify the rotation recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK5H
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, RotationRecognizer001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rotation recognizer and set touch rotation event callback.
+     * Test double-finger rotation.
+     */
+    std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
+    auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
+    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
+    auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
+
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), taskExecutor, assetManager, resRegister, fakeFrontend, 0);
+
+    RotationEventResult onRotation;
+    int32_t fingers = 2;
+    double angle = MIN_ROTATION_ANGLE;
+    auto rotationRecognizer = AceType::MakeRefPtr<RotationRecognizer>(fingers, angle);
+    rotationRecognizer->SetOnActionStart([&onRotation](const GestureEvent& info) { onRotation.SetRotationInfo(info); });
+    rotationRecognizer->SetOnActionUpdate(
+        [&onRotation](const GestureEvent& info) { onRotation.SetRotationInfo(info); });
+    rotationRecognizer->SetOnActionEnd([&onRotation](const GestureEvent& info) { onRotation.SetRotationInfo(info); });
+    rotationRecognizer->SetOnActionCancel([&onRotation]() { onRotation.SetRotationCancel(true); });
+
+    /**
+     * @tc.steps: step2. send down event and all move event.
+     * @tc.expected: step2. receive event callback and result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    rotationRecognizer->HandleEvent(point);
+
+    TouchPoint point1 { .id = 1,
+        .x = LOCATION_X1,
+        .y = LOCATION_Y1,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    rotationRecognizer->HandleEvent(point1);
+
+    ASSERT_EQ(onRotation.GetRotationInfo().GetAngle(), 0.0);
+
+    // onActionStart
+    point1.type = TouchType::MOVE;
+    point1.y += 200;
+    rotationRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onRotation.GetRotationInfo().GetAngle(), 45.0);
+
+    // onActionUpdate
+    point1.y += 200;
+    rotationRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onRotation.GetRotationInfo().GetAngle(), 90.0);
+
+    /**
+     * @tc.steps: step3. send up event, check touch point result is right
+     * @tc.expected: step3. touch point result is right.
+     */
+    // onActionEnd
+    point.type = TouchType::UP;
+    point1.type = TouchType::UP;
+    rotationRecognizer->HandleEvent(point);
+    rotationRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onRotation.GetRotationInfo().GetAngle(), 90.0);
+
+    /**
+     * @tc.steps: step4. send cancel event, check touch point result is right
+     * @tc.expected: step4. touch point result is right.
+     */
+    // onActionCancel
+    point.type = TouchType::CANCEL;
+    point1.type = TouchType::CANCEL;
+    onRotation.SetRotationCancel(true);
+    rotationRecognizer->HandleEvent(point);
+    rotationRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onRotation.GetRotationInfo().GetAngle(), 90.0);
+    ASSERT_TRUE(onRotation.GetRotationCancel());
+}
+
+/**
+ * @tc.name: RotationRecognizer002
+ * @tc.desc: Verify the rotation recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK5H
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, RotationRecognizer002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rotation recognizer and set touch rotation event callback.
+     * Test three-finger rotation.
+     */
+    std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
+    auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
+    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
+    auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
+
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), taskExecutor, assetManager, resRegister, fakeFrontend, 0);
+
+    RotationEventResult onRotation;
+    int32_t fingers = 3;
+    double angle = MIN_ROTATION_ANGLE;
+    auto rotationRecognizer = AceType::MakeRefPtr<RotationRecognizer>(fingers, angle);
+    rotationRecognizer->SetOnActionStart([&onRotation](const GestureEvent& info) { onRotation.SetRotationInfo(info); });
+    rotationRecognizer->SetOnActionUpdate(
+        [&onRotation](const GestureEvent& info) { onRotation.SetRotationInfo(info); });
+    rotationRecognizer->SetOnActionEnd([&onRotation](const GestureEvent& info) { onRotation.SetRotationInfo(info); });
+    rotationRecognizer->SetOnActionCancel([&onRotation]() { onRotation.SetRotationCancel(true); });
+
+    /**
+     * @tc.steps: step2. send down event and all move event.
+     * @tc.expected: step2. receive event callback and result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    rotationRecognizer->HandleEvent(point);
+
+    TouchPoint point1 { .id = 1,
+        .x = LOCATION_X1,
+        .y = LOCATION_Y1,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    rotationRecognizer->HandleEvent(point1);
+
+    ASSERT_EQ(onRotation.GetRotationInfo().GetAngle(), 0.0);
+
+    point1.type = TouchType::MOVE;
+    point1.y += 200;
+    rotationRecognizer->HandleEvent(point1);
+    ASSERT_NE(onRotation.GetRotationInfo().GetAngle(), 45.0);
+
+    point1.y += 200;
+    rotationRecognizer->HandleEvent(point1);
+    ASSERT_NE(onRotation.GetRotationInfo().GetAngle(), 90.0);
+
+    TouchPoint point2 { .id = 2,
+        .x = LOCATION_X2,
+        .y = LOCATION_Y2,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    rotationRecognizer->HandleEvent(point2);
+
+    // onActionStart
+    point1.type = TouchType::MOVE;
+    point1.x -= 200;
+    rotationRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onRotation.GetRotationInfo().GetAngle(), 45.0);
+
+    // onActionUpdate
+    point1.x -= 200;
+    rotationRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onRotation.GetRotationInfo().GetAngle(), 90.0);
+
+    // no effect
+    point2.y += 200;
+    rotationRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onRotation.GetRotationInfo().GetAngle(), 90.0);
+
+    /**
+     * @tc.steps: step3. send up event, check touch point result is right
+     * @tc.expected: step3. touch point result is right.
+     */
+    // onActionEnd
+    point.type = TouchType::UP;
+    point1.type = TouchType::UP;
+    rotationRecognizer->HandleEvent(point);
+    rotationRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onRotation.GetRotationInfo().GetAngle(), 90.0);
+
+    /**
+     * @tc.steps: step4. send cancel event, check touch point result is right
+     * @tc.expected: step4. touch point result is right.
+     */
+    // onActionCancel
+    point.type = TouchType::CANCEL;
+    point1.type = TouchType::CANCEL;
+    onRotation.SetRotationCancel(true);
+    rotationRecognizer->HandleEvent(point);
+    rotationRecognizer->HandleEvent(point1);
+    ASSERT_EQ(onRotation.GetRotationInfo().GetAngle(), 90.0);
+    ASSERT_TRUE(onRotation.GetRotationCancel());
+}
+
+/**
+ * @tc.name: MultiLongPressRecognizer001
+ * @tc.desc: Verify the long press recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK55
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, MultiLongPressRecognizer001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create long press recognizer and set touch long press event callback.
+     * Test one-finger long press.
+     */
+    std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
+    auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
+    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
+    auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
+
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), taskExecutor, assetManager, resRegister, fakeFrontend, 0);
+
+    MultiLongPressEventResult onLongPress;
+    int32_t fingers = 1;
+    bool repeat = true;
+    double duration = DEFAULT_LONGPRESS_DURATION;
+    auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(pipelineContext, duration, fingers, repeat);
+    longPressRecognizer->SetOnAction(
+        [&onLongPress](const GestureEvent& info) { onLongPress.SetMultiLongPressInfo(info); });
+    longPressRecognizer->SetOnActionEnd(
+        [&onLongPress](const GestureEvent& info) { onLongPress.SetMultiLongPressInfo(info); });
+    longPressRecognizer->SetOnActionCancel([&onLongPress]() { onLongPress.SetMultiLongPressCancel(true); });
+
+    /**
+     * @tc.steps: step2. send down event and all move event.
+     * @tc.expected: step2. receive event callback and result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    longPressRecognizer->HandleEvent(point);
+    ASSERT_FALSE(onLongPress.GetMultiLongPressInfo().GetRepeat());
+
+    /**
+     * @tc.steps: step3. send up event, check touch point result is right
+     * @tc.expected: step3. touch point result is right.
+     */
+    // onActionEnd
+    point.type = TouchType::UP;
+    longPressRecognizer->HandleEvent(point);
+    ASSERT_FALSE(onLongPress.GetMultiLongPressInfo().GetRepeat());
+
+    /**
+     * @tc.steps: step4. send cancel event, check touch point result is right
+     * @tc.expected: step4. touch point result is right.
+     */
+    // onActionCancel
+    point.type = TouchType::CANCEL;
+    onLongPress.SetMultiLongPressCancel(true);
+    longPressRecognizer->HandleEvent(point);
+    ASSERT_TRUE(onLongPress.GetMultiLongPressCancel());
+}
+
+/**
+ * @tc.name: MultiLongPressRecognizer002
+ * @tc.desc: Verify the long press recognizer recognizes corresponding touch down event and up event.
+ * @tc.type: FUNC
+ * @tc.require: AR000FQK55
+ * @tc.author: wangzezhen
+ */
+HWTEST_F(GesturesTest, MultiLongPressRecognizer002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create long press recognizer and set touch long press event callback.
+     * Test one-finger long press.
+     */
+    std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
+    auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
+    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
+    auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
+
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), taskExecutor, assetManager, resRegister, fakeFrontend, 0);
+
+    MultiLongPressEventResult onLongPress;
+    int32_t fingers = 2;
+    bool repeat = true;
+    double duration = DEFAULT_LONGPRESS_DURATION;
+    auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(pipelineContext, duration, fingers, repeat);
+    longPressRecognizer->SetOnAction(
+        [&onLongPress](const GestureEvent& info) { onLongPress.SetMultiLongPressInfo(info); });
+    longPressRecognizer->SetOnActionEnd(
+        [&onLongPress](const GestureEvent& info) { onLongPress.SetMultiLongPressInfo(info); });
+    longPressRecognizer->SetOnActionCancel([&onLongPress]() { onLongPress.SetMultiLongPressCancel(true); });
+
+    /**
+     * @tc.steps: step2. send down event and all move event.
+     * @tc.expected: step2. receive event callback and result is right.
+     */
+    TouchPoint point { .id = 0,
+        .x = LOCATION_X,
+        .y = LOCATION_Y,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    longPressRecognizer->HandleEvent(point);
+    ASSERT_FALSE(onLongPress.GetMultiLongPressInfo().GetRepeat());
+
+    TouchPoint point1 { .id = 1,
+        .x = LOCATION_X1,
+        .y = LOCATION_Y1,
+        .type = TouchType::DOWN,
+        .time = std::chrono::high_resolution_clock::now() };
+    longPressRecognizer->HandleEvent(point1);
+    ASSERT_FALSE(onLongPress.GetMultiLongPressInfo().GetRepeat());
+
+    /**
+     * @tc.steps: step3. send up event, check touch point result is right
+     * @tc.expected: step3. touch point result is right.
+     */
+    // onActionEnd
+    point.type = TouchType::UP;
+    longPressRecognizer->HandleEvent(point);
+    ASSERT_FALSE(onLongPress.GetMultiLongPressInfo().GetRepeat());
+
+    /**
+     * @tc.steps: step4. send cancel event, check touch point result is right
+     * @tc.expected: step4. touch point result is right.
+     */
+    // onActionCancel
+    point.type = TouchType::CANCEL;
+    onLongPress.SetMultiLongPressCancel(true);
+    longPressRecognizer->HandleEvent(point);
+    ASSERT_TRUE(onLongPress.GetMultiLongPressCancel());
 }
 
 } // namespace OHOS::Ace

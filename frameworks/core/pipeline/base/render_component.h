@@ -16,10 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_RENDER_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_RENDER_COMPONENT_H
 
-#include "base/geometry/dimension.h"
+#include "base/geometry/animatable_dimension.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components/common/layout/position_param.h"
+#include "core/components/common/properties/motion_path_option.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/base/component.h"
 
@@ -55,6 +56,16 @@ public:
         return zIndex_;
     }
 
+    void SetIsPercentSize(bool isPercentSize)
+    {
+        isPercentSize_ = isPercentSize;
+    }
+
+    bool GetIsPercentSize() const
+    {
+        return isPercentSize_;
+    }
+
     const std::string& GetAccessibilityText() const
     {
         return accessibilityText_;
@@ -67,17 +78,45 @@ public:
 
     virtual void SetLeft(const Dimension& left)
     {
+        positionParam_.left.first = AnimatableDimension(left);
+        positionParam_.left.second = true;
+    }
+
+    virtual void SetLeft(const AnimatableDimension& left)
+    {
         positionParam_.left.first = left;
         positionParam_.left.second = true;
     }
 
+    void SetAnchorX(const Dimension& anchorX)
+    {
+        positionParam_.anchor.first = anchorX;
+    }
+
     virtual void SetRight(const Dimension& right)
+    {
+        positionParam_.right.first = AnimatableDimension(right);
+        positionParam_.right.second = true;
+    }
+
+    virtual void SetRight(const AnimatableDimension& right)
     {
         positionParam_.right.first = right;
         positionParam_.right.second = true;
     }
 
+    void SetAnchorY(const Dimension& anchorY)
+    {
+        positionParam_.anchor.second = anchorY;
+    }
+
     virtual void SetTop(const Dimension& top)
+    {
+        positionParam_.top.first = AnimatableDimension(top);
+        positionParam_.top.second = true;
+    }
+
+    virtual void SetTop(const AnimatableDimension& top)
     {
         positionParam_.top.first = top;
         positionParam_.top.second = true;
@@ -86,6 +125,12 @@ public:
     virtual void SetBottom(const Dimension& bottom)
     {
         positionParam_.bottom.first = bottom;
+        positionParam_.bottom.second = true;
+    }
+
+    virtual void SetBottom(const AnimatableDimension& bottom)
+    {
+        positionParam_.bottom.first = AnimatableDimension(bottom);
         positionParam_.bottom.second = true;
     }
 
@@ -224,6 +269,26 @@ public:
         isIgnored_ = ignore;
     }
 
+    bool InterceptEvent() const
+    {
+        return interceptEvent_;
+    }
+
+    void SetInterceptEvent(bool interceptEvent)
+    {
+        interceptEvent_ = interceptEvent;
+    }
+
+    const MotionPathOption& GetMotionPathOption() const
+    {
+        return motionPathOption_;
+    }
+
+    void SetMotionPathOption(const MotionPathOption& option)
+    {
+        motionPathOption_ = option;
+    }
+
     virtual RefPtr<RenderNode> CreateRenderNode() = 0;
 
 protected:
@@ -235,9 +300,12 @@ protected:
     MeasureType measureType_ = MeasureType::PARENT;
     EventMarker onLayoutReady_;
     bool isIgnored_ = false;
+    bool interceptEvent_ = false;
 
     bool isCustomComponent_ = false;
+    bool isPercentSize_ = false;
     int32_t zIndex_ = 0;
+    MotionPathOption motionPathOption_;
 };
 
 } // namespace OHOS::Ace

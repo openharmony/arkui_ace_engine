@@ -102,13 +102,16 @@ void RenderPickerOption::UpdateValue(uint32_t newIndex, const std::string& newTe
         LOGE("text component is null in picker option.");
         return;
     }
+
+    if (textComponent_->GetData() == text_) {
+        LOGE("The text does not change and does not need to be updated.");
+        return; // needless to update
+    }
+
     textComponent_->SetData(text_);
     if (!renderText_) {
         LOGE("render text is null in picker option.");
         return;
-    }
-    if (renderText_->GetTextData() == textComponent_->GetData()) {
-        return; // needless to update
     }
     renderText_->Update(textComponent_);
 }

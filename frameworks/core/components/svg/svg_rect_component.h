@@ -16,90 +16,47 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_SVG_RECT_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_SVG_RECT_COMPONENT_H
 
-#include "frameworks/core/components/svg/svg_sharp.h"
+#include "core/components/declaration/svg/svg_rect_declaration.h"
 #include "frameworks/core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace {
 
-class SvgRectComponent : public ComponentGroup, public SvgSharp {
-    DECLARE_ACE_TYPE(SvgRectComponent, ComponentGroup, SvgSharp);
+class SvgRectComponent : public ComponentGroup {
+    DECLARE_ACE_TYPE(SvgRectComponent, ComponentGroup);
 
 public:
-    SvgRectComponent() = default;
-    explicit SvgRectComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children) {};
+    SvgRectComponent();
+    explicit SvgRectComponent(const std::list<RefPtr<Component>>& children);
     ~SvgRectComponent() override = default;
-
+    void InitDeclaration();
     RefPtr<RenderNode> CreateRenderNode() override;
-
     RefPtr<Element> CreateElement() override;
+    const Dimension& GetX() const;
+    const Dimension& GetY() const;
+    const Dimension& GetRx() const;
+    const Dimension& GetRy() const;
+    const Dimension& GetWidth() const;
+    const Dimension& GetHeight() const;
+    void SetX(const Dimension& x);
+    void SetY(const Dimension& y);
+    void SetRx(const Dimension& rx);
+    void SetRy(const Dimension& ry);
+    void SetWidth(const Dimension& width);
+    void SetHeight(const Dimension& height);
+    void SetDeclaration(const RefPtr<SvgRectDeclaration>& declaration);
 
-    void SetX(const Dimension& x)
+    const RefPtr<SvgRectDeclaration>& GetDeclaration() const
     {
-        x_ = x;
+        return declaration_;
     }
 
-    const Dimension& GetX() const
+    void Inherit(const RefPtr<SvgBaseDeclaration>& parent)
     {
-        return x_;
-    }
-
-    void SetY(const Dimension& y)
-    {
-        y_ = y;
-    }
-
-    const Dimension& GetY() const
-    {
-        return y_;
-    }
-
-    void SetRx(const Dimension& rx)
-    {
-        rx_ = rx;
-    }
-
-    const Dimension& GetRx() const
-    {
-        return rx_;
-    }
-
-    void SetRy(const Dimension& ry)
-    {
-        ry_ = ry;
-    }
-
-    const Dimension& GetRy() const
-    {
-        return ry_;
-    }
-
-    void SetWidth(const Dimension& width)
-    {
-        width_ = width;
-    }
-
-    const Dimension& GetWidth() const
-    {
-        return width_;
-    }
-
-    void SetHeight(const Dimension& height)
-    {
-        height_ = height;
-    }
-
-    const Dimension& GetHeight() const
-    {
-        return height_;
+        declaration_->Inherit(parent);
     }
 
 private:
-    Dimension x_;
-    Dimension y_;
-    Dimension rx_;
-    Dimension ry_;
-    Dimension width_ = Dimension(-1.0);
-    Dimension height_ = Dimension(-1.0);
+    RefPtr<SvgRectDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

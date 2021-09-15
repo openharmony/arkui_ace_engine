@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MACROS_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MACROS_H
 
+#define ACE_FORCE_EXPORT __attribute__((visibility("default")))
+
 #ifndef ACE_EXPORT
 #ifndef WEARABLE_PRODUCT
-#define ACE_EXPORT __attribute__((visibility("default")))
+#define ACE_EXPORT ACE_FORCE_EXPORT
 #else
 #define ACE_EXPORT
 #endif

@@ -55,6 +55,7 @@ void RenderToolBarItem::Initialize()
             toolBarItem->HandleClickEvent();
         }
     });
+    InitAccessibilityEventListener();
 }
 
 void RenderToolBarItem::HandleTouchEvent(bool isTouch)
@@ -110,6 +111,20 @@ void RenderToolBarItem::Update(const RefPtr<Component>& component)
         return;
     }
     if (!toolBarItemComponent->GetClickedEventId().IsEmpty()) {
+        auto clickId = toolBarItemComponent->GetClickedEventId();
+        auto catchMode = clickId.IsEmpty() || clickId.GetCatchMode();
+        static const int32_t bubbleModeVersion = 6;
+        auto pipeline = context_.Upgrade();
+        if (!catchMode) {
+            if (pipeline && pipeline->GetMinPlatformVersion() >= bubbleModeVersion) {
+                catchMode = false;
+            } else {
+                catchMode = true;
+            }
+        }
+        if (clickRecognizer_) {
+            clickRecognizer_->SetUseCatchMode(catchMode);
+        }
         onClick_ = AceAsyncEvent<void()>::Create(toolBarItemComponent->GetClickedEventId(), context_);
     }
     if (!eventEffectController_) {
@@ -174,7 +189,6 @@ void RenderToolBarItem::OnMouseHoverEnterTest()
         controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
     }
     colorAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-    colorAnimationEnter_->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
     CreateColorAnimation(colorAnimationEnter_, Color::TRANSPARENT, mouseHoverColor_, true);
     colorAnimationEnter_->SetCurve(Curves::FRICTION);
     StartHoverAnimation(controllerEnter_, colorAnimationEnter_);
@@ -187,7 +201,6 @@ void RenderToolBarItem::OnMouseHoverExitTest()
         controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
     }
     colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-    colorAnimationExit_->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
     CreateColorAnimation(colorAnimationExit_, hoverColor_, Color::TRANSPARENT, false);
     if (hoverColor_ == mouseHoverColor_) {
         colorAnimationExit_->SetCurve(Curves::FRICTION);
@@ -262,6 +275,21 @@ void RenderToolBarItem::PlayEventEffectAnimation(const Color& endColor)
     eventEffectController_->SetDuration(PRESS_DURATION);
     eventEffectController_->SetFillMode(FillMode::FORWARDS);
     eventEffectController_->Forward();
+}
+
+void RenderToolBarItem::InitAccessibilityEventListener()
+{
+    const auto& accessibilityNode = accessibilityNode_.Upgrade();
+    if (!accessibilityNode) {
+        return;
+    }
+    accessibilityNode->AddSupportAction(AceAction::ACTION_CLICK);
+    accessibilityNode->SetActionClickImpl([weakPtr = WeakClaim(this)]() {
+        const auto& toolBarItem = weakPtr.Upgrade();
+        if (toolBarItem) {
+            toolBarItem->HandleClickEvent();
+        }
+    });
 }
 
 } // namespace OHOS::Ace

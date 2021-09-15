@@ -61,5 +61,5 @@ group("unittest") {
   testonly = true
   deps = []
 
-  deps += [ ":RenderTextSelectTest" ]
+  #deps += [ ":RenderTextSelectTest" ]
 }

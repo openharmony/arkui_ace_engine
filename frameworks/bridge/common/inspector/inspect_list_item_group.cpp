@@ -31,5 +31,6 @@ void InspectListItemGroup::PackAttrAndStyle()
     // add for the styles
     styles_.insert(std::make_pair("flex-direction", "row"));
     styles_.insert(std::make_pair("justify-content", "flex-start"));
+    styles_.erase("position");
 }
 } // namespace OHOS::Ace::Framework

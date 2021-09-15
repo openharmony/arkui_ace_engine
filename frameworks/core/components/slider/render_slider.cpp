@@ -45,6 +45,9 @@ void RenderSlider::Update(const RefPtr<Component>& component)
         LOGE("Update error, slider component is null");
         return;
     }
+    if (slider->GetOnChange()) {
+        onChange_ = *slider->GetOnChange();
+    }
     sliderComponent_ = slider;
     if (!blockActive_) {
         Initialize();
@@ -271,6 +274,9 @@ void RenderSlider::FireMoveEndEvent()
                                 .append("}");
         onMoveEnd_(param);
     }
+    if (onChange_) {
+        onChange_(value_, static_cast<int>(SliderEvent::MOVE_END));
+    }
 }
 
 void RenderSlider::FireMovingEvent(SliderEvent mode)
@@ -282,26 +288,44 @@ void RenderSlider::FireMovingEvent(SliderEvent mode)
             case SliderEvent::MOVE_START:
                 jsonResult->Put("isEnd", "false");
                 jsonResult->Put("mode", "start");
+                if (onChange_) {
+                    onChange_(value_, static_cast<int>(SliderEvent::MOVE_START));
+                }
                 break;
             case SliderEvent::MOVE_MOVING:
                 jsonResult->Put("isEnd", "false");
                 jsonResult->Put("mode", "move");
+                if (onChange_) {
+                    onChange_(value_, static_cast<int>(SliderEvent::MOVE_MOVING));
+                }
                 break;
             case SliderEvent::MOVE_END:
                 jsonResult->Put("isEnd", "true");
                 jsonResult->Put("mode", "end");
+                if (onChange_) {
+                    onChange_(value_, static_cast<int>(SliderEvent::MOVE_END));
+                }
                 break;
             case SliderEvent::CLICK:
                 jsonResult->Put("isEnd", "true");
                 jsonResult->Put("mode", "click");
+                if (onChange_) {
+                    onChange_(value_, static_cast<int>(SliderEvent::MOVE_END));
+                }
                 break;
             case SliderEvent::ACCESSIBILITY:
                 jsonResult->Put("isEnd", "false");
                 jsonResult->Put("mode", "accessibility");
+                if (onChange_) {
+                    onChange_(value_, static_cast<int>(SliderEvent::MOVE_END));
+                }
                 break;
             case SliderEvent::FOCUS:
                 jsonResult->Put("isEnd", "true");
                 jsonResult->Put("mode", "keyevent");
+                if (onChange_) {
+                    onChange_(value_, static_cast<int>(SliderEvent::MOVE_END));
+                }
                 break;
         }
         jsonResult->Put("value", value_);
@@ -452,6 +476,9 @@ void RenderSlider::UpdateBlockPosition(const Offset& touchPosition, bool isClick
         double stepRatio = step_ / (max_ - min_);
         double endRatio = stepRatio * std::floor((totalRatio + HALF * stepRatio) / stepRatio);
         endValue = (max_ - min_) * endRatio + min_;
+        if (GreatOrEqual(endValue, max_)) {
+            endValue = max_;
+        }
     }
     RestartMoveAnimation(endValue, isClick);
 }
@@ -637,6 +664,12 @@ void RenderSlider::UpdateAnimation()
     }));
     controller_->SetDuration(DEFAULT_SLIDER_ANIMATION_DURATION);
     controller_->AddInterpolator(translate_);
+}
+
+void RenderSlider::UpdateTouchRect()
+{
+    touchRect_ = GetPaintRect();
+    ownTouchRect_ = touchRect_;
 }
 
 } // namespace OHOS::Ace

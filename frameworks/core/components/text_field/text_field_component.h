@@ -24,7 +24,9 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/input_option.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/declaration/textfield/textfield_declaration.h"
 #include "core/components/image/image_component.h"
 #include "core/components/text_field/text_field_controller.h"
 #include "core/event/ace_event_handler.h"
@@ -36,11 +38,11 @@ namespace OHOS::Ace {
 class RenderNode;
 class Element;
 
-class TextFieldComponent : public RenderComponent, public LabelTarget {
+class ACE_EXPORT TextFieldComponent : public RenderComponent, public LabelTarget {
     DECLARE_ACE_TYPE(TextFieldComponent, RenderComponent, LabelTarget);
 
 public:
-    TextFieldComponent() = default;
+    TextFieldComponent();
     ~TextFieldComponent() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override;
@@ -131,6 +133,15 @@ public:
     bool ShowEllipsis() const;
     void SetShowEllipsis(bool showEllipsis);
 
+    bool IsSoftKeyboardEnabled() const;
+    void SetSoftKeyboardEnabled(bool softKeyboardEnabled);
+
+    bool ShowPasswordIcon() const;
+    void SetShowPasswordIcon(bool showEllipsis);
+
+    const std::optional<Color>& GetImageFill() const;
+    void SetImageFill(const std::optional<Color>& color);
+
     const std::string& GetIconImage() const;
     void SetIconImage(const std::string& iconImage);
 
@@ -146,22 +157,10 @@ public:
     const Dimension& GetIconHotZoneSize() const;
     void SetIconHotZoneSize(const Dimension& iconHotZoneSize);
 
-    const EventMarker& GetOnTextChange() const;
-    void SetOnTextChange(const EventMarker& onTextChange);
-
-    const EventMarker& GetOnFinishInput() const;
-    void SetOnFinishInput(const EventMarker& onFinishInput);
-
-    const EventMarker& GetOnTap() const;
-    void SetOnTap(const EventMarker& onTap);
-
-    const EventMarker& GetOnLongPress() const;
-    void SetOnLongPress(const EventMarker& onLongPress);
-
-    const RefPtr<TextEditController>& GetTextEditController() const;
+    RefPtr<TextEditController> GetTextEditController() const;
     void SetTextEditController(const RefPtr<TextEditController>& controller);
 
-    const RefPtr<TextFieldController>& GetTextFieldController() const;
+    RefPtr<TextFieldController> GetTextFieldController() const;
     void SetTextFieldController(const RefPtr<TextFieldController>& controller);
 
     void SetFocusBgColor(const Color& focusBgColor);
@@ -199,6 +198,7 @@ public:
 
     void SetResetToStart(bool resetToStart);
     bool GetResetToStart() const;
+    bool HasSetResetToStart() const;
 
     void SetShowCounter(bool showCounter);
     bool ShowCounter() const;
@@ -215,8 +215,28 @@ public:
     void SetOverCountStyleOuter(const TextStyle& overCountStyleOuter);
     const TextStyle& GetOverCountStyleOuter() const;
 
-    void SetInputOptions(const std::vector<Framework::InputOption>& inputOptions);
-    const std::vector<Framework::InputOption>& GetInputOptions() const;
+    const TextSelection& GetSelection() const;
+    void SetSelectedStart(int32_t selectedStart);
+    void SetSelectedEnd(int32_t selectedEnd);
+
+    const EventMarker& GetOnTextChange() const;
+    void SetOnTextChange(const EventMarker& onTextChange);
+    void SetOnTextChangeFunction(std::function<void(const std::string&)>&& onTextChangeCallback);
+
+    const EventMarker& GetOnSelectChange() const;
+    void SetOnSelectChange(const EventMarker& onSelectChange);
+
+    const EventMarker& GetOnFinishInput() const;
+    void SetOnFinishInput(const EventMarker& onFinishInput);
+
+    const EventMarker& GetOnTap() const;
+    void SetOnTap(const EventMarker& onTap);
+
+    const EventMarker& GetOnLongPress() const;
+    void SetOnLongPress(const EventMarker& onLongPress);
+
+    void SetInputOptions(const std::vector<InputOption>& inputOptions);
+    const std::vector<InputOption>& GetInputOptions() const;
 
     const EventMarker& GetOnOptionsClick() const;
     void SetOnOptionsClick(const EventMarker& onOptionsClick);
@@ -232,89 +252,20 @@ public:
 
     bool IsValueUpdated() const;
 
+    void SetCorrection(bool correction);
+
+    void SetInputFilter(bool correction);
+
+    void SetDeclaration(const RefPtr<TextFieldDeclaration>& declaration);
+
+    ACE_DEFINE_COMPONENT_EVENT(OnChange, void(std::string));
+
+    ACE_DEFINE_COMPONENT_EVENT(OnEditChanged, void(bool));
+
+    ACE_DEFINE_COMPONENT_EVENT(OnSubmit, void(int32_t));
+
 private:
-    std::string value_;
-    std::string placeholder_;
-    Color placeholderColor_;
-    Color cursorColor_;
-    Dimension cursorRadius_;
-    Dimension widthReserved_;
-    bool cursorColorIsSet_ = false;
-    bool showCursor_ = true;
-    // Obscure the text, for example, password.
-    bool obscure_ = false;
-    bool enabled_ = true;
-    TextInputType keyboard_ = TextInputType::TEXT;
-    // Action when "enter" pressed.
-    TextInputAction action_ = TextInputAction::UNSPECIFIED;
-    std::string actionLabel_;
-    bool lengthLimited_ = false;
-    uint32_t maxLength_ = std::numeric_limits<uint32_t>::max();
-    bool autoFocus_ = false;
-    // Whether height of textfield can auto-extend.
-    bool extend_ = false;
-    bool showEllipsis_ = false;
-    bool blockRightShade_ = false;
-    bool isVisible_ = true;
-    bool resetToStart_ = true;
-    bool isValueUpdated_ = false;
-
-    // Herder-icon of textField.
-    std::string iconImage_;
-    Dimension iconSize_;
-    Dimension iconHotZoneSize_;
-    // Icon to control password show or hide.
-    std::string showImage_;
-    std::string hideImage_;
-
-    TextAlign textAlign_ = TextAlign::START;
-    uint32_t textMaxLines_ = 1;
-    Dimension height_;
-    TextStyle textStyle_;
-    TextStyle errorTextStyle_;
-    // Spacing between error text and input text.
-    Dimension errorSpacing_;
-    // Whether error text show inner or under.
-    bool errorIsInner_ = false;
-    Dimension errorBorderWidth_;
-    Color errorBorderColor_;
-    bool needFade_ = false;
-    RefPtr<Decoration> decoration_;
-    Border originBorder_;
-
-    // theme setting
-    Color focusBgColor_;
-    Color focusPlaceholderColor_;
-    Color focusTextColor_;
-    Color bgColor_;
-    Color textColor_;
-    Color selectedColor_;
-    Color hoverColor_;
-    Color pressColor_;
-
-    // Callback id for when text is changed.
-    EventMarker onTextChange_;
-    // Callback id for when user press "enter"
-    EventMarker onFinishInput_;
-    EventMarker onTap_;
-    EventMarker onLongPress_;
-    EventMarker onOptionsClick_;
-    // Callback id for text overlay.
-    EventMarker onTranslate_;
-    EventMarker onShare_;
-    EventMarker onSearch_;
-
-    RefPtr<TextEditController> controller_;
-    RefPtr<TextFieldController> textFieldController_;
-
-    // Whether show counter, should work together with maxLength_.
-    bool showCounter_ = false;
-    TextStyle countTextStyle_;
-    TextStyle overCountStyle_;
-    TextStyle countTextStyleOuter_;
-    TextStyle overCountStyleOuter_;
-
-    std::vector<Framework::InputOption> inputOptions_;
+    RefPtr<TextFieldDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

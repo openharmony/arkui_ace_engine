@@ -26,16 +26,22 @@ build_component("common") {
 
     # #properties
     "properties/alignment.cpp",
+    "properties/animatable_path.cpp",
     "properties/border.cpp",
     "properties/border_edge.cpp",
+    "properties/border_image_edge.cpp",
+    "properties/clip_path.cpp",
     "properties/color.cpp",
     "properties/color_factory.cpp",
     "properties/decoration.cpp",
     "properties/edge.cpp",
+    "properties/motion_path_evaluator.cpp",
     "properties/page_transition_option.cpp",
     "properties/scroll_bar.cpp",
+    "properties/shadow.cpp",
     "properties/shadow_config.cpp",
     "properties/text_style.cpp",
+    "properties/text_style_parser.cpp",
 
     # layout
     "layout/grid_column_info.cpp",

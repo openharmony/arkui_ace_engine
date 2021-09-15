@@ -36,10 +36,11 @@ public:
     virtual void MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc) override;
     virtual void ReleaseRT(JSRuntime* rt) override;
 
-    void execute(const TouchCallBackInfo& info);
+    void execute(const TouchEventInfo& info);
 
 private:
-    JSValue createTouchInfo(const TouchCallBackInfo& touchInfo);
+    JSValue createTouchInfo(const TouchLocationInfo& touchInfo);
+    JSValue createJSEventInfo(const TouchEventInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

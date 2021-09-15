@@ -30,26 +30,12 @@ public:
     DOMText(NodeId nodeId, const std::string& nodeName);
     ~DOMText() override = default;
 
-    void InitializeStyle() override;
-
     RefPtr<Component> GetSpecializedComponent() override
     {
         return textChild_;
     }
 
-    bool HasSetFontColor() const
-    {
-        return hasSetTextColor_;
-    }
-
-    bool HasSetFontSize() const
-    {
-        return hasSetTextFontSize_;
-    }
-
 protected:
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
-    bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
     void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) override;
     void OnChildNodeRemoved(const RefPtr<DOMNode>& child) override;
     void PrepareSpecializedComponent() override;
@@ -60,10 +46,6 @@ protected:
 private:
     void CheckAndSetSpanStyle(const RefPtr<DOMSpan>& dmoSpan, TextStyle& spanStyle);
     void SetBoxAlignForText();
-
-    bool hasSetTextFontSize_ = false;
-    bool hasSetTextColor_ = false;
-    TextStyle textStyle_;
 };
 
 } // namespace OHOS::Ace::Framework

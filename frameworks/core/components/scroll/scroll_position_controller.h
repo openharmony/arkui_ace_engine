@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "core/animation/curve.h"
+#include "core/components/scroll/scroll_controller_interface.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -34,12 +35,10 @@ enum class ScrollEvent : size_t {
     SCROLL_TOUCHUP,
     SCROLL_END,
     SCROLL_POSITION,
+    SCROLL_EDGE,
+    SCROLL_LEFT,
+    SCROLL_RIGHT,
     UNKNOWN,
-};
-
-enum class ScrollEdgeType : size_t {
-    SCROLL_TOP = 0,
-    SCROLL_BOTTOM,
 };
 
 using OnScrollFunc = std::function<void(const std::string&)>;
@@ -73,6 +72,11 @@ public:
         return scrollState_;
     }
 
+    void SetScrollType(ScrollEvent type)
+    {
+        type_ = type;
+    }
+
 private:
     ScrollEvent type_ = ScrollEvent::SCROLL_TOP;
     double scrollX_ = 0.0;
@@ -81,7 +85,7 @@ private:
 };
 
 using ScrollEventFunc = std::function<void(std::shared_ptr<ScrollEventInfo>&)>;
-class ACE_EXPORT ScrollPositionController : public AceType {
+class ACE_EXPORT ScrollPositionController : public ScrollController {
     DECLARE_ACE_TYPE(ScrollPositionController, AceType);
 
 public:
@@ -119,22 +123,24 @@ public:
     }
 
     double GetCurrentPosition() const;
+    Axis GetScrollDirection() const override;
 
-    void JumpTo(int32_t index, int32_t source = SCROLL_FROM_JUMP);
+    void JumpTo(int32_t index, int32_t source = SCROLL_FROM_JUMP) override;
     void JumpTo(double position);
-    void AnimateTo(double position, float duration, const RefPtr<Curve>& curve);
-    void ScrollBy(double pixelX, double pixelY, bool smooth);
+    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve) override;
+    bool AnimateTo(double position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,
+        const std::function<void()>& onFinish = nullptr);
+    bool AnimateToTarget(const ComposeId& targetId, float duration, const RefPtr<Curve>& curve,
+        bool limitDuration = true, const std::function<void()>& onFinish = nullptr);
+    void ScrollBy(double pixelX, double pixelY, bool smooth) override;
     void ScrollArrow(double scrollDistance, bool reverse, bool smooth);
-    void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
-    void ScrollPage(bool reverse, bool smooth);
-    Offset GetCurrentOffset() const;
+    void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
+    void ScrollPage(bool reverse, bool smooth) override;
+    Offset GetCurrentOffset() const override;
 
-    void SetScrollNode(const WeakPtr<RenderNode>& scroll)
-    {
-        scroll_ = scroll;
-    }
 
-    void SetScrollEvent(ScrollEvent event, const ScrollEventFunc& scrollEvent)
+    void SetScrollEvent(
+        ScrollEvent event, const ScrollEventFunc& scrollEvent)
     {
         switch (event) {
             case ScrollEvent::SCROLL_TOP:
@@ -152,6 +158,9 @@ public:
             case ScrollEvent::SCROLL_POSITION:
                 scrollPosition_ = scrollEvent;
                 break;
+            case ScrollEvent::SCROLL_EDGE:
+                scrollEdge_ = scrollEvent;
+                break;
             default:
                 LOGW("unknown scroll event");
                 break;
@@ -165,16 +174,21 @@ public:
             return;
         }
         auto eventType = info->GetType();
-        LOGD("scroll event info:type[%{public}lu], param:[%{public}s]", eventType, info->ToJSONString().c_str());
         switch (eventType) {
             case ScrollEvent::SCROLL_TOP:
                 if (scrollTop_) {
                     scrollTop_(info);
                 }
+                if (scrollEdge_) {
+                    scrollEdge_(info);
+                }
                 break;
             case ScrollEvent::SCROLL_BOTTOM:
                 if (scrollBottom_) {
                     scrollBottom_(info);
+                }
+                if (scrollEdge_) {
+                    scrollEdge_(info);
                 }
                 break;
             case ScrollEvent::SCROLL_END:
@@ -264,13 +278,13 @@ private:
     OnFirstChanged onChanged_;
     IndexerRotation indexerRotationCallback_;
     int32_t firstIndex_ = 0;
-    WeakPtr<RenderNode> scroll_;
 
     ScrollEventFunc scrollTop_;
     ScrollEventFunc scrollBottom_;
     ScrollEventFunc scrollTouchUp_;
     ScrollEventFunc scrollEnd_;
     ScrollEventFunc scrollPosition_;
+    ScrollEventFunc scrollEdge_;
     uint32_t flags_ = POSITION_TOP;
 };
 

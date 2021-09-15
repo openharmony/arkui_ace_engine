@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_node.h"
+#include "core/pipeline/base/base_composed_component.h"
 
 namespace OHOS::Ace {
 
@@ -29,6 +30,12 @@ struct AccessibilityEvent {
     double itemCount = 0.0;
 };
 
+enum class AccessibilityVersion {
+    JS_VERSION = 1,
+    JS_DECLARATIVE_VERSION,
+};
+
+using VisibleRatioCallback = std::function<void(bool, double)>;
 class AccessibilityManager : public AceType {
     DECLARE_ACE_TYPE(AccessibilityManager, AceType);
 
@@ -56,6 +63,24 @@ public:
     virtual void SetCardViewPosition(int id, float offsetX, float offsetY) = 0;
     virtual void SetCardViewParams(const std::string& key, bool focus) = 0;
     virtual void ClearNodeRectInfo(RefPtr<AccessibilityNode>& node, bool isPopDialog) = 0;
+    virtual void AddComposedElement(const std::string& key, const RefPtr<ComposedElement>& node) = 0;
+    virtual WeakPtr<ComposedElement> GetComposedElementFromPage(NodeId nodeId) = 0;
+    virtual void TriggerVisibleChangeEvent() = 0;
+    virtual void AddVisibleChangeNode(NodeId nodeId, double ratio, VisibleRatioCallback callback) = 0;
+    virtual void RemoveVisibleChangeNode(NodeId nodeId) = 0;
+    virtual bool IsVisibleChangeNodeExists(NodeId nodeId) = 0;
+
+    void SetVersion(AccessibilityVersion version)
+    {
+        version_ = version;
+    }
+    AccessibilityVersion GetVersion()
+    {
+        return version_;
+    }
+
+private:
+    AccessibilityVersion version_ = AccessibilityVersion::JS_VERSION;
 };
 
 } // namespace OHOS::Ace

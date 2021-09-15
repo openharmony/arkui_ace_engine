@@ -29,6 +29,8 @@ namespace OHOS::Ace {
 */
 ACE_EXPORT int64_t GetMicroTickCount();
 
+int64_t GetSysTimestamp();
+
 struct TimeOfNow final {
     explicit TimeOfNow(double hoursWest = DBL_MAX) : hoursWest_(hoursWest) {}
     ~TimeOfNow() = default;

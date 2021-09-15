@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_SHARED_TRANSITION_EFFECT_H
 
 #include "base/memory/ace_type.h"
-#include "core/animation/animator.h"
 #include "core/animation/page_transition_listener.h"
 #include "core/components/common/properties/tween_option.h"
 #include "core/pipeline/base/component.h"
@@ -35,7 +34,7 @@ enum class SharedTransitionEffectType {
     SHARED_EFFECT_EXCHANGE,
 };
 
-class SharedTransitionEffect : public AceType {
+class ACE_EXPORT SharedTransitionEffect : public AceType {
     DECLARE_ACE_TYPE(SharedTransitionEffect, AceType);
 
 public:
@@ -58,6 +57,22 @@ public:
     {
         return src_;
     }
+    const RefPtr<Animator>& GetAnimator() const
+    {
+        return controller_;
+    }
+    const std::string& GetShareId() const
+    {
+        return shareId_;
+    }
+    void setCurrentSharedElement(const WeakPtr<SharedTransitionElement>& current)
+    {
+        currentWorking_ = current;
+    }
+    const WeakPtr<SharedTransitionElement>& GetCurrentSharedElement() const
+    {
+        return currentWorking_;
+    }
     virtual bool CreateAnimation(TweenOption& option, TransitionEvent event, bool isLazy) = 0;
     virtual bool ApplyAnimation(RefPtr<OverlayElement>& overlay, RefPtr<Animator>& controller,
         TweenOption& option, TransitionEvent event) = 0;
@@ -76,6 +91,7 @@ protected:
     const SharedTransitionEffectType type_;
     WeakPtr<SharedTransitionElement> dest_;
     WeakPtr<SharedTransitionElement> src_;
+    WeakPtr<SharedTransitionElement> currentWorking_;
     RefPtr<Animator> controller_;
     WeakPtr<TweenElement> tweenSeatElement_;
 };
@@ -95,6 +111,7 @@ public:
 private:
     bool CreateTranslateAnimation(TweenOption& option, TransitionEvent event, bool calledByLazyLoad);
     bool CreateSizeAnimation(TweenOption& option, TransitionEvent event, bool isLazy);
+    bool CreateOpacityAnimation(TweenOption& option, TransitionEvent event, bool isLazy);
     void AddLazyLoadCallback(TransitionEvent event);
     bool autoWidth_ = true;
     bool autoHeight_ = true;
@@ -109,7 +126,7 @@ public:
         : SharedTransitionEffect(shareId, SharedTransitionEffectType::SHARED_EFFECT_STATIC) {};
     ~SharedTransitionStatic() override = default;
     bool CreateAnimation(TweenOption& option, TransitionEvent event, bool isLazy) override;
-    // The static effect only works on the dest page
+    // the dest page and source page elements are in effect
     bool ApplyAnimation(RefPtr<OverlayElement>& overlay, RefPtr<Animator>& controller, TweenOption& option,
         TransitionEvent event) override;
     bool Allow(TransitionEvent event) override;

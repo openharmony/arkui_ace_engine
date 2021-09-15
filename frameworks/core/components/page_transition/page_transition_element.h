@@ -18,6 +18,7 @@
 
 #include "core/components/box/box_element.h"
 #include "core/components/common/properties/page_transition_option.h"
+#include "core/components/page_transition/page_transition_info.h"
 #include "core/components/stack/stack_component.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/transition/transition_element.h"
@@ -25,7 +26,7 @@
 
 namespace OHOS::Ace {
 
-class PageTransitionElement : public StackElement {
+class ACE_EXPORT PageTransitionElement : public StackElement {
     DECLARE_ACE_TYPE(PageTransitionElement, StackElement);
 
 public:
@@ -37,16 +38,27 @@ public:
     const RefPtr<Animator>& GetTransitionController() const;
     void SetTransition(DeviceType deviceType, TransitionEvent event, TransitionDirection direction,
         const RRect& rrect);
-    void SetVisible(VisibleType visible);
+    void SetWrapHidden(bool hidden);
     void InitController(TransitionDirection direction, TransitionEvent event);
     RefPtr<Element> GetContentElement() const;
     const RefPtr<TransitionElement>& GetContentTransitionElement() const;
     const RefPtr<TransitionElement>& GetBackgroundTransitionElement() const;
     void SetTouchable(bool enable);
     void InitTransitionClip();
+    TweenOption ProcessPageTransition(const RefPtr<PageTransition>& pageTransition, TransitionEvent event);
+    RefPtr<PageTransition> GetCurrentPageTransition(TransitionEvent event, TransitionDirection direction) const;
+    void SetDeclarativeDirection(TransitionDirection direction)
+    {
+        direction_ = direction;
+    }
+    bool GetIsCustomOption() const
+    {
+        return isCustomOption_;
+    }
 
     // element only support page now
     static RefPtr<PageTransitionElement> GetTransitionElement(const RefPtr<Element>& element);
+    static PageTransitionType GetPageTransitionType(TransitionEvent event, TransitionDirection direction);
 
 private:
     void UpdateTransitionOption();
@@ -56,7 +68,7 @@ private:
     RefPtr<TransitionElement> contentTransition_;         // element to animate page content
     RefPtr<TransitionElement> backgroundTransition_;      // element to animate background
     RefPtr<TransitionElement> frontDecorationTransition_; // element to animate front decoration opacity
-    RefPtr<Animator> controller_;             // animator for content and background
+    RefPtr<Animator> controller_;                         // animator for content and background
     TweenOption contentInOption_;
     TweenOption contentOutOption_;
     TweenOption sharedInOption_;
@@ -64,6 +76,10 @@ private:
     bool isRightToLeft_ = false;
     bool isCustomOptionOut_ = false;
     bool isCustomOptionIn_ = false;
+    std::unordered_map<PageTransitionType, RefPtr<PageTransition>> pageTransitions_;
+    TransitionDirection direction_ = TransitionDirection::TRANSITION_IN;
+    bool isCustomOption_ = false;
+    RefPtr<Animation<float>> floatAnimation_;
 };
 
 } // namespace OHOS::Ace

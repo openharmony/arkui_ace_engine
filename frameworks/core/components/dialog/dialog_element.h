@@ -30,8 +30,16 @@ public:
 
     void PerformBuild() override;
 
+    int32_t GetDialogId() const
+    {
+        return dialogId_;
+    }
+
 protected:
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
+
+private:
+    int32_t dialogId_ = -1;
 };
 
 } // namespace OHOS::Ace

@@ -83,8 +83,6 @@ void AccessibilityNodeManager::ClearPageAccessibilityNodes(int32_t pageId) {}
 void AccessibilityNodeManager::TrySaveTargetAndIdNode(
     const std::string& id, const std::string& target, const RefPtr<AccessibilityNode>& node) {}
 
-void AccessibilityNodeManager::HandleComponentPostBinding() {}
-
 void AccessibilityNodeManager::DumpHandleEvent(const std::vector<std::string>& params) {}
 
 void AccessibilityNodeManager::DumpProperty(const std::vector<std::string>& params) {}
@@ -94,5 +92,19 @@ void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID) {}
 void AccessibilityNodeManager::SetCardViewParams(const std::string& key, bool focus) {}
 
 void AccessibilityNodeManager::SetCardViewPosition(int id, float offsetX, float offsetY) {}
+
+void AccessibilityNodeManager::AddComposedElement(const std::string& key, const RefPtr<ComposedElement>& node) {}
+
+WeakPtr<ComposedElement> AccessibilityNodeManager::GetComposedElementFromPage(NodeId nodeId)
+{
+    RefPtr<ComposedElement> fake = nullptr;
+    return AceType::WeakClaim(AceType::RawPtr(fake));
+}
+
+void AccessibilityNodeManager::TriggerVisibleChangeEvent() {}
+
+void AccessibilityNodeManager::AddVisibleChangeNode(NodeId nodeId, double ratio, VisibleRatioCallback callback) {}
+
+void AccessibilityNodeManager::RemoveVisibleChangeNode(NodeId nodeId) {}
 
 } // namespace OHOS::Ace::Framework

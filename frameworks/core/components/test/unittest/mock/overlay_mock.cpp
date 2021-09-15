@@ -16,6 +16,7 @@
 #include "core/components/test/unittest/mock/overlay_mock.h"
 
 #include "core/components/overlay/overlay_component.h"
+#include "core/components/stack/flutter_render_stack.h"
 
 namespace OHOS::Ace {
 
@@ -39,6 +40,16 @@ RefPtr<Element> OverlayComponent::CreateElement()
         g_hookOverlay(overlay);
     }
     return overlay;
+}
+
+RefPtr<RenderNode> OverlayComponent::CreateRenderNode()
+{
+    auto renderNode = AceType::DynamicCast<FlutterRenderStack>(StackComponent::CreateRenderNode());
+    if (renderNode) {
+        renderNode->SetVisible(false);
+        renderNode->SetBoundary();
+    }
+    return renderNode;
 }
 
 } // namespace OHOS::Ace

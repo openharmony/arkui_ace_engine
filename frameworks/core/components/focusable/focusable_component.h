@@ -20,35 +20,14 @@
 
 #include "core/components/box/box_component.h"
 #include "core/components/box/render_box.h"
+#include "core/components/declaration/common/controllers.h"
 #include "core/components/focusable/focusable_element.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace {
 
-using RequestFocusImpl = std::function<void(bool flag)>;
-
-class FocusableController : public virtual AceType {
-    DECLARE_ACE_TYPE(FocusableController, AceType);
-
-public:
-    void RequestFocus(bool flag)
-    {
-        if (requestFocusImpl_) {
-            requestFocusImpl_(flag);
-        }
-    }
-
-    void SetRequestFocusImpl(const RequestFocusImpl& requestFocusImpl)
-    {
-        requestFocusImpl_ = requestFocusImpl;
-    }
-
-private:
-    RequestFocusImpl requestFocusImpl_;
-};
-
-class FocusableComponent final : public SoleChildComponent {
+class ACE_EXPORT FocusableComponent final : public SoleChildComponent {
     DECLARE_ACE_TYPE(FocusableComponent, SoleChildComponent);
 
 public:
@@ -106,6 +85,15 @@ public:
     void SetOnKeyId(const EventMarker& onKeyId)
     {
         onKeyId_ = onKeyId;
+    }
+
+    const EventMarker& GetOnDeleteId() const
+    {
+        return onDeleteId_;
+    }
+    void SetOnDeleteId(const EventMarker& onDeleteId)
+    {
+        onDeleteId_ = onDeleteId;
     }
 
     RefPtr<BoxComponent> GetBoxStyle() const
@@ -166,11 +154,19 @@ public:
         return focusableController_;
     }
 
+    bool IsDeleteDisabled() {
+        return deleteDisabled_;
+    }
+    void SetDeleteDisabled(bool deleteDisabled) {
+        deleteDisabled_ = deleteDisabled;
+    }
+
 private:
     EventMarker onClickId_;
     EventMarker onFocusId_;
     EventMarker onBlurId_;
     EventMarker onKeyId_;
+    EventMarker onDeleteId_;
 
     RefPtr<BoxComponent> boxStyle_;
     RefPtr<BoxComponent> focusedBoxStyle_;
@@ -180,6 +176,7 @@ private:
     bool focusNode_ { false };
     bool focusable_ { false };
     bool show_ { true };
+    bool deleteDisabled_ { false };
 };
 
 } // namespace OHOS::Ace

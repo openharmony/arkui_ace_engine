@@ -17,6 +17,7 @@
 
 #include "adapter/ohos/osal/fake_asset_manager.h"
 #include "adapter/ohos/osal/fake_task_executor.h"
+#include "base/json/json_util.h"
 #include "base/log/log.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/simple_spring_adapter.h"

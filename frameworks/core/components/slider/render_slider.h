@@ -143,7 +143,11 @@ public:
 
     void SetTotalRatio(double ratio)
     {
-        totalRatio_ = ratio;
+        if (ratio > 1.0) {
+            totalRatio_ = 1.0;
+        } else {
+            totalRatio_ = ratio;
+        }
         if (showTips_) {
             UpdateTipText(totalRatio_);
         }
@@ -168,6 +172,11 @@ protected:
     virtual void OnMouseHoverEnterTest() override {}
     virtual void OnMouseHoverExitTest() override {}
 
+    void SetOnChange(const std::function<void(double,int)>& value)
+    {
+        onChange_ = value;
+    }
+
     void HandleClick(const Offset& clickPosition);
 
     void FireMoveEndEvent();
@@ -187,6 +196,7 @@ protected:
     void UpdateAccessibilityAttr();
     void InitAccessibilityEventListener();
     void HandleScrollUpdate(double delta);
+    void UpdateTouchRect() override;
 
     bool renderWholeNode_ = true;
 
@@ -223,6 +233,8 @@ protected:
     RefPtr<RenderNode> renderText_;
     RefPtr<TextComponent> tipText_;
     WeakPtr<SliderComponent> sliderComponent_;
+
+    std::function<void(double,int)> onChange_;
 
 private:
     // Slider render information

@@ -13,9 +13,18 @@
  * limitations under the License.
  */
 
+
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
+ * Description: Implement RenderScroll.
+ * Create: 2019/12/25
+ */
+
 #include "core/components/scroll/render_scroll.h"
 
 #include "core/animation/curve_animation.h"
+#include "core/event/ace_event_helper.h"
+#include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -42,6 +51,10 @@ void RenderScroll::Initialize()
     touchRecognizer_->SetOnTouchCancel([weakItem = AceType::WeakClaim(this)](const TouchEventInfo&) {
         auto item = weakItem.Upgrade();
         if (!item) {
+            return;
+        }
+        // check out of boundary
+        if (!item->IsOutOfBoundary()) {
             return;
         }
         auto scrollEffect = item->scrollEffect_;
@@ -124,6 +137,11 @@ bool RenderScroll::HandleCrashBottom()
         positionController_->HandleScrollEvent(
             std::make_shared<ScrollEventInfo>(ScrollEvent::SCROLL_BOTTOM, 0.0, 0.0, -1));
     }
+    if (axis_ == Axis::HORIZONTAL) {
+        OnReachEnd();
+    } else {
+        OnReachBottom();
+    }
     return false;
 }
 
@@ -133,6 +151,11 @@ bool RenderScroll::HandleCrashTop()
         positionController_->SetTop();
         positionController_->HandleScrollEvent(
             std::make_shared<ScrollEventInfo>(ScrollEvent::SCROLL_TOP, 0.0, 0.0, -1));
+    }
+    if (axis_ == Axis::HORIZONTAL) {
+        OnReachStart();
+    } else {
+        OnReachTop();
     }
     return false;
 }
@@ -524,6 +547,10 @@ void RenderScroll::ResetScrollEventCallBack()
 void RenderScroll::InitScrollBar(const RefPtr<ScrollBar>& scrollBar)
 {
     if (scrollBar_ != scrollBar) {
+        if (scrollBar_) {
+            // Clear the old data.
+            scrollBar_->Reset();
+        }
         scrollBar_ = scrollBar;
         if (!scrollBar_) {
             scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF);
@@ -575,6 +602,7 @@ void RenderScroll::ResetScrollable()
         } else {
             scrollable_ = AceType::MakeRefPtr<Scrollable>(callback, Axis::HORIZONTAL);
         }
+        scrollable_->SetScrollableNode(AceType::WeakClaim(this));
     }
     scrollable_->SetNotifyScrollOverCallBack([weak = AceType::WeakClaim(this)] (double velocity) {
         auto scroll = weak.Upgrade();
@@ -626,13 +654,13 @@ void RenderScroll::SetEdgeEffectAttribute()
 void RenderScroll::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    if (!GetVisible()) {
+    if (!GetVisible() || axis_ == Axis::NONE) {
         return;
     }
     if (!scrollable_ || !scrollable_->Available()) {
         return;
     }
-    if (scrollBar_ && scrollBar_->InBarRegion(globalPoint_)) {
+    if (scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
         scrollBar_->AddScrollBarController(coordinateOffset, result);
     } else {
         scrollable_->SetCoordinateOffset(coordinateOffset);
@@ -661,14 +689,14 @@ void RenderScroll::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     }
 }
 
-bool RenderScroll::ScrollPage(bool reverse, bool smooth)
+bool RenderScroll::ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish)
 {
     if (reverse) {
         double distance = -GetMainSize(viewPort_);
-        ScrollBy(distance, distance, smooth);
+        ScrollBy(distance, distance, smooth, onFinish);
     } else {
         double distance = GetMainSize(viewPort_);
-        ScrollBy(distance, distance, smooth);
+        ScrollBy(distance, distance, smooth, onFinish);
     }
     return true;
 }
@@ -703,7 +731,8 @@ void RenderScroll::DoJump(double position, int32_t source)
     }
 }
 
-void RenderScroll::AnimateTo(double position, float duration, const RefPtr<Curve>& curve)
+void RenderScroll::AnimateTo(double position, float duration, const RefPtr<Curve>& curve, bool limitDuration,
+    const std::function<void()>& onFinish)
 {
     LOGD("animate from position %{public}lf to %{public}lf, duration: %{public}f", GetCurrentPosition(), position,
         duration);
@@ -728,12 +757,12 @@ void RenderScroll::AnimateTo(double position, float duration, const RefPtr<Curve
         }
     });
     animator_->AddInterpolator(animation);
-    animator_->SetDuration(std::min(duration, SCROLL_MAX_TIME));
+    animator_->SetDuration(limitDuration ? std::min(duration, SCROLL_MAX_TIME) : duration);
     animator_->ClearStopListeners();
     animator_->Play();
     auto weakScroll = AceType::WeakClaim(this);
     auto weakScrollBar = AceType::WeakClaim(AceType::RawPtr(scrollBar_));
-    animator_->AddStopListener([weakScroll, weakScrollBar]() {
+    animator_->AddStopListener([weakScroll, weakScrollBar, onFinish, context = context_]() {
         auto scrollBar = weakScrollBar.Upgrade();
         if (scrollBar) {
             scrollBar->HandleScrollBarEnd();
@@ -747,12 +776,41 @@ void RenderScroll::AnimateTo(double position, float duration, const RefPtr<Curve
                 scrollEvent.nodeId = scroll->GetAccessibilityNodeId();
                 scrollEvent.eventType = "scrollend";
                 context->SendEventToAccessibility(scrollEvent);
+                if (context->GetIsDeclarative() && scroll->scrollable_) {
+                    scroll->scrollable_->ProcessScrollMotionStop();
+                }
             }
+        }
+
+        if (onFinish) {
+            onFinish();
         }
     });
 }
 
-void RenderScroll::ScrollBy(double pixelX, double pixelY, bool smooth)
+bool RenderScroll::AnimateToTarget(const ComposeId& targetId, float duration, const RefPtr<Curve>& curve,
+    bool limitDuration, const std::function<void()>& onFinish)
+{
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        return false;
+    }
+    auto targetElement = context->GetComposedElementById(targetId);
+    if (!targetElement) {
+        return false;
+    }
+    auto targetRender = targetElement->GetRenderNode();
+    if (!targetRender) {
+        return false;
+    }
+
+    auto globalOffset = targetRender->GetGlobalOffset() - GetPosition();
+    double distance = ((axis_ == Axis::VERTICAL) ? globalOffset.GetY() : globalOffset.GetX()) + GetCurrentPosition();
+    AnimateTo(distance, duration, curve, limitDuration, onFinish);
+    return true;
+}
+
+void RenderScroll::ScrollBy(double pixelX, double pixelY, bool smooth, const std::function<void()>& onFinish)
 {
     double distance = (axis_ == Axis::VERTICAL) ? pixelY : pixelX;
     if (NearZero(distance)) {
@@ -760,7 +818,7 @@ void RenderScroll::ScrollBy(double pixelX, double pixelY, bool smooth)
     }
     double position = GetMainOffset(currentOffset_) + distance;
     if (smooth) {
-        AnimateTo(position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT);
+        AnimateTo(position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true, onFinish);
     } else {
         JumpToPosition(position);
     }
@@ -786,6 +844,15 @@ void RenderScroll::Update(const RefPtr<Component>& component)
     // Send scroll none when first build.
     HandleScrollPosition(0.0, 0.0, SCROLL_NONE);
     MarkNeedLayout();
+    auto scroll = AceType::DynamicCast<ScrollComponent>(component);
+    if (scroll == nullptr) {
+        LOGI("scroll component is null, which it is multi scroll, not single scroll");
+        return;
+    }
+    onReachStart_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachStart(), context_);
+    onReachEnd_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachEnd(), context_);
+    onReachTop_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachTop(), context_);
+    onReachBottom_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachBottom(), context_);
 }
 
 void RenderScroll::SetBarCallBack(bool isVertical)
@@ -889,6 +956,50 @@ void RenderScroll::OnChildAdded(const RefPtr<RenderNode>& child)
             scroll->scrollable_->SetSlipFactor(slipFactor);
         }
     });
+}
+
+void RenderScroll::OnReachStart() const
+{
+    if (onReachStart_) {
+        onReachStart_(std::string("\"reachstart\",null"));
+    }
+}
+
+void RenderScroll::OnReachEnd() const
+{
+    if (onReachEnd_) {
+        onReachEnd_(std::string("\"reachend\",null"));
+    }
+}
+
+void RenderScroll::OnReachTop() const
+{
+    if (onReachTop_) {
+        onReachTop_(std::string("\"reachtop\",null"));
+    }
+}
+
+void RenderScroll::OnReachBottom() const
+{
+    if (onReachBottom_) {
+        onReachBottom_(std::string("\"reachbottom\",null"));
+    }
+}
+
+void RenderScroll::UpdateTouchRect()
+{
+    RenderNode::UpdateTouchRect();
+    if (!scrollBar_) {
+        return;
+    }
+    double scrollBarPosition = NormalizeToPx(scrollBar_->GetPosition());
+    if (!NearZero(scrollBarPosition)) {
+        touchRect_.SetWidth(touchRect_.Width() + scrollBarPosition);
+        if (scrollBar_->GetPositionMode() == PositionMode::LEFT) {
+            touchRect_.SetLeft(touchRect_.Left() - scrollBarPosition);
+        }
+        ownTouchRect_ = touchRect_;
+    }
 }
 
 } // namespace OHOS::Ace

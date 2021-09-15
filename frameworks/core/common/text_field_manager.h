@@ -32,11 +32,15 @@ public:
     ~TextFieldManager() override = default;
 
     void SetClickPosition(const Offset& position) override;
-    void MovePage(const RefPtr<StackElement>& stackElement, const Offset& rootRect, double offsetHeight) override;
+    const Offset& GetClickPosition();
+    void MovePage(int32_t pageId, const Offset& rootRect, double offsetHeight) override;
+    void SetScrollElement(int32_t pageId, const WeakPtr<ScrollElement>& scrollElement) override;
+    void RemovePageId(int32_t pageId) override;
 
 private:
     bool hasMove_ = false;
     Offset position_;
+    std::unordered_map<int32_t, WeakPtr<ScrollElement>> scrollMap_;
 };
 
 } // namespace OHOS::Ace

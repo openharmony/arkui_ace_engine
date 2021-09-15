@@ -36,7 +36,7 @@ public:
      *
      * @param[in] client The event receiver to handle IME event. Make it weak.
      * @param[in] config Indicate how to show the keyboard.
-     * @param[in] taskExecutor The task executor to be posted to run task.
+     * @param[in] taskExecutor The task executor to be posted to run JNI task.
      *
      * @return A connection which can interact with IME.
      */

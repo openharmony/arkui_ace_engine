@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_RADIUS_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_RADIUS_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_RADIUS_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_RADIUS_H
 
-#include "base/geometry/dimension.h"
+#include "base/geometry/animatable_dimension.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
@@ -27,9 +27,17 @@ public:
     Radius() = default;
     explicit Radius(double value) : Radius(value, value) {};
     explicit Radius(const Dimension& value) : Radius(value, value) {};
+    explicit Radius(const AnimatableDimension& value) : Radius(value, value) {};
     Radius(double x, double y) : x_(Dimension(x)), y_(Dimension(y)) {}
     Radius(const Dimension& x, const Dimension& y) : x_(x), y_(y) {};
+    Radius(const AnimatableDimension& x, const AnimatableDimension& y) : x_(x), y_(y) {};
     ~Radius() = default;
+
+    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+    {
+        x_.SetContextAndCallback(context, callback);
+        y_.SetContextAndCallback(context, callback);
+    }
 
     void ApplyScaleAndRound(double scale)
     {
@@ -39,7 +47,7 @@ public:
 
     bool IsValid() const
     {
-        return GreatOrEqual(x_.Value(), 0.0) && GreatOrEqual(y_.Value(), 0.0);
+        return x_.IsValid() && y_.IsValid();
     }
 
     bool HasValue() const
@@ -47,14 +55,34 @@ public:
         return x_.IsValid() || y_.IsValid();
     }
 
-    const Dimension& GetX() const
+    const AnimatableDimension& GetX() const
     {
         return x_;
     }
 
-    const Dimension& GetY() const
+    const AnimatableDimension& GetY() const
     {
         return y_;
+    }
+
+    void SetX(const Dimension& x, const AnimationOption& option = AnimationOption())
+    {
+        x_ = AnimatableDimension(x, option);
+    }
+
+    void SetY(const Dimension& y, const AnimationOption& option = AnimationOption())
+    {
+        y_ = AnimatableDimension(y, option);
+    }
+
+    void SetX(const AnimatableDimension& x)
+    {
+        x_ = x;
+    }
+
+    void SetY(const AnimatableDimension& y)
+    {
+        y_ = y;
     }
 
     Radius operator+(const Radius& radius) const
@@ -77,11 +105,16 @@ public:
         return (radius.GetX() == x_) && (radius.GetY() == y_);
     }
 
+    std::string ToString() const
+    {
+        return std::string("x:").append(x_.ToString()).append(", y:").append(y_.ToString());
+    }
+
 private:
-    Dimension x_;
-    Dimension y_;
+    AnimatableDimension x_;
+    AnimatableDimension y_;
 };
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_RADIUS_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_RADIUS_H

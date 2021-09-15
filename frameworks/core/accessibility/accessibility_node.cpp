@@ -15,11 +15,14 @@
 
 #include "core/accessibility/accessibility_node.h"
 
+#include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/common/container.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -102,6 +105,7 @@ AccessibilityNode::AccessibilityNode(NodeId nodeId, const std::string& nodeName)
     // Initialize member variable in bitfield
     isEnabled_ = true;
     visible_ = true;
+    shown_ = true;
 }
 
 void AccessibilityNode::SetActionClickImpl(const ActionClickImpl& actionClickImpl)
@@ -243,8 +247,10 @@ void AccessibilityNode::AddEvent(int32_t pageId, const std::vector<std::string>&
             onAccessibilityEventId_ = EventMarker(std::to_string(nodeId_), event, pageId);
         } else if (event == CLICK) {
             onClickId_ = EventMarker(std::to_string(nodeId_), event, pageId);
+            SetClickableState(true);
         } else if (event == LONG_PRESS) {
             onLongPressId_ = EventMarker(std::to_string(nodeId_), event, pageId);
+            SetLongClickableState(true);
         } else if (event == FOCUS) {
             onFocusId_ = EventMarker(std::to_string(nodeId_), event, pageId);
         } else if (event == BLUR) {
@@ -367,15 +373,7 @@ void AccessibilityNode::SetOperableInfo()
     int64_t operateIter = BinarySearchFindIndex(nodeOperatorMap, ArraySize(nodeOperatorMap), tag_.c_str());
     if (operateIter != -1) {
         isCheckable_ = nodeOperatorMap[operateIter].value.checkable;
-        isClickable_ = nodeOperatorMap[operateIter].value.clickable;
-        if (isClickable_) {
-            AddSupportAction(AceAction::ACTION_CLICK);
-        }
         isScrollable_ = nodeOperatorMap[operateIter].value.scrollable;
-        isLongClickable_ = nodeOperatorMap[operateIter].value.longClickable;
-        if (isLongClickable_) {
-            AddSupportAction(AceAction::ACTION_LONG_CLICK);
-        }
         isFocusable_ = nodeOperatorMap[operateIter].value.focusable;
         if (isFocusable_) {
             AddSupportAction(AceAction::ACTION_FOCUS);
@@ -420,6 +418,35 @@ std::unordered_set<AceAction> AccessibilityNode::GetSupportAction() const
         }
     }
     return supportActions;
+}
+
+void AccessibilityNode::SetFocusChangeEventMarker(const EventMarker& eventId)
+{
+    if (eventId.IsEmpty()) {
+        return;
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("Container is null.");
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("PipelineContext is null.");
+        return;
+    }
+    focusChangeEventId_ =
+        AceAsyncEvent<void(const std::string&)>::Create(eventId, pipelineContext);
+}
+
+void AccessibilityNode::OnFocusChange(bool isFocus)
+{
+    if (focusChangeEventId_) {
+        auto json = JsonUtil::Create(true);
+        json->Put("eventType", isFocused_ ? "1" : "2");
+        focusChangeEventId_(json->ToString());
+    }
 }
 
 } // namespace OHOS::Ace

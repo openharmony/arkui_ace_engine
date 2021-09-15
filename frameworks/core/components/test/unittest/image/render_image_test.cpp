@@ -264,4 +264,30 @@ HWTEST_F(RenderImageTest, DecideLayoutSize004, TestSize.Level1)
     ASSERT_TRUE(renderImage->GetLayoutSize() == Size(SMALL_LENGTH, EXTRA_SMALL_LENGTH));
 }
 
+/**
+ * @tc.name: DecideLayoutSize005
+ * @tc.desc: Verify that RenderImage can use max size of layout param when imageComponent is set to fit max size
+ * @tc.type: FUNC
+ * @tc.require: AR000DAQUM
+ * @tc.author: chenxuankai
+ */
+HWTEST_F(RenderImageTest, DecideLayoutSize005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create renderImage with expected maxSize, width and height and then call PerformLayout()
+     */
+    RefPtr<RenderRoot> root = CreateRenderRoot(Size(EXTRA_LARGE_LENGTH, LARGE_LENGTH));
+    RefPtr<RenderImage> renderImage = CreateRenderImage(DEFAULT_LENGTH, DEFAULT_LENGTH, FIT_MAX_SIZE);
+    auto mockContext = GetMockContext();
+    renderImage->Attach(mockContext);
+    root->AddChild(renderImage);
+    root->PerformLayout();
+
+    /**
+     * @tc.steps: step2. Verify that layout size is Size(EXTRA_LARGE_LENGTH, LARGE_LENGTH).
+     * @tc.expected: step2. layout size is Size(EXTRA_LARGE_LENGTH, LARGE_LENGTH).
+     */
+    ASSERT_TRUE(renderImage->GetLayoutSize() == Size(EXTRA_LARGE_LENGTH, LARGE_LENGTH));
+}
+
 } // namespace OHOS::Ace

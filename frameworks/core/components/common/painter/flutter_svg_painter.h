@@ -16,14 +16,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_FLUTTER_SVG_PAINTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_FLUTTER_SVG_PAINTER_H
 
-#include "include/core/SkPoint.h"
-#include "include/core/SkTypeface.h"
+
 
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/painting/paint.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPoint.h"
+#include "include/core/SkTypeface.h"
 
 #include "frameworks/base/geometry/matrix4.h"
+#include "frameworks/core/components/common/properties/motion_path_evaluator.h"
 #include "frameworks/core/components/common/properties/svg_paint_state.h"
+#include "frameworks/core/components/svg/render_svg_base.h"
 #include "frameworks/core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -47,6 +51,13 @@ struct TextDrawInfo {
     double rotate = 0.0;
 };
 
+struct RenderInfo {
+    RefPtr<RenderSvgBase> node = nullptr;
+    Offset offset;
+    uint8_t opacity = UINT8_MAX;
+    bool antiAlias = true;
+};
+
 class FlutterSvgPainter {
 public:
     FlutterSvgPainter() = default;
@@ -55,18 +66,31 @@ public:
     static void CheckFontType();
     static double GetPathLength(const std::string& path);
     static Offset GetPathOffset(const std::string& path, double current);
-    static void SetFillStyle(SkPaint& skPaint, const FillState& fillState, uint8_t opacity = UINT8_MAX);
+    static bool GetMotionPathPosition(const std::string& path, double percent, MotionPathPosition& result);
+    static void SetMask(SkCanvas* canvas);
+    static void SetFillStyle(SkPaint& skPaint, const FillState& fillState, uint8_t opacity = UINT8_MAX,
+        bool antiAlias = true);
     static void SetFillStyle(SkCanvas* canvas, const SkPath& skPath, const FillState& fillState,
-        uint8_t opacity = UINT8_MAX);
-    static void SetStrokeStyle(SkPaint& skPaint, const StrokeState& strokeState, uint8_t opacity = UINT8_MAX);
+        uint8_t opacity = UINT8_MAX, bool antiAlias = true);
+    static void SetFillStyle(SkCanvas* canvas, const SkPath& skPath, const FillState& fillState,
+        RenderInfo& renderInfo);
+    static void SetStrokeStyle(SkPaint& skPaint, const StrokeState& strokeState, uint8_t opacity = UINT8_MAX,
+        bool antiAlias = true);
     static void SetStrokeStyle(SkCanvas* canvas, const SkPath& skPath, const StrokeState& strokeState,
-        uint8_t opacity = UINT8_MAX);
+        uint8_t opacity = UINT8_MAX, bool antiAlias = true);
+    static void SetStrokeStyle(SkCanvas* canvas, const SkPath& skPath, const StrokeState& strokeState,
+        RenderInfo& renderInfo);
     static void UpdateLineDash(SkPaint& paint, const StrokeState& strokeState);
     static Offset UpdateText(SkCanvas* canvas, const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo);
     static double UpdateTextPath(SkCanvas* canvas, const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo);
+    static Offset MeasureTextBounds(const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo, Rect& bounds);
+    static double MeasureTextPathBounds(const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo, Rect& bounds);
     static void StringToPoints(const char str[], std::vector<SkPoint>& points);
     static Matrix4 CreateMotionMatrix(const std::string& path, const std::string& rotate,
-        const Point& startPoint, double percent, bool& isSuccess);
+        double percent, bool& isSuccess);
+    static SkMatrix ToSkMatrix(const Matrix4& matrix4);
+
+    static void SetGradientStyle(SkPaint& skPaint, const FillState& fillState, double opacity);
 
 private:
     static sk_sp<SkTypeface> fontTypeChinese_;

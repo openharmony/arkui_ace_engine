@@ -17,6 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_JS_MESSAGE_DISPATCHER_H
 
 #include "base/memory/ace_type.h"
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#include "adapter/preview/osal/request_data.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -27,8 +30,15 @@ public:
     JsMessageDispatcher() = default;
     ~JsMessageDispatcher() override = default;
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    virtual void CallCurlFunction(const RequestData requestData, int32_t callbackId) const = 0;
+#endif
+
     virtual void Dispatch(const std::string& channel, std::vector<uint8_t>&& data, int32_t id,
         bool replyToComponent = false) const = 0;
+
+    virtual void DispatchSync(
+        const std::string& group, std::vector<uint8_t>&& data, uint8_t** resData, long& position) const = 0;
 
     virtual void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const = 0;
 };

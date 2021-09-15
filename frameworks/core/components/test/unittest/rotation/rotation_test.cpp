@@ -81,6 +81,7 @@ void RotationTest::TearDown() {}
  * @tc.desc: Build render tree and dispatch rotation event to rotation node, then node accept it and check result.
  * @tc.type: FUNC
  * @tc.require: AR000DQ24K AR000DQ24I
+ * @tc.author: h00418034
  */
 HWTEST_F(RotationTest, RotationTest001, TestSize.Level0)
 {
@@ -108,6 +109,7 @@ HWTEST_F(RotationTest, RotationTest001, TestSize.Level0)
  * @tc.desc: Build render tree and dispatch rotation event to rotation node, then node refuse it and check result.
  * @tc.type: FUNC
  * @tc.require: AR000DQ24K AR000DQ24J
+ * @tc.author: h00418034
  */
 HWTEST_F(RotationTest, RotationTest002, TestSize.Level0)
 {
@@ -135,6 +137,7 @@ HWTEST_F(RotationTest, RotationTest002, TestSize.Level0)
  * @tc.desc: Build render tree and dispatch rotation event to rotation node, then third node accept it and check result.
  * @tc.type: FUNC
  * @tc.require: AR000DQ24K AR000DQ24J
+ * @tc.author: h00418034
  */
 HWTEST_F(RotationTest, RotationTest003, TestSize.Level0)
 {
@@ -163,6 +166,7 @@ HWTEST_F(RotationTest, RotationTest003, TestSize.Level0)
  * @tc.desc: Build render tree and dispatch rotation event to rotation node, then third node refuse it and check result.
  * @tc.type: FUNC
  * @tc.require: AR000DQ24K AR000DQ24J
+ * @tc.author: h00418034
  */
 HWTEST_F(RotationTest, RotationTest004, TestSize.Level0)
 {

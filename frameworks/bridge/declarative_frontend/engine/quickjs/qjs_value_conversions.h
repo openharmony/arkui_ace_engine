@@ -20,80 +20,85 @@
 
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 
-namespace __private__ {
+// FIXME(cvetan) Move to appropriate file and if possibly consolidate this with V8 conversions
+namespace __detail__ {
 
 template<typename T>
-struct is_signed_int {
+struct _is_signed_int_ {
     static constexpr bool value =
         std::is_integral<T>::value && std::is_signed<T>::value && !std::is_same<T, bool>::value;
 };
 
-} // namespace __private__
-
-namespace __remove__ {
-
-template<typename T, typename E = void>
-struct QJSValueConvertor;
+template<typename T>
+static constexpr bool is_signed_int_v = _is_signed_int_<T>::value;
 
 template<typename T>
-struct QJSValueConvertor<T, typename std::enable_if<std::is_same<T, std::string>::value>::type> {
-    static T FromJSValue(JSValue val)
-    {
-        auto* ctx = OHOS::Ace::Framework::QJSContext::current();
-        OHOS::Ace::Framework::ScopedString str(ctx, val);
-        return str.get();
+T fromJSValue(JSValueConst val)
+{
+    static_assert(!std::is_const_v<T> && !std::is_reference_v<T>, //
+        "Cannot convert values to reference or cv-qualified types!");
+
+    JSContext* ctx = OHOS::Ace::Framework::QJSContext::Current();
+    if constexpr (is_signed_int_v<T>) {
+        int64_t res;
+        JS_ToInt64(ctx, &res, val);
+        return res;
+    } else if constexpr (std::is_unsigned_v<T>) {
+        uint32_t res;
+        JS_ToUint32(ctx, &res, val);
+        return res;
+    } else if constexpr (std::is_floating_point_v<T>) {
+        double res;
+        JS_ToFloat64(ctx, &res, val);
+        return res;
+    } else if constexpr (std::is_same_v<T, std::string>) {
+        OHOS::Ace::Framework::ScopedString str(val);
+        return str.str();
     }
 
-    static bool Validate(JSValue val)
-    {
-        if (JS_IsString(val)) {
-            return true;
-        }
+    return T();
+}
 
-        return false;
+template<typename T>
+JSValue toJSValue(T val)
+{
+    JSContext* ctx = OHOS::Ace::Framework::QJSContext::Current();
+    if constexpr (is_signed_int_v<T>) {
+        return JS_NewInt64(ctx, val);
+    } else if constexpr (std::is_unsigned_v<T>) {
+        return JS_NewInt64(ctx, val);
+    } else if constexpr (std::is_floating_point_v<T>) {
+        return JS_NewFloat64(ctx, val);
+    } else if constexpr (std::is_same_v<T, std::string>) {
+        return JS_NewStringLen(ctx, val.c_str(), val.size());
+    } else if constexpr (std::is_same_v<T, const char*>) {
+        return JS_NewStringLen(ctx, val, strlen(val));
+    }
+
+    return JS_ThrowInternalError(ctx, "Conversion failure...");
+}
+
+template<typename... Types>
+struct TupleConverter {
+    std::tuple<Types...> operator()(JSValueConst* argv)
+    {
+        int index = 0;
+        return {
+            __detail__::fromJSValue<Types>(argv[index++])...,
+        };
     }
 };
 
-template<typename T>
-struct QJSValueConvertor<T, typename std::enable_if<std::is_unsigned<T>::value>::type> {
-    static T FromJSValue(JSValue value)
-    {
-        auto* ctx = OHOS::Ace::Framework::QJSContext::current();
-        uint32_t pres;
-        JS_ToUint32(ctx, &pres, value);
-        return pres;
-    }
+}; // namespace __detail__
 
-    static bool Validate(JSValue value)
-    {
-        if (JS_IsNumber(value)) {
-            return true;
-        }
-
-        return false;
-    }
-};
+namespace OHOS::Ace::Framework::QJSValueConvertor {
 
 template<typename T>
-struct QJSValueConvertor<T, typename std::enable_if<__private__::is_signed_int<T>::value>::type> {
-    static T FromJSValue(JSValue value)
-    {
-        auto* ctx = OHOS::Ace::Framework::QJSContext::current();
-        int32_t pres;
-        JS_ToInt32(ctx, &pres, value);
-        return pres;
-    }
+inline JSValue toQJSValue(T&& val)
+{
+    return __detail__::toJSValue(std::forward<T>(val));
+}
 
-    static bool Validate(JSValue value)
-    {
-        if (JS_IsInteger(value)) {
-            return true;
-        }
-
-        return false;
-    }
-};
-
-} // namespace __remove__
+} // namespace OHOS::Ace::Framework::QJSValueConvertor
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_QUICKJS_QJS_VALUE_CONVERSIONS_H

@@ -18,9 +18,12 @@
 #include "adapter/ohos/osal/fake_asset_manager.h"
 #include "adapter/ohos/osal/fake_task_executor.h"
 #include "base/log/log.h"
+#include "core/animation/animatable.h"
+#include "core/animation/animatable_data.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/curve_animation.h"
 #include "core/animation/keyframe_animation.h"
+#include "core/animation/property_animation.h"
 #include "core/components/box/box_component.h"
 #include "core/components/test/json/json_frontend.h"
 #include "core/components/test/unittest/mock/render_mock.h"
@@ -66,6 +69,19 @@ void CreateScaleTweenKeyFrame(TweenOption& tweenOption, float begin, float end)
     tweenOption.SetTransformFloatAnimation(AnimationType::SCALE, scale);
 }
 
+template<class T>
+RefPtr<PropertyAnimation> CreateAnimatable(const T& beginValue, const T& endValue, AnimatableType type)
+{
+    auto begin = AceType::MakeRefPtr<AnimatableData<T>>(beginValue);
+    begin->SetTimePoint(0.0f);
+    auto end = AceType::MakeRefPtr<AnimatableData<T>>(endValue);
+    end->SetTimePoint(1.0f);
+    auto animation = AceType::MakeRefPtr<PropertyAnimation>(type);
+    animation->AddAnimatable(begin);
+    animation->AddAnimatable(end);
+    return animation;
+}
+
 } // namespace
 
 class TweenElementTest : public testing::Test {
@@ -109,10 +125,15 @@ public:
         boxComponent_ = AceType::MakeRefPtr<BoxComponent>();
         boxComponent_->SetWidth(TEST_SURFACE_WIDTH);
         boxComponent_->SetHeight(TEST_SURFACE_HEIGHT);
-        boxComponent_->SetColor(Color::WHITE);
+        auto backDecoration = AceType::MakeRefPtr<Decoration>();
+        backDecoration->SetImage(AceType::MakeRefPtr<BackgroundImage>());
+        backDecoration->SetBackgroundColor(Color::WHITE);
+        boxComponent_->SetBackDecoration(backDecoration);
+        boxComponent_->SetFrontDecoration(AceType::MakeRefPtr<Decoration>());
         tweenComponent_ = AceType::MakeRefPtr<MockTweenComponent>("test_tween_id", "tween component", boxComponent_);
         if (g_configTweenComponent) {
-            tweenComponent_->SetTweenOperation(TweenOperation::PLAY);
+            tweenComponent_->SetAnimationOperation(AnimationOperation::PLAY);
+            tweenComponent_->UpdateAnimationName("test");
             g_configTweenComponent(tweenComponent_);
         }
         auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, tweenComponent_);
@@ -194,12 +215,19 @@ HWTEST_F(TweenElementTest, TweenBackgroundPositionTest001, TestSize.Level1)
         BackgroundImagePosition(BackgroundImagePositionType::PERCENT, 0, BackgroundImagePositionType::PX, 0);
     BackgroundImagePosition backgroundImagePositionEnd =
         BackgroundImagePosition(BackgroundImagePositionType::PERCENT, 100, BackgroundImagePositionType::PX, 50);
-    g_configTweenComponent = [backgroundImagePositionBegin, backgroundImagePositionEnd](
+    g_configTweenComponent = [this, backgroundImagePositionBegin, backgroundImagePositionEnd](
                                  const RefPtr<TweenComponent>& tweenComponent) {
+        auto backgroundImagePosition = CreateAnimatable<BackgroundImagePosition>(
+            backgroundImagePositionBegin, backgroundImagePositionEnd, AnimatableType::PROPERTY_BACKGROUND_POSITION);
+        PropAnimationMap propAnimationMap;
+        propAnimationMap[AnimatableType::PROPERTY_BACKGROUND_POSITION] = backgroundImagePosition;
+        if (boxComponent_) {
+            for (auto& [type, animatable] : propAnimationMap) {
+                boxComponent_->AddAnimatable(type, animatable);
+            }
+        }
         TweenOption tweenOption;
-        auto backgroundPosition = AceType::MakeRefPtr<CurveAnimation<BackgroundImagePosition>>(
-            backgroundImagePositionBegin, backgroundImagePositionEnd, Curves::LINEAR);
-        tweenOption.SetBackgroundPositionAnimation(backgroundPosition);
+        tweenOption.SetAnimatables(propAnimationMap);
         tweenOption.SetDuration(20);
         tweenOption.SetFillMode(FillMode::FORWARDS);
         tweenComponent->SetTweenOption(tweenOption);
@@ -213,14 +241,14 @@ HWTEST_F(TweenElementTest, TweenBackgroundPositionTest001, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     auto box = AceType::DynamicCast<MockRenderBox>(tweenElement_->GetContentRender());
     platformWindowRaw_->TriggerOneFrame();
-    EXPECT_EQ(box->GetBackgroundPositionPublic(), (backgroundImagePositionEnd + backgroundImagePositionBegin) * 0.5);
+    EXPECT_EQ(box->GetBackgroundPosition(), (backgroundImagePositionEnd + backgroundImagePositionBegin) * 0.5);
 
     /**
      * @tc.steps: step3. trigger last frame
      * @tc.expected: step3. check the final value
      */
     platformWindowRaw_->TriggerOneFrame();
-    EXPECT_EQ(box->GetBackgroundPositionPublic(), backgroundImagePositionEnd);
+    EXPECT_EQ(box->GetBackgroundPosition(), backgroundImagePositionEnd);
 }
 
 /**
@@ -242,7 +270,7 @@ HWTEST_F(TweenElementTest, PauseTest001, TestSize.Level1)
         tweenOption.SetDuration(0);
         tweenOption.SetFillMode(FillMode::FORWARDS);
         tweenComponent->SetTweenOption(tweenOption);
-        tweenComponent->SetTweenOperation(TweenOperation::PAUSE);
+        tweenComponent->SetAnimationOperation(AnimationOperation::PAUSE);
     };
     CreateAndBuildTweenComponent();
 
@@ -276,7 +304,7 @@ HWTEST_F(TweenElementTest, CancelTest001, TestSize.Level1)
         tweenOption.SetDuration(0);
         tweenOption.SetFillMode(FillMode::FORWARDS);
         tweenComponent->SetTweenOption(tweenOption);
-        tweenComponent->SetTweenOperation(TweenOperation::CANCEL);
+        tweenComponent->SetAnimationOperation(AnimationOperation::CANCEL);
     };
     CreateAndBuildTweenComponent();
 
@@ -1364,7 +1392,6 @@ HWTEST_F(TweenElementTest, KeyframeTest005, TestSize.Level1)
         colorAnimation->AddKeyframe(keyframe1);
         colorAnimation->AddKeyframe(keyframe2);
 
-        colorAnimation->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
         tweenOption.SetColorAnimation(colorAnimation);
         tweenComponent->SetTweenOption(tweenOption);
     };
@@ -1436,7 +1463,6 @@ HWTEST_F(TweenElementTest, PropertyAnimationTest002, TestSize.Level1)
     g_configTweenComponent = [](const RefPtr<TweenComponent>& tweenComponent) {
         TweenOption tweenOption;
         auto color = AceType::MakeRefPtr<CurveAnimation<Color>>(Color::WHITE, Color::BLACK, Curves::LINEAR);
-        color->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
         tweenOption.SetColorAnimation(color);
         tweenOption.SetDuration(20);
         tweenOption.SetFillMode(FillMode::FORWARDS);
@@ -1448,11 +1474,11 @@ HWTEST_F(TweenElementTest, PropertyAnimationTest002, TestSize.Level1)
      * @tc.steps: step2. trigger frames to let animation done
      * @tc.expected: step2. check the final value
      */
+    platformWindowRaw_->TriggerOneFrame();
     auto box = AceType::DynamicCast<RenderBox>(tweenElement_->GetContentRender());
     EXPECT_TRUE(box);
     EXPECT_EQ(box->GetColor(), Color::WHITE);
 
-    platformWindowRaw_->TriggerOneFrame();
     platformWindowRaw_->TriggerOneFrame();
     platformWindowRaw_->TriggerOneFrame();
     EXPECT_EQ(box->GetColor(), Color::BLACK);
@@ -1477,7 +1503,7 @@ HWTEST_F(TweenElementTest, ReplayTest001, TestSize.Level1)
         tweenOption.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_WIDTH, width);
         tweenOption.SetDuration(20);
         tweenComponent->SetTweenOption(tweenOption);
-        tweenComponent->SetTweenOperation(TweenOperation::PLAY);
+        tweenComponent->SetAnimationOperation(AnimationOperation::PLAY);
     };
     CreateAndBuildTweenComponent();
 
@@ -1497,7 +1523,7 @@ HWTEST_F(TweenElementTest, ReplayTest001, TestSize.Level1)
      * @tc.steps: step3. update it again to make it replay, and check
      * @tc.expected: step3. check the final value
      */
-    tweenComponent_->SetTweenOperation(TweenOperation::PLAY);
+    tweenComponent_->SetAnimationOperation(AnimationOperation::PLAY);
     context_->ScheduleUpdate(tweenComponent_);
     platformWindowRaw_->TriggerOneFrame();
     platformWindowRaw_->TriggerOneFrame();
@@ -1545,7 +1571,7 @@ HWTEST_F(TweenElementTest, ReplayTest002, TestSize.Level1)
      * @tc.steps: step3. make it replay before previous is done. and check
      * @tc.expected: step3. check the final value
      */
-    tweenComponent_->SetTweenOperation(TweenOperation::PLAY);
+    tweenComponent_->SetAnimationOperation(AnimationOperation::PLAY);
     context_->ScheduleUpdate(tweenComponent_);
     platformWindowRaw_->TriggerOneFrame();
     platformWindowRaw_->TriggerOneFrame();
@@ -1590,6 +1616,461 @@ HWTEST_F(TweenElementTest, TweenElementTimerUpdateTest001, TestSize.Level1)
     context_->ScheduleUpdate(tweenComponent_);
     platformWindowRaw_->TriggerOneFrame();
     EXPECT_NEAR(box->GetWidth(), 15.0, DBL_EPSILON);
+}
+
+/**
+ * @tc.name: TweenPlayStateTest001
+ * @tc.desc: test animation-play-state in tween.
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0U6
+ * @tc.author: zhouzebin
+ */
+HWTEST_F(TweenElementTest, TweenPlayStateTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TweenElementTest TweenPlayStateTest001";
+    /**
+     * @tc.steps: step1. init tween option and build tween component
+     */
+    g_configTweenComponent = [](const RefPtr<TweenComponent>& tweenComponent) {
+        TweenOption tweenOption;
+        auto width = AceType::MakeRefPtr<CurveAnimation<float>>(1.0f, 5.0f, Curves::LINEAR);
+        tweenOption.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_WIDTH, width);
+        tweenOption.SetDuration(20);
+        tweenOption.SetFillMode(FillMode::FORWARDS);
+        tweenComponent->SetTweenOption(tweenOption);
+    };
+    CreateAndBuildTweenComponent();
+
+    /**
+     * @tc.steps: step2. trigger frames to let animation done
+     * @tc.expected: step2. check the final value
+     */
+    platformWindowRaw_->TriggerOneFrame();
+    platformWindowRaw_->TriggerOneFrame();
+    platformWindowRaw_->TriggerOneFrame();
+    auto box = AceType::DynamicCast<RenderBoxBase>(tweenElement_->GetContentRender());
+    EXPECT_TRUE(box);
+    EXPECT_NEAR(box->GetWidth(), 5.0, DBL_EPSILON);
+}
+
+/**
+ * @tc.name: TweenAnimationTest001
+ * @tc.desc: test animation in tween.
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0U5
+ * @tc.author: zhouzebin
+ */
+HWTEST_F(TweenElementTest, TweenAnimationTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TweenElementTest TweenAnimationTest001";
+    /**
+     * @tc.steps: step1. init tween option and build tween component
+     */
+    g_configTweenComponent = [](const RefPtr<TweenComponent>& tweenComponent) {
+        TweenOption tweenOption;
+        auto width = AceType::MakeRefPtr<CurveAnimation<float>>(1.0f, 5.0f, Curves::LINEAR);
+        tweenOption.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_WIDTH, width);
+        tweenOption.SetDuration(20);
+        tweenOption.SetFillMode(FillMode::FORWARDS);
+        tweenComponent->SetTweenOption(tweenOption);
+    };
+    CreateAndBuildTweenComponent();
+
+    /**
+     * @tc.steps: step2. trigger frames to let animation done
+     * @tc.expected: step2. check the final value
+     */
+    platformWindowRaw_->TriggerOneFrame();
+    platformWindowRaw_->TriggerOneFrame();
+    platformWindowRaw_->TriggerOneFrame();
+    auto box = AceType::DynamicCast<RenderBoxBase>(tweenElement_->GetContentRender());
+    EXPECT_TRUE(box);
+    EXPECT_NEAR(box->GetWidth(), 5.0, DBL_EPSILON);
+
+    /**
+     * @tc.steps: step3. make it play again and check
+     * @tc.expected: step3. check play again.
+     */
+    tweenComponent_->SetAnimationOperation(AnimationOperation::PLAY);
+    context_->ScheduleUpdate(tweenComponent_);
+    platformWindowRaw_->TriggerOneFrame();
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_NEAR(box->GetWidth(), 1.0, DBL_EPSILON);
+    platformWindowRaw_->TriggerOneFrame();
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_NEAR(box->GetWidth(), 5.0, DBL_EPSILON);
+}
+
+/*
+ * @tc.name : TweenPaddingTest001
+ * @tc.desc : verify padding property animation
+ * @tc.type: FUNC
+ * @tc.require : AR000FL0UO
+ * @tc.author : jiangtao
+ */
+HWTEST_F(TweenElementTest, TweenPaddingTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TweenElementTest TweenPaddingTest001";
+    /**
+     * @tc.steps: step1. init tween option and build tween component
+     */
+    g_configTweenComponent = [this](const RefPtr<TweenComponent>& tweenComponent) {
+        auto paddingLeft = CreateAnimatable<Dimension>(1.0_px, 5.0_px, AnimatableType::PROPERTY_PADDING_LEFT);
+        auto paddingTop = CreateAnimatable<Dimension>(2.0_px, 6.0_px, AnimatableType::PROPERTY_PADDING_TOP);
+        auto paddingRight = CreateAnimatable<Dimension>(3.0_px, 7.0_px, AnimatableType::PROPERTY_PADDING_RIGHT);
+        auto paddingBottom = CreateAnimatable<Dimension>(4.0_px, 8.0_px, AnimatableType::PROPERTY_PADDING_BOTTOM);
+        PropAnimationMap propAnimationMap;
+        propAnimationMap[AnimatableType::PROPERTY_PADDING_LEFT] = paddingLeft;
+        propAnimationMap[AnimatableType::PROPERTY_PADDING_TOP] = paddingTop;
+        propAnimationMap[AnimatableType::PROPERTY_PADDING_RIGHT] = paddingRight;
+        propAnimationMap[AnimatableType::PROPERTY_PADDING_BOTTOM] = paddingBottom;
+        if (boxComponent_) {
+            for (auto& [type, animatable] : propAnimationMap) {
+                boxComponent_->AddAnimatable(type, animatable);
+            }
+        }
+        TweenOption tweenOption;
+        tweenOption.SetAnimatables(propAnimationMap);
+        tweenOption.SetDuration(20);
+        tweenOption.SetFillMode(FillMode::FORWARDS);
+        tweenComponent->SetTweenOption(tweenOption);
+    };
+    CreateAndBuildTweenComponent();
+    /**
+     * @tc.steps : step2.trigger frames to let animation done
+     * @tc.expected : step2.check the final value
+     */
+    platformWindowRaw_->TriggerOneFrame();
+    platformWindowRaw_->TriggerOneFrame();
+    auto box = AceType::DynamicCast<MockRenderBox>(tweenElement_->GetContentRender());
+    EXPECT_TRUE(box);
+    EXPECT_NEAR(box->GetPaddingOrigin().Left().Value(), 3.0f, DBL_EPSILON);
+    EXPECT_NEAR(box->GetPaddingOrigin().Top().Value(), 4.0f, DBL_EPSILON);
+    EXPECT_NEAR(box->GetPaddingOrigin().Right().Value(), 5.0f, DBL_EPSILON);
+    EXPECT_NEAR(box->GetPaddingOrigin().Bottom().Value(), 6.0f, DBL_EPSILON);
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_NEAR(box->GetPaddingOrigin().Left().Value(), 5.0f, DBL_EPSILON);
+    EXPECT_NEAR(box->GetPaddingOrigin().Top().Value(), 6.0f, DBL_EPSILON);
+    EXPECT_NEAR(box->GetPaddingOrigin().Right().Value(), 7.0f, DBL_EPSILON);
+    EXPECT_NEAR(box->GetPaddingOrigin().Bottom().Value(), 8.0f, DBL_EPSILON);
+}
+
+/**
+ * @tc.name: TweenMarginTest001
+ * @tc.desc: verify margin property animation
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0UP
+ * @tc.author: jiangtao
+ */
+HWTEST_F(TweenElementTest, TweenMarginTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TweenElementTest TweenMarginTest001";
+    /**
+     * @tc.steps: step1. init tween option and build tween component
+     */
+    g_configTweenComponent = [this](const RefPtr<TweenComponent>& tweenComponent) {
+        auto marginLeft = CreateAnimatable<Dimension>(1.0_px, 5.0_px, AnimatableType::PROPERTY_MARGIN_LEFT);
+        auto marginTop = CreateAnimatable<Dimension>(2.0_px, 6.0_px, AnimatableType::PROPERTY_MARGIN_TOP);
+        auto marginRight = CreateAnimatable<Dimension>(3.0_px, 7.0_px, AnimatableType::PROPERTY_MARGIN_RIGHT);
+        auto marginBottom = CreateAnimatable<Dimension>(4.0_px, 8.0_px, AnimatableType::PROPERTY_MARGIN_BOTTOM);
+        PropAnimationMap propAnimationMap;
+        propAnimationMap[AnimatableType::PROPERTY_MARGIN_LEFT] = marginLeft;
+        propAnimationMap[AnimatableType::PROPERTY_MARGIN_TOP] = marginTop;
+        propAnimationMap[AnimatableType::PROPERTY_MARGIN_RIGHT] = marginRight;
+        propAnimationMap[AnimatableType::PROPERTY_MARGIN_BOTTOM] = marginBottom;
+        if (boxComponent_) {
+            for (auto& [type, animatable] : propAnimationMap) {
+                boxComponent_->AddAnimatable(type, animatable);
+            }
+        }
+        TweenOption tweenOption;
+        tweenOption.SetAnimatables(propAnimationMap);
+        tweenOption.SetDuration(20);
+        tweenOption.SetFillMode(FillMode::FORWARDS);
+        tweenComponent->SetTweenOption(tweenOption);
+    };
+    CreateAndBuildTweenComponent();
+    /**
+     * @tc.steps : step2.trigger frames to let animation done
+     * @tc.expected : step2.check the final value
+     */
+    platformWindowRaw_->TriggerOneFrame();
+    platformWindowRaw_->TriggerOneFrame();
+    auto box = AceType::DynamicCast<MockRenderBox>(tweenElement_->GetContentRender());
+    EXPECT_TRUE(box);
+    EXPECT_NEAR(box->GetMarginOrigin().Left().Value(), 3.0f, DBL_EPSILON);
+    EXPECT_NEAR(box->GetMarginOrigin().Top().Value(), 4.0f, DBL_EPSILON);
+    EXPECT_NEAR(box->GetMarginOrigin().Right().Value(), 5.0f, DBL_EPSILON);
+    EXPECT_NEAR(box->GetMarginOrigin().Bottom().Value(), 6.0f, DBL_EPSILON);
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_NEAR(box->GetMarginOrigin().Left().Value(), 5.0f, DBL_EPSILON);
+    EXPECT_NEAR(box->GetMarginOrigin().Top().Value(), 6.0f, DBL_EPSILON);
+    EXPECT_NEAR(box->GetMarginOrigin().Right().Value(), 7.0f, DBL_EPSILON);
+    EXPECT_NEAR(box->GetMarginOrigin().Bottom().Value(), 8.0f, DBL_EPSILON);
+}
+
+/**
+ * @tc.name: TweenBorderTest001
+ * @tc.desc: verify border property animation
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0UQ
+ * @tc.author: jiangtao
+ */
+HWTEST_F(TweenElementTest, TweenBorderTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TweenElementTest TweenBorderTest001";
+    /**
+     * @tc.steps: step1. init tween option and build tween component
+     */
+    g_configTweenComponent = [this](const RefPtr<TweenComponent>& tweenComponent) {
+        PropAnimationMap propAnimationMap;
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_LEFT_WIDTH] =
+            CreateAnimatable(1.0f, 5.0f, AnimatableType::PROPERTY_BORDER_LEFT_WIDTH);
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_TOP_WIDTH] =
+            CreateAnimatable(2.0f, 6.0f, AnimatableType::PROPERTY_BORDER_TOP_WIDTH);
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_RIGHT_WIDTH] =
+            CreateAnimatable(3.0f, 7.0f, AnimatableType::PROPERTY_BORDER_RIGHT_WIDTH);
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_BOTTOM_WIDTH] =
+            CreateAnimatable(4.0f, 8.0f, AnimatableType::PROPERTY_BORDER_BOTTOM_WIDTH);
+
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_TOP_LEFT_RADIUS] =
+            CreateAnimatable(1.0f, 5.0f, AnimatableType::PROPERTY_BORDER_TOP_LEFT_RADIUS);
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_TOP_RIGHT_RADIUS] =
+            CreateAnimatable(2.0f, 6.0f, AnimatableType::PROPERTY_BORDER_TOP_RIGHT_RADIUS);
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_BOTTOM_LEFT_RADIUS] =
+            CreateAnimatable(3.0f, 7.0f, AnimatableType::PROPERTY_BORDER_TOP_RIGHT_RADIUS);
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_BOTTOM_RIGHT_RADIUS] =
+            CreateAnimatable(4.0f, 8.0f, AnimatableType::PROPERTY_BORDER_BOTTOM_RIGHT_RADIUS);
+
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_LEFT_COLOR] =
+            CreateAnimatable(Color::WHITE, Color::BLUE, AnimatableType::PROPERTY_BORDER_LEFT_COLOR);
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_TOP_COLOR] =
+            CreateAnimatable(Color::WHITE, Color::BLUE, AnimatableType::PROPERTY_BORDER_TOP_COLOR);
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_RIGHT_COLOR] =
+            CreateAnimatable(Color::WHITE, Color::BLUE, AnimatableType::PROPERTY_BORDER_RIGHT_COLOR);
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_BOTTOM_COLOR] =
+            CreateAnimatable(Color::WHITE, Color::BLUE, AnimatableType::PROPERTY_BORDER_BOTTOM_COLOR);
+
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_LEFT_STYLE] =
+            CreateAnimatable(BorderStyle::DASHED, BorderStyle::SOLID, AnimatableType::PROPERTY_BORDER_LEFT_STYLE);
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_TOP_STYLE] =
+            CreateAnimatable(BorderStyle::DASHED, BorderStyle::SOLID, AnimatableType::PROPERTY_BORDER_TOP_STYLE);
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_RIGHT_STYLE] =
+            CreateAnimatable(BorderStyle::DASHED, BorderStyle::SOLID, AnimatableType::PROPERTY_BORDER_RIGHT_STYLE);
+        propAnimationMap[AnimatableType::PROPERTY_BORDER_BOTTOM_STYLE] =
+            CreateAnimatable(BorderStyle::DASHED, BorderStyle::SOLID, AnimatableType::PROPERTY_BORDER_BOTTOM_STYLE);
+        if (boxComponent_) {
+            for (auto& [type, animatable] : propAnimationMap) {
+                boxComponent_->AddAnimatable(type, animatable);
+            }
+        }
+        TweenOption tweenOption;
+        tweenOption.SetAnimatables(propAnimationMap);
+        tweenOption.SetDuration(20);
+        tweenOption.SetFillMode(FillMode::FORWARDS);
+        tweenComponent->SetTweenOption(tweenOption);
+    };
+    CreateAndBuildTweenComponent();
+    /**
+     * * @tc.steps: step2. trigger frames to let animation done
+     * @tc.expected: step2. check the final value
+     */
+    platformWindowRaw_->TriggerOneFrame();
+    platformWindowRaw_->TriggerOneFrame();
+    auto box = AceType::DynamicCast<MockRenderBox>(tweenElement_->GetContentRender());
+    EXPECT_TRUE(box);
+    RefPtr<Decoration> decoration = box->GetBackDecoration();
+    EXPECT_TRUE(decoration);
+    EXPECT_NEAR(decoration->GetBorder().Left().GetWidth().Value(), 3.0f, DBL_EPSILON);
+    EXPECT_NEAR(decoration->GetBorder().Top().GetWidth().Value(), 4.0f, DBL_EPSILON);
+    EXPECT_NEAR(decoration->GetBorder().Right().GetWidth().Value(), 5.0f, DBL_EPSILON);
+    EXPECT_NEAR(decoration->GetBorder().Bottom().GetWidth().Value(), 6.0f, DBL_EPSILON);
+    EXPECT_NEAR(decoration->GetBorder().TopLeftRadius().GetX().Value(), 3.0f, DBL_EPSILON);
+    EXPECT_NEAR(decoration->GetBorder().TopRightRadius().GetX().Value(), 4.0f, DBL_EPSILON);
+    EXPECT_NEAR(decoration->GetBorder().BottomLeftRadius().GetX().Value(), 5.0f, DBL_EPSILON);
+    EXPECT_NEAR(decoration->GetBorder().BottomRightRadius().GetX().Value(), 6.0f, DBL_EPSILON);
+    EXPECT_EQ(decoration->GetBorder().Left().GetColor(), Color(0xFF7F7FFF));
+
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_NEAR(decoration->GetBorder().Left().GetWidth().Value(), 5.0f, DBL_EPSILON);
+    EXPECT_NEAR(decoration->GetBorder().Top().GetWidth().Value(), 6.0f, DBL_EPSILON);
+    EXPECT_NEAR(decoration->GetBorder().Right().GetWidth().Value(), 7.0f, DBL_EPSILON);
+    EXPECT_NEAR(decoration->GetBorder().Bottom().GetWidth().Value(), 8.0f, DBL_EPSILON);
+    EXPECT_NEAR(decoration->GetBorder().TopLeftRadius().GetX().Value(), 5.0f, DBL_EPSILON);
+    EXPECT_NEAR(decoration->GetBorder().TopRightRadius().GetX().Value(), 6.0f, DBL_EPSILON);
+    EXPECT_NEAR(decoration->GetBorder().BottomLeftRadius().GetX().Value(), 7.0f, DBL_EPSILON);
+    EXPECT_NEAR(decoration->GetBorder().BottomRightRadius().GetX().Value(), 8.0f, DBL_EPSILON);
+    EXPECT_EQ(decoration->GetBorder().Left().GetColor(), Color::BLUE);
+}
+
+/**
+ * @tc.name: TweenBackgroundTest001
+ * @tc.desc: test background image animation in tween.
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0UR
+ * @tc.author: jiangtao
+ */
+HWTEST_F(TweenElementTest, TweenBackgroundTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TweenElementTest TweenBackgroundTest001";
+    /**
+     * @tc.steps: step1. init tween option and build tween component
+     */
+    BackgroundImageSize bgImageSizeBegin =
+        BackgroundImageSize(BackgroundImageSizeType::PERCENT, 100, BackgroundImageSizeType::PERCENT, 100);
+    BackgroundImageSize bgImageSizeEnd =
+        BackgroundImageSize(BackgroundImageSizeType::PERCENT, 0, BackgroundImageSizeType::PERCENT, 0);
+    g_configTweenComponent = [this, bgImageSizeBegin, bgImageSizeEnd](const RefPtr<TweenComponent>& tweenComponent) {
+        PropAnimationMap propAnimationMap;
+        propAnimationMap[AnimatableType::PROPERTY_BACKGROUND_SIZE] =
+            CreateAnimatable(bgImageSizeBegin, bgImageSizeEnd, AnimatableType::PROPERTY_BACKGROUND_SIZE);
+        if (boxComponent_) {
+            for (auto& [type, animatable] : propAnimationMap) {
+                boxComponent_->AddAnimatable(type, animatable);
+            }
+        }
+        TweenOption tweenOption;
+        tweenOption.SetAnimatables(propAnimationMap);
+        tweenOption.SetDuration(20);
+        tweenOption.SetFillMode(FillMode::FORWARDS);
+        tweenComponent->SetTweenOption(tweenOption);
+    };
+    CreateAndBuildTweenComponent();
+    /**
+     * @tc.steps: step2. trigger frames to let animation go
+     * @tc.expected: step2. verify set curve taking effect
+     */
+    platformWindowRaw_->TriggerOneFrame();
+    auto box = AceType::DynamicCast<MockRenderBox>(tweenElement_->GetContentRender());
+    platformWindowRaw_->TriggerOneFrame();
+    RefPtr<Decoration> decoration = box->GetBackDecoration();
+    EXPECT_TRUE(decoration);
+    EXPECT_TRUE(decoration->GetImage());
+    EXPECT_EQ(decoration->GetImage()->GetImageSize(), bgImageSizeBegin * 0.5 + bgImageSizeEnd * 0.5);
+    /**
+     * @tc.steps: step3. trigger last frame
+     * @tc.expected: step3. check the final value
+     */
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_EQ(decoration->GetImage()->GetImageSize(), bgImageSizeEnd);
+}
+
+/**
+ * @tc.name: TweenFilterTest001
+ * @tc.desc: test filter animation in tween.
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0US
+ * @tc.author: jiangtao
+ */
+HWTEST_F(TweenElementTest, TweenFilterTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TweenElementTest TweenFilterTest001";
+    /**
+     * @tc.steps: step1. init tween option and build tween component
+     */
+    g_configTweenComponent = [this](const RefPtr<TweenComponent>& tweenComponent) {
+        auto backdropBlur = CreateAnimatable<float>(1.0f, 5.0f, AnimatableType::PROPERTY_BACKDROP_FILTER_BLUR);
+        auto blur = CreateAnimatable<float>(2.0f, 6.0f, AnimatableType::PROPERTY_FILTER_BLUR);
+        auto windowBlur = CreateAnimatable<float>(3.0f, 7.0f, AnimatableType::PROPERTY_WINDOW_FILTER_BLUR);
+        PropAnimationMap propAnimationMap;
+        propAnimationMap[AnimatableType::PROPERTY_BACKDROP_FILTER_BLUR] = backdropBlur;
+        propAnimationMap[AnimatableType::PROPERTY_FILTER_BLUR] = blur;
+        propAnimationMap[AnimatableType::PROPERTY_WINDOW_FILTER_BLUR] = windowBlur;
+        if (boxComponent_) {
+            for (auto& [type, animatable] : propAnimationMap) {
+                boxComponent_->AddAnimatable(type, animatable);
+            }
+        }
+        TweenOption tweenOption;
+        tweenOption.SetAnimatables(propAnimationMap);
+        tweenOption.SetDuration(20);
+        tweenOption.SetFillMode(FillMode::FORWARDS);
+        tweenComponent->SetTweenOption(tweenOption);
+    };
+    CreateAndBuildTweenComponent();
+    /**
+     * @tc.steps: step2. trigger frames to let animation go
+     * @tc.expected: step2. verify set curve taking effect
+     */
+    platformWindowRaw_->TriggerOneFrame();
+    auto box = AceType::DynamicCast<MockRenderBox>(tweenElement_->GetContentRender());
+    platformWindowRaw_->TriggerOneFrame();
+    RefPtr<Decoration> decoration = box->GetBackDecoration();
+    EXPECT_TRUE(decoration);
+    EXPECT_EQ(decoration->GetBlurRadius().Value(), 3.0);
+    EXPECT_EQ(decoration->GetWindowBlurProgress(), 5.0);
+    RefPtr<Decoration> frontDecoration = box->GetFrontDecoration();
+    EXPECT_TRUE(frontDecoration);
+    EXPECT_EQ(frontDecoration->GetBlurRadius().Value(), 4.0);
+    /**
+     * @tc.steps: step3. trigger last frame
+     * @tc.expected: step3. check the final value
+     */
+    platformWindowRaw_->TriggerOneFrame();
+    EXPECT_EQ(decoration->GetBlurRadius().Value(), 5.0);
+    EXPECT_EQ(decoration->GetWindowBlurProgress(), 7.0);
+    EXPECT_EQ(frontDecoration->GetBlurRadius().Value(), 6.0);
+}
+
+/**
+ * @tc.name: TweenShadowTest001
+ * @tc.desc: test shadow animation in tween.
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0UT
+ * @tc.author: jiangtao
+ */
+HWTEST_F(TweenElementTest, TweenShadowTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TweenElementTest TweenShadowTest001";
+    /**
+     * @tc.steps: step1. init tween option and build tween component
+     */
+    g_configTweenComponent = [this](const RefPtr<TweenComponent>& tweenComponent) {
+        Shadow begin(3.0f, 4.0f, Offset(1.0f, 2.0f), Color::WHITE);
+        Shadow end(7.0f, 8.0f, Offset(5.0f, 6.0f), Color::BLUE);
+        auto animation = CreateAnimatable(begin, end, AnimatableType::PROPERTY_BOX_SHADOW);
+
+        PropAnimationMap propAnimationMap;
+        propAnimationMap[AnimatableType::PROPERTY_BOX_SHADOW] = animation;
+        if (boxComponent_) {
+            for (auto& [type, animatable] : propAnimationMap) {
+                boxComponent_->AddAnimatable(type, animatable);
+            }
+        }
+        TweenOption tweenOption;
+        tweenOption.SetAnimatables(propAnimationMap);
+        tweenOption.SetDuration(20);
+        tweenOption.SetFillMode(FillMode::FORWARDS);
+        tweenComponent->SetTweenOption(tweenOption);
+    };
+    CreateAndBuildTweenComponent();
+    /**
+     * @tc.steps: step2. trigger frames to let animation go
+     * @tc.expected: step2. verify set curve taking effect
+     */
+    platformWindowRaw_->TriggerOneFrame();
+    auto box = AceType::DynamicCast<MockRenderBox>(tweenElement_->GetContentRender());
+    platformWindowRaw_->TriggerOneFrame();
+    RefPtr<Decoration> decoration = box->GetBackDecoration();
+    EXPECT_TRUE(decoration);
+    auto shadows = decoration->GetShadows();
+    EXPECT_TRUE(shadows.size() == 1);
+    EXPECT_EQ(shadows.front().GetOffset().GetX(), 3.0);
+    EXPECT_EQ(shadows.front().GetOffset().GetY(), 4.0);
+    EXPECT_EQ(shadows.front().GetBlurRadius(), 5.0);
+    EXPECT_EQ(shadows.front().GetSpreadRadius(), 6.0);
+    EXPECT_EQ(shadows.front().GetColor(), Color(0xFFBABAFF));
+    /**
+     * @tc.steps: step3. trigger last frame
+     * @tc.expected: step3. check the final value
+     */
+    platformWindowRaw_->TriggerOneFrame();
+    shadows = decoration->GetShadows();
+    EXPECT_EQ(shadows.front().GetOffset().GetX(), 5.0);
+    EXPECT_EQ(shadows.front().GetOffset().GetY(), 6.0);
+    EXPECT_EQ(shadows.front().GetBlurRadius(), 7.0);
+    EXPECT_EQ(shadows.front().GetSpreadRadius(), 8.0);
+    EXPECT_EQ(shadows.front().GetColor(), Color::BLUE);
 }
 
 } // namespace OHOS::Ace

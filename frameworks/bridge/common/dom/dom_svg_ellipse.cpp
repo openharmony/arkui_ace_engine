@@ -21,30 +21,6 @@ namespace OHOS::Ace::Framework {
 
 DOMSvgEllipse::DOMSvgEllipse(NodeId nodeId, const std::string& nodeName) : DOMSvgBase(nodeId, nodeName) {}
 
-bool DOMSvgEllipse::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    if (DOMSvgBase::SetPresentationAttr(attr)) {
-        return true;
-    }
-    if (attr.first == DOM_SVG_CX) {
-        cx_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_CY) {
-        cy_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_RX) {
-        rx_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_RY) {
-        ry_ = ParseDimension(attr.second);
-        return true;
-    }
-    return false;
-}
-
 RefPtr<Component> DOMSvgEllipse::GetSpecializedComponent()
 {
     return ellipseComponent_;
@@ -57,7 +33,7 @@ void DOMSvgEllipse::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 
 void DOMSvgEllipse::OnMounted(const RefPtr<DOMNode>& parentNode)
 {
-    DOMSvgBase::InheritCommonAttrs(ellipseComponent_, parentNode);
+    DOMSvgBase::InheritAttrs(parentNode);
 }
 
 void DOMSvgEllipse::PrepareSpecializedComponent()
@@ -65,11 +41,10 @@ void DOMSvgEllipse::PrepareSpecializedComponent()
     if (!ellipseComponent_) {
         ellipseComponent_ = AceType::MakeRefPtr<SvgEllipseComponent>();
     }
-    ellipseComponent_->SetCx(cx_);
-    ellipseComponent_->SetCy(cy_);
-    ellipseComponent_->SetRx(rx_);
-    ellipseComponent_->SetRy(ry_);
-    DOMSvgBase::PrepareCommonAttrs(ellipseComponent_);
+    auto declaration = AceType::DynamicCast<SvgEllipseDeclaration>(declaration_);
+    if (declaration) {
+        ellipseComponent_->SetDeclaration(declaration);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

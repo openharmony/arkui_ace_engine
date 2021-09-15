@@ -329,6 +329,7 @@ protected:
     void MoveToViewPort();
     void PlayPressDownAnimation();
     void PlayPressUpAnimation();
+    void OnCancelPressAnimation() override;
     RefPtr<RenderList> GetRenderList() const;
     bool NeedDivider();
     void PerformLayout() override;
@@ -345,7 +346,7 @@ protected:
     RefPtr<RenderDisplay> renderDisplay_;
     bool needVibrate_ = true;
     bool supportScale_ = true;
-    bool supportOpacity_ = true;
+    bool supportOpacity_ = false;
     bool supportClick_ = true;
     bool isStretch_ = false;
     bool isTitle_ = false;
@@ -355,6 +356,7 @@ protected:
     bool primaryChange_ = false;
     bool needDivider_ = false;
     bool isActive_ = false;
+    Color clickColor_ = Color::TRANSPARENT;
     FlexAlign selfAlign_ = FlexAlign::AUTO;
 
     Dimension dividerOrigin_;
@@ -384,6 +386,7 @@ private:
     ItemState lastState_ = ItemState::NONE;
     ItemState currentState_ = ItemState::NONE;
     RefPtr<ScrollPositionController> scrollController_;
+    bool pressAnimation_ = false;
     bool redraw_ = false;
     bool sticky_ = false;
     bool nearByOpacitySticky_ = false;

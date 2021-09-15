@@ -38,7 +38,7 @@ class ACE_EXPORT DOMDocument final : public virtual AceType {
 
 public:
     explicit DOMDocument(int32_t pageId) : rootNodeId_(DOM_ROOT_NODE_ID_BASE + pageId) {};
-    ~DOMDocument() override = default;
+    ~DOMDocument() override;
 
     RefPtr<DOMNode> CreateNodeWithId(const std::string& tag, NodeId nodeId, int32_t itemIndex = -1);
 

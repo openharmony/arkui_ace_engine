@@ -20,17 +20,16 @@
 namespace OHOS::Ace {
 
 ComposedComponent::ComposedComponent(const ComposeId& id, const std::string& name, const RefPtr<Component>& child)
-    : SingleChild(child), id_(id), name_(name)
-{}
+    : BaseComposedComponent(id, name), SingleChild(child) {}
 
 RefPtr<Element> ComposedComponent::CreateElement()
 {
-    auto element = ComposedElement::Create(GetId());
+    auto element = AceType::MakeRefPtr<ComposedElement>(GetId());
 
     // elementFunction_ is true only for userdefined custom views
     // in other case use default path in performBuild
     if (elementFunction_) {
-        elementFunction_(AceType::DynamicCast<ComposedElement>(AceType::RawPtr(element)));
+        elementFunction_(element);
     }
 
     return element;
@@ -41,10 +40,9 @@ void ComposedComponent::SetElementFunction(ElementFunction&& func)
     elementFunction_ = std::move(func);
 }
 
-void ComposedComponent::CallElementFunction(Element* element)
+void ComposedComponent::CallElementFunction(const RefPtr<Element>& element)
 {
     elementFunction_(AceType::DynamicCast<ComposedElement>(element));
 }
-
 
 } // namespace OHOS::Ace

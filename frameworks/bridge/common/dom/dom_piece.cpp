@@ -15,93 +15,47 @@
 
 #include "frameworks/bridge/common/dom/dom_piece.h"
 
-#include "core/components/piece/piece_theme.h"
+#include "core/components/declaration/piece/piece_declaration.h"
 
 namespace OHOS::Ace::Framework {
 
 DOMPiece::DOMPiece(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
     pieceChild_ = AceType::MakeRefPtr<PieceComponent>();
-    if (IsRightToLeft()) {
-        pieceChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 void DOMPiece::ResetInitializedStyle()
 {
-    InitializeStyle();
-}
-
-void DOMPiece::InitializeStyle()
-{
-    auto theme = GetTheme<PieceTheme>();
-    if (!theme) {
-        return;
+    if (declaration_) {
+        declaration_->InitializeStyle();
     }
-    hasBoxStyle_ = true;
-    hasDecorationStyle_ = true;
-    SetHeight(theme->GetHeight());
-    paddingLeft_ = theme->GetPaddingHorizontal();
-    paddingRight_ = theme->GetPaddingHorizontal();
-    paddingTop_ = theme->GetPaddingVertical();
-    paddingBottom_ = theme->GetPaddingVertical();
-    backDecoration_->SetBackgroundColor(theme->GetBackgroundColor());
-    border_.SetBorderRadius(Radius(theme->GetHeight() / 2.0));
-    pieceChild_->SetTextStyle(theme->GetTextStyle());
-    pieceChild_->SetInterval(theme->GetInterval());
-    pieceChild_->SetIconResource(theme->GetIconResource());
-    pieceChild_->SetIconSize(theme->GetIconSize());
-    pieceChild_->SetHoverColor(theme->GetHoverColor());
-}
-
-bool DOMPiece::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    if (attr.first == DOM_PIECE_CONTENT) {
-        hasContent_ = !attr.second.empty();
-        pieceChild_->SetContent(attr.second);
-        return true;
-    } else if (attr.first == DOM_PIECE_ICON) {
-        pieceChild_->SetIcon(attr.second);
-        return true;
-    } else if (attr.first == DOM_PIECE_CLOSABLE) {
-        pieceChild_->SetShowDelete(StringToBool(attr.second));
-        return true;
-    }
-    return false;
-}
-
-bool DOMPiece::SetSpecializedStyle(const std::pair<std::string, std::string>& style)
-{
-    if (style.first == DOM_BACKGROUND || style.first == DOM_BACKGROUND_IMAGE) {
-        hasBackGround_ = true;
-    }
-    return false;
 }
 
 void DOMPiece::PrepareSpecializedComponent()
 {
-    if (!hasBackGroundColor_ && hasBackGround_) {
-        backDecoration_->SetBackgroundColor(Color::TRANSPARENT);
+    auto declaration = AceType::DynamicCast<PieceDeclaration>(declaration_);
+    if (!declaration) {
+        return;
     }
-    pieceChild_->SetMargin(GetBoxComponent()->GetMargin());
+
+    pieceChild_->SetTextDirection(declaration->IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+    if (!declaration->HasBackGroundColor() && declaration->HasBackground()) {
+        declaration->GetBackDecoration()->SetBackgroundColor(Color::TRANSPARENT);
+    }
+    declaration->SetMargin(GetBoxComponent()->GetMargin());
     if (boxComponent_->GetBackDecoration()) {
-        pieceChild_->SetBorder(boxComponent_->GetBackDecoration()->GetBorder());
+        declaration->SetBorder(boxComponent_->GetBackDecoration()->GetBorder());
     }
-    if (!hasContent_) {
+
+    // If content is not exist, clear style.
+    if (!declaration->HasContent()) {
         boxComponent_->SetWidth(0.0);
         boxComponent_->SetHeight(0.0);
         boxComponent_->SetPadding(Edge());
         boxComponent_->SetMargin(Edge());
     }
-}
 
-bool DOMPiece::AddSpecializedEvent(int32_t pageId, const std::string& event)
-{
-    if (event == DOM_PIECE_EVENT_CLOSE) {
-        pieceChild_->SetOnDelete(EventMarker(GetNodeIdForEvent(), event, pageId));
-        return true;
-    }
-    return false;
+    pieceChild_->SetDeclaration(AceType::DynamicCast<PieceDeclaration>(declaration_));
 }
 
 RefPtr<Component> DOMPiece::GetSpecializedComponent()
