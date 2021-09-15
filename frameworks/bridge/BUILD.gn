@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//ark/ts2abc/ts2panda/ts2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
 
@@ -581,22 +582,67 @@ gen_obj("js_enum_style") {
   snapshot_dep = []
 }
 
+# compile stateMgmt.js, jsEnumStyle.js to stateMgmt.abc, jsEnumStyle.abc.
+action("gen_stateMgmt_abc") {
+  visibility = [ ":*" ]
+
+  deps = [ "//ark/ts2abc/ts2panda:ark_ts2abc_build" ]
+
+  script = "//ark/ts2abc/ts2panda/scripts/generate_js_bytecode.py"
+
+  args = [
+    "--src-js",
+    rebase_path(
+        "//foundation/ace/ace_engine/frameworks/bridge/declarative_frontend/engine/stateMgmt.js"),
+    "--dst-file",
+    rebase_path(base_output_path + "/stateMgmt.abc"),
+    "--node",
+    rebase_path("${node_path}"),
+    "--frontend-tool-path",
+    rebase_path("${ts2abc_build_path}"),
+    "--node-modules",
+    rebase_path("${node_modules}"),
+  ]
+
+  inputs = [ "//foundation/ace/ace_engine/frameworks/bridge/declarative_frontend/engine/stateMgmt.js" ]
+  outputs = [ base_output_path + "/stateMgmt.abc" ]
+}
+
+action("gen_jsEnumStyle_abc") {
+  visibility = [ ":*" ]
+
+  deps = [ "//ark/ts2abc/ts2panda:ark_ts2abc_build" ]
+
+  script = "//ark/ts2abc/ts2panda/scripts/generate_js_bytecode.py"
+
+  args = [
+    "--src-js",
+    rebase_path(
+        "//foundation/ace/ace_engine/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js"),
+    "--dst-file",
+    rebase_path(base_output_path + "/jsEnumStyle.abc"),
+    "--node",
+    rebase_path("${node_path}"),
+    "--frontend-tool-path",
+    rebase_path("${ts2abc_build_path}"),
+    "--node-modules",
+    rebase_path("${node_modules}"),
+  ]
+
+  inputs = [ "//foundation/ace/ace_engine/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js" ]
+  outputs = [ base_output_path + "/jsEnumStyle.abc" ]
+}
+
 gen_obj("abc_proxyclass") {
-  input = "declarative_frontend/engine/stateMgmt.abc"
-  if (use_mac) {
-    abcproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
-  }
+  input = base_output_path + "/stateMgmt.abc"
   output = abcproxyclass_obj_path
-  snapshot_dep = []
+  snapshot_dep = [ ":gen_stateMgmt_abc" ]
 }
 
 gen_obj("abc_enum_style") {
-  input = "declarative_frontend/engine/jsEnumStyle.abc"
-  if (use_mac) {
-    abcenumstyle_obj_path = base_output_path + "/js_enum_style.c"
-  }
+  input = base_output_path + "/jsEnumStyle.abc"
   output = abcenumstyle_obj_path
-  snapshot_dep = []
+  snapshot_dep = [ ":gen_jsEnumStyle_abc" ]
 }
 
 gen_obj("js_mock_system_plugin") {
@@ -775,7 +821,10 @@ template("declarative_js_engine") {
         defines += [ "APP_USE_ARM" ]
       }
 
-      deps += [ "//ark/js_runtime:libark_jsruntime" ]
+      deps += [
+        "//ark/js_runtime:libark_jsruntime",
+        "//third_party/jsframework:ark_build",
+      ]
 
       configs += [
         "//ark/runtime_core/libpandabase:arkbase_public_config",
@@ -928,8 +977,7 @@ template("js_backend_engine") {
         "appexecfwk_standard:appexecfwk_core",
         "appexecfwk_standard:libeventhandler",
         "ipc:ipc_core",
-
-        #"ipc_js:rpc",
+        "ipc_js:rpc",
         "napi:ace_napi",
         "samgr_L2:samgr_proxy",
       ]

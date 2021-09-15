@@ -15,14 +15,12 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 
-#include<vector>
+#include <vector>
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/components/text_field/render_text_field.h"
 #include "frameworks/core/components/text_field/text_field_component.h"
-#include "frameworks/core/components/text_field/text_field_element.h"
 #include "frameworks/core/common/ime/text_input_action.h"
 
 namespace OHOS::Ace::Framework {

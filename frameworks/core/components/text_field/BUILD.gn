@@ -21,4 +21,9 @@ build_component("text_field") {
     "text_field_controller.cpp",
     "text_field_element.cpp",
   ]
+
+  external_deps = [
+    "inputmethod_native:inputmethod_ability",
+    "inputmethod_native:inputmethod_client",
+  ]
 }

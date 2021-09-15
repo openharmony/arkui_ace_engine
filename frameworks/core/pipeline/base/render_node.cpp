@@ -246,7 +246,7 @@ void RenderNode::RenderWithContext(RenderContext& context, const Offset& offset)
     }
     pendingDispatchLayoutReady_ = false;
     if (GetHasSubWindow()) {
-        LOGE("Hole: meet subwindow node");
+        LOGI("Hole: meet subwindow node");
         auto& flutterRenderContext = static_cast<FlutterRenderContext&>(context);
         if (flutterRenderContext.GetNeedRestoreHole()) {
             auto canvas = flutterRenderContext.GetCanvas();
@@ -292,6 +292,11 @@ void RenderNode::NotifyPaintFinish()
 
 void RenderNode::Paint(RenderContext& context, const Offset& offset)
 {
+    auto canvas = static_cast<FlutterRenderContext&>(context).GetCanvas();
+    if (!canvas || !canvas->canvas()) {
+        LOGI("Paint canvas is null");
+        return;
+    }
     const auto& children = GetChildren();
     for (const auto& item : SortChildrenByZIndex(children)) {
         PaintChild(item, context, offset);

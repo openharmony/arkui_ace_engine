@@ -59,6 +59,8 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     napi_value messageNApi = nullptr;
     napi_value durationNApi = nullptr;
     napi_value bottomNApi = nullptr;
+    std::string messageString;
+    std::string bottomString;
 
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
@@ -66,20 +68,34 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         napi_get_named_property(env, argv, "message", &messageNApi);
         napi_get_named_property(env, argv, "duration", &durationNApi);
         napi_get_named_property(env, argv, "bottom", &bottomNApi);
+    } else {
+        return nullptr;
     }
     size_t ret = 0;
-    size_t messageLen = GetParamLen(messageNApi);
-    std::unique_ptr<char[]> message(new char[messageLen] { 0 });
-    napi_get_value_string_utf8(env, messageNApi, message.get(), messageLen, &ret);
-
-    size_t bottomLen = GetParamLen(bottomNApi);
-    std::unique_ptr<char[]> bottom(new char[messageLen] { 0 });
-    napi_get_value_string_utf8(env, bottomNApi, bottom.get(), bottomLen, &ret);
+    napi_typeof(env, messageNApi, &valueType);
+    if (valueType == napi_string) {
+        size_t messageLen = GetParamLen(messageNApi) + 1;
+        std::unique_ptr<char[]> message = std::make_unique<char[]>(messageLen);
+        napi_get_value_string_utf8(env, messageNApi, message.get(), messageLen, &ret);
+        messageString = message.get();
+    } else {
+        LOGE("The paramter type is incorrect");
+        return nullptr;
+    }
 
     int32_t duration = -1;
-    napi_get_value_int32(env, bottomNApi, &duration);
-    std::string messageString = message.get();
-    std::string bottomString = bottom.get();
+    napi_typeof(env, durationNApi, &valueType);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, durationNApi, &duration);
+    }
+
+    napi_typeof(env, bottomNApi, &valueType);
+    if (valueType == napi_string) {
+        size_t bottomLen = GetParamLen(bottomNApi) + 1;
+        std::unique_ptr<char[]> message = std::make_unique<char[]>(bottomLen);
+        napi_get_value_string_utf8(env, bottomNApi, message.get(), bottomLen, &ret);
+        bottomString = message.get();
+    }
 
     OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
     napi_get_jsEngine(env, (void**)&jsEngine);

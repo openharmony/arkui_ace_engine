@@ -163,6 +163,12 @@ public:
         ability_ = ability;
     }
 
+    void SetDialogCallback(DialogCallback callback) override
+    {
+        if (jsEngine_) {
+            jsEngine_->SetDialogCallback(callback);
+        }
+    }
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 

@@ -18,9 +18,7 @@
 #include<vector>
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/text_field/render_text_field.h"
 #include "core/components/text_field/text_field_component.h"
-#include "core/components/text_field/text_field_element.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"

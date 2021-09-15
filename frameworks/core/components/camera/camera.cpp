@@ -225,7 +225,7 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
 void CameraCallback::MarkTreeRender(const RefPtr<RenderNode>& root)
 {
     root->MarkNeedRender();
-    LOGE("Hole: MarkTreeRender %{public}s", AceType::TypeName(Referenced::RawPtr(root)));
+    LOGI("Hole: MarkTreeRender %{public}s", AceType::TypeName(Referenced::RawPtr(root)));
     for (auto child: root->GetChildren()){
         MarkTreeRender(child);
     }
@@ -248,7 +248,7 @@ void CameraCallback::MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak)
 
     for(auto child: parent->GetChildren()) {
         if (child == node){
-            LOGE("Hole: MarkWholeRender meet barrier");
+            LOGI("Hole: MarkWholeRender meet barrier");
             break;
         }
         MarkTreeRender(child);
@@ -519,13 +519,12 @@ void CameraCallback::Release()
         LOGI("CameraCallback: Destroy subWindow.");
         subwindow_ = nullptr;
         auto context = context_.Upgrade();
-        LOGE("Hole: Release x=0, y=0, w=0, h=0");
+        LOGI("Hole: Release x=0, y=0, w=0, h=0");
         context->SetClipHole(0, 0, 0, 0);
         auto renderNode = renderNode_.Upgrade();
         if (renderNode) {
             renderNode->SetHasSubWindow(false);
         }
-        context->MarkForcedRefresh();
     }
     LOGI("CameraCallback: Release end.");
 }

@@ -157,6 +157,10 @@ void FrontendDelegateImpl::RunPage(const std::string& url, const std::string& pa
     } else {
         mainPagePath_ = manifestParser_->GetRouter()->GetEntry();
     }
+
+    if ((url.find("pages/dialog/dialog.js")) != -1)  {
+        mainPagePath_ = url;
+    }
     LoadPage(GenerateNextPageId(), mainPagePath_, true, params);
 }
 
@@ -1306,10 +1310,12 @@ void FrontendDelegateImpl::PopPage()
                     return;
                 }
                 auto ability = static_cast<AppExecFwk::Ability*>(delegate->ability_);
-                std::shared_ptr<AppExecFwk::AbilityInfo> info = ability->GetAbilityInfo();
-                if (info != nullptr && info->isLauncherAbility) {
-                    LOGW("launcher ability, return");
-                    return;
+                if (ability) {
+                    std::shared_ptr<AppExecFwk::AbilityInfo> info = ability->GetAbilityInfo();
+                    if (info != nullptr && info->isLauncherAbility) {
+                        LOGW("launcher ability, return");
+                        return;
+                    }
                 }
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
                 delegate->OnPageHide();

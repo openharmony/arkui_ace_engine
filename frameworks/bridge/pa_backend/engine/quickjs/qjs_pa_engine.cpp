@@ -21,11 +21,9 @@
 #include <unistd.h>
 #include <unordered_map>
 
-/*
 #include "napi/native_node_api.h"
 #include "napi_common_want.h"
 #include "napi_remote_object.h"
-*/
 
 #include "third_party/quickjs/message_server.h"
 
@@ -525,13 +523,10 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want &want)
         return;
     }
 
-    /*
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine_), want);
     NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
     JSValue jsWant = (JSValue)*nativeWant;
     JSValueConst argv[] = { jsWant };
-    */
-    JSValueConst argv[] = {};
     JSValue retVal = QJSUtils::Call(ctx, paStartFunc, paObj, countof(argv), argv);
     if (JS_IsException(retVal)) {
         LOGE("PA: QjsPaEngine QJSUtils::Call IsException");
@@ -1066,7 +1061,6 @@ Uri QjsPaEngine::DenormalizeUri(const Uri& uri)
 
 sptr<IRemoteObject> QjsPaEngine::OnConnectService(const OHOS::AAFwk::Want &want)
 {
-/*
     LOGI("OnConnectService");
     JSContext *ctx = engineInstance_->GetQjsContext();
     ACE_DCHECK(ctx);
@@ -1103,13 +1097,10 @@ sptr<IRemoteObject> QjsPaEngine::OnConnectService(const OHOS::AAFwk::Want &want)
         JS_FreeValue(ctx, retVal);
         return remoteObj;
     }
-*/
-    return nullptr;
 }
 
 void QjsPaEngine::OnDisconnectService(const OHOS::AAFwk::Want &want)
 {
-/*
     LOGI("OnDisconnectService");
     JSContext *ctx = engineInstance_->GetQjsContext();
     ACE_DCHECK(ctx);
@@ -1136,7 +1127,6 @@ void QjsPaEngine::OnDisconnectService(const OHOS::AAFwk::Want &want)
         LOGE("Qjs OnDisconnectService FAILED!");
     }
     JS_FreeValue(ctx, globalObj);
-*/
 }
 
 void QjsPaEngine::OnDelete(const int64_t formId)
@@ -1258,13 +1248,10 @@ void QjsPaEngine::OnAcquireState(const OHOS::AAFwk::Want &want)
     QJSHandleScope handleScope(ctx);
     JSValue paFunc = GetPaFunc("onAcquireState");
 
-    /*
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine_), want);
     NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
     JSValue jsWant = (JSValue)*nativeWant;
     JSValueConst argv[] = { jsWant };
-    */
-    JSValueConst argv[] = {};
     JSValue retVal = QJSUtils::Call(ctx, paFunc, JS_UNDEFINED, countof(argv), argv);
     if (JS_IsException(retVal)) {
         LOGE("PA: OnAcquireState FAILED!");
