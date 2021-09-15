@@ -2457,11 +2457,11 @@ JSValue JSWindowCallBack(JSContext* ctx, JSValueConst value, int32_t argc, JSVal
     LOGI("JSWindowCallBack");
     JSValue globalObj = JS_GetGlobalObject(ctx);
     JSValue id = JS_GetPropertyStr(ctx, globalObj, "dialogId");
-    int32_t global_id;
-    JS_ToInt32(ctx, &global_id, id);
+    int32_t globalId = -1;
+    JS_ToInt32(ctx, &globalId, id);
 
     for (auto& iter : g_JsEngindMap) {
-        if (iter.first == id) {
+        if (iter.first == globalId) {
             JsEngine* jsEngine = iter.second;
             if (jsEngine == nullptr) {
                 return JS_NULL;

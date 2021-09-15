@@ -276,7 +276,7 @@ config("config_render_checkable_test") {
 group("unittest") {
   testonly = true
   deps = [
-    ":CheckableComponentTest",
-    ":CheckableCreatorTest",
+    #":CheckableComponentTest",
+    #":CheckableCreatorTest",
   ]
 }
