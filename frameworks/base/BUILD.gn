@@ -44,7 +44,11 @@ template("ace_base_source_set") {
 
     # add base source file here
     sources = [
+      "geometry/animatable_dimension.cpp",
+      "geometry/animatable_matrix4.cpp",
       "geometry/matrix4.cpp",
+      "geometry/quaternion.cpp",
+      "geometry/transform_util.cpp",
       "json/json_util.cpp",
       "log/ace_trace.cpp",
       "log/dump_log.cpp",
@@ -52,11 +56,12 @@ template("ace_base_source_set") {
       "thread/background_task_executor.cpp",
       "utils/base_id.cpp",
       "utils/date_util.cpp",
+      "utils/resource_configuration.cpp",
       "utils/string_utils.cpp",
       "utils/time_util.cpp",
     ]
 
-    if (is_standard_system) {
+    if (is_standard_system && !use_mingw_win && !use_mac) {
       configs += [ "//third_party/curl:curl_config" ]
       deps += [ "//third_party/curl:curl" ]
       sources += [ "network/download_manager.cpp" ]
@@ -72,6 +77,7 @@ template("ace_base_source_set") {
         "//utils/native/base/src/securec/memset_s.c",
         "//utils/native/base/src/securec/securecutil.c",
         "//utils/native/base/src/securec/secureprintoutput_a.c",
+        "//utils/native/base/src/securec/snprintf_s.c",
         "//utils/native/base/src/securec/sprintf_s.c",
         "//utils/native/base/src/securec/strcat_s.c",
         "//utils/native/base/src/securec/strcpy_s.c",

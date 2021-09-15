@@ -176,6 +176,8 @@ private:
     void AddStepperToOpacityListener(int32_t fromIndex, int32_t toIndex);
     void AddStepperToStopListener(int32_t fromIndex, int32_t toIndex);
     void DoStepperToAnimation(int32_t fromIndex, int32_t toIndex, bool reverse);
+    void InitAccessibilityEventListener();
+    void InitChildrenArr();
     Offset GetMainAxisOffset(double offset) const
     {
         return Offset(offset, 0);

@@ -29,6 +29,7 @@ void RootElement::PerformBuild()
     LOGD("RootElement::PerformBuild");
     const RefPtr<RootComponent> root = AceType::DynamicCast<RootComponent>(component_);
     if (root) {
+        active_ = true;
         auto first = children_.begin();
         const auto& stageElement = (first == children_.end()) ? nullptr : *first;
         UpdateChild(stageElement, root->GetChild());
@@ -52,7 +53,17 @@ RefPtr<Element> RootElement::GetOverlayElement(WindowModal windowModal) const
         }
         return dialogModal->GetOverlayElement();
     } else {
-        return GetFirstChild();
+        auto stack = GetFirstChild();
+        if (!stack) {
+            return RefPtr<OverlayElement>();
+        }
+        auto child = stack->GetChildren();
+        if (child.size() > 1) {
+            auto it = child.begin();
+            it++;
+            return AceType::DynamicCast<OverlayElement>(*it);
+        }
+        return RefPtr<OverlayElement>();
     }
 }
 

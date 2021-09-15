@@ -44,6 +44,8 @@ protected:
     void PrepareSpecializedComponent() override;
 
 private:
+    std::string textOn_;
+    std::string textOff_;
     TextStyle textStyle_;
     EventMarker changeEvent_;
     RefPtr<SwitchComponent> switchChild_;

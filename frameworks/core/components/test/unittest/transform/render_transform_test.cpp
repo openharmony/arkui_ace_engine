@@ -306,18 +306,12 @@ HWTEST_F(RenderTransformTest, RenderTransformTest005, TestSize.Level1)
     renderTransform->PerformLayout();
     renderTransform->UpdateTransform();
     Matrix4 expect = Matrix4::CreateIdentity();
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(-10.0, 1.0f, 0.0f, 0.0f) * expect; // RotateX(10.0)
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(-20.0, 0.0f, 1.0f, 0.0f) * expect; // RotateY(20.0)
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(30.0, 0.0f, 0.0f, 1.0f) * expect;  // RotateZ(30.0)
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(-40.0, 0.0f, 1.0f, 0.0f) * expect; // RotateY(40.0)
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(50.0, 0.0f, 0.0f, 1.0f) * expect;  // RotateZ(50.0)
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(-60.0, 1.0f, 0.0f, 0.0f) * expect; // RotateX(60.0)
+    expect = expect * Matrix4::CreateRotate(10.0, 1.0f, 0.0f, 0.0f); // RotateX(10.0)
+    expect = expect * Matrix4::CreateRotate(20.0, 0.0f, 1.0f, 0.0f); // RotateY(20.0)
+    expect = expect * Matrix4::CreateRotate(30.0, 0.0f, 0.0f, 1.0f); // RotateZ(30.0)
+    expect = expect * Matrix4::CreateRotate(40.0, 0.0f, 1.0f, 0.0f); // RotateY(40.0)
+    expect = expect * Matrix4::CreateRotate(50.0, 0.0f, 0.0f, 1.0f); // RotateZ(50.0)
+    expect = expect * Matrix4::CreateRotate(60.0, 1.0f, 0.0f, 0.0f); // RotateX(60.0)
     ASSERT_TRUE(renderTransform->GetTransform() == expect);
 }
 
@@ -450,16 +444,13 @@ HWTEST_F(RenderTransformTest, RenderTransformTest008, TestSize.Level1)
     renderTransform->PerformLayout();
     renderTransform->UpdateTransform();
     Matrix4 expect = Matrix4::CreateIdentity();
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(-10.0, 1.0f, 0.0f, 0.0f) * expect; // RotateX(10.0)
-    expect = Matrix4::CreateScale(0.5f, 1.0f, 1.0f) * expect;         // ScaleX(0.5)
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(-20.0, 0.0f, 1.0f, 0.0f) * expect; // RotateY(20.0)
-    expect = Matrix4::CreateTranslate(40.0f, 0.0f, 0.0f) * expect;    // TranslateX(20%)
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(30.0, 0.0f, 0.0f, 1.0f) * expect;  // RotateZ(30.0)
-    expect = Matrix4::CreateScale(1.0f, 0.8f, 1.0f) * expect;         // ScaleY(0.8)
-    expect = Matrix4::CreateTranslate(0.0f, 50.0f, 0.0f) * expect;    // TranslateY(50%)
+    expect = expect * Matrix4::CreateRotate(10.0, 1.0f, 0.0f, 0.0f); // RotateX(10.0)
+    expect = expect * Matrix4::CreateScale(0.5f, 1.0f, 1.0f);        // ScaleX(0.5)
+    expect = expect * Matrix4::CreateRotate(20.0, 0.0f, 1.0f, 0.0f); // RotateY(20.0)
+    expect = expect * Matrix4::CreateTranslate(40.0f, 0.0f, 0.0f);   // TranslateX(20%)
+    expect = expect * Matrix4::CreateRotate(30.0, 0.0f, 0.0f, 1.0f); // RotateZ(30.0)
+    expect = expect * Matrix4::CreateScale(1.0f, 0.8f, 1.0f);        // ScaleY(0.8)
+    expect = expect * Matrix4::CreateTranslate(0.0f, 50.0f, 0.0f);   // TranslateY(50%)
     ASSERT_TRUE(renderTransform->GetTransform() == expect);
 
     /**
@@ -513,18 +504,12 @@ HWTEST_F(RenderTransformTest, RenderTransformTest009, TestSize.Level1)
     renderTransform->PerformLayout();
     renderTransform->UpdateTransform();
     Matrix4 expect = Matrix4::CreateIdentity();
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(10.0, 1.0f, 0.0f, 0.0f) * expect; // RotateX(10.0)
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(20.0, 0.0f, 1.0f, 0.0f) * expect; // RotateY(20.0)
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(30.0, 0.0f, 0.0f, 1.0f) * expect; // RotateZ(30.0)
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(40.0, 0.0f, 1.0f, 0.0f) * expect; // RotateY(40.0)
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(50.0, 0.0f, 0.0f, 1.0f) * expect; // RotateZ(50.0)
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(60.0, 1.0f, 0.0f, 0.0f) * expect; // RotateX(60.0)
+    expect = expect * Matrix4::CreateRotate(10.0, 1.0f, 0.0f, 0.0f); // RotateX(10.0)
+    expect = expect * Matrix4::CreateRotate(20.0, 0.0f, 1.0f, 0.0f); // RotateY(20.0)
+    expect = expect * Matrix4::CreateRotate(30.0, 0.0f, 0.0f, 1.0f); // RotateZ(30.0)
+    expect = expect * Matrix4::CreateRotate(40.0, 0.0f, 1.0f, 0.0f); // RotateY(40.0)
+    expect = expect * Matrix4::CreateRotate(50.0, 0.0f, 0.0f, 1.0f); // RotateZ(50.0)
+    expect = expect * Matrix4::CreateRotate(60.0, 1.0f, 0.0f, 0.0f); // RotateX(60.0)
     ASSERT_TRUE(renderTransform->GetTransform() == expect);
 }
 
@@ -657,16 +642,13 @@ HWTEST_F(RenderTransformTest, RenderTransformTest012, TestSize.Level1)
     renderTransform->Translate(Dimension(), Dimension(0.5, DimensionUnit::PERCENT));
     renderTransform->UpdateTransform();
     Matrix4 expect = Matrix4::CreateIdentity();
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(10.0, 1.0f, 0.0f, 0.0f) * expect; // RotateX(10.0)
-    expect = Matrix4::CreateScale(0.5f, 1.0f, 1.0f) * expect;         // ScaleX(0.5)
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(20.0, 0.0f, 1.0f, 0.0f) * expect; // RotateY(20.0)
-    expect = Matrix4::CreateTranslate(40.0f, 0.0f, 0.0f) * expect;    // TranslateX(20%)
-    expect.SetEntry(INDEX_THREE, INDEX_TWO, PERSPECTIVE);
-    expect = Matrix4::CreateRotate(30.0, 0.0f, 0.0f, 1.0f) * expect;  // RotateZ(30.0)
-    expect = Matrix4::CreateScale(1.0f, 0.8f, 1.0f) * expect;         // ScaleY(0.8)
-    expect = Matrix4::CreateTranslate(0.0f, 50.0f, 0.0f) * expect;    // TranslateY(50%)
+    expect = expect * Matrix4::CreateRotate(10.0, 1.0f, 0.0f, 0.0f); // RotateX(10.0)
+    expect = expect * Matrix4::CreateScale(0.5f, 1.0f, 1.0f);        // ScaleX(0.5)
+    expect = expect * Matrix4::CreateRotate(20.0, 0.0f, 1.0f, 0.0f); // RotateY(20.0)
+    expect = expect * Matrix4::CreateTranslate(40.0f, 0.0f, 0.0f);   // TranslateX(20%)
+    expect = expect * Matrix4::CreateRotate(30.0, 0.0f, 0.0f, 1.0f); // RotateZ(30.0)
+    expect = expect * Matrix4::CreateScale(1.0f, 0.8f, 1.0f);        // ScaleY(0.8)
+    expect = expect * Matrix4::CreateTranslate(0.0f, 50.0f, 0.0f);   // TranslateY(50%)
     ASSERT_TRUE(renderTransform->GetTransform() == expect);
 
     /**

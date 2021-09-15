@@ -73,7 +73,7 @@ TextStyle TextStyleCreator::CreateFromJson(const JsonValue& json)
         textStyle.SetShadow(shadow);
     }
     if (json.Contains(TEXT_WORD_SPACING) && json.GetValue(TEXT_WORD_SPACING)->IsNumber()) {
-        textStyle.SetWordSpacing(json.GetValue(TEXT_WORD_SPACING)->GetDouble());
+        textStyle.SetWordSpacing(Dimension(json.GetValue(TEXT_WORD_SPACING)->GetDouble()));
     }
     auto arrayJsonObject = json.GetValue(TEXT_FONT_FAMILIES);
     if (arrayJsonObject && arrayJsonObject->IsArray()) {
@@ -87,7 +87,7 @@ TextStyle TextStyleCreator::CreateFromJson(const JsonValue& json)
         textStyle.SetLineHeight(Dimension(json.GetValue(TEXT_LINE_HEIGHT)->GetDouble(), DimensionUnit::PX));
     }
     if (json.Contains(TEXT_LETTER_SPACING) && json.GetValue(TEXT_LETTER_SPACING)->IsNumber()) {
-        textStyle.SetLetterSpacing(json.GetValue(TEXT_LETTER_SPACING)->GetDouble());
+        textStyle.SetLetterSpacing(Dimension(json.GetValue(TEXT_LETTER_SPACING)->GetDouble()));
     }
     if (json.Contains(TEXT_ADAPT) && json.GetValue(TEXT_ADAPT)->IsBool()) {
         if (json.Contains(TEXT_ADAPT_MIN_FONTSIZE) && json.GetValue(TEXT_ADAPT_MIN_FONTSIZE)->IsNumber()) {

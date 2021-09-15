@@ -107,7 +107,7 @@ public:
     void SetTopLeftRadius(const Radius& topLeftRadius)
     {
         if (!topLeftRadius.IsValid()) {
-            LOGE("Invalid radius x:%{public}lf, y:%{public}lf", topLeftRadius.GetX().Value(),
+            LOGD("Invalid radius x:%{public}lf, y:%{public}lf", topLeftRadius.GetX().Value(),
                 topLeftRadius.GetY().Value());
             return;
         }
@@ -118,7 +118,7 @@ public:
     void SetTopRightRadius(const Radius& topRightRadius)
     {
         if (!topRightRadius.IsValid()) {
-            LOGE("Invalid radius x:%{public}lf, y:%{public}lf", topRightRadius.GetX().Value(),
+            LOGD("Invalid radius x:%{public}lf, y:%{public}lf", topRightRadius.GetX().Value(),
                 topRightRadius.GetY().Value());
             return;
         }
@@ -128,7 +128,7 @@ public:
     void SetBottomLeftRadius(const Radius& bottomLeftRadius)
     {
         if (!bottomLeftRadius.IsValid()) {
-            LOGE("Invalid radius x:%{public}f, y:%{public}f", bottomLeftRadius.GetX().Value(),
+            LOGD("Invalid radius x:%{public}f, y:%{public}f", bottomLeftRadius.GetX().Value(),
                 bottomLeftRadius.GetY().Value());
             return;
         }
@@ -138,7 +138,7 @@ public:
     void SetBottomRightRadius(const Radius& bottomRightRadius)
     {
         if (!bottomRightRadius.IsValid()) {
-            LOGE("Invalid radius x:%{public}f, y:%{public}f", bottomRightRadius.GetX().Value(),
+            LOGD("Invalid radius x:%{public}f, y:%{public}f", bottomRightRadius.GetX().Value(),
                 bottomRightRadius.GetY().Value());
             return;
         }
@@ -390,6 +390,15 @@ public:
         alignSelf_ = alignSelf;
     }
 
+    const Color& GetClickColor() const
+    {
+        return clickColor_;
+    }
+    void SetClickColor(const Color& clickColor)
+    {
+        clickColor_ = clickColor;
+    }
+
 private:
     int32_t index_ = -1; // invalid index
     int32_t columnSpan_ = DEFAULT_COLUMN_SPAN;
@@ -406,7 +415,7 @@ private:
     std::string indexKey_;
     bool needVibrate_ = true;
     bool supportScale_ = true;
-    bool supportOpacity_ = true;
+    bool supportOpacity_ = false;
     bool supportClick_ = true;
     bool sticky_ = false;
     bool isTitle_ = false;
@@ -419,6 +428,7 @@ private:
     Dimension dividerLength_;
     Dimension dividerHeight_ = DIVIDER_DEFAULT_HEIGHT;
     Color dividerColor_;
+    Color clickColor_ = Color::TRANSPARENT;
 
     EventMarker clickEventId_;
     EventMarker stickyEventId_;

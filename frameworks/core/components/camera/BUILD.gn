@@ -18,16 +18,12 @@ config("standard_camera_config") {
   include_dirs = [
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include/",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//foundation/graphic/standard/window_manager/include",
     "//foundation/multimedia/media_standard/interfaces/kits/native/include",
     "//foundation/multimedia/media_standard/interfaces/innerkits/native/media/include",
     "//utils/native/base/include",
     "//drivers/peripheral/codec/interfaces/include",
     "//drivers/peripheral/display/interfaces/include",
-    "//foundation/graphic/standard/interfaces/kits/surface",
-    "//foundation/graphic/standard/window_manager/include",
     "//drivers/framework/include/utils",
-    "//foundation/graphic/standard/frameworks/surface/include",
     "//drivers/adapter/uhdf2/include/hdi",
     "//drivers/adapter/uhdf2/osal/include/",
     "//drivers/peripheral/camera/interfaces/include/",
@@ -40,7 +36,7 @@ config("standard_camera_config") {
     "//foundation/multimedia/camera_standard/services/camera_service/binder/client/include",
     "//foundation/multimedia/camera_standard/services/camera_service/binder/server/include",
     "//foundation/multimedia/camera_standard/frameworks/innerkitsimpl/metadata/include",
-    "//foundation/multimedia/camera_standard/interfaces/innerkits/native/camera/include"
+    "//foundation/multimedia/camera_standard/interfaces/innerkits/native/camera/include",
   ]
 }
 
@@ -56,10 +52,9 @@ build_component("camera") {
     sources += [ "camera.cpp" ]
 
     deps = [
-      "//foundation/graphic/standard:libwms_client",
+      "//foundation/graphic/standard:libwmclient",
+      "//foundation/multimedia/camera_standard/frameworks/innerkitsimpl/camera:camera_framework",
       "//utils/native/base:utils",
-      "//foundation/graphic/standard/frameworks/surface:surface",
-      "//foundation/multimedia/camera_standard/frameworks/innerkitsimpl/camera:camera_framework"
     ]
 
     external_deps = [

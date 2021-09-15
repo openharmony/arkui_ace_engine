@@ -112,7 +112,7 @@ void AssertParseMenifest(const std::string& json, int32_t expectDesignWidth, boo
     auto manifestWindow = AceType::MakeRefPtr<ManifestWindow>();
     auto rootJson = JsonUtil::ParseJsonString(json);
     manifestWindow->WindowParse(rootJson);
-    const auto& config = manifestWindow->GetWindowConfig();
+    auto& config = manifestWindow->GetWindowConfig();
     ASSERT_EQ(config.designWidth, expectDesignWidth);
     ASSERT_EQ(config.autoDesignWidth, expectAutoDesignWidth);
 }

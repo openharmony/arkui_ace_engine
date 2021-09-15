@@ -42,47 +42,54 @@ void PopupElement::PerformBuild()
     popupController->SetCancelPopupImpl([weak = WeakClaim(this)]() {
         auto popupElement = weak.Upgrade();
         if (popupElement) {
-            popupElement->CancelPopup();
+            popupElement->CancelPopup(popupElement->GetId());
         }
     });
 }
 
-void PopupElement::ShowPopup()
+bool PopupElement::ShowPopup()
 {
     if (!popup_) {
-        return;
+        return false;
     }
 
     const auto context = context_.Upgrade();
     if (!context) {
-        return;
+        return false;
     }
 
     if (popup_->GetPopupParam()->GetTargetId().empty()) {
-        return;
+        return false;
     }
 
     RefPtr<BubbleComponent> bubble = AceType::MakeRefPtr<BubbleComponent>(popup_->GetChild());
     bubble->SetPopupParam(popup_->GetPopupParam());
     bubble->SetId(popup_->GetId());
     bubble->SetDisabledStatus(popup_->IsDisabledStatus());
+    bubble->SetStateChangeEvent([weak = WeakClaim(this)](bool isVisible) {
+                auto popup = weak.Upgrade();
+                if (popup) {
+                    popup->OnStateChange(isVisible);
+                }
+            });
 
     auto stackElement = context->GetLastStack();
     if (!stackElement) {
-        return;
+        return false;
     }
     weakStack_ = WeakClaim(RawPtr(stackElement));
     bubble->SetWeakStack(weakStack_);
-    stackElement->PushComponent(bubble, false, false);
+    stackElement->PushComponent(bubble, false);
+    return true;
 }
 
-void PopupElement::CancelPopup()
+bool PopupElement::CancelPopup(const ComposeId& id)
 {
     auto stackElement = weakStack_.Upgrade();
     if (!stackElement) {
-        return;
+        return false;
     }
-    stackElement->PopPopup(GetId());
+    stackElement->PopPopup(id);
 
     auto context = context_.Upgrade();
     if (context) {
@@ -91,6 +98,7 @@ void PopupElement::CancelPopup()
             accessibilityManager->RemoveAccessibilityNodeById(StringUtils::StringToInt(popup_->GetId()));
         }
     }
+    return true;
 }
 
 } // namespace OHOS::Ace

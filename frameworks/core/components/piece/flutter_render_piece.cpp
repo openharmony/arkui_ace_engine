@@ -35,6 +35,10 @@ void FlutterRenderPiece::Paint(RenderContext& context, const Offset& offset)
     if (mouseState_ != MouseState::HOVER) {
         return;
     }
+    if (!pieceComponent_) {
+        return;
+    }
+    auto margin = pieceComponent_->GetMargin();
     auto parent = GetParent().Upgrade();
     Size pieceSize = GetLayoutSize();
     Offset pieceOffset = GetPosition();
@@ -43,8 +47,8 @@ void FlutterRenderPiece::Paint(RenderContext& context, const Offset& offset)
         pieceOffset = Offset();
         const auto& context = context_.Upgrade();
         if (context) {
-            pieceSize -= margin_.GetLayoutSizeInPx(context->GetDipScale());
-            pieceOffset += margin_.GetOffsetInPx(context->GetDipScale());
+            pieceSize -= margin.GetLayoutSizeInPx(context->GetDipScale());
+            pieceOffset += margin.GetOffsetInPx(context->GetDipScale());
         }
     }
     auto canvas = ScopedCanvas::Create(context);
@@ -58,9 +62,9 @@ void FlutterRenderPiece::Paint(RenderContext& context, const Offset& offset)
     }
     SkPaint paint;
     skCanvas->save();
-    paint.setColor(hoverColor_.GetValue());
+    paint.setColor(pieceComponent_->GetHoverColor().GetValue());
     Rect pieceRect(pieceOffset + offset - GetPosition(), pieceSize);
-    skCanvas->drawRRect(MakeRRect(pieceRect.GetOffset(), pieceRect.GetSize(), border_), paint);
+    skCanvas->drawRRect(MakeRRect(pieceRect.GetOffset(), pieceRect.GetSize(), pieceComponent_->GetBorder()), paint);
     skCanvas->restore();
 }
 

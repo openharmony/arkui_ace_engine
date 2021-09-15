@@ -21,10 +21,30 @@ namespace OHOS::Ace::Flutter {
 
 void ClipLayer::AddToScene(SceneBuilder& builder, double x, double y)
 {
-    flutter::RRect rrect;
-    rrect.sk_rrect = rrect_.sk_rrect.makeOffset(x + x_, y + y_);
-    builder.PushClipRRect(rrect, static_cast<int32_t>(clipBehavior_));
+    if (isPath_) {
+        fml::RefPtr<flutter::CanvasPath> path = flutter::CanvasPath::Create();
+        path->addPath(canvasPath_.get(), x + x_, y + y_);
+        builder.PushClipPath(path.get(), static_cast<int32_t>(clipBehavior_));
+    } else {
+        flutter::RRect rrect;
+        rrect.sk_rrect = rrect_.sk_rrect.makeOffset(x + x_, y + y_);
+        builder.PushClipRRect(rrect, static_cast<int32_t>(clipBehavior_));
+    }
+
+    if (isMask_) {
+        if (isSvgMask_) {
+            builder.PushSvgMask(svgDom_, svgX_, svgY_, scaleX_, scaleY_);
+        } else if (isGradientMask_) {
+            builder.PushGradientColorMask(maskPaint_);
+        } else if (isPathMask_) {
+            builder.PushPathMask(maskPaint_, maskPath_);
+        }
+    }
+
     AddChildToScene(builder, x + x_, y + y_);
+    if (isMask_) {
+        builder.Pop();
+    }
     builder.Pop();
 }
 
@@ -33,6 +53,7 @@ void ClipLayer::SetClip(double left, double right, double top, double bottom, Cl
     rrect_.sk_rrect = SkRRect::MakeRect(SkRect::MakeLTRB(static_cast<SkScalar>(left), static_cast<SkScalar>(top),
         static_cast<SkScalar>(right), static_cast<SkScalar>(bottom)));
     clipBehavior_ = clipBehavior;
+    isPath_ = false;
 }
 
 void ClipLayer::SetClipRRect(const RRect& rrect, Clip clipBehavior)
@@ -45,6 +66,7 @@ void ClipLayer::SetClipRRect(const RRect& rrect, Clip clipBehavior)
     radii[SkRRect::kLowerRight_Corner] = GetSkRadii(rrect.GetCorner().bottomRightRadius);
     rrect_.sk_rrect.setRectRadii(SkRect::MakeXYWH(rect.Left(), rect.Top(), rect.Width(), rect.Height()), radii);
     clipBehavior_ = clipBehavior;
+    isPath_ = false;
 }
 
 void ClipLayer::SetClipRRect(const Rect& rect, double x, double y, Clip clipBehavior)
@@ -52,11 +74,26 @@ void ClipLayer::SetClipRRect(const Rect& rect, double x, double y, Clip clipBeha
     rrect_.sk_rrect = SkRRect::MakeRectXY(SkRect::MakeXYWH(rect.Left(), rect.Top(), rect.Width(), rect.Height()),
         SkDoubleToScalar(x), SkDoubleToScalar(y));
     clipBehavior_ = clipBehavior;
+    isPath_ = false;
 }
 
 void ClipLayer::SetClipRRect(const flutter::RRect& rrect)
 {
     rrect_.sk_rrect = rrect.sk_rrect;
+    isPath_ = false;
+}
+
+void ClipLayer::SetClipPath(const fml::RefPtr<flutter::CanvasPath>& canvasPath, Clip clipBehavior)
+{
+    canvasPath_ = canvasPath;
+    clipBehavior_ = clipBehavior;
+    isPath_ = true;
+}
+
+void ClipLayer::SetClipPath(const fml::RefPtr<flutter::CanvasPath>& canvasPath)
+{
+    canvasPath_ = canvasPath;
+    isPath_ = true;
 }
 
 SkVector ClipLayer::GetSkRadii(const Radius& radius)
@@ -65,6 +102,44 @@ SkVector ClipLayer::GetSkRadii(const Radius& radius)
     fRadii.set(
         SkDoubleToScalar(std::max(radius.GetX().Value(), 0.0)), SkDoubleToScalar(std::max(radius.GetY().Value(), 0.0)));
     return fRadii;
+}
+
+void ClipLayer::CancelMask()
+{
+    isMask_ = false;
+}
+
+void ClipLayer::SetSvgMask(const sk_sp<SkSVGDOM>& svgDom, double x, double y, double scaleX, double scaleY)
+{
+    isMask_ = true;
+    isSvgMask_ = true;
+    isGradientMask_ = false;
+    isPathMask_ = false;
+
+    svgX_ = x;
+    svgY_ = y;
+    scaleX_ = scaleX;
+    scaleY_ = scaleY;
+    svgDom_ = svgDom;
+}
+
+void ClipLayer::SetColorMask(const SkPaint& maskPaint)
+{
+    isMask_ = true;
+    isSvgMask_ = false;
+    isGradientMask_ = true;
+    isPathMask_ = false;
+    maskPaint_ = maskPaint;
+}
+
+void ClipLayer::SetPathMask(const SkPaint& maskPaint, const SkPath& path)
+{
+    isMask_ = true;
+    isSvgMask_ = false;
+    isGradientMask_ = false;
+    isPathMask_ = true;
+    maskPaint_ = maskPaint;
+    maskPath_ = path;
 }
 
 void ClipLayer::Dump()

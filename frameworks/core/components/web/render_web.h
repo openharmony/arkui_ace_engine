@@ -34,7 +34,6 @@ public:
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
-    void MarkNeedRender(bool overlay = false);
     void OnAttachContext() override;
 
     void SetDelegate(const RefPtr<WebDelegate>& delegate)

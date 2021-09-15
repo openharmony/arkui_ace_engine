@@ -22,6 +22,7 @@
 #include "base/log/log.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/back_end_event_manager.h"
+#include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 
 namespace OHOS::Ace {
 
@@ -30,9 +31,14 @@ namespace {
 constexpr char WEB_METHOD_RELOAD[] = "reload";
 constexpr char WEB_METHOD_ROUTER_BACK[] = "routerBack";
 constexpr char WEB_METHOD_UPDATEURL[] = "updateUrl";
+constexpr char WEB_METHOD_CHANGE_PAGE_URL[] = "changePageUrl";
+constexpr char WEB_METHOD_PAGE_PATH_INVALID[] = "pagePathInvalid";
 constexpr char WEB_EVENT_PAGESTART[] = "onPageStarted";
 constexpr char WEB_EVENT_PAGEFINISH[] = "onPageFinished";
 constexpr char WEB_EVENT_PAGEERROR[] = "onPageError";
+constexpr char WEB_EVENT_ONMESSAGE[] = "onMessage";
+constexpr char WEB_EVENT_ROUTERPUSH[] = "routerPush";
+
 constexpr char WEB_CREATE[] = "web";
 constexpr char NTC_PARAM_WEB[] = "web";
 constexpr char NTC_PARAM_WIDTH[] = "width";
@@ -43,6 +49,8 @@ constexpr char NTC_ERROR[] = "create error";
 constexpr char NTC_PARAM_SRC[] = "src";
 constexpr char NTC_PARAM_ERROR_CODE[] = "errorCode";
 constexpr char NTC_PARAM_URL[] = "url";
+constexpr char NTC_PARAM_PAGE_URL[] = "pageUrl";
+constexpr char NTC_PARAM_PAGE_INVALID[] = "pageInvalid";
 constexpr char NTC_PARAM_DESCRIPTION[] = "description";
 constexpr char WEB_ERROR_CODE_CREATEFAIL[] = "error-web-delegate-000001";
 constexpr char WEB_ERROR_MSG_CREATEFAIL[] = "create web_delegate failed.";
@@ -98,6 +106,8 @@ void WebDelegate::UnregisterEvent()
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_PAGESTART));
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_PAGEFINISH));
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_PAGEERROR));
+    resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_ROUTERPUSH));
+    resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_ONMESSAGE));
 }
 
 void WebDelegate::CreatePlatformResource(
@@ -151,30 +161,37 @@ void WebDelegate::CreatePluginResource(
     auto platformTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(),
                                                          TaskExecutor::TaskType::PLATFORM);
     auto resRegister = pipelineContext->GetPlatformResRegister();
-
-    platformTaskExecutor.PostTask([this, resRegister, size, position] {
-        if (resRegister == nullptr) {
+    auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
+    platformTaskExecutor.PostTask([weakWeb = AceType::WeakClaim(this), weakRes, size, position] {
+        auto webDelegate = weakWeb.Upgrade();
+        if (webDelegate == nullptr) {
+            LOGE("webDelegate is null!");
             return;
         }
-        auto webCom = this->webComponent_.Upgrade();
+        auto webCom = webDelegate->webComponent_.Upgrade();
         if (!webCom) {
-            OnError(NTC_ERROR, "fail to call WebDelegate::SetSrc PostTask");
+            webDelegate->OnError(NTC_ERROR, "fail to call WebDelegate::SetSrc PostTask");
+            return;
         }
-
+        auto resRegister = weakRes.Upgrade();
         if (!resRegister) {
-            if (onError_) {
-                onError_(WEB_ERROR_CODE_CREATEFAIL, WEB_ERROR_MSG_CREATEFAIL);
+            if (webDelegate->onError_) {
+                webDelegate->onError_(WEB_ERROR_CODE_CREATEFAIL, WEB_ERROR_MSG_CREATEFAIL);
             }
             return;
         }
-        auto context = this->context_.Upgrade();
+        auto context = webDelegate->context_.Upgrade();
         if (!context) {
             LOGE("context is null");
             return;
         }
 
+        std::string pageUrl;
+        int32_t pageId;
+        OHOS::Ace::Framework::DelegateClient::GetInstance().GetWebPageUrl(pageUrl, pageId);
+
         std::stringstream paramStream;
-        paramStream << NTC_PARAM_WEB << WEB_PARAM_EQUALS << id_ << WEB_PARAM_AND
+        paramStream << NTC_PARAM_WEB << WEB_PARAM_EQUALS << webDelegate->id_ << WEB_PARAM_AND
                     << NTC_PARAM_WIDTH << WEB_PARAM_EQUALS
                     << size.Width() * context->GetViewScale() << WEB_PARAM_AND
                     << NTC_PARAM_HEIGHT << WEB_PARAM_EQUALS
@@ -183,21 +200,23 @@ void WebDelegate::CreatePluginResource(
                     << position.GetX() * context->GetViewScale() << WEB_PARAM_AND
                     << NTC_PARAM_TOP << WEB_PARAM_EQUALS
                     << position.GetY() * context->GetViewScale() << WEB_PARAM_AND
-                    << NTC_PARAM_SRC << WEB_PARAM_EQUALS << webCom->GetSrc();
+                    << NTC_PARAM_SRC << WEB_PARAM_EQUALS << webCom->GetSrc() << WEB_PARAM_AND
+                    << NTC_PARAM_PAGE_URL << WEB_PARAM_EQUALS << pageUrl;
 
         std::string param = paramStream.str();
-        id_ = resRegister->CreateResource(WEB_CREATE, param);
-
-        if (id_ == INVALID_ID) {
-            if (onError_) {
-                onError_(WEB_ERROR_CODE_CREATEFAIL, WEB_ERROR_MSG_CREATEFAIL);
+        webDelegate->id_ = resRegister->CreateResource(WEB_CREATE, param);
+        if (webDelegate->id_ == INVALID_ID) {
+            if (webDelegate->onError_) {
+                webDelegate->onError_(WEB_ERROR_CODE_CREATEFAIL, WEB_ERROR_MSG_CREATEFAIL);
             }
             return;
         }
-        state_ = State::CREATED;
-        hash_ = MakeResourceHash();
-        RegisterWebEvent();
-        BindRouterBackMethod();
+        webDelegate->state_ = State::CREATED;
+        webDelegate->hash_ = webDelegate->MakeResourceHash();
+        webDelegate->RegisterWebEvent();
+        webDelegate->BindRouterBackMethod();
+        webDelegate->BindPopPageSuccessMethod();
+        webDelegate->BindIsPagePathInvalidMethod();
     });
 }
 
@@ -220,6 +239,10 @@ void WebDelegate::InitWebEvent()
     if (!webCom->GetPageErrorEventId().IsEmpty()) {
         onPageError_ =
             AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageErrorEventId(), context_);
+    }
+    if (!webCom->GetMessageEventId().IsEmpty()) {
+        onMessage_ =
+            AceAsyncEvent<void(const std::string&)>::Create(webCom->GetMessageEventId(), context_);
     }
 }
 
@@ -252,6 +275,20 @@ void WebDelegate::RegisterWebEvent()
                 auto delegate = weak.Upgrade();
                 if (delegate) {
                     delegate->OnPageError(param);
+                }
+            });
+    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_ROUTERPUSH),
+                               [weak = WeakClaim(this)](const std::string& param) {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->OnRouterPush(param);
+                }
+            });
+    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_ONMESSAGE),
+                               [weak = WeakClaim(this)](const std::string& param) {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->OnMessage(param);
                 }
             });
 }
@@ -308,13 +345,33 @@ void WebDelegate::CallWebRouterBack()
     CallResRegisterMethod(routerBackMethod_, WEB_PARAM_NONE, nullptr);
 }
 
+void WebDelegate::CallPopPageSuccessPageUrl(const std::string& url)
+{
+    hash_ = MakeResourceHash();
+    changePageUrlMethod_ = MakeMethodHash(WEB_METHOD_CHANGE_PAGE_URL);
+    std::stringstream paramStream;
+    paramStream << NTC_PARAM_PAGE_URL << WEB_PARAM_EQUALS << url;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(changePageUrlMethod_, param, nullptr);
+}
+
+void WebDelegate::CallIsPagePathInvalid(const bool& isPageInvalid)
+{
+    hash_ = MakeResourceHash();
+    isPagePathInvalidMethod_ = MakeMethodHash(WEB_METHOD_PAGE_PATH_INVALID);
+    std::stringstream paramStream;
+    paramStream << NTC_PARAM_PAGE_INVALID << WEB_PARAM_EQUALS << isPageInvalid;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(isPagePathInvalidMethod_, param, nullptr);
+}
+
 void WebDelegate::OnPageStarted(const std::string& param)
 {
     if (onPageStarted_) {
         std::string paramStart = std::string(R"(")").append(param).append(std::string(R"(")"));
-        std::string param =
+        std::string urlParam =
             std::string(R"("pagestart",{"url":)").append(paramStart.append("},null"));
-        onPageStarted_(param);
+        onPageStarted_(urlParam);
     }
 }
 
@@ -322,9 +379,9 @@ void WebDelegate::OnPageFinished(const std::string& param)
 {
     if (onPageFinished_) {
         std::string paramFinish = std::string(R"(")").append(param).append(std::string(R"(")"));
-        std::string param =
+        std::string urlParam =
             std::string(R"("pagefinish",{"url":)").append(paramFinish.append("},null"));
-        onPageFinished_(param);
+        onPageFinished_(urlParam);
     }
 }
 
@@ -351,11 +408,30 @@ void WebDelegate::OnPageError(const std::string& param)
                                                    .append(std::string(R"(")")
                                                    .append(description)
                                                    .append(std::string(R"(")")));
-        std::string param = std::string(R"("error",{"url":)")
+        std::string errorParam = std::string(R"("error",{"url":)")
                                            .append((paramUrl + paramErrorCode + paramDesc)
                                            .append("},null"));
-        onPageError_(param);
+        onPageError_(errorParam);
     }
+}
+
+void WebDelegate::OnMessage(const std::string& param)
+{
+    std::string removeQuotes;
+    removeQuotes = param;
+    removeQuotes.erase(std::remove(removeQuotes.begin(), removeQuotes.end(), '\"'),
+                       removeQuotes.end());
+    if (onMessage_) {
+        std::string paramMessage = std::string(R"(")").append(removeQuotes).append(std::string(R"(")"));
+        std::string messageParam =
+                std::string(R"("message",{"message":)").append(paramMessage.append("},null"));
+        onMessage_(messageParam);
+    }
+}
+
+void WebDelegate::OnRouterPush(const std::string& param)
+{
+    OHOS::Ace::Framework::DelegateClient::GetInstance().RouterPush(param);
 }
 
 std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::string& name) const
@@ -382,6 +458,34 @@ void WebDelegate::BindRouterBackMethod()
             auto delegate = weak.Upgrade();
             if (delegate) {
                 delegate->CallWebRouterBack();
+            }
+        });
+    }
+}
+
+void WebDelegate::BindPopPageSuccessMethod()
+{
+    auto context = context_.Upgrade();
+    if (context) {
+        context->SetPopPageSuccessEventHandler(
+            [weak = WeakClaim(this)](const std::string& pageUrl, const int32_t pageId) {
+                std::string url = pageUrl.substr(0, pageUrl.length() - 3);
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->CallPopPageSuccessPageUrl(url);
+                }
+        });
+    }
+}
+
+void WebDelegate::BindIsPagePathInvalidMethod()
+{
+    auto context = context_.Upgrade();
+    if (context) {
+        context->SetIsPagePathInvalidEventHandler([weak = WeakClaim(this)](bool& isPageInvalid) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->CallIsPagePathInvalid(isPageInvalid);
             }
         });
     }

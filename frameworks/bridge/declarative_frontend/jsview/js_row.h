@@ -20,41 +20,37 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSRow : public JSFlex<RowComponent> {
-    DECLARE_ACE_TYPE(JSRow, JSContainerBase);
-
+class JSRow : public JSFlex {
 public:
-    JSRow() = delete;
-#ifdef USE_V8_ENGINE
-    JSRow(const std::list<JSViewAbstract*>& children,
-        std::list<v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>>> jsChildren)
-#else
-    JSRow(const std::list<JSViewAbstract*>& children, std::list<JSValue> jsChildren)
-#endif
-        : JSFlex<RowComponent>(children, jsChildren) {};
-
-    ~JSRow()
-    {
-        LOGD("Destroy: JSRow");
-    };
-
-    virtual void Destroy(JSViewAbstract* parentCustomView) override;
-
-protected:
-    bool IsHorizontal() const override;
-
-public:
+    static void Create(const JSCallbackInfo& info);
+    static void CreateWithWrap(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
+};
 
-#ifdef USE_QUICKJS_ENGINE
-    static JSValue ConstructorCallback(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv);
-    static void QjsDestructor(JSRuntime* rt, JSRow* ptr);
-    static void QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc);
-#elif USE_V8_ENGINE
-    static void ConstructorCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
-#endif
+class VerticalAlignDeclaration : public AlignDeclaration {
+    DECLARE_ACE_TYPE(VerticalAlignDeclaration, AlignDeclaration);
+
+public:
+    explicit VerticalAlignDeclaration(VerticalAlign align) : align_(align) {}
+    ~VerticalAlignDeclaration() override = default;
+
+    static void ConstructorCallback(const JSCallbackInfo& args);
+    static void DestructorCallback(VerticalAlignDeclaration* obj);
+
+    virtual VerticalAlign GetVerticalAlign() const override
+    {
+        return align_;
+    }
+
+    DeclarationType GetDeclarationType() override
+    {
+        return DeclarationType::VERTICAL;
+    }
+
+private:
+    VerticalAlignDeclaration() = default;
+    VerticalAlign align_ { VerticalAlign::CENTER };
 };
 
 } // namespace OHOS::Ace::Framework
-
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_ROW_H

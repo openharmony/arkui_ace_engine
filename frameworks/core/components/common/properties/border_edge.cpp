@@ -19,7 +19,11 @@ namespace OHOS::Ace {
 
 BorderEdge::BorderEdge(const Color& color, const Dimension& width, BorderStyle style)
     : color_(color), width_(width), style_(style)
-{}
+{
+    if (width.Value() < 0.0) {
+        width_.SetValue(0.0);
+    }
+}
 
 bool BorderEdge::HasValue() const
 {

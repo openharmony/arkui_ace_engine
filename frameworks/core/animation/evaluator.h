@@ -18,8 +18,13 @@
 
 #include <cmath>
 
+#include "animator.h"
+
+#include "base/geometry/transform_util.h"
 #include "base/memory/ace_type.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/shadow.h"
 
 namespace OHOS::Ace {
 
@@ -42,12 +47,9 @@ public:
     }
 };
 
-class ColorEvaluator : public Evaluator<Color> {
+template<>
+class LinearEvaluator<Color> : public Evaluator<Color> {
 public:
-    ColorEvaluator() = default;
-
-    ~ColorEvaluator() override = default;
-
     Color Evaluate(const Color& begin, const Color& end, float fraction) override
     {
         // convert begin color from ARGB to linear
@@ -101,6 +103,47 @@ private:
         uint8_t gammaAlpha = std::clamp(static_cast<int32_t>(alpha), 0, UINT8_MAX);
 
         return Color::FromARGB(gammaAlpha, gammaRed, gammaGreen, gammaBlue);
+    }
+};
+
+template<>
+class LinearEvaluator<BorderStyle> : public Evaluator<BorderStyle> {
+public:
+    BorderStyle Evaluate(const BorderStyle& begin, const BorderStyle& end, float fraction) override
+    {
+        if (fraction >= HALF_PERCENT) {
+            return end;
+        }
+        return begin;
+    }
+
+private:
+    constexpr static float HALF_PERCENT = 0.5f;
+};
+
+template<>
+class LinearEvaluator<TransformOperation> : public Evaluator<TransformOperation> {
+    TransformOperation Evaluate(const TransformOperation& begin, const TransformOperation& end, float fraction) override
+    {
+        return TransformOperation::Blend(end, begin, fraction);
+    }
+};
+
+template<>
+class LinearEvaluator<Shadow> : public Evaluator<Shadow> {
+    Shadow Evaluate(const Shadow& begin, const Shadow& end, float fraction) override
+    {
+        return Shadow::Blend(end, begin, fraction);
+    }
+};
+
+template<>
+class LinearEvaluator<TransformOperations> : public Evaluator<TransformOperations> {
+public:
+    TransformOperations Evaluate(
+        const TransformOperations& begin, const TransformOperations& end, float fraction) override
+    {
+        return TransformOperations::Blend(end, begin, fraction);
     }
 };
 

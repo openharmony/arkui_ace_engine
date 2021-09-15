@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CALENDAR_CALENDAR_ELEMENT_H
 
 #include "core/components/calendar/calendar_component.h"
+#include "core/components/text/text_element.h"
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/render_element.h"
 
@@ -56,9 +57,11 @@ public:
 private:
     void UpdateAttr(const RefPtr<CalendarComponent>& calendar);
     void SetArrowImage(const RefPtr<Element>& element, bool isLeft);
+    RefPtr<TextElement> GetTextElement(const RefPtr<Element>& flex);
 
     RefPtr<CalendarController> calendarController_;
     RefPtr<RenderSwiper> renderSwiper_;
+    std::function<void(const std::string&)> dateEvent_;
 };
 
 class CalendarMonthElement : public RenderElement, public FocusNode {

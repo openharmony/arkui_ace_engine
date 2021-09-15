@@ -71,7 +71,17 @@ RefPtr<OverlayElement> DialogModalElement::GetOverlayElement() const
         LOGE("Get overlay element failed. bgBox element is null!");
         return RefPtr<OverlayElement>();
     }
-    return AceType::DynamicCast<OverlayElement>(bgBox->GetFirstChild());
+    auto stack = bgBox->GetFirstChild();
+    if (!stack) {
+        return RefPtr<OverlayElement>();
+    }
+    auto child = stack->GetChildren();
+    if (child.size() > 1) {
+        auto it = child.begin();
+        it++;
+        return AceType::DynamicCast<OverlayElement>(*it);
+    }
+    return RefPtr<OverlayElement>();
 }
 
 void DialogModalElement::UpdateSystemBarHeight(double statusBar, double navigationBar)

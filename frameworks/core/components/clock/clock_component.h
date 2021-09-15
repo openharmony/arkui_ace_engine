@@ -18,6 +18,7 @@
 
 #include "core/components/clock/clock_element.h"
 #include "core/components/clock/render_clock.h"
+#include "core/components/declaration/clock/clock_declaration.h"
 
 namespace OHOS::Ace {
 
@@ -25,7 +26,7 @@ class ClockComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(ClockComponent, ComponentGroup);
 
 public:
-    ClockComponent() = default;
+    ClockComponent();
     ~ClockComponent() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override
@@ -37,202 +38,46 @@ public:
     {
         return AceType::MakeRefPtr<ClockElement>();
     }
+    void SetClockFaceSrc(const std::string& clockFaceSrc);
+    void SetClockFaceNightSrc(const std::string& clockFaceNightSrc);
+    void SetHourHandSrc(const std::string& hourHandSrc);
+    void SetHourHandNightSrc(const std::string& hourHandNightSrc);
+    void SetMinuteHandSrc(const std::string& minuteHandSrc);
+    void SetMinuteHandNightSrc(const std::string& minuteHandNightSrc);
+    void SetSecondHandSrc(const std::string& secondHandSrc);
+    void SetSecondHandNightSrc(const std::string& secondHandNightSrc);
+    void SetHoursWest(double hoursWest);
+    void SetDigitColor(const std::string& digitColor);
+    void SetDigitColorNight(const std::string& digitColorNight);
+    void SetDefaultSize(const Dimension& defaultSize);
+    void SetDigitSizeRatio(double digitSizeRatio);
+    void SetDigitRadiusRatio(double digitRadiusRatio);
+    void SetFontFamilies(const std::vector<std::string>& fontFamilies);
+    void SetShowDigit(bool showDigit);
+    void SetOnHourChangeEvent(const EventMarker& onHourChangeEvent);
+    const std::string& GetClockFaceSrc() const;
+    const std::string& GetClockFaceNightSrc() const;
+    const std::string& GetHourHandSrc() const;
+    const std::string& GetHourHandNightSrc() const;
+    const std::string& GetMinuteHandSrc() const;
+    const std::string& GetMinuteHandNightSrc() const;
+    const std::string& GetSecondHandSrc() const;
+    const std::string& GetSecondHandNightSrc() const;
+    double GetHoursWest() const;
+    const Color& GetDigitColor() const;
+    const Color& GetDigitColorNight() const;
+    const Dimension& GetDefaultSize() const;
+    double GetDigitSizeRatio() const;
+    double GetDigitRadiusRatio() const;
+    const std::vector<std::string>& GetFontFamilies() const;
+    bool GetShowDigit() const;
+    const EventMarker& GetOnHourChangeEvent() const;
 
-    void SetClockFaceSrc(const std::string& clockFaceSrc)
-    {
-        clockFaceSrc_ = clockFaceSrc;
-    }
-
-    const std::string& GetClockFaceSrc() const
-    {
-        return clockFaceSrc_;
-    }
-
-    void SetClockFaceNightSrc(const std::string& clockFaceNightSrc)
-    {
-        clockFaceNightSrc_ = clockFaceNightSrc;
-    }
-
-    const std::string& GetClockFaceNightSrc() const
-    {
-        return clockFaceNightSrc_;
-    }
-
-    void SetHourHandSrc(const std::string& hourHandSrc)
-    {
-        hourHandSrc_ = hourHandSrc;
-    }
-
-    const std::string& GetHourHandSrc() const
-    {
-        return hourHandSrc_;
-    }
-
-    void SetHourHandNightSrc(const std::string& hourHandNightSrc)
-    {
-        hourHandNightSrc_ = hourHandNightSrc;
-    }
-
-    const std::string& GetHourHandNightSrc() const
-    {
-        return hourHandNightSrc_;
-    }
-
-    void SetMinuteHandSrc(const std::string& minuteHandSrc)
-    {
-        minuteHandSrc_ = minuteHandSrc;
-    }
-
-    const std::string& GetMinuteHandSrc() const
-    {
-        return minuteHandSrc_;
-    }
-
-    void SetMinuteHandNightSrc(const std::string& minuteHandNightSrc)
-    {
-        minuteHandNightSrc_ = minuteHandNightSrc;
-    }
-
-    const std::string& GetMinuteHandNightSrc() const
-    {
-        return minuteHandNightSrc_;
-    }
-
-    void SetSecondHandSrc(const std::string& secondHandSrc)
-    {
-        secondHandSrc_ = secondHandSrc;
-    }
-
-    const std::string& GetSecondHandSrc() const
-    {
-        return secondHandSrc_;
-    }
-
-    void SetSecondHandNightSrc(const std::string& secondHandNightSrc)
-    {
-        secondHandNightSrc_ = secondHandNightSrc;
-    }
-
-    const std::string& GetSecondHandNightSrc() const
-    {
-        return secondHandNightSrc_;
-    }
-
-    void SetHoursWest(double hoursWest)
-    {
-        hoursWest_ = hoursWest;
-    }
-
-    double GetHoursWest() const
-    {
-        return hoursWest_;
-    }
-
-    void SetDigitColor(const Color& digitColor)
-    {
-        digitColor_ = digitColor;
-    }
-
-    const Color& GetDigitColor() const
-    {
-        return digitColor_;
-    }
-
-    void SetDigitColorNight(const Color& digitColorNight)
-    {
-        digitColorNight_ = digitColorNight;
-    }
-
-    const Color& GetDigitColorNight() const
-    {
-        return digitColorNight_;
-    }
-
-    void SetDefaultSize(const Dimension& defaultSize)
-    {
-        defaultSize_ = defaultSize;
-    }
-
-    const Dimension& GetDefaultSize() const
-    {
-        return defaultSize_;
-    }
-
-    void SetDigitSizeRatio(double digitSizeRatio)
-    {
-        digitSizeRatio_ = digitSizeRatio;
-    }
-
-    double GetDigitSizeRatio() const
-    {
-        return digitSizeRatio_;
-    }
-
-    void SetDigitRadiusRatio(double digitRadiusRatio)
-    {
-        digitRadiusRatio_ = digitRadiusRatio;
-    }
-
-    double GetDigitRadiusRatio() const
-    {
-        return digitRadiusRatio_;
-    }
-
-    const std::vector<std::string>& GetFontFamilies() const
-    {
-        return fontFamilies_;
-    }
-
-    void SetFontFamilies(const std::vector<std::string>& fontFamilies)
-    {
-        fontFamilies_ = fontFamilies;
-    }
-
-    bool GetShowDigit() const
-    {
-        return showDigit_;
-    }
-
-    void SetShowDigit(bool showDigit)
-    {
-        showDigit_ = showDigit;
-    }
-
-    void SetOnHourChangeEvent(const EventMarker& onHourChangeEvent)
-    {
-        onHourCallback_ = onHourChangeEvent;
-    }
-
-    const EventMarker& GetOnHourChangeEvent() const
-    {
-        return onHourCallback_;
-    }
+    void SetDeclaration(const RefPtr<ClockDeclaration>& declaration);
+    const RefPtr<ClockDeclaration>& GetDeclaration() const;
 
 private:
-    std::string clockFaceSrc_;
-    std::string hourHandSrc_;
-    std::string minuteHandSrc_;
-    std::string secondHandSrc_;
-    std::string clockFaceNightSrc_;
-    std::string hourHandNightSrc_;
-    std::string minuteHandNightSrc_;
-    std::string secondHandNightSrc_;
-    // hours west of Greenwich, for e.g., [hoursWest] is [-8] in  GMT+8.
-    // Valid range of [hoursWest] is [-12, 14]. Set default value to DBL_MAX to use current time zone by default.
-    double hoursWest_ = DBL_MAX;
-    Color digitColor_;
-    Color digitColorNight_;
-    Dimension defaultSize_;
-    // ratio of digit-radius and half of side length of clock-face-image.
-    // digit-radius is used to calculate digit offset.
-    // e.g., when size of clock-face-image is 200 x 200, digit "3" is [200 / 2 x 0.7 = 70] right of the center.
-    double digitRadiusRatio_ = 0.7;
-    // ratio of digit-size and side length of clock-face-image, which is used to decide font-size of digit.
-    // e.g., when size of clock-face-image is 200 x 200, font-size of digit is 200 x 0.08 = 16
-    double digitSizeRatio_ = 0.08;
-    std::vector<std::string> fontFamilies_;
-    bool showDigit_ = true;
-    EventMarker onHourCallback_;
+    RefPtr<ClockDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

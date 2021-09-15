@@ -19,9 +19,12 @@
 #include "base/utils/utils.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
+
+const char SVG_THEME_FILL[] = "theme_fill";
 
 ImageFit ConvertStrToFit(const std::string& fit)
 {
@@ -42,23 +45,33 @@ ImageFit ConvertStrToFit(const std::string& fit)
 
 } // namespace
 
+ImageObjectPosition ImageObjectPosition(const std::string& value)
+{
+    return ParseImageObjectPosition(value.c_str());
+}
+
+void DOMImage::InitializeStyle()
+{
+    theme_ = GetTheme<ImageTheme>();
+    if (!theme_) {
+        LOGW("ImageTheme is null");
+    }
+}
+
 DOMImage::DOMImage(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
     imageChild_ = AceType::MakeRefPtr<ImageComponent>();
     imageChild_->SetFitMaxSize(true);
-    if (IsRightToLeft()) {
-        imageChild_->SetTextDirection(TextDirection::RTL);
-    }
 }
 
 bool DOMImage::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
 {
     if (attr.first == DOM_SRC) {
-        imageChild_->SetSrc(attr.second);
+        imageChild_->SetSrc(ParseImageSrc(attr.second));
         return true;
     }
     if (attr.first == DOM_IMAGE_ALT) {
-        imageChild_->SetAlt(attr.second);
+        imageChild_->SetAlt(ParseImageSrc(attr.second));
         return true;
     }
     return false;
@@ -68,6 +81,12 @@ bool DOMImage::SetSpecializedStyle(const std::pair<std::string, std::string>& st
 {
     // static linear map must be sorted by key.
     static const LinearMapNode<void (*)(const std::string&, DOMImage&)> imageStylesOperators[] = {
+        { DOM_IMAGE_FILL_COLOR,
+            [](const std::string& val, DOMImage& image) {
+                if (val == SVG_THEME_FILL && image.theme_) {
+                    image.imageChild_->SetColor(image.theme_->GetFillColor());
+                }
+            } },
         { DOM_IMAGE_FIT_ORIGINAL_SIZE,
             [](const std::string& val, DOMImage& image) { image.imageChild_->SetFitMaxSize(!StringToBool(val)); } },
         { DOM_IMAGE_MATCH_TEXT_DIRECTION,
@@ -76,6 +95,8 @@ bool DOMImage::SetSpecializedStyle(const std::pair<std::string, std::string>& st
             } },
         { DOM_IMAGE_FIT, [](const std::string& val,
                          DOMImage& image) { image.imageChild_->SetImageFit(ConvertStrToFit(val.c_str())); } },
+        { DOM_IMAGE_POSITION, [](const std::string& val, DOMImage& image) {
+            image.imageChild_->SetImageObjectPosition(ImageObjectPosition(val.c_str())); } },
     };
     auto operatorIter =
         BinarySearchFindIndex(imageStylesOperators, ArraySize(imageStylesOperators), style.first.c_str());
@@ -89,11 +110,11 @@ bool DOMImage::SetSpecializedStyle(const std::pair<std::string, std::string>& st
 bool DOMImage::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
     if (event == DOM_COMPLETE) {
-        loadSuccessEventId_ = EventMarker(GetNodeIdForEvent(), event, pageId);
-        imageChild_->SetLoadSuccessEventId(loadSuccessEventId_);
+        loadSuccessEvent_ = EventMarker(GetNodeIdForEvent(), event, pageId);
+        imageChild_->SetLoadSuccessEvent(loadSuccessEvent_);
     } else if (event == DOM_ERROR) {
-        loadFailEventId_ = EventMarker(GetNodeIdForEvent(), event, pageId);
-        imageChild_->SetLoadFailEventId(loadFailEventId_);
+        loadFailEvent_ = EventMarker(GetNodeIdForEvent(), event, pageId);
+        imageChild_->SetLoadFailEvent(loadFailEvent_);
     } else {
         return false;
     }
@@ -102,6 +123,7 @@ bool DOMImage::AddSpecializedEvent(int32_t pageId, const std::string& event)
 
 void DOMImage::PrepareSpecializedComponent()
 {
+    imageChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     // If there is a corresponding box decoration, specialize the box.
     if (boxComponent_) {
         auto backDecoration = boxComponent_->GetBackDecoration();
@@ -116,6 +138,8 @@ void DOMImage::PrepareSpecializedComponent()
     if (flexItemComponent_ && !imageChild_->GetFitMaxSize()) {
         flexItemComponent_->SetStretchFlag(false);
     }
+
+    imageChild_->SetImageFill(GetImageFill());
 }
 
 } // namespace OHOS::Ace::Framework

@@ -80,7 +80,12 @@ const std::vector<std::string> COMMON_STYLE_LIST = {
     DOM_BACKDROP_FILTER,
     DOM_TRANSITION_EFFECT,
     DOM_WINDOW_FILTER,
+    DOM_MASK_IMAGE,
+    DOM_MASK_POSITION,
+    DOM_MASK_SIZE,
     DOM_TRANSFORM_ORIGIN,
+    DOM_TRANSFORM,
+    DOM_CLIP_PATH,
 };
 
 // common event list
@@ -155,6 +160,7 @@ const std::vector<std::string> TEXT_STYLE_LIST = {
     DOM_TEXT_MAX_FONT_SIZE,
     DOM_TEXT_FONT_SIZE_STEP,
     DOM_TEXT_PREFER_FONT_SIZES,
+    DOM_TEXT_FONT_VARIANT,
 };
 
 // text node attribute list
@@ -318,6 +324,7 @@ const std::vector<std::string> SPAN_STYLE_LIST = {
     DOM_TEXT_FONT_WEIGHT,
     DOM_TEXT_DECORATION,
     DOM_TEXT_FONT_FAMILY,
+    DOM_TEXT_FONT_VARIANT,
 };
 
 // span node attribute list
@@ -435,6 +442,7 @@ const std::vector<std::string> TEXTAREA_STYLE_LIST = {
     DOM_TEXTAREA_FONT_SIZE,
     DOM_TEXTAREA_FONT_WEIGHT,
     DOM_TEXTAREA_PLACEHOLDER_COLOR,
+    DOM_CARET_COLOR,
     DOM_TEXTAREA_FONT_FAMILY,
     DOM_TEXTAREA_CURSOR_COLOR,
 };
@@ -450,6 +458,9 @@ const std::vector<std::string> TEXTAREA_ATTR_LIST = {
     DOM_TEXTAREA_OBSCURE,
     DOM_TEXTAREA_EXTEND,
     DOM_ICON_SRC,
+    DOM_INPUT_SELECTED_START,
+    DOM_INPUT_SELECTED_END,
+    DOM_INPUT_SOFT_KEYBOARD_ENABLED,
 };
 
 // textarea node event list
@@ -554,6 +565,9 @@ const std::vector<std::string> SEARCH_ATTR_LIST = {
     DOM_SEARCH_ICON,
     DOM_SEARCH_HINT,
     DOM_SEARCH_VALUE,
+    DOM_INPUT_SELECTED_START,
+    DOM_INPUT_SELECTED_END,
+    DOM_INPUT_SOFT_KEYBOARD_ENABLED,
 };
 
 const std::vector<std::string> SEARCH_STYLE_LIST = {
@@ -562,6 +576,7 @@ const std::vector<std::string> SEARCH_STYLE_LIST = {
     DOM_TEXT_FONT_FAMILY,
     DOM_COLOR,
     DOM_INPUT_PLACEHOLDER_COLOR,
+    DOM_CARET_COLOR,
     DOM_PADDING_LEFT,
     DOM_PADDING_TOP,
     DOM_PADDING_RIGHT,

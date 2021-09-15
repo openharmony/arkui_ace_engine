@@ -224,7 +224,7 @@ void CardTransitionController::CreateCardListAnimation(const RefPtr<RenderNode>&
 {
     auto renderListItem = AceType::DynamicCast<RenderListItem>(renderNode);
     if (!renderListItem) {
-        LOGW("list item is null");
+        LOGD("list item is null");
         return;
     }
     auto height = renderListItem->GetLayoutSize().Height();
@@ -353,7 +353,7 @@ RRect CardTransitionController::GetCardRect(const ComposeId& composeId) const
     }
     auto renderListItem = AceType::DynamicCast<RenderListItem>(cardComposeElement->GetRenderNode());
     if (!renderListItem) {
-        LOGW("list item is null");
+        LOGD("list item is null");
         return RRect();
     }
     return renderListItem->GetRRect();

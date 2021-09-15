@@ -18,7 +18,28 @@
 #include "base/log/log.h"
 #include "core/components/common/layout/grid_system_manager.h"
 
+namespace {
+constexpr int32_t INVALID_OFFSET = -1;
+}
+
 namespace OHOS::Ace {
+
+/* set offset by grid column number */
+void GridColumnInfo::Builder::SetOffset(int32_t offset, GridSizeType type)
+{
+    if (!columnInfo_->hasColumnOffset_) {
+        for (uint8_t i = 0; i < sizeof(columnInfo_->offsets_) / sizeof(int32_t); i++) {
+            columnInfo_->offsets_[i] = INVALID_OFFSET;
+        }
+        columnInfo_->hasColumnOffset_ = true;
+    }
+
+    const int32_t arraySize = static_cast<const int32_t>(GridSizeType::XL);
+    int32_t typeVal = static_cast<int32_t>(type);
+    if (typeVal < arraySize) {
+        columnInfo_->offsets_[typeVal] = offset;
+    }
+}
 
 double GridColumnInfo::GetWidth() const
 {
@@ -48,8 +69,7 @@ double GridColumnInfo::GetWidth() const
         default:
             break;
     }
-
-    return GetWidth(columns);
+    return (columns == 0) ? 0.0 : GetWidth(columns);
 }
 
 double GridColumnInfo::GetWidth(uint32_t columns) const
@@ -93,31 +113,51 @@ double GridColumnInfo::GetMaxWidth() const
     return GetWidth(columns);
 }
 
-const Dimension& GridColumnInfo::GetOffset() const
+Dimension GridColumnInfo::GetOffset() const
 {
     if (!parent_) {
         LOGE("no parent info");
         return UNDEFINED_DIMENSION;
     }
-    auto sizeType = parent_->GetSizeType();
-    switch (sizeType) {
-        case GridSizeType::XS:
-            return xsSizeOffset_;
-            break;
-        case GridSizeType::SM:
-            return smSizeOffset_;
-            break;
-        case GridSizeType::MD:
-            return mdSizeOffset_;
-            break;
-        case GridSizeType::LG:
-            return lgSizeOffset_;
-            break;
-        default:
-            break;
+
+    /* ace1.0 obsolete logic since 6 */
+    if (!hasColumnOffset_) {
+        Dimension dim = UNDEFINED_DIMENSION;
+        switch (parent_->GetSizeType()) {
+            case GridSizeType::XS:
+                dim = xsSizeOffset_;
+                break;
+            case GridSizeType::SM:
+                dim = smSizeOffset_;
+                break;
+            case GridSizeType::MD:
+                dim = mdSizeOffset_;
+                break;
+            case GridSizeType::LG:
+                dim = lgSizeOffset_;
+                break;
+            default:
+                break;
+        }
+        return dim;
     }
 
-    return UNDEFINED_DIMENSION;
+    /* ace2.0 */
+    int32_t sizeType = static_cast<int32_t>(parent_->GetSizeType());
+    int32_t offset = INVALID_OFFSET;
+    if (sizeType < static_cast<int32_t>(GridSizeType::XL)) {
+        offset = offsets_[sizeType];
+    }
+
+    if (offset == INVALID_OFFSET) {
+        offset = offsets_[static_cast<int32_t>(GridSizeType::UNDEFINED)]; // use common offset
+    }
+    if (offset == INVALID_OFFSET) {
+        return UNDEFINED_DIMENSION;
+    }
+    double dipScale = GridSystemManager::GetInstance().GetDipScale();
+    double offsetVp = offset * (parent_->GetColumnWidth() + parent_->GetGutterWidth().ConvertToPx(dipScale));
+    return Dimension(offsetVp, DimensionUnit::PX);
 }
 
 } // namespace OHOS::Ace

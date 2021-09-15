@@ -26,42 +26,43 @@ namespace {
 
 void ParseIndicatorProperty(const JsonValue& componentJson, const RefPtr<SwiperComponent>& swiperComponent)
 {
+    auto indicator = swiperComponent->GetIndicator();
     if (componentJson.Contains(SWIPER_INDICATOR_COLOR) && componentJson.GetValue(SWIPER_INDICATOR_COLOR)->IsObject()) {
         auto colorJson = componentJson.GetValue(SWIPER_INDICATOR_COLOR);
         auto color = ColorCreator::CreateFromJson(*colorJson);
-        swiperComponent->SetIndicatorColor(color);
+        indicator->SetColor(color);
     }
     if (componentJson.Contains(SWIPER_INDICATOR_SELECTED_COLOR) &&
         componentJson.GetValue(SWIPER_INDICATOR_SELECTED_COLOR)->IsObject()) {
         auto colorJson = componentJson.GetValue(SWIPER_INDICATOR_SELECTED_COLOR);
         auto color = ColorCreator::CreateFromJson(*colorJson);
-        swiperComponent->SetIndicatorSelectedColor(color);
+        indicator->SetSelectedColor(color);
     }
     if (componentJson.Contains(SWIPER_INDICATOR_SIZE) && componentJson.GetValue(SWIPER_INDICATOR_SIZE)->IsNumber()) {
         double size = componentJson.GetValue(SWIPER_INDICATOR_SIZE)->GetDouble();
-        swiperComponent->SetIndicatorSize(Dimension(size, DimensionUnit::VP));
+        indicator->SetSize(Dimension(size, DimensionUnit::VP));
     }
     if (componentJson.Contains(SWIPER_INDICATOR_SELECTED_SIZE) &&
         componentJson.GetValue(SWIPER_INDICATOR_SELECTED_SIZE)->IsNumber()) {
         double size = componentJson.GetValue(SWIPER_INDICATOR_SELECTED_SIZE)->GetDouble();
-        swiperComponent->SetIndicatorSelectedSize(Dimension(size, DimensionUnit::VP));
+        indicator->SetSelectedSize(Dimension(size, DimensionUnit::VP));
     }
     if (componentJson.Contains(SWIPER_INDICATOR_TOP) && componentJson.GetValue(SWIPER_INDICATOR_TOP)->IsNumber()) {
         double value = componentJson.GetValue(SWIPER_INDICATOR_TOP)->GetDouble();
-        swiperComponent->SetIndicatorTop(Dimension(value, DimensionUnit::PX));
+        indicator->SetTop(Dimension(value, DimensionUnit::PX));
     }
     if (componentJson.Contains(SWIPER_INDICATOR_LEFT) && componentJson.GetValue(SWIPER_INDICATOR_LEFT)->IsNumber()) {
         double value = componentJson.GetValue(SWIPER_INDICATOR_LEFT)->GetDouble();
-        swiperComponent->SetIndicatorLeft(Dimension(value, DimensionUnit::PX));
+        indicator->SetLeft(Dimension(value, DimensionUnit::PX));
     }
     if (componentJson.Contains(SWIPER_INDICATOR_BOTTOM) &&
         componentJson.GetValue(SWIPER_INDICATOR_BOTTOM)->IsNumber()) {
         double value = componentJson.GetValue(SWIPER_INDICATOR_BOTTOM)->GetDouble();
-        swiperComponent->SetIndicatorBottom(Dimension(value, DimensionUnit::PX));
+        indicator->SetBottom(Dimension(value, DimensionUnit::PX));
     }
     if (componentJson.Contains(SWIPER_INDICATOR_RIGHT) && componentJson.GetValue(SWIPER_INDICATOR_RIGHT)->IsNumber()) {
         double value = componentJson.GetValue(SWIPER_INDICATOR_RIGHT)->GetDouble();
-        swiperComponent->SetIndicatorRight(Dimension(value, DimensionUnit::PX));
+        indicator->SetRight(Dimension(value, DimensionUnit::PX));
     }
 }
 

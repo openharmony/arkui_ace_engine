@@ -24,9 +24,12 @@
 namespace OHOS::Ace {
 namespace {
 
-const GradientDirection GRADIENT_DIRECTIONS[] = { GradientDirection::LEFT, GradientDirection::LEFT_TOP,
-    GradientDirection::TOP, GradientDirection::RIGHT_TOP, GradientDirection::RIGHT, GradientDirection::RIGHT_BOTTOM,
-    GradientDirection::BOTTOM, GradientDirection::LEFT_BOTTOM };
+const GradientDirection GRADIENT_DIRECTIONS[] = {
+    GradientDirection::LEFT,
+    GradientDirection::TOP,
+    GradientDirection::RIGHT,
+    GradientDirection::BOTTOM,
+};
 const DimensionUnit DIMENSION_UNITS[] = { DimensionUnit::PX, DimensionUnit::VP, DimensionUnit::FP,
     DimensionUnit::PERCENT };
 
@@ -48,8 +51,7 @@ Gradient GradientCreator::CreateFromJson(const JsonValue& json)
             json.GetValue(GRADIENT_DIRECTION)->GetInt(), GRADIENT_DIRECTIONS, GradientDirection::LEFT));
     }
     if (json.Contains(GRADIENT_ANGLE) && json.GetValue(GRADIENT_ANGLE)->IsNumber()) {
-        gradient.SetUseAngle(true);
-        gradient.SetAngle(json.GetValue(GRADIENT_ANGLE)->GetDouble());
+        gradient.GetLinearGradient().angle = json.GetValue(GRADIENT_ANGLE)->GetDouble();
     }
     if (json.Contains(GRADIENT_REPEAT) && json.GetValue(GRADIENT_REPEAT)->IsBool()) {
         gradient.SetRepeat(json.GetValue(GRADIENT_REPEAT)->GetBool());

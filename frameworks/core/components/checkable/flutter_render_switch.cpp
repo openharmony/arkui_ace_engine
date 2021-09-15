@@ -39,14 +39,16 @@ void FlutterRenderSwitch::Paint(RenderContext& context, const Offset& offset)
     flutter::Paint trackPaint;
     flutter::Paint paint;
     flutter::PaintData paintData;
+    trackPaint.paint()->setAntiAlias(true);
+    paint.paint()->setAntiAlias(true);
 
     double originX = paintOffset.GetX();
     double originY = paintOffset.GetY();
     double pointOriginX = paintOffset.GetX() + currentPointOriginX_;
     double pointOriginY = paintOffset.GetY() + NormalizeToPx(pointPadding_);
 
-    uint32_t trackColor = 0;
-    uint32_t pointColor = 0;
+    uint32_t trackColor;
+    uint32_t pointColor;
     paintTrackSize_ = switchSize_;
     SetPaintStyle(originX, originY, trackColor, pointColor, trackPaint);
     if (IsPhone() && onFocus_) {

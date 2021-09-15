@@ -32,12 +32,12 @@ public:
     ThemeManager();
     ~ThemeManager() = default;
 
-    void InitResource(const DeviceResourceInfo& resourceInfo)
+    void InitResource(const ResourceInfo& resourceInfo)
     {
         themeConstants_->InitResource(resourceInfo);
     }
 
-    void UpdateConfig(const DeviceConfig& config)
+    void UpdateConfig(const ResourceConfiguration& config)
     {
         themeConstants_->UpdateConfig(config);
     }

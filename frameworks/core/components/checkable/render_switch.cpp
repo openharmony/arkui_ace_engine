@@ -131,16 +131,16 @@ void RenderSwitch::InitRenderText()
     LayoutParam innerLayout;
     innerLayout.SetMaxSize(Size(Size::INFINITE_SIZE, Size::INFINITE_SIZE));
 
-    textComponent_ = AceType::MakeRefPtr<TextComponent>(textOn_);
-    renderTextOn_ = AceType::DynamicCast<RenderText>(textComponent_->CreateRenderNode());
+    textOnComponent_ = AceType::MakeRefPtr<TextComponent>(textOn_);
+    renderTextOn_ = AceType::DynamicCast<RenderText>(textOnComponent_->CreateRenderNode());
     renderTextOn_->Attach(GetContext());
-    renderTextOn_->Update(textComponent_);
+    renderTextOn_->Update(textOnComponent_);
     renderTextOn_->SetLayoutParam(innerLayout);
 
-    textComponent_->SetData(textOff_);
-    renderTextOff_ = AceType::DynamicCast<RenderText>(textComponent_->CreateRenderNode());
+    textOffComponent_ = AceType::MakeRefPtr<TextComponent>(textOff_);
+    renderTextOff_ = AceType::DynamicCast<RenderText>(textOffComponent_->CreateRenderNode());
     renderTextOff_->Attach(GetContext());
-    renderTextOff_->Update(textComponent_);
+    renderTextOff_->Update(textOffComponent_);
     renderTextOff_->SetLayoutParam(innerLayout);
 
     auto context = context_.Upgrade();
@@ -270,14 +270,14 @@ void RenderSwitch::UpdateRenderText(const RefPtr<SwitchComponent>& switchCompone
 
     textStyle_ = switchComponent->GetTextStyle();
     textStyle_.SetTextColor(textColorOn_);
-    textComponent_->SetData(textOn_);
-    textComponent_->SetTextStyle(textStyle_);
-    renderTextOn_->Update(textComponent_);
+    textOnComponent_->SetData(textOn_);
+    textOnComponent_->SetTextStyle(textStyle_);
+    renderTextOn_->Update(textOnComponent_);
 
     textStyle_.SetTextColor(textColorOff_);
-    textComponent_->SetData(textOff_);
-    textComponent_->SetTextStyle(textStyle_);
-    renderTextOff_->Update(textComponent_);
+    textOffComponent_->SetData(textOff_);
+    textOffComponent_->SetTextStyle(textStyle_);
+    renderTextOff_->Update(textOffComponent_);
 }
 
 void RenderSwitch::OnDrag(const Offset& updatePoint)

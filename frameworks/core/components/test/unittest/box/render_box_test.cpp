@@ -1113,7 +1113,9 @@ HWTEST_F(RenderBoxTest, RenderBoxTest026, TestSize.Level1)
     boxComponent->SetConstraints(LayoutParam(SMALL_SIZE, LARGE_SIZE));
     RefPtr<Decoration> backDecoration = AceType::MakeRefPtr<Decoration>();
     backDecoration->SetBackgroundColor(SHADOW_COLOR);
-    backDecoration->SetImage(AceType::MakeRefPtr<BackgroundImage>("1.jpg"));
+    RefPtr<BackgroundImage> backgroundImage = AceType::MakeRefPtr<BackgroundImage>();
+    backgroundImage->SetSrc("1.jpg", nullptr);
+    backDecoration->SetImage(backgroundImage);
     boxComponent->SetBackDecoration(backDecoration);
 
     /**
@@ -1244,7 +1246,9 @@ HWTEST_F(RenderBoxTest, RenderBoxTest029, TestSize.Level1)
     boxComponent->SetConstraints(LayoutParam(SMALL_SIZE, LARGE_SIZE));
     RefPtr<Decoration> frontDecoration = AceType::MakeRefPtr<Decoration>();
     frontDecoration->SetBackgroundColor(SHADOW_COLOR);
-    frontDecoration->SetImage(AceType::MakeRefPtr<BackgroundImage>("1.jpg"));
+    RefPtr<BackgroundImage> backgroundImage = AceType::MakeRefPtr<BackgroundImage>();
+    backgroundImage->SetSrc("1.jpg", nullptr);
+    frontDecoration->SetImage(backgroundImage);
     boxComponent->SetFrontDecoration(frontDecoration);
 
     /**

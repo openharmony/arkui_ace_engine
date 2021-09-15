@@ -26,15 +26,12 @@ namespace OHOS::Ace {
 
 void RenderPiece::Update(const RefPtr<Component>& component)
 {
-    const RefPtr<PieceComponent> piece = AceType::DynamicCast<PieceComponent>(component);
-    if (!piece) {
+    pieceComponent_ = AceType::DynamicCast<PieceComponent>(component);
+    if (!pieceComponent_) {
         LOGE("piece component is null");
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
-    margin_ = piece->GetMargin();
-    border_ = piece->GetBorder();
-    hoverColor_ = piece->GetHoverColor();
     MarkNeedLayout();
 }
 
@@ -59,19 +56,22 @@ void RenderPiece::OnPaintFinish()
     if (!context) {
         return;
     }
-    if (renderStatus_ == RenderStatus::FOCUS) {
+
+    if (pieceComponent_ && renderStatus_ == RenderStatus::FOCUS) {
+        auto margin = pieceComponent_->GetMargin();
+        auto border = pieceComponent_->GetBorder();
         Offset offset = GetPosition();
         Size size = GetLayoutSize();
         Offset globalOffset = GetGlobalOffset();
         auto parent = GetParent().Upgrade();
         if (parent && AceType::DynamicCast<RenderBox>(parent)) {
             offset = parent->GetPosition();
-            size = parent->GetLayoutSize() - margin_.GetLayoutSizeInPx(context->GetDipScale());
-            globalOffset = parent->GetGlobalOffset() + margin_.GetOffsetInPx(context->GetDipScale());
+            size = parent->GetLayoutSize() - margin.GetLayoutSizeInPx(context->GetDipScale());
+            globalOffset = parent->GetGlobalOffset() + margin.GetOffsetInPx(context->GetDipScale());
         }
         RRect rrect = RRect::MakeRect(Rect(offset, size));
-        rrect.SetCorner({ border_.TopLeftRadius(), border_.TopRightRadius(), border_.BottomRightRadius(),
-            border_.BottomLeftRadius() });
+        rrect.SetCorner(
+            { border.TopLeftRadius(), border.TopRightRadius(), border.BottomRightRadius(), border.BottomLeftRadius() });
         context->ShowFocusAnimation(rrect, Color::BLUE, globalOffset);
     }
 }
@@ -86,7 +86,11 @@ bool RenderPiece::MouseHoverTest(const Point& parentLocalPoint)
     if (!context) {
         return false;
     }
-    if ((parent->GetTouchRect() - parent->GetTouchRect().GetOffset() + margin_.GetOffsetInPx(context->GetDipScale()))
+    if (!pieceComponent_) {
+        return false;
+    }
+    auto margin = pieceComponent_->GetMargin();
+    if ((parent->GetTouchRect() - parent->GetTouchRect().GetOffset() + margin.GetOffsetInPx(context->GetDipScale()))
             .IsInRegion(parentLocalPoint)) {
         if (mouseState_ == MouseState::NONE) {
             OnMouseHoverEnterTest();

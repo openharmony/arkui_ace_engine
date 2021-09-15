@@ -29,6 +29,11 @@ enum class GridSizeType {
     XL,
 };
 
+enum class GridTemplateType {
+    NORMAL = 0,
+    GRID,
+};
+
 enum class GridColumnType {
     NONE = 0,
     BUBBLE_TYPE,
@@ -40,6 +45,7 @@ enum class GridColumnType {
     PANEL,
     TOOL_BAR,
     DIALOG,
+    CAR_DIALOG,
 };
 
 class GridLayoutInfo : public virtual AceType {

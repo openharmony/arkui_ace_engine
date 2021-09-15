@@ -60,6 +60,7 @@ protected:
     bool useEffect_ = false;
     bool animationInitialized_ = false;
     bool isUserSetPlay_ = false;
+    double userAnimationDuration_ = -1.0;
 
     double previousPercentValue_ = 0.0;
     double percentChange_ = 0.0;
@@ -170,6 +171,11 @@ protected:
         return totalValue_;
     }
 
+    double GetMaxValue() const
+    {
+        return maxValue_;
+    }
+
     const std::vector<Segment>& GetSegments() const
     {
         return segments_;
@@ -192,6 +198,7 @@ private:
     double sweepDegree_ = 360.0;
     std::vector<Segment> segments_;
     double totalValue_ = 0.0;
+    double maxValue_ = 0.0;
     RefPtr<CurveAnimation<double>> animation_;
 };
 

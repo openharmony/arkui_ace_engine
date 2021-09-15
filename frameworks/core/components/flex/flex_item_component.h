@@ -27,8 +27,12 @@ class FlexItemComponent : public SoleChildComponent {
 
 public:
     FlexItemComponent(double flexGrow, double flexShrink, double flexBasis)
+        : flexGrow_(flexGrow), flexShrink_(flexShrink), flexBasis_(Dimension(flexBasis)) {};
+    FlexItemComponent(double flexGrow, double flexShrink, const Dimension& flexBasis)
         : flexGrow_(flexGrow), flexShrink_(flexShrink), flexBasis_(flexBasis) {};
     FlexItemComponent(double flexGrow, double flexShrink, double flexBasis, const RefPtr<Component>& child)
+        : SoleChildComponent(child), flexGrow_(flexGrow), flexShrink_(flexShrink), flexBasis_(Dimension(flexBasis)) {}
+    FlexItemComponent(double flexGrow, double flexShrink, const Dimension& flexBasis, const RefPtr<Component>& child)
         : SoleChildComponent(child), flexGrow_(flexGrow), flexShrink_(flexShrink), flexBasis_(flexBasis) {}
     ~FlexItemComponent() override = default;
 
@@ -52,7 +56,7 @@ public:
         return flexShrink_;
     }
 
-    double GetFlexBasis() const
+    const Dimension& GetFlexBasis() const
     {
         return flexBasis_;
     }
@@ -67,7 +71,7 @@ public:
         flexShrink_ = flexShrink;
     }
 
-    void SetFlexBasis(double flexBasis)
+    void SetFlexBasis(const Dimension& flexBasis)
     {
         flexBasis_ = flexBasis;
     }
@@ -80,6 +84,16 @@ public:
     void SetStretchFlag(bool canStretch)
     {
         canStretch_ = canStretch;
+    }
+
+    bool MustStretch() const
+    {
+        return mustStretch_;
+    }
+
+    void SetMustStretch(bool mustStretch)
+    {
+        mustStretch_ = mustStretch;
     }
 
     FlexAlign GetAlignSelf() const
@@ -155,8 +169,9 @@ public:
 private:
     double flexGrow_ = 0.0;
     double flexShrink_ = 0.0;
-    double flexBasis_ = 0.0;
-    bool canStretch_ = true; // When width or height is set, this item can not be stretched.
+    Dimension flexBasis_ = 0.0_px;
+    bool canStretch_ = true;   // Set this flag to tell Flex whether this child can be stretched.
+    bool mustStretch_ = false; // Set this flag to tell Flex this child must be as large as Flex.
 
     LayoutParam constraints_;
     Dimension minWidth_ = Dimension();

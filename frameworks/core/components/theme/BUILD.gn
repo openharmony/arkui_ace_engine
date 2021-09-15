@@ -55,18 +55,16 @@ template("ace_core_components_theme_set") {
 
     if (use_mingw_win || use_mac) {
       sources += [ "resource_adapter_preview.cpp" ]
+    } else if (!is_standard_system) {
+      sources += [ "resource_adapter.cpp" ]
+      external_deps = [
+        "hilog:libhilog",
+        "resmgr:resourcemanager",
+      ]
     }
   }
 }
 
 ace_core_components_theme_set("ace_core_components_theme_ohos") {
   defines = ace_ohos_defines
-}
-
-ace_core_components_theme_set("ace_core_components_theme_windows") {
-  defines = ace_windows_defines
-}
-
-ace_core_components_theme_set("ace_core_components_theme_mac") {
-  defines = ace_mac_defines
 }

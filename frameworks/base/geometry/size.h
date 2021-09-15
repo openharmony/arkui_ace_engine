@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_SIZE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_SIZE_H
 
+#include <iomanip>
 #include <limits>
+#include <sstream>
 #include <string>
 
 #include "base/utils/utils.h"
@@ -48,6 +50,12 @@ public:
     void SetHeight(double height)
     {
         height_ = height;
+    }
+
+    void SetSize(const Size& size)
+    {
+        width_ = size.Width();
+        height_ = size.Height();
     }
 
     bool IsWidthInfinite() const
@@ -175,11 +183,22 @@ public:
 
     std::string ToString() const
     {
-        return std::string(std::string("["))
-            .append(NearEqual(width_, INFINITE_SIZE) ? std::string("INFINITE") : std::to_string(width_))
-            .append(" x ")
-            .append(NearEqual(height_, INFINITE_SIZE) ? std::string("INFINITE") : std::to_string(height_))
-            .append("]");
+        std::stringstream ss;
+        ss << "[" << std::fixed << std::setprecision(2);
+        if (NearEqual(width_, INFINITE_SIZE)) {
+            ss << "INFINITE";
+        } else {
+            ss << width_;
+        }
+        ss << " x ";
+        if (NearEqual(height_, INFINITE_SIZE)) {
+            ss << "INFINITE";
+        } else {
+            ss << height_;
+        }
+        ss << "]";
+        std::string output = ss.str();
+        return output;
     }
 
 private:

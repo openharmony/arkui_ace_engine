@@ -32,7 +32,7 @@ BackEndEventIdManager::~BackEndEventIdManager() = default;
 
 std::string BackEndEventIdManager::GetAvailableId()
 {
-    ACE_DCHECK(g_currentId.load() == UINT64_MAX);
+    ACE_DCHECK(g_currentId.load() != UINT64_MAX);
     return std::to_string(++g_currentId);
 }
 

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_ADAPTER_CPP_FLUTTER_ASSET_MANAGER_H
 
 #include <deque>
+#include <vector>
 
 #include "flutter/assets/asset_resolver.h"
 #include "flutter/fml/mapping.h"
@@ -47,14 +48,14 @@ private:
     std::unique_ptr<fml::Mapping> mapping_;
 };
 
-class FlutterAssetManager final : public AssetManager {
+class ACE_EXPORT FlutterAssetManager final : public AssetManager {
     DECLARE_ACE_TYPE(FlutterAssetManager, AssetManager);
 
 public:
     FlutterAssetManager() = default;
     ~FlutterAssetManager() override = default;
 
-    void PushFront(std::unique_ptr<flutter::AssetResolver> provider)
+    void PushFront(RefPtr<AssetProvider> provider) override
     {
         if (!provider || !provider->IsValid()) {
             return;
@@ -62,7 +63,7 @@ public:
         providers_.push_front(std::move(provider));
     }
 
-    void PushBack(std::unique_ptr<flutter::AssetResolver> provider)
+    void PushBack(RefPtr<AssetProvider> provider) override
     {
         if (!provider || !provider->IsValid()) {
             return;
@@ -70,24 +71,25 @@ public:
         providers_.push_back(std::move(provider));
     }
 
-    RefPtr<Asset> GetAsset(const std::string& assetName) override
-    {
-        if (assetName.empty()) {
-            return nullptr;
-        }
+    RefPtr<Asset> GetAsset(const std::string& assetName) override;
 
-        for (const auto& provider : providers_) {
-            auto mapping = provider->GetAsMapping(assetName);
-            if (mapping) {
-                return AceType::MakeRefPtr<FlutterAsset>(std::move(mapping));
-            }
-        }
-        LOGE("find asset failed, assetName = %{private}s", assetName.c_str());
-        return nullptr;
+    std::string GetAssetPath(const std::string& assetName) override;
+
+    void GetAssetList(const std::string& path, std::vector<std::string>& assetList) const override;
+
+    void SetPackagePath(const std::string& packagePath) override
+    {
+        packagePath_ = packagePath;
+    }
+
+    std::string GetPackagePath() const override
+    {
+        return packagePath_;
     }
 
 private:
-    std::deque<std::unique_ptr<flutter::AssetResolver>> providers_;
+    std::deque<RefPtr<AssetProvider>> providers_;
+    std::string packagePath_;
 };
 
 } // namespace OHOS::Ace

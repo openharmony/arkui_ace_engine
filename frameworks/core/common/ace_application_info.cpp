@@ -24,6 +24,36 @@
 
 namespace OHOS::Ace {
 
+void AceApplicationInfo::SetPackageName(const std::string& packageName)
+{
+    packageName_ = packageName;
+}
+
+const std::string& AceApplicationInfo::GetPackageName() const
+{
+    return packageName_;
+}
+
+void AceApplicationInfo::SetUid(int32_t uid)
+{
+    uid_ = uid;
+}
+
+int32_t AceApplicationInfo::GetUid() const
+{
+    return uid_;
+}
+
+void AceApplicationInfo::SetProcessName(const std::string& processName)
+{
+    processName_ = processName;
+}
+
+const std::string& AceApplicationInfo::GetProcessName() const
+{
+    return processName_;
+}
+
 std::string AceApplicationInfo::GetUnicodeSetting() const
 {
     std::vector<std::string> keyValuePairs;

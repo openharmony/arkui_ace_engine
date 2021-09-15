@@ -33,17 +33,11 @@ public:
         return webChild_;
     }
 
-    void CallSpecializedMethod(const std::string& method, const std::string& args) override;
-
 protected:
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
-    bool AddSpecializedEvent(int32_t pageId, const std::string& event) override;
+    void PrepareSpecializedComponent() override;
 
 private:
     RefPtr<WebComponent> webChild_;
-    EventMarker pageStartEventId_;
-    EventMarker pageFinishEventId_;
-    EventMarker pageErrorEventId_;
 };
 
 } // namespace OHOS::Ace::Framework

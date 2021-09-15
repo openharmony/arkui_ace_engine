@@ -67,7 +67,7 @@ public:
     // When the event id starts with "Backend_" flag, then uses backend event manager processing.
     static std::function<void(Args...)> Create(const EventMarker& marker, const WeakPtr<PipelineContext>& context)
     {
-        if (marker.IsEmpty()) {
+        if ((marker.IsEmpty()) && (!marker.HasPreFunction())) {
             return nullptr;
         }
         return [marker, context](Args... args) {
@@ -77,6 +77,10 @@ public:
                 return;
             }
             marker.CallPreFunction();
+            if (marker.IsEmpty()) {
+                LOGI("just call pre function, fail to fire async event due to marker is empty");
+                return;
+            }
             refContext->FireAsyncEvent(marker, std::forward<Args>(args)...);
         };
     }

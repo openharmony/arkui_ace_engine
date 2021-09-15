@@ -46,6 +46,18 @@ auto CallMemberFunction(C* instance, R (C::*func)(Types...), Tuple&& tup)
     return CallMemberFunction(instance, func, std::forward<Tuple>(tup), std::make_index_sequence<sizeof...(Types)> {});
 }
 
+template<typename F, typename T, size_t... I>
+auto CallStaticMemberFunction(F func, T&& tuple, std::index_sequence<I...>)
+{
+    return func(std::get<I>(std::forward<T>(tuple))...);
+}
+
+template<typename R, typename Tuple, typename... Types>
+auto CallStaticMemberFunction(R (*func)(Types...), Tuple&& tup)
+{
+    return CallStaticMemberFunction(func, std::forward<Tuple>(tup), std::make_index_sequence<sizeof...(Types)> {});
+}
+
 template<class T, class Tuple, size_t... Is>
 T* ConstructFromTuple(Tuple&& tuple, std::index_sequence<Is...>)
 {

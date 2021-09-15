@@ -34,6 +34,27 @@ public:
 
     RefPtr<Element> CreateElement() override;
 
+    void MarkOptionChanged(bool change)
+    {
+        optionChanged_ = change;
+    }
+
+    bool IsOptionChanged() const
+    {
+        return optionChanged_;
+    }
+
+    void SetTransitionOption(const TweenOption& transition)
+    {
+        MarkOptionChanged(true);
+        transitionOption_ = std::move(transition);
+    }
+
+    const TweenOption& GetTransitionOption() const
+    {
+        return transitionOption_;
+    }
+
     void SetTransitionOption(const TweenOption& in, const TweenOption& out);
     const TweenOption& GetTransitionInOption() const;
 
@@ -47,6 +68,8 @@ public:
 private:
     TweenOption inOption_;  // In option
     TweenOption outOption_; // Out option
+    TweenOption transitionOption_; // transition option
+    bool optionChanged_ = false;
     bool isFirstFrameShow_ = true;
 };
 

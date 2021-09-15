@@ -34,18 +34,24 @@ public:
     static RefPtr<RenderNode> Create();
     RenderLayer GetRenderLayer() override;
     void Paint(RenderContext& context, const Offset& offset) override;
+    void PaintDirectly(RenderContext& context, const Offset& offset) override;
 
     bool IsRepaintBoundary() const override
     {
         return true;
     }
 
+    void OnGlobalPositionChanged() override;
+
 protected:
+    Rect GetPaintBounds(const Offset& offset) override;
     bool isDrawSpace_ = false;
 
 private:
+    void MeasureTextBounds(DrawOffset& drawOffset, Rect& bounds);
     void DrawText(RenderContext& context, DrawOffset& drawOffset);
     Offset OnDrawText(RenderContext& context, const DrawOffset& drawOffset);
+    Offset OnMeasureTextBounds(const DrawOffset& drawOffset, Rect& bounds);
     virtual void UpdateDrawOffset(DrawOffset& drawOffset);
 
 private:

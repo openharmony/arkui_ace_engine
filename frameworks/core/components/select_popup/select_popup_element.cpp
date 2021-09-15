@@ -83,7 +83,6 @@ void SelectPopupElement::OnRefreshAnimation(const TweenOption& option, bool isIn
     tween->ApplyOptions();
     tween->ApplyKeyframes();
     isInAnimation_ = isIn;
-    auto render = AceType::DynamicCast<RenderSelectPopup>(renderNode_);
 }
 
 } // namespace OHOS::Ace

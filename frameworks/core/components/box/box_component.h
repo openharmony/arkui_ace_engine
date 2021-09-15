@@ -17,8 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_BOX_COMPONENT_H
 
 #include "core/components/box/box_base_component.h"
+#include "core/components/common/properties/animatable_color.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace {
 
@@ -27,6 +29,8 @@ enum class HoverAnimationType : int32_t {
     OPACITY,
     SCALE,
 };
+
+using OnDragFunc = std::function<void(const RefPtr<DragEvent>& info)>;
 
 // A component can box others components.
 class ACE_EXPORT BoxComponent : public BoxBaseComponent {
@@ -76,7 +80,15 @@ public:
         SetDecorationUpdateFlag(true);
     }
 
-    void SetColor(const Color& color)
+    void SetColor(const Color& color, const AnimationOption& option = AnimationOption())
+    {
+        if (!backDecoration_) {
+            backDecoration_ = AceType::MakeRefPtr<Decoration>();
+        }
+        backDecoration_->SetBackgroundColor(color, option);
+    }
+
+    void SetColor(const AnimatableColor& color)
     {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
@@ -94,14 +106,139 @@ public:
         animationType_ = animationType;
     }
 
-    void SetOverflow(Overflow overflow)
+    OnDragFunc GetOnDragId() const
     {
-        overflow_ = overflow;
+        if (!onDragId_) {
+            return nullptr;
+        }
+        return *onDragId_;
     }
 
-    Overflow GetOverflow() const
+    void SetOnDragId(const OnDragFunc& onDragId)
     {
-        return overflow_;
+        onDragId_ = std::make_unique<OnDragFunc>(onDragId);
+    }
+
+    OnDragFunc GetOnDragEnterId() const
+    {
+        if (!onDragEnterId_) {
+            return nullptr;
+        }
+        return *onDragEnterId_;
+    }
+
+    void SetOnDragEnterId(const OnDragFunc& onDragEnterId)
+    {
+        onDragEnterId_ = std::make_unique<OnDragFunc>(onDragEnterId);
+    }
+
+    OnDragFunc GetOnDragLeaveId() const
+    {
+        if (!onDragLeaveId_) {
+            return nullptr;
+        }
+        return *onDragLeaveId_;
+    }
+
+    OnDragFunc GetOnDragMoveId() const
+    {
+        if (!onDragMoveId_) {
+            return nullptr;
+        }
+        return *onDragMoveId_;
+    }
+
+    void SetOnDragMoveId(const OnDragFunc& onDragMoveId)
+    {
+        onDragMoveId_ = std::make_unique<OnDragFunc>(onDragMoveId);
+    }
+
+    void SetOnDragLeaveId(const OnDragFunc& onDragLeaveId)
+    {
+        onDragLeaveId_ = std::make_unique<OnDragFunc>(onDragLeaveId);
+    }
+
+    OnDragFunc GetOnDropId() const
+    {
+        if (!onDropId_) {
+            return nullptr;
+        }
+        return *onDropId_;
+    }
+
+    void SetOnDropId(const OnDragFunc& onDropId)
+    {
+        onDropId_ = std::make_unique<OnDragFunc>(onDropId);
+    }
+
+    RefPtr<Gesture> GetOnClick() const
+    {
+        return onClickId_;
+    }
+
+    void SetOnClick(const RefPtr<Gesture>& onClickId)
+    {
+        onClickId_ = onClickId;
+    }
+
+    void AddGesture(GesturePriority priority, RefPtr<Gesture> gesture)
+    {
+        gestures_[static_cast<int32_t>(priority)] = gesture;
+    }
+
+    const std::array<RefPtr<Gesture>, 3>& GetGestures() const
+    {
+        return gestures_;
+    }
+
+    const EventMarker& GetOnDomDragEnter() const
+    {
+        return onDomDragEnterId_;
+    }
+
+    void SetOnDomDragEnter(const EventMarker& value)
+    {
+        onDomDragEnterId_ = value;
+    }
+
+    const EventMarker& GetOnDomDragOver() const
+    {
+        return onDomDragOverId_;
+    }
+
+    void SetOnDomDragOver(const EventMarker& value)
+    {
+        onDomDragOverId_ = value;
+    }
+
+    const EventMarker& GetOnDomDragLeave() const
+    {
+        return onDomDragLeaveId_;
+    }
+
+    void SetOnDomDragLeave(const EventMarker& value)
+    {
+        onDomDragLeaveId_ = value;
+    }
+
+    const EventMarker& GetOnDomDragDrop() const
+    {
+        return onDomDragDropId_;
+    }
+
+    void SetOnDomDragDrop(const EventMarker& value)
+    {
+        onDomDragDropId_ = value;
+    }
+
+    void SetGeometryTransitionId(const std::string& id)
+    {
+        geometryTransitionId_ = id;
+    }
+
+    std::string GetGeometryTransitionId() const
+    {
+        return geometryTransitionId_;
     }
 
 private:
@@ -109,7 +246,18 @@ private:
     RefPtr<Decoration> frontDecoration_;
     bool decorationUpdateFlag_ = false;
     HoverAnimationType animationType_ = HoverAnimationType::NONE;
-    Overflow overflow_ = Overflow::OBSERVABLE;
+    std::unique_ptr<OnDragFunc> onDragId_;
+    std::unique_ptr<OnDragFunc> onDragEnterId_;
+    std::unique_ptr<OnDragFunc> onDragMoveId_;
+    std::unique_ptr<OnDragFunc> onDragLeaveId_;
+    std::unique_ptr<OnDragFunc> onDropId_;
+    RefPtr<Gesture> onClickId_;
+    std::array<RefPtr<Gesture>, 3> gestures_;
+    EventMarker onDomDragEnterId_;
+    EventMarker onDomDragOverId_;
+    EventMarker onDomDragLeaveId_;
+    EventMarker onDomDragDropId_;
+    std::string geometryTransitionId_;
 };
 
 } // namespace OHOS::Ace

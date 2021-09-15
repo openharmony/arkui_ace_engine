@@ -29,22 +29,29 @@ namespace {
 
 constexpr int32_t POP_TO_LEAST_COUNT = 2;
 
-RefPtr<Animator> GetSharedController(WeakPtr<PipelineContext> contextWeak, TransitionEvent event)
+void StartSharedController(WeakPtr<PipelineContext> contextWeak, TransitionEvent event, int32_t duration)
 {
     auto context = contextWeak.Upgrade();
     if (!context) {
         LOGE("Get Shared Controller failed. context is null.");
-        return nullptr;
+        return;
     }
     auto sharedTransitionController = context->GetSharedTransitionController();
     if (!sharedTransitionController) {
         LOGE("Get Shared Controller failed. shared transition controller is null.");
-        return nullptr;
+        return;
     }
     if (!sharedTransitionController->HasSharedTransition(event)) {
-        return nullptr;
+        return;
     }
-    return sharedTransitionController->GetAnimator();
+
+    for (const auto& controller : sharedTransitionController->GetAnimators()) {
+        controller->AttachScheduler(context);
+        if (controller->GetDuration() == 0) {
+            controller->SetDuration(duration);
+        }
+        controller->Forward();
+    }
 }
 
 RefPtr<Animator> GetCardController(WeakPtr<PipelineContext> contextWeak, const ComposeId& composeId)
@@ -101,10 +108,7 @@ bool StageElement::OnKeyEvent(const KeyEvent& keyEvent)
 void StageElement::MarkDirty()
 {
     isWaitingForBuild_ = true;
-    RefPtr<PipelineContext> context = context_.Upgrade();
-    if (context) {
-        context->AddDirtyElement(AceType::Claim(this));
-    }
+    StackElement::MarkDirty();
 }
 
 bool StageElement::CanRouterPage()
@@ -279,6 +283,11 @@ bool StageElement::PerformPushPageTransition(const RefPtr<Element>& elementIn, c
         LOGW("check page transition failed, skip push transition.");
         return false;
     }
+    auto context = GetContext().Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        transitionIn->SetDeclarativeDirection(TransitionDirection::TRANSITION_IN);
+        transitionOut->SetDeclarativeDirection(TransitionDirection::TRANSITION_OUT);
+    }
     LOGD("notify push page event. page id: in: %{public}d, out: %{public}d", pageIn->GetPageId(), pageOut->GetPageId());
     NotifyPageTransitionListeners(TransitionEvent::PUSH_START, pageIn, pageOut);
     if (!InitTransition(transitionIn, transitionOut, TransitionEvent::PUSH_START)) {
@@ -311,11 +320,7 @@ bool StageElement::PerformPushPageTransition(const RefPtr<Element>& elementIn, c
     LOGD("start push transition.");
     controllerIn_->Forward();
     controllerOut_->Forward();
-    auto sharedController = GetSharedController(context_, TransitionEvent::PUSH_START);
-    if (sharedController) {
-        sharedController->SetDuration(controllerIn_->GetDuration());
-        sharedController->Forward();
-    }
+    StartSharedController(context_, TransitionEvent::PUSH_START, controllerIn_->GetDuration());
     auto cardController = GetCardController(context_, pageIn->GetCardComposeId());
     if (cardController) {
         cardController->SetDuration(controllerIn_->GetDuration());
@@ -335,6 +340,7 @@ void StageElement::AddListenerForPopPage(
         if (stage && elementIn) {
             // Remove top page.
             stage->UpdateChild(elementIn, nullptr);
+            stage->MakeTopPageTouchable();
             stage->NotifyPageTransitionListeners(TransitionEvent::POP_END, pageInWeak, pageOutWeak);
             stage->RefreshFocus();
         }
@@ -350,6 +356,11 @@ bool StageElement::PerformPopPageTransition(const RefPtr<Element>& elementIn, co
     if (!CheckPageTransitionElement(transitionIn, transitionOut)) {
         LOGW("check page transition failed, skip pop transition.");
         return false;
+    }
+    auto context = GetContext().Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        transitionIn->SetDeclarativeDirection(TransitionDirection::TRANSITION_OUT);
+        transitionOut->SetDeclarativeDirection(TransitionDirection::TRANSITION_IN);
     }
     NotifyPageTransitionListeners(TransitionEvent::POP_START, pageIn, pageOut);
     if (!InitTransition(transitionIn, transitionOut, TransitionEvent::POP_START)) {
@@ -375,14 +386,23 @@ bool StageElement::PerformPopPageTransition(const RefPtr<Element>& elementIn, co
         controllerIn_->Forward();
         controllerOut_->Forward();
     } else {
-        controllerIn_->Backward();
-        controllerOut_->Backward();
+        if (context && context->GetIsDeclarative()) {
+            if (transitionIn->GetIsCustomOption()) {
+                controllerIn_->Forward();
+            } else {
+                controllerIn_->Backward();
+            }
+            if (transitionOut->GetIsCustomOption()) {
+                controllerOut_->Forward();
+            } else {
+                controllerOut_->Backward();
+            }
+        } else {
+            controllerIn_->Backward();
+            controllerOut_->Backward();
+        }
     }
-    auto sharedController = GetSharedController(context_, TransitionEvent::POP_START);
-    if (sharedController) {
-        sharedController->SetDuration(controllerIn_->GetDuration());
-        sharedController->Forward();
-    }
+    StartSharedController(context_, TransitionEvent::POP_START, controllerIn_->GetDuration());
     auto cardController = GetCardController(context_, pageIn->GetCardComposeId());
     if (cardController) {
         cardController->SetDuration(controllerIn_->GetDuration());
@@ -394,6 +414,12 @@ bool StageElement::PerformPopPageTransition(const RefPtr<Element>& elementIn, co
 void StageElement::PerformPushPage()
 {
     LOGD("start to push page.");
+    if (isForMountCard_) {
+        UpdateChild(nullptr, newComponent_);
+        operation_ = StackOperation::NONE;
+        return;
+    }
+
 #ifndef WEARABLE_PRODUCT
     auto pageComponent = DynamicCast<PageComponent>(newComponent_);
     if (pageComponent) {
@@ -419,14 +445,15 @@ void StageElement::PerformPushPage()
         topElement = children_.back();
     }
     auto pushedElement = UpdateChild(nullptr, newComponent_);
+    MakeTopPageTouchable();
     auto transitionIn = PageTransitionElement::GetTransitionElement(pushedElement);
     auto transitionOut = PageTransitionElement::GetTransitionElement(topElement);
     if (!CheckPageTransitionElement(transitionIn, transitionOut)) {
         LOGE("check page transition failed, skip push transition.");
         return;
     }
-    LOGD("set transition in invisible.");
-    transitionIn->SetVisible(VisibleType::INVISIBLE);
+    LOGD("set transition in hidden.");
+    transitionIn->SetWrapHidden(true);
     auto context = context_.Upgrade();
     if (context) {
         context->AddPostFlushListener(AceType::Claim(this));
@@ -698,6 +725,39 @@ void StageElement::OnPostFlush()
             break;
     }
     pendingOperation_ = StackOperation::NONE;
+}
+
+void StageElement::MakeTopPageTouchable()
+{
+    auto renderStage = GetRenderNode();
+    if (!renderStage) {
+        return;
+    }
+    const auto& children = renderStage->GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        // only top page can touch
+        child->SetDisableTouchEvent(!(iter == children.rbegin()));
+    }
+}
+
+void SectionStageElement::PushPage(const RefPtr<Component>& newComponent)
+{
+    AddAsOnlyPage(newComponent);
+}
+
+void SectionStageElement::Replace(const RefPtr<Component>& newComponent)
+{
+    AddAsOnlyPage(newComponent);
+}
+
+void SectionStageElement::AddAsOnlyPage(const RefPtr<Component>& newComponent)
+{
+    if (children_.empty()) {
+        StageElement::PushPage(newComponent);
+    } else {
+        StageElement::Replace(newComponent);
+    }
 }
 
 } // namespace OHOS::Ace

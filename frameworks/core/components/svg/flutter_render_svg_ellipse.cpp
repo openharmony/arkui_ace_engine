@@ -50,40 +50,103 @@ void FlutterRenderSvgEllipse::Paint(RenderContext& context, const Offset& offset
         return;
     }
 
+    if (transformLayer_ && NeedTransform()) {
+        transformLayer_->Update(GetTransformMatrix4());
+    }
+
+    SkAutoCanvasRestore save(skCanvas, false);
+    PaintMaskLayer(context, offset, offset);
+
     SkPath path;
-    double width = GetLayoutSize().Width();
-    double height = GetLayoutSize().Height();
-    double rx = ConvertDimensionToPx(rx_, width);
-    double ry = ConvertDimensionToPx(ry_, height);
-    SkRect rect = SkRect::MakeXYWH(ConvertDimensionToPx(cx_, width) - rx, ConvertDimensionToPx(cy_, height) - ry,
-        rx + rx, ry + ry);
-    path.addOval(rect);
-    FlutterSvgPainter::SetFillStyle(skCanvas, path, fillState_, opacity_);
-    FlutterSvgPainter::SetStrokeStyle(skCanvas, path, strokeState_, opacity_);
+    GetPath(path);
+    UpdateGradient(fillState_);
+
+    RenderInfo renderInfo = { AceType::Claim(this), offset, opacity_, true };
+    FlutterSvgPainter::SetFillStyle(skCanvas, path, fillState_, renderInfo);
+    FlutterSvgPainter::SetStrokeStyle(skCanvas, path, strokeState_, renderInfo);
     RenderNode::Paint(context, offset);
 }
 
-void FlutterRenderSvgEllipse::UpdateMotion(const std::string& path, const std::string& rotate,
-    double percent, const Point& point)
+void FlutterRenderSvgEllipse::PaintDirectly(RenderContext& context, const Offset& offset)
+{
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkCanvas* skCanvas = canvas->canvas();
+    if (!skCanvas) {
+        LOGE("Paint skCanvas is null");
+        return;
+    }
+
+    if (NeedTransform()) {
+        skCanvas->save();
+        skCanvas->concat(FlutterSvgPainter::ToSkMatrix(GetTransformMatrix4()));
+    }
+
+    SkPath path;
+    GetPath(path);
+    UpdateGradient(fillState_);
+    FlutterSvgPainter::SetFillStyle(skCanvas, path, fillState_, opacity_);
+    FlutterSvgPainter::SetStrokeStyle(skCanvas, path, strokeState_, opacity_);
+    if (NeedTransform()) {
+        skCanvas->restore();
+    }
+}
+
+void FlutterRenderSvgEllipse::UpdateMotion(const std::string& path, const std::string& rotate, double percent)
 {
     if (!transformLayer_) {
         LOGE("transformLayer is null");
         return;
     }
     bool isSuccess = true;
-    auto motionMatrix = FlutterSvgPainter::CreateMotionMatrix(path, rotate, point, percent, isSuccess);
+    auto motionMatrix = FlutterSvgPainter::CreateMotionMatrix(path, rotate, percent, isSuccess);
     if (isSuccess) {
         auto transform = FlutterRenderTransform::GetTransformByOffset(motionMatrix, GetGlobalOffset());
         transformLayer_->Update(transform);
     }
 }
 
-bool FlutterRenderSvgEllipse::GetStartPoint(Point& point)
+Rect FlutterRenderSvgEllipse::GetPaintBounds(const Offset& offset)
 {
-    double width = GetLayoutSize().Width();
-    double height = GetLayoutSize().Height();
-    point = Point(ConvertDimensionToPx(cx_, width), ConvertDimensionToPx(cy_, height));
-    return true;
+    SkPath path;
+    GetPath(path);
+    auto& bounds = path.getBounds();
+    return Rect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
+}
+
+void FlutterRenderSvgEllipse::GetPath(SkPath& path)
+{
+    double rx = 0.0;
+    if (GreatOrEqual(rx_.Value(), 0.0)) {
+        rx = ConvertDimensionToPx(rx_, LengthType::HORIZONTAL);
+    } else {
+        if (GreatNotEqual(ry_.Value(), 0.0)) {
+            rx = ConvertDimensionToPx(ry_, LengthType::VERTICAL);
+        }
+    }
+    double ry = 0.0;
+    if (GreatOrEqual(ry_.Value(), 0.0)) {
+        ry = ConvertDimensionToPx(ry_, LengthType::VERTICAL);
+    } else {
+        if (GreatNotEqual(rx_.Value(), 0.0)) {
+            ry = ConvertDimensionToPx(rx_, LengthType::HORIZONTAL);
+        }
+    }
+    SkRect rect = SkRect::MakeXYWH(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL) - rx,
+        ConvertDimensionToPx(cy_, LengthType::VERTICAL) - ry, rx + rx, ry + ry);
+    path.addOval(rect);
+}
+
+void FlutterRenderSvgEllipse::OnGlobalPositionChanged()
+{
+    if (transformLayer_ && NeedTransform()) {
+        transformLayer_->Update(UpdateTransformMatrix4());
+    }
+    RenderNode::OnGlobalPositionChanged();
 }
 
 } // namespace OHOS::Ace

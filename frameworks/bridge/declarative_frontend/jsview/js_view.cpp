@@ -17,59 +17,274 @@
 
 #include "base/log/ace_trace.h"
 #include "core/pipeline/base/composed_element.h"
-
-#ifdef USE_V8_ENGINE
-#include "frameworks/bridge/declarative_frontend/engine/v8/v8_utils.h"
-#endif
+#include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
-#ifdef USE_QUICKJS_ENGINE
-JSView::JSView(JSContext* ctx, JSValue jsObject, JSValue jsRenderFunction)
+ViewFunctions::ViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction)
 {
-    jsViewFunction_ = AceType::MakeRefPtr<QJSViewFunction>(ctx, jsObject, jsRenderFunction);
+    jsObject_ = jsObject;
+
+    JSRef<JSVal> jsAppearFunc = jsObject->GetProperty("aboutToAppear");
+    if (jsAppearFunc->IsFunction()) {
+        jsAppearFunc_ = JSRef<JSFunc>::Cast(jsAppearFunc);
+    }
+
+    JSRef<JSVal> jsDisappearFunc = jsObject->GetProperty("aboutToDisappear");
+    if (jsDisappearFunc->IsFunction()) {
+        jsDisappearFunc_ = JSRef<JSFunc>::Cast(jsDisappearFunc);
+    } else {
+        LOGD("aboutToDisappear is not a function");
+    }
+
+    JSRef<JSVal> jsAboutToBeDeletedFunc = jsObject->GetProperty("aboutToBeDeleted");
+    if (jsAboutToBeDeletedFunc->IsFunction()) {
+        jsAboutToBeDeletedFunc_ = JSRef<JSFunc>::Cast(jsAboutToBeDeletedFunc);
+    } else {
+        LOGD("aboutToBeDeleted is not a function");
+    }
+
+    JSRef<JSVal> jsAboutToRenderFunc = jsObject->GetProperty("aboutToRender");
+    if (jsAboutToRenderFunc->IsFunction()) {
+        jsAboutToRenderFunc_ = JSRef<JSFunc>::Cast(jsAboutToRenderFunc);
+    } else {
+        LOGD("aboutToRender is not a function");
+    }
+
+    JSRef<JSVal> jsRenderDoneFunc = jsObject->GetProperty("onRenderDone");
+    if (jsRenderDoneFunc->IsFunction()) {
+        jsRenderDoneFunc_ = JSRef<JSFunc>::Cast(jsRenderDoneFunc);
+    } else {
+        LOGD("onRenderDone is not a function");
+    }
+
+    JSRef<JSVal> jsAboutToBuildFunc = jsObject->GetProperty("aboutToBuild");
+    if (jsAboutToBuildFunc->IsFunction()) {
+        jsAboutToBuildFunc_ = JSRef<JSFunc>::Cast(jsAboutToBuildFunc);
+    } else {
+        LOGD("aboutToBuild is not a function");
+    }
+
+    JSRef<JSVal> jsBuildDoneFunc = jsObject->GetProperty("onBuildDone");
+    if (jsBuildDoneFunc->IsFunction()) {
+        jsBuildDoneFunc_ = JSRef<JSFunc>::Cast(jsBuildDoneFunc);
+    } else {
+        LOGD("onBuildDone is not a function");
+    }
+
+    JSRef<JSVal> jsTransitionFunc = jsObject->GetProperty("pageTransition");
+    if (jsTransitionFunc->IsFunction()) {
+        jsTransitionFunc_ = JSRef<JSFunc>::Cast(jsTransitionFunc);
+    } else {
+        LOGD("transition is not a function");
+    }
+
+    JSRef<JSVal> jsOnHideFunc = jsObject->GetProperty("onPageHide");
+    if (jsOnHideFunc->IsFunction()) {
+        jsOnHideFunc_ = JSRef<JSFunc>::Cast(jsOnHideFunc);
+    } else {
+        LOGD("onHide is not a function");
+    }
+
+    JSRef<JSVal> jsOnShowFunc = jsObject->GetProperty("onPageShow");
+    if (jsOnShowFunc->IsFunction()) {
+        jsOnShowFunc_ = JSRef<JSFunc>::Cast(jsOnShowFunc);
+    } else {
+        LOGD("onShow is not a function");
+    }
+
+    JSRef<JSVal> jsBackPressFunc = jsObject->GetProperty("onBackPress");
+    if (jsBackPressFunc->IsFunction()) {
+        jsBackPressFunc_ = JSRef<JSFunc>::Cast(jsBackPressFunc);
+    } else {
+        LOGD("onBackPress is not a function");
+    }
+
+    jsRenderFunc_ = jsRenderFunction;
+}
+
+void ViewFunctions::ExecuteRender()
+{
+    if (jsRenderFunc_.IsEmpty()) {
+        LOGE("no render function in View!");
+        return;
+    }
+
+    auto func = jsRenderFunc_.Lock();
+    JSRef<JSVal> jsThis = jsObject_.Lock();
+    JSRef<JSVal> res = func->Call(jsThis);
+    if (!res.IsEmpty()) {
+        jsRenderResult_ = res;
+    }
+
+    if (jsRenderResult_.IsEmpty()) {
+        LOGE("Result of render function is empty!");
+    }
+}
+
+void ViewFunctions::ExecuteAppear()
+{
+    ExecuteFunction(jsAppearFunc_, "aboutToAppear");
+}
+
+void ViewFunctions::ExecuteDisappear()
+{
+    ExecuteFunction(jsDisappearFunc_, "aboutToDisappear");
+}
+
+void ViewFunctions::ExecuteAboutToBeDeleted()
+{
+    ExecuteFunction(jsAboutToBeDeletedFunc_, "aboutToDisappear");
+}
+
+void ViewFunctions::ExecuteAboutToRender()
+{
+    // for developer callback.
+    ExecuteFunction(jsAboutToBuildFunc_, "aboutToBuild");
+    // for state manager mark rendering progress.
+    ExecuteFunction(jsAboutToRenderFunc_, "aboutToRender");
+}
+
+void ViewFunctions::ExecuteOnRenderDone()
+{
+    // for state manager reset rendering progress.
+    ExecuteFunction(jsRenderDoneFunc_, "onRenderDone");
+    // for developer callback.
+    ExecuteFunction(jsBuildDoneFunc_, "onBuildDone");
+}
+
+void ViewFunctions::ExecuteTransition()
+{
+    ExecuteFunction(jsTransitionFunc_, "pageTransition");
+}
+
+void ViewFunctions::ExecuteShow()
+{
+    ExecuteFunction(jsOnShowFunc_, "onPageShow");
+}
+
+void ViewFunctions::ExecuteHide()
+{
+    ExecuteFunction(jsOnHideFunc_, "onPageHide");
+}
+
+bool ViewFunctions::ExecuteOnBackPress()
+{
+    auto ret = ExecuteFunctionWithReturn(jsBackPressFunc_, "onBackPress");
+    if (!ret->IsEmpty() && ret->IsBoolean()) {
+        return ret->ToBoolean();
+    }
+    return false;
+}
+
+void ViewFunctions::ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (func.IsEmpty()) {
+        LOGD("View doesn't have %{public}s() method!", debugInfo);
+        return;
+    }
+
+    JSRef<JSVal> jsObject = jsObject_.Lock();
+    JSRef<JSVal> result = func.Lock()->Call(jsObject);
+    if (result.IsEmpty()) {
+        LOGE("Error calling %{public}s", debugInfo);
+    }
+}
+
+JSRef<JSVal> ViewFunctions::ExecuteFunctionWithReturn(JSWeak<JSFunc>& func, const char* debugInfo)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, JSRef<JSVal>::Make())
+    if (func.IsEmpty()) {
+        LOGD("View doesn't have %{public}s() method!", debugInfo);
+        return JSRef<JSVal>::Make();
+    }
+
+    JSRef<JSVal> jsObject = jsObject_.Lock();
+    JSRef<JSVal> result = func.Lock()->Call(jsObject);
+    if (result.IsEmpty()) {
+        LOGE("Error calling %{public}s", debugInfo);
+    }
+    return result;
+}
+
+void ViewFunctions::Destroy(JSView* parentCustomView)
+{
+    LOGD("Destroy");
+    // Might be called from parent view, before any result has been produced??
+    if (jsRenderResult_.IsEmpty()) {
+        LOGI("ViewFunctions::Destroy() -> no previous render result to delete");
+        return;
+    }
+
+    auto renderRes = jsRenderResult_.Lock();
+    if (renderRes.IsEmpty() || !renderRes->IsObject()) {
+        LOGD("ViewFunctions::Destroy() -> result not an object");
+        return;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(renderRes);
+    if (!obj.IsEmpty()) {
+        JSView* view = obj->Unwrap<JSView>();
+        view->Destroy(parentCustomView);
+    }
+    jsRenderResult_.Reset();
+    LOGD("ViewFunctions::Destroy() end");
+}
+
+JSView::JSView(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction)
+    : viewId_(viewId)
+{
+    jsViewFunction_ = AceType::MakeRefPtr<ViewFunctions>(jsObject, jsRenderFunction);
     LOGD("JSView constructor");
 }
-#endif
-#ifdef USE_V8_ENGINE
-JSView::JSView(v8::Local<v8::Object> jsObject, v8::Local<v8::Function> jsRenderFunction) : JSCustomViewBase()
-{
-    jsViewFunction_ = AceType::MakeRefPtr<V8ViewFunction>(jsObject, jsRenderFunction);
-    LOGD("JSView constructor");
-};
-#endif
 
 JSView::~JSView()
 {
+    LOGD("Destroy");
     jsViewFunction_.Reset();
-    LOGD("DestroyJSView");
 };
 
-RefPtr<OHOS::Ace::Component> JSView::CreateSpecializedComponent()
+RefPtr<OHOS::Ace::Component> JSView::CreateComponent()
 {
     ACE_SCOPED_TRACE("JSView::CreateSpecializedComponent");
-    LOGD("Create component: View  -> create composed component");
     // create component, return new something, need to set proper ID
-    auto composedComponent =
-        AceType::MakeRefPtr<ComposedComponent>(HasUniqueKey() ? GetUniqueKey() : std::string(""), "view");
+
+    std::string key = ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
+    auto composedComponent = AceType::MakeRefPtr<ComposedComponent>(key, "view");
 
     // add callback for element creation to component, and get pointer reference
     // to the element on creation. When state of this view changes, mark the
     // element to dirty.
+    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<Component> {
+        auto jsView = weak.Upgrade();
+        return jsView ? jsView->InternalRender() : nullptr;
+    };
 
-    auto renderFunction = [&]() -> RefPtr<Component> { return internalRender(); };
-
-    auto elementFunction = [&, renderFunction](OHOS::Ace::ComposedElement* element) {
-        if (!element_) {
-            jsViewFunction_->executeAppear();
+    auto elementFunction = [weak = AceType::WeakClaim(this), renderFunction](const RefPtr<ComposedElement>& element) {
+        auto jsView = weak.Upgrade();
+        if (!jsView) {
+            LOGE("the js view is nullptr in element function");
+            return;
         }
-        element_ = element;
+        if (jsView->element_.Invalid()) {
+            jsView->jsViewFunction_->ExecuteAppear();
+        }
+        jsView->element_ = element;
         // add render function callback to element. when the element rebuilds due
         // to state update it will call this callback to get the new child component.
-        element_->SetRenderFunction(std::move(renderFunction));
+        if (element) {
+            element->SetRenderFunction(std::move(renderFunction));
+        }
     };
 
     composedComponent->SetElementFunction(std::move(elementFunction));
+
+    if (jsViewFunction_) {
+        jsViewFunction_->ExecuteTransition();
+    }
 
     if (IsStatic()) {
         LOGD("will mark composedComponent as static");
@@ -78,24 +293,28 @@ RefPtr<OHOS::Ace::Component> JSView::CreateSpecializedComponent()
     return composedComponent;
 }
 
-RefPtr<OHOS::Ace::Component> JSView::internalRender()
+RefPtr<OHOS::Ace::PageTransitionComponent> JSView::BuildPageTransitionComponent()
 {
-    LOGD("JSView: internalRender");
+    auto pageTransitionComponent = ViewStackProcessor::GetInstance()->GetPageTransitionComponent();
+    ViewStackProcessor::GetInstance()->ClearPageTransitionComponent();
+    return pageTransitionComponent;
+}
+
+RefPtr<OHOS::Ace::Component> JSView::InternalRender()
+{
+    LOGD("JSView: InternalRender");
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     needsUpdate_ = false;
-    jsViewFunction_->executeAboutToRender();
-    auto childView = jsViewFunction_->executeRender();
-
-    if (childView) {
-        auto component = childView->CreateComponent();
-        jsViewFunction_->executeOnRenderDone();
-        JSCustomViewBase::CleanUpAbandonedChild();
-        jsViewFunction_->Destroy(this);
-        LOGD("JSView: internalRender end");
-        return component;
+    if (!jsViewFunction_) {
+        LOGE("JSView: InternalRender jsViewFunction_ error");
+        return nullptr;
     }
-
-    jsViewFunction_->executeOnRenderDone();
-    return nullptr;
+    jsViewFunction_->ExecuteAboutToRender();
+    jsViewFunction_->ExecuteRender();
+    jsViewFunction_->ExecuteOnRenderDone();
+    CleanUpAbandonedChild();
+    jsViewFunction_->Destroy(this);
+    return ViewStackProcessor::GetInstance()->Finish();
 }
 
 /**
@@ -103,204 +322,178 @@ RefPtr<OHOS::Ace::Component> JSView::internalRender()
  */
 void JSView::MarkNeedUpdate()
 {
-    ACE_DCHECK((getElement() != nullptr) && "JSView's ComposedElement must be created before requesting an update");
+    ACE_DCHECK((!GetElement().Invalid()) && "JSView's ComposedElement must be created before requesting an update");
     ACE_SCOPED_TRACE("JSView::MarkNeedUpdate");
-    LOGD("JSView View(%d) has just been marked to need update", getViewId());
-    getElement()->MarkDirty();
+
+    auto element = GetElement().Upgrade();
+    if (element) {
+        element->MarkDirty();
+    }
     needsUpdate_ = true;
 }
 
-void JSView::Destroy(JSViewAbstract* parentCustomView)
+void JSView::Destroy(JSView* parentCustomView)
 {
     LOGD("JSView::Destroy start");
-    JSCustomViewBase::Destroy(parentCustomView);
-    jsViewFunction_->executeDisappear();
-    jsViewFunction_.Reset();
+    DestroyChild(parentCustomView);
+    jsViewFunction_->ExecuteDisappear();
+    jsViewFunction_->ExecuteAboutToBeDeleted();
     LOGD("JSView::Destroy end");
+}
+
+void JSView::Create(const JSCallbackInfo& info)
+{
+    if (info[0]->IsObject()) {
+        JSRefPtr<JSView> view = JSRef<JSObject>::Cast(info[0]);
+        ViewStackProcessor::GetInstance()->Push(view->CreateComponent());
+    } else {
+        LOGE("JSView Object is expected.");
+    }
 }
 
 void JSView::JSBind(BindingTarget object)
 {
     JSClass<JSView>::Declare("NativeView");
+    JSClass<JSView>::StaticMethod("create", &JSView::Create);
+    JSClass<JSView>::Method("markNeedUpdate", &JSView::MarkNeedUpdate);
+    JSClass<JSView>::Method("needsUpdate", &JSView::NeedsUpdate);
+    JSClass<JSView>::Method("markStatic", &JSView::MarkStatic);
+    JSClass<JSView>::CustomMethod("findChildById", &JSView::FindChildById);
     JSClass<JSView>::Inherit<JSViewAbstract>();
-    JSClass<JSView>::Bind(object, ConstructorCallback);
+    JSClass<JSView>::Bind(object, ConstructorCallback, DestructorCallback);
 }
 
-#ifdef USE_V8_ENGINE
-void JSView::ConstructorCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
+void JSView::FindChildById(const JSCallbackInfo& info)
 {
-    auto isolate = info.GetIsolate();
-    v8::HandleScope scp(isolate);
-    auto context = isolate->GetCurrentContext();
+    LOGD("JSView::FindChildById");
+    if (info[0]->IsNumber() || info[0]->IsString()) {
+        std::string viewId = info[0]->ToString();
+        JSRefPtr<JSView> jsView = GetChildById(viewId);
+        info.SetReturnValue(jsView.Get());
+    } else {
+        LOGE("JSView FindChildById with invalid arguments.");
+        JSException::Throw("%s", "JSView FindChildById with invalid arguments.");
+    }
+}
 
-    v8::Local<v8::Value> renderFunc =
-        info.This()->Get(context, V8ValueConvertor::toV8Value<std::string>("render")).ToLocalChecked();
-
+void JSView::ConstructorCallback(const JSCallbackInfo& info)
+{
+    JSRef<JSObject> thisObj = info.This();
+    JSRef<JSVal> renderFunc = thisObj->GetProperty("render");
     if (!renderFunc->IsFunction()) {
-        V8Utils ::ThrowException("View derived classes must provide render(){...} function");
+        LOGE("View derived classes must provide render(){...} function");
+        JSException::Throw("%s", "View derived classes must provide render(){...} function");
         return;
     }
 
     int argc = info.Length();
     if (argc > 1 && (info[0]->IsNumber() || info[0]->IsString())) {
-        V8Utils::ScopedString viewId(info[0]);
+        std::string viewId = info[0]->ToString();
+        auto instance = AceType::MakeRefPtr<JSView>(viewId, info.This(), JSRef<JSFunc>::Cast(renderFunc));
+        auto context = info.GetExecutionContext();
+        instance->SetContext(context);
+        instance->IncRefCount();
+        info.SetReturnValue(AceType::RawPtr(instance));
         if (!info[1]->IsUndefined() && info[1]->IsObject()) {
-            v8::Local<v8::Object> parentObj = info[1]->ToObject(context).ToLocalChecked();
-            JSView* parentView = static_cast<JSView*>(parentObj->GetAlignedPointerFromInternalField(0));
-            auto shouldRecycle = parentView->FindChildById(viewId);
-            if (shouldRecycle) {
-                auto [view, jsView] = parentView->GetChildById(viewId);
-                info.GetReturnValue().Set(jsView);
-                if (!view->NeedsUpdate()) {
-                    view->MarkStatic();
-                }
-            } else {
-                auto instance =
-                    V8Object<JSView>::New(info.This(), info.This(), v8::Local<v8::Function>::Cast(renderFunc));
-                info.GetReturnValue().Set(instance->Get());
-
-                JSViewAbstract* view =
-                    static_cast<JSViewAbstract*>(instance->Get()->GetAlignedPointerFromInternalField(0));
-                parentView->AddChildById(viewId, view, instance->Get());
-            }
-            return;
+            JSRef<JSObject> parentObj = JSRef<JSObject>::Cast(info[1]);
+            JSView* parentView = parentObj->Unwrap<JSView>();
+            parentView->AddChildById(viewId, info.This());
         }
-        auto instance = V8Object<JSView>::New(info.This(), info.This(), v8::Local<v8::Function>::Cast(renderFunc));
-        info.GetReturnValue().Set(instance->Get());
     } else {
         LOGE("JSView creation with invalid arguments.");
-        V8Utils ::ThrowException("JSView creation with invalid arguments.");
+        JSException::Throw("%s", "JSView creation with invalid arguments.");
     }
 }
-#endif // USE_V8_ENGINE
 
-#ifdef USE_QUICKJS_ENGINE
-void JSView::MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc)
+void JSView::DestructorCallback(JSView* view)
 {
-    LOGD("JSView => MarkGC: start");
-    // this should always be true
-    if (jsViewFunction_) {
-        jsViewFunction_->MarkGC(rt, markFunc);
-    }
-    LOGD("JSView => MarkGC: end");
+    LOGD("JSView(DestructorCallback) start");
+    view->DecRefCount();
+    LOGD("JSView(DestructorCallback) end");
 }
 
-void JSView::ReleaseRT(JSRuntime* rt)
+void JSView::DestroyChild(JSView* parentCustomView)
 {
-    LOGD("JSView => release: start");
-    // this should always be true
-    if (jsViewFunction_) {
-        jsViewFunction_->ReleaseRT(rt);
+    LOGD("JSView::DestroyChild start");
+    for (auto child : customViewChildren_) {
+        child.second->Destroy(this);
+        child.second.Reset();
     }
-
-    LOGD("JSView => release: end");
+    LOGD("JSView::DestroyChild end");
 }
 
-// STATIC qjs_class_binding
-JSValue JSView::ConstructorCallback(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+void JSView::CleanUpAbandonedChild()
 {
-    ACE_SCOPED_TRACE("JSView::QjsConstructor");
-    JSValue jsObject = JS_UNDEFINED;
-    JSAtom renderProp = JS_NewAtom(ctx, "render");
-    JSValue jsRenderFunction;
-    JSView* view = nullptr;
-
-    QJSContext::Scope scope(ctx);
-
-    if (JS_IsUndefined(new_target)) {
-        return JS_ThrowSyntaxError(ctx, "View called without 'new'!");
-    }
-
-    auto proto = JS_GetPropertyStr(ctx, new_target, "prototype");
-    if (JS_IsException(proto)) {
-        LOGE("Can not find prototype of JS View");
-        JS_FreeValue(ctx, jsObject);
-        JS_FreeAtom(ctx, renderProp);
-        return proto;
-    }
-
-    if (argc > 1 && (JS_IsNumber(argv[0]) || JS_IsString(argv[0]))) {
-        ScopedString viewId(argv[0]);
-
-        JSView* parentView = nullptr;
-        if (!JS_IsUndefined(argv[1]) && JS_IsObject(argv[1])) {
-            parentView = static_cast<JSView*>(UnwrapAny(argv[1]));
+    auto startIter = customViewChildren_.begin();
+    auto endIter = customViewChildren_.end();
+    std::vector<std::string> removedViewIds;
+    while (startIter != endIter) {
+        auto found = lastAccessedViewIds_.find(startIter->first);
+        if (found == lastAccessedViewIds_.end()) {
+            LOGD(" found abandoned view with id %{public}s", startIter->first.c_str());
+            removedViewIds.emplace_back(startIter->first);
+            startIter->second->Destroy(this);
+            startIter->second.Reset();
         }
-
-        if (parentView && parentView->FindChildById(viewId)) {
-            auto [recycleView, jsView] = parentView->GetChildById(viewId);
-            if (!recycleView->NeedsUpdate()) {
-                recycleView->MarkStatic();
-            }
-            JS_FreeAtom(ctx, renderProp);
-            JS_FreeValue(ctx, proto);
-            return jsView;
-        } else {
-            // Merge properties defined in JS file with inherited properties - set as new prototype
-            jsObject = QJSKlass<JSView>::NewObjectProtoClass(proto);
-
-            LOGD("before JS_GetPropertyNoMagic");
-            //  this does nto work because jsObject is exotic: JS_GetProperty(ctx, jsObject, renderProp);
-            // JS_GetPropertyNoMagic is a new function we added to QuickJS.
-            // It seves a very special purpose just for this one case here:
-            // the JS render() function is part of the JS object prototype.
-            // Since the object is a magic one a regular JS_GetProperty can not read
-            // it (instead the request for the property is to ExoitcGet)
-            // JS_GetPropertyNoMagic reads the function from the object's prototype
-            // so that it store in JSRenderFunction.
-            // use JS_GetPropertyNoMagic instead?;
-            jsRenderFunction = JS_GetProperty(ctx, jsObject, renderProp);
-            LOGD("after JS_GetPropertyNoMagic");
-
-            if (!JS_IsFunction(ctx, jsRenderFunction)) {
-                LOGE("View derived classes must provide render(){...} function");
-                JS_FreeValue(ctx, jsObject);
-                JS_FreeAtom(ctx, renderProp);
-                return JS_ThrowSyntaxError(ctx, "View derived classes must provide render(){...} function");
-            }
-            view = new JSView(ctx, jsObject, jsRenderFunction);
-            if (parentView) {
-                parentView->AddChildById(viewId, view, jsObject);
-            }
-        }
-    } else {
-        JS_FreeValue(ctx, jsObject);
-        JS_FreeAtom(ctx, renderProp);
-        return JS_ThrowSyntaxError(ctx, "JSView 2 creation with invalid arguments.");
+        ++startIter;
     }
 
-    JS_FreeAtom(ctx, renderProp);
-    JS_FreeValue(ctx, jsRenderFunction);
-    JS_FreeValue(ctx, proto);
+    for (auto& viewId : removedViewIds) {
+        customViewChildren_.erase(viewId);
+    }
 
-    JS_SetOpaque(jsObject, view);
-
-    return jsObject;
+    lastAccessedViewIds_.clear();
 }
 
-void JSView::QjsDestructor(JSRuntime* rt, JSView* view)
+JSRefPtr<JSView> JSView::GetChildById(const std::string& viewId)
 {
-    LOGD("JSView(QjsDestructor) start");
-    if (!view)
-        return;
-
-    view->ReleaseRT(rt);
-    delete view;
-    LOGD("JSView(QjsDestructor) end");
+    auto id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    auto found = customViewChildren_.find(id);
+    if (found != customViewChildren_.end()) {
+        ChildAccessedById(id);
+        return found->second;
+    }
+    return JSRefPtr<JSView>();
 }
 
-void JSView::QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc)
+void JSView::AddChildById(const std::string& viewId, const JSRefPtr<JSView>& obj)
 {
-    LOGD("JSView(QjsGcMark) start");
+    auto id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    customViewChildren_.emplace(id, obj);
+    ChildAccessedById(id);
+}
 
-    JSView* view = Unwrap<JSView>(val);
-    if (!view) {
-        LOGE("Failed to unwrap JSView!");
+void JSView::RemoveChildGroupById(const std::string& viewId)
+{
+    if (viewId.empty()) {
+        auto removeView = customViewChildren_.find(viewId);
+        if (removeView != customViewChildren_.end()) {
+            removeView->second->Destroy(this);
+            removeView->second.Reset();
+            customViewChildren_.erase(removeView);
+        }
         return;
     }
-    view->MarkGC(rt, markFunc);
-    LOGD("JSView(QjsGcMark) end");
+    auto startIter = customViewChildren_.begin();
+    auto endIter = customViewChildren_.end();
+    std::vector<std::string> removedViewIds;
+    while (startIter != endIter) {
+        if (StartWith(startIter->first, viewId)) {
+            removedViewIds.emplace_back(startIter->first);
+            startIter->second->Destroy(this);
+            startIter->second.Reset();
+        }
+        ++startIter;
+    }
+
+    for (auto&& removeId : removedViewIds) {
+        customViewChildren_.erase(removeId);
+    }
 }
-#endif
+
+void JSView::ChildAccessedById(const std::string& viewId)
+{
+    lastAccessedViewIds_.emplace(viewId);
+}
 
 } // namespace OHOS::Ace::Framework

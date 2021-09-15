@@ -321,7 +321,29 @@ public:
         showAnimation_ = isAnimation;
     }
 
+    void SetLableMarkedText(std::string markedText)
+    {
+        markedText_ = markedText;
+    }
+
+    void SetLableMarkedColor(Color markedColor)
+    {
+        markedTextColor_ = markedColor;
+    }
+
+    std::string GetLableMarkedText()
+    {
+        return markedText_;
+    }
+
+    Color GetLableMarkedColor()
+    {
+        return markedTextColor_;
+    }
+
 private:
+    std::string markedText_;
+    Color markedTextColor_;
     Color selectColor_;
     Gradient selectGradient_;
     Color cachedColor_;

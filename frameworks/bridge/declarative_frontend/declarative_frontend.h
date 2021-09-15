@@ -46,11 +46,15 @@ public:
 
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
 
+    void Destroy() override;
+
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
     void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
+
+    void ReplacePage(const std::string& url, const std::string& params) override;
 
     void PushPage(const std::string& url, const std::string& params) override;
 
@@ -70,9 +74,13 @@ public:
     void TransferComponentResponseData(int32_t callbackId, int32_t code,
         std::vector<uint8_t>&& data) const override;
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void TransferJsResponseDataPreview(int32_t callbackId, int32_t code, ResponseData responseData) const;
+#endif
     void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
     void TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;
     void LoadPluginJsCode(std::string&& jsCode) const override;
+    void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const override;
 
     // application lifecycle.
     void UpdateState(Frontend::State state) override;
@@ -81,14 +89,19 @@ public:
     bool OnBackPressed() override;
     void OnShow() override;
     void OnHide() override;
+    void OnConfigurationUpdated(const std::string& data) override;
     void OnActive() override;
     void OnInactive() override;
     bool OnStartContinuation() override;
     void OnCompleteContinuation(int32_t code) override;
+    void OnRemoteTerminated() override;
     void OnSaveData(std::string& data) override;
+    void GetPluginsUsed(std::string& data) override;
     bool OnRestoreData(const std::string& data) override;
     void OnNewRequest(const std::string& data) override;
+    void SetColorMode(ColorMode colorMode) override;
     void CallRouterBack() override;
+    void NotifyAppStorage(const std::string& key, const std::string& value) override;
 
     void OnSurfaceChanged(int32_t width, int32_t height) override;
 
@@ -111,10 +124,12 @@ public:
     }
 
     RefPtr<AccessibilityManager> GetAccessibilityManager() const override;
-    const WindowConfig& GetWindowConfig() const override;
+    WindowConfig& GetWindowConfig() override;
 
     // navigator component call router
-    void NavigatePage(uint8_t type, const std::string& url) override;
+    void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) override;
+
+    void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data);
 
     void SetJsEngine(const RefPtr<Framework::JsEngine>& jsEngine)
     {
@@ -142,6 +157,11 @@ public:
         }
     }
 
+    void MarkIsSubWindow(bool isSubWindow)
+    {
+        isSubWindow_ = isSubWindow;
+    }
+
     void SetAbility(void* ability)
     {
         ability_ = ability;
@@ -158,6 +178,7 @@ private:
     RefPtr<Framework::JsEngine> jsEngine_;
     RefPtr<AccessibilityManager> accessibilityManager_;
     bool foregroundFrontend_ = false;
+    bool isSubWindow_ = false;
     void* ability_ = nullptr;
 };
 
@@ -191,6 +212,10 @@ public:
     void HandleSyncEvent(const EventMarker& eventMarker, const KeyEvent& info, bool& result) override;
 
     void HandleSyncEvent(const EventMarker& eventMarker, const std::string& param, std::string& result) override;
+
+    void HandleSyncEvent(const EventMarker& eventMarker, const std::shared_ptr<BaseEventInfo>& info) override;
+
+    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId) override;
 
 private:
     RefPtr<Framework::FrontendDelegateDeclarative> delegate_;

@@ -18,22 +18,11 @@
 
 #include <string>
 
+#include "base/utils/resource_configuration.h"
 #include "base/utils/device_type.h"
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
-
-enum class DeviceOrientation : int32_t {
-    PORTRAIT,
-    LANDSCAPE,
-    ORIENTATION_UNDEFINED,
-};
-
-enum class ColorMode : int32_t {
-    LIGHT = 0,
-    DARK,
-    COLOR_MODE_UNDEFINED,
-};
 
 enum class ResolutionType : int32_t {
     RESOLUTION_NONE = -2,
@@ -48,6 +37,18 @@ enum class ResolutionType : int32_t {
 
 constexpr int32_t MCC_UNDEFINED = 0;
 constexpr int32_t MNC_UNDEFINED = 0;
+
+enum class LongScreenType : int32_t {
+    LONG = 0,
+    NOT_LONG,
+    LONG_SCREEN_UNDEFINED,
+};
+
+enum class ScreenShape : int32_t {
+    ROUND = 0,
+    NOT_ROUND,
+    SCREEN_SHAPE_UNDEFINED,
+};
 
 class ACE_EXPORT SystemProperties final {
 public:
@@ -66,27 +67,6 @@ public:
      * Init device type according to system property.
      */
     static void InitDeviceTypeBySystemProperty();
-
-    /*
-     * Update view's width and height information.
-     */
-    static void UpdateSurfaceStatus(int32_t width, int32_t height);
-
-    /*
-     * Get width of view.
-     */
-    static int32_t GetWidth()
-    {
-        return width_;
-    }
-
-    /*
-     * Get height of view.
-     */
-    static int32_t GetHeight()
-    {
-        return height_;
-    }
 
     /*
      * Get type of current device.
@@ -194,7 +174,9 @@ public:
 
     static void SetColorMode(ColorMode colorMode)
     {
-        colorMode_ = colorMode;
+        if (colorMode_ != colorMode) {
+            colorMode_ = colorMode;
+        }
     }
 
     static ColorMode GetColorMode()
@@ -204,11 +186,14 @@ public:
 
     static void InitMccMnc(int32_t mcc, int32_t mnc);
 
+    static ScreenShape GetScreenShape()
+    {
+        return screenShape_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool isRound_;
-    static int32_t width_;
-    static int32_t height_;
     static int32_t deviceWidth_;
     static int32_t deviceHeight_;
     static double resolution_;
@@ -224,6 +209,8 @@ private:
     static int32_t mcc_;
     static int32_t mnc_;
     static ColorMode colorMode_;
+    static ScreenShape screenShape_;
+    static LongScreenType LongScreen_;
 };
 
 } // namespace OHOS::Ace

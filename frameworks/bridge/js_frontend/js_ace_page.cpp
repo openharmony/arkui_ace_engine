@@ -24,16 +24,13 @@ namespace OHOS::Ace::Framework {
 
 JsAcePage::~JsAcePage()
 {
+    LOG_DESTROY();
     auto pipelineContext = pipelineContext_.Upgrade();
     if (!pipelineContext) {
         return;
     }
 
     auto accessibilityManager = pipelineContext->GetAccessibilityManager();
-    if (!accessibilityManager) {
-        LOGE("accessibilityManager not exists");
-        return;
-    }
 
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     if (!taskExecutor) {
@@ -43,17 +40,48 @@ JsAcePage::~JsAcePage()
 
     RefPtr<DOMDocument> domDoc;
     domDoc.Swap(domDoc_);
-    taskExecutor->PostTask(
-        [domDoc, accessibilityManager] { accessibilityManager->ClearPageAccessibilityNodes(domDoc->GetRootNodeId()); },
-        TaskExecutor::TaskType::UI);
+    auto weakDom = AceType::WeakClaim(AceType::RawPtr(domDoc));
+    auto weakAcc = AceType::WeakClaim(AceType::RawPtr(accessibilityManager));
+    taskExecutor->PostTask([weakDom, weakAcc] {
+        auto domDoc = weakDom.Upgrade();
+        auto accessibilityManager = weakAcc.Upgrade();
+        if (domDoc && accessibilityManager) {
+            accessibilityManager->ClearPageAccessibilityNodes(domDoc->GetRootNodeId());
+        }
+    }, TaskExecutor::TaskType::UI);
+
+    // Release Dom and Components in UI thread
+    RefPtr<PageTransitionComponent> pageTransition;
+    pageTransition.Swap(pageTransition_);
+    RefPtr<Component> component;
+    component.Swap(component_);
+    std::shared_ptr<JsPageRadioGroups> radioGroups;
+    radioGroups.swap(radioGroups_);
+
+    taskExecutor->PostSyncTask([&domDoc, &pageTransition, &component, &radioGroups]() {
+        LOGI("release Dom and Components on UI thread");
+        domDoc.Reset();
+        pageTransition.Reset();
+        component.Reset();
+        radioGroups.reset();
+    }, TaskExecutor::TaskType::UI);
 }
 
 RefPtr<PageComponent> JsAcePage::BuildPage(const std::string& url)
 {
+    CHECK_RUN_ON(UI);
     auto pageId = GetPageId();
     auto rootStack = domDoc_->GetRootStackComponent();
     auto rootComposedStack = domDoc_->GetRootComposedStack();
     auto focusCollaboration = AceType::MakeRefPtr<FocusCollaborationComponent>(true);
+
+    if (container_.Upgrade()) {
+        if (component_) {
+            return AceType::MakeRefPtr<PageComponent>(pageId, component_);
+        } else if (rootComposedStack) {
+            return AceType::MakeRefPtr<PageComponent>(pageId, rootComposedStack);
+        }
+    }
     if (!pageTransition_) {
         pageTransition_ = AceType::MakeRefPtr<PageTransitionComponent>();
     }
@@ -72,18 +100,40 @@ RefPtr<PageComponent> JsAcePage::BuildPage(const std::string& url)
             SwapBackgroundDecoration(pageTransition_);
         }
     }
+    bool isDeclarative = false;
+    auto context = pipelineContext_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        isDeclarative = true;
+    }
+    const std::string& cardComposeId = GetCardId();
+    if (!cardComposeId.empty()) {
+        return AceType::MakeRefPtr<PageComponent>(
+            pageId, cardComposeId, isDeclarative ? std::move(pageTransition_) : pageTransition_);
+    }
+    return AceType::MakeRefPtr<PageComponent>(pageId, isDeclarative ? std::move(pageTransition_) : pageTransition_);
+}
+
+std::string JsAcePage::GetCardId() const
+{
     std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(pageParams_);
     if (argsValue && argsValue->IsObject()) {
-        const std::string& cardComposeId = argsValue->GetString(DOM_TRANSITION_CARD_COMPOSEID);
-        if (!cardComposeId.empty()) {
-            return AceType::MakeRefPtr<PageComponent>(pageId, cardComposeId, pageTransition_);
+        // support old JSON structure as { "ref": value}
+        if (!argsValue->GetString(DOM_TRANSITION_CARD_COMPOSEID).empty()) {
+            return argsValue->GetString(DOM_TRANSITION_CARD_COMPOSEID);
+        }
+
+        // support new JSON structure as { "paramsData": { "ref": value } }
+        const auto& paramsData = argsValue->GetObject(DOM_TRANSITION_CARD_PARAMS);
+        if (paramsData->IsObject() && !paramsData->GetString(DOM_TRANSITION_CARD_COMPOSEID).empty()) {
+            return paramsData->GetString(DOM_TRANSITION_CARD_COMPOSEID);
         }
     }
-    return AceType::MakeRefPtr<PageComponent>(pageId, pageTransition_);
+    return "";
 }
 
 RefPtr<ComposedComponent> JsAcePage::BuildPagePatch(int32_t nodeId)
 {
+    CHECK_RUN_ON(UI);
     RefPtr<Component> dirtyComponent = domDoc_->GetComponentById(nodeId);
     if (!dirtyComponent) {
         LOGE("Node[%{public}d] can't be reached.", nodeId);
@@ -97,6 +147,7 @@ RefPtr<ComposedComponent> JsAcePage::BuildPagePatch(int32_t nodeId)
 
 void JsAcePage::SwapBackgroundDecoration(const RefPtr<PageTransitionComponent>& transition)
 {
+    CHECK_RUN_ON(UI);
     if (!transition) {
         LOGW("swap background decoration failed. transition is null.");
         return;
@@ -131,6 +182,7 @@ void JsAcePage::SwapBackgroundDecoration(const RefPtr<PageTransitionComponent>& 
 
 RefPtr<BaseCanvasBridge> JsAcePage::GetBridgeById(NodeId nodeId)
 {
+    std::unique_lock<std::mutex> lock(bridgeMutex_);
     auto iter = canvasBridges_.find(nodeId);
     if (iter == canvasBridges_.end()) {
         LOGE("the canvas is not in the map");
@@ -139,8 +191,42 @@ RefPtr<BaseCanvasBridge> JsAcePage::GetBridgeById(NodeId nodeId)
     return iter->second;
 }
 
+RefPtr<BaseCanvasBridge> JsAcePage::GetOffscreenCanvasBridgeById(int32_t birdgeId)
+{
+    auto iter = offscreenCanvasBridges_.find(birdgeId);
+    if (iter == offscreenCanvasBridges_.end()) {
+        LOGE("the canvas is not in the map");
+        return nullptr;
+    }
+    return iter->second;
+}
+
+RefPtr<BaseXComponentBridge> JsAcePage::GetXComponentBridgeById(NodeId nodeId)
+{
+    auto iter = xcomponentBridges_.find(nodeId);
+    if (iter == xcomponentBridges_.end()) {
+        LOGE("the XComponent is not in the map");
+        return nullptr;
+    }
+    return iter->second;
+}
+
+void JsAcePage::PushDynamicNode(int32_t nodeId, const RefPtr<DOMNode>& node)
+{
+    dynamicNodes_[nodeId] = node;
+}
+
+RefPtr<DOMNode> JsAcePage::GetDynamicNodeById(int32_t nodeId)
+{
+    if (dynamicNodes_[nodeId]) {
+        return dynamicNodes_[nodeId];
+    }
+    return nullptr;
+}
+
 RefPtr<BaseAnimationBridge> JsAcePage::GetAnimationBridge(NodeId nodeId)
 {
+    std::unique_lock<std::mutex> lock(bridgeMutex_);
     auto bridge = animationBridges_.find(nodeId);
     if (bridge == animationBridges_.end()) {
         LOGW("the animation bridge is not in the map, nodeId: %{public}d", nodeId);
@@ -151,6 +237,7 @@ RefPtr<BaseAnimationBridge> JsAcePage::GetAnimationBridge(NodeId nodeId)
 
 void JsAcePage::RemoveAnimationBridge(NodeId nodeId)
 {
+    std::unique_lock<std::mutex> lock(bridgeMutex_);
     animationBridges_.erase(nodeId);
 }
 
@@ -160,7 +247,98 @@ void JsAcePage::AddAnimationBridge(NodeId nodeId, const RefPtr<BaseAnimationBrid
         LOGE("AddAnimationBridge failed. Animation bridge is null.");
         return;
     }
+    std::unique_lock<std::mutex> lock(bridgeMutex_);
     animationBridges_[nodeId] = animationBridge;
+}
+
+void JsAcePage::AddAnimatorBridge(int32_t bridgeId, const RefPtr<BaseAnimationBridge>& animatorBridge)
+{
+    if (!animatorBridge) {
+        LOGE("AddAnimationBridge failed. Animation bridge is null.");
+        return;
+    }
+    auto animator = animatorBridge->JsGetAnimator();
+    if (!animator) {
+        LOGE("animator is null");
+        return;
+    }
+    animator->AttachScheduler(pipelineContext_);
+    std::unique_lock<std::mutex> lock(bridgeMutex_);
+    animatorBridges_[bridgeId] = animatorBridge;
+}
+
+void JsAcePage::RemoveAnimatorBridge(int32_t bridgeId)
+{
+    std::unique_lock<std::mutex> lock(bridgeMutex_);
+    animatorBridges_.erase(bridgeId);
+}
+
+RefPtr<BaseAnimationBridge> JsAcePage::GetAnimatorBridge(int32_t bridgeId)
+{
+    std::unique_lock<std::mutex> lock(bridgeMutex_);
+    auto bridge = animatorBridges_.find(bridgeId);
+    if (bridge == animatorBridges_.end()) {
+        LOGW("the animation bridge is not in the map, nodeId: %{public}d", bridgeId);
+        return nullptr;
+    }
+    return bridge->second;
+}
+
+RefPtr<Curve> JsAcePage::GetCurve(const std::string& curveString)
+{
+    CHECK_RUN_ON(JS);
+    auto curveIter = curves_.find(curveString);
+    if (curveIter == curves_.end()) {
+        LOGW("the animation curve is not in the map");
+        return nullptr;
+    }
+    return curveIter->second;
+}
+
+void JsAcePage::RemoveCurve(const std::string& curveString)
+{
+    CHECK_RUN_ON(JS);
+    curves_.erase(curveString);
+}
+
+void JsAcePage::AddCurve(const std::string& curveString, const RefPtr<Curve>& curve)
+{
+    CHECK_RUN_ON(JS);
+    if (!curve) {
+        LOGE("AddCurve failed. Animation curve is null.");
+        return;
+    }
+    curves_[curveString] = curve;
+}
+
+void JsAcePage::AddAnimatorInfo(const std::string animatorId, const RefPtr<AnimatorInfo>& animatorInfo)
+{
+    if (!animatorInfo) {
+        LOGE("AddAnimation failed. Animation is null.");
+        return;
+    }
+    auto animator = animatorInfo->GetAnimator();
+    if (!animator) {
+        LOGE("animator is null");
+        return;
+    }
+    animator->AttachScheduler(pipelineContext_);
+    animatorInfos_[animatorId] = animatorInfo;
+}
+
+void JsAcePage::RemoveAnimatorInfo(const std::string& animatorId)
+{
+    animatorInfos_.erase(animatorId);
+}
+
+RefPtr<AnimatorInfo> JsAcePage::GetAnimatorInfo(const std::string& animatorId)
+{
+    auto bridge = animatorInfos_.find(animatorId);
+    if (bridge == animatorInfos_.end()) {
+        LOGW("the animation bridge is not in the map, animatorId: %{public}s", animatorId.c_str());
+        return nullptr;
+    }
+    return bridge->second;
 }
 
 void JsAcePage::PushCanvasBridge(NodeId nodeId, const RefPtr<BaseCanvasBridge>& bridge)
@@ -169,23 +347,65 @@ void JsAcePage::PushCanvasBridge(NodeId nodeId, const RefPtr<BaseCanvasBridge>& 
         LOGE("PushCanvasBridge failed. Canvas bridge is null.");
         return;
     }
+    std::unique_lock<std::mutex> lock(bridgeMutex_);
     canvasBridges_[nodeId] = bridge;
+}
+
+void JsAcePage::PushOffscreenCanvasBridge(int32_t bridgeId, const RefPtr<BaseCanvasBridge>& bridge)
+{
+    offscreenCanvasBridges_[bridgeId] = bridge;
+}
+
+void JsAcePage::PushXComponentBridge(NodeId nodeId, const RefPtr<BaseXComponentBridge>& bridge)
+{
+    if (!bridge) {
+        LOGE("PushXComponentBridge failed. XComponent bridge is null.");
+        return;
+    }
+    xcomponentBridges_[nodeId] = bridge;
 }
 
 void JsAcePage::AddNodeEvent(int32_t nodeId, const std::string& actionType, const std::string& eventAction)
 {
+    std::unique_lock<std::mutex> lock(eventMutex_);
     nodeEvent_[nodeId][actionType] = eventAction;
 }
 
-std::string& JsAcePage::GetNodeEventAction(int32_t nodeId, const std::string& actionType)
+std::string JsAcePage::GetNodeEventAction(int32_t nodeId, const std::string& actionType)
 {
     // in error case just use empty string.
+    std::unique_lock<std::mutex> lock(eventMutex_);
     return nodeEvent_[nodeId][actionType];
 }
 
 std::shared_ptr<JsPageRadioGroups> JsAcePage::GetRadioGroups()
 {
     return radioGroups_;
+}
+
+void JsAcePage::OnJsEngineDestroy()
+{
+    std::unique_lock<std::mutex> lock(bridgeMutex_);
+    for (auto&& [id, bridge] : animationBridges_) {
+        if (bridge) {
+            bridge->OnJsEngineDestroy();
+        }
+    }
+    for (auto&& [id, bridge] : canvasBridges_) {
+        if (bridge) {
+            bridge->OnJsEngineDestroy();
+        }
+    }
+    for (auto&& [id, bridge] : xcomponentBridges_) {
+        if (bridge) {
+            bridge->OnJsEngineDestroy();
+        }
+    }
+    for (auto&& [id, bridge] : animatorBridges_) {
+        if (bridge) {
+            bridge->OnJsEngineDestroy();
+        }
+    }
 }
 
 } // namespace OHOS::Ace::Framework

@@ -35,7 +35,7 @@ public:
     void PerformBuild() override;
     void Update() override;
     void ChangeByContent(int32_t index);
-    void ChangeByBar(int32_t index);
+    void ChangeByBar(int32_t index, bool isFromController = false);
     void PrepareContent(int32_t index);
     void ChangeDispatch(int32_t index);
     RefPtr<Element> GetTabContentChild(int32_t index) const;
@@ -59,6 +59,7 @@ private:
     // new content index, requested by drag
     int32_t newIndex_ = -1;
     int32_t lastIndex_ = -1;
+    bool fromController_ = false;
 };
 
 } // namespace OHOS::Ace

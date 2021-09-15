@@ -19,6 +19,10 @@
 #include <map>
 #include <string>
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#include "adapter/preview/osal/request_data.h"
+#include "adapter/preview/osal/response_data.h"
+#endif
 #include "base/memory/ace_type.h"
 #include "base/utils/singleton.h"
 #include "frameworks/bridge/codec/codec_data.h"
@@ -54,7 +58,15 @@ public:
     void Uninitialize();
 
     void TriggerModuleJsCallback(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) override;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void GetRequestData(JSContext* ctx, JSValueConst valObject, OHOS::Ace::RequestData& requestData);
 
+    ParseJsDataResult ParseRequestData(
+        JSContext* ctx, int32_t argc, JSValueConst* argv, OHOS::Ace::RequestData& requesetData, int32_t requestId);
+
+    void TriggerModuleJsCallbackPreview(
+        int32_t callbackId, int32_t code, OHOS::Ace::ResponseData responseData) override;
+#endif
     void TriggerModulePluginGetErrorCallback(
         int32_t callbackId, int32_t errorCode, std::string&& errorMessage) override;
 
@@ -63,6 +75,8 @@ public:
     void LoadPluginJsCode(std::string&& jsCode) override;
 
     void Destroy() override {}
+
+    void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) override;
 
 private:
     int32_t GetPendingCallbackIdAndIncrement()
@@ -90,7 +104,7 @@ private:
     // process when parse data from js engine failed
     static void ProcessParseJsError(ParseJsDataResult errorType, JSContext* ctx, int32_t callbackId);
     ParseJsDataResult ParseJsPara(JSContext* ctx, int32_t argc, JSValueConst* argv, std::vector<CodecData>& args,
-        int32_t requestId);
+        int32_t requestId, int32_t beginIndex);
 
     static void QuickJsPrintException(JSContext* context, int32_t expLine, int32_t line);
     static bool QuickJsCheckException(JSContext* context, JSValueConst object, int32_t line);
@@ -100,6 +114,9 @@ private:
     // JsSendGroupMessage is mapped to the JS function[SendGroupMessage]
     // contains three parameters: groupName, message, callbackfunction
     static JSValue ProcessJsRequest(JSContext* ctx, JSValueConst thisVal, int32_t argc, JSValueConst* argv);
+    // JsSendGroupMessage is mapped to the JS function[SendGroupMessage]
+    // contains three parameters: groupName, message, callbackfunction
+    static JSValue ProcessJsRequestSync(JSContext* ctx, JSValueConst thisVal, int32_t argc, JSValueConst* argv);
 
     // JsSetEventMsgHandler is mapped to the JS function[SetEventMsgHandler]
     // contains two parameters: groupName, eventCallbackFunction

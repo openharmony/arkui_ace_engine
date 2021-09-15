@@ -22,44 +22,14 @@ namespace OHOS::Ace::Framework {
 
 DOMSvg::DOMSvg(NodeId nodeId, const std::string& nodeName) : DOMSvgBase(nodeId, nodeName)
 {
-    SetHasDisplayStyleFlag(true);
     transformComponent_ = AceType::MakeRefPtr<TransformComponent>();
-    overflow_ = Overflow::CLIP;
-}
-
-bool DOMSvg::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    if (DOMSvgBase::SetPresentationAttr(attr)) {
-        return true;
-    }
-    if (attr.first == DOM_SVG_VIEW_BOX) {
-        std::vector<std::string> viewBoxValues;
-        if (!attr.second.empty()) {
-            StringUtils::SplitStr(attr.second, " ", viewBoxValues);
+    if (declaration_) {
+        declaration_->SetHasDisplayStyle(true);
+        auto& overflowStyle = declaration_->MaybeResetStyle<CommonOverflowStyle>(StyleTag::COMMON_OVERFLOW_STYLE);
+        if (overflowStyle.IsValid()) {
+            overflowStyle.overflow = Overflow::CLIP;
         }
-        if (viewBoxValues.size() == 4) {
-            viewBox_ = Rect(ParseDouble(viewBoxValues[0]), ParseDouble(viewBoxValues[1]),
-                ParseDouble(viewBoxValues[2]), ParseDouble(viewBoxValues[3]));
-        }
-        return true;
     }
-    if (attr.first == DOM_SVG_X) {
-        x_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_Y) {
-        y_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_WIDTH) {
-        width_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_HEIGHT) {
-        height_ = ParseDimension(attr.second);
-        return true;
-    }
-    return false;
 }
 
 RefPtr<Component> DOMSvg::GetSpecializedComponent()
@@ -69,6 +39,10 @@ RefPtr<Component> DOMSvg::GetSpecializedComponent()
 
 void DOMSvg::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 {
+    if (!child) {
+        LOGE("child is null");
+        return;
+    }
     if (AceType::InstanceOf<SvgAnimateComponent>(child->GetSpecializedComponent())) {
         svgComponent_->InsertChild(slot, child->GetSpecializedComponent());
     } else {
@@ -78,14 +52,21 @@ void DOMSvg::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 
 void DOMSvg::OnMounted(const RefPtr<DOMNode>& parentNode)
 {
+    auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
+    if (!declaration) {
+        LOGE("declaration is null");
+        return;
+    }
     auto svgNode = AceType::DynamicCast<DOMSvg>(parentNode);
     if (svgNode) {
-        fillState_.Inherit(svgNode->GetFillState());
-        strokeState_.Inherit(svgNode->GetStrokeState());
-        textStyle_.Inherit(svgNode->GetTextStyle());
-        if (!NearZero(x_.Value()) || !NearZero(y_.Value())) {
-            transformComponent_->Translate(x_, y_);
-        }
+        declaration->Inherit(svgNode->GetDeclaration());
+        svgComponent_->MarkIsRoot(false);
+    } else {
+        svgComponent_->MarkIsRoot(true);
+    }
+    auto box = GetBoxComponent();
+    if (box) {
+        box->SetOverflow(Overflow::FORCE_CLIP);
     }
 }
 
@@ -94,12 +75,10 @@ void DOMSvg::PrepareSpecializedComponent()
     if (!svgComponent_) {
         svgComponent_ = AceType::MakeRefPtr<SvgComponent>();
     }
-    svgComponent_->SetX(x_);
-    svgComponent_->SetY(y_);
-    svgComponent_->SetHeight(height_);
-    svgComponent_->SetWidth(width_);
-    svgComponent_->SetViewBox(viewBox_);
-    DOMSvgBase::PrepareCommonAttrs(svgComponent_);
+    auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
+    if (declaration) {
+        svgComponent_->SetDeclaration(declaration);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

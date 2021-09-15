@@ -23,19 +23,19 @@ template("ace_base_platform_source_set") {
     defines += invoker.defines
     configs = [
       "$ace_root:ace_config",
-      "$flutter_root:flutter_config",
-      "$flutter_root:icu_config_$platform",
+      "$ace_flutter_engine_root:flutter_config",
+      "$ace_flutter_engine_root:icu_config_$platform",
     ]
 
     include_dirs = [ "//utils/native/base/include" ]
 
     sources = [
-      "ace_res_config.cpp",
-      "ace_res_key_parser.cpp",
       "ace_trace.cpp",
       "file_asset_provider.cpp",
+      "flutter_asset_manager.cpp",
       "flutter_task_executor.cpp",
       "localization.cpp",
+      "string_utils.cpp",
       "thread_util.cpp",
     ]
     if (is_standard_system) {
@@ -77,8 +77,8 @@ template("libace_shared_library") {
         deps += [ "$ace_root/frameworks/bridge:js_engine_debug_$platform" ]
       } else {
         deps += [
+          "$ace_root/frameworks/bridge:js_backend_engine_$platform",
           "$ace_root/frameworks/bridge:js_engine_$platform",
-          "$ace_root/frameworks/bridge:declarative_js_engine_qjs_$platform",
         ]
       }
     }
@@ -135,9 +135,23 @@ template("ace_platform_engine") {
       if (use_js_debug) {
         deps += [ "$ace_root/frameworks/bridge:js_engine_debug_$platform" ]
       } else if (is_declarative) {
-        deps += [ "$ace_root/frameworks/bridge:declarative_js_engine_qjs_$platform" ]
+        deps += [
+          "$ace_root/frameworks/bridge:declarative_js_engine_qjs_$platform",
+        ]
       } else {
-        deps += [ "$ace_root/frameworks/bridge:js_engine_$platform"]
+        deps += [
+          "$ace_root/frameworks/bridge:js_backend_engine_$platform",
+          "$ace_root/frameworks/bridge:js_engine_$platform",
+        ]
+      }
+    }
+    if (use_ark_engine) {
+      if (is_declarative) {
+        deps += [
+          "$ace_root/frameworks/bridge:declarative_js_engine_ark_$platform",
+        ]
+      } else {
+        deps += [ "$ace_root/frameworks/bridge:js_engine_ark_$platform" ]
       }
     }
 
@@ -154,6 +168,7 @@ template("ace_platform_engine") {
 ace_platform_engine("libace_engine_qjs") {
   is_ohos_platform = true
   use_quickjs_engine = true
+  use_ark_engine = false
   if (is_standard_system) {
     platform = "ohos"
   }
@@ -163,17 +178,49 @@ ace_platform_engine("libace_engine_qjs") {
 ace_platform_engine("libace_engine_declarative_qjs") {
   is_ohos_platform = true
   use_quickjs_engine = true
+  use_ark_engine = false
   if (is_standard_system) {
     platform = "ohos"
   }
   is_declarative = true
 }
 
+ace_platform_engine("libace_engine_pa_qjs") {
+  is_ohos_platform = true
+  use_quickjs_engine = true
+  use_ark_engine = false
+  if (is_standard_system) {
+    platform = "ohos"
+  }
+  is_declarative = false
+}
+
 ace_platform_engine("libace_engine_qjs_debug") {
   is_ohos_platform = true
   use_quickjs_engine = true
+  use_ark_engine = false
   use_js_debug = true
   if (is_standard_system) {
     platform = "ohos"
   }
+}
+
+ace_platform_engine("libace_engine_ark") {
+  is_ohos_platform = true
+  use_quickjs_engine = false
+  use_ark_engine = true
+  if (is_standard_system) {
+    platform = "ohos"
+  }
+  is_declarative = false
+}
+
+ace_platform_engine("libace_engine_declarative_ark") {
+  is_ohos_platform = true
+  use_quickjs_engine = false
+  use_ark_engine = true
+  if (is_standard_system) {
+    platform = "ohos"
+  }
+  is_declarative = true
 }

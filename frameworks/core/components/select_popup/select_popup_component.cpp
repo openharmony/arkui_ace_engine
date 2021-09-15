@@ -79,7 +79,7 @@ void SelectPopupComponent::InnerHideDialog(uint32_t index)
         return;
     }
 
-    stackElement_->PopComponent(true);
+    stackElement_->PopMenu();
     dialogShowed_ = false;
     stackElement_ = nullptr;
 
@@ -159,7 +159,7 @@ void SelectPopupComponent::ShowDialog(
         selectRightBottom_ = rightBottom;
     }
 
-    stackElement->PushComponent(AceType::Claim(this), true);
+    stackElement->PushComponent(AceType::Claim(this));
     dialogShowed_ = true;
     stackElement_ = stackElement;
     isMenu_ = isMenu;
@@ -278,7 +278,7 @@ bool SelectPopupComponent::Initialize(const RefPtr<AccessibilityManager>& manage
     RefPtr<TweenComponent> tween = AceType::MakeRefPtr<TweenComponent>(tweenId, tweenId);
     tween->SetShadow(ShadowConfig::DefaultShadowM);
     tween->SetIsFirstFrameShow(false);
-    tween->SetTweenOperation(TweenOperation::PLAY);
+    tween->SetAnimationOperation(AnimationOperation::PLAY);
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     auto popupNode = manager->CreateSpecializedNode("select-popup", id, GetSelectPopupId());

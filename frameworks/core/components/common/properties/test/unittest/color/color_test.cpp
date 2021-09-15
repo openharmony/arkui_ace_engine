@@ -20,6 +20,7 @@
 #include "base/utils/system_properties.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/theme/theme_utils.h"
 

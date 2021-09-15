@@ -43,19 +43,45 @@
 
 namespace OHOS::Ace::Platform {
 
-AceContainer::AceContainer(int32_t instanceId, FrontendType type, AceAbility* aceAbility,
-    std::unique_ptr<PlatformEventCallback> callback) : instanceId_(instanceId), type_(type), aceAbility_(aceAbility)
+AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, AceAbility* aceAbility,
+    std::unique_ptr<PlatformEventCallback> callback) : instanceId_(instanceId), type_(type), isArkApp_(isArkApp),
+    aceAbility_(aceAbility)
 {
     ACE_DCHECK(callback);
     auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     flutterTaskExecutor->InitPlatformThread();
-    flutterTaskExecutor->InitJsThread();
+    // No need to create JS Thread for DECLARATIVE_JS
+    if (type_ != FrontendType::DECLARATIVE_JS) {
+        flutterTaskExecutor->InitJsThread();
+    }
     taskExecutor_ = flutterTaskExecutor;
+    taskExecutor_->PostTask([id = instanceId_]() { Container::InitForThread(id); }, TaskExecutor::TaskType::JS);
+    platformEventCallback_ = std::move(callback);
+}
+
+void AceContainer::Initialize()
+{
+    // For DECLARATIVE_JS frontend use UI as JS Thread, so InitializeFrontend after UI thread created.
     if (type_ != FrontendType::DECLARATIVE_JS) {
         InitializeFrontend();
     }
+}
 
-    platformEventCallback_ = std::move(callback);
+void AceContainer::Destroy()
+{
+    if (pipelineContext_ && taskExecutor_) {
+        if (taskExecutor_) {
+            taskExecutor_->PostTask([context = pipelineContext_]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
+        }
+    }
+    if (frontend_) {
+        frontend_->UpdateState(Frontend::State::ON_DESTROY);
+    }
+
+    resRegister_.Reset();
+    assetManager_.Reset();
+    frontend_.Reset();
+    pipelineContext_.Reset();
 }
 
 void AceContainer::InitializeFrontend()
@@ -63,14 +89,20 @@ void AceContainer::InitializeFrontend()
     if (type_ == FrontendType::JS) {
         frontend_ = Frontend::Create();
         auto jsFrontend = AceType::DynamicCast<JsFrontend>(frontend_);
-        jsFrontend->SetJsEngine(Framework::JsEngineLoader::Get().CreateJsEngine(instanceId_));
+        jsFrontend->SetJsEngine(Framework::JsEngineLoader::Get(isArkApp_).CreateJsEngine(instanceId_));
         jsFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
         jsFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
         jsFrontend->SetAbility(aceAbility_);
+    } else if (type_ == FrontendType::JS_CARD) {
+        AceApplicationInfo::GetInstance().SetCardType();
+        frontend_ = AceType::MakeRefPtr<CardFrontend>();
     } else if (type_ == FrontendType::DECLARATIVE_JS) {
         frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-        declarativeFrontend->SetJsEngine(Framework::JsEngineLoader::GetDeclarative().CreateJsEngine(instanceId_));
+        declarativeFrontend->SetJsEngine(Framework::JsEngineLoader::GetDeclarative(isArkApp_).CreateJsEngine(instanceId_));
+        declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
+        declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+        declarativeFrontend->SetAbility(aceAbility_);
     } else {
         LOGE("Frontend type not supported");
         EventReport::SendAppStartException(AppStartExcepType::FRONTEND_TYPE_ERR);
@@ -175,17 +207,35 @@ void AceContainer::OnInactive(int32_t instanceId)
     }
 }
 
+bool AceContainer::OnStartContinuation(int32_t instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        LOGI("container is null, OnStartContinuation failed.");
+        return false;
+    }
+    auto front = container->GetFrontend();
+    if (!front) {
+        LOGI("front is null, OnStartContinuation failed.");
+        return false;
+    }
+    return front->OnStartContinuation();
+}
+
 std::string AceContainer::OnSaveData(int32_t instanceId)
 {
     std::string result = "false";
     auto container = AceEngine::Get().GetContainer(instanceId);
-    if (container) {
-        auto front = container->GetFrontend();
-        if (front) {
-            front->OnSaveData(result);
-        }
+    if (!container) {
+        LOGI("container is null, OnSaveData failed.");
+        return result;
     }
-
+    auto front = container->GetFrontend();
+    if (!front) {
+        LOGI("front is null, OnSaveData failed.");
+        return result;
+    }
+    front->OnSaveData(result);
     return result;
 }
 
@@ -193,18 +243,60 @@ bool AceContainer::OnRestoreData(int32_t instanceId, const std::string& data)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
+        LOGI("container is null, OnRestoreData failed.");
         return false;
     }
-
     auto front = container->GetFrontend();
-    if (front) {
-        if (!data.empty()) {
-            auto result = front->OnRestoreData(data);
-            return result;
-        }
+    if (!front) {
+        LOGI("front is null, OnRestoreData failed.");
+        return false;
     }
+    return front->OnRestoreData(data);
+}
 
-    return false;
+void AceContainer::OnCompleteContinuation(int32_t instanceId, int result)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        LOGI("container is null, OnCompleteContinuation failed.");
+        return;
+    }
+    auto front = container->GetFrontend();
+    if (!front) {
+        LOGI("front is null, OnCompleteContinuation failed.");
+        return;
+    }
+    front->OnCompleteContinuation(result);
+}
+
+void AceContainer::OnRemoteTerminated(int32_t instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        LOGI("container is null, OnRemoteTerminated failed.");
+        return;
+    }
+    auto front = container->GetFrontend();
+    if (!front) {
+        LOGI("front is null, OnRemoteTerminated failed.");
+        return;
+    }
+    front->OnRemoteTerminated();
+}
+
+void AceContainer::OnConfigurationUpdated(int32_t instanceId, const std::string& configuration)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        LOGI("container is null, OnConfigurationUpdated failed.");
+        return;
+    }
+    auto front = container->GetFrontend();
+    if (!front) {
+        LOGI("front is null, OnConfigurationUpdated failed.");
+        return;
+    }
+    front->OnConfigurationUpdated(configuration);
 }
 
 void AceContainer::OnNewRequest(int32_t instanceId, const std::string& data)
@@ -286,23 +378,15 @@ void AceContainer::InitializeCallback()
             [context, deadline]() { context->OnIdle(deadline); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterIdleCallback(idleCallback);
-
-    auto&& viewDestoryCallback = [context = pipelineContext_](AceView::ViewReleaseCallback&& callback) {
-        context->GetTaskExecutor()->PostTask(
-            [context, callback = std::move(callback)]() {
-                context->GetTaskExecutor()->PostTask(
-                    [callback = std::move(callback)]() { callback(); }, TaskExecutor::TaskType::PLATFORM);
-            },
-            TaskExecutor::TaskType::UI);
-    };
-    aceView_->RegisterViewDestroyCallback(viewDestoryCallback);
 }
 
-void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, AceAbility* aceAbility,
+void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, AceAbility* aceAbility,
     std::unique_ptr<PlatformEventCallback> callback)
 {
-    auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, aceAbility, std::move(callback));
+    Container::InitForThread(INSTANCE_ID_PLATFORM);
+    auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, isArkApp, aceAbility, std::move(callback));
     AceEngine::Get().AddContainer(instanceId, aceContainer);
+    aceContainer->Initialize();
     auto front = aceContainer->GetFrontend();
     if (front) {
         front->UpdateState(Frontend::State::ON_CREATE);
@@ -312,24 +396,18 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, AceAbi
 
 void AceContainer::DestroyContainer(int32_t instanceId)
 {
-    LOGI("DestroyContainer with id %{private}d", instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
-        LOGE("no AceContainer with id %{private}d", instanceId);
+        LOGE("no AceContainer with id %{private}d in AceEngine", instanceId);
         return;
     }
-    auto context = container->GetPipelineContext();
-    if (context) {
-        auto taskExecutor = context->GetTaskExecutor();
-        if (taskExecutor) {
-            taskExecutor->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
-        }
+    container->Destroy();
+    auto taskExecutor = container->GetTaskExecutor();
+    if (taskExecutor) {
+        taskExecutor->PostSyncTask([] { LOGI("Wait UI thread..."); }, TaskExecutor::TaskType::UI);
+        taskExecutor->PostSyncTask([] { LOGI("Wait JS thread..."); }, TaskExecutor::TaskType::JS);
     }
     AceEngine::Get().RemoveContainer(instanceId);
-    auto front = container->GetFrontend();
-    if (front) {
-        front->UpdateState(Frontend::State::ON_DESTROY);
-    }
 }
 
 void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t height)
@@ -435,7 +513,7 @@ void AceContainer::AddAssetPath(
     }
 
     AceEngine::Get().SetPackagePath(packagePath);
-    for (auto path: paths) {
+    for (const auto& path: paths) {
         AceEngine::Get().SetAssetBasePath(path);
     }
 
@@ -450,7 +528,7 @@ void AceContainer::AddAssetPath(
         }
     }
     if (flutterAssetManager && !packagePath.empty()) {
-        auto assetProvider = std::make_unique<FileAssetProvider>();
+        auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
         if (assetProvider->Initialize(packagePath, paths)) {
             LOGI("Push AssetProvider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
@@ -467,9 +545,9 @@ void AceContainer::AttachView(
     ACE_DCHECK(state != nullptr);
     auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
     flutterTaskExecutor->InitOtherThreads(state->GetTaskRunners());
-
+    taskExecutor_->PostTask([id = instanceId_]() { Container::InitForThread(id); }, TaskExecutor::TaskType::UI);
     if (type_ == FrontendType::DECLARATIVE_JS) {
-        // For DECLARATIVE_JS or UJOINT_JS frontend display UI in JS thread temporarily.
+        // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
         flutterTaskExecutor->InitJsThread(false);
         InitializeFrontend();
         auto front = GetFrontend();
@@ -478,8 +556,9 @@ void AceContainer::AttachView(
             front->SetJsMessageDispatcher(AceType::Claim(this));
             front->SetAssetManager(assetManager_);
         }
+    } else if (type_ != FrontendType::JS_CARD) {
+        aceView_->SetCreateTime(createTime_);
     }
-
     resRegister_ = aceView_->GetPlatformResRegister();
     pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(std::move(window),
                                                             taskExecutor_,
@@ -544,6 +623,7 @@ void AceContainer::AttachView(
     };
     pipelineContext_->SetStatusBarEventHandler(setStatusBarEventHandler);
 
+    ThemeConstants::InitDeviceType();
     // Load custom style at UI thread before frontend attach, to make sure style can be loaded before building dom tree.
     auto themeManager = pipelineContext_->GetThemeManager();
     if (themeManager) {
@@ -585,5 +665,17 @@ void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, C
     }
     container->SetWindowModal(windowModal);
     container->SetColorScheme(colorScheme);
+}
+
+void AceContainer::SetDialogCallback(int32_t instanceId, DialogCallback callback)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        return;
+    }
+    auto front = container->GetFrontend();
+    if (front && front->GetType() == FrontendType::JS) {
+        front->SetDialogCallback(callback);
+    }
 }
 } // namespace OHOS::Ace::Platform

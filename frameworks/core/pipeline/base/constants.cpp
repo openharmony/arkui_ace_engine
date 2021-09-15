@@ -48,7 +48,6 @@ const char IMAGE_SIZE_TYPE[] = "type";
 const char IMAGE_REPEAT[] = "imageRepeat";
 const char IMAGE_FIT[] = "imageFit";
 const char IMAGE_COLOR[] = "color";
-const char SRC_TYPE[] = "srcType";
 const char IMAGE_ON_LOAD_SUCCESS[] = "onLoadSuccess";
 const char IMAGE_ON_LOAD_FAIL[] = "onLoadFail";
 const char IMAGE_ALT_BLANK[] = "blank";
@@ -72,7 +71,6 @@ const char TEXT_WORD_SPACING[] = "wordSpacing";
 const char TEXT_LINE_HEIGHT[] = "lineHeight";
 const char TEXT_LETTER_SPACING[] = "letterSpacing";
 const char TEXT_STYLE[] = "textStyle";
-const char TEXT_SPAN[] = "textSpan";
 const char TEXT_SPAN_NAME[] = "TextSpan";
 const char TEXT_ADAPT[] = "textAdapt";
 const char TEXT_ADAPT_MIN_FONTSIZE[] = "textAdaptMinSize";
@@ -111,8 +109,6 @@ const char COLOR_ALPHA[] = "alpha";
 const char COLOR_OPACITY[] = "opacity";
 
 // shadow constants
-const char SHADOW_CLASSNAME[] = "Shadow";
-const char OFFSET_CLASSNAME[] = "Offset";
 const char SHADOW[] = "shadow";
 const char OFFSET[] = "offset";
 const char HORIZONTAL_OFFSET[] = "dx";
@@ -128,12 +124,8 @@ const char COMPOSE_DATA[] = "componentData";
 
 // box constants
 const char BOX_NAME[] = "Box";
-const char BOX_CONSTRAINTS[] = "constraints";
 const char BOX_BACK_DECORATION[] = "backDecoration";
 const char BOX_FRONT_DECORATION[] = "frontDecoration";
-const char BOX_MARGIN[] = "margin";
-const char BOX_PADDING[] = "padding";
-const char BOX_DELIVER_MIN_TO_CHILD[] = "deliverMinToChild";
 
 // flex constants
 const char COLUMN_NAME[] = "Column";
@@ -231,7 +223,6 @@ const char EDGE_RIGHT[] = "right";
 const char EDGE_BOTTOM[] = "bottom";
 
 // border constants
-const char BORDER[] = "border";
 const char BORDER_NAME[] = "Border";
 const char BORDER_VALUE[] = "value";
 const char BORDER_LEFT[] = "left";
@@ -263,12 +254,10 @@ const char BACKGROUND_IMAGE[] = "backgroundImage";
 const char BACKGROUND_COLOR[] = "color";
 const char DECORATION_BORDER[] = "border";
 const char DECORATION_PADDING[] = "padding";
-const char DECORATION_GRADIENT[] = "gradient";
 
 // backgroundImage constants
 const char BACKGROUND_IMAGE_NAME[] = "BackgroundImage";
 const char BACKGROUND_SRC[] = "src";
-const char DECORATION_IMAGE_ALIGNMENT[] = "alignment";
 
 // gradient constants
 const char GRADIENT_NAME[] = "Gradient";
@@ -311,7 +300,6 @@ const char OPTION_TRANSLATE_Y[] = "translateY";
 const char OPTION_ROTATE_Z[] = "rotateZ";
 const char OPTION_ROTATE_X[] = "rotateX";
 const char OPTION_ROTATE_Y[] = "rotateY";
-const char OPTION_OPACITY[] = "opacity";
 
 // slider constants
 const char SLIDER_NAME[] = "Slider";
@@ -319,15 +307,10 @@ const char VALUE[] = "value";
 const char SLIDER_MIN[] = "min";
 const char SLIDER_MAX[] = "max";
 const char SLIDER_STEP[] = "step";
-const char SLIDER_BAR_HEIGHT[] = "barHeight";
-const char SLIDER_BAR_WIDTH[] = "barWidth";
-const char SLIDER_BLOCK_RADIUS[] = "blockRadius";
 const char SLIDER_SELECTED_COLOR[] = "barSelectedColor";
 const char SLIDER_BAR_BACKGROUND_COLOR[] = "barBackgroundColor";
 const char SLIDER_BLOCK_COLOR[] = "blockColor";
-const char SLIDER_PADDING[] = "padding";
 const char ON_MOVE_END_ID[] = "onMoveEndId";
-const char ON_CLICKED_ID[] = "onClickedId";
 
 // swiper constants
 const char SWIPER_NAME[] = "Swiper";
@@ -424,10 +407,6 @@ const char TAB_CONTENT_SCROLLABEL[] = "scrollable";
 const char TAB_INDICATOR_COLOR[] = "indicatorColor";
 const char TAB_INDICATOR_PADDING[] = "indicatorPadding";
 const char TAB_INDICATOR_SIZE[] = "indicatorSize";
-const char TAB_LABEL_COLOR[] = "labelColor";
-const char TAB_UNSELECTED_LABEL_COLOR[] = "unselectedLabelColor";
-const char TAB_LABEL_STYLE[] = "labelStyle";
-const char TAB_UNSELECTED_LABEL_STYLE[] = "unselectedLabelStyle";
 const char TAB_LABEL_PADDING[] = "labelPadding";
 const char TAB_MODE[] = "mode";
 const char TAB_ITEM_TEXT[] = "text";
@@ -441,8 +420,6 @@ const char DIALOG_CONTENT[] = "content";
 const char DIALOG_CONTENT_PADDING[] = "contentPadding";
 const char DIALOG_BACKGROUND_COLOR[] = "backgroundColor";
 const char DIALOG_ACTIONS[] = "actions";
-const char DIALOG_ACTION_TEXT[] = "text";
-const char DIALOG_ACTION_COLOR[] = "color";
 const char DIALOG_AUTO_CANCEL[] = "autoCancel";
 
 // scroll constants
@@ -523,7 +500,6 @@ const char MARQUEE_START[] = "start";
 // rating constants
 const char RATING_NAME[] = "Rating";
 const char RATING_SCORE[] = "ratingScore";
-const char RATING_BOTTOM_SCORE[] = "bottomScore";
 const char RATING_FOREGROUND_SRC[] = "foregroundSrc";
 const char RATING_SECONDARY_SRC[] = "secondarySrc";
 const char RATING_BACKGROUND_SRC[] = "backgroundSrc";
@@ -584,8 +560,6 @@ const char SELECT_OPTION_TEXT[] = "text";
 const char SELECT_OPTION_SELECTED[] = "selected";
 const uint32_t SELECT_DEFAULT_OPTION_SIZE = static_cast<uint32_t>(INT32_MAX);
 const uint32_t SELECT_INVALID_INDEX = 0xFFFFFFFF;
-const double SELECT_DEFAULT_POPUP_SHADOW_WIDTH = 5.0;
-const double SELECT_DEFAULT_POPUP_BORDER_WIDTH = 1.0;
 
 // clip constants
 const char CLIP_NAME[] = "Clip";
@@ -596,7 +570,14 @@ const char DIVIDER_STROKE_WIDTH[] = "strokeWidth";
 const char DIVIDER_COLOR[] = "color";
 const char DIVIDER_VERTICAL[] = "vertical";
 
-// columSplit constants
+// columnSplit constants
 const double DEFAULT_SPLIT_HEIGHT = 2.0;
+
+// animator constants
+const char START[] = "start";
+const char PAUSE[] = "pause";
+const char STOP[] = "stop";
+const char RESUME[] = "resume";
+const char CANCEL[] = "cancel";
 
 } // namespace OHOS::Ace

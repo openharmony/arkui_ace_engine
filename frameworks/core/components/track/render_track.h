@@ -157,6 +157,8 @@ public:
     void Dump() override;
 
 protected:
+    std::string markedText_;
+    Color markedTextColor_;
     RenderRingInfo paintData_;
     bool showIndicator_ = false;
     std::vector<Color> colors_;

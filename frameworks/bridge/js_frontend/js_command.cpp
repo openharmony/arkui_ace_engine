@@ -61,6 +61,21 @@ inline void TrySaveTargetAndIdNode(const std::string& id, const std::string& tar
     }
 }
 
+// TODO delete this vector after declaration refactor if finished.
+std::vector<std::string> g_declarationNodes =
+{   DOM_NODE_TAG_BADGE,
+    DOM_NODE_TAG_BUTTON,
+    DOM_NODE_TAG_LABEL,
+    DOM_NODE_TAG_PIECE,
+    DOM_NODE_TAG_QRCODE,
+    DOM_NODE_TAG_SPAN,
+    DOM_NODE_TAG_SWIPER,
+    DOM_NODE_TAG_TEXT,
+    DOM_NODE_TAG_WEB,
+    DOM_NODE_TAG_CLOCK,
+    DOM_NODE_TAG_XCOMPONENT
+};
+
 } // namespace
 
 void JsCommandDomElementOperator::UpdateForChart(const RefPtr<DOMNode>& node) const
@@ -175,11 +190,69 @@ RefPtr<DOMNode> JsCommandDomElementCreator::CreateDomNode(const RefPtr<JsAcePage
     if (page->IsLiteStyle()) {
         node->AdjustParamInLiteMode();
     }
-    node->SetBoxWrap(page->IsUseBoxWrap());
 
     // supplement: set svg tag by parentNode.hasSvgTag_ or tagName_
     node->SetParentNode(parentNode);
 
+    TrySaveTargetAndIdNode(id_, target_, domDocument, node);
+    node->SetShareId(shareId_);
+    node->SetPipelineContext(pipelineContext_);
+    node->SetIsCustomComponent(isCustomComponent_);
+    node->SetBoxWrap(page->IsUseBoxWrap());
+    node->InitializeStyle();
+    auto declaration = node->GetDeclaration();
+    if (declaration) {
+        declaration->BindPipelineContext(pipelineContext_);
+        declaration->InitializeStyle();
+    }
+    node->SetAttr(attrs_);
+
+    if (animationStyles_) {
+        node->SetAnimationStyle(*animationStyles_);
+    }
+    if (transitionEnter_) {
+        node->SetIsTransition(true);
+        node->SetIsEnter(true);
+        node->SetAnimationStyle(*transitionEnter_);
+    }
+    if (transitionExit_) {
+        node->SetIsTransition(true);
+        node->SetIsEnter(false);
+        node->SetAnimationStyle(*transitionExit_);
+    }
+    if (sharedTransitionName_) {
+        node->SetSharedTransitionStyle(*sharedTransitionName_);
+    }
+
+    UpdateForChart(node);
+    UpdateForImageAnimator(node);
+    UpdateForClock(node);
+    UpdateForBadge(node);
+    UpdateForStepperLabel(node);
+    UpdateForInput(node);
+    node->SetStyle(styles_);
+    node->AddEvent(pageId, events_);
+    return node;
+}
+
+RefPtr<DOMNode> JsCommandDomElementCreator::CreateDomElement(const RefPtr<JsAcePage>& page) const
+{
+    if (!page) {
+        return nullptr;
+    }
+    auto pageId = page->GetPageId();
+    auto domDocument = page->GetDomDocument();
+    ACE_DCHECK(domDocument);
+    std::string tagName = tagName_;
+    auto node = domDocument->CreateNodeWithId(tagName, nodeId_, -1);
+    if (!node) {
+        EventReport::SendJsException(JsExcepType::CREATE_NODE_ERR);
+        return nullptr;
+    }
+    if (page->IsLiteStyle()) {
+        node->AdjustParamInLiteMode();
+    }
+    node->SetBoxWrap(page->IsUseBoxWrap());
     TrySaveTargetAndIdNode(id_, target_, domDocument, node);
     node->SetShareId(shareId_);
     node->SetPipelineContext(pipelineContext_);
@@ -212,6 +285,7 @@ RefPtr<DOMNode> JsCommandDomElementCreator::CreateDomNode(const RefPtr<JsAcePage
 
     node->SetStyle(styles_);
     node->AddEvent(pageId, events_);
+    page->PushDynamicNode(nodeId_, node);
     return node;
 }
 
@@ -338,6 +412,22 @@ void JsCommandCreateDomBody::Execute(const RefPtr<JsAcePage>& page) const
     accessibilityNode->AddEvent(page->GetPageId(), events_);
 }
 
+void JsCommandCreateDomElement::Execute(const RefPtr<JsAcePage>& page) const
+{
+    auto domDocument = page ? page->GetDomDocument() : nullptr;
+    if (!domDocument) {
+        LOGE("Failed to get DOM document");
+        EventReport::SendJsException(JsExcepType::CREATE_NODE_ERR);
+        return;
+    }
+    auto node = CreateDomElement(page);
+
+    if (!node) {
+        return;
+    }
+
+}
+
 void JsCommandAddDomElement::Execute(const RefPtr<JsAcePage>& page) const
 {
     auto domDocument = page ? page->GetDomDocument() : nullptr;
@@ -357,6 +447,12 @@ void JsCommandAddDomElement::Execute(const RefPtr<JsAcePage>& page) const
         auto bridge = JsEngineLoader::Get().CreateCanvasBridge();
         page->PushCanvasBridge(nodeId_, bridge);
     }
+
+    if (tagName_ == DOM_NODE_TAG_XCOMPONENT) {
+        auto bridge = JsEngineLoader::Get().CreateXComponentBridge();
+        page->PushXComponentBridge(nodeId_, bridge);
+    }
+
     page->PushNewNode(nodeId_, parentNodeId_);
 
     // create other accessibility node
@@ -378,6 +474,17 @@ void JsCommandAddDomElement::Execute(const RefPtr<JsAcePage>& page) const
     accessibilityNode->SetAttr(attrs_);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     accessibilityNode->SetStyle(styles_);
+    if (!animationStyles_) {
+        return;
+    }
+    for (const auto& animationNameKeyframe : *animationStyles_.get()) {
+        auto animationName = animationNameKeyframe.find(DOM_ANIMATION_NAME);
+        if (animationName != animationNameKeyframe.end()) {
+            std::vector<std::pair<std::string, std::string>> vector;
+            vector.emplace_back(DOM_ANIMATION_NAME, animationName->second);
+            accessibilityNode->SetStyle(vector);
+        }
+    }
 #endif
     accessibilityNode->AddEvent(page->GetPageId(), events_);
 }
@@ -416,6 +523,56 @@ void JsCommandRemoveDomElement::Execute(const RefPtr<JsAcePage>& page) const
     accessibilityManager->RemoveAccessibilityNodes(accessibilityNode);
 }
 
+void JsCommandAppendElement::Execute(const RefPtr<JsAcePage>& page) const
+{
+    auto domDocument = page ? page->GetDomDocument() : nullptr;
+    if (!domDocument) {
+        LOGE("Failed to get DOM document");
+        EventReport::SendJsException(JsExcepType::CREATE_NODE_ERR);
+        return;
+    }
+    auto node = page->GetDynamicNodeById(nodeId_);
+    if (!node) {
+        return;
+    }
+    RefPtr<DOMNode> parentNode;
+    int32_t parentNodeId = parentNodeId_;
+    if (parentNodeId != -1) {
+        parentNode = domDocument->GetDOMNodeById(parentNodeId);
+        if (!parentNode) {
+            LOGE("Parent node %{private}d not exists", nodeId_);
+            EventReport::SendJsException(JsExcepType::CREATE_NODE_ERR);
+        }
+    }
+    node->SetParentNode(parentNode);
+
+    MountDomNode(node, domDocument, parentNodeId_);
+    page->PushNewNode(nodeId_, parentNodeId_);
+
+    // create other accessibility node
+    auto accessibilityManager = GetAccessibilityManager(page);
+    if (!accessibilityManager) {
+        LOGW("accessibilityManager not exists");
+        return;
+    }
+    if (tagName_ == DOM_NODE_TAG_OPTION) {
+        return; // option of menu and select for popup do not need auto creating
+    }
+
+    auto accessibilityNode =
+    accessibilityManager->CreateAccessibilityNode(tagName_, nodeId_, parentNodeId_, itemIndex_);
+    if (!accessibilityNode) {
+        LOGD("Failed to create accessibility node %{public}s", tagName_.c_str());
+        return;
+    }
+    accessibilityManager->TrySaveTargetAndIdNode(id_, target_, accessibilityNode);
+    accessibilityNode->SetAttr(attrs_);
+    #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+        accessibilityNode->SetStyle(styles_);
+    #endif
+    accessibilityNode->AddEvent(page->GetPageId(), events_);
+}
+
 void JsCommandUpdateDomElementAttrs::Execute(const RefPtr<JsAcePage>& page) const
 {
     auto node = GetNodeFromPage(page, nodeId_);
@@ -427,7 +584,6 @@ void JsCommandUpdateDomElementAttrs::Execute(const RefPtr<JsAcePage>& page) cons
     if (page->IsLiteStyle()) {
         node->AdjustParamInLiteMode();
     }
-    node->SetBoxWrap(page->IsUseBoxWrap());
     if (page->CheckShowCommandConsumed()) {
         auto showAttr = std::find_if(std::begin(attrs_), std::end(attrs_),
             [](const std::pair<std::string, std::string>& attr) { return attr.first == DOM_SHOW; });
@@ -436,6 +592,7 @@ void JsCommandUpdateDomElementAttrs::Execute(const RefPtr<JsAcePage>& page) cons
         }
     }
     TrySaveTargetAndIdNode(id_, target_, page->GetDomDocument(), node);
+    node->SetBoxWrap(page->IsUseBoxWrap());
     node->SetAttr(attrs_);
     node->SetShareId(shareId_);
     UpdateForChart(node);
@@ -505,7 +662,13 @@ void JsCommandCallDomElementMethod::Execute(const RefPtr<JsAcePage>& page) const
     if (method_ == DOM_FOCUS) {
         page->UpdateShowAttr();
     }
-    node->CallMethod(method_, param_);
+    auto declaration = node->GetDeclaration();
+    if (declaration &&
+        std::find(g_declarationNodes.begin(), g_declarationNodes.end(), node->GetTag()) != g_declarationNodes.end()) {
+        declaration->CallMethod(method_, param_);
+    } else {
+        node->CallMethod(method_, param_);
+    }
 }
 
 void JsCommandContextOperation::Execute(const RefPtr<JsAcePage>& page) const
@@ -528,6 +691,26 @@ void JsCommandContextOperation::Execute(const RefPtr<JsAcePage>& page) const
     task_(pool);
 }
 
+void JsCommandXComponentOperation::Execute(const RefPtr<JsAcePage>& page) const
+{
+    if (!task_) {
+        return;
+    }
+    auto xcomponent = AceType::DynamicCast<DOMXComponent>(GetNodeFromPage(page, nodeId_));
+    if (!xcomponent) {
+        LOGE("Node %{private}d not exists or not a xcomponent", nodeId_);
+        return;
+    }
+    auto child = AceType::DynamicCast<XComponentComponent>(xcomponent->GetSpecializedComponent());
+    ACE_DCHECK(child);
+    auto pool = child->GetTaskPool();
+    if (!pool) {
+        LOGE("xcomponent get pool failed");
+        return;
+    }
+    task_(pool);
+}
+
 void JsCommandAnimation::Execute(const RefPtr<JsAcePage>& page) const
 {
     if (!page) {
@@ -536,6 +719,17 @@ void JsCommandAnimation::Execute(const RefPtr<JsAcePage>& page) const
     }
     if (task_) {
         task_->AnimationBridgeTaskFunc(page, nodeId_);
+    }
+}
+
+void JsCommandAnimator::Execute(const RefPtr<JsAcePage>& page) const
+{
+    if (!page) {
+        LOGE("execute animation command failed. page is null.");
+        return;
+    }
+    if (task_) {
+        task_->AnimatorBridgeTaskFunc(page, bridgeId_);
     }
 }
 

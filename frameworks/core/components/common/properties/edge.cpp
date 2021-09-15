@@ -77,6 +77,11 @@ bool Edge::IsValid() const
     return left_.Value() >= 0.0 && top_.Value() >= 0.0 && right_.Value() >= 0.0 && bottom_.Value() >= 0.0;
 }
 
+bool Edge::IsEffective() const
+{
+    return left_.Value() > 0.0 || top_.Value() > 0.0 || right_.Value() > 0.0 || bottom_.Value() > 0.0;
+}
+
 Size Edge::GetLayoutSizeInPx(double dipScale) const
 {
     double width = GetValueInPx(left_, dipScale) + GetValueInPx(right_, dipScale);

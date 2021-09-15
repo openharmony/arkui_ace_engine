@@ -17,6 +17,7 @@
 
 #include "adapter/ohos/osal/fake_asset_manager.h"
 #include "adapter/ohos/osal/fake_task_executor.h"
+#include "base/json/json_util.h"
 #include "base/log/log.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/flush_event.h"
@@ -42,17 +43,14 @@ class SvgAnimationMock : public FlushEvent {
     DECLARE_ACE_TYPE(SvgAnimationMock, FlushEvent);
 
 public:
-    SvgAnimationMock(T originValue, const RefPtr<Evaluator<T>>& evaluator, const RefPtr<SvgAnimate>& svgAnimate,
-        const WeakPtr<PipelineContext>& context)
+    SvgAnimationMock(T originValue, const RefPtr<SvgAnimate>& svgAnimate, const WeakPtr<PipelineContext>& context)
         : FlushEvent()
     {
         originValue_ = originValue;
         currentValue_ = originValue_;
-        evaluator_ = evaluator;
         svgAnimate_ = svgAnimate;
         animator_ = AceType::MakeRefPtr<Animator>(context);
     }
-    ~SvgAnimationMock() = default;
 
     void CreatePropertyAnimate()
     {
@@ -68,7 +66,7 @@ public:
             }
             mock->currentValue_ = value;
         };
-        svgAnimate_->CreatePropertyAnimate(std::move(callback), originValue_, evaluator_, animator_);
+        svgAnimate_->CreatePropertyAnimate(std::move(callback), originValue_, animator_);
     }
 
     void CreateMotionAnimate()
@@ -109,7 +107,6 @@ public:
 private:
     RefPtr<SvgAnimate> svgAnimate_;
     RefPtr<Animator> animator_;
-    RefPtr<Evaluator<T>> evaluator_;
 };
 
 class SvgAnimateTest : public testing::Test {
@@ -161,7 +158,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. init svg animate and animator
      */
-    RefPtr<Evaluator<double>> evaluator = AceType::MakeRefPtr<LinearEvaluator<double>>();
     RefPtr<SvgAnimate> svgAnimate = AceType::MakeRefPtr<SvgAnimate>();
     svgAnimate->SetAttributeName("opacity");
     svgAnimate->SetBegin(0);
@@ -172,7 +168,7 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest001, TestSize.Level1)
     svgAnimate->SetFrom("0.1");
     svgAnimate->SetTo("1.0");
     svgAnimate->SetSvgAnimateType(SvgAnimateType::ANIMATE);
-    auto flushEventMock = AceType::MakeRefPtr<SvgAnimationMock<double>>(0.0, evaluator, svgAnimate, context_);
+    auto flushEventMock = AceType::MakeRefPtr<SvgAnimationMock<double>>(0.0, svgAnimate, context_);
     context_->AddPostFlushListener(flushEventMock);
 
     /**
@@ -182,9 +178,9 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest001, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     EXPECT_NEAR(flushEventMock->currentValue_, 0.0, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(10);
-    EXPECT_NEAR(flushEventMock->currentValue_, 0.19, CUBIC_ERROR_BOUND);
+    EXPECT_NEAR(flushEventMock->currentValue_, 0.193, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(20);
-    EXPECT_NEAR(flushEventMock->currentValue_, 0.37, CUBIC_ERROR_BOUND);
+    EXPECT_NEAR(flushEventMock->currentValue_, 0.38, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(70);
     EXPECT_NEAR(flushEventMock->currentValue_, 1.0, CUBIC_ERROR_BOUND);
 }
@@ -202,7 +198,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. init svg animate and animator
      */
-    RefPtr<Evaluator<Color>> evaluator = AceType::MakeRefPtr<ColorEvaluator>();
     RefPtr<SvgAnimate> svgAnimate = AceType::MakeRefPtr<SvgAnimate>();
     svgAnimate->SetAttributeName("fill");
     svgAnimate->SetBegin(0);
@@ -213,7 +208,7 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest002, TestSize.Level1)
     svgAnimate->SetFrom("red");
     svgAnimate->SetTo("blue");
     svgAnimate->SetSvgAnimateType(SvgAnimateType::ANIMATE);
-    auto flushEventMock = AceType::MakeRefPtr<SvgAnimationMock<Color>>(Color::RED, evaluator, svgAnimate, context_);
+    auto flushEventMock = AceType::MakeRefPtr<SvgAnimationMock<Color>>(Color::RED, svgAnimate, context_);
     context_->AddPostFlushListener(flushEventMock);
 
     /**
@@ -223,9 +218,9 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest002, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     EXPECT_TRUE(flushEventMock->currentValue_.GetValue() == Color::RED.GetValue());
     platformWindowRaw_->TriggerFrames(10);
-    EXPECT_TRUE(flushEventMock->currentValue_.GetValue() == 4294115417);
+    EXPECT_EQ(flushEventMock->currentValue_.GetValue(), 4294049883);
     platformWindowRaw_->TriggerFrames(20);
-    EXPECT_TRUE(flushEventMock->currentValue_.GetValue() == 4292346003);
+    EXPECT_EQ(flushEventMock->currentValue_.GetValue(), 4292280470);
     platformWindowRaw_->TriggerFrames(70);
     EXPECT_TRUE(flushEventMock->currentValue_.GetValue() == Color::BLUE.GetValue());
 }
@@ -243,7 +238,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. init svg animate and animator
      */
-    RefPtr<Evaluator<Dimension>> evaluator = AceType::MakeRefPtr<LinearEvaluator<Dimension>>();
     RefPtr<SvgAnimate> svgAnimate = AceType::MakeRefPtr<SvgAnimate>();
     svgAnimate->SetAttributeName("width");
     svgAnimate->SetBegin(0);
@@ -254,8 +248,7 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest003, TestSize.Level1)
     svgAnimate->SetFrom("100");
     svgAnimate->SetTo("300");
     svgAnimate->SetSvgAnimateType(SvgAnimateType::ANIMATE);
-    auto flushEventMock =
-        AceType::MakeRefPtr<SvgAnimationMock<Dimension>>(Dimension(50.0), evaluator, svgAnimate, context_);
+    auto flushEventMock = AceType::MakeRefPtr<SvgAnimationMock<Dimension>>(Dimension(50.0), svgAnimate, context_);
     context_->AddPostFlushListener(flushEventMock);
 
     /**
@@ -265,9 +258,9 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest003, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     EXPECT_NEAR(flushEventMock->currentValue_.Value(), 50.0, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(10);
-    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 120.0, CUBIC_ERROR_BOUND);
+    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 120.75, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(20);
-    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 160.0, CUBIC_ERROR_BOUND);
+    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 162.375, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(70);
     EXPECT_NEAR(flushEventMock->currentValue_.Value(), 300.0, CUBIC_ERROR_BOUND);
 }
@@ -285,8 +278,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest004, TestSize.Level1)
     /**
      * @tc.steps: step1. init svg animate and animator
      */
-    RefPtr<Evaluator<Dimension>> evaluator = AceType::MakeRefPtr<LinearEvaluator<Dimension>>();
-
     RefPtr<SvgAnimate> svgAnimate = AceType::MakeRefPtr<SvgAnimate>();
     svgAnimate->SetAttributeName("width");
     svgAnimate->SetBegin(0);
@@ -297,8 +288,7 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest004, TestSize.Level1)
     std::vector<std::string> values = { "50", "100", "200", "300" };
     svgAnimate->SetValues(values);
     svgAnimate->SetSvgAnimateType(SvgAnimateType::ANIMATE);
-    auto flushEventMock =
-        AceType::MakeRefPtr<SvgAnimationMock<Dimension>>(Dimension(50.0), evaluator, svgAnimate, context_);
+    auto flushEventMock = AceType::MakeRefPtr<SvgAnimationMock<Dimension>>(Dimension(50.0), svgAnimate, context_);
     context_->AddPostFlushListener(flushEventMock);
 
     /**
@@ -308,9 +298,9 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest004, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     EXPECT_NEAR(flushEventMock->currentValue_.Value(), 50.0, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(10);
-    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 65.1515, CUBIC_ERROR_BOUND);
+    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 65.719, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(20);
-    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 95.4545, CUBIC_ERROR_BOUND);
+    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 97.254, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(70);
     EXPECT_NEAR(flushEventMock->currentValue_.Value(), 300.0, CUBIC_ERROR_BOUND);
 }
@@ -328,7 +318,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest005, TestSize.Level1)
     /**
      * @tc.steps: step1. init svg animate and animator
      */
-    RefPtr<Evaluator<Dimension>> evaluator = AceType::MakeRefPtr<LinearEvaluator<Dimension>>();
     RefPtr<SvgAnimate> svgAnimate = AceType::MakeRefPtr<SvgAnimate>();
     svgAnimate->SetAttributeName("width");
     svgAnimate->SetBegin(0);
@@ -341,8 +330,7 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest005, TestSize.Level1)
     std::vector<double> keyTimes = { 0.0, 0.2, 0.7, 1.0 };
     svgAnimate->SetKeyTimes(keyTimes);
     svgAnimate->SetSvgAnimateType(SvgAnimateType::ANIMATE);
-    auto flushEventMock =
-        AceType::MakeRefPtr<SvgAnimationMock<Dimension>>(Dimension(50.0), evaluator, svgAnimate, context_);
+    auto flushEventMock = AceType::MakeRefPtr<SvgAnimationMock<Dimension>>(Dimension(50.0), svgAnimate, context_);
     context_->AddPostFlushListener(flushEventMock);
 
     /**
@@ -352,9 +340,9 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest005, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     EXPECT_NEAR(flushEventMock->currentValue_.Value(), 50.0, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(10);
-    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 75.0, CUBIC_ERROR_BOUND);
+    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 75.937, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(20);
-    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 120.0, CUBIC_ERROR_BOUND);
+    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 122.375, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(70);
     EXPECT_NEAR(flushEventMock->currentValue_.Value(), 300.0, CUBIC_ERROR_BOUND);
 }
@@ -372,7 +360,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. init svg animate and animator
      */
-    RefPtr<Evaluator<Dimension>> evaluator = AceType::MakeRefPtr<LinearEvaluator<Dimension>>();
     RefPtr<SvgAnimate> svgAnimate = AceType::MakeRefPtr<SvgAnimate>();
     svgAnimate->SetAttributeName("width");
     svgAnimate->SetBegin(0);
@@ -387,8 +374,7 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest006, TestSize.Level1)
     std::vector<std::string> keySplines = { "0.5 0 0.5 1", "0.5 0 0.5 1", "0.5 0 0.5 1" };
     svgAnimate->SetKeySplines(keySplines);
     svgAnimate->SetSvgAnimateType(SvgAnimateType::ANIMATE);
-    auto flushEventMock =
-        AceType::MakeRefPtr<SvgAnimationMock<Dimension>>(Dimension(50.0), evaluator, svgAnimate, context_);
+    auto flushEventMock = AceType::MakeRefPtr<SvgAnimationMock<Dimension>>(Dimension(50.0), svgAnimate, context_);
     context_->AddPostFlushListener(flushEventMock);
 
     /**
@@ -398,9 +384,9 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest006, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     EXPECT_NEAR(flushEventMock->currentValue_.Value(), 50.0, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(10);
-    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 75.0, CUBIC_ERROR_BOUND);
+    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 76.903, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(20);
-    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 106.408, CUBIC_ERROR_BOUND);
+    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 108.183, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(70);
     EXPECT_NEAR(flushEventMock->currentValue_.Value(), 300.0, CUBIC_ERROR_BOUND);
 }
@@ -418,8 +404,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. init svg animate and animator
      */
-    RefPtr<Evaluator<Dimension>> evaluator = AceType::MakeRefPtr<LinearEvaluator<Dimension>>();
-
     RefPtr<SvgAnimate> svgAnimate = AceType::MakeRefPtr<SvgAnimate>();
     svgAnimate->SetAttributeName("width");
     svgAnimate->SetBegin(0);
@@ -432,8 +416,7 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest007, TestSize.Level1)
     std::vector<double> keyTimes = { 0.0, 0.2, 0.7, 1.0 };
     svgAnimate->SetKeyTimes(keyTimes);
     svgAnimate->SetSvgAnimateType(SvgAnimateType::ANIMATE);
-    auto flushEventMock =
-        AceType::MakeRefPtr<SvgAnimationMock<Dimension>>(Dimension(50.0), evaluator, svgAnimate, context_);
+    auto flushEventMock = AceType::MakeRefPtr<SvgAnimationMock<Dimension>>(Dimension(50.0), svgAnimate, context_);
     context_->AddPostFlushListener(flushEventMock);
 
     /**
@@ -463,8 +446,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest008, TestSize.Level1)
     /**
      * @tc.steps: step1. init svg animate and animator
      */
-    RefPtr<Evaluator<Dimension>> evaluator = AceType::MakeRefPtr<LinearEvaluator<Dimension>>();
-
     RefPtr<SvgAnimate> svgAnimate = AceType::MakeRefPtr<SvgAnimate>();
     svgAnimate->SetAttributeName("width");
     svgAnimate->SetBegin(0);
@@ -477,8 +458,7 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest008, TestSize.Level1)
     std::vector<double> keyTimes = { 0.0, 0.2, 0.7, 1.0 };
     svgAnimate->SetKeyTimes(keyTimes);
     svgAnimate->SetSvgAnimateType(SvgAnimateType::ANIMATE);
-    auto flushEventMock =
-        AceType::MakeRefPtr<SvgAnimationMock<Dimension>>(Dimension(50.0), evaluator, svgAnimate, context_);
+    auto flushEventMock = AceType::MakeRefPtr<SvgAnimationMock<Dimension>>(Dimension(50.0), svgAnimate, context_);
     context_->AddPostFlushListener(flushEventMock);
 
     /**
@@ -488,9 +468,9 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest008, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     EXPECT_NEAR(flushEventMock->currentValue_.Value(), 50.0, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(10);
-    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 65.1515, CUBIC_ERROR_BOUND);
+    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 65.72, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(20);
-    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 95.4545, CUBIC_ERROR_BOUND);
+    EXPECT_NEAR(flushEventMock->currentValue_.Value(), 97.254, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(70);
     EXPECT_NEAR(flushEventMock->currentValue_.Value(), 300.0, CUBIC_ERROR_BOUND);
 }
@@ -508,7 +488,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest009, TestSize.Level1)
     /**
      * @tc.steps: step1. init svg animate and animator
      */
-    RefPtr<Evaluator<double>> evaluator = AceType::MakeRefPtr<LinearEvaluator<double>>();
     RefPtr<SvgAnimate> svgAnimate = AceType::MakeRefPtr<SvgAnimate>();
     svgAnimate->SetBegin(0);
     svgAnimate->SetDur(1600);
@@ -520,7 +499,7 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest009, TestSize.Level1)
     std::vector<double> keyTimes = { 0.0, 0.4, 1.0 };
     svgAnimate->SetKeyTimes(keyTimes);
     svgAnimate->SetSvgAnimateType(SvgAnimateType::MOTION);
-    auto flushEventMock = AceType::MakeRefPtr<SvgAnimationMock<double>>(0.0, evaluator, svgAnimate, context_);
+    auto flushEventMock = AceType::MakeRefPtr<SvgAnimationMock<double>>(0.0, svgAnimate, context_);
     context_->AddPostFlushListener(flushEventMock);
 
     /**
@@ -530,9 +509,9 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest009, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     EXPECT_NEAR(flushEventMock->motionValue_, 0.0, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(10);
-    EXPECT_NEAR(flushEventMock->motionValue_, 0.125, CUBIC_ERROR_BOUND);
+    EXPECT_NEAR(flushEventMock->motionValue_, 0.13, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(20);
-    EXPECT_NEAR(flushEventMock->motionValue_, 0.375, CUBIC_ERROR_BOUND);
+    EXPECT_NEAR(flushEventMock->motionValue_, 0.389, CUBIC_ERROR_BOUND);
     platformWindowRaw_->TriggerFrames(70);
     EXPECT_NEAR(flushEventMock->motionValue_, 1.0, CUBIC_ERROR_BOUND);
 }

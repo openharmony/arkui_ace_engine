@@ -18,6 +18,7 @@
 
 #include <cstdint>
 
+#include "base/json/json_util.h"
 #include "core/common/platform_window.h"
 #include "core/common/window.h"
 #include "core/components/box/render_box.h"
@@ -72,8 +73,6 @@ public:
     {
         nanoTimestamp_ += deltaNanoTimestamp;
         frameCount_ += deltaFrameCount;
-        LOGD("MockPlatformWindow TriggerFrame. nanoTimestamp: %{public}" PRIu64 ", frameCount: %{public}u",
-            nanoTimestamp_, frameCount_);
         if (callback_) {
             callback_(nanoTimestamp_, frameCount_);
         }
@@ -108,6 +107,11 @@ public:
     void Repaint(const RefPtr<RenderNode>& node) override {};
     void PaintChild(const RefPtr<RenderNode>& child, const Offset& offset) override {};
 };
+
+RefPtr<RenderContext> RenderContext::Create()
+{
+    return AceType::MakeRefPtr<MockRenderContext>();
+}
 
 class MockRenderRoot : public RenderRoot {};
 class MockRenderStack : public RenderStack {};

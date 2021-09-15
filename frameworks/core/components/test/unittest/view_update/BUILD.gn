@@ -32,6 +32,7 @@ ohos_unittest("ViewUpdateTest") {
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "$ace_root/frameworks/core:ace_core_ohos",
+    "$ace_root/frameworks/core/components/test:json",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]

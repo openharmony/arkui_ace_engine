@@ -44,8 +44,6 @@ enum MeasureFormatStyle { WIDTH_WIDE, WIDTH_SHORT, WIDTH_NARROW, WIDTH_NUMERIC, 
 
 enum TimeUnitStyle { YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, MILLISECOND };
 
-const std::string FormatEntry(const char* fmt, ...);
-
 class ACE_EXPORT Localization : public NonCopyable {
 public:
     /**
@@ -59,6 +57,12 @@ public:
     static void SetLocale(const std::string& language, const std::string& countryOrRegion, const std::string& script,
         const std::string& selectLanguage, const std::string& keywordsAndValues);
 
+    static std::string ComputeScript(const std::string& language, const std::string& region);
+
+    static void ParseLocaleTag(
+        const std::string& languageTag, std::string& language, std::string& script, std::string& region,
+        bool needAddSubtags);
+
     void SetOnChange(const std::function<void()>& value) {
         onChange_ = value;
     }
@@ -67,6 +71,23 @@ public:
     {
         if (onChange_) {
             onChange_();
+        }
+    }
+
+    void SetOnMymrChange(const std::function<void(bool)>& value)
+    {
+        onMymrChange_ = value;
+    }
+
+    const std::function<void(bool)>& GetOnMymrChange() const
+    {
+        return onMymrChange_;
+    }
+
+    void HandleOnMymrChange(bool isZawgyiMyanmar)
+    {
+        if (onMymrChange_) {
+            onMymrChange_(isZawgyiMyanmar);
         }
     }
 
@@ -232,6 +253,7 @@ private:
     std::promise<bool> promise_;
     std::shared_future<bool> future_ = promise_.get_future();
     std::function<void()> onChange_;
+    std::function<void(bool)> onMymrChange_;
     bool isPromiseUsed_ = false;
     bool isInit_ = false;
 

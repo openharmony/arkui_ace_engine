@@ -18,6 +18,8 @@
 
 #include <cstdint>
 
+#include "core/event/ace_events.h"
+
 namespace OHOS::Ace {
 
 enum class KeyCode : int32_t {
@@ -34,6 +36,7 @@ enum class KeyCode : int32_t {
     KEYBOARD_TAB = 61,
     KEYBOARD_SPACE = 62,
     KEYBOARD_ENTER = 66,
+    KEYBOARD_BACKSPACE = 67,
     KEYBOARD_ESCAPE = 111,
     KEYBOARD_NUMBER_ENTER = 160,
 
@@ -59,9 +62,10 @@ enum class KeyAction : int32_t {
 const char* KeyToString(int32_t code);
 
 struct KeyEvent final {
-    KeyEvent(KeyCode code, KeyAction action, int32_t repeatTime, int64_t timeStamp, int64_t timeStampStart)
+    KeyEvent(KeyCode code, KeyAction action, int32_t repeatTime, int64_t timeStamp, int64_t timeStampStart,
+        int32_t metaKey, int32_t sourceDevice, int32_t deviceId)
         : code(code), action(action), repeatTime(repeatTime), timeStamp(timeStamp), timeStampStart(timeStampStart),
-          key(KeyToString(static_cast<int32_t>(code)))
+          key(KeyToString(static_cast<int32_t>(code))), metaKey(metaKey), sourceDevice(sourceDevice), deviceId(deviceId)
     {}
     ~KeyEvent() = default;
 
@@ -74,7 +78,58 @@ struct KeyEvent final {
     int64_t timeStamp = 0;
     int64_t timeStampStart = 0;
     const char* key = nullptr;
+    int32_t metaKey = 0;
+    int32_t sourceDevice = 0;
+    int32_t deviceId = 0;
 };
+
+class ACE_EXPORT KeyEventInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(KeyEventInfo, BaseEventInfo)
+
+public:
+    explicit KeyEventInfo(const KeyEvent& event) : BaseEventInfo("keyEvent")
+    {
+        keyType_ = static_cast<int32_t>(event.action);
+        keyCode_ = event.code;
+        keyText_ = event.key;
+        keySource_ = event.sourceDevice;
+        SetDeviceId(event.deviceId);
+        metakey_ = event.metaKey;
+        std::chrono::microseconds micros(event.timeStamp);
+        TimeStamp time(micros);
+        SetTimeStamp(time);
+    };
+    ~KeyEventInfo() override = default;
+
+    int32_t GetKeyType() const
+    {
+        return keyType_;
+    }
+    KeyCode GetKeyCode() const
+    {
+        return keyCode_;
+    }
+    const char* GetKeyText() const
+    {
+        return keyText_;
+    }
+    int32_t GetKeySource() const
+    {
+        return keySource_;
+    }
+    int32_t GetMetaKey() const
+    {
+        return metakey_;
+    }
+
+private:
+    int32_t keyType_ = 0;
+    KeyCode keyCode_{KeyCode::UNKNOWN};
+    const char* keyText_ = nullptr;
+    int32_t keySource_ = 0;
+    int32_t metakey_ = 0;
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H

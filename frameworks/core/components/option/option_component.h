@@ -27,11 +27,6 @@
 
 namespace OHOS::Ace {
 
-enum class ShowInNavigationBar {
-    SHOW = 0,
-    POPUP,
-};
-
 class OptionComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(OptionComponent, ComponentGroup);
 
@@ -95,15 +90,6 @@ public:
     void SetFocused(bool value)
     {
         focused_ = value;
-    }
-
-    bool GetHovered() const
-    {
-        return hovered_;
-    }
-    void SetHovered(bool value)
-    {
-        hovered_ = value;
     }
 
     bool GetFocusable() const
@@ -354,7 +340,6 @@ private:
     bool selected_ = false;
     bool clicked_ = false;
     bool focused_ = false;
-    bool hovered_ = false;
     bool selectable_ = true;
     std::string value_;
     ShowInNavigationBar showInNavigationBar_ = ShowInNavigationBar::SHOW;
@@ -363,7 +348,7 @@ private:
     std::function<void(std::size_t)> clickedCallback_;
     std::function<void(std::size_t)> modifiedCallback_;
     std::string lastText_;
-    ComposeId id_;
+    ComposeId id_ = "-1";
     EventMarker clickEvent_;
     EventMarker clickEventForToolBarItem_;
 

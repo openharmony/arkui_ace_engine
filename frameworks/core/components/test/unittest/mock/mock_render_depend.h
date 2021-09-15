@@ -24,6 +24,7 @@
 #include "core/common/window.h"
 #include "core/components/box/box_component.h"
 #include "core/components/box/render_box.h"
+#include "core/components/clock/render_clock.h"
 #include "core/components/dialog_modal/dialog_modal_component.h"
 #include "core/components/dialog_modal/dialog_modal_element.h"
 #include "core/components/display/render_display.h"
@@ -34,7 +35,7 @@
 #include "core/components/semi_modal/semi_modal_component.h"
 #include "core/components/semi_modal/semi_modal_element.h"
 #include "core/components/stack/render_stack.h"
-#include "core/components/swiper/swiper_component.h"
+#include "core/components/swiper/render_swiper.h"
 #include "core/components/test/json/json_frontend.h"
 #include "core/components/text/render_text.h"
 #include "core/components/transform/render_transform.h"
@@ -90,7 +91,12 @@ public:
 
     Size Measure() override
     {
-        return Size(0.0, 0.0);
+        return Size(1080.1, 0.0);
+    }
+
+    int32_t GetTouchPosition(const Offset& offset) override
+    {
+        return 0;
     }
 };
 
@@ -155,6 +161,8 @@ class MockEventHandler : public AceEventHandler {
     void HandleSyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info, bool& result) override {};
     void HandleSyncEvent(const EventMarker& eventMarker, const std::string& param, std::string& result) override {};
     void HandleSyncEvent(const EventMarker& eventMarker, const KeyEvent& keyEvent, bool& result) override {};
+    void HandleSyncEvent(
+        const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId) override {};
 };
 
 class MockRenderBox : public RenderBox {};
@@ -177,6 +185,11 @@ RefPtr<PipelineContext> RenderTestUtils::GetMockPipelineContext(const RefPtr<Fro
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     return AceType::MakeRefPtr<PipelineContext>(
         std::move(window), taskExecutor, assetManager, resRegister, frontend, 0);
+}
+
+RefPtr<RenderContext> RenderContext::Create()
+{
+    return AceType::MakeRefPtr<MockRenderContext>();
 }
 
 RefPtr<RenderNode> RenderSwiper::Create()
@@ -282,6 +295,32 @@ bool SemiModalElement::IsFullWindow() const
 void DialogModalElement::AnimateToExitApp() {}
 
 void DialogModalElement::RegisterTransitionListener() {}
+
+class MockRenderClock : public RenderClock {
+    DECLARE_ACE_TYPE(MockRenderClock, RenderClock);
+
+public:
+    MockRenderClock() = default;
+    ~MockRenderClock() override = default;
+};
+
+RefPtr<RenderNode> RenderClock::Create()
+{
+    return AceType::MakeRefPtr<MockRenderClock>();
+}
+
+class MockRenderClockHand : public RenderClockHand {
+    DECLARE_ACE_TYPE(MockRenderClockHand, RenderClockHand);
+
+public:
+    MockRenderClockHand() = default;
+    ~MockRenderClockHand() override = default;
+};
+
+RefPtr<RenderNode> RenderClockHand::Create()
+{
+    return AceType::MakeRefPtr<MockRenderClockHand>();
+}
 
 } // namespace OHOS::Ace
 

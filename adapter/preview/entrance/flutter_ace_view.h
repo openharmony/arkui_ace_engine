@@ -102,8 +102,10 @@ public:
 
     void ProcessIdleEvent(int64_t deadline);
 
-    void NotifySurfaceChanged(int32_t width, int32_t height) const
+    void NotifySurfaceChanged(int32_t width, int32_t height)
     {
+        width_ = width;
+        height_ = height;
         if (viewChangeCallback_) {
             viewChangeCallback_(width, height);
         }
@@ -130,18 +132,6 @@ public:
         }
     }
 
-    void NotifyViewDestroyed(ViewReleaseCallback&& callback)
-    {
-        if (viewDestoryCallback_) {
-            viewDestoryCallback_(std::move(callback));
-        }
-    }
-
-    void RegisterViewDestroyCallback(ViewDestoryCallback&& callback) override
-    {
-        viewDestoryCallback_ = std::move(callback);
-    }
-
     // Use to receive event from glfw window
     bool HandleTouchEvent(std::unique_ptr<flutter::PointerDataPacket> packet) override;
 
@@ -155,6 +145,7 @@ public:
 
     std::unique_ptr<DrawDelegate> GetDrawDelegate() override;
     std::unique_ptr<PlatformWindow> GetPlatformWindow() override;
+    const void* GetNativeWindowById(uint64_t textureId) override;
 
 private:
     int32_t instanceId_ = 0;
@@ -172,7 +163,6 @@ private:
     IdleCallback idleCallback_;
     KeyEventCallback keyEventCallback_;
     KeyEventRecognizer keyEventRecognizer_;
-    ViewDestoryCallback viewDestoryCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(FlutterAceView);
 };

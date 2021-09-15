@@ -23,23 +23,47 @@
 
 namespace OHOS::Ace::Framework {
 
-JSValue QJSTouchFunction::createTouchInfo(const TouchCallBackInfo& touchInfo)
+JSValue QJSTouchFunction::createTouchInfo(const TouchLocationInfo& touchInfo)
 {
     JSValue touchInfoObj = JS_NewObject(ctx_);
-    JS_SetPropertyStr(ctx_, touchInfoObj, "type", JS_NewFloat64(ctx_, static_cast<int32_t>(touchInfo.GetTouchType())));
-    JS_SetPropertyStr(ctx_, touchInfoObj, "screenX", JS_NewFloat64(ctx_, touchInfo.GetScreenX()));
-    JS_SetPropertyStr(ctx_, touchInfoObj, "screenY", JS_NewFloat64(ctx_, touchInfo.GetScreenY()));
-    JS_SetPropertyStr(ctx_, touchInfoObj, "x", JS_NewFloat64(ctx_, touchInfo.GetLocalX()));
-    JS_SetPropertyStr(ctx_, touchInfoObj, "y", JS_NewFloat64(ctx_, touchInfo.GetLocalY()));
-    JS_SetPropertyStr(ctx_, touchInfoObj, "timestamp",
-        JS_NewFloat64(ctx_, static_cast<double>(touchInfo.GetTimeStamp().time_since_epoch().count())));
+    const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
+    const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
+    JS_SetPropertyStr(ctx_, touchInfoObj, "globalX", JS_NewFloat64(ctx_, globalLocation.GetX()));
+    JS_SetPropertyStr(ctx_, touchInfoObj, "globalY", JS_NewFloat64(ctx_, globalLocation.GetY()));
+    JS_SetPropertyStr(ctx_, touchInfoObj, "localX", JS_NewFloat64(ctx_, localLocation.GetX()));
+    JS_SetPropertyStr(ctx_, touchInfoObj, "localY", JS_NewFloat64(ctx_, localLocation.GetY()));
     return touchInfoObj;
 }
 
-void QJSTouchFunction::execute(const TouchCallBackInfo& info)
+JSValue QJSTouchFunction::createJSEventInfo(const TouchEventInfo& info)
+{
+    JSValue eventObj = JS_NewObject(ctx_);
+    JSValue touchArr = JS_NewArray(ctx_);
+    JSValue changeTouchArr = JS_NewArray(ctx_);
+
+    const std::list<TouchLocationInfo>& touchList = info.GetTouches();
+    uint32_t idx = 0;
+    for (const TouchLocationInfo& location : touchList) {
+        JSValue element = createTouchInfo(location);
+        JS_SetPropertyUint32(ctx_, touchArr, idx++, element);
+    }
+    JS_SetPropertyStr(ctx_, eventObj, "touches", touchArr);
+
+    idx = 0; // reset index counter
+    const std::list<TouchLocationInfo>& changeTouch = info.GetChangedTouches();
+    for (const TouchLocationInfo& change : changeTouch) {
+        JSValue element = createTouchInfo(change);
+        JS_SetPropertyUint32(ctx_, changeTouchArr, idx++, element);
+    }
+    JS_SetPropertyStr(ctx_, eventObj, "changedTouches", changeTouchArr);
+
+    return eventObj;
+}
+
+void QJSTouchFunction::execute(const TouchEventInfo& info)
 {
     LOGD("QJSTouchFunction: eventType[%s]", info.GetType().c_str());
-    JSValue param = createTouchInfo(info);
+    JSValue param = createJSEventInfo(info);
 
     if (JS_IsException(param)) {
         QjsUtils::JsStdDumpErrorAce(ctx_);

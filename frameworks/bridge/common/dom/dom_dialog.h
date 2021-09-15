@@ -56,6 +56,7 @@ private:
     Dimension marginBottom_ = 0.0_vp;
     bool customizedMargin_ = false;
     bool isShow_ = true;
+    bool dragable_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

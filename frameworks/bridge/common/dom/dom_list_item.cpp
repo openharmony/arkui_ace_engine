@@ -146,10 +146,13 @@ void DOMListItem::SetCardTransitionEffect()
     if (!transformComponent_) {
         transformComponent_ = AceType::MakeRefPtr<TransformComponent>();
     }
-    if (!hasClickEffect_) {
+    if (!declaration_) {
+        return;
+    }
+    if (!declaration_->HasClickEffect()) {
         transformComponent_->SetClickSpringEffectType(ClickSpringEffectType::MEDIUM);
     }
-    if (!hasTransitionAnimation_) {
+    if (!declaration_->HasTransitionAnimation()) {
         transformComponent_->SetTransitionEffect(TransitionEffect::UNFOLD);
         if (listItemComponent_) {
             listItemComponent_->SetTransitionEffect(TransitionEffect::UNFOLD);
@@ -166,6 +169,8 @@ bool DOMListItem::SetSpecializedStyle(const std::pair<std::string, std::string>&
                            DOMListItem& listItem) { listItem.flexCrossAlign_ = ConvertStrToFlexAlign(val); } },
         { DOM_ALIGN_SELF, [](const std::string& val,
                          DOMListItem& listItem) { listItem.alignSelf_ = ConvertStrToFlexAlign(val); } },
+        { DOM_LISTITEM_CLICK_COLOR,
+            [](const std::string& val, DOMListItem& listItem) { listItem.clickColor_ = listItem.ParseColor(val); } },
         { DOM_FLEX_DIRECTION, [](const std::string& val,
                               DOMListItem& listItem) { listItem.flexDirection_ = ConvertStrToFlexDirection(val); } },
         { DOM_JUSTIFY_CONTENT, [](const std::string& val,
@@ -226,17 +231,12 @@ bool DOMListItem::SetSpecializedStyle(const std::pair<std::string, std::string>&
 bool DOMListItem::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
     LOGD("DOMListItem AddEvent");
-    if (event == DOM_CLICK) {
-        clickEventId_ = EventMarker(GetNodeIdForEvent(), event, pageId);
-        listItemComponent_->SetClickEventId(clickEventId_);
-        return true;
-    } else if (event == DOM_LIST_ITEM_EVENT_STICKY) {
+    if (event == DOM_LIST_ITEM_EVENT_STICKY) {
         stickyEventId_ = EventMarker(GetNodeIdForEvent(), event, pageId);
         listItemComponent_->SetStickyEventId(stickyEventId_);
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 void DOMListItem::AddListItem(const RefPtr<DOMNode>& node, int32_t slot)
@@ -330,10 +330,15 @@ void DOMListItem::ResetInitializedStyle()
 
     if (SystemProperties::GetDeviceType() == DeviceType::TV && boxComponent_) {
         RefPtr<ListItemTheme> itemTheme = GetTheme<ListItemTheme>();
-        if (itemTheme) {
-            double margin = itemTheme->GetItemMarginInPercent();
-            boxComponent_->SetMargin(Edge(GetMarginLeft(), GetMarginTop(), GetMarginRight(), GetMarginBottom()),
-                                     Edge(margin, margin, margin, margin, DimensionUnit::PERCENT));
+        if (itemTheme && declaration_) {
+            Edge padding;
+            auto& style = static_cast<CommonPaddingStyle&>(declaration_->GetStyle(StyleTag::COMMON_PADDING_STYLE));
+            if (style.IsValid() && style.padding.IsEffective()) {
+                return;
+            }
+            // Add theme padding to item when not set customised padding.
+            double additionalPadding = itemTheme->GetItemPaddingInPercent();
+            boxComponent_->SetPadding(Edge(), Edge(Dimension(additionalPadding, DimensionUnit::PERCENT)));
         }
     }
 }
@@ -358,10 +363,14 @@ void DOMListItem::PrepareSpecializedComponent()
     listItemComponent_->SetTopRightRadius(topRightRadius_);
     listItemComponent_->SetBottomLeftRadius(bottomLeftRadius_);
     listItemComponent_->SetBottomRightRadius(bottomRightRadius_);
+    if (clickColor_ != Color::TRANSPARENT) {
+        listItemComponent_->SetClickColor(clickColor_);
+    }
     listItemComponent_->SetAlignSelf(alignSelf_);
     if (!indexKey_.empty()) {
         listItemComponent_->SetIndexKey(indexKey_);
     }
+    listItemComponent_->SetClickEventId(GetClickId());
 
     if (flexComponent_) {
         flexComponent_->SetDirection(flexDirection_);
@@ -420,13 +429,10 @@ RefPtr<Component> DOMListItem::CompositeSpecializedComponent(const std::vector<R
             listItemComponent_->SetChild(component);
         }
     }
-    hasPositionProcessed_ = true;
+    if (declaration_) {
+        declaration_->SetHasPositionProcessed(true);
+    }
     return listItemComponent_;
-}
-
-const EventMarker& DOMListItem::GetClickId()
-{
-    return clickEventId_;
 }
 
 } // namespace OHOS::Ace::Framework

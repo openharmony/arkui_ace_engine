@@ -26,9 +26,9 @@ namespace {
 const char SLASH = '/';
 const char SLASHSTR[] = "/";
 
-bool ParseFileUri(const std::string& fileUri, std::string& assetsFilePath)
+bool ParseFileUri(const RefPtr<AssetManager>& assetManager, const std::string& fileUri, std::string& assetsFilePath)
 {
-    if (fileUri.empty() || (fileUri.length() > PATH_MAX)) {
+    if (!assetManager || fileUri.empty() || (fileUri.length() > PATH_MAX)) {
         return false;
     }
 
@@ -39,7 +39,7 @@ bool ParseFileUri(const std::string& fileUri, std::string& assetsFilePath)
         fileName = fileUri;
     } else {
         fileName = fileUri.substr(slashPos + 1);
-        filePath = fileUri.substr(0, slashPos + 1);
+        filePath = fileUri.substr(0, slashPos);
     }
 
     if (StartWith(filePath, SLASHSTR)) {
@@ -47,6 +47,7 @@ bool ParseFileUri(const std::string& fileUri, std::string& assetsFilePath)
     }
 
     std::vector<std::string> files;
+    //assetManager->GetAssetList(filePath, files);
     if (!AceApplicationInfo::GetInstance().GetFiles(filePath, files)) {
         LOGE("ParseFileUri GetFiles failed.");
         return false;
@@ -71,7 +72,7 @@ template<typename T>
 bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content)
 {
     std::string targetFilePath;
-    if (!ParseFileUri(fileUri, targetFilePath)) {
+    if (!ParseFileUri(assetManager_, fileUri, targetFilePath)) {
         LOGE("GetResourceData parse file uri failed.");
         return false;
     }

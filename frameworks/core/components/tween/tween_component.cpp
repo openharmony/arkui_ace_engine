@@ -45,24 +45,24 @@ const TweenOption& TweenComponent::GetCustomTweenOption() const
     return optionCustom_;
 }
 
-void TweenComponent::SetTweenOperation(const TweenOperation& operation)
+void TweenComponent::SetAnimationOperation(const AnimationOperation& operation)
 {
     SetOperationCssChanged(true);
     operationCss_ = operation;
 }
 
-const TweenOperation& TweenComponent::GetTweenOperation() const
+const AnimationOperation& TweenComponent::GetAnimationOperation() const
 {
     return operationCss_;
 }
 
-void TweenComponent::SetCustomTweenOperation(const TweenOperation& operation)
+void TweenComponent::SetCustomAnimationOperation(const AnimationOperation& operation)
 {
     SetOperationCustomChanged(true);
     operationCustom_ = operation;
 }
 
-const TweenOperation& TweenComponent::GetCustomTweenOperation() const
+const AnimationOperation& TweenComponent::GetCustomAnimationOperation() const
 {
     return operationCustom_;
 }

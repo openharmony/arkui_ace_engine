@@ -30,7 +30,6 @@ std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const s
     auto clearImageDataCallback = [wp = AceType::WeakClaim(this), picName = name]() {
         auto sharedImageManager = wp.Upgrade();
         if (!sharedImageManager) {
-            LOGW("sharedImageManager upgrade fail, picName: %{private}s", picName.c_str());
             return;
         }
         {
@@ -41,6 +40,7 @@ std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const s
             std::lock_guard<std::mutex> lockCancelableCallbackMap_(sharedImageManager->cancelableCallbackMapMutex_);
             sharedImageManager->cancelableCallbackMap_.erase(picName);
         }
+        LOGI("Done clean image data for %{private}s", picName.c_str());
     };
     return clearImageDataCallback;
 }

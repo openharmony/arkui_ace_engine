@@ -23,10 +23,11 @@
 #include "core/pipeline/base/component_group.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/element.h"
+#include "core/components_v2/common/common_def.h"
 
 namespace OHOS::Ace {
 
-class RatingComponent : public RenderComponent {
+class ACE_EXPORT RatingComponent : public RenderComponent {
     DECLARE_ACE_TYPE(RatingComponent, RenderComponent);
 
 public:
@@ -38,6 +39,7 @@ public:
 
     void SetResIdFromTheme(const RefPtr<RatingTheme>& theme);
     void SetMiniResIdFromTheme(const RefPtr<RatingTheme>& theme);
+    void SetThemeStyle(const RefPtr<RatingTheme>& theme);
 
     int32_t GetStarNum() const
     {
@@ -268,10 +270,12 @@ public:
         return starColorInactive_;
     }
 
+    ACE_DEFINE_COMPONENT_EVENT(OnChange, void(double));
+
 private:
-    int32_t starNum_ = DEFAULT_RATING_STAR_NUM;
-    double ratingScore_ = DEFAULT_RATING_SCORE;
-    double stepSize_ = DEFAULT_RATING_STEP_SIZE;
+    int32_t starNum_ = 5;
+    double ratingScore_ = 0.0;
+    double stepSize_ = 0.5;
     double designedStarAspectRatio_ = 1.0;
     Dimension width_;
     Dimension height_;

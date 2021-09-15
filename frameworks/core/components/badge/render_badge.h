@@ -40,6 +40,11 @@ public:
     virtual Size CalculateTextSize(const std::string& text, const TextStyle& textStyle,
         RefPtr<RenderText>& renderText) = 0;
 
+    const RefPtr<BadgeComponent>& GetBadgeComponent() const
+    {
+        return badge_;
+    }
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -47,16 +52,10 @@ protected:
     void InitialBadgeText();
     void UpdateBadgeText();
 
-    Color badgeColor_;
-    Color badgeTextColor_;
     double width_ = 0.0;
     double height_ = 0.0;
     Size badgeSize_;
-    Dimension badgeFontSize_;
     std::string textData_;
-    BadgePosition badgePosition_ { BadgePosition::RIGHT_TOP };
-    Edge padding_;
-    int32_t messageCount_ = 0;
     bool showMessage_ = false;
     std::function<void()> onClick_;
     RefPtr<ClickRecognizer> clickRecognizer_;
@@ -66,10 +65,6 @@ protected:
     RefPtr<BadgeComponent> badge_;
     Offset badgeChildInitialOffset_;
     double dipScale_ = 1.0;
-    Dimension badgeCircleSize_;
-    int32_t countLimit_ = 99;
-    bool badgeCircleSizeDefined_ = false;
-    std::string badgeLabel_;
 };
 
 } // namespace OHOS::Ace

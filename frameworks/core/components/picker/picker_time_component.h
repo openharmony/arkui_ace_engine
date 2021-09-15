@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-class PickerTimeComponent : public PickerBaseComponent {
+class ACE_EXPORT PickerTimeComponent : public PickerBaseComponent {
     DECLARE_ACE_TYPE(PickerTimeComponent, PickerBaseComponent);
 
 public:

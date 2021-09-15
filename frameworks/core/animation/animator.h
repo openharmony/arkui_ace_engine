@@ -54,11 +54,6 @@ public:
 
     ~Animator() override;
 
-    void SetDeclarativeAnimator(bool declarative)
-    {
-        isDeclarativeAnimator = declarative;
-    }
-
     void AttachScheduler(const WeakPtr<PipelineContext>& context);
     bool HasScheduler() const;
 
@@ -88,6 +83,9 @@ public:
 
     // fillmode used to decided the attr of last frame or first frame.
     void SetFillMode(FillMode fillMode);
+
+    // tempo is used to control speed of animation.
+    void SetTempo(float tempo);
 
     // Whether the animation should be played in reverse in turn.
     void SetAnimationDirection(AnimationDirection direction);
@@ -173,12 +171,11 @@ private:
     bool isReverse_ = false;
     bool isResume_ = false;
     bool isCurDirection_ = false;
-    bool directionChange_ = false;
+    bool toggleDirectionPending_ = false;
     Status status_ = Status::IDLE;
     int32_t controllerId_ = 0;
     static float scale_;
-    bool isLastAnimationInterrupted_ = false;
-    bool isDeclarativeAnimator = false;
+    float tempo_ = 1.0f;
     bool isBothBackwards = false;
 };
 

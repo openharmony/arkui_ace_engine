@@ -34,14 +34,21 @@ class ACE_EXPORT CardFrontend : public Frontend {
     DECLARE_ACE_TYPE(CardFrontend, Frontend);
 
 public:
+    using OnGotWindowConfigCallback = std::function<void(WindowConfig)>;
+
     CardFrontend() = default;
     ~CardFrontend() override;
 
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
+    void SetSelfTaskExectuor(const RefPtr<TaskExecutor>& taskExecutor);
+
+    void Destroy() override;
+
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
     void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
+    void ReplacePage(const std::string& url, const std::string& params) override {}
     void PushPage(const std::string& url, const std::string& params) override {}
     void AddPage(const RefPtr<AcePage>& page) override {}
     RefPtr<AcePage> GetPage(int32_t pageId) const override;
@@ -56,6 +63,7 @@ public:
     void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override {}
 
     void LoadPluginJsCode(std::string&& jsCode) const override {}
+    void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const override {}
 
     // application lifecycle.
     void UpdateState(Frontend::State state) override {}
@@ -74,7 +82,6 @@ public:
         foregroundFrontend_ = false;
     }
 
-    // TODO(maxuchu): these life cycle function needs to be completed.
     void OnActive() override {}
     void OnInactive() override {}
     bool OnStartContinuation() override
@@ -91,7 +98,7 @@ public:
     void CallRouterBack() override {}
     void OnSurfaceChanged(int32_t width, int32_t height) override;
     void DumpFrontend() const override {}
-    const WindowConfig& GetWindowConfig() const override;
+    WindowConfig& GetWindowConfig() override;
     void UpdateData(const std::string& dataList);
     void SetColorMode(ColorMode colorMode) override;
     void RebuildAllPages() override;
@@ -126,6 +133,26 @@ public:
         density_ = density;
     }
 
+    void SetNoDependentContainer()
+    {
+        noDependentContainer_ = true;
+    }
+
+    void SetPageParentElement(const RefPtr<Element>& parent)
+    {
+        parentElement_ = parent;
+    }
+
+    void AddOnGotWindowConfigCallback(const OnGotWindowConfigCallback& callback)
+    {
+        onGotWindowConfigCallback_ = callback;
+    }
+
+    void ResetPageLoadState()
+    {
+        pageLoaded_ = false;
+    }
+
 private:
     void UpdatePageData(const std::string& dataList);
     void LoadPage(const std::string& urlPath, const std::string& params);
@@ -135,6 +162,7 @@ private:
     void ParseManifest() const;
     void HandleSurfaceChanged(int32_t width, int32_t height);
     void OnMediaFeatureUpdate();
+    const RefPtr<TaskExecutor>& GetTaskExecutor() const;
 
     ColorMode colorMode_ = ColorMode::LIGHT;
     FrontendType type_ = FrontendType::JS_CARD;
@@ -148,10 +176,14 @@ private:
 
     mutable std::once_flag onceFlag_;
     RefPtr<TaskExecutor> taskExecutor_;
+    RefPtr<TaskExecutor> selfTaskExecutor_;
     RefPtr<AceEventHandler> eventHandler_;
     RefPtr<Framework::CardFrontendDelegate> delegate_;
     Framework::PageIdPool pageIdPool_;
     RefPtr<Framework::JsCardParser> parseJsCard_;
+    RefPtr<Element> parentElement_;
+    bool noDependentContainer_ = false;
+    OnGotWindowConfigCallback onGotWindowConfigCallback_;
 };
 
 class CardEventHandler : public AceEventHandler {
@@ -210,6 +242,11 @@ public:
     }
 
     void HandleSyncEvent(const EventMarker& eventMarker, const std::string& param, std::string& result) override
+    {
+        LOGW("card event handler does not support this event type!");
+    }
+
+    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId) override
     {
         LOGW("card event handler does not support this event type!");
     }

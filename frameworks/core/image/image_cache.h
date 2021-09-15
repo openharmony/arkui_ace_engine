@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <list>
 #include <mutex>
+#include <shared_mutex>
 #include <unordered_map>
 #include <vector>
 
@@ -29,13 +30,31 @@
 namespace OHOS::Ace {
 
 struct CachedImage;
-
+class ImageObject;
+template<typename T>
 struct CacheNode {
-    CacheNode(const std::string& key, const std::shared_ptr<CachedImage>& image)
-        : imageKey(key), imagePtr(image)
+    CacheNode(const std::string& key, const T& obj)
+        : cacheKey(key), cacheObj(obj)
     {}
-    std::string imageKey;
-    std::shared_ptr<CachedImage> imagePtr;
+    std::string cacheKey;
+    T cacheObj;
+};
+
+struct CachedImageData : public AceType {
+    DECLARE_ACE_TYPE(CachedImageData, AceType);
+public:
+    CachedImageData() = default;
+    virtual ~CachedImageData() = default;
+    virtual size_t GetSize() = 0;
+    virtual const uint8_t* GetData() = 0;
+};
+
+struct CacheImageDataNode {
+    CacheImageDataNode(const std::string& key, const RefPtr<CachedImageData>& imageData)
+        : imageDataKey(key), imageDataPtr(imageData)
+    {}
+    std::string imageDataKey;
+    RefPtr<CachedImageData> imageDataPtr;
 };
 
 struct FileInfo {
@@ -62,19 +81,26 @@ public:
     ~ImageCache() = default;
     void CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image);
     std::shared_ptr<CachedImage> GetCacheImage(const std::string& key);
-    static void SetCacheFileInfo();
-    static void WriteCacheFile(const std::string& url, std::vector<uint8_t>& byteData);
 
-    void RemoveCachedImage(const std::string& key)
-    {
-        std::scoped_lock lock(imageCacheMutex_, cacheListMutex_);
-        cacheList_.remove_if([&key](const CacheNode& cacheNode) { return cacheNode.imageKey == key; });
-        imageCache_.erase(key);
-    }
+    void CacheImageData(const std::string& key, const RefPtr<CachedImageData>& imageData);
+    RefPtr<CachedImageData> GetCacheImageData(const std::string& key);
+
+    void CacheImgObj(const std::string& key, const RefPtr<ImageObject>& imgObj);
+    RefPtr<ImageObject> GetCacheImgObj(const std::string& key);
+
+    static void SetCacheFileInfo();
+    static void WriteCacheFile(const std::string& url, const void * const data, const size_t size);
 
     void SetCapacity(size_t capacity)
     {
+        LOGI("Set Capacity : %{public}d", static_cast<int32_t>(capacity));
         capacity_ = capacity;
+    }
+
+    void SetDataCacheLimit(size_t sizeLimit)
+    {
+        LOGI("Set data size cache limit : %{public}d", static_cast<int32_t>(sizeLimit));
+        dataSizeLimit_ = sizeLimit;
     }
 
     size_t GetCapacity() const
@@ -90,7 +116,7 @@ public:
 
     static void SetImageCacheFilePath(const std::string& cacheFilePath)
     {
-        std::lock_guard<std::mutex> lock(cacheFilePathMutex_);
+        std::unique_lock<std::shared_mutex> lock(cacheFilePathMutex_);
         if (cacheFilePath_.empty()) {
             cacheFilePath_ = cacheFilePath;
         }
@@ -98,13 +124,13 @@ public:
 
     static std::string GetImageCacheFilePath()
     {
-        std::lock_guard<std::mutex> lock(cacheFilePathMutex_);
+        std::shared_lock<std::shared_mutex> lock(cacheFilePathMutex_);
         return cacheFilePath_;
     }
 
-    static std::string GetNetworkImageCacheFilePath(const std::string& url)
+    static std::string GetImageCacheFilePath(const std::string& url)
     {
-        std::lock_guard<std::mutex> lock(cacheFilePathMutex_);
+        std::shared_lock<std::shared_mutex> lock(cacheFilePathMutex_);
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         return cacheFilePath_ + "/" + std::to_string(std::hash<std::string> {}(url));
 #elif defined(MAC_PLATFORM)
@@ -150,18 +176,51 @@ public:
 
     virtual void Clear() = 0;
 
+    static void Purge();
+
 protected:
     static void ClearCacheFile(const std::vector<std::string>& removeFiles);
 
+    template<typename T>
+    static void CacheWithCountLimitLRU(
+        const std::string& key,
+        const T& cacheObj,
+        std::list<CacheNode<T>>& cacheList,
+        std::unordered_map<std::string, typename std::list<CacheNode<T>>::iterator>& cache,
+        const std::atomic<size_t>& capacity);
+
+    template<typename T>
+    static T GetCacheObjWithCountLimitLRU(
+        const std::string& key,
+        std::list<CacheNode<T>>& cacheList,
+        std::unordered_map<std::string, typename std::list<CacheNode<T>>::iterator>& cache);
+
+    bool processImageDataCacheInner(size_t dataSize);
+
     mutable std::mutex cacheListMutex_;
-    std::list<CacheNode> cacheList_;
+    std::list<CacheNode<std::shared_ptr<CachedImage>>> cacheList_;
 
     std::mutex imageCacheMutex_;
-    std::unordered_map<std::string, std::list<CacheNode>::iterator> imageCache_;
+    std::unordered_map<std::string, std::list<CacheNode<std::shared_ptr<CachedImage>>>::iterator> imageCache_;
 
-    std::atomic<size_t> capacity_ = 80; // by default memory cache can store 80 images.
+    std::atomic<size_t> capacity_ = 0; // by default memory cache can store 0 images.
 
-    static std::mutex cacheFilePathMutex_;
+    mutable std::mutex dataCacheListMutex_;
+    std::list<CacheImageDataNode> dataCacheList_;
+
+    std::mutex imageDataCacheMutex_;
+    std::unordered_map<std::string, std::list<CacheImageDataNode>::iterator> imageDataCache_;
+
+    std::atomic<size_t> dataSizeLimit_ = 0; // by default, image data before decoded cache is 0 MB.;
+    std::atomic<size_t> curDataSize_ = 0;
+
+    std::mutex cacheImgObjListMutex_;
+    std::list<CacheNode<RefPtr<ImageObject>>> cacheImgObjList_;
+    std::mutex imgObjCacheMutex_;
+    std::unordered_map<std::string, std::list<CacheNode<RefPtr<ImageObject>>>::iterator> imgObjCache_;
+    std::atomic<size_t> imgObjCapacity_ = 2000; // imgObj is cached after clear image data.
+
+    static std::shared_mutex cacheFilePathMutex_;
     static std::string cacheFilePath_;
 
     static std::atomic<size_t> cacheFileLimit_;

@@ -20,13 +20,21 @@
 #include "base/geometry/offset.h"
 #include "base/log/event_report.h"
 #include "base/utils/utils.h"
+#include "core/animation/property_animatable_helper.h"
 #include "core/components/box/box_component.h"
+#include "core/components/root/root_element.h"
 #include "core/components/text_field/render_text_field.h"
+#include "core/gestures/long_press_recognizer.h"
+#include "core/gestures/pan_recognizer.h"
+#include "core/gestures/sequenced_recognizer.h"
 
 namespace OHOS::Ace {
 namespace {
 
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
+constexpr int32_t DEFAULT_FINGERS = 1;
+constexpr int32_t DEFAULT_DURATION = 150;
+constexpr int32_t DEFAULT_DISTANCE = 0;
 
 }; // namespace
 
@@ -52,19 +60,236 @@ void RenderBox::Update(const RefPtr<Component>& component)
 {
     const RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(component);
     if (box) {
+        boxComponent_ = box;
         RenderBoxBase::Update(component);
-        // When declarative animation is active for this renderbox,
-        // the animatbale properties are set by PropertyAnimatable::SetProperty.
-        // And currently declarative api allow only animating
-        // PROPERTY_BACK_DECORATION_COLOR
-        if (!IsDeclarativeAnimationActive()) {
-            backDecoration_ = box->GetBackDecoration();
-        }
-        frontDecoration_ = box->GetFrontDecoration();
-        overflow_ = box->GetOverflow();
+        UpdateBackDecoration(box->GetBackDecoration());
+        UpdateFrontDecoration(box->GetFrontDecoration());
         animationType_ = box->GetMouseAnimationType();
-
         MarkNeedLayout();
+
+        auto tapGesture = box->GetOnClick();
+        if (tapGesture) {
+            onClick_ = tapGesture->CreateRecognizer(context_);
+            onClick_->SetIsExternalGesture(true);
+        }
+
+        onDrag_ = box->GetOnDragId();
+        onDragEnter_ = box->GetOnDragEnterId();
+        onDragMove_ = box->GetOnDragMoveId();
+        onDragLeave_ = box->GetOnDragLeaveId();
+        onDrop_ = box->GetOnDropId();
+        if (onDrag_) {
+            CreateDragDropRecognizer();
+        }
+
+        if (!box->GetOnDomDragEnter().IsEmpty()) {
+            onDomDragEnter_ = AceAsyncEvent<void(const DragUpdateInfo&)>::Create(box->GetOnDomDragEnter(), context_);
+        }
+        if (!box->GetOnDomDragOver().IsEmpty()) {
+            onDomDragOver_ = AceAsyncEvent<void(const DragUpdateInfo&)>::Create(box->GetOnDomDragOver(), context_);
+        }
+        if (!box->GetOnDomDragLeave().IsEmpty()) {
+            onDomDragLeave_ = AceAsyncEvent<void(const DragUpdateInfo&)>::Create(box->GetOnDomDragLeave(), context_);
+        }
+        if (!box->GetOnDomDragDrop().IsEmpty()) {
+            onDomDragDrop_ = AceAsyncEvent<void(const DragEndInfo&)>::Create(box->GetOnDomDragDrop(), context_);
+        }
+
+        auto context = GetContext().Upgrade();
+        if (onDrag_ || onDrop_) {
+            context->InitDragListener();
+        }
+
+        auto gestures = box->GetGestures();
+        UpdateGestureRecognizer(gestures);
+    }
+}
+
+void RenderBox::CreateDragDropRecognizer()
+{
+    if (dragDropGesture_) {
+        return;
+    }
+
+    auto context = GetContext();
+    auto longPressRecognizer =
+        AceType::MakeRefPtr<OHOS::Ace::LongPressRecognizer>(context, DEFAULT_DURATION, DEFAULT_FINGERS, false);
+    PanDirection panDirection;
+    auto panRecognizer =
+        AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context, DEFAULT_FINGERS, panDirection, DEFAULT_DISTANCE);
+    panRecognizer->SetOnActionStart([context, onDrag = onDrag_](const GestureEvent& info) {
+        if (onDrag) {
+            auto pipelineContext = context.Upgrade();
+            RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+            RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+            event->SetPasteData(pasteData);
+            event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+            event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+            onDrag(event);
+        }
+    });
+    panRecognizer->SetOnActionUpdate(
+        [weakRenderBox = AceType::WeakClaim<RenderBox>(this), context = context](const GestureEvent& info) {
+            auto pipelineContext = context.Upgrade();
+            RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+            RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+            event->SetPasteData(pasteData);
+            event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+            event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+
+            auto renderBox = weakRenderBox.Upgrade();
+            if (!renderBox) {
+                return;
+            }
+            auto targetRenderBox = renderBox->FindTargetRenderBox(context.Upgrade(), info);
+            auto preTargetRenderBox = renderBox->GetPreTargetRenderBox();
+            if (preTargetRenderBox == targetRenderBox) {
+                if (targetRenderBox && targetRenderBox->GetOnDragMove()) {
+                    (targetRenderBox->GetOnDragMove())(event);
+                }
+                return;
+            }
+            if (preTargetRenderBox && preTargetRenderBox->GetOnDragLeave()) {
+                (preTargetRenderBox->GetOnDragLeave())(event);
+            }
+            if (targetRenderBox && targetRenderBox->GetOnDragEnter()) {
+                (targetRenderBox->GetOnDragEnter())(event);
+            }
+            renderBox->SetPreTargetRenderBox(targetRenderBox);
+        });
+    panRecognizer->SetOnActionEnd(
+        [weakRenderBox = AceType::WeakClaim<RenderBox>(this), context = context](const GestureEvent& info) {
+            auto pipelineContext = context.Upgrade();
+            RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+            RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+            event->SetPasteData(pasteData);
+            event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+            event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+
+            auto renderBox = weakRenderBox.Upgrade();
+            if (!renderBox) {
+                return;
+            }
+            ACE_DCHECK(renderBox->GetPreTargetRenderBox() == renderBox->FindTargetRenderBox(context.Upgrade(), info));
+            auto targetRenderBox = renderBox->GetPreTargetRenderBox();
+            if (!targetRenderBox) {
+                return;
+            }
+            if (targetRenderBox->GetOnDrop()) {
+                (targetRenderBox->GetOnDrop())(event);
+            }
+            renderBox->SetPreTargetRenderBox(nullptr);
+        });
+    panRecognizer->SetOnActionCancel([weakRenderBox = AceType::WeakClaim<RenderBox>(this)]() {
+            auto renderBox = weakRenderBox.Upgrade();
+            if (!renderBox) {
+                return;
+            }
+            renderBox->SetPreTargetRenderBox(nullptr);
+        });
+    std::vector<RefPtr<GestureRecognizer>> recognizers {longPressRecognizer, panRecognizer};
+    dragDropGesture_ = AceType::MakeRefPtr<OHOS::Ace::SequencedRecognizer>(GetContext(), recognizers);
+    dragDropGesture_->SetIsExternalGesture(true);
+}
+
+RefPtr<RenderBox> RenderBox::FindTargetRenderBox(const RefPtr<PipelineContext> context, const GestureEvent& info)
+{
+    if (!context) {
+        return nullptr;
+    }
+
+    auto pageRenderNode = context->GetLastPageRender();
+    if (!pageRenderNode) {
+        return nullptr;
+    }
+
+    auto targetRenderNode = pageRenderNode->FindDropChild(info.GetGlobalPoint(), info.GetGlobalPoint());
+    if (!targetRenderNode) {
+        return nullptr;
+    }
+    return AceType::DynamicCast<RenderBox>(targetRenderNode);
+}
+
+void RenderBox::UpdateBackDecoration(const RefPtr<Decoration>& newDecoration)
+{
+    if (!newDecoration) {
+        backDecoration_ = newDecoration;
+        return;
+    }
+
+    if (!backDecoration_) {
+        LOGD("backDecoration_ is null.");
+        backDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+
+    backDecoration_->SetAnimationColor(newDecoration->GetAnimationColor());
+    backDecoration_->SetArcBackground(newDecoration->GetArcBackground());
+    backDecoration_->SetBlurRadius(newDecoration->GetBlurRadius());
+    backDecoration_->SetBorder(newDecoration->GetBorder());
+    backDecoration_->SetGradient(newDecoration->GetGradient());
+    backDecoration_->SetGradientBorderImage(newDecoration->GetGradientBorderImage());
+    backDecoration_->SetImage(newDecoration->GetImage());
+    backDecoration_->SetBorderImage(newDecoration->GetBorderImage());
+    backDecoration_->SetPadding(newDecoration->GetPadding());
+    backDecoration_->SetWindowBlurProgress(newDecoration->GetWindowBlurProgress());
+    backDecoration_->SetWindowBlurStyle(newDecoration->GetWindowBlurStyle());
+    backDecoration_->SetShadows(newDecoration->GetShadows());
+    backDecoration_->SetBackgroundColor(newDecoration->GetBackgroundColor());
+    backDecoration_->SetGrayScale(newDecoration->GetGrayScale());
+    backDecoration_->SetBrightness(newDecoration->GetBrightness());
+    backDecoration_->SetContrast(newDecoration->GetContrast());
+    backDecoration_->SetSaturate(newDecoration->GetSaturate());
+}
+
+void RenderBox::UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration)
+{
+    if (!newDecoration) {
+        frontDecoration_ = newDecoration;
+        return;
+    }
+
+    if (!frontDecoration_) {
+        LOGD("frontDecoration_ is null.");
+        frontDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+
+    frontDecoration_->SetBlurRadius(newDecoration->GetBlurRadius());
+    frontDecoration_->SetBorder(newDecoration->GetBorder());
+    frontDecoration_->SetImage(newDecoration->GetImage());
+    frontDecoration_->SetShadows(newDecoration->GetShadows());
+    frontDecoration_->SetBackgroundColor(newDecoration->GetBackgroundColor());
+}
+
+void RenderBox::UpdateStyleFromRenderNode(PropertyAnimatableType type)
+{
+    // Operator map for styles
+    static const std::unordered_map<PropertyAnimatableType, void (*)(RenderBox&)> operators = {
+        // Set width and height
+        { PropertyAnimatableType::PROPERTY_WIDTH,
+            [](RenderBox& node) {
+                auto box = node.boxComponent_.Upgrade();
+                if (box) {
+                    box->SetWidth(node.width_);
+                }
+            } },
+        { PropertyAnimatableType::PROPERTY_HEIGHT,
+            [](RenderBox& node) {
+                auto box = node.boxComponent_.Upgrade();
+                if (box) {
+                    box->SetHeight(node.height_);
+                }
+            } },
+        { PropertyAnimatableType::PROPERTY_BACK_DECORATION_COLOR,
+            [](RenderBox& node) {
+                auto box = node.boxComponent_.Upgrade();
+                if (box) {
+                    box->SetColor(node.GetColor());
+                }
+            } },
+    };
+    auto operatorIter = operators.find(type);
+    if (operatorIter != operators.end()) {
+        operatorIter->second(*this);
     }
 }
 
@@ -96,8 +321,13 @@ void RenderBox::OnPaintFinish()
     }
 
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
-    Size size = GetLayoutSize() * viewScale;
-    Offset globalOffset = GetGlobalOffset() * viewScale;
+    Size size = GetPaintSize() * viewScale;
+    Offset globalOffset = (GetGlobalOffsetExternal() + margin_.GetOffset()) * viewScale;
+    node->SetMarginSize(margin_.GetLayoutSize() * viewScale);
+    node->SetWidth(size.Width());
+    node->SetHeight(size.Height());
+    node->SetLeft(globalOffset.GetX());
+    node->SetTop(globalOffset.GetY());
 #else
     Size size = paintSize_;
     Offset globalOffset = GetGlobalOffset();
@@ -123,12 +353,23 @@ void RenderBox::OnPaintFinish()
         auto mananger = context->GetAccessibilityManager();
         mananger->RemoveAccessibilityNodes(node);
     }
-    return;
 #endif
-    node->SetWidth(size.Width());
-    node->SetHeight(size.Height());
-    node->SetLeft(globalOffset.GetX());
-    node->SetTop(globalOffset.GetY());
+}
+
+Offset RenderBox::GetGlobalOffsetExternal() const
+{
+    auto renderNode = GetParent().Upgrade();
+    auto offset = renderNode ? GetPosition() + renderNode->GetGlobalOffsetExternal() : GetPosition();
+    offset += alignOffset_;
+    return offset;
+}
+
+Offset RenderBox::GetGlobalOffset() const
+{
+    auto renderNode = GetParent().Upgrade();
+    auto offset = renderNode ? GetPosition() + renderNode->GetGlobalOffset() : GetPosition();
+    offset += alignOffset_;
+    return offset;
 }
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
@@ -143,15 +384,15 @@ void RenderBox::CalculateScale(RefPtr<AccessibilityNode> node, Offset& globalOff
         // parent and children are scaled by the center point of parent.
         auto currentOffset = globalOffset;
         auto currentSize = size;
-        auto boxCenter = Offset(currentOffset.GetX() + currentSize.Width() / 2.0,
-                                currentOffset.GetY() + currentSize.Height() / 2.0);
+        auto boxCenter =
+            Offset(currentOffset.GetX() + currentSize.Width() / 2.0, currentOffset.GetY() + currentSize.Height() / 2.0);
         if (boxCenter == scaleCenter) {
             globalOffset = Offset(currentSize.Width() * (1 - scaleFactor) / 2.0 + currentOffset.GetX(),
-                                  currentSize.Height() * (1 - scaleFactor) / 2.0 + currentOffset.GetY());
+                currentSize.Height() * (1 - scaleFactor) / 2.0 + currentOffset.GetY());
         } else {
             auto center = scaleCenter;
             globalOffset = Offset(scaleFactor * currentOffset.GetX() + (1 - scaleFactor) * center.GetX(),
-                                  scaleFactor * currentOffset.GetY() + (1 - scaleFactor) * center.GetY());
+                scaleFactor * currentOffset.GetY() + (1 - scaleFactor) * center.GetY());
         }
         size = size * scaleFactor;
     }
@@ -185,11 +426,10 @@ void RenderBox::CalculateRotate(RefPtr<AccessibilityNode> node, Offset& globalOf
         leftBottom.Rotate(center, RotateAngle);
         rightBottom.Rotate(center, RotateAngle);
 
-
-        double min_X = std::min({leftTop.GetX(), rightTop.GetX(), leftBottom.GetX(), rightBottom.GetX()});
-        double max_X = std::max({leftTop.GetX(), rightTop.GetX(), leftBottom.GetX(), rightBottom.GetX()});
-        double min_Y = std::min({leftTop.GetY(), rightTop.GetY(), leftBottom.GetY(), rightBottom.GetY()});
-        double max_Y = std::max({leftTop.GetY(), rightTop.GetY(), leftBottom.GetY(), rightBottom.GetY()});
+        double min_X = std::min({ leftTop.GetX(), rightTop.GetX(), leftBottom.GetX(), rightBottom.GetX() });
+        double max_X = std::max({ leftTop.GetX(), rightTop.GetX(), leftBottom.GetX(), rightBottom.GetX() });
+        double min_Y = std::min({ leftTop.GetY(), rightTop.GetY(), leftBottom.GetY(), rightBottom.GetY() });
+        double max_Y = std::max({ leftTop.GetY(), rightTop.GetY(), leftBottom.GetY(), rightBottom.GetY() });
         globalOffset.SetX(min_X);
         globalOffset.SetY(min_Y);
         size.SetWidth(max_X - min_X);
@@ -207,6 +447,9 @@ void RenderBox::CalculateTranslate(RefPtr<AccessibilityNode> node, Offset& globa
 
 void RenderBox::SetBackgroundPosition(const BackgroundImagePosition& position)
 {
+    if (backDecoration_ == nullptr) {
+        backDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
     RefPtr<BackgroundImage> backgroundImage = backDecoration_->GetImage();
     if (!backgroundImage) {
         // Suppress error logs when do animation.
@@ -229,16 +472,74 @@ void RenderBox::ClearRenderObject()
     renderImage_ = nullptr;
     backDecoration_ = nullptr;
     frontDecoration_ = nullptr;
+    controllerEnter_ = nullptr;
+    controllerExit_ = nullptr;
+    colorAnimationEnter_ = nullptr;
+    colorAnimationExit_ = nullptr;
+    animationType_ = HoverAnimationType::NONE;
+    hoverColor_ = Color::TRANSPARENT;
+    for (size_t i = 0; i < recognizers_.size(); i++) {
+        recognizers_[i] = nullptr;
+    }
+
+    dragDropGesture_ = nullptr;
+    preTargetRenderBox_ = nullptr;
+    onDrag_ = nullptr;
+    onDragEnter_ = nullptr;
+    onDragMove_ = nullptr;
+    onDragLeave_ = nullptr;
+    onDrop_ = nullptr;
+    onClick_ = nullptr;
 }
 
 BackgroundImagePosition RenderBox::GetBackgroundPosition() const
 {
+    if (backDecoration_ == nullptr) {
+        return BackgroundImagePosition();
+    }
     RefPtr<BackgroundImage> backgroundImage = backDecoration_->GetImage();
     if (!backgroundImage) {
         LOGE("get background position failed. no background image.");
         return BackgroundImagePosition();
     }
     return backgroundImage->GetImagePosition();
+}
+
+void RenderBox::SetBackgroundSize(const BackgroundImageSize& size)
+{
+    if (backDecoration_ == nullptr) {
+        backDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    RefPtr<BackgroundImage> backgroundImage = backDecoration_->GetImage();
+    if (!backgroundImage) {
+        // Suppress error logs when do animation.
+        LOGE("set background size failed. no background image.");
+        return;
+    }
+    if (backgroundImage->GetImageSize() == size) {
+        return;
+    }
+    backgroundImage->SetImageSize(size);
+    if (renderImage_) {
+        // x direction
+        renderImage_->SetBgImageSize(size.GetSizeTypeX(), size.GetSizeValueX(), true);
+        // y direction
+        renderImage_->SetBgImageSize(size.GetSizeTypeY(), size.GetSizeValueY(), false);
+    }
+    MarkNeedLayout();
+}
+
+BackgroundImageSize RenderBox::GetBackgroundSize() const
+{
+    if (backDecoration_ == nullptr) {
+        return BackgroundImageSize();
+    }
+    RefPtr<BackgroundImage> backgroundImage = backDecoration_->GetImage();
+    if (!backgroundImage) {
+        LOGE("get background size failed. no background image.");
+        return BackgroundImageSize();
+    }
+    return backgroundImage->GetImageSize();
 }
 
 void RenderBox::OnMouseHoverEnterAnimation()
@@ -249,7 +550,6 @@ void RenderBox::OnMouseHoverEnterAnimation()
         controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
     }
     colorAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-    colorAnimationEnter_->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
     if (animationType_ == HoverAnimationType::OPACITY) {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
@@ -271,7 +571,6 @@ void RenderBox::OnMouseHoverExitAnimation()
         controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
     }
     colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-    colorAnimationExit_->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
     if (animationType_ == HoverAnimationType::OPACITY) {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
@@ -405,34 +704,348 @@ ColorPropertyAnimatable::GetterMap RenderBox::GetColorPropertyGetterMap()
     return map;
 }
 
-BackgroundPositionPropertyAnimatable::SetterMap RenderBox::GetBackgroundPositionPropertySetterMap()
+void RenderBox::SetShadow(const Shadow& value)
 {
-    BackgroundPositionPropertyAnimatable::SetterMap map;
-    auto weak = AceType::WeakClaim(this);
-    map[PropertyAnimatableType::PROPERTY_BACKGROUND_POSITION] = [weak](BackgroundImagePosition position) {
-        auto box = weak.Upgrade();
-        if (!box) {
-            LOGE("Set background position failed. box is null.");
-            return;
-        }
-        return box->SetBackgroundPosition(position);
-    };
-    return map;
+    if (backDecoration_ == nullptr) {
+        backDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+
+    auto shadows = backDecoration_->GetShadows();
+    Shadow shadow;
+
+    if (!shadows.empty()) {
+        shadow = shadows.front();
+    }
+
+    if (shadow != value) {
+        backDecoration_->ClearAllShadow();
+        backDecoration_->AddShadow(value);
+        MarkNeedLayout();
+    }
 }
 
-BackgroundPositionPropertyAnimatable::GetterMap RenderBox::GetBackgroundPositionPropertyGetterMap()
+Shadow RenderBox::GetShadow() const
 {
-    BackgroundPositionPropertyAnimatable::GetterMap map;
-    auto weak = AceType::WeakClaim(this);
-    map[PropertyAnimatableType::PROPERTY_BACKGROUND_POSITION] = [weak]() -> BackgroundImagePosition {
-        auto box = weak.Upgrade();
-        if (!box) {
-            LOGE("Get background position failed. box is null.");
-            return BackgroundImagePosition();
+    if (backDecoration_ != nullptr) {
+        const auto& shadows = backDecoration_->GetShadows();
+        if (!shadows.empty()) {
+            return shadows.front();
         }
-        return box->GetBackgroundPosition();
-    };
-    return map;
+    }
+    return {};
+}
+
+void RenderBox::SetGrayScale(double scale)
+{
+    if (frontDecoration_ == nullptr) {
+        frontDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+
+    double _scale = frontDecoration_->GetGrayScale().Value();
+
+    if (!NearEqual(_scale, scale)) {
+        frontDecoration_->SetGrayScale(Dimension(_scale));
+        MarkNeedRender();
+    }
+}
+
+double RenderBox::GetGrayScale(void) const
+{
+    if (frontDecoration_ != nullptr) {
+        return frontDecoration_->GetGrayScale().Value();
+    }
+
+    return 0.0;
+}
+
+void RenderBox::SetBrightness(double ness)
+{
+    if (frontDecoration_ == nullptr) {
+        frontDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+
+    double brightness = frontDecoration_->GetBrightness().Value();
+
+    if (!NearEqual(brightness, ness)) {
+        frontDecoration_->SetBrightness(Dimension(brightness));
+        MarkNeedRender();
+    }
+}
+
+double RenderBox::GetBrightness(void) const
+{
+    if (frontDecoration_ != nullptr) {
+        return frontDecoration_->GetBrightness().Value();
+    }
+    return 0.0;
+}
+
+void RenderBox::SetContrast(double trast)
+{
+    if (frontDecoration_ == nullptr) {
+        frontDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    double contrast = frontDecoration_->GetContrast().Value();
+    if (!NearEqual(contrast, trast)) {
+        frontDecoration_->SetContrast(Dimension(contrast));
+        MarkNeedRender();
+    }
+}
+
+double RenderBox::GetContrast(void) const
+{
+    if (frontDecoration_ != nullptr) {
+        return frontDecoration_->GetContrast().Value();
+    }
+    return 0.0;
+}
+
+void RenderBox::SetSaturate(double rate)
+{
+    if (frontDecoration_ == nullptr) {
+        frontDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    double saturate = frontDecoration_->GetSaturate().Value();
+    if (!NearEqual(saturate, rate)) {
+        frontDecoration_->SetSaturate(Dimension(saturate));
+        MarkNeedRender();
+    }
+}
+
+double RenderBox::GetSaturate(void) const
+{
+    if (frontDecoration_ != nullptr) {
+        return frontDecoration_->GetSaturate().Value();
+    }
+    return 0.0;
+}
+
+void RenderBox::SetBorderWidth(double width, const BorderEdgeHelper& helper)
+{
+    if (backDecoration_ == nullptr) {
+        backDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    Border border = backDecoration_->GetBorder();
+    if (helper.Set(width, &border)) {
+        backDecoration_->SetBorder(border);
+        MarkNeedLayout();
+    }
+}
+
+double RenderBox::GetBorderWidth(const BorderEdgeHelper& helper) const
+{
+    if (backDecoration_ != nullptr) {
+        return helper.Get(backDecoration_->GetBorder()).GetWidth().Value();
+    }
+    return 0.0;
+}
+
+void RenderBox::SetBorderColor(const Color& color, const BorderEdgeHelper& helper)
+{
+    if (backDecoration_ == nullptr) {
+        backDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    Border border = backDecoration_->GetBorder();
+    if (helper.Set(color, &border)) {
+        backDecoration_->SetBorder(border);
+        MarkNeedLayout();
+    }
+}
+
+Color RenderBox::GetBorderColor(const BorderEdgeHelper& helper) const
+{
+    if (backDecoration_) {
+        return helper.Get(backDecoration_->GetBorder()).GetColor();
+    }
+    return {};
+}
+
+void RenderBox::SetBorderStyle(BorderStyle borderStyle, const BorderEdgeHelper& helper)
+{
+    if (backDecoration_ == nullptr) {
+        backDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    Border border = backDecoration_->GetBorder();
+    if (helper.Set(borderStyle, &border)) {
+        backDecoration_->SetBorder(border);
+        MarkNeedLayout();
+    }
+}
+
+BorderStyle RenderBox::GetBorderStyle(const BorderEdgeHelper& helper) const
+{
+    if (backDecoration_) {
+        return helper.Get(backDecoration_->GetBorder()).GetBorderStyle();
+    }
+    return BorderStyle::NONE;
+}
+
+void RenderBox::SetBorderRadius(double radius, const BorderRadiusHelper& helper)
+{
+    if (backDecoration_ == nullptr) {
+        backDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    Border border = backDecoration_->GetBorder();
+    if (helper.Set(radius, &border)) {
+        backDecoration_->SetBorder(border);
+        MarkNeedLayout();
+    }
+}
+
+double RenderBox::GetBorderRadius(const BorderRadiusHelper& helper) const
+{
+    if (backDecoration_) {
+        return helper.Get(backDecoration_->GetBorder());
+    }
+    return 0.0;
+}
+
+void RenderBox::SetBlurRadius(const AnimatableDimension& radius)
+{
+    if (frontDecoration_ == nullptr) {
+        frontDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    if (!NearEqual(frontDecoration_->GetBlurRadius().Value(), radius.Value())) {
+        frontDecoration_->SetBlurRadius(radius);
+        MarkNeedRender();
+    }
+}
+
+AnimatableDimension RenderBox::GetBlurRadius() const
+{
+    if (frontDecoration_) {
+        return frontDecoration_->GetBlurRadius();
+    }
+    return AnimatableDimension(0.0, DimensionUnit::PX);
+}
+
+void RenderBox::SetBackdropRadius(const AnimatableDimension& radius)
+{
+    if (backDecoration_ == nullptr) {
+        backDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    if (!NearEqual(backDecoration_->GetBlurRadius().Value(), radius.Value())) {
+        backDecoration_->SetBlurRadius(radius);
+        MarkNeedRender();
+    }
+}
+
+AnimatableDimension RenderBox::GetBackdropRadius() const
+{
+    if (backDecoration_) {
+        return backDecoration_->GetBlurRadius();
+    }
+    return AnimatableDimension(0.0, DimensionUnit::PX);
+}
+
+void RenderBox::SetWindowBlurProgress(double progress)
+{
+    if (backDecoration_ == nullptr) {
+        backDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    if (!NearEqual(backDecoration_->GetWindowBlurProgress(), progress)) {
+        backDecoration_->SetWindowBlurProgress(progress);
+        MarkNeedRender();
+    }
+}
+
+double RenderBox::GetWindowBlurProgress() const
+{
+    if (backDecoration_) {
+        return backDecoration_->GetWindowBlurProgress();
+    }
+    return 0.0;
+}
+
+void RenderBox::AddRecognizerToResult(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
+    TouchTestResult& result)
+{
+    if (!ExistGestureRecognizer()) {
+        return;
+    }
+
+    bool ignoreInternal = false;
+    for (int i = MAX_GESTURE_SIZE - 1; i >= 0; i--) {
+        if (recognizers_[i]) {
+            ignoreInternal = recognizers_[i]->GetPriorityMask() == GestureMask::IgnoreInternal;
+            if (ignoreInternal) {
+                break;
+            }
+        }
+    }
+
+    if (ignoreInternal) {
+        auto iter = result.begin();
+        while (iter != result.end()) {
+            auto recognizer = AceType::DynamicCast<GestureRecognizer>(*iter);
+            if (!recognizer) {
+                iter++;
+                continue;
+            }
+
+            if (!recognizer->GetIsExternalGesture()) {
+                iter++;
+                continue;
+            }
+            iter = result.erase(iter);
+        }
+    }
+
+    for (int i = MAX_GESTURE_SIZE - 1; i >= 0; i--) {
+        if (recognizers_[i]) {
+            LOGD("OnTouchTestHit add recognizer to result %{public}s", AceType::TypeName(recognizers_[i]));
+            recognizers_[i]->SetCoordinateOffset(coordinateOffset);
+            result.emplace_back(recognizers_[i]);
+        }
+    }
+}
+
+void RenderBox::OnTouchTestHit(
+    const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
+{
+    AddRecognizerToResult(coordinateOffset, touchRestrict, result);
+
+    if (onClick_) {
+        result.emplace_back(onClick_);
+    }
+    if (dragDropGesture_) {
+        result.emplace_back(dragDropGesture_);
+    }
+}
+
+void RenderBox::UpdateGestureRecognizer(const std::array<RefPtr<Gesture>, MAX_GESTURE_SIZE>& gestures)
+{
+    // Considering 4 cases:
+    // 1. new gesture == null && old recognizer == null  -->  do nothing
+    // 2. new gesture != null && old recognizer == null  -->  create new recognizer configured with new gesture
+    // 3. new gesture == null && old recognizer != null  -->  remove old recognizer
+    // 4. new gesture != null && old recognizer != null  -->  update old recognizer with new configuration if
+    // possible(determined by[GestureRecognizer::ReconcileFrom]), or remove the old recognizer and create new
+    // one configured with new gesture.
+    for (size_t i = 0; i < gestures.size(); i++) {
+        if (!gestures[i]) {
+            recognizers_[i] = nullptr;
+            continue;
+        }
+        auto recognizer = gestures[i]->CreateRecognizer(context_);
+        recognizer->SetIsExternalGesture(true);
+        if (recognizer) {
+            if (!recognizers_[i] || !recognizers_[i]->ReconcileFrom(recognizer)) {
+                recognizers_[i] = recognizer;
+            }
+        }
+    }
+}
+
+bool RenderBox::ExistGestureRecognizer()
+{
+    for (size_t i = 0; i < recognizers_.size(); i++) {
+        if (recognizers_[i]) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 } // namespace OHOS::Ace

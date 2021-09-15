@@ -56,6 +56,8 @@ void FlutterRenderCheckbox::Paint(RenderContext& context, const Offset& offset)
     }
     flutter::Paint strokePaint;
     flutter::Paint shadowPaint;
+    shadowPaint.paint()->setAntiAlias(true);
+    strokePaint.paint()->setAntiAlias(true);
     if (!strokePaint.paint() || !shadowPaint.paint()) {
         LOGE("paint is nullptr!");
         return;

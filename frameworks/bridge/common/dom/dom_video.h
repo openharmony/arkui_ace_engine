@@ -18,6 +18,7 @@
 
 #include "core/components/video/video_component.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
+#include "frameworks/core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -58,6 +59,7 @@ protected:
 
 private:
     static ImageFit ConvertStrToFit(const std::string& fit);
+    static ImageObjectPosition ConvertStrToPosition(const std::string& position);
     static std::unique_ptr<JsonValue> GetParamFromJson(const std::string& json, const std::string& key);
 
     RefPtr<VideoComponent> videoChild_;

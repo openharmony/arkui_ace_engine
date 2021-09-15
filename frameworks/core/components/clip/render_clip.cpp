@@ -174,13 +174,13 @@ Rect RenderClip::GetClipRect(const Offset& offset) const
     if (!NearZero(width_)) {
         clipWidth = width_;
     } else {
-        clipWidth = GetLayoutSize().Width();
+        clipWidth = GetTransitionPaintRect().Width();
     }
     double clipHeight = 0.0;
     if (!NearZero(height_)) {
         clipHeight = height_;
     } else {
-        clipHeight = GetLayoutSize().Height();
+        clipHeight = GetTransitionPaintRect().Height();
     }
     return Rect(offset.GetX() + offsetX_, offset.GetY() + offsetY_, clipWidth, clipHeight);
 }

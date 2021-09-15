@@ -54,7 +54,6 @@ bool FocusNode::HandleKeyEvent(const KeyEvent& keyEvent)
     if (!IsCurrentFocus()) {
         return false;
     }
-
     if (OnKeyEvent(keyEvent)) {
         return true;
     }
@@ -197,6 +196,30 @@ void FocusNode::RefreshFocus()
     }
     parent->LostFocus();
     parent->RequestFocusImmediately();
+}
+
+bool FocusNode::OnKeyEvent(const KeyEvent& keyEvent)
+{
+    if (onKeyCallback_) {
+        return onKeyCallback_(keyEvent);
+    }
+    auto element = AceType::DynamicCast<Element>(this);
+    if (!element) {
+        return false;
+    }
+    auto context = element->GetContext().Upgrade();
+    if (!context) {
+        return false;
+    }
+    if (context->GetIsDeclarative()) {
+        auto event = std::make_shared<KeyEventInfo>(keyEvent);
+        if (!onKeyEventCallback_) {
+            return false;
+        }
+        onKeyEventCallback_(event);
+        return event->IsStopPropagation() ? true : false;
+    }
+    return false;
 }
 
 void FocusNode::RefreshParentFocusable(bool focusable)
@@ -433,6 +456,9 @@ void FocusGroup::OnFocus()
     do {
         if (itLastFocusNode_ == focusNodes_.end()) {
             itLastFocusNode_ = focusNodes_.begin();
+            if (itLastFocusNode_ == itFocusNode) {
+                break;
+            }
         }
         if ((*itLastFocusNode_)->RequestFocusImmediately()) {
             FocusNode::OnFocus();

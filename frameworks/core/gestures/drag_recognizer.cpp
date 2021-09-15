@@ -124,6 +124,9 @@ void DragRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
                 .SetLocalLocation(event.GetOffset() - coordinateOffset_);
             info.SetTimeStamp(event.time);
             onDragUpdate_(info);
+            if (onDragUpdateNotifyCall_) {
+                onDragUpdateNotifyCall_(event.GetOffset().GetX(), event.GetOffset().GetY(), info);
+            }
         }
     } else if (dragInfo.states_ == DetectState::DETECTING) {
         dragInfo.dragOffset_ += dragInfo.velocityTracker_.GetDelta();
@@ -156,15 +159,36 @@ void DragRecognizer::HandleTouchUpEvent(const TouchPoint& event)
 
     auto& dragInfo = iter->second;
     if (dragInfo.states_ == DetectState::DETECTED) {
-        LOGD("use animation to end drag");
-        if (onDragEnd_) {
+        bool upSuccess = true;
+        for (auto entry = dragFingers_.begin(); entry != dragFingers_.end(); ++entry) {
+            if (entry == iter) {
+                continue;
+            }
+            auto& otherDragInfo = entry->second;
+            if (otherDragInfo.states_ == DetectState::DETECTED) {
+                upSuccess = false;
+            }
+        }
+        if (upSuccess) {
+            LOGD("use animation to end drag");
+            if (onDragEnd_) {
+                DragEndInfo endInfo(event.id);
+                endInfo.SetVelocity(dragInfo.velocityTracker_.GetVelocity())
+                    .SetMainVelocity(dragInfo.velocityTracker_.GetMainAxisVelocity())
+                    .SetGlobalLocation(event.GetOffset())
+                    .SetLocalLocation(event.GetOffset() - coordinateOffset_);
+                endInfo.SetTimeStamp(event.time);
+                onDragEnd_(endInfo);
+            }
+        }
+        if (onDragEndNotifyCall_) {
             DragEndInfo endInfo(event.id);
             endInfo.SetVelocity(dragInfo.velocityTracker_.GetVelocity())
                 .SetMainVelocity(dragInfo.velocityTracker_.GetMainAxisVelocity())
                 .SetGlobalLocation(event.GetOffset())
                 .SetLocalLocation(event.GetOffset() - coordinateOffset_);
             endInfo.SetTimeStamp(event.time);
-            onDragEnd_(endInfo);
+            onDragEndNotifyCall_(event.GetOffset().GetX(), event.GetOffset().GetY(), endInfo);
         }
     } else if (dragInfo.states_ == DetectState::DETECTING) {
         LOGD("this gesture is not drag, try to reject it");

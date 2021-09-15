@@ -20,6 +20,7 @@
 namespace OHOS::Ace {
 namespace {
 
+// Negotiated fields with Java
 const char TYPE[] = "type";
 const char OBSCURE_TEXT[] = "obscureText";
 const char ACTION_LABEL[] = "actionLabel";

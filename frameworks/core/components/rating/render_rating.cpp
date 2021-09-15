@@ -541,6 +541,7 @@ void RenderRating::UpdateTouchRect()
 {
     touchRect_.SetSize(GetLayoutSize());
     touchRect_.SetOffset(GetPosition());
+    ownTouchRect_ = touchRect_;
 }
 
 Offset RenderRating::GetStarOffset(double imageVerticalOffset)
@@ -602,7 +603,6 @@ void RenderRating::CreateColorAnimation(const Color& from, const Color& to, int3
     }
     animation->AddKeyframe(colorFrameStart);
     animation->AddKeyframe(colorFrameEnd);
-    animation->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
     animation->AddListener([weakNode = AceType::WeakClaim(this), starIndex](const Color& value) {
         auto node = weakNode.Upgrade();
         if (node) {

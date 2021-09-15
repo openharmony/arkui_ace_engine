@@ -52,7 +52,7 @@ public:
         requireCallback_ = callback;
     }
 
-    void ChangeScroll(int32_t index);
+    void ChangeScroll(int32_t index, bool fromController = false);
 
     void UpdateDragPosition(int32_t index);
 
@@ -74,6 +74,11 @@ public:
 
     void FireDomChangeEvent(int32_t index) const;
 
+    bool IsScrollable() const
+    {
+        return scrollable_;
+    }
+
 private:
     // for handle scroll tabContent
     void OnTouchTestHit(
@@ -86,10 +91,10 @@ private:
     void FireContentChangeEvent() const;
 
     // used to scroll TabContent and update the position
-    void ScrollContents(int32_t newIndex, bool isLinkBar);
+    void ScrollContents(int32_t newIndex, bool isLinkBar, bool fromController = false);
     void UpdateScrollPosition(double dragDelta);
     void UpdateChildPosition(double offset, int32_t currentIndex, int32_t newIndex, bool needChange);
-    void HandleStopListener(int32_t newIndex, bool needChange);
+    void HandleStopListener(int32_t newIndex, bool needChange, bool FromController = false);
     void HandleStartListener(int32_t newIndex, bool needChange, bool isLinkBar);
     void SetHiddenChild();
 
@@ -123,6 +128,7 @@ private:
     // onChange event
     std::function<void(const std::string&)> changeEvent_;
     std::function<void(uint32_t)> domChangeEvent_;
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)> onChangeEvent_;
 
     bool isAnimationAdded_ = false; // whether the animation is added
     bool scrollable_ = true;        // the default value is true

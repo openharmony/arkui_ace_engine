@@ -63,6 +63,8 @@ public:
     const RefPtr<SharedTransitionEffect>& GetEffect() const;
     Size GetSuitSize() const;
     Offset GetGlobalOffset() const;
+    float GetOpacity() const;
+    int32_t GetZIndex() const;
     RefPtr<Element> GetContentElement() const;
     bool IsEnablePopEnter() const;
     bool IsEnablePushEnter() const;
@@ -85,6 +87,7 @@ protected:
 private:
     void Register();
     RefPtr<RenderBox> GetRenderPassengerWithPajamas() const;
+    RefPtr<RenderBox> GetRenderBox();
     RefPtr<PageElement> SearchParentPage() const;
 
     ShareId shareId_;
@@ -102,6 +105,8 @@ private:
     bool enablePushEnter_ = true;
     bool enablePushExit_ = true;
     SizeModifiedCallback sizeModifiedCallback_;
+    float opacity_ = 1.0f;
+    int32_t zIndex_ = 0;
 };
 
 } // namespace OHOS::Ace

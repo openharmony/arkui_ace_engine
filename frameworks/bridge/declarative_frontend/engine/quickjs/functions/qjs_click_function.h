@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_QUICKJS_FUNCTION_QJS_CLICK_FUNCTION_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_QUICKJS_FUNCTION_QJS_CLICK_FUNCTION_H
 
+#include "core/gestures/click_recognizer.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/functions/qjs_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
@@ -33,8 +34,11 @@ public:
 
     virtual void MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc) override;
     virtual void ReleaseRT(JSRuntime* rt) override;
-
     void execute();
+    void execute(const ClickInfo& info);
+
+private:
+    JSValue createClickInfo(const ClickInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

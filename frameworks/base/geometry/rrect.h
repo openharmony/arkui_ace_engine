@@ -134,21 +134,12 @@ public:
         return rect_.Height();
     }
 
-    bool NearEqual(const RRect& rrect) const
-    {
-        return rrect.GetCorner().bottomLeftRadius == corner_.bottomLeftRadius &&
-               rrect.GetCorner().bottomRightRadius == corner_.bottomRightRadius &&
-               rrect.GetCorner().topLeftRadius == corner_.topLeftRadius &&
-               rrect.GetCorner().topRightRadius == corner_.topRightRadius && rrect.GetRect() == rect_;
-    }
-
     bool operator==(const RRect& rrect) const
     {
         return rrect.GetCorner().bottomLeftRadius == corner_.bottomLeftRadius &&
                rrect.GetCorner().bottomRightRadius == corner_.bottomRightRadius &&
                rrect.GetCorner().topLeftRadius == corner_.topLeftRadius &&
-               rrect.GetCorner().topRightRadius == corner_.topRightRadius && rrect.Height() == rect_.Height() &&
-               rrect.Width() == rect_.Width();
+               rrect.GetCorner().topRightRadius == corner_.topRightRadius && rrect.GetRect() == rect_;
     }
 
     RRect& operator+=(const Offset& offset)

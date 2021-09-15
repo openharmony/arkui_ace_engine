@@ -39,6 +39,7 @@ public:
         GPU,
         JS,
         BACKGROUND,
+        UNKNOWN,
     };
 
     ~TaskExecutor() override = default;
@@ -172,10 +173,27 @@ protected:
 
     virtual bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const = 0;
 
+#ifdef ACE_DEBUG
+    virtual bool OnPreSyncTask(TaskType type) const
+    {
+        return true;
+    }
+    virtual void OnPostSyncTask() const {}
+#endif
+
 private:
     bool PostTaskAndWait(CancelableTask&& task, TaskType type) const
     {
+#ifdef ACE_DEBUG
+        bool result = false;
+        if (OnPreSyncTask(type)) {
+            result = OnPostTask(Task(task), type, 0) && task.WaitUntilComplete();
+            OnPostSyncTask();
+        }
+        return result;
+#else
         return OnPostTask(Task(task), type, 0) && task.WaitUntilComplete();
+#endif
     }
 };
 

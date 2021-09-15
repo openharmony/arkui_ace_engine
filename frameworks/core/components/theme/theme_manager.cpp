@@ -18,12 +18,15 @@
 #include "core/components/badge/badge_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/calendar/calendar_theme.h"
+#include "core/components/camera/camera_theme.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/clock/clock_theme.h"
+#include "core/components/counter/counter_theme.h"
 #include "core/components/data_panel/data_panel_theme.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/divider/divider_theme.h"
 #include "core/components/focus_animation/focus_animation_theme.h"
+#include "core/components/image/image_theme.h"
 #include "core/components/list/list_item_theme.h"
 #include "core/components/list/list_theme.h"
 #include "core/components/marquee/marquee_theme.h"
@@ -100,6 +103,9 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { ToolBarTheme::TypeId(), &ThemeBuildFunc<ToolBarTheme::Builder> },
     { CardTheme::TypeId(), &ThemeBuildFunc<CardTheme::Builder> },
     { QrcodeTheme::TypeId(), &ThemeBuildFunc<QrcodeTheme::Builder> },
+    { CameraTheme::TypeId(), &ThemeBuildFunc<CameraTheme::Builder> },
+    { ImageTheme::TypeId(), &ThemeBuildFunc<ImageTheme::Builder> },
+    { CounterTheme::TypeId(), &ThemeBuildFunc<CounterTheme::Builder> }
 };
 
 } // namespace

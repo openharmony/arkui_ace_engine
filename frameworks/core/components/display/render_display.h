@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DISPLAY_RENDER_DISPLAY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DISPLAY_RENDER_DISPLAY_H
 
+#include "core/animation/animator.h"
 #include "core/components/display/display_component.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -31,11 +32,34 @@ public:
 
     void Dump() override;
 
+    void OnAttachContext() override
+    {
+        animatableOpacity_.SetContextAndCallback(
+            context_, std::bind(&RenderDisplay::OnOpacityAnimationCallback, this));
+    }
+
     void UpdateVisibleType(VisibleType type)
     {
         if (visible_ != type) {
             visible_ = type;
+            SetVisible(visible_ == VisibleType::VISIBLE);
             MarkNeedLayout();
+        }
+    }
+
+    void UpdateHidden(bool hidden)
+    {
+        if (GetHidden() != hidden) {
+            SetSelfHidden(hidden);
+            MarkNeedLayout();
+        }
+    }
+
+    void UpdateOpacity()
+    {
+        auto display = displayComponent_.Upgrade();
+        if (display) {
+            display->SetOpacity(transitionOpacity_);
         }
     }
 
@@ -53,9 +77,9 @@ public:
         }
     }
 
-    uint8_t GetOpacity() const
+    double GetTransitionOpacity() const
     {
-        return opacity_;
+        return transitionOpacity_;
     }
 
     VisibleType GetVisibleType()
@@ -67,10 +91,31 @@ public:
 
     bool GetVisible() const override;
 
+    void OnTransition(TransitionType type, int32_t id) override;
+
+    bool HasDisappearingTransition(int32_t nodeId) override;
+
 protected:
+    void OnOpacityAnimationCallback();
+    void OnOpacityDisappearingCallback();
+    void ClearRenderObject() override;
+    int32_t GetCardAppearingDuration();
+    void CreateAppearingAnimation(uint8_t opacity, int32_t limit);
+    void ResetAppearingAnimation();
+
+    int32_t duration_ = 0;
+    double transitionOpacity_ = 0.0;
     VisibleType visible_ = VisibleType::VISIBLE;
+    AnimatableDouble animatableOpacity_ = AnimatableDouble(1.0);
+    double appearingOpacity_ = 0.0;
+    double disappearingOpacity_ = 0.0;
+    bool hasDisappearTransition_ = false;
+    bool pendingAppearing_ = false;
     bool disableLayer_ = false;
     std::list<OpacityCallback> opacityCallbacks_;
+    WeakPtr<DisplayComponent> displayComponent_;
+    RefPtr<CurveAnimation<uint8_t>> appearingAnimation_;
+    RefPtr<Animator> animator_;
 };
 
 } // namespace OHOS::Ace

@@ -20,12 +20,13 @@ template("libace_engine") {
   ohos_shared_library(target_name) {
     defines += invoker.defines
     sources = [
-      "$ace_root/adapter/common/cpp/ace_res_config.cpp",
-      "$ace_root/adapter/common/cpp/ace_res_key_parser.cpp",
       "$ace_root/adapter/common/cpp/ace_trace.cpp",
+      "$ace_root/adapter/common/cpp/flutter_asset_manager.cpp",
       "$ace_root/adapter/common/cpp/localization.cpp",
       "$ace_root/adapter/common/cpp/thread_util.cpp",
       "$ace_root/adapter/preview/osal/download_manager.cpp",
+      "$ace_root/adapter/preview/osal/fetch_manager.cpp",
+      "$ace_root/adapter/preview/osal/response_data.cpp",
       "ace_ability.cpp",
       "ace_application_info.cpp",
       "ace_container.cpp",
@@ -36,18 +37,20 @@ template("libace_engine") {
 
     configs = [
       "$ace_root:ace_config",
-      "$flutter_root:flutter_config",
-      "$flutter_root:flutter_glfw_config",
-      "$flutter_root:icu_config_$platform",
+      "$ace_flutter_engine_root:flutter_config",
+      "$ace_flutter_engine_root:flutter_glfw_config",
+      "$ace_flutter_engine_root:icu_config_$platform",
       "//third_party/curl:curl_config",
+      "//third_party/zlib:zlib_config",
     ]
 
     cflags = [ "-std=c++17" ]
     deps = [
+      "$ace_flutter_engine_root:ace_skia_$platform",
       "$ace_root/frameworks/base:ace_base_$platform",
+      "$ace_root/frameworks/bridge:declarative_js_engine_$platform",
       "$ace_root/frameworks/bridge:js_engine_$platform",
       "$ace_root/frameworks/core:ace_core_$platform",
-      "$flutter_root:ace_skia_$platform",
       "//third_party/curl:curl",
     ]
     if (platform == "windows") {

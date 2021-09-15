@@ -227,7 +227,7 @@ void SelectElement::FlushRefresh()
     component->Initialize();
     const auto& child = children_.front();
     RemoveChild(child);
-    InflateComponent(dataComponent_, DEFAULT_ELEMENT_SLOT);
+    InflateComponent(dataComponent_, DEFAULT_ELEMENT_SLOT, DEFAULT_RENDER_SLOT);
 }
 
 void SelectElement::HandleOptionClickedEvent(std::size_t index)
@@ -418,7 +418,6 @@ void SelectElement::CreateColorAnimation(RefPtr<KeyframeAnimation<Color>>& anima
     end->SetCurve(Curves::SHARP);
     animation->AddKeyframe(start);
     animation->AddKeyframe(end);
-    animation->SetEvaluator(AceType::MakeRefPtr<ColorEvaluator>());
     animation->AddListener([weak = AceType::WeakClaim(this), isDown](const Color& value) {
         auto select = weak.Upgrade();
         if (select) {

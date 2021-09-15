@@ -22,6 +22,9 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "native_engine/impl/quickjs/quickjs_native_engine.h"
+#endif
 
 namespace OHOS::Ace::Framework {
 
@@ -51,11 +54,17 @@ public:
     // Fire SyncEvent on JS
     void FireSyncEvent(const std::string& eventId, const std::string& param) override;
 
+    void FireExternalEvent(const std::string& componentId, const uint32_t nodeId) override;
+
     // Timer callback
     virtual void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) override;
 
+    void TimerCallJs(const std::string& callbackId, bool isInterval);
+
     // destroy page instance
     void DestroyPageInstance(int32_t pageId) override;
+
+    void OnConfigurationUpdated(const std::string& data) override;
 
     void MediaQueryCallback(const std::string& callbackId, const std::string& args) override;
 
@@ -63,16 +72,37 @@ public:
 
     void JsCallback(const std::string& callbackId, const std::string& args) override;
 
+    void CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv);
+
     // destroy application instance according packageName
     void DestroyApplication(const std::string& packageName) override;
+
+    void UpdateApplicationState(const std::string& packageName, Frontend::State state) override;
+
+    void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data) override;
 
     void RunGarbageCollection() override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
+    virtual FrontendDelegate* GetFrontend() override
+    {
+        return AceType::RawPtr(engineInstance_->GetDelegate());
+    }
+
 private:
     RefPtr<QJSDeclarativeEngineInstance> engineInstance_;
     int32_t instanceId_ = 0;
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    QuickJSNativeEngine* nativeEngine_ = nullptr;
+    void SetPostTask(NativeEngine* nativeEngine);
+#endif
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(ENABLE_WORKER)
+    void RegisterWorker();
+    void RegisterInitWorkerFunc();
+    void RegisterAssetFunc();
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(QJSDeclarativeEngine);
 };

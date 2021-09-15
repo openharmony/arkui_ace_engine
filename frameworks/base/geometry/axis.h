@@ -22,6 +22,7 @@ enum class Axis {
     VERTICAL = 0,
     HORIZONTAL,
     FREE,
+    NONE,
 };
 
 enum class RotateAxis {

@@ -29,6 +29,26 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
 
+    bool GetIsVertical() const
+    {
+        return vertical_;
+    }
+
+    Color GetDividerColor() const
+    {
+        return dividerColor_;
+    }
+
+    Dimension GetStrokeWidth() const
+    {
+        return strokeWidth_;
+    }
+
+    LineCap GetLineCap() const
+    {
+        return lineCap_;
+    }
+
 protected:
     bool vertical_ = false;
     double dividerLength_ = 0.0;

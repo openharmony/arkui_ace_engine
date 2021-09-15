@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "core/pipeline/base/base_composed_component.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/single_child.h"
 
@@ -26,43 +27,19 @@ namespace OHOS::Ace {
 using ComposeId = std::string;
 
 // A component can compose others components.
-class ACE_EXPORT ComposedComponent : public Component, public SingleChild {
-    DECLARE_ACE_TYPE(ComposedComponent, Component, SingleChild);
+class ACE_EXPORT ComposedComponent : public BaseComposedComponent, public SingleChild {
+    DECLARE_ACE_TYPE(ComposedComponent, BaseComposedComponent, SingleChild);
 
 public:
     ComposedComponent(const ComposeId& id, const std::string& name, const RefPtr<Component>& child);
-    ComposedComponent(const ComposeId& id, const std::string& name) : id_(id), name_(name) {};
+    ComposedComponent(const ComposeId& id, const std::string& name) : BaseComposedComponent(id, name) {};
     ~ComposedComponent() override = default;
 
     RefPtr<Element> CreateElement() override;
 
-    const ComposeId& GetId() const
-    {
-        return id_;
-    }
-
-    const std::string& GetName() const
-    {
-        return name_;
-    }
-
-    bool NeedUpdate() const
-    {
-        return needUpdate_;
-    }
-
-    void MarkNeedUpdate()
-    {
-        needUpdate_ = true;
-    }
-
-    void ClearNeedUpdate()
-    {
-        needUpdate_ = false;
-    }
-
     void SetUpdateType(UpdateType updateType) override
     {
+        BaseComposedComponent::SetUpdateType(updateType);
         auto child = GetChild();
         if (child) {
             child->SetUpdateType(updateType);
@@ -71,7 +48,7 @@ public:
 
     void SetDisabledStatus(bool disabledStatus) override
     {
-        Component::SetDisabledStatus(disabledStatus);
+        BaseComposedComponent::SetDisabledStatus(disabledStatus);
         auto child = GetChild();
         if (child) {
             child->SetDisabledStatus(disabledStatus);
@@ -80,7 +57,7 @@ public:
 
     void SetTextDirection(TextDirection direction) override
     {
-        direction_ = direction;
+        BaseComposedComponent::SetTextDirection(direction);
         auto child = GetChild();
         if (child) {
             child->SetTextDirection(direction);
@@ -96,12 +73,13 @@ public:
     }
 
     void SetElementFunction(ElementFunction&& func) override;
-    void CallElementFunction(Element* element) override;
+    void CallElementFunction(const RefPtr<Element>& element) override;
+    virtual bool IsInspector()
+    {
+        return false;
+    }
 
 private:
-    ComposeId id_;
-    std::string name_;
-    bool needUpdate_ = false;
     ElementFunction elementFunction_;
 };
 

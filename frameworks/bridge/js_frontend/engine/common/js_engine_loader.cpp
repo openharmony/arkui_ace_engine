@@ -29,6 +29,8 @@ constexpr char JS_ENGINE_ENTRY[] = "OHOS_ACE_GetJsEngineLoader";
 
 constexpr char QUICK_JS_ENGINE_SHARED_LIB[] = "libace_engine_qjs.z.so";
 constexpr char QJS_DECLARATIVE_JS_ENGINE_SHARED_LIB[] = "libace_engine_declarative_qjs.z.so";
+constexpr char ARK_JS_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
+constexpr char ARK_DECLARATIVE_JS_ENGINE_SHARED_LIB[] = "libace_engine_declarative_ark.z.so";
 
 using DynamicEntry = void* (*)();
 
@@ -45,14 +47,32 @@ public:
     {
         return nullptr;
     }
+
+    RefPtr<BaseXComponentBridge> CreateXComponentBridge() const override
+    {
+        return nullptr;
+    }
 };
 
 DummyJsEngineLoader::DummyJsEngineLoader() = default;
 DummyJsEngineLoader::~DummyJsEngineLoader() = default;
 
-const char* GetSharedLibrary()
+const char* GetSharedLibrary(bool isArkApp)
 {
-    return QUICK_JS_ENGINE_SHARED_LIB;
+    if (isArkApp) {
+        return ARK_JS_ENGINE_SHARED_LIB;
+    } else {
+        return QUICK_JS_ENGINE_SHARED_LIB;
+    }
+}
+
+const char* GetDeclarativeSharedLibrary(bool isArkApp)
+{
+    if (isArkApp) {
+        return ARK_DECLARATIVE_JS_ENGINE_SHARED_LIB;
+    } else {
+        return QJS_DECLARATIVE_JS_ENGINE_SHARED_LIB;
+    }
 }
 
 JsEngineLoader& GetJsEngineLoader(const char* sharedLibrary)
@@ -82,15 +102,15 @@ JsEngineLoader& GetJsEngineLoader(const char* sharedLibrary)
 
 } // namespace
 
-JsEngineLoader& JsEngineLoader::Get()
+JsEngineLoader& JsEngineLoader::Get(bool isArkApp)
 {
-    static JsEngineLoader& instance = GetJsEngineLoader(GetSharedLibrary());
+    static JsEngineLoader& instance = GetJsEngineLoader(GetSharedLibrary(isArkApp));
     return instance;
 }
 
-JsEngineLoader& JsEngineLoader::GetDeclarative()
+JsEngineLoader& JsEngineLoader::GetDeclarative(bool isArkApp)
 {
-    static JsEngineLoader& instance = GetJsEngineLoader(QJS_DECLARATIVE_JS_ENGINE_SHARED_LIB);
+    static JsEngineLoader& instance = GetJsEngineLoader(GetDeclarativeSharedLibrary(isArkApp));
     return instance;
 }
 

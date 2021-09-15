@@ -20,6 +20,7 @@
 #include "base/resource/asset_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/frontend.h"
 #include "core/common/platform_res_register.h"
@@ -35,21 +36,22 @@ using MouseEventCallback = std::function<void(const MouseEvent&)>;
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
 
-class Container : public virtual AceType {
+constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
+constexpr int32_t INSTANCE_ID_PLATFORM = -2;
+
+class ACE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
 
 public:
     Container() = default;
     ~Container() override = default;
 
+    virtual void Initialize() = 0;
+
+    virtual void Destroy() = 0;
+
     // Get the instance id of this container
     virtual int32_t GetInstanceId() const = 0;
-
-    // Get the package path of this container
-    virtual std::string GetPackagePath() const
-    {
-        return "";
-    };
 
     // Get the ability name of this container
     virtual std::string GetHostClassName() const = 0;
@@ -72,7 +74,74 @@ public:
     // Dump container.
     virtual bool Dump(const std::vector<std::string>& params) = 0;
 
+    // Get the width/height of the view
+    virtual int32_t GetViewWidth() const = 0;
+    virtual int32_t GetViewHeight() const = 0;
+    virtual void* GetView() const = 0;
+
+    // Trigger garbage collection
+    virtual void TriggerGarbageCollection() {}
+
+    virtual void NotifyFontNodes() {}
+
+    virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
+
+    // Get MutilModal ptr.
+    virtual uintptr_t GetMutilModalPtr() const
+    {
+        return 0;
+    }
+
+    virtual void ProcessScreenOnEvents() {}
+
+    virtual void ProcessScreenOffEvents() {}
+
+    void SetCreateTime(std::chrono::time_point<std::chrono::high_resolution_clock> time)
+    {
+        createTime_ = time;
+    }
+
+    bool IsFirstUpdate()
+    {
+        return firstUpateData_;
+    }
+
+    void AlreadyFirstUpdate()
+    {
+        firstUpateData_ = false;
+    }
+
+    void SetModuleName(const std::string& moduleName)
+    {
+        moduleName_ = moduleName;
+    }
+
+    std::string GetModuleName() const
+    {
+        return moduleName_;
+    }
+
+    virtual bool IsMainWindow() const
+    {
+        return false;
+    }
+
+    virtual void SetViewFirstUpdating(std::chrono::time_point<std::chrono::high_resolution_clock> time) {}
+
+    virtual void UpdateResourceConfiguration(const std::string& jsonStr) {}
+
+    static int32_t CurrentId();
+    static RefPtr<Container> Current();
+    static RefPtr<TaskExecutor> CurrentTaskExecutor();
+    static void InitForThread(int32_t id);
+
+protected:
+    std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
+    bool firstUpateData_ = true;
+
 private:
+    static thread_local int32_t currentId_;
+    std::string moduleName_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

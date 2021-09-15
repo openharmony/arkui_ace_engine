@@ -53,6 +53,23 @@ public:
         mainStackSize_ = mainStackSize;
     }
 
+    const Alignment& GetAlignment() const
+    {
+        return align_;
+    }
+
+    StackFit GetStackFit() const
+    {
+        return fit_;
+    }
+
+    Overflow GetOverflow() const
+    {
+        return overflow_;
+    }
+
+    void OnAttachContext() override;
+
 protected:
     LayoutParam MakeNonPositionedInnerLayoutParam(const RefPtr<RenderNode>& firstChild) const;
     LayoutParam MakePositionedInnerLayoutParam(

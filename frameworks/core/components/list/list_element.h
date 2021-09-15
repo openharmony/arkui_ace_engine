@@ -49,7 +49,7 @@ public:
 
 private:
     RefPtr<RenderNode> CreateRenderNode() override;
-    void Apply(const RefPtr<Element>&) override;
+    void ApplyRenderChild(const RefPtr<RenderElement>& renderChild) override;
 
     bool RecycleItem(int32_t index);
     void RecycleByRange(int32_t& from, int32_t& to);
@@ -79,7 +79,7 @@ private:
     void OnRefreshed();
 
     void UpdateCachedComponent();
-    int32_t AddToCache(RefPtr<Component> item, int32_t index, bool isDynamic = false);
+    int32_t AddToCache(const RefPtr<Component>& item, int32_t index, bool isDynamic = false);
     void RemoveComposedChildFromMap(RefPtr<Element> element);
 
     RefPtr<RenderList> renderList_;
@@ -106,6 +106,7 @@ private:
     std::vector<RefPtr<Component>> itemComponents_;
     RefPtr<Component> listComponent_;
     bool needRefresh_ = false;
+    bool isJsCard_ = false;
 
     size_t bucketSize_ = 6; // default cache size
     bool building_ = false;

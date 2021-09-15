@@ -103,7 +103,7 @@ private:
     CloseRecordImpl closeRecordImpl_;
 };
 
-class CameraComponent : public TextureComponent {
+class ACE_EXPORT CameraComponent : public TextureComponent {
     DECLARE_ACE_TYPE(CameraComponent, TextureComponent);
 
 public:
@@ -148,6 +148,46 @@ public:
         return errorEventId_;
     }
 
+    void SetCameraId(const std::string& cameraId)
+    {
+        cameraId_ = cameraId;
+    }
+
+    const std::string& GetCameraId() const
+    {
+        return cameraId_;
+    }
+
+    void SetResolutionWidth(int32_t resolutionWidth)
+    {
+        resolutionWidth_ = resolutionWidth;
+    }
+
+    int32_t GetResolutionWidth() const
+    {
+        return resolutionWidth_;
+    }
+
+    void SetResolutionHeight(int32_t resolutionHeight)
+    {
+        resolutionHeight_ = resolutionHeight;
+    }
+
+    int32_t GetResolutionHeight() const
+    {
+        return resolutionHeight_;
+    }
+
+    void SignSetResolution(bool isSetResolution)
+    {
+        isSetResolution_ = isSetResolution;
+    }
+
+    bool IsSetResolution() const
+    {
+        return isSetResolution_;
+    }
+
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
 
@@ -156,6 +196,10 @@ private:
     FlashType flash_ = FlashType::AUTO;
     DevicePosition devicePosition_ = DevicePosition::CAMERA_FACING_BACK;
     EventMarker errorEventId_;
+    std::string cameraId_;
+    int32_t resolutionWidth_ = 0;
+    int32_t resolutionHeight_ = 0;
+    bool isSetResolution_ = false;
 };
 
 } // namespace OHOS::Ace

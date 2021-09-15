@@ -15,6 +15,7 @@
 
 #include "core/common/font_manager.h"
 
+#include "base/utils/system_properties.h"
 #include "core/components/text/render_text.h"
 #include "core/pipeline/base/render_node.h"
 

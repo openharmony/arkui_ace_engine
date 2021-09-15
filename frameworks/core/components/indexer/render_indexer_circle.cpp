@@ -193,7 +193,9 @@ void RenderIndexerCircle::HandleTouchDown(const TouchEventInfo& info)
     if (curStatus_ == IndexerItemStatus::ANIMATION) {
         return;
     }
-
+    if (info.GetTouches().empty()) {
+        return;
+    }
     Offset position = info.GetTouches().front().GetLocalLocation();
     LOGD("[indexer] x:%{public}lf, y:%{public}lf, curStatus_:%{public}d, nextStatus_:%{public}d", position.GetX(),
         position.GetY(), curStatus_, nextStatus_);
@@ -251,6 +253,9 @@ void RenderIndexerCircle::HandleTouchMove(const TouchEventInfo& info)
 {
     if (!touching_) {
         LOGD("[indexer] not in touching.");
+        return;
+    }
+    if (info.GetTouches().empty()) {
         return;
     }
     Offset position = info.GetTouches().front().GetLocalLocation();

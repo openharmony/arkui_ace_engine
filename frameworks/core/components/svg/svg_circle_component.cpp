@@ -20,6 +20,25 @@
 
 namespace OHOS::Ace {
 
+SvgCircleComponent::SvgCircleComponent()
+{
+    InitDeclaration();
+}
+
+SvgCircleComponent::SvgCircleComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children)
+{
+    InitDeclaration();
+}
+
+void SvgCircleComponent::InitDeclaration()
+{
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<SvgCircleDeclaration>();
+        declaration_->Init();
+        declaration_->InitializeStyle();
+    }
+}
+
 RefPtr<Element> SvgCircleComponent::CreateElement()
 {
     return AceType::MakeRefPtr<SvgCircleElement>();
@@ -28,6 +47,43 @@ RefPtr<Element> SvgCircleComponent::CreateElement()
 RefPtr<RenderNode> SvgCircleComponent::CreateRenderNode()
 {
     return RenderSvgCircle::Create();
+}
+
+void SvgCircleComponent::SetCx(const Dimension& cx)
+{
+    declaration_->SetCx(cx);
+}
+
+const Dimension& SvgCircleComponent::GetCx() const
+{
+    return declaration_->GetCx();
+}
+
+void SvgCircleComponent::SetCy(const Dimension& cy)
+{
+    declaration_->SetCy(cy);
+}
+
+const Dimension& SvgCircleComponent::GetCy() const
+{
+    return declaration_->GetCy();
+}
+
+void SvgCircleComponent::SetR(const Dimension& r)
+{
+    declaration_->SetR(r);
+}
+
+const Dimension& SvgCircleComponent::GetR() const
+{
+    return declaration_->GetR();
+}
+
+void SvgCircleComponent::SetDeclaration(const RefPtr<SvgCircleDeclaration>& declaration)
+{
+    if (declaration) {
+        declaration_ = declaration;
+    }
 }
 
 } // namespace OHOS::Ace

@@ -16,7 +16,9 @@
 #include "frameworks/bridge/js_frontend/engine/quickjs/canvas_bridge.h"
 
 #include "base/utils/linear_map.h"
+#include "core/components/custom_paint/offscreen_canvas.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/bridge/js_frontend/engine/quickjs/offscreen_canvas_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_engine.h"
 
 namespace OHOS::Ace::Framework {
@@ -121,9 +123,6 @@ void PushTaskToPage(JSContext* ctx, JSValueConst value, const std::function<void
         return;
     }
     page->PushCommand(command);
-    if (page->CheckPageCreated()) {
-        instance->GetDelegate()->TriggerPageUpdate(page->GetPageId());
-    }
 }
 
 inline PaintState JsParseTextState(JSContext* ctx, JSValue value)
@@ -240,6 +239,7 @@ void CanvasBridge::HandleJsContext(JSContext* ctx, NodeId id, const std::string&
         { "createImageData", JS_NewCFunction(ctx, JsCreateImageData, "createImageData", 2) },
         { "putImageData", JS_NewCFunction(ctx, JsPutImageData, "putImageData", 7) },
         { "getImageData", JS_NewCFunction(ctx, JsGetImageData, "getImageData", 4) },
+        { "transferFromImageBitmap", JS_NewCFunction(ctx, JsTransferFromImageBitmap, "transferFromImageBitmap", 1)},
     };
 
     for (const auto& iter : contextTable) {
@@ -374,6 +374,34 @@ Gradient CanvasBridge::GetGradient(JSContext* ctx, JSValueConst value)
     }
     JS_FreeValue(ctx, nodeId);
     return gradientColors_[id];
+}
+
+JSValue CanvasBridge::JsTransferFromImageBitmap(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    if ((!argv) || (argc != 1)) {
+        LOGE("argc error, argc = %{private}d", argc);
+        return JS_NULL;
+    }
+
+    int32_t bridgeId = GetCurrentBridgeId(ctx, argv[0]);
+
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (!instance) {
+        return JS_NULL;
+    }
+    auto page = instance->GetRunningPage();
+    if (page) {
+        RefPtr<OffscreenCanvasBridge> birdge = AceType::DynamicCast<OffscreenCanvasBridge>(
+            page->GetOffscreenCanvasBridgeById(bridgeId));
+        if (birdge) {
+            RefPtr<OffscreenCanvas> offscreenCanvas = birdge->offscreenCanvas_;
+            auto task = [offscreenCanvas](const RefPtr<CanvasTaskPool>& pool) {
+                pool->TransferFromImageBitmap(offscreenCanvas);
+            };
+            PushTaskToPage(ctx, value, std::move(task));
+        }
+    }
+    return JS_NULL;
 }
 
 JSValue CanvasBridge::JsHandleRect(

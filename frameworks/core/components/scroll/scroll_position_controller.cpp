@@ -70,15 +70,45 @@ void ScrollPositionController::JumpTo(double position)
     }
 }
 
-void ScrollPositionController::AnimateTo(double position, float duration, const RefPtr<Curve>& curve)
+bool ScrollPositionController::AnimateTo(double position, float duration, const RefPtr<Curve>& curve,
+    bool limitDuration, const std::function<void()>& onFinish)
 {
     RefPtr<RenderNode> node = scroll_.Upgrade();
     if (node) {
         auto scroll = AceType::DynamicCast<RenderScroll>(node);
         if (scroll) {
-            scroll->AnimateTo(position, duration, curve);
+            scroll->AnimateTo(position, duration, curve, limitDuration, onFinish);
+            return true;
         }
     }
+    return false;
+}
+
+bool ScrollPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
+{
+    RefPtr<RenderNode> node = scroll_.Upgrade();
+    if (node) {
+        auto scroll = AceType::DynamicCast<RenderScroll>(node);
+        if (scroll) {
+            auto normalizedPos = scroll->NormalizePercentToPx(position, scroll->GetAxis() == Axis::VERTICAL);
+            scroll->AnimateTo(normalizedPos, duration, curve, true, nullptr);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ScrollPositionController::AnimateToTarget(const ComposeId& targetId, float duration, const RefPtr<Curve>& curve,
+    bool limitDuration, const std::function<void()>& onFinish)
+{
+    RefPtr<RenderNode> node = scroll_.Upgrade();
+    if (node) {
+        auto scroll = AceType::DynamicCast<RenderScroll>(node);
+        if (scroll) {
+            return scroll->AnimateToTarget(targetId, duration, curve, limitDuration, onFinish);
+        }
+    }
+    return false;
 }
 
 void ScrollPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
@@ -123,6 +153,19 @@ double ScrollPositionController::GetCurrentPosition() const
     return scroll->GetCurrentPosition();
 }
 
+Axis ScrollPositionController::GetScrollDirection() const
+{
+    auto direction = Axis::VERTICAL;
+    RefPtr<RenderNode> node = scroll_.Upgrade();
+    if (node) {
+        auto scroll = AceType::DynamicCast<RenderScroll>(node);
+        if (scroll) {
+            direction = scroll->GetAxis();
+        }
+    }
+    return direction;
+}
+
 void ScrollPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 {
     RefPtr<RenderNode> node = scroll_.Upgrade();
@@ -153,7 +196,20 @@ Offset ScrollPositionController::GetCurrentOffset() const
         return Offset::Zero();
     }
 
-    return scroll->GetCurrentOffset();
+    auto ctx = scroll->GetContext().Upgrade();
+    if (!ctx) {
+        return Offset::Zero();
+    }
+    if (!ctx->GetIsDeclarative()) {
+        return scroll->GetCurrentOffset();
+    }
+
+    auto pxOffset = scroll->GetCurrentOffset();
+    auto x = Dimension(pxOffset.GetX(), DimensionUnit::PX);
+    auto y = Dimension(pxOffset.GetY(), DimensionUnit::PX);
+    Offset offset(ctx->ConvertPxToVp(x), ctx->ConvertPxToVp(y));
+
+    return offset;
 }
 
 } // namespace OHOS::Ace

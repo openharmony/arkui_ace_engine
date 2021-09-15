@@ -37,26 +37,29 @@ void FlutterRenderQrcode::Paint(RenderContext& context, const Offset& offset)
     }
     int32_t blockWidth = width_ / qrCode.getSize();
     int32_t sizeInPixel = blockWidth * qrCode.getSize();
-    auto qrOffset = Alignment::GetAlignPosition(Size(width_, height_), Size(sizeInPixel, sizeInPixel),
-        Alignment::CENTER);
+    auto qrOffset =
+        Alignment::GetAlignPosition(Size(width_, height_), Size(sizeInPixel, sizeInPixel), Alignment::CENTER);
     DrawQRCode(context, offset + qrOffset, sizeInPixel, qrCode);
 }
 
-void FlutterRenderQrcode::DrawQRCode(RenderContext& context, const Offset& topLeft, int32_t size,
-    const qrcodegen::QrCode& qrCode)
+void FlutterRenderQrcode::DrawQRCode(
+    RenderContext& context, const Offset& topLeft, int32_t size, const qrcodegen::QrCode& qrCode)
 {
     auto canvas = ScopedCanvas::Create(context);
     if (!canvas) {
         LOGE("Paint canvas is null");
         return;
     }
-    if (qrcodeType_ == QrcodeType::CIRCLE) {
+    if (!qrcode_) {
+        return;
+    }
+    if (qrcode_->GetType() == QrcodeType::CIRCLE) {
         SkRect clipRect = { topLeft.GetX(), topLeft.GetY(), topLeft.GetX() + size, topLeft.GetY() + size };
         auto clipLayer = SkRRect::MakeRectXY(clipRect, size / 2, size / 2);
         canvas->canvas()->clipRRect(clipLayer, SkClipOp::kIntersect, true);
     }
     canvas->canvas()->drawBitmap(ProcessQrcodeData(size, qrCode), topLeft.GetX(), topLeft.GetY());
-    if (qrcodeType_ == QrcodeType::CIRCLE) {
+    if (qrcode_->GetType() == QrcodeType::CIRCLE) {
         int32_t smallSquareWidth = size / sqrt(2);
         canvas->canvas()->drawBitmap(ProcessQrcodeData(smallSquareWidth, qrCode),
             topLeft.GetX() + (size - smallSquareWidth) / 2, topLeft.GetY() + (size - smallSquareWidth) / 2);
@@ -76,18 +79,21 @@ uint32_t FlutterRenderQrcode::ConvertColorFromHighToLow(const Color& color)
 SkBitmap FlutterRenderQrcode::ProcessQrcodeData(int32_t width, const qrcodegen::QrCode& qrCode)
 {
     // each block width may smaller the width / qrCode.getSize(), because of precision loss.
-    auto imageInfo = SkImageInfo::Make(width, width, SkColorType::kRGBA_8888_SkColorType,
-        SkAlphaType::kOpaque_SkAlphaType);
+    auto imageInfo =
+        SkImageInfo::Make(width, width, SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
     SkBitmap skBitmap;
+    if (!qrcode_) {
+        return skBitmap;
+    }
     skBitmap.allocPixels(imageInfo);
     void* rawData = skBitmap.getPixels();
     int32_t* data = reinterpret_cast<int32_t*>(rawData);
     int32_t blockWidth = width / qrCode.getSize();
     for (int32_t i = 0; i < width; i++) {
         for (int32_t j = 0; j < width; j++) {
-            data[i * width + j] = qrCode.getModule(i / blockWidth, j / blockWidth) ?
-                ConvertColorFromHighToLow(qrcodeColor_) :
-                ConvertColorFromHighToLow(backgroundColor_);
+            data[i * width + j] = qrCode.getModule(i / blockWidth, j / blockWidth)
+                                      ? ConvertColorFromHighToLow(qrcode_->GetQrcodeColor())
+                                      : ConvertColorFromHighToLow(qrcode_->GetBackgroundColor());
         }
     }
     return skBitmap;

@@ -22,17 +22,25 @@
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/render_component.h"
+#include "frameworks/core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
 
 inline constexpr int64_t INVALID_TEXTURE = -1;
+inline constexpr double IMAGE_POSITION_DEFAULT_SIZE = 50.0;
 
 // A component can show Texture.
 class TextureComponent : public RenderComponent {
     DECLARE_ACE_TYPE(TextureComponent, RenderComponent);
 
 public:
-    TextureComponent() = default;
+    TextureComponent()
+    {
+        imagePosition_.SetSizeValueX(IMAGE_POSITION_DEFAULT_SIZE);
+        imagePosition_.SetSizeValueY(IMAGE_POSITION_DEFAULT_SIZE);
+        imagePosition_.SetSizeTypeX(BackgroundImagePositionType::PERCENT);
+        imagePosition_.SetSizeTypeY(BackgroundImagePositionType::PERCENT);
+    }
     ~TextureComponent() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override;
@@ -88,11 +96,22 @@ public:
         child_ = child;
     }
 
+    void SetImagePosition(ImageObjectPosition imagePosition)
+    {
+        imagePosition_ = imagePosition;
+    }
+
+    ImageObjectPosition GetImagePosition() const
+    {
+        return imagePosition_;
+    }
+
 private:
     int64_t textureId_ = INVALID_TEXTURE;
     uint32_t srcWidth_ = 0;
     uint32_t srcHeight_ = 0;
     ImageFit imageFit_ { ImageFit::CONTAIN };
+    ImageObjectPosition imagePosition_;
 
     RefPtr<Component> child_;
 };

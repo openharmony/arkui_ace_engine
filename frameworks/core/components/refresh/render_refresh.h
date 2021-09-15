@@ -86,6 +86,7 @@ protected:
     }
 
 private:
+    void CalcLoadingParams(const RefPtr<Component>& component);
     void Initialize();
     void InitAccessibilityEventListener();
 
@@ -161,6 +162,10 @@ private:
     double frictionRatio_ = 0.0;
     double timeDistance_ = 0.0;
     double timeOffset_ = 0.0;
+
+    // Use for update loading size when screen size changed.
+    double scale_ = 0.0;
+    WeakPtr<Component> refreshComponent_;
 
     std::string timeText_;
     std::string lastTimeText_;

@@ -49,6 +49,15 @@ public:
         onClickId_ = onClickId;
     }
 
+    const EventMarker& GetOnDoubleClickId() const
+    {
+        return onDoubleClickId_;
+    }
+    void SetOnDoubleClickId(const EventMarker& onDoubleClickId)
+    {
+        onDoubleClickId_ = onDoubleClickId;
+    }
+
     const EventMarker& GetOnLongPressId() const
     {
         return onLongPressId_;
@@ -56,6 +65,42 @@ public:
     void SetOnLongPressId(const EventMarker& onLongPressId)
     {
         onLongPressId_ = onLongPressId;
+    }
+
+    const EventMarker& GetOnPinchStartId() const
+    {
+        return onPinchStartId_;
+    }
+    void SetOnPinchStartId(const EventMarker& onPinchStartId)
+    {
+        onPinchStartId_ = onPinchStartId;
+    }
+
+    const EventMarker& GetOnPinchUpdateId() const
+    {
+        return onPinchUpdateId_;
+    }
+    void SetOnPinchUpdateId(const EventMarker& onPinchUpdateId)
+    {
+        onPinchUpdateId_ = onPinchUpdateId;
+    }
+
+    const EventMarker& GetOnPinchEndId() const
+    {
+        return onPinchEndId_;
+    }
+    void SetOnPinchEndId(const EventMarker& onPinchEndId)
+    {
+        onPinchEndId_ = onPinchEndId;
+    }
+
+    const EventMarker& GetOnPinchCancelId() const
+    {
+        return onPinchCancelId_;
+    }
+    void SetOnPinchCancelId(const EventMarker& onPinchCancelId)
+    {
+        onPinchCancelId_ = onPinchCancelId;
     }
 
     const EventMarker& GetOnHorizontalDragStartId() const
@@ -178,7 +223,12 @@ public:
 
 private:
     EventMarker onClickId_;
+    EventMarker onDoubleClickId_;
     EventMarker onLongPressId_;
+    EventMarker onPinchStartId_;
+    EventMarker onPinchUpdateId_;
+    EventMarker onPinchEndId_;
+    EventMarker onPinchCancelId_;
     EventMarker onHorizontalDragStartId_;
     EventMarker onHorizontalDragUpdateId_;
     EventMarker onHorizontalDragEndId_;

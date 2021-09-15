@@ -16,57 +16,42 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_SVG_CIRCLE_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_SVG_CIRCLE_COMPONENT_H
 
-#include "frameworks/core/components/svg/svg_sharp.h"
+#include "core/components/declaration/svg/svg_circle_declaration.h"
 #include "frameworks/core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace {
 
-class SvgCircleComponent : public ComponentGroup, public SvgSharp {
-    DECLARE_ACE_TYPE(SvgCircleComponent, ComponentGroup, SvgSharp);
+class SvgCircleComponent : public ComponentGroup {
+    DECLARE_ACE_TYPE(SvgCircleComponent, ComponentGroup);
 
 public:
-    SvgCircleComponent() = default;
-    explicit SvgCircleComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children) {};
+    SvgCircleComponent();
+    explicit SvgCircleComponent(const std::list<RefPtr<Component>>& children);
     ~SvgCircleComponent() override = default;
-
+    void InitDeclaration();
     RefPtr<RenderNode> CreateRenderNode() override;
-
     RefPtr<Element> CreateElement() override;
+    void SetCx(const Dimension& cx);
+    const Dimension& GetCx() const;
+    void SetCy(const Dimension& cy);
+    const Dimension& GetCy() const;
+    void SetR(const Dimension& r);
+    const Dimension& GetR() const;
 
-    void SetCx(const Dimension& cx)
+    void SetDeclaration(const RefPtr<SvgCircleDeclaration>& declaration);
+
+    const RefPtr<SvgCircleDeclaration>& GetDeclaration() const
     {
-        cx_ = cx;
+        return declaration_;
     }
 
-    const Dimension& GetCx() const
+    void Inherit(const RefPtr<SvgBaseDeclaration>& parent)
     {
-        return cx_;
-    }
-
-    void SetCy(const Dimension& cy)
-    {
-        cy_ = cy;
-    }
-
-    const Dimension& GetCy() const
-    {
-        return cy_;
-    }
-
-    void SetR(const Dimension& r)
-    {
-        r_ = r;
-    }
-
-    const Dimension& GetR() const
-    {
-        return r_;
+        declaration_->Inherit(parent);
     }
 
 private:
-    Dimension cx_;
-    Dimension cy_;
-    Dimension r_;
+    RefPtr<SvgCircleDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

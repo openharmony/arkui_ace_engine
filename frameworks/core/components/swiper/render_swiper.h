@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <map>
+#include <utility>
 #include <vector>
 
 #include "base/memory/ace_type.h"
@@ -25,6 +26,7 @@
 #include "core/animation/animation.h"
 #include "core/animation/animator.h"
 #include "core/animation/keyframe_animation.h"
+#include "core/animation/scroll_motion.h"
 #include "core/animation/spring_motion.h"
 #include "core/common/vibrator/vibrator_proxy.h"
 #include "core/components/box/render_box.h"
@@ -35,6 +37,7 @@
 #include "core/components/flex/render_flex.h"
 #include "core/components/text/render_text.h"
 #include "core/components/text/text_component.h"
+#include "core/components/swiper/swiper_component.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/drag_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
@@ -81,39 +84,28 @@ enum class TouchContentType {
     TOUCH_INDICATOR
 };
 
-using SwiperChangeEndListener = std::function<void(const int32_t)>;
-using MoveCallback = std::function<void(int32_t)>;
-
-class ACE_EXPORT SwiperChangeEvent : public BaseEventInfo, public EventToJSONStringAdapter {
-    DECLARE_RELATIONSHIP_OF_CLASSES(SwiperChangeEvent, BaseEventInfo, EventToJSONStringAdapter);
-
-public:
-    SwiperChangeEvent(int32_t index) : BaseEventInfo("SwiperChangeEvent"), index_(index) {}
-    ~SwiperChangeEvent() = default;
-
-    int32_t GetIndex() const
-    {
-        return index_;
-    }
-
-    std::string ToJSONString() const override
-    {
-        return std::string(R"("change",{"index":)").append(std::to_string(index_).append("},null"));
-    }
-
-private:
-    int32_t index_ = 0;
+enum class RotationStatus {
+    ROTATION_START = 0,
+    ROTATION_UPDATE,
+    ROTATION_END,
 };
+
+using SwiperChangeEndListener = std::function<void(const int32_t)>;
 
 class ACE_EXPORT RenderSwiper : public RenderNode, public RotationNode {
     DECLARE_ACE_TYPE(RenderSwiper, RenderNode, RotationNode)
 
 public:
+    static constexpr double FADE_DURATION = 500.0;
+    using BuildChildByIndex = std::function<bool(int32_t)>;
+    using DeleteChildByIndex = std::function<void(int32_t)>;
+
     ~RenderSwiper() override;
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void UpdateTouchRect() override;
     void PerformLayout() override;
+
     int32_t GetCurrentIndex() const
     {
         return currentIndex_;
@@ -134,8 +126,9 @@ public:
 
     void ExecuteMoveCallback(int32_t index)
     {
-        if (moveCallback_) {
-            moveCallback_(index);
+        const auto& callback = swiper_->GetMoveCallback();
+        if (callback) {
+            callback(index);
         }
     }
 
@@ -143,6 +136,14 @@ public:
     {
         disableSwipe_ = disableSwipe;
     }
+
+    double GetMainSize(const Size& size) const
+    {
+        return axis_ == Axis::HORIZONTAL ? size.Width() : size.Height();
+    }
+
+    void ShowPrevious();
+    void ShowNext();
 
     /* indicator animimation begin */
     // indicator status init
@@ -195,6 +196,50 @@ public:
     void MarkIndicatorPosition(bool isZoomMax = true);
     /* indicator animimation end */
 
+    // for lazy for each
+    void SetBuildChildByIndex(BuildChildByIndex buildChildByIndex)
+    {
+        buildChildByIndex_ = std::move(buildChildByIndex);
+    }
+
+    void SetDeleteChildByIndex(DeleteChildByIndex deleteChildByIndex)
+    {
+        deleteChildByIndex_ = std::move(deleteChildByIndex);
+    }
+    void AddChildByIndex(int32_t index, const RefPtr<RenderNode>& renderNode);
+    void RemoveChildByIndex(int32_t index);
+    void OnDataSourceUpdated(int32_t totalCount, int32_t startIndex);
+
+    bool GetAutoPlay() const
+    {
+        return autoPlay_;
+    }
+
+    uint64_t GetAutoPlayInterval() const
+    {
+        return autoPlayInterval_;
+    }
+
+    bool IsShowIndicator() const
+    {
+        return showIndicator_;
+    }
+
+    bool GetLoop() const
+    {
+        return loop_;
+    }
+
+    double GetDuration() const
+    {
+        return duration_;
+    }
+
+    bool IsVertical()
+    {
+        return axis_ == Axis::VERTICAL;
+    }
+
 protected:
     struct IndicatorProperties final {
         IndicatorProperties(const Offset& normalPaddingStart, const Offset& normalPaddingEnd,
@@ -236,23 +281,23 @@ protected:
     bool MouseHoverTest(const Point& parentLocalPoint) override;
 
     // swiper item
-    std::vector<RefPtr<RenderNode>> childrenArray_;
+    std::unordered_map<int32_t, RefPtr<RenderNode>> items_;
     double scale_ = 0.0;
     int32_t itemCount_ = 0;
-    float animationDuration_ = 0.0f;
     double swiperWidth_ = 0.0;
     double swiperHeight_ = 0.0;
     int32_t currentIndex_ = 0;
     int32_t targetIndex_ = 0;
     int32_t outItemIndex_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
-    AnimationCurve animationCurve_ = AnimationCurve::FRICTION;
     bool animationOpacity_ = true;
     bool needReverse_ = false;
     bool moveStatus_ = false;
     bool show_ = true;
     bool digitalIndicator_ = false;
     bool onFocus_ = false;
+    double dragDelta_ = 0.0;
+    bool isPaintedFade_ = false;
 
     // swiper indicator
     RefPtr<SwiperIndicator> indicator_;
@@ -280,11 +325,15 @@ protected:
     // indicator animation flag
     bool isIndicatorAnimationStart_ = false;
     bool isDragStart_ = false;
+    bool quickTrunItem_ = false; // quick trun swipe item
+    Color fadeColor_ = Color::GRAY;
 
 private:
     // for handle drag event
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
+    void StartSpringMotion(double mainPosition, double mainVelocity,
+        const ExtentPair& extent, const ExtentPair& initExtent);
     void HandleTouchDown(const TouchEventInfo& info);
     void HandleTouchUp(const TouchEventInfo& info);
     void HandleTouchMove(const TouchEventInfo& info);
@@ -293,15 +342,18 @@ private:
     void HandleDragUpdate(const DragUpdateInfo& info);
     void HandleDragEnd(const DragEndInfo& info);
 
-    void Initialize(const WeakPtr<PipelineContext>& context);
-    void InitRecognizer();
+    void Initialize(const WeakPtr<PipelineContext>& context, bool catchMode);
+    void InitRecognizer(bool catchMode);
     void InitDragRecognizer();
     void InitRawDragRecognizer();
     void InitAccessibilityEventListener();
     void UpdateIndex(int32_t index);
-    void MoveItems(double dragOffset, int32_t fromIndex, int32_t toIndex);
+    void MoveItems(double dragOffset, double dragVelocity, int32_t fromIndex, int32_t toIndex);
     void RestoreAutoPlay()
     {
+        if (!scheduler_) {
+            return;
+        }
         if (autoPlay_) {
             bool playEnding = currentIndex_ >= itemCount_ - 1 && !loop_;
             if (playEnding && scheduler_->IsActive()) {
@@ -321,14 +373,17 @@ private:
         }
     }
 
-    void FireItemChangedEvent() const;
+    void FireItemChangedEvent(bool changed) const;
+    void ResetCachedChildren();
+    void SetSwiperHidden(int32_t forwardNum, int32_t backNum);
+    void SetSwiperEffect(double dragOffset);
     void SwipeTo(int32_t index, bool reverse);
     int32_t GetPrevIndex() const;
     int32_t GetNextIndex() const;
+    int32_t GetPrevIndex(int32_t index) const;
+    int32_t GetNextIndex(int32_t index) const;
     int32_t GetPrevIndexOnAnimation() const;
     int32_t GetNextIndexOnAnimation() const;
-    void ShowPrevious();
-    void ShowNext();
     void InitSwipeToAnimation(double start, double end);
     void AddSwipeToTranslateListener(int32_t fromIndex, int32_t toIndex);
     void AddSwipeToOpacityListener(int32_t fromIndex, int32_t toIndex);
@@ -338,16 +393,39 @@ private:
     void RedoSwipeToAnimation(int32_t toIndex, bool reverse);
     void StopSwipeToAnimation();
     void UpdateItemOpacity(uint8_t opacity, int32_t index);
+    void UpdateOneItemOpacity(uint8_t opacity, int32_t index);
     void UpdateItemPosition(double offset, int32_t index);
-
     void UpdateScrollPosition(double dragDelta);
     void UpdateChildPosition(double offset, int32_t fromIndex, int32_t toIndex);
     Offset GetMainAxisOffset(double offset) const
     {
-        return axis_ == Axis::HORIZONTAL ? Offset(offset, 0) : Offset(0, offset);
+        double margin = (needReverse_ ? nextMargin_ : prevMargin_);
+        if (!loop_) {
+            if (nextIndex_ == 0) {
+                margin = needReverse_ ? nextMargin_ + prevMargin_ : 0;
+            } else  if (nextIndex_ == itemCount_ - 1) {
+                margin = needReverse_ ? 0 : nextMargin_ + prevMargin_;
+            }
+        }
+
+        return axis_ == Axis::HORIZONTAL ? Offset(offset + margin, 0) : Offset(0, offset + margin);
     }
     // timer tick callback, duration is in millisecond.
     void Tick(uint64_t duration);
+    bool SpringItems(const DragEndInfo& info);
+    void HandleRotationStart();
+    void HandleRotationUpdate(double delta);
+    void HandleRotationEnd();
+    void ResetRotationEndListener();
+
+    void UpdateItemCount(int32_t itemCount);
+    void BuildLazyItems();
+    void LoadItems();
+    void LoadLazyItems(bool swipeToNext);
+    double CalculateFriction(double gamma);
+    void ClearItems(const RefPtr<Component>& lazyForEachComponent, int32_t index);
+
+    RefPtr<SwiperComponent> swiper_;
 
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<ClickRecognizer> clickRecognizer_;
@@ -355,7 +433,7 @@ private:
     RefPtr<Animation<double>> translate_;
     RefPtr<Animator> controller_;
     RefPtr<Animator> swipeToController_;
-
+    RefPtr<ScrollMotion> scrollMotion_;
     RefPtr<KeyframeAnimation<double>> curTranslateAnimation_;
     RefPtr<KeyframeAnimation<double>> targetTranslateAnimation_;
     RefPtr<KeyframeAnimation<uint8_t>> curOpacityAnimation_;
@@ -365,27 +443,35 @@ private:
     bool hasDragAction_ = false;
     bool isSwipeToAnimationAdded_ = false;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> changeEvent_;
+    std::function<void()> animationFinishEvent_;
     std::function<void(const std::string&)> rotationEvent_;
-    std::function<void()> clickEvent_;
+    std::function<void(const std::shared_ptr<ClickInfo>&)> clickEvent_;
 
+    double duration_ = 0.0;
     double prevItemOffset_ = 0.0;
     double nextItemOffset_ = 0.0;
     double scrollOffset_ = 0.0;
-    double rotationStepValue_ = 0.0;
+    bool showIndicator_ = true;
     bool autoPlay_ = false;
     bool loop_ = true;
-    bool slideContinued_  = false;
     bool disableSwipe_ = false;
+    bool disableRotation_ = false;
+    bool catchMode_ = true;
     int32_t index_ = 0;
     int32_t swipeToIndex_ = -1;
-    bool isSwiperInitialized_ = false;
+    MainSwiperSize mainSwiperSize_ = MainSwiperSize::MAX;
+    double prevMargin_ = 0.0;
+    double nextMargin_ = 0.0;
 
     // need timer for auto play
     RefPtr<Scheduler> scheduler_;
     uint64_t elapsedTime_ = 0; // millisecond.
     uint64_t autoPlayInterval_ = 0;
     std::map<int32_t, std::function<void(const int32_t&)>> changeEndListeners_;
-    MoveCallback moveCallback_;
+
+    // handle rotation event on watch
+    CancelableCallback<void()> rotationTimer_;
+    RotationStatus rotationStatus_ = RotationStatus::ROTATION_END;
 
     // indicator animimation controller and indicator dyanamic info.
     RefPtr<SpringMotion> indicatorSpringMotion_;
@@ -402,6 +488,7 @@ private:
     RefPtr<Animator> zoomInDotController_;
     RefPtr<Animator> zoomOutDotController_;
     RefPtr<Animator> springController_;
+    RefPtr<Animator> fadeController_;
     RefPtr<Animator> indicatorController_;
     RefPtr<Animator> dragRetractionController_;
     RefPtr<Vibrator> vibrator_ = nullptr;
@@ -417,6 +504,14 @@ private:
     double heightStretchRate_ = 1.0;
     double dragBaseOffset_ = 0.0;
     double dragMoveOffset_ = 0.0;
+    // for lazy load
+    BuildChildByIndex buildChildByIndex_;
+    DeleteChildByIndex deleteChildByIndex_;
+    int32_t cacheStart_ = 0;
+    int32_t cacheEnd_ = 0;
+    int32_t lazyLoadCacheSize_ = 5; // default lazy load cache number: 5
+    double dragOffset_ = 0.0;
+    int32_t nextIndex_ = 0;
 };
 
 } // namespace OHOS::Ace

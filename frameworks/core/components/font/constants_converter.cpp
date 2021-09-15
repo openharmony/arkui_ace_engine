@@ -21,6 +21,7 @@
 #include "flutter/third_party/txt/src/txt/text_decoration.h"
 
 #include "base/i18n/localization.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::Constants {
@@ -41,9 +42,11 @@ txt::FontWeight ConvertTxtFontWeight(FontWeight fontWeight)
             break;
         case FontWeight::W400:
         case FontWeight::NORMAL:
+        case FontWeight::REGULAR:
             convertValue = txt::FontWeight::w400;
             break;
         case FontWeight::W500:
+        case FontWeight::MEDIUM:
             convertValue = txt::FontWeight::w500;
             break;
         case FontWeight::W600:
@@ -196,10 +199,21 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineContext>&
         txtStyle.font_size = textStyle.GetFontSize().Value();
     }
     txtStyle.font_style = ConvertTxtFontStyle(textStyle.GetFontStyle());
-    txtStyle.word_spacing = static_cast<SkScalar>(textStyle.GetWordSpacing());
-    txtStyle.letter_spacing = textStyle.GetLetterSpacing();
+
+    if (textStyle.GetWordSpacing().Unit() == DimensionUnit::PERCENT) {
+        txtStyle.word_spacing = textStyle.GetWordSpacing().Value() * txtStyle.font_size;
+    } else {
+        if (pipelineContext) {
+            txtStyle.word_spacing = pipelineContext->NormalizeToPx(textStyle.GetWordSpacing());
+        } else {
+            txtStyle.word_spacing = textStyle.GetWordSpacing().Value();
+        }
+    }
+
+    txtStyle.letter_spacing = pipelineContext->NormalizeToPx(textStyle.GetLetterSpacing());
     txtStyle.text_baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
+    txtStyle.decoration_color = ConvertSkColor(textStyle.GetTextDecorationColor());
     txtStyle.font_families = textStyle.GetFontFamilies();
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
 
@@ -227,6 +241,16 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineContext>&
             LOGD("use default text style height value.");
             txtStyle.height = 1;
         }
+    }
+
+    // set font variant
+    auto fontFeatures = textStyle.GetFontFeatures();
+    if (!fontFeatures.empty()) {
+        txt::FontFeatures features;
+        for (auto iter = fontFeatures.begin(); iter != fontFeatures.end(); ++iter) {
+            features.SetFeature(iter->first, iter->second);
+        }
+        txtStyle.font_features = features;
     }
 }
 

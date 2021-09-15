@@ -18,7 +18,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/offset.h"
-#include "core/gestures/touch_event.h"
+#include "core/event/touch_event.h"
 #include "core/gestures/velocity.h"
 
 namespace OHOS::Ace {

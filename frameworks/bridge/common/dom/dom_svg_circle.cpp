@@ -21,25 +21,6 @@ namespace OHOS::Ace::Framework {
 
 DOMSvgCircle::DOMSvgCircle(NodeId nodeId, const std::string& nodeName) : DOMSvgBase(nodeId, nodeName) {}
 
-bool DOMSvgCircle::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
-{
-    if (DOMSvgBase::SetPresentationAttr(attr)) {
-        return true;
-    }
-    if (attr.first == DOM_SVG_CX) {
-        cx_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_CY) {
-        cy_ = ParseDimension(attr.second);
-        return true;
-    }
-    if (attr.first == DOM_SVG_R) {
-        r_ = ParseDimension(attr.second);
-        return true;
-    }
-    return false;
-}
 
 RefPtr<Component> DOMSvgCircle::GetSpecializedComponent()
 {
@@ -53,7 +34,7 @@ void DOMSvgCircle::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 
 void DOMSvgCircle::OnMounted(const RefPtr<DOMNode>& parentNode)
 {
-    DOMSvgBase::InheritCommonAttrs(circleComponent_, parentNode);
+    DOMSvgBase::InheritAttrs(parentNode);
 }
 
 void DOMSvgCircle::PrepareSpecializedComponent()
@@ -61,10 +42,10 @@ void DOMSvgCircle::PrepareSpecializedComponent()
     if (!circleComponent_) {
         circleComponent_ = AceType::MakeRefPtr<SvgCircleComponent>();
     }
-    circleComponent_->SetCx(cx_);
-    circleComponent_->SetCy(cy_);
-    circleComponent_->SetR(r_);
-    DOMSvgBase::PrepareCommonAttrs(circleComponent_);
+    auto declaration = AceType::DynamicCast<SvgCircleDeclaration>(declaration_);
+    if (declaration) {
+        circleComponent_->SetDeclaration(declaration);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

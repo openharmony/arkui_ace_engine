@@ -33,7 +33,11 @@ class FlutterRenderSvgTspan : public FlutterRenderSvgText {
 public:
     static RefPtr<RenderNode> Create();
 
+    void Paint(RenderContext& context, const Offset& offset) override;
+
     void DrawTextPath(RenderContext& context, PathOffset& pathOffset);
+
+    void MeasureTextPathBounds(PathOffset& pathOffset, Rect& bounds);
 
 protected:
     void OnNotifyRender() override;
@@ -42,6 +46,7 @@ private:
     void UpdateDrawOffset(DrawOffset& drawOffset) override;
     void UpdatePathOffset(PathOffset& pathOffset);
     double OnDrawTextPath(RenderContext& context, const PathOffset& pathOffset);
+    double OnMeasureTextPathBounds(const PathOffset& pathOffset, Rect& bounds);
 };
 
 } // namespace OHOS::Ace

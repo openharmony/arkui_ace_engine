@@ -26,6 +26,7 @@ void RenderSelect::OnTouchTestHit(
     LOGD("RenderSelect::OnTouchTestHit(%{public}lf, %{public}lf).", coordinateOffset.GetX(), coordinateOffset.GetY());
     if (clickRecognizer_) {
         result.emplace_back(clickRecognizer_);
+        clickRecognizer_->SetIsExternalGesture(true);
     }
 
     if (rawRecognizer_) {

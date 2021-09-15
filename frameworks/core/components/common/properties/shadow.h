@@ -27,6 +27,8 @@ constexpr float LIGHT_RADIUS = 800.0f; // System recommended value.
 // A style class indicates the way to render shadow effect
 class Shadow final {
 public:
+    static Shadow Blend(const Shadow& to, const Shadow& from, float progress);
+
     Shadow() = default;
     ~Shadow() = default;
 

@@ -55,8 +55,11 @@ void RenderRadio::Update(const RefPtr<Component>& component)
         radioValue_ = radio->GetValue();
         groupValue_ = radio->GetGroupValue();
     }
-    if (!radioValue_.empty()) {
+    bool originChecked = radio->GetOriginChecked();
+    if (!groupValue_.empty()) {
         checked_ = radioValue_ == groupValue_;
+    } else {
+        checked_ = originChecked;
     }
     auto theme = GetTheme<RadioTheme>();
     if (theme) {
@@ -141,6 +144,9 @@ bool RenderRadio::UpdateGroupValue(const std::string& groupValue)
     if (changeEvent_) {
         changeEvent_(result);
     }
+    if (valueChangeEvent_) {
+        valueChangeEvent_(groupValue_);
+    }
     return needRender;
 }
 
@@ -178,6 +184,10 @@ void RenderRadio::OffAnimationEnd()
 void RenderRadio::OnAnimationStart()
 {
     // set the stage to checked and then start animation
+    auto context = context_.Upgrade();
+    if (context->GetIsDeclarative()) {
+        RenderCheckable::HandleClick();
+    }
     UpdateAccessibilityAttr();
 }
 

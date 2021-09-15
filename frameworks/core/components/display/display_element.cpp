@@ -16,8 +16,37 @@
 #include "core/components/display/display_element.h"
 
 #include "core/components/display/render_display.h"
+#include "core/components/stage/stage_element.h"
+#include "core/components/tween/tween_component.h"
 
 namespace OHOS::Ace {
+
+void DisplayElement::Update()
+{
+    if (!component_) {
+        SoleChildElement::Update();
+        return;
+    }
+    auto displayComponent = AceType::DynamicCast<DisplayComponent>(component_);
+    if (!displayComponent) {
+        LOGE("Get DisplayComponent failed.");
+        return;
+    }
+
+    auto renderDisplay = AceType::DynamicCast<RenderDisplay>(GetRenderNode());
+    auto tween = AceType::DynamicCast<TweenComponent>(displayComponent->GetChild());
+    if (renderDisplay && tween) {
+        if (displayComponent->GetVisible() != renderDisplay->GetVisibleType() &&
+            renderDisplay->GetVisibleType() == VisibleType::GONE) {
+            LOGD("SetIsFirstFrameShow false");
+            tween->SetIsFirstFrameShow(false);
+        } else {
+            LOGD("SetIsFirstFrameShow true");
+            tween->SetIsFirstFrameShow(true);
+        }
+    }
+    SoleChildElement::Update();
+}
 
 void DisplayElement::PerformBuild()
 {
@@ -27,6 +56,26 @@ void DisplayElement::PerformBuild()
         displayRender->GetOpacityCallbacks();
         // refresh.
         displayRender->UpdateOpacity(displayRender->GetOpacity());
+    }
+}
+
+void DisplayElement::Mount(const RefPtr<Element>& parent, int32_t slot, int32_t renderSlot)
+{
+    auto stage = AceType::DynamicCast<StageElement>(parent);
+    if (stage && stage->IsForCard()) {
+        Element::SetParent(parent);
+        SetDepth(parent != nullptr ? parent->GetDepth() + 1 : 1);
+
+        SetPipelineContext(stage->GetCardContext());
+        Prepare(parent);
+        SetRenderSlot(renderSlot);
+        if (parent) {
+            parent->AddChild(AceType::Claim(this), slot);
+            AddToFocus();
+        }
+        Rebuild();
+    } else {
+        Element::Mount(parent, slot, renderSlot);
     }
 }
 

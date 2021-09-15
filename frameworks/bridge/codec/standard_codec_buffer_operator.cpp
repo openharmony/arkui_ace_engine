@@ -43,6 +43,20 @@ bool StandardCodecBufferReader::ReadType(BufferDataType& type)
     return false;
 }
 
+bool StandardCodecBufferReader::ReadMapSize(int32_t& data)
+{
+    BufferDataType type = BufferDataType::TYPE_NULL;
+    if (!ReadType(type)) {
+        LOGW("Read type failed");
+        return false;
+    }
+    if (type == BufferDataType::TYPE_MAP) {
+        byteBufferReader_.ReadData(data);
+        return true;
+    }
+    return false;
+}
+
 bool StandardCodecBufferReader::ReadDataList(std::vector<CodecData>& resultDataList)
 {
     resultDataList.clear();

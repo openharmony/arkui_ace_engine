@@ -24,7 +24,6 @@
 #include "core/components/svg/render_svg_line.h"
 #include "core/components/svg/render_svg_path.h"
 #include "core/components/svg/render_svg_polygon.h"
-#include "core/components/svg/render_svg_polyline.h"
 #include "core/components/svg/render_svg_rect.h"
 #include "core/components/svg/svg_circle_component.h"
 #include "core/components/svg/svg_component.h"
@@ -32,7 +31,6 @@
 #include "core/components/svg/svg_line_component.h"
 #include "core/components/svg/svg_path_component.h"
 #include "core/components/svg/svg_polygon_component.h"
-#include "core/components/svg/svg_polyline_component.h"
 #include "core/components/svg/svg_rect_component.h"
 #include "core/components/test/unittest/mock/mock_render_common.h"
 
@@ -257,10 +255,10 @@ HWTEST_F(RenderSvgTest, RenderSvgTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. construct SvgPolygonComponent and RenderSvgPolygon.
      */
-    auto component = AceType::MakeRefPtr<SvgPolylineComponent>();
+    auto component = AceType::MakeRefPtr<SvgPolygonComponent>(false);
     component->SetPoints("0,400 60,325 70,375 100,300");
     auto mockContext = MockRenderCommon::GetMockContext();
-    auto render = AceType::MakeRefPtr<RenderSvgPolyline>();
+    auto render = AceType::MakeRefPtr<RenderSvgPolygon>();
     render->Attach(mockContext);
 
     /**
@@ -283,7 +281,7 @@ HWTEST_F(RenderSvgTest, RenderSvgTest007, TestSize.Level1)
 HWTEST_F(RenderSvgTest, RenderSvgTest008, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. construct SvgPolylineComponent and RenderSvgPolygon.
+     * @tc.steps: step1. construct SvgPolygonComponent and RenderSvgPolygon.
      */
     auto component = AceType::MakeRefPtr<SvgPolygonComponent>();
     component->SetPoints("0,400 60,325 70,375 100,300");

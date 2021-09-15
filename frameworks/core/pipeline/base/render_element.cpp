@@ -21,6 +21,7 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/focus_animation/render_focus_animation.h"
 #include "core/components/shadow/render_shadow.h"
+#include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/render_component.h"
 
@@ -38,12 +39,11 @@ void RenderElement::Prepare(const WeakPtr<Element>& parent)
     if (!renderNode_) {
         renderNode_ = CreateRenderNode();
     }
-    if (renderNode_ != nullptr) {
+    if (renderNode_) {
         SetAccessibilityNode(parent);
         renderNode_->Attach(context_);
     }
-
-    // register on fcous move callback
+    // register on focus move callback
     auto focusItem = AceType::DynamicCast<FocusNode>(this);
     if (focusItem) {
         focusItem->SetFocusMoveCallback([weak = AceType::WeakClaim(this)] {
@@ -53,6 +53,7 @@ void RenderElement::Prepare(const WeakPtr<Element>& parent)
             }
         });
     }
+    nodeMounted_ = true;
 }
 
 void RenderElement::SetAccessibilityNode(const WeakPtr<Element>& parent)
@@ -129,24 +130,36 @@ void RenderElement::Apply(const RefPtr<Element>& child)
         return;
     }
 
+    if (child->GetType() == RENDER_ELEMENT) {
+        // Directly attach the RenderNode if child is RenderElement.
+        ApplyRenderChild(AceType::DynamicCast<RenderElement>(child));
+    } else if (child->GetType() == COMPOSED_ELEMENT) {
+        // If child is ComposedElement, just set apply function.
+        RefPtr<ComposedElement> composeChild = AceType::DynamicCast<ComposedElement>(child);
+        if (composeChild) {
+            composeChild->ApplyComposed([weak = AceType::WeakClaim(this)](const RefPtr<RenderElement>& renderChild) {
+                auto renderElement = weak.Upgrade();
+                if (renderElement) {
+                    renderElement->ApplyRenderChild(renderChild);
+                }
+            });
+        }
+    }
+}
+
+void RenderElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChild)
+{
+    if (!renderChild) {
+        LOGW("Invalid render child");
+        return;
+    }
+
     if (!renderNode_) {
         LOGE("RenderElement don't have a render node");
         return;
     }
 
-    if (child->GetType() == RENDER_ELEMENT) {
-        // Directly attach the RenderNode if child is RenderElement.
-        RefPtr<RenderElement> renderChild = AceType::DynamicCast<RenderElement>(child);
-        if (renderChild) {
-            renderNode_->AddChild(renderChild->GetRenderNode(), renderChild->GetSlot());
-        }
-    } else if (child->GetType() == COMPOSED_ELEMENT) {
-        // If child is ComposedElement, just set parent render node.
-        RefPtr<ComposedElement> composeChild = AceType::DynamicCast<ComposedElement>(child);
-        if (composeChild) {
-            composeChild->SetParentRenderNode(renderNode_);
-        }
-    }
+    renderNode_->AddChild(renderChild->GetRenderNode(), renderChild->GetRenderSlot());
 }
 
 void RenderElement::Update()
@@ -154,6 +167,18 @@ void RenderElement::Update()
     if (renderNode_ != nullptr) {
         UpdateAccessibilityNode();
         renderNode_->UpdateAll(component_);
+        if (component_ && nodeMounted_) {
+            if (!component_->GetAppearEventMarker().IsEmpty()) {
+                auto appearCallback = AceAsyncEvent<void()>::Create(component_->GetAppearEventMarker(), context_);
+                appearCallback();
+            }
+            if (!component_->GetDisappearEventMarker().IsEmpty()) {
+                disappearCallback_ = AceAsyncEvent<void()>::Create(component_->GetDisappearEventMarker(), context_);
+            } else {
+                disappearCallback_ = nullptr;
+            }
+            nodeMounted_ = false;
+        }
     }
 }
 
@@ -178,9 +203,17 @@ void RenderElement::Detached()
     if (renderNode_) {
         renderNode_ = nullptr;
     }
+    if (disappearCallback_) {
+        disappearCallback_();
+    }
 }
 
 void RenderElement::Deactivate()
+{
+    UmountRender();
+}
+
+void RenderElement::UmountRender()
 {
     if (renderNode_) {
         auto focusAnimation = AceType::DynamicCast<RenderFocusAnimation>(renderNode_);
@@ -202,6 +235,11 @@ void RenderElement::Deactivate()
         }
         renderNode_->Unmount();
     }
+}
+
+RefPtr<Element> RenderElement::UpdateChild(const RefPtr<Element>& child, const RefPtr<Component>& newComponent)
+{
+    return UpdateChildWithSlot(child, newComponent, DEFAULT_ELEMENT_SLOT, DEFAULT_RENDER_SLOT);
 }
 
 } // namespace OHOS::Ace

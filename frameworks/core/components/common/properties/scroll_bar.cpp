@@ -69,14 +69,17 @@ void ScrollBar::SetTrickRegion(const Offset& offset, const Size& size, const Off
             activeOffsetY = std::min(activeOffsetY, barRegionHeight - activeHeight);
             double normalWidth = NormalizeToPx(normalWidth_);
             if (positionMode_ == PositionMode::LEFT) {
-                activeRect_ = Rect(0.0, activeOffsetY, normalWidth, activeHeight) + offset;
+                activeRect_ = Rect(-NormalizeToPx(position_), activeOffsetY, normalWidth, activeHeight) + offset;
                 touchRegion_ = activeRect_ + Size(NormalizeToPx(touchWidth_), 0);
             } else {
-                activeRect_ = Rect(width - normalWidth - NormalizeToPx(padding_.Right()),
-                    activeOffsetY, normalWidth, activeHeight) + offset;
+                double x = width - normalWidth - NormalizeToPx(padding_.Right()) + NormalizeToPx(position_);
+                activeRect_ = Rect(x, activeOffsetY, normalWidth, activeHeight) + offset;
                 // Update the hot region
-                touchRegion_ = activeRect_ - Offset(NormalizeToPx(touchWidth_ - normalWidth_ - padding_.Right()), 0.0) +
-                    Size(NormalizeToPx(touchWidth_ - normalWidth_), 0);
+                touchRegion_ =
+                    activeRect_ -
+                    Offset(NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Right()),
+                        0.0) +
+                    Size(NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_), 0);
             }
         }
     } else {
@@ -120,7 +123,9 @@ void ScrollBar::InitScrollBar(const WeakPtr<RenderNode>& scroll, const WeakPtr<P
 {
     pipelineContext_ = context;
     if (NeedScrollBar()) {
-        barController_ = AceType::MakeRefPtr<ScrollBarController>();
+        if (!barController_) {
+            barController_ = AceType::MakeRefPtr<ScrollBarController>();
+        }
         barController_->Initialize(context);
         barController_->SetScrollNode(scroll);
         barController_->SetActiveWidth(activeWidth_);
@@ -210,6 +215,13 @@ Size ScrollBar::GetRootSize() const
         return Size(rootWidth, rootHeight);
     } else {
         return Size();
+    }
+}
+
+void ScrollBar::Reset()
+{
+    if (barController_) {
+        barController_->Reset();
     }
 }
 

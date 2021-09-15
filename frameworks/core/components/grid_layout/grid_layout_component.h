@@ -18,6 +18,9 @@
 
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/scroll_bar.h"
+#include "core/components_v2/foreach/lazy_foreach_component.h"
+#include "core/components_v2/grid/grid_position_controller.h"
 #include "core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace {
@@ -26,8 +29,7 @@ class ACE_EXPORT GridLayoutComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(GridLayoutComponent, ComponentGroup);
 
 public:
-    explicit GridLayoutComponent(const std::list<RefPtr<Component>>& children)
-        : ComponentGroup(children) {}
+    explicit GridLayoutComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children) {}
 
     ~GridLayoutComponent() override = default;
 
@@ -43,9 +45,17 @@ public:
     void SetHeight(double height);
     void SetColumnsArgs(const std::string& columnsArgs);
     void SetRowsArgs(const std::string& rowsArgs);
-    void SetColumnGap(double columnGap);
-    void SetRowGap(double rowGap);
+    void SetColumnGap(const Dimension& columnGap);
+    void SetRowGap(const Dimension& rowGap);
     void SetRightToLeft(bool rightToLeft);
+
+    // set scroll bar color
+    void SetScrollBarColor(const std::string& color);
+
+    // set scroll bar width
+    void SetScrollBarWidth(const std::string& width);
+
+    void SetScrollBar(DisplayMode displayMode);
 
     const std::string& GetColumnsArgs() const
     {
@@ -57,12 +67,12 @@ public:
         return rowsArgs_;
     }
 
-    double GetColumnGap() const
+    const Dimension& GetColumnGap() const
     {
         return columnGap_;
     }
 
-    double GetRowGap() const
+    const Dimension& GetRowGap() const
     {
         return rowGap_;
     }
@@ -102,6 +112,51 @@ public:
         return rightToLeft_;
     }
 
+    void SetUseScroll(bool flag)
+    {
+        useScroll_ = flag;
+    }
+
+    const std::string& GetScrollBarColor() const
+    {
+        return scrollBarColor_;
+    }
+
+    const std::string& GetScrollBarWidth() const
+    {
+        return scrollBarWidth_;
+    }
+
+    DisplayMode GetScrollBar()
+    {
+        return displayMode_;
+    }
+
+    void SetDeclarative()
+    {
+        isDeclarative_ = true;
+    }
+
+    const RefPtr<V2::GridPositionController>& GetController() const
+    {
+        return controller_;
+    }
+
+    void SetController(const RefPtr<V2::GridPositionController>& controller)
+    {
+        controller_ = controller;
+    }
+
+    void SetScrolledEvent(const EventMarker& event)
+    {
+        scrolledEvent_ = event;
+    }
+
+    const EventMarker& GetScrolledEvent() const
+    {
+        return scrolledEvent_;
+    }
+
 private:
     FlexDirection direction_ = FlexDirection::COLUMN;
     FlexAlign flexAlign_ = FlexAlign::CENTER;
@@ -109,12 +164,21 @@ private:
     double height_ = -1.0;
     int32_t columnCount_ = 1;
     int32_t rowCount_ = 1;
+    bool isDeclarative_ = false;
 
     std::string columnsArgs_;
     std::string rowsArgs_;
-    double columnGap_ = 0.0;
-    double rowGap_ = 0.0;
+    Dimension columnGap_ = 0.0_px;
+    Dimension rowGap_ = 0.0_px;
     bool rightToLeft_ = false;
+    bool useScroll_ = true;
+
+    // scroll bar attribute
+    std::string scrollBarColor_;
+    std::string scrollBarWidth_;
+    DisplayMode displayMode_ = DisplayMode::OFF;
+    RefPtr<V2::GridPositionController> controller_;
+    EventMarker scrolledEvent_;
 };
 
 } // namespace OHOS::Ace

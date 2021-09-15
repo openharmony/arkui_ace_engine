@@ -28,11 +28,9 @@
 namespace OHOS::Ace::Framework {
 namespace {
 
-const Alignment ALIGN_ARRAY[3][3] = {
-    { Alignment::TOP_LEFT, Alignment::TOP_CENTER, Alignment::TOP_RIGHT },
+const Alignment ALIGN_ARRAY[3][3] = { { Alignment::TOP_LEFT, Alignment::TOP_CENTER, Alignment::TOP_RIGHT },
     { Alignment::CENTER_LEFT, Alignment::CENTER, Alignment::CENTER_RIGHT },
-    { Alignment::BOTTOM_LEFT, Alignment::BOTTOM_CENTER, Alignment::BOTTOM_RIGHT }
-};
+    { Alignment::BOTTOM_LEFT, Alignment::BOTTOM_CENTER, Alignment::BOTTOM_RIGHT } };
 
 } // namespace
 
@@ -127,9 +125,14 @@ void DOMDiv::CreateOrUpdateGrid()
     if (!grid_) {
         grid_ = AceType::MakeRefPtr<GridLayoutComponent>(std::list<RefPtr<Component>>());
     }
-    grid_->SetDirection(direction_ == DOM_FLEX_ROW ? FlexDirection::COLUMN : FlexDirection::ROW);
+    if (boxWrap_) {
+        grid_->SetDirection(direction_ == DOM_FLEX_ROW ? FlexDirection::COLUMN : FlexDirection::ROW);
+    } else {
+        grid_->SetDirection(direction_ == DOM_FLEX_COLUMN ? FlexDirection::COLUMN : FlexDirection::ROW);
+    }
     grid_->SetColumnsArgs(columnsArgs_);
     grid_->SetRowsArgs(rowsArgs_);
+    grid_->SetUseScroll(false);
     grid_->SetColumnGap(columnGap_);
     grid_->SetRowGap(rowGap_);
     grid_->SetRightToLeft(IsRightToLeft());
@@ -176,8 +179,10 @@ void DOMDiv::CreateOrUpdateFlex()
     }
     if (IsRightToLeft()) {
         textDirection_ = TextDirection::RTL;
-        flexChild_->SetTextDirection(textDirection_);
+    } else {
+        textDirection_ = TextDirection::LTR;
     }
+    flexChild_->SetTextDirection(textDirection_);
     flexChild_->SetMainAxisAlign(flexMainAlign);
     flexChild_->SetCrossAxisAlign(flexCrossAlign);
     if (boxWrap_) {
@@ -200,6 +205,7 @@ void DOMDiv::CreateOrUpdateFlex()
         flexChild_->SetStretchToParent(!boxWrap_);
         flexChild_->SetCrossAxisSize(CrossAxisSize::MAX);
     }
+    SetSpecializedOverflow();
 }
 
 void DOMDiv::CreateOrUpdateWrap()
@@ -237,9 +243,11 @@ void DOMDiv::CreateOrUpdateWrap()
     wrapChild_->SetAlignment(wrapAlignContent);
 
     if (IsRightToLeft()) {
-        textDirection_ = TextDirection ::RTL;
-        wrapChild_->SetTextDirection(textDirection_);
+        textDirection_ = TextDirection::RTL;
+    } else {
+        textDirection_ = TextDirection::LTR;
     }
+    wrapChild_->SetTextDirection(textDirection_);
 
     LOGD("DOMDiv GetWrapAlign end ,Direction:%{public}d, flexMainAlign:%{public}d, flexCrossAlign:%{public}d, "
          "AlignContent :%{public}d",
@@ -257,11 +265,19 @@ void DOMDiv::SetBoxWidthFlex(bool isHorizontal) const
     }
 }
 
+void DOMDiv::SetSpecializedOverflow()
+{
+    auto& overflowStyle = static_cast<CommonOverflowStyle&>(declaration_->GetStyle(StyleTag::COMMON_OVERFLOW_STYLE));
+    if (overflowStyle.IsValid() && flexChild_) {
+        flexChild_->SetOverflow(overflowStyle.overflow);
+    }
+}
+
 // If not set div height, The root node(id=0) should be fill the column height
 void DOMDiv::SetRootBoxHeight() const
 {
     // not the root node 0 or Height != 0
-    if ((!isRootNode_) || GreatOrEqual(boxComponent_->GetHeightDimension().Value(), 0.0)) {
+    if (boxWrap_ || (!isRootNode_) || GreatOrEqual(boxComponent_->GetHeightDimension().Value(), 0.0)) {
         return;
     }
     if (boxComponent_->GetWidthDimension().IsValid()) {
@@ -270,10 +286,11 @@ void DOMDiv::SetRootBoxHeight() const
     }
     auto context = GetPipelineContext().Upgrade();
     if (context && (context->GetWindowModal() == WindowModal::SEMI_MODAL ||
-        context->GetWindowModal() == WindowModal::DIALOG_MODAL)) {
+                       context->GetWindowModal() == WindowModal::DIALOG_MODAL)) {
         boxComponent_->SetFlex(BoxFlex::FLEX_X);
     } else {
         boxComponent_->SetFlex(BoxFlex::FLEX_XY);
+        flexChild_->SetCrossAxisSize(CrossAxisSize::MAX);
     }
 }
 
@@ -299,12 +316,24 @@ void DOMDiv::SetFlexHeight(FlexAlign flexMainAlign)
 
 void DOMDiv::OnMounted(const RefPtr<DOMNode>& parentNode)
 {
+    if (!declaration_) {
+        return;
+    }
+    auto& overflowStyle = static_cast<CommonOverflowStyle&>(declaration_->GetStyle(StyleTag::COMMON_OVERFLOW_STYLE));
+
     // overflowFlag means that default tabcontent, dialog and panel support scroll.
-    auto overflowFlag = !parentNode->HasOverflowStyle() && !hasOverflowStyle_;
+    auto overflowFlag = !parentNode->HasOverflowStyle() && !declaration_->HasOverflowStyle();
     if (parentNode->GetTag() == DOM_NODE_TAG_TAB_CONTENT && direction_ == DOM_FLEX_COLUMN && overflowFlag) {
         auto child = boxComponent_->GetChild();
         scroll_ = AceType::MakeRefPtr<ScrollComponent>(child);
-        scroll_->InitScrollBar(GetTheme<ScrollBarTheme>(), scrollBarColor_, scrollBarWidth_, edgeEffect_);
+        scroll_->SetOnReachStart(onReachStart_);
+        scroll_->SetOnReachEnd(onReachEnd_);
+        scroll_->SetOnReachTop(onReachTop_);
+        scroll_->SetOnReachBottom(onReachBottom_);
+        if (overflowStyle.IsValid()) {
+            scroll_->InitScrollBar(GetTheme<ScrollBarTheme>(), overflowStyle.scrollBarColor,
+                overflowStyle.scrollBarWidth, overflowStyle.edgeEffect);
+        }
         boxComponent_->SetChild(scroll_);
         if (flexChild_) {
             flexChild_->SetUseViewPortFlag(true);
@@ -326,7 +355,10 @@ void DOMDiv::OnMounted(const RefPtr<DOMNode>& parentNode)
         // dialog child should be scrollable
         auto child = rootComponent_->GetChild();
         scroll_ = AceType::MakeRefPtr<ScrollComponent>(child);
-        scroll_->InitScrollBar(GetTheme<ScrollBarTheme>(), scrollBarColor_, scrollBarWidth_, edgeEffect_);
+        if (overflowStyle.IsValid()) {
+            scroll_->InitScrollBar(GetTheme<ScrollBarTheme>(), overflowStyle.scrollBarColor,
+                overflowStyle.scrollBarWidth, overflowStyle.edgeEffect);
+        }
         // use takeBoundary to expand the size of dialog
         scroll_->SetTakeBoundary(false);
         rootComponent_->SetChild(scroll_);
@@ -335,7 +367,10 @@ void DOMDiv::OnMounted(const RefPtr<DOMNode>& parentNode)
     if (parentNode->GetTag() == DOM_NODE_TAG_PANEL && direction_ == DOM_FLEX_COLUMN && overflowFlag) {
         auto child = rootComponent_->GetChild();
         scroll_ = AceType::MakeRefPtr<ScrollComponent>(child);
-        scroll_->InitScrollBar(GetTheme<ScrollBarTheme>(), scrollBarColor_, scrollBarWidth_, edgeEffect_);
+        if (overflowStyle.IsValid()) {
+            scroll_->InitScrollBar(GetTheme<ScrollBarTheme>(), overflowStyle.scrollBarColor,
+                overflowStyle.scrollBarWidth, overflowStyle.edgeEffect);
+        }
         rootComponent_->SetChild(scroll_);
     }
 }
@@ -350,10 +385,11 @@ bool DOMDiv::SetSpecializedStyle(const std::pair<std::string, std::string>& styl
         { DOM_GRID_AUTO_FLOW, [](const std::string& value, DOMDiv& div) { div.direction_ = value; } },
         { DOM_GRID_COLUMN_END, [](const std::string& value, DOMDiv& div) { div.columnEnd_ = StringToInt(value); } },
         { DOM_GRID_COLUMN_START, [](const std::string& value, DOMDiv& div) { div.columnStart_ = StringToInt(value); } },
-        { DOM_GRID_COLUMN_GAP, [](const std::string& value, DOMDiv& div) { div.columnGap_ = StringToDouble(value); } },
+        { DOM_GRID_COLUMN_GAP,
+            [](const std::string& value, DOMDiv& div) { div.columnGap_ = StringToDimension(value); } },
         { DOM_GRID_ROW_END, [](const std::string& value, DOMDiv& div) { div.rowEnd_ = StringToInt(value); } },
         { DOM_GRID_ROW_START, [](const std::string& value, DOMDiv& div) { div.rowStart_ = StringToInt(value); } },
-        { DOM_GRID_ROW_GAP, [](const std::string& value, DOMDiv& div) { div.rowGap_ = StringToDouble(value); } },
+        { DOM_GRID_ROW_GAP, [](const std::string& value, DOMDiv& div) { div.rowGap_ = StringToDimension(value); } },
         { DOM_GRID_TEMPLATE_COLUMNS, [](const std::string& value, DOMDiv& div) { div.columnsArgs_ = value; } },
         { DOM_GRID_TEMPLATE_ROWS, [](const std::string& value, DOMDiv& div) { div.rowsArgs_ = value; } },
         { DOM_JUSTIFY_CONTENT, [](const std::string& value, DOMDiv& div) { div.justifyContent_ = value; } },
@@ -374,6 +410,43 @@ bool DOMDiv::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
     }
     if (attr.first == DOM_DIV_CARD_BLUR) {
         isCardBlur_ = StringToBool(attr.second);
+        return true;
+    }
+    return false;
+}
+
+bool DOMDiv::AddSpecializedEvent(int32_t pageId, const std::string& event)
+{
+    // static linear map must be sorted by key.
+    static const LinearMapNode<void (*)(int32_t, DOMDiv&)> eventOperators[] = {
+        {
+            DOM_DIV_EVENT_REACH_BOTTOM,
+            [](int32_t pageId, DOMDiv& div) {
+                div.onReachBottom_ = EventMarker(div.GetNodeIdForEvent(), DOM_DIV_EVENT_REACH_BOTTOM, pageId);
+            },
+        },
+        {
+            DOM_DIV_EVENT_REACH_END,
+            [](int32_t pageId, DOMDiv& div) {
+                div.onReachEnd_ = EventMarker(div.GetNodeIdForEvent(), DOM_DIV_EVENT_REACH_END, pageId);
+            },
+        },
+        {
+            DOM_DIV_EVENT_REACH_START,
+            [](int32_t pageId, DOMDiv& div) {
+                div.onReachStart_ = EventMarker(div.GetNodeIdForEvent(), DOM_DIV_EVENT_REACH_START, pageId);
+            },
+        },
+        {
+            DOM_DIV_EVENT_REACH_TOP,
+            [](int32_t pageId, DOMDiv& div) {
+                div.onReachTop_ = EventMarker(div.GetNodeIdForEvent(), DOM_DIV_EVENT_REACH_TOP, pageId);
+            },
+        },
+    };
+    auto iter = BinarySearchFindIndex(eventOperators, ArraySize(eventOperators), event.c_str());
+    if (iter != -1) {
+        eventOperators[iter].value(pageId, *this);
         return true;
     }
     return false;
@@ -402,10 +475,10 @@ void DOMDiv::SetCardThemeAttrs()
             if (backDecoration && (backDecoration->GetBackgroundColor() == Color::TRANSPARENT)) {
                 backDecoration->SetBackgroundColor(cardTheme_->GetBackgroundColor());
             }
+            RefPtr<Decoration> frontDecoration = boxComponent_->GetFrontDecoration();
             if (isCardBlur_) {
-                RefPtr<Decoration> frontDecoration = boxComponent_->GetFrontDecoration();
                 if (!frontDecoration) {
-                    RefPtr<Decoration> frontDecoration = AceType::MakeRefPtr<Decoration>();
+                    frontDecoration = AceType::MakeRefPtr<Decoration>();
                     frontDecoration->SetBlurRadius(cardTheme_->GetBlurRadius());
                     boxComponent_->SetFrontDecoration(frontDecoration);
                 }
@@ -413,7 +486,6 @@ void DOMDiv::SetCardThemeAttrs()
                     frontDecoration->SetBlurRadius(cardTheme_->GetBlurRadius());
                 }
             } else {
-                RefPtr<Decoration> frontDecoration = boxComponent_->GetFrontDecoration();
                 if (frontDecoration && frontDecoration->GetBlurRadius().IsValid()) {
                     frontDecoration->SetBlurRadius(Dimension());
                 }
@@ -465,9 +537,18 @@ void DOMDiv::CompositeComponents()
 {
     DOMNode::CompositeComponents();
 
+    if (!declaration_) {
+        return;
+    }
+    auto& overflowStyle = static_cast<CommonOverflowStyle&>(declaration_->GetStyle(StyleTag::COMMON_OVERFLOW_STYLE));
+    if (!overflowStyle.IsValid()) {
+        return;
+    }
+
     scroll_.Reset();
     // root div is scrollable
-    bool isRootScroll = isRootNode_ && (!hasOverflowStyle_ || overflow_ == Overflow::SCROLL);
+    bool isRootScroll =
+        isRootNode_ && (!declaration_->HasOverflowStyle() || overflowStyle.overflow == Overflow::SCROLL);
     if (isRootScroll) {
         auto child = rootComponent_->GetChild();
         auto focusCollaboration = AceType::MakeRefPtr<FocusCollaborationComponent>();
@@ -478,13 +559,15 @@ void DOMDiv::CompositeComponents()
         } else if (direction_ == DOM_FLEX_COLUMN) {
             scroll_ = AceType::MakeRefPtr<ScrollComponent>(focusCollaboration);
             scroll_->SetAxisDirection(Axis::VERTICAL);
-            scroll_->InitScrollBar(GetTheme<ScrollBarTheme>(), scrollBarColor_, scrollBarWidth_, edgeEffect_);
+            scroll_->InitScrollBar(GetTheme<ScrollBarTheme>(), overflowStyle.scrollBarColor,
+                overflowStyle.scrollBarWidth, overflowStyle.edgeEffect);
             rootComponent_->SetChild(scroll_);
         } else if (direction_ == DOM_FLEX_ROW) {
             scroll_ = AceType::MakeRefPtr<ScrollComponent>(focusCollaboration);
             scroll_->SetAxisDirection(Axis::HORIZONTAL);
             scroll_->SetEnable(false);
-            scroll_->InitScrollBar(GetTheme<ScrollBarTheme>(), scrollBarColor_, scrollBarWidth_, edgeEffect_);
+            scroll_->InitScrollBar(GetTheme<ScrollBarTheme>(), overflowStyle.scrollBarColor,
+                overflowStyle.scrollBarWidth, overflowStyle.edgeEffect);
             rootComponent_->SetChild(scroll_);
         } else {
             rootComponent_->SetChild(focusCollaboration);
@@ -505,18 +588,27 @@ void DOMDiv::CompositeComponents()
         focusCollaboration->InsertChild(0, child);
         rootComponent_->SetChild(focusCollaboration);
     }
-    if (!isRootNode_ && overflow_ == Overflow::SCROLL) {
+    if (!isRootNode_ && overflowStyle.overflow == Overflow::SCROLL) {
         auto child = boxComponent_->GetChild();
         scroll_ = AceType::MakeRefPtr<ScrollComponent>(child);
         scroll_->SetAxisDirection(direction_ == DOM_FLEX_COLUMN ? Axis::VERTICAL : Axis::HORIZONTAL);
-        scroll_->InitScrollBar(GetTheme<ScrollBarTheme>(), scrollBarColor_, scrollBarWidth_, edgeEffect_);
+        scroll_->InitScrollBar(GetTheme<ScrollBarTheme>(), overflowStyle.scrollBarColor, overflowStyle.scrollBarWidth,
+            overflowStyle.edgeEffect);
         boxComponent_->SetChild(scroll_);
+    }
+    if (scroll_ != nullptr) {
+        scroll_->SetOnReachStart(onReachStart_);
+        scroll_->SetOnReachEnd(onReachEnd_);
+        scroll_->SetOnReachTop(onReachTop_);
+        scroll_->SetOnReachBottom(onReachBottom_);
     }
 }
 
 void DOMDiv::AdjustSpecialParamInLiteMode()
 {
-    alignItems_ = DOM_ALIGN_ITEMS_START;
+    if (alignItems_ == DOM_ALIGN_ITEMS_STRETCH) {
+        alignItems_ = DOM_ALIGN_ITEMS_START;
+    }
 }
 
 } // namespace OHOS::Ace::Framework

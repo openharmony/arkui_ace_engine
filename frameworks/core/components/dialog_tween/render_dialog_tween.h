@@ -58,21 +58,37 @@ private:
     void CallOnSuccess(int32_t successType);
     void InitAccessibilityEventListener();
     void RemoveBackendEvent(const RefPtr<DialogTweenComponent>& component);
+    void BindButtonEvent(const RefPtr<DialogTweenComponent>& component);
+    void ComputeInnerLayoutParam(LayoutParam& innerLayout);
+    Offset ComputeChildPosition(const Size& childSize) const;
+    void HandleDragUpdate(const Offset& currentPoint);
 
     std::function<void(int32_t)> onSuccess_;
     std::function<void()> onCancel_;
     std::function<void()> onComplete_;
     std::function<void()> onPop_;
+    std::function<void(bool)> onStatusChanged_;
 
     std::string data_;
+    int32_t dialogId_ = -1;
     int32_t composedId_ = 0;
     // used for inspector node in PC preview
     int32_t customDialogId_ = -1;
     double dragStart_ = 0.0;
+    double dragX_ = 0.0;
+    double dragY_ = 0.0;
+    const double DRAG_BAR_HEIGHT = 50.0;
+    double lastPositionX_ = 1.0;
+    double lastPositionY_ = 1.0;
     RefPtr<Animator> animator_;
     bool isLimit_ = true;
     Edge margin_;
     bool isSetMargin_ = false;
+    bool isDragable_ = false;
+    bool isDraging_ = false;
+    bool init_ = true;
+    Offset topLeftPoint_;
+    TouchRegion maskDragRegion_;
     WeakPtr<DialogTweenComponent> weakDialogTweenComponent_;
 };
 

@@ -22,6 +22,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
 
@@ -81,6 +82,7 @@ public:
             theme->titleStyle_.SetFontWeight(FontWeight::W500);
             theme->titleStyle_.SetTextColor(themeConstants->GetColor(THEME_OHOS_COLOR_TEXT_PRIMARY));
             theme->titleStyle_.SetTextDecoration(TextDecoration::NONE);
+            // this is the const padding needed by emui
             theme->optionPadding_ = Edge(16.0, 15.0, 16.0, 15.0, DimensionUnit::VP);
             theme->optionInterval_ = theme->isTV_ ? Dimension(6.0, DimensionUnit::VP) : 0.0_vp;
             theme->tvFocusTextColor_ = Color(0xE6000000);

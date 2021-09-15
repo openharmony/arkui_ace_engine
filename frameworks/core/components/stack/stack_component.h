@@ -20,9 +20,6 @@
 #ifdef WEARABLE_PRODUCT
 #include "core/components/flex/flex_component.h"
 #endif
-#ifndef WEARABLE_PRODUCT
-#include "core/components/navigation_bar/navigation_container_component.h"
-#endif
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/stack/render_stack.h"
@@ -95,23 +92,7 @@ public:
         return navigationBar_ != nullptr;
     }
 
-    void SetNavigationBar(const RefPtr<Component>& navigationBar)
-    {
-        navigationBar_ = navigationBar;
-        auto rootChild = GetChildren().front();
-#ifndef WEARABLE_PRODUCT
-        auto container = AceType::MakeRefPtr<NavigationContainerComponent>(navigationBar, rootChild);
-#else
-        auto container = AceType::MakeRefPtr<ColumnComponent>(
-            FlexAlign::FLEX_START, FlexAlign::STRETCH, std::list<RefPtr<Component>>());
-        container->SetContainsNavigation(true);
-        container->SetMainAxisSize(MainAxisSize::MIN);
-        container->AppendChild(navigationBar_);
-        container->AppendChild(rootChild);
-#endif
-        RemoveChild(rootChild);
-        InsertChild(0, container);
-    }
+    void SetNavigationBar(const RefPtr<Component>& navigationBar);
 
 private:
     Alignment align_;

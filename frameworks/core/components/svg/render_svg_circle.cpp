@@ -36,8 +36,7 @@ void RenderSvgCircle::Update(const RefPtr<Component> &component)
     cx_ = circleComponent->GetCx();
     cy_ = circleComponent->GetCy();
     r_ = circleComponent->GetR();
-    fillState_ = circleComponent->GetFillState();
-    strokeState_ = circleComponent->GetStrokeState();
+    RenderSvgBase::SetPresentationAttrs(circleComponent->GetDeclaration());
     PrepareAnimations(component);
     MarkNeedLayout();
 }
@@ -68,11 +67,10 @@ bool RenderSvgCircle::PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimate)
             return;
         }
         if (circle->SetProperty(attributeName, value)) {
-            circle->MarkNeedLayout(true);
+            circle->MarkNeedRender(true);
         }
     };
-    RefPtr<Evaluator<Dimension>> evaluator = AceType::MakeRefPtr<LinearEvaluator<Dimension>>();
-    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback), evaluator);
+    CreatePropertyAnimation(svgAnimate, originalValue, std::move(callback));
     return true;
 }
 

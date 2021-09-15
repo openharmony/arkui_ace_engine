@@ -30,6 +30,7 @@ class DOMSelect final : public DOMNode {
 public:
     DOMSelect(NodeId nodeId, const std::string& nodeName);
     ~DOMSelect() override = default;
+    void PrepareSpecializedComponent() override;
 
     RefPtr<Component> GetSpecializedComponent() override
     {

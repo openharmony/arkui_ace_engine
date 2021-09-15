@@ -15,241 +15,505 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include <dlfcn.h>
+#endif
+
+#include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
-#ifdef USE_QUICKJS_ENGINE
-JSValue LoadImageSuccEventToJSValue(const LoadImageSuccessEvent& eventInfo, JSContext* ctx)
+JSRef<JSVal> LoadImageSuccEventToJSValue(const LoadImageSuccessEvent& eventInfo)
 {
-    JSValue eventObj = JS_NewObject(ctx);
-    JS_SetPropertyStr(ctx, eventObj, "width", JS_NewFloat64(ctx, eventInfo.GetWidth()));
-    JS_SetPropertyStr(ctx, eventObj, "height", JS_NewFloat64(ctx, eventInfo.GetHeight()));
-    return eventObj;
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("width", eventInfo.GetWidth());
+    obj->SetProperty("height", eventInfo.GetHeight());
+    obj->SetProperty("componentWidth", eventInfo.GetComponentWidth());
+    obj->SetProperty("componentHeight", eventInfo.GetComponentHeight());
+    obj->SetProperty("loadingStatus", eventInfo.GetLoadingStatus());
+    return JSRef<JSVal>::Cast(obj);
 }
 
-JSValue LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo, JSContext* ctx)
+JSRef<JSVal> LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo)
 {
-    return JS_NewObject(ctx);
-}
-#endif
-
-#ifdef USE_V8_ENGINE
-v8::Local<v8::Value> LoadImageSuccEventToJSValue(const LoadImageSuccessEvent& eventInfo, v8::Isolate* isolate)
-{
-    ACE_DCHECK(isolate);
-    auto context = isolate->GetCurrentContext();
-    v8::Local<v8::Object> obj = v8::Object::New(isolate);
-    obj->Set(context, v8::String::NewFromUtf8(isolate, "width").ToLocalChecked(),
-           v8::Number::New(isolate, eventInfo.GetWidth()))
-        .ToChecked();
-    obj->Set(context, v8::String::NewFromUtf8(isolate, "height").ToLocalChecked(),
-           v8::Number::New(isolate, eventInfo.GetHeight()))
-        .ToChecked();
-    return v8::Local<v8::Value>(obj);
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("componentWidth", eventInfo.GetComponentWidth());
+    obj->SetProperty("componentHeight", eventInfo.GetComponentHeight());
+    return JSRef<JSVal>::Cast(obj);
 }
 
-v8::Local<v8::Value> LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo, v8::Isolate* isolate)
+void JSImage::SetAlt(const JSCallbackInfo& args)
 {
-    return v8::Local<v8::Value>(v8::Object::New(isolate));
-}
-#endif
-
-JSImage::~JSImage()
-{
-    LOGD("Destroy: JSImage");
-}
-
-RefPtr<OHOS::Ace::Component> JSImage::CreateSpecializedComponent()
-{
-    LOGD("Create component: Image");
-    auto imageComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(src_);
-    imageComponent->SetAlt(alt_);
-    imageComponent->SetImageFit(objectFit_);
-    imageComponent->SetMatchTextDirection(matchTextDirection_);
-    imageComponent->SetFitMaxSize(!fitOriginalSize_);
-    if (jsLoadSuccFunc_) {
-        imageComponent->SetLoadSuccessEventId(
-            EventMarker([func = std::move(jsLoadSuccFunc_)](const BaseEventInfo* info) {
-                auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageSuccessEvent>(info);
-                func->execute(*eventInfo);
-            }));
+    if (args.Length() < 1) {
+        LOGE("The argv is wrong, it it supposed to have at least 1 argument");
+        return;
     }
-    if (jsLoadFailFunc_) {
-        imageComponent->SetLoadFailEventId(EventMarker([func = std::move(jsLoadFailFunc_)](const BaseEventInfo* info) {
-            LOGD("HandleLoadImageFail");
-            auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageFailEvent>(info);
-            func->execute(*eventInfo);
-        }));
-    }
-    if (boxComponent_) {
-        auto backDecoration = boxComponent_->GetBackDecoration();
-        if (backDecoration) {
-            Border border = backDecoration->GetBorder();
-            if (border.TopLeftRadius().IsValid() && border.TopRightRadius().IsValid() &&
-                border.BottomLeftRadius().IsValid() && border.BottomRightRadius().IsValid()) {
-                imageComponent->SetBorder(border);
-            }
-        }
-    }
-    return imageComponent;
-}
 
-std::vector<RefPtr<OHOS::Ace::SingleChild>> JSImage::CreateInteractableComponents()
-{
-    return JSInteractableView::CreateComponents();
-}
+    std::string src;
+    if (!ParseJsMedia(args[0], src)) {
+        return;
+    }
 
-void JSImage::SetAlt(std::string& value)
-{
-    alt_ = value;
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetAlt(src);
+    }
 }
 
 void JSImage::SetObjectFit(int32_t value)
 {
-    objectFit_ = static_cast<ImageFit>(value);
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetImageFit(static_cast<ImageFit>(value));
+    }
 }
 
 void JSImage::SetMatchTextDirection(bool value)
 {
-    matchTextDirection_ = value;
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetMatchTextDirection(value);
+    }
 }
 
 void JSImage::SetFitOriginalSize(bool value)
 {
-    fitOriginalSize_ = value;
-}
-
-#ifdef USE_QUICKJS_ENGINE
-JSValue JSImage::QjsOnComplete(JSContext* ctx, JSValueConst jsObject, int argc, JSValueConst* argv)
-{
-    if ((argc != 1) || !JS_IsFunction(ctx, argv[0])) {
-        LOGE("OnComplete expects a function as parameter. Throwing exception.");
-        return JS_EXCEPTION;
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetFitMaxSize(!value);
     }
-    QJSContext::Scope scope(ctx);
-    JSImage* jsImage = Unwrap<JSImage>(jsObject);
+}
 
-    if (jsImage == nullptr) {
-        LOGE("OnComplete must be called on a JSImage. Throwing exception.");
-        return JS_EXCEPTION;
+RefPtr<Decoration> JSImage::GetFrontDecoration()
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto decoration = box->GetFrontDecoration();
+    if (!decoration) {
+        decoration = AceType::MakeRefPtr<Decoration>();
+        box->SetFrontDecoration(decoration);
     }
-    auto loadSuccHandler =
-        new QJSEventFunction<LoadImageSuccessEvent, 2>(ctx, JS_DupValue(ctx, argv[0]), LoadImageSuccEventToJSValue);
-    jsLoadSuccFunc_ = loadSuccHandler;
-    return JS_DupValue(ctx, jsObject); // for call chain
+
+    return decoration;
 }
 
-JSValue JSImage::QjsOnError(JSContext* ctx, JSValueConst jsObject, int argc, JSValueConst* argv)
+const Border& JSImage::GetBorder()
 {
-    if ((argc != 1) || !JS_IsFunction(ctx, argv[0])) {
-        LOGE("OnError expects a function as parameter. Throwing exception.");
-        return JS_EXCEPTION;
+    return GetFrontDecoration()->GetBorder();
+}
+
+BorderEdge JSImage::GetLeftBorderEdge()
+{
+    return GetBorder().Left();
+}
+
+BorderEdge JSImage::GetTopBorderEdge()
+{
+    return GetBorder().Top();
+}
+
+BorderEdge JSImage::GetRightBorderEdge()
+{
+    return GetBorder().Right();
+}
+
+BorderEdge JSImage::GetBottomBorderEdge()
+{
+    return GetBorder().Bottom();
+}
+
+void JSImage::SetBorderEdge(const BorderEdge& edge)
+{
+    Border border = GetBorder();
+    border.SetBorderEdge(edge);
+    SetBorder(border);
+}
+
+void JSImage::SetLeftBorderEdge(const BorderEdge& edge)
+{
+    Border border = GetBorder();
+    border.SetLeftEdge(edge);
+    SetBorder(border);
+}
+
+void JSImage::SetTopBorderEdge(const BorderEdge& edge)
+{
+    Border border = GetBorder();
+    border.SetTopEdge(edge);
+    SetBorder(border);
+}
+
+void JSImage::SetRightBorderEdge(const BorderEdge& edge)
+{
+    Border border = GetBorder();
+    border.SetRightEdge(edge);
+    SetBorder(border);
+}
+
+void JSImage::SetBottomBorderEdge(const BorderEdge& edge)
+{
+    Border border = GetBorder();
+    border.SetBottomEdge(edge);
+    SetBorder(border);
+}
+
+void JSImage::SetBorder(const Border& border)
+{
+    GetFrontDecoration()->SetBorder(border);
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetBorder(border);
     }
-    QJSContext::Scope scope(ctx);
-    JSImage* jsImage = Unwrap<JSImage>(jsObject);
+}
 
-    if (jsImage == nullptr) {
-        LOGE("OnError must be called on a JSImage. Throwing exception.");
-        return JS_EXCEPTION;
+void JSImage::SetBorderRadius(const Dimension& value)
+{
+    Border border = GetBorder();
+    border.SetBorderRadius(Radius(value));
+    SetBorder(border);
+}
+
+void JSImage::SetBorderStyle(int32_t style)
+{
+    BorderStyle borderStyle = BorderStyle::SOLID;
+
+    if (static_cast<int32_t>(BorderStyle::SOLID) == style) {
+        borderStyle = BorderStyle::SOLID;
+    } else if (static_cast<int32_t>(BorderStyle::DASHED) == style) {
+        borderStyle = BorderStyle::DASHED;
+    } else if (static_cast<int32_t>(BorderStyle::DOTTED) == style) {
+        borderStyle = BorderStyle::DOTTED;
+    } else {
+        borderStyle = BorderStyle::NONE;
     }
-    auto loadFailHandler =
-        new QJSEventFunction<LoadImageFailEvent, 0>(ctx, JS_DupValue(ctx, argv[0]), LoadImageFailEventToJSValue);
-    jsLoadFailFunc_ = loadFailHandler;
-    return JS_DupValue(ctx, jsObject);
+
+    BorderEdge edge = GetLeftBorderEdge();
+    edge.SetStyle(borderStyle);
+    SetBorderEdge(edge);
 }
 
-void JSImage::MarkGC(JSRuntime* rt, JS_MarkFunc* markFunc)
+void JSImage::SetBorderColor(const Color& color)
 {
-    LOGD("JSImage => MarkGC: Mark value for GC start");
-    JSInteractableView::MarkGC(rt, markFunc);
-    LOGD("JSImage => MarkGC: Mark value for GC end");
+    SetLeftBorderColor(color);
+    SetTopBorderColor(color);
+    SetRightBorderColor(color);
+    SetBottomBorderColor(color);
 }
 
-void JSImage::ReleaseRT(JSRuntime* rt)
+void JSImage::SetLeftBorderColor(const Color& color)
 {
-    LOGD("JSImage => release start");
-    JSInteractableView::ReleaseRT(rt);
-    LOGD("JSImage => release end");
+    BorderEdge edge = GetLeftBorderEdge();
+    edge.SetColor(color);
+    SetLeftBorderEdge(edge);
 }
 
-void JSImage::QjsDestructor(JSRuntime* rt, JSImage* view)
+void JSImage::SetTopBorderColor(const Color& color)
 {
-    LOGD("JSImage(QjsDestructor) start");
-    if (!view)
+    BorderEdge edge = GetTopBorderEdge();
+    edge.SetColor(color);
+    SetTopBorderEdge(edge);
+}
+
+void JSImage::SetRightBorderColor(const Color& color)
+{
+    BorderEdge edge = GetRightBorderEdge();
+    edge.SetColor(color);
+    SetRightBorderEdge(edge);
+}
+
+void JSImage::SetBottomBorderColor(const Color& color)
+{
+    BorderEdge edge = GetBottomBorderEdge();
+    edge.SetColor(color);
+    SetBottomBorderEdge(edge);
+}
+
+void JSImage::SetBorderWidth(const Dimension& value)
+{
+    SetLeftBorderWidth(value);
+    SetTopBorderWidth(value);
+    SetRightBorderWidth(value);
+    SetBottomBorderWidth(value);
+}
+
+void JSImage::SetLeftBorderWidth(const Dimension& value)
+{
+    BorderEdge edge = GetLeftBorderEdge();
+    edge.SetWidth(value);
+    SetLeftBorderEdge(edge);
+}
+
+void JSImage::SetTopBorderWidth(const Dimension& value)
+{
+    BorderEdge edge = GetTopBorderEdge();
+    edge.SetWidth(value);
+    SetTopBorderEdge(edge);
+}
+
+void JSImage::SetRightBorderWidth(const Dimension& value)
+{
+    BorderEdge edge = GetRightBorderEdge();
+    edge.SetWidth(value);
+    SetRightBorderEdge(edge);
+}
+
+void JSImage::SetBottomBorderWidth(const Dimension& value)
+{
+    BorderEdge edge = GetBottomBorderEdge();
+    edge.SetWidth(value);
+    SetBottomBorderEdge(edge);
+}
+
+void JSImage::JsBorderColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
-
-    view->ReleaseRT(rt);
-    delete view;
-    LOGD("JSImage(QjsDestructor) end");
-}
-
-void JSImage::QjsGcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc)
-{
-    LOGD("JSImage(QjsGcMark) start");
-
-    JSImage* view = Unwrap<JSImage>(val);
-    if (!view)
+    }
+    Color borderColor;
+    if (!ParseJsColor(info[0], borderColor)) {
         return;
-
-    view->MarkGC(rt, markFunc);
-    LOGD("JSImage(QjsGcMark) end");
+    }
+    SetBorderColor(borderColor);
 }
-#endif // USE_QUICKJS_ENGINE
 
-#ifdef USE_V8_ENGINE
-void JSImage::V8OnComplete(const v8::FunctionCallbackInfo<v8::Value>& args)
+void JSImage::OnComplete(const JSCallbackInfo& args)
 {
     LOGD("JSImage V8OnComplete");
-    auto isolate = args.GetIsolate();
-    v8::HandleScope handleScope(isolate);
     if (args[0]->IsFunction()) {
-        v8::Local<v8::Function> loadSuccFunction = v8::Local<v8::Function>::Cast(args[0]);
-        jsLoadSuccFunc_ = AceType::MakeRefPtr<V8EventFunction<LoadImageSuccessEvent, 2>>(
-            loadSuccFunction, LoadImageSuccEventToJSValue);
+        auto jsLoadSuccFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageSuccessEvent, 1>>(
+            JSRef<JSFunc>::Cast(args[0]), LoadImageSuccEventToJSValue);
+        auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        image->SetLoadSuccessEvent(EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsLoadSuccFunc)]
+            (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageSuccessEvent>(info);
+            func->Execute(*eventInfo);
+        }));
     } else {
         LOGE("args not function");
     }
-    args.GetReturnValue().Set(args.This());
 }
 
-void JSImage::V8OnError(const v8::FunctionCallbackInfo<v8::Value>& args)
+void JSImage::OnError(const JSCallbackInfo& args)
 {
     LOGD("JSImage V8OnError");
-    auto isolate = args.GetIsolate();
-    v8::HandleScope scp(isolate);
     if (args[0]->IsFunction()) {
-        v8::Local<v8::Function> loadErrorFunction = v8::Local<v8::Function>::Cast(args[0]);
-        jsLoadFailFunc_ =
-            AceType::MakeRefPtr<V8EventFunction<LoadImageFailEvent, 0>>(loadErrorFunction, LoadImageFailEventToJSValue);
+        auto jsLoadFailFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageFailEvent, 1>>(
+            JSRef<JSFunc>::Cast(args[0]), LoadImageFailEventToJSValue);
+        auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        image->SetLoadFailEvent(EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsLoadFailFunc)]
+            (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageFailEvent>(info);
+            func->Execute(*eventInfo);
+        }));
     } else {
         LOGE("args not function");
     }
-    args.GetReturnValue().Set(args.This());
 }
 
-#endif // USE_V8_ENGINE
+void JSImage::OnFinish(const JSCallbackInfo& info)
+{
+    LOGD("JSImage V8OnFinish");
+    if (!info[0]->IsFunction()) {
+        LOGE("info[0] is not a function.");
+        return;
+    }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto eventMarker = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute();
+    });
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    image->SetSvgAnimatorFinishEvent(eventMarker);
+}
+
+void JSImage::Create(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    std::string src;
+    auto usePixMap = ParseJsMedia(info[0], src);
+    RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(src);
+    imageComponent->SetUseSkiaSvg(false);
+    ViewStackProcessor::GetInstance()->Push(imageComponent);
+    if (usePixMap) {
+        return;
+    }
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    imageComponent->SetPixmap(CreatePixelMapFromNapiValue(info[0]));
+#endif
+}
+
+void JSImage::JsBorderWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Dimension borderWidth;
+    if (!ParseJsDimensionVp(info[0], borderWidth)) {
+        return;
+    }
+    SetBorderWidth(borderWidth);
+}
+
+void JSImage::JsBorderRadius(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Dimension borderRadius;
+    if (!ParseJsDimensionVp(info[0], borderRadius)) {
+        return;
+    }
+    SetBorderRadius(borderRadius);
+}
+
+void JSImage::JsBorder(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGE("arg is not a object.");
+        return;
+    }
+
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+        info.SetReturnValue(info.This());
+        return;
+    }
+    Dimension width = Dimension(0.0, DimensionUnit::VP);
+    Dimension radius = Dimension(0.0, DimensionUnit::VP);
+    ParseJsonDimensionVp(argsPtrItem->GetValue("width"), width);
+    ParseJsonDimensionVp(argsPtrItem->GetValue("radius"), radius);
+    auto borderStyle = argsPtrItem->GetInt("style", static_cast<int32_t>(BorderStyle::SOLID));
+    LOGD("JsBorder width = %lf unit = %d, radius = %lf unit = %d, borderStyle = %d", width.Value(),
+        width.Unit(), radius.Value(), radius.Unit(), borderStyle);
+    Color color;
+    if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
+        SetBorderColor(color);
+    }
+    SetBorderStyle(borderStyle);
+    SetBorderWidth(width);
+    SetBorderRadius(radius);
+    info.SetReturnValue(info.This());
+}
+
+void JSImage::SetSourceSize(const JSCallbackInfo& info)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    image->SetImageSourceSize(JSViewAbstract::ParseSize(info));
+}
+
+void JSImage::SetImageFill(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    Color color;
+    if (!ParseJsColor(info[0], color)) {
+        return;
+    }
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    image->SetImageFill(color);
+}
+
+void JSImage::SetImageRenderMode(int32_t imageRenderMode)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    image->SetImageRenderMode(static_cast<ImageRenderMode>(imageRenderMode));
+}
+
+void JSImage::SetImageInterpolation(int32_t imageInterpolation)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    image->SetImageInterpolation(static_cast<ImageInterpolation>(imageInterpolation));
+}
+
+void JSImage::SetImageRepeat(int32_t imageRepeat)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    image->SetImageRepeat(static_cast<ImageRepeat>(imageRepeat));
+}
+
+void JSImage::JsTransition(const JSCallbackInfo& info)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image && image->IsSrcSvgImage()) {
+        JSViewAbstract::JsTransition(info);
+    } else {
+        JSViewAbstract::JsTransitionPassThrough(info);
+    }
+}
+
+void JSImage::JsOpacity(const JSCallbackInfo& info)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image && image->IsSrcSvgImage()) {
+        JSViewAbstract::JsOpacity(info);
+    } else {
+        JSViewAbstract::JsOpacityPassThrough(info);
+    }
+}
+
+void JSImage::SetAutoResize(bool autoResize)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetAutoResize(autoResize);
+    }
+}
 
 void JSImage::JSBind(BindingTarget globalObj)
 {
     JSClass<JSImage>::Declare("Image");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSImage>::StaticMethod("create", &JSImage::Create, opt);
+    JSClass<JSImage>::StaticMethod("alt", &JSImage::SetAlt, opt);
+    JSClass<JSImage>::StaticMethod("objectFit", &JSImage::SetObjectFit, opt);
+    JSClass<JSImage>::StaticMethod("matchTextDirection", &JSImage::SetMatchTextDirection, opt);
+    JSClass<JSImage>::StaticMethod("fitOriginalSize", &JSImage::SetFitOriginalSize, opt);
+    JSClass<JSImage>::StaticMethod("sourceSize", &JSImage::SetSourceSize, opt);
+    JSClass<JSImage>::StaticMethod("fillColor", &JSImage::SetImageFill, opt);
+    JSClass<JSImage>::StaticMethod("renderMode", &JSImage::SetImageRenderMode, opt);
+    JSClass<JSImage>::StaticMethod("objectRepeat", &JSImage::SetImageRepeat, opt);
+    JSClass<JSImage>::StaticMethod("interpolation", &JSImage::SetImageInterpolation, opt);
+    JSClass<JSImage>::StaticMethod("borderStyle", &JSImage::SetBorderStyle, opt);
+    JSClass<JSImage>::StaticMethod("borderColor", &JSImage::JsBorderColor);
+    JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
+    JSClass<JSImage>::StaticMethod("borderWidth", &JSImage::JsBorderWidth);
+    JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
+    JSClass<JSImage>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);
+
+    JSClass<JSImage>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSImage>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSImage>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSImage>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSImage>::StaticMethod("onComplete", &JSImage::OnComplete);
+    JSClass<JSImage>::StaticMethod("onError", &JSImage::OnError);
+    JSClass<JSImage>::StaticMethod("onFinish", &JSImage::OnFinish);
     JSClass<JSImage>::Inherit<JSViewAbstract>();
-    JSClass<JSImage>::CustomMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSImage>::CustomMethod("onClick", &JSInteractableView::JsOnClick);
-    MethodOptions opt = MethodOptions::RETURN_SELF;
-    JSClass<JSImage>::Method("alt", &JSImage::SetAlt, opt);
-    JSClass<JSImage>::Method("objectFit", &JSImage::SetObjectFit, opt);
-    JSClass<JSImage>::Method("matchTextDirection", &JSImage::SetMatchTextDirection, opt);
-    JSClass<JSImage>::Method("fitOriginalSize", &JSImage::SetFitOriginalSize, opt);
-#ifdef USE_QUICKJS_ENGINE
-    JSClass<JSImage>::CustomMethod("onComplete", &JSImage::QjsOnComplete);
-    JSClass<JSImage>::CustomMethod("onError", &JSImage::QjsOnError);
-#endif
-#ifdef USE_V8_ENGINE
-    JSClass<JSImage>::CustomMethod("onComplete", &JSImage::V8OnComplete);
-    JSClass<JSImage>::CustomMethod("onError", &JSImage::V8OnError);
-#endif
-    JSClass<JSImage>::Bind<std::string>(globalObj);
+    // override method
+    JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
+    JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
+    JSClass<JSImage>::Bind<>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

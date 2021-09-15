@@ -16,35 +16,44 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_SVG_POLYGON_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_SVG_POLYGON_COMPONENT_H
 
-#include "frameworks/core/components/svg/svg_sharp.h"
+#include "core/components/declaration/svg/svg_polygon_declaration.h"
 #include "frameworks/core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace {
 
-class SvgPolygonComponent : public ComponentGroup, public SvgSharp {
-    DECLARE_ACE_TYPE(SvgPolygonComponent, ComponentGroup, SvgSharp);
+class SvgPolygonComponent : public ComponentGroup {
+    DECLARE_ACE_TYPE(SvgPolygonComponent, ComponentGroup);
 
 public:
-    SvgPolygonComponent() = default;
-    explicit SvgPolygonComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children) {};
+    SvgPolygonComponent();
+    SvgPolygonComponent(bool isClose);
+    explicit SvgPolygonComponent(const std::list<RefPtr<Component>>& children);
     ~SvgPolygonComponent() override = default;
-
+    void InitDeclaration();
     RefPtr<RenderNode> CreateRenderNode() override;
-
     RefPtr<Element> CreateElement() override;
+    void SetPoints(const std::string& points);
+    const std::string& GetPoints() const;
+    void SetDeclaration(const RefPtr<SvgPolygonDeclaration>& declaration);
 
-    void SetPoints(const std::string& points)
+    bool IsClose() const
     {
-        points_ = points;
+        return isClose_;
     }
 
-    const std::string& GetPoints() const
+    const RefPtr<SvgPolygonDeclaration>& GetDeclaration() const
     {
-        return points_;
+        return declaration_;
+    }
+
+    void Inherit(const RefPtr<SvgBaseDeclaration>& parent)
+    {
+        declaration_->Inherit(parent);
     }
 
 private:
-    std::string points_;
+    bool isClose_ = true;
+    RefPtr<SvgPolygonDeclaration> declaration_;
 };
 
 } // namespace OHOS::Ace

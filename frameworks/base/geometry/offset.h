@@ -21,6 +21,7 @@
 
 #include "base/geometry/size.h"
 #include "base/utils/utils.h"
+#include "core/components/common/properties/animation_option.h"
 
 namespace OHOS::Ace {
 
@@ -34,6 +35,8 @@ public:
     {
         deltaX_ = 0.0;
         deltaY_ = 0.0;
+        deltaXAnimationOption_ = AnimationOption();
+        deltaYAnimationOption_ = AnimationOption();
     }
 
     static Offset Zero()
@@ -66,14 +69,26 @@ public:
         return deltaY_;
     }
 
-    void SetX(double x)
+    void SetX(double x, const AnimationOption& option = AnimationOption())
     {
         deltaX_ = x;
+        deltaXAnimationOption_ = option;
     }
 
-    void SetY(double y)
+    void SetY(double y, const AnimationOption& option = AnimationOption())
     {
         deltaY_ = y;
+        deltaYAnimationOption_ = option;
+    }
+
+    AnimationOption GetXAnimationOption() const
+    {
+        return deltaXAnimationOption_;
+    }
+
+    AnimationOption GetYAnimationOption() const
+    {
+        return deltaYAnimationOption_;
     }
 
     double GetDistance() const
@@ -128,11 +143,10 @@ public:
 
     std::string ToString() const
     {
-        return std::string("Offset (")
-            .append(std::to_string(deltaX_))
-            .append(", ")
-            .append(std::to_string(deltaY_))
-            .append(")");
+        std::stringstream ss;
+        ss << "Offset (" << std::fixed << std::setprecision(2) << deltaX_ << ", " << deltaY_ << ")";
+        std::string output = ss.str();
+        return output;
     }
 
     bool IsPositiveOffset() const
@@ -143,6 +157,8 @@ public:
 private:
     double deltaX_ = 0.0;
     double deltaY_ = 0.0;
+    AnimationOption deltaXAnimationOption_;
+    AnimationOption deltaYAnimationOption_;
 };
 
 } // namespace OHOS::Ace

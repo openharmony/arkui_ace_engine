@@ -45,6 +45,7 @@ using ActionScrollForwardImpl = std::function<bool()>;
 using ActionScrollBackwardImpl = std::function<bool()>;
 using ActionFocusImpl = std::function<void()>;
 using ActionUpdateIdsImpl = std::function<void()>;
+using FocusChangeCallback = std::function<void(const std::string&)>;
 
 using NodeId = int32_t;
 // If no insertion location is specified, new child will be added to the end of children list by default.
@@ -152,6 +153,10 @@ public:
     {
         return onFocusId_;
     }
+
+    void SetFocusChangeEventMarker(const EventMarker& eventId);
+
+    void OnFocusChange(bool isFocus);
 
     const EventMarker& GetBlurEventMarker() const
     {
@@ -272,6 +277,7 @@ public:
     void SetFocusedState(bool state)
     {
         isFocused_ = state;
+        OnFocusChange(isFocused_);
     }
 
     bool GetSelectedState() const
@@ -302,6 +308,7 @@ public:
     void SetClickableState(bool state)
     {
         isClickable_ = state;
+        SetSupportAction(AceAction::ACTION_CLICK, state);
     }
 
     bool GetFocusableState() const
@@ -332,6 +339,7 @@ public:
     void SetLongClickableState(bool state)
     {
         isLongClickable_ = state;
+        SetSupportAction(AceAction::ACTION_LONG_CLICK, state);
     }
 
     bool GetIsMultiLine() const
@@ -361,6 +369,13 @@ public:
         supportActions_ |= (1LL << static_cast<uint32_t>(action));
     }
 
+    void SetSupportAction(AceAction action, bool isEnable)
+    {
+        isEnable ? supportActions_ |= (1LL << static_cast<uint32_t>(action))
+                 : supportActions_ &= (~(0LL)) ^ (1LL << static_cast<uint32_t>(action));
+    }
+
+
     const std::string& GetAccessibilityLabel() const
     {
         return accessibilityLabel_;
@@ -384,6 +399,11 @@ public:
     const std::string& GetImportantForAccessibility() const
     {
         return importantForAccessibility_;
+    }
+
+    void SetImportantForAccessibility(const std::string& importance)
+    {
+        importantForAccessibility_ = importance;
     }
 
     size_t GetMaxTextLength() const
@@ -439,6 +459,11 @@ public:
     bool GetAccessible() const
     {
         return accessible_;
+    }
+
+    void SetAccessible(bool accessible)
+    {
+        accessible_ = accessible;
     }
 
     AccessibilityValue GetAccessibilityValue() const
@@ -533,6 +558,21 @@ public:
         }
     }
 
+    const Rect& GetGlobalRect()
+    {
+        return globalRect_;
+    }
+
+    void SetGlobalRect(const Rect& rect)
+    {
+        globalRect_ = rect;
+    }
+
+    void ClearRect()
+    {
+        rect_ = Rect(0, 0, 0, 0);
+    }
+
     bool IsValidRect() const
     {
         return isValidRect_;
@@ -546,6 +586,16 @@ public:
     void SetClicked(bool clicked)
     {
         isClicked_ = clicked;
+    }
+
+    void SetMarginSize(const Size& marginSize)
+    {
+        marginSize_ = marginSize;
+    }
+
+    Size GetMarginSize() const
+    {
+        return marginSize_;
     }
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
@@ -676,6 +726,33 @@ public:
     {
         isAnimationNode_ = IsAnimationNode;
     }
+
+    int32_t GetZIndex() {
+        return zIndex_;
+    }
+
+    void SetZIndex(int32_t index) {
+        zIndex_ = index;
+    }
+
+    // only panel has ZIndex,others components is default value 0
+    void SetZIndexToChild(int32_t index)
+    {
+        for (auto& child : children_) {
+            child->SetZIndexToChild(index);
+        }
+        SetZIndex(index);
+    }
+
+    void SetDebugLine(std::string debugLine)
+    {
+        debugLine_ = debugLine;
+    }
+
+    std::string GetDebugLine()
+    {
+        return debugLine_;
+    }
 #endif
 
 protected:
@@ -697,6 +774,7 @@ protected:
     EventMarker onLongPressId_;
     EventMarker onFocusId_;
     EventMarker onBlurId_;
+    FocusChangeCallback focusChangeEventId_;
 
 private:
     void SetOperableInfo();
@@ -718,7 +796,9 @@ private:
     uint64_t supportActions_ = 0;
     std::unique_ptr<ChartValue> chartValue_;
 
+    Rect globalRect_;
     Rect rect_;
+    Size marginSize_;
     union {
         struct {
             bool isValidRect_ : 1;
@@ -758,6 +838,8 @@ private:
     double rotateAngle_ = 0.0;
     RotateAxis rotateAxis_ = RotateAxis::AXIS_Z;
     bool isAnimationNode_ = false;
+    int32_t zIndex_ = 0;
+    std::string debugLine_;
 #endif
 };
 

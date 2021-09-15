@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DIALOG_DIALOG_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DIALOG_DIALOG_THEME_H
 
+#include "base/utils/system_properties.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
 
@@ -131,6 +133,41 @@ public:
             theme->titleTextStyle_.SetTextColor(themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_PRIMARY, Color::BLACK));
             theme->contentTextStyle_.SetTextColor(themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_PRIMARY, Color::BLACK));
             theme->buttonBackgroundColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_DIALOG_BG, Color::BLACK);
+            auto dialogPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_DIALOG_TOGGLE, nullptr);
+            if (SystemProperties::GetDeviceType() != DeviceType::CAR || !dialogPattern) {
+                return;
+            }
+            auto defaultPadding = dialogPattern->GetAttr<Dimension>(DIALOG_CONTENT_TOP_PADDING, 0.0_vp);
+            auto titlePadding = dialogPattern->GetAttr<Dimension>(DIALOG_TITLE_TOP_PADDING, 0.0_vp);
+            auto actionsTopPadding = dialogPattern->GetAttr<Dimension>(DIALOG_ACTIONS_TOP_PADDING, 0.0_vp);
+            theme->radius_ = Radius(themeStyle->GetAttr<Dimension>(THEME_ATTR_DIALOG_RADIUS, 0.0_vp));
+            theme->titleAdjustPadding_ = Edge(defaultPadding, titlePadding, defaultPadding, titlePadding);
+            theme->titleDefaultPadding_ = Edge(defaultPadding, titlePadding, defaultPadding, titlePadding);
+            theme->defaultPadding_ = Edge(defaultPadding, defaultPadding, defaultPadding, defaultPadding);
+            theme->adjustPadding_ = Edge(defaultPadding, defaultPadding, defaultPadding, 0.0_vp);
+            theme->contentDefaultPadding_ = Edge(defaultPadding, 0.0_vp, defaultPadding, defaultPadding);
+            theme->contentAdjustPadding_ = Edge(defaultPadding, 0.0_vp, defaultPadding, 0.0_vp);
+            theme->actionsPadding_ = Edge(defaultPadding, actionsTopPadding, defaultPadding, actionsTopPadding);
+            theme->buttonHeight_ = dialogPattern->GetAttr<Dimension>(DIALOG_BUTTON_HEIGHT, 0.0_vp);
+            theme->titleMaxLines_ = dialogPattern->GetAttr<int32_t>(DIALOG_TITLE_MAX_LINES, 2);
+            theme->titleTextStyle_.SetFontSize(
+                themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_HEAD_LINE8, 20.0_vp));
+            theme->titleMinFontSize_ = themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_HEAD_LINE8, 20.0_vp);
+            theme->contentTextStyle_.SetFontSize(themeStyle->GetAttr<Dimension>(TEXTFIELD_FONT_SIZE, 16.0_vp));
+            theme->contentMinFontSize_ = themeStyle->GetAttr<Dimension>(TEXTFIELD_FONT_SIZE, 16.0_vp);
+            theme->buttonSpacingHorizontal_ = actionsTopPadding;
+            theme->commonButtonBgColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_BUTTON_NORMAL_COLOR, Color::GRAY);
+            theme->emphasizeButtonBgColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_EMPHASIZE, Color::BLACK);
+            theme->commonButtonTextColor_ =
+                dialogPattern->GetAttr<Color>(DIALOG_COMMON_BUTTON_TEXT_COLOR, Color::WHITE);
+            theme->buttonTextSize_ = themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_BUTTON1, 16.0_vp);
+            theme->buttonMinTextSize_ = dialogPattern->GetAttr<Dimension>(DIALOG_MIN_BUTTON_TEXT_SIZE, 10.0_vp);
+            theme->minButtonWidth_ = dialogPattern->GetAttr<Dimension>(DIALOG_MIN_BUTTON_WIDTH, 104.0_vp);
+            theme->maxButtonWidth_ = dialogPattern->GetAttr<Dimension>(DIALOG_MAX_BUTTON_WIDTH, 260.0_vp);
+            theme->buttonClickedColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_CLICK_EFFECT, Color::BLACK);
+            theme->emphasizeButtonTextColor_ =
+                themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_FOREGROUND_CONTRARY, Color::WHITE);
+            theme->maskColorEnd_ = dialogPattern->GetAttr<Color>(DIALOG_MASK_COLOR_END, Color::WHITE);
         }
     };
 
@@ -144,6 +181,16 @@ public:
     const Color& GetBackgroundColor() const
     {
         return backgroundColor_;
+    }
+
+    const Color& GetCommonButtonBgColor() const
+    {
+        return commonButtonBgColor_;
+    }
+
+    const Color& GetEmphasizeButtonBgColor() const
+    {
+        return emphasizeButtonBgColor_;
     }
 
     const TextStyle& GetTitleTextStyle() const
@@ -286,6 +333,16 @@ public:
         return maskColorEnd_;
     }
 
+    const Color& GetCommonButtonTextColor() const
+    {
+        return commonButtonTextColor_;
+    }
+
+    const Color& GetEmphasizeButtonTextColor() const
+    {
+        return emphasizeButtonTextColor_;
+    }
+
     int32_t GetAnimationDurationIn() const
     {
         return animationDurationIn_;
@@ -331,6 +388,21 @@ public:
         return marginRight_;
     }
 
+    const Dimension& GetButtonHeight() const
+    {
+        return buttonHeight_;
+    }
+
+    const Dimension& GetButtonTextSize() const
+    {
+        return buttonTextSize_;
+    }
+
+    const Dimension& GetMinButtonTextSize() const
+    {
+        return buttonMinTextSize_;
+    }
+
 protected:
     DialogTheme() = default;
 
@@ -356,6 +428,7 @@ private:
     Dimension buttonSpacingVertical_;
     Color buttonBackgroundColor_;
     Color buttonClickedColor_;
+    Color emphasizeButtonTextColor_;
     Dimension translateValue_;
     double frameStart_ = 0.0;
     double frameEnd_ = 1.0;
@@ -368,12 +441,20 @@ private:
     Color maskColorStart_;
     Color maskColorEnd_;
     Color dividerColor_;
+    Color commonButtonBgColor_;
+    Color commonButtonTextColor_;
+    Color emphasizeButtonBgColor_;
     Dimension dividerWidth_;
     Dimension dividerHeight_;
     Edge dividerPadding_;
     Dimension marginLeft_;
     Dimension marginRight_;
     Dimension marginBottom_;
+    Dimension buttonHeight_;
+    Dimension buttonTextSize_;
+    Dimension buttonMinTextSize_;
+    Dimension minButtonWidth_;
+    Dimension maxButtonWidth_;
 };
 
 } // namespace OHOS::Ace

@@ -103,6 +103,7 @@ void FlutterRenderOption::PaintLine(RenderContext& context, const Offset& offset
 
     flutter::Paint paint;
     paint.paint()->setARGB(lineColor_.GetAlpha(), lineColor_.GetRed(), lineColor_.GetGreen(), lineColor_.GetBlue());
+    paint.paint()->setAntiAlias(true);
     flutter::PaintData paintData;
     canvas->drawPath(path.get(), paint, paintData);
 

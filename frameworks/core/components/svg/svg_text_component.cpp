@@ -20,6 +20,24 @@
 
 namespace OHOS::Ace {
 
+SvgTextComponent::SvgTextComponent()
+{
+    InitDeclaration();
+}
+
+SvgTextComponent::SvgTextComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children)
+{
+    InitDeclaration();
+}
+
+void SvgTextComponent::InitDeclaration()
+{
+    if (!declaration_) {
+        declaration_ = AceType::MakeRefPtr<SvgTextDeclaration>();
+        declaration_->Init();
+    }
+}
+
 RefPtr<Element> SvgTextComponent::CreateElement()
 {
     return AceType::MakeRefPtr<SvgTextElement>();
@@ -28,6 +46,93 @@ RefPtr<Element> SvgTextComponent::CreateElement()
 RefPtr<RenderNode> SvgTextComponent::CreateRenderNode()
 {
     return FlutterRenderSvgText::Create();
+}
+
+const std::string& SvgTextComponent::GetTextData() const
+{
+    return declaration_->GetTextData();
+}
+
+void SvgTextComponent::SetTextData(const std::string& textData)
+{
+    declaration_->SetTextData(textData);
+}
+
+void SvgTextComponent::SetX(const Dimension& x)
+{
+    declaration_->SetX(x);
+}
+
+const Dimension& SvgTextComponent::GetX() const
+{
+    return declaration_->GetX();
+}
+
+void SvgTextComponent::SetY(const Dimension& y)
+{
+    declaration_->SetY(y);
+}
+
+const Dimension& SvgTextComponent::GetY() const
+{
+    return declaration_->GetY();
+}
+
+void SvgTextComponent::SetDx(const Dimension& dx)
+{
+    declaration_->SetDx(dx);
+}
+
+const Dimension& SvgTextComponent::GetDx() const
+{
+    return declaration_->GetDx();
+}
+
+void SvgTextComponent::SetDy(const Dimension& dy)
+{
+    declaration_->SetDy(dy);
+}
+
+const Dimension& SvgTextComponent::GetDy() const
+{
+    return declaration_->GetDy();
+}
+
+void SvgTextComponent::SetHasX(bool hasX)
+{
+    declaration_->SetHasX(hasX);
+}
+
+bool SvgTextComponent::GetHasX() const
+{
+    return declaration_->HasX();
+}
+
+void SvgTextComponent::SetHasY(bool hasY)
+{
+    declaration_->SetHasY(hasY);
+}
+
+bool SvgTextComponent::GetHasY() const
+{
+    return declaration_->HasY();
+}
+
+void SvgTextComponent::SetRotate(double rotate)
+{
+    declaration_->SetRotate(rotate);
+}
+
+double SvgTextComponent::GetRotate() const
+{
+    return declaration_->GetRotate();
+}
+
+void SvgTextComponent::SetDeclaration(const RefPtr<SvgTextDeclaration>& declaration)
+{
+    if (declaration) {
+        declaration_ = declaration;
+    }
 }
 
 } // namespace OHOS::Ace
