@@ -1244,6 +1244,8 @@ ACE_EXPORT extern const char DOM_ZINDEX[];
 ACE_EXPORT extern const char DOM_TAKE_PHOTO[];
 ACE_EXPORT extern const char DOM_CAMERA_FLASH[];
 ACE_EXPORT extern const char DOM_CAMERA_DEVICE_POSITION[];
+ACE_EXPORT extern const char DOM_CAMERA_START_RECORD[];
+ACE_EXPORT extern const char DOM_CAMERA_CLOSE_RECORDER[];
 
 // form
 ACE_EXPORT extern const char DOM_FORM_EVENT_SUBMIT[];

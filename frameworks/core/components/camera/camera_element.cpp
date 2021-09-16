@@ -420,6 +420,7 @@ void CameraElement::TakePhoto(const Size& size)
 
 void CameraElement::StartRecord()
 {
+    LOGI("CameraElement::StartRecord.");
     if (camera_ && !isRecording_) {
         camera_->StartRecord();
         isRecording_ = true;
@@ -428,6 +429,7 @@ void CameraElement::StartRecord()
 
 void CameraElement::CloseRecorder(const std::string& params)
 {
+    LOGI("CameraElement::CloseRecorder.");
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("fail to get context");
