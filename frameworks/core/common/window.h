@@ -34,6 +34,7 @@ public:
 
     void Destroy()
     {
+        platformWindow_->Destroy();
         platformWindow_.reset();
     }
 

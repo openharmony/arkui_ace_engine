@@ -405,8 +405,9 @@ QjsPaEngine::~QjsPaEngine()
     if (nativeEngine_ != nullptr) {
         delete nativeEngine_;
     }
-    ACE_DCHECK(engineInstance_);
-    JS_RunGC(engineInstance_->GetQjsRuntime());
+    if (engineInstance_ && engineInstance_->GetQjsRuntime()) {
+        JS_RunGC(engineInstance_->GetQjsRuntime());
+    }
 }
 
 inline int32_t GetJsInt32Val(JSContext* ctx, JSValueConst value)
