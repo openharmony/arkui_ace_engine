@@ -3062,8 +3062,9 @@ QjsEngine::~QjsEngine()
         nativeEngine_->CancelCheckUVLoop();
         delete nativeEngine_;
     }
-    ACE_DCHECK(engineInstance_);
-    JS_RunGC(engineInstance_->GetQjsRuntime());
+    if (engineInstance_ && engineInstance_->GetQjsRuntime()) {
+        JS_RunGC(engineInstance_->GetQjsRuntime());
+    }
 }
 
 void QjsEngine::GetLoadOptions(std::string& optionStr, bool isMainPage, const RefPtr<JsAcePage>& page)

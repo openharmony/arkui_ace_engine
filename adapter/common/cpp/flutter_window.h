@@ -28,6 +28,8 @@ public:
     explicit FlutterWindow(int32_t instanceId);
     ~FlutterWindow() override;
 
+    void Destroy() override;
+
     // Platform window interface
     void RequestFrame() override;
     void RegisterVsyncCallback(AceVsyncCallback&& callback) override;
