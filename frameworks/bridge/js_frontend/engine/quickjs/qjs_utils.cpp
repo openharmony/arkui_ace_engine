@@ -189,6 +189,7 @@ std::string ScopedString::Stringify(JSValueConst val)
     JSValue funcObj = JS_GetPropertyStr(ctx, thisObj, "stringify");
     JSValue retVal = JS_Call(ctx, funcObj, thisObj, 1, &val);
     std::string str = ScopedString(retVal).str();
+    js_std_loop(ctx);
     JS_FreeValue(ctx, retVal);
     JS_FreeValue(ctx, funcObj);
     JS_FreeValue(ctx, thisObj);
@@ -243,6 +244,7 @@ JSValue QJSUtils::Call(JSContext* ctx, JSValueConst funcObj, JSValueConst thisOb
     QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
     JSValue retVal = JS_Call(ctx, funcObj, thisObj, argc, argv);
     scope->jsValues_.push_back(retVal);
+    js_std_loop(ctx);
     return retVal;
 }
 
@@ -252,6 +254,7 @@ JSValue QJSUtils::Eval(JSContext* ctx, const char* input, size_t inputLen, const
     QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
     JSValue retVal = JS_Eval(ctx, input, inputLen, filename, evalFlags);
     scope->jsValues_.push_back(retVal);
+    js_std_loop(ctx);
     return retVal;
 }
 

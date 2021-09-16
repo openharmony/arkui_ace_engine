@@ -232,6 +232,7 @@ void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValu
         return;
     }
     JS_Call(ctx, appFunc, JS_UNDEFINED, argc, argv);
+    js_std_loop(ctx);
     JS_FreeValue(ctx, appFunc);
     JS_FreeValue(ctx, defaultobj);
     JS_FreeValue(ctx, exportobj);
@@ -334,6 +335,7 @@ void QJSDeclarativeEngine::TimerCallJs(const std::string& callbackId, bool isInt
         }
         JS_Call(ctx, jsFunc, JS_UNDEFINED, jsargv.size(), argv);
     }
+    js_std_loop(ctx);
 }
 
 void QJSDeclarativeEngine::MediaQueryCallback(const std::string& callbackId, const std::string& args)

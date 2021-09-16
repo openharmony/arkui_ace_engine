@@ -78,6 +78,7 @@ void QJSForEachFunction::executeBuilderForIndex(int32_t index)
     // indexed item
     JSValue jsItem = JS_GetPropertyUint32(ctx_, jsThis_, index);
     JSValue jsView = JS_Call(ctx_, jsViewMapperFunc_, jsThis_, 1, &jsItem);
+    js_std_loop(ctx_);
     JS_FreeValue(ctx_, jsItem);
     if (JS_IsException(jsView)) {
         QjsUtils::JsStdDumpErrorAce(ctx_);
