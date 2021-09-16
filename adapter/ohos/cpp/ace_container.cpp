@@ -504,6 +504,25 @@ bool AceContainer::Dump(const std::vector<std::string>& params)
     return false;
 }
 
+void AceContainer::TriggerGarbageCollection()
+{
+#if !defined(OHOS_PLATFORM) || !defined(ENABLE_NATIVE_VIEW)
+    // GPU and IO thread is standalone while disable native view
+    taskExecutor_->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::GPU);
+    taskExecutor_->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::IO);
+#endif
+    taskExecutor_->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::UI);
+    taskExecutor_->PostTask(
+        [frontend = WeakPtr<Frontend>(frontend_)] {
+            auto sp = frontend.Upgrade();
+            if (sp) {
+                sp->TriggerGarbageCollection();
+            }
+            PurgeMallocCache();
+        },
+        TaskExecutor::TaskType::JS);
+}
+
 void AceContainer::AddAssetPath(
     int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths)
 {

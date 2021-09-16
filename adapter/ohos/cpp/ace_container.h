@@ -117,6 +117,8 @@ public:
 
     bool Dump(const std::vector<std::string>& params) override;
 
+    void TriggerGarbageCollection() override;
+
     void OnFinish()
     {
         if (platformEventCallback_) {
