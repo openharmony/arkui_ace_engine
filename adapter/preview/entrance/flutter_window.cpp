@@ -61,7 +61,9 @@ void FlutterWindow::SetRootRenderNode(const RefPtr<RenderNode>& root) {}
 void FlutterWindow::OnVsyncCallback(uint64_t timeStampNanos)
 {
     for (const auto& vsyncCallback : vsyncCallbacks_) {
-        vsyncCallback(timeStampNanos, 0);
+        if (vsyncCallback) {
+            vsyncCallback(timeStampNanos, 0);
+        }
     }
 }
 

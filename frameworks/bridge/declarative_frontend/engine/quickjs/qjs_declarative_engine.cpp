@@ -37,7 +37,9 @@ QJSDeclarativeEngine::~QJSDeclarativeEngine()
         delete nativeEngine_;
     }
 #endif
-    JS_RunGC(engineInstance_->GetQJSRuntime());
+    if (engineInstance_ && engineInstance_->GetQJSRuntime()) {
+        JS_RunGC(engineInstance_->GetQJSRuntime());
+    }
 }
 
 bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)

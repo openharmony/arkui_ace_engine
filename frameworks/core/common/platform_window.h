@@ -36,6 +36,8 @@ public:
 
     static std::unique_ptr<PlatformWindow> Create(AceView* aceView);
 
+    virtual void Destroy() {};
+
     // Request next vsync.
     virtual void RequestFrame() = 0;
 
