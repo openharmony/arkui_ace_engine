@@ -54,6 +54,7 @@ JSValue QJSFunction::executeJS(int argc, JSValueConst* argv)
 
     JSValue result = JS_Call(ctx_, jsTmpFunc, jsTmpThis, argc, argv);
 
+    js_std_loop(ctx_);
     JS_FreeValue(ctx_, jsTmpFunc);
     JS_FreeValue(ctx_, jsTmpThis);
 
