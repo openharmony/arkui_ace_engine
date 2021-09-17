@@ -252,10 +252,6 @@ public:
 
     bool IsValueUpdated() const;
 
-    void SetCorrection(bool correction);
-
-    void SetInputFilter(bool correction);
-
     void SetDeclaration(const RefPtr<TextFieldDeclaration>& declaration);
 
     ACE_DEFINE_COMPONENT_EVENT(OnChange, void(std::string));

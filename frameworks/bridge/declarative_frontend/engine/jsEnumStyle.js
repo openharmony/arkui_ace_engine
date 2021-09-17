@@ -548,3 +548,20 @@ var DatePickerType;
   DatePickerType[DatePickerType["Time"] = 0] = "Time";
   DatePickerType[DatePickerType["Date"] = 1] = "Date";
 })(DatePickerType || (DatePickerType = {}));
+
+var InputType;
+(function (InputType) {
+  InputType[InputType["Normal"] = 0] = "Normal";
+  InputType[InputType["Number"] = 2] = "Number";
+  InputType[InputType["Email"] = 5] = "Email";
+  InputType[InputType["Password"] = 7] = "Password";
+})(InputType || (InputType = {}));
+
+var EnterKeyType;
+(function (EnterKeyType) {
+  EnterKeyType[EnterKeyType["Go"] = 2] = "Go";
+  EnterKeyType[EnterKeyType["Search"] = 3] = "Search";
+  EnterKeyType[EnterKeyType["Send"] = 4] = "Send";
+  EnterKeyType[EnterKeyType["Next"] = 5] = "Next";
+  EnterKeyType[EnterKeyType["Done"] = 6] = "Done";
+})(EnterKeyType || (EnterKeyType = {}));

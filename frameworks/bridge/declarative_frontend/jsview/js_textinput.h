@@ -29,9 +29,7 @@ public:
     static void SetPlaceholderColor(const JSCallbackInfo& info);
     static void SetPlaceholderFont(const JSCallbackInfo& info);
     static void SetEnterKeyType(const JSCallbackInfo& info);
-    static void SetInputFilter(const JSCallbackInfo& info);
     static void SetCaretColor(const JSCallbackInfo& info);
-    static void SetCorrection(const JSCallbackInfo& info);
     static void SetOnEditChanged(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
