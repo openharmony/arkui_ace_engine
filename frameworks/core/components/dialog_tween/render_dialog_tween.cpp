@@ -288,6 +288,14 @@ void RenderDialogTween::PerformLayout()
 {
     LayoutParam innerLayout = GetLayoutParam();
     auto maxSize = innerLayout.GetMaxSize();
+    // If max size is INFINITE, use viewport of parent.
+    if (maxSize == Size(std::numeric_limits<double>::max(), std::numeric_limits<double>::max())) {
+        auto parent = GetParent().Upgrade();
+        if (parent) {
+            maxSize = parent->GetChildViewPort();
+        }
+    }
+    innerLayout.SetMaxSize(maxSize);
     ComputeInnerLayoutParam(innerLayout);
     if (GetChildren().empty()) {
         SetLayoutSize(maxSize);
@@ -350,6 +358,13 @@ Offset RenderDialogTween::ComputeChildPosition(const Size& childSize) const
     }
 
     auto maxSize = GetLayoutParam().GetMaxSize();
+    // If max size is INFINITE, use viewport of parent.
+    if (maxSize == Size(std::numeric_limits<double>::max(), std::numeric_limits<double>::max())) {
+        auto parent = GetParent().Upgrade();
+        if (parent) {
+            maxSize = parent->GetChildViewPort();
+        }
+    }
     if (!isDraging_) {
         if (init_) {
             if (context->GetIsDeclarative()) {
