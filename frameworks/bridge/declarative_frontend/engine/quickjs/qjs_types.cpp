@@ -211,6 +211,7 @@ QJSRef<QJSValue> QJSFunction::Call(QJSRef<QJSValue> thisVal, int argc, QJSRef<QJ
     }
     QJSContext::Scope scp(ctx_);
     JSValue res = JS_Call(QJSContext::Current(), GetHandle(), thisVal.Get().GetHandle(), argc, args.data());
+    js_std_loop(ctx_);
     if (JS_IsException(res)) {
         QJSUtils::JsStdDumpErrorAce(QJSContext::Current());
         JS_FreeValue(QJSContext::Current(), res);
