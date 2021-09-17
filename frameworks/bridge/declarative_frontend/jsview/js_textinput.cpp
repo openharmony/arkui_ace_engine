@@ -20,8 +20,9 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/components/text_field/text_field_component.h"
 #include "frameworks/core/common/ime/text_input_action.h"
+#include "frameworks/core/common/ime/text_input_type.h"
+#include "frameworks/core/components/text_field/text_field_component.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -30,13 +31,11 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::Declare("TextInput");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSTextInput>::StaticMethod("create", &JSTextInput::Create, opt);
-    JSClass<JSTextInput>::StaticMethod("textInputType", &JSTextInput::SetType);
+    JSClass<JSTextInput>::StaticMethod("textInpuutType", &JSTextInput::SetType);
     JSClass<JSTextInput>::StaticMethod("placeholderColor", &JSTextInput::SetPlaceholderColor);
     JSClass<JSTextInput>::StaticMethod("placeholderFont", &JSTextInput::SetPlaceholderFont);
-    JSClass<JSTextInput>::StaticMethod("textInputAction", &JSTextInput::SetEnterKeyType);
-    JSClass<JSTextInput>::StaticMethod("inputFilter", &JSTextInput::SetInputFilter);
+    JSClass<JSTextInput>::StaticMethod("enterKeyType", &JSTextInput::SetEnterKeyType);
     JSClass<JSTextInput>::StaticMethod("caretColor", &JSTextInput::SetCaretColor);
-    JSClass<JSTextInput>::StaticMethod("correction", &JSTextInput::SetCorrection);
     JSClass<JSTextInput>::StaticMethod("onEditChanged", &JSTextInput::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextInput::SetOnSubmit);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextInput::SetOnChange);
@@ -47,7 +46,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
 void JSTextInput::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("textinput create error, info is non-vaild");
+        LOGE("text-input create error, info is non-vaild");
         return;
     }
 
@@ -80,6 +79,7 @@ void JSTextInput::SetType(const JSCallbackInfo& info)
     }
     TextInputType textInputType = static_cast<TextInputType>(info[0]->ToNumber<int32_t>());
     component->SetTextInputType(textInputType);
+    component->SetObscure(textInputType == TextInputType::VISIBLE_PASSWORD);
 }
 
 void JSTextInput::SetPlaceholderColor(const JSCallbackInfo& info)
@@ -113,38 +113,39 @@ void JSTextInput::SetPlaceholderFont(const JSCallbackInfo& info)
     }
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-
-    auto fontSize = paramObject->GetProperty("size");
-    Dimension value;
-    ParseJsDimensionPx(fontSize, value);
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetFontSize(value);
-
-    auto weight = paramObject->GetProperty("weight");
-    if (!weight->IsNumber()) {
-        LOGE("Info(weight) is not number");
+    if (!component) {
+        LOGE("The component(SetPlaceholderFont) is null");
         return;
     }
-    FontWeight fontWeight = static_cast<FontWeight>(weight->ToNumber<int32_t>());
-    textStyle.SetFontWeight(fontWeight);
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto textStyle = component->GetTextStyle();
 
-    std::vector<std::string> fontFamilies;
-    std::string fontFamily;
-    if (ParseJsString(paramObject->GetProperty("fontFamily"), fontFamily)) {
-        fontFamilies.push_back(fontFamily);
-        textStyle.SetFontFamilies(fontFamilies);
-    } else {
-        LOGE("fontFamily parse false");
+    auto fontSize = paramObject->GetProperty("size");
+    if (!fontSize->IsNull()) {
+        Dimension size;
+        ParseJsDimensionPx(fontSize, size);
+        textStyle.SetFontSize(size);
+    }
+
+    auto weight = paramObject->GetProperty("weight");
+    if (!weight->IsNull()) {
+        FontWeight fontWeight = static_cast<FontWeight>(weight->ToNumber<int32_t>());
+        textStyle.SetFontWeight(fontWeight);
+    }
+
+    auto font = paramObject->GetProperty("family");
+    if (!font->IsNull()) {
+        std::vector<std::string> fontFamilies;
+        if (ParseJsFontFamilies(font, fontFamilies)) {
+            textStyle.SetFontFamilies(fontFamilies);
+        }
     }
 
     auto style = paramObject->GetProperty("style");
-    if (!style->IsNumber()) {
-        LOGE("Info(style is not number");
-        return;
+    if (!style->IsNull()) {
+        FontStyle fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
+        textStyle.SetFontStyle(fontStyle);
     }
-    FontStyle fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
-    textStyle.SetFontStyle(fontStyle);
     component->SetTextStyle(std::move(textStyle));
 }
 
@@ -157,7 +158,7 @@ void JSTextInput::SetEnterKeyType(const JSCallbackInfo& info)
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
     if (!component) {
-        LOGE("The component(enterkeytype) is null");
+        LOGE("The component(SetEnterKeyType) is null");
         return;
     }
     if (!info[0]->IsNumber()) {
@@ -166,26 +167,6 @@ void JSTextInput::SetEnterKeyType(const JSCallbackInfo& info)
     }
     TextInputAction textInputAction = static_cast<TextInputAction>(info[0]->ToNumber<int32_t>());
     component->SetAction(textInputAction);
-}
-
-void JSTextInput::SetInputFilter(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The SetInputFilter is null");
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("The component(SetInputFilter) is null");
-        return;
-    }
-    if (!info[0]->IsNumber()) {
-        LOGE();
-        return;
-    }
-    component->SetInputFilter(info[0]->ToBoolean());
 }
 
 void JSTextInput::SetCaretColor(const JSCallbackInfo& info)
@@ -209,27 +190,6 @@ void JSTextInput::SetCaretColor(const JSCallbackInfo& info)
         LOGE("The component(SetCaretColor) is null");
         return;
     }
-}
-
-void JSTextInput::SetCorrection(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg(SetCorrection) is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
-    if (!info[0]->IsBoolean()) {
-        LOGE("The arg is(SetCorrection) not bool");
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("The(SetCorrection) Component is null");
-        return;
-    }
-    component->SetCorrection(info[0]->ToBoolean());
 }
 
 void JSTextInput::SetOnEditChanged(const JSCallbackInfo& info)

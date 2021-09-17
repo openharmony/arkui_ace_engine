@@ -19,7 +19,7 @@ namespace OHOS::Ace {
 
 TextInputType CastToTextInputType(int32_t value)
 {
-    if (value < static_cast<int32_t>(TextInputType::BEGIN) || value >= static_cast<int32_t>(TextInputType::END)) {
+    if (value < static_cast<int32_t>(TextInputType::BEGIN) || value > static_cast<int32_t>(TextInputType::END)) {
         return TextInputType::TEXT;
     }
     return static_cast<TextInputType>(value);
