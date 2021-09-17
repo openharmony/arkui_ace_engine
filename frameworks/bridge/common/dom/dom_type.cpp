@@ -1240,6 +1240,8 @@ const char DOM_ZINDEX[] = "zIndex";
 const char DOM_TAKE_PHOTO[] = "takePhoto";
 const char DOM_CAMERA_FLASH[] = "flash";
 const char DOM_CAMERA_DEVICE_POSITION[] = "deviceposition";
+const char DOM_CAMERA_START_RECORD[] = "startRecorder";
+const char DOM_CAMERA_CLOSE_RECORDER[] = "closeRecorder";
 
 // form
 const char DOM_FORM_EVENT_SUBMIT[] = "submit";
