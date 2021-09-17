@@ -38,6 +38,7 @@ public:
     void OnStop() override;
     sptr<IRemoteObject> OnConnect(const OHOS::AAFwk::Want &want) override;
     void OnDisconnect(const OHOS::AAFwk::Want &want) override;
+    void OnCommand(const AAFwk::Want &want, bool restart, int startId) override;
 
 private:
     int32_t abilityId_ = 100000;

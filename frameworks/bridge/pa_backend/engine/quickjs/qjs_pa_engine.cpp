@@ -1084,7 +1084,6 @@ sptr<IRemoteObject> QjsPaEngine::OnConnectService(const OHOS::AAFwk::Want &want)
     JSValue jsWant = (JSValue)*nativeWant;
     JSValueConst argv[] = { jsWant };
     JSValue retVal = QJSUtils::Call(ctx, onConnectFunc, JS_UNDEFINED, countof(argv), argv);
-    js_std_loop(ctx);
     if (JS_IsException(retVal)) {
         LOGE("Qjs onConnectService FAILED!");
         JS_FreeValue(ctx, globalObj);
@@ -1095,7 +1094,6 @@ sptr<IRemoteObject> QjsPaEngine::OnConnectService(const OHOS::AAFwk::Want &want)
         auto remoteObj = NAPI_ohos_rpc_getNativeRemoteObject(reinterpret_cast<napi_env>(nativeEngine_), 
                      reinterpret_cast<napi_value>(nativeValue));
         JS_FreeValue(ctx, globalObj);
-        JS_FreeValue(ctx, retVal);
         return remoteObj;
     }
 }
@@ -1128,6 +1126,7 @@ void QjsPaEngine::OnDisconnectService(const OHOS::AAFwk::Want &want)
         LOGE("Qjs OnDisconnectService FAILED!");
     }
     JS_FreeValue(ctx, globalObj);
+    JS_FreeValue(ctx, retVal);
 }
 
 void QjsPaEngine::OnDelete(const int64_t formId)
@@ -1259,6 +1258,40 @@ void QjsPaEngine::OnAcquireState(const OHOS::AAFwk::Want &want)
         return;
     }
     return;
+}
+
+void QjsPaEngine::OnCommand(const OHOS::AAFwk::Want &want, int startId)
+{
+    LOGI("OnCommand");
+    JSContext *ctx = engineInstance_->GetQjsContext();
+    ACE_DCHECK(ctx);
+
+    QJSHandleScope handleScope(ctx);
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue paObj = QJSUtils::GetPropertyStr(ctx, globalObj, "pa");
+    if (!JS_IsObject(paObj)) {
+        LOGE("get onCommand function error");
+        return;
+    }
+    JSValue onCommandFunc = QJSUtils::GetPropertyStr(ctx, paObj, "onCommand");
+    if (!JS_IsFunction(ctx, onCommandFunc)) {
+        LOGE("onCommand function is not found!");
+        JS_FreeValue(ctx, globalObj);
+        return;
+    }
+    napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine_), want);
+    NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
+    JSValue jsWant = (JSValue)*nativeWant;
+    JSValueConst argv[] = {
+        jsWant,
+        JS_NewInt32(ctx, startId)
+    };
+    JSValue retVal = QJSUtils::Call(ctx, onCommandFunc, JS_UNDEFINED, countof(argv), argv);
+    if (JS_IsException(retVal)) {
+        LOGE("Qjs onCommand FAILED!");
+    }
+    JS_FreeValue(ctx, globalObj);
+    JS_FreeValue(ctx, retVal);
 }
 
 } // namespace OHOS::Ace::Framework
