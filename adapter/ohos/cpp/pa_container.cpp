@@ -533,7 +533,7 @@ sptr<IRemoteObject> PaContainer::OnConnect(int32_t instanceId, const OHOS::AAFwk
     LOGI("OnConnect with id %{private}d", instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
-        LOGE("no AceContainer with id %{private}d", instanceId);
+        LOGE("no pa container with id %{private}d", instanceId);
         return nullptr;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
@@ -554,7 +554,7 @@ void PaContainer::OnDisConnect(int32_t instanceId, const OHOS::AAFwk::Want &want
     LOGI("OnDisConnect with id %{private}d", instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
-        LOGE("no AceContainer with id %{private}d", instanceId);
+        LOGE("no pa container with id %{private}d", instanceId);
         return;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
@@ -566,6 +566,26 @@ void PaContainer::OnDisConnect(int32_t instanceId, const OHOS::AAFwk::Want &want
             return;
         }
         paBackend->OnDisConnect(want);
+    }
+}
+
+void PaContainer::OnCommand(const OHOS::AAFwk::Want &want, int startId, int32_t instanceId)
+{
+    LOGI("OnCommand with id %{private}d", instanceId);
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        LOGE("no pa container with id %{private}d", instanceId);
+        return;
+    }
+    auto aceContainer = AceType::DynamicCast<PaContainer>(container);
+    auto back = aceContainer->GetBackend();
+    if (back) {
+        auto paBackend = AceType::DynamicCast<PaBackend>(back);
+        if (paBackend == nullptr) {
+            LOGE("DynamicCast paBackend failed with id %{private}d", instanceId);
+            return;
+        }
+        paBackend->OnCommand(want, startId);
     }
 }
 

@@ -131,5 +131,13 @@ void AceServiceAbility::OnDisconnect(const Want &want)
     LOGI("AceServiceAbility::OnDisconnect end");
 }
 
+void AceServiceAbility::OnCommand(const AAFwk::Want &want, bool restart, int startId)
+{
+    LOGI("AceServiceAbility::OnCommand start");
+    Ability::OnCommand(want, restart, startId);
+    Platform::PaContainer::OnCommand(want, startId, abilityId_);
+    LOGI("AceServiceAbility::OnCommand end");
+}
+
 }
 } // namespace OHOS::Ace
