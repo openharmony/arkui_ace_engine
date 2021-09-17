@@ -66,7 +66,7 @@ void FromBindingData::Constructor(const std::string& param)
     JSValue jsParam = QJSUtils::NewString(ctx_, param.c_str());
     JSValueConst argv[] = {jsParam};
     JS_Call(ctx_, paFunc, JS_UNDEFINED, countof(argv), argv);
-
+    js_std_loop(ctx_);
     return;
 }
 
@@ -81,7 +81,7 @@ void FromBindingData::UpdateData(const std::string& data)
     JSValue param = QJSUtils::NewString(ctx_, data.c_str());
     JSValueConst argv[] = {param};
     JS_Call(ctx_, paFunc, JS_UNDEFINED, countof(argv), argv);
-
+    js_std_loop(ctx_);
     return;
 }
 
@@ -95,7 +95,7 @@ std::string FromBindingData::GetDataString() const
 
     JSValueConst argv[] = {};
     JS_Call(ctx_, paFunc, JS_UNDEFINED, countof(argv), argv);
-
+    js_std_loop(ctx_);
     return "";
 }
 
@@ -110,7 +110,7 @@ void FromBindingData::AddImageData(const std::string& name, void* buffer)
     JSValue param = QJSUtils::NewString(ctx_, name.c_str());
     JSValueConst argv[] = {param};
     JS_Call(ctx_, paFunc, JS_UNDEFINED, countof(argv), argv);
-
+    js_std_loop(ctx_);
     return;
 }
 
@@ -125,7 +125,7 @@ void FromBindingData::RemoveImageData(const std::string& name)
     JSValue param = QJSUtils::NewString(ctx_, name.c_str());
     JSValueConst argv[] = {param};
     JS_Call(ctx_, paFunc, JS_UNDEFINED, countof(argv), argv);
-
+    js_std_loop(ctx_);
     return;
 }
 
@@ -272,7 +272,7 @@ JSValue QjsPaEngineInstance::FireJsEvent(const std::string &eventId, const std::
     };
 
     JSValue retVal = JS_Call(ctx, callJsFunc, JS_UNDEFINED, countof(argv), argv);
-
+    js_std_loop(ctx);
     JS_FreeValue(ctx, globalObj);
 
     // It is up to the caller to check this value. No exception checks here.
@@ -325,7 +325,7 @@ bool QjsPaEngineInstance::InitJsEnv(JSRuntime* runtime, JSContext* context)
     }
 
     JS_FreeValue(context_, CppToJSRet);
-
+    js_std_loop(context_);
     return true;
 }
 

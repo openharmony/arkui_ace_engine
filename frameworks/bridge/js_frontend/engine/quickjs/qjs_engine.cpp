@@ -93,6 +93,7 @@ int32_t CallEvalBuf(
         ret = JS_CALL_FAIL;
     }
     JS_FreeValue(ctx, val);
+    js_std_loop(ctx);
     return ret;
 }
 

@@ -163,6 +163,7 @@ int QJSDeclarativeEngineInstance::EvalBuf(
         ret = JS_CALL_FAIL;
     }
     JS_FreeValue(ctx, val);
+    js_std_loop(ctx);
     return ret;
 }
 
@@ -231,6 +232,7 @@ JSValue QJSDeclarativeEngineInstance::CompileSource(std::string url, const char*
         // Evaluate and write to the file
         LOGD("cache file does not exist, compiling source file");
         retVal = JS_Eval(GetQJSContext(), buf, bufSize, url.c_str(), JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_COMPILE_ONLY);
+        js_std_loop(ctx);
         if (JS_IsException(retVal)) {
             LOGE("Failed reading (source) JS file %s into QuickJS!", url.c_str());
             QJSUtils::JsStdDumpErrorAce(ctx);
