@@ -93,6 +93,8 @@ public:
         }
     }
 
+    void OnCommand(const OHOS::AAFwk::Want &want, int startId);
+
 private:
     void InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
     BackendType type_ = BackendType::SERVICE;

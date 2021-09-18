@@ -280,6 +280,15 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor> &taskExecut
         jsBackendEngine->OnAcquireState(want);
     };
 
+    builder.commandCallback = [weakEngine = WeakPtr<Framework::JsBackendEngine>(jsBackendEngine_)](
+            const OHOS::AAFwk::Want &want, int startId) {
+        auto jsBackendEngine = weakEngine.Upgrade();
+        if (!jsBackendEngine) {
+            return;
+        }
+        jsBackendEngine->OnCommand(want, startId);
+    };
+
     builder.taskExecutor = taskExecutor;
     builder.ability = ability_;
     builder.type = type_;
@@ -412,6 +421,11 @@ sptr<IRemoteObject> PaBackend::OnConnect(const OHOS::AAFwk::Want &want)
 void PaBackend::OnDisConnect(const OHOS::AAFwk::Want &want)
 {
     delegate_->OnDisConnect(want);
+}
+
+void PaBackend::OnCommand(const OHOS::AAFwk::Want &want, int startId)
+{
+    delegate_->OnCommand(want, startId);
 }
 
 } // namespace OHOS::Ace

@@ -66,6 +66,7 @@ using UpdateFormCallback = std::function<void(const int64_t formId)>;
 using CastTemptoNormalCallback = std::function<void(const int64_t formId)>;
 using VisibilityChangedCallback = std::function<void(const std::map<int64_t, int32_t>& formEventsMap)>;
 using AcquireStateCallback = std::function<void(const OHOS::AAFwk::Want &want)>;
+using CommandCallback = std::function<void(const OHOS::AAFwk::Want &want, int startId)>;
 
 struct BackendDelegateImplBuilder {
     RefPtr<TaskExecutor> taskExecutor;
@@ -93,6 +94,7 @@ struct BackendDelegateImplBuilder {
     CastTemptoNormalCallback castTemptoNormalCallback;
     VisibilityChangedCallback visibilityChangedCallback;
     AcquireStateCallback acquireStateCallback;
+    CommandCallback commandCallback;
     void* ability;
     BackendType type;
 };
@@ -143,6 +145,7 @@ public:
     void OnApplicationDestroy(const std::string &packageName);
     sptr<IRemoteObject> OnConnect(const OHOS::AAFwk::Want &want);
     void OnDisConnect(const OHOS::AAFwk::Want &want);
+    void OnCommand(const OHOS::AAFwk::Want &want, int startId);
 
     int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value);
     std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> Query(
@@ -207,6 +210,7 @@ private:
     CastTemptoNormalCallback castTemptoNormalCallback_;
     VisibilityChangedCallback visibilityChangedCallback_;
     AcquireStateCallback acquireStateCallback_;
+    CommandCallback commandCallback_;
 
     RefPtr<Framework::ManifestParser> manifestParser_;
     void* ability_;

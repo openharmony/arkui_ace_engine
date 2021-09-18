@@ -149,6 +149,7 @@ public:
     static sptr<IRemoteObject> OnConnect(int32_t instanceId, const OHOS::AAFwk::Want &want);
     static void OnDisConnect(int32_t instanceId, const OHOS::AAFwk::Want &want);
     static AppExecFwk::FormProviderData GetFormData(int32_t formId);
+    static void OnCommand(const OHOS::AAFwk::Want &want, int startId, int32_t instanceId);
 
 private:
     void InitializeBackend();
