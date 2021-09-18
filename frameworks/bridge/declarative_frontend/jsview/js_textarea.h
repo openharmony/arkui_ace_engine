@@ -29,7 +29,6 @@ public:
     static void SetPlaceholderFont(const JSCallbackInfo& info);
     static void SetTextAlign(const JSCallbackInfo& info);
     static void SetCaretColor(const JSCallbackInfo& info);
-    static void SetCorrection(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
 };
 
