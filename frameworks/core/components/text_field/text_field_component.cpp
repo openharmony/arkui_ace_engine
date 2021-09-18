@@ -718,16 +718,6 @@ void TextFieldComponent::SetOnSearch(const EventMarker& onSearch)
     declaration_->SetOnSearch(onSearch);
 }
 
-void TextFieldComponent::SetCorrection(bool isValueUpdated)
-{
-    declaration_->SetIsValueUpdated(isValueUpdated);
-}
-
-void TextFieldComponent::SetInputFilter(bool isValueUpdated)
-{
-    declaration_->SetIsValueUpdated(isValueUpdated);
-}
-
 void TextFieldComponent::SetDeclaration(const RefPtr<TextFieldDeclaration>& declaration)
 {
     if (declaration) {

@@ -15,7 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 
-#include<vector>
+#include <vector>
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/text_field/text_field_component.h"
@@ -42,7 +42,6 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("placeholderFont", &JSTextArea::SetPlaceholderFont);
     JSClass<JSTextArea>::StaticMethod("textAlign", &JSTextArea::SetTextAlign);
     JSClass<JSTextArea>::StaticMethod("caretColor", &JSTextArea::SetCaretColor);
-    JSClass<JSTextArea>::StaticMethod("correction", &JSTextArea::SetCorrection);
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextArea::SetOnChange);
     JSClass<JSTextArea>::Inherit<JSViewAbstract>();
     JSClass<JSTextArea>::Bind(globalObj);
@@ -172,27 +171,6 @@ void JSTextArea::SetCaretColor(const JSCallbackInfo& info)
     } else {
         LOGE("The component(SetCaretColor) is null");
     }
-}
-
-void JSTextArea::SetCorrection(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg(SetCorrection) is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
-    if (!info[0]->IsBoolean()) {
-        LOGE("arg is(SetCorrection) not bool.");
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("The(SetCorrection) Component is null");
-        return;
-    }
-    component->SetCorrection(info[0]->ToBoolean());
 }
 
 void JSTextArea::SetOnChange(const JSCallbackInfo& info)
