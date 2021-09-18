@@ -189,7 +189,11 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
         option->SetHeight(windowSize_.Height());
         option->SetX(windowOffset_.GetX());
         option->SetY(windowOffset_.GetY());
+#ifdef PRODUCT_RK
+        option->SetWindowType(SUBWINDOW_TYPE_NORMAL);
+#else
         option->SetWindowType(SUBWINDOW_TYPE_VIDEO);
+#endif
         auto window = wmi->GetWindowByID(context->GetWindowId());
         if (window == nullptr) {
             LOGE("Camera:fail to get window to create Camera");
@@ -205,7 +209,11 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
     }
     previewSurface_ = subwindow_->GetSurface();
     previewSurface_->SetUserData(SURFACE_STRIDE_ALIGNMENT, std::to_string(SURFACE_STRIDE_ALIGNMENT_VAL));
+#ifdef PRODUCT_RK
+    previewSurface_->SetUserData(SURFACE_FORMAT, std::to_string(PIXEL_FMT_RGBA_8888));
+#else
     previewSurface_->SetUserData(SURFACE_FORMAT, std::to_string(PIXEL_FMT_YCRCB_420_SP));
+#endif
     previewSurface_->SetUserData(SURFACE_WIDTH, std::to_string(PREVIEW_SURFACE_WIDTH));
     previewSurface_->SetUserData(SURFACE_HEIGHT, std::to_string(PREVIEW_SURFACE_HEIGHT));
     previewSurface_->SetUserData(REGION_WIDTH, std::to_string(windowSize_.Width()));

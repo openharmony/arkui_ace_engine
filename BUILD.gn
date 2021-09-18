@@ -82,6 +82,10 @@ config("ace_config") {
     defines += [ "SK_BUILD_FOR_UNIX" ]
   }
 
+  if ("${product_name}" == "rk3566" || "${product_name}" == "rk3568") {
+    defines += [ "PRODUCT_RK" ]
+  }
+
   cflags = [
     "-fvisibility=hidden",
     "-fdata-sections",
