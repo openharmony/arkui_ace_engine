@@ -58,7 +58,7 @@ BackendDelegateImpl::BackendDelegateImpl(const BackendDelegateImplBuilder &build
       castTemptoNormalCallback_(builder.castTemptoNormalCallback),
       visibilityChangedCallback_(builder.visibilityChangedCallback),
       acquireStateCallback_(builder.acquireStateCallback),
-
+      commandCallback_(builder.commandCallback),
       manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
       ability_(builder.ability),
       type_(builder.type),
@@ -383,6 +383,12 @@ void BackendDelegateImpl::OnAcquireState(const OHOS::AAFwk::Want &want)
     taskExecutor_->PostTask(
             [acquireStateCallback = acquireStateCallback_, want] { acquireStateCallback(want); },
             TaskExecutor::TaskType::JS);
+}
+
+void BackendDelegateImpl::OnCommand(const OHOS::AAFwk::Want &want, int startId)
+{
+    taskExecutor_->PostTask([commandCallback = commandCallback_, want, startId] { commandCallback(want, startId); },
+        TaskExecutor::TaskType::JS);
 }
 
 } // namespace OHOS::Ace::Framework

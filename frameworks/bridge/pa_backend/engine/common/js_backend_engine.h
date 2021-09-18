@@ -74,6 +74,8 @@ public:
     virtual void OnCastTemptoNormal(const int64_t formId) = 0;
     virtual void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) = 0;
     virtual void OnAcquireState(const OHOS::AAFwk::Want &want) = 0;
+    virtual void OnCommand(const OHOS::AAFwk::Want &want, int startId) = 0;
+
     void SetFormData(const AppExecFwk::FormProviderData &formProviderData)
     {
         formProviderData_ = formProviderData;
