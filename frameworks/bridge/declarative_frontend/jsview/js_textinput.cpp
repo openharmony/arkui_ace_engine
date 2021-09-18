@@ -31,7 +31,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::Declare("TextInput");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSTextInput>::StaticMethod("create", &JSTextInput::Create, opt);
-    JSClass<JSTextInput>::StaticMethod("textInputType", &JSTextInput::SetType);
+    JSClass<JSTextInput>::StaticMethod("type", &JSTextInput::SetType);
     JSClass<JSTextInput>::StaticMethod("placeholderColor", &JSTextInput::SetPlaceholderColor);
     JSClass<JSTextInput>::StaticMethod("placeholderFont", &JSTextInput::SetPlaceholderFont);
     JSClass<JSTextInput>::StaticMethod("enterKeyType", &JSTextInput::SetEnterKeyType);
