@@ -60,7 +60,7 @@ public:
         return nullptr;
     }
 
-    const WindowConfig& GetWindowConfig() override
+    WindowConfig& GetWindowConfig() override
     {
         return windowConfig_;
     }
