@@ -80,7 +80,7 @@ public:
     virtual RefPtr<AceEventHandler> GetEventHandler() = 0;
 
     // Get window config of front end, which is used to calculate the pixel ratio of the real device.
-    virtual const WindowConfig& GetWindowConfig() = 0;
+    virtual WindowConfig& GetWindowConfig() = 0;
 
     virtual FrontendType GetType() = 0;
 
