@@ -193,7 +193,7 @@ public:
 
     void ReturnSelf() const;
 
-    std::variant<void*, panda::Local<panda::JSValueRef>> GetReturnValue()
+    std::variant<void*, panda::Global<panda::JSValueRef>> GetReturnValue()
     {
         return retVal_;
     }
@@ -205,11 +205,11 @@ public:
 
 private:
     panda::ecmascript::EcmaVM* vm_ = nullptr;
-    panda::Local<panda::JSValueRef> thisObj_;
+    panda::Global<panda::JSValueRef> thisObj_;
     int argc_;
-    panda::Local<panda::JSValueRef>* argv_;
+    std::vector<panda::Global<panda::JSValueRef>> argv_;
 
-    mutable std::variant<void*, panda::Local<panda::JSValueRef>> retVal_;
+    mutable std::variant<void*, panda::Global<panda::JSValueRef>> retVal_;
 };
 
 class JsiGCMarkCallbackInfo {
