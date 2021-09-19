@@ -172,13 +172,15 @@ public:
     {
         onPanDistanceIds_.emplace(onPanDistanceId.GetId(), onPanDistanceId);
     }
+
+    
+    std::unordered_map<typename OnPanFingersFunc::IdType, OnPanFingersFunc> onPanFingersIds_;
+    std::unordered_map<typename OnPanDirectionFunc::IdType, OnPanDirectionFunc> onPanDirectionIds_;
+    std::unordered_map<typename OnPanDistanceFunc::IdType, OnPanDistanceFunc> onPanDistanceIds_;
 private:
     PanDirection direction_;
     double distance_ = DEFAULT_PAN_DISTANCE;
     int32_t fingers_ = DEFAULT_PAN_FINGER;
-    std::unordered_map<typename OnPanFingersFunc::IdType, OnPanFingersFunc> onPanFingersIds_;
-    std::unordered_map<typename OnPanDirectionFunc::IdType, OnPanDirectionFunc> onPanDirectionIds_;
-    std::unordered_map<typename OnPanDistanceFunc::IdType, OnPanDistanceFunc> onPanDistanceIds_;
 };
 
 class PasteData : public AceType {

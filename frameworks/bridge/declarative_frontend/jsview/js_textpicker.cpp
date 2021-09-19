@@ -27,7 +27,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextPicker>::Declare("TextPicker");
     MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSTextPicker>::StaticMethod("create", &JSTextPicker::Create,opt);
+    JSClass<JSTextPicker>::StaticMethod("create", &JSTextPicker::Create, opt);
     JSClass<JSTextPicker>::StaticMethod("defaultPickerItemHeight", &JSTextPicker::SetDefaultPickerItemHeight);
     JSClass<JSTextPicker>::StaticMethod("onAccept", &JSTextPicker::OnAccept);
     JSClass<JSTextPicker>::StaticMethod("onCancel", &JSTextPicker::OnCancel);
@@ -38,7 +38,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
 
 void JSTextPicker::Create(const JSCallbackInfo& info)
 {
-    std::string value ="0";
+    std::string value = "0";
     uint32_t selected = 0;
 
     if (info.Length() < 1 || !info[0]->IsObject()) {
@@ -54,9 +54,9 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
 
     JSRef<JSArray> getRange = paramObject->GetProperty("range");
     std::vector<std::string> getRangeVector;
-    for(size_t i = 0; i<getRange->Length(); i++){
+    for(size_t i = 0; i < getRange->Length(); i++) {
         JSRef<JSVal> getRangeValue = getRange->GetValueAt(i);
-        if(!getRangeValue->IsString()){
+        if (!getRangeValue->IsString()) {
             LOGE("range need to be string type");
             return;
         } else {
@@ -101,7 +101,7 @@ void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsNumber()) {
-        auto height= info[0]->ToNumber<double>();
+        auto height = info[0]->ToNumber<double>();
         TextPicker->SetDefaultPickerItemHeight(Dimension(height));
     }
 }

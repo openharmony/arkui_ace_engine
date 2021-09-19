@@ -75,6 +75,7 @@ static napi_value JSGetInfo(napi_env env, napi_callback_info info)
     if (asyncContext->sucCallbackRef == nullptr && asyncContext->failCallbackRef == nullptr &&
         asyncContext->cmpCallbackRef == nullptr) {
         LOGE("all callback is null");
+        delete asyncContext;
         return nullptr;
     }
 

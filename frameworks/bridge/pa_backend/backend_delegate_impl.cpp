@@ -233,8 +233,8 @@ int32_t BackendDelegateImpl::Insert(const Uri& uri, const OHOS::NativeRdb::Value
     return ret;
 }
 
-std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> BackendDelegateImpl::Query(const Uri& uri, const std::vector<std::string>& columns,
-                                                      const OHOS::NativeRdb::DataAbilityPredicates& predicates)
+std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> BackendDelegateImpl::Query(
+    const Uri& uri, const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates)
 {
     std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> ret;
     taskExecutor_->PostSyncTask(
@@ -329,60 +329,68 @@ sptr<IRemoteObject> BackendDelegateImpl::OnConnect(const OHOS::AAFwk::Want &want
 {
     sptr<IRemoteObject> ret = nullptr;
     taskExecutor_->PostSyncTask(
-            [connectCallback = connectCallback_, want, &ret]() {
-                    ret = connectCallback(want);
-                },
-            TaskExecutor::TaskType::JS);
+        [connectCallback = connectCallback_, want, &ret]()
+        {
+            ret = connectCallback(want);
+        },
+        TaskExecutor::TaskType::JS);
     return ret;
 }
 
 void BackendDelegateImpl::OnDisConnect(const OHOS::AAFwk::Want &want)
 {
     taskExecutor_->PostTask(
-            [disConnectCallback = disConnectCallback_, want] { disConnectCallback(want); },
-            TaskExecutor::TaskType::JS);
+        [disConnectCallback = disConnectCallback_, want]
+        { disConnectCallback(want); },
+        TaskExecutor::TaskType::JS);
 }
 
 void BackendDelegateImpl::OnDelete(const int64_t formId)
 {
     taskExecutor_->PostTask(
-            [deleteCallback = deleteCallback_, formId] { deleteCallback(formId); },
-            TaskExecutor::TaskType::JS);
+        [deleteCallback = deleteCallback_, formId]
+        { deleteCallback(formId); },
+        TaskExecutor::TaskType::JS);
 }
 
 void BackendDelegateImpl::OnTriggerEvent(const int64_t formId, const std::string &message)
 {
     taskExecutor_->PostTask(
-            [triggerEventCallback = triggerEventCallback_, formId, message] { triggerEventCallback(formId, message); },
-            TaskExecutor::TaskType::JS);
+        [triggerEventCallback = triggerEventCallback_, formId, message]
+        { triggerEventCallback(formId, message); },
+        TaskExecutor::TaskType::JS);
 }
 
 void BackendDelegateImpl::OnUpdate(const int64_t formId)
 {
     taskExecutor_->PostTask(
-            [updateCallback = updateCallback_, formId] { updateCallback(formId); },
-            TaskExecutor::TaskType::JS);
+        [updateCallback = updateCallback_, formId]
+        { updateCallback(formId); },
+        TaskExecutor::TaskType::JS);
 }
 
 void BackendDelegateImpl::OnCastTemptoNormal(const int64_t formId)
 {
     taskExecutor_->PostTask(
-            [castTemptoNormalCallback = castTemptoNormalCallback_, formId] { castTemptoNormalCallback(formId); },
-            TaskExecutor::TaskType::JS);
+        [castTemptoNormalCallback = castTemptoNormalCallback_, formId]
+        { castTemptoNormalCallback(formId); },
+        TaskExecutor::TaskType::JS);
 }
 
-void BackendDelegateImpl::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap)
+void BackendDelegateImpl::OnVisibilityChanged(const std::map<int64_t, int32_t> &formEventsMap)
 {
     taskExecutor_->PostTask(
-            [visibilityChangedCallback = visibilityChangedCallback_, formEventsMap] { visibilityChangedCallback(formEventsMap); },
-            TaskExecutor::TaskType::JS);
+        [visibilityChangedCallback = visibilityChangedCallback_, formEventsMap]
+        { visibilityChangedCallback(formEventsMap); },
+        TaskExecutor::TaskType::JS);
 }
 
 void BackendDelegateImpl::OnAcquireState(const OHOS::AAFwk::Want &want)
 {
     taskExecutor_->PostTask(
-            [acquireStateCallback = acquireStateCallback_, want] { acquireStateCallback(want); },
-            TaskExecutor::TaskType::JS);
+        [acquireStateCallback = acquireStateCallback_, want]
+        { acquireStateCallback(want); },
+        TaskExecutor::TaskType::JS);
 }
 
 void BackendDelegateImpl::OnCommand(const OHOS::AAFwk::Want &want, int startId)

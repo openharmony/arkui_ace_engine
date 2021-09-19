@@ -647,10 +647,8 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
     nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
     ACE_DCHECK(delegate);
-    delegate->AddTaskObserver([nativeEngine = nativeEngine_](){
-        nativeEngine->Loop(LOOP_NOWAIT);
-    });
-
+    delegate->AddTaskObserver([nativeEngine = nativeEngine_]()
+        { nativeEngine->Loop(LOOP_NOWAIT); });
     return result;
 }
 
@@ -842,8 +840,10 @@ void JsiDeclarativeEngine::OnWindowDisplayModeChanged(bool isShownInMultiWindow,
 {
     LOGI("JsiDeclarativeEngine OnWindowDisplayModeChanged");
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = {
-        runtime->NewBoolean(isShownInMultiWindow), runtime->NewString(data) };
+    const std::vector<shared_ptr<JsValue>>& argv = { 
+        runtime->NewBoolean(isShownInMultiWindow),
+        runtime->NewString(data)
+    };
     CallAppFunc("onWindowDisplayModeChanged", argv);
 }
 

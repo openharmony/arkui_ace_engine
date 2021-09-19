@@ -65,7 +65,7 @@ enum class CursorPositionType {
 
 class OnTextChangedListenerImpl : public MiscServices::OnTextChangedListener {
 public:
-    OnTextChangedListenerImpl(const WeakPtr<RenderTextField>& field ) : field_(field) {}
+    OnTextChangedListenerImpl(const WeakPtr<RenderTextField>& field) : field_(field) {}
     void InsertText(const std::u16string& text) override;
     void DeleteBackward(int32_t length) override;
     void SetKeyboardStatus(bool status) override;

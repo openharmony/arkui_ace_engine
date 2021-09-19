@@ -262,14 +262,15 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     AAFwk::Want want;
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, (long)runningCardId_);
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_MESSAGE_KEY, action);
-    //want.HasParameter(Constants::PARAM_FORM_IDENTITY_KEY)) {
+    // want.HasParameter(Constants::PARAM_FORM_IDENTITY_KEY)) {
     if (AppExecFwk::FormMgr::GetRecoverStatus() == OHOS::AppExecFwk::Constants::IN_RECOVERING) {
         LOGE("form is in recover status, can't do action on form.");
         return;
     }
 
     // requestForm request to fms
-    int resultCode = AppExecFwk::FormMgr::GetInstance().MessageEvent(runningCardId_, want, AppExecFwk::FormHostClient::GetInstance());
+    int resultCode = AppExecFwk::FormMgr::GetInstance().MessageEvent(
+        runningCardId_, want, AppExecFwk::FormHostClient::GetInstance());
     if (resultCode != ERR_OK) {
         LOGE("failed to notify the form service, error code is %{public}d.", resultCode);
     }

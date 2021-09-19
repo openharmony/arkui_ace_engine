@@ -127,10 +127,11 @@ const MediaQueryerRule CSS_LEVEL4_MULTI(
 
         auto mediaFeatureValue = mediaFeature->GetDouble(matchResults[MEDIA_FEATURE], NOT_FOUND);
         return CalculateExpression(TransferValue(mediaFeatureValue, matchResults[LEFT_UNIT]),
-                   matchResults[LEFT_RELATIONSHIP], StringToDouble(matchResults[LEFT_CONDITION_VALUE]), failReason) &&
+                                   matchResults[LEFT_RELATIONSHIP],
+                                   StringToDouble(matchResults[LEFT_CONDITION_VALUE]), failReason) &&
                CalculateExpression(StringToDouble(matchResults[RIGHT_CONDITION_VALUE]),
-                   matchResults[RIGHT_RELATIONSHIP], TransferValue(mediaFeatureValue, matchResults[RIGHT_UNIT]),
-                   failReason);
+                                   matchResults[RIGHT_RELATIONSHIP],
+                                   TransferValue(mediaFeatureValue, matchResults[RIGHT_UNIT]), failReason);
     },
     8);
 

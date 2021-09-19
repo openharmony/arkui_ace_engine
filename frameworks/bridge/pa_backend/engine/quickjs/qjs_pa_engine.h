@@ -115,13 +115,17 @@ private:
 using RdbValueBucketNewInstance = napi_value (*)(napi_env env, OHOS::NativeRdb::ValuesBucket& valueBucket);
 using RdbValueBucketGetNativeObject = OHOS::NativeRdb::ValuesBucket* (*)(napi_env env, napi_value& value);
 using RdbResultSetProxyNewInstance = napi_value (*)(napi_env env, OHOS::NativeRdb::AbsSharedResultSet* resultSet);
-using RdbResultSetProxyGetNativeObject = OHOS::NativeRdb::AbsSharedResultSet* (*)(const napi_env env, const napi_value& arg);
-using DataAbilityPredicatesNewInstance = napi_value (*)(napi_env env, OHOS::NativeRdb::DataAbilityPredicates* predicates);
-using DataAbilityPredicatesGetNativeObject = OHOS::NativeRdb::DataAbilityPredicates* (*)(const napi_env env, const napi_value& arg);
+using RdbResultSetProxyGetNativeObject =
+    OHOS::NativeRdb::AbsSharedResultSet* (*)(const napi_env env, const napi_value& arg);
+using DataAbilityPredicatesNewInstance =
+    napi_value (*)(napi_env env, OHOS::NativeRdb::DataAbilityPredicates* predicates);
+using DataAbilityPredicatesGetNativeObject =
+    OHOS::NativeRdb::DataAbilityPredicates* (*)(const napi_env env, const napi_value& arg);
 
 class QjsPaEngine : public JsBackendEngine {
 public:
-    explicit QjsPaEngine(int32_t instanceId) : instanceId_(instanceId) {};
+    explicit QjsPaEngine(int32_t instanceId) : instanceId_(instanceId),
+        dataAbilityPredicatesGetNativeObject_(nullptr) {};
     ~QjsPaEngine() override;
 
     bool Initialize(const RefPtr<BackendDelegate>& delegate) override;

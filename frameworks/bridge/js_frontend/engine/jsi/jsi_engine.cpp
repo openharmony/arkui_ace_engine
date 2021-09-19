@@ -2639,9 +2639,8 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
     nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
     ACE_DCHECK(delegate);
-    delegate->AddTaskObserver([nativeEngine = nativeEngine_](){
-        nativeEngine->Loop(LOOP_NOWAIT);
-    });
+    delegate->AddTaskObserver([nativeEngine = nativeEngine_]()
+        { nativeEngine->Loop(LOOP_NOWAIT); });
 
     return true;
 }

@@ -148,15 +148,14 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 
         napi_typeof(env, asyncContext->titleNApi, &valueType);
         size_t titleLen = GetParamLen(asyncContext->titleNApi);
-        std::unique_ptr<char[]> titleChar(new char[titleLen] { 0 });
+        std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(titleLen);
         if (asyncContext->titleNApi != nullptr && valueType == napi_string) {
             napi_get_value_string_utf8(env, asyncContext->titleNApi, titleChar.get(), titleLen, &ret);
             asyncContext->titleString = titleChar.get();
         }
-        LOGE("hzq JSPromptShowDialog 333");
         napi_typeof(env, asyncContext->messageNApi, &valueType);
         size_t messageLen = GetParamLen(asyncContext->messageNApi);
-        std::unique_ptr<char[]> messageChar(new char[messageLen] { 0 });
+        std::unique_ptr<char[]> messageChar = std::make_unique<char[]>(messageLen);
         if (asyncContext->messageNApi != nullptr && valueType == napi_string) {
             napi_get_value_string_utf8(env, asyncContext->messageNApi, messageChar.get(), messageLen, &ret);
             asyncContext->messageString = messageChar.get();
@@ -324,7 +323,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 
         napi_typeof(env, asyncContext->titleNApi, &valueType);
         size_t titleLen = GetParamLen(asyncContext->titleNApi);
-        std::unique_ptr<char[]> titleChar(new char[titleLen] { 0 });
+        std::unique_ptr<char[]> titleChar = std::make_unique(titleLen);
         if (asyncContext->titleNApi != nullptr && valueType == napi_string) {
             napi_get_value_string_utf8(env, asyncContext->titleNApi, titleChar.get(), titleLen, &ret);
             asyncContext->titleString = titleChar.get();
@@ -434,14 +433,14 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                         case 1:
                             if (asyncContext->callbackFail) {
                                 asyncContext->callbackFailString = "Fail showActionMenu:fail cancel";
-                                napi_value returnObj = GetReturnObj(env,asyncContext->callbackFailString);
+                                napi_value returnObj = GetReturnObj(env, asyncContext->callbackFailString);
                                 napi_get_reference_value(env, asyncContext->callbackFail, &callback);
                                 napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
                                 napi_delete_reference(env, asyncContext->callbackFail);
                             }
                             if (asyncContext->callbackComplete) {
                                 asyncContext->callbackCompleteString = "Complete showActionMenu:fail cancel";
-                                napi_value returnObj = GetReturnObj(env,asyncContext->callbackCompleteString);
+                                napi_value returnObj = GetReturnObj(env, asyncContext->callbackCompleteString);
                                 napi_get_reference_value(env, asyncContext->callbackComplete, &callback);
                                 napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
                                 napi_delete_reference(env, asyncContext->callbackComplete);

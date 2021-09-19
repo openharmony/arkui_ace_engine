@@ -59,9 +59,9 @@ void ImageProvider::FatchImageObject(
             auto imgObj = imageCache->GetCacheImgObj(imageInfo.ToString());
             if (imgObj) {
                 LOGE("image object got from cache: %{public}s", imageInfo.ToString().c_str());
-                taskExecutor->PostTask([ successCallback, imageInfo, imgObj ] () {
-                    successCallback(imageInfo, imgObj);
-                }, TaskExecutor::TaskType::UI);
+                taskExecutor->PostTask([successCallback, imageInfo, imgObj]()
+                                       { successCallback(imageInfo, imgObj); },
+                                       TaskExecutor::TaskType::UI);
                 return;
             }
         }

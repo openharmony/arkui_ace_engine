@@ -216,9 +216,9 @@ void JSForm::JsOnRouter(const JSCallbackInfo& info)
 
         auto onRouterId =
             EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
-              JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-              std::vector<std::string> keys = { "action" };
-              func->Execute(keys, param);
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                std::vector<std::string> keys = { "action" };
+                func->Execute(keys, param);
             });
 
         form->SetOnRouterEventId(onRouterId);

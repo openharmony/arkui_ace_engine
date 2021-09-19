@@ -34,46 +34,22 @@ bool ModuleManager::InitModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<
 {
     static const std::unordered_map<std::string,
         void (*)(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& thisObj)> MODULE_LIST = {
-        { "system.router",
-            [] (const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& thisObj) {
-                InitRouterModule(runtime, thisObj);
-            }
-        },
-        { "ohos.router",
-            [] (const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& thisObj) {
-                InitRouterModule(runtime, thisObj);
-            }
-        },
-        { "system.app",
-            [] (const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& thisObj) {
-                InitAppModule(runtime, thisObj);
-            }
-        },
-        { "ohos.app",
-            [] (const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& thisObj) {
-                InitAppModule(runtime, thisObj);
-            }
-        },
-        { "system.curves",
-            [] (const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& thisObj) {
-                InitCurvesModule(runtime, thisObj);
-            }
-        },
-        { "ohos.curves",
-            [] (const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& thisObj) {
-                InitCurvesModule(runtime, thisObj);
-            }
-        },
-        { "system.matrix4",
-            [] (const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& thisObj) {
-                InitMatrix4Module(runtime, thisObj);
-            }
-        },
-        { "ohos.matrix4",
-            [] (const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& thisObj) {
-            InitMatrix4Module(runtime, thisObj);
-            }
-        },
+        { "system.router", [](const shared_ptr<JsRuntime>& runtime,
+		               shared_ptr<JsValue>& thisObj) { InitRouterModule(runtime, thisObj); } },
+        { "ohos.router", [](const shared_ptr<JsRuntime>& runtime,
+			     shared_ptr<JsValue>& thisObj) { InitRouterModule(runtime, thisObj); } },
+        { "system.app", [](const shared_ptr<JsRuntime>& runtime,
+		            shared_ptr<JsValue>& thisObj) { InitAppModule(runtime, thisObj); } },
+        { "ohos.app", [](const shared_ptr<JsRuntime>& runtime,
+		          shared_ptr<JsValue>& thisObj) { InitAppModule(runtime, thisObj); } },
+        { "system.curves", [](const shared_ptr<JsRuntime>& runtime,
+			       shared_ptr<JsValue>& thisObj) { InitCurvesModule(runtime, thisObj); } },
+        { "ohos.curves", [](const shared_ptr<JsRuntime>& runtime,
+		             shared_ptr<JsValue>& thisObj) { InitCurvesModule(runtime, thisObj); } },
+        { "system.matrix4", [](const shared_ptr<JsRuntime>& runtime,
+			        shared_ptr<JsValue>& thisObj) { InitMatrix4Module(runtime, thisObj); } },
+        { "ohos.matrix4", [](const shared_ptr<JsRuntime>& runtime,
+			      shared_ptr<JsValue>& thisObj) { InitMatrix4Module(runtime, thisObj); } },
     };
     auto iter = MODULE_LIST.find(moduleName);
     if (iter != MODULE_LIST.end()) {

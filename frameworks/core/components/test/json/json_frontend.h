@@ -97,7 +97,7 @@ public:
         handler_ = handler;
     }
 
-    WindowConfig& GetWindowConfig() override
+    const WindowConfig& GetWindowConfig() override
     {
         return windowConfig_;
     }
