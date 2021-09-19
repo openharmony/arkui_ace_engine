@@ -323,7 +323,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 
         napi_typeof(env, asyncContext->titleNApi, &valueType);
         size_t titleLen = GetParamLen(asyncContext->titleNApi);
-        std::unique_ptr<char[]> titleChar = std::make_unique(titleLen);
+        std::unique_ptr<char[]> titleChar = std::make_unique<char*>(titleLen);
         if (asyncContext->titleNApi != nullptr && valueType == napi_string) {
             napi_get_value_string_utf8(env, asyncContext->titleNApi, titleChar.get(), titleLen, &ret);
             asyncContext->titleString = titleChar.get();

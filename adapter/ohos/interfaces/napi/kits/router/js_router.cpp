@@ -30,7 +30,7 @@ static void ParseUri(napi_env env, napi_value uriNApi, std::string& uriString)
     auto resultUri = nativeUri->ToString();
     auto nativeStringUri = reinterpret_cast<NativeString*>(resultUri->GetInterface(NativeString::INTERFACE_ID));
     size_t uriLen = nativeStringUri->GetLength();
-    std::unique_ptr<char[]> uri = std::make_unique(uriLen);
+    std::unique_ptr<char[]> uri = std::make_unique<char*>(uriLen);
     size_t retLen = 0;
     napi_get_value_string_utf8(env, uriNApi, uri.get(), uriLen, &retLen);
     uriString = uri.get();
