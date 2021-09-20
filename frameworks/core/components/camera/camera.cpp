@@ -541,11 +541,10 @@ void CameraCallback::Stop(bool isClosePreView)
     if (isClosePreView) {
         if (capSession_ != nullptr) {
             capSession_->Stop();
-            capSession_->Release();
-            capSession_ = nullptr;
         }
         previewState_ = State::STATE_IDLE;
         isReady_ = false;
+        Release();
     }
 }
 
