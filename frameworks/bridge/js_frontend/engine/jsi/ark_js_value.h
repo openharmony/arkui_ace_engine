@@ -94,7 +94,7 @@ public:
     }
 
 private:
-    Global<JSValueRef> value_{};
+    Global<JSValueRef> value_ {};
 };
 }  // namespace OHOS::Ace::Framework
 #endif  // PANDA_RUNTIME_ECMASCRIPT_NAPI_JSI_ARK_JS_VALUE_H

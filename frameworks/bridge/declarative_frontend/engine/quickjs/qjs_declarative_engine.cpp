@@ -269,8 +269,10 @@ void QJSDeclarativeEngine::OnWindowDisplayModeChanged(bool isShownInMultiWindow,
         return;
     }
 
-    JSValueConst callBackResult[] = { callBackResult[0] = JS_NewBool(ctx, isShownInMultiWindow),
-        callBackResult[1] = JS_ParseJSON(ctx, data.c_str(), data.length(), "") };
+    JSValueConst callBackResult[] = {
+        callBackResult[0] = JS_NewBool(ctx, isShownInMultiWindow),
+        callBackResult[1] = JS_ParseJSON(ctx, data.c_str(), data.length(), "")
+    };
     CallAppFunc("onWindowDisplayModeChanged", 2, callBackResult);
 
     js_std_loop(engineInstance_->GetQJSContext());
@@ -319,7 +321,7 @@ void QJSDeclarativeEngine::TimerCallJs(const std::string& callbackId, bool isInt
     }
 
     JSValue jsFunc = ModuleManager::GetInstance()->GetCallbackFunc(std::stoi(callbackId), isInterval);
-    if (!JS_IsFunction(ctx,jsFunc)) {
+    if (!JS_IsFunction(ctx, jsFunc)) {
         LOGE("TimerCallJs is not func");
         return;
     }

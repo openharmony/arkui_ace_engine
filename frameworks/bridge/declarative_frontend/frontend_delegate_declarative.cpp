@@ -164,9 +164,9 @@ void FrontendDelegateDeclarative::GetResourceConfiguration(std::unique_ptr<JsonV
 void FrontendDelegateDeclarative::GetConfigurationCommon(const std::string& filePath, std::unique_ptr<JsonValue>& data)
 {
     std::vector<std::string> files;
-    //if (assetManager_) {
-    //    assetManager_->GetAssetList(filePath, files);
-    //}
+    // if (assetManager_) {
+    //     assetManager_->GetAssetList(filePath, files);
+    // }
     if (!AceApplicationInfo::GetInstance().GetFiles(filePath, files)) {
         LOGE("Get configuration files fail!");
         return;
@@ -205,9 +205,9 @@ void FrontendDelegateDeclarative::LoadResourceConfiguration(std::map<std::string
     std::unique_ptr<JsonValue>& currentResourceData)
 {
     std::vector<std::string> files;
-    //if (assetManager_) {
-    //    assetManager_->GetAssetList(RESOURCES_FOLDER, files);
-    //}
+    // if (assetManager_) {
+    //     assetManager_->GetAssetList(RESOURCES_FOLDER, files);
+    // }
     if (!AceApplicationInfo::GetInstance().GetFiles(RESOURCES_FOLDER, files)) {
         LOGE("Get configuration files fail!");
         return;

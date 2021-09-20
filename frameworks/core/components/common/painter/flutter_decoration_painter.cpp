@@ -1240,7 +1240,7 @@ void FlutterDecorationPainter::PaintContrast(const flutter::RRect& outerRRect, S
             paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
             float matrix[20];
-            memset(matrix, 0, 20 * sizeof(float));
+            memset_s(matrix, 20 * sizeof(float), 0, 20 * sizeof(float));
             matrix[0] = matrix[6] = matrix[12] = 5 * contrasts;
             matrix[4] = matrix[9] = matrix[14] = 128 * (1 - 5 * contrasts);
             matrix[18] = 1.0f;

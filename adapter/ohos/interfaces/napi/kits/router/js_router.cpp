@@ -30,7 +30,7 @@ static void ParseUri(napi_env env, napi_value uriNApi, std::string& uriString)
     auto resultUri = nativeUri->ToString();
     auto nativeStringUri = reinterpret_cast<NativeString*>(resultUri->GetInterface(NativeString::INTERFACE_ID));
     size_t uriLen = nativeStringUri->GetLength();
-    std::unique_ptr<char[]> uri(new char[uriLen] { 0 });
+    std::unique_ptr<char[]> uri = std::make_unique<char[]>(uriLen);
     size_t retLen = 0;
     napi_get_value_string_utf8(env, uriNApi, uri.get(), uriLen, &retLen);
     uriString = uri.get();
@@ -69,7 +69,7 @@ static void ParseParams(napi_env env, napi_value params, napi_value dontOverwrit
         auto resultValue = nativeValue->ToString();
         auto nativeString = reinterpret_cast<NativeString*>(resultValue->GetInterface(NativeString::INTERFACE_ID));
         size_t len = nativeString->GetLength();
-        std::unique_ptr<char[]> paramsChar(new char[len] { 0 });
+        std::unique_ptr<char[]> paramsChar = std::make_unique<char[]>(len);
         size_t ret = 0;
         napi_get_value_string_utf8(env, returnValue, paramsChar.get(), len, &ret);
         paramsString = paramsChar.get();
@@ -158,7 +158,7 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
     napi_value params = nullptr;
     napi_value dontOverwrite = nullptr;
     if (argc == 0) {
-        jsEngine->GetFrontend()->Back(uriString,paramsString);
+        jsEngine->GetFrontend()->Back(uriString, paramsString);
     } else {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv, &valueType);
@@ -166,10 +166,9 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv, "uri", &uriNApi);
             napi_get_named_property(env, argv, "params", &params);
             napi_get_named_property(env, argv, "dontOverwrite", &dontOverwrite);
-            if(uriNApi)
-            {
+            if(uriNApi) {
                 ParseParams(env, params, dontOverwrite, paramsString);
-                jsEngine->GetFrontend()->Back(uriString,paramsString);
+                jsEngine->GetFrontend()->Back(uriString, paramsString);
                 return nullptr;
             }
         }
@@ -277,7 +276,7 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
             auto resultValue = nativeValue->ToString();
             auto nativeString = reinterpret_cast<NativeString*>(resultValue->GetInterface(NativeString::INTERFACE_ID));
             size_t len = nativeString->GetLength();
-            std::unique_ptr<char[]> messageChar(new char[len] { 0 });
+            std::unique_ptr<char[]> messageChar = std::make_unique<char[]>(len);
             size_t ret = 0;
             napi_get_value_string_utf8(env, routerAsyncContext->message_napi, messageChar.get(), len, &ret);
             routerAsyncContext->messageString = messageChar.get();
@@ -454,8 +453,7 @@ static napi_value JSRouterGetParams(napi_env env, napi_callback_info info)
     napi_get_jsEngine(env, (void**)&jsEngine);
     std::string paramsStr = jsEngine->GetFrontend()->GetParams();
     LOGI("PageGetParams params is null");
-    if (paramsStr.empty())
-    {
+    if (paramsStr.empty()) {
         return nullptr;
     }
     napi_value globalValue;

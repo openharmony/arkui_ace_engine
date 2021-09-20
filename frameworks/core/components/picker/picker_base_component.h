@@ -451,8 +451,8 @@ public:
     }
 
     ACE_DEFINE_COMPONENT_EVENT(OnTextCancel, void(void));
-    ACE_DEFINE_COMPONENT_EVENT(OnTextAccept, void(const std::string&,double));
-    ACE_DEFINE_COMPONENT_EVENT(OnTextChange, void(const std::string&,double));
+    ACE_DEFINE_COMPONENT_EVENT(OnTextAccept, void(const std::string&, double));
+    ACE_DEFINE_COMPONENT_EVENT(OnTextChange, void(const std::string&, double));
 
     static const char PICKER_YEAR_COLUMN[];
     static const char PICKER_MONTH_COLUMN[];

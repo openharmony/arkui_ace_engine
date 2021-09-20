@@ -567,9 +567,9 @@ void JsCommandAppendElement::Execute(const RefPtr<JsAcePage>& page) const
     }
     accessibilityManager->TrySaveTargetAndIdNode(id_, target_, accessibilityNode);
     accessibilityNode->SetAttr(attrs_);
-    #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-        accessibilityNode->SetStyle(styles_);
-    #endif
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    accessibilityNode->SetStyle(styles_);
+#endif
     accessibilityNode->AddEvent(page->GetPageId(), events_);
 }
 

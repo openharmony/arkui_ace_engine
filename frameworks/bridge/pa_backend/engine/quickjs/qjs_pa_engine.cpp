@@ -439,7 +439,7 @@ inline std::string GetJsStringVal(JSContext* ctx, JSValueConst value)
 inline std::string ToJSONStringInt(std::string sKey, std::string sValue)
 {
     char szDoubleQutoes[] = "\"";
-    char szColon[]= ":";
+    char szColon[] = ":";
     std::string strResult;
     strResult.append(szDoubleQutoes);
     strResult.append(sKey);
@@ -453,7 +453,7 @@ inline std::string ToJSONStringInt(std::string sKey, std::string sValue)
 inline std::string ToJSONString(std::string sKey, std::string sValue)
 {
     char szDoubleQutoes[] = "\"";
-    char szColon[]= ":";
+    char szColon[] = ":";
     std::string strResult;
     strResult.append(szDoubleQutoes);
     strResult.append(sKey);
@@ -1091,8 +1091,8 @@ sptr<IRemoteObject> QjsPaEngine::OnConnectService(const OHOS::AAFwk::Want &want)
         return nullptr;
     } else {
         NativeValue* nativeValue = QuickJSNativeEngine::JSValueToNativeValue(nativeEngine_, retVal);
-        auto remoteObj = NAPI_ohos_rpc_getNativeRemoteObject(reinterpret_cast<napi_env>(nativeEngine_), 
-                     reinterpret_cast<napi_value>(nativeValue));
+        auto remoteObj = NAPI_ohos_rpc_getNativeRemoteObject(reinterpret_cast<napi_env>(nativeEngine_),
+                                                             reinterpret_cast<napi_value>(nativeValue));
         JS_FreeValue(ctx, globalObj);
         return remoteObj;
     }

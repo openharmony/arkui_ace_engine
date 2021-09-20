@@ -53,6 +53,9 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr)
     }
 
     long size = std::ftell(file.get());
+    if (size == -1L) {
+        return FrontendType::JS;
+    }
     char* fileData = new (std::nothrow) char[size];
     if (fileData == nullptr) {
         LOGE("new json buff failed, return default frontend: JS frontend.");
@@ -108,6 +111,9 @@ bool GetIsArkFromConfig(const std::string &packagePathStr)
     }
 
     long size = std::ftell(file.get());
+    if (size == -1L) {
+        return false;
+    }
     char *fileData = new (std::nothrow) char[size];
     if (fileData == nullptr) {
         LOGE("new json buff failed, return not arkApp.");
@@ -174,11 +180,11 @@ void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBoudle, std::stri
 
     SetHwIcuDirectory();
     // create container
-    Platform::AceContainer::CreateContainer(
-            g_dialogId, FrontendType::JS, false, nullptr,
-            std::make_unique<AcePlatformEventCallback>([]() {
-                //TerminateAbility();
-            }));
+    Platform::AceContainer::CreateContainer(g_dialogId, FrontendType::JS, false, nullptr,
+        std::make_unique<AcePlatformEventCallback>([]()
+        {
+            // TerminateAbility();
+        }));
     Platform::AceContainer::SetDialogCallback(g_dialogId, callback);
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(g_dialogId);
@@ -232,8 +238,7 @@ void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBoudle, std::stri
     }
 
     // run page.
-    Platform::AceContainer::RunPage(
-            g_dialogId, Platform::AceContainer::GetContainer(g_dialogId)->GeneratePageId(),
+    Platform::AceContainer::RunPage(g_dialogId, Platform::AceContainer::GetContainer(g_dialogId)->GeneratePageId(),
             jsBoudle, param);
 
     g_dialogId++;
@@ -363,7 +368,7 @@ void AceAbility::OnStart(const Want& want)
 
         AAFwk::Want want;
         want.SetElementName(bundle, ability);
-        //want.SetParam(Constants::PARAM_FORM_IDENTITY_KEY, std::to_string(formJsInfo_.formId));
+        // want.SetParam(Constants::PARAM_FORM_IDENTITY_KEY, std::to_string(formJsInfo_.formId));
         this->StartAbility(want);
     };
 

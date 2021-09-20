@@ -27,7 +27,7 @@ enum class PickerStyle {
     FADE,
 };
 
-class JSTextPicker: public JSViewAbstract{
+class JSTextPicker : public JSViewAbstract {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);

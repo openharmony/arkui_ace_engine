@@ -1925,9 +1925,9 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
         return ImageAnimatorBridge::JsGetState(ctx, nodeId);
     } else if (std::strcmp(methodName.get(), "createIntersectionObserver") == 0) {
         return ComponentApiBridge::JsCreateObserver(ctx, args.get(), nodeId);
-    } else if(std::strcmp(methodName.get(), "setAttr") == 0) {
+    } else if (std::strcmp(methodName.get(), "setAttr") == 0) {
         JsUpdateElementAttrs(ctx, value, argc, argv);
-    } else if(std::strcmp(methodName.get(), "setStyle") == 0) {
+    } else if (std::strcmp(methodName.get(), "setStyle") == 0) {
         JsUpdateElementStyles(ctx, value, argc, argv);
     } else {
         page->PushCommand(Referenced::MakeRefPtr<JsCommandCallDomElementMethod>(nodeId, methodName.get(), args.get()));
@@ -2250,7 +2250,7 @@ JSValue JsCreateElement(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
 {
     LOGI("JsCreateElement");
 
-    int32_t newNodeId = CreateDomElement(ctx,value,argc,argv);
+    int32_t newNodeId = CreateDomElement(ctx, value, argc, argv);
     JSValue node = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, node, "__nodeId",  JS_NewInt32(ctx, newNodeId));
     JS_SetPropertyStr(ctx, node, "setAttr", JS_NewCFunction(ctx, JsSetAttribute, "setAttr", 1));
@@ -3146,7 +3146,7 @@ void QjsEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
     JS_SetContextOpaque(ctx, reinterpret_cast<void*>(AceType::RawPtr(engineInstance_)));
 
     JSValue globalObj = JS_GetGlobalObject(ctx);
-    if((url.compare(WINDOW_DIALOG_DOUBLE_BUTTON)) == 0){
+    if ((url.compare(WINDOW_DIALOG_DOUBLE_BUTTON)) == 0) {
         JS_SetPropertyStr(ctx, globalObj, "dialogId", JS_NewInt32(ctx, instanceId_));
     }
     JSValue createInstanceFunc = QJSUtils::GetPropertyStr(ctx, globalObj, "createInstance");

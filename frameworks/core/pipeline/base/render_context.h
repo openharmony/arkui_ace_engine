@@ -40,8 +40,14 @@ public:
 
     virtual void Repaint(const RefPtr<RenderNode>&) = 0;
     virtual void PaintChild(const RefPtr<RenderNode>&, const Offset& offset) = 0;
-    virtual bool IsIntersectWith(const RefPtr<RenderNode>& child, Offset& offset) { return true; }
-    virtual void SetClipHole(Rect clipHole) { clipHole_ = clipHole; }
+    virtual bool IsIntersectWith(const RefPtr<RenderNode>& child, Offset& offset)
+    {
+	return true;
+    }
+    virtual void SetClipHole(Rect clipHole)
+    {
+        clipHole_ = clipHole;
+    }
 
 protected:
     RenderContext() = default;

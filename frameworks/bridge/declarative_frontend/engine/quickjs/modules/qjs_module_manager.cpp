@@ -121,8 +121,8 @@ uint32_t ModuleManager::AddCallback(JSValue callbackFunc, std::vector<JSValue> c
 }
 
 uint32_t ModuleManager::AddCallback(std::unordered_map<uint32_t, JSValue>& callbackFuncMap,
-        std::unordered_map<uint32_t, std::vector<JSValue>>& callbackArrayMap, JSValue callbackFunc,
-        std::vector<JSValue> callbackArray)
+    std::unordered_map<uint32_t, std::vector<JSValue>>& callbackArrayMap, JSValue callbackFunc,
+    std::vector<JSValue> callbackArray)
 {
     ++callbackId_;
     callbackFuncMap[callbackId_] = callbackFunc;
@@ -189,7 +189,7 @@ void ModuleManager::RemoveCallbackFunc(JSContext* ctx, uint32_t callbackId, bool
 }
 
 void ModuleManager::RemoveCallbackFunc(JSContext* ctx, std::unordered_map<uint32_t, JSValue>& callbackFuncMap,
-        std::unordered_map<uint32_t, std::vector<JSValue>>& callbackArrayMap, uint32_t callbackId)
+    std::unordered_map<uint32_t, std::vector<JSValue>>& callbackArrayMap, uint32_t callbackId)
 {
     JS_FreeValue(ctx, callbackFuncMap[callbackId]);
     callbackFuncMap.erase(callbackId);

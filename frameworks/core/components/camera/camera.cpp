@@ -246,7 +246,7 @@ void CameraCallback::MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak)
         return;
     }
 
-    for(auto child: parent->GetChildren()) {
+    for(auto child : parent->GetChildren()) {
         if (child == node){
             LOGI("Hole: MarkWholeRender meet barrier");
             break;

@@ -95,7 +95,7 @@ public:
     }
 
 private:
-    Global<JSValueRef> value_{};
+    Global<JSValueRef> value_ {};
 };
 }  // namespace OHOS::Ace::Framework
 #endif  // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_ARK_ARK_JS_VALUE_H

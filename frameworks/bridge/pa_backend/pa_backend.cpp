@@ -109,7 +109,8 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor> &taskExecut
 
     builder.queryCallback = [weakEngine = WeakPtr<Framework::JsBackendEngine>(jsBackendEngine_)]
         (const Uri& uri, const std::vector<std::string>& columns,
-         const OHOS::NativeRdb::DataAbilityPredicates& predicates)-> std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> {
+         const OHOS::NativeRdb::DataAbilityPredicates& predicates)
+	-> std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (!jsBackendEngine) {
                 return nullptr;
