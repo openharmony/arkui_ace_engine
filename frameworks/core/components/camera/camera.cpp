@@ -166,7 +166,6 @@ void CameraCallback::CloseRecorder()
         recorder_->Release();
         recorder_ = nullptr;
     }
-    recordState_ = State::STATE_IDLE;
 }
 
 sptr<Surface> CameraCallback::createSubWindowSurface()
@@ -313,8 +312,6 @@ int32_t CameraCallback::PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> c
     int ret = PrepareRecorder();
     if (ret != ERR_OK) {
         LOGE("Camera PrepareRecorder failed.");
-        CloseRecorder();
-        onRecord(false, NULL_STRING);
         return -1;
     }
 
@@ -322,15 +319,11 @@ int32_t CameraCallback::PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> c
     ret = recorder_->SetOutputPath(DEFAULT_CATCH_PATH);
     if (ret != ERR_OK) {
         LOGE("Camera SetOutputPath failed. ret= %{private}d", ret);
-        CloseRecorder();
-        onRecord(false, NULL_STRING);
         return -1;
     }
     ret = recorder_->Prepare();
     if (ret != ERR_OK) {
         LOGE("Prepare failed. ret= %{private}d", ret);
-        CloseRecorder();
-        onRecord(false, NULL_STRING);
         return -1;
     }
     sptr<Surface> recorderSurface = (recorder_->GetSurface(videoSourceId_));
@@ -466,6 +459,7 @@ void CameraCallback::StartRecord()
     ret = PrepareCamera(true);
     if (ret != ERR_OK) {
         LOGE("Prepare Recording Failed");
+        onRecord(false, NULL_STRING);
         return;
     }
 
@@ -475,7 +469,6 @@ void CameraCallback::StartRecord()
     ret = recorder_->Start();
     if (ret != ERR_OK) {
         LOGE("recorder start failed. ret= %{private}d", ret);
-        CloseRecorder();
         onRecord(false, NULL_STRING);
         return;
     }
@@ -536,6 +529,11 @@ void CameraCallback::Release()
 void CameraCallback::Stop(bool isClosePreView)
 {
     CloseRecorder();
+    bool isSuccess = false;
+    if (recordState_ == State::STATE_RUNNING) {
+        isSuccess = true;
+    }
+
     PreviousReadyMode_ = ReadyMode::NONE;
     recordState_ = State::STATE_IDLE;
     if (isClosePreView) {
@@ -545,6 +543,10 @@ void CameraCallback::Stop(bool isClosePreView)
         previewState_ = State::STATE_IDLE;
         isReady_ = false;
         Release();
+    }
+
+    if (isSuccess) {
+        onRecord(true, DEFAULT_CATCH_PATH);
     }
 }
 
