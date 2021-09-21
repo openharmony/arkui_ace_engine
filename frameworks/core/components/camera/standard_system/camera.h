@@ -37,6 +37,12 @@ enum State : int32_t {
     STATE_BUTT
 };
 
+enum ReadyMode : int32_t {
+    NONE,
+    PHOTO,
+    VIDEO
+};
+
 class CaptureListener;
 
 class CameraCallback {
@@ -74,7 +80,7 @@ public:
     sptr<Surface> createSubWindowSurface();
     int32_t PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> camManagerObj);
     int32_t PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> camManagerObj);
-    int32_t PrepareCamera();
+    int32_t PrepareCamera(bool bIsRecorder);
     int32_t SaveData(char *buffer, int32_t size, std::string& path);
     void OnTakePhoto(bool isSucces, std::string info);
     void AddTakePhotoListener(TakePhotoListener&& listener);
@@ -101,6 +107,7 @@ private:
 
     std::shared_ptr<Media::Recorder> recorder_ = nullptr;
     int32_t videoSourceId_ = -1;
+    int32_t PreviousReadyMode_ = ReadyMode::NONE;
     sptr<Surface> previewSurface_;
 
     ErrorListener onErrorListener_;
