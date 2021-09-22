@@ -2753,6 +2753,10 @@ void JsiEngine::RegisterInitWorkerFunc()
             return;
         }
         instance->RegisterConsoleModule(arkNativeEngine);
+        // load jsfwk
+        if (!arkNativeEngine->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
+            LOGE("Failed to load js framework!");
+        }
     };
     OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
 }
