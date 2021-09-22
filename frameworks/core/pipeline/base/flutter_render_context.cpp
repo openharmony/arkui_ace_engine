@@ -73,7 +73,7 @@ void FlutterRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Off
             auto pipelineContext = child->GetContext().Upgrade();
             LOGI("Hole: child canvas render");
             auto transparentHole = pipelineContext->GetTransparentHole();
-            if (transparentHole.IsValid()) {
+            if (transparentHole.IsValid() && child->GetNeedClip()) {
                 Offset childOffset = rect.GetOffset();
                 Rect hole = transparentHole - childOffset;
                 context.SetClipHole(hole);

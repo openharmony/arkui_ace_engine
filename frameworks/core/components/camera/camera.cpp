@@ -221,12 +221,23 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
     return previewSurface_;
 }
 
-void CameraCallback::MarkTreeRender(const RefPtr<RenderNode>& root)
+void CameraCallback::MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole)
 {
+    if (root->GetHasSubWindow()) {
+        meetHole = true;
+    }
+
+    if (meetHole) {
+        root->SetNeedClip(false);
+    } else {
+        root->SetNeedClip(true);
+    }
+
     root->MarkNeedRender();
     LOGI("Hole: MarkTreeRender %{public}s", AceType::TypeName(Referenced::RawPtr(root)));
+    bool subMeetHole = meetHole;
     for (auto child: root->GetChildren()){
-        MarkTreeRender(child);
+        MarkTreeRender(child, subMeetHole);
     }
 }
 
@@ -240,20 +251,14 @@ void CameraCallback::MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak)
 
     auto parentWeak = node->GetParent();
     auto parent = parentWeak.Upgrade();
-    if (!parent) {
-        node->MarkNeedRender();
-        return;
+    while (parent) {
+        node = parent;
+        parentWeak = node->GetParent();
+        parent = parentWeak.Upgrade();
     }
 
-    for(auto child : parent->GetChildren()) {
-        if (child == node){
-            LOGI("Hole: MarkWholeRender meet barrier");
-            break;
-        }
-        MarkTreeRender(child);
-    }
-
-    MarkWholeRender(parentWeak);
+    bool meetHole = false;
+    MarkTreeRender(node, meetHole);
 }
 
 int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> camManagerObj)
