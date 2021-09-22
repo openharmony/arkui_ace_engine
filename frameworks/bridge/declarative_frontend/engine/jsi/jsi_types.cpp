@@ -202,6 +202,10 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
     }
     auto thisObj = thisVal.Get().GetHandle();
     auto result = GetHandle()->Call(vm_, thisObj, arguments.data(), argc);
+    Local<ObjectRef> exception = JSNApi::GetUncaughtException(vm_);
+    if (!exception.IsEmpty() && !exception->IsHole()) {
+        result = JSValueRef::Undefined(vm_);
+    }
     return JsiRef<JsiValue>::Make(result);
 }
 
@@ -224,13 +228,15 @@ void JsiObjTemplate::SetInternalFieldCount(int32_t count) const
 JsiRef<JsiObject> JsiObjTemplate::NewInstance() const
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    return JsiRef<JsiObject>::Make(panda::ObjectRef::New(runtime->GetEcmaVm()));
+    auto instance = panda::ObjectRef::New(runtime->GetEcmaVm());
+    instance->SetNativePointerFieldCount(1);
+    return JsiRef<JsiObject>::Make(instance);
 }
 
 panda::Local<panda::JSValueRef> JsiObjTemplate::New()
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    return panda::JSValueRef::Undefined(runtime->GetEcmaVm());
+    return panda::ObjectRef::New(runtime->GetEcmaVm());
 }
 
 // -----------------------
@@ -238,17 +244,26 @@ panda::Local<panda::JSValueRef> JsiObjTemplate::New()
 // -----------------------
 JsiCallbackInfo::JsiCallbackInfo(panda::ecmascript::EcmaVM* vm, panda::Local<panda::JSValueRef> thisObj, int32_t argc,
     const panda::Local<panda::JSValueRef>* argv)
-    : vm_(vm), thisObj_(thisObj), argc_(argc), argv_(const_cast<panda::Local<panda::JSValueRef>*>(argv))
-{}
+    : vm_(vm), thisObj_(vm, thisObj), argc_(argc)
+{
+    for (int i = 0; i < argc; i++) {
+        argv_.emplace_back(vm, argv[i]);
+    }
+
+}
 
 JsiRef<JsiValue> JsiCallbackInfo::operator[](size_t index) const
 {
-    return JsiRef<JsiValue>::Make(argv_[index]);
+    if (index < argc_) {
+        return JsiRef<JsiValue>::Make(argv_[index].ToLocal(vm_));
+    }
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    return JsiRef<JsiValue>::Make(panda::JSValueRef::Undefined(runtime->GetEcmaVm()));
 }
 
 JsiRef<JsiObject> JsiCallbackInfo::This() const
 {
-    auto obj = JsiObject { thisObj_ };
+    auto obj = JsiObject { thisObj_.ToLocal(vm_) };
     auto ref = JsiRef<JsiObject>(obj);
     return ref;
 }
