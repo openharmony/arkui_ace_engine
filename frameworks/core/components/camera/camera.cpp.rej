@@ -1,0 +1,28 @@
+diff a/frameworks/core/components/camera/camera.cpp b/frameworks/core/components/camera/camera.cpp	(rejected hunks)
+@@ -249,20 +260,14 @@ void CameraCallback::MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak)
+ 
+     auto parentWeak = node->GetParent();
+     auto parent = parentWeak.Upgrade();
+-    if (!parent) {
+-        node->MarkNeedRender();
+-        return;
+-    }
+-
+-    for(auto child: parent->GetChildren()) {
+-        if (child == node){
+-            LOGI("Hole: MarkWholeRender meet barrier");
+-            break;
+-        }
+-        MarkTreeRender(child);
++    while (parent) {
++        node = parent;
++        parentWeak = node->GetParent();
++        parent = parentWeak.Upgrade();
+     }
+ 
+-    MarkWholeRender(parentWeak);
++    bool meetHole = false;
++    MarkTreeRender(node, meetHole);
+ }
+ 
+ int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> camManagerObj)

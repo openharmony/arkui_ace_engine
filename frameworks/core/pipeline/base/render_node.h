@@ -896,6 +896,16 @@ public:
         return hasSubWindow_;
     }
 
+    void SetNeedClip(bool needClip)
+    {
+        needClip_ = needClip;
+    }
+
+    bool GetNeedClip()
+    {
+        return needClip_;
+    }
+
 protected:
     explicit RenderNode(bool takeBoundary = false);
     virtual void ClearRenderObject();
@@ -959,6 +969,7 @@ protected:
     }
 
     bool hasSubWindow_ = false;
+    bool needClip_ = false;
     WeakPtr<PipelineContext> context_;
     Size viewPort_;
     Point globalPoint_;
