@@ -25,6 +25,7 @@
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/text_overlay/text_overlay_element.h"
 #include "core/event/ace_event_helper.h"
+#include "core/pipeline/pipeline_context.h"
 #include "unistd.h"
 
 namespace OHOS::Ace {
@@ -66,13 +67,21 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text) {
     if (!renderTextField) {
         return;
     }
+    auto context = renderTextField->GetContext().Upgrade();
+    if (context) {
+        context->GetTaskExecutor()->PostTask([renderTextField, text] {
+            if (renderTextField) {
+                auto value = renderTextField->GetEditingValue();
+                auto textEditingValue = std::make_shared<TextEditingValue>();
+                textEditingValue->text =
+                    value.GetBeforeSelection() + StringUtils::Str16ToStr8(text) + value.GetAfterSelection();
+                textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
+                renderTextField->UpdateEditingValue(textEditingValue, true);
+            }
+        },
+        TaskExecutor::TaskType::UI);
+    }
 
-    auto value = renderTextField->GetEditingValue();
-    std::shared_ptr<TextEditingValue> textEditingValue = std::shared_ptr<TextEditingValue>(new TextEditingValue());
-    textEditingValue->text = value.GetBeforeSelection() + StringUtils::Str16ToStr8(text) + value.GetAfterSelection();
-    textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
-
-    renderTextField->UpdateEditingValue(textEditingValue, true);
 }
 
 void OnTextChangedListenerImpl::DeleteBackward(int32_t length) {
@@ -86,18 +95,25 @@ void OnTextChangedListenerImpl::DeleteBackward(int32_t length) {
         return;
     }
 
-    auto value = renderTextField->GetEditingValue();
-    auto start = value.selection.GetStart();
-    auto end = value.selection.GetEnd();
-    std::shared_ptr<TextEditingValue> textEditingValue = std::shared_ptr<TextEditingValue>(new TextEditingValue());
-    textEditingValue->text = value.text;
-    textEditingValue->UpdateSelection(start, end);
-
-    if (start > 0 && end > 0) {
-        textEditingValue->Delete(start == end ? start - length : start, end);
+    auto context = renderTextField->GetContext().Upgrade();
+    if (context) {
+        context->GetTaskExecutor()->PostTask([renderTextField, length] {
+            if (renderTextField) {
+                auto value = renderTextField->GetEditingValue();
+                auto start = value.selection.GetStart();
+                auto end = value.selection.GetEnd();
+                auto textEditingValue = std::make_shared<TextEditingValue>();
+                textEditingValue->text = value.text;
+                textEditingValue->UpdateSelection(start, end);
+                if (start > 0 && end > 0) {
+                    textEditingValue->Delete(start == end ? start - length : start, end);
+                }
+                renderTextField->UpdateEditingValue(textEditingValue, true);
+            }
+        },
+        TaskExecutor::TaskType::UI);
     }
 
-    renderTextField->UpdateEditingValue(textEditingValue, true);
 }
 
 void OnTextChangedListenerImpl::SetKeyboardStatus(bool status) {
@@ -106,12 +122,20 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status) {
         return;
     }
 
-    LOGE("aaainputmethod:SetKeyboardStatus, status=%{public}d", status);
-    if (status) {
-        renderTextField->SetInputMethodStatus(true);
-    } else {
-        MiscServices::InputMethodController::GetInstance()->Close();
-        renderTextField->SetInputMethodStatus(false);
+    auto context = renderTextField->GetContext().Upgrade();
+    if (context) {
+        context->GetTaskExecutor()->PostTask([renderTextField, status] {
+            if (renderTextField) {
+                LOGE("inputmethod:SetKeyboardStatus, status=%{public}d", status);
+                if (status) {
+                    renderTextField->SetInputMethodStatus(true);
+                } else {
+                    MiscServices::InputMethodController::GetInstance()->Close();
+                    renderTextField->SetInputMethodStatus(false);
+                }
+            }
+        },
+        TaskExecutor::TaskType::UI);
     }
 }
 
@@ -744,12 +768,12 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
     }
 
     if (softKeyboardEnabled_) {
-	    if (!HasConnection()) {
-	        MiscServices::InputMethodController::GetInstance()->Attach();
-	        sleep(2);
-	        listener_ = new OnTextChangedListenerImpl(WeakClaim(this));
-	        MiscServices::InputMethodController::GetInstance()->ShowTextInput(listener_);
-	    }
+        if (!HasConnection()) {
+            MiscServices::InputMethodController::GetInstance()->Attach();
+            sleep(3);
+            listener_ = new OnTextChangedListenerImpl(WeakClaim(this));
+            MiscServices::InputMethodController::GetInstance()->ShowTextInput(listener_);
+        }
     }
     if (keyboard_ != TextInputType::MULTILINE) {
         resetToStart_ = false;
