@@ -75,9 +75,9 @@ public:
     template<typename Base>
     static void Inherit();
 
-    static std::unordered_map<std::string, panda::Local<panda::FunctionRef>>& GetCustomFunctions();
+    static std::unordered_map<std::string, panda::Global<panda::FunctionRef>>& GetCustomFunctions();
 
-    static std::unordered_map<std::string, panda::Local<panda::FunctionRef>>& GetStaticFunctions();
+    static std::unordered_map<std::string, panda::Global<panda::FunctionRef>>& GetStaticFunctions();
 
     static panda::Local<panda::JSValueRef> NewInstance();
 
@@ -128,8 +128,8 @@ private:
         panda::Local<panda::JSValueRef> newTarget, const panda::Local<panda::JSValueRef> argv[], int32_t argc,
         void* data);
 
-    static std::unordered_map<std::string, panda::Local<panda::FunctionRef>> staticFunctions_;
-    static std::unordered_map<std::string, panda::Local<panda::FunctionRef>> customFunctions_;
+    static std::unordered_map<std::string, panda::Global<panda::FunctionRef>> staticFunctions_;
+    static std::unordered_map<std::string, panda::Global<panda::FunctionRef>> customFunctions_;
     static FunctionCallback constructor_;
     static JSFunctionCallback jsConstructor_;
     static JSDestructorCallback<C> jsDestructor_;
