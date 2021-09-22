@@ -42,7 +42,7 @@ public:
     virtual void PaintChild(const RefPtr<RenderNode>&, const Offset& offset) = 0;
     virtual bool IsIntersectWith(const RefPtr<RenderNode>& child, Offset& offset)
     {
-	return true;
+        return true;
     }
     virtual void SetClipHole(Rect clipHole)
     {

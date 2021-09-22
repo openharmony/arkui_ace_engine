@@ -1185,7 +1185,7 @@ void FlutterDecorationPainter::PaintGrayScale(const flutter::RRect& outerRRect, 
             paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
             float matrix[20];
-            memset(matrix, 0, 20 * sizeof(float));
+            memset_s(matrix, 20 * sizeof(float), 0, 20 * sizeof(float));
             matrix[0] = matrix[5] = matrix[10] = 0.2126f * _grayscale;
             matrix[1] = matrix[6] = matrix[11] = 0.7152f * _grayscale;
             matrix[2] = matrix[7] = matrix[12] = 0.0722f * _grayscale;
@@ -1214,7 +1214,7 @@ void FlutterDecorationPainter::PaintBrightness(const flutter::RRect& outerRRect,
             paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
             float matrix[20];
-            memset(matrix, 0, 20 * sizeof(float));
+            memset_s(matrix, 20 * sizeof(float), 0, 20 * sizeof(float));
             matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
             matrix[4] = matrix[9] = matrix[14] = 230 * bright;
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
@@ -1267,7 +1267,7 @@ void FlutterDecorationPainter::PaintSaturate(const flutter::RRect& outerRRect, S
             paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
             float matrix[20];
-            memset(matrix, 0, 20 * sizeof(float));
+            memset_s(matrix, 20 * sizeof(float), 0, 20 * sizeof(float));
             matrix[0] = 0.3086f * (1 - saturates) + saturates;
             matrix[1] = matrix[11] = 0.6094f * (1 - saturates);
             matrix[2] = matrix[7] = 0.0820f * (1 - saturates);
