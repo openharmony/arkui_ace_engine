@@ -124,7 +124,9 @@ using DataAbilityPredicatesGetNativeObject =
 
 class QjsPaEngine : public JsBackendEngine {
 public:
-    explicit QjsPaEngine(int32_t instanceId) : instanceId_(instanceId),
+    explicit QjsPaEngine(int32_t instanceId) : instanceId_(instanceId), rdbValueBucketNewInstance_(nullptr),
+        rdbValueBucketGetNativeObject_(nullptr), rdbResultSetProxyNewInstance_(nullptr),
+        rdbResultSetProxyGetNativeObject_(nullptr), dataAbilityPredicatesNewInstance_(nullptr),
         dataAbilityPredicatesGetNativeObject_(nullptr) {};
     ~QjsPaEngine() override;
 

@@ -153,13 +153,14 @@ public:
         LOGI("json frontend not support.");
     }
 
+    WindowConfig windowConfig_ { .designWidth = JSON_DESIGN_WIDTH, .autoDesignWidth = false };
+
 private:
     FrontendType type_ { FrontendType::JSON };
     static constexpr int32_t JSON_DESIGN_WIDTH = 1080;
     std::unordered_map<int, RefPtr<AcePage>> pageMap_;
     RefPtr<PipelineContext> pipelineContext_;
     RefPtr<AceEventHandler> handler_;
-    WindowConfig windowConfig_ { .designWidth = JSON_DESIGN_WIDTH, .autoDesignWidth = false };
 };
 
 } // namespace OHOS::Ace

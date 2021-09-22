@@ -45,12 +45,16 @@ static napi_value JSGetInfo(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
 
     auto asyncContext = new CallbackContext();
-
+    if (asyncContext == nullptr) {
+        LOGE("asyncContext initial failed");
+        return nullptr;
+    }
     asyncContext->env = env;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv[0], &valueType);
     if (valueType != napi_object) {
         LOGE("params is not object");
+        delete asyncContext;
         return nullptr;
     }
     napi_value successFunc;
