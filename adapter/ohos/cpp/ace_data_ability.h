@@ -36,15 +36,15 @@ public:
     void OnStart(const OHOS::AAFwk::Want& want) override;
     void OnStop() override;
 
-    int32_t Insert(const Uri& uri, const OHOS::AppExecFwk::ValuesBucket& value) override;
-    std::shared_ptr<OHOS::AppExecFwk::ResultSet> Query(
+    int32_t Insert(const Uri& uri, const NativeRdb::ValuesBucket& value) override;
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> Query(
         const Uri& uri, const std::vector<std::string>& columns,
-        const OHOS::AppExecFwk::DataAbilityPredicates& predicates) override;
-    int32_t Update(const Uri& uri, const OHOS::AppExecFwk::ValuesBucket& value,
-        const OHOS::AppExecFwk::DataAbilityPredicates& predicates) override;
-    int32_t Delete(const Uri& uri, const OHOS::AppExecFwk::DataAbilityPredicates& predicates) override;
+        const NativeRdb::DataAbilityPredicates& predicates) override;
+    int32_t Update(const Uri& uri, const NativeRdb::ValuesBucket& value,
+        const NativeRdb::DataAbilityPredicates& predicates) override;
+    int32_t Delete(const Uri& uri, const NativeRdb::DataAbilityPredicates& predicates) override;
 
-    int32_t BatchInsert(const Uri& uri, const std::vector<OHOS::AppExecFwk::ValuesBucket>& values) override;
+    int32_t BatchInsert(const Uri& uri, const std::vector<NativeRdb::ValuesBucket>& values) override;
     std::string GetType(const Uri& uri) override;
     std::vector<std::string> GetFileTypes(const Uri& uri, const std::string& mimeTypeFilter) override;
     int32_t OpenFile(const Uri& uri, const std::string& mode) override;
