@@ -521,7 +521,7 @@ bool AceAbility::OnSaveData(OHOS::AAFwk::WantParams &saveData)
 
 bool AceAbility::OnRestoreData(OHOS::AAFwk::WantParams &restoreData)
 {
-    LOGI("AceAbility::OnStartContinuation called.");
+    LOGI("AceAbility::OnRestoreData called.");
     if (restoreData.HasParam(PAGE_URI)) {
         auto value = restoreData.GetParam(PAGE_URI);
         OHOS::AAFwk::IString *ao = OHOS::AAFwk::IString::Query(value);
@@ -536,7 +536,7 @@ bool AceAbility::OnRestoreData(OHOS::AAFwk::WantParams &restoreData)
             remoteData_ = OHOS::AAFwk::String::Unbox(ao);
         }
     }
-    LOGI("AceAbility::OnStartContinuation finish.");
+    LOGI("AceAbility::OnRestoreData finish.");
     return true;
 }
 

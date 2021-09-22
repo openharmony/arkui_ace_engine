@@ -66,13 +66,23 @@ public:
 
     void OnConfigurationUpdated(const std::string& data) override;
 
+    bool OnStartContinuation() override;
+
+    void OnCompleteContinuation(int32_t code) override;
+
+    void OnRemoteTerminated() override;
+
+    void OnSaveData(std::string& data) override;
+
+    bool OnRestoreData(const std::string& data) override;
+
     void MediaQueryCallback(const std::string& callbackId, const std::string& args) override;
 
     void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) override;
 
     void JsCallback(const std::string& callbackId, const std::string& args) override;
 
-    void CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv);
+    JSValue CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv);
 
     // destroy application instance according packageName
     void DestroyApplication(const std::string& packageName) override;

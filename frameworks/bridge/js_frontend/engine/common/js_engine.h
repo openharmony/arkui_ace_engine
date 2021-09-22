@@ -101,6 +101,16 @@ public:
 
     virtual void OnConfigurationUpdated(const std::string& data) {}
 
+    virtual bool OnStartContinuation() { return false; }
+
+    virtual void OnCompleteContinuation(int32_t code) {}
+
+    virtual void OnRemoteTerminated() {}
+
+    virtual void OnSaveData(std::string& data) {}
+
+    virtual bool OnRestoreData(const std::string& data) { return false; }
+
     virtual void MediaQueryCallback(const std::string& callbackId, const std::string& args)
     {
         if (mediaUpdateCallback_) {

@@ -89,7 +89,12 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
     const TimerCallback& timerCallback, const MediaQueryCallback& mediaQueryCallback,
     const RequestAnimationCallback& requestAnimationCallback, const JsCallback& jsCallback,
     const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
-    const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack)
+    const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
+    const OnStartContinuationCallBack& onStartContinuationCallBack,
+    const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
+    const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack,
+    const OnSaveDataCallBack& onSaveDataCallBack,
+    const OnRestoreDataCallBack& onRestoreDataCallBack)
     : loadJs_(loadCallback), dispatcherCallback_(transferCallback), asyncEvent_(asyncEventCallback),
       syncEvent_(syncEventCallback), updatePage_(updatePageCallback), resetStagingPage_(resetLoadingPageCallback),
       destroyPage_(destroyPageCallback), destroyApplication_(destroyApplicationCallback),
@@ -97,6 +102,11 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
       mediaQueryCallback_(mediaQueryCallback), requestAnimationCallback_(requestAnimationCallback),
       jsCallback_(jsCallback), onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
       onConfigurationUpdated_(onConfigurationUpdatedCallBack),
+      onStartContinuationCallBack_(onStartContinuationCallBack),
+      onCompleteContinuationCallBack_(onCompleteContinuationCallBack),
+      onRemoteTerminatedCallBack_(onRemoteTerminatedCallBack),
+      onSaveDataCallBack_(onSaveDataCallBack),
+      onRestoreDataCallBack_(onRestoreDataCallBack),
       manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
       jsAccessibilityManager_(AccessibilityNodeManager::Create()),
       mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()), taskExecutor_(taskExecutor)
@@ -467,25 +477,59 @@ void FrontendDelegateDeclarative::OnConfigurationUpdated(const std::string& data
 
 bool FrontendDelegateDeclarative::OnStartContinuation()
 {
-    return FireSyncEvent("_root", std::string("\"onStartContinuation\","), std::string(""));
+    bool ret = false;
+    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &ret] {
+        auto delegate = weak.Upgrade();
+        if (delegate && delegate->onStartContinuationCallBack_) {
+            ret = delegate->onStartContinuationCallBack_();
+        }
+    }, TaskExecutor::TaskType::JS);
+    return ret;
 }
 
 void FrontendDelegateDeclarative::OnCompleteContinuation(int32_t code)
 {
-    FireSyncEvent("_root", std::string("\"onCompleteContinuation\","), std::to_string(code));
+    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), code] {
+        auto delegate = weak.Upgrade();
+        if (delegate && delegate->onCompleteContinuationCallBack_) {
+            delegate->onCompleteContinuationCallBack_(code);
+        }
+    }, TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnRemoteTerminated()
 {
-    FireSyncEvent("_root", std::string("\"onRemoteTerminated\","), std::string(""));
+    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this)] {
+        auto delegate = weak.Upgrade();
+        if (delegate && delegate->onRemoteTerminatedCallBack_) {
+            delegate->onRemoteTerminatedCallBack_();
+        }
+    }, TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnSaveData(std::string& data)
 {
     std::string savedData;
-    FireSyncEvent("_root", std::string("\"onSaveData\","), std::string(""), savedData);
+    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &savedData] {
+        auto delegate = weak.Upgrade();
+        if (delegate && delegate->onSaveDataCallBack_) {
+            delegate->onSaveDataCallBack_(savedData);
+        }
+    }, TaskExecutor::TaskType::JS);
     std::string pageUri = GetRunningPageUrl();
     data = std::string("{\"url\":\"").append(pageUri).append("\",\"__remoteData\":").append(savedData).append("}");
+}
+
+bool FrontendDelegateDeclarative::OnRestoreData(const std::string& data)
+{
+    bool ret = false;
+    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &data, &ret] {
+        auto delegate = weak.Upgrade();
+        if (delegate && delegate->onRestoreDataCallBack_) {
+            ret = delegate->onRestoreDataCallBack_(data);
+        }
+    }, TaskExecutor::TaskType::JS);
+    return ret;
 }
 
 void FrontendDelegateDeclarative::GetPluginsUsed(std::string& data)
@@ -494,12 +538,6 @@ void FrontendDelegateDeclarative::GetPluginsUsed(std::string& data)
         LOGW("read failed, will load all the system plugin");
         data = "All";
     }
-}
-
-bool FrontendDelegateDeclarative::OnRestoreData(const std::string& data)
-{
-    LOGD("OnRestoreData: restores the user data to shareData from remote ability");
-    return FireSyncEvent("_root", std::string("\"onRestoreData\","), data);
 }
 
 void FrontendDelegateDeclarative::OnNewRequest(const std::string& data)

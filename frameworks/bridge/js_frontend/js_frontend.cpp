@@ -388,6 +388,49 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
         jsEngine->UpdateApplicationState(packageName, state);
     };
 
+    builder.onStartContinuationCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() -> bool {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return false;
+        }
+        return jsEngine->OnStartContinuation();
+    };
+
+    builder.onCompleteContinuationCallBack =
+        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](int32_t code) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->OnCompleteContinuation(code);
+    };
+
+    builder.onRemoteTerminatedCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->OnRemoteTerminated();
+    };
+
+    builder.onSaveDataCallBack =
+        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](std::string& savedData) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->OnSaveData(savedData);
+    };
+
+    builder.onRestoreDataCallBack =
+        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& data) -> bool {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return false;
+        }
+        return jsEngine->OnRestoreData(data);
+    };
+
     builder.timerCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                     const std::string& callbackId, const std::string& delay, bool isInterval) {
         auto jsEngine = weakEngine.Upgrade();

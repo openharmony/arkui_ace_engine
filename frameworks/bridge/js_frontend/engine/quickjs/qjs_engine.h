@@ -238,6 +238,16 @@ public:
 
     void UpdateApplicationState(const std::string& packageName, Frontend::State state) override;
 
+    bool OnStartContinuation() override;
+
+    void OnCompleteContinuation(int32_t code) override;
+
+    void OnRemoteTerminated() override;
+
+    void OnSaveData(std::string& data) override;
+
+    bool OnRestoreData(const std::string& data) override;
+
     void RunGarbageCollection() override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
