@@ -17,6 +17,8 @@
 
 #include <unistd.h>
 
+#include "worker_init.h"
+
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -405,6 +407,93 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
     global->SetProperty(runtime_, "aceConsole", aceConsoleObj);
 }
 
+std::string GetLogContent(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+{
+    std::string content;
+    for (size_t i = 0; i < info->argc; ++i) {
+        if (info->argv[i]->TypeOf() != NATIVE_STRING) {
+            LOGE("argv is not NativeString");
+            continue;
+        }
+        auto nativeString = reinterpret_cast<NativeString*>(info->argv[i]->GetInterface(NativeString::INTERFACE_ID));
+        size_t bufferSize = nativeString->GetLength();
+        size_t strLength = 0;
+        char* buffer = new char[bufferSize + 1] { 0 };
+        nativeString->GetCString(buffer, bufferSize + 1, &strLength);
+        content.append(buffer);
+        delete[] buffer;
+    }
+    return content;
+}
+
+NativeValue* AppLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info, JsLogLevel level)
+{
+    // Should have at least 1 parameters.
+    if (info->argc == 0) {
+        LOGE("the arg is error");
+        return nativeEngine->CreateUndefined();
+    }
+    std::string content = GetLogContent(nativeEngine, info);
+    switch (level) {
+        case JsLogLevel::DEBUG:
+            APP_LOGD("app Log: %{public}s", content.c_str());
+            break;
+        case JsLogLevel::INFO:
+            APP_LOGI("app Log: %{public}s", content.c_str());
+            break;
+        case JsLogLevel::WARNING:
+            APP_LOGW("app Log: %{public}s", content.c_str());
+            break;
+        case JsLogLevel::ERROR:
+            APP_LOGE("app Log: %{public}s", content.c_str());
+            break;
+    }
+
+    return nativeEngine->CreateUndefined();
+}
+
+NativeValue* AppDebugLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+{
+    return AppLogPrint(nativeEngine, info, JsLogLevel::DEBUG);
+}
+
+NativeValue* AppInfoLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+{
+    return AppLogPrint(nativeEngine, info, JsLogLevel::INFO);
+}
+
+NativeValue* AppWarnLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+{
+    return AppLogPrint(nativeEngine, info, JsLogLevel::WARNING);
+}
+
+NativeValue* AppErrorLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+{
+    return AppLogPrint(nativeEngine, info, JsLogLevel::ERROR);
+}
+
+void JsiDeclarativeEngineInstance::InitConsoleModule(ArkNativeEngine* engine)
+{
+    ACE_SCOPED_TRACE("JsiDeclarativeEngineInstance::RegisterConsoleModule");
+    LOGD("JsiDeclarativeEngineInstance RegisterConsoleModule to nativeEngine");
+    NativeValue* global = engine->GetGlobal();
+    if (global->TypeOf() != NATIVE_OBJECT) {
+        LOGE("global is not NativeObject");
+        return;
+    }
+    auto nativeGlobal = reinterpret_cast<NativeObject*>(global->GetInterface(NativeObject::INTERFACE_ID));
+
+    // app log method
+    NativeValue* console = engine->CreateObject();
+    auto consoleObj = reinterpret_cast<NativeObject*>(console->GetInterface(NativeObject::INTERFACE_ID));
+    consoleObj->SetProperty("log", engine->CreateFunction("log", strlen("log"), AppDebugLogPrint, nullptr));
+    consoleObj->SetProperty("debug", engine->CreateFunction("debug", strlen("debug"), AppDebugLogPrint, nullptr));
+    consoleObj->SetProperty("info", engine->CreateFunction("info", strlen("info"), AppInfoLogPrint, nullptr));
+    consoleObj->SetProperty("warn", engine->CreateFunction("warn", strlen("warn"), AppWarnLogPrint, nullptr));
+    consoleObj->SetProperty("error", engine->CreateFunction("error", strlen("error"), AppErrorLogPrint, nullptr));
+    nativeGlobal->SetProperty("console", console);
+}
+
 void JsiDeclarativeEngineInstance::InitPerfUtilModule()
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngineInstance::InitPerfUtilModule");
@@ -611,7 +700,76 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     LOGI("JsiDeclarativeEngine Initialize");
     ACE_DCHECK(delegate);
     engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate, instanceId_);
-    return engineInstance_->InitJsEnv(IsDebugVersion() && NeedDebugBreakPoint());
+    bool result = engineInstance_->InitJsEnv(IsDebugVersion() && NeedDebugBreakPoint());
+    if (!result) {
+        LOGE("JsiDeclarativeEngine Initialize, init js env failed");
+        return false;
+    }
+
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto vm = std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm();
+    if (vm == nullptr) {
+        LOGE("JsiDeclarativeEngine Initialize, vm is null");
+        return false;
+    }
+    nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
+    ACE_DCHECK(delegate);
+    delegate->AddTaskObserver([nativeEngine = nativeEngine_](){
+        nativeEngine->Loop(LOOP_NOWAIT);
+    });
+    RegisterWorker();
+
+    return result;
+}
+
+void JsiDeclarativeEngine::RegisterInitWorkerFunc()
+{
+    auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
+    auto&& initWorkerFunc = [weakInstance](NativeEngine* nativeEngine) {
+        LOGI("WorkerCore RegisterInitWorkerFunc called");
+        if (nativeEngine == nullptr) {
+            LOGE("nativeEngine is nullptr");
+            return;
+        }
+        auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
+        if (arkNativeEngine == nullptr) {
+            LOGE("arkNativeEngine is nullptr");
+            return;
+        }
+        auto instance = weakInstance.Upgrade();
+        if (instance == nullptr) {
+            LOGE("instance is nullptr");
+            return;
+        }
+        instance->InitConsoleModule(arkNativeEngine);
+    };
+    OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
+}
+
+void JsiDeclarativeEngine::RegisterAssetFunc()
+{
+    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
+    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content) {
+        LOGI("WorkerCore RegisterAssetFunc called");
+        auto delegate = weakDelegate.Upgrade();
+        if (delegate == nullptr) {
+            LOGE("delegate is nullptr");
+            return;
+        }
+        size_t index = uri.find_last_of(".");
+        if (index == std::string::npos) {
+            LOGE("invalid uri");
+        } else {
+            delegate->GetResourceData(uri.substr(0, index) + ".abc", content);
+        }
+    };
+    OHOS::CCRuntime::Worker::WorkerCore::RegisterAssetFunc(assetFunc);
+}
+
+void JsiDeclarativeEngine::RegisterWorker()
+{
+    RegisterInitWorkerFunc();
+    RegisterAssetFunc();
 }
 
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)

@@ -47,6 +47,9 @@ public:
 
     bool FireJsEvent(const std::string& eventStr);
 
+    // add Console object to worker
+    void InitConsoleModule(ArkNativeEngine* engine);
+
     static void RootViewHandle(const shared_ptr<JsRuntime>& runtime, panda::Local<panda::ObjectRef> value);
     void DestroyRootViewHandle(int32_t pageId);
     void DestroyAllRootViewHandle();
@@ -203,6 +206,10 @@ private:
     void CallAppFunc(const std::string& appFuncName, const std::vector<shared_ptr<JsValue>>& argv);
 
     void TimerCallJs(const std::string& callbackId) const;
+
+    void RegisterWorker();
+    void RegisterInitWorkerFunc();
+    void RegisterAssetFunc();
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 

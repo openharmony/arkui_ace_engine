@@ -39,7 +39,7 @@ bool ParseFileUri(const RefPtr<AssetManager>& assetManager, const std::string& f
         fileName = fileUri;
     } else {
         fileName = fileUri.substr(slashPos + 1);
-        filePath = fileUri.substr(0, slashPos);
+        filePath = fileUri.substr(0, slashPos + 1);
     }
 
     if (StartWith(filePath, SLASHSTR)) {
