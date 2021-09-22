@@ -392,8 +392,6 @@ template("js_engine") {
         "//utils/native/base/include",
       ]
       deps += [ "//foundation/ace/napi:ace_napi_quickjs" ]
-
-      # external_deps = [ "jsapi:worker_init" ]  wait for ccruntime
     }
 
     # add ark engine support
@@ -456,6 +454,7 @@ template("js_engine") {
       }
       deps += [ ":intl_qjs" ]
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+      external_deps += [ "jsapi_worker:worker_init" ]
     }
 
     if (use_mingw_win || use_mac) {
@@ -784,7 +783,7 @@ template("declarative_js_engine") {
       deps += [ "//foundation/ace/napi:ace_napi_quickjs" ]
       deps += [ "//foundation/ace/napi:ace_napi" ]
 
-      # external_deps = [ "jsapi:worker_init" ] wait for ccruntime
+      external_deps = [ "jsapi_worker:worker_init" ]
 
       sources += [
         "declarative_frontend/engine/quickjs/modules/qjs_curves_module.cpp",
@@ -835,7 +834,7 @@ template("declarative_js_engine") {
         deps += [ "//foundation/ace/napi:ace_napi_ark" ]
         deps += [ "//foundation/ace/napi:ace_napi" ]
 
-        # external_deps = [ "jsapi:worker_init" ]
+        external_deps = [ "jsapi_worker:worker_init" ]
       }
 
       include_dirs = [ "//foundation/ace/napi" ]

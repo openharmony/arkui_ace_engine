@@ -25,7 +25,7 @@ node_js_path = "//prebuilts/ace-toolkit/nodejs/node-v12.18.4-linux-x64/bin/"
 cjson_root = "//third_party/cJSON"
 
 use_js_debug = false
-enable_worker = false
+enable_worker = true
 declare_args() {
   enable_ace_debug = false
 }
