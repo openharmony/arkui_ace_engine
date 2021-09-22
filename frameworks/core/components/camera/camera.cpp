@@ -82,15 +82,15 @@ inline bool IsDirectory(const char *dirName)
 void CameraCallback::PrepareCameraInput(sptr<OHOS::CameraStandard::CaptureInput> InCamInput_)
 {
     camInput_ = InCamInput_;
+    if (prepareEventListener_) {
+        prepareEventListener_();
+    }
+
     int32_t ret = 0;
     ret = PrepareCamera(false);
     if (ret != ERR_OK) {
         LOGE("Prepare Preview Failed");
         return;
-    }
-
-    if (prepareEventListener_) {
-        prepareEventListener_();
     }
 }
 std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
