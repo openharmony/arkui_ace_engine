@@ -259,7 +259,7 @@ void CameraCallback::MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak)
     }
 
     bool meetHole = false;
-    MarkWholeRender(node, meetHole);
+    MarkTreeRender(node, meetHole);
 }
 
 int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> camManagerObj)
