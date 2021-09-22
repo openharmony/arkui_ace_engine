@@ -218,12 +218,12 @@ void QJSDeclarativeEngine::DestroyPageInstance(int32_t pageId)
     LOGE("Not implemented!");
 }
 
-void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv)
+JSValue QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv)
 {
     JSContext* ctx = engineInstance_->GetQJSContext();
     if (!ctx) {
         LOGE("context is null");
-        return;
+        return JS_UNDEFINED;
     }
     JSValue globalObj = JS_GetGlobalObject(ctx);
     JSValue exportobj = JS_GetPropertyStr(ctx, globalObj, "exports");
@@ -232,14 +232,15 @@ void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValu
     JSValue appFunc = JS_GetPropertyStr(ctx, defaultobj, appFuncName.c_str());
     if (!JS_IsFunction(ctx, appFunc)) {
         LOGE("cannot find %s function", appFuncName.c_str());
-        return;
+        return JS_UNDEFINED;
     }
-    JS_Call(ctx, appFunc, JS_UNDEFINED, argc, argv);
+    JSValue ret = JS_Call(ctx, appFunc, JS_UNDEFINED, argc, argv);
     js_std_loop(ctx);
     JS_FreeValue(ctx, appFunc);
     JS_FreeValue(ctx, defaultobj);
     JS_FreeValue(ctx, exportobj);
     JS_FreeValue(ctx, globalObj);
+    return ret;
 }
 
 void QJSDeclarativeEngine::DestroyApplication(const std::string& packageName)
@@ -291,6 +292,68 @@ void QJSDeclarativeEngine::OnConfigurationUpdated(const std::string& data)
     CallAppFunc("onConfigurationUpdated", 1, callBackResult);
 
     js_std_loop(engineInstance_->GetQJSContext());
+}
+
+bool QJSDeclarativeEngine::OnStartContinuation()
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return false;
+    }
+    JSValue ret = CallAppFunc("onStartContinuation", 0, nullptr);
+    std::string result = JS_ToCString(ctx, ret);
+    js_std_loop(engineInstance_->GetQJSContext());
+    return (result == "true");
+}
+
+void QJSDeclarativeEngine::OnCompleteContinuation(int32_t code)
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return;
+    }
+    JSValueConst callBackResult[] = { JS_NewInt32(ctx, code) };
+    CallAppFunc("onCompleteContinuation", 1, callBackResult);
+    js_std_loop(engineInstance_->GetQJSContext());
+}
+
+void QJSDeclarativeEngine::OnRemoteTerminated()
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return;
+    }
+    CallAppFunc("onRemoteTerminated", 0, nullptr);
+    js_std_loop(engineInstance_->GetQJSContext());
+}
+
+void QJSDeclarativeEngine::OnSaveData(std::string& data)
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return;
+    }
+    JSValue ret = CallAppFunc("onSaveData", 0, nullptr);
+    data = JS_ToCString(ctx, ret);
+    js_std_loop(engineInstance_->GetQJSContext());
+}
+
+bool QJSDeclarativeEngine::OnRestoreData(const std::string& data)
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return false;
+    }
+    JSValueConst callBackResult[] = { JS_NewString(ctx, data.c_str()) };
+    JSValue ret = CallAppFunc("onRestoreData", 1, callBackResult);
+    std::string result = JS_ToCString(ctx, ret);
+    js_std_loop(engineInstance_->GetQJSContext());
+    return (result == "true");
 }
 
 void QJSDeclarativeEngine::TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval)

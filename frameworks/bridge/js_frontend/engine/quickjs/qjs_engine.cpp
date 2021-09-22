@@ -3334,6 +3334,96 @@ void QjsEngine::UpdateApplicationState(const std::string& packageName, Frontend:
     JS_FreeValue(ctx, globalObj);
 }
 
+bool QjsEngine::OnStartContinuation()
+{
+    JSContext* ctx = engineInstance_->GetQjsContext();
+    QJSHandleScope handleScope(ctx);
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue func = JS_GetPropertyStr(ctx, globalObj, "onStartContinuation");
+    if (!JS_IsFunction(ctx, func)) {
+        LOGE("onStartContinuation is not found.");
+        JS_FreeValue(ctx, globalObj);
+        return false;
+    }
+    JSValueConst argv[] = {};
+    JSValue ret = QJSUtils::Call(ctx, func, JS_UNDEFINED, countof(argv), argv);
+    std::string result = JS_ToCString(ctx, ret);
+    js_std_loop(ctx);
+    JS_FreeValue(ctx, globalObj);
+    return (result == "true");
+}
+
+void QjsEngine::OnCompleteContinuation(int32_t code)
+{
+    JSContext* ctx = engineInstance_->GetQjsContext();
+    QJSHandleScope handleScope(ctx);
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue func = JS_GetPropertyStr(ctx, globalObj, "onCompleteContinuation");
+    if (!JS_IsFunction(ctx, func)) {
+        LOGE("onCompleteContinuation is not found.");
+        JS_FreeValue(ctx, globalObj);
+        return;
+    }
+    JSValueConst argv[] = { JS_NewInt32(ctx, code) };
+    QJSUtils::Call(ctx, func, JS_UNDEFINED, countof(argv), argv);
+    js_std_loop(ctx);
+    JS_FreeValue(ctx, globalObj);
+}
+
+void QjsEngine::OnRemoteTerminated()
+{
+    JSContext* ctx = engineInstance_->GetQjsContext();
+    QJSHandleScope handleScope(ctx);
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue func = JS_GetPropertyStr(ctx, globalObj, "onRemoteTerminated");
+    if (!JS_IsFunction(ctx, func)) {
+        LOGE("onRemoteTerminated is not found.");
+        JS_FreeValue(ctx, globalObj);
+        return;
+    }
+    JSValueConst argv[] = {};
+    QJSUtils::Call(ctx, func, JS_UNDEFINED, countof(argv), argv);
+    js_std_loop(ctx);
+    JS_FreeValue(ctx, globalObj);
+}
+
+void QjsEngine::OnSaveData(std::string& data)
+{
+    JSContext* ctx = engineInstance_->GetQjsContext();
+    QJSHandleScope handleScope(ctx);
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue func = JS_GetPropertyStr(ctx, globalObj, "onSaveData");
+    if (!JS_IsFunction(ctx, func)) {
+        LOGE("onSaveData is not found.");
+        JS_FreeValue(ctx, globalObj);
+        return;
+    }
+    JSValueConst argv[] = {};
+    JSValue ret = QJSUtils::Call(ctx, func, JS_UNDEFINED, countof(argv), argv);
+    data = JS_ToCString(ctx, ret);
+    js_std_loop(ctx);
+    JS_FreeValue(ctx, globalObj);
+}
+
+bool QjsEngine::OnRestoreData(const std::string& data)
+{
+    JSContext* ctx = engineInstance_->GetQjsContext();
+    QJSHandleScope handleScope(ctx);
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue func = JS_GetPropertyStr(ctx, globalObj, "onRestoreData");
+    if (!JS_IsFunction(ctx, func)) {
+        LOGE("onRestoreData is not found.");
+        JS_FreeValue(ctx, globalObj);
+        return false;
+    }
+    JSValueConst argv[] = { JS_NewString(ctx, data.c_str()) };
+    JSValue ret = QJSUtils::Call(ctx, func, JS_UNDEFINED, countof(argv), argv);
+    std::string result = JS_ToCString(ctx, ret);
+    js_std_loop(ctx);
+    JS_FreeValue(ctx, globalObj);
+    return (result == "true");
+}
+
 void QjsEngine::TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval)
 {
     if (isInterval) {

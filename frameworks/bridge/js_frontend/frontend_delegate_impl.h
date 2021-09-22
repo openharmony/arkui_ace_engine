@@ -54,6 +54,11 @@ using RequestAnimationCallback = std::function<void(const std::string& callbackI
 using JsCallback = std::function<void(const std::string& callbackId, const std::string& args)>;
 using OnWindowDisplayModeChangedCallBack = std::function<void(bool isShownInMultiWindow, const std::string& data)>;
 using OnConfigurationUpdatedCallBack = std::function<void(const std::string& data)>;
+using OnStartContinuationCallBack = std::function<bool(void)>;
+using OnCompleteContinuationCallBack = std::function<void(int32_t code)>;
+using OnRemoteTerminatedCallBack = std::function<void(void)>;
+using OnSaveDataCallBack = std::function<void(std::string& data)>;
+using OnRestoreDataCallBack = std::function<bool(const std::string& data)>;
 
 struct PageInfo {
     int32_t pageId = -1;
@@ -116,6 +121,11 @@ struct FrontendDelegateImplBuilder {
     DestroyPageCallback destroyPageCallback;
     DestroyApplicationCallback destroyApplicationCallback;
     UpdateApplicationStateCallback updateApplicationStateCallback;
+    OnStartContinuationCallBack onStartContinuationCallBack;
+    OnCompleteContinuationCallBack onCompleteContinuationCallBack;
+    OnRemoteTerminatedCallBack onRemoteTerminatedCallBack;
+    OnSaveDataCallBack onSaveDataCallBack;
+    OnRestoreDataCallBack onRestoreDataCallBack;
     TimerCallback timerCallback;
     MediaQueryCallback mediaQueryCallback;
     RequestAnimationCallback requestAnimationCallback;
@@ -422,6 +432,11 @@ private:
     DestroyPageCallback destroyPage_;
     DestroyApplicationCallback destroyApplication_;
     UpdateApplicationStateCallback updateApplicationState_;
+    OnStartContinuationCallBack onStartContinuationCallBack_;
+    OnCompleteContinuationCallBack onCompleteContinuationCallBack_;
+    OnRemoteTerminatedCallBack onRemoteTerminatedCallBack_;
+    OnSaveDataCallBack onSaveDataCallBack_;
+    OnRestoreDataCallBack onRestoreDataCallBack_;
     TimerCallback timer_;
     std::unordered_map<std::string, CancelableCallback<void()>> timeoutTaskMap_;
     MediaQueryCallback mediaQueryCallback_;

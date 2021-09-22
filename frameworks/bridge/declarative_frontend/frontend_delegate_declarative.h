@@ -51,7 +51,12 @@ public:
         const UpdateApplicationStateCallback& updateApplicationStateCallback, const TimerCallback& timerCallback,
         const MediaQueryCallback& mediaQueryCallback, const RequestAnimationCallback& requestAnimationCallback,
         const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
-        const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack);
+        const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
+        const OnStartContinuationCallBack& onStartContinuationCallBack,
+        const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
+        const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack,
+        const OnSaveDataCallBack& onSaveDataCallBack,
+        const OnRestoreDataCallBack& onRestoreDataCallBack);
     ~FrontendDelegateDeclarative() override;
 
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
@@ -90,7 +95,6 @@ public:
     void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data);
     void NotifyAppStorage(const WeakPtr<Framework::JsEngine>& jsEngineWeak,
         const std::string& key, const std::string& value);
-
 
     // Accessibility delegate functions.
     RefPtr<Framework::AccessibilityNodeManager> GetJSAccessibilityManager() const
@@ -291,6 +295,11 @@ private:
     JsCallback jsCallback_;
     OnWindowDisplayModeChangedCallBack onWindowDisplayModeChanged_;
     OnConfigurationUpdatedCallBack onConfigurationUpdated_;
+    OnStartContinuationCallBack onStartContinuationCallBack_;
+    OnCompleteContinuationCallBack onCompleteContinuationCallBack_;
+    OnRemoteTerminatedCallBack onRemoteTerminatedCallBack_;
+    OnSaveDataCallBack onSaveDataCallBack_;
+    OnRestoreDataCallBack onRestoreDataCallBack_;
     RefPtr<Framework::ManifestParser> manifestParser_;
     RefPtr<Framework::AccessibilityNodeManager> jsAccessibilityManager_;
     RefPtr<MediaQueryInfo> mediaQueryInfo_;
