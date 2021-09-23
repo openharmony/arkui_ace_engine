@@ -78,7 +78,7 @@ void RenderNode::MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole, 
     }
     LOGI("Hole: MarkTreeRender %{public}s", AceType::TypeName(Referenced::RawPtr(root)));
     bool subMeetHole = meetHole;
-    for (auto child: root->GetChildren()){
+    for (auto child: root->GetChildren()) {
         MarkTreeRender(child, subMeetHole);
     }
     meetHole = subMeetHole;
