@@ -277,7 +277,6 @@ public:
     void SetFocusedState(bool state)
     {
         isFocused_ = state;
-        OnFocusChange(isFocused_);
     }
 
     bool GetSelectedState() const
