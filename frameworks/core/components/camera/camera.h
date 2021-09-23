@@ -117,9 +117,6 @@ private:
     void onRecord(bool isSucces, std::string info);
     void MakeDir(const std::string& path);
 
-    void MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole);
-    void MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak);
-
     std::shared_ptr<Media::Recorder> recorder_ = nullptr;
     int32_t videoSourceId_ = -1;
     int32_t PreviousReadyMode_ = ReadyMode::NONE;
