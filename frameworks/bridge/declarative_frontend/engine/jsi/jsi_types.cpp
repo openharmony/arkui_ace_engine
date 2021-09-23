@@ -110,6 +110,9 @@ std::string JsiValue::ToString() const
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
     panda::LocalScope scope(runtime->GetEcmaVm());
+    if (IsObject()) {
+        return JSON::Stringify(runtime->GetEcmaVm(), GetHandle())->ToString(runtime->GetEcmaVm())->ToString();
+    }
     return GetHandle()->ToString(runtime->GetEcmaVm())->ToString();
 }
 

@@ -95,13 +95,17 @@ shared_ptr<JsValue> PageReplace(const shared_ptr<JsRuntime>& runtime, const shar
 shared_ptr<JsValue> PageBack(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    if (argc != 1) {
+    if (argc != 1 && argc != 0) {
         LOGE("PageBack agrs count is invalid");
         return runtime->NewNull();
     }
 
-    std::string uri = ParseRouteUrl(runtime, argv[0], ROUTE_KEY_URI);
-    std::string params = ParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
+    std::string uri;
+    std::string params;
+    if (argc == 1) {
+        uri = ParseRouteUrl(runtime, argv[0], ROUTE_KEY_URI);
+        params = ParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
+    }
     auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
     if (instance == nullptr) {
         LOGE("get jsi engine instance failed");
