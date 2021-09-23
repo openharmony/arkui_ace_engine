@@ -60,9 +60,9 @@ public:
     using SlipFactorSetting = std::function<void(double)>;
     ~RenderNode() override = default;
 
-    static void MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole);
+    static void MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole, bool needFlush);
 
-    static void MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak);
+    static void MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak, bool needFlush);
 
     void SetZIndex(int32_t zIndex)
     {

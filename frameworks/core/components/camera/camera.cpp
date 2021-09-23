@@ -218,7 +218,7 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
         LOGE("Hole: renderNode from weak to normal success.");
         renderNode->SetHasSubWindow(true);
     }
-    RenderNode::MarkWholeRender(renderNode_);
+    RenderNode::MarkWholeRender(renderNode_, true);
     return previewSurface_;
 }
 

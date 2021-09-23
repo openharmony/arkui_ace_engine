@@ -59,7 +59,7 @@ constexpr Dimension FOCUS_BOUNDARY = 4.0_vp; // focus padding + effect boundary,
 
 RenderNode::RenderNode(bool takeBoundary) : takeBoundary_(takeBoundary) {}
 
-void RenderNode::MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole)
+void RenderNode::MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole, bool needFlush)
 {
     if (root->GetHasSubWindow()) {
         meetHole = true;
@@ -73,7 +73,9 @@ void RenderNode::MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole)
         LOGI("Hole: has not meet hole, need clip");
     }
 
-    root->MarkNeedRender();
+    if (needFlush) {
+        root->MarkNeedRender();
+    }
     LOGI("Hole: MarkTreeRender %{public}s", AceType::TypeName(Referenced::RawPtr(root)));
     bool subMeetHole = meetHole;
     for (auto child: root->GetChildren()){
@@ -82,7 +84,7 @@ void RenderNode::MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole)
     meetHole = subMeetHole;
 }
 
-void RenderNode::MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak)
+void RenderNode::MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak, bool needFlush)
 {
     auto node = nodeWeak.Upgrade();
     if (!node) {
@@ -121,7 +123,7 @@ void RenderNode::AddChild(const RefPtr<RenderNode>& child, int32_t slot)
     child->SetParent(AceType::WeakClaim(this));
     auto context = context_.Upgrade();
     if (context && context->GetTransparentHole().IsValid()) {
-        MarkWholeRender(AceType::WeakClaim(this));
+        MarkWholeRender(AceType::WeakClaim(this), false);
     }
     child->SetDepth(GetDepth() + 1);
     OnChildAdded(child);
