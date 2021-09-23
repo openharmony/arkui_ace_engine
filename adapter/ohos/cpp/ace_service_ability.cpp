@@ -89,7 +89,7 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want &want)
     if (info != nullptr && !info->srcPath.empty()) {
         LOGI("AceServiceAbility::OnStar assetBasePathStr: %{public}s, parsedUrl: %{public}s",
             info->srcPath.c_str(), parsedUrl.c_str());
-        auto assetBasePathStr = { "assets/js/default/" + info->srcPath };
+        auto assetBasePathStr = { "assets/js/" + info->srcPath + "/" };
         Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
     } else {
         LOGI("AceServiceAbility::OnStar parsedUrl: %{public}s", parsedUrl.c_str());
