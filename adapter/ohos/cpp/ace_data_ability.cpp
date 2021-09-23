@@ -102,7 +102,7 @@ void AceDataAbility::OnStop()
     LOGI("AceDataAbility::OnStop called End");
 }
 
-int32_t AceDataAbility::Insert(const Uri& uri, const OHOS::AppExecFwk::ValuesBucket& dummyValue)
+int32_t AceDataAbility::Insert(const Uri& uri, const NativeRdb::ValuesBucket& dummyValue)
 {
     LOGI("AceDataAbility::Insert called");
     OHOS::NativeRdb::ValuesBucket value;
@@ -111,21 +111,21 @@ int32_t AceDataAbility::Insert(const Uri& uri, const OHOS::AppExecFwk::ValuesBuc
     return ret;
 }
 
-std::shared_ptr<OHOS::AppExecFwk::ResultSet> AceDataAbility::Query(
+std::shared_ptr<NativeRdb::AbsSharedResultSet> AceDataAbility::Query(
     const Uri& uri, const std::vector<std::string>& columns,
-    const OHOS::AppExecFwk::DataAbilityPredicates& dummyPredicates)
+    const NativeRdb::DataAbilityPredicates& dummyPredicates)
 {
     LOGI("AceDataAbility::Query called");
     OHOS::NativeRdb::DataAbilityPredicates predicates;
     auto resultSet = Platform::PaContainer::Query(abilityId_, uri, columns, predicates);
     (void)resultSet;
     LOGI("AceDataAbility::Query called End");
-    std::shared_ptr<OHOS::AppExecFwk::ResultSet> dummyResultSet;
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> dummyResultSet;
     return dummyResultSet;
 }
 
-int32_t AceDataAbility::Update(const Uri& uri, const OHOS::AppExecFwk::ValuesBucket& dummyValue,
-    const OHOS::AppExecFwk::DataAbilityPredicates& dummyPredicates)
+int32_t AceDataAbility::Update(const Uri& uri, const NativeRdb::ValuesBucket& dummyValue,
+    const NativeRdb::DataAbilityPredicates& dummyPredicates)
 {
     LOGI("AceDataAbility::Update called");
     OHOS::NativeRdb::ValuesBucket value;
@@ -135,7 +135,7 @@ int32_t AceDataAbility::Update(const Uri& uri, const OHOS::AppExecFwk::ValuesBuc
     return ret;
 }
 
-int32_t AceDataAbility::Delete(const Uri& uri, const OHOS::AppExecFwk::DataAbilityPredicates& dummyPredicates)
+int32_t AceDataAbility::Delete(const Uri& uri, const NativeRdb::DataAbilityPredicates& dummyPredicates)
 {
     LOGI("AceDataAbility::Delete called");
     OHOS::NativeRdb::DataAbilityPredicates predicates;
@@ -144,7 +144,7 @@ int32_t AceDataAbility::Delete(const Uri& uri, const OHOS::AppExecFwk::DataAbili
     return ret;
 }
 
-int32_t AceDataAbility::BatchInsert(const Uri& uri, const std::vector<OHOS::AppExecFwk::ValuesBucket>& dummyValues)
+int32_t AceDataAbility::BatchInsert(const Uri& uri, const std::vector<NativeRdb::ValuesBucket>& dummyValues)
 {
     LOGI("AceDataAbility::BatchInsert called");
     std::vector<OHOS::NativeRdb::ValuesBucket> values;
