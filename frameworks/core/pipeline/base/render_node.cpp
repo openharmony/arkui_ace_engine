@@ -79,7 +79,7 @@ void RenderNode::MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole, 
     LOGI("Hole: MarkTreeRender %{public}s", AceType::TypeName(Referenced::RawPtr(root)));
     bool subMeetHole = meetHole;
     for (auto child: root->GetChildren()) {
-        MarkTreeRender(child, subMeetHole);
+        MarkTreeRender(child, subMeetHole, needFlush);
     }
     meetHole = subMeetHole;
 }
@@ -101,7 +101,7 @@ void RenderNode::MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak, bool needF
     }
 
     bool meetHole = false;
-    MarkTreeRender(node, meetHole);
+    MarkTreeRender(node, meetHole, needFlush);
 }
 
 void RenderNode::AddChild(const RefPtr<RenderNode>& child, int32_t slot)
@@ -123,7 +123,7 @@ void RenderNode::AddChild(const RefPtr<RenderNode>& child, int32_t slot)
     child->SetParent(AceType::WeakClaim(this));
     auto context = context_.Upgrade();
     if (context && context->GetTransparentHole().IsValid()) {
-        MarkWholeRender(AceType::WeakClaim(this), false);
+        MarkWholeRender(AceType::WeakClaim(this), true);
     }
     child->SetDepth(GetDepth() + 1);
     OnChildAdded(child);
