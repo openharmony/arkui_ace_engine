@@ -59,6 +59,51 @@ constexpr Dimension FOCUS_BOUNDARY = 4.0_vp; // focus padding + effect boundary,
 
 RenderNode::RenderNode(bool takeBoundary) : takeBoundary_(takeBoundary) {}
 
+void RenderNode::MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole, bool needFlush)
+{
+    if (root->GetHasSubWindow()) {
+        meetHole = true;
+    }
+
+    if (meetHole) {
+        root->SetNeedClip(false);
+        LOGI("Hole: has meet hole, no need clip");
+    } else {
+        root->SetNeedClip(true);
+        LOGI("Hole: has not meet hole, need clip");
+    }
+
+    if (needFlush) {
+        root->MarkNeedRender();
+    }
+    LOGI("Hole: MarkTreeRender %{public}s", AceType::TypeName(Referenced::RawPtr(root)));
+    bool subMeetHole = meetHole;
+    for (auto child: root->GetChildren()) {
+        MarkTreeRender(child, subMeetHole, needFlush);
+    }
+    meetHole = subMeetHole;
+}
+
+void RenderNode::MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak, bool needFlush)
+{
+    auto node = nodeWeak.Upgrade();
+    if (!node) {
+        LOGE("Hole: MarkWholeRender node is null");
+        return;
+    }
+
+    auto parentWeak = node->GetParent();
+    auto parent = parentWeak.Upgrade();
+    while (parent) {
+        node = parent;
+        parentWeak = node->GetParent();
+        parent = parentWeak.Upgrade();
+    }
+
+    bool meetHole = false;
+    MarkTreeRender(node, meetHole, needFlush);
+}
+
 void RenderNode::AddChild(const RefPtr<RenderNode>& child, int32_t slot)
 {
     if (!child) {
@@ -76,6 +121,10 @@ void RenderNode::AddChild(const RefPtr<RenderNode>& child, int32_t slot)
     std::advance(pos, slot);
     children_.insert(pos, child);
     child->SetParent(AceType::WeakClaim(this));
+    auto context = context_.Upgrade();
+    if (context && context->GetTransparentHole().IsValid()) {
+        MarkWholeRender(AceType::WeakClaim(this), true);
+    }
     child->SetDepth(GetDepth() + 1);
     OnChildAdded(child);
     disappearingNodes_.remove(child);
@@ -245,8 +294,8 @@ void RenderNode::RenderWithContext(RenderContext& context, const Offset& offset)
         onLayoutReady_(std::string("\"layoutReady\",null,null"));
     }
     pendingDispatchLayoutReady_ = false;
-    if (GetHasSubWindow()) {
-        LOGI("Hole: meet subwindow node");
+    if (GetHasSubWindow() || !GetNeedClip()) {
+        LOGI("Hole: meet subwindow node or no need clip");
         auto& flutterRenderContext = static_cast<FlutterRenderContext&>(context);
         if (flutterRenderContext.GetNeedRestoreHole()) {
             auto canvas = flutterRenderContext.GetCanvas();

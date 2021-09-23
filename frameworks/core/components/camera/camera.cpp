@@ -217,48 +217,8 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
         LOGE("Hole: renderNode from weak to normal success.");
         renderNode->SetHasSubWindow(true);
     }
-    MarkWholeRender(renderNode_);
+    RenderNode::MarkWholeRender(renderNode_, true);
     return previewSurface_;
-}
-
-void CameraCallback::MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole)
-{
-    if (root->GetHasSubWindow()) {
-        meetHole = true;
-    }
-
-    if (meetHole) {
-        root->SetNeedClip(false);
-    } else {
-        root->SetNeedClip(true);
-    }
-
-    root->MarkNeedRender();
-    LOGI("Hole: MarkTreeRender %{public}s", AceType::TypeName(Referenced::RawPtr(root)));
-    bool subMeetHole = meetHole;
-    for (auto child: root->GetChildren()){
-        MarkTreeRender(child, subMeetHole);
-    }
-}
-
-void CameraCallback::MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak)
-{
-    auto node = nodeWeak.Upgrade();
-    if (!node) {
-        LOGE("Hole: MarkWholeRender node is null");
-        return;
-    }
-
-    auto parentWeak = node->GetParent();
-    auto parent = parentWeak.Upgrade();
-    while (parent) {
-        node = parent;
-        parentWeak = node->GetParent();
-        parent = parentWeak.Upgrade();
-    }
-
-    bool meetHole = false;
-    MarkTreeRender(node, meetHole);
 }
 
 int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> camManagerObj)
