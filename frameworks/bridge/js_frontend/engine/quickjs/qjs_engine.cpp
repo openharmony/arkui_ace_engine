@@ -3339,7 +3339,17 @@ bool QjsEngine::OnStartContinuation()
     JSContext* ctx = engineInstance_->GetQjsContext();
     QJSHandleScope handleScope(ctx);
     JSValue globalObj = JS_GetGlobalObject(ctx);
-    JSValue func = JS_GetPropertyStr(ctx, globalObj, "onStartContinuation");
+    JSValue appObj = QJSUtils::GetPropertyStr(ctx, globalObj, "aceapp");
+    if (!JS_IsObject(appObj)) {
+        LOGE("aceapp is not found.");
+        return false;
+    }
+    JSValue defObj = QJSUtils::GetPropertyStr(ctx, appObj, "$def");
+    if (!JS_IsObject(defObj)) {
+        LOGE("$def is not found.");
+        return false;
+    }
+    JSValue func = QJSUtils::GetPropertyStr(ctx, defObj, "onStartContinuation");
     if (!JS_IsFunction(ctx, func)) {
         LOGE("onStartContinuation is not found.");
         JS_FreeValue(ctx, globalObj);
@@ -3358,7 +3368,17 @@ void QjsEngine::OnCompleteContinuation(int32_t code)
     JSContext* ctx = engineInstance_->GetQjsContext();
     QJSHandleScope handleScope(ctx);
     JSValue globalObj = JS_GetGlobalObject(ctx);
-    JSValue func = JS_GetPropertyStr(ctx, globalObj, "onCompleteContinuation");
+    JSValue appObj = QJSUtils::GetPropertyStr(ctx, globalObj, "aceapp");
+    if (!JS_IsObject(appObj)) {
+        LOGE("aceapp is not found.");
+        return;
+    }
+    JSValue defObj = QJSUtils::GetPropertyStr(ctx, appObj, "$def");
+    if (!JS_IsObject(defObj)) {
+        LOGE("$def is not found.");
+        return;
+    }
+    JSValue func = QJSUtils::GetPropertyStr(ctx, defObj, "onCompleteContinuation");
     if (!JS_IsFunction(ctx, func)) {
         LOGE("onCompleteContinuation is not found.");
         JS_FreeValue(ctx, globalObj);
@@ -3375,7 +3395,17 @@ void QjsEngine::OnRemoteTerminated()
     JSContext* ctx = engineInstance_->GetQjsContext();
     QJSHandleScope handleScope(ctx);
     JSValue globalObj = JS_GetGlobalObject(ctx);
-    JSValue func = JS_GetPropertyStr(ctx, globalObj, "onRemoteTerminated");
+    JSValue appObj = QJSUtils::GetPropertyStr(ctx, globalObj, "aceapp");
+    if (!JS_IsObject(appObj)) {
+        LOGE("aceapp is not found.");
+        return;
+    }
+    JSValue defObj = QJSUtils::GetPropertyStr(ctx, appObj, "$def");
+    if (!JS_IsObject(defObj)) {
+        LOGE("$def is not found.");
+        return;
+    }
+    JSValue func = QJSUtils::GetPropertyStr(ctx, defObj, "onRemoteTerminated");
     if (!JS_IsFunction(ctx, func)) {
         LOGE("onRemoteTerminated is not found.");
         JS_FreeValue(ctx, globalObj);
@@ -3392,7 +3422,17 @@ void QjsEngine::OnSaveData(std::string& data)
     JSContext* ctx = engineInstance_->GetQjsContext();
     QJSHandleScope handleScope(ctx);
     JSValue globalObj = JS_GetGlobalObject(ctx);
-    JSValue func = JS_GetPropertyStr(ctx, globalObj, "onSaveData");
+    JSValue appObj = QJSUtils::GetPropertyStr(ctx, globalObj, "aceapp");
+    if (!JS_IsObject(appObj)) {
+        LOGE("aceapp is not found.");
+        return;
+    }
+    JSValue defObj = QJSUtils::GetPropertyStr(ctx, appObj, "$def");
+    if (!JS_IsObject(defObj)) {
+        LOGE("$def is not found.");
+        return;
+    }
+    JSValue func = QJSUtils::GetPropertyStr(ctx, defObj, "onSaveData");
     if (!JS_IsFunction(ctx, func)) {
         LOGE("onSaveData is not found.");
         JS_FreeValue(ctx, globalObj);
@@ -3410,7 +3450,17 @@ bool QjsEngine::OnRestoreData(const std::string& data)
     JSContext* ctx = engineInstance_->GetQjsContext();
     QJSHandleScope handleScope(ctx);
     JSValue globalObj = JS_GetGlobalObject(ctx);
-    JSValue func = JS_GetPropertyStr(ctx, globalObj, "onRestoreData");
+    JSValue appObj = QJSUtils::GetPropertyStr(ctx, globalObj, "aceapp");
+    if (!JS_IsObject(appObj)) {
+        LOGE("aceapp is not found.");
+        return false;
+    }
+    JSValue defObj = QJSUtils::GetPropertyStr(ctx, appObj, "$def");
+    if (!JS_IsObject(defObj)) {
+        LOGE("$def is not found.");
+        return false;
+    }
+    JSValue func = QJSUtils::GetPropertyStr(ctx, defObj, "onRestoreData");
     if (!JS_IsFunction(ctx, func)) {
         LOGE("onRestoreData is not found.");
         JS_FreeValue(ctx, globalObj);
