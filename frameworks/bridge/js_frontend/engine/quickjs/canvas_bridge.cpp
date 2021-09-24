@@ -1489,6 +1489,10 @@ JSValue CanvasBridge::JsGetImageData(JSContext* ctx, JSValueConst value, int32_t
         return JS_NULL;
     }
     Rect rect = GetJsRectParam(ctx, argc, argv);
+    rect.SetLeft(static_cast<int32_t>(rect.Left()));
+    rect.SetTop(static_cast<int32_t>(rect.Top()));
+    rect.SetWidth(static_cast<int32_t>(rect.Width()));
+    rect.SetHeight(static_cast<int32_t>(rect.Height()));
     NodeId id = GetCurrentNodeId(ctx, value);
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     auto page = instance->GetRunningPage();
