@@ -66,6 +66,7 @@ public:
     std::string str();
 
     static std::string Stringify(JSValueConst val);
+    static std::string Stringify(JSContext* ctx, JSValueConst val);
 
     operator std::string() const;
 

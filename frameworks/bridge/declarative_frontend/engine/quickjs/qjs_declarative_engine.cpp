@@ -337,8 +337,12 @@ void QJSDeclarativeEngine::OnSaveData(std::string& data)
         LOGE("context is null");
         return;
     }
-    JSValue ret = CallAppFunc("onSaveData", 0, nullptr);
-    data = JS_ToCString(ctx, ret);
+    JSValue object = JS_NewObject(ctx);
+    JSValueConst callBackResult[] = { object };
+    JSValue ret = CallAppFunc("onSaveData", 1, callBackResult);
+    if (JS_ToCString(ctx, ret) == std::string("true")) {
+        data = ScopedString::Stringify(ctx, object);
+    }
     js_std_loop(engineInstance_->GetQJSContext());
 }
 
@@ -349,7 +353,12 @@ bool QJSDeclarativeEngine::OnRestoreData(const std::string& data)
         LOGE("context is null");
         return false;
     }
-    JSValueConst callBackResult[] = { JS_NewString(ctx, data.c_str()) };
+    JSValue jsonObj = JS_ParseJSON(ctx, data.c_str(), data.length(), "");
+    if (JS_IsUndefined(jsonObj) || JS_IsException(jsonObj)) {
+        LOGE("Parse json for restore data failed.");
+        return false;
+    }
+    JSValueConst callBackResult[] = { jsonObj };
     JSValue ret = CallAppFunc("onRestoreData", 1, callBackResult);
     std::string result = JS_ToCString(ctx, ret);
     js_std_loop(engineInstance_->GetQJSContext());
