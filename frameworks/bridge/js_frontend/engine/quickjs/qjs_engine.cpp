@@ -3438,9 +3438,12 @@ void QjsEngine::OnSaveData(std::string& data)
         JS_FreeValue(ctx, globalObj);
         return;
     }
-    JSValueConst argv[] = {};
+    JSValue object = JS_NewObject(ctx);
+    JSValueConst argv[] = { object };
     JSValue ret = QJSUtils::Call(ctx, func, JS_UNDEFINED, countof(argv), argv);
-    data = JS_ToCString(ctx, ret);
+    if (JS_ToCString(ctx, ret) == std::string("true")) {
+        data = ScopedString::Stringify(ctx, object);
+    }
     js_std_loop(ctx);
     JS_FreeValue(ctx, globalObj);
 }
@@ -3466,7 +3469,12 @@ bool QjsEngine::OnRestoreData(const std::string& data)
         JS_FreeValue(ctx, globalObj);
         return false;
     }
-    JSValueConst argv[] = { JS_NewString(ctx, data.c_str()) };
+    JSValue jsonObj = JS_ParseJSON(ctx, data.c_str(), data.length(), "");
+    if (JS_IsUndefined(jsonObj) || JS_IsException(jsonObj)) {
+        LOGE("Parse json for restore data failed.");
+        return false;
+    }
+    JSValueConst argv[] = { jsonObj };
     JSValue ret = QJSUtils::Call(ctx, func, JS_UNDEFINED, countof(argv), argv);
     std::string result = JS_ToCString(ctx, ret);
     js_std_loop(ctx);

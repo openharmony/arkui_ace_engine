@@ -404,7 +404,9 @@ void AceAbility::OnStart(const Want& want)
         abilityId_, Platform::AceContainer::GetContainer(abilityId_)->GeneratePageId(),
         parsedPageUrl, want.GetStringParam(START_PARAMS_KEY));
 
-    Platform::AceContainer::OnRestoreData(abilityId_, remoteData_);
+    if (!remoteData_.empty()) {
+        Platform::AceContainer::OnRestoreData(abilityId_, remoteData_);
+    }
     if (!isSystemUI && (moduleInfo->name.find("ohos.istone.system.dialog")) != -1) {
         std::string dialogParam = "{\"title\":\"Alert!\", \"message\":\"Two button style!\"," \
              "\"button1\":\"Got it!\", \"button2\":\"Cancel!\"}";
