@@ -32,9 +32,27 @@
 namespace OHOS {
 namespace Ace {
 namespace {
-FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr)
+FrontendType GetFrontendType(const std::string& frontendType)
 {
-    auto manifestPath = packagePathStr + std::string("assets/js/default/manifest.json");
+    if (frontendType == "normal") {
+        return FrontendType::JS;
+    } else if (frontendType == "form") {
+        return FrontendType::JS_CARD;
+    } else if (frontendType == "declarative") {
+        return FrontendType::DECLARATIVE_JS;
+    } else {
+        LOGE("frontend type not supported. return default frontend: JS frontend.");
+        return FrontendType::JS;
+    }
+}
+
+FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr, const std::string& srcPath)
+{
+    std::string manifest = std::string("assets/js/default/manifest.json");
+    if (!srcPath.empty()) {
+        manifest = "assets/js/" + srcPath + "/manifest.json";
+    }
+    auto manifestPath = packagePathStr + manifest;
     char realPath[PATH_MAX] = { 0x00 };
     if (realpath(manifestPath.c_str(), realPath) == nullptr) {
         LOGE("realpath fail! filePath: %{private}s, fail reason: %{public}s", manifestPath.c_str(), strerror(errno));
@@ -77,17 +95,7 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr)
             return FrontendType::DECLARATIVE_JS;
         }
     }
-    std::string frontendType = rootJson->GetString("type");
-    if (frontendType == "normal") {
-        return FrontendType::JS;
-    } else if (frontendType == "form") {
-        return FrontendType::JS_CARD;
-    } else if (frontendType == "declarative") {
-        return FrontendType::DECLARATIVE_JS;
-    } else {
-        LOGE("frontend type not supported. return default frontend: JS frontend.");
-        return FrontendType::JS;
-    }
+    return GetFrontendType(rootJson->GetString("type"));
 }
 
 bool GetIsArkFromConfig(const std::string &packagePathStr)
@@ -174,7 +182,8 @@ REGISTER_AA(AceAbility)
 int32_t g_dialogId = 1;
 const std::string WINDOW_DIALOG_DOUBLE_BUTTON = "pages/dialog/dialog.js";
 
-void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBundle, std::string param, DialogCallback callback)
+void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBundle, std::string param, DialogCallback callback,
+    const std::string& srcPath)
 {
     LOGI("showDialog");
 
@@ -220,8 +229,13 @@ void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBundle, std::stri
 
     // add asset path.
     auto packagePathStr = "system/dialog/";
-    auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
-    Platform::AceContainer::AddAssetPath(g_dialogId, packagePathStr, assetBasePathStr);
+    if (srcPath.empty()) {
+        auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
+        Platform::AceContainer::AddAssetPath(g_dialogId, packagePathStr, assetBasePathStr);
+    } else {
+        auto assetBasePathStr = { "assets/js/" + srcPath + "/" };
+        Platform::AceContainer::AddAssetPath(g_dialogId, packagePathStr, assetBasePathStr);
+    }
 
     // set view
     Platform::AceContainer::SetView(flutterAceView, 1.0f, windowConfig.width, windowConfig.height);
@@ -280,7 +294,13 @@ void AceAbility::OnStart(const Want& want)
         isSystemUI = true;
     }
 
-    FrontendType frontendType = GetFrontendTypeFromManifest(packagePathStr);
+    std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
+    std::string srcPath = "";
+    if (info != nullptr && !info->srcPath.empty()) {
+        srcPath = info->srcPath;
+    }
+
+    FrontendType frontendType = GetFrontendTypeFromManifest(packagePathStr, srcPath);
     bool isArkApp = GetIsArkFromConfig(packagePathStr);
 
     // create container
@@ -326,8 +346,13 @@ void AceAbility::OnStart(const Want& want)
     metrics.physical_height = windowConfig.height;
     Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
 
-    auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
-    Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+    if (srcPath.empty()) {
+        auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
+        Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+    } else {
+        auto assetBasePathStr = { "assets/js/" + srcPath + "/" };
+        Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+    }
 
     // set view
     Platform::AceContainer::SetView(flutterAceView, density_, windowConfig.width, windowConfig.height);
@@ -383,7 +408,7 @@ void AceAbility::OnStart(const Want& want)
     if (!isSystemUI && (moduleInfo->name.find("ohos.istone.system.dialog")) != -1) {
         std::string dialogParam = "{\"title\":\"Alert!\", \"message\":\"Two button style!\"," \
              "\"button1\":\"Got it!\", \"button2\":\"Cancel!\"}";
-        showDialog(Ability::GetWindow(), WINDOW_DIALOG_DOUBLE_BUTTON, dialogParam, DialogHandle1);
+        showDialog(Ability::GetWindow(), WINDOW_DIALOG_DOUBLE_BUTTON, dialogParam, DialogHandle1, srcPath);
         return;
     }
     LOGI("AceAbility::OnStart called End");

@@ -113,8 +113,17 @@ OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::W
     if (moduleInfo != nullptr) {
         packagePathStr += "/" + moduleInfo->name + "/";
     }
-    auto assetBasePathStr = {std::string("assets/js/default/"), std::string("assets/js/share/")};
-    Platform::PaContainer::AddAssetPath(wantId, packagePathStr, assetBasePathStr);
+    std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
+    if (info != nullptr && !info->srcPath.empty()) {
+        LOGI("AceFormAbility::OnCreate assetBasePathStr: %{public}s, parsedUrl: %{public}s",
+            info->srcPath.c_str(), parsedUrl.c_str());
+        auto assetBasePathStr = { "assets/js/" + info->srcPath + "/" };
+        Platform::PaContainer::AddAssetPath(wantId, packagePathStr, assetBasePathStr);
+    } else {
+        LOGI("AceFormAbility::OnCreate parsedUrl: %{public}s", parsedUrl.c_str());
+        auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
+        Platform::PaContainer::AddAssetPath(wantId, packagePathStr, assetBasePathStr);
+    }
 
     // run form ability
     Platform::PaContainer::RunPa(wantId, parsedUrl, want);

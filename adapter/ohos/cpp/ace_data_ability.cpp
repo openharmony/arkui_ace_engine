@@ -84,8 +84,18 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want &want)
     if (moduleInfo != nullptr) {
         packagePathStr += "/" + moduleInfo->name + "/";
     }
-    auto assetBasePathStr = {std::string("assets/js/default/"), std::string("assets/js/share/")};
-    Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+
+    std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
+    if (info != nullptr && !info->srcPath.empty()) {
+        LOGI("AceDataAbility::OnStart assetBasePathStr: %{public}s, parsedUrl: %{public}s",
+            info->srcPath.c_str(), parsedUrl.c_str());
+        auto assetBasePathStr = { "assets/js/" + info->srcPath + "/" };
+        Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+    } else {
+        LOGI("AceDataAbility::OnStart parsedUrl: %{public}s", parsedUrl.c_str());
+        auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
+        Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+    }
 
     // run data ability
     Platform::PaContainer::RunPa(

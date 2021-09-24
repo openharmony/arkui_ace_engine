@@ -24,7 +24,8 @@
 
 namespace OHOS::Ace {
 using DialogCallback = std::function<void(std::string event, std::string param)>;
-void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBoudle, std::string param, DialogCallback callback);
+void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBoudle, std::string param, DialogCallback callback,
+    const std::string& srcPath);
 
 class AceAbility final : public OHOS::AppExecFwk::Ability {
 public:
