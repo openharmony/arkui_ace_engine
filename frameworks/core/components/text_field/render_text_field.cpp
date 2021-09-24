@@ -57,7 +57,8 @@ constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
 
 } // namespace
 
-void OnTextChangedListenerImpl::InsertText(const std::u16string& text) {
+void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
+{
     if (text.length() <= 0) {
         LOGE("the text is null");
         return;
@@ -84,7 +85,8 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text) {
 
 }
 
-void OnTextChangedListenerImpl::DeleteBackward(int32_t length) {
+void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
+{
     if (length <= 0) {
         LOGE("Delete nothing.");
         return;
@@ -116,7 +118,8 @@ void OnTextChangedListenerImpl::DeleteBackward(int32_t length) {
 
 }
 
-void OnTextChangedListenerImpl::SetKeyboardStatus(bool status) {
+void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
+{
     auto renderTextField = field_.Upgrade();
     if (!renderTextField) {
         return;

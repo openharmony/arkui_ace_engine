@@ -840,7 +840,6 @@ bool JsCardParser::GetI18nData(std::string& value)
         LOGE("Get i18n files fail!");
         return false;
     }
-    // assetManager->GetAssetList(I18N_FOLDER, files);
     if (!AceApplicationInfo::GetInstance().GetFiles(I18N_FOLDER, files)) {
         LOGE("Get i18n files fail!");
         return false;

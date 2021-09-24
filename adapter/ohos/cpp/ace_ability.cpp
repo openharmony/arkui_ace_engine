@@ -174,21 +174,17 @@ REGISTER_AA(AceAbility)
 int32_t g_dialogId = 1;
 const std::string WINDOW_DIALOG_DOUBLE_BUTTON = "pages/dialog/dialog.js";
 
-void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBoudle, std::string param, DialogCallback callback)
+void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBundle, std::string param, DialogCallback callback)
 {
     LOGI("showDialog");
 
     SetHwIcuDirectory();
     // create container
     Platform::AceContainer::CreateContainer(g_dialogId, FrontendType::JS, false, nullptr,
-        std::make_unique<AcePlatformEventCallback>([]()
-        {
-            // TerminateAbility();
-        }));
+        std::make_unique<AcePlatformEventCallback>([]() {}));
     Platform::AceContainer::SetDialogCallback(g_dialogId, callback);
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(g_dialogId);
-    // window->Resize(460, 700);
     auto&& touchEventCallback = [aceView = flutterAceView](OHOS::TouchEvent event) -> bool {
         LOGD("RegistOnTouchCb touchEventCallback called");
         return aceView->DispatchTouchEvent(aceView, event);
@@ -239,7 +235,7 @@ void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBoudle, std::stri
 
     // run page.
     Platform::AceContainer::RunPage(g_dialogId, Platform::AceContainer::GetContainer(g_dialogId)->GeneratePageId(),
-            jsBoudle, param);
+        jsBundle, param);
 
     g_dialogId++;
 }
@@ -368,7 +364,6 @@ void AceAbility::OnStart(const Want& want)
 
         AAFwk::Want want;
         want.SetElementName(bundle, ability);
-        // want.SetParam(Constants::PARAM_FORM_IDENTITY_KEY, std::to_string(formJsInfo_.formId));
         this->StartAbility(want);
     };
 

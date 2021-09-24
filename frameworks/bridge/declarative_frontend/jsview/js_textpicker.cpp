@@ -54,7 +54,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
 
     JSRef<JSArray> getRange = paramObject->GetProperty("range");
     std::vector<std::string> getRangeVector;
-    for(size_t i = 0; i < getRange->Length(); i++) {
+    for (size_t i = 0; i < getRange->Length(); i++) {
         JSRef<JSVal> getRangeValue = getRange->GetValueAt(i);
         if (!getRangeValue->IsString()) {
             LOGE("range need to be string type");
