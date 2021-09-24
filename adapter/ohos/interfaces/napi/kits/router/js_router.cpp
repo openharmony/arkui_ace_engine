@@ -166,7 +166,7 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv, "uri", &uriNApi);
             napi_get_named_property(env, argv, "params", &params);
             napi_get_named_property(env, argv, "dontOverwrite", &dontOverwrite);
-            if(uriNApi) {
+            if (uriNApi) {
                 ParseParams(env, params, dontOverwrite, paramsString);
                 jsEngine->GetFrontend()->Back(uriString, paramsString);
                 return nullptr;

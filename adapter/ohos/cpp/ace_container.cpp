@@ -100,7 +100,7 @@ void AceContainer::InitializeFrontend()
         frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
         declarativeFrontend->SetJsEngine(
-	    Framework::JsEngineLoader::GetDeclarative(isArkApp_).CreateJsEngine(instanceId_));
+	        Framework::JsEngineLoader::GetDeclarative(isArkApp_).CreateJsEngine(instanceId_));
         declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
         declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
         declarativeFrontend->SetAbility(aceAbility_);

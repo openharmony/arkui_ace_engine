@@ -47,7 +47,6 @@ bool ParseFileUri(const RefPtr<AssetManager>& assetManager, const std::string& f
     }
 
     std::vector<std::string> files;
-    // assetManager->GetAssetList(filePath, files);
     if (!AceApplicationInfo::GetInstance().GetFiles(filePath, files)) {
         LOGE("ParseFileUri GetFiles failed.");
         return false;
