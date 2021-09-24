@@ -40,11 +40,17 @@
 #endif
 
 extern const char _binary_stateMgmt_js_start[];
-extern const char _binary_stateMgmt_js_end[];
 extern const char _binary_jsEnumStyle_js_start[];
-extern const char _binary_jsEnumStyle_js_end[];
 extern const char _binary_jsMockSystemPlugin_js_start[];
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+extern const char* _binary_stateMgmt_js_end;
+extern const char* _binary_jsEnumStyle_js_end;
+extern const char* _binary_jsMockSystemPlugin_js_end;
+#else
+extern const char _binary_stateMgmt_js_end[];
+extern const char _binary_jsEnumStyle_js_end[];
 extern const char _binary_jsMockSystemPlugin_js_end[];
+#endif
 
 namespace OHOS::Ace::Framework {
 
