@@ -48,6 +48,8 @@
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 
+#include "napi_common_ability.h"
+
 namespace OHOS::Ace::Framework {
 FromBindingData::FromBindingData(JSContext* ctx, JSValue value)
 {
@@ -524,11 +526,31 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want &want)
         return;
     }
 
-    napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine_), want);
-    NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
-    JSValue jsWant = (JSValue)*nativeWant;
-    JSValueConst argv[] = { jsWant };
-    JSValue retVal = QJSUtils::Call(ctx, paStartFunc, paObj, countof(argv), argv);
+    JSValue retVal = JS_UNDEFINED;
+    if (type == BackendType::SERVICE) {
+        JSValueConst argv[] = {};
+        retVal = QJSUtils::Call(ctx, paStartFunc, paObj, countof(argv), argv);
+    } else if (type == BackendType::DATA) {
+        const std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo =
+            reinterpret_cast<Ability*>(engineInstance_->GetDelegate()->GetAbility())->GetAbilityInfo();
+        const AppExecFwk::AbilityInfo abilityInfoInstance = *(abilityInfo.get());
+        napi_value abilityInfoNapi =
+            AppExecFwk::ConvertAbilityInfo(reinterpret_cast<napi_env>(nativeEngine_), abilityInfoInstance);
+
+        NativeValue* abilityInfoNative = reinterpret_cast<NativeValue*>(abilityInfoNapi);
+        JSValue abilityInfoJS = (JSValue)*abilityInfoNative;
+        JSValueConst argv[] = { abilityInfoJS };
+        retVal = QJSUtils::Call(ctx, paStartFunc, paObj, countof(argv), argv);
+    } else if (type == BackendType::FORM) {
+        napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine_), want);
+        NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
+        JSValue jsWant = (JSValue)*nativeWant;
+        JSValueConst argv[] = { jsWant };
+        retVal = QJSUtils::Call(ctx, paStartFunc, paObj, countof(argv), argv);
+    } else {
+        LOGE("PA: QjsPaEngine backend type not support");
+    }
+
     if (JS_IsException(retVal)) {
         LOGE("PA: QjsPaEngine QJSUtils::Call IsException");
     } else {
@@ -791,6 +813,7 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> QjsPaEngine::Query(
     JSValue argColumnsJSValue = (JSValue)*argColumnsNativeValue;
 
     OHOS::NativeRdb::DataAbilityPredicates* predicatesPtr = new OHOS::NativeRdb::DataAbilityPredicates();
+    *predicatesPtr = predicates;
     napi_value argPredicatesNapiValue = dataAbilityPredicatesNewInstance_(env, predicatesPtr);
     NativeValue* argPredicatesNativeValue = reinterpret_cast<NativeValue*>(argPredicatesNapiValue);
     if (argPredicatesNativeValue == nullptr) {
@@ -801,7 +824,7 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> QjsPaEngine::Query(
 
     JSValueConst argv[] = { argUriJSValue, argColumnsJSValue, argPredicatesJSValue };
     JSValue retVal = QJSUtils::Call(ctx, paFunc, JS_UNDEFINED, countof(argv), argv);
-    if (JS_IsException(retVal)) {
+    if (JS_IsException(retVal) || JS_IsUndefined(retVal)) {
         LOGE("Qjs paFunc FAILED!");
         return resultSet;
     }
@@ -835,6 +858,7 @@ int32_t QjsPaEngine::Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
     JSValue argNapiJSValue = (JSValue)*argNapiNativeValue;
 
     OHOS::NativeRdb::DataAbilityPredicates* predicatesPtr = new OHOS::NativeRdb::DataAbilityPredicates();
+    *predicatesPtr = predicates;
     napi_value argPredicatesNapiValue = dataAbilityPredicatesNewInstance_(env, predicatesPtr);
     NativeValue* argPredicatesNativeValue = reinterpret_cast<NativeValue*>(argPredicatesNapiValue);
     if (argPredicatesNativeValue == nullptr) {
@@ -865,6 +889,7 @@ int32_t QjsPaEngine::Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPr
 
     napi_env env = reinterpret_cast<napi_env>(nativeEngine_);
     OHOS::NativeRdb::DataAbilityPredicates* predicatesPtr = new OHOS::NativeRdb::DataAbilityPredicates();
+    *predicatesPtr = predicates;
     napi_value argPredicatesNapiValue = dataAbilityPredicatesNewInstance_(env, predicatesPtr);
     NativeValue* argPredicatesNativeValue = reinterpret_cast<NativeValue*>(argPredicatesNapiValue);
     if (argPredicatesNativeValue == nullptr) {
