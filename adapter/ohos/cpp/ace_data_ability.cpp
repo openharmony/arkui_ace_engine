@@ -112,10 +112,9 @@ void AceDataAbility::OnStop()
     LOGI("AceDataAbility::OnStop called End");
 }
 
-int32_t AceDataAbility::Insert(const Uri& uri, const NativeRdb::ValuesBucket& dummyValue)
+int32_t AceDataAbility::Insert(const Uri& uri, const NativeRdb::ValuesBucket& value)
 {
     LOGI("AceDataAbility::Insert called");
-    OHOS::NativeRdb::ValuesBucket value;
     int32_t ret = Platform::PaContainer::Insert(abilityId_, uri, value);
     LOGI("AceDataAbility::Insert called End");
     return ret;
@@ -123,41 +122,34 @@ int32_t AceDataAbility::Insert(const Uri& uri, const NativeRdb::ValuesBucket& du
 
 std::shared_ptr<NativeRdb::AbsSharedResultSet> AceDataAbility::Query(
     const Uri& uri, const std::vector<std::string>& columns,
-    const NativeRdb::DataAbilityPredicates& dummyPredicates)
+    const NativeRdb::DataAbilityPredicates& predicates)
 {
     LOGI("AceDataAbility::Query called");
-    OHOS::NativeRdb::DataAbilityPredicates predicates;
     auto resultSet = Platform::PaContainer::Query(abilityId_, uri, columns, predicates);
-    (void)resultSet;
     LOGI("AceDataAbility::Query called End");
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> dummyResultSet;
-    return dummyResultSet;
+    return resultSet;
 }
 
-int32_t AceDataAbility::Update(const Uri& uri, const NativeRdb::ValuesBucket& dummyValue,
-    const NativeRdb::DataAbilityPredicates& dummyPredicates)
+int32_t AceDataAbility::Update(const Uri& uri, const NativeRdb::ValuesBucket& value,
+    const NativeRdb::DataAbilityPredicates& predicates)
 {
     LOGI("AceDataAbility::Update called");
-    OHOS::NativeRdb::ValuesBucket value;
-    OHOS::NativeRdb::DataAbilityPredicates predicates;
     int32_t ret = Platform::PaContainer::Update(abilityId_, uri, value, predicates);
     LOGI("AceDataAbility::Update called End");
     return ret;
 }
 
-int32_t AceDataAbility::Delete(const Uri& uri, const NativeRdb::DataAbilityPredicates& dummyPredicates)
+int32_t AceDataAbility::Delete(const Uri& uri, const NativeRdb::DataAbilityPredicates& predicates)
 {
     LOGI("AceDataAbility::Delete called");
-    OHOS::NativeRdb::DataAbilityPredicates predicates;
     int32_t ret = Platform::PaContainer::Delete(abilityId_, uri, predicates);
     LOGI("AceDataAbility::Delete called End");
     return ret;
 }
 
-int32_t AceDataAbility::BatchInsert(const Uri& uri, const std::vector<NativeRdb::ValuesBucket>& dummyValues)
+int32_t AceDataAbility::BatchInsert(const Uri& uri, const std::vector<NativeRdb::ValuesBucket>& values)
 {
     LOGI("AceDataAbility::BatchInsert called");
-    std::vector<OHOS::NativeRdb::ValuesBucket> values;
     int32_t ret = Platform::PaContainer::BatchInsert(abilityId_, uri, values);
     LOGI("AceDataAbility::BatchInsert called End");
     return ret;
