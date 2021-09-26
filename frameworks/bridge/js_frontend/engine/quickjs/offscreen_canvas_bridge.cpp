@@ -1383,6 +1383,10 @@ JSValue OffscreenCanvasBridge::JsGetImageData(JSContext* ctx, JSValueConst value
         return JS_NULL;
     }
     Rect rect = GetJsRectParam(ctx, argc, argv);
+    rect.SetLeft(static_cast<int32_t>(rect.Left()));
+    rect.SetTop(static_cast<int32_t>(rect.Top()));
+    rect.SetWidth(static_cast<int32_t>(rect.Width()));
+    rect.SetHeight(static_cast<int32_t>(rect.Height()));
     std::unique_ptr<ImageData> data;
     auto bridge = GetOffscreenCanvasBridge(ctx, value);
     if (bridge) {
