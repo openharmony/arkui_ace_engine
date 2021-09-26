@@ -405,6 +405,7 @@ QjsPaEngine::~QjsPaEngine()
     UnloadLibrary();
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     if (nativeEngine_ != nullptr) {
+        nativeEngine_->CancelCheckUVLoop();
         delete nativeEngine_;
     }
     if (engineInstance_ && engineInstance_->GetQjsRuntime()) {
