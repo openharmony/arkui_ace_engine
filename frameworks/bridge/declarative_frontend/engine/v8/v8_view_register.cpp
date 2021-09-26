@@ -495,6 +495,33 @@ void Px2Lpx(const v8::FunctionCallbackInfo<v8::Value>& args)
     args.GetReturnValue().Set(lpxV8Value);
 }
 
+void SetAppBackgroundColor(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    v8::Isolate* isolate = args.GetIsolate();
+    ACE_DCHECK(isolate);
+    v8::Isolate::Scope isolateScope(isolate);
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    if (args.Length() < 1 || !args[0]->IsString()) {
+        LOGE("The arg is wrong, must have one argument");
+        return;
+    }
+    v8::String::Utf8Value backgroundColorUtf8Str(isolate, args[0]);
+    if (!(*backgroundColorUtf8Str)) {
+        return;
+    }
+    std::string backgroundColorStr(*backgroundColorUtf8Str);
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext) {
+        pipelineContext->SetRootBgColor(Color::FromString(backgroundColorStr));
+    }
+}
+
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
     {"Flex", JSFlexImpl::JSBind},
     {"Text", JSText::JSBind},
@@ -646,6 +673,8 @@ void JsRegisterViews(BindingTarget globalObj)
         v8::FunctionTemplate::New(isolate, Lpx2Px));
     globalObj->Set(v8::String::NewFromUtf8(isolate, "px2lpx").ToLocalChecked(),
         v8::FunctionTemplate::New(isolate, Px2Lpx));
+    globalObj->Set(v8::String::NewFromUtf8(isolate, "setAppBgColor").ToLocalChecked(),
+        v8::FunctionTemplate::New(isolate, SetAppBackgroundColor));
 
     JSViewAbstract::JSBind();
     JSContainerBase::JSBind();

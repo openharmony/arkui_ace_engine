@@ -52,6 +52,7 @@
 #include "core/components/scroll/scrollable.h"
 #include "core/components/semi_modal/semi_modal_component.h"
 #include "core/components/semi_modal/semi_modal_element.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components/stage/stage_component.h"
 #include "core/components/stage/stage_element.h"
 #include "core/image/image_provider.h"
@@ -1681,6 +1682,19 @@ void PipelineContext::SetRootRect(double width, double height) const
         rootNode->MarkNeedLayout();
         rootNode->MarkNeedRender();
         focusAnimationManager_->SetAvailableRect(paintRect);
+    }
+}
+
+void PipelineContext::SetRootBgColor(const Color& color)
+{
+    rootBgColor_ = color;
+    auto appTheme = themeManager_->GetTheme<AppTheme>();
+    appTheme->SetBackgroundColor(color);
+    if (rootElement_) {
+        auto renderRoot = DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
+        if (renderRoot) {
+            renderRoot->SetBgColor(color);
+        }
     }
 }
 
