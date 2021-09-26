@@ -47,6 +47,11 @@ public:
         return backgroundColor_;
     }
 
+    void SetBackgroundColor(const Color& color)
+    {
+        backgroundColor_ = color;
+    }
+
 protected:
     AppTheme() = default;
 
