@@ -526,7 +526,7 @@ void FrontendDelegateDeclarative::OnApplicationDestroy(const std::string& packag
 
 void FrontendDelegateDeclarative::UpdateApplicationState(const std::string& packageName, Frontend::State state)
 {
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostTask(
         [updateApplicationState = updateApplicationState_, packageName, state] {
             updateApplicationState(packageName, state);
         },
@@ -535,7 +535,7 @@ void FrontendDelegateDeclarative::UpdateApplicationState(const std::string& pack
 
 void FrontendDelegateDeclarative::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
 {
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostTask(
         [onWindowDisplayModeChanged = onWindowDisplayModeChanged_, isShownInMultiWindow, data] {
             onWindowDisplayModeChanged(isShownInMultiWindow, data);
         },
