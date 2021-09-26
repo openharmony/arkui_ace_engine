@@ -212,7 +212,7 @@ public:
     LinearGradientShader(const Gradient& gradient, const SkPoint& firstPoint, const SkPoint& secondPoint)
         : GradientShader(gradient), firstPoint_(firstPoint), secondPoint_(secondPoint)
     {}
-    ~LinearGradientShader() = default;
+    ~LinearGradientShader() override = default;
 
     sk_sp<SkShader> CreateGradientShader() override
     {
@@ -378,7 +378,7 @@ public:
         : GradientShader(gradient), center_(center), radius0_(radius0), radius1_(radius1), ratio_(ratio)
     {}
 
-    ~RadialGradientShader() = default;
+    ~RadialGradientShader() override = default;
 
     sk_sp<SkShader> CreateGradientShader() override
     {
@@ -603,7 +603,7 @@ public:
         const Gradient& gradient, const SkPoint& center, float startAngle, float endAngle, float rotation)
         : GradientShader(gradient), center_(center), startAngle_(startAngle), endAngle_(endAngle), rotation_(rotation)
     {}
-    ~SweepGradientShader() = default;
+    ~SweepGradientShader() override = default;
 
     sk_sp<SkShader> CreateGradientShader() override
     {
