@@ -535,7 +535,8 @@ bool AceAbility::OnSaveData(OHOS::AAFwk::WantParams &saveData)
         saveData.SetParam(PAGE_URI, OHOS::AAFwk::String::Box(json->GetString(PAGE_URI)));
     }
     if (json->Contains(CONTINUE_PARAMS_KEY)) {
-        saveData.SetParam(CONTINUE_PARAMS_KEY, OHOS::AAFwk::String::Box(json->GetString(CONTINUE_PARAMS_KEY)));
+        std::string params = json->GetObject(CONTINUE_PARAMS_KEY)->ToString();
+        saveData.SetParam(CONTINUE_PARAMS_KEY, OHOS::AAFwk::String::Box(params));
     }
     LOGI("AceAbility::OnSaveData finish.");
     return true;
