@@ -54,6 +54,6 @@ private:
     static RefPtr<CalendarComponentV2> GetComponent();
 };
 
-} // namespace HarmonyOS::Ace
+} // namespace OHOS::Ace::Framework
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CALENDAR_H

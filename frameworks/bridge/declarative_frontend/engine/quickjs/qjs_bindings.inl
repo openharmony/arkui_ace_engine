@@ -518,7 +518,6 @@ JSValue QJSKlass<C>::JSConstructorInterceptor(JSContext* ctx, JSValueConst newTa
     }
 
     // It should not go here
-    // ACE_DCHECK(false && "This should not happen!");
     return JS_ThrowInternalError(
         ctx, "Constructor for %s returned an undefined value! This should not happen", ThisJSClass::JSName());
 }
