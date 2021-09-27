@@ -762,6 +762,12 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             return;
         }
         instance->InitConsoleModule(arkNativeEngine);
+
+        std::vector<uint8_t> buffer((uint8_t *)_binary_jsEnumStyle_abc_start, (uint8_t *)_binary_jsEnumStyle_abc_end);
+        auto stateMgmtResult = arkNativeEngine->RunBufferScript(buffer);
+        if (stateMgmtResult == nullptr) {
+            LOGE("init worker error");
+        }
     };
     OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
 }
