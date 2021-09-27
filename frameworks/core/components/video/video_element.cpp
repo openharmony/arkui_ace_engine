@@ -887,6 +887,10 @@ void VideoElement::OnPrepared(
             std::string("\"prepared\",{\"duration\":").append(std::to_string(duration_)).append("}");
         onPrepared_(param);
     }
+
+    if (isAutoPlay_) {
+        Start();
+    }
 }
 
 void VideoElement::OnPlayerStatus(bool isPlaying)
