@@ -175,7 +175,6 @@ function Observed(target) {
         aceConsole.log(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
         return new ObservedObject(new original(...args), undefined);
     };
-    //f.prototype = original.prototype;
     Object.setPrototypeOf(f, Object.getPrototypeOf(original));
     // return new constructor (will override original)
     return f;
@@ -382,7 +381,6 @@ class ObservedPropertyAbstract {
     */
     unlinkSuscriber(subscriberId) {
         this.subscribers_.delete(subscriberId);
-        // Is this correct? FIXME SubscriberManager.Get().delete(subscriberId);
     }
     notifyHasChanged(newValue) {
         aceConsole.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
@@ -921,7 +919,6 @@ class AppStorage {
     static IsMutable(key) {
         // FIXME(cvetan): No mechanism for immutable/mutable properties
         return true;
-        //   return AppStorage.GetOrCreate().isMutable(key);
     }
     /**
      * App should call this method to order close down app storage before

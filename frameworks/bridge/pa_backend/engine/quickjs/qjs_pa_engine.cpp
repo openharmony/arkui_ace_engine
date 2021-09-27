@@ -589,8 +589,6 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want &want)
             formData.AddImageData("image1", image);
             LOGI("PA: QjsPaEngine image.size %{public}d", len);
         }
-        // free(pImage); // image need be freed by FormProviderData ;
-
     }
 
     js_std_loop(ctx);
