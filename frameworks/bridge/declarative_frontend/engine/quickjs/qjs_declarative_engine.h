@@ -22,9 +22,6 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-#include "native_engine/impl/quickjs/quickjs_native_engine.h"
-#endif
 
 namespace OHOS::Ace::Framework {
 
@@ -74,12 +71,24 @@ public:
 
     void CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv);
 
+    void CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv, JSValue& ret);
+
     // destroy application instance according packageName
     void DestroyApplication(const std::string& packageName) override;
 
     void UpdateApplicationState(const std::string& packageName, Frontend::State state) override;
 
     void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data) override;
+
+    bool OnStartContinuation() override;
+
+    void OnRemoteTerminated() override;
+
+    void OnCompleteContinuation(const int32_t code) override;
+
+    bool OnRestoreData(const std::string& data) override;
+
+    void OnSaveData(std::string& saveData) override;
 
     void RunGarbageCollection() override;
 
@@ -93,15 +102,12 @@ public:
 private:
     RefPtr<QJSDeclarativeEngineInstance> engineInstance_;
     int32_t instanceId_ = 0;
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-    QuickJSNativeEngine* nativeEngine_ = nullptr;
-    void SetPostTask(NativeEngine* nativeEngine);
-#endif
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(ENABLE_WORKER)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     void RegisterWorker();
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
+    void SetPostTask(NativeEngine* nativeEngine);
 #endif
 
     ACE_DISALLOW_COPY_AND_MOVE(QJSDeclarativeEngine);

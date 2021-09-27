@@ -27,11 +27,6 @@ namespace {
 
 constexpr char JS_ENGINE_ENTRY[] = "OHOS_ACE_GetJsEngineLoader";
 
-constexpr char QUICK_JS_ENGINE_SHARED_LIB[] = "libace_engine_qjs.z.so";
-constexpr char QJS_DECLARATIVE_JS_ENGINE_SHARED_LIB[] = "libace_engine_declarative_qjs.z.so";
-constexpr char ARK_JS_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
-constexpr char ARK_DECLARATIVE_JS_ENGINE_SHARED_LIB[] = "libace_engine_declarative_ark.z.so";
-
 using DynamicEntry = void* (*)();
 
 class DummyJsEngineLoader final : public JsEngineLoader, public Singleton<DummyJsEngineLoader> {
@@ -57,26 +52,13 @@ public:
 DummyJsEngineLoader::DummyJsEngineLoader() = default;
 DummyJsEngineLoader::~DummyJsEngineLoader() = default;
 
-const char* GetSharedLibrary(bool isArkApp)
-{
-    if (isArkApp) {
-        return ARK_JS_ENGINE_SHARED_LIB;
-    } else {
-        return QUICK_JS_ENGINE_SHARED_LIB;
-    }
-}
-
-const char* GetDeclarativeSharedLibrary(bool isArkApp)
-{
-    if (isArkApp) {
-        return ARK_DECLARATIVE_JS_ENGINE_SHARED_LIB;
-    } else {
-        return QJS_DECLARATIVE_JS_ENGINE_SHARED_LIB;
-    }
-}
-
 JsEngineLoader& GetJsEngineLoader(const char* sharedLibrary)
 {
+    if (sharedLibrary == nullptr) {
+        LOGE("Name of shared library MUST NOT be null pointer");
+        return DummyJsEngineLoader::GetInstance();
+    }
+
     void* handle = dlopen(sharedLibrary, RTLD_LAZY);
     if (handle == nullptr) {
         LOGE("Failed to open shared library %{public}s, reason: %{public}sn", sharedLibrary, dlerror());
@@ -102,15 +84,15 @@ JsEngineLoader& GetJsEngineLoader(const char* sharedLibrary)
 
 } // namespace
 
-JsEngineLoader& JsEngineLoader::Get(bool isArkApp)
+JsEngineLoader& JsEngineLoader::Get(const char* sharedLibrary)
 {
-    static JsEngineLoader& instance = GetJsEngineLoader(GetSharedLibrary(isArkApp));
+    static JsEngineLoader& instance = GetJsEngineLoader(sharedLibrary);
     return instance;
 }
 
-JsEngineLoader& JsEngineLoader::GetDeclarative(bool isArkApp)
+JsEngineLoader& JsEngineLoader::GetDeclarative(const char* sharedLibrary)
 {
-    static JsEngineLoader& instance = GetJsEngineLoader(GetDeclarativeSharedLibrary(isArkApp));
+    static JsEngineLoader& instance = GetJsEngineLoader(sharedLibrary);
     return instance;
 }
 

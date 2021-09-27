@@ -25,20 +25,26 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+
+const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
+    DialogAlignment::BOTTOM, DialogAlignment::DEFAULT };
+
+} // namespace
 
 void ParseButtonObj(
     const JSCallbackInfo& args, DialogProperties& properties, JSRef<JSObject> obj, const std::string& property)
 {
     auto jsVal = obj->GetProperty(property.c_str());
     if (jsVal->IsObject()) {
-        JSRef<JSObject> objInner = JSRef<JSObject>::Cast(jsVal);
-        JSRef<JSVal> value = objInner->GetProperty("value");
+        auto objInner = JSRef<JSObject>::Cast(jsVal);
+        auto value = objInner->GetProperty("value");
         std::string buttonValue;
         if (JSAlertDialog::ParseJsString(value, buttonValue)) {
             properties.buttons.emplace_back(buttonValue, "");
         }
 
-        JSRef<JSVal> actionValue = objInner->GetProperty("action");
+        auto actionValue = objInner->GetProperty("action");
         if (actionValue->IsFunction()) {
             auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
             EventMarker actionId([execCtx = args.GetExecutionContext(), func = std::move(actionFunc)]() {
@@ -59,30 +65,30 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
 {
     DialogProperties properties { .type = DialogType::ALERT_DIALOG };
     if (args[0]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        auto obj = JSRef<JSObject>::Cast(args[0]);
 
         // Parse title.
-        JSRef<JSVal> titleValue = obj->GetProperty("title");
+        auto titleValue = obj->GetProperty("title");
         std::string title;
         if (ParseJsString(titleValue, title)) {
             properties.title = title;
         }
 
         // Parses message.
-        JSRef<JSVal> messageValue = obj->GetProperty("message");
+        auto messageValue = obj->GetProperty("message");
         std::string message;
         if (ParseJsString(messageValue, message)) {
             properties.content = message;
         }
 
         // Parse auto autoCancel.
-        JSRef<JSVal> autoCancelValue = obj->GetProperty("autoCancel");
+        auto autoCancelValue = obj->GetProperty("autoCancel");
         if (autoCancelValue->IsBoolean()) {
             properties.autoCancel = autoCancelValue->ToBoolean();
         }
 
         // Parse cancel.
-        JSRef<JSVal> cancelValue = obj->GetProperty("cancel");
+        auto cancelValue = obj->GetProperty("cancel");
         if (cancelValue->IsFunction()) {
             auto cancelFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(cancelValue));
             EventMarker cancelId([execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
@@ -99,6 +105,28 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             // Parse primaryButton and secondaryButton.
             ParseButtonObj(args, properties, obj, "primaryButton");
             ParseButtonObj(args, properties, obj, "secondaryButton");
+        }
+
+        // Parse alignment
+        auto alignmentValue = obj->GetProperty("alignment");
+        if (alignmentValue->IsNumber()) {
+            auto alignment = alignmentValue->ToNumber<int32_t>();
+            if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+                properties.alignment = DIALOG_ALIGNMENT[alignment];
+            }
+        }
+
+        // Parse offset
+        auto offsetValue = obj->GetProperty("offset");
+        if (offsetValue->IsObject()) {
+            auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
+            Dimension dx;
+            auto dxValue = offsetObj->GetProperty("dx");
+            ParseJsDimensionVp(dxValue, dx);
+            Dimension dy;
+            auto dyValue = offsetObj->GetProperty("dy");
+            ParseJsDimensionVp(dyValue, dy);
+            properties.offset = DimensionOffset(dx, dy);
         }
 
         // Show dialog.

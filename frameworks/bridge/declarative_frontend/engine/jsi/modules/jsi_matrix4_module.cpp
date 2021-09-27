@@ -65,7 +65,7 @@ shared_ptr<JsValue> Init(const shared_ptr<JsRuntime>& runtime, const shared_ptr<
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc != 1) {
-        LOGE("PagePush agrs count is invalid");
+        LOGE("PagePush args count is invalid");
         return runtime->NewNull();
     }
 

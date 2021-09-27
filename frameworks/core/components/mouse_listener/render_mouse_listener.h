@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-class RenderMouseListener final : public RenderProxy {
+class ACE_EXPORT RenderMouseListener final : public RenderProxy {
     DECLARE_ACE_TYPE(RenderMouseListener, RenderProxy);
 
 public:
@@ -44,6 +44,13 @@ public:
     {
         if (onMouseHover) {
             recognizer_->SetOnMouseHover(onMouseHover);
+        }
+    }
+
+    void SetOnHover(const OnHoverCallback& onHover)
+    {
+        if (onHover) {
+            recognizer_->SetOnHover(onHover);
         }
     }
 

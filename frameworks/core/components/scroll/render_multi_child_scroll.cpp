@@ -17,6 +17,7 @@
 
 #include "core/animation/curve.h"
 #include "core/animation/curve_animation.h"
+#include "core/common/vibrator/vibrator_proxy.h"
 #include "core/components/box/render_box.h"
 #include "core/event/ace_event_helper.h"
 
@@ -31,6 +32,10 @@ constexpr double LIST_INCONTINUOUS_ROTATION_SENSITYVITY_NORMAL = 0.6;
 constexpr double LIST_CONTINUOUS_ROTATION_SENSITYVITY_NORMAL = 1.0;
 constexpr double LIST_ITEMCENTER_ROTATION_THRESHOLD = 0.7;
 constexpr int32_t COMPATIBLE_VERSION = 6;
+
+#ifdef WEARABLE_PRODUCT
+const std::string& VIBRATOR_TYPE_WATCH_CROWN_STRENGTH3 = "watchhaptic.crown.strength3";
+#endif
 
 } // namespace
 
@@ -223,6 +228,11 @@ void RenderMultiChildScroll::Update(const RefPtr<Component>& component)
     }
     if (context->IsJsCard()) {
         cacheExtent_ = (std::numeric_limits<double>::max)();
+    }
+
+    scrollVibrate_ = listComponent->GetScrollVibrate();
+    if (scrollVibrate_ && !vibrator_ && context) {
+        vibrator_ = VibratorProxy::GetInstance().GetVibrator(context->GetTaskExecutor());
     }
 
     if (listComponent->IsInRefresh()) {
@@ -502,6 +512,25 @@ void RenderMultiChildScroll::ExtendViewPort()
             viewPort_.SetHeight(viewPort_.Height() * EXTENT_RATIO);
         }
     }
+}
+
+bool RenderMultiChildScroll::HandleCrashTop()
+{
+#ifdef WEARABLE_PRODUCT
+    if (scrollVibrate_ && vibrator_) {
+        vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH3);
+    }
+#endif
+    return RenderScroll::HandleCrashTop();
+}
+bool RenderMultiChildScroll::HandleCrashBottom()
+{
+#ifdef WEARABLE_PRODUCT
+    if (scrollVibrate_ && vibrator_) {
+        vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH3);
+    }
+#endif
+    return RenderScroll::HandleCrashBottom();
 }
 
 bool RenderMultiChildScroll::IsReadyToJump() const

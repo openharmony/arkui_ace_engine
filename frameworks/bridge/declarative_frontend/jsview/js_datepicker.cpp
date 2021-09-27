@@ -45,7 +45,7 @@ void JSDatePicker::Create(const JSCallbackInfo& info)
     }
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    DatePickerType pickerType = DatePickerType::DATE;
+    DatePickerType pickerType = DatePickerType::TIME;
     auto type = paramObject->GetProperty("type");
     if (type->IsNumber()) {
         pickerType = static_cast<DatePickerType>(type->ToNumber<int32_t>());
@@ -76,7 +76,6 @@ void JSDatePicker::SetLunar(bool isLunar)
     }
     datePicker->SetShowLunar(isLunar);
 }
-
 void JSDatePicker::UseMilitaryTime(bool isUseMilitaryTime)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();

@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_RENDER_BOX_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_RENDER_BOX_H
 
-#include "base/memory/referenced.h"
 #include "core/animation/animator.h"
 #include "core/animation/keyframe_animation.h"
 #include "core/components/box/box_component.h"
@@ -130,8 +129,16 @@ public:
     double GetBrightness(void) const;
     void SetContrast(double trast);
     double GetContrast(void) const;
+    void SetColorBlend(const Color& color);
+    Color GetColorBlend(void) const;
     void SetSaturate(double rate);
     double GetSaturate(void) const;
+    void SetSepia(double pia);
+    double GetSepia(void) const;
+    void SetInvert(double invert);
+    double GetInvert(void) const;
+    void SetHueRotate(float deg);
+    float GetHueRotate(void) const;
     void SetBorderWidth(double width, const BorderEdgeHelper& helper);
     double GetBorderWidth(const BorderEdgeHelper& helper) const;
     void SetBorderColor(const Color& color, const BorderEdgeHelper& helper);
@@ -181,16 +188,6 @@ public:
     void AddRecognizerToResult(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& result);
 
-    void SetPreTargetRenderBox(const RefPtr<RenderBox>& preTargetRenderBox) 
-    {
-        preTargetRenderBox_ = preTargetRenderBox;
-    }
-
-    const RefPtr<RenderBox>& GetPreTargetRenderBox() const
-    {
-        return preTargetRenderBox_;
-    }
-
 protected:
     void ClearRenderObject() override;
 
@@ -227,7 +224,6 @@ private:
     std::array<RefPtr<GestureRecognizer>, MAX_GESTURE_SIZE> recognizers_;
 
     RefPtr<GestureRecognizer> dragDropGesture_;
-    RefPtr<RenderBox> preTargetRenderBox_;
     OnDragFunc onDrag_;
     OnDragFunc onDragEnter_;
     OnDragFunc onDragMove_;

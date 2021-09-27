@@ -81,7 +81,6 @@ void RenderDisplay::PerformLayout()
         const auto& child = GetChildren().front();
         child->Layout(layoutParam);
         childSize = child->GetLayoutSize();
-        child->SetPosition(Offset());
     }
     SetLayoutSize(childSize);
 }

@@ -42,7 +42,8 @@ void SvgG::AppendChild(const RefPtr<SvgNode>& child)
     component_->AppendChild(child->GetComponent());
 }
 
-RefPtr<RenderNode> SvgG::CreateRender(const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent)
+RefPtr<RenderNode> SvgG::CreateRender(
+    const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox)
 {
     component_->Inherit(parent);
     auto href = component_->GetDeclaration()->GetFillState().GetHref();
@@ -60,12 +61,15 @@ RefPtr<RenderNode> SvgG::CreateRender(const LayoutParam& layoutParam, const RefP
     renderNode->Attach(context_);
     renderNode->Update(component_);
     for (auto child : children_) {
-        auto childRender = child->CreateRender(layoutParam, component_->GetDeclaration());
+        auto childRender = child->CreateRender(layoutParam, component_->GetDeclaration(), useBox);
         if (childRender) {
             renderNode->AddChild(childRender, renderNode->GetChildren().size());
         }
     }
     renderNode->Layout(layoutParam);
+    if (!useBox) {
+        return renderNode;
+    }
 
     auto boxComponent = CreateBoxComponent(layoutParam, component_->GetDeclaration()->GetClipPathHref());
     auto renderBox = boxComponent->CreateRenderNode();

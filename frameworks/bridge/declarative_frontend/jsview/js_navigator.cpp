@@ -63,6 +63,7 @@ void JSNavigator::JSBind(BindingTarget globalObj)
     JSClass<JSNavigator>::StaticMethod("height", &JSNavigator::JsHeight);
     JSClass<JSNavigator>::StaticMethod("size", &JSNavigator::JsSize);
     JSClass<JSNavigator>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSNavigator>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSNavigator>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSNavigator>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSNavigator>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);

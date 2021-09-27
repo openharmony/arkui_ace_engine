@@ -27,9 +27,12 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void SetPlaceholderColor(const JSCallbackInfo& info);
     static void SetPlaceholderFont(const JSCallbackInfo& info);
-    static void SetTextAlign(const JSCallbackInfo& info);
+    static void SetTextAlign(int32_t value);
     static void SetCaretColor(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
+    static void InitializeStyle();
+    static void UpdateDecoration();
+    static void PrepareSpecializedComponent();
 };
 
 } // namespace OHOS::Ace::Fremawork

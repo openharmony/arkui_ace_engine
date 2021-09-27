@@ -63,7 +63,9 @@ public:
     explicit InspectorComposedElement(const ComposeId& id) : ComposedElement(id) {}
     ~InspectorComposedElement() override = default;
 
+    void Update() override;
     bool CanUpdate(const RefPtr<Component>& newComponent) override;
+    void UpdateComposedComponentId(const ComposeId& oldId, const ComposeId& newId);
     RefPtr<RenderNode> GetInspectorNode(IdType typeId) const;
 
     template<class T>
@@ -93,8 +95,8 @@ public:
     }
 
     // dimension settings
-    virtual double GetWidth() const;
-    virtual double GetHeight() const;
+    virtual std::string GetWidth() const;
+    virtual std::string GetHeight() const;
     virtual Dimension GetPadding(OHOS::Ace::AnimatableType type) const;
     virtual Dimension GetMargin(OHOS::Ace::AnimatableType type) const;
     virtual std::string GetConstraintSize() const;
@@ -114,7 +116,7 @@ public:
     virtual int32_t GetDisplayPriority() const;
 
     // flex layout
-    virtual double GetFlexBasis() const;
+    virtual std::string GetFlexBasis() const;
     virtual double GetFlexGrow() const;
     virtual double GetFlexShrink() const;
     virtual std::string GetAlignSelf() const;
@@ -123,11 +125,12 @@ public:
     virtual Border GetBorder() const;
     virtual std::string GetBorderStyle() const;
     virtual std::string GetBorderWidth() const;
-    virtual uint32_t GetBorderColor() const;
+    virtual std::string GetBorderColor() const;
 
     // background settings
     virtual RefPtr<Decoration> GetBackDecoration() const;
     virtual std::string GetBackgroundImage() const;
+    virtual std::string GetBackgroundColor() const;
     virtual std::unique_ptr<JsonValue> GetBackgroundImageSize() const;
     virtual std::unique_ptr<JsonValue> GetBackgroundImagePosition() const;
 
@@ -167,6 +170,7 @@ public:
     virtual RefPtr<GridColumnInfo> GetGridColumnInfo() const;
 
     virtual std::unique_ptr<JsonValue> ToJsonObject() const;
+
     virtual AceType::IdType GetTargetTypeId() const
     {
         return AceType::TypeId(this);

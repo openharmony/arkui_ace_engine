@@ -27,7 +27,7 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
 
-const std::string SPAN_DATA = "ohos1234@?!";
+const std::string SPAN_DATA = "test1234@?!";
 constexpr double FONT_SIZE = 10.0;
 constexpr int32_t FONT_WEIGHT = 1;
 constexpr int32_t FONT_STYLE = 1;
@@ -47,7 +47,7 @@ constexpr double BLURRADIUS = 10.0;
 const std::vector<std::string> FONT_FAMILIES = { "normal", "sans-serif", "serif", "monospace" };
 const std::string JSON_SPAN_STR = "{                                    "
                                   "  \"className\": \"TextSpan\",       "
-                                  "  \"value\": \"ohos1234@?!\",      "
+                                  "  \"value\": \"test1234@?!\",      "
                                   "  \"textStyle\":                     "
                                   "{                                    "
                                   "  \"className\": \"TextStyle\",      "
@@ -98,7 +98,7 @@ const std::string JSON_NESTED_SPAN_STR = "{                                    "
                                          "  \"child\":                         "
                                          "{                                    "
                                          "  \"className\": \"TextSpan\",       "
-                                         "  \"value\": \"ohos1234@?!\",      "
+                                         "  \"value\": \"test1234@?!\",      "
                                          "  \"textStyle\":                     "
                                          "{                                    "
                                          "  \"className\": \"TextStyle\",      "

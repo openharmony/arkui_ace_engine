@@ -33,7 +33,7 @@ void RenderSvgPolygon::Update(const RefPtr<Component> &component)
     }
     points_ = polygonComponent->GetPoints();
     isClose_ = polygonComponent->IsClose();
-    RenderSvgBase::SetPresentationAttrs(polygonComponent->GetDeclaration());
+    RenderSvgBase::SetPresentationAttrs(component, polygonComponent->GetDeclaration());
     PrepareAnimations(component);
     MarkNeedLayout();
 }

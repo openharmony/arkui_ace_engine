@@ -42,7 +42,8 @@ void SvgSvg::AppendChild(const RefPtr<SvgNode>& child)
     component_->AppendChild(child->GetComponent());
 }
 
-RefPtr<RenderNode> SvgSvg::CreateRender(const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent)
+RefPtr<RenderNode> SvgSvg::CreateRender(
+    const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox)
 {
     component_->Inherit(parent);
     auto href = component_->GetDeclaration()->GetFillState().GetHref();
@@ -67,7 +68,7 @@ RefPtr<RenderNode> SvgSvg::CreateRender(const LayoutParam& layoutParam, const Re
 
     renderNode->Update(component_);
     for (const auto& child : children_) {
-        auto childRender = child->CreateRender(layoutParam, component_->GetDeclaration());
+        auto childRender = child->CreateRender(layoutParam, component_->GetDeclaration(), useBox);
         if (childRender) {
             renderNode->AddChild(childRender, renderNode->GetChildren().size());
             child->Update(childRender);
@@ -75,6 +76,10 @@ RefPtr<RenderNode> SvgSvg::CreateRender(const LayoutParam& layoutParam, const Re
     }
     renderNode->MarkIsFixSize(true);
     renderNode->Layout(layoutParam);
+    if (!useBox) {
+        return renderNode;
+    }
+
     auto boxComponent = CreateBoxComponent(layoutParam, component_->GetDeclaration()->GetClipPathHref());
     boxComponent->SetWidth(layoutParam.GetMaxSize().Width());
     boxComponent->SetHeight(layoutParam.GetMaxSize().Height());

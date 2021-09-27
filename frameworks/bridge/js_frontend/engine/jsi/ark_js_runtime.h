@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_ECMASCRIPT_NAPI_JSI_ARK_JS_RUNTIME_H
-#define PANDA_RUNTIME_ECMASCRIPT_NAPI_JSI_ARK_JS_RUNTIME_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H
+#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H
 
 #include <memory>
 
@@ -50,13 +50,6 @@ class PandaFunctionData;
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ArkJSRuntime final : public JsRuntime, public std::enable_shared_from_this<ArkJSRuntime> {
 public:
-    static shared_ptr<JsRuntime> GetInstance()
-    {
-        shared_ptr<ArkJSRuntime> runtime = std::make_shared<ArkJSRuntime>();
-        new shared_ptr<ArkJSRuntime>(runtime);
-        return runtime;
-    }
-    bool StartDebugger(const char *libraryPath, EcmaVM *vm) const;
     bool Initialize(const std::string &libraryPath) override;
     void Reset() override;
     void SetLogPrint(LOG_PRINT out) override;
@@ -117,4 +110,4 @@ private:
                                               int32_t length, void *data);
 };
 }  // namespace OHOS::Ace::Framework
-#endif  // PANDA_RUNTIME_ECMASCRIPT_NAPI_JSI_ARK_JS_RUNTIME_H
+#endif  // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H

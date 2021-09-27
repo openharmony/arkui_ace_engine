@@ -20,8 +20,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSGauge: public JSViewAbstract {
-
+class JSGauge : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);

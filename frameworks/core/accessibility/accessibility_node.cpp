@@ -398,7 +398,7 @@ void AccessibilityNode::SetOperableInfo()
     }
 }
 
-std::unordered_set<AceAction> AccessibilityNode::GetSupportAction() const
+std::unordered_set<AceAction> AccessibilityNode::GetSupportAction(uint64_t enableActions) const
 {
     static const AceAction allActions[] = {
         AceAction::ACTION_NONE, AceAction::GLOBAL_ACTION_BACK, AceAction::CUSTOM_ACTION, AceAction::ACTION_CLICK,
@@ -412,8 +412,9 @@ std::unordered_set<AceAction> AccessibilityNode::GetSupportAction() const
         return supportActions;
     }
 
+    auto finalSupportActions = supportActions_ & enableActions;
     for (auto action : allActions) {
-        if ((supportActions_ & (1LL << static_cast<uint32_t>(action))) != 0) {
+        if ((finalSupportActions & (1UL << static_cast<uint32_t>(action))) != 0) {
             supportActions.emplace(action);
         }
     }

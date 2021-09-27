@@ -20,7 +20,6 @@
 #include "base/thread/background_task_executor.h"
 #include "core/common/ace_page.h"
 #include "core/image/image_cache.h"
-#include "unistd.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -107,71 +106,6 @@ void AceEngine::DefusingBomb(int32_t instanceId)
     watchDog_->DefusingBomb(instanceId);
 }
 
-void AceEngine::SetPackageName(const std::string& packageName)
-{
-    packageName_ = packageName;
-}
-
-const std::string& AceEngine::GetPackageName() const
-{
-    return packageName_;
-}
-
-void AceEngine::SetPackagePath(const std::string& packagePath)
-{
-    packagePath_ = packagePath;
-}
-
-const std::string& AceEngine::GetPackagePath() const
-{
-    return packagePath_;
-}
-
-void AceEngine::SetAssetBasePath(const std::string& assetBasePath)
-{
-    assetBasePathSet_.insert(assetBasePath);
-}
-
-const std::set<std::string>& AceEngine::GetAssetBasePath() const
-{
-    return assetBasePathSet_;
-}
-
-RefPtr<Frontend> AceEngine::GetForegroundFrontend() const
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    for (const auto& [first, second] : containerMap_) {
-        auto frontend = second->GetFrontend();
-        if (frontend && (frontend->GetType() == FrontendType::JS)) {
-            if (frontend->IsForeground()) {
-                return frontend;
-            }
-        }
-    }
-    LOGW("container not found foreground frontend");
-    return nullptr;
-}
-
-void AceEngine::SetUid(int32_t uid)
-{
-    uid_ = uid;
-}
-
-int32_t AceEngine::GetUid() const
-{
-    return uid_;
-}
-
-void AceEngine::SetProcessName(const std::string& processName)
-{
-    processName_ = processName;
-}
-
-const std::string& AceEngine::GetProcessName() const
-{
-    return processName_;
-}
-
 void AceEngine::TriggerGarbageCollection()
 {
     std::unordered_map<int32_t, RefPtr<Container>> copied;
@@ -209,18 +143,6 @@ void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container
     for (const auto& [first, second] : containerMap_) {
         callback(second);
     }
-}
-
-const std::string AceEngine::GetAssetAbsolutePath(const std::string& path) const
-{
-    for (auto basePath: assetBasePathSet_) {
-        std::string assetPath;
-        assetPath.append(packagePath_).append(basePath).append(path);
-        if (access(assetPath.c_str(), F_OK) == 0) {
-            return "file://" + assetPath;
-        }
-    }
-    return path;
 }
 
 } // namespace OHOS::Ace

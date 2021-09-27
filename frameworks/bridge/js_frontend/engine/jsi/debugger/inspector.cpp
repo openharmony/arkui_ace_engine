@@ -86,7 +86,7 @@ void ResetService()
 
 } // namespace
 
-bool StartDebug(const std::string& componentName, const EcmaVM *vm)
+bool StartDebug(const std::string& componentName, void *vm)
 {
     LOGI("StartDebug: %{private}s", componentName.c_str());
     g_handle = dlopen(ARK_DEBUGGER_SHARED_LIB, RTLD_LAZY);
@@ -95,8 +95,8 @@ bool StartDebug(const std::string& componentName, const EcmaVM *vm)
         return false;
     }
     g_websocketServer = std::make_unique<WsServer>(componentName, std::bind(&OnMessage, std::placeholders::_1));
-    auto initialize = reinterpret_cast<void (*)(const std::function<void(std::string)> &,
-        const EcmaVM *)>(GetArkDynFunction("InitializeDebugger"));
+    auto initialize = reinterpret_cast<void (*)(const std::function<void(std::string)> &, void *)>(
+        GetArkDynFunction("InitializeDebugger"));
     if (initialize == nullptr) {
         ResetService();
         return false;

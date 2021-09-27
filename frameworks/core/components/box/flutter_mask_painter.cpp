@@ -33,7 +33,7 @@ RefPtr<Mask> Mask::Create()
 void FlutterMaskPainter::LoadMask(const WeakPtr<PipelineContext>& context, const RefPtr<RenderNode>& parent)
 {
     if (!IsValid()) {
-        LOGW("vaild mask image type");
+        LOGW("valid mask image type");
         return;
     }
 

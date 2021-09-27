@@ -199,6 +199,28 @@ std::vector<std::string> ThemeConstants::GetStringArray(uint32_t key) const
     return {};
 }
 
+bool ThemeConstants::GetBoolean(uint32_t key) const
+{
+    if (IsGlobalResource(key)) {
+        if (!resAdapter_) {
+            return false;
+        }
+        return resAdapter_->GetBoolean(key);
+    }
+    return false;
+}
+
+std::vector<uint32_t> ThemeConstants::GetIntArray(uint32_t key) const
+{
+    if (IsGlobalResource(key)) {
+        if (!resAdapter_) {
+            return {};
+        }
+        return resAdapter_->GetIntArray(key);
+    }
+    return {};
+}
+
 bool ThemeConstants::GetResourceIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const
 {
     if (!resAdapter_) {

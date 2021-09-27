@@ -48,6 +48,7 @@ void JSRowSplit::JSBind(BindingTarget globalObj)
     JSClass<JSRowSplit>::StaticMethod("resizeable", &JSRowSplit::JsResizeable, MethodOptions::NONE);
     JSClass<JSRowSplit>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSRowSplit>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSRowSplit>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSRowSplit>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSRowSplit>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRowSplit>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);

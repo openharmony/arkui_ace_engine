@@ -19,9 +19,6 @@
 #include <regex>
 #include <string>
 
-#include "ability_info.h"
-#include "ability.h"
-
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -46,7 +43,7 @@ constexpr int32_t TOAST_TIME_DEFAULT = 1500; // ms
 constexpr int32_t MAX_PAGE_ID_SIZE = sizeof(uint64_t) * 8;
 constexpr int32_t NANO_TO_MILLI = 1000000; // nanosecond to millisecond
 constexpr int32_t TO_MILLI = 1000;         // second to millisecond
-constexpr int32_t COMPATIBLE_VERSION = 5;
+constexpr int32_t COMPATIBLE_VERSION = 7;
 constexpr int32_t WEB_FEATURE_VERSION = 6;
 
 const char MANIFEST_JSON[] = "manifest.json";
@@ -89,7 +86,6 @@ FrontendDelegateImpl::FrontendDelegateImpl(const FrontendDelegateImplBuilder& bu
       requestAnimationCallback_(builder.requestAnimationCallback), jsCallback_(builder.jsCallback),
       manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
       jsAccessibilityManager_(AccessibilityNodeManager::Create()),
-      ability_(builder.ability),
       mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()), taskExecutor_(builder.taskExecutor)
 {}
 
@@ -157,10 +153,6 @@ void FrontendDelegateImpl::RunPage(const std::string& url, const std::string& pa
     } else {
         mainPagePath_ = manifestParser_->GetRouter()->GetEntry();
     }
-
-    if ((url.find("pages/dialog/dialog.js")) != -1)  {
-        mainPagePath_ = url;
-    }
     LoadPage(GenerateNextPageId(), mainPagePath_, true, params);
 }
 
@@ -191,12 +183,8 @@ void FrontendDelegateImpl::GetResourceConfiguration(std::unique_ptr<JsonValue>& 
 void FrontendDelegateImpl::GetConfigurationCommon(const std::string& filePath, std::unique_ptr<JsonValue>& data)
 {
     std::vector<std::string> files;
-    //if (assetManager_) {
-    //    assetManager_->GetAssetList(filePath, files);
-    //}
-    if (!AceApplicationInfo::GetInstance().GetFiles(filePath, files)) {
-        LOGE("Get resources files fail!");
-        return;
+    if (assetManager_) {
+        assetManager_->GetAssetList(filePath, files);
     }
 
     std::vector<std::string> fileNameList;
@@ -381,11 +369,6 @@ void FrontendDelegateImpl::OnCompleteContinuation(int32_t code)
     FireSyncEvent("_root", std::string("\"onCompleteContinuation\","), std::to_string(code));
 }
 
-void FrontendDelegateImpl::OnRemoteTerminated()
-{
-    FireSyncEvent("_root", std::string("\"onRemoteTerminated\","), std::string(""));
-}
-
 void FrontendDelegateImpl::OnSaveData(std::string& data)
 {
     std::string savedData;
@@ -529,7 +512,7 @@ void FrontendDelegateImpl::Push(const std::string& uri, const std::string& param
         return;
     }
     std::string pagePath = manifestParser_->GetRouter()->GetPagePath(uri);
-    LOGD("router.Push pagePath = %{public}s", pagePath.c_str());
+    LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
         isPagePathInvalid_ = true;
         LoadPage(GenerateNextPageId(), pagePath, false, params);
@@ -555,6 +538,12 @@ void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& pa
         LOGE("router.Replace uri is empty");
         return;
     }
+
+    auto pipelineContext = pipelineContextHolder_.Get();
+    if (pipelineContext) {
+        pipelineContext->NotifyDestroyEventDismiss();
+    }
+
     std::string pagePath = manifestParser_->GetRouter()->GetPagePath(uri);
     LOGD("router.Replace pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
@@ -566,6 +555,11 @@ void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& pa
 
 void FrontendDelegateImpl::Back(const std::string& uri, const std::string& params)
 {
+    auto pipelineContext = pipelineContextHolder_.Get();
+    if (pipelineContext) {
+        pipelineContext->NotifyDestroyEventDismiss();
+    }
+
     std::lock_guard<std::mutex> lock(mutex_);
     auto& currentPage = pageRouteStack_.back();
     if (!pageRouteStack_.empty() && currentPage.isAlertBeforeBackPage) {
@@ -1267,7 +1261,7 @@ void FrontendDelegateImpl::PopToPage(const std::string& url)
 void FrontendDelegateImpl::PopToPageTransitionListener(
     const TransitionEvent& event, const std::string& url, int32_t pageId)
 {
-    if (event == TransitionEvent::POP_START) {
+    if (event == TransitionEvent::POP_END) {
         OnPopToPageSuccess(url);
         SetCurrentPage(pageId);
         OnPageShow();
@@ -1309,22 +1303,11 @@ void FrontendDelegateImpl::PopPage()
                     LOGW("Not allow back because this is the last page!");
                     return;
                 }
-                auto ability = static_cast<AppExecFwk::Ability*>(delegate->ability_);
-                if (ability) {
-                    std::shared_ptr<AppExecFwk::AbilityInfo> info = ability->GetAbilityInfo();
-                    if (info != nullptr && info->isLauncherAbility) {
-                        LOGW("launcher ability, return");
-                        return;
-                    }
-                }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+
                 delegate->OnPageHide();
                 delegate->OnPageDestroy(delegate->GetRunningPageId());
                 delegate->OnPopPageSuccess();
                 pipelineContext->Finish();
-#else
-                LOGW("Can't back because this is the last page!");
-#endif
                 return;
             }
             if (!pipelineContext->CanPopPage()) {
@@ -1348,7 +1331,7 @@ void FrontendDelegateImpl::PopPage()
 
 void FrontendDelegateImpl::PopPageTransitionListener(const TransitionEvent& event, int32_t destroyPageId)
 {
-    if (event == TransitionEvent::POP_START) {
+    if (event == TransitionEvent::POP_END) {
         OnPageDestroy(destroyPageId);
         auto pageId = OnPopPageSuccess();
         SetCurrentPage(pageId);
@@ -1721,6 +1704,7 @@ RefPtr<PipelineContext> FrontendDelegateImpl::GetPipelineContext()
 
 void FrontendDelegateImpl::SetColorMode(ColorMode colorMode)
 {
+    mediaQueryInfo_->EnsureListenerIdValid();
     OnMediaQueryUpdate();
 }
 
@@ -1728,12 +1712,8 @@ void FrontendDelegateImpl::LoadResourceConfiguration(std::map<std::string, std::
     std::unique_ptr<JsonValue>& currentResourceData)
 {
     std::vector<std::string> files;
-    //if (assetManager_) {
-    //    assetManager_->GetAssetList(RESOURCES_FOLDER, files);
-    //}
-    if (!AceApplicationInfo::GetInstance().GetFiles(RESOURCES_FOLDER, files)) {
-        LOGE("Get configuration files fail!");
-        return;
+    if (assetManager_) {
+        assetManager_->GetAssetList(RESOURCES_FOLDER, files);
     }
 
     std::set<std::string> resourceFolderName;

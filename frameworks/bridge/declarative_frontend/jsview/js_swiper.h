@@ -44,6 +44,7 @@ protected:
     static RefPtr<OHOS::Ace::SwiperIndicator> InitIndicatorStyle();
     static void SetIndicatorStyle(const JSCallbackInfo& info);
     static void SetItemSpace(const JSCallbackInfo& info);
+    static void SetDisplayMode(int32_t index);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
 };

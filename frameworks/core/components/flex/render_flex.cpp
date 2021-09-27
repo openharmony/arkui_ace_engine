@@ -733,7 +733,7 @@ void RenderFlex::LayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, FlexItem
 {
     double itemShrink = flexItem->GetFlexShrink();
     double itemGrow = flexItem->GetFlexGrow();
-    double itemBasis = flexItem->GetFlexBasis();
+    double itemBasis = flexItem->GetFlexBasisToPx();
     if (itemGrow > 0) {
         flexItemProperties.lastGrowChild = flexItem;
     }

@@ -26,6 +26,7 @@
 #include "core/components/scroll/scrollable.h"
 #include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/render_list_item.h"
+#include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace::V2 {
@@ -142,6 +143,11 @@ protected:
     size_t FindPreviousStickyListItem(size_t index);
 
     void OnItemDelete(const RefPtr<RenderListItem>& item);
+    void OnItemSelect(const RefPtr<RenderListItem>& item);
+    size_t GetIndexByListItem(const RefPtr<RenderListItem>& item) const;
+    bool PrepareRawRecognizer();
+    void OnSelectedItemMove(double position);
+    void OnSelectedItemStopMoving(bool canceled);
 
     void UpdateStickyListItem(const RefPtr<RenderListItem>& newStickyItem, size_t newStickyItemIndex,
         const RefPtr<RenderListItem>& nextStickyItem, const LayoutParam& layoutParam);
@@ -193,6 +199,7 @@ protected:
     bool reachEnd_ = false;
     bool isOutOfBoundary_ = false;
     bool vertical_ = true;
+    bool fixedMainSizeByLayoutParam_ = true;
     bool fixedMainSize_ = true;
     bool fixedCrossSize_ = false;
     bool chainAnimation_ = false;
@@ -218,6 +225,16 @@ protected:
 
     size_t currentStickyIndex_ = INITIAL_CHILD_INDEX;
     RefPtr<RenderListItem> currentStickyItem_;
+
+    size_t targetIndex_ = INITIAL_CHILD_INDEX;
+    size_t selectedItemIndex_ = INITIAL_CHILD_INDEX;
+    RefPtr<RenderListItem> selectedItem_;
+    double selectedItemMainAxis_;
+    double targetMainAxis_;
+    RefPtr<RawRecognizer> rawRecognizer_;
+    double lastPos_ = 0.0f;
+    bool autoScrollingForItemMove_ = false;
+    bool movingForward_ = false;
 
 private:
     bool ActionByScroll(bool forward, ScrollEventBack scrollEventBack);

@@ -24,7 +24,9 @@
 
 namespace OHOS::Ace {
 
-class MouseListenerComponent final : public SoleChildComponent {
+using OnHoverCallback = std::function<void(bool)>;
+
+class ACE_EXPORT MouseListenerComponent final : public SoleChildComponent {
     DECLARE_ACE_TYPE(MouseListenerComponent, SoleChildComponent);
 
 public:
@@ -57,6 +59,19 @@ public:
         onMouseHoverId_ = onMouseHoverId;
     }
 
+    void SetOnHoverId(const OnHoverCallback& onHoverId)
+    {
+        onHoverId_ = std::make_unique<OnHoverCallback>(onHoverId);
+    }
+
+    OnHoverCallback GetOnHoverId() const
+    {
+        if (!onHoverId_) {
+            return nullptr;
+        }
+        return *onHoverId_;
+    }
+
     const EventMarker& GetOnMouseHoverId() const
     {
         return onMouseHoverId_;
@@ -76,6 +91,7 @@ private:
     EventMarker onMouseId_;
     EventMarker onMouseHoverId_;
     EventMarker onMouseHoverExitId_;
+    std::unique_ptr<OnHoverCallback> onHoverId_;
 };
 
 } // namespace OHOS::Ace

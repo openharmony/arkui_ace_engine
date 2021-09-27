@@ -55,4 +55,13 @@ Axis GridPositionController::GetScrollDirection() const
     return grid->GetAxis();
 }
 
+void GridPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
+{
+    auto grid = AceType::DynamicCast<V2::RenderGridScroll>(scroll_.Upgrade());
+    if (!grid) {
+        return;
+    }
+    grid->ScrollToEdge(scrollEdgeType, smooth);
+}
+
 } // namespace OHOS::Ace::V2

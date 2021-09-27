@@ -16,6 +16,8 @@ import("//foundation/ace/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
   module_output_path = "ace_engine_standard/backenduicomponent/dialogandpopup"
+} else {
+  module_output_path = "ace_engine_full/backenduicomponent/dialogandpopup"
 }
 
 ohos_unittest("DialogCreatorTest") {
@@ -33,16 +35,14 @@ ohos_unittest("DialogCreatorTest") {
   ]
 
   deps = [
-    "$ace_root/frameworks/base:ace_base_ohos",
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
+    "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components/test:json",
-    "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
-  if (is_standard_system) {
-    deps += [ "$ace_root/frameworks/bridge:js_framework_ohos" ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -72,20 +72,14 @@ ohos_unittest("RenderDialogTest") {
   ]
 
   deps = [
-    "$ace_root/frameworks/base:ace_base_ohos",
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
+    "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components/test:json",
-    "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
-  if (is_standard_system) {
-    configs += [ "//third_party/curl:curl_config" ]
-    deps += [
-      "$ace_root/frameworks/bridge:js_framework_ohos",
-      "//third_party/curl:curl",
-    ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -110,16 +104,14 @@ ohos_unittest("DialogComponentTest") {
   ]
 
   deps = [
-    "$ace_root/frameworks/base:ace_base_ohos",
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
+    "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components/test:json",
-    "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
-  if (is_standard_system) {
-    deps += [ "$ace_root/frameworks/bridge:js_framework_ohos" ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -139,7 +131,7 @@ group("unittest") {
 
   deps += [
     ":DialogComponentTest",
-    ":DialogCreatorTest",
-    ":RenderDialogTest",
+    # ":DialogCreatorTest",
+    # ":RenderDialogTest",
   ]
 }

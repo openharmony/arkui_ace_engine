@@ -198,42 +198,12 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
     if (!formManagerBridge_) {
         formManagerBridge_ =
             AceType::MakeRefPtr<FormManagerDelegate>(GetContext());
-        formManagerBridge_->AddFormAcquireCallback(
-            [weak = WeakClaim(this)] (int64_t id, std::string path, std::string module, std::string data) {
-            auto element = weak.Upgrade();
-            auto uiTaskExecutor = SingleTaskExecutor::Make(
-                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([id, path, module, data, weak] {
-                auto form = weak.Upgrade();
-                if (form) {
-                    form->HandleOnAcquireEvent(id);
-                    auto container = form->GetSubContainer();
-                    if (container) {
-                        container->RunCard(id, path, module, data);
-                    }
-                }
-            });
-        });
-        formManagerBridge_->AddFormUpdateCallback(
-            [weak = WeakClaim(this)] (int64_t id, std::string data) {
-            auto element = weak.Upgrade();
-            auto uiTaskExecutor = SingleTaskExecutor::Make(
-                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([id, data, weak] {
-                auto form = weak.Upgrade();
-                if (form) {
-                    if (form->ISAllowUpdate()) {
-                        form->GetSubContainer()->UpdateCard(data);
-                    }
-                }
-            });
-        });
         formManagerBridge_->AddFormErrorCallback(
             [weak = WeakClaim(this)](std::string code, std::string msg) {
-            auto element = weak.Upgrade();
-            auto uiTaskExecutor = SingleTaskExecutor::Make(
-                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([code, msg, weak] {
+              auto element = weak.Upgrade();
+              auto uiTaskExecutor = SingleTaskExecutor::Make(
+                  element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+              uiTaskExecutor.PostTask([code, msg, weak] {
                 auto form = weak.Upgrade();
                 if (form) {
                     form->HandleOnErrorEvent(code, msg);
@@ -244,8 +214,8 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                     form->RemoveChild(child);
                     form->MarkNeedRebuild();
                 }
+              });
             });
-        });
     }
 }
 
@@ -268,12 +238,8 @@ void FormElement::OnActionEvent(const std::string& action) const
         return;
     }
 
-    if (type == "router") {
-        auto context = GetContext().Upgrade();
-        if (context) {
-            LOGI("send action evetn to ability to process");
-            context->OnActionEvent(action);
-        }
+    if ("router" == type) {
+        HandleOnRouterEvent(eventAction);
         return;
     }
 

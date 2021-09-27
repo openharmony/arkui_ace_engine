@@ -18,6 +18,7 @@
 
 #include "core/components/box/render_box.h"
 #include "core/components/menu/menu_component.h"
+#include "core/components/select_popup/select_popup_component.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {
@@ -31,15 +32,27 @@ public:
 
     void PerformBuild() override;
 
+    void SetMenuShow(bool status)
+    {
+        menuShow_ = status;
+    }
+
+    bool GetMenuShow()
+    {
+        return menuShow_;
+    }
+
 private:
     void OnTargetCallback(const ComposeId& id, const Offset& point);
     void OnOptionCallback(std::size_t index);
     void OnCanceledCallback();
     RefPtr<RenderBox> GetBoxRenderChild(const RefPtr<Element>& element);
 
+    RefPtr<SelectPopupComponent> popup_;
     RefPtr<MenuComponent> data_;
     std::function<void(const std::string&)> jsSuccessCallback_;
     std::function<void(const std::string&)> jsCancelCallback_;
+    bool menuShow_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -68,6 +68,13 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
 
 sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
 {
+    // first seek in cache
+    auto iterator = cachedFrame_.find(index);
+    if (iterator != cachedFrame_.end() && iterator->second != nullptr) {
+        LOGD("index %{private}d found in cache.", index);
+        return SkImage::MakeFromBitmap(*iterator->second);
+    }
+
     SkBitmap bitmap;
     SkImageInfo info = codec_->getInfo().makeColorType(kN32_SkColorType);
     bitmap.allocPixels(info);
@@ -75,23 +82,42 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
     options.fFrameIndex = index;
     const int32_t requiredFrame = frameInfos_[index].fRequiredFrame;
     if (requiredFrame != SkCodec::kNoFrame) {
-        if (lastRequiredBitmap_ == nullptr) {
-            LOGW("no required frames are cached!");
-            return nullptr;
-        }
-        if (lastRequiredBitmap_->getPixels() &&
+        if (requiredFrame == lastRequiredFrameIndex_ && lastRequiredBitmap_ && lastRequiredBitmap_->getPixels() &&
             CopyTo(&bitmap, lastRequiredBitmap_->colorType(), *lastRequiredBitmap_)) {
             options.fPriorFrame = requiredFrame;
+        } else if (requiredFrame != lastRequiredFrameIndex_) {
+            // find requiredFrame in cached frame.
+            auto iter = cachedFrame_.find(requiredFrame);
+            if (iter != cachedFrame_.end() && iter->second != nullptr &&
+                CopyTo(&bitmap, iter->second->colorType(), *iter->second)) {
+                options.fPriorFrame = requiredFrame;
+            }
         }
     }
+
     if (SkCodec::kSuccess != codec_->getPixels(info, bitmap.getPixels(), bitmap.rowBytes(), &options)) {
-        LOGW("Could not getPixels for frame %{public}i:", index);
+        LOGW("Could not getPixels for frame %{public}d:", index);
         return nullptr;
     }
-    if (frameInfos_[index].fDisposalMethod == SkCodecAnimation::DisposalMethod::kKeep) {
+
+    if (frameInfos_[index].fDisposalMethod != SkCodecAnimation::DisposalMethod::kRestorePrevious) {
         lastRequiredBitmap_ = std::make_unique<SkBitmap>(bitmap);
-        requiredFrameIndex_ = index;
+        lastRequiredFrameIndex_ = index;
     }
+
+    if (iterator != cachedFrame_.end() && iterator->second == nullptr) {
+        LOGD("index %{private}d cached.", index);
+        iterator->second = std::make_unique<SkBitmap>(bitmap);
+    }
+#ifndef GPU_DISABLED
+    if (ioManager_) {
+        auto resourceContext = ioManager_->GetResourceContext();
+        if (resourceContext) {
+            SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(), bitmap.pixelRef()->rowBytes());
+            return SkImage::MakeCrossContextFromPixmap(resourceContext.get(), pixmap, true, pixmap.colorSpace());
+        }
+    }
+#endif
     return SkImage::MakeFromBitmap(bitmap);
 }
 

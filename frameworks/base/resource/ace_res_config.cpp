@@ -812,7 +812,6 @@ void AceResConfig::MatchAndSortI18nConfigs(const std::vector<std::string>& candi
 void AceResConfig::MatchAndSortResConfigs(const std::vector<std::string>& candidateFiles,
     const std::string& deviceResTag, std::vector<std::string>& matchedFileList, bool styleRes)
 {
-    styleRes = false;
     std::vector<AceResConfig> candidateResConfigs;
     for (auto& file : candidateFiles) {
         AceResConfig ResConfig = ConvertResTagToConfig(file, styleRes);
@@ -821,7 +820,7 @@ void AceResConfig::MatchAndSortResConfigs(const std::vector<std::string>& candid
         }
     }
 
-    AceResConfig deviceResConfig = ConvertResTagToConfig(deviceResTag, styleRes);
+    AceResConfig deviceResConfig = ConvertResTagToConfig(deviceResTag, false);
     int32_t candidateConfigSize = candidateResConfigs.size();
     std::vector<AceResConfig> matchedResConfigs;
     for (auto i = 0; i < candidateConfigSize; i++) {
@@ -1028,7 +1027,6 @@ AceResConfig AceResConfig::ConvertDeclarativeResTagToConfig(const std::string& d
 
 std::string AceResConfig::ConvertResConfigToTag(const AceResConfig& resConfig, bool styleRes)
 {
-    styleRes = false;
     std::string resTag;
     if (!styleRes) {
         resTag = "res";

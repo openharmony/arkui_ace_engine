@@ -106,6 +106,7 @@ void JSDivider::JSBind(BindingTarget globalObj)
     JSClass<JSDivider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSDivider>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSDivider>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSDivider>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSDivider>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSDivider>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSDivider>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

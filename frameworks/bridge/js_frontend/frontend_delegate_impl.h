@@ -27,11 +27,6 @@
 #include "core/components/dialog/dialog_component.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-#include "frameworks/bridge/common/accessibility/js_accessibility_manager.h"
-#else
-#include "frameworks/bridge/common/inspector/js_inspector_manager.h"
-#endif
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
@@ -54,6 +49,11 @@ using RequestAnimationCallback = std::function<void(const std::string& callbackI
 using JsCallback = std::function<void(const std::string& callbackId, const std::string& args)>;
 using OnWindowDisplayModeChangedCallBack = std::function<void(bool isShownInMultiWindow, const std::string& data)>;
 using OnConfigurationUpdatedCallBack = std::function<void(const std::string& data)>;
+using OnStartContinuationCallBack = std::function<bool()>;
+using OnSaveDataCallBack = std::function<void(std::string& savedData)>;
+using OnRemoteTerminatedCallBack = std::function<void()>;
+using OnCompleteContinuationCallBack = std::function<void(const int32_t code)>;
+using OnRestoreDataCallBack = std::function<bool(const std::string& data)>;
 
 struct PageInfo {
     int32_t pageId = -1;
@@ -64,7 +64,6 @@ struct PageInfo {
 
 class PipelineContextHolder {
 public:
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     ~PipelineContextHolder()
     {
         if (pipelineContext_) {
@@ -76,7 +75,6 @@ public:
             taskExecutor->PostTask([context] { context->DecRefCount(); }, TaskExecutor::TaskType::PLATFORM);
         }
     }
-#endif
 
     void Attach(const RefPtr<PipelineContext>& context)
     {
@@ -121,7 +119,11 @@ struct FrontendDelegateImplBuilder {
     RequestAnimationCallback requestAnimationCallback;
     JsCallback jsCallback;
     OnWindowDisplayModeChangedCallBack onWindowDisplayModeChangedCallBack;
-    void* ability;
+    OnSaveDataCallBack onSaveDataCallBack;
+    OnStartContinuationCallBack onStartContinuationCallBack;
+    OnRemoteTerminatedCallBack onRemoteTerminatedCallBack;
+    OnCompleteContinuationCallBack onCompleteContinuationCallBack;
+    OnRestoreDataCallBack onRestoreDataCallBack;
 };
 
 class DelegateClient {
@@ -214,7 +216,6 @@ public:
     void OnInactive();
     bool OnStartContinuation();
     void OnCompleteContinuation(int32_t code);
-    void OnRemoteTerminated();
     void OnSaveData(std::string& data);
     bool OnRestoreData(const std::string& data);
     void OnNewRequest(const std::string& data);
@@ -346,11 +347,6 @@ public:
         return isPagePathInvalid_;
     }
 
-    void* GetAbility() override
-    {
-        return ability_;
-    }
-
     void RebuildAllPages();
 
 private:
@@ -429,7 +425,6 @@ private:
     JsCallback jsCallback_;
     RefPtr<Framework::ManifestParser> manifestParser_;
     RefPtr<Framework::AccessibilityNodeManager> jsAccessibilityManager_;
-    void* ability_ = nullptr;
     RefPtr<MediaQueryInfo> mediaQueryInfo_;
     RefPtr<GroupJsBridge> groupJsBridge_;
 

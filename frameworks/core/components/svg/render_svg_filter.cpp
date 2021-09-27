@@ -33,7 +33,6 @@ void RenderSvgFilter::Update(const RefPtr<Component> &component)
     y_ = declaration->GetY();
     height_ = declaration->GetHeight();
     width_ = declaration->GetWidth();
-    id_ = declaration->GetId();
     RenderSvgBase::SetPresentationAttrs(FilterComponent->GetDeclaration());
     PrepareAnimations(component);
     AddFilterToRoot(id_, AceType::Claim(this));

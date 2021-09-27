@@ -53,7 +53,6 @@ protected:
     Dimension width_;
     std::string patternUnits_ = "objectBoundingBox";
     std::string patternContentUnits_ = "userSpaceOnUse";
-    std::string id_;
     Rect viewBox_;
 
 private:

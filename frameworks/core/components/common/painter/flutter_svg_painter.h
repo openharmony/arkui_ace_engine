@@ -92,7 +92,6 @@ public:
 
     static void SetGradientStyle(SkPaint& skPaint, const FillState& fillState, double opacity);
 
-private:
     static sk_sp<SkTypeface> fontTypeChinese_;
     static sk_sp<SkTypeface> fontTypeNormal_;
 };

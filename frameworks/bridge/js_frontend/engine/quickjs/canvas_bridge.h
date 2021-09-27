@@ -19,9 +19,11 @@
 #include <map>
 #include <string>
 
+#include "core/components/custom_paint/canvas_render_context_base.h"
 #include "frameworks/bridge/common/dom/dom_canvas.h"
 #include "frameworks/bridge/js_frontend/engine/common/base_canvas_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
+#include "frameworks/bridge/js_frontend/engine/quickjs/qjs_engine.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -29,7 +31,7 @@ class CanvasBridge : public BaseCanvasBridge {
     DECLARE_ACE_TYPE(CanvasBridge, BaseCanvasBridge)
 
 public:
-    void HandleJsContext(JSContext* ctx, NodeId id, const std::string& args);
+    void HandleJsContext(JSContext* ctx, NodeId id, const std::string& args, JsEngineInstance* engine);
     void HandleToDataURL(JSContext* ctx, NodeId id, const std::string& args);
 
     JSValue GetRenderContext() const
@@ -164,9 +166,14 @@ private:
     static JSValue JsHandleStyleSetter(
             JSContext* ctx, JSValueConst value, JSValueConst proto, FunctionCode functionCode);
     static void JsSetAntiAlias(JSContext* ctx, NodeId id, const std::string& args);
+    void JSHandleWebglContext(JSContext* ctx, NodeId id, const std::string& args, JsEngineInstance* engine);
 
     JSValue renderContext_;
     JSValue dataURL_;
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    CanvasRenderContextBase* canvasRenderContext_ = nullptr;
+#endif
 
     static int32_t gradientCount_;
     static int32_t patternCount_;

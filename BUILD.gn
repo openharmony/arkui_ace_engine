@@ -14,45 +14,6 @@
 import("//build/ohos.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
 
-config("accessibility_library_config") {
-  include_dirs = [ "../accessibility/common/" ]
-}
-
-group("ace_packages") {
-  deps = []
-
-  # core library for Ability Cross-platform Environment(ACE) JS
-  deps += [
-    "$ace_root/adapter/ohos/interfaces/napi/kits:napi_group",
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "adapter/common/cpp:libace",
-  ]
-
-  if (is_wearable_product) {
-    deps += [ "adapter/common/cpp:libace_debug" ]
-  }
-
-  if (!is_wearable_product) {
-    deps += [
-      "adapter/common/cpp:libace_engine_ark",
-      "adapter/common/cpp:libace_engine_declarative_ark",
-      "adapter/common/cpp:libace_engine_declarative_qjs",
-      "adapter/common/cpp:libace_engine_pa_qjs",
-      "adapter/common/cpp:libace_engine_qjs",
-      "adapter/common/cpp:libace_engine_qjs_debug",
-    ]
-  }
-}
-
-group("ace_test_packages") {
-  # ohos platform
-  deps = []
-}
-
-source_set("third_party_cjson") {
-  sources = [ "$cjson_root/cJSON.c" ]
-}
-
 # Common config for Ability Cross-platform Environment(ACE) source
 config("ace_config") {
   visibility = [ ":*" ]
@@ -62,10 +23,12 @@ config("ace_config") {
     "$root_out_dir/ace/framework",
     "//third_party/zlib",
   ]
+
+  # TODO: should not add here
   if (is_standard_system) {
     include_dirs += [
+      "//base/global/resmgr_standard/frameworks/resmgr/include",
       "//base/global/resmgr_standard/interfaces/innerkits/include",
-      "//third_party/icu/icu4c/source/common",
     ]
   }
   defines = ace_common_defines
@@ -74,12 +37,8 @@ config("ace_config") {
     defines += ace_wearable_defines
   }
 
-  if (enable_dump_drawcmd) {
-    defines += [ "DUMP_DRAW_CMD" ]
-  }
-
-  if (is_standard_system) {
-    defines += [ "SK_BUILD_FOR_UNIX" ]
+  if (is_ivi_product) {
+    defines += ace_ivi_defines
   }
 
   if ("${product_name}" == "rk3566" || "${product_name}" == "rk3568") {
@@ -98,25 +57,9 @@ config("ace_config") {
     "-Os",
   ]
 
-  if (use_js_debug) {
-    cflags_cc += [
-      "-fexceptions",
-      "-fno-complete-member-pointers",
-      "-Wno-implicit-fallthrough",
-    ]
-  }
-
   if (use_mingw_win) {
     cflags += [ "-std=c++17" ]
     defines += [ "_USE_MATH_DEFINES" ]
-  }
-
-  if (enable_worker) {
-    defines += [ "ENABLE_WORKER" ]
-  }
-
-  if (enable_ace_debug) {
-    defines += [ "ACE_DEBUG" ]
   }
 }
 
@@ -126,12 +69,24 @@ config("ace_test_config") {
     "$ace_root",
     "$ace_root/frameworks",
     "$root_out_dir/ace/framework",
-    "//base/global/resmgr_standard/interfaces/innerkits/include",
-    "//third_party/icu/icu4c/source/common",
-    "//third_party/flutter/engine",
   ]
+  cflags_cc = []
   defines = ace_common_defines
-  defines += ace_ohos_defines
+
+  # TODO: should not add here
+  if (is_standard_system) {
+    include_dirs += [
+      "//base/global/resmgr_standard/frameworks/resmgr/include",
+      "//base/global/resmgr_standard/interfaces/innerkits/include",
+    ]
+
+    cflags_cc += [
+      "-Wno-thread-safety-attributes",
+      "-Wno-thread-safety-analysis",
+    ]
+    defines += [ "OHOS_STANDARD_SYSTEM" ]
+  }
+  defines += [ "OHOS_PLATFORM" ]
 
   if (is_wearable_product) {
     defines += ace_wearable_defines
@@ -143,5 +98,5 @@ config("ace_test_config") {
     "-ffunction-sections",
   ]
 
-  cflags_cc = [ "-fvisibility-inlines-hidden" ]
+  cflags_cc += [ "-fvisibility-inlines-hidden" ]
 }

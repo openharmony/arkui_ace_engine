@@ -81,15 +81,18 @@ JSValue Init(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* arg
         return JS_NULL;
     }
 
+    // create new object
+    JSValue other = JS_NewObject(ctx);
+    // init functions
+    InitMatrix4Module(ctx, other);
     int32_t length = QJSUtils::JsGetArrayLength(ctx, argv[0]);
     if (length != MATRIX_LENGTH) {
         LOGE("matrix init array length %d not equal %d", length, MATRIX_LENGTH);
         return JS_NULL;
     }
     auto matrix = ConvertToMatrix(ctx, argv[0]);
-    JS_SetPropertyStr(ctx, value, MATRIX_4X4, ConvertToJSValue(ctx, matrix));
-    JS_DupValue(ctx, value);
-    return value;
+    JS_SetPropertyStr(ctx, other, MATRIX_4X4, ConvertToJSValue(ctx, matrix));
+    return other;
 }
 
 JSValue Copy(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
@@ -126,9 +129,12 @@ JSValue Combine(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* 
 
 JSValue Identity(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
-    JS_SetPropertyStr(ctx, value, MATRIX_4X4, ConvertToJSValue(ctx, Matrix4::CreateIdentity()));
-    JS_DupValue(ctx, value);
-    return value;
+    // create new object
+    JSValue other = JS_NewObject(ctx);
+    // init functions
+    InitMatrix4Module(ctx, other);
+    JS_SetPropertyStr(ctx, other, MATRIX_4X4, ConvertToJSValue(ctx, Matrix4::CreateIdentity()));
+    return other;
 }
 
 JSValue Invert(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)

@@ -20,6 +20,7 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/focus_collaboration/focus_collaboration_component.h"
 #include "core/components/gesture_listener/gesture_listener_component.h"
+#include "core/components/menu/menu_component.h"
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/select_popup/render_select_popup.h"
 #include "core/components/select_popup/select_popup_element.h"
@@ -239,13 +240,20 @@ bool SelectPopupComponent::Initialize(const RefPtr<AccessibilityManager>& manage
     std::list<RefPtr<Component>> children;
     for (std::size_t index = 0; index < options_.size(); index++) {
         options_[index]->SetIndex(index);
-        options_[index]->SetClickedCallback([weak = WeakClaim(this)](std::size_t index) {
-            auto refPtr = weak.Upgrade();
-            if (!refPtr) {
-                return;
+        auto customizedFunc = options_[index]->GetCustomizedCallback();
+        options_[index]->SetClickedCallback(
+            [weak = WeakClaim(this), customizedFunc](std::size_t index) {
+                if (customizedFunc) {
+                    customizedFunc();
+                } else {
+                    auto refPtr = weak.Upgrade();
+                    if (!refPtr) {
+                        return;
+                    }
+                    refPtr->HandleOptionClick(index);
+                }
             }
-            refPtr->HandleOptionClick(index);
-        });
+        );
         options_[index]->SetParentId(id);
         if (options_[index]->GetVisible()) {
             children.push_back(options_[index]);

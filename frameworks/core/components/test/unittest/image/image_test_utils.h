@@ -111,7 +111,6 @@ struct ImageFitConfig final {
 
 void VerifyImageFit(ImageFitConfig&& imageFitConfig, const Rect& expectSrcRect, const Rect& expectDstRect);
 void VerifyRectSize(const std::list<Rect>& rectList, const Size& expectRectSize);
-std::list<Rect> GetRectList(const ImageRepeat&& imageRepeat, const Size& parentSize);
 RefPtr<RenderRoot> CreateRenderRoot(const Size& maxSize);
 RefPtr<RenderImage> CreateRenderImage(double width, double height, bool fitMaxSize = false);
 RefPtr<PipelineContext> GetMockContext();

@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
 
-module_output_path = "$ace_test_output_root/graphicalbasicability/focus"
+module_output_path = "ace_engine_full/graphicalbasicability/focus"
 
 ohos_unittest("FocusTest") {
   module_out_path = module_output_path
@@ -29,6 +29,8 @@ ohos_unittest("FocusTest") {
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
+    "$ace_root/frameworks/core/common/container.cpp",
+    "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
     "$ace_root/frameworks/core/components/box/render_box.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
@@ -49,8 +51,8 @@ ohos_unittest("FocusTest") {
     "focus_test.cpp",
 
     #mock
-    "$ace_root/adapter/common/cpp/thread_util.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
     "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
@@ -71,16 +73,23 @@ ohos_unittest("FocusTest") {
   configs = [
     "$ace_root:ace_test_config",
     "$ace_flutter_engine_root:flutter_config",
-    "//third_party/cJSON:cJSON_config",
   ]
 
   deps = [
-    "$ace_root:third_party_cjson",
+    "$ace_root/build/third_party/cJSON:third_party_cjson",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps = [ "hilog:libhilog" ]
+  }
+
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -88,5 +97,6 @@ ohos_unittest("FocusTest") {
 
 group("unittest") {
   testonly = true
-  #deps = [ ":FocusTest" ]
+
+  deps = [ ":FocusTest" ]
 }

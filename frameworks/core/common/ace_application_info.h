@@ -25,7 +25,6 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/string_utils.h"
-#include "resource_manager.h"
 
 namespace OHOS::Ace {
 
@@ -41,16 +40,11 @@ public:
     virtual void SetLocale(const std::string& language, const std::string& countryOrRegion, const std::string& script,
         const std::string& keywordsAndValues) = 0;
     virtual void ChangeLocale(const std::string& language, const std::string& countryOrRegion) = 0;
-    virtual std::vector<std::string> GetLocaleFallback(const std::vector<std::string>& localeList) const = 0;
-    virtual std::vector<std::string> GetResourceFallback(const std::vector<std::string>& resourceList) const = 0;
-    virtual std::vector<std::string> GetStyleResourceFallback(const std::vector<std::string>& resourceList) const = 0;
-    virtual std::vector<std::string> GetDeclarativeResourceFallback(
-        const std::set<std::string>& resourceList) const = 0;
-    virtual bool GetFiles(const std::string& filePath, std::vector<std::string>& fileList) const = 0;
-    virtual bool GetFiles(int32_t instanceId, const std::string& filePath, std::vector<std::string>& fileList) const
-    {
-        return false;
-    };
+
+    virtual bool GetMediaById(uint32_t id, std::string& mediaPath) { return false; }
+    virtual bool GetColorById(uint32_t id, uint32_t& colorId) { return false; }
+    virtual bool GetFloatById(uint32_t id, float& floatValue) { return false; }
+
     void SetUserId(int userId)
     {
         userId_ = userId;
@@ -72,12 +66,9 @@ public:
 
     virtual bool GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo) = 0;
     virtual double GetLifeTime() const = 0;
+
+    // TODO: move to AceSettings
     virtual std::string GetJsEngineParam(const std::string& key) const = 0;
-    virtual std::string GetCurrentDeviceResTag() const = 0;
-    virtual std::string GetCurrentDeviceDeclarativeResTag() const = 0;
-    virtual double GetTargetMediaScaleRatio(const std::string& targetResTag) const = 0;
-    virtual void SetResourceManager(std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) = 0;
-    virtual std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() = 0;
 
     const std::string& GetCountryOrRegion() const
     {
@@ -149,6 +140,8 @@ protected:
     bool isRightToLeft_ = false;
     bool isDebugVersion_ = false;
     bool needDebugBreakpoint_ = false;
+
+    // TODO: move to container
     bool isCardType_ = false;
 
     int userId_ = 0;

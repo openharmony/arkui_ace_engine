@@ -15,17 +15,34 @@
 
 #include "core/components/test/unittest/mock/mock_render_common.h"
 
-#include "adapter/ohos/osal/fake_asset_manager.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
 #include "core/components/stage/stage_element.h"
 #include "core/components/test/json/json_frontend.h"
+#include "core/mock/fake_asset_manager.h"
+#include "core/mock/fake_task_executor.h"
 #include "core/mock/mock_resource_register.h"
 
 namespace OHOS::Ace {
 
+#ifndef OHOS_STANDARD_SYSTEM
+Platform::JniEnvironment::JniEnvironment() {}
+
+Platform::JniEnvironment::~JniEnvironment() = default;
+
+std::shared_ptr<JNIEnv> Platform::JniEnvironment::GetJniEnv(JNIEnv* jniEnv) const
+{
+    return nullptr;
+}
+
+Platform::JniEnvironment& Platform::JniEnvironment::GetInstance()
+{
+    static Platform::JniEnvironment jniEnvironment;
+    return jniEnvironment;
+}
+#endif
+
 RefPtr<PipelineContext> MockRenderCommon::GetMockContext()
 {
-    auto platformWindow = std::make_unique<MockWindow>(nullptr);
+    auto platformWindow = PlatformWindow::Create(nullptr);
     auto window = std::make_unique<Window>(std::move(platformWindow));
     auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
     auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();

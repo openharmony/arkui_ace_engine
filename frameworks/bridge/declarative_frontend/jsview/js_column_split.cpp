@@ -48,6 +48,7 @@ void JSColumnSplit::JSBind(BindingTarget globalObj)
     JSClass<JSColumnSplit>::StaticMethod("resizeable", &JSColumnSplit::JsResizeable, MethodOptions::NONE);
     JSClass<JSColumnSplit>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSColumnSplit>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSColumnSplit>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSColumnSplit>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSColumnSplit>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSColumnSplit>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);

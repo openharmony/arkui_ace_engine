@@ -32,7 +32,6 @@ constexpr int32_t DEFAULT_DESIGN_WIDTH = 720;
 #else
 constexpr int32_t DEFAULT_DESIGN_WIDTH = 454;
 #endif
-using DialogCallback = std::function<void(std::string event, std::string param)>;
 
 // Window config of frontend.
 struct WindowConfig {
@@ -146,14 +145,13 @@ public:
     // when front on a local ability migration is complete
     virtual void OnCompleteContinuation(int32_t code) = 0;
 
-    // Used to notify the local Ability that the remote Ability has been destroyed
-    virtual void OnRemoteTerminated() {};
-
     // interface to save the user data
     virtual void OnSaveData(std::string& data) = 0;
 
     // interface to restores the user data on the remote device
     virtual bool OnRestoreData(const std::string& data) = 0;
+
+    virtual void OnRemoteTerminated() = 0;
 
     // start the ability when it's running
     virtual void OnNewRequest(const std::string& data) = 0;
@@ -171,7 +169,7 @@ public:
 
     // navigator component call router
     virtual void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) {};
-    virtual void SetDialogCallback(DialogCallback callback) {};
+
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {};
 
     // Disallow pop last page

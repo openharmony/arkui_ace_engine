@@ -146,4 +146,13 @@ void* PixelMapOhos::GetPixelManager() const
     return reinterpret_cast<void*>(new Media::PixelMapManager(newPixelMap.release()));
 }
 
+void* PixelMapOhos::GetRawPixelMapPtr() const
+{
+    if (!pixmap_) {
+        LOGE("pixmap is nullptr, raw pixel map pointer is nullptr.");
+        return nullptr;
+    }
+    return pixmap_.get();
+}
+
 } // namespace OHOS::Ace

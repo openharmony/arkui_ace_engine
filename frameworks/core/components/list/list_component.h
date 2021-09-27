@@ -505,6 +505,16 @@ public:
         onRotateId_ = onRotateId;
     }
 
+    void SetScrollVibrate(bool scrollVibrate)
+    {
+        scrollVibrate_ = scrollVibrate;
+    }
+
+    bool GetScrollVibrate()
+    {
+        return scrollVibrate_;
+    }
+
 private:
     EventMarker onRequestItem_;
     EventMarker onScroll_;
@@ -553,6 +563,8 @@ private:
     Dimension dividerHeight_ = DIVIDER_DEFAULT_HEIGHT;
     Color dividerColor_;
     bool needDivider_ = false;
+
+    bool scrollVibrate_ = true;
 };
 
 } // namespace OHOS::Ace

@@ -138,6 +138,9 @@ void RenderMarquee::OnAnimationStart()
     if (startEvent_) {
         startEvent_();
     }
+    if (onStartEvent_) {
+        onStartEvent_();
+    }
 }
 
 void RenderMarquee::OnAnimationStop()
@@ -145,6 +148,9 @@ void RenderMarquee::OnAnimationStop()
     LOGD("OnBounce");
     if (bounceEvent_) {
         bounceEvent_();
+    }
+    if (onBounceEvent_) {
+        onBounceEvent_();
     }
     bool continueAnimation = false;
     if (loop_ <= 0) {
@@ -159,6 +165,10 @@ void RenderMarquee::OnAnimationStop()
             LOGD("OnFinish");
             if (finishEvent_) {
                 finishEvent_();
+            }
+            if (onFinishEvent_) {
+                onFinishEvent_();
+                playerFinishControl_ = true;
             }
         }
     }
@@ -176,6 +186,7 @@ void RenderMarquee::Update(const RefPtr<Component>& component)
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
+    GetMarqueeCallback(component);
     auto context = GetContext().Upgrade();
     if (context && context->UseLiteStyle()) {
         // lite loop time is 1000ms, while default marquee loop is 85ms.
@@ -200,6 +211,7 @@ void RenderMarquee::Update(const RefPtr<Component>& component)
     bounceEvent_ = AceAsyncEvent<void()>::Create(marquee->GetBounceEventId(), context_);
     finishEvent_ = AceAsyncEvent<void()>::Create(marquee->GetFinishEventId(), context_);
     startEvent_ = AceAsyncEvent<void()>::Create(marquee->GetStartEventId(), context_);
+    bool playStatus = playerFinishControl_ ? false : marquee->GetPlayerStatus();
     const auto& methodController = marquee->GetController();
     if (methodController) {
         auto weak = AceType::WeakClaim(this);
@@ -216,6 +228,7 @@ void RenderMarquee::Update(const RefPtr<Component>& component)
                     marquee->Stop();
                 }
             });
+        GetPlayerCtr(component, context->GetIsDeclarative(), playStatus);
     }
     if (!controller_) {
         controller_ = AceType::MakeRefPtr<Animator>(GetContext());
@@ -274,6 +287,46 @@ void RenderMarquee::PerformLayout()
     if (startAfterLayout_) {
         startAfterLayout_ = false;
         Start();
+    }
+}
+
+void RenderMarquee::GetPlayerCtr(const RefPtr<Component>& component, bool emdit, bool control)
+{
+    const RefPtr<MarqueeComponent> marquee = AceType::DynamicCast<MarqueeComponent>(component);
+    if (!marquee) {
+        LOGE("marquee component is null");
+        EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
+        return;
+    }
+
+    const auto& methodController = marquee->GetController();
+    if (emdit) {
+        if (control) {
+            methodController->Start();
+        } else {
+            methodController->Stop();
+            playerFinishControl_ = false;
+        }
+    }
+}
+
+void RenderMarquee::GetMarqueeCallback(const RefPtr<Component>& component)
+{
+    const RefPtr<MarqueeComponent> marquee = AceType::DynamicCast<MarqueeComponent>(component);
+    if (!marquee) {
+        LOGE("marquee component is null");
+        EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
+        return;
+    }
+
+    if (marquee->GetOnStart()) {
+        onStartEvent_ = *marquee->GetOnStart();
+    }
+    if (marquee->GetOnBounce()) {
+        onBounceEvent_ = *marquee->GetOnBounce();
+    }
+    if (marquee->GetOnFinish()) {
+        onFinishEvent_ = *marquee->GetOnFinish();
     }
 }
 

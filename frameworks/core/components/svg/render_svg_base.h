@@ -102,11 +102,14 @@ public:
         rootSvgNode_ = svgRoot;
     }
 
+    RefPtr<Component> GetComponentHrefFromRoot(const std::string& id);
+    RefPtr<SvgBaseDeclaration> GetDeclarationHrefFromRoot(const std::string& id);
+    RefPtr<RenderSvgBase> GetHrefFromRoot(const std::string& id);
     RefPtr<RenderSvgBase> GetMaskFromRoot(const std::string& id);
-
     RefPtr<RenderSvgBase> GetPatternFromRoot(const std::string& id);
-
     RefPtr<RenderSvgBase> GetFilterFromRoot(const std::string& id);
+
+    void Inherit(const RefPtr<SvgBaseDeclaration>& parent, const RefPtr<SvgBaseDeclaration>& self);
 
 protected:
     bool PrepareBaseAnimation(const RefPtr<SvgAnimate>& animateComponent);
@@ -124,6 +127,7 @@ protected:
     double ConvertDimensionToPx(const Dimension& value, LengthType type, bool isRoot = false);
 
     void SetPresentationAttrs(const RefPtr<SvgBaseDeclaration>& baseDeclaration);
+    void SetPresentationAttrs(const RefPtr<Component>& component, const RefPtr<SvgBaseDeclaration>& baseDeclaration);
 
     void PrepareWeightAnimate(const RefPtr<SvgAnimate>& svgAnimate, std::vector<std::string>& valueVector,
         const std::string& originalValue, bool& isBy);
@@ -134,6 +138,9 @@ protected:
     const Matrix4 GetTransformMatrix4();
     const Matrix4 UpdateTransformMatrix4();
 
+    void AddComponentHrefToRoot(const std::string& id, const RefPtr<Component>& component);
+    void AddDeclarationHrefToRoot(const std::string& id, const RefPtr<SvgBaseDeclaration>& declaration);
+    void AddHrefToRoot(const std::string& id, const RefPtr<RenderSvgBase>& node);
     void AddMaskToRoot(const std::string& id, const RefPtr<RenderSvgBase>& mask);
     void AddPatternToRoot(const std::string& id, const RefPtr<RenderSvgBase>& pattern);
     void AddFilterToRoot(const std::string& id, const RefPtr<RenderSvgBase>& filter);
@@ -161,6 +168,7 @@ protected:
     std::optional<TransformInfo> transformInfo_ = std::nullopt;
     WeakPtr<RenderSvgBase> rootSvgNode_ = nullptr;
     std::optional<Rect> svgViewBox_ = std::nullopt; // which contains viewBox
+    std::string id_;
 
     virtual void OnNotifyRender()
     {

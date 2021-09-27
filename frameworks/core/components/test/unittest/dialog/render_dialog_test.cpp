@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 
+#include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components/dialog/dialog_component.h"
@@ -25,6 +26,21 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
+
+Platform::JniEnvironment::JniEnvironment() {}
+
+Platform::JniEnvironment::~JniEnvironment() = default;
+
+std::shared_ptr<JNIEnv> Platform::JniEnvironment::GetJniEnv(JNIEnv* jniEnv) const
+{
+    return nullptr;
+}
+
+Platform::JniEnvironment& Platform::JniEnvironment::GetInstance()
+{
+    static Platform::JniEnvironment jniEnvironment;
+    return jniEnvironment;
+}
 
 class RenderDialogTest : public testing::Test {
 public:

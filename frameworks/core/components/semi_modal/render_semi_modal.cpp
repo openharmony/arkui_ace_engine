@@ -36,7 +36,6 @@ constexpr double KEYBOARD_HEIGHT_RATIO = 0.18;
 constexpr uint32_t FIND_MAX_COUNT = 64;
 constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
 constexpr Dimension DRAG_UP_THRESHOLD = 48.0_vp;
-constexpr Dimension DRAG_DOWN_THRESHOLD = 80.0_vp;
 constexpr Dimension DRAG_BAR_ARROW_BIAS = 1.0_vp;
 constexpr double CONTENT_MIN_TOLERANCE = 0.01;
 
@@ -462,13 +461,7 @@ void RenderSemiModal::OnTouchTestHit(
     }
 }
 
-void RenderSemiModal::HandleClick(const Offset& clickPosition)
-{
-    // Quit ability when clicking the blank region
-    if (blankTouchRegion_.IsInRegion(Point(clickPosition.GetX(), clickPosition.GetY()))) {
-        AnimateToExitApp();
-    }
-}
+void RenderSemiModal::HandleClick(const Offset& clickPosition) {}
 
 void RenderSemiModal::AnimateToExitApp()
 {
@@ -555,6 +548,18 @@ void RenderSemiModal::HandleDragEnd(const Offset& endPoint)
         ExtendContentHeight();
         return;
     }
+    auto contentHeight = GetScrollContentHeight();
+    if (dragBar_) {
+        contentHeight += dragBar_->GetLayoutSize().Height();
+    }
+    contentHeight += navigationHeight_;
+    double dragDownThreshold = 0.0;
+    if (!hasInputHeight_) {
+        dragDownThreshold =
+            std::min(contentHeight, GetLayoutParam().GetMaxSize().Height() * CONTENT_DEFAULT_RATIO) / 2.0;
+    } else {
+        dragDownThreshold = (GetLayoutSize().Height() - std::min(contentHeight, inputHeight_)) / 2.0;
+    }
     if (endPoint.GetY() < dragStart) {
         // Handle drag up.
         bool extendToMax = dragStart - endPoint.GetY() >= NormalizeToPx(DRAG_UP_THRESHOLD);
@@ -565,7 +570,7 @@ void RenderSemiModal::HandleDragEnd(const Offset& endPoint)
         }
     } else if (endPoint.GetY() >= dragStart) {
         // Handle drag down.
-        bool exitApp = endPoint.GetY() - dragStart >= NormalizeToPx(DRAG_DOWN_THRESHOLD);
+        bool exitApp = endPoint.GetY() - dragStart >= dragDownThreshold;
         if (exitApp) {
             AnimateToExitApp();
         } else {

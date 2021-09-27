@@ -28,6 +28,7 @@ public:
     ~Vibrator() override = default;
 
     virtual void Vibrate(int32_t duration) = 0;
+    virtual void Vibrate(const std::string& effectId) = 0;
 
 protected:
     explicit Vibrator(const RefPtr<TaskExecutor>& taskExecutor) : taskExecutor_(taskExecutor) {}

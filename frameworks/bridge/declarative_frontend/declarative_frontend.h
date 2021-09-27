@@ -94,10 +94,10 @@ public:
     void OnInactive() override;
     bool OnStartContinuation() override;
     void OnCompleteContinuation(int32_t code) override;
-    void OnRemoteTerminated() override;
     void OnSaveData(std::string& data) override;
     void GetPluginsUsed(std::string& data) override;
     bool OnRestoreData(const std::string& data) override;
+    void OnRemoteTerminated() override;
     void OnNewRequest(const std::string& data) override;
     void SetColorMode(ColorMode colorMode) override;
     void CallRouterBack() override;
@@ -162,11 +162,6 @@ public:
         isSubWindow_ = isSubWindow;
     }
 
-    void SetAbility(void* ability)
-    {
-        ability_ = ability;
-    }
-
     void RebuildAllPages() override;
 
 private:
@@ -179,7 +174,6 @@ private:
     RefPtr<AccessibilityManager> accessibilityManager_;
     bool foregroundFrontend_ = false;
     bool isSubWindow_ = false;
-    void* ability_ = nullptr;
 };
 
 class DeclarativeEventHandler : public AceEventHandler {

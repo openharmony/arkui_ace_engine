@@ -51,11 +51,11 @@ private:
     void RemoveCallbackFunc(JSContext* ctx, std::unordered_map<uint32_t, JSValue>& callbackFuncMap,
         std::unordered_map<uint32_t, std::vector<JSValue>>& callbackArrayMap, uint32_t callbackId);
 
-    uint32_t callbackId_ = 0;
     std::unordered_map<uint32_t, JSValue> callbackFuncMap_;
     std::unordered_map<uint32_t, JSValue> intervalCallbackFuncMap_;
     std::unordered_map<uint32_t, std::vector<JSValue>> callbackArrayMap_;
     std::unordered_map<uint32_t, std::vector<JSValue>> intervalCallbackArrayMap_;
+    uint32_t callbackId_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(ModuleManager);
 };

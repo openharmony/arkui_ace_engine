@@ -47,7 +47,7 @@ void FlutterRenderList::Paint(RenderContext& context, const Offset& offset)
     }
 
     for (const auto& child : items_) {
-        if (child == currentStickyItem_) {
+        if (child == currentStickyItem_ || child == selectedItem_) {
             continue;
         }
         PaintChild(child, context, offset);
@@ -77,6 +77,10 @@ void FlutterRenderList::Paint(RenderContext& context, const Offset& offset)
         paint.setStrokeWidth(strokeWidth);
 
         for (const auto& child : items_) {
+            if (child == selectedItem_) {
+                continue;
+            }
+
             double mainAxis = GetMainAxis(child->GetPosition());
             if (GreatOrEqual(mainAxis - topOffset, mainSize)) {
                 break;
@@ -91,10 +95,24 @@ void FlutterRenderList::Paint(RenderContext& context, const Offset& offset)
                 skCanvas->drawLine(mainAxis, startCrossAxis, mainAxis, endCrossAxis, paint);
             }
         }
+
+        if (selectedItem_) {
+            double mainAxis = targetMainAxis_ - halfSpaceWidth;
+            if (vertical_) {
+                skCanvas->drawLine(startCrossAxis, mainAxis, endCrossAxis, mainAxis, paint);
+            } else {
+                skCanvas->drawLine(mainAxis, startCrossAxis, mainAxis, endCrossAxis, paint);
+            }
+        }
     }
 
     if (currentStickyItem_) {
         PaintChild(currentStickyItem_, context, offset);
+    }
+
+    if (selectedItem_) {
+        selectedItem_->SetPosition(MakeValue<Offset>(selectedItemMainAxis_, 0.0));
+        PaintChild(selectedItem_, context, offset);
     }
 }
 

@@ -112,7 +112,8 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
 
 ThemeManager::ThemeManager()
 {
-    themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+    auto resAdapter = ResourceAdapter::Create();
+    themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(resAdapter);
 }
 
 RefPtr<Theme> ThemeManager::GetTheme(ThemeType type)

@@ -27,7 +27,13 @@
 
 namespace OHOS::Ace {
 
-class MenuComponent : public ComposedComponent {
+enum MenuStatus {
+    OFF = 0,
+    ON,
+    INIT
+};
+
+class ACE_EXPORT MenuComponent : public ComposedComponent {
     DECLARE_ACE_TYPE(MenuComponent, ComposedComponent);
 
 public:
@@ -50,6 +56,13 @@ public:
     {
         if (popup_) {
             popup_->InitTheme(themeManager);
+        }
+    }
+
+    void SetTheme(const RefPtr<SelectTheme>& theme)
+    {
+        if (popup_) {
+            popup_->SetTheme(theme);
         }
     }
 
@@ -104,10 +117,30 @@ public:
         onCancel_ = value;
     }
 
+    void SetMenuShow(const MenuStatus& status)
+    {
+        menuShow_ = status;
+    }
+
+    const MenuStatus& GetMenuShow()
+    {
+        return menuShow_;
+    }
+
+    void SetPopupPosition(const Offset& position)
+    {
+        popupPosition_ = position;
+    }
+
+    const Offset& GetPopupPosition()
+    {
+        return popupPosition_;
+    }
+
     std::string GetTitle() const;
     void SetTitle(const std::string& value);
 
-    TextStyle GetTitleStyle() const;
+    const TextStyle& GetTitleStyle() const;
     void SetTitleStyle(const TextStyle& value);
     void SetIsBindTarget(bool isBindTarget) {}
     const RefPtr<SelectPopupComponent>& GetPopup() const;
@@ -117,6 +150,9 @@ private:
     std::function<void(const ComposeId&, const Offset&)> targetCallback_;
     EventMarker onSuccess_;
     EventMarker onCancel_;
+    MenuStatus menuShow_ = MenuStatus::INIT;
+    Offset popupPosition_ = Offset(0, 0);
+    TextStyle textStyle_ = TextStyle();
 };
 
 } // namespace OHOS::Ace

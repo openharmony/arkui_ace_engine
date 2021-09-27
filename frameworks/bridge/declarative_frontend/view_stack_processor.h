@@ -30,6 +30,7 @@
 #include "frameworks/core/components/focusable/focusable_component.h"
 #include "frameworks/core/components/gesture_listener/gesture_component.h"
 #include "frameworks/core/components/gesture_listener/gesture_listener_component.h"
+#include "frameworks/core/components/mouse_listener/mouse_listener_component.h"
 #include "frameworks/core/components/navigation_bar/navigation_container_component.h"
 #include "frameworks/core/components/page_transition/page_transition_component.h"
 #ifndef WEARABLE_PRODUCT
@@ -58,6 +59,7 @@ public:
     bool HasDisplayComponent() const;
     RefPtr<TransformComponent> GetTransformComponent();
     RefPtr<TouchListenerComponent> GetTouchListenerComponent();
+    RefPtr<MouseListenerComponent> GetMouseListenerComponent();
     RefPtr<GestureListenerComponent> GetClickGestureListenerComponent();
     RefPtr<GestureListenerComponent> GetPanGestureListenerComponent();
     RefPtr<FocusableComponent> GetFocusableComponent(bool createIfNotExist = true);
@@ -76,7 +78,8 @@ public:
 
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the stack.
-    void Push(const RefPtr<Component>& component);
+    // use flag: isCustomView to avoid creating redundant Components.
+    void Push(const RefPtr<Component>& component, bool isCustomView = false);
 
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrappedcomponent has child of the new stack top's main component.
@@ -115,15 +118,21 @@ private:
 
     bool ShouldPopImmediately();
 
+#ifdef ACE_DEBUG
+    // Dump view stack comtent
+    void DumpStack();
+#endif
+
     // Go through the wrappingComponentsMap and wrap the components
     // should be done before pushing to the stack.
     RefPtr<Component> WrapComponents();
 
+    // Update position and enabled status
     void UpdateTopComponentProps(const RefPtr<Component>& component);
 
     RefPtr<ComposedComponent> GetInspectorComposedComponent(RefPtr<Component> mainComponent);
 
-    //  Singleton instance
+    // Singleton instance
     static thread_local std::unique_ptr<ViewStackProcessor> instance;
 
     // stack

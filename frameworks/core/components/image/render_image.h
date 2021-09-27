@@ -75,10 +75,6 @@ public:
     {
         return imageAlt_;
     }
-    const std::list<Rect>& GetRectList() const
-    {
-        return rectList_;
-    }
     void SetMatchTextDirection(bool matchTextDirection)
     {
         matchTextDirection_ = matchTextDirection;
@@ -148,6 +144,12 @@ public:
         imageUpdateFunc_ = imageUpdateFunc;
     }
 
+    using ImageRenderFunc = std::function<void()>;
+    void RegisterImageRenderFunc(const ImageRenderFunc& imageRenderFunc)
+    {
+        imageRenderFunc_ = imageRenderFunc;
+    }
+
     void SetBackgroundImageFlag(bool backgroundImageFlag)
     {
         if (background_ != backgroundImageFlag) {
@@ -176,9 +178,13 @@ public:
         }
     }
 
+    void SetDirectPaint(bool directPaint = true)
+    {
+        directPaint_ = directPaint;
+    }
+
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
-    void GenerateRepeatRects(const Rect& fundamentalRect, const Size& parentSize, const ImageRepeat& imageRepeat);
     virtual void FetchImageObject() {}
     void Dump() override;
     virtual bool IsSourceWideGamut() const
@@ -188,6 +194,19 @@ public:
     virtual bool RetryLoading()
     {
         return false;
+    }
+    void SetLoadFailCallback(std::function<void()>&& loadFailCallback)
+    {
+        loadFailCallback_ = std::move(loadFailCallback);
+    }
+    void OnAttachContext() override
+    {
+        imagePosition_.SetContextAndCallback(context_, [weak = WeakClaim(this)] {
+            auto renderImage = weak.Upgrade();
+            if (renderImage) {
+                renderImage->MarkNeedLayout();
+            }
+        });
     }
 
 protected:
@@ -221,6 +240,7 @@ protected:
     std::function<void(const std::string&)> loadFailEvent_;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> loadImgSuccessEvent_;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> loadImgFailEvent_;
+    mutable std::function<void()> loadFailCallback_;
     EventMarker svgAnimatorFinishEvent_;
     bool fitMaxSize_ = false;
     bool hasObjectPosition_ = false;
@@ -237,9 +257,11 @@ protected:
     Rect srcRect_;
     Rect dstRect_;
     Rect currentSrcRect_;
+    Rect currentDstRect_;
     std::list<Rect> currentDstRectList_;
-    ImageObjectPosition imageObjectPosition_;
     std::list<Rect> rectList_;
+
+    ImageObjectPosition imageObjectPosition_;
     Color color_ = Color::TRANSPARENT;
     bool isColorSet_ = false;
     double singleWidth_ = 0.0;
@@ -265,6 +287,7 @@ protected:
 
     // background image
     ImageUpdateFunc imageUpdateFunc_;
+    ImageRenderFunc imageRenderFunc_;
     bool background_ = false;
     Size boxPaintSize_;
     Offset boxMarginOffset_;
@@ -285,6 +308,7 @@ protected:
     bool forceReload_ = false;
     Size imageSizeForEvent_;
     bool useSkiaSvg_ = true;
+    bool directPaint_ = false;
     int32_t retryCnt_ = 0;
     RefPtr<PixelMap> pixmap_ = nullptr;
     std::list<std::function<void()>> imageLayoutCallbacks_;

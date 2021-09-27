@@ -181,9 +181,9 @@ JSValue AppErrorLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSVal
 
 void InitConsole(JSContext* ctx)
 {
-    JSValue globalObj, console, aceConsole;
+    JSValue globalObj;
     globalObj = JS_GetGlobalObject(ctx);
-    console = JS_NewObject(ctx);
+    JSValue console = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, console, "log", JS_NewCFunction(ctx, AppLogPrint, "log", 1));
     JS_SetPropertyStr(ctx, console, "debug", JS_NewCFunction(ctx, AppDebugLogPrint, "debug", 1));
     JS_SetPropertyStr(ctx, console, "info", JS_NewCFunction(ctx, AppInfoLogPrint, "info", 1));
@@ -192,7 +192,7 @@ void InitConsole(JSContext* ctx)
     JS_SetPropertyStr(ctx, globalObj, "console", console);
 
     // js framework log method
-    aceConsole = JS_NewObject(ctx);
+    JSValue aceConsole = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, aceConsole, "log", JS_NewCFunction(ctx, JsLogPrint, "log", 1));
     JS_SetPropertyStr(ctx, aceConsole, "debug", JS_NewCFunction(ctx, JsDebugLogPrint, "debug", 1));
     JS_SetPropertyStr(ctx, aceConsole, "info", JS_NewCFunction(ctx, JsInfoLogPrint, "info", 1));

@@ -29,6 +29,12 @@ constexpr char IMAGE_SRC[] = "src";
 constexpr char IMAGE_WIDTH[] = "width";
 constexpr char IMAGE_HEIGHT[] = "height";
 
+constexpr char CANVAS_TYPE_WEBGL[] = "webgl";
+constexpr char CANVAS_TYPE_WEBGL2[] = "webgl2";
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+constexpr char CANVAS_WEBGL_SO[] = "webglnapi";
+#endif
+
 template<typename T>
 inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t length, T defaultValue)
 {
@@ -125,6 +131,21 @@ void PushTaskToPage(JSContext* ctx, JSValueConst value, const std::function<void
     page->PushCommand(command);
 }
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+void PushTaskToPageById(JSContext* ctx, NodeId id, const std::function<void(const RefPtr<CanvasTaskPool>&)>& task)
+{
+    auto command = Referenced::MakeRefPtr<JsCommandContextOperation>(id, task);
+    // push command
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    ACE_DCHECK(instance);
+    auto page = instance->GetRunningPage();
+    if (!page) {
+        return;
+    }
+    page->PushCommand(command);
+}
+#endif
+
 inline PaintState JsParseTextState(JSContext* ctx, JSValue value)
 {
     PaintState state;
@@ -197,9 +218,21 @@ const JSCFunctionListEntry JS_ANIMATION_FUNCS[] = {
         CanvasBridge::JsSmoothingQualityGetter, CanvasBridge::JsSmoothingQualitySetter),
 };
 
-void CanvasBridge::HandleJsContext(JSContext* ctx, NodeId id, const std::string& args)
+void CanvasBridge::HandleJsContext(JSContext* ctx, NodeId id, const std::string& args, JsEngineInstance* engine)
 {
     LOGD("CanvasBridge::HandleJsContext");
+    std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
+    if (argsValue && argsValue->IsArray() && argsValue->GetArraySize() > 0) {
+        auto typeArg = argsValue->GetArrayItem(0);
+        if (typeArg && typeArg->IsString()) {
+            std::string type = typeArg->GetString();
+            if (type == std::string(CANVAS_TYPE_WEBGL) || type == std::string(CANVAS_TYPE_WEBGL2)) {
+                JSHandleWebglContext(ctx, id, args, engine);
+                return;
+            }
+        }
+    }
+
     renderContext_ = JS_NewObject(ctx);
     const std::vector<std::pair<const char*, JSValue>> contextTable = {
         { "__nodeId", JS_NewInt32(ctx, id) },
@@ -248,6 +281,69 @@ void CanvasBridge::HandleJsContext(JSContext* ctx, NodeId id, const std::string&
     // getter and setter
     JS_SetPropertyFunctionList(ctx, renderContext_, JS_ANIMATION_FUNCS, countof(JS_ANIMATION_FUNCS));
     JsSetAntiAlias(ctx, id, args);
+}
+
+void CanvasBridge::JSHandleWebglContext(
+    JSContext* ctx, NodeId id, const std::string& args, JsEngineInstance* engine)
+{
+    LOGD("CanvasBridge::HandleWebglContext");
+    if (engine == nullptr) {
+        LOGE("engine is null");
+        return;
+    }
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    QuickJSNativeEngine* nativeEngine = static_cast<QjsEngineInstance*>(engine)->GetQuickJSNativeEngine();
+    if (nativeEngine == nullptr) {
+        LOGE("nativeEngine is null");
+        return;
+    }
+    std::string moduleName(CANVAS_WEBGL_SO);
+    std::string pluginId(std::to_string(id));
+    renderContext_ = nativeEngine->GetModuleFromName(
+        moduleName, false, pluginId, args, WEBGL_RENDER_CONTEXT_NAME, reinterpret_cast<void**>(&canvasRenderContext_));
+    if (!canvasRenderContext_) {
+        LOGE("CanvasBridge invalid canvasRenderContext");
+        return;
+    }
+
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (!instance) {
+        return;
+    }
+    auto page = instance->GetRunningPage();
+    if (!page) {
+        LOGE("page is null.");
+        return;
+    }
+    auto task = [weak = WeakClaim(this), page, id]() {
+        auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+        if (!canvas) {
+            LOGE("DOMCanvas is null.");
+            return;
+        }
+        auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
+        auto pool = paintChild->GetTaskPool();
+        if (!pool) {
+            LOGE("TaskPool is null.");
+            return;
+        }
+        auto bridge = weak.Upgrade();
+        if (bridge) {
+            pool->WebGLInit(bridge->canvasRenderContext_);
+        }
+    };
+    instance->GetDelegate()->PostSyncTaskToPage(task);
+
+    canvasRenderContext_->Init();
+
+    auto onWebGLUpdateCallback = [ctx, id]() {
+        auto task = [](const RefPtr<CanvasTaskPool>& pool) {
+            pool->WebGLUpdate();
+        };
+        PushTaskToPageById(ctx, id, task);
+    };
+    canvasRenderContext_->SetUpdateCallback(onWebGLUpdateCallback);
+#endif
 }
 
 void CanvasBridge::HandleToDataURL(JSContext* ctx, NodeId id, const std::string& args)
@@ -1032,7 +1128,7 @@ JSValue CanvasBridge::JsPath2DSetTransform(JSContext* ctx, JSValueConst value, i
 {
     // 6 parameters: setTransform(a, b, c, d, e, f)
     if ((!argv) || (argc != 6)) {
-        LOGE("Call Path2D SetTransform fialed, invalid agrs.");
+        LOGE("Call Path2D SetTransform fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -1056,7 +1152,7 @@ JSValue CanvasBridge::JsPath2DMoveTo(JSContext* ctx, JSValueConst value, int32_t
 {
     // 2 parameters: moveTo(x, y)
     if ((!argv) || (argc != 2)) {
-        LOGE("Call Path2D Arc MoveTo, invalid agrs.");
+        LOGE("Call Path2D Arc MoveTo, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -1078,7 +1174,7 @@ JSValue CanvasBridge::JsPath2DLineTo(JSContext* ctx, JSValueConst value, int32_t
 {
     // 2 parameters: lineTo(x, y)
     if ((!argv) || (argc != 2)) {
-        LOGE("Call Path2D LineTo fialed, invalid agrs.");
+        LOGE("Call Path2D LineTo fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -1100,7 +1196,7 @@ JSValue CanvasBridge::JsPath2DArc(JSContext* ctx, JSValueConst value, int32_t ar
 {
     // 5 or 6 parameters: arc(x, y, radius, startAngle, endAngle, anticlockwise?)
     if ((!argv) || (argc < 5) || (argc > 6)) {
-        LOGE("Call Path2D Arc fialed, invalid agrs.");
+        LOGE("Call Path2D Arc fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -1129,7 +1225,7 @@ JSValue CanvasBridge::JsPath2DArcTo(JSContext* ctx, JSValueConst value, int32_t 
 {
     // 5 parameters: arcTo(x1, y1, x2, y2, radius)
     if ((!argv) || (argc != 5)) {
-        LOGE("Call Path2D ArcTo fialed, invalid agrs.");
+        LOGE("Call Path2D ArcTo fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -1152,7 +1248,7 @@ JSValue CanvasBridge::JsPath2DQuadraticCurveTo(JSContext* ctx, JSValueConst valu
 {
     // 4 parameters: quadraticCurveTo(cpx, cpy, x, y)
     if ((!argv) || (argc != 4)) {
-        LOGE("Call Path2D QuadraticCurveTo fialed, invalid agrs.");
+        LOGE("Call Path2D QuadraticCurveTo fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -1175,7 +1271,7 @@ JSValue CanvasBridge::JsPath2DBezierCurveTo(JSContext* ctx, JSValueConst value, 
 {
     // 6 parameters: bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
     if ((!argv) || (argc != 6)) {
-        LOGE("Call Path2D BezierCurveTo fialed, invalid agrs.");
+        LOGE("Call Path2D BezierCurveTo fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -1199,7 +1295,7 @@ JSValue CanvasBridge::JsPath2DEllipse(JSContext* ctx, JSValueConst value, int32_
 {
     // 7 or 8 parameters: ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise?)
     if ((!argv) || (argc < 7) || (argc > 8)) {
-        LOGE("Call Path2D Ellipse fialed, invalid agrs.");
+        LOGE("Call Path2D Ellipse fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -1229,7 +1325,7 @@ JSValue CanvasBridge::JsPath2DRect(JSContext* ctx, JSValueConst value, int32_t a
 {
     // 4 parameters: rect(x, y, width, height)
     if ((!argv) || (argc != 4)) {
-        LOGE("Call Path2D Rect fialed, invalid agrs.");
+        LOGE("Call Path2D Rect fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;

@@ -48,8 +48,8 @@ std::unique_ptr<JsonValue> BlankComposedElement::ToJsonObject() const
 std::string BlankComposedElement::GetMin() const
 {
     auto renderFlexItem = GetRenderFlexItem();
-    auto min = renderFlexItem ? renderFlexItem->GetFlexBasis() : 0.0;
-    return std::to_string(min);
+    auto min = renderFlexItem ? renderFlexItem->GetFlexBasis().ToString() : "0.0";
+    return min;
 }
 
 RefPtr<RenderFlexItem> BlankComposedElement::GetRenderFlexItem() const

@@ -41,7 +41,7 @@ void JSGauge::JSBind(BindingTarget globalObj)
 void JSGauge::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 && !info[0]->IsObject()) {
-        LOGI("gauge create error, info is non-vaild");
+        LOGE("gauge create error, info is non-valid");
         return;
     }
 
@@ -54,7 +54,7 @@ void JSGauge::Create(const JSCallbackInfo& info)
     double gaugeMax = max->IsNumber() ? max->ToNumber<double>() : 100;
     double gaugeValue = value->IsNumber() ? value->ToNumber<double>() : 0;
     auto progressChild =
-        AceType::MakeRefPtr<ProgressComponent>(gaugeMin, gaugeValue, 0.0, gaugeMax, ProgressType::GAUGE);
+        AceType::MakeRefPtr<ProgressComponent>(gaugeMin, gaugeValue, gaugeMin, gaugeMax, ProgressType::GAUGE);
     progressChild->SetIndicatorFlag(true);
     ViewStackProcessor::GetInstance()->Push(progressChild);
     RefPtr<ProgressTheme> progressTheme = GetTheme<ProgressTheme>();
@@ -150,33 +150,29 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
 
 void JSGauge::SetLableTextConfig(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject() || info.Length() < 1) {
+    if (info.Length() < 1) {
         LOGI("JSGauge::SetLableTextConfig::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto markedValue = paramObject->GetProperty("markedLabelText");
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
 
-    if (markedValue->IsString()) {
-        gaugeComponent->SetLableMarkedText(markedValue->ToString());
+    if (info[0]->IsString()) {
+        gaugeComponent->SetLableMarkedText(info[0]->ToString());
     }
 }
 
 void JSGauge::SetLableColorConfig(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject() || info.Length() < 1) {
+    if (info.Length() < 1) {
         LOGI("JSGauge::SetLableColorConfig::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto markedLabelColor = paramObject->GetProperty("markedLabelColor");
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
     Color currentColor;
 
-    if (ParseJsColor(markedLabelColor, currentColor)) {
+    if (ParseJsColor(info[0], currentColor)) {
         gaugeComponent->SetMarkedTextColor(currentColor);
     }
 }

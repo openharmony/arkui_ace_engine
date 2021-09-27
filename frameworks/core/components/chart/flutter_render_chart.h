@@ -24,7 +24,7 @@
 #include "base/geometry/rect.h"
 #include "core/components/chart/render_chart.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
-#include "core/pipeline/layers/offset_layer.h"
+#include "core/pipeline/layers/clip_layer.h"
 
 namespace OHOS::Ace {
 
@@ -88,7 +88,8 @@ private:
 
     Rect GetBarsAreaPaintRect(const Rect& paintRect, int32_t barsAreaIndex);
 
-    Rect GetBarAreaPaintRect(const Rect& barsAreaPaintRect, int32_t barGroupIndex, int32_t barGroupNumber);
+    Rect GetBarAreaPaintRect(const Rect& barsAreaPaintRect, int32_t barGroupIndex, int32_t barGroupNumber,
+        double barInterval);
 
     Offset CalculateControlA(const Offset& prev, const Offset& cur, const Offset& next);
 
@@ -100,13 +101,17 @@ private:
     bool drawLine_ = false;
     uint32_t startIndex_ = 0;
 
-    RefPtr<Flutter::OffsetLayer> layer_;
+    RefPtr<Flutter::ClipLayer> layer_;
 
     Offset startGradientPoint_;
     Offset endGradientPoint_;
     size_t startGradientIndex_ = 0;
     size_t endGradientIndex_ = 0;
     bool gradientOfLine_ = false;
+    Offset startOffset_;
+    double paintWidth_ = 0;
+    Color targetColor_;
+    bool wholeLineGradient_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -384,7 +384,7 @@ Size FlutterRenderText::GetSize()
     return Size(text_->GetMaxWidthLayout() ? paragraphNewWidth_ : std::ceil(paragraphNewWidth_), heightFinal);
 }
 
-void FlutterRenderText::ApplyWhiteSpace()
+std::string FlutterRenderText::ApplyWhiteSpace()
 {
     std::string data = text_->GetData();
     switch (textStyle_.GetWhiteSpace()) {
@@ -405,7 +405,7 @@ void FlutterRenderText::ApplyWhiteSpace()
         default:
             break;
     }
-    text_->SetData(data);
+    return data;
 }
 
 void FlutterRenderText::ApplyIndents(double width)
@@ -455,13 +455,20 @@ bool FlutterRenderText::UpdateParagraph()
         }
         ChangeDirectionIfNeeded(data);
     }
-    ApplyWhiteSpace();
+    std::string displayData = ApplyWhiteSpace();
     style.text_direction = ConvertTxtTextDirection(textDirection_);
     style.text_align = ConvertTxtTextAlign(textAlign);
     style.max_lines = textStyle_.GetMaxLines();
     style.locale = Localization::GetInstance()->GetFontLocale();
     if (textStyle_.GetTextOverflow() == TextOverflow::ELLIPSIS) {
+        if (!IsLongestLineVersion() && textStyle_.GetMaxLines() == UINT32_MAX) {
+            style.max_lines = 1;
+        }
         style.ellipsis = ELLIPSIS;
+        auto context = GetContext().Upgrade();
+        if (context && context->UseLiteStyle()) {
+            style.max_lines = 1;
+        }
     }
     style.word_break_type = static_cast<minikin::WordBreakType>(textStyle_.GetWordBreak());
 
@@ -486,7 +493,6 @@ bool FlutterRenderText::UpdateParagraph()
             }
         }
     } else {
-        auto displayData = text_->GetData();
         StringUtils::TransfromStrCase(displayData, (int32_t)textStyle_.GetTextCase());
         builder->AddText(StringUtils::Str8ToStr16(displayData));
     }

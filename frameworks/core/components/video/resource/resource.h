@@ -46,10 +46,12 @@ public:
     {}
     virtual ~Resource() = default;
 
-    void Release(const std::function<void(bool)>& onRelease = nullptr);
+    virtual void Release(const std::function<void(bool)>& onRelease = nullptr);
 
     void CallResRegisterMethod(
         const Method& method, const std::string& param, const std::function<void(std::string&)>& callback = nullptr);
+
+    static std::map<std::string, std::string> ParseMapFromString(const std::string& param);
 
     int64_t GetId() const
     {

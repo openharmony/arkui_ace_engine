@@ -20,9 +20,4 @@ build_component("search") {
     "search_component.cpp",
     "search_element.cpp",
   ]
-
-  external_deps = [
-    "inputmethod_native:inputmethod_ability",
-    "inputmethod_native:inputmethod_client",
-  ]
 }

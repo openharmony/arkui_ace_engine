@@ -136,6 +136,15 @@ void AccessibilityNodeManager::AddComposedElement(const std::string& key, const 
     composedElementIdMap_[key] = node;
 }
 
+void AccessibilityNodeManager::RemoveComposedElementById(const std::string& key)
+{
+    LOGD("remove composed element id:%{public}s", key.c_str());
+    auto it = composedElementIdMap_.find(key);
+    if (it != composedElementIdMap_.end()) {
+        composedElementIdMap_.erase(it);
+    }
+}
+
 WeakPtr<ComposedElement> AccessibilityNodeManager::GetComposedElementFromPage(NodeId nodeId)
 {
     if (isOhosHostCard_) {
@@ -153,7 +162,7 @@ WeakPtr<ComposedElement> AccessibilityNodeManager::GetComposedElementFromPage(No
 
     const auto itNode = composedElementIdMap_.find(std::to_string(nodeId));
     if (itNode == composedElementIdMap_.end()) {
-        LOGW("Failed to get ComposedElement from Page");
+        LOGW("Failed to get ComposedElement from Page, id:%{public}d", nodeId);
         return nullptr;
     }
     return itNode->second;
@@ -381,6 +390,11 @@ void AccessibilityNodeManager::TriggerVisibleChangeEvent()
         auto marginSize = accessibilityNode->GetMarginSize();
         auto visibleRect = accessibilityNode->GetRect() - marginSize;
         auto globalRect = accessibilityNode->GetGlobalRect() - marginSize;
+        auto pipeline = context_.Upgrade();
+        if (pipeline) {
+            pipeline->GetBoundingRectData(visibleNodeId, globalRect);
+            globalRect = globalRect * pipeline->GetViewScale() - marginSize;
+        }
         auto& nodeCallbackInfoList = visibleChangeNode.second;
         for (auto& nodeCallbackInfo : nodeCallbackInfoList) {
             if (!globalRect.IsValid() || !accessibilityNode->GetVisible()) {

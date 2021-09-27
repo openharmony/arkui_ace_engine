@@ -46,11 +46,12 @@ const char* ITEM_ALIGN[] = {
     "ItemAlign.Baseline"
 };
 
+// NONE translate to Solid
 const char* BORDER_STYLE[] = {
-    "BorderStyle.Dotted",
-    "BorderStyle.Dashed",
     "BorderStyle.Solid",
-    "NONE"
+    "BorderStyle.Dashed",
+    "BorderStyle.Dotted",
+    "BorderStyle.Solid",
 };
 
 const char* WINDOW_BLUR_STYLE[] = {
@@ -80,12 +81,9 @@ const char* GRID_SIZE_TYPE[] = {
 
 const std::unordered_map<std::string, DoubleJsonFunc> CREATE_JSON_DOUBLE_MAP {
     { "opacity", [](const InspectorComposedElement& inspector) { return inspector.GetOpacity(); } },
-    { "flexBasis", [](const InspectorComposedElement& inspector) { return inspector.GetFlexBasis(); } },
     { "flexGrow", [](const InspectorComposedElement& inspector) { return inspector.GetFlexGrow(); } },
     { "flexShrink", [](const InspectorComposedElement& inspector) { return inspector.GetFlexShrink(); } },
     { "gridOffset", [](const InspectorComposedElement& inspector) { return inspector.GetGridOffset(); } },
-    { "width", [](const InspectorComposedElement& inspector) { return inspector.GetWidth(); } },
-    { "height", [](const InspectorComposedElement& inspector) { return inspector.GetHeight(); } },
     { "blur", [](const InspectorComposedElement& inspector) { return inspector.GetBlur(); } },
     { "backdropBlur", [](const InspectorComposedElement& inspector) { return inspector.GetBackDropBlur(); } }
 };
@@ -127,13 +125,18 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
         } },
     { "constraintSize",
         [](const InspectorComposedElement& inspector) { return inspector.GetConstraintSize(); } },
+    { "borderColor", [](const InspectorComposedElement& inspector) { return inspector.GetBorderColor(); } },
     { "borderStyle", [](const InspectorComposedElement& inspector) { return inspector.GetBorderStyle(); } },
     { "borderWidth", [](const InspectorComposedElement& inspector) { return inspector.GetBorderWidth(); } },
     { "borderRadius",
         [](const InspectorComposedElement& inspector) {
             return inspector.GetBorder().TopLeftRadius().GetX().ToString();
         } },
-    { "backgroundImage", [](const InspectorComposedElement& inspector) { return inspector.GetBackgroundImage(); } }
+    { "backgroundImage", [](const InspectorComposedElement& inspector) { return inspector.GetBackgroundImage(); } },
+    { "backgroundColor", [](const InspectorComposedElement& inspector) { return inspector.GetBackgroundColor(); } },
+    { "flexBasis", [](const InspectorComposedElement& inspector) { return inspector.GetFlexBasis(); } },
+    { "width", [](const InspectorComposedElement& inspector) { return inspector.GetWidth(); } },
+    { "height", [](const InspectorComposedElement& inspector) { return inspector.GetHeight(); } },
 };
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP { { "enabled",
@@ -143,8 +146,7 @@ const std::unordered_map<std::string, IntJsonFunc> CREATE_JSON_INT_MAP {
     { "zIndex", [](const InspectorComposedElement& inspector) { return inspector.GetZIndex(); } },
     { "gridSpan", [](const InspectorComposedElement& inspector) { return inspector.GetGridSpan(); } },
     { "layoutPriority", [](const InspectorComposedElement& inspector) { return inspector.GetLayoutPriority(); } },
-    { "layoutWeight", [](const InspectorComposedElement& inspector) { return inspector.GetLayoutWeight(); } },
-    { "borderColor", [](const InspectorComposedElement& inspector) { return inspector.GetBorderColor(); } }
+    { "layoutWeight", [](const InspectorComposedElement& inspector) { return inspector.GetLayoutWeight(); } }
 };
 
 const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_MAP {
@@ -184,9 +186,45 @@ std::unique_ptr<JsonValue> InspectorComposedElement::ToJsonObject() const
     return resultJson;
 }
 
+void InspectorComposedElement::Update()
+{
+    const RefPtr<ComposedComponent> compose = AceType::DynamicCast<ComposedComponent>(component_);
+    if (compose != nullptr) {
+        name_ = compose->GetName();
+        if (id_ != compose->GetId()) {
+            auto context = context_.Upgrade();
+            if (addedToMap_ && context != nullptr) {
+                context->RemoveComposedElement(id_, AceType::Claim(this));
+                context->AddComposedElement(compose->GetId(), AceType::Claim(this));
+                UpdateComposedComponentId(id_, compose->GetId());
+            }
+            id_ = compose->GetId();
+        }
+        compose->ClearNeedUpdate();
+    }
+}
+
 bool InspectorComposedElement::CanUpdate(const RefPtr<Component>& newComponent)
 {
     return Element::CanUpdate(newComponent);
+}
+
+void InspectorComposedElement::UpdateComposedComponentId(const ComposeId& oldId, const ComposeId& newId)
+{
+    auto context = context_.Upgrade();
+    if (context == nullptr) {
+        LOGW("get context failed");
+        return;
+    }
+    auto accessibilityManager = context->GetAccessibilityManager();
+    if (!accessibilityManager) {
+        LOGW("get AccessibilityManager failed");
+        return;
+    }
+    accessibilityManager->RemoveComposedElementById(oldId);
+    accessibilityManager->RemoveAccessibilityNodeById(StringUtils::StringToInt(oldId));
+    accessibilityManager->AddComposedElement(newId, AceType::Claim(this));
+    LOGD("Update ComposedComponent Id %{public}s to %{public}s", oldId.c_str(), newId.c_str());
 }
 
 RefPtr<RenderNode> InspectorComposedElement::GetInspectorNode(IdType typeId) const
@@ -211,22 +249,23 @@ RefPtr<RenderBox> InspectorComposedElement::GetRenderBox() const
     return AceType::DynamicCast<RenderBox>(node);
 }
 
-double InspectorComposedElement::GetWidth() const
+std::string InspectorComposedElement::GetWidth() const
 {
     auto render = GetRenderBox();
     if (render) {
-        return render->GetWidth();
+        render->GetWidthDimension();
+        return render->GetWidthDimension().ToString();
     }
-    return -1.0;
+    return "NONE";
 }
 
-double InspectorComposedElement::GetHeight() const
+std::string InspectorComposedElement::GetHeight() const
 {
     auto render = GetRenderBox();
     if (render) {
-        return render->GetHeight();
+        return render->GetHeightDimension().ToString();
     }
-    return -1.0;
+    return "NONE";
 }
 
 Dimension InspectorComposedElement::GetPadding(OHOS::Ace::AnimatableType type) const
@@ -410,13 +449,13 @@ int32_t InspectorComposedElement::GetDisplayPriority() const
     return 1;
 }
 
-double InspectorComposedElement::GetFlexBasis() const
+std::string InspectorComposedElement::GetFlexBasis() const
 {
     auto render = AceType::DynamicCast<RenderFlexItem>(GetInspectorNode(FlexItemElement::TypeId()));
     if (render) {
-        return render->GetFlexBasis();
+        return render->GetFlexBasis().ToString();
     }
-    return 0.0;
+    return "auto";
 }
 
 double InspectorComposedElement::GetFlexGrow() const
@@ -472,10 +511,10 @@ std::string InspectorComposedElement::GetBorderWidth() const
     return border.Left().GetWidth().ToString();
 }
 
-uint32_t InspectorComposedElement::GetBorderColor() const
+std::string InspectorComposedElement::GetBorderColor() const
 {
     auto border = GetBorder();
-    return border.Left().GetColor().GetValue();
+    return border.Left().GetColor().ColorToString();
 }
 
 RefPtr<Decoration> InspectorComposedElement::GetBackDecoration() const
@@ -498,6 +537,17 @@ std::string InspectorComposedElement::GetBackgroundImage() const
         return "NONE";
     }
     return image->GetSrc();
+}
+
+std::string InspectorComposedElement::GetBackgroundColor() const
+{
+    auto backDecoration = GetBackDecoration();
+    if (!backDecoration) {
+        return "NONE";
+    }
+    auto color = backDecoration->GetBackgroundColor();
+    LOGE("backgroundColor:%{public}s", color.ColorToString().c_str());
+    return color.ColorToString();
 }
 
 std::unique_ptr<JsonValue> InspectorComposedElement::GetBackgroundImageSize() const

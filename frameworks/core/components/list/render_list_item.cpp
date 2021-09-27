@@ -41,9 +41,10 @@ const double ITEM_OPACITY_BASE = 1.0;
 const double ITEM_RATIO = -0.34; // 0.78 - 1.12  // 0.66 - 1.0
 const double DISTANCE_EPSILON = 1.0;
 constexpr int32_t MIN_COMPATITABLE_VERSION = 5;
+const double WATCH_SIZE = 466.0;
 
 #ifdef WEARABLE_PRODUCT
-const int32_t VIBRATE_DURATION = 5;
+const std::string& VIBRATOR_TYPE_WATCH_CROWN_STRENGTH1 = "watchhaptic.crown.strength1";
 #endif
 
 } // namespace
@@ -121,31 +122,53 @@ void RenderListItem::CalculateScaleFactorOnWatch()
     if (isTitle_) {
         return;
     }
-    auto renderList = GetRenderList();
-    if (!renderList) {
-        LOGE("Can not find parent render list");
-        return;
-    }
 
-    double itemSize = renderList->IsVertical() ? GetLayoutSize().Height() : GetLayoutSize().Width();
-    double itemCenter = GetPositionInList() + renderList->GetListPosition() + itemSize * HALF_SIZE;
-    double scale = ITEM_DEFAULT_SCALE;
-    auto pipelineContext = context_.Upgrade();
-    if (pipelineContext) {
-        scale = pipelineContext->GetDipScale();
+    auto context = GetContext().Upgrade();
+    const static int32_t PLATFORM_VERSION_FIVE = 5;
+    if (context && context->GetMinPlatformVersion() <= PLATFORM_VERSION_FIVE) {
+        Offset itemCenter = GetGlobalOffset() + GetLayoutSize() * HALF_SIZE;
+        double scale = ITEM_DEFAULT_SCALE;
+        double viewScale = ITEM_DEFAULT_SCALE;
+        auto pipelineContext = context_.Upgrade();
+        if (pipelineContext) {
+            scale = pipelineContext->GetDipScale();
+            viewScale = pipelineContext->GetViewScale();
+        }
+        if (NearZero(scale) || NearZero(viewScale)) {
+            LOGE("pipeline parameter is invalid");
+            return;
+        }
+        auto distance = std::abs(itemCenter.GetY() - WATCH_SIZE / viewScale * HALF_SIZE);
+        auto ratio = std::pow(distance, SQUARE) * ITEM_RATIO / std::pow(ITEM_DISTANCE_BASE * scale, SQUARE);
+        scaleFactor_ = std::max(ITEM_ZERO, ratio + ITEM_SCALE_BASE);
+        opacityFactor_ = std::max(ITEM_ZERO, ratio + ITEM_OPACITY_BASE);
+    } else {
+        auto renderList = GetRenderList();
+        if (!renderList) {
+            LOGE("Can not find parent render list");
+            return;
+        }
+
+        double itemSize = renderList->IsVertical() ? GetLayoutSize().Height() : GetLayoutSize().Width();
+        double itemCenter = GetPositionInList() + renderList->GetListPosition() + itemSize * HALF_SIZE;
+        double scale = ITEM_DEFAULT_SCALE;
+        auto pipelineContext = context_.Upgrade();
+        if (pipelineContext) {
+            scale = pipelineContext->GetDipScale();
+        }
+        if (NearZero(scale)) {
+            LOGE("Pipeline parameter is invalid");
+            return;
+        }
+        double viewPort = renderList->IsVertical() ? viewPort_.Height() : viewPort_.Width();
+        auto distance = std::abs(itemCenter - viewPort * HALF_SIZE);
+        if (NearZero(distance, DISTANCE_EPSILON)) {
+            distance = 0.0;
+        }
+        auto ratio = std::pow(distance, SQUARE) * ITEM_RATIO / std::pow(ITEM_DISTANCE_BASE * scale, SQUARE);
+        scaleFactor_ = std::max(ITEM_ZERO, ratio + ITEM_SCALE_BASE);
+        opacityFactor_ = std::max(ITEM_ZERO, ratio + ITEM_OPACITY_BASE);
     }
-    if (NearZero(scale)) {
-        LOGE("Pipeline parameter is invalid");
-        return;
-    }
-    double viewPort = renderList->IsVertical() ? viewPort_.Height() : viewPort_.Width();
-    auto distance = std::abs(itemCenter - viewPort * HALF_SIZE);
-    if (NearZero(distance, DISTANCE_EPSILON)) {
-        distance = 0.0;
-    }
-    auto ratio = std::pow(distance, SQUARE) * ITEM_RATIO / std::pow(ITEM_DISTANCE_BASE * scale, SQUARE);
-    scaleFactor_ = std::max(ITEM_ZERO, ratio + ITEM_SCALE_BASE);
-    opacityFactor_ = std::max(ITEM_ZERO, ratio + ITEM_OPACITY_BASE);
 }
 
 void RenderListItem::Update(const RefPtr<Component>& component)
@@ -285,7 +308,7 @@ void RenderListItem::HandleItemEffect()
     if (currentState_ != lastState_) {
 #ifdef WEARABLE_PRODUCT
         if (needVibrate_ && lastState_ == ItemState::NEARBY && currentState_ == ItemState::FOCUS && vibrator_) {
-            vibrator_->Vibrate(VIBRATE_DURATION);
+            vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH1);
         }
 #endif
         LOGD("item (%{public}d) change from %{public}d to %{public}d.", index_, lastState_, currentState_);

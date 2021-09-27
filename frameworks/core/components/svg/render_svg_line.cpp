@@ -38,7 +38,7 @@ void RenderSvgLine::Update(const RefPtr<Component> &component)
     x2_ = lineComponent->GetX2();
     y1_ = lineComponent->GetY1();
     y2_ = lineComponent->GetY2();
-    RenderSvgBase::SetPresentationAttrs(lineComponent->GetDeclaration());
+    RenderSvgBase::SetPresentationAttrs(component, lineComponent->GetDeclaration());
     PrepareAnimations(component);
     MarkNeedLayout();
 }

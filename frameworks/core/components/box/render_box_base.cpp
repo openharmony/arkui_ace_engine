@@ -245,18 +245,6 @@ void RenderBoxBase::CalculateGridLayoutSize()
     if (!gridColumnInfo_) {
         return;
     }
-
-    auto offset = gridColumnInfo_->GetOffset();
-    if (offset != UNDEFINED_DIMENSION) {
-        auto context = context_.Upgrade();
-        positionParam_.type =
-            (context && context->GetIsDeclarative()) ? PositionType::SEMI_RELATIVE : PositionType::ABSOLUTE;
-        std::pair<AnimatableDimension, bool>& edge =
-            (GetTextDirection() == TextDirection::RTL) ? positionParam_.right : positionParam_.left;
-        edge.first = offset;
-        edge.second = true;
-    }
-
     double defaultWidth = gridColumnInfo_->GetWidth();
     if (NearEqual(defaultWidth, 0.0)) {
         return;
@@ -286,7 +274,6 @@ void RenderBoxBase::CalculateSelfLayoutParam()
             gridContainerInfo_->GetMarginRight(), marginOrigin_.Bottom());
     }
     ConvertMarginPaddingToPx();
-
     if (GreatNotEqual(aspectRatio_.Value(), 0.0)) {
         AdjustSizeByAspectRatio();
     }
@@ -311,12 +298,13 @@ void RenderBoxBase::CalculateSelfLayoutParam()
     selfMax = layoutSetByParent.Constrain(constrainMax);
     selfMin = layoutSetByParent.Constrain(constrainMin);
     auto context = context_.Upgrade();
+    // allow overflow parent when set height or width, except when set flexgrow or flexshrink
     if (context->GetIsDeclarative()) {
         if (selfDefineWidth_ && layoutSetByParent.GetMinSize().Width() != layoutSetByParent.GetMaxSize().Width()) {
-            selfMax.SetWidth(selfMaxWidth_);
+            selfMax.SetWidth(constrainMax.Width());
         }
         if (selfDefineHeight_ && layoutSetByParent.GetMinSize().Height() != layoutSetByParent.GetMaxSize().Height()) {
-            selfMax.SetHeight(selfMaxHeight_);
+            selfMax.SetHeight(constrainMax.Height());
         }
     }
 
@@ -478,6 +466,10 @@ void RenderBoxBase::CalculateSelfLayoutSize()
     } else {
         height = childSize_.Height() + padding_.GetLayoutSize().Height() + borderSize.Height();
     }
+    double minWidth = padding_.GetLayoutSize().Width() + borderSize.Width();
+    double minHeight = padding_.GetLayoutSize().Height() + borderSize.Height();
+    width = width > minWidth ? width : minWidth;
+    height = height > minHeight ? height : minHeight;
     paintSize_ = Size(width, height);
     // box layout size = paint size + margin size
 
@@ -581,8 +573,12 @@ void RenderBoxBase::PerformLayoutInLiteMode()
     } else {
         height = childSize_.Height() + padding_.GetLayoutSize().Height() + borderSize.Height();
     }
+    double targetHeight = padding_.GetLayoutSize().Height() + borderSize.Height();
+    targetHeight = targetHeight > height ? targetHeight : height;
+    double targetWidth = padding_.GetLayoutSize().Width() + borderSize.Width();
+    targetHeight = targetWidth > width ? targetWidth : width;
     // Determine self size, not use constrain.
-    paintSize_ = Size(width, height);
+    paintSize_ = Size(targetWidth, targetHeight);
     selfLayoutSize_ = paintSize_ + margin_.GetLayoutSize();
     touchArea_.SetOffset(margin_.GetOffset());
     touchArea_.SetSize(paintSize_);

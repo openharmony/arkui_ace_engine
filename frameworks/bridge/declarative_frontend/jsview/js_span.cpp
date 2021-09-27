@@ -263,6 +263,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("textCase", &JSSpan::SetTextCase, opt);
     JSClass<JSSpan>::StaticMethod("decoration", &JSSpan::SetDecoration);
     JSClass<JSSpan>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSSpan>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSSpan>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSpan>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSpan>::StaticMethod("onClick", &JSSpan::JsOnClick);

@@ -15,7 +15,26 @@
 
 #include "base/log/ace_trace.h"
 
+#ifndef WINDOWS_PLATFORM
+#include "securec.h"
+#endif
+
 namespace OHOS::Ace {
+namespace {
+
+const size_t MAX_STRING_SIZE = 128;
+
+}
+
+bool AceTraceBeginWithArgv(const char* format, va_list args)
+{
+    char name[MAX_STRING_SIZE] = { 0 };
+    if (vsnprintf_s(name, sizeof(name), sizeof(name) - 1, format, args) < 0) {
+        return false;
+    }
+    AceTraceBegin(name);
+    return true;
+}
 
 bool AceTraceBeginWithArgs(const char* format, ...)
 {

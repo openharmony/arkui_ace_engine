@@ -311,6 +311,49 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->OnConfigurationUpdated(data);
     };
 
+    const auto& onStartContinuationCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() -> bool {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return false;
+        }
+        return jsEngine->OnStartContinuation();
+    };
+
+    const auto& onRemoteTerminatedCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->OnRemoteTerminated();
+    };
+
+    const auto& onCompleteContinuationCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                                     const int32_t code) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->OnCompleteContinuation(code);
+    };
+
+    const auto& onRestoreDataCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                            const std::string& data) -> bool {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return false;
+        }
+        return jsEngine->OnRestoreData(data);
+    };
+
+    const auto& onSaveDataCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                         std::string& saveData) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->OnSaveData(saveData);
+    };
+
     const auto& timerCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                     const std::string& callbackId, const std::string& delay, bool isInterval) {
         auto jsEngine = weakEngine.Upgrade();
@@ -350,8 +393,8 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
         resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
         timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
-        onConfigurationUpdatedCallBack);
-    delegate_->SetAbility(ability_);
+        onConfigurationUpdatedCallBack, onSaveDataCallBack, onStartContinuationCallBack, onRemoteTerminatedCallBack,
+        onCompleteContinuationCallBack, onRestoreDataCallBack);
     if (disallowPopLastPage_) {
         delegate_->DisallowPopLastPage();
     }
@@ -577,13 +620,6 @@ void DeclarativeFrontend::OnCompleteContinuation(int32_t code)
     }
 }
 
-void DeclarativeFrontend::OnRemoteTerminated()
-{
-    if (delegate_) {
-        delegate_->OnRemoteTerminated();
-    }
-}
-
 void DeclarativeFrontend::OnSaveData(std::string& data)
 {
     if (delegate_) {
@@ -605,6 +641,13 @@ bool DeclarativeFrontend::OnRestoreData(const std::string& data)
         return false;
     }
     return delegate_->OnRestoreData(data);
+}
+
+void DeclarativeFrontend::OnRemoteTerminated()
+{
+    if (delegate_) {
+        delegate_->OnRemoteTerminated();
+    }
 }
 
 void DeclarativeFrontend::OnNewRequest(const std::string& data)

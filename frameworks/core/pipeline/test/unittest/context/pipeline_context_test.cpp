@@ -18,16 +18,16 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/task_runner.h"
 
-#include "adapter/common/cpp/flutter_task_executor.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
 #include "base/json/json_util.h"
 #include "base/thread/task_executor.h"
+#include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/frontend.h"
 #include "core/common/platform_window.h"
 #include "core/common/window.h"
 #include "core/components/box/box_component.h"
 #include "core/components/test/unittest/mock/mock_render_depend.h"
 #include "core/components/touch_listener/touch_listener_component.h"
+#include "core/mock/fake_task_executor.h"
 #include "core/pipeline/pipeline_context.h"
 
 using namespace testing;
@@ -187,6 +187,7 @@ public:
     {
         return false;
     }
+    void OnRemoteTerminated() override {}
     void OnNewRequest(const std::string& data) override {}
     void CallRouterBack() override {}
     void OnSurfaceChanged(int32_t width, int32_t height) override {}

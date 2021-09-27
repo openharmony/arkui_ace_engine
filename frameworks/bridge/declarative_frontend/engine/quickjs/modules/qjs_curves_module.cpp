@@ -104,7 +104,7 @@ JSValue CurvesInit(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCons
         LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
         return JS_NULL;
     }
-    auto page = instance->GetStagingPage(ctx);
+    auto page = instance->GetRunningPage(ctx);
     if (page == nullptr) {
         LOGE("page is nullptr");
         return JS_NULL;
@@ -142,7 +142,7 @@ JSValue ParseCurves(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCon
         LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
         return JS_NULL;
     }
-    auto page = instance->GetStagingPage(ctx);
+    auto page = instance->GetRunningPage(ctx);
     if (page == nullptr) {
         LOGE("page is nullptr");
         return JS_NULL;

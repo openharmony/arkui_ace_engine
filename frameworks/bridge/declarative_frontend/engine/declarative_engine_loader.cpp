@@ -61,7 +61,7 @@ RefPtr<BaseXComponentBridge> DeclarativeEngineLoader::CreateXComponentBridge() c
 }
 
 #if defined(BUILT_IN_JS_ENGINE)
-JsEngineLoader& JsEngineLoader::GetDeclarative()
+JsEngineLoader& JsEngineLoader::GetDeclarative(const char*)
 {
     return DeclarativeEngineLoader::GetInstance();
 }

@@ -94,8 +94,8 @@ void SetTextStyle(const ScopedCanvas& canvas, const RenderRingInfo& trackInfo,
     builder->AddText(StringUtils::Str8ToStr16(markedText));
     auto paragraph = builder->Build();
     paragraph->Layout(dataRegion.Width());
-    paragraph->Paint(canvas->canvas(),pathStartVertexX - txtStyle.font_size,
-        pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
+    paragraph->Paint(
+        canvas->canvas(), pathStartVertexX - txtStyle.font_size, pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
 }
 
 void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo,

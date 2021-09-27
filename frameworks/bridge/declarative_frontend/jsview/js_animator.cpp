@@ -43,7 +43,7 @@ RefPtr<JsAcePage> GetCurrentPage()
 
 #elif USE_QUICKJS_ENGINE
     auto context = QJSContext::Current();
-    auto page = QJSDeclarativeEngineInstance::GetStagingPage(context);
+    auto page = QJSDeclarativeEngineInstance::GetRunningPage(context);
     return page;
 #elif USE_ARK_ENGINE
     auto runtime = JsiDeclarativeEngineInstance::GetJsRuntime();

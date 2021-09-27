@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_ANIMATED_IMAGE_PLAYER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_ANIMATED_IMAGE_PLAYER_H
 
+#include <unordered_map>
+
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "third_party/skia/include/codec/SkCodec.h"
@@ -35,7 +37,7 @@ class AnimatedImagePlayer : public virtual AceType {
 public:
     AnimatedImagePlayer(
         ImageSourceInfo source,
-        PaintSuccessCallback successCallback,
+        UploadSuccessCallback successCallback,
         const WeakPtr<PipelineContext>& weakContext,
         const fml::WeakPtr<flutter::IOManager>& ioManager,
         const fml::RefPtr<flutter::SkiaUnrefQueue>& gpuQueue,
@@ -53,6 +55,7 @@ public:
             animator_ = AceType::MakeRefPtr<Animator>(context);
             auto pictureAnimation = AceType::MakeRefPtr<PictureAnimation<int32_t>>();
             float totalFrameDuration = 0.0f;
+            int32_t lastRequiredIndex = -1;
             for (int32_t index = 0; index < frameCount_; index++) {
                 LOGD("frame[%{public}d] duration is %{public}d", index, frameInfos_[index].fDuration);
                 // if frame duration is 0, set this frame duration as 100ms
@@ -60,7 +63,21 @@ public:
                     frameInfos_[index].fDuration = 100;
                 }
                 totalFrameDuration += frameInfos_[index].fDuration;
+
+                // process required frame index.
+                int32_t requiredIndex = frameInfos_[index].fRequiredFrame;
+                // if requiredIndex is valid
+                if (requiredIndex >= 0 && requiredIndex < frameCount_) {
+                    LOGD("now index: %{private}d require prior frame: %{private}d", index, requiredIndex);
+                    // if require prior frame before last frame, cache it after first loop.
+                    if (requiredIndex < lastRequiredIndex) {
+                        LOGD("requiredIndex < lastRequiredIndex, lastRequiredIndex: %{private}d ", lastRequiredIndex);
+                        cachedFrame_.emplace(requiredIndex, nullptr);
+                    }
+                    lastRequiredIndex = requiredIndex;
+                }
             }
+            LOGD("frame cached size: %{private}d", static_cast<int32_t>(cachedFrame_.size()));
             LOGD("animatied image total duration: %{public}f", totalFrameDuration);
             for (int32_t index = 0; index < frameCount_; index++) {
                 pictureAnimation->AddPicture(
@@ -75,7 +92,7 @@ public:
             animator_->AddInterpolator(pictureAnimation);
             animator_->SetDuration(totalFrameDuration);
             animator_->SetIteration(
-                repetitionCount_ >= 0 ? repetitionCount_ + 1 : ANIMATION_REPEAT_INFINITE);
+                repetitionCount_ > 0 ? repetitionCount_ : ANIMATION_REPEAT_INFINITE);
             animator_->Play();
         }
     }
@@ -91,7 +108,7 @@ private:
     static bool CopyTo(SkBitmap* dst, SkColorType dstColorType, const SkBitmap& src);
 
     ImageSourceInfo imageSource_;
-    PaintSuccessCallback successCallback_;
+    UploadSuccessCallback successCallback_;
     WeakPtr<PipelineContext> context_;
     fml::WeakPtr<flutter::IOManager> ioManager_;
     fml::RefPtr<flutter::SkiaUnrefQueue> unrefQueue_;
@@ -99,11 +116,17 @@ private:
     const int32_t frameCount_;
     const int32_t repetitionCount_;
     std::vector<SkCodec::FrameInfo> frameInfos_;
-    std::unique_ptr<SkBitmap> lastRequiredBitmap_;
-    int32_t requiredFrameIndex_ = -1;
+
     RefPtr<Animator> animator_;
     int32_t dstWidth_ = -1;
     int32_t dstHeight_ = -1;
+
+    // used to cache required frame.
+    std::unordered_map<int32_t, std::unique_ptr<SkBitmap>> cachedFrame_;
+
+    // used to cache last required frame. this will be reset during looping.
+    std::unique_ptr<SkBitmap> lastRequiredBitmap_;
+    int32_t lastRequiredFrameIndex_ = -1;
 };
 
 } // namespace OHOS::Ace

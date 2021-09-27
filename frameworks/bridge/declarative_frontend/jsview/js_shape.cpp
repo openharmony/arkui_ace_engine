@@ -395,6 +395,7 @@ void JSShape::JSBind(BindingTarget globalObj)
     JSClass<JSShape>::StaticMethod("antiAlias", &JSShape::SetAntiAlias);
 
     JSClass<JSShape>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSShape>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSShape>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSShape>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSShape>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

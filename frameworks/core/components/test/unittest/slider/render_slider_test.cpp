@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 
+#include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/i18n/localization.h"
 #include "core/components/slider/block_component.h"
 #include "core/components/slider/render_block.h"

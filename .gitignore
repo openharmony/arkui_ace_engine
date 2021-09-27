@@ -4,6 +4,12 @@
 .idea/
 CMakeLists.txt
 cmake-build-debug/
+.vs/
+.vscode/
+*.iml
+.idea/
+CMakeLists.txt
+cmake-build-debug/
 lite/appfwk/
 lite/base/
 lite/interfaces/

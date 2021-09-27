@@ -15,8 +15,7 @@
 
 #include "gtest/gtest.h"
 
-#include "adapter/ohos/osal/fake_asset_manager.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
+#include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/json/json_util.h"
 #include "base/log/log.h"
 #include "core/animation/card_transition_controller.h"
@@ -24,6 +23,8 @@
 #include "core/animation/svg_animate.h"
 #include "core/animation/test/unittest/mock/animation_test_utils.h"
 #include "core/components/test/json/json_frontend.h"
+#include "core/mock/fake_asset_manager.h"
+#include "core/mock/fake_task_executor.h"
 #include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -31,6 +32,22 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
+
+Platform::JniEnvironment::JniEnvironment() {}
+
+Platform::JniEnvironment::~JniEnvironment() = default;
+
+std::shared_ptr<JNIEnv> Platform::JniEnvironment::GetJniEnv(JNIEnv* jniEnv) const
+{
+    return nullptr;
+}
+
+Platform::JniEnvironment& Platform::JniEnvironment::GetInstance()
+{
+    static Platform::JniEnvironment jniEnvironment;
+    return jniEnvironment;
+}
+
 namespace {
 
 constexpr int32_t NANOSECOND_TO_MILLISECOND = 1000000;

@@ -38,6 +38,9 @@ void RenderRating::Update(const RefPtr<Component>& component)
         if (isUpdateAll) {
             ratingScore_ = rating->GetRatingScore();
         }
+        if (rating->GetOnChange()) {
+            onChangeRating = *rating->GetOnChange();
+        }
         stepSize_ = rating->GetStepSize();
         paddingHorizontal_ = rating->GetPaddingHorizontal();
         paddingVertical_ = rating->GetPaddingVertical();
@@ -311,6 +314,7 @@ void RenderRating::UpdateRenderImage(const RefPtr<ImageComponent>& imageComponen
 
     renderImage = AceType::DynamicCast<RenderImage>(imageComponent->CreateRenderNode());
     renderImage->Attach(GetContext());
+    renderImage->SetDirectPaint(true);
     renderImage->Update(imageComponent);
 
     AddChild(renderImage);
@@ -377,7 +381,6 @@ void RenderRating::HandleTouchEvent(const Offset& updatePoint)
     if (NearEqual(newScore, drawScore_)) {
         return;
     }
-
     drawScore_ = newScore;
     ConstrainScore(drawScore_, stepSize_, starNum_);
     UpdateRatingBar();
@@ -412,6 +415,9 @@ void RenderRating::FireChangeEvent()
     if (onScoreChange_) {
         std::string param = std::string(R"("change",{"rating":)").append(std::to_string(drawScore_).append("}"));
         onScoreChange_(param);
+    }
+    if (onChangeRating) {
+        onChangeRating(static_cast<int>(drawScore_));
     }
 }
 

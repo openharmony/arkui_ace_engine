@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
+#include "bridge/declarative_frontend/jsview/js_radio.h"
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/checkable/checkable_component.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSRadio::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("radio create erroe, info is not-vaild");
+        LOGE("radio create error, info is not-valid");
         return;
     }
     RefPtr<RadioTheme> radioTheme = GetTheme<RadioTheme>();
@@ -55,7 +55,7 @@ void JSRadio::JSBind(BindingTarget globalObj)
 void JSRadio::Checked(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("JSRadio checked, info is not-vaild");
+        LOGE("JSRadio checked, info is not-valid");
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();

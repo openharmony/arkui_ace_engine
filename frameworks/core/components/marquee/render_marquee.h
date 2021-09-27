@@ -24,12 +24,14 @@
 
 namespace OHOS::Ace {
 
-class RenderMarquee : public RenderNode {
+class ACE_EXPORT RenderMarquee : public RenderNode {
     DECLARE_ACE_TYPE(RenderMarquee, RenderNode);
 
 public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
+    void GetPlayerCtr(const RefPtr<Component>& component, bool emdit, bool control);
+    void GetMarqueeCallback(const RefPtr<Component>& component);
     void PerformLayout() override;
     void OnHiddenChanged(bool hidden) override;
     void Start();
@@ -37,6 +39,21 @@ public:
 
 protected:
     virtual TextDirection GetTextDirection(const std::string& text) const = 0;
+
+    void SetOnStart(const std::function<void(void)>& value)
+    {
+        onStartEvent_ = value;
+    }
+
+    void SetOnBounce(const std::function<void(void)>& value)
+    {
+        onBounceEvent_ = value;
+    }
+
+    void SetOnFinish(const std::function<void(void)>& value)
+    {
+        onFinishEvent_ = value;
+    }
 
 private:
     void UpdateAnimation();
@@ -51,6 +68,7 @@ private:
 
     bool startAfterLayout_ = true;
     bool startAfterShowed_ = false;
+    bool playerFinishControl_ = false;
     bool isHidden_ = false;
     double scrollAmount_ = 0.0;
     int32_t loop_ = ANIMATION_REPEAT_INFINITE;
@@ -59,6 +77,10 @@ private:
     std::function<void()> bounceEvent_;
     std::function<void()> finishEvent_;
     std::function<void()> startEvent_;
+
+    std::function<void()> onBounceEvent_;
+    std::function<void()> onFinishEvent_;
+    std::function<void()> onStartEvent_;
 };
 
 } // namespace OHOS::Ace

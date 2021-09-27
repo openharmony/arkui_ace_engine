@@ -51,28 +51,15 @@ std::string MediaQueryInfo::GetOrientation() const
     return "";
 }
 
+/* 1.0 info */
 std::string MediaQueryInfo::GetMediaQueryInfo() const
 {
-    CHECK_RUN_ON(JS);
-    auto json = JsonUtil::Create(true);
-    auto container = Container::Current();
-    int32_t width = container ? container->GetViewWidth() : 0;
-    int32_t height = container ? container->GetViewHeight() : 0;
-    double aspectRatio = (height != 0) ? (static_cast<double>(width) / height) : 1.0;
-    json->Put("width", width);
-    json->Put("height", height);
-    json->Put("aspectRatio", aspectRatio);
-    json->Put("roundScreen", SystemProperties::GetIsScreenRound());
-    json->Put("deviceWidth", SystemProperties::GetDeviceWidth());
-    json->Put("deviceHeight", SystemProperties::GetDeviceHeight());
-    json->Put("resolution", SystemProperties::GetResolution());
-    json->Put("orientation", GetOrientation().c_str());
-    json->Put("deviceType", GetDeviceType().c_str());
+    auto json = GetMediaQueryJsonInfo();
     json->Put("isInit", false);
-    json->Put("darkMode", SystemProperties::GetColorMode() == ColorMode::DARK);
     return json->ToString();
 }
 
+/* 2.0 info */
 std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo() const
 {
     CHECK_RUN_ON(JS);
@@ -91,6 +78,7 @@ std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo() const
     json->Put("orientation", GetOrientation().c_str());
     json->Put("device-type", GetDeviceType().c_str());
     json->Put("dark-mode", SystemProperties::GetColorMode() == ColorMode::DARK);
+    json->Put("api-version", StringUtils::StringToInt(SystemProperties::GetApiVersion()));
     return json;
 }
 

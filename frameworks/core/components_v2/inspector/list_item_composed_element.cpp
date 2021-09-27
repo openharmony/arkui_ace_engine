@@ -26,7 +26,7 @@ namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const ListItemComposedElement&)>> CREATE_JSON_MAP {
     { "sticky", [](const ListItemComposedElement& inspector) { return inspector.GetSticky(); } },
-    { "editable", [](const ListItemComposedElement& inspector) { return inspector.GetEditable(); } }
+    { "editMode", [](const ListItemComposedElement& inspector) { return inspector.GetEditMode(); } }
 };
 
 }
@@ -37,7 +37,7 @@ void ListItemComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(
         std::string("sticky: ").append(GetSticky()));
     DumpLog::GetInstance().AddDesc(
-        std::string("editable: ").append(GetEditable()));
+        std::string("editMode: ").append(GetEditMode()));
 }
 
 
@@ -63,17 +63,29 @@ std::string ListItemComposedElement::GetSticky() const
     return "Sticky.None";
 }
 
-std::string ListItemComposedElement::GetEditable() const
+std::string ListItemComposedElement::GetEditMode() const
 {
     auto node = GetInspectorNode(ListItemElement::TypeId());
     if (!node) {
-        return "false";
+        return "EditMode.None";
     }
     auto renderListItem = AceType::DynamicCast<RenderListItem>(node);
-    if (renderListItem) {
-        return renderListItem->IsEditable() ? "true" : "false";
+    if (!renderListItem) {
+        return "EditMode.None";
     }
-    return "false";
+    if (renderListItem->IsDeletable()) {
+        if (renderListItem->IsMovable()) {
+            return "EditMode.Deletable | EditMode.Movable";
+        } else {
+            return "EditMode.Deletable";
+        }
+    } else {
+        if (renderListItem->IsMovable()) {
+            return "EditMode.Movable";
+        } else {
+            return "EditMode.None";
+        }
+    }
 }
 
 } // namespace OHOS::Ace::V2

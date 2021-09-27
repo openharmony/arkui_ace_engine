@@ -18,6 +18,7 @@
 #include "core/components/common/layout/constants.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine_instance.h"
+#include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ability_component.h"
@@ -28,6 +29,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
 #endif
@@ -60,8 +62,11 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_option.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
@@ -71,6 +76,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
@@ -329,10 +335,7 @@ JSValue Fp2Px(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* a
         return JS_ThrowSyntaxError(ctx, "container is null");
     }
     auto pipelineContext = container->GetPipelineContext();
-    double fontScale = 1.0;
-    if (pipelineContext) {
-        fontScale = pipelineContext->GetFontScale();
-    }
+    double fontScale = pipelineContext->GetFontScale();
     double pxValue = fpValue * density * fontScale;
 
     int32_t result = GreatOrEqual(pxValue, 0) ? (pxValue + 0.5) : (pxValue - 0.5);
@@ -360,10 +363,7 @@ JSValue Px2Fp(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* a
         return JS_ThrowSyntaxError(ctx, "container is null");
     }
     auto pipelineContext = container->GetPipelineContext();
-    double fontScale = 1.0;
-    if (pipelineContext) {
-        fontScale = pipelineContext->GetFontScale();
-    }
+    double fontScale = pipelineContext->GetFontScale();
     double ratio = density * fontScale;
     double fpValue = pxValue / ratio;
 
@@ -389,15 +389,10 @@ JSValue Lpx2Px(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* 
     if (!container) {
         return JS_ThrowSyntaxError(ctx, "container is null");
     }
-    double pxValue = 1.0;
     auto pipelineContext = container->GetPipelineContext();
-    if (pipelineContext) {
-        auto frontend = pipelineContext->GetFrontend();
-        if (frontend) {
-            auto& windowConfig = frontend->GetWindowConfig();
-            pxValue = lpxValue * windowConfig.designWidthScale;
-        }
-    }
+    auto frontend = pipelineContext->GetFrontend();
+    auto& windowConfig = frontend->GetWindowConfig();
+    double pxValue = lpxValue * windowConfig.designWidthScale;
 
     int32_t result = GreatOrEqual(pxValue, 0) ? (pxValue + 0.5) : (pxValue - 0.5);
     JSValue lpxQJSValue = JS_NewInt32(ctx, result);
@@ -422,15 +417,11 @@ JSValue Px2Lpx(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* 
     if (!container) {
         return JS_ThrowSyntaxError(ctx, "container is null");
     }
-    double lpxValue = 1.0;
     auto pipelineContext = container->GetPipelineContext();
-    if (pipelineContext) {
-        auto frontend = pipelineContext->GetFrontend();
-        if (frontend) {
-            auto& windowConfig = frontend->GetWindowConfig();
-            lpxValue = pxValue / windowConfig.designWidthScale;
-        }
-    }
+    auto frontend = pipelineContext->GetFrontend();
+    auto& windowConfig = frontend->GetWindowConfig();
+    double lpxValue = pxValue / windowConfig.designWidthScale;
+
     JSValue lpxQJSValue = JS_NewInt32(ctx, lpxValue);
     return lpxQJSValue;
 }
@@ -499,7 +490,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSBadge::JSBind(globalObj);
     JSTextArea::JSBind(globalObj);
     JSTextInput::JSBind(globalObj);
-#ifndef WEARABLE_PRODUCT
+    JSMarquee::JSBind(globalObj);
+#if !defined(WEARABLE_PRODUCT) && !defined(OHOS_STANDARD_SYSTEM)
     JSForm::JSBind(globalObj);
 #endif
     JSRect::JSBind(globalObj);
@@ -530,12 +522,21 @@ void JsRegisterViews(BindingTarget globalObj)
     JSGridContainer::JSBind(globalObj);
     JSIndexer::JSBind(globalObj);
     JSGauge::JSBind(globalObj);
+    JSHyperlink::JSBind(globalObj);
 
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);
     toggleType.Constant("Switch", 1);
     toggleType.Constant("Button", 2);
 
+    JSObjectTemplate refreshStatus;
+    refreshStatus.Constant("Inactive", 0);
+    refreshStatus.Constant("Drag", 1);
+    refreshStatus.Constant("OverDrag", 2);
+    refreshStatus.Constant("Refresh", 3);
+    refreshStatus.Constant("Done", 4);
+
+    JSActionSheet::JSBind(globalObj);
     JSAlertDialog::JSBind(globalObj);
 
     JSAbilityComponent::JSBind(globalObj);
@@ -628,6 +629,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JS_SetPropertyStr(ctx, globalObj, "Overflow", *overflow);
     JS_SetPropertyStr(ctx, globalObj, "ButtonType", *buttonType);
     JS_SetPropertyStr(ctx, globalObj, "ToggleType", *toggleType);
+    JS_SetPropertyStr(ctx, globalObj, "RefreshStatus", *refreshStatus);
     JS_SetPropertyStr(ctx, globalObj, "SliderStyle", *sliderStyle);
     JS_SetPropertyStr(ctx, globalObj, "SliderChangeMode", *sliderChangeMode);
     JS_SetPropertyStr(ctx, globalObj, "ProgressStyle", *progressStyle);

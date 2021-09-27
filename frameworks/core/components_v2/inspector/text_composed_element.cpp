@@ -68,34 +68,6 @@ std::unique_ptr<JsonValue> TextComposedElement::ToJsonObject() const
     return resultJson;
 }
 
-double TextComposedElement::GetWidth() const
-{
-    double width = InspectorComposedElement::GetWidth();
-    if (width != -1.0) {
-        return width;
-    }
-
-    auto renderText = GetRenderText();
-    if (renderText) {
-        return renderText->GetPaintRect().Width();
-    }
-    return -1.0;
-}
-
-double TextComposedElement::GetHeight() const
-{
-    double height = InspectorComposedElement::GetHeight();
-    if (height != -1.0) {
-        return height;
-    }
-
-    auto renderText = GetRenderText();
-    if (renderText) {
-        return renderText->GetPaintRect().Height();
-    }
-    return -1.0;
-}
-
 std::string TextComposedElement::GetTextAlign() const
 {
     auto renderText = GetRenderText();
@@ -157,7 +129,7 @@ std::string TextComposedElement::GetTextFontColor() const
     auto renderText = GetRenderText();
     auto fontColor =
         renderText ? renderText->GetTextStyle().GetTextColor() : Color::BLACK;
-    return std::to_string(fontColor.GetValue());
+    return fontColor.ColorToString();
 }
 
 std::string TextComposedElement::GetTextFontSize() const
@@ -187,7 +159,7 @@ std::string TextComposedElement::GetTextFontWeight() const
 std::string TextComposedElement::GetData() const
 {
     auto renderText = GetRenderText();
-    return renderText ? "" : renderText->GetTextData();
+    return renderText ? renderText->GetTextData() : "";
 }
 
 RefPtr<RenderText> TextComposedElement::GetRenderText() const

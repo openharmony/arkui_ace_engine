@@ -491,6 +491,26 @@ public:
         return lineGradient_;
     }
 
+    void SetWholeLineGradient(bool flag)
+    {
+        wholeLineGradient_ = flag;
+    }
+
+    bool GetWholeLineGradient() const
+    {
+        return wholeLineGradient_;
+    }
+
+    const Color& GetTargetColor() const
+    {
+        return targetColor_;
+    }
+
+    void SetTargetColor(const Color& targetColor)
+    {
+        targetColor_ = targetColor;
+    }
+
     void SetHeadPointIndex(int32_t index)
     {
         headPointIndex_ = index;
@@ -545,10 +565,12 @@ private:
     int32_t erasePointNumber_ = 0;
     int32_t headPointIndex_ = -1;
     bool lineGradient_ = false;
+    bool wholeLineGradient_ = false;
 
     Color textColor_;
     double textSize_ = 18.0;
     std::vector<std::string> fontFamily_;
+    Color targetColor_ = Color::TRANSPARENT;
 };
 
 class ChartComponent : public RenderComponent {

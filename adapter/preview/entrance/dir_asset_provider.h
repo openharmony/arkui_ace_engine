@@ -28,7 +28,7 @@
 
 #include "flutter/assets/directory_asset_bundle.h"
 
-#include "adapter/common/cpp/file_asset_provider.h"
+#include "core/common/flutter/flutter_asset_manager.h"
 #include "base/resource/asset_manager.h"
 #include "base/utils/macros.h"
 

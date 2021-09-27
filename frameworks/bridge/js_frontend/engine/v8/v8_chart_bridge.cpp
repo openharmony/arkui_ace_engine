@@ -259,6 +259,22 @@ void GetChartAttrOptionsSeriesLineStyle(
                                 chartOptions.SetSmoothFlag(StringToBool(valStr));
                             }
                         } },
+                    { "lineGradient",
+                        [](v8::Local<v8::Context> ctx, v8::Local<v8::Value> val, ChartOptions& chartOptions) {
+                            v8::String::Utf8Value valV8Str(ctx->GetIsolate(), val);
+                            const char* valStr = *valV8Str;
+                            if (valStr != nullptr) {
+                                chartOptions.SetWholeLineGradient(StringToBool(valStr));
+                            }
+                        } },
+                    { "targetColor",
+                        [](v8::Local<v8::Context> ctx, v8::Local<v8::Value> val, ChartOptions& chartOptions) {
+                            v8::String::Utf8Value valV8Str(ctx->GetIsolate(), val);
+                            const char* valStr = *valV8Str;
+                            if (valStr != nullptr) {
+                                chartOptions.SetTargetColor(Color::FromString(valStr));
+                            }
+                        } },
                 };
             auto iter = chartOptionsSeriesLineStyleMap.find(keyStr);
             if (iter != chartOptionsSeriesLineStyleMap.end()) {

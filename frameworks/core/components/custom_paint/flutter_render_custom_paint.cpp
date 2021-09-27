@@ -212,16 +212,23 @@ SkPaint FlutterRenderCustomPaint::GetStrokePaint()
 
 std::string FlutterRenderCustomPaint::ToDataURL(const std::string& args)
 {
+    auto pipeline = context_.Upgrade();
+    if (!pipeline) {
+        return UNSUPPORTED;
+    }
+
     std::string mimeType = GetMimeType(args);
     double quality = GetQuality(args);
     double width = GetLayoutSize().Width();
     double height = GetLayoutSize().Height();
     SkBitmap tempCache;
-    tempCache.allocPixels(SkImageInfo::Make(width, height,
-        SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType));
+    tempCache.allocPixels(SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
+        (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
     SkCanvas tempCanvas(tempCache);
-    auto rect = SkRect::MakeXYWH(0.0, 0.0, width, height);
-    tempCanvas.drawBitmapRect(canvasCache_, rect, rect, nullptr);
+    double viewScale = pipeline->GetViewScale();
+    tempCanvas.clear(SK_ColorTRANSPARENT);
+    tempCanvas.scale(1.0 / viewScale, 1.0 / viewScale);
+    tempCanvas.drawBitmap(canvasCache_, 0.0f, 0.0f);
     SkPixmap src;
     bool success = tempCache.peekPixels(&src);
     if (!success) {
@@ -231,7 +238,7 @@ std::string FlutterRenderCustomPaint::ToDataURL(const std::string& args)
     SkDynamicMemoryWStream dst;
     if (mimeType == IMAGE_JPEG) {
         SkJpegEncoder::Options options;
-        options.fQuality = quality;
+        options.fQuality = quality * 100;
         success = SkJpegEncoder::Encode(&dst, src, options);
     } else if (mimeType == IMAGE_WEBP) {
         SkWebpEncoder::Options options;
@@ -1060,8 +1067,8 @@ void FlutterRenderCustomPaint::SetTransform(const TransformParam& param)
     // use physical pixel to store bitmap
     double viewScale = pipeline->GetViewScale();
     SkMatrix skMatrix;
-    skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX, param.skewX * viewScale,
-        param.scaleY * viewScale, param.translateY, 0, 0, 1);
+    skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX * viewScale,
+        param.skewX * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
     skCanvas_->setMatrix(skMatrix);
 }
 

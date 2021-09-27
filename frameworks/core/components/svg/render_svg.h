@@ -78,6 +78,38 @@ public:
         return svgHrefNodes_[id].Upgrade();
     }
 
+    void AddHrefComponent(const std::string& id, const RefPtr<Component>& component)
+    {
+        if (id.empty() || component == nullptr) {
+            return;
+        }
+        svgHrefComponents_[id] = component;
+    }
+
+    RefPtr<Component> GetHrefComponent(const std::string& id)
+    {
+        if (svgHrefComponents_.find(id) == svgHrefComponents_.end()) {
+            return nullptr;
+        }
+        return svgHrefComponents_[id].Upgrade();
+    }
+
+    void AddHrefDeclaration(const std::string& id, const RefPtr<SvgBaseDeclaration>& declaration)
+    {
+        if (id.empty() || declaration == nullptr) {
+            return;
+        }
+        svgHrefDeclarations_[id] = declaration;
+    }
+
+    RefPtr<SvgBaseDeclaration> GetHrefDeclaration(const std::string& id)
+    {
+        if (svgHrefDeclarations_.find(id) == svgHrefDeclarations_.end()) {
+            return nullptr;
+        }
+        return svgHrefDeclarations_[id].Upgrade();
+    }
+
     void MarkIsFixSize(bool isFixSize)
     {
         isFixSize_ = isFixSize;
@@ -117,6 +149,8 @@ private:
     bool hasUpdated_ = false;
     std::function<void(double)> opacityCallback_;
     std::map<std::string, WeakPtr<RenderSvgBase>> svgHrefNodes_;
+    std::map<std::string, WeakPtr<Component>> svgHrefComponents_;
+    std::map<std::string, WeakPtr<SvgBaseDeclaration>> svgHrefDeclarations_;
     bool isFixSize_ = false;
 };
 

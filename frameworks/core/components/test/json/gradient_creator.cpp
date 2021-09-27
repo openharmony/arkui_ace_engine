@@ -51,7 +51,7 @@ Gradient GradientCreator::CreateFromJson(const JsonValue& json)
             json.GetValue(GRADIENT_DIRECTION)->GetInt(), GRADIENT_DIRECTIONS, GradientDirection::LEFT));
     }
     if (json.Contains(GRADIENT_ANGLE) && json.GetValue(GRADIENT_ANGLE)->IsNumber()) {
-        gradient.GetLinearGradient().angle = json.GetValue(GRADIENT_ANGLE)->GetDouble();
+        gradient.GetLinearGradient().angle = AnimatableDimension(json.GetValue(GRADIENT_ANGLE)->GetDouble());
     }
     if (json.Contains(GRADIENT_REPEAT) && json.GetValue(GRADIENT_REPEAT)->IsBool()) {
         gradient.SetRepeat(json.GetValue(GRADIENT_REPEAT)->GetBool());

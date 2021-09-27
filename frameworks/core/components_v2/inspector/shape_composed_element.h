@@ -29,8 +29,8 @@ public:
     ~ShapeComposedElement() override = default;
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
-    double GetWidth() const override;
-    double GetHeight() const override;
+    std::string GetWidth() const override;
+    std::string GetHeight() const override;
 
     std::string GetShapeType() const;
     std::string GetCommands() const;

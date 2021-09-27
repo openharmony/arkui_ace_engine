@@ -50,6 +50,7 @@ using FocusChangeCallback = std::function<void(const std::string&)>;
 using NodeId = int32_t;
 // If no insertion location is specified, new child will be added to the end of children list by default.
 constexpr int32_t DEFAULT_INDEX = -1;
+constexpr uint64_t DEFAULT_ACTIONS = std::numeric_limits<uint64_t>::max();
 
 class ACE_EXPORT AccessibilityNode : public AceType {
     DECLARE_ACE_TYPE(AccessibilityNode, AceType);
@@ -362,17 +363,18 @@ public:
         isPassword_ = isPassword;
     }
 
-    std::unordered_set<AceAction> GetSupportAction() const;
+    std::unordered_set<AceAction> GetSupportAction(
+        uint64_t enableActions = DEFAULT_ACTIONS) const;
 
     void AddSupportAction(AceAction action)
     {
-        supportActions_ |= (1LL << static_cast<uint32_t>(action));
+        supportActions_ |= (1UL << static_cast<uint32_t>(action));
     }
 
     void SetSupportAction(AceAction action, bool isEnable)
     {
-        isEnable ? supportActions_ |= (1LL << static_cast<uint32_t>(action))
-                 : supportActions_ &= (~(0LL)) ^ (1LL << static_cast<uint32_t>(action));
+        isEnable ? supportActions_ |= (1UL << static_cast<uint32_t>(action))
+                 : supportActions_ &= (~(0UL)) ^ (1UL << static_cast<uint32_t>(action));
     }
 
 

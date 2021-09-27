@@ -39,6 +39,12 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
     deviceHeight = temp;
 }
 
+bool IsTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.enabled", "0") == "1" ||
+        system::GetParameter("debug.ace.trace.enabled", "0") == "1");
+}
+
 } // namespace
 
 void SystemProperties::InitDeviceType(DeviceType)
@@ -46,7 +52,7 @@ void SystemProperties::InitDeviceType(DeviceType)
     // Do nothing, no need to store type here, use system property at 'GetDeviceType' instead.
 }
 
-bool SystemProperties::traceEnabled_ = system::GetParameter("persist.ace.trace.enabled", "0") == "1";
+bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::isRound_ = false;
 int32_t SystemProperties::deviceWidth_ = 0;
 int32_t SystemProperties::deviceHeight_ = 0;

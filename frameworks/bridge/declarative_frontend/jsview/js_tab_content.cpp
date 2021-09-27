@@ -76,16 +76,22 @@ void JSTabContent::ProcessTabBarData(const WeakPtr<TabsComponent>& weakTabs,
     if (!text) {
         return;
     }
-    if (info[0]->IsString()) {
-        std::string infoStr = info[0]->ToString();
+    std::string infoStr;
+    if (ParseJsString(info[0], infoStr)) {
         text->SetData(infoStr.empty() ? DEFAULT_TAB_BAR_NAME : infoStr);
         tabContentItem->SetBarText(text->GetData());
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> iconVal = obj->GetProperty("icon");
         JSRef<JSVal> textVal = obj->GetProperty("text");
-        std::string iconUri = iconVal->IsString() ? iconVal->ToString() : "";
-        std::string textStr = textVal->IsString() ? textVal->ToString() : "";
+        std::string iconUri;
+        if (!ParseJsMedia(iconVal, iconUri)) {
+            iconUri = "";
+        }
+        std::string textStr;
+        if (!ParseJsString(textVal, textStr)) {
+            textStr = "";
+        }
         tabContentItem->SetBarIcon(iconUri);
         tabContentItem->SetBarText(textStr.empty() ? DEFAULT_TAB_BAR_NAME : textStr);
         if (iconUri.empty()) {
@@ -139,6 +145,7 @@ void JSTabContent::JSBind(BindingTarget globalObj)
     JSClass<JSTabContent>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTabContent>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTabContent>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSTabContent>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSTabContent>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTabContent>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSTabContent>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

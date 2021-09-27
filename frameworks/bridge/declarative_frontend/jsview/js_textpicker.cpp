@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
+
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/picker/picker_theme.h"
 #include "core/components/picker/picker_text_component.h"
+#include "core/components/picker/picker_theme.h"
 #include "core/components/picker/render_picker_column.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -27,7 +28,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextPicker>::Declare("TextPicker");
     MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSTextPicker>::StaticMethod("create", &JSTextPicker::Create,opt);
+    JSClass<JSTextPicker>::StaticMethod("create", &JSTextPicker::Create, opt);
     JSClass<JSTextPicker>::StaticMethod("defaultPickerItemHeight", &JSTextPicker::SetDefaultPickerItemHeight);
     JSClass<JSTextPicker>::StaticMethod("onAccept", &JSTextPicker::OnAccept);
     JSClass<JSTextPicker>::StaticMethod("onCancel", &JSTextPicker::OnCancel);
@@ -38,11 +39,11 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
 
 void JSTextPicker::Create(const JSCallbackInfo& info)
 {
-    std::string value ="0";
+    std::string value = "0";
     uint32_t selected = 0;
 
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("TextPicker create error, info is non-vaild");
+        LOGE("TextPicker create error, info is non-valid");
         return;
     }
 
@@ -54,18 +55,13 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
 
     JSRef<JSArray> getRange = paramObject->GetProperty("range");
     std::vector<std::string> getRangeVector;
-    for(size_t i = 0; i<getRange->Length(); i++){
-        JSRef<JSVal> getRangeValue = getRange->GetValueAt(i);
-        if(!getRangeValue->IsString()){
-            LOGE("range need to be string type");
-            return;
-        } else {
-            getRangeVector.push_back(getRangeValue->ToString());
-        }
+    if (!ParseJsStrArray(getRange, getRangeVector)) {
+        LOGE("parse range failed");
+        return;
     }
 
-    if (getSelected->IsNumber()) {
-        selected = getSelected->ToNumber<uint32_t>();
+    if (!ParseJsInteger(getSelected, selected)) {
+        LOGE("parse selected value failed");
     }
 
     RefPtr<Component> pickerTextComponent = AceType::MakeRefPtr<OHOS::Ace::PickerTextComponent>();
@@ -81,6 +77,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
 
     PickerText->SetSelected(selected);
     PickerText->SetRange(getRangeVector);
+
     PickerText->SetIsDialog(false);
 
     auto theme = GetTheme<PickerTheme>();
@@ -101,7 +98,7 @@ void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsNumber()) {
-        auto height= info[0]->ToNumber<double>();
+        auto height = info[0]->ToNumber<double>();
         TextPicker->SetDefaultPickerItemHeight(Dimension(height));
     }
 }

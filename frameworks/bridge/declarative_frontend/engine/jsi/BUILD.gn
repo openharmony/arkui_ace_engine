@@ -1,0 +1,164 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//ark/ts2abc/ts2panda/ts2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/ace/ace_engine/build/ace_gen_obj.gni")
+
+base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
+abcproxyclass_obj_path = base_output_path + "/abc_proxy_class.o"
+abcenumstyle_obj_path = base_output_path + "/abc_enum_style.o"
+
+action("gen_stateMgmt_abc") {
+  visibility = [ ":*" ]
+
+  deps = [ "//ark/ts2abc/ts2panda:ark_ts2abc_build" ]
+
+  script = "//prebuilts/ace-toolkit/ace-loader/plugin-build-tools/generate_js_bytecode.py"
+
+  args = [
+    "--src-js",
+    rebase_path(
+        "$ace_root/frameworks/bridge/declarative_frontend/engine/stateMgmt.js"),
+    "--dst-file",
+    rebase_path(base_output_path + "/stateMgmt.abc"),
+    "--node",
+    rebase_path("${node_js_path}"),
+    "--frontend-tool-path",
+    rebase_path("${ts2abc_build_path}"),
+    "--node-modules",
+    rebase_path("${node_modules}"),
+  ]
+
+  inputs =
+      [ "$ace_root/frameworks/bridge/declarative_frontend/engine/stateMgmt.js" ]
+  outputs = [ base_output_path + "/stateMgmt.abc" ]
+}
+
+gen_obj("abc_proxyclass") {
+  input = base_output_path + "/stateMgmt.abc"
+  if (use_mac) {
+    abcproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
+  }
+  output = abcproxyclass_obj_path
+  snapshot_dep = [ ":gen_stateMgmt_abc" ]
+}
+
+action("gen_jsEnumStyle_abc") {
+  visibility = [ ":*" ]
+
+  deps = [ "//ark/ts2abc/ts2panda:ark_ts2abc_build" ]
+
+  script = "//prebuilts/ace-toolkit/ace-loader/plugin-build-tools/generate_js_bytecode.py"
+
+  args = [
+    "--src-js",
+    rebase_path(
+        "$ace_root/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js"),
+    "--dst-file",
+    rebase_path(base_output_path + "/jsEnumStyle.abc"),
+    "--node",
+    rebase_path("${node_js_path}"),
+    "--frontend-tool-path",
+    rebase_path("${ts2abc_build_path}"),
+    "--node-modules",
+    rebase_path("${node_modules}"),
+  ]
+
+  inputs = [
+    "$ace_root/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js",
+  ]
+  outputs = [ base_output_path + "/jsEnumStyle.abc" ]
+}
+
+gen_obj("abc_enum_style") {
+  input = base_output_path + "/jsEnumStyle.abc"
+  output = abcenumstyle_obj_path
+  snapshot_dep = [ ":gen_jsEnumStyle_abc" ]
+}
+
+template("declarative_js_engine_ark") {
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+    if (target_cpu == "arm64") {
+      defines += [ "APP_USE_ARM64" ]
+    } else if (target_cpu == "arm") {
+      defines += [ "APP_USE_ARM" ]
+    }
+
+    configs = [
+      "$ace_root:ace_config",
+      "$ark_runtime_path/libpandabase:arkbase_public_config",
+      "//ark/js_runtime:ark_jsruntime_public_config",
+    ]
+
+    sources = [
+      "ark/ark_js_runtime.cpp",
+      "ark/ark_js_value.cpp",
+      "jsi_declarative_engine.cpp",
+      "jsi_declarative_utils.cpp",
+      "jsi_object_template.cpp",
+      "jsi_types.cpp",
+      "jsi_view_register.cpp",
+      "modules/jsi_app_module.cpp",
+      "modules/jsi_curves_module.cpp",
+      "modules/jsi_matrix4_module.cpp",
+      "modules/jsi_module_manager.cpp",
+      "modules/jsi_router_module.cpp",
+      "modules/jsi_timer_module.cpp",
+    ]
+
+    deps = [ "//ark/js_runtime:libark_jsruntime" ]
+
+    # if napi support
+    if (platform != "windows" && platform != "mac") {
+      deps += [ "//foundation/ace/napi:ace_napi_ark" ]
+      public_deps = [ "//foundation/ace/napi:ace_napi" ]
+      external_deps = worker_deps
+    }
+
+    deps += [
+      ":gen_obj_src_abc_enum_style",
+      ":gen_obj_src_abc_proxyclass",
+    ]
+  }
+}
+
+foreach(item, ace_platforms) {
+  platform = item.name
+  engine_config = {
+  }
+  engine_config = item.config
+  support_engines = []
+  support_engines = engine_config.js_engines
+  foreach(engine, support_engines) {
+    if (engine.engine_name == "ark") {
+      declarative_js_engine_ark("declarative_js_engine_bridge_ark_$platform") {
+        platform = item.name
+        defines = engine.engine_defines
+        config = {
+        }
+
+        if (defined(item.config)) {
+          config = item.config
+        }
+        if (defined(config.defines)) {
+          defines += config.defines
+        }
+      }
+    }
+  }
+}

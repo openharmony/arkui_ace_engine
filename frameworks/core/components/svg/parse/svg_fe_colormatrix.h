@@ -30,7 +30,8 @@ public:
     static RefPtr<SvgNode> Create();
 
     void SetAttr(const std::string& name, const std::string& value) override;
-    RefPtr<RenderNode> CreateRender(const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent) override;
+    RefPtr<RenderNode> CreateRender(
+        const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox = true) override;
     void AppendChild(const RefPtr<SvgNode>& child) override;
 
     RefPtr<Component> GetComponent() const override

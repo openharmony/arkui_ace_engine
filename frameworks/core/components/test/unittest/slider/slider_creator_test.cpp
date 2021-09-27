@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 
+#include "adapter/aosp/entrance/java/jni/ace_application_info.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
@@ -45,6 +46,21 @@ const Color BLOCK_COLOR = Color(567891234);
 const std::string JSON_ON_MOVE_ID = "123456";
 
 } // namespace
+
+Platform::JniEnvironment::JniEnvironment() {}
+
+Platform::JniEnvironment::~JniEnvironment() = default;
+
+std::shared_ptr<JNIEnv> Platform::JniEnvironment::GetJniEnv(JNIEnv* jniEnv) const
+{
+    return nullptr;
+}
+
+Platform::JniEnvironment& Platform::JniEnvironment::GetInstance()
+{
+    static Platform::JniEnvironment jniEnvironment;
+    return jniEnvironment;
+}
 
 class SliderCreatorTest : public testing::Test {
 public:

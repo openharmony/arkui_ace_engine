@@ -84,6 +84,35 @@ RefPtr<OverlayElement> DialogModalElement::GetOverlayElement() const
     return RefPtr<OverlayElement>();
 }
 
+RefPtr<StageElement> DialogModalElement::GetStageElement() const
+{
+    auto tween = AceType::DynamicCast<TweenElement>(GetFirstChild());
+    if (!tween) {
+        LOGE("Get overlay element failed. Tween element is null!");
+        return RefPtr<StageElement>();
+    }
+    auto box = AceType::DynamicCast<BoxElement>(tween->GetContentElement());
+    if (!box) {
+        LOGE("Get overlay element failed. Box element is null!");
+        return RefPtr<StageElement>();
+    }
+    auto clip = AceType::DynamicCast<ClipElement>(box->GetFirstChild());
+    if (!clip) {
+        LOGE("Get overlay element failed. Clip element is null!");
+        return RefPtr<StageElement>();
+    }
+    auto bgBox = AceType::DynamicCast<BoxElement>(clip->GetFirstChild());
+    if (!bgBox) {
+        LOGE("Get overlay element failed. bgBox element is null!");
+        return RefPtr<StageElement>();
+    }
+    auto stack = bgBox->GetFirstChild();
+    if (!stack) {
+        return RefPtr<StageElement>();
+    }
+    return AceType::DynamicCast<StageElement>(stack->GetFirstChild());
+}
+
 void DialogModalElement::UpdateSystemBarHeight(double statusBar, double navigationBar)
 {
     auto renderNode = AceType::DynamicCast<RenderDialogModal>(GetRenderNode());

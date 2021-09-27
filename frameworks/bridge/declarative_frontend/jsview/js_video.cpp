@@ -46,8 +46,9 @@ void JSVideo::Create(const JSCallbackInfo& info)
 
     JSRef<JSObject> videoObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> srcValue = videoObj->GetProperty("src");
-    if (srcValue->IsString()) {
-        videoComponent->SetSrc(srcValue->ToString());
+    std::string videoPath;
+    if (ParseJsMedia(srcValue, videoPath)) {
+        videoComponent->SetSrc(videoPath);
     }
 
     JSRef<JSVal> currentProgressRateValue = videoObj->GetProperty("currentProgressRate");
@@ -276,6 +277,7 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("onError", &JSVideo::JsOnError);
 
     JSClass<JSVideo>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSVideo>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSVideo>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSVideo>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSVideo>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

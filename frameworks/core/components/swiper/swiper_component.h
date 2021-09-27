@@ -94,6 +94,8 @@ public:
     const EventMarker& GetAnimationFinishEventId() const;
     double GetAutoPlayInterval() const;
     void SetAutoPlayInterval(double autoPlayInterval);
+    SwiperDisplayMode GetDisplayMode() const;
+    void SetDisplayMode(SwiperDisplayMode displayMode);
 
     AnimationCurve GetAnimationCurve() const;
     void SetAnimationCurve(AnimationCurve animationCurve);

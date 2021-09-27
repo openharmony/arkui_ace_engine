@@ -32,7 +32,7 @@ void RenderSvgRect::Update(const RefPtr<Component>& component)
     ry_ = rectComponent->GetRy();
     width_ = rectComponent->GetWidth();
     height_ = rectComponent->GetHeight();
-    RenderSvgBase::SetPresentationAttrs(rectComponent->GetDeclaration());
+    RenderSvgBase::SetPresentationAttrs(component, rectComponent->GetDeclaration());
     PrepareAnimations(component);
     MarkNeedLayout();
 }

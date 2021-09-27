@@ -32,6 +32,7 @@ const char PLAYER_PARAM_ISAUTOPLAY[] = "autoplay";
 const char PLAYER_PARAM_ISMUTE[] = "mute";
 const char PLAYER_PARAM_TEXTURE[] = "texture";
 const char PLAYER_PARAM_NEEDFRESHFORCE[] = "needRefreshForce";
+const char PLAYER_PARAM_LOOP[] = "loop";
 
 const char PLAYER_METHOD_INIT[] = "init";
 const char PLAYER_METHOD_GETPOSITION[] = "getposition";
@@ -41,11 +42,16 @@ const char PLAYER_METHOD_SEEKTO[] = "seekto";
 const char PLAYER_METHOD_STOP[] = "stop";
 const char PLAYER_METHOD_SETVOLUME[] = "setvolume";
 const char PLAYER_METHOD_FULLSCREEN[] = "fullscreen";
+const char PLAYER_METHOD_ENABLE_LOOPING[] = "enablelooping";
+const char PLAYER_METHOD_SETSPEED[] = "setspeed";
+const char PLAYER_METHOD_SETDIRECTION[] = "setdirection";
+const char PLAYER_METHOD_SETLANDSCAPE[] = "setlandscape";
 
 const char PLAYER_EVENT_PREPARED[] = "prepared";
 const char PLAYER_EVENT_COMPLETION[] = "completion";
 const char PLAYER_EVENT_SEEKCOMPLETE[] = "seekcomplete";
 const char PLAYER_EVENT_ONPLAYSTATUS[] = "onplaystatus";
+const char PLAYER_EVENT_ONGETCURRENTTIME[] = "ongetcurrenttime";
 
 const char PLAYER_ERROR_CODE_CREATEFAIL[] = "error_video_000001";
 const char PLAYER_ERROR_MSG_CREATEFAIL[] = "Create player failed.";
@@ -127,6 +133,13 @@ void Player::CreatePlayer(const std::function<void(int64_t)>& onCreate)
                 player->OnPlayStatus(param);
             }
         });
+    resRegister->RegisterEvent(
+        MakeEventHash(PLAYER_EVENT_ONGETCURRENTTIME), [weak = WeakClaim(this)](const std::string& param) {
+            auto player = weak.Upgrade();
+            if (player) {
+                player->OnTimeGetted(param);
+            }
+        });
     if (onCreate) {
         onCreate(id_);
     }
@@ -172,6 +185,10 @@ void Player::OnPrepared(const std::string& param)
     stopMethod_ = MakeMethodHash(PLAYER_METHOD_STOP);
     setVolumeMethod_ = MakeMethodHash(PLAYER_METHOD_SETVOLUME);
     fullscreenMethod_ = MakeMethodHash(PLAYER_METHOD_FULLSCREEN);
+    enableloopingMethod_ = MakeMethodHash(PLAYER_METHOD_ENABLE_LOOPING);
+    setSpeedMethod_ = MakeMethodHash(PLAYER_METHOD_SETSPEED);
+    setDirectionMethod_ = MakeMethodHash(PLAYER_METHOD_SETDIRECTION);
+    setLandsacpeMethod_ = MakeMethodHash(PLAYER_METHOD_SETLANDSCAPE);
 
     if (isPlaying_) {
         SetTickActive(true);
@@ -247,12 +264,7 @@ void Player::OnTick(uint64_t timeStamp)
 
 void Player::GetCurrentTime()
 {
-    CallResRegisterMethod(getCurrentPosMethod_, PARAM_NONE, [weak = WeakClaim(this)](std::string& result) {
-        auto player = weak.Upgrade();
-        if (player) {
-            player->OnTimeGetted(result);
-        }
-    });
+    CallResRegisterMethod(getCurrentPosMethod_, PARAM_NONE);
 }
 
 void Player::OnTimeGetted(const std::string& result)
@@ -475,6 +487,38 @@ void Player::PopListener()
             player->OnPopListener();
         }
     });
+}
+
+void Player::EnableLooping(bool loop)
+{
+    std::stringstream paramStream;
+    paramStream << PLAYER_PARAM_LOOP << PARAM_EQUALS << (loop ? "1" : "0");
+
+    std::string param = paramStream.str();
+    CallResRegisterMethod(enableloopingMethod_, param);
+}
+
+void Player::SetSpeed(float speed)
+{
+    std::stringstream paramStream;
+    paramStream << PARAM_VALUE << PARAM_EQUALS << speed;
+
+    std::string param = paramStream.str();
+    CallResRegisterMethod(setSpeedMethod_, param);
+}
+
+void Player::SetDirection(std::string& direction)
+{
+    std::stringstream paramStream;
+    paramStream << PARAM_VALUE << PARAM_EQUALS << direction;
+
+    std::string param = paramStream.str();
+    CallResRegisterMethod(setDirectionMethod_, param);
+}
+
+void Player::SetLandscape()
+{
+    CallResRegisterMethod(setLandsacpeMethod_, PARAM_NONE);
 }
 
 void Player::OnPopListener()

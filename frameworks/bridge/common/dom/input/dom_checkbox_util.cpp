@@ -47,6 +47,12 @@ RefPtr<CheckboxComponent> DOMCheckboxUtil::CreateComponentAndSetChildAttr(
             boxComponent->SetBackDecoration(backDecoration);
         }
     }
+    // set the default hot zone
+    auto pipelineContext = node.GetPipelineContext().Upgrade();
+    if (pipelineContext->UseLiteStyle()) {
+        component->SetHorizontalPadding(Dimension(0));
+        component->SetHotZoneVerticalPadding(Dimension(0));
+    }
     if (LessOrEqual(node.GetWidth().Value(), 0.0)) {
         node.SetWidth(theme->GetWidth());
         boxComponent->SetWidth(theme->GetWidth().Value(), theme->GetWidth().Unit());

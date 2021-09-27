@@ -23,8 +23,8 @@
 namespace OHOS::Ace::V2 {
 
 const std::unordered_map<std::string, std::function<std::string(const ButtonComposedElement&)>> CREATE_JSON_MAP {
-    { "BottonType", [](const ButtonComposedElement& inspector) { return inspector.GetBottonType(); } },
-    { "StateEffect", [](const ButtonComposedElement& inspector) { return inspector.GetStateEffect(); } },
+    { "type", [](const ButtonComposedElement& inspector) { return inspector.GetBottonType(); } },
+    { "stateEffect", [](const ButtonComposedElement& inspector) { return inspector.GetStateEffect(); } },
 };
 
 void ButtonComposedElement::Dump()

@@ -158,6 +158,11 @@ TEXT_CATEGORY ConvertInputType(AceTextCategory type)
     }
 }
 
+bool IsEnable(uint64_t supportActions, AceAction aceAction)
+{
+    return (supportActions & (1UL<< static_cast<uint32_t>(aceAction))) != 0;
+}
+
 int32_t ConvertToCardAccessibilityId(int32_t nodeId, int32_t cardId, int32_t rootNodeId)
 {
     // result is integer total ten digits, top five for agp virtualViewId, end five for ace nodeId,
@@ -228,15 +233,19 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     nodeInfo.width *= scaleX;
     nodeInfo.height *= scaleY;
 
+    uint64_t supportActions = manager->GetSupportActions();
     nodeInfo.isChecked = node->GetCheckedState();
     nodeInfo.isEnabled = node->GetEnabledState();
-    nodeInfo.isFocused = node->GetFocusedState();
+    nodeInfo.isFocused =
+        IsEnable(supportActions, AceAction::ACTION_ACCESSIBILITY_FOCUS) && node->GetFocusedState();
     nodeInfo.isSelected = node->GetSelectedState();
     nodeInfo.isCheckable = node->GetCheckableState();
-    nodeInfo.isClickable = node->GetClickableState();
-    nodeInfo.isFocusable = node->GetFocusableState();
-    nodeInfo.isScrollable = node->GetScrollableState();
-    nodeInfo.isLongClickable = node->GetLongClickableState();
+    nodeInfo.isClickable = IsEnable(supportActions, AceAction::ACTION_CLICK) && node->GetClickableState();
+    nodeInfo.isFocusable = IsEnable(supportActions, AceAction::ACTION_FOCUS) && node->GetFocusableState();
+    nodeInfo.isScrollable = (IsEnable(supportActions, AceAction::ACTION_SCROLL_FORWARD) ||
+        IsEnable(supportActions, AceAction::ACTION_SCROLL_BACKWARD)) && node->GetScrollableState();
+    nodeInfo.isLongClickable =
+        IsEnable(supportActions, AceAction::ACTION_LONG_CLICK) && node->GetLongClickableState();
     nodeInfo.isEditable = node->GetEditable();
     nodeInfo.isMultiLine = node->GetIsMultiLine();
     nodeInfo.isPassword = node->GetIsPassword();
@@ -274,7 +283,7 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
         }
     }
 
-    auto supportAceActions = node->GetSupportAction();
+    auto supportAceActions = node->GetSupportAction(supportActions);
     std::vector<Action> actions(supportAceActions.size());
     std::transform(supportAceActions.begin(), supportAceActions.end(), actions.begin(),
         [](const AceAction& action) { return ConvertAceAction(action); });
@@ -780,6 +789,12 @@ void JsAccessibilityManager::HandleComponentPostBinding()
             ++idItem;
         }
     }
+}
+
+void JsAccessibilityManager::SetSupportAction(uint32_t action, bool isEnable)
+{
+    isEnable ? supportActions_ |= (1UL << action)
+            : supportActions_ &= (~(0UL)) ^ (1UL << action);
 }
 
 RefPtr<AccessibilityNodeManager> AccessibilityNodeManager::Create()

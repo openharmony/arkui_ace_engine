@@ -68,6 +68,11 @@ const char SVG_TRANSFORM_ORIGIN_BOTTOM_RIGHT[] = "bottom_right";
 
 } // namespace
 
+uint8_t OpacityDoubleToUint8(double opacity)
+{
+    return static_cast<uint8_t>(round(opacity * UINT8_MAX));
+}
+
 RefPtr<RenderSvg> FindRootSvgNode(RefPtr<RenderNode> parent, WeakPtr<RenderSvgBase>& rootSvgNode)
 {
     auto root = AceType::DynamicCast<RenderSvg>(rootSvgNode.Upgrade());
@@ -276,7 +281,7 @@ Offset RenderSvgBase::GetTransformOffset(bool isRoot)
 void RenderSvgBase::SetPresentationAttrs(const RefPtr<SvgBaseDeclaration>& baseDeclaration)
 {
     if (baseDeclaration) {
-        opacity_ = static_cast<uint8_t>(round(baseDeclaration->GetOpacity() * UINT8_MAX));
+        opacity_ = OpacityDoubleToUint8(baseDeclaration->GetOpacity());
         fillState_ = baseDeclaration->GetFillState();
         strokeState_ = baseDeclaration->GetStrokeState();
         textStyle_ = baseDeclaration->GetSvgTextStyle();
@@ -287,6 +292,21 @@ void RenderSvgBase::SetPresentationAttrs(const RefPtr<SvgBaseDeclaration>& baseD
         transformOrigin_ = CreateTransformOrigin(baseDeclaration->GetTransformOrigin());
         maskId_ = ParseIdFromUrl(baseDeclaration->GetMaskId());
         filterId_ = ParseIdFromUrl(baseDeclaration->GetFilterId());
+        id_ = baseDeclaration->GetId();
+    }
+}
+
+void RenderSvgBase::SetPresentationAttrs(
+    const RefPtr<Component>& component, const RefPtr<SvgBaseDeclaration>& baseDeclaration)
+{
+    SetPresentationAttrs(baseDeclaration);
+    if (!id_.empty() && component) {
+        // href used by svg tag 'use'
+        AddComponentHrefToRoot(id_, component);
+        if (baseDeclaration) {
+            AddDeclarationHrefToRoot(id_, baseDeclaration);
+        }
+        return;
     }
 }
 
@@ -644,27 +664,74 @@ void RenderSvgBase::PrepareAnimation(const std::list<RefPtr<Component>>& compone
     }
 }
 
-void RenderSvgBase::AddMaskToRoot(const std::string& id, const RefPtr<RenderSvgBase>& mask)
+void RenderSvgBase::AddComponentHrefToRoot(const std::string& id, const RefPtr<Component>& component)
 {
-    if (!id.empty() && mask != nullptr) {
+    if (!id.empty() && component != nullptr) {
         auto rootSvg = FindRootSvgNode(GetParent().Upgrade(), rootSvgNode_);
         if (rootSvg != nullptr) {
-            rootSvg->AddHrefNode(id, mask);
+            rootSvg->AddHrefComponent(id, component);
         }
     }
 }
 
+void RenderSvgBase::AddDeclarationHrefToRoot(const std::string& id, const RefPtr<SvgBaseDeclaration>& declaration)
+{
+    if (!id.empty() && declaration != nullptr) {
+        auto rootSvg = FindRootSvgNode(GetParent().Upgrade(), rootSvgNode_);
+        if (rootSvg != nullptr) {
+            rootSvg->AddHrefDeclaration(id, declaration);
+        }
+    }
+}
+
+void RenderSvgBase::AddHrefToRoot(const std::string& id, const RefPtr<RenderSvgBase>& node)
+{
+    if (!id.empty() && node != nullptr) {
+        auto rootSvg = FindRootSvgNode(GetParent().Upgrade(), rootSvgNode_);
+        if (rootSvg != nullptr) {
+            rootSvg->AddHrefNode(id, node);
+        }
+    }
+}
+
+void RenderSvgBase::AddMaskToRoot(const std::string& id, const RefPtr<RenderSvgBase>& mask)
+{
+    return AddHrefToRoot(id, mask);
+}
+
 void RenderSvgBase::AddPatternToRoot(const std::string& id, const RefPtr<RenderSvgBase>& pattern)
 {
-    return AddMaskToRoot(id, pattern);
+    return AddHrefToRoot(id, pattern);
 }
 
 void RenderSvgBase::AddFilterToRoot(const std::string& id, const RefPtr<RenderSvgBase>& filter)
 {
-    return AddMaskToRoot(id, filter);
+    return AddHrefToRoot(id, filter);
 }
 
-RefPtr<RenderSvgBase> RenderSvgBase::GetMaskFromRoot(const std::string& id)
+RefPtr<Component> RenderSvgBase::GetComponentHrefFromRoot(const std::string& id)
+{
+    if (!id.empty()) {
+        auto rootSvg = FindRootSvgNode(GetParent().Upgrade(), rootSvgNode_);
+        if (rootSvg != nullptr) {
+            return rootSvg->GetHrefComponent(id);
+        }
+    }
+    return nullptr;
+}
+
+RefPtr<SvgBaseDeclaration> RenderSvgBase::GetDeclarationHrefFromRoot(const std::string& id)
+{
+    if (!id.empty()) {
+        auto rootSvg = FindRootSvgNode(GetParent().Upgrade(), rootSvgNode_);
+        if (rootSvg != nullptr) {
+            return rootSvg->GetHrefDeclaration(id);
+        }
+    }
+    return nullptr;
+}
+
+RefPtr<RenderSvgBase> RenderSvgBase::GetHrefFromRoot(const std::string& id)
 {
     if (!id.empty()) {
         auto rootSvg = FindRootSvgNode(GetParent().Upgrade(), rootSvgNode_);
@@ -675,14 +742,36 @@ RefPtr<RenderSvgBase> RenderSvgBase::GetMaskFromRoot(const std::string& id)
     return nullptr;
 }
 
+RefPtr<RenderSvgBase> RenderSvgBase::GetMaskFromRoot(const std::string& id)
+{
+    return GetHrefFromRoot(id);
+}
+
 RefPtr<RenderSvgBase> RenderSvgBase::GetPatternFromRoot(const std::string& id)
 {
-    return GetMaskFromRoot(id);
+    return GetHrefFromRoot(id);
 }
 
 RefPtr<RenderSvgBase> RenderSvgBase::GetFilterFromRoot(const std::string& id)
 {
-    return GetMaskFromRoot(id);
+    return GetHrefFromRoot(id);
+}
+
+void RenderSvgBase::Inherit(const RefPtr<SvgBaseDeclaration>& parent, const RefPtr<SvgBaseDeclaration>& self)
+{
+    if (!parent || !self) {
+        LOGD("parent or self declaration is null");
+        return;
+    }
+    if (!self->HasOpacity()) {
+        if (parent->HasOpacity()) {
+            opacity_ = OpacityDoubleToUint8(parent->GetOpacity());
+        }
+    }
+    fillState_.Inherit(parent->GetFillState());
+    strokeState_.Inherit(parent->GetStrokeState());
+    textStyle_.Inherit(parent->GetSvgTextStyle());
+    clipState_.Inherit(parent->GetClipState());
 }
 
 const Rect RenderSvgBase::GetViewBoxFromRoot()
@@ -781,15 +870,30 @@ void RenderSvgBase::UpdateGradient(FillState& fillState)
     if (gradient->GetType() == GradientType::RADIAL) {
         const auto& radialGradient = gradient->GetRadialGradient();
         auto gradientInfo = RadialGradientInfo();
-        gradientInfo.r =
-            ConvertDimensionToPx(radialGradient.radialHorizontalSize ? radialGradient.radialHorizontalSize.value() :
-                0.5_pct, sqrt(width * height));
-        gradientInfo.cx =
-            ConvertDimensionToPx(radialGradient.radialCenterX ? radialGradient.radialCenterX.value() : 0.5_pct,
-                width) + bounds.Left();
-        gradientInfo.cy =
-            ConvertDimensionToPx(radialGradient.radialCenterY ? radialGradient.radialCenterY.value() : 0.5_pct,
-                height) + bounds.Top();
+
+        if (radialGradient.radialHorizontalSize) {
+            Dimension radialHorizontalSize = Dimension(
+                radialGradient.radialHorizontalSize.value().Value(),
+                radialGradient.radialHorizontalSize.value().Unit());
+            gradientInfo.r = ConvertDimensionToPx(radialHorizontalSize, sqrt(width * height));
+        } else {
+            gradientInfo.r = ConvertDimensionToPx(0.5_pct, sqrt(width * height));
+        }
+        if (radialGradient.radialCenterX) {
+            Dimension radialCenterX = Dimension(
+                radialGradient.radialCenterX.value().Value(), radialGradient.radialCenterX.value().Unit());
+            gradientInfo.cx = ConvertDimensionToPx(radialCenterX, width) + bounds.Left();
+        } else {
+            gradientInfo.cx = ConvertDimensionToPx(0.5_pct, width) + bounds.Left();
+        }
+        if (radialGradient.radialCenterX) {
+            Dimension radialCenterY = Dimension(
+                radialGradient.radialCenterY.value().Value(), radialGradient.radialCenterY.value().Unit());
+            gradientInfo.cy = ConvertDimensionToPx(radialCenterY, height) + bounds.Top();
+        } else {
+            gradientInfo.cy = ConvertDimensionToPx(0.5_pct, height) + bounds.Top();
+        }
+
         if (radialGradient.fRadialCenterX && radialGradient.fRadialCenterX->IsValid()) {
             gradientInfo.fx = ConvertDimensionToPx(radialGradient.fRadialCenterX.value(), width) + bounds.Left();
         } else {

@@ -225,8 +225,6 @@ protected:
 
     void ScheduleUpdateForFixedNode(const RefPtr<DOMDocument>& domDocument) const;
 
-    RefPtr<DOMNode> CreateDomElement(const RefPtr<JsAcePage>& page) const;
-
     std::string tagName_;
 };
 
@@ -239,15 +237,6 @@ public:
     void Execute(const RefPtr<JsAcePage>& page) const final;
 };
 
-// JS command, which used to create a new element
-class ACE_EXPORT JsCommandCreateDomElement final : public JsCommandDomElementCreator {
-public:
-    JsCommandCreateDomElement(const std::string& tagName, NodeId nodeId)
-        : JsCommandDomElementCreator(tagName, nodeId){}
-    ~JsCommandCreateDomElement() override = default;
-
-    void Execute(const RefPtr<JsAcePage>& page) const final;
-};
 // JS command, which used to create and add new element into DOM tree.
 class ACE_EXPORT JsCommandAddDomElement final : public JsCommandDomElementCreator {
 public:
@@ -255,19 +244,6 @@ public:
         : JsCommandDomElementCreator(tagName, nodeId), parentNodeId_(parentNodeId)
     {}
     ~JsCommandAddDomElement() override = default;
-
-    void Execute(const RefPtr<JsAcePage>& page) const final;
-
-private:
-    NodeId parentNodeId_ = -1;
-};
-
-class ACE_EXPORT JsCommandAppendElement final : public JsCommandDomElementCreator {
-public:
-JsCommandAppendElement(const std::string& tagName, NodeId nodeId, NodeId parentNodeId)
-    : JsCommandDomElementCreator(tagName, nodeId), parentNodeId_(parentNodeId)
-    {}
-    ~JsCommandAppendElement() override = default;
 
     void Execute(const RefPtr<JsAcePage>& page) const final;
 

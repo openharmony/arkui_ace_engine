@@ -19,6 +19,7 @@
 #include "core/gestures/click_recognizer.h"
 #include "core/pipeline/base/single_child.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
@@ -58,6 +59,19 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
         auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
         focusableComponent->SetFocusable(true);
         focusableComponent->SetOnKeyId(onKeyId);
+    }
+}
+
+void JSInteractableView::JsOnHover(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(args[0]));
+        auto onHoverId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute(info);
+        };
+        auto mouseComponent = ViewStackProcessor::GetInstance()->GetMouseListenerComponent();
+        mouseComponent->SetOnHoverId(onHoverId);
     }
 }
 

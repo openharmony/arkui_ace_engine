@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DIALOG_MODAL_DIALOG_MODAL_ELEMENT_H
 
 #include "core/components/overlay/overlay_element.h"
+#include "core/components/stage/stage_element.h"
 #include "core/components/tween/tween_element.h"
 #include "core/pipeline/base/sole_child_element.h"
 
@@ -30,6 +31,8 @@ public:
     ~DialogModalElement() override = default;
 
     RefPtr<OverlayElement> GetOverlayElement() const;
+
+    RefPtr<StageElement> GetStageElement() const;
 
     void UpdateSystemBarHeight(double statusBar, double navigationBar);
 

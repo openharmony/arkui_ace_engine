@@ -59,7 +59,6 @@ protected:
     Dimension width_ = Dimension(1.2, DimensionUnit::PERCENT); // masking area height defalut  value
     std::string maskUnits_ = "objectBoundingBox";
     std::string maskContentUnits_ = "userSpaceOnUse";
-    std::string id_;
     Rect elementBounds_;
 
 private:

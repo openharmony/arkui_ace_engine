@@ -14,60 +14,59 @@
 import("//build/ohos.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
 
-template("libace_engine") {
+template("preview_entrance_source") {
   forward_variables_from(invoker, "*")
 
-  ohos_shared_library(target_name) {
+  ohos_source_set(target_name) {
     defines += invoker.defines
+    cflags_cc += invoker.cflags_cc
+    configs = [ "$ace_root:ace_config" ]
+
+    if (platform == "windows") {
+      defines -= [ "UNICODE" ]
+    }
+
+    if (platform == "mac") {
+      include_dirs = [ "//utils/native/base/include" ]
+    }
+
     sources = [
-      "$ace_root/adapter/common/cpp/ace_trace.cpp",
-      "$ace_root/adapter/common/cpp/flutter_asset_manager.cpp",
-      "$ace_root/adapter/common/cpp/localization.cpp",
-      "$ace_root/adapter/common/cpp/thread_util.cpp",
-      "$ace_root/adapter/preview/osal/download_manager.cpp",
-      "$ace_root/adapter/preview/osal/fetch_manager.cpp",
-      "$ace_root/adapter/preview/osal/response_data.cpp",
       "ace_ability.cpp",
       "ace_application_info.cpp",
       "ace_container.cpp",
       "ace_resource_register.cpp",
       "flutter_ace_view.cpp",
-      "flutter_window.cpp",
     ]
 
-    configs = [
-      "$ace_root:ace_config",
-      "$ace_flutter_engine_root:flutter_config",
-      "$ace_flutter_engine_root:flutter_glfw_config",
-      "$ace_flutter_engine_root:icu_config_$platform",
-      "//third_party/curl:curl_config",
-      "//third_party/zlib:zlib_config",
-    ]
-
-    cflags = [ "-std=c++17" ]
     deps = [
-      "$ace_flutter_engine_root:ace_skia_$platform",
-      "$ace_root/frameworks/base:ace_base_$platform",
-      "$ace_root/frameworks/bridge:declarative_js_engine_$platform",
-      "$ace_root/frameworks/bridge:js_engine_$platform",
-      "$ace_root/frameworks/core:ace_core_$platform",
-      "//third_party/curl:curl",
+      "$ace_flutter_engine_root/glfw:flutter_glfw_preview_$platform",
+      "$ace_flutter_engine_root/skia:ace_skia_$platform",
+      "$ace_root/frameworks/core/components/theme:build_theme_code",
     ]
-    if (platform == "windows") {
-      defines += [ "NOGDI" ]
-    }
-    if (platform == "mac") {
-      include_dirs = [ "//utils/native/base/include" ]
-    }
   }
 }
 
-libace_engine("libace_engine_windows") {
-  defines = ace_windows_defines
-  platform = "windows"
-}
+foreach(item, ace_platforms) {
+  platform = item.name
+  if (platform == "windows" || platform == "mac") {
+    preview_entrance_source("ace_preview_entrance_" + item.name) {
+      platform = item.name
+      defines = []
+      cflags_cc = []
+      config = {
+      }
 
-libace_engine("libace_engine_mac") {
-  defines = ace_mac_defines
-  platform = "mac"
+      if (defined(item.config)) {
+        config = item.config
+      }
+
+      if (defined(config.defines)) {
+        defines = config.defines
+      }
+
+      if (defined(config.cflags_cc)) {
+        cflags_cc = config.cflags_cc
+      }
+    }
+  }
 }

@@ -16,50 +16,46 @@ import("//foundation/ace/ace_engine/ace_config.gni")
 
 config("ace_base_i18n_config") {
   defines = [ "ACEL10N" ]
-
-  include_dirs = [ "//utils/native/base/include" ]
 }
 
 template("ace_base_i18n") {
   forward_variables_from(invoker, "*")
   source_set(target_name) {
     defines += invoker.defines
+    cflags_cc += invoker.cflags_cc
     deps = [
-      "$ace_flutter_engine_root:ace_libicu_$platform",
+      "$ace_flutter_engine_root/icu:ace_libicu_$platform",
       "$ace_root/frameworks/base/resource:ace_resource",
     ]
 
     configs += [
       ":ace_base_i18n_config",
       "$ace_root:ace_config",
-      "$ace_flutter_engine_root:icu_config_$platform",
     ]
 
     # add base source file here
     sources = [ "localization.cpp" ]
-
-    if (use_mingw_win) {
-      cflags = [
-        "-std=c++17",
-
-        # Notice: this flag actually apply to icu source code.
-        "-Wno-ignored-attributes",
-      ]
-    }
   }
 }
 
-ace_base_i18n("ace_base_i18n_ohos") {
-  defines = ace_ohos_defines
-  platform = "ohos"
-}
+foreach(item, ace_platforms) {
+  ace_base_i18n("ace_base_i18n_" + item.name) {
+    platform = item.name
+    defines = []
+    cflags_cc = []
+    config = {
+    }
 
-ace_base_i18n("ace_base_i18n_windows") {
-  defines = ace_windows_defines
-  platform = "windows"
-}
+    if (defined(item.config)) {
+      config = item.config
+    }
 
-ace_base_i18n("ace_base_i18n_mac") {
-  defines = ace_mac_defines
-  platform = "mac"
+    if (defined(config.defines)) {
+      defines = config.defines
+    }
+
+    if (defined(config.cflags_cc)) {
+      cflags_cc = config.cflags_cc
+    }
+  }
 }

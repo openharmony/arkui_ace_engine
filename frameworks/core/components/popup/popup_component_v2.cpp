@@ -165,13 +165,12 @@ const RefPtr<Component> PopupComponentV2::CreateButton(const ButtonProperties& b
     buttonComponent->SetDeclarativeFlag(true);
     buttonComponent->SetHeight(buttonTheme->GetHeight());
     buttonComponent->SetBackgroundColor(Color::TRANSPARENT);
-    buttonComponent->SetClickFunction(
-        [action = buttonProperties.actionId, context = context_]() {
-            auto func = AceAsyncEvent<void()>::Create(action, context);
-            if (func) {
-                func();
-            }
-        });
+    buttonComponent->SetClickFunction([action = buttonProperties.actionId, context = context_]() {
+        auto func = AceAsyncEvent<void()>::Create(action, context);
+        if (func) {
+            func();
+        }
+    });
     return buttonComponent;
 }
 

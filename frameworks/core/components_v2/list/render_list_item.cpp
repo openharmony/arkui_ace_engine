@@ -42,7 +42,7 @@ void RenderListItem::Update(const RefPtr<Component>& component)
     component_ = item;
     SetEditMode(false);
 
-    if (IsEditable()) {
+    if (IsDeletable()) {
         CreateDeleteButton();
     } else {
         button_.Reset();
@@ -159,6 +159,26 @@ void RenderListItem::CreateDeleteButton()
         button->AddChild(image);
         button_ = button;
     }
+}
+
+void RenderListItem::OnTouchTestHit(
+    const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
+{
+    if (!editMode_ || !IsMovable()) {
+        return;
+    }
+
+    if (!longPressRecognizer_) {
+        longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(context_);
+        longPressRecognizer_->SetOnLongPress([weak = AceType::WeakClaim(this)](const LongPressInfo&) {
+            auto spThis = weak.Upgrade();
+            if (spThis) {
+                ResumeEventCallback(spThis, &RenderListItem::GetOnSelect, spThis);
+            }
+        });
+    }
+
+    result.emplace_back(longPressRecognizer_);
 }
 
 } // namespace OHOS::Ace::V2

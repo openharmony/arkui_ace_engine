@@ -2578,7 +2578,8 @@ void JsCallComponent(const v8::FunctionCallbackInfo<v8::Value>& args)
         LOGD("animate args = %{private}s", arguments.c_str());
         auto resultValue = V8AnimationBridgeUtils::CreateAnimationContext(context, page->GetPageId(), nodeId);
         auto animationBridge = AceType::MakeRefPtr<V8AnimationBridge>(context, isolate, resultValue, nodeId);
-        auto task = AceType::MakeRefPtr<V8AnimationBridgeTaskCreate>(isolate, animationBridge, arguments);
+        auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
+        auto task = AceType::MakeRefPtr<V8AnimationBridgeTaskCreate>(*delegate, animationBridge, arguments);
         page->PushCommand(Referenced::MakeRefPtr<JsCommandAnimation>(nodeId, task));
         args.GetReturnValue().Set(resultValue);
     } else if (std::strcmp(methodName.c_str(), "currentOffset") == 0) {
@@ -2595,7 +2596,7 @@ void JsCallComponent(const v8::FunctionCallbackInfo<v8::Value>& args)
     } else {
         page->PushCommand(Referenced::MakeRefPtr<JsCommandCallDomElementMethod>(nodeId, methodName, arguments));
     }
-    // focus method should delayed util show attribute update.
+    // focus method should be delayed util show attribute update.
     if (page->CheckPageCreated() && strcmp(DOM_FOCUS, methodName.c_str()) != 0) {
         auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
         (*delegate)->TriggerPageUpdate(page->GetPageId(), true);
@@ -3350,29 +3351,36 @@ bool V8Engine::Initialize(const RefPtr<FrontendDelegate>& delegate)
             StartDebuggerAgent(GetPlatform(), context, instanceName);
         }
     }
-    nativeEngine_ =
-        new V8NativeEngine(GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
+    nativeEngine_ = std::make_shared<V8NativeEngine>(
+        GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
     engineInstance_->SetV8NativeEngine(nativeEngine_);
-    SetPostTask(nativeEngine_);
+    SetPostTask();
     nativeEngine_->CheckUVLoop();
-    delegate->AddTaskObserver([nativeEngine = nativeEngine_]() { nativeEngine->Loop(LOOP_NOWAIT); });
-    std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
-    nativeEngine_->SetPackagePath(packagePath);
+    if (delegate && delegate->GetAssetManager()) {
+        std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
+        nativeEngine_->SetPackagePath(packagePath);
+    }
 
     return true;
 }
 
-void V8Engine::SetPostTask(NativeEngine* nativeEngine)
+void V8Engine::SetPostTask()
 {
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_](bool needSync) {
+    std::weak_ptr<V8NativeEngine> weakNativeEngine(nativeEngine_);
+    auto&& postTask = [weakDelegate, weakNativeEngine](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync]() {
+        delegate->PostJsTask([weakNativeEngine, needSync]() {
+            auto nativeEngine = weakNativeEngine.lock();
+            if (!nativeEngine) {
+                LOGE("native v8 engine weak pointer invalid");
+                return;
+            }
             nativeEngine->Loop(LOOP_NOWAIT, needSync);
         });
     };
@@ -3459,9 +3467,8 @@ V8Engine::~V8Engine()
 {
     CHECK_RUN_ON(JS);
 
-    if (nativeEngine_ != nullptr) {
+    if (nativeEngine_) {
         nativeEngine_->CancelCheckUVLoop();
-        delete nativeEngine_;
     }
 
     if (g_debugger != nullptr) {
@@ -3476,21 +3483,11 @@ void V8Engine::GetLoadOptions(std::string& optionStr, bool isMainPage, const Ref
     ACE_DCHECK(isolate);
     auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
 
-    auto renderOption = JsonUtil::Create(true);
-    auto mediaQuery = (*delegate)->GetMediaQueryInfoInstance();
-    auto container = Container::Current();
+    auto mediaQuery = engineInstance_->GetDelegate()->GetMediaQueryInfoInstance();
+    auto renderOption = mediaQuery->GetMediaQueryJsonInfo();
     if (mediaQuery) {
-        renderOption->Put("orientation", mediaQuery->GetOrientation().c_str());
-        renderOption->Put("deviceType", mediaQuery->GetDeviceType().c_str());
-        renderOption->Put("deviceWidth", SystemProperties::GetDeviceWidth());
-        renderOption->Put("deviceHeight", SystemProperties::GetDeviceHeight());
-        renderOption->Put("roundScreen", SystemProperties::GetIsScreenRound());
-        renderOption->Put("width", container ? container->GetViewWidth() : 0);
-        renderOption->Put("height", container ? container->GetViewHeight() : 0);
         renderOption->Put("isInit", mediaQuery->GetIsInit());
         renderOption->Put("bundleUrl", page->GetUrl().c_str());
-        renderOption->Put("darkMode", SystemProperties::GetColorMode() == ColorMode::DARK);
-        renderOption->Put("resolution", SystemProperties::GetResolution());
     }
     renderOption->Put("pcPreview", PC_PREVIEW);
     renderOption->Put("appInstanceId", "10002");

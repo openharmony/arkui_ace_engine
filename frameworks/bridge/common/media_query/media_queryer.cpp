@@ -348,22 +348,19 @@ bool MediaQueryer::MatchCondition(const std::string& condition, const MediaFeatu
     return result;
 }
 
+/* card info */
 std::unique_ptr<JsonValue> MediaQueryer::GetMediaFeature() const
 {
     MediaQueryInfo mediaQueryInfo;
-    auto json = JsonUtil::Create(true);
+    auto json = mediaQueryInfo.GetMediaQueryJsonInfo();
+
+    /* cover the following aspects with card specified values */
     double aspectRatio = (height_ != 0) ? (static_cast<double>(width_) / height_) : 1.0;
-    json->Put("width", width_);
-    json->Put("height", height_);
-    json->Put("aspect-ratio", aspectRatio);
-    json->Put("round-screen", SystemProperties::GetIsScreenRound());
-    json->Put("device-width", SystemProperties::GetDeviceWidth());
+    json->Replace("width", width_);
+    json->Replace("height", height_);
+    json->Replace("aspect-ratio", aspectRatio);
+    json->Replace("dark-mode", colorMode_ == ColorMode::DARK);
     json->Put("device-brand", SystemProperties::GetBrand().c_str());
-    json->Put("device-height", SystemProperties::GetDeviceHeight());
-    json->Put("resolution", SystemProperties::GetResolution());
-    json->Put("orientation", mediaQueryInfo.GetOrientation().c_str());
-    json->Put("device-type", mediaQueryInfo.GetDeviceType().c_str());
-    json->Put("dark-mode", colorMode_ == ColorMode::DARK);
     LOGD("current media info %{public}s", json->ToString().c_str());
     return json;
 }

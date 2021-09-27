@@ -17,7 +17,8 @@
 
 #include <cstdlib>
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(ENABLE_WORKER)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "native_engine/impl/quickjs/quickjs_native_engine.h"
 #include "worker_init.h"
 #endif
 
@@ -26,6 +27,7 @@
 #include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
+#include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -44,7 +46,7 @@ QJSDeclarativeEngine::~QJSDeclarativeEngine()
 
 bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 {
-    LOGD("QJSDeclarativeEngine initialize");
+    LOGI("QJSDeclarativeEngine initialize");
     JSRuntime* runtime = nullptr;
     JSContext* context = nullptr;
 
@@ -56,22 +58,24 @@ bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
 
     engineInstance_ = AceType::MakeRefPtr<QJSDeclarativeEngineInstance>(delegate);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     nativeEngine_ = new QuickJSNativeEngine(runtime, context, static_cast<void*>(this));
-    bool res = engineInstance_->InitJSEnv(runtime, context);
+#endif
+    bool res = engineInstance_->InitJSEnv(runtime, context, GetExtraNativeObject());
     if (!res) {
         LOGE("QJSDeclarativeEngine initialize failed: %{public}d", instanceId_);
         return false;
     }
-
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
-
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(ENABLE_WORKER)
     RegisterWorker();
 #endif
+
     return true;
 }
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 void QJSDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
@@ -89,7 +93,6 @@ void QJSDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
     nativeEngine_->SetPostTask(postTask);
 }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(ENABLE_WORKER)
 void QJSDeclarativeEngine::RegisterInitWorkerFunc()
 {
     auto&& initWorkerFunc = [](NativeEngine* nativeEngine) {
@@ -112,7 +115,7 @@ void QJSDeclarativeEngine::RegisterInitWorkerFunc()
         // Note: default 256KB is not enough
         JS_SetMaxStackSize(ctx, MAX_STACK_SIZE);
 
-        InitConsole(ctx);
+        // Need Init console.
     };
     OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
 }
@@ -224,6 +227,18 @@ void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValu
         LOGE("context is null");
         return;
     }
+    JSValue ret = JS_NULL;
+    CallAppFunc(appFuncName, argc, argv, ret);
+    JS_FreeValue(ctx, ret);
+}
+
+void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv, JSValue& ret)
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return;
+    }
     JSValue globalObj = JS_GetGlobalObject(ctx);
     JSValue exportobj = JS_GetPropertyStr(ctx, globalObj, "exports");
     JSValue defaultobj = JS_GetPropertyStr(ctx, exportobj, "default");
@@ -233,8 +248,7 @@ void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValu
         LOGE("cannot find %s function", appFuncName.c_str());
         return;
     }
-    JS_Call(ctx, appFunc, JS_UNDEFINED, argc, argv);
-    js_std_loop(ctx);
+    ret = JS_Call(ctx, appFunc, JS_UNDEFINED, argc, argv);
     JS_FreeValue(ctx, appFunc);
     JS_FreeValue(ctx, defaultobj);
     JS_FreeValue(ctx, exportobj);
@@ -269,8 +283,8 @@ void QJSDeclarativeEngine::OnWindowDisplayModeChanged(bool isShownInMultiWindow,
         return;
     }
 
-    JSValueConst callBackResult[] = { callBackResult[0] = JS_NewBool(ctx, isShownInMultiWindow),
-        callBackResult[1] = JS_ParseJSON(ctx, data.c_str(), data.length(), "") };
+    JSValueConst callBackResult[] = { JS_NewBool(ctx, isShownInMultiWindow),
+        JS_ParseJSON(ctx, data.c_str(), data.length(), "") };
     CallAppFunc("onWindowDisplayModeChanged", 2, callBackResult);
 
     js_std_loop(engineInstance_->GetQJSContext());
@@ -286,6 +300,90 @@ void QJSDeclarativeEngine::OnConfigurationUpdated(const std::string& data)
 
     JSValueConst callBackResult[] = { JS_ParseJSON(ctx, data.c_str(), data.length(), "") };
     CallAppFunc("onConfigurationUpdated", 1, callBackResult);
+
+    js_std_loop(engineInstance_->GetQJSContext());
+}
+
+void QJSDeclarativeEngine::OnCompleteContinuation(const int32_t code)
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return;
+    }
+
+    JSValueConst callBackResult[] = { JS_NewInt32(ctx, code) };
+    CallAppFunc("OnCompleteContinuation", 1, callBackResult);
+
+    js_std_loop(engineInstance_->GetQJSContext());
+}
+
+bool QJSDeclarativeEngine::OnRestoreData(const std::string& data)
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return false;
+    }
+
+    JSValueConst callBackResult[] = { JS_ParseJSON(ctx, data.c_str(), data.length(), "") };
+
+    JSValue ret = JS_NULL;
+    CallAppFunc("OnRestoreData", 1, callBackResult, ret);
+    js_std_loop(engineInstance_->GetQJSContext());
+
+    if (JS_IsBool(ret)) {
+        return JS_ToBool(ctx, ret);
+    } else {
+        return false;
+    }
+}
+
+bool QJSDeclarativeEngine::OnStartContinuation()
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return false;
+    }
+
+    JSValue ret = JS_NULL;
+    CallAppFunc("OnStartContinuation", 0, nullptr, ret);
+    js_std_loop(engineInstance_->GetQJSContext());
+
+    if (JS_IsBool(ret)) {
+        return JS_ToBool(ctx, ret);
+    } else {
+        return false;
+    }
+}
+
+void QJSDeclarativeEngine::OnSaveData(std::string& saveData)
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return;
+    }
+    JSValue obj = JS_NewObject(ctx);
+    JSValueConst callBackResult[] = { obj };
+    JSValue ret = JS_NULL;
+    CallAppFunc("OnSaveData", 1, callBackResult, ret);
+
+    if (JS_IsBool(ret)) {
+        saveData = ScopedString::Stringify(obj);
+    }
+}
+
+void QJSDeclarativeEngine::OnRemoteTerminated()
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return;
+    }
+
+    CallAppFunc("OnRemoteTerminated", 0, nullptr);
 
     js_std_loop(engineInstance_->GetQJSContext());
 }
@@ -319,7 +417,7 @@ void QJSDeclarativeEngine::TimerCallJs(const std::string& callbackId, bool isInt
     }
 
     JSValue jsFunc = ModuleManager::GetInstance()->GetCallbackFunc(std::stoi(callbackId), isInterval);
-    if (!JS_IsFunction(ctx,jsFunc)) {
+    if (!JS_IsFunction(ctx, jsFunc)) {
         LOGE("TimerCallJs is not func");
         return;
     }
@@ -337,7 +435,6 @@ void QJSDeclarativeEngine::TimerCallJs(const std::string& callbackId, bool isInt
         }
         JS_Call(ctx, jsFunc, JS_UNDEFINED, jsargv.size(), argv);
     }
-    js_std_loop(ctx);
 }
 
 void QJSDeclarativeEngine::MediaQueryCallback(const std::string& callbackId, const std::string& args)

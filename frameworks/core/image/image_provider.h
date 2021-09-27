@@ -55,7 +55,7 @@ public:
 
 class SvgDom;
 using ImageObjSuccessCallback = std::function<void(ImageSourceInfo, const RefPtr<ImageObject>)>;
-using PaintSuccessCallback = std::function<void(ImageSourceInfo, const fml::RefPtr<flutter::CanvasImage>&)>;
+using UploadSuccessCallback = std::function<void(ImageSourceInfo, const fml::RefPtr<flutter::CanvasImage>&)>;
 using SvgDomSuccessCallback =  std::function<void(ImageSourceInfo, const RefPtr<SvgDom>&)>;
 using FailedCallback = std::function<void(ImageSourceInfo)>;
 using CancelableTask = CancelableCallback<void()>;

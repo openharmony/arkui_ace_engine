@@ -192,6 +192,9 @@ public:
 
     virtual bool IsOutOfTopBoundary();
 
+    virtual bool HandleCrashTop();
+    virtual bool HandleCrashBottom();
+
 protected:
     explicit RenderScroll();
 
@@ -248,8 +251,6 @@ private:
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     void HandleScrollPosition(double scrollX, double scrollY, int32_t scrollState) const;
     void SetEdgeEffectAttribute();
-    bool HandleCrashTop();
-    bool HandleCrashBottom();
     bool HandleRefreshEffect(Offset& delta, int32_t source);
     void ResetScrollEventCallBack();
     void HandleScrollEffect();

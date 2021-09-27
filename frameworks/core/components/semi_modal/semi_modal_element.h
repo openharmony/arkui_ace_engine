@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SEMI_MODAL_SEMI_MODAL_ELEMENT_H
 
 #include "core/components/overlay/overlay_element.h"
+#include "core/components/stage/stage_element.h"
 #include "core/pipeline/base/sole_child_element.h"
 
 namespace OHOS::Ace {
@@ -36,6 +37,8 @@ public:
     void UpdateSystemBarHeight(double statusBar, double navigationBar);
 
     RefPtr<OverlayElement> GetOverlayElement() const;
+
+    RefPtr<StageElement> GetStageElement() const;
 
     void AnimateToExitApp() const;
 

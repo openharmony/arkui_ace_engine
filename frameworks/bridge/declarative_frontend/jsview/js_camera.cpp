@@ -76,6 +76,7 @@ void JSCamera::JSBind(BindingTarget globalObj)
     JSClass<JSCamera>::StaticMethod("devicePosition", &JSCamera::JsDeviceposition, opt);
 
     JSClass<JSCamera>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSCamera>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSCamera>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSCamera>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSCamera>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

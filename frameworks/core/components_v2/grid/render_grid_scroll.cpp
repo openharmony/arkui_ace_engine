@@ -33,7 +33,6 @@ namespace {
 
 const char UNIT_PERCENT[] = "%";
 const char UNIT_RATIO[] = "fr";
-constexpr int32_t CACHECOUNT = 1;
 constexpr int32_t TIMETHRESHOLD = 2; // microsecond
 constexpr int64_t SEC_TO_MICROSEC = 1000000;
 
@@ -87,6 +86,7 @@ bool RenderGridScroll::NeedUpdate(const RefPtr<Component>& component)
     if (!animator_) {
         animator_ = AceType::MakeRefPtr<Animator>(GetContext());
     }
+    cacheCount_ = grid->GetCacheCount();
 
     if (direction_ != grid->GetDirection() || crossAxisAlign_ != grid->GetFlexAlign() ||
         gridWidth_ != grid->GetWidth() || gridHeight_ != grid->GetHeight() || colsArgs_ != grid->GetColumnsArgs() ||
@@ -177,6 +177,11 @@ void RenderGridScroll::OnTouchTestHit(
         result.emplace_back(scrollable_);
     }
     result.emplace_back(scrollable_);
+}
+
+bool RenderGridScroll::IsChildrenTouchEnable()
+{
+    return scrollable_->IsMotionStop();
 }
 
 void RenderGridScroll::SetChildPosition(
@@ -441,13 +446,16 @@ bool RenderGridScroll::CheckGridPlaced(
     return true;
 }
 
-void RenderGridScroll::LayoutChild(
-    const RefPtr<RenderNode>& child, int32_t main, int32_t cross, int32_t mainSpan, int32_t crossSpan)
+void RenderGridScroll::LayoutChild(const RefPtr<RenderNode>& child, int32_t main, int32_t cross, int32_t mainSpan,
+    int32_t crossSpan, bool needPosition)
 {
     child->Layout(MakeInnerLayoutParam(main, cross, mainSpan, crossSpan));
     SetMainSize(gridCells_.at(main).at(cross), child->GetLayoutSize());
     if (GetSize(gridCells_.at(main).at(0)) < GetSize(gridCells_.at(main).at(cross))) {
         SetMainSize(gridCells_.at(main).at(0), gridCells_.at(main).at(cross));
+    }
+    if (!needPosition) {
+        return;
     }
     if (useScrollable_ != SCROLLABLE::HORIZONTAL) {
         child->SetPosition(Offset(0, *mainSize_ + *mainGap_));
@@ -572,7 +580,9 @@ void RenderGridScroll::CaculateViewPort()
             if (currentOffset_ < 0) {
                 firstItemOffset_ -= currentOffset_;
             } else {
-                reachHead_ = true;
+                if (startIndex_ == 0) {
+                    reachHead_ = true;
+                }
             }
             currentOffset_ = 0.0;
         } else {
@@ -602,6 +612,8 @@ void RenderGridScroll::CaculateViewPort()
             if (blank < 0) {
                 return;
             }
+            blank = blank - firstItemOffset_;
+            firstItemOffset_ = 0;
             // Move up
             while (blank > 0 && startIndex_ > 0) {
                 if (gridCells_.find(startIndex_ - 1) == gridCells_.end()) {
@@ -630,7 +642,7 @@ double RenderGridScroll::CalculateBlankOfEnd()
     return *mainSize_ - drawLength;
 }
 
-double RenderGridScroll::SupplementItems(int32_t mainIndex, int32_t itemIndex)
+double RenderGridScroll::SupplementItems(int32_t mainIndex, int32_t itemIndex, bool needPosition)
 {
     ACE_SCOPED_TRACE("SupplementItems %d", mainIndex);
     if (loadingIndex_ == mainIndex) {
@@ -648,7 +660,7 @@ double RenderGridScroll::SupplementItems(int32_t mainIndex, int32_t itemIndex)
                 if (items_.find(item.second) != items_.end() || buildChildByIndex_(item.second)) {
                     int32_t itemRowSpan = GetItemSpan(items_[item.second], true);
                     int32_t itemColSpan = GetItemSpan(items_[item.second], false);
-                    LayoutChild(items_[item.second], mainIndex, item.first, itemRowSpan, itemColSpan);
+                    LayoutChild(items_[item.second], mainIndex, item.first, itemRowSpan, itemColSpan, needPosition);
                 }
             }
             frontIndex = item.second;
@@ -781,7 +793,7 @@ void RenderGridScroll::PerformLayout()
 
     int32_t firstIndex = GetIndexByPosition(0);
     if (lastFirstIdex_ != firstIndex) {
-        if (animatorJumpFlag_ == false) {
+        if (!animatorJumpFlag_) {
             OnScrolled(firstIndex);
         }
         lastFirstIdex_ = firstIndex;
@@ -797,7 +809,7 @@ void RenderGridScroll::DealCache(int32_t start, int32_t end)
 
     std::set<int32_t> deleteItem;
     for (const auto& item : inCache_) {
-        if (item < start - CACHECOUNT || item > end + CACHECOUNT) {
+        if (item < start - cacheCount_ || item > end + cacheCount_) {
             deleteItem.insert(item);
         }
     }
@@ -806,7 +818,7 @@ void RenderGridScroll::DealCache(int32_t start, int32_t end)
         DeleteItems(item, false);
     }
 
-    for (int32_t i = 1; i <= CACHECOUNT; i++) {
+    for (int32_t i = 1; i <= cacheCount_; i++) {
         if (inCache_.count(i + end) == 0) {
             loadingIndex_ = i + end;
             break;
@@ -1108,7 +1120,7 @@ void RenderGridScroll::ScrollToIndex(int32_t index, int32_t source)
         return;
     }
     auto inputIdx = GetItemMainIndex(index);
-    if (inputIdx < endIndex_ && inputIdx >= startIndex_) {
+    if (inputIdx < endIndex_ && inputIdx > startIndex_) {
         LOGI("already in map, not need to jump.");
         return;
     }
@@ -1122,15 +1134,25 @@ void RenderGridScroll::ScrollToIndex(int32_t index, int32_t source)
     double scrollLength = 0.0;
     inputIdx = GetItemMainIndex(index);
     if (inputIdx >= endIndex_) {
-        for (int32_t i = endIndex_; i <= inputIdx; ++i) {
+        double mainLen = -firstItemOffset_;
+        for (int32_t i = startIndex_; i <= endIndex_; ++i) {
+            mainLen += GetSize(gridCells_.at(i).at(0)) + *mainGap_;
+        }
+        scrollLength += (mainLen - GetSize(GetLayoutSize()));
+        for (int32_t i = endIndex_; i < inputIdx; ++i) {
             SupplementItems(i, index);
-            scrollLength += GetSize(gridCells_.at(i).at(0)) + *mainGap_;
+            if (i != inputIdx) {
+                scrollLength += GetSize(gridCells_.at(i).at(0)) + *mainGap_;
+            }
         }
         scrollLength = -scrollLength;
     } else if (inputIdx <= startIndex_) {
+        scrollLength += firstItemOffset_;
         for (int32_t i = startIndex_; i >= inputIdx; --i) {
-            SupplementItems(i, index);
-            scrollLength += GetSize(gridCells_.at(i).at(0)) + *mainGap_;
+            SupplementItems(i, index, i != inputIdx);
+            if (i != inputIdx) {
+                scrollLength += GetSize(gridCells_.at(i).at(0)) + *mainGap_;
+            }
         }
     } else {
         return;
@@ -1207,7 +1229,7 @@ void RenderGridScroll::BuildItemsForwardByRange(int32_t startItemIdx, int32_t en
     }
     auto itemIndex = startItemIdx;
     auto end = endItemIdx;
-    while (itemIndex > end) {
+    while (itemIndex >= end) {
         if (GetItemMainIndex(itemIndex) != -1) {
             --itemIndex;
             continue;
@@ -1240,6 +1262,7 @@ void RenderGridScroll::BuildItemsForwardByRange(int32_t startItemIdx, int32_t en
     }
     // Check current front main line is placed completely or not.
     int32_t firstCross = gridMatrix_.begin()->second.begin()->first;
+    --end;
     for (int32_t crossIndex = firstCross - 1; crossIndex >= 0; --crossIndex) {
         int32_t itemMain = -1;
         int32_t itemCross = -1;
@@ -1253,6 +1276,7 @@ void RenderGridScroll::BuildItemsForwardByRange(int32_t startItemIdx, int32_t en
             continue;
         }
         itemMain = gridMatrix_.begin()->first;
+        itemCross = itemCross == -1 ? crossIndex : itemCross;
         CheckGridPlaced(end, itemMain, itemCross, itemMainSpan, itemCrossSpan);
         --end;
     }
@@ -1265,7 +1289,7 @@ void RenderGridScroll::BuildItemsBackwardByRange(int32_t startItemIdx, int32_t e
     }
     auto itemIndex = startItemIdx;
     auto end = endItemIdx;
-    while (itemIndex < end) {
+    while (itemIndex <= end) {
         if (GetItemMainIndex(itemIndex) != -1) {
             ++itemIndex;
             continue;
@@ -1298,6 +1322,7 @@ void RenderGridScroll::BuildItemsBackwardByRange(int32_t startItemIdx, int32_t e
     }
     // Check current end main line is placed completely or not.
     int32_t lastCross = gridMatrix_.rbegin()->second.rbegin()->first;
+    ++end;
     for (int32_t crossIndex = lastCross + 1; crossIndex < *crossCount_; ++crossIndex) {
         int32_t itemMain = -1;
         int32_t itemCross = -1;
@@ -1311,6 +1336,7 @@ void RenderGridScroll::BuildItemsBackwardByRange(int32_t startItemIdx, int32_t e
             continue;
         }
         itemMain = gridMatrix_.rbegin()->first;
+        itemCross = itemCross == -1 ? crossIndex : itemCross;
         CheckGridPlaced(end, itemMain, itemCross, itemMainSpan, itemCrossSpan);
         ++end;
     }
@@ -1333,6 +1359,25 @@ bool RenderGridScroll::GetItemPropsByIndex(
         }
     }
     return true;
+}
+
+void RenderGridScroll::ScrollToEdge(OHOS::Ace::ScrollEdgeType edgeType, bool smooth)
+{
+    if (edgeType != ScrollEdgeType::SCROLL_TOP) {
+        LOGW("Not supported yet");
+        return;
+    }
+    if (items_.empty() && updateFlag_) {
+        return;
+    }
+    if (scrollable_ && !scrollable_->IsStopped()) {
+        scrollable_->StopScrollable();
+    }
+    currentItemIndex_ = 0;
+    startRankItemIndex_ = GetStartingItem(currentItemIndex_);
+    ClearItems();
+    ClearLayout(false);
+    MarkNeedLayout();
 }
 
 void RenderGridScroll::DoJump(double position, int32_t source)
@@ -1398,6 +1443,10 @@ void RenderGridScroll::OnPredictLayout(int64_t targetTimestamp)
     if (loadingIndex_ == -1) {
         DealCache(startIndex_, endIndex_);
         if (loadingIndex_ == -1) {
+            if (startIndex_ == 0 && startRankItemIndex_ > 0) {
+                LoadForward();
+                MarkNeedPredictLayout();
+            }
             return;
         }
     }

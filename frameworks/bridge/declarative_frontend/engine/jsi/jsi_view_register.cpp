@@ -18,6 +18,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
+#include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ability_component.h"
@@ -59,6 +60,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
@@ -90,6 +92,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
@@ -251,13 +254,44 @@ RefPtr<FrontendDelegate> JsGetFrontendDelegate()
 panda::Local<panda::JSValueRef> JsGetInspectorNodes(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
     const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
 {
-    return panda::JSValueRef::Undefined(vm);
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto declarativeDelegate = AceType::DynamicCast<FrontendDelegateDeclarative>(JsGetFrontendDelegate());
+    if (!declarativeDelegate) {
+        LOGE("declarativeDelegate is null!");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto accessibilityManager = declarativeDelegate->GetJSAccessibilityManager();
+    auto nodeInfos = accessibilityManager->DumpComposedElementsToJson();
+    return panda::StringRef::NewFromUtf8(vm, nodeInfos->ToString().c_str());
 }
 
 panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
     const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
 {
-    return panda::JSValueRef::Undefined(vm);
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (argc < 1 || !args[0]->IsNumber()) {
+        LOGE("The arg is wrong, must have one argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto declarativeDelegate = OHOS::Ace::AceType::DynamicCast<FrontendDelegateDeclarative>(JsGetFrontendDelegate());
+    if (!declarativeDelegate) {
+        LOGE("declarativeDelegate is null!");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto accessibilityManager = declarativeDelegate->GetJSAccessibilityManager();
+    if (!accessibilityManager) {
+        LOGE("accessibilityManager is null!");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t intValue = args[0]->Int32Value(vm);
+    auto nodeInfo = accessibilityManager->DumpComposedElementToJson(intValue);
+    return panda::StringRef::NewFromUtf8(vm, nodeInfo->ToString().c_str());
 }
 
 panda::Local<panda::JSValueRef> Vp2Px(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
@@ -421,26 +455,62 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::EcmaVM* vm, panda::Local<panda::JS
 }
 
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
-    { "Flex", JSFlexImpl::JSBind }, { "Text", JSText::JSBind }, { "Animator", JSAnimator::JSBind },
-    { "SpringProp", JSAnimator::JSBind }, { "SpringMotion", JSAnimator::JSBind },
-    { "ScrollMotion", JSAnimator::JSBind }, { "Animator", JSAnimator::JSBind }, { "Span", JSSpan::JSBind },
-    { "Button", JSButton::JSBind }, { "LazyForEach", JSLazyForEach::JSBind }, { "List", JSList::JSBind },
-    { "ListItem", JSListItem::JSBind }, { "LoadingProgress", JSLoadingProgress::JSBind }, { "Image", JSImage::JSBind },
-    { "ImageAnimator", JSImageAnimator::JSBind }, { "Counter", JSCounter::JSBind }, { "Progress", JSProgress::JSBind },
-    { "Column", JSColumn::JSBind }, { "Row", JSRow::JSBind }, { "Grid", JSGrid::JSBind },
-    { "GridItem", JSGridItem::JSBind }, { "GridContainer", JSGridContainer::JSBind }, { "Slider", JSSlider::JSBind },
-    { "Stack", JSStack::JSBind }, { "ForEach", JSForEach::JSBind }, { "Divider", JSDivider::JSBind },
-    { "Swiper", JSSwiper::JSBind }, { "Panel", JSSlidingPanel::JSBind }, { "NavigationView", JSNavigationView::JSBind },
-    { "Navigator", JSNavigator::JSBind }, { "ColumnSplit", JSColumnSplit::JSBind }, { "If", JSIfElse::JSBind },
-    { "Scroll", JSScroll::JSBind }, { "Toggle", JSToggle::JSBind }, { "Blank", JSBlank::JSBind },
-    { "Calendar", JSCalendar::JSBind }, { "Rect", JSRect::JSBind }, { "Shape", JSShape::JSBind },
-    { "Path", JSPath::JSBind }, { "Circle", JSCircle::JSBind }, { "Line", JSPolygon::JSBind },
-    { "Polygon", JSPolygon::JSBind }, { "Polyline", JSPolyline::JSBind }, { "Ellipse", JSEllipse::JSBind },
-    { "Tabs", JSTabs::JSBind }, { "TabContent", JSTabContent::JSBind }, { "TextPicker", JSTextPicker::JSBind },
-    { "PageTransitionEnter", JSPageTransition::JSBind }, { "PageTransitionExit", JSPageTransition::JSBind },
-    { "RowSplit", JSRowSplit::JSBind }, { "ColumnSplit", JSColumnSplit::JSBind },
-    { "AlphabetIndexer", JSIndexer::JSBind }, { "Radio", JSRadio::JSBind }, { "AlertDialog", JSAlertDialog::JSBind },
+    { "Flex", JSFlexImpl::JSBind },
+    { "Text", JSText::JSBind },
+    { "Animator", JSAnimator::JSBind },
+    { "SpringProp", JSAnimator::JSBind },
+    { "SpringMotion", JSAnimator::JSBind },
+    { "ScrollMotion", JSAnimator::JSBind },
+    { "Animator", JSAnimator::JSBind },
+    { "Span", JSSpan::JSBind },
+    { "Button", JSButton::JSBind },
+    { "LazyForEach", JSLazyForEach::JSBind },
+    { "List", JSList::JSBind },
+    { "ListItem", JSListItem::JSBind },
+    { "LoadingProgress", JSLoadingProgress::JSBind },
+    { "Image", JSImage::JSBind },
+    { "ImageAnimator", JSImageAnimator::JSBind },
+    { "Counter", JSCounter::JSBind },
+    { "Progress", JSProgress::JSBind },
+    { "Column", JSColumn::JSBind },
+    { "Row", JSRow::JSBind }, { "Grid", JSGrid::JSBind },
+    { "GridItem", JSGridItem::JSBind },
+    { "GridContainer", JSGridContainer::JSBind },
+    { "Slider", JSSlider::JSBind },
+    { "Stack", JSStack::JSBind },
+    { "ForEach", JSForEach::JSBind },
+    { "Divider", JSDivider::JSBind },
+    { "Swiper", JSSwiper::JSBind },
+    { "Panel", JSSlidingPanel::JSBind },
+    { "NavigationView", JSNavigationView::JSBind },
+    { "Navigator", JSNavigator::JSBind },
+    { "ColumnSplit", JSColumnSplit::JSBind },
+    { "If", JSIfElse::JSBind },
+    { "Scroll", JSScroll::JSBind },
+    { "Toggle", JSToggle::JSBind },
+    { "Blank", JSBlank::JSBind },
+    { "Calendar", JSCalendar::JSBind },
+    { "Rect", JSRect::JSBind },
+    { "Shape", JSShape::JSBind },
+    { "Path", JSPath::JSBind },
+    { "Circle", JSCircle::JSBind },
+    { "Line", JSPolygon::JSBind },
+    { "Polygon", JSPolygon::JSBind },
+    { "Polyline", JSPolyline::JSBind },
+    { "Ellipse", JSEllipse::JSBind },
+    { "Tabs", JSTabs::JSBind },
+    { "TabContent", JSTabContent::JSBind },
+    { "TextPicker", JSTextPicker::JSBind },
+    { "PageTransitionEnter", JSPageTransition::JSBind },
+    { "PageTransitionExit", JSPageTransition::JSBind },
+    { "RowSplit", JSRowSplit::JSBind },
+    { "ColumnSplit", JSColumnSplit::JSBind },
+    { "AlphabetIndexer", JSIndexer::JSBind },
+    { "Radio", JSRadio::JSBind },
+    { "ActionSheet", JSActionSheet::JSBind },
+    { "AlertDialog", JSAlertDialog::JSBind },
     { "AbilityComponent", JSAbilityComponent::JSBind },
+    { "TextArea", JSTextArea::JSBind },
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     { "QRCode", JSQRCode::JSBind },
 #ifndef WEARABLE_PRODUCT
@@ -448,10 +518,15 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #endif
 #ifndef WEARABLE_PRODUCT
-    { "Camera", JSCamera::JSBind }, { "Piece", JSPiece::JSBind }, { "Rating", JSRating::JSBind },
+    { "Camera", JSCamera::JSBind },
+    { "Piece", JSPiece::JSBind },
+    { "Rating", JSRating::JSBind },
     { "Video", JSVideo::JSBind },
 #endif
-    { "DataPanel", JSDataPanel::JSBind }, { "Badge", JSBadge::JSBind }, { "Gauge", JSGauge::JSBind }
+    { "DataPanel", JSDataPanel::JSBind },
+    { "Badge", JSBadge::JSBind },
+    { "Gauge", JSGauge::JSBind },
+    { "Marquee", JSMarquee::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj)

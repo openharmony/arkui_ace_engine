@@ -17,6 +17,8 @@
 
 #include "gtest/gtest.h"
 
+#include "adapter/aosp/entrance/java/jni/ace_application_info.h"
+#include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/progress/loading_progress_component.h"
@@ -48,6 +50,21 @@ constexpr double JSON_DIAMETER = 50.0;
 constexpr double DEFAULT_DIAMETER = 100.0;
 
 } // namespace
+
+Platform::JniEnvironment::JniEnvironment() {}
+
+Platform::JniEnvironment::~JniEnvironment() = default;
+
+std::shared_ptr<JNIEnv> Platform::JniEnvironment::GetJniEnv(JNIEnv* jniEnv) const
+{
+    return nullptr;
+}
+
+Platform::JniEnvironment& Platform::JniEnvironment::GetInstance()
+{
+    static Platform::JniEnvironment jniEnvironment;
+    return jniEnvironment;
+}
 
 class ProgressCreatorTest : public testing::Test {
 public:

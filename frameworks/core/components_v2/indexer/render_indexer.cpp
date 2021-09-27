@@ -161,6 +161,15 @@ void RenderIndexer::Update(const RefPtr<Component>& component)
     itemSizeRender_ = itemSize_;
     itemCount_ = indexerComponent->GetItemCount();
     LOGI("[indexer] Init data, itemSizeRender_:%{public}lf, itemCount_:%{public}d", itemSizeRender_, itemCount_);
+    if (IsValidBubbleBox() && !bubbleBox_->GetChildren().empty()) {
+        auto text = AceType::DynamicCast<RenderText>(bubbleBox_->GetChildren().front());
+        auto item = GetSpecificItem(focusedItem_);
+        if (bubbleText_ && text && item) {
+            bubbleText_->SetData(item->GetSectionText());
+            text->Update(bubbleText_);
+            text->PerformLayout();
+        }
+    }
     MarkNeedLayout();
     selectedEventFun_ = AceAsyncEvent<void(const std::shared_ptr<IndexerEventInfo>&)>::
         Create(indexerComponent->GetSelectedEvent(), context_);

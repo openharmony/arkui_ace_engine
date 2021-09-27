@@ -20,7 +20,7 @@
 #include <unistd.h>
 
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
-#include "bridge/js_frontend/engine/jsi/ark_js_value.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
@@ -47,11 +47,10 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_stepper_bridge.h"
 
 namespace OHOS::Ace::Framework {
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 const int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
 using std::shared_ptr;
-using JSI_GetRuntime = void* (*)();
 
 RefPtr<JsAcePage> GetStagingPage(const shared_ptr<JsRuntime>& runtime)
 {
@@ -332,7 +331,6 @@ bool SetDomAttributes(
     bool hasShowAttr = false;
 
     if (!attrObj || !attrObj->IsObject(runtime)) {
-        LOGE("domAttribute argument is not an object, attributes not found!");
         return false;
     }
 
@@ -2538,10 +2536,6 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode)
         return false;
     }
 
-    shared_ptr<JsValue> abilityValue = runtime_->NewNativePointer(this->GetFrontendDelegate()->GetAbility());
-    shared_ptr<JsValue> global = runtime_->GetGlobal();
-    global->SetProperty(runtime_, "ability", abilityValue);
-
     RegisterAceModule();
     RegisterConsoleModule();
     RegisterPerfUtilModule();
@@ -2574,6 +2568,8 @@ void JsiEngineInstance::InitGroupJsBridge()
 
 bool JsiEngineInstance::FireJsEvent(const std::string& eventStr)
 {
+    LOGI("JsiEngineInstance FireJsEvent");
+
     std::vector<shared_ptr<JsValue>> argv;
     argv.push_back(runtime_->NewString(std::to_string(runningPage_->GetPageId())));
     shared_ptr<JsValue> var1 = runtime_->ParseJson(eventStr);
@@ -2593,6 +2589,7 @@ bool JsiEngineInstance::FireJsEvent(const std::string& eventStr)
 
 void JsiEngineInstance::CallJs(const std::string& callbackId, const std::string& args, bool keepAlive, bool isGlobal)
 {
+    LOGI("JsiEngineInstance CallJs");
     std::string keepAliveStr = keepAlive ? "true" : "false";
     std::string callBuff = std::string("[{\"args\": [\"")
                                .append(callbackId)
@@ -2659,19 +2656,10 @@ void JsiEngine::GetLoadOptions(std::string& optionStr, bool isMainPage, bool has
     LOGD("JsiEngine GetLoadOptions");
     ACE_DCHECK(engineInstance_);
     auto delegate = engineInstance_->GetFrontendDelegate();
-    auto renderOption = JsonUtil::Create(true);
     auto mediaQuery = delegate->GetMediaQueryInfoInstance();
-    auto container = Container::Current();
+    auto renderOption = mediaQuery->GetMediaQueryJsonInfo();
     if (mediaQuery) {
-        renderOption->Put("orientation", mediaQuery->GetOrientation().c_str());
-        renderOption->Put("deviceType", mediaQuery->GetDeviceType().c_str());
-        renderOption->Put("deviceWidth", SystemProperties::GetDeviceWidth());
-        renderOption->Put("deviceHeight", SystemProperties::GetDeviceHeight());
-        renderOption->Put("roundScreen", SystemProperties::GetIsScreenRound());
-        renderOption->Put("width", container ? container->GetViewWidth() : 0);
-        renderOption->Put("height", container ? container->GetViewHeight() : 0);
         renderOption->Put("isInit", mediaQuery->GetIsInit());
-        renderOption->Put("darkMode", SystemProperties::GetColorMode() == ColorMode::DARK);
     }
     renderOption->Put("pcPreview", PC_PREVIEW);
     renderOption->Put("appInstanceId", "10002");
@@ -2697,8 +2685,8 @@ void JsiEngine::GetLoadOptions(std::string& optionStr, bool isMainPage, bool has
 
 void JsiEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
-    LOGI("JsiEngine LoadJs enter: %{public}s", url.c_str());
     ACE_SCOPED_TRACE("JsiEngine::LoadJs");
+    LOGD("JsiEngine LoadJs");
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetStagingPage(page);
     if (isMainPage) {

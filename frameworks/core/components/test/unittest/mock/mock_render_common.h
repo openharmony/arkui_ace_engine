@@ -16,6 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEST_UNITTEST_MOCK_MOCK_RENDER_COMMON_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEST_UNITTEST_MOCK_MOCK_RENDER_COMMON_H
 
+#ifndef OHOS_STANDARD_SYSTEM
+#include "adapter/aosp/entrance/java/jni/ace_application_info.h"
+#include "adapter/aosp/entrance/java/jni/jni_environment.h"
+#endif
 #include "core/common/window.h"
 #include "core/components/root/render_root.h"
 

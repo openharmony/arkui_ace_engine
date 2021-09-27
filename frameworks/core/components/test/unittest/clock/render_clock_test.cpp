@@ -16,15 +16,15 @@
 #include "gtest/gtest.h"
 
 #define protected public
-#include "adapter/ohos/osal/fake_asset_manager.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
 #include "base/i18n/localization.h"
 #include "base/utils/system_properties.h"
+#include "core/mock/fake_asset_manager.h"
+#include "core/mock/fake_task_executor.h"
 #include "frameworks/core/components/clock/clock_component.h"
 #include "frameworks/core/components/clock/render_clock.h"
 #include "frameworks/core/components/test/json/json_frontend.h"
-#include "frameworks/core/components/text/render_text.h"
 #include "frameworks/core/components/test/unittest/mock/mock_render_depend.h"
+#include "frameworks/core/components/text/render_text.h"
 #include "frameworks/core/event/key_event.h"
 #include "frameworks/core/mock/mock_resource_register.h"
 

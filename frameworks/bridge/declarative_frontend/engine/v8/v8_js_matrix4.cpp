@@ -101,17 +101,20 @@ void JSMatrix4::Init(const v8::FunctionCallbackInfo<v8::Value>& info)
     v8::HandleScope scp(isolate);
     auto context = isolate->GetCurrentContext();
 
+    auto copy = v8::Object::New(isolate);
+    CreateMatrix4Object(copy, isolate);
+
     if (info.Length() == 1 && info[0]->IsArray()) {
         v8::Local<v8::Array> array = v8::Local<v8::Array>::Cast(info[0]);
         if (array->Length() == Matrix4::DIMENSION * Matrix4::DIMENSION) {
             auto success =
-                info.This()->Set(context, v8::String::NewFromUtf8(isolate, MATRIX_4X4).ToLocalChecked(), array);
+                copy->Set(context, v8::String::NewFromUtf8(isolate, MATRIX_4X4).ToLocalChecked(), array);
             if (!success.ToChecked()) {
                 LOGE("JSMatrix4::Init Set failed!");
             }
         }
     }
-    info.GetReturnValue().Set(info.This());
+    info.GetReturnValue().Set(copy);
 }
 
 void JSMatrix4::Identity(const v8::FunctionCallbackInfo<v8::Value>& info)
@@ -119,15 +122,19 @@ void JSMatrix4::Identity(const v8::FunctionCallbackInfo<v8::Value>& info)
     LOGD("JSMatrix4::Identity");
     auto isolate = info.GetIsolate();
     v8::HandleScope scp(isolate);
+
     auto context = isolate->GetCurrentContext();
+    auto copy = v8::Object::New(isolate);
+    CreateMatrix4Object(copy, isolate);
     v8::Local<v8::Array> array = v8::Array::New(isolate);
     Matrix4 matrix = Matrix4::CreateIdentity();
     Matrix4ToArray(matrix, isolate, array);
-    auto success = info.This()->Set(context, v8::String::NewFromUtf8(isolate, MATRIX_4X4).ToLocalChecked(), array);
+    auto success = copy->Set(context, v8::String::NewFromUtf8(isolate, MATRIX_4X4).ToLocalChecked(), array);
     if (!success.ToChecked()) {
         LOGE("JSMatrix4::Identity Set failed!");
     }
-    info.GetReturnValue().Set(info.This());
+
+    info.GetReturnValue().Set(copy);
 }
 
 void JSMatrix4::Copy(const v8::FunctionCallbackInfo<v8::Value>& info)

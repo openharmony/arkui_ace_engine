@@ -104,7 +104,11 @@ void RenderCheckable::CalculateSize()
     }
 
     // Calculate draw size with hot zone and ratio of (width / height).
-    drawSize_ = Size(width_ - 2 * hotZoneHorizontalPadding, height_ - 2 * hotZoneVerticalPadding);
+    double width = width_ - 2 * hotZoneHorizontalPadding;
+    width = width > 0 ? width : 0;
+    double height = height_ - 2 * hotZoneVerticalPadding;
+    height = height > 0 ? height : 0;
+    drawSize_ = Size(width, height);
     ApplyAspectRatio(drawSize_);
     paintPosition_ = Alignment::GetAlignPosition(Size(width_, height_), drawSize_, Alignment::CENTER);
 }

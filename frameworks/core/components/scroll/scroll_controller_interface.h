@@ -65,7 +65,6 @@ public:
         scroll_ = scroll;
     }
 
-
 protected:
     WeakPtr<RenderNode> scroll_;
 };

@@ -424,7 +424,6 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
         jsEngine->JsCallback(callbackId, args);
     };
     builder.taskExecutor = taskExecutor;
-    builder.ability = ability_;
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateImpl>(builder);
     if (disallowPopLastPage_) {
         delegate_->DisallowPopLastPage();
@@ -628,13 +627,6 @@ void JsFrontend::OnCompleteContinuation(int32_t code)
 {
     if (delegate_) {
         delegate_->OnCompleteContinuation(code);
-    }
-}
-
-void JsFrontend::OnRemoteTerminated()
-{
-    if (delegate_) {
-        delegate_->OnRemoteTerminated();
     }
 }
 

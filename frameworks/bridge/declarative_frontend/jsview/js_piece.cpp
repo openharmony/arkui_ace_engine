@@ -23,7 +23,7 @@ namespace OHOS::Ace::Framework {
 void JSPiece::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("piece create error, info is non-vaild");
+        LOGE("piece create error, info is non-valid");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);

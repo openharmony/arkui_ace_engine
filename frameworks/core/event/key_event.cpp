@@ -19,9 +19,9 @@ namespace OHOS::Ace {
 
 namespace {
 
-// key : define key event code, value : define ace key string
+// key : define aosp key event code, value : define ace key string
 constexpr int32_t KEYCODE_SIZE = 289;
-const char* g_keycode2String[KEYCODE_SIZE] = {
+const char* g_aospKeycode2String[KEYCODE_SIZE] = {
     "Unknown", "SoftLeft", "SoftRight", "Home", "Back", "Call", "EndCall", "Digit0", "Digit1", "Digit2", "Digit3",
     "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9", "Star", "Pound", "DpadUp", "DpadDown", "DpadLeft",
     "DpadRight", "DpadCenter", "VolumeUp", "VolumeDown", "Power", "Camera", "Clear", "KeyA", "KeyB", "KeyC",
@@ -62,9 +62,9 @@ const char* g_keycode2String[KEYCODE_SIZE] = {
 const char* KeyToString(int32_t code)
 {
     if (code >= 0 && code < KEYCODE_SIZE) {
-        return g_keycode2String[code];
+        return g_aospKeycode2String[code];
     } else {
-        return g_keycode2String[0]; // "UnKnown"
+        return g_aospKeycode2String[0]; // "UnKnown"
     }
 }
 

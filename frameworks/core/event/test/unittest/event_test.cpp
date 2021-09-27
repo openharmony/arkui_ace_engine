@@ -15,8 +15,6 @@
 
 #include <gtest/gtest.h>
 
-#include "adapter/ohos/osal/fake_asset_manager.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
 #include "core/common/platform_window.h"
 #include "core/components/test/json/json_frontend.h"
 #include "core/event/ace_event_helper.h"
@@ -24,6 +22,8 @@
 #include "core/event/key_event.h"
 #include "core/event/key_event_recognizer.h"
 #include "core/event/mouse_raw_recognizer.h"
+#include "core/mock/fake_asset_manager.h"
+#include "core/mock/fake_task_executor.h"
 #include "core/mock/mock_resource_register.h"
 
 using namespace testing::ext;

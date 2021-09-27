@@ -31,7 +31,7 @@ public:
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
     std::string GetSticky() const;
-    std::string GetEditable() const;
+    std::string GetEditMode() const;
 };
 
 } // namespace OHOS::Ace

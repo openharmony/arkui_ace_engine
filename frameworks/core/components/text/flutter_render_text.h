@@ -56,7 +56,7 @@ private:
     void EffectAutoMaxLines();
     // Change text direction accroding to first strong direction letter when developer set direction auto.
     void ChangeDirectionIfNeeded(const std::string& data);
-    void ApplyWhiteSpace();
+    std::string ApplyWhiteSpace();
     void ApplyIndents(double width);
     std::unique_ptr<txt::Paragraph> paragraph_;
 

@@ -25,7 +25,6 @@
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/text_overlay/text_overlay_element.h"
 #include "core/event/ace_event_helper.h"
-#include "unistd.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -56,65 +55,6 @@ constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
 
 } // namespace
 
-void OnTextChangedListenerImpl::InsertText(const std::u16string& text) {
-    if (text.length() <= 0) {
-        LOGE("the text is null");
-        return;
-    }
-
-    auto renderTextField = field_.Upgrade();
-    if (!renderTextField) {
-        return;
-    }
-
-    auto value = renderTextField->GetEditingValue();
-    std::shared_ptr<TextEditingValue> textEditingValue = std::shared_ptr<TextEditingValue>(new TextEditingValue());
-    textEditingValue->text = value.GetBeforeSelection() + StringUtils::Str16ToStr8(text) + value.GetAfterSelection();
-    textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
-
-    renderTextField->UpdateEditingValue(textEditingValue, true);
-}
-
-void OnTextChangedListenerImpl::DeleteBackward(int32_t length) {
-    if (length <= 0) {
-        LOGE("Delete nothing.");
-        return;
-    }
-
-    auto renderTextField = field_.Upgrade();
-    if (!renderTextField) {
-        return;
-    }
-
-    auto value = renderTextField->GetEditingValue();
-    auto start = value.selection.GetStart();
-    auto end = value.selection.GetEnd();
-    std::shared_ptr<TextEditingValue> textEditingValue = std::shared_ptr<TextEditingValue>(new TextEditingValue());
-    textEditingValue->text = value.text;
-    textEditingValue->UpdateSelection(start, end);
-
-    if (start > 0 && end > 0) {
-        textEditingValue->Delete(start == end ? start - length : start, end);
-    }
-
-    renderTextField->UpdateEditingValue(textEditingValue, true);
-}
-
-void OnTextChangedListenerImpl::SetKeyboardStatus(bool status) {
-    auto renderTextField = field_.Upgrade();
-    if (!renderTextField) {
-        return;
-    }
-
-    LOGE("aaainputmethod:SetKeyboardStatus, status=%{public}d", status);
-    if (status) {
-        renderTextField->SetInputMethodStatus(true);
-    } else {
-        MiscServices::InputMethodController::GetInstance()->Close();
-        renderTextField->SetInputMethodStatus(false);
-    }
-}
-
 RenderTextField::RenderTextField()
     : twinklingInterval(TWINKLING_INTERVAL_MS), controller_(AceType::MakeRefPtr<TextEditController>())
 {}
@@ -138,7 +78,8 @@ RenderTextField::~RenderTextField()
 
     // If soft keyboard is still exist, close it.
     if (HasConnection()) {
-        MiscServices::InputMethodController::GetInstance()->Close();
+        connection_->Close(GetInstanceId());
+        connection_ = nullptr;
     }
 }
 
@@ -324,7 +265,6 @@ void RenderTextField::PerformLayout()
     if (renderHideIcon_) {
         renderHideIcon_->Layout(layoutParam);
     }
-
     if (needNotifyChangeEvent_ && (onTextChangeEvent_ || onValueChangeEvent_ || onChange_)) {
         needNotifyChangeEvent_ = false;
         if (onChange_) {
@@ -519,6 +459,11 @@ void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
 
 void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHandle)
 {
+    auto context = context_.Upgrade();
+    if (context->GetIsDeclarative()) {
+        StartTwinkling();
+        return;
+    }
     if (!isVisible_) {
         return;
     }
@@ -744,13 +689,17 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
     }
 
     if (softKeyboardEnabled_) {
-	    if (!HasConnection()) {
-	        MiscServices::InputMethodController::GetInstance()->Attach();
-	        sleep(1);
-	        listener_ = new OnTextChangedListenerImpl(WeakClaim(this));
-	        MiscServices::InputMethodController::GetInstance()->ShowTextInput(listener_);
-	    }
+        if (!HasConnection()) {
+            AttachIme();
+            if (!HasConnection()) {
+                LOGE("Get TextInput connection error");
+                return false;
+            }
+            connection_->SetEditingState(GetEditingValue(), GetInstanceId());
+        }
+        connection_->Show(isFocusViewChanged, GetInstanceId());
     }
+    
     if (keyboard_ != TextInputType::MULTILINE) {
         resetToStart_ = false;
         MarkNeedLayout();
@@ -766,7 +715,8 @@ bool RenderTextField::CloseKeyboard(bool forceClose)
     if (!isOverlayShowed_ || !isOverlayFocus_ || forceClose) {
         StopTwinkling();
         if (HasConnection()) {
-            MiscServices::InputMethodController::GetInstance()->HideTextInput();
+            connection_->Close(GetInstanceId());
+            connection_ = nullptr;
         }
 
         if (onKeyboardClose_) {
@@ -786,6 +736,26 @@ bool RenderTextField::CloseKeyboard(bool forceClose)
         return true;
     }
     return false;
+}
+
+void RenderTextField::AttachIme()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGW("No context exists, failed to request keyboard.");
+        return;
+    }
+
+    TextInputConfiguration config;
+    config.type = keyboard_;
+    config.action = action_;
+    config.actionLabel = actionLabel_;
+    config.obscureText = obscure_;
+    LOGD("Request keyboard configuration: type=%{private}d action=%{private}d actionLabel=%{private}s "
+         "obscureText=%{private}d",
+        keyboard_, action_, actionLabel_.c_str(), obscure_);
+    connection_ =
+        TextInputProxy::GetInstance().Attach(WeakClaim(this), config, context->GetTaskExecutor(), GetInstanceId());
 }
 
 void RenderTextField::StartTwinkling()
@@ -1134,6 +1104,7 @@ void RenderTextField::UpdateIcon(const RefPtr<TextFieldComponent>& textField)
             return;
         }
         iconImage_->Attach(GetContext());
+        iconImage_->SetDirectPaint(true);
         iconImage_->Update(imageComponent);
         AddChild(iconImage_);
     }
@@ -1168,6 +1139,7 @@ void RenderTextField::UpdatePasswordIcon(const RefPtr<TextFieldComponent>& textF
         return;
     }
     renderShowIcon_->Attach(GetContext());
+    renderShowIcon_->SetDirectPaint(true);
     renderShowIcon_->Update(showImage);
     AddChild(renderShowIcon_);
 
@@ -1186,6 +1158,7 @@ void RenderTextField::UpdatePasswordIcon(const RefPtr<TextFieldComponent>& textF
         return;
     }
     renderHideIcon_->Attach(GetContext());
+    renderHideIcon_->SetDirectPaint(true);
     renderHideIcon_->Update(hideImage);
     AddChild(renderHideIcon_);
 }
@@ -1375,6 +1348,7 @@ void RenderTextField::UpdateRemoteEditing(bool needFireChangeEvent)
     if (!HasConnection()) {
         return;
     }
+    connection_->SetEditingState(GetEditingValue(), GetInstanceId(), needFireChangeEvent);
 }
 
 void RenderTextField::UpdateRemoteEditingIfNeeded(bool needFireChangeEvent)

@@ -2321,7 +2321,7 @@ void Declaration::SetBorderImageGradientDirections(const std::unique_ptr<JsonVal
             angleItem = gradientDirections->GetArrayItem(0);
             if (angleItem->IsString()) {
                 LinearGradient linearGradient;
-                linearGradient.angle = StringToDouble(angleItem->GetString());
+                linearGradient.angle = AnimatableDimension(StringToDouble(angleItem->GetString()));
                 backgroundStyle.gradientBorderImage.SetLinearGradient(linearGradient);
                 declaration.hasDecorationStyle_ = true;
             }
@@ -2567,7 +2567,7 @@ void Declaration::SetGradientDirections(const std::unique_ptr<JsonValue>& gradie
             angleItem = gradientDirections->GetArrayItem(0);
             if (angleItem->IsString()) {
                 LinearGradient linearGradient;
-                linearGradient.angle = StringToDouble(angleItem->GetString());
+                linearGradient.angle = AnimatableDimension(StringToDouble(angleItem->GetString()));
                 backgroundStyle.gradient.SetLinearGradient(linearGradient);
                 declaration.hasDecorationStyle_ = true;
             }
@@ -2770,10 +2770,10 @@ void Declaration::SetGradientAngle(const std::string& gradientAngle, Declaration
     StringUtils::StringSpliter(gradientAngle, ' ', offsets);
     if (!offsets.empty()) {
         auto startAngle = StringUtils::StringToDegree(offsets[0]);
-        backgroundStyle.gradient.GetSweepGradient().startAngle = startAngle;
+        backgroundStyle.gradient.GetSweepGradient().startAngle = AnimatableDimension(startAngle);
         if (offsets.size() > 1) {
             auto endAngle = StringUtils::StringToDegree(offsets[1]);
-            backgroundStyle.gradient.GetSweepGradient().endAngle = endAngle;
+            backgroundStyle.gradient.GetSweepGradient().endAngle = AnimatableDimension(endAngle);
         }
         declaration.hasDecorationStyle_ = true;
     }
@@ -2792,7 +2792,7 @@ void Declaration::SetGradientRotation(const std::string& gradientRotation, Decla
     StringUtils::StringSpliter(gradientRotation, ' ', offsets);
     if (!offsets.empty()) {
         auto rotationAngle = StringUtils::StringToDegree(offsets[0]);
-        backgroundStyle.gradient.GetSweepGradient().rotation = rotationAngle;
+        backgroundStyle.gradient.GetSweepGradient().rotation = AnimatableDimension(rotationAngle);
         declaration.hasDecorationStyle_ = true;
     }
 }

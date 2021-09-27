@@ -100,6 +100,7 @@ void DOMButton::PrepareSpecializedComponent()
     imageChild_->SetImageFill(GetImageFill());
     imageChild_->SetWidth(buttonDeclaration_->GetIconWidth());
     imageChild_->SetHeight(buttonDeclaration_->GetIconHeight());
+    imageChild_->SetFitMaxSize(false);
     paddingChild_->SetPadding(buttonDeclaration_->GetPadding());
     textChild_->SetData(buttonDeclaration_->GetTextData());
     bool isCard = AceApplicationInfo::GetInstance().GetIsCardType();
@@ -556,8 +557,14 @@ void DOMButton::UpdateCustomizedColorFlag()
 Dimension DOMButton::GetHeight() const
 {
     Dimension height = Dimension(-1.0, DimensionUnit::PX);
-    if (buttonDeclaration_) {
-        height = buttonDeclaration_->GetHeight();
+    auto buttonDeclaration = buttonDeclaration_;
+    if (IsPlatformFive()) {
+        // less api 5 should set height of box component in UpdateBoxSize, buttonDeclaration_ != nullptr after
+        // PrepareSpecializedComponent
+        buttonDeclaration = AceType::DynamicCast<ButtonDeclaration>(declaration_);
+    }
+    if (buttonDeclaration) {
+        height = buttonDeclaration->GetHeight();
     }
     return height;
 }
@@ -565,10 +572,24 @@ Dimension DOMButton::GetHeight() const
 Dimension DOMButton::GetWidth() const
 {
     Dimension width = Dimension(-1.0, DimensionUnit::PX);
-    if (buttonDeclaration_) {
-        width = buttonDeclaration_->GetWidth();
+    auto buttonDeclaration = buttonDeclaration_;
+    if (IsPlatformFive()) {
+        // less api 5 should set width of box component in UpdateBoxSize, buttonDeclaration_ != nullptr after
+        // PrepareSpecializedComponent
+        buttonDeclaration = AceType::DynamicCast<ButtonDeclaration>(declaration_);
     }
+    if (buttonDeclaration) {
+        width = buttonDeclaration->GetWidth();
+    }
+
     return width;
+}
+
+bool DOMButton::IsPlatformFive() const
+{
+    const static int32_t PLATFORM_VERSION_FIVE = 5;
+    auto context = GetPipelineContext().Upgrade();
+    return context && context->GetMinPlatformVersion() <= PLATFORM_VERSION_FIVE;
 }
 
 } // namespace OHOS::Ace::Framework

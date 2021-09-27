@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <memory>
+
 #include "frameworks/bridge/js_frontend/engine/v8/v8_canvas_bridge.h"
 
 #include "base/utils/string_utils.h"
@@ -299,8 +301,8 @@ void V8CanvasBridge::HandleWebglContext(
         LOGE("engine is null");
         return;
     }
-    V8NativeEngine* nativeEngine = static_cast<V8EngineInstance*>(engine)->GetV8NativeEngine();
-    if (nativeEngine == nullptr) {
+    std::shared_ptr<V8NativeEngine> nativeEngine = static_cast<V8EngineInstance*>(engine)->GetV8NativeEngine();
+    if (!nativeEngine) {
         LOGE("nativeEngine is null");
         return;
     }
@@ -1182,7 +1184,7 @@ void V8CanvasBridge::Path2DSetTransform(const v8::FunctionCallbackInfo<v8::Value
 {
     // 6 parameters: setTransform(a, b, c, d, e, f)
     if (args.Length() != 6) {
-        LOGE("Call Path2D SetTransform fialed, invalid agrs.");
+        LOGE("Call Path2D SetTransform fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1212,7 +1214,7 @@ void V8CanvasBridge::Path2DMoveTo(const v8::FunctionCallbackInfo<v8::Value>& arg
 {
     // 2 parameters: moveTo(x, y)
     if (args.Length() != 2) {
-        LOGE("Call Path2D Arc MoveTo, invalid agrs.");
+        LOGE("Call Path2D Arc MoveTo, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1237,7 +1239,7 @@ void V8CanvasBridge::Path2DLineTo(const v8::FunctionCallbackInfo<v8::Value>& arg
 {
     // 2 parameters: lineTo(x, y)
     if (args.Length() != 2) {
-        LOGE("Call Path2D LineTo fialed, invalid agrs.");
+        LOGE("Call Path2D LineTo fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1262,7 +1264,7 @@ void V8CanvasBridge::Path2DArc(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
     // 5 or 6 parameters: arc(x, y, radius, startAngle, endAngle, anticlockwise?)
     if (args.Length() < 5 || args.Length() > 6) {
-        LOGE("Call Path2D Arc fialed, invalid agrs.");
+        LOGE("Call Path2D Arc fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1293,7 +1295,7 @@ void V8CanvasBridge::Path2DArcTo(const v8::FunctionCallbackInfo<v8::Value>& args
 {
     // 5 parameters: arcTo(x1, y1, x2, y2, radius)
     if (args.Length() != 5) {
-        LOGE("Call Path2D ArcTo fialed, invalid agrs.");
+        LOGE("Call Path2D ArcTo fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1322,7 +1324,7 @@ void V8CanvasBridge::Path2DQuadraticCurveTo(const v8::FunctionCallbackInfo<v8::V
 {
     // 4 parameters: quadraticCurveTo(cpx, cpy, x, y)
     if (args.Length() != 4) {
-        LOGE("Call Path2D QuadraticCurveTo fialed, invalid agrs.");
+        LOGE("Call Path2D QuadraticCurveTo fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1350,7 +1352,7 @@ void V8CanvasBridge::Path2DBezierCurveTo(const v8::FunctionCallbackInfo<v8::Valu
 {
     // 6 parameters: bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
     if (args.Length() != 6) {
-        LOGE("Call Path2D BezierCurveTo fialed, invalid agrs.");
+        LOGE("Call Path2D BezierCurveTo fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1380,7 +1382,7 @@ void V8CanvasBridge::Path2DEllipse(const v8::FunctionCallbackInfo<v8::Value>& ar
 {
     // 7 or 8 parameters: ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise?)
     if (args.Length() < 7 || args.Length() > 8) {
-        LOGE("Call Path2D Ellipse fialed, invalid agrs.");
+        LOGE("Call Path2D Ellipse fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1412,7 +1414,7 @@ void V8CanvasBridge::Path2DRect(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
     // 4 parameters: rect(x, y, width, height)
     if (args.Length() != 4) {
-        LOGE("Call Path2D Rect fialed, invalid agrs.");
+        LOGE("Call Path2D Rect fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();

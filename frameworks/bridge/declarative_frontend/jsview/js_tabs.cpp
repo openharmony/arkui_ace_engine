@@ -75,9 +75,9 @@ void JSTabs::Create(const JSCallbackInfo& info)
                 barVal = BAR_POSITIONS[barPositionVal];
             }
         }
-        JSRef<JSVal> indexValue = obj->GetProperty("initialIndex");
-        if (indexValue->IsNumber()) {
-            initialIndex = indexValue->ToNumber<int32_t>();
+        JSRef<JSVal> index = obj->GetProperty("index");
+        if (index->IsNumber()) {
+            initialIndex = index->ToNumber<int32_t>();
         }
         JSRef<JSVal> controller = obj->GetProperty("controller");
         if (controller->IsObject()) {
@@ -209,6 +209,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTabs>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTabs>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSTabs>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSTabs>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTabs>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSTabs>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

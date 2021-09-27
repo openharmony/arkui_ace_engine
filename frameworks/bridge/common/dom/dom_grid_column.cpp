@@ -29,6 +29,10 @@ RefPtr<Component> DomGridColumn::GetSpecializedComponent()
     if (!columnInfo_) {
         columnInfo_ = infoBuilder_.Build();
         boxComponent_->SetGridLayoutInfo(columnInfo_);
+        if (!flexItemComponent_) {
+            flexItemComponent_ = AceType::MakeRefPtr<FlexItemComponent>();
+        }
+        flexItemComponent_->SetGridColumnInfoBuilder(boxComponent_->GetGridColumnInfoBuilder());
     }
     return DOMDiv::GetSpecializedComponent();
 }
@@ -87,9 +91,9 @@ bool DomGridColumn::SetSpecializedAttr(const std::pair<std::string, std::string>
                 column.infoBuilder_.SetSmSizeColumn(span, offset);
             } },
         { DOM_GRID_COLUMN_SPAN,
-                [](const std::string& value, DomGridColumn& column) {
-                    column.infoBuilder_.SetColumns(StringUtils::StringToUint(value));
-                } },
+            [](const std::string& value, DomGridColumn& column) {
+                column.infoBuilder_.SetColumns(StringUtils::StringToUint(value));
+            } },
         { DOM_GRID_SIZE_TYPE_XS,
             [](const std::string& value, DomGridColumn& column) {
                 uint32_t span = 0;

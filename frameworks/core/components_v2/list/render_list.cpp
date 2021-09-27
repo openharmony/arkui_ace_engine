@@ -147,9 +147,15 @@ void RenderList::PerformLayout()
         curMainPos += GetMainSize(child->GetLayoutSize()) + spaceWidth_;
     }
 
+    if (selectedItem_ && selectedItemIndex_ < startIndex_) {
+        curMainPos += GetMainSize(selectedItem_->GetLayoutSize()) + spaceWidth_;
+    }
+
+    curMainPos -= spaceWidth_;
+
     // Check if reach the end of list
     reachEnd_ = LessOrEqual(curMainPos, mainSize);
-    bool noEdgeEffect = (scrollable_ && scrollable_->Idle()) || !scrollEffect_;
+    bool noEdgeEffect = (scrollable_ && scrollable_->Idle()) || !scrollEffect_ || autoScrollingForItemMove_;
     if (noEdgeEffect && reachEnd_) {
         // Adjust end of list to match the end of layout
         currentOffset_ += mainSize - curMainPos;
@@ -161,6 +167,9 @@ void RenderList::PerformLayout()
         auto child = RequestAndLayoutNewItem(startIndex_ - 1, innerLayout);
         if (!child) {
             break;
+        }
+        if (selectedItemIndex_ == startIndex_) {
+            continue;
         }
         currentOffset_ -= GetMainSize(child->GetLayoutSize()) + spaceWidth_;
     }
@@ -183,6 +192,9 @@ void RenderList::PerformLayout()
 
     // Set layout size of list component itself
     SetLayoutSize(GetLayoutParam().Constrain(layoutSize));
+
+    // Clear auto scrolling flags
+    autoScrollingForItemMove_ = false;
 }
 
 Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutParam)
@@ -200,12 +212,43 @@ Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutPara
     double nextStickyMainAxis = Size::INFINITE_SIZE;
     size_t firstIdx = INITIAL_CHILD_INDEX;
     size_t lastIdx = 0;
+    double selectedItemMainSize = selectedItem_ ? GetMainSize(selectedItem_->GetLayoutSize()) : 0.0;
 
     for (const auto& child : items_) {
+        const auto& childLayoutSize = child->GetLayoutSize();
+        double childMainSize = GetMainSize(childLayoutSize);
+
+        if (selectedItem_) {
+            double range = std::min(selectedItemMainSize, childMainSize) / 2.0;
+            bool beforeSelectedItem = index <= selectedItemIndex_;
+            if (beforeSelectedItem && targetIndex_ == index) {
+                targetMainAxis_ = curMainPos;
+                curMainPos += selectedItemMainSize + spaceWidth_;
+            }
+
+            if (movingForward_) {
+                double axis = selectedItemMainAxis_;
+                if (GreatOrEqual(axis, curMainPos) && LessNotEqual(axis, curMainPos + range)) {
+                    targetIndex_ = beforeSelectedItem ? index : index - 1;
+                    targetMainAxis_ = curMainPos;
+                    curMainPos += selectedItemMainSize + spaceWidth_;
+                }
+            } else {
+                double axis = selectedItemMainAxis_ + selectedItemMainSize;
+                double limit = curMainPos + childMainSize;
+                if (GreatNotEqual(axis, limit - range) && LessOrEqual(axis, limit)) {
+                    targetIndex_ = beforeSelectedItem ? index + 1 : index;
+                    targetMainAxis_ = curMainPos;
+                    curMainPos -= selectedItemMainSize + spaceWidth_;
+                }
+            }
+        }
+
         auto offset = MakeValue<Offset>(curMainPos, 0.0);
         if (chainAnimation_) {
             offset += MakeValue<Offset>(-GetChainDelta(index), 0.0);
         }
+
         child->SetPosition(offset);
         // Disable sticky mode while expand all items
         if (fixedMainSize_ && child->GetSticky() != StickyMode::NONE) {
@@ -218,8 +261,7 @@ Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutPara
             }
         }
 
-        const auto& childLayoutSize = child->GetLayoutSize();
-        double childMainSize = GetMainSize(childLayoutSize) + spaceWidth_;
+        childMainSize += spaceWidth_;
         if (LessNotEqual(curMainPos, mainSize) && GreatNotEqual(curMainPos + childMainSize, 0.0)) {
             if (!fixedCrossSize_) {
                 crossSize = std::max(crossSize, GetCrossSize(childLayoutSize));
@@ -228,7 +270,15 @@ Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutPara
             lastIdx = std::max(lastIdx, index);
         }
 
-        curMainPos += childMainSize;
+        if (child != selectedItem_) {
+            curMainPos += childMainSize;
+        }
+
+        if (selectedItem_ && index > selectedItemIndex_ && targetIndex_ == index) {
+            targetMainAxis_ = curMainPos;
+            curMainPos += selectedItemMainSize + spaceWidth_;
+        }
+
         ++index;
     }
     if (firstIdx != firstDisplayIndex_ || lastIdx != lastDisplayIndex_) {
@@ -339,6 +389,11 @@ void RenderList::OnTouchTestHit(
     if (!GetVisible()) {
         return;
     }
+
+    if (PrepareRawRecognizer()) {
+        result.emplace_back(rawRecognizer_);
+    }
+
     // Disable scroll while expand all items
     if (!fixedMainSize_) {
         return;
@@ -373,17 +428,18 @@ double RenderList::ApplyLayoutParam()
 
             startMainPos_ = 0.0;
             endMainPos_ = std::numeric_limits<decltype(endMainPos_)>::max();
-            fixedMainSize_ = false;
+            fixedMainSizeByLayoutParam_ = false;
         } else {
             startMainPos_ = -maxMainSize;
             endMainPos_ = startMainPos_ + (maxMainSize * VIEW_PORT_SCALE);
-            fixedMainSize_ = NearEqual(maxMainSize, GetMainSize(GetLayoutParam().GetMinSize()));
+            fixedMainSizeByLayoutParam_ = NearEqual(maxMainSize, GetMainSize(GetLayoutParam().GetMinSize()));
         }
 
         fixedCrossSize_ = !NearEqual(GetCrossSize(maxLayoutSize), Size::INFINITE_SIZE);
-        TakeBoundary(fixedMainSize_ && fixedCrossSize_);
+        TakeBoundary(fixedMainSizeByLayoutParam_ && fixedCrossSize_);
     }
 
+    fixedMainSize_ = fixedMainSizeByLayoutParam_;
     return maxMainSize;
 }
 
@@ -409,7 +465,7 @@ double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam)
             startIndex_ = curIndex + 1;
         }
 
-        if (currentStickyItem_ != child) {
+        if (currentStickyItem_ != child && selectedItem_ != child) {
             // Recycle list items out of view port
             RecycleListItem(curIndex);
         }
@@ -458,6 +514,14 @@ RefPtr<RenderListItem> RenderList::RequestListItem(size_t index)
             }
             spThis->OnItemDelete(item);
         });
+
+        newItem->SetOnSelect([weak = AceType::WeakClaim(this)](RefPtr<RenderListItem> item) {
+            auto spThis = weak.Upgrade();
+            if (!spThis) {
+                return;
+            }
+            spThis->OnItemSelect(item);
+        });
     }
 
     if (!newItem->GetVisible()) {
@@ -489,39 +553,40 @@ size_t RenderList::FindPreviousStickyListItem(size_t index)
 
 void RenderList::OnItemDelete(const RefPtr<RenderListItem>& item)
 {
-    ACE_DCHECK(item);
-
-    size_t index = 0;
-    auto it = std::find(items_.begin(), items_.end(), item);
-    if (it != items_.end()) {
-        int32_t offset = std::distance(items_.begin(), it);
-        ACE_DCHECK(offset >= 0);
-        index = startIndex_ + offset;
-    } else {
-        ACE_DCHECK(fixedMainSize_);
-        ACE_DCHECK(item == currentStickyItem_);
-        index = currentStickyIndex_;
-    }
-
+    size_t index = GetIndexByListItem(item);
     if (!ResumeEventCallback(component_, &ListComponent::GetOnItemDelete, false, static_cast<int32_t>(index))) {
-        LOGI("Stop deleting item");
+        LOGI("User canceled, stop deleting item");
         return;
-    }
-
-    if (index == currentStickyIndex_) {
-        ApplyPreviousStickyListItem(index - 1);
-    }
-
-    RecycleListItem(index);
-    if (it != items_.end()) {
-        items_.erase(it);
     }
 
     if (index < startIndex_) {
         --startIndex_;
     }
+}
 
-    MarkNeedLayout();
+void RenderList::OnItemSelect(const RefPtr<RenderListItem>& item)
+{
+    targetIndex_ = GetIndexByListItem(item);
+    selectedItemIndex_ = targetIndex_;
+    selectedItem_ = item;
+    selectedItemMainAxis_ = GetMainAxis(item->GetPosition());
+    LOGI("Select list item %{private}zu to move", selectedItemIndex_);
+}
+
+size_t RenderList::GetIndexByListItem(const RefPtr<RenderListItem>& item) const
+{
+    ACE_DCHECK(item);
+
+    auto it = std::find(items_.begin(), items_.end(), item);
+    if (it != items_.end()) {
+        int32_t offset = std::distance(items_.begin(), it);
+        ACE_DCHECK(offset >= 0);
+        return startIndex_ + offset;
+    }
+
+    ACE_DCHECK(fixedMainSize_);
+    ACE_DCHECK(item == currentStickyItem_);
+    return currentStickyIndex_;
 }
 
 void RenderList::RemoveAllItems()
@@ -851,8 +916,8 @@ double RenderList::FlushChainAnimation()
     chain_->FlushAnimation();
     if (dragStartIndexPending_ != dragStartIndex_) {
         deltaDistance = chainAdapter_->ResetControl(dragStartIndexPending_ - dragStartIndex_);
-        LOGD("Switch chain control node. %{public}zu -> %{public}zu, deltaDistance: %{public}.1f",
-            dragStartIndex_, dragStartIndexPending_, deltaDistance);
+        LOGD("Switch chain control node. %{public}zu -> %{public}zu, deltaDistance: %{public}.1f", dragStartIndex_,
+            dragStartIndexPending_, deltaDistance);
         dragStartIndex_ = dragStartIndexPending_;
         chainAdapter_->SetDeltaValue(-deltaDistance);
         needSetValue = true;
@@ -1035,6 +1100,100 @@ void RenderList::UpdateAccessibilityChild()
         childAccessibilityNode->SetParentNode(parentAccessibilityNode);
         childAccessibilityNode->Mount(-1);
     }
+}
+
+bool RenderList::PrepareRawRecognizer()
+{
+    if (rawRecognizer_) {
+        return true;
+    }
+
+    rawRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
+    auto weak = AceType::WeakClaim(this);
+    rawRecognizer_->SetOnTouchDown([weak](const TouchEventInfo& info) {
+        if (info.GetTouches().empty()) {
+            return;
+        }
+        auto spThis = weak.Upgrade();
+        if (spThis) {
+            spThis->lastPos_ = spThis->GetMainAxis(info.GetTouches().front().GetLocalLocation());
+        }
+    });
+    rawRecognizer_->SetOnTouchMove([weak](const TouchEventInfo& info) {
+        if (info.GetTouches().empty()) {
+            return;
+        }
+
+        auto spThis = weak.Upgrade();
+        if (!spThis || !spThis->selectedItem_) {
+            return;
+        }
+        double currentPos = spThis->GetMainAxis(info.GetTouches().front().GetLocalLocation());
+        spThis->OnSelectedItemMove(currentPos);
+    });
+    rawRecognizer_->SetOnTouchUp([weak](const TouchEventInfo& info) {
+        auto spThis = weak.Upgrade();
+        if (spThis) {
+            spThis->OnSelectedItemStopMoving(false);
+        }
+    });
+    rawRecognizer_->SetOnTouchCancel([weak](const TouchEventInfo& info) {
+        auto spThis = weak.Upgrade();
+        if (spThis) {
+            spThis->OnSelectedItemStopMoving(true);
+        }
+    });
+
+    return true;
+}
+
+void RenderList::OnSelectedItemMove(double position)
+{
+    double deltaPos = position - lastPos_;
+
+    movingForward_ = LessOrEqual(deltaPos, 0.0);
+    selectedItemMainAxis_ += deltaPos;
+    deltaPos = -deltaPos;
+    if (LessOrEqual(selectedItemMainAxis_, 0.0)) {
+        selectedItemMainAxis_ = 0.0;
+    } else {
+        double maxMainSize = GetMainSize(GetLayoutSize());
+        double mainSize = GetMainSize(selectedItem_->GetLayoutSize());
+        if (GreatOrEqual(selectedItemMainAxis_ + mainSize, maxMainSize)) {
+            selectedItemMainAxis_ = maxMainSize - mainSize;
+        } else {
+            deltaPos = 0.0;
+            lastPos_ = position;
+        }
+    }
+
+    if (!NearZero(deltaPos)) {
+        currentOffset_ += deltaPos;
+        autoScrollingForItemMove_ = true;
+    }
+
+    MarkNeedLayout();
+}
+
+void RenderList::OnSelectedItemStopMoving(bool canceled)
+{
+    if (!canceled && targetIndex_ != selectedItemIndex_) {
+        auto from = static_cast<int32_t>(selectedItemIndex_);
+        auto to = static_cast<int32_t>(targetIndex_);
+        LOGI("Moving item from %{private}d to %{private}d", from, to);
+        if (!ResumeEventCallback(component_, &ListComponent::GetOnItemMove, false, from, to)) {
+            LOGI("User canceled, stop moving item");
+        }
+    }
+
+    if (selectedItemIndex_ < startIndex_ || selectedItemIndex_ >= startIndex_ + items_.size()) {
+        RecycleListItem(selectedItemIndex_);
+    }
+
+    targetIndex_ = INITIAL_CHILD_INDEX;
+    selectedItemIndex_ = INITIAL_CHILD_INDEX;
+    selectedItem_ = nullptr;
+    MarkNeedLayout();
 }
 
 } // namespace OHOS::Ace::V2

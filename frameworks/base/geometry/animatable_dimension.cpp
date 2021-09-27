@@ -42,7 +42,7 @@ AnimatableDimension& AnimatableDimension::operator=(const AnimatableDimension& n
         SetAnimationOption(explicitAnim);
         AnimateTo(newDimension.Value());
     } else if (animationOption_.IsValid()) {
-        LOGD("Animatable assign with implicit animation, duration: %{public}d", explicitAnim.GetDuration());
+        LOGD("Animatable assign with implicit animation, duration: %{public}d", animationOption_.GetDuration());
         AnimateTo(newDimension.Value());
     } else {
         LOGD("Animatable assign without animation.");

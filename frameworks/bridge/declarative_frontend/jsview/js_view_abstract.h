@@ -32,8 +32,6 @@
 #include "core/components/transform/transform_component.h"
 #include "core/pipeline/base/component.h"
 
-#include "resource_manager.h"
-
 namespace OHOS::Ace::Framework {
 
 enum class ResourceType : uint32_t {
@@ -41,7 +39,13 @@ enum class ResourceType : uint32_t {
     FLOAT,
     STRING,
     PLURAL,
+    BOOLEAN,
+    INTARRAY,
+    INTEGER,
+    PATTERN,
+    STRARRAY,
     MEDIA = 20000,
+    RAWFILE = 30000
 };
 
 class JSViewAbstract {
@@ -83,6 +87,7 @@ public:
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void JsBlur(const JSCallbackInfo& info);
+    static void JsColorBlend(const JSCallbackInfo& info);
     static void JsBackdropBlur(const JSCallbackInfo& info);
     static void JsWindowBlur(const JSCallbackInfo& info);
     static void JsFlexBasis(const JSCallbackInfo& info);
@@ -113,6 +118,11 @@ public:
     static bool ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue, Color& result);
     static bool ParseJsString(const JSRef<JSVal>& jsValue, std::string& result);
     static bool ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& result);
+
+    static bool ParseJsBool(const JSRef<JSVal>& jsValue, bool& result);
+    static bool ParseJsInteger(const JSRef<JSVal>& jsValue, uint32_t& result);
+    static bool ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result);
+    static bool ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
 
     static std::pair<Dimension, Dimension> ParseSize(const JSCallbackInfo& info);
     static void JsUseAlign(const JSCallbackInfo& info);
@@ -150,6 +160,9 @@ public:
     static void JsBrightness(const JSCallbackInfo& info);
     static void JsContrast(const JSCallbackInfo& info);
     static void JsSaturate(const JSCallbackInfo& info);
+    static void JsSepia(const JSCallbackInfo& info);
+    static void JsInvert(const JSCallbackInfo& info);
+    static void JsHueRotate(const JSCallbackInfo& info);
 
     static void JsClip(const JSCallbackInfo& info);
     static void JsMask(const JSCallbackInfo& info);
@@ -206,6 +219,7 @@ protected:
     static void SetBorderColor(const Color& color, const AnimationOption& option);
     static void SetBorderWidth(const Dimension& value, const AnimationOption& option);
     static void SetBlur(float radius);
+    static void SetColorBlend(Color color);
     static void SetBackdropBlur(float radius);
     static void SetBlurRadius(const RefPtr<Decoration>& decoration, float radius);
     static void SetWindowBlur(float progress, WindowBlurStyle blurStyle);
@@ -215,7 +229,6 @@ protected:
     static void SetHideNavigationBackButton(bool hide);
     static void SetHideToolBar(bool hide);
     static RefPtr<ThemeConstants> GetThemeConstants();
-    static std::shared_ptr<OHOS::Global::Resource::ResourceManager> GetResourceManager();
     static bool JsWidth(const JSRef<JSVal>& jsValue);
     static bool JsHeight(const JSRef<JSVal>& jsValue);
     template<typename T>

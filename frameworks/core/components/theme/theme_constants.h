@@ -33,7 +33,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT ThemeConstants : public AceType {
+class ACE_FORCE_EXPORT ThemeConstants : public AceType {
     DECLARE_ACE_TYPE(ThemeConstants, AceType);
 
 public:
@@ -102,11 +102,33 @@ public:
     std::string GetString(uint32_t key) const;
 
     /*
+     * Get bool value from platform constants.
+     * NOTE: false will be returned if not found or value is not boolean.
+     * @param[in] key Target key.
+     * @return bool value corresponding to the key.
+     */
+    bool GetBoolean(uint32_t key) const;
+
+    /*
+     * Get int array value from platform constants.
+     * NOTE: empty array will be returned if not found or value is not boolean.
+     * @param[in] key Target key.
+     * @return int array value corresponding to the key.
+     */
+    std::vector<uint32_t> GetIntArray(uint32_t key) const;
+
+    /*
      * Get ResourceId from platform constants.
      * NOTE: ResourceId::NO_ID will be returned if not found or value is not ResourceId.
      */
     InternalResource::ResourceId GetResourceId(uint32_t key) const;
 
+    /*
+     * Get string array value from platform constants.
+     * NOTE: empty array will be returned if not found or value is not boolean.
+     * @param[in] key Target key.
+     * @return string array value corresponding to the key.
+     */
     std::vector<std::string> GetStringArray(uint32_t key) const;
 
     template<class T>

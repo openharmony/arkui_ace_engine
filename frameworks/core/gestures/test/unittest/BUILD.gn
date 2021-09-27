@@ -16,6 +16,8 @@ import("//foundation/ace/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
   module_output_path = "ace_engine_standard/graphicalbasicability/gestures"
+} else {
+  module_output_path = "ace_engine_full/graphicalbasicability/gestures"
 }
 
 ohos_unittest("GesturesTest") {
@@ -25,13 +27,12 @@ ohos_unittest("GesturesTest") {
 
   configs = [ "$ace_root:ace_test_config" ]
 
-  deps = [
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
-    "//third_party/googletest:gtest_main",
-  ]
-  if (is_standard_system) {
-    deps += [ "$ace_root/frameworks/bridge:js_framework_ohos" ]
+  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
+
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }

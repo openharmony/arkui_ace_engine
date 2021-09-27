@@ -31,7 +31,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::Framework {
 namespace {
 
-const std::string TEXT_DATA = "ohos1234@?!";
+const std::string TEXT_DATA = "test1234@?!";
 constexpr int32_t TEST_OVER_FLOW = 1;
 constexpr double TEST_FONT_SIZE = 50.0;
 constexpr int32_t TEST_FONT_WEIGHT = 1;
@@ -57,7 +57,7 @@ const std::string JSON_TEXT_STR = ""
                                   "{                                                       "
                                   "  \"tag\": \"text\",                                    "
                                   "  \"attr\" : [{                                         "
-                                  "           \"value\" : \"ohos1234@?!\"                "
+                                  "           \"value\" : \"test1234@?!\"                "
                                   "            }],                                         "
                                   "  \"style\": [{                                         "
                                   "           \"textOverflow\":\"ellipsis\"                "

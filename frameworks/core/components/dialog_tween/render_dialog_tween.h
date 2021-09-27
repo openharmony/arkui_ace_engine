@@ -90,6 +90,9 @@ private:
     Offset topLeftPoint_;
     TouchRegion maskDragRegion_;
     WeakPtr<DialogTweenComponent> weakDialogTweenComponent_;
+
+    DialogAlignment alignment_ = DialogAlignment::DEFAULT;
+    DimensionOffset offset_;
 };
 
 } // namespace OHOS::Ace

@@ -68,7 +68,7 @@ public:
     virtual void UploadToGpuForRender(
         const WeakPtr<PipelineContext> context,
         RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-        PaintSuccessCallback successCallback,
+        UploadSuccessCallback successCallback,
         FailedCallback failedCallback,
         Size imageSize,
         bool forceResize)
@@ -145,7 +145,7 @@ public:
     void UploadToGpuForRender(
         const WeakPtr<PipelineContext> context,
         RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-        PaintSuccessCallback successCallback,
+        UploadSuccessCallback successCallback,
         FailedCallback failedCallback,
         Size imageSize,
         bool forceResize) override;
@@ -176,7 +176,7 @@ public:
     void UploadToGpuForRender(
         const WeakPtr<PipelineContext> context,
         RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-        PaintSuccessCallback successCallback,
+        UploadSuccessCallback successCallback,
         FailedCallback failedCallback,
         Size imageSize,
         bool forceResize) override;
@@ -192,7 +192,7 @@ public:
     virtual void Resume() override
     {
         if (animatedPlayer_) {
-            LOGE("animatied image Resume");
+            LOGI("animatied image Resume");
             animatedPlayer_->Resume();
         }
     }

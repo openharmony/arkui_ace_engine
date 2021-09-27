@@ -53,6 +53,7 @@ public:
     RefPtr<AccessibilityNode> GetAccessibilityNodeFromPage(NodeId nodeId) const;
     void ClearNodeRectInfo(RefPtr<AccessibilityNode>& node, bool isPopDialog) override;
     void AddComposedElement(const std::string& key, const RefPtr<ComposedElement>& node) override;
+    void RemoveComposedElementById(const std::string& key) override;
     WeakPtr<ComposedElement> GetComposedElementFromPage(NodeId nodeId) override;
     void TriggerVisibleChangeEvent() override;
     void AddVisibleChangeNode(NodeId nodeId, double ratio, VisibleRatioCallback callback) override;
@@ -117,6 +118,8 @@ public:
     std::unique_ptr<JsonValue> DumpComposedElementToJson(NodeId nodeId);
     void SetCardViewParams(const std::string& key, bool focus) override;
     void SetCardViewPosition(int id, float offsetX, float offsetY) override;
+
+    virtual void SetSupportAction(uint32_t action, bool isEnable) override {}
 
     bool IsDeclarative();
 

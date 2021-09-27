@@ -129,6 +129,8 @@ void RenderDialogTween::Update(const RefPtr<Component>& component)
     if (isSetMargin_) {
         margin_ = dialog->GetMargin();
     }
+    alignment_ = dialog->GetAlignment();
+    offset_ = dialog->GetOffset();
 
     if (dialog->IsMenu()) {
         auto menuSuccessId = dialog->GetMenuSuccessId();
@@ -365,29 +367,50 @@ Offset RenderDialogTween::ComputeChildPosition(const Size& childSize) const
             maxSize = parent->GetChildViewPort();
         }
     }
-    if (!isDraging_) {
-        if (init_) {
-            if (context->GetIsDeclarative()) {
-                topLeftPoint = Offset(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
-                return topLeftPoint;
-            }
-
-            // Set different positions for different devices
-            if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-                SystemProperties::GetDevcieOrientation() == DeviceOrientation::PORTRAIT) {
-                topLeftPoint = Offset((maxSize.Width() - childSize.Width()) / 2.0,
-                    maxSize.Height() - childSize.Height() - (isSetMargin_ ? 0.0 :
-                    NormalizeToPx(theme->GetMarginBottom())));
-            } else {
-                topLeftPoint =
-                Offset((maxSize.Width() - childSize.Width()) / 2.0, (maxSize.Height() - childSize.Height()) / 2.0);
-            }
-        }
-    } else {
-        topLeftPoint = Offset(topLeftPoint_.GetX() + (dragX_ - lastPositionX_),
-            topLeftPoint_.GetY() + (dragY_ - lastPositionY_));
+    if (isDraging_) {
+        topLeftPoint =
+            Offset(topLeftPoint_.GetX() + (dragX_ - lastPositionX_), topLeftPoint_.GetY() + (dragY_ - lastPositionY_));
+        return topLeftPoint;
     }
-    return topLeftPoint;
+
+    Offset dialogOffset =
+        Offset(NormalizePercentToPx(offset_.GetX(), false, true), NormalizePercentToPx(offset_.GetY(), true, true));
+    if (init_) {
+        // If alignment is setted, compute position with alignment and offset.
+        if (alignment_ != DialogAlignment::DEFAULT) {
+            switch (alignment_) {
+                case DialogAlignment::TOP:
+                    topLeftPoint = Offset((maxSize.Width() - childSize.Width()) / 2.0, 0.0);
+                    break;
+                case DialogAlignment::BOTTOM:
+                    topLeftPoint =
+                        Offset((maxSize.Width() - childSize.Width()) / 2.0, maxSize.Height() - childSize.Height());
+                    break;
+                case DialogAlignment::CENTER:
+                default:
+                    topLeftPoint =
+                        Offset(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+                    break;
+            }
+            return topLeftPoint + dialogOffset;
+        }
+
+        if (context->GetIsDeclarative()) {
+            topLeftPoint = Offset(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+            return topLeftPoint + dialogOffset;
+        }
+
+        // Set different positions for different devices
+        if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
+            SystemProperties::GetDevcieOrientation() == DeviceOrientation::PORTRAIT) {
+            topLeftPoint = Offset((maxSize.Width() - childSize.Width()) / 2.0,
+                maxSize.Height() - childSize.Height() - (isSetMargin_ ? 0.0 : NormalizeToPx(theme->GetMarginBottom())));
+        } else {
+            topLeftPoint =
+                Offset((maxSize.Width() - childSize.Width()) / 2.0, (maxSize.Height() - childSize.Height()) / 2.0);
+        }
+    }
+    return topLeftPoint + dialogOffset;
 }
 
 void RenderDialogTween::UpdateTouchRegion(const Offset& topLeftPoint, const Size& maxSize, const Size& childSize)

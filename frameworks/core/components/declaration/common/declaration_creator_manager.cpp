@@ -32,6 +32,11 @@
 #include "core/components/declaration/svg/svg_circle_declaration.h"
 #include "core/components/declaration/svg/svg_declaration.h"
 #include "core/components/declaration/svg/svg_ellipse_declaration.h"
+#include "core/components/declaration/svg/svg_fe_colormatrix_declaration.h"
+#include "core/components/declaration/svg/svg_fe_composite_declaration.h"
+#include "core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
+#include "core/components/declaration/svg/svg_fe_offset_declaration.h"
+#include "core/components/declaration/svg/svg_filter_declaration.h"
 #include "core/components/declaration/svg/svg_gradient_declaration.h"
 #include "core/components/declaration/svg/svg_line_declaration.h"
 #include "core/components/declaration/svg/svg_mask_declaration.h"
@@ -70,6 +75,12 @@ const RefPtr<Declaration> DeclarationCreatorManager::CreateDeclaration(const std
         { DOM_NODE_TAG_CIRCLE, DeclarationCreator<SvgCircleDeclaration> },
         { DOM_NODE_TAG_CLOCK, DeclarationCreator<ClockDeclaration> },
         { DOM_NODE_TAG_ELLIPSE, DeclarationCreator<SvgEllipseDeclaration> },
+        { DOM_NODE_TAG_FE_COLORMATRIX, DeclarationCreator<SvgFeColorMatrixDeclaration> },
+        { DOM_NODE_TAG_FE_COMPOSITE, DeclarationCreator<SvgFeCompositeDeclaration> },
+        { DOM_NODE_TAG_FE_GAUSSIANBLUR, DeclarationCreator<SvgFeGaussianBlurDeclaration> },
+        { DOM_NODE_TAG_FE_OFFSET, DeclarationCreator<SvgFeOffsetDeclaration> },
+        { DOM_NODE_TAG_FILTER, DeclarationCreator<SvgFilterDeclaration> },
+        { DOM_NODE_TAG_G, DeclarationCreator<SvgDeclaration> },
         { DOM_NODE_TAG_LINEAR_GRADIENT, DeclarationCreator<SvgGradientDeclaration> },
         { DOM_NODE_TAG_IMAGE_ANIMATOR, DeclarationCreator<ImageAnimatorDeclaration> },
         { DOM_NODE_TAG_LABEL, DeclarationCreator<TextDeclaration> },
@@ -91,6 +102,7 @@ const RefPtr<Declaration> DeclarationCreatorManager::CreateDeclaration(const std
         { DOM_NODE_TAG_TEXT, DeclarationCreator<TextDeclaration> },
         { DOM_NODE_TAG_TEXT_PATH, DeclarationCreator<SvgTextPathDeclaration> },
         { DOM_NODE_TAG_TSPAN, DeclarationCreator<SvgTextDeclaration> },
+        { DOM_NODE_TAG_USE, DeclarationCreator<SvgDeclaration> },
         { DOM_NODE_TAG_WEB, DeclarationCreator<WebDeclaration> },
         { DOM_NODE_TAG_XCOMPONENT, DeclarationCreator<XComponentDeclaration> },
     };

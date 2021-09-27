@@ -36,7 +36,8 @@ public:
 
     ~QJSDeclarativeEngineInstance() override;
 
-    bool InitJSEnv(JSRuntime* runtime, JSContext* context);
+    bool InitJSEnv(JSRuntime* runtime, JSContext* context,
+        const std::unordered_map<std::string, void*>& extraNativeObject);
 
     bool InitAceModules(const char* start, size_t length, const char* fileName);
 
@@ -158,8 +159,7 @@ private:
     void output_object_code(JSContext* ctx, int fho, JSValueConst obj);
     JSValue eval_binary_buf(JSContext* ctx, const uint8_t* buf, size_t buf_len);
 
-    // TODO: does it have multi-instance error?
-    static thread_local JSRuntime* runtime_;
+    thread_local static JSRuntime* runtime_;
     JSContext* context_ = nullptr;
     RefPtr<FrontendDelegate> frontendDelegate_;
     static std::map<std::string, std::string> mediaResourceFileMap_;

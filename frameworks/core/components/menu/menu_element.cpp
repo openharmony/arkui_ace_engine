@@ -61,6 +61,23 @@ void MenuElement::PerformBuild()
         }
         refPtr->OnTargetCallback(id, point);
     });
+    if (data_->GetMenuShow() != MenuStatus::INIT) {
+        auto options = data_->GetOptions();
+        if (popup_ && popup_->GetDialogShowed() == false && GetMenuShow()) {
+            SetMenuShow(false);
+        }
+        if (data_->GetMenuShow() == MenuStatus::ON && !GetMenuShow()) {
+            popup_ = data_->GetPopup();
+            SetMenuShow(true);
+            auto showDialog = data_->GetTargetCallback();
+            showDialog("", data_->GetPopupPosition());
+        } else if (data_->GetMenuShow() == MenuStatus::OFF && GetMenuShow()) {
+            if (popup_) {
+                popup_->HideDialog(SELECT_INVALID_INDEX);
+                SetMenuShow(false);
+            }
+        }
+    }
 }
 
 void MenuElement::OnTargetCallback(const ComposeId& id, const Offset& point)

@@ -335,7 +335,7 @@ void TextFieldDeclaration::CallSpecializedMethod(const std::string& method, cons
 
 void TextFieldDeclaration::OnRequestFocus(bool shouldFocus)
 {
-    if (!textFieldController_) {
+    if (textFieldController_) {
         textFieldController_->Focus(shouldFocus);
     }
 }

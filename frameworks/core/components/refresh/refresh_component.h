@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_REFRESH_REFRESH_COMPONENT_H
 
 #include "base/geometry/dimension.h"
+#include "core/components_v2/common/common_def.h"
 #include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace {
@@ -30,7 +31,7 @@ inline constexpr int32_t DEFAULT_FRICTION_RATIO = 62;
 inline constexpr int32_t DEFAULT_FRICTION_RATIO = 42;
 #endif
 
-class RefreshComponent : public SoleChildComponent {
+class ACE_EXPORT RefreshComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(RefreshComponent, SoleChildComponent);
 
 public:
@@ -46,6 +47,10 @@ public:
     {
         return indicatorOffset_;
     }
+
+    ACE_DEFINE_COMPONENT_EVENT(OnStateChange, void(int));
+
+    ACE_DEFINE_COMPONENT_EVENT(OnRefreshing, void());
 
     void SetIndicatorOffset(const Dimension& indicatorOffset)
     {

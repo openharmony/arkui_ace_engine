@@ -187,6 +187,9 @@ public:
     std::string ToString() const
     {
         static std::string units[5] = {"px", "vp", "fp", "%", "lpx"};
+        if (units[static_cast<int>(unit_)] == units[3]) {
+            return std::to_string(value_ * 100).append(units[static_cast<int>(unit_)]);
+        }
         return std::to_string(value_).append(units[static_cast<int>(unit_)]);
     }
 

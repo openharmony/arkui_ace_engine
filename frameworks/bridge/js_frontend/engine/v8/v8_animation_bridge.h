@@ -22,6 +22,7 @@
 
 #include "frameworks/bridge/common/dom/dom_node.h"
 #include "frameworks/bridge/js_frontend/engine/common/base_animation_bridge.h"
+#include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/bridge/js_frontend/js_command.h"
 
 namespace OHOS::Ace::Framework {
@@ -75,13 +76,14 @@ private:
 class V8AnimationBridgeTaskCreate : public AnimationBridgeTask {
     DECLARE_ACE_TYPE(V8AnimationBridgeTaskCreate, AnimationBridgeTask)
 public:
-    V8AnimationBridgeTaskCreate(v8::Isolate* isolate, const RefPtr<V8AnimationBridge>& bridge, std::string param);
+    V8AnimationBridgeTaskCreate(const RefPtr<FrontendDelegate>& delegate,
+        const RefPtr<V8AnimationBridge>& bridge, std::string param);
     ~V8AnimationBridgeTaskCreate() override = default;
     void AnimationBridgeTaskFunc(const RefPtr<JsAcePage>& page, NodeId nodeId) override;
 
 private:
     RefPtr<V8AnimationBridge> bridge_;
-    v8::Isolate* isolate_ = nullptr;
+    WeakPtr<FrontendDelegate> delegate_;
     std::string param_;
 };
 

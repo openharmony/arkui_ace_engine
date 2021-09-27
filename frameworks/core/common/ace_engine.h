@@ -44,20 +44,9 @@ public:
     void DefusingBomb(int32_t instanceId);
     static AceEngine& Get();
     void Dump(const std::vector<std::string>& params) const;
-    void SetPackageName(const std::string& packageName);
-    const std::string& GetPackageName() const;
-    void SetPackagePath(const std::string& packagePath);
-    const std::string& GetPackagePath() const;
-    void SetAssetBasePath(const std::string& assetBasePath);
-    const std::set<std::string>& GetAssetBasePath() const;
-    RefPtr<Frontend> GetForegroundFrontend() const;
-    void SetUid(int32_t uid);
-    int32_t GetUid() const;
-    void SetProcessName(const std::string& processName);
-    const std::string& GetProcessName() const;
+
     void TriggerGarbageCollection();
     void NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback);
-    const std::string GetAssetAbsolutePath(const std::string& path) const;
 
 private:
     AceEngine();
@@ -65,11 +54,6 @@ private:
     mutable std::mutex mutex_;
     std::unordered_map<int32_t, RefPtr<Container>> containerMap_;
     RefPtr<WatchDog> watchDog_;
-    std::string packageName_;
-    std::string packagePath_;
-    std::set<std::string> assetBasePathSet_;
-    int32_t uid_;
-    std::string processName_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceEngine);
 };

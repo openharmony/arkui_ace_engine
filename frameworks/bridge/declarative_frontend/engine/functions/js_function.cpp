@@ -58,6 +58,8 @@ void JsFunction::Execute(std::vector<std::string> keys, const std::string& param
             eventInfo->SetProperty<std::string>(key.c_str(), value->GetString().c_str());
         } else if (value->IsNumber()) {
             eventInfo->SetProperty<double>(key.c_str(), value->GetDouble());
+        } else if (value->IsBool()) {
+            eventInfo->SetProperty<bool>(key.c_str(), value->GetBool());
         } else if (value->IsObject()) {
             eventInfo->SetPropertyJsonObject(key.c_str(), value->ToString().c_str());
         }

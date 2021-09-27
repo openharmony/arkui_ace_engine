@@ -44,7 +44,7 @@ enum MeasureFormatStyle { WIDTH_WIDE, WIDTH_SHORT, WIDTH_NARROW, WIDTH_NUMERIC, 
 
 enum TimeUnitStyle { YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, MILLISECOND };
 
-class ACE_EXPORT Localization : public NonCopyable {
+class ACE_FORCE_EXPORT Localization : public NonCopyable {
 public:
     /**
      * Get language list to select the best language.

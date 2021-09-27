@@ -1428,11 +1428,7 @@ void FlutterRenderOffscreenCanvas::SetGrayFilter(const std::string& percent)
     matrix[0] = matrix[6] = matrix[12] = primColor;
     matrix[1] = matrix[2] = matrix[5] = matrix[7] = matrix[10] = matrix[11] = otherColor;
     matrix[18] = 1.0f;
-#ifdef USE_SYSTEM_SKIA
-    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
-#else
-    imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
+    SetColorFilter(matrix);
 }
 
 void FlutterRenderOffscreenCanvas::SetSepiaFilter(const std::string& percent)
@@ -1459,11 +1455,7 @@ void FlutterRenderOffscreenCanvas::SetSepiaFilter(const std::string& percent)
     matrix[11] = percentNum * 0.4696f;
     matrix[12] = 1.0f - percentNum * 0.9088f;
     matrix[18] = 1.0f;
-#ifdef USE_SYSTEM_SKIA
-    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
-#else
-    imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
+    SetColorFilter(matrix);
 }
 
 void FlutterRenderOffscreenCanvas::SetInvertFilter(const std::string& filterParam)
@@ -1471,7 +1463,6 @@ void FlutterRenderOffscreenCanvas::SetInvertFilter(const std::string& filterPara
     std::string percent = filterParam;
     bool hasPercent = IsPercentStr(percent);
     float percentage = 0.0f;
-    float temp = 0.0f;
     std::istringstream iss(percent);
     iss >> percentage;
     if (hasPercent) {
@@ -1479,26 +1470,10 @@ void FlutterRenderOffscreenCanvas::SetInvertFilter(const std::string& filterPara
     }
 
     float matrix[20] = {0};
-    if (percentage == 1) {
-        temp = -percentage;
-    } else if (percentage == 0) {
-        temp = 1.0f;
-        percentage = 0;
-    } else if (percentage > 0.5f) {
-        temp = -(1 - percentage);
-    } else if (percentage < 0.5f) {
-        temp = percentage;
-    } else {
-        temp = 0.0f;
-    }
-    matrix[0] = matrix[6] = matrix[12] = temp;
+    matrix[0] = matrix[6] = matrix[12] = 1.0 - 2.0 * percentage;
     matrix[4] = matrix[9] = matrix[14] = percentage;
     matrix[18] = 1.0f;
-#ifdef USE_SYSTEM_SKIA
-    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
-#else
-    imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
+    SetColorFilter(matrix);
 }
 
 void FlutterRenderOffscreenCanvas::SetOpacityFilter(const std::string& filterParam)
@@ -1515,11 +1490,7 @@ void FlutterRenderOffscreenCanvas::SetOpacityFilter(const std::string& filterPar
     float matrix[20] = {0};
     matrix[0] = matrix[6] = matrix[12] = 1.0f;
     matrix[18] = percentage;
-#ifdef USE_SYSTEM_SKIA
-    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
-#else
-    imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
+    SetColorFilter(matrix);
 }
 
 void FlutterRenderOffscreenCanvas::SetBrightnessFilter(const std::string& percent)
@@ -1535,24 +1506,11 @@ void FlutterRenderOffscreenCanvas::SetBrightnessFilter(const std::string& percen
 
     if (percentage < 0) {
         return;
-    } else if (percentage > 20.0f) {
-        percentage = 20.0f;
-    }
-    if (percentage <= 1) {
-        percentage = percentage - 1;
-    } else if (percentage <= 10) {
-        percentage = (percentage / 10) * 0.7f;
-    } else {
-        percentage = (percentage / 20) * 0.9f;
     }
     float matrix[20] = {0};
-    matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
-    matrix[4] = matrix[9] = matrix[14] = percentage;
-#ifdef USE_SYSTEM_SKIA
-    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
-#else
-    imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
+    matrix[0] = matrix[6] = matrix[12] = percentage;
+    matrix[18] = 1.0f;
+    SetColorFilter(matrix);
 }
 
 void FlutterRenderOffscreenCanvas::SetContrastFilter(const std::string& percent)
@@ -1568,13 +1526,9 @@ void FlutterRenderOffscreenCanvas::SetContrastFilter(const std::string& percent)
 
     float matrix[20] = {0};
     matrix[0] = matrix[6] = matrix[12] = percentage;
-    matrix[4] = matrix[9] = matrix[14] = 0.25f * (1 - percentage);
+    matrix[4] = matrix[9] = matrix[14] = 0.5f * (1 - percentage);
     matrix[18] = 1;
-#ifdef USE_SYSTEM_SKIA
-    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
-#else
-    imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
+    SetColorFilter(matrix);
 }
 
 void FlutterRenderOffscreenCanvas::SetBlurFilter(const std::string& percent)
@@ -1614,11 +1568,7 @@ void FlutterRenderOffscreenCanvas::SetSaturateFilter(const std::string& filterPa
     matrix[6] = 0.6094f * (1 - N) + N;
     matrix[12] = 0.0820f * (1 - N) + N;
     matrix[18] = 1.0f;
-#ifdef USE_SYSTEM_SKIA
-    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
-#else
-    imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
+    SetColorFilter(matrix);
 }
 
 void FlutterRenderOffscreenCanvas::SetHueRotateFilter(const std::string& filterParam)
@@ -1673,10 +1623,20 @@ void FlutterRenderOffscreenCanvas::SetHueRotateFilter(const std::string& filterP
             matrix[18] = 1.0f;
             break;
     }
+    SetColorFilter(matrix);
+}
+
+void FlutterRenderOffscreenCanvas::SetColorFilter(float matrix[20])
+{
 #ifdef USE_SYSTEM_SKIA
+    matrix[4] *= 255;
+    matrix[9] *= 255;
+    matrix[14] *= 255;
+    matrix[19] *= 255;
     imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
 #else
     imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
 }
+
 }

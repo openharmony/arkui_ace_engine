@@ -19,9 +19,12 @@
 
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/entrance/ace_container.h"
-#include "frameworks/bridge/common/inspector/inspector_client.h"
+#include "adapter/preview/inspector/inspector_client.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
+#include "frameworks/core/components/common/painter/flutter_svg_painter.h"
+#include "third_party/skia/include/core/SkFontMgr.h"
+#include "third_party/skia/src/ports/SkFontMgr_config_parser.h"
 
 namespace OHOS::Ace::Platform {
 
@@ -30,7 +33,7 @@ std::atomic<bool> AceAbility::loopRunning_ = true;
 namespace {
 
 // JS frontend maintain the page ID self, so it's useless to pass page ID from platform
-// layer, neither OpenHarmony or Windows, we should delete here usage when Java delete it.
+// layer, neither Android/OpenHarmony or Windows, we should delete here usage when Java delete it.
 constexpr int32_t UNUSED_PAGE_ID = 1;
 
 constexpr char ASSET_PATH_SHARE[] = "share";
@@ -47,6 +50,24 @@ constexpr double SCREEN_DENSITY_COEFFICIENT_WATCH = 466.0 * 160 / 320.0;
 constexpr double SCREEN_DENSITY_COEFFICIENT_TABLE = 2560.0 * 160.0 / 280.0;
 constexpr double SCREEN_DENSITY_COEFFICIENT_TV = 3840.0 * 160.0 / 640.0;
 #endif
+
+void SetPhysicalDeviceFonts(bool& physicalDeviceFontsEnabled)
+{
+    if (physicalDeviceFontsEnabled) {
+        LOGI("Use physical devices fonts.");
+    } else {
+        LOGI("Use fonts installed on pc.");
+    }
+    SkFontMgr::setPhysicalDeviceFonts(physicalDeviceFontsEnabled);
+}
+
+void SetFontBasePath(std::string& basePath)
+{
+    LOGI("Physical devices font base path is %s", basePath.c_str());
+    basePath = basePath.append(DELIMITER);
+    SkFontMgr_Config_Parser::setFontBasePathCallback(basePath);
+}
+
 } // namespace
 
 std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
@@ -59,6 +80,19 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
     }
 
     AceApplicationInfo::GetInstance().SetLocale(runArgs.language, runArgs.region, runArgs.script, "");
+
+    // To check if use physical device fonts. Use Pc font by default.
+    SetPhysicalDeviceFonts(runArgs.physicalDeviceFontsEnabled);
+    if (runArgs.physicalDeviceFontsEnabled) {
+        SetFontBasePath(runArgs.fontBasePath);
+    }
+
+    // Initialize FlutterSvgPainter static member variable fontTypeChinese_ and fontTypeNormal_ here
+    // to make sure the font base path is already passed to SkFontMgr_Config_Parser, or previewer will crush.
+    std::string fontTypeChinesePath = runArgs.fontBasePath + "HwChinese-Medium.ttf";
+    std::string fontTypeNormalPath = runArgs.fontBasePath + "DroidSans.ttf";
+    FlutterSvgPainter::fontTypeChinese_ = SkTypeface::MakeFromFile(fontTypeChinesePath.c_str());
+    FlutterSvgPainter::fontTypeNormal_ = SkTypeface::MakeFromFile(fontTypeNormalPath.c_str());
 
     auto controller = FlutterDesktopCreateWindow(
         runArgs.deviceWidth, runArgs.deviceHeight, runArgs.windowTitle.c_str(), runArgs.onRender);
@@ -201,8 +235,8 @@ void AceAbility::InitEnv()
     AceContainer::AddAssetPath(
         ACE_INSTANCE_ID, "", { runArgs_.assetPath, GetCustomAssetPath(runArgs_.assetPath).append(ASSET_PATH_SHARE) });
 
-    AceContainer::SetResourcesPathAndThemeStyle(
-        ACE_INSTANCE_ID, runArgs_.resourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
+    AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath,
+        runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
 
     auto view = new FlutterAceView(ACE_INSTANCE_ID);
     AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);

@@ -19,6 +19,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
+#include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ability_component.h"
@@ -29,6 +30,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
 #endif
@@ -63,8 +65,11 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_option.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
@@ -72,14 +77,15 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
@@ -533,10 +539,11 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"Blank", JSBlank::JSBind},
     {"Calendar", JSCalendar::JSBind},
     {"Rect", JSRect::JSBind},
+    {"Refresh", JSRefresh::JSBind},
     {"Shape", JSShape::JSBind},
     {"Path", JSPath::JSBind},
     {"Circle", JSCircle::JSBind},
-    {"Line", JSPolygon::JSBind},
+    {"Line", JSLine::JSBind},
     {"Polygon", JSPolygon::JSBind},
     {"Polyline", JSPolyline::JSBind},
     {"Ellipse", JSEllipse::JSBind},
@@ -549,11 +556,15 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"RowSplit", JSRowSplit::JSBind},
     {"ColumnSplit", JSColumnSplit::JSBind},
     {"AlphabetIndexer", JSIndexer::JSBind},
+    {"Hyperlink", JSHyperlink::JSBind},
     {"Radio", JSRadio::JSBind},
+    {"ActionSheet", JSActionSheet::JSBind},
     {"AlertDialog", JSAlertDialog::JSBind},
     {"AbilityComponent", JSAbilityComponent::JSBind},
     {"TextArea", JSTextArea::JSBind},
     {"TextInput", JSTextInput::JSBind},
+    {"Menu", JSMenu::JSBind},
+    {"Option", JSOption::JSBind},
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     {"QRCode", JSQRCode::JSBind},
 #ifndef WEARABLE_PRODUCT
@@ -568,18 +579,28 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     {"DataPanel", JSDataPanel::JSBind},
     {"Badge", JSBadge::JSBind},
-    {"Gauge", JSGauge::JSBind}
+    {"Gauge", JSGauge::JSBind},
+    {"Marquee", JSMarquee::JSBind},
+    {"Gesture", JSGesture::JSBind},
+    {"TapGesture", JSGesture::JSBind},
+    {"LongPressGesture", JSGesture::JSBind},
+    {"PanGesture", JSGesture::JSBind},
+    {"PinchGesture", JSGesture::JSBind},
+    {"RotationGesture", JSGesture::JSBind},
+    {"GestureGroup", JSGesture::JSBind},
+    {"PanGestureOption", JSPanGestureOption::JSBind},
+    {"CustomDialogController", JSCustomDialogController::JSBind},
+    {"Scroller", JSScroller::JSBind},
+    {"SwiperController", JSSwiperController::JSBind},
+    {"TabsController", JSTabsController::JSBind},
+    {"CalendarController", JSCalendarController::JSBind},
+    {"AbilityController", JSAbilityComponentController::JSBind},
+    {"VideoController", JSVideoController::JSBind}
 };
 
 void RegisterAllModule(BindingTarget globalObj)
 {
     JSColumn::JSBind(globalObj);
-    JSSwiperController::JSBind(globalObj);
-    JSTabsController::JSBind(globalObj);
-    JSScroller::JSBind(globalObj);
-    JSCalendarController::JSBind(globalObj);
-    JSAbilityComponentController::JSBind(globalObj);
-    JSVideoController::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
         iter.second(globalObj);
     }
@@ -592,17 +613,7 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         LOGW("Component not exist, name: %{public}s", moduleName.c_str());
         return;
     }
-    if ((*func).first == "Swiper") {
-        JSSwiperController::JSBind(globalObj);
-    } else if ((*func).first == "Tabs") {
-        JSTabsController::JSBind(globalObj);
-    } else if ((*func).first == "Calendar") {
-        JSCalendarController::JSBind(globalObj);
-    } else if ((*func).first == "AbilityComponent") {
-        JSAbilityComponentController::JSBind(globalObj);
-    } else if ((*func).first == "Video") {
-        JSVideoController::JSBind(globalObj);
-    } else if ((*func).first == "Grid") {
+    if ((*func).first == "Grid") {
         JSColumn::JSBind(globalObj);
     }
 
@@ -651,17 +662,13 @@ void JsRegisterViews(BindingTarget globalObj)
     JSContainerBase::JSBind();
     JSShapeAbstract::JSBind();
     JSView::JSBind(globalObj);
+
     JSEnvironment::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);
     JSTouchHandler::JSBind(globalObj);
     JSPanHandler::JSBind(globalObj);
-    JSGesture::JSBind(globalObj);
-    JSPanGestureOption::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
-    JSCustomDialogController::JSBind(globalObj);
-    JSShareData::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
-    JSScroller::JSBind(globalObj);
 
     auto delegate =
         static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
@@ -677,6 +684,13 @@ void JsRegisterViews(BindingTarget globalObj)
     toggleType.Constant("Checkbox", 0);
     toggleType.Constant("Switch", 1);
     toggleType.Constant("Button", 2);
+
+    JSObjectTemplate refreshStatus;
+    refreshStatus.Constant("Inactive", 0);
+    refreshStatus.Constant("Drag", 1);
+    refreshStatus.Constant("OverDrag", 2);
+    refreshStatus.Constant("Refresh", 3);
+    refreshStatus.Constant("Done", 4);
 
     JSObjectTemplate mainAxisAlign;
     mainAxisAlign.Constant("Start", 1);
@@ -762,6 +776,7 @@ void JsRegisterViews(BindingTarget globalObj)
     globalObj->Set(isolate, "LoadingProgressStyle", *loadingProgressStyle);
     globalObj->Set(isolate, "ProgressStyle", *progressStyle);
     globalObj->Set(isolate, "ToggleType", *toggleType);
+    globalObj->Set(isolate, "RefreshStatus", *refreshStatus);
     globalObj->Set(isolate, "SliderStyle", *sliderStyle);
     globalObj->Set(isolate, "SliderChangeMode", *sliderChangeMode);
     globalObj->Set(isolate, "IconPosition", *iconPosition);

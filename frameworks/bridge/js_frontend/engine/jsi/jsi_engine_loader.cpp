@@ -40,7 +40,7 @@ RefPtr<BaseXComponentBridge> JsiEngineLoader::CreateXComponentBridge() const
 }
 
 #if defined(BUILT_IN_JS_ENGINE)
-JsEngineLoader& JsEngineLoader::Get()
+JsEngineLoader& JsEngineLoader::Get(const char*)
 {
     return JsiEngineLoader::GetInstance();
 }

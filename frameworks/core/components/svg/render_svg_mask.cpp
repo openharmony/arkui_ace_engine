@@ -34,7 +34,6 @@ void RenderSvgMask::Update(const RefPtr<Component> &component)
     y_ = declaration->GetY();
     height_ = declaration->GetHeight();
     width_ = declaration->GetWidth();
-    id_ = declaration->GetId();
     maskUnits_ = declaration->GetMaskUnits();
     maskContentUnits_ = declaration->GetMaskContentUnits();
     RenderSvgBase::SetPresentationAttrs(maskComponent->GetDeclaration());

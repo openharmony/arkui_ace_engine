@@ -34,6 +34,7 @@
 #include "core/components/common/properties/border_edge.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/flex/render_flex.h"
+#include "core/components/image/image_component.h"
 #include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/flutter_scene_builder.h"
@@ -132,15 +133,22 @@ void FlutterRenderBox::UpdateBackgroundImage(const RefPtr<BackgroundImage>& imag
                 box->MarkNeedLayout();
             }
         });
+        renderImage_->RegisterImageRenderFunc([weakRenderBox = AceType::WeakClaim(this)]() {
+            auto box = weakRenderBox.Upgrade();
+            if (box) {
+                box->MarkNeedRender();
+            }
+        });
     }
 
-    renderImage_->SetImageSrc(image->GetSrc());
-    renderImage_->SetImageRepeat(image->GetImageRepeat());
+    auto imageComponent = AceType::MakeRefPtr<ImageComponent>(image->GetSrc());
+    imageComponent->SetImageRepeat(image->GetImageRepeat());
     // set image size, x direction
     renderImage_->SetBgImageSize(image->GetImageSize().GetSizeTypeX(), image->GetImageSize().GetSizeValueX(), true);
     // set image size, y direction
     renderImage_->SetBgImageSize(image->GetImageSize().GetSizeTypeY(), image->GetImageSize().GetSizeValueY(), false);
     renderImage_->SetBgImagePosition(image->GetImagePosition());
+    renderImage_->Update(imageComponent);
 }
 
 void FlutterRenderBox::PerformLayout()
@@ -164,7 +172,8 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     FetchImageData();
-    Rect paintSize = GetPaintRect() + offset;
+    // global offset and paint size exclude margin
+    Rect paintSize = Rect(offset + margin_.GetOffsetInPx(pipeline->GetDipScale()), paintSize_);
     if (useLiteStyle_) {
         Size maxSize;
         maxSize.SetWidth(paintSize_.Width() > GetLayoutSize().Width() ? paintSize_.Width() : GetLayoutSize().Width());
@@ -181,7 +190,7 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
     if (backDecoration_ || frontDecoration_) {
         if (!useLiteStyle_) {
             // consider the effect of padding and margin, we get the adjustedSize
-            Size adjustedSize = paintSize.GetSize() - (GetLayoutSize() - paintSize_);
+            Size adjustedSize = GetPaintRect().GetSize() - (GetLayoutSize() - paintSize_);
             decorationPainter = AceType::MakeRefPtr<FlutterDecorationPainter>(
                 backDecoration_, GetPaintRect(), adjustedSize, pipeline->GetDipScale());
         } else {
@@ -210,10 +219,16 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
         }
         decorationPainter->PaintDecoration(offset, canvas->canvas(), context, image_);
         decorationPainter->PaintBlur(outerRRect, canvas->canvas(), backDecoration_->GetBlurRadius(), bgColor);
-        decorationPainter->PaintGrayScale(outerRRect, canvas->canvas(), backDecoration_->GetGrayScale(), bgColor);
-        decorationPainter->PaintBrightness(outerRRect, canvas->canvas(), backDecoration_->GetBrightness(), bgColor);
-        decorationPainter->PaintContrast(outerRRect, canvas->canvas(), backDecoration_->GetContrast(), bgColor);
-        decorationPainter->PaintSaturate(outerRRect, canvas->canvas(), backDecoration_->GetSaturate(), bgColor);
+        auto context = context_.Upgrade();
+        if (context->GetIsDeclarative()) {
+            decorationPainter->PaintGrayScale(outerRRect, canvas->canvas(), backDecoration_->GetGrayScale(), bgColor);
+            decorationPainter->PaintBrightness(outerRRect, canvas->canvas(), backDecoration_->GetBrightness(), bgColor);
+            decorationPainter->PaintContrast(outerRRect, canvas->canvas(), backDecoration_->GetContrast(), bgColor);
+            decorationPainter->PaintSaturate(outerRRect, canvas->canvas(), backDecoration_->GetSaturate(), bgColor);
+            decorationPainter->PaintInvert(outerRRect, canvas->canvas(), backDecoration_->GetInvert(), bgColor);
+            decorationPainter->PaintSepia(outerRRect, canvas->canvas(), backDecoration_->GetSepia(), bgColor);
+            decorationPainter->PaintHueRotate(outerRRect, canvas->canvas(), backDecoration_->GetHueRotate(), bgColor);
+        }
     }
 
     RenderNode::Paint(context, offset);
@@ -223,14 +238,19 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
             LOGE("Paint canvas is null.");
             return;
         }
-
         decorationPainter->SetDecoration(frontDecoration_);
         decorationPainter->PaintDecoration(offset, canvas->canvas(), context);
         decorationPainter->PaintBlur(outerRRect, canvas->canvas(), frontDecoration_->GetBlurRadius(), bgColor);
-        decorationPainter->PaintGrayScale(outerRRect, canvas->canvas(), frontDecoration_->GetGrayScale(), bgColor);
-        decorationPainter->PaintBrightness(outerRRect, canvas->canvas(), frontDecoration_->GetBrightness(), bgColor);
-        decorationPainter->PaintContrast(outerRRect, canvas->canvas(), frontDecoration_->GetContrast(), bgColor);
-        decorationPainter->PaintSaturate(outerRRect, canvas->canvas(), frontDecoration_->GetSaturate(), bgColor);
+        auto context = context_.Upgrade();
+        if (context->GetIsDeclarative()) {
+            decorationPainter->PaintGrayScale(outerRRect, canvas->canvas(), frontDecoration_->GetGrayScale(), bgColor);
+            decorationPainter->PaintBrightness(outerRRect, canvas->canvas(), frontDecoration_->GetBrightness(), bgColor);
+            decorationPainter->PaintContrast(outerRRect, canvas->canvas(), frontDecoration_->GetContrast(), bgColor);
+            decorationPainter->PaintSaturate(outerRRect, canvas->canvas(), frontDecoration_->GetSaturate(), bgColor);
+            decorationPainter->PaintInvert(outerRRect, canvas->canvas(), frontDecoration_->GetInvert(), bgColor);
+            decorationPainter->PaintSepia(outerRRect, canvas->canvas(), frontDecoration_->GetSepia(), bgColor);
+            decorationPainter->PaintHueRotate(outerRRect, canvas->canvas(), frontDecoration_->GetHueRotate(), bgColor);
+        }
     }
 }
 
@@ -294,8 +314,12 @@ void FlutterRenderBox::DrawOnPixelMap()
         LOGE("pixelMap_ or clipLayer_ is nullptr.");
         return;
     }
-    auto width =  NormalizeToPx(width_);
-    auto height = NormalizeToPx(height_);
+    auto width = paintSize_.Width();
+    auto height = paintSize_.Height();
+    if (LessOrEqual(width, 0.0) || LessOrEqual(height, 0.0)) {
+        LOGE("invalidate size.");
+        return;
+    }
     auto imageInfo = SkImageInfo::Make(
         width, height, SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
     SkBitmap tempCache;
@@ -303,6 +327,10 @@ void FlutterRenderBox::DrawOnPixelMap()
     SkCanvas tempCanvas(tempCache);
 
     RefPtr<Flutter::FlutterSceneBuilder> flutterSceneBuilder = AceType::MakeRefPtr<Flutter::FlutterSceneBuilder>();
+    Offset saveOffset = clipLayer_->GetOffset();
+    Offset saveStaticOffset = clipLayer_->GetStaticOffset();
+    clipLayer_->SetOffset(0, 0);
+    clipLayer_->SetStaticOffset(0, 0);
     clipLayer_->AddToScene(*flutterSceneBuilder, 0.0, 0.0);
     auto scene = flutterSceneBuilder->Build();
     if (!scene) {
@@ -319,6 +347,8 @@ void FlutterRenderBox::DrawOnPixelMap()
         LOGE("picture is nullptr.");
         return;
     }
+    clipLayer_->SetOffset(saveOffset.GetX(), saveOffset.GetY());
+    clipLayer_->SetStaticOffset(saveStaticOffset.GetX(), saveStaticOffset.GetY());
     tempCanvas.clear(SK_ColorTRANSPARENT);
     tempCanvas.drawPicture(picture.get());
 

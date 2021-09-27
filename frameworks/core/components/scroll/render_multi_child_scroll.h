@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_RENDER_MULTI_CHILD_SCROLL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_RENDER_MULTI_CHILD_SCROLL_H
 
+#include "core/common/vibrator/vibrator.h"
 #include "core/components/common/rotation/rotation_node.h"
 #include "core/components/list/list_component.h"
 #include "core/components/list/render_list.h"
@@ -83,6 +84,16 @@ public:
 
     double GetFixPositionOnWatch(double final, double current) override;
 
+    void SetScrollVibrate(bool scrollVibrate)
+    {
+        scrollVibrate_ = scrollVibrate;
+    }
+
+    bool GetScrollVibrate()
+    {
+        return scrollVibrate_;
+    }
+
 protected:
     void OnPredictLayout(int64_t targetTimestamp) override;
     void PerformLayout() override;
@@ -106,6 +117,8 @@ private:
     bool ScrollToPosition(double position, int32_t source, bool smooth);
     void ProcessScrollExtent();
     void ExtendViewPort();
+    bool HandleCrashTop() override;
+    bool HandleCrashBottom() override;
 
     double cacheExtent_ = 300.0;
     int32_t currentIndex_ = 0;
@@ -114,8 +127,10 @@ private:
     double initialOffset_ = 0.0;
     double effectOffset_ = 0.0;
     double accumulatedRotationValue_ = 0.0;
+    bool scrollVibrate_ = true;
 
     RefPtr<Animator> animateController_;
+    RefPtr<Vibrator> vibrator_;
 };
 
 } // namespace OHOS::Ace

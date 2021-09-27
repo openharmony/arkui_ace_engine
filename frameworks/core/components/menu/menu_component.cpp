@@ -19,6 +19,7 @@
 
 namespace OHOS::Ace {
 
+
 RefPtr<Element> MenuComponent::CreateElement()
 {
     return AceType::MakeRefPtr<MenuElement>(GetId());
@@ -112,11 +113,11 @@ void MenuComponent::SetTitle(const std::string& value)
     popup_->SetTitle(value);
 }
 
-TextStyle MenuComponent::GetTitleStyle() const
+const TextStyle& MenuComponent::GetTitleStyle() const
 {
     if (!popup_) {
         LOGE("popup is null.");
-        return TextStyle();
+        return textStyle_;
     }
     return popup_->GetTitleStyle();
 }

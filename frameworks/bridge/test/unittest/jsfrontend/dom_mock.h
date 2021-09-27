@@ -117,6 +117,7 @@ public:
     void OnInactive() override {}
     void OnCompleteContinuation(int32_t code) override {}
     void OnSaveData(std::string& data) override {}
+    void OnRemoteTerminated() override {}
     void OnNewRequest(const std::string& data) override {}
     void CallRouterBack() override {}
     void OnSurfaceChanged(int32_t width, int32_t height) override {}

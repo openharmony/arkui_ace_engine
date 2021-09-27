@@ -36,7 +36,8 @@ public:
         return AceType::MakeRefPtr<SvgDefs>();
     }
 
-    RefPtr<RenderNode> CreateRender(const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent) override
+    RefPtr<RenderNode> CreateRender(
+        const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox = true) override
     {
         auto svgContext = svgContext_.Upgrade();
         if (svgContext == nullptr) {
@@ -50,7 +51,7 @@ public:
             if (AceType::InstanceOf<SvgMask>(child) ||
                 AceType::InstanceOf<SvgPattern>(child) ||
                 AceType::InstanceOf<SvgFilter>(child)) {
-                auto childRender = child->CreateRender(layoutParam, nullptr);
+                auto childRender = child->CreateRender(layoutParam, nullptr, useBox);
                 if (childRender) {
                     root->AddChild(childRender, root->GetChildren().size());
                     child->Update(childRender);

@@ -20,9 +20,4 @@ build_component("text_overlay") {
     "text_overlay_component.cpp",
     "text_overlay_element.cpp",
   ]
-
-  external_deps = [
-    "inputmethod_native:inputmethod_ability",
-    "inputmethod_native:inputmethod_client",
-  ]
 }

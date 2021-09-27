@@ -22,6 +22,7 @@
 
 namespace OHOS::Ace::Framework {
 
+constexpr size_t  MAX_COUNT = 9;
 void JSDataPanel::JSBind(BindingTarget globalObj)
 {
     JSClass<JSDataPanel>::Declare("DataPanel");
@@ -35,7 +36,7 @@ void JSDataPanel::JSBind(BindingTarget globalObj)
 void JSDataPanel::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("toggle create error, info is non-vaild");
+        LOGE("toggle create error, info is non-valid");
         return;
     }
 
@@ -48,7 +49,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
     }
 
     JSRef<JSArray> values = paramObject->GetProperty("values");
-    for (size_t i = 0; i < values->Length(); ++i) {
+    for(size_t i = 0; i < values->Length() && i < MAX_COUNT; ++i) {
         if (!values->GetValueAt(i)->IsNumber()) {
             LOGE("JSDataPanel::Create value is not number");
             return;

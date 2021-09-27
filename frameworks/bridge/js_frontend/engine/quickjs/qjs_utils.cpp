@@ -617,9 +617,6 @@ JSContext* QJSContext::Current()
     ACE_DCHECK(s_qjsContextStack.size() > 0 &&
                "QJSContext::Current() called outside of the lifetime of a QJSContext::Scope "
                "object. Did you forget QJSContext::Scope scope(ctx); ?");
-    if (s_qjsContextStack.empty()) {
-        return nullptr;
-    }
     return s_qjsContextStack.top();
 }
 
@@ -652,9 +649,6 @@ QJSHandleScope::~QJSHandleScope()
 
 QJSHandleScope* QJSHandleScope::GetCurrent()
 {
-    if (qjsHandleScopeStack.empty()) {
-        return nullptr;
-    }
     return qjsHandleScopeStack.top();
 }
 

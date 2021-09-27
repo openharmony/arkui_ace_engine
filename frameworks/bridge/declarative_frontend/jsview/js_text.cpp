@@ -403,6 +403,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("baselineOffset", &JSText::SetBaselineOffset, opt);
     JSClass<JSText>::StaticMethod("decoration", &JSText::SetDecoration);
     JSClass<JSText>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSText>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSText>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSText>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);

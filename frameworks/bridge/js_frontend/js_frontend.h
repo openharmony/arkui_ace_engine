@@ -100,9 +100,9 @@ public:
     void OnInactive() override;
     bool OnStartContinuation() override;
     void OnCompleteContinuation(int32_t code) override;
-    void OnRemoteTerminated() override;
     void OnSaveData(std::string& data) override;
     bool OnRestoreData(const std::string& data) override;
+    void OnRemoteTerminated() override {}
     void OnNewRequest(const std::string& data) override;
     void CallRouterBack() override;
     void SetColorMode(ColorMode colorMode) override;
@@ -158,17 +158,6 @@ public:
 
     void RebuildAllPages() override;
 
-    void SetAbility(void* ability)
-    {
-        ability_ = ability;
-    }
-
-    void SetDialogCallback(DialogCallback callback) override
-    {
-        if (jsEngine_) {
-            jsEngine_->SetDialogCallback(callback);
-        }
-    }
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 
@@ -177,8 +166,6 @@ private:
     RefPtr<AceEventHandler> handler_;
     RefPtr<Framework::JsEngine> jsEngine_;
     bool foregroundFrontend_ = false;
-
-    void* ability_ = nullptr;
 };
 
 class JsEventHandler : public AceEventHandler {

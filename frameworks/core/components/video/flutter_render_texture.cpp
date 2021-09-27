@@ -13,17 +13,30 @@
  * limitations under the License.
  */
 
-#include "core/components/display/render_display.h"
 #include "core/components/video/flutter_render_texture.h"
 
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/painting/picture_recorder.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "include/core/SkColor.h"
+#include "include/core/SkColorFilter.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/effects/SkBlurImageFilter.h"
 
+#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
+#include "core/components/display/render_display.h"
+#include "core/pipeline/base/flutter_render_context.h"
 
 namespace OHOS::Ace {
+
+namespace {
+
+constexpr int32_t GAUSSIAN_DURATION = 1000;
+constexpr Color GAUSSIAN_COLOR = Color(0xffc7bcb9);
+
+} // namespace
 
 using namespace Flutter;
 
@@ -44,6 +57,9 @@ void FlutterRenderTexture::Paint(RenderContext& context, const Offset& offset)
     }
 
     RenderNode::Paint(context, offset);
+    if (IsAddGaussianFuzzy()) {
+        AddGaussianFuzzy(context, offset);
+    }
 }
 
 RenderLayer FlutterRenderTexture::GetRenderLayer()
@@ -69,6 +85,58 @@ void FlutterRenderTexture::AddTextureLayer()
     layer_->AddChildren(textureLayer_);
 }
 
+void FlutterRenderTexture::InitGaussianFuzzyParas()
+{
+    gaussianFuzzySize_ = GetPaintRect();
+    colorValue_ = GAUSSIAN_COLOR;
+}
+
+void FlutterRenderTexture::SetIsAddGaussianFuzzy(bool isAddGaussianFuzzy)
+{
+    RenderTexture::SetIsAddGaussianFuzzy(isAddGaussianFuzzy);
+    if (isAddGaussianFuzzy) {
+        if (!controller_) {
+            controller_ = AceType::MakeRefPtr<Animator>(GetContext());
+        } else if (controller_->IsRunning()) {
+            controller_->Finish();
+        }
+        controller_->ClearInterpolators();
+        controller_->ClearAllListeners();
+
+        controller_->AddStartListener([weak = AceType::WeakClaim(this)]() {
+            auto texture = weak.Upgrade();
+            if (texture) {
+                texture->InitGaussianFuzzyParas();
+            }
+        });
+
+        controller_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+            auto texture = weak.Upgrade();
+            if (texture) {
+                texture->SetIsAddGaussianFuzzy(false);
+            }
+        });
+
+        moveAnimation_ = AceType::MakeRefPtr<CurveAnimation<uint8_t>>(0, 1, Curves::LINEAR);
+        moveAnimation_->AddListener(
+            Animation<uint8_t>::ValueCallback([weak = AceType::WeakClaim(this)](uint8_t value) {
+                auto texture = weak.Upgrade();
+                if (texture) {
+                    texture->MarkNeedRender();
+                }
+            }));
+
+        controller_->SetDuration(GAUSSIAN_DURATION);
+        controller_->AddInterpolator(moveAnimation_);
+        controller_->Play();
+    } else {
+        if (controller_ && controller_->IsRunning()) {
+            controller_->Stop();
+        }
+    }
+}
+
+
 void FlutterRenderTexture::AddBackgroundLayer()
 {
     if (!backgroundLayer_) {
@@ -82,6 +150,39 @@ void FlutterRenderTexture::AddBackgroundLayer()
     if (imageFit_ != ImageFit::FILL) {
         layer_->AddChildren(backgroundLayer_);
     }
+}
+
+void FlutterRenderTexture::AddGaussianFuzzy(RenderContext& context, const Offset& offset)
+{
+    const auto flutterContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = flutterContext->GetCanvas();
+    if (canvas == nullptr) {
+        LOGE("Paint canvas is null.");
+        return;
+    }
+
+    SkCanvas* skCanvas = canvas->canvas();
+    if (skCanvas == nullptr) {
+        LOGE("Paint skCanvas is null.");
+        return;
+    }
+
+    SkRRect skRRect = SkRRect::MakeRect(SkRect::MakeLTRB(
+        gaussianFuzzySize_.Left(), gaussianFuzzySize_.Top(), gaussianFuzzySize_.Right(), gaussianFuzzySize_.Bottom()));
+
+    SkAutoCanvasRestore acr(skCanvas, true);
+    skCanvas->clipRRect(skRRect, true);
+
+    SkPaint paint;
+    paint.setAntiAlias(true);
+#ifdef USE_SYSTEM_SKIA
+    paint.setColorFilter(SkColorFilter::MakeModeFilter(colorValue_.GetValue(), SkBlendMode::kDstOver));
+#else
+    paint.setColorFilter(SkColorFilters::Blend(colorValue_.GetValue(), SkBlendMode::kDstOver));
+#endif
+    paint.setImageFilter(SkBlurImageFilter::Make(gaussianFuzzySize_.Width(), gaussianFuzzySize_.Height(), nullptr));
+    SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+    skCanvas->saveLayer(slr);
 }
 
 void FlutterRenderTexture::DrawBackground()

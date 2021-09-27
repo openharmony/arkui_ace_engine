@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FLEX_RENDER_FLEX_ITEM_H
 
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components/proxy/render_proxy.h"
 
 namespace OHOS::Ace {
@@ -57,6 +58,8 @@ public:
 
     void Update(const RefPtr<Component>& component) override;
 
+    void PerformLayout() override;
+
     double GetFlexGrow() const
     {
         return flexGrow_;
@@ -78,10 +81,16 @@ public:
     }
 
     // should not used in Update.
-    double GetFlexBasis() const
+    double GetFlexBasisToPx() const
     {
         auto basis = NormalizeToPx(flexBasis_);
         return basis;
+    }
+
+    // should not used in Update.
+    const Dimension& GetFlexBasis() const
+    {
+        return flexBasis_;
     }
 
     void SetFlexBasis(const Dimension& flexBasis)
@@ -147,6 +156,7 @@ private:
     bool canStretch_ = true;
     bool mustStretch_ = false;
     bool isHidden_ = false;
+    RefPtr<GridColumnInfo> gridColumnInfo_;
 
     Dimension minWidth_ = Dimension();
     Dimension minHeight_ = Dimension();

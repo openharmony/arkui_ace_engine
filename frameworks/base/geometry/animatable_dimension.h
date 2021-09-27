@@ -47,6 +47,14 @@ public:
         animationCallback_ = callback;
     }
 
+    void SetContextAndCallbackAfterFirstAssign(
+        const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+    {
+        context_ = context;
+        animationCallback_ = callback;
+        isFirstAssign_ = false;
+    }
+
     const AnimationOption& GetAnimationOption() const
     {
         return animationOption_;

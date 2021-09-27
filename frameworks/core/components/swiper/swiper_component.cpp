@@ -116,6 +116,15 @@ void SwiperComponent::SetAutoPlayInterval(double autoPlayInterval)
     declaration_->SetAutoPlayInterval(autoPlayInterval);
 }
 
+SwiperDisplayMode SwiperComponent::GetDisplayMode() const
+{
+    return declaration_->GetDisplayMode();
+}
+void SwiperComponent::SetDisplayMode(SwiperDisplayMode displayMode)
+{
+    declaration_->SetDisplayMode(displayMode);
+}
+
 void SwiperComponent::SetChangeEventId(const EventMarker& changeEventId)
 {
     declaration_->SetChangeEventId(changeEventId);

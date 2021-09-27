@@ -27,11 +27,12 @@
 
 namespace OHOS::Ace {
 
-class OptionComponent : public ComponentGroup {
+class ACE_EXPORT OptionComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(OptionComponent, ComponentGroup);
 
 public:
     OptionComponent() = default;
+    OptionComponent(const RefPtr<SelectTheme>& theme);
     ~OptionComponent() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override;
@@ -56,6 +57,18 @@ public:
     {
         text_ = text;
         CheckOptionModify();
+    }
+
+    void SetTheme(const RefPtr<SelectTheme>& theme)
+    {
+        SetClickedColor(theme->GetClickedColor());
+        SetSelectedColor(theme->GetSelectedColor());
+        SetFontColor(theme->GetFontColor());
+        SetFontSize(theme->GetFontSize());
+        SetFontWeight(theme->GetFontWeight());
+        SetFontFamily(theme->GetFontFamily());
+        SetTextDecoration(theme->GetTextDecoration());
+        SetAllowScale(theme->IsAllowScale());
     }
 
     bool GetSelected() const
@@ -317,6 +330,16 @@ public:
         styles_ = styles;
     }
 
+    const std::function<void()>& GetCustomizedCallback()
+    {
+        return customizedCallback_;
+    }
+
+    void SetCustomizedCallback(const std::function<void()>& onClickFunc)
+    {
+        customizedCallback_ = onClickFunc;
+    }
+
 private:
     // used for inspector node in PC preview
     const std::vector<std::pair<std::string, std::string>> GetAttr()
@@ -347,6 +370,7 @@ private:
     std::size_t index_ = SELECT_INVALID_INDEX;
     std::function<void(std::size_t)> clickedCallback_;
     std::function<void(std::size_t)> modifiedCallback_;
+    std::function<void()> customizedCallback_;
     std::string lastText_;
     ComposeId id_ = "-1";
     EventMarker clickEvent_;

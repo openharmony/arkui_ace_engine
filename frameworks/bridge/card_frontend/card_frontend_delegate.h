@@ -18,11 +18,7 @@
 
 #include "frameworks/base/memory/ace_type.h"
 #include "frameworks/base/utils/noncopyable.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-#include "frameworks/bridge/common/accessibility/js_accessibility_manager.h"
-#else
-#include "frameworks/bridge/common/inspector/js_inspector_manager.h"
-#endif
+#include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 namespace OHOS::Ace::Framework {

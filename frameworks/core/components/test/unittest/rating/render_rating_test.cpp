@@ -15,12 +15,13 @@
 
 #include "gtest/gtest.h"
 
-#include "adapter/ohos/osal/fake_asset_manager.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
 #include "base/utils/system_properties.h"
+#include "core/mock/fake_asset_manager.h"
+#include "core/mock/fake_task_executor.h"
 #include "frameworks/core/components/rating/rating_component.h"
 #include "frameworks/core/components/test/json/json_frontend.h"
 #include "frameworks/core/event/key_event.h"
+#include "frameworks/core/image/image_object.h"
 #include "frameworks/core/mock/mock_resource_register.h"
 #define protected public
 #include "frameworks/core/components/rating/render_rating.h"

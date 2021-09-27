@@ -35,6 +35,12 @@ void MouseRawRecognizer::HandleEvent(const MouseEvent& event)
 
 void MouseRawRecognizer::HandleHoverEvent(MouseState mouseState)
 {
+    // Ace2.0
+    if (onHover_) {
+        onHover_(mouseState == MouseState::HOVER);
+    }
+
+    // Ace1.0
     if (onMouseHover_ && mouseState == MouseState::HOVER) {
         onMouseHover_();
     } else if (onMouseHoverExit_ && mouseState == MouseState::NONE) {

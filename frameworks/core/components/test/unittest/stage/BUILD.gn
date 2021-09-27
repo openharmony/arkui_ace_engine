@@ -16,6 +16,8 @@ import("//foundation/ace/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
   module_output_path = "ace_engine_standard/frameworkbasicability/stage"
+} else {
+  module_output_path = "ace_engine_full/frameworkbasicability/stage"
 }
 
 ohos_unittest("StageElementTest") {
@@ -28,20 +30,12 @@ ohos_unittest("StageElementTest") {
     "$ace_root:ace_test_config",
   ]
 
-  deps = [
-    "$ace_root/frameworks/base:ace_base_ohos",
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
-    "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
-  if (is_standard_system) {
-    configs += [ "//third_party/curl:curl_config" ]
-    deps += [
-      "$ace_root/frameworks/bridge:js_framework_ohos",
-      "//third_party/curl:curl",
-    ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -59,5 +53,7 @@ group("unittest") {
   testonly = true
   deps = []
 
-  deps += [ ":StageElementTest" ]
+  deps += [
+    # ":StageElementTest"
+  ]
 }

@@ -534,7 +534,7 @@ function $r(id, type, ...params){
 }
 
 function $rawfile(fileName){
-  return {"fileName": fileName};
+  return {"id": 0, "type": 30000, "params": [fileName]}
 }
 
 var IndexerAlign;
@@ -542,6 +542,27 @@ var IndexerAlign;
   IndexerAlign[IndexerAlign["Left"] = 0] = "Left";
   IndexerAlign[IndexerAlign["Right"] = 1] = "Right";
 })(IndexerAlign || (IndexerAlign = {}));
+
+var DialogAlignment;
+(function (DialogAlignment) {
+  DialogAlignment[DialogAlignment["Top"] = 0] = "Top";
+  DialogAlignment[DialogAlignment["Center"] = 1] = "Center";
+  DialogAlignment[DialogAlignment["Bottom"] = 2] = "Bottom";
+  DialogAlignment[DialogAlignment["Default"] = 3] = "Default";
+})(DialogAlignment || (DialogAlignment = {}));
+
+var EditMode;
+(function (EditMode) {
+  EditMode[EditMode["None"] = 0] = "None";
+  EditMode[EditMode["Deletable"] = 1] = "Deletable";
+  EditMode[EditMode["Movable"] = 2] = "Movable";
+})(EditMode || (EditMode = {}));
+
+var SwiperDisplayMode;
+(function (SwiperDisplayMode) {
+  SwiperDisplayMode[SwiperDisplayMode["Stretch"] = 0] = "Stretch";
+  SwiperDisplayMode[SwiperDisplayMode["AutoLinear"] = 1] = "AutoLinear";
+})(SwiperDisplayMode || (SwiperDisplayMode = {}));
 
 var DatePickerType;
 (function (DatePickerType) {

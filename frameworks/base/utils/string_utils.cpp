@@ -15,10 +15,32 @@
 
 #include "base/utils/string_utils.h"
 
+#ifndef WINDOWS_PLATFORM
+#include "securec.h"
+#endif
+
 namespace OHOS::Ace::StringUtils {
+namespace {
+
+const size_t MAX_STRING_SIZE = 256;
+
+}
 
 const char DEFAULT_STRING[] = "error";
 const std::wstring DEFAULT_WSTRING = L"error";
 const std::u16string DEFAULT_USTRING = u"error";
+
+const std::string FormatString(const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    char name[MAX_STRING_SIZE] = { 0 };
+    if (vsnprintf_s(name, sizeof(name), sizeof(name) - 1, fmt, args) < 0) {
+        va_end(args);
+        return "";
+    }
+    va_end(args);
+    return name;
+}
 
 } // namespace OHOS::Ace::StringUtils

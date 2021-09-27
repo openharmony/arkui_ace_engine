@@ -150,13 +150,15 @@ void RenderCalendar::OnDataChanged(const CalendarDaysOfMonth& daysOfMonth)
         // the number of rows will be 5 or 6, and week number height is half of the date number
         rowCount_ = colCount_ ? daysOfMonth.days.size() / colCount_ : 0;
         UpdateBreakInformation();
+        isNeedRepaint_ = true;
         MarkNeedLayout();
         return;
     }
     calendarDays_ = daysOfMonth.days;
     currentMonth_ = daysOfMonth.month;
     lastDayIndex_ = daysOfMonth.lastDayIndex;
-    if (!calendarController_->FirstSetToday() || currentMonth_ != calendarController_->GetCurrentMonth()) {
+    if ((!calendarController_->FirstSetToday() || currentMonth_ != calendarController_->GetCurrentMonth()) &&
+        IsValid(firstDayIndex_)) {
         calendarDays_[firstDayIndex_].touched = true;
         touchIndex_ = firstDayIndex_;
     }
@@ -371,7 +373,8 @@ int32_t RenderCalendar::JudgeArea(const Offset& offset)
         (offset.GetY() > maxHeight) || LessOrEqual(dayHeight_, 0.0) || LessOrEqual(dayWidth_, 0.0)) {
         return -1;
     }
-    auto height = offset.GetY() - browHeight - NormalizeToPx(calendarTheme_.boundaryColOffset);
+    auto boundaryColOffset = cardCalendar_ ? 0.0 : NormalizeToPx(calendarTheme_.boundaryColOffset);
+    auto height = offset.GetY() - browHeight - boundaryColOffset;
     auto boundaryRowOffset = NormalizeToPx(calendarTheme_.boundaryRowOffset);
     int32_t y =
         height < (dayHeight_ + rowSpace / 2) ? 0 : (height - dayHeight_ - rowSpace / 2) / (dayHeight_ + rowSpace) + 1;

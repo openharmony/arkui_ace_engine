@@ -78,8 +78,7 @@ public:
     template<typename... Args>
     static JsiRef<T> Make(Args&&... args)
     {
-        auto obj = T { args... };
-        return JsiRef<T>(obj);
+        return JsiRef<T>::Claim(T { std::forward<Args>(args)... });
     }
 
     static JsiRef<T> Claim(T&& val)

@@ -40,7 +40,7 @@ private:
 
     JSView* ownerView_ = nullptr;
     bool isShown_ = false;
-    bool autoCancel_ = true;
+    DialogProperties dialogProperties_;
     RefPtr<JsFunction> jsBuilderFunction_;
     RefPtr<JsFunction> jsCancelFunction_;
     RefPtr<Component> customDialog_;

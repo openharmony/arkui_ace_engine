@@ -15,8 +15,7 @@
 
 #include "gtest/gtest.h"
 
-#include "adapter/ohos/osal/fake_asset_manager.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
+#include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/log/log.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/keyframe_animation.h"
@@ -30,6 +29,8 @@
 #include "core/components/transition/transition_component.h"
 #include "core/components/transition/transition_element.h"
 #include "core/components/tween/tween_element.h"
+#include "core/mock/fake_asset_manager.h"
+#include "core/mock/fake_task_executor.h"
 #include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -38,6 +39,10 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 
+Platform::JniEnvironment::JniEnvironment() {}
+
+Platform::JniEnvironment::~JniEnvironment() = default;
+
 CardTransitionController::CardTransitionController(const WeakPtr<PipelineContext>& context) {};
 
 void CardTransitionController::RegisterTransitionListener() {};
@@ -45,6 +50,17 @@ void CardTransitionController::RegisterTransitionListener() {};
 RRect CardTransitionController::GetCardRect(const ComposeId& composeId) const
 {
     return RRect();
+}
+
+std::shared_ptr<JNIEnv> Platform::JniEnvironment::GetJniEnv(JNIEnv* jniEnv) const
+{
+    return nullptr;
+}
+
+Platform::JniEnvironment& Platform::JniEnvironment::GetInstance()
+{
+    static Platform::JniEnvironment jniEnvironment;
+    return jniEnvironment;
 }
 
 namespace {

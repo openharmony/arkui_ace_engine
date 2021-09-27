@@ -25,11 +25,6 @@
 #include "core/common/js_message_dispatcher.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-#include "frameworks/bridge/common/accessibility/js_accessibility_manager.h"
-#else
-#include "frameworks/bridge/common/inspector/js_inspector_manager.h"
-#endif
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
@@ -51,7 +46,11 @@ public:
         const UpdateApplicationStateCallback& updateApplicationStateCallback, const TimerCallback& timerCallback,
         const MediaQueryCallback& mediaQueryCallback, const RequestAnimationCallback& requestAnimationCallback,
         const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
-        const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack);
+        const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
+        const OnSaveDataCallBack& onSaveDataCallBack, const OnStartContinuationCallBack& onStartContinuationCallBack,
+        const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack,
+        const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
+        const OnRestoreDataCallBack& onRestoreDataCallBack);
     ~FrontendDelegateDeclarative() override;
 
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
@@ -78,10 +77,10 @@ public:
     void OnSuspended();
     bool OnStartContinuation();
     void OnCompleteContinuation(int32_t code);
-    void OnRemoteTerminated();
     void OnSaveData(std::string& data);
     void GetPluginsUsed(std::string& data);
     bool OnRestoreData(const std::string& data);
+    void OnRemoteTerminated();
     void OnNewRequest(const std::string& data);
     void SetColorMode(ColorMode colorMode);
     void CallPopPage();
@@ -210,16 +209,6 @@ public:
 
     void RebuildAllPages();
 
-    virtual void* GetAbility() override
-    {
-        return ability_;
-    }
-
-    void SetAbility(void* ability)
-    {
-        ability_ = ability;
-    }
-
 private:
     int32_t GenerateNextPageId();
     void RecyclePageId(int32_t pageId);
@@ -291,6 +280,11 @@ private:
     JsCallback jsCallback_;
     OnWindowDisplayModeChangedCallBack onWindowDisplayModeChanged_;
     OnConfigurationUpdatedCallBack onConfigurationUpdated_;
+    OnSaveDataCallBack onSaveData_;
+    OnStartContinuationCallBack onStartContinuation_;
+    OnRemoteTerminatedCallBack onRemoteTerminated_;
+    OnCompleteContinuationCallBack onCompleteContinuation_;
+    OnRestoreDataCallBack onRestoreData_;
     RefPtr<Framework::ManifestParser> manifestParser_;
     RefPtr<Framework::AccessibilityNodeManager> jsAccessibilityManager_;
     RefPtr<MediaQueryInfo> mediaQueryInfo_;
@@ -305,7 +299,6 @@ private:
     std::unordered_map<std::string, CancelableCallback<void()>> animationFrameTaskMap_;
 
     mutable std::mutex mutex_;
-    void* ability_ = nullptr;
 };
 
 } // namespace OHOS::Ace::Framework

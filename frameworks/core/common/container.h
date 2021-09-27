@@ -39,7 +39,7 @@ using CardViewPositionCallBack = std::function<void(int id, float offsetX, float
 constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
 constexpr int32_t INSTANCE_ID_PLATFORM = -2;
 
-class ACE_EXPORT Container : public virtual AceType {
+class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
 
 public:

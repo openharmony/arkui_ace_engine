@@ -86,12 +86,12 @@ protected:
         onTextCancel_ = value;
     }
 
-    void SetTextOnAccept(const std::function<void(const std::string&,double)>& value)
+    void SetTextOnAccept(const std::function<void(const std::string&, double)>& value)
     {
         onTextAccept_ = value;
     }
 
-    void SetTextOnChange(const std::function<void(const std::string&,double)>& value)
+    void SetTextOnChange(const std::function<void(const std::string&, double)>& value)
     {
         onTextChange_ = value;
     }
@@ -101,9 +101,9 @@ protected:
     RefPtr<RenderBox> box_;
     RefPtr<RenderNode> columnParent_;
 
-    std::function<void(void)> onTextCancel_ ;
-    std::function<void(const std::string&,double)> onTextAccept_;
-    std::function<void(const std::string&,double)> onTextChange_;
+    std::function<void(void)> onTextCancel_;
+    std::function<void(const std::string&, double)> onTextAccept_;
+    std::function<void(const std::string&, double)> onTextChange_;
 
 private:
     void HandleFinish(bool success);

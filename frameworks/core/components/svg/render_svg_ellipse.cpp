@@ -38,7 +38,7 @@ void RenderSvgEllipse::Update(const RefPtr<Component>& component)
     cy_ = ellipseComponent->GetCy();
     rx_ = ellipseComponent->GetRx();
     ry_ = ellipseComponent->GetRy();
-    RenderSvgBase::SetPresentationAttrs(ellipseComponent->GetDeclaration());
+    RenderSvgBase::SetPresentationAttrs(component, ellipseComponent->GetDeclaration());
     PrepareAnimations(component);
     MarkNeedLayout();
 }

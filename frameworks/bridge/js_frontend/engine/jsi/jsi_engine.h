@@ -26,7 +26,6 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_utils.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
-#include "native_engine/impl/ark/ark_native_engine.h"
 
 namespace OHOS::Ace::Framework {
 class JsiEngineInstance final : public AceType, public JsEngineInstance {
@@ -110,7 +109,6 @@ private:
 
     int32_t instanceId_ = 0;
     RefPtr<JsiEngineInstance> engineInstance_;
-    ArkNativeEngine* nativeEngine_ = nullptr;
 };
 } // namespace OHOS::Ace::Framework
 

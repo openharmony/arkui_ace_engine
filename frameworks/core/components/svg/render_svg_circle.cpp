@@ -36,7 +36,7 @@ void RenderSvgCircle::Update(const RefPtr<Component> &component)
     cx_ = circleComponent->GetCx();
     cy_ = circleComponent->GetCy();
     r_ = circleComponent->GetR();
-    RenderSvgBase::SetPresentationAttrs(circleComponent->GetDeclaration());
+    RenderSvgBase::SetPresentationAttrs(circleComponent, circleComponent->GetDeclaration());
     PrepareAnimations(component);
     MarkNeedLayout();
 }

@@ -32,7 +32,6 @@
 #include "core/components/transform/render_transform.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/component.h"
-#include "core/pipeline/base/flutter_render_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -245,16 +244,7 @@ void RenderNode::RenderWithContext(RenderContext& context, const Offset& offset)
         onLayoutReady_(std::string("\"layoutReady\",null,null"));
     }
     pendingDispatchLayoutReady_ = false;
-    if (GetHasSubWindow()) {
-        LOGI("Hole: meet subwindow node");
-        auto& flutterRenderContext = static_cast<FlutterRenderContext&>(context);
-        if (flutterRenderContext.GetNeedRestoreHole()) {
-            auto canvas = flutterRenderContext.GetCanvas();
-            canvas->restore();
-            flutterRenderContext.SetNeedRestoreHole(false);
-            flutterRenderContext.SetClipHole(Rect());
-        }
-    }
+    ClipHole(context, offset);
     Paint(context, offset);
     for (const auto& item : SortChildrenByZIndex(disappearingNodes_)) {
         PaintChild(item, context, offset);
@@ -292,11 +282,6 @@ void RenderNode::NotifyPaintFinish()
 
 void RenderNode::Paint(RenderContext& context, const Offset& offset)
 {
-    auto canvas = static_cast<FlutterRenderContext&>(context).GetCanvas();
-    if (!canvas || !canvas->canvas()) {
-        LOGI("Paint canvas is null");
-        return;
-    }
     const auto& children = GetChildren();
     for (const auto& item : SortChildrenByZIndex(children)) {
         PaintChild(item, context, offset);
@@ -307,6 +292,36 @@ void RenderNode::PaintChild(const RefPtr<RenderNode>& child, RenderContext& cont
 {
     if (child && child->GetVisible()) {
         context.PaintChild(child, offset);
+    }
+}
+
+void RenderNode::ClipHole(RenderContext& context, const Offset& offset)
+{
+    LOGD("Hole: PrePaint RenderNode");
+    auto pipelineContext = GetContext().Upgrade();
+
+    if (pipelineContext && pipelineContext->GetIsHoleValid()) {
+        if (!(pipelineContext->GetHasClipHole())) {
+            if (!(pipelineContext->GetHasMeetSubWindowNode())) {
+                context.ClipHoleBegin(pipelineContext->GetTransparentHole());
+                pipelineContext->SetHasClipHole(true);
+            } else {
+                LOGI("Hole: hole status is wrong.");
+            }
+        } else {
+            if (!(pipelineContext->GetHasMeetSubWindowNode())) {
+                if (GetHasSubWindow()) {
+                    context.ClipHoleEnd();
+                    pipelineContext->SetHasMeetSubWindowNode(true);
+                } else {
+                    LOGI("Hole: RenderNode has not SubWindow.");
+                }
+            } else {
+                LOGI("Hole: now clip has done.");
+            }
+        }
+    } else {
+        LOGD("Hole: hole is not valid.");
     }
 }
 
@@ -557,24 +572,25 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     const auto localPoint = transformPoint - GetPaintRect().GetOffset();
     bool dispatchSuccess = false;
     const auto& sortedChildern = SortChildrenByZIndex(GetChildren());
-    for (auto iter = sortedChildern.rbegin(); iter != sortedChildern.rend(); ++iter) {
-        auto& child = *iter;
-        if (!child->GetVisible()) {
-            continue;
-        }
-        if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {
-            dispatchSuccess = true;
-            break;
-        }
-        if (child->InterceptTouchEvent() || IsExclusiveEventForChild()) {
-            auto localTransformPoint = child->GetTransformPoint(localPoint);
-            if (child->GetTouchRect().IsInRegion(localTransformPoint)) {
+    if (IsChildrenTouchEnable()) {
+        for (auto iter = sortedChildern.rbegin(); iter != sortedChildern.rend(); ++iter) {
+            auto& child = *iter;
+            if (!child->GetVisible()) {
+                continue;
+            }
+            if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {
                 dispatchSuccess = true;
                 break;
             }
+            if (child->InterceptTouchEvent() || IsExclusiveEventForChild()) {
+                auto localTransformPoint = child->GetTransformPoint(localPoint);
+                if (child->GetTouchRect().IsInRegion(localTransformPoint)) {
+                    dispatchSuccess = true;
+                    break;
+                }
+            }
         }
     }
-
     auto beforeSize = result.size();
     if (touchable_ && GetOwnTouchRect().IsInRegion(transformPoint)) {
         // Calculates the coordinate offset in this node.
@@ -653,9 +669,18 @@ bool RenderNode::HandleMouseHoverEvent(MouseState mouseState)
 
 bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)
 {
-    const auto localPoint = parentLocalPoint - paintRect_.GetOffset();
+    LOGD("OnMouseHoverTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
+        GetTypeName(), GetTouchRect().Left(), GetTouchRect().Top(), GetTouchRect().Width(), GetTouchRect().Height());
+    LOGD("OnMouseHoverTest: the local point refer to parent is %{public}lf, %{public}lf, ", parentLocalPoint.GetX(),
+        parentLocalPoint.GetY());
+    if (disabled_) {
+        return false;
+    }
+
+    Point transformPoint = GetTransformPoint(parentLocalPoint);
+    const auto localPoint = transformPoint - paintRect_.GetOffset();
     // Since the paintRect is relative to parent, use parent local point to perform touch test.
-    if (GetTouchRect().IsInRegion(parentLocalPoint)) {
+    if (GetTouchRect().IsInRegion(transformPoint)) {
         auto context = context_.Upgrade();
         if (!context) {
             return false;
@@ -673,6 +698,7 @@ bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)
         if (mouseState_ == MouseState::NONE) {
             OnMouseHoverEnterTest();
             mouseState_ = MouseState::HOVER;
+            HandleMouseHoverEvent(MouseState::HOVER);
         }
         return true;
     } else {
@@ -683,6 +709,7 @@ bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)
         if (mouseState_ == MouseState::HOVER) {
             OnMouseHoverExitTest();
             mouseState_ = MouseState::NONE;
+            HandleMouseHoverEvent(MouseState::NONE);
         }
         return false;
     }
@@ -784,6 +811,10 @@ bool RenderNode::RotationMatchTest(const RefPtr<RenderNode>& requestRenderNode)
 
 bool RenderNode::RotationTest(const RotationEvent& event)
 {
+    if (disabled_) {
+        return false;
+    }
+
     const auto& children = GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         const auto& child = *iter;

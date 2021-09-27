@@ -97,6 +97,7 @@ void JSRow::JSBind(BindingTarget globalObj)
     JSClass<JSRow>::StaticMethod("width", &JSFlex::JsWidth, opt);
     JSClass<JSRow>::StaticMethod("size", &JSFlex::JsSize, opt);
     JSClass<JSRow>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSRow>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSRow>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSRow>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRow>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

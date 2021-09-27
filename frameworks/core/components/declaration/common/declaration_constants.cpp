@@ -208,6 +208,8 @@ const std::shared_ptr<SvgFeColorMatrixAttribute> DeclarationConstants::DEFAULT_S
     std::make_shared<SvgFeColorMatrixAttribute>();
 const std::shared_ptr<SvgFeAttribute> DeclarationConstants::DEFAULT_SVG_FE_COMPONENT_TRANSFER_ATTR =
     std::make_shared<SvgFeAttribute>();
+const std::shared_ptr<SvgFeCompositeAttribute> DeclarationConstants::DEFAULT_SVG_FE_COMPOSITE_ATTR =
+    std::make_shared<SvgFeCompositeAttribute>();
 const std::shared_ptr<SvgFeOffsetAttribute> DeclarationConstants::DEFAULT_SVG_FE_OFFSET_ATTR =
     std::make_shared<SvgFeOffsetAttribute>();
 const std::shared_ptr<SvgFeFloodAttribute> DeclarationConstants::DEFAULT_SVG_FE_FLOOD_ATTR =
@@ -216,6 +218,10 @@ const std::shared_ptr<SvgFeFuncAttribute> DeclarationConstants::DEFAULT_SVG_FE_F
     std::make_shared<SvgFeFuncAttribute>();
 const std::shared_ptr<SvgFeGaussianBlurAttribute> DeclarationConstants::DEFAULT_SVG_FE_GAUSSIAN_BLUR_ATTR =
     std::make_shared<SvgFeGaussianBlurAttribute>();
+const std::shared_ptr<SvgFeMergeAttribute> DeclarationConstants::DEFAULT_SVG_FE_MERGE_ATTR =
+    std::make_shared<SvgFeMergeAttribute>();
+const std::shared_ptr<SvgFeMergeNodeAttribute> DeclarationConstants::DEFAULT_SVG_FE_MERGE_NODE_ATTR =
+    std::make_shared<SvgFeMergeNodeAttribute>();
 
 // default value of image_animator
 const std::shared_ptr<ImageAnimatorAttribute> DeclarationConstants::DEFAULT_IMAGE_ANIMATOR_ATTR =

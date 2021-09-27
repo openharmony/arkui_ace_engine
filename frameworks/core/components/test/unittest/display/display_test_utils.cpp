@@ -15,12 +15,13 @@
 
 #include "core/components/test/unittest/display/display_test_utils.h"
 
-#include "adapter/ohos/osal/fake_asset_manager.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
+#include "adapter/aosp/entrance/java/jni/ace_application_info.h"
 #include "core/components/box/box_component.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/test/json/json_frontend.h"
 #include "core/components/text/text_component.h"
+#include "core/mock/fake_asset_manager.h"
+#include "core/mock/fake_task_executor.h"
 #include "core/mock/mock_resource_register.h"
 
 namespace OHOS::Ace {

@@ -44,14 +44,14 @@ void JSToggle::JSBind(BindingTarget globalObj)
 void JSToggle::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("toggle create error, info is non-vaild");
+        LOGE("toggle create error, info is non-valid");
         return;
     }
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto type = paramObject->GetProperty("type");
     if (!type->IsNumber()) {
-        LOGI("toggle create error, type is non-vaild");
+        LOGI("toggle create error, type is non-valid");
         return;
     }
 

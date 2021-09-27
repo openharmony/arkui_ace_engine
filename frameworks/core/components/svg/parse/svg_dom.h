@@ -52,7 +52,8 @@ public:
     static RefPtr<SvgDom> CreateSvgDom(SkStream& svgStream, const WeakPtr<PipelineContext>& context,
         const std::optional<Color>& svgThemeColor);
     bool ParseSvg(SkStream& svgStream);
-    void CreateRenderNode(ImageFit imageFit, const SvgRadius& svgRadius);
+    void CreateRenderNode(ImageFit imageFit, const SvgRadius& svgRadius, bool useBox = true);
+    void PaintDirectly(RenderContext& context, const Offset& offset);
 
     void SetContainerSize(const Size& size)
     {
@@ -67,6 +68,11 @@ public:
     RefPtr<RenderNode> GetRootRenderNode() const
     {
         return renderNode_;
+    }
+
+    RefPtr<RenderNode> GetRootSvgRenderNode() const
+    {
+        return svgRoot_.Upgrade();
     }
 
     void SetFinishEvent(const EventMarker& finishEvent)
@@ -100,6 +106,7 @@ private:
     RefPtr<RenderNode> renderNode_;
     WeakPtr<RenderNode> svgRoot_;
     WeakPtr<RenderNode> clipBox_;
+    WeakPtr<RenderNode> transform_;
     Size containerSize_;
     Size svgSize_;
     RefPtr<AnimatorGroup> animatorGroup_ = nullptr;

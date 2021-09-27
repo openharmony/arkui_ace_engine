@@ -51,7 +51,17 @@ void JSEnvironment::DestructorCallback(JSEnvironment* obj)
 void JSEnvironment::GetAccessibilityEnabled(const JSCallbackInfo& args)
 {
     std::string value;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     value = "false";
+#else
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return;
+    }
+    auto executor = container->GetTaskExecutor();
+    value = EnvironmentProxy::GetInstance()->GetEnvironment(executor)->GetAccessibilityEnabled();
+#endif
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(args.GetExecutionContext());
     auto returnValue = JSVal(ToJSValue(value));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
@@ -81,11 +91,7 @@ void JSEnvironment::GetFontScale(const JSCallbackInfo& args)
         return;
     }
     auto context = container->GetPipelineContext();
-    float scale = 1.0f;
-    if (context) {
-        scale = context->GetFontScale();
-    }
-    auto returnValue = JSVal(ToJSValue(scale));
+    auto returnValue = JSVal(ToJSValue(context->GetFontScale()));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     args.SetReturnValue(returnPtr);
 }

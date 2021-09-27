@@ -78,6 +78,8 @@ public:
 
     bool OnRestoreData(const std::string& data) override;
 
+    void OnRemoteTerminated() override {}
+
     void OnNewRequest(const std::string& data) override;
 
     void CallRouterBack() override;

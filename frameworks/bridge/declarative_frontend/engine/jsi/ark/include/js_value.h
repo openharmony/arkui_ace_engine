@@ -49,6 +49,7 @@ public:
     virtual bool IsString(shared_ptr<JsRuntime> runtime) = 0;
     virtual bool IsFunction(shared_ptr<JsRuntime> runtime) = 0;
 
+    // NOLINTNEXTLINE(google-runtime-references)
     virtual bool GetPropertyNames(shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> &propertyNames, int32_t &len) = 0;
     virtual bool GetEnumerablePropertyNames(shared_ptr<JsRuntime> runtime,
                                             shared_ptr<JsValue> &propertyNames, int32_t &len) = 0;

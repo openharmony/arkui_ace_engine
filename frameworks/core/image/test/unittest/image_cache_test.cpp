@@ -304,7 +304,7 @@ HWTEST_F(ImageCacheTest, FileCache004, TestSize.Level1)
      * @tc.steps: step2. call WriteCacheFile().
      * @tc.expected: file write into filePath and file info update right.
      */
-    std::vector<uint8_t> imageData = { 1, 2, 3, 4, 5, 6 };
+    std::vector<uint8_t> imageData = { 1, 2, 3 };
     std::string url = "http:/testfilecache003/image";
     ImageCache::WriteCacheFile(url, imageData.data(), imageData.size());
     float ratio = ImageCache::clearCacheFileRatio_;

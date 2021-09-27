@@ -27,6 +27,7 @@ class FlutterRenderSvgG : public RenderSvgG {
 public:
     RenderLayer GetRenderLayer() override;
     void Paint(RenderContext& context, const Offset& offset) override;
+    void PaintDirectly(RenderContext& context, const Offset& offset) override;
 
     bool IsRepaintBoundary() const override
     {

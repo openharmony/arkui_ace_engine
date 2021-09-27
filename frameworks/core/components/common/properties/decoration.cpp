@@ -238,9 +238,9 @@ BackgroundImagePosition BackgroundImagePosition::operator*(double value) const
 
 bool BackgroundImagePosition::operator==(const BackgroundImagePosition& backgroundImagePosition) const
 {
-    bool isXAxisEqual = NearEqual(GetSizeValueX(), backgroundImagePosition.GetSizeValueX()) &&
+    bool isXAxisEqual = (GetSizeX() == backgroundImagePosition.GetSizeX()) &&
                         GetSizeTypeX() == backgroundImagePosition.GetSizeTypeX();
-    bool isYAxisEqual = NearEqual(GetSizeValueY(), backgroundImagePosition.GetSizeValueY()) &&
+    bool isYAxisEqual = (GetSizeY() == backgroundImagePosition.GetSizeY()) &&
                         GetSizeTypeY() == backgroundImagePosition.GetSizeTypeY();
     return isXAxisEqual && isYAxisEqual;
 }

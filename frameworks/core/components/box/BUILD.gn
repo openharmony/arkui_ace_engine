@@ -22,8 +22,4 @@ build_component("box") {
     "render_box.cpp",
     "render_box_base.cpp",
   ]
-  external_deps = [
-    "inputmethod_native:inputmethod_ability",
-    "inputmethod_native:inputmethod_client",
-  ]
 }

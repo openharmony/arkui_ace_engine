@@ -18,6 +18,7 @@
 
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/input_option.h"
+#include "core/components/checkable/checkable_component.h"
 #include "core/pipeline/base/component.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
 #include "frameworks/bridge/common/dom/dom_text.h"
@@ -81,6 +82,9 @@ private:
     void PrepareCheckedListener();
     void CheckSubmitAndResetType();
     void SetFormValueListener();
+
+    void HandlePadding(RefPtr<Component> component, RefPtr<BoxComponent> boxComponent,
+        const std::map<std::string, std::string>& styles);
 
     RefPtr<Component> inputChild_;
     WeakPtr<DOMNode> formNode_;

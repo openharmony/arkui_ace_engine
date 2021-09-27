@@ -23,6 +23,7 @@
 #include "frameworks/core/components/svg/parse/svg_defs.h"
 #include "frameworks/core/components/svg/parse/svg_ellipse.h"
 #include "frameworks/core/components/svg/parse/svg_fe_colormatrix.h"
+#include "frameworks/core/components/svg/parse/svg_fe_composite.h"
 #include "frameworks/core/components/svg/parse/svg_fe_gaussianblur.h"
 #include "frameworks/core/components/svg/parse/svg_fe_offset.h"
 #include "frameworks/core/components/svg/parse/svg_filter.h"
@@ -60,6 +61,7 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
     { "defs", []() -> RefPtr<SvgNode> { return SvgDefs::Create(); } },
     { "ellipse", []() -> RefPtr<SvgNode> { return SvgEllipse::Create(); } },
     { "feColorMatrix", []() -> RefPtr<SvgNode> { return SvgFeColorMatrix::Create(); } },
+    { "feComposite", []() -> RefPtr<SvgNode> { return SvgFeComposite::Create(); } },
     { "feGaussianBlur", []() -> RefPtr<SvgNode> { return SvgFeGaussianBlur::Create(); } },
     { "feOffset", []() -> RefPtr<SvgNode> { return SvgFeOffset::Create(); } },
     { "filter", []() -> RefPtr<SvgNode> { return SvgFilter::Create(); } },
@@ -277,11 +279,18 @@ void SvgDom::SetAttrValue(const std::string& name, const std::string& value, con
     svgNode->SetAttr(name, value);
 }
 
-void SvgDom::CreateRenderNode(ImageFit imageFit, const SvgRadius& svgRadius)
+void SvgDom::PaintDirectly(RenderContext& context, const Offset& offset)
 {
-    if (root_ == nullptr) {
-        return;
+    auto svgRoot = AceType::DynamicCast<FlutterRenderSvg>(svgRoot_.Upgrade());
+    if (svgRoot) {
+        svgRoot->PaintDirectly(context, offset);
+    } else {
+        LOGD("paint fail as svg root is null");
     }
+}
+
+void SvgDom::CreateRenderNode(ImageFit imageFit, const SvgRadius& svgRadius, bool useBox)
+{
     auto svg = AceType::DynamicCast<SvgSvg>(root_);
     if (svg == nullptr) {
         return;
@@ -292,7 +301,7 @@ void SvgDom::CreateRenderNode(ImageFit imageFit, const SvgRadius& svgRadius)
     } else {
         size = containerSize_;
     }
-    auto renderSvg = svg->CreateRender(LayoutParam(size, Size(0.0, 0.0)), nullptr);
+    auto renderSvg = svg->CreateRender(LayoutParam(size, Size(0.0, 0.0)), nullptr, useBox);
     if (renderSvg) {
         InitAnimatorGroup(renderSvg);
         double scaleX = 1.0;
@@ -306,6 +315,7 @@ void SvgDom::CreateRenderNode(ImageFit imageFit, const SvgRadius& svgRadius)
         renderTransform->AddChild(renderSvg);
         renderTransform->Layout(LayoutParam(containerSize_, Size(0.0, 0.0)));
         svgRoot_ = renderSvg;
+        transform_ = renderTransform;
 
         auto clipBox = AceType::MakeRefPtr<BoxComponent>();
         clipBox->SetWidth(containerSize_.Width());
