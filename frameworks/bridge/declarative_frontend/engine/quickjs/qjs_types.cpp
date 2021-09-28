@@ -222,7 +222,7 @@ QJSRef<QJSValue> QJSFunction::Call(QJSRef<QJSValue> thisVal, int argc, QJSRef<QJ
 
 JSValue QJSFunction::New(FunctionCallback func)
 {
-    return JS_UNDEFINED;
+    return JS_NewCFunction(QJSContext::Current(), func, "", 1);
 }
 
 QJSArray::QJSArray() {}

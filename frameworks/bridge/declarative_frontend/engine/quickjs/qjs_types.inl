@@ -34,7 +34,10 @@ U* QJSObject::Unwrap() const
 }
 
 template<typename U>
-void QJSObject::Wrap(U* data) const {}
+void QJSObject::Wrap(U* data) const
+{
+    JS_SetOpaque(GetHandle(), data);
+}
 
 template<typename T>
 T QJSValue::ToNumber() const
