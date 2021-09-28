@@ -32,7 +32,7 @@ struct CallbackContext {
     napi_ref failCallbackRef = nullptr;
     napi_ref cmpCallbackRef = nullptr;
 
-    napi_value infoList;
+    napi_value infoList = nullptr;
     bool status = 0;
 };
 

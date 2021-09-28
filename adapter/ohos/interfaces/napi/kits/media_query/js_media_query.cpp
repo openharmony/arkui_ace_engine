@@ -56,7 +56,7 @@ class MediaQueryListener : public MediaQueryResult {
 
 public:
     MediaQueryListener(bool match, const std::string& media) : MediaQueryResult(match, media) {}
-    ~MediaQueryListener()
+    ~MediaQueryListener() override
     {
         const std::lock_guard<std::mutex> lock(mutex_);
         for (auto& item : listenerSets_) {
