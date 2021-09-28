@@ -534,6 +534,18 @@ void RenderScroll::ResetScrollEventCallBack()
             }
         }
     });
+
+    scrollable_->SetDragCancel([weakScroll = AceType::WeakClaim(this)]() {
+        auto scroll = weakScroll.Upgrade();
+        if (scroll) {
+            auto refresh = scroll->refreshParent_.Upgrade();
+            if (refresh && scroll->inLinkRefresh_) {
+                refresh->HandleDragCancel();
+                scroll->inLinkRefresh_ = false;
+            }
+        }
+    });
+
     if (positionController_) {
         positionController_->SetMiddle();
         double mainOffset = GetMainOffset(currentOffset_);
@@ -777,6 +789,7 @@ void RenderScroll::AnimateTo(double position, float duration, const RefPtr<Curve
                 scrollEvent.eventType = "scrollend";
                 context->SendEventToAccessibility(scrollEvent);
                 if (context->GetIsDeclarative() && scroll->scrollable_) {
+                    scroll->scrollable_->ChangeMoveStatus(true);
                     scroll->scrollable_->ProcessScrollMotionStop();
                 }
             }

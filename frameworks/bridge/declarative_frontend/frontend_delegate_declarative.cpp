@@ -19,12 +19,6 @@
 #include <regex>
 #include <string>
 
-#ifndef OHOS_STANDARD_SYSTEM
-#include "third_party/skia/include/core/SkImage.h"
-#endif
-
-#include "ability.h"
-#include "ability_info.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
@@ -89,14 +83,20 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
     const TimerCallback& timerCallback, const MediaQueryCallback& mediaQueryCallback,
     const RequestAnimationCallback& requestAnimationCallback, const JsCallback& jsCallback,
     const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
-    const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack)
+    const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
+    const OnSaveDataCallBack& onSaveDataCallBack, const OnStartContinuationCallBack& onStartContinuationCallBack,
+    const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack,
+    const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
+    const OnRestoreDataCallBack& onRestoreDataCallBack)
     : loadJs_(loadCallback), dispatcherCallback_(transferCallback), asyncEvent_(asyncEventCallback),
       syncEvent_(syncEventCallback), updatePage_(updatePageCallback), resetStagingPage_(resetLoadingPageCallback),
       destroyPage_(destroyPageCallback), destroyApplication_(destroyApplicationCallback),
       updateApplicationState_(updateApplicationStateCallback), timer_(timerCallback),
       mediaQueryCallback_(mediaQueryCallback), requestAnimationCallback_(requestAnimationCallback),
       jsCallback_(jsCallback), onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
-      onConfigurationUpdated_(onConfigurationUpdatedCallBack),
+      onConfigurationUpdated_(onConfigurationUpdatedCallBack), onSaveData_(onSaveDataCallBack),
+      onStartContinuation_(onStartContinuationCallBack), onRemoteTerminated_(onRemoteTerminatedCallBack),
+      onCompleteContinuation_(onCompleteContinuationCallBack), onRestoreData_(onRestoreDataCallBack),
       manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
       jsAccessibilityManager_(AccessibilityNodeManager::Create()),
       mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()), taskExecutor_(taskExecutor)
@@ -164,12 +164,8 @@ void FrontendDelegateDeclarative::GetResourceConfiguration(std::unique_ptr<JsonV
 void FrontendDelegateDeclarative::GetConfigurationCommon(const std::string& filePath, std::unique_ptr<JsonValue>& data)
 {
     std::vector<std::string> files;
-    //if (assetManager_) {
-    //    assetManager_->GetAssetList(filePath, files);
-    //}
-    if (!AceApplicationInfo::GetInstance().GetFiles(filePath, files)) {
-        LOGE("Get configuration files fail!");
-        return;
+    if (assetManager_) {
+        assetManager_->GetAssetList(filePath, files);
     }
 
     std::vector<std::string> fileNameList;
@@ -205,12 +201,8 @@ void FrontendDelegateDeclarative::LoadResourceConfiguration(std::map<std::string
     std::unique_ptr<JsonValue>& currentResourceData)
 {
     std::vector<std::string> files;
-    //if (assetManager_) {
-    //    assetManager_->GetAssetList(RESOURCES_FOLDER, files);
-    //}
-    if (!AceApplicationInfo::GetInstance().GetFiles(RESOURCES_FOLDER, files)) {
-        LOGE("Get configuration files fail!");
-        return;
+    if (assetManager_) {
+        assetManager_->GetAssetList(RESOURCES_FOLDER, files);
     }
 
     std::set<std::string> resourceFolderName;
@@ -467,23 +459,32 @@ void FrontendDelegateDeclarative::OnConfigurationUpdated(const std::string& data
 
 bool FrontendDelegateDeclarative::OnStartContinuation()
 {
-    return FireSyncEvent("_root", std::string("\"onStartContinuation\","), std::string(""));
+    bool result = false;
+    taskExecutor_->PostSyncTask(
+        [onStartContinuation = onStartContinuation_, &result]() {
+            result = onStartContinuation();
+        },
+        TaskExecutor::TaskType::JS);
+    return result;
 }
 
 void FrontendDelegateDeclarative::OnCompleteContinuation(int32_t code)
 {
-    FireSyncEvent("_root", std::string("\"onCompleteContinuation\","), std::to_string(code));
-}
-
-void FrontendDelegateDeclarative::OnRemoteTerminated()
-{
-    FireSyncEvent("_root", std::string("\"onRemoteTerminated\","), std::string(""));
+    taskExecutor_->PostSyncTask(
+        [onCompleteContinuation = onCompleteContinuation_, code]() {
+            onCompleteContinuation(code);
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnSaveData(std::string& data)
 {
     std::string savedData;
-    FireSyncEvent("_root", std::string("\"onSaveData\","), std::string(""), savedData);
+    taskExecutor_->PostSyncTask(
+        [onSaveData = onSaveData_, &savedData] {
+            onSaveData(savedData);
+        },
+        TaskExecutor::TaskType::JS);
     std::string pageUri = GetRunningPageUrl();
     data = std::string("{\"url\":\"").append(pageUri).append("\",\"__remoteData\":").append(savedData).append("}");
 }
@@ -499,7 +500,23 @@ void FrontendDelegateDeclarative::GetPluginsUsed(std::string& data)
 bool FrontendDelegateDeclarative::OnRestoreData(const std::string& data)
 {
     LOGD("OnRestoreData: restores the user data to shareData from remote ability");
-    return FireSyncEvent("_root", std::string("\"onRestoreData\","), data);
+    auto result = false;
+    taskExecutor_->PostSyncTask(
+        [onRestoreData = onRestoreData_, &result, &data]() {
+            result = onRestoreData(data);
+        },
+        TaskExecutor::TaskType::JS);
+    return result;
+}
+
+void FrontendDelegateDeclarative::OnRemoteTerminated()
+{
+    LOGD("OnRemoteTerminated: remote ability terminated");
+    taskExecutor_->PostSyncTask(
+        [onRemoteTerminated = onRemoteTerminated_]() {
+            onRemoteTerminated();
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnNewRequest(const std::string& data)
@@ -1231,20 +1248,11 @@ void FrontendDelegateDeclarative::PopPage()
                     LOGW("Not allow back because this is the last page!");
                     return;
                 }
-                auto ability = static_cast<AppExecFwk::Ability*>(delegate->ability_);
-                std::shared_ptr<AppExecFwk::AbilityInfo> info = ability->GetAbilityInfo();
-                if (info != nullptr && info->isLauncherAbility) {
-                    LOGW("launcher ability, return");
-                    return;
-                }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+
                 delegate->OnPageHide();
                 delegate->OnPageDestroy(delegate->GetRunningPageId());
                 delegate->OnPopPageSuccess();
                 pipelineContext->Finish();
-#else
-                LOGW("Can't back because this is the last page!");
-#endif
                 return;
             }
             if (!pipelineContext->CanPopPage()) {

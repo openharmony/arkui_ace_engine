@@ -62,8 +62,10 @@ public:
     virtual void DumpTree(int32_t depth, NodeId nodeID) = 0;
     virtual void SetCardViewPosition(int id, float offsetX, float offsetY) = 0;
     virtual void SetCardViewParams(const std::string& key, bool focus) = 0;
+    virtual void SetSupportAction(uint32_t action, bool isEnable) = 0;
     virtual void ClearNodeRectInfo(RefPtr<AccessibilityNode>& node, bool isPopDialog) = 0;
     virtual void AddComposedElement(const std::string& key, const RefPtr<ComposedElement>& node) = 0;
+    virtual void RemoveComposedElementById(const std::string& key) = 0;
     virtual WeakPtr<ComposedElement> GetComposedElementFromPage(NodeId nodeId) = 0;
     virtual void TriggerVisibleChangeEvent() = 0;
     virtual void AddVisibleChangeNode(NodeId nodeId, double ratio, VisibleRatioCallback callback) = 0;

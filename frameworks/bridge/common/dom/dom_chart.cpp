@@ -233,6 +233,8 @@ void DOMChart::SetChart(MainChart& chartDataset)
     chartDataset.SetLineWidth(chartOptions_.GetLineWidth());
     chartDataset.SetSmoothFlag(chartOptions_.GetSmoothFlag());
     chartDataset.SetLineGradient(chartOptions_.GetLineGradient());
+    chartDataset.SetWholeLineGradient(chartOptions_.GetWholeLineGradient());
+    chartDataset.SetTargetColor(chartOptions_.GetTargetColor());
     chartDataset.SetErasePointNumber(chartOptions_.GetErasePointNumber());
     chartDataset.SetTextSize(textSize_);
     chartDataset.SetFontFamily(fontFamily_);
@@ -280,13 +282,20 @@ void DOMChart::SetChart(MainChart& chartDataset)
             segment.SetSegmentColor(chartDataset.GetStrokeColor());
             pointInfo->SetSegmentInfo(segment);
         }
-        if (point.GetY() > topPoint.GetY()) {
-            topPoint = point;
+        if ((chartType_ == ChartType::LINE && point.GetX() < chartOptions_.GetXAxis().min) ||
+            (chartType_ == ChartType::LINE && point.GetX() > chartOptions_.GetXAxis().max) ||
+            ((chartType_ != ChartType::LINE && chartType_ != ChartType::BAR)
+            && (point.GetY() < chartOptions_.GetYAxis().min || point.GetY() > chartOptions_.GetYAxis().max))) {
+            points.erase(pointInfo);
+        } else {
+            if (point.GetY() > topPoint.GetY()) {
+                topPoint = point;
+            }
+            if (point.GetY() < bottomPoint.GetY()) {
+                bottomPoint = point;
+            }
+            ++pointInfo;
         }
-        if (point.GetY() < bottomPoint.GetY()) {
-            bottomPoint = point;
-        }
-        ++pointInfo;
     }
     chartDataset.SetData(points);
 

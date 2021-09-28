@@ -41,6 +41,7 @@ void RenderFlexItem::Update(const RefPtr<Component>& component)
     if (flexItem->GetFlexGrow() >= 0.0) {
         flexGrow_ = flexItem->GetFlexGrow();
     }
+    gridColumnInfo_ = flexItem->GetGridColumnInfo();
     canStretch_ = flexItem->GetStretchFlag();
     mustStretch_ = flexItem->MustStretch();
     alignSelf_ = flexItem->GetAlignSelf();
@@ -50,6 +51,22 @@ void RenderFlexItem::Update(const RefPtr<Component>& component)
     maxHeight_ = flexItem->GetMaxHeight();
     isHidden_ = flexItem->IsHidden();
     MarkNeedLayout();
+}
+
+void RenderFlexItem::PerformLayout()
+{
+    RenderProxy::PerformLayout();
+    if (!gridColumnInfo_) {
+        return;
+    }
+    auto offset = gridColumnInfo_->GetOffset();
+    if (offset != UNDEFINED_DIMENSION) {
+        positionParam_.type = PositionType::SEMI_RELATIVE;
+        std::pair<AnimatableDimension, bool>& edge =
+            (GetTextDirection() == TextDirection::RTL) ? positionParam_.right : positionParam_.left;
+        edge.first = offset;
+        edge.second = true;
+    }
 }
 
 bool RenderFlexItem::MaybeRelease()

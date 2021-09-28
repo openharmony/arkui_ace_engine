@@ -56,7 +56,14 @@
 #include "frameworks/bridge/common/dom/dom_svg_animate_motion.h"
 #include "frameworks/bridge/common/dom/dom_svg_animate_transform.h"
 #include "frameworks/bridge/common/dom/dom_svg_circle.h"
+#include "frameworks/bridge/common/dom/dom_svg_defs.h"
 #include "frameworks/bridge/common/dom/dom_svg_ellipse.h"
+#include "frameworks/bridge/common/dom/dom_svg_fe_colormatrix.h"
+#include "frameworks/bridge/common/dom/dom_svg_fe_composite.h"
+#include "frameworks/bridge/common/dom/dom_svg_fe_gaussianblur.h"
+#include "frameworks/bridge/common/dom/dom_svg_fe_offset.h"
+#include "frameworks/bridge/common/dom/dom_svg_filter.h"
+#include "frameworks/bridge/common/dom/dom_svg_g.h"
 #include "frameworks/bridge/common/dom/dom_svg_line.h"
 #include "frameworks/bridge/common/dom/dom_svg_mask.h"
 #include "frameworks/bridge/common/dom/dom_svg_path.h"
@@ -66,6 +73,7 @@
 #include "frameworks/bridge/common/dom/dom_svg_text.h"
 #include "frameworks/bridge/common/dom/dom_svg_text_path.h"
 #include "frameworks/bridge/common/dom/dom_svg_tspan.h"
+#include "frameworks/bridge/common/dom/dom_svg_use.h"
 #include "frameworks/bridge/common/dom/dom_swiper.h"
 #include "frameworks/bridge/common/dom/dom_switch.h"
 #include "frameworks/bridge/common/dom/dom_text.h"
@@ -147,11 +155,18 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_CHART, &DOMNodeCreator<DOMChart> },
         { DOM_NODE_TAG_CIRCLE, &DOMNodeCreator<DOMSvgCircle> },
         { DOM_NODE_TAG_CLOCK, &DOMNodeCreator<DOMClock> },
+        { DOM_NODE_TAG_DEFS, &DOMNodeCreator<DOMSvgDefs> },
         { DOM_NODE_TAG_DIALOG, &DOMNodeCreator<DOMDialog> },
         { DOM_NODE_TAG_DIV, &DOMNodeCreator<DOMDiv> },
         { DOM_NODE_TAG_DIVIDER, &DOMNodeCreator<DOMDivider> },
         { DOM_NODE_TAG_ELLIPSE, &DOMNodeCreator<DOMSvgEllipse> },
+        { DOM_NODE_TAG_FE_COLORMATRIX, &DOMNodeCreator<DOMSvgFeColorMatrix> },
+        { DOM_NODE_TAG_FE_COMPOSITE, &DOMNodeCreator<DOMSvgFeComposite> },
+        { DOM_NODE_TAG_FE_GAUSSIANBLUR, &DOMNodeCreator<DOMSvgFeGaussianBlur> },
+        { DOM_NODE_TAG_FE_OFFSET, &DOMNodeCreator<DOMSvgFeOffset> },
+        { DOM_NODE_TAG_FILTER, &DOMNodeCreator<DOMSvgFilter> },
         { DOM_NODE_TAG_FORM, &DOMNodeCreator<DOMForm> },
+        { DOM_NODE_TAG_G, &DOMNodeCreator<DOMSvgG> },
         { DOM_NODE_TAG_GRID_COLUMN, &DOMNodeCreator<DomGridColumn> },
         { DOM_NODE_TAG_GRID_CONTAINER, &DOMNodeCreator<DomGridContainer> },
         { DOM_NODE_TAG_GRID_ROW, &DOMNodeCreator<DomGridRow> },
@@ -225,6 +240,7 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_TOOL_BAR_ITEM, &DOMNodeCreator<DOMToolBarItem> },
 #endif
         { DOM_NODE_TAG_TSPAN, &DOMNodeCreator<DOMSvgTspan> },
+        { DOM_NODE_TAG_USE, &DOMNodeCreator<DOMSvgUse> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_VIDEO, &DOMNodeCreator<DOMVideo> },
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(OHOS_STANDARD_SYSTEM)

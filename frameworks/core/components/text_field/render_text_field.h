@@ -23,9 +23,10 @@
 #include "base/geometry/rect.h"
 #include "base/geometry/size.h"
 #include "base/utils/system_properties.h"
-#include "input_method_controller.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
+#include "core/common/ime/text_input_client.h"
+#include "core/common/ime/text_input_connection.h"
 #include "core/common/ime/text_input_formatter.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
@@ -45,7 +46,6 @@ namespace OHOS::Ace {
 class ClickRecognizer;
 class ClickInfo;
 class TextOverlayComponent;
-class RenderTextField;
 struct TextEditingValue;
 
 enum class DirectionStatus : uint8_t {
@@ -62,19 +62,8 @@ enum class CursorPositionType {
     NORMAL,
 };
 
-
-class OnTextChangedListenerImpl : public MiscServices::OnTextChangedListener {
-public:
-    OnTextChangedListenerImpl(const WeakPtr<RenderTextField>& field ) : field_(field) {}
-    void InsertText(const std::u16string& text) override;
-    void DeleteBackward(int32_t length) override;
-    void SetKeyboardStatus(bool status) override;
-private:
-    WeakPtr<RenderTextField> field_;
-};
-
-class RenderTextField : public RenderNode, public ValueChangeObserver {
-    DECLARE_ACE_TYPE(RenderTextField, RenderNode, ValueChangeObserver);
+class RenderTextField : public RenderNode, public TextInputClient, public ValueChangeObserver {
+    DECLARE_ACE_TYPE(RenderTextField, RenderNode, TextInputClient, ValueChangeObserver);
 
 public:
     ~RenderTextField() override;
@@ -86,8 +75,8 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     // Override TextInputClient
-    void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true);
-    void PerformAction(TextInputAction action, bool forceCloseKeyboard = false);
+    void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+    void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void OnStatusChanged(RenderStatus renderStatus) override;
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
     void OnPaintFinish() override;
@@ -219,11 +208,6 @@ public:
         needNotifyChangeEvent_ = needNotifyChangeEvent;
     }
 
-    void SetInputMethodStatus(bool imeAttached)
-    {
-        imeAttached_ = imeAttached;
-    }
-
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -278,7 +262,7 @@ protected:
 
     bool HasConnection() const
     {
-        return imeAttached_;
+        return connection_;
     }
 
     bool ShowCounter() const;
@@ -452,6 +436,8 @@ private:
      */
     void UpdateRemoteEditingIfNeeded(bool needFireChangeEvent = true);
 
+    void AttachIme();
+
     int32_t initIndex_ = 0;
     bool isOverlayFocus_ = false;
     bool isShiftDown_ = false;
@@ -460,7 +446,6 @@ private:
     bool isSingleHandle_ = false;
     bool hasTextOverlayPushed_ = false;
     bool softKeyboardEnabled_ = true;
-    bool imeAttached_ = false;
     Color pressColor_;
     TextSelection selection_; // Selection from custom.
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
@@ -502,7 +487,6 @@ private:
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<Animator> pressController_;
     RefPtr<Animator> animator_;
-    sptr<MiscServices::OnTextChangedListener> listener_;
 };
 
 } // namespace OHOS::Ace

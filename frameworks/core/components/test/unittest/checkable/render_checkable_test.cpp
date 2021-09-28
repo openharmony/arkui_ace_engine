@@ -16,14 +16,14 @@
 #include "flutter/lib/ui/painting/canvas.h"
 #include "gtest/gtest.h"
 
-#include "adapter/ohos/osal/fake_asset_manager.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
 #include "base/log/log.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/checkable/radio_group_component.h"
 #include "core/components/checkable/render_checkable.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/test/json/json_frontend.h"
+#include "core/mock/fake_asset_manager.h"
+#include "core/mock/fake_task_executor.h"
 #include "core/mock/mock_resource_register.h"
 #include "core/pipeline/base/flutter_render_context.h"
 #define protected public

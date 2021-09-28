@@ -18,6 +18,8 @@
 
 #include "flutter/fml/memory/ref_counted.h"
 
+#include "core/animation/animator.h"
+#include "core/animation/curve_animation.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/video/render_texture.h"
 #include "core/pipeline/layers/clip_layer.h"
@@ -37,6 +39,7 @@ public:
     RenderLayer GetRenderLayer() override;
     void UpdateOpacity(uint8_t opacity) override;
     void DumpTree(int32_t depth) override;
+    void SetIsAddGaussianFuzzy(bool isAddGaussianFuzzy) override;
 
 private:
     void PerformLayout() override;
@@ -44,11 +47,17 @@ private:
     void AddTextureLayer();
     void AddBackgroundLayer();
     void DrawBackground();
+    void AddGaussianFuzzy(RenderContext& context, const Offset& offset);
+    void InitGaussianFuzzyParas();
 
     RefPtr<Flutter::TextureLayer> textureLayer_;
     RefPtr<Flutter::ClipLayer> layer_;
     RefPtr<Flutter::PictureLayer> backgroundLayer_;
     bool needDrawBackground_ = false;
+    RefPtr<Animator> controller_;
+    RefPtr<CurveAnimation<uint8_t>> moveAnimation_;
+    Color colorValue_;
+    Rect gaussianFuzzySize_;
 };
 
 } // namespace OHOS::Ace

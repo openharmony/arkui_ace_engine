@@ -27,7 +27,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::Framework {
 namespace {
 
-const std::string TEXT_DATA = "ohos1234@?!";
+const std::string TEXT_DATA = "test1234@?!";
 const std::string SVG_LENGTH_ADJUST_VALUE = "spacingAndGlyphs";
 const std::string SVG_PATH_VALUE = "M40,1160 Q360,1160 360,980 Q360,840 200,840 Q40,"
                                     "840 40,960 Q40,1080 180,1080 Q280,1080 300,1000";
@@ -51,7 +51,7 @@ const std::string JSON_SVG_TSPAN_TAG = ""
                                        "{                                         "
                                        "  \"tag\": \"tspan\",                      ";
 const std::string JSON_SVG_TEXT_STR = "  \"attr\": [{                           "
-                                    "             \"value\":  \"ohos1234@?!\"  "
+                                    "             \"value\":  \"test1234@?!\"  "
                                     "          },"
                                     "          { "
                                     "           \"fontSize\":\"50.0\"          "
@@ -98,7 +98,7 @@ const std::string JSON_SVG_TEXT_PATH_STR = ""
                                     "{                                         "
                                     "  \"tag\": \"textpath\",                      "
                                     "  \"attr\": [{                           "
-                                    "             \"value\":  \"ohos1234@?!\"  "
+                                    "             \"value\":  \"test1234@?!\"  "
                                     "          },"
                                     "          { "
                                     "           \"fontSize\":\"50.0\"          "

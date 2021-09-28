@@ -17,26 +17,26 @@ config("standard_camera_config") {
 
   include_dirs = [
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include/",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//foundation/multimedia/media_standard/interfaces/kits/native/include",
-    "//foundation/multimedia/media_standard/interfaces/innerkits/native/media/include",
-    "//utils/native/base/include",
-    "//drivers/peripheral/codec/interfaces/include",
-    "//drivers/peripheral/display/interfaces/include",
-    "//drivers/framework/include/utils",
     "//drivers/adapter/uhdf2/include/hdi",
     "//drivers/adapter/uhdf2/osal/include/",
+    "//drivers/framework/include/utils",
     "//drivers/peripheral/camera/interfaces/include/",
-    "//drivers/peripheral/camera/interfaces/include/server/",
     "//drivers/peripheral/camera/interfaces/include/callback/device/",
     "//drivers/peripheral/camera/interfaces/include/callback/host/",
     "//drivers/peripheral/camera/interfaces/include/callback/operator/",
-    "//foundation/multimedia/camera_standard/services/camera_service/include",
+    "//drivers/peripheral/camera/interfaces/include/server/",
+    "//drivers/peripheral/codec/interfaces/include",
+    "//drivers/peripheral/display/interfaces/include",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//foundation/multimedia/camera_standard/frameworks/innerkitsimpl/metadata/include",
+    "//foundation/multimedia/camera_standard/interfaces/innerkits/native/camera/include",
     "//foundation/multimedia/camera_standard/services/camera_service/binder/base/include",
     "//foundation/multimedia/camera_standard/services/camera_service/binder/client/include",
     "//foundation/multimedia/camera_standard/services/camera_service/binder/server/include",
-    "//foundation/multimedia/camera_standard/frameworks/innerkitsimpl/metadata/include",
-    "//foundation/multimedia/camera_standard/interfaces/innerkits/native/camera/include",
+    "//foundation/multimedia/camera_standard/services/camera_service/include",
+    "//foundation/multimedia/media_standard/interfaces/innerkits/native/media/include",
+    "//foundation/multimedia/media_standard/interfaces/kits/native/include",
+    "//utils/native/base/include",
   ]
 }
 
@@ -49,7 +49,7 @@ build_component("camera") {
   if (is_standard_system) {
     configs = [ ":standard_camera_config" ]
 
-    sources += [ "camera.cpp" ]
+    sources += [ "standard_system/camera.cpp" ]
 
     deps = [
       "//foundation/graphic/standard:libwmclient",
@@ -61,5 +61,7 @@ build_component("camera") {
       "ipc:ipc_core",
       "multimedia_media_standard:media_client",
     ]
+  } else {
+    sources += [ "large_system/camera.cpp" ]
   }
 }

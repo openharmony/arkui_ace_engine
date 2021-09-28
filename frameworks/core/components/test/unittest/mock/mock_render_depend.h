@@ -16,8 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEST_UNITTEST_MOCK_MOCK_RENDER_DEPEND_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEST_UNITTEST_MOCK_MOCK_RENDER_DEPEND_H
 
-#include "adapter/ohos/osal/fake_asset_manager.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
+#ifndef OHOS_STANDARD_SYSTEM
+#include "adapter/aosp/entrance/java/jni/ace_application_info.h"
+#include "adapter/aosp/entrance/java/jni/jni_environment.h"
+#endif
 #include "core/animation/animator.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/shared_transition_controller.h"
@@ -39,6 +41,8 @@
 #include "core/components/test/json/json_frontend.h"
 #include "core/components/text/render_text.h"
 #include "core/components/transform/render_transform.h"
+#include "core/mock/fake_asset_manager.h"
+#include "core/mock/fake_task_executor.h"
 #include "core/mock/mock_resource_register.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -59,6 +63,23 @@ public:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(MockWindow);
 };
+
+#ifndef OHOS_STANDARD_SYSTEM
+Platform::JniEnvironment::JniEnvironment() {}
+
+Platform::JniEnvironment::~JniEnvironment() = default;
+
+std::shared_ptr<JNIEnv> Platform::JniEnvironment::GetJniEnv(JNIEnv* jniEnv) const
+{
+    return nullptr;
+}
+
+Platform::JniEnvironment& Platform::JniEnvironment::GetInstance()
+{
+    static Platform::JniEnvironment jniEnvironment;
+    return jniEnvironment;
+}
+#endif
 
 std::unique_ptr<PlatformWindow> PlatformWindow::Create(AceView* aceView)
 {
@@ -267,6 +288,11 @@ RefPtr<OverlayElement> SemiModalElement::GetOverlayElement() const
     return nullptr;
 }
 
+RefPtr<StageElement> SemiModalElement::GetStageElement() const
+{
+    return nullptr;
+}
+
 RefPtr<Component> SemiModalComponent::Create(
     RefPtr<Component> child, bool isFullScreen, int32_t modalHeight, uint32_t color)
 {
@@ -276,6 +302,11 @@ RefPtr<Component> SemiModalComponent::Create(
 void DialogModalElement::UpdateSystemBarHeight(double statusBar, double navigationBar) {}
 
 RefPtr<OverlayElement> DialogModalElement::GetOverlayElement() const
+{
+    return nullptr;
+}
+
+RefPtr<StageElement> DialogModalElement::GetStageElement() const
 {
     return nullptr;
 }

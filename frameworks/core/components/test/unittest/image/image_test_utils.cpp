@@ -17,14 +17,15 @@
 
 #include "gtest/gtest.h"
 
-#include "adapter/ohos/osal/fake_asset_manager.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
+#include "adapter/aosp/entrance/java/jni/ace_application_info.h"
 #include "core/animation/animator.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/shared_transition_controller.h"
 #include "core/components/align/render_align.h"
 #include "core/components/image/image_component.h"
 #include "core/components/test/json/json_frontend.h"
+#include "core/mock/fake_asset_manager.h"
+#include "core/mock/fake_task_executor.h"
 #include "core/mock/mock_resource_register.h"
 
 namespace OHOS::Ace {
@@ -61,18 +62,6 @@ void VerifyRectSize(const std::list<Rect>& rectList, const Size& expectRectSize)
     for (const auto& rect : rectList) {
         ASSERT_TRUE(rect.GetSize() == expectRectSize);
     }
-}
-
-std::list<Rect> GetRectList(const ImageRepeat&& imageRepeat, const Size& parentSize)
-{
-    Rect fundamentalRect = Rect(Offset(EXTRA_SMALL_LENGTH, EXTRA_SMALL_LENGTH), Size(SMALL_LENGTH, SMALL_LENGTH));
-    RefPtr<ImageComponent> image = AceType::MakeRefPtr<ImageComponent>("");
-    RefPtr<RenderImage> renderImage = AceType::MakeRefPtr<MockRenderImage>();
-    auto mockContext = GetMockContext();
-    renderImage->Attach(mockContext);
-    renderImage->Update(image);
-    renderImage->GenerateRepeatRects(fundamentalRect, parentSize, imageRepeat);
-    return renderImage->GetRectList();
 }
 
 RefPtr<RenderContext> RenderContext::Create()

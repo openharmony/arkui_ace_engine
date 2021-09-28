@@ -38,6 +38,7 @@
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
 #include "core/components/dialog/dialog_component.h"
+#include "core/components/dialog/dialog_element.h"
 #include "core/components/dialog_modal/dialog_modal_component.h"
 #include "core/components/dialog_modal/dialog_modal_element.h"
 #include "core/components/display/display_component.h"
@@ -274,13 +275,26 @@ RefPtr<StageElement> PipelineContext::GetStageElement() const
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
         return RefPtr<StageElement>();
     }
-    auto stack = rootElement_->GetFirstChild();
-    if (!stack) {
-        LOGE("Get stage element failed. stack element is null!");
-        EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
-        return RefPtr<StageElement>();
+
+    if (windowModal_ == WindowModal::SEMI_MODAL || windowModal_ == WindowModal::SEMI_MODAL_FULL_SCREEN) {
+        auto semiElement = AceType::DynamicCast<SemiModalElement>(rootElement_->GetFirstChild());
+        if (semiElement) {
+            return semiElement->GetStageElement();
+        }
+    } else if (windowModal_ == WindowModal::DIALOG_MODAL) {
+        auto dialogElement = AceType::DynamicCast<DialogModalElement>(rootElement_->GetFirstChild());
+        if (dialogElement) {
+            return dialogElement->GetStageElement();
+        }
+    } else {
+        auto stack = rootElement_->GetFirstChild();
+        if (stack) {
+            return AceType::DynamicCast<StageElement>(stack->GetFirstChild());
+        }
     }
-    return AceType::DynamicCast<StageElement>(stack->GetFirstChild());
+    LOGE("Get stage element failed.");
+    EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
+    return RefPtr<StageElement>();
 }
 
 Rect PipelineContext::GetRootRect() const
@@ -426,15 +440,12 @@ void PipelineContext::FlushRender(const RefPtr<RenderContext>& ctx)
         isDirtyRootRect = true;
     }
 
+    UpdateNodesNeedDrawOnPixelMap();
+
     RefPtr<RenderContext> context = isSub_ ? ctx : RenderContext::Create();
-    if (transparentHole_.IsValid()) {
-        LOGI("Hole: set transparentHole_ in FlushRender");
-        context->SetClipHole(transparentHole_);
-    }
     if (!dirtyRenderNodes_.empty()) {
         decltype(dirtyRenderNodes_) dirtyNodes(std::move(dirtyRenderNodes_));
         for (const auto& dirtyNode : dirtyNodes) {
-            UpdateNodesNeedDrawOnPixelMap(dirtyNode);
             context->Repaint(dirtyNode);
             if (!isDirtyRootRect) {
                 Rect curRect = dirtyNode->GetDirtyRect();
@@ -450,7 +461,6 @@ void PipelineContext::FlushRender(const RefPtr<RenderContext>& ctx)
     if (!dirtyRenderNodesInOverlay_.empty()) {
         decltype(dirtyRenderNodesInOverlay_) dirtyNodesInOverlay(std::move(dirtyRenderNodesInOverlay_));
         for (const auto& dirtyNodeInOverlay : dirtyNodesInOverlay) {
-            UpdateNodesNeedDrawOnPixelMap(dirtyNodeInOverlay);
             context->Repaint(dirtyNodeInOverlay);
             if (!isDirtyRootRect) {
                 Rect curRect = dirtyNodeInOverlay->GetDirtyRect();
@@ -482,7 +492,6 @@ void PipelineContext::FlushRender(const RefPtr<RenderContext>& ctx)
             isFirstLoaded_ = false;
         }
     }
-    NotifyDrawOnPiexlMap();
     needForcedRefresh_ = false;
 }
 
@@ -543,6 +552,17 @@ void PipelineContext::ProcessPreFlush()
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
 
+    // if we need clip hole
+    if (transparentHole_.IsValid()) {
+        hasMeetSubWindowNode_ = false;
+        hasClipHole_ = false;
+        isHoleValid_ = true;
+        needForcedRefresh_ = true;
+    } else {
+        hasMeetSubWindowNode_ = false;
+        hasClipHole_ = false;
+        isHoleValid_ = false;
+    }
     if (preFlushListeners_.empty()) {
         return;
     }
@@ -1268,7 +1288,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         }
     }
     rootElement_->HandleSpecifiedKey(event);
-    NotifyKeyEventDismiss();
+    NotifyDestroyEventDismiss();
     return eventManager_.DispatchKeyEvent(event, rootElement_);
 }
 
@@ -1298,12 +1318,10 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
         // Send Hover Exit Animation event to preHoverNodes.
         for (const auto& exitNode : preHoverNodes) {
             exitNode->OnMouseHoverExitAnimation();
-            exitNode->HandleMouseHoverEvent(MouseState::NONE);
         }
         // Send Hover Enter Animation event to curHoverNodes.
         for (const auto& enterNode : hoverNodes_) {
             enterNode->OnMouseHoverEnterAnimation();
-            enterNode->HandleMouseHoverEvent(MouseState::HOVER);
         }
     } else {
         HandleMouseInputEvent(event);
@@ -1802,22 +1820,22 @@ void PipelineContext::NotifyIsPagePathInvalidDismiss(bool isPageInvalid) const
     }
 }
 
+void PipelineContext::NotifyDestroyEventDismiss() const
+{
+    CHECK_RUN_ON(UI);
+    for (auto& iterDestroyEventHander : destroyEventHandler_) {
+        if (iterDestroyEventHander) {
+            iterDestroyEventHander();
+        }
+    }
+}
+
 void PipelineContext::NotifyDispatchTouchEventDismiss(const TouchPoint& event) const
 {
     CHECK_RUN_ON(UI);
     for (auto& iterDispatchTouchEventHander : dispatchTouchEventHandler_) {
         if (iterDispatchTouchEventHander) {
             iterDispatchTouchEventHander(event);
-        }
-    }
-}
-
-void PipelineContext::NotifyKeyEventDismiss() const
-{
-    CHECK_RUN_ON(UI);
-    for (auto& iterKeyEventHander : keyEventHandler_) {
-        if (iterKeyEventHander) {
-            iterKeyEventHander();
         }
     }
 }
@@ -2681,18 +2699,18 @@ void PipelineContext::AddNodesToNotifyOnPreDraw(const RefPtr<RenderNode>& render
     nodesToNotifyOnPreDraw_.emplace(renderNode);
 }
 
-void PipelineContext::NotifyDrawOnPiexlMap()
+void PipelineContext::UpdateNodesNeedDrawOnPixelMap()
 {
-    decltype(nodesNeedDrawOnPixelMap_) nodesNeedDrawOnPiexlMap(std::move(nodesNeedDrawOnPixelMap_));
-    for (const auto& node : nodesNeedDrawOnPiexlMap) {
-        auto box = AceType::DynamicCast<RenderBox>(node);
-        if (box) {
-            box->DrawOnPixelMap();
-        }
+    for (const auto& dirtyNode : dirtyRenderNodes_) {
+        SearchNodesNeedDrawOnPixelMap(dirtyNode);
     }
+    for (const auto& dirtyNode : dirtyRenderNodesInOverlay_) {
+        SearchNodesNeedDrawOnPixelMap(dirtyNode);
+    }
+    NotifyDrawOnPiexlMap();
 }
 
-void PipelineContext::UpdateNodesNeedDrawOnPixelMap(const RefPtr<RenderNode>& renderNode)
+void PipelineContext::SearchNodesNeedDrawOnPixelMap(const RefPtr<RenderNode>& renderNode)
 {
     auto parent = renderNode;
     while (parent) {
@@ -2701,6 +2719,17 @@ void PipelineContext::UpdateNodesNeedDrawOnPixelMap(const RefPtr<RenderNode>& re
             nodesNeedDrawOnPixelMap_.emplace(parent);
         }
         parent = parent->GetParent().Upgrade();
+    }
+}
+
+void PipelineContext::NotifyDrawOnPiexlMap()
+{
+    decltype(nodesNeedDrawOnPixelMap_) nodesNeedDrawOnPiexlMap(std::move(nodesNeedDrawOnPixelMap_));
+    for (const auto& node : nodesNeedDrawOnPiexlMap) {
+        auto box = AceType::DynamicCast<RenderBox>(node);
+        if (box) {
+            box->DrawOnPixelMap();
+        }
     }
 }
 

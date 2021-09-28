@@ -148,9 +148,18 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild001, TestSize.Level1)
     EXPECT_TRUE(column->GetChildren().size() == 1);
     RefPtr<FlexItemComponent> flexItem = AceType::DynamicCast<FlexItemComponent>(column->GetChildren().front());
     EXPECT_TRUE(flexItem != nullptr);
-    RefPtr<RowComponent> row = AceType::DynamicCast<RowComponent>(flexItem->GetChild());
-    EXPECT_TRUE(row != nullptr);
-    RefPtr<PaddingComponent> padding = AceType::DynamicCast<PaddingComponent>(row->GetChildren().front());
+    RefPtr<PaddingComponent> padding;
+    if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
+        RefPtr<RowComponent> brow = AceType::DynamicCast<RowComponent>(flexItem->GetChild());
+        EXPECT_TRUE(brow != nullptr);
+        RefPtr<BoxComponent> row = AceType::DynamicCast<BoxComponent>(brow->GetChildren().front());
+        EXPECT_TRUE(row != nullptr);
+        padding = AceType::DynamicCast<PaddingComponent>(row->GetChild());
+    } else {
+        RefPtr<RowComponent> row = AceType::DynamicCast<RowComponent>(flexItem->GetChild());
+        EXPECT_TRUE(row != nullptr);
+        padding = AceType::DynamicCast<PaddingComponent>(row->GetChildren().front());
+    }
     EXPECT_TRUE(padding != nullptr);
     RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(padding->GetChild());
     EXPECT_TRUE(box != nullptr);
@@ -249,9 +258,18 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild004, TestSize.Level1)
     EXPECT_TRUE(column->GetChildren().size() == 2);
     RefPtr<FlexItemComponent> titleFlex = AceType::DynamicCast<FlexItemComponent>(column->GetChildren().front());
     EXPECT_TRUE(titleFlex != nullptr);
-    RefPtr<RowComponent> row = AceType::DynamicCast<RowComponent>(titleFlex->GetChild());
-    EXPECT_TRUE(row != nullptr);
-    RefPtr<PaddingComponent> titlePadding = AceType::DynamicCast<PaddingComponent>(row->GetChildren().front());
+    RefPtr<PaddingComponent> titlePadding;
+    if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
+        RefPtr<RowComponent> brow = AceType::DynamicCast<RowComponent>(titleFlex->GetChild());
+        EXPECT_TRUE(brow != nullptr);
+        RefPtr<BoxComponent> row = AceType::DynamicCast<BoxComponent>(brow->GetChildren().front());
+        EXPECT_TRUE(row != nullptr);
+        titlePadding = AceType::DynamicCast<PaddingComponent>(row->GetChild());
+    } else {
+        RefPtr<RowComponent> row = AceType::DynamicCast<RowComponent>(titleFlex->GetChild());
+        EXPECT_TRUE(row != nullptr);
+        titlePadding = AceType::DynamicCast<PaddingComponent>(row->GetChildren().front());
+    }
     EXPECT_TRUE(titlePadding != nullptr);
     RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(titlePadding->GetChild());
     EXPECT_TRUE(box != nullptr);
@@ -295,9 +313,18 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild005, TestSize.Level1)
     EXPECT_TRUE(column->GetChildren().size() == 2);
     RefPtr<FlexItemComponent> titleFlex = AceType::DynamicCast<FlexItemComponent>(column->GetChildren().front());
     EXPECT_TRUE(titleFlex != nullptr);
-    RefPtr<RowComponent> titleRow = AceType::DynamicCast<RowComponent>(titleFlex->GetChild());
-    EXPECT_TRUE(titleRow != nullptr);
-    RefPtr<PaddingComponent> titlePadding = AceType::DynamicCast<PaddingComponent>(titleRow->GetChildren().front());
+    RefPtr<PaddingComponent> titlePadding;
+    if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
+        RefPtr<RowComponent> brow = AceType::DynamicCast<RowComponent>(titleFlex->GetChild());
+        EXPECT_TRUE(brow != nullptr);
+        RefPtr<BoxComponent> row = AceType::DynamicCast<BoxComponent>(brow->GetChildren().front());
+        EXPECT_TRUE(row != nullptr);
+        titlePadding = AceType::DynamicCast<PaddingComponent>(row->GetChild());
+    } else {
+        RefPtr<RowComponent> row = AceType::DynamicCast<RowComponent>(titleFlex->GetChild());
+        EXPECT_TRUE(row != nullptr);
+        titlePadding = AceType::DynamicCast<PaddingComponent>(row->GetChildren().front());
+    }
     EXPECT_TRUE(titlePadding != nullptr);
     RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(titlePadding->GetChild());
     EXPECT_TRUE(box != nullptr);
@@ -387,10 +414,18 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild007, TestSize.Level1)
         if (index == 1) {
             RefPtr<FlexItemComponent> titleFlex = AceType::DynamicCast<FlexItemComponent>(child);
             EXPECT_TRUE(titleFlex != nullptr);
-            RefPtr<RowComponent> titleRow = AceType::DynamicCast<RowComponent>(titleFlex->GetChild());
-            EXPECT_TRUE(titleRow != nullptr);
-            RefPtr<PaddingComponent> titlePadding =
-                AceType::DynamicCast<PaddingComponent>(titleRow->GetChildren().front());
+            RefPtr<PaddingComponent> titlePadding;
+            if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
+                RefPtr<RowComponent> brow = AceType::DynamicCast<RowComponent>(titleFlex->GetChild());
+                EXPECT_TRUE(brow != nullptr);
+                RefPtr<BoxComponent> row = AceType::DynamicCast<BoxComponent>(brow->GetChildren().front());
+                EXPECT_TRUE(row != nullptr);
+                titlePadding = AceType::DynamicCast<PaddingComponent>(row->GetChild());
+            } else {
+                RefPtr<RowComponent> row = AceType::DynamicCast<RowComponent>(titleFlex->GetChild());
+                EXPECT_TRUE(row != nullptr);
+                titlePadding = AceType::DynamicCast<PaddingComponent>(row->GetChildren().front());
+            }
             EXPECT_TRUE(titlePadding != nullptr);
             RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(titlePadding->GetChild());
             EXPECT_TRUE(box != nullptr);
@@ -454,10 +489,18 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild008, TestSize.Level1)
         if (index == 1) {
             RefPtr<FlexItemComponent> titleFlex = AceType::DynamicCast<FlexItemComponent>(child);
             EXPECT_TRUE(titleFlex != nullptr);
-            RefPtr<RowComponent> titleRow = AceType::DynamicCast<RowComponent>(titleFlex->GetChild());
-            EXPECT_TRUE(titleRow != nullptr);
-            RefPtr<PaddingComponent> titlePadding =
-                AceType::DynamicCast<PaddingComponent>(titleRow->GetChildren().front());
+            RefPtr<PaddingComponent> titlePadding;
+            if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
+                RefPtr<RowComponent> brow = AceType::DynamicCast<RowComponent>(titleFlex->GetChild());
+                EXPECT_TRUE(brow != nullptr);
+                RefPtr<BoxComponent> row = AceType::DynamicCast<BoxComponent>(brow->GetChildren().front());
+                EXPECT_TRUE(row != nullptr);
+                titlePadding = AceType::DynamicCast<PaddingComponent>(row->GetChild());
+            } else {
+                RefPtr<RowComponent> row = AceType::DynamicCast<RowComponent>(titleFlex->GetChild());
+                EXPECT_TRUE(row != nullptr);
+                titlePadding = AceType::DynamicCast<PaddingComponent>(row->GetChildren().front());
+            }
             EXPECT_TRUE(titlePadding != nullptr);
             RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(titlePadding->GetChild());
             EXPECT_TRUE(box != nullptr);

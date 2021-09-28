@@ -37,6 +37,7 @@ void RenderImage::Update(const RefPtr<Component>& component)
         return;
     }
     currentSrcRect_ = srcRect_;
+    currentDstRect_ = dstRect_;
     currentDstRectList_ = rectList_;
 
     width_ = image->GetWidth();
@@ -84,12 +85,16 @@ void RenderImage::Update(const RefPtr<Component>& component)
     LOGD("imageLoadingStatus_: %{public}d", static_cast<int32_t>(imageLoadingStatus_));
     proceedPreviousLoading_ = sourceInfo_.IsValid() && sourceInfo_ == inComingSource;
     sourceInfo_ = inComingSource;
+    MarkNeedLayout(sourceInfo_.IsSvg());
 }
 
 void RenderImage::PerformLayout()
 {
     if (background_) {
         PerformLayoutBgImage();
+        if (imageRenderFunc_) {
+            imageRenderFunc_();
+        }
         return;
     }
 
@@ -122,11 +127,8 @@ void RenderImage::PerformLayout()
     ApplyImageFit(srcRect_, dstRect_);
     // Restore image size.
     srcRect_.ApplyScale(scale_);
-    GenerateRepeatRects(dstRect_, GetLayoutSize(), imageRepeat_);
     if (!imageComponentSize_.IsValid()) {
         SetLayoutSize(dstRect_.GetSize());
-        std::for_each(
-            rectList_.begin(), rectList_.end(), [offset = dstRect_.GetOffset()](Rect& rect) { rect -= offset; });
     }
     decltype(imageLayoutCallbacks_) imageLayoutCallbacks(std::move(imageLayoutCallbacks_));
     std::for_each(
@@ -308,56 +310,6 @@ void RenderImage::ApplyNone(Rect& srcRect, Rect& dstRect, const Size& rawPicSize
     srcRect.SetRect(Alignment::GetAlignPosition(rawPicSize, srcSize, alignment_), srcSize);
 }
 
-void RenderImage::GenerateRepeatRects(
-    const Rect& fundamentalRect, const Size& parentSize, const ImageRepeat& imageRepeat)
-{
-    rectList_.clear();
-    if (!(fundamentalRect.GetSize() < parentSize)) {
-        if (fundamentalRect.GetSize() != parentSize) {
-            LOGW("Invalid input! Please check fundamentalRect size and parentSize.");
-        }
-        rectList_.push_back(fundamentalRect);
-        return;
-    }
-    if (!fundamentalRect.GetSize().IsValid()) {
-        LOGW("Invalid fundamentalRect size! Please check fundamentalRect size.");
-        return;
-    }
-
-    double beforeCeilNum = fundamentalRect.Left() / fundamentalRect.Width();
-    double leftRepeatNum = NearZero(beforeCeilNum - floor(beforeCeilNum)) ? floor(beforeCeilNum) : ceil(beforeCeilNum);
-    beforeCeilNum = (parentSize.Width() - fundamentalRect.Right()) / fundamentalRect.Width();
-    double rightRepeatNum = NearZero(beforeCeilNum - floor(beforeCeilNum)) ? floor(beforeCeilNum) : ceil(beforeCeilNum);
-    beforeCeilNum = fundamentalRect.Top() / fundamentalRect.Height();
-    double upRepeatNum = NearZero(beforeCeilNum - floor(beforeCeilNum)) ? floor(beforeCeilNum) : ceil(beforeCeilNum);
-    beforeCeilNum = (parentSize.Height() - fundamentalRect.Bottom()) / fundamentalRect.Height();
-    double bottomRepeatNum =
-        NearZero(beforeCeilNum - floor(beforeCeilNum)) ? floor(beforeCeilNum) : ceil(beforeCeilNum);
-    switch (imageRepeat) {
-        case ImageRepeat::REPEAT:
-            break;
-        case ImageRepeat::REPEATX:
-            upRepeatNum = 0.0;
-            bottomRepeatNum = 0.0;
-            break;
-        case ImageRepeat::REPEATY:
-            leftRepeatNum = 0.0;
-            rightRepeatNum = 0.0;
-            break;
-        default:
-            upRepeatNum = 0.0;
-            bottomRepeatNum = 0.0;
-            leftRepeatNum = 0.0;
-            rightRepeatNum = 0.0;
-            break;
-    }
-    for (int32_t i = -1 * upRepeatNum; i <= bottomRepeatNum; i++) {
-        for (int32_t j = -1 * leftRepeatNum; j <= rightRepeatNum; j++) {
-            rectList_.push_back(fundamentalRect + Offset(j * fundamentalRect.Width(), i * fundamentalRect.Height()));
-        }
-    }
-}
-
 void RenderImage::FireLoadEvent(const Size& picSize) const
 {
     auto context = context_.Upgrade();
@@ -389,6 +341,10 @@ void RenderImage::FireLoadEvent(const Size& picSize) const
                     .append(std::to_string(picSize.Height()))
                     .append("}");
         loadFailEvent_(param);
+    }
+    if (loadFailCallback_&& (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL)) {
+        loadFailCallback_();
+        loadFailCallback_ = nullptr;
     }
 }
 
@@ -662,6 +618,7 @@ void RenderImage::ClearRenderObject()
     renderAltImage_ = nullptr;
     proceedPreviousLoading_ = false;
     imageUpdateFunc_ = nullptr;
+    imageRenderFunc_ = nullptr;
     background_ = false;
     boxPaintSize_ = Size();
     boxMarginOffset_ = Offset();

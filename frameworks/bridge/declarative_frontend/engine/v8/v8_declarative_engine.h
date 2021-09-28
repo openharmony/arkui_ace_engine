@@ -277,6 +277,16 @@ public:
 
     void OnConfigurationUpdated(const std::string& data) override;
 
+    bool OnStartContinuation() override;
+
+    void OnRemoteTerminated() override;
+
+    void OnCompleteContinuation(const int32_t code) override;
+
+    bool OnRestoreData(const std::string& data) override;
+
+    void OnSaveData(std::string& saveData) override;
+
     void MediaQueryCallback(const std::string& callbackId, const std::string& args) override;
 
     void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) override;
@@ -299,7 +309,7 @@ public:
 private:
     void CallAppFunc(v8::Isolate* isolate, const v8::Local<v8::Context>& context, std::string appFuncName);
 
-    void CallAppFunc(v8::Isolate* isolate, const v8::Local<v8::Context>& context, std::string appFuncName,
+    bool CallAppFunc(v8::Isolate* isolate, const v8::Local<v8::Context>& context, std::string appFuncName,
         int argc, v8::Local<v8::Value>* argv);
 
     void RegisterWorker();

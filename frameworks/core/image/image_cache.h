@@ -147,6 +147,7 @@ public:
 
     static void SetCacheFileLimit(size_t cacheFileLimit)
     {
+        LOGI("Set file cache limit size : %{public}d", static_cast<int32_t>(cacheFileLimit));
         cacheFileLimit_ = cacheFileLimit;
     }
 

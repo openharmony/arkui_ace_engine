@@ -66,6 +66,13 @@ void RenderList::Update(const RefPtr<Component>& component)
     pageReady_ = list->GetPageReady();
     itemScale_ = list->IsItemScale();
     isCenterLayout_ = list->IsCenterLayout();
+    const static int32_t PLATFORM_VERSION_FIVE = 5;
+    auto context = GetContext().Upgrade();
+    if (context && context->GetMinPlatformVersion() <= PLATFORM_VERSION_FIVE) {
+        // api 5 not have center layout use item scale
+        isCenterLayout_ = itemScale_;
+    }
+
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         chainAnimation_ = list->GetChainAnimation();
     } else {

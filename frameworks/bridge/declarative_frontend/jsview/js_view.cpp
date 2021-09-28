@@ -345,7 +345,7 @@ void JSView::Create(const JSCallbackInfo& info)
 {
     if (info[0]->IsObject()) {
         JSRefPtr<JSView> view = JSRef<JSObject>::Cast(info[0]);
-        ViewStackProcessor::GetInstance()->Push(view->CreateComponent());
+        ViewStackProcessor::GetInstance()->Push(view->CreateComponent(), true);
     } else {
         LOGE("JSView Object is expected.");
     }

@@ -31,6 +31,14 @@ enum class StickyMode {
     OPACITY,
 };
 
+struct EditMode {
+    enum : uint32_t {
+        NONE = 0,
+        DELETABLE = (1 << 0),
+        MOVABLE = (1 << 1),
+    };
+};
+
 class ACE_EXPORT ListItemComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(V2::ListItemComponent, SoleChildComponent);
 
@@ -43,7 +51,7 @@ public:
 
     ACE_DEFINE_COMPONENT_PROP(Type, std::string);
     ACE_DEFINE_COMPONENT_PROP(Sticky, StickyMode, StickyMode::NONE);
-    ACE_DEFINE_COMPONENT_PROP(Editable, bool, false);
+    ACE_DEFINE_COMPONENT_PROP(EditMode, uint32_t, EditMode::NONE);
 
     static RefPtr<ListItemComponent> FindListItem(const RefPtr<Component>& component);
 

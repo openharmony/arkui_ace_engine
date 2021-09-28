@@ -302,6 +302,11 @@ void DOMInput::UpdateSpecializedComponentStyle()
                     DOMButtonUtil::SetChildStyle(
                         boxComponent, AceType::DynamicCast<ButtonComponent>(component), styles, input);
                 } },
+            { INPUT_TYPE_CHECKBOX,
+                [](const RefPtr<BoxComponent>& boxComponent, const RefPtr<Component>& component,
+                    const std::map<std::string, std::string>& styles, const Border& boxBorder, DOMInput& input){
+                        input.HandlePadding(component, boxComponent, styles);
+                } },
             { INPUT_TYPE_DATE,
                 [](const RefPtr<BoxComponent>& boxComponent, const RefPtr<Component>& component,
                     const std::map<std::string, std::string>& styles, const Border& boxBorder, DOMInput& input) {
@@ -331,6 +336,7 @@ void DOMInput::UpdateSpecializedComponentStyle()
                     const std::map<std::string, std::string>& styles, const Border& boxBorder, DOMInput& input) {
                     DOMRadioUtil::SetChildStyle(
                         boxComponent, AceType::DynamicCast<RadioComponent<std::string>>(component), styles);
+                    input.HandlePadding(component, boxComponent, styles);
                 } },
             { INPUT_TYPE_TEXT,
                 [](const RefPtr<BoxComponent>& boxComponent, const RefPtr<Component>& component,
@@ -565,5 +571,51 @@ bool DOMInput::CheckPseduo(RefPtr<Decoration> decoration) const
     decoration->GetImage()->SetSrc(targetImage, themeManager->GetThemeConstants());
     return true;
 
+}
+
+void DOMInput::HandlePadding(RefPtr<Component> component, RefPtr<BoxComponent> boxComponent,
+    const std::map<std::string, std::string>& styles)
+{
+    auto checkable = AceType::DynamicCast<CheckableComponent>(component);
+    if (!checkable || !boxComponent) {
+        LOGE("fail to set child attr due to checkbox component is null");
+        return;
+    }
+    // Padding is set in radio specially so that it can respond click event.
+    double left = -1.0;
+    double right = -1.0;
+    double top = -1.0;
+    double bottom = -1.0;
+    for (const auto& style : styles) {
+        if (style.first == DOM_PADDING_LEFT) {
+            left = StringUtils::StringToDouble(style.second);
+        } else if (style.first == DOM_PADDING_TOP) {
+            top = StringUtils::StringToDouble(style.second);
+        } else if (style.first == DOM_PADDING_RIGHT) {
+            right = StringUtils::StringToDouble(style.second);
+        } else if (style.first == DOM_PADDING_BOTTOM) {
+            bottom = StringUtils::StringToDouble(style.second);
+        }
+    }
+    // set the horizontal hot zone value is the minmum value in left and right,
+    // the vertical hot zone is the minmum value in top and bottom
+    Edge padding;
+    if (left >= 0 || right >= 0) {
+        left = left >= 0 ? left : 0;
+        right = right >= 0 ? right : 0;
+        double horizontal = std::min(left, right);
+        checkable->SetHorizontalPadding(Dimension(horizontal));
+        padding.SetLeft(Dimension(left - horizontal));
+        padding.SetRight(Dimension(right - horizontal));
+    }
+    if (top >= 0 || bottom >= 0) {
+        top = top >= 0 ? top : 0;
+        bottom = bottom >= 0 ? bottom : 0;
+        double vertical = std::min(top, bottom);
+        checkable->SetHotZoneVerticalPadding(Dimension(vertical));
+        padding.SetTop(Dimension(top - vertical));
+        padding.SetBottom(Dimension(bottom - vertical));
+    }
+    boxComponent->SetPadding(padding);
 }
 } // namespace OHOS::Ace::Framework

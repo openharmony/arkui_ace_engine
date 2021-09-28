@@ -49,50 +49,44 @@ void JSSlider::Create(const JSCallbackInfo& info)
     double max = 100;   // max:Set the maximum value. The default value is 100.
     double step = 1;    // step:Sets the sliding jump value of the slider. The default value is 1.
 
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("slider create error, info is non-vaild");
+    if (!info[0]->IsObject()) {
+        LOGE("slider create error, info is non-valid");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto getvalue = paramObject->GetProperty("value");
-    auto getmin = paramObject->GetProperty("min");
-    auto getmax = paramObject->GetProperty("max");
-    auto getstep = paramObject->GetProperty("step");
-    auto getstyle = paramObject->GetProperty("style");
+    auto getValue = paramObject->GetProperty("value");
+    auto getMin = paramObject->GetProperty("min");
+    auto getMax = paramObject->GetProperty("max");
+    auto getStep = paramObject->GetProperty("step");
+    auto getStyle = paramObject->GetProperty("style");
 
-    if (getvalue->IsNumber()) {
-        value = getvalue->ToNumber<double>();
+    if (getValue->IsNumber()) {
+        value = getValue->ToNumber<double>();
     }
 
-    if (getmin->IsNumber()) {
-        min = getmin->ToNumber<double>();
+    if (getMin->IsNumber()) {
+        min = getMin->ToNumber<double>();
     }
 
-    if (getmax->IsNumber()) {
-        max = getmax->ToNumber<double>();
+    if (getMax->IsNumber()) {
+        max = getMax->ToNumber<double>();
     }
 
-    if (getstep->IsNumber()) {
-        step = getstep->ToNumber<double>();
+    if (getStep->IsNumber()) {
+        step = getStep->ToNumber<double>();
     }
 
-    RefPtr<Component> sliderComponent = AceType::MakeRefPtr<OHOS::Ace::SliderComponent>(value, step, min, max);
-
-    ViewStackProcessor::GetInstance()->Push(sliderComponent);
-    JSInteractableView::SetFocusNode(true);
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto slider = AceType::DynamicCast<SliderComponent>(component);
-    if (!slider) {
-        LOGE("Slider Component is null");
-        return;
+    if (step < 0){
+        step = 0 ;
     }
 
-    auto sliderMode = static_cast<SliderMode>(getstyle->ToNumber<int32_t>());
-    if (sliderMode == SliderMode::INSET) {
-        slider->SetSliderMode(SliderMode::INSET);
+    auto sliderComponent = AceType::MakeRefPtr<OHOS::Ace::SliderComponent>(value, step, min, max);
+
+    auto sliderMode = static_cast<SliderStyle>(getStyle->ToNumber<int32_t>());
+    if (sliderMode == SliderStyle::INSET) {
+        sliderComponent->SetSliderMode(SliderMode::INSET);
     } else {
-        slider->SetSliderMode(SliderMode::OUTSET);
+        sliderComponent->SetSliderMode(SliderMode::OUTSET);
     }
 
     auto theme = GetTheme<SliderTheme>();
@@ -100,7 +94,9 @@ void JSSlider::Create(const JSCallbackInfo& info)
         LOGE("Slider Theme is null");
         return;
     }
-    slider->SetThemeStyle(theme);
+    sliderComponent->SetThemeStyle(theme);
+
+    ViewStackProcessor::GetInstance()->Push(sliderComponent);
 }
 
 void JSSlider::SetBlockColor(const JSCallbackInfo& info)
@@ -109,13 +105,6 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-
-    if (!info[0]->IsString()) {
-        LOGE("arg is not a string");
-        return;
-    }
-
-    Color color = Color::FromString(info[0]->ToString());
 
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto slider = AceType::DynamicCast<SliderComponent>(component);
@@ -129,7 +118,10 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
         return;
     }
 
-    block->SetBlockColor(color);
+    Color colorVal;
+    if (ParseJsColor(info[0], colorVal))  {
+        block->SetBlockColor(colorVal);
+    }
 }
 
 void JSSlider::SetTrackColor(const JSCallbackInfo& info)
@@ -139,13 +131,6 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
         return;
     }
 
-    if (!info[0]->IsString()) {
-        LOGE("arg is not a string");
-        return;
-    }
-
-    Color color = Color::FromString(info[0]->ToString());
-
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto slider = AceType::DynamicCast<SliderComponent>(component);
     if (!slider) {
@@ -157,7 +142,11 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
         LOGE("track Component is null");
         return;
     }
-    track->SetBackgroundColor(color);
+
+    Color colorVal;
+    if (ParseJsColor(info[0], colorVal))  {
+        track->SetBackgroundColor(colorVal);
+    }
 }
 
 void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
@@ -167,13 +156,6 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
         return;
     }
 
-    if (!info[0]->IsString()) {
-        LOGE("arg is not a string");
-        return;
-    }
-
-    Color color = Color::FromString(info[0]->ToString());
-
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto slider = AceType::DynamicCast<SliderComponent>(component);
     if (!slider) {
@@ -186,7 +168,10 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
         return;
     }
 
-    track->SetSelectColor(color);
+    Color colorVal;
+    if (ParseJsColor(info[0], colorVal))  {
+        track->SetSelectColor(colorVal);
+    }
 }
 
 void JSSlider::SetMinLabel(const JSCallbackInfo& info)

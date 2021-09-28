@@ -91,6 +91,10 @@ public:
     bool GetHasObjectPosition() const;
     void SetImageObjectPosition(const ImageObjectPosition& imageObjectPosition);
     const ImageObjectPosition& GetImageObjectPosition() const;
+    std::optional<Color> GetImageFill() const;
+
+    static RefPtr<ImageComponent> MakeFromOtherWithoutSourceAndEvent(const RefPtr<ImageComponent>& other);
+
 private:
     std::string src_;
     std::string alt_;

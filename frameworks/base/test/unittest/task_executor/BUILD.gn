@@ -16,6 +16,8 @@ import("//foundation/ace/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
   module_output_path = "ace_engine_standard/frameworkbasicability/executor"
+} else {
+  module_output_path = "ace_engine_full/frameworkbasicability/executor"
 }
 
 ohos_unittest("TaskExecutorsTest") {
@@ -23,20 +25,18 @@ ohos_unittest("TaskExecutorsTest") {
 
   sources = [ "task_executor_test.cpp" ]
 
-  configs = [
-    "$ace_root:ace_test_config",
-    "$ace_flutter_engine_root:flutter_config",
-  ]
+  configs = [ "$ace_root:ace_test_config" ]
 
   deps = [
-    "$ace_flutter_engine_root:ace_libicu_ohos",
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
-    "$ace_root/frameworks/base:ace_base_ohos",
-    "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
+    "$ace_flutter_engine_root/icu:ace_libicu_ohos",
+    "$ace_root/build:ace_ohos_unittest_base",
   ]
 
-  if (is_standard_system) {
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }

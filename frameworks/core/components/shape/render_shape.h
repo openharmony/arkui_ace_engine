@@ -97,6 +97,17 @@ public:
         return antiAlias_.first && antiAlias_.second;
     }
 
+    Dimension GetWidthDimension() const
+    {
+        return static_cast<Dimension>(width_);
+    }
+
+    Dimension GetHeightDimension() const
+    {
+        return static_cast<Dimension>(height_);
+    }
+
+    void NormalToPxOfShape(AnimatableDimension sizeFromComponent, AnimatableDimension& sizeOfCurrent);
     void NotifySizeTransition(const AnimationOption& option, Size fromSize, Size toSize, int32_t nodeId) override;
 
 protected:

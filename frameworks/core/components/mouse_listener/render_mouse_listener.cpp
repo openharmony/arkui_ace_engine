@@ -34,6 +34,8 @@ void RenderMouseListener::Update(const RefPtr<Component>& component)
     SetOnMouse(AceAsyncEvent<void(const MouseEventInfo&)>::Create(mouseComponent->GetOnMouseId(), context_));
     SetOnMouseHover(AceAsyncEvent<void()>::Create(mouseComponent->GetOnMouseHoverId(), context_));
     SetOnMouseHoverExit(AceAsyncEvent<void()>::Create(mouseComponent->GetOnMouseHoverExitId(), context_));
+    // Ace 2.0
+    SetOnHover(mouseComponent->GetOnHoverId());
 }
 
 void RenderMouseListener::OnMouseTestHit(const Offset& coordinateOffset, MouseTestResult& result)

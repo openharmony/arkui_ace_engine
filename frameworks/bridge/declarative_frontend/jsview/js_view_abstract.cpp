@@ -24,6 +24,7 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/motion_path_option.h"
 
@@ -44,6 +45,7 @@ constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
+constexpr double EPSILON = 0.000002f;
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 
 void ParseJsScale(std::unique_ptr<JsonValue>& argsPtrItem, float& scaleX, float& scaleY, float& scaleZ,
@@ -237,10 +239,14 @@ bool ParseMotionPath(const std::unique_ptr<JsonValue>& argsPtrItem, MotionPathOp
 void SetBgImgPosition(const BackgroundImagePositionType type, const double valueX, const double valueY,
     BackgroundImagePosition& bgImgPosition)
 {
-    bgImgPosition.SetSizeTypeX(type);
-    bgImgPosition.SetSizeValueX(valueX);
-    bgImgPosition.SetSizeTypeY(type);
-    bgImgPosition.SetSizeValueY(valueY);
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    if (type == BackgroundImagePositionType::PERCENT) {
+        bgImgPosition.SetSizeX(AnimatableDimension(valueX, DimensionUnit::PERCENT, option));
+        bgImgPosition.SetSizeY(AnimatableDimension(valueY, DimensionUnit::PERCENT, option));
+    } else {
+        bgImgPosition.SetSizeX(AnimatableDimension(valueX, DimensionUnit::PX, option));
+        bgImgPosition.SetSizeY(AnimatableDimension(valueY, DimensionUnit::PX, option));
+    }
 }
 
 std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray> params, int32_t containCount)
@@ -1332,10 +1338,7 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         double y = 0.0;
         ParseJsonDouble(imageArgs->GetValue("x"), x);
         ParseJsonDouble(imageArgs->GetValue("y"), y);
-        bgImgPosition.SetSizeTypeX(BackgroundImagePositionType::PX);
-        bgImgPosition.SetSizeValueX(x);
-        bgImgPosition.SetSizeTypeY(BackgroundImagePositionType::PX);
-        bgImgPosition.SetSizeValueY(y);
+        SetBgImgPosition(BackgroundImagePositionType::PX, x, y, bgImgPosition);
     }
     image->SetImagePosition(bgImgPosition);
     decoration->SetImage(image);
@@ -1478,6 +1481,20 @@ void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
+void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Color colorBlend;
+    if (!ParseJsColor(info[0], colorBlend)) {
+        return;
+    }
+    SetColorBlend(colorBlend);
+    info.SetReturnValue(info.This());
+}
+
 void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1543,13 +1560,9 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
         LOGW("resId is not number");
         return false;
     }
-    auto themeConstants = GetResourceManager();
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
-        return false;
-    }
+    // TODO: should check how to deal with the themeConstants
     float dimensionFloat = 0.0f;
-    if (!themeConstants->GetFloatById(resId->ToNumber<uint32_t>(), dimensionFloat)) {
+    if (!AceApplicationInfo::GetInstance().GetFloatById(resId->ToNumber<uint32_t>(), dimensionFloat)) {
         result = Dimension(static_cast<double>(dimensionFloat), defaultUnit);
         return true;
     }
@@ -1603,13 +1616,9 @@ bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
         LOGW("resId is not number");
         return false;
     }
-    auto themeConstants = GetResourceManager();
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
-        return false;
-    }
+    // TODO: should check how to deal with the themeConstants
     float resultFloat = 0.0f;
-    if (!themeConstants->GetFloatById(resId->ToNumber<uint32_t>(), resultFloat)) {
+    if (!AceApplicationInfo::GetInstance().GetFloatById(resId->ToNumber<uint32_t>(), resultFloat)) {
         result = static_cast<double>(resultFloat);
         return true;
     }
@@ -1636,13 +1645,9 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
         LOGW("resId is not number");
         return false;
     }
-    auto themeConstants = GetResourceManager();
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
-        return false;
-    }
+    // TODO: should check how to deal with the themeConstants
     uint32_t colorId;
-    if (!themeConstants->GetColorById(resId->ToNumber<uint32_t>(), colorId)) {
+    if (!AceApplicationInfo::GetInstance().GetColorById(resId->ToNumber<uint32_t>(), colorId)) {
         result = Color(colorId);
         return true;
     }
@@ -1666,17 +1671,15 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
         LOGW("resId is not number");
         return false;
     }
-    auto themeConstants = GetResourceManager();
+
+    // TODO: should check how to deal with the themeConstants
+    auto themeConstants = GetThemeConstants();
     if (!themeConstants) {
         LOGW("themeConstants is nullptr");
         return false;
     }
-    std::string fontFamily;
-    if (!themeConstants->GetStringById(resId->ToNumber<uint32_t>(), fontFamily)) {
-        result.emplace_back(fontFamily);
-        return true;
-    }
-    return false;
+    result.emplace_back(themeConstants->GetString(resId->ToNumber<uint32_t>()));
+    return true;
 }
 
 bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& result)
@@ -1687,7 +1690,7 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
     }
 
     if (jsValue->IsString()) {
-        LOGE("jsValue->IsString()");
+        LOGD("jsValue->IsString()");
         result = jsValue->ToString();
         return true;
     }
@@ -1705,7 +1708,8 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         return false;
     }
 
-    auto themeConstants = GetResourceManager();
+    // TODO: should check how to deal with the themeConstants
+    auto themeConstants = GetThemeConstants();
     if (!themeConstants) {
         LOGW("themeConstants is nullptr");
         return false;
@@ -1719,24 +1723,26 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
 
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
     if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::STRING)) {
-        std::string originStr;
-        if (!themeConstants->GetStringById(resId->ToNumber<uint32_t>(), originStr)) {
-            ReplaceHolder(originStr, params, 0);
-            result = originStr;
-        }
+        auto originStr = themeConstants->GetString(resId->ToNumber<uint32_t>());
+        ReplaceHolder(originStr, params, 0);
+        result = originStr;
     } else if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::PLURAL)) {
         auto countJsVal = params->GetValueAt(0);
-        int count = 0;
+        double count = 0.0;
         if (!countJsVal->IsNumber()) {
             LOGW("pluralString, pluralnumber is not number");
             return false;
         }
-        count = countJsVal->ToNumber<int>();
-        std::string pluralResult;
-        if (!themeConstants->GetPluralStringById(resId->ToNumber<uint32_t>(), count, pluralResult)) {
-            ReplaceHolder(pluralResult, params, 1);
-            result = pluralResult;
+        count = countJsVal->ToNumber<double>();
+        auto pluralResults = themeConstants->GetStringArray(resId->ToNumber<uint32_t>());
+        auto pluralChoice = Localization::GetInstance()->PluralRulesFormat(count);
+        auto iter = std::find(pluralResults.begin(), pluralResults.end(), pluralChoice);
+        std::string originStr;
+        if (iter != pluralResults.end() && ++iter != pluralResults.end()) {
+            originStr = *iter;
         }
+        ReplaceHolder(originStr, params, 1);
+        result = originStr;
     } else {
         return false;
     }
@@ -1758,47 +1764,247 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
 
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (type->IsNumber() && type->ToNumber<int32_t>() != static_cast<int>(ResourceType::MEDIA)) {
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (!resId->IsNull() && !type->IsNull() && type->IsNumber() && resId->IsNumber()) {
+        auto typeInteger = type->ToNumber<int32_t>();
+        auto resIdInteger = resId->ToNumber<int32_t>();
+        if (typeInteger == static_cast<int>(ResourceType::MEDIA)) {
+            // TODO: should check how to deal with the themeConstants
+            std::string mediaPath;
+            if (!AceApplicationInfo::GetInstance().GetMediaById(resIdInteger, mediaPath)) {
+                result = "file:///" + mediaPath;
+                return true;
+            } else {
+                LOGE("themeConstants GetString failed");
+                return false;
+            }
+        }
+
+        if (typeInteger == static_cast<int>(ResourceType::RAWFILE)) {
+            JSRef<JSVal> args = jsObj->GetProperty("params");
+            if (!args->IsArray()) {
+                LOGW("args is not Array");
+                return false;
+            }
+            JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+            auto fileName = params->GetValueAt(0);
+            if (!fileName->IsString()) {
+                LOGW("fileName is not String");
+                return false;
+            }
+            auto container = Container::Current();
+            if (!container) {
+                LOGW("container is null");
+                return false;
+            }
+            auto moduleName = container->GetModuleName();
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+            result = "resource://RAWFILE/" + moduleName + "/resources/rawfile/" + fileName->ToString();
+#else
+            result = "resource://RAWFILE/assets/" + moduleName + "/resources/rawfile/" + fileName->ToString();
+#endif
+            return true;
+        }
+
         LOGE("JSImage::Create ParseJsMedia type is wrong");
         return false;
     }
+
+    LOGE("input value is not string or number");
+    result = "empty_src_using_pixmap";
+    return false;
+}
+
+bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
+{
+    if (!jsValue->IsBoolean() && !jsValue->IsObject()) {
+        LOGE("arg is not bool or Object.");
+        return false;
+    }
+
+    if (jsValue->IsBoolean()) {
+        LOGD("jsValue->IsBoolean()");
+        result = jsValue->ToBoolean();
+        return true;
+    }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> type = jsObj->GetProperty("type");
+    if (!type->IsNumber()) {
+        LOGW("type is not number");
+        return false;
+    }
+
     JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNull() && resId->IsNumber()) {
-        auto themeConstants = GetResourceManager();
-        if (!themeConstants) {
-            LOGW("themeConstants is nullptr");
-            return false;
-        }
-        std::string mediaPath;
-        if (!themeConstants->GetMediaById(resId->ToNumber<uint32_t>(), mediaPath)) {
-            result = "file:///" + mediaPath;
-            return true;
-        } else {
-            LOGE("themeConstants GetString failed");
-            return false;
-        }
+    if (!resId->IsNumber()) {
+        LOGW("resId is not number");
+        return false;
+    }
 
-    } else if (resId->IsNull() || resId->IsUndefined()) {
-        JSRef<JSVal> fileName = jsObj->GetProperty("fileName");
-        if (!fileName->IsString()) {
-            LOGW("fileName is not string");
-            return false;
-        }
+    auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is nullptr");
+        return false;
+    }
 
-        auto container = Container::Current();
-        if (!container) {
-            LOGW("container is null");
-            return false;
-        }
-        auto moduleName = container->GetModuleName();
-        result = "resource://RAWFILE/assets/" + moduleName + "/resources/rawfile/" + fileName->ToString();
+    if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::BOOLEAN)) {
+        result = themeConstants->GetBoolean(resId->ToNumber<uint32_t>());
         return true;
     } else {
-        LOGE("input value is not string or number");
-        result = "empty_src_using_pixmap";
         return false;
     }
 }
+
+bool JSViewAbstract::ParseJsInteger(const JSRef<JSVal>& jsValue, uint32_t& result)
+{
+    if (!jsValue->IsNumber() && !jsValue->IsObject()) {
+        LOGE("arg is not number or Object.");
+        return false;
+    }
+
+    if (jsValue->IsNumber()) {
+        LOGD("jsValue->IsNumber()");
+        result = jsValue->ToNumber<uint32_t>();
+        return true;
+    }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> type = jsObj->GetProperty("type");
+    if (!type->IsNumber()) {
+        LOGW("type is not number");
+        return false;
+    }
+
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (!resId->IsNumber()) {
+        LOGW("resId is not number");
+        return false;
+    }
+
+    auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is nullptr");
+        return false;
+    }
+
+    if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::INTEGER)) {
+        result = themeConstants->GetInt(resId->ToNumber<uint32_t>());
+        return true;
+    } else {
+        return false;
+    }
+
+}
+
+bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result)
+{
+
+    if (!jsValue->IsArray() && !jsValue->IsObject()) {
+        LOGE("arg is not array or Object.");
+        return false;
+    }
+
+    if (jsValue->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            if (value->IsNumber()) {
+                result.emplace_back(value->ToNumber<uint32_t>());
+            } else if (value->IsObject()) {
+                uint32_t singleResInt;
+                if (ParseJsInteger(value, singleResInt)) {
+                    result.emplace_back(singleResInt);
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> type = jsObj->GetProperty("type");
+    if (!type->IsNumber()) {
+        LOGW("type is not number");
+        return false;
+    }
+
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (!resId->IsNumber()) {
+        LOGW("resId is not number");
+        return false;
+    }
+
+    auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is nullptr");
+        return false;
+    }
+
+    if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::INTARRAY)) {
+        result = themeConstants->GetIntArray(resId->ToNumber<uint32_t>());
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result)
+{
+    if (!jsValue->IsArray() && !jsValue->IsObject()) {
+        LOGE("arg is not array or Object.");
+        return false;
+    }
+
+    if (jsValue->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            if (value->IsString()) {
+                result.emplace_back(value->ToString());
+            } else if (value->IsObject()) {
+                std::string singleResStr;
+                if (ParseJsString(value, singleResStr)) {
+                    result.emplace_back(singleResStr);
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> type = jsObj->GetProperty("type");
+    if (!type->IsNumber()) {
+        LOGW("type is not number");
+        return false;
+    }
+
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (!resId->IsNumber()) {
+        LOGW("resId is not number");
+        return false;
+    }
+
+    auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is nullptr");
+        return false;
+    }
+
+    if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::STRARRAY)) {
+        result = themeConstants->GetStringArray(resId->ToNumber<uint32_t>());
+        return true;
+    } else {
+        return false;
+    }
+}
+
 
 std::pair<Dimension, Dimension> JSViewAbstract::ParseSize(const JSCallbackInfo& info)
 {
@@ -1913,6 +2119,9 @@ void JSViewAbstract::JsGridOffset(const JSCallbackInfo& info)
         builder->SetParent(gridContainerInfo);
         int32_t offset = info[0]->ToNumber<int32_t>();
         builder->SetOffset(offset);
+
+        auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+        flexItemComponent->SetGridColumnInfoBuilder(builder);
     }
 }
 
@@ -1970,6 +2179,9 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
             builder->SetOffset(offset, static_cast<GridSizeType>(i));
         }
     }
+
+    auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    flexItemComponent->SetGridColumnInfoBuilder(builder);
 }
 
 void JSViewAbstract::JsZIndex(const JSCallbackInfo& info)
@@ -2176,11 +2388,12 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
     }
     Gradient lineGradient;
     lineGradient.SetType(GradientType::LINEAR);
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     // angle
     std::optional<float> degree;
     GetAngle("angle", argsPtrItem, degree);
     if (degree) {
-        lineGradient.GetLinearGradient().angle = degree.value();
+        lineGradient.GetLinearGradient().angle = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
         degree.reset();
     }
     // direction
@@ -2252,32 +2465,33 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
 
     Gradient radialGradient;
     radialGradient.SetType(GradientType::RADIAL);
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     // center
     auto center = argsPtrItem->GetValue("center");
     if (center && !center->IsNull() && center->IsArray() && center->GetArraySize() == 2) {
         Dimension value;
         if (ParseJsonDimensionVp(center->GetArrayItem(0), value)) {
-            radialGradient.GetRadialGradient().radialCenterX = value;
+            radialGradient.GetRadialGradient().radialCenterX = AnimatableDimension(value, option);
             if (value.Unit() == DimensionUnit::PERCENT) {
                 // [0,1] -> [0, 100]
                 radialGradient.GetRadialGradient().radialCenterX =
-                    Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+                    AnimatableDimension(value.Value() * 100.0, DimensionUnit::PERCENT, option);
             }
         }
         if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
-            radialGradient.GetRadialGradient().radialCenterY = value;
+            radialGradient.GetRadialGradient().radialCenterY = AnimatableDimension(value, option);
             if (value.Unit() == DimensionUnit::PERCENT) {
                 // [0,1] -> [0, 100]
                 radialGradient.GetRadialGradient().radialCenterY =
-                    Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+                    AnimatableDimension(value.Value() * 100.0, DimensionUnit::PERCENT, option);
             }
         }
     }
     // radius
     Dimension radius;
     if (ParseJsonDimensionVp(argsPtrItem->GetValue("radius"), radius)) {
-        radialGradient.GetRadialGradient().radialVerticalSize = radius;
-        radialGradient.GetRadialGradient().radialHorizontalSize = radius;
+        radialGradient.GetRadialGradient().radialVerticalSize = AnimatableDimension(radius, option);
+        radialGradient.GetRadialGradient().radialHorizontalSize = AnimatableDimension(radius, option);
     }
     // repeating
     auto repeating = argsPtrItem->GetBool("repeating", false);
@@ -2310,22 +2524,25 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
 
     Gradient sweepGradient;
     sweepGradient.SetType(GradientType::SWEEP);
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     // center
     auto center = argsPtrItem->GetValue("center");
     if (center && !center->IsNull() && center->IsArray() && center->GetArraySize() == 2) {
         Dimension value;
         if (ParseJsonDimensionVp(center->GetArrayItem(0), value)) {
-            sweepGradient.GetSweepGradient().centerX = value;
+            sweepGradient.GetSweepGradient().centerX = AnimatableDimension(value, option);
             if (value.Unit() == DimensionUnit::PERCENT) {
                 // [0,1] -> [0, 100]
-                sweepGradient.GetSweepGradient().centerX = Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+                sweepGradient.GetSweepGradient().centerX = AnimatableDimension(
+                    value.Value() * 100.0, DimensionUnit::PERCENT, option);
             }
         }
         if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
-            sweepGradient.GetSweepGradient().centerY = value;
+            sweepGradient.GetSweepGradient().centerY = AnimatableDimension(value, option);
             if (value.Unit() == DimensionUnit::PERCENT) {
                 // [0,1] -> [0, 100]
-                sweepGradient.GetSweepGradient().centerY = Dimension(value.Value() * 100.0, DimensionUnit::PERCENT);
+                sweepGradient.GetSweepGradient().centerY = AnimatableDimension(
+                    value.Value() * 100.0, DimensionUnit::PERCENT, option);
             }
         }
     }
@@ -2333,19 +2550,19 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
     // start
     GetAngle("start", argsPtrItem, degree);
     if (degree) {
-        sweepGradient.GetSweepGradient().startAngle = degree.value();
+        sweepGradient.GetSweepGradient().startAngle = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
         degree.reset();
     }
     // end
     GetAngle("end", argsPtrItem, degree);
     if (degree) {
-        sweepGradient.GetSweepGradient().endAngle = degree.value();
+        sweepGradient.GetSweepGradient().endAngle = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
         degree.reset();
     }
     // rotation
     GetAngle("rotation", argsPtrItem, degree);
     if (degree) {
-        sweepGradient.GetSweepGradient().rotation = degree.value();
+        sweepGradient.GetSweepGradient().rotation = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
         degree.reset();
     }
     // repeating
@@ -2454,8 +2671,8 @@ void JSViewAbstract::JsBrightness(const JSCallbackInfo& info)
         return;
     }
 
-    if (LessNotEqual(value.Value(), 0.0)) {
-        value.SetValue(0.0);
+    if (NearEqual(value.Value(), 0.0)) {
+        value.SetValue(EPSILON);
     }
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetBrightness(value);
@@ -2471,6 +2688,10 @@ void JSViewAbstract::JsContrast(const JSCallbackInfo& info)
     Dimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
+    }
+
+    if (NearEqual(value.Value(), 0.0)) {
+        value.SetValue(EPSILON);
     }
 
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -2491,11 +2712,76 @@ void JSViewAbstract::JsSaturate(const JSCallbackInfo& info)
         return;
     }
 
+    if (NearEqual(value.Value(), 0.0)) {
+        value.SetValue(EPSILON);
+    }
+
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetSaturate(value);
+}
+
+void JSViewAbstract::JsSepia(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    auto frontDecoration = GetFrontDecoration();
+    frontDecoration->SetSepia(value);
+}
+
+void JSViewAbstract::JsInvert(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    auto frontDecoration = GetFrontDecoration();
+    frontDecoration->SetInvert(value);
+}
+
+void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
+{
+    std::optional<float> degree;
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    if (info[0]->IsString()) {
+        degree = static_cast<float>(StringUtils::StringToDegree(info[0]->ToString()));
+    } else if (info[0]->IsNumber()) {
+        degree = static_cast<float>(info[0]->ToNumber<uint32_t>());
+    } else {
+        LOGE("Invalid value type");
+    }
+    float deg = 0.0;
+    if (degree) {
+        deg = degree.value();
+        degree.reset();
+    }
+    auto decoration = GetFrontDecoration();
+    if (decoration) {
+        decoration->SetHueRotate(deg);
+    }
 }
 
 void JSViewAbstract::JsClip(const JSCallbackInfo& info)
@@ -2706,6 +2992,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("overlay", &JSViewAbstract::JsOverlay);
 
     JSClass<JSViewAbstract>::StaticMethod("blur", &JSViewAbstract::JsBlur);
+    JSClass<JSViewAbstract>::StaticMethod("colorBlend", &JSViewAbstract::JsColorBlend);
     JSClass<JSViewAbstract>::StaticMethod("backdropBlur", &JSViewAbstract::JsBackdropBlur);
     JSClass<JSViewAbstract>::StaticMethod("windowBlur", &JSViewAbstract::JsWindowBlur);
     JSClass<JSViewAbstract>::StaticMethod("visibility", &JSViewAbstract::SetVisibility);
@@ -2747,6 +3034,9 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("brightness", &JSViewAbstract::JsBrightness);
     JSClass<JSViewAbstract>::StaticMethod("contrast", &JSViewAbstract::JsContrast);
     JSClass<JSViewAbstract>::StaticMethod("saturate", &JSViewAbstract::JsSaturate);
+    JSClass<JSViewAbstract>::StaticMethod("sepia", &JSViewAbstract::JsSepia);
+    JSClass<JSViewAbstract>::StaticMethod("invert", &JSViewAbstract::JsInvert);
+    JSClass<JSViewAbstract>::StaticMethod("hueRotate", &JSViewAbstract::JsHueRotate);
     JSClass<JSViewAbstract>::StaticMethod("clip", &JSViewAbstract::JsClip);
     JSClass<JSViewAbstract>::StaticMethod("mask", &JSViewAbstract::JsMask);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
@@ -3005,6 +3295,14 @@ void JSViewAbstract::SetBlur(float radius)
     SetBlurRadius(decoration, radius);
 }
 
+void JSViewAbstract::SetColorBlend(Color color)
+{
+    auto decoration = GetFrontDecoration();
+    if (decoration) {
+        decoration->SetColorBlend(color);
+    }
+}
+
 void JSViewAbstract::SetBackdropBlur(float radius)
 {
     auto decoration = GetBackDecoration();
@@ -3078,13 +3376,10 @@ bool JSViewAbstract::ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonVa
         LOGE("invalid resource id");
         return false;
     }
-    auto themeConstants = GetResourceManager();
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
-        return false;
-    }
-    float dimensionFloat = 0.0;
-    if (!themeConstants->GetFloatById(resId->GetUInt(), dimensionFloat)) {
+
+    // TODO: should check how to deal with the themeConstants
+    float dimensionFloat = 0.0f;
+    if (!AceApplicationInfo::GetInstance().GetFloatById(resId->GetUInt(), dimensionFloat)) {
         result = Dimension(static_cast<double>(dimensionFloat), defaultUnit);
         return true;
     }
@@ -3120,13 +3415,9 @@ bool JSViewAbstract::ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue
         LOGE("invalid resource id");
         return false;
     }
-    auto themeConstants = GetResourceManager();
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
-        return false;
-    }
+    // TODO: should check how to deal with the themeConstants
     float resultFloat = 0.0f;
-    if (!themeConstants->GetFloatById(resId->GetUInt(), resultFloat)) {
+    if (!AceApplicationInfo::GetInstance().GetFloatById(resId->GetUInt(), resultFloat)) {
         result = static_cast<double>(resultFloat);
         return true;
     }
@@ -3157,14 +3448,10 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
         LOGE("invalid resource id");
         return false;
     }
-    auto themeConstants = GetResourceManager();
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
-        return false;
-    }
-    uint32_t resultId;
-    if (!themeConstants->GetColorById(resId->GetUInt(), resultId)) {
-        result = Color(resultId);
+    // TODO: should check how to deal with the themeConstants
+    uint32_t colorId;
+    if (!AceApplicationInfo::GetInstance().GetColorById(resId->GetUInt(), colorId)) {
+        result = Color(colorId);
         return true;
     }
     return false;
@@ -3342,11 +3629,6 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants()
         return nullptr;
     }
     return themeManager->GetThemeConstants();
-}
-
-std::shared_ptr<OHOS::Global::Resource::ResourceManager> JSViewAbstract::GetResourceManager()
-{
-    return AceApplicationInfo::GetInstance().GetResourceManager();
 }
 
 } // namespace OHOS::Ace::Framework

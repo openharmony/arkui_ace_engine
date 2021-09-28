@@ -28,6 +28,10 @@ void RenderTexture::Update(const RefPtr<Component>& component)
 
     textureId_ = texture->GetTextureId();
     sourceSize_ = Size(static_cast<double>(texture->GetSrcWidth()), static_cast<double>(texture->GetSrcHeight()));
+#ifndef OHOS_STANDARD_SYSTEM
+    imageFit_ = texture->GetFit();
+#endif
+    imagePosition_ = texture->GetImagePosition();
 
     MarkNeedLayout();
 }
@@ -80,6 +84,8 @@ void RenderTexture::PerformLayout()
             break;
     }
 
+    ApplyObjectPosition();
+
     SetNeedLayout(false);
     if (textureSizeChangeEvent_) {
         textureSizeChangeEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
@@ -91,6 +97,22 @@ void RenderTexture::PerformLayout()
     MarkNeedRender();
 }
 
+void RenderTexture::ApplyObjectPosition()
+{
+    const Size& layoutSize = GetLayoutSize();
+    if (imagePosition_.GetSizeTypeX() == BackgroundImagePositionType::PX) {
+        alignmentX_ = imagePosition_.GetSizeValueX();
+    } else {
+        alignmentX_ = imagePosition_.GetSizeValueX() * (layoutSize.Width() - drawSize_.Width()) / PERCENT_TRANSLATE;
+    }
+
+    if (imagePosition_.GetSizeTypeY() == BackgroundImagePositionType::PX) {
+        alignmentY_ = imagePosition_.GetSizeValueY();
+    } else {
+        alignmentY_ = imagePosition_.GetSizeValueY() * (layoutSize.Height() - drawSize_.Height()) / PERCENT_TRANSLATE;
+    }
+}
+
 void RenderTexture::CalculateFitContain()
 {
     const Size& layoutSize = GetLayoutSize();
@@ -99,12 +121,8 @@ void RenderTexture::CalculateFitContain()
 
     if (sourceRatio < layoutRatio) {
         drawSize_ = Size(sourceRatio * layoutSize.Height(), layoutSize.Height());
-        alignmentX_ = (layoutSize.Width() - drawSize_.Width()) / 2.0;
-        alignmentY_ = 0.0;
     } else {
         drawSize_ = Size(layoutSize.Width(), layoutSize.Width() / sourceRatio);
-        alignmentX_ = 0.0;
-        alignmentY_ = (layoutSize.Height() - drawSize_.Height()) / 2.0;
     }
 }
 
@@ -116,29 +134,19 @@ void RenderTexture::CalculateFitCover()
 
     if (sourceRatio < layoutRatio) {
         drawSize_ = Size(LayoutSize.Width(), LayoutSize.Width() / sourceRatio);
-        alignmentX_ = 0.0;
-        alignmentY_ = (LayoutSize.Height() - drawSize_.Height()) / 2.0;
     } else {
         drawSize_ = Size(LayoutSize.Height() * sourceRatio, LayoutSize.Height());
-        alignmentX_ = (LayoutSize.Width() - drawSize_.Width()) / 2.0;
-        alignmentY_ = 0.0;
     }
 }
 
 void RenderTexture::CalculateFitFill()
 {
     drawSize_ = GetLayoutSize();
-    alignmentY_ = 0.0;
-    alignmentX_ = 0.0;
 }
 
 void RenderTexture::CalculateFitNone()
 {
-    const Size& LayoutSize = GetLayoutSize();
-
     drawSize_ = sourceSize_;
-    alignmentX_ = (LayoutSize.Width() - drawSize_.Width()) / 2.0;
-    alignmentY_ = (LayoutSize.Height() - drawSize_.Height()) / 2.0;
 }
 
 void RenderTexture::CalculateFitScaleDown()

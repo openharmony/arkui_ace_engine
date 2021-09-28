@@ -38,7 +38,7 @@ extern const char _binary_jsEnumStyle_abc_end[];
 namespace OHOS::Ace::Framework {
 namespace {
 
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 
 std::string ParseLogContent(const std::vector<std::string>& params)
 {
@@ -344,10 +344,6 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode)
     runtime_->SetEmbedderData(this);
     runtime_->RegisterUncaughtExceptionHandler(JsiDeclarativeUtils::ReportJsErrorEvent);
 
-    shared_ptr<JsValue> abilityValue = runtime_->NewNativePointer(this->GetDelegate()->GetAbility());
-    shared_ptr<JsValue> global = runtime_->GetGlobal();
-    global->SetProperty(runtime_, "ability", abilityValue);
-
     InitGlobalObjectTemplate();
     InitConsoleModule();
     InitAceModule();
@@ -458,14 +454,11 @@ void JsiDeclarativeEngineInstance::RootViewHandle(const shared_ptr<JsRuntime>& r
         LOGE("jsRuntime is nullptr");
         return;
     }
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    panda::Global<panda::ObjectRef> globalValue = panda::Global<ObjectRef>(arkRuntime->GetEcmaVm(), value);
     RefPtr<JsAcePage> page = JsiDeclarativeEngineInstance::GetStagingPage(runtime);
     if (page != nullptr) {
-        auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
-        if (!arkRuntime) {
-            LOGE("ark engine is null");
-            return;
-        }
-        rootViewMap_.emplace(page->GetPageId(), panda::Global<panda::ObjectRef>(arkRuntime->GetEcmaVm(), value));
+        rootViewMap_.emplace(page->GetPageId(), globalValue);
     }
 }
 
@@ -473,12 +466,7 @@ void JsiDeclarativeEngineInstance::DestroyRootViewHandle(int32_t pageId)
 {
     CHECK_RUN_ON(JS);
     if (rootViewMap_.count(pageId) != 0) {
-        auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
-        if (!arkRuntime) {
-            LOGE("ark engine is null");
-            return;
-        }
-        panda::Local<panda::ObjectRef> rootView = rootViewMap_[pageId].ToLocal(arkRuntime->GetEcmaVm());
+        panda::Global<panda::ObjectRef> rootView = rootViewMap_[pageId];
         JSView* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
         jsView->Destroy(nullptr);
         rootViewMap_.erase(pageId);
@@ -491,13 +479,8 @@ void JsiDeclarativeEngineInstance::DestroyAllRootViewHandle()
     if (rootViewMap_.size() > 0) {
         LOGI("DestroyAllRootViewHandle release left %{private}zu views ", rootViewMap_.size());
     }
-    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
-    if (!arkRuntime) {
-        LOGE("ark engine is null");
-        return;
-    }
     for (const auto& pair : rootViewMap_) {
-        panda::Local<panda::ObjectRef> rootView = pair.second.ToLocal(arkRuntime->GetEcmaVm());
+        panda::Global<panda::ObjectRef> rootView = pair.second;
         JSView* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
         jsView->Destroy(nullptr);
     }
@@ -619,11 +602,6 @@ JsiDeclarativeEngine::~JsiDeclarativeEngine()
 {
     CHECK_RUN_ON(JS);
     LOG_DESTROY();
-
-    engineInstance_->GetDelegate()->RemoveTaskObserver();
-    if (nativeEngine_ != nullptr) {
-        delete nativeEngine_;
-    }
 }
 
 bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
@@ -633,25 +611,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     LOGI("JsiDeclarativeEngine Initialize");
     ACE_DCHECK(delegate);
     engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate, instanceId_);
-    bool result = engineInstance_->InitJsEnv(IsDebugVersion() && NeedDebugBreakPoint());
-    if (!result) {
-        LOGE("JsiDeclarativeEngine Initialize, init js env failed");
-        return false;
-    }
-
-    auto runtime = engineInstance_->GetJsRuntime();
-    auto vm = std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm();
-    if (vm == nullptr) {
-        LOGE("JsiDeclarativeEngine Initialize, vm is null");
-        return false;
-    }
-    nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
-    ACE_DCHECK(delegate);
-    delegate->AddTaskObserver([nativeEngine = nativeEngine_](){
-        nativeEngine->Loop(LOOP_NOWAIT);
-    });
-
-    return result;
+    return engineInstance_->InitJsEnv(IsDebugVersion() && NeedDebugBreakPoint());
 }
 
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
@@ -842,8 +802,8 @@ void JsiDeclarativeEngine::OnWindowDisplayModeChanged(bool isShownInMultiWindow,
 {
     LOGI("JsiDeclarativeEngine OnWindowDisplayModeChanged");
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = {
-        runtime->NewBoolean(isShownInMultiWindow), runtime->NewString(data) };
+    const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewBoolean(isShownInMultiWindow),
+        runtime->NewString(data) };
     CallAppFunc("onWindowDisplayModeChanged", argv);
 }
 

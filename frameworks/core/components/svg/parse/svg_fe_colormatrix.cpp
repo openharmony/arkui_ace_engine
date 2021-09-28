@@ -42,7 +42,7 @@ void SvgFeColorMatrix::AppendChild(const RefPtr<SvgNode>& child)
 }
 
 RefPtr<RenderNode> SvgFeColorMatrix::CreateRender(
-    const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent)
+    const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox)
 {
     component_->Inherit(parent);
     auto renderNode = AceType::DynamicCast<RenderSvgFeColorMatrix>(component_->CreateRenderNode());

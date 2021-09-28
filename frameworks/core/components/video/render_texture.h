@@ -70,7 +70,7 @@ public:
 
     void OnAppShow() override
     {
-        LOGE("RenderTexture: Camera OnAppShow.");
+        LOGI("RenderTexture: Camera OnAppShow.");
         RenderNode::OnAppShow();
         if (hiddenChangeEvent_) {
             hiddenChangeEvent_(false);
@@ -79,11 +79,31 @@ public:
 
     void OnAppHide() override
     {
-        LOGE("RenderTexture: Camera OnAppHidden.");
+        LOGI("RenderTexture: Camera OnAppHidden.");
         RenderNode::OnAppHide();
         if (hiddenChangeEvent_) {
             hiddenChangeEvent_(true);
         }
+    }
+
+    void SetIsComponentSize(bool isComponentSize)
+    {
+        isComponentSize_ = isComponentSize;
+    }
+
+    bool IsComponentSize() const
+    {
+        return isComponentSize_;
+    }
+
+    virtual void SetIsAddGaussianFuzzy(bool isAddGaussianFuzzy)
+    {
+        isAddGaussianFuzzy_ = isAddGaussianFuzzy;
+    }
+
+    bool IsAddGaussianFuzzy() const
+    {
+        return isAddGaussianFuzzy_;
     }
 
 protected:
@@ -92,7 +112,12 @@ protected:
     int64_t textureId_ = INVALID_TEXTURE;
     Size drawSize_;   // size of draw area
     Size sourceSize_; // size of source
+#ifdef OHOS_STANDARD_SYSTEM
     ImageFit imageFit_ = ImageFit::FILL;
+#else
+    ImageFit imageFit_ = ImageFit::CONTAIN;
+#endif
+    ImageObjectPosition imagePosition_;
     double alignmentX_ = 0.0;
     double alignmentY_ = 0.0;
 
@@ -102,9 +127,12 @@ private:
     void CalculateFitFill();
     void CalculateFitNone();
     void CalculateFitScaleDown();
+    void ApplyObjectPosition();
     HiddenChangeEvent hiddenChangeEvent_;
     TextureSizeChangeEvent textureSizeChangeEvent_;
     TextureOffsetChangeEvent textureOffsetChangeEvent_;
+    bool isComponentSize_ = false;
+    bool isAddGaussianFuzzy_ = false;
 };
 
 } // namespace OHOS::Ace

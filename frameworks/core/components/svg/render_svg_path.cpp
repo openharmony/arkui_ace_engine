@@ -32,7 +32,7 @@ void RenderSvgPath::Update(const RefPtr<Component>& component)
         return;
     }
     d_ = pathComponent->GetD();
-    RenderSvgBase::SetPresentationAttrs(pathComponent->GetDeclaration());
+    RenderSvgBase::SetPresentationAttrs(component, pathComponent->GetDeclaration());
     PrepareAnimations(component);
     MarkNeedLayout();
 }

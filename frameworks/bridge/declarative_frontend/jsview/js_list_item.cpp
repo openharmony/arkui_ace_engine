@@ -42,9 +42,31 @@ void JSListItem::SetSticky(int32_t sticky)
     JSViewSetProperty(&V2::ListItemComponent::SetSticky, sticky, STICKY_MODE_TABLE, V2::StickyMode::NONE);
 }
 
-void JSListItem::SetEditable(bool editable)
+void JSListItem::SetEditable(const JSCallbackInfo& args)
 {
-    JSViewSetProperty(&V2::ListItemComponent::SetEditable, editable);
+    do {
+        if (args.Length() < 1) {
+            LOGW("Not enough params");
+            break;
+        }
+
+        if (args[0]->IsBoolean()) {
+            uint32_t value =
+                args[0]->ToBoolean() ? V2::EditMode::DELETABLE | V2::EditMode::MOVABLE : V2::EditMode::NONE;
+            JSViewSetProperty(&V2::ListItemComponent::SetEditMode, value);
+            break;
+        }
+
+        if (args[0]->IsNumber()) {
+            uint32_t value = args[0]->ToNumber<uint32_t>();
+            JSViewSetProperty(&V2::ListItemComponent::SetEditMode, value);
+            break;
+        }
+
+        LOGW("Invalid params, unknown type");
+    } while (0);
+
+    args.ReturnSelf();
 }
 
 void JSListItem::JSBind(BindingTarget globalObj)
@@ -59,6 +81,7 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSListItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSListItem>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSListItem>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSListItem>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSListItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
 

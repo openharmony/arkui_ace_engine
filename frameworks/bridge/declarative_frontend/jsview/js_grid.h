@@ -34,6 +34,7 @@ public:
     static void SetScrollBarColor(const std::string& color);
     static void SetScrollBarWidth(const std::string& scrollWidth);
     static void JsOnScrollIndex(const JSCallbackInfo& info);
+    static void SetCachedCount(int32_t cachedCount);
 };
 
 } // namespace OHOS::Ace::Framework

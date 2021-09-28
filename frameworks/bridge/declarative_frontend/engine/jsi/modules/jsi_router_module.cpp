@@ -56,7 +56,7 @@ shared_ptr<JsValue> PagePush(const shared_ptr<JsRuntime>& runtime, const shared_
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc != 1) {
-        LOGE("PagePush agrs count is invalid");
+        LOGE("PagePush args count is invalid");
         return runtime->NewNull();
     }
 
@@ -76,7 +76,7 @@ shared_ptr<JsValue> PageReplace(const shared_ptr<JsRuntime>& runtime, const shar
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc != 1) {
-        LOGE("PageReplace agrs count is invalid");
+        LOGE("PageReplace args count is invalid");
         return runtime->NewNull();
     }
 
@@ -96,7 +96,7 @@ shared_ptr<JsValue> PageBack(const shared_ptr<JsRuntime>& runtime, const shared_
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc != 1) {
-        LOGE("PageBack agrs count is invalid");
+        LOGE("PageBack args count is invalid");
         return runtime->NewNull();
     }
 

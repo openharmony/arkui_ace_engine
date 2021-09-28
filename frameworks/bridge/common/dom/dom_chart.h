@@ -126,6 +126,26 @@ public:
         loop_ = loop;
     }
 
+    bool GetWholeLineGradient() const
+    {
+        return wholeLineGradient_;
+    }
+
+    void SetWholeLineGradient(bool wholeLineGradient)
+    {
+        wholeLineGradient_ = wholeLineGradient;
+    }
+
+    const Color& GetTargetColor() const
+    {
+        return targetColor_;
+    }
+
+    void SetTargetColor(const Color& targetColor)
+    {
+        targetColor_ = targetColor;
+    }
+
 private:
     AxisOption xAxis_;
     AxisOption yAxis_;
@@ -136,7 +156,9 @@ private:
     PointInfo bottomPoint_;
     int32_t erasePointNumber_ = 0;
     bool lineGradient_ = false;
+    bool wholeLineGradient_ = false;
     bool loop_ = false;
+    Color targetColor_ = Color::TRANSPARENT;
 };
 
 class DOMChart : public DOMNode {

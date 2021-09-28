@@ -31,6 +31,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/dialog/action_sheet/action_sheet_component.h"
 #include "core/components/dialog/alert_dialog_component.h"
 #include "core/components/dialog/dialog_element.h"
 #include "core/components/dialog/render_dialog.h"
@@ -191,6 +192,8 @@ void DialogComponent::BuildDialogTween(const RefPtr<TransitionComponent>& transi
     if (isSetMargin_) {
         dialogTween->SetMargin(margin);
     }
+    dialogTween->SetAlignment(properties_.alignment);
+    dialogTween->SetOffset(properties_.offset);
     if (dialogTweenBox_) {
         const auto& dialogComposed = GenerateComposed("dialog", dialogTween, false);
         dialogTween->SetComposedId(dialogTweenComposedId_);
@@ -634,6 +637,12 @@ RefPtr<DialogComponent> DialogBuilder::BuildDialogWithType(DialogType type)
     switch (type) {
         case DialogType::ALERT_DIALOG: {
             dialog = AceType::MakeRefPtr<AlertDialogComponent>();
+            dialog->SetOnSuccessId(BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker());
+            break;
+        }
+        case DialogType::ACTION_SHEET: {
+            dialog = AceType::MakeRefPtr<ActionSheetComponent>();
+            dialog->SetIsMenu(true);
             dialog->SetOnSuccessId(BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker());
             break;
         }

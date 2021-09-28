@@ -173,6 +173,38 @@ RefPtr<OverlayElement> SemiModalElement::GetOverlayElement() const
     return RefPtr<OverlayElement>();
 }
 
+RefPtr<StageElement> SemiModalElement::GetStageElement() const
+{
+    auto box = AceType::DynamicCast<BoxElement>(GetFirstChild());
+    if (!box) {
+        LOGE("Get stage element failed. Box element is null!");
+        return RefPtr<StageElement>();
+    }
+    auto column = AceType::DynamicCast<ColumnElement>(box->GetFirstChild());
+    if (!column || column->GetChildren().size() < COLUMN_CHILD_MIN) {
+        // column should has more than 2 child
+        LOGE("Get stage element failed. Column is null or child size error!");
+        return RefPtr<StageElement>();
+    }
+    // Get second child
+    auto secondItr = std::next(column->GetChildren().begin());
+    auto flexItem = AceType::DynamicCast<FlexItemElement>(*secondItr);
+    if (!flexItem) {
+        LOGE("Get stage element failed. FlexItemElement is null!");
+        return RefPtr<StageElement>();
+    }
+    auto clip = flexItem->GetFirstChild();
+    if (!clip) {
+        LOGE("Get stage element failed. clip is null!");
+        return RefPtr<StageElement>();
+    }
+    auto stack = clip->GetFirstChild();
+    if (!stack) {
+        return RefPtr<StageElement>();
+    }
+    return AceType::DynamicCast<StageElement>(stack->GetFirstChild());
+}
+
 void SemiModalElement::AnimateToExitApp() const
 {
     auto renderSemi = AceType::DynamicCast<RenderSemiModal>(GetRenderNode());

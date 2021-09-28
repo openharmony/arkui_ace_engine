@@ -27,7 +27,7 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
 
-const std::string TEXT_DATA_JSON = "ohos1234@?!";
+const std::string TEXT_DATA_JSON = "test1234@?!";
 constexpr int32_t TEXT_ALIGN_JSON = 3;
 constexpr int32_t TEXT_ALIGN_DEFAULT = 4;
 constexpr uint32_t TEXT_MAX_LINES_JSON = 10;
@@ -80,7 +80,7 @@ HWTEST_F(TextCreatorTest, TextComponentCreator001, TestSize.Level1)
      */
     const std::string jsonTextStr = "{                                 "
                                     "  \"className\": \"Text\",        "
-                                    "  \"value\": \"ohos1234@?!\",   "
+                                    "  \"value\": \"test1234@?!\",   "
                                     "  \"textAlign\": 3,               "
                                     "  \"textDirection\": 1,           "
                                     "  \"textMaxLines\": 10,           "

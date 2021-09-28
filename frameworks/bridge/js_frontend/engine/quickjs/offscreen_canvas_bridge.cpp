@@ -715,7 +715,7 @@ JSValue OffscreenCanvasBridge::JsPath2DSetTransform(JSContext* ctx, JSValueConst
 {
     // 6 parameters: setTransform(a, b, c, d, e, f)
     if ((!argv) || (argc != 6)) {
-        LOGE("Call Path2D SetTransform fialed, invalid agrs.");
+        LOGE("Call Path2D SetTransform fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -739,7 +739,7 @@ JSValue OffscreenCanvasBridge::JsPath2DMoveTo(JSContext* ctx, JSValueConst value
 {
     // 2 parameters: moveTo(x, y)
     if ((!argv) || (argc != 2)) {
-        LOGE("Call Path2D Arc MoveTo, invalid agrs.");
+        LOGE("Call Path2D Arc MoveTo, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -761,7 +761,7 @@ JSValue OffscreenCanvasBridge::JsPath2DLineTo(JSContext* ctx, JSValueConst value
 {
     // 2 parameters: lineTo(x, y)
     if ((!argv) || (argc != 2)) {
-        LOGE("Call Path2D LineTo fialed, invalid agrs.");
+        LOGE("Call Path2D LineTo fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -783,7 +783,7 @@ JSValue OffscreenCanvasBridge::JsPath2DArc(JSContext* ctx, JSValueConst value, i
 {
     // 5 or 6 parameters: arc(x, y, radius, startAngle, endAngle, anticlockwise?)
     if ((!argv) || (argc < 5) || (argc > 6)) {
-        LOGE("Call Path2D Arc fialed, invalid agrs.");
+        LOGE("Call Path2D Arc fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -812,7 +812,7 @@ JSValue OffscreenCanvasBridge::JsPath2DArcTo(JSContext* ctx, JSValueConst value,
 {
     // 5 parameters: arcTo(x1, y1, x2, y2, radius)
     if ((!argv) || (argc != 5)) {
-        LOGE("Call Path2D ArcTo fialed, invalid agrs.");
+        LOGE("Call Path2D ArcTo fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -836,7 +836,7 @@ JSValue OffscreenCanvasBridge::JsPath2DQuadraticCurveTo(JSContext* ctx, JSValueC
 {
     // 4 parameters: quadraticCurveTo(cpx, cpy, x, y)
     if ((!argv) || (argc != 4)) {
-        LOGE("Call Path2D QuadraticCurveTo fialed, invalid agrs.");
+        LOGE("Call Path2D QuadraticCurveTo fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -860,7 +860,7 @@ JSValue OffscreenCanvasBridge::JsPath2DBezierCurveTo(JSContext* ctx, JSValueCons
 {
     // 6 parameters: bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
     if ((!argv) || (argc != 6)) {
-        LOGE("Call Path2D BezierCurveTo fialed, invalid agrs.");
+        LOGE("Call Path2D BezierCurveTo fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -884,7 +884,7 @@ JSValue OffscreenCanvasBridge::JsPath2DEllipse(JSContext* ctx, JSValueConst valu
 {
     // 7 or 8 parameters: ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise?)
     if ((!argv) || (argc < 7) || (argc > 8)) {
-        LOGE("Call Path2D Ellipse fialed, invalid agrs.");
+        LOGE("Call Path2D Ellipse fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
@@ -914,7 +914,7 @@ JSValue OffscreenCanvasBridge::JsPath2DRect(JSContext* ctx, JSValueConst value, 
 {
     // 4 parameters: rect(x, y, width, height)
     if ((!argv) || (argc != 4)) {
-        LOGE("Call Path2D Rect fialed, invalid agrs.");
+        LOGE("Call Path2D Rect fialed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;

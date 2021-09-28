@@ -54,6 +54,13 @@ public:
         return scaleY_;
     }
 
+    uint64_t GetSupportActions()
+    {
+        return supportActions_;
+    }
+
+    void SetSupportAction(uint32_t action, bool isEnable) override;
+
 private:
     void UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node);
     void SendAccessibilitySyncEvent(const AccessibilityEvent& accessibilityEvent);
@@ -61,6 +68,7 @@ private:
     std::string callbackKey_;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
+    uint64_t supportActions_ = DEFAULT_ACTIONS;
 };
 
 } // namespace OHOS::Ace::Framework

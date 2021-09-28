@@ -26,6 +26,7 @@ namespace OHOS::Ace {
 namespace {
 // error code
 constexpr int32_t ACTION_SUCCESS = 0;
+constexpr int32_t ACTION_FAIL = 1;
 constexpr int32_t COMMON_ERROR_CODE = 200;
 // httpcode
 constexpr int32_t HTTP_OK = 200;
@@ -60,6 +61,7 @@ public:
 
     void SetHeaders(std::string headersStr);
     std::unique_ptr<JsonValue> GetResultString() const;
+    int GetActionCode() const;
 private:
     int32_t code_ = COMMON_ERROR_CODE;
     std::string data_;

@@ -41,6 +41,10 @@ group("unittest") {
     "unittest/jsfrontend/utils:unittest",
   ]
 
+  if (!is_standard_system) {
+    deps += [ "unittest/jsfrontend/codec:unittest" ]
+  }
+
   if (!is_wearable_product) {
     deps += [
       "unittest/cardfrontend/dombutton:unittest",

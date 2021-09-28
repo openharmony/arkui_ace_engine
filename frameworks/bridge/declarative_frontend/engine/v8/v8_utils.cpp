@@ -98,7 +98,7 @@ void JsStdDumpErrorAce(v8::Isolate* isolate, const v8::TryCatch* tryCatch)
 
     RefPtr<RevSourceMap> pageMap;
     RefPtr<RevSourceMap> appMap;
-    if (stagingPage) {
+    if (stagingPage && (*stagingPage)) {
         pageMap = (*stagingPage)->GetPageMap();
         appMap = (*stagingPage)->GetAppMap();
     }

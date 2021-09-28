@@ -21,6 +21,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr double PICKER_ROTATION_SENSITIVITY_NORMAL = 0.6;
+const std::string& VIBRATOR_TYPE_WATCH_CROWN_STRENGTH2 = "watchhaptic.crown.strength2";
 
 }
 
@@ -51,12 +52,13 @@ void RenderPickerColumn::Update(const RefPtr<Component>& component)
     jumpInterval_ = theme->GetJumpInterval();
     columnMargin_ = theme->GetColumnIntervalMargin();
     rotateInterval_ = theme->GetRotateInterval();
-    if (!vibrator_) {
-        auto context = context_.Upgrade();
-        if (context) {
-            vibrator_ = VibratorProxy::GetInstance().GetVibrator(context->GetTaskExecutor());
-        }
+
+    needVibrate_ = column->GetNeedVibrate();
+    auto context = context_.Upgrade();
+    if (needVibrate_ && !vibrator_ && context) {
+        vibrator_ = VibratorProxy::GetInstance().GetVibrator(context->GetTaskExecutor());
     }
+
     MarkNeedLayout();
 }
 
@@ -155,8 +157,8 @@ bool RenderPickerColumn::InnerHandleScroll(bool isDown)
         return false;
     }
 
-    if (vibrator_) {
-        vibrator_->Vibrate(10); // use 10 which is just ok.
+    if (needVibrate_ && vibrator_) {
+        vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH2);
     }
 
     uint32_t totalOptionCount = data_->GetOptionCount();

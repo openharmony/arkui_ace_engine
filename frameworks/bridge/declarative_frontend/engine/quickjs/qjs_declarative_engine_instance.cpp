@@ -35,6 +35,10 @@
 #include "frameworks/core/common/ace_application_info.h"
 #include "frameworks/core/image/image_cache.h"
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "native_engine/impl/quickjs/quickjs_native_engine.h"
+#endif
+
 extern const char _binary_stateMgmt_js_start[];
 extern const char _binary_stateMgmt_js_end[];
 extern const char _binary_jsEnumStyle_js_start[];
@@ -262,8 +266,8 @@ void QJSDeclarativeEngineInstance::CallAnimationFinishJs(JSValue animationContex
     }
     LOGD("animation onfinish event call");
     JSValue retVal = JS_Call(ctx, proto, animationContext, 0, {});
-    js_std_loop(ctx);
     JS_FreeValue(ctx, retVal);
+    js_std_loop(ctx);
 }
 
 void QJSDeclarativeEngineInstance::CallAnimationCancelJs(JSValue animationContext)
@@ -277,8 +281,8 @@ void QJSDeclarativeEngineInstance::CallAnimationCancelJs(JSValue animationContex
 
     LOGD("animation oncancel event call");
     JSValue retVal = JS_Call(ctx, proto, animationContext, 0, {});
-    js_std_loop(ctx);
     JS_FreeValue(ctx, retVal);
+    js_std_loop(ctx);
 }
 
 bool QJSDeclarativeEngineInstance::ExecuteDocumentJS(JSValue jsCode)
@@ -319,14 +323,15 @@ JSModuleDef* JsInitModule(JSContext* ctx)
     return m;
 }
 
-bool InitJSContext(JSContext* ctx1, const RefPtr<FrontendDelegate>& delegate, size_t maxStackSize)
+JSContext* InitJSContext(JSContext* ctx1, size_t maxStackSize,
+    const std::unordered_map<std::string, void*>& extraNativeObject)
 {
     LOGD("QJS Creating new JS context and loading HBS module");
+
     ACE_SCOPED_TRACE("Init JS Context");
-    if (ctx1 == nullptr) {
-        LOGE("Qjs cannot allocate JS context");
-        EventReport::SendJsException(JsExcepType::JS_ENGINE_INIT_ERR);
-        return false;
+    if (!ctx1) {
+        LOGD("QJS cannot allocate JS context");
+        return nullptr;
     }
 
     /*
@@ -355,24 +360,27 @@ bool InitJSContext(JSContext* ctx1, const RefPtr<FrontendDelegate>& delegate, si
         LOGE("QJS created JS context but failed to init hbs, os, or std module.!");
     }
 
-    NativeObjectInfo* nativeObjectInfo = new NativeObjectInfo();
-    nativeObjectInfo->nativeObject = delegate->GetAbility();
-    JSValue abilityValue = JS_NewExternal(ctx1, nativeObjectInfo, [](JSContext* ctx, void *data, void *hint) {
-        NativeObjectInfo *info = (NativeObjectInfo *)data;
-        if (info) {
-            delete info;
-        }
-    }, nullptr);
-    JS_SetPropertyStr(ctx1, globalObj, "ability", abilityValue);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    for (const auto& [key, value] : extraNativeObject) {
+        auto nativeObjectInfo = std::make_unique<NativeObjectInfo>();
+        nativeObjectInfo->nativeObject = value;
+        JSValue abilityValue = JS_NewExternal(ctx1, nativeObjectInfo.release(),
+            [](JSContext* ctx, void *data, void *hint) {
+                std::unique_ptr<NativeObjectInfo> info(static_cast<NativeObjectInfo*>(data));
+            }, nullptr);
+        JS_SetPropertyStr(ctx1, globalObj, key.c_str(), abilityValue);
+    }
+#endif
     JS_FreeValue(ctx1, globalObj);
-    return true;
+    return ctx1;
 }
 
 std::map<std::string, std::string> QJSDeclarativeEngineInstance::mediaResourceFileMap_;
 
 std::unique_ptr<JsonValue> QJSDeclarativeEngineInstance::currentConfigResourceData_;
 
-bool QJSDeclarativeEngineInstance::InitJSEnv(JSRuntime* runtime, JSContext* context)
+bool QJSDeclarativeEngineInstance::InitJSEnv(JSRuntime* runtime, JSContext* context,
+    const std::unordered_map<std::string, void*>& extraNativeObject)
 {
     ACE_SCOPED_TRACE("Init JS Env");
     if (runtime == nullptr) {
@@ -395,7 +403,7 @@ bool QJSDeclarativeEngineInstance::InitJSEnv(JSRuntime* runtime, JSContext* cont
         JS_FreeContext(context_);
     }
     context_ = context;
-    bool initRet = InitJSContext(context_, frontendDelegate_, MAX_STACK_SIZE);
+    bool initRet = InitJSContext(context_, MAX_STACK_SIZE, extraNativeObject);
     if (!initRet) {
         LOGE("QJS cannot allocate JS context");
         JS_FreeRuntime(runtime_);

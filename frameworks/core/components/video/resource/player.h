@@ -27,7 +27,7 @@ namespace OHOS::Ace {
 
 constexpr uint32_t FREAUENCY_GET_CURRENT_TIME = 250; // Millisecond
 
-class Player : public Resource {
+class ACE_EXPORT Player : public Resource {
     DECLARE_ACE_TYPE(Player, Resource);
 
 public:
@@ -95,6 +95,10 @@ public:
     void SeekTo(uint32_t pos);
     void SetVolume(float volume);
     void EnterFullScreen();
+    void EnableLooping(bool loop);
+    void SetSpeed(float speed);
+    void SetDirection(std::string& direction);
+    void SetLandscape();
 
 private:
     void OnAddPreparedListener(PreparedListener&& listener);
@@ -117,10 +121,10 @@ private:
 
     int64_t textureId_ = INVALID_ID;
     std::string src_;
-    int32_t duration_ = 0;
+    uint32_t duration_ = 0;
     uint32_t width_ = 0;
     uint32_t height_ = 0;
-    int32_t currentPos_ = 0;
+    uint32_t currentPos_ = 0;
     bool isPlaying_ = false;
     bool isMute_ = false;
     bool isAutoPlay_ = false;
@@ -133,6 +137,10 @@ private:
     Method seekMethod_;
     Method setVolumeMethod_;
     Method fullscreenMethod_;
+    Method enableloopingMethod_;
+    Method setSpeedMethod_;
+    Method setDirectionMethod_;
+    Method setLandsacpeMethod_;
 
     std::list<PreparedListener> onPreparedListener_;
     std::list<PlayStatusListener> onPlayStatusListener_;

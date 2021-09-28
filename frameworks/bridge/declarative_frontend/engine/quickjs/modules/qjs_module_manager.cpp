@@ -74,17 +74,18 @@ JSValue ClearInterval(JSContext* ctx, JSValueConst value, int32_t argc, JSValueC
 
 JSValue ModuleManager::SetWaitTimer(JSContext* ctx, int32_t argc, JSValueConst* argv, bool isInterval)
 {
+    LOGD("SetWaitTimer argc is %d", argc);
+
     if (argc < 1) {
         LOGE("JsSetTimer: invalid callback value");
         return JS_NULL;
     }
 
-    if (!JS_IsFunction(ctx, argv[0])) {
-        LOGE("arg[0] is not function");
+    JSValue jsFunc = JS_DupValue(ctx, argv[0]);
+    if (!JS_IsFunction(ctx, jsFunc)) {
+        LOGE("argv[0] is not function");
         return JS_NULL;
     }
-    JSValue jsFunc = JS_DupValue(ctx, argv[0]);
-
 
     int index = 1;
     uint32_t delay = 0;
@@ -121,8 +122,8 @@ uint32_t ModuleManager::AddCallback(JSValue callbackFunc, std::vector<JSValue> c
 }
 
 uint32_t ModuleManager::AddCallback(std::unordered_map<uint32_t, JSValue>& callbackFuncMap,
-        std::unordered_map<uint32_t, std::vector<JSValue>>& callbackArrayMap, JSValue callbackFunc,
-        std::vector<JSValue> callbackArray)
+    std::unordered_map<uint32_t, std::vector<JSValue>>& callbackArrayMap, JSValue callbackFunc,
+    std::vector<JSValue> callbackArray)
 {
     ++callbackId_;
     callbackFuncMap[callbackId_] = callbackFunc;
@@ -163,7 +164,7 @@ std::vector<JSValue> ModuleManager::GetCallbackArray(
 JSValue ModuleManager::ClearWaitTimer(JSContext* ctx, int32_t argc, JSValueConst* argv, bool isInterval)
 {
     if (argc < 0 || !JS_IsNumber(argv[0])) {
-        LOGE("argv[0] is not number");
+        LOGE("args[0] is not number");
         return JS_NULL;
     }
 
@@ -189,7 +190,7 @@ void ModuleManager::RemoveCallbackFunc(JSContext* ctx, uint32_t callbackId, bool
 }
 
 void ModuleManager::RemoveCallbackFunc(JSContext* ctx, std::unordered_map<uint32_t, JSValue>& callbackFuncMap,
-        std::unordered_map<uint32_t, std::vector<JSValue>>& callbackArrayMap, uint32_t callbackId)
+    std::unordered_map<uint32_t, std::vector<JSValue>>& callbackArrayMap, uint32_t callbackId)
 {
     JS_FreeValue(ctx, callbackFuncMap[callbackId]);
     callbackFuncMap.erase(callbackId);
@@ -208,9 +209,10 @@ void ModuleManager::InitTimerModule(JSContext* ctx)
 {
     JSValue globalObj = JS_GetGlobalObject(ctx);
     JS_SetPropertyStr(ctx, globalObj, SET_TIMEOUT, JS_NewCFunction(ctx, SetTimeout, SET_TIMEOUT, 2));
-    JS_SetPropertyStr(ctx, globalObj, SET_INTERVAL, JS_NewCFunction(ctx, SetInterval, SET_TIMEOUT, 2));
-    JS_SetPropertyStr(ctx, globalObj, CLEAR_TIMEOUT, JS_NewCFunction(ctx, ClearTimeout, SET_TIMEOUT, 1));
-    JS_SetPropertyStr(ctx, globalObj, CLEAR_INTERVAL, JS_NewCFunction(ctx, ClearInterval, SET_TIMEOUT, 1));
+    JS_SetPropertyStr(ctx, globalObj, SET_INTERVAL, JS_NewCFunction(ctx, SetInterval, SET_INTERVAL, 2));
+    JS_SetPropertyStr(ctx, globalObj, CLEAR_TIMEOUT, JS_NewCFunction(ctx, ClearTimeout, CLEAR_TIMEOUT, 1));
+    JS_SetPropertyStr(ctx, globalObj, CLEAR_INTERVAL, JS_NewCFunction(ctx, ClearInterval, CLEAR_INTERVAL, 1));
+    JS_FreeValue(ctx, globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

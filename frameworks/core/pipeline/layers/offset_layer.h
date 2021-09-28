@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_LAYERS_OFFSET_LAYER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_LAYERS_OFFSET_LAYER_H
 
+#include "base/geometry/offset.h"
 #include "core/pipeline/layers/container_layer.h"
 #include "core/pipeline/layers/scene_builder.h"
 
@@ -38,6 +39,16 @@ public:
     {
         staticX_ = x;
         staticY_ = y;
+    }
+
+    Offset GetOffset() const
+    {
+        return Offset(x_, y_);
+    }
+
+    Offset GetStaticOffset() const
+    {
+        return Offset(staticX_, staticY_);
     }
 
     void AddToScene(SceneBuilder& builder, double x, double y) override;

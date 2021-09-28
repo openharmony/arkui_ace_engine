@@ -88,6 +88,7 @@ void JSGridItem::JSBind(BindingTarget globalObj)
     JSClass<JSGridItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSGridItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSGridItem>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSGridItem>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSGridItem>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSGridItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
 

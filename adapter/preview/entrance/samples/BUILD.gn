@@ -15,7 +15,11 @@ import("//build/ohos.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
 
 config("ace_pc_preview_config") {
-  cflags = [ "-std=c++17" ]
+  cflags = [
+    "-std=c++17",
+    "-Wno-c99-designator",
+    "-Wno-unknown-warning-option",
+  ]
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",
@@ -29,96 +33,46 @@ template("ace_test") {
   forward_variables_from(invoker, "*")
   ohos_executable(target_name) {
     defines += invoker.defines
-    if (device == "phone") {
-      sources = [ "ace_phone_test.cpp" ]
-    } else if (device == "wearable") {
-      sources = [ "ace_watch_test.cpp" ]
-    } else if (device == "tv") {
-      sources = [ "ace_tv_test.cpp" ]
-    } else if (device == "tablet") {
-      sources = [ "ace_tablet_test.cpp" ]
-    } else if (device == "card") {
-      sources = [ "ace_card_test.cpp" ]
-    } else if (device == "car") {
-      sources = [ "ace_car_test.cpp" ]
-    }
-
     configs = [ ":ace_pc_preview_config" ]
-    deps = [ "$ace_root/adapter/preview/entrance:libace_engine_$platform(${current_toolchain})" ]
+
+    sources = [ "ace_${device}_test.cpp" ]
+
+    deps = [ "$ace_root/adapter/preview/build:libace_engine_$platform(${current_toolchain})" ]
     if (platform == "windows") {
       libs = [ "pthread" ]
     }
   }
 }
 
-ace_test("ace_test_windows_phone") {
-  defines = ace_windows_defines
-  platform = "windows"
-  device = "phone"
-}
+ace_devices = [
+  "phone",
+  "tv",
+  "wearable",
+  "tablet",
+  "card",
+  "car",
+]
 
-ace_test("ace_test_windows_tv") {
-  defines = ace_windows_defines
-  platform = "windows"
-  device = "tv"
-}
+foreach(item, ace_platforms) {
+  platform = item.name
+  platform_defines = []
+  config = {
+  }
 
-ace_test("ace_test_windows_wearable") {
-  defines = ace_windows_defines
-  platform = "windows"
-  device = "wearable"
-}
+  if (defined(item.config)) {
+    config = item.config
+  }
+  if (defined(config.defines)) {
+    platform_defines = config.defines
+  }
 
-ace_test("ace_test_windows_tablet") {
-  defines = ace_windows_defines
-  platform = "windows"
-  device = "tablet"
-}
-
-ace_test("ace_test_windows_card") {
-  defines = ace_windows_defines
-  platform = "windows"
-  device = "card"
-}
-
-ace_test("ace_test_windows_car") {
-  defines = ace_windows_defines
-  platform = "windows"
-  device = "car"
-}
-
-ace_test("ace_test_mac_phone") {
-  defines = ace_mac_defines
-  platform = "mac"
-  device = "phone"
-}
-
-ace_test("ace_test_mac_tv") {
-  defines = ace_mac_defines
-  platform = "mac"
-  device = "tv"
-}
-
-ace_test("ace_test_mac_wearable") {
-  defines = ace_mac_defines
-  platform = "mac"
-  device = "wearable"
-}
-
-ace_test("ace_test_mac_tablet") {
-  defines = ace_mac_defines
-  platform = "mac"
-  device = "tablet"
-}
-
-ace_test("ace_test_mac_card") {
-  defines = ace_mac_defines
-  platform = "mac"
-  device = "card"
-}
-
-ace_test("ace_test_mac_car") {
-  defines = ace_mac_defines
-  platform = "mac"
-  device = "car"
+  if (platform == "windows" || platform == "mac") {
+    foreach(device, ace_devices) {
+      ace_test("ace_test_${platform}_$device") {
+        defines = platform_defines
+        platform = platform
+        device = device
+      }
+    }
+  }
 }

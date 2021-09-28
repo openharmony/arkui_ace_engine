@@ -15,12 +15,12 @@
 
 #include "gtest/gtest.h"
 
-#include "adapter/ohos/osal/fake_asset_manager.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
 #include "base/log/log.h"
 #include "core/components/test/json/json_frontend.h"
 #include "core/components/test/unittest/mock/mock_render_depend.h"
 #include "core/components_v2/swiper/swiper_element.h"
+#include "core/mock/fake_asset_manager.h"
+#include "core/mock/fake_task_executor.h"
 #include "core/mock/mock_resource_register.h"
 
 using namespace testing;

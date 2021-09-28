@@ -14,7 +14,11 @@
 import("//foundation/ace/ace_engine/ace_config.gni")
 
 source_set("ace_resource") {
-  deps = [ ":binary_resource" ]
+  if (current_os == "mac" || current_os == "mingw") {
+    deps = [ ":binary_resource_mac_and_windows" ]
+  } else {
+    deps = [ ":binary_resource" ]
+  }
 
   include_dirs = [ "//utils/native/base/include" ]
 
@@ -34,13 +38,9 @@ source_set("ace_resource") {
 }
 
 source_set("binary_resource") {
-  if (current_os == "mac") {
-    ace_resource_dir = "$ace_root/frameworks/base/resource/binary/mac/"
-  } else {
-    deps = [ ":objcopy_resource" ]
-    ace_resource_dir =
-        get_label_info(":binary_resource($current_toolchain)", "target_out_dir")
-  }
+  deps = [ ":objcopy_resource" ]
+  ace_resource_dir =
+      get_label_info(":binary_resource($current_toolchain)", "target_out_dir")
   sources = [
     "$ace_resource_dir/close.o",
     "$ace_resource_dir/correct.o",
@@ -48,6 +48,12 @@ source_set("binary_resource") {
     "$ace_resource_dir/entry.o",
     "$ace_resource_dir/errorcode.o",
     "$ace_resource_dir/exit_full_screen.o",
+    "$ace_resource_dir/fa_black_clock_widget_hour.o",
+    "$ace_resource_dir/fa_black_clock_widget_minute.o",
+    "$ace_resource_dir/fa_black_clock_widget_second.o",
+    "$ace_resource_dir/fa_clock_widget_hour.o",
+    "$ace_resource_dir/fa_clock_widget_minute.o",
+    "$ace_resource_dir/fa_clock_widget_second.o",
     "$ace_resource_dir/full_screen.o",
     "$ace_resource_dir/hide_password.o",
     "$ace_resource_dir/ic_back.o",
@@ -86,6 +92,61 @@ source_set("binary_resource") {
   ]
 }
 
+source_set("binary_resource_mac_and_windows") {
+  deps = [ ":objcopy_resource_mac_and_windows" ]
+  ace_resource_dir =
+      get_label_info(":binary_resource($current_toolchain)", "target_out_dir")
+  sources = [
+    "$ace_resource_dir/close.c",
+    "$ace_resource_dir/correct.c",
+    "$ace_resource_dir/down_arrow.c",
+    "$ace_resource_dir/entry.c",
+    "$ace_resource_dir/errorcode.c",
+    "$ace_resource_dir/exit_full_screen.c",
+    "$ace_resource_dir/fa_black_clock_widget_hour.c",
+    "$ace_resource_dir/fa_black_clock_widget_minute.c",
+    "$ace_resource_dir/fa_black_clock_widget_second.c",
+    "$ace_resource_dir/fa_clock_widget_hour.c",
+    "$ace_resource_dir/fa_clock_widget_minute.c",
+    "$ace_resource_dir/fa_clock_widget_second.c",
+    "$ace_resource_dir/full_screen.c",
+    "$ace_resource_dir/hide_password.c",
+    "$ace_resource_dir/ic_back.c",
+    "$ace_resource_dir/ic_more.c",
+    "$ace_resource_dir/ic_more_dark.c",
+    "$ace_resource_dir/ic_more_transparent.c",
+    "$ace_resource_dir/indexer_arrow.c",
+    "$ace_resource_dir/indexletter_bar.c",
+    "$ace_resource_dir/left_arrow.c",
+    "$ace_resource_dir/pause.c",
+    "$ace_resource_dir/piece_delete.c",
+    "$ace_resource_dir/play.c",
+    "$ace_resource_dir/rate_star_big_off.c",
+    "$ace_resource_dir/rate_star_big_on.c",
+    "$ace_resource_dir/rate_star_small_off.c",
+    "$ace_resource_dir/rate_star_small_on.c",
+    "$ace_resource_dir/right_arrow.c",
+    "$ace_resource_dir/search.c",
+    "$ace_resource_dir/select_arrow_disabled.c",
+    "$ace_resource_dir/select_arrow_normal.c",
+    "$ace_resource_dir/semi_modal_bar_down.c",
+    "$ace_resource_dir/semi_modal_bar_middle.c",
+    "$ace_resource_dir/share.c",
+    "$ace_resource_dir/show_password.c",
+    "$ace_resource_dir/stepper_back_arrow.c",
+    "$ace_resource_dir/stepper_next_arrow.c",
+    "$ace_resource_dir/translate_c2e.c",
+    "$ace_resource_dir/tv_rate_star_big_off.c",
+    "$ace_resource_dir/tv_rate_star_big_on.c",
+    "$ace_resource_dir/tv_rate_star_small_off.c",
+    "$ace_resource_dir/tv_rate_star_small_on.c",
+    "$ace_resource_dir/up_arrow.c",
+    "$ace_resource_dir/watch_down_arrow.c",
+    "$ace_resource_dir/watch_up_arrow.c",
+    "$ace_resource_dir/wrong.c",
+  ]
+}
+
 action_foreach("objcopy_resource") {
   # add resource file here
   sources = [
@@ -93,6 +154,12 @@ action_foreach("objcopy_resource") {
     "binary/correct.svg",
     "binary/down_arrow.svg",
     "binary/exit_full_screen.svg",
+    "binary/fa_black_clock_widget_hour.png",
+    "binary/fa_black_clock_widget_minute.png",
+    "binary/fa_black_clock_widget_second.png",
+    "binary/fa_clock_widget_hour.png",
+    "binary/fa_clock_widget_minute.png",
+    "binary/fa_clock_widget_second.png",
     "binary/full_screen.svg",
     "binary/hide_password.svg",
     "binary/i18n/entry.json",
@@ -137,16 +204,9 @@ action_foreach("objcopy_resource") {
 
   outputs = [ "$ace_resource_dir/{{source_name_part}}.o" ]
 
-  objcopy_tool = objcopy_aarch64
+  objcopy_tool = objcopy_default
   script = "$flutter_root/engine/flutter/sky/tools/objcopy.py"
-
-  if (use_mingw_win) {
-    objcopy_tool = objcopy_mingw
-    script = "$flutter_root/engine/flutter/sky/tools/objcopy_pc_mac.py"
-  } else if (use_mac) {
-    objcopy_tool = objcopy_clang
-    script = "$flutter_root/engine/flutter/sky/tools/objcopy_pc_mac.py"
-  } else if (target_cpu == "x86_64") {
+  if (target_cpu == "x86_64") {
     objcopy_tool = objcopy_x86_64
   }
 
@@ -159,5 +219,73 @@ action_foreach("objcopy_resource") {
     rebase_path("$ace_resource_dir/") + "{{source_name_part}}.o",
     "--arch",
     current_cpu,
+  ]
+}
+
+action_foreach("objcopy_resource_mac_and_windows") {
+  # add resource file here
+  sources = [
+    "binary/close.svg",
+    "binary/correct.svg",
+    "binary/down_arrow.svg",
+    "binary/exit_full_screen.svg",
+    "binary/fa_black_clock_widget_hour.png",
+    "binary/fa_black_clock_widget_minute.png",
+    "binary/fa_black_clock_widget_second.png",
+    "binary/fa_clock_widget_hour.png",
+    "binary/fa_clock_widget_minute.png",
+    "binary/fa_clock_widget_second.png",
+    "binary/full_screen.svg",
+    "binary/hide_password.svg",
+    "binary/i18n/entry.json",
+    "binary/i18n/errorcode.json",
+    "binary/ic_back.svg",
+    "binary/ic_more.svg",
+    "binary/ic_more_dark.svg",
+    "binary/ic_more_transparent.svg",
+    "binary/indexer_arrow.png",
+    "binary/indexletter_bar.json",
+    "binary/left_arrow.svg",
+    "binary/pause.svg",
+    "binary/piece_delete.svg",
+    "binary/play.svg",
+    "binary/rate_star_big_off.svg",
+    "binary/rate_star_big_on.svg",
+    "binary/rate_star_small_off.svg",
+    "binary/rate_star_small_on.svg",
+    "binary/right_arrow.svg",
+    "binary/search.svg",
+    "binary/select_arrow_disabled.png",
+    "binary/select_arrow_normal.png",
+    "binary/semi_modal_bar_down.svg",
+    "binary/semi_modal_bar_middle.svg",
+    "binary/share.svg",
+    "binary/show_password.svg",
+    "binary/stepper_back_arrow.svg",
+    "binary/stepper_next_arrow.svg",
+    "binary/translate_c2e.svg",
+    "binary/tv_rate_star_big_off.svg",
+    "binary/tv_rate_star_big_on.svg",
+    "binary/tv_rate_star_small_off.svg",
+    "binary/tv_rate_star_small_on.svg",
+    "binary/up_arrow.svg",
+    "binary/watch_down_arrow.svg",
+    "binary/watch_up_arrow.svg",
+    "binary/wrong.svg",
+  ]
+
+  ace_resource_dir =
+      get_label_info(":binary_resource($current_toolchain)", "target_out_dir")
+
+  outputs = [ "$ace_resource_dir/{{source_name_part}}.c" ]
+
+  script = "$ace_root/build/tools/build_resource_to_bytecode.py"
+  out_target = rebase_path("$ace_resource_dir/") + "{{source_name_part}}.c"
+
+  args = [
+    "--input",
+    "{{source}}",
+    "--output",
+    out_target,
   ]
 }

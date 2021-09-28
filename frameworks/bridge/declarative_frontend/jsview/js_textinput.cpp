@@ -22,7 +22,9 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/common/ime/text_input_action.h"
 #include "frameworks/core/common/ime/text_input_type.h"
+#include "frameworks/core/components/text_field/render_text_field.h"
 #include "frameworks/core/components/text_field/text_field_component.h"
+#include "frameworks/core/components/text_field/text_field_element.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -30,6 +32,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextInput>::Declare("TextInput");
     MethodOptions opt = MethodOptions::NONE;
+
     JSClass<JSTextInput>::StaticMethod("create", &JSTextInput::Create, opt);
     JSClass<JSTextInput>::StaticMethod("type", &JSTextInput::SetType);
     JSClass<JSTextInput>::StaticMethod("placeholderColor", &JSTextInput::SetPlaceholderColor);
@@ -39,6 +42,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onEditChanged", &JSTextInput::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextInput::SetOnSubmit);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextInput::SetOnChange);
+    
     JSClass<JSTextInput>::Inherit<JSViewAbstract>();
     JSClass<JSTextInput>::Bind(globalObj);
 }
@@ -67,7 +71,7 @@ void JSTextInput::Create(const JSCallbackInfo& info)
 void JSTextInput::SetType(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("SetType create error, info is non-vaild");
+        LOGE("SetType create error, info is non-valid");
         return;
     }
 

@@ -62,8 +62,6 @@ void SystemProperties::InitDeviceType(DeviceType type)
 
 bool SystemProperties::traceEnabled_ = false;
 bool SystemProperties::isRound_ = false;
-int32_t SystemProperties::width_ = 0;
-int32_t SystemProperties::height_ = 0;
 int32_t SystemProperties::deviceWidth_ = 0;
 int32_t SystemProperties::deviceHeight_ = 0;
 double SystemProperties::resolution_ = 1.0;
@@ -81,12 +79,6 @@ int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
 ColorMode SystemProperties::colorMode_ = ColorMode::LIGHT;
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
-
-void SystemProperties::UpdateSurfaceStatus(int32_t width, int32_t height)
-{
-    width_ = width;
-    height_ = height;
-}
 
 DeviceType SystemProperties::GetDeviceType()
 {
@@ -114,9 +106,6 @@ void SystemProperties::InitDeviceInfo(int32_t deviceWidth, int32_t deviceHeight,
     resolution_ = resolution;
     deviceWidth_ = deviceWidth;
     deviceHeight_ = deviceHeight;
-    // To avoid the deviceinfor api failure due to surface width and height equal 0 in previewer.
-    width_ = deviceWidth_;
-    height_ = deviceHeight_;
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {

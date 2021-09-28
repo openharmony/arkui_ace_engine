@@ -15,8 +15,7 @@
 
 #include "gtest/gtest.h"
 
-#include "adapter/ohos/osal/fake_asset_manager.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
+#include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/log/log.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/friction_motion.h"
@@ -25,6 +24,8 @@
 #include "core/animation/test/unittest/mock/animation_mock.h"
 #include "core/animation/test/unittest/mock/animation_test_utils.h"
 #include "core/components/test/json/json_frontend.h"
+#include "core/mock/fake_asset_manager.h"
+#include "core/mock/fake_task_executor.h"
 #include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -40,6 +41,21 @@ void CardTransitionController::RegisterTransitionListener() {};
 RRect CardTransitionController::GetCardRect(const ComposeId& composeId) const
 {
     return RRect();
+}
+
+Platform::JniEnvironment::JniEnvironment() {}
+
+Platform::JniEnvironment::~JniEnvironment() = default;
+
+std::shared_ptr<JNIEnv> Platform::JniEnvironment::GetJniEnv(JNIEnv* jniEnv) const
+{
+    return nullptr;
+}
+
+Platform::JniEnvironment& Platform::JniEnvironment::GetInstance()
+{
+    static Platform::JniEnvironment jniEnvironment;
+    return jniEnvironment;
 }
 
 namespace {

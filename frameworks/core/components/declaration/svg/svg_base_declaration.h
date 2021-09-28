@@ -132,6 +132,12 @@ public:
         return attribute.clipState;
     }
 
+    const std::string& GetId()
+    {
+        auto& commonAttr = MaybeResetAttribute<CommonAttribute>(AttributeTag::COMMON_ATTR);
+        return commonAttr.id;
+    }
+
     LineCapStyle GetLineCapStyle(const std::string& val) const;
     LineJoinStyle GetLineJoinStyle(const std::string& val) const;
     Color GetColor(const std::string& value) const;

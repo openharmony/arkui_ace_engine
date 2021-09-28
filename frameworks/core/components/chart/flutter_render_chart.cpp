@@ -44,6 +44,7 @@ constexpr double DEFAULT_AXISTICK = 10.0;
 constexpr double DEFAULT_AXIS_STROKE_WIDTH = 3.0;
 constexpr double BEZIER_CONSTANT = 6.0;
 constexpr double DOUBLE_TEXT_PADDING = TEXT_PADDING * 2;
+constexpr int32_t MIN_SDK_VERSION = 6;
 
 } // namespace
 
@@ -55,7 +56,8 @@ RefPtr<RenderNode> RenderChart::Create()
 RenderLayer FlutterRenderChart::GetRenderLayer()
 {
     if (!layer_) {
-        layer_ = AceType::MakeRefPtr<Flutter::OffsetLayer>();
+        layer_ = AceType::MakeRefPtr<Flutter::ClipLayer>(0.0, GetLayoutSize().Width(), 0.0,
+            GetLayoutSize().Height(), Flutter::Clip::NONE);
     }
     return AceType::RawPtr(layer_);
 }
@@ -104,9 +106,15 @@ void FlutterRenderChart::Paint(RenderContext& context, const Offset& offset)
             horizontal_.tickNumber * tickHorizontalOffset_, vertical_.tickNumber * tickOffset_);
     }
     if (!dataRegion.IsValid()) {
-        LOGW("chart paint data region is not vaild height:%{public}lf, width:%{public}lf. do not paint data",
+        LOGW("chart paint data region is not valid height:%{public}lf, width:%{public}lf. do not paint data",
             dataRegion.Height(), dataRegion.Width());
         return;
+    }
+    paintWidth_ = dataRegion.GetSize().Width();
+    auto piplelineContext = GetContext().Upgrade();
+    if (piplelineContext && (piplelineContext->GetMinPlatformVersion() >= MIN_SDK_VERSION) && layer_) {
+        layer_->SetClip(dataRegion.Left(), dataRegion.Right(), dataRegion.Top(), dataRegion.Bottom(),
+            Flutter::Clip::HARD_EDGE);
     }
     PaintDatas(context, dataRegion);
 }
@@ -293,6 +301,7 @@ void FlutterRenderChart::PaintLinearGraph(const ScopedCanvas& canvas, const Rect
         auto previousSegment = pointInfo[0].GetSegmentInfo();
         auto previousPoint = pointInfo[0].GetPointInfo();
         Offset previousPosition = ConvertDataToPosition(paintRect, previousPoint);
+        startOffset_ = previousPosition;
         auto edgePath = flutter::CanvasPath::Create();
         auto gradientPath = flutter::CanvasPath::Create();
         edgePath->moveTo(previousPosition.GetX(), previousPosition.GetY());
@@ -311,6 +320,10 @@ void FlutterRenderChart::PaintLinearGraph(const ScopedCanvas& canvas, const Rect
             } else {
                 gradientPath->lineTo(currentPosition.GetX(), currentPosition.GetY());
                 edgePath->lineTo(currentPosition.GetX(), currentPosition.GetY());
+            }
+            wholeLineGradient_ = line.GetWholeLineGradient();
+            if (wholeLineGradient_) {
+                targetColor_ = line.GetTargetColor();
             }
             int32_t i = static_cast<int32_t>(index);
             if ((line.GetHeadPointIndex() > 0) && (i > line.GetHeadPointIndex()) &&
@@ -380,6 +393,21 @@ void FlutterRenderChart::PaintLineEdge(const ScopedCanvas& canvas, fml::RefPtr<f
             segmentInfo.GetSpaceWidth() + segmentInfo.GetSolidWidth(), 5.0f, SkPath1DPathEffect::kMorph_Style));
     } else {
         paint.paint()->setStrokeWidth(thickness);
+    }
+    if (wholeLineGradient_) {
+        double end = startGradientPoint_.GetX();
+        if (NearZero(end)) {
+            end = startOffset_.GetX() + paintWidth_;
+        }
+        SkPoint points[2] = { SkPoint::Make(startOffset_.GetX(), 0.0f), SkPoint::Make(end, 0.0f) };
+        SkColor colors[2] = { segmentInfo.GetSegmentColor().GetValue(), targetColor_.GetValue() };
+#ifdef USE_SYSTEM_SKIA
+        paint.paint()->setShader(
+            SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkShader::kClamp_TileMode, 0, nullptr));
+#else
+        paint.paint()->setShader(
+            SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr));
+#endif
     }
     if (gradientOfLine_ && drawGradient) {
         SkPoint points[2] = { SkPoint::Make(startGradientPoint_.GetX(), 0.0f),
@@ -588,7 +616,12 @@ void FlutterRenderChart::PaintBar(const ScopedCanvas& canvas, flutter::Paint& pa
             return;
         }
         auto barsAreaPaintRect = GetBarsAreaPaintRect(paintRect, barIndex);
-        auto barAreaPaintRect = GetBarAreaPaintRect(barsAreaPaintRect, barGroupIndex, barGroupNum);
+        double barInterval = BARS_INTERVAL_PROPORTION;
+        auto context = GetContext().Upgrade();
+        if (context && context->GetMinPlatformVersion() >= MIN_SDK_VERSION) {
+            barInterval = 0;
+        }
+        auto barAreaPaintRect = GetBarAreaPaintRect(barsAreaPaintRect, barGroupIndex, barGroupNum, barInterval);
         Offset position = ConvertDataToPosition(paintRect, point);
         flutter::RRect rrect;
         flutter::PaintData paintData;
@@ -611,14 +644,14 @@ Rect FlutterRenderChart::GetBarsAreaPaintRect(const Rect& paintRect, int32_t bar
 }
 
 Rect FlutterRenderChart::GetBarAreaPaintRect(
-    const Rect& barsAreaPaintRect, int32_t barGroupIndex, int32_t barGroupNumber)
+    const Rect& barsAreaPaintRect, int32_t barGroupIndex, int32_t barGroupNumber, double barInterval)
 {
     // Divide 30% of the horizontal space of barsArea into 2 parts as left and right intervals,
     // and divide the remaining part by barGroupNumber to get barAreaWidth
-    auto barAreaWidth = (1 - BARS_INTERVAL_PROPORTION) * barsAreaPaintRect.Width() / barGroupNumber;
+    auto barAreaWidth = (1 - barInterval) * barsAreaPaintRect.Width() / barGroupNumber;
     auto barAreaHeight = barsAreaPaintRect.Height();
     // After leaving the interval, the left border of the barArea area is obtained
-    auto barAreaLeft = barsAreaPaintRect.Left() + BARS_INTERVAL_PROPORTION / 2 * barsAreaPaintRect.Width() +
+    auto barAreaLeft = barsAreaPaintRect.Left() + barInterval / 2 * barsAreaPaintRect.Width() +
                        barGroupIndex * barAreaWidth;
     Rect barAreaRect = Rect(barAreaLeft, barsAreaPaintRect.Top(), barAreaWidth, barAreaHeight);
     return barAreaRect;

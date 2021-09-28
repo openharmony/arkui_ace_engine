@@ -40,15 +40,21 @@ int main(int argc, const char* argv[])
 #ifdef MAC_PLATFORM
     std::string assetPath = "/Volumes/SSD2T/daily-test/preview/js/default";
     std::string assetPath2 = "/Volumes/SSD2T/daily-test/preview/js/default_2.0";
-    std::string resourcesPath = "/Volumes/SSD2T/daily-test/preview/js/resources";
+    std::string appResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/AppResources";
+    std::string systemResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/SystemResources";
+    std::string fontBasePath = "/Volumes/SSD2T/daily-test/preview/js/fonts";
 #else
     std::string assetPath = "D:\\Workspace\\preview\\js\\default";
     std::string assetPath2 = "D:\\Workspace\\preview\\js\\default_2.0";
-    std::string resourcesPath = "D:\\Workspace\\preview\\js\\resources";
+    std::string appResourcesPath = "D:\\Workspace\\preview\\js\\AppResources\\assets\\entry";
+    std::string systemResourcesPath = "D:\\Workspace\\preview\\js\\SystemResources\\assets\\entry";
+    std::string fontBasePath = "D:\\Workspace\\preview\\js\\fonts";
 #endif
     OHOS::Ace::Platform::AceRunArgs args = {
         .assetPath = assetPath,
-        .resourcesPath = resourcesPath,
+        .systemResourcesPath = systemResourcesPath,
+        .appResourcesPath = appResourcesPath,
+        .fontBasePath = fontBasePath,
         .deviceConfig.orientation = OHOS::Ace::DeviceOrientation::LANDSCAPE,
         .deviceConfig.density = 1,
         .deviceConfig.deviceType = OHOS::Ace::DeviceType::TABLET,

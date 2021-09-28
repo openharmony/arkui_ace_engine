@@ -16,7 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CAMERA_CAMERA_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CAMERA_CAMERA_ELEMENT_H
 
-#include "core/components/camera/camera.h"
+#ifdef OHOS_STANDARD_SYSTEM
+#include "core/components/camera/standard_system/camera.h"
+#else
+#include "core/components/camera/large_system/camera.h"
+#endif
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#include "core/components/align/align_component.h"
+#include "core/components/text/text_component.h"
+#include "core/components/theme/theme_manager.h"
+#endif
 #include "core/components/camera/camera_component.h"
 #include "core/components/camera/camera_theme.h"
 #include "core/focus/focus_node.h"
@@ -24,6 +34,12 @@
 #include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace {
+
+enum CameraState : int32_t {
+    STATE_UMDEFINED,
+    STATE_ENABLE,
+    STATE_DISABLE
+};
 
 class CameraElement : public RenderElement, public FocusNode {
     DECLARE_ACE_TYPE(CameraElement, RenderElement, FocusNode);
@@ -39,18 +55,18 @@ public:
     void SetNewComponent(const RefPtr<Component>& newComponent) override;
     void TakePhoto(const TakePhotoParams& params);
 
+#ifdef OHOS_STANDARD_SYSTEM
     void StartRecord();
     void CloseRecorder(const std::string& params);
     void StartPreview();
     void StopPreview();
+#endif
 
 private:
     void SetMethodCall(const RefPtr<CameraComponent>& cameraComponent);
     void OnTextureSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
-    void OnTextureOffset(int64_t textureId, int32_t x, int32_t y);
     void CreatePlatformResource();
     void ReleasePlatformResource();
-    void CreateCamera();
     void InitListener();
     void OnTakePhotoCallBack(const std::map<std::string, std::string>& result);
     void ExecuteJsCallback(const std::string& callbackId, const std::string& result);
@@ -59,19 +75,48 @@ private:
     void HiddenChange(bool hidden);
     void OnPrepared();
 
+#ifdef OHOS_STANDARD_SYSTEM
+    void CreateCamera();
     void OnRecorderCallBack(const std::map<std::string, std::string>& result);
+    void OnTextureOffset(int64_t textureId, int32_t x, int32_t y);
     void TakePhoto(const Size& size);
     void CloseRecorder();
+
+    std::string recorderBackId_;
+    bool isRecording_ = false;
+    bool isPreViewing_ = false;
+#else
+    void CreateTexture();
+    void CreateCamera(int64_t id, ErrorCallback &&errorCallback);
+    void UpdateCamera(const RefPtr<CameraComponent>& cameraComponent);
+    void OnPreViewSizeChange(int32_t preViewWidth, int32_t preViewHeight);
+    void InitDeclarativePara(const RefPtr<CameraComponent>& cameraComponent);
+    void HandleDeclarativePara();
+    void RealseDeclarativePara();
+
+    RefPtr<Texture> texture_;
+    FlashType flash_ = FlashType::AUTO;
+    DevicePosition devicePosition_ = DevicePosition::CAMERA_FACING_BACK;
+    int32_t preViewWidth_ = 0;
+    int32_t preViewHeight_ = 0;
+    int32_t resolutionWidth_ = 0;
+    int32_t resolutionHeight_ = 0;
+    bool isSetResolution_ = false;
+    std::string cameraId_;
+#endif
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void UpdataChild(const RefPtr<Component>& childComponent);
+    const RefPtr<Component> CreateErrorText(const std::string& errorMsg);
+    TextDirection textDirection_ = TextDirection::LTR;
+#endif
 
     EventCallback onTakePhotoEvent_;
     EventCallback onError_;
     TakePhotoParams callbackIds_;
     RefPtr<CameraTheme> theme_;
-
     RefPtr<Camera> camera_;
-    std::string recorderBackId_;
-    bool isRecording_ = false;
-    bool isPreViewing_ = false;
+
+    CameraState cameraState_ = CameraState::STATE_UMDEFINED;
 };
 
 } // namespace OHOS::Ace

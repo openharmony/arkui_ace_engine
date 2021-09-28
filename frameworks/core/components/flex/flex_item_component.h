@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FLEX_FLEX_ITEM_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FLEX_FLEX_ITEM_COMPONENT_H
 
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components/flex/flex_item_element.h"
 #include "core/components/flex/render_flex_item.h"
 #include "core/pipeline/base/sole_child_component.h"
@@ -34,6 +35,7 @@ public:
         : SoleChildComponent(child), flexGrow_(flexGrow), flexShrink_(flexShrink), flexBasis_(Dimension(flexBasis)) {}
     FlexItemComponent(double flexGrow, double flexShrink, const Dimension& flexBasis, const RefPtr<Component>& child)
         : SoleChildComponent(child), flexGrow_(flexGrow), flexShrink_(flexShrink), flexBasis_(flexBasis) {}
+    FlexItemComponent() : FlexItemComponent(0.0, 1.0, -1.0) {}
     ~FlexItemComponent() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override
@@ -166,6 +168,19 @@ public:
         isHidden_ = isHidden;
     }
 
+    void SetGridColumnInfoBuilder(const RefPtr<GridColumnInfo::Builder>& gridColumnInfoBuilder)
+    {
+        gridColumnInfoBuilder_ = gridColumnInfoBuilder;
+    }
+
+    RefPtr<GridColumnInfo> GetGridColumnInfo()
+    {
+        if (gridColumnInfoBuilder_) {
+            return gridColumnInfoBuilder_->Build();
+        } else {
+            return nullptr;
+        }
+    }
 private:
     double flexGrow_ = 0.0;
     double flexShrink_ = 0.0;
@@ -181,6 +196,7 @@ private:
     bool isHidden_ = false;
 
     FlexAlign alignSelf_ = FlexAlign::AUTO;
+    RefPtr<GridColumnInfo::Builder> gridColumnInfoBuilder_;
 };
 
 } // namespace OHOS::Ace

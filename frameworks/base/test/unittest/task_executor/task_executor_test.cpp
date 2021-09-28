@@ -17,9 +17,9 @@
 #include "flutter/fml/task_runner.h"
 #include "gtest/gtest.h"
 
-#include "adapter/common/cpp/flutter_task_executor.h"
 #include "base/thread/background_task_executor.h"
 #include "base/thread/task_executor.h"
+#include "core/common/flutter/flutter_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -107,6 +107,8 @@ void TaskExecutorsTest::GetString(const std::string& task, std::promise<std::str
  * @tc.name: TaskExecutorsTest001
  * @tc.desc: test synchronous and asynchronous execution of the UI thread
  * @tc.type: FUNC
+ * @tc.require: AR000DACK5 AR000DACK7
+ * @tc.author: jiangyingjie
  */
 HWTEST_F(TaskExecutorsTest, TaskExecutorsTest001, TestSize.Level0)
 {
@@ -139,6 +141,8 @@ HWTEST_F(TaskExecutorsTest, TaskExecutorsTest001, TestSize.Level0)
  * @tc.name: TaskExecutorsTest002
  * @tc.desc: test synchronous and asynchronous execution of the PLATFORM thread
  * @tc.type: FUNC
+ * @tc.require: AR000DACK5 AR000DACK7
+ * @tc.author: jiangyingjie
  */
 HWTEST_F(TaskExecutorsTest, TaskExecutorsTest002, TestSize.Level0)
 {
@@ -172,6 +176,8 @@ HWTEST_F(TaskExecutorsTest, TaskExecutorsTest002, TestSize.Level0)
  * @tc.name: TaskExecutorsTest003
  * @tc.desc: test synchronous and asynchronous execution of the IO thread
  * @tc.type: FUNC
+ * @tc.require: AR000DACK5 AR000DACK7
+ * @tc.author: jiangyingjie
  */
 HWTEST_F(TaskExecutorsTest, TaskExecutorsTest003, TestSize.Level0)
 {
@@ -204,6 +210,8 @@ HWTEST_F(TaskExecutorsTest, TaskExecutorsTest003, TestSize.Level0)
  * @tc.name: TaskExecutorsTest004
  * @tc.desc: test synchronous and asynchronous execution of the JS thread
  * @tc.type: FUNC
+ * @tc.require: AR000DACK5 AR000DACK7
+ * @tc.author: jiangyingjie
  */
 HWTEST_F(TaskExecutorsTest, TaskExecutorsTest004, TestSize.Level0)
 {
@@ -236,6 +244,8 @@ HWTEST_F(TaskExecutorsTest, TaskExecutorsTest004, TestSize.Level0)
  * @tc.name: TaskExecutorsTest005
  * @tc.desc: test synchronous and asynchronous execution of the BACKGROUND thread
  * @tc.type: FUNC
+ * @tc.require: AR000DACK5 AR000DACK7 AR000DE7QP
+ * @tc.author: jiangyingjie
  */
 HWTEST_F(TaskExecutorsTest, TaskExecutorsTest005, TestSize.Level0)
 {

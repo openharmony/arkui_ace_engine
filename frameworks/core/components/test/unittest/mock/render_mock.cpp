@@ -15,6 +15,7 @@
 
 #include "core/components/test/unittest/mock/render_mock.h"
 
+#include "adapter/aosp/entrance/java/jni/ace_application_info.h"
 #include "core/components/dialog_modal/dialog_modal_component.h"
 #include "core/components/semi_modal/semi_modal_component.h"
 #include "core/image/image_object.h"

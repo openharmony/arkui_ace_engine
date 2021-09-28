@@ -16,6 +16,7 @@
 #include "frameworks/core/components/svg/flutter_render_svg_filter.h"
 
 #include "frameworks/core/components/svg/flutter_render_svg_fe_colormatrix.h"
+#include "frameworks/core/components/svg/flutter_render_svg_fe_composite.h"
 #include "frameworks/core/components/svg/flutter_render_svg_fe_gaussianblur.h"
 #include "frameworks/core/components/svg/flutter_render_svg_fe_offset.h"
 
@@ -55,8 +56,20 @@ void FlutterRenderSvgFilter::GetImageFilter(
         return;
     }
     ColorInterpolationType srcColor = currentColor;
-    InitFilterParam(fe, imageFilter, currentColor);
+    InitFilterColor(fe, currentColor);
 
+    auto feComposite = AceType::DynamicCast<FlutterRenderSvgFeComposite>(fe);
+    if (feComposite) {
+        auto foreImageFilter = MakeImageFilter(feComposite->GetInType(), imageFilter);
+        auto backImageFilter = MakeImageFilter(feComposite->GetIn2Type(), imageFilter);
+        ConverImageFilterColor(foreImageFilter, srcColor, currentColor);
+        ConverImageFilterColor(backImageFilter, srcColor, currentColor);
+        feComposite->OnAsImageFilter(backImageFilter, foreImageFilter, imageFilter);
+        ConverImageFilterColor(imageFilter, srcColor, currentColor);
+        return;
+    }
+
+    imageFilter = MakeImageFilter(fe->GetInType(), imageFilter);
     auto feOffset = AceType::DynamicCast<FlutterRenderSvgFeOffset>(fe);
     if (feOffset) {
         feOffset->OnAsImageFilter(imageFilter);
@@ -81,27 +94,32 @@ void FlutterRenderSvgFilter::GetImageFilter(
     currentColor = srcColor;
 }
 
-void FlutterRenderSvgFilter::InitFilterParam(
-    const RefPtr<RenderSvgFe>& fe, sk_sp<SkImageFilter>& imageFilter, ColorInterpolationType& currentColor)
+void FlutterRenderSvgFilter::InitFilterColor(const RefPtr<RenderSvgFe>& fe, ColorInterpolationType& currentColor)
 {
     if (!fe) {
         return;
     }
 
-    switch (fe->GetInType()) {
+    if (fe->GetInType() == FeInType::SOURCE_GRAPHIC) {
+        currentColor = ColorInterpolationType::SRGB;
+    } else {
+        currentColor = fe->GetColorType();
+    }
+}
+
+sk_sp<SkImageFilter> FlutterRenderSvgFilter::MakeImageFilter(const FeInType& in, sk_sp<SkImageFilter>& imageFilter)
+{
+    switch (in) {
         case FeInType::SOURCE_GRAPHIC:
-            imageFilter = nullptr;
-            currentColor = ColorInterpolationType::SRGB;
-            break;
+            return nullptr;
         case FeInType::SOURCE_ALPHA:
             SkColorMatrix m;
             m.setScale(0, 0, 0, 1.0f);
 #ifdef USE_SYSTEM_SKIA
-            imageFilter = SkColorFilterImageFilter::Make(SkColorFilter::MakeMatrixFilterRowMajor255(m.fMat), nullptr);
+            return SkColorFilterImageFilter::Make(SkColorFilter::MakeMatrixFilterRowMajor255(m.fMat), nullptr);
 #else
-            imageFilter = SkColorFilterImageFilter::Make(SkColorFilters::Matrix(m), nullptr);
+            return SkColorFilterImageFilter::Make(SkColorFilters::Matrix(m), nullptr);
 #endif
-            break;
         case FeInType::BACKGROUND_IMAGE:
             break;
         case FeInType::BACKGROUND_ALPHA:
@@ -115,7 +133,7 @@ void FlutterRenderSvgFilter::InitFilterParam(
         default:
             break;
     }
-    currentColor = fe->GetColorType();
+    return imageFilter;
 }
 
 void FlutterRenderSvgFilter::ConverImageFilterColor(

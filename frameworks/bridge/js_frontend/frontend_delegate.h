@@ -171,8 +171,6 @@ public:
         disallowPopLastPage_ = true;
     }
 
-    virtual void* GetAbility() = 0;
-
 protected:
     RefPtr<AssetManager> assetManager_;
     bool disallowPopLastPage_ = false;

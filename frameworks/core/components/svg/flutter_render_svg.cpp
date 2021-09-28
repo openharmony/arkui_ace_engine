@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components/svg/flutter_render_svg.h"
 
+#include "frameworks/core/components/common/painter/flutter_svg_painter.h"
 #include "frameworks/core/components/transform/flutter_render_transform.h"
 #include "frameworks/core/pipeline/base/flutter_render_context.h"
 
@@ -42,6 +43,38 @@ void FlutterRenderSvg::Paint(RenderContext& context, const Offset& offset)
     }
     UpdateTransformByGlobalOffset();
     RenderNode::Paint(context, offset);
+}
+
+void FlutterRenderSvg::PaintDirectly(RenderContext& context, const Offset& offset)
+{
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkCanvas* skCanvas = canvas->canvas();
+    if (!skCanvas) {
+        LOGE("Paint skCanvas is null");
+        return;
+    }
+
+    bool isViewBox = GreatNotEqual(viewBox_.Width(), 0.0) && GreatNotEqual(viewBox_.Height(), 0.0);
+    if (isViewBox) {
+        double scale = std::min(GetLayoutSize().Width() / viewBox_.Width(),
+                                GetLayoutSize().Height() / viewBox_.Height());
+        double tx = GetLayoutSize().Width() * 0.5 - (viewBox_.Width() * 0.5 + viewBox_.Left()) * scale;
+        double ty = GetLayoutSize().Height() * 0.5 - (viewBox_.Height() * 0.5 + viewBox_.Top()) * scale;
+        auto transform = Matrix4::CreateScale(static_cast<float>(scale), static_cast<float>(scale), 1.0f);
+        transform = Matrix4::CreateTranslate(static_cast<float>(tx), static_cast<float>(ty), 0.0f) * transform;
+        skCanvas->save();
+        skCanvas->concat(FlutterSvgPainter::ToSkMatrix(transform));
+    }
+
+    RenderSvgBase::PaintDirectly(context, offset);
+    if (isViewBox) {
+        skCanvas->restore();
+    }
 }
 
 void FlutterRenderSvg::OnGlobalPositionChanged()

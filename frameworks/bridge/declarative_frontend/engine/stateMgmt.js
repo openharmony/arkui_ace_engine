@@ -384,17 +384,17 @@ class ObservedPropertyAbstract {
         this.subscribers_.delete(subscriberId);
         // Is this correct? FIXME SubscriberManager.Get().delete(subscriberId);
     }
-    notifyHasChanged(newValue) {
+    notifyHasChanged(newValue, isCrossWindow) {
         aceConsole.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
         var registry = SubscriberManager.Get();
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = registry.get(subscribedId);
             if (subscriber) {
                 if ('hasChanged' in subscriber) {
-                    subscriber.hasChanged(newValue);
+                    subscriber.hasChanged(newValue, isCrossWindow);
                 }
                 if ('propertyHasChanged' in subscriber) {
-                    subscriber.propertyHasChanged(this.info_);
+                    subscriber.propertyHasChanged(this.info_, isCrossWindow);
                 }
             }
             else {
@@ -470,9 +470,9 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
     //       thisProp.aObsObj.aProp = 47  a object prop gets changed
     // It is NOT called when
     //    thisProp.aObsObj = new ClassA
-    hasChanged(newValue) {
+    hasChanged(newValue, isCrossWindow) {
         aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: hasChanged`);
-        this.notifyHasChanged(this.wrappedValue_);
+        this.notifyHasChanged(this.wrappedValue_, isCrossWindow);
     }
     unsubscribeFromOwningProperty() {
         if (this.wrappedValue_) {
@@ -516,14 +516,14 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
-    set(newValue) {
+    set(newValue, isCrossWindow) {
         if (this.wrappedValue_ == newValue) {
             aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
             return;
         }
         aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: set, changed`);
         this.setValueInternal(newValue);
-        this.notifyHasChanged(newValue);
+        this.notifyHasChanged(newValue, isCrossWindow);
     }
     /**
    * These functions are meant for use in connection with the App Stoage and
@@ -562,9 +562,9 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
         }
         super.aboutToBeDeleted();
     }
-    hasChanged(newValue) {
+    hasChanged(newValue, isCrossWindow) {
         aceConsole.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: hasChanged`);
-        this.notifyHasChanged(this.wrappedValue_);
+        this.notifyHasChanged(this.wrappedValue_, isCrossWindow);
     }
     /*
       actually update this.wrappedValue_
@@ -580,14 +580,14 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
-    set(newValue) {
+    set(newValue, isCrossWindow) {
         if (this.wrappedValue_ == newValue) {
             aceConsole.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
             return;
         }
         aceConsole.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
         this.setValueInternal(newValue);
-        this.notifyHasChanged(newValue);
+        this.notifyHasChanged(newValue, isCrossWindow);
     }
     /**
    * These functions are meant for use in connection with the App Stoage and
@@ -631,9 +631,9 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
     }
     // this object is subscriber to ObservedObject
     // will call this cb function when property has changed
-    hasChanged(newValue) {
+    hasChanged(newValue, isCrossWindow) {
         aceConsole.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`);
-        this.notifyHasChanged(this.getObject());
+        this.notifyHasChanged(this.getObject(), isCrossWindow);
     }
     // get 'read through` from the ObservedProperty
     get() {
@@ -641,7 +641,7 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
         return this.getObject();
     }
     // set 'writes through` to the ObservedProperty
-    set(newValue) {
+    set(newValue, isCrossWindow) {
         if (this.getObject() == newValue) {
             aceConsole.debug(`SynchedPropertyObjectTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
             return;
@@ -650,7 +650,7 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
         ObservedObject.removeOwningProperty(this.getObject(), this);
         this.setObject(newValue);
         ObservedObject.addOwningProperty(this.getObject(), this);
-        this.notifyHasChanged(newValue);
+        this.notifyHasChanged(newValue, isCrossWindow);
     }
     /**
    * These functions are meant for use in connection with the App Stoage and
@@ -692,9 +692,9 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
     }
     // this object is subscriber to ObservedObject
     // will call this cb function when property has changed
-    hasChanged(newValue) {
+    hasChanged(newValue, isCrossWindow) {
         aceConsole.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`);
-        this.notifyHasChanged(this.obsObject_);
+        this.notifyHasChanged(this.obsObject_, isCrossWindow);
     }
     // get 'read through` from the ObservedProperty
     get() {
@@ -703,7 +703,7 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
         return this.obsObject_;
     }
     // set 'writes through` to the ObservedProperty
-    set(newValue) {
+    set(newValue, isCrossWindow) {
         if (this.obsObject_ == newValue) {
             aceConsole.debug(`SynchedPropertyNesedObject[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
             return;
@@ -715,7 +715,7 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
         // subscribe to the new value ObservedObject
         ObservedObject.addOwningProperty(this.obsObject_, this);
         // notify value change to subscribing View
-        this.notifyHasChanged(this.obsObject_);
+        this.notifyHasChanged(this.obsObject_, isCrossWindow);
     }
     /**
    * These functions are meant for use in connection with the App Stoage and
@@ -750,13 +750,13 @@ class SynchedPropertySimpleOneWay extends ObservedPropertySimpleAbstract {
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
-    set(newValue) {
+    set(newValue, isCrossWindow) {
         if (this.wrappedValue_ == newValue) {
             aceConsole.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value '${this.wrappedValue_}'- ignoring.`);
             return;
         }
         aceConsole.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
-        this.notifyHasChanged(newValue);
+        this.notifyHasChanged(newValue, isCrossWindow);
         this.wrappedValue_ = newValue;
     }
     /**
@@ -788,9 +788,9 @@ class SynchedPropertySimpleOneWaySubscribing extends SynchedPropertySimpleOneWay
         this.linkedParentProperty_.unlinkSuscriber(this.id());
         super.aboutToBeDeleted();
     }
-    hasChanged(newValue) {
+    hasChanged(newValue, isCrossWindow) {
         aceConsole.debug(`SynchedPropertySimpleOneWaySubscribing[${this.id()}, '${this.info() || "unknown"}']: source property hasChanged'.`);
-        this.set(newValue);
+        this.set(newValue, isCrossWindow);
     }
     /**
      * These functions are meant for use in connection with the App Stoage and
@@ -823,9 +823,9 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     // this object is subscriber to  SynchedPropertySimpleTwoWay
     // will call this cb function when property has changed
     // a set (newValue) is not done because get reads through for the source_
-    hasChanged(newValue) {
+    hasChanged(newValue, isCrossWindow) {
         aceConsole.debug(`SynchedPropertySimpleTwoWay[${this.id()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`);
-        this.notifyHasChanged(newValue);
+        this.notifyHasChanged(newValue, isCrossWindow);
     }
     // get 'read through` from the ObservedProperty
     get() {
@@ -834,14 +834,14 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
         return this.source_.get();
     }
     // set 'writes through` to the ObservedProperty
-    set(newValue) {
+    set(newValue, isCrossWindow) {
         if (this.source_.get() == newValue) {
             aceConsole.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
             return;
         }
         aceConsole.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
         // the source_ ObservedProeprty will call: this.hasChanged(newValue);
-        this.notifyHasChanged(newValue);
+        this.notifyHasChanged(newValue, isCrossWindow);
         return this.source_.set(newValue);
     }
     /**
@@ -1074,6 +1074,23 @@ class AppStorage {
         }
         return undefined;
     }
+    /*
+    cross window notify
+    */
+    crossWindowNotify(propName, newValue) {
+        var p = this.storage_.get(propName);
+        if (p) {
+            aceConsole.debug(`crossWindowNotify(${propName}, ${newValue}) update existing property`);
+            p.set(newValue, true);
+        }
+        else {
+            aceConsole.debug(`crossWindowNotify(${propName}, ${newValue}) create new entry and set value`);
+            const newProp = (typeof newValue === "object") ?
+                new ObservedPropertyObject(newValue, undefined, propName)
+                : new ObservedPropertySimple(newValue, undefined, propName);
+            this.storage_.set(propName, newProp);
+        }
+    }
 }
 AppStorage.Instance_ = undefined;
 // Nativeview
@@ -1294,9 +1311,13 @@ class PersistentStorage {
             PersistentStorage.Storage_.set(propName, link.get());
         });
     }
-    propertyHasChanged(info) {
+    propertyHasChanged(info, isCrossWindow) {
         aceConsole.debug("PersistentStorage: property changed");
-        this.write();
+        if (isCrossWindow) {
+            aceConsole.debug(`PersistentStorage propertyHasChanged isCrossWindow is ${isCrossWindow}`);
+        } else {
+            this.write();
+        }
     }
     // public required by the interface, use the static method instead!
     aboutToBeDeleted() {
@@ -1425,15 +1446,14 @@ class Environment {
     }
 }
 Environment.Instance_ = undefined;
-var global = globalThis;
-aceConsole.info("ACE State Mgmt init ...");
+aceConsole.debug("ACE State Mgmt init ...");
 PersistentStorage.ConfigureBackend(new Storage());
 Environment.ConfigureBackend(new EnvironmentSetting());
 
 function notifyAppStorageChange(key, value) {
-    aceConsole.info(`notifyAppStorageChange(${key}, ${value})`);
+    aceConsole.debug(`notifyAppStorageChange(${key}, ${value})`);
     if (value === "undefined") {
         return;
     }
-    AppStorage.GetOrCreate().setOrCreate(key, value);
+    AppStorage.GetOrCreate().crossWindowNotify(key, value);
 }

@@ -227,6 +227,26 @@ public:
         return onStatusChanged_;
     }
 
+    void SetAlignment(DialogAlignment alignment)
+    {
+        alignment_ = alignment;
+    }
+
+    DialogAlignment GetAlignment() const
+    {
+        return alignment_;
+    }
+
+    void SetOffset(const DimensionOffset& offset)
+    {
+        offset_ = offset;
+    }
+
+    const DimensionOffset& GetOffset() const
+    {
+        return offset_;
+    }
+
 private:
     bool autoCancel_ = true;
     RefPtr<Animator> animator_;
@@ -245,6 +265,10 @@ private:
     int32_t dialogId_ = -1;
     std::string data_;
     std::function<void(bool)> onStatusChanged_;
+
+    // Alignment and offset can control the position of dialog.
+    DialogAlignment alignment_ = DialogAlignment::DEFAULT;
+    DimensionOffset offset_;
 
     Edge margin_;
     bool isSetMargin_ = false;

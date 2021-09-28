@@ -332,19 +332,19 @@ public:
     }
     void NotifyIsPagePathInvalidDismiss(bool isPageInvalid) const;
 
+    using DestroyEventHandler = std::function<void()>;
+    void SetDestroyHandler(DestroyEventHandler&& listener)
+    {
+        destroyEventHandler_.push_back(std::move(listener));
+    }
+    void NotifyDestroyEventDismiss() const;
+
     using DispatchTouchEventHandler = std::function<void(const TouchPoint& event)>;
     void SetDispatchTouchEventHandler(DispatchTouchEventHandler&& listener)
     {
         dispatchTouchEventHandler_.push_back(std::move(listener));
     }
     void NotifyDispatchTouchEventDismiss(const TouchPoint& event) const;
-
-    using KeyEventHandler = std::function<void()>;
-    void SetKeyHandler(KeyEventHandler&& listener)
-    {
-        keyEventHandler_.push_back(std::move(listener));
-    }
-    void NotifyKeyEventDismiss() const;
 
     float GetViewScale() const
     {
@@ -797,8 +797,9 @@ public:
     void NotifyOnPreDraw();
     void AddNodesToNotifyOnPreDraw(const RefPtr<RenderNode>& renderNode);
 
+    void UpdateNodesNeedDrawOnPixelMap();
+    void SearchNodesNeedDrawOnPixelMap(const RefPtr<RenderNode>& renderNode);
     void NotifyDrawOnPiexlMap();
-    void UpdateNodesNeedDrawOnPixelMap(const RefPtr<RenderNode>& renderNode);
 
     const RefPtr<RootElement>& GetRootElement() const
     {
@@ -1039,8 +1040,9 @@ private:
     RouterBackEventHandler routerBackEventHandler_;
     std::list<PopPageSuccessEventHandler> popPageSuccessEventHandler_;
     std::list<IsPagePathInvalidEventHandler> isPagePathInvalidEventHandler_;
+    std::list<DestroyEventHandler> destroyEventHandler_;
     std::list<DispatchTouchEventHandler> dispatchTouchEventHandler_;
-    std::list<KeyEventHandler> keyEventHandler_;
+
     RefPtr<ManagerInterface> textFieldManager_;
     RefPtr<PlatformBridge> messageBridge_;
     WeakPtr<RenderNode> requestedRenderNode_;

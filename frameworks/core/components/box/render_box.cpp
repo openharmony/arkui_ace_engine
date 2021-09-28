@@ -126,67 +126,20 @@ void RenderBox::CreateDragDropRecognizer()
             event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
             event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
             onDrag(event);
+            if (!event->GetPixmap()) {
+                LOGE("pixmap is nullptr");
+                return;
+            }
+            auto jsonResult = JsonUtil::Create(true);
+            jsonResult->Put("description", event->GetDescription().c_str());
+            jsonResult->Put("plainText", event->GetPasteData()->GetPlainText().c_str());
+            jsonResult->Put("width", event->GetPixmap()->GetWidth());
+            jsonResult->Put("height", event->GetPixmap()->GetHeight());
+            if (pipelineContext) {
+                pipelineContext->StartSystemDrag(jsonResult->ToString(), event->GetPixmap());
+            }
         }
     });
-    panRecognizer->SetOnActionUpdate(
-        [weakRenderBox = AceType::WeakClaim<RenderBox>(this), context = context](const GestureEvent& info) {
-            auto pipelineContext = context.Upgrade();
-            RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
-            RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
-            event->SetPasteData(pasteData);
-            event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
-            event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
-
-            auto renderBox = weakRenderBox.Upgrade();
-            if (!renderBox) {
-                return;
-            }
-            auto targetRenderBox = renderBox->FindTargetRenderBox(context.Upgrade(), info);
-            auto preTargetRenderBox = renderBox->GetPreTargetRenderBox();
-            if (preTargetRenderBox == targetRenderBox) {
-                if (targetRenderBox && targetRenderBox->GetOnDragMove()) {
-                    (targetRenderBox->GetOnDragMove())(event);
-                }
-                return;
-            }
-            if (preTargetRenderBox && preTargetRenderBox->GetOnDragLeave()) {
-                (preTargetRenderBox->GetOnDragLeave())(event);
-            }
-            if (targetRenderBox && targetRenderBox->GetOnDragEnter()) {
-                (targetRenderBox->GetOnDragEnter())(event);
-            }
-            renderBox->SetPreTargetRenderBox(targetRenderBox);
-        });
-    panRecognizer->SetOnActionEnd(
-        [weakRenderBox = AceType::WeakClaim<RenderBox>(this), context = context](const GestureEvent& info) {
-            auto pipelineContext = context.Upgrade();
-            RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
-            RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
-            event->SetPasteData(pasteData);
-            event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
-            event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
-
-            auto renderBox = weakRenderBox.Upgrade();
-            if (!renderBox) {
-                return;
-            }
-            ACE_DCHECK(renderBox->GetPreTargetRenderBox() == renderBox->FindTargetRenderBox(context.Upgrade(), info));
-            auto targetRenderBox = renderBox->GetPreTargetRenderBox();
-            if (!targetRenderBox) {
-                return;
-            }
-            if (targetRenderBox->GetOnDrop()) {
-                (targetRenderBox->GetOnDrop())(event);
-            }
-            renderBox->SetPreTargetRenderBox(nullptr);
-        });
-    panRecognizer->SetOnActionCancel([weakRenderBox = AceType::WeakClaim<RenderBox>(this)]() {
-            auto renderBox = weakRenderBox.Upgrade();
-            if (!renderBox) {
-                return;
-            }
-            renderBox->SetPreTargetRenderBox(nullptr);
-        });
     std::vector<RefPtr<GestureRecognizer>> recognizers {longPressRecognizer, panRecognizer};
     dragDropGesture_ = AceType::MakeRefPtr<OHOS::Ace::SequencedRecognizer>(GetContext(), recognizers);
     dragDropGesture_->SetIsExternalGesture(true);
@@ -226,7 +179,12 @@ void RenderBox::UpdateBackDecoration(const RefPtr<Decoration>& newDecoration)
     backDecoration_->SetArcBackground(newDecoration->GetArcBackground());
     backDecoration_->SetBlurRadius(newDecoration->GetBlurRadius());
     backDecoration_->SetBorder(newDecoration->GetBorder());
-    backDecoration_->SetGradient(newDecoration->GetGradient());
+    backDecoration_->SetGradient(newDecoration->GetGradient(), context_, [weak = WeakClaim(this)] {
+        auto renderBox = weak.Upgrade();
+        if (renderBox) {
+            renderBox->OnAnimationCallback();
+        }
+    });
     backDecoration_->SetGradientBorderImage(newDecoration->GetGradientBorderImage());
     backDecoration_->SetImage(newDecoration->GetImage());
     backDecoration_->SetBorderImage(newDecoration->GetBorderImage());
@@ -239,6 +197,9 @@ void RenderBox::UpdateBackDecoration(const RefPtr<Decoration>& newDecoration)
     backDecoration_->SetBrightness(newDecoration->GetBrightness());
     backDecoration_->SetContrast(newDecoration->GetContrast());
     backDecoration_->SetSaturate(newDecoration->GetSaturate());
+    backDecoration_->SetInvert(newDecoration->GetInvert());
+    backDecoration_->SetColorBlend(newDecoration->GetColorBlend());
+    backDecoration_->SetSepia(newDecoration->GetSepia());
 }
 
 void RenderBox::UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration)
@@ -252,12 +213,19 @@ void RenderBox::UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration)
         LOGD("frontDecoration_ is null.");
         frontDecoration_ = AceType::MakeRefPtr<Decoration>();
     }
-
     frontDecoration_->SetBlurRadius(newDecoration->GetBlurRadius());
     frontDecoration_->SetBorder(newDecoration->GetBorder());
     frontDecoration_->SetImage(newDecoration->GetImage());
     frontDecoration_->SetShadows(newDecoration->GetShadows());
     frontDecoration_->SetBackgroundColor(newDecoration->GetBackgroundColor());
+    frontDecoration_->SetGrayScale(newDecoration->GetGrayScale());
+    frontDecoration_->SetBrightness(newDecoration->GetBrightness());
+    frontDecoration_->SetContrast(newDecoration->GetContrast());
+    frontDecoration_->SetSaturate(newDecoration->GetSaturate());
+    frontDecoration_->SetInvert(newDecoration->GetInvert());
+    frontDecoration_->SetColorBlend(newDecoration->GetColorBlend());
+    frontDecoration_->SetSepia(newDecoration->GetSepia());
+    frontDecoration_->SetHueRotate(newDecoration->GetHueRotate());
 }
 
 void RenderBox::UpdateStyleFromRenderNode(PropertyAnimatableType type)
@@ -483,7 +451,6 @@ void RenderBox::ClearRenderObject()
     }
 
     dragDropGesture_ = nullptr;
-    preTargetRenderBox_ = nullptr;
     onDrag_ = nullptr;
     onDragEnter_ = nullptr;
     onDragMove_ = nullptr;
@@ -800,6 +767,25 @@ double RenderBox::GetContrast(void) const
     return 0.0;
 }
 
+void RenderBox::SetColorBlend(const Color& color)
+{
+    if (frontDecoration_ == nullptr) {
+        frontDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    if (!NearEqual(frontDecoration_->GetColorBlend().GetValue(), color.GetValue())) {
+        frontDecoration_->SetColorBlend(color);
+        MarkNeedRender();
+    }
+}
+
+Color RenderBox::GetColorBlend() const
+{
+    if (frontDecoration_) {
+        return frontDecoration_->GetColorBlend();
+    }
+    return {};
+}
+
 void RenderBox::SetSaturate(double rate)
 {
     if (frontDecoration_ == nullptr) {
@@ -816,6 +802,66 @@ double RenderBox::GetSaturate(void) const
 {
     if (frontDecoration_ != nullptr) {
         return frontDecoration_->GetSaturate().Value();
+    }
+    return 0.0;
+}
+
+void RenderBox::SetSepia(double pia)
+{
+    if (frontDecoration_ == nullptr) {
+        frontDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    double pias = frontDecoration_->GetSepia().Value();
+    if (!NearEqual(pias, pia)) {
+        frontDecoration_->SetSepia(Dimension(pias));
+        MarkNeedRender();
+    }
+}
+
+double RenderBox::GetSepia(void) const
+{
+    if (frontDecoration_ != nullptr) {
+        return frontDecoration_->GetSepia().Value();
+    }
+    return 0.0;
+}
+
+void RenderBox::SetInvert(double invert)
+{
+    if (frontDecoration_ == nullptr) {
+        frontDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    double inverts = frontDecoration_->GetInvert().Value();
+    if (!NearEqual(inverts, invert)) {
+        frontDecoration_->SetInvert(Dimension(inverts));
+        MarkNeedRender();
+    }
+}
+
+double RenderBox::GetInvert(void) const
+{
+    if (frontDecoration_ != nullptr) {
+        return frontDecoration_->GetInvert().Value();
+    }
+    return 0.0;
+}
+
+void RenderBox::SetHueRotate(float deg)
+{
+    if (frontDecoration_ == nullptr) {
+        frontDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    float degs = frontDecoration_->GetHueRotate();
+    if (!NearEqual(degs, deg)) {
+        frontDecoration_->SetHueRotate(degs);
+        MarkNeedRender();
+    }
+}
+
+float RenderBox::GetHueRotate(void) const
+{
+    if (frontDecoration_ != nullptr) {
+        return frontDecoration_->GetHueRotate();
     }
     return 0.0;
 }

@@ -16,6 +16,7 @@
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_group_js_bridge.h"
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+// TODO: DO NOT include adapter includes
 #include "adapter/preview/entrance/ace_container.h"
 #include "core/common/ace_engine.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine_instance.h"
@@ -770,8 +771,13 @@ void QuickJsGroupJsBridge::TriggerModuleJsCallbackPreview(
 {
     JSValue callBackResult = JS_NULL;
     std::string resultString = responseData.GetResultString()->ToString();
+    code = responseData.GetActionCode();
     if (!resultString.empty()) {
         callBackResult = JS_NewString(context_, resultString.c_str());
+    } else {
+        code = PLUGIN_REQUEST_FAIL;
+        callBackResult = JS_NewString(context_, std::string("{\"code\":").append(std::to_string(code)).append(",")
+            .append("\"data\":\"invalid response data\"}").c_str());
     }
 
     CallModuleJsCallback(callbackId, code, callBackResult);

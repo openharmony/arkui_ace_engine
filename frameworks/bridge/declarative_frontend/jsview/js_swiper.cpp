@@ -62,9 +62,11 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("vertical", &JSSwiper::SetVertical, opt);
     JSClass<JSSwiper>::StaticMethod("indicator", &JSSwiper::SetIndicator, opt);
     JSClass<JSSwiper>::StaticMethod("cancelSwipeOnOtherAxis", &JSSwiper::SetCancelSwipeOnOtherAxis, opt);
+    JSClass<JSSwiper>::StaticMethod("displayMode", &JSSwiper::SetDisplayMode);
     JSClass<JSSwiper>::StaticMethod("itemSpace", &JSSwiper::SetItemSpace);
     JSClass<JSSwiper>::StaticMethod("onChange", &JSSwiper::SetOnChange);
     JSClass<JSSwiper>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSSwiper>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSSwiper>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSwiper>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSwiper>::StaticMethod("onClick", &JSSwiper::SetOnClick);
@@ -236,6 +238,15 @@ void JSSwiper::SetItemSpace(const JSCallbackInfo& info)
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
     if (swiper) {
         swiper->SetItemSpace(value);
+    }
+}
+
+void JSSwiper::SetDisplayMode(int32_t index)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetDisplayMode(static_cast<SwiperDisplayMode>(index));
     }
 }
 

@@ -17,14 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_BACKEND_H
 
 #include "base/memory/ace_type.h"
+#include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
 #include "core/common/js_message_dispatcher.h"
-
-#include "abs_shared_result_set.h"
-#include "data_ability_predicates.h"
-#include "result_set.h"
-#include "uri.h"
-#include "values_bucket.h"
 
 namespace OHOS::Ace {
 
@@ -37,39 +32,38 @@ public:
     Backend() = default;
     ~Backend() override = default;
 
-    enum class State {
-        ON_CREATE,
-        ON_DESTROY,
-    };
+    enum class State { ON_CREATE, ON_DESTROY };
 
     static RefPtr<Backend> Create();
-    static RefPtr<Backend> CreateDefault();
 
     virtual bool Initialize(BackendType type, const RefPtr<TaskExecutor>& taskExecutor) = 0;
 
+    virtual void LoadEngine(const char* libName, int32_t instanceId) = 0;
+
+    virtual void MethodChannel(const std::string& methodName, std::string& jsonStr) = 0;
+
+    virtual void RunPa(const std::string &url) = 0;
+
+    virtual void OnCommand(const std::string& intent, int startId) = 0;
+
+    virtual void SetAssetManager(const RefPtr<AssetManager> &assetManager) = 0;
+
     virtual void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher> &transfer) const = 0;
+
+    virtual void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const = 0;
+
+    virtual void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const = 0;
+
+    virtual void TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const = 0;
+
+    virtual void LoadPluginJsCode(std::string&& jsCode) const = 0;
+
+    virtual void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const = 0;
 
     virtual BackendType GetType() = 0;
 
     // inform the frontend that onCreate or onDestroy
     virtual void UpdateState(State) = 0;
-
-    virtual int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value) = 0;
-    virtual std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> Query(
-        const Uri& uri, const std::vector<std::string>& columns,
-        const OHOS::NativeRdb::DataAbilityPredicates& predicates) = 0;
-    virtual int32_t Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
-        const OHOS::NativeRdb::DataAbilityPredicates& predicates) = 0;
-    virtual int32_t Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates) = 0;
-
-    virtual int32_t BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values) = 0;
-    virtual std::string GetType(const Uri& uri) = 0;
-    virtual std::vector<std::string> GetFileTypes(const Uri& uri, const std::string& mimeTypeFilter) = 0;
-    virtual int32_t OpenFile(const Uri& uri, const std::string& mode) = 0;
-    virtual int32_t OpenRawFile(const Uri& uri, const std::string& mode) = 0;
-    virtual Uri NormalizeUri(const Uri& uri) = 0;
-    virtual Uri DenormalizeUri(const Uri& uri) = 0;
-
 };
 
 } // namespace OHOS::Ace

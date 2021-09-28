@@ -659,8 +659,8 @@ v8::Local<v8::Object> V8AnimationBridgeUtils::CreateAnimationContext(
 }
 
 V8AnimationBridgeTaskCreate::V8AnimationBridgeTaskCreate(
-    v8::Isolate* isolate, const RefPtr<V8AnimationBridge>& bridge, std::string param)
-    : bridge_(bridge), isolate_(isolate), param_(std::move(param))
+    const RefPtr<FrontendDelegate>& delegate, const RefPtr<V8AnimationBridge>& bridge, std::string param)
+    : bridge_(bridge), delegate_(delegate), param_(std::move(param))
 {}
 
 void V8AnimationBridgeTaskCreate::AnimationBridgeTaskFunc(const RefPtr<JsAcePage>& page, NodeId nodeId)
@@ -671,16 +671,18 @@ void V8AnimationBridgeTaskCreate::AnimationBridgeTaskFunc(const RefPtr<JsAcePage
         return;
     }
     auto bridgeFree = AceType::DynamicCast<V8AnimationBridge>(page->GetAnimationBridge(nodeId));
-    auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate_->GetData(V8EngineInstance::FRONTEND_DELEGATE));
-    auto jsTaskExecutor = (*delegate)->GetAnimationJsTask();
-    if (bridgeFree) {
-        auto weakBridge = AceType::WeakClaim(AceType::RawPtr(bridgeFree));
-        jsTaskExecutor.PostTask([weakBridge]() mutable {
-            auto bridgeFree = weakBridge.Upgrade();
-            if (bridgeFree != nullptr) {
-                bridgeFree.Reset();
-            }
-        });
+    auto sp = delegate_.Upgrade();
+    if (sp) {
+        auto jsTaskExecutor = sp->GetAnimationJsTask();
+        if (bridgeFree) {
+            auto weakBridge = AceType::WeakClaim(AceType::RawPtr(bridgeFree));
+            jsTaskExecutor.PostTask([weakBridge]() mutable {
+                auto bridgeFree = weakBridge.Upgrade();
+                if (bridgeFree != nullptr) {
+                    bridgeFree.Reset();
+                }
+            });
+        }
     }
     bridge_->JsCreateAnimation(page, param_);
     page->AddAnimationBridge(nodeId, bridge_);

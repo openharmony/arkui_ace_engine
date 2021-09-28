@@ -142,6 +142,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("onScrollEnd", &JSScroll::OnScrollEndCallback, opt);
     JSClass<JSScroll>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSScroll>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSScroll>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSScroll>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSScroll>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSScroll>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);

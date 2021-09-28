@@ -16,6 +16,7 @@
 #include "frameworks/bridge/common/dom/dom_svg_base.h"
 
 #include "frameworks/bridge/common/dom/dom_svg.h"
+#include "frameworks/bridge/common/dom/dom_svg_g.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
@@ -24,8 +25,7 @@ DOMSvgBase::DOMSvgBase(NodeId nodeId, const std::string& nodeName) : DOMNode(nod
 
 void DOMSvgBase::InheritAttrs(const RefPtr<DOMNode>& parentNode)
 {
-    auto svgNode = AceType::DynamicCast<DOMSvg>(parentNode);
-    if (!svgNode) {
+    if (!AceType::InstanceOf<DOMSvg>(parentNode) && !AceType::InstanceOf<DOMSvgG>(parentNode)) {
         LOGE("parentNode is null");
         return;
     }
@@ -34,7 +34,7 @@ void DOMSvgBase::InheritAttrs(const RefPtr<DOMNode>& parentNode)
         LOGE("declaration is null");
         return;
     }
-    declaration->Inherit(svgNode->GetDeclaration());
+    declaration->Inherit(parentNode->GetDeclaration());
 }
 
 } // namespace OHOS::Ace::Framework

@@ -307,6 +307,7 @@ void JSRect::JSBind(BindingTarget globalObj)
     JSClass<JSRect>::CustomMethod("fill", &JSShapeAbstract::ObjectFill);
 
     JSClass<JSRect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSRect>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSRect>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSRect>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

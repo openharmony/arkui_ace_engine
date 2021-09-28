@@ -94,6 +94,8 @@ const char COUNTER_ETS_TAG[] = "Counter";
 // flex
 const char FLEX_COMPONENT_TAG[] = "FlexComponentV2";
 const char FLEX_ETS_TAG[] = "Flex";
+const char WRAP_COMPONENT_TAG[] = "WrapComponent";
+const char WRAP_ETS_TAG[] = "Flex";
 
 // grid
 const char GRID_COMPONENT_TAG[] = "GridLayoutComponent";
@@ -161,11 +163,11 @@ ACE_EXPORT extern const char DIVIDER_ETS_TAG[] = "Divider";
 
 // checkbox
 const char CHECKBOX_COMPONENT_TAG[] = "CheckboxComponent";
-const char CHECKBOX_ETS_TAG[] = "Checkbox";
+const char CHECKBOX_ETS_TAG[] = "Toggle";
 
 // switch
 const char SWITCH_COMPONENT_TAG[] = "SwitchComponent";
-const char SWITCH_ETS_TAG[] = "Switch";
+const char SWITCH_ETS_TAG[] = "Toggle";
 
 // toggle
 const char TOGGLE_COMPONENT_TAG[] = "ToggleComponent";

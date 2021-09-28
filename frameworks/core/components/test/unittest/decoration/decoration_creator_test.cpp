@@ -188,7 +188,7 @@ HWTEST_F(DecorationCreatorTest, DecorationCreator004, TestSize.Level1)
      * @tc.expected: step2. decoration properties are set correctly.
      */
     RefPtr<Decoration> decoration = CreateFromDsl(content);
-    ASSERT_TRUE(decoration->GetGradient().GetLinearGradient().angle.value() == TEST_GRADIENT_ANGLE);
+    ASSERT_TRUE(decoration->GetGradient().GetLinearGradient().angle.value().Value() == TEST_GRADIENT_ANGLE);
     ASSERT_TRUE(decoration->GetGradient().GetRepeat() == TEST_GRADIENT_REPEAT);
 }
 

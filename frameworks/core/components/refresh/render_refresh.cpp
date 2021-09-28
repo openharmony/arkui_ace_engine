@@ -81,6 +81,12 @@ void RenderRefresh::Update(const RefPtr<Component>& component)
         LOGW("RefreshComponent is null");
         return;
     }
+    if (refresh->GetOnStateChange()) {
+        onStateChange_ = *refresh->GetOnStateChange();
+    }
+    if (refresh->GetOnRefreshing()) {
+        onRefreshing_ = *refresh->GetOnRefreshing();
+    }
 
     refreshComponent_ = AceType::WeakClaim(AceType::RawPtr(component));
     refreshing_ = refresh->IsRefreshing();
@@ -187,6 +193,13 @@ void RenderRefresh::Initialize()
         }
     });
 
+    dragDetector_->SetOnDragCancel([weakFresh = AceType::WeakClaim(this)]() {
+        auto refresh = weakFresh.Upgrade();
+        if (refresh) {
+            refresh->HandleDragCancel();
+        }
+    });
+
     animator_ = AceType::MakeRefPtr<Animator>(GetContext());
     refreshController_ = AceType::MakeRefPtr<RefreshController>();
     refreshController_->SetRefresh(AceType::WeakClaim(this));
@@ -257,6 +270,17 @@ void RenderRefresh::HandleDragEnd()
         loading_->SetLoadingMode(MODE_LOOP);
         StartAnimation(start, end, false);
     }
+}
+
+void RenderRefresh::HandleDragCancel()
+{
+    LOGD("RenderRefresh HandleDragCancel");
+    refreshing_ = false;
+    refreshStatus_ = RefreshStatus::INACTIVE;
+    scrollableOffset_.Reset();
+    loading_->SetLoadingMode(MODE_DRAG);
+    loading_->SetDragDistance(scrollableOffset_.GetY());
+    MarkNeedLayout();
 }
 
 void RenderRefresh::UpdateScrollOffset(double value)
@@ -330,6 +354,7 @@ void RenderRefresh::HandleStopListener(bool isFinished)
 RefreshStatus RenderRefresh::GetNextStatus()
 {
     RefreshStatus nextStatus;
+    auto context = context_.Upgrade();
     switch (refreshStatus_) {
         case RefreshStatus::INACTIVE:
             if (refreshing_) {
@@ -355,7 +380,7 @@ RefreshStatus RenderRefresh::GetNextStatus()
             }
             break;
         case RefreshStatus::OVER_DRAG:
-            if (!refreshEvent_) {
+            if (!refreshEvent_ && !context->GetIsDeclarative()) {
                 nextStatus = RefreshStatus::DONE;
                 break;
             }
@@ -365,6 +390,9 @@ RefreshStatus RenderRefresh::GetNextStatus()
             }
             // No break here, continue get next status.
             nextStatus = RefreshStatus::REFRESH;
+            if (onRefreshing_) {
+                onRefreshing_();
+            }
             [[fallthrough]];
         case RefreshStatus::REFRESH:
             if (!refreshing_) {
@@ -385,6 +413,9 @@ RefreshStatus RenderRefresh::GetNextStatus()
         default:
             nextStatus = RefreshStatus::INACTIVE;
             break;
+    }
+    if (onStateChange_ && (refreshStatus_ != nextStatus)) {
+        onStateChange_(static_cast<int>(nextStatus));
     }
     return nextStatus;
 }

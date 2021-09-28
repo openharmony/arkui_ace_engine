@@ -62,6 +62,7 @@ void JSBlank::JSBind(BindingTarget globalObj)
     JSClass<JSBlank>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSBlank>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSBlank>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSBlank>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSBlank>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSBlank>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSBlank>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

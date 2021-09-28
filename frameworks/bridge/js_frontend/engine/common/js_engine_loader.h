@@ -26,8 +26,8 @@ class JsEngineLoader {
 public:
     virtual ~JsEngineLoader() = default;
 
-    static JsEngineLoader& Get(bool isArkApp = false);
-    static JsEngineLoader& GetDeclarative(bool isArkApp = false);
+    static JsEngineLoader& Get(const char* sharedLibrary = nullptr);
+    static JsEngineLoader& GetDeclarative(const char* sharedLibrary = nullptr);
 
     virtual RefPtr<JsEngine> CreateJsEngine(int32_t instanceId) const = 0;
     virtual RefPtr<BaseCanvasBridge> CreateCanvasBridge() const = 0;

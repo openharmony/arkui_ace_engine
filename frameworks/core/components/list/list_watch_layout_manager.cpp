@@ -112,15 +112,23 @@ void ListWatchLayoutManager::SetChildPosition(const RefPtr<RenderNode>& child, i
         default:
             break;
     }
+    auto isPlatformFive = IsPlatformFive();
 
     if (isVertical_) {
         if (direction_ == FlexDirection::COLUMN_REVERSE) {
             mainAxis = mainLen - renderList_.GetMainSize(child->GetLayoutSize()) - mainAxis;
         }
+
+        if (isPlatformFive && renderList_.IsCenterLayout() && firstChildSize_ < renderList_.GetMainSize(viewPort_)) {
+            mainAxis += (renderList_.GetMainSize(viewPort_) - firstChildSize_) * HALF_SIZE;
+        }
         child->SetPosition(Offset(crossAxis, mainAxis) + position_);
     } else {
         if (IsRowReverse()) {
             mainAxis = mainLen - renderList_.GetMainSize(child->GetLayoutSize()) - mainAxis;
+        }
+        if (isPlatformFive && renderList_.IsCenterLayout() && firstChildSize_ < renderList_.GetMainSize(viewPort_)) {
+            mainAxis += (renderList_.GetMainSize(viewPort_) - firstChildSize_) * HALF_SIZE;
         }
         child->SetPosition(Offset(mainAxis, crossAxis) + position_);
     }
@@ -212,7 +220,20 @@ double ListWatchLayoutManager::AdjustLayoutSize(double size)
     if (NearZero(lastChildSize_)) {
         lastChildSize_ = firstChildSize_;
     }
-    return size + (renderList_.GetMainSize(viewPort_) - lastChildSize_) * HALF_SIZE;
+    if (IsPlatformFive()) {
+        double changeSize = size + renderList_.GetMainSize(viewPort_);
+        changeSize = changeSize - (firstChildSize_ + lastChildSize_) * HALF_SIZE;
+        return changeSize;
+    } else {
+        return size + (renderList_.GetMainSize(viewPort_) - lastChildSize_) * HALF_SIZE;
+    }
+}
+
+bool ListWatchLayoutManager::IsPlatformFive()
+{
+    auto context = renderList_.GetContext().Upgrade();
+    const static int32_t PLATFORM_VERSION_FIVE = 5;
+    return context && context->GetMinPlatformVersion() <= PLATFORM_VERSION_FIVE;
 }
 
 } // namespace OHOS::Ace

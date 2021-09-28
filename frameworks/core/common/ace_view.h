@@ -75,9 +75,8 @@ public:
     using PreDrawCallback = std::function<void()>;
     virtual void RegisterPreDrawCallback(PreDrawCallback&& callback) {}
 
-    using ViewReleaseCallback = std::function<void()>;
-    using ViewDestoryCallback = std::function<void(ViewReleaseCallback&&)>;
-    virtual void RegisterViewDestroyCallback(ViewDestoryCallback&& callback) = 0;
+    using RequestFrameCallback = std::function<void()>;
+    virtual void RegisterRequestFrameCallback(RequestFrameCallback&& callback) {}
 
     virtual bool Dump(const std::vector<std::string>& params) = 0;
 
@@ -108,13 +107,17 @@ public:
 
     void SetBackgroundColor(const Color& color)
     {
-        std::lock_guard<std::mutex> lock(backgroundColorMutex_);
         backgroundColor_ = color;
+        if (!hasSet_) {
+            promise_.set_value(true);
+        }
     }
 
     const Color& GetBackgroundColor()
     {
-        std::lock_guard<std::mutex> lock(backgroundColorMutex_);
+        if (!hasSet_) {
+            hasSet_ = future_.get();
+        }
         return backgroundColor_;
     }
 
@@ -166,6 +169,9 @@ private:
     std::mutex backgroundColorMutex_;
     Color backgroundColor_;
     std::string cachePath_;
+    std::promise<bool> promise_;
+    std::shared_future<bool> future_ = promise_.get_future();
+    bool hasSet_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceView);
 };

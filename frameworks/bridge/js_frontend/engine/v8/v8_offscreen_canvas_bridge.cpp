@@ -1141,7 +1141,7 @@ void V8OffscreenCanvasBridge::Path2DSetTransform(const v8::FunctionCallbackInfo<
 {
     // 6 parameters: setTransform(a, b, c, d, e, f)
     if (args.Length() != 6) {
-        LOGE("Call Path2D SetTransform fialed, invalid agrs.");
+        LOGE("Call Path2D SetTransform fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1173,7 +1173,7 @@ void V8OffscreenCanvasBridge::Path2DMoveTo(const v8::FunctionCallbackInfo<v8::Va
 {
     // 2 parameters: moveTo(x, y)
     if (args.Length() != 2) {
-        LOGE("Call Path2D Arc MoveTo, invalid agrs.");
+        LOGE("Call Path2D Arc MoveTo, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1200,7 +1200,7 @@ void V8OffscreenCanvasBridge::Path2DLineTo(const v8::FunctionCallbackInfo<v8::Va
 {
     // 2 parameters: lineTo(x, y)
     if (args.Length() != 2) {
-        LOGE("Call Path2D LineTo fialed, invalid agrs.");
+        LOGE("Call Path2D LineTo fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1227,7 +1227,7 @@ void V8OffscreenCanvasBridge::Path2DArc(const v8::FunctionCallbackInfo<v8::Value
 {
     // 5 or 6 parameters: arc(x, y, radius, startAngle, endAngle, anticlockwise?)
     if (args.Length() < 5 || args.Length() > 6) {
-        LOGE("Call Path2D Arc fialed, invalid agrs.");
+        LOGE("Call Path2D Arc fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1260,7 +1260,7 @@ void V8OffscreenCanvasBridge::Path2DArcTo(const v8::FunctionCallbackInfo<v8::Val
 {
     // 5 parameters: arcTo(x1, y1, x2, y2, radius)
     if (args.Length() != 5) {
-        LOGE("Call Path2D ArcTo fialed, invalid agrs.");
+        LOGE("Call Path2D ArcTo fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1291,7 +1291,7 @@ void V8OffscreenCanvasBridge::Path2DQuadraticCurveTo(const v8::FunctionCallbackI
 {
     // 4 parameters: quadraticCurveTo(cpx, cpy, x, y)
     if (args.Length() != 4) {
-        LOGE("Call Path2D QuadraticCurveTo fialed, invalid agrs.");
+        LOGE("Call Path2D QuadraticCurveTo fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1321,7 +1321,7 @@ void V8OffscreenCanvasBridge::Path2DBezierCurveTo(const v8::FunctionCallbackInfo
 {
     // 6 parameters: bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
     if (args.Length() != 6) {
-        LOGE("Call Path2D BezierCurveTo fialed, invalid agrs.");
+        LOGE("Call Path2D BezierCurveTo fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1353,7 +1353,7 @@ void V8OffscreenCanvasBridge::Path2DEllipse(const v8::FunctionCallbackInfo<v8::V
 {
     // 7 or 8 parameters: ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise?)
     if (args.Length() < 7 || args.Length() > 8) {
-        LOGE("Call Path2D Ellipse fialed, invalid agrs.");
+        LOGE("Call Path2D Ellipse fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1387,7 +1387,7 @@ void V8OffscreenCanvasBridge::Path2DRect(const v8::FunctionCallbackInfo<v8::Valu
 {
     // 4 parameters: rect(x, y, width, height)
     if (args.Length() != 4) {
-        LOGE("Call Path2D Rect fialed, invalid agrs.");
+        LOGE("Call Path2D Rect fialed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1492,7 +1492,7 @@ void V8OffscreenCanvasBridge::TransferToImageBitmap(const v8::FunctionCallbackIn
 void V8OffscreenCanvasBridge::ToDataURL(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
     if (args.Length() != 2) {
-        LOGE("invalid agrs");
+        LOGE("invalid args");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();

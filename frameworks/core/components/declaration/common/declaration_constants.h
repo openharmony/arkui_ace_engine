@@ -38,9 +38,12 @@
 #include "core/components/declaration/svg/svg_ellipse_declaration.h"
 #include "core/components/declaration/svg/svg_filter_declaration.h"
 #include "core/components/declaration/svg/svg_fe_colormatrix_declaration.h"
+#include "core/components/declaration/svg/svg_fe_composite_declaration.h"
 #include "core/components/declaration/svg/svg_fe_flood_declaration.h"
 #include "core/components/declaration/svg/svg_fe_func_declaration.h"
 #include "core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
+#include "core/components/declaration/svg/svg_fe_merge_declaration.h"
+#include "core/components/declaration/svg/svg_fe_merge_node_declaration.h"
 #include "core/components/declaration/svg/svg_fe_offset_declaration.h"
 #include "core/components/declaration/svg/svg_gradient_declaration.h"
 #include "core/components/declaration/svg/svg_line_declaration.h"
@@ -186,10 +189,13 @@ public:
     static const std::shared_ptr<SvgFilterAttribute> DEFAULT_SVG_FILTER_ATTR;
     static const std::shared_ptr<SvgFeColorMatrixAttribute> DEFAULT_SVG_FE_COLORMATRIX_ATTR;
     static const std::shared_ptr<SvgFeAttribute> DEFAULT_SVG_FE_COMPONENT_TRANSFER_ATTR;
+    static const std::shared_ptr<SvgFeCompositeAttribute> DEFAULT_SVG_FE_COMPOSITE_ATTR;
     static const std::shared_ptr<SvgFeOffsetAttribute> DEFAULT_SVG_FE_OFFSET_ATTR;
     static const std::shared_ptr<SvgFeFuncAttribute> DEFAULT_SVG_FE_FUNC_ATTR;
     static const std::shared_ptr<SvgFeFloodAttribute> DEFAULT_SVG_FE_FLOOD_ATTR;
     static const std::shared_ptr<SvgFeGaussianBlurAttribute> DEFAULT_SVG_FE_GAUSSIAN_BLUR_ATTR;
+    static const std::shared_ptr<SvgFeMergeAttribute> DEFAULT_SVG_FE_MERGE_ATTR;
+    static const std::shared_ptr<SvgFeMergeNodeAttribute> DEFAULT_SVG_FE_MERGE_NODE_ATTR;
 
     // default value of image_animator
     static const std::shared_ptr<ImageAnimatorAttribute> DEFAULT_IMAGE_ANIMATOR_ATTR;

@@ -19,6 +19,12 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+
+const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
+    DialogAlignment::BOTTOM, DialogAlignment::DEFAULT };
+
+} // namespace
 
 void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 {
@@ -57,7 +63,29 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         // Parses autoCancel.
         JSRef<JSVal> autoCancelValue = constructorArg->GetProperty("autoCancel");
         if (autoCancelValue->IsBoolean()) {
-            instance->autoCancel_ = autoCancelValue->ToBoolean();
+            instance->dialogProperties_.autoCancel = autoCancelValue->ToBoolean();
+        }
+
+        // Parse alignment
+        auto alignmentValue = constructorArg->GetProperty("alignment");
+        if (alignmentValue->IsNumber()) {
+            auto alignment = alignmentValue->ToNumber<int32_t>();
+            if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+                instance->dialogProperties_.alignment = DIALOG_ALIGNMENT[alignment];
+            }
+        }
+
+        // Parse offset
+        auto offsetValue = constructorArg->GetProperty("offset");
+        if (offsetValue->IsObject()) {
+            auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
+            Dimension dx;
+            auto dxValue = offsetObj->GetProperty("dx");
+            JSViewAbstract::ParseJsDimensionVp(dxValue, dx);
+            Dimension dy;
+            auto dyValue = offsetObj->GetProperty("dy");
+            JSViewAbstract::ParseJsDimensionVp(dyValue, dy);
+            instance->dialogProperties_.offset = DimensionOffset(dx, dy);
         }
 
         info.SetReturnValue(instance);
@@ -86,16 +114,14 @@ void JSCustomDialogController::ShowDialog(const JSCallbackInfo& info)
         LOGE("JSCustomDialogController No Context");
         return;
     }
-    DialogProperties dialogProperties;
-    dialogProperties.autoCancel = autoCancel_;
-    dialogProperties.customComponent = customDialog_;
+    dialogProperties_.customComponent = customDialog_;
     EventMarker cancelMarker([cancelCallback = jsCancelFunction_]() {
         if (cancelCallback) {
             cancelCallback->Execute();
         }
     });
-    dialogProperties.callbacks.try_emplace("cancel", cancelMarker);
-    dialogProperties.onStatusChanged = [this](bool isShown) { this->isShown_ = isShown; };
+    dialogProperties_.callbacks.try_emplace("cancel", cancelMarker);
+    dialogProperties_.onStatusChanged = [this](bool isShown) { this->isShown_ = isShown; };
 
     auto executor = context->GetTaskExecutor();
     if (!executor) {
@@ -103,7 +129,7 @@ void JSCustomDialogController::ShowDialog(const JSCallbackInfo& info)
         return;
     }
     executor->PostTask(
-        [context, dialogProperties, this]() mutable {
+        [context, dialogProperties = dialogProperties_, this]() mutable {
             if (context) {
                 this->dialogComponent_ = context->ShowDialog(dialogProperties, false);
             }

@@ -82,6 +82,10 @@ ACE_EXPORT extern const char DOM_NODE_TAG_TOOL_BAR[];
 ACE_EXPORT extern const char DOM_NODE_TAG_TOOL_BAR_ITEM[];
 ACE_EXPORT extern const char DOM_NODE_TAG_QRCODE[];
 ACE_EXPORT extern const char DOM_NODE_TAG_SVG[];
+ACE_EXPORT extern const char DOM_NODE_TAG_G[];
+ACE_EXPORT extern const char DOM_NODE_TAG_USE[];
+ACE_EXPORT extern const char DOM_NODE_TAG_DEFS[];
+ACE_EXPORT extern const char DOM_NODE_TAG_SYMBOL[];
 ACE_EXPORT extern const char DOM_NODE_TAG_RECT[];
 ACE_EXPORT extern const char DOM_NODE_TAG_ANIMATE[];
 ACE_EXPORT extern const char DOM_NODE_TAG_ANIMATE_TRANSFORM[];
@@ -100,6 +104,11 @@ ACE_EXPORT extern const char DOM_NODE_TAG_CAMERA[];
 ACE_EXPORT extern const char DOM_NODE_TAG_STOP[];
 ACE_EXPORT extern const char DOM_NODE_TAG_LINEAR_GRADIENT[];
 ACE_EXPORT extern const char DOM_NODE_TAG_RADIAL_GRADIENT[];
+ACE_EXPORT extern const char DOM_NODE_TAG_FILTER[];
+ACE_EXPORT extern const char DOM_NODE_TAG_FE_COLORMATRIX[];
+ACE_EXPORT extern const char DOM_NODE_TAG_FE_COMPOSITE[];
+ACE_EXPORT extern const char DOM_NODE_TAG_FE_GAUSSIANBLUR[];
+ACE_EXPORT extern const char DOM_NODE_TAG_FE_OFFSET[];
 
 // common attribute constants
 ACE_EXPORT extern const char DOM_ID[];
@@ -660,6 +669,8 @@ ACE_EXPORT extern const char DOM_INDEX[];
 ACE_EXPORT extern const char DOM_SWIPER_ANIMATION_OPACITY[];
 ACE_EXPORT extern const char DOM_AUTOPLAY[];
 ACE_EXPORT extern const char DOM_CACHED_SIZE[];
+ACE_EXPORT extern const char DOM_DISPLAY_MODE[];
+ACE_EXPORT extern const char DOM_DISPLAY_MODE_AUTO_LINEAR[];
 ACE_EXPORT extern const char DOM_INTERVAL[];
 ACE_EXPORT extern const char DOM_INDICATOR[];
 ACE_EXPORT extern const char DOM_LOOP[];
@@ -970,6 +981,7 @@ ACE_EXPORT extern const char DOM_PICKER_SUFFIX[];
 ACE_EXPORT extern const char DOM_PICKER_DISAPPEAR_COLOR[];
 ACE_EXPORT extern const char DOM_PICKER_DISAPPEAR_FONT_SIZE[];
 ACE_EXPORT extern const char DOM_PICKER_COLUMN_HEIGHT[];
+ACE_EXPORT extern const char DOM_PICKER_VIBRATE[];
 
 // calendar
 ACE_EXPORT extern const char DOM_CALENDAR_DATA[];
@@ -1204,6 +1216,7 @@ ACE_EXPORT extern const char DOM_SVG_HREF[];
 ACE_EXPORT extern const char DOM_SVG_XLINK_HREF[];
 ACE_EXPORT extern const char DOM_SVG_CLIP_RULE[];
 ACE_EXPORT extern const char DOM_SVG_FE_IN[];
+ACE_EXPORT extern const char DOM_SVG_FE_IN2[];
 ACE_EXPORT extern const char DOM_SVG_FE_RESULT[];
 ACE_EXPORT extern const char DOM_SVG_FE_COLOR_INTERPOLATION_FILTERS[];
 ACE_EXPORT extern const char DOM_SVG_FE_TYPE[];
@@ -1217,6 +1230,12 @@ ACE_EXPORT extern const char DOM_SVG_FE_EXPONENT[];
 ACE_EXPORT extern const char DOM_SVG_FE_INTERCEPT[];
 ACE_EXPORT extern const char DOM_SVG_FE_SLOPE[];
 ACE_EXPORT extern const char DOM_SVG_FE_TABLE_VALUES[];
+ACE_EXPORT extern const char DOM_SVG_FE_K1[];
+ACE_EXPORT extern const char DOM_SVG_FE_K2[];
+ACE_EXPORT extern const char DOM_SVG_FE_K3[];
+ACE_EXPORT extern const char DOM_SVG_FE_K4[];
+ACE_EXPORT extern const char DOM_SVG_FE_OPERATOR_TYPE[];
+
 
 // web
 ACE_EXPORT extern const char DOM_PAGESTART[];

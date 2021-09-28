@@ -16,6 +16,7 @@
 #include "frameworks/core/components/svg/render_svg_use.h"
 
 #include "frameworks/core/components/svg/svg_use_component.h"
+#include "frameworks/core/pipeline/base/render_component.h"
 
 namespace OHOS::Ace {
 
@@ -28,7 +29,31 @@ void RenderSvgUse::Update(const RefPtr<Component>& component)
     }
     x_ = svgUseComponent->GetX();
     y_ = svgUseComponent->GetY();
-    RenderSvgBase::SetPresentationAttrs(svgUseComponent->GetDeclaration());
+    RenderSvgBase::SetPresentationAttrs(component, svgUseComponent->GetDeclaration());
+
+    if (!GetFirstChild()) {
+        // Need to actively add child node in ace 1.0 only when child added with svg parse in ace 2.0.
+        auto href = svgUseComponent->GetDeclaration()->GetHref();
+        if (href.empty()) {
+            LOGW("used href is empty");
+            return;
+        }
+        auto refComponent = AceType::DynamicCast<RenderComponent>(GetComponentHrefFromRoot(href));
+        if (!refComponent) {
+            LOGW("ref RenderComponent is null, href:%{public}s", href.c_str());
+            return;
+        }
+        auto renderNode = AceType::DynamicCast<RenderSvgBase>(refComponent->CreateRenderNode());
+        if (!renderNode) {
+            LOGW("create svg use child fail, href:%{public}s", href.c_str());
+            return;
+        }
+        renderNode->Attach(context_);
+        renderNode->Update(refComponent);
+        renderNode->Inherit(svgUseComponent->GetDeclaration(), GetDeclarationHrefFromRoot(href));
+        AddChild(renderNode);
+    }
+
     MarkNeedLayout();
 }
 
@@ -39,6 +64,7 @@ void RenderSvgUse::PerformLayout()
         LOGE("context is null");
         return;
     }
+
     const auto& child = GetFirstChild();
     if (child) {
         child->Layout(GetLayoutParam());

@@ -68,16 +68,13 @@ void JSPersistent::Set(const JSCallbackInfo& args)
         return;
     }
     StorageProxy::GetInstance()->GetStorage(executor)->Set(key, value);
-
-    if (needCrossThread_) {
-        LOGD("cross window nofity, containerId=%{private}d", container->GetInstanceId());
-        AceEngine::Get().NotifyContainers(
-            [currInstanceId = container->GetInstanceId(), key, value](const RefPtr<Container>& container) {
-                if (container && container->GetInstanceId() != currInstanceId) {
-                    container->NotifyAppStorage(key, value);
-                }
-            });
-    }
+    LOGD("cross window nofity, containerId=%{private}d", container->GetInstanceId());
+    AceEngine::Get().NotifyContainers(
+        [currInstanceId = container->GetInstanceId(), key, value](const RefPtr<Container>& container) {
+        if (container && container->GetInstanceId() != currInstanceId) {
+            container->NotifyAppStorage(key, value);
+        }
+    });
 }
 
 void JSPersistent::Get(const JSCallbackInfo& args)

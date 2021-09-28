@@ -49,7 +49,8 @@ void SvgFilter::Update(RefPtr<RenderNode>& node)
     }
 }
 
-RefPtr<RenderNode> SvgFilter::CreateRender(const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent)
+RefPtr<RenderNode> SvgFilter::CreateRender(
+    const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox)
 {
     auto svgContext = svgContext_.Upgrade();
     if (!svgContext) {
@@ -65,7 +66,7 @@ RefPtr<RenderNode> SvgFilter::CreateRender(const LayoutParam& layoutParam, const
     }
 
     for (auto& child : children_) {
-        auto childRender = child->CreateRender(layoutParam, component_->GetDeclaration());
+        auto childRender = child->CreateRender(layoutParam, component_->GetDeclaration(), useBox);
         if (childRender) {
             renderNode->AddChild(childRender, renderNode->GetChildren().size());
             child->Update(childRender);

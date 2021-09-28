@@ -98,6 +98,7 @@ const char APP_REQUEST_FULL_WINDOW_DUATION[] = "duration";
 const char APP_SCREEN_ON_VISIBLE_FLAG[] = "visible";
 const char APP_SET_IMAGE_CACHE_COUNT[] = "setImageCacheCount";
 const char APP_SET_IMAGE_RAWDATA_CACHE_SIZE[] = "setImageRawDataCacheSize";
+const char APP_SET_IMAGE_FILE_CACHE_SIZE[] = "setImageFileCacheSize";
 
 // for animation
 const char ANIMATION_REQUEST_ANIMATION_FRAME[] = "requestAnimationFrame";

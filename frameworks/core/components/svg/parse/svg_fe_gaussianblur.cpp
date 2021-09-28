@@ -42,7 +42,7 @@ void SvgFeGaussianBlur::AppendChild(const RefPtr<SvgNode>& child)
 }
 
 RefPtr<RenderNode> SvgFeGaussianBlur::CreateRender(
-    const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent)
+    const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox)
 {
     component_->Inherit(parent);
     auto renderNode = AceType::DynamicCast<RenderSvgFeGaussianBlur>(component_->CreateRenderNode());

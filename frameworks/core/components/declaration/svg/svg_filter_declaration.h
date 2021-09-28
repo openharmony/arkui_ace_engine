@@ -84,12 +84,6 @@ public:
         return attribute.width;
     }
 
-    const std::string& GetId()
-    {
-        auto& commonAttr = MaybeResetAttribute<CommonAttribute>(AttributeTag::COMMON_ATTR);
-        return commonAttr.id;
-    }
-
 protected:
     void InitSpecialized() override;
 };

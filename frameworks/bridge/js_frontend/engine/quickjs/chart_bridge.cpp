@@ -166,9 +166,17 @@ void GetChartAttrOptionsSeriesLineStyle(JSContext* ctx, JSValueConst valObject, 
         if (JS_IsString(val) || JS_IsBool(val) || JS_IsNumber(val)) {
             static const LinearMapNode<void (*)(const char*, ChartOptions&)>
                 chartOptionsSeriesLinestyleMap[] = {
+                    { "lineGradient",
+                        [](const char* valStr, ChartOptions& chartOptions) {
+                            chartOptions.SetWholeLineGradient(StringToDouble(valStr));
+                        } },
                     { "smooth",
                         [](const char* valStr, ChartOptions& chartOptions) {
                             chartOptions.SetSmoothFlag(StringToBool(valStr));
+                        } },
+                    { "targetColor",
+                        [](const char* valStr, ChartOptions& chartOptions) {
+                            chartOptions.SetTargetColor(Color::FromString(valStr));
                         } },
                     { "width",
                         [](const char* valStr, ChartOptions& chartOptions) {

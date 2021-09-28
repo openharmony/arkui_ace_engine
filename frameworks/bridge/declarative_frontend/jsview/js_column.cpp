@@ -101,6 +101,7 @@ void JSColumn::JSBind(BindingTarget globalObj)
     JSClass<JSColumn>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSColumn>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSColumn>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSColumn>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSColumn>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSColumn>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSColumn>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

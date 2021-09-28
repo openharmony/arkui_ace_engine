@@ -101,6 +101,22 @@ public:
 
     virtual void OnConfigurationUpdated(const std::string& data) {}
 
+    virtual bool OnStartContinuation()
+    {
+        return false;
+    }
+
+    virtual void OnRemoteTerminated() {}
+
+    virtual void OnCompleteContinuation(const int32_t code) {}
+
+    virtual bool OnRestoreData(const std::string& data)
+    {
+        return false;
+    }
+
+    virtual void OnSaveData(std::string& saveData) {}
+
     virtual void MediaQueryCallback(const std::string& callbackId, const std::string& args)
     {
         if (mediaUpdateCallback_) {
@@ -152,15 +168,6 @@ public:
         instanceName_ = name;
     }
 
-    void SetDialogCallback(const DialogCallback callback)
-    {
-        dialogCallback_ = callback;
-    }
-    DialogCallback GetDialogCallback() const
-    {
-        return dialogCallback_;
-    }
-
     void AddExtraNativeObject(const std::string& key, void* value)
     {
         extraNativeObject_[key] = value;
@@ -203,7 +210,6 @@ private:
     std::string instanceName_;
 
     std::unordered_map<std::string, void*> extraNativeObject_;
-    DialogCallback dialogCallback_;
 };
 
 } // namespace OHOS::Ace::Framework

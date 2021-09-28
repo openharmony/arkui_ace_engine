@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MARQUEE_MARQUEE_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MARQUEE_MARQUEE_COMPONENT_H
 
+#include "core/components_v2/common/common_def.h"
 #include "core/components/marquee/render_marquee.h"
 #include "core/components/text/text_component.h"
 #include "core/pipeline/base/sole_child_component.h"
@@ -28,7 +29,7 @@ inline constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
 using MarqueeStartFunc = std::function<void()>;
 using MarqueeStopFunc = std::function<void()>;
 
-class MarqueeController : public virtual AceType {
+class ACE_EXPORT MarqueeController : public virtual AceType {
     DECLARE_ACE_TYPE(MarqueeController, AceType);
 
 public:
@@ -57,7 +58,7 @@ private:
     MarqueeStopFunc stopFunc_;
 };
 
-class MarqueeComponent : public SoleChildComponent {
+class ACE_EXPORT MarqueeComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(MarqueeComponent, SoleChildComponent);
 
 public:
@@ -161,10 +162,25 @@ public:
         return controller_;
     }
 
+    void SetPlayerStatus(bool playerStatus)
+    {
+        playerStatus_ = playerStatus;
+    }
+
+    bool GetPlayerStatus() const
+    {
+        return playerStatus_;
+    }
+
+    ACE_DEFINE_COMPONENT_EVENT(OnStart, void());
+    ACE_DEFINE_COMPONENT_EVENT(OnBounce, void());
+    ACE_DEFINE_COMPONENT_EVENT(OnFinish, void());
+
 private:
     RefPtr<TextComponent> textChild_;
     double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT;
     int32_t loop_ = DEFAULT_MARQUEE_LOOP;
+    bool playerStatus_ = false;
     MarqueeDirection direction_ { MarqueeDirection::LEFT };
     EventMarker bounceEventId_;
     EventMarker finishEventId_;

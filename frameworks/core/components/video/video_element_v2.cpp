@@ -147,6 +147,10 @@ void VideoElementV2::SetNewComponent(const RefPtr<Component>& newComponent)
 
     if (videoComponent) {
         UpdatVideoComponent(videoComponent);
+        auto singleChild = AceType::DynamicCast<SingleChild>(videoComponent->GetParent().Upgrade());
+        if (singleChild) {
+            singleChild->SetChild(videoComponent_);
+        }
         VideoElement::SetNewComponent(videoComponent_);
     } else {
         VideoElement::SetNewComponent(newComponent);

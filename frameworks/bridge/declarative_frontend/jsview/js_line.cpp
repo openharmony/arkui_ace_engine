@@ -59,6 +59,7 @@ void JSLine::SetStart(const JSCallbackInfo& info)
     JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(info[0]);
     ShapePoint startPoint;
     SetPoint(pointArray, startPoint);
+    line->SetStart(startPoint);
 }
 
 void JSLine::SetEnd(const JSCallbackInfo& info)
@@ -75,6 +76,7 @@ void JSLine::SetEnd(const JSCallbackInfo& info)
     JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(info[0]);
     ShapePoint endPoint;
     SetPoint(pointArray, endPoint);
+    line->SetEnd(endPoint);
 }
 
 void JSLine::SetPoint(const JSRef<JSArray>& array, ShapePoint& point)

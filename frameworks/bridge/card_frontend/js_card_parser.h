@@ -211,7 +211,7 @@ private:
     std::unordered_map<std::string, std::string> imageUrlMap_;
     std::unordered_map<std::string, std::string> methodToAction_;
     std::unordered_map<int32_t, std::pair<std::vector<int32_t>, int32_t>> listIdMap_;
-    std::unordered_map<std::string, int32_t> singleLoopMap_;
+    std::unordered_map<int32_t, int32_t> singleLoopMap_;
     std::unordered_map<std::string, std::unique_ptr<JsonValue>> mediaQueryStyles_;
     std::vector<std::pair<std::string, std::string>> customStyles_;
     MediaQueryer mediaQueryer_;

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_ECMASCRIPT_NAPI_JSI_ARK_JS_VALUE_H
-#define PANDA_RUNTIME_ECMASCRIPT_NAPI_JSI_ARK_JS_VALUE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_VALUE_H
+#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_VALUE_H
 
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_value.h"
@@ -94,7 +94,7 @@ public:
     }
 
 private:
-    Global<JSValueRef> value_{};
+    Global<JSValueRef> value_ {};
 };
 }  // namespace OHOS::Ace::Framework
-#endif  // PANDA_RUNTIME_ECMASCRIPT_NAPI_JSI_ARK_JS_VALUE_H
+#endif  // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_VALUE_H

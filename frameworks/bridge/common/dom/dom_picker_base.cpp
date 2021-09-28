@@ -131,10 +131,10 @@ bool DOMPickerBase::GetPickerTime(const std::string& strDate, PickerTime& outTim
         return false;
     }
     outTime.SetMinute(StringUtils::StringToInt(strValue));
-    if (!std::getline(streamDate, strValue)) {
-        return false;
+    // the format time hh:mm is supported, so the time should be set
+    if (std::getline(streamDate, strValue)) {
+        outTime.SetSecond(StringUtils::StringToInt(strValue));
     }
-    outTime.SetSecond(StringUtils::StringToInt(strValue));
     return true;
 }
 
@@ -196,6 +196,7 @@ bool DOMPickerBase::SetSpecializedAttr(const std::pair<std::string, std::string>
         { DOM_PICKER_RANGE, [](DOMPickerBase& picker, const std::string& val) { picker.SetRange(val); } },
         { DOM_SELECTED, [](DOMPickerBase& picker, const std::string& val) { picker.SetSelected(val); } },
         { DOM_START, [](DOMPickerBase& picker, const std::string& val) { picker.SetStart(val); } },
+        { DOM_PICKER_VIBRATE, [](DOMPickerBase& picker, const std::string& val) { picker.SetVibrate(val); } },
     };
     auto it = BinarySearchFindIndex(pickerAttrOperators, ArraySize(pickerAttrOperators), attr.first.c_str());
     if (it != -1) {
@@ -790,6 +791,24 @@ bool DOMPickerBase::SetSuffix(const std::string& value)
         AceType::InstanceOf<PickerTextComponent>(basePickerChild_)) {
         auto picker = AceType::DynamicCast<PickerTextComponent>(basePickerChild_);
         picker->SetSuffix(value);
+        return true;
+    }
+    return false;
+}
+
+bool DOMPickerBase::SetVibrate(const std::string& value)
+{
+    static const char* FALSE = "false";
+    static const char* TRUE = "true";
+
+    if (basePickerChild_) {
+        if (value == TRUE) {
+            basePickerChild_->SetNeedVibrate(true);
+        } else if (value == FALSE) {
+            basePickerChild_->SetNeedVibrate(false);
+        } else {
+            LOGE("value of lunar is invalid.");
+        }
         return true;
     }
     return false;

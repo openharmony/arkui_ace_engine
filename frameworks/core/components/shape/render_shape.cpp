@@ -39,8 +39,8 @@ void RenderShape::Update(const RefPtr<Component>& component)
     antiAlias_ = shapeComponent->GetAntiAlias();
     pathCmd_ = shapeComponent->GetPathCmd();
     points_ = shapeComponent->GetPoints();
-    width_ = shapeComponent->GetWidth();
-    height_ = shapeComponent->GetHeight();
+    NormalToPxOfShape(shapeComponent->GetWidth(), width_);
+    NormalToPxOfShape(shapeComponent->GetHeight(), height_);
     MarkNeedLayout();
 }
 
@@ -56,6 +56,20 @@ void RenderShape::PerformLayout()
 void RenderShape::OnAnimationCallback()
 {
     CalcSize();
+}
+
+void RenderShape::NormalToPxOfShape(AnimatableDimension sizeFromComponent, AnimatableDimension& sizeOfCurrent)
+{
+    if (sizeFromComponent.Unit() == DimensionUnit::PERCENT || sizeFromComponent.Unit() == DimensionUnit::PX) {
+        sizeOfCurrent = sizeFromComponent;
+    } else {
+        auto context = context_.Upgrade();
+        if (!context) {
+            return;
+        }
+        sizeOfCurrent.SetValue(context->NormalizeToPx(sizeFromComponent));
+        sizeOfCurrent.SetUnit(DimensionUnit::PX);
+    }
 }
 
 void RenderShape::NotifySizeTransition(const AnimationOption& option, Size fromSize, Size toSize, int32_t nodeId)

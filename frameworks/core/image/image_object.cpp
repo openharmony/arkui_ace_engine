@@ -77,7 +77,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
 void StaticImageObject::UploadToGpuForRender(
     const WeakPtr<PipelineContext> context,
     RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-    PaintSuccessCallback successCallback,
+    UploadSuccessCallback successCallback,
     FailedCallback failedCallback,
     Size imageSize,
     bool forceResize)
@@ -116,17 +116,15 @@ void StaticImageObject::UploadToGpuForRender(
             LOGD("reload sk data");
             skData = ImageProvider::LoadImageRawData(imageSource, pipelineContext, imageSize);
             if (!skData) {
-                LOGE("reload image data failed.");
+                LOGE("reload image data failed. imageSource: %{private}s", imageSource.ToString().c_str());
                 taskExecutor->PostTask(
                     [failedCallback, imageSource] { failedCallback(imageSource); }, TaskExecutor::TaskType::UI);
                 return;
             }
-        } else {
-            LOGE("sk data not null!");
         }
         auto rawImage = SkImage::MakeFromEncoded(skData);
         if (!rawImage) {
-            LOGE("static image MakeFromEncoded fail!");
+            LOGE("static image MakeFromEncoded fail! imageSource: %{private}s", imageSource.ToString().c_str());
             taskExecutor->PostTask(
                 [failedCallback, imageSource] { failedCallback(imageSource); }, TaskExecutor::TaskType::UI);
             return;
@@ -162,7 +160,7 @@ bool StaticImageObject::CancelBackgroundTasks()
 void AnimatedImageObject::UploadToGpuForRender(
     const WeakPtr<PipelineContext> context,
     RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-    PaintSuccessCallback successCallback,
+    UploadSuccessCallback successCallback,
     FailedCallback failedCallback,
     Size imageSize,
     bool forceResize)

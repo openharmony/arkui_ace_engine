@@ -43,6 +43,7 @@ private:
     void CalculateItemState(RefPtr<RenderNode>& item);
     void MarkAllItemBlur();
     double GetFirstChildSize(RefPtr<RenderNode>& itemChild);
+    bool IsPlatformFive();
 
     double firstChildSize_ = 0.0;
     double lastChildSize_ = 0.0;

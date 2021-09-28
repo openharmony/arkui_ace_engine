@@ -16,6 +16,8 @@ import("//foundation/ace/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
   module_output_path = "ace_engine_standard/backenduicomponent/theme"
+} else {
+  module_output_path = "ace_engine_full/backenduicomponent/theme"
 }
 
 ohos_unittest("ThemeManagerTest") {
@@ -45,12 +47,16 @@ ohos_unittest("ThemeManagerTest") {
     "$ace_root/frameworks/core/animation/scheduler.cpp",
 
     # common
+    "$ace_root/frameworks/core/common/ace_engine.cpp",
+    "$ace_root/frameworks/core/common/container.cpp",
+    "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
-    "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
 
     # event
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
+    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
     "theme_manager_test.cpp",
+    "theme_mock.cpp",
   ]
 
   # add sources only needed by wearable like watch.
@@ -72,15 +78,28 @@ ohos_unittest("ThemeManagerTest") {
   ]
 
   deps = [
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
 
-  if (is_standard_system) {
+  if (!is_standard_system) {
     sources += [
-      "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-      "$ace_root/adapter/ohos/osal/system_properties.cpp",
+      "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
+      "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
+      "$ace_root/frameworks/bridge/common/utils/utils.cpp",
+    ]
+    deps += [ "$ace_root/frameworks/base:ace_base_ohos" ]
+    external_deps = [
+      "hilog:libhilog",
+      "resmgr:resourcemanager",
+      "startup:syspara",
+    ]
+  } else {
+    subsystem_name = "ace"
+    part_name = "ace_engine_standard"
+    sources += [
       "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
       "$ace_root/frameworks/base/log/dump_log.cpp",
       "$ace_root/frameworks/base/utils/base_id.cpp",
@@ -90,9 +109,9 @@ ohos_unittest("ThemeManagerTest") {
       "startup_l2:syspara",
     ]
     configs += [ "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config" ]
-    subsystem_name = "ace"
-    part_name = "ace_engine_standard"
   }
+  subsystem_name = "ace"
+  part_name = "ace_engine_full"
 }
 
 ohos_unittest("ThemeConstantsTest") {
@@ -128,11 +147,15 @@ ohos_unittest("ThemeConstantsTest") {
 
     # common
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
+    "$ace_root/frameworks/base/memory/memory_monitor.cpp",
+    "$ace_root/frameworks/core/common/ace_engine.cpp",
+    "$ace_root/frameworks/core/common/container.cpp",
+    "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
-    "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
 
     # event
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
+    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
     "theme_constants_test.cpp",
     "theme_mock.cpp",
   ]
@@ -153,23 +176,36 @@ ohos_unittest("ThemeConstantsTest") {
   configs = [
     ":config_theme_manager_test",
     "$ace_root:ace_test_config",
-    "//third_party/cJSON:cJSON_config",
   ]
 
   deps = [
-    "$ace_root:third_party_cjson",
+    "$ace_root/build/third_party/cJSON:third_party_cjson",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
 
-  sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
   if (is_standard_system) {
     external_deps = [
       "hiviewdfx_hilog_native:libhilog",
       "startup_l2:syspara",
     ]
     configs += [ "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config" ]
+  } else {
+    external_deps = [
+      "hilog:libhilog",
+      "startup:syspara",
+    ]
+  }
+
+  sources += [
+    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
+  ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -186,7 +222,7 @@ config("config_theme_manager_test") {
 group("unittest") {
   testonly = true
   deps = [
-    #":ThemeConstantsTest",
-    #":ThemeManagerTest",
+    ":ThemeConstantsTest",
+    ":ThemeManagerTest",
   ]
 }

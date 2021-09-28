@@ -42,7 +42,7 @@ void SvgFeOffset::AppendChild(const RefPtr<SvgNode>& child)
 }
 
 RefPtr<RenderNode> SvgFeOffset::CreateRender(
-    const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent)
+    const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox)
 {
     component_->Inherit(parent);
     auto renderNode = AceType::DynamicCast<RenderSvgFeOffset>(component_->CreateRenderNode());

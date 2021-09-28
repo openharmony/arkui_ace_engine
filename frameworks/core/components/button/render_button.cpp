@@ -369,13 +369,9 @@ void RenderButton::Update(const RefPtr<Component>& component)
     if (theme) {
         defaultClickedColor_ = theme->GetClickedColor();
     }
-    if (type_ == ButtonType::ARC) {
-        width_ = ARC_BUTTON_WIDTH;
-        height_ = ARC_BUTTON_HEIGHT;
-    } else {
-        width_ = buttonComponent_->GetWidth();
-        height_ = buttonComponent_->GetHeight();
-    }
+
+    width_ = buttonComponent_->GetWidth();
+    height_ = buttonComponent_->GetHeight();
     layoutFlag_ = button->GetLayoutFlag();
     clickedColor_ = button->GetClickedColor();
     stateEffect_ = button->GetStateEffect();
@@ -409,6 +405,10 @@ void RenderButton::PerformLayout()
     type_ = buttonComponent_->GetType();
     widthDefined_ = GreatOrEqual(buttonComponent_->GetWidth().Value(), 0.0);
     heightDefined_ = GreatOrEqual(buttonComponent_->GetHeight().Value(), 0.0);
+    if (type_ == ButtonType::ARC) {
+        width_ = ARC_BUTTON_WIDTH;
+        height_ = ARC_BUTTON_HEIGHT;
+    }
     buttonSize_ = Size(NormalizeToPx(width_), NormalizeToPx(height_));
     rrectRadius_ = NormalizeToPx(buttonComponent_->GetRectRadius());
     layoutSize_ = Measure();

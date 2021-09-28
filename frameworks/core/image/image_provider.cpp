@@ -59,9 +59,8 @@ void ImageProvider::FatchImageObject(
             auto imgObj = imageCache->GetCacheImgObj(imageInfo.ToString());
             if (imgObj) {
                 LOGE("image object got from cache: %{public}s", imageInfo.ToString().c_str());
-                taskExecutor->PostTask([ successCallback, imageInfo, imgObj ] () {
-                    successCallback(imageInfo, imgObj);
-                }, TaskExecutor::TaskType::UI);
+                taskExecutor->PostTask([successCallback, imageInfo, imgObj]() { successCallback(imageInfo, imgObj); },
+                    TaskExecutor::TaskType::UI);
                 return;
             }
         }
@@ -126,6 +125,8 @@ sk_sp<SkData> ImageProvider::LoadImageRawData(
                 auto data = cacheFileLoader->LoadImageData(std::string("file:/").append(cacheFilePath));
                 if (data) {
                     return data;
+                } else {
+                    LOGW("load data from cache file failed, try load from raw image file.");
                 }
             }
         } else {
@@ -234,8 +235,49 @@ void ImageProvider::UploadImageToGPUForRender(
     const std::function<void(flutter::SkiaGPUObject<SkImage>)>&& callback,
     const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder)
 {
-    // If want to dump draw command, should use CPU image.
+#if defined(DUMP_DRAW_CMD) || defined(GPU_DISABLED)
+    // If want to dump draw command or gpu disabled, should use CPU image.
     callback({ image, renderTaskHolder->unrefQueue });
+#else
+    // TODO: software render not upload to gpu
+
+    auto rasterizedImage = image->makeRasterImage();
+    if (!rasterizedImage) {
+        LOGW("Rasterize image failed. callback.");
+        callback({ image, renderTaskHolder->unrefQueue });
+        return;
+    }
+    if (renderTaskHolder->IsValid()) {
+        auto task = [rasterizedImage, callback, renderTaskHolder] () {
+            if (!renderTaskHolder->ioManager) {
+                // Shell is closing.
+                callback({ rasterizedImage, renderTaskHolder->unrefQueue });
+                return;
+            }
+            ACE_DCHECK(!rasterizedImage->isTextureBacked());
+            auto resContext = renderTaskHolder->ioManager->GetResourceContext();
+            if (!resContext) {
+                callback({ rasterizedImage, renderTaskHolder->unrefQueue });
+                return;
+            }
+            SkPixmap pixmap;
+            if (!rasterizedImage->peekPixels(&pixmap)) {
+                LOGW("Could not peek pixels of image for texture upload.");
+                callback({ rasterizedImage, renderTaskHolder->unrefQueue });
+                return;
+            }
+            auto textureImage =
+                SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, pixmap.colorSpace(), true);
+            callback({ textureImage ? textureImage : rasterizedImage, renderTaskHolder->unrefQueue });
+
+            // Trigger purge cpu bitmap resource, after image upload to gpu.
+            SkGraphics::PurgeResourceCache();
+        };
+        renderTaskHolder->ioTaskRunner->PostTask(std::move(task));
+    } else {
+        callback({ rasterizedImage, renderTaskHolder->unrefQueue });
+    }
+#endif
 }
 
 sk_sp<SkImage> ImageProvider::ResizeSkImage(
@@ -302,7 +344,7 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
         if (needCacheResizedImageFile && !srcKey.empty()) {
             auto data = scaledImage->encodeToData(SkEncodedImageFormat::kPNG, 100);
             if (data) {
-                LOGD("write cache file: %{private}s", srcKey);
+                LOGD("write cache file: %{private}s", srcKey.c_str());
                 ImageCache::WriteCacheFile(srcKey, data->data(), data->size());
             }
         }

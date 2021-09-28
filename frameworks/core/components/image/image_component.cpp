@@ -191,6 +191,33 @@ void ImageComponent::SetAutoResize(bool autoResize)
     autoResize_ = autoResize;
 }
 
+RefPtr<ImageComponent> ImageComponent::MakeFromOtherWithoutSourceAndEvent(const RefPtr<ImageComponent>& other)
+{
+    RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<ImageComponent>("");
+    imageComponent->SetAlignment(other->GetAlignment());
+    imageComponent->SetImageFill(other->GetImageFill());
+    imageComponent->SetColor(other->GetColor());
+    imageComponent->SetBorder(other->GetBorder());
+    imageComponent->SetFitMaxSize(other->GetFitMaxSize());
+    imageComponent->SetMatchTextDirection(other->IsMatchTextDirection());
+    imageComponent->SetImageFit(other->GetImageFit());
+    imageComponent->SetImageInterpolation(other->GetImageInterpolation());
+    imageComponent->SetImageRenderMode(other->GetImageRenderMode());
+    imageComponent->SetImageRepeat(other->GetImageRepeat());
+    imageComponent->SetImageSourceSize(other->GetImageSourceSize());
+    imageComponent->SetUseSkiaSvg(other->GetUseSkiaSvg());
+    imageComponent->SetAutoResize(other->GetAutoResize());
+    return imageComponent;
+}
+
+std::optional<Color> ImageComponent::GetImageFill() const
+{
+    if (!isFillSet_) {
+        return std::nullopt;
+    }
+    return std::optional<Color>(fillColor_);
+}
+
 bool ImageComponent::GetFitMaxSize() const
 {
     return fitMaxSize_;

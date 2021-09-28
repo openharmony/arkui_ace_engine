@@ -15,8 +15,6 @@
 
 #include "gtest/gtest.h"
 
-#include "adapter/ohos/osal/fake_asset_manager.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "core/animation/card_transition_controller.h"
@@ -32,6 +30,8 @@
 #include "core/components/test/unittest/mock/transition_mock.h"
 #include "core/components/test/unittest/mock/window_mock.h"
 #include "core/components/tween/tween_element.h"
+#include "core/mock/fake_asset_manager.h"
+#include "core/mock/fake_task_executor.h"
 #include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
 

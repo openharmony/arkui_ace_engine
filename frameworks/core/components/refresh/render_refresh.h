@@ -50,6 +50,7 @@ public:
     void UpdateScrollableOffset(double delta);
     void HandleDragUpdate(double delta);
     void HandleDragEnd();
+    void HandleDragCancel();
 
     RefreshStatus GetStatus() const
     {
@@ -116,6 +117,9 @@ private:
 
     // OnPullDownStartEvent
     std::function<void(const std::string&)> pullDownEvent_;
+
+    std::function<void(int)> onStateChange_;
+    std::function<void(void)> onRefreshing_;
 
     bool showLastTime_ = false;
     bool refreshing_ = false;

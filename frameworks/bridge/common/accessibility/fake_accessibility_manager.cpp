@@ -26,6 +26,10 @@ void JsAccessibilityManager::SendAccessibilitySyncEvent(const AccessibilityEvent
 
 void JsAccessibilityManager::UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node) {}
 
+void JsAccessibilityManager::HandleComponentPostBinding() {}
+
+void JsAccessibilityManager::SetSupportAction(uint32_t action, bool isEnable) {}
+
 void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& params) {}
 
 void JsAccessibilityManager::DumpProperty(const std::vector<std::string>& params) {};
@@ -33,8 +37,6 @@ void JsAccessibilityManager::DumpProperty(const std::vector<std::string>& params
 void JsAccessibilityManager::DumpTree(int32_t depth, NodeId nodeID) {};
 
 void JsAccessibilityManager::SetCardViewParams(const std::string& key, bool focus) {};
-
-void JsAccessibilityManager::HandleComponentPostBinding() {};
 
 RefPtr<AccessibilityNodeManager> AccessibilityNodeManager::Create()
 {

@@ -16,6 +16,8 @@ import("//foundation/ace/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
   module_output_path = "ace_engine_standard/backenduicomponent/tabbar"
+} else {
+  module_output_path = "ace_engine_full/backenduicomponent/tabbar"
 }
 
 ohos_unittest("RenderTabBarTest") {
@@ -30,18 +32,12 @@ ohos_unittest("RenderTabBarTest") {
 
   configs = [ "$ace_root:ace_test_config" ]
 
-  deps = [
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
-  if (is_standard_system) {
-    configs += [ "//third_party/curl:curl_config" ]
-    deps += [
-      "$ace_root/frameworks/bridge:js_framework_ohos",
-      "//third_party/curl:curl",
-    ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -80,10 +76,13 @@ ohos_unittest("RenderTabContentTest") {
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
 
     # common
+    "$ace_root/frameworks/core/common/ace_application_info.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
+    "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/event_manager.cpp",
     "$ace_root/frameworks/core/common/focus_animation_manager.cpp",
     "$ace_root/frameworks/core/common/font_manager.cpp",
+    "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
     "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
     "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
@@ -107,10 +106,12 @@ ohos_unittest("RenderTabContentTest") {
     "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",
 
     # elements
+    "$ace_root/frameworks/core/components/box/box_element.cpp",
     "$ace_root/frameworks/core/components/bubble/bubble_element.cpp",
     "$ace_root/frameworks/core/components/display/display_element.cpp",
     "$ace_root/frameworks/core/components/flex/flex_element.cpp",
     "$ace_root/frameworks/core/components/page/page_element.cpp",
+    "$ace_root/frameworks/core/components/page_transition/page_transition_component.cpp",
     "$ace_root/frameworks/core/components/page_transition/page_transition_element.cpp",
     "$ace_root/frameworks/core/components/root/root_element.cpp",
     "$ace_root/frameworks/core/components/stack/stack_element.cpp",
@@ -210,8 +211,6 @@ ohos_unittest("RenderTabContentTest") {
 
   if (is_standard_system) {
     sources += [
-      "$ace_root/adapter/common/cpp/thread_util.cpp",
-      "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
       "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
       "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
       "$ace_root/frameworks/base/geometry/matrix4.cpp",
@@ -225,6 +224,8 @@ ohos_unittest("RenderTabContentTest") {
       "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
       "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
     ]
+  } else {
+    sources += [ "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp" ]
   }
 
   # add sources only needed by wearable like watch.
@@ -247,14 +248,27 @@ ohos_unittest("RenderTabContentTest") {
   ]
 
   deps = [
-    "$ace_flutter_engine_root:ace_skia_ohos",
+    "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
 
-  if (is_standard_system) {
+  if (!is_standard_system) {
+    deps += [ "$ace_root/frameworks/base:ace_base_ohos" ]
+    external_deps = [
+      "hilog:libhilog",
+      "resmgr:resourcemanager",
+    ]
+  } else {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  }
+
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -279,16 +293,14 @@ ohos_unittest("TabContentCreatorTest") {
   ]
 
   deps = [
-    "$ace_root/frameworks/base:ace_base_ohos",
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
+    "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components/test:json",
-    "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
-  if (is_standard_system) {
-    deps += [ "$ace_root/frameworks/bridge:js_framework_ohos" ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -314,20 +326,14 @@ ohos_unittest("TabBarElementTest") {
   ]
 
   deps = [
-    "$ace_root/frameworks/base:ace_base_ohos",
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
+    "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components/test:json",
-    "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
-  if (is_standard_system) {
-    configs += [ "//third_party/curl:curl_config" ]
-    deps += [
-      "$ace_root/frameworks/bridge:js_framework_ohos",
-      "//third_party/curl:curl",
-    ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -355,16 +361,14 @@ ohos_unittest("TabBarCreatorTest") {
   ]
 
   deps = [
-    "$ace_root/frameworks/base:ace_base_ohos",
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
+    "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components/test:json",
-    "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
-  if (is_standard_system) {
-    deps += [ "$ace_root/frameworks/bridge:js_framework_ohos" ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -377,8 +381,10 @@ group("unittest") {
     ":RenderTabBarTest",
 
     #":RenderTabContentTest",
-    ":TabBarCreatorTest",
+
+    #":TabBarCreatorTest",
     ":TabBarElementTest",
-    ":TabContentCreatorTest",
+
+    #":TabContentCreatorTest",
   ]
 }

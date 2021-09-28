@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 
-#include "adapter/ohos/osal/fake_asset_manager.h"
-#include "adapter/ohos/osal/fake_task_executor.h"
+#include "mock/gesture_mock.h"
+
 #include "core/common/platform_window.h"
 #include "core/common/window.h"
 #include "core/gestures/click_recognizer.h"
@@ -28,9 +28,10 @@
 #include "core/gestures/raw_recognizer.h"
 #include "core/gestures/rotation_recognizer.h"
 #include "core/gestures/velocity_tracker.h"
+#include "core/mock/fake_asset_manager.h"
+#include "core/mock/fake_task_executor.h"
 #include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
-#include "mock/gesture_mock.h"
 
 using namespace testing::ext;
 

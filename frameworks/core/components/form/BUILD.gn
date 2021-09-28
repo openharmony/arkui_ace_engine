@@ -21,12 +21,4 @@ build_component("form") {
     "resource/form_manager_resource.cpp",
     "sub_container.cpp",
   ]
-
-  external_deps = [
-    "aafwk_standard:want",
-    "appexecfwk_standard:appexecfwk_base",
-    "appexecfwk_standard:appexecfwk_core",
-    "appexecfwk_standard:fmskit_native",
-    "ipc:ipc_core",
-  ]
 }

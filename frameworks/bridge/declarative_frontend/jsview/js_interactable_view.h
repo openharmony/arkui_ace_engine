@@ -29,6 +29,7 @@ public:
     static void JsOnTouch(const JSCallbackInfo& args);
     static void JsOnPan(const JSCallbackInfo& args);
     static void JsOnClick(const JSCallbackInfo& info);
+    static void JsOnHover(const JSCallbackInfo& args);
     static EventMarker GetClickEventMarker(const JSCallbackInfo& info);
     static RefPtr<Gesture> GetTapGesture(const JSCallbackInfo& info);
     static void JsOnKey(const JSCallbackInfo& args);

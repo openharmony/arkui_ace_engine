@@ -34,7 +34,6 @@ void RenderSvgPattern::Update(const RefPtr<Component> &component)
     y_ = declaration->GetY();
     height_ = declaration->GetHeight();
     width_ = declaration->GetWidth();
-    id_ = declaration->GetId();
     viewBox_ = declaration->GetViewBox();
     patternUnits_ = declaration->GetPatternUnits();
     patternContentUnits_ = declaration->GetPatternContentUnits();

@@ -17,10 +17,8 @@
 
 #include "flutter/lib/ui/ui_dart_state.h"
 
-#include "adapter/common/cpp/flutter_asset_manager.h"
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/entrance/dir_asset_provider.h"
-#include "adapter/preview/entrance/flutter_task_executor.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -28,6 +26,8 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ace_view.h"
+#include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_window.h"
 #include "core/common/text_field_manager.h"
@@ -118,6 +118,7 @@ void AceContainer::InitializeFrontend()
         return;
     }
     ACE_DCHECK(frontend_);
+    frontend_->DisallowPopLastPage();
     frontend_->Initialize(type_, taskExecutor_);
 }
 
@@ -268,12 +269,18 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
 
 void AceContainer::UpdateResourceConfiguration(const std::string& jsonStr)
 {
-    bool isConfigurationUpdated = false;
+    uint32_t updateFlags = 0;
     auto resConfig = resourceInfo_.GetResourceConfiguration();
-    if (!resConfig.UpdateFromJsonString(jsonStr, isConfigurationUpdated) || !isConfigurationUpdated) {
+    if (!resConfig.UpdateFromJsonString(jsonStr, updateFlags) || !updateFlags) {
         return;
     }
     resourceInfo_.SetResourceConfiguration(resConfig);
+    if (ResourceConfiguration::TestFlag(updateFlags, ResourceConfiguration::COLOR_MODE_UPDATED_FLAG)) {
+        SystemProperties::SetColorMode(resConfig.GetColorMode());
+        if (frontend_) {
+            frontend_->SetColorMode(resConfig.GetColorMode());
+        }
+    }
     if (!pipelineContext_) {
         return;
     }
@@ -384,7 +391,7 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
 {
     auto front = GetFrontend();
     if (!front) {
-        LOGE("the front is nullptr");
+        LOGE("the front jni is nullptr");
         return;
     }
 
@@ -449,8 +456,8 @@ void AceContainer::AddAssetPath(
     }
 }
 
-void AceContainer::SetResourcesPathAndThemeStyle(
-    int32_t instanceId, const std::string& resourcesPath, const int32_t& themeId, const ColorMode& colorMode)
+void AceContainer::SetResourcesPathAndThemeStyle(int32_t instanceId, const std::string& systemResourcesPath,
+    const std::string& appResourcesPath, const int32_t& themeId, const ColorMode& colorMode)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     if (!container) {
@@ -459,7 +466,8 @@ void AceContainer::SetResourcesPathAndThemeStyle(
     auto resConfig = container->resourceInfo_.GetResourceConfiguration();
     resConfig.SetColorMode(static_cast<OHOS::Ace::ColorMode>(colorMode));
     container->resourceInfo_.SetResourceConfiguration(resConfig);
-    container->resourceInfo_.SetPackagePath(resourcesPath);
+    container->resourceInfo_.SetPackagePath(appResourcesPath);
+    container->resourceInfo_.SetSystemPackagePath(systemResourcesPath);
     container->resourceInfo_.SetThemeId(themeId);
 }
 

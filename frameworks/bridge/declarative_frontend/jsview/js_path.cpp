@@ -89,6 +89,7 @@ void JSPath::JSBind(BindingTarget globalObj)
     JSClass<JSPath>::CustomMethod("fill", &JSShapeAbstract::ObjectFill);
 
     JSClass<JSPath>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSPath>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSPath>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSPath>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSPath>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

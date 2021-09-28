@@ -87,7 +87,7 @@ void XComponentElement::RegisterSurfaceDestroyEvent()
 {
     auto context = context_.Upgrade();
     if (context) {
-        context->SetKeyHandler([weak = WeakClaim(this)] {
+        context->SetDestroyHandler([weak = WeakClaim(this)] {
             auto element = weak.Upgrade();
             if (element) {
                 element->OnSurfaceDestroyEvent();
@@ -114,7 +114,7 @@ void XComponentElement::RegisterDispatchTouchEventCallback()
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("pipelineContext is null");
+        LOGE("RegisterDispatchTouchEventCallback pipelineContext is null");
         return;
     }
     pipelineContext->SetDispatchTouchEventHandler([weak = WeakClaim(this)](const TouchPoint& event) {
@@ -127,6 +127,11 @@ void XComponentElement::RegisterDispatchTouchEventCallback()
 
 void XComponentElement::DispatchTouchEvent(const TouchPoint& event)
 {
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("DispatchTouchEvent pipelineContext is null");
+        return;
+    }
     auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
     if (renderXComponent != nullptr && renderXComponent->GetPluginContext() != nullptr) {
         touchEventPoint_.id = event.id;
@@ -137,7 +142,13 @@ void XComponentElement::DispatchTouchEvent(const TouchPoint& event)
         touchEventPoint_.deviceId = event.deviceId;
         touchEventPoint_.time = event.time;
         SetTouchEventType(event);
-        renderXComponent->GetPluginContext()->DispatchTouchEvent(touchEventPoint_);
+
+        pipelineContext->GetTaskExecutor()->PostTask(
+            [weakEle = WeakClaim(this), renderXComponent] {
+                auto element = weakEle.Upgrade();
+                renderXComponent->GetPluginContext()->DispatchTouchEvent(element->touchEventPoint_);
+            },
+            TaskExecutor::TaskType::JS);
     }
 }
 

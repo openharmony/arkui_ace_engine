@@ -38,7 +38,6 @@ protected:
     Dimension y_;
     Dimension height_;
     Dimension width_;
-    std::string id_;
 
 private:
     void PrepareAnimations(const RefPtr<Component>& component);

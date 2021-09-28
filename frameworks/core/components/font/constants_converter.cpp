@@ -240,6 +240,11 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineContext>&
         } else {
             LOGD("use default text style height value.");
             txtStyle.height = 1;
+            static const int32_t BEGIN_VERSION = 6;
+            auto isBeginVersion = pipelineContext && pipelineContext->GetMinPlatformVersion() >= BEGIN_VERSION;
+            if (NearZero(lineHeight) || (!isBeginVersion && NearEqual(lineHeight, fontSize))) {
+                txtStyle.has_height_override = false;
+            }
         }
     }
 

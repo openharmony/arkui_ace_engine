@@ -1,0 +1,100 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/ace/ace_engine/ace_config.gni")
+
+# build static
+template("ace_ohos_standard_source_set") {
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+    cflags_cc += invoker.cflags_cc
+
+    sources = [
+      "$ace_root/adapter/ohos/entrance/ace_ability.cpp",
+      "$ace_root/adapter/ohos/entrance/ace_application_info.cpp",
+      "$ace_root/adapter/ohos/entrance/ace_container.cpp",
+      "$ace_root/adapter/ohos/entrance/ace_data_ability.cpp",
+      "$ace_root/adapter/ohos/entrance/ace_form_ability.cpp",
+      "$ace_root/adapter/ohos/entrance/ace_service_ability.cpp",
+      "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
+      "$ace_root/adapter/ohos/entrance/flutter_ace_view.cpp",
+      "$ace_root/adapter/ohos/entrance/pa_container.cpp",
+    ]
+
+    configs = [ "$ace_root:ace_config" ]
+
+    include_dirs = [
+      "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/featureAbility",
+      "//foundation/ace/napi/interfaces/kits",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability/include",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include",
+      "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
+      "//third_party/node/src",
+      "//utils/native/base/include",
+    ]
+
+    deps = [
+      "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
+      "$ace_flutter_engine_root/skia:ace_skia_$platform",
+      "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
+      "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
+      "//foundation/graphic/standard:libwmclient",
+      "//third_party/zlib:libz",
+    ]
+
+    public_deps =
+        [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
+
+    external_deps = [
+      "aafwk_standard:ability_manager",
+      "aafwk_standard:base",
+      "aafwk_standard:want",
+      "appexecfwk_standard:appexecfwk_base",
+      "appexecfwk_standard:appexecfwk_core",
+      "appexecfwk_standard:fmskit_native",
+      "appexecfwk_standard:libeventhandler",
+      "ipc:ipc_core",
+      "multimodalinput_base:mmi_event",
+      "native_appdatamgr:native_dataability",
+      "native_appdatamgr:native_rdb",
+    ]
+  }
+}
+
+foreach(item, ace_platforms) {
+  platform = item.name
+  if (platform == "ohos") {
+    ace_ohos_standard_source_set("ace_ohos_standard_entrance") {
+      platform = item.name
+      defines = []
+      cflags_cc = []
+      config = {
+      }
+
+      if (defined(item.config)) {
+        config = item.config
+      }
+
+      if (defined(config.defines)) {
+        defines = config.defines
+      }
+
+      if (defined(config.cflags_cc)) {
+        cflags_cc = config.cflags_cc
+      }
+    }
+  }
+}

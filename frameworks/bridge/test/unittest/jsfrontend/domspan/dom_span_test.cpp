@@ -26,7 +26,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::Framework {
 namespace {
 
-const std::string SPAN_DATA = "ohos1234@?!";
+const std::string SPAN_DATA = "test1234@?!";
 constexpr double TEST_FONT_SIZE = 50.0;
 constexpr int32_t TEST_FONT_WEIGHT = 1;
 constexpr int32_t TEST_FONT_STYLE = 1;
@@ -99,7 +99,7 @@ HWTEST_F(DomSpanTest, DomSpanTest002, TestSize.Level1)
                                     "{                                             "
                                     "  \"tag\": \"span\",                          "
                                     "  \"attr\" : [{                               "
-                                    "           \"value\" : \"ohos1234@?!\"      "
+                                    "           \"value\" : \"test1234@?!\"      "
                                     "            }],                               "
                                     "  \"style\": [{                               "
                                     "           \"fontSize\":\"50.0\"              "

@@ -29,7 +29,7 @@ namespace OHOS::Ace {
 
 using RefreshAnimationCallback = std::function<void(const TweenOption&, bool)>;
 
-class SelectPopupComponent : public SoleChildComponent {
+class ACE_EXPORT SelectPopupComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(SelectPopupComponent, SoleChildComponent);
 
 public:
@@ -225,6 +225,11 @@ public:
         isFullScreen_ = isFullScreen;
     }
 
+    void SetTheme(const RefPtr<SelectTheme>& theme)
+    {
+        theme_ = theme->clone();
+    }
+
     const RefPtr<SelectTheme>& GetTheme() const
     {
         return theme_;
@@ -259,6 +264,11 @@ public:
     }
 
     void SetDefaultSelecting();
+
+    bool GetPopupShowed()
+    {
+        return dialogShowed_;
+    }
 
 private:
     RefPtr<BoxComponent> InitializeInnerBox(const RefPtr<ScrollComponent>& scroll);

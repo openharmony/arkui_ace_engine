@@ -26,7 +26,10 @@ class FlutterRenderSvgFe : public AceType {
     DECLARE_ACE_TYPE(FlutterRenderSvgFe, AceType);
 
 public:
-    virtual void OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const = 0;
+    virtual void OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const {}
+    virtual void OnAsImageFilter(const sk_sp<SkImageFilter>& backImageFilter,
+                                 const sk_sp<SkImageFilter>& foreImageFilter,
+                                 sk_sp<SkImageFilter>& imageFilter) const {}
 };
 
 } // namespace OHOS::Ace

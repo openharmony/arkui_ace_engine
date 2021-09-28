@@ -157,6 +157,16 @@ public:
         return scrolledEvent_;
     }
 
+    void SetCachedCount(int32_t cacheCount)
+    {
+        cacheCount_ = cacheCount;
+    }
+
+    int32_t GetCacheCount() const
+    {
+        return cacheCount_;
+    }
+
 private:
     FlexDirection direction_ = FlexDirection::COLUMN;
     FlexAlign flexAlign_ = FlexAlign::CENTER;
@@ -165,6 +175,7 @@ private:
     int32_t columnCount_ = 1;
     int32_t rowCount_ = 1;
     bool isDeclarative_ = false;
+    int32_t cacheCount_ = 1;
 
     std::string columnsArgs_;
     std::string rowsArgs_;

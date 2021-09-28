@@ -451,8 +451,15 @@ public:
     }
 
     ACE_DEFINE_COMPONENT_EVENT(OnTextCancel, void(void));
-    ACE_DEFINE_COMPONENT_EVENT(OnTextAccept, void(const std::string&,double));
-    ACE_DEFINE_COMPONENT_EVENT(OnTextChange, void(const std::string&,double));
+    ACE_DEFINE_COMPONENT_EVENT(OnTextAccept, void(const std::string&, double));
+    ACE_DEFINE_COMPONENT_EVENT(OnTextChange, void(const std::string&, double));
+
+    void SetNeedVibrate(bool needVibrate);
+
+    bool GetNeedVibrate()
+    {
+        return needVibrate_;
+    }
 
     static const char PICKER_YEAR_COLUMN[];
     static const char PICKER_MONTH_COLUMN[];
@@ -491,6 +498,7 @@ private:
     bool isDialog_ = true;
     bool subsidiary_ = false;
     bool masterHasLunar_ = false;
+    bool needVibrate_ = true;
     int32_t nodeId_ = -1; // default of dialog's node id.
     // used for inspector node in PC preview
     int32_t pickerId_ = -1;

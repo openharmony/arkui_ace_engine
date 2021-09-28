@@ -235,60 +235,6 @@ RefPtr<DOMNode> JsCommandDomElementCreator::CreateDomNode(const RefPtr<JsAcePage
     return node;
 }
 
-RefPtr<DOMNode> JsCommandDomElementCreator::CreateDomElement(const RefPtr<JsAcePage>& page) const
-{
-    if (!page) {
-        return nullptr;
-    }
-    auto pageId = page->GetPageId();
-    auto domDocument = page->GetDomDocument();
-    ACE_DCHECK(domDocument);
-    std::string tagName = tagName_;
-    auto node = domDocument->CreateNodeWithId(tagName, nodeId_, -1);
-    if (!node) {
-        EventReport::SendJsException(JsExcepType::CREATE_NODE_ERR);
-        return nullptr;
-    }
-    if (page->IsLiteStyle()) {
-        node->AdjustParamInLiteMode();
-    }
-    node->SetBoxWrap(page->IsUseBoxWrap());
-    TrySaveTargetAndIdNode(id_, target_, domDocument, node);
-    node->SetShareId(shareId_);
-    node->SetPipelineContext(pipelineContext_);
-    node->SetIsCustomComponent(isCustomComponent_);
-    node->InitializeStyle();
-    node->SetAttr(attrs_);
-    if (animationStyles_) {
-        node->SetAnimationStyle(*animationStyles_);
-    }
-    if (transitionEnter_) {
-        node->SetIsTransition(true);
-        node->SetIsEnter(true);
-        node->SetAnimationStyle(*transitionEnter_);
-    }
-    if (transitionExit_) {
-        node->SetIsTransition(true);
-        node->SetIsEnter(false);
-        node->SetAnimationStyle(*transitionExit_);
-    }
-    if (sharedTransitionName_) {
-        node->SetSharedTransitionStyle(*sharedTransitionName_);
-    }
-
-    UpdateForChart(node);
-    UpdateForImageAnimator(node);
-    UpdateForClock(node);
-    UpdateForBadge(node);
-    UpdateForStepperLabel(node);
-    UpdateForInput(node);
-
-    node->SetStyle(styles_);
-    node->AddEvent(pageId, events_);
-    page->PushDynamicNode(nodeId_, node);
-    return node;
-}
-
 void JsCommandDomElementCreator::MountDomNode(
     const RefPtr<DOMNode>& node, const RefPtr<DOMDocument>& domDocument, NodeId parentNodeId) const
 {
@@ -412,22 +358,6 @@ void JsCommandCreateDomBody::Execute(const RefPtr<JsAcePage>& page) const
     accessibilityNode->AddEvent(page->GetPageId(), events_);
 }
 
-void JsCommandCreateDomElement::Execute(const RefPtr<JsAcePage>& page) const
-{
-    auto domDocument = page ? page->GetDomDocument() : nullptr;
-    if (!domDocument) {
-        LOGE("Failed to get DOM document");
-        EventReport::SendJsException(JsExcepType::CREATE_NODE_ERR);
-        return;
-    }
-    auto node = CreateDomElement(page);
-
-    if (!node) {
-        return;
-    }
-
-}
-
 void JsCommandAddDomElement::Execute(const RefPtr<JsAcePage>& page) const
 {
     auto domDocument = page ? page->GetDomDocument() : nullptr;
@@ -521,56 +451,6 @@ void JsCommandRemoveDomElement::Execute(const RefPtr<JsAcePage>& page) const
         return;
     }
     accessibilityManager->RemoveAccessibilityNodes(accessibilityNode);
-}
-
-void JsCommandAppendElement::Execute(const RefPtr<JsAcePage>& page) const
-{
-    auto domDocument = page ? page->GetDomDocument() : nullptr;
-    if (!domDocument) {
-        LOGE("Failed to get DOM document");
-        EventReport::SendJsException(JsExcepType::CREATE_NODE_ERR);
-        return;
-    }
-    auto node = page->GetDynamicNodeById(nodeId_);
-    if (!node) {
-        return;
-    }
-    RefPtr<DOMNode> parentNode;
-    int32_t parentNodeId = parentNodeId_;
-    if (parentNodeId != -1) {
-        parentNode = domDocument->GetDOMNodeById(parentNodeId);
-        if (!parentNode) {
-            LOGE("Parent node %{private}d not exists", nodeId_);
-            EventReport::SendJsException(JsExcepType::CREATE_NODE_ERR);
-        }
-    }
-    node->SetParentNode(parentNode);
-
-    MountDomNode(node, domDocument, parentNodeId_);
-    page->PushNewNode(nodeId_, parentNodeId_);
-
-    // create other accessibility node
-    auto accessibilityManager = GetAccessibilityManager(page);
-    if (!accessibilityManager) {
-        LOGW("accessibilityManager not exists");
-        return;
-    }
-    if (tagName_ == DOM_NODE_TAG_OPTION) {
-        return; // option of menu and select for popup do not need auto creating
-    }
-
-    auto accessibilityNode =
-    accessibilityManager->CreateAccessibilityNode(tagName_, nodeId_, parentNodeId_, itemIndex_);
-    if (!accessibilityNode) {
-        LOGD("Failed to create accessibility node %{public}s", tagName_.c_str());
-        return;
-    }
-    accessibilityManager->TrySaveTargetAndIdNode(id_, target_, accessibilityNode);
-    accessibilityNode->SetAttr(attrs_);
-    #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-        accessibilityNode->SetStyle(styles_);
-    #endif
-    accessibilityNode->AddEvent(page->GetPageId(), events_);
 }
 
 void JsCommandUpdateDomElementAttrs::Execute(const RefPtr<JsAcePage>& page) const

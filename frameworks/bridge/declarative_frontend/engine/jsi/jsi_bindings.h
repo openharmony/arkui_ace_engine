@@ -136,7 +136,6 @@ private:
     static JSGCMarkCallback<C> jsGcMark_;
     static std::string className_;
     static panda::Global<panda::FunctionRef> classFunction_;
-    static std::vector<shared_ptr<int32_t>> functionIds_;
 };
 
 template<typename T>

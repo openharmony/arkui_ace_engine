@@ -40,40 +40,30 @@ JsiType<T>::JsiType(panda::Local<S> val)
 }
 
 template<typename T>
-JsiType<T>::JsiType(panda::Global<T> other)
-{
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), other.ToLocal(runtime->GetEcmaVm()));
-}
+JsiType<T>::JsiType(panda::Global<T> other) : handle_(other)
+{}
 
 template<typename T>
-JsiType<T>::JsiType(const JsiType<T>& rhs)
-{
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_.ToLocal(runtime->GetEcmaVm()));
-}
+JsiType<T>::JsiType(const JsiType<T>& rhs) : handle_(rhs.handle_)
+{}
 
 template<typename T>
-JsiType<T>::JsiType(JsiType<T>&& rhs)
+JsiType<T>::JsiType(JsiType<T>&& rhs) : handle_(std::move(rhs.handle_))
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_.ToLocal(runtime->GetEcmaVm()));
     rhs.handle_.FreeGlobalHandleAddr();
 }
 
 template<typename T>
 JsiType<T>& JsiType<T>::operator=(const JsiType<T>& rhs)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_.ToLocal(runtime->GetEcmaVm()));
+    handle_ = rhs.handle_;
     return *this;
 }
 
 template<typename T>
 JsiType<T>& JsiType<T>::operator=(JsiType<T>&& rhs)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_.ToLocal(runtime->GetEcmaVm()));
+    handle_ = std::move(rhs.handle_);
     rhs.handle_.FreeGlobalHandleAddr();
     return *this;
 }

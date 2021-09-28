@@ -16,6 +16,8 @@ import("//foundation/ace/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
   module_output_path = "ace_engine_standard/backenduicomponent/box"
+} else {
+  module_output_path = "ace_engine_full/backenduicomponent/box"
 }
 
 ohos_unittest("BoxCreatorTest") {
@@ -32,16 +34,14 @@ ohos_unittest("BoxCreatorTest") {
   ]
 
   deps = [
-    "$ace_root/frameworks/base:ace_base_ohos",
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
+    "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components/test:json",
-    "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
-  if (is_standard_system) {
-    deps += [ "$ace_root/frameworks/bridge:js_framework_ohos" ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -59,18 +59,12 @@ ohos_unittest("RenderBoxTest") {
 
   configs = [ "$ace_root:ace_test_config" ]
 
-  deps = [
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
-    "//third_party/googletest:gtest_main",
-  ]
-  if (is_standard_system) {
-    deps += [ "$ace_root/frameworks/bridge:js_framework_ohos" ]
-  }
+  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
-  if (is_standard_system) {
-    configs += [ "//third_party/curl:curl_config" ]
-    deps += [ "//third_party/curl:curl" ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -88,26 +82,21 @@ ohos_unittest("RenderBoxPercentTest") {
   ]
 
   deps = [
-    "$ace_flutter_engine_root:ace_skia_ohos",
-    "$ace_root/frameworks/base:ace_base_ohos",
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
-    "//third_party/googletest:gtest_main",
+    "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    "$ace_root/build:ace_ohos_unittest_base",
     "//third_party/zlib:libz",
   ]
-  if (is_standard_system) {
-    deps += [ "$ace_root/frameworks/bridge:js_framework_ohos" ]
-  }
 
   configs = [
     "$ace_root:ace_test_config",
     "$ace_flutter_engine_root:flutter_config",
-    "$ace_flutter_engine_root:icu_config_ohos",
+    "$ace_flutter_engine_root/icu:icu_config_ohos",
   ]
 
-  if (is_standard_system) {
-    configs += [ "//third_party/curl:curl_config" ]
-    deps += [ "//third_party/curl:curl" ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -125,18 +114,12 @@ ohos_unittest("MouseHoverTest") {
 
   configs = [ "$ace_root:ace_test_config" ]
 
-  deps = [
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
-    "//third_party/googletest:gtest_main",
-  ]
-  if (is_standard_system) {
-    deps += [ "$ace_root/frameworks/bridge:js_framework_ohos" ]
-  }
+  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
-  if (is_standard_system) {
-    configs += [ "//third_party/curl:curl_config" ]
-    deps += [ "//third_party/curl:curl" ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -154,18 +137,12 @@ ohos_unittest("MouseHoverAnimationTest") {
 
   configs = [ "$ace_root:ace_test_config" ]
 
-  deps = [
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
-    "//third_party/googletest:gtest_main",
-  ]
-  if (is_standard_system) {
-    deps += [ "$ace_root/frameworks/bridge:js_framework_ohos" ]
-  }
+  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
-  if (is_standard_system) {
-    configs += [ "//third_party/curl:curl_config" ]
-    deps += [ "//third_party/curl:curl" ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -179,7 +156,8 @@ group("unittest") {
   ]
   deps += [ ":MouseHoverTest" ]
   deps += [ ":MouseHoverAnimationTest" ]
-  deps += [ ":BoxCreatorTest" ]
+
+  #deps += [ ":BoxCreatorTest" ]
 }
 
 config("config_json_creator_test") {

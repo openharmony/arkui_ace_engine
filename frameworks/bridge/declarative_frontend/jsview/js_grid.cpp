@@ -135,12 +135,14 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSGrid>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSGrid>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSGrid>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSGrid>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSGrid>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSGrid>::StaticMethod("scrollBar", &JSGrid::SetScrollBar, opt);
     JSClass<JSGrid>::StaticMethod("scrollBarWidth", &JSGrid::SetScrollBarWidth, opt);
     JSClass<JSGrid>::StaticMethod("scrollBarColor", &JSGrid::SetScrollBarColor, opt);
     JSClass<JSGrid>::StaticMethod("onScrollIndex", &JSGrid::JsOnScrollIndex);
+    JSClass<JSGrid>::StaticMethod("cachedCount", &JSGrid::SetCachedCount);
     JSClass<JSGrid>::Inherit<JSContainerBase>();
     JSClass<JSGrid>::Inherit<JSViewAbstract>();
     JSClass<JSGrid>::Bind<>(globalObj);
@@ -173,6 +175,15 @@ void JSGrid::SetScrollBarWidth(const std::string& width)
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid) {
         grid->SetScrollBarWidth(width);
+    }
+}
+
+void JSGrid::SetCachedCount(int32_t cachedCount)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid) {
+        grid->SetCachedCount(cachedCount);
     }
 }
 

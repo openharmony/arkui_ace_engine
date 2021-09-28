@@ -74,10 +74,6 @@ static const std::unordered_set<std::string> TRANSITION_PROPERTIES = {
     DOM_BORDER_BOTTOM_COLOR
 };
 
-// default flex value
-constexpr double DEFAULT_FLEX_GROW = 0.0;
-constexpr double DEFAULT_FLEX_SHRINK = 1.0;
-constexpr double DEFAULT_FLEX_BASIS = -1.0;
 constexpr int32_t TRANSITION_NAME_LENGTH = 4;
 
 // prefix id of TweenComponent, for differentiation from id of ComposedComponent
@@ -137,7 +133,7 @@ void DOMNode::Mount(int32_t slot)
     };
     if (flexItemParents.count(parentTag_) > 0) {
         flexItemComponent_ =
-            AceType::MakeRefPtr<FlexItemComponent>(DEFAULT_FLEX_GROW, DEFAULT_FLEX_SHRINK, DEFAULT_FLEX_BASIS);
+            AceType::MakeRefPtr<FlexItemComponent>();
         if (boxComponent_) {
             // span has no box component.
             boxComponent_->SetDeliverMinToChild(false);

@@ -15,7 +15,9 @@
 
 #include "frameworks/core/components/svg/flutter_render_svg_g.h"
 
+#include "frameworks/core/components/common/painter/flutter_svg_painter.h"
 #include "frameworks/core/components/svg/flutter_render_svg_filter.h"
+#include "frameworks/core/pipeline/base/flutter_render_context.h"
 
 namespace OHOS::Ace {
 
@@ -50,6 +52,32 @@ void FlutterRenderSvgG::Paint(RenderContext& context, const Offset& offset)
     }
 
     RenderNode::Paint(context, offset);
+}
+
+void FlutterRenderSvgG::PaintDirectly(RenderContext& context, const Offset& offset)
+{
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkCanvas* skCanvas = canvas->canvas();
+    if (!skCanvas) {
+        LOGE("Paint skCanvas is null");
+        return;
+    }
+
+    if (NeedTransform()) {
+        skCanvas->save();
+        skCanvas->concat(FlutterSvgPainter::ToSkMatrix(GetTransformMatrix4()));
+    }
+
+    RenderSvgBase::PaintDirectly(context, offset);
+
+    if (NeedTransform()) {
+        skCanvas->restore();
+    }
 }
 
 void FlutterRenderSvgG::OnGlobalPositionChanged()

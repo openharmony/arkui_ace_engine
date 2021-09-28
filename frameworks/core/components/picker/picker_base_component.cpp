@@ -234,6 +234,17 @@ void PickerBaseComponent::AppendColumn(const RefPtr<PickerColumnComponent>& colu
     columns_.emplace_back(column);
 }
 
+void PickerBaseComponent::SetNeedVibrate(bool needVibrate)
+{
+    if (needVibrate_ == needVibrate) {
+        return;
+    }
+    needVibrate_ = needVibrate;
+    for (auto& column : columns_) {
+        column->SetNeedVibrate(needVibrate_);
+    }
+}
+
 RefPtr<PickerColumnComponent> PickerBaseComponent::GetColumn(const std::string& tag) const
 {
     auto iter = std::find_if(columns_.begin(), columns_.end(),

@@ -18,7 +18,10 @@
 #include <vector>
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/text_field/render_text_field.h"
 #include "core/components/text_field/text_field_component.h"
+#include "core/components/text_field/text_field_element.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -30,8 +33,138 @@ namespace {
 
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = {"sans-serif"};
+constexpr uint32_t TEXTAREA_MAXLENGTH_VALUE_DEFAULT = std::numeric_limits<uint32_t>::max();
+constexpr Dimension BOX_HOVER_RADIUS = 18.0_vp;
 
 }; // namespace
+
+void JSTextArea::PrepareSpecializedComponent()
+{
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto stack = ViewStackProcessor::GetInstance();
+    auto textAreaComponent = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    std::vector<InputOption> inputOptions;
+    if (!boxComponent || !textAreaComponent) {
+        return;
+    }
+    boxComponent->SetMouseAnimationType(HoverAnimationType::OPACITY);
+    textAreaComponent->SetInputOptions(inputOptions);
+    textAreaComponent->SetImageFill(Color::RED);
+    UpdateDecoration();
+    boxComponent->SetPadding(Edge());
+    boxComponent->SetDeliverMinToChild(true);
+    auto theme = GetTheme<TextFieldTheme>();
+    if (boxComponent->GetHeightDimension().Value() < 0.0 && theme) {
+        boxComponent->SetHeight(theme->GetHeight().Value(), theme->GetHeight().Unit());
+    }
+    textAreaComponent->SetHeight(boxComponent->GetHeightDimension());
+    if (textAreaComponent->IsExtend()) {
+        boxComponent->SetHeight(-1.0, DimensionUnit::PX);
+        textAreaComponent->SetExtend(true);
+    }
+}
+
+void JSTextArea::UpdateDecoration()
+{
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto stack = ViewStackProcessor::GetInstance();
+    auto textAreaComponent = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    auto theme = GetTheme<TextFieldTheme>();
+    Radius defaultRadius_;
+    bool hasBoxRadius = false;
+
+    if (!boxComponent || !textAreaComponent) {
+        return;
+    }
+    RefPtr<Decoration> backDecoration = boxComponent->GetBackDecoration();
+    RefPtr<Decoration> decoration = textAreaComponent->GetDecoration();
+    if (backDecoration) {
+        Border boxBorder = backDecoration->GetBorder();
+        if (decoration) {
+            if (hasBoxRadius) {
+                decoration->SetBorder(boxBorder);
+            } else {
+                Border border = decoration->GetBorder();
+                border.SetLeftEdge(boxBorder.Left());
+                border.SetRightEdge(boxBorder.Right());
+                border.SetTopEdge(boxBorder.Top());
+                border.SetBottomEdge(boxBorder.Bottom());
+                decoration->SetBorder(border);
+            }
+            textAreaComponent->SetOriginBorder(decoration->GetBorder());
+        }
+
+        if (backDecoration->GetImage() || backDecoration->GetGradient().IsValid()) {
+            backDecoration->SetBackgroundColor(Color::TRANSPARENT);
+            Border border;
+            if (!hasBoxRadius) {
+                border.SetBorderRadius(defaultRadius_);
+            } else {
+                border.SetTopLeftRadius(boxBorder.TopLeftRadius());
+                border.SetTopRightRadius(boxBorder.TopRightRadius());
+                border.SetBottomLeftRadius(boxBorder.BottomLeftRadius());
+                border.SetBottomRightRadius(boxBorder.BottomRightRadius());
+            }
+            backDecoration->SetBorder(border);
+        } else {
+            backDecoration = AceType::MakeRefPtr<Decoration>();
+            backDecoration->SetBorderRadius(Radius(BOX_HOVER_RADIUS));
+            boxComponent->SetBackDecoration(backDecoration);
+        }
+    }
+}
+
+void JSTextArea::InitializeStyle()
+{
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto stack = ViewStackProcessor::GetInstance();
+    auto textAreaComponent = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    auto theme = GetTheme<TextFieldTheme>();
+    TextStyle textStyle;
+    if (!boxComponent || !textAreaComponent || !theme) {
+        return;
+    }
+    textAreaComponent->SetTextMaxLines(TEXTAREA_MAXLENGTH_VALUE_DEFAULT);
+    textAreaComponent->SetCursorColor(theme->GetCursorColor());
+    textAreaComponent->SetTextInputType(TextInputType::MULTILINE);
+    textAreaComponent->SetPlaceholderColor(theme->GetPlaceholderColor());
+    textAreaComponent->SetFocusBgColor(theme->GetFocusBgColor());
+    textAreaComponent->SetFocusPlaceholderColor(theme->GetFocusPlaceholderColor());
+    textAreaComponent->SetFocusTextColor(theme->GetFocusTextColor());
+    textAreaComponent->SetBgColor(theme->GetBgColor());
+    textAreaComponent->SetTextColor(theme->GetTextColor());
+    textAreaComponent->SetSelectedColor(theme->GetSelectedColor());
+    textAreaComponent->SetHoverColor(theme->GetHoverColor());
+    textAreaComponent->SetPressColor(theme->GetPressColor());
+    textStyle.SetTextColor(theme->GetTextColor());
+    textStyle.SetFontSize(theme->GetFontSize());
+    textStyle.SetFontWeight(theme->GetFontWeight());
+    textStyle.SetFontFamilies(INPUT_FONT_FAMILY_VALUE);
+    textAreaComponent->SetTextStyle(textStyle);
+    textAreaComponent->SetCountTextStyle(theme->GetCountTextStyle());
+    textAreaComponent->SetOverCountStyle(theme->GetOverCountStyle());
+    textAreaComponent->SetCountTextStyleOuter(theme->GetCountTextStyleOuter());
+    textAreaComponent->SetOverCountStyleOuter(theme->GetOverCountStyleOuter());
+    textAreaComponent->SetErrorBorderWidth(theme->GetErrorBorderWidth());
+    textAreaComponent->SetErrorBorderColor(theme->GetErrorBorderColor());
+
+    RefPtr<Decoration> backDecoration = AceType::MakeRefPtr<Decoration>();
+    backDecoration->SetPadding(theme->GetPadding());
+    backDecoration->SetBackgroundColor(theme->GetBgColor());
+    Radius defaultRadius;
+    defaultRadius = theme->GetBorderRadius();
+    backDecoration->SetBorderRadius(defaultRadius);
+    if (boxComponent->GetBackDecoration()) {
+        backDecoration->SetImage(boxComponent->GetBackDecoration()->GetImage());
+        backDecoration->SetGradient(boxComponent->GetBackDecoration()->GetGradient());
+    }
+    textAreaComponent->SetDecoration(backDecoration);
+    textAreaComponent->SetIconSize(theme->GetIconSize());
+    textAreaComponent->SetIconHotZoneSize(theme->GetIconHotZoneSize());
+    boxComponent->SetBackDecoration(backDecoration);
+    boxComponent->SetPadding(theme->GetPadding());
+}
 
 void JSTextArea::JSBind(BindingTarget globalObj)
 {
@@ -50,7 +183,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
 void JSTextArea::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("textarea create error, info is non-vaild");
+        LOGE("textarea create error, info is non-valid");
         return;
     }
 
@@ -66,17 +199,19 @@ void JSTextArea::Create(const JSCallbackInfo& info)
         textAreaComponent->SetValue(text->ToString());
     }
     ViewStackProcessor::GetInstance()->Push(textAreaComponent);
+    InitializeStyle();
+    PrepareSpecializedComponent();
 }
 
 void JSTextArea::SetPlaceholderColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsString()) {
+    if (info.Length() < 1) {
         LOGE("The arg(SetPlaceholderColor) is wrong, it is supposed to have atlease 1 argument");
         return;
     }
 
-    Color color;
-    if (!ParseJsColor(info[0], color)) {
+    Color placeholderColor;
+    if (!ParseJsColor(info[0], placeholderColor)) {
         LOGE("the info[0] is null");
         return;
     }
@@ -84,7 +219,8 @@ void JSTextArea::SetPlaceholderColor(const JSCallbackInfo& info)
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
     if (component) {
-        component->SetPlaceholderColor(color);
+        component->SetPlaceholderColor(placeholderColor);
+        component->SetFocusPlaceholderColor(placeholderColor);
     } else {
         LOGE("The component(SetPlaceholderColor) is null");
     }
@@ -92,8 +228,8 @@ void JSTextArea::SetPlaceholderColor(const JSCallbackInfo& info)
 
 void JSTextArea::SetPlaceholderFont(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("PlaceholderFont create error, info is non-vaild");
+    if (info.Length() < 1) {
+        LOGE("placeholderFont create error, info is non-vaild");
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
@@ -105,7 +241,6 @@ void JSTextArea::SetPlaceholderFont(const JSCallbackInfo& info)
     ParseJsDimensionPx(fontSize, value);
     auto textStyle = component->GetTextStyle();
     textStyle.SetFontSize(value);
-
     auto weight = paramObject->GetProperty("weight");
     if (!weight->IsNumber()) {
         LOGE("Info(weight) is not number");
@@ -133,22 +268,20 @@ void JSTextArea::SetPlaceholderFont(const JSCallbackInfo& info)
     component->SetTextStyle(std::move(textStyle));
 }
 
-void JSTextArea::SetTextAlign(const JSCallbackInfo& info)
+void JSTextArea::SetTextAlign(int32_t value)
 {
-    if (!info[0]->IsNumber()) {
-        LOGE("Info(textAlign) is not number!");
-        return;
-    }
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
     if (!component) {
-        LOGE("component is not valid");
+        LOGE("textAlign component is not valid");
         return;
     }
-    auto textStyle = component->GetTextStyle();
-    TextAlign textAlign = static_cast<TextAlign>(info[0]->ToNumber<int32_t>());
-    textStyle.SetTextAlign(textAlign);
-    component->SetTextStyle(std::move(textStyle));
+
+    if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
+        component->SetTextAlign(TEXT_ALIGNS[value]);
+    } else {
+        LOGE("the value is error");
+    }
 }
 
 void JSTextArea::SetCaretColor(const JSCallbackInfo& info)

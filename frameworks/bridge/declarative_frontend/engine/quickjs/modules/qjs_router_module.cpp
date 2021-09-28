@@ -95,7 +95,7 @@ std::string JsParseRouteParams(JSContext* ctx, JSValueConst valObject, const std
 JSValue PagePush(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
     if (argc != 1) {
-        LOGE("PagePush agrs count is invalid");
+        LOGE("PagePush args count is invalid");
         return JS_NULL;
     }
 
@@ -113,7 +113,7 @@ JSValue PagePush(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst*
 JSValue PageReplace(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
     if (argc != 1) {
-        LOGE("PageReplace agrs count is invalid");
+        LOGE("PageReplace args count is invalid");
         return JS_NULL;
     }
 
@@ -131,7 +131,7 @@ JSValue PageReplace(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCon
 JSValue PageBack(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
     if (argc != 1 && argc != 0) {
-        LOGE("PageBack agrs count is invalid");
+        LOGE("PageBack args count is invalid");
         return JS_NULL;
     }
 

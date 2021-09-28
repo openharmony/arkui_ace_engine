@@ -165,6 +165,7 @@ private:
     RefPtr<CurveAnimation<double>> fromTopCurve_;
 
     RefPtr<Vibrator> vibrator_;
+    bool needVibrate_ = true;
 };
 
 } // namespace OHOS::Ace

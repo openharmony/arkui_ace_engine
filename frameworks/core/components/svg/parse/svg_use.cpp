@@ -40,7 +40,8 @@ void SvgUse::AppendChild(const RefPtr<SvgNode>& child)
     component_->AppendChild(child->GetComponent());
 }
 
-RefPtr<RenderNode> SvgUse::CreateRender(const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent)
+RefPtr<RenderNode> SvgUse::CreateRender(
+    const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox)
 {
     auto svgContext = svgContext_.Upgrade();
     if (!svgContext) {
@@ -64,7 +65,7 @@ RefPtr<RenderNode> SvgUse::CreateRender(const LayoutParam& layoutParam, const Re
             component_->GetDeclaration()->SetGradient(gradient.value());
         }
     }
-    auto refRenderNode = refSvgNode->CreateRender(layoutParam, component_->GetDeclaration());
+    auto refRenderNode = refSvgNode->CreateRender(layoutParam, component_->GetDeclaration(), useBox);
     if (!refRenderNode) {
         return nullptr;
     }
@@ -77,6 +78,10 @@ RefPtr<RenderNode> SvgUse::CreateRender(const LayoutParam& layoutParam, const Re
     renderNode->Update(component_);
     renderNode->AddChild(refRenderNode, 0);
     renderNode->Layout(layoutParam);
+    if (!useBox) {
+        return renderNode;
+    }
+
     auto boxComponent = CreateBoxComponent(layoutParam, component_->GetDeclaration()->GetClipPathHref());
     auto renderBox = boxComponent->CreateRenderNode();
     renderBox->Attach(context_);

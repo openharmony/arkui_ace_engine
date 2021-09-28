@@ -64,7 +64,9 @@ bool SvgFeFuncDeclaration::SetSpecializedValue(const std::pair<std::string, std:
                 declaration.SetType(val);
             } },
     };
-    auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), attr.first.c_str());
+    std::string key = attr.first;
+    StringUtils::TransfromStrCase(key, StringUtils::TEXT_CASE_LOWERCASR);
+    auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), key.c_str());
     if (attrIter != -1) {
         attrs[attrIter].value(attr.second, *this);
         return true;

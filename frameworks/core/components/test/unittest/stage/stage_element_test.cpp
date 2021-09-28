@@ -15,6 +15,8 @@
 
 #include "gtest/gtest.h"
 
+#include "adapter/aosp/entrance/java/jni/ace_application_info.h"
+#include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/log/log.h"
 #include "core/components/box/box_component.h"
 #include "core/components/box/render_box.h"
@@ -31,6 +33,21 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
+
+Platform::JniEnvironment::JniEnvironment() {}
+
+Platform::JniEnvironment::~JniEnvironment() = default;
+
+std::shared_ptr<JNIEnv> Platform::JniEnvironment::GetJniEnv(JNIEnv* jniEnv) const
+{
+    return nullptr;
+}
+
+Platform::JniEnvironment& Platform::JniEnvironment::GetInstance()
+{
+    static Platform::JniEnvironment jniEnvironment;
+    return jniEnvironment;
+}
 
 class StageElementTest : public testing::Test {
 public:

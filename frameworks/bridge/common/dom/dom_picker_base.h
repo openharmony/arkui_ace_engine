@@ -54,6 +54,7 @@ public:
     bool SetShowLunar(const std::string& value);
     bool SetPrefix(const std::string& value);
     bool SetSuffix(const std::string& value);
+    bool SetVibrate(const std::string& value);
 
 protected:
     bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;

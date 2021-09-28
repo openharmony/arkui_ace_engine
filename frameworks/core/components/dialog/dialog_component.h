@@ -301,10 +301,10 @@ protected:
     RefPtr<BoxComponent> BuildBox(bool& isLimit);
     void BuildFocusChild(const RefPtr<Component>& child, const RefPtr<FocusCollaborationComponent>& collaboration);
     void BuildTitle(const RefPtr<ColumnComponent>& column);
-    void BuildContent(const RefPtr<ColumnComponent>& column);
+    virtual void BuildContent(const RefPtr<ColumnComponent>& column);
     virtual void BuildActions(const RefPtr<ThemeManager>& themeManager, const RefPtr<ColumnComponent>& column);
     void BuildActionsForWatch(const RefPtr<ColumnComponent>& column);
-    void BuildMenu(const RefPtr<ColumnComponent>& column);
+    virtual void BuildMenu(const RefPtr<ColumnComponent>& column);
     RefPtr<Component> BuildButton(const RefPtr<ButtonComponent>& button, const EventMarker& callbackId,
         const Edge& edge, bool isAutoFocus = false);
     RefPtr<TransitionComponent> BuildAnimation(const RefPtr<BoxComponent>& child);

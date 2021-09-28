@@ -54,6 +54,7 @@ private:
 
 using MouseCallback = std::function<void(const MouseEventInfo&)>;
 using MouseHoverCallback = std::function<void()>;
+using OnHoverCallback = std::function<void(bool)>;
 
 class MouseRawRecognizer : public MouseEventTarget {
     DECLARE_ACE_TYPE(MouseRawRecognizer, MouseEventTarget);
@@ -70,6 +71,11 @@ public:
     void SetOnMouseHover(const MouseHoverCallback& onMouseHover)
     {
         onMouseHover_ = onMouseHover;
+    }
+
+    void SetOnHover(const OnHoverCallback& onHover)
+    {
+        onHover_ = onHover;
     }
 
     void SetOnMouseHoverExit(const MouseHoverCallback& onMouseHoverExit)
@@ -91,6 +97,7 @@ private:
     MouseEvent lastEvent_;
     MouseHoverCallback onMouseHover_;
     MouseHoverCallback onMouseHoverExit_;
+    OnHoverCallback onHover_;
 };
 
 } // namespace OHOS::Ace

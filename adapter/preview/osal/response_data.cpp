@@ -25,7 +25,7 @@ std::unique_ptr<JsonValue> ResponseData::GetResultString() const
         resultJson->Put(std::string("data").c_str(), GetStringValue());
     } else {
         resultJson->Put(std::string("code").c_str(), COMMON_ERROR_CODE);
-        resultJson->Put(std::string("data").c_str(), "invalid response data");
+        resultJson->Put(std::string("data").c_str(), GetStringValue());
     }
 
     return resultJson;
@@ -65,6 +65,15 @@ void ResponseData::SetHeaders(std::string headersStr)
         }
         headersStr = headersStr.substr(posSeparator + 1);
         posSeparator = headersStr.find(separator);
+    }
+}
+
+int ResponseData::GetActionCode() const
+{
+    if (code_ == HTTP_OK) {
+        return ACTION_SUCCESS;
+    } else {
+        return ACTION_FAIL;
     }
 }
 } // namespace OHOS::Ace

@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-class Texture : public Resource {
+class ACE_EXPORT Texture : public Resource {
     DECLARE_ACE_TYPE(Texture, Resource);
 public:
     using RefreshListener = std::function<void()>;

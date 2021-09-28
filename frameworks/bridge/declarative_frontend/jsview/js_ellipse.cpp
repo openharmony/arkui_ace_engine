@@ -77,6 +77,7 @@ void JSEllipse::JSBind(BindingTarget globalObj)
     JSClass<JSEllipse>::CustomMethod("fill", &JSShapeAbstract::ObjectFill);
 
     JSClass<JSEllipse>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSEllipse>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSEllipse>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSEllipse>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSEllipse>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

@@ -218,6 +218,16 @@ public:
         return tossAnimationController_;
     }
 
+    void SetNeedVibrate(bool needVibrate)
+    {
+        needVibrate_ = needVibrate;
+    }
+
+    bool GetNeedVibrate()
+    {
+        return needVibrate_;
+    }
+
 private:
     uint32_t currentIndex_ = 0;
 
@@ -247,6 +257,8 @@ private:
     std::function<void()> requestFocusCallback_;
 
     RefPtr<TossAnimationController> tossAnimationController_ = AceType::MakeRefPtr<TossAnimationController>();
+
+    bool needVibrate_ = true;
 };
 
 } // namespace OHOS::Ace

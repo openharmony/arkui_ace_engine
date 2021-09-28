@@ -333,6 +333,34 @@ void AppSetImageRawDataCacheSize(const v8::FunctionCallbackInfo<v8::Value>& args
     });
 }
 
+void AppSetImageFileCacheSize(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    if (args.Length() != 1 || !args[0]->IsNumber()) {
+        LOGE("The arguments must be one int number.");
+        return;
+    }
+    auto delegate =
+        static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
+    WeakPtr<PipelineContext> pipelineContextWeak = (*delegate)->GetPipelineContext();
+    auto uiTaskExecutor = (*delegate)->GetUiTask();
+    int32_t size = args[0]->Int32Value(context).ToChecked();
+    size = size > 0 ? size : 0;
+    uiTaskExecutor.PostTask([pipelineContextWeak, size]() mutable {
+        auto pipelineContext = pipelineContextWeak.Upgrade();
+        if (pipelineContext) {
+            auto imageCache = pipelineContext->GetImageCache();
+            if (imageCache) {
+                imageCache->SetCacheFileLimit(size);
+            } else {
+                LOGW("image cache is null");
+            }
+        }
+    });
+}
+
 void InitAppModule(v8::Local<v8::Object> moduleObj, v8::Isolate* isolate)
 {
     auto context = isolate->GetCurrentContext();
@@ -348,6 +376,8 @@ void InitAppModule(v8::Local<v8::Object> moduleObj, v8::Isolate* isolate)
                    v8::Function::New(context, AppSetImageCacheCount).ToLocalChecked()).ToChecked();
     moduleObj->Set(context, v8::String::NewFromUtf8(isolate, APP_SET_IMAGE_RAWDATA_CACHE_SIZE).ToLocalChecked(),
                    v8::Function::New(context, AppSetImageRawDataCacheSize).ToLocalChecked()).ToChecked();
+    moduleObj->Set(context, v8::String::NewFromUtf8(isolate, APP_SET_IMAGE_FILE_CACHE_SIZE).ToLocalChecked(),
+                   v8::Function::New(context, AppSetImageFileCacheSize).ToLocalChecked()).ToChecked();
 }
 
 void CurvesInterpolate(const v8::FunctionCallbackInfo<v8::Value>& args)
@@ -529,19 +559,19 @@ void ModuleManager::SetWaitTimer(const v8::FunctionCallbackInfo<v8::Value>& args
         LOGE("args[0] is not function");
         return;
     }
-    if (!args[1]->IsNumber()) {
-        LOGE("args[1] is not number");
-        return;
-    }
-
-    uint32_t delay = args[1]->ToInt32(context).ToLocalChecked()->Value();
     v8::Local<v8::Function> jsFunc = v8::Local<v8::Function>::Cast(args[0]);
+
+    int index = 1;
+    uint32_t delay = 0;
+    if (args[1]->IsNumber()) {
+        LOGE("args[1] is number");
+        delay = args[1]->ToInt32(context).ToLocalChecked()->Value();
+        index = 2;
+    }
 
     CopyablePersistent<v8::Function> pFunction;
     pFunction.Reset(isolate, jsFunc);
 
-    // agrs index begin at 2
-    int index = 2;
     std::vector<v8::Persistent<v8::Value, v8::CopyablePersistentTraits<v8::Value>>> callbackArray;
     while (index < args.Length()) {
         CopyablePersistent<v8::Value> pValue;
@@ -689,16 +719,16 @@ void ModuleManager::InitTimerModule(v8::Local<v8::Context>& localContext)
     v8::Isolate* isolate = localContext->GetIsolate();
     v8::Local<v8::Object> global = localContext->Global();
     global
-        ->Set(localContext, v8::String::NewFromUtf8(isolate, "setTimeout").ToLocalChecked(),
+        ->Set(localContext, v8::String::NewFromUtf8(isolate, SET_TIMEOUT).ToLocalChecked(),
               v8::Function::New(localContext, SetTimeout).ToLocalChecked()).ToChecked();
     global
-        ->Set(localContext, v8::String::NewFromUtf8(isolate, "setInterval").ToLocalChecked(),
+        ->Set(localContext, v8::String::NewFromUtf8(isolate, SET_INTERVAL).ToLocalChecked(),
               v8::Function::New(localContext, SetInterval).ToLocalChecked()).ToChecked();
     global
-        ->Set(localContext, v8::String::NewFromUtf8(isolate, "clearTimeout").ToLocalChecked(),
+        ->Set(localContext, v8::String::NewFromUtf8(isolate, CLEAR_TIMEOUT).ToLocalChecked(),
               v8::Function::New(localContext, ClearTimeout).ToLocalChecked()).ToChecked();
     global
-        ->Set(localContext, v8::String::NewFromUtf8(isolate, "clearInterval").ToLocalChecked(),
+        ->Set(localContext, v8::String::NewFromUtf8(isolate, CLEAR_INTERVAL).ToLocalChecked(),
               v8::Function::New(localContext, ClearInterval).ToLocalChecked()).ToChecked();
 }
 

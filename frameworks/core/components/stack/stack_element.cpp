@@ -375,6 +375,14 @@ void StackElement::OnFocus()
     itLastFocusNode_ = focusNodes_.end();
 }
 
+void StackElement::OnBlur()
+{
+    FocusGroup::OnBlur();
+    if (itLastFocusNode_ != focusNodes_.end()) {
+        ++itLastFocusNode_;
+    }
+}
+
 void StackElement::EnableTouchEventAndRequestFocus()
 {
     for (auto& child : children_) {

@@ -52,19 +52,20 @@ template("ace_core_components_theme_set") {
     } else {
       sources += [ "$root_out_dir/ace/framework/core/components/theme/theme_constants_tv.cpp" ]
     }
-
-    if (use_mingw_win || use_mac) {
-      sources += [ "resource_adapter_preview.cpp" ]
-    } else if (!is_standard_system) {
-      sources += [ "resource_adapter.cpp" ]
-      external_deps = [
-        "hilog:libhilog",
-        "resmgr:resourcemanager",
-      ]
-    }
   }
 }
 
-ace_core_components_theme_set("ace_core_components_theme_ohos") {
-  defines = ace_ohos_defines
+foreach(item, ace_platforms) {
+  ace_core_components_theme_set("ace_core_components_theme_" + item.name) {
+    defines = []
+    config = {
+    }
+
+    if (defined(item.config)) {
+      config = item.config
+    }
+    if (defined(config.defines)) {
+      defines = config.defines
+    }
+  }
 }

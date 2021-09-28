@@ -64,6 +64,8 @@ void JsonUtilsTest::TearDown()
  * @tc.name: JsonUtilsTest001
  * @tc.desc: Check json util function for bool type value
  * @tc.type: FUNC
+ * @tc.require: AR000DAQVN
+ * @tc.author: luoying
  */
 HWTEST_F(JsonUtilsTest, JsonUtilsTest001, TestSize.Level1)
 {
@@ -88,6 +90,8 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest001, TestSize.Level1)
  * @tc.name: JsonUtilsTest002
  * @tc.desc: Check json util function for bool type value
  * @tc.type: FUNC
+ * @tc.require: AR000DAQVN
+ * @tc.author: luoying
  */
 HWTEST_F(JsonUtilsTest, JsonUtilsTest002, TestSize.Level1)
 {
@@ -112,6 +116,8 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest002, TestSize.Level1)
  * @tc.name: JsonUtilsTest003
  * @tc.desc: Check json util function for signed integer
  * @tc.type: FUNC
+ * @tc.require: AR000DAQVN
+ * @tc.author: luoying
  */
 HWTEST_F(JsonUtilsTest, JsonUtilsTest003, TestSize.Level1)
 {
@@ -141,6 +147,8 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest003, TestSize.Level1)
  * @tc.name: JsonUtilsTest004
  * @tc.desc: Check json util function for unsigned integer
  * @tc.type: FUNC
+ * @tc.require: AR000DAQVN
+ * @tc.author: luoying
  */
 HWTEST_F(JsonUtilsTest, JsonUtilsTest004, TestSize.Level1)
 {
@@ -170,6 +178,8 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest004, TestSize.Level1)
  * @tc.name: JsonUtilsTest005
  * @tc.desc: Check json util function for decimal number
  * @tc.type: FUNC
+ * @tc.require: AR000DAQVN
+ * @tc.author: luoying
  */
 HWTEST_F(JsonUtilsTest, JsonUtilsTest005, TestSize.Level1)
 {
@@ -199,6 +209,8 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest005, TestSize.Level1)
  * @tc.name: JsonUtilsTest006
  * @tc.desc: Check json util function for string
  * @tc.type: FUNC
+ * @tc.require: AR000DAQVN
+ * @tc.author: luoying
  */
 HWTEST_F(JsonUtilsTest, JsonUtilsTest006, TestSize.Level1)
 {
@@ -223,6 +235,8 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest006, TestSize.Level1)
  * @tc.name: JsonUtilsTest007
  * @tc.desc: Check json util function for empty string
  * @tc.type: FUNC
+ * @tc.require: AR000DAQVN
+ * @tc.author: luoying
  */
 HWTEST_F(JsonUtilsTest, JsonUtilsTest007, TestSize.Level1)
 {
@@ -247,6 +261,8 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest007, TestSize.Level1)
  * @tc.name: JsonUtilsTest008
  * @tc.desc: Check json util function for JsonObject
  * @tc.type: FUNC
+ * @tc.require: AR000DAQVN
+ * @tc.author: luoying
  */
 HWTEST_F(JsonUtilsTest, JsonUtilsTest008, TestSize.Level1)
 {
@@ -274,6 +290,8 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest008, TestSize.Level1)
  * @tc.name: JsonUtilsTest009
  * @tc.desc: Check json util function for incorrect JsonObject
  * @tc.type: FUNC
+ * @tc.require: AR000DAQVN
+ * @tc.author: luoying
  */
 HWTEST_F(JsonUtilsTest, JsonUtilsTest009, TestSize.Level1)
 {
@@ -299,6 +317,8 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest009, TestSize.Level1)
  * @tc.name: JsonUtilsTest010
  * @tc.desc: Check json util function for array
  * @tc.type: FUNC
+ * @tc.require: AR000DAQVN
+ * @tc.author: luoying
  */
 HWTEST_F(JsonUtilsTest, JsonUtilsTest010, TestSize.Level1)
 {
@@ -327,6 +347,8 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest010, TestSize.Level1)
  * @tc.name: JsonUtilsTest011
  * @tc.desc: Check json util function for empty array
  * @tc.type: FUNC
+ * @tc.require: AR000DAQVN
+ * @tc.author: luoying
  */
 HWTEST_F(JsonUtilsTest, JsonUtilsTest011, TestSize.Level1)
 {
@@ -351,6 +373,8 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest011, TestSize.Level1)
  * @tc.name: JsonUtilsTest012
  * @tc.desc: Check json util function for empty test string
  * @tc.type: FUNC
+ * @tc.require: AR000DAQVN
+ * @tc.author: luoying
  */
 HWTEST_F(JsonUtilsTest, JsonUtilsTest012, TestSize.Level1)
 {
@@ -373,6 +397,8 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest012, TestSize.Level1)
  * @tc.name: JsonUtilsTest013
  * @tc.desc: Check json util function for illegal type value
  * @tc.type: FUNC
+ * @tc.require: AR000DAQVN
+ * @tc.author: luoying
  */
 HWTEST_F(JsonUtilsTest, JsonUtilsTest013, TestSize.Level1)
 {

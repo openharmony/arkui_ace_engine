@@ -47,11 +47,7 @@ bool ParseFileUri(const RefPtr<AssetManager>& assetManager, const std::string& f
     }
 
     std::vector<std::string> files;
-    //assetManager->GetAssetList(filePath, files);
-    if (!AceApplicationInfo::GetInstance().GetFiles(filePath, files)) {
-        LOGE("ParseFileUri GetFiles failed.");
-        return false;
-    }
+    assetManager->GetAssetList(filePath, files);
 
     bool fileExist = false;
     for (const auto& file : files) {
@@ -82,11 +78,6 @@ bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content)
     }
 
     return true;
-}
-
-void FrontendDelegate::SetAssetManager(const RefPtr<AssetManager>& assetManager)
-{
-    assetManager_ = assetManager;
 }
 
 template bool FrontendDelegate::GetResourceData(const std::string& fileUri, std::string& content);

@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
 
-module_output_path = "$ace_test_output_root/backenduicomponent/marquee"
+module_output_path = "ace_engine_full/backenduicomponent/marquee"
 
 ohos_unittest("MarqueeCreatorTest") {
   module_out_path = module_output_path
@@ -27,16 +27,14 @@ ohos_unittest("MarqueeCreatorTest") {
   ]
 
   deps = [
-    "$ace_root/frameworks/base:ace_base_ohos",
-    "$ace_root/frameworks/base/resource:ace_resource",
-    "$ace_root/frameworks/core:ace_core_ohos",
+    "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components/test:json",
-    "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
-  if (is_standard_system) {
-    deps += [ "$ace_root/frameworks/bridge:js_framework_ohos" ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -75,9 +73,9 @@ ohos_unittest("RenderMarqueeTest") {
     "$ace_root/frameworks/core/animation/property_animation.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
 
-    #base
-    "$ace_root/adapter/common/cpp/thread_util.cpp",
+    # base
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
     "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
@@ -91,10 +89,12 @@ ohos_unittest("RenderMarqueeTest") {
 
     # common
     "$ace_root/frameworks/core/common/ace_engine.cpp",
+    "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/event_manager.cpp",
     "$ace_root/frameworks/core/common/focus_animation_manager.cpp",
     "$ace_root/frameworks/core/common/font_loader.cpp",
     "$ace_root/frameworks/core/common/font_manager.cpp",
+    "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
     "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
     "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
@@ -116,9 +116,11 @@ ohos_unittest("RenderMarqueeTest") {
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
 
     # elements
+    "$ace_root/frameworks/core/components/box/box_element.cpp",
     "$ace_root/frameworks/core/components/bubble/bubble_element.cpp",
     "$ace_root/frameworks/core/components/display/display_element.cpp",
     "$ace_root/frameworks/core/components/page/page_element.cpp",
+    "$ace_root/frameworks/core/components/page_transition/page_transition_component.cpp",
     "$ace_root/frameworks/core/components/page_transition/page_transition_element.cpp",
     "$ace_root/frameworks/core/components/root/root_element.cpp",
     "$ace_root/frameworks/core/components/stack/stack_element.cpp",
@@ -228,19 +230,28 @@ ohos_unittest("RenderMarqueeTest") {
     ":config_render_marquee_test",
     "$ace_root:ace_test_config",
     "$ace_flutter_engine_root:flutter_config",
-    "//third_party/cJSON:cJSON_config",
   ]
 
   deps = [
-    "$ace_flutter_engine_root:ace_skia_ohos",
-    "$ace_root:third_party_cjson",
+    "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    "$ace_root/build/third_party/cJSON:third_party_cjson",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
-
-  if (is_standard_system) {
+  if (!is_standard_system) {
+    external_deps = [
+      "hilog:libhilog",
+      "resmgr:resourcemanager",
+    ]
+  } else {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  }
+
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -257,7 +268,7 @@ config("config_render_marquee_test") {
 group("unittest") {
   testonly = true
   deps = [
-    ":MarqueeCreatorTest",
+    #":MarqueeCreatorTest",
     #":RenderMarqueeTest",
   ]
 }

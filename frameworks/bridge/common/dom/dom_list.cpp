@@ -308,6 +308,8 @@ void DOMList::CreateOrUpdateList()
         listComponent_ = AceType::MakeRefPtr<ListComponent>();
     }
 
+    listComponent_->SetScrollVibrate(scrollVibrate_);
+
     listComponent_->SetDirection(flexDirection_);
     if (flexDirection_ == FlexDirection::COLUMN || flexDirection_ == FlexDirection::COLUMN_REVERSE) {
         listComponent_->SetScrollPage(scrollPage_);

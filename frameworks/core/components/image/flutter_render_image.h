@@ -57,8 +57,7 @@ public:
 
     void UpLoadImageDataForPaint();
 
-    void PaintBgImage(const flutter::Paint& paint, const flutter::PaintData& paint_data, const Offset& offset,
-        const ScopedCanvas& canvas) const;
+    void PaintBgImage(const flutter::Paint& paint, const Offset& offset, const ScopedCanvas& canvas) const;
 
     void FetchImageObject() override;
 
@@ -66,6 +65,7 @@ public:
     {
         return true;
     }
+
     bool IsSourceWideGamut() const override;
     virtual bool RetryLoading() override;
     static SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap);
@@ -85,6 +85,9 @@ public:
         fetchImageObjTask_ = task;
     }
 
+    void OnAppHide() override;
+    void OnAppShow() override;
+
 protected:
     virtual bool MaybeRelease() override;
     virtual void ClearRenderObject() override;
@@ -92,11 +95,20 @@ protected:
 private:
     void InitializeCallbacks();
     Size Measure() override;
-    void UpdateRenderAltImage();
+    void UpdateRenderAltImage(const RefPtr<Component>& component);
     void SetSkRadii(const Radius& radius, SkVector& radii);
     void SetClipRadius();
-    void CanvasDrawImageRect(const flutter::Paint& paint, const flutter::PaintData& paint_data, const Offset& offset,
-        const ScopedCanvas& canvas,  const std::list<Rect>& paintRectList);
+    void CanvasDrawImageRect(
+        const flutter::Paint& paint,
+        const Offset& offset,
+        const ScopedCanvas& canvas,
+        const Rect& paintRect);
+    void DrawImageOnCanvas(
+        const Rect& srcRect,
+        const Rect& dstRect,
+        const ScopedCanvas& canvas,
+        const flutter::Paint& paint,
+        const Offset& dstOffset = Offset()) const;
     void PaintSVGImage(const sk_sp<SkData>& skData, bool onlyLayoutSelf = false);
     void DrawSVGImage(const Offset& offset, ScopedCanvas& canvas);
     void DrawSVGImageCustom(RenderContext& context, const Offset& offset);
@@ -104,7 +116,7 @@ private:
     Rect RecalculateSrcRect(const Size& realImageSize);
     void ApplyColorFilter(flutter::Paint& paint);
     void ApplyInterpolation(flutter::Paint& paint);
-    void ApplyBorderRadius(const Offset& offset, const ScopedCanvas& canvas, const std::list<Rect>& paintRectList);
+    void ApplyBorderRadius(const Offset& offset, const ScopedCanvas& canvas, const Rect& paintRect);
     void AddSvgChild();
     void CreateAnimatedPlayer(const RefPtr<ImageProvider>& provider, SkCodec* codecPtr, bool forceResize);
     bool VerifySkImageDataFromPixmap();
@@ -116,6 +128,7 @@ private:
     RefPtr<SvgDom> svgDom_;
     sk_sp<SkImage> image_;
     bool loadSvgAfterLayout_ = false;
+    bool loadSvgOnPaint_ = false; // only load svg trees without box and bind
     RefPtr<Flutter::OffsetLayer> layer_;
     SkVector radii_[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
     Size formerRawImageSize_;
@@ -123,7 +136,7 @@ private:
 
     ImageSourceInfo curSourceInfo_;
     ImageObjSuccessCallback imageObjSuccessCallback_;
-    PaintSuccessCallback paintSuccessCallback_;
+    UploadSuccessCallback uploadSuccessCallback_;
     FailedCallback failedCallback_;
     OnPostBackgroundTask onPostBackgroundTask_;
     RefPtr<ImageObject> imageObj_;

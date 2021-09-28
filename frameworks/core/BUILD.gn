@@ -23,6 +23,10 @@ template("ace_core_source_set") {
 
     # add common source file needed by all product platform here
     sources = [
+      #accessibility
+      "accessibility/accessibility_node.cpp",
+      "accessibility/accessibility_utils.cpp",
+
       # animation
       "animation/animatable_data.cpp",
       "animation/animatable_properties.cpp",
@@ -93,10 +97,13 @@ template("ace_core_source_set") {
       "components/declaration/svg/svg_ellipse_declaration.cpp",
       "components/declaration/svg/svg_fe_colormatrix_declaration.cpp",
       "components/declaration/svg/svg_fe_component_transfer_declaration.cpp",
+      "components/declaration/svg/svg_fe_composite_declaration.cpp",
       "components/declaration/svg/svg_fe_declaration.cpp",
       "components/declaration/svg/svg_fe_flood_declaration.cpp",
       "components/declaration/svg/svg_fe_func_declaration.cpp",
       "components/declaration/svg/svg_fe_gaussianblur_declaration.cpp",
+      "components/declaration/svg/svg_fe_merge_declaration.cpp",
+      "components/declaration/svg/svg_fe_merge_node_declaration.cpp",
       "components/declaration/svg/svg_fe_offset_declaration.cpp",
       "components/declaration/svg/svg_filter_declaration.cpp",
       "components/declaration/svg/svg_gradient_declaration.cpp",
@@ -169,6 +176,11 @@ template("ace_core_source_set") {
       "common/ime/text_input_formatter.cpp",
       "common/ime/text_input_proxy.cpp",
       "common/ime/text_input_type.cpp",
+
+      # flutter impl
+      "common/flutter/flutter_asset_manager.cpp",
+      "common/flutter/flutter_task_executor.cpp",
+      "common/flutter/flutter_window.cpp",
     ]
 
     # add sources needed by phone and TV. wearable like watch do not need them
@@ -179,15 +191,11 @@ template("ace_core_source_set") {
       ]
     }
 
-    configs = [
-      "$ace_root:ace_config",
-      "$ace_flutter_engine_root:flutter_config",
-      "$ace_flutter_engine_root:icu_config_$platform",
-    ]
+    configs = [ "$ace_root:ace_config" ]
 
     deps = [
-      "$ace_flutter_engine_root:ace_skia_$platform",
-      "$ace_root/frameworks/base:ace_base_$platform",
+      "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
+      "$ace_flutter_engine_root/skia:ace_skia_$platform",
       "pipeline:ace_core_pipeline_$platform",
     ]
 
@@ -226,6 +234,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/gesture_listener:ace_core_components_gesture_listener_$platform",
       "$ace_root/frameworks/core/components/grid:ace_core_components_grid_$platform",
       "$ace_root/frameworks/core/components/grid_layout:ace_core_components_grid_layout_$platform",
+      "$ace_root/frameworks/core/components/hyperlink:ace_core_components_hyperlink_$platform",
       "$ace_root/frameworks/core/components/ifelse:ace_core_components_ifelse_$platform",
       "$ace_root/frameworks/core/components/image:ace_core_components_image_$platform",
       "$ace_root/frameworks/core/components/indexer:ace_core_components_indexer_$platform",
@@ -291,7 +300,8 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_v2/swiper:ace_core_components_swiper_v2_$platform",
     ]
 
-    if (!use_mingw_win && !use_mac && !is_wearable_product) {
+    if (!use_mingw_win && !use_mac && !is_wearable_product &&
+        !is_standard_system) {
       deps += [
         "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform",
         "$ace_root/frameworks/core/components/rich_text:ace_core_components_rich_text_$platform",
@@ -314,17 +324,32 @@ template("ace_core_source_set") {
       ]
     }
 
-    if (use_mingw_win) {
-      cflags_cc = [ "-std=c++17" ]
-      defines += [
-        "_USE_MATH_DEFINES",
-        "NOGDI",
-      ]
-    }
+    cflags_cc = []
+    cflags_cc += invoker.cflags_cc
   }
 }
 
-ace_core_source_set("ace_core_ohos") {
-  defines = ace_ohos_defines
-  platform = "ohos"
+foreach(item, ace_platforms) {
+  ace_core_source_set("ace_core_" + item.name) {
+    platform = item.name
+
+    if (defined(item.config)) {
+      config = item.config
+    } else {
+      config = {
+      }
+    }
+
+    if (defined(config.defines)) {
+      defines = config.defines
+    } else {
+      defines = []
+    }
+
+    if (defined(config.cflags_cc)) {
+      cflags_cc = config.cflags_cc
+    } else {
+      cflags_cc = []
+    }
+  }
 }

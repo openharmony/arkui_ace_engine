@@ -97,6 +97,8 @@ ACE_EXPORT extern const char COUNTER_ETS_TAG[];
 // flex
 ACE_EXPORT extern const char FLEX_COMPONENT_TAG[];
 ACE_EXPORT extern const char FLEX_ETS_TAG[];
+ACE_EXPORT extern const char WRAP_COMPONENT_TAG[];
+ACE_EXPORT extern const char WRAP_ETS_TAG[];
 
 // grid
 ACE_EXPORT extern const char GRID_COMPONENT_TAG[];

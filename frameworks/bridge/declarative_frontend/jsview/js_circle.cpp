@@ -77,6 +77,7 @@ void JSCircle::JSBind(BindingTarget globalObj)
     JSClass<JSCircle>::CustomMethod("fill", &JSShapeAbstract::ObjectFill);
 
     JSClass<JSCircle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSCircle>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSCircle>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSCircle>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSCircle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

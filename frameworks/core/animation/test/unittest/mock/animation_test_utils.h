@@ -18,6 +18,7 @@
 
 #include <cstdint>
 
+#include "adapter/aosp/entrance/java/jni/ace_application_info.h"
 #include "base/json/json_util.h"
 #include "core/common/platform_window.h"
 #include "core/common/window.h"

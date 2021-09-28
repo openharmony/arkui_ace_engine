@@ -47,7 +47,13 @@ Texture::~Texture()
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         resRegister->UnregisterEvent(MakeEventHash(TEXTURE_METHOD_REFRESH));
     } else {
-        platformTaskExecutor.PostTask([eventHash = MakeEventHash(TEXTURE_METHOD_REFRESH), resRegister] {
+        auto weak = AceType::WeakClaim(AceType::RawPtr(resRegister));
+        platformTaskExecutor.PostTask([eventHash = MakeEventHash(TEXTURE_METHOD_REFRESH), weak] {
+            auto resRegister = weak.Upgrade();
+            if (resRegister == nullptr) {
+                LOGE("resRegister is nullptr");
+                return;
+            }
             resRegister->UnregisterEvent(eventHash);
         });
     }

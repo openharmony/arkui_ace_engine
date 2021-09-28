@@ -37,13 +37,18 @@ constexpr float ROTATE_VALUE = 0.0005f;
 constexpr float FLAT_ANGLE = 180.0f;
 const char ROTATE_TYPE_AUTO[] = "auto";
 const char ROTATE_TYPE_REVERSE[] = "auto-reverse";
-const char FONT_TYPE_HWCHINESE[] = "/system/fonts/HwChinese-Medium.ttf";
-const char FONT_TYPE_DROIDSANS[] = "/system/fonts/DroidSans.ttf";
 
 } // namespace
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+const char FONT_TYPE_HWCHINESE[] = "/system/fonts/HwChinese-Medium.ttf";
+const char FONT_TYPE_DROIDSANS[] = "/system/fonts/DroidSans.ttf";
 sk_sp<SkTypeface> FlutterSvgPainter::fontTypeChinese_ = SkTypeface::MakeFromFile(FONT_TYPE_HWCHINESE);
 sk_sp<SkTypeface> FlutterSvgPainter::fontTypeNormal_ = SkTypeface::MakeFromFile(FONT_TYPE_DROIDSANS);
+#else
+sk_sp<SkTypeface> FlutterSvgPainter::fontTypeChinese_;
+sk_sp<SkTypeface> FlutterSvgPainter::fontTypeNormal_;
+#endif
 
 void FlutterSvgPainter::SetMask(SkCanvas* canvas)
 {

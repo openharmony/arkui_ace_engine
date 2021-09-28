@@ -38,7 +38,7 @@ namespace {
 // Different with mobile, we don't support multi-instances in Windows, because we only want
 // preivew UI effect, it doesn't make scense to create multi ability in one process.
 constexpr int32_t ACE_INSTANCE_ID = 0;
-}
+} // namespace
 
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 
@@ -51,8 +51,8 @@ public:
     static void DestroyContainer(int32_t instanceId);
 
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
-    static void SetResourcesPathAndThemeStyle(int32_t instanceId, const std::string& resourcesPath,
-                                              const int32_t& themeId, const ColorMode& colorMode);
+    static void SetResourcesPathAndThemeStyle(int32_t instanceId, const std::string& systemResourcesPath,
+        const std::string& appResourcesPath, const int32_t& themeId, const ColorMode& colorMode);
     static void SetView(FlutterAceView* view, double density, int32_t width, int32_t height);
     static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& url, const std::string& params);
     static RefPtr<AceContainer> GetContainerInstance(int32_t instanceId);

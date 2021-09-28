@@ -129,6 +129,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("stateEffect", &JSButton::SetStateEffect, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("onClick", &JSButton::JsOnClick);
     JSClass<JSButton>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSButton>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSButton>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSButton>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSButton>::StaticMethod("backgroundColor", &JSButton::JsBackgroundColor);

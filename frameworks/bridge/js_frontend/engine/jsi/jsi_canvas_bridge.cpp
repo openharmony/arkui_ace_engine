@@ -1041,7 +1041,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsPath2DSetTransform(const shared_ptr<JsRun
 {
     // 6 parameters: setTransform(a, b, c, d, e, f)
     if (argc != 6) {
-        LOGE("Call Path2D SetTransform fialed, invalid agrs.");
+        LOGE("Call Path2D SetTransform fialed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1068,7 +1068,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsPath2DMoveTo(const shared_ptr<JsRuntime>&
 {
     // 2 parameters: moveTo(x, y)
     if (argc != 2) {
-        LOGE("Call Path2D Arc MoveTo, invalid agrs.");
+        LOGE("Call Path2D Arc MoveTo, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1093,7 +1093,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsPath2DLineTo(const shared_ptr<JsRuntime>&
 {
     // 2 parameters: lineTo(x, y)
     if (argc != 2) {
-        LOGE("Call Path2D LineTo fialed, invalid agrs.");
+        LOGE("Call Path2D LineTo fialed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1118,7 +1118,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsPath2DArc(const shared_ptr<JsRuntime>& ru
 {
     // 5 or 6 parameters: arc(x, y, radius, startAngle, endAngle, anticlockwise?)
     if (argc < 5 || argc > 6) {
-        LOGE("Call Path2D Arc fialed, invalid agrs.");
+        LOGE("Call Path2D Arc fialed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1150,7 +1150,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsPath2DArcTo(const shared_ptr<JsRuntime>& 
 {
     // 5 parameters: arcTo(x1, y1, x2, y2, radius)
     if (argc != 5) {
-        LOGE("Call Path2D ArcTo fialed, invalid agrs.");
+        LOGE("Call Path2D ArcTo fialed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1176,7 +1176,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsPath2DQuadraticCurveTo(const shared_ptr<J
 {
     // 4 parameters: quadraticCurveTo(cpx, cpy, x, y)
     if (argc != 4) {
-        LOGE("Call Path2D QuadraticCurveTo fialed, invalid agrs.");
+        LOGE("Call Path2D QuadraticCurveTo fialed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1202,7 +1202,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsPath2DBezierCurveTo(const shared_ptr<JsRu
 {
     // 6 parameters: bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
     if (argc != 6) {
-        LOGE("Call Path2D BezierCurveTo fialed, invalid agrs.");
+        LOGE("Call Path2D BezierCurveTo fialed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1229,7 +1229,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsPath2DEllipse(const shared_ptr<JsRuntime>
 {
     // 7 or 8 parameters: ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise?)
     if (argc < 7 || argc > 8) {
-        LOGE("Call Path2D Ellipse fialed, invalid agrs.");
+        LOGE("Call Path2D Ellipse fialed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1262,7 +1262,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsPath2DRect(const shared_ptr<JsRuntime>& r
 {
     // 4 parameters: rect(x, y, width, height)
     if (argc != 4) {
-        LOGE("Call Path2D Rect fialed, invalid agrs.");
+        LOGE("Call Path2D Rect fialed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;

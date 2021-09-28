@@ -45,7 +45,8 @@ using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEventCallback = std::function<void()>;
 using OutBoundaryCallback = std::function<bool()>;
 using ScrollOverCallback = std::function<void(double velocity)>;
-using DragEndForRefreshtCallback = std::function<void()>;
+using DragEndForRefreshCallback = std::function<void()>;
+using DragCancelRefreshCallback = std::function<void()>;
 using WatchFixCallback = std::function<double(double final, double current)>;
 
 class Scrollable : public TouchEventTarget, public RelatedChild {
@@ -167,9 +168,14 @@ public:
         outBoundaryCallback_ = outBoundaryCallback;
     }
 
-    void SetDragEndCallback(const DragEndForRefreshtCallback& dragEndCallback)
+    void SetDragEndCallback(const DragEndForRefreshCallback& dragEndCallback)
     {
         dragEndCallback_ = dragEndCallback;
+    }
+
+    void SetDragCancel(const DragCancelRefreshCallback& dragCancelCallback)
+    {
+        dragCancelCallback_ = dragCancelCallback;
     }
 
     void SetWatchFixCallback(const WatchFixCallback& watchFixCallback)
@@ -193,6 +199,8 @@ public:
     bool Idle() const;
 
     bool IsStopped() const;
+
+    void StopScrollable();
 
     bool Available() const
     {
@@ -225,6 +233,11 @@ public:
         }
     }
 
+    void ChangeMoveStatus(bool flag)
+    {
+        moved_ = flag;
+    }
+
     static const RefPtr<SpringProperty>& GetDefaultOverSpringProperty();
 
 private:
@@ -240,7 +253,8 @@ private:
     ScrollOverCallback scrollOverCallback_;       // scroll motion controller when edge set to spring
     ScrollOverCallback notifyScrollOverCallback_; // scroll motion controller when edge set to spring
     OutBoundaryCallback outBoundaryCallback_;     // whether out of boundary check when edge set to spring
-    DragEndForRefreshtCallback dragEndCallback_;
+    DragEndForRefreshCallback dragEndCallback_;
+    DragCancelRefreshCallback dragCancelCallback_;
     WatchFixCallback watchFixCallback_;
     Axis axis_;
     RefPtr<DragRecognizer> dragRecognizer_;
@@ -262,7 +276,6 @@ private:
     bool needCenterFix_ = false;
     int32_t nodeId_ = 0;
     double slipFactor_ = 0.0;
-    double velocityRangeScale_ = 1.0;
     static double sFriction_;
     static double sVelocityScale_;
 };

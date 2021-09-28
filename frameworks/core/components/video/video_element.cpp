@@ -17,7 +17,6 @@
 
 #include <algorithm>
 #include <iomanip>
-#include <securec.h>
 #include <sstream>
 
 #include "base/i18n/localization.h"
@@ -26,7 +25,6 @@
 #include "base/log/log.h"
 #include "base/resource/internal_resource.h"
 #include "base/utils/utils.h"
-#include "core/common/ace_engine.h"
 #include "core/components/align/align_component.h"
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
@@ -44,9 +42,14 @@
 #include "core/event/back_end_event_manager.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/pipeline_context.h"
-#include "window_manager.h"
+
+#ifdef OHOS_STANDARD_SYSTEM
+#include <securec.h>
+
 #include "display_type.h"
 #include "surface.h"
+#include "window_manager.h"
+#endif
 
 namespace OHOS::Ace {
 namespace {
@@ -55,10 +58,15 @@ const char* PLAY_LABEL = "play";
 const char* PAUSE_LABEL = "pause";
 const char* FULLSCREEN_LABEL = "fullscreen";
 const char* EXIT_FULLSCREEN_LABEL = "exitFullscreen";
+
+#ifdef OHOS_STANDARD_SYSTEM
 const char* SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 constexpr int32_t WINDOW_HEIGHT_DEFAULT = 1;
 constexpr int32_t WINDOW_WIDTH_DEFAULT = 1;
+#else
+constexpr float ILLEGAL_SPEED = 0.0f;
+#endif
 
 } // namespace
 
@@ -95,9 +103,6 @@ VideoElement::~VideoElement()
         }
     }
     ReleasePlatformResource();
-    if (mediaPlayer_ != nullptr) {
-        mediaPlayer_->Release();
-    }
 }
 
 void VideoElement::PerformBuild()
@@ -114,13 +119,28 @@ void VideoElement::PerformBuild()
 void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
 {
     imageFit_ = videoComponent->GetFit();
+    imagePosition_ = videoComponent->GetImagePosition();
     needControls_ = videoComponent->NeedControls();
     isAutoPlay_ = videoComponent->IsAutoPlay();
     isMute_ = videoComponent->IsMute();
     src_ = videoComponent->GetSrc();
     poster_ = videoComponent->GetPoster();
     isFullScreen_ = videoComponent->IsFullscreen();
+    direction_ = videoComponent->GetDirection();
+    startTime_ = videoComponent->GetStartTime();
+    if (isLoop_ != videoComponent->IsLoop()) {
+        isLoop_ = videoComponent->IsLoop();
+        EnableLooping(isLoop_);
+    }
+
+    if (speed_ != videoComponent->GetSpeed()) {
+        speed_ = videoComponent->GetSpeed();
+        SetSpeed(speed_);
+    }
+
+#ifdef OHOS_STANDARD_SYSTEM
     PreparePlayer();
+#endif
 
     if (!videoComponent->GetPlayer().Invalid() && !videoComponent->GetTexture().Invalid()) {
         player_ = videoComponent->GetPlayer().Upgrade();
@@ -135,6 +155,7 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
     }
 }
 
+#ifdef OHOS_STANDARD_SYSTEM
 ::OHOS::sptr<::OHOS::Subwindow> VideoElement::CreateSubwindow()
 {
     const auto &wmi = ::OHOS::WindowManager::GetInstance();
@@ -222,8 +243,8 @@ void VideoElement::CreateMediaPlayer()
     if (mediaPlayer_ != nullptr) {
         return;
     }
-    subwindow_ = CreateSubwindow();
-    if (subwindow_ == nullptr) {
+    subWindow_ = CreateSubwindow();
+    if (subWindow_ == nullptr) {
         LOGE("Create subwindow failed");
         return;
     }
@@ -250,7 +271,7 @@ void VideoElement::PreparePlayer()
     }
     std::string filePath = src_;
     if (!StringUtils::StartWith(filePath, "file://")) {
-        filePath = AceEngine::Get().GetAssetAbsolutePath(src_);
+        filePath = GetAssetAbsolutePath(src_);
     }
     LOGI("filePath : %{private}s", filePath.c_str());
     if (mediaPlayer_->SetSource(filePath) != 0) {
@@ -258,7 +279,7 @@ void VideoElement::PreparePlayer()
         return;
     }
     RegistMediaPlayerEvent();
-    auto producerSurface = subwindow_->GetSurface();
+    auto producerSurface = subWindow_->GetSurface();
     if (producerSurface == nullptr) {
         LOGE("producerSurface is nullptr");
         return;
@@ -291,6 +312,24 @@ void VideoElement::PreparePlayer()
     });
 }
 
+std::string VideoElement::GetAssetAbsolutePath(const std::string& fileName)
+{
+    const auto pipelineContext = GetContext().Upgrade();
+    if (!pipelineContext) {
+        LOGW("the pipeline context is null");
+        return fileName;
+    }
+    auto assetManager = pipelineContext->GetAssetManager();
+    if (!assetManager) {
+        LOGW("the assetManager is null");
+        return fileName;
+    }
+    std::string filePath = assetManager->GetAssetPath(fileName);
+    std::string absolutePath = "file://" + filePath + fileName;
+    return absolutePath;
+}
+#endif
+
 void VideoElement::ResetStatus()
 {
     needControls_ = true;
@@ -304,6 +343,8 @@ void VideoElement::ResetStatus()
     isError_ = false;
     videoWidth_ = 0.0;
     videoHeight_ = 0.0;
+    isLoop_ = false;
+    startTime_ = 0;
     durationText_ = Localization::GetInstance()->FormatDuration(0);
     currentPosText_ = Localization::GetInstance()->FormatDuration(0);
 }
@@ -336,7 +377,9 @@ void VideoElement::Prepare(const WeakPtr<Element>& parent)
 
     RenderElement::Prepare(parent);
     if (renderNode_) {
+#ifdef OHOS_STANDARD_SYSTEM
         CreateMediaPlayer();
+#endif
         auto renderTexture = AceType::DynamicCast<RenderTexture>(renderNode_);
         if (renderTexture) {
             renderTexture->SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
@@ -359,7 +402,8 @@ void VideoElement::Prepare(const WeakPtr<Element>& parent)
 
 void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
-    if (subwindow_ != nullptr) {
+#ifdef OHOS_STANDARD_SYSTEM
+    if (subWindow_ != nullptr) {
         auto context = context_.Upgrade();
         if (context == nullptr) {
             LOGE("context is nullptr");
@@ -375,15 +419,20 @@ void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_
             height = textureHeight;
         }
         float viewScale = context->GetViewScale();
-        subwindow_->Resize(textureWidth * viewScale, height * viewScale);
+        subWindow_->Resize(textureWidth * viewScale, height * viewScale);
         LOGI("SetSubWindowSize width: %{public}f, height: %{public}f", textureWidth * viewScale, height * viewScale);
 
         if (renderNode_ != nullptr) {
             Offset offset = renderNode_->GetGlobalOffset();
-            subwindow_->Move(offset.GetX() * viewScale, offset.GetY() * viewScale);
+            subWindow_->Move(offset.GetX() * viewScale, offset.GetY() * viewScale);
             LOGI("SubWindow move X: %{public}f, Y: %{public}f", offset.GetX() * viewScale, offset.GetY() * viewScale);
         }
     }
+#else
+    if (texture_) {
+        texture_->OnSize(textureId, textureWidth, textureHeight);
+    }
+#endif
 }
 
 void VideoElement::HiddenChange(bool hidden)
@@ -533,9 +582,13 @@ void VideoElement::SetNewComponent(const RefPtr<Component>& newComponent)
             CreatePlatformResource();
         }
         if (texture_) {
+#ifndef OHOS_STANDARD_SYSTEM
+            videoComponent->SetTextureId(texture_->GetId());
+#endif
             videoComponent->SetSrcWidth(videoWidth_);
             videoComponent->SetSrcHeight(videoHeight_);
             videoComponent->SetFit(imageFit_);
+            videoComponent->SetImagePosition(imagePosition_);
         }
         videoComponent->SetChild(CreateChild());
 
@@ -568,6 +621,10 @@ void VideoElement::InitEvent(const RefPtr<VideoComponent>& videoComponent)
 
     if (!videoComponent->GetPauseEventId().IsEmpty()) {
         onPause_ = AceAsyncEvent<void(const std::string&)>::Create(videoComponent->GetPauseEventId(), context_);
+    }
+
+    if (!videoComponent->GetStopEventId().IsEmpty()) {
+        onStop_ = AceAsyncEvent<void(const std::string&)>::Create(videoComponent->GetStopEventId(), context_);
     }
 
     if (!videoComponent->GetSeekingEventId().IsEmpty()) {
@@ -606,6 +663,14 @@ void VideoElement::SetMethodCall(const RefPtr<VideoComponent>& videoComponent)
                 auto videoElement = weak.Upgrade();
                 if (videoElement) {
                     videoElement->Pause();
+                }
+            });
+        });
+        videoController->SetStopImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostTask([weak]() {
+                auto videoElement = weak.Upgrade();
+                if (videoElement) {
+                    videoElement->Stop();
                 }
             });
         });
@@ -782,6 +847,11 @@ void VideoElement::InitListener()
 
 void VideoElement::ReleasePlatformResource()
 {
+#ifdef OHOS_STANDARD_SYSTEM
+    if (mediaPlayer_ != nullptr) {
+        mediaPlayer_->Release();
+    }
+#else
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -823,7 +893,13 @@ void VideoElement::ReleasePlatformResource()
                 auto gpuTaskExecutor =
                     SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::GPU);
                 // Release texture after paint.
-                gpuTaskExecutor.PostTask([texture = texture_, platformTaskExecutor]() {
+                auto weak = AceType::WeakClaim(AceType::RawPtr(texture_));
+                gpuTaskExecutor.PostTask([weak, platformTaskExecutor]() {
+                    auto texture = weak.Upgrade();
+                    if (texture == nullptr) {
+                        LOGE("texture is nullptr");
+                        return;
+                    }
                     texture->Release();
                     // Make sure it's destroyed when it's release task done.
                     platformTaskExecutor.PostTask([texture]() {});
@@ -835,6 +911,7 @@ void VideoElement::ReleasePlatformResource()
 #endif
         }
     }
+#endif
 }
 
 void VideoElement::UpdataChild(const RefPtr<Component>& childComponent)
@@ -846,11 +923,22 @@ void VideoElement::UpdataChild(const RefPtr<Component>& childComponent)
 void VideoElement::OnError(const std::string& errorId, const std::string& param)
 {
     isError_ = true;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    std::string errorcode = "This component is not supported on PC Preview.";
+#else
     std::string errorcode = Localization::GetInstance()->GetErrorDescription(errorId);
+#endif
     UpdataChild(CreateErrorText(errorcode));
 
     if (onError_) {
-        std::string param = std::string("\"error\",{").append("}");
+        std::string param;
+        if (IsDeclarativePara()) {
+            auto json = JsonUtil::Create(true);
+            json->Put("error", "");
+            param = json->ToString();
+        } else {
+            param = std::string("\"error\",{").append("}");
+        }
         onError_(param);
     }
 }
@@ -869,9 +957,13 @@ void VideoElement::OnPrepared(
     IntTimeToText(currentPos_, currentPosText_);
 
     auto video = AceType::MakeRefPtr<VideoComponent>();
+#ifndef OHOS_STANDARD_SYSTEM
+    video->SetTextureId(texture_->GetId());
+#endif
     video->SetSrcWidth(videoWidth_);
     video->SetSrcHeight(videoHeight_);
     video->SetFit(imageFit_);
+    video->SetImagePosition(imagePosition_);
 
     if (isPlaying || currentPos != 0) {
         isInitialState_ = false;
@@ -883,9 +975,28 @@ void VideoElement::OnPrepared(
     UpdataChild(CreateChild());
 
     if (needFireEvent && onPrepared_) {
-        std::string param =
-            std::string("\"prepared\",{\"duration\":").append(std::to_string(duration_)).append("}");
+        std::string param;
+        if (IsDeclarativePara()) {
+            auto json = JsonUtil::Create(true);
+            json->Put("duration", std::to_string(duration_).c_str());
+            param = json->ToString();
+        } else {
+            param = std::string("\"prepared\",{\"duration\":")
+                                    .append(std::to_string(duration_)).append("}");
+        }
+        LOGE("video onPrepared event: %s ", param.c_str());
         onPrepared_(param);
+    }
+
+    if (!isExternalResource_) {
+        SetCurrentTime(startTime_);
+        EnableLooping(isLoop_);
+        SetSpeed(speed_);
+    }
+
+    if (isStop_) {
+        isStop_ = false;
+        Start();
     }
 }
 
@@ -902,19 +1013,36 @@ void VideoElement::OnPlayerStatus(bool isPlaying)
 
     if (isPlaying) {
         if (onStart_) {
-            std::string param = std::string("\"start\",{").append("}");
+            std::string param;
+            if (IsDeclarativePara()) {
+                auto json = JsonUtil::Create(true);
+                json->Put("start", "");
+                param = json->ToString();
+            } else {
+                param = std::string("\"start\",{").append("}");
+            }
+            LOGE("video onStart event: %s ", param.c_str());
             onStart_(param);
         }
     } else {
         if (onPause_) {
-            std::string param = std::string("\"pause\",{").append("}");
+            std::string param;
+            if (IsDeclarativePara()) {
+                auto json = JsonUtil::Create(true);
+                json->Put("pause", "");
+                param = json->ToString();
+            } else {
+                param = std::string("\"pause\",{").append("}");
+            }
+            LOGE("video onPause event: %s ", param.c_str());
             onPause_(param);
         }
     }
 }
 
-void VideoElement::OnCurrentTimeChange(int32_t currentPos)
+void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     if (currentPos == currentPos_) {
         return;
     }
@@ -925,6 +1053,7 @@ void VideoElement::OnCurrentTimeChange(int32_t currentPos)
             IntTimeToText(duration_, durationText_);
         }
     }
+#endif
 
     isInitialState_ = isInitialState_ ? currentPos == 0 : false;
     IntTimeToText(currentPos, currentPosText_);
@@ -933,8 +1062,16 @@ void VideoElement::OnCurrentTimeChange(int32_t currentPos)
     UpdataChild(CreateChild());
 
     if (onTimeUpdate_) {
-        std::string param =
-            std::string("\"timeupdate\",{\"currenttime\":").append(std::to_string(currentPos)).append("}");
+        std::string param;
+        if (IsDeclarativePara()) {
+            auto json = JsonUtil::Create(true);
+            json->Put("time", std::to_string(currentPos).c_str());
+            param = json->ToString();
+        } else {
+            param = std::string("\"timeupdate\",{\"currenttime\":")
+                        .append(std::to_string(currentPos)).append("}");
+        }
+        LOGE("video onTimeUpdate event: %s ", param.c_str());
         onTimeUpdate_(param);
     }
 }
@@ -948,7 +1085,15 @@ void VideoElement::OnCompletion()
     UpdataChild(CreateChild());
 
     if (onFinish_) {
-        std::string param = std::string("\"finish\",{").append("}");
+        std::string param;
+        if (IsDeclarativePara()) {
+            auto json = JsonUtil::Create(true);
+            json->Put("finish", "");
+            param = json->ToString();
+        } else {
+            param = std::string("\"finish\",{").append("}");
+        }
+        LOGE("video onFinish event: %s ", param.c_str());
         onFinish_(param);
     }
 }
@@ -999,19 +1144,28 @@ const RefPtr<Component> VideoElement::CreatePlayBtn()
 
     auto image = AceType::MakeRefPtr<ImageComponent>(imageIcon);
     const Size& btnSize = theme_->GetBtnSize();
-    image->SetWidth(Dimension(btnSize.Width()));
-    image->SetHeight(Dimension(btnSize.Height()));
+    image->SetWidth(Dimension(btnSize.Width(), DimensionUnit::VP));
+    image->SetHeight(Dimension(btnSize.Height(), DimensionUnit::VP));
     image->SetTextDirection(textDirection_);
     image->SetMatchTextDirection(true);
     std::list<RefPtr<Component>> btnChildren;
     btnChildren.emplace_back(image);
 
     auto button = AceType::MakeRefPtr<ButtonComponent>(btnChildren);
-    button->SetWidth(Dimension(btnSize.Width()));
-    button->SetHeight(Dimension(btnSize.Height()));
+    button->SetWidth(Dimension(btnSize.Width(), DimensionUnit::VP));
+    button->SetHeight(Dimension(btnSize.Height(), DimensionUnit::VP));
     button->SetType(ButtonType::ICON);
-    button->SetClickedEventId(startBtnClickId_);
 
+    if (IsDeclarativePara()) {
+        button->SetClickFunction([weak = WeakClaim(this)]() {
+            auto videoElement = weak.Upgrade();
+            if (videoElement) {
+                videoElement->OnStartBtnClick();
+            }
+        });
+    } else {
+        button->SetClickedEventId(startBtnClickId_);
+    }
     return button;
 }
 
@@ -1025,8 +1179,8 @@ const RefPtr<Component> VideoElement::CreateFullScreenBtn()
 
     auto image = AceType::MakeRefPtr<ImageComponent>(imageIcon);
     const Size& btnSize = theme_->GetBtnSize();
-    image->SetWidth(Dimension(btnSize.Width()));
-    image->SetHeight(Dimension(btnSize.Height()));
+    image->SetWidth(Dimension(btnSize.Width(), DimensionUnit::VP));
+    image->SetHeight(Dimension(btnSize.Height(), DimensionUnit::VP));
     image->SetTextDirection(textDirection_);
     image->SetMatchTextDirection(true);
 
@@ -1034,10 +1188,20 @@ const RefPtr<Component> VideoElement::CreateFullScreenBtn()
     btnChildren.emplace_back(image);
 
     auto button = AceType::MakeRefPtr<ButtonComponent>(btnChildren);
-    button->SetWidth(Dimension(btnSize.Width()));
-    button->SetHeight(Dimension(btnSize.Height()));
+    button->SetWidth(Dimension(btnSize.Width(), DimensionUnit::VP));
+    button->SetHeight(Dimension(btnSize.Height(), DimensionUnit::VP));
     button->SetType(ButtonType::ICON);
-    button->SetClickedEventId(fullscreenBtnClickId_);
+
+    if (IsDeclarativePara()) {
+        button->SetClickFunction([weak = WeakClaim(this), isFullScreen = isFullScreen_]() {
+            auto videoElement = weak.Upgrade();
+            if (videoElement) {
+                videoElement->OnFullScreenBtnClick();
+            }
+        });
+    } else {
+        button->SetClickedEventId(fullscreenBtnClickId_);
+    }
     return button;
 }
 
@@ -1064,6 +1228,10 @@ const RefPtr<Component> VideoElement::CreateControl()
 
     rowChildren.emplace_back(SetPadding(CreateDurationText(), Edge(theme_->GetTextEdge())));
 
+#ifndef OHOS_STANDARD_SYSTEM
+    rowChildren.emplace_back(SetPadding(CreateFullScreenBtn(), Edge(theme_->GetBtnEdge())));
+#endif
+
     auto decoration = AceType::MakeRefPtr<Decoration>();
     decoration->SetBackgroundColor(theme_->GetBkgColor());
     auto box = AceType::MakeRefPtr<BoxComponent>();
@@ -1083,16 +1251,15 @@ const RefPtr<Component> VideoElement::CreatePoster()
 {
     auto image = AceType::MakeRefPtr<ImageComponent>(poster_);
     image->SetImageFit(imageFit_);
+    image->SetImageObjectPosition(imagePosition_);
     image->SetFitMaxSize(true);
 
     std::list<RefPtr<Component>> childrenAlign;
     childrenAlign.emplace_back(image);
 
-    auto gestureListener = AceType::MakeRefPtr<GestureListenerComponent>(
-        AceType::MakeRefPtr<AlignComponent>(childrenAlign, Alignment::CENTER));
-    gestureListener->SetOnClickId(shieldId_);
-    gestureListener->SetOnLongPressId(shieldId_);
-    return gestureListener;
+    auto box = AceType::MakeRefPtr<BoxComponent>();
+    box->SetChild(AceType::MakeRefPtr<AlignComponent>(childrenAlign, Alignment::CENTER));
+    return box;
 }
 
 const RefPtr<Component> VideoElement::CreateChild()
@@ -1100,8 +1267,14 @@ const RefPtr<Component> VideoElement::CreateChild()
     RefPtr<Component> child;
     if (isInitialState_ && !poster_.empty()) {
         std::list<RefPtr<Component>> columnChildren;
+#ifndef OHOS_STANDARD_SYSTEM
+        columnChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(VIDEO_CHILD_COMMON_FLEX_GROW,
+            VIDEO_CHILD_COMMON_FLEX_SHRINK, VIDEO_CHILD_COMMON_FLEX_BASIS, CreatePoster()));
+#endif
         if (needControls_) {
             columnChildren.emplace_back(CreateControl());
+        } else if (IsDeclarativePara()) {
+            columnChildren.emplace_back(AceType::MakeRefPtr<BoxComponent>());
         }
         child = AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_END, FlexAlign::SPACE_AROUND, columnChildren);
     } else if (needControls_) {
@@ -1132,9 +1305,23 @@ const RefPtr<Component> VideoElement::CreateChild()
     }
 }
 
+bool VideoElement::IsDeclarativePara()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return false;
+    }
+
+    return context->GetIsDeclarative();
+}
+
 void VideoElement::OnStartBtnClick()
 {
+#ifdef OHOS_STANDARD_SYSTEM
     if (mediaPlayer_->IsPlaying()) {
+#else
+    if (isPlaying_) {
+#endif
         Pause();
     } else {
         Start();
@@ -1167,7 +1354,15 @@ void VideoElement::OnSliderChange(const std::string& param)
 
         SetCurrentTime(value);
         if (onSeeked_) {
-            std::string param = std::string("\"seeked\",{\"currenttime\":").append(std::to_string(value)).append("}");
+            std::string param;
+            if (IsDeclarativePara()) {
+                auto json = JsonUtil::Create(true);
+                json->Put("time", std::to_string(value).c_str());
+                param = json->ToString();
+            } else {
+                param = std::string("\"seeked\",{\"currenttime\":")
+                                        .append(std::to_string(value)).append("}");
+            }
             onSeeked_(param);
         }
     }
@@ -1192,7 +1387,15 @@ void VideoElement::OnSliderMoving(const std::string& param)
 
         SetCurrentTime(value);
         if (onSeeking_) {
-            std::string param = std::string("\"seeking\",{\"currenttime\":").append(std::to_string(value)).append("}");
+            std::string param;
+            if (IsDeclarativePara()) {
+                auto json = JsonUtil::Create(true);
+                json->Put("time", std::to_string(value).c_str());
+                param = json->ToString();
+            } else {
+                param = std::string("\"seeking\",{\"currenttime\":")
+                                        .append(std::to_string(value)).append("}");
+            }
             onSeeking_(param);
         }
     }
@@ -1207,6 +1410,12 @@ void VideoElement::IntTimeToText(uint32_t time, std::string& timeText)
 
 void VideoElement::Start()
 {
+    if (isStop_) {
+        CreatePlatformResource();
+        return;
+    }
+
+#ifdef OHOS_STANDARD_SYSTEM
     if (mediaPlayer_ != nullptr && !mediaPlayer_->IsPlaying()) {
         LOGI("Video Start");
         auto context = context_.Upgrade();
@@ -1219,29 +1428,54 @@ void VideoElement::Start()
             mediaPlayer->Play();
         });
     }
+#else
+    if (!isPlaying_ && player_) {
+        player_->Start();
+    }
+#endif
 }
 
 void VideoElement::Pause()
 {
+#ifdef OHOS_STANDARD_SYSTEM
     if (mediaPlayer_ != nullptr && mediaPlayer_->IsPlaying()) {
         LOGI("Video Pause");
         mediaPlayer_->Pause();
     }
+#else
+    if (isPlaying_ && player_) {
+        player_->Pause();
+    }
+#endif
 }
 
-void VideoElement::SetCurrentTime(int32_t currentPos)
+void VideoElement::Stop()
 {
+    OnCurrentTimeChange(0);
+    OnPlayerStatus(false);
+    ReleasePlatformResource();
+    isStop_ = true;
+}
+
+void VideoElement::SetCurrentTime(uint32_t currentPos)
+{
+#ifdef OHOS_STANDARD_SYSTEM
     if (mediaPlayer_ != nullptr && currentPos >= 0 && currentPos < duration_) {
         LOGI("Video Seek");
         mediaPlayer_->Seek(currentPos * MILLISECONDS_TO_SECONDS, OHOS::Media::SEEK_PREVIOUS_SYNC);
     }
+#else
+    if (currentPos >= 0 && currentPos < duration_ && player_) {
+        player_->SeekTo(currentPos);
+    }
+#endif
 }
 
 void VideoElement::FullScreen()
 {
     if (!isFullScreen_ && !isError_) {
         if (fullscreenEvent_) {
-            auto component = AceType::DynamicCast<ComposedComponent>(fullscreenEvent_(true, player_, texture_));
+            RefPtr<Component> component = fullscreenEvent_(true, player_, texture_);
             if (component) {
                 auto context = context_.Upgrade();
                 if (!context) {
@@ -1253,16 +1487,41 @@ void VideoElement::FullScreen()
                     return;
                 }
 
-                // add fullscreen component cover component
-                stackElement->PushComponent(AceType::MakeRefPtr<ComposedComponent>(component->GetId() + "fullscreen",
-                                                component->GetName() + "fullscreen", component->GetChild()),
-                    true);
-
+                // add fullscreen component cover componen
+                if (IsDeclarativePara()) {
+                    stackElement->PushComponent(
+                        AceType::MakeRefPtr<ComposedComponent>("0", "fullscreen", component));
+                } else {
+                    auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
+                    if (!composedComponent) {
+                        LOGE("VideoElement::FullScreen: is not ComposedComponent");
+                        return;
+                    }
+                    if (composedComponent->IsInspector()) {
+                        LOGE("VideoElement::FullScreen: is InspectorComposedComponent");
+                        return;
+                    }
+                    stackElement->PushComponent(
+                        AceType::MakeRefPtr<ComposedComponent>(composedComponent->GetId(),
+                        composedComponent->GetName() + "fullscreen", composedComponent->GetChild()));
+                }
                 isFullScreen_ = true;
+#ifndef OHOS_STANDARD_SYSTEM
+                if (player_) {
+                    player_->SetDirection(direction_);
+                }
+#endif
                 if (onFullScreenChange_) {
-                    std::string param = std::string("\"fullscreenchange\",{\"fullscreen\":")
+                    std::string param;
+                    if (IsDeclarativePara()) {
+                        auto json = JsonUtil::Create(true);
+                        json->Put("fullscreen", isFullScreen_);
+                        param = json->ToString();
+                    } else {
+                        param = std::string("\"fullscreenchange\",{\"fullscreen\":")
                                             .append(std::to_string(isFullScreen_))
                                             .append("}");
+                    }
                     onFullScreenChange_(param);
                 }
             }
@@ -1287,10 +1546,23 @@ void VideoElement::ExitFullScreen()
             return;
         }
         stackElement->PopComponent();
+#ifndef OHOS_STANDARD_SYSTEM
+        if (player_) {
+            player_->SetLandscape();
+        }
+#endif
         isFullScreen_ = false;
         if (onFullScreenChange_) {
-            std::string param =
-                std::string("\"fullscreenchange\",{\"fullscreen\":").append(std::to_string(isFullScreen_)).append("}");
+            std::string param;
+            if (IsDeclarativePara()) {
+                auto json = JsonUtil::Create(true);
+                json->Put("fullscreen", isFullScreen_);
+                param = json->ToString();
+            } else {
+                param = std::string("\"fullscreenchange\",{\"fullscreen\":")
+                                        .append(std::to_string(isFullScreen_))
+                                        .append("}");
+            }
             onFullScreenChange_(param);
         }
         if (renderNode_) {
@@ -1301,9 +1573,33 @@ void VideoElement::ExitFullScreen()
 
 void VideoElement::SetVolume(float volume)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     if (mediaPlayer_ != nullptr) {
         mediaPlayer_->SetVolume(volume, volume);
     }
+#else
+    if (player_) {
+        player_->SetVolume(volume);
+    }
+#endif
+}
+
+void VideoElement::EnableLooping(bool loop)
+{
+#ifndef OHOS_STANDARD_SYSTEM
+    if (player_) {
+        player_->EnableLooping(loop);
+    }
+#endif
+}
+
+void VideoElement::SetSpeed(float speed)
+{
+#ifndef OHOS_STANDARD_SYSTEM
+    if (player_ && speed >= ILLEGAL_SPEED) {
+        player_->SetSpeed(speed);
+    }
+#endif
 }
 
 void VideoElement::Dump()

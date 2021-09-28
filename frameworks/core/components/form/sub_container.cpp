@@ -15,9 +15,9 @@
 
 #include "core/components/form/sub_container.h"
 
-#include "adapter/common/cpp/file_asset_provider.h"
-#include "adapter/common/cpp/flutter_asset_manager.h"
-#include "adapter/common/cpp/flutter_task_executor.h"
+#include "adapter/aosp/entrance/java/jni/file_asset_provider.h"  // TODO: should not deps on adapter
+#include "frameworks/core/common/flutter/flutter_asset_manager.h"
+#include "frameworks/core/common/flutter/flutter_task_executor.h"
 #include "frameworks/core/components/box/box_element.h"
 #include "frameworks/core/components/form/form_element.h"
 #include "frameworks/core/components/stage/stage_element.h"

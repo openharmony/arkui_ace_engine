@@ -51,7 +51,7 @@
 #include "core/components_v2/inspector/tabs_composed_element.h"
 #include "core/components_v2/inspector/text_composed_element.h"
 #include "core/components_v2/inspector/toggle_composed_element.h"
-
+#include "core/components_v2/inspector/wrap_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace::V2 {
@@ -83,6 +83,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ColumnComposedElement>(id); } },
     { FLEX_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::FlexComposedElement>(id); } },
+    { WRAP_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::WrapComposedElement>(id); } },
     { GRID_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::GridComposedElement>(id); } },
     { GRID_ITEM_COMPONENT_TAG,
@@ -141,6 +143,7 @@ const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_T
     { TAB_CONTENT_ITEM_COMPONENT_TAG, TAB_CONTENT_ITEM_ETS_TAG },
     { TABS_COMPONENT_TAG, TABS_ETS_TAG },
     { FLEX_COMPONENT_TAG, FLEX_ETS_TAG },
+    { WRAP_COMPONENT_TAG, WRAP_ETS_TAG },
     { GRID_COMPONENT_TAG, GRID_ETS_TAG },
     { GRID_ITEM_COMPONENT_TAG, GRID_ITEM_ETS_TAG },
     { LIST_COMPONENT_TAG, LIST_ETS_TAG },

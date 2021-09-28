@@ -69,27 +69,11 @@ std::string FlexComposedElement::GetFlexDirection() const
     if (renderFlex) {
         return ConvertFlexDirectionToStirng(renderFlex->GetDirection());
     }
-    auto renderWrap = AceType::DynamicCast<RenderWrap>(node);
-    if (renderWrap) {
-        return ConvertWrapDirectionToStirng(renderWrap->GetDirection());
-    }
     return "FlexDirection.Row";
 }
 
 std::string FlexComposedElement::GetWrap() const
 {
-    auto node = GetInspectorNode(FlexElement::TypeId());
-    if (!node) {
-        return "FlexWrap.NoWrap";
-    }
-    auto renderWrap = AceType::DynamicCast<RenderWrap>(node);
-    if (renderWrap) {
-        if (renderWrap->GetDirection() == WrapDirection::HORIZONTAL_REVERSE
-            || renderWrap->GetDirection() == WrapDirection::VERTICAL_REVERSE) {
-                return "FlexWrap.WrapReverse";
-            }
-        return "FlexWrap.Wrap";
-    }
     return "FlexWrap.NoWrap";
 }
 
@@ -102,10 +86,6 @@ std::string FlexComposedElement::GetJustifyContent() const
     auto renderFlex = AceType::DynamicCast<RenderFlex>(node);
     if (renderFlex) {
         return ConvertFlexAlignToStirng(renderFlex->GetJustifyContent());
-    }
-    auto renderWrap = AceType::DynamicCast<RenderWrap>(node);
-    if (renderWrap) {
-        return ConvertWrapAlignmentToStirng(renderWrap->GetJustifyContent());
     }
     return "FlexAlign.Start";
 }
@@ -120,10 +100,6 @@ std::string FlexComposedElement::GetAlignItems() const
     if (renderFlex) {
         return ConvertFlexAlignToStirng(renderFlex->GetAlignItems());
     }
-    auto renderWrap = AceType::DynamicCast<RenderWrap>(node);
-    if (renderWrap) {
-        return ConvertWrapAlignmentToStirng(renderWrap->GetAlignItems());
-    }
     return "FlexAlign.Start";
 }
 
@@ -132,10 +108,6 @@ std::string FlexComposedElement::GetAlignContent() const
     auto node = GetInspectorNode(FlexElement::TypeId());
     if (!node) {
         return "FlexAlign.Start";
-    }
-    auto renderWrap = AceType::DynamicCast<RenderWrap>(node);
-    if (renderWrap) {
-        return ConvertWrapAlignmentToStirng(renderWrap->GetAlignContent());
     }
     return "FlexAlign.Start";
 }

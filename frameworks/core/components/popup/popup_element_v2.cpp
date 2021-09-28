@@ -81,7 +81,7 @@ void PopupElementV2::OnStateChange(bool isVisible)
         return;
     }
     auto json = JsonUtil::Create(true);
-    json->Put("isVisible", isVisible ? "true" : "false");
+    json->Put("isVisible", isVisible);
     onStateChange_(json->ToString());
 }
 

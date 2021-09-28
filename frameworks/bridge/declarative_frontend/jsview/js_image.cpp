@@ -503,6 +503,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);
 
     JSClass<JSImage>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSImage>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSImage>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSImage>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSImage>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

@@ -41,6 +41,14 @@ public:
     virtual std::vector<std::string> GetStringArray(uint32_t resId) const = 0;
     virtual double GetDouble(uint32_t resId) = 0;
     virtual int32_t GetInt(uint32_t resId) = 0;
+    virtual bool GetBoolean(uint32_t resId) const
+    {
+        return false;
+    };
+    virtual std::vector<uint32_t> GetIntArray(uint32_t resId) const
+    {
+        return {};
+    };
     virtual bool GetResource(uint32_t resId, std::ostream& dest) const
     {
         return false;

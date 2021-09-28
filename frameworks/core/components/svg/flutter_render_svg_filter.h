@@ -38,8 +38,8 @@ public:
 protected:
     void GetImageFilter(
         const RefPtr<RenderSvgFe>& fe, sk_sp<SkImageFilter>& imageFilter, ColorInterpolationType& currentColor);
-    void InitFilterParam(
-        const RefPtr<RenderSvgFe>& fe, sk_sp<SkImageFilter>& imageFilter, ColorInterpolationType& currentColor);
+    void InitFilterColor(const RefPtr<RenderSvgFe>& fe, ColorInterpolationType& currentColor);
+    sk_sp<SkImageFilter> MakeImageFilter(const FeInType& in, sk_sp<SkImageFilter>& imageFilter);
     void ConverImageFilterColor(
         sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& src, const ColorInterpolationType& dst);
 };

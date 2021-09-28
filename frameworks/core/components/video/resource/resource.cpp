@@ -44,16 +44,19 @@ void Resource::Release(const std::function<void(bool)>& onRelease)
 
     auto resRegister = context->GetPlatformResRegister();
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
-    auto releaseTask = [this, resRegister, onRelease] {
-        if (resRegister == nullptr) {
+    auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
+    auto releaseTask = [weak = AceType::WeakClaim(this), weakRes, onRelease] {
+        auto resource = weak.Upgrade();
+        auto resRegister = weakRes.Upgrade();
+        if (resource == nullptr || resRegister == nullptr) {
+            LOGE("resource or resRegister is nullptr");
             return;
         }
-        bool ret = resRegister->ReleaseResource(hash_);
+        bool ret = resRegister->ReleaseResource(resource->hash_);
         if (ret) {
-            id_ = INVALID_ID;
-            hash_.clear();
+            resource->id_ = INVALID_ID;
+            resource->hash_.clear();
         }
-
         if (onRelease) {
             onRelease(ret);
         }
@@ -94,6 +97,32 @@ int32_t Resource::GetIntParam(const std::string& param, const std::string& name)
         ss >> result;
     }
 
+    return result;
+}
+
+std::map<std::string, std::string> Resource::ParseMapFromString(const std::string& param)
+{
+    size_t equalsLen = sizeof(PARAM_EQUALS) - 1;
+    size_t andLen = sizeof(PARAM_EQUALS) - 1;
+    size_t totalLen = param.length();
+    size_t index = 0;
+    std::map<std::string, std::string> result;
+    while (index < totalLen) {
+        size_t end = param.find(PARAM_AND, index);
+        if (end == std::string::npos) {
+            end = totalLen;
+        }
+
+        size_t mid = param.find(PARAM_EQUALS, index);
+        if (mid == std::string::npos) {
+            index = end + andLen;
+            continue;
+        }
+        std::string key = param.substr(index, mid - index);
+        std::string value = param.substr(mid + equalsLen, end - mid - equalsLen);
+        result[key] = value;
+        index = end + andLen;
+    }
     return result;
 }
 
@@ -158,9 +187,11 @@ void Resource::CallResRegisterMethod(
 
     auto resRegister = context->GetPlatformResRegister();
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
-
-    platformTaskExecutor.PostTask([method, param, resRegister, callback] {
+    auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
+    platformTaskExecutor.PostTask([method, param, weakRes, callback] {
+        auto resRegister = weakRes.Upgrade();
         if (resRegister == nullptr) {
+            LOGE("resRegister is nullptr");
             return;
         }
         std::string result;

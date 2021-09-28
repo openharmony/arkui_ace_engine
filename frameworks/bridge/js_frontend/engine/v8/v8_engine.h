@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_V8_V8_ENGINE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_V8_V8_ENGINE_H
 
+#include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -135,14 +136,14 @@ public:
         return frontendDelegate_;
     }
 
-    void SetV8NativeEngine(V8NativeEngine* nativeEngine)
+    void SetV8NativeEngine(std::shared_ptr<V8NativeEngine> nativeEngine)
     {
         nativeEngine_ = nativeEngine;
     }
 
-    V8NativeEngine* GetV8NativeEngine() const
+    std::shared_ptr<V8NativeEngine> GetV8NativeEngine() const
     {
-        return nativeEngine_;
+        return nativeEngine_.lock();
     }
 
 private:
@@ -166,7 +167,7 @@ private:
     RefPtr<JsAcePage> stagingPage_;
 
     WeakPtr<JsMessageDispatcher> dispatcher_;
-    V8NativeEngine* nativeEngine_ = nullptr;
+    std::weak_ptr<V8NativeEngine> nativeEngine_;
     mutable std::mutex mutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(V8EngineInstance);
@@ -236,11 +237,11 @@ private:
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
     void RegisterOffWorkerFunc();
-    void SetPostTask(NativeEngine* nativeEngine);
+    void SetPostTask();
 
     RefPtr<V8EngineInstance> engineInstance_;
     int32_t instanceId_ = 0;
-    V8NativeEngine* nativeEngine_ = nullptr;
+    std::shared_ptr<V8NativeEngine> nativeEngine_;
 
     ACE_DISALLOW_COPY_AND_MOVE(V8Engine);
 };

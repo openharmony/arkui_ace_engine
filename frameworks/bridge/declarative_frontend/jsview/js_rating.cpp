@@ -26,7 +26,7 @@ namespace OHOS::Ace::Framework {
 void JSRating::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("piece create error, info is non-vaild");
+        LOGE("piece create error, info is non-valid");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -61,7 +61,6 @@ void JSRating::Create(const JSCallbackInfo& info)
             boxComponent->SetWidth(theme->GetRatingMiniWidth());
         }
         component->SetPaddingVertical(Dimension());
-        component->SetRatingScore(theme->GetRatingMiniScore());
         component->SetMiniResIdFromTheme(theme);
     } else {
         if (boxComponent->GetHeightDimension().Value() < 0.0) {

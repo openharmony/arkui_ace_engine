@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <memory>
+
 #include "frameworks/bridge/js_frontend/engine/v8/v8_xcomponent_bridge.h"
 
 #include "base/utils/string_utils.h"
@@ -91,8 +93,8 @@ void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId
         return;
     }
 
-    V8NativeEngine* nativeEngine = static_cast<V8EngineInstance*>(engine)->GetV8NativeEngine();
-    if (nativeEngine == nullptr) {
+    std::shared_ptr<V8NativeEngine> nativeEngine = static_cast<V8EngineInstance*>(engine)->GetV8NativeEngine();
+    if (!nativeEngine) {
         LOGE("nativeEngine is null");
         return;
     }

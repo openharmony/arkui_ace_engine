@@ -55,7 +55,7 @@ uint32_t ListItemComponent::Compare(const RefPtr<Component> &component) const
         return static_cast<uint32_t>(UpdateRenderType::LAYOUT);
     }
     uint32_t updateRenderType = static_cast<uint32_t>(UpdateRenderType::NONE);
-    updateRenderType |= static_cast<uint32_t>(listItem->GetEditable() == propEditable_ ?
+    updateRenderType |= static_cast<uint32_t>(listItem->GetEditMode() == propEditMode_ ?
         UpdateRenderType::NONE : UpdateRenderType::LAYOUT);
     updateRenderType |= static_cast<uint32_t>(listItem->GetSticky() == propSticky_ ?
         UpdateRenderType::NONE : UpdateRenderType::LAYOUT);

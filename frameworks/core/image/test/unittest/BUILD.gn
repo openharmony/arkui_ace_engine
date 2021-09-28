@@ -16,6 +16,8 @@ import("//foundation/ace/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
   module_output_path = "ace_engine_standard/graphicalbasicability/image"
+} else {
+  module_output_path = "ace_engine_full/graphicalbasicability/image"
 }
 
 ohos_unittest("ImageCacheTest") {
@@ -67,20 +69,22 @@ ohos_unittest("ImageCacheTest") {
   configs = [
     ":config_image_cache_test",
     "$ace_root:ace_test_config",
-    "$ace_flutter_engine_root:flutter_config",
-    "$ace_flutter_engine_root:icu_config_ohos",
   ]
 
   deps = [
-    "$ace_flutter_engine_root:ace_skia_ohos",
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+    "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
 
-  if (is_standard_system) {
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -148,22 +152,22 @@ ohos_unittest("ImageProviderTest") {
   configs = [
     ":config_image_provider_test",
     "$ace_root:ace_test_config",
-    "$ace_flutter_engine_root:flutter_config",
-    "$ace_flutter_engine_root:icu_config_ohos",
   ]
 
   deps = [
-    "$ace_flutter_engine_root:ace_skia_ohos",
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+    "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
 
-  if (is_standard_system) {
-    configs += [ "//third_party/curl:curl_config" ]
-    deps += [ "//third_party/curl:curl" ]
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
     subsystem_name = "ace"
     part_name = "ace_engine_standard"
   }
@@ -178,6 +182,6 @@ group("unittest") {
   testonly = true
   deps = [
     ":ImageCacheTest",
-    ":ImageProviderTest",
+    # ":ImageProviderTest",
   ]
 }

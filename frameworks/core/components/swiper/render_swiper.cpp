@@ -86,7 +86,6 @@ constexpr int32_t ZOOM_OUT_HOVER_DURATION = 250;
 constexpr int32_t ZOOM_IN_DOT_DURATION = 100;
 constexpr int32_t ZOOM_OUT_DOT_DURATION = 150;
 constexpr int32_t DRAG_RETRETION_DURATION = 250;
-constexpr int32_t INDICATOR_START_ANIMATION = 400;
 
 // indicator animation curve
 const RefPtr<CubicCurve> INDICATOR_FOCUS_HEAD = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 1.0f, 1.0f);
@@ -106,6 +105,7 @@ constexpr Dimension INDICATOR_FOCUS_RADIUS_DEL_SIZE = 3.0_vp;
 constexpr int32_t INDICATOR_FOCUS_COLOR = 0x0a59f7;
 
 constexpr Dimension MIN_TURN_PAGE_VELOCITY = 400.0_vp;
+constexpr Dimension MIN_DRAG_DISTANCE = 25.0_vp;
 
 } // namespace
 
@@ -244,20 +244,21 @@ void RenderSwiper::PerformLayout()
     }
     innerLayout.SetMaxSize(maxSizeClild);
 
+    bool isLinearLayout = swiper_ ? swiper_->GetDisplayMode() == SwiperDisplayMode::AUTO_LINEAR : false;
     double maxWidth = minSize.Width();
     double maxHeight = minSize.Height();
     if (mainSwiperSize_ == MainSwiperSize::MAX) {
-        maxWidth = maxSize.Width();
-        maxHeight = maxSize.Height();
+        maxWidth = (axis_ == Axis::HORIZONTAL && isLinearLayout) ? 0.0 : maxSize.Width();
+        maxHeight = (axis_ == Axis::VERTICAL && isLinearLayout) ? 0.0 : maxSize.Height();
     } else if (mainSwiperSize_ == MainSwiperSize::MIN) {
         maxWidth = 0.0;
         maxHeight = 0.0;
     } else if (mainSwiperSize_ == MainSwiperSize::MAX_X) {
-        maxWidth = maxSize.Width();
+        maxWidth = (axis_ == Axis::HORIZONTAL && isLinearLayout) ? 0.0 : maxSize.Width();
         maxHeight = 0.0;
     } else if (mainSwiperSize_ == MainSwiperSize::MAX_Y) {
         maxWidth = 0.0;
-        maxHeight = maxSize.Height();
+        maxHeight = (axis_ == Axis::VERTICAL && isLinearLayout) ? 0.0 : maxSize.Height();
     } else if (mainSwiperSize_ == MainSwiperSize::AUTO) {
         LOGD("Use default MainSwiperSize");
     } else {
@@ -273,6 +274,7 @@ void RenderSwiper::PerformLayout()
         maxWidth = std::max(maxWidth, childItem->GetLayoutSize().Width());
         maxHeight = std::max(maxHeight, childItem->GetLayoutSize().Height());
     }
+
     if (mainSwiperSize_ == MainSwiperSize::AUTO) {
         if (maxSize.IsInfinite()) {
             SetLayoutSize(Size(maxWidth, maxHeight));
@@ -280,13 +282,15 @@ void RenderSwiper::PerformLayout()
             SetLayoutSize(maxSize);
         }
     } else {
-        SetLayoutSize(Size(maxWidth, maxHeight));
+        SetLayoutSize(isLinearLayout ? maxSize : Size(maxWidth, maxHeight));
     }
 
     Size layoutSize = GetLayoutSize();
     double halfSpace = swiper_ ? NormalizeToPx(swiper_->GetItemSpace()) / 2.0 : 0.0;
-    swiperWidth_ = layoutSize.Width() + 2.0 * halfSpace;
-    swiperHeight_ = layoutSize.Height();
+    swiperWidth_ = (isLinearLayout ? maxWidth : layoutSize.Width()) + 2.0 * halfSpace;
+    swiperHeight_ = (isLinearLayout ? maxHeight : layoutSize.Height());
+    showingCount_ = axis_ == Axis::HORIZONTAL ? std::ceil(layoutSize.Width() / swiperWidth_)
+                                              : std::ceil(layoutSize.Height() / swiperHeight_);
 
     prevItemOffset_ = axis_ == Axis::HORIZONTAL ? (needReverse_ ? swiperWidth_ - prevMargin_ - nextMargin_ + halfSpace
                                                 : -swiperWidth_ + prevMargin_ + nextMargin_ - halfSpace) :
@@ -294,11 +298,6 @@ void RenderSwiper::PerformLayout()
     nextItemOffset_ = axis_ == Axis::HORIZONTAL ? (needReverse_ ? -swiperWidth_ + prevMargin_ + nextMargin_ - halfSpace
                                                 : swiperWidth_ - prevMargin_ - nextMargin_ + halfSpace) :
                                                 swiperHeight_ - prevMargin_ - nextMargin_;
-    // layout all the child
-    int32_t prevIndex = GetPrevIndex(currentIndex_);
-    int32_t nextIndex = GetNextIndex(currentIndex_);
-    Offset firstItemPosition = GetMainAxisOffset(2 * prevItemOffset_);
-    Offset lastItemPosition = GetMainAxisOffset(2 * nextItemOffset_);
     for (const auto& item : items_) {
         int32_t i = item.first;
         // Refuse update item position during animation unless quick trun item
@@ -309,17 +308,10 @@ void RenderSwiper::PerformLayout()
         if (!childItem) {
             continue;
         }
-        if (i == currentIndex_) {
-            childItem->SetPosition(GetMainAxisOffset(0));
-        } else if (i == prevIndex) {
-            childItem->SetPosition(GetMainAxisOffset(prevItemOffset_));
-        } else if (i == nextIndex) {
-            childItem->SetPosition(GetMainAxisOffset(nextItemOffset_));
-        } else if (i < currentIndex_) {
-            childItem->SetPosition(firstItemPosition);
-        } else {
-            childItem->SetPosition(lastItemPosition);
-        }
+        int32_t maxShowingIndex = currentIndex_ - 1 + showingCount_;
+        int32_t loopCount = loop_ && maxShowingIndex >= itemCount_ && i <= (maxShowingIndex % itemCount_) ?
+            itemCount_ : 0;
+        childItem->SetPosition(GetMainAxisOffset((i + loopCount - currentIndex_) * nextItemOffset_));
     }
     quickTrunItem_ = false;
 
@@ -609,10 +601,8 @@ void RenderSwiper::HandleTouchUp(const TouchEventInfo& info)
     }
     // restore the item position that slides to half stopped by a touch event during autoplay
     scrollOffset_ = fmod(scrollOffset_, nextItemOffset_);
-    if (scrollOffset_ > 0.0) {
-        MoveItems(scrollOffset_, 0.0, currentIndex_, needReverse_ ? GetNextIndex() : GetPrevIndex());
-    } else if (scrollOffset_ < 0.0) {
-        MoveItems(scrollOffset_, 0.0, currentIndex_, needReverse_ ? GetPrevIndex() : GetNextIndex());
+    if (!NearZero(scrollOffset_)) {
+        MoveItems(0.0);
     } else {
         // restore autoplay which break by a touch event
         RestoreAutoPlay();
@@ -798,11 +788,7 @@ bool RenderSwiper::SpringItems(const DragEndInfo& info)
     EdgeEffect edgeEffect = swiper_->GetEdgeEffect();
     if (edgeEffect == EdgeEffect::SPRING) {
         int32_t toIndex = 0;
-        if (GreatNotEqual(scrollOffset_, 0.0)) {
-            toIndex = needReverse_ ? GetNextIndex() : GetPrevIndex();
-        } else {
-            toIndex = needReverse_ ? GetPrevIndex() : GetNextIndex();
-        }
+        toIndex = GreatNotEqual(scrollOffset_, 0.0) ? GetPrevIndex() : GetNextIndex();
         nextIndex_ = toIndex;
 
         if (currentIndex_ == toIndex) {
@@ -887,13 +873,7 @@ void RenderSwiper::HandleDragEnd(const DragEndInfo& info)
     }
 
     isIndicatorAnimationStart_ = false;
-    if (scrollOffset_ > 0.0) {
-        MoveItems(scrollOffset_, info.GetMainVelocity(), currentIndex_,
-            needReverse_ ? GetNextIndex() : GetPrevIndex());
-    } else {
-        MoveItems(scrollOffset_, info.GetMainVelocity(), currentIndex_,
-            needReverse_ ? GetPrevIndex() : GetNextIndex());
-    }
+    MoveItems(info.GetMainVelocity());
 }
 
 void RenderSwiper::StartSpringMotion(double mainPosition, double mainVelocity,
@@ -915,7 +895,7 @@ void RenderSwiper::StartSpringMotion(double mainPosition, double mainVelocity,
     scrollMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double position) {
         auto swiper = weakScroll.Upgrade();
         if (swiper) {
-            swiper->UpdateChildPosition(position, swiper->currentIndex_, swiper->currentIndex_);
+            swiper->UpdateChildPosition(position, swiper->currentIndex_);
         }
     });
     springController_->ClearStopListeners();
@@ -935,7 +915,7 @@ void RenderSwiper::StartSpringMotion(double mainPosition, double mainVelocity,
     });
 }
 
-void RenderSwiper::MoveItems(double dragOffset, double dragVelocity, int32_t fromIndex, int32_t toIndex)
+void RenderSwiper::MoveItems(double dragVelocity)
 {
     if (isIndicatorAnimationStart_) {
         LOGE("item and indicator animation is processing.");
@@ -948,9 +928,12 @@ void RenderSwiper::MoveItems(double dragOffset, double dragVelocity, int32_t fro
     }
 
     isIndicatorAnimationStart_ = true;
-    double start = dragOffset;
+    double start = scrollOffset_;
     double end;
 
+    bool needRestore = false;
+    int32_t fromIndex = currentIndex_;
+    int32_t toIndex = 0;
     // Adjust offset more than MIN_SCROLL_OFFSET at least
     double minOffset = 0.0;
     if (axis_ == Axis::VERTICAL) {
@@ -958,21 +941,42 @@ void RenderSwiper::MoveItems(double dragOffset, double dragVelocity, int32_t fro
     } else {
         minOffset = MIN_SCROLL_OFFSET * swiperWidth_;
     }
-    bool needRestore = false;
-    if ((!NearZero(dragOffset) && std::abs(dragOffset) < minOffset
-        && std::abs(dragVelocity) < NormalizeToPx(MIN_TURN_PAGE_VELOCITY)) || (fromIndex == toIndex)) {
-        LOGI("scroll offset and velocity less than min value.");
-        targetIndex_ = fromIndex;
-        nextIndex_ = fromIndex;
+    if (std::abs(dragVelocity) > NormalizeToPx(MIN_TURN_PAGE_VELOCITY) &&
+        std::abs(scrollOffset_) > NormalizeToPx(MIN_DRAG_DISTANCE)) {
+        if (dragVelocity > 0.0) {
+            toIndex = GetPrevIndex();
+            end = currentIndex_ == toIndex ? 0.0 : nextItemOffset_;
+            if (scrollOffset_ < 0.0) {
+                fromIndex = GetNextIndex();
+                start += nextItemOffset_;
+                toIndex = currentIndex_;
+            }
+        } else {
+            toIndex = GetNextIndex();
+            end = currentIndex_ == toIndex ? 0.0 : prevItemOffset_;
+            if (scrollOffset_ > 0.0) {
+                fromIndex = GetPrevIndex();
+                start += prevItemOffset_;
+                toIndex = currentIndex_;
+            }
+        }
+        targetIndex_ = toIndex;
+    } else if (std::abs(scrollOffset_) > minOffset) {
+        if (scrollOffset_ > 0.0) {
+            toIndex = GetPrevIndex();
+            end = nextItemOffset_;
+        } else {
+            toIndex = GetNextIndex();
+            end = prevItemOffset_;
+        }
+        targetIndex_ = toIndex;
+    } else {
+        toIndex = scrollOffset_ > 0.0 ? GetPrevIndex() : GetNextIndex();
         end = 0.0;
         needRestore = true;
-    } else {
-        targetIndex_ = toIndex;
-        nextIndex_ = toIndex;
-        // auto play drag offset is zero, move to previous
-        end = needReverse_ ? (dragOffset >= 0.0 ? prevItemOffset_ : nextItemOffset_)
-                           : (dragOffset > 0.0 ? nextItemOffset_ : prevItemOffset_);
     }
+    nextIndex_ = targetIndex_;
+
     LOGD("translate animation, start=%{public}f, end=%{public}f", start, end);
     translate_ = AceType::MakeRefPtr<CurveAnimation<double>>(start, end, Curves::LINEAR);
     auto weak = AceType::WeakClaim(this);
@@ -983,7 +987,7 @@ void RenderSwiper::MoveItems(double dragOffset, double dragVelocity, int32_t fro
                 double moveRate = Curves::EASE_OUT->MoveInternal((value - start) / (end - start));
                 value = start + (end - start) * moveRate;
             }
-            swiper->UpdateChildPosition(value, fromIndex, toIndex);
+            swiper->UpdateChildPosition(value, fromIndex);
             swiper->MoveIndicator(toIndex, value, true);
         }
     }));
@@ -1325,10 +1329,7 @@ int32_t RenderSwiper::GetPrevIndexOnAnimation() const
 
 int32_t RenderSwiper::GetPrevIndex(int32_t index) const
 {
-    if (--index < 0) {
-        index = loop_ ? itemCount_ - 1 : 0;
-    }
-    return index;
+    return GetIndex(index, !needReverse_);
 }
 
 int32_t RenderSwiper::GetNextIndex() const
@@ -1343,8 +1344,19 @@ int32_t RenderSwiper::GetNextIndexOnAnimation() const
 
 int32_t RenderSwiper::GetNextIndex(int32_t index) const
 {
-    if (++index >= itemCount_) {
-        index = loop_ ? 0 : itemCount_ - 1;
+    return GetIndex(index, needReverse_);
+}
+
+int32_t RenderSwiper::GetIndex(int32_t index, bool leftOrTop) const
+{
+    if (leftOrTop) {
+        if (--index < 0) {
+            index = loop_ ? itemCount_ - 1 : 0;
+        }
+    } else {
+        if (++index >= itemCount_) {
+            index = loop_ ? 0 : itemCount_ - 1;
+        }
     }
     return index;
 }
@@ -1409,12 +1421,7 @@ void RenderSwiper::UpdateScrollPosition(double dragDelta)
 {
     auto limitDelta = std::clamp(dragDelta, -MAX_VIEW_PORT_WIDTH, MAX_VIEW_PORT_WIDTH);
     double newDragOffset = scrollOffset_ + limitDelta;
-    int32_t toIndex = 0;
-    if (newDragOffset > 0) {
-        toIndex = needReverse_ ? GetNextIndex() : GetPrevIndex();
-    } else {
-        toIndex = needReverse_ ? GetPrevIndex() : GetNextIndex();
-    }
+    int32_t toIndex = newDragOffset > 0 ? GetPrevIndex() : GetNextIndex();
     if (toIndex < 0 || toIndex >= itemCount_) {
         LOGD("toIndex is error %{public}d", toIndex);
         return;
@@ -1429,6 +1436,7 @@ void RenderSwiper::UpdateScrollPosition(double dragDelta)
     if (std::fabs(newDragOffset) >= std::fabs(nextItemOffset_)) {
         scrollOffset_ = (newDragOffset >= nextItemOffset_) ? newDragOffset - nextItemOffset_
                                                            : newDragOffset - prevItemOffset_;
+        LoadLazyItems((currentIndex_ + 1) % itemCount_ == toIndex);
         outItemIndex_ = currentIndex_;
         currentIndex_ = toIndex;
         FireItemChangedEvent(true);
@@ -1448,13 +1456,8 @@ void RenderSwiper::UpdateScrollPosition(double dragDelta)
     if (dragReverse) {
         int32_t lastToIndex = 0;
         double toItemPosValue = 0.0;
-        if (needReverse_) {
-            lastToIndex = scrollOffset_ > 0 ? GetNextIndex() : GetPrevIndex();
-            toItemPosValue = scrollOffset_ > 0 ? nextItemOffset_ : prevItemOffset_;
-        } else {
-            lastToIndex = scrollOffset_ > 0 ? GetPrevIndex() : GetNextIndex();
-            toItemPosValue = scrollOffset_ > 0 ? prevItemOffset_ : nextItemOffset_;
-        }
+        lastToIndex = scrollOffset_ > 0 ? GetPrevIndex() : GetNextIndex();
+        toItemPosValue = scrollOffset_ > 0 ? prevItemOffset_ : nextItemOffset_;
 
         auto iter = items_.find(lastToIndex);
         if (iter != items_.end()) {
@@ -1462,7 +1465,7 @@ void RenderSwiper::UpdateScrollPosition(double dragDelta)
         }
     }
 
-    UpdateChildPosition(newDragOffset, currentIndex_, toIndex);
+    UpdateChildPosition(newDragOffset, currentIndex_);
     MoveIndicator(toIndex, newDragOffset);
 }
 
@@ -1483,17 +1486,13 @@ void RenderSwiper::SetSwiperEffect(double dragOffset)
         MarkNeedRender();
     } else if (isSpring) {
         isPaintedFade_ = false;
-        UpdateChildPosition(dragOffset, currentIndex_, currentIndex_);
+        UpdateChildPosition(dragOffset, currentIndex_);
     }
 }
 
-void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, int32_t toIndex)
+void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex)
 {
     scrollOffset_ = offset;
-    auto iter = items_.find(fromIndex);
-    if (iter != items_.end()) {
-        iter->second->SetPosition(GetMainAxisOffset(offset));
-    }
     int32_t prevIndex = GetPrevIndex(fromIndex);
     if (prevIndex != fromIndex) {
         auto item = items_.find(prevIndex);
@@ -1501,13 +1500,19 @@ void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, int32_t
             item->second->SetPosition(GetMainAxisOffset(offset + (needReverse_ ? nextItemOffset_ : prevItemOffset_)));
         }
     }
-
-    int32_t nextIndex = GetNextIndex(fromIndex);
-    if (nextIndex != fromIndex) {
-        auto item = items_.find(nextIndex);
+    int32_t lastIndex = fromIndex;
+    int32_t maxUpdateCount = showingCount_ + 1;
+    for (int32_t i = 0; i < maxUpdateCount; i++) {
+        auto item = items_.find(lastIndex);
         if (item != items_.end()) {
-            item->second->SetPosition(GetMainAxisOffset(offset + (needReverse_ ? prevItemOffset_ : nextItemOffset_)));
+            item->second->SetPosition(
+                GetMainAxisOffset(offset + (needReverse_ ? i * prevItemOffset_ : i * nextItemOffset_)));
         }
+        int32_t nextIndex = GetNextIndex(lastIndex);
+        if (nextIndex == lastIndex) {
+            break;
+        }
+        lastIndex = nextIndex;
     }
 
     if ((itemCount_ > WITH_MARGIN_MIN_ITEM_COUNT) || (!loop_)) {
@@ -1519,17 +1524,7 @@ void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, int32_t
                     + (needReverse_ ? 2 * nextItemOffset_ : 2 * prevItemOffset_)));
             }
         }
-
-        int32_t nextNextIndex = GetNextIndex(nextIndex);
-        if (nextNextIndex != nextIndex) {
-            auto item = items_.find(nextNextIndex);
-            if (item != items_.end()) {
-                item->second->SetPosition(GetMainAxisOffset(offset
-                    + (needReverse_ ? 2 * prevItemOffset_ : 2 * nextItemOffset_)));
-            }
-        }
     }
-
     MarkNeedRender();
 }
 
@@ -2665,13 +2660,13 @@ void RenderSwiper::StartIndicatorAnimation(int32_t fromIndex, int32_t toIndex, b
         if (swiper) {
             swiper->UpdateIndicatorOffset(fromIndex, toIndex, value);
             double itemOffset = (value == CUR_END_TRANSLATE_TIME) ? value : Curves::EASE_OUT->MoveInternal(value);
-            swiper->UpdateChildPosition(itemOffset * contentOffset, fromIndex, toIndex);
+            swiper->UpdateChildPosition(itemOffset * contentOffset, fromIndex);
         }
     });
 
     indicatorController_->ClearInterpolators();
     indicatorController_->AddInterpolator(indicatorAnimation_);
-    indicatorController_->SetDuration(INDICATOR_START_ANIMATION);
+    indicatorController_->SetDuration(duration_);
     indicatorController_->ClearStopListeners();
     indicatorController_->AddStopListener([weak = AceType::WeakClaim(this), fromIndex, toIndex]() {
         auto swiper = weak.Upgrade();

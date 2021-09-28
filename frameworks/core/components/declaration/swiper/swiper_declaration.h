@@ -28,6 +28,11 @@ inline constexpr double DEFAULT_SWIPER_ANIMATION_DURATION = 400.0;
 inline constexpr double DEFAULT_SWIPER_AUTOPLAY_INTERVAL = 3000.0;
 inline constexpr int32_t DEFAULT_SWIPER_CACHED_SIZE = -1;
 
+enum class SwiperDisplayMode {
+    STRETCH = 0,
+    AUTO_LINEAR,
+};
+
 struct SwiperAttribute : Attribute {
     uint32_t index = DEFAULT_SWIPER_CURRENT_INDEX;
     double duration = DEFAULT_SWIPER_ANIMATION_DURATION;
@@ -39,6 +44,7 @@ struct SwiperAttribute : Attribute {
     double autoPlayInterval = DEFAULT_SWIPER_AUTOPLAY_INTERVAL;
     int32_t cachedSize = DEFAULT_SWIPER_CACHED_SIZE;
     EdgeEffect edgeEffect = EdgeEffect::SPRING;
+    SwiperDisplayMode displayMode = SwiperDisplayMode::STRETCH;
 };
 
 struct SwiperStyle : Style {
@@ -175,6 +181,18 @@ public:
     {
         auto& attribute = MaybeResetAttribute<SwiperAttribute>(AttributeTag::SPECIALIZED_ATTR);
         attribute.digitalIndicator = digitalIndicator;
+    }
+
+    SwiperDisplayMode GetDisplayMode() const
+    {
+        auto& attribute = static_cast<SwiperAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
+        return attribute.displayMode;
+    }
+
+    void SetDisplayMode(SwiperDisplayMode displayMode)
+    {
+        auto& attribute = MaybeResetAttribute<SwiperAttribute>(AttributeTag::SPECIALIZED_ATTR);
+        attribute.displayMode = displayMode;
     }
 
     AnimationCurve GetAnimationCurve() const

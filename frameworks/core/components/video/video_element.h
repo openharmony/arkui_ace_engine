@@ -19,7 +19,6 @@
 #include "core/components/common/properties/edge.h"
 #include "core/components/multimodal/render_multimodal.h"
 #include "core/components/slider/slider_theme.h"
-#include "core/components/video/media_player_callback.h"
 #include "core/components/video/resource/player.h"
 #include "core/components/video/resource/texture.h"
 #include "core/components/video/video_component.h"
@@ -27,15 +26,18 @@
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/render_element.h"
 
+#ifdef OHOS_STANDARD_SYSTEM
+#include "core/components/video/media_player_callback.h"
 #include "foundation/multimedia/media_standard/interfaces/innerkits/native/media/include/player.h"
 #include "window_manager.h"
+#endif
 
 namespace OHOS::Ace {
 
 constexpr double VIDEO_CHILD_COMMON_FLEX_GROW = 1.0;
 constexpr double VIDEO_CHILD_COMMON_FLEX_SHRINK = 1.0;
 constexpr double VIDEO_CHILD_COMMON_FLEX_BASIS = 0.0;
-constexpr int32_t VIDEO_SEEK_STEP = 5;
+constexpr uint32_t VIDEO_SEEK_STEP = 5;
 
 class VideoElement : public RenderElement, public FocusNode {
     DECLARE_ACE_TYPE(VideoElement, RenderElement, FocusNode);
@@ -55,19 +57,32 @@ public:
 
     void Start();
     void Pause();
-    void SetCurrentTime(int32_t currentPos);
+    void Stop();
+    void SetCurrentTime(uint32_t currentPos);
     void FullScreen();
     void ExitFullScreen();
     void SetVolume(float volume);
+    void SetSpeed(float speed);
+
 protected:
     virtual void InitStatus(const RefPtr<VideoComponent>& videoComponent);
+    bool IsDeclarativePara();
+
+    bool isFullScreen_ = false;
+    bool isInitialState_ = true; // Initial state is true. Play or seek will set it to true.
+    bool isError_ = false;
+    std::string direction_ = "auto";
+    bool isExternalResource_ = false;
+    RefPtr<Player> player_;
+    RefPtr<Texture> texture_;
+    EventCallback onFullScreenChange_;
 
 private:
     void OnError(const std::string& errorId, const std::string& param);
     void OnPrepared(
         uint32_t width, uint32_t height, bool isPlaying, uint32_t duration, uint32_t currentPos, bool needFireEvent);
     void OnPlayerStatus(bool isPlaying);
-    void OnCurrentTimeChange(int32_t currentPos);
+    void OnCurrentTimeChange(uint32_t currentPos);
     void OnCompletion();
     void OnStartBtnClick();
     void OnFullScreenBtnClick();
@@ -89,6 +104,7 @@ private:
     void OnTextureRefresh();
     void HiddenChange(bool hidden);
     void OnTextureSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
+    void EnableLooping(bool loop);
 
     const RefPtr<Component> CreateChild();
     const RefPtr<Component> CreatePoster();
@@ -108,31 +124,30 @@ private:
     bool isSubscribeMultimodal_ = false;
     RefPtr<VideoTheme> theme_;
     RefPtr<SliderTheme> sliderTheme_;
-    RefPtr<Player> player_;
-    RefPtr<Texture> texture_;
-    bool isExternalResource_ = false;
+    bool isStop_ = false;
 
     ImageFit imageFit_ { ImageFit::CONTAIN };
+    ImageObjectPosition imagePosition_;
 
     bool needControls_ = true;
     bool isAutoPlay_ = false;
     bool isMute_ = false;
     std::string src_;
     std::string poster_;
-    int32_t duration_ = 0;
-    int32_t currentPos_ = 0;
+    uint32_t duration_ = 0;
+    uint32_t currentPos_ = 0;
     bool isPlaying_ = false;
     bool pastPlayingStatus_ = false; // Record the player status before dragging the progress bar.
     bool isReady_ = false;
-    bool isFullScreen_ = false;
-    bool isInitialState_ = true; // Initial state is true. Play or seek will set it to true.
-    bool isError_ = false;
     bool isElementPrepared_ = false;
     double videoWidth_ = 0.0;
     double videoHeight_ = 0.0;
+    bool isLoop_ = false;
+    int32_t startTime_ = 0;
     std::string durationText_;
     std::string currentPosText_;
     TextDirection textDirection_ = TextDirection::LTR;
+    float speed_ = -1.0f;
 
     EventMarker shieldId_; // Shield the event on the control bar.
     EventMarker startBtnClickId_;
@@ -142,12 +157,12 @@ private:
     EventCallback onPrepared_;
     EventCallback onStart_;
     EventCallback onPause_;
+    EventCallback onStop_;
     EventCallback onFinish_;
     EventCallback onError_;
     EventCallback onSeeking_;
     EventCallback onSeeked_;
     EventCallback onTimeUpdate_;
-    EventCallback onFullScreenChange_;
 
     // multimodal required param
     MultimodalEventCallback multimodalEventFullscreen_;
@@ -162,14 +177,17 @@ private:
 
     FullscreenEvent fullscreenEvent_;
 
+#ifdef OHOS_STANDARD_SYSTEM
     ::OHOS::sptr<::OHOS::Subwindow> CreateSubwindow();
     void RegistMediaPlayerEvent();
     void CreateMediaPlayer();
     void PreparePlayer();
+    std::string GetAssetAbsolutePath(const std::string& fileName);
 
     std::shared_ptr<OHOS::Media::Player> mediaPlayer_ = nullptr;
-    ::OHOS::sptr<::OHOS::Subwindow> subwindow_ = nullptr;
+    ::OHOS::sptr<::OHOS::Subwindow> subWindow_ = nullptr;
     std::shared_ptr<MediaPlayerCallback> mediaPlayerCallback_ = nullptr;
+#endif
 };
 
 } // namespace OHOS::Ace

@@ -181,9 +181,6 @@ public:
     RefPtr<AnimatorInfo> GetAnimatorInfo(const std::string& animatorId);
     void RemoveAnimatorInfo(const std::string& animatorId);
     void AddAnimatorInfo(const std::string animatorId, const RefPtr<AnimatorInfo>& animatorInfo);
-	
-    void PushDynamicNode(int32_t nodeId, const RefPtr<DOMNode>& node);
-    RefPtr<DOMNode> GetDynamicNodeById(int32_t nodeId);
 
     void SetPageParams(const std::string& params)
     {
@@ -379,7 +376,6 @@ private:
     std::function<void()> onPageDisAppear_;
     std::function<bool()> onBackPress_;
     std::function<void()> onPageRefresh_;
-    std::unordered_map<int32_t, RefPtr<DOMNode>> dynamicNodes_;
 };
 
 } // namespace OHOS::Ace::Framework

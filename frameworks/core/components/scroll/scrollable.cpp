@@ -116,6 +116,12 @@ void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
             }
         }
     });
+    dragRecognizer_->SetOnDragCancel([weakScroll = AceType::WeakClaim(this)]() {
+        auto scroll = weakScroll.Upgrade();
+        if (scroll && scroll->dragCancelCallback_) {
+            scroll->dragCancelCallback_();
+        }
+    });
 
     // use RawRecognizer to receive next touch down event to stop animation.
     rawRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
@@ -137,11 +143,6 @@ void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
 
     spring_ = GetDefaultOverSpringProperty();
     available_ = true;
-
-    auto pipelineContext = context_.Upgrade();
-    if (pipelineContext && pipelineContext->GetIsDeclarative()) {
-        velocityRangeScale_ = 3.0;
-    }
 }
 
 void Scrollable::HandleTouchDown()
@@ -183,10 +184,20 @@ bool Scrollable::Idle() const
 {
     return !isTouching_ && controller_->IsStopped() && springController_->IsStopped();
 }
-
 bool Scrollable::IsStopped() const
 {
-    return controller_->IsStopped() && springController_->IsStopped();
+    return (springController_ ? (springController_->IsStopped()) : true) &&
+           (controller_ ? (controller_->IsStopped()) : true);
+}
+
+void Scrollable::StopScrollable()
+{
+    if (controller_) {
+        controller_->Stop();
+    }
+    if (springController_) {
+        springController_->Stop();
+    }
 }
 
 void Scrollable::HandleDragStart(const OHOS::Ace::DragStartInfo& info)
@@ -232,8 +243,8 @@ void Scrollable::HandleDragEnd(const DragEndInfo& info)
     springController_->ClearAllListeners();
     touchUp_ = false;
     scrollPause_ = false;
-    double correctVelocity = std::clamp(info.GetMainVelocity(), MIN_VELOCITY * velocityRangeScale_ + slipFactor_,
-        MAX_VELOCITY * velocityRangeScale_ - slipFactor_);
+    double correctVelocity = std::clamp(info.GetMainVelocity(), MIN_VELOCITY + slipFactor_,
+        MAX_VELOCITY - slipFactor_);
     correctVelocity = correctVelocity * sVelocityScale_;
     currentVelocity_ = correctVelocity;
     if (dragEndCallback_) {

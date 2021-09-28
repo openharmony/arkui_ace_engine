@@ -31,7 +31,7 @@ extern "C" {
 #endif
 #endif /* End of #ifdef __cplusplus */
 
-bool StartDebug(const std::string& componentName, const EcmaVM *vm);
+bool StartDebug(const std::string& componentName, void *vm);
 
 void StopDebug(const std::string& componentName);
 

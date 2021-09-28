@@ -564,6 +564,11 @@ public:
         return disableTouchEvent_;
     }
 
+    virtual bool IsChildrenTouchEnable()
+    {
+        return true;
+    }
+
     void SetTextDirection(TextDirection textDirection)
     {
         textDirection_ = textDirection;
@@ -885,6 +890,8 @@ public:
     void SetIsPaintGeometryTransition(bool isPaintGeometryTransition);
     bool IsPaintOutOfParent();
     void UpdatePosition();
+
+    virtual void ClipHole(RenderContext& context, const Offset& offset);
 
     void SetHasSubWindow(bool hasSubWindow)
     {

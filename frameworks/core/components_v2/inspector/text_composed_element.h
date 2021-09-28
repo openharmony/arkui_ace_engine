@@ -37,8 +37,6 @@ public:
         return TextElement::TypeId();
     }
 
-    double GetWidth() const override;
-    double GetHeight() const override;
     std::string GetData() const;
     std::string GetTextAlign() const;
     std::string GetTextOverflow() const;

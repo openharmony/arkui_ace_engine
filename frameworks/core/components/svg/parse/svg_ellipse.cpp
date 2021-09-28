@@ -41,7 +41,8 @@ void SvgEllipse::AppendChild(const RefPtr<SvgNode>& child)
     component_->AppendChild(child->GetComponent());
 }
 
-RefPtr<RenderNode> SvgEllipse::CreateRender(const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent)
+RefPtr<RenderNode> SvgEllipse::CreateRender(
+    const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox)
 {
     component_->Inherit(parent);
     auto href = component_->GetDeclaration()->GetFillState().GetHref();
@@ -58,6 +59,9 @@ RefPtr<RenderNode> SvgEllipse::CreateRender(const LayoutParam& layoutParam, cons
     }
     renderNode->Attach(context_);
     renderNode->Update(component_);
+    if (!useBox) {
+        return renderNode;
+    }
 
     auto boxComponent = CreateBoxComponent(layoutParam, component_->GetDeclaration()->GetClipPathHref());
     auto renderBox = boxComponent->CreateRenderNode();

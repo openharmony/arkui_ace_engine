@@ -271,6 +271,30 @@ extern uint8_t _binary_translate_c2e_svg_end[];
 extern uint8_t _binary_share_svg_start[];
 extern uint8_t _binary_share_svg_end[];
 
+// binary/fa_clock_widget_hour.png
+extern uint8_t _binary_fa_clock_widget_hour_png_start[];
+extern uint8_t _binary_fa_clock_widget_hour_png_end[];
+
+// binary/fa_clock_widget_minute.png
+extern uint8_t _binary_fa_clock_widget_minute_png_start[];
+extern uint8_t _binary_fa_clock_widget_minute_png_end[];
+
+// binary/fa_clock_widget_second.png
+extern uint8_t _binary_fa_clock_widget_second_png_start[];
+extern uint8_t _binary_fa_clock_widget_second_png_end[];
+
+// binary/fa_black_clock_widget_hour.png
+extern uint8_t _binary_fa_black_clock_widget_hour_png_start[];
+extern uint8_t _binary_fa_black_clock_widget_hour_png_end[];
+
+// binary/fa_black_clock_widget_minute.png
+extern uint8_t _binary_fa_black_clock_widget_minute_png_start[];
+extern uint8_t _binary_fa_black_clock_widget_minute_png_end[];
+
+// binary/fa_black_clock_widget_second.png
+extern uint8_t _binary_fa_black_clock_widget_second_png_start[];
+extern uint8_t _binary_fa_black_clock_widget_second_png_end[];
+
 namespace OHOS::Ace {
 namespace {
 
@@ -417,6 +441,29 @@ const uint8_t* InternalResource::GetResource(const ResourceId id, size_t& size) 
         { InternalResource::ResourceId::SHARE_SVG,
             ResourceData(
                 _binary_share_svg_start, static_cast<size_t>(_binary_share_svg_end - _binary_share_svg_start)) },
+        { InternalResource::ResourceId::FA_CLOCK_WIDGET_HOUR,
+            ResourceData(_binary_fa_clock_widget_hour_png_start,
+                static_cast<size_t>(_binary_fa_clock_widget_hour_png_end - _binary_fa_clock_widget_hour_png_start)) },
+        { InternalResource::ResourceId::FA_CLOCK_WIDGET_MINUTE,
+            ResourceData(_binary_fa_clock_widget_minute_png_start,
+                static_cast<size_t>(
+                    _binary_fa_clock_widget_minute_png_end - _binary_fa_clock_widget_minute_png_start)) },
+        { InternalResource::ResourceId::FA_CLOCK_WIDGET_SECOND,
+            ResourceData(_binary_fa_clock_widget_second_png_start,
+                static_cast<size_t>(
+                    _binary_fa_clock_widget_second_png_end - _binary_fa_clock_widget_second_png_start)) },
+        { InternalResource::ResourceId::FA_BLACK_CLOCK_WIDGET_HOUR,
+            ResourceData(_binary_fa_black_clock_widget_hour_png_start,
+                static_cast<size_t>(
+                    _binary_fa_black_clock_widget_hour_png_end - _binary_fa_black_clock_widget_hour_png_start)) },
+        { InternalResource::ResourceId::FA_BLACK_CLOCK_WIDGET_MINUTE,
+            ResourceData(_binary_fa_black_clock_widget_minute_png_start,
+                static_cast<size_t>(
+                    _binary_fa_black_clock_widget_minute_png_end - _binary_fa_black_clock_widget_minute_png_start)) },
+        { InternalResource::ResourceId::FA_BLACK_CLOCK_WIDGET_SECOND,
+            ResourceData(_binary_fa_black_clock_widget_second_png_start,
+                static_cast<size_t>(
+                    _binary_fa_black_clock_widget_second_png_end - _binary_fa_black_clock_widget_second_png_start)) },
     };
     auto iter = RESOURCE_MAP.find(id);
     if (iter != RESOURCE_MAP.end()) {

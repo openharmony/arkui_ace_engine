@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 
+#include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/size.h"
 #include "base/log/log.h"
@@ -26,6 +27,22 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
+
+Platform::JniEnvironment::JniEnvironment() {}
+
+Platform::JniEnvironment::~JniEnvironment() = default;
+
+std::shared_ptr<JNIEnv> Platform::JniEnvironment::GetJniEnv(JNIEnv* jniEnv) const
+{
+    return nullptr;
+}
+
+Platform::JniEnvironment& Platform::JniEnvironment::GetInstance()
+{
+    static Platform::JniEnvironment jniEnvironment;
+    return jniEnvironment;
+}
+
 namespace {
 
 const uint8_t OPACITY = 128;

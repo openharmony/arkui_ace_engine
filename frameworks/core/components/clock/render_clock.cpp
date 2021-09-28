@@ -39,6 +39,27 @@ void UseDaySourceIfEmpty(const std::string& daySource, std::string& nightSource)
     }
 }
 
+std::function<void()> GenerateClockHandLoadFailCallback(const RefPtr<RenderImage>& renderClockHand, double hoursWest,
+    const std::string& handType, InternalResource::ResourceId resourceIdForDay,
+    InternalResource::ResourceId resourceIdForNight)
+{
+    auto clockHandLoadFailCallback = [wp = AceType::WeakClaim(AceType::RawPtr(renderClockHand)), hoursWest, handType,
+        resourceIdForDay, resourceIdForNight]() {
+        auto renderClockHand = wp.Upgrade();
+        if (!renderClockHand) {
+            LOGE("renderClockHand upgrade fail when try handle clock hand load fail event");
+            return;
+        }
+        RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<ImageComponent>("");
+        auto resourceId = IsDayTime(GetTimeOfNow(hoursWest)) ? resourceIdForDay : resourceIdForNight;
+        imageComponent->SetResourceId(resourceId);
+        renderClockHand->Update(imageComponent);
+        LOGE("clock hand load fail event triggered, using internal clock hand source, handType: %{public}s",
+            handType.c_str());
+    };
+    return clockHandLoadFailCallback;
+}
+
 } // namespace
 
 RenderClock::RenderClock()
@@ -112,8 +133,18 @@ void RenderClock::Update(const RefPtr<Component>& component)
 
     CheckNightConfig();
 
-    auto timeOfNow = GetTimeOfNow(declaration_->GetHoursWest());
+    double hoursWest = declaration_->GetHoursWest();
+    auto timeOfNow = GetTimeOfNow(hoursWest);
     IsDayTime(timeOfNow) ? UseDayConfig() : UseNightConfig();
+    renderHourHand_->SetLoadFailCallback(GenerateClockHandLoadFailCallback(renderHourHand_, hoursWest, "hour",
+        InternalResource::ResourceId::FA_CLOCK_WIDGET_HOUR,
+        InternalResource::ResourceId::FA_BLACK_CLOCK_WIDGET_HOUR));
+    renderMinuteHand_->SetLoadFailCallback(GenerateClockHandLoadFailCallback(renderMinuteHand_, hoursWest, "minute",
+        InternalResource::ResourceId::FA_CLOCK_WIDGET_MINUTE,
+        InternalResource::ResourceId::FA_BLACK_CLOCK_WIDGET_MINUTE));
+    renderSecondHand_->SetLoadFailCallback(GenerateClockHandLoadFailCallback(renderSecondHand_, hoursWest, "second",
+        InternalResource::ResourceId::FA_CLOCK_WIDGET_SECOND,
+        InternalResource::ResourceId::FA_BLACK_CLOCK_WIDGET_SECOND));
 
     renderClockHand_->SetHoursWest(declaration_->GetHoursWest());
     renderClockHand_->Attach(GetContext());

@@ -74,7 +74,18 @@ public:
     void PaintSaturate(const flutter::RRect& outerRRect, SkCanvas* canvas,
                        const Dimension& saturate, const Color& color);
 
+    void PaintSepia(const flutter::RRect& outerRRect, SkCanvas* canvas,
+                    const Dimension& sepia, const Color& color);
+
+    void PaintInvert(const flutter::RRect& outerRRect, SkCanvas* canvas,
+                     const Dimension& invert, const Color& color);
+
+    void PaintHueRotate(const flutter::RRect& outerRRect, SkCanvas* canvas, const float& hueRotate, const Color& color);
+
     void PaintBlur(const flutter::RRect& outerRRect, SkCanvas* canvas, const Dimension& blurRadius, const Color& color);
+
+    void PaintColorBlend(const flutter::RRect& outerRRect, SkCanvas* canvas, const Color& colorBlend,
+                         const Color& color);
 
     void PaintGradient(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
 

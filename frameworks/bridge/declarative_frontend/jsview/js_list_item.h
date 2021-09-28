@@ -26,7 +26,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& args);
     static void SetSticky(int32_t sticky);
-    static void SetEditable(bool editable);
+    static void SetEditable(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework

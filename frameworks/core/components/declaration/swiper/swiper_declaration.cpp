@@ -64,6 +64,14 @@ bool SwiperDeclaration::SetSpecializedAttr(const std::pair<std::string, std::str
             } },
         { DOM_DIGITAL_INDICATOR,
             [](const std::string& val, SwiperDeclaration& swiper) { swiper.SetDigitalIndicator(StringToBool(val)); } },
+        { DOM_DISPLAY_MODE,
+            [](const std::string& val, SwiperDeclaration& swiper) {
+                if (val == DOM_DISPLAY_MODE_AUTO_LINEAR) {
+                    swiper.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+                } else {
+                    swiper.SetDisplayMode(SwiperDisplayMode::STRETCH);
+                }
+            } },
         { DOM_DURATION,
             [](const std::string& val, SwiperDeclaration& swiper) { swiper.SetDuration(StringToDouble(val)); } },
         { DOM_INDEX,

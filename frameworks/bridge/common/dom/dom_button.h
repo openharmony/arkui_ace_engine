@@ -70,6 +70,7 @@ private:
     void AddPadding();
     void ResetBoxHeight(double height, DimensionUnit unit = DimensionUnit::PX);
     void UpdateCustomizedColorFlag();
+    bool IsPlatformFive() const;
 
     RefPtr<ButtonComponent> buttonChild_;
     RefPtr<TextComponent> textChild_;

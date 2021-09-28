@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "frameworks/base/log/log_wrapper.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 
 #include <iostream>
@@ -24,11 +25,6 @@
 // NOLINTNEXTLINE(readability-identifier-naming)
 namespace OHOS::Ace::Framework {
 // NOLINTNEXTLINE(readability-identifier-naming)
-extern "C" void *JSI_GetRuntime()
-{
-    return ArkJSRuntime::GetInstance().get();
-}
-
 static constexpr auto PANDA_MAIN_FUNCTION = "_GLOBAL::func_main_0";
 
 Local<JSValueRef> FunctionCallback(EcmaVM *vm, Local<JSValueRef> thisValue,
@@ -44,6 +40,7 @@ Local<JSValueRef> FunctionCallback(EcmaVM *vm, Local<JSValueRef> thisValue,
 
 bool ArkJSRuntime::Initialize(const std::string &libraryPath)
 {
+    LOGI("Ark: create jsvm");
     RuntimeOption option;
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
     const int64_t poolSize = 0x10000000;  // 256M

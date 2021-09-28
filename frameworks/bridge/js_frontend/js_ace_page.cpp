@@ -211,19 +211,6 @@ RefPtr<BaseXComponentBridge> JsAcePage::GetXComponentBridgeById(NodeId nodeId)
     return iter->second;
 }
 
-void JsAcePage::PushDynamicNode(int32_t nodeId, const RefPtr<DOMNode>& node)
-{
-    dynamicNodes_[nodeId] = node;
-}
-
-RefPtr<DOMNode> JsAcePage::GetDynamicNodeById(int32_t nodeId)
-{
-    if (dynamicNodes_[nodeId]) {
-        return dynamicNodes_[nodeId];
-    }
-    return nullptr;
-}
-
 RefPtr<BaseAnimationBridge> JsAcePage::GetAnimationBridge(NodeId nodeId)
 {
     std::unique_lock<std::mutex> lock(bridgeMutex_);

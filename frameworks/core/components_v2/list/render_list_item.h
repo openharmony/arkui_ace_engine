@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_LIST_RENDER_LIST_ITEM_H
 
 #include "core/components_v2/list/list_item_component.h"
+#include "core/gestures/long_press_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace::V2 {
@@ -37,9 +38,14 @@ public:
     void OnChildAdded(const RefPtr<RenderNode>& child) override;
     void OnChildRemoved(const RefPtr<RenderNode>& child) override;
 
-    bool IsEditable() const
+    bool IsDeletable() const
     {
-        return component_ ? component_->GetEditable() : false;
+        return component_ ? (component_->GetEditMode() & EditMode::DELETABLE) != 0 : false;
+    }
+
+    bool IsMovable() const
+    {
+        return component_ ? (component_->GetEditMode() & EditMode::MOVABLE) != 0 : false;
     }
 
     StickyMode GetSticky() const
@@ -50,11 +56,15 @@ public:
     void SetEditMode(bool editMode);
 
     ACE_DEFINE_COMPONENT_EVENT(OnDeleteClick, void(RefPtr<RenderListItem>));
+    ACE_DEFINE_COMPONENT_EVENT(OnSelect, void(RefPtr<RenderListItem>));
 
     RefPtr<Component> GetComponent() override
     {
         return component_;
     }
+
+    void OnTouchTestHit(
+        const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
 private:
     void CreateDeleteButton();
@@ -64,6 +74,8 @@ private:
     RefPtr<RenderNode> child_;
     RefPtr<RenderNode> button_;
     bool editMode_ = false;
+
+    RefPtr<LongPressRecognizer> longPressRecognizer_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderListItem);
 };

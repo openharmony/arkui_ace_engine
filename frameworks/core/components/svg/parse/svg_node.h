@@ -47,7 +47,8 @@ public:
     virtual void Update(RefPtr<RenderNode>& node) {}
     virtual void Inherit(const RefPtr<SvgBaseDeclaration>& parent) {}
 
-    virtual RefPtr<RenderNode> CreateRender(const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent)
+    virtual RefPtr<RenderNode> CreateRender(
+        const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox = true)
     {
         return nullptr;
     }

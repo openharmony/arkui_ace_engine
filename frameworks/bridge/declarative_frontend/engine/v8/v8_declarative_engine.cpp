@@ -1032,10 +1032,10 @@ V8DeclarativeEngine::~V8DeclarativeEngine()
 void V8DeclarativeEngine::CallAppFunc(
     v8::Isolate* isolate, const v8::Local<v8::Context>& context, std::string appFuncName)
 {
-    CallAppFunc(isolate, context, appFuncName, 0, nullptr);
+    (void)CallAppFunc(isolate, context, appFuncName, 0, nullptr);
 }
 
-void V8DeclarativeEngine::CallAppFunc(v8::Isolate* isolate, const v8::Local<v8::Context>& context,
+bool V8DeclarativeEngine::CallAppFunc(v8::Isolate* isolate, const v8::Local<v8::Context>& context,
     std::string appFuncName, int argc, v8::Local<v8::Value>* argv)
 {
     v8::Local<v8::Object> global = context->Global();
@@ -1044,11 +1044,11 @@ void V8DeclarativeEngine::CallAppFunc(v8::Isolate* isolate, const v8::Local<v8::
     bool succ = global->Get(context, exportName).ToLocal(&exportval);
     if (!succ) {
         LOGD("no property named \"export\" in global object");
-        return;
+        return false;
     }
     if (!exportval->IsObject()) {
         LOGD("property \"exports\" is not a object");
-        return;
+        return false;
     }
 
     v8::Local<v8::Object> exportobj = exportval->ToObject(context).ToLocalChecked();
@@ -1057,11 +1057,11 @@ void V8DeclarativeEngine::CallAppFunc(v8::Isolate* isolate, const v8::Local<v8::
     succ = exportobj->Get(context, defaultName).ToLocal(&defaultval);
     if (!succ) {
         LOGD("no property named \"default\" in export object");
-        return;
+        return false;
     }
     if (!defaultval->IsObject()) {
         LOGD("property \"defaultval\" is not a object");
-        return;
+        return false;
     }
 
     v8::Local<v8::Object> defaultobj = defaultval->ToObject(context).ToLocalChecked();
@@ -1070,20 +1070,21 @@ void V8DeclarativeEngine::CallAppFunc(v8::Isolate* isolate, const v8::Local<v8::
     succ = defaultobj->Get(context, funcName).ToLocal(&jsFuncVal);
     if (!succ) {
         LOGD("no property named \"%{public}s\" in global object", appFuncName.c_str());
-        return;
+        return false;
     }
     if (!jsFuncVal->IsFunction()) {
         LOGD("property \"%{public}s\" is not a function", appFuncName.c_str());
-        return;
+        return false;
     }
 
     v8::Local<v8::Function> jsFunc = v8::Local<v8::Function>::Cast(jsFuncVal);
     v8::Local<v8::Value> res;
     succ = jsFunc->Call(context, defaultobj, argc, argv).ToLocal(&res);
     if (!succ) {
-        LOGE("call failed");
-        return;
+        LOGD("call failed");
+        return false;
     }
+    return res->IsTrue();
 }
 
 void V8DeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
@@ -1265,7 +1266,7 @@ void V8DeclarativeEngine::OnWindowDisplayModeChanged(bool isShownInMultiWindow, 
     v8::Local<v8::Value> v8Config = v8::JSON::Parse(context, v8Data).ToLocalChecked();
     v8::Local<v8::Value> argv[] = { v8Bool, v8Config };
     int32_t argc = 2;
-    CallAppFunc(isolate, context, "onWindowDisplayModeChanged", argc, argv);
+    (void)CallAppFunc(isolate, context, "onWindowDisplayModeChanged", argc, argv);
     while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
         continue;
     }
@@ -1286,7 +1287,148 @@ void V8DeclarativeEngine::OnConfigurationUpdated(const std::string& data)
     v8::Local<v8::Value> ResourceConfiguration = v8::JSON::Parse(context, v8Data).ToLocalChecked();
     v8::Local<v8::Value> argv[] = { ResourceConfiguration };
     int32_t argc = 1;
-    CallAppFunc(isolate, context, "onConfigurationUpdated", argc, argv);
+    (void)CallAppFunc(isolate, context, "onConfigurationUpdated", argc, argv);
+    while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
+        continue;
+    }
+}
+
+void V8DeclarativeEngine::OnRemoteTerminated()
+{
+    LOGD("AceAbility Enter OnRemoteTerminated");
+    v8::Isolate* isolate = engineInstance_->GetV8Isolate();
+    ACE_DCHECK(isolate);
+    v8::HandleScope handleScope(isolate);
+    v8::Isolate::Scope isolateScope(isolate);
+    auto context = engineInstance_->GetV8Context();
+    if (context.IsEmpty()) {
+        LOGE("AceAbility OnRemoteTerminated, context Is Empty");
+        return;
+    }
+    v8::Context::Scope contextScope(context);
+
+    v8::TryCatch tryCatch(isolate);
+
+    CallAppFunc(isolate, context, "onRemoteTerminated");
+    while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
+        continue;
+    }
+}
+
+void V8DeclarativeEngine::OnCompleteContinuation(const int32_t code)
+{
+    LOGD("AceAbility Enter OnCompleteContinuation");
+    v8::Isolate* isolate = engineInstance_->GetV8Isolate();
+    ACE_DCHECK(isolate);
+    v8::HandleScope handleScope(isolate);
+    v8::Isolate::Scope isolateScope(isolate);
+    auto context = engineInstance_->GetV8Context();
+    if (context.IsEmpty()) {
+        LOGE("AceAbility OnCompleteContinuation, context Is Empty");
+        return;
+    }
+    v8::Context::Scope contextScope(context);
+
+    v8::TryCatch tryCatch(isolate);
+
+    v8::Local<v8::Integer> v8Integer = v8::Uint32::NewFromUnsigned(isolate, code);
+    v8::Local<v8::Value> argv[] = { v8Integer };
+    int32_t len = 1;
+
+    (void)CallAppFunc(isolate, context, "onCompleteContinuation", len, argv);
+    while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
+        continue;
+    }
+}
+
+
+bool V8DeclarativeEngine::OnRestoreData(const std::string& data)
+{
+    LOGD("AceAbility Enter OnRestoreData");
+    v8::Isolate* isolate = engineInstance_->GetV8Isolate();
+    ACE_DCHECK(isolate);
+    v8::HandleScope handleScope(isolate);
+    v8::Isolate::Scope isolateScope(isolate);
+    auto context = engineInstance_->GetV8Context();
+    if (context.IsEmpty()) {
+        LOGE("AceAbility OnRestoreData, context Is Empty");
+        return false;
+    }
+    v8::Context::Scope contextScope(context);
+
+    v8::TryCatch tryCatch(isolate);
+
+    v8::Local<v8::String> v8Data = v8::String::NewFromUtf8(isolate, data.c_str()).ToLocalChecked();
+    v8::Local<v8::Value> dataValue = v8::JSON::Parse(context, v8Data).ToLocalChecked();
+    v8::Local<v8::Value> argv[] = { dataValue };
+    int32_t len = 1;
+
+    if (!CallAppFunc(isolate, context, "onRestoreData", len, argv)) {
+        return false;
+    }
+
+    while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
+        continue;
+    }
+
+    return true;
+}
+
+bool V8DeclarativeEngine::OnStartContinuation()
+{
+    LOGE("AceAbility Enter OnStartContinuation");
+    v8::Isolate* isolate = engineInstance_->GetV8Isolate();
+    ACE_DCHECK(isolate);
+    v8::HandleScope handleScope(isolate);
+    v8::Isolate::Scope isolateScope(isolate);
+    auto context = engineInstance_->GetV8Context();
+    if (context.IsEmpty()) {
+        LOGE("AceAbility OnStartContinuation, context Is Empty");
+        return false;
+    }
+    v8::Context::Scope contextScope(context);
+
+    v8::TryCatch tryCatch(isolate);
+
+    int len = 0;
+    auto argv = nullptr;
+    if (!CallAppFunc(isolate, context, "onStartContinuation", len, argv)) {
+        return false;
+    }
+
+    while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
+        continue;
+    }
+
+    return true;
+}
+
+void V8DeclarativeEngine::OnSaveData(std::string& saveData)
+{
+    LOGE("AceAbility Enter save data");
+    v8::Isolate* isolate = engineInstance_->GetV8Isolate();
+    ACE_DCHECK(isolate);
+    v8::HandleScope handleScope(isolate);
+    v8::Isolate::Scope isolateScope(isolate);
+    auto context = engineInstance_->GetV8Context();
+    if (context.IsEmpty()) {
+        LOGE("AceAbility Sava date, context Is Empty");
+        return;
+    }
+    v8::Context::Scope contextScope(context);
+
+    v8::TryCatch tryCatch(isolate);
+
+    v8::Local<v8::Object> data = v8::Object::New(isolate);
+    v8::Local<v8::Value> argv[] = { data };
+    int len = 1;
+
+    if (CallAppFunc(isolate, context, "onSaveData", len, argv)) {
+        v8::Local<v8::String> propertyEntries = v8::JSON::Stringify(context, data).ToLocalChecked();
+        v8::String::Utf8Value utf8Value(isolate, propertyEntries);
+        saveData = *utf8Value;
+    }
+
     while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
         continue;
     }

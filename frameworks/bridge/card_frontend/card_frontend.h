@@ -94,6 +94,7 @@ public:
     {
         return false;
     }
+    void OnRemoteTerminated() override {}
     void OnNewRequest(const std::string& data) override {}
     void CallRouterBack() override {}
     void OnSurfaceChanged(int32_t width, int32_t height) override;

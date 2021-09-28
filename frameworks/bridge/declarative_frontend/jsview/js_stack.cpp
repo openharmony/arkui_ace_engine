@@ -196,6 +196,7 @@ void JSStack::JSBind(BindingTarget globalObj)
     JSClass<JSStack>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSStack>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSStack>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSStack>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSStack>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSStack>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSStack>::Inherit<JSContainerBase>();

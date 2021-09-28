@@ -1,0 +1,59 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+defines = [
+  "OHOS_PLATFORM",
+  "OHOS_STANDARD_SYSTEM",
+]
+
+js_engines = []
+qjs_engine = {
+  engine_name = "qjs"
+  engine_path = "quickjs"
+  engine_defines = [ "USE_QUICKJS_ENGINE" ]
+  have_debug = true
+  declarative_default = true
+}
+js_engines += [ qjs_engine ]
+ark_engine = {
+  engine_name = "ark"
+  engine_path = "jsi"
+  engine_defines = [ "USE_ARK_ENGINE" ]
+}
+js_engines += [ ark_engine ]
+
+disable_gpu = true
+use_external_icu = "shared"
+use_curl_download = true
+ohos_standard_fontmgr = true
+sk_use_hilog = true
+accessibility_support = false
+rich_components_support = true
+advance_components_support = false
+form_components_support = false
+js_pa_support = true
+pa_engine_path = "adapter/ohos/entrance/pa_engine"
+
+if (disable_gpu) {
+  defines += [ "GPU_DISABLED" ]
+}
+
+cflags_cc = [
+  "-Wno-thread-safety-attributes",
+  "-Wno-thread-safety-analysis",
+]
+
+platform_deps = [
+  "//foundation/ace/ace_engine/adapter/ohos/entrance:ace_ohos_standard_entrance",
+  "//foundation/ace/ace_engine/adapter/ohos/osal:ace_osal_ohos",
+]

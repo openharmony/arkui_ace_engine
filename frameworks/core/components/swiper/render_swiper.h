@@ -348,7 +348,7 @@ private:
     void InitRawDragRecognizer();
     void InitAccessibilityEventListener();
     void UpdateIndex(int32_t index);
-    void MoveItems(double dragOffset, double dragVelocity, int32_t fromIndex, int32_t toIndex);
+    void MoveItems(double dragVelocity);
     void RestoreAutoPlay()
     {
         if (!scheduler_) {
@@ -384,6 +384,7 @@ private:
     int32_t GetNextIndex(int32_t index) const;
     int32_t GetPrevIndexOnAnimation() const;
     int32_t GetNextIndexOnAnimation() const;
+    int32_t GetIndex(int32_t index, bool leftOrTop) const;
     void InitSwipeToAnimation(double start, double end);
     void AddSwipeToTranslateListener(int32_t fromIndex, int32_t toIndex);
     void AddSwipeToOpacityListener(int32_t fromIndex, int32_t toIndex);
@@ -396,7 +397,7 @@ private:
     void UpdateOneItemOpacity(uint8_t opacity, int32_t index);
     void UpdateItemPosition(double offset, int32_t index);
     void UpdateScrollPosition(double dragDelta);
-    void UpdateChildPosition(double offset, int32_t fromIndex, int32_t toIndex);
+    void UpdateChildPosition(double offset, int32_t fromIndex);
     Offset GetMainAxisOffset(double offset) const
     {
         double margin = (needReverse_ ? nextMargin_ : prevMargin_);
@@ -512,6 +513,8 @@ private:
     int32_t lazyLoadCacheSize_ = 5; // default lazy load cache number: 5
     double dragOffset_ = 0.0;
     int32_t nextIndex_ = 0;
+
+    int32_t showingCount_ = 0;
 };
 
 } // namespace OHOS::Ace

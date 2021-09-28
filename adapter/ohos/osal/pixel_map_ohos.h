@@ -39,9 +39,11 @@ public:
     int32_t GetRowBytes() const override;
     int32_t GetByteCount() const override;
     void* GetPixelManager() const override;
+    void* GetRawPixelMapPtr() const override;
 
 private:
     std::shared_ptr<Media::PixelMap> pixmap_;
+
 };
 
 } // namespace OHOS::Ace

@@ -27,35 +27,55 @@ template("ace_osal_ohos_source_set") {
         "startup_l2:syspara",
       ]
       configs = [
+        # need check this
         "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config",
         "$ace_root:ace_config",
-        "$ace_flutter_engine_root:flutter_config",
       ]
+    } else {
+      external_deps = [
+        "bytrace:bytrace_core",
+        "hilog:libhilog",
+        "startup:syspara",
+      ]
+
+      configs = [ "$ace_root:ace_config" ]
     }
     include_dirs = [ "//utils/native/base/include" ]
 
     sources = [
-      "$ace_root/adapter/ohos/osal/ace_trace.cpp",
-      "$ace_root/adapter/ohos/osal/event_report.cpp",
-      "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-
-      #"$ace_root/adapter/ohos/osal/pixel_map_ohos.cpp",
-      "$ace_root/adapter/ohos/osal/system_properties.cpp",
-    ]
-    external_deps += [ "hisysevent_native:libhisysevent" ]
-
-    deps = [
-      "$ace_root/adapter/common/cpp:ace_base_common_$platform",
-      "//third_party/zlib:libz",
+      "ace_trace.cpp",
+      "event_report.cpp",
+      "log_wrapper.cpp",
+      "system_properties.cpp",
     ]
 
+    # TODO: standard should support pixel map
     if (is_standard_system) {
-      deps += [ "$ace_root/adapter/ohos/cpp:ace_base_platform_ohos" ]
+      sources += [ "resource_adapter_impl.cpp" ]
+      sources += [ "pixel_map.cpp" ]
+    } else {
+      sources += [ "pixel_map_ohos.cpp" ]
+      external_deps += [ "multimedia_image:image" ]
     }
+
+    external_deps += [ "hisysevent_native:libhisysevent" ]
   }
 }
 
-ace_osal_ohos_source_set("ace_osal_ohos") {
-  defines = ace_ohos_defines
-  platform = "ohos"
+foreach(item, ace_platforms) {
+  platform = item.name
+  if (platform == "ohos") {
+    ace_osal_ohos_source_set("ace_osal_ohos") {
+      defines = []
+      config = {
+      }
+
+      if (defined(item.config)) {
+        config = item.config
+      }
+      if (defined(config.defines)) {
+        defines = config.defines
+      }
+    }
+  }
 }

@@ -123,6 +123,11 @@ protected:
     {
         return operationEvent_;
     }
+    std::function<void(int)> onChangeRating;
+    void SetOnChange(const std::function<void(int)>& value)
+    {
+        onChangeRating = value;
+    }
 
     int32_t starNum_ = DEFAULT_RATING_STAR_NUM;
     double ratingScore_ = DEFAULT_RATING_SCORE;

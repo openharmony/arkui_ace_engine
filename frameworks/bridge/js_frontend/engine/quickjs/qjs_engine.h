@@ -32,7 +32,9 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/animation_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/animator_bridge.h"
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "native_engine/impl/quickjs/quickjs_native_engine.h"
+#endif
 
 namespace OHOS::Ace::Framework {
 
@@ -46,7 +48,8 @@ public:
 
     void FlushCommandBuffer(void* context, const std::string& command) override;
 
-    bool InitJsEnv(JSRuntime* runtime, JSContext* context);
+    bool InitJsEnv(
+        JSRuntime* runtime, JSContext* context, const std::unordered_map<std::string, void*>& extraNativeObject);
 
     JSRuntime* GetQjsRuntime() const
     {
@@ -168,6 +171,18 @@ public:
         }
     }
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    void SetQuickJSNativeEngine(QuickJSNativeEngine* nativeEngine)
+    {
+        nativeEngine_ = nativeEngine;
+    }
+
+    QuickJSNativeEngine* GetQuickJSNativeEngine() const
+    {
+        return nativeEngine_;
+    }
+#endif
+
 private:
     JSRuntime* runtime_ = nullptr;
     JSContext* context_ = nullptr;
@@ -187,6 +202,9 @@ private:
     RefPtr<JsAcePage> stagingPage_;
 
     WeakPtr<JsMessageDispatcher> dispatcher_;
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    QuickJSNativeEngine* nativeEngine_ = nullptr;
+#endif
     mutable std::mutex mutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(QjsEngineInstance);
@@ -251,13 +269,13 @@ private:
     void GetLoadOptions(std::string& optionStr, bool isMainPage, const RefPtr<JsAcePage>& page);
     RefPtr<QjsEngineInstance> engineInstance_;
     int32_t instanceId_;
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(ENABLE_WORKER)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     void RegisterWorker();
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
-#endif
     void SetPostTask(NativeEngine* nativeEngine);
     QuickJSNativeEngine* nativeEngine_ = nullptr;
+#endif
     ACE_DISALLOW_COPY_AND_MOVE(QjsEngine);
 };
 

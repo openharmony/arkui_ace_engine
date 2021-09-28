@@ -48,15 +48,15 @@ public:
     }
     void SetHideBar(bool hide)
     {
-        hideBar_ = hide ? HIDE::TRUE_DEFINED : HIDE::FALSE_DEFINED;
+        hideBar_ = hide ? HIDE::TRUE : HIDE::FALSE;
     }
     void SetHideBarBackButton(bool hide)
     {
-        hideBackButton_ = hide ? HIDE::TRUE_DEFINED : HIDE::FALSE_DEFINED;
+        hideBackButton_ = hide ? HIDE::TRUE : HIDE::FALSE;
     }
     void SetHideToolBar(bool hide)
     {
-        hideToolbar_ = hide ? HIDE::TRUE_DEFINED : HIDE::FALSE_DEFINED;
+        hideToolbar_ = hide ? HIDE::TRUE : HIDE::FALSE;
     }
     void AddToolBarItem(const ToolBarItem& item)
     {
@@ -76,15 +76,15 @@ public:
 
     bool HasNavigationBar()
     {
-        return hideBar_ != HIDE::TRUE_DEFINED;
+        return hideBar_ != HIDE::TRUE;
     }
     bool HasBackButton()
     {
-        return hideBackButton_ != HIDE::TRUE_DEFINED;
+        return hideBackButton_ != HIDE::TRUE;
     }
     bool HasToolBar()
     {
-        return (hideToolbar_ != HIDE::TRUE_DEFINED) && !toolbarItems_.empty();
+        return (hideToolbar_ != HIDE::TRUE) && !toolbarItems_.empty();
     }
     const std::list<ToolBarItem>& GetToolBarItems()
     {
@@ -95,8 +95,8 @@ public:
 
 private:
     enum class HIDE {
-        FALSE_DEFINED = 0,
-        TRUE_DEFINED,
+        FALSE = 0,
+        TRUE,
         UNDEFINED,
     };
     std::string title_;

@@ -178,12 +178,12 @@ struct ACE_EXPORT RadialGradient {
     // shape circle or ellipse
     std::optional<RadialShapeType> radialShape;
     // size in x-axis
-    std::optional<Dimension> radialHorizontalSize;
+    std::optional<AnimatableDimension> radialHorizontalSize;
     // size in y-axis
-    std::optional<Dimension> radialVerticalSize;
+    std::optional<AnimatableDimension> radialVerticalSize;
     // center of shape
-    std::optional<Dimension> radialCenterX;
-    std::optional<Dimension> radialCenterY;
+    std::optional<AnimatableDimension> radialCenterX;
+    std::optional<AnimatableDimension> radialCenterY;
 
     std::optional<Dimension> fRadialCenterX;
     std::optional<Dimension> fRadialCenterY;
@@ -195,7 +195,7 @@ struct ACE_EXPORT LinearGradient {
     // direction in y-axis
     std::optional<GradientDirection> linearY;
     // angle of gradient line in bearing angle
-    std::optional<float> angle;
+    std::optional<AnimatableDimension> angle;
 
     std::optional<Dimension> x1;
     std::optional<Dimension> y1;
@@ -212,15 +212,15 @@ struct ACE_EXPORT LinearGradient {
 
 struct ACE_EXPORT SweepGradient {
     // center of x-axis
-    std::optional<Dimension> centerX;
+    std::optional<AnimatableDimension> centerX;
     // center of y-axis
-    std::optional<Dimension> centerY;
+    std::optional<AnimatableDimension> centerY;
     // startAngle in degree
-    std::optional<float> startAngle;
+    std::optional<AnimatableDimension> startAngle;
     // endAngle in degree
-    std::optional<float> endAngle;
+    std::optional<AnimatableDimension> endAngle;
     // rotation in degree
-    std::optional<float> rotation;
+    std::optional<AnimatableDimension> rotation;
 };
 
 class ACE_EXPORT Gradient final {
@@ -480,22 +480,28 @@ public:
     ~BackgroundImagePosition() = default;
     BackgroundImagePosition(
         BackgroundImagePositionType typeX, double valueX, BackgroundImagePositionType typeY, double valueY)
-        : typeX_(typeX), typeY_(typeY), valueX_(valueX), valueY_(valueY)
+        : typeX_(typeX), typeY_(typeY), valueX_(AnimatableDimension(valueX)), valueY_(AnimatableDimension(valueY))
     {}
+
+    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+    {
+        valueX_.SetContextAndCallback(context, callback);
+        valueY_.SetContextAndCallback(context, callback);
+    }
 
     void SetSizeTypeX(BackgroundImagePositionType type)
     {
         typeX_ = type;
     }
 
-    void SetSizeX(const Dimension& sizeX)
+    void SetSizeX(const AnimatableDimension& sizeX)
     {
         if (sizeX.Unit() == DimensionUnit::PERCENT) {
             typeX_ = BackgroundImagePositionType::PERCENT;
         } else {
             typeX_ = BackgroundImagePositionType::PX;
         }
-        valueX_ = sizeX.Value();
+        valueX_ = sizeX;
     }
 
     void SetSizeTypeY(BackgroundImagePositionType type)
@@ -503,24 +509,24 @@ public:
         typeY_ = type;
     }
 
-    void SetSizeY(const Dimension& sizeY)
+    void SetSizeY(const AnimatableDimension& sizeY)
     {
         if (sizeY.Unit() == DimensionUnit::PERCENT) {
             typeY_ = BackgroundImagePositionType::PERCENT;
         } else {
             typeY_ = BackgroundImagePositionType::PX;
         }
-        valueY_ = sizeY.Value();
+        valueY_ = sizeY;
     }
 
     void SetSizeValueX(double value)
     {
-        valueX_ = value;
+        valueX_ = AnimatableDimension(value);
     }
 
     void SetSizeValueY(double value)
     {
-        valueY_ = value;
+        valueY_ = AnimatableDimension(value);
     }
 
     BackgroundImagePositionType GetSizeTypeX() const
@@ -533,14 +539,24 @@ public:
         return typeY_;
     }
 
-    double GetSizeValueX() const
+    const AnimatableDimension& GetSizeX() const
     {
         return valueX_;
     }
 
-    double GetSizeValueY() const
+    const AnimatableDimension& GetSizeY() const
     {
         return valueY_;
+    }
+
+    double GetSizeValueX() const
+    {
+        return valueX_.Value();
+    }
+
+    double GetSizeValueY() const
+    {
+        return valueY_.Value();
     }
 
     BackgroundImagePosition operator+(const BackgroundImagePosition& position) const;
@@ -556,8 +572,8 @@ public:
 private:
     BackgroundImagePositionType typeX_ { BackgroundImagePositionType::PX };
     BackgroundImagePositionType typeY_ { BackgroundImagePositionType::PX };
-    double valueX_ = 0.0;
-    double valueY_ = 0.0;
+    AnimatableDimension valueX_ = AnimatableDimension(0.0);
+    AnimatableDimension valueY_ = AnimatableDimension(0.0);
 };
 
 class ImageObjectPosition final : public BackgroundImagePosition {
@@ -762,9 +778,59 @@ public:
         animationColor_ = animationColor;
     }
 
-    void SetGradient(const Gradient& gradient)
+    void SetGradient(
+        const Gradient& gradient, const WeakPtr<PipelineContext>& context = nullptr,
+        const RenderNodeAnimationCallback& callback = nullptr)
     {
         gradient_ = gradient;
+        if (callback) {
+            switch (gradient_.GetType()) {
+                case GradientType::LINEAR:
+                    if (gradient_.GetLinearGradient().angle) {
+                        gradient_.GetLinearGradient().angle->SetContextAndCallbackAfterFirstAssign(context, callback);
+                    }
+                    break;
+                case GradientType::SWEEP:
+                    if (gradient_.GetSweepGradient().centerX) {
+                        gradient_.GetSweepGradient().centerX->SetContextAndCallbackAfterFirstAssign(
+                            context, callback);
+                    }
+                    if (gradient_.GetSweepGradient().centerY) {
+                        gradient_.GetSweepGradient().centerY->SetContextAndCallbackAfterFirstAssign(context, callback);
+                    }
+                    if (gradient_.GetSweepGradient().startAngle) {
+                        gradient_.GetSweepGradient().startAngle->SetContextAndCallbackAfterFirstAssign(
+                            context, callback);
+                    }
+                    if (gradient_.GetSweepGradient().endAngle) {
+                        gradient_.GetSweepGradient().endAngle->SetContextAndCallbackAfterFirstAssign(context, callback);
+                    }
+                    if (gradient_.GetSweepGradient().rotation) {
+                        gradient_.GetSweepGradient().rotation->SetContextAndCallbackAfterFirstAssign(context, callback);
+                    }
+                    break;
+                case GradientType::RADIAL:
+                    if (gradient_.GetRadialGradient().radialHorizontalSize) {
+                        gradient_.GetRadialGradient().radialHorizontalSize->SetContextAndCallbackAfterFirstAssign(
+                            context, callback);
+                    }
+                    if (gradient_.GetRadialGradient().radialVerticalSize) {
+                        gradient_.GetRadialGradient().radialVerticalSize->SetContextAndCallbackAfterFirstAssign(
+                            context, callback);
+                    }
+                    if (gradient_.GetRadialGradient().radialCenterX) {
+                        gradient_.GetRadialGradient().radialCenterX->SetContextAndCallbackAfterFirstAssign(
+                            context, callback);
+                    }
+                    if (gradient_.GetRadialGradient().radialCenterY) {
+                        gradient_.GetRadialGradient().radialCenterY->SetContextAndCallbackAfterFirstAssign(
+                            context, callback);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     void SetGradientBorderImage(const Gradient& gradient)
@@ -809,6 +875,16 @@ public:
     void SetBlurRadius(const AnimatableDimension& radius)
     {
         blurRadius_ = radius;
+    }
+
+    const Color& GetColorBlend(void) const
+    {
+        return colorBlend;
+    }
+
+    void SetColorBlend(const Color& color)
+    {
+        colorBlend = color;
     }
 
     void SetWindowBlurProgress(float progress)
@@ -911,6 +987,36 @@ public:
         saturate_ = saturate;
     }
 
+    const Dimension& GetSepia(void) const
+    {
+        return sepia_;
+    }
+
+    void SetSepia(const Dimension& sepia)
+    {
+        sepia_ = sepia;
+    }
+
+    void SetInvert(const Dimension& invert)
+    {
+        invert_ = invert;
+    }
+
+    const Dimension& GetInvert(void) const
+    {
+        return invert_;
+    }
+
+    float GetHueRotate(void) const
+    {
+        return hueRotate_;
+    }
+
+    void SetHueRotate(const float& hueRotate)
+    {
+        hueRotate_ = hueRotate;
+    }
+
     const RefPtr<ArcBackground>& GetArcBackground() const
     {
         return arcBG_;
@@ -961,10 +1067,16 @@ private:
     Dimension grayScale_;
     // Brightness
     Dimension brightness_;
+    // hueRotate
+    float hueRotate_;
     // Contrast
     Dimension contrast_;
     // Saturate
     Dimension saturate_;
+    // Sepia
+    Dimension sepia_;
+    // invert
+    Dimension invert_;
     // color is transparent
     AnimatableColor backgroundColor_ { Color::TRANSPARENT };
     Color animationColor_ = Color::TRANSPARENT;
@@ -980,6 +1092,7 @@ private:
     float windowBlurProgress_ = 0.0f;
     // window blur style;
     WindowBlurStyle windowBlurStyle_ = WindowBlurStyle::STYLE_BACKGROUND_SMALL_LIGHT;
+    Color colorBlend;
 };
 
 class Pattern final {

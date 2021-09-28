@@ -61,6 +61,10 @@ public:
             ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_HTTPHEADER, header);
         }
 
+        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_TIMEOUT_MS, HttpConstant::TIME_OUT);
+        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_CONNECTTIMEOUT_MS, HttpConstant::TIME_OUT);
+        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_BUFFERSIZE, HttpConstant::BUFFER_SIZE);
+
         std::string responseBody;
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_WRITEFUNCTION, OnWritingMemoryBody);
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_WRITEDATA, &responseBody);
@@ -89,14 +93,17 @@ public:
         } else {
             LOGE("no method match!");
             responseData.SetCode(HttpConstant::ERROR);
-            return false;
+            responseData.SetData(responseBody);
+            return true;
         }
 
         CURLcode result = curl_easy_perform(handle.get());
         if (result != CURLE_OK) {
             LOGE("Failed to fetch, url: %{private}s, %{public}s", requestData.GetUrl().c_str(),
                 curl_easy_strerror(result));
-            return false;
+            responseData.SetCode(HttpConstant::ERROR);
+            responseData.SetData(responseBody);
+            return true;
         }
 
         char* ct = nullptr;
@@ -105,7 +112,7 @@ public:
             LOGD("fetch-preview content_type: %{public}s", ct);
         }
 
-        int32_t responseCode;
+        int32_t responseCode = HttpConstant::ERROR;
         curl_easy_getinfo(handle.get(), CURLINFO_RESPONSE_CODE, &responseCode);
         responseData.SetCode(responseCode);
         responseData.SetData(responseBody);
@@ -147,8 +154,12 @@ public:
 
     bool SetOptionForPost(const RequestData requestData, CURL* curl) const
     {
-        ACE_CURL_EASY_SET_OPTION(curl, CURLOPT_URL, requestData.GetUrl().c_str());
-        ACE_CURL_EASY_SET_OPTION(curl, CURLOPT_POST, 1L);
+        // refer to function buildConnectionWithStream() in HttpFetchImpl.java
+        LOGD("begin to set option for post");
+        std::string url = requestData.GetUrl();
+        LOGD("final url : %{public}s", url.c_str());
+        ACE_CURL_EASY_SET_OPTION(curl, CURLOPT_URL, url.c_str());
+        ACE_CURL_EASY_SET_OPTION(curl, CURLOPT_POSTFIELDS, requestData.GetData().c_str());
         return true;
     }
 

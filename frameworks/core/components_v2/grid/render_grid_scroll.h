@@ -114,6 +114,7 @@ public:
     void ScrollToIndex(int32_t index, int32_t source);
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve);
     Offset CurrentOffset();
+    void ScrollToEdge(ScrollEdgeType edgeType, bool smooth);
 
     Axis GetAxis() const
     {
@@ -121,6 +122,8 @@ public:
     }
 
     void OnPaintFinish() override;
+
+    bool IsChildrenTouchEnable() override;
 
     size_t GetCachedSize() const
     {
@@ -141,7 +144,8 @@ protected:
         const RefPtr<RenderNode>& child, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan) override;
 
     void CreateScrollable();
-    void LayoutChild(const RefPtr<RenderNode>& child, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan);
+    void LayoutChild(const RefPtr<RenderNode>& child, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan,
+        bool needPosition = true);
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     bool UpdateScrollPosition(double offset, int32_t source);
@@ -153,7 +157,7 @@ protected:
     bool GetGridSize();
     void BuildGrid(std::vector<double>& rows, std::vector<double>& cols);
     double CalculateBlankOfEnd();
-    double SupplementItems(int32_t mainIndex, int32_t itemIndex = -1);
+    double SupplementItems(int32_t mainIndex, int32_t itemIndex = -1, bool needPosition = true);
     bool Rank(int32_t mainIndex, int32_t itemIndex = -1);
     void BuildItemsForwardByRange(int32_t startItemIdx, int32_t endItemIdx);
     void BuildItemsBackwardByRange(int32_t startItemIdx, int32_t endItemIdx);
@@ -247,6 +251,7 @@ protected:
 
     int32_t lastFirstIdex_ = -1;
     int32_t loadingIndex_ = -1;
+    int32_t cacheCount_ = 1;
 };
 
 } // namespace OHOS::Ace::V2

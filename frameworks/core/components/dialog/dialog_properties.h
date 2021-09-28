@@ -16,32 +16,63 @@
 #ifndef FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_DIALOG_PROPERTIES_H
 #define FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_DIALOG_PROPERTIES_H
 
+#include "base/geometry/dimension_offset.h"
 #include "core/event/ace_event_handler.h"
+#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace {
 
 enum class DialogType {
     COMMON = 0,
     ALERT_DIALOG,
+    ACTION_SHEET,
+};
+
+// Alignment of dialog in vertical.
+enum class DialogAlignment {
+    TOP = 0,
+    CENTER,
+    BOTTOM,
+    DEFAULT,
+};
+
+// Information of ActionSheet
+struct ActionSheetInfo {
+    std::string title;       // title of ActionSheet, necessary.
+    std::string icon;        // icon of ActionSheet, not necessary.
+    EventMarker callbackId;  // called when ActionSheet is clicked.
+    RefPtr<Gesture> gesture; // called when ActionSheet is clicked.
+
+    // Whether sheetInfo is valid, valid if title if not empty.
+    bool IsValid() const
+    {
+        return !title.empty();
+    }
 };
 
 struct DialogProperties {
     DialogType type = DialogType::COMMON; // type of dialog, current support common dialog and alert dialog.
-    std::string title; // title of dialog.
-    std::string content; // message of dialog.
-    bool autoCancel = true; // pop dialog when click mask if autoCancel is true.
+    std::string title;                    // title of dialog.
+    std::string content;                  // message of dialog.
+    bool autoCancel = true;               // pop dialog when click mask if autoCancel is true.
     bool isMenu = false;
     std::vector<std::pair<std::string, std::string>> buttons; // <text of button, color of text>
-    std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
+    std::unordered_map<std::string, EventMarker> callbacks;   // <callback type(success, cancel, complete), eventId>
+    DialogAlignment alignment = DialogAlignment::DEFAULT;     // Alignment of dialog.
+    DimensionOffset offset;                                   // Offset which base on alignment of Dialog.
 
     // These ids is used for AlertDialog of declarative.
-    EventMarker primaryId; // first button's callback.
+    EventMarker primaryId;   // first button's callback.
     EventMarker secondaryId; // second button's callback.
 
-    RefPtr<Component> customComponent; // Used for CustomDialog in declarative.
+    // These attributes is used for CustomDialog.
+    RefPtr<Component> customComponent;         // Used for CustomDialog in declarative.
     std::function<void(bool)> onStatusChanged; // Called when dialog appear or disappear.
+
+    // These attributes is used for ActionSheet.
+    std::vector<ActionSheetInfo> sheetsInfo;
 };
 
-}
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_DIALOG_PROPERTIES_H

@@ -40,7 +40,7 @@ RefPtr<BaseXComponentBridge> QjsEngineLoader::CreateXComponentBridge() const
 }
 
 #if defined(BUILT_IN_JS_ENGINE)
-JsEngineLoader& JsEngineLoader::Get(bool isArkApp)
+JsEngineLoader& JsEngineLoader::Get(const char*)
 {
     return QjsEngineLoader::GetInstance();
 }

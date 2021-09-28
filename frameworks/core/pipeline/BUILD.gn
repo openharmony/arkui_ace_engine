@@ -58,48 +58,45 @@ template("ace_core_pipeline_source_set") {
       "layers/transform_layer.cpp",
     ]
 
-    configs += [
-      "$ace_root:ace_config",
-      "$ace_flutter_engine_root:flutter_config",
-      "$ace_flutter_engine_root:icu_config_$platform",
-    ]
+    configs += [ "$ace_root:ace_config" ]
 
     deps = [
-      "$ace_flutter_engine_root:ace_skia_$platform",
       "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
-      "$ace_root/frameworks/base:ace_base_$platform",
+      "$ace_flutter_engine_root/skia:ace_skia_$platform",
     ]
 
-    if (is_ohos_platform && enable_native_view) {
+    if (platform == "ohos" && defined(config.enable_native_view) &&
+        config.enable_native_view) {
       sources += [ "layers/ace_scene_builder.cpp" ]
-      deps += [ "$flutter_root/engine/flutter/flow/ohos_layers:flutter_ohos_layers_$platform" ]
+      deps += [ "$ace_flutter_engine_root/ohos_layers:flutter_ohos_layers" ]
     }
 
-    if (use_mingw_win) {
-      cflags_cc = [ "-std=c++17" ]
-
-      defines += [
-        "_USE_MATH_DEFINES",
-        "NOGDI",
-      ]
-    }
+    cflags_cc = []
+    cflags_cc += invoker.cflags_cc
   }
 }
 
-ace_core_pipeline_source_set("ace_core_pipeline_ohos") {
-  defines = ace_ohos_defines
-  platform = "ohos"
-  is_ohos_platform = true
-}
+foreach(item, ace_platforms) {
+  ace_core_pipeline_source_set("ace_core_pipeline_" + item.name) {
+    platform = item.name
 
-ace_core_pipeline_source_set("ace_core_pipeline_windows") {
-  defines = ace_windows_defines
-  platform = "windows"
-  is_ohos_platform = false
-}
+    if (defined(item.config)) {
+      config = item.config
+    } else {
+      config = {
+      }
+    }
 
-ace_core_pipeline_source_set("ace_core_pipeline_mac") {
-  defines = ace_mac_defines
-  platform = "mac"
-  is_ohos_platform = false
+    if (defined(config.defines)) {
+      defines = config.defines
+    } else {
+      defines = []
+    }
+
+    if (defined(config.cflags_cc)) {
+      cflags_cc = config.cflags_cc
+    } else {
+      cflags_cc = []
+    }
+  }
 }
