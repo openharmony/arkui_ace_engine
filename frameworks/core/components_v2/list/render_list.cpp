@@ -31,6 +31,8 @@ constexpr int32_t DEFAULT_SOURCE = 3;
 constexpr int32_t SCROLL_STATE_IDLE = 0;
 constexpr int32_t SCROLL_STATE_SCROLL = 1;
 constexpr int32_t SCROLL_STATE_FLING = 2;
+constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
+constexpr int32_t SCROLL_FROM_JUMP = 3;
 
 } // namespace
 
@@ -104,6 +106,9 @@ void RenderList::Update(const RefPtr<Component>& component)
     auto controller = component_->GetScrollController();
     if (controller) {
         controller->SetScrollNode(AceType::WeakClaim(this));
+    }
+    if (!animator_) {
+        animator_ = AceType::MakeRefPtr<Animator>(GetContext());
     }
 
     // chainAnimation
@@ -643,6 +648,38 @@ void RenderList::JumpToIndex(int32_t idx, int32_t source)
     startIndex_ = idx;
     currentOffset_ = 0.0;
     MarkNeedLayout(true);
+}
+
+void RenderList::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
+{
+    if (!animator_->IsStopped()) {
+        animator_->Stop();
+    }
+    animator_->ClearInterpolators();
+    auto pos = NormalizePercentToPx(position, GetDirection());
+    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(GetCurrentPosition(), GetCurrentPosition() + pos,
+        curve);
+    animation->AddListener([weak = AceType::WeakClaim(this)](double pos) {
+        auto renderList = weak.Upgrade();
+        if (!renderList) {
+            return;
+        }
+        if (renderList->scrollable_ && !renderList->scrollable_->IsSpringMotionRunning()) {
+            Offset delta;
+            if (renderList->vertical_) {
+                delta.SetX(0.0);
+                delta.SetY(pos - renderList->currentOffset_);
+            } else {
+                delta.SetX(pos - renderList->currentOffset_);
+                delta.SetY(0.0);
+            }
+            renderList->UpdateScrollPosition(renderList->GetMainAxis(delta), SCROLL_FROM_JUMP);
+        }
+    });
+    animator_->AddInterpolator(animation);
+    animator_->SetDuration(std::min(duration, SCROLL_MAX_TIME));
+    animator_->ClearStopListeners();
+    animator_->Play();
 }
 
 void RenderList::UpdateTouchRect()

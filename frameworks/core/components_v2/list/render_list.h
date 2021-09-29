@@ -117,6 +117,8 @@ public:
 
     void JumpToIndex(int32_t idx, int32_t source);
 
+    void AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve);
+
     RefPtr<Component> GetComponent() override
     {
         return component_;
@@ -210,6 +212,7 @@ protected:
     RefPtr<SpringProperty> overSpringProperty_;
     RefPtr<BilateralSpringAdapter> chainAdapter_;
     RefPtr<SimpleSpringChain> chain_;
+    RefPtr<Animator> animator_;
 
     size_t firstDisplayIndex_ = INITIAL_CHILD_INDEX;
     size_t lastDisplayIndex_ = INITIAL_CHILD_INDEX;
