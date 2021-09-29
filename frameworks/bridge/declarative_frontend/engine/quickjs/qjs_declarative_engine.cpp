@@ -234,7 +234,7 @@ JSValue QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSV
         LOGE("cannot find %s function", appFuncName.c_str());
         return JS_UNDEFINED;
     }
-    JSValue ret = JS_Call(ctx, appFunc, JS_UNDEFINED, argc, argv);
+    JSValue ret = JS_Call(ctx, appFunc, defaultobj, argc, argv);
     js_std_loop(ctx);
     JS_FreeValue(ctx, appFunc);
     JS_FreeValue(ctx, defaultobj);
