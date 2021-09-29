@@ -27,6 +27,10 @@ template("ace_base_platform_source_set") {
       "$ace_flutter_engine_root:icu_config_$platform",
     ]
 
+    if (ace_enable_gpu) {
+      configs += [ "$ace_flutter_engine_root:skia_config" ]
+    }
+
     include_dirs = [ "//utils/native/base/include" ]
 
     sources = [
