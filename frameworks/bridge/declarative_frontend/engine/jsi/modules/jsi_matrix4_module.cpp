@@ -77,14 +77,14 @@ shared_ptr<JsValue> Init(const shared_ptr<JsRuntime>& runtime, const shared_ptr<
 
     auto matrix = ConvertToMatrix(runtime, argv[0]);
     thisObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, matrix));
-    return runtime->NewNull();
+    return thisObj;
 }
 
 shared_ptr<JsValue> Identity(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     thisObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, Matrix4::CreateIdentity()));
-    return runtime->NewNull();
+    return thisObj;
 }
 
 shared_ptr<JsValue> Copy(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
