@@ -3356,7 +3356,7 @@ bool QjsEngine::OnStartContinuation()
         return false;
     }
     JSValueConst argv[] = {};
-    JSValue ret = QJSUtils::Call(ctx, func, JS_UNDEFINED, countof(argv), argv);
+    JSValue ret = QJSUtils::Call(ctx, func, defObj, countof(argv), argv);
     std::string result = JS_ToCString(ctx, ret);
     js_std_loop(ctx);
     JS_FreeValue(ctx, globalObj);
@@ -3385,7 +3385,7 @@ void QjsEngine::OnCompleteContinuation(int32_t code)
         return;
     }
     JSValueConst argv[] = { JS_NewInt32(ctx, code) };
-    QJSUtils::Call(ctx, func, JS_UNDEFINED, countof(argv), argv);
+    QJSUtils::Call(ctx, func, defObj, countof(argv), argv);
     js_std_loop(ctx);
     JS_FreeValue(ctx, globalObj);
 }
@@ -3412,7 +3412,7 @@ void QjsEngine::OnRemoteTerminated()
         return;
     }
     JSValueConst argv[] = {};
-    QJSUtils::Call(ctx, func, JS_UNDEFINED, countof(argv), argv);
+    QJSUtils::Call(ctx, func, defObj, countof(argv), argv);
     js_std_loop(ctx);
     JS_FreeValue(ctx, globalObj);
 }
@@ -3440,7 +3440,7 @@ void QjsEngine::OnSaveData(std::string& data)
     }
     JSValue object = JS_NewObject(ctx);
     JSValueConst argv[] = { object };
-    JSValue ret = QJSUtils::Call(ctx, func, JS_UNDEFINED, countof(argv), argv);
+    JSValue ret = QJSUtils::Call(ctx, func, defObj, countof(argv), argv);
     if (JS_ToCString(ctx, ret) == std::string("true")) {
         data = ScopedString::Stringify(ctx, object);
     }
@@ -3475,7 +3475,7 @@ bool QjsEngine::OnRestoreData(const std::string& data)
         return false;
     }
     JSValueConst argv[] = { jsonObj };
-    JSValue ret = QJSUtils::Call(ctx, func, JS_UNDEFINED, countof(argv), argv);
+    JSValue ret = QJSUtils::Call(ctx, func, defObj, countof(argv), argv);
     std::string result = JS_ToCString(ctx, ret);
     js_std_loop(ctx);
     JS_FreeValue(ctx, globalObj);
