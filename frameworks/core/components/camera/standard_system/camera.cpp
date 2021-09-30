@@ -50,38 +50,25 @@ const char REGION_POSITION_X[] = "region_position_x";
 const char REGION_POSITION_Y[] = "region_position_y";
 const char REGION_WIDTH[] = "region_width";
 const char REGION_HEIGHT[] = "region_height";
-constexpr int32_t DEFAULT_WIDTH = 1920;
-constexpr int32_t DEFAULT_HEIGHT = 1080;
+constexpr int32_t DEFAULT_WIDTH = 640;
+constexpr int32_t DEFAULT_HEIGHT = 360;
 constexpr int32_t SURFACE_STRIDE_ALIGNMENT_VAL = 8;
 constexpr int32_t PREVIEW_SURFACE_WIDTH = 640;
 constexpr int32_t PREVIEW_SURFACE_HEIGHT = 480;
 constexpr int32_t PHOTO_SURFACE_WIDTH = 1280;
 constexpr int32_t PHOTO_SURFACE_HEIGHT = 960;
 constexpr int32_t MAX_DURATION = 36000;
-constexpr int32_t SAMPLE_RATE = 48000;
 constexpr int32_t FRAME_RATE = 30;
-constexpr int32_t RATE = 4096;
+constexpr int32_t RATE = 48000;
+constexpr int32_t AUDIO_CHANNEL_COUNT = 2;
+constexpr int32_t AUDIO_SAMPLE_RATE = 48000;
+constexpr int32_t AUDIO_ENCODING_BITRATE = 48000;
+constexpr int32_t QUEUE_SIZE = 10;
 constexpr double FPS = 30;
 const uid_t CHOWN_OWNER_ID = -1;
 const gid_t CHOWN_GROUP_ID = 1023;
 const mode_t MKDIR_RWX_USR_GRP_DIR = 0770;
 const mode_t MKDIR_RWX_USR_GRP_FILE = 0660;
-
-inline int32_t GetRecordFile(const std::string& filePath, std::string& path)
-{
-    LOGI("Camera GetRecordFile.");
-    struct timeval tv = {};
-    gettimeofday(&tv, nullptr);
-    struct tm *ltm = localtime(&tv.tv_sec);
-    int32_t fd = -1;
-    if (ltm != nullptr) {
-        std::ostringstream ss("Capture_");
-        ss << "Record" << ltm->tm_hour << "-" << ltm->tm_min << "-" << ltm->tm_sec << ".mp4";
-        path = filePath + ss.str();
-        fd = open(path.c_str(), O_WRONLY | O_CREAT | O_CLOEXEC | O_TRUNC, S_IRUSR | S_IWUSR);
-    }
-    return fd;
-}
 
 inline bool IsDirectory(const char *dirName)
 {
@@ -103,10 +90,10 @@ void CameraCallback::PrepareCameraInput(sptr<OHOS::CameraStandard::CaptureInput>
         prepareEventListener_();
     }
 
-    int32_t intResult = 0;
-    intResult = PrepareCamera();
-    if (intResult != 0) {
-        LOGE("Prepare Camera Failed");
+    int32_t ret = 0;
+    ret = PrepareCamera(false);
+    if (ret != ERR_OK) {
+        LOGE("Prepare Preview Failed");
         return;
     }
 }
@@ -114,23 +101,20 @@ std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
 {
     LOGI("Camera CreateRecorder start.");
     int ret = 0;
-    int32_t channelCount = 1;
-    Media::AudioCodecFormat audioFormat = Media::AAC_LC;
-    Media::AudioSourceType inputSource = Media::AUDIO_MIC;
-    int32_t audioEncodingBitRate = SAMPLE_RATE;
-    Media::VideoSourceType source = Media::VIDEO_SOURCE_SURFACE_ES;
-    int32_t sourceId = 0;
+    Media::VideoSourceType videoSource = Media::VIDEO_SOURCE_SURFACE_ES;
+    Media::AudioSourceType audioSource = Media::AUDIO_MIC;
+    int32_t videoSourceId = 0;
     int32_t audioSourceId = 0;
     int32_t width = DEFAULT_WIDTH;
     int32_t height = DEFAULT_HEIGHT;
-    Media::VideoCodecFormat encoder = Media::HEVC;
+    Media::VideoCodecFormat encoder = Media::H264;
 
     std::shared_ptr<Media::Recorder> recorder = Media::RecorderFactory::CreateRecorder();
-    if ((ret = recorder->SetVideoSource(source, sourceId)) != ERR_OK) {
+    if ((ret = recorder->SetVideoSource(videoSource, videoSourceId)) != ERR_OK) {
         LOGE("SetVideoSource failed. ret= %{private}d.", ret);
         return nullptr;
     }
-    if ((ret = recorder->SetAudioSource(inputSource, audioSourceId)) != ERR_OK) {
+    if ((ret = recorder->SetAudioSource(audioSource, audioSourceId)) != ERR_OK) {
         LOGE("SetAudioSource failed. ret= %{private}d.", ret);
         return nullptr;
     }
@@ -138,47 +122,47 @@ std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
         LOGE("SetOutputFormat failed. ret= %{private}d.", ret);
         return nullptr;
     }
-    if ((ret = recorder->SetVideoEncoder(sourceId, encoder)) != ERR_OK) {
+    if ((ret = recorder->SetVideoEncoder(videoSourceId, encoder)) != ERR_OK) {
         LOGE("SetVideoEncoder failed. ret= %{private}d.", ret);
         return nullptr;
     }
-    if ((ret = recorder->SetVideoSize(sourceId, width, height)) != ERR_OK) {
+    if ((ret = recorder->SetVideoSize(videoSourceId, width, height)) != ERR_OK) {
         LOGE("SetVideoSize failed. ret= %{private}d.", ret);
         return nullptr;
     }
-    if ((ret = recorder->SetVideoFrameRate(sourceId, FRAME_RATE)) != ERR_OK) {
+    if ((ret = recorder->SetVideoFrameRate(videoSourceId, FRAME_RATE)) != ERR_OK) {
         LOGE("SetVideoFrameRate failed. ret= %{private}d.", ret);
         return nullptr;
     }
-    if ((ret = recorder->SetVideoEncodingBitRate(sourceId, RATE)) != ERR_OK) {
+    if ((ret = recorder->SetVideoEncodingBitRate(videoSourceId, RATE)) != ERR_OK) {
         LOGE("SetVideoEncodingBitRate failed. ret= %{private}d.", ret);
         return nullptr;
     }
-    if ((ret = recorder->SetCaptureRate(sourceId, FPS)) != ERR_OK) {
+    if ((ret = recorder->SetCaptureRate(videoSourceId, FPS)) != ERR_OK) {
         LOGE("SetCaptureRate failed. ret= %{private}d.", ret);
         return nullptr;
     }
-    if ((ret = recorder->SetAudioEncoder(audioSourceId, audioFormat)) != ERR_OK) {
+    if ((ret = recorder->SetAudioEncoder(audioSourceId, Media::AAC_LC)) != ERR_OK) {
         LOGE("SetAudioEncoder failed. ret= %{private}d.", ret);
         return nullptr;
     }
-    if ((ret = recorder->SetAudioSampleRate(audioSourceId, SAMPLE_RATE)) != ERR_OK) {
+    if ((ret = recorder->SetAudioSampleRate(audioSourceId, AUDIO_SAMPLE_RATE)) != ERR_OK) {
         LOGE("SetAudioSampleRate failed. ret= %{private}d.", ret);
         return nullptr;
     }
-    if ((ret = recorder->SetAudioChannels(audioSourceId, channelCount)) != ERR_OK) {
+    if ((ret = recorder->SetAudioChannels(audioSourceId, AUDIO_CHANNEL_COUNT)) != ERR_OK) {
         LOGE("SetAudioChannels failed. ret= %{private}d.", ret);
         return nullptr;
     }
-    if ((ret = recorder->SetAudioEncodingBitRate(audioSourceId, audioEncodingBitRate)) != ERR_OK) {
+    if ((ret = recorder->SetAudioEncodingBitRate(audioSourceId, AUDIO_ENCODING_BITRATE)) != ERR_OK) {
         LOGE("SetAudioEncodingBitRate failed. ret= %{private}d.", ret);
         return nullptr;
     }
     if ((ret = recorder->SetMaxDuration(MAX_DURATION)) != ERR_OK) { // 36000s=10h
-        LOGE("SetAudioEncodingBitRate failed. ret= %{private}d.", ret);
+        LOGE("SetMaxDuration failed. ret= %{private}d.", ret);
         return nullptr;
     }
-    videoSourceId_ = sourceId;
+    videoSourceId_ = videoSourceId;
     LOGI("Camera CreateRecorder success.");
     return recorder;
 }
@@ -193,33 +177,20 @@ int CameraCallback::PrepareRecorder()
         LOGE("Camera: Recorder not available.");
         return -1;
     }
-    if (recordFileId_ == -1) {
-        recordFileId_ = GetRecordFile(cacheFilePath_, recordPath_);
-    }
-    if (recordFileId_ == -1) {
-        LOGE("Camera: Create fd failed.");
-        return -1;
-    }
     return ERR_OK;
 }
 
 void CameraCallback::CloseRecorder()
 {
-    if (recordState_ == State::STATE_RUNNING) {
-        if (videoOutput_ != nullptr) {
-            ((sptr<OHOS::CameraStandard::VideoOutput> &)(videoOutput_))->Stop();
-            ((sptr<OHOS::CameraStandard::VideoOutput> &)(videoOutput_))->Release();
-        }
-        if (recorder_ != nullptr) {
-            recorder_->Stop(true);
-            recorder_ = nullptr;
-        }
-
-        if (recordFileId_ != -1) {
-            onRecord(true, recordPath_);
-        }
-        recordFileId_ = -1;
-        recordState_ = State::STATE_IDLE;
+    if (videoOutput_ != nullptr) {
+        ((sptr<OHOS::CameraStandard::VideoOutput> &)(videoOutput_))->Stop();
+        ((sptr<OHOS::CameraStandard::VideoOutput> &)(videoOutput_))->Release();
+        videoOutput_ = nullptr;
+    }
+    if (recorder_ != nullptr) {
+        recorder_->Stop(false);
+        recorder_->Release();
+        recorder_ = nullptr;
     }
 }
 
@@ -259,7 +230,7 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
             LOGE("Camera:create subwindow failed, because %{public}s", WMErrorStr(wret).c_str());
             return nullptr;
         }
-        subwindow_->GetSurface()->SetQueueSize(10);
+        subwindow_->GetSurface()->SetQueueSize(QUEUE_SIZE);
     }
     previewSurface_ = subwindow_->GetSurface();
     previewSurface_->SetUserData(SURFACE_STRIDE_ALIGNMENT, std::to_string(SURFACE_STRIDE_ALIGNMENT_VAL));
@@ -340,22 +311,18 @@ int32_t CameraCallback::PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> c
     int ret = PrepareRecorder();
     if (ret != ERR_OK) {
         LOGE("Camera PrepareRecorder failed.");
-        CloseRecorder();
-        onRecord(false, NULL_STRING);
         return -1;
     }
-    ret = recorder_->SetOutputFile(recordFileId_);
+
+    MakeDir(DEFAULT_CATCH_PATH);
+    ret = recorder_->SetOutputPath(DEFAULT_CATCH_PATH);
     if (ret != ERR_OK) {
         LOGE("Camera SetOutputPath failed. ret= %{private}d", ret);
-        CloseRecorder();
-        onRecord(false, NULL_STRING);
         return -1;
     }
     ret = recorder_->Prepare();
     if (ret != ERR_OK) {
         LOGE("Prepare failed. ret= %{private}d", ret);
-        CloseRecorder();
-        onRecord(false, NULL_STRING);
         return -1;
     }
     sptr<Surface> recorderSurface = (recorder_->GetSurface(videoSourceId_));
@@ -364,9 +331,17 @@ int32_t CameraCallback::PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> c
         LOGE("Create Video Output Failed");
         return -1;
     }
+    int intResult = 0;
+    intResult = capSession_->AddOutput(videoOutput_);
+    if (intResult != 0) {
+        LOGE("Failed to add Video Output");
+        return -1;
+    }
+
     return 0;
 }
-int32_t CameraCallback::PrepareCamera()
+
+int32_t CameraCallback::PrepareCamera(bool bIsRecorder)
 {
     if (camInput_ == nullptr) {
         LOGE("Prepare Camera: camInput is not Init Succeeded and wait.");
@@ -384,6 +359,11 @@ int32_t CameraCallback::PrepareCamera()
     LOGI("Prepare Camera start.");
 
     sptr<OHOS::CameraStandard::CameraManager> camManagerObj = OHOS::CameraStandard::CameraManager::GetInstance();
+    if (capSession_ != nullptr) {
+        LOGI("Recreating the Session");
+        Stop(true);
+        hasCallPreView_ = true;
+    }
     capSession_ = camManagerObj->CreateCaptureSession();
     if (capSession_ == nullptr) {
         LOGE("CameraCallback: Create was not Proper, capSession is null!");
@@ -396,8 +376,10 @@ int32_t CameraCallback::PrepareCamera()
         return -1;
     }
     surface = createSubWindowSurface();
-    previewOutput_ = camManagerObj->CreateCustomPreviewOutput(
-        surface, surface->GetDefaultHeight(), surface->GetDefaultWidth());
+    LOGI("Preview surface width: %{public}d, height: %{public}d", surface->GetDefaultWidth(),
+        surface->GetDefaultHeight());
+    previewOutput_ = camManagerObj->CreateCustomPreviewOutput(surface, surface->GetDefaultHeight(),
+                                                              surface->GetDefaultWidth());
     if (previewOutput_ == nullptr) {
         LOGE("Failed to create PreviewOutput");
         return -1;
@@ -407,10 +389,20 @@ int32_t CameraCallback::PrepareCamera()
         LOGE("Failed to Add Preview Output");
         return -1;
     }
-    intResult = PreparePhoto(camManagerObj);
-    if (intResult != 0) {
-        LOGE("Failed to Prepare Photo");
-        return -1;
+    if (!bIsRecorder) {
+        intResult = PreparePhoto(camManagerObj);
+        if (intResult != 0) {
+            LOGE("Failed to Prepare Photo");
+            return -1;
+        }
+        PreviousReadyMode_ = ReadyMode::PHOTO;
+    } else {
+        intResult = PrepareVideo(camManagerObj);
+        if (intResult != 0) {
+            LOGE("Failed to Prepare Video");
+            return -1;
+        }
+        PreviousReadyMode_ = ReadyMode::VIDEO;
     }
     intResult = capSession_->CommitConfig();
     if (intResult != 0) {
@@ -429,7 +421,7 @@ int32_t CameraCallback::PrepareCamera()
 
 void CameraCallback::StartPreview()
 {
-    LOGI("CameraCallback::StartPreview is called!");
+    LOGI("CameraCallback::StartPreview() is called!");
     int intResult = 0;
     if (!isReady_) {
         LOGE("Not ready for StartPreview.");
@@ -462,15 +454,23 @@ void CameraCallback::StartRecord()
         LOGE("Camera is already recording.");
         return;
     }
-    ret = recorder_->Start();
+    LOGI("Prepare Recorder Start");
+    ret = PrepareCamera(true);
     if (ret != ERR_OK) {
-        LOGE("recorder start failed. ret= %{private}d", ret);
-        CloseRecorder();
+        LOGE("Prepare Recording Failed");
         onRecord(false, NULL_STRING);
         return;
     }
 
+    LOGI("Video Output Start");
     ((sptr<OHOS::CameraStandard::VideoOutput> &)(videoOutput_))->Start();
+    LOGI("Recorder Start");
+    ret = recorder_->Start();
+    if (ret != ERR_OK) {
+        LOGE("recorder start failed. ret= %{private}d", ret);
+        onRecord(false, NULL_STRING);
+        return;
+    }
 
     recordState_ = State::STATE_RUNNING;
     LOGI("Camera start recording succeed.");
@@ -480,6 +480,14 @@ void CameraCallback::Capture(Size photoSize)
 {
     LOGI("Camera capture start.");
     int32_t intResult = 0;
+    if (PreviousReadyMode_ != PHOTO) {
+        LOGI("Photo was not prepared, so need to prepare");
+        intResult = PrepareCamera(false);
+        if (intResult != 0) {
+            LOGE("Prepare Camera Failed");
+            return;
+        }
+    }
 
     if (!isReady_ || (photoOutput_ == nullptr)) {
         LOGE("Camera is not ready for Take Photo");
@@ -502,7 +510,7 @@ void CameraCallback::Release()
         capSession_->Release();
         capSession_ = nullptr;
     }
-
+    PreviousReadyMode_ = ReadyMode::NONE;
     if (subwindow_ != nullptr) {
         LOGI("CameraCallback: Destroy subWindow.");
         subwindow_ = nullptr;
@@ -519,6 +527,12 @@ void CameraCallback::Release()
 void CameraCallback::Stop(bool isClosePreView)
 {
     CloseRecorder();
+    bool isSuccess = false;
+    if (recordState_ == State::STATE_RUNNING) {
+        isSuccess = true;
+    }
+
+    PreviousReadyMode_ = ReadyMode::NONE;
     recordState_ = State::STATE_IDLE;
     if (isClosePreView) {
         if (capSession_ != nullptr) {
@@ -529,7 +543,9 @@ void CameraCallback::Stop(bool isClosePreView)
         Release();
     }
 
-    previewState_ = State::STATE_IDLE;
+    if (isSuccess) {
+        onRecord(true, DEFAULT_CATCH_PATH);
+    }
 }
 
 void CameraCallback::AddTakePhotoListener(TakePhotoListener&& listener)
@@ -602,7 +618,7 @@ void CameraCallback::OnCameraSizeChange(double width, double height)
 
     sizeInitSucceeded_ = true;
     LOGI("CameraCallback::OnCameraSizeChange success: %{public}lf  %{public}lf.", width, height);
-    PrepareCamera();
+    PrepareCamera(false);
 }
 
 void CameraCallback::OnCameraOffsetChange(double x, double y)
@@ -634,9 +650,10 @@ void CameraCallback::OnCameraOffsetChange(double x, double y)
 
     windowOffset_.SetX(x);
     windowOffset_.SetY(y);
+
     offsetInitSucceeded_ = true;
     LOGI("CameraCallback::OnCameraOffsetChange success: %{public}lf  %{public}lf.", x, y);
-    PrepareCamera();
+    PrepareCamera(false);
 }
 
 void CaptureListener::OnBufferAvailable()
@@ -683,7 +700,6 @@ int32_t CameraCallback::SaveData(char *buffer, int32_t size, std::string& path)
 
 void CameraCallback::OnTakePhoto(bool isSucces, std::string info)
 {
-
     LOGI("Camera:SurfaceListener OnTakePhoto %{public}d  %{public}s--", isSucces, info.c_str());
     if (!takePhotoListener_) {
         return;
@@ -770,7 +786,8 @@ void Camera::StartPreview()
 
 void Camera::StartRecord()
 {
-    LOGI("Camera:StartRecord (suspended temporarily)");
+    LOGI("Camera:StartRecord");
+    cameraCallback_.StartRecord();
 }
 
 void Camera::AddTakePhotoListener(TakePhotoListener&& listener)
