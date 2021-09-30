@@ -25,7 +25,7 @@ action("gen_stateMgmt_abc") {
 
   deps = [ "//ark/ts2abc/ts2panda:ark_ts2abc_build" ]
 
-  script = "//prebuilts/ace-toolkit/ace-loader/plugin-build-tools/generate_js_bytecode.py"
+  script = "//ark/ts2abc/ts2panda/scripts/generate_js_bytecode.py"
 
   args = [
     "--src-js",
@@ -60,7 +60,7 @@ action("gen_jsEnumStyle_abc") {
 
   deps = [ "//ark/ts2abc/ts2panda:ark_ts2abc_build" ]
 
-  script = "//prebuilts/ace-toolkit/ace-loader/plugin-build-tools/generate_js_bytecode.py"
+  script = "//ark/ts2abc/ts2panda/scripts/generate_js_bytecode.py"
 
   args = [
     "--src-js",
