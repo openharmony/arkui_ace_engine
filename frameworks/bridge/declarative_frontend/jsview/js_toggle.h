@@ -26,7 +26,7 @@ enum class ToggleType {
     BUTTON,
 };
 
-class JSToggle : public JSContainerBase {
+class JSToggle : public JSViewAbstract, public JSInteractable {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
