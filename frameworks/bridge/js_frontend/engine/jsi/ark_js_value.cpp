@@ -138,7 +138,10 @@ shared_ptr<JsValue> ArkJSValue::Call(shared_ptr<JsRuntime> runtime, shared_ptr<J
     Local<JSValueRef> thisValue = std::static_pointer_cast<ArkJSValue>(thisObj)->GetValue(pandaRuntime);
     Local<FunctionRef> function(GetValue(pandaRuntime));
     Local<JSValueRef> result = function->Call(pandaRuntime->GetEcmaVm(), thisValue, arguments.data(), argc);
-    runtime->HandleUncaughtException();
+    Local<ObjectRef> exception = JSNApi::GetUncaughtException(pandaRuntime->GetEcmaVm());
+    if (!exception.IsEmpty() && !exception->IsHole()) {
+        result = JSValueRef::Undefined(pandaRuntime->GetEcmaVm());
+    }
     return std::make_shared<ArkJSValue>(pandaRuntime, result);
 }
 
