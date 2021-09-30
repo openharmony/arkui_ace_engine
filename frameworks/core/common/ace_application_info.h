@@ -44,6 +44,8 @@ public:
     virtual bool GetMediaById(uint32_t id, std::string& mediaPath) { return false; }
     virtual bool GetColorById(uint32_t id, uint32_t& colorId) { return false; }
     virtual bool GetFloatById(uint32_t id, float& floatValue) { return false; }
+    virtual bool GetStringById(uint32_t id, std::string& strValue) { return false; }
+    virtual bool GetPluralStringById(uint32_t id, int count, std::string& pluralResult) { return false; }
 
     void SetUserId(int userId)
     {
