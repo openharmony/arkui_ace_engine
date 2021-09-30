@@ -426,6 +426,31 @@ JSValue Px2Lpx(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* 
     return lpxQJSValue;
 }
 
+JSValue SetAppBackgroundColor(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    if (argc != 1) {
+        LOGE("The arg is wrong, must have one argument");
+        return JS_ThrowSyntaxError(ctx, "input value must be number");
+    }
+    QJSContext::Scope scp(ctx);
+    if (!JS_IsString(argv[0])) {
+        LOGE("The arg is wrong, value must be string");
+        return JS_ThrowSyntaxError(ctx, "input value must be string");
+    }
+    ScopedString valueString(ctx, argv[0]);
+    std::string backgroundColorStr = valueString.get();
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext) {
+        pipelineContext->SetRootBgColor(Color::FromString(backgroundColorStr));
+    }
+    return JS_UNDEFINED;
+}
+
 void JsRegisterViews(BindingTarget globalObj)
 {
     JSContext* ctx = QJSContext::Current();
@@ -440,6 +465,7 @@ void JsRegisterViews(BindingTarget globalObj)
     QJSUtils::DefineGlobalFunction(ctx, Px2Fp, "px2fp", 1);
     QJSUtils::DefineGlobalFunction(ctx, Lpx2Px, "lpx2px", 1);
     QJSUtils::DefineGlobalFunction(ctx, Px2Lpx, "px2lpx", 1);
+    QJSUtils::DefineGlobalFunction(ctx, SetAppBackgroundColor, "setAppBgColor", 1);
 
     JSViewAbstract::JSBind();
     JSContainerBase::JSBind();

@@ -454,6 +454,30 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::EcmaVM* vm, panda::Local<panda::JS
     return panda::NumberRef::New(vm, lpxValue);
 }
 
+panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
+    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+{
+    if (argc != 1) {
+        LOGE("The arg is wrong, must have one argument");
+        return panda::JSValueRef::Exception(vm);
+    }
+    if (!args[0]->IsString()) {
+        LOGE("The arg is wrong, value must be number");
+        return panda::JSValueRef::Exception(vm);
+    }
+    std::string backgroundColorStr = args[0]->ToString(vm)->ToString();
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return panda::JSValueRef::Exception(vm);
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext) {
+        pipelineContext->SetRootBgColor(Color::FromString(backgroundColorStr));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
     { "Flex", JSFlexImpl::JSBind },
     { "Text", JSText::JSBind },
@@ -604,6 +628,8 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Lpx2Px, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2lpx"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx, nullptr));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor, nullptr));
 
     JSViewAbstract::JSBind();
     JSContainerBase::JSBind();
