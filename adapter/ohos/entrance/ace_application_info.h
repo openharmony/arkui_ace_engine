@@ -65,6 +65,22 @@ public:
         return false;
     }
 
+    bool GetStringById(uint32_t id, std::string& strValue) override
+    {
+        if (resourceManager_) {
+            return resourceManager_->GetStringById(id, strValue);
+        }
+        return false;
+    }
+
+    bool GetPluralStringById(uint32_t id, int count, std::string& pluralResult) override
+    {
+        if (resourceManager_) {
+            return resourceManager_->GetPluralStringById(id, count, pluralResult);
+        }
+        return false;
+    }
+
     double GetLifeTime() const override
     {
         return 0.0;

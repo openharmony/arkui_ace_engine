@@ -1709,11 +1709,6 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
     }
 
     // TODO: should check how to deal with the themeConstants
-    auto themeConstants = GetThemeConstants();
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
-        return false;
-    }
 
     JSRef<JSVal> args = jsObj->GetProperty("params");
     if (!args->IsArray()) {
@@ -1723,26 +1718,24 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
 
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
     if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::STRING)) {
-        auto originStr = themeConstants->GetString(resId->ToNumber<uint32_t>());
-        ReplaceHolder(originStr, params, 0);
-        result = originStr;
+        std::string originStr;
+        if (!AceApplicationInfo::GetInstance().GetStringById(resId->ToNumber<uint32_t>(), originStr)) {
+            ReplaceHolder(originStr, params, 0);
+            result = originStr;
+        }
     } else if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::PLURAL)) {
         auto countJsVal = params->GetValueAt(0);
-        double count = 0.0;
+        int count = 0;
         if (!countJsVal->IsNumber()) {
             LOGW("pluralString, pluralnumber is not number");
             return false;
         }
-        count = countJsVal->ToNumber<double>();
-        auto pluralResults = themeConstants->GetStringArray(resId->ToNumber<uint32_t>());
-        auto pluralChoice = Localization::GetInstance()->PluralRulesFormat(count);
-        auto iter = std::find(pluralResults.begin(), pluralResults.end(), pluralChoice);
-        std::string originStr;
-        if (iter != pluralResults.end() && ++iter != pluralResults.end()) {
-            originStr = *iter;
+        count = countJsVal->ToNumber<int>();
+        std::string pluralResult;
+        if (!AceApplicationInfo::GetInstance().GetPluralStringById(resId->ToNumber<uint32_t>(), count, pluralResult)) {
+            ReplaceHolder(pluralResult, params, 1);
+            result = pluralResult;
         }
-        ReplaceHolder(originStr, params, 1);
-        result = originStr;
     } else {
         return false;
     }
