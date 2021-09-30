@@ -517,7 +517,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSTextArea::JSBind(globalObj);
     JSTextInput::JSBind(globalObj);
     JSMarquee::JSBind(globalObj);
-#if !defined(WEARABLE_PRODUCT) && !defined(OHOS_STANDARD_SYSTEM)
+#if defined(FORM_SUPPORTED)
     JSForm::JSBind(globalObj);
 #endif
     JSRect::JSBind(globalObj);

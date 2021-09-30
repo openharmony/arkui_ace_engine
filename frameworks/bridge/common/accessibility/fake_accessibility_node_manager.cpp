@@ -107,4 +107,14 @@ void AccessibilityNodeManager::SetCardViewParams(const std::string& key, bool fo
 
 void AccessibilityNodeManager::SetCardViewPosition(int id, float offsetX, float offsetY) {}
 
+std::unique_ptr<JsonValue> AccessibilityNodeManager::DumpComposedElementsToJson() const
+{
+    return nullptr;
+}
+
+std::unique_ptr<JsonValue> AccessibilityNodeManager::DumpComposedElementToJson(NodeId nodeId)
+{
+    return nullptr;
+}
+
 } // namespace OHOS::Ace::Framework

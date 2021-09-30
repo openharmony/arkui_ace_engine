@@ -311,6 +311,11 @@ template("ace_core_source_set") {
       sources += [ "common/form_manager.cpp" ]
     }
 
+    if (defined(config.form_components_support) &&
+        config.form_components_support) {
+      deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
+    }
+
     if (!is_wearable_product) {
       deps += [
         "$ace_root/frameworks/core/components/camera:ace_core_components_camera_$platform",

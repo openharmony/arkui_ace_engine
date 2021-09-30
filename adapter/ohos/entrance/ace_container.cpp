@@ -46,8 +46,18 @@ namespace OHOS::Ace::Platform {
 namespace {
 
 constexpr char QUICK_JS_ENGINE_SHARED_LIB[] = "libace_engine_qjs.z.so";
+constexpr char ARK_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
 constexpr char DECLARATIVE_JS_ENGINE_SHARED_LIB[] = "libace_engine_declarative.z.so";
 constexpr char DECLARATIVE_ARK_ENGINE_SHARED_LIB[] = "libace_engine_declarative_ark.z.so";
+
+const char* GetEngineSharedLibrary(bool isArkApp)
+{
+    if (isArkApp) {
+        return ARK_ENGINE_SHARED_LIB;
+    } else {
+        return QUICK_JS_ENGINE_SHARED_LIB;
+    }
+}
 
 const char* GetDeclarativeSharedLibrary(bool isArkApp)
 {
@@ -106,7 +116,7 @@ void AceContainer::InitializeFrontend()
     if (type_ == FrontendType::JS) {
         frontend_ = Frontend::Create();
         auto jsFrontend = AceType::DynamicCast<JsFrontend>(frontend_);
-        auto& loader = Framework::JsEngineLoader::Get(QUICK_JS_ENGINE_SHARED_LIB);
+        auto& loader = Framework::JsEngineLoader::Get(GetEngineSharedLibrary(isArkApp_));
         auto jsEngine = loader.CreateJsEngine(instanceId_);
         jsEngine->AddExtraNativeObject("ability", aceAbility_);
         jsFrontend->SetJsEngine(jsEngine);
