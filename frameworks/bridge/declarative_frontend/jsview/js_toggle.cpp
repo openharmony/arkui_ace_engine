@@ -36,7 +36,6 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("size", &JSToggle::JsSize);
     JSClass<JSToggle>::StaticMethod("padding", &JSToggle::JsPadding);
     JSClass<JSToggle>::StaticMethod("swithPointStyle", &JSToggle::SwithPointStyle);
-    JSClass<JSToggle>::Inherit<JSContainerBase>();
     JSClass<JSToggle>::Inherit<JSViewAbstract>();
     JSClass<JSToggle>::Bind(globalObj);
 }
