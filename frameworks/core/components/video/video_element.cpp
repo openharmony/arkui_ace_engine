@@ -103,11 +103,6 @@ VideoElement::~VideoElement()
         }
     }
     ReleasePlatformResource();
-#ifdef OHOS_STANDARD_SYSTEM
-    if (mediaPlayer_ != nullptr) {
-        mediaPlayer_->Release();
-    }
-#endif
 }
 
 void VideoElement::PerformBuild()
@@ -852,6 +847,11 @@ void VideoElement::InitListener()
 
 void VideoElement::ReleasePlatformResource()
 {
+#ifdef OHOS_STANDARD_SYSTEM
+    if (mediaPlayer_ != nullptr) {
+        mediaPlayer_->Release();
+    }
+#else
     auto context = context_.Upgrade();
     if (!context) {
         return;
