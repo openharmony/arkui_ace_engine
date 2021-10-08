@@ -48,7 +48,7 @@ public:
             case OHOS::Media::INFO_TYPE_SEEKDONE:
                 LOGI("OnSeekDone callback");
                 if (positionUpdatedEvent_ != nullptr) {
-                    positionUpdatedEvent_(extra);
+                    positionUpdatedEvent_(extra / MILLISECONDS_TO_SECONDS);
                 }
                 break;
             case OHOS::Media::INFO_TYPE_EOS:
@@ -65,6 +65,9 @@ public:
                 }
                 break;
             case OHOS::Media::INFO_TYPE_POSITION_UPDATE:
+                if (positionUpdatedEvent_ != nullptr) {
+                    positionUpdatedEvent_(extra / MILLISECONDS_TO_SECONDS);
+                }
                 break;
             case OHOS::Media::INFO_TYPE_MESSAGE:
                 LOGI("OnMessage callback type: %{public}d", extra);

@@ -998,6 +998,12 @@ void VideoElement::OnPrepared(
         isStop_ = false;
         Start();
     }
+
+#ifdef OHOS_STANDARD_SYSTEM
+    if (isAutoPlay_) {
+        Start();
+    }
+#endif
 }
 
 void VideoElement::OnPlayerStatus(bool isPlaying)
