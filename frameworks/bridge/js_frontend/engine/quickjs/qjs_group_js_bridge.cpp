@@ -124,6 +124,7 @@ int32_t QuickJsGroupJsBridge::LoadJsBridgeFunction()
     }
 
     JS_FreeValue(context_, globalObj);
+    js_std_loop(context_);
     return JS_CALL_SUCCESS;
 }
 
@@ -881,5 +882,6 @@ void QuickJsGroupJsBridge::TriggerEventJsCallback(int32_t callbackId, int32_t co
     } else {
         CallEventJsCallback(callbackId, std::move(eventData));
     }
+    js_std_loop(context_);
 }
 } // namespace OHOS::Ace::Framework

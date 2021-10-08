@@ -1211,6 +1211,7 @@ JSValue JsHandleCallback(JSContext* ctx, JSValueConst argv, const std::string& m
     } else {
         LOGW("internal.jsResult not support method = %{private}s", methodName.c_str());
     }
+    js_std_loop(ctx);
     return JS_NULL;
 }
 
@@ -1341,6 +1342,7 @@ JSValue JsReadArrayBuffer(JSContext* ctx, JSValueConst argv)
     JSValue binaryArray = JS_NewArrayBufferCopy(ctx, &binaryContent[position - 1], length);
     JS_SetPropertyStr(ctx, binaryData, "buffer", binaryArray);
     instance->CallJs(callbackId.get(), R"({"arguments":["read array buffer success"],"method":"success"})");
+    js_std_loop(ctx);
     return binaryData;
 }
 
@@ -1427,6 +1429,7 @@ JSValue JsReadText(JSContext* ctx, JSValueConst argv)
     JS_FreeValue(ctx, jsCallbackId);
     JS_FreeValue(ctx, jsObject);
     js_free(ctx, pTab);
+    js_std_loop(ctx);
     return JS_NULL;
 }
 
@@ -1493,6 +1496,7 @@ void JsClearTimeout(JSContext* ctx, JSValueConst argv)
         JS_FreeValue(ctx, jsCallBackId);
         js_free(ctx, pTab);
     }
+    js_std_loop(ctx);
 }
 
 JSValue JsSetLocale(JSContext* ctx, JSValueConst argv)
@@ -2056,6 +2060,7 @@ JSValue JsCallNative(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCo
     const std::string methodName = methodPtr->GetString();
 
     LOGD("JsCallNative moduleName = %{private}s, methodName = %{private}s", moduleName.c_str(), methodName.c_str());
+    js_std_loop(ctx);
     return JsHandleModule(moduleName, methodName, ctx, value, argv);
 }
 
@@ -2499,7 +2504,7 @@ JSValue LoadJsFramework(JSContext* ctx, const uint8_t buf[], const uint32_t bufS
         LOGD("Qjs loading JSFramework failed!");
         QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::LOAD_JS_FRAMEWORK_ERROR, instanceId);
     }
-
+    js_std_loop(ctx);
     return ret;
 }
 
@@ -2720,6 +2725,7 @@ void QjsEngineInstance::CallAnimationStartJs(JSValue animationContext)
             stagingPage_);
         return;
     }
+    js_std_loop(ctx);
 }
 
 void QjsEngineInstance::CallAnimationFinishJs(JSValue animationContext)
@@ -2742,6 +2748,7 @@ void QjsEngineInstance::CallAnimationFinishJs(JSValue animationContext)
             stagingPage_);
         return;
     }
+    js_std_loop(ctx);
 }
 
 void QjsEngineInstance::CallAnimationCancelJs(JSValue animationContext)
@@ -2764,6 +2771,7 @@ void QjsEngineInstance::CallAnimationCancelJs(JSValue animationContext)
             stagingPage_);
         return;
     }
+    js_std_loop(ctx);
 }
 
 void QjsEngineInstance::CallAnimationRepeatJs(JSValue animationContext)
@@ -2786,6 +2794,7 @@ void QjsEngineInstance::CallAnimationRepeatJs(JSValue animationContext)
             stagingPage_);
         return;
     }
+    js_std_loop(ctx);
 }
 
 void QjsEngineInstance::CallAnimationFrameJs(JSValue animationContext, const char* str)
@@ -2801,6 +2810,7 @@ void QjsEngineInstance::CallAnimationFrameJs(JSValue animationContext, const cha
     JSValue value = QJSUtils::NewString(ctx, str);
     JSValueConst argv[] = { value };
     QJSUtils::Call(ctx, proto, animationContext, 1, argv);
+    js_std_loop(ctx);
 }
 
 // -----------------------
@@ -3093,12 +3103,14 @@ void QjsEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)
 {
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetRunningPage(page);
+    js_std_loop(engineInstance_->GetQjsContext());
 }
 
 void QjsEngine::UpdateStagingPage(const RefPtr<JsAcePage>& page)
 {
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetStagingPage(page);
+    js_std_loop(engineInstance_->GetQjsContext());
 }
 
 void QjsEngine::ResetStagingPage()
@@ -3106,6 +3118,7 @@ void QjsEngine::ResetStagingPage()
     ACE_DCHECK(engineInstance_);
     auto runningPage = engineInstance_->GetRunningPage();
     engineInstance_->ResetStagingPage(runningPage);
+    js_std_loop(engineInstance_->GetQjsContext());
 }
 
 void QjsEngine::DestroyPageInstance(int32_t pageId)
@@ -3144,6 +3157,7 @@ void QjsEngine::DestroyPageInstance(int32_t pageId)
 
     RunGarbageCollection();
     JS_FreeValue(ctx, globalObj);
+    js_std_loop(engineInstance_->GetQjsContext());
 }
 
 void QjsEngine::UpdateApplicationState(const std::string& packageName, Frontend::State state)
@@ -3190,6 +3204,7 @@ void QjsEngine::UpdateApplicationState(const std::string& packageName, Frontend:
     }
 
     JS_FreeValue(ctx, globalObj);
+    js_std_loop(engineInstance_->GetQjsContext());
 }
 
 void QjsEngine::TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval)
@@ -3242,6 +3257,7 @@ void QjsEngine::FireAsyncEvent(const std::string& eventId, const std::string& pa
         QJSUtils::JsStdDumpErrorAce(engineInstance_->GetQjsContext(), JsErrorType::FIRE_EVENT_ERROR, instanceId_,
             nullptr, engineInstance_->GetRunningPage());
     }
+    js_std_loop(engineInstance_->GetQjsContext());
     JS_FreeValue(engineInstance_->GetQjsContext(), cppToJsRet);
 }
 
@@ -3261,6 +3277,7 @@ void QjsEngine::FireSyncEvent(const std::string& eventId, const std::string& par
         QJSUtils::JsStdDumpErrorAce(engineInstance_->GetQjsContext(), JsErrorType::FIRE_EVENT_ERROR, instanceId_,
             nullptr, engineInstance_->GetRunningPage());
     }
+    js_std_loop(engineInstance_->GetQjsContext());
     JS_FreeValue(engineInstance_->GetQjsContext(), cppToJsRet);
 }
 
