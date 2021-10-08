@@ -30,6 +30,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/include/js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 
 namespace OHOS::Ace::Framework {
 
