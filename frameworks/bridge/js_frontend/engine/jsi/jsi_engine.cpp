@@ -1419,7 +1419,7 @@ void ShowActionMenu(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsVal
             engine->CallJs(complete, R"({"errMsg":"enableAlertBeforeBackPage:buttons is invalid"})");
         } else {
             std::string callBackStr = arg->ToString(runtime);
-            // Get callbackId and clear redundant symbols
+            // Get callbackId and clear redundant symbols, 2 is available min string length
             if (callBackStr.size() > 2 && callBackStr.front() == '\"' && callBackStr.back() == '\"') {
                 callBackStr = callBackStr.substr(1, callBackStr.size() - 2);
                 engine->CallJs(callBackStr,
@@ -1497,7 +1497,7 @@ shared_ptr<JsValue> EnableAlertBeforeBackPage(const shared_ptr<JsRuntime>& runti
     } else {
         LOGE("enableAlertBeforeBackPage message is null");
         std::string callBackStr = arg->ToString(runtime);
-        // Get callbackId and clear redundant symbols
+        // Get callbackId and clear redundant symbols, 2 is available min string length
         if (callBackStr.size() > 2 && callBackStr.front() == '\"' && callBackStr.back() == '\"') {
             callBackStr = callBackStr.substr(1, callBackStr.size() - 2);
             engine->CallJs(callBackStr,
@@ -1561,7 +1561,7 @@ shared_ptr<JsValue> DisableAlertBeforeBackPage(const shared_ptr<JsRuntime>& runt
     }
 
     std::string callBackStr = arg->ToString(runtime);
-    // Get callbackId and clear redundant symbols
+    // Get callbackId and clear redundant symbols, 2 is available min string length
     if (callBackStr.size() > 2 && callBackStr.front() == '\"' && callBackStr.back() == '\"') {
         callBackStr = callBackStr.substr(1, callBackStr.size() - 2);
         engine->CallJs(callBackStr, R"({"arguments":[{"errMsg":"disableAlertBeforeBackPage:ok"}],"method":"success"})");
@@ -2724,7 +2724,7 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
     nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
     ACE_DCHECK(delegate);
-    delegate->AddTaskObserver([nativeEngine = nativeEngine_](){
+    delegate->AddTaskObserver([nativeEngine = nativeEngine_]() {
         nativeEngine->Loop(LOOP_NOWAIT);
     });
     RegisterWorker();
