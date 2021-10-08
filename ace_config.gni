@@ -42,7 +42,8 @@ ace_flutter_engine_root = "$ace_root/build/third_party/flutter"
 flutter_root = "//third_party/flutter"
 v8_root = "//third_party/v8"
 ark_tools_root = "//prebuilts/ace-toolkit/ace-loader/panda"
-node_js_path = "//prebuilts/ace-toolkit/nodejs/node-v12.18.4-linux-x64/bin/"
+node_js_path =
+    "//prebuilts/build-tools/common/nodejs/node-v12.18.4-linux-x64/bin/"
 
 # Config toolchain
 windows_buildtool = "//build/toolchain/mingw:mingw_x86_64"

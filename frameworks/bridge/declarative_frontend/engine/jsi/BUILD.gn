@@ -102,8 +102,9 @@ template("declarative_js_engine_ark") {
     configs = [
       "$ace_root:ace_config",
       "$ark_runtime_path/libpandabase:arkbase_public_config",
-      "//ark/js_runtime:ark_jsruntime_public_config",
     ]
+
+    public_configs = [ "//ark/js_runtime:ark_jsruntime_public_config" ]
 
     sources = [
       "ark/ark_js_runtime.cpp",

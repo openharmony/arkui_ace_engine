@@ -48,6 +48,10 @@ if (disable_gpu) {
   defines += [ "GPU_DISABLED" ]
 }
 
+if (form_components_support) {
+  defines += [ "FORM_SUPPORTED" ]
+}
+
 cflags_cc = [
   "-Wno-thread-safety-attributes",
   "-Wno-thread-safety-analysis",

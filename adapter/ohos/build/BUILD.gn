@@ -26,12 +26,16 @@ group("ace_packages") {
 
   # Engine and debugger
   deps += [
+    "$ace_root/build:libace_engine_ark",
     "$ace_root/build:libace_engine_qjs",
     "$ace_root/build:libace_engine_qjs_debug",
   ]
 
   # Declarative engine
-  deps += [ "$ace_root/build:libace_engine_declarative" ]
+  deps += [
+    "$ace_root/build:libace_engine_declarative",
+    "$ace_root/build:libace_engine_declarative_ark",
+  ]
 
   # Pa engine
   deps += [ "$ace_root/build:libace_engine_pa_qjs" ]

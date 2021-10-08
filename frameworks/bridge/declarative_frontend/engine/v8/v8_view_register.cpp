@@ -594,7 +594,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"Option", JSOption::JSBind},
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     {"QRCode", JSQRCode::JSBind},
-#ifndef WEARABLE_PRODUCT
+#ifdef FORM_SUPPORTED
     {"FormComponent", JSForm::JSBind},
 #endif
 #endif

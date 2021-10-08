@@ -142,7 +142,7 @@ void JsiClass<C>::Bind(BindingTarget t, FunctionCallback ctor)
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
     auto vm = runtime->GetEcmaVm();
     classFunction_ = panda::Global<panda::FunctionRef>(
-        vm, panda::FunctionRef::NewClassFunction(vm, ConstructorInterceptor, nullptr));
+        vm, panda::FunctionRef::NewClassFunction(vm, ConstructorInterceptor, nullptr, nullptr));
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
     auto prototype = Local<ObjectRef>(classFunction_->GetFunctionPrototype(vm));
     for (const auto& [name, val] : staticFunctions_) {
@@ -164,7 +164,7 @@ void JsiClass<C>::Bind(
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
     auto vm = runtime->GetEcmaVm();
     classFunction_ = panda::Global<panda::FunctionRef>(
-        vm, panda::FunctionRef::NewClassFunction(vm, JSConstructorInterceptor, nullptr));
+        vm, panda::FunctionRef::NewClassFunction(vm, JSConstructorInterceptor, nullptr, nullptr));
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
     auto prototype = panda::Local<panda::ObjectRef>(classFunction_->GetFunctionPrototype(vm));
     for (const auto& [name, val] : staticFunctions_) {
@@ -186,7 +186,7 @@ void JsiClass<C>::Bind(BindingTarget t, JSDestructorCallback<C> dtor, JSGCMarkCa
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
     auto vm = runtime->GetEcmaVm();
     classFunction_ = panda::Global<panda::FunctionRef>(
-        vm, panda::FunctionRef::NewClassFunction(vm, InternalConstructor<Args...>, nullptr));
+        vm, panda::FunctionRef::NewClassFunction(vm, InternalConstructor<Args...>, nullptr, nullptr));
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
     auto prototype = panda::Local<panda::ObjectRef>(classFunction_->GetFunctionPrototype(vm));
     for (const auto& [name, val] : staticFunctions_) {
