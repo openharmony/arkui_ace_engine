@@ -20,30 +20,24 @@ base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
 abcproxyclass_obj_path = base_output_path + "/abc_proxy_class.o"
 abcenumstyle_obj_path = base_output_path + "/abc_enum_style.o"
 
-action("gen_stateMgmt_abc") {
-  visibility = [ ":*" ]
+ts2abc_gen_abc("gen_stateMgmt_abc") {
+  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  src_js = rebase_path(
+          "//foundation/ace/ace_engine/frameworks/bridge/declarative_frontend/engine/stateMgmt.js")
+  dst_file = rebase_path(base_output_path + "/stateMgmt.abc")
 
-  deps = [ "//ark/ts2abc/ts2panda:ark_ts2abc_build" ]
+  in_puts = [ "//foundation/ace/ace_engine/frameworks/bridge/declarative_frontend/engine/stateMgmt.js" ]
+  out_puts = [ base_output_path + "/stateMgmt.abc" ]
+}
 
-  script = "//ark/ts2abc/ts2panda/scripts/generate_js_bytecode.py"
+ts2abc_gen_abc("gen_jsEnumStyle_abc") {
+  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  src_js = rebase_path(
+          "//foundation/ace/ace_engine/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js")
+  dst_file = rebase_path(base_output_path + "/jsEnumStyle.abc")
 
-  args = [
-    "--src-js",
-    rebase_path(
-        "$ace_root/frameworks/bridge/declarative_frontend/engine/stateMgmt.js"),
-    "--dst-file",
-    rebase_path(base_output_path + "/stateMgmt.abc"),
-    "--node",
-    rebase_path("${node_js_path}"),
-    "--frontend-tool-path",
-    rebase_path("${ts2abc_build_path}"),
-    "--node-modules",
-    rebase_path("${node_modules}"),
-  ]
-
-  inputs =
-      [ "$ace_root/frameworks/bridge/declarative_frontend/engine/stateMgmt.js" ]
-  outputs = [ base_output_path + "/stateMgmt.abc" ]
+  in_puts = [ "//foundation/ace/ace_engine/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js" ]
+  out_puts = [ base_output_path + "/jsEnumStyle.abc" ]
 }
 
 gen_obj("abc_proxyclass") {
@@ -53,33 +47,6 @@ gen_obj("abc_proxyclass") {
   }
   output = abcproxyclass_obj_path
   snapshot_dep = [ ":gen_stateMgmt_abc" ]
-}
-
-action("gen_jsEnumStyle_abc") {
-  visibility = [ ":*" ]
-
-  deps = [ "//ark/ts2abc/ts2panda:ark_ts2abc_build" ]
-
-  script = "//ark/ts2abc/ts2panda/scripts/generate_js_bytecode.py"
-
-  args = [
-    "--src-js",
-    rebase_path(
-        "$ace_root/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js"),
-    "--dst-file",
-    rebase_path(base_output_path + "/jsEnumStyle.abc"),
-    "--node",
-    rebase_path("${node_js_path}"),
-    "--frontend-tool-path",
-    rebase_path("${ts2abc_build_path}"),
-    "--node-modules",
-    rebase_path("${node_modules}"),
-  ]
-
-  inputs = [
-    "$ace_root/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js",
-  ]
-  outputs = [ base_output_path + "/jsEnumStyle.abc" ]
 }
 
 gen_obj("abc_enum_style") {
