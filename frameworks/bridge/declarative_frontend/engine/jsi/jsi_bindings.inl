@@ -48,6 +48,7 @@ void JsiClass<C>::Declare(const char* name)
     className_ = name;
     staticFunctions_.clear();
     customFunctions_.clear();
+    classFunction_.Empty();
 }
 
 template<typename C>
