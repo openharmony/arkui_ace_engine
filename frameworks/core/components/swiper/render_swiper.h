@@ -179,7 +179,7 @@ public:
     void StopZoomDotAnimation();
     void StartDragRetractionAnimation(); // on handle drag end
     void StopDragRetractionAnimation();
-    void FinishAllSwipeAnimation();
+    void FinishAllSwipeAnimation(bool useFinish = false);
     bool IsZoomAnimationStopped();
     bool IsZoomOutAnimationStopped();
     bool IsZoomOutDotAnimationStopped();
@@ -384,7 +384,17 @@ private:
         }
     }
 
+    void FinishSwipeAnimation()
+    {
+        if (controller_ && !controller_->IsStopped()) {
+            controller_->Finish();
+        }
+    }
+
+    bool IsAnimatorStopped() const;
+
     void FireItemChangedEvent(bool changed) const;
+    void FireSwiperControllerFinishEvent();
     void ResetCachedChildren();
     void SetSwiperHidden(int32_t forwardNum, int32_t backNum);
     void SetSwiperEffect(double dragOffset);

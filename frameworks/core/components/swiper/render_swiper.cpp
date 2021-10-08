@@ -189,6 +189,12 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
                 swiper->ShowNext();
             }
         });
+        swiperController->SetFinishImpl([weak]() {
+            auto swiper = weak.Upgrade();
+            if (swiper) {
+                swiper->FinishAllSwipeAnimation(true);
+            }
+        });
     }
 
     const auto& rotationController = swiper->GetRotationController();
@@ -2564,9 +2570,17 @@ void RenderSwiper::StopDragRetractionAnimation()
     }
 }
 
-void RenderSwiper::FinishAllSwipeAnimation()
+void RenderSwiper::FinishAllSwipeAnimation(bool useFinish)
 {
-    StopSwipeAnimation();
+    if (useFinish && IsAnimatorStopped()) {
+        FireSwiperControllerFinishEvent();
+        return;
+    }
+    if (useFinish) {
+        FinishSwipeAnimation();
+    } else {
+        StopSwipeAnimation();
+    }
     StopSwipeToAnimation();
     StopIndicatorAnimation();
     StopIndicatorSpringAnimation();
@@ -2574,8 +2588,25 @@ void RenderSwiper::FinishAllSwipeAnimation()
     UpdateOneItemOpacity(MAX_OPACITY, currentIndex_);
     UpdateOneItemOpacity(MAX_OPACITY, targetIndex_);
     currentIndex_ = targetIndex_;
+    if (useFinish) {
+        FireSwiperControllerFinishEvent();
+    }
     quickTrunItem_ = true;
     MarkNeedLayout();
+}
+
+bool RenderSwiper::IsAnimatorStopped() const
+{
+    return !controller_->IsRunning() && !swipeToController_->IsRunning() && !indicatorController_->IsRunning() &&
+        !springController_->IsRunning();
+}
+
+void RenderSwiper::FireSwiperControllerFinishEvent()
+{
+    if (swiper_ && swiper_->GetSwiperController() && !swiper_->GetSwiperController()->GetFinishCallback().IsEmpty()) {
+        auto finishEvent = AceAsyncEvent<void()>::Create(swiper_->GetSwiperController()->GetFinishCallback(), context_);
+        finishEvent();
+    }
 }
 
 bool RenderSwiper::IsZoomAnimationStopped()

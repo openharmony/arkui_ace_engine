@@ -75,6 +75,8 @@ public:
         }
     }
 
+    void FinishAnimation(const JSCallbackInfo& args);
+
     void SetController(const RefPtr<SwiperController>& controller)
     {
         controller_ = controller;

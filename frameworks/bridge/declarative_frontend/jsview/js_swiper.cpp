@@ -431,6 +431,7 @@ void JSSwiperController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSwiperController>::Declare("SwiperController");
     JSClass<JSSwiperController>::CustomMethod("showNext", &JSSwiperController::ShowNext);
+    JSClass<JSSwiperController>::CustomMethod("finishAnimation", &JSSwiperController::FinishAnimation);
     JSClass<JSSwiperController>::CustomMethod("showPrevious", &JSSwiperController::ShowPrevious);
     JSClass<JSSwiperController>::Bind(globalObj, JSSwiperController::Constructor, JSSwiperController::Destructor);
 }
@@ -447,6 +448,24 @@ void JSSwiperController::Destructor(JSSwiperController* scroller)
     if (scroller != nullptr) {
         scroller->DecRefCount();
     }
+}
+
+void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute();
+        });
+        if (controller_) {
+            controller_->SetFinishCallback(eventMarker);
+        }
+    }
+    if (controller_) {
+        controller_->FinishAnimation();
+    }
+    args.ReturnSelf();
 }
 
 } // namespace OHOS::Ace::Framework
