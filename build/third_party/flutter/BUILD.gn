@@ -423,6 +423,7 @@ template("flutter_engine_shell") {
         "$flutter_root/engine/flutter/shell/platform/ohos/ace_vsync_waiter_embedder.cc",
         "$flutter_root/engine/flutter/shell/platform/ohos/ohos_shell_holder.cc",
         "$flutter_root/engine/flutter/shell/platform/ohos/ohos_surface_software.cc",
+        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_view_ohos.cc",
       ]

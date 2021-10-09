@@ -27,6 +27,9 @@
 #define FML_EMBEDDER_ONLY
 #endif
 #include "flutter/fml/message_loop.h"
+#ifdef OHOS_STANDARD_SYSTEM
+#include "flutter/shell/platform/ohos/platform_task_runner.h"
+#endif
 
 #include "base/log/log.h"
 #include "base/thread/background_task_executor.h"
@@ -89,8 +92,12 @@ FlutterTaskExecutor::~FlutterTaskExecutor()
 
 void FlutterTaskExecutor::InitPlatformThread()
 {
+#ifdef OHOS_STANDARD_SYSTEM
+    platformRunner_ = flutter::PlatformTaskRunner::CurrentTaskRunner();
+#else
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     platformRunner_ = fml::MessageLoop::GetCurrent().GetTaskRunner();
+#endif
 
 #ifdef ACE_DEBUG
     FillTaskTypeTable(TaskType::PLATFORM);
