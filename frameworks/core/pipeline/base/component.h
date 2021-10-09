@@ -39,6 +39,7 @@ enum class UpdateType {
     ATTR,
     EVENT,
     METHOD,
+    REBUILD,
     ALL,
 };
 

@@ -46,7 +46,7 @@ void ComponentGroupElement::PerformBuild()
     }
 
     const auto& newComponents = componentGroup->GetChildren();
-    if (context->GetIsDeclarative()) {
+    if (context->GetIsDeclarative() && componentGroup->GetUpdateType() != UpdateType::REBUILD) {
         LOGD("Reconciliation via declarative path %{public}s", AceType::TypeName(this));
         UpdateChildrenForDeclarative(newComponents);
     } else {

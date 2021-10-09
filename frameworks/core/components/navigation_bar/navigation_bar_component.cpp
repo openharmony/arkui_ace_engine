@@ -372,6 +372,7 @@ RefPtr<Component> NormalTitleBarBuilder::Build()
     RefPtr<RowComponent> container =
         AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, std::list<RefPtr<Component>>());
     container->SetTextDirection(direction_);
+    container->SetUpdateType(UpdateType::REBUILD);
 
     if (backEnabled_) {
         titleFontSize_ = Dimension(20, DimensionUnit::VP);
