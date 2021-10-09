@@ -30,6 +30,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/include/js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -46,6 +47,9 @@ public:
     bool InitJsEnv(bool debuggerMode);
 
     bool FireJsEvent(const std::string& eventStr);
+
+    // add Console object to worker
+    void InitConsoleModule(ArkNativeEngine* engine);
 
     static void RootViewHandle(const shared_ptr<JsRuntime>& runtime, panda::Local<panda::ObjectRef> value);
     void DestroyRootViewHandle(int32_t pageId);
@@ -203,6 +207,10 @@ private:
     void CallAppFunc(const std::string& appFuncName, const std::vector<shared_ptr<JsValue>>& argv);
 
     void TimerCallJs(const std::string& callbackId) const;
+
+    void RegisterWorker();
+    void RegisterInitWorkerFunc();
+    void RegisterAssetFunc();
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 

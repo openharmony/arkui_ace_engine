@@ -26,6 +26,7 @@
 #include "base/log/event_report.h"
 #include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
+#include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_helpers.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 

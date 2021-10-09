@@ -70,7 +70,7 @@ if (is_standard_system) {
 } else {
   ace_engine_part = "ace_engine_full"
   hilog_deps = [ "hilog:libhilog" ]
-  worker_deps = [ "jsapi:worker_init" ]
+  worker_deps = [ "jsapi_worker:worker_init" ]
   ark_runtime_path = "//ark/runtime"
 }
 

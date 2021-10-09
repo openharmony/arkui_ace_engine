@@ -26,6 +26,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_utils.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 
 namespace OHOS::Ace::Framework {
 class JsiEngineInstance final : public AceType, public JsEngineInstance {
@@ -47,6 +48,8 @@ public:
     void CallJs(const std::string& callbackId, const std::string& args, bool keepAlive = false, bool isGlobal = false);
     shared_ptr<JsRuntime> GetJsRuntime() const;
     bool InitJsEnv(bool debugger_mode);
+    // add Console object to worker
+    void RegisterConsoleModule(ArkNativeEngine* engine);
 
     void FlushCommandBuffer(void* context, const std::string& command) override;
 
@@ -106,6 +109,9 @@ public:
 
 private:
     void GetLoadOptions(std::string& optionStr, bool isMainPage, bool hasAppCode);
+    void RegisterWorker();
+    void RegisterInitWorkerFunc();
+    void RegisterAssetFunc();
 
     int32_t instanceId_ = 0;
     RefPtr<JsiEngineInstance> engineInstance_;
