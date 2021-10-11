@@ -772,10 +772,8 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
 
     if (softKeyboardEnabled_) {
         if (!HasConnection()) {
-            MiscServices::InputMethodController::GetInstance()->Attach();
-            sleep(3);
             listener_ = new OnTextChangedListenerImpl(WeakClaim(this));
-            MiscServices::InputMethodController::GetInstance()->ShowTextInput(listener_);
+            MiscServices::InputMethodController::GetInstance()->Attach(listener_);
         }
     }
     if (keyboard_ != TextInputType::MULTILINE) {
