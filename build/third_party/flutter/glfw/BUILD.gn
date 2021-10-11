@@ -138,7 +138,7 @@ template("flutter_platform_glfw") {
     ]
 
     # wait for glfw enabled in standard system
-    if (!is_standard_system) {
+    if (!is_standard_system || use_mingw_win || use_mac) {
       deps += [ "//third_party/glfw:glfw_$platform" ]
     }
   }

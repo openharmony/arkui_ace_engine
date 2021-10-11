@@ -45,7 +45,6 @@ template("ace_osal_preview_source_set") {
       "event_report.cpp",
       "fetch_manager.cpp",
       "log_wrapper.cpp",
-      "resource_adapter_impl.cpp",
       "response_data.cpp",
       "system_properties.cpp",
     ]
@@ -59,18 +58,23 @@ template("ace_osal_preview_source_set") {
       ":utilsecurec_source_$platform",
       "//third_party/curl:curl",
     ]
-
-    if (platform == "windows") {
-      defines += [ "NOGDI" ]
-      libs = [ "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libresourcemanager_win.lib" ]
-    } else if (platform == "mac") {
-      libs = [ "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libresourcemanager_mac.dylib" ]
+    if (is_standard_system) {
+      sources += [ "resource_adapter_impl_standard.cpp" ]
+      include_dirs = [ "//utils/native/base/include" ]
+      defines += [ "OHOS_STANDARD_SYSTEM" ]
+    } else {
+      sources += [ "resource_adapter_impl.cpp" ]
+      include_dirs = [
+        "//utils/native/base/include",
+        "//prebuilts/ace-toolkit/preview/rich/include/resmgr/resourcemanager/include",
+      ]
+      if (platform == "windows") {
+        defines += [ "NOGDI" ]
+        libs = [ "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libresourcemanager_win.lib" ]
+      } else if (platform == "mac") {
+        libs = [ "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libresourcemanager_mac.dylib" ]
+      }
     }
-
-    include_dirs = [
-      "//utils/native/base/include",
-      "//prebuilts/ace-toolkit/preview/rich/include/resmgr/resourcemanager/include",
-    ]
 
     configs = [
       "$ace_root:ace_config",

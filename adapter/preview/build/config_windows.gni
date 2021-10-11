@@ -33,7 +33,7 @@ use_curl_download = true
 accessibility_support = true
 rich_components_support = true
 advance_components_support = false
-form_components_support = true
+form_components_support = false
 js_pa_support = false
 
 cflags_cc = [

@@ -46,7 +46,7 @@ build_component("camera") {
     "camera_element.cpp",
   ]
 
-  if (is_standard_system) {
+  if (is_standard_system && !use_mingw_win && !use_mac) {
     configs = [ ":standard_camera_config" ]
 
     sources += [ "standard_system/camera.cpp" ]

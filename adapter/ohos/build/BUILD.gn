@@ -40,3 +40,22 @@ group("ace_packages") {
   # Pa engine
   deps += [ "$ace_root/build:libace_engine_pa_qjs" ]
 }
+
+# Install packages
+group("ace_for_windows") {
+  deps = [
+    "$ace_root/adapter/preview/build:libace_engine_windows(${windows_buildtool})",
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
+  ]
+  if (is_wearable_product) {
+    deps += [ "$ace_root/adapter/preview/entrance/samples:ace_test_windows_wearable(${windows_buildtool})" ]
+  } else {
+    deps += [
+      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_car(${windows_buildtool})",
+      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_card(${windows_buildtool})",
+      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_phone(${windows_buildtool})",
+      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_tablet(${windows_buildtool})",
+      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_tv(${windows_buildtool})",
+    ]
+  }
+}
