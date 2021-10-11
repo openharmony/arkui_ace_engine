@@ -241,19 +241,21 @@ void RenderSwiper::PerformLayout()
     prevMargin_ = swiper_ ? NormalizePercentToPx(swiper_->GetPreviousMargin(), axis_ == Axis::VERTICAL, true) : 0.0;
     nextMargin_ = swiper_ ? NormalizePercentToPx(swiper_->GetNextMargin(), axis_ == Axis::VERTICAL, true) : 0.0;
     Size swiperSize = GetLayoutSize();
-    double maxLength = (axis_ == Axis::HORIZONTAL ? swiperSize.Width() : swiperSize.Height()) - 1.0f;
-    if (LessOrEqual(prevMargin_, 0.0)) {
-        prevMargin_ = 0.0;
-    }
-    if (LessOrEqual(nextMargin_, 0.0)) {
-        nextMargin_ = 0.0;
-    }
+    if (GreatNotEqual(swiperSize.Width(), 0) && GreatNotEqual(swiperSize.Height(), 0)) {
+        double maxLength = (axis_ == Axis::HORIZONTAL ? swiperSize.Width() : swiperSize.Height()) - 1.0f;
+        if (LessOrEqual(prevMargin_, 0.0)) {
+            prevMargin_ = 0.0;
+        }
+        if (LessOrEqual(nextMargin_, 0.0)) {
+            nextMargin_ = 0.0;
+        }
 
-    if (GreatOrEqual(prevMargin_, maxLength)) {
-        prevMargin_ = maxLength;
-    }
-    if (GreatOrEqual(nextMargin_, maxLength - prevMargin_)) {
-        nextMargin_ = maxLength - prevMargin_;
+        if (GreatOrEqual(prevMargin_, maxLength)) {
+            prevMargin_ = maxLength;
+        }
+        if (GreatOrEqual(nextMargin_, maxLength - prevMargin_)) {
+            nextMargin_ = maxLength - prevMargin_;
+        }
     }
 
     LayoutParam innerLayout = GetLayoutParam();
