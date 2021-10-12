@@ -151,6 +151,7 @@ JSValue ParseCurves(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCon
     int32_t pageId = page->GetPageId();
     JS_SetPropertyStr(ctx, value, "__pageId", JS_NewInt32(ctx, pageId));
     JS_SetPropertyStr(ctx, value, "__curveString", JS_NewString(ctx, customCurve.c_str()));
+    JS_DupValue(ctx, value);
     return value;
 }
 

@@ -55,6 +55,7 @@ extern const char THEME_ATTR_TOOLBAR_BG_COLOR[];
 extern const char THEME_ATTR_TOOLBAR_SUB_BG_COLOR[];
 extern const char THEME_ATTR_COLOR_COMPONENT_NORMAL[];
 extern const char THEME_ATTR_COLOR_EMPHASIZE[];
+extern const char THEME_ATTR_COLOR_WARNING[];
 extern const char THEME_ATTR_COLOR_DIALOG_BG[];
 extern const char THEME_ATTR_COLOR_FOREGROUND[];
 extern const char THEME_ATTR_COLOR_TIPS_BG[];

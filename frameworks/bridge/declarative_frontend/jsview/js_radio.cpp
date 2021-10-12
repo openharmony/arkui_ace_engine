@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/checkable/checkable_component.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -48,6 +49,12 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("size", &JSRadio::JsSize);
     JSClass<JSRadio>::StaticMethod("padding", &JSRadio::JsPadding);
     JSClass<JSRadio>::StaticMethod("onChange", &JSRadio::OnChange);
+    JSClass<JSRadio>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSRadio>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSRadio>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSRadio>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSRadio>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRadio>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRadio>::Inherit<JSViewAbstract>();
     JSClass<JSRadio>::Bind<>(globalObj);
 }

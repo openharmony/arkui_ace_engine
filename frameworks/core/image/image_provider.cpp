@@ -33,55 +33,68 @@ constexpr double SRGB_GAMUT_AREA = 0.104149;
 
 } // namespace
 
-void ImageProvider::FatchImageObject(
+void ImageProvider::FetchImageObject(
     ImageSourceInfo imageInfo,
     ImageObjSuccessCallback successCallback,
+    UploadSuccessCallback uploadSuccessCallback,
     FailedCallback failedCallback,
     const WeakPtr<PipelineContext> context,
     bool syncMode,
     bool useSkiaSvg,
+    bool needAutoResize,
     const std::optional<Color>& color,
+    RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     OnPostBackgroundTask onBackgroundTaskPostCallback)
 {
-    auto task = [ context, imageInfo, successCallback, failedCallback, useSkiaSvg, color] () {
+    auto task = [ context, imageInfo, successCallback, failedCallback, useSkiaSvg, color, &renderTaskHolder,
+        uploadSuccessCallback, needAutoResize] () {
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
-            LOGE("pipline context has been released.");
+            LOGE("pipline context has been released. imageInfo: %{private}s", imageInfo.ToString().c_str());
             return;
         }
         auto taskExecutor = pipelineContext->GetTaskExecutor();
         if (!taskExecutor) {
-            LOGE("task executor is null.");
+            LOGE("task executor is null. imageInfo: %{private}s", imageInfo.ToString().c_str());
             return;
         }
-        auto imageCache = pipelineContext->GetImageCache();
-        if (imageCache) {
-            auto imgObj = imageCache->GetCacheImgObj(imageInfo.ToString());
-            if (imgObj) {
-                LOGE("image object got from cache: %{public}s", imageInfo.ToString().c_str());
-                taskExecutor->PostTask([successCallback, imageInfo, imgObj]() { successCallback(imageInfo, imgObj); },
-                    TaskExecutor::TaskType::UI);
-                return;
-            }
+        RefPtr<ImageObject> imageObj = QueryImageObjectFromCache(imageInfo, pipelineContext);
+        if (!imageObj) { // if image object is not in cache, generate a new one.
+            imageObj = GeneraterAceImageObject(imageInfo, pipelineContext, useSkiaSvg, color);
         }
-        auto imageObj = GeneraterAceImageObject(imageInfo, pipelineContext, useSkiaSvg, color);
-        if (!imageObj) {
-            taskExecutor->PostTask(
-                [failedCallback, imageInfo] { failedCallback(imageInfo); }, TaskExecutor::TaskType::UI);
-        } else {
-            taskExecutor->PostTask([successCallback, imageInfo, imageObj]() { successCallback(imageInfo, imageObj); },
+        if (!imageObj) { // if it fails to generate an image object, trigger fail callback.
+            taskExecutor->PostTask([failedCallback, imageInfo] { failedCallback(imageInfo); },
                 TaskExecutor::TaskType::UI);
+            return;
+        }
+        taskExecutor->PostTask([ successCallback, imageInfo, imageObj ] () { successCallback(imageInfo, imageObj); },
+            TaskExecutor::TaskType::UI);
+        bool canStartUploadImageObj = !needAutoResize && (imageObj->GetFrameCount() == 1);
+        if (canStartUploadImageObj) {
+            bool forceResize = (!imageObj->IsSvg()) && (imageInfo.IsSourceDimensionValid());
+            FlutterRenderImage::UploadImageObjToGpuForRender(imageObj, context, renderTaskHolder, uploadSuccessCallback,
+                failedCallback, imageObj->GetImageSize(), forceResize, true);
         }
     };
     if (syncMode) {
         task();
-    } else {
-        CancelableTask cancelableTask(std::move(task));
-        if (onBackgroundTaskPostCallback) {
-            onBackgroundTaskPostCallback(cancelableTask);
-        }
-        BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask);
+        return;
     }
+    CancelableTask cancelableTask(std::move(task));
+    if (onBackgroundTaskPostCallback) {
+        onBackgroundTaskPostCallback(cancelableTask);
+    }
+    BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask);
+}
+
+RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(
+    const ImageSourceInfo& imageInfo, const RefPtr<PipelineContext>& pipelineContext)
+{
+    auto imageCache = pipelineContext->GetImageCache();
+    if (!imageCache) {
+        return nullptr;
+    }
+    return imageCache->GetCacheImgObj(imageInfo.ToString());
 }
 
 RefPtr<ImageObject> ImageProvider::GeneraterAceImageObject(
@@ -93,7 +106,7 @@ RefPtr<ImageObject> ImageProvider::GeneraterAceImageObject(
     auto imageData = LoadImageRawData(imageInfo, context);
 
     if (!imageData) {
-        LOGE("load image data failed.");
+        LOGE("load image data failed. imageInfo: %{private}s", imageInfo.ToString().c_str());
         return nullptr;
     }
 
@@ -136,7 +149,7 @@ sk_sp<SkData> ImageProvider::LoadImageRawData(
     // 3. try load raw image file.
     auto imageLoader = ImageLoader::CreateImageLoader(imageInfo);
     if (!imageLoader) {
-        LOGE("imageLoader create failed.");
+        LOGE("imageLoader create failed. imageInfo: %{private}s", imageInfo.ToString().c_str());
         return nullptr;
     }
     auto data = imageLoader->LoadImageData(imageInfo.GetSrc(), context);
@@ -158,7 +171,7 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(
     auto task = [ src, successCallback, failedCallback, context, svgThemeColor ] {
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
-            LOGW("render image or pipeline has been released.");
+            LOGW("render image or pipeline has been released. src: %{private}s", src.c_str());
             return;
         }
         auto taskExecutor = pipelineContext->GetTaskExecutor();
@@ -167,7 +180,7 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(
         }
         auto imageLoader = ImageLoader::CreateImageLoader(ImageSourceInfo(src));
         if (!imageLoader) {
-            LOGE("load image failed when create image loader.");
+            LOGE("load image failed when create image loader. src: %{private}s", src.c_str());
             return;
         }
         auto imageData = imageLoader->LoadImageData(src, context);
@@ -182,7 +195,7 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(
                 }
             }
         }
-        LOGE("svg data wrong!");
+        LOGE("svg data wrong! src: %{private}s", src.c_str());
         taskExecutor->PostTask([failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI);
     };
     CancelableTask cancelableTask(std::move(task));
@@ -287,7 +300,7 @@ sk_sp<SkImage> ImageProvider::ResizeSkImage(
     bool forceResize)
 {
     if (!imageSize.IsValid()) {
-        LOGE("not valid size!, imageSize: %{private}s", imageSize.ToString().c_str());
+        LOGE("not valid size!, imageSize: %{private}s, src: %{private}s", imageSize.ToString().c_str(), src.c_str());
         return rawImage;
     }
     int32_t dstWidth = static_cast<int32_t>(imageSize.Width() + 0.5);
@@ -328,11 +341,15 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
         SkImageInfo::Make(dstWidth, dstHeight, rawImage->colorType(), rawImage->alphaType(), rawImage->refColorSpace());
     SkBitmap scaledBitmap;
     if (!scaledBitmap.tryAllocPixels(scaledImageInfo)) {
-        LOGE("Could not allocate bitmap when attempting to scale.");
+        LOGE("Could not allocate bitmap when attempting to scale. srcKey: %{private}s, destination size: [%{public}d x"
+            " %{public}d], raw image size: [%{public}d x %{public}d]", srcKey.c_str(), dstWidth, dstHeight,
+            rawImage->width(), rawImage->height());
         return rawImage;
     }
     if (!rawImage->scalePixels(scaledBitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint)) {
-        LOGE("Could not scale pixels");
+        LOGE("Could not scale pixels srcKey: %{private}s, destination size: [%{public}d x"
+            " %{public}d], raw image size: [%{public}d x %{public}d]", srcKey.c_str(), dstWidth,
+            dstHeight, rawImage->width(), rawImage->height());
         return rawImage;
     }
     // Marking this as immutable makes the MakeFromBitmap call share the pixels instead of copying.
@@ -350,7 +367,9 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
         }
         return scaledImage;
     }
-    LOGE("Could not create a scaled image from a scaled bitmap.");
+    LOGE("Could not create a scaled image from a scaled bitmap. srcKey: %{private}s, destination size: [%{public}d x"
+        " %{public}d], raw image size: [%{public}d x %{public}d]", srcKey.c_str(), dstWidth, dstHeight,
+        rawImage->width(), rawImage->height());
     return rawImage;
 }
 
@@ -362,12 +381,12 @@ sk_sp<SkImage> ImageProvider::GetSkImage(
     auto imageLoader = ImageLoader::CreateImageLoader(ImageSourceInfo(src));
     auto imageSkData = imageLoader->LoadImageData(src, context);
     if (!imageSkData) {
-        LOGE("fetch data failed");
+        LOGE("fetch data failed. src: %{private}s", src.c_str());
         return nullptr;
     }
     auto rawImage = SkImage::MakeFromEncoded(imageSkData);
     if (!rawImage) {
-        LOGE("MakeFromEncoded failed!");
+        LOGE("MakeFromEncoded failed! src: %{private}s", src.c_str());
         return nullptr;
     }
     auto image = ResizeSkImage(rawImage, src, targetSize);

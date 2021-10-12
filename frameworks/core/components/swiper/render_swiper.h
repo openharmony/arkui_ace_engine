@@ -106,6 +106,8 @@ public:
     void UpdateTouchRect() override;
     void PerformLayout() override;
 
+    bool IsChildrenTouchEnable() override;
+
     int32_t GetCurrentIndex() const
     {
         return currentIndex_;
@@ -240,6 +242,8 @@ public:
         return axis_ == Axis::VERTICAL;
     }
 
+    bool RefuseUpdatePosition(int32_t index);
+    void OnPaintFinish() override;
 protected:
     struct IndicatorProperties final {
         IndicatorProperties(const Offset& normalPaddingStart, const Offset& normalPaddingEnd,
@@ -393,11 +397,11 @@ private:
     void DoSwipeToAnimation(int32_t fromIndex, int32_t toIndex, bool reverse);
     void RedoSwipeToAnimation(int32_t toIndex, bool reverse);
     void StopSwipeToAnimation();
-    void UpdateItemOpacity(uint8_t opacity, int32_t index);
+    void UpdateItemOpacity(uint8_t opacity, int32_t index, int32_t otherIndex);
     void UpdateOneItemOpacity(uint8_t opacity, int32_t index);
-    void UpdateItemPosition(double offset, int32_t index);
+    void UpdateItemPosition(double offset, int32_t index, int32_t otherIndex);
     void UpdateScrollPosition(double dragDelta);
-    void UpdateChildPosition(double offset, int32_t fromIndex);
+    void UpdateChildPosition(double offset, int32_t fromIndex, bool inLayout = false);
     Offset GetMainAxisOffset(double offset) const
     {
         double margin = (needReverse_ ? nextMargin_ : prevMargin_);

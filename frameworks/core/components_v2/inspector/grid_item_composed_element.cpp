@@ -17,7 +17,6 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/grid_layout/grid_layout_item_element.h"
 #include "core/components/grid_layout/render_grid_layout_item.h"
 #include "core/components_v2/inspector/utils.h"
 

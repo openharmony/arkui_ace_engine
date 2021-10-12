@@ -111,6 +111,21 @@ public:
         return step_;
     }
 
+    SliderMode GetMode() const
+    {
+        return mode_;
+    }
+
+    bool GetShowSteps() const
+    {
+        return showSteps_;
+    }
+
+    bool GetShowTips() const
+    {
+        return showTips_;
+    }
+
     std::function<void(const std::string&)> GetOnMovedEndId() const
     {
         return onMoveEnd_;
@@ -124,6 +139,11 @@ public:
     bool GetFocus() const
     {
         return isFocus_;
+    }
+
+    const WeakPtr<SliderComponent>& GetSliderComponent() const
+    {
+        return sliderComponent_;
     }
 
     void SetFocus(bool isFocus)

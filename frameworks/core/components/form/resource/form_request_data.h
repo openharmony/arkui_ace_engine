@@ -28,6 +28,8 @@ struct RequestFormInfo {
     std::string moduleName;
     int32_t dimension = -1;
     bool allowUpate = true;
+    Dimension width;
+    Dimension height;
     uint64_t index = GetNanoseconds();
 
     std::string ToString() const

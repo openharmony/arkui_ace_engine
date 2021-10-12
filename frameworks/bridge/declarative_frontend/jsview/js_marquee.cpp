@@ -27,7 +27,7 @@ namespace OHOS::Ace::Framework {
 void JSMarquee::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("marquee create error, info is non-vaild");
+        LOGE("marquee create error, info is non-valid");
         return;
     }
 
@@ -36,45 +36,28 @@ void JSMarquee::Create(const JSCallbackInfo& info)
 
     auto src = paramObject->GetProperty("src");
     if (!src->IsString()) {
-        LOGI("src is not string");
+        LOGE("marquee create error, src is non-valid");
         return;
     }
     marqueeComponent->SetValue(src->ToString());
 
-    RefPtr<MarqueeTheme> theme = GetTheme<MarqueeTheme>();
-    auto textStyle = marqueeComponent->GetTextStyle();
-    textStyle.SetMaxLines(1);
-    if (!theme) {
-        LOGI("theme is nullptr");
-        return;
-    }
-    textStyle.SetFontSize(theme->GetFontSize());
-    textStyle.SetTextColor(theme->GetTextColor());
-    marqueeComponent->SetTextStyle(std::move(textStyle));
-
     auto getStart = paramObject->GetProperty("start");
-    bool Start = getStart->IsBoolean() ? getStart->ToBoolean() : false;
-    marqueeComponent->SetPlayerStatus(Start);
+    bool start = getStart->IsBoolean() ? getStart->ToBoolean() : false;
+    marqueeComponent->SetPlayerStatus(start);
 
     auto getStep = paramObject->GetProperty("step");
-    if (!getStep->IsNumber()) {
-        LOGE("marquee create error, step is non-vaild");
-        return;
+    if (getStep->IsNumber()) {
+        marqueeComponent->SetScrollAmount(getStep->ToNumber<double>());
     }
-    double Step = getStep->ToNumber<double>();
-    marqueeComponent->SetScrollAmount(Step);
 
     auto getLoop = paramObject->GetProperty("loop");
-    if (!getLoop->IsNumber()) {
-        LOGE("textinput create error, type is non-vaild");
-        return;
+    if (getLoop->IsNumber()) {
+        marqueeComponent->SetLoop(getLoop->ToNumber<int32_t>());
     }
-    int32_t Loop = getLoop->ToNumber<int32_t>();
-    marqueeComponent->SetLoop(Loop);
 
     auto getFromStart = paramObject->GetProperty("fromStart");
-    bool FromStart = getFromStart->IsBoolean() ? getFromStart->ToBoolean() : false;
-    if (FromStart) {
+    bool fromStart = getFromStart->IsBoolean() ? getFromStart->ToBoolean() : true;
+    if (fromStart) {
         marqueeComponent->SetDirection(MarqueeDirection::LEFT);
     } else {
         marqueeComponent->SetDirection(MarqueeDirection::RIGHT);
@@ -87,11 +70,123 @@ void JSMarquee::JSBind(BindingTarget globalObj)
     JSClass<JSMarquee>::Declare("Marquee");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSMarquee>::StaticMethod("create", &JSMarquee::Create, opt);
+    JSClass<JSMarquee>::StaticMethod("fontColor", &JSMarquee::SetTextColor);
+    JSClass<JSMarquee>::StaticMethod("fontSize", &JSMarquee::SetFontSize);
+    JSClass<JSMarquee>::StaticMethod("allowScale", &JSMarquee::SetAllowScale);
+    JSClass<JSMarquee>::StaticMethod("fontWeight", &JSMarquee::SetFontWeight);
+    JSClass<JSMarquee>::StaticMethod("fontFamily", &JSMarquee::SetFontFamily);
     JSClass<JSMarquee>::StaticMethod("onStart", &JSMarquee::OnStart);
     JSClass<JSMarquee>::StaticMethod("onBounce", &JSMarquee::OnBounce);
     JSClass<JSMarquee>::StaticMethod("onFinish", &JSMarquee::OnFinish);
+    JSClass<JSMarquee>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSMarquee>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSMarquee>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSMarquee>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSMarquee>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSMarquee>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSMarquee>::Inherit<JSViewAbstract>();
     JSClass<JSMarquee>::Bind(globalObj);
+}
+
+void JSMarquee::SetTextColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("SetTextColor create error, info is non-valid");
+        return;
+    }
+
+    Color color;
+    if (!ParseJsColor(info[0], color)) {
+        LOGE("the info[0] is null");
+        return;
+    }
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::MarqueeComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("The component(SetTextColor) is null");
+        return;
+    }
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetTextColor(color);
+    component->SetTextStyle(std::move(textStyle));
+}
+
+void JSMarquee::SetFontSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("SetFrontSize create error, info is non-valid");
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::MarqueeComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("The component(SetFrontSize) is null");
+        return;
+    }
+
+    Dimension fontSize;
+    if (!ParseJsDimensionFp(info[0], fontSize)) {
+        return;
+    }
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetFontSize(fontSize);
+    component->SetTextStyle(std::move(textStyle));
+}
+
+void JSMarquee::SetAllowScale(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsBoolean()) {
+        LOGE("SetAllowScale create error, info is non-valid");
+        return;
+    }
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::MarqueeComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("The component(SetAllowScale) is null");
+        return;
+    }
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetAllowScale(info[0]->ToBoolean());
+    component->SetTextStyle(std::move(textStyle));
+}
+
+void JSMarquee::SetFontWeight(const std::string& value)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::MarqueeComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("The component(SetFrontWeight) is null");
+        return;
+    }
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetFontWeight(ConvertStrToFontWeight(value));
+    component->SetTextStyle(std::move(textStyle));
+}
+
+void JSMarquee::SetFontFamily(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("SetFrontFamily create error, info is non-valid");
+        return;
+    }
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::MarqueeComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("The component(SetFrontFamily) is null");
+        return;
+    }
+
+    std::vector<std::string> fontFamilies;
+    if (!ParseJsFontFamilies(info[0], fontFamilies)) {
+        LOGE("Parse FontFamilies failed");
+        return;
+    }
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetFontFamilies(fontFamilies);
+    component->SetTextStyle(std::move(textStyle));
 }
 
 void JSMarquee::OnStart(const JSCallbackInfo& info)

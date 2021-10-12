@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_XCOMPONENT_RENDER_XCOMPONENT_H
 
 #include "core/components/common/layout/constants.h"
-#include "core/components/xcomponent/native_render_context.h"
+#include "core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "core/components/xcomponent/resource/xcomponent_delegate.h"
 #include "core/components/xcomponent/xcomponent_component.h"
 #include "core/pipeline/base/render_node.h"
@@ -49,25 +49,26 @@ public:
         READY,
     };
 
-    virtual void PluginContextInit(NativeRenderContext* context) = 0;
+    virtual void NativeXComponentInit(
+        NativeXComponent* nativeXComponent,
+        WeakPtr<NativeXComponentImpl> nativeXComponentImpl) = 0;
     virtual void PluginUpdate() = 0;
-    virtual void SetTextureId(int64_t id) = 0;
 
     void SetXComponentSizeChange(XComponentSizeChangeEvent &&xcomponentSizeChangeEvent)
     {
         xcomponentSizeChangeEvent_ = std::move(xcomponentSizeChangeEvent);
     }
 
-    NativeRenderContext* GetPluginContext() const
-    {
-        return pluginContext_;
-    }
+    void NativeXComponentDestroy();
+
+    void NativeXComponentDispatchTouchEvent(const TouchInfo& touchInfo);
 
 protected:
     RefPtr<XComponentDelegate> delegate_;
     RefPtr<XComponentTaskPool> pool_;
     std::list<TaskFunction> tasks_;
-    NativeRenderContext* pluginContext_ = nullptr;
+    NativeXComponent* nativeXComponent_ = nullptr;
+    WeakPtr<NativeXComponentImpl> nativeXComponentImpl_;
     XComponentSizeChangeEvent xcomponentSizeChangeEvent_;
 
     Offset position_;

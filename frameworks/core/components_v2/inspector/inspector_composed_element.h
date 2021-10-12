@@ -105,8 +105,10 @@ public:
 
     // position settings
     virtual std::string GetAlign() const;
+    virtual std::string GetDirectionStr() const;
     virtual TextDirection GetDirection() const;
     virtual std::unique_ptr<JsonValue> GetPosition() const;
+    virtual std::unique_ptr<JsonValue> GetMarkAnchor() const;
     virtual std::unique_ptr<JsonValue> GetOffset() const;
     virtual std::string GetRect() const;
     virtual Rect GetParentRect() const;
@@ -159,9 +161,8 @@ public:
     virtual std::unique_ptr<JsonValue> GetShadow() const;
 
     // shape clip
-    virtual RefPtr<ClipPath> GetClip() const;
-    virtual bool GetBoxClipFlag() const;
-    virtual RefPtr<Mask> GetMask() const;
+    virtual std::unique_ptr<JsonValue> GetClip() const;
+    virtual std::unique_ptr<JsonValue> GetMask() const;
 
     // grid setting
     virtual int32_t GetGridSpan() const;
@@ -169,6 +170,8 @@ public:
     virtual std::unique_ptr<JsonValue> GetUseSizeType() const;
     virtual RefPtr<GridColumnInfo> GetGridColumnInfo() const;
 
+    // useAlign seeting
+    virtual std::unique_ptr<JsonValue> GetUseAlign() const;
     virtual std::unique_ptr<JsonValue> ToJsonObject() const;
 
     virtual AceType::IdType GetTargetTypeId() const
@@ -176,7 +179,7 @@ public:
         return AceType::TypeId(this);
     }
 
-private:
+protected:
     RefPtr<RenderBox> GetRenderBox() const;
 };
 

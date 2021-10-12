@@ -49,6 +49,8 @@ const char ROUTE_KEY_PARAMS[] = "params";
 const char ROUTE_KEY_DONT_OVERWRITE[] = "dontOverwrite";
 const char ROUTE_ENABLE_ALERT_BEFORE_BACK_PAGE[] = "enableAlertBeforeBackPage";
 const char ROUTE_DISABLE_ALERT_BEFORE_BACK_PAGE[] = "disableAlertBeforeBackPage";
+const char ROUTE_POSTPONE[] = "postpone";
+const char ROUTE_LAUNCH[] = "launch";
 
 // for prompt
 const char PROMPT_SHOW_TOAST[] = "showToast";

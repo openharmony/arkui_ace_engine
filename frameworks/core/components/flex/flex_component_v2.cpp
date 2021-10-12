@@ -45,6 +45,7 @@ RefPtr<Component> AddFlexItemComponent(const RefPtr<Component>& component)
             return composedComponent;
         }
 
+        composedComponent->SetChild(nullptr);
         auto newFlexItem = AceType::MakeRefPtr<FlexItemComponent>(0.0, 1.0, 0.0);
         newFlexItem->SetChild(composedChild);
         composedComponent->SetChild(newFlexItem);

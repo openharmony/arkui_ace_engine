@@ -22,6 +22,7 @@ group("ace_packages") {
   deps += [
     "$ace_root/build:libace",
     "$ace_root/interfaces/napi/kits:napi_group",
+    "$ace_root/interfaces/native:ace_packages_ndk",
   ]
 
   # Engine and debugger

@@ -292,18 +292,22 @@ void QJSUtils::JsStdDumpErrorAce(JSContext* ctx, JsErrorType errorType, int32_t 
         JSValue val = QJSUtils::GetPropertyStr(ctx, exceptionVal, "stack");
         if (!JS_IsUndefined(val)) {
             const char* stackTrace = JS_ToCString(ctx, val);
-            const char* stack = stackTrace;
-            if (stack != nullptr) {
+            std::string stack = stackTrace;
+            if (stackTrace != nullptr) {
                 if (pageMap || appMap) {
-                    stack = const_cast<char *>(JsDumpSourceFile(stack, pageMap, appMap).c_str());
+                    stack = JsDumpSourceFile(stackTrace, pageMap, appMap);
                 }
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-                LOGE("[Engine Log] %{public}s", stack);
+                if (strcmp(stack.c_str(), stackTrace) != 0) {
+                    LOGE("[Engine Log] %{public}s", stack.c_str());
+                } else {
+                    LOGE("%{public}s", stack.c_str());
+                }
 #else
-                LOGE("%{public}s", stack);
+                LOGE("%{public}s", stack.c_str());
 #endif
                 std::string reasonStr = GetReason(errorType);
-                std::string summaryBody = GenerateSummaryBody(printLog.get(), stack, instanceId, pageUrl);
+                std::string summaryBody = GenerateSummaryBody(printLog.get(), stack.c_str(), instanceId, pageUrl);
                 EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), reasonStr, summaryBody);
                 JS_FreeValue(ctx, exceptionVal);
                 JS_FreeCString(ctx, stackTrace);

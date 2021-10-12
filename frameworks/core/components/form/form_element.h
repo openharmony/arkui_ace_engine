@@ -17,27 +17,27 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_FORM_ELEMENT_H
 
 #include "core/pipeline/base/render_element.h"
-
-#include "core/components/form/sub_container.h"
 #include "core/components/form/form_component.h"
+#include "core/components/form/sub_container.h"
+#include "core/components/form/resource/form_manager_delegate.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {
 
-class FormManagerDelegate;
-
-class FormElement : public ComposedElement {
-    DECLARE_ACE_TYPE(FormElement, ComposedElement);
+class FormElement : public RenderElement {
+    DECLARE_ACE_TYPE(FormElement, RenderElement);
 
 public:
     using EventCallback = std::function<void(const std::string&)>;
 
-    explicit FormElement(const ComposeId& id);
+    FormElement() = default;
     ~FormElement() override;
 
     void Prepare(const WeakPtr<Element>& parent) override;
     void Update()  override;
     void PerformBuild() override;
+
+    RefPtr<RenderNode> CreateRenderNode() override;
 
     const RefPtr<SubContainer> GetSubContainer() const
     {
@@ -48,6 +48,7 @@ public:
     void HandleOnErrorEvent(const std::string code, const std::string msg) const;
     void HandleOnRouterEvent(const std::unique_ptr<JsonValue>& action) const;
     void OnActionEvent(const std::string& action) const;
+
     bool ISAllowUpdate() const
     {
         return cardInfo_.allowUpate;

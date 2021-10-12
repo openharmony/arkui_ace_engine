@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_IMAGE_COMPOSED_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_IMAGE_COMPOSED_ELEMENT_H
 
+#include "core/components/image/image_element.h"
 #include "core/components/image/render_image.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
@@ -39,6 +40,11 @@ public:
     std::string GetInterpolation() const;
     std::string GetRenderMode() const;
     std::string GetSourceSize() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return ImageElement::TypeId();
+    }
 
 private:
     RefPtr<RenderImage> GetRenderImage() const;

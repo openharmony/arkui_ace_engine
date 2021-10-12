@@ -79,14 +79,16 @@ void XComponentTaskPool::SetRenderNode(const WeakPtr<RenderXComponent>& renderNo
     renderNode_ = renderNode;
 }
 
-void XComponentTaskPool::PluginContextInit(NativeRenderContext* context)
+void XComponentTaskPool::NativeXComponentInit(
+    NativeXComponent* nativeXComponent,
+    WeakPtr<NativeXComponentImpl> nativeXComponentImpl)
 {
     auto renderNode = renderNode_.Upgrade();
     if (!renderNode) {
-        LOGE("XComponentTaskPool::PluginContextInit invalid renderNode");
+        LOGE("XComponentTaskPool::NativeXComponentInit invalid renderNode");
         return;
     }
-    renderNode->PluginContextInit(context);
+    renderNode->NativeXComponentInit(nativeXComponent, nativeXComponentImpl);
 }
 
 void XComponentTaskPool::PluginUpdate()

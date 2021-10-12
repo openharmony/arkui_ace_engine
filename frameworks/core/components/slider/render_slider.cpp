@@ -310,26 +310,30 @@ void RenderSlider::FireMovingEvent(SliderEvent mode)
                 jsonResult->Put("isEnd", "true");
                 jsonResult->Put("mode", "click");
                 if (onChange_) {
-                    onChange_(value_, static_cast<int>(SliderEvent::MOVE_END));
+                    onChange_(value_, static_cast<int>(SliderEvent::CLICK));
                 }
                 break;
             case SliderEvent::ACCESSIBILITY:
                 jsonResult->Put("isEnd", "false");
                 jsonResult->Put("mode", "accessibility");
                 if (onChange_) {
-                    onChange_(value_, static_cast<int>(SliderEvent::MOVE_END));
+                    onChange_(value_, static_cast<int>(SliderEvent::ACCESSIBILITY));
                 }
                 break;
             case SliderEvent::FOCUS:
                 jsonResult->Put("isEnd", "true");
                 jsonResult->Put("mode", "keyevent");
                 if (onChange_) {
-                    onChange_(value_, static_cast<int>(SliderEvent::MOVE_END));
+                    onChange_(value_, static_cast<int>(SliderEvent::FOCUS));
                 }
                 break;
         }
         jsonResult->Put("value", value_);
         onMoving_(std::string(R"("change",)").append(jsonResult->ToString()));
+    }
+
+    if (onChange_) {
+        onChange_(value_, static_cast<int>(SliderEvent::MOVE_MOVING));
     }
 }
 

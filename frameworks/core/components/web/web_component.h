@@ -20,6 +20,8 @@
 
 #include "base/geometry/size.h"
 #include "base/utils/utils.h"
+#include "core/components/declaration/common/declaration.h"
+#include "core/components_v2/common/common_def.h"
 #include "core/components/declaration/web/web_client.h"
 #include "core/components/declaration/web/web_declaration.h"
 #include "core/pipeline/base/element.h"
@@ -27,8 +29,21 @@
 namespace OHOS::Ace {
 
 class WebDelegate;
+
+class WebController : public virtual AceType {
+    DECLARE_ACE_TYPE(WebController, AceType);
+
+public:
+    void Reload() const
+    {
+        declaration_->webMethod.Reload();
+    }
+private:
+    RefPtr<WebDeclaration> declaration_;
+};
+
 // A component can show HTML5 webpages.
-class WebComponent : public RenderComponent {
+class ACE_EXPORT WebComponent : public RenderComponent {
     DECLARE_ACE_TYPE(WebComponent, RenderComponent);
 
 public:
@@ -37,6 +52,10 @@ public:
     using ErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using MethodCall = std::function<void(const std::string&)>;
     using Method = std::string;
+    ACE_DEFINE_COMPONENT_EVENT(OnPageStart, void(std::string));
+    ACE_DEFINE_COMPONENT_EVENT(OnPageFinish, void(std::string));
+    ACE_DEFINE_COMPONENT_EVENT(OnError, void(std::string));
+    ACE_DEFINE_COMPONENT_EVENT(OnMessage, void(std::string));
 
     WebComponent() = default;
     explicit WebComponent(const std::string& type);
@@ -112,13 +131,23 @@ public:
         }
     }
 
+    RefPtr<WebController> GetController() const
+    {
+        return webController_;
+    }
+
+    void SetWebController(const RefPtr<WebController>& webController)
+    {
+        webController_ = webController;
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
     ReleasedCallback releasedCallback_ = nullptr;
     ErrorCallback errorCallback_ = nullptr;
     RefPtr<WebDelegate> delegate_;
-
+    RefPtr<WebController> webController_;
     std::string type_;
 };
 

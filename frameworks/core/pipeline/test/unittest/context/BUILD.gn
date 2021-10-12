@@ -71,6 +71,7 @@ ohos_unittest("PipelineContextTest") {
     "//foundation/ace/ace_engine/frameworks/core/components/overlay/overlay_component.cpp",
     "//foundation/ace/ace_engine/frameworks/core/components/page/page_component.cpp",
     "//foundation/ace/ace_engine/frameworks/core/components/root/root_component.cpp",
+    "//foundation/ace/ace_engine/frameworks/core/components/transform/transform_component.cpp",
     "//foundation/ace/ace_engine/frameworks/core/components/tween/tween_component.cpp",
     "//foundation/ace/ace_engine/frameworks/core/pipeline/base/component.cpp",
     "//foundation/ace/ace_engine/frameworks/core/pipeline/base/composed_component.cpp",

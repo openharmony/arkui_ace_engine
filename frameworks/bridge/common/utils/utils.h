@@ -177,6 +177,7 @@ inline BorderImageRepeat ConvertStrToBorderImageRepeat(const std::string& repeat
     static const LinearMapNode<BorderImageRepeat> borderImageRepeatTable[] = {
         { "repeat", BorderImageRepeat::REPEAT },
         { "round", BorderImageRepeat::ROUND },
+        { "space", BorderImageRepeat::SPACE },
         { "stretch", BorderImageRepeat::STRETCH },
     };
 

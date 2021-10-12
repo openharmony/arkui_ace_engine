@@ -34,13 +34,10 @@ class ACE_EXPORT CardFrontend : public Frontend {
     DECLARE_ACE_TYPE(CardFrontend, Frontend);
 
 public:
-    using OnGotWindowConfigCallback = std::function<void(WindowConfig)>;
-
     CardFrontend() = default;
     ~CardFrontend() override;
 
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
-    void SetSelfTaskExectuor(const RefPtr<TaskExecutor>& taskExecutor);
 
     void Destroy() override;
 
@@ -73,6 +70,11 @@ public:
     {
         return false;
     }
+
+    void OnSaveAbilityState (std::string& data) override {}
+
+    void OnRestoreAbilityState (const std::string& data) override {}
+
     void OnShow() override
     {
         foregroundFrontend_ = true;
@@ -89,6 +91,7 @@ public:
         return false;
     }
     void OnCompleteContinuation(int32_t code) override {}
+    void OnMemoryLevel(const int32_t level) override {}
     void OnSaveData(std::string& data) override {}
     bool OnRestoreData(const std::string& data) override
     {
@@ -96,6 +99,7 @@ public:
     }
     void OnRemoteTerminated() override {}
     void OnNewRequest(const std::string& data) override {}
+    void OnNewWant(const std::string& data) override {}
     void CallRouterBack() override {}
     void OnSurfaceChanged(int32_t width, int32_t height) override;
     void DumpFrontend() const override {}
@@ -134,21 +138,6 @@ public:
         density_ = density;
     }
 
-    void SetNoDependentContainer()
-    {
-        noDependentContainer_ = true;
-    }
-
-    void SetPageParentElement(const RefPtr<Element>& parent)
-    {
-        parentElement_ = parent;
-    }
-
-    void AddOnGotWindowConfigCallback(const OnGotWindowConfigCallback& callback)
-    {
-        onGotWindowConfigCallback_ = callback;
-    }
-
     void ResetPageLoadState()
     {
         pageLoaded_ = false;
@@ -163,7 +152,6 @@ private:
     void ParseManifest() const;
     void HandleSurfaceChanged(int32_t width, int32_t height);
     void OnMediaFeatureUpdate();
-    const RefPtr<TaskExecutor>& GetTaskExecutor() const;
 
     ColorMode colorMode_ = ColorMode::LIGHT;
     FrontendType type_ = FrontendType::JS_CARD;
@@ -177,14 +165,10 @@ private:
 
     mutable std::once_flag onceFlag_;
     RefPtr<TaskExecutor> taskExecutor_;
-    RefPtr<TaskExecutor> selfTaskExecutor_;
     RefPtr<AceEventHandler> eventHandler_;
     RefPtr<Framework::CardFrontendDelegate> delegate_;
     Framework::PageIdPool pageIdPool_;
     RefPtr<Framework::JsCardParser> parseJsCard_;
-    RefPtr<Element> parentElement_;
-    bool noDependentContainer_ = false;
-    OnGotWindowConfigCallback onGotWindowConfigCallback_;
 };
 
 class CardEventHandler : public AceEventHandler {

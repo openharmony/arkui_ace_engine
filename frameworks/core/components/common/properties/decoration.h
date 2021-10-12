@@ -847,6 +847,36 @@ public:
         borderImage_ = borderImage;
     }
 
+    void SetHasBorderImageSource(const bool tag)
+    {
+        hasBorderImageSource_ = tag;
+    }
+
+    void SetHasBorderImageSlice(const bool tag)
+    {
+        hasBorderImageSlice_ = tag;
+    }
+
+    void SetHasBorderImageWidth(const bool tag)
+    {
+        hasBorderImageWidth_ = tag;
+    }
+
+    void SetHasBorderImageOutset(const bool tag)
+    {
+        hasBorderImageOutset_ = tag;
+    }
+
+    void SetHasBorderImageRepeat(const bool tag)
+    {
+        hasBorderImageRepeat_ = tag;
+    }
+
+    void SetHasBorderImageGradient(const bool tag)
+    {
+        hasBorderImageGradient_ = tag;
+    }
+
     void SetPadding(const Edge& padding)
     {
         padding_ = padding;
@@ -896,7 +926,15 @@ public:
     {
         windowBlurStyle_ = style;
     }
+    void SetBorderType(int type)
+    {
+        borderType = type;
+    }
 
+    int GetBorderType()
+    {
+        return borderType;
+    }
     const Border& GetBorder() const
     {
         return border_;
@@ -925,6 +963,36 @@ public:
     const Gradient& GetGradientBorderImage() const
     {
         return gradientBorderImage_;
+    }
+
+    bool GetHasBorderImageSource()
+    {
+        return hasBorderImageSource_;
+    }
+
+    bool GetHasBorderImageSlice()
+    {
+        return hasBorderImageSlice_;
+    }
+
+    bool GetHasBorderImageWidth()
+    {
+        return hasBorderImageWidth_;
+    }
+
+    bool GetHasBorderImageOutset()
+    {
+        return hasBorderImageOutset_;
+    }
+
+    bool GetHasBorderImageRepeat()
+    {
+        return hasBorderImageRepeat_;
+    }
+
+    bool GetHasBorderImageGradient()
+    {
+        return hasBorderImageGradient_;
     }
 
     const AnimatableColor& GetBackgroundColor() const
@@ -1058,6 +1126,16 @@ public:
     Offset GetOffset(double dipScale) const;
 
 private:
+    bool hasBorderImageSource_ = false;
+    bool hasBorderImageSlice_ = false;
+    bool hasBorderImageWidth_ = false;
+    bool hasBorderImageOutset_ = false;
+    bool hasBorderImageRepeat_ = false;
+    bool hasBorderImageGradient_ = false;
+
+    // 0 border 1 borderimage-url 2 borderimage-gradient
+    int borderType = 0;
+
     // padding is zero
     Edge padding_;
     // border contains black color and 1.0f thickness as default

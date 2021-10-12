@@ -192,6 +192,38 @@ ACE_EXPORT extern const char CALENDAR_ETS_TAG[];
 ACE_EXPORT extern const char BADGE_COMPONENT_TAG[];
 ACE_EXPORT extern const char BADGE_ETS_TAG[];
 
+// search
+ACE_EXPORT extern const char SEARCH_COMPONENT_TAG[];
+ACE_EXPORT extern const char SEARCH_ETS_TAG[];
+
+// formComponent
+ACE_EXPORT extern const char FORM_COMPONENT_TAG[];
+ACE_EXPORT extern const char FORM_ETS_TAG[];
+
+// video
+ACE_EXPORT extern const char VIDEO_COMPONENT_TAG[];
+ACE_EXPORT extern const char VIDEO_ETS_TAG[];
+
+// AlphabetIndexer
+ACE_EXPORT extern const char INDEXER_COMPONENT_TAG[];
+ACE_EXPORT extern const char INDEXER_ETS_TAG[];
+
+// slider
+ACE_EXPORT extern const char SLIDER_COMPONENT_TAG[];
+ACE_EXPORT extern const char SLIDER_ETS_TAG[];
+
+// rating
+ACE_EXPORT extern const char RATING_COMPONENT_TAG[];
+ACE_EXPORT extern const char RATING_ETS_TAG[];
+
+// progress
+ACE_EXPORT extern const char PROGRESS_COMPONENT_TAG[];
+ACE_EXPORT extern const char PROGRESS_ETS_TAG[];
+
+// datapanel
+ACE_EXPORT extern const char DATA_PANEL_COMPONENT_TAG[];
+ACE_EXPORT extern const char DATA_PANEL_ETS_TAG[];
+
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

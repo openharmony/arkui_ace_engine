@@ -175,6 +175,25 @@ void SharedTransitionController::KickoffSharedTransition(TransitionEvent event, 
     }
 }
 
+bool SharedTransitionController::CheckAndCreateTransition(
+    std::vector<RefPtr<SharedTransitionEffect>>& effects, RefPtr<OverlayElement>& overlay)
+{
+    bool hasShared = false;
+    for (auto& effect : effects) {
+        const auto& shareId = effect->GetShareId();
+        if (!effect->Allow(event_)) {
+            LOGE("Shared transition not allowed, event: %{public}d, share id: %{public}s", event_, shareId.c_str());
+            continue;
+        }
+        if (!PrepareEachTransition(shareId, effect, overlay)) {
+            LOGE("Prepare shared transition failed. share id: %{public}s", shareId.c_str());
+            continue;
+        }
+        hasShared = true;
+    }
+    return hasShared;
+}
+
 bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overlay, bool preCheck)
 {
     auto pageDest = pageDest_.Upgrade();
@@ -189,6 +208,7 @@ bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overla
     const auto& destMap = pageDest->GetSharedTransitionMap();
     bool hasShared = false;
     std::vector<RefPtr<SharedTransitionEffect>> effects;
+    std::vector<RefPtr<SharedTransitionEffect>> anchorEffects;
 
     // find out all exchange effect or static effect in dest page
     for (auto& item : destMap) {
@@ -212,7 +232,11 @@ bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overla
         }
         effect->SetSharedElement(srcWeak, destWeak);
         effect->setCurrentSharedElement(destWeak);
-        effects.push_back(effect);
+        if (effect->GetType() == SharedTransitionEffectType::SHARED_EFFECT_STATIC) {
+            anchorEffects.push_back(effect);
+        } else {
+            effects.push_back(effect);
+        }
     }
 
     // find out all static effect in source page only in ace declarative
@@ -234,22 +258,19 @@ bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overla
             }
             effect->SetSharedElement(sourceWeak, nullptr);
             effect->setCurrentSharedElement(sourceWeak);
-            effects.push_back(effect);
+            if (effect->GetType() == SharedTransitionEffectType::SHARED_EFFECT_STATIC) {
+                anchorEffects.push_back(effect);
+            } else {
+                effects.push_back(effect);
+            }
         }
     }
 
     // prepare each sharedTransition effect
-    for (auto& effect : effects) {
-        const auto& shareId = effect->GetShareId();
-        if (!effect->Allow(event_)) {
-            LOGE("Shared transition not allowed, event: %{public}d, share id: %{public}s", event_, shareId.c_str());
-            continue;
-        }
-        if (!PrepareEachTransition(shareId, effect, overlay)) {
-            LOGE("Prepare shared transition failed. share id: %{public}s", shareId.c_str());
-            continue;
-        }
-        hasShared = true;
+    hasShared = CheckAndCreateTransition(effects, overlay);
+    if (hasShared) {
+        // anchor effects only available when other effects are available
+        CheckAndCreateTransition(anchorEffects, overlay);
     }
 
     if (!hasShared) {

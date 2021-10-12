@@ -34,6 +34,11 @@ public:
 
     std::string GetResizeable() const;
 
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return InspectorComposedElement::TypeId();
+    }
+
 private:
     RefPtr<RenderColumnSplit> GetRenderColumnSplit() const;
 };

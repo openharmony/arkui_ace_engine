@@ -276,6 +276,28 @@ void PageTransitionElement::SetWrapHidden(bool hidden)
     }
 }
 
+void PageTransitionElement::AddPreFlush()
+{
+    if (contentTransition_) {
+        contentTransition_->AddPreFlush();
+    }
+
+    if (backgroundTransition_) {
+        backgroundTransition_->AddPreFlush();
+    }
+}
+
+void PageTransitionElement::SkipPostFlush()
+{
+    if (contentTransition_) {
+        contentTransition_->SkipPostFlush();
+    }
+
+    if (backgroundTransition_) {
+        backgroundTransition_->SkipPostFlush();
+    }
+}
+
 RefPtr<Element> PageTransitionElement::GetContentElement() const
 {
     if (!contentTransition_) {
@@ -294,6 +316,22 @@ RefPtr<Element> PageTransitionElement::GetContentElement() const
         return transition;
     }
     return element;
+}
+
+void PageTransitionElement::LoadTransition()
+{
+    auto pageElement = GetPageElement();
+    if (!pageElement) {
+        return;
+    }
+    auto componentUpdated = pageElement->CallPageTransitionFunction();
+    // save origin component
+    auto componentOrigin = component_;
+    component_ = componentUpdated;
+    // update with updated component
+    UpdateTransitionOption();
+    // restore origin component
+    component_ = componentOrigin;
 }
 
 void PageTransitionElement::SetTransition(

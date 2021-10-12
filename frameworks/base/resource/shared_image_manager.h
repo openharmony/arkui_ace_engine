@@ -62,8 +62,8 @@ public:
     }
 
 private:
-    void PostDelayedTaskToClearImageData(const std::string& name);
-    std::function<void()> GenerateClearImageDataCallback(const std::string& name);
+    void PostDelayedTaskToClearImageData(const std::string& name, size_t dataSize);
+    std::function<void()> GenerateClearImageDataCallback(const std::string& name, size_t dataSize);
 
     std::mutex sharedImageMapMutex_;
     std::mutex providerMapMutex_;

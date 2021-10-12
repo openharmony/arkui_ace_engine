@@ -94,6 +94,10 @@ public:
     {
         return buttonComponent_;
     }
+    Color GetClickedColor()
+    {
+        return clickedColor_;
+    }
 
 protected:
     RenderButton();

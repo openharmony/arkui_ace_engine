@@ -206,6 +206,34 @@ void PageGetParams(const v8::FunctionCallbackInfo<v8::Value>& args)
     args.GetReturnValue().Set(res);
 }
 
+void PostponePageTransition(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    if (context.IsEmpty()) {
+        LOGE("context is empty!");
+        return;
+    }
+    auto delegate =
+        static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
+    (*delegate)->PostponePageTransition();
+}
+
+void LaunchPageTransition(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    if (context.IsEmpty()) {
+        LOGE("context is empty!");
+        return;
+    }
+    auto delegate =
+        static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
+    (*delegate)->LaunchPageTransition();
+}
+
 void InitRouterModule(v8::Local<v8::Object> moduleObj, v8::Isolate* isolate)
 {
     auto context = isolate->GetCurrentContext();
@@ -227,6 +255,10 @@ void InitRouterModule(v8::Local<v8::Object> moduleObj, v8::Isolate* isolate)
         v8::Function::New(context, PageGetState).ToLocalChecked()).ToChecked();
     moduleObj->Set(context, v8::String::NewFromUtf8(isolate, ROUTE_PAGE_GET_PARAMS).ToLocalChecked(),
         v8::Function::New(context, PageGetParams).ToLocalChecked()).ToChecked();
+    moduleObj->Set(context, v8::String::NewFromUtf8(isolate, ROUTE_POSTPONE).ToLocalChecked(),
+                   v8::Function::New(context, PostponePageTransition).ToLocalChecked()).ToChecked();
+    moduleObj->Set(context, v8::String::NewFromUtf8(isolate, ROUTE_LAUNCH).ToLocalChecked(),
+                   v8::Function::New(context, LaunchPageTransition).ToLocalChecked()).ToChecked();
 }
 
 void AppGetInfo(const v8::FunctionCallbackInfo<v8::Value>& args)

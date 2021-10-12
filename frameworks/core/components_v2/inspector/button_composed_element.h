@@ -32,9 +32,16 @@ public:
 
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
-    std::string GetBottonType() const;
+    std::string GetButtonType() const;
     std::string GetStateEffect() const;
+    std::string GetLabel() const;
+    std::string GetBackgroundColor() const override;
     std::string ConvertButtonTypeToString(ButtonType buttonType) const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return ButtonElement::TypeId();
+    }
 
 private:
     RefPtr<RenderButton> GetRenderButton() const;

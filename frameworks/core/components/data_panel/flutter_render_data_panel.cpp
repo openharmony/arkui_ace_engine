@@ -298,6 +298,7 @@ void PaintRainbowFilterMask(ScopedCanvas& canvas, double factor, const std::vect
     double thickness = arcData.thickness;
     double radius = arcData.radius - SHADOW_BLUR_RADIUS;
     Offset center = arcData.center;
+    double maxValue = arcData.maxValue;
     SkPaint filterPaint;
     filterPaint.setAntiAlias(true);
     filterPaint.setStrokeCap(SkPaint::kButt_Cap);
@@ -325,7 +326,7 @@ void PaintRainbowFilterMask(ScopedCanvas& canvas, double factor, const std::vect
     canvas->canvas()->save();
     canvas->canvas()->rotate(-QUARTER_CIRCLE + 1, center.GetX(), center.GetY());
     for (const auto& segment : segments) {
-        double sweepAngle = segment.GetValue() * 0.01 * arcData.wholeAngle * factor;
+        double sweepAngle = segment.GetValue() / maxValue * arcData.wholeAngle * factor;
         if (GreatNotEqual(sweepAngle, arcData.wholeAngle)) {
             sweepAngle = arcData.wholeAngle;
         }
@@ -514,23 +515,35 @@ void FlutterRenderPercentageDataPanel::Paint(RenderContext& context, const Offse
     }
     PaintTrackBackground(canvas, arcData.center, arcData.thickness, backgroundTrack_, arcData.radius * 2);
     double factor = 1.0;
+    double proportions = 1.0;
     if (LessOrEqual(maxValue, 0.0)) {
         maxValue = 100.0;
     }
     if (GreatNotEqual(totalValue, maxValue)) {
         factor = maxValue / totalValue;
+        proportions = 100 / totalValue;
+    } else {
+        proportions = 100 / maxValue;
     }
+    arcData.maxValue = maxValue;
     if (useEffect_ && GreatNotEqual(totalValue, 0.0)) {
         PaintRainbowFilterMask(canvas, factor * animationPercent_, segments, arcData);
     }
-    totalValue = totalValue * factor;
+    totalValue = totalValue * proportions;
     for (int i = segments.size() - 1; i >= 0; i--) {
         const auto& segment = segments[i];
         arcData.startColor = segment.GetStartColor();
         arcData.endColor = segment.GetEndColor();
         arcData.progress = totalValue * animationPercent_;
-        PaintProgress(canvas, arcData);
-        totalValue -= segment.GetValue() * factor;
+        auto context = context_.Upgrade();
+        if (context->GetIsDeclarative()) {
+            if (useEffect_) {
+                PaintProgress(canvas, arcData);
+            }
+        } else {
+            PaintProgress(canvas, arcData);
+        }
+        totalValue -= segment.GetValue() * proportions;
     }
 }
 

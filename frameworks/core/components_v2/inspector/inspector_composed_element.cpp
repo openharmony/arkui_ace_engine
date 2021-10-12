@@ -24,6 +24,7 @@
 #include "core/components/text/text_element.h"
 #include "core/components/transform/transform_element.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -79,13 +80,31 @@ const char* GRID_SIZE_TYPE[] = {
     "lg"
 };
 
+constexpr const char* TEXT_DIRECTION[] = {
+    "Ltr",
+    "Rtl",
+    "Inherit",
+    "Auto"
+};
+
+constexpr const char* BASIC_SHAPE_TYPE[] {
+    "None",
+    "Inset",
+    "Circle",
+    "Ellipse",
+    "Polygon",
+    "Path",
+    "Rect"
+};
+
 const std::unordered_map<std::string, DoubleJsonFunc> CREATE_JSON_DOUBLE_MAP {
     { "opacity", [](const InspectorComposedElement& inspector) { return inspector.GetOpacity(); } },
     { "flexGrow", [](const InspectorComposedElement& inspector) { return inspector.GetFlexGrow(); } },
     { "flexShrink", [](const InspectorComposedElement& inspector) { return inspector.GetFlexShrink(); } },
     { "gridOffset", [](const InspectorComposedElement& inspector) { return inspector.GetGridOffset(); } },
     { "blur", [](const InspectorComposedElement& inspector) { return inspector.GetBlur(); } },
-    { "backdropBlur", [](const InspectorComposedElement& inspector) { return inspector.GetBackDropBlur(); } }
+    { "backdropBlur", [](const InspectorComposedElement& inspector) { return inspector.GetBackDropBlur(); } },
+    { "aspectRatio", [](const InspectorComposedElement& inspector) { return inspector.GetAspectRatio(); } },
 };
 
 const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
@@ -109,19 +128,19 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
         } },
     { "margin-top",
         [](const InspectorComposedElement& inspector) {
-            return inspector.GetMargin(AnimatableType::PROPERTY_PADDING_TOP).ToString();
+            return inspector.GetMargin(AnimatableType::PROPERTY_MARGIN_TOP).ToString();
         } },
     { "margin-right",
         [](const InspectorComposedElement& inspector) {
-            return inspector.GetMargin(AnimatableType::PROPERTY_PADDING_RIGHT).ToString();
+            return inspector.GetMargin(AnimatableType::PROPERTY_MARGIN_RIGHT).ToString();
         } },
     { "margin-bottom",
         [](const InspectorComposedElement& inspector) {
-            return inspector.GetMargin(AnimatableType::PROPERTY_PADDING_BOTTOM).ToString();
+            return inspector.GetMargin(AnimatableType::PROPERTY_MARGIN_BOTTOM).ToString();
         } },
     { "margin-left",
         [](const InspectorComposedElement& inspector) {
-            return inspector.GetMargin(AnimatableType::PROPERTY_PADDING_LEFT).ToString();
+            return inspector.GetMargin(AnimatableType::PROPERTY_MARGIN_LEFT).ToString();
         } },
     { "constraintSize",
         [](const InspectorComposedElement& inspector) { return inspector.GetConstraintSize(); } },
@@ -137,6 +156,8 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
     { "flexBasis", [](const InspectorComposedElement& inspector) { return inspector.GetFlexBasis(); } },
     { "width", [](const InspectorComposedElement& inspector) { return inspector.GetWidth(); } },
     { "height", [](const InspectorComposedElement& inspector) { return inspector.GetHeight(); } },
+    { "align", [](const InspectorComposedElement& inspector) { return inspector.GetAlign(); } },
+    { "direction", [](const InspectorComposedElement& inspector) { return inspector.GetDirectionStr(); } },
 };
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP { { "enabled",
@@ -146,7 +167,8 @@ const std::unordered_map<std::string, IntJsonFunc> CREATE_JSON_INT_MAP {
     { "zIndex", [](const InspectorComposedElement& inspector) { return inspector.GetZIndex(); } },
     { "gridSpan", [](const InspectorComposedElement& inspector) { return inspector.GetGridSpan(); } },
     { "layoutPriority", [](const InspectorComposedElement& inspector) { return inspector.GetLayoutPriority(); } },
-    { "layoutWeight", [](const InspectorComposedElement& inspector) { return inspector.GetLayoutWeight(); } }
+    { "layoutWeight", [](const InspectorComposedElement& inspector) { return inspector.GetLayoutWeight(); } },
+    { "displayPriority", [](const InspectorComposedElement& inspector) { return inspector.GetDisplayPriority(); } },
 };
 
 const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_MAP {
@@ -159,7 +181,16 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
     { "backgroundImagePosition",
         [](const InspectorComposedElement& inspector) { return inspector.GetBackgroundImagePosition(); } },
     { "useSizeType",
-        [](const InspectorComposedElement& inspector) { return inspector.GetUseSizeType(); } }
+        [](const InspectorComposedElement& inspector) { return inspector.GetUseSizeType(); } },
+    { "transformEffect",
+        [](const InspectorComposedElement& inspector) { return inspector.GetTransformEffect(); } },
+    { "markAnchor",
+        [](const InspectorComposedElement& inspector) { return inspector.GetMarkAnchor(); } },
+    { "clip",
+        [](const InspectorComposedElement& inspector) { return inspector.GetClip(); } },
+    { "mask",
+        [](const InspectorComposedElement& inspector) { return inspector.GetMask(); } },
+    { "useAlign", [](const InspectorComposedElement& inspector) { return inspector.GetUseAlign(); } },
 };
 
 }; // namespace
@@ -349,6 +380,20 @@ std::string InspectorComposedElement::GetAlign() const
     return ALIGNMENT_TYPE[1][1];
 }
 
+std::string InspectorComposedElement::GetDirectionStr() const
+{
+    auto render = GetRenderBox();
+    if (!render) {
+        return TEXT_DIRECTION[3];
+    }
+    auto value = static_cast<int32_t>(render->GetTextDirection());
+    auto length = static_cast<int32_t>(sizeof(TEXT_DIRECTION) / sizeof(TEXT_DIRECTION[0]));
+    if (value < length) {
+        return TEXT_DIRECTION[value];
+    }
+    return TEXT_DIRECTION[3];
+}
+
 TextDirection InspectorComposedElement::GetDirection() const
 {
     auto render = GetRenderBox();
@@ -375,6 +420,26 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetPosition() const
             jsonValue->Put("y", render->GetTop().ToString().c_str());
             return jsonValue;
         }
+    }
+    jsonValue->Put("x", "0.0px");
+    jsonValue->Put("y", "0.0px");
+    return jsonValue;
+}
+
+std::unique_ptr<JsonValue> InspectorComposedElement::GetMarkAnchor() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    auto node = GetInspectorNode(FlexItemElement::TypeId());
+    if (!node) {
+        jsonValue->Put("x", "0.0px");
+        jsonValue->Put("y", "0.0px");
+        return jsonValue;
+    }
+    auto render = AceType::DynamicCast<RenderFlexItem>(node);
+    if (render) {
+        jsonValue->Put("x", render->GetAnchorX().ToString().c_str());
+        jsonValue->Put("y", render->GetAnchorY().ToString().c_str());
+        return jsonValue;
     }
     jsonValue->Put("x", "0.0px");
     jsonValue->Put("y", "0.0px");
@@ -453,7 +518,8 @@ std::string InspectorComposedElement::GetFlexBasis() const
 {
     auto render = AceType::DynamicCast<RenderFlexItem>(GetInspectorNode(FlexItemElement::TypeId()));
     if (render) {
-        return render->GetFlexBasis().ToString();
+        auto flexBasis = render->GetFlexBasis();
+        return flexBasis.IsValid() ? render->GetFlexBasis().ToString() : "auto";
     }
     return "auto";
 }
@@ -631,7 +697,7 @@ std::string InspectorComposedElement::GetVisibility() const
 
 bool InspectorComposedElement::GetEnabled() const
 {
-    auto node = GetInspectorNode(ComposedElement::TypeId());
+    auto node = GetInspectorNode(GetTargetTypeId());
     if (!node) {
         return true;
     }
@@ -662,12 +728,11 @@ DimensionOffset InspectorComposedElement::GetOriginPoint() const
 
 std::unique_ptr<JsonValue> InspectorComposedElement::GetTransformEffect() const
 {
-    auto render = AceType::DynamicCast<RenderTransform>(GetInspectorNode(BoxElement::TypeId()));
+    auto render = AceType::DynamicCast<RenderTransform>(GetInspectorNode(TransformElement::TypeId()));
     if (!render) {
         return nullptr;
     }
     auto jsonValue = JsonUtil::CreateArray(true);
-
     for (const auto& operation : render->GetTransformEffects().GetOperations()) {
         switch (operation.type_) {
             case TransformOperationType::TRANSLATE: {
@@ -713,7 +778,6 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetTransformEffect() const
                 break;
         }
     }
-
     return jsonValue;
 }
 
@@ -763,31 +827,43 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetShadow() const
     return jsonValue;
 }
 
-RefPtr<ClipPath> InspectorComposedElement::GetClip() const
+std::unique_ptr<JsonValue> InspectorComposedElement::GetClip() const
 {
     auto render = GetRenderBox();
     if (!render) {
         return nullptr;
     }
-    return render->GetClipPath();
-}
-
-bool InspectorComposedElement::GetBoxClipFlag() const
-{
-    auto render = GetRenderBox();
-    if (!render) {
-        return false;
+    auto jsonValue = JsonUtil::Create(true);
+    auto clipPath = render->GetClipPath();
+    if (clipPath && clipPath->GetBasicShape()) {
+        int32_t shapeType = static_cast<int32_t>(clipPath->GetBasicShape()->GetBasicShapeType());
+        int32_t size = static_cast<int32_t>(sizeof(BASIC_SHAPE_TYPE) / sizeof(BASIC_SHAPE_TYPE[0]));
+        if (shapeType < size) {
+            jsonValue->Put("shape", BASIC_SHAPE_TYPE[shapeType]);
+        }
+    } else {
+        jsonValue->Put("shape", render->GetBoxClipFlag());
     }
-    return render->GetBoxClipFlag();
+    return jsonValue;
 }
 
-RefPtr<Mask> InspectorComposedElement::GetMask() const
+std::unique_ptr<JsonValue> InspectorComposedElement::GetMask() const
 {
     auto render = GetRenderBox();
     if (!render) {
         return nullptr;
     }
-    return render->GetMask();
+    auto jsonValue = JsonUtil::Create(true);
+    auto mask = render->GetMask();
+    if (mask && mask->GetMaskPath() && mask->GetMaskPath()->GetBasicShape()) {
+        auto shape = mask->GetMaskPath()->GetBasicShape();
+        int32_t shapeType = static_cast<int32_t>(shape->GetBasicShapeType());
+        int32_t size = static_cast<int32_t>(sizeof(BASIC_SHAPE_TYPE) / sizeof(BASIC_SHAPE_TYPE[0]));
+        if (shapeType < size) {
+            jsonValue->Put("shape", BASIC_SHAPE_TYPE[shapeType]);
+        }
+    }
+    return jsonValue;
 }
 
 RefPtr<GridColumnInfo> InspectorComposedElement::GetGridColumnInfo() const
@@ -839,4 +915,15 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetUseSizeType() const
     return jsonRoot;
 }
 
+std::unique_ptr<JsonValue> InspectorComposedElement::GetUseAlign() const
+{
+    auto render = GetRenderBox();
+    if (!render) {
+        return nullptr;
+    }
+    auto jsonValue = JsonUtil::Create(false);
+    jsonValue->Put("edge", ConvertSideToString(render->GetUseAlignSide()).c_str());
+    jsonValue->Put("offset", render->GetUseAlignOffset().ToString().c_str());
+    return jsonValue;
+}
 } // namespace OHOS::Ace::V2

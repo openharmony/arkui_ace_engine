@@ -281,6 +281,7 @@ enum class BorderStyle {
 };
 
 enum class BorderImageRepeat {
+    SPACE,
     STRETCH,
     REPEAT,
     ROUND,

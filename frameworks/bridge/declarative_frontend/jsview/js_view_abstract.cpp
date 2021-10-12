@@ -24,19 +24,23 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
-#include "core/components/common/properties/motion_path_option.h"
 
 #ifdef USE_V8_ENGINE
 #include "bridge/declarative_frontend/engine/v8/functions/v8_function.h"
 #endif
+
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_view_register.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/align_declaration.h"
+#include "core/components/common/properties/motion_path_option.h"
+#include "core/components/menu/menu_component.h"
+#include "core/components/option/option_component.h"
+#include "frameworks/base/memory/referenced.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "frameworks/core/components/text/text_component.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -1344,6 +1348,49 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
     decoration->SetImage(image);
 }
 
+void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
+{
+    auto menuComponent = AceType::MakeRefPtr<OHOS::Ace::MenuComponent>("", "menu");
+    auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
+    tapGesture->SetOnActionId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](const GestureEvent& info) {
+        auto refPtr = weak.Upgrade();
+        if (!refPtr) {
+            return;
+        }
+        auto showDialog = refPtr->GetTargetCallback();
+        showDialog("", info.GetGlobalLocation());
+    });
+    click->SetOnClick(tapGesture);
+    ViewStackProcessor::GetInstance()->Push(menuComponent);
+    auto menuTheme = GetTheme<SelectTheme>();
+    menuComponent->SetTheme(menuTheme);
+
+    auto paramArray = JSRef<JSArray>::Cast(info[0]);
+    size_t size = paramArray->Length();
+    for (size_t i = 0; i < size; i++) {
+        std::string value;
+        auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
+        auto menuValue = indexObject->GetProperty("value");
+        auto menuAction = indexObject->GetProperty("action");
+        ParseJsString(menuValue, value);
+        auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(menuAction));
+
+        auto optionTheme = GetTheme<SelectTheme>();
+        auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+        auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
+
+        optionComponent->SetTheme(optionTheme);
+        optionComponent->SetText(textComponent);
+        optionComponent->SetValue(value);
+        optionComponent->SetCustomizedCallback([func = std::move(action)]() {
+            func->Execute();
+        });
+        menuComponent->AppendOption(optionComponent);
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+}
+
 void JSViewAbstract::JsPadding(const JSCallbackInfo& info)
 {
     ParseMarginOrPadding(info, false);
@@ -1560,6 +1607,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
         LOGW("resId is not number");
         return false;
     }
+
     // TODO: should check how to deal with the themeConstants
     float dimensionFloat = 0.0f;
     if (!AceApplicationInfo::GetInstance().GetFloatById(resId->ToNumber<uint32_t>(), dimensionFloat)) {
@@ -1616,6 +1664,7 @@ bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
         LOGW("resId is not number");
         return false;
     }
+
     // TODO: should check how to deal with the themeConstants
     float resultFloat = 0.0f;
     if (!AceApplicationInfo::GetInstance().GetFloatById(resId->ToNumber<uint32_t>(), resultFloat)) {
@@ -1645,6 +1694,7 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
         LOGW("resId is not number");
         return false;
     }
+
     // TODO: should check how to deal with the themeConstants
     uint32_t colorId;
     if (!AceApplicationInfo::GetInstance().GetColorById(resId->ToNumber<uint32_t>(), colorId)) {
@@ -1803,8 +1853,7 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
         return false;
     }
 
-    LOGE("input value is not string or number");
-    result = "empty_src_using_pixmap";
+    LOGE("input value is not string or number, using PixelMap");
     return false;
 }
 
@@ -2112,9 +2161,6 @@ void JSViewAbstract::JsGridOffset(const JSCallbackInfo& info)
         builder->SetParent(gridContainerInfo);
         int32_t offset = info[0]->ToNumber<int32_t>();
         builder->SetOffset(offset);
-
-        auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-        flexItemComponent->SetGridColumnInfoBuilder(builder);
     }
 }
 
@@ -2172,9 +2218,6 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
             builder->SetOffset(offset, static_cast<GridSizeType>(i));
         }
     }
-
-    auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    flexItemComponent->SetGridColumnInfoBuilder(builder);
 }
 
 void JSViewAbstract::JsZIndex(const JSCallbackInfo& info)
@@ -2648,6 +2691,10 @@ void JSViewAbstract::JsGrayScale(const JSCallbackInfo& info)
         value.SetValue(0.0);
     }
 
+    if (GreatNotEqual(value.Value(), 1.0)) {
+        value.SetValue(1.0);
+    }
+
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetGrayScale(value);
 }
@@ -2664,7 +2711,7 @@ void JSViewAbstract::JsBrightness(const JSCallbackInfo& info)
         return;
     }
 
-    if (NearEqual(value.Value(), 0.0)) {
+    if (value.Value() == 0) {
         value.SetValue(EPSILON);
     }
     auto frontDecoration = GetFrontDecoration();
@@ -2683,7 +2730,7 @@ void JSViewAbstract::JsContrast(const JSCallbackInfo& info)
         return;
     }
 
-    if (NearEqual(value.Value(), 0.0)) {
+    if (value.Value() == 0) {
         value.SetValue(EPSILON);
     }
 
@@ -2705,7 +2752,7 @@ void JSViewAbstract::JsSaturate(const JSCallbackInfo& info)
         return;
     }
 
-    if (NearEqual(value.Value(), 0.0)) {
+    if (value.Value() == 0) {
         value.SetValue(EPSILON);
     }
 
@@ -3009,6 +3056,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("bindPopup", &JSViewAbstract::JsBindPopup);
 #endif
 
+    JSClass<JSViewAbstract>::StaticMethod("bindMenu", &JSViewAbstract::JsBindMenu);
     JSClass<JSViewAbstract>::StaticMethod("onDrag", &JSViewAbstract::JsOnDrag);
     JSClass<JSViewAbstract>::StaticMethod("onDragEnter", &JSViewAbstract::JsOnDragEnter);
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);
@@ -3408,6 +3456,7 @@ bool JSViewAbstract::ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue
         LOGE("invalid resource id");
         return false;
     }
+
     // TODO: should check how to deal with the themeConstants
     float resultFloat = 0.0f;
     if (!AceApplicationInfo::GetInstance().GetFloatById(resId->GetUInt(), resultFloat)) {
@@ -3441,6 +3490,7 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
         LOGE("invalid resource id");
         return false;
     }
+
     // TODO: should check how to deal with the themeConstants
     uint32_t colorId;
     if (!AceApplicationInfo::GetInstance().GetColorById(resId->GetUInt(), colorId)) {

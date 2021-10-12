@@ -64,7 +64,9 @@ public:
 
     void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) override;
 
-    void Destroy() override;
+    void Destroy() override {};
+
+    void Destroy(v8::Isolate* isolate, bool isWorker = false);
 
     // load the js source code work on v8 engine
     int32_t CallEvalBuf(v8::Isolate* isolate, v8::Local<v8::String> src);
@@ -75,8 +77,6 @@ public:
     }
 
     void AddIsolateNativeWorkRelation(v8::Isolate* isolate, NativeEngine* nativeEngine);
-
-    void RemoveIsolateNativeWorkRelation(v8::Isolate* isolate);
 
     bool ForwardToWorker(int32_t callbackId) override;
 
@@ -122,6 +122,11 @@ private:
 
     static void NativeAsyncExecuteCallback(NativeEngine* engine, void* data);
     static void NativeAsyncCompleteCallback(NativeEngine* engine, int status, void* data);
+
+    void GetCallbackId(v8::Isolate* isolate, std::set<int32_t>& callbackIdSet);
+    void DestroyModuleCallbackMap(v8::Isolate* isolate);
+    void DestroyCallbackIdIsolateMap(v8::Isolate* isolate);
+    void DestroyIsolateNativeWorkMap(v8::Isolate* isolate);
 
     EventCallbackMap eventCallBackFuncs_;
     ModuleCallbackMap moduleCallBackFuncs_;

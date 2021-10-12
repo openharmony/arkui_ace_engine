@@ -81,6 +81,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
@@ -102,6 +103,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "frameworks/bridge/declarative_frontend/jsview/js_web.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
+#endif
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
@@ -480,6 +485,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSList::JSBind(globalObj);
     JSListItem::JSBind(globalObj);
     JSLoadingProgress::JSBind(globalObj);
+    JSMenu::JSBind(globalObj);
+    JSOption::JSBind(globalObj);
     JSImage::JSBind(globalObj);
     JSImageAnimator::JSBind(globalObj);
     JSColumn::JSBind(globalObj);
@@ -522,6 +529,7 @@ void JsRegisterViews(BindingTarget globalObj)
 #endif
     JSRect::JSBind(globalObj);
     JSShape::JSBind(globalObj);
+    JSSearch::JSBind(globalObj);
     JSPath::JSBind(globalObj);
     JSCircle::JSBind(globalObj);
     JSLine::JSBind(globalObj);
@@ -534,6 +542,10 @@ void JsRegisterViews(BindingTarget globalObj)
     JSCamera::JSBind(globalObj);
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(OHOS_STANDARD_SYSTEM)
+    JSWeb::JSBind(globalObj);
+    JSWebController::JSBind(globalObj);
+#endif
 #endif
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
@@ -597,10 +609,10 @@ void JsRegisterViews(BindingTarget globalObj)
     loadingProgressStyle.Constant("Orbital", 3);
 
     JSObjectTemplate progressStyle;
-    progressStyle.Constant("Linear", 1);
-    progressStyle.Constant("Capsule", 2);
-    progressStyle.Constant("Eclipse", 3);
-    progressStyle.Constant("Circular", 4);
+    progressStyle.Constant("Linear", 0);
+    progressStyle.Constant("Capsule", 1);
+    progressStyle.Constant("Eclipse", 2);
+    progressStyle.Constant("Circular", 3);
 
     JSObjectTemplate stackFit;
     stackFit.Constant("Keep", 0);
@@ -647,6 +659,11 @@ void JsRegisterViews(BindingTarget globalObj)
     pickerStyle.Constant("Block", 1);
     pickerStyle.Constant("Fade", 2);
 
+    JSObjectTemplate badgePosition;
+    badgePosition.Constant("RightTop", 0);
+    badgePosition.Constant("Right", 1);
+    badgePosition.Constant("Left", 2);
+
     JS_SetPropertyStr(ctx, globalObj, "MainAxisAlign", *mainAxisAlign);
     JS_SetPropertyStr(ctx, globalObj, "CrossAxisAlign", *crossAxisAlign);
     JS_SetPropertyStr(ctx, globalObj, "Direction", *direction);
@@ -662,6 +679,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JS_SetPropertyStr(ctx, globalObj, "LoadingProgressStyle", *loadingProgressStyle);
     JS_SetPropertyStr(ctx, globalObj, "IconPosition", *iconPosition);
     JS_SetPropertyStr(ctx, globalObj, "PickerStyle", *pickerStyle);
+    JS_SetPropertyStr(ctx, globalObj, "BadgePosition", *badgePosition);
 
     LOGD("View classes and jsCreateDocuemnt, registerObservableObject functions registered.");
 }

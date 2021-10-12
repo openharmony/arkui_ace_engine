@@ -31,6 +31,8 @@ void RenderCheckable::Update(const RefPtr<Component>& component)
     }
     pointColor_ = checkable->GetPointColor().GetValue();
     activeColor_ = checkable->GetActiveColor().GetValue();
+    pointColorInspector_ = checkable->GetPointColor();
+    activeColorInspector_ = checkable->GetActiveColor();
     inactiveColor_ = checkable->GetInactiveColor().GetValue();
     inactivePointColor_ = checkable->GetInactivePointColor().GetValue();
     focusColor_ = checkable->GetFocusColor().GetValue();

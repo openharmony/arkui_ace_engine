@@ -133,6 +133,12 @@ public:
     // when configuration update
     virtual void OnConfigurationUpdated(const std::string& data) {};
 
+    virtual void OnSaveAbilityState (std::string& data) = 0;
+
+    virtual void OnMemoryLevel(const int32_t level) = 0;
+
+    virtual void OnRestoreAbilityState (const std::string& data) = 0;
+
     // when front on active
     virtual void OnActive() = 0;
 
@@ -155,6 +161,8 @@ public:
 
     // start the ability when it's running
     virtual void OnNewRequest(const std::string& data) = 0;
+
+    virtual void OnNewWant(const std::string& data) = 0;
 
     // call router back
     virtual void CallRouterBack() = 0;

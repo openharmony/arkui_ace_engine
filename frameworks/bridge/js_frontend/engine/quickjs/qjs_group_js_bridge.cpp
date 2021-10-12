@@ -872,6 +872,7 @@ void QuickJsGroupJsBridge::CallEventJsCallback(int32_t callbackId, std::vector<u
     } else {
         LOGE("trigger JS callback function error, it is not exists, callbackId:%{private}d", callbackId);
     }
+    js_std_loop(context_);
     eventData.clear();
 }
 

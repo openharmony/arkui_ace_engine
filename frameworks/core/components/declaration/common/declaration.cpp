@@ -2096,6 +2096,7 @@ void Declaration::SetBorderImageWidthForFourEdges(const std::string& value, Decl
         default:
             break;
     }
+    declaration.backDecoration_->SetHasBorderImageWidth(true);
     declaration.hasDecorationStyle_ = true;
     declaration.hasBorderStyle_ = true;
 }
@@ -2137,6 +2138,7 @@ void Declaration::SetBorderImageSliceForFourEdges(const std::string& value, Decl
         default:
             break;
     }
+    declaration.backDecoration_->SetHasBorderImageSlice(true);
     declaration.hasDecorationStyle_ = true;
     declaration.hasBorderStyle_ = true;
 }
@@ -2174,6 +2176,7 @@ void Declaration::SetBorderImageOutSetForFourEdges(const std::string& value, Dec
         default:
             break;
     }
+    declaration.backDecoration_->SetHasBorderImageOutset(true);
     declaration.hasDecorationStyle_ = true;
     declaration.hasBorderStyle_ = true;
 }
@@ -2185,6 +2188,7 @@ void Declaration::SetBorderImageRepeatForFourEdges(const std::string& value, Dec
     borderStyle.border.SetBorderImageRepeat(ConvertStrToBorderImageRepeat(value));
     borderStyle.border.SetBorderImageRepeat(ConvertStrToBorderImageRepeat(value));
     borderStyle.border.SetBorderImageRepeat(ConvertStrToBorderImageRepeat(value));
+    declaration.backDecoration_->SetHasBorderImageRepeat(true);
     declaration.hasDecorationStyle_ = true;
     declaration.hasBorderStyle_ = true;
 }
@@ -2230,6 +2234,8 @@ void Declaration::SetBorderImageGradient(const std::unique_ptr<JsonValue>& value
         }
         SetBorderImageSliceForFourEdges(sliceStr, declaration);
     }
+    declaration.backDecoration_->SetBorderType(2);
+    declaration.backDecoration_->SetHasBorderImageGradient(true);
     declaration.hasDecorationStyle_ = true;
     declaration.hasBorderStyle_ = true;
 }
@@ -2265,8 +2271,8 @@ void Declaration::SetBorderImageUrl(const std::unique_ptr<JsonValue>& values, De
         }
         SetBorderImageOutSetForFourEdges(outsetStr, declaration);
     }
-    if (values->Contains("repeat") && values->GetValue("repeat")->IsArray()) {
-        SetBorderImageRepeatForFourEdges(values->GetValue("url")->GetString(), declaration);
+    if (values->Contains("repeat") && values->GetValue("repeat")->IsString()) {
+        SetBorderImageRepeatForFourEdges(values->GetValue("repeat")->GetString(), declaration);
     }
     declaration.hasDecorationStyle_ = true;
     declaration.hasBorderStyle_ = true;
@@ -2279,6 +2285,8 @@ void Declaration::SetBorderImageFindUrl(const std::string& value, Declaration& d
     if (backgroundStyle.IsValid()) {
         backgroundStyle.borderImage->SetSrc(value);
         declaration.backDecoration_->SetBorderImage(backgroundStyle.borderImage);
+        declaration.backDecoration_->SetBorderType(1);
+        declaration.backDecoration_->SetHasBorderImageSource(true);
         declaration.hasDecorationStyle_ = true;
     }
 }
@@ -3059,6 +3067,7 @@ void Declaration::ResetDefaultStyles()
     auto& background = static_cast<CommonBackgroundStyle&>(GetStyle(StyleTag::COMMON_BACKGROUND_STYLE));
     if (background.IsValid() && !background.IsShared()) {
         background.gradient = Gradient();
+        background.gradientBorderImage = Gradient();
         background.backgroundImage = AceType::MakeRefPtr<BackgroundImage>();
         background.borderImage = AceType::MakeRefPtr<BorderImage>();
     }

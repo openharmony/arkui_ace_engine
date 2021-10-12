@@ -18,7 +18,6 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/wrap/render_wrap.h"
-#include "core/components/wrap/wrap_element.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {

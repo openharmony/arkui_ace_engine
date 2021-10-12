@@ -74,6 +74,26 @@ public:
 
     RefPtr<Component> GetComponent() override;
 
+    void SetParagraphWidth(double paragraphWidth)
+    {
+        paragraphWidth_ = paragraphWidth;
+    }
+
+    double GetParagraphWidth() const
+    {
+        return paragraphWidth_;
+    }
+
+    void SetParagraphHeight(double paragraphHeight)
+    {
+        paragraphHeight_ = paragraphHeight;
+    }
+
+    double GetParagraphHeight() const
+    {
+        return paragraphHeight_;
+    }
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -106,6 +126,8 @@ protected:
     uint32_t maxLines_ = UINT32_MAX;
     RefPtr<TextComponent> text_;
     std::map<int32_t, std::map<GestureType, EventMarker>> touchRegions_; // key of map is end position of span.
+    double paragraphWidth_;
+    double paragraphHeight_;
 
 private:
     void HandleTouchEvent(GestureType type, const Offset& touchPosition);

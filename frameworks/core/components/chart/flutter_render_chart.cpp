@@ -56,8 +56,12 @@ RefPtr<RenderNode> RenderChart::Create()
 RenderLayer FlutterRenderChart::GetRenderLayer()
 {
     if (!layer_) {
-        layer_ = AceType::MakeRefPtr<Flutter::ClipLayer>(0.0, GetLayoutSize().Width(), 0.0,
-            GetLayoutSize().Height(), Flutter::Clip::NONE);
+        layer_ = AceType::MakeRefPtr<Flutter::ClipLayer>(
+            0, GetLayoutSize().Width(), 0, GetLayoutSize().Height(), Flutter::Clip::NONE);
+        lastLayoutSize_ = GetLayoutSize();
+    } else if (lastLayoutSize_ != GetLayoutSize()) {
+        layer_->SetClip(0, GetLayoutSize().Width(), 0, GetLayoutSize().Height(), Flutter::Clip::NONE);
+        lastLayoutSize_ = GetLayoutSize();
     }
     return AceType::RawPtr(layer_);
 }

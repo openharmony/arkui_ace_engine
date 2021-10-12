@@ -22,6 +22,11 @@
 #include "core/components/form/resource/form_manager_resource.h"
 #include "core/components/form/resource/form_request_data.h"
 
+#ifdef OHOS_STANDARD_SYSTEM
+#include "form_js_info.h"
+#include "ohos/aafwk/content/want.h"
+#endif
+
 namespace OHOS::Ace {
 
 class FormManagerDelegate : public FormManagerResource {
@@ -29,8 +34,8 @@ class FormManagerDelegate : public FormManagerResource {
 
 public:
     using OnFormAcquiredCallback
-        = std::function<void(const std::string&, const std::string&, const std::string&, const std::string&)>;
-    using OnFormUpdateCallback = std::function<void(const std::string&, const std::string&)>;
+        = std::function<void(int64_t, const std::string&, const std::string&, const std::string&)>;
+    using OnFormUpdateCallback = std::function<void(int64_t, const std::string&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
 
     enum class State: char {
@@ -56,6 +61,12 @@ public:
 
     void OnActionEvent(const std::string& action);
 
+#ifdef OHOS_STANDARD_SYSTEM
+    void ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJsInfo);
+    void ProcessFormUninstall(const int64_t formId);
+    void OnDeathReceived();
+#endif
+
 private:
     void CreatePlatformResource(const WeakPtr<PipelineContext>& context, const RequestFormInfo& info);
     void Stop();
@@ -72,6 +83,11 @@ private:
     OnFormErrorCallback onFormErrorCallback_;
 
     State state_ { State::WAITINGFORSIZE };
+#ifdef OHOS_STANDARD_SYSTEM
+    int64_t runningCardId_ = -1;
+    AAFwk::Want wantCache_;
+    bool hasCreated_ = false;
+#endif
 };
 
 } // namespace OHOS::Ace

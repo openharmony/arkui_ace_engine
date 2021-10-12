@@ -180,10 +180,16 @@ void Scrollable::HandleTouchUp()
     }
 }
 
+bool Scrollable::IsAnimationNotRunning() const
+{
+    return !isTouching_ && !controller_->IsRunning() && !springController_->IsRunning();
+}
+
 bool Scrollable::Idle() const
 {
     return !isTouching_ && controller_->IsStopped() && springController_->IsStopped();
 }
+
 bool Scrollable::IsStopped() const
 {
     return (springController_ ? (springController_->IsStopped()) : true) &&

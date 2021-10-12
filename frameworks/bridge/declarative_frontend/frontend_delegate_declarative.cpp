@@ -67,7 +67,7 @@ int32_t FrontendDelegateDeclarative::GenerateNextPageId()
 
 void FrontendDelegateDeclarative::RecyclePageId(int32_t pageId)
 {
-    if (pageId < 0 && pageId >= MAX_PAGE_ID_SIZE) {
+    if (pageId < 0 || pageId >= MAX_PAGE_ID_SIZE) {
         return;
     }
     uint64_t bitMask = (1ULL << pageId);
@@ -84,9 +84,13 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
     const RequestAnimationCallback& requestAnimationCallback, const JsCallback& jsCallback,
     const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
     const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
+    const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
+    const OnRestoreAbilityStateCallBack& onRestoreAbilityStateCallBack,
+    const OnNewWantCallBack& onNewWantCallBack,
     const OnSaveDataCallBack& onSaveDataCallBack, const OnStartContinuationCallBack& onStartContinuationCallBack,
-    const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack,
-    const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
+    const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack, const OnActiveCallBack& onActiveCallBack,
+    const OnInactiveCallBack& onInactiveCallBack, const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
+    const OnMemoryLevelCallBack& onMemoryLevelCallBack,
     const OnRestoreDataCallBack& onRestoreDataCallBack)
     : loadJs_(loadCallback), dispatcherCallback_(transferCallback), asyncEvent_(asyncEventCallback),
       syncEvent_(syncEventCallback), updatePage_(updatePageCallback), resetStagingPage_(resetLoadingPageCallback),
@@ -94,10 +98,14 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
       updateApplicationState_(updateApplicationStateCallback), timer_(timerCallback),
       mediaQueryCallback_(mediaQueryCallback), requestAnimationCallback_(requestAnimationCallback),
       jsCallback_(jsCallback), onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
-      onConfigurationUpdated_(onConfigurationUpdatedCallBack), onSaveData_(onSaveDataCallBack),
+      onConfigurationUpdated_(onConfigurationUpdatedCallBack),
+      onSaveAbilityState_(onSaveAbilityStateCallBack),
+      onRestoreAbilityState_(onRestoreAbilityStateCallBack),
+      onNewWant_(onNewWantCallBack), onSaveData_(onSaveDataCallBack),
       onStartContinuation_(onStartContinuationCallBack), onRemoteTerminated_(onRemoteTerminatedCallBack),
-      onCompleteContinuation_(onCompleteContinuationCallBack), onRestoreData_(onRestoreDataCallBack),
-      manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
+      onActive_(onActiveCallBack), onInactive_(onInactiveCallBack),
+      onCompleteContinuation_(onCompleteContinuationCallBack), onMemoryLevel_(onMemoryLevelCallBack),
+      onRestoreData_(onRestoreDataCallBack), manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
       jsAccessibilityManager_(AccessibilityNodeManager::Create()),
       mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()), taskExecutor_(taskExecutor)
 {
@@ -470,9 +478,20 @@ bool FrontendDelegateDeclarative::OnStartContinuation()
 
 void FrontendDelegateDeclarative::OnCompleteContinuation(int32_t code)
 {
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostTask(
         [onCompleteContinuation = onCompleteContinuation_, code]() {
             onCompleteContinuation(code);
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarative::OnMemoryLevel(const int32_t level)
+{
+    taskExecutor_->PostTask(
+        [onMemoryLevel = onMemoryLevel_, level]() {
+            if (onMemoryLevel) {
+                onMemoryLevel(level);
+            }
         },
         TaskExecutor::TaskType::JS);
 }
@@ -512,9 +531,27 @@ bool FrontendDelegateDeclarative::OnRestoreData(const std::string& data)
 void FrontendDelegateDeclarative::OnRemoteTerminated()
 {
     LOGD("OnRemoteTerminated: remote ability terminated");
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostTask(
         [onRemoteTerminated = onRemoteTerminated_]() {
             onRemoteTerminated();
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarative::OnActive()
+{
+    taskExecutor_->PostTask(
+        [onActive = onActive_]() {
+            onActive();
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarative::OnInactive()
+{
+    taskExecutor_->PostTask(
+        [onInactive = onInactive_]() {
+            onInactive();
         },
         TaskExecutor::TaskType::JS);
 }
@@ -555,6 +592,33 @@ void FrontendDelegateDeclarative::OnWindowDisplayModeChanged(bool isShownInMulti
     taskExecutor_->PostTask(
         [onWindowDisplayModeChanged = onWindowDisplayModeChanged_, isShownInMultiWindow, data] {
             onWindowDisplayModeChanged(isShownInMultiWindow, data);
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarative::OnSaveAbilityState(std::string& data)
+{
+    taskExecutor_->PostSyncTask(
+        [onSaveAbilityState = onSaveAbilityState_, &data] {
+            onSaveAbilityState(data);
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarative::OnRestoreAbilityState(const std::string& data)
+{
+    taskExecutor_->PostTask(
+        [onRestoreAbilityState = onRestoreAbilityState_, data] {
+            onRestoreAbilityState(data);
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarative::OnNewWant(const std::string& data)
+{
+    taskExecutor_->PostTask(
+        [onNewWant = onNewWant_, data] {
+            onNewWant(data);
         },
         TaskExecutor::TaskType::JS);
 }
@@ -670,6 +734,34 @@ void FrontendDelegateDeclarative::Replace(const PageTarget& target, const std::s
     } else {
         LOGW("this uri not support in route replace.");
     }
+}
+
+void FrontendDelegateDeclarative::PostponePageTransition()
+{
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this)] {
+          auto delegate = weak.Upgrade();
+          if (!delegate) {
+              return;
+          }
+          auto pipelineContext = delegate->pipelineContextHolder_.Get();
+          pipelineContext->PostponePageTransition();
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void FrontendDelegateDeclarative::LaunchPageTransition()
+{
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this)] {
+          auto delegate = weak.Upgrade();
+          if (!delegate) {
+              return;
+          }
+          auto pipelineContext = delegate->pipelineContextHolder_.Get();
+          pipelineContext->LaunchPageTransition();
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const std::string& params)
@@ -984,6 +1076,7 @@ void FrontendDelegateDeclarative::LoadPage(
     }
     if (isStagingPageExist_) {
         LOGE("FrontendDelegateDeclarative, load page failed, waiting for current page loading finish.");
+        RecyclePageId(pageId);
         return;
     }
     isStagingPageExist_ = true;
@@ -1620,16 +1713,6 @@ void FrontendDelegateDeclarative::AttachPipelineContext(const RefPtr<PipelineCon
     pipelineContextHolder_.Attach(context);
     jsAccessibilityManager_->SetPipelineContext(context);
     jsAccessibilityManager_->InitializeCallback();
-}
-
-void FrontendDelegateDeclarative::SetAssetManager(const RefPtr<AssetManager>& assetManager)
-{
-    assetManager_ = assetManager;
-}
-
-RefPtr<AssetManager> FrontendDelegateDeclarative::GetAssetManager() const
-{
-    return assetManager_;
 }
 
 RefPtr<PipelineContext> FrontendDelegateDeclarative::GetPipelineContext()

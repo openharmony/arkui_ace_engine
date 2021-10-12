@@ -160,6 +160,11 @@ void ViewFunctions::ExecuteTransition()
     ExecuteFunction(jsTransitionFunc_, "pageTransition");
 }
 
+bool ViewFunctions::HasPageTransition() const
+{
+    return !jsTransitionFunc_.IsEmpty();
+}
+
 void ViewFunctions::ExecuteShow()
 {
     ExecuteFunction(jsOnShowFunc_, "onPageShow");
@@ -277,14 +282,21 @@ RefPtr<OHOS::Ace::Component> JSView::CreateComponent()
         // to state update it will call this callback to get the new child component.
         if (element) {
             element->SetRenderFunction(std::move(renderFunction));
+            if (jsView->jsViewFunction_ && jsView->jsViewFunction_->HasPageTransition()) {
+                auto pageTransitionFunction = [weak]() -> RefPtr<Component> {
+                    auto jsView = weak.Upgrade();
+                    if (!jsView || !jsView->jsViewFunction_) {
+                        return nullptr;
+                    }
+                    jsView->jsViewFunction_->ExecuteTransition();
+                    return jsView->BuildPageTransitionComponent();
+                };
+                element->SetPageTransitionFunction(std::move(pageTransitionFunction));
+            }
         }
     };
 
     composedComponent->SetElementFunction(std::move(elementFunction));
-
-    if (jsViewFunction_) {
-        jsViewFunction_->ExecuteTransition();
-    }
 
     if (IsStatic()) {
         LOGD("will mark composedComponent as static");

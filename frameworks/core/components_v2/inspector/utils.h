@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/align_declaration.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -332,6 +333,27 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
     inline std::string ConvertAxisToString(Axis axis)
     {
         return AXIS_TYPE[static_cast<int32_t>(axis)];
+    }
+
+    inline  std::string ConvertSideToString(AlignDeclaration::Edge edge)
+    {
+        if (edge == AlignDeclaration::Edge::TOP) {
+            return "Edge::Top";
+        } else if (edge == AlignDeclaration::Edge::CENTER) {
+            return "Edge::Center";
+        } else if (edge == AlignDeclaration::Edge::BOTTOM) {
+            return "Edge::Bottom";
+        } else if (edge == AlignDeclaration::Edge::BASELINE) {
+            return "Edge::Baseline";
+        } else if (edge == AlignDeclaration::Edge::START) {
+            return "Edge::Start";
+        } else if (edge == AlignDeclaration::Edge::MIDDLE) {
+            return "Edge::Middle";
+        } else if (edge == AlignDeclaration::Edge::END) {
+            return "Edge::End";
+        } else {
+            return "Edge::Center";
+        }
     }
 } // namespace OHOS::Ace::V2
 

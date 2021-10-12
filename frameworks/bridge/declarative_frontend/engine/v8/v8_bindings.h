@@ -19,6 +19,8 @@
 #include "third_party/v8/include/v8.h"
 #include "v8_value_conversions.h"
 
+#include <mutex>
+
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_utils.h"
 
 namespace __detail__ {
@@ -149,8 +151,10 @@ private:
     static void JSConstructorInterceptor(const v8::FunctionCallbackInfo<v8::Value>& info);
     static bool CheckIfConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info);
 
-    static v8::Persistent<v8::FunctionTemplate> functionTemplate_;
+    // functionTemplate corresponding to isolate
+    static std::unordered_map<v8::Isolate*, v8::Persistent<v8::FunctionTemplate>> functionTemplates_;
     static std::unordered_map<std::string, v8::Local<v8::FunctionTemplate>> staticPropertyNames_;
+    static std::mutex mutex_;
     // TODO(cvetan): Remove
     static FunctionCallback constructor_;
     static JSFunctionCallback jsConstructor_;

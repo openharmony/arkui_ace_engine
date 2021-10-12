@@ -386,16 +386,6 @@ void V8DeclarativeGroupJsBridge::AddIsolateNativeWorkRelation(v8::Isolate* isola
     LOGD("isolateNativeWorkMap size = %{private}zu", isolateNativeWorkMap_.size());
 }
 
-void V8DeclarativeGroupJsBridge::RemoveIsolateNativeWorkRelation(v8::Isolate* isolate)
-{
-    std::lock_guard<std::mutex> lock(isolateNativeWorkMapMutex_);
-    LOGI("remove worker isolate, isolate:%{private}p", isolate);
-    auto result = isolateNativeWorkMap_.find(isolate);
-    if (result != isolateNativeWorkMap_.end()) {
-        isolateNativeWorkMap_.erase(isolate);
-    }
-}
-
 void V8DeclarativeGroupJsBridge::ProcessParseJsError(
     ParseJsDataResult errorType, v8::Isolate* isolate, int32_t callbackId)
 {
@@ -877,21 +867,69 @@ void V8DeclarativeGroupJsBridge::LoadPluginJsByteCode(std::vector<uint8_t>&& jsC
     LOGW("V8 do not support load js bytecode now.");
 }
 
-void V8DeclarativeGroupJsBridge::Destroy()
+void V8DeclarativeGroupJsBridge::Destroy(v8::Isolate* isolate, bool isWorker)
 {
-    eventCallBackFuncs_.clear();
-    moduleCallBackFuncs_.clear();
-    requestIdCallbackIdMap_.clear();
-    callbackIdIsolateMap_.clear();
-    IsolateNativeWorkMap::iterator iter;
-    for (iter = isolateNativeWorkMap_.begin(); iter != isolateNativeWorkMap_.end(); ++iter) {
-        NativeAsyncWork* nativeAsyncWork = iter->second;
-        if (nativeAsyncWork != nullptr) {
-            delete nativeAsyncWork;
+    if (!isWorker) {
+        eventCallBackFuncs_.clear();
+        requestIdCallbackIdMap_.clear();
+        context_.Reset();
+    }
+
+    DestroyModuleCallbackMap(isolate);
+    DestroyCallbackIdIsolateMap(isolate);
+    DestroyIsolateNativeWorkMap(isolate);
+}
+
+void V8DeclarativeGroupJsBridge::GetCallbackId(v8::Isolate* isolate, std::set<int32_t>& callbackIdSet)
+{
+    std::lock_guard<std::mutex> lock(callbackIdIsolateMapMutex_);
+    for (auto iter = callbackIdIsolateMap_.begin(); iter != callbackIdIsolateMap_.end(); ++iter) {
+        if (iter->second == isolate) {
+            callbackIdSet.emplace(iter->first);
         }
     }
-    isolateNativeWorkMap_.clear();
-    context_.Reset();
+}
+
+void V8DeclarativeGroupJsBridge::DestroyModuleCallbackMap(v8::Isolate* isolate)
+{
+    std::set<int32_t> callbackIdSet;
+    GetCallbackId(isolate, callbackIdSet);
+
+    std::lock_guard<std::mutex> lock(moduleCallbackMapMutex_);
+    for (auto iter = moduleCallBackFuncs_.begin(); iter != moduleCallBackFuncs_.end();) {
+        if (callbackIdSet.find(iter->first) != callbackIdSet.end()) {
+            iter = moduleCallBackFuncs_.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+
+void V8DeclarativeGroupJsBridge::DestroyCallbackIdIsolateMap(v8::Isolate* isolate)
+{
+    std::lock_guard<std::mutex> lock(callbackIdIsolateMapMutex_);
+    for (auto iter = callbackIdIsolateMap_.begin(); iter != callbackIdIsolateMap_.end();) {
+        if (iter->second == isolate) {
+            iter = callbackIdIsolateMap_.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+
+void V8DeclarativeGroupJsBridge::DestroyIsolateNativeWorkMap(v8::Isolate* isolate)
+{
+    std::lock_guard<std::mutex> lock(isolateNativeWorkMapMutex_);
+    auto result = isolateNativeWorkMap_.find(isolate);
+    if (result != isolateNativeWorkMap_.end()) {
+        LOGD("remove worker isolate, isolate:%{private}p", isolate);
+        NativeAsyncWork* nativeAsyncWork = result->second;
+        if (nativeAsyncWork != nullptr) {
+            delete nativeAsyncWork;
+            nativeAsyncWork = nullptr;
+        }
+        isolateNativeWorkMap_.erase(isolate);
+    }
 }
 
 bool V8DeclarativeGroupJsBridge::ForwardToWorker(int32_t callbackId)

@@ -41,30 +41,12 @@ public:
     bool CanPushPage();
     bool CanReplacePage();
     bool CanRouterPage();
+    void PostponePageTransition();
+    void LaunchPageTransition();
     void RefreshFocus();
     bool IsFocusable() const override;
     bool InitTransition(const RefPtr<PageTransitionElement>& transitionIn,
         const RefPtr<PageTransitionElement>& transitionOut, TransitionEvent event);
-
-    void SetForCard()
-    {
-        isForMountCard_ = true;
-    }
-
-    bool IsForCard()
-    {
-        return isForMountCard_;
-    }
-
-    WeakPtr<PipelineContext> GetCardContext() const
-    {
-        return cardContext_;
-    }
-
-    void SetCardContext(const WeakPtr<PipelineContext>& context)
-    {
-        cardContext_ = context;
-    }
 
     StackOperation GetStackOperation() const
     {
@@ -105,15 +87,13 @@ private:
 
     StackOperation operation_ { StackOperation::NONE };
     StackOperation pendingOperation_ { StackOperation::NONE };
+    bool postponePageTransition_ { false };
 
     RefPtr<Component> newComponent_;
     RefPtr<Animator> controllerIn_;  // Controller for transition in.
     RefPtr<Animator> controllerOut_; // Controller for transition out.
     int32_t directedPageId_ = 0;
     bool isWaitingForBuild_ = false;
-
-    bool isForMountCard_ = false;
-    WeakPtr<PipelineContext> cardContext_;
 };
 
 class SectionStageElement : public StageElement {

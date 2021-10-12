@@ -26,6 +26,7 @@
 #include "core/components_v2/inspector/checkbox_composed_element.h"
 #include "core/components_v2/inspector/column_composed_element.h"
 #include "core/components_v2/inspector/column_split_composed_element.h"
+#include "core/components_v2/inspector/data_panel_composed_element.h"
 #include "core/components_v2/inspector/divider_composed_element.h"
 #include "core/components_v2/inspector/flex_composed_element.h"
 #include "core/components_v2/inspector/grid_composed_element.h"
@@ -35,14 +36,19 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/list_composed_element.h"
 #include "core/components_v2/inspector/list_item_composed_element.h"
+#include "core/components_v2/inspector/navigation_view_composed_element.h"
 #include "core/components_v2/inspector/navigator_composed_element.h"
 #include "core/components_v2/inspector/panel_composed_element.h"
+#include "core/components_v2/inspector/progress_composed_element.h"
 #include "core/components_v2/inspector/qrcode_composed_element.h"
+#include "core/components_v2/inspector/rating_composed_element.h"
 #include "core/components_v2/inspector/row_composed_element.h"
 #include "core/components_v2/inspector/row_split_composed_element.h"
 #include "core/components_v2/inspector/scroll_composed_element.h"
+#include "core/components_v2/inspector/search_composed_element.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
 #include "core/components_v2/inspector/shape_container_composed_element.h"
+#include "core/components_v2/inspector/slider_composed_element.h"
 #include "core/components_v2/inspector/span_composed_element.h"
 #include "core/components_v2/inspector/stack_composed_element.h"
 #include "core/components_v2/inspector/swiper_composed_element.h"
@@ -66,7 +72,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { COUNTER_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { NAVIGATION_VIEW_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationViewComposedElement>(id); } },
     { ROW_SPLIT_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::RowSplitComposedElement>(id); } },
     { STACK_COMPONENT_TAG,
@@ -128,7 +134,23 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { CALENDAR_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::CalendarComposedElement>(id); } },
     { BADGE_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::BadgeComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::BadgeComposedElement>(id); } },
+    { SEARCH_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::SearchComposedElement>(id); } },
+    { FORM_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { VIDEO_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { INDEXER_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { SLIDER_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::SliderComposedElement>(id); } },
+    { RATING_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::RatingComposedElement>(id); } },
+    { PROGRESS_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::ProgressComposedElement>(id); } },
+    { DATA_PANEL_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::DataPanelComposedElement>(id); } }
 };
 
 const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP {
@@ -165,7 +187,15 @@ const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_T
     { TOGGLE_COMPONENT_TAG, TOGGLE_ETS_TAG },
     { SCROLL_COMPONENT_TAG, SCROLL_ETS_TAG },
     { CALENDAR_COMPONENT_TAG, CALENDAR_ETS_TAG },
-    { BADGE_COMPONENT_TAG, BADGE_ETS_TAG }
+    { BADGE_COMPONENT_TAG, BADGE_ETS_TAG },
+    { SEARCH_COMPONENT_TAG, SEARCH_ETS_TAG },
+    { FORM_COMPONENT_TAG, FORM_ETS_TAG },
+    { VIDEO_COMPONENT_TAG, VIDEO_ETS_TAG },
+    { INDEXER_COMPONENT_TAG, INDEXER_ETS_TAG },
+    { SLIDER_COMPONENT_TAG, SLIDER_ETS_TAG },
+    { RATING_COMPONENT_TAG, RATING_ETS_TAG },
+    { PROGRESS_COMPONENT_TAG, PROGRESS_ETS_TAG },
+    { DATA_PANEL_COMPONENT_TAG, DATA_PANEL_ETS_TAG }
 };
 
 } // namespace
@@ -212,15 +242,16 @@ bool InspectorComposedComponent::HasInspectorFinished(std::string tag)
 RefPtr<AccessibilityNode> InspectorComposedComponent::CreateAccessibilityNode(
     const std::string& tag, int32_t nodeId, int32_t parentNodeId, int32_t itemIndex)
 {
-    auto iter = COMPONENT_TAG_TO_ETS_TAG_MAP.find(tag);
-    if (iter == COMPONENT_TAG_TO_ETS_TAG_MAP.end()) {
-        LOGD("can't find %{public}s component", tag.c_str());
-        return nullptr;
-    }
     auto accessibilityManager = GetAccessibilityManager();
     if (!accessibilityManager) {
         LOGE("get AccessibilityManager failed");
         return nullptr;
+    }
+
+    auto iter = COMPONENT_TAG_TO_ETS_TAG_MAP.find(tag);
+    if (iter == COMPONENT_TAG_TO_ETS_TAG_MAP.end()) {
+        auto node = accessibilityManager->CreateAccessibilityNode(tag, nodeId, parentNodeId, itemIndex);
+        return node;
     }
     auto node = accessibilityManager->CreateAccessibilityNode(iter->second, nodeId, parentNodeId, itemIndex);
     return node;

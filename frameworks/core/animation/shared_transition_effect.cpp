@@ -408,15 +408,15 @@ bool SharedTransitionStatic::Allow(TransitionEvent event)
 
 bool SharedTransitionStatic::CreateAnimation(TweenOption& option, TransitionEvent event, bool isLazy)
 {
-    if (event == TransitionEvent::PUSH_START) {
-        // push page opacity 0 to 1
+    if (src_.Invalid()) {
+        // anchor appearing, opacity 0 to 1
         auto opacityAnimation = option.GetOpacityAnimation();
         if (!opacityAnimation) {
             TransitionTweenOptionFactory::CreateSharedTweenOption(
                 SharedTransitionEffectType::SHARED_EFFECT_STATIC, option);
         }
     } else {
-        // pop page opacity 1 to 0
+        // anchor disappearing, opacity 1 to 0
         if (!option.GetOpacityAnimation()) {
             auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(1.0f, 0.0f, option.GetCurve());
             option.SetOpacityAnimation(animation);

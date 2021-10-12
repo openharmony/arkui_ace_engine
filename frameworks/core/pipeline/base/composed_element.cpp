@@ -19,6 +19,7 @@
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/common/frontend.h"
+#include "core/components/page/page_element.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/base/render_element.h"
@@ -84,6 +85,12 @@ void ComposedElement::Update()
             id_ = compose->GetId();
         }
         compose->ClearNeedUpdate();
+    }
+    if (HasPageTransitionFunction()) {
+        auto pageElement = GetPageElement();
+        if (pageElement) {
+            pageElement->SetPageTransitionFunction(std::move(pageTransitionFunction_));
+        }
     }
 }
 

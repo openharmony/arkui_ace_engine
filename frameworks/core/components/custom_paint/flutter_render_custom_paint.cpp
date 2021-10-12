@@ -157,11 +157,13 @@ void FlutterRenderCustomPaint::Paint(RenderContext& context, const Offset& offse
     }
     if (!canvasCache_.readyToDraw()) {
         auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale,
-            SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
+            SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
         canvasCache_.allocPixels(imageInfo);
         cacheBitmap_.allocPixels(imageInfo);
+#ifdef USE_SYSTEM_SKIA
         canvasCache_.eraseColor(SK_ColorTRANSPARENT);
         cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
+#endif
         skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
         cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
     }
@@ -1265,6 +1267,12 @@ std::unique_ptr<ImageData> FlutterRenderCustomPaint::GetImageData(double left, d
         imageData->data.emplace_back(Color::FromARGB(alpha, red, green, blue));
     }
     return imageData;
+}
+
+std::string FlutterRenderCustomPaint::GetJsonData(const std::string& path)
+{
+    AssetImageLoader imageLoader;
+    return imageLoader.LoadJsonData(path, context_.Upgrade());
 }
 
 void FlutterRenderCustomPaint::WebGLInit(CanvasRenderContextBase* context)

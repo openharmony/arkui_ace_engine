@@ -35,6 +35,12 @@ public:
 
     std::string GetIcon() const;
     std::string GetText() const;
+    std::string GetTabBar() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return TabContentItemElement::TypeId();
+    }
 
 private:
     RefPtr<TabContentItemElement> GetTabContentItemElement() const;

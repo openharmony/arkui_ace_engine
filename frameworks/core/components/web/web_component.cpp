@@ -34,6 +34,7 @@ WebComponent::WebComponent(const std::string& type) : type_(type)
         declaration_ = AceType::MakeRefPtr<WebDeclaration>();
         declaration_->Init();
     }
+    webController_ = AceType::MakeRefPtr<WebController>();
 }
 
 RefPtr<RenderNode> WebComponent::CreateRenderNode()

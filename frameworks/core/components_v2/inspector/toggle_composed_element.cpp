@@ -19,14 +19,14 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/toggle/toggle_element.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const ToggleComposedElement&)>> CREATE_JSON_MAP {
-    { "checked", [](const ToggleComposedElement& inspector) { return inspector.GetChecked(); } }
+    { "ison", [](const ToggleComposedElement& inspector) { return inspector.GetChecked(); } },
+    { "selectedColor", [](const ToggleComposedElement& inspector) { return inspector.GetSelectedColor(); } }
 };
 
 } // namespace
@@ -34,7 +34,8 @@ const std::unordered_map<std::string, std::function<std::string(const ToggleComp
 void ToggleComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("checked: ").append(GetChecked()));
+    DumpLog::GetInstance().AddDesc(std::string("ison: ").append(GetChecked()));
+    DumpLog::GetInstance().AddDesc(std::string("selectedColor: ").append(GetSelectedColor()));
 }
 
 std::unique_ptr<JsonValue> ToggleComposedElement::ToJsonObject() const
@@ -51,6 +52,15 @@ std::string ToggleComposedElement::GetChecked() const
     auto renderToggle = GetRenderToggle();
     auto checked = renderToggle ? renderToggle->GetToggleComponent()->GetCheckedState() : false;
     return ConvertBoolToString(checked);
+}
+
+std::string ToggleComposedElement::GetSelectedColor() const
+{
+    auto renderToggle = GetRenderToggle();
+    if (renderToggle) {
+        return renderToggle->GetToggleComponent()->GetCheckedColor().ColorToString();
+    }
+    return "";
 }
 
 RefPtr<RenderToggle> ToggleComposedElement::GetRenderToggle() const

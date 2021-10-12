@@ -349,10 +349,12 @@ void RenderTransform::UpdateTransform()
         return;
     }
     if (pendingAppearing_ && hasAppearTransition_) {
-        for (auto& effect : transformEffectsAppearing_) {
-            ParseDimension(effect);
+        if (transformAnimation_.GetAnimationStatus() != Animator::Status::RUNNING) {
+            for (auto& effect : transformEffectsAppearing_) {
+                ParseDimension(effect);
+            }
+            transformAnimation_.SetTransformOperations(transformEffectsAppearing_);
         }
-        transformAnimation_.SetTransformOperations(transformEffectsAppearing_);
         transformAnimation_.SetAnimationStopCallback(nullptr);
         // transform from appearing Transform to identity matrix
         transformAnimation_.PlayTransformAnimation(transitionOption_, std::vector<TransformOperation>());
@@ -530,6 +532,7 @@ void RenderTransform::OnTransition(TransitionType type, int32_t id)
     LOGD("OnTransition. type: %{public}d, id: %{public}d", type, id);
     if (type == TransitionType::APPEARING) {
         pendingAppearing_ = true;
+        needUpdateTransform_ = true;
     } else if (type == TransitionType::DISAPPEARING && hasDisappearTransition_) {
         auto context = context_.Upgrade();
         if (!context) {

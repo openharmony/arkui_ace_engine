@@ -106,6 +106,14 @@ public:
         isFirstAssign_ = false;
     }
 
+    Animator::Status GetAnimationStatus() const
+    {
+        if (!animationController_) {
+            return Animator::Status::IDLE;
+        }
+        return animationController_->GetStatus();
+    }
+
 private:
     void AnimateTo(double endValue)
     {

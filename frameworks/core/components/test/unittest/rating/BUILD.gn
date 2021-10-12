@@ -85,6 +85,7 @@ ohos_unittest("RatingComponentTest") {
     "$ace_root/frameworks/core/components/page/page_component.cpp",
     "$ace_root/frameworks/core/components/rating/rating_component.cpp",
     "$ace_root/frameworks/core/components/root/root_component.cpp",
+    "$ace_root/frameworks/core/components/transform/transform_component.cpp",
     "$ace_root/frameworks/core/components/tween/tween_component.cpp",
     "$ace_root/frameworks/core/pipeline/base/component.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",

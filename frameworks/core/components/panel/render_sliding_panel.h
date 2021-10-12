@@ -115,17 +115,17 @@ public:
 
     double GetFullHeight() const
     {
-        return fullHalfBoundary_;
+        return fullHeight_.first.Value();
     }
 
     double GetHalfHeight() const
     {
-        return halfMiniBoundary_;
+        return halfHeight_.first.Value();
     }
 
     double GetMiniHeight() const
     {
-        return fullMiniBoundary_;
+        return miniHeight_.first.Value();
     }
 
     void UpdateTouchRect() override;

@@ -236,6 +236,12 @@ bool DOMListItem::AddSpecializedEvent(int32_t pageId, const std::string& event)
         listItemComponent_->SetStickyEventId(stickyEventId_);
         return true;
     }
+
+    if (event == DOM_CLICK || event == DOM_CATCH_BUBBLE_CLICK) {
+        EventMarker eventMarker(GetNodeIdForEvent(), event, pageId);
+        listItemComponent_->SetClickEventId(eventMarker);
+        return true;
+    }
     return false;
 }
 
@@ -370,7 +376,6 @@ void DOMListItem::PrepareSpecializedComponent()
     if (!indexKey_.empty()) {
         listItemComponent_->SetIndexKey(indexKey_);
     }
-    listItemComponent_->SetClickEventId(GetClickId());
 
     if (flexComponent_) {
         flexComponent_->SetDirection(flexDirection_);

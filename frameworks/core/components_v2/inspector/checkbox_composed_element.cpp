@@ -18,7 +18,6 @@
 #include <unordered_map>
 
 #include "base/log/dump_log.h"
-#include "core/components/checkable/checkable_element.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -26,7 +25,8 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const CheckboxComposedElement&)>> CREATE_JSON_MAP {
-    { "checked", [](const CheckboxComposedElement& inspector) { return inspector.GetChecked(); } }
+    { "ison", [](const CheckboxComposedElement& inspector) { return inspector.GetChecked(); } },
+    { "selectedColor", [](const CheckboxComposedElement& inspector) { return inspector.GetSelectedColor(); } }
 };
 
 } // namespace
@@ -34,7 +34,8 @@ const std::unordered_map<std::string, std::function<std::string(const CheckboxCo
 void CheckboxComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("alignContent: ").append(GetChecked()));
+    DumpLog::GetInstance().AddDesc(std::string("ison: ").append(GetChecked()));
+    DumpLog::GetInstance().AddDesc(std::string("selectedColor: ").append(GetSelectedColor()));
 }
 
 std::unique_ptr<JsonValue> CheckboxComposedElement::ToJsonObject() const
@@ -51,6 +52,15 @@ std::string CheckboxComposedElement::GetChecked() const
     auto renderCheckbox = GetRenderCheckbox();
     auto checked = renderCheckbox ? renderCheckbox->GetChecked() : false;
     return ConvertBoolToString(checked);
+}
+
+std::string CheckboxComposedElement::GetSelectedColor() const
+{
+    auto renderCheckbox = GetRenderCheckbox();
+    if (renderCheckbox) {
+        return renderCheckbox->GetActiveColor().ColorToString();
+    }
+    return "";
 }
 
 RefPtr<RenderCheckbox> CheckboxComposedElement::GetRenderCheckbox() const

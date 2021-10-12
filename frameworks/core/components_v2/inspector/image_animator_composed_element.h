@@ -39,6 +39,11 @@ public:
     std::string GetFillMode() const;
     std::string GetIteration() const;
     std::string GetImages() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return ImageAnimatorElement::TypeId();
+    }
 };
 
 } // namespace OHOS::Ace::V2

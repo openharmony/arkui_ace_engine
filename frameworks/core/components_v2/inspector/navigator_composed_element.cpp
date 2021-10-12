@@ -17,7 +17,6 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/navigator/navigator_element.h"
 #include "core/components/navigator/render_navigator.h"
 #include "core/components_v2/inspector/utils.h"
 

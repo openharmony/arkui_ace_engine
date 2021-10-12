@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_TOGGLE_COMPOSED_ELEMENT_H
 
 #include "core/components/toggle/render_toggle.h"
+#include "core/components/toggle/toggle_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -33,6 +34,12 @@ public:
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
     std::string GetChecked() const;
+    std::string GetSelectedColor() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return ToggleElement::TypeId();
+    }
 
 private:
     RefPtr<RenderToggle> GetRenderToggle() const;

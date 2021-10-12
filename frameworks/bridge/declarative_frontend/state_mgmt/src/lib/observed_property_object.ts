@@ -86,7 +86,6 @@ class ObservedPropertyObject<T extends Object> extends ObservedPropertyObjectAbs
   }
 
   public get(): T {
-    //  console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
     console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: get`);
     this.notifyPropertyRead();
     return this.wrappedValue_;
@@ -97,7 +96,6 @@ class ObservedPropertyObject<T extends Object> extends ObservedPropertyObjectAbs
       console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
       return;
     }
-    //console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
     console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: set, changed`);
     this.setValueInternal(newValue);
     this.notifyHasChanged(newValue);

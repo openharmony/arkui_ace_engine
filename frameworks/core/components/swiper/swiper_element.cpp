@@ -55,9 +55,12 @@ void SwiperElement::registerCallBack()
     }
     indicatorFocusNode_->SetOnFocusCallback([weak = WeakClaim(this)](void) {
         auto client = weak.Upgrade();
+        if (!client) {
+            return;
+        }
         auto weakContext = client->GetContext();
         auto context = weakContext.Upgrade();
-        if (client && context) {
+        if (context) {
             client->HandleIndicatorFocus(true && context->IsKeyEvent());
         }
     });

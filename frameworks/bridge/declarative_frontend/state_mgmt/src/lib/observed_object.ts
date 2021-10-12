@@ -42,7 +42,6 @@ function Observed<C extends Object>(target: Type<C>): any {
     return new ObservedObject<C>(new original(...args), undefined);
   };
 
-  //f.prototype = original.prototype;
   Object.setPrototypeOf(f, Object.getPrototypeOf(original));
   // return new constructor (will override original)
   return f;

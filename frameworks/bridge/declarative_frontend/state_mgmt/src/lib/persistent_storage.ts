@@ -90,7 +90,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     if (this.persistProp1(propName, defaultValue)) {
       // persist new prop
       console.debug(`PersistentStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
-      PersistentStorage.Storage_.set(propName, this.links_.get(propName).get());
+      PersistentStorage.Storage_.set(propName, JSON.stringify(this.links_.get(propName).get()));
     }
   }
 
@@ -121,7 +121,9 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
       }
       try {
         returnValue = JSON.parse(newValue);
-      } catch (e) {}
+      } catch (error) {
+        console.error(`PersistentStorage: convert for ${propName} has error: ` + error.toString());
+      }
       link = AppStorage.GetOrCreate().setAndLink(propName, returnValue, this);
       this.links_.set(propName, link);
       console.debug(`PersistentStorage: created new persistent prop for ${propName}`);
@@ -152,7 +154,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   private write(): void {
     this.links_.forEach((link, propName, map) => {
       console.debug(`PersistentStorage: writing ${propName} to storage`);
-      PersistentStorage.Storage_.set(propName, link.get());
+      PersistentStorage.Storage_.set(propName, JSON.stringify(link.get()));
     });
   }
 
@@ -187,7 +189,9 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
    * @param key property that has changed
    */
     public static NotifyHasChanged(propName: string) {
-      console.debug(`PersistentStorage: force writing '${propName}' - '${PersistentStorage.GetOrCreate().links_.get(propName)}' to storage`);
-      PersistentStorage.Storage_.set(propName, PersistentStorage.GetOrCreate().links_.get(propName).get());
+      console.debug(`PersistentStorage: force writing '${propName}'-
+        '${PersistentStorage.GetOrCreate().links_.get(propName)}' to storage`);
+      PersistentStorage.Storage_.set(propName,
+        JSON.stringify(PersistentStorage.GetOrCreate().links_.get(propName).get()));
     }
 };

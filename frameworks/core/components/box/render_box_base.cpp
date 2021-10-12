@@ -245,6 +245,18 @@ void RenderBoxBase::CalculateGridLayoutSize()
     if (!gridColumnInfo_) {
         return;
     }
+
+    auto offset = gridColumnInfo_->GetOffset();
+    if (offset != UNDEFINED_DIMENSION) {
+        auto context = context_.Upgrade();
+        positionParam_.type =
+            (context && context->GetIsDeclarative()) ? PositionType::SEMI_RELATIVE : PositionType::ABSOLUTE;
+        std::pair<AnimatableDimension, bool>& edge =
+            (GetTextDirection() == TextDirection::RTL) ? positionParam_.right : positionParam_.left;
+        edge.first = offset;
+        edge.second = true;
+    }
+
     double defaultWidth = gridColumnInfo_->GetWidth();
     if (NearEqual(defaultWidth, 0.0)) {
         return;
@@ -470,7 +482,16 @@ void RenderBoxBase::CalculateSelfLayoutSize()
     double minHeight = padding_.GetLayoutSize().Height() + borderSize.Height();
     width = width > minWidth ? width : minWidth;
     height = height > minHeight ? height : minHeight;
+
+    // allow force layoutsize for parend
+    if (layoutSetByParent.GetMaxSize().Width() == layoutSetByParent.GetMinSize().Width()) {
+        width = layoutSetByParent.GetMinSize().Width();
+    }
+    if (layoutSetByParent.GetMaxSize().Height() == layoutSetByParent.GetMinSize().Height()) {
+        height = layoutSetByParent.GetMinSize().Height();
+    }
     paintSize_ = Size(width, height);
+
     // box layout size = paint size + margin size
 
     if (LessNotEqual(margin_.LeftPx(), 0.0)) {

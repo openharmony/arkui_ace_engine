@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_SHAPE_COMPOSED_ELEMENT_H
 
 #include "core/components/shape/render_shape.h"
+#include "core/components/shape/shape_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -43,12 +44,17 @@ public:
     std::string GetFillOpacity() const;
     std::string GetStroke() const;
     std::string GetStrokeDashOffset() const;
-    std::string GetStrokeDashArray() const;
     std::string GetStrokeLineCap() const;
     std::string GetStrokeLineJoin() const;
     std::string GetStrokeMiterLimit() const;
     std::string GetStrokeOpacity() const;
     std::string GetStrokeWidth() const;
+    std::unique_ptr<JsonValue> GetStrokeDashArray() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return ShapeElement::TypeId();
+    }
 };
 
 } // namespace OHOS::Ace::V2

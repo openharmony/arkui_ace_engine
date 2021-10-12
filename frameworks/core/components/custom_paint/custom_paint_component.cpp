@@ -286,6 +286,16 @@ std::unique_ptr<ImageData> CanvasTaskPool::GetImageData(double left, double top,
     return paint->GetImageData(left, top, width, height);
 }
 
+std::string CanvasTaskPool::GetJsonData(const std::string& path)
+{
+    auto paint = renderNode_.Upgrade();
+    if (!paint) {
+        return "";
+    }
+
+    return paint->GetJsonData(path);
+}
+
 void CanvasTaskPool::UpdateFillColor(const Color& color)
 {
     auto task = [color](RenderCustomPaint& interface, const Offset& offset) {

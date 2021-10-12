@@ -40,13 +40,7 @@ void RenderDisplay::Update(const RefPtr<Component>& component)
     disappearingOpacity_ = display->GetDisappearingOpacity();
     appearingOpacity_ = display->GetAppearingOpacity();
     hasDisappearTransition_ = display->HasDisappearTransition();
-    if (pendingAppearing_) {
-        animatableOpacity_.MoveTo(appearingOpacity_);
-        // appearing transition do not need stop callback anymore.
-        animatableOpacity_.SetAnimationStopCallback(nullptr);
-        animatableOpacity_ = AnimatableDouble(display->GetOpacity());
-        pendingAppearing_ = false;
-    } else {
+    if (!pendingAppearing_) {
         animatableOpacity_ = AnimatableDouble(display->GetOpacity(), display->GetOpacityAnimationOption());
     }
     double opacity = std::min(std::max(animatableOpacity_.GetValue(), 0.0), 1.0);
@@ -69,7 +63,15 @@ void RenderDisplay::Update(const RefPtr<Component>& component)
 
 void RenderDisplay::PerformLayout()
 {
-    pendingAppearing_ = false;
+    if (pendingAppearing_) {
+        if (animatableOpacity_.GetAnimationStatus() != Animator::Status::RUNNING) {
+            animatableOpacity_.MoveTo(appearingOpacity_);
+        }
+        // appearing transition do not need stop callback anymore.
+        animatableOpacity_.SetAnimationStopCallback(nullptr);
+        animatableOpacity_ = AnimatableDouble(opacity_ / (1.0 * UINT8_MAX));
+        pendingAppearing_ = false;
+    }
     LayoutParam layoutParam = GetLayoutParam();
     if (visible_ == VisibleType::GONE) {
         layoutParam.SetMinSize(Size());
@@ -81,6 +83,7 @@ void RenderDisplay::PerformLayout()
         const auto& child = GetChildren().front();
         child->Layout(layoutParam);
         childSize = child->GetLayoutSize();
+        child->SetPosition(Offset());
     }
     SetLayoutSize(childSize);
 }
@@ -144,6 +147,7 @@ void RenderDisplay::OnTransition(TransitionType type, int32_t id)
     LOGD("OnTransition. type: %{public}d, id: %{public}d", type, id);
     if (type == TransitionType::APPEARING) {
         pendingAppearing_ = true;
+        MarkNeedLayout();
     } else if (type == TransitionType::DISAPPEARING) {
         animatableOpacity_.SetAnimationStopCallback(std::bind(&RenderDisplay::OnOpacityDisappearingCallback, this));
         animatableOpacity_ = AnimatableDouble(disappearingOpacity_);

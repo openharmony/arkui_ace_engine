@@ -91,8 +91,9 @@ public:
             });
             animator_->AddInterpolator(pictureAnimation);
             animator_->SetDuration(totalFrameDuration);
+            auto repetitionCount = context->IsJsCard() ? 1 : repetitionCount_;
             animator_->SetIteration(
-                repetitionCount_ > 0 ? repetitionCount_ : ANIMATION_REPEAT_INFINITE);
+                repetitionCount > 0 ? repetitionCount : ANIMATION_REPEAT_INFINITE);
             animator_->Play();
         }
     }
@@ -102,6 +103,12 @@ public:
     void Pause();
     void Resume();
     void RenderFrame(const int32_t& index);
+
+    void SetTargetSize(int32_t width, int32_t height)
+    {
+        dstWidth_ = width;
+        dstHeight_ = height;
+    }
 
 private:
     sk_sp<SkImage> DecodeFrameImage(const int32_t& index);

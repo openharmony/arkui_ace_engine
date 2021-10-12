@@ -21,7 +21,7 @@
 #include "base/geometry/size.h"
 #include "base/utils/utils.h"
 #include "core/components/declaration/xcomponent/xcomponent_declaration.h"
-#include "core/components/xcomponent/native_render_context.h"
+#include "core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "core/components/xcomponent/resource/native_texture.h"
 #include "core/components/xcomponent/xcomponent_element.h"
 #include "core/pipeline/base/element.h"
@@ -63,7 +63,9 @@ public:
     }
 
     void SetRenderNode(const WeakPtr<RenderXComponent>& renderNode);
-    void PluginContextInit(NativeRenderContext* context);
+    void NativeXComponentInit(
+        NativeXComponent* nativeXComponent,
+        WeakPtr<NativeXComponentImpl> nativeXComponentImpl);
     void PluginUpdate();
 
     WeakPtr<XComponentComponent> component_;

@@ -18,7 +18,6 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_v2/inspector/utils.h"
-#include "core/components_v2/list/list_element.h"
 #include "core/components_v2/list/render_list.h"
 
 namespace OHOS::Ace::V2 {
@@ -28,7 +27,13 @@ const std::unordered_map<std::string, std::function<std::string(const ListCompos
     { "space", [](const ListComposedElement& inspector) { return inspector.GetSpace(); } },
     { "initialIndex", [](const ListComposedElement& inspector) { return inspector.GetInitialIndex(); } },
     { "listDirection", [](const ListComposedElement& inspector) { return inspector.GetListDirection(); } },
-    { "editMode", [](const ListComposedElement& inspector) { return inspector.GetEditMode(); } }
+    { "editMode", [](const ListComposedElement& inspector) { return inspector.GetEditMode(); } },
+    { "edgeEffect", [](const ListComposedElement& inspector) { return inspector.GetEdgeEffect(); } }
+};
+
+const std::unordered_map<std::string, std::function<std::unique_ptr<JsonValue>(const ListComposedElement&)>>
+    CREATE_JSON_JSON_VALUE_MAP {
+    { "divider", [](const ListComposedElement& inspector) { return inspector.GetDivider(); } }
 };
 
 }
@@ -51,6 +56,9 @@ std::unique_ptr<JsonValue> ListComposedElement::ToJsonObject() const
     auto resultJson = InspectorComposedElement::ToJsonObject();
     for (const auto& value : CREATE_JSON_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this).c_str());
+    }
+    for (const auto& value : CREATE_JSON_JSON_VALUE_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
     }
     return resultJson;
 }
@@ -105,6 +113,74 @@ std::string ListComposedElement::GetEditMode() const
         return renderList->GetEditable() ? "true" : "false";
     }
     return "false";
+}
+
+std::unique_ptr<JsonValue> ListComposedElement::GetDivider() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    do {
+        auto node = GetInspectorNode(ListElement::TypeId());
+        if (!node) {
+            LOGE("list inspector node is null when try get divider for list inspector");
+            break;
+        }
+        auto renderList = AceType::DynamicCast<RenderList>(node);
+        if (!renderList) {
+            LOGE("list render node is null when try get divider for list inspector");
+            break;
+        }
+        auto listComponent = AceType::DynamicCast<ListComponent>(renderList->GetComponent());
+        if (!listComponent) {
+            LOGE("list component is null when try get divider for list inspector");
+            break;
+        }
+        const auto& divider = listComponent->GetItemDivider();
+        if (!divider) {
+            LOGE("item divider is null when try get divider for list inspector");
+            break;
+        }
+        jsonValue->Put("strokeWidth", divider->strokeWidth.ToString().c_str());
+        jsonValue->Put("color", ConvertColorToString(divider->color).c_str());
+        jsonValue->Put("startMargin", divider->startMargin.ToString().c_str());
+        jsonValue->Put("endMargin", divider->endMargin.ToString().c_str());
+        return jsonValue;
+    } while (0);
+    jsonValue->Put("strokeWidth", "0.0vp");
+    jsonValue->Put("color", "#FFFFFFFF");
+    jsonValue->Put("startMargin", "0.0vp");
+    jsonValue->Put("endMargin", "0.0vp");
+    return jsonValue;
+}
+
+std::string ListComposedElement::GetEdgeEffect() const
+{
+    do {
+        auto node = GetInspectorNode(ListElement::TypeId());
+        if (!node) {
+            LOGE("list inspector node is null when try get edge effect for list inspector.");
+            break;
+        }
+        auto renderList = AceType::DynamicCast<RenderList>(node);
+        if (!renderList) {
+            LOGE("list render node is null when try get edge effect for list inspector.");
+            break;
+        }
+        auto listComponent = AceType::DynamicCast<ListComponent>(renderList->GetComponent());
+        if (!listComponent) {
+            LOGE("list component is null when try get edge effect for list inspector.");
+            break;
+        }
+        switch (listComponent->GetEdgeEffect()) {
+            case EdgeEffect::FADE:
+                return "EdgeEffect.Fade";
+            case EdgeEffect::NONE:
+                return "EdgeEffect.None";
+            case EdgeEffect::SPRING:
+            default:
+                return "EdgeEffect.Spring";
+        }
+    } while (0);
+    return "EdgeEffect.Spring";
 }
 
 } // namespace OHOS::Ace::V2

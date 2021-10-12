@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_WRAP_COMPOSED_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_WRAP_COMPOSED_ELEMENT_H
 
+#include "core/components/wrap/wrap_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -36,6 +37,11 @@ public:
     std::string GetJustifyContent() const;
     std::string GetAlignItems() const;
     std::string GetAlignContent() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return WrapElement::TypeId();
+    }
 };
 
 } // namespace OHOS::Ace

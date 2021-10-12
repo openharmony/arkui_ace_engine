@@ -45,7 +45,7 @@ public:
     {
         LOG_DESTROY();
         if (isolate_) {
-            LOGE("Dispose thread isolate.");
+            LOGI("Dispose thread isolate.");
             isolate_->Dispose();
         }
     }
@@ -108,7 +108,7 @@ public:
 
     bool InitJSEnv();
 
-    void InitJsConsoleObject(v8::Local<v8::Context>& context, v8::Isolate* isolate);
+    static void InitJsConsoleObject(v8::Local<v8::Context>& context, v8::Isolate* isolate);
 
     void InitJsPerfUtilObject(v8::Local<v8::Context>& context);
 
@@ -118,7 +118,7 @@ public:
 
     void InitJSContext();
 
-    void InitAceModules(const char* start, const char* end, v8::Isolate* isolate);
+    static void InitAceModules(const char* start, const char* end, v8::Isolate* isolate);
 
     void InitGlobalObjectTemplate();
 
@@ -181,10 +181,21 @@ public:
         isolate_->SetData(DISPATCHER, static_cast<void*>(&dispatcher_));
     }
 
-    RefPtr<FrontendDelegate> GetDelegate() const
+    const RefPtr<FrontendDelegate>& GetDelegate() const
     {
         return frontendDelegate_;
     }
+
+    void* GetDelegateForV8Data()
+    {
+        return static_cast<void*>(&frontendDelegate_);
+    }
+
+    void* GetJsMessageDispatcherForV8Data()
+    {
+        return static_cast<void*>(&dispatcher_);
+    }
+
 
     void SetDelegate(v8::Isolate* isolate)
     {
@@ -275,11 +286,23 @@ public:
 
     void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data) override;
 
+    void OnNewWant(const std::string& data) override;
+
+    void OnSaveAbilityState(std::string& data) override;
+
+    void OnRestoreAbilityState(const std::string& data) override;
+
     void OnConfigurationUpdated(const std::string& data) override;
 
     bool OnStartContinuation() override;
 
     void OnRemoteTerminated() override;
+
+    void OnActive() override;
+
+    void OnInactive() override;
+
+    void OnMemoryLevel(const int32_t level) override;
 
     void OnCompleteContinuation(const int32_t code) override;
 

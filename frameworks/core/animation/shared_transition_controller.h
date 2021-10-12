@@ -46,6 +46,8 @@ private:
     void StartSharedTransition();
     void KickoffSharedTransition(TransitionEvent event, RefPtr<OverlayElement>& overlay);
     bool PrepareTransition(RefPtr<OverlayElement> overlay, bool preCheck = false);
+    bool CheckAndCreateTransition(
+        std::vector<RefPtr<SharedTransitionEffect>>& effects, RefPtr<OverlayElement>& overlay);
     bool PrepareEachTransition(
         const ShareId& shareId, RefPtr<SharedTransitionEffect>& effect, RefPtr<OverlayElement>& overlay);
     WeakPtr<PipelineContext> context_;

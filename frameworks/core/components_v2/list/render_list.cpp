@@ -28,6 +28,9 @@ namespace {
 constexpr double VIEW_PORT_SCALE = 3.0;
 constexpr int32_t CHAIN_ANIMATION_NODE_COUNT = 30;
 constexpr int32_t DEFAULT_SOURCE = 3;
+constexpr int32_t SCROLL_STATE_IDLE = 0;
+constexpr int32_t SCROLL_STATE_SCROLL = 1;
+constexpr int32_t SCROLL_STATE_FLING = 2;
 
 } // namespace
 
@@ -155,7 +158,8 @@ void RenderList::PerformLayout()
 
     // Check if reach the end of list
     reachEnd_ = LessOrEqual(curMainPos, mainSize);
-    bool noEdgeEffect = (scrollable_ && scrollable_->Idle()) || !scrollEffect_ || autoScrollingForItemMove_;
+    bool noEdgeEffect =
+        (scrollable_ && scrollable_->IsAnimationNotRunning()) || !scrollEffect_ || autoScrollingForItemMove_;
     if (noEdgeEffect && reachEnd_) {
         // Adjust end of list to match the end of layout
         currentOffset_ += mainSize - curMainPos;
@@ -195,6 +199,10 @@ void RenderList::PerformLayout()
 
     // Clear auto scrolling flags
     autoScrollingForItemMove_ = false;
+    if (scrollable_ && scrollable_->Idle()) {
+        ResumeEventCallback(component_, &ListComponent::GetOnScroll, Dimension(offset_ / dipScale_, DimensionUnit::VP),
+            ScrollState(SCROLL_STATE_IDLE));
+    }
 }
 
 Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutParam)
@@ -378,6 +386,18 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
         reachStart_ = false;
     }
 
+    auto context = context_.Upgrade();
+    if (context) {
+        dipScale_ = context->GetDipScale();
+    }
+    offset_ = offset;
+    if (source == SCROLL_FROM_UPDATE) {
+        ResumeEventCallback(component_, &ListComponent::GetOnScroll, Dimension(offset_ / dipScale_, DimensionUnit::VP),
+            ScrollState(SCROLL_STATE_SCROLL));
+    } else if (source == SCROLL_FROM_ANIMATION) {
+        ResumeEventCallback(component_, &ListComponent::GetOnScroll, Dimension(offset_ / dipScale_, DimensionUnit::VP),
+            ScrollState(SCROLL_STATE_FLING));
+    }
     currentOffset_ += offset;
     MarkNeedLayout(true);
     return true;

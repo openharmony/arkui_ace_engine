@@ -169,6 +169,7 @@ template("declarative_js_engine") {
       "jsview/js_row_split.cpp",
       "jsview/js_scroll.cpp",
       "jsview/js_scroller.cpp",
+      "jsview/js_search.cpp",
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
       "jsview/js_slider.cpp",
@@ -202,6 +203,14 @@ template("declarative_js_engine") {
         "jsview/js_rating.cpp",
         "jsview/js_video.cpp",
         "jsview/js_video_controller.cpp",
+      ]
+    }
+
+    if (defined(config.advance_components_support) &&
+        config.advance_components_support) {
+      sources += [
+        "jsview/js_web.cpp",
+        "jsview/js_web_controller.cpp",
       ]
     }
 

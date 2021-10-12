@@ -25,8 +25,7 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const TabContentComposedElement&)>> CREATE_JSON_MAP {
-    { "icon", [](const TabContentComposedElement& inspector) { return inspector.GetIcon(); } },
-    { "text", [](const TabContentComposedElement& inspector) { return inspector.GetText(); } }
+    { "tabBar", [](const TabContentComposedElement& inspector) { return inspector.GetTabBar(); } }
 };
 
 } // namespace
@@ -59,15 +58,31 @@ std::string TabContentComposedElement::GetText() const
     return element ? element->GetText() : "";
 }
 
+std::string TabContentComposedElement::GetTabBar() const
+{
+    auto element = GetTabContentItemElement();
+    if (!element) {
+        LOGD("GetTabContentItemElement is null");
+        return "";
+    }
+    if (!element->GetIcon().empty()) {
+        auto jsonValue = JsonUtil::Create(true);
+        jsonValue->Put("icon", element->GetIcon().c_str());
+        jsonValue->Put("text", element->GetText().c_str());
+        return jsonValue->ToString();
+    } else {
+        return element->GetText();
+    }
+}
+
 RefPtr<TabContentItemElement> TabContentComposedElement::GetTabContentItemElement() const
 {
-    auto parent = GetElementParent().Upgrade();
-    while (parent) {
-        auto tabContentItem = AceType::DynamicCast<TabContentItemElement>(parent);
-        if (tabContentItem) {
-            return tabContentItem;
+    auto child = children_.empty() ? nullptr : children_.front();
+    while (child) {
+        if (AceType::TypeId(child) == TabContentItemElement::TypeId()) {
+            return AceType::DynamicCast<TabContentItemElement>(child);
         }
-        parent = parent->GetElementParent().Upgrade();
+        child = child->GetChildren().empty() ? nullptr : child->GetChildren().front();
     }
     return nullptr;
 }

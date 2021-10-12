@@ -157,7 +157,7 @@ public:
             theme->contentMinFontSize_ = themeStyle->GetAttr<Dimension>(TEXTFIELD_FONT_SIZE, 16.0_vp);
             theme->buttonSpacingHorizontal_ = actionsTopPadding;
             theme->commonButtonBgColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_BUTTON_NORMAL_COLOR, Color::GRAY);
-            theme->emphasizeButtonBgColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_EMPHASIZE, Color::BLACK);
+            theme->emphasizeButtonBgColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_WARNING, Color::BLACK);
             theme->commonButtonTextColor_ =
                 dialogPattern->GetAttr<Color>(DIALOG_COMMON_BUTTON_TEXT_COLOR, Color::WHITE);
             theme->buttonTextSize_ = themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_BUTTON1, 16.0_vp);

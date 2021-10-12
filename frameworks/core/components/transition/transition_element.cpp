@@ -248,6 +248,26 @@ void TransitionElement::SetWrapHidden(bool hidden)
     tween->SetWrapHidden(hidden);
 }
 
+void TransitionElement::AddPreFlush()
+{
+    auto tween = GetChildTween();
+    if (!tween) {
+        LOGE("Add pre flush failed. no tween found.");
+        return;
+    }
+    tween->AddPreFlush();
+}
+
+void TransitionElement::SkipPostFlush()
+{
+    auto tween = GetChildTween();
+    if (!tween) {
+        LOGE("Skip post flush failed. no tween found.");
+        return;
+    }
+    tween->SkipPostFlush();
+}
+
 RefPtr<TweenElement> TransitionElement::GetChildTween() const
 {
     if (children_.empty()) {

@@ -26,6 +26,7 @@ constexpr double MILLISECOND_PER_PERCENT = 20.0;
 constexpr double MAX_TRANSITION_TIME = 5000.0;
 constexpr double MIN_TRANSITION_TIME = 200.0;
 constexpr double SECOND_TO_MILLISECOND = 1000.0;
+constexpr double ONE_CYCLE_ANGLE = 360.0;
 
 } // namespace
 
@@ -52,7 +53,30 @@ void RenderTrack::Update(const RefPtr<Component>& component)
     leftToRight_ = track->GetTextDirection() == TextDirection::LTR;
 
     paintData_.startDegree = track->GetStartDegree();
-    paintData_.sweepDegree = track->GetSweepDegree();
+    auto context = context_.Upgrade();
+    if (context->GetIsDeclarative()) {
+        double endDegree = track->GetSweepDegree();
+        double startAngle = paintData_.startDegree;
+        while (startAngle < 0) {
+            startAngle = startAngle + ONE_CYCLE_ANGLE;
+        }
+        while (endDegree < 0) {
+            endDegree = endDegree + ONE_CYCLE_ANGLE;
+        }
+        while (startAngle > ONE_CYCLE_ANGLE) {
+            startAngle = startAngle - ONE_CYCLE_ANGLE;
+        }
+        while (endDegree > ONE_CYCLE_ANGLE) {
+            endDegree = endDegree - ONE_CYCLE_ANGLE;
+        }
+        if (endDegree < startAngle) {
+            paintData_.sweepDegree = abs(endDegree + ONE_CYCLE_ANGLE - startAngle);
+        } else {
+            paintData_.sweepDegree = abs(endDegree - startAngle);
+        }
+    } else {
+        paintData_.sweepDegree = track->GetSweepDegree();
+    }
     thickness_ = track->GetTrackThickness();
     paintData_.clockwise = track->GetClockwiseValue();
     paintData_.totalScaleNumber = track->GetScaleNumber();

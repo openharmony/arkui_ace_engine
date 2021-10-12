@@ -61,8 +61,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_option.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
@@ -505,7 +507,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
+    { "Option", JSOption::JSBind },
     { "Panel", JSSlidingPanel::JSBind },
+    { "Menu", JSMenu::JSBind },
     { "NavigationView", JSNavigationView::JSBind },
     { "Navigator", JSNavigator::JSBind },
     { "ColumnSplit", JSColumnSplit::JSBind },

@@ -270,7 +270,7 @@ public:
         return starColorInactive_;
     }
 
-    ACE_DEFINE_COMPONENT_EVENT(OnChange, void(int));
+    ACE_DEFINE_COMPONENT_EVENT(OnChange, void(double));
 
 private:
     int32_t starNum_ = 5;

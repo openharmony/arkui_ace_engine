@@ -38,7 +38,7 @@ void BlankComposedElement::Dump()
 
 std::unique_ptr<JsonValue> BlankComposedElement::ToJsonObject() const
 {
-    auto resultJson = InspectorComposedElement::ToJsonObject();
+    auto resultJson = JsonUtil::Create(true);
     for (const auto& value : CREATE_JSON_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this).c_str());
     }

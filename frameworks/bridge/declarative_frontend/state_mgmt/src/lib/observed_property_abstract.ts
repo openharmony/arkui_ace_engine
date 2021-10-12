@@ -80,7 +80,6 @@ abstract class ObservedPropertyAbstract<T>  {
   */
   public unlinkSuscriber(subscriberId: number): void {
     this.subscribers_.delete(subscriberId);
-    // Is this correct? FIXME SubscriberManager.Get().delete(subscriberId);
   }
 
   protected notifyHasChanged(newValue: T) {

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_STACK_COMPOSED_ELEMENT_H
 
 #include "core/components/stack/render_stack.h"
+#include "core/components/stack/stack_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -35,6 +36,11 @@ public:
     std::string GetAlignContent() const;
     std::string GetStackFit() const;
     std::string GetOverflow() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return StackElement::TypeId();
+    }
 
 private:
     RefPtr<RenderStack> GetRenderStack() const;

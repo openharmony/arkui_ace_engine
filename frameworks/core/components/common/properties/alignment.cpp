@@ -56,7 +56,7 @@ std::string Alignment::GetAlignmentStr(TextDirection direction) const
     if (alignment == TOP_LEFT) {
         result = direction == TextDirection::RTL ? "Alignment.TopEnd" : "Alignment.TopStart";
     } else if (alignment == TOP_CENTER) {
-        result = "Alignment.TopCenter";
+        result = "Alignment.Top";
     } else if (alignment == TOP_RIGHT) {
         result = direction == TextDirection::RTL ? "Alignment.TopStart" : "Alignment.TopEnd";
     } else if (alignment == CENTER_LEFT) {
@@ -68,7 +68,7 @@ std::string Alignment::GetAlignmentStr(TextDirection direction) const
     } else if (alignment == BOTTOM_LEFT) {
         result = direction == TextDirection::RTL ? "Alignment.BottomEnd" : "Alignment.BottomStart";
     } else if (alignment == BOTTOM_CENTER) {
-        result = "Alignment.BottomCenter";
+        result = "Alignment.Bottom";
     } else if (alignment == BOTTOM_RIGHT) {
         result = direction == TextDirection::RTL ? "Alignment.BottomStart" : "Alignment.BottomEnd";
     } else {

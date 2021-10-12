@@ -24,6 +24,11 @@ class JSMarquee : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
+    static void SetTextColor(const JSCallbackInfo& info);
+    static void SetFontSize(const JSCallbackInfo& info);
+    static void SetAllowScale(const JSCallbackInfo& info);
+    static void SetFontWeight(const std::string& value);
+    static void SetFontFamily(const JSCallbackInfo& info);
     static void OnStart(const JSCallbackInfo& info);
     static void OnBounce(const JSCallbackInfo& info);
     static void OnFinish(const JSCallbackInfo& info);
@@ -32,4 +37,3 @@ public:
 } // namespace OHOS::Ace::Framework
 
 #endif
-

@@ -25,7 +25,9 @@ thread_local std::vector<RefPtr<GridContainerInfo>> JSGridContainer::gridContain
 
 void JSGridContainer::Create(const JSCallbackInfo& info)
 {
+    JSColumn::SetInspectorTag("GridContainer");
     JSColumn::Create(info);
+    JSColumn::ClearInspectorTag();
     GridContainerInfo::Builder gridContainerInfoBuilder;
 
     if (info.Length() > 0 && info[0]->IsObject()) {

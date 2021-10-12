@@ -843,6 +843,13 @@ void VideoElement::InitListener()
     player_->AddPlayStatusListener(onPlayerStatus);
     player_->AddCurrentPosListener(onCurrentTimeChange);
     player_->AddCompletionListener(onCompletion);
+
+    player_->AddRefreshRenderListener([videoElement]() {
+        auto video = videoElement.Upgrade();
+        if (video) {
+            video->OnTextureRefresh();
+        }
+    });
 }
 
 void VideoElement::ReleasePlatformResource()

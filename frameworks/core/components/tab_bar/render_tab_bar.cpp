@@ -631,11 +631,13 @@ void RenderTabBar::OnPaintFinish()
         }
     } else {
         int32_t focusedChildIndex = indicator_ ? index_ + 1 : index_;
-        auto focusedItem = GetChildren().begin();
-        std::advance(focusedItem, focusedChildIndex);
+        auto focusedItem = GetChildByIndex(focusedChildIndex);
+        if (!focusedItem) {
+            return;
+        }
 
-        auto layoutSize = (*focusedItem)->GetLayoutSize();
-        auto position = (*focusedItem)->GetGlobalOffset();
+        auto layoutSize = focusedItem->GetLayoutSize();
+        auto position = focusedItem->GetGlobalOffset();
 
         double offsetForFocus = NormalizeToPx(OFFSET_FOR_FOCUS);
         Offset offset = Offset(offsetForFocus, offsetForFocus);
@@ -708,6 +710,17 @@ void RenderTabBar::InitScrollableOffset(TabBarMode mode)
     if (mode != mode_) {
         scrollableOffset_.Reset();
     }
+}
+
+RefPtr<RenderNode> RenderTabBar::GetChildByIndex(int32_t index) const
+{
+    int32_t size = GetChildren().size();
+    if (index < 0 || index >= size) {
+        return nullptr;
+    }
+    auto pos = GetChildren().begin();
+    std::advance(pos, index);
+    return *pos;
 }
 
 } // namespace OHOS::Ace

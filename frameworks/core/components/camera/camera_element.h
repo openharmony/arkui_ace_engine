@@ -93,6 +93,7 @@ private:
     void InitDeclarativePara(const RefPtr<CameraComponent>& cameraComponent);
     void HandleDeclarativePara();
     void RealseDeclarativePara();
+    void OnTextureRefresh();
 
     RefPtr<Texture> texture_;
     FlashType flash_ = FlashType::AUTO;

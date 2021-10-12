@@ -86,6 +86,10 @@ public:
         return crossAxisAlign_;
     }
 
+    AlignDeclarationPtr GetAlignPtr() const
+    {
+        return alignPtr_;
+    }
     double GetBaselineDistance(TextBaseline baseline) override;
 
     Size GetChildViewPort() override;
@@ -126,7 +130,7 @@ private:
      * @param flexItem The item under operation.
      * @param flexItemProperties Store all the flex item properties.
      */
-    void LayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, FlexItemProperties& flexItemProperties) const;
+    void LayoutFlexItem(RefPtr<RenderFlexItem>& flexItem, FlexItemProperties& flexItemProperties);
 
     void RelayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, double flexSize, BaselineProperties& baselineProps,
         double& allocatedFlexSpace);
@@ -211,6 +215,7 @@ private:
     std::set<RefPtr<RenderNode>> infinityLayoutNodes_;
     std::set<RefPtr<RenderNode>> absoluteNodes_;
     std::list<RefPtr<RenderNode>> relativeNodes_;
+    std::list<RefPtr<RenderFlexItem>> stretchNodes_;
     // use map to order the magic Nodes
     std::map<int32_t, std::list<MagicLayoutNode>> magicNodes_;
     std::map<int32_t, double> magicWeightMaps_;

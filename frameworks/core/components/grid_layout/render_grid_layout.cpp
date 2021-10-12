@@ -95,6 +95,9 @@ void RenderGridLayout::Update(const RefPtr<Component>& component)
     userColGap_ = grid->GetColumnGap();
     userRowGap_ = grid->GetRowGap();
     rightToLeft_ = grid->GetRightToLeft();
+    scrollBarWidth_ = grid->GetScrollBarWidth();
+    scrollBarColor_ = grid->GetScrollBarColor();
+    displayMode_ = grid->GetScrollBar();
 
     if (direction_ == FlexDirection::COLUMN) {
         isVertical_ = true;

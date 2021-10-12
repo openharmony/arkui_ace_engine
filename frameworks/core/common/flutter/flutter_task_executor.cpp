@@ -71,6 +71,17 @@ void SetThreadPriority(int32_t priority)
 
 } // namespace
 
+FlutterTaskExecutor::FlutterTaskExecutor(const RefPtr<FlutterTaskExecutor>& taskExecutor)
+{
+    jsThread_ = std::make_unique<fml::Thread>(GenJsThreadName());
+    jsRunner_ = jsThread_->GetTaskRunner();
+
+    platformRunner_ = taskExecutor->platformRunner_;
+    uiRunner_ = taskExecutor->uiRunner_;
+    ioRunner_ = taskExecutor->ioRunner_;
+    gpuRunner_ = taskExecutor->gpuRunner_;
+}
+
 FlutterTaskExecutor::FlutterTaskExecutor(const flutter::TaskRunners& taskRunners)
 {
     jsThread_ = std::make_unique<fml::Thread>(GenJsThreadName());

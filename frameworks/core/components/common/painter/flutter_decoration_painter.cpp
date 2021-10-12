@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,8 +50,8 @@ constexpr float LEFT_START = 135.0f;
 constexpr float LEFT_END = 180.0f;
 constexpr float SWEEP_ANGLE = 45.0f;
 constexpr float EXTEND = 1024.0f;
-constexpr float BRIGHT_DARK = 220.0f;
-constexpr float BRIGHT_LIGHT = 22.0f;
+constexpr float BRIGHT_DARK = 230.0f;
+constexpr float BRIGHT_LIGHT = 45.0f;
 
 class GradientShader {
 public:
@@ -789,33 +790,40 @@ void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* c
         if (border.HasValue()) {
             // set AntiAlias
             paint.setAntiAlias(true);
-            if (image) {
+
+            if (decoration_->GetBorderType() == 1) {
+                canvas->save();
+                canvas->clipRRect(outerRRect.sk_rrect, true);
                 PaintBorderImage(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint, image);
-            }
-            Gradient gradient = decoration_->GetGradientBorderImage();
-            if (gradient.IsValid()) {
-                if (NearZero(paintSize_.Width()) || NearZero(paintSize_.Height())) {
-                    return;
-                }
-                SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()),
-                    SkDoubleToMScalar(paintSize_.Height()));
-                SkAutoCanvasRestore restore(canvas, true);
-                auto shader = CreateGradientShader(gradient, skPaintSize);
-                paint.setShader(std::move(shader));
-
-                auto imageInfo = SkImageInfo::Make(paintSize_.Width(), paintSize_.Height(),
-                    SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
-                SkBitmap skBitmap_;
-                skBitmap_.allocPixels(imageInfo);
-                std::unique_ptr<SkCanvas> skCanvas_ = std::make_unique<SkCanvas>(skBitmap_);
-                skCanvas_->drawPaint(paint);
-                sk_sp<SkImage> skImage_ = SkImage::MakeFromBitmap(skBitmap_);
-                PaintBorderImage(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint, skImage_);
-                paint.setShader(nullptr);
-            }
-
-            if (image || gradient.IsValid()) {
                 canvas->restore();
+            }
+            if (decoration_->GetBorderType() == 2) {
+                Gradient gradient = decoration_->GetGradientBorderImage();
+                if (gradient.IsValid()) {
+                    if (NearZero(paintSize_.Width()) || NearZero(paintSize_.Height())) {
+                        return;
+                    }
+                    canvas->save();
+                    SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()),
+                        SkDoubleToMScalar(paintSize_.Height()));
+                    auto shader = CreateGradientShader(gradient, skPaintSize);
+                    paint.setShader(std::move(shader));
+
+                    auto imageInfo = SkImageInfo::Make(paintSize_.Width(), paintSize_.Height(),
+                        SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+                    SkBitmap skBitmap_;
+                    skBitmap_.allocPixels(imageInfo);
+                    std::unique_ptr<SkCanvas> skCanvas_ = std::make_unique<SkCanvas>(skBitmap_);
+                    skCanvas_->drawPaint(paint);
+                    sk_sp<SkImage> skImage_ = SkImage::MakeFromBitmap(skBitmap_);
+                    canvas->clipRRect(outerRRect.sk_rrect, true);
+                    PaintBorderImage(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint, skImage_);
+                    paint.setShader(nullptr);
+                    canvas->restore();
+                }
+            }
+
+            if (decoration_->GetBorderType() != 0) {
                 return;
             }
             AdjustBorderStyle(border);
@@ -835,221 +843,356 @@ void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* c
                 canvas->restore();
             }
         }
-        canvas->restore();
-    }
-}
-void FlutterDecorationPainter::CheckWidth(const Border& border)
-{
-    if (NearZero(leftWidth_)) {
-        leftWidth_ = NormalizeToPx(border.Left().GetWidth());
-    }
-    if (NearZero(topWidth_)) {
-        topWidth_ = NormalizeToPx(border.Top().GetWidth());
-    }
-    if (NearZero(rightWidth_)) {
-        rightWidth_ = NormalizeToPx(border.Right().GetWidth());
-    }
-    if (NearZero(bottomWidth_)) {
-        bottomWidth_ = NormalizeToPx(border.Bottom().GetWidth());
     }
 }
 
 void FlutterDecorationPainter::PaintBorderImage(const Offset& offset, const Border& border,
     SkCanvas* canvas, SkPaint& paint, const sk_sp<SkImage>& image)
 {
-    // border-image class property
+    image_ = image;
     BorderImageEdge imageLeft = border.ImageLeftEdge();
     BorderImageEdge imageTop = border.ImageTopEdge();
     BorderImageEdge imageRight = border.ImageRightEdge();
     BorderImageEdge imageBottom = border.ImageBottomEdge();
 
-    // border-image-slice
-    double leftSlice = NormalizeToPx(imageLeft.GetBorderImageSlice());
-    double topSlice = NormalizeToPx(imageTop.GetBorderImageSlice());
-    double rightSlice = NormalizeToPx(imageRight.GetBorderImageSlice());
-    double bottomSlice = NormalizeToPx(imageBottom.GetBorderImageSlice());
+    if (decoration_->GetHasBorderImageSlice()) {
+        leftSlice_ = SliceNormalizePercentToPx(imageLeft.GetBorderImageSlice(), true);
+        topSlice_ = SliceNormalizePercentToPx(imageTop.GetBorderImageSlice(), false);
+        rightSlice_ = SliceNormalizePercentToPx(imageRight.GetBorderImageSlice(), true);
+        bottomSlice_ = SliceNormalizePercentToPx(imageBottom.GetBorderImageSlice(), false);
+    } else {
+        leftSlice_ = image_->width();
+        topSlice_ = image_->height();
+        rightSlice_ = image_->width();
+        bottomSlice_ = image_->height();
+    }
 
-    leftWidth_ = NormalizeToPx(imageLeft.GetBorderImageWidth());
-    topWidth_ = NormalizeToPx(imageTop.GetBorderImageWidth());
-    rightWidth_ = NormalizeToPx(imageRight.GetBorderImageWidth());
-    bottomWidth_ = NormalizeToPx(imageBottom.GetBorderImageWidth());
+    if (decoration_->GetHasBorderImageWidth()) {
+        leftWidth_ = WidthNormalizePercentToPx(imageLeft.GetBorderImageWidth(), true);
+        topWidth_ = WidthNormalizePercentToPx(imageTop.GetBorderImageWidth(), false);
+        rightWidth_ = WidthNormalizePercentToPx(imageRight.GetBorderImageWidth(), true);
+        bottomWidth_ = WidthNormalizePercentToPx(imageBottom.GetBorderImageWidth(), false);
+    } else {
+        leftWidth_ = WidthNormalizePercentToPx(border.Left().GetWidth(), true);
+        topWidth_ = WidthNormalizePercentToPx(border.Top().GetWidth(), false);
+        rightWidth_ = WidthNormalizePercentToPx(border.Right().GetWidth(), true);
+        bottomWidth_ = WidthNormalizePercentToPx(border.Bottom().GetWidth(), false);
+    }
 
-    CheckWidth(border);
+    leftOutset_ = OutsetNormalizePercentToPx(imageLeft.GetBorderImageOutset(), true);
+    topOutset_ = OutsetNormalizePercentToPx(imageTop.GetBorderImageOutset(), false);
+    rightOutset_ = OutsetNormalizePercentToPx(imageRight.GetBorderImageOutset(), true);
+    bottomOutset_ = OutsetNormalizePercentToPx(imageBottom.GetBorderImageOutset(), false);
 
-    double leftOutset = NormalizeToPx(imageLeft.GetBorderImageOutset());
-    double topOutset = NormalizeToPx(imageTop.GetBorderImageOutset());
-    double rightOutset = NormalizeToPx(imageRight.GetBorderImageOutset());
-    double bottomOutset = NormalizeToPx(imageBottom.GetBorderImageOutset());
-    double offsetLeftX = offset.GetX() - leftOutset;
-    double offsetRightX = offset.GetX() + paintSize_.Width() + rightOutset;
-    double offsetTopY = offset.GetY() - topOutset;
-    double offsetBottomY = offset.GetY() + bottomOutset;
+    PaintBorderImageFourCorner(offset, canvas, paint);
 
-    // image size
-    double imageWidth = image->width();
-    double imageHeight = image->height();
+    BorderImageRepeat repeat = imageLeft.GetBorderImageRepeat();
+
+    if (repeat == BorderImageRepeat::STRETCH) {
+        PaintBorderImageFourStretch(offset, canvas, paint);
+    } else if (repeat == BorderImageRepeat::SPACE) {
+        PaintBorderImageFourSpace(offset, canvas, paint);
+    } else if (repeat == BorderImageRepeat::ROUND) {
+        PaintBorderImageFourRound(offset, canvas, paint);
+    } else if (repeat == BorderImageRepeat::REPEAT) {
+        PaintBorderImageFourRepeat(offset, canvas, paint);
+    }
+    paint.reset();
+}
+
+void FlutterDecorationPainter::PaintBorderImageFourCorner(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
+{
+
+    double imageWidth = image_->width();
+    double imageHeight = image_->height();
+
+    double offsetLeftX = offset.GetX() - leftOutset_;
+    double offsetRightX = offset.GetX() + paintSize_.Width() + rightOutset_;
+    double offsetTopY = offset.GetY() - topOutset_;
+    double offsetBottomY = offset.GetY() + paintSize_.Height() + bottomOutset_;
 
     // top left corner
-    SkRect srcRectLeftTop = SkRect::MakeXYWH(0, 0, leftSlice, topSlice);
+    SkRect srcRectLeftTop = SkRect::MakeXYWH(0, 0, leftSlice_, topSlice_);
     // top right corner
-    SkRect srcRectRightTop = SkRect::MakeXYWH(imageWidth - rightSlice, 0, rightSlice, topSlice);
+    SkRect srcRectRightTop = SkRect::MakeXYWH(imageWidth - rightSlice_, 0, rightSlice_, topSlice_);
     // left bottom corner
-    SkRect srcRectLeftBottom = SkRect::MakeXYWH(0, imageHeight - bottomSlice, leftSlice, bottomSlice);
+    SkRect srcRectLeftBottom = SkRect::MakeXYWH(0, imageHeight - bottomSlice_, leftSlice_, bottomSlice_);
     // right bottom corner
     SkRect srcRectRightBottom =
-        SkRect::MakeXYWH(imageWidth - rightSlice, imageHeight - bottomSlice, rightSlice, bottomSlice);
-
-    // left edge
-    SkRect srcRectLeft = SkRect::MakeXYWH(0, topSlice, leftSlice, imageHeight - topSlice - bottomSlice);
-    // top  edge
-    SkRect srcRectTop = SkRect::MakeXYWH(leftSlice, 0, imageWidth - leftSlice - rightSlice, topSlice);
-    // right edge
-    SkRect srcRectRight =
-        SkRect::MakeXYWH(imageWidth - rightSlice, topSlice, rightSlice, imageHeight - topSlice - bottomSlice);
-    // bototm edge
-    SkRect srcRectBottom =
-        SkRect::MakeXYWH(leftSlice, imageHeight - bottomSlice, imageWidth - leftSlice - rightSlice, bottomSlice);
+        SkRect::MakeXYWH(imageWidth - rightSlice_, imageHeight - bottomSlice_, rightSlice_, bottomSlice_);
 
     // Draw the four corners of the picture to the four corners of the border
     // left top
     SkRect desRectLeftTop = SkRect::MakeXYWH(offsetLeftX, offsetTopY, leftWidth_, topWidth_);
-    canvas->drawImageRect(image, srcRectLeftTop, desRectLeftTop, &paint);
+    canvas->drawImageRect(image_, srcRectLeftTop, desRectLeftTop, &paint);
 
     // right top
     SkRect desRectRightTop = SkRect::MakeXYWH(offsetRightX - rightWidth_, offsetTopY, rightWidth_, topWidth_);
-    canvas->drawImageRect(image, srcRectRightTop, desRectRightTop, &paint);
+    canvas->drawImageRect(image_, srcRectRightTop, desRectRightTop, &paint);
 
     // left bottom
     SkRect desRectLeftBottom =
-        SkRect::MakeXYWH(offsetLeftX, offsetBottomY + paintSize_.Height() - bottomWidth_, leftWidth_, bottomWidth_);
-    canvas->drawImageRect(image, srcRectLeftBottom, desRectLeftBottom, &paint);
+        SkRect::MakeXYWH(offsetLeftX, offsetBottomY - bottomWidth_, leftWidth_, bottomWidth_);
+    canvas->drawImageRect(image_, srcRectLeftBottom, desRectLeftBottom, &paint);
 
     // right bottom
     SkRect desRectRightBottom =
-        SkRect::MakeXYWH(offsetRightX - rightWidth_, offsetBottomY + paintSize_.Height() - bottomWidth_,
+        SkRect::MakeXYWH(offsetRightX - rightWidth_, offsetBottomY - bottomWidth_,
             rightWidth_, bottomWidth_);
-    canvas->drawImageRect(image, srcRectRightBottom, desRectRightBottom, &paint);
+    canvas->drawImageRect(image_, srcRectRightBottom, desRectRightBottom, &paint);
 
-    // border-image-repeat property
-    BorderImageRepeat repeat = imageLeft.GetBorderImageRepeat();
+}
 
-    // Crop four edges based on border-image-repeat
-    if (repeat == BorderImageRepeat::STRETCH) {
-        // STRETCH
+void FlutterDecorationPainter::PaintBorderImageFourStretch(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
+{
+    double imageWidth = image_->width();
+    double imageHeight = image_->height();
 
-        // left border-image
-        SkRect desRectLeft =
-            SkRect::MakeXYWH(offsetLeftX, offsetTopY + topWidth_, leftWidth_,
-                paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset + bottomOutset);
-        canvas->drawImageRect(image, srcRectLeft, desRectLeft, &paint);
+    double offsetLeftX = offset.GetX() - leftOutset_;
+    double offsetRightX = offset.GetX() + paintSize_.Width() + rightOutset_;
+    double offsetTopY = offset.GetY() - topOutset_;
+    double offsetBottomY = offset.GetY() + bottomOutset_;
 
-        // top border-image
-        SkRect desRectTop =
-            SkRect::MakeXYWH(offsetLeftX + leftWidth_, offsetTopY,
-                paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset + rightOutset, topWidth_);
-        canvas->drawImageRect(image, srcRectTop, desRectTop, &paint);
+    // left edge
+    SkRect srcRectLeft = SkRect::MakeXYWH(0, topSlice_, leftSlice_, imageHeight - topSlice_ - bottomSlice_);
+    // top  edge
+    SkRect srcRectTop = SkRect::MakeXYWH(leftSlice_, 0, imageWidth - leftSlice_ - rightSlice_, topSlice_);
+    // right edge
+    SkRect srcRectRight =
+        SkRect::MakeXYWH(imageWidth - rightSlice_, topSlice_, rightSlice_, imageHeight - topSlice_ - bottomSlice_);
+    // bototm edge
+    SkRect srcRectBottom =
+        SkRect::MakeXYWH(leftSlice_, imageHeight - bottomSlice_, imageWidth - leftSlice_ - rightSlice_, bottomSlice_);
 
-        // right border-image
-        SkRect desRectRight =
-            SkRect::MakeXYWH(offsetRightX - rightWidth_, offsetTopY + topWidth_,
-                rightWidth_, paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset + bottomOutset);
-        canvas->drawImageRect(image, srcRectRight, desRectRight, &paint);
+    // STRETCH
+    // left border-image_
+    SkRect desRectLeft =
+        SkRect::MakeXYWH(offsetLeftX, offsetTopY + topWidth_, leftWidth_,
+            paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset_ + bottomOutset_);
+    canvas->drawImageRect(image_, srcRectLeft, desRectLeft, &paint);
 
-        // bottom border-image
-        SkRect desRectBottom =
-            SkRect::MakeXYWH(offsetLeftX + leftWidth_, paintSize_.Height() + offsetBottomY - bottomWidth_,
-                paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset + rightOutset, bottomWidth_);
-        canvas->drawImageRect(image, srcRectBottom, desRectBottom, &paint);
+    // top border-image_
+    SkRect desRectTop =
+        SkRect::MakeXYWH(offsetLeftX + leftWidth_, offsetTopY,
+            paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_, topWidth_);
+    canvas->drawImageRect(image_, srcRectTop, desRectTop, &paint);
 
-    } else if (repeat == BorderImageRepeat::ROUND) {
-        // ROUND
+    // right border-image_
+    SkRect desRectRight =
+        SkRect::MakeXYWH(offsetRightX - rightWidth_, offsetTopY + topWidth_,
+            rightWidth_, paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset_ + bottomOutset_);
+    canvas->drawImageRect(image_, srcRectRight, desRectRight, &paint);
 
-        // horizontal  border
-        double roundHorizontal = paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset + rightOutset;
+    // bottom border-image_
+    SkRect desRectBottom =
+        SkRect::MakeXYWH(offsetLeftX + leftWidth_, paintSize_.Height() + offsetBottomY - bottomWidth_,
+            paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_, bottomWidth_);
+    canvas->drawImageRect(image_, srcRectBottom, desRectBottom, &paint);
 
-        // vertical  border
-        double roundVertical = paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset + bottomOutset;
+}
 
-        // Calculate the height and width of each side of the picture minus the size of the four corners
+void FlutterDecorationPainter::PaintBorderImageFourRound(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
+{
+    double imageWidth = image_->width();
+    double imageHeight = image_->height();
 
-        // image horizontal
-        double roundImageHorizontal = imageWidth - leftSlice - rightSlice;
+    double offsetLeftX = offset.GetX() - leftOutset_;
+    double offsetTopY = offset.GetY() - topOutset_;
 
-        // image vertical
-        double roundImageVertical = imageHeight - topSlice - bottomSlice;
+    // left edge
+    SkRect srcRectLeft = SkRect::MakeXYWH(0, topSlice_, leftSlice_, imageHeight - topSlice_ - bottomSlice_);
+    // top  edge
+    SkRect srcRectTop = SkRect::MakeXYWH(leftSlice_, 0, imageWidth - leftSlice_ - rightSlice_, topSlice_);
+    // right edge
+    SkRect srcRectRight =
+        SkRect::MakeXYWH(imageWidth - rightSlice_, topSlice_, rightSlice_, imageHeight - topSlice_ - bottomSlice_);
+    // bototm edge
+    SkRect srcRectBottom =
+        SkRect::MakeXYWH(leftSlice_, imageHeight - bottomSlice_, imageWidth - leftSlice_ - rightSlice_, bottomSlice_);
 
-        // How many pictures can be put in the calculation border
+    // ROUND
+    // horizontal  border
+    double roundHorizontal = paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_;
 
-        int roundHorizontalCount = (int)(roundHorizontal / roundImageHorizontal);
+    // vertical  border
+    double roundVertical = paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset_ + bottomOutset_;
 
-        int roundVerticalCount = (int)(roundVertical / roundImageVertical);
+    // Calculate the height and width of each side of the picture minus the size of the four corners
 
-        // Surplus
-        if (fmod(roundHorizontal, roundImageHorizontal) != 0) {
-            roundHorizontalCount += 1;
-        }
+    // image_ horizontal
+    double roundImageHorizontal = imageWidth - leftSlice_ - rightSlice_;
 
-        if (fmod(roundVertical, roundImageVertical) != 0) {
-            roundVerticalCount += 1;
-        }
+    // image_ vertical
+    double roundImageVertical = imageHeight - topSlice_ - bottomSlice_;
 
-        double roundSizeHorizontal = roundHorizontal / roundHorizontalCount;
-        double roundSizeVertical = roundVertical / roundVerticalCount;
+    // How many pictures can be put in the calculation border
 
-        double roundStartHorizontal = offsetLeftX + leftWidth_;
+    int roundHorizontalCount = (int)(roundHorizontal / roundImageHorizontal);
 
-        // draw horizontal border-image
-        for (int i = 0; i < roundHorizontalCount; i++) {
-            // top
-            SkRect desRectTopRound =
-                SkRect::MakeXYWH(roundStartHorizontal, offsetTopY, roundSizeHorizontal, topWidth_);
-            canvas->drawImageRect(image, srcRectTop, desRectTopRound, &paint);
-            // bottom
-            SkRect desRectBottomRound =
-                SkRect::MakeXYWH(roundStartHorizontal,
-                    paintSize_.Height() + offsetTopY - bottomWidth_ + bottomOutset + topOutset,
-                    roundSizeHorizontal, bottomWidth_);
-            canvas->drawImageRect(image, srcRectBottom, desRectBottomRound, &paint);
+    int roundVerticalCount = (int)(roundVertical / roundImageVertical);
 
-            roundStartHorizontal += roundSizeHorizontal;
-        }
-        double roundStartVertical = offsetTopY + topWidth_;
-        // draw vertical border-image
-        for (int i = 0; i < roundVerticalCount; i++) {
-            // left
-            SkRect desRectLeftRound =
-                SkRect::MakeXYWH(offsetLeftX, roundStartVertical, leftWidth_, roundSizeVertical);
-            canvas->drawImageRect(image, srcRectLeft, desRectLeftRound, &paint);
-            // right
-            SkRect desRectRightRound =
-                SkRect::MakeXYWH(offsetLeftX + paintSize_.Width() - rightWidth_ + rightOutset + leftOutset,
-                    roundStartVertical, rightWidth_, roundSizeVertical);
-            canvas->drawImageRect(image, srcRectRight, desRectRightRound, &paint);
-            roundStartVertical += roundSizeVertical;
-        }
-    } else if (repeat == BorderImageRepeat::REPEAT) {
-        double repeatHorizontal = paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset + rightOutset;
-        double imageHorizontal = imageWidth - leftSlice - rightSlice;
+    // Surplus
+    if (fmod(roundHorizontal, roundImageHorizontal) != 0) {
+        roundHorizontalCount += 1;
+    }
 
-        double countHorizontal = 0;
-        if (!NearZero(imageHorizontal)) {
-            countHorizontal = repeatHorizontal / imageHorizontal;
-        }
+    if (fmod(roundVertical, roundImageVertical) != 0) {
+        roundVerticalCount += 1;
+    }
 
-        if (countHorizontal <= 1) {
+    double roundSizeHorizontal = roundHorizontal / roundHorizontalCount;
+    double roundSizeVertical = roundVertical / roundVerticalCount;
+
+    double roundStartHorizontal = offsetLeftX + leftWidth_;
+
+    // draw horizontal border-image_
+    for (int i = 0; i < roundHorizontalCount; i++) {
+        // top
+        SkRect desRectTopRound =
+            SkRect::MakeXYWH(roundStartHorizontal, offsetTopY, roundSizeHorizontal, topWidth_);
+        canvas->drawImageRect(image_, srcRectTop, desRectTopRound, &paint);
+        // bottom
+        SkRect desRectBottomRound =
+            SkRect::MakeXYWH(roundStartHorizontal,
+                paintSize_.Height() + offsetTopY - bottomWidth_ + bottomOutset_ + topOutset_,
+                roundSizeHorizontal, bottomWidth_);
+        canvas->drawImageRect(image_, srcRectBottom, desRectBottomRound, &paint);
+
+        roundStartHorizontal += roundSizeHorizontal;
+    }
+    double roundStartVertical = offsetTopY + topWidth_;
+    // draw vertical border-image_
+    for (int i = 0; i < roundVerticalCount; i++) {
+        // left
+        SkRect desRectLeftRound =
+            SkRect::MakeXYWH(offsetLeftX, roundStartVertical, leftWidth_, roundSizeVertical);
+        canvas->drawImageRect(image_, srcRectLeft, desRectLeftRound, &paint);
+        // right
+        SkRect desRectRightRound =
+            SkRect::MakeXYWH(offsetLeftX + paintSize_.Width() - rightWidth_ + rightOutset_ + leftOutset_,
+                roundStartVertical, rightWidth_, roundSizeVertical);
+        canvas->drawImageRect(image_, srcRectRight, desRectRightRound, &paint);
+        roundStartVertical += roundSizeVertical;
+    }
+}
+
+void FlutterDecorationPainter::PaintBorderImageFourSpace(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
+{
+
+    double imageWidth = image_->width();
+    double imageHeight = image_->height();
+
+    double offsetLeftX = offset.GetX() - leftOutset_;
+    double offsetTopY = offset.GetY() - topOutset_;
+
+    // left edge
+    SkRect srcRectLeft = SkRect::MakeXYWH(0, topSlice_, leftSlice_, imageHeight - topSlice_ - bottomSlice_);
+    // top  edge
+    SkRect srcRectTop = SkRect::MakeXYWH(leftSlice_, 0, imageWidth - leftSlice_ - rightSlice_, topSlice_);
+    // right edge
+    SkRect srcRectRight =
+        SkRect::MakeXYWH(imageWidth - rightSlice_, topSlice_, rightSlice_, imageHeight - topSlice_ - bottomSlice_);
+    // bototm edge
+    SkRect srcRectBottom =
+        SkRect::MakeXYWH(leftSlice_, imageHeight - bottomSlice_, imageWidth - leftSlice_ - rightSlice_, bottomSlice_);
+
+    double roundHorizontal = paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_;
+    // vertical  border
+    double roundVertical = paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset_ + bottomOutset_;
+
+    double roundImageHorizontal = imageWidth - leftSlice_ - rightSlice_;
+
+    // image_ vertical
+    double roundImageVertical = imageHeight - topSlice_ - bottomSlice_;
+
+    // How many pictures can be put in the calculation border
+
+    int roundHorizontalCount = (int)(roundHorizontal / roundImageHorizontal);
+
+    int roundVerticalCount = (int)(roundVertical / roundImageVertical);
+
+    double blankHorizontalSize = fmod(roundHorizontal, roundImageHorizontal) / (roundHorizontalCount + 1);
+
+    double blankVerticalSize = fmod(roundVertical, roundImageVertical) / (roundVerticalCount + 1);
+
+    double roundStartHorizontal = offsetLeftX + leftWidth_ + blankHorizontalSize;
+    for (int i = 0; i < roundHorizontalCount; i++) {
+        // top
+        SkRect desRectTopRound =
+        SkRect::MakeXYWH(roundStartHorizontal, offsetTopY, roundImageHorizontal, topWidth_);
+        canvas->drawImageRect(image_, srcRectTop, desRectTopRound, &paint);
+        // bottom
+        SkRect desRectBottomRound =
+        SkRect::MakeXYWH(roundStartHorizontal,
+            paintSize_.Height() + offsetTopY - bottomWidth_ + bottomOutset_ + topOutset_,
+            roundImageHorizontal, bottomWidth_);
+        canvas->drawImageRect(image_, srcRectBottom, desRectBottomRound, &paint);
+
+        roundStartHorizontal += roundImageHorizontal + blankHorizontalSize;
+    }
+
+    double roundStartVertical = offsetTopY + topWidth_ + blankVerticalSize;
+    // draw vertical border-image_
+    for (int i = 0; i < roundVerticalCount; i++) {
+        // left
+        SkRect desRectLeftRound =
+        SkRect::MakeXYWH(offsetLeftX, roundStartVertical, leftWidth_, roundImageVertical);
+        canvas->drawImageRect(image_, srcRectLeft, desRectLeftRound, &paint);
+        // right
+        SkRect desRectRightRound =
+        SkRect::MakeXYWH(offsetLeftX + paintSize_.Width() - rightWidth_ + rightOutset_ + leftOutset_,
+            roundStartVertical, rightWidth_, roundImageVertical);
+        canvas->drawImageRect(image_, srcRectRight, desRectRightRound, &paint);
+        roundStartVertical += roundImageVertical + blankVerticalSize;
+    }
+}
+
+void FlutterDecorationPainter::PaintBorderImageFourRepeat(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
+{
+    double imageWidth = image_->width();
+    double imageHeight = image_->height();
+
+    double offsetLeftX = offset.GetX() - leftOutset_;
+    double offsetRightX = offset.GetX() + paintSize_.Width() + rightOutset_;
+    double offsetTopY = offset.GetY() - topOutset_;
+    double offsetBottomY = offset.GetY() + bottomOutset_;
+
+    // left edge
+    SkRect srcRectLeft = SkRect::MakeXYWH(0, topSlice_, leftSlice_, imageHeight - topSlice_ - bottomSlice_);
+    // top  edge
+    SkRect srcRectTop = SkRect::MakeXYWH(leftSlice_, 0, imageWidth - leftSlice_ - rightSlice_, topSlice_);
+    // right edge
+    SkRect srcRectRight =
+        SkRect::MakeXYWH(imageWidth - rightSlice_, topSlice_, rightSlice_, imageHeight - topSlice_ - bottomSlice_);
+    // bototm edge
+    SkRect srcRectBottom =
+        SkRect::MakeXYWH(leftSlice_, imageHeight - bottomSlice_, imageWidth - leftSlice_ - rightSlice_, bottomSlice_);
+
+    double repeatHorizontal = paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_;
+    double imageHorizontal = imageWidth - leftSlice_ - rightSlice_;
+
+    double countHorizontal = 0;
+
+    if (GreatNotEqual(imageHorizontal, 0.0)) {
+        countHorizontal = repeatHorizontal / imageHorizontal;
+
+        if (GreatNotEqual(countHorizontal, 0.0) && LessOrEqual(countHorizontal, 1.0)) {
+
             double num = (imageHorizontal - repeatHorizontal) / 2;
-            SkRect srcRectTop = SkRect::MakeXYWH(num + leftSlice, 0, repeatHorizontal, topSlice);
+            SkRect srcRectTop = SkRect::MakeXYWH(num + leftSlice_, 0, repeatHorizontal, topSlice_);
             SkRect desRectTop =
                 SkRect::MakeXYWH(offset.GetX() + leftWidth_, offset.GetY(), repeatHorizontal, topWidth_);
-            canvas->drawImageRect(image, srcRectTop, desRectTop, &paint);
+            canvas->drawImageRect(image_, srcRectTop, desRectTop, &paint);
 
             SkRect srcRectBottom =
-                SkRect::MakeXYWH(num + leftSlice, imageHeight - bottomSlice, repeatHorizontal, bottomSlice);
+                SkRect::MakeXYWH(num + leftSlice_, imageHeight - bottomSlice_, repeatHorizontal, bottomSlice_);
             SkRect desRectBottom =
                 SkRect::MakeXYWH(offset.GetX() + leftWidth_, offset.GetY() + paintSize_.Height() - bottomWidth_,
                     repeatHorizontal, bottomWidth_);
-            canvas->drawImageRect(image, srcRectBottom, desRectBottom, &paint);
-        } else {
+            canvas->drawImageRect(image_, srcRectBottom, desRectBottom, &paint);
+
+        } else if (GreatNotEqual(countHorizontal, 1.0)) {
+
             double sizeHorizontal = 0;
             if (fmod(countHorizontal, 2) == 0) {
                 countHorizontal -= 1;
@@ -1059,69 +1202,74 @@ void FlutterDecorationPainter::PaintBorderImage(const Offset& offset, const Bord
             }
 
             SkRect srcRectTopLeft =
-                SkRect::MakeXYWH(imageWidth - rightSlice - sizeHorizontal, 0, sizeHorizontal, topSlice);
+                SkRect::MakeXYWH(imageWidth - rightSlice_ - sizeHorizontal, 0, sizeHorizontal, topSlice_);
             SkRect desRectTopLeftEnd =
                 SkRect::MakeXYWH(offsetLeftX + leftWidth_, offsetTopY, sizeHorizontal, topWidth_);
-            canvas->drawImageRect(image, srcRectTopLeft, desRectTopLeftEnd, &paint);
+            canvas->drawImageRect(image_, srcRectTopLeft, desRectTopLeftEnd, &paint);
 
-            SkRect srcRectTopRight = SkRect::MakeXYWH(leftSlice, 0, sizeHorizontal, topSlice);
+            SkRect srcRectTopRight = SkRect::MakeXYWH(leftSlice_, 0, sizeHorizontal, topSlice_);
             SkRect desRectTop_right_end =
                 SkRect::MakeXYWH(offsetLeftX + leftWidth_ + repeatHorizontal - sizeHorizontal,
                     offsetTopY, sizeHorizontal, topWidth_);
-            canvas->drawImageRect(image, srcRectTopRight, desRectTop_right_end, &paint);
+            canvas->drawImageRect(image_, srcRectTopRight, desRectTop_right_end, &paint);
 
             SkRect srcRectBottomLeft =
-                SkRect::MakeXYWH(imageWidth - rightSlice - sizeHorizontal,
-                    imageHeight - bottomSlice, sizeHorizontal, bottomSlice);
+                SkRect::MakeXYWH(imageWidth - rightSlice_ - sizeHorizontal,
+                    imageHeight - bottomSlice_, sizeHorizontal, bottomSlice_);
             SkRect desRectBottomLeftEnd =
                 SkRect::MakeXYWH(offsetLeftX + leftWidth_, paintSize_.Height() + offsetBottomY - bottomWidth_,
                     sizeHorizontal, bottomWidth_);
-            canvas->drawImageRect(image, srcRectBottomLeft, desRectBottomLeftEnd, &paint);
+            canvas->drawImageRect(image_, srcRectBottomLeft, desRectBottomLeftEnd, &paint);
 
             SkRect srcRectBottomRight =
-                SkRect::MakeXYWH(leftSlice, imageHeight - bottomSlice, sizeHorizontal, topSlice);
+                SkRect::MakeXYWH(leftSlice_, imageHeight - bottomSlice_, sizeHorizontal, topSlice_);
             SkRect desRectBottomRightEnd =
                 SkRect::MakeXYWH(offsetLeftX + leftWidth_ + repeatHorizontal - sizeHorizontal,
                     paintSize_.Height() + offsetBottomY - bottomWidth_, sizeHorizontal, bottomWidth_);
-            canvas->drawImageRect(image, srcRectBottomRight, desRectBottomRightEnd, &paint);
+            canvas->drawImageRect(image_, srcRectBottomRight, desRectBottomRightEnd, &paint);
 
             for (int i = 0; i < (int)(countHorizontal); i++) {
                 // top
                 SkRect desRectTopRepeat =
                     SkRect::MakeXYWH(offsetLeftX + leftWidth_ + sizeHorizontal,
                         offsetTopY, imageHorizontal, topWidth_);
-                canvas->drawImageRect(image, srcRectTop, desRectTopRepeat, &paint);
+                canvas->drawImageRect(image_, srcRectTop, desRectTopRepeat, &paint);
 
                 // bottom
                 SkRect desRectBottomRepeat =
                     SkRect::MakeXYWH(offsetLeftX + leftWidth_ + sizeHorizontal,
                         paintSize_.Height() + offsetBottomY - bottomWidth_, imageHorizontal, bottomWidth_);
-                canvas->drawImageRect(image, srcRectBottom, desRectBottomRepeat, &paint);
+                canvas->drawImageRect(image_, srcRectBottom, desRectBottomRepeat, &paint);
 
                 sizeHorizontal += imageHorizontal;
             }
         }
-        double repeatVertical = paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset + bottomOutset;
-        double imageVertical = imageHeight - topSlice - bottomSlice;
+    }
 
-        double countVertical = 0;
-        if (!NearZero(imageVertical)) {
-            countVertical = repeatHorizontal / imageVertical;
-        }
-        if (countVertical <= 1) {
+    double repeatVertical = paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset_ + bottomOutset_;
+    double imageVertical = imageHeight - topSlice_ - bottomSlice_;
+
+    double countVertical = 0;
+
+    if (GreatNotEqual(imageVertical, 0.0)) {
+        countVertical = repeatVertical / imageVertical;
+
+        if (GreatNotEqual(countVertical, 0.0) && LessOrEqual(countVertical, 1.0)) {
+
             double num = (imageVertical - repeatVertical) / 2;
-            SkRect srcRectLeft = SkRect::MakeXYWH(0, topSlice + num, leftSlice, repeatVertical);
+            SkRect srcRectLeft = SkRect::MakeXYWH(0, topSlice_ + num, leftSlice_, repeatVertical);
             SkRect desRectLeft =
                 SkRect::MakeXYWH(offset.GetX(), offset.GetY() + topWidth_, leftWidth_, repeatVertical);
-            canvas->drawImageRect(image, srcRectLeft, desRectLeft, &paint);
+            canvas->drawImageRect(image_, srcRectLeft, desRectLeft, &paint);
 
             SkRect srcRectRight =
-                SkRect::MakeXYWH(imageWidth - rightSlice, topSlice + num, leftSlice, repeatVertical);
+                SkRect::MakeXYWH(imageWidth - rightSlice_, topSlice_ + num, leftSlice_, repeatVertical);
             SkRect desRectRight =
                 SkRect::MakeXYWH(offset.GetX() + paintSize_.Width() - rightWidth_,
                     offset.GetY() + topWidth_, leftWidth_, repeatVertical);
-            canvas->drawImageRect(image, srcRectRight, desRectRight, &paint);
-        } else {
+            canvas->drawImageRect(image_, srcRectRight, desRectRight, &paint);
+        } else if (GreatNotEqual(countVertical, 1.0)) {
+
             double size_vertical = 0;
             if (fmod(countVertical, 2) == 0) {
                 countVertical -= 1;
@@ -1131,42 +1279,42 @@ void FlutterDecorationPainter::PaintBorderImage(const Offset& offset, const Bord
             }
 
             SkRect srcRectLeft_top =
-                SkRect::MakeXYWH(0, imageHeight - bottomSlice - size_vertical, leftSlice, size_vertical);
+                SkRect::MakeXYWH(0, imageHeight - bottomSlice_ - size_vertical, leftSlice_, size_vertical);
             SkRect desRectLeft_top_end =
                 SkRect::MakeXYWH(offsetLeftX, offsetTopY + topWidth_, leftWidth_, size_vertical);
-            canvas->drawImageRect(image, srcRectLeft_top, desRectLeft_top_end, &paint);
+            canvas->drawImageRect(image_, srcRectLeft_top, desRectLeft_top_end, &paint);
 
             SkRect srcRectRight_top =
-                SkRect::MakeXYWH(imageWidth - rightSlice, imageHeight - bottomSlice - size_vertical,
-                    leftSlice, size_vertical);
+                SkRect::MakeXYWH(imageWidth - rightSlice_, imageHeight - bottomSlice_ - size_vertical,
+                    leftSlice_, size_vertical);
             SkRect desRectRight_top_end =
                 SkRect::MakeXYWH(offsetRightX - rightWidth_, offsetTopY + topWidth_, rightWidth_, size_vertical);
-            canvas->drawImageRect(image, srcRectRight_top, desRectRight_top_end, &paint);
+            canvas->drawImageRect(image_, srcRectRight_top, desRectRight_top_end, &paint);
 
-            SkRect srcRectLeft_bottom = SkRect::MakeXYWH(0, topSlice, leftSlice, size_vertical);
+            SkRect srcRectLeft_bottom = SkRect::MakeXYWH(0, topSlice_, leftSlice_, size_vertical);
             SkRect desRectLeft_bottom_end =
                 SkRect::MakeXYWH(offsetLeftX, offsetBottomY + paintSize_.Height() - bottomWidth_ - size_vertical,
                     leftWidth_, size_vertical);
-            canvas->drawImageRect(image, srcRectLeft_bottom, desRectLeft_bottom_end, &paint);
+            canvas->drawImageRect(image_, srcRectLeft_bottom, desRectLeft_bottom_end, &paint);
 
             SkRect srcRectRight_bottom =
-                SkRect::MakeXYWH(imageWidth - rightSlice, topSlice, rightSlice, size_vertical);
+                SkRect::MakeXYWH(imageWidth - rightSlice_, topSlice_, rightSlice_, size_vertical);
             SkRect desRectRight_bottom_end =
                 SkRect::MakeXYWH(offsetRightX - rightWidth_,
                     offsetBottomY + paintSize_.Height() - bottomWidth_ - size_vertical, rightWidth_, size_vertical);
-            canvas->drawImageRect(image, srcRectRight_bottom, desRectRight_bottom_end, &paint);
+            canvas->drawImageRect(image_, srcRectRight_bottom, desRectRight_bottom_end, &paint);
 
             for (int i = 0; i < (int)(countVertical); i++) {
                 // left
                 SkRect desRectLeftRepeat =
                     SkRect::MakeXYWH(offsetLeftX, offsetTopY + topWidth_ + size_vertical, leftWidth_, imageVertical);
-                canvas->drawImageRect(image, srcRectLeft, desRectLeftRepeat, &paint);
+                canvas->drawImageRect(image_, srcRectLeft, desRectLeftRepeat, &paint);
 
                 // right
                 SkRect desRectRightRepeat =
                     SkRect::MakeXYWH(offsetRightX - rightWidth_,
                         offsetTopY + topWidth_ + size_vertical, rightWidth_, imageVertical);
-                canvas->drawImageRect(image, srcRectRight, desRectRightRepeat, &paint);
+                canvas->drawImageRect(image_, srcRectRight, desRectRightRepeat, &paint);
 
                 size_vertical += imageVertical;
             }
@@ -1178,8 +1326,8 @@ void FlutterDecorationPainter::PaintBorderImage(const Offset& offset, const Bord
 void FlutterDecorationPainter::PaintGrayScale(const flutter::RRect& outerRRect, SkCanvas* canvas,
     const Dimension& grayscale, const Color& color)
 {
-    double _grayscale = grayscale.Value();
-    if (GreatNotEqual(_grayscale, 0.0)) {
+    double scale = grayscale.Value();
+    if (GreatNotEqual(scale, 0.0)) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
             canvas->clipRRect(outerRRect.sk_rrect, true);
@@ -1188,10 +1336,10 @@ void FlutterDecorationPainter::PaintGrayScale(const flutter::RRect& outerRRect, 
 #ifdef USE_SYSTEM_SKIA
             float matrix[20];
             memset(matrix, 0, 20 * sizeof(float));
-            matrix[0] = matrix[5] = matrix[10] = 0.2126f * _grayscale;
-            matrix[1] = matrix[6] = matrix[11] = 0.7152f * _grayscale;
-            matrix[2] = matrix[7] = matrix[12] = 0.0722f * _grayscale;
-            matrix[18] = 1.0f;
+            matrix[0] = matrix[5] = matrix[10] = 0.2126f * scale;
+            matrix[1] = matrix[6] = matrix[11] = 0.7152f * scale;
+            matrix[2] = matrix[7] = matrix[12] = 0.0722f * scale;
+            matrix[18] = 1.0f * scale;
 
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
             paint.setColorFilter(filter);
@@ -1215,15 +1363,18 @@ void FlutterDecorationPainter::PaintBrightness(const flutter::RRect& outerRRect,
             SkPaint paint;
             paint.setAntiAlias(true);
             float matrix[20];
+            memset(matrix, 0, 20 * sizeof(float));
+
             if (bright < 0.0) {
-                bright = 1.0;
+                return;
+            } else if (bright > 20.0) {
+                bright = 20.0;
             }
-            if (bright < 1.0) {
-                bright = BRIGHT_DARK * (bright - 1.0);
+            if (bright <= 1.0) {
+                bright = BRIGHT_DARK * (bright - 1);
             } else {
                 bright = BRIGHT_LIGHT * bright;
             }
-            memset(matrix, 0, 20 * sizeof(float));
             matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
             matrix[4] = matrix[9] = matrix[14] = bright;
 #ifdef USE_SYSTEM_SKIA
@@ -1399,13 +1550,14 @@ void FlutterDecorationPainter::PaintHueRotate(const flutter::RRect& outerRRect, 
             while (GreatOrEqual(hueRotates, 360)) {
                 hueRotates -= 360;
             }
-            float matrix[20] = {0};
+            float matrix[20];
+            memset(matrix, 0, 20 * sizeof(float));
             int32_t type = hueRotates / 120;
             float N = (hueRotates - 120 * type) / 120;
             switch (type) {
                 case 0:
-                    matrix[0] = matrix[6] = matrix[12] = 1 - N;
                     matrix[2] = matrix[5] = matrix[11] = N;
+                    matrix[0] = matrix[6] = matrix[12] = 1 - N;
                     matrix[18] = 1.0f;
                     break;
                 case 1:
@@ -1414,7 +1566,7 @@ void FlutterDecorationPainter::PaintHueRotate(const flutter::RRect& outerRRect, 
                     matrix[18] = 1.0f;
                     break;
                 case 2:
-                    matrix[0] = matrix[6] = matrix[11] = N;
+                    matrix[0] = matrix[6] = matrix[12] = N;
                     matrix[1] = matrix[7] = matrix[10] = 1 - N;
                     matrix[18] = 1.0f;
                     break;
@@ -2217,6 +2369,33 @@ double FlutterDecorationPainter::NormalizeToPx(const Dimension& dimension) const
         return (dimension.Value() * dipScale_);
     }
     return dimension.Value();
+}
+
+double FlutterDecorationPainter::SliceNormalizePercentToPx(const Dimension& dimension, bool isVertical) const
+{
+    if (dimension.Unit() != DimensionUnit::PERCENT) {
+        return NormalizeToPx(dimension);
+    }
+    auto limit = isVertical ? image_->width() : image_->height();
+    return limit * dimension.Value();
+}
+
+double FlutterDecorationPainter::WidthNormalizePercentToPx(const Dimension& dimension, bool isVertical) const
+{
+    if (dimension.Unit() != DimensionUnit::PERCENT) {
+        return NormalizeToPx(dimension);
+    }
+    auto limit = isVertical ? paintSize_.Width() : paintSize_.Height();
+    return limit * dimension.Value();
+}
+
+double FlutterDecorationPainter::OutsetNormalizePercentToPx(const Dimension& dimension, bool isVertical) const
+{
+    if (dimension.Unit() != DimensionUnit::PERCENT) {
+        return NormalizeToPx(dimension);
+    }
+    auto limit = isVertical ? paintSize_.Width() : paintSize_.Height();
+    return limit * dimension.Value();
 }
 
 } // namespace OHOS::Ace

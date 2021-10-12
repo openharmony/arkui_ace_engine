@@ -61,6 +61,7 @@ void SystemProperties::InitDeviceType(DeviceType type)
 }
 
 bool SystemProperties::traceEnabled_ = false;
+bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
 int32_t SystemProperties::deviceWidth_ = 0;
 int32_t SystemProperties::deviceHeight_ = 0;

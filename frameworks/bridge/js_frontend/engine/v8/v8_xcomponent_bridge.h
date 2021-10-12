@@ -24,13 +24,15 @@
 #include "core/components/common/properties/decoration.h"
 #include "frameworks/bridge/js_frontend/engine/common/base_xcomponent_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/v8/v8_engine.h"
-#include "frameworks/core/components/xcomponent/native_render_context.h"
+#include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
 
 namespace OHOS::Ace::Framework {
 class V8XComponentBridge : public BaseXComponentBridge {
     DECLARE_ACE_TYPE(V8XComponentBridge, BaseXComponentBridge)
 
 public:
+    V8XComponentBridge();
+    ~V8XComponentBridge();
     void HandleContext(const v8::Local<v8::Context>& ctx, NodeId id, const std::string& args, JsEngineInstance* engine);
 
     v8::Local<v8::Context> GetContext() const
@@ -47,8 +49,10 @@ private:
     v8::Persistent<v8::Object> renderContext_;
     v8::Persistent<v8::Context> ctx_;
     v8::Isolate* isolate_ = nullptr;
-    NativeRenderContext* nativeRenderContext_;
-    void* nativeWindow_ = nullptr;
+
+    NativeXComponent *nativeXComponent_ = nullptr;
+    RefPtr<NativeXComponentImpl> nativeXcomponentImpl_;
+
     bool hasPluginLoaded_ = false;
 };
 } // namespace OHOS::Ace::Framework

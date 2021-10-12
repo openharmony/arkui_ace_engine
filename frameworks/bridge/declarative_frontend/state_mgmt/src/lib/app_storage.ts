@@ -95,7 +95,6 @@ class AppStorage {
   static IsMutable(key: string): boolean {
     // FIXME(cvetan): No mechanism for immutable/mutable properties
     return true;
-    //   return AppStorage.GetOrCreate().isMutable(key);
   }
 
   constructor() {

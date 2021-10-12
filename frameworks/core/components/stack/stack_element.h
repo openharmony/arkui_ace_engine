@@ -72,7 +72,6 @@ public:
 
 protected:
     void OnFocus() override;
-    void OnBlur() override;
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
 
 private:

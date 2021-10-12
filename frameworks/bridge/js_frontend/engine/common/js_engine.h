@@ -99,6 +99,12 @@ public:
 
     virtual void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data) {}
 
+    virtual void OnNewWant(const std::string& data) {}
+
+    virtual void OnSaveAbilityState(std::string& data) {}
+
+    virtual void OnRestoreAbilityState(const std::string& data) {}
+
     virtual void OnConfigurationUpdated(const std::string& data) {}
 
     virtual bool OnStartContinuation()
@@ -108,7 +114,12 @@ public:
 
     virtual void OnRemoteTerminated() {}
 
+    virtual void OnActive() {}
+
+    virtual void OnInactive() {}
+
     virtual void OnCompleteContinuation(const int32_t code) {}
+    virtual void OnMemoryLevel(const int32_t code) {}
 
     virtual bool OnRestoreData(const std::string& data)
     {

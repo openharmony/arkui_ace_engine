@@ -28,28 +28,27 @@ namespace OHOS::Ace {
 class ACE_EXPORT Window {
 public:
     explicit Window(std::unique_ptr<PlatformWindow> platformWindow);
-    ~Window() = default;
+    virtual ~Window() = default;
 
-    void RequestFrame();
+    virtual void RequestFrame();
 
-    void Destroy()
+    virtual void Destroy()
     {
-        platformWindow_->Destroy();
         platformWindow_.reset();
     }
 
-    void SetRootRenderNode(const RefPtr<RenderNode>& root);
+    virtual void SetRootRenderNode(const RefPtr<RenderNode>& root);
 
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
 
-    void SetVsyncCallback(AceVsyncCallback&& callback)
+    virtual void SetVsyncCallback(AceVsyncCallback&& callback)
     {
-        callback_ = std::move(callback);
+        callbacks_.push_back(std::move(callback));
     }
 
 private:
     std::unique_ptr<PlatformWindow> platformWindow_;
-    AceVsyncCallback callback_;
+    std::list<AceVsyncCallback> callbacks_;
     bool isRequestVsync_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(Window);

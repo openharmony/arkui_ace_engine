@@ -16,8 +16,10 @@
 #include <string>
 
 #include "ecmascript/napi/include/jsnapi.h"
+#include "jsi_bindings.h"
 
 namespace OHOS::Ace::Framework {
+
 template<typename C>
 std::unordered_map<std::string, panda::Global<panda::FunctionRef>> JsiClass<C>::staticFunctions_;
 
@@ -43,6 +45,9 @@ template<typename C>
 panda::Global<panda::FunctionRef> JsiClass<C>::classFunction_;
 
 template<typename C>
+std::vector<shared_ptr<int32_t>> JsiClass<C>::functionIds_;
+
+template<typename C>
 void JsiClass<C>::Declare(const char* name)
 {
     className_ = name;
@@ -56,10 +61,12 @@ template<typename Base, typename R, typename... Args>
 void JsiClass<C>::Method(const char* name, R (Base::*func)(Args...), int id)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    auto vm = runtime->GetEcmaVm();
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     auto funcId = std::make_shared<int32_t>(id);
-    customFunctions_.emplace(name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
-        MethodCallback<Base, R, Args...>, funcId.get())));
+    functionIds_.emplace_back(funcId);
+    customFunctions_.emplace(
+        name, panda::Global<panda::FunctionRef>(vm,
+        panda::FunctionRef::New(vm, MethodCallback<Base, R, Args...>, funcId.get())));
 }
 
 template<typename C>
@@ -67,8 +74,9 @@ template<typename T>
 void JsiClass<C>::CustomMethod(const char* name, MemberFunctionCallback<T> callback, int id)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    auto vm = runtime->GetEcmaVm();
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     auto funcId = std::make_shared<int32_t>(id);
+    functionIds_.emplace_back(funcId);
     customFunctions_.emplace(
         name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
         InternalMemberFunctionCallback<T, panda::EcmaVM*, panda::Local<panda::JSValueRef>,
@@ -80,7 +88,7 @@ template<typename C>
 void JsiClass<C>::CustomMethod(const char* name, FunctionCallback callback)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    auto vm = runtime->GetEcmaVm();
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     customFunctions_.emplace(
         name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, callback, nullptr)));
 }
@@ -90,9 +98,11 @@ template<typename T>
 void JsiClass<C>::CustomMethod(const char* name, JSMemberFunctionCallback<T> callback, int id)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    auto vm = runtime->GetEcmaVm();
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     auto funcId = std::make_shared<int32_t>(id);
-    customFunctions_.emplace(name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
+    functionIds_.emplace_back(funcId);
+    customFunctions_.emplace(
+        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
         InternalJSMemberFunctionCallback<T>, funcId.get())));
 }
 
@@ -101,9 +111,11 @@ template<typename R, typename... Args>
 void JsiClass<C>::StaticMethod(const char* name, R (*func)(Args...), int id)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    auto vm = runtime->GetEcmaVm();
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     auto funcId = std::make_shared<int32_t>(id);
-    staticFunctions_.emplace(name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
+    functionIds_.emplace_back(funcId);
+    staticFunctions_.emplace(
+        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
         StaticMethodCallback<R, Args...>, funcId.get())));
 }
 
@@ -111,9 +123,11 @@ template<typename C>
 void JsiClass<C>::StaticMethod(const char* name, JSFunctionCallback func, int id)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    auto vm = runtime->GetEcmaVm();
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     auto funcId = std::make_shared<int32_t>(id);
-    staticFunctions_.emplace(name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
+    functionIds_.emplace_back(funcId);
+    staticFunctions_.emplace(
+        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
         JSStaticMethodCallback, funcId.get())));
 }
 
@@ -121,7 +135,7 @@ template<typename C>
 void JsiClass<C>::CustomStaticMethod(const char* name, FunctionCallback callback)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    auto vm = runtime->GetEcmaVm();
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     staticFunctions_.emplace(
         name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, callback, nullptr)));
 }
@@ -131,7 +145,7 @@ template<typename T>
 void JsiClass<C>::StaticConstant(const char* name, T val)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    auto vm = runtime->GetEcmaVm();
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     panda::Local<panda::JSValueRef> key = panda::StringRef::NewFromUtf8(vm, name);
     classFunction_->Set(vm, key, JsiValueConvertor::toJsiValue<std::string>(val));
 }
@@ -141,18 +155,20 @@ void JsiClass<C>::Bind(BindingTarget t, FunctionCallback ctor)
 {
     constructor_ = ctor;
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    auto vm = runtime->GetEcmaVm();
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     classFunction_ = panda::Global<panda::FunctionRef>(
         vm, panda::FunctionRef::NewClassFunction(vm, ConstructorInterceptor, nullptr, nullptr));
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
     auto prototype = Local<ObjectRef>(classFunction_->GetFunctionPrototype(vm));
+    prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, "constructor"),
+        panda::Local<panda::JSValueRef>(classFunction_.ToLocal(vm)));
     for (const auto& [name, val] : staticFunctions_) {
         classFunction_->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal(vm));
     }
     for (const auto& [name, val] : customFunctions_) {
         prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal(vm));
     }
-    t->Set(vm, panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName()), classFunction_);
+    t->Set(vm, panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName()), panda::Local<panda::JSValueRef>(classFunction_.ToLocal(vm)));
 }
 
 template<typename C>
@@ -163,11 +179,13 @@ void JsiClass<C>::Bind(
     jsDestructor_ = dtor;
     jsGcMark_ = gcMark;
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    auto vm = runtime->GetEcmaVm();
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     classFunction_ = panda::Global<panda::FunctionRef>(
         vm, panda::FunctionRef::NewClassFunction(vm, JSConstructorInterceptor, nullptr, nullptr));
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
     auto prototype = panda::Local<panda::ObjectRef>(classFunction_->GetFunctionPrototype(vm));
+    prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, "constructor"),
+        panda::Local<panda::JSValueRef>(classFunction_.ToLocal(vm)));
     for (const auto& [name, val] : staticFunctions_) {
         classFunction_->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal(vm));
     }
@@ -185,11 +203,13 @@ void JsiClass<C>::Bind(BindingTarget t, JSDestructorCallback<C> dtor, JSGCMarkCa
     jsDestructor_ = dtor;
     jsGcMark_ = gcMark;
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    auto vm = runtime->GetEcmaVm();
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     classFunction_ = panda::Global<panda::FunctionRef>(
         vm, panda::FunctionRef::NewClassFunction(vm, InternalConstructor<Args...>, nullptr, nullptr));
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
     auto prototype = panda::Local<panda::ObjectRef>(classFunction_->GetFunctionPrototype(vm));
+    prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, "constructor"),
+        panda::Local<panda::JSValueRef>(classFunction_.ToLocal(vm)));
     for (const auto& [name, val] : staticFunctions_) {
         classFunction_->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal(vm));
     }
@@ -204,15 +224,15 @@ template<typename C>
 template<typename Base>
 void JsiClass<C>::Inherit()
 {
-    auto& staticFunctions = GetStaticFunctions();
+    auto& staticFunctions = JsiClass<Base>::GetStaticFunctions();
     for (auto& [name, function] : staticFunctions) {
         if (staticFunctions_.find(name) != staticFunctions_.end()) {
             continue;
         }
         staticFunctions_.emplace(name, function);
     }
-    auto& customFunctions_ = GetCustomFunctions();
-    for (auto& [name, function] : customFunctions_) {
+    auto& customFunctions = JsiClass<Base>::GetCustomFunctions();
+    for (auto& [name, function] : customFunctions) {
         if (customFunctions_.find(name) != customFunctions_.end()) {
             continue;
         }
@@ -279,9 +299,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(EcmaVM* vm, panda::L
     int index = *(static_cast<int*>(data));
     auto binding = ThisJSClass::GetFunctionBinding(index);
     LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
-    bool strictTypeCheck = binding->Options() & MethodOptions::STRICT_TYPE_CHECK;
-    if (strictTypeCheck) {
-    }
+
     auto fnPtr = static_cast<FunctionBinding<Class, R, Args...>*>(binding)->Get();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(argv);
     bool returnSelf = binding->Options() & MethodOptions::RETURN_SELF;
@@ -317,9 +335,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSMethodCallback(panda::EcmaVM* vm,
     int index = *(static_cast<int*>(data));
     auto binding = ThisJSClass::GetFunctionBinding(index);
     LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
-    bool strictTypeCheck = binding->Options() & MethodOptions::STRICT_TYPE_CHECK;
-    if (strictTypeCheck) {
-    }
+
     JsiCallbackInfo info(vm, thisObj, argc, argv);
     auto fnPtr = static_cast<FunctionBinding<Class, R, Args...>*>(binding)->Get();
     (instance->*fnPtr)(info);
@@ -333,9 +349,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::EcmaVM*
     int index = *(static_cast<int*>(data));
     auto binding = ThisJSClass::GetFunctionBinding(index);
     LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
-    bool strictTypeCheck = binding->Options() & MethodOptions::STRICT_TYPE_CHECK;
-    if (strictTypeCheck) {
-    }
+
     auto fnPtr = static_cast<StaticFunctionBinding<R, Args...>*>(binding)->Get();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(argv);
     bool returnSelf = binding->Options() & MethodOptions::RETURN_SELF;
@@ -387,8 +401,9 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalConstructor(panda::EcmaVM* 
     JsiCallbackInfo info(vm, thisObj, argc, argv);
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(argv);
     C* instance = FunctionUtils::ConstructFromTuple<C>(tuple);
+    Local<ObjectRef>(thisObj)->SetNativePointerFieldCount(1);
     panda::Local<panda::ObjectRef>(thisObj)->SetNativePointerField(0, static_cast<void*>(instance));
-    return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
+    return thisObj;
 }
 
 template<typename C>
@@ -438,7 +453,7 @@ template<typename C>
 panda::Local<panda::JSValueRef> JsiClass<C>::NewInstance()
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    auto vm = runtime->GetEcmaVm();
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     return classFunction_->Constructor(vm, nullptr, 0);
 }
 } // namespace OHOS::Ace::Framework

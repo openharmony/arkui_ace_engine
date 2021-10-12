@@ -543,11 +543,14 @@ void JsiDeclarativeEngineInstance::RootViewHandle(const shared_ptr<JsRuntime>& r
         LOGE("jsRuntime is nullptr");
         return;
     }
-    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-    panda::Global<panda::ObjectRef> globalValue = panda::Global<ObjectRef>(arkRuntime->GetEcmaVm(), value);
     RefPtr<JsAcePage> page = JsiDeclarativeEngineInstance::GetStagingPage(runtime);
     if (page != nullptr) {
-        rootViewMap_.emplace(page->GetPageId(), globalValue);
+        auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+        if (!arkRuntime) {
+            LOGE("ark engine is null");
+            return;
+        }
+        rootViewMap_.emplace(page->GetPageId(), panda::Global<panda::ObjectRef>(arkRuntime->GetEcmaVm(), value));
     }
 }
 
@@ -555,7 +558,12 @@ void JsiDeclarativeEngineInstance::DestroyRootViewHandle(int32_t pageId)
 {
     CHECK_RUN_ON(JS);
     if (rootViewMap_.count(pageId) != 0) {
-        panda::Global<panda::ObjectRef> rootView = rootViewMap_[pageId];
+        auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+        if (!arkRuntime) {
+            LOGE("ark engine is null");
+            return;
+        }
+        panda::Local<panda::ObjectRef> rootView = rootViewMap_[pageId].ToLocal(arkRuntime->GetEcmaVm());
         JSView* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
         jsView->Destroy(nullptr);
         rootViewMap_.erase(pageId);
@@ -568,8 +576,13 @@ void JsiDeclarativeEngineInstance::DestroyAllRootViewHandle()
     if (rootViewMap_.size() > 0) {
         LOGI("DestroyAllRootViewHandle release left %{private}zu views ", rootViewMap_.size());
     }
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+    if (!arkRuntime) {
+        LOGE("ark engine is null");
+        return;
+    }
     for (const auto& pair : rootViewMap_) {
-        panda::Global<panda::ObjectRef> rootView = pair.second;
+        panda::Local<panda::ObjectRef> rootView = pair.second.ToLocal(arkRuntime->GetEcmaVm());
         JSView* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
         jsView->Destroy(nullptr);
     }
@@ -691,6 +704,11 @@ JsiDeclarativeEngine::~JsiDeclarativeEngine()
 {
     CHECK_RUN_ON(JS);
     LOG_DESTROY();
+
+    engineInstance_->GetDelegate()->RemoveTaskObserver();
+    if (nativeEngine_ != nullptr) {
+        delete nativeEngine_;
+    }
 }
 
 bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
@@ -714,11 +732,9 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
     nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
     ACE_DCHECK(delegate);
-    delegate->AddTaskObserver([nativeEngine = nativeEngine_]() {
-        nativeEngine->Loop(LOOP_NOWAIT);
-    });
+    delegate->AddTaskObserver([nativeEngine = nativeEngine_]()
+        { nativeEngine->Loop(LOOP_NOWAIT); });
     RegisterWorker();
-
     return result;
 }
 
@@ -742,12 +758,6 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             return;
         }
         instance->InitConsoleModule(arkNativeEngine);
-
-        std::vector<uint8_t> buffer((uint8_t *)_binary_jsEnumStyle_abc_start, (uint8_t *)_binary_jsEnumStyle_abc_end);
-        auto stateMgmtResult = arkNativeEngine->RunBufferScript(buffer);
-        if (stateMgmtResult == nullptr) {
-            LOGE("init worker error");
-        }
     };
     OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
 }
@@ -777,6 +787,7 @@ void JsiDeclarativeEngine::RegisterWorker()
     RegisterInitWorkerFunc();
     RegisterAssetFunc();
 }
+
 
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
@@ -966,8 +977,10 @@ void JsiDeclarativeEngine::OnWindowDisplayModeChanged(bool isShownInMultiWindow,
 {
     LOGI("JsiDeclarativeEngine OnWindowDisplayModeChanged");
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewBoolean(isShownInMultiWindow),
-        runtime->NewString(data) };
+    const std::vector<shared_ptr<JsValue>>& argv = {
+        runtime->NewBoolean(isShownInMultiWindow),
+        runtime->NewString(data)
+    };
     CallAppFunc("onWindowDisplayModeChanged", argv);
 }
 

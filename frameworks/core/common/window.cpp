@@ -53,8 +53,11 @@ void Window::SetRootRenderNode(const RefPtr<RenderNode>& root)
 void Window::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     isRequestVsync_ = false;
-    if (callback_) {
-        callback_(nanoTimestamp, frameCount);
+
+    for (auto& callback : callbacks_) {
+        if (callback) {
+            callback(nanoTimestamp, frameCount);
+        }
     }
 }
 

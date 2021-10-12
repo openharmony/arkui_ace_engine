@@ -18,8 +18,10 @@
 #include <string>
 
 #include "base/log/ace_trace.h"
+#include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/button/button_component.h"
+#include "core/components/checkable/checkable_component.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/menu/menu_component.h"
@@ -314,8 +316,18 @@ void ViewStackProcessor::ClearPageTransitionComponent()
     }
 }
 
-void ViewStackProcessor::CreateAccessibilityNode(const RefPtr<Component>& component)
+void ViewStackProcessor::CreateAccessibilityNode(const RefPtr<Component>& component, const std::string& inspectorTag)
 {
+    // if_else_component、for_each_component、MultiComposedComponent not create accessibilityNode
+    if (AceType::InstanceOf<MultiComposedComponent>(component)) {
+        if (!GetMainComponent()) {
+            return;
+        }
+        auto parentId = GetMainComponent()->GetInspectorId();
+        component->SetInspectorId(parentId);
+        return;
+    }
+    component->SetInspectorId(GenerateId());
     int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
     if (componentsStack_.empty()) {
         auto node = OHOS::Ace::V2::InspectorComposedComponent::CreateAccessibilityNode(
@@ -324,39 +336,49 @@ void ViewStackProcessor::CreateAccessibilityNode(const RefPtr<Component>& compon
             LOGD("this is not AccessibilityNode");
             return;
         }
-    } else {
         auto parentId = GetMainComponent()->GetInspectorId();
-        auto node = OHOS::Ace::V2::InspectorComposedComponent::CreateAccessibilityNode(
-            AceType::TypeName(component), inspectorId, StringUtils::StringToInt(parentId), -1);
-        if (!node) {
-            LOGD("this is not AccessibilityNode with parentId");
-            return;
-        }
+        component->SetInspectorId(parentId);
+        return;
+    }
+    component->SetInspectorId(GenerateId());
+    std::string tag = inspectorTag.empty() ? AceType::TypeName(component) : inspectorTag;
+    int32_t parentId = componentsStack_.empty() ? -1 : StringUtils::StringToInt(GetMainComponent()->GetInspectorId());
+    auto node = OHOS::Ace::V2::InspectorComposedComponent::CreateAccessibilityNode(tag, inspectorId, parentId, -1);
+    if (!node) {
+        LOGD("Create AccessibilityNode:%{public}s Failed", tag.c_str());
+        return;
     }
 }
 
-void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomView)
+void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomView, const std::string& inspectorTag)
 {
     std::unordered_map<std::string, RefPtr<Component>> wrappingComponentsMap;
     if (componentsStack_.size() > 1 && ShouldPopImmediately()) {
         Pop();
     }
-    component->SetInspectorId(GenerateId());
-
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    CreateAccessibilityNode(component);
+    CreateAccessibilityNode(component, inspectorTag);
 #else
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        CreateAccessibilityNode(component);
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()
+        || SystemProperties::GetAccessibilityEnabled()) {
+        CreateAccessibilityNode(component, inspectorTag);
     }
 #endif
     wrappingComponentsMap.emplace("main", component);
     componentsStack_.push(wrappingComponentsMap);
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component)
         && !AceType::InstanceOf<TextSpanComponent>(component)) {
         GetBoxComponent();
     }
-
+#else
+    bool isAccessEnable = AceApplicationInfo::GetInstance().IsAccessibilityEnabled()
+        || SystemProperties::GetAccessibilityEnabled();
+    if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component)
+        && !AceType::InstanceOf<TextSpanComponent>(component) && isAccessEnable) {
+        GetBoxComponent();
+    }
+#endif
     auto navigationContainer = AceType::DynamicCast<NavigationContainerComponent>(component);
     if (navigationContainer) {
         navigationViewDeclaration_ = navigationContainer->GetDeclaration();
@@ -370,8 +392,10 @@ bool ViewStackProcessor::ShouldPopImmediately()
     auto multiComposedComponent = AceType::DynamicCast<MultiComposedComponent>(GetMainComponent());
     auto soleChildComponent = AceType::DynamicCast<SoleChildComponent>(GetMainComponent());
     auto menuComponent = AceType::DynamicCast<MenuComponent>(GetMainComponent());
+    auto checkableComponent = AceType::DynamicCast<CheckableComponent>(GetMainComponent());
+
     return (strcmp(type, AceType::TypeName<TextSpanComponent>()) == 0 ||
-            !(componentGroup || multiComposedComponent || soleChildComponent || menuComponent));
+            !(componentGroup || multiComposedComponent || soleChildComponent || menuComponent || checkableComponent));
 }
 
 void ViewStackProcessor::Pop()
@@ -420,13 +444,14 @@ void ViewStackProcessor::PopContainer()
     auto componentGroup = AceType::DynamicCast<ComponentGroup>(GetMainComponent());
     auto multiComposedComponent = AceType::DynamicCast<MultiComposedComponent>(GetMainComponent());
     auto soleChildComponent = AceType::DynamicCast<SoleChildComponent>(GetMainComponent());
+    auto checkableComponent = AceType::DynamicCast<CheckableComponent>(GetMainComponent());
     if ((componentGroup && strcmp(type, AceType::TypeName<TextSpanComponent>()) != 0) || multiComposedComponent ||
-        soleChildComponent) {
+        soleChildComponent || checkableComponent) {
         Pop();
         return;
     }
 
-    while ((!componentGroup && !multiComposedComponent && !soleChildComponent) ||
+    while ((!componentGroup && !multiComposedComponent && !soleChildComponent && !checkableComponent) ||
            strcmp(type, AceType::TypeName<TextSpanComponent>()) == 0) {
         Pop();
         type = AceType::TypeName(GetMainComponent());
@@ -490,7 +515,6 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
         components.emplace_back(mainComponent);
     }
 
-    /* orders should not change */
     std::string componentNames[] = { "flexItem", "display", "transform", "touch", "pan_guesture", "click_guesture",
         "focusable", "box", "shared_transition", "coverage", "mouse" };
     for (auto& name : componentNames) {
@@ -661,7 +685,12 @@ std::string ViewStackProcessor::GenerateId()
 
 RefPtr<ComposedComponent> ViewStackProcessor::GetInspectorComposedComponent(RefPtr<Component> mainComponent)
 {
-    std::string typeName = AceType::TypeName(mainComponent);
+    auto component = AceType::DynamicCast<ComposedComponent>(GetMainComponent());
+    std::string name;
+    if (component) {
+        name = component->GetName();
+    }
+    std::string typeName = name.empty() ? AceType::TypeName(mainComponent) : name;
     std::string id = mainComponent->GetInspectorId();
     if (OHOS::Ace::V2::InspectorComposedComponent::HasInspectorFinished(typeName)) {
         auto composedComponent = AceType::MakeRefPtr<V2::InspectorComposedComponent>(id, typeName);

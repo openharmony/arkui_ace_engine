@@ -53,6 +53,7 @@ void CardTestFactory::ParseCardDslWithParams(
         auto platformWindow = std::make_unique<MockPlatformWindow>();
         auto window = std::make_unique<Window>(std::move(platformWindow));
         context_ = AceType::MakeRefPtr<PipelineContext>(std::move(window), nullptr, nullptr, nullptr, frontend, 0);
+        context_->SetThemeManager(AceType::MakeRefPtr<ThemeManager>());
     }
     cardFrontend.Initialize(FrontendType::JS_CARD, nullptr);
     cardFrontend.ParsePage(context_, content, params, page);

@@ -132,6 +132,9 @@ public:
         const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
     static shared_ptr<JsValue> JsTransferFromImageBitmap(const shared_ptr<JsRuntime>& runtime,
         const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
+    // support to read inner json data by lottie
+    static shared_ptr<JsValue> JsGetJsonData(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
+        const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
 
     // getter and setter
     static shared_ptr<JsValue> JsFillStyleGetter(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
@@ -205,6 +208,10 @@ public:
     static shared_ptr<JsValue> JsSmoothingQualityGetter(const shared_ptr<JsRuntime>& runtime,
         const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
     static shared_ptr<JsValue> JsSmoothingQualitySetter(const shared_ptr<JsRuntime>& runtime,
+        const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
+    static shared_ptr<JsValue> JsOffsetWidthGetter(const shared_ptr<JsRuntime>& runtime,
+        const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
+    static shared_ptr<JsValue> JsOffsetHeightGetter(const shared_ptr<JsRuntime>& runtime,
         const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
 
     static shared_ptr<JsValue> JsPath2DAddPath(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,

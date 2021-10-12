@@ -25,9 +25,9 @@ constexpr char MEMORY_IMAGE_HEAD[] = "memory://";
 
 } // namespace
 
-std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const std::string& name)
+std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const std::string& name, size_t dataSize)
 {
-    auto clearImageDataCallback = [wp = AceType::WeakClaim(this), picName = name]() {
+    auto clearImageDataCallback = [wp = AceType::WeakClaim(this), picName = name, dataSize]() {
         auto sharedImageManager = wp.Upgrade();
         if (!sharedImageManager) {
             return;
@@ -40,12 +40,12 @@ std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const s
             std::lock_guard<std::mutex> lockCancelableCallbackMap_(sharedImageManager->cancelableCallbackMapMutex_);
             sharedImageManager->cancelableCallbackMap_.erase(picName);
         }
-        LOGI("Done clean image data for %{private}s", picName.c_str());
+        LOGI("Done clean image data for %{private}s, data size is %{public}zu", picName.c_str(), dataSize);
     };
     return clearImageDataCallback;
 }
 
-void SharedImageManager::PostDelayedTaskToClearImageData(const std::string& name)
+void SharedImageManager::PostDelayedTaskToClearImageData(const std::string& name, size_t dataSize)
 {
     if (!taskExecutor_) {
         LOGE("taskExecutor is null!");
@@ -53,12 +53,13 @@ void SharedImageManager::PostDelayedTaskToClearImageData(const std::string& name
     }
     std::lock_guard<std::mutex> lockCancelableCallbackMap_(cancelableCallbackMapMutex_);
     auto& cancelableCallback = cancelableCallbackMap_[name];
-    cancelableCallback.Reset(GenerateClearImageDataCallback(name));
+    cancelableCallback.Reset(GenerateClearImageDataCallback(name, dataSize));
     taskExecutor_->PostDelayedTask(cancelableCallback, TaskExecutor::TaskType::IO, DELAY_TIME_FOR_IMAGE_DATA_CLEAN);
 }
 
 void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& sharedImage)
 {
+    size_t dataSize = 0;
     {
         std::set<RefPtr<ImageProviderLoader>> providerSet = std::set<RefPtr<ImageProviderLoader>>();
         // step1: lock provider map to search for record of current picture name
@@ -68,7 +69,7 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
             for (const auto& providerWp : providersToNotify->second) {
                 auto provider = providerWp.Upgrade();
                 if (!provider) {
-                    LOGE("provider of %{private}s is null", name.c_str());
+                    LOGE("provider of %{private}s is null, data size is %{public}zu", name.c_str(), sharedImage.size());
                     continue;
                 }
                 providerSet.emplace(provider);
@@ -84,10 +85,10 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
         for (const auto& provider : providerSet) {
             provider->UpdateData(std::string(MEMORY_IMAGE_HEAD).append(name), result.first->second);
         }
-        LOGI("done add image data for %{private}s, length of data is %{private}zu", name.c_str(),
-            result.first->second.size());
+        dataSize = result.first->second.size();
+        LOGI("done add image data for %{private}s, length of data is %{public}zu", name.c_str(), dataSize);
     }
-    PostDelayedTaskToClearImageData(name);
+    PostDelayedTaskToClearImageData(name, dataSize);
 }
 
 void SharedImageManager::AddPictureNamesToReloadMap(std::string&& name)

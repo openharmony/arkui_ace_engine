@@ -88,6 +88,11 @@ inline bool NotInUtf16Bmp(char16_t c)
     return (c & 0xF800) == 0xD800;
 }
 
+inline bool NotInBmp(wchar_t ch)
+{
+    return ch >= 0xD800 && ch <= 0xDBFF;
+}
+
 inline bool IsNumber(const std::string& value)
 {
     if (value.empty()) {

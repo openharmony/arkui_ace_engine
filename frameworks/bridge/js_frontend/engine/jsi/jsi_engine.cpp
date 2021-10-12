@@ -1569,6 +1569,46 @@ shared_ptr<JsValue> DisableAlertBeforeBackPage(const shared_ptr<JsRuntime>& runt
     return runtime->NewUndefined();
 }
 
+shared_ptr<JsValue> PostponePageTransition(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg)
+{
+    if (!runtime) {
+        LOGE("PostponePageTransition failed. runtime is null.");
+        return nullptr;
+    }
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engine) {
+        LOGE("PostponePageTransition failed. engine is null.");
+        return runtime->NewUndefined();
+    }
+    auto delegate = engine->GetFrontendDelegate();
+    if (!delegate) {
+        LOGE("PostponePageTransition failed. delegate is null.");
+        return runtime->NewUndefined();
+    }
+    delegate->PostponePageTransition();
+    return runtime->NewUndefined();
+}
+
+shared_ptr<JsValue> LaunchPageTransition(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg)
+{
+    if (!runtime) {
+        LOGE("LaunchPageTransition failed. runtime is null.");
+        return nullptr;
+    }
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engine) {
+        LOGE("LaunchPageTransition failed. engine is null.");
+        return runtime->NewUndefined();
+    }
+    auto delegate = engine->GetFrontendDelegate();
+    if (!delegate) {
+        LOGE("LaunchPageTransition failed. delegate is null.");
+        return runtime->NewUndefined();
+    }
+    delegate->LaunchPageTransition();
+    return runtime->NewUndefined();
+}
+
 shared_ptr<JsValue> JsHandlePageRoute(
     const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg, const std::string& methodName)
 {
@@ -1645,6 +1685,10 @@ shared_ptr<JsValue> JsHandlePageRoute(
         return EnableAlertBeforeBackPage(runtime, arg);
     } else if (methodName == ROUTE_DISABLE_ALERT_BEFORE_BACK_PAGE) {
         return DisableAlertBeforeBackPage(runtime, arg);
+    } else if (methodName == ROUTE_POSTPONE) {
+        return PostponePageTransition(runtime, arg);
+    } else if (methodName == ROUTE_LAUNCH) {
+        return LaunchPageTransition(runtime, arg);
     } else {
         LOGW("system.router not support method = %{private}s", methodName.c_str());
     }
@@ -1669,9 +1713,17 @@ shared_ptr<JsValue> JsHandleSetTimeout(
 shared_ptr<JsValue> JsHandleAnimator(
     const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg, const std::string& methodName)
 {
+    if (!runtime) {
+        LOGE("runtime is nullptr");
+        return nullptr;
+    }
+    if (!arg) {
+        LOGE("arg is nullptr");
+        return runtime->NewNull();
+    }
     auto page = GetStagingPage(runtime);
-    if (page == nullptr || runtime == nullptr || arg == nullptr) {
-        LOGE("page or runtime or arg is nullptr");
+    if (page == nullptr) {
+        LOGE("page is nullptr");
         return runtime->NewNull();
     }
     std::string arguments = arg->ToString(runtime);

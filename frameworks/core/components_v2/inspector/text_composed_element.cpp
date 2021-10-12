@@ -37,7 +37,7 @@ const std::unordered_map<std::string, std::function<std::string(const TextCompos
     { "fontSize", [](const TextComposedElement& inspector) { return inspector.GetTextFontSize(); } },
     { "fontStyle", [](const TextComposedElement& inspector) { return inspector.GetTextFontStyle(); } },
     { "fontWeight", [](const TextComposedElement& inspector) { return inspector.GetTextFontWeight(); } },
-
+    { "fontFamily", [](const TextComposedElement& inspector) { return inspector.GetTextFontFamily(); } },
 };
 
 } // namespace
@@ -88,8 +88,8 @@ std::string TextComposedElement::GetMaxLines() const
 {
     auto renderText = GetRenderText();
     auto maxLines =
-        renderText ? renderText->GetTextStyle().GetMaxLines() : INT32_MAX;
-    return std::to_string(static_cast<int32_t>(maxLines));
+        renderText ? renderText->GetTextStyle().GetMaxLines() : UINT32_MAX;
+    return std::to_string(static_cast<uint32_t>(maxLines));
 }
 
 std::string TextComposedElement::GetLineHeight() const
@@ -105,7 +105,10 @@ std::string TextComposedElement::GetTextDecoration() const
     auto renderText = GetRenderText();
     auto textDecoration =
         renderText ? renderText->GetTextStyle().GetTextDecoration() : TextDecoration::NONE;
-    return ConvertWrapTextDecorationToStirng(textDecoration);
+    auto textDecorationColor = renderText ? renderText->GetTextStyle().GetTextDecorationColor() : Color::BLACK;
+    std::string result =
+        ConvertWrapTextDecorationToStirng(textDecoration) + "," + ConvertColorToString(textDecorationColor);
+    return result;
 }
 
 std::string TextComposedElement::GetBaseLineOffset() const
@@ -156,10 +159,46 @@ std::string TextComposedElement::GetTextFontWeight() const
     return ConvertWrapFontWeightToStirng(fontWeight);
 }
 
+std::string TextComposedElement::GetTextFontFamily() const
+{
+    auto renderText = GetRenderText();
+    auto fontFamily = renderText ? renderText->GetTextStyle().GetFontFamilies() : std::vector<std::string>();
+    return ConvertFontFamily(fontFamily);
+}
+
+
 std::string TextComposedElement::GetData() const
 {
     auto renderText = GetRenderText();
     return renderText ? renderText->GetTextData() : "";
+}
+
+std::string TextComposedElement::GetWidth() const
+{
+    auto render = GetRenderBox();
+    if (render) {
+        Dimension width = render->GetWidthDimension();
+        if (!NearEqual(width.Value(), -1.0)) {
+            return render->GetHeightDimension().ToString();
+        }
+    }
+
+    auto renderText = GetRenderText();
+    return renderText ? std::to_string(renderText->GetParagraphWidth()) : "None";
+}
+
+std::string TextComposedElement::GetHeight() const
+{
+    auto render = GetRenderBox();
+    if (render) {
+        Dimension height = render->GetWidthDimension();
+        if (!NearEqual(height.Value(), -1.0)) {
+            return render->GetHeightDimension().ToString();
+        }
+    }
+
+    auto renderText = GetRenderText();
+    return renderText ? std::to_string(renderText->GetParagraphHeight()) : "None";
 }
 
 RefPtr<RenderText> TextComposedElement::GetRenderText() const
@@ -170,5 +209,16 @@ RefPtr<RenderText> TextComposedElement::GetRenderText() const
     }
     return nullptr;
 }
+
+std::string TextComposedElement::ConvertFontFamily(const std::vector<std::string>& fontFamily) const
+{
+    std::string result = "";
+    for (const auto& item : fontFamily) {
+        result += item;
+        result += ",";
+    }
+    return result;
+}
+
 
 } // namespace OHOS::Ace::V2

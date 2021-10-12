@@ -25,26 +25,19 @@
 #include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::Framework {
-namespace {
-void PushAsyncTaskToPageById(const v8::Local<v8::Context>& context, NodeId id,
-                             const std::function<void(const RefPtr<XComponentTaskPool>&)>& task)
+V8XComponentBridge::V8XComponentBridge()
 {
-    v8::Isolate* isolate = context->GetIsolate();
-    if (!isolate) {
-        LOGE("PushAsyncTaskToPageById handleScope. isolate = null");
-        return;
-    }
-    v8::HandleScope handleScope(isolate);
-
-    auto command = Referenced::MakeRefPtr<JsCommandXComponentOperation>(id, task);
-    auto page = static_cast<RefPtr<JsAcePage>*>(isolate->GetData(V8EngineInstance::RUNNING_PAGE));
-    if (!page) {
-        LOGE("page is null.");
-        return;
-    }
-    (*page)->PushCommand(command);
+    nativeXcomponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
+    nativeXComponent_ = new NativeXComponent(AceType::RawPtr(nativeXcomponentImpl_));
 }
-} // namespace
+
+V8XComponentBridge::~V8XComponentBridge()
+{
+    if (nativeXComponent_) {
+        delete nativeXComponent_;
+        nativeXComponent_ = nullptr;
+    }
+}
 
 void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId id,
                                        const std::string& args, JsEngineInstance* engine)
@@ -87,11 +80,13 @@ void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId
         LOGE("V8XComponentBridge nativeView null");
         return;
     }
-    nativeWindow_ = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
-    if (!nativeWindow_) {
+    auto nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+    if (!nativeWindow) {
         LOGE("V8XComponentBridge::HandleJsContext nativeWindow invalid");
         return;
     }
+    nativeXcomponentImpl_->SetSurface(nativeWindow);
+    nativeXcomponentImpl_->SetXComponentId(xcomponent->GetId());
 
     std::shared_ptr<V8NativeEngine> nativeEngine = static_cast<V8EngineInstance*>(engine)->GetV8NativeEngine();
     if (!nativeEngine) {
@@ -99,18 +94,10 @@ void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId
         return;
     }
 
-    auto renderContext = nativeEngine->GetModuleFromName(xcomponent->GetLibraryName(), true, xcomponent->GetId(),
-                                                         args, NATIVE_RENDER_TAG,
-                                                         reinterpret_cast<void**>(&nativeRenderContext_));
+    auto renderContext = nativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true,
+                                                        args, NATIVE_XCOMPONENT_OBJ,
+                                                        reinterpret_cast<void*>(nativeXComponent_));
     renderContext_.Reset(isolate_, renderContext);
-    if (!nativeRenderContext_) {
-        LOGE("V8XComponentBridge invalid native render context");
-        return;
-    }
-
-    nativeRenderContext_->OnNativeWindowInit(nativeWindow_);
-
-    nativeRenderContext_->OnGLContextInit();
 
     auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate_->GetData(V8EngineInstance::FRONTEND_DELEGATE));
     auto task = [weak = WeakClaim(this), xcomponent]() {
@@ -120,7 +107,9 @@ void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId
         }
         auto bridge = weak.Upgrade();
         if (bridge) {
-            pool->PluginContextInit(bridge->nativeRenderContext_);
+            pool->NativeXComponentInit(
+                bridge->nativeXComponent_,
+                AceType::WeakClaim(AceType::RawPtr(bridge->nativeXcomponentImpl_)));
         }
     };
     if (*delegate == nullptr) {
@@ -128,18 +117,6 @@ void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId
         return;
     }
     (*delegate)->PostSyncTaskToPage(task);
-
-    auto onPluginUpdateCallback = [weak = WeakClaim(this), id]() {
-        auto bridge = weak.Upgrade();
-        if (bridge) {
-            auto ctx = bridge->GetContext();
-            auto task = [](const RefPtr<XComponentTaskPool>& pool) {
-                pool->PluginUpdate();
-            };
-            PushAsyncTaskToPageById(ctx, id, task);
-        }
-    };
-    nativeRenderContext_->OnRenderDoneCallbackCreated(onPluginUpdateCallback);
 
     hasPluginLoaded_ = true;
     return;

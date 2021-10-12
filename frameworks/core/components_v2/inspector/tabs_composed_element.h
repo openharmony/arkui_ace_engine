@@ -20,6 +20,7 @@
 #include "core/components/flex/render_flex.h"
 #include "core/components/tab_bar/render_tab_bar.h"
 #include "core/components/tab_bar/render_tab_content.h"
+#include "core/components/tab_bar/tabs_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -42,6 +43,11 @@ public:
     std::string GetBarMode() const;
     std::string GetBarWidth() const;
     std::string GetBarHeight() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return TabsElement::TypeId();
+    }
 
 private:
     RefPtr<RenderFlex> GetRenderFlex() const;

@@ -31,6 +31,9 @@ class CanvasBridge : public BaseCanvasBridge {
     DECLARE_ACE_TYPE(CanvasBridge, BaseCanvasBridge)
 
 public:
+    CanvasBridge() = default;
+    virtual ~CanvasBridge();
+
     void HandleJsContext(JSContext* ctx, NodeId id, const std::string& args, JsEngineInstance* engine);
     void HandleToDataURL(JSContext* ctx, NodeId id, const std::string& args);
 
@@ -91,6 +94,8 @@ public:
     static JSValue JsPutImageData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv);
     static JSValue JsGetImageData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv);
     static JSValue JsTransferFromImageBitmap(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv);
+    // support to read inner json data by lottie
+    static JSValue JsGetJsonData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv);
 
     // getter and setter
     static JSValue JsFillStyleGetter(JSContext* ctx, JSValueConst value);
@@ -129,6 +134,8 @@ public:
     static JSValue JsSmoothingEnabledSetter(JSContext* ctx, JSValueConst value, JSValueConst proto);
     static JSValue JsSmoothingQualityGetter(JSContext* ctx, JSValueConst value);
     static JSValue JsSmoothingQualitySetter(JSContext* ctx, JSValueConst value, JSValueConst proto);
+    static JSValue JsOffsetWidthGetter(JSContext* ctx, JSValueConst value);
+    static JSValue JsOffsetHeightGetter(JSContext* ctx, JSValueConst value);
 
     static JSValue JsPath2DAddPath(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv);
     static JSValue JsPath2DSetTransform(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv);
@@ -166,13 +173,15 @@ private:
     static JSValue JsHandleStyleSetter(
             JSContext* ctx, JSValueConst value, JSValueConst proto, FunctionCode functionCode);
     static void JsSetAntiAlias(JSContext* ctx, NodeId id, const std::string& args);
-    void JSHandleWebglContext(JSContext* ctx, NodeId id, const std::string& args, JsEngineInstance* engine);
+    void JSHandleWebglContext(JSContext* ctx, NodeId id, const std::string& args, JsEngineInstance* engine,
+        CanvasRenderContextBase*& canvasRenderContext);
 
     JSValue renderContext_;
     JSValue dataURL_;
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-    CanvasRenderContextBase* canvasRenderContext_ = nullptr;
+    CanvasRenderContextBase* webglRenderContext_ = nullptr;
+    CanvasRenderContextBase* webgl2RenderContext_ = nullptr;
 #endif
 
     static int32_t gradientCount_;

@@ -40,6 +40,22 @@ public:
     {
         return isError_;
     }
+    double GetMaxValue() const
+    {
+        return max_;
+    }
+    double GetValue() const
+    {
+        return value_;
+    }
+    ProgressType GetProgressType() const
+    {
+        return type_;
+    }
+    RefPtr<ProgressComponent> GetProgressComponent() const
+    {
+        return component_;
+    }
 
 protected:
     Size Measure();

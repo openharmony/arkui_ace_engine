@@ -155,6 +155,11 @@ public:
         return traceEnabled_;
     }
 
+    static bool GetAccessibilityEnabled()
+    {
+        return accessibilityEnabled_;
+    }
+
     /*
      * Set device orientation.
      */
@@ -193,6 +198,7 @@ public:
 
 private:
     static bool traceEnabled_;
+    static bool accessibilityEnabled_;
     static bool isRound_;
     static int32_t deviceWidth_;
     static int32_t deviceHeight_;

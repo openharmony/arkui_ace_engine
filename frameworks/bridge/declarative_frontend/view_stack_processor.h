@@ -71,7 +71,7 @@ public:
     RefPtr<PageTransitionComponent> GetPageTransitionComponent();
     RefPtr<CoverageComponent> GetCoverageComponent();
     void ClearPageTransitionComponent();
-    void CreateAccessibilityNode(const RefPtr<Component>& component);
+    void CreateAccessibilityNode(const RefPtr<Component>& component, const std::string& inspectorTag);
 #ifndef WEARABLE_PRODUCT
     RefPtr<PopupComponentV2> GetPopupComponent(bool createNewComponent = true);
 #endif
@@ -79,7 +79,7 @@ public:
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the stack.
     // use flag: isCustomView to avoid creating redundant Components.
-    void Push(const RefPtr<Component>& component, bool isCustomView = false);
+    void Push(const RefPtr<Component>& component, bool isCustomView = false, const std::string& inspectorTag = "");
 
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrappedcomponent has child of the new stack top's main component.

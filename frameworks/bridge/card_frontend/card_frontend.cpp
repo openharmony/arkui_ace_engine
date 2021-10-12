@@ -28,13 +28,6 @@ namespace {
 const char MANIFEST_JSON[] = "manifest.json";
 const char FILE_TYPE_JSON[] = ".json";
 
-static int32_t g_pageId = 0;
-
-static int32_t GetPageId()
-{
-    return g_pageId++;
-}
-
 } // namespace
 
 CardFrontend::~CardFrontend()
@@ -49,11 +42,6 @@ bool CardFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& tas
     delegate_ = AceType::MakeRefPtr<Framework::CardFrontendDelegate>();
     manifestParser_ = AceType::MakeRefPtr<Framework::ManifestParser>();
     return true;
-}
-
-void CardFrontend::SetSelfTaskExectuor(const RefPtr<TaskExecutor>& taskExecutor)
-{
-    selfTaskExecutor_ = taskExecutor;
 }
 
 void CardFrontend::Destroy()
@@ -93,9 +81,6 @@ void CardFrontend::ParseManifest() const
             return;
         }
         manifestParser_->Parse(jsonContent);
-        if (noDependentContainer_ && onGotWindowConfigCallback_) {
-            onGotWindowConfigCallback_(manifestParser_->GetWindowConfig());
-        }
     });
 }
 
@@ -114,8 +99,7 @@ void CardFrontend::RunPage(int32_t pageId, const std::string& url, const std::st
         EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
         return;
     }
-
-    GetTaskExecutor()->PostTask(
+    taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), urlPath, params] {
             auto frontend = weak.Upgrade();
             if (frontend) {
@@ -145,10 +129,7 @@ void CardFrontend::LoadPage(const std::string& urlPath, const std::string& param
     if (!delegate_) {
         return;
     }
-    auto stage = AceType::DynamicCast<StageElement>(parentElement_);
-    auto page = noDependentContainer_ ?
-        delegate_->CreatePage(GetPageId(), urlPath, AceType::WeakClaim(AceType::RawPtr(stage))) :
-        delegate_->CreatePage(GetPageId(), urlPath);
+    auto page = delegate_->CreatePage(0, urlPath);
     page->SetPageParams(params);
     page->SetFlushCallback([weak = WeakClaim(this)](const RefPtr<Framework::JsAcePage>& page) {
         auto front = weak.Upgrade();
@@ -238,7 +219,6 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
                         }
                     }
                 }
-                LOGI("card update finish");
                 return;
             }
 
@@ -250,26 +230,8 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
             if (pipelineContext->GetAccessibilityManager()) {
                 pipelineContext->GetAccessibilityManager()->HandleComponentPostBinding();
             }
-
-            if (!frontend->noDependentContainer_) {
-                if (pipelineContext->CanPushPage()) {
-                    pipelineContext->PushPage(page->BuildPage(page->GetUrl()));
-
-                    frontend->pageLoaded_ = true;
-                    if (frontend->delegate_) {
-                        frontend->delegate_->GetJsAccessibilityManager()->SetRunningPage(page);
-                    }
-                }
-            } else {
-                auto rootComponent = page->BuildPage(page->GetUrl());
-                RefPtr<StageElement> stage = AceType::DynamicCast<StageElement>(frontend->parentElement_);
-                if (!stage) {
-                    LOGW("could not get card mount stage element, maybe will show error");
-                }
-                auto mainPipelineCtx = pipelineContext->GetMainPipelineContext();
-                if (mainPipelineCtx) {
-                    mainPipelineCtx->PushPage(rootComponent, stage);
-                }
+            if (pipelineContext->CanPushPage()) {
+                pipelineContext->PushPage(page->BuildPage(page->GetUrl()));
                 frontend->pageLoaded_ = true;
                 if (frontend->delegate_) {
                     frontend->delegate_->GetJsAccessibilityManager()->SetRunningPage(page);
@@ -281,7 +243,7 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
 
 void CardFrontend::UpdateData(const std::string& dataList)
 {
-    GetTaskExecutor()->PostTask(
+    taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), dataList] {
             auto frontend = weak.Upgrade();
             if (frontend) {
@@ -304,7 +266,7 @@ void CardFrontend::UpdatePageData(const std::string& dataList)
 
 void CardFrontend::SetColorMode(ColorMode colorMode)
 {
-    GetTaskExecutor()->PostTask(
+    taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), colorMode]() {
             auto frontend = weak.Upgrade();
             if (frontend) {
@@ -350,7 +312,7 @@ void CardFrontend::RebuildAllPages()
 
 void CardFrontend::OnSurfaceChanged(int32_t width, int32_t height)
 {
-    GetTaskExecutor()->PostTask(
+    taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), width, height] {
             auto frontend = weak.Upgrade();
             if (frontend) {
@@ -379,15 +341,6 @@ void CardFrontend::OnMediaFeatureUpdate()
         return;
     }
     parseJsCard_->UpdateStyle(delegate_->GetPage());
-}
-
-const RefPtr<TaskExecutor>& CardFrontend::GetTaskExecutor() const
-{
-    if (noDependentContainer_) {
-        return selfTaskExecutor_;
-    } else {
-        return taskExecutor_;
-    }
 }
 
 } // namespace OHOS::Ace

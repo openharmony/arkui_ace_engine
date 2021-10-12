@@ -93,6 +93,12 @@ public:
     void SetTweenComponent(const RefPtr<TweenComponent>& tweenComponent)
     {
         tweenComponent_ = tweenComponent;
+        if (!displayComponent_) {
+            displayComponent_ = AceType::MakeRefPtr<DisplayComponent>(rootComponent_->GetChild());
+        }
+        if (!transformComponent_) {
+            transformComponent_ = AceType::MakeRefPtr<TransformComponent>();
+        }
     }
 
     RefPtr<TweenComponent> GetTweenComponent() const

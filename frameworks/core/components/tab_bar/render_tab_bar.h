@@ -131,6 +131,7 @@ private:
     {
         return TabBarMode::SCROLLABEL == mode_ || TabBarMode::FIXED_START == mode_;
     }
+    RefPtr<RenderNode> GetChildByIndex(int32_t index) const;
 
     RefPtr<ClickRecognizer> clickRecognizer_;
     RefPtr<Scrollable> scrollable_;

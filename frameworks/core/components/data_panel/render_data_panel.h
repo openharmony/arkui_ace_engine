@@ -35,6 +35,10 @@ public:
     static RefPtr<RenderNode> Create();
     virtual void PlayAnimation() = 0;
     virtual void StopAnimation() = 0;
+    bool GetCloseEffect() const
+    {
+        return !useEffect_;
+    }
 
 protected:
     RenderDataPanel();
@@ -163,12 +167,9 @@ public:
         }
     }
 
-protected:
-    void PrepareAnimation() override;
-
-    double GetTotalValue() const
+    const std::vector<Segment>& GetSegments() const
     {
-        return totalValue_;
+        return segments_;
     }
 
     double GetMaxValue() const
@@ -176,9 +177,12 @@ protected:
         return maxValue_;
     }
 
-    const std::vector<Segment>& GetSegments() const
+protected:
+    void PrepareAnimation() override;
+
+    double GetTotalValue() const
     {
-        return segments_;
+        return totalValue_;
     }
 
     double GetStartDegree() const

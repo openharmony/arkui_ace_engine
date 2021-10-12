@@ -303,7 +303,6 @@ template("ace_core_source_set") {
     if (!use_mingw_win && !use_mac && !is_wearable_product &&
         !is_standard_system) {
       deps += [
-        "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform",
         "$ace_root/frameworks/core/components/rich_text:ace_core_components_rich_text_$platform",
         "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform",
         "$ace_root/frameworks/core/components/xcomponent:ace_core_components_xcomponent_$platform",

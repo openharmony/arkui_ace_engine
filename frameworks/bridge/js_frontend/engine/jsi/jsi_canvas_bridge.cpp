@@ -231,6 +231,7 @@ void JsiCanvasBridge::HandleJsContext(const shared_ptr<JsRuntime>& runtime, Node
         { "createImageData", JsCreateImageData },
         { "putImageData", JsPutImageData },
         { "getImageData", JsGetImageData },
+        { "getJsonData", JsGetJsonData },
         { "transferFromImageBitmap", JsTransferFromImageBitmap },
     };
     renderContext_->SetProperty(runtime, "__nodeId", runtime->NewInt32(id));
@@ -255,7 +256,9 @@ void JsiCanvasBridge::HandleJsContext(const shared_ptr<JsRuntime>& runtime, Node
         { "shadowOffsetX", JsShadowOffsetXGetter, JsShadowOffsetXSetter },
         { "shadowOffsetY", JsShadowOffsetYGetter, JsShadowOffsetYSetter },
         { "imageSmoothingEnabled", JsSmoothingEnabledGetter, JsSmoothingEnabledSetter },
-        { "imageSmoothingQuality", JsSmoothingQualityGetter, JsSmoothingQualitySetter }
+        { "imageSmoothingQuality", JsSmoothingQualityGetter, JsSmoothingQualitySetter },
+        { "offsetWidth", JsOffsetWidthGetter, nullptr },
+        { "offsetHeight", JsOffsetHeightGetter, nullptr }
     };
     for (const auto& item : animationFuncs) {
         auto getterTempl = runtime->NewFunction(std::get<1>(item));
@@ -1562,6 +1565,47 @@ shared_ptr<JsValue> JsiCanvasBridge::JsGetImageData(const shared_ptr<JsRuntime>&
     return imageData;
 }
 
+shared_ptr<JsValue> JsiCanvasBridge::JsGetJsonData(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argc != 1) {
+        return runtime->NewUndefined();
+    }
+    NodeId id = GetCurrentNodeId(runtime, value);
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engine) {
+        LOGE("JsGetJsonData failed. engine is null.");
+        return runtime->NewUndefined();
+    }
+    auto page = engine->GetRunningPage();
+    if (!page) {
+        LOGE("JsGetJsonData failed. page is null.");
+        return runtime->NewUndefined();
+    }
+    std::string path = argv[0]->ToString(runtime);
+    std::string jsonData;
+    auto task = [id, page, path, &jsonData]() {
+        auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+        if (!canvas) {
+            return;
+        }
+        auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
+        auto canvasTask = paintChild->GetTaskPool();
+        if (!canvasTask) {
+            return;
+        }
+        jsonData = canvasTask->GetJsonData(path);
+    };
+    auto delegate = engine->GetFrontendDelegate();
+    if (!delegate) {
+        LOGE("JsGetJsonData failed. delegate is null.");
+        return runtime->NewUndefined();
+    }
+    delegate->PostSyncTaskToPage(task);
+
+    return runtime->NewString(jsonData.c_str());
+}
+
 shared_ptr<JsValue> JsiCanvasBridge::JsTransferFromImageBitmap(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
@@ -2098,6 +2142,50 @@ shared_ptr<JsValue> JsiCanvasBridge::JsSmoothingQualitySetter(const shared_ptr<J
     PushTaskToPage(runtime, value, task);
     value->SetProperty(runtime, "__imageSmoothingQuality", proto);
     return runtime->NewUndefined();
+}
+
+shared_ptr<JsValue> JsiCanvasBridge::JsOffsetWidthGetter(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    NodeId id = GetCurrentNodeId(runtime, value);
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engine) {
+        LOGE("JsOffsetWidthGetter failed. engine is null.");
+        return runtime->NewUndefined();
+    }
+    auto page = engine->GetRunningPage();
+    if (!page) {
+        LOGE("JsOffsetWidthGetter failed. page is null.");
+        return runtime->NewUndefined();
+    }
+
+    auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+    if (!canvas) {
+        return runtime->NewUndefined();
+    }
+    return runtime->NewNumber(canvas->GetWidth().Value());
+}
+
+shared_ptr<JsValue> JsiCanvasBridge::JsOffsetHeightGetter(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    NodeId id = GetCurrentNodeId(runtime, value);
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engine) {
+        LOGE("JsOffsetHeightGetter failed. engine is null.");
+        return runtime->NewUndefined();
+    }
+    auto page = engine->GetRunningPage();
+    if (!page) {
+        LOGE("JsOffsetHeightGetter failed. page is null.");
+        return runtime->NewUndefined();
+    }
+
+    auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+    if (!canvas) {
+        return runtime->NewUndefined();
+    }
+    return runtime->NewNumber(canvas->GetHeight().Value());
 }
 
 } // namespace OHOS::Ace::Framework

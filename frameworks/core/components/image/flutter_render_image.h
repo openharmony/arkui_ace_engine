@@ -72,10 +72,20 @@ public:
     static SkAlphaType AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap);
     static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
     static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
+    static void UploadImageObjToGpuForRender(
+        const RefPtr<ImageObject>& imageObj,
+        const WeakPtr<PipelineContext> context,
+        RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+        UploadSuccessCallback uploadSuccessCallback,
+        FailedCallback failedCallback,
+        Size resizeTarget,
+        bool forceResize,
+        bool syncMode = false);
 
     void ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasImage>& image);
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
     void ImageObjFailed();
+    bool NeedUploadImageObjToGpu();
 
     void SetFetchImageObjBackgroundTask(CancelableTask task)
     {
@@ -87,6 +97,7 @@ public:
 
     void OnAppHide() override;
     void OnAppShow() override;
+    void OnVisibleChanged() override;
 
 protected:
     virtual bool MaybeRelease() override;

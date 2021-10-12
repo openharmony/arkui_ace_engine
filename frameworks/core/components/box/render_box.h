@@ -188,6 +188,18 @@ public:
     void AddRecognizerToResult(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& result);
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void SetPreTargetRenderBox(const RefPtr<RenderBox>& preTargetRenderBox)
+    {
+        preTargetRenderBox_ = preTargetRenderBox;
+    }
+
+    const RefPtr<RenderBox> GetPreTargetRenderBox() const
+    {
+        return preTargetRenderBox_;
+    }
+#endif
+
 protected:
     void ClearRenderObject() override;
 
@@ -224,6 +236,9 @@ private:
     std::array<RefPtr<GestureRecognizer>, MAX_GESTURE_SIZE> recognizers_;
 
     RefPtr<GestureRecognizer> dragDropGesture_;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    RefPtr<RenderBox> preTargetRenderBox_;
+#endif
     OnDragFunc onDrag_;
     OnDragFunc onDragEnter_;
     OnDragFunc onDragMove_;

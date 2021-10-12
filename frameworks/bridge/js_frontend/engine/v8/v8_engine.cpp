@@ -1237,6 +1237,28 @@ void DisableAlertBeforeBackPage(const v8::FunctionCallbackInfo<v8::Value>& args,
     }
 }
 
+void PostponePageTransition(const v8::FunctionCallbackInfo<v8::Value>& args, int32_t index)
+{
+    CHECK_RUN_ON(JS);
+    LOGD("Enter PostponePageTransition");
+    v8::Isolate* isolate = args.GetIsolate();
+    ACE_DCHECK(isolate);
+    v8::HandleScope handleScope(isolate);
+    auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
+    (*delegate)->PostponePageTransition();
+}
+
+void LaunchPageTransition(const v8::FunctionCallbackInfo<v8::Value>& args, int32_t index)
+{
+    CHECK_RUN_ON(JS);
+    LOGD("Enter LaunchPageTransition");
+    v8::Isolate* isolate = args.GetIsolate();
+    ACE_DCHECK(isolate);
+    v8::HandleScope handleScope(isolate);
+    auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
+    (*delegate)->LaunchPageTransition();
+}
+
 void JsHandlePageRoute(const v8::FunctionCallbackInfo<v8::Value>& args, const std::string& methodName, int32_t index)
 {
     CHECK_RUN_ON(JS);
@@ -1347,6 +1369,10 @@ void JsHandlePageRoute(const v8::FunctionCallbackInfo<v8::Value>& args, const st
         EnableAlertBeforeBackPage(args, index);
     } else if (methodName == ROUTE_DISABLE_ALERT_BEFORE_BACK_PAGE) {
         DisableAlertBeforeBackPage(args, index);
+    } else if (methodName == ROUTE_POSTPONE) {
+        PostponePageTransition(args, index);
+    } else if (methodName == ROUTE_LAUNCH) {
+        LaunchPageTransition(args, index);
     } else {
         LOGW("system.router not support method = %{private}s", methodName.c_str());
     }

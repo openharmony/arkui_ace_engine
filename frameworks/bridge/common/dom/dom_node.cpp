@@ -74,6 +74,10 @@ static const std::unordered_set<std::string> TRANSITION_PROPERTIES = {
     DOM_BORDER_BOTTOM_COLOR
 };
 
+// default flex value
+constexpr double DEFAULT_FLEX_GROW = 0.0;
+constexpr double DEFAULT_FLEX_SHRINK = 1.0;
+constexpr double DEFAULT_FLEX_BASIS = -1.0;
 constexpr int32_t TRANSITION_NAME_LENGTH = 4;
 
 // prefix id of TweenComponent, for differentiation from id of ComposedComponent
@@ -133,7 +137,7 @@ void DOMNode::Mount(int32_t slot)
     };
     if (flexItemParents.count(parentTag_) > 0) {
         flexItemComponent_ =
-            AceType::MakeRefPtr<FlexItemComponent>();
+            AceType::MakeRefPtr<FlexItemComponent>(DEFAULT_FLEX_GROW, DEFAULT_FLEX_SHRINK, DEFAULT_FLEX_BASIS);
         if (boxComponent_) {
             // span has no box component.
             boxComponent_->SetDeliverMinToChild(false);
@@ -1195,6 +1199,17 @@ void DOMNode::CompositeComponents()
         UpdateFlexItemComponent();
         components.emplace_back(flexItemComponent_);
     }
+    if (tweenComponent_) {
+        tweenComponent_->SetLeafNode(IsLeafNode());
+        components.emplace_back(tweenComponent_);
+    }
+    if (displayComponent_) {
+        displayComponent_->DisableLayer(IsLeafNode());
+        components.emplace_back(displayComponent_);
+        if (focusableEventComponent_) {
+            focusableEventComponent_->SetShow(GetDisplay() != DisplayType::NONE);
+        }
+    }
     if (transformComponent_) {
         components.emplace_back(transformComponent_);
     }
@@ -1217,21 +1232,8 @@ void DOMNode::CompositeComponents()
     if (mouseEventComponent_) {
         components.emplace_back(mouseEventComponent_);
     }
-
-    if (displayComponent_) {
-        displayComponent_->DisableLayer(IsLeafNode());
-        components.emplace_back(displayComponent_);
-        if (focusableEventComponent_) {
-            focusableEventComponent_->SetShow(GetDisplay() != DisplayType::NONE);
-        }
-    }
-
     if (propTransitionComponent_) {
         components.emplace_back(propTransitionComponent_);
-    }
-    if (tweenComponent_) {
-        tweenComponent_->SetLeafNode(IsLeafNode());
-        components.emplace_back(tweenComponent_);
     }
     if (boxComponent_) {
         components.emplace_back(boxComponent_);
@@ -1461,11 +1463,13 @@ void DOMNode::UpdateDisplayComponent()
         return;
     }
 
+    bool hasCreated = true;
     if (!displayComponent_) {
         displayComponent_ = AceType::MakeRefPtr<DisplayComponent>(rootComponent_->GetChild());
+        hasCreated = false;
     }
     auto& opacityStyle = static_cast<CommonOpacityStyle&>(declaration_->GetStyle(StyleTag::COMMON_OPACITY_STYLE));
-    if (opacityStyle.IsValid()) {
+    if (opacityStyle.IsValid() && !hasCreated) {
         displayComponent_->SetOpacity(opacityStyle.opacity);
         displayComponent_->SetAppearingDuration(opacityStyle.appearingDuration);
     }

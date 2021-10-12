@@ -90,6 +90,9 @@ public:
     void OnShow() override;
     void OnHide() override;
     void OnConfigurationUpdated(const std::string& data) override;
+    void OnSaveAbilityState(std::string& data) override;
+    void OnRestoreAbilityState(const std::string& data) override;
+    void OnNewWant(const std::string& data) override;
     void OnActive() override;
     void OnInactive() override;
     bool OnStartContinuation() override;
@@ -99,6 +102,7 @@ public:
     bool OnRestoreData(const std::string& data) override;
     void OnRemoteTerminated() override;
     void OnNewRequest(const std::string& data) override;
+    void OnMemoryLevel(const int32_t level) override;
     void SetColorMode(ColorMode colorMode) override;
     void CallRouterBack() override;
     void NotifyAppStorage(const std::string& key, const std::string& value) override;

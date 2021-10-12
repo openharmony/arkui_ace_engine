@@ -243,7 +243,8 @@ JSValue ComponentApiBridge::JsObserverOn(JSContext* ctx, JSValueConst value, int
 
     auto callbackJsObject = AceType::MakeRefPtr<QJSVisibleListenerCallback>(ctx, argv[0], id);
     auto jsCallback = [callbackObj = callbackJsObject](bool visible, double ratio) {
-        auto context = callbackObj->GetContext();
+        JSContext* context = callbackObj->GetContext();
+        QJSHandleScope handleScope(context);
         auto jsFunc = callbackObj->GetJsObject();
         JSValue globalObj = JS_GetGlobalObject(context);
 

@@ -16,6 +16,7 @@ import("//foundation/ace/ace_engine/frameworks/core/components/components.gni")
 build_component("xcomponent") {
   sources = [
     "flutter_render_xcomponent.cpp",
+    "native_interface_xcomponent_impl.cpp",
     "render_xcomponent.cpp",
     "resource/native_texture.cpp",
     "resource/xcomponent_delegate.cpp",
@@ -23,9 +24,4 @@ build_component("xcomponent") {
     "xcomponent_component.cpp",
     "xcomponent_element.cpp",
   ]
-}
-
-ohos_ndk_headers("ace_header") {
-  dest_dir = "$ndk_headers_out_dir/ace/xcomponent/"
-  sources = [ "native_render_context.h" ]
 }

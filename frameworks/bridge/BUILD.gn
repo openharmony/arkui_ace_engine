@@ -26,7 +26,7 @@ template("framework_bridge") {
       "declarative_frontend:declarative_frontend_$platform",
 
       # bridge source
-      "card_frontend:card_frontend",
+      "card_frontend:card_frontend_$platform",
       "codec:data_codec",
       "common:bridge_common_$platform",
       "common/accessibility:bridge_accessibility_$platform",

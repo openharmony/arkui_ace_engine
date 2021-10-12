@@ -117,9 +117,87 @@ void RenderBox::CreateDragDropRecognizer()
     PanDirection panDirection;
     auto panRecognizer =
         AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context, DEFAULT_FINGERS, panDirection, DEFAULT_DISTANCE);
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     panRecognizer->SetOnActionStart([context, onDrag = onDrag_](const GestureEvent& info) {
         if (onDrag) {
             auto pipelineContext = context.Upgrade();
+            RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+            RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+            event->SetPasteData(pasteData);
+            event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+            event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+            LOGE("[Engine Log] Unable to display drag events on the Previewer. Perform this operation on the "
+                "emulator or a real device instead.");
+            onDrag(event);
+        }
+    });
+    panRecognizer->SetOnActionUpdate(
+        [weakRenderBox = AceType::WeakClaim<RenderBox>(this), context = context](const GestureEvent& info) {
+            auto pipelineContext = context.Upgrade();
+            RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+            RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+            event->SetPasteData(pasteData);
+            event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+            event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+
+            auto renderBox = weakRenderBox.Upgrade();
+            if (!renderBox) {
+                return;
+            }
+            auto targetRenderBox = renderBox->FindTargetRenderBox(context.Upgrade(), info);
+            auto preTargetRenderBox = renderBox->GetPreTargetRenderBox();
+            if (preTargetRenderBox == targetRenderBox) {
+                if (targetRenderBox && targetRenderBox->GetOnDragMove()) {
+                    (targetRenderBox->GetOnDragMove())(event);
+                }
+                return;
+            }
+            if (preTargetRenderBox && preTargetRenderBox->GetOnDragLeave()) {
+                (preTargetRenderBox->GetOnDragLeave())(event);
+            }
+            if (targetRenderBox && targetRenderBox->GetOnDragEnter()) {
+                (targetRenderBox->GetOnDragEnter())(event);
+            }
+            renderBox->SetPreTargetRenderBox(targetRenderBox);
+        });
+    panRecognizer->SetOnActionEnd(
+        [weakRenderBox = AceType::WeakClaim<RenderBox>(this), context = context](const GestureEvent& info) {
+            auto pipelineContext = context.Upgrade();
+            RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+            RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+            event->SetPasteData(pasteData);
+            event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+            event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+
+            auto renderBox = weakRenderBox.Upgrade();
+            if (!renderBox) {
+                return;
+            }
+            ACE_DCHECK(renderBox->GetPreTargetRenderBox() == renderBox->FindTargetRenderBox(context.Upgrade(), info));
+            auto targetRenderBox = renderBox->GetPreTargetRenderBox();
+            if (!targetRenderBox) {
+                return;
+            }
+            if (targetRenderBox->GetOnDrop()) {
+                (targetRenderBox->GetOnDrop())(event);
+            }
+            renderBox->SetPreTargetRenderBox(nullptr);
+        });
+    panRecognizer->SetOnActionCancel([weakRenderBox = AceType::WeakClaim<RenderBox>(this)]() {
+        auto renderBox = weakRenderBox.Upgrade();
+        if (!renderBox) {
+            return;
+        }
+        renderBox->SetPreTargetRenderBox(nullptr);
+    });
+#else
+    panRecognizer->SetOnActionStart([context, onDrag = onDrag_](const GestureEvent& info) {
+        if (onDrag) {
+            auto pipelineContext = context.Upgrade();
+            if (!pipelineContext) {
+                LOGE("pipeline context is null!");
+                return;
+            }
             RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
             RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
             event->SetPasteData(pasteData);
@@ -135,11 +213,11 @@ void RenderBox::CreateDragDropRecognizer()
             jsonResult->Put("plainText", event->GetPasteData()->GetPlainText().c_str());
             jsonResult->Put("width", event->GetPixmap()->GetWidth());
             jsonResult->Put("height", event->GetPixmap()->GetHeight());
-            if (pipelineContext) {
-                pipelineContext->StartSystemDrag(jsonResult->ToString(), event->GetPixmap());
-            }
+            pipelineContext->StartSystemDrag(jsonResult->ToString(), event->GetPixmap());
         }
     });
+#endif
+
     std::vector<RefPtr<GestureRecognizer>> recognizers {longPressRecognizer, panRecognizer};
     dragDropGesture_ = AceType::MakeRefPtr<OHOS::Ace::SequencedRecognizer>(GetContext(), recognizers);
     dragDropGesture_->SetIsExternalGesture(true);
@@ -185,7 +263,14 @@ void RenderBox::UpdateBackDecoration(const RefPtr<Decoration>& newDecoration)
             renderBox->OnAnimationCallback();
         }
     });
+    backDecoration_->SetBorderType(newDecoration->GetBorderType());
     backDecoration_->SetGradientBorderImage(newDecoration->GetGradientBorderImage());
+    backDecoration_->SetHasBorderImageSource(newDecoration->GetHasBorderImageSource());
+    backDecoration_->SetHasBorderImageSlice(newDecoration->GetHasBorderImageSlice());
+    backDecoration_->SetHasBorderImageWidth(newDecoration->GetHasBorderImageWidth());
+    backDecoration_->SetHasBorderImageOutset(newDecoration->GetHasBorderImageOutset());
+    backDecoration_->SetHasBorderImageRepeat(newDecoration->GetHasBorderImageRepeat());
+    backDecoration_->SetHasBorderImageGradient(newDecoration->GetHasBorderImageGradient());
     backDecoration_->SetImage(newDecoration->GetImage());
     backDecoration_->SetBorderImage(newDecoration->GetBorderImage());
     backDecoration_->SetPadding(newDecoration->GetPadding());
@@ -451,6 +536,9 @@ void RenderBox::ClearRenderObject()
     }
 
     dragDropGesture_ = nullptr;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    preTargetRenderBox_ = nullptr;
+#endif
     onDrag_ = nullptr;
     onDragEnter_ = nullptr;
     onDragMove_ = nullptr;
@@ -1074,8 +1162,8 @@ void RenderBox::UpdateGestureRecognizer(const std::array<RefPtr<Gesture>, MAX_GE
             continue;
         }
         auto recognizer = gestures[i]->CreateRecognizer(context_);
-        recognizer->SetIsExternalGesture(true);
         if (recognizer) {
+            recognizer->SetIsExternalGesture(true);
             if (!recognizers_[i] || !recognizers_[i]->ReconcileFrom(recognizer)) {
                 recognizers_[i] = recognizer;
             }

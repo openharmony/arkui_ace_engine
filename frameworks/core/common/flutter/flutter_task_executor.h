@@ -33,6 +33,7 @@ class ACE_EXPORT FlutterTaskExecutor final : public TaskExecutor {
     DECLARE_ACE_TYPE(FlutterTaskExecutor, TaskExecutor);
 
 public:
+    explicit FlutterTaskExecutor(const RefPtr<FlutterTaskExecutor>& taskExecutors);
     explicit FlutterTaskExecutor(const flutter::TaskRunners& taskRunners);
     FlutterTaskExecutor() = default;
     ~FlutterTaskExecutor() final;

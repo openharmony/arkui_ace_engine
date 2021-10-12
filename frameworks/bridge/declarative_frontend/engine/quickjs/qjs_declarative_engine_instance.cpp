@@ -197,6 +197,7 @@ JSValue QJSDeclarativeEngineInstance::eval_binary_buf(JSContext* ctx, const uint
         js_std_dump_error(ctx);
         return obj;
     }
+    js_std_loop(ctx);
     return JS_EvalFunction(ctx, obj);
 }
 

@@ -870,30 +870,19 @@ void RenderSvgBase::UpdateGradient(FillState& fillState)
     if (gradient->GetType() == GradientType::RADIAL) {
         const auto& radialGradient = gradient->GetRadialGradient();
         auto gradientInfo = RadialGradientInfo();
-
-        if (radialGradient.radialHorizontalSize) {
-            Dimension radialHorizontalSize = Dimension(
-                radialGradient.radialHorizontalSize.value().Value(),
-                radialGradient.radialHorizontalSize.value().Unit());
-            gradientInfo.r = ConvertDimensionToPx(radialHorizontalSize, sqrt(width * height));
-        } else {
-            gradientInfo.r = ConvertDimensionToPx(0.5_pct, sqrt(width * height));
-        }
-        if (radialGradient.radialCenterX) {
-            Dimension radialCenterX = Dimension(
-                radialGradient.radialCenterX.value().Value(), radialGradient.radialCenterX.value().Unit());
-            gradientInfo.cx = ConvertDimensionToPx(radialCenterX, width) + bounds.Left();
-        } else {
-            gradientInfo.cx = ConvertDimensionToPx(0.5_pct, width) + bounds.Left();
-        }
-        if (radialGradient.radialCenterX) {
-            Dimension radialCenterY = Dimension(
-                radialGradient.radialCenterY.value().Value(), radialGradient.radialCenterY.value().Unit());
-            gradientInfo.cy = ConvertDimensionToPx(radialCenterY, height) + bounds.Top();
-        } else {
-            gradientInfo.cy = ConvertDimensionToPx(0.5_pct, height) + bounds.Top();
-        }
-
+        Dimension radialHorizontalSize = Dimension(
+            radialGradient.radialHorizontalSize.value().Value(), radialGradient.radialHorizontalSize.value().Unit());
+        gradientInfo.r =
+            ConvertDimensionToPx(radialGradient.radialHorizontalSize ? radialHorizontalSize :
+                0.5_pct, sqrt(width * height));
+        Dimension radialCenterX = Dimension(
+            radialGradient.radialCenterX.value().Value(), radialGradient.radialCenterX.value().Unit());
+        gradientInfo.cx =
+            ConvertDimensionToPx(radialGradient.radialCenterX ? radialCenterX : 0.5_pct, width) + bounds.Left();
+        Dimension radialCenterY = Dimension(
+            radialGradient.radialCenterY.value().Value(), radialGradient.radialCenterY.value().Unit());
+        gradientInfo.cy =
+            ConvertDimensionToPx(radialGradient.radialCenterY ? radialCenterY : 0.5_pct, height) + bounds.Top();
         if (radialGradient.fRadialCenterX && radialGradient.fRadialCenterX->IsValid()) {
             gradientInfo.fx = ConvertDimensionToPx(radialGradient.fRadialCenterX.value(), width) + bounds.Left();
         } else {

@@ -94,7 +94,7 @@ public:
         return depth_;
     }
 
-    virtual void SetPipelineContext(const WeakPtr<PipelineContext>& context);
+    void SetPipelineContext(const WeakPtr<PipelineContext>& context);
 
     enum ElementType {
         BASE_ELEMENT,

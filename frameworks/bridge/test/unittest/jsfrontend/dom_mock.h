@@ -116,9 +116,13 @@ public:
     void OnActive() override {}
     void OnInactive() override {}
     void OnCompleteContinuation(int32_t code) override {}
+    void OnMemoryLevel(const int32_t level) override {}
     void OnSaveData(std::string& data) override {}
+    void OnSaveAbilityState (std::string& data) override {}
+    void OnRestoreAbilityState (const std::string& data) override {}
     void OnRemoteTerminated() override {}
     void OnNewRequest(const std::string& data) override {}
+    void OnNewWant(const std::string& data) override {}
     void CallRouterBack() override {}
     void OnSurfaceChanged(int32_t width, int32_t height) override {}
 

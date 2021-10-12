@@ -49,6 +49,9 @@ void RenderRating::Update(const RefPtr<Component>& component)
         foregroundSrc_ = rating->GetForegroundSrc();
         secondarySrc_ = rating->GetSecondarySrc();
         backgroundSrc_ = rating->GetBackgroundSrc();
+        foregroundSrc1_ = rating->GetForegroundSrc();
+        secondarySrc1_ = rating->GetSecondarySrc();
+        backgroundSrc1_ = rating->GetBackgroundSrc();
         foregroundResourceId_ = rating->GetForegroundResourceId();
         secondaryResourceId_ = rating->GetSecondaryResourceId();
         backgroundResourceId_ = rating->GetBackgroundResourceId();
@@ -381,6 +384,9 @@ void RenderRating::HandleTouchEvent(const Offset& updatePoint)
     if (NearEqual(newScore, drawScore_)) {
         return;
     }
+    if (onChangeRating) {
+        onChangeRating(static_cast<double>(drawScore_));
+    }
     drawScore_ = newScore;
     ConstrainScore(drawScore_, stepSize_, starNum_);
     UpdateRatingBar();
@@ -415,9 +421,6 @@ void RenderRating::FireChangeEvent()
     if (onScoreChange_) {
         std::string param = std::string(R"("change",{"rating":)").append(std::to_string(drawScore_).append("}"));
         onScoreChange_(param);
-    }
-    if (onChangeRating) {
-        onChangeRating(static_cast<int>(drawScore_));
     }
 }
 

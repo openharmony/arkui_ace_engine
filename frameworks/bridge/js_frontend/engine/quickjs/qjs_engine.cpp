@@ -867,6 +867,20 @@ JSValue DisableAlertBeforeBackPage(JSContext* ctx, JSValueConst argv)
     return JS_NULL;
 }
 
+JSValue PostponePageTransition(JSContext* ctx, JSValueConst argv)
+{
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    instance->GetDelegate()->PostponePageTransition();
+    return JS_NULL;
+}
+
+JSValue LaunchPageTransition(JSContext* ctx, JSValueConst argv)
+{
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    instance->GetDelegate()->LaunchPageTransition();
+    return JS_NULL;
+}
+
 JSValue JsHandlePageRoute(JSContext* ctx, JSValueConst argv, const std::string& methodName)
 {
     std::string uri = "";
@@ -943,6 +957,10 @@ JSValue JsHandlePageRoute(JSContext* ctx, JSValueConst argv, const std::string& 
         return EnableAlertBeforeBackPage(ctx, argv);
     } else if (methodName == ROUTE_DISABLE_ALERT_BEFORE_BACK_PAGE) {
         return DisableAlertBeforeBackPage(ctx, argv);
+    } else if (methodName == ROUTE_POSTPONE) {
+        return PostponePageTransition(ctx, argv);
+    } else if (methodName == ROUTE_LAUNCH) {
+        return LaunchPageTransition(ctx, argv);
     } else {
         LOGW("system.router not support method = %{private}s", methodName.c_str());
     }
@@ -1428,8 +1446,8 @@ JSValue JsReadText(JSContext* ctx, JSValueConst argv)
         false);
     JS_FreeValue(ctx, jsCallbackId);
     JS_FreeValue(ctx, jsObject);
-    js_free(ctx, pTab);
     js_std_loop(ctx);
+    js_free(ctx, pTab);
     return JS_NULL;
 }
 
@@ -2607,7 +2625,6 @@ void QjsEngineInstance::FreeGroupJsBridge()
         LOGE("group js bridge is null.");
         return;
     }
-
     groupJsBridge->Uninitialize();
 }
 
