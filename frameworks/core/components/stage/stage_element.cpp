@@ -213,15 +213,25 @@ void StageElement::PerformBuild()
     switch (operation_) {
         case StackOperation::NONE:
             break;
-        case StackOperation::PUSH_PAGE:
+        case StackOperation::PUSH_PAGE: {
             PerformPushPage();
+            auto render = GetRenderNode();
+            if (render) {
+                render->MarkNeedLayout();
+            }
             break;
+        }
         case StackOperation::POP:
             PerformPop();
             break;
-        case StackOperation::REPLACE:
+        case StackOperation::REPLACE: {
             PerformReplace();
+            auto render = GetRenderNode();
+            if (render) {
+                render->MarkNeedLayout();
+            }
             break;
+        }
         case StackOperation::POP_TO_PAGE:
             PerformPopToPage();
             break;
