@@ -6,7 +6,8 @@
         "phone"
       ],
       "module_list": [
-        "//foundation/ace/ace_engine/adapter/ohos/build:ace_packages"
+        "//foundation/ace/ace_engine/adapter/ohos/build:ace_packages",
+        "//foundation/ace/ace_engine/adapter/ohos/build:ace_for_windows"
       ],
       "test_list": [
         "//foundation/ace/ace_engine/frameworks/base/test:unittest",
