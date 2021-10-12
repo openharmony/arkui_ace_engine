@@ -190,12 +190,36 @@ JSValue AppLogPrint(JSContext *ctx, JSValueConst value, int32_t argc, JSValueCon
     return AppLogPrint(ctx, JsLogLevel::DEBUG, value, argc, argv);
 }
 
+JSValue AppDebugLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    return AppLogPrint(ctx, JsLogLevel::DEBUG, value, argc, argv);
+}
+
+JSValue AppInfoLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    return AppLogPrint(ctx, JsLogLevel::INFO, value, argc, argv);
+}
+
+JSValue AppWarnLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    return AppLogPrint(ctx, JsLogLevel::WARNING, value, argc, argv);
+}
+
+JSValue AppErrorLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    return AppLogPrint(ctx, JsLogLevel::ERROR, value, argc, argv);
+}
+
 void InitJsConsoleObject(JSContext *ctx, const JSValue &globalObj)
 {
     JSValue console;
     // app log method
     console = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, console, "log", JS_NewCFunction(ctx, AppLogPrint, "log", 1));
+    JS_SetPropertyStr(ctx, console, "debug", JS_NewCFunction(ctx, AppDebugLogPrint, "debug", 1));
+    JS_SetPropertyStr(ctx, console, "info", JS_NewCFunction(ctx, AppInfoLogPrint, "info", 1));
+    JS_SetPropertyStr(ctx, console, "warn", JS_NewCFunction(ctx, AppWarnLogPrint, "warn", 1));
+    JS_SetPropertyStr(ctx, console, "error", JS_NewCFunction(ctx, AppErrorLogPrint, "error", 1));
     JS_SetPropertyStr(ctx, globalObj, "console", console);
 }
 
