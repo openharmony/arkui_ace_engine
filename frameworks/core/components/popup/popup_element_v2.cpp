@@ -76,6 +76,9 @@ bool PopupElementV2::IsDeclarative()
 
 void PopupElementV2::OnStateChange(bool isVisible)
 {
+    if (hasShown_ == isVisible) {
+        return;
+    }
     hasShown_ = isVisible;
     if (!onStateChange_) {
         return;

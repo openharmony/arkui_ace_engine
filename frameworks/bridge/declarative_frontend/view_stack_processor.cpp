@@ -492,7 +492,7 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
 
     /* orders should not change */
     std::string componentNames[] = { "flexItem", "display", "transform", "touch", "pan_guesture", "click_guesture",
-        "focusable", "box", "shared_transition", "coverage", "mouse" };
+        "focusable", "coverage", "box", "shared_transition", "mouse" };
     for (auto& name : componentNames) {
         auto iter = wrappingComponentsMap.find(name);
         if (iter != wrappingComponentsMap.end()) {
