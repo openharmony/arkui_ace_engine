@@ -438,7 +438,9 @@ template("flutter_engine_shell") {
     } else if (platform == "ohos" || platform == "android") {
       sources += [
         # Ability Cross-platform Environment(ACE) override implementation
+        "$flutter_root/engine/flutter/shell/common/ace_display_manager_jni.cc",
         "$flutter_root/engine/flutter/shell/platform/android/ace_platform_view_android.cc",
+        "$flutter_root/engine/flutter/shell/platform/android/ace_vsync_waiter_android.cc",
         "$flutter_root/engine/flutter/shell/platform/android/android_context_gl.cc",
         "$flutter_root/engine/flutter/shell/platform/android/android_environment_gl.cc",
         "$flutter_root/engine/flutter/shell/platform/android/android_external_texture_gl.cc",
@@ -464,8 +466,6 @@ template("flutter_engine_shell") {
           "graphic:libagpcoreui_adapter",
           "graphic:libagpwindow",
         ]
-      } else {
-        sources += [ "$flutter_root/engine/flutter/shell/platform/android/ace_vsync_waiter_android.cc" ]
       }
     }
   }
