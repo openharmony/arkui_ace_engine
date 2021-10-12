@@ -1321,23 +1321,19 @@ void V8DeclarativeEngine::OnSaveAbilityState(std::string& saveData)
     v8::Isolate::Scope isolateScope(isolate);
     auto context = engineInstance_->GetV8Context();
     if (context.IsEmpty()) {
-        LOGE("AceAbility Sava date, context Is Empty");
+        LOGE("AceAbility Sava data, context Is Empty");
         return;
     }
 
-    v8::Local<v8::String> v8Data = v8::String::NewFromUtf8(isolate, saveData.c_str()).ToLocalChecked();
-    auto jsonValue = v8::JSON::Parse(context, v8Data);
-    if (jsonValue.IsEmpty()) {
-        LOGE("jsonValue is empty");
-        return;
+    v8::Local<v8::Object> data = v8::Object::New(isolate);
+    v8::Local<v8::Value> argv[] = { data };
+    int len = 1;
+    CallAppFunc(isolate, context, "onSaveAbilityState", len, argv);
+    v8::Local<v8::String> propertyEntries = v8::JSON::Stringify(context, data).ToLocalChecked();
+    v8::String::Utf8Value utf8Value(isolate, propertyEntries);
+    if (*utf8Value) {
+        saveData = *utf8Value;
     }
-    v8::Local<v8::Value> dataValue = jsonValue.ToLocalChecked();
-    v8::Local<v8::Value> argv[] = { dataValue };
-    int32_t argc = 1;
-    if (!CallAppFunc(isolate, context, "onSaveAbilityState", argc, argv)) {
-        return;
-    }
-
     while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
         continue;
     }
@@ -1351,20 +1347,27 @@ void V8DeclarativeEngine::OnRestoreAbilityState(const std::string& data)
     v8::Isolate::Scope isolateScope(isolate);
     auto context = engineInstance_->GetV8Context();
     if (context.IsEmpty()) {
-        LOGE("AceAbility Sava date, context Is Empty");
+        LOGE("AceAbility Restore data, context Is Empty");
         return;
     }
     v8::Context::Scope contextScope(context);
 
     v8::TryCatch tryCatch(isolate);
 
-    v8::Local<v8::Object> tmpData = v8::Object::New(isolate);
-    v8::Local<v8::Value> argv[] = { tmpData };
-    int len = 1;
+    v8::Local<v8::String> v8Data = v8::String::NewFromUtf8(isolate, data.c_str()).ToLocalChecked();
+    auto jsonValue = v8::JSON::Parse(context, v8Data);
+    if (jsonValue.IsEmpty()) {
+        LOGE("AceAbility RestoreAbility, data Is Empty");
+        return;
+    }
+    v8::Local<v8::Value> dataValue = v8::JSON::Parse(context, v8Data).ToLocalChecked();
+    v8::Local<v8::Value> argv[] = { dataValue };
+    int32_t len = 1;
 
     if (!CallAppFunc(isolate, context, "onRestoreAbilityState", len, argv)) {
         return;
     }
+
     while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
         continue;
     }
