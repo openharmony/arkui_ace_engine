@@ -1646,6 +1646,7 @@ template("ace_fontmgr") {
         if (platform == "ohos") {
           sources += [ "$flutter_root/skia/src/ports/SkFontMgr_ohos.cpp" ]
         }
+        deps = [ "$ace_root/build/third_party/expat:ace_libexpat" ]
       }
     }
   }

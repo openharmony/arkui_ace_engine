@@ -84,9 +84,11 @@ template("thirdparty_lib_txt") {
     ]
 
     if (platform == "ohos") {
-      sources += [
-        "$flutter_root/engine/flutter/third_party/txt/src/txt/platform_ohos.cc",
-      ]
+      if (defined(oem_commercial_build) && oem_commercial_build) {
+        sources += [ "$flutter_root/engine/flutter/third_party/txt/src/txt/platform_android.cc" ]
+      } else {
+        sources += [ "$flutter_root/engine/flutter/third_party/txt/src/txt/platform_ohos.cc" ]
+      }
     } else if (platform == "windows") {
       sources +=
           [ "$flutter_root/engine/flutter/third_party/txt/src/txt/platform.cc" ]
