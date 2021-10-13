@@ -103,8 +103,8 @@ void XComponentElement::OnSurfaceDestroyEvent()
             onXComponentDestroy_();
         }
         auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
-        if (renderXComponent != nullptr && renderXComponent->GetPluginContext() != nullptr) {
-            renderXComponent->GetPluginContext()->OnSurfaceDestroyed();
+        if (renderXComponent) {
+            renderXComponent->NativeXComponentDestroy();
         }
         hasSendDestroyEvent_ = true;
     }
@@ -133,22 +133,16 @@ void XComponentElement::DispatchTouchEvent(const TouchPoint& event)
         return;
     }
     auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
-    if (renderXComponent != nullptr && renderXComponent->GetPluginContext() != nullptr) {
+    if (renderXComponent) {
         touchEventPoint_.id = event.id;
         touchEventPoint_.x = event.x;
         touchEventPoint_.y = event.y;
         touchEventPoint_.size = event.size;
         touchEventPoint_.force = event.force;
         touchEventPoint_.deviceId = event.deviceId;
-        touchEventPoint_.time = event.time;
+        touchEventPoint_.timeStamp = event.time.time_since_epoch().count();
         SetTouchEventType(event);
-
-        pipelineContext->GetTaskExecutor()->PostTask(
-            [weakEle = WeakClaim(this), renderXComponent] {
-                auto element = weakEle.Upgrade();
-                renderXComponent->GetPluginContext()->DispatchTouchEvent(element->touchEventPoint_);
-            },
-            TaskExecutor::TaskType::JS);
+        renderXComponent->NativeXComponentDispatchTouchEvent(touchEventPoint_);
     }
 }
 

@@ -49,7 +49,6 @@ constexpr float SWIPE_TO_ANIMATION_TIME = 500.0f;
 constexpr uint8_t TRANSLATE_RATIO = 10;
 constexpr int32_t COMPONENT_CHANGE_END_LISTENER_KEY = 1001;
 constexpr double MIN_SCROLL_OFFSET = 0.5;
-constexpr int32_t WITH_MARGIN_MIN_ITEM_COUNT = 3;
 
 // for watch rotation const param
 constexpr double ROTATION_SENSITIVITY_NORMAL = 1.4;
@@ -227,12 +226,36 @@ void RenderSwiper::UpdateTouchRect()
     ownTouchRect_ = touchRect_;
 }
 
+bool RenderSwiper::RefuseUpdatePosition(int32_t index)
+{
+    if ((isIndicatorAnimationStart_ && !quickTrunItem_) && (index == currentIndex_ || index == targetIndex_)) {
+        return true;
+    }
+    return false;
+}
+
 void RenderSwiper::PerformLayout()
 {
     LoadItems();
-    // layout all children
+    // get the prevMargin_ and nextMargin_, and make sure that prevMargin_ + nextMargin_ <= maxLength
     prevMargin_ = swiper_ ? NormalizePercentToPx(swiper_->GetPreviousMargin(), axis_ == Axis::VERTICAL, true) : 0.0;
     nextMargin_ = swiper_ ? NormalizePercentToPx(swiper_->GetNextMargin(), axis_ == Axis::VERTICAL, true) : 0.0;
+    Size swiperSize = GetLayoutSize();
+    double maxLength = (axis_ == Axis::HORIZONTAL ? swiperSize.Width() : swiperSize.Height()) - 1.0f;
+    if (LessOrEqual(prevMargin_, 0.0)) {
+        prevMargin_ = 0.0;
+    }
+    if (LessOrEqual(nextMargin_, 0.0)) {
+        nextMargin_ = 0.0;
+    }
+
+    if (GreatOrEqual(prevMargin_, maxLength)) {
+        prevMargin_ = maxLength;
+    }
+    if (GreatOrEqual(nextMargin_, maxLength - prevMargin_)) {
+        nextMargin_ = maxLength - prevMargin_;
+    }
+
     LayoutParam innerLayout = GetLayoutParam();
     Size minSize = GetLayoutParam().GetMinSize();
     Size maxSize = GetLayoutParam().GetMaxSize();
@@ -289,30 +312,18 @@ void RenderSwiper::PerformLayout()
     double halfSpace = swiper_ ? NormalizeToPx(swiper_->GetItemSpace()) / 2.0 : 0.0;
     swiperWidth_ = (isLinearLayout ? maxWidth : layoutSize.Width()) + 2.0 * halfSpace;
     swiperHeight_ = (isLinearLayout ? maxHeight : layoutSize.Height());
-    showingCount_ = axis_ == Axis::HORIZONTAL ? std::ceil(layoutSize.Width() / swiperWidth_)
-                                              : std::ceil(layoutSize.Height() / swiperHeight_);
 
-    prevItemOffset_ = axis_ == Axis::HORIZONTAL ? (needReverse_ ? swiperWidth_ - prevMargin_ - nextMargin_ + halfSpace
-                                                : -swiperWidth_ + prevMargin_ + nextMargin_ - halfSpace) :
-                                                -swiperHeight_ + prevMargin_ + nextMargin_;
-    nextItemOffset_ = axis_ == Axis::HORIZONTAL ? (needReverse_ ? -swiperWidth_ + prevMargin_ + nextMargin_ - halfSpace
-                                                : swiperWidth_ - prevMargin_ - nextMargin_ + halfSpace) :
-                                                swiperHeight_ - prevMargin_ - nextMargin_;
-    for (const auto& item : items_) {
-        int32_t i = item.first;
-        // Refuse update item position during animation unless quick trun item
-        if ((isIndicatorAnimationStart_ && !quickTrunItem_) && (i == currentIndex_ || i == targetIndex_)) {
-            continue;
-        }
-        const auto& childItem = item.second;
-        if (!childItem) {
-            continue;
-        }
-        int32_t maxShowingIndex = currentIndex_ - 1 + showingCount_;
-        int32_t loopCount = loop_ && maxShowingIndex >= itemCount_ && i <= (maxShowingIndex % itemCount_) ?
-            itemCount_ : 0;
-        childItem->SetPosition(GetMainAxisOffset((i + loopCount - currentIndex_) * nextItemOffset_));
+    if (isLinearLayout) {
+        prevItemOffset_ = axis_ == Axis::HORIZONTAL ? (needReverse_ ? swiperWidth_ + halfSpace
+                                               : -swiperWidth_ - halfSpace) :
+                                               -swiperHeight_ ;
+    } else {
+        prevItemOffset_ = axis_ == Axis::HORIZONTAL ? (needReverse_ ? swiperWidth_ - prevMargin_ - nextMargin_ + halfSpace
+                                               : -swiperWidth_ + prevMargin_ + nextMargin_ - halfSpace) :
+                                               -swiperHeight_ + prevMargin_ + nextMargin_;
     }
+    nextItemOffset_ = -prevItemOffset_;
+    UpdateChildPosition(0, currentIndex_, true);
     quickTrunItem_ = false;
 
     // layout indicator
@@ -907,8 +918,8 @@ void RenderSwiper::StartSpringMotion(double mainPosition, double mainVelocity,
 
             swiper->RestoreAutoPlay();
             swiper->ResetCachedChildren();
-            swiper->UpdateItemOpacity(MAX_OPACITY, swiper->currentIndex_);
-            swiper->UpdateItemOpacity(MAX_OPACITY, swiper->currentIndex_);
+            swiper->UpdateOneItemOpacity(MAX_OPACITY, swiper->currentIndex_);
+            swiper->UpdateOneItemOpacity(MAX_OPACITY, swiper->currentIndex_);
             swiper->ExecuteMoveCallback(swiper->currentIndex_);
             swiper->MarkNeedLayout();
         }
@@ -937,9 +948,9 @@ void RenderSwiper::MoveItems(double dragVelocity)
     // Adjust offset more than MIN_SCROLL_OFFSET at least
     double minOffset = 0.0;
     if (axis_ == Axis::VERTICAL) {
-        minOffset = MIN_SCROLL_OFFSET * swiperHeight_;
+        minOffset = MIN_SCROLL_OFFSET * (swiperHeight_ - prevMargin_ - nextMargin_) ;
     } else {
-        minOffset = MIN_SCROLL_OFFSET * swiperWidth_;
+        minOffset = MIN_SCROLL_OFFSET * (swiperWidth_ - prevMargin_ - nextMargin_);
     }
     if (std::abs(dragVelocity) > NormalizeToPx(MIN_TURN_PAGE_VELOCITY) &&
         std::abs(scrollOffset_) > NormalizeToPx(MIN_DRAG_DISTANCE)) {
@@ -1008,8 +1019,8 @@ void RenderSwiper::MoveItems(double dragVelocity)
             swiper->RestoreAutoPlay();
             swiper->FireItemChangedEvent(!needRestore);
             swiper->ResetCachedChildren();
-            swiper->UpdateItemOpacity(MAX_OPACITY, fromIndex);
-            swiper->UpdateItemOpacity(MAX_OPACITY, toIndex);
+            swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
+            swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
             swiper->ExecuteMoveCallback(swiper->currentIndex_);
             swiper->MarkNeedLayout();
         }
@@ -1103,17 +1114,17 @@ void RenderSwiper::AddSwipeToTranslateListener(int32_t fromIndex, int32_t toInde
     auto weak = AceType::WeakClaim(this);
     targetIndex_ = toIndex;
     nextIndex_ = toIndex;
-    curTranslateAnimation_->AddListener([weak, fromIndex](const double& value) {
+    curTranslateAnimation_->AddListener([weak, fromIndex, toIndex](const double& value) {
         auto swiper = weak.Upgrade();
         if (swiper) {
-            swiper->UpdateItemPosition(value, fromIndex);
+            swiper->UpdateItemPosition(value, fromIndex, toIndex);
         }
     });
 
-    targetTranslateAnimation_->AddListener([weak, toIndex](const double& value) {
+    targetTranslateAnimation_->AddListener([weak, fromIndex, toIndex](const double& value) {
         auto swiper = weak.Upgrade();
         if (swiper) {
-            swiper->UpdateItemPosition(value, toIndex);
+            swiper->UpdateItemPosition(value, toIndex, fromIndex);
         }
     });
 }
@@ -1124,17 +1135,17 @@ void RenderSwiper::AddSwipeToOpacityListener(int32_t fromIndex, int32_t toIndex)
         return;
     }
     auto weak = AceType::WeakClaim(this);
-    curOpacityAnimation_->AddListener([weak, fromIndex](const uint8_t& opacity) {
+    curOpacityAnimation_->AddListener([weak, fromIndex, toIndex](const uint8_t& opacity) {
         auto swiper = weak.Upgrade();
         if (swiper) {
-            swiper->UpdateItemOpacity(opacity, fromIndex);
+            swiper->UpdateItemOpacity(opacity, fromIndex, toIndex);
         }
     });
 
-    targetOpacityAnimation_->AddListener([weak, toIndex](const uint8_t& opacity) {
+    targetOpacityAnimation_->AddListener([weak, fromIndex, toIndex](const uint8_t& opacity) {
         auto swiper = weak.Upgrade();
         if (swiper) {
-            swiper->UpdateItemOpacity(opacity, toIndex);
+            swiper->UpdateItemOpacity(opacity, toIndex, fromIndex);
         }
     });
 }
@@ -1222,8 +1233,8 @@ void RenderSwiper::DoSwipeToAnimation(int32_t fromIndex, int32_t toIndex, bool r
             swiper->currentIndex_ = toIndex;
             swiper->moveStatus_ = false;
             swiper->UpdateIndicatorSpringStatus(SpringStatus::FOCUS_SWITCH);
-            swiper->UpdateItemOpacity(MAX_OPACITY, fromIndex);
-            swiper->UpdateItemOpacity(MAX_OPACITY, toIndex);
+            swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
+            swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
             swiper->RestoreAutoPlay();
             swiper->FireItemChangedEvent(true);
             swiper->ResetCachedChildren();
@@ -1258,22 +1269,22 @@ void RenderSwiper::StopSwipeToAnimation()
     if (swipeToController_ && !swipeToController_->IsStopped()) {
         swipeToController_->ClearStopListeners();
         swipeToController_->Stop();
-        UpdateItemOpacity(MAX_OPACITY, currentIndex_);
-        UpdateItemOpacity(MAX_OPACITY, targetIndex_);
+        UpdateOneItemOpacity(MAX_OPACITY, currentIndex_);
+        UpdateOneItemOpacity(MAX_OPACITY, targetIndex_);
         isIndicatorAnimationStart_ = false;
     }
 }
 
-void RenderSwiper::UpdateItemOpacity(uint8_t opacity, int32_t index)
+void RenderSwiper::UpdateItemOpacity(uint8_t opacity, int32_t index, int32_t otherIndex)
 {
     UpdateOneItemOpacity(opacity, index);
 
     int32_t preIndex = GetPrevIndex(index);
-    if (preIndex != index) {
+    if (preIndex != index && preIndex != otherIndex) {
         UpdateOneItemOpacity(opacity, preIndex);
     }
     int32_t nextIndex = GetNextIndex(index);
-    if (nextIndex != index) {
+    if (nextIndex != index && nextIndex != otherIndex) {
         UpdateOneItemOpacity(opacity, nextIndex);
     }
 }
@@ -1294,21 +1305,21 @@ void RenderSwiper::UpdateOneItemOpacity(uint8_t opacity, int32_t index)
     display->UpdateOpacity(opacity);
 }
 
-void RenderSwiper::UpdateItemPosition(double offset, int32_t index)
+void RenderSwiper::UpdateItemPosition(double offset, int32_t index, int32_t otherIndex)
 {
     auto iter = items_.find(index);
     if (iter != items_.end()) {
         iter->second->SetPosition(GetMainAxisOffset(offset));
     }
     int32_t prevIndex = GetPrevIndex(index);
-    if (prevIndex != index) {
+    if (prevIndex != index && prevIndex != otherIndex) {
         auto item = items_.find(prevIndex);
         if (iter != items_.end()) {
             item->second->SetPosition(GetMainAxisOffset(offset + (needReverse_ ? nextItemOffset_ : prevItemOffset_)));
         }
     }
     int32_t nextIndex = GetNextIndex(index);
-    if (nextIndex != index) {
+    if (nextIndex != index && nextIndex != otherIndex) {
         auto item = items_.find(nextIndex);
         if (iter != items_.end()) {
             item->second->SetPosition(GetMainAxisOffset(offset + (needReverse_ ? prevItemOffset_ : nextItemOffset_)));
@@ -1441,8 +1452,8 @@ void RenderSwiper::UpdateScrollPosition(double dragDelta)
         currentIndex_ = toIndex;
         FireItemChangedEvent(true);
         ResetCachedChildren();
-        UpdateItemOpacity(MAX_OPACITY, outItemIndex_);
-        UpdateItemOpacity(MAX_OPACITY, currentIndex_);
+        UpdateOneItemOpacity(MAX_OPACITY, outItemIndex_);
+        UpdateOneItemOpacity(MAX_OPACITY, currentIndex_);
         ExecuteMoveCallback(currentIndex_);
         ResetIndicatorPosition();
         MarkNeedLayout();
@@ -1490,41 +1501,66 @@ void RenderSwiper::SetSwiperEffect(double dragOffset)
     }
 }
 
-void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex)
+void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, bool inLayout)
 {
     scrollOffset_ = offset;
-    int32_t prevIndex = GetPrevIndex(fromIndex);
-    if (prevIndex != fromIndex) {
-        auto item = items_.find(prevIndex);
-        if (item != items_.end()) {
-            item->second->SetPosition(GetMainAxisOffset(offset + (needReverse_ ? nextItemOffset_ : prevItemOffset_)));
-        }
-    }
-    int32_t lastIndex = fromIndex;
-    int32_t maxUpdateCount = showingCount_ + 1;
-    for (int32_t i = 0; i < maxUpdateCount; i++) {
-        auto item = items_.find(lastIndex);
-        if (item != items_.end()) {
-            item->second->SetPosition(
-                GetMainAxisOffset(offset + (needReverse_ ? i * prevItemOffset_ : i * nextItemOffset_)));
-        }
-        int32_t nextIndex = GetNextIndex(lastIndex);
-        if (nextIndex == lastIndex) {
-            break;
-        }
-        lastIndex = nextIndex;
+
+    // move current item
+    auto item = items_.find(fromIndex);
+    if (item != items_.end()) {
+        item->second->SetPosition(GetMainAxisOffset(offset));
     }
 
-    if ((itemCount_ > WITH_MARGIN_MIN_ITEM_COUNT) || (!loop_)) {
-        int32_t prevPrevIndex = GetPrevIndex(prevIndex);
-        if (prevPrevIndex != prevIndex) {
-            auto item = items_.find(prevPrevIndex);
-            if (item != items_.end()) {
-                item->second->SetPosition(GetMainAxisOffset(offset
-                    + (needReverse_ ? 2 * nextItemOffset_ : 2 * prevItemOffset_)));
-            }
+    // calculate the num of prev item
+    int32_t prevItemCount = 0;
+    if (!loop_) {
+        prevItemCount = fromIndex;
+    } else {
+        prevItemCount = (offset + prevMargin_ + std::fabs(prevItemOffset_) - 1) / std::fabs(prevItemOffset_);
+    }
+    if (prevItemCount >= itemCount_ - 1) {
+        prevItemCount = itemCount_ - 1;
+    }
+
+    // move prev item
+    int32_t prevIndex = fromIndex;
+    for (int32_t i = 0; i < prevItemCount; i++) {
+        prevIndex = GetPrevIndex(prevIndex);
+        if (RefuseUpdatePosition(prevIndex) && inLayout) {
+            continue;
+        }
+        auto item = items_.find(prevIndex);
+        if (item != items_.end()) {
+            item->second->SetPosition(GetMainAxisOffset(offset + (needReverse_ ? (i + 1) * nextItemOffset_ : (i + 1) * prevItemOffset_)));
         }
     }
+
+    // calculate the num of next item
+    int32_t maxNextItemCount = itemCount_ - 1 - prevItemCount;
+    int32_t nextItemCount = 0;
+    if (inLayout) {
+        nextItemCount = maxNextItemCount;
+    } else {
+        double maxLength = (axis_ == Axis::HORIZONTAL ? GetLayoutSize().Width() : GetLayoutSize().Height());
+        nextItemCount = (maxLength - offset - prevMargin_) / std::fabs(prevItemOffset_);
+        if (nextItemCount > maxNextItemCount) {
+            nextItemCount = maxNextItemCount;
+        }
+    }
+
+    // move next item
+    int32_t nextIndex = fromIndex;
+    for (int32_t i = 0; i < nextItemCount; i++) {
+        nextIndex = GetNextIndex(nextIndex);
+        if (RefuseUpdatePosition(nextIndex) && inLayout) {
+            continue;
+        }
+        auto item = items_.find(nextIndex);
+        if (item != items_.end()) {
+            item->second->SetPosition(GetMainAxisOffset(offset + (needReverse_ ? (i + 1) * prevItemOffset_ : (i + 1) * nextItemOffset_)));
+        }
+    }
+
     MarkNeedRender();
 }
 
@@ -2512,8 +2548,8 @@ void RenderSwiper::FinishAllSwipeAnimation()
     StopIndicatorAnimation();
     StopIndicatorSpringAnimation();
     ResetIndicatorPosition();
-    UpdateItemOpacity(MAX_OPACITY, currentIndex_);
-    UpdateItemOpacity(MAX_OPACITY, targetIndex_);
+    UpdateOneItemOpacity(MAX_OPACITY, currentIndex_);
+    UpdateOneItemOpacity(MAX_OPACITY, targetIndex_);
     currentIndex_ = targetIndex_;
     quickTrunItem_ = true;
     MarkNeedLayout();
@@ -2984,6 +3020,21 @@ void RenderSwiper::SetSwiperHidden(int32_t forwardNum, int32_t backNum)
             }
         }
     }
+}
+
+bool RenderSwiper::IsChildrenTouchEnable()
+{
+    return !(controller_ && controller_->IsRunning());
+}
+
+void RenderSwiper::OnPaintFinish()
+{
+    for (const auto& child : GetChildren()) {
+        child->SetAccessibilityVisible(false);
+        child->ClearAccessibilityRect();
+    }
+
+    RenderNode::OnPaintFinish();
 }
 
 } // namespace OHOS::Ace

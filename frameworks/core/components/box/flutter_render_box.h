@@ -53,6 +53,10 @@ protected:
     void OnVisibleChanged() override
     {
         RenderBox::OnVisibleChanged();
+        if (renderImage_) {
+            renderImage_->SetVisible(GetVisible());
+            renderImage_->OnVisibleChanged();
+        }
 
         if (NeedWindowBlur()) {
             if (GetVisible()) {
@@ -90,6 +94,22 @@ protected:
     RRect GetWindowBlurRRect() const override
     {
         return windowBlurRRect_;
+    }
+
+    void OnAppShow() override
+    {
+        RenderBox::OnAppShow();
+        if (renderImage_) {
+            renderImage_->OnAppShow();
+        }
+    }
+
+    void OnAppHide() override
+    {
+        RenderBox::OnAppHide();
+        if (renderImage_) {
+            renderImage_->OnAppHide();
+        }
     }
 
     void CalculateRepeatParam();

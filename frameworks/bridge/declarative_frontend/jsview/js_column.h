@@ -25,6 +25,10 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void CreateWithWrap(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
+    static void SetInspectorTag(const std::string& inspectorTag);
+    static void ClearInspectorTag();
+private:
+    static std::string inspectorTag_;
 };
 
 class HorizontalAlignDeclaration : public AlignDeclaration {

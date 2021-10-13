@@ -165,6 +165,30 @@ RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& imageS
     }
 }
 
+sk_sp<SkData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
+{
+    std::string cacheFilePath = ImageCache::GetImageCacheFilePath(uri);
+    if (cacheFilePath.length() > PATH_MAX) {
+        LOGE("cache file path is too long, cacheFilePath: %{private}s", cacheFilePath.c_str());
+        return nullptr;
+    }
+    bool cacheFileFound = ImageCache::GetFromCacheFile(cacheFilePath);
+    if (!cacheFileFound) {
+        return nullptr;
+    }
+    char realPath[PATH_MAX] = { 0x00 };
+    if (realpath(cacheFilePath.c_str(), realPath) == nullptr) {
+        LOGE("realpath fail! cacheFilePath: %{private}s, fail reason: %{public}s", cacheFilePath.c_str(),
+            strerror(errno));
+        return nullptr;
+    }
+    std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
+    if (file) {
+        return SkData::MakeFromFILE(file.get());
+    }
+    return nullptr;
+}
+
 sk_sp<SkData> FileImageLoader::LoadImageData(const std::string& src, const WeakPtr<PipelineContext> context)
 {
     LOGD("File Image!");
@@ -207,6 +231,10 @@ sk_sp<SkData> FileImageLoader::LoadImageData(const std::string& src, const WeakP
 
 sk_sp<SkData> DataProviderImageLoader::LoadImageData(const std::string& src, const WeakPtr<PipelineContext> context)
 {
+    auto skData = ImageLoader::LoadDataFromCachedFile(src);
+    if (skData) {
+        return skData;
+    }
     auto pipeline = context.Upgrade();
     if (!pipeline) {
         LOGE("the pipeline context is null");
@@ -222,7 +250,9 @@ sk_sp<SkData> DataProviderImageLoader::LoadImageData(const std::string& src, con
         LOGE("fail to get data res is from data provider");
         return nullptr;
     }
-    return SkData::MakeWithCopy(dataRes->GetData().data(), dataRes->GetData().size());
+    auto imageData = dataRes->GetData();
+    ImageCache::WriteCacheFile(src, imageData.data(), imageData.size());
+    return SkData::MakeWithCopy(imageData.data(), imageData.size());
 }
 
 sk_sp<SkData> AssetImageLoader::LoadImageData(const std::string& src, const WeakPtr<PipelineContext> context)
@@ -258,29 +288,46 @@ sk_sp<SkData> AssetImageLoader::LoadImageData(const std::string& src, const Weak
     return SkData::MakeWithCopy(data, dataSize);
 }
 
+std::string AssetImageLoader::LoadJsonData(const std::string& src, const WeakPtr<PipelineContext> context)
+{
+    if (src.empty()) {
+        LOGE("image src is empty");
+        return "";
+    }
+
+    std::string assetSrc(src);
+    if (assetSrc[0] == '/') {
+        assetSrc = assetSrc.substr(1); // get the asset src without '/'.
+    } else if (assetSrc[0] == '.' && assetSrc.size() > 2 && assetSrc[1] == '/') {
+        assetSrc = assetSrc.substr(2); // get the asset src without './'.
+    }
+    auto pipelineContext = context.Upgrade();
+    if (!pipelineContext) {
+        LOGE("invalid pipeline context");
+        return "";
+    }
+    auto assetManager = pipelineContext->GetAssetManager();
+    if (!assetManager) {
+        LOGE("No asset manager!");
+        return "";
+    }
+    auto assetData = assetManager->GetAsset(assetSrc);
+    if (!assetData || !assetData->GetData()) {
+        LOGE("No asset data!");
+        return "";
+    }
+    return (char *)assetData->GetData();
+}
+
 sk_sp<SkData> NetworkImageLoader::LoadImageData(const std::string& uri, const WeakPtr<PipelineContext> context)
 {
     // 1. find in cache file path.
     LOGD("Network Image!");
-    std::string cacheFilePath = ImageCache::GetImageCacheFilePath(uri);
-    if (cacheFilePath.length() > PATH_MAX) {
-        LOGE("cache file path is too long");
-        return nullptr;
+    auto skData = ImageLoader::LoadDataFromCachedFile(uri);
+    if (skData) {
+        return skData;
     }
-    bool cacheFileFound = ImageCache::GetFromCacheFile(cacheFilePath);
-    if (cacheFileFound) {
-        char realPath[PATH_MAX] = { 0x00 };
-        if (realpath(cacheFilePath.c_str(), realPath) == nullptr) {
-            LOGE("realpath fail! cacheFilePath: %{private}s, fail reason: %{public}s", cacheFilePath.c_str(),
-                strerror(errno));
-            return nullptr;
-        }
-        std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
-        if (file) {
-            LOGD("find network image in file cache!");
-            return SkData::MakeFromFILE(file.get());
-        }
-    }
+
     // 2. if not found. download it.
     std::vector<uint8_t> imageData;
     if (!DownloadManager::GetInstance().Download(uri, imageData) || imageData.empty()) {

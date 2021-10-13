@@ -107,7 +107,9 @@ void Texture::CreateTexture(const std::function<void(int64_t)>& onCreate)
 
 void Texture::OnRefresh(const std::string& param)
 {
-    onRefreshListener_();
+    if (onRefreshListener_) {
+        onRefreshListener_();
+    }
 }
 
 void Texture::OnSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight)

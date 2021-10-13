@@ -1,0 +1,22 @@
+[
+    {
+        "first_introduced": "7",
+        "name": "NativeXComponent_GetXComponentId"
+    },
+    {
+        "first_introduced": "7",
+        "name": "NativeXComponent_GetNativeWindow"
+    },
+    {
+        "first_introduced": "7",
+        "name": "NativeXComponent_GetSurfaceSize"
+    },
+    {
+        "first_introduced": "7",
+        "name": "NativeXComponent_RegisterCallback"
+    },
+    {
+        "first_introduced": "7",
+        "name": "NativeXComponent_GetTouchInfo"
+    }
+]

@@ -501,6 +501,13 @@ void CameraElement::RealseDeclarativePara()
         camera_->ChangeCameraCompenentId(false, cameraId_);
     }
 }
+
+void CameraElement::OnTextureRefresh()
+{
+    if (renderNode_) {
+        renderNode_->MarkNeedRender();
+    }
+}
 #endif
 
 void CameraElement::OnPrepared()
@@ -663,6 +670,18 @@ void CameraElement::InitListener()
             });
     };
     camera_->AddPreViewSizeChang(onSizeChangeListener);
+
+    if (texture_) {
+        auto onTextureRefresh = [weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostSyncTask([weak] {
+                auto camera = weak.Upgrade();
+                if (camera) {
+                    camera->OnTextureRefresh();
+                }
+            });
+        };
+        texture_->SetRefreshListener(onTextureRefresh);
+    }
 #endif
 }
 

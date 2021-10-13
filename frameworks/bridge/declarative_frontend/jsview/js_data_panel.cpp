@@ -14,7 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
-
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include <vector>
 #include "core/components/data_panel/data_panel_component.h"
 #include "core/components/theme/theme_manager.h"
@@ -28,6 +28,12 @@ void JSDataPanel::JSBind(BindingTarget globalObj)
     JSClass<JSDataPanel>::Declare("DataPanel");
     JSClass<JSDataPanel>::StaticMethod("create", &JSDataPanel::Create);
     JSClass<JSDataPanel>::StaticMethod("closeEffect", &JSDataPanel::CloseEffect);
+    JSClass<JSDataPanel>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSDataPanel>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSDataPanel>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSDataPanel>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSDataPanel>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSDataPanel>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
 
     JSClass<JSDataPanel>::Inherit<JSViewAbstract>();
     JSClass<JSDataPanel>::Bind(globalObj);

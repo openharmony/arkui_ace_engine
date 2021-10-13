@@ -47,15 +47,18 @@ public:
         const MediaQueryCallback& mediaQueryCallback, const RequestAnimationCallback& requestAnimationCallback,
         const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
         const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
+        const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
+        const OnRestoreAbilityStateCallBack& onRestoreAbilityStateCallBack,
+        const OnNewWantCallBack& onNewWantCallBack,
         const OnSaveDataCallBack& onSaveDataCallBack, const OnStartContinuationCallBack& onStartContinuationCallBack,
         const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack,
+        const OnActiveCallBack& onActiveCallBack, const OnInactiveCallBack& onInactiveCallBack,
         const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
+        const OnMemoryLevelCallBack& onMemoryLevelCallBack,
         const OnRestoreDataCallBack& onRestoreDataCallBack);
     ~FrontendDelegateDeclarative() override;
 
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
-    void SetAssetManager(const RefPtr<AssetManager>& assetManager);
-    RefPtr<AssetManager> GetAssetManager() const override;
 
     // JSFrontend delegate functions.
     void RunPage(const std::string& url, const std::string& params);
@@ -74,13 +77,19 @@ public:
     void OnBackGround();
     void OnForground();
     void OnConfigurationUpdated(const std::string& data);
+    void OnSaveAbilityState(std::string& data);
+    void OnRestoreAbilityState(const std::string& data);
+    void OnNewWant(const std::string& data);
     void OnSuspended();
     bool OnStartContinuation();
     void OnCompleteContinuation(int32_t code);
+    void OnMemoryLevel(const int32_t level);
     void OnSaveData(std::string& data);
     void GetPluginsUsed(std::string& data);
     bool OnRestoreData(const std::string& data);
     void OnRemoteTerminated();
+    void OnActive();
+    void OnInactive();
     void OnNewRequest(const std::string& data);
     void SetColorMode(ColorMode colorMode);
     void CallPopPage();
@@ -114,6 +123,8 @@ public:
     void Push(const std::string& uri, const std::string& params) override;
     void Replace(const std::string& uri, const std::string& params) override;
     void Back(const std::string& uri, const std::string& params) override;
+    void PostponePageTransition() override;
+    void LaunchPageTransition() override;
     void Clear() override;
     int32_t GetStackSize() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
@@ -280,10 +291,16 @@ private:
     JsCallback jsCallback_;
     OnWindowDisplayModeChangedCallBack onWindowDisplayModeChanged_;
     OnConfigurationUpdatedCallBack onConfigurationUpdated_;
+    OnSaveAbilityStateCallBack onSaveAbilityState_;
+    OnRestoreAbilityStateCallBack onRestoreAbilityState_;
+    OnNewWantCallBack onNewWant_;
     OnSaveDataCallBack onSaveData_;
     OnStartContinuationCallBack onStartContinuation_;
     OnRemoteTerminatedCallBack onRemoteTerminated_;
+    OnActiveCallBack onActive_;
+    OnInactiveCallBack onInactive_;
     OnCompleteContinuationCallBack onCompleteContinuation_;
+    OnMemoryLevelCallBack onMemoryLevel_;
     OnRestoreDataCallBack onRestoreData_;
     RefPtr<Framework::ManifestParser> manifestParser_;
     RefPtr<Framework::AccessibilityNodeManager> jsAccessibilityManager_;

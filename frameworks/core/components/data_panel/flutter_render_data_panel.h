@@ -27,6 +27,7 @@ struct ArcData {
     double progress = 0.0;
     double radius = 0.0;
     double thickness = 0.0;
+    double maxValue = 0.0;
     Color startColor;
     Color endColor;
 

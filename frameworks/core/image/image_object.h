@@ -71,7 +71,8 @@ public:
         UploadSuccessCallback successCallback,
         FailedCallback failedCallback,
         Size imageSize,
-        bool forceResize)
+        bool forceResize,
+        bool syncMode = false)
     {}
 
     virtual void Pause() {}
@@ -148,7 +149,8 @@ public:
         UploadSuccessCallback successCallback,
         FailedCallback failedCallback,
         Size imageSize,
-        bool forceResize) override;
+        bool forceResize,
+        bool syncMode = false) override;
 
     void ClearData() override
     {
@@ -179,7 +181,8 @@ public:
         UploadSuccessCallback successCallback,
         FailedCallback failedCallback,
         Size imageSize,
-        bool forceResize) override;
+        bool forceResize,
+        bool syncMode = false) override;
 
     virtual void Pause() override
     {

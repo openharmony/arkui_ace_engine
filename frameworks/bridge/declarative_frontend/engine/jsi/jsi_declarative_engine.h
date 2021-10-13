@@ -216,6 +216,8 @@ private:
 
     int32_t instanceId_ = 0;
 
+    ArkNativeEngine* nativeEngine_ = nullptr;
+
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };
 

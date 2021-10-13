@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_LIST_ITEM_COMPOSED_ELEMENT_H
 
 #include "core/components_v2/inspector/inspector_composed_element.h"
+#include "core/components_v2/list/list_item_element.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace::V2 {
@@ -32,6 +33,11 @@ public:
     std::unique_ptr<JsonValue> ToJsonObject() const override;
     std::string GetSticky() const;
     std::string GetEditMode() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return ListItemElement::TypeId();
+    }
 };
 
 } // namespace OHOS::Ace

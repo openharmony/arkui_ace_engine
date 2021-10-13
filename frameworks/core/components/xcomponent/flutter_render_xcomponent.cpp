@@ -114,23 +114,38 @@ void FlutterRenderXComponent::DumpTree(int32_t depth)
     }
 }
 
-void FlutterRenderXComponent::PluginContextInit(NativeRenderContext* context)
+void FlutterRenderXComponent::NativeXComponentInit(
+    NativeXComponent* nativeXComponent,
+    WeakPtr<NativeXComponentImpl> nativeXComponentImpl)
 {
-    pluginContext_ = context;
-    if (pluginContext_) {
-        pluginContext_->OnSurfaceCreated((int)(position_.GetX()),
-                                         (int)(position_.GetY()),
-                                         (int)(drawSize_.Width()),
-                                         (int)(drawSize_.Height()));
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("NativeXComponentInit pipelineContext is null");
+        return;
     }
+    nativeXComponent_ = nativeXComponent;
+    nativeXComponentImpl_ = nativeXComponentImpl;
+
+    pipelineContext->GetTaskExecutor()->PostTask(
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_,
+            w = drawSize_.Width(), h = drawSize_.Height()] {
+            auto nXCompImpl = weakNXCompImpl.Upgrade();
+            if (nXComp && nXCompImpl) {
+                nXCompImpl->SetSurfaceWidth((int)(w));
+                nXCompImpl->SetSurfaceHeight((int)(h));
+                auto surface = nXCompImpl->GetSurface();
+                auto callback = nXCompImpl->GetCallback();
+                if (callback && callback->OnSurfaceCreated != nullptr) {
+                    callback->OnSurfaceCreated(nXComp, surface);
+                }
+            } else {
+                LOGE("Native XComponent nullptr");
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void FlutterRenderXComponent::PluginUpdate()
 {
-}
-
-void FlutterRenderXComponent::SetTextureId(int64_t id)
-{
-    textureId_ = id;
 }
 } // namespace OHOS::Ace

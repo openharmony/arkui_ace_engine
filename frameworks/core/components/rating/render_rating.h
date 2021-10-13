@@ -60,6 +60,30 @@ public:
     {
         return isIndicator_;
     }
+    double GetRatingScore() const
+    {
+        return ratingScore_;
+    }
+    int32_t GetStarNum() const
+    {
+        return starNum_;
+    }
+    double GetStepSize() const
+    {
+        return stepSize_;
+    }
+    std::string GetForegroundSrc() const
+    {
+        return foregroundSrc1_;
+    }
+    std::string GetSecondarySrc() const
+    {
+        return secondarySrc1_;
+    }
+    std::string GetBackgroundSrc() const
+    {
+        return backgroundSrc1_;
+    }
     bool HandleFocusEvent(const KeyEvent& keyEvent);
     bool IsTv() const
     {
@@ -123,8 +147,8 @@ protected:
     {
         return operationEvent_;
     }
-    std::function<void(int)> onChangeRating;
-    void SetOnChange(const std::function<void(int)>& value)
+    std::function<void(double)> onChangeRating;
+    void SetOnChange(const std::function<void(double)>& value)
     {
         onChangeRating = value;
     }
@@ -138,6 +162,9 @@ protected:
     std::string foregroundSrc_;
     std::string secondarySrc_;
     std::string backgroundSrc_;
+    std::string foregroundSrc1_;
+    std::string secondarySrc1_;
+    std::string backgroundSrc1_;
     InternalResource::ResourceId foregroundResourceId_ = InternalResource::ResourceId::RATE_STAR_SMALL_ON_SVG;
     InternalResource::ResourceId secondaryResourceId_ = InternalResource::ResourceId::RATE_STAR_SMALL_OFF_SVG;
     InternalResource::ResourceId backgroundResourceId_ = InternalResource::ResourceId::RATE_STAR_SMALL_OFF_SVG;

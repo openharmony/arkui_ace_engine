@@ -17,7 +17,6 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/flex/flex_element.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -26,7 +25,8 @@ namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const RowComposedElement&)>> CREATE_JSON_MAP {
     { "alignItems", [](const RowComposedElement& inspector) { return inspector.GetAlignItems(); } },
-    { "space", [](const RowComposedElement& inspector) { return inspector.GetSpace(); } }
+    { "space", [](const RowComposedElement& inspector) { return inspector.GetSpace(); } },
+    { "selfAlign", [](const RowComposedElement& inspector) { return inspector.GetVerticalAlign(); } },
 };
 
 }
@@ -53,26 +53,60 @@ std::string RowComposedElement::GetAlignItems() const
 {
     auto node = GetInspectorNode(RowElement::TypeId());
     if (!node) {
-        return "FlexAlign.Center";
+        return "VerticalAlign.Center";
     }
     auto renderRow = AceType::DynamicCast<RenderFlex>(node);
     if (renderRow) {
-        return ConvertFlexAlignToStirng(renderRow->GetAlignItems());
+        auto alignItems = renderRow->GetAlignItems();
+        if (alignItems == FlexAlign::FLEX_START) {
+            return "VerticalAlign.Top";
+        } else if (alignItems == FlexAlign::CENTER) {
+            return "VerticalAlign.Center";
+        } else if (alignItems == FlexAlign::FLEX_END) {
+            return "VerticalAlign.Bottom";
+        }
     }
-    return "FlexAlign.Center";
+    return "VerticalAlign.Center";
 }
 
 std::string RowComposedElement::GetSpace() const
 {
     auto node = GetInspectorNode(RowElement::TypeId());
     if (!node) {
-        return "0";
+        return Dimension(0.0).ToString();
     }
     auto renderRow = AceType::DynamicCast<RenderFlex>(node);
     if (renderRow) {
-        return std::to_string(renderRow->GetSpace());
+        auto dimension = Dimension(renderRow->GetSpace());
+        return dimension.ToString();
     }
-    return "0";
+    return Dimension(0.0).ToString();
+}
+
+std::string RowComposedElement::GetVerticalAlign() const
+{
+    auto node = GetInspectorNode(RowElement::TypeId());
+    if (!node) {
+        return "VerticalAlign::Center";
+    }
+    auto renderRow = AceType::DynamicCast<RenderFlex>(node);
+    if (renderRow) {
+        auto alignPtr = renderRow->GetAlignPtr();
+        if (alignPtr) {
+            auto verticalAlign = alignPtr->GetVerticalAlign();
+            switch (verticalAlign) {
+                case VerticalAlign::TOP:
+                    return "VerticalAlign::Top";
+                case VerticalAlign::CENTER:
+                    return "VerticalAlign::Center";
+                case VerticalAlign::BOTTOM:
+                    return "VerticalAlign::Bottom";
+                default:
+                    return "verticalAlign::Center";
+            }
+        }
+    }
+    return "verticalAlign::Center";
 }
 
 } // namespace OHOS::Ace::V2

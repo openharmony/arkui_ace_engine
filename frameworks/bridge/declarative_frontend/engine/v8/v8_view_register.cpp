@@ -49,6 +49,8 @@
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_web.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
 #endif
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
@@ -90,6 +92,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
@@ -622,7 +625,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"TabsController", JSTabsController::JSBind},
     {"CalendarController", JSCalendarController::JSBind},
     {"AbilityController", JSAbilityComponentController::JSBind},
-    {"VideoController", JSVideoController::JSBind}
+    {"VideoController", JSVideoController::JSBind},
+    {"Search", JSSearch::JSBind}
 };
 
 void RegisterAllModule(BindingTarget globalObj)
@@ -745,10 +749,10 @@ void JsRegisterViews(BindingTarget globalObj)
     loadingProgressStyle.Constant("Orbital", 3);
 
     JSObjectTemplate progressStyle;
-    progressStyle.Constant("Linear", 1);
-    progressStyle.Constant("Capsule", 2);
-    progressStyle.Constant("Eclipse", 3);
-    progressStyle.Constant("Circular", 4);
+    progressStyle.Constant("Linear", 0);
+    progressStyle.Constant("Capsule", 1);
+    progressStyle.Constant("Eclipse", 2);
+    progressStyle.Constant("Circular", 3);
 
     JSObjectTemplate stackFit;
     stackFit.Constant("Keep", 0);
@@ -795,6 +799,11 @@ void JsRegisterViews(BindingTarget globalObj)
     iconPosition.Constant("Start", 0);
     iconPosition.Constant("End", 1);
 
+    JSObjectTemplate badgePosition;
+    badgePosition.Constant("RightTop", 0);
+    badgePosition.Constant("Right", 1);
+    badgePosition.Constant("Left", 2);
+
     globalObj->Set(isolate, "MainAxisAlign", *mainAxisAlign);
     globalObj->Set(isolate, "CrossAxisAlign", *crossAxisAlign);
     globalObj->Set(isolate, "Direction", *direction);
@@ -810,6 +819,7 @@ void JsRegisterViews(BindingTarget globalObj)
     globalObj->Set(isolate, "SliderChangeMode", *sliderChangeMode);
     globalObj->Set(isolate, "IconPosition", *iconPosition);
     globalObj->Set(isolate, "PickerStyle", *pickerStyle);
+    globalObj->Set(isolate, "BadgePosition", *badgePosition);
     LOGD("View classes and jsCreateDocuemnt, registerObservableObject functions registered.");
 }
 

@@ -43,8 +43,10 @@ public:
     ~FrontendDelegate() override = default;
 
     virtual void AttachPipelineContext(const RefPtr<PipelineContext>& context) = 0;
-    void SetAssetManager(const RefPtr<AssetManager>& assetManager);
-    virtual RefPtr<AssetManager> GetAssetManager() const = 0;
+    ACE_EXPORT void SetAssetManager(const RefPtr<AssetManager>& assetManager)
+    {
+        assetManager_ = assetManager;
+    }
 
     // ----------------
     // system.router
@@ -55,6 +57,10 @@ public:
     virtual void Replace(const std::string& uri, const std::string& params) = 0;
     // Back to specified page or the previous page if url not set.
     virtual void Back(const std::string& uri, const std::string& params = "") = 0;
+    // Postpone page transition after Begin called, usually to wait some async operation
+    virtual void PostponePageTransition() = 0;
+    // Begin page transition after Postpone called, usually to wait some async operation
+    virtual void LaunchPageTransition() = 0;
     // Clear all the pages in stack except the top page, that is current page.
     virtual void Clear() = 0;
     // Gets the number of pages in the page stack.
@@ -162,6 +168,15 @@ public:
 
     template<typename T>
     bool ACE_EXPORT GetResourceData(const std::string& fileUri, T& content);
+
+    template<typename T>
+    ACE_EXPORT static bool GetResourceData(const std::string& fileUri, const RefPtr<AssetManager>& assetManager,
+        T& content);
+
+    ACE_EXPORT RefPtr<AssetManager> GetAssetManager() const
+    {
+        return assetManager_;
+    }
 
     virtual void LoadResourceConfiguration(std::map<std::string, std::string>& sortedResourcePath,
         std::unique_ptr<JsonValue>& currentResourceData) = 0;

@@ -35,7 +35,7 @@ public:
     static ModuleManager* GetInstance();
     bool InitModule(v8::Local<v8::Object> moduleObj, const std::string& moduleName, v8::Isolate* isolate);
 
-    void InitTimerModule(v8::Local<v8::Context>& localContext);
+    static void InitTimerModule(v8::Local<v8::Context>& localContext);
     void SetWaitTimer(const v8::FunctionCallbackInfo<v8::Value>& args, bool isInterval);
     void ClearWaitTimer(const v8::FunctionCallbackInfo<v8::Value>& args, bool isInterval);
     uint32_t AddCallback(CopyablePersistent<v8::Function> callbackFunc,

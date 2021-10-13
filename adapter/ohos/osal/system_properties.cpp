@@ -45,6 +45,12 @@ bool IsTraceEnabled()
         system::GetParameter("debug.ace.trace.enabled", "0") == "1");
 }
 
+bool IsAccessibilityEnabled()
+{
+    return (system::GetParameter("persist.ace.testmode.enabled", "0") == "1" ||
+        system::GetParameter("debug.ace.testmode.enabled", "0") == "1");
+}
+
 } // namespace
 
 void SystemProperties::InitDeviceType(DeviceType)
@@ -53,6 +59,7 @@ void SystemProperties::InitDeviceType(DeviceType)
 }
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
+bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 int32_t SystemProperties::deviceWidth_ = 0;
 int32_t SystemProperties::deviceHeight_ = 0;

@@ -34,10 +34,12 @@ class FlutterRenderXComponent final : public RenderXComponent {
 public:
     void DumpTree(int32_t depth) override;
     void Paint(RenderContext& context, const Offset& offset) override;
-    void PluginContextInit(NativeRenderContext* context) override;
-    void PluginUpdate() override;
     RenderLayer GetRenderLayer() override;
-    void SetTextureId(int64_t id) override;
+
+    void NativeXComponentInit(
+        NativeXComponent* nativeXComponent,
+        WeakPtr<NativeXComponentImpl> nativeXComponentImpl) override;
+    void PluginUpdate() override;
 
     RefPtr<Flutter::TextureLayer> textureLayer_;
     RefPtr<Flutter::ClipLayer> layer_;

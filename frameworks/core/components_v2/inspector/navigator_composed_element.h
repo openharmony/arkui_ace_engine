@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_NAVIGATOR_COMPOSED_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_NAVIGATOR_COMPOSED_ELEMENT_H
 
+#include "core/components/navigator/navigator_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -34,6 +35,11 @@ public:
     std::string GetTarget() const;
     std::string GetNavigatorType() const;
     std::string GetParams() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return NavigatorElement::TypeId();
+    }
 };
 
 } // namespace OHOS::Ace

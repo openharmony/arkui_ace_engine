@@ -51,6 +51,11 @@ public:
     bool HandleEnterEvent();
     bool HandleFocusEvent(bool vertical, bool reverse);
 
+    const RefPtr<SearchComponent>&  GetSearchComponent() const
+    {
+        return searchComponent_;
+    }
+
 protected:
     bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
@@ -70,6 +75,7 @@ protected:
     RefPtr<RenderBox> renderSearchBox_;
     RefPtr<TextEditController> textEditController_;
     RefPtr<Decoration> decoration_;
+    RefPtr<SearchComponent> searchComponent_;
     // Overlay color for hover and press.
     Color overlayColor_ = Color::TRANSPARENT;
 

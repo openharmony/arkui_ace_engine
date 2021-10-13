@@ -130,6 +130,11 @@ public:
         return track_->SetTrackThickness(thickness);
     }
 
+    int32_t GetScaleNumber() const
+    {
+        return track_->GetScaleNumber();
+    }
+
     void SetScaleNumber(int32_t number)
     {
         return track_->SetScaleNumber(number);

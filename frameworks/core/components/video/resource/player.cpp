@@ -249,12 +249,9 @@ void Player::OnTick(uint64_t timeStamp)
 {
     timeStamp_ += timeStamp;
     if (isNeedFreshForce_) {
-        auto context = context_.Upgrade();
-        if (!context) {
-            LOGE("fail to get context");
-            return;
+        if (!onRefreshRenderListener_.empty()) {
+            onRefreshRenderListener_.back()();
         }
-        context->DrawLastFrame();
     }
     if (timeStamp_ > FREAUENCY_GET_CURRENT_TIME) {
         GetCurrentTime();
@@ -474,6 +471,7 @@ void Player::OnAddCompletionListener(CompletionListener&& listener)
 
 void Player::PopListener()
 {
+    onRefreshRenderListener_.pop_back();
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("fail to get context");
@@ -487,6 +485,11 @@ void Player::PopListener()
             player->OnPopListener();
         }
     });
+}
+
+void Player::AddRefreshRenderListener(RefreshRenderListener&& listener)
+{
+    onRefreshRenderListener_.push_back(std::move(listener));
 }
 
 void Player::EnableLooping(bool loop)

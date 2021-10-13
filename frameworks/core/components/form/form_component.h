@@ -22,14 +22,14 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT FormComponent : public ComposedComponent {
-    DECLARE_ACE_TYPE(FormComponent, ComposedComponent);
+class ACE_EXPORT FormComponent : public RenderComponent {
+    DECLARE_ACE_TYPE(FormComponent, RenderComponent);
 
 public:
-    FormComponent(const ComposeId& id, const std::string& name, const RefPtr<Component>& child);
-    FormComponent(const ComposeId& id, const std::string& name);
+    FormComponent() = default;
     ~FormComponent() override = default;
 
+    RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
 
     void SetFormRequestionInfo(const RequestFormInfo& info)
@@ -64,22 +64,18 @@ public:
 
     void SetCardSize(const Dimension& width, const Dimension& height)
     {
-        width_ = width;
-        height_ = height;
-        if (mountBox_) {
-            mountBox_->SetWidth(width.Value(), width.Unit());
-            mountBox_->SetHeight(height.Value(), height.Unit());
-        }
+        info_.width = width;
+        info_.height = height;
     }
 
     const Dimension& GetWidth() const
     {
-        return width_;
+        return info_.width;
     }
 
     const Dimension& GetHeight() const
     {
-        return height_;
+        return info_.height;
     }
 
     void SetOnAcquireFormEventId(const EventMarker& event)
@@ -113,15 +109,10 @@ public:
     }
 
 private:
-    void CreateChildren();
-
     RequestFormInfo info_;
-    RefPtr<BoxComponent> mountBox_;
     EventMarker onAcquireForm_;
     EventMarker onError_;
     EventMarker onRouter_;
-    Dimension width_;
-    Dimension height_;
 };
 
 } // namespace OHOS::Ace

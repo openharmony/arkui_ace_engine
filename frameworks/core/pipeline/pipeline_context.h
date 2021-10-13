@@ -104,8 +104,8 @@ public:
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineContext(RefPtr<TaskExecutor>& taskExecutor, RefPtr<AssetManager> assetManager,
-        const RefPtr<Frontend>& frontend, bool isSub = true);
+    PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
+        RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend);
 
     ~PipelineContext() override;
 
@@ -122,6 +122,8 @@ public:
 
     void PushPage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage);
     void PushPage(const RefPtr<PageComponent>& pageComponent);
+    void PostponePageTransition();
+    void LaunchPageTransition();
 
     bool CanPushPage();
 
@@ -610,6 +612,11 @@ public:
         return themeManager_;
     }
 
+    void SetThemeManager(RefPtr<ThemeManager> theme)
+    {
+        themeManager_ = theme;
+    }
+
     void SetIsKeyEvent(bool isKeyEvent);
 
     bool IsKeyEvent() const
@@ -660,8 +667,6 @@ public:
     {
         return buildingFirstPage_;
     }
-
-    void DrawLastFrame();
 
     const RefPtr<SharedImageManager>& GetSharedImageManager() const
     {
@@ -864,34 +869,9 @@ public:
     void SetPreTargetRenderNode(const RefPtr<RenderNode>& preTargetRenderNode);
     const RefPtr<RenderNode> GetPreTargetRenderNode() const;
 
-    void FlushPipelineWithoutAnimation(const RefPtr<RenderContext>& ctx = nullptr);
-
     double GetDensity() const
     {
         return density_;
-    }
-
-    void SetCardPipelineContext(RefPtr<PipelineContext> context)
-    {
-        innerPipelineContexts.push_back(context);
-    }
-
-    void RemoveCardPipelineContext(RefPtr<PipelineContext> context)
-    {
-        auto it = find(innerPipelineContexts.begin(), innerPipelineContexts.end(), context);
-        if (it != innerPipelineContexts.end()) {
-            innerPipelineContexts.erase(it);
-        }
-    }
-
-    void SetMainPipelineContext(RefPtr<PipelineContext> context)
-    {
-        mainPipelineContexts = context;
-    }
-
-    const RefPtr<PipelineContext>& GetMainPipelineContext() const
-    {
-        return mainPipelineContexts;
     }
 
     void RequestFrame();
@@ -929,8 +909,9 @@ public:
     }
 
 private:
+    void FlushPipelineWithoutAnimation();
     void FlushLayout();
-    void FlushRender(const RefPtr<RenderContext>& ctx = nullptr);
+    void FlushRender();
     void FlushRenderFinish();
     void FireVisibleChangeEvent();
     void FlushPredictLayout(int64_t targetTimestamp);
@@ -1121,9 +1102,6 @@ private:
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
-    bool isSub_ = false;
-    std::vector<RefPtr<PipelineContext>> innerPipelineContexts;
-    RefPtr<PipelineContext> mainPipelineContexts;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

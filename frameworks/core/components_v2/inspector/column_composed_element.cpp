@@ -18,28 +18,92 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/flex/flex_element.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
+namespace {
+
+const std::unordered_map<std::string, std::function<std::string(const ColumnComposedElement&)>> CREATE_JSON_MAP {
+    { "alignItems", [](const ColumnComposedElement& inspector) { return inspector.GetAlignContent(); } },
+    { "space", [](const ColumnComposedElement& inspector) { return inspector.GetSpace(); } },
+    { "selfAlign", [](const ColumnComposedElement& inspector) { return inspector.GetHorizontalAlign(); } },
+};
+
+}
 
 void ColumnComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
     DumpLog::GetInstance().AddDesc(
-        std::string("alignSelf: ").append(std::to_string(static_cast<int32_t>(GetAlignContent()))));
+        std::string("alignContent: ").append(GetAlignContent()));
 }
 
-FlexAlign ColumnComposedElement::GetAlignContent()
+std::unique_ptr<JsonValue> ColumnComposedElement::ToJsonObject() const
+{
+    auto resultJson = InspectorComposedElement::ToJsonObject();
+    for (const auto& value : CREATE_JSON_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this).c_str());
+    }
+    return resultJson;
+}
+
+std::string ColumnComposedElement::GetAlignContent() const
 {
     auto node = GetInspectorNode(ColumnElement::TypeId());
     if (!node) {
-        return FlexAlign::CENTER;
+        return "HorizontalAlign::Center";
     }
 
-    RefPtr<RenderFlex> renderFlex = AceType::DynamicCast<RenderFlex>(node);
-    if (renderFlex) {
-        return renderFlex->GetAlignItem();
+    RefPtr<RenderFlex> renderColumn = AceType::DynamicCast<RenderFlex>(node);
+    if (renderColumn) {
+        auto alignItems = renderColumn->GetAlignItems();
+        if (alignItems == FlexAlign::FLEX_START) {
+            return "HorizontalAlign.Start";
+        } else if (alignItems == FlexAlign::CENTER) {
+            return "HorizontalAlign.Center";
+        } else if (alignItems == FlexAlign::FLEX_END) {
+            return "HorizontalAlign.End";
+        }
     }
-    return FlexAlign::CENTER;
+    return "HorizontalAlign::Center";
+}
+
+std::string ColumnComposedElement::GetSpace() const
+{
+    auto node = GetInspectorNode(ColumnElement::TypeId());
+    if (!node) {
+        return Dimension(0.0).ToString();
+    }
+    auto renderColumn = AceType::DynamicCast<RenderFlex>(node);
+    if (renderColumn) {
+        auto dimension = Dimension(renderColumn->GetSpace());
+        return dimension.ToString();
+    }
+    return Dimension(0.0).ToString();
+}
+
+std::string ColumnComposedElement::GetHorizontalAlign() const
+{
+    auto node = GetInspectorNode(ColumnElement::TypeId());
+    if (!node) {
+        return "HorizontalAlign::Center";
+    }
+    auto renderColumn = AceType::DynamicCast<RenderFlex>(node);
+    if (renderColumn) {
+        auto alignPtr = renderColumn->GetAlignPtr();
+        if (alignPtr) {
+            auto horizontalAlign = alignPtr->GetHorizontalAlign();
+            switch (horizontalAlign) {
+                case HorizontalAlign::START:
+                    return "HorizontalAlign::Start";
+                case HorizontalAlign::CENTER:
+                    return "HorizontalAlign::Center";
+                case HorizontalAlign::END:
+                    return "HorizontalAlign::End";
+            }
+        }
+    }
+    return "HorizontalAlign::Center";
 }
 
 } // namespace OHOS::Ace::V2

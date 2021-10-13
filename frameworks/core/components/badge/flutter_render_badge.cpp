@@ -105,6 +105,7 @@ void FlutterRenderBadge::DrawNumericalBadge(flutter::Canvas& canvas, const Offse
             badgeWidth_ = badgeCircleDiameter_;
         } else if (textData_.size() > 1 || messageCount > countLimit) {
             badgeWidth_ = textSize_.Width() + NormalizeToPx(NUMERICAL_BADGE_PADDING) * 2;
+            badgeWidth_ = badgeCircleDiameter_ > badgeWidth_ ? badgeCircleDiameter_ : badgeWidth_;
             badgeCircleRadius_ = badgeCircleDiameter_ / 2;
         }
     }

@@ -20,6 +20,7 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+std::string JSColumn::inspectorTag_ = "";
 
 void JSColumn::Create(const JSCallbackInfo& info)
 {
@@ -47,7 +48,7 @@ void JSColumn::Create(const JSCallbackInfo& info)
         }
     }
 
-    ViewStackProcessor::GetInstance()->Push(columnComponent);
+    ViewStackProcessor::GetInstance()->Push(columnComponent, false, inspectorTag_);
     JSInteractableView::SetFocusNode(true);
 }
 
@@ -64,6 +65,17 @@ void JSColumn::CreateWithWrap(const JSCallbackInfo& info)
 
     ViewStackProcessor::GetInstance()->Push(component);
 }
+
+void JSColumn::SetInspectorTag(const std::string& inspectorTag)
+{
+    inspectorTag_ = inspectorTag;
+}
+
+void JSColumn::ClearInspectorTag()
+{
+    inspectorTag_.clear();
+}
+
 
 void HorizontalAlignDeclaration::ConstructorCallback(const JSCallbackInfo& args)
 {

@@ -66,6 +66,12 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.autoCancel = autoCancelValue->ToBoolean();
         }
 
+        // Parses customStyle.
+        JSRef<JSVal> customStyleValue = constructorArg->GetProperty("customStyle");
+        if (customStyleValue->IsBoolean()) {
+            instance->dialogProperties_.customStyle = customStyleValue->ToBoolean();
+        }
+
         // Parse alignment
         auto alignmentValue = constructorArg->GetProperty("alignment");
         if (alignmentValue->IsNumber()) {

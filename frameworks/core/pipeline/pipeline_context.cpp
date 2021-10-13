@@ -110,19 +110,15 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
       timeProvider_(g_defaultTimeProvider), instanceId_(instanceId)
 {
     frontendType_ = frontend->GetType();
-    if (!isSub_) {
-        RegisterEventHandler(frontend->GetEventHandler());
-        auto&& vsyncCallback =
-            [weak = AceType::WeakClaim(this)](const uint64_t nanoTimestamp, const uint32_t frameCount) {
-                auto context = weak.Upgrade();
-                if (context) {
-                    context->OnVsyncEvent(nanoTimestamp, frameCount);
-                }
-            };
-        ACE_DCHECK(window_);
-        window_->SetVsyncCallback(vsyncCallback);
-    }
-
+    RegisterEventHandler(frontend->GetEventHandler());
+    auto&& vsyncCallback = [weak = AceType::WeakClaim(this)](const uint64_t nanoTimestamp, const uint32_t frameCount) {
+        auto context = weak.Upgrade();
+        if (context) {
+            context->OnVsyncEvent(nanoTimestamp, frameCount);
+        }
+    };
+    ACE_DCHECK(window_);
+    window_->SetVsyncCallback(vsyncCallback);
     focusAnimationManager_ = AceType::MakeRefPtr<FocusAnimationManager>();
     sharedTransitionController_ = AceType::MakeRefPtr<SharedTransitionController>(AceType::WeakClaim(this));
     cardTransitionController_ = AceType::MakeRefPtr<CardTransitionController>(AceType::WeakClaim(this));
@@ -130,22 +126,31 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
         imageCache_ = ImageCache::Create();
     }
     fontManager_ = FontManager::Create();
-    themeManager_ = AceType::MakeRefPtr<ThemeManager>();
     renderFactory_ = AceType::MakeRefPtr<FlutterRenderFactory>();
     UpdateFontWeightScale();
 }
 
-PipelineContext::PipelineContext(RefPtr<TaskExecutor>& taskExecutor, RefPtr<AssetManager> assetManager,
-    const RefPtr<Frontend>& frontend, bool forSubContainer)
-    : taskExecutor_(taskExecutor), assetManager_(std::move(assetManager)), weakFrontend_(frontend),
-      timeProvider_(g_defaultTimeProvider), isSub_(forSubContainer)
+PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
+    RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend)
+    : window_(std::move(window)), taskExecutor_(taskExecutor), assetManager_(std::move(assetManager)),
+      weakFrontend_(frontend), timeProvider_(g_defaultTimeProvider)
 {
     frontendType_ = frontend->GetType();
+
+    RegisterEventHandler(frontend->GetEventHandler());
+    auto&& vsyncCallback = [weak = AceType::WeakClaim(this)](const uint64_t nanoTimestamp, const uint32_t frameCount) {
+        auto context = weak.Upgrade();
+        if (context) {
+            context->OnVsyncEvent(nanoTimestamp, frameCount);
+        }
+    };
+    ACE_DCHECK(window_);
+    window_->SetVsyncCallback(vsyncCallback);
+
     focusAnimationManager_ = AceType::MakeRefPtr<FocusAnimationManager>();
     sharedTransitionController_ = AceType::MakeRefPtr<SharedTransitionController>(AceType::WeakClaim(this));
     cardTransitionController_ = AceType::MakeRefPtr<CardTransitionController>(AceType::WeakClaim(this));
     fontManager_ = FontManager::Create();
-    themeManager_ = AceType::MakeRefPtr<ThemeManager>();
     renderFactory_ = AceType::MakeRefPtr<FlutterRenderFactory>();
     UpdateFontWeightScale();
 }
@@ -155,11 +160,11 @@ PipelineContext::~PipelineContext()
     LOG_DESTROY();
 }
 
-void PipelineContext::FlushPipelineWithoutAnimation(const RefPtr<RenderContext>& ctx)
+void PipelineContext::FlushPipelineWithoutAnimation()
 {
     FlushBuild();
     FlushLayout();
-    FlushRender(ctx);
+    FlushRender();
     FlushRenderFinish();
     FlushWindowBlur();
     FlushFocus();
@@ -423,7 +428,7 @@ void PipelineContext::CorrectPosition()
     }
 }
 
-void PipelineContext::FlushRender(const RefPtr<RenderContext>& ctx)
+void PipelineContext::FlushRender()
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
@@ -443,7 +448,7 @@ void PipelineContext::FlushRender(const RefPtr<RenderContext>& ctx)
 
     UpdateNodesNeedDrawOnPixelMap();
 
-    RefPtr<RenderContext> context = isSub_ ? ctx : RenderContext::Create();
+    auto context = RenderContext::Create();
     if (!dirtyRenderNodes_.empty()) {
         decltype(dirtyRenderNodes_) dirtyNodes(std::move(dirtyRenderNodes_));
         for (const auto& dirtyNode : dirtyNodes) {
@@ -475,18 +480,10 @@ void PipelineContext::FlushRender(const RefPtr<RenderContext>& ctx)
         }
     }
 
-    if (!isSub_) {
-        for (const auto& subPipelineContext : innerPipelineContexts) {
-            subPipelineContext->FlushPipelineWithoutAnimation(context);
-        }
-    }
-
     if (rootElement_) {
         auto renderRoot = rootElement_->GetRenderNode();
         curDirtyRect = curDirtyRect * viewScale_;
-        if (!isSub_) {
-            renderRoot->FinishRender(drawDelegate_, dirtyRect_.CombineRect(curDirtyRect));
-        }
+        renderRoot->FinishRender(drawDelegate_, dirtyRect_.CombineRect(curDirtyRect));
         dirtyRect_ = curDirtyRect;
         if (isFirstLoaded_) {
             LOGI("PipelineContext::FlushRender()");
@@ -637,17 +634,14 @@ RefPtr<Element> PipelineContext::SetupRootElement()
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
         return RefPtr<Element>();
     }
-
-    if (!isSub_) {
-        const auto& rootRenderNode = rootElement_->GetRenderNode();
-        window_->SetRootRenderNode(rootRenderNode);
-        sharedTransitionController_->RegisterTransitionListener();
-        cardTransitionController_->RegisterTransitionListener();
-        if (windowModal_ == WindowModal::DIALOG_MODAL) {
-            auto dialog = AceType::DynamicCast<DialogModalElement>(rootElement_->GetFirstChild());
-            if (dialog) {
-                dialog->RegisterTransitionListener();
-            }
+    const auto& rootRenderNode = rootElement_->GetRenderNode();
+    window_->SetRootRenderNode(rootRenderNode);
+    sharedTransitionController_->RegisterTransitionListener();
+    cardTransitionController_->RegisterTransitionListener();
+    if (windowModal_ == WindowModal::DIALOG_MODAL) {
+        auto dialog = AceType::DynamicCast<DialogModalElement>(rootElement_->GetFirstChild());
+        if (dialog) {
+            dialog->RegisterTransitionListener();
         }
     }
 
@@ -787,6 +781,7 @@ bool PipelineContext::CanPushPage()
 
 void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage)
 {
+    ACE_FUNCTION_TRACE();
     CHECK_RUN_ON(UI);
     auto stageElement = stage;
     if (!stageElement) {
@@ -807,12 +802,44 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
         RefPtr<DisplayComponent> display = AceType::MakeRefPtr<DisplayComponent>(pageComponent);
         stageElement->PushPage(display);
     }
+    if (GetIsDeclarative()) {
+        if (isSurfaceReady_) {
+            FlushPipelineImmediately();
+        } else {
+            FlushBuild();
+        }
+        return;
+    }
     FlushBuildAndLayoutBeforeSurfaceReady();
 }
 
 void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent)
 {
     PushPage(pageComponent, nullptr);
+}
+
+void PipelineContext::PostponePageTransition()
+{
+    CHECK_RUN_ON(UI);
+    // if not target stage, use root stage
+    auto stageElement = GetStageElement();
+    if (!stageElement) {
+        LOGE("Get stage element failed!");
+        return;
+    }
+    stageElement->PostponePageTransition();
+}
+
+void PipelineContext::LaunchPageTransition()
+{
+    CHECK_RUN_ON(UI);
+    // if not target stage, use root stage
+    auto stageElement = GetStageElement();
+    if (!stageElement) {
+        LOGE("Get stage element failed!");
+        return;
+    }
+    stageElement->LaunchPageTransition();
 }
 
 void PipelineContext::GetBoundingRectData(int32_t nodeId, Rect& rect)
@@ -1010,13 +1037,7 @@ void PipelineContext::ScheduleUpdate(const RefPtr<ComposedComponent>& compose)
             composedElement->SetUpdateComponent(compose);
         }
     }
-    if (!isSub_) {
-        FlushBuildAndLayoutBeforeSurfaceReady();
-    } else {
-        if (mainPipelineContexts) {
-            mainPipelineContexts->MarkForcedRefresh();
-        }
-    }
+    FlushBuildAndLayoutBeforeSurfaceReady();
 }
 
 void PipelineContext::AddComposedElement(const ComposeId& id, const RefPtr<ComposedElement>& element)
@@ -1056,13 +1077,7 @@ void PipelineContext::AddDirtyElement(const RefPtr<Element>& dirtyElement)
     LOGD("schedule rebuild for %{public}s", AceType::TypeName(dirtyElement));
     dirtyElements_.emplace(dirtyElement);
     hasIdleTasks_ = true;
-    if (!isSub_) {
-        window_->RequestFrame();
-    } else {
-        if (mainPipelineContexts) {
-            mainPipelineContexts->RequestFrame();
-        }
-    }
+    window_->RequestFrame();
 }
 
 void PipelineContext::RequestFrame()
@@ -1095,13 +1110,7 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<RenderNode>& renderNode, b
         dirtyRenderNodesInOverlay_.emplace(renderNode);
     }
     hasIdleTasks_ = true;
-    if (!isSub_) {
-        window_->RequestFrame();
-    } else {
-        if (mainPipelineContexts) {
-            mainPipelineContexts->RequestFrame();
-        }
-    }
+    window_->RequestFrame();
 }
 
 void PipelineContext::AddNeedRenderFinishNode(const RefPtr<RenderNode>& renderNode)
@@ -1126,13 +1135,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<RenderNode>& renderNode)
     renderNode->SaveExplicitAnimationOption(explicitAnimationOption_);
     dirtyLayoutNodes_.emplace(renderNode);
     hasIdleTasks_ = true;
-    if (!isSub_) {
-        window_->RequestFrame();
-    } else {
-        if (mainPipelineContexts) {
-            mainPipelineContexts->RequestFrame();
-        }
-    }
+    window_->RequestFrame();
 }
 
 void PipelineContext::AddPredictLayoutNode(const RefPtr<RenderNode>& renderNode)
@@ -1145,52 +1148,28 @@ void PipelineContext::AddPredictLayoutNode(const RefPtr<RenderNode>& renderNode)
     LOGD("schedule predict layout for %{public}s", AceType::TypeName(renderNode));
     predictLayoutNodes_.emplace(renderNode);
     hasIdleTasks_ = true;
-    if (!isSub_) {
-        window_->RequestFrame();
-    } else {
-        if (mainPipelineContexts) {
-            mainPipelineContexts->RequestFrame();
-        }
-    }
+    window_->RequestFrame();
 }
 
 void PipelineContext::AddPreFlushListener(const RefPtr<FlushEvent>& listener)
 {
     CHECK_RUN_ON(UI);
     preFlushListeners_.emplace_back(listener);
-    if (!isSub_) {
-        window_->RequestFrame();
-    } else {
-        if (mainPipelineContexts) {
-            mainPipelineContexts->RequestFrame();
-        }
-    }
+    window_->RequestFrame();
 }
 
 void PipelineContext::AddPostFlushListener(const RefPtr<FlushEvent>& listener)
 {
     CHECK_RUN_ON(UI);
     postFlushListeners_.emplace_back(listener);
-    if (!isSub_) {
-        window_->RequestFrame();
-    } else {
-        if (mainPipelineContexts) {
-            mainPipelineContexts->RequestFrame();
-        }
-    }
+    window_->RequestFrame();
 }
 
 uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
 {
     CHECK_RUN_ON(UI);
     scheduleTasks_.try_emplace(++nextScheduleTaskId_, task);
-    if (!isSub_) {
-        window_->RequestFrame();
-    } else {
-        if (mainPipelineContexts) {
-            mainPipelineContexts->RequestFrame();
-        }
-    }
+    window_->RequestFrame();
     return nextScheduleTaskId_;
 }
 
@@ -1428,7 +1407,7 @@ void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
     }
 #endif
 
-    if (isSurfaceReady_ && !isSub_) {
+    if (isSurfaceReady_) {
         FlushAnimation(GetTimeFromExternalTimer());
         FlushPipelineWithoutAnimation();
         FlushAnimationTasks();
@@ -1437,13 +1416,7 @@ void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
         LOGW("the surface is not ready, waiting");
     }
     if (isMoving_) {
-        if (!isSub_) {
-            window_->RequestFrame();
-        } else {
-            if (mainPipelineContexts) {
-                mainPipelineContexts->RequestFrame();
-            }
-        }
+        window_->RequestFrame();
         MarkForcedRefresh();
         isMoving_ = false;
     }
@@ -1463,13 +1436,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     FlushPredictLayout(deadline);
     if (hasIdleTasks_) {
         FlushPipelineImmediately();
-        if (!isSub_) {
-            window_->RequestFrame();
-        } else {
-            if (mainPipelineContexts) {
-                mainPipelineContexts->RequestFrame();
-            }
-        }
+        window_->RequestFrame();
         MarkForcedRefresh();
         hasIdleTasks_ = false;
     }
@@ -1551,15 +1518,8 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
         return;
     }
     isSurfaceReady_ = true;
-    if (!isSub_) {
-        FlushPipelineWithoutAnimation();
-        MarkForcedRefresh();
-    } else {
-        if (mainPipelineContexts) {
-            mainPipelineContexts->MarkForcedRefresh();
-        }
-    }
-
+    FlushPipelineWithoutAnimation();
+    MarkForcedRefresh();
 #ifndef WEARABLE_PRODUCT
     multiModalManager_->OpenChannel(Claim(this));
 #endif
@@ -1878,14 +1838,7 @@ void PipelineContext::AddDirtyFocus(const RefPtr<FocusNode>& node)
     } else {
         dirtyFocusScope_ = node;
     }
-
-    if (!isSub_) {
-        window_->RequestFrame();
-    } else {
-        if (mainPipelineContexts) {
-            mainPipelineContexts->RequestFrame();
-        }
-    }
+    window_->RequestFrame();
 }
 
 void PipelineContext::CancelFocusAnimation() const
@@ -2224,8 +2177,12 @@ uint64_t PipelineContext::GetTimeFromExternalTimer()
 
 void PipelineContext::SetFontScale(float fontScale)
 {
+    const static float CARD_MAX_FONT_SCALE = 1.3f;
     if (!NearEqual(fontScale_, fontScale)) {
         fontScale_ = fontScale;
+        if (isJsCard_ && GreatOrEqual(fontScale_, CARD_MAX_FONT_SCALE)) {
+            fontScale_ = CARD_MAX_FONT_SCALE;
+        }
         fontManager_->RebuildFontNode();
     }
 }
@@ -2339,13 +2296,7 @@ void PipelineContext::AddPageUpdateTask(std::function<void()>&& task, bool direc
     if (directExecute) {
         FlushPageUpdateTasks();
     } else {
-        if (!isSub_) {
-            window_->RequestFrame();
-        } else {
-            if (mainPipelineContexts) {
-                mainPipelineContexts->RequestFrame();
-            }
-        }
+        window_->RequestFrame();
     }
 #if defined(ENABLE_NATIVE_VIEW)
     if (frameCount_ == 1) {
@@ -2588,13 +2539,6 @@ void PipelineContext::DumpFrontend() const
     auto frontend = weakFrontend_.Upgrade();
     if (frontend) {
         frontend->DumpFrontend();
-    }
-}
-
-void PipelineContext::DrawLastFrame()
-{
-    if (drawDelegate_) {
-        drawDelegate_->DrawLastFrame(Rect(0.0, 0.0, width_, height_));
     }
 }
 

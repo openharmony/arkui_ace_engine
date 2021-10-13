@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_LIST_COMPOSED_ELEMENT_H
 
 #include "core/components_v2/inspector/inspector_composed_element.h"
+#include "core/components_v2/list/list_element.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace::V2 {
@@ -34,6 +35,13 @@ public:
     std::string GetInitialIndex() const;
     std::string GetListDirection() const;
     std::string GetEditMode() const;
+    std::string GetEdgeEffect() const;
+    std::unique_ptr<JsonValue> GetDivider() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return ListElement::TypeId();
+    }
 };
 
 } // namespace OHOS::Ace

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_CHECKBOX_COMPOSED_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_CHECKBOX_COMPOSED_ELEMENT_H
 
+#include "core/components/checkable/checkable_element.h"
 #include "core/components/checkable/render_checkbox.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
@@ -31,8 +32,13 @@ public:
 
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
-
     std::string GetChecked() const;
+    std::string GetSelectedColor() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return CheckableElement::TypeId();
+    }
 
 private:
     RefPtr<RenderCheckbox> GetRenderCheckbox() const;

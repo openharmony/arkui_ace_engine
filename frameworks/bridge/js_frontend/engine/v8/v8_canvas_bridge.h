@@ -33,6 +33,9 @@ class V8CanvasBridge : public BaseCanvasBridge {
     DECLARE_ACE_TYPE(V8CanvasBridge, BaseCanvasBridge)
 
 public:
+    V8CanvasBridge() = default;
+    virtual ~V8CanvasBridge();
+
     v8::Local<v8::Object> GetRenderContext() const
     {
         return renderContext_;
@@ -93,6 +96,8 @@ public:
     static void PutImageData(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetImageData(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void TransferFromImageBitmap(const v8::FunctionCallbackInfo<v8::Value>& args);
+    // support to read inner json data by lottie
+    static void GetJsonData(const v8::FunctionCallbackInfo<v8::Value>& args);
 
     // getter and setter
     static void FillStyleGetter(const v8::FunctionCallbackInfo<v8::Value>& info);
@@ -131,6 +136,9 @@ public:
     static void SmoothingEnabledSetter(const v8::FunctionCallbackInfo<v8::Value>& info);
     static void SmoothingQualityGetter(const v8::FunctionCallbackInfo<v8::Value>& info);
     static void SmoothingQualitySetter(const v8::FunctionCallbackInfo<v8::Value>& info);
+    // support only read for lottie
+    static void OffsetWidthGetter(const v8::FunctionCallbackInfo<v8::Value>& info);
+    static void OffsetHeightGetter(const v8::FunctionCallbackInfo<v8::Value>& info);
 
     static void Path2DAddPath(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void Path2DSetTransform(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -155,12 +163,14 @@ private:
     static void SetAntiAlias(const v8::Local<v8::Context>& ctx, NodeId id, const std::string& args);
     static RefPtr<CanvasPath2D> MakePath2D(const v8::FunctionCallbackInfo<v8::Value>& args);
     void HandleWebglContext(
-        const v8::Local<v8::Context>& ctx, NodeId id, const std::string& args, JsEngineInstance* engine);
+        const v8::Local<v8::Context>& ctx, NodeId id, const std::string& args, JsEngineInstance* engine,
+        CanvasRenderContextBase*& canvasRenderContext);
 
     v8::Local<v8::Object> renderContext_;
     v8::Local<v8::String> dataURL_;
 
-    CanvasRenderContextBase* canvasRenderContext_ = nullptr;
+    CanvasRenderContextBase* webglRenderContext_ = nullptr;
+    CanvasRenderContextBase* webgl2RenderContext_ = nullptr;
 
     static int32_t gradientCount_;
     static int32_t patternCount_;

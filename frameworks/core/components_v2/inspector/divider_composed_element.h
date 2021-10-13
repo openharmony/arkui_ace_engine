@@ -37,6 +37,10 @@ public:
     std::string GetStrokeWidth() const;
     std::string GetDividerLineCap() const;
 
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return DividerElement::TypeId();
+    }
 private:
     RefPtr<RenderDivider> GetRenderDivider() const;
 };

@@ -384,14 +384,19 @@ void FlutterRenderCalendar::PaintDay(
             } else {
                 if (day.dayMark == "work") {
                     workStateStyle.font_size = workDayMarkSize_;
-                    workStateStyle.color = nonCurrentMonthWorkDayMarkColor_;
+                    workStateStyle.color = isV2Component_ ? SkColorSetA(workDayMarkColor_, WEEKEND_TRANSPARENT)
+                                                          : nonCurrentMonthWorkDayMarkColor_;
                 } else if (day.dayMark == "off") {
                     workStateStyle.font_size = offDayMarkSize_;
-                    workStateStyle.color = nonCurrentMonthOffDayMarkColor_;
+                    workStateStyle.color = isV2Component_ ? SkColorSetA(offDayMarkColor_, WEEKEND_TRANSPARENT)
+                                                          : nonCurrentMonthOffDayMarkColor_;
                 }
             }
             if (day.focused) {
                 workStateStyle.color = Color::BLACK.GetValue();
+            }
+            if (isV2Component_ && IsToday(day) && day.touched) {
+                workStateStyle.color = focusedDayColor_;
             }
         }
         DrawCalendarText(canvas, day.dayMarkValue, workStateStyle, boxRect);

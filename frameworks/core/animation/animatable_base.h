@@ -77,6 +77,14 @@ public:
         animationOption_ = option;
     }
 
+    Animator::Status GetAnimationStatus() const
+    {
+        if (!animationController_) {
+            return Animator::Status::IDLE;
+        }
+        return animationController_->GetStatus();
+    }
+
 protected:
     virtual void OnAnimationCallback(const T& value)
     {

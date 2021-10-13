@@ -25,6 +25,7 @@
 #include "core/components/common/properties/tween_option.h"
 #include "core/components/display/render_display.h"
 #include "core/components/transform/render_transform.h"
+#include "core/components/transform/transform_component.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {
@@ -46,6 +47,8 @@ public:
     const TweenOption& GetOption() const;
     void SetOption(const TweenOption& option);
     void SetWrapHidden(bool hidden);
+    void AddPreFlush();
+    void SkipPostFlush();
     void SetOpacity(uint8_t opacity);
     void SetController(const RefPtr<Animator>& controller);
     RefPtr<RenderNode> GetContentRender() const;
@@ -69,7 +72,6 @@ private:
     void CreateScaleAnimation(const RefPtr<RenderTransform>& renderTransformNode, TweenOption& option);
     void CreateRotateAnimation(const RefPtr<RenderTransform>& renderTransformNode, TweenOption& option);
     void CreateTransformOriginAnimation(const RefPtr<RenderTransform>& renderTransformNode, TweenOption& option);
-    void CreateOpacityAnimation(const RefPtr<RenderDisplay>& renderDisplayNode, TweenOption& option);
     void CreateColorAnimation(const RefPtr<PropertyAnimatable>& animatable, TweenOption& option);
     void CreatePropertyAnimationFloat(const RefPtr<PropertyAnimatable>& animatable, TweenOption& option);
     void ApplyOperation(RefPtr<Animator>& controller, AnimationOperation& operation);
@@ -99,6 +101,9 @@ private:
         transformFloatAnimationAddMap_[];
     Shadow shadow_;
     PositionParam positionParam_;
+    bool skipPostFlush_ = false;
+    WeakPtr<TransformComponent> transform_;
+    WeakPtr<DisplayComponent> display_;
 };
 
 } // namespace OHOS::Ace

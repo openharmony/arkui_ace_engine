@@ -177,6 +177,16 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     } else {
         LOGE("UnKnown frontend type");
     }
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null, set configuration failed.");
+        return;
+    }
+    auto resConfig = container->GetResourceConfiguration();
+    resConfig.SetOrientation(SystemProperties::GetDevcieOrientation());
+    resConfig.SetDensity(SystemProperties::GetResolution());
+    resConfig.SetDeviceType(SystemProperties::GetDeviceType());
+    container->SetResourceConfiguration(resConfig);
 }
 
 void AceAbility::SetConfigChanges(const std::string& configChanges)
@@ -355,6 +365,11 @@ void AceAbility::SurfaceChanged(
         LOGE("container is null, SurfaceChanged failed.");
         return;
     }
+    auto resConfig = container->GetResourceConfiguration();
+    resConfig.SetOrientation(SystemProperties::GetDevcieOrientation());
+    resConfig.SetDensity(SystemProperties::GetResolution());
+    resConfig.SetDeviceType(SystemProperties::GetDeviceType());
+    container->SetResourceConfiguration(resConfig);
 
     auto viewPtr = container->GetAceView();
     if (viewPtr == nullptr) {

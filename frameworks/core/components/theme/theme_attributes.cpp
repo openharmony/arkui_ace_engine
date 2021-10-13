@@ -54,6 +54,7 @@ const char THEME_ATTR_TEXT_SIZE_BUTTON1[] = "attribute_text_size_button1";
 const char THEME_ATTR_COLOR_PROGRESS[] = "attribute_color_progress";
 const char THEME_ATTR_COLOR_COMPONENT_NORMAL[] = "attribute_color_component_normal";
 const char THEME_ATTR_COLOR_EMPHASIZE[] = "attribute_color_emphasize";
+const char THEME_ATTR_COLOR_WARNING[] = "attribute_color_warning";
 const char THEME_ATTR_COLOR_DIALOG_BG[] = "attribute_color_dialog_bg";
 const char THEME_ATTR_COLOR_FOREGROUND[] = "attribute_color_foreground";
 const char THEME_ATTR_COLOR_TIPS_BG[] = "attribute_color_help_tip_bg";

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_SWIPER_COMPOSED_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_SWIPER_COMPOSED_ELEMENT_H
 
+#include "core/components/swiper/swiper_element.h"
 #include "core/components/swiper/render_swiper.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
@@ -39,6 +40,11 @@ public:
     std::string GetLoop() const;
     std::string GetDuration() const;
     std::string GetVertical() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return SwiperElement::TypeId();
+    }
 
 private:
     RefPtr<RenderSwiper> GetRenderSwiper() const;

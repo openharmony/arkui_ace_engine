@@ -68,6 +68,7 @@ public:
     // matrix3d in the column-major order.
     void Matrix3d(float a1, float b1, float c1, float d1, float a2, float b2, float c2, float d2, float a3, float b3,
         float c3, float d3, float a4, float b4, float c4, float d4, const AnimationOption& = AnimationOption());
+    void Matrix3d(Matrix4 m, const AnimationOption& = AnimationOption());
 
     const DimensionOffset& GetOriginDimension() const
     {

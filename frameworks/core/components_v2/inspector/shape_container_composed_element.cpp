@@ -17,34 +17,64 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/shape/render_shape_container.h"
-#include "core/components/shape/shape_container_element.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
 namespace {
 
-const std::unordered_map<std::string, std::function<std::string(const ShapeContainerComposedElement&)>>
-    CREATE_JSON_MAP {
-        { "fill", [](const ShapeContainerComposedElement& inspector) { return inspector.GetFill(); } },
-        { "fillOpacity", [](const ShapeContainerComposedElement& inspector) { return inspector.GetFillOpacity(); } },
-        { "stroke", [](const ShapeContainerComposedElement& inspector) { return inspector.GetStroke(); } },
-        { "strokeDashOffset",
-            [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeDashOffset(); } },
-        { "strokeDashArray",
-            [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeDashArray(); } },
-        { "strokeLineCap",
-            [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeLineCap(); } },
-        { "strokeLineJoin",
-            [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeLineJoin(); } },
-        { "strokeMiterLimit",
-            [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeMiterLimit(); } },
-        { "strokeOpacity",
-            [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeOpacity(); } },
-        { "strokeWidth", [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeWidth(); } },
-        { "antiAlias", [](const ShapeContainerComposedElement& inspector) { return inspector.GetAntiAlias(); } },
-        { "viewPort", [](const ShapeContainerComposedElement& inspector) { return inspector.GetViewBox(); } },
+using StrFuncType = std::function<std::string(const ShapeContainerComposedElement&)>;
+const std::unordered_map<std::string, StrFuncType> CREATE_JSON_MAP {
+    { "fill", [](const ShapeContainerComposedElement& inspector) { return inspector.GetFill(); } },
+    { "fillOpacity", [](const ShapeContainerComposedElement& inspector) { return inspector.GetFillOpacity(); } },
+    { "stroke", [](const ShapeContainerComposedElement& inspector) { return inspector.GetStroke(); } },
+    { "strokeDashOffset",
+        [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeDashOffset(); } },
+    { "strokeLineCap", [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeLineCap(); } },
+    { "strokeLineJoin", [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeLineJoin(); } },
+    { "strokeMiterLimit",
+        [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeMiterLimit(); } },
+    { "strokeOpacity", [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeOpacity(); } },
+    { "strokeWidth", [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeWidth(); } },
+    { "antiAlias", [](const ShapeContainerComposedElement& inspector) { return inspector.GetAntiAlias(); } },
+    { "viewPort", [](const ShapeContainerComposedElement& inspector) { return inspector.GetViewBox(); } },
+};
+
+using JsonFuncType = std::function<std::unique_ptr<JsonValue>(const ShapeContainerComposedElement&)>;
+const std::unordered_map<std::string, JsonFuncType> CREATE_JSON_JSON_VALUE_MAP {
+    { "strokeDashArray",
+        [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeDashArray(); } },
+};
+
+}
+
+std::string ShapeContainerComposedElement::LineCapStyleToString(LineCapStyle lineCapStyle)
+{
+    static const std::unordered_map<LineCapStyle, std::string> STYLE_MAP {
+        { LineCapStyle::BUTT, "BUTT" },
+        { LineCapStyle::ROUND, "ROUND" },
+        { LineCapStyle::SQUARE, "SQUARE" },
     };
 
+    auto pos = STYLE_MAP.find(lineCapStyle);
+    if (pos != STYLE_MAP.end()) {
+        return pos->second;
+    }
+    return "";
+}
+
+std::string ShapeContainerComposedElement::LineJoinStyleToString(LineJoinStyle lineJoinStyle)
+{
+    static const std::unordered_map<LineJoinStyle, std::string> STYLE_MAP {
+        { LineJoinStyle::MITER, "MITER" },
+        { LineJoinStyle::BEVEL, "BEVEL" },
+        { LineJoinStyle::ROUND, "ROUND" },
+    };
+
+    auto pos = STYLE_MAP.find(lineJoinStyle);
+    if (pos != STYLE_MAP.end()) {
+        return pos->second;
+    }
+    return "";
 }
 
 void ShapeContainerComposedElement::Dump()
@@ -60,6 +90,9 @@ std::unique_ptr<JsonValue> ShapeContainerComposedElement::ToJsonObject() const
     auto resultJson = InspectorComposedElement::ToJsonObject();
     for (const auto& value : CREATE_JSON_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this).c_str());
+    }
+    for (const auto& value : CREATE_JSON_JSON_VALUE_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
     }
     return resultJson;
 }
@@ -77,7 +110,7 @@ std::string ShapeContainerComposedElement::GetFill() const
 {
     auto render = GetContentRender<RenderShapeContainer>(ShapeContainerElement::TypeId());
     if (render) {
-        return std::to_string(render->GetFillState().GetColor().GetValue());
+        return render->GetFillState().GetColor().ColorToString();
     }
     return "";
 }
@@ -95,7 +128,7 @@ std::string ShapeContainerComposedElement::GetStroke() const
 {
     auto render = GetContentRender<RenderShapeContainer>(ShapeContainerElement::TypeId());
     if (render) {
-        return std::to_string(render->GetStrokeState().GetColor().GetValue());
+        return render->GetStrokeState().GetColor().ColorToString();
     }
     return "";
 }
@@ -109,24 +142,27 @@ std::string ShapeContainerComposedElement::GetStrokeDashOffset() const
     return "";
 }
 
-std::string ShapeContainerComposedElement::GetStrokeDashArray() const
+std::unique_ptr<JsonValue> ShapeContainerComposedElement::GetStrokeDashArray() const
 {
     auto render = GetContentRender<RenderShapeContainer>(ShapeContainerElement::TypeId());
+    auto jsonDashArray = JsonUtil::CreateArray(true);
     if (render) {
-        std::string strDashArray;
-        for (const auto& dash : render->GetStrokeState().GetStrokeDashArray()) {
-            strDashArray.append(dash.ToString() + ",");
+        std::vector<Dimension> array = render->GetStrokeState().GetStrokeDashArray();
+        for (size_t i = 0; i < array.size(); i++) {
+            auto index = std::to_string(i);
+            auto value = array[i].ToString();
+            jsonDashArray->Put(index.c_str(), value.c_str());
         }
-        return strDashArray;
     }
-    return "";
+    return jsonDashArray;
 }
 
 std::string ShapeContainerComposedElement::GetStrokeLineCap() const
 {
     auto render = GetContentRender<RenderShapeContainer>(ShapeContainerElement::TypeId());
     if (render) {
-        return std::to_string(static_cast<int32_t>(render->GetStrokeState().GetLineCap()));
+        auto style = render->GetStrokeState().GetLineCap();
+        return LineCapStyleToString(style);
     }
     return "";
 }
@@ -135,7 +171,8 @@ std::string ShapeContainerComposedElement::GetStrokeLineJoin() const
 {
     auto render = GetContentRender<RenderShapeContainer>(ShapeContainerElement::TypeId());
     if (render) {
-        return std::to_string(static_cast<int32_t>(render->GetStrokeState().GetLineJoin()));
+        auto style = render->GetStrokeState().GetLineJoin();
+        return LineJoinStyleToString(style);
     }
     return "";
 }

@@ -79,7 +79,6 @@ const nestedObsObjProps = tsuite("Nested Observed Object and Properties", () => 
 
     // 2. child view v2p2a1 of above View has a property 'a'
     let v2p2a1 = new SubscribingView("v2p2a1");
-    // = p1b1.createObjectLink("p2a1", "a", v2p2a1);
     let p2a1: ObservedPropertyObjectAbstract<ClassA> =
       new SynchedPropertyNesedObject<ClassA>(p1b1.get().a, v2p2a1, "a");
     let v2p2a1Spy = spyOn(v2p2a1, "propertyHasChanged");

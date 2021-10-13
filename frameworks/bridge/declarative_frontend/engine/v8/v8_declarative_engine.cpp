@@ -35,7 +35,9 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/common/utils/v8/v8_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
+#include "frameworks/bridge/declarative_frontend/engine/v8/v8_bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_declarative_group_js_bridge.h"
+#include "frameworks/bridge/declarative_frontend/engine/v8/v8_function_destroy_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"
@@ -499,13 +501,6 @@ void V8DeclarativeEngineInstance::InitJSContext()
     InitAceModules(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end, isolate_.Get());
     InitAceModules(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end, isolate_.Get());
 
-    const char* str = "var global = globalThis;\n";
-    bool evalAceModule = CallEvalBuf(isolate_.Get(), str);
-    if (!evalAceModule) {
-        LOGW("JS Engine created JS context but failed to init Ace modules!");
-        EventReport::SendJsException(JsExcepType::JS_ENGINE_INIT_ERR);
-    }
-
     auto groupJsBridge = DynamicCast<V8DeclarativeGroupJsBridge>(frontendDelegate_->GetGroupJsBridge());
     if (groupJsBridge == nullptr || groupJsBridge->InitializeGroupJsBridge(localContext) == JS_CALL_FAIL) {
         LOGE("JS Engine Initialize GroupJsBridge failed!");
@@ -792,15 +787,18 @@ V8DeclarativeEngineInstance::~V8DeclarativeEngineInstance()
     delete create_params_.array_buffer_allocator;
 
     // Destroy group bridge
-    auto groupJsBridge = frontendDelegate_->GetGroupJsBridge();
+    auto groupJsBridge = DynamicCast<V8DeclarativeGroupJsBridge>(frontendDelegate_->GetGroupJsBridge());
     if (groupJsBridge != nullptr) {
-        groupJsBridge->Destroy();
+        groupJsBridge->Destroy(GetV8Isolate());
     }
-    {
-        // Force GC before dispose v8 isolate
-        v8::Isolate::Scope isolateScope(isolate_.Get());
-        isolate_->LowMemoryNotification();
+    // Force GC before dispose v8 isolate
+    auto* isolate = isolate_.Get();
+    if (isolate != nullptr) {
+        v8::Isolate::Scope isolateScope(isolate);
+        isolate->LowMemoryNotification();
     }
+    // delete function template
+    V8FunctionDestroyCallbackHelper::DeleteFunctionTemplate(isolate_.Get());
     // Just invalidate it, isolate_ will dispose when js-thread finished.
     isolate_.Invalidate();
 }
@@ -912,9 +910,15 @@ void V8DeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
 
 void V8DeclarativeEngine::RegisterInitWorkerFunc()
 {
-    auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
-    auto&& initWorkerFunc = [weakInstance](NativeEngine* nativeEngine) {
+    auto weakInstance = WeakPtr<V8DeclarativeEngineInstance>(engineInstance_);
+    WeakPtr<GroupJsBridge> weakJsBridge = engineInstance_->GetDelegate()->GetGroupJsBridge();
+    auto&& initWorkerFunc = [weakInstance, weakJsBridge, delegate = engineInstance_->GetDelegateForV8Data(),
+        dispatch = engineInstance_->GetJsMessageDispatcherForV8Data()](NativeEngine* nativeEngine) {
         LOGI("WorkerCore RegisterInitWorkerFunc called");
+        if (weakInstance.Invalid()) {
+            LOGE("instance is nullptr");
+            return;
+        }
         if (nativeEngine == nullptr) {
             LOGE("nativeEngine is nullptr");
             return;
@@ -922,11 +926,6 @@ void V8DeclarativeEngine::RegisterInitWorkerFunc()
         auto v8NativeEngine = static_cast<V8NativeEngine*>(nativeEngine);
         if (v8NativeEngine == nullptr) {
             LOGE("v8NativeEngine is nullptr");
-            return;
-        }
-        auto instance = weakInstance.Upgrade();
-        if (instance == nullptr) {
-            LOGE("instance is nullptr");
             return;
         }
         auto isolate = v8NativeEngine->GetIsolate();
@@ -938,13 +937,13 @@ void V8DeclarativeEngine::RegisterInitWorkerFunc()
         v8::HandleScope handleScope(isolate);
         v8::Local<v8::Context> localContext = v8NativeEngine->GetContext();
         isolate->SetStackLimit(V8_MAX_STACK_SIZE);
-        instance->SetDispatcher(isolate);
-        instance->SetDelegate(isolate);
-        instance->InitJsConsoleObject(localContext, isolate);
-        instance->InitAceModules(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end, isolate);
-        ModuleManager::GetInstance()->InitTimerModule(localContext);
+        isolate->SetData(V8DeclarativeEngineInstance::DISPATCHER, dispatch);
+        isolate->SetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE, delegate);
+        V8DeclarativeEngineInstance::InitJsConsoleObject(localContext, isolate);
+        V8DeclarativeEngineInstance::InitAceModules(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end, isolate);
+        ModuleManager::InitTimerModule(localContext);
 
-        auto jsBridge = DynamicCast<V8DeclarativeGroupJsBridge>(instance->GetDelegate()->GetGroupJsBridge());
+        auto jsBridge = DynamicCast<V8DeclarativeGroupJsBridge>(weakJsBridge.Upgrade());
         if (jsBridge != nullptr) {
             jsBridge->AddIsolateNativeWorkRelation(isolate, nativeEngine);
             auto source = v8::String::NewFromUtf8(isolate, jsBridge->GetJsCode().c_str()).ToLocalChecked();
@@ -962,23 +961,23 @@ void V8DeclarativeEngine::RegisterInitWorkerFunc()
 
 void V8DeclarativeEngine::RegisterAssetFunc()
 {
-    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content) {
+    auto weakAsset = WeakPtr<AssetManager>(engineInstance_->GetDelegate()->GetAssetManager());
+    auto&& assetFunc = [weakAsset](const std::string& uri, std::vector<uint8_t>& content) {
         LOGI("WorkerCore RegisterAssetFunc called");
-        auto delegate = weakDelegate.Upgrade();
-        if (delegate == nullptr) {
+        auto asset = weakAsset.Upgrade();
+        if (!asset) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->GetResourceData(uri, content);
+        FrontendDelegate::GetResourceData(uri, asset, content);
     };
     OHOS::CCRuntime::Worker::WorkerCore::RegisterAssetFunc(assetFunc);
 }
 
 void V8DeclarativeEngine::RegisterOffWorkerFunc()
 {
-    auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
-    auto&& offWorkerFunc = [weakInstance](NativeEngine* nativeEngine) {
+    WeakPtr<GroupJsBridge> weakJsBridge = engineInstance_->GetDelegate()->GetGroupJsBridge();
+    auto&& offWorkerFunc = [weakJsBridge](NativeEngine* nativeEngine) {
         LOGI("WorkerCore RegisterOffWorkerFunc called");
         if (nativeEngine == nullptr) {
             LOGE("nativeEngine is nullptr");
@@ -989,9 +988,9 @@ void V8DeclarativeEngine::RegisterOffWorkerFunc()
             LOGE("v8NativeEngine is nullptr");
             return;
         }
-        auto instance = weakInstance.Upgrade();
-        if (instance == nullptr) {
-            LOGE("instance is nullptr");
+        auto jsBridge = DynamicCast<V8DeclarativeGroupJsBridge>(weakJsBridge.Upgrade());
+        if (jsBridge == nullptr) {
+            LOGE("jsBridge is nullptr");
             return;
         }
         auto isolate = v8NativeEngine->GetIsolate();
@@ -1000,10 +999,7 @@ void V8DeclarativeEngine::RegisterOffWorkerFunc()
             return;
         }
 
-        auto jsBridge = DynamicCast<V8DeclarativeGroupJsBridge>(instance->GetDelegate()->GetGroupJsBridge());
-        if (jsBridge != nullptr) {
-            jsBridge->RemoveIsolateNativeWorkRelation(isolate);
-        }
+        jsBridge->Destroy(isolate, true);
     };
     OHOS::CCRuntime::Worker::WorkerCore::RegisterOffWorkerFunc(offWorkerFunc);
 }
@@ -1263,10 +1259,179 @@ void V8DeclarativeEngine::OnWindowDisplayModeChanged(bool isShownInMultiWindow, 
 
     v8::Local<v8::Boolean> v8Bool = v8::Boolean::New(isolate, isShownInMultiWindow);
     v8::Local<v8::String> v8Data = v8::String::NewFromUtf8(isolate, data.c_str()).ToLocalChecked();
-    v8::Local<v8::Value> v8Config = v8::JSON::Parse(context, v8Data).ToLocalChecked();
+    auto jsonValue = v8::JSON::Parse(context, v8Data);
+    if (jsonValue.IsEmpty()) {
+        LOGE("jsonValue is empty");
+        return;
+    }
+    v8::Local<v8::Value> v8Config = jsonValue.ToLocalChecked();
     v8::Local<v8::Value> argv[] = { v8Bool, v8Config };
     int32_t argc = 2;
     (void)CallAppFunc(isolate, context, "onWindowDisplayModeChanged", argc, argv);
+    while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
+        continue;
+    }
+}
+
+void V8DeclarativeEngine::OnNewWant(const std::string& data)
+{
+    LOGD("V8DeclarativeEngine::OnNewWant");
+    v8::Isolate* isolate = engineInstance_->GetV8Isolate();
+    ACE_DCHECK(isolate);
+    v8::HandleScope handleScope(isolate);
+    v8::Isolate::Scope isolateScope(isolate);
+    auto context = engineInstance_->GetV8Context();
+    if (context.IsEmpty()) {
+        LOGE("AceAbility Sava date, context Is Empty");
+        return;
+    }
+    v8::Context::Scope contextScope(context);
+    v8::TryCatch tryCatch(isolate);
+    v8::Local<v8::String> v8Data = v8::String::NewFromUtf8(isolate, data.c_str()).ToLocalChecked();
+    auto jsonValue = v8::JSON::Parse(context, v8Data);
+    if (jsonValue.IsEmpty()) {
+        v8::Local<v8::Object> tmpData = v8::Object::New(isolate);
+        v8::Local<v8::Value> argv[] = { tmpData };
+        int len = 1;
+        if (!CallAppFunc(isolate, context, "onNewWant", len, argv)) {
+            return;
+        }
+    } else {
+        v8::Local<v8::Value> dataValue = jsonValue.ToLocalChecked();
+        v8::Local<v8::Value> argv[] = { dataValue };
+        int32_t len = 1;
+        if (!CallAppFunc(isolate, context, "onNewWant", len, argv)) {
+            return;
+        }
+    }
+
+    while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
+        continue;
+    }
+}
+
+void V8DeclarativeEngine::OnSaveAbilityState(std::string& saveData)
+{
+    v8::Isolate* isolate = engineInstance_->GetV8Isolate();
+    ACE_DCHECK(isolate);
+    v8::HandleScope handleScope(isolate);
+    v8::Isolate::Scope isolateScope(isolate);
+    auto context = engineInstance_->GetV8Context();
+    if (context.IsEmpty()) {
+        LOGE("AceAbility Sava date, context Is Empty");
+        return;
+    }
+
+    v8::Local<v8::String> v8Data = v8::String::NewFromUtf8(isolate, saveData.c_str()).ToLocalChecked();
+    auto jsonValue = v8::JSON::Parse(context, v8Data);
+    if (jsonValue.IsEmpty()) {
+        LOGE("jsonValue is empty");
+        return;
+    }
+    v8::Local<v8::Value> dataValue = jsonValue.ToLocalChecked();
+    v8::Local<v8::Value> argv[] = { dataValue };
+    int32_t argc = 1;
+    if (!CallAppFunc(isolate, context, "onSaveAbilityState", argc, argv)) {
+        return;
+    }
+
+    while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
+        continue;
+    }
+}
+
+void V8DeclarativeEngine::OnRestoreAbilityState(const std::string& data)
+{
+    v8::Isolate* isolate = engineInstance_->GetV8Isolate();
+    ACE_DCHECK(isolate);
+    v8::HandleScope handleScope(isolate);
+    v8::Isolate::Scope isolateScope(isolate);
+    auto context = engineInstance_->GetV8Context();
+    if (context.IsEmpty()) {
+        LOGE("AceAbility Sava date, context Is Empty");
+        return;
+    }
+    v8::Context::Scope contextScope(context);
+
+    v8::TryCatch tryCatch(isolate);
+
+    v8::Local<v8::Object> tmpData = v8::Object::New(isolate);
+    v8::Local<v8::Value> argv[] = { tmpData };
+    int len = 1;
+
+    if (!CallAppFunc(isolate, context, "onRestoreAbilityState", len, argv)) {
+        return;
+    }
+    while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
+        continue;
+    }
+}
+
+void V8DeclarativeEngine::OnActive()
+{
+    v8::Isolate* isolate = engineInstance_->GetV8Isolate();
+    ACE_DCHECK(isolate);
+    v8::HandleScope handleScope(isolate);
+    v8::Isolate::Scope isolateScope(isolate);
+    auto context = engineInstance_->GetV8Context();
+    if (context.IsEmpty()) {
+        LOGE("AceAbility OnActive, context Is Empty");
+        return;
+    }
+    v8::Context::Scope contextScope(context);
+
+    v8::TryCatch tryCatch(isolate);
+
+    CallAppFunc(isolate, context, "onActive");
+    while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
+        continue;
+    }
+}
+
+void V8DeclarativeEngine::OnInactive()
+{
+    v8::Isolate* isolate = engineInstance_->GetV8Isolate();
+    ACE_DCHECK(isolate);
+    v8::HandleScope handleScope(isolate);
+    v8::Isolate::Scope isolateScope(isolate);
+    auto context = engineInstance_->GetV8Context();
+    if (context.IsEmpty()) {
+        LOGE("AceAbility OnInactive, context Is Empty");
+        return;
+    }
+    v8::Context::Scope contextScope(context);
+
+    v8::TryCatch tryCatch(isolate);
+
+    CallAppFunc(isolate, context, "onInactive");
+    while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
+        continue;
+    }
+}
+
+void V8DeclarativeEngine::OnMemoryLevel(const int32_t level)
+{
+    LOGD("AceAbility Enter OnMemoryLevel");
+    v8::Isolate* isolate = engineInstance_->GetV8Isolate();
+    ACE_DCHECK(isolate);
+    v8::HandleScope handleScope(isolate);
+    v8::Isolate::Scope isolateScope(isolate);
+    auto context = engineInstance_->GetV8Context();
+    if (context.IsEmpty()) {
+        LOGE("AceAbility OnMemoryLevel, context Is Empty");
+        return;
+    }
+    v8::Context::Scope contextScope(context);
+
+    v8::TryCatch tryCatch(isolate);
+
+    v8::Local<v8::Integer> v8Integer = v8::Uint32::NewFromUnsigned(isolate, level);
+    v8::Local<v8::Value> argv[] = { v8Integer };
+    int32_t len = 1;
+
+    if (!CallAppFunc(isolate, context, "onMemoryLevel", len, argv)) {
+        return;
+    }
     while (v8::platform::PumpMessageLoop(GetPlatform().get(), isolate)) {
         continue;
     }
@@ -1284,7 +1449,12 @@ void V8DeclarativeEngine::OnConfigurationUpdated(const std::string& data)
     }
 
     v8::Local<v8::String> v8Data = v8::String::NewFromUtf8(isolate, data.c_str()).ToLocalChecked();
-    v8::Local<v8::Value> ResourceConfiguration = v8::JSON::Parse(context, v8Data).ToLocalChecked();
+    auto jsonValue = v8::JSON::Parse(context, v8Data);
+    if (jsonValue.IsEmpty()) {
+        LOGE("jsonValue is empty");
+        return;
+    }
+    v8::Local<v8::Value> ResourceConfiguration = jsonValue.ToLocalChecked();
     v8::Local<v8::Value> argv[] = { ResourceConfiguration };
     int32_t argc = 1;
     (void)CallAppFunc(isolate, context, "onConfigurationUpdated", argc, argv);
@@ -1359,7 +1529,12 @@ bool V8DeclarativeEngine::OnRestoreData(const std::string& data)
     v8::TryCatch tryCatch(isolate);
 
     v8::Local<v8::String> v8Data = v8::String::NewFromUtf8(isolate, data.c_str()).ToLocalChecked();
-    v8::Local<v8::Value> dataValue = v8::JSON::Parse(context, v8Data).ToLocalChecked();
+    auto jsonValue = v8::JSON::Parse(context, v8Data);
+    if (jsonValue.IsEmpty()) {
+        LOGE("jsonValue is empty");
+        return false;
+    }
+    v8::Local<v8::Value> dataValue = jsonValue.ToLocalChecked();
     v8::Local<v8::Value> argv[] = { dataValue };
     int32_t len = 1;
 

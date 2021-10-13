@@ -75,6 +75,14 @@ public:
     {
         return mouseState_ == MouseState::HOVER;
     }
+    Color GetActiveColor() const
+    {
+        return activeColorInspector_;
+    }
+    Color GetPointColor()
+    {
+        return pointColorInspector_;
+    }
     virtual void RequestFocusBorder(const Offset& focusOffset, const Size& focusSize, double borderRadius);
 
 protected:
@@ -113,6 +121,8 @@ protected:
     Offset paintPosition_;
     uint32_t pointColor_ = 0;
     uint32_t activeColor_ = 0;
+    Color pointColorInspector_;
+    Color activeColorInspector_;
     uint32_t inactiveColor_ = 0;
     uint32_t focusColor_ = 0;
     uint32_t inactivePointColor_ = 0;

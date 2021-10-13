@@ -670,8 +670,9 @@ void AceContainer::AttachView(
 
     ThemeConstants::InitDeviceType();
     // Load custom style at UI thread before frontend attach, to make sure style can be loaded before building dom tree.
-    auto themeManager = pipelineContext_->GetThemeManager();
+    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
     if (themeManager) {
+        pipelineContext_->SetThemeManager(themeManager);
         taskExecutor_->PostTask(
             [themeManager, assetManager = assetManager_, colorScheme = colorScheme_] {
                 themeManager->SetColorScheme(colorScheme);

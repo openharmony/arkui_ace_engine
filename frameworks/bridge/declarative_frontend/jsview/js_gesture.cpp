@@ -168,6 +168,8 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
     PanDirection panDirection;
     auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
     if (args.Length() <= 0 || !args[0]->IsObject()) {
+        auto gesture = AceType::MakeRefPtr<OHOS::Ace::PanGesture>(fingersNum, panDirection, distanceNum);
+        gestureComponent->PushGesture(gesture);
         return;
     }
 

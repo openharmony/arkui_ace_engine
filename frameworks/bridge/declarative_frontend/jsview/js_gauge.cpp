@@ -14,7 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
-
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/chart/chart_component.h"
 #include "core/components/progress/progress_component.h"
@@ -33,6 +33,12 @@ void JSGauge::JSBind(BindingTarget globalObj)
     JSClass<JSGauge>::StaticMethod("strokeWidth", &JSGauge::SetStrokeWidth);
     JSClass<JSGauge>::StaticMethod("labelTextConfig", &JSGauge::SetLableTextConfig);
     JSClass<JSGauge>::StaticMethod("labelColorConfig", &JSGauge::SetLableColorConfig);
+    JSClass<JSGauge>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSGauge>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSGauge>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSGauge>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSGauge>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSGauge>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
 
     JSClass<JSGauge>::Inherit<JSViewAbstract>();
     JSClass<JSGauge>::Bind(globalObj);

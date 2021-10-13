@@ -48,6 +48,8 @@ public:
     RefPtr<Animator> GetController() const;
     void SetTouchable(bool enable);
     void SetWrapHidden(bool hidden);
+    void AddPreFlush();
+    void SkipPostFlush();
     void SwitchTransitionOption(TransitionOptionType direction, bool needApplyOption = false);
     void SetTransition(const TweenOption& inOption, const TweenOption& outOption);
     void SetSharedTransition(const TweenOption& inOption, const TweenOption& outOption);

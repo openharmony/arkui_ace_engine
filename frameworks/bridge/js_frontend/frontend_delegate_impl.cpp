@@ -598,6 +598,30 @@ void FrontendDelegateImpl::BackImplement(const std::string& uri)
     }
 }
 
+void FrontendDelegateImpl::PostponePageTransition()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    taskExecutor_->PostTask(
+        [context = pipelineContextHolder_.Get()]() {
+            if (context) {
+                context->PostponePageTransition();
+            }
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void FrontendDelegateImpl::LaunchPageTransition()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    taskExecutor_->PostTask(
+        [context = pipelineContextHolder_.Get()]() {
+          if (context) {
+              context->LaunchPageTransition();
+          }
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void FrontendDelegateImpl::Clear()
 {
     ClearInvisiblePages();
@@ -1015,6 +1039,7 @@ void FrontendDelegateImpl::LoadPage(int32_t pageId, const std::string& url, bool
     }
     if (isStagingPageExist_) {
         LOGE("FrontendDelegateImpl, load page failed, waiting for current page loading finish.");
+        RecyclePageId(pageId);
         return;
     }
     isStagingPageExist_ = true;
@@ -1685,16 +1710,6 @@ void FrontendDelegateImpl::AttachPipelineContext(const RefPtr<PipelineContext>& 
     pipelineContextHolder_.Attach(context);
     jsAccessibilityManager_->SetPipelineContext(context);
     jsAccessibilityManager_->InitializeCallback();
-}
-
-void FrontendDelegateImpl::SetAssetManager(const RefPtr<AssetManager>& assetManager)
-{
-    assetManager_ = assetManager;
-}
-
-RefPtr<AssetManager> FrontendDelegateImpl::GetAssetManager() const
-{
-    return assetManager_;
 }
 
 RefPtr<PipelineContext> FrontendDelegateImpl::GetPipelineContext()

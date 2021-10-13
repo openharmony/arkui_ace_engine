@@ -74,13 +74,21 @@ public:
 
     void OnCompleteContinuation(int32_t code) override;
 
+    void OnMemoryLevel(const int32_t level) override {}
+
     void OnSaveData(std::string& data) override;
+
+    void OnSaveAbilityState (std::string& data) override {}
+
+    void OnRestoreAbilityState (const std::string& data) override {}
 
     bool OnRestoreData(const std::string& data) override;
 
     void OnRemoteTerminated() override {}
 
     void OnNewRequest(const std::string& data) override;
+
+    void OnNewWant(const std::string& data) override {}
 
     void CallRouterBack() override;
 

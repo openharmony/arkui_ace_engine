@@ -47,27 +47,24 @@ void JSProgress::Create(const JSCallbackInfo& info)
 
     auto progressType = ProgressType::LINEAR;
     auto jsStyle = paramObject->GetProperty("style");
-    if (jsStyle->IsNumber()) {
-        progressType = static_cast<ProgressType>(jsStyle->ToNumber<int32_t>());
-    } else {
-        LOGE("create progress fail becaude the style is not value");
+
+    auto progressStyle = static_cast<ProgressStyle>(jsStyle->ToNumber<int32_t>());
+    if (progressStyle == ProgressStyle::Eclipse) {
+       progressType = ProgressType::MOON;
+    } else if(progressStyle == ProgressStyle::Circular){
+       progressType = ProgressType::SCALE;
     }
 
-    RefPtr<ProgressComponent> progressComponent =
-        AceType::MakeRefPtr<OHOS::Ace::ProgressComponent>(0.0, value, 0.0, total, progressType);
-    if (!progressComponent) {
-        LOGE("Progress Component is null");
+    auto progressComponent = AceType::MakeRefPtr<OHOS::Ace::ProgressComponent>(0.0, value, 0.0, total, progressType);
+    auto theme = GetTheme<ProgressTheme>();
+
+    if (!theme) {
+        LOGE("progress Theme is null");
         return;
     }
 
+    progressComponent->InitStyle(theme);
     ViewStackProcessor::GetInstance()->Push(progressComponent);
-
-    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-    RefPtr<TrackComponent> track = progressComponent->GetTrack();
-    track->SetSelectColor(theme->GetTrackSelectedColor());
-    track->SetCachedColor(theme->GetTrackCachedColor());
-    track->SetBackgroundColor(theme->GetTrackBgColor());
-    track->SetTrackThickness(theme->GetTrackThickness());
 }
 
 void JSProgress::JSBind(BindingTarget globalObj)
@@ -78,7 +75,8 @@ void JSProgress::JSBind(BindingTarget globalObj)
     JSClass<JSProgress>::StaticMethod("create", &JSProgress::Create, opt);
     JSClass<JSProgress>::StaticMethod("value", &JSProgress::SetValue, opt);
     JSClass<JSProgress>::StaticMethod("color", &JSProgress::SetColor, opt);
-    JSClass<JSProgress>::StaticMethod("cricularStyle", &JSProgress::SetCricularStyle, opt);
+    JSClass<JSProgress>::StaticMethod("circularStyle", &JSProgress::SetCircularStyle, opt);
+    JSClass<JSProgress>::StaticMethod("cricularStyle", &JSProgress::SetCircularStyle, opt);
     JSClass<JSProgress>::Inherit<JSViewAbstract>();
     JSClass<JSProgress>::Bind(globalObj);
 }
@@ -90,15 +88,19 @@ void JSProgress::SetValue(double value)
     progress->SetValue(value);
 }
 
-void JSProgress::SetColor(std::string& color)
+void JSProgress::SetColor(const JSCallbackInfo& info)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto progress = AceType::DynamicCast<ProgressComponent>(component);
     RefPtr<TrackComponent> track = progress->GetTrack();
-    track->SetSelectColor(Color::FromString(color));
+
+    Color colorVal;
+    if (ParseJsColor(info[0], colorVal))  {
+        track->SetSelectColor(colorVal);
+    }
 }
 
-void JSProgress::SetCricularStyle(const JSCallbackInfo& info)
+void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
 {
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();

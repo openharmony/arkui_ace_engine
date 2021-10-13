@@ -14,14 +14,35 @@
 import("//build/ohos.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
 
-ohos_source_set("card_frontend") {
-  configs = [ "$ace_root:ace_config" ]
+template("card_frontend") {
+  forward_variables_from(invoker, "*")
 
-  sources = [
-    "card_frontend.cpp",
-    "card_frontend_delegate.cpp",
-    "js_card_parser.cpp",
-  ]
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+    configs = [ "$ace_root:ace_config" ]
 
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    sources = [
+      "card_frontend.cpp",
+      "card_frontend_delegate.cpp",
+      "js_card_parser.cpp",
+    ]
+
+    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  }
+}
+
+foreach(item, ace_platforms) {
+  card_frontend("card_frontend_" + item.name) {
+    defines = []
+    config = {
+    }
+
+    if (defined(item.config)) {
+      config = item.config
+    }
+
+    if (defined(config.defines)) {
+      defines = config.defines
+    }
+  }
 }

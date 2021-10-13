@@ -48,11 +48,17 @@ using TimerCallback = std::function<void(const std::string& callbackId, const st
 using RequestAnimationCallback = std::function<void(const std::string& callbackId, uint64_t timeStamp)>;
 using JsCallback = std::function<void(const std::string& callbackId, const std::string& args)>;
 using OnWindowDisplayModeChangedCallBack = std::function<void(bool isShownInMultiWindow, const std::string& data)>;
+using OnNewWantCallBack = std::function<void(const std::string& data)>;
+using OnSaveAbilityStateCallBack = std::function<void(std::string& data)>;
+using OnRestoreAbilityStateCallBack = std::function<void(const std::string& data)>;
 using OnConfigurationUpdatedCallBack = std::function<void(const std::string& data)>;
 using OnStartContinuationCallBack = std::function<bool()>;
 using OnSaveDataCallBack = std::function<void(std::string& savedData)>;
 using OnRemoteTerminatedCallBack = std::function<void()>;
+using OnActiveCallBack = std::function<void()>;
+using OnInactiveCallBack = std::function<void()>;
 using OnCompleteContinuationCallBack = std::function<void(const int32_t code)>;
+using OnMemoryLevelCallBack = std::function<void(const int32_t level)>;
 using OnRestoreDataCallBack = std::function<bool(const std::string& data)>;
 
 struct PageInfo {
@@ -119,10 +125,16 @@ struct FrontendDelegateImplBuilder {
     RequestAnimationCallback requestAnimationCallback;
     JsCallback jsCallback;
     OnWindowDisplayModeChangedCallBack onWindowDisplayModeChangedCallBack;
+    OnNewWantCallBack onNewWantCallBack;
+    OnSaveAbilityStateCallBack onSaveAbilityStateCallBack;
+    OnRestoreAbilityStateCallBack onRestoreAbilityStateCallBack;
     OnSaveDataCallBack onSaveDataCallBack;
     OnStartContinuationCallBack onStartContinuationCallBack;
     OnRemoteTerminatedCallBack onRemoteTerminatedCallBack;
+    OnActiveCallBack onActiveCallBack;
+    OnInactiveCallBack onInactiveCallBack;
     OnCompleteContinuationCallBack onCompleteContinuationCallBack;
+    OnMemoryLevelCallBack onMemoryLevelCallBack;
     OnRestoreDataCallBack onRestoreDataCallBack;
 };
 
@@ -192,8 +204,6 @@ public:
     ~FrontendDelegateImpl() override;
 
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
-    void SetAssetManager(const RefPtr<AssetManager>& assetManager);
-    RefPtr<AssetManager> GetAssetManager() const override;
 
     // JsFrontend delegate functions.
     void RunPage(const std::string& url, const std::string& params);
@@ -217,8 +227,10 @@ public:
     bool OnStartContinuation();
     void OnCompleteContinuation(int32_t code);
     void OnSaveData(std::string& data);
+    void OnMemoryLevel(const int32_t level);
     bool OnRestoreData(const std::string& data);
     void OnNewRequest(const std::string& data);
+    void OnNewWant(const std::string& data);
     void CallPopPage();
     void OnApplicationDestroy(const std::string& packageName);
     void OnApplicationUpdateState(const std::string& packageName, Frontend::State state);
@@ -245,6 +257,8 @@ public:
     void Push(const std::string& uri, const std::string& params) override;
     void Replace(const std::string& uri, const std::string& params) override;
     void Back(const std::string& uri, const std::string& params = "") override;
+    void PostponePageTransition() override;
+    void LaunchPageTransition() override;
     void Clear() override;
     int32_t GetStackSize() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;

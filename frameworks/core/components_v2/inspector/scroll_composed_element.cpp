@@ -20,14 +20,16 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/render_single_child_scroll.h"
-#include "core/components/scroll/scroll_element.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const ScrollComposedElement&)>> CREATE_JSON_MAP {
-    { "AxisDirection", [](const ScrollComposedElement& inspector) { return inspector.GetAxisDirection(); } }
+    { "scrollable", [](const ScrollComposedElement& inspector) { return inspector.GetAxisDirection(); } },
+    { "scrollBar", [](const ScrollComposedElement& inspector) { return inspector.GetDisplayMode(); } },
+    { "scrollBarColor", [](const ScrollComposedElement& inspector) { return inspector.GetForegroundColor(); } },
+    { "scrollBarWidth", [](const ScrollComposedElement& inspector) { return inspector.GetBarWidth(); } }
 };
 
 } // namespace
@@ -35,7 +37,10 @@ const std::unordered_map<std::string, std::function<std::string(const ScrollComp
 void ScrollComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("axisDirection: ").append(GetAxisDirection()));
+    DumpLog::GetInstance().AddDesc(std::string("scrollable: ").append(GetAxisDirection()));
+    DumpLog::GetInstance().AddDesc(std::string("scrollBar: ").append(GetDisplayMode()));
+    DumpLog::GetInstance().AddDesc(std::string("scrollBarColor: ").append(GetForegroundColor()));
+    DumpLog::GetInstance().AddDesc(std::string("scrollBarWidth: ").append(GetBarWidth()));
 }
 
 std::unique_ptr<JsonValue> ScrollComposedElement::ToJsonObject() const
@@ -50,19 +55,72 @@ std::unique_ptr<JsonValue> ScrollComposedElement::ToJsonObject() const
 std::string ScrollComposedElement::GetAxisDirection() const
 {
     auto renderSingleChildScroll = GetRenderSingleChildScroll();
+    if (!renderSingleChildScroll) {
+        return "";
+    }
     Axis axisDirection = renderSingleChildScroll->GetAxis();
     switch (axisDirection) {
         case Axis::VERTICAL:
-            return std::string("VERTICAL");
+            return std::string("ScrollDirection.Vertical");
         case Axis::HORIZONTAL:
-            return std::string("HORIZONTAL");
+            return std::string("ScrollDirection.Horizontal");
         case Axis::FREE:
-            return std::string("FREE");
+            return std::string("ScrollDirection.Free");
         case Axis::NONE:
-            return std::string("NONE");
+            return std::string("ScrollDirection.None");
         default:
             return std::string("");
     }
+}
+
+std::string ScrollComposedElement::GetDisplayMode() const
+{
+    auto renderSingleChildScroll = GetRenderSingleChildScroll();
+    if (!renderSingleChildScroll) {
+        return "";
+    }
+    auto scrollBar = renderSingleChildScroll->GetScrollBar();
+    if (!scrollBar) {
+        return "";
+    }
+    DisplayMode displayMode = scrollBar->GetDisplayMode();
+    switch (displayMode) {
+        case DisplayMode::OFF:
+            return std::string("DisplayMode.Off");
+        case DisplayMode::AUTO:
+            return std::string("DisplayMode.Auto");
+        case DisplayMode::ON:
+            return std::string("DisplayMode.On");
+        default:
+            return std::string("");
+    }
+}
+
+std::string ScrollComposedElement::GetForegroundColor() const
+{
+    auto renderSingleChildScroll = GetRenderSingleChildScroll();
+    if (!renderSingleChildScroll) {
+        return "";
+    }
+    auto scrollBar = renderSingleChildScroll->GetScrollBar();
+    if (!scrollBar) {
+        return "";
+    }
+    return scrollBar->GetForegroundColor().ColorToString();
+}
+
+std::string ScrollComposedElement::GetBarWidth() const
+{
+    auto renderSingleChildScroll = GetRenderSingleChildScroll();
+    if (!renderSingleChildScroll) {
+        return "";
+    }
+    auto scrollBar = renderSingleChildScroll->GetScrollBar();
+    if (!scrollBar) {
+        return "";
+    }
+    Dimension BarWidth = scrollBar->GetActiveWidth();
+    return BarWidth.ToString();
 }
 
 RefPtr<RenderSingleChildScroll> ScrollComposedElement::GetRenderSingleChildScroll() const

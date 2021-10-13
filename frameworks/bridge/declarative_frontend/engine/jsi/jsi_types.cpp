@@ -27,48 +27,83 @@ JsiValue::JsiValue(panda::Local<panda::JSValueRef> val) : JsiType(val) {}
 
 bool JsiValue::IsEmpty() const
 {
-    return GetHandle().IsEmpty();
+    if (GetHandle().IsEmpty()) {
+        return true;
+    }
+    return GetHandle()->IsUndefined() || GetHandle()->IsNull();
 }
 
 bool JsiValue::IsFunction() const
 {
-    return GetHandle()->IsFunction();
+    if (GetHandle().IsEmpty()) {
+        return false;
+    } else {
+        return GetHandle()->IsFunction();
+    }
 }
 
 bool JsiValue::IsNumber() const
 {
-    return GetHandle()->IsNumber();
+    if (GetHandle().IsEmpty()) {
+        return false;
+    } else {
+        return GetHandle()->IsNumber();
+    }
 }
 
 bool JsiValue::IsString() const
 {
-    return GetHandle()->IsString();
+    if (GetHandle().IsEmpty()) {
+        return false;
+    } else {
+        return GetHandle()->IsString();
+    }
 }
 
 bool JsiValue::IsBoolean() const
 {
-    return GetHandle()->IsBoolean();
+    if (GetHandle().IsEmpty()) {
+        return false;
+    } else {
+        return GetHandle()->IsBoolean();
+    }
 }
 
 bool JsiValue::IsObject() const
 {
-    return GetHandle()->IsObject();
+    if (GetHandle().IsEmpty()) {
+        return false;
+    } else {
+        return GetHandle()->IsObject();
+    }
 }
 
 bool JsiValue::IsArray() const
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    return GetHandle()->IsArray(runtime->GetEcmaVm());
+    if (GetHandle().IsEmpty()) {
+        return false;
+    } else {
+        return GetHandle()->IsArray(runtime->GetEcmaVm());
+    }
 }
 
 bool JsiValue::IsUndefined() const
 {
-    return GetHandle()->IsUndefined();
+    if (GetHandle().IsEmpty()) {
+        return true;
+    } else {
+        return GetHandle()->IsUndefined();
+    }
 }
 
 bool JsiValue::IsNull() const
 {
-    return GetHandle()->IsNull();
+    if (GetHandle().IsEmpty()) {
+        return true;
+    } else {
+        return GetHandle()->IsNull();
+    }
 }
 
 std::string JsiValue::ToString() const
@@ -127,7 +162,10 @@ JsiRef<JsiValue> JsiObject::GetProperty(const char* prop) const
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
     auto stringRef = panda::StringRef::NewFromUtf8(runtime->GetEcmaVm(), prop);
-    return JsiRef<JsiValue>::Make(GetHandle()->Get(runtime->GetEcmaVm(), stringRef));
+    auto value = GetHandle()->Get(runtime->GetEcmaVm(), stringRef);
+    auto func = JsiValue(value);
+    auto refValue =  JsiRef<JsiValue>(func);
+    return refValue;
 }
 
 void JsiObject::SetPropertyJsonObject(const char* prop, const char* value) const
@@ -161,7 +199,6 @@ JsiFunction::JsiFunction(panda::Local<panda::FunctionRef> val) : JsiType(val)
 
 JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<JsiValue> argv[]) const
 {
-    panda::LocalScope scope(vm_);
     std::vector<panda::Local<panda::JSValueRef>> arguments;
     for (int i = 0; i < argc; ++i) {
         arguments.emplace_back(argv[i].Get().GetHandle());
@@ -178,7 +215,7 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
 panda::Local<panda::FunctionRef> JsiFunction::New(JsiFunctionCallback func)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    return panda::FunctionRef::New(runtime->GetEcmaVm(), func, nullptr);
+    return panda::FunctionRef::New(const_cast<EcmaVM*>(runtime->GetEcmaVm()), func, nullptr);
 }
 
 // -----------------------
@@ -220,7 +257,7 @@ JsiCallbackInfo::JsiCallbackInfo(panda::ecmascript::EcmaVM* vm, panda::Local<pan
 
 JsiRef<JsiValue> JsiCallbackInfo::operator[](size_t index) const
 {
-    if (index < argc_) {
+    if (static_cast<int32_t>(index) < argc_) {
         return JsiRef<JsiValue>::Make(argv_[index].ToLocal(vm_));
     }
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());

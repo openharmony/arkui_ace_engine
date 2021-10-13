@@ -552,8 +552,9 @@ void AceContainer::AttachView(
     InitializeCallback();
 
     // Only init global resource here, construct theme in UI thread
-    auto themeManager = pipelineContext_->GetThemeManager();
+    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
     if (themeManager) {
+        pipelineContext_->SetThemeManager(themeManager);
         // Init resource, load theme map.
         themeManager->InitResource(resourceInfo_);
         themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());

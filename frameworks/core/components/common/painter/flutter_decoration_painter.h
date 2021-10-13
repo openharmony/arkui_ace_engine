@@ -120,8 +120,6 @@ public:
 
     flutter::RRect GetBoxRRect(const Offset& offset, const Border& border, double shrinkFactor, bool isRound);
 
-    void CheckWidth(const Border& border);
-
 protected:
     void PaintColorAndImage(const Offset& offset, SkCanvas* canvas, SkPaint& paint, RenderContext& context);
 
@@ -147,6 +145,14 @@ protected:
     bool CheckBorderEdgeForRRect(const Border& border);
 
     double NormalizeToPx(const Dimension& dimension) const;
+    double SliceNormalizePercentToPx(const Dimension& dimension, bool isVertical) const;
+    double WidthNormalizePercentToPx(const Dimension& dimension, bool isVertical) const;
+    double OutsetNormalizePercentToPx(const Dimension& dimension, bool isVertical) const;
+    void PaintBorderImageFourCorner(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
+    void PaintBorderImageFourStretch(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
+    void PaintBorderImageFourRound(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
+    void PaintBorderImageFourSpace(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
+    void PaintBorderImageFourRepeat(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
 
     Size GetLayoutSize() const
     {
@@ -164,11 +170,23 @@ protected:
 
     RefPtr<RenderImage> renderImage_;
     RefPtr<Flutter::ClipLayer> clipLayer_;
+    sk_sp<SkImage> image_;
 
     double leftWidth_ = 0.0;
     double topWidth_ = 0.0;
     double rightWidth_ = 0.0;
     double bottomWidth_ = 0.0;
+
+    double leftSlice_ = 0.0;
+    double topSlice_ = 0.0;
+    double rightSlice_ = 0.0;
+    double bottomSlice_ = 0.0;
+
+    double leftOutset_ = 0.0;
+    double topOutset_ = 0.0;
+    double rightOutset_ = 0.0;
+    double bottomOutset_ = 0.0;
+
 };
 
 } // namespace OHOS::Ace

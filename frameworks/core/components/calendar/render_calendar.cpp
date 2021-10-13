@@ -181,8 +181,14 @@ void RenderCalendar::OnSelectedDay(int32_t selected)
     if (isV2Component_ && calendarController_->IsCrossMonth() &&
         calendarController_->GetCrossMonthDay().month == currentMonth_ && IsValid(touchIndex_)) {
         calendarDays_[touchIndex_].touched = false;
+        if (IsToday(calendarDays_[touchIndex_])) {
+            isNeedRepaint_ = true;
+        }
         touchIndex_ = selected + firstDayIndex_ - 1;
         calendarDays_[touchIndex_].touched = true;
+        if (IsToday(calendarDays_[touchIndex_])) {
+            isNeedRepaint_ = true;
+        }
         MarkNeedRender();
         return;
     } else if (SystemProperties::GetDeviceType() == DeviceType::TV) {
@@ -421,6 +427,10 @@ void RenderCalendar::UpdateBreakInformation()
     auto workDayValue = dataAdapter_->GetWorkDays();
     StringUtils::StringSpliter(holidaysValue, ',', holidays);
     StringUtils::StringSpliter(workDayValue, ',', workDays);
+    for (auto& day : calendarDays_) {
+        day.dayMark = "";
+        day.dayMarkValue = "";
+    }
     for (auto holiday : holidays) {
         auto index = holiday + firstDayIndex_ - 1;
         if (index >= 0 && index < (int32_t)calendarDays_.size()) {

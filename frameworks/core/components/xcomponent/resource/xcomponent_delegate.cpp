@@ -23,7 +23,6 @@
 #include "core/event/ace_event_helper.h"
 #include "core/event/back_end_event_manager.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
-#include "frameworks/core/components/xcomponent/native_render_context.h"
 
 namespace OHOS::Ace {
 namespace {

@@ -22,6 +22,13 @@
 #include "base/log/log.h"
 #include "frameworks/base/json/json_util.h"
 
+#ifdef OHOS_STANDARD_SYSTEM
+#include "form_host_client.h"
+#include "form_js_info.h"
+#include "form_mgr.h"
+#include "frameworks/core/components/form/resource/form_callback_client.h"
+#endif
+
 namespace OHOS::Ace {
 
 namespace {
@@ -41,8 +48,16 @@ FormManagerDelegate::~FormManagerDelegate()
 
 void FormManagerDelegate::ReleasePlatformResource()
 {
+#ifdef OHOS_STANDARD_SYSTEM
+    if (runningCardId_ > 0) {
+        OHOS::AppExecFwk::FormMgr::GetInstance().DeleteForm(
+            runningCardId_, OHOS::AppExecFwk::FormHostClient::GetInstance());
+        runningCardId_ = -1;
+    }
+#else
     Stop();
     Release();
+#endif
 }
 
 void FormManagerDelegate::Stop()
@@ -80,6 +95,39 @@ void FormManagerDelegate::UnregisterEvent()
 
 void FormManagerDelegate::AddForm(const WeakPtr<PipelineContext>& context, const RequestFormInfo& info)
 {
+#ifdef OHOS_STANDARD_SYSTEM
+    // dynamic add new form should release the running form first.
+    if (runningCardId_ > 0) {
+        AppExecFwk::FormMgr::GetInstance().DeleteForm(runningCardId_, AppExecFwk::FormHostClient::GetInstance());
+        runningCardId_ = -1;
+    }
+
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    wantCache_.SetElementName(info.bundleName, info.abilityName);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, info.id);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_MODULE_NAME_KEY, info.moduleName);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_NAME_KEY, info.cardName);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TEMPORARY_KEY, false);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::ACQUIRE_TYPE,
+        OHOS::AppExecFwk::Constants::ACQUIRE_TYPE_CREATE_FORM);
+    if (info.dimension != -1) {
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
+    }
+
+    auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
+    auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
+    if (ret == 0) {
+        LOGI("add form success");
+        std::shared_ptr<FormCallbackClient> client = std::make_shared<FormCallbackClient>();
+        client->SetFormManagerDelegate(AceType::WeakClaim(this));
+        clientInstance->AddForm(client, formJsInfo.formId);
+
+        runningCardId_ = formJsInfo.formId;
+    } else {
+        // TODO: add error info here
+        LOGE("add form fail");
+    }
+#else
     if (state_ == State::CREATED) {
         hash_ = MakeResourceHash();
         Method addFormMethod = MakeMethodHash("addForm");
@@ -89,6 +137,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineContext>& context, const
     } else {
         CreatePlatformResource(context, info);
     }
+#endif
 }
 
 std::string FormManagerDelegate::ConvertRequestInfo(const RequestFormInfo& info) const
@@ -121,10 +170,14 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineContext>&
     auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
     platformTaskExecutor.PostTask([weak = WeakClaim(this), weakRes, info] {
         auto delegate = weak.Upgrade();
+        if (!delegate) {
+            LOGE("delegate is null");
+            return;
+        }
         auto resRegister = weakRes.Upgrade();
         auto context = delegate->context_.Upgrade();
-        if (!delegate || !resRegister || !context) {
-            LOGE("delegate is null");
+        if (!resRegister || !context) {
+            LOGE("resouce register or context is null");
             delegate->OnFormError("internal error");
             return;
         }
@@ -229,6 +282,23 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
         return;
     }
 
+#ifdef OHOS_STANDARD_SYSTEM
+    AAFwk::Want want;
+    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, (long)runningCardId_);
+    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_MESSAGE_KEY, action);
+    //want.HasParameter(Constants::PARAM_FORM_IDENTITY_KEY)) {
+    if (AppExecFwk::FormMgr::GetRecoverStatus() == OHOS::AppExecFwk::Constants::IN_RECOVERING) {
+        LOGE("form is in recover status, can't do action on form.");
+        return;
+    }
+
+    // requestForm request to fms
+    int resultCode = AppExecFwk::FormMgr::GetInstance().MessageEvent(runningCardId_, want,
+        AppExecFwk::FormHostClient::GetInstance());
+    if (resultCode != ERR_OK) {
+        LOGE("failed to notify the form service, error code is %{public}d.", resultCode);
+    }
+#else
     hash_ = MakeResourceHash();
     Method actionMethod = MakeMethodHash("onAction");
     std::stringstream paramStream;
@@ -238,13 +308,15 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     LOGI("send method:%{private}s, type:%{public}s params:%{private}s",
         actionMethod.c_str(), type.c_str(), param.c_str());
     CallResRegisterMethod(actionMethod, param, nullptr);
+#endif
 }
 
 void FormManagerDelegate::OnFormAcquired(const std::string& param)
 {
     auto result = ParseMapFromString(param);
     if (onFormAcquiredCallback_) {
-        onFormAcquiredCallback_(result["formId"], result["codePath"], result["moduleName"], result["data"]);
+        onFormAcquiredCallback_(StringUtils::StringToLongInt(result["formId"]), result["codePath"],
+            result["moduleName"], result["data"]);
     }
 }
 
@@ -252,7 +324,7 @@ void FormManagerDelegate::OnFormUpdate(const std::string& param)
 {
     auto result = ParseMapFromString(param);
     if (onFormUpdateCallback_) {
-        onFormUpdateCallback_(result["formId"], result["data"]);
+        onFormUpdateCallback_(StringUtils::StringToLongInt(result["formId"]), result["data"]);
     }
 }
 
@@ -263,5 +335,55 @@ void FormManagerDelegate::OnFormError(const std::string& param)
         onFormErrorCallback_(result["code"], result["msg"]);
     }
 }
+
+#ifdef OHOS_STANDARD_SYSTEM
+void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJsInfo)
+{
+    if (formJsInfo.formId != runningCardId_) {
+        LOGI("form update, but card is not current card");
+        return;
+    }
+    if (!hasCreated_) {
+        if (formJsInfo.jsFormCodePath.empty() || formJsInfo.formName.empty()) {
+            LOGE("acquire form data success, but code path or form name is empty!!!");
+            return;
+        }
+        if (!onFormAcquiredCallback_) {
+            LOGE("acquire form data success, but acquire callback is null!!!");
+            return;
+        }
+        hasCreated_ = true;
+        onFormAcquiredCallback_(runningCardId_, formJsInfo.jsFormCodePath + "/", formJsInfo.formName,
+            formJsInfo.formData);
+    } else {
+        if (formJsInfo.formData.empty()) {
+            LOGE("update form data success, but data is empty!!!");
+            return;
+        }
+        if (!onFormUpdateCallback_) {
+            LOGE("update form data success, but update callback is null!!!");
+            return;
+        }
+        onFormUpdateCallback_(formJsInfo.formId, formJsInfo.formData);
+    }
+}
+
+void FormManagerDelegate::ProcessFormUninstall(const int64_t formId)
+{
+
+}
+
+void FormManagerDelegate::OnDeathReceived()
+{
+    LOGI("form component on death, should relink");
+    AppExecFwk::FormJsInfo formJsInfo;
+    auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(
+        runningCardId_, wantCache_, OHOS::AppExecFwk::FormHostClient::GetInstance(), formJsInfo);
+
+    if (ret != 0) {
+        LOGE("relink to form manager fail!!!");
+    }
+}
+#endif
 
 } // namespace OHOS::Ace

@@ -45,14 +45,18 @@ public:
     std::string GetTextFontColor() const;
     std::string GetTextFontStyle() const;
     std::string GetTextFontWeight() const;
+    std::string GetTextFontFamily() const;
 
     std::string GetMaxLines() const;
     std::string GetLineHeight() const;
     std::string GetBaseLineOffset() const;
     std::string GetTextFontSize() const;
+    std::string GetWidth() const override;
+    std::string GetHeight() const override;
 
 private:
     RefPtr<RenderText> GetRenderText() const;
+    std::string ConvertFontFamily(const std::vector<std::string>& fontFamily) const;
 };
 
 } // namespace OHOS::Ace::V2

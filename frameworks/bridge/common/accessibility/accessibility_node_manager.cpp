@@ -258,6 +258,7 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateDeclarativeAccessibili
     auto accessibilityNode = AceType::MakeRefPtr<AccessibilityNode>(nodeId, tag);
     accessibilityNode->SetIsRootNode(nodeId == rootNodeId_);
     accessibilityNode->SetPageId(rootNodeId_ - DOM_ROOT_NODE_ID_BASE);
+    accessibilityNode->SetFocusableState(true);
     if (parentNode) {
         accessibilityNode->SetParentNode(parentNode);
         accessibilityNode->Mount(itemIndex);

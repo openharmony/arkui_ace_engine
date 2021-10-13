@@ -237,8 +237,13 @@ void RenderSlidingPanel::SetDragBarCallBack()
 {
     dragBar_->SetClickArrowCallback([weak = WeakClaim(this)]() {
         auto panel = weak.Upgrade();
+        if (!panel) {
+            LOGE("panel is nullptr");
+            return;
+        }
         auto dragBar = panel->GetDragBar();
-        if (!panel || !dragBar) {
+        if (!dragBar) {
+            LOGE("dragBar is nullptr");
             return;
         }
         panel->previousMode_ = panel->mode_;

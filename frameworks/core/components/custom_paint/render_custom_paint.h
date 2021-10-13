@@ -99,6 +99,7 @@ public:
     virtual void DrawImage(const Offset& offset, const CanvasImage& image, double width, double height) = 0;
     virtual void PutImageData(const Offset& offset, const ImageData& imageData) = 0;
     virtual std::unique_ptr<ImageData> GetImageData(double left, double top, double width, double height) = 0;
+    virtual std::string GetJsonData(const std::string& path) = 0;
 
     virtual void WebGLInit(CanvasRenderContextBase* context) = 0;
     virtual void WebGLUpdate() = 0;

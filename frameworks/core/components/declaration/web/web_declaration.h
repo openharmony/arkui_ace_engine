@@ -40,12 +40,13 @@ struct WebMethod : Method {
     }
 };
 
-class WebDeclaration : public Declaration {
+class ACE_EXPORT WebDeclaration : public Declaration {
     DECLARE_ACE_TYPE(WebDeclaration, Declaration);
 
 public:
     WebDeclaration() = default;
     ~WebDeclaration() override = default;
+    WebMethod webMethod;
 
     void SetWebSrc(const std::string& src)
     {

@@ -76,6 +76,7 @@ void CustomDialogElement::ShowDialog()
     baseDialog->SetHeight(dialog_->GetHeight());
     baseDialog->SetWidth(dialog_->GetWidth());
     baseDialog->SetIsDragable(dialog_->IsDragable());
+    baseDialog->SetDisabledStatus(dialog_->IsDisabledStatus());
     if (dialog_->IsSetMargin()) {
         baseDialog->SetMargin(dialog_->GetMargin());
     }

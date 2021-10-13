@@ -288,6 +288,7 @@ RefPtr<DOMNode> DOMNodeFactory::CreateDOMNodeFromDsl(const std::string& jsonStr)
         auto platformWindow = std::make_unique<MockPlatformWindow>();
         auto window = std::make_unique<Window>(std::move(platformWindow));
         context_ = AceType::MakeRefPtr<PipelineContext>(std::move(window), nullptr, nullptr, nullptr, frontend, 0);
+        context_->SetThemeManager(AceType::MakeRefPtr<ThemeManager>());
     }
 
     domNodeRoot->SetPipelineContext(context_);

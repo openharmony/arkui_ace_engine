@@ -18,15 +18,18 @@
 #include "core/common/form_manager.h"
 #include "frameworks/base/utils/string_utils.h"
 #include "frameworks/core/components/form/form_component.h"
+#include "frameworks/core/components/form/render_form.h"
 #include "frameworks/core/components/form/resource/form_manager_delegate.h"
 
 namespace OHOS::Ace {
 
-FormElement::FormElement(const ComposeId& id) : ComposedElement(id) {}
-
 FormElement::~FormElement()
 {
     formManagerBridge_.Reset();
+
+    auto id = subContainer_->GetRunningCardId();
+    FormManager::GetInstance().RemoveSubContainer(id);
+
     subContainer_->Destroy();
     subContainer_.Reset();
 }
@@ -46,35 +49,29 @@ void FormElement::Update()
         cardInfo_ = info;
     } else {
         // for update form componet
-        cardInfo_.allowUpate = info.allowUpate;
-        if (subContainer_) {
-            subContainer_->SetAllowUpdate(cardInfo_.allowUpate);
-        }
-        double scale = subContainer_->GetRootElementScale();
-        if (NearZero(scale)) {
-            LOGE("scale value is near zero");
-            return;
+        if (cardInfo_.allowUpate != info.allowUpate) {
+            cardInfo_.allowUpate = info.allowUpate;
+            LOGI(" update card allow info:%{public}d", cardInfo_.allowUpate);
+            if (subContainer_) {
+                subContainer_->SetAllowUpdate(cardInfo_.allowUpate);
+            }
         }
 
-        auto box = AceType::DynamicCast<BoxComponent>(form->GetChild());
-        if (!box) {
-            LOGE("could not get size box");
-            return;
+        if (cardInfo_.width != info.width || cardInfo_.height != info.height) {
+            LOGI("update card size old w:%lf,h:%lf", cardInfo_.width.Value(), cardInfo_.height.Value());
+            LOGI("update card size new w:%lf,h:%lf", info.width.Value(), info.height.Value());
+            cardInfo_.width = info.width;
+            cardInfo_.height = info.height;
+            GetRenderNode()->Update(component_);
+            subContainer_->SetFormComponet(component_);
+            subContainer_->UpdateRootElmentSize();
+            subContainer_->UpdateSurfaceSize();
         }
-        LOGD("rootbox width:%{public}f, height:%{public}f", box->GetWidth().Value(), box->GetHeight().Value());
 
-        auto transform = AceType::DynamicCast<TransformComponent>(box->GetChild());
-        if (transform) {
-            transform->Scale(scale, scale, scale);
-        }
-
-        auto rootBox = AceType::DynamicCast<BoxComponent>(transform->GetChild());
-        if (rootBox) {
-            rootBox->SetWidth(box->GetWidth().Value() / scale, box->GetWidth().Unit());
-            rootBox->SetHeight(box->GetHeight().Value() / scale, box->GetHeight().Unit());
-        }
         return;
     }
+
+    GetRenderNode()->Update(component_);
 
     CreateCardContainer();
 
@@ -87,51 +84,7 @@ void FormElement::Update()
 
 void FormElement::PerformBuild()
 {
-    RefPtr<FormComponent> form = AceType::DynamicCast<FormComponent>(component_);
-    if (form) {
-        const auto& child = children_.empty() ? nullptr : children_.front();
-        UpdateChild(child, form->GetChild());
-    }
-
-    auto box = GetFirstChild();
-    if (!box) {
-        LOGE("not got form child box");
-        return;
-    }
-
-    auto boxElement = AceType::DynamicCast<BoxElement>(box);
-    if (!boxElement) {
-        LOGE("not got box element");
-        return;
-    }
-
-    auto tarnsform = box->GetFirstChild();
-    if (!tarnsform) {
-        LOGE("not got transform elment");
-        return;
-    }
-
-    auto rootBox = tarnsform->GetFirstChild();
-    if (!rootBox) {
-        LOGE("not got root box");
-        return;
-    }
-
-    auto stage = rootBox->GetFirstChild();
-    if (!stage) {
-        LOGE("not got stage");
-        return;
-    }
-
-    auto stageElement = AceType::DynamicCast<StageElement>(stage);
-    if (stageElement) {
-        stageElement->SetForCard();
-    } else {
-        LOGE("not got stage element");
-    }
-
     subContainer_->SetFormElement(AceType::WeakClaim(this));
-    subContainer_->SetStageElement(stageElement);
 }
 
 void FormElement::InitEvent(const RefPtr<FormComponent>& component)
@@ -193,29 +146,63 @@ void FormElement::HandleOnErrorEvent(const std::string code, const std::string m
 
 void FormElement::Prepare(const WeakPtr<Element>& parent)
 {
-    ComposedElement::Prepare(parent);
+    RenderElement::Prepare(parent);
 
     if (!formManagerBridge_) {
         formManagerBridge_ =
             AceType::MakeRefPtr<FormManagerDelegate>(GetContext());
+        formManagerBridge_->AddFormAcquireCallback(
+            [weak = WeakClaim(this)] (int64_t id, std::string path, std::string module, std::string data) {
+            auto element = weak.Upgrade();
+            auto uiTaskExecutor = SingleTaskExecutor::Make(
+                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            uiTaskExecutor.PostTask([id, path, module, data, weak] {
+                auto form = weak.Upgrade();
+                if (form) {
+                    form->HandleOnAcquireEvent(id);
+                    auto container = form->GetSubContainer();
+                    if (container) {
+                        container->RunCard(id, path, module, data);
+                    }
+                }
+            });
+        });
+        formManagerBridge_->AddFormUpdateCallback(
+            [weak = WeakClaim(this)] (int64_t id, std::string data) {
+            auto element = weak.Upgrade();
+            auto uiTaskExecutor = SingleTaskExecutor::Make(
+                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            uiTaskExecutor.PostTask([id, data, weak] {
+                auto form = weak.Upgrade();
+                if (form) {
+                    if (form->ISAllowUpdate()) {
+                        form->GetSubContainer()->UpdateCard(data);
+                    }
+                }
+            });
+        });
         formManagerBridge_->AddFormErrorCallback(
             [weak = WeakClaim(this)](std::string code, std::string msg) {
-              auto element = weak.Upgrade();
-              auto uiTaskExecutor = SingleTaskExecutor::Make(
-                  element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-              uiTaskExecutor.PostTask([code, msg, weak] {
+            auto element = weak.Upgrade();
+            auto uiTaskExecutor = SingleTaskExecutor::Make(
+                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            uiTaskExecutor.PostTask([code, msg, weak] {
                 auto form = weak.Upgrade();
                 if (form) {
                     form->HandleOnErrorEvent(code, msg);
                 }
-                // when get error from form manager, remove the card
-                auto child = form->GetFirstChild();
-                if (child) {
-                    form->RemoveChild(child);
-                    form->MarkNeedRebuild();
+
+                auto render = form->GetRenderNode();
+                if (!render) {
+                    LOGE("remove card from screen fail, due to could not get card render node");
+                    return;
                 }
-              });
+                auto renderForm = AceType::DynamicCast<RenderForm>(render);
+                if (renderForm) {
+                    renderForm->RemoveChildren();
+                }
             });
+        });
     }
 }
 
@@ -239,7 +226,15 @@ void FormElement::OnActionEvent(const std::string& action) const
     }
 
     if ("router" == type) {
+#ifdef OHOS_STANDARD_SYSTEM
+        auto context = GetContext().Upgrade();
+        if (context) {
+            LOGI("send action evetn to ability to process");
+            context->OnActionEvent(action);
+        }
+#else
         HandleOnRouterEvent(eventAction);
+#endif
         return;
     }
 
@@ -286,6 +281,11 @@ void FormElement::CreateCardContainer()
             }
         });
     });
+}
+
+RefPtr<RenderNode> FormElement::CreateRenderNode()
+{
+    return RenderForm::Create();
 }
 
 } // namespace OHOS::Ace

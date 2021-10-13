@@ -17,7 +17,6 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/grid_layout/grid_layout_element.h"
 #include "core/components/grid_layout/render_grid_layout.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -28,7 +27,10 @@ const std::unordered_map<std::string, std::function<std::string(const GridCompos
     { "columnsTemplate", [](const GridComposedElement& inspector) { return inspector.GetColumnsTemplate(); } },
     { "rowsTemplate", [](const GridComposedElement& inspector) { return inspector.GetRowsTemplate(); } },
     { "columnsGap", [](const GridComposedElement& inspector) { return inspector.GetColumnsGap(); } },
-    { "rowsGap", [](const GridComposedElement& inspector) { return inspector.GetRowsGap(); } }
+    { "rowsGap", [](const GridComposedElement& inspector) { return inspector.GetRowsGap(); } },
+    { "scrollBarColor", [](const GridComposedElement& inspector) { return inspector.GetScrollBarColor(); } },
+    { "scrollBarWidth", [](const GridComposedElement& inspector) { return inspector.GetScrollBarWidth(); } },
+    { "scrollBar", [](const GridComposedElement& inspector) { return inspector.GetScrollBar(); } },
 };
 
 }
@@ -105,6 +107,58 @@ std::string GridComposedElement::GetRowsGap() const
         return std::to_string(renderGrip->GetRowGaps());
     }
     return "1fr";
+}
+
+std::string GridComposedElement::GetScrollBarWidth() const
+{
+    auto node = GetInspectorNode(GridLayoutElement::TypeId());
+    if (!node) {
+        return "";
+    }
+    auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
+    if (renderGrip) {
+        return renderGrip->GetScrollBarWidth();
+    }
+    return "";
+}
+
+std::string GridComposedElement::GetScrollBarColor() const
+{
+    auto node = GetInspectorNode(GridLayoutElement::TypeId());
+    if (!node) {
+        return "";
+    }
+    auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
+    if (renderGrip) {
+        return renderGrip->GetScrollBarColor();
+    }
+    return "";
+}
+
+std::string GridComposedElement::GetScrollBar() const
+{
+    auto node = GetInspectorNode(GridLayoutElement::TypeId());
+    if (!node) {
+        return "BarState::OFF";
+    }
+    auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
+    if (renderGrip) {
+        return DisplayModeToString(renderGrip->GetScrollBar());
+    }
+    return "BarState::OFF";
+}
+
+std::string GridComposedElement::DisplayModeToString(DisplayMode displayMode) const
+{
+    switch (displayMode) {
+        case DisplayMode::OFF:
+            return "BarState::OFF";
+        case DisplayMode::AUTO:
+            return "BarState::AUTO";
+        case DisplayMode::ON:
+            return "BarState::ON";
+    }
+    return "BarState::OFF";
 }
 
 } // namespace OHOS::Ace::V2

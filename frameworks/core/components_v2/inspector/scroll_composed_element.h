@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_SCROLL_COMPOSED_ELEMENT_H
 
 #include "core/components/scroll/render_single_child_scroll.h"
+#include "core/components/scroll/scroll_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -33,6 +34,14 @@ public:
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
     std::string GetAxisDirection() const;
+    std::string GetDisplayMode() const;
+    std::string GetForegroundColor() const;
+    std::string GetBarWidth() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return ScrollElement::TypeId();
+    }
 
 private:
     RefPtr<RenderSingleChildScroll> GetRenderSingleChildScroll() const;

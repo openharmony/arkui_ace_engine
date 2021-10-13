@@ -32,6 +32,7 @@ class ACE_EXPORT ComposedElement : public Element {
 
 public:
     using RenderFunction = std::function<RefPtr<Component>()>;
+    using PageTransitionFunction = RenderFunction;
     using ApplyFunction = std::function<void(const RefPtr<RenderElement>&)>;
     explicit ComposedElement(const ComposeId& id);
     ~ComposedElement() override = default;
@@ -81,6 +82,25 @@ public:
         }
         return false;
     }
+
+    RefPtr<Component> CallPageTransitionFunction()
+    {
+        if (!pageTransitionFunction_) {
+            return nullptr;
+        }
+        return pageTransitionFunction_();
+    }
+
+    void SetPageTransitionFunction(PageTransitionFunction&& func)
+    {
+        pageTransitionFunction_ = std::move(func);
+    }
+
+    bool HasPageTransitionFunction()
+    {
+        return !!pageTransitionFunction_;
+    }
+
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     void SetDebugLine(std::string debugLine)
     {
@@ -109,6 +129,7 @@ protected:
     bool addedToMap_ = false;
     int32_t countRenderNode_ = -1;
     RenderFunction renderFunction_;
+    PageTransitionFunction pageTransitionFunction_;
 
     ApplyFunction applyFunction_;
 };

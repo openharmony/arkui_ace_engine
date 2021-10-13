@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/scroll_bar.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -61,6 +62,21 @@ public:
     double GetRowGaps() const
     {
         return rowGap_;
+    }
+
+    const std::string& GetScrollBarWidth() const
+    {
+        return scrollBarWidth_;
+    }
+
+    const std::string& GetScrollBarColor() const
+    {
+        return scrollBarColor_;
+    }
+
+    DisplayMode GetScrollBar() const
+    {
+        return displayMode_;
     }
 
 protected:
@@ -126,6 +142,9 @@ protected:
     double rowGap_ = 0.0;
     std::string colsArgs_;
     std::string rowsArgs_;
+    std::string scrollBarWidth_;
+    std::string scrollBarColor_;
+    DisplayMode displayMode_ = DisplayMode::OFF;
     bool rightToLeft_ = false;
     // Map structure: [rowIndex - (columnIndex, index)]
     std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix_;

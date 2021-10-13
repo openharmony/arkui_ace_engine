@@ -30,7 +30,7 @@ static void ParseUri(napi_env env, napi_value uriNApi, std::string& uriString)
         auto nativeUri = reinterpret_cast<NativeValue*>(uriNApi);
         auto resultUri = nativeUri->ToString();
         auto nativeStringUri = reinterpret_cast<NativeString*>(resultUri->GetInterface(NativeString::INTERFACE_ID));
-        size_t uriLen = nativeStringUri->GetLength();
+        size_t uriLen = nativeStringUri->GetLength() + 1;
         std::unique_ptr<char[]> uri = std::make_unique<char[]>(uriLen);
         size_t retLen = 0;
         napi_get_value_string_utf8(env, uriNApi, uri.get(), uriLen, &retLen);
@@ -53,7 +53,7 @@ static void ParseParams(napi_env env, napi_value params, std::string& paramsStri
         auto nativeValue = reinterpret_cast<NativeValue*>(returnValue);
         auto resultValue = nativeValue->ToString();
         auto nativeString = reinterpret_cast<NativeString*>(resultValue->GetInterface(NativeString::INTERFACE_ID));
-        size_t len = nativeString->GetLength();
+        size_t len = nativeString->GetLength() + 1;
         std::unique_ptr<char[]> paramsChar = std::make_unique<char[]>(len);
         size_t ret = 0;
         napi_get_value_string_utf8(env, returnValue, paramsChar.get(), len, &ret);
@@ -270,7 +270,7 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
             auto nativeValue = reinterpret_cast<NativeValue*>(routerAsyncContext->message_napi);
             auto resultValue = nativeValue->ToString();
             auto nativeString = reinterpret_cast<NativeString*>(resultValue->GetInterface(NativeString::INTERFACE_ID));
-            size_t len = nativeString->GetLength();
+            size_t len = nativeString->GetLength() + 1;
             std::unique_ptr<char[]> messageChar = std::make_unique<char[]>(len);
             size_t ret = 0;
             napi_get_value_string_utf8(env, routerAsyncContext->message_napi, messageChar.get(), len, &ret);

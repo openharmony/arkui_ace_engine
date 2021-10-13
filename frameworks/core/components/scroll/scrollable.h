@@ -196,6 +196,8 @@ public:
     void StartSpringMotion(
         double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent);
 
+    bool IsAnimationNotRunning() const;
+
     bool Idle() const;
 
     bool IsStopped() const;

@@ -37,7 +37,8 @@ bool TextStyle::operator==(const TextStyle& rhs) const
            letterSpacing_ == rhs.letterSpacing_ && maxLines_ == rhs.maxLines_ && adaptTextSize_ == rhs.adaptTextSize_ &&
            allowScale_ == rhs.allowScale_ && wordBreak_ == rhs.wordBreak_ &&
            textDecorationColor_ == rhs.textDecorationColor_ && textCase_ == rhs.textCase_ &&
-           baselineOffset_ == rhs.baselineOffset_ && adaptHeight_ == rhs.adaptHeight_;
+           baselineOffset_ == rhs.baselineOffset_ && adaptHeight_ == rhs.adaptHeight_ &&
+           textIndent_ == rhs.textIndent_ && verticalAlign_ == rhs.verticalAlign_;
 }
 
 bool TextStyle::operator!=(const TextStyle& rhs) const

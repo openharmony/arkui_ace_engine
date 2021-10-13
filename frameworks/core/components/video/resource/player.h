@@ -35,6 +35,7 @@ public:
     using PlayStatusListener = std::function<void(bool)>;
     using CurrentPosListener = std::function<void(uint32_t)>;
     using CompletionListener = std::function<void()>;
+    using RefreshRenderListener = std::function<void()>;
 
     Player(int64_t textureId, const std::string& src, const WeakPtr<PipelineContext>& context, ErrorCallback&& onError)
         : Resource("video", context, std::move(onError)), textureId_(textureId), src_(src)
@@ -83,6 +84,7 @@ public:
     void AddPlayStatusListener(PlayStatusListener&& listener);
     void AddCurrentPosListener(CurrentPosListener&& listener);
     void AddCompletionListener(CompletionListener&& listener);
+    void AddRefreshRenderListener(RefreshRenderListener&& listener);
 
     void PopListener();
     void OnPopListener();
@@ -146,6 +148,7 @@ private:
     std::list<PlayStatusListener> onPlayStatusListener_;
     std::list<CurrentPosListener> onCurrentPosListener_;
     std::list<CompletionListener> onCompletionListener_;
+    std::list<RefreshRenderListener> onRefreshRenderListener_;
 
     RefPtr<Scheduler> scheduler_;
     uint64_t timeStamp_ = 0;

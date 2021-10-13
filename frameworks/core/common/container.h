@@ -126,6 +126,11 @@ public:
         return false;
     }
 
+    const std::string& GetCardHapPath() const
+    {
+        return cardHapPath_;
+    }
+
     virtual void SetViewFirstUpdating(std::chrono::time_point<std::chrono::high_resolution_clock> time) {}
 
     virtual void UpdateResourceConfiguration(const std::string& jsonStr) {}
@@ -138,6 +143,7 @@ public:
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpateData_ = true;
+    std::string cardHapPath_;
 
 private:
     static thread_local int32_t currentId_;

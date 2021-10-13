@@ -136,6 +136,12 @@ void DialogComponent::BuildChild(const RefPtr<ThemeManager>& themeManager)
 RefPtr<BoxComponent> DialogComponent::BuildBox(bool& isLimit)
 {
     auto box = AceType::MakeRefPtr<BoxComponent>();
+    // If use custom style, don't set default style.
+    if (properties_.customStyle) {
+        isLimit = false;
+        return box;
+    }
+
     auto backDecoration = AceType::MakeRefPtr<Decoration>();
     backDecoration->SetBackgroundColor(backgroundColor_);
     Border border;

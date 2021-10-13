@@ -55,6 +55,8 @@ public:
     void ExecuteShow();
     void ExecuteHide();
 
+    bool HasPageTransition() const;
+
     void ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo);
     JSRef<JSVal> ExecuteFunctionWithReturn(JSWeak<JSFunc>& func, const char* debugInfo);
 

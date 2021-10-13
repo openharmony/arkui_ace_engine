@@ -57,7 +57,7 @@ void JSForm::Create(const JSCallbackInfo& info)
     fomInfo.moduleName = module->ToString();
     fomInfo.dimension = dimension->ToNumber<int32_t>();
 
-    RefPtr<FormComponent> form = AceType::MakeRefPtr<OHOS::Ace::FormComponent>("", "card");
+    RefPtr<FormComponent> form = AceType::MakeRefPtr<OHOS::Ace::FormComponent>();
     form->SetFormRequestionInfo(fomInfo);
 #else
     // for PC Preivew
@@ -76,7 +76,7 @@ void JSForm::Create(const JSCallbackInfo& info)
     form->SetChild(mountBox);
 #endif
 
-    ViewStackProcessor::GetInstance()->Push(form);
+    ViewStackProcessor::GetInstance()->Push(form, false, "FormComponent");
 }
 
 void JSForm::SetSize(const JSCallbackInfo& info)
@@ -108,7 +108,7 @@ void JSForm::SetSize(const JSCallbackInfo& info)
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (form) {
-        form->SetCardSize(width, height);
+        form->SetCardSize(width.IsValid() ? width : 0.0_vp, height.IsValid() ? height : 0.0_vp);
     }
 #else
     // for PC Preview
@@ -235,6 +235,7 @@ void JSForm::JSBind(BindingTarget globalObj)
     JSClass<JSForm>::StaticMethod("dimension", &JSForm::SetDimension, opt);
     JSClass<JSForm>::StaticMethod("allowUpdate", &JSForm::AllowUpdate, opt);
     JSClass<JSForm>::StaticMethod("visibility", &JSForm::SetVisibility, opt);
+    JSClass<JSForm>::StaticMethod("clip", &JSViewAbstract::JsClip, opt);
 
     JSClass<JSForm>::StaticMethod("onAcquired", &JSForm::JsOnAcquired);
     JSClass<JSForm>::StaticMethod("onError", &JSForm::JsOnError);

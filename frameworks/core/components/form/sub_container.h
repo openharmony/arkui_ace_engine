@@ -35,12 +35,6 @@ public:
     void UpdateCard(const std::string content);
     void Destroy();
 
-    void SetStageElement(const RefPtr<Element>& stage)
-    {
-        stageElement_ = stage;
-        frontend_->SetPageParentElement(stageElement_);
-    }
-
     void SetFormElement(const WeakPtr<Element>& element)
     {
         formElement_ = element;
@@ -56,16 +50,6 @@ public:
         formComponent_ = mountPoint;
     }
 
-    void SetRootElementScale(double scale)
-    {
-        scale_ = scale;
-    }
-
-    double GetRootElementScale() const
-    {
-        return scale_;
-    }
-
     RefPtr<TaskExecutor> GetTaskExecutor() const
     {
         return taskExecutor_;
@@ -75,6 +59,9 @@ public:
     {
         return pipelineContext_;
     }
+
+    void UpdateRootElmentSize();
+    void UpdateSurfaceSize();
 
     void AddFormAcquireCallback(const OnFormAcquiredCallback& callback)
     {
@@ -96,20 +83,22 @@ public:
 private:
     RefPtr<CardFrontend> frontend_;
     RefPtr<TaskExecutor> taskExecutor_;
-    RefPtr<TaskExecutor> subTaskExecutor_;
     RefPtr<PipelineContext> pipelineContext_;
     WeakPtr<PipelineContext> outSidePipelineContext_;
     RefPtr<AssetManager> assetManager_;
 
     int64_t runningCardId_ = 0;
-    double scale_ = 1.0f;
-
     bool allowUpdate_ = true;
 
-    RefPtr<Element> stageElement_;
     RefPtr<Component> formComponent_;
     WeakPtr<Element> formElement_;
     OnFormAcquiredCallback onFormAcquiredCallback_;
+
+    double surfaceWidth_ = 1.0f;
+    double surfaceHeight_ = 1.0f;
+    Dimension rootWidht_ = 0.0_vp;
+    Dimension rootHeight_ = 0.0_vp;
+    double density_ = 1.0f;
 };
 
 } // namespace OHOS::Ace

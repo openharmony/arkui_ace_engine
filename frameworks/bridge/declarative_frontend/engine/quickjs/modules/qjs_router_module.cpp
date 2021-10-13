@@ -203,6 +203,28 @@ JSValue PageGetParams(JSContext* ctx, JSValueConst value, int32_t argc, JSValueC
     return paramsRes;
 }
 
+JSValue PostponePageTransition(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        return JS_NULL;
+    }
+    instance->GetDelegate()->PostponePageTransition();
+    return JS_NULL;
+}
+
+JSValue LaunchPageTransition(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        return JS_NULL;
+    }
+    instance->GetDelegate()->LaunchPageTransition();
+    return JS_NULL;
+}
+
 void InitRouterModule(JSContext* ctx, JSValue& moduleObj)
 {
     JS_SetPropertyStr(ctx, moduleObj, ROUTE_PAGE_PUSH, JS_NewCFunction(ctx, PagePush, ROUTE_PAGE_PUSH, 1));
@@ -214,6 +236,6 @@ void InitRouterModule(JSContext* ctx, JSValue& moduleObj)
     JS_SetPropertyStr(
         ctx, moduleObj, ROUTE_PAGE_GET_STATE, JS_NewCFunction(ctx, PageGetState, ROUTE_PAGE_GET_STATE, 0));
     JS_SetPropertyStr(
-        ctx, moduleObj, ROUTE_PAGE_GET_PARAMS, JS_NewCFunction(ctx, PageGetParams, ROUTE_PAGE_GET_PARAMS, 0));
+        ctx, moduleObj, ROUTE_POSTPONE, JS_NewCFunction(ctx, PostponePageTransition, ROUTE_POSTPONE, 0));
 }
 } // namespace OHOS::Ace::Framework

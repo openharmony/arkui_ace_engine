@@ -80,7 +80,7 @@ public:
     void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) override;
     void HandleUncaughtException() override;
 
-    EcmaVM *GetEcmaVm() const
+    const EcmaVM *GetEcmaVm() const
     {
         return vm_;
     }

@@ -86,10 +86,10 @@ void RenderXComponent::PerformLayout()
 void RenderXComponent::OnPaintFinish()
 {
     auto xcomponent = delegate_->GetXComponent().Upgrade();
+    position_ = GetGlobalOffset();
     if (std::strcmp(xcomponent->GetXComponentType().c_str(), "texture") == 0) {
         return;
     }
-    position_ = GetGlobalOffset();
     CreateXComponentPlatformResource();
     UpdateXComponentLayout();
 }
@@ -111,6 +111,59 @@ void RenderXComponent::UpdateXComponentLayout()
     }
     prePosition_ = position_;
     preDrawSize_ = drawSize_;
+}
+
+void RenderXComponent::NativeXComponentDestroy()
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("NativeXComponentDestroy context null");
+        return;
+    }
+
+    pipelineContext->GetTaskExecutor()->PostTask(
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_] {
+        auto nXCompImpl = weakNXCompImpl.Upgrade();
+        if (nXComp != nullptr && nXCompImpl) {
+            auto surface = nXCompImpl->GetSurface();
+            auto callback = nXCompImpl->GetCallback();
+            if (callback != nullptr && callback->OnSurfaceDestroyed != nullptr) {
+                callback->OnSurfaceDestroyed(nXComp, surface);
+            }
+        } else {
+            LOGE("Native XComponent nullptr");
+        }
+    },
+    TaskExecutor::TaskType::JS);
+}
+
+void RenderXComponent::NativeXComponentDispatchTouchEvent(const TouchInfo& touchInfo)
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("NativeXComponentDispatchTouchEvent context null");
+        return;
+    }
+    float scale = pipelineContext->GetViewScale();
+    float diffX = touchInfo.x - position_.GetX() * scale;
+    float diffY = touchInfo.y - position_.GetY() * scale;
+    if (diffX >= 0 & diffX <= drawSize_.Width() * scale  && diffY >= 0 && diffY <= drawSize_.Height() * scale) {
+        pipelineContext->GetTaskExecutor()->PostTask(
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, touchInfo] {
+            auto nXCompImpl = weakNXCompImpl.Upgrade();
+            if (nXComp != nullptr && nXCompImpl) {
+                nXCompImpl->SetTouchInfo(touchInfo);
+                auto surface = nXCompImpl->GetSurface();
+                auto callback = nXCompImpl->GetCallback();
+                if (callback != nullptr && callback->DispatchTouchEvent != nullptr) {
+                    callback->DispatchTouchEvent(nXComp, surface);
+                }
+            } else {
+                LOGE("Native XComponent nullptr");
+            }
+        },
+        TaskExecutor::TaskType::JS);
+    }
 }
 
 void RenderXComponent::CallXComponentLayoutMethod()

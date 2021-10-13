@@ -29,9 +29,9 @@ constexpr char IMAGE_SRC[] = "src";
 constexpr char IMAGE_WIDTH[] = "width";
 constexpr char IMAGE_HEIGHT[] = "height";
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 constexpr char CANVAS_TYPE_WEBGL[] = "webgl";
 constexpr char CANVAS_TYPE_WEBGL2[] = "webgl2";
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 constexpr char CANVAS_WEBGL_SO[] = "webglnapi";
 #endif
 
@@ -214,24 +214,43 @@ const JSCFunctionListEntry JS_ANIMATION_FUNCS[] = {
     JS_CGETSET_DEF("shadowOffsetY", CanvasBridge::JsShadowOffsetYGetter, CanvasBridge::JsShadowOffsetYSetter),
     JS_CGETSET_DEF("imageSmoothingEnabled",
         CanvasBridge::JsSmoothingEnabledGetter, CanvasBridge::JsSmoothingEnabledSetter),
-    JS_CGETSET_DEF("imageSmoothingQuality",
-        CanvasBridge::JsSmoothingQualityGetter, CanvasBridge::JsSmoothingQualitySetter),
+    JS_CGETSET_DEF("offsetWidth", CanvasBridge::JsOffsetWidthGetter, nullptr),
+    JS_CGETSET_DEF("offsetHeight", CanvasBridge::JsOffsetHeightGetter, nullptr),
 };
+
+CanvasBridge::~CanvasBridge()
+{
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (webglRenderContext_) {
+        delete webglRenderContext_;
+        webglRenderContext_ = nullptr;
+    }
+    if (webgl2RenderContext_) {
+        delete webgl2RenderContext_;
+        webgl2RenderContext_ = nullptr;
+    }
+#endif
+}
 
 void CanvasBridge::HandleJsContext(JSContext* ctx, NodeId id, const std::string& args, JsEngineInstance* engine)
 {
     LOGD("CanvasBridge::HandleJsContext");
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
     if (argsValue && argsValue->IsArray() && argsValue->GetArraySize() > 0) {
         auto typeArg = argsValue->GetArrayItem(0);
         if (typeArg && typeArg->IsString()) {
             std::string type = typeArg->GetString();
-            if (type == std::string(CANVAS_TYPE_WEBGL) || type == std::string(CANVAS_TYPE_WEBGL2)) {
-                JSHandleWebglContext(ctx, id, args, engine);
+            if (type == std::string(CANVAS_TYPE_WEBGL)) {
+                JSHandleWebglContext(ctx, id, args, engine, webglRenderContext_);
+                return;
+            } else if (type == std::string(CANVAS_TYPE_WEBGL2)) {
+                JSHandleWebglContext(ctx, id, args, engine, webgl2RenderContext_);
                 return;
             }
         }
     }
+#endif
 
     renderContext_ = JS_NewObject(ctx);
     const std::vector<std::pair<const char*, JSValue>> contextTable = {
@@ -272,6 +291,7 @@ void CanvasBridge::HandleJsContext(JSContext* ctx, NodeId id, const std::string&
         { "createImageData", JS_NewCFunction(ctx, JsCreateImageData, "createImageData", 2) },
         { "putImageData", JS_NewCFunction(ctx, JsPutImageData, "putImageData", 7) },
         { "getImageData", JS_NewCFunction(ctx, JsGetImageData, "getImageData", 4) },
+        { "getJsonData", JS_NewCFunction(ctx, JsGetJsonData, "getJsonData", 1)},
         { "transferFromImageBitmap", JS_NewCFunction(ctx, JsTransferFromImageBitmap, "transferFromImageBitmap", 1)},
     };
 
@@ -284,7 +304,8 @@ void CanvasBridge::HandleJsContext(JSContext* ctx, NodeId id, const std::string&
 }
 
 void CanvasBridge::JSHandleWebglContext(
-    JSContext* ctx, NodeId id, const std::string& args, JsEngineInstance* engine)
+    JSContext* ctx, NodeId id, const std::string& args, JsEngineInstance* engine,
+    CanvasRenderContextBase*& canvasRenderContext)
 {
     LOGD("CanvasBridge::HandleWebglContext");
     if (engine == nullptr) {
@@ -300,8 +321,8 @@ void CanvasBridge::JSHandleWebglContext(
     std::string moduleName(CANVAS_WEBGL_SO);
     std::string pluginId(std::to_string(id));
     renderContext_ = nativeEngine->GetModuleFromName(
-        moduleName, false, pluginId, args, WEBGL_RENDER_CONTEXT_NAME, reinterpret_cast<void**>(&canvasRenderContext_));
-    if (!canvasRenderContext_) {
+        moduleName, false, pluginId, args, WEBGL_RENDER_CONTEXT_NAME, reinterpret_cast<void**>(&canvasRenderContext));
+    if (!canvasRenderContext) {
         LOGE("CanvasBridge invalid canvasRenderContext");
         return;
     }
@@ -315,7 +336,7 @@ void CanvasBridge::JSHandleWebglContext(
         LOGE("page is null.");
         return;
     }
-    auto task = [weak = WeakClaim(this), page, id]() {
+    auto task = [canvasRenderContext, page, id]() {
         auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
         if (!canvas) {
             LOGE("DOMCanvas is null.");
@@ -327,14 +348,11 @@ void CanvasBridge::JSHandleWebglContext(
             LOGE("TaskPool is null.");
             return;
         }
-        auto bridge = weak.Upgrade();
-        if (bridge) {
-            pool->WebGLInit(bridge->canvasRenderContext_);
-        }
+        pool->WebGLInit(canvasRenderContext);
     };
     instance->GetDelegate()->PostSyncTaskToPage(task);
 
-    canvasRenderContext_->Init();
+    canvasRenderContext->Init();
 
     auto onWebGLUpdateCallback = [ctx, id]() {
         auto task = [](const RefPtr<CanvasTaskPool>& pool) {
@@ -342,7 +360,7 @@ void CanvasBridge::JSHandleWebglContext(
         };
         PushTaskToPageById(ctx, id, task);
     };
-    canvasRenderContext_->SetUpdateCallback(onWebGLUpdateCallback);
+    canvasRenderContext->SetUpdateCallback(onWebGLUpdateCallback);
 #endif
 }
 
@@ -1585,6 +1603,10 @@ JSValue CanvasBridge::JsGetImageData(JSContext* ctx, JSValueConst value, int32_t
         return JS_NULL;
     }
     Rect rect = GetJsRectParam(ctx, argc, argv);
+    rect.SetLeft(static_cast<int32_t>(rect.Left()));
+    rect.SetTop(static_cast<int32_t>(rect.Top()));
+    rect.SetWidth(static_cast<int32_t>(rect.Width()));
+    rect.SetHeight(static_cast<int32_t>(rect.Height()));
     NodeId id = GetCurrentNodeId(ctx, value);
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     auto page = instance->GetRunningPage();
@@ -1626,6 +1648,38 @@ JSValue CanvasBridge::JsGetImageData(JSContext* ctx, JSValueConst value, int32_t
     }
     JS_SetPropertyStr(ctx, imageData, "data", colorArray);
     return imageData;
+}
+
+JSValue CanvasBridge::JsGetJsonData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    // 1 parameters: JsGetJsonData(path)
+    if (!argv || (argc != 1)) {
+        return JS_NULL;
+    }
+    NodeId id = GetCurrentNodeId(ctx, value);
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    auto page = instance->GetRunningPage();
+    if (!page) {
+        return JS_NULL;
+    }
+
+    std::string path = JS_ToCString(ctx, argv[0]);
+    std::string jsonData;
+    auto task = [id, page, path, &jsonData]() {
+        auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+        if (!canvas) {
+            return;
+        }
+        auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
+        auto canvasTask = paintChild->GetTaskPool();
+        if (!canvasTask) {
+            return;
+        }
+        jsonData = canvasTask->GetJsonData(path);
+    };
+    instance->GetDelegate()->PostSyncTaskToPage(task);
+
+    return JS_NewString(ctx, jsonData.c_str());
 }
 
 JSValue CanvasBridge::JsFillStyleGetter(JSContext* ctx, JSValueConst value)
@@ -2001,6 +2055,36 @@ JSValue CanvasBridge::JsSmoothingQualitySetter(JSContext* ctx, JSValueConst valu
     PushTaskToPage(ctx, value, task);
     JS_SetPropertyStr(ctx, value, "__imageSmoothingQuality", JS_DupValue(ctx, proto));
     return JS_NULL;
+}
+
+JSValue CanvasBridge::JsOffsetWidthGetter(JSContext* ctx, JSValueConst value)
+{
+    NodeId id = GetCurrentNodeId(ctx, value);
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    auto page = instance->GetRunningPage();
+    if (!page) {
+        return JS_NULL;
+    }
+    auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+    if (!canvas) {
+        return JS_NULL;
+    }
+    return JS_NewFloat64(ctx, canvas->GetWidth().Value());
+}
+
+JSValue CanvasBridge::JsOffsetHeightGetter(JSContext* ctx, JSValueConst value)
+{
+    NodeId id = GetCurrentNodeId(ctx, value);
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    auto page = instance->GetRunningPage();
+    if (!page) {
+        return JS_NULL;
+    }
+    auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+    if (!canvas) {
+        return JS_NULL;
+    }
+    return JS_NewFloat64(ctx, canvas->GetHeight().Value());
 }
 
 } // namespace OHOS::Ace::Framework

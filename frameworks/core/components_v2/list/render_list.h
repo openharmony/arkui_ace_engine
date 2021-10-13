@@ -235,6 +235,8 @@ protected:
     double lastPos_ = 0.0f;
     bool autoScrollingForItemMove_ = false;
     bool movingForward_ = false;
+    double dipScale_ = 1.0;
+    double offset_ = 0.0;
 
 private:
     bool ActionByScroll(bool forward, ScrollEventBack scrollEventBack);

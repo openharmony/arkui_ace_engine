@@ -39,6 +39,7 @@ Size FlutterRenderShape::CalcSize()
         case ShapeType::ELLIPSE:
             return CreateEllipse();
         case ShapeType::LINE:
+            path_.reset();
             path_.moveTo(NormalizePercentToPx(start_.first, false), NormalizePercentToPx(start_.second, true));
             path_.lineTo(NormalizePercentToPx(end_.first, false), NormalizePercentToPx(end_.second, true));
             break;
@@ -53,6 +54,9 @@ Size FlutterRenderShape::CalcSize()
             return Size();
     }
     auto skRect =  path_.getBounds();
+    if (width_.IsValid() && height_.IsValid()) {
+        return Size(NormalizePercentToPx(width_, false), NormalizePercentToPx(height_, true));
+    }
     return Size(skRect.right(), skRect.bottom());
 }
 
@@ -131,6 +135,9 @@ Size FlutterRenderShape::CreatePolygon(bool needClose)
     }
     path_.addPoly(&skPoints[0], skPoints.size(), needClose);
     auto skRect =  path_.getBounds();
+    if (width_.IsValid() && height_.IsValid()) {
+        return Size(NormalizePercentToPx(width_, false), NormalizePercentToPx(height_, true));
+    }
     return Size(skRect.right(), skRect.bottom());
 }
 

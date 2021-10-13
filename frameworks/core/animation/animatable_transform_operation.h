@@ -51,7 +51,9 @@ private:
 
     void SetCurrentValue(const TransformOperation& other)
     {
-        if (type_ != TransformOperationType::UNDEFINED && type_ != other.type_) {
+        auto pipelineContext = context_.Upgrade();
+        if (pipelineContext && pipelineContext->GetIsDeclarative() && type_ != TransformOperationType::UNDEFINED &&
+            type_ != other.type_) {
             LOGE("SetCurrentValue failed, not same type");
             return;
         }

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_ROW_COMPOSED_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_ROW_COMPOSED_ELEMENT_H
 
+#include "core/components/flex/flex_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -32,6 +33,7 @@ public:
     std::unique_ptr<JsonValue> ToJsonObject() const override;
     std::string GetAlignItems() const;
     std::string GetSpace() const;
+    std::string GetVerticalAlign() const;
 };
 
 } // namespace OHOS::Ace

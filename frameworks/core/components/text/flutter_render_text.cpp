@@ -83,6 +83,8 @@ void FlutterRenderText::Paint(RenderContext& context, const Offset& offset)
     auto paintOffset = offset - Offset(0.0, baselineOffset);
     auto textRealWidth = paragraph_->GetMaxWidth();
     auto textRealHeight = paragraph_->GetHeight();
+    SetParagraphWidth(textRealWidth);
+    SetParagraphHeight(textRealHeight);
     float newX = paintOffset.GetX();
     float newY = paintOffset.GetY();
 

@@ -522,6 +522,9 @@ void RenderFlex::PerformLayoutInItemMode()
             item->Layout(MakeStretchInnerLayoutParam(item));
         }
     } else {
+        for (const auto& item : stretchNodes_) {
+            item->Layout(MakeStretchInnerLayoutParam(item));
+        }
         mainAxisSize = MainAxisSize::MIN;
     }
     LayoutAbsoluteChildren();
@@ -729,11 +732,14 @@ void RenderFlex::PlaceChildren(double frontSpace, double betweenSpace, const Bas
     }
 }
 
-void RenderFlex::LayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, FlexItemProperties& flexItemProperties) const
+void RenderFlex::LayoutFlexItem(RefPtr<RenderFlexItem>& flexItem, FlexItemProperties& flexItemProperties)
 {
     double itemShrink = flexItem->GetFlexShrink();
     double itemGrow = flexItem->GetFlexGrow();
     double itemBasis = flexItem->GetFlexBasisToPx();
+    if (flexItem->MustStretch()) {
+        stretchNodes_.emplace_back(flexItem);
+    }
     if (itemGrow > 0) {
         flexItemProperties.lastGrowChild = flexItem;
     }
@@ -757,6 +763,14 @@ void RenderFlex::RelayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, double
 {
     bool canItemStretch = flexItem->MustStretch() || ((GetSelfAlign(flexItem) == FlexAlign::STRETCH) &&
                                                          (flexItem->GetStretchFlag()) && (relativeNodes_.size() > 1));
+    const static int32_t PLATFORM_VERSION_FIVE = 5;
+    auto context = GetContext().Upgrade();
+    if (context && context->GetMinPlatformVersion() <= PLATFORM_VERSION_FIVE) {
+        // less or equal than api 5
+        canItemStretch =
+            flexItem->MustStretch() || ((GetSelfAlign(flexItem) == FlexAlign::STRETCH) && (flexItem->GetStretchFlag()));
+    }
+
     if (NearZero(flexSize) && !canItemStretch) {
         return;
     }
@@ -778,6 +792,7 @@ void RenderFlex::RelayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, double
             innerMax.SetWidth(crossStretch);
         }
         innerLayout.SetMaxSize(innerMax);
+        innerLayout.SetMinSize(innerMax);
     }
     flexItem->Layout(innerLayout);
     allocatedFlexSpace += flexSize;
@@ -915,6 +930,7 @@ void RenderFlex::ClearChildrenLists()
     magicNodes_.clear();
     magicWeightMaps_.clear();
     displayNodes_.clear();
+    stretchNodes_.clear();
 }
 
 void RenderFlex::ResizeByItem(const RefPtr<RenderNode>& item, double &allocatedSize)
@@ -1080,6 +1096,7 @@ void RenderFlex::ClearRenderObject()
     magicNodes_.clear();
     magicWeightMaps_.clear();
     displayNodes_.clear();
+    stretchNodes_.clear();
     scrollNode = nullptr;
     isMainInfinite_ = false;
     isCrossInfinite_ = false;

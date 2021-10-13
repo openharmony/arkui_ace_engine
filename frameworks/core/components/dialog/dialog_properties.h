@@ -55,6 +55,7 @@ struct DialogProperties {
     std::string title;                    // title of dialog.
     std::string content;                  // message of dialog.
     bool autoCancel = true;               // pop dialog when click mask if autoCancel is true.
+    bool customStyle = false;             // whether use custom style.
     bool isMenu = false;
     std::vector<std::pair<std::string, std::string>> buttons; // <text of button, color of text>
     std::unordered_map<std::string, EventMarker> callbacks;   // <callback type(success, cancel, complete), eventId>

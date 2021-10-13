@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSRefresh: public JSViewAbstract, public JSInteractableView {
+class JSRefresh : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);

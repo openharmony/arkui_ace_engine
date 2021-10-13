@@ -90,14 +90,17 @@ public:
         const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder);
 
     // get out source image data asynchronously.
-    static void FatchImageObject(
+    static void FetchImageObject(
         ImageSourceInfo imageInfo,
         ImageObjSuccessCallback successCallback,
+        UploadSuccessCallback uploadSuccessCallback,
         FailedCallback failedCallback,
         const WeakPtr<PipelineContext> context,
         bool syncMode,
         bool useSkiaSvg,
+        bool needAutoResize,
         const std::optional<Color>& color,
+        RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
         OnPostBackgroundTask onBackgroundTaskPostCallback = nullptr);
 
     static sk_sp<SkImage> ResizeSkImage(
@@ -132,6 +135,9 @@ public:
         const ImageSourceInfo& imageInfo,
         const RefPtr<PipelineContext> context,
         const Size& targetSize = Size());
+
+    static RefPtr<ImageObject> QueryImageObjectFromCache(
+        const ImageSourceInfo& imageInfo, const RefPtr<PipelineContext>& pipelineContext);
 };
 
 } // namespace OHOS::Ace

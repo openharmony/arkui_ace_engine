@@ -63,7 +63,10 @@ std::string SpanComposedElement::GetDeclaration() const
     auto renderTextSpan = GetRenderTextSpan();
     auto textDecoration =
         renderTextSpan ? renderTextSpan->GetSpanStyle().GetTextDecoration() : TextDecoration::NONE;
-    return ConvertWrapTextDecorationToStirng(textDecoration);
+    auto textDecorationColor = renderTextSpan ? renderTextSpan->GetSpanStyle().GetTextDecorationColor() : Color::BLACK;
+    std::string result =
+        ConvertWrapTextDecorationToStirng(textDecoration) + "," + ConvertColorToString(textDecorationColor);
+    return result;
 }
 
 std::string SpanComposedElement::GetTextCase() const

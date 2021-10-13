@@ -91,34 +91,47 @@ void SetAnimationProperties(const RefPtr<Animation<T>>& animation, TweenOption& 
     }
 }
 
-void TransformUpdate(WeakPtr<RenderTransform>& weakPtr, const TransformOperation& value)
+void TransformUpdate(
+    WeakPtr<RenderTransform>& weakPtr, WeakPtr<TransformComponent>& transform, const TransformOperation& value)
 {
     auto renderTransformNode = weakPtr.Upgrade();
-    if (renderTransformNode) {
+    auto transformComponent = transform.Upgrade();
+    if (renderTransformNode && transformComponent) {
+        transformComponent->ResetTransform();
         switch (value.type_) {
             case TransformOperationType::TRANSLATE:
                 renderTransformNode->Translate(
                     value.translateOperation_.dx, value.translateOperation_.dy, value.translateOperation_.dz);
+                transformComponent->Translate(
+                    value.translateOperation_.dx, value.translateOperation_.dy, value.translateOperation_.dz);
                 break;
             case TransformOperationType::SKEW:
                 renderTransformNode->Skew(value.skewOperation_.skewX, value.skewOperation_.skewY);
+                transformComponent->Skew(value.skewOperation_.skewX, value.skewOperation_.skewY);
                 break;
             case TransformOperationType::ROTATE:
                 renderTransformNode->Rotate(value.rotateOperation_.angle, value.rotateOperation_.dx,
                     value.rotateOperation_.dy, value.rotateOperation_.dz);
+                transformComponent->Rotate(value.rotateOperation_.angle, value.rotateOperation_.dx,
+                    value.rotateOperation_.dy, value.rotateOperation_.dz);
                 break;
             case TransformOperationType::MATRIX:
                 renderTransformNode->Matrix3D(value.matrix4_);
+                transformComponent->Matrix3d(value.matrix4_);
                 break;
             case TransformOperationType::SCALE:
                 renderTransformNode->Scale(
                     value.scaleOperation_.scaleX, value.scaleOperation_.scaleY, value.scaleOperation_.scaleZ);
+                transformComponent->Scale(
+                    value.scaleOperation_.scaleX, value.scaleOperation_.scaleY, value.scaleOperation_.scaleZ);
                 break;
             case TransformOperationType::PERSPECTIVE:
                 renderTransformNode->Perspective(value.perspectiveOperation_.distance);
+                transformComponent->Perspective(value.perspectiveOperation_.distance);
                 break;
             case TransformOperationType::UNDEFINED:
                 renderTransformNode->Translate(Dimension {}, Dimension {}, Dimension {});
+                transformComponent->Translate(Dimension {}, Dimension {}, Dimension {});
                 break;
             default:
                 LOGE("unsupported transform operation");
@@ -127,15 +140,52 @@ void TransformUpdate(WeakPtr<RenderTransform>& weakPtr, const TransformOperation
     }
 }
 
-void CreateTransformAnimation(const RefPtr<RenderTransform>& renderTransformNode, TweenOption& option)
+void CreateTransformAnimation(const RefPtr<RenderTransform>& renderTransformNode,
+    const WeakPtr<TransformComponent>& transform, TweenOption& option)
 {
     WeakPtr<RenderTransform> weak(renderTransformNode);
 
     for (const auto& animation : option.GetTransformAnimations()) {
         if (animation) {
             SetAnimationProperties(animation, option);
-            animation->AddListener(std::bind(TransformUpdate, weak, std::placeholders::_1));
+            animation->AddListener(std::bind(TransformUpdate, weak, transform, std::placeholders::_1));
         }
+    }
+}
+
+void OpacityAnimationListener(
+    const WeakPtr<RenderDisplay>& weakRender, WeakPtr<DisplayComponent>& display, float value)
+{
+    auto opacity = static_cast<uint8_t>(Round(value * UINT8_MAX));
+    if (value < 0.0f || value > 1.0f) {
+        opacity = UINT8_MAX;
+    }
+    auto renderDisplayNode = weakRender.Upgrade();
+    auto displayComponent = display.Upgrade();
+    if (renderDisplayNode) {
+        renderDisplayNode->UpdateOpacity(opacity);
+        if (displayComponent) {
+            displayComponent->SetOpacity((double) opacity / UINT8_MAX);
+        }
+    }
+}
+
+void CreateOpacityAnimation(
+    const RefPtr<RenderDisplay>& renderDisplayNode, const WeakPtr<DisplayComponent>& display, TweenOption& option)
+{
+    auto& opacityAnimation = option.GetOpacityAnimation();
+    if (!opacityAnimation) {
+        LOGD("create opacity animation with null. skip it.");
+        return;
+    }
+    if (!opacityAnimation->HasInitValue()) {
+        opacityAnimation->SetInitValue(UINT8_MAX);
+    }
+    WeakPtr<RenderDisplay> weakRender = renderDisplayNode;
+    opacityAnimation->AddListener(std::bind(OpacityAnimationListener, weakRender, display, std::placeholders::_1));
+
+    if (option.GetCurve()) {
+        opacityAnimation->SetCurve(option.GetCurve());
     }
 }
 
@@ -326,11 +376,11 @@ void TweenElement::ApplyOperation(RefPtr<Animator>& controller, AnimationOperati
 
 void TweenElement::OnPostFlush()
 {
-    auto pipelineContext = context_.Upgrade();
-    if (!pipelineContext) {
+    if (skipPostFlush_) {
+        skipPostFlush_ = false;
         return;
     }
-    pipelineContext->AddPreFlushListener(AceType::Claim(this));
+    AddPreFlush();
 }
 
 void TweenElement::OnPreFlush()
@@ -429,8 +479,20 @@ RefPtr<Component> TweenElement::BuildChild()
 {
     RefPtr<TweenComponent> tween = AceType::DynamicCast<TweenComponent>(component_);
     if (tween) {
-        RefPtr<TransformComponent> transformComponent = AceType::MakeRefPtr<TransformComponent>();
-        RefPtr<DisplayComponent> displayComponent = AceType::MakeRefPtr<DisplayComponent>(transformComponent);
+        RefPtr<DisplayComponent> displayComponent = AceType::DynamicCast<DisplayComponent>(tween->GetChild());
+        RefPtr<TransformComponent> transformComponent;
+        if (displayComponent) {
+            transformComponent = AceType::DynamicCast<TransformComponent>(displayComponent->GetChild());
+            if (!transformComponent) {
+                transformComponent = AceType::MakeRefPtr<TransformComponent>();
+                transformComponent->SetChild(displayComponent->GetChild());
+                displayComponent->SetChild(transformComponent);
+            }
+        } else {
+            transformComponent = AceType::MakeRefPtr<TransformComponent>();
+            displayComponent = AceType::MakeRefPtr<DisplayComponent>(transformComponent);
+            transformComponent->SetChild(ComposedElement::BuildChild());
+        }
         displayComponent->SetPositionType(positionParam_.type);
         displayComponent->SetHasLeft(positionParam_.left.second);
         displayComponent->SetHasRight(positionParam_.right.second);
@@ -441,7 +503,8 @@ RefPtr<Component> TweenElement::BuildChild()
         displayComponent->SetTop(positionParam_.top.first);
         displayComponent->SetBottom(positionParam_.bottom.first);
         displayComponent->DisableLayer(tween->IsLeafNode());
-        transformComponent->SetChild(ComposedElement::BuildChild());
+        transform_ = transformComponent;
+        display_ = displayComponent;
         return displayComponent;
     } else {
         LOGE("no tween component found. return empty child.");
@@ -640,33 +703,6 @@ void TweenElement::CreateRotateAnimation(const RefPtr<RenderTransform>& renderTr
     }
 }
 
-void TweenElement::CreateOpacityAnimation(const RefPtr<RenderDisplay>& renderDisplayNode, TweenOption& option)
-{
-    auto& opacityAnimation = option.GetOpacityAnimation();
-    if (!opacityAnimation) {
-        LOGD("create opacity animation with null. skip it.");
-        return;
-    }
-    if (!opacityAnimation->HasInitValue()) {
-        opacityAnimation->SetInitValue(UINT8_MAX);
-    }
-    WeakPtr<RenderDisplay> weakRender = renderDisplayNode;
-    opacityAnimation->AddListener([weakRender](float value) {
-        auto opacity = static_cast<uint8_t>(std::round(value * UINT8_MAX));
-        if (value < 0.0f || value > 1.0f) {
-            opacity = UINT8_MAX;
-        }
-        auto renderDisplayNode = weakRender.Upgrade();
-        if (renderDisplayNode) {
-            renderDisplayNode->UpdateOpacity(opacity);
-        }
-    });
-
-    if (option.GetCurve()) {
-        opacityAnimation->SetCurve(option.GetCurve());
-    }
-}
-
 void TweenElement::CreateColorAnimation(const RefPtr<PropertyAnimatable>& animatable, TweenOption& option)
 {
     if (!animatable) {
@@ -779,6 +815,20 @@ void TweenElement::SetOpacity(uint8_t opacity)
     }
     LOGD("set Opacity. Opacity: %{public}d", opacity);
     displayRenderNode->UpdateOpacity(opacity);
+}
+
+void TweenElement::SkipPostFlush()
+{
+    skipPostFlush_ = true;
+}
+
+void TweenElement::AddPreFlush()
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        return;
+    }
+    pipelineContext->AddPreFlushListener(AceType::Claim(this));
 }
 
 void TweenElement::SetWrapHidden(bool hidden)
@@ -912,7 +962,7 @@ bool TweenElement::ApplyKeyframes(RefPtr<Animator>& controller, TweenOption& opt
         CreateColorAnimation(animatable, option);
         CreatePropertyAnimationFloat(animatable, option);
     }
-    CreateTransformAnimation(transformRenderNode, option);
+    CreateTransformAnimation(transformRenderNode, transform_, option);
     CreateTranslateAnimation(transformRenderNode, option);
     CreateScaleAnimation(transformRenderNode, option);
     CreateRotateAnimation(transformRenderNode, option);
@@ -920,7 +970,7 @@ bool TweenElement::ApplyKeyframes(RefPtr<Animator>& controller, TweenOption& opt
     if (option.HasTransformOffsetChanged() || option.HasTransformFloatChanged() || option.HasTransformChanged()) {
         AddPrepareListener(controller, transformRenderNode, prepareId);
     }
-    CreateOpacityAnimation(displayRenderNode, option);
+    CreateOpacityAnimation(displayRenderNode, display_, option);
     return IsNeedAnimation(controller, option);
 }
 

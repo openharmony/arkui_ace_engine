@@ -38,6 +38,8 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("showSteps", &JSSlider::SetShowSteps);
     JSClass<JSSlider>::StaticMethod("showTips", &JSSlider::SetShowTips);
     JSClass<JSSlider>::StaticMethod("onChange", &JSSlider::OnChange);
+    JSClass<JSSlider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSlider>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSlider>::Inherit<JSViewAbstract>();
     JSClass<JSSlider>::Bind(globalObj);
 }
@@ -76,8 +78,8 @@ void JSSlider::Create(const JSCallbackInfo& info)
         step = getStep->ToNumber<double>();
     }
 
-    if (step < 0){
-        step = 0 ;
+    if (step < 0) {
+        step = 0;
     }
 
     auto sliderComponent = AceType::MakeRefPtr<OHOS::Ace::SliderComponent>(value, step, min, max);

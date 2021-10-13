@@ -24,11 +24,15 @@
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/sole_child_component.h"
 #include "core/components/declaration/search/search_declaration.h"
+#include "core/components/text_field/textfield_theme.h"
 
 namespace OHOS::Ace {
 
-class SearchComponent : public SoleChildComponent {
+class ACE_EXPORT SearchComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(SearchComponent, SoleChildComponent);
+
+    ACE_DEFINE_COMPONENT_EVENT(OnSubmit, void(const std::string&));
+    ACE_DEFINE_COMPONENT_EVENT(OnChange, void(const std::string&));
 
 public:
     SearchComponent();

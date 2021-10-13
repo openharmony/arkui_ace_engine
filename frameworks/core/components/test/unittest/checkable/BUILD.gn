@@ -110,6 +110,7 @@ ohos_unittest("CheckableComponentTest") {
     "$ace_root/frameworks/core/components/root/root_component.cpp",
     "$ace_root/frameworks/core/components/text/text_component.cpp",
     "$ace_root/frameworks/core/components/text_span/text_span_component.cpp",
+    "$ace_root/frameworks/core/components/transform/transform_component.cpp",
     "$ace_root/frameworks/core/components/tween/tween_component.cpp",
     "$ace_root/frameworks/core/pipeline/base/component.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",

@@ -49,6 +49,8 @@ ACE_EXPORT extern const char ROUTE_KEY_PARAMS[];
 ACE_EXPORT extern const char ROUTE_KEY_DONT_OVERWRITE[];
 ACE_EXPORT extern const char ROUTE_ENABLE_ALERT_BEFORE_BACK_PAGE[];
 ACE_EXPORT extern const char ROUTE_DISABLE_ALERT_BEFORE_BACK_PAGE[];
+ACE_EXPORT extern const char ROUTE_POSTPONE[];
+ACE_EXPORT extern const char ROUTE_LAUNCH[];
 
 // for prompt
 ACE_EXPORT extern const char PROMPT_SHOW_TOAST[];

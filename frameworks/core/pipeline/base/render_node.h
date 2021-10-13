@@ -499,7 +499,7 @@ public:
         return children_;
     }
 
-    void NotifyPaintFinish();
+    virtual void NotifyPaintFinish();
 
     virtual void RenderWithContext(RenderContext& context, const Offset& offset);
     virtual void Paint(RenderContext& context, const Offset& offset);
@@ -699,6 +699,7 @@ public:
     virtual void OnMouseClickDownAnimation() {}
     virtual void OnMouseClickUpAnimation() {}
     virtual void StopMouseHoverAnimation() {}
+    virtual void OnVisibleChanged() {}
 
     void CreateMouseAnimation(RefPtr<KeyframeAnimation<Color>>& animation, const Color& from, const Color& to);
     void SetHoverAndPressCallback(const HoverAndPressCallback& callback)
@@ -938,7 +939,6 @@ protected:
     };
     virtual void OnPositionChanged() {};
     virtual void OnSizeChanged() {};
-    virtual void OnVisibleChanged() {};
     virtual void OnRenderFinish() {};
     virtual void OnStatusChanged(RenderStatus renderStatus) {};
     virtual void OnHiddenChanged(bool hidden) {};

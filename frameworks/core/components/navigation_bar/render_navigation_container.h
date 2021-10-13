@@ -18,6 +18,7 @@
 
 #include "core/animation/animation.h"
 #include "core/animation/animator.h"
+#include "core/components/navigation_bar/navigation_container_component.h"
 #include "core/components/navigation_bar/render_collapsing_navigation_bar.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/related_node.h"
@@ -30,7 +31,7 @@ class RenderNavigationContainer : public RenderNode, public RelatedContainer {
 
 public:
     static RefPtr<RenderNode> Create();
-    void Update(const RefPtr<Component>& component) override {};
+    void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void OnRelatedStart() override;
     void OnRelatedPreScroll(const Offset& delta, Offset& consumed) override;
@@ -40,9 +41,29 @@ public:
     {
         collapsingNavigationBar_ = collapsingNavigationBar;
     }
+    const std::string& GetTitle() const
+    {
+        return title_;
+    }
+    const std::string& GetSubTitle() const
+    {
+        return subTitle_;
+    }
+    bool GetHideBackButton() const
+    {
+        return hideBackButton_;
+    }
+    bool GetHideNavigationBar() const
+    {
+        return hideNavigationBar_;
+    }
 
 private:
     RefPtr<RenderCollapsingNavigationBar> collapsingNavigationBar_;
+    std::string title_;
+    std::string subTitle_;
+    bool hideBackButton_ = false;
+    bool hideNavigationBar_ = false;
 };
 
 } // namespace OHOS::Ace

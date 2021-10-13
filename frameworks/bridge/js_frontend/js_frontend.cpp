@@ -74,116 +74,102 @@ void TouchInfoToString(const BaseEventInfo& info, std::string& eventParam)
     eventParam.append("}]}");
 }
 
-void DragStartInfoToString(const BaseEventInfo& info, std::string& eventParam, std::string& eventType)
+void DragStartInfoToString(const BaseEventInfo& info, std::string& eventParam)
 {
-    eventParam.append("{\"dragevent\":{");
+    eventParam.append("{");
     const auto touchInfo = TypeInfoHelper::DynamicCast<DragStartInfo>(&info);
     if (touchInfo) {
         auto globalLocation = touchInfo->GetGlobalLocation();
         eventParam.append("\"globalX\":")
             .append(std::to_string(globalLocation.GetX()))
             .append(",\"globalY\":")
-            .append(std::to_string(globalLocation.GetY()))
-            .append(",\"timestamp\":")
-            .append(std::to_string(static_cast<double>(touchInfo->GetTimeStamp().time_since_epoch().count())));
+            .append(std::to_string(globalLocation.GetY()));
     }
-    eventParam.append("}}");
+    eventParam.append("}");
 }
 
-void DragUpdateInfoToString(const BaseEventInfo& info, std::string& eventParam, std::string& eventType)
+void DragUpdateInfoToString(const BaseEventInfo& info, std::string& eventParam)
 {
-    eventParam.append("{\"dragevent\":{");
+    eventParam.append("{");
     const auto touchInfo = TypeInfoHelper::DynamicCast<DragUpdateInfo>(&info);
     if (touchInfo) {
         auto globalLocation = touchInfo->GetGlobalLocation();
         eventParam.append("\"globalX\":")
             .append(std::to_string(globalLocation.GetX()))
             .append(",\"globalY\":")
-            .append(std::to_string(globalLocation.GetY()))
-            .append(",\"timestamp\":")
-            .append(std::to_string(static_cast<double>(touchInfo->GetTimeStamp().time_since_epoch().count())));
+            .append(std::to_string(globalLocation.GetY()));
     }
-    eventParam.append("}}");
+    eventParam.append("}");
 }
 
-void DragEnterInfoToString(const BaseEventInfo& info, std::string& eventParam, std::string& eventType)
+void DragEnterInfoToString(const BaseEventInfo& info, std::string& eventParam)
 {
-    eventParam.append("{\"dragevent\":{");
+    eventParam.append("{");
     const auto touchInfo = TypeInfoHelper::DynamicCast<DragUpdateInfo>(&info);
     if (touchInfo) {
         auto globalLocation = touchInfo->GetGlobalLocation();
         eventParam.append("\"globalX\":")
             .append(std::to_string(globalLocation.GetX()))
             .append(",\"globalY\":")
-            .append(std::to_string(globalLocation.GetY()))
-            .append(",\"timestamp\":")
-            .append(std::to_string(static_cast<double>(touchInfo->GetTimeStamp().time_since_epoch().count())));
+            .append(std::to_string(globalLocation.GetY()));
     }
-    eventParam.append("}}");
+    eventParam.append("}");
 }
 
-void DragOverInfoToString(const BaseEventInfo& info, std::string& eventParam, std::string& eventType)
+void DragOverInfoToString(const BaseEventInfo& info, std::string& eventParam)
 {
-    eventParam.append("{\"dragevent\":{");
+    eventParam.append("{");
     const auto touchInfo = TypeInfoHelper::DynamicCast<DragUpdateInfo>(&info);
     if (touchInfo) {
         auto globalLocation = touchInfo->GetGlobalLocation();
         eventParam.append("\"globalX\":")
             .append(std::to_string(globalLocation.GetX()))
             .append(",\"globalY\":")
-            .append(std::to_string(globalLocation.GetY()))
-            .append(",\"timestamp\":")
-            .append(std::to_string(static_cast<double>(touchInfo->GetTimeStamp().time_since_epoch().count())));
+            .append(std::to_string(globalLocation.GetY()));
     }
-    eventParam.append("}}");
+    eventParam.append("}");
 }
 
-void DragLeaveInfoToString(const BaseEventInfo& info, std::string& eventParam, std::string& eventType)
+void DragLeaveInfoToString(const BaseEventInfo& info, std::string& eventParam)
 {
-    eventParam.append("{\"dragevent\":{");
+    eventParam.append("{");
     const auto touchInfo = TypeInfoHelper::DynamicCast<DragUpdateInfo>(&info);
     if (touchInfo) {
         auto globalLocation = touchInfo->GetGlobalLocation();
         eventParam.append("\"globalX\":")
             .append(std::to_string(globalLocation.GetX()))
             .append(",\"globalY\":")
-            .append(std::to_string(globalLocation.GetY()))
-            .append(",\"timestamp\":")
-            .append(std::to_string(static_cast<double>(touchInfo->GetTimeStamp().time_since_epoch().count())));
+            .append(std::to_string(globalLocation.GetY()));
     }
-    eventParam.append("}}");
+    eventParam.append("}");
 }
 
-void DragDropInfoToString(const BaseEventInfo& info, std::string& eventParam, std::string& eventType)
+void DragDropInfoToString(const BaseEventInfo& info, std::string& eventParam)
 {
-    eventParam.append("{\"dragevent\":{");
+    eventParam.append("{");
     const auto touchInfo = TypeInfoHelper::DynamicCast<DragEndInfo>(&info);
     if (touchInfo) {
         auto globalLocation = touchInfo->GetGlobalLocation();
         eventParam.append("\"globalX\":")
             .append(std::to_string(globalLocation.GetX()))
             .append(",\"globalY\":")
-            .append(std::to_string(globalLocation.GetY()))
-            .append(",\"timestamp\":")
-            .append(std::to_string(static_cast<double>(touchInfo->GetTimeStamp().time_since_epoch().count())));
+            .append(std::to_string(globalLocation.GetY()));
     }
-    eventParam.append("}}");
+    eventParam.append("}");
 }
 
-void DragEndInfoToString(const BaseEventInfo& info, std::string& eventParam, std::string& eventType)
+void DragEndInfoToString(const BaseEventInfo& info, std::string& eventParam)
 {
-    eventParam.append("{\"dragevent\":{");
+    eventParam.append("{");
     const auto touchInfo = TypeInfoHelper::DynamicCast<DragEndInfo>(&info);
     if (touchInfo) {
         auto globalLocation = touchInfo->GetGlobalLocation();
         eventParam.append("\"globalX\":")
             .append(std::to_string(globalLocation.GetX()))
             .append(",\"globalY\":")
-            .append(std::to_string(globalLocation.GetY()))
-            .append(",\"timestamp\":")
-            .append(std::to_string(static_cast<double>(touchInfo->GetTimeStamp().time_since_epoch().count())));
+            .append(std::to_string(globalLocation.GetY()));
     }
-    eventParam.append("}}");
+    eventParam.append("}");
 }
 
 void MouseInfoToString(const BaseEventInfo& info, std::string& eventParam)
@@ -697,6 +683,18 @@ void JsFrontend::RebuildAllPages()
     }
 }
 
+void JsFrontend::GetPluginsUsed(std::string& data)
+{
+    if (!delegate_) {
+        LOGW("delegate hasn't initialized, load all system plugin");
+        return;
+    }
+
+    if (!delegate_->GetAssetContent("module_collection.txt", data)) {
+        LOGW("read failed, will load all the system plugin");
+    }
+}
+
 void JsFrontend::SetColorMode(ColorMode colorMode)
 {
     if (delegate_) {
@@ -727,26 +725,19 @@ void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const Base
     } else if (eventMarker.GetData().eventType == "swipe") {
         SwipeInfoToString(info, eventParam);
     } else if (eventMarker.GetData().eventType == "dragstart") {
-        std::string eventType = eventMarker.GetData().eventType;
-        DragStartInfoToString(info, eventParam, eventType);
+        DragStartInfoToString(info, eventParam);
     } else if (eventMarker.GetData().eventType == "drag") {
-        std::string eventType = eventMarker.GetData().eventType;
-        DragUpdateInfoToString(info, eventParam, eventType);
+        DragUpdateInfoToString(info, eventParam);
     } else if (eventMarker.GetData().eventType == "dragend") {
-        std::string eventType = eventMarker.GetData().eventType;
-        DragEndInfoToString(info, eventParam, eventType);
+        DragEndInfoToString(info, eventParam);
     } else if (eventMarker.GetData().eventType == "dragenter") {
-        std::string eventType = eventMarker.GetData().eventType;
-        DragEnterInfoToString(info, eventParam, eventType);
+        DragEnterInfoToString(info, eventParam);
     } else if (eventMarker.GetData().eventType == "dragover") {
-        std::string eventType = eventMarker.GetData().eventType;
-        DragOverInfoToString(info, eventParam, eventType);
+        DragOverInfoToString(info, eventParam);
     } else if (eventMarker.GetData().eventType == "dragleave") {
-        std::string eventType = eventMarker.GetData().eventType;
-        DragLeaveInfoToString(info, eventParam, eventType);
+        DragLeaveInfoToString(info, eventParam);
     } else if (eventMarker.GetData().eventType == "drop") {
-        std::string eventType = eventMarker.GetData().eventType;
-        DragDropInfoToString(info, eventParam, eventType);
+        DragDropInfoToString(info, eventParam);
     }
 
     LOGD("HandleAsyncEvent pageId: %{public}d, eventId: %{public}s, eventType: %{public}s",

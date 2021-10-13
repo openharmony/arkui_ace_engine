@@ -76,6 +76,9 @@ QJSValue QJSValue::Dup() const
 void QJSValue::Free()
 {
     JSRuntime* rt = QJSDeclarativeEngineInstance::GetQJSRuntime();
+    if (rt == nullptr) {
+        return;
+    }
     JS_FreeValueRT(rt, value_);
     value_ = JS_UNDEFINED;
 }
@@ -211,12 +214,12 @@ QJSRef<QJSValue> QJSFunction::Call(QJSRef<QJSValue> thisVal, int argc, QJSRef<QJ
     }
     QJSContext::Scope scp(ctx_);
     JSValue res = JS_Call(QJSContext::Current(), GetHandle(), thisVal.Get().GetHandle(), argc, args.data());
-    js_std_loop(ctx_);
     if (JS_IsException(res)) {
         QJSUtils::JsStdDumpErrorAce(QJSContext::Current());
         JS_FreeValue(QJSContext::Current(), res);
         return QJSRef<QJSValue>::Make(JS_NULL);
     }
+    js_std_loop(ctx_);
     return QJSRef<QJSValue>::Make(res);
 }
 

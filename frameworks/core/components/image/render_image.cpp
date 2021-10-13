@@ -342,7 +342,7 @@ void RenderImage::FireLoadEvent(const Size& picSize) const
                     .append("}");
         loadFailEvent_(param);
     }
-    if (loadFailCallback_&& (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL)) {
+    if (loadFailCallback_ && (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL)) {
         loadFailCallback_();
         loadFailCallback_ = nullptr;
     }

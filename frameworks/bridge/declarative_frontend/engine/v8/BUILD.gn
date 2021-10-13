@@ -42,6 +42,7 @@ template("declarative_js_engine_v8") {
       "functions/v8_function.cpp",
       "v8_declarative_engine.cpp",
       "v8_declarative_group_js_bridge.cpp",
+      "v8_function_destroy_helper.cpp",
       "v8_js_matrix4.cpp",
       "v8_module_manager.cpp",
       "v8_object_template.cpp",

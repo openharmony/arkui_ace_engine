@@ -175,7 +175,6 @@ function Observed(target) {
         aceConsole.log(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
         return new ObservedObject(new original(...args), undefined);
     };
-    //f.prototype = original.prototype;
     Object.setPrototypeOf(f, Object.getPrototypeOf(original));
     // return new constructor (will override original)
     return f;
@@ -382,7 +381,6 @@ class ObservedPropertyAbstract {
     */
     unlinkSuscriber(subscriberId) {
         this.subscribers_.delete(subscriberId);
-        // Is this correct? FIXME SubscriberManager.Get().delete(subscriberId);
     }
     notifyHasChanged(newValue, isCrossWindow) {
         aceConsole.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
@@ -921,7 +919,6 @@ class AppStorage {
     static IsMutable(key) {
         // FIXME(cvetan): No mechanism for immutable/mutable properties
         return true;
-        //   return AppStorage.GetOrCreate().isMutable(key);
     }
     /**
      * App should call this method to order close down app storage before
@@ -1252,7 +1249,7 @@ class PersistentStorage {
         if (this.persistProp1(propName, defaultValue)) {
             // persist new prop
             aceConsole.debug(`PersistentStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
-            PersistentStorage.Storage_.set(propName, this.links_.get(propName).get());
+            PersistentStorage.Storage_.set(propName, JSON.stringify(this.links_.get(propName).get()));
         }
     }
     // helper function to persist a property
@@ -1281,7 +1278,9 @@ class PersistentStorage {
                 try {
                     returnValue = JSON.parse(newValue);
                 }
-                catch (e) {}
+                catch (error) {
+                    aceConsole.error(`PersistentStorage: convert for ${propName} has error: ` + error.toString());
+                }
             }
             link = AppStorage.GetOrCreate().setAndLink(propName, returnValue, this);
             this.links_.set(propName, link);
@@ -1308,7 +1307,7 @@ class PersistentStorage {
     write() {
         this.links_.forEach((link, propName, map) => {
             aceConsole.debug(`PersistentStorage: writing ${propName} to storage`);
-            PersistentStorage.Storage_.set(propName, link.get());
+            PersistentStorage.Storage_.set(propName, JSON.stringify(link.get()));
         });
     }
     propertyHasChanged(info, isCrossWindow) {
@@ -1343,7 +1342,7 @@ class PersistentStorage {
     */
     static NotifyHasChanged(propName) {
         aceConsole.debug(`PersistentStorage: force writing '${propName}' - '${PersistentStorage.GetOrCreate().links_.get(propName)}' to storage`);
-        PersistentStorage.Storage_.set(propName, PersistentStorage.GetOrCreate().links_.get(propName).get());
+        PersistentStorage.Storage_.set(propName, JSON.stringify(PersistentStorage.GetOrCreate().links_.get(propName).get()));
     }
 }
 PersistentStorage.Instance_ = undefined;
@@ -1446,6 +1445,7 @@ class Environment {
     }
 }
 Environment.Instance_ = undefined;
+var global = globalThis;
 aceConsole.debug("ACE State Mgmt init ...");
 PersistentStorage.ConfigureBackend(new Storage());
 Environment.ConfigureBackend(new EnvironmentSetting());

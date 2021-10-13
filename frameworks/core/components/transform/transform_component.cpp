@@ -160,6 +160,14 @@ void TransformComponent::Matrix3d(float a1, float b1, float c1, float d1, float 
     transformEffects.AddTransformOperation(operation, animationOption);
 }
 
+void TransformComponent::Matrix3d(Matrix4 m, const AnimationOption& animationOption)
+{
+    TransformOperation operation;
+    operation.type_ = TransformOperationType::MATRIX;
+    operation.matrix4_ = m;
+    transformEffects.AddTransformOperation(operation, animationOption);
+}
+
 void TransformComponent::SetRotateTransition(TransitionType type, double x, double y, double z, double angle)
 {
     if (type == TransitionType::ALL) {

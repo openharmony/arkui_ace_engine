@@ -105,6 +105,7 @@ private:
 
     Offset startGradientPoint_;
     Offset endGradientPoint_;
+    Size lastLayoutSize_;
     size_t startGradientIndex_ = 0;
     size_t endGradientIndex_ = 0;
     bool gradientOfLine_ = false;

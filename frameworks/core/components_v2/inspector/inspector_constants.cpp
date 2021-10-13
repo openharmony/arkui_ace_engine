@@ -143,7 +143,7 @@ const char IMAGE_ETS_TAG[] = "Image";
 
 // qrcode
 const char QRCODE_COMPONENT_TAG[] = "QrcodeComponent";
-const char QRCODE_ETS_TAG[] = "Qrcode";
+const char QRCODE_ETS_TAG[] = "QRCode";
 
 // span
 const char SPAN_COMPONENT_TAG[] = "TextSpanComponent";
@@ -184,5 +184,37 @@ ACE_EXPORT extern const char CALENDAR_ETS_TAG[] = "Calendar";
 // badge
 const char BADGE_COMPONENT_TAG[] = "BadgeComponent";
 const char BADGE_ETS_TAG[] = "Badge";
+
+// search
+const char SEARCH_COMPONENT_TAG[] = "SearchComponent";
+const char SEARCH_ETS_TAG[] = "Search";
+
+// formComponent
+const char FORM_COMPONENT_TAG[] = "card";
+const char FORM_ETS_TAG[] = "FormComponent";
+
+// video
+const char VIDEO_COMPONENT_TAG[] = "VideoComponentV2";
+const char VIDEO_ETS_TAG[] = "Video";
+
+// AlphabetIndexer
+const char INDEXER_COMPONENT_TAG[] = "IndexerComponent";
+const char INDEXER_ETS_TAG[] = "AlphabetIndexer";
+
+// slider
+ACE_EXPORT extern const char SLIDER_COMPONENT_TAG[] = "SliderComponent";
+ACE_EXPORT extern const char SLIDER_ETS_TAG[] = "Slider";
+
+// rating
+ACE_EXPORT extern const char RATING_COMPONENT_TAG[] = "RatingComponent";
+ACE_EXPORT extern const char RATING_ETS_TAG[] = "Rating";
+
+// progress
+ACE_EXPORT extern const char PROGRESS_COMPONENT_TAG[] = "ProgressComponent";
+ACE_EXPORT extern const char PROGRESS_ETS_TAG[] = "Progress";
+
+// datapanel
+ACE_EXPORT extern const char DATA_PANEL_COMPONENT_TAG[] = "percentageDataPanelComponent";
+ACE_EXPORT extern const char DATA_PANEL_ETS_TAG[] = "DataPanel";
 
 } // namespace OHOS::Ace::V2

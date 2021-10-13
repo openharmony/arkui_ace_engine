@@ -176,9 +176,9 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
     Rect paintSize = Rect(offset + margin_.GetOffsetInPx(pipeline->GetDipScale()), paintSize_);
     if (useLiteStyle_) {
         Size maxSize;
-        maxSize.SetWidth(paintSize_.Width() > GetLayoutSize().Width() ? paintSize_.Width() : GetLayoutSize().Width());
-        maxSize.SetHeight(paintSize_.Height() > GetLayoutSize().Height() ?
-            paintSize_.Height() : GetLayoutSize().Height());
+        maxSize.SetWidth(paintSize_.Width() > GetPaintRect().Width() ? paintSize_.Width() : GetPaintRect().Width());
+        maxSize.SetHeight(paintSize_.Height() > GetPaintRect().Height() ?
+            paintSize_.Height() : GetPaintRect().Height());
         paintSize.SetSize(maxSize);
     }
     flutter::RRect outerRRect;
@@ -244,7 +244,8 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
         auto context = context_.Upgrade();
         if (context->GetIsDeclarative()) {
             decorationPainter->PaintGrayScale(outerRRect, canvas->canvas(), frontDecoration_->GetGrayScale(), bgColor);
-            decorationPainter->PaintBrightness(outerRRect, canvas->canvas(), frontDecoration_->GetBrightness(), bgColor);
+            decorationPainter->PaintBrightness(
+                outerRRect, canvas->canvas(), frontDecoration_->GetBrightness(), bgColor);
             decorationPainter->PaintContrast(outerRRect, canvas->canvas(), frontDecoration_->GetContrast(), bgColor);
             decorationPainter->PaintSaturate(outerRRect, canvas->canvas(), frontDecoration_->GetSaturate(), bgColor);
             decorationPainter->PaintInvert(outerRRect, canvas->canvas(), frontDecoration_->GetInvert(), bgColor);
@@ -445,7 +446,7 @@ RefPtr<Flutter::ClipLayer> FlutterRenderBox::GetClipLayer()
     if (mask) {
         if (!clipLayer_) {
             clipLayer_ = AceType::MakeRefPtr<ClipLayer>(
-                0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::HARD_EDGE);
+                0.0, GetPaintRect().Width(), 0.0, GetPaintRect().Height(), Clip::HARD_EDGE);
         }
         if (mask->HasReady()) {
             if (mask->IsPaintSvgMask()) {
@@ -480,7 +481,7 @@ RefPtr<Flutter::ClipLayer> FlutterRenderBox::GetClipLayer()
         }
         if (!clipLayer_) {
             clipLayer_ = AceType::MakeRefPtr<ClipLayer>(
-                0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::ANTI_ALIAS);
+                0.0, GetPaintRect().Width(), 0.0, GetPaintRect().Height(), Clip::ANTI_ALIAS);
         }
         fml::RefPtr<flutter::CanvasPath> canvasPath = flutter::CanvasPath::CreateFrom(skPath);
         clipLayer_->SetClipPath(canvasPath);
@@ -488,7 +489,7 @@ RefPtr<Flutter::ClipLayer> FlutterRenderBox::GetClipLayer()
     } else {
         if (!clipLayer_) {
             clipLayer_ = AceType::MakeRefPtr<ClipLayer>(
-                0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::ANTI_ALIAS);
+                0.0, GetPaintRect().Width(), 0.0, GetPaintRect().Height(), Clip::ANTI_ALIAS);
         }
         Border border;
         if (backDecoration_) {
@@ -524,13 +525,14 @@ flutter::RRect FlutterRenderBox::GetBoxRRect(
     flutter::RRect rRect = flutter::RRect();
     SkRect skRect {};
     SkVector fRadii[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+    Size adjustedSize = GetPaintRect().GetSize() - (GetLayoutSize() - paintSize_);
     if (CheckBorderEdgeForRRect(border)) {
         BorderEdge borderEdge = border.Left();
         double borderWidth = NormalizeToPx(borderEdge.GetWidth());
         skRect.setXYWH(SkDoubleToScalar(offset.GetX() + shrinkFactor * borderWidth),
             SkDoubleToScalar(offset.GetY() + shrinkFactor * borderWidth),
-            SkDoubleToScalar(paintSize_.Width() - shrinkFactor * DOUBLE_WIDTH * borderWidth),
-            SkDoubleToScalar(paintSize_.Height() - shrinkFactor * DOUBLE_WIDTH * borderWidth));
+            SkDoubleToScalar(adjustedSize.Width() - shrinkFactor * DOUBLE_WIDTH * borderWidth),
+            SkDoubleToScalar(adjustedSize.Height() - shrinkFactor * DOUBLE_WIDTH * borderWidth));
         if (isRound) {
             fRadii[SkRRect::kUpperLeft_Corner] = GetSkRadii(border.TopLeftRadius(), shrinkFactor, borderWidth);
             fRadii[SkRRect::kUpperRight_Corner] = GetSkRadii(border.TopRightRadius(), shrinkFactor, borderWidth);
@@ -541,9 +543,9 @@ flutter::RRect FlutterRenderBox::GetBoxRRect(
         float offsetX = SkDoubleToScalar(offset.GetX() + shrinkFactor * NormalizeToPx(border.Left().GetWidth()));
         float offsetY = SkDoubleToScalar(offset.GetY() + shrinkFactor * NormalizeToPx(border.Top().GetWidth()));
         float width = SkDoubleToScalar(
-            paintSize_.Width() - shrinkFactor * DOUBLE_WIDTH * NormalizeToPx(border.Right().GetWidth()));
+            adjustedSize.Width() - shrinkFactor * DOUBLE_WIDTH * NormalizeToPx(border.Right().GetWidth()));
         float height = SkDoubleToScalar(
-            paintSize_.Height() - shrinkFactor * DOUBLE_WIDTH * NormalizeToPx(border.Bottom().GetWidth()));
+            adjustedSize.Height() - shrinkFactor * DOUBLE_WIDTH * NormalizeToPx(border.Bottom().GetWidth()));
         skRect.setXYWH(offsetX, offsetY, width, height);
     }
     rRect.sk_rrect.setRectRadii(skRect, fRadii);

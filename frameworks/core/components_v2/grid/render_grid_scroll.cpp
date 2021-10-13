@@ -106,6 +106,7 @@ void RenderGridScroll::AddChildByIndex(int32_t index, const RefPtr<RenderNode>& 
         if (node) {
             node->SetBoundary();
             node->SetIndex(index);
+            node->SetHidden(false);
         }
     }
 }
@@ -615,7 +616,13 @@ void RenderGridScroll::CaculateViewPort()
             blank = blank - firstItemOffset_;
             firstItemOffset_ = 0;
             // Move up
-            while (blank > 0 && startIndex_ > 0) {
+            while (blank > 0) {
+                if (startIndex_ == 0 && startRankItemIndex_ > 0) {
+                    LoadForward();
+                }
+                if (startIndex_ == 0) {
+                    break;
+                }
                 if (gridCells_.find(startIndex_ - 1) == gridCells_.end()) {
                     SupplementItems(startIndex_ - 1);
                 }

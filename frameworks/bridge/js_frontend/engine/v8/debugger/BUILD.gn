@@ -20,6 +20,7 @@ config("v8_debugger_config") {
     "-fno-complete-member-pointers",
     "-Wno-implicit-fallthrough",
     "-fvisibility=default",
+    "-frtti",
   ]
 }
 

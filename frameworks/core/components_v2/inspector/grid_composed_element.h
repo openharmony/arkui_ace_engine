@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_GRID_COMPOSED_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_GRID_COMPOSED_ELEMENT_H
 
+#include "core/components/common/properties/scroll_bar.h"
+#include "core/components/grid_layout/grid_layout_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -35,6 +37,18 @@ public:
     std::string GetRowsTemplate() const;
     std::string GetColumnsGap() const;
     std::string GetRowsGap() const;
+    std::string GetScrollBarWidth() const;
+    std::string GetScrollBarColor() const;
+    std::string GetScrollBar() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return GridLayoutElement::TypeId();
+    }
+
+private:
+    std::string DisplayModeToString(DisplayMode displayMode) const;
+
 };
 
 } // namespace OHOS::Ace

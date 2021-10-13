@@ -29,9 +29,6 @@ public:
 
     void Update() override;
     void PerformBuild() override;
-
-    void Mount(const RefPtr<Element>& parent,
-               int32_t slot = DEFAULT_ELEMENT_SLOT, int32_t renderSlot = DEFAULT_RENDER_SLOT) override;
 };
 
 } // namespace OHOS::Ace

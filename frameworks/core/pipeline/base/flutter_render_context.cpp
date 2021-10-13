@@ -68,17 +68,38 @@ void FlutterRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Off
 
     if (child->GetRenderLayer()) {
         StopRecordingIfNeeded();
-        if (child->NeedRender()) {
-            FlutterRenderContext context;
-            context.Repaint(child);
-        } else {
-            // No need to repaint, notify to update AccessibilityNode info.
-            child->NotifyPaintFinish();
+        std::string name = AceType::TypeName(child);
+        if (name != "FlutterRenderForm") {
+            if (child->NeedRender()) {
+                FlutterRenderContext context;
+                context.Repaint(child);
+                LOGE("form  PaintChild  3");
+            } else {
+                // No need to repaint, notify to update AccessibilityNode info.
+                child->NotifyPaintFinish();
+            }
         }
         // add child layer to parent layer
         OffsetLayer* layer = CastLayerAs<OffsetLayer>(child->GetRenderLayer());
         Offset pos = rect.GetOffset();
-        layer->SetOffset(pos.GetX(), pos.GetY());
+        if (name != "FlutterRenderForm") {
+            layer->SetOffset(pos.GetX(), pos.GetY());
+        } else {
+            auto renderPost = child->GetGlobalOffset();
+            auto context = child->GetContext().Upgrade();
+            if (context) {
+                auto density = context->GetDensity();
+                auto parent = child->GetParent();
+                if (!NearZero(density)) {
+                    if (parent.Upgrade() && parent.Upgrade()->GetRenderLayer()) {
+                        layer->SetOffset(renderPost.GetX() / density - renderPost.GetX(),
+                            renderPost.GetY() / density - renderPost.GetY());
+                    } else {
+                        layer->SetOffset(pos.GetX() / density, pos.GetY() / density);
+                    }
+                }
+            }
+        }
         containerLayer_->AddChildren(AceType::Claim(layer));
     } else {
         child->RenderWithContext(*this, rect.GetOffset());

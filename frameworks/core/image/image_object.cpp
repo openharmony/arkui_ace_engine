@@ -45,6 +45,8 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
             int64_t colorValue = 0;
             if (color) {
                 colorValue = color.value().GetValue();
+                // skia svg relies on the 32th bit to determine whether or not to use the color we set.
+                colorValue = colorValue | (static_cast<int64_t>(0b1) << 32);
             }
             auto skiaDom = SkSVGDOM::MakeFromStream(*svgStream, colorValue);
             return skiaDom ? MakeRefPtr<SvgSkiaImageObject>(source, Size(), 1, skiaDom) : nullptr;
@@ -80,7 +82,8 @@ void StaticImageObject::UploadToGpuForRender(
     UploadSuccessCallback successCallback,
     FailedCallback failedCallback,
     Size imageSize,
-    bool forceResize)
+    bool forceResize,
+    bool syncMode)
 {
     auto task = [ context, renderTaskHolder, successCallback, failedCallback,
                     imageSize, forceResize, skData = skData_, imageSource = imageSource_] () mutable {
@@ -148,6 +151,10 @@ void StaticImageObject::UploadToGpuForRender(
         };
         ImageProvider::UploadImageToGPUForRender(image, callback, renderTaskHolder);
     };
+    if (syncMode) {
+        task();
+        return;
+    }
     uploadForPaintTask_ = CancelableTask(std::move(task));
     BackgroundTaskExecutor::GetInstance().PostTask(uploadForPaintTask_);
 }
@@ -163,25 +170,37 @@ void AnimatedImageObject::UploadToGpuForRender(
     UploadSuccessCallback successCallback,
     FailedCallback failedCallback,
     Size imageSize,
-    bool forceResize)
+    bool forceResize,
+    bool syncMode)
 {
-    auto codec = SkCodec::MakeFromData(skData_);
-    int32_t dstWidth = -1;
-    int32_t dstHeight = -1;
-    if (forceResize) {
-        dstWidth = static_cast<int32_t>(imageSize.Width() + 0.5);
-        dstHeight = static_cast<int32_t>(imageSize.Height() + 0.5);
+    if (!animatedPlayer_ && skData_) {
+        auto codec = SkCodec::MakeFromData(skData_);
+        int32_t dstWidth = -1;
+        int32_t dstHeight = -1;
+        if (forceResize) {
+            dstWidth = static_cast<int32_t>(imageSize.Width() + 0.5);
+            dstHeight = static_cast<int32_t>(imageSize.Height() + 0.5);
+        }
+        animatedPlayer_ = MakeRefPtr<AnimatedImagePlayer>(
+            imageSource_,
+            successCallback,
+            context,
+            renderTaskHolder->ioManager,
+            renderTaskHolder->unrefQueue,
+            std::move(codec),
+            dstWidth,
+            dstHeight);
+        ClearData();
+    } else if (animatedPlayer_ && forceResize && imageSize.IsValid()) {
+        LOGI("animated player has been construced, forceResize: %{public}s", imageSize.ToString().c_str());
+        int32_t dstWidth = static_cast<int32_t>(imageSize.Width() + 0.5);
+        int32_t dstHeight = static_cast<int32_t>(imageSize.Height() + 0.5);
+        animatedPlayer_->SetTargetSize(dstWidth, dstHeight);
+    } else if (!animatedPlayer_ && !skData_) {
+        LOGE("animated player is not constructed and image data is null, can not construct animated player!");
+    } else if (animatedPlayer_ && !forceResize) {
+        LOGI("animated player has been construced, do nothing!");
     }
-    animatedPlayer_ = MakeRefPtr<AnimatedImagePlayer>(
-        imageSource_,
-        successCallback,
-        context,
-        renderTaskHolder->ioManager,
-        renderTaskHolder->unrefQueue,
-        std::move(codec),
-        dstWidth,
-        dstHeight);
-    ClearData();
 }
 
 } // namespace OHOS::Ace

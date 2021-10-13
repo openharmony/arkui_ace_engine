@@ -196,6 +196,18 @@ std::unordered_map<int32_t, Pattern> V8CanvasBridge::pattern_;
 std::unordered_map<int32_t, Gradient> V8CanvasBridge::gradientColors_;
 std::unordered_map<int32_t, RefPtr<CanvasPath2D>> V8CanvasBridge::path2Ds_;
 
+V8CanvasBridge::~V8CanvasBridge()
+{
+    if (webglRenderContext_) {
+        delete webglRenderContext_;
+        webglRenderContext_ = nullptr;
+    }
+    if (webgl2RenderContext_) {
+        delete webgl2RenderContext_;
+        webgl2RenderContext_ = nullptr;
+    }
+}
+
 void V8CanvasBridge::HandleContext(
     const v8::Local<v8::Context>& ctx, NodeId id, const std::string& args, JsEngineInstance* engine)
 {
@@ -205,8 +217,11 @@ void V8CanvasBridge::HandleContext(
         auto typeArg = argsValue->GetArrayItem(0);
         if (typeArg && typeArg->IsString()) {
             std::string type = typeArg->GetString();
-            if (type == std::string(CANVAS_TYPE_WEBGL) || type == std::string(CANVAS_TYPE_WEBGL2)) {
-                HandleWebglContext(ctx, id, args, engine);
+            if (type == std::string(CANVAS_TYPE_WEBGL)) {
+                HandleWebglContext(ctx, id, args, engine, webglRenderContext_);
+                return;
+            } else if (type == std::string(CANVAS_TYPE_WEBGL2)) {
+                HandleWebglContext(ctx, id, args, engine, webgl2RenderContext_);
                 return;
             }
         }
@@ -255,6 +270,7 @@ void V8CanvasBridge::HandleContext(
         { "createImageData", v8::Function::New(ctx, CreateImageData, v8::Local<v8::Value>(), 2).ToLocalChecked() },
         { "putImageData", v8::Function::New(ctx, PutImageData, v8::Local<v8::Value>(), 7).ToLocalChecked() },
         { "getImageData", v8::Function::New(ctx, GetImageData, v8::Local<v8::Value>(), 4).ToLocalChecked() },
+        { "getJsonData", v8::Function::New(ctx, GetJsonData, v8::Local<v8::Value>(), 1).ToLocalChecked() },
         { "transferFromImageBitmap",
             v8::Function::New(ctx, TransferFromImageBitmap, v8::Local<v8::Value>(), 1).ToLocalChecked() },
     };
@@ -281,7 +297,9 @@ void V8CanvasBridge::HandleContext(
         { "shadowOffsetX", V8CanvasBridge::ShadowOffsetXGetter, V8CanvasBridge::ShadowOffsetXSetter },
         { "shadowOffsetY", V8CanvasBridge::ShadowOffsetYGetter, V8CanvasBridge::ShadowOffsetYSetter },
         { "imageSmoothingEnabled", V8CanvasBridge::SmoothingEnabledGetter, V8CanvasBridge::SmoothingEnabledSetter },
-        { "imageSmoothingQuality", V8CanvasBridge::SmoothingQualityGetter, V8CanvasBridge::SmoothingQualitySetter }
+        { "imageSmoothingQuality", V8CanvasBridge::SmoothingQualityGetter, V8CanvasBridge::SmoothingQualitySetter },
+        { "offsetWidth", V8CanvasBridge::OffsetWidthGetter, nullptr },
+        { "offsetHeight", V8CanvasBridge::OffsetHeightGetter, nullptr }
     };
     for (const auto& item : v8AnimationFuncs) {
         auto getter_templ = v8::FunctionTemplate::New(ctx->GetIsolate(), std::get<1>(item));
@@ -294,7 +312,8 @@ void V8CanvasBridge::HandleContext(
 }
 
 void V8CanvasBridge::HandleWebglContext(
-    const v8::Local<v8::Context>& ctx, NodeId id, const std::string& args, JsEngineInstance* engine)
+    const v8::Local<v8::Context>& ctx, NodeId id, const std::string& args, JsEngineInstance* engine,
+    CanvasRenderContextBase*& canvasRenderContext)
 {
     LOGD("V8CanvasBridge::HandleWebglContext");
     if (engine == nullptr) {
@@ -309,8 +328,8 @@ void V8CanvasBridge::HandleWebglContext(
     std::string moduleName(CANVAS_WEBGL_SO);
     std::string pluginId(std::to_string(id));
     renderContext_ = nativeEngine->GetModuleFromName(
-        moduleName, false, pluginId, args, WEBGL_RENDER_CONTEXT_NAME, reinterpret_cast<void**>(&canvasRenderContext_));
-    if (!canvasRenderContext_) {
+        moduleName, false, pluginId, args, WEBGL_RENDER_CONTEXT_NAME, reinterpret_cast<void**>(&canvasRenderContext));
+    if (!canvasRenderContext) {
         LOGE("V8CanvasBridge invalid canvasRenderContext");
         return;
     }
@@ -320,7 +339,7 @@ void V8CanvasBridge::HandleWebglContext(
         LOGE("page is null.");
         return;
     }
-    auto task = [weak = WeakClaim(this), page, id]() {
+    auto task = [canvasRenderContext, page, id]() {
         auto canvas = AceType::DynamicCast<DOMCanvas>((*page)->GetDomDocument()->GetDOMNodeById(id));
         if (!canvas) {
             return;
@@ -330,10 +349,7 @@ void V8CanvasBridge::HandleWebglContext(
         if (!pool) {
             return;
         }
-        auto bridge = weak.Upgrade();
-        if (bridge) {
-            pool->WebGLInit(bridge->canvasRenderContext_);
-        }
+        pool->WebGLInit(canvasRenderContext);
     };
     auto delegate = static_cast<RefPtr<FrontendDelegate>*>(
         ctx->GetIsolate()->GetData(V8EngineInstance::FRONTEND_DELEGATE));
@@ -343,7 +359,7 @@ void V8CanvasBridge::HandleWebglContext(
     }
     (*delegate)->PostSyncTaskToPage(task);
 
-    canvasRenderContext_->Init();
+    canvasRenderContext->Init();
 
     auto onWebGLUpdateCallback = [ctx, id]() {
         auto task = [](const RefPtr<CanvasTaskPool>& pool) {
@@ -351,7 +367,7 @@ void V8CanvasBridge::HandleWebglContext(
         };
         PushTaskToPageById(ctx, id, task);
     };
-    canvasRenderContext_->SetUpdateCallback(onWebGLUpdateCallback);
+    canvasRenderContext->SetUpdateCallback(onWebGLUpdateCallback);
 }
 
 void V8CanvasBridge::HandleToDataURL(const v8::Local<v8::Context>& ctx, NodeId id, const std::string& args)
@@ -1747,6 +1763,47 @@ void V8CanvasBridge::GetImageData(const v8::FunctionCallbackInfo<v8::Value>& arg
     args.GetReturnValue().Set(imageData);
 }
 
+void V8CanvasBridge::GetJsonData(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    // 1 parameters: GetJsonData(path)
+    if (args.Length() != 1) {
+        return;
+    }
+
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    v8::String::Utf8Value arg(isolate, args[0]->ToString(context).ToLocalChecked());
+    if (!(*arg)) {
+        return;
+    }
+    std::string path = *arg;
+
+    NodeId id = GetCurrentNodeId(context, args.Holder());
+    auto page = static_cast<RefPtr<JsAcePage>*>(isolate->GetData(V8EngineInstance::RUNNING_PAGE));
+    if (!page) {
+        return;
+    }
+
+    std::string jsonData;
+    auto task = [id, page, path, &jsonData]() {
+        auto canvas = AceType::DynamicCast<DOMCanvas>((*page)->GetDomDocument()->GetDOMNodeById(id));
+        if (!canvas) {
+            return;
+        }
+        auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
+        auto canvasTask = paintChild->GetTaskPool();
+        if (!canvasTask) {
+            return;
+        }
+        jsonData = canvasTask->GetJsonData(path);
+    };
+    auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
+    (*delegate)->PostSyncTaskToPage(task);
+
+    args.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, jsonData.c_str()).ToLocalChecked());
+}
+
 void V8CanvasBridge::TransferFromImageBitmap(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
     if (args.Length() != 1) {
@@ -2374,6 +2431,40 @@ void V8CanvasBridge::SmoothingQualitySetter(const v8::FunctionCallbackInfo<v8::V
     PushTaskToPage(context, info.Holder(), task);
     info.Holder()->Set(context,
         v8::String::NewFromUtf8(isolate, "__imageSmoothingQuality").ToLocalChecked(), info[0]).ToChecked();
+}
+
+void V8CanvasBridge::OffsetWidthGetter(const v8::FunctionCallbackInfo<v8::Value>& info)
+{
+    v8::Isolate* isolate = info.GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    NodeId id = GetCurrentNodeId(context, info.Holder());
+    auto page = static_cast<RefPtr<JsAcePage>*>(isolate->GetData(V8EngineInstance::RUNNING_PAGE));
+    if (!page) {
+        LOGE("page is null.");
+        return;
+    }
+    auto canvas = AceType::DynamicCast<DOMCanvas>((*page)->GetDomDocument()->GetDOMNodeById(id));
+    if (canvas) {
+        info.GetReturnValue().Set(v8::Number::New(isolate, canvas->GetWidth().Value()));
+    }
+}
+
+void V8CanvasBridge::OffsetHeightGetter(const v8::FunctionCallbackInfo<v8::Value>& info)
+{
+    v8::Isolate* isolate = info.GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    NodeId id = GetCurrentNodeId(context, info.Holder());
+    auto page = static_cast<RefPtr<JsAcePage>*>(isolate->GetData(V8EngineInstance::RUNNING_PAGE));
+    if (!page) {
+        LOGE("page is null.");
+        return;
+    }
+    auto canvas = AceType::DynamicCast<DOMCanvas>((*page)->GetDomDocument()->GetDOMNodeById(id));
+    if (canvas) {
+        info.GetReturnValue().Set(v8::Number::New(isolate, canvas->GetHeight().Value()));
+    }
 }
 
 } // namespace OHOS::Ace::Framework

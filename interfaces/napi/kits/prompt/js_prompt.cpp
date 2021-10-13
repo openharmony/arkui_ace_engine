@@ -66,7 +66,7 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     size_t ret = 0;
     napi_typeof(env, messageNApi, &valueType);
     if (valueType == napi_string) {
-        size_t messageLen = GetParamLen(messageNApi);
+        size_t messageLen = GetParamLen(messageNApi) + 1;
         std::unique_ptr<char[]> message = std::make_unique<char[]>(messageLen);
         napi_get_value_string_utf8(env, messageNApi, message.get(), messageLen, &ret);
         messageString = message.get();
@@ -109,7 +109,7 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
 
     napi_typeof(env, bottomNApi, &valueType);
     if (valueType == napi_string) {
-        size_t bottomLen = GetParamLen(bottomNApi);
+        size_t bottomLen = GetParamLen(bottomNApi) + 1;
         std::unique_ptr<char[]> bottom = std::make_unique<char[]>(bottomLen);
         napi_get_value_string_utf8(env, bottomNApi, bottom.get(), bottomLen, &ret);
         bottomString = bottom.get();
@@ -146,7 +146,7 @@ struct PromptAsyncContext {
     std::string titleString;
     std::string messageString;
     std::vector<std::pair<std::string, std::string>> buttons;
-    bool autoCancelBool;
+    bool autoCancelBool = true;
     std::set<std::string> callbacks;
     std::string callbackSuccessString;
     std::string callbackCancelString;
@@ -194,7 +194,7 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         }
         napi_typeof(env, asyncContext->messageNApi, &valueType);
         if (valueType == napi_string) {
-            size_t messageLen = GetParamLen(asyncContext->messageNApi);
+            size_t messageLen = GetParamLen(asyncContext->messageNApi) + 1;
             std::unique_ptr<char[]> messageChar = std::make_unique<char[]>(messageLen);
             napi_get_value_string_utf8(env, asyncContext->messageNApi, messageChar.get(), messageLen, &ret);
             asyncContext->messageString = messageChar.get();
@@ -231,31 +231,17 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 std::string colorString;
                 napi_typeof(env, textNApi, &valueType);
                 if (valueType == napi_string) {
-                    size_t textLen = GetParamLen(textNApi);
-                    char text[textLen + 1];
-                    napi_get_value_string_utf8(env, textNApi, text, textLen, &ret);
-                    textString = text;
-                } else if (valueType == napi_object) {
-                    int32_t id = 0;
-                    int32_t type = 0;
-                    std::vector<std::string> params;
-                    if (ParseResourceParam(env, textNApi, id, type, params)) {
-                        ParseString(id, type, params, textString);
-                    }
+                    size_t textLen = GetParamLen(textNApi) + 1;
+                    std::unique_ptr<char[]> text = std::make_unique<char[]>(textLen);
+                    napi_get_value_string_utf8(env, textNApi, text.get(), textLen, &ret);
+                    textString = text.get();
                 }
                 napi_typeof(env, colorNApi, &valueType);
                 if (valueType == napi_string) {
-                    size_t colorLen = GetParamLen(colorNApi);
-                    char color[colorLen + 1];
-                    napi_get_value_string_utf8(env, colorNApi, color, colorLen, &ret);
-                    colorString = color;
-                } else if (valueType == napi_object) {
-                    int32_t id = 0;
-                    int32_t type = 0;
-                    std::vector<std::string> params;
-                    if (ParseResourceParam(env, colorNApi, id, type, params)) {
-                        ParseString(id, type, params, colorString);
-                    }
+                    size_t colorLen = GetParamLen(colorNApi) + 1;
+                    std::unique_ptr<char[]> color = std::make_unique<char[]>(colorLen);
+                    napi_get_value_string_utf8(env, colorNApi, color.get(), colorLen, &ret);
+                    colorString = color.get();
                 }
                 asyncContext->buttons.emplace_back(textString, colorString);
             }
@@ -264,8 +250,6 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         napi_typeof(env, asyncContext->autoCancel, &valueType);
         if (valueType == napi_boolean) {
             napi_get_value_bool(env, asyncContext->autoCancel, &asyncContext->autoCancelBool);
-        } else {
-            asyncContext->autoCancelBool = true;
         }
 
         napi_typeof(env, successFunc, &valueType);
@@ -399,7 +383,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 
         napi_typeof(env, asyncContext->titleNApi, &valueType);
         if (valueType == napi_string) {
-            size_t titleLen = GetParamLen(asyncContext->titleNApi);
+            size_t titleLen = GetParamLen(asyncContext->titleNApi) + 1;
             std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(titleLen);
             napi_get_value_string_utf8(env, asyncContext->titleNApi, titleChar.get(), titleLen, &ret);
             asyncContext->titleString = titleChar.get();
@@ -436,7 +420,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 std::string colorString;
                 napi_typeof(env, textNApi, &valueType);
                 if (valueType == napi_string) {
-                    size_t textLen = GetParamLen(textNApi);
+                    size_t textLen = GetParamLen(textNApi) + 1;
                     char text[textLen + 1];
                     napi_get_value_string_utf8(env, textNApi, text, textLen, &ret);
                     textString = text;
@@ -450,7 +434,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 }
                 napi_typeof(env, colorNApi, &valueType);
                 if (valueType == napi_string) {
-                    size_t colorLen = GetParamLen(colorNApi);
+                    size_t colorLen = GetParamLen(colorNApi) + 1;
                     char color[colorLen + 1];
                     napi_get_value_string_utf8(env, colorNApi, color, colorLen, &ret);
                     colorString = color;

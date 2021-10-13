@@ -42,29 +42,42 @@ const Color SEARCH_BUTTON_TEXT_COLOR = Color(0xFF254FF7);
 
 void RenderSearch::Update(const RefPtr<Component>& component)
 {
-    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
-    if (!searchComponent) {
+    searchComponent_ = AceType::DynamicCast<SearchComponent>(component);
+    if (!searchComponent_) {
         LOGW("component is null");
         return;
     }
-    needReverse_ = (searchComponent->GetTextDirection() == TextDirection::RTL);
-    closeIconSize_ = searchComponent->GetCloseIconSize();
-    closeIconHotZoneHorizontal_ = searchComponent->GetCloseIconHotZoneHorizontal();
-    decoration_ = searchComponent->GetDecoration();
-    if (searchComponent->GetTextEditController() && textEditController_ != searchComponent->GetTextEditController()) {
+    needReverse_ = (searchComponent_->GetTextDirection() == TextDirection::RTL);
+    closeIconSize_ = searchComponent_->GetCloseIconSize();
+    closeIconHotZoneHorizontal_ = searchComponent_->GetCloseIconHotZoneHorizontal();
+
+    decoration_ = searchComponent_->GetDecoration();
+    if (searchComponent_->GetTextEditController() && textEditController_ != searchComponent_->GetTextEditController()) {
         if (textEditController_) {
             textEditController_->RemoveObserver(WeakClaim(this));
         }
-        textEditController_ = searchComponent->GetTextEditController();
+        textEditController_ = searchComponent_->GetTextEditController();
         textEditController_->AddObserver(WeakClaim(this));
     }
-    hoverColor_ = searchComponent->GetHoverColor();
-    pressColor_ = searchComponent->GetPressColor();
 
-    CreateRenderImage(searchComponent);
-    CreateRenderButton(searchComponent);
-    changeEvent_ = AceAsyncEvent<void(const std::string)>::Create(searchComponent->GetChangeEventId(), context_);
-    submitEvent_ = AceAsyncEvent<void(const std::string)>::Create(searchComponent->GetSubmitEventId(), context_);
+    hoverColor_ = searchComponent_->GetHoverColor();
+    pressColor_ = searchComponent_->GetPressColor();
+    CreateRenderImage(searchComponent_);
+    CreateRenderButton(searchComponent_);
+
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        if (searchComponent_->GetOnChange()) {
+            changeEvent_ = *searchComponent_->GetOnChange();
+        }
+
+        if (searchComponent_->GetOnSubmit()) {
+            submitEvent_ = *searchComponent_->GetOnSubmit();
+        }
+    } else {
+        changeEvent_ = AceAsyncEvent<void(const std::string)>::Create(searchComponent_->GetChangeEventId(), context_);
+        submitEvent_ = AceAsyncEvent<void(const std::string)>::Create(searchComponent_->GetSubmitEventId(), context_);
+    }
 
     MarkNeedLayout();
 }

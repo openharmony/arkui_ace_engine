@@ -15,7 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 
-#include <vector>
+#include<vector>
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/text_field/render_text_field.h"
@@ -61,7 +61,6 @@ void JSTextArea::PrepareSpecializedComponent()
     textAreaComponent->SetHeight(boxComponent->GetHeightDimension());
     if (textAreaComponent->IsExtend()) {
         boxComponent->SetHeight(-1.0, DimensionUnit::PX);
-        textAreaComponent->SetExtend(true);
     }
 }
 
@@ -189,14 +188,16 @@ void JSTextArea::Create(const JSCallbackInfo& info)
 
     RefPtr<TextFieldComponent> textAreaComponent = AceType::MakeRefPtr<TextFieldComponent>();
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto placeholder = paramObject->GetProperty("placeholder");
-    if (placeholder->IsString()) {
-        textAreaComponent->SetPlaceholder(placeholder->ToString());
+
+    std::string placeholder;
+    if (ParseJsString(paramObject->GetProperty("placeholder"), placeholder)) {
+        textAreaComponent->SetPlaceholder(placeholder);
     }
 
-    auto text = paramObject->GetProperty("text");
-    if (text->IsString()) {
-        textAreaComponent->SetValue(text->ToString());
+    textAreaComponent->SetExtend(true);
+    std::string text;
+    if (ParseJsString(paramObject->GetProperty("text"), text)) {
+        textAreaComponent->SetValue(text);
     }
     ViewStackProcessor::GetInstance()->Push(textAreaComponent);
     InitializeStyle();
@@ -228,43 +229,44 @@ void JSTextArea::SetPlaceholderColor(const JSCallbackInfo& info)
 
 void JSTextArea::SetPlaceholderFont(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("placeholderFont create error, info is non-vaild");
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("PlaceholderFont create error, info is non-valid");
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-
-    auto fontSize = paramObject->GetProperty("size");
-    Dimension value;
-    ParseJsDimensionPx(fontSize, value);
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetFontSize(value);
-    auto weight = paramObject->GetProperty("weight");
-    if (!weight->IsNumber()) {
-        LOGE("Info(weight) is not number");
+    if (!component) {
+        LOGE("The component(SetPlaceholderFont) is null");
         return;
     }
-    FontWeight fontWeight = static_cast<FontWeight>(weight->ToNumber<int32_t>());
-    textStyle.SetFontWeight(fontWeight);
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto textStyle = component->GetTextStyle();
 
-    std::vector<std::string> fontFamilies;
-    std::string fontFamily;
-    if (ParseJsString(paramObject->GetProperty("fontFamily"), fontFamily)) {
-        fontFamilies.push_back(fontFamily);
-        textStyle.SetFontFamilies(fontFamilies);
-    } else {
-        LOGE("Family have a big problem");
+    auto fontSize = paramObject->GetProperty("size");
+    if (!fontSize->IsNull()) {
+        Dimension size;
+        ParseJsDimensionPx(fontSize, size);
+        textStyle.SetFontSize(size);
+    }
+
+    std::string weight;
+    if (ParseJsString(paramObject->GetProperty("weight"), weight)) {
+        textStyle.SetFontWeight(ConvertStrToFontWeight(weight));
+    }
+
+    auto font = paramObject->GetProperty("family");
+    if (!font->IsNull()) {
+        std::vector<std::string> fontFamilies;
+        if (ParseJsFontFamilies(font, fontFamilies)) {
+            textStyle.SetFontFamilies(fontFamilies);
+        }
     }
 
     auto style = paramObject->GetProperty("style");
-    if (!style->IsNumber()) {
-        LOGE("Info(style is not number");
-        return;
+    if (!style->IsNull()) {
+        FontStyle fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
+        textStyle.SetFontStyle(fontStyle);
     }
-    FontStyle fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
-    textStyle.SetFontStyle(fontStyle);
     component->SetTextStyle(std::move(textStyle));
 }
 

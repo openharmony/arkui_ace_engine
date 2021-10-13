@@ -128,6 +128,20 @@ bool StageElement::CanRouterPage()
     return true;
 }
 
+void StageElement::PostponePageTransition()
+{
+    postponePageTransition_ = true;
+}
+
+void StageElement::LaunchPageTransition()
+{
+    postponePageTransition_ = false;
+    auto context = context_.Upgrade();
+    if (pendingOperation_ != StackOperation::NONE && context) {
+        context->AddPostFlushListener(AceType::Claim(this));
+    }
+}
+
 bool StageElement::CanPushPage()
 {
     return CanRouterPage();
@@ -424,12 +438,6 @@ bool StageElement::PerformPopPageTransition(const RefPtr<Element>& elementIn, co
 void StageElement::PerformPushPage()
 {
     LOGD("start to push page.");
-    if (isForMountCard_) {
-        UpdateChild(nullptr, newComponent_);
-        operation_ = StackOperation::NONE;
-        return;
-    }
-
 #ifndef WEARABLE_PRODUCT
     auto pageComponent = DynamicCast<PageComponent>(newComponent_);
     if (pageComponent) {
@@ -464,9 +472,13 @@ void StageElement::PerformPushPage()
     }
     LOGD("set transition in hidden.");
     transitionIn->SetWrapHidden(true);
+    transitionIn->SkipPostFlush();
+    transitionOut->SkipPostFlush();
     auto context = context_.Upgrade();
     if (context) {
-        context->AddPostFlushListener(AceType::Claim(this));
+        if (!postponePageTransition_) {
+            context->AddPostFlushListener(AceType::Claim(this));
+        }
         pendingOperation_ = operation_;
     }
     RefreshFocus();
@@ -480,7 +492,9 @@ void StageElement::PerformPop()
     }
     auto context = context_.Upgrade();
     if (context) {
-        context->AddPostFlushListener(Claim(this));
+        if (!postponePageTransition_) {
+            context->AddPostFlushListener(Claim(this));
+        }
         pendingOperation_ = operation_;
     }
 }
@@ -594,6 +608,10 @@ bool StageElement::InitTransition(const RefPtr<PageTransitionElement>& transitio
     auto deviceType = SystemProperties::GetDeviceType();
     // Reset status listener.
     controller->ClearAllListeners();
+    auto context = GetContext().Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        transition->LoadTransition();
+    }
     transition->SetTransition(deviceType, event, direction, cardRRect);
     transition->SetTransitionDirection(event, direction);
     controller->SetFillMode(FillMode::FORWARDS);
@@ -618,6 +636,8 @@ bool StageElement::InitTransition(const RefPtr<PageTransitionElement>& transitio
         LOGE("init transition out failed.");
         return false;
     }
+    transitionIn->AddPreFlush();
+    transitionOut->AddPreFlush();
     controllerIn_ = transitionIn->GetTransitionController();
     controllerOut_ = transitionOut->GetTransitionController();
     return true;

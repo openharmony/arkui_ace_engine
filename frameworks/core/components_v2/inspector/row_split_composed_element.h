@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_ROW_SPLIT_COMPOSED_ELEMENT_H
 
 #include "core/components/split_container/render_row_split.h"
+#include "core/components/split_container/row_split_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -33,6 +34,11 @@ public:
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
     std::string GetResizeable() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return RowSplitElement::TypeId();
+    }
 
 private:
     RefPtr<RenderRowSplit> GetRenderRowSplit() const;

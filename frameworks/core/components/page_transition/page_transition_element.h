@@ -36,9 +36,12 @@ public:
     void SetTransitionDirection(TransitionEvent event, TransitionDirection direction);
     void SetTransitionController();
     const RefPtr<Animator>& GetTransitionController() const;
+    void LoadTransition();
     void SetTransition(DeviceType deviceType, TransitionEvent event, TransitionDirection direction,
         const RRect& rrect);
     void SetWrapHidden(bool hidden);
+    void AddPreFlush();
+    void SkipPostFlush();
     void InitController(TransitionDirection direction, TransitionEvent event);
     RefPtr<Element> GetContentElement() const;
     const RefPtr<TransitionElement>& GetContentTransitionElement() const;

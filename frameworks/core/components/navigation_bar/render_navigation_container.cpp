@@ -66,4 +66,21 @@ void RenderNavigationContainer::OnRelatedEnd()
         collapsingNavigationBar_->OnRelatedEnd();
     }
 }
+
+void RenderNavigationContainer::Update(const RefPtr<Component>& component)
+{
+    auto navigationContainerComponent = AceType::DynamicCast<NavigationContainerComponent>(component);
+    if (!navigationContainerComponent) {
+        return;
+    }
+    auto declaration = navigationContainerComponent->GetDeclaration();
+    if (!declaration) {
+        return;
+    }
+    title_ = declaration->GetTitle();
+    subTitle_ = declaration->GetSubTitle();
+    hideBackButton_ = !declaration->HasBackButton();
+    hideNavigationBar_ = !declaration->HasNavigationBar();
+}
+
 } // namespace OHOS::Ace

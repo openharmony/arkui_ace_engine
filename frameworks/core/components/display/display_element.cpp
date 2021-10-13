@@ -16,7 +16,6 @@
 #include "core/components/display/display_element.h"
 
 #include "core/components/display/render_display.h"
-#include "core/components/stage/stage_element.h"
 #include "core/components/tween/tween_component.h"
 
 namespace OHOS::Ace {
@@ -56,26 +55,6 @@ void DisplayElement::PerformBuild()
         displayRender->GetOpacityCallbacks();
         // refresh.
         displayRender->UpdateOpacity(displayRender->GetOpacity());
-    }
-}
-
-void DisplayElement::Mount(const RefPtr<Element>& parent, int32_t slot, int32_t renderSlot)
-{
-    auto stage = AceType::DynamicCast<StageElement>(parent);
-    if (stage && stage->IsForCard()) {
-        Element::SetParent(parent);
-        SetDepth(parent != nullptr ? parent->GetDepth() + 1 : 1);
-
-        SetPipelineContext(stage->GetCardContext());
-        Prepare(parent);
-        SetRenderSlot(renderSlot);
-        if (parent) {
-            parent->AddChild(AceType::Claim(this), slot);
-            AddToFocus();
-        }
-        Rebuild();
-    } else {
-        Element::Mount(parent, slot, renderSlot);
     }
 }
 

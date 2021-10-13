@@ -113,7 +113,7 @@ void ArkJSRuntime::RunGC()
 {
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
-    JSNApi::TriggerGC(vm_, JSNApi::TRIGGER_GC_TYPE::COMPRESS_FULL_GC);
+    JSNApi::TriggerGC(vm_);
 }
 
 shared_ptr<JsValue> ArkJSRuntime::NewInt32(int32_t value)

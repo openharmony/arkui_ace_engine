@@ -18,7 +18,6 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_v2/inspector/utils.h"
-#include "core/components_v2/list/list_item_element.h"
 #include "core/components_v2/list/render_list_item.h"
 
 namespace OHOS::Ace::V2 {

@@ -539,8 +539,13 @@ RefPtr<ComposedComponent> CommonBuilder::GenerateAccessibilityComposed(
     const auto& accessibilityManager = pipelineContext->GetAccessibilityManager();
     if (accessibilityManager) {
         auto composedId = accessibilityManager->GenerateNextAccessibilityId();
-        accessibilityManager->CreateSpecializedNode(name, composedId, parentId);
-        return AceType::MakeRefPtr<ComposedComponent>(std::to_string(composedId), name, child);
+        auto node = accessibilityManager->CreateSpecializedNode(name, composedId, parentId);
+        if (node) {
+            node->SetFocusableState(true);
+        }
+        auto box = AceType::MakeRefPtr<BoxComponent>();
+        box->SetChild(child);
+        return AceType::MakeRefPtr<ComposedComponent>(std::to_string(composedId), name, box);
     }
     return nullptr;
 }

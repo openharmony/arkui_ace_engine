@@ -21,14 +21,21 @@
 
 namespace OHOS::Ace::Framework {
 
+enum class ProgressStyle {
+    Linear,
+    Capsule,
+    Eclipse,
+    Circular
+};
+
 class JSProgress : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
 
     static void SetValue(double value);
-    static void SetColor(std::string& color);
-    static void SetCricularStyle(const JSCallbackInfo& info);
+    static void SetColor(const JSCallbackInfo& info);
+    static void SetCircularStyle(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

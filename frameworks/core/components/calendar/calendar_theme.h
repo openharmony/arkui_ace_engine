@@ -218,7 +218,7 @@ public:
                 themeConstants->GetDimension(THEME_CARD_CALENDAR_WEEK_AND_DAY_ROW_SPACE);
             theme->cardCalendarTheme_.dailyFiveRowSpace =
                 themeConstants->GetDimension(THEME_CARD_CALENDAR_DAILY_FIVE_ROW_SPACE);
-            theme->calendarTheme_.dayYAxisOffset = themeConstants->GetDimension(THEME_CALENDAR_DAY_YAXIS_OFFSET);
+            theme->cardCalendarTheme_.dayYAxisOffset = themeConstants->GetDimension(THEME_CALENDAR_DAY_YAXIS_OFFSET);
             theme->cardCalendarTheme_.lunarDayYAxisOffset =
                 themeConstants->GetDimension(THEME_CALENDAR_LUNAR_DAY_YAXIS_OFFSET);
             theme->cardCalendarTheme_.underscoreXAxisOffset =

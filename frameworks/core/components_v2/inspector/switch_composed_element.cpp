@@ -18,7 +18,6 @@
 #include <unordered_map>
 
 #include "base/log/dump_log.h"
-#include "core/components/checkable/checkable_element.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -26,7 +25,9 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const SwitchComposedElement&)>> CREATE_JSON_MAP {
-    { "checked", [](const SwitchComposedElement& inspector) { return inspector.GetChecked(); } }
+    { "ison", [](const SwitchComposedElement& inspector) { return inspector.GetChecked(); } },
+    { "SelectedColor", [](const SwitchComposedElement& inspector) { return inspector.GetSelectedColor(); } },
+    { "PointColor", [](const SwitchComposedElement& inspector) { return inspector.GetPointColor(); } }
 };
 
 } // namespace
@@ -34,7 +35,9 @@ const std::unordered_map<std::string, std::function<std::string(const SwitchComp
 void SwitchComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("checked: ").append(GetChecked()));
+    DumpLog::GetInstance().AddDesc(std::string("ison: ").append(GetChecked()));
+    DumpLog::GetInstance().AddDesc(std::string("SelectedColor: ").append(GetSelectedColor()));
+    DumpLog::GetInstance().AddDesc(std::string("PointColor: ").append(GetPointColor()));
 }
 
 std::unique_ptr<JsonValue> SwitchComposedElement::ToJsonObject() const
@@ -51,6 +54,24 @@ std::string SwitchComposedElement::GetChecked() const
     auto renderSwitch = GetRenderSwitch();
     auto checked = renderSwitch ? renderSwitch->GetChecked() : false;
     return ConvertBoolToString(checked);
+}
+
+std::string SwitchComposedElement::GetSelectedColor() const
+{
+    auto renderSwitch = GetRenderSwitch();
+    if (renderSwitch) {
+        return renderSwitch->GetActiveColor().ColorToString();
+    }
+    return "";
+}
+
+std::string SwitchComposedElement::GetPointColor() const
+{
+    auto renderSwitch = GetRenderSwitch();
+    if (renderSwitch) {
+        return renderSwitch->GetPointColor().ColorToString();
+    }
+    return "";
 }
 
 RefPtr<RenderSwitch> SwitchComposedElement::GetRenderSwitch() const

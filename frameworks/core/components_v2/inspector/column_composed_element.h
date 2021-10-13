@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_COLUMN_COMPOSED_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_COLUMN_COMPOSED_ELEMENT_H
 
+#include "core/components/flex/flex_element.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
@@ -30,7 +31,11 @@ public:
     ~ColumnComposedElement() override = default;
 
     void Dump() override;
-    FlexAlign GetAlignContent();
+
+    std::string GetAlignContent() const;
+    std::string GetSpace() const;
+    std::string GetHorizontalAlign() const;
+    std::unique_ptr<JsonValue> ToJsonObject() const override;
 };
 
 } // namespace OHOS::Ace::V2

@@ -18,6 +18,7 @@
 
 #include "core/components/shape/render_shape_container.h"
 #include "core/components/shape/shape_container_component.h"
+#include "core/components/shape/shape_container_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -27,9 +28,11 @@ class ACE_EXPORT ShapeContainerComposedElement : public InspectorComposedElement
     DECLARE_ACE_TYPE(ShapeContainerComposedElement, InspectorComposedElement)
 
 public:
+    static std::string LineCapStyleToString(LineCapStyle lineCapStyle);
+    static std::string LineJoinStyleToString(LineJoinStyle lineJoinStyle);
+
     explicit ShapeContainerComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}
     ~ShapeContainerComposedElement() override = default;
-
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
@@ -38,13 +41,18 @@ public:
     std::string GetFillOpacity() const;
     std::string GetStroke() const;
     std::string GetStrokeDashOffset() const;
-    std::string GetStrokeDashArray() const;
     std::string GetStrokeLineCap() const;
     std::string GetStrokeLineJoin() const;
     std::string GetStrokeMiterLimit() const;
     std::string GetStrokeOpacity() const;
     std::string GetStrokeWidth() const;
     std::string GetViewBox() const;
+    std::unique_ptr<JsonValue> GetStrokeDashArray() const;
+
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return ShapeContainerElement::TypeId();
+    }
 };
 
 } // namespace OHOS::Ace::V2

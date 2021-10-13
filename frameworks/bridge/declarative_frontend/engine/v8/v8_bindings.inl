@@ -19,6 +19,8 @@
 
 #include "v8_bindings.h"
 
+#include "frameworks/bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
+#include "frameworks/bridge/declarative_frontend/engine/v8/v8_function_destroy_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_wrapper.h"
 
 namespace OHOS::Ace::Framework {
@@ -58,7 +60,10 @@ struct MaybeReferenced<C, true>
 };
 
 template<typename C>
-v8::Persistent<v8::FunctionTemplate> V8Class<C>::functionTemplate_;
+std::unordered_map<v8::Isolate*, v8::Persistent<v8::FunctionTemplate>> V8Class<C>::functionTemplates_;
+
+template<typename C>
+std::mutex V8Class<C>::mutex_;
 
 template<typename C>
 FunctionCallback V8Class<C>::constructor_ = nullptr;
@@ -78,20 +83,28 @@ template<typename C>
 void V8Class<C>::Declare(const char* name)
 {
     staticPropertyNames_.clear();
-    functionTemplate_.Empty();
     constructor_ = nullptr;
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     v8::Local<v8::FunctionTemplate> funcTemplate = v8::FunctionTemplate::New(isolate);
     funcTemplate->InstanceTemplate()->SetInternalFieldCount(1);
-    functionTemplate_.Reset(isolate, funcTemplate);
+    auto destroyCallback = [](v8::Isolate* isolate) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        functionTemplates_.erase(isolate);
+    };
+    V8FunctionDestroyCallbackHelper::AddDestroyCallback(destroyCallback, isolate);
+    std::lock_guard<std::mutex> lock(mutex_);
+    functionTemplates_[isolate].Empty();
+    functionTemplates_[isolate].Reset(isolate, funcTemplate);
 }
 
 template<typename C>
 template<typename Base, typename R, typename... Args>
 void V8Class<C>::Method(const char* name, R (Base::*func)(Args...), int id)
 {
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    functionTemplate_.Get(isolate)->PrototypeTemplate()->Set(isolate, name,
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto& funtionTemplate = functionTemplates_[isolate];
+    funtionTemplate.Get(isolate)->PrototypeTemplate()->Set(isolate, name,
         v8::FunctionTemplate::New(isolate, MethodCallback<Base, R, Args...>, v8::Integer::New(isolate, id)));
 }
 
@@ -99,8 +112,10 @@ template<typename C>
 template<typename T>
 void V8Class<C>::CustomMethod(const char* name, MemberFunctionCallback<T> callback, int id)
 {
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    functionTemplate_.Get(isolate)->PrototypeTemplate()->Set(isolate, name,
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto& funtionTemplate = functionTemplates_[isolate];
+    funtionTemplate.Get(isolate)->PrototypeTemplate()->Set(isolate, name,
         v8::FunctionTemplate::New(isolate,
             InternalMemberFunctionCallback<T, const v8::FunctionCallbackInfo<v8::Value>&>,
             v8::Integer::New(isolate, id)));
@@ -109,8 +124,10 @@ void V8Class<C>::CustomMethod(const char* name, MemberFunctionCallback<T> callba
 template<typename C>
 void V8Class<C>::CustomMethod(const char* name, FunctionCallback callback)
 {
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    functionTemplate_.Get(isolate)->PrototypeTemplate()->Set(
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto& funtionTemplate = functionTemplates_[isolate];
+    funtionTemplate.Get(isolate)->PrototypeTemplate()->Set(
         isolate, name, v8::FunctionTemplate::New(isolate, callback));
 }
 
@@ -118,8 +135,10 @@ template<typename C>
 template<typename T>
 void V8Class<C>::CustomMethod(const char* name, JSMemberFunctionCallback<T> callback, int id)
 {
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    functionTemplate_.Get(isolate)->PrototypeTemplate()->Set(isolate, name,
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto& funtionTemplate = functionTemplates_[isolate];
+    funtionTemplate.Get(isolate)->PrototypeTemplate()->Set(isolate, name,
         v8::FunctionTemplate::New(
             isolate, InternalMemberFunctionCallback<T, const JSCallbackInfo&>, v8::Integer::New(isolate, id)));
 }
@@ -128,30 +147,33 @@ template<typename C>
 template<typename R, typename... Args>
 void V8Class<C>::StaticMethod(const char* name, R (*func)(Args...), int id)
 {
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     v8::Local<v8::FunctionTemplate> functiontemplate =
         v8::FunctionTemplate::New(isolate, StaticMethodCallback<R, Args...>, v8::Integer::New(isolate, id));
-    functionTemplate_.Get(isolate)->Set(isolate, name, functiontemplate);
     staticPropertyNames_.emplace(name, functiontemplate);
+    std::lock_guard<std::mutex> lock(mutex_);
+    functionTemplates_[isolate].Get(isolate)->Set(isolate, name, functiontemplate);
 }
 
 template<typename C>
 void V8Class<C>::StaticMethod(const char* name, JSFunctionCallback func, int id)
 {
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     v8::Local<v8::FunctionTemplate> functiontemplate =
         v8::FunctionTemplate::New(isolate, JSStaticMethodCallback, v8::Integer::New(isolate, id));
-    functionTemplate_.Get(isolate)->Set(isolate, name, functiontemplate);
     staticPropertyNames_.emplace(name, functiontemplate);
+    std::lock_guard<std::mutex> lock(mutex_);
+    functionTemplates_[isolate].Get(isolate)->Set(isolate, name, functiontemplate);
 }
 
 template<typename C>
 void V8Class<C>::CustomStaticMethod(const char* name, FunctionCallback callback)
 {
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     v8::Local<v8::FunctionTemplate> functiontemplate = v8::FunctionTemplate::New(isolate, callback);
-    functionTemplate_.Get(isolate)->Set(isolate, name, functiontemplate);
     staticPropertyNames_.emplace(name, functiontemplate);
+    std::lock_guard<std::mutex> lock(mutex_);
+    functionTemplates_[isolate].Get(isolate)->Set(isolate, name, functiontemplate);
 }
 
 template<typename C>
@@ -159,7 +181,9 @@ template<typename T>
 void V8Class<C>::StaticConstant(const char* name, T val)
 {
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    functionTemplate_.Get(isolate)->Set(v8::Local<v8::Name>::Cast(V8ValueConvertor::toV8Value<std::string>(name)),
+    std::lock_guard<std::mutex> lock(mutex_);
+    functionTemplates_[isolate].Get(isolate)->Set(
+        v8::Local<v8::Name>::Cast(V8ValueConvertor::toV8Value<std::string>(name)),
         V8ValueConvertor::toV8Value(val), v8::PropertyAttribute::ReadOnly);
 }
 
@@ -167,10 +191,12 @@ template<typename C>
 void V8Class<C>::Bind(BindingTarget t, FunctionCallback ctor)
 {
     constructor_ = ctor;
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     v8::HandleScope scp(isolate);
-    functionTemplate_.Get(isolate)->SetCallHandler(ConstructorInterceptor);
-    t->Set(v8::String::NewFromUtf8(isolate, ThisJSClass::JSName()).ToLocalChecked(), functionTemplate_.Get(isolate));
+    std::lock_guard<std::mutex> lock(mutex_);
+    functionTemplates_[isolate].Get(isolate)->SetCallHandler(ConstructorInterceptor);
+    t->Set(v8::String::NewFromUtf8(isolate, ThisJSClass::JSName()).ToLocalChecked(),
+        functionTemplates_[isolate].Get(isolate));
 }
 
 template<typename C>
@@ -182,9 +208,10 @@ void V8Class<C>::Bind(
     gcMark_ = gcMark;
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
     v8::HandleScope scp(isolate);
-    functionTemplate_.Get(isolate)->SetCallHandler(JSConstructorInterceptor);
-
-    t->Set(v8::String::NewFromUtf8(isolate, ThisJSClass::JSName()).ToLocalChecked(), functionTemplate_.Get(isolate));
+    std::lock_guard<std::mutex> lock(mutex_);
+    functionTemplates_[isolate].Get(isolate)->SetCallHandler(JSConstructorInterceptor);
+    t->Set(v8::String::NewFromUtf8(isolate, ThisJSClass::JSName()).ToLocalChecked(),
+        functionTemplates_[isolate].Get(isolate));
 }
 
 template<typename C>
@@ -193,10 +220,12 @@ void V8Class<C>::Bind(BindingTarget t, JSDestructorCallback<C> dtor, JSGCMarkCal
 {
     jsDestructor_ = dtor;
     gcMark_ = gcMark;
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     v8::HandleScope scp(isolate);
-    functionTemplate_.Get(isolate)->SetCallHandler(InternalConstructor<Args...>);
-    t->Set(v8::String::NewFromUtf8(isolate, ThisJSClass::JSName()).ToLocalChecked(), functionTemplate_.Get(isolate));
+    std::lock_guard<std::mutex> lock(mutex_);
+    functionTemplates_[isolate].Get(isolate)->SetCallHandler(InternalConstructor<Args...>);
+    t->Set(v8::String::NewFromUtf8(isolate, ThisJSClass::JSName()).ToLocalChecked(),
+        functionTemplates_[isolate].Get(isolate));
 }
 
 template<typename C>
@@ -205,9 +234,10 @@ void V8Class<C>::Inherit()
 {
     GetFunctionTemplate()->Inherit(V8Class<Base>::GetFunctionTemplate());
 
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     auto& baseStaticPropertyNames = V8Class<Base>::GetStaticPropertyNames();
     auto& staticPropertyNames = GetStaticPropertyNames();
+    std::lock_guard<std::mutex> lock(mutex_);
     for (auto& [property, functionTemplate] : baseStaticPropertyNames) {
         if (staticPropertyNames.find(property) != staticPropertyNames.end()) {
             continue;
@@ -220,8 +250,8 @@ void V8Class<C>::Inherit()
 template<typename C>
 v8::Local<v8::FunctionTemplate> V8Class<C>::GetFunctionTemplate()
 {
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    return functionTemplate_.Get(isolate);
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
+    return functionTemplates_[isolate].Get(isolate);
 }
 
 template<typename C>
@@ -467,13 +497,14 @@ void V8Class<C>::JSConstructorInterceptor(const v8::FunctionCallbackInfo<v8::Val
 template<typename C>
 v8::Local<v8::Object> V8Class<C>::NewInstance()
 {
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     v8::Isolate::Scope isolateScope(isolate);
     v8::HandleScope scp(isolate);
     v8::Context::Scope contextScope(isolate->GetCurrentContext());
 
     auto context = isolate->GetCurrentContext();
-    v8::MaybeLocal<v8::Function> func = functionTemplate_.Get(isolate)->GetFunction(context);
+    std::lock_guard<std::mutex> lock(mutex_);
+    v8::MaybeLocal<v8::Function> func = functionTemplates_[isolate].Get(isolate)->GetFunction(context);
     if (func.IsEmpty()) {
         return v8::Local<v8::Object>();
     }

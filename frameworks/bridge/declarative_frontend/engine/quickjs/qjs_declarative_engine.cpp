@@ -201,12 +201,14 @@ void QJSDeclarativeEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)
 {
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetRunningPage(page);
+    js_std_loop(engineInstance_->GetQJSContext());
 }
 
 void QJSDeclarativeEngine::UpdateStagingPage(const RefPtr<JsAcePage>& page)
 {
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetStagingPage(page);
+    js_std_loop(engineInstance_->GetQJSContext());
 }
 
 void QJSDeclarativeEngine::ResetStagingPage()
@@ -214,11 +216,13 @@ void QJSDeclarativeEngine::ResetStagingPage()
     ACE_DCHECK(engineInstance_);
     auto runningPage = engineInstance_->GetRunningPage();
     engineInstance_->ResetStagingPage(runningPage);
+    js_std_loop(engineInstance_->GetQJSContext());
 }
 
 void QJSDeclarativeEngine::DestroyPageInstance(int32_t pageId)
 {
     LOGE("Not implemented!");
+    js_std_loop(engineInstance_->GetQJSContext());
 }
 
 void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv)
@@ -230,6 +234,7 @@ void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValu
     }
     JSValue ret = JS_NULL;
     CallAppFunc(appFuncName, argc, argv, ret);
+    js_std_loop(ctx);
     JS_FreeValue(ctx, ret);
 }
 
@@ -250,6 +255,7 @@ void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValu
         return;
     }
     ret = JS_Call(ctx, appFunc, JS_UNDEFINED, argc, argv);
+    js_std_loop(ctx);
     JS_FreeValue(ctx, appFunc);
     JS_FreeValue(ctx, defaultobj);
     JS_FreeValue(ctx, exportobj);
@@ -374,6 +380,7 @@ void QJSDeclarativeEngine::OnSaveData(std::string& saveData)
     if (JS_IsBool(ret)) {
         saveData = ScopedString::Stringify(obj);
     }
+    js_std_loop(ctx);
 }
 
 void QJSDeclarativeEngine::OnRemoteTerminated()
@@ -407,6 +414,7 @@ void QJSDeclarativeEngine::TimerCallback(const std::string& callbackId, const st
         ModuleManager::GetInstance()->RemoveCallbackFunc(ctx, std::stoi(callbackId), isInterval);
         engineInstance_->GetDelegate()->ClearTimer(callbackId);
     }
+    js_std_loop(engineInstance_->GetQJSContext());
 }
 
 void QJSDeclarativeEngine::TimerCallJs(const std::string& callbackId, bool isInterval)
@@ -436,6 +444,7 @@ void QJSDeclarativeEngine::TimerCallJs(const std::string& callbackId, bool isInt
         }
         JS_Call(ctx, jsFunc, JS_UNDEFINED, jsargv.size(), argv);
     }
+    js_std_loop(ctx);
 }
 
 void QJSDeclarativeEngine::MediaQueryCallback(const std::string& callbackId, const std::string& args)

@@ -534,7 +534,7 @@ function $r(id, type, ...params){
 }
 
 function $rawfile(fileName){
-  return {"id": 0, "type": 30000, "params": [fileName]}
+  return {"id": 0, "type": 30000, "params": [fileName]};
 }
 
 var IndexerAlign;

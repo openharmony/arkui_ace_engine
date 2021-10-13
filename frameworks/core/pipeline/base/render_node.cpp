@@ -171,10 +171,10 @@ void RenderNode::UpdateTouchRect()
             if (child->GetTouchRect().GetSize().IsEmpty()) {
                 continue;
             }
-            minX = std::min(minX, child->GetTouchRect().Left() + touchRect_.Left());
-            minY = std::min(minY, child->GetTouchRect().Top() + touchRect_.Top());
-            maxX = std::max(maxX, child->GetTouchRect().Right() + touchRect_.Left());
-            maxY = std::max(maxY, child->GetTouchRect().Bottom() + touchRect_.Top());
+            minX = std::min(minX, child->GetTouchRect().Left() + GetPaintRect().Left());
+            minY = std::min(minY, child->GetTouchRect().Top() + GetPaintRect().Top());
+            maxX = std::max(maxX, child->GetTouchRect().Right() + GetPaintRect().Left());
+            maxY = std::max(maxY, child->GetTouchRect().Bottom() + GetPaintRect().Top());
         }
         touchRect_.SetOffset({ minX, minY });
         touchRect_.SetSize({ maxX - minX, maxY - minY });
@@ -575,7 +575,7 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     if (IsChildrenTouchEnable()) {
         for (auto iter = sortedChildern.rbegin(); iter != sortedChildern.rend(); ++iter) {
             auto& child = *iter;
-            if (!child->GetVisible()) {
+            if (!child->GetVisible() || child->disabled_ || child->disableTouchEvent_) {
                 continue;
             }
             if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {

@@ -37,6 +37,11 @@ public:
     std::string GetDeclaration() const;
     std::string GetTextCase() const;
 
+    AceType::IdType GetTargetTypeId() const override
+    {
+        return TextSpanElement::TypeId();
+    }
+
 private:
     RefPtr<RenderTextSpan> GetRenderTextSpan() const;
 };

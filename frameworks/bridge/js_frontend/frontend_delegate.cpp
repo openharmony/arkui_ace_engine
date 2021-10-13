@@ -39,7 +39,7 @@ bool ParseFileUri(const RefPtr<AssetManager>& assetManager, const std::string& f
         fileName = fileUri;
     } else {
         fileName = fileUri.substr(slashPos + 1);
-        filePath = fileUri.substr(0, slashPos + 1);
+        filePath = fileUri.substr(0, slashPos);
     }
 
     if (StartWith(filePath, SLASHSTR)) {
@@ -80,7 +80,26 @@ bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content)
     return true;
 }
 
+template<typename T>
+bool FrontendDelegate::GetResourceData(const std::string& fileUri, const RefPtr<AssetManager>& assetManager,
+    T& content)
+{
+    std::string targetFilePath;
+    if (!ParseFileUri(assetManager, fileUri, targetFilePath)) {
+        LOGE("GetResourceData parse file uri failed.");
+        return false;
+    }
+    if (!GetAssetContentAllowEmpty(assetManager, targetFilePath, content)) {
+        LOGE("GetResourceData GetAssetContent failed.");
+        return false;
+    }
+
+    return true;
+}
+
 template bool FrontendDelegate::GetResourceData(const std::string& fileUri, std::string& content);
 template bool FrontendDelegate::GetResourceData(const std::string& fileUri, std::vector<uint8_t>& content);
+template bool FrontendDelegate::GetResourceData(const std::string& fileUri, const RefPtr<AssetManager>& assetManager,
+    std::vector<uint8_t>& content);
 
 } // namespace OHOS::Ace::Framework

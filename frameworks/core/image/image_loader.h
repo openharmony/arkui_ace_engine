@@ -40,6 +40,7 @@ public:
     static std::string RemovePathHead(const std::string& uri);
     static RefPtr<ImageLoader> CreateImageLoader(const ImageSourceInfo& imageSourceInfo);
     static void CacheResizedImage(const sk_sp<SkImage>& image, const std::string& key);
+    static sk_sp<SkData> LoadDataFromCachedFile(const std::string& uri);
 };
 
 // File image provider: read image from file.
@@ -63,6 +64,7 @@ public:
     explicit AssetImageLoader() = default;
     ~AssetImageLoader() override = default;
     sk_sp<SkData> LoadImageData(const std::string& src, const WeakPtr<PipelineContext> context = nullptr) override;
+    std::string LoadJsonData(const std::string& src, const WeakPtr<PipelineContext> context = nullptr);
 };
 
 // Network image provider: read image from network.

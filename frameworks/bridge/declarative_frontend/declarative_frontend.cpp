@@ -302,6 +302,50 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->OnWindowDisplayModeChanged(isShownInMultiWindow, data);
     };
 
+    const auto& onSaveAbilityStateCallBack  = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                                    std::string& data) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            LOGE("the js engine is nullptr");
+            return;
+        }
+        jsEngine->OnSaveAbilityState(data);
+    };
+    const auto& onRestoreAbilityStateCallBack  = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                                    const std::string& data) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            LOGE("the js engine is nullptr");
+            return;
+        }
+        jsEngine->OnRestoreAbilityState(data);
+    };
+
+    const auto& onNewWantCallBack  = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                                    const std::string& data) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            LOGE("the js engine is nullptr");
+            return;
+        }
+        jsEngine->OnNewWant(data);
+    };
+    const auto& onActiveCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->OnActive();
+    };
+
+    const auto& onInactiveCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->OnInactive();
+    };
+
     const auto& onConfigurationUpdatedCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                                      const std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
@@ -334,6 +378,15 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             return;
         }
         jsEngine->OnCompleteContinuation(code);
+    };
+
+    const auto& onMemoryLevelCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                                     const int32_t level) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->OnMemoryLevel(level);
     };
 
     const auto& onRestoreDataCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
@@ -389,12 +442,15 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         }
         jsEngine->JsCallback(callbackId, args);
     };
+
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
         setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
         resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
         timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
-        onConfigurationUpdatedCallBack, onSaveDataCallBack, onStartContinuationCallBack, onRemoteTerminatedCallBack,
-        onCompleteContinuationCallBack, onRestoreDataCallBack);
+        onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack,
+        onNewWantCallBack, onSaveDataCallBack, onStartContinuationCallBack, onRemoteTerminatedCallBack,
+        onActiveCallBack, onInactiveCallBack, onCompleteContinuationCallBack, onMemoryLevelCallBack,
+        onRestoreDataCallBack);
     if (disallowPopLastPage_) {
         delegate_->DisallowPopLastPage();
     }
@@ -539,6 +595,27 @@ void DeclarativeFrontend::OnWindowDisplayModeChanged(bool isShownInMultiWindow, 
     delegate_->OnWindowDisplayModeChanged(isShownInMultiWindow, data);
 }
 
+void DeclarativeFrontend::OnSaveAbilityState(std::string& data)
+{
+    if (delegate_) {
+        delegate_->OnSaveAbilityState(data);
+    }
+}
+
+void DeclarativeFrontend::OnRestoreAbilityState(const std::string& data)
+{
+    if (delegate_) {
+        delegate_->OnRestoreAbilityState(data);
+    }
+}
+
+void DeclarativeFrontend::OnNewWant(const std::string& data)
+{
+    if (delegate_) {
+        delegate_->OnNewWant(data);
+    }
+}
+
 RefPtr<AccessibilityManager> DeclarativeFrontend::GetAccessibilityManager() const
 {
     if (!delegate_) {
@@ -593,6 +670,7 @@ void DeclarativeFrontend::OnActive()
 {
     if (delegate_) {
         foregroundFrontend_ = true;
+        delegate_->OnActive();
         delegate_->InitializeAccessibilityCallback();
     }
 }
@@ -600,6 +678,7 @@ void DeclarativeFrontend::OnActive()
 void DeclarativeFrontend::OnInactive()
 {
     if (delegate_) {
+        delegate_->OnInactive();
         delegate_->OnSuspended();
     }
 }
@@ -617,6 +696,13 @@ void DeclarativeFrontend::OnCompleteContinuation(int32_t code)
 {
     if (delegate_) {
         delegate_->OnCompleteContinuation(code);
+    }
+}
+
+void DeclarativeFrontend::OnMemoryLevel(const int32_t level)
+{
+    if (delegate_) {
+        delegate_->OnMemoryLevel(level);
     }
 }
 

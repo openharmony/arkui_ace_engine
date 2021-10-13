@@ -71,6 +71,8 @@ public:
     void DrawImage(const Offset& offset, const CanvasImage& canvasImage, double width, double height) override;
     void PutImageData(const Offset& offset, const ImageData& imageData) override;
     std::unique_ptr<ImageData> GetImageData(double left, double top, double width, double height) override;
+    std::string GetJsonData(const std::string& path) override;
+
     void WebGLInit(CanvasRenderContextBase* context) override;
     void WebGLUpdate() override;
     RenderLayer GetRenderLayer() override;

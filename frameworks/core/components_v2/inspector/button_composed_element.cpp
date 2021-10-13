@@ -18,13 +18,16 @@
 #include "base/log/dump_log.h"
 #include "core/components/button/button_element.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/text/render_text.h"
+#include "core/components/text/text_element.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
 
 const std::unordered_map<std::string, std::function<std::string(const ButtonComposedElement&)>> CREATE_JSON_MAP {
-    { "type", [](const ButtonComposedElement& inspector) { return inspector.GetBottonType(); } },
+    { "type", [](const ButtonComposedElement& inspector) { return inspector.GetButtonType(); } },
     { "stateEffect", [](const ButtonComposedElement& inspector) { return inspector.GetStateEffect(); } },
+    { "label", [](const ButtonComposedElement& inspector) { return inspector.GetLabel(); } },
 };
 
 void ButtonComposedElement::Dump()
@@ -32,9 +35,11 @@ void ButtonComposedElement::Dump()
     InspectorComposedElement::Dump();
     DumpLog::GetInstance().AddDesc(std::string("button_composed_element"));
     DumpLog::GetInstance().AddDesc(
-        std::string("BottonType: ").append(GetBottonType()));
+        std::string("ButtonType: ").append(GetButtonType()));
     DumpLog::GetInstance().AddDesc(
         std::string("StateEffect: ").append(GetStateEffect()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("Label: ").append(GetLabel()));
 }
 
 std::unique_ptr<JsonValue> ButtonComposedElement::ToJsonObject() const
@@ -46,7 +51,7 @@ std::unique_ptr<JsonValue> ButtonComposedElement::ToJsonObject() const
     return resultJson;
 }
 
-std::string ButtonComposedElement::GetBottonType() const
+std::string ButtonComposedElement::GetButtonType() const
 {
     auto renderButton = GetRenderButton();
     auto type = renderButton ? renderButton->GetButtonType() : ButtonType::CAPSULE;
@@ -58,6 +63,28 @@ std::string ButtonComposedElement::GetStateEffect() const
     auto renderButton = GetRenderButton();
     auto stateEffect = renderButton ? renderButton->GetStateEffect() : true;
     return ConvertBoolToString(stateEffect);
+}
+
+std::string ButtonComposedElement::GetLabel() const
+{
+    auto node = GetInspectorNode(TextElement::TypeId());
+    if (!node) {
+        return "";
+    }
+    auto render = AceType::DynamicCast<RenderText>(node);
+    if (!render) {
+        return "";
+    }
+    return render->GetTextData();
+}
+
+std::string ButtonComposedElement::GetBackgroundColor() const
+{
+    auto renderButton = GetRenderButton();
+    if (!renderButton) {
+        return "None";
+    }
+    return renderButton->GetClickedColor().ColorToString();
 }
 
 RefPtr<RenderButton> ButtonComposedElement::GetRenderButton() const
