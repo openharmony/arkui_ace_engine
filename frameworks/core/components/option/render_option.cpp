@@ -91,6 +91,7 @@ void RenderOption::OnFocus(bool focus)
     // lost focus => just update status.
     if (!focus) {
         data_->SetFocused(false);
+        data_->SetSelected(false);
         UpdateStatus();
         return;
     }
