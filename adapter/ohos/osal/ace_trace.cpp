@@ -92,6 +92,7 @@ void AceTraceBegin(const char* name)
         std::string nameStr(name);
         if (PushString(nameStr)) {
             StartTrace(BYTRACE_TAG_ACE, nameStr);
+            UpdateTraceLabel();
         } else {
             LOGW("Failed push current tag name");
         }
