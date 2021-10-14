@@ -201,6 +201,8 @@ private:
     bool usingDefaultStyle_ { false };
     TextStyle activeTextStyle_;
     TextStyle inactiveTextStyle_;
+    Color activeColor_;
+    Color inactiveColor_;
     Alignment itemAlignment_ = Alignment::CENTER;
     EventMarker domChangeEventId_;
     BarPosition barPosition_ = BarPosition::START;

@@ -92,6 +92,7 @@ ohos_unittest("RenderTabContentTest") {
     # components
     "$ace_root/frameworks/core/components/box/box_component.cpp",
     "$ace_root/frameworks/core/components/display/display_component.cpp",
+    "$ace_root/frameworks/core/components/image/image_component.cpp",
     "$ace_root/frameworks/core/components/overlay/overlay_component.cpp",
     "$ace_root/frameworks/core/components/page/page_component.cpp",
     "$ace_root/frameworks/core/components/root/root_component.cpp",

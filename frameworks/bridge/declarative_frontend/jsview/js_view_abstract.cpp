@@ -3093,8 +3093,8 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod(
         "hideNavigationBackButton", &JSViewAbstract::SetHideNavigationBackButton, opt);
     JSClass<JSViewAbstract>::StaticMethod("hideToolBar", &JSViewAbstract::SetHideToolBar, opt);
+    JSClass<JSViewAbstract>::StaticMethod("toolBar", &JSViewAbstract::SetToolBar);
     JSClass<JSViewAbstract>::StaticMethod("direction", &JSViewAbstract::SetDirection, opt);
-    JSClass<JSViewAbstract>::CustomStaticMethod("toolBar", &JSViewAbstract::JsToolBar);
 #ifndef WEARABLE_PRODUCT
     JSClass<JSViewAbstract>::StaticMethod("bindPopup", &JSViewAbstract::JsBindPopup);
 #endif
@@ -3440,6 +3440,56 @@ void JSViewAbstract::SetHideToolBar(bool hide)
     GetNavigationDeclaration()->SetHideToolBar(hide);
 }
 
+void JSViewAbstract::SetToolBar(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least one argument");
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        LOGE("arg is not a object.");
+        return;
+    }
+
+    auto itemsValue = JSRef<JSObject>::Cast(info[0])->GetProperty("items");
+    if (!itemsValue->IsObject() || !itemsValue->IsArray()) {
+        LOGE("arg format error: not find items");
+        return;
+    }
+    auto itemsArray = JSRef<JSArray>::Cast(itemsValue);
+    auto length = itemsArray->Length();
+    auto navigationDeclaration = GetNavigationDeclaration();
+    for (uint32_t i = 0; i < length; i++) {
+        auto item = itemsArray->GetValueAt(i);
+        if (!item->IsObject()) {
+            LOGE("tab bar item is not json object");
+            continue;
+        }
+
+        auto itemObject = JSRef<JSObject>::Cast(item);
+        ToolBarItem toolBarItem;
+        auto itemValueObject = itemObject->GetProperty("value");
+        if (itemValueObject->IsString()) {
+            toolBarItem.value = itemValueObject->ToString();
+        }
+
+        auto itemIconObject = itemObject->GetProperty("icon");
+        if (itemIconObject->IsString()) {
+            toolBarItem.icon = itemIconObject->ToString();
+        }
+
+        auto itemActionValue = itemObject->GetProperty("action");
+        if (itemActionValue->IsFunction()) {
+            auto tabBarItemActionFunc = AceType::MakeRefPtr<JsEventFunction<BaseEventInfo, 0>>(
+                JSRef<JSFunc>::Cast(itemActionValue), nullptr);
+            toolBarItem.action =
+                EventMarker([func = std::move(tabBarItemActionFunc)]() { func->Execute(); }, "tabBarItemClick", 0);
+        }
+        navigationDeclaration->AddToolBarItem(toolBarItem);
+    }
+}
+
 bool JSViewAbstract::ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonValue, Dimension& result,
     DimensionUnit defaultUnit)
 {
@@ -3611,93 +3661,6 @@ void JSViewAbstract::SetDirection(const std::string& dir)
             AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     }
 }
-
-#ifdef USE_QUICKJS_ENGINE
-JSValue JSViewAbstract::JsToolBar(JSContext* ctx, JSValueConst thisValue, int32_t argc, JSValueConst* argv)
-{
-    if ((argv == nullptr) || (argc < 1)) {
-        return JS_ThrowSyntaxError(ctx, "The arg is wrong: less than one parameter");
-    }
-    if (!JS_IsObject(argv[0])) {
-        return JS_ThrowSyntaxError(ctx, "The arg is wrong: parameter of type object expected");
-    }
-    auto argsPtrItem = JsonUtil::ParseJsonString(ScopedString::Stringify(argv[0]));
-    if (!argsPtrItem) {
-        LOGE("Js Parse Border failed. argsPtr is null. %s", ScopedString::Stringify(argv[0]).c_str());
-        return thisValue;
-    }
-    if (argsPtrItem->IsNull()) {
-        LOGE("Js Parse Border failed. argsPtr is null. %s", ScopedString::Stringify(argv[0]).c_str());
-        return thisValue;
-    }
-
-    return thisValue;
-}
-#elif USE_V8_ENGINE
-void JSViewAbstract::JsToolBar(const v8::FunctionCallbackInfo<v8::Value>& info)
-{
-    auto isolate = info.GetIsolate();
-    auto context = isolate->GetCurrentContext();
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not a object.");
-        return;
-    }
-
-    auto object = info[0]->ToObject(context).ToLocalChecked();
-    auto items = object->Get(context, v8::String::NewFromUtf8(isolate, "items").ToLocalChecked()).ToLocalChecked();
-    if (!items->IsObject() || !items->IsArray()) {
-        LOGE("arg format error: not find items");
-        return;
-    }
-    auto itemsObject = items->ToObject(context).ToLocalChecked();
-    auto length = itemsObject->Get(context, v8::String::NewFromUtf8(isolate, "length").ToLocalChecked())
-                      .ToLocalChecked()->Uint32Value(context).ToChecked();
-    auto navigationDeclaration = GetNavigationDeclaration();
-    for (uint32_t i = 0; i < length; i++) {
-        auto item = itemsObject->Get(context, i).ToLocalChecked();
-        if (!item->IsObject()) {
-            LOGE("tab bar item is not json object");
-            continue;
-        }
-
-        ToolBarItem toolBarItem;
-        auto itemObject = item->ToObject(context).ToLocalChecked();
-
-        auto itemValueObject =
-            itemObject->Get(context, v8::String::NewFromUtf8(isolate, "value").ToLocalChecked()).ToLocalChecked();
-        if (itemValueObject->IsString()) {
-            toolBarItem.value = *v8::String::Utf8Value(isolate, itemValueObject->ToString(context).ToLocalChecked());
-        }
-
-        auto itemIconObject =
-            itemObject->Get(context, v8::String::NewFromUtf8(isolate, "icon").ToLocalChecked()).ToLocalChecked();
-        if (itemIconObject->IsString()) {
-            toolBarItem.icon = *v8::String::Utf8Value(isolate, itemIconObject->ToString(context).ToLocalChecked());
-        }
-
-        auto itemActionValue =
-            itemObject->Get(context, v8::String::NewFromUtf8(isolate, "action").ToLocalChecked()).ToLocalChecked();
-        if (itemActionValue->IsFunction()) {
-            auto tabBarItemActionFunc = AceType::MakeRefPtr<V8EventFunction<BaseEventInfo, 0>>(
-                v8::Local<v8::Function>::Cast(itemActionValue), nullptr);
-            toolBarItem.action =
-                EventMarker([func = std::move(tabBarItemActionFunc)]() { func->execute(); }, "tabBarItemClick", 0);
-        }
-        navigationDeclaration->AddToolBarItem(toolBarItem);
-    }
-    info.GetReturnValue().Set(info.This());
-}
-#elif USE_ARK_ENGINE
-panda::Local<panda::JSValueRef> JSViewAbstract::JsToolBar(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> thisObj,
-    const panda::Local<panda::JSValueRef> argv[], int32_t argc, void* data)
-{
-    return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
-}
-#endif // USE_ARK_ENGINE
 
 RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants()
 {

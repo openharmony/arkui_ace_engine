@@ -76,7 +76,7 @@ void FindChildren(const RefPtr<Component>& component, std::stack<RefPtr<Componen
     }
 }
 
-void TabBarItemComponent::UpdateTextStyle(const TextStyle& textStyle)
+void TabBarItemComponent::UpdateStyle(const TextStyle& textStyle, const Color& color)
 {
     std::stack<RefPtr<Component>> allChildren;
     allChildren.push(GetChild());
@@ -85,8 +85,11 @@ void TabBarItemComponent::UpdateTextStyle(const TextStyle& textStyle)
         auto component = allChildren.top();
         allChildren.pop();
         auto text = AceType::DynamicCast<TextComponent>(component);
+        auto image = AceType::DynamicCast<ImageComponent>(component);
         if (text) {
             text->SetTextStyle(textStyle);
+        } else if (image) {
+            image->SetColor(color);
         } else {
             FindChildren(component, allChildren);
         }

@@ -116,12 +116,14 @@ void TabBarComponent::InitBottomTabStyle(const RefPtr<TabTheme>& theme)
 {
     usingDefaultStyle_ = true;
     indicator_ = nullptr;
-    activeTextStyle_.SetTextColor(theme->GetActiveIndicatorColor());
+    activeColor_ = theme->GetActiveIndicatorColor();
+    activeTextStyle_.SetTextColor(activeColor_);
     activeTextStyle_.SetFontSize(Dimension(BOTTOM_TAB_TEXT_SIZE, DimensionUnit::VP));
     activeTextStyle_.SetMaxLines(1);
     activeTextStyle_.SetTextOverflow(TextOverflow::CLIP);
 
-    inactiveTextStyle_.SetTextColor(Color::FromRGBO(0, 0, 0, INACTIVE_TEXT_OPACITY));
+    inactiveColor_ = Color::FromRGBO(0, 0, 0, INACTIVE_TEXT_OPACITY);
+    inactiveTextStyle_.SetTextColor(inactiveColor_);
     inactiveTextStyle_.SetFontSize(Dimension(BOTTOM_TAB_TEXT_SIZE, DimensionUnit::VP));
     inactiveTextStyle_.SetMaxLines(1);
     inactiveTextStyle_.SetTextOverflow(TextOverflow::CLIP);
@@ -138,9 +140,9 @@ void TabBarComponent::BuildItems(std::list<RefPtr<TabBarItemComponent>>& items)
         }
         if (usingDefaultStyle_) {
             if (currentIndex++ == activeIndex) {
-                box->UpdateTextStyle(activeTextStyle_);
+                box->UpdateStyle(activeTextStyle_, activeColor_);
             } else {
-                box->UpdateTextStyle(inactiveTextStyle_);
+                box->UpdateStyle(inactiveTextStyle_, inactiveColor_);
             }
         }
         box->SetPadding(labelPadding_);

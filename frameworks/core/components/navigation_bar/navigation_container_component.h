@@ -149,6 +149,9 @@ public:
     RefPtr<Element> CreateElement() override;
 
     static uint32_t GetGlobalTabControllerId();
+    static RefPtr<ComposedComponent> BuildToolBar(
+        const RefPtr<NavigationDeclaration>& declaration,const RefPtr<TabController>& controller);
+
     RefPtr<TabController> GetTabController()
     {
         return tabController_;
@@ -161,7 +164,6 @@ public:
 
 private:
     RefPtr<Component> BuildNavigationBar() const;
-    RefPtr<Component> BuildTabBar();
     bool NeedSection() const;
 
     RefPtr<NavigationDeclaration> declaration_;

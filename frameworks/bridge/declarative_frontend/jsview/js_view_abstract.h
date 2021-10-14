@@ -194,16 +194,6 @@ public:
      */
     static void JSBind();
 
-#ifdef USE_QUICKJS_ENGINE
-    static JSValue JsToolBar(JSContext* ctx, JSValueConst this_value, int32_t argc, JSValueConst* argv);
-#elif USE_V8_ENGINE
-    static void JsToolBar(const v8::FunctionCallbackInfo<v8::Value>& info);
-#elif USE_ARK_ENGINE
-    static panda::Local<panda::JSValueRef> JsToolBar(panda::EcmaVM* vm,
-        panda::Local<panda::JSValueRef> thisObj, const panda::Local<panda::JSValueRef> argv[], int32_t argc,
-        void* data);
-#endif // USE_ARK_ENGINE
-
 protected:
     /**
      * box properties setter
@@ -235,6 +225,7 @@ protected:
     static void SetHideNavigationBar(bool hide);
     static void SetHideNavigationBackButton(bool hide);
     static void SetHideToolBar(bool hide);
+    static void SetToolBar(const JSCallbackInfo& info);
     static RefPtr<ThemeConstants> GetThemeConstants();
     static bool JsWidth(const JSRef<JSVal>& jsValue);
     static bool JsHeight(const JSRef<JSVal>& jsValue);

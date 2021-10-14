@@ -69,7 +69,7 @@ void NavigationContainerElement::PerformBuild()
     }
     auto tabController = navigationContainer->GetTabController();
     if (tabController) {
-        tabBarChangeListener_ = [declaration, content = context_](int32_t index) {
+        tabBarChangeListener_ = [declaration, weakContent = context_, tabController](int32_t index) {
             if (!declaration) {
                 return;
             }
@@ -80,8 +80,14 @@ void NavigationContainerElement::PerformBuild()
             auto pos = toolbarItems.begin();
             std::advance(pos, index);
             if (!pos->action.IsEmpty()) {
-                AceAsyncEvent<void()>::Create(pos->action, content)();
+                AceAsyncEvent<void()>::Create(pos->action, weakContent)();
             }
+
+            auto pipelineContext = weakContent.Upgrade();
+            if (!pipelineContext) {
+                return;
+            }
+            pipelineContext->ScheduleUpdate(NavigationContainerComponent::BuildToolBar(declaration, tabController));
         };
         tabController->SetTabBarChangeListener(tabBarChangeListener_);
     }
