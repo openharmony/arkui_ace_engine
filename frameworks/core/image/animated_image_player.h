@@ -117,7 +117,10 @@ private:
     ImageSourceInfo imageSource_;
     UploadSuccessCallback successCallback_;
     WeakPtr<PipelineContext> context_;
+
+    // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
     fml::WeakPtr<flutter::IOManager> ioManager_;
+    
     fml::RefPtr<flutter::SkiaUnrefQueue> unrefQueue_;
     const std::unique_ptr<SkCodec> codec_;
     const int32_t frameCount_;

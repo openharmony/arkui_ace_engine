@@ -110,6 +110,7 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
         iterator->second = std::make_unique<SkBitmap>(bitmap);
     }
 #ifndef GPU_DISABLED
+    // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
     if (ioManager_) {
         auto resourceContext = ioManager_->GetResourceContext();
         if (resourceContext) {
