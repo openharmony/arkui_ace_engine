@@ -89,6 +89,13 @@ public:
     void SetCatchFilePath(std::string cacheFilePath);
     void OnCameraSizeChange(double width, double height);
     void OnCameraOffsetChange(double x, double y);
+    void MarkWhole();
+    void SetLayoutOffset(double x, double y);
+    void SetLayoutSize(double width, double height)
+    {
+        layoutSize_.SetWidth(width);
+        layoutSize_.SetHeight(height);
+    }
     void AddPrepareEventListener(PrepareEventListener&& listener)
     {
         prepareEventListener_ = std::move(listener);
@@ -109,6 +116,8 @@ private:
     int32_t videoSourceId_ = -1;
     int32_t PreviousReadyMode_ = ReadyMode::NONE;
     sptr<Surface> previewSurface_;
+    Size layoutSize_;
+    Offset layoutOffset_;
 
     ErrorListener onErrorListener_;
     RecordListener onRecordListener_;

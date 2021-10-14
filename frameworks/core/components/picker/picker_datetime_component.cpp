@@ -134,7 +134,7 @@ void PickerDateTimeComponent::ShowDatePicker()
     datePicker_->SetShowLunar(lunar_);
     datePicker_->SetSelectedDate(currentDate_);
     datePicker_->SetMasterHasLunar(GetHasLunar());
-    datePicker_->ShowDialog(GetStack());
+    datePicker_->ShowDialog(GetStack(), false);
 }
 
 void PickerDateTimeComponent::HideDatePicker()

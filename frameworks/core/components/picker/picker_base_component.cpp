@@ -283,7 +283,7 @@ void PickerBaseComponent::SetChangeCallback(const ColumnChangeCallback& value)
     }
 }
 
-void PickerBaseComponent::ShowDialog(const RefPtr<StackElement>& stack)
+void PickerBaseComponent::ShowDialog(const RefPtr<StackElement>& stack, bool disableTouchEvent)
 {
     if (!isDialog_) {
         return;
@@ -300,7 +300,7 @@ void PickerBaseComponent::ShowDialog(const RefPtr<StackElement>& stack)
     }
 
     stack_ = stack;
-    if (!stack_->PushDialog(AceType::Claim(this))) {
+    if (!stack_->PushDialog(AceType::Claim(this), disableTouchEvent)) {
         LOGE("push dialog failed!");
         return;
     }

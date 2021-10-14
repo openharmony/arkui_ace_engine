@@ -349,7 +349,7 @@ public:
         return stack_;
     }
 
-    void ShowDialog(const RefPtr<StackElement>& stack);
+    void ShowDialog(const RefPtr<StackElement>& stack, bool disableTouchEvent = true);
     bool HideDialog();
 
     bool IsDialogShowed()
