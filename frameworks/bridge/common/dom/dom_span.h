@@ -97,6 +97,7 @@ protected:
     void PrepareSpecializedComponent() override;
     void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) override;
     void OnChildNodeRemoved(const RefPtr<DOMNode>& child) override;
+    void ResetInitializedStyle() override;
 
 private:
     void CheckAndSetCurrentSpanStyle(

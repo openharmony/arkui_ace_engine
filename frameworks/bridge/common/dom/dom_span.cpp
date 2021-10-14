@@ -28,6 +28,28 @@ DOMSpan::DOMSpan(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, n
     boxComponent_.Reset();
 }
 
+void DOMSpan::ResetInitializedStyle()
+{
+    for (const auto& child : GetChildList()) {
+        auto domSpan = AceType::DynamicCast<DOMSpan>(child);
+        if (!domSpan) {
+            LOGW("span only support span child");
+            continue;
+        }
+        auto spanComponent = AceType::DynamicCast<TextSpanComponent>(domSpan->GetSpecializedComponent());
+        if (!spanComponent) {
+            LOGW("span only support span child");
+            continue;
+        }
+
+        // If span component has no developer-set styles, then set text styles to span
+        TextStyle spanStyle = spanComponent->GetTextStyle();
+        CheckAndSetCurrentSpanStyle(domSpan, spanStyle, textSpanChild_->GetTextStyle());
+        domSpan->SetTextStyle(spanStyle);
+        spanComponent->SetTextStyle(spanStyle);
+    }
+}
+
 void DOMSpan::CheckAndSetCurrentSpanStyle(
     const RefPtr<DOMSpan>& domSpan, TextStyle& currentStyle, const TextStyle& parentStyle)
 {
