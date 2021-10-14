@@ -236,6 +236,8 @@ void InitRouterModule(JSContext* ctx, JSValue& moduleObj)
     JS_SetPropertyStr(
         ctx, moduleObj, ROUTE_PAGE_GET_STATE, JS_NewCFunction(ctx, PageGetState, ROUTE_PAGE_GET_STATE, 0));
     JS_SetPropertyStr(
+        ctx, moduleObj, ROUTE_PAGE_GET_PARAMS, JS_NewCFunction(ctx, PageGetParams, ROUTE_PAGE_GET_PARAMS, 0));
+    JS_SetPropertyStr(
         ctx, moduleObj, ROUTE_POSTPONE, JS_NewCFunction(ctx, PostponePageTransition, ROUTE_POSTPONE, 0));
 }
 } // namespace OHOS::Ace::Framework
