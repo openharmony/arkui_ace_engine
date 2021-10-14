@@ -32,7 +32,39 @@ void RenderPiece::Update(const RefPtr<Component>& component)
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
+    if (pieceComponent_->GetOnChange()) {
+        onChangeShowDelete = *pieceComponent_->GetOnChange();
+    }
+    showDelete = pieceComponent_->ShowDelete();
+    Initialize();
     MarkNeedLayout();
+}
+
+void RenderPiece::Initialize()
+{
+    clickRecognizer_ = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer_->SetOnClick([wp = WeakClaim(this)](const ClickInfo& info) {
+        auto renderPiece = wp.Upgrade();
+        if (!renderPiece) {
+            LOGE("WeakPtr of RenderMyCircle fails to be upgraded, stop handling click event.");
+            return;
+        }
+        renderPiece->HandleClickEvent(info);
+    });
+}
+
+void RenderPiece::HandleClickEvent(const ClickInfo& info)
+{
+    if (onChangeShowDelete && !showDelete) {
+        onChangeShowDelete(true);
+    }
+}
+
+void RenderPiece::OnTouchTestHit(
+    const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
+{
+    clickRecognizer_->SetCoordinateOffset(coordinateOffset);
+    result.emplace_back(clickRecognizer_);
 }
 
 void RenderPiece::PerformLayout()
@@ -56,7 +88,6 @@ void RenderPiece::OnPaintFinish()
     if (!context) {
         return;
     }
-
     if (pieceComponent_ && renderStatus_ == RenderStatus::FOCUS) {
         auto margin = pieceComponent_->GetMargin();
         auto border = pieceComponent_->GetBorder();

@@ -18,6 +18,7 @@
 
 #include "core/components/declaration/common/declaration.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
+#include "frameworks/core/components/piece/piece_theme.h"
 
 namespace OHOS::Ace {
 
@@ -35,6 +36,7 @@ struct PieceStyle : Style {
     Edge margin;
     Border border;
     Color hoverColor;
+    Color backGroundColor;
 };
 
 struct PieceEvent : Event {
@@ -48,8 +50,8 @@ public:
     PieceDeclaration() = default;
     ~PieceDeclaration() override = default;
 
-    void InitializeStyle() override;
-
+    void InitializeStyle(RefPtr<PieceTheme>& theme);
+    void InitializeStyle() override {}
     const std::string& GetContent() const
     {
         auto& attribute = static_cast<PieceAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
@@ -154,10 +156,23 @@ public:
         auto& style = static_cast<PieceStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
         return style.hoverColor;
     }
+
     void SetHoverColor(const Color& hoverColor)
     {
         auto& style = MaybeResetStyle<PieceStyle>(StyleTag::SPECIALIZED_STYLE);
         style.hoverColor = hoverColor;
+    }
+
+    void SetBackGroundColor(const Color& backGroundColor)
+    {
+        auto& style = MaybeResetStyle<PieceStyle>(StyleTag::SPECIALIZED_STYLE);
+        style.backGroundColor = backGroundColor;
+    }
+
+    const Color& GetBackGroundColor() const
+    {
+        auto& style = static_cast<PieceStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        return style.backGroundColor;
     }
 
     const EventMarker& GetOnDelete() const

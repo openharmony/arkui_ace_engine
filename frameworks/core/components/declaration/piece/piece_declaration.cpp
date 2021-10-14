@@ -18,7 +18,6 @@
 #include "base/utils/string_utils.h"
 #include "core/components/declaration/common/declaration_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/core/components/piece/piece_theme.h"
 
 namespace OHOS::Ace {
 
@@ -32,13 +31,11 @@ void PieceDeclaration::InitSpecialized()
     AddSpecializedEvent(DeclarationConstants::DEFAULT_PIECE_EVENT);
 }
 
-void PieceDeclaration::InitializeStyle()
+void PieceDeclaration::InitializeStyle(RefPtr<PieceTheme>& theme)
 {
-    auto theme = GetTheme<PieceTheme>();
     if (!theme) {
         return;
     }
-
     SetHasBoxStyle(true);
     SetHasDecorationStyle(true);
     auto& sizeStyle = MaybeResetStyle<CommonSizeStyle>(StyleTag::COMMON_SIZE_STYLE);
@@ -58,12 +55,13 @@ void PieceDeclaration::InitializeStyle()
     if (borderStyle.IsValid()) {
         borderStyle.border.SetBorderRadius(Radius(theme->GetHeight() / 2.0));
     }
-    GetBackDecoration()->SetBackgroundColor(theme->GetBackgroundColor());
+
     SetTextStyle(theme->GetTextStyle());
     SetInterval(theme->GetInterval());
     SetIconResource(theme->GetIconResource());
     SetIconSize(theme->GetIconSize());
     SetHoverColor(theme->GetHoverColor());
+    SetBackGroundColor(theme->GetBackgroundColor());
 }
 
 bool PieceDeclaration::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)

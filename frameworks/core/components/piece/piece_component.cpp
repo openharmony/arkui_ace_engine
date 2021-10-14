@@ -15,6 +15,7 @@
 
 #include "core/components/piece/piece_component.h"
 
+#include "core/components/display/render_display.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/gesture_listener/gesture_listener_component.h"
@@ -31,6 +32,10 @@ PieceComponent::PieceComponent()
         declaration_ = AceType::MakeRefPtr<PieceDeclaration>();
         declaration_->Init();
     }
+}
+void PieceComponent::InitializeStyle(RefPtr<PieceTheme>& theme)
+{
+    declaration_->InitializeStyle(theme);
 }
 
 RefPtr<Element> PieceComponent::CreateElement()
@@ -161,6 +166,15 @@ void PieceComponent::SetHoverColor(const Color& hoverColor)
     declaration_->SetHoverColor(hoverColor);
 }
 
+const Color& PieceComponent::GetBackGroundColor() const
+{
+    return declaration_->GetBackGroundColor();
+}
+void PieceComponent::SetBackGroundColor(const Color& backGroundColor)
+{
+    declaration_->SetBackGroundColor(backGroundColor);
+}
+
 void PieceComponent::SetDeclaration(const RefPtr<PieceDeclaration>& declaration)
 {
     if (declaration) {
@@ -170,25 +184,31 @@ void PieceComponent::SetDeclaration(const RefPtr<PieceDeclaration>& declaration)
 
 void PieceComponent::SetImage(RefPtr<RowComponent>& row)
 {
-    if (ShowDelete()) {
-        RefPtr<ImageComponent> image =
-            GetIcon().empty() ? MakeRefPtr<ImageComponent>(GetIconResource()) : MakeRefPtr<ImageComponent>(GetIcon());
-        image->SetWidth(GetIconSize());
-        image->SetHeight(GetIconSize());
-        image->SetImageFill(declaration_->GetImageFill());
-        auto gestureListener = MakeRefPtr<GestureListenerComponent>();
-        gestureListener->SetOnClickId(GetOnDelete());
-        gestureListener->SetChild(image);
-        auto padding = MakeRefPtr<PaddingComponent>();
-        if (GetTextDirection() == TextDirection::RTL) {
-            padding->SetPadding(Edge(0.0_vp, 0.0_vp, GetInterval(), 0.0_vp));
-        } else {
-            padding->SetPadding(Edge(GetInterval(), 0.0_vp, 0.0_vp, 0.0_vp));
-        }
-        padding->SetChild(gestureListener);
-        auto iconFlex = MakeRefPtr<FlexItemComponent>(0, 0, 0.0, padding);
-        row->AppendChild(iconFlex);
+    RefPtr<ImageComponent> image =
+        GetIcon().empty() ? MakeRefPtr<ImageComponent>(GetIconResource()) : MakeRefPtr<ImageComponent>(GetIcon());
+    image->SetWidth(GetIconSize());
+    image->SetHeight(GetIconSize());
+    image->SetImageFill(declaration_->GetImageFill());
+    auto gestureListener = MakeRefPtr<GestureListenerComponent>();
+    gestureListener->SetOnClickId(GetOnDelete());
+    gestureListener->SetChild(image);
+    auto padding = MakeRefPtr<PaddingComponent>();
+    if (GetTextDirection() == TextDirection::RTL) {
+        padding->SetPadding(Edge(0.0_vp, 0.0_vp, GetInterval(), 0.0_vp));
+    } else {
+        padding->SetPadding(Edge(GetInterval(), 0.0_vp, 0.0_vp, 0.0_vp));
     }
+    padding->SetChild(gestureListener);
+    auto iconFlex = MakeRefPtr<FlexItemComponent>(0, 0, 0.0, padding);
+
+    auto displayComponent = MakeRefPtr<DisplayComponent>();
+    displayComponent->SetChild(iconFlex);
+    if (ShowDelete()) {
+        displayComponent->SetVisible(VisibleType::VISIBLE);
+    } else {
+        displayComponent->SetVisible(VisibleType::GONE);
+    }
+    row->AppendChild(displayComponent);
 }
 
 void PieceComponent::SetText(RefPtr<RowComponent>& row)

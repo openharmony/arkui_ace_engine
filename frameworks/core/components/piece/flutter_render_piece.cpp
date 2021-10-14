@@ -30,12 +30,8 @@ RefPtr<RenderNode> RenderPiece::Create()
 void FlutterRenderPiece::Paint(RenderContext& context, const Offset& offset)
 {
     RenderNode::Paint(context, offset);
-
-    // Paint overlay when hover.
-    if (mouseState_ != MouseState::HOVER) {
-        return;
-    }
     if (!pieceComponent_) {
+        LOGE("!pieceComponent_");
         return;
     }
     auto margin = pieceComponent_->GetMargin();
@@ -62,7 +58,7 @@ void FlutterRenderPiece::Paint(RenderContext& context, const Offset& offset)
     }
     SkPaint paint;
     skCanvas->save();
-    paint.setColor(pieceComponent_->GetHoverColor().GetValue());
+    paint.setColor(pieceComponent_->GetBackGroundColor().GetValue());
     Rect pieceRect(pieceOffset + offset - GetPosition(), pieceSize);
     skCanvas->drawRRect(MakeRRect(pieceRect.GetOffset(), pieceRect.GetSize(), pieceComponent_->GetBorder()), paint);
     skCanvas->restore();
