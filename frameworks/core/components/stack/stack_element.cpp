@@ -75,7 +75,7 @@ void StackElement::PopPanel()
     PopDialog();
 }
 
-bool StackElement::PushDialog(const RefPtr<Component>& newComponent)
+bool StackElement::PushDialog(const RefPtr<Component>& newComponent, bool disableTouchEvent)
 {
     auto context = context_.Upgrade();
     if (context) {
@@ -85,7 +85,7 @@ bool StackElement::PushDialog(const RefPtr<Component>& newComponent)
     }
     PopupComponentInfo pushComponentInfo = { -1, "-1", Operation::DIALOG_PUSH, newComponent };
     popupComponentInfos_.emplace_back(pushComponentInfo);
-    disableTouchEvent_ = true;
+    disableTouchEvent_ = disableTouchEvent;
     MarkDirty();
     return true;
 }

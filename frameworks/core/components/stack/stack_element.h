@@ -62,7 +62,7 @@ public:
     void PopToastComponent(int32_t toastPopId);
     void PushPanel(const RefPtr<Component>& newComponent, bool disableTouchEvent = false);
     void PopPanel();
-    bool PushDialog(const RefPtr<Component>& newComponent);
+    bool PushDialog(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     bool PopDialog(int32_t id = -1);
     void PopTextOverlay();
     void PopPopup(const ComposeId& id);

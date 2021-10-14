@@ -379,9 +379,11 @@ bool RenderBubble::PopBubble()
     if (accessibilityManager) {
         auto bubbleNodeId = StringUtils::StringToInt(bubbleComponent_->GetId());
         auto node = accessibilityManager->GetAccessibilityNodeById(bubbleNodeId);
-        auto children = node->GetChildList();
-        for (auto& child : children) {
-            child->ClearRect();
+        if (node) {
+            auto children = node->GetChildList();
+            for (auto& child : children) {
+                child->ClearRect();
+            }
         }
     }
 #endif

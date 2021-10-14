@@ -245,14 +245,33 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
     previewSurface_->SetUserData(REGION_HEIGHT, std::to_string(windowSize_.Height()));
     previewSurface_->SetUserData(REGION_POSITION_X, std::to_string(windowOffset_.GetX()));
     previewSurface_->SetUserData(REGION_POSITION_Y, std::to_string(windowOffset_.GetY()));
+    MarkWhole();
+    return previewSurface_;
+}
 
-    // call context to create hole
-    context->SetClipHole(windowOffset_.GetX(), windowOffset_.GetY(), windowSize_.Width(), windowSize_.Height());
+void CameraCallback::MarkWhole()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("Camera:fail to get context to create Camera");
+        return;
+    }
+
+    context->SetClipHole(layoutOffset_.GetX(), layoutOffset_.GetY(), layoutSize_.Width(), layoutSize_.Height());
     auto renderNode = renderNode_.Upgrade();
     if (renderNode) {
         renderNode->SetHasSubWindow(true);
     }
-    return previewSurface_;
+}
+
+void CameraCallback::SetLayoutOffset(double x, double y)
+{
+    layoutOffset_.SetX(x);
+    layoutOffset_.SetY(y);
+    if (subwindow_) {
+        LOGI("CameraCallback::SetLayoutOffset:  move %{public}lf %{public}lf ", x, y);
+        MarkWhole();
+    }
 }
 
 int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> camManagerObj)
@@ -623,11 +642,6 @@ void CameraCallback::OnCameraSizeChange(double width, double height)
 
 void CameraCallback::OnCameraOffsetChange(double x, double y)
 {
-    if (offsetInitSucceeded_) {
-        LOGE("Camera::CameraCallback: offset has Init Succeeded.");
-        return;
-    }
-
     std::vector<struct ::OHOS::WMDisplayInfo> displays;
     ::OHOS::WindowManager::GetInstance()->GetDisplays(displays);
     if (displays.size() <= 0) {
@@ -651,9 +665,20 @@ void CameraCallback::OnCameraOffsetChange(double x, double y)
     windowOffset_.SetX(x);
     windowOffset_.SetY(y);
 
-    offsetInitSucceeded_ = true;
     LOGI("CameraCallback::OnCameraOffsetChange success: %{public}lf  %{public}lf.", x, y);
-    PrepareCamera(false);
+    if (!offsetInitSucceeded_) {
+        offsetInitSucceeded_ = true;
+        PrepareCamera(false);
+    }
+
+    if (subwindow_) {
+        LOGI("CameraCallback: subwindow move: %{public}d  %{public}d.",
+            (int32_t)windowOffset_.GetX(), (int32_t)windowOffset_.GetY());
+        WMError moveRet = subwindow_->Move((int32_t)windowOffset_.GetX(), (int32_t)windowOffset_.GetY());
+        if (moveRet != WM_OK) {
+            LOGE("CameraCallback: subwindow move failed.");
+        }
+    }
 }
 
 void CaptureListener::OnBufferAvailable()
@@ -815,6 +840,7 @@ void Camera::OnCameraSizeChange(double width, double height)
     float viewScale = context->GetViewScale();
 
     LOGI("Camera::OnCameraSizeChange:viewScale %{public}f .", viewScale);
+    cameraCallback_.SetLayoutSize(width, height);
     cameraCallback_.OnCameraSizeChange(width * viewScale, height * viewScale);
 }
 
@@ -828,6 +854,7 @@ void Camera::OnCameraOffsetChange(double x, double y)
     float viewScale = context->GetViewScale();
 
     LOGI("Camera::OnCameraOffsetChange:viewScale %{public}f .", viewScale);
+    cameraCallback_.SetLayoutOffset(x, y);
     cameraCallback_.OnCameraOffsetChange(x * viewScale, y * viewScale);
 }
 } // namespace OHOS::Ace
