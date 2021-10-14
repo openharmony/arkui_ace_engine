@@ -47,7 +47,7 @@ public:
     bool FireJsEvent(const std::string& eventStr);
     void CallJs(const std::string& callbackId, const std::string& args, bool keepAlive = false, bool isGlobal = false);
     shared_ptr<JsRuntime> GetJsRuntime() const;
-    bool InitJsEnv(bool debugger_mode);
+    bool InitJsEnv(bool debugger_mode, const std::unordered_map<std::string, void*>& extraNativeObject);
     // add Console object to worker
     void RegisterConsoleModule(ArkNativeEngine* engine);
 

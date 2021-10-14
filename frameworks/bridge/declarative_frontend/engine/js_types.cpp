@@ -30,7 +30,11 @@ void JsStopPropagation(const v8::FunctionCallbackInfo<v8::Value>& info)
 #elif USE_QUICKJS_ENGINE
 JSValue JsStopPropagation(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* arg)
 {
-    LOGD("JsStopPropagation trigger");
+    auto eventInfo = static_cast<BaseEventInfo*>(JS_GetOpaque3(new_target));
+    if (eventInfo) {
+        LOGD("JsStopPropagation is trigger");
+        eventInfo->SetStopPropagation(true);
+    }
     return JS_UNDEFINED;
 }
 
@@ -38,6 +42,11 @@ JSValue JsStopPropagation(JSContext* ctx, JSValueConst new_target, int argc, JSV
 Local<JSValueRef> JsStopPropagation(
     EcmaVM* vm, Local<JSValueRef> thisObj, const Local<JSValueRef> argv[], int32_t argc, void* data)
 {
+    auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    if (eventInfo) {
+        LOGD("JsStopPropagation is trigger");
+        eventInfo->SetStopPropagation(true);
+    }
     return JSValueRef::Undefined(vm);
 }
 #endif
