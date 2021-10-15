@@ -586,3 +586,11 @@ var EnterKeyType;
   EnterKeyType[EnterKeyType["Next"] = 5] = "Next";
   EnterKeyType[EnterKeyType["Done"] = 6] = "Done";
 })(EnterKeyType || (EnterKeyType = {}));
+
+var ItemState
+(function (ItemState) {
+  ItemState[ItemState["Normal"] = 0] = "Normal";
+  ItemState[ItemState["Disabled"] = 1] = "Disabled";
+  ItemState[ItemState["Waiting"] = 2] = "Waiting";
+  ItemState[ItemState["Skip"] = 3] = "Skip";
+})(ItemState || (ItemState = {}));

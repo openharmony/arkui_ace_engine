@@ -98,6 +98,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_stepper.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
@@ -555,6 +557,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"GridContainer", JSGridContainer::JSBind},
     {"Slider", JSSlider::JSBind},
     {"Stack", JSStack::JSBind},
+    {"Stepper", JSStepper::JSBind},
+    {"StepperItem", JSStepperItem::JSBind},
     {"ForEach", JSForEach::JSBind},
     {"Divider", JSDivider::JSBind},
     {"Swiper", JSSwiper::JSBind},

@@ -176,6 +176,8 @@ template("declarative_js_engine") {
       "jsview/js_sliding_panel.cpp",
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
+      "jsview/js_stepper.cpp",
+      "jsview/js_stepper_item.cpp",
       "jsview/js_swiper.cpp",
       "jsview/js_tab_content.cpp",
       "jsview/js_tabs.cpp",

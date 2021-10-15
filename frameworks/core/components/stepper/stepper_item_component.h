@@ -29,7 +29,7 @@ struct StepperLabels {
     std::string initialStatus;
 };
 
-class StepperItemComponent : public SoleChildComponent {
+class ACE_EXPORT StepperItemComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(StepperItemComponent, SoleChildComponent);
 
 public:

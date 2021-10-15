@@ -70,6 +70,21 @@ void RenderStepper::Update(const RefPtr<Component>& component)
             }
         });
     }
+    if (stepperComponent_->GetOnFinish()) {
+        onFinish_ = *stepperComponent_->GetOnFinish();
+    }
+    if (stepperComponent_->GetOnSkip()) {
+        onSkip_ = *stepperComponent_->GetOnSkip();
+    }
+    if (stepperComponent_->GetOnChange()) {
+        onChange_ = *stepperComponent_->GetOnChange();
+    }
+    if (stepperComponent_->GetOnNext()) {
+        onNext_ = *stepperComponent_->GetOnNext();
+    }
+    if (stepperComponent_->GetOnPrevious()) {
+        onPrevious_ = *stepperComponent_->GetOnPrevious();
+    }
     finishEvent_ = AceAsyncEvent<void(const std::string&)>::Create(stepperComponent_->GetFinishEventId(), context_);
     skipEvent_ = AceAsyncEvent<void(const std::string&)>::Create(stepperComponent_->GetSkipEventId(), context_);
     changeEvent_ = AceAsyncEvent<void(const std::string&)>::Create(stepperComponent_->GetChangeEventId(), context_);
@@ -544,6 +559,9 @@ void RenderStepper::FireFinishEvent() const
         std::string param = std::string("\"finish\",null");
         finishEvent_(param);
     }
+    if (onFinish_) {
+        onFinish_();
+    }
 }
 
 void RenderStepper::FireSkipEvent() const
@@ -551,6 +569,9 @@ void RenderStepper::FireSkipEvent() const
     if (skipEvent_) {
         std::string param = std::string("\"skip\",null");
         skipEvent_(param);
+    }
+    if (onSkip_) {
+        onSkip_();
     }
 }
 
@@ -569,6 +590,9 @@ void RenderStepper::FireChangedEvent(int32_t oldIndex, int32_t newIndex) const
             second(currentIndex_);
         }
     }
+    if (onChange_) {
+        onChange_(oldIndex, newIndex);
+    }
 }
 
 void RenderStepper::FireNextEvent(int32_t currentIndex, int32_t& pendingIndex)
@@ -585,6 +609,9 @@ void RenderStepper::FireNextEvent(int32_t currentIndex, int32_t& pendingIndex)
             pendingIndex = StringUtils::StringToInt(result);
         }
     }
+    if (onNext_) {
+        onNext_(currentIndex, pendingIndex);
+    }
 }
 
 void RenderStepper::FireBackEvent(int32_t currentIndex, int32_t& pendingIndex)
@@ -600,6 +627,9 @@ void RenderStepper::FireBackEvent(int32_t currentIndex, int32_t& pendingIndex)
         if (!result.empty() && isdigit(result[0])) {
             pendingIndex = StringUtils::StringToInt(result);
         }
+    }
+    if (onPrevious_) {
+        onPrevious_(currentIndex, pendingIndex);
     }
 }
 
@@ -734,7 +764,6 @@ void RenderStepper::UpdateItemPosition(double offset, int32_t index)
     }
     const auto& childItem = childrenArray_[index];
     childItem->SetPosition(GetMainAxisOffset(offset));
-
     MarkNeedRender();
 }
 

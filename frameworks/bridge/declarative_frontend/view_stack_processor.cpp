@@ -25,6 +25,7 @@
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/menu/menu_component.h"
+#include "core/components/stepper/stepper_item_component_v2.h"
 #include "core/components/text/text_component.h"
 #include "core/components/text_span/text_span_component.h"
 #include "core/components/video/video_component_v2.h"
@@ -504,6 +505,9 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
 
     bool isItemComponent = AceType::InstanceOf<V2::ListItemComponent>(mainComponent);
     isItemComponent |= AceType::InstanceOf<GridLayoutItemComponent>(mainComponent);
+    auto stepperItemComponentV2 = AceType::DynamicCast<StepperItemComponentV2>(mainComponent);
+    bool isStepperItemComponent = AceType::InstanceOf<StepperItemComponentV2>(mainComponent);
+
     RefPtr<Component> itemChildComponent;
 
     auto composedComponent = GetInspectorComposedComponent(mainComponent);
@@ -547,6 +551,11 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
         if (itemChildComponent) {
             components.emplace_back(itemChildComponent);
         }
+    } else if (isStepperItemComponent) {
+        if (stepperItemComponentV2) {
+            auto scorll = stepperItemComponentV2->AdjustComponentScroll(mainComponent);
+            components.emplace_back(scorll);
+        }
     } else {
         components.emplace_back(mainComponent);
     }
@@ -575,6 +584,11 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     }
 
     auto component = components.front();
+    if (isStepperItemComponent) {
+        if (stepperItemComponentV2) {
+            component = stepperItemComponentV2->AdjustComponentDisplay(component);
+        }
+    }
     auto iter = wrappingComponentsMap.find("box");
     if (iter != wrappingComponentsMap.end()) {
         component->SetTextDirection(iter->second->GetTextDirection());

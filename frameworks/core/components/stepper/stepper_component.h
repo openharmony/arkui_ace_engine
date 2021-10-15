@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_STEPPER_STEPPER_COMPONENT_H
 
 #include "core/components/stepper/stepper_item_component.h"
+#include "core/components_v2/common/common_def.h"
 #include "core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace {
@@ -43,7 +44,7 @@ private:
     ChangeStatusFunc setRightButtonStatusImpl_;
 };
 
-class StepperComponent : public ComponentGroup {
+class ACE_EXPORT StepperComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(StepperComponent, ComponentGroup);
 
 public:
@@ -319,6 +320,15 @@ public:
         return disabledAlpha_;
     }
 
+    ACE_DEFINE_COMPONENT_EVENT(OnFinish, void());
+
+    ACE_DEFINE_COMPONENT_EVENT(OnSkip, void());
+
+    ACE_DEFINE_COMPONENT_EVENT(OnChange, void(int32_t, int32_t));
+
+    ACE_DEFINE_COMPONENT_EVENT(OnNext, void(int32_t, int32_t));
+
+    ACE_DEFINE_COMPONENT_EVENT(OnPrevious, void(int32_t, int32_t));
 private:
     std::vector<StepperLabels> stepperLabels_;
     std::vector<TextStyle> labelsTextStyles_;

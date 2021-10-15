@@ -88,6 +88,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_stepper.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
@@ -495,6 +497,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSGrid::JSBind(globalObj);
     JSGridItem::JSBind(globalObj);
     JSStack::JSBind(globalObj);
+    JSStepper::JSBind(globalObj);
+    JSStepperItem::JSBind(globalObj);
     JSForEach::JSBind(globalObj);
     JSDivider::JSBind(globalObj);
     JSProgress::JSBind(globalObj);

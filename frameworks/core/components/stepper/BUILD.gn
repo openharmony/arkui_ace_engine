@@ -23,6 +23,7 @@ build_component("stepper") {
     "stepper_component.cpp",
     "stepper_element.cpp",
     "stepper_item_component.cpp",
+    "stepper_item_component_v2.cpp",
     "stepper_item_element.cpp",
   ]
 }

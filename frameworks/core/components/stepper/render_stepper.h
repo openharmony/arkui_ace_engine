@@ -194,6 +194,12 @@ private:
     OnReturnEventFunc backEvent_;
     RefPtr<RawRecognizer> touchRecognizer_;
     RefPtr<ClickRecognizer> clickRecognizer_;
+
+    std::function<void()> onFinish_;
+    std::function<void()> onSkip_;
+    std::function<void(int32_t, int32_t)> onChange_;
+    std::function<void(int32_t, int32_t)> onNext_;
+    std::function<void(int32_t, int32_t)> onPrevious_;
     // theme style
     double defaultPaddingStart_ = 0.0;
     double defaultPaddingEnd_ = 0.0;
