@@ -31,6 +31,24 @@ void DOMText::ResetInitializedStyle()
     if (declaration_) {
         declaration_->InitializeStyle();
     }
+    for (const auto& child : GetChildList()) {
+        auto domSpan = AceType::DynamicCast<DOMSpan>(child);
+        if (!domSpan) {
+            LOGW("text only support span child");
+            continue;
+        }
+        auto spanComponent = AceType::DynamicCast<TextSpanComponent>(domSpan->GetSpecializedComponent());
+        if (!spanComponent) {
+            LOGW("text only support span child");
+            continue;
+        }
+
+        // If span component has no developer-set styles, then set text styles to span
+        TextStyle spanStyle = spanComponent->GetTextStyle();
+        CheckAndSetSpanStyle(domSpan, spanStyle);
+        domSpan->SetTextStyle(spanStyle);
+        spanComponent->SetTextStyle(spanStyle);
+    }
 }
 
 void DOMText::CheckAndSetSpanStyle(const RefPtr<DOMSpan>& dmoSpan, TextStyle& spanStyle)
