@@ -44,11 +44,9 @@ public:
           ioManager(manager),
           ioTaskRunner(taskRunner)
         {}
-    bool IsValid()
-    {
-        return ioManager && ioManager->GetResourceContext() && ioTaskRunner;
-    }
+
     fml::RefPtr<flutter::SkiaUnrefQueue> unrefQueue;
+    // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
     fml::WeakPtr<flutter::IOManager> ioManager;
     fml::RefPtr<fml::TaskRunner> ioTaskRunner;
 };

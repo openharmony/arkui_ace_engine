@@ -40,7 +40,7 @@ protected:
 
 public:
     JsFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction);
-    ~JsFunction();
+    virtual ~JsFunction();
 };
 
 template<class T, int32_t ARGC = 0>

@@ -260,36 +260,33 @@ void ImageProvider::UploadImageToGPUForRender(
         callback({ image, renderTaskHolder->unrefQueue });
         return;
     }
-    if (renderTaskHolder->IsValid()) {
-        auto task = [rasterizedImage, callback, renderTaskHolder] () {
-            if (!renderTaskHolder->ioManager) {
-                // Shell is closing.
-                callback({ rasterizedImage, renderTaskHolder->unrefQueue });
-                return;
-            }
-            ACE_DCHECK(!rasterizedImage->isTextureBacked());
-            auto resContext = renderTaskHolder->ioManager->GetResourceContext();
-            if (!resContext) {
-                callback({ rasterizedImage, renderTaskHolder->unrefQueue });
-                return;
-            }
-            SkPixmap pixmap;
-            if (!rasterizedImage->peekPixels(&pixmap)) {
-                LOGW("Could not peek pixels of image for texture upload.");
-                callback({ rasterizedImage, renderTaskHolder->unrefQueue });
-                return;
-            }
-            auto textureImage =
-                SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, pixmap.colorSpace(), true);
-            callback({ textureImage ? textureImage : rasterizedImage, renderTaskHolder->unrefQueue });
+    auto task = [rasterizedImage, callback, renderTaskHolder] () {
+        // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
+        if (!renderTaskHolder->ioManager) {
+            // Shell is closing.
+            callback({ rasterizedImage, renderTaskHolder->unrefQueue });
+            return;
+        }
+        ACE_DCHECK(!rasterizedImage->isTextureBacked());
+        auto resContext = renderTaskHolder->ioManager->GetResourceContext();
+        if (!resContext) {
+            callback({ rasterizedImage, renderTaskHolder->unrefQueue });
+            return;
+        }
+        SkPixmap pixmap;
+        if (!rasterizedImage->peekPixels(&pixmap)) {
+            LOGW("Could not peek pixels of image for texture upload.");
+            callback({ rasterizedImage, renderTaskHolder->unrefQueue });
+            return;
+        }
+        auto textureImage =
+            SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, pixmap.colorSpace(), true);
+        callback({ textureImage ? textureImage : rasterizedImage, renderTaskHolder->unrefQueue });
 
-            // Trigger purge cpu bitmap resource, after image upload to gpu.
-            SkGraphics::PurgeResourceCache();
-        };
-        renderTaskHolder->ioTaskRunner->PostTask(std::move(task));
-    } else {
-        callback({ rasterizedImage, renderTaskHolder->unrefQueue });
-    }
+        // Trigger purge cpu bitmap resource, after image upload to gpu.
+        SkGraphics::PurgeResourceCache();
+    };
+    renderTaskHolder->ioTaskRunner->PostTask(std::move(task));
 #endif
 }
 
