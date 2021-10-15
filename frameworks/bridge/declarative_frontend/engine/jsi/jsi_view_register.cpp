@@ -38,6 +38,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_counter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
@@ -529,6 +530,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Tabs", JSTabs::JSBind },
     { "TabContent", JSTabContent::JSBind },
     { "TextPicker", JSTextPicker::JSBind },
+    { "DatePicker", JSDatePicker::JSBind },
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
     { "RowSplit", JSRowSplit::JSBind },
@@ -663,21 +665,21 @@ void JsRegisterViews(BindingTarget globalObj)
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);
     toggleType.Constant("Switch", 1);
-    toggleType.Constant("Button", 2);
+    toggleType.Constant("Button", 2);  // 2 means index of constant
 
     JSObjectTemplate mainAxisAlign;
     mainAxisAlign.Constant("Start", 1);
-    mainAxisAlign.Constant("Center", 2);
-    mainAxisAlign.Constant("End", 3);
-    mainAxisAlign.Constant("SpaceBetween", 6);
-    mainAxisAlign.Constant("SpaceAround", 7);
+    mainAxisAlign.Constant("Center", 2);  // 2 means index of constant
+    mainAxisAlign.Constant("End", 3);  // 3 means index of constant
+    mainAxisAlign.Constant("SpaceBetween", 6);  // 6 means index of constant
+    mainAxisAlign.Constant("SpaceAround", 7);  // 7 means index of constant
 
     JSObjectTemplate crossAxisAlign;
     crossAxisAlign.Constant("Start", 1);
 
-    crossAxisAlign.Constant("Center", 2);
-    crossAxisAlign.Constant("End", 3);
-    crossAxisAlign.Constant("Stretch", 4);
+    crossAxisAlign.Constant("Center", 2);  // 2 means index of constant
+    crossAxisAlign.Constant("End", 3);  // 3 means index of constant
+    crossAxisAlign.Constant("Stretch", 4);  // 4 means index of constant
 
     JSObjectTemplate direction;
     direction.Constant("Horizontal", 0);
@@ -685,20 +687,20 @@ void JsRegisterViews(BindingTarget globalObj)
 
     JSObjectTemplate loadingProgressStyle;
     loadingProgressStyle.Constant("Default", 1);
-    loadingProgressStyle.Constant("Circular", 2);
-    loadingProgressStyle.Constant("Orbital", 3);
+    loadingProgressStyle.Constant("Circular", 2);  // 2 means index of constant
+    loadingProgressStyle.Constant("Orbital", 3);  // 3 means index of constant
 
     JSObjectTemplate progressStyle;
     progressStyle.Constant("Linear", 1);
-    progressStyle.Constant("Capsule", 2);
-    progressStyle.Constant("Eclipse", 3);
-    progressStyle.Constant("Circular", 4);
+    progressStyle.Constant("Capsule", 2);  // 2 means index of constant
+    progressStyle.Constant("Eclipse", 3);  // 3 means index of constant
+    progressStyle.Constant("Circular", 4);  // 4 means index of constant
 
     JSObjectTemplate stackFit;
     stackFit.Constant("Keep", 0);
     stackFit.Constant("Stretch", 1);
-    stackFit.Constant("Inherit", 2);
-    stackFit.Constant("FirstChild", 3);
+    stackFit.Constant("Inherit", 2);  // 2 means index of constant
+    stackFit.Constant("FirstChild", 3);  // 3 means index of constant
 
     JSObjectTemplate overflow;
     overflow.Constant("Clip", 0);
@@ -707,13 +709,13 @@ void JsRegisterViews(BindingTarget globalObj)
     JSObjectTemplate alignment;
     alignment.Constant("TopLeft", 0);
     alignment.Constant("TopCenter", 1);
-    alignment.Constant("TopRight", 2);
-    alignment.Constant("CenterLeft", 3);
-    alignment.Constant("Center", 4);
-    alignment.Constant("CenterRight", 5);
-    alignment.Constant("BottomLeft", 6);
-    alignment.Constant("BottomCenter", 7);
-    alignment.Constant("BottomRight", 8);
+    alignment.Constant("TopRight", 2);   // 2 means index of constant
+    alignment.Constant("CenterLeft", 3);  // 3 means index of constant
+    alignment.Constant("Center", 4);  // 4 means index of constant
+    alignment.Constant("CenterRight", 5);  // 5 means index of constant
+    alignment.Constant("BottomLeft", 6);  // 6 means index of constant
+    alignment.Constant("BottomCenter", 7);  // 7 means index of constant
+    alignment.Constant("BottomRight", 8);  // 8 means index of constant
 
     JSObjectTemplate sliderStyle;
     sliderStyle.Constant("OutSet", 0);
@@ -722,12 +724,12 @@ void JsRegisterViews(BindingTarget globalObj)
     JSObjectTemplate sliderChangeMode;
     sliderChangeMode.Constant("Begin", 0);
     sliderChangeMode.Constant("Moving", 1);
-    sliderChangeMode.Constant("End", 2);
+    sliderChangeMode.Constant("End", 2);  // 2 means index of constant
 
     JSObjectTemplate pickerStyle;
     pickerStyle.Constant("Inline", 0);
     pickerStyle.Constant("Block", 1);
-    pickerStyle.Constant("Fade", 2);
+    pickerStyle.Constant("Fade", 2);  // 2 means index of constant
 
     JSObjectTemplate buttonType;
     buttonType.Constant("Normal", (int)ButtonType::NORMAL);
