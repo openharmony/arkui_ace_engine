@@ -48,7 +48,12 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_stepper_bridge.h"
 
 namespace OHOS::Ace::Framework {
+
+#ifdef APP_USE_ARM
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
+#else
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
+#endif
 const int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
 using std::shared_ptr;
@@ -2654,7 +2659,7 @@ void JsiEngineInstance::RegisterI18nPluralRulesModule()
     global->SetProperty(runtime_, "i18nPluralRules", i18nObj);
 }
 
-bool JsiEngineInstance::InitJsEnv(bool debugger_mode)
+bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<std::string, void*>& extraNativeObject)
 {
     ACE_SCOPED_TRACE("JsiEngine::InitJsEnv");
 #ifdef PREBUILD_ARK_RUNTIME
@@ -2675,6 +2680,13 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode)
         LOGE("Js Engine initialize runtime failed");
         return false;
     }
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    for (const auto& [key, value] : extraNativeObject) {
+        shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
+        runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
+    }
+#endif
 
     RegisterAceModule();
     RegisterConsoleModule();
@@ -2762,7 +2774,7 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     ACE_SCOPED_TRACE("JsiEngine::Initialize");
     LOGD("JsiEngine initialize");
     engineInstance_ = AceType::MakeRefPtr<JsiEngineInstance>(delegate, instanceId_);
-    bool result = engineInstance_->InitJsEnv(IsDebugVersion() && NeedDebugBreakPoint());
+    bool result = engineInstance_->InitJsEnv(IsDebugVersion() && NeedDebugBreakPoint(), GetExtraNativeObject());
     if (!result) {
         LOGE("JsiEngine Initialize, init js env failed");
         return false;

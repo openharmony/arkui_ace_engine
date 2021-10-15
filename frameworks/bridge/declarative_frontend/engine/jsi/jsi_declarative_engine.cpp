@@ -40,7 +40,11 @@ extern const char _binary_jsEnumStyle_abc_end[];
 namespace OHOS::Ace::Framework {
 namespace {
 
+#ifdef APP_USE_ARM
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
+#else
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
+#endif
 
 std::string ParseLogContent(const std::vector<std::string>& params)
 {
@@ -321,7 +325,8 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
     JsiDeclarativeUtils::SetCurrentState(nullptr, JsErrorType::JS_CRASH, 0, "", nullptr);
 }
 
-bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode)
+bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
+    const std::unordered_map<std::string, void*>& extraNativeObject)
 {
     CHECK_RUN_ON(JS);
     ACE_SCOPED_TRACE("JsiDeclarativeEngineInstance::InitJsEnv");
@@ -345,6 +350,13 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode)
     }
     runtime_->SetEmbedderData(this);
     runtime_->RegisterUncaughtExceptionHandler(JsiDeclarativeUtils::ReportJsErrorEvent);
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    for (const auto& [key, value] : extraNativeObject) {
+        shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
+        runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
+    }
+#endif
 
     InitGlobalObjectTemplate();
     InitConsoleModule();
@@ -718,7 +730,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     LOGI("JsiDeclarativeEngine Initialize");
     ACE_DCHECK(delegate);
     engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate, instanceId_);
-    bool result = engineInstance_->InitJsEnv(IsDebugVersion() && NeedDebugBreakPoint());
+    bool result = engineInstance_->InitJsEnv(IsDebugVersion() && NeedDebugBreakPoint(), GetExtraNativeObject());
     if (!result) {
         LOGE("JsiDeclarativeEngine Initialize, init js env failed");
         return false;
@@ -758,6 +770,12 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             return;
         }
         instance->InitConsoleModule(arkNativeEngine);
+
+        std::vector<uint8_t> buffer((uint8_t *)_binary_jsEnumStyle_abc_start, (uint8_t *)_binary_jsEnumStyle_abc_end);
+        auto stateMgmtResult = arkNativeEngine->RunBufferScript(buffer);
+        if (stateMgmtResult == nullptr) {
+            LOGE("init worker error");
+        }
     };
     OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
 }

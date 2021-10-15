@@ -44,7 +44,7 @@ public:
 
     void FlushCommandBuffer(void* context, const std::string& command) override;
 
-    bool InitJsEnv(bool debuggerMode);
+    bool InitJsEnv(bool debuggerMode, const std::unordered_map<std::string, void*>& extraNativeObject);
 
     bool FireJsEvent(const std::string& eventStr);
 
