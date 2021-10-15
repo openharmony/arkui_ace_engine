@@ -89,6 +89,8 @@ template("make_skia_deps") {
         "shared_library:libharfbuzz_ng",
         "shared_library:libhwui",
       ]
+
+      sources = [ "//third_party/aosp/external/skia/src/utils/SkParsePath.cpp" ]
     } else {
       public_configs = [
         ":skia_config",
@@ -890,12 +892,6 @@ foreach(item, ace_platforms) {
 config("ace_skia_ext_config") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//third_party/aosp/external/skia/src/core",
-    "//third_party/aosp/external/skia/src/opts",
-    "//third_party/aosp/external/skia/src/shaders",
-    "//third_party/aosp/external/skia/src/gpu",
-    "$libs_root/shared_library/${target_os}_${target_cpu}/include/frameworks/native/libs/nativewindow/include",
-    "$libs_root/shared_library/${target_os}_${target_cpu}/include/frameworks/native/libs/arect/include",
     "$flutter_root",
     "$flutter_root/skia",
     "$flutter_root/engine",
@@ -910,20 +906,16 @@ template("ace_skia_ext") {
   ohos_source_set(target_name) {
     defines += invoker.defines
     defines += [ "OHOS_ACE_SKIA_EXT" ]
-    configs = [
-      ":system_skia_config",
-      ":ace_skia_ext_config",
-    ]
+    configs = [ ":ace_skia_ext_config" ]
     cflags_cc += invoker.cflags_cc
     cflags_cc += ace_skia_common_ccflags
 
     sources = [
       # enable ext utils
-      "//third_party/aosp/external/skia/src/core/SkArenaAlloc.cpp",
-      "//third_party/aosp/external/skia/src/core/SkOpts.cpp",
-      "//third_party/aosp/external/skia/src/core/SkTSearch.cpp",
-      "//third_party/aosp/external/skia/src/utils/SkBase64.cpp",
-      "//third_party/aosp/external/skia/src/utils/SkParsePath.cpp",
+      "$flutter_root/skia/src/core/SkArenaAlloc.cpp",
+      "$flutter_root/skia/src/core/SkOpts.cpp",
+      "$flutter_root/skia/src/core/SkTSearch.cpp",
+      "$flutter_root/skia/src/utils/SkBase64.cpp",
 
       # use ohos fontmgr
       "$flutter_root/skia/src/ports/SkFontMgr_ohos.cpp",
