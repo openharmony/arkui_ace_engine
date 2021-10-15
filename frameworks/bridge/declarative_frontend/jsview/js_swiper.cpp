@@ -148,9 +148,11 @@ void JSSwiper::SetIndicator(bool showIndicator)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    swiper->SetShowIndicator(showIndicator);
-    if (!showIndicator && swiper) {
-        swiper->SetIndicator(nullptr);
+    if (swiper) {
+        swiper->SetShowIndicator(showIndicator);
+        if (!showIndicator) {
+            swiper->SetIndicator(nullptr);
+        }
     }
 }
 
