@@ -1183,6 +1183,7 @@ void FrontendDelegateDeclarative::OnPageReady(
                 if (!isMainPage) {
                     delegate->OnPageHide();
                 }
+                delegate->OnPrePageChange(page);
                 pipelineContext->PushPage(page->BuildPage(url), page->GetStageElement());
                 delegate->OnPushPageSuccess(page, url);
                 delegate->SetCurrentPage(page->GetPageId());
@@ -1199,6 +1200,14 @@ void FrontendDelegateDeclarative::OnPageReady(
             }
         },
         TaskExecutor::TaskType::UI);
+}
+
+void FrontendDelegateDeclarative::OnPrePageChange(const RefPtr<JsAcePage>& page)
+{
+    LOGI("FrontendDelegateDeclarative OnPrePageChange");
+    if (page && page->GetDomDocument() && jsAccessibilityManager_) {
+        jsAccessibilityManager_->SetRootNodeId(page->GetDomDocument()->GetRootNodeId());
+    }
 }
 
 void FrontendDelegateDeclarative::FlushPageCommand(
@@ -1459,6 +1468,7 @@ void FrontendDelegateDeclarative::ReplacePage(
             if (pipelineContext->CanReplacePage()) {
                 delegate->OnPageHide();
                 delegate->OnPageDestroy(delegate->GetRunningPageId());
+                delegate->OnPrePageChange(page);
                 pipelineContext->ReplacePage(page->BuildPage(url), page->GetStageElement());
                 delegate->OnReplacePageSuccess(page, url);
                 delegate->SetCurrentPage(page->GetPageId());

@@ -230,6 +230,7 @@ private:
     void FlushPageCommand(
         const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage);
     void AddPageLocked(const RefPtr<JsAcePage>& page);
+    void OnPrePageChange(const RefPtr<JsAcePage>& page);
     void SetCurrentPage(int32_t pageId);
 
     void OnPushPageSuccess(const RefPtr<JsAcePage>& page, const std::string& url);
