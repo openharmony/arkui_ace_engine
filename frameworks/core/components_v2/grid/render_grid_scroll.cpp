@@ -182,7 +182,7 @@ bool RenderGridScroll::UpdateScrollPosition(double offset, int32_t source)
         reachHead_ = false;
     }
 
-    currentOffset_ += offset;
+    currentOffset_ += Round(offset);
     MarkNeedLayout(true);
     return true;
 }
@@ -384,6 +384,11 @@ void RenderGridScroll::InitialGridProp()
         int32_t endIndex = -1;
         while (endIndex < currentItemIndex_) {
             if (!Rank(*mainCount_, *mainCount_ == 0 ? startRankItemIndex_ : -1)) {
+                // When [firstLineToBottom_] does not equal to [std::nullopt], it indicates that this [InitialGridProp]
+                // is called after [ScrollToIndex].
+                // This this is the case when it scrolls to the last line and the last line is not full.
+                // So we need to add an additional line to [*mainCount_].
+                (*mainCount_) += firstLineToBottom_ ? 1 : 0;
                 break;
             }
             (*mainCount_)++;
@@ -401,14 +406,20 @@ void RenderGridScroll::InitialGridProp()
         }
         currentItemIndex_ = 0;
 
-        SupplementItems(*mainCount_ > 0 ? *mainCount_ - 1 : 0);
+        SupplyItems(*mainCount_ > 0 ? *mainCount_ - 1 : 0);
         startIndex_ = *mainCount_ > 0 ? *mainCount_ - 1 : 0;
 
         if (NearZero(currentOffset_)) {
-            currentOffset_ = -0.001;
+            needCalculateViewPort_ = true;
         }
     }
     updateFlag_ = false;
+    if (firstLineToBottom_ && firstLineToBottom_.value()) {
+        // calculate the distance from the first line to the last line
+        currentOffset_ = *mainSize_ - GetSize(gridCells_.at(0).at(0));
+        needCalculateViewPort_ = false;
+    }
+    firstLineToBottom_ = std::nullopt;
 }
 
 double RenderGridScroll::BuildLazyGridLayout(int32_t index, double sizeNeed)
@@ -420,7 +431,7 @@ double RenderGridScroll::BuildLazyGridLayout(int32_t index, double sizeNeed)
     double size = 0.0;
     int32_t startIndex = index;
     while (size < sizeNeed) {
-        auto suppleSize = SupplementItems(startIndex);
+        auto suppleSize = SupplyItems(startIndex);
         if (NearZero(suppleSize)) {
             break;
         }
@@ -491,7 +502,7 @@ void RenderGridScroll::LayoutChild(const RefPtr<RenderNode>& child, int32_t main
     }
 }
 
-void RenderGridScroll::GetNextGird(int32_t& curMain, int32_t& curCross) const
+void RenderGridScroll::GetNextGrid(int32_t& curMain, int32_t& curCross) const
 {
     ++curCross;
     if (curCross >= *crossCount_) {
@@ -587,21 +598,28 @@ void RenderGridScroll::LoadForward()
 
 void RenderGridScroll::CaculateViewPort()
 {
-    while (!NearZero(currentOffset_)) {
+    while (!NearZero(currentOffset_) || needCalculateViewPort_) {
         if (currentOffset_ > 0) {
             // move to top/left of first row/column
             if (!NearZero(firstItemOffset_)) {
-                currentOffset_ += GetSize(gridCells_.at(startIndex_++).at(0)) + *mainGap_ - firstItemOffset_;
+                if (gridCells_.find(startIndex_ + 1) != gridCells_.end()) {
+                    currentOffset_ += GetSize(gridCells_.at(startIndex_++).at(0)) + *mainGap_ - firstItemOffset_;
+                }
                 firstItemOffset_ = 0.0;
             }
             // Move up
-            while (startIndex_ > 0 && currentOffset_ > 0) {
-                if (gridCells_.find(startIndex_ - 1) == gridCells_.end()) {
-                    SupplementItems(startIndex_ - 1);
+            while (currentOffset_ > 0) {
+                if (startIndex_ > 0) {
+                    if (gridCells_.find(startIndex_ - 1) == gridCells_.end()) {
+                        SupplyItems(startIndex_ - 1);
+                    }
+                    currentOffset_ -= GetSize(gridCells_.at(startIndex_-- - 1).at(0)) + *mainGap_;
                 }
-                currentOffset_ -= GetSize(gridCells_.at(startIndex_-- - 1).at(0)) + *mainGap_;
                 if (startIndex_ == 0 && startRankItemIndex_ > 0 && currentOffset_ > 0) {
                     LoadForward();
+                }
+                if (startIndex_ == 0) {
+                    break;
                 }
             }
             if (currentOffset_ < 0) {
@@ -618,9 +636,10 @@ void RenderGridScroll::CaculateViewPort()
                 firstItemOffset_ = 0.0;
             }
             // Move down
-            while (startIndex_ < *mainCount_ && currentOffset_ < 0) {
+            while (startIndex_ < *mainCount_ && (currentOffset_ < 0 || needCalculateViewPort_)) {
                 currentOffset_ += GetSize(gridCells_.at(startIndex_++).at(0)) + *mainGap_;
             }
+            needCalculateViewPort_ = false;
             if (currentOffset_ > 0) {
                 firstItemOffset_ = GetSize(gridCells_.at(--startIndex_).at(0)) + *mainGap_ - currentOffset_;
                 currentOffset_ = 0.0;
@@ -650,7 +669,7 @@ void RenderGridScroll::CaculateViewPort()
                     break;
                 }
                 if (gridCells_.find(startIndex_ - 1) == gridCells_.end()) {
-                    SupplementItems(startIndex_ - 1);
+                    SupplyItems(startIndex_ - 1);
                 }
                 blank -= GetSize(gridCells_.at(--startIndex_).at(0)) + *mainGap_;
             }
@@ -675,9 +694,9 @@ double RenderGridScroll::CalculateBlankOfEnd()
     return *mainSize_ - drawLength;
 }
 
-double RenderGridScroll::SupplementItems(int32_t mainIndex, int32_t itemIndex, bool needPosition)
+double RenderGridScroll::SupplyItems(int32_t mainIndex, int32_t itemIndex, bool needPosition)
 {
-    ACE_SCOPED_TRACE("SupplementItems %d", mainIndex);
+    ACE_SCOPED_TRACE("SupplyItems %d", mainIndex);
     if (loadingIndex_ == mainIndex) {
         loadingIndex_ = -1;
     }
@@ -745,7 +764,7 @@ bool RenderGridScroll::Rank(int32_t mainIndex, int32_t itemIndex)
         } else {
             if (!getChildSpanByIndex_(itemIndex, useScrollable_ == SCROLLABLE::HORIZONTAL, itemMain, itemCross,
                 itemMainSpan, itemCrossSpan)) {
-                return (itemIndex == totalCount_);
+                return false;
             }
         }
 
@@ -757,7 +776,7 @@ bool RenderGridScroll::Rank(int32_t mainIndex, int32_t itemIndex)
             CheckGridPlaced(itemIndex, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
         } else {
             while (!CheckGridPlaced(itemIndex, mainIndex, crossIndex, itemMainSpan, itemCrossSpan)) {
-                GetNextGird(mainIndex, crossIndex);
+                GetNextGrid(mainIndex, crossIndex);
                 if (mainIndex > index) {
                     isFilled = true;
                     break;
@@ -799,7 +818,7 @@ void RenderGridScroll::PerformLayout()
                 continue;
             }
             if (buildChildByIndex_ && inCache_.count(main) == 0) {
-                SupplementItems(main);
+                SupplyItems(main);
             }
             if (showItem_.count(crossIter->second) == 0) {
                 showItem_.insert(crossIter->second);
@@ -1168,10 +1187,17 @@ void RenderGridScroll::ScrollToIndex(int32_t index, int32_t source)
         return;
     }
     // Build items
-    if (index < startShowItemIndex_) {
-        BuildItemsForwardByRange(index, startShowItemIndex_);
-    } else if (index > endShowItemIndex_) {
-        BuildItemsBackwardByRange(endShowItemIndex_, index);
+    if (index < startShowItemIndex_ || index > endShowItemIndex_) {
+        firstLineToBottom_.emplace(index > endShowItemIndex_);
+        if (scrollable_ && !scrollable_->IsStopped()) {
+            scrollable_->StopScrollable();
+        }
+        startRankItemIndex_ = GetStartingItem(index);
+        ClearItems();
+        ClearLayout(false);
+        currentOffset_ = 0;
+        MarkNeedLayout();
+        return;
     }
     // Calculate scroll length
     double scrollLength = 0.0;
@@ -1179,11 +1205,13 @@ void RenderGridScroll::ScrollToIndex(int32_t index, int32_t source)
     if (inputIdx >= endIndex_) {
         double mainLen = -firstItemOffset_;
         for (int32_t i = startIndex_; i <= endIndex_; ++i) {
-            mainLen += GetSize(gridCells_.at(i).at(0)) + *mainGap_;
+            if (gridCells_.find(i) != gridCells_.end()) {
+                mainLen += GetSize(gridCells_.at(i).at(0)) + *mainGap_;
+            }
         }
         scrollLength += (mainLen - GetSize(GetLayoutSize()));
         for (int32_t i = endIndex_; i < inputIdx; ++i) {
-            SupplementItems(i, index);
+            SupplyItems(i, index);
             if (i != inputIdx) {
                 scrollLength += GetSize(gridCells_.at(i).at(0)) + *mainGap_;
             }
@@ -1192,7 +1220,7 @@ void RenderGridScroll::ScrollToIndex(int32_t index, int32_t source)
     } else if (inputIdx <= startIndex_) {
         scrollLength += firstItemOffset_;
         for (int32_t i = startIndex_; i >= inputIdx; --i) {
-            SupplementItems(i, index, i != inputIdx);
+            SupplyItems(i, index, i != inputIdx);
             if (i != inputIdx) {
                 scrollLength += GetSize(gridCells_.at(i).at(0)) + *mainGap_;
             }
@@ -1263,126 +1291,6 @@ Offset RenderGridScroll::CurrentOffset()
     auto mainOffset = ctx->ConvertPxToVp(Dimension(GetCurrentOffset(), DimensionUnit::PX));
     Offset currentOffset = useScrollable_ == SCROLLABLE::HORIZONTAL ? Offset(mainOffset, 0.0) : Offset(0.0, mainOffset);
     return currentOffset;
-}
-
-void RenderGridScroll::BuildItemsForwardByRange(int32_t startItemIdx, int32_t endItemIdx)
-{
-    if (startItemIdx <= endItemIdx) {
-        return;
-    }
-    auto itemIndex = startItemIdx;
-    auto end = endItemIdx;
-    while (itemIndex >= end) {
-        if (GetItemMainIndex(itemIndex) != -1) {
-            --itemIndex;
-            continue;
-        }
-        int32_t itemMain = -1;
-        int32_t itemCross = -1;
-        int32_t itemMainSpan = -1;
-        int32_t itemCrossSpan = -1;
-        if (!GetItemPropsByIndex(itemIndex, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
-            return;
-        }
-        if (itemCrossSpan > *crossCount_) {
-            --itemIndex;
-            continue;
-        }
-        if (itemMain >= 0 && itemCross >= 0 && itemCross < *crossCount_ &&
-            CheckGridPlaced(itemIndex, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
-        } else {
-            // itemMain < 0 means this item is not placed, place it to the front of the gridMatrix_.
-            if (itemMain < 0) {
-                itemMain = gridMatrix_.begin()->first;
-                itemCross = gridMatrix_.begin()->second.begin()->first;
-                GetPreviousGrid(itemMain, itemCross);
-                while (!CheckGridPlaced(itemIndex, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
-                    GetPreviousGrid(itemMain, itemCross);
-                }
-            }
-        }
-        --itemIndex;
-    }
-    // Check current front main line is placed completely or not.
-    int32_t firstCross = gridMatrix_.begin()->second.begin()->first;
-    --end;
-    for (int32_t crossIndex = firstCross - 1; crossIndex >= 0; --crossIndex) {
-        int32_t itemMain = -1;
-        int32_t itemCross = -1;
-        int32_t itemMainSpan = -1;
-        int32_t itemCrossSpan = -1;
-        if (!GetItemPropsByIndex(end, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
-            return;
-        }
-        if (itemCrossSpan > *crossCount_) {
-            --end;
-            continue;
-        }
-        itemMain = gridMatrix_.begin()->first;
-        itemCross = itemCross == -1 ? crossIndex : itemCross;
-        CheckGridPlaced(end, itemMain, itemCross, itemMainSpan, itemCrossSpan);
-        --end;
-    }
-}
-
-void RenderGridScroll::BuildItemsBackwardByRange(int32_t startItemIdx, int32_t endItemIdx)
-{
-    if (startItemIdx >= endItemIdx) {
-        return;
-    }
-    auto itemIndex = startItemIdx;
-    auto end = endItemIdx;
-    while (itemIndex <= end) {
-        if (GetItemMainIndex(itemIndex) != -1) {
-            ++itemIndex;
-            continue;
-        }
-        int32_t itemMain = -1;
-        int32_t itemCross = -1;
-        int32_t itemMainSpan = -1;
-        int32_t itemCrossSpan = -1;
-        if (!GetItemPropsByIndex(itemIndex, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
-            return;
-        }
-        if (itemCrossSpan > *crossCount_) {
-            itemIndex++;
-            continue;
-        }
-        if (itemMain >= 0 && itemCross >= 0 && itemCross < *crossCount_ &&
-            CheckGridPlaced(itemIndex, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
-        } else {
-            // itemMain < 0 means this item is not placed, place it to the end of the gridMatrix_.
-            if (itemMain < 0) {
-                itemMain = gridMatrix_.rbegin()->first;
-                itemCross = gridMatrix_.rbegin()->second.rbegin()->first;
-                GetNextGird(itemMain, itemCross);
-                while (!CheckGridPlaced(itemIndex, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
-                    GetNextGird(itemMain, itemCross);
-                }
-            }
-        }
-        itemIndex++;
-    }
-    // Check current end main line is placed completely or not.
-    int32_t lastCross = gridMatrix_.rbegin()->second.rbegin()->first;
-    ++end;
-    for (int32_t crossIndex = lastCross + 1; crossIndex < *crossCount_; ++crossIndex) {
-        int32_t itemMain = -1;
-        int32_t itemCross = -1;
-        int32_t itemMainSpan = -1;
-        int32_t itemCrossSpan = -1;
-        if (!GetItemPropsByIndex(end, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
-            return;
-        }
-        if (itemCrossSpan > *crossCount_) {
-            ++end;
-            continue;
-        }
-        itemMain = gridMatrix_.rbegin()->first;
-        itemCross = itemCross == -1 ? crossIndex : itemCross;
-        CheckGridPlaced(end, itemMain, itemCross, itemMainSpan, itemCrossSpan);
-        ++end;
-    }
 }
 
 bool RenderGridScroll::GetItemPropsByIndex(
@@ -1516,7 +1424,7 @@ void RenderGridScroll::OnPredictLayout(int64_t targetTimestamp)
                     return;
                 }
             }
-            SupplementItems(loadingIndex_);
+            SupplyItems(loadingIndex_);
         }
         MarkNeedPredictLayout();
     } else {

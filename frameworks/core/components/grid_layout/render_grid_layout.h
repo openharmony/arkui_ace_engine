@@ -100,7 +100,7 @@ protected:
 
     int32_t GetItemSpan(const RefPtr<RenderNode>& child, bool isRow) const;
 
-    virtual void GetNextGird(int32_t& curRow, int32_t& curCol) const;
+    virtual void GetNextGrid(int32_t& curRow, int32_t& curCol) const;
 
     virtual bool CheckGridPlaced(int32_t index, int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan);
 

@@ -290,7 +290,7 @@ Size RenderGridLayout::GetTargetLayoutSize(int32_t row, int32_t col)
             }
         } else {
             while (!CheckGridPlaced(itemIndex, rowIndex, colIndex, itemRowSpan, itemColSpan)) {
-                GetNextGird(rowIndex, colIndex);
+                GetNextGrid(rowIndex, colIndex);
                 if (rowIndex >= rowCount_ || colIndex >= colCount_) {
                     break;
                 }
@@ -625,7 +625,7 @@ int32_t RenderGridLayout::GetItemSpan(const RefPtr<RenderNode>& child, bool isRo
     return span < 1 ? 1 : span;
 }
 
-void RenderGridLayout::GetNextGird(int32_t& curRow, int32_t& curCol) const
+void RenderGridLayout::GetNextGrid(int32_t& curRow, int32_t& curCol) const
 {
     if (isVertical_) {
         ++curCol;
@@ -715,7 +715,7 @@ void RenderGridLayout::PerformLayout()
             SetChildPosition(item, itemRow, itemCol, itemRowSpan, itemColSpan);
         } else {
             while (!CheckGridPlaced(itemIndex, rowIndex, colIndex, itemRowSpan, itemColSpan)) {
-                GetNextGird(rowIndex, colIndex);
+                GetNextGrid(rowIndex, colIndex);
                 if (rowIndex >= rowCount_ || colIndex >= colCount_) {
                     break;
                 }

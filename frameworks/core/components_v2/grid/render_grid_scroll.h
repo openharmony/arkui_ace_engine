@@ -142,7 +142,7 @@ protected:
     int32_t GetItemMainIndex(const RefPtr<RenderNode>& child, bool isMain) const;
     void SetMainSize(Size& dst, const Size& src);
     double GetSize(const Size& src, bool isMain = true) const;
-    void GetNextGird(int32_t& curMain, int32_t& curCross) const override;
+    void GetNextGrid(int32_t& curMain, int32_t& curCross) const override;
     void GetPreviousGrid(int32_t& curMain, int32_t& curCross);
     LayoutParam MakeInnerLayoutParam(int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan) const override;
     bool CheckGridPlaced(int32_t index, int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan) override;
@@ -165,10 +165,8 @@ protected:
     bool GetGridSize();
     void BuildGrid(std::vector<double>& rows, std::vector<double>& cols);
     double CalculateBlankOfEnd();
-    double SupplementItems(int32_t mainIndex, int32_t itemIndex = -1, bool needPosition = true);
+    double SupplyItems(int32_t mainIndex, int32_t itemIndex = -1, bool needPosition = true);
     bool Rank(int32_t mainIndex, int32_t itemIndex = -1);
-    void BuildItemsForwardByRange(int32_t startItemIdx, int32_t endItemIdx);
-    void BuildItemsBackwardByRange(int32_t startItemIdx, int32_t endItemIdx);
     bool GetItemPropsByIndex(int32_t index, int32_t& itemMain, int32_t& itemCross, int32_t& itemMainSpan,
         int32_t& itemCrossSpan);
 
@@ -218,6 +216,8 @@ protected:
     RefPtr<Scrollable> scrollable_;
     bool reachHead_ = false;
     bool reachTail_ = false;
+    std::optional<bool> firstLineToBottom_;
+    bool needCalculateViewPort_ = false;
     double startMainPos_ = 0.0;
     double endMainPos_ = 0.0;
     double currentOffset_ = 0.0;
