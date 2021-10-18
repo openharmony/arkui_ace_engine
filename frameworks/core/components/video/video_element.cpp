@@ -686,6 +686,7 @@ void VideoElement::SetMethodCall(const RefPtr<VideoComponent>& videoComponent)
             uiTaskExecutor.PostTask([weak, isPortrait]() {
                 auto videoElement = weak.Upgrade();
                 if (videoElement) {
+                    videoElement->OnPreFullScreen(isPortrait);
                     videoElement->FullScreen();
                 }
             });

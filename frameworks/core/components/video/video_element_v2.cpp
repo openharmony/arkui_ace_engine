@@ -196,4 +196,9 @@ void VideoElementV2::InitStatus(const RefPtr<VideoComponent>& videoComponent)
     }
 }
 
+void VideoElementV2::OnPreFullScreen(bool isPortrait)
+{
+    direction_ = isPortrait ? "horizontal" : "vertical";
+}
+
 } // namespace OHOS::Ace

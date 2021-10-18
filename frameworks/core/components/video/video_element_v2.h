@@ -32,6 +32,7 @@ public:
 
 protected:
     void InitStatus(const RefPtr<VideoComponent>& videoComponent) override;
+    void OnPreFullScreen(bool isPortrait) override;
     RefPtr<Component> GetRootComponent();
     void UpdatVideoComponent(const RefPtr<VideoComponentV2>& videoComponent);
     RefPtr<Component> FireFullscreen(

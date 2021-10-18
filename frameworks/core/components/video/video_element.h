@@ -67,6 +67,7 @@ public:
 protected:
     virtual void InitStatus(const RefPtr<VideoComponent>& videoComponent);
     bool IsDeclarativePara();
+    virtual void OnPreFullScreen(bool isPortrait) {}
 
     bool isFullScreen_ = false;
     bool isInitialState_ = true; // Initial state is true. Play or seek will set it to true.
