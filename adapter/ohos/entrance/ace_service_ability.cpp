@@ -63,12 +63,6 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want)
 {
     Ability::OnStart(want);
     LOGI("AceServiceAbility::OnStart called");
-
-    if (type_ == BackendType::FORM) {
-        LOGI("AceServiceAbility::OnStart is form");
-        return;
-    }
-
     // get url
     std::string parsedUrl;
     if (want.HasParameter(URI)) {
@@ -116,10 +110,6 @@ void AceServiceAbility::OnStop()
 sptr<IRemoteObject> AceServiceAbility::OnConnect(const Want& want)
 {
     LOGI("AceServiceAbility::OnConnect start");
-    if (type_ == BackendType::FORM) {
-        LOGI("AceServiceAbility::OnConnect is form");
-        return GetFormRemoteObject();
-    }
     Ability::OnConnect(want);
     auto ret = Platform::PaContainer::OnConnect(abilityId_, want);
     if (ret == nullptr) {
@@ -144,80 +134,6 @@ void AceServiceAbility::OnCommand(const AAFwk::Want &want, bool restart, int sta
     Ability::OnCommand(want, restart, startId);
     Platform::PaContainer::OnCommand(want, startId, abilityId_);
     LOGI("AceServiceAbility::OnCommand end");
-}
-
-OHOS::AppExecFwk::FormProviderInfo AceServiceAbility::OnCreate(const OHOS::AAFwk::Want& want)
-{
-    LOGI("AceServiceAbility::OnCreate called");
-    // get url
-    std::string parsedUrl;
-    if (want.HasParameter(URI)) {
-        parsedUrl = want.GetStringParam(URI);
-    } else {
-        parsedUrl = "app.js";
-    }
-
-    int32_t wantId = abilityId_;
-    if (want.HasParameter(AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY)) {
-        std::string wantIdStr = want.GetStringParam(AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY);
-        wantId = atoi(wantIdStr.c_str());
-        LOGI("AceServiceAbility:: wantId = %{public}s, %{public}d", wantIdStr.c_str(), wantId);
-    } else {
-        LOGE("AceServiceAbility:: has not formId in want");
-    }
-
-    // init service
-    BackendType backendType = BackendType::FORM;
-    Platform::PaContainer::CreateContainer(
-        wantId, backendType, this, std::make_unique<ServicePlatformEventCallback>([this]() { TerminateAbility(); }));
-
-    // get asset
-    auto packagePathStr = GetBundleCodePath();
-    auto moduleInfo = GetHapModuleInfo();
-    if (moduleInfo != nullptr) {
-        packagePathStr += "/" + moduleInfo->name + "/";
-    }
-    auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
-    Platform::PaContainer::AddAssetPath(wantId, packagePathStr, assetBasePathStr);
-
-    // run service
-    Platform::PaContainer::RunPa(wantId, parsedUrl, want);
-
-    OHOS::AppExecFwk::FormProviderInfo formProviderInfo;
-    formProviderInfo.SetFormData(Platform::PaContainer::GetFormData(wantId));
-    std::string formData = formProviderInfo.GetFormData().GetDataString();
-    LOGI("AceServiceAbility::OnCreate return ok, formData: %{public}s", formData.c_str());
-    return formProviderInfo;
-}
-
-void AceServiceAbility::OnDelete(const int64_t formId)
-{
-    Platform::PaContainer::OnDelete(formId);
-}
-
-void AceServiceAbility::OnTriggerEvent(const int64_t formId, const std::string& message)
-{
-    Platform::PaContainer::OnTriggerEvent(formId, message);
-}
-
-void AceServiceAbility::OnUpdate(const int64_t formId)
-{
-    Platform::PaContainer::OnUpdate(formId);
-}
-
-void AceServiceAbility::OnCastTemptoNormal(const int64_t formId)
-{
-    Platform::PaContainer::OnCastTemptoNormal(formId);
-}
-
-void AceServiceAbility::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap)
-{
-    Platform::PaContainer::OnVisibilityChanged(formEventsMap);
-}
-
-void AceServiceAbility::OnAcquireState(const OHOS::AAFwk::Want& want)
-{
-    Platform::PaContainer::OnAcquireState(want);
 }
 
 } // namespace Ace

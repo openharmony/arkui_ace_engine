@@ -43,21 +43,12 @@ public:
     void OnDisconnect(const OHOS::AAFwk::Want &want) override;
     void OnCommand(const AAFwk::Want &want, bool restart, int startId) override;
 
-    virtual OHOS::AppExecFwk::FormProviderInfo OnCreate(const OHOS::AAFwk::Want& want) override;
-    virtual void OnDelete(const int64_t formId) override;
-    virtual void OnTriggerEvent(const int64_t formId, const std::string& message) override;
-    virtual void OnUpdate(const int64_t formId) override;
-    virtual void OnCastTemptoNormal(const int64_t formId) override;
-    virtual void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) override;
-    virtual void OnAcquireState(const OHOS::AAFwk::Want& want);
-
 private:
     int32_t abilityId_ = 100000;
 
     static int32_t instanceId_;
     static const std::string START_PARAMS_KEY;
     static const std::string URI;
-    BackendType type_ = BackendType::FORM;
 };
 
 } // namespace OHOS::Ace
