@@ -219,6 +219,9 @@ void RenderPercentageDataPanel::PrepareAnimation()
         } else {
             animator_->SetDuration(3000);
         }
+        if (!useEffect_) {
+            animator_->SetDuration(0.0);
+        }
         animator_->SetIteration(1);
     }
 }
