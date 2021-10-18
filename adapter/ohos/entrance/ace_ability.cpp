@@ -21,7 +21,6 @@
 #include "res_config.h"
 #include "resource_manager.h"
 #include "string_wrapper.h"
-#include "touch_event.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
@@ -340,6 +339,17 @@ void AceAbility::OnBackPressed()
         Ability::OnBackPressed();
     }
     LOGI("AceAbility::OnBackPressed called End");
+}
+
+bool AceAbility::OnTouchEvent(const TouchEvent &touchEvent)
+{
+    LOGI("AceAbility::OnTouchEvent called ");
+    auto flutterAceView = static_cast<Platform::FlutterAceView*>(
+        Platform::AceContainer::GetContainer(abilityId_)->GetView());
+    TouchEvent event = touchEvent;
+    bool ret = flutterAceView->DispatchTouchEvent(flutterAceView, event);
+    LOGI("AceAbility::OnTouchEvent called End: ret: %{public}d", ret);
+    return ret;
 }
 
 void AceAbility::OnNewWant(const Want& want)

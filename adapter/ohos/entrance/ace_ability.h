@@ -21,6 +21,7 @@
 
 #include "ability.h"
 #include "ability_loader.h"
+#include "touch_event.h"
 #include "want.h"
 
 namespace OHOS::Ace {
@@ -41,6 +42,7 @@ public:
     void OnForeground(const OHOS::AAFwk::Want& want) override;
     void OnBackground() override;
     void OnBackPressed() override;
+    bool OnTouchEvent(const TouchEvent &touchEvent) override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
     void OnRestoreAbilityState(const OHOS::AppExecFwk::PacMap& inState) override;
     void OnSaveAbilityState(OHOS::AppExecFwk::PacMap& outState) override;
