@@ -60,7 +60,7 @@ template("js_pa_engine_qjs") {
       "napi:ace_napi",
       "native_appdatamgr:native_dataability",
       "native_appdatamgr:native_rdb",
-      "samgr_L2:samgr_proxy",
+      "samgr_standard:samgr_proxy",
     ]
 
     public_deps =
