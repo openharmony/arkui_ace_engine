@@ -71,7 +71,7 @@ TouchPoint ConvertTouchEvent(OHOS::TouchEvent& touchEvent)
     return point;
 }
 
-void GetMouseEventAction(OHOS::MouseEvent& mouseEvent, MouseEvent& events)
+void GetMouseEventAction(const OHOS::MouseEvent& mouseEvent, MouseEvent& events)
 {
     const MouseActionEnum action = static_cast<MouseActionEnum>(mouseEvent.GetAction());
     switch (action) {
@@ -99,7 +99,7 @@ void GetMouseEventAction(OHOS::MouseEvent& mouseEvent, MouseEvent& events)
     }
 }
 
-void GetMouseEventButton(OHOS::MouseEvent& mouseEvent, MouseEvent& events)
+void GetMouseEventButton(const OHOS::MouseEvent& mouseEvent, MouseEvent& events)
 {
     switch (mouseEvent.GetActionButton()) {
         case MouseButtonEnum::LEFT_BUTTON:
