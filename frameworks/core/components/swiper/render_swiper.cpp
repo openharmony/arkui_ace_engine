@@ -1314,14 +1314,14 @@ void RenderSwiper::UpdateItemPosition(double offset, int32_t index, int32_t othe
     int32_t prevIndex = GetPrevIndex(index);
     if (prevIndex != index && prevIndex != otherIndex) {
         auto item = items_.find(prevIndex);
-        if (iter != items_.end()) {
+        if (item != items_.end()) {
             item->second->SetPosition(GetMainAxisOffset(offset + (needReverse_ ? nextItemOffset_ : prevItemOffset_)));
         }
     }
     int32_t nextIndex = GetNextIndex(index);
     if (nextIndex != index && nextIndex != otherIndex) {
         auto item = items_.find(nextIndex);
-        if (iter != items_.end()) {
+        if (item != items_.end()) {
             item->second->SetPosition(GetMainAxisOffset(offset + (needReverse_ ? prevItemOffset_ : nextItemOffset_)));
         }
     }
