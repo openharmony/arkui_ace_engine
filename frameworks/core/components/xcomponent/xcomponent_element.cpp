@@ -15,6 +15,7 @@
 
 #include "core/components/xcomponent/xcomponent_element.h"
 
+#include "base/json/json_util.h"
 #include "core/components/xcomponent/render_xcomponent.h"
 #include "core/components/xcomponent/xcomponent_component.h"
 
@@ -31,6 +32,7 @@ void XComponentElement::SetNewComponent(const RefPtr<Component>& newComponent)
         return;
     }
     auto xcomponent = AceType::DynamicCast<XComponentComponent>(newComponent);
+    idStr_ = xcomponent->GetId();
     if (xcomponent) {
         if (texture_) {
             xcomponent->SetTextureId(texture_->GetId());
@@ -71,15 +73,19 @@ void XComponentElement::Prepare(const WeakPtr<Element>& parent)
 void XComponentElement::InitEvent()
 {
     if (!xcomponent_) {
+        LOGE("XComponentElement::InitEvent xcomponent_ is null");
         return;
     }
     if (!xcomponent_->GetXComponentInitEventId().IsEmpty()) {
         onSurfaceInit_ = AceSyncEvent<void(const std::string&, const uint32_t)>::Create(
             xcomponent_->GetXComponentInitEventId(), context_);
-        onXComponentInit_ = AceAsyncEvent<void()>::Create(xcomponent_->GetXComponentInitEventId(), context_);
+        onXComponentInit_ =
+            AceAsyncEvent<void(const std::string&)>::Create(xcomponent_->GetXComponentInitEventId(),
+                                                                            context_);
     }
     if (!xcomponent_->GetXComponentDestroyEventId().IsEmpty()) {
-        onXComponentDestroy_ = AceAsyncEvent<void()>::Create(xcomponent_->GetXComponentDestroyEventId(), context_);
+        onXComponentDestroy_ =
+            AceAsyncEvent<void(const std::string&)>::Create(xcomponent_->GetXComponentDestroyEventId(), context_);
     }
 }
 
@@ -98,9 +104,17 @@ void XComponentElement::RegisterSurfaceDestroyEvent()
 
 void XComponentElement::OnSurfaceDestroyEvent()
 {
+    std::string param;
+    if (IsDeclarativePara()) {
+        auto json = JsonUtil::Create(true);
+        json->Put("destroy", "");
+        param = json->ToString();
+    } else {
+        param = std::string("\"destroy\",{").append("}");
+    }
     if (!hasSendDestroyEvent_) {
         if (onXComponentDestroy_) {
-            onXComponentDestroy_();
+            onXComponentDestroy_(param);
         }
         auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
         if (renderXComponent) {
@@ -108,6 +122,16 @@ void XComponentElement::OnSurfaceDestroyEvent()
         }
         hasSendDestroyEvent_ = true;
     }
+}
+
+bool XComponentElement::IsDeclarativePara()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return false;
+    }
+
+    return context->GetIsDeclarative();
 }
 
 void XComponentElement::RegisterDispatchTouchEventCallback()
@@ -187,7 +211,6 @@ void XComponentElement::CreatePlatformResource()
         });
     };
     texture_ = AceType::MakeRefPtr<NativeTexture>(context_, errorCallback);
-
     texture_->Create([weak = WeakClaim(this), errorCallback](int64_t id) mutable {
         auto XComponentElement = weak.Upgrade();
         if (XComponentElement) {
@@ -201,7 +224,7 @@ void XComponentElement::CreatePlatformResource()
                 }
             }
         }
-    });
+    }, idStr_);
 }
 
 void XComponentElement::ReleasePlatformResource()
@@ -241,15 +264,24 @@ void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth
 void XComponentElement::OnTextureSize(int64_t textureId, std::string& result)
 {
     if (xcomponent_) {
-        OnXComponentInit("");
         OnSurfaceInit(xcomponent_->GetId(), xcomponent_->GetNodeId());
+        OnXComponentInit("");
     }
 }
 
 void XComponentElement::OnXComponentInit(const std::string& param)
 {
+    std::string loadStr;
+    if (IsDeclarativePara()) {
+        auto json = JsonUtil::Create(true);
+        json->Put("load", "");
+        loadStr = json->ToString();
+    } else {
+        loadStr = std::string("\"load\",{").append("}");
+    }
+
     if (onXComponentInit_) {
-        onXComponentInit_();
+        onXComponentInit_(loadStr);
     }
 }
 

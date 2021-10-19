@@ -18,6 +18,7 @@
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -72,6 +73,13 @@ void JsFunction::Execute(std::vector<std::string> keys, const std::string& param
 
     JSRef<JSVal> paramObj = JSRef<JSVal>::Cast(eventInfo);
     JsFunction::ExecuteJS(1, &paramObj);
+}
+
+void JsFunction::ExecuteNew(std::vector<std::string> keys, const std::string& param)
+{
+    JSRef<JSVal> jsVal;
+    XComponentClient::GetInstance().GetJSVal(jsVal);
+    JsFunction::ExecuteJS(1, &jsVal);
 }
 
 JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])

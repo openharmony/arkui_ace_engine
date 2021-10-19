@@ -86,14 +86,17 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
     const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
     const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
     const OnRestoreAbilityStateCallBack& onRestoreAbilityStateCallBack,
-    const OnNewWantCallBack& onNewWantCallBack, const OnActiveCallBack& onActiveCallBack,
+    const OnNewWantCallBack& onNewWantCallBack,
+    const OnActiveCallBack& onActiveCallBack,
     const OnInactiveCallBack& onInactiveCallBack, const OnMemoryLevelCallBack& onMemoryLevelCallBack,
     const OnStartContinuationCallBack& onStartContinuationCallBack,
     const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
     const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack,
     const OnSaveDataCallBack& onSaveDataCallBack,
-    const OnRestoreDataCallBack& onRestoreDataCallBack)
-    : loadJs_(loadCallback), dispatcherCallback_(transferCallback), asyncEvent_(asyncEventCallback),
+    const OnRestoreDataCallBack& onRestoreDataCallBack,
+    const ExternalEventCallback& externalEventCallback)
+    : loadJs_(loadCallback), externalEvent_(externalEventCallback),
+      dispatcherCallback_(transferCallback), asyncEvent_(asyncEventCallback),
       syncEvent_(syncEventCallback), updatePage_(updatePageCallback), resetStagingPage_(resetLoadingPageCallback),
       destroyPage_(destroyPageCallback), destroyApplication_(destroyApplicationCallback),
       updateApplicationState_(updateApplicationStateCallback), timer_(timerCallback),
@@ -671,6 +674,20 @@ bool FrontendDelegateDeclarative::FireSyncEvent(
     std::string resultStr;
     FireSyncEvent(eventId, param, jsonArgs, resultStr);
     return (resultStr == "true");
+}
+
+
+void FrontendDelegateDeclarative::FireExternalEvent(
+    const std::string& eventId, const std::string& componentId, const uint32_t nodeId)
+{
+    taskExecutor_->PostSyncTask(
+        [weak = AceType::WeakClaim(this), componentId, nodeId] {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->externalEvent_(componentId, nodeId);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::FireSyncEvent(

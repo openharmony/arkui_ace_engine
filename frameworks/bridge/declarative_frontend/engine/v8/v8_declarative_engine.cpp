@@ -34,14 +34,20 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/common/utils/v8/v8_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_declarative_group_js_bridge.h"
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_function_destroy_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_module_manager.h"
+#include "frameworks/bridge/declarative_frontend/engine/v8/v8_types.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
+#include "frameworks/core/common/ace_view.h"
+#include "frameworks/core/common/container.h"
 
 extern const char _binary_stateMgmt_js_start[];
 extern const char _binary_stateMgmt_js_end[];
@@ -740,7 +746,6 @@ void V8DeclarativeEngineInstance::InitGlobalObjectTemplate()
     v8::Isolate::Scope isolateScope(isolate_.Get());
     v8::HandleScope handleScope(isolate_.Get());
     v8::Local<v8::ObjectTemplate> globalObj = v8::ObjectTemplate::New(isolate_.Get());
-
     JsRegisterViews(globalObj);
 
     globalObjectTemplate_.Reset(isolate_.Get(), globalObj);
@@ -1032,10 +1037,15 @@ V8DeclarativeEngine::~V8DeclarativeEngine()
         }
     }
     LOG_DESTROY();
-
+    XComponentClient::GetInstance().SetRegisterCallbackToNull();
+    XComponentClient::GetInstance().SetJSValCallToNull();
     if (nativeEngine_ != nullptr) {
         nativeEngine_->CancelCheckUVLoop();
         delete nativeEngine_;
+    }
+    if (nativeXComponent_) {
+        delete nativeXComponent_;
+        nativeXComponent_ = nullptr;
     }
     if (g_debugger != nullptr) {
         dlclose(g_debugger);
@@ -1727,9 +1737,93 @@ void V8DeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::s
     LOGW("V8DeclarativeEngine FireAsyncEvent is unusable");
 }
 
+void V8DeclarativeEngine::InitXComponent()
+{
+    ACE_DCHECK(engineInstance_);
+    isolateXComp_ = engineInstance_->GetV8Isolate();
+    if (!isolateXComp_) {
+        LOGE("InitXComponent isolateXComp_ is null.");
+        return;
+    }
+    ACE_DCHECK(isolateXComp_);
+    v8::Isolate::Scope isolateScope(isolateXComp_);
+    v8::HandleScope handleScope(isolateXComp_);
+    auto context = isolateXComp_->GetCurrentContext();
+    if (context.IsEmpty()) {
+        LOGE("InitXComponent context is empty");
+        return;
+    }
+    ctxXComp_.Reset(isolateXComp_, context);
+    nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
+    nativeXComponent_ = new NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
+}
+
 void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
 {
+    CHECK_RUN_ON(JS);
+    InitXComponent();
+    RefPtr<XComponentComponent> xcomponent;
+    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponent(xcomponent);
+    if (!xcomponent) {
+        LOGE("FireExternalEvent xcomponent is null.");
+        return;
+    }
+    auto textureId = static_cast<int64_t>(xcomponent->GetTextureId());
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("FireExternalEvent Current container null");
+        return;
+    }
+    auto nativeView = static_cast<AceView*>(container->GetView());
+    if (!nativeView) {
+        LOGE("FireExternalEvent nativeView null");
+        return;
+    }
+    auto nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+    if (!nativeWindow) {
+        LOGE("FireExternalEvent nativeWindow invalid");
+        return;
+    }
 
+    nativeXComponentImpl_->SetSurface(nativeWindow);
+    nativeXComponentImpl_->SetXComponentId(xcomponent->GetId());
+    auto v8NativeEngine = static_cast<V8NativeEngine*>(nativeEngine_);
+    if (v8NativeEngine == nullptr) {
+        LOGE("FireExternalEvent v8NativeEngine is nullptr");
+        return;
+    }
+    std::string arguments;
+    v8::Local<v8::Object> renderContext = v8NativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true,
+                                                                           arguments, NATIVE_XCOMPONENT_OBJ,
+                                                                           reinterpret_cast<void*>(nativeXComponent_));
+    renderContextXComp_.Reset(isolateXComp_, renderContext);
+    auto objContext = V8Object(renderContext);
+    JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
+    auto getJSValCallback = [obj](JSRef<JSVal> &jsVal) {
+        jsVal = obj;
+        return true;
+    };
+    XComponentClient::GetInstance().RegisterJSValCallback(getJSValCallback);
+    auto delegate =
+            static_cast<RefPtr<FrontendDelegate>*>(isolateXComp_->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
+    v8::TryCatch tryCatch(isolateXComp_);
+    auto task = [weak = WeakClaim(this), xcomponent]() {
+        auto pool = xcomponent->GetTaskPool();
+        if (!pool) {
+            return;
+        }
+        auto bridge = weak.Upgrade();
+        if (bridge) {
+            pool->NativeXComponentInit(
+                    bridge->nativeXComponent_,
+                    AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
+        }
+    };
+    if (*delegate == nullptr) {
+        LOGE("FireExternalEvent delegate is null.");
+        return;
+    }
+    (*delegate)->PostSyncTaskToPage(task);
 }
 
 void V8DeclarativeEngine::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher)

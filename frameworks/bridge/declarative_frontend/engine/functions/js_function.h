@@ -31,6 +31,7 @@ class ACE_EXPORT JsFunction : public virtual AceType {
 public:
     void Execute();
     void Execute(std::vector<std::string> keys, const std::string& param);
+    void ExecuteNew(std::vector<std::string> keys, const std::string& param);
 
 protected:
     JSRef<JSFunc> jsFunction_;

@@ -125,6 +125,9 @@
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 
@@ -624,6 +627,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"Piece", JSPiece::JSBind},
     {"Rating", JSRating::JSBind},
     {"Video", JSVideo::JSBind},
+#endif
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    {"XComponent", JSXComponent::JSBind},
 #endif
     {"DataPanel", JSDataPanel::JSBind},
     {"Badge", JSBadge::JSBind},

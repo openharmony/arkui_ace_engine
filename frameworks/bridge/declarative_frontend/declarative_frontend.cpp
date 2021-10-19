@@ -439,13 +439,24 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         }
         return jsEngine->OnRestoreData(data);
     };
+
+    const auto& externalEventCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                    const std::string& componentId, const uint32_t nodeId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->FireExternalEvent(componentId, nodeId);
+    };
+
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
         setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
         resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
         timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
         onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack,
         onNewWantCallBack, onActiveCallBack, onInactiveCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
-        onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack);
+        onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack,
+        onRestoreDataCallBack, externalEventCallback);
     if (disallowPopLastPage_) {
         delegate_->DisallowPopLastPage();
     }
@@ -993,7 +1004,9 @@ void DeclarativeEventHandler::HandleSyncEvent(
 void DeclarativeEventHandler::HandleSyncEvent(
     const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId)
 {
-    LOGW("js event handler does not support this event type!");
+    if (delegate_) {
+        delegate_->FireExternalEvent(eventMarker.GetData().eventId, componentId, nodeId);
+    }
 }
 
 } // namespace OHOS::Ace

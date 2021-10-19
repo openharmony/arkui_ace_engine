@@ -230,6 +230,11 @@ template("declarative_js_engine") {
       ]
     }
 
+    if (defined(config.xcomponent_components_support) &&
+        config.xcomponent_components_support) {
+      sources += [ "jsview/js_xcomponent.cpp" ]
+    }
+
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       sources += [ "jsview/js_form.cpp" ]

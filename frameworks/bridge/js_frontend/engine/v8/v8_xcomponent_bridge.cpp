@@ -99,7 +99,6 @@ void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId
                                                         args, NATIVE_XCOMPONENT_OBJ,
                                                         reinterpret_cast<void*>(nativeXComponent_));
     renderContext_.Reset(isolate_, renderContext);
-
     auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate_->GetData(V8EngineInstance::FRONTEND_DELEGATE));
     auto task = [weak = WeakClaim(this), xcomponent]() {
         auto pool = xcomponent->GetTaskPool();
@@ -118,7 +117,6 @@ void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId
         return;
     }
     (*delegate)->PostSyncTaskToPage(task);
-
     hasPluginLoaded_ = true;
     return;
 }

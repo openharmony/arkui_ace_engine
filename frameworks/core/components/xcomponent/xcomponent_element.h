@@ -27,7 +27,8 @@ class XComponentElement : public RenderElement {
     DECLARE_ACE_TYPE(XComponentElement, RenderElement);
 
 public:
-    using EventCallback = std::function<void()>;
+    using InitEventCallback = std::function<void(const std::string&)>;
+    using DestroyEventCallback = std::function<void(const std::string&)>;
     ~XComponentElement();
     void Prepare(const WeakPtr<Element>& parent) override;
     void SetNewComponent(const RefPtr<Component>& newComponent) override;
@@ -48,12 +49,14 @@ private:
 
     void CreatePlatformResource();
     void ReleasePlatformResource();
+    bool IsDeclarativePara();
 
     std::function<void(const std::string&, const uint32_t)> onSurfaceInit_;
-    EventCallback onXComponentInit_;
-    EventCallback onXComponentDestroy_;
+    InitEventCallback onXComponentInit_;
+    DestroyEventCallback onXComponentDestroy_;
     TouchInfo touchEventPoint_;
     std::string name_;
+    std::string idStr_;
     bool hasSendDestroyEvent_ = false;
     bool isExternalResource_ = false;
     RefPtr<NativeTexture> texture_;

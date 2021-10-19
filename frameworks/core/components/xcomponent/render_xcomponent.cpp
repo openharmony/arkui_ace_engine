@@ -143,8 +143,8 @@ void RenderXComponent::NativeXComponentInit(
             } else {
                 LOGE("Native XComponent nullptr");
             }
-        },
-        TaskExecutor::TaskType::JS);
+         },
+         TaskExecutor::TaskType::JS);
 }
 
 void RenderXComponent::NativeXComponentDestroy()

@@ -34,6 +34,8 @@
 
 namespace OHOS::Ace::Framework {
 
+using ExternalEventCallback = std::function<void(const std::string&, const uint32_t&)>;
+
 class FrontendDelegateDeclarative : public FrontendDelegate {
     DECLARE_ACE_TYPE(FrontendDelegateDeclarative, FrontendDelegate);
 
@@ -56,7 +58,8 @@ public:
         const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
         const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack,
         const OnSaveDataCallBack& onSaveDataCallBack,
-        const OnRestoreDataCallBack& onRestoreDataCallBack);
+        const OnRestoreDataCallBack& onRestoreDataCallBack,
+        const ExternalEventCallback& externalEventCallback);
     ~FrontendDelegateDeclarative() override;
 
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
@@ -116,6 +119,7 @@ public:
     bool FireSyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);
     void FireSyncEvent(
         const std::string& eventId, const std::string& param, const std::string& jsonArgs, std::string& result);
+    void FireExternalEvent(const std::string& eventId, const std::string& componentId, const uint32_t nodeId);
 
     // FrontendDelegate overrides.
     void Push(const PageTarget& target, const std::string& params);
@@ -286,6 +290,7 @@ private:
     std::unordered_map<int32_t, std::string> jsCallBackResult_;
 
     LoadJsCallback loadJs_;
+    ExternalEventCallback externalEvent_;
     JsMessageDispatcherSetterCallback dispatcherCallback_;
     EventCallback asyncEvent_;
     EventCallback syncEvent_;
