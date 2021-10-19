@@ -71,12 +71,8 @@ TouchPoint ConvertTouchEvent(OHOS::TouchEvent& touchEvent)
     return point;
 }
 
-void ConvertMouseEvent(OHOS::MouseEvent& mouseEvent, MouseEvent& events)
+void GetMouseEventAction(OHOS::MouseEvent& mouseEvent, MouseEvent& events)
 {
-    MmiPoint mmiPoint = mouseEvent.GetCursor();
-    events.x = mmiPoint.GetX();
-    events.y = mmiPoint.GetY();
-    events.z = mmiPoint.GetZ();
     const MouseActionEnum action = static_cast<MouseActionEnum>(mouseEvent.GetAction());
     switch (action) {
         case MouseActionEnum::PRESS:
@@ -101,6 +97,10 @@ void ConvertMouseEvent(OHOS::MouseEvent& mouseEvent, MouseEvent& events)
             events.action = MouseAction::NONE;
             break;
     }
+}
+
+void GetMouseEventButton(OHOS::MouseEvent& mouseEvent, MouseEvent& events)
+{
     switch (mouseEvent.GetActionButton()) {
         case MouseButtonEnum::LEFT_BUTTON:
             events.button = MouseButton::LEFT_BUTTON;
@@ -121,6 +121,18 @@ void ConvertMouseEvent(OHOS::MouseEvent& mouseEvent, MouseEvent& events)
             events.button = MouseButton::NONE_BUTTON;
             break;
     }
+}
+
+void ConvertMouseEvent(OHOS::MouseEvent& mouseEvent, MouseEvent& events)
+{
+    MmiPoint mmiPoint = mouseEvent.GetCursor();
+    events.x = mmiPoint.GetX();
+    events.y = mmiPoint.GetY();
+    events.z = mmiPoint.GetZ();
+    
+    GetMouseEventAction(mouseEvent, events);
+    GetMouseEventButton(mouseEvent, events);
+    
     events.pressedButtons = static_cast<size_t>(mouseEvent.GetPressedButtons());
     std::chrono::microseconds micros(mouseEvent.GetOccurredTime());
     TimeStamp time(micros);
