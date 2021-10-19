@@ -1981,13 +1981,13 @@ JSValue JsHandleModule(std::string moduleName, std::string methodName, JSContext
                 [](JSContext* ctx, JSValueConst value, JSValueConst* argv, const std::string& methodName) {
                     return JsHandleAnimationFrame(ctx, argv[1], methodName);
                 } },
-            { "ohos.animator",
-                [](JSContext* ctx, JSValueConst value, JSValueConst* argv, const std::string& methodName) {
-                    return JsHandleAnimator(ctx, argv[1], methodName);
-                } },
             { "internal.jsResult",
                 [](JSContext* ctx, JSValueConst value, JSValueConst* argv, const std::string& methodName) {
                     return JsHandleCallback(ctx, argv[1], methodName);
+                } },
+            { "ohos.animator",
+                [](JSContext* ctx, JSValueConst value, JSValueConst* argv, const std::string& methodName) {
+                    return JsHandleAnimator(ctx, argv[1], methodName);
                 } },
             { "system.app",
                 [](JSContext* ctx, JSValueConst value, JSValueConst* argv, const std::string& methodName) {
