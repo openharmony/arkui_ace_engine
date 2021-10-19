@@ -30,8 +30,7 @@ public:
     static void SetEndAngle(const JSCallbackInfo& info);
     static void SetColors(const JSCallbackInfo& info);
     static void SetStrokeWidth(const JSCallbackInfo& info);
-    static void SetLableTextConfig(const JSCallbackInfo& info);
-    static void SetLableColorConfig(const JSCallbackInfo& info);
+    static void SetLableConfig(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
