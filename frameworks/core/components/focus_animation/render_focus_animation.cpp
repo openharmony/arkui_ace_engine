@@ -88,7 +88,9 @@ void RenderFocusAnimation::SetFocusAnimationProperties(const RRect& rrect, const
     rrect_ = rrect;
     offset_ = offset - GetGlobalOffset();
     isNeedClip_ = false;
-    pathColor_ = focusTheme_->GetColor();
+    if (focusTheme_) {
+        pathColor_ = focusTheme_->GetColor();
+    }
     animationParamsSet_ = true;
     if ((offset_.GetX() + rrect.Width()) > layoutSize_.Width() && (offset_.GetX() + rrect.Width()) > 0) {
         layoutSize_.SetWidth(offset_.GetX() + rrect.Width() + NormalizeToPx(blurMaskRadius_) * 2);
