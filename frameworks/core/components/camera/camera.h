@@ -95,11 +95,7 @@ public:
     }
     friend class CaptureListener;
 
-    void SetLayoutOffset(double x, double y)
-    {
-        layoutOffset_.SetX(x);
-        layoutOffset_.SetY(y);
-    }
+    void SetLayoutOffset(double x, double y);
 
     void SetLayoutSize(double width, double height)
     {
@@ -112,6 +108,7 @@ protected:
 
 private:
     int PrepareRecorder();
+    void MarkWhole();
     std::shared_ptr<Media::Recorder> CreateRecorder();
     void onError();
     void onRecord(bool isSucces, std::string info);
