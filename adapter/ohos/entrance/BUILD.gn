@@ -52,6 +52,7 @@ template("ace_ohos_standard_source_set") {
       "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
       "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
       "//foundation/graphic/standard:libwmclient",
+      "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
       "//third_party/zlib:libz",
     ]
 
@@ -67,7 +68,6 @@ template("ace_ohos_standard_source_set") {
       "appexecfwk_standard:fmskit_native",
       "appexecfwk_standard:libeventhandler",
       "ipc:ipc_core",
-      "multimodalinput_base:mmi_event",
       "native_appdatamgr:native_dataability",
       "native_appdatamgr:native_rdb",
     ]
