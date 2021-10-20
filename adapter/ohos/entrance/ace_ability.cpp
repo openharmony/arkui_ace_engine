@@ -32,9 +32,28 @@
 namespace OHOS {
 namespace Ace {
 namespace {
-FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr)
+
+FrontendType GetFrontendType(const std::string& frontendType)
 {
-    auto manifestPath = packagePathStr + std::string("assets/js/default/manifest.json");
+    if (frontendType == "normal") {
+        return FrontendType::JS;
+    } else if (frontendType == "form") {
+        return FrontendType::JS_CARD;
+    } else if (frontendType == "declarative") {
+        return FrontendType::DECLARATIVE_JS;
+    } else {
+        LOGE("frontend type not supported. return default frontend: JS frontend.");
+        return FrontendType::JS;
+    }
+}
+
+FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr, const std::string& srcPath)
+{
+    std::string manifest = std::string("assets/js/default/manifest.json");
+    if (!srcPath.empty()) {
+        manifest = "assets/js/" + srcPath + "/manifest.json";
+    }
+    auto manifestPath = packagePathStr + manifest;
     char realPath[PATH_MAX] = { 0x00 };
     if (realpath(manifestPath.c_str(), realPath) == nullptr) {
         LOGE("realpath fail! filePath: %{private}s, fail reason: %{public}s", manifestPath.c_str(), strerror(errno));
@@ -74,17 +93,7 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr)
             return FrontendType::DECLARATIVE_JS;
         }
     }
-    std::string frontendType = rootJson->GetString("type");
-    if (frontendType == "normal") {
-        return FrontendType::JS;
-    } else if (frontendType == "form") {
-        return FrontendType::JS_CARD;
-    } else if (frontendType == "declarative") {
-        return FrontendType::DECLARATIVE_JS;
-    } else {
-        LOGE("frontend type not supported. return default frontend: JS frontend.");
-        return FrontendType::JS;
-    }
+    return GetFrontendType(rootJson->GetString("type"));
 }
 
 bool GetIsArkFromConfig(const std::string& packagePathStr)
@@ -191,7 +200,13 @@ void AceAbility::OnStart(const Want& want)
     if (moduleInfo != nullptr) {
         packagePathStr += "/" + moduleInfo->name + "/";
     }
-    FrontendType frontendType = GetFrontendTypeFromManifest(packagePathStr);
+    std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
+    std::string srcPath = "";
+    if (info != nullptr && !info->srcPath.empty()) {
+        srcPath = info->srcPath;
+    }
+
+    FrontendType frontendType = GetFrontendTypeFromManifest(packagePathStr, srcPath);
     bool isArkApp = GetIsArkFromConfig(packagePathStr);
 
     // create container
@@ -235,8 +250,13 @@ void AceAbility::OnStart(const Want& want)
     metrics.physical_height = windowConfig.height;
     Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
 
-    auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
-    Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+    if (srcPath.empty()) {
+        auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
+        Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+    } else {
+        auto assetBasePathStr = { "assets/js/" + srcPath + "/" };
+        Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
+    }
 
     // set view
     Platform::AceContainer::SetView(flutterAceView, density_, windowConfig.width, windowConfig.height);
