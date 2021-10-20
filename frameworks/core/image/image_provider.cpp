@@ -248,6 +248,10 @@ void ImageProvider::UploadImageToGPUForRender(
     const std::function<void(flutter::SkiaGPUObject<SkImage>)>&& callback,
     const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder)
 {
+    if (!renderTaskHolder) {
+        LOGW("renderTaskHolder has been released.");
+        return;
+    }
 #if defined(DUMP_DRAW_CMD) || defined(GPU_DISABLED)
     // If want to dump draw command or gpu disabled, should use CPU image.
     callback({ image, renderTaskHolder->unrefQueue });
@@ -261,6 +265,10 @@ void ImageProvider::UploadImageToGPUForRender(
         return;
     }
     auto task = [rasterizedImage, callback, renderTaskHolder] () {
+        if (!renderTaskHolder) {
+            LOGW("renderTaskHolder has been released.");
+            return;
+        }
         // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
         if (!renderTaskHolder->ioManager) {
             // Shell is closing.
