@@ -2408,7 +2408,6 @@ JsiEngineInstance::~JsiEngineInstance()
         runtime_->Reset();
     }
     runtime_.reset();
-    JsiUtils::SetCurrentState(nullptr, JsErrorType::JS_CRASH, 0, "", nullptr);
 }
 
 void JsiEngineInstance::FlushCommandBuffer(void* context, const std::string& command)

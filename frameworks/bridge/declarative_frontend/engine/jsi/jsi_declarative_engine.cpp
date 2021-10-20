@@ -322,7 +322,6 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
         runtime_->Reset();
     }
     runtime_.reset();
-    JsiDeclarativeUtils::SetCurrentState(nullptr, JsErrorType::JS_CRASH, 0, "", nullptr);
 }
 
 bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
