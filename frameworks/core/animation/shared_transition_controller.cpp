@@ -268,9 +268,10 @@ bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overla
 
     // prepare each sharedTransition effect
     hasShared = CheckAndCreateTransition(effects, overlay);
-    if (hasShared) {
+    bool needsAnchor = hasShared || (context && !context->GetIsDeclarative());
+    if (needsAnchor) {
         // anchor effects only available when other effects are available
-        CheckAndCreateTransition(anchorEffects, overlay);
+        hasShared = hasShared || CheckAndCreateTransition(anchorEffects, overlay);
     }
 
     if (!hasShared) {
