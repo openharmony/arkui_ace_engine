@@ -133,7 +133,7 @@ public:
     }
 
     // Use to receive event from glfw window
-    bool HandleTouchEvent(std::unique_ptr<flutter::PointerDataPacket> packet) override;
+    bool HandleTouchEvent(const std::vector<uint8_t>& data) override;
 
     // Use to receive event from pc previewer
     bool HandleTouchEvent(const TouchPoint& touchEvent) override;

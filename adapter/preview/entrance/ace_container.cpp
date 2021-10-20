@@ -210,10 +210,10 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type)
     std::call_once(onceFlag_, [] {
         FlutterEngineRegisterHandleTouchEventCallback([](std::unique_ptr<flutter::PointerDataPacket>& packet) -> bool {
             auto container = AceContainer::GetContainerInstance(0);
-            if (!container || !container->GetAceView()) {
+            if (!container || !container->GetAceView() || !packet) {
                 return false;
             }
-            return container->GetAceView()->HandleTouchEvent(std::move(packet));
+            return container->GetAceView()->HandleTouchEvent(packet->data());
         });
     });
 #endif

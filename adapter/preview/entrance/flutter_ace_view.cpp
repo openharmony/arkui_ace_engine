@@ -116,14 +116,10 @@ void FlutterAceView::ProcessIdleEvent(int64_t deadline)
     }
 }
 
-bool FlutterAceView::HandleTouchEvent(std::unique_ptr<flutter::PointerDataPacket> packet)
+bool FlutterAceView::HandleTouchEvent(const std::vector<uint8_t>& data)
 {
-    if (packet == nullptr) {
-        return false;
-    }
-
     std::vector<TouchPoint> touchEvents;
-    ConvertTouchEvent(packet->data(), touchEvents);
+    ConvertTouchEvent(data, touchEvents);
     for (const auto& point : touchEvents) {
         LOGD("HandleTouchEvent point.x: %lf, point.y: %lf, point.size: %lf", point.x, point.y, point.size);
         if (point.type == TouchType::UNKNOWN) {
