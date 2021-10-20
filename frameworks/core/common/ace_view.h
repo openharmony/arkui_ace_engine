@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ACE_VIEW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ACE_VIEW_H
 
-#include "flutter/lib/ui/window/pointer_data_packet.h"
-
 #include <chrono>
 
 #include "base/resource/asset_manager.h"
@@ -81,7 +79,7 @@ public:
     virtual bool Dump(const std::vector<std::string>& params) = 0;
 
     // Use to receive event from glfw window
-    virtual bool HandleTouchEvent(std::unique_ptr<flutter::PointerDataPacket> packet)
+    virtual bool HandleTouchEvent(const std::vector<uint8_t>& data)
     {
         return false;
     }
