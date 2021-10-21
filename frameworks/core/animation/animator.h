@@ -91,10 +91,11 @@ public:
     void SetAnimationDirection(AnimationDirection direction);
 
     // Update the played time, will not trigger OnFrame callback.
-    void UpdatePlayedTime(int32_t playedTime);
+    void UpdatePlayedTime(int32_t playedTime, bool checkReverse = false);
+    int64_t GetPlayedTime() const;
 
     // Trigger one frame callback by the given time.
-    void TriggerFrame(int32_t playedTime);
+    void TriggerFrame(int32_t playedTime, bool checkReverse = false);
 
     // Motion not support set duration & repeat & Reverse.
     void PlayMotion(const RefPtr<Motion>& motion);

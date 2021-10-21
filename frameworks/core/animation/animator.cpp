@@ -267,7 +267,7 @@ bool Animator::GetInitAnimationDirection()
     return isReverse_ ? (repeatTimesLeft_ % 2) == 0 : false;
 }
 
-void Animator::UpdatePlayedTime(int32_t playedTime)
+void Animator::UpdatePlayedTime(int32_t playedTime, bool checkReverse)
 {
     if (playedTime < 0 || playedTime > duration_) {
         LOGE("UpdatePlayedTime failed. Invalid playedTime:%{public}d", playedTime);
@@ -277,9 +277,11 @@ void Animator::UpdatePlayedTime(int32_t playedTime)
         LOGE("Unsupported UpdatePlayedTime when startDelay or motion");
         return;
     }
-    // only support go forward.
-    isReverse_ = false;
-    isCurDirection_ = false;
+    if (!checkReverse) {
+        // only support go forward.
+        isReverse_ = false;
+        isCurDirection_ = false;
+    }
     float scale = GetDurationScale();
     if (!NearZero(tempo_)) {
         int32_t scaledPlayedTime = playedTime * scale / tempo_;
@@ -287,7 +289,12 @@ void Animator::UpdatePlayedTime(int32_t playedTime)
     }
 }
 
-void Animator::TriggerFrame(int32_t playedTime)
+int64_t Animator::GetPlayedTime() const
+{
+    return elapsedTime_;
+}
+
+void Animator::TriggerFrame(int32_t playedTime, bool checkReverse)
 {
     CHECK_RUN_ON(UI);
     if (playedTime < 0 || playedTime > duration_) {
@@ -298,7 +305,7 @@ void Animator::TriggerFrame(int32_t playedTime)
         LOGE("Unsupported TriggerFrame when startDelay or motion");
         return;
     }
-    UpdatePlayedTime(playedTime);
+    UpdatePlayedTime(playedTime, checkReverse);
     UpdateScaledTime();
     NotifyPrepareListener();
     NotifyInterpolator(elapsedTime_);

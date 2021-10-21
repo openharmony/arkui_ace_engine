@@ -176,6 +176,8 @@ public:
 
     void AddPreFlushListener(const RefPtr<FlushEvent>& listener);
 
+    void AddPostAnimationFlushListener(const RefPtr<FlushEvent>& listener);
+
     void AddPostFlushListener(const RefPtr<FlushEvent>& listener);
 
     void AddPageUpdateTask(std::function<void()>&& task, bool directExecute = false);
@@ -916,6 +918,7 @@ private:
     void FireVisibleChangeEvent();
     void FlushPredictLayout(int64_t targetTimestamp);
     void FlushAnimation(uint64_t nanoTimestamp);
+    void FlushPostAnimation();
     void FlushPageUpdateTasks();
     void ProcessPreFlush();
     void ProcessPostFlush();
@@ -973,6 +976,7 @@ private:
     std::set<RefPtr<RenderNode>> nodesToNotifyOnPreDraw_;
     std::set<RefPtr<RenderNode>> nodesNeedDrawOnPixelMap_;
     std::list<RefPtr<FlushEvent>> postFlushListeners_;
+    std::list<RefPtr<FlushEvent>> postAnimationFlushListeners_;
     std::list<RefPtr<FlushEvent>> preFlushListeners_;
     std::unique_ptr<Window> window_;
     RefPtr<FocusAnimationManager> focusAnimationManager_;

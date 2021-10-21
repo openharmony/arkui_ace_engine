@@ -333,6 +333,10 @@ void TweenElement::Update()
         }
 
         LOGD("add request to pipeline context.");
+        if (operation_ == AnimationOperation::PAUSE || operation_ == AnimationOperation::FINISH
+            || operationCustom_ == AnimationOperation::PAUSE || operationCustom_ == AnimationOperation::FINISH) {
+            pipelineContext->AddPostAnimationFlushListener(AceType::Claim(this));
+        }
         pipelineContext->AddPostFlushListener(AceType::Claim(this));
     }
 }
@@ -381,6 +385,16 @@ void TweenElement::OnPostFlush()
         return;
     }
     AddPreFlush();
+}
+
+void TweenElement::OnPostAnimationFlush()
+{
+    if (controller_) {
+        controller_->TriggerFrame(controller_->GetPlayedTime(), true);
+    }
+    if (controllerCustom_) {
+        controllerCustom_->TriggerFrame(controllerCustom_->GetPlayedTime(), true);
+    }
 }
 
 void TweenElement::OnPreFlush()

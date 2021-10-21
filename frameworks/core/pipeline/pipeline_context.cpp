@@ -163,6 +163,7 @@ PipelineContext::~PipelineContext()
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
     FlushBuild();
+    FlushPostAnimation();
     FlushLayout();
     FlushRender();
     FlushRenderFinish();
@@ -523,6 +524,20 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
         scheduleTask.second->OnFrame(nanoTimestamp);
     }
     isFlushingAnimation_ = false;
+}
+
+void PipelineContext::FlushPostAnimation()
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
+
+    if (postAnimationFlushListeners_.empty()) {
+        return;
+    }
+    decltype(postAnimationFlushListeners_) listeners(std::move(postAnimationFlushListeners_));
+    for (const auto& listener : listeners) {
+        listener->OnPostAnimationFlush();
+    }
 }
 
 void PipelineContext::FlushPageUpdateTasks()
@@ -1156,6 +1171,12 @@ void PipelineContext::AddPreFlushListener(const RefPtr<FlushEvent>& listener)
     CHECK_RUN_ON(UI);
     preFlushListeners_.emplace_back(listener);
     window_->RequestFrame();
+}
+
+void PipelineContext::AddPostAnimationFlushListener(const RefPtr<FlushEvent>& listener)
+{
+    CHECK_RUN_ON(UI);
+    postAnimationFlushListeners_.emplace_back(listener);
 }
 
 void PipelineContext::AddPostFlushListener(const RefPtr<FlushEvent>& listener)
@@ -1889,6 +1910,7 @@ void PipelineContext::Destroy()
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
     postFlushListeners_.clear();
+    postAnimationFlushListeners_.clear();
     preFlushListeners_.clear();
     needPaintFinishNodes_.clear();
     sharedTransitionController_.Reset();
