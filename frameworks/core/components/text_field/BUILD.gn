@@ -21,4 +21,10 @@ build_component("text_field") {
     "text_field_controller.cpp",
     "text_field_element.cpp",
   ]
+  if (is_standard_system && current_os != "mac" && current_os != "mingw") {
+    external_deps = [
+      "inputmethod_native:inputmethod_ability",
+      "inputmethod_native:inputmethod_client",
+    ]
+  }
 }

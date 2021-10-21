@@ -88,6 +88,9 @@ void QJSDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
             return;
         }
         delegate->PostJsTask([nativeEngine, needSync]() {
+            if (nativeEngine == nullptr) {
+                return;
+            }
             nativeEngine->Loop(LOOP_NOWAIT, needSync);
         });
     };
@@ -116,7 +119,7 @@ void QJSDeclarativeEngine::RegisterInitWorkerFunc()
         // Note: default 256KB is not enough
         JS_SetMaxStackSize(ctx, MAX_STACK_SIZE);
 
-        // Need Init console.
+        InitConsole(ctx);
     };
     OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
 }
@@ -254,7 +257,7 @@ void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValu
         LOGE("cannot find %s function", appFuncName.c_str());
         return;
     }
-    ret = JS_Call(ctx, appFunc, JS_UNDEFINED, argc, argv);
+    ret = JS_Call(ctx, appFunc, defaultobj, argc, argv);
     js_std_loop(ctx);
     JS_FreeValue(ctx, appFunc);
     JS_FreeValue(ctx, defaultobj);
@@ -311,17 +314,58 @@ void QJSDeclarativeEngine::OnConfigurationUpdated(const std::string& data)
     js_std_loop(engineInstance_->GetQJSContext());
 }
 
-void QJSDeclarativeEngine::OnCompleteContinuation(const int32_t code)
+
+bool QJSDeclarativeEngine::OnStartContinuation()
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return false;
+    }
+    JSValue ret = JS_NULL;
+    CallAppFunc("onStartContinuation", 0, nullptr, ret);
+    std::string result = JS_ToCString(ctx, ret);
+    js_std_loop(engineInstance_->GetQJSContext());
+    return (result == "true");
+}
+
+void QJSDeclarativeEngine::OnCompleteContinuation(int32_t code)
 {
     JSContext* ctx = engineInstance_->GetQJSContext();
     if (!ctx) {
         LOGE("context is null");
         return;
     }
-
     JSValueConst callBackResult[] = { JS_NewInt32(ctx, code) };
-    CallAppFunc("OnCompleteContinuation", 1, callBackResult);
+    CallAppFunc("onCompleteContinuation", 1, callBackResult);
+    js_std_loop(engineInstance_->GetQJSContext());
+}
 
+void QJSDeclarativeEngine::OnRemoteTerminated()
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return;
+    }
+    CallAppFunc("onRemoteTerminated", 0, nullptr);
+    js_std_loop(engineInstance_->GetQJSContext());
+}
+
+void QJSDeclarativeEngine::OnSaveData(std::string& data)
+{
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    if (!ctx) {
+        LOGE("context is null");
+        return;
+    }
+    JSValue object = JS_NewObject(ctx);
+    JSValueConst callBackResult[] = { object };
+    JSValue ret = JS_NULL;
+    CallAppFunc("onSaveData", 1, callBackResult, ret);
+    if (JS_ToCString(ctx, ret) == std::string("true")) {
+        data = ScopedString::Stringify(ctx, object);
+    }
     js_std_loop(engineInstance_->GetQJSContext());
 }
 
@@ -332,69 +376,19 @@ bool QJSDeclarativeEngine::OnRestoreData(const std::string& data)
         LOGE("context is null");
         return false;
     }
-
-    JSValueConst callBackResult[] = { JS_ParseJSON(ctx, data.c_str(), data.length(), "") };
-
-    JSValue ret = JS_NULL;
-    CallAppFunc("OnRestoreData", 1, callBackResult, ret);
-    js_std_loop(engineInstance_->GetQJSContext());
-
-    if (JS_IsBool(ret)) {
-        return JS_ToBool(ctx, ret);
-    } else {
+    JSValue jsonObj = JS_ParseJSON(ctx, data.c_str(), data.length(), "");
+    if (JS_IsUndefined(jsonObj) || JS_IsException(jsonObj)) {
+        LOGE("Parse json for restore data failed.");
         return false;
     }
-}
-
-bool QJSDeclarativeEngine::OnStartContinuation()
-{
-    JSContext* ctx = engineInstance_->GetQJSContext();
-    if (!ctx) {
-        LOGE("context is null");
-        return false;
-    }
-
+    JSValueConst callBackResult[] = { jsonObj };
     JSValue ret = JS_NULL;
-    CallAppFunc("OnStartContinuation", 0, nullptr, ret);
+    CallAppFunc("onRestoreData", 1, callBackResult, ret);
+    std::string result = JS_ToCString(ctx, ret);
     js_std_loop(engineInstance_->GetQJSContext());
-
-    if (JS_IsBool(ret)) {
-        return JS_ToBool(ctx, ret);
-    } else {
-        return false;
-    }
+    return (result == "true");
 }
 
-void QJSDeclarativeEngine::OnSaveData(std::string& saveData)
-{
-    JSContext* ctx = engineInstance_->GetQJSContext();
-    if (!ctx) {
-        LOGE("context is null");
-        return;
-    }
-    JSValue obj = JS_NewObject(ctx);
-    JSValueConst callBackResult[] = { obj };
-    JSValue ret = JS_NULL;
-    CallAppFunc("OnSaveData", 1, callBackResult, ret);
-
-    if (JS_IsBool(ret)) {
-        saveData = ScopedString::Stringify(obj);
-    }
-    js_std_loop(ctx);
-}
-
-void QJSDeclarativeEngine::OnRemoteTerminated()
-{
-    JSContext* ctx = engineInstance_->GetQJSContext();
-    if (!ctx) {
-        LOGE("context is null");
-        return;
-    }
-
-    CallAppFunc("OnRemoteTerminated", 0, nullptr);
-
-    js_std_loop(engineInstance_->GetQJSContext());
-}
 
 void QJSDeclarativeEngine::TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval)
 {

@@ -2899,6 +2899,9 @@ void QjsEngine::SetPostTask(NativeEngine* nativeEngine)
             return;
         }
         delegate->PostJsTask([nativeEngine, needSync]() {
+            if (nativeEngine == nullptr) {
+                return;
+            }
             nativeEngine->Loop(LOOP_NOWAIT, needSync);
         });
     };
@@ -3222,6 +3225,154 @@ void QjsEngine::UpdateApplicationState(const std::string& packageName, Frontend:
 
     JS_FreeValue(ctx, globalObj);
     js_std_loop(engineInstance_->GetQjsContext());
+}
+
+bool QjsEngine::OnStartContinuation()
+{
+    JSContext* ctx = engineInstance_->GetQjsContext();
+    QJSHandleScope handleScope(ctx);
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue appObj = QJSUtils::GetPropertyStr(ctx, globalObj, "aceapp");
+    if (!JS_IsObject(appObj)) {
+        LOGE("aceapp is not found.");
+        return false;
+    }
+    JSValue defObj = QJSUtils::GetPropertyStr(ctx, appObj, "$def");
+    if (!JS_IsObject(defObj)) {
+        LOGE("$def is not found.");
+        return false;
+    }
+    JSValue func = QJSUtils::GetPropertyStr(ctx, defObj, "onStartContinuation");
+    if (!JS_IsFunction(ctx, func)) {
+        LOGE("onStartContinuation is not found.");
+        JS_FreeValue(ctx, globalObj);
+        return false;
+    }
+    JSValueConst argv[] = {};
+    JSValue ret = QJSUtils::Call(ctx, func, defObj, countof(argv), argv);
+    std::string result = JS_ToCString(ctx, ret);
+    js_std_loop(ctx);
+    JS_FreeValue(ctx, globalObj);
+    return (result == "true");
+}
+
+void QjsEngine::OnCompleteContinuation(int32_t code)
+{
+    JSContext* ctx = engineInstance_->GetQjsContext();
+    QJSHandleScope handleScope(ctx);
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue appObj = QJSUtils::GetPropertyStr(ctx, globalObj, "aceapp");
+    if (!JS_IsObject(appObj)) {
+        LOGE("aceapp is not found.");
+        return;
+    }
+    JSValue defObj = QJSUtils::GetPropertyStr(ctx, appObj, "$def");
+    if (!JS_IsObject(defObj)) {
+        LOGE("$def is not found.");
+        return;
+    }
+    JSValue func = QJSUtils::GetPropertyStr(ctx, defObj, "onCompleteContinuation");
+    if (!JS_IsFunction(ctx, func)) {
+        LOGE("onCompleteContinuation is not found.");
+        JS_FreeValue(ctx, globalObj);
+        return;
+    }
+    JSValueConst argv[] = { JS_NewInt32(ctx, code) };
+    QJSUtils::Call(ctx, func, defObj, countof(argv), argv);
+    js_std_loop(ctx);
+    JS_FreeValue(ctx, globalObj);
+}
+
+void QjsEngine::OnRemoteTerminated()
+{
+    JSContext* ctx = engineInstance_->GetQjsContext();
+    QJSHandleScope handleScope(ctx);
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue appObj = QJSUtils::GetPropertyStr(ctx, globalObj, "aceapp");
+    if (!JS_IsObject(appObj)) {
+        LOGE("aceapp is not found.");
+        return;
+    }
+    JSValue defObj = QJSUtils::GetPropertyStr(ctx, appObj, "$def");
+    if (!JS_IsObject(defObj)) {
+        LOGE("$def is not found.");
+        return;
+    }
+    JSValue func = QJSUtils::GetPropertyStr(ctx, defObj, "onRemoteTerminated");
+    if (!JS_IsFunction(ctx, func)) {
+        LOGE("onRemoteTerminated is not found.");
+        JS_FreeValue(ctx, globalObj);
+        return;
+    }
+    JSValueConst argv[] = {};
+    QJSUtils::Call(ctx, func, defObj, countof(argv), argv);
+    js_std_loop(ctx);
+    JS_FreeValue(ctx, globalObj);
+}
+
+void QjsEngine::OnSaveData(std::string& data)
+{
+    JSContext* ctx = engineInstance_->GetQjsContext();
+    QJSHandleScope handleScope(ctx);
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue appObj = QJSUtils::GetPropertyStr(ctx, globalObj, "aceapp");
+    if (!JS_IsObject(appObj)) {
+        LOGE("aceapp is not found.");
+        return;
+    }
+    JSValue defObj = QJSUtils::GetPropertyStr(ctx, appObj, "$def");
+    if (!JS_IsObject(defObj)) {
+        LOGE("$def is not found.");
+        return;
+    }
+    JSValue func = QJSUtils::GetPropertyStr(ctx, defObj, "onSaveData");
+    if (!JS_IsFunction(ctx, func)) {
+        LOGE("onSaveData is not found.");
+        JS_FreeValue(ctx, globalObj);
+        return;
+    }
+    JSValue object = JS_NewObject(ctx);
+    JSValueConst argv[] = { object };
+    JSValue ret = QJSUtils::Call(ctx, func, defObj, countof(argv), argv);
+    if (JS_ToCString(ctx, ret) == std::string("true")) {
+        data = ScopedString::Stringify(ctx, object);
+    }
+    js_std_loop(ctx);
+    JS_FreeValue(ctx, globalObj);
+}
+
+bool QjsEngine::OnRestoreData(const std::string& data)
+{
+    JSContext* ctx = engineInstance_->GetQjsContext();
+    QJSHandleScope handleScope(ctx);
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue appObj = QJSUtils::GetPropertyStr(ctx, globalObj, "aceapp");
+    if (!JS_IsObject(appObj)) {
+        LOGE("aceapp is not found.");
+        return false;
+    }
+    JSValue defObj = QJSUtils::GetPropertyStr(ctx, appObj, "$def");
+    if (!JS_IsObject(defObj)) {
+        LOGE("$def is not found.");
+        return false;
+    }
+    JSValue func = QJSUtils::GetPropertyStr(ctx, defObj, "onRestoreData");
+    if (!JS_IsFunction(ctx, func)) {
+        LOGE("onRestoreData is not found.");
+        JS_FreeValue(ctx, globalObj);
+        return false;
+    }
+    JSValue jsonObj = JS_ParseJSON(ctx, data.c_str(), data.length(), "");
+    if (JS_IsUndefined(jsonObj) || JS_IsException(jsonObj)) {
+        LOGE("Parse json for restore data failed.");
+        return false;
+    }
+    JSValueConst argv[] = { jsonObj };
+    JSValue ret = QJSUtils::Call(ctx, func, defObj, countof(argv), argv);
+    std::string result = JS_ToCString(ctx, ret);
+    js_std_loop(ctx);
+    JS_FreeValue(ctx, globalObj);
+    return (result == "true");
 }
 
 void QjsEngine::TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval)

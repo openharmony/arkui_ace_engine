@@ -147,7 +147,12 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId)
     flutter::Settings settings;
     settings.instanceId = instanceId;
     settings.platform = flutter::AcePlatform::ACE_PLATFORM_OHOS;
+#ifndef GPU_DISABLED
+    settings.enable_software_rendering = false;
+#else
     settings.enable_software_rendering = true;
+#endif
+    LOGI("software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
     settings.idle_notification_callback = [aceSurface](int64_t deadline) {
         if (aceSurface != nullptr) {
             aceSurface->ProcessIdleEvent(deadline);

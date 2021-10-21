@@ -427,6 +427,11 @@ template("flutter_engine_shell") {
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_view_ohos.cc",
       ]
+      if (defined(config.disable_gpu) && !config.disable_gpu) {
+        sources += [
+          "$flutter_root/engine/flutter/shell/platform/ohos/ohos_surface_gl.cc",
+        ]
+      }
       deps += [
         "//foundation/graphic/standard:libvsync_client",
         "//foundation/graphic/standard:libwmclient",

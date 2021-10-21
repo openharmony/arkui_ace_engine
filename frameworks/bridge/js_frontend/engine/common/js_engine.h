@@ -107,26 +107,21 @@ public:
 
     virtual void OnConfigurationUpdated(const std::string& data) {}
 
-    virtual bool OnStartContinuation()
-    {
-        return false;
-    }
-
-    virtual void OnRemoteTerminated() {}
-
     virtual void OnActive() {}
 
     virtual void OnInactive() {}
 
-    virtual void OnCompleteContinuation(const int32_t code) {}
     virtual void OnMemoryLevel(const int32_t code) {}
 
-    virtual bool OnRestoreData(const std::string& data)
-    {
-        return false;
-    }
+    virtual bool OnStartContinuation() { return false; }
 
-    virtual void OnSaveData(std::string& saveData) {}
+    virtual void OnCompleteContinuation(int32_t code) {}
+
+    virtual void OnRemoteTerminated() {}
+
+    virtual void OnSaveData(std::string& data) {}
+
+    virtual bool OnRestoreData(const std::string& data) { return false; }
 
     virtual void MediaQueryCallback(const std::string& callbackId, const std::string& args)
     {

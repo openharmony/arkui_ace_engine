@@ -129,7 +129,7 @@ std::string GenerateSummaryBody(
 
 } // namespace
 
-std::stack<QJSHandleScope*> QJSHandleScope::qjsHandleScopeStack;
+thread_local std::stack<QJSHandleScope*> QJSHandleScope::qjsHandleScopeStack;
 
 ScopedString::ScopedString(JSContext* ctx, JSValueConst val) : context_(ctx)
 {
@@ -184,6 +184,21 @@ std::string ScopedString::str()
 std::string ScopedString::Stringify(JSValueConst val)
 {
     JSContext* ctx = QJSContext::Current();
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue thisObj = JS_GetPropertyStr(ctx, globalObj, "JSON");
+    JSValue funcObj = JS_GetPropertyStr(ctx, thisObj, "stringify");
+    JSValue retVal = JS_Call(ctx, funcObj, thisObj, 1, &val);
+    std::string str = ScopedString(retVal).str();
+    js_std_loop(ctx);
+    JS_FreeValue(ctx, retVal);
+    JS_FreeValue(ctx, funcObj);
+    JS_FreeValue(ctx, thisObj);
+    JS_FreeValue(ctx, globalObj);
+    return str;
+}
+
+std::string ScopedString::Stringify(JSContext* ctx, JSValueConst val)
+{
     JSValue globalObj = JS_GetGlobalObject(ctx);
     JSValue thisObj = JS_GetPropertyStr(ctx, globalObj, "JSON");
     JSValue funcObj = JS_GetPropertyStr(ctx, thisObj, "stringify");

@@ -355,58 +355,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->OnConfigurationUpdated(data);
     };
 
-    const auto& onStartContinuationCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() -> bool {
-        auto jsEngine = weakEngine.Upgrade();
-        if (!jsEngine) {
-            return false;
-        }
-        return jsEngine->OnStartContinuation();
-    };
-
-    const auto& onRemoteTerminatedCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
-        auto jsEngine = weakEngine.Upgrade();
-        if (!jsEngine) {
-            return;
-        }
-        jsEngine->OnRemoteTerminated();
-    };
-
-    const auto& onCompleteContinuationCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                                     const int32_t code) {
-        auto jsEngine = weakEngine.Upgrade();
-        if (!jsEngine) {
-            return;
-        }
-        jsEngine->OnCompleteContinuation(code);
-    };
-
-    const auto& onMemoryLevelCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                                     const int32_t level) {
-        auto jsEngine = weakEngine.Upgrade();
-        if (!jsEngine) {
-            return;
-        }
-        jsEngine->OnMemoryLevel(level);
-    };
-
-    const auto& onRestoreDataCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                            const std::string& data) -> bool {
-        auto jsEngine = weakEngine.Upgrade();
-        if (!jsEngine) {
-            return false;
-        }
-        return jsEngine->OnRestoreData(data);
-    };
-
-    const auto& onSaveDataCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                         std::string& saveData) {
-        auto jsEngine = weakEngine.Upgrade();
-        if (!jsEngine) {
-            return;
-        }
-        jsEngine->OnSaveData(saveData);
-    };
-
     const auto& timerCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                     const std::string& callbackId, const std::string& delay, bool isInterval) {
         auto jsEngine = weakEngine.Upgrade();
@@ -443,14 +391,60 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->JsCallback(callbackId, args);
     };
 
+    const auto& onMemoryLevelCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                                     const int32_t level) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->OnMemoryLevel(level);
+    };
+
+    const auto& onStartContinuationCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() -> bool {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return false;
+        }
+        return jsEngine->OnStartContinuation();
+    };
+    const auto& onCompleteContinuationCallBack =
+        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](int32_t code) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->OnCompleteContinuation(code);
+    };
+    const auto& onRemoteTerminatedCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->OnRemoteTerminated();
+    };
+    const auto& onSaveDataCallBack =
+        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](std::string& savedData) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->OnSaveData(savedData);
+    };
+    const auto& onRestoreDataCallBack =
+        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& data) -> bool {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return false;
+        }
+        return jsEngine->OnRestoreData(data);
+    };
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
         setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
         resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
         timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
         onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack,
-        onNewWantCallBack, onSaveDataCallBack, onStartContinuationCallBack, onRemoteTerminatedCallBack,
-        onActiveCallBack, onInactiveCallBack, onCompleteContinuationCallBack, onMemoryLevelCallBack,
-        onRestoreDataCallBack);
+        onNewWantCallBack, onActiveCallBack, onInactiveCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
+        onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack);
     if (disallowPopLastPage_) {
         delegate_->DisallowPopLastPage();
     }

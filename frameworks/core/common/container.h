@@ -50,6 +50,8 @@ public:
 
     virtual void Destroy() = 0;
 
+    virtual void DestroyView() {}
+
     // Get the instance id of this container
     virtual int32_t GetInstanceId() const = 0;
 

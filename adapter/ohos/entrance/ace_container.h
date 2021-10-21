@@ -40,6 +40,8 @@ public:
 
     void Destroy() override;
 
+    void DestroyView() override;
+
     static bool Register();
 
     int32_t GetInstanceId() const override

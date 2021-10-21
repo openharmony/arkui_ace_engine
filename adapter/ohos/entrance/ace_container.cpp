@@ -98,17 +98,32 @@ void AceContainer::Destroy()
 {
     if (pipelineContext_ && taskExecutor_) {
         if (taskExecutor_) {
-            taskExecutor_->PostTask([context = pipelineContext_]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
+            // 1. Destroy Pipeline on UI thread.
+            RefPtr<PipelineContext> context;
+            context.Swap(pipelineContext_);
+            taskExecutor_->PostTask([context]() {
+                context->Destroy();
+            }, TaskExecutor::TaskType::UI);
+
+            // 2. Destroy Frontend on JS thread.
+            RefPtr<Frontend> frontend;
+            frontend_.Swap(frontend);
+            taskExecutor_->PostTask([frontend]() {
+                frontend->UpdateState(Frontend::State::ON_DESTROY);
+                frontend->Destroy();
+            }, TaskExecutor::TaskType::JS);
         }
     }
-    if (frontend_) {
-        frontend_->UpdateState(Frontend::State::ON_DESTROY);
-    }
-
     resRegister_.Reset();
     assetManager_.Reset();
-    frontend_.Reset();
-    pipelineContext_.Reset();
+}
+
+void AceContainer::DestroyView()
+{
+    if (aceView_ != nullptr) {
+        delete aceView_;
+        aceView_ = nullptr;
+    }
 }
 
 void AceContainer::InitializeFrontend()
@@ -442,6 +457,7 @@ void AceContainer::DestroyContainer(int32_t instanceId)
         taskExecutor->PostSyncTask([] { LOGI("Wait UI thread..."); }, TaskExecutor::TaskType::UI);
         taskExecutor->PostSyncTask([] { LOGI("Wait JS thread..."); }, TaskExecutor::TaskType::JS);
     }
+    container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
     AceEngine::Get().RemoveContainer(instanceId);
 }
 

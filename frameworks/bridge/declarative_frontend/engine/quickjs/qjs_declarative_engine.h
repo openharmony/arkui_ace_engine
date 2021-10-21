@@ -63,6 +63,16 @@ public:
 
     void OnConfigurationUpdated(const std::string& data) override;
 
+    bool OnStartContinuation() override;
+
+    void OnCompleteContinuation(int32_t code) override;
+
+    void OnRemoteTerminated() override;
+
+    void OnSaveData(std::string& data) override;
+
+    bool OnRestoreData(const std::string& data) override;
+
     void MediaQueryCallback(const std::string& callbackId, const std::string& args) override;
 
     void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) override;
@@ -80,16 +90,6 @@ public:
 
     void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data) override;
 
-    bool OnStartContinuation() override;
-
-    void OnRemoteTerminated() override;
-
-    void OnCompleteContinuation(const int32_t code) override;
-
-    bool OnRestoreData(const std::string& data) override;
-
-    void OnSaveData(std::string& saveData) override;
-
     void RunGarbageCollection() override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
@@ -102,7 +102,6 @@ public:
 private:
     RefPtr<QJSDeclarativeEngineInstance> engineInstance_;
     int32_t instanceId_ = 0;
-
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     void RegisterWorker();
     void RegisterInitWorkerFunc();

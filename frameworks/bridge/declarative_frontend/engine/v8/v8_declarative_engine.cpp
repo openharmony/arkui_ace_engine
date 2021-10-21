@@ -902,6 +902,9 @@ void V8DeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
             return;
         }
         delegate->PostJsTask([nativeEngine, needSync]() {
+            if (nativeEngine == nullptr) {
+                return;
+            }
             nativeEngine->Loop(LOOP_NOWAIT, needSync);
         });
     };
