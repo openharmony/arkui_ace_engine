@@ -260,10 +260,11 @@ void RenderSwiper::PerformLayout()
     Size minSize = GetLayoutParam().GetMinSize();
     Size maxSize = GetLayoutParam().GetMaxSize();
     Size maxSizeClild = maxSize;
+    auto showingCount = swiper_->GetDisplayCount();
     if (axis_ == Axis::HORIZONTAL) {
-        maxSizeClild.SetWidth(maxSize.Width() - prevMargin_ - nextMargin_);
+        maxSizeClild.SetWidth(maxSize.Width() / showingCount - prevMargin_ - nextMargin_);
     } else {
-        maxSizeClild.SetHeight(maxSize.Height() - prevMargin_ - nextMargin_);
+        maxSizeClild.SetHeight(maxSize.Height() / showingCount - prevMargin_ - nextMargin_);
     }
     innerLayout.SetMaxSize(maxSizeClild);
 

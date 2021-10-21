@@ -564,6 +564,13 @@ var SwiperDisplayMode;
   SwiperDisplayMode[SwiperDisplayMode["AutoLinear"] = 1] = "AutoLinear";
 })(SwiperDisplayMode || (SwiperDisplayMode = {}));
 
+var EdgeEffect;
+(function (EdgeEffect) {
+  EdgeEffect[EdgeEffect["Spring"] = 0] = "Spring";
+  EdgeEffect[EdgeEffect["Fade"] = 1] = "Fade";
+  EdgeEffect[EdgeEffect["None"] = 2] = "None";
+})(EdgeEffect || (EdgeEffect = {}));
+
 var DatePickerType;
 (function (DatePickerType) {
   DatePickerType[DatePickerType["Time"] = 0] = "Time";

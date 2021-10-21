@@ -63,6 +63,8 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("indicator", &JSSwiper::SetIndicator, opt);
     JSClass<JSSwiper>::StaticMethod("cancelSwipeOnOtherAxis", &JSSwiper::SetCancelSwipeOnOtherAxis, opt);
     JSClass<JSSwiper>::StaticMethod("displayMode", &JSSwiper::SetDisplayMode);
+    JSClass<JSSwiper>::StaticMethod("effectMode", &JSSwiper::SetEffectMode);
+    JSClass<JSSwiper>::StaticMethod("displayCount", &JSSwiper::SetDisplayCount);
     JSClass<JSSwiper>::StaticMethod("itemSpace", &JSSwiper::SetItemSpace);
     JSClass<JSSwiper>::StaticMethod("onChange", &JSSwiper::SetOnChange);
     JSClass<JSSwiper>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -87,6 +89,53 @@ void JSSwiper::SetAutoplay(bool autoPlay)
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
     if (swiper) {
         swiper->SetAutoPlay(autoPlay);
+    }
+}
+
+void JSSwiper::SetEffectMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (!swiper) {
+        return;
+    }
+
+    if (!info[0]->IsNumber()) {
+        LOGE("info is not a  number ");
+        return;
+    }
+    auto swiperMode = static_cast<EdgeEffect>(info[0]->ToNumber<int32_t>());
+    if (swiperMode == EdgeEffect::SPRING) {
+        swiper->SetEdgeEffect(EdgeEffect::SPRING);
+    } else if (swiperMode == EdgeEffect::FADE) {
+        swiper->SetEdgeEffect(EdgeEffect::FADE);
+    } else {
+        swiper->SetEdgeEffect(EdgeEffect::NONE);
+    }
+}
+
+void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (!swiper) {
+        return;
+    }
+
+    if (info[0]->ToString() == "auto") {
+        swiper->SetMainSwiperSize(MainSwiperSize::AUTO);
+    }
+
+    if (info[0]->IsNumber()) {
+        swiper->SetDisplayCount(info[0]->ToNumber<int32_t>());
     }
 }
 

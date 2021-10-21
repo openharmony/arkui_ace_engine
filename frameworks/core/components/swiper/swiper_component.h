@@ -78,6 +78,8 @@ public:
     void SetAnimationOpacity(bool animationOpacity);
     const Dimension& GetItemSpace() const;
     void SetItemSpace(const Dimension& space);
+    int32_t GetDisplayCount() const;
+    void SetDisplayCount(int32_t displayCount);
     void SetDigitalIndicator(bool digitalIndicator);
     bool GetDigitalIndicator() const;
     Color GetFadeColor() const;

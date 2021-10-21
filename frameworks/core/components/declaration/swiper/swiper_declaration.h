@@ -27,6 +27,7 @@ inline constexpr uint32_t DEFAULT_SWIPER_CURRENT_INDEX = 0;
 inline constexpr double DEFAULT_SWIPER_ANIMATION_DURATION = 400.0;
 inline constexpr double DEFAULT_SWIPER_AUTOPLAY_INTERVAL = 3000.0;
 inline constexpr int32_t DEFAULT_SWIPER_CACHED_SIZE = -1;
+inline constexpr int32_t DEFAULT_SWIPER_DISPLAY_COUNT = 1;
 
 enum class SwiperDisplayMode {
     STRETCH = 0,
@@ -45,6 +46,7 @@ struct SwiperAttribute : Attribute {
     int32_t cachedSize = DEFAULT_SWIPER_CACHED_SIZE;
     EdgeEffect edgeEffect = EdgeEffect::SPRING;
     SwiperDisplayMode displayMode = SwiperDisplayMode::STRETCH;
+    int32_t displayCount = DEFAULT_SWIPER_DISPLAY_COUNT;
 };
 
 struct SwiperStyle : Style {
@@ -113,6 +115,20 @@ public:
     {
         auto& attribute = MaybeResetAttribute<SwiperAttribute>(AttributeTag::SPECIALIZED_ATTR);
         attribute.loop = loop;
+    }
+
+    int32_t GetDisplayCount() const
+    {
+        auto& attribute = static_cast<SwiperAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
+        return attribute.displayCount;
+    }
+
+    void SetDisplayCount(int32_t displayCount)
+    {
+        if (displayCount > 0) {
+            auto& attribute = static_cast<SwiperAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
+            attribute.displayCount = displayCount;
+        }
     }
 
     bool IsAutoPlay() const
