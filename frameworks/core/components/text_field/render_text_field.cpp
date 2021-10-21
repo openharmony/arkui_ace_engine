@@ -26,6 +26,10 @@
 #include "core/components/text_overlay/text_overlay_element.h"
 #include "core/event/ace_event_helper.h"
 
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#include "input_method_controller.h"
+#endif
+
 namespace OHOS::Ace {
 namespace {
 
@@ -55,6 +59,99 @@ constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
 
 } // namespace
 
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+class OnTextChangedListenerImpl : public MiscServices::OnTextChangedListener {
+public:
+    OnTextChangedListenerImpl(const WeakPtr<RenderTextField>& field) : field_(field) {}
+    void InsertText(const std::u16string& text) override
+    {
+        if (text.length() <= 0) {
+            LOGE("the text is null");
+            return;
+        }
+
+        auto renderTextField = field_.Upgrade();
+        if (!renderTextField) {
+            return;
+        }
+        auto context = renderTextField->GetContext().Upgrade();
+        if (context) {
+            context->GetTaskExecutor()->PostTask([renderTextField, text] {
+                if (renderTextField) {
+                    auto value = renderTextField->GetEditingValue();
+                    auto textEditingValue = std::make_shared<TextEditingValue>();
+                    textEditingValue->text =
+                        value.GetBeforeSelection() + StringUtils::Str16ToStr8(text) + value.GetAfterSelection();
+                    textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
+                    renderTextField->UpdateEditingValue(textEditingValue, true);
+                }
+            },
+            TaskExecutor::TaskType::UI);
+        }
+    }
+
+    void DeleteBackward(int32_t length) override
+    {
+        if (length <= 0) {
+            LOGE("Delete nothing.");
+            return;
+        }
+
+        auto renderTextField = field_.Upgrade();
+        if (!renderTextField) {
+            return;
+        }
+
+        auto context = renderTextField->GetContext().Upgrade();
+        if (context) {
+            context->GetTaskExecutor()->PostTask([renderTextField, length] {
+                if (renderTextField) {
+                    auto value = renderTextField->GetEditingValue();
+                    auto start = value.selection.GetStart();
+                    auto end = value.selection.GetEnd();
+                    auto textEditingValue = std::make_shared<TextEditingValue>();
+                    textEditingValue->text = value.text;
+                    textEditingValue->UpdateSelection(start, end);
+                    if (start > 0 && end > 0) {
+                        textEditingValue->Delete(start == end ? start - length : start, end);
+                    }
+                    renderTextField->UpdateEditingValue(textEditingValue, true);
+                }
+            },
+            TaskExecutor::TaskType::UI);
+        }
+    }
+
+    void SetKeyboardStatus(bool status) override
+    {
+        auto renderTextField = field_.Upgrade();
+        if (!renderTextField) {
+            return;
+        }
+
+        auto context = renderTextField->GetContext().Upgrade();
+        if (context) {
+            context->GetTaskExecutor()->PostTask([renderTextField, status] {
+                if (renderTextField) {
+                    LOGE("inputmethod:SetKeyboardStatus, status=%{public}d", status);
+                    if (status) {
+                        renderTextField->SetInputMethodStatus(true);
+                    } else {
+                        MiscServices::InputMethodController::GetInstance()->Close();
+                        renderTextField->SetInputMethodStatus(false);
+                    }
+                }
+            },
+            TaskExecutor::TaskType::UI);
+        }
+    }
+
+private:
+    WeakPtr<RenderTextField> field_;
+};
+sptr<MiscServices::OnTextChangedListener> g_listener = nullptr;
+#endif
+
 RenderTextField::RenderTextField()
     : twinklingInterval(TWINKLING_INTERVAL_MS), controller_(AceType::MakeRefPtr<TextEditController>())
 {}
@@ -78,8 +175,12 @@ RenderTextField::~RenderTextField()
 
     // If soft keyboard is still exist, close it.
     if (HasConnection()) {
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+        MiscServices::InputMethodController::GetInstance()->Close();
+#else
         connection_->Close(GetInstanceId());
         connection_ = nullptr;
+#endif
     }
 }
 
@@ -689,6 +790,12 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
     }
 
     if (softKeyboardEnabled_) {
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+        if (!HasConnection()) {
+            g_listener = new OnTextChangedListenerImpl(WeakClaim(this));
+            MiscServices::InputMethodController::GetInstance()->Attach(g_listener);
+        }
+#else
         if (!HasConnection()) {
             AttachIme();
             if (!HasConnection()) {
@@ -698,6 +805,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
             connection_->SetEditingState(GetEditingValue(), GetInstanceId());
         }
         connection_->Show(isFocusViewChanged, GetInstanceId());
+#endif
     }
     
     if (keyboard_ != TextInputType::MULTILINE) {
@@ -715,8 +823,12 @@ bool RenderTextField::CloseKeyboard(bool forceClose)
     if (!isOverlayShowed_ || !isOverlayFocus_ || forceClose) {
         StopTwinkling();
         if (HasConnection()) {
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+            MiscServices::InputMethodController::GetInstance()->HideTextInput();
+#else
             connection_->Close(GetInstanceId());
             connection_ = nullptr;
+#endif
         }
 
         if (onKeyboardClose_) {
@@ -1345,10 +1457,16 @@ void RenderTextField::UpdateSelection(int32_t start, int32_t end)
 
 void RenderTextField::UpdateRemoteEditing(bool needFireChangeEvent)
 {
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+    if (!HasConnection()) {
+        return;
+    }
+#else
     if (!HasConnection()) {
         return;
     }
     connection_->SetEditingState(GetEditingValue(), GetInstanceId(), needFireChangeEvent);
+#endif
 }
 
 void RenderTextField::UpdateRemoteEditingIfNeeded(bool needFireChangeEvent)

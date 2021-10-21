@@ -64,7 +64,6 @@ enum class CursorPositionType {
 
 class RenderTextField : public RenderNode, public TextInputClient, public ValueChangeObserver {
     DECLARE_ACE_TYPE(RenderTextField, RenderNode, TextInputClient, ValueChangeObserver);
-
 public:
     ~RenderTextField() override;
 
@@ -208,6 +207,13 @@ public:
         needNotifyChangeEvent_ = needNotifyChangeEvent;
     }
 
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+    void SetInputMethodStatus(bool imeAttached)
+    {
+        imeAttached_ = imeAttached;
+    }
+#endif
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -262,7 +268,11 @@ protected:
 
     bool HasConnection() const
     {
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+        return imeAttached_;
+#else
         return connection_;
+#endif
     }
 
     bool ShowCounter() const;
@@ -487,6 +497,9 @@ private:
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<Animator> pressController_;
     RefPtr<Animator> animator_;
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+    bool imeAttached_ = false;
+#endif
 };
 
 } // namespace OHOS::Ace

@@ -40,6 +40,15 @@ FlutterWindow::FlutterWindow(int32_t instanceId) : instanceId_(instanceId) {}
 
 FlutterWindow::~FlutterWindow() {}
 
+void FlutterWindow::Destroy()
+{
+    auto window = flutter::WindowManager::GetWindow(instanceId_);
+    if (window != nullptr) {
+        window->SetBeginFrameCallback(nullptr);
+    }
+    vsyncCallbacks_.clear();
+}
+
 void FlutterWindow::RequestFrame()
 {
     auto window = flutter::WindowManager::GetWindow(instanceId_);

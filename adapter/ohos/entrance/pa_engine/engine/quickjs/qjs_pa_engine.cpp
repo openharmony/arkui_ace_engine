@@ -423,7 +423,12 @@ void QjsPaEngine::SetPostTask(NativeEngine* nativeEngine)
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync]() { nativeEngine->Loop(LOOP_NOWAIT, needSync); });
+        delegate->PostJsTask([nativeEngine, needSync]() {
+            if (nativeEngine == nullptr) {
+                return;
+            }
+            nativeEngine->Loop(LOOP_NOWAIT, needSync);
+        });
     };
     nativeEngine_->SetPostTask(postTask);
 }
@@ -433,6 +438,7 @@ QjsPaEngine::~QjsPaEngine()
     UnloadLibrary();
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     if (nativeEngine_ != nullptr) {
+        nativeEngine_->CancelCheckUVLoop();
         delete nativeEngine_;
     }
     if (engineInstance_ && engineInstance_->GetQjsRuntime()) {

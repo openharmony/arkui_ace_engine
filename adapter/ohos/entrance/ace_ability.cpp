@@ -71,6 +71,9 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr, cons
     }
 
     long size = std::ftell(file.get());
+    if (size == -1L) {
+        return FrontendType::JS;
+    }
     char* fileData = new (std::nothrow) char[size];
     if (fileData == nullptr) {
         LOGE("new json buff failed, return default frontend: JS frontend.");
@@ -116,7 +119,10 @@ bool GetIsArkFromConfig(const std::string& packagePathStr)
     }
 
     long size = std::ftell(file.get());
-    char* fileData = new (std::nothrow) char[size];
+    if (size == -1L) {
+        return false;
+    }
+    char *fileData = new (std::nothrow) char[size];
     if (fileData == nullptr) {
         LOGE("new json buff failed, return not arkApp.");
         return false;
@@ -307,7 +313,9 @@ void AceAbility::OnStart(const Want& want)
     Platform::AceContainer::RunPage(abilityId_, Platform::AceContainer::GetContainer(abilityId_)->GeneratePageId(),
         parsedPageUrl, want.GetStringParam(START_PARAMS_KEY));
 
-    Platform::AceContainer::OnRestoreData(abilityId_, remoteData_);
+    if (!remoteData_.empty()) {
+        Platform::AceContainer::OnRestoreData(abilityId_, remoteData_);
+    }
     LOGI("AceAbility::OnStart called End");
 }
 
@@ -441,7 +449,8 @@ bool AceAbility::OnSaveData(OHOS::AAFwk::WantParams& saveData)
         saveData.SetParam(PAGE_URI, OHOS::AAFwk::String::Box(json->GetString(PAGE_URI)));
     }
     if (json->Contains(CONTINUE_PARAMS_KEY)) {
-        saveData.SetParam(CONTINUE_PARAMS_KEY, OHOS::AAFwk::String::Box(json->GetString(CONTINUE_PARAMS_KEY)));
+        std::string params = json->GetObject(CONTINUE_PARAMS_KEY)->ToString();
+        saveData.SetParam(CONTINUE_PARAMS_KEY, OHOS::AAFwk::String::Box(params));
     }
     LOGI("AceAbility::OnSaveData finish.");
     return true;
@@ -449,7 +458,7 @@ bool AceAbility::OnSaveData(OHOS::AAFwk::WantParams& saveData)
 
 bool AceAbility::OnRestoreData(OHOS::AAFwk::WantParams& restoreData)
 {
-    LOGI("AceAbility::OnStartContinuation called.");
+    LOGI("AceAbility::OnRestoreData called.");
     if (restoreData.HasParam(PAGE_URI)) {
         auto value = restoreData.GetParam(PAGE_URI);
         OHOS::AAFwk::IString* ao = OHOS::AAFwk::IString::Query(value);
@@ -464,7 +473,7 @@ bool AceAbility::OnRestoreData(OHOS::AAFwk::WantParams& restoreData)
             remoteData_ = OHOS::AAFwk::String::Unbox(ao);
         }
     }
-    LOGI("AceAbility::OnStartContinuation finish.");
+    LOGI("AceAbility::OnRestoreData finish.");
     return true;
 }
 

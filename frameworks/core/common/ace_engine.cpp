@@ -30,7 +30,8 @@ std::unique_ptr<AceEngine> g_aceEngine;
 
 AceEngine::AceEngine()
 {
-    watchDog_ = AceType::MakeRefPtr<WatchDog>();
+    // Watch dog thread(anr) can not exit when app stop.
+    // watchDog_ = AceType::MakeRefPtr<WatchDog>()
 }
 
 AceEngine& AceEngine::Get()
@@ -63,7 +64,9 @@ void AceEngine::RemoveContainer(int32_t instanceId)
     if (num == 0) {
         LOGW("container not found with instance id: %{public}d", instanceId);
     }
-    watchDog_->Unregister(instanceId);
+    if (watchDog_) {
+        watchDog_->Unregister(instanceId);
+    }
 }
 
 void AceEngine::Dump(const std::vector<std::string>& params) const
@@ -93,17 +96,23 @@ RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
 
 void AceEngine::RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor)
 {
-    watchDog_->Register(instanceId, taskExecutor);
+    if (watchDog_) {
+        watchDog_->Register(instanceId, taskExecutor);
+    }
 }
 
 void AceEngine::BuriedBomb(int32_t instanceId, uint64_t bombId)
 {
-    watchDog_->BuriedBomb(instanceId, bombId);
+    if (watchDog_) {
+        watchDog_->BuriedBomb(instanceId, bombId);
+    }
 }
 
 void AceEngine::DefusingBomb(int32_t instanceId)
 {
-    watchDog_->DefusingBomb(instanceId);
+    if (watchDog_) {
+        watchDog_->DefusingBomb(instanceId);
+    }
 }
 
 void AceEngine::TriggerGarbageCollection()

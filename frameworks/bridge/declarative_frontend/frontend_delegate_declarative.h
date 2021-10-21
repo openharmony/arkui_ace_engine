@@ -50,11 +50,12 @@ public:
         const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
         const OnRestoreAbilityStateCallBack& onRestoreAbilityStateCallBack,
         const OnNewWantCallBack& onNewWantCallBack,
-        const OnSaveDataCallBack& onSaveDataCallBack, const OnStartContinuationCallBack& onStartContinuationCallBack,
-        const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack,
         const OnActiveCallBack& onActiveCallBack, const OnInactiveCallBack& onInactiveCallBack,
-        const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
         const OnMemoryLevelCallBack& onMemoryLevelCallBack,
+        const OnStartContinuationCallBack& onStartContinuationCallBack,
+        const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
+        const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack,
+        const OnSaveDataCallBack& onSaveDataCallBack,
         const OnRestoreDataCallBack& onRestoreDataCallBack);
     ~FrontendDelegateDeclarative() override;
 
@@ -295,14 +296,14 @@ private:
     OnSaveAbilityStateCallBack onSaveAbilityState_;
     OnRestoreAbilityStateCallBack onRestoreAbilityState_;
     OnNewWantCallBack onNewWant_;
-    OnSaveDataCallBack onSaveData_;
-    OnStartContinuationCallBack onStartContinuation_;
-    OnRemoteTerminatedCallBack onRemoteTerminated_;
     OnActiveCallBack onActive_;
     OnInactiveCallBack onInactive_;
-    OnCompleteContinuationCallBack onCompleteContinuation_;
     OnMemoryLevelCallBack onMemoryLevel_;
-    OnRestoreDataCallBack onRestoreData_;
+    OnStartContinuationCallBack onStartContinuationCallBack_;
+    OnCompleteContinuationCallBack onCompleteContinuationCallBack_;
+    OnRemoteTerminatedCallBack onRemoteTerminatedCallBack_;
+    OnSaveDataCallBack onSaveDataCallBack_;
+    OnRestoreDataCallBack onRestoreDataCallBack_;
     RefPtr<Framework::ManifestParser> manifestParser_;
     RefPtr<Framework::AccessibilityNodeManager> jsAccessibilityManager_;
     RefPtr<MediaQueryInfo> mediaQueryInfo_;

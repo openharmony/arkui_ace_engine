@@ -34,6 +34,7 @@ public:
 
     virtual void Destroy()
     {
+        platformWindow_->Destroy();
         platformWindow_.reset();
     }
 

@@ -89,6 +89,7 @@ template("build_component") {
 
   foreach(item, ace_platforms) {
     build_component_impl(item.name) {
+      platform = item.name
       defines = []
 
       if (defined(item.config)) {

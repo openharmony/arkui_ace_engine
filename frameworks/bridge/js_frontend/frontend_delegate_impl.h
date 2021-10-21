@@ -48,17 +48,17 @@ using TimerCallback = std::function<void(const std::string& callbackId, const st
 using RequestAnimationCallback = std::function<void(const std::string& callbackId, uint64_t timeStamp)>;
 using JsCallback = std::function<void(const std::string& callbackId, const std::string& args)>;
 using OnWindowDisplayModeChangedCallBack = std::function<void(bool isShownInMultiWindow, const std::string& data)>;
+using OnConfigurationUpdatedCallBack = std::function<void(const std::string& data)>;
 using OnNewWantCallBack = std::function<void(const std::string& data)>;
 using OnSaveAbilityStateCallBack = std::function<void(std::string& data)>;
 using OnRestoreAbilityStateCallBack = std::function<void(const std::string& data)>;
-using OnConfigurationUpdatedCallBack = std::function<void(const std::string& data)>;
-using OnStartContinuationCallBack = std::function<bool()>;
-using OnSaveDataCallBack = std::function<void(std::string& savedData)>;
-using OnRemoteTerminatedCallBack = std::function<void()>;
 using OnActiveCallBack = std::function<void()>;
 using OnInactiveCallBack = std::function<void()>;
-using OnCompleteContinuationCallBack = std::function<void(const int32_t code)>;
 using OnMemoryLevelCallBack = std::function<void(const int32_t level)>;
+using OnStartContinuationCallBack = std::function<bool(void)>;
+using OnCompleteContinuationCallBack = std::function<void(int32_t code)>;
+using OnRemoteTerminatedCallBack = std::function<void(void)>;
+using OnSaveDataCallBack = std::function<void(std::string& data)>;
 using OnRestoreDataCallBack = std::function<bool(const std::string& data)>;
 
 struct PageInfo {
@@ -120,6 +120,11 @@ struct FrontendDelegateImplBuilder {
     DestroyPageCallback destroyPageCallback;
     DestroyApplicationCallback destroyApplicationCallback;
     UpdateApplicationStateCallback updateApplicationStateCallback;
+    OnStartContinuationCallBack onStartContinuationCallBack;
+    OnCompleteContinuationCallBack onCompleteContinuationCallBack;
+    OnRemoteTerminatedCallBack onRemoteTerminatedCallBack;
+    OnSaveDataCallBack onSaveDataCallBack;
+    OnRestoreDataCallBack onRestoreDataCallBack;
     TimerCallback timerCallback;
     MediaQueryCallback mediaQueryCallback;
     RequestAnimationCallback requestAnimationCallback;
@@ -128,14 +133,10 @@ struct FrontendDelegateImplBuilder {
     OnNewWantCallBack onNewWantCallBack;
     OnSaveAbilityStateCallBack onSaveAbilityStateCallBack;
     OnRestoreAbilityStateCallBack onRestoreAbilityStateCallBack;
-    OnSaveDataCallBack onSaveDataCallBack;
-    OnStartContinuationCallBack onStartContinuationCallBack;
-    OnRemoteTerminatedCallBack onRemoteTerminatedCallBack;
     OnActiveCallBack onActiveCallBack;
     OnInactiveCallBack onInactiveCallBack;
-    OnCompleteContinuationCallBack onCompleteContinuationCallBack;
     OnMemoryLevelCallBack onMemoryLevelCallBack;
-    OnRestoreDataCallBack onRestoreDataCallBack;
+    void* ability;
 };
 
 class DelegateClient {
@@ -226,10 +227,11 @@ public:
     void OnInactive();
     bool OnStartContinuation();
     void OnCompleteContinuation(int32_t code);
+    void OnRemoteTerminated();
     void OnSaveData(std::string& data);
-    void OnMemoryLevel(const int32_t level);
     bool OnRestoreData(const std::string& data);
     void OnNewRequest(const std::string& data);
+    void OnMemoryLevel(const int32_t level);
     void OnNewWant(const std::string& data);
     void CallPopPage();
     void OnApplicationDestroy(const std::string& packageName);
@@ -432,6 +434,11 @@ private:
     DestroyPageCallback destroyPage_;
     DestroyApplicationCallback destroyApplication_;
     UpdateApplicationStateCallback updateApplicationState_;
+    OnStartContinuationCallBack onStartContinuationCallBack_;
+    OnCompleteContinuationCallBack onCompleteContinuationCallBack_;
+    OnRemoteTerminatedCallBack onRemoteTerminatedCallBack_;
+    OnSaveDataCallBack onSaveDataCallBack_;
+    OnRestoreDataCallBack onRestoreDataCallBack_;
     TimerCallback timer_;
     std::unordered_map<std::string, CancelableCallback<void()>> timeoutTaskMap_;
     MediaQueryCallback mediaQueryCallback_;

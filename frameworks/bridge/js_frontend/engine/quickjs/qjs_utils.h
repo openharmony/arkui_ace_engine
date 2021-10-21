@@ -66,6 +66,7 @@ public:
     std::string str();
 
     static std::string Stringify(JSValueConst val);
+    static std::string Stringify(JSContext* ctx, JSValueConst val);
 
     operator std::string() const;
 
@@ -167,7 +168,7 @@ public:
 private:
     friend class QJSUtils;
     friend class QJSValue;
-    static std::stack<QJSHandleScope*> qjsHandleScopeStack;
+    static thread_local std::stack<QJSHandleScope*> qjsHandleScopeStack;
 
     static QJSHandleScope* GetCurrent();
     void Push(JSValue val);

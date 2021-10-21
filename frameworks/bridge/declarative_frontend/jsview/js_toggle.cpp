@@ -36,7 +36,6 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("size", &JSToggle::JsSize);
     JSClass<JSToggle>::StaticMethod("padding", &JSToggle::JsPadding);
     JSClass<JSToggle>::StaticMethod("swithPointStyle", &JSToggle::SwithPointStyle);
-    JSClass<JSToggle>::Inherit<JSContainerBase>();
     JSClass<JSToggle>::Inherit<JSViewAbstract>();
     JSClass<JSToggle>::Bind(globalObj);
 }
@@ -51,7 +50,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto type = paramObject->GetProperty("type");
     if (!type->IsNumber()) {
-        LOGI("toggle create error, type is non-valid");
+        LOGE("toggle create error, type is non-valid");
         return;
     }
 
