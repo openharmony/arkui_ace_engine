@@ -456,7 +456,9 @@ void RenderDialogTween::OnTouchTestHit(
 {
     clickDetector_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(clickDetector_);
-    result.emplace_back(dragDetector_);
+    if (isDragable_) {
+        result.emplace_back(dragDetector_);
+    }
 }
 
 bool RenderDialogTween::PopDialog()
