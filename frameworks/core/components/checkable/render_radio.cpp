@@ -36,6 +36,7 @@ void RenderRadio::Update(const RefPtr<Component>& component)
     LOGD("update");
     RenderCheckable::Update(component);
     const auto& radio = AceType::DynamicCast<RadioComponent<std::string>>(component);
+    component_ = radio;
     if (!radio) {
         LOGE("cast to radio component failed");
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
@@ -184,10 +185,6 @@ void RenderRadio::OffAnimationEnd()
 void RenderRadio::OnAnimationStart()
 {
     // set the stage to checked and then start animation
-    auto context = context_.Upgrade();
-    if (context->GetIsDeclarative()) {
-        RenderCheckable::HandleClick();
-    }
     UpdateAccessibilityAttr();
 }
 

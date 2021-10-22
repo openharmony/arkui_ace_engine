@@ -24,6 +24,7 @@
 #include "core/components/common/properties/animation_option.h"
 #include "core/pipeline/base/component.h"
 #include "frameworks/core/components/box/box_component.h"
+#include "frameworks/core/components/checkable/radio_group_component.h"
 #include "frameworks/core/components/coverage/coverage_component.h"
 #include "frameworks/core/components/display/display_component.h"
 #include "frameworks/core/components/flex/flex_item_component.h"
@@ -43,6 +44,8 @@
 #include "frameworks/core/components_v2/inspector/inspector_composed_component.h"
 
 namespace OHOS::Ace::Framework {
+    using JsPageRadioGroups = std::unordered_map<std::string, RadioGroupComponent<std::string>>;
+
 class ViewStackProcessor final {
 public:
     using SaveComponentEvent = std::function<void(std::unordered_map<std::string, RefPtr<Component>>)>;
@@ -112,9 +115,10 @@ public:
     void SetZIndex(RefPtr<Component>& component);
 
     void SetIsPercentSize(RefPtr<Component>& component);
+    std::shared_ptr<JsPageRadioGroups> GetRadioGroupCompnent();
 
 private:
-    ViewStackProcessor() = default;
+    ViewStackProcessor();
 
     bool ShouldPopImmediately();
 
@@ -137,6 +141,7 @@ private:
 
     // stack
     std::stack<std::unordered_map<std::string, RefPtr<Component>>> componentsStack_;
+    std::shared_ptr<JsPageRadioGroups> radioGroups_;
 
     // navigation declaration of NavigatonView
     RefPtr<NavigationDeclaration> navigationViewDeclaration_;

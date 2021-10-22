@@ -45,6 +45,16 @@ ViewStackProcessor* ViewStackProcessor::GetInstance()
     return instance.get();
 }
 
+ViewStackProcessor::ViewStackProcessor()
+{
+    radioGroups_ = std::make_shared<JsPageRadioGroups>();
+}
+
+std::shared_ptr<JsPageRadioGroups> ViewStackProcessor::GetRadioGroupCompnent()
+{
+    return radioGroups_;
+}
+
 RefPtr<ComposedComponent> ViewStackProcessor::GetRootComponent(const std::string& id, const std::string& name)
 {
     auto& wrappingComponentsMap = componentsStack_.top();

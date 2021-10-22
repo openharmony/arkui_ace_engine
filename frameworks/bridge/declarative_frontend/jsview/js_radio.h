@@ -31,9 +31,10 @@ public:
     static void JsPadding(const JSCallbackInfo& info);
     static void JsWidth(const JSRef<JSVal>& jsValue);
     static void JsHeight(const JSRef<JSVal>& jsValue);
-    static void JsSize(const JSCallbackInfo& info);
+    static void JsSize(const JSCallbackInfo& args);
     static void OnChange(const JSCallbackInfo& info);
     static void SetPadding(const Dimension& topDimen, const Dimension& leftDimen);
+    static void Checked(bool checked);
 
 };
 

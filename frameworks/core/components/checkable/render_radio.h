@@ -57,6 +57,7 @@ protected:
     double totalScale_ = 1.0;
     double pointScale_ = 1.0;
     bool isClicked_ = false;
+    RefPtr<RadioComponent<std::string>> component_;
 };
 
 } // namespace OHOS::Ace
