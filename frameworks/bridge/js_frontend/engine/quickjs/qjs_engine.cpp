@@ -2872,7 +2872,8 @@ bool QjsEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         LOGE("GetInstanceName strcpy_s fail");
         return false;
     }
-    DBG_SetComponentName(componentName, strlen(componentName));
+    DBG_SetComponentNameAndInstanceId(componentName, strlen(componentName), instanceId_);
+    DBG_SetNeedDebugBreakPoint(NeedDebugBreakPoint());
 #endif
     ACE_DCHECK(delegate);
 
