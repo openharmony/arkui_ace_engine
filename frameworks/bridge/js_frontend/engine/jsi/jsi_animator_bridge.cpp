@@ -135,7 +135,7 @@ void CallAnimationStartJs(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, shared_p
         LOGD("cannot find 'CallAnimationStartJs' function from animation object, maybe no callback at all.");
         return;
     }
-    JsiUtils::SetCurrentState(runtime, JsErrorType::ANIMATION_START_ERROR);
+    JsiUtils::SetCurrentState(JsErrorType::ANIMATION_START_ERROR);
     jsFunc->Call(runtime, runtime->GetGlobal(), {}, 0);
 }
 
@@ -162,7 +162,7 @@ void CallAnimationFinishJs(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, shared_
         LOGD("cannot find 'CallAnimationFinishJs' function from animation object, maybe no callback at all.");
         return;
     }
-    JsiUtils::SetCurrentState(runtime, JsErrorType::ANIMATION_FINISH_ERROR);
+    JsiUtils::SetCurrentState(JsErrorType::ANIMATION_FINISH_ERROR);
     jsFunc->Call(runtime, runtime->GetGlobal(), {}, 0);
 }
 
@@ -189,7 +189,7 @@ void CallAnimationCancelJs(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, shared_
         LOGD("cannot find 'CallAnimationCancelJs' function from animation object, maybe no callback at all.");
         return;
     }
-    JsiUtils::SetCurrentState(runtime, JsErrorType::ANIMATION_CANCEL_ERROR);
+    JsiUtils::SetCurrentState(JsErrorType::ANIMATION_CANCEL_ERROR);
     jsFunc->Call(runtime, runtime->GetGlobal(), {}, 0);
 }
 
@@ -216,7 +216,7 @@ void CallAnimationRepeatJs(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, shared_
         LOGD("cannot find 'CallAnimationRepeatJs' function from animation object, maybe no callback at all.");
         return;
     }
-    JsiUtils::SetCurrentState(runtime, JsErrorType::ANIMATION_REPEAT_ERROR);
+    JsiUtils::SetCurrentState(JsErrorType::ANIMATION_REPEAT_ERROR);
     jsFunc->Call(runtime, runtime->GetGlobal(), {}, 0);
 }
 
@@ -244,7 +244,7 @@ void CallAnimationFrameJs(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, shared_p
         return;
     }
     std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(value) };
-    JsiUtils::SetCurrentState(runtime, JsErrorType::ANIMATION_FRAME_ERROR);
+    JsiUtils::SetCurrentState(JsErrorType::ANIMATION_FRAME_ERROR);
     jsFunc->Call(runtime, runtime->GetGlobal(), argv, argv.size());
 }
 

@@ -273,7 +273,7 @@ std::string JsiGroupJsBridge::SerializationObjectToString(
         LOGE("SerializationObjectToString error: JSON has no attribute stringify");
         return "";
     }
-    JsiUtils::SetCurrentState(runtime, JsErrorType::STRINGFY_ERROR);
+    JsiUtils::SetCurrentState(JsErrorType::STRINGFY_ERROR);
     shared_ptr<JsValue> strValue = jsFunc->Call(runtime, runtime->NewUndefined(), { val }, 1);
     if (strValue->IsUndefined(runtime)) {
         LOGE("SerializationObjectToString error: js call error.");
@@ -368,7 +368,7 @@ void JsiGroupJsBridge::CallModuleJsCallback(int32_t callbackId, int32_t code, co
         }
         std::vector<shared_ptr<JsValue>> argv = { callBackResult };
 
-        JsiUtils::SetCurrentState(runtime_);
+        JsiUtils::SetCurrentState();
         // Pass only 1 parameter, call promise resolve call back.
         jsFunc->Call(runtime_, global, argv, 1);
         itFunc->second.rejectCallback = runtime_->NewUndefined();
