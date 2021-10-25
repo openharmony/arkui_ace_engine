@@ -2597,8 +2597,12 @@ void RenderSwiper::FinishAllSwipeAnimation(bool useFinish)
 
 bool RenderSwiper::IsAnimatorStopped() const
 {
-    return !controller_->IsRunning() && !swipeToController_->IsRunning() && !indicatorController_->IsRunning() &&
-        !springController_->IsRunning();
+    bool isControllerRunning = controller_ && controller_->IsRunning();
+    bool isSwiperControllerRunning = swipeToController_ && swipeToController_->IsRunning();
+    bool isIndicatorControllerRunning = indicatorController_ && indicatorController_->IsRunning();
+    bool isSpringControllerRunning = springController_ && springController_->IsRunning();
+    return !isControllerRunning && !isSwiperControllerRunning && !isIndicatorControllerRunning &&
+           !isSpringControllerRunning;
 }
 
 void RenderSwiper::FireSwiperControllerFinishEvent()
