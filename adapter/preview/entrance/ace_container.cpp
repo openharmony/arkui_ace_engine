@@ -56,7 +56,7 @@ const char UNICODE_SETTING_TAG[] = "unicodeSetting";
 const char LOCALE_DIR_LTR[] = "ltr";
 const char LOCALE_DIR_RTL[] = "rtl";
 const char LOCALE_KEY[] = "locale";
-}
+} // namespace
 
 std::once_flag AceContainer::onceFlag_;
 
@@ -66,36 +66,62 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type)
     ThemeConstants::InitDeviceType();
 
     auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
-    taskExecutor_ = Referenced::MakeRefPtr<FlutterTaskExecutor>(state->GetTaskRunners());
+    auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>(state->GetTaskRunners());
+    if (type != FrontendType::DECLARATIVE_JS) {
+        flutterTaskExecutor->InitJsThread();
+    }
+    taskExecutor_ = flutterTaskExecutor;
     taskExecutor_->PostTask([instanceId]() { Container::InitForThread(instanceId); }, TaskExecutor::TaskType::JS);
     taskExecutor_->PostTask([instanceId]() { Container::InitForThread(instanceId); }, TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::Initialize()
 {
-    InitializeFrontend();
+    if (type_ != FrontendType::DECLARATIVE_JS) {
+        InitializeFrontend();
+    }
 }
 
 void AceContainer::Destroy()
 {
-    if (pipelineContext_ && taskExecutor_) {
-        taskExecutor_->PostTask([context = pipelineContext_]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
+    LOGI("AceContainer::Destroy begin");
+    if (!pipelineContext_) {
+        LOGE("no context find in %{private}d container", instanceId_);
+        return;
     }
+    if (!taskExecutor_) {
+        LOGE("no taskExecutor find in %{private}d container", instanceId_);
+        return;
+    }
+    auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
+    taskExecutor_->PostTask(
+        [weak]() {
+            auto context = weak.Upgrade();
+            if (context == nullptr) {
+                LOGE("context is nullptr");
+                return;
+            }
+            context->Destroy();
+        },
+        TaskExecutor::TaskType::UI);
 
+    RefPtr<Frontend> frontend;
+    frontend_.Swap(frontend);
     if (frontend_ && taskExecutor_) {
         taskExecutor_->PostTask(
-            [front = frontend_]() { front->UpdateState(Frontend::State::ON_DESTROY); }, TaskExecutor::TaskType::JS);
+            [front = frontend_]() {
+                front->UpdateState(Frontend::State::ON_DESTROY);
+                front->Destroy();
+            },
+            TaskExecutor::TaskType::JS);
     }
 
-    if (aceView_) {
-        aceView_->DecRefCount();
-    }
-
+    messageBridge_.Reset();
     resRegister_.Reset();
     assetManager_.Reset();
-    messageBridge_.Reset();
-    frontend_.Reset();
     pipelineContext_.Reset();
+    aceView_ = nullptr;
+    LOGI("AceContainer::Destory end");
 }
 
 void AceContainer::InitializeFrontend()
@@ -120,6 +146,9 @@ void AceContainer::InitializeFrontend()
     ACE_DCHECK(frontend_);
     frontend_->DisallowPopLastPage();
     frontend_->Initialize(type_, taskExecutor_);
+    if (assetManager_) {
+        frontend_->SetAssetManager(assetManager_);
+    }
 }
 
 void AceContainer::InitializeCallback()
@@ -127,13 +156,25 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
 
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
-    auto&& touchEventCallback = [context = pipelineContext_](const TouchPoint& event) {
+
+    auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
+    auto&& touchEventCallback = [weak](const TouchPoint& event) {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
         context->GetTaskExecutor()->PostTask(
             [context, event]() { context->OnTouchEvent(event); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterTouchEventCallback(touchEventCallback);
 
-    auto&& keyEventCallback = [context = pipelineContext_](const KeyEvent& event) {
+    auto&& keyEventCallback = [weak](const KeyEvent& event) {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return false;
+        }
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
             [context, event, &result]() { result = context->OnKeyEvent(event); }, TaskExecutor::TaskType::UI);
@@ -141,13 +182,23 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterKeyEventCallback(keyEventCallback);
 
-    auto&& mouseEventCallback = [context = pipelineContext_](const MouseEvent& event) {
+    auto&& mouseEventCallback = [weak](const MouseEvent& event) {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
         context->GetTaskExecutor()->PostTask(
             [context, event]() { context->OnMouseEvent(event); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 
-    auto&& rotationEventCallback = [context = pipelineContext_](const RotationEvent& event) {
+    auto&& rotationEventCallback = [weak](const RotationEvent& event) {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return false;
+        }
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
             [context, event, &result]() { result = context->OnRotationEvent(event); }, TaskExecutor::TaskType::UI);
@@ -155,35 +206,60 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterRotationEventCallback(rotationEventCallback);
 
-    auto&& cardViewPositionCallback = [context = pipelineContext_](int id, float offsetX, float offsetY) {
+    auto&& cardViewPositionCallback = [weak](int id, float offsetX, float offsetY) {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
         context->GetTaskExecutor()->PostSyncTask(
             [context, id, offsetX, offsetY]() { context->SetCardViewPosition(id, offsetX, offsetY); },
             TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterCardViewPositionCallback(cardViewPositionCallback);
 
-    auto&& cardViewParamsCallback = [context = pipelineContext_](const std::string& key, bool focus) {
+    auto&& cardViewParamsCallback = [weak](const std::string& key, bool focus) {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
         context->GetTaskExecutor()->PostSyncTask(
             [context, key, focus]() { context->SetCardViewAccessibilityParams(key, focus); },
             TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterCardViewAccessibilityParamsCallback(cardViewParamsCallback);
 
-    auto&& viewChangeCallback = [context = pipelineContext_](int32_t width, int32_t height) {
+    auto&& viewChangeCallback = [weak](int32_t width, int32_t height) {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
             [context, width, height]() { context->OnSurfaceChanged(width, height); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
 
-    auto&& densityChangeCallback = [context = pipelineContext_](double density) {
+    auto&& densityChangeCallback = [weak](double density) {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
         context->GetTaskExecutor()->PostTask(
             [context, density]() { context->OnSurfaceDensityChanged(density); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterDensityChangeCallback(densityChangeCallback);
 
-    auto&& systemBarHeightChangeCallback = [context = pipelineContext_](double statusBar, double navigationBar) {
+    auto&& systemBarHeightChangeCallback = [weak](double statusBar, double navigationBar) {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
         ACE_SCOPED_TRACE("SystemBarHeightChangeCallback(%lf, %lf)", statusBar, navigationBar);
         context->GetTaskExecutor()->PostTask(
             [context, statusBar, navigationBar]() { context->OnSystemBarHeightChanged(statusBar, navigationBar); },
@@ -191,13 +267,23 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterSystemBarHeightChangeCallback(systemBarHeightChangeCallback);
 
-    auto&& surfaceDestroyCallback = [context = pipelineContext_]() {
+    auto&& surfaceDestroyCallback = [weak]() {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
         context->GetTaskExecutor()->PostTask(
             [context]() { context->OnSurfaceDestroyed(); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
 
-    auto&& idleCallback = [context = pipelineContext_](int64_t deadline) {
+    auto&& idleCallback = [weak](int64_t deadline) {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
         context->GetTaskExecutor()->PostTask(
             [context, deadline]() { context->OnIdle(deadline); }, TaskExecutor::TaskType::UI);
     };
@@ -226,6 +312,8 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type)
         front->UpdateState(Frontend::State::ON_CREATE);
         front->SetJsMessageDispatcher(aceContainer);
     }
+    auto platMessageBridge = aceContainer->GetMessageBridge();
+    platMessageBridge->SetJsMessageDispatcher(aceContainer);
 }
 
 void AceContainer::DestroyContainer(int32_t instanceId)
@@ -443,7 +531,9 @@ void AceContainer::AddAssetPath(
         } else {
             flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
             container->assetManager_ = flutterAssetManager;
-            container->frontend_->SetAssetManager(flutterAssetManager);
+            if (container->frontend_) {
+                container->frontend_->SetAssetManager(flutterAssetManager);
+            }
         }
 
         if (flutterAssetManager) {
@@ -539,6 +629,21 @@ void AceContainer::AttachView(
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
 
+    auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
+    ACE_DCHECK(state != nullptr);
+    auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
+    flutterTaskExecutor->InitOtherThreads(state->GetTaskRunners());
+    taskExecutor_->PostTask([id = instanceId_]() { Container::InitForThread(id); }, TaskExecutor::TaskType::UI);
+    if (type_ == FrontendType::DECLARATIVE_JS) {
+        // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
+        flutterTaskExecutor->InitJsThread(false);
+        InitializeFrontend();
+        auto front = GetFrontend();
+        if (front) {
+            front->UpdateState(Frontend::State::ON_CREATE);
+            front->SetJsMessageDispatcher(AceType::Claim(this));
+        }
+    }
     resRegister_ = aceView_->GetPlatformResRegister();
     pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
         std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
@@ -551,6 +656,7 @@ void AceContainer::AttachView(
     pipelineContext_->SetIsJsCard(type_ == FrontendType::JS_CARD);
     InitializeCallback();
 
+    ThemeConstants::InitDeviceType();
     // Only init global resource here, construct theme in UI thread
     auto themeManager = AceType::MakeRefPtr<ThemeManager>();
     if (themeManager) {
@@ -569,8 +675,17 @@ void AceContainer::AttachView(
             TaskExecutor::TaskType::UI);
     }
 
+    auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
     taskExecutor_->PostTask(
-        [context = pipelineContext_]() { context->SetupRootElement(); }, TaskExecutor::TaskType::UI);
+        [weak]() {
+            auto context = weak.Upgrade();
+            if (context == nullptr) {
+                LOGE("context is nullptr");
+                return;
+            }
+            context->SetupRootElement();
+        },
+        TaskExecutor::TaskType::UI);
     aceView_->Launch();
 
     frontend_->AttachPipelineContext(pipelineContext_);
@@ -578,11 +693,37 @@ void AceContainer::AttachView(
     if (cardFronted) {
         cardFronted->SetDensity(static_cast<double>(density));
         taskExecutor_->PostTask(
-            [context = pipelineContext_, width, height]() { context->OnSurfaceChanged(width, height); },
+            [weak, width, height]() {
+                auto context = weak.Upgrade();
+                if (context == nullptr) {
+                    LOGE("context is nullptr");
+                    return;
+                }
+                context->OnSurfaceChanged(width, height);
+            },
             TaskExecutor::TaskType::UI);
     }
 
     AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_);
+}
+
+void AceContainer::InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs)
+{
+    SystemProperties::InitDeviceInfo(runArgs.deviceWidth, runArgs.deviceHeight,
+        runArgs.deviceConfig.orientation == DeviceOrientation::PORTRAIT ? 0 : 1, runArgs.deviceConfig.density,
+        runArgs.isRound);
+    SystemProperties::InitDeviceType(runArgs.deviceConfig.deviceType);
+    SystemProperties::SetColorMode(runArgs.deviceConfig.colorMode);
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    if (!container) {
+        LOGE("container is null, AceContainer::InitDeviceInfo failed.");
+        return;
+    }
+    auto config = container->GetResourceConfiguration();
+    config.SetOrientation(SystemProperties::GetDevcieOrientation());
+    config.SetDensity(runArgs.deviceConfig.density);
+    config.SetDeviceType(SystemProperties::GetDeviceType());
+    container->SetResourceConfiguration(config);
 }
 
 RefPtr<AceContainer> AceContainer::GetContainerInstance(int32_t instanceId)

@@ -88,7 +88,7 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
     }
 
     // Initialize FlutterSvgPainter static member variable fontTypeChinese_ and fontTypeNormal_ here
-    // to make sure the font base path is already passed to SkFontMgr_Config_Parser, or previewer will crush.
+    // to make sure the font base path is already passed to SkFontMgr_Config_Parser, or previewer will crash.
     std::string fontTypeChinesePath = runArgs.fontBasePath + "HwChinese-Medium.ttf";
     std::string fontTypeNormalPath = runArgs.fontBasePath + "DroidSans.ttf";
     FlutterSvgPainter::fontTypeChinese_ = SkTypeface::MakeFromFile(fontTypeChinesePath.c_str());
@@ -159,12 +159,6 @@ bool AceAbility::DispatchBackPressedEvent()
 
 AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
 {
-    SystemProperties::InitDeviceInfo(runArgs_.deviceWidth, runArgs_.deviceHeight,
-        runArgs_.deviceConfig.orientation == DeviceOrientation::PORTRAIT ? 0 : 1,
-        runArgs_.deviceConfig.density, runArgs_.isRound);
-    SystemProperties::InitDeviceType(runArgs_.deviceConfig.deviceType);
-    SystemProperties::SetColorMode(runArgs_.deviceConfig.colorMode);
-    SetConfigChanges(runArgs.configChanges);
     if (runArgs_.formsEnabled) {
         LOGI("CreateContainer with JS_CARD frontend");
         AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD);
@@ -182,6 +176,8 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
         LOGE("container is null, set configuration failed.");
         return;
     }
+    container->InitDeviceInfo(ACE_INSTANCE_ID, runArgs);
+    SetConfigChanges(runArgs.configChanges);
     auto resConfig = container->GetResourceConfiguration();
     resConfig.SetOrientation(SystemProperties::GetDevcieOrientation());
     resConfig.SetDensity(SystemProperties::GetResolution());
@@ -249,7 +245,14 @@ void AceAbility::InitEnv()
         runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
 
     auto view = new FlutterAceView(ACE_INSTANCE_ID);
-    AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
+    if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
+        AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
+        AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
+    } else {
+        AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
+        AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
+    }
+
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     IdleCallback idleNoticeCallback = [view](int64_t deadline) { view->ProcessIdleEvent(deadline); };
     FlutterDesktopSetIdleCallback(controller_, idleNoticeCallback);
@@ -287,7 +290,6 @@ void AceAbility::OnConfigurationChanged(const DeviceConfig& newConfig)
 
 void AceAbility::Start()
 {
-    AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
     RunEventLoop();
 }
 

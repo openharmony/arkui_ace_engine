@@ -77,6 +77,7 @@ void QJSValue::Free()
 {
     JSRuntime* rt = QJSDeclarativeEngineInstance::GetQJSRuntime();
     if (rt == nullptr) {
+        LOGE("rt is nullptr");
         return;
     }
     JS_FreeValueRT(rt, value_);

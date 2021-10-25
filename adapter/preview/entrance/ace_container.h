@@ -54,6 +54,7 @@ public:
     static void SetResourcesPathAndThemeStyle(int32_t instanceId, const std::string& systemResourcesPath,
         const std::string& appResourcesPath, const int32_t& themeId, const ColorMode& colorMode);
     static void SetView(FlutterAceView* view, double density, int32_t width, int32_t height);
+    static void InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs);
     static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& url, const std::string& params);
     static RefPtr<AceContainer> GetContainerInstance(int32_t instanceId);
     static void AddRouterChangeCallback(int32_t instanceId, const OnRouterChangeCallback& onRouterChangeCallback);
