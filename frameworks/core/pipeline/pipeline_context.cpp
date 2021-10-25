@@ -2492,15 +2492,23 @@ bool PipelineContext::ProcessDragEvent(int action, double windowX, double window
 void PipelineContext::FlushWindowBlur()
 {
     CHECK_RUN_ON(UI);
-    // js card not support window blur
-    if (IsJsCard()) {
-        return;
-    }
 
     if (!updateWindowBlurRegionHandler_) {
         return;
     }
 
+    if (IsJsCard()) {
+        if (!needWindowBlurRegionRefresh_) {
+            return;
+        }
+        std::vector<std::vector<float>> blurRectangles;
+        if (!windowBlurRegions_.empty()) {
+            blurRectangles.push_back(std::vector<float> { 1 });
+        }
+        updateWindowBlurRegionHandler_(blurRectangles);
+        needWindowBlurRegionRefresh_ = false;
+        return;
+    }
     if (!rootElement_) {
         LOGE("root element is null");
         return;
