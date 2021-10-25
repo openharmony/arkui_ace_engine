@@ -36,10 +36,6 @@ public:
     std::string GetShapeType() const;
     std::string GetCommands() const;
     std::string GetAntiAlias() const;
-    std::string GetTopLeftRadius() const;
-    std::string GetTopRightRadius() const;
-    std::string GetBottomLeftRadius() const;
-    std::string GetBottomRightRadius() const;
     std::string GetFill() const;
     std::string GetFillOpacity() const;
     std::string GetStroke() const;
@@ -50,6 +46,7 @@ public:
     std::string GetStrokeOpacity() const;
     std::string GetStrokeWidth() const;
     std::unique_ptr<JsonValue> GetStrokeDashArray() const;
+    std::unique_ptr<JsonValue> GetRadiusArray() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

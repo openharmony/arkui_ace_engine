@@ -36,13 +36,13 @@ const std::unordered_map<std::string, StrFuncType> CREATE_JSON_MAP {
     { "strokeOpacity", [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeOpacity(); } },
     { "strokeWidth", [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeWidth(); } },
     { "antiAlias", [](const ShapeContainerComposedElement& inspector) { return inspector.GetAntiAlias(); } },
-    { "viewPort", [](const ShapeContainerComposedElement& inspector) { return inspector.GetViewBox(); } },
 };
 
 using JsonFuncType = std::function<std::unique_ptr<JsonValue>(const ShapeContainerComposedElement&)>;
 const std::unordered_map<std::string, JsonFuncType> CREATE_JSON_JSON_VALUE_MAP {
     { "strokeDashArray",
         [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeDashArray(); } },
+    { "viewPort", [](const ShapeContainerComposedElement& inspector) { return inspector.GetViewBox(); } }
 };
 
 }
@@ -50,9 +50,9 @@ const std::unordered_map<std::string, JsonFuncType> CREATE_JSON_JSON_VALUE_MAP {
 std::string ShapeContainerComposedElement::LineCapStyleToString(LineCapStyle lineCapStyle)
 {
     static const std::unordered_map<LineCapStyle, std::string> STYLE_MAP {
-        { LineCapStyle::BUTT, "BUTT" },
-        { LineCapStyle::ROUND, "ROUND" },
-        { LineCapStyle::SQUARE, "SQUARE" },
+        { LineCapStyle::BUTT, "LineCapStyle.BUTT" },
+        { LineCapStyle::ROUND, "LineCapStyle.ROUND" },
+        { LineCapStyle::SQUARE, "LineCapStyle.SQUARE" },
     };
 
     auto pos = STYLE_MAP.find(lineCapStyle);
@@ -65,9 +65,9 @@ std::string ShapeContainerComposedElement::LineCapStyleToString(LineCapStyle lin
 std::string ShapeContainerComposedElement::LineJoinStyleToString(LineJoinStyle lineJoinStyle)
 {
     static const std::unordered_map<LineJoinStyle, std::string> STYLE_MAP {
-        { LineJoinStyle::MITER, "MITER" },
-        { LineJoinStyle::BEVEL, "BEVEL" },
-        { LineJoinStyle::ROUND, "ROUND" },
+        { LineJoinStyle::MITER, "LineJoinStyle.MITER" },
+        { LineJoinStyle::BEVEL, "LineJoinStyle.BEVEL" },
+        { LineJoinStyle::ROUND, "LineJoinStyle.ROUND" },
     };
 
     auto pos = STYLE_MAP.find(lineJoinStyle);
@@ -204,23 +204,18 @@ std::string ShapeContainerComposedElement::GetStrokeWidth() const
     return "";
 }
 
-std::string ShapeContainerComposedElement::GetViewBox() const
+std::unique_ptr<JsonValue> ShapeContainerComposedElement::GetViewBox() const
 {
     auto render = GetContentRender<RenderShapeContainer>(ShapeContainerElement::TypeId());
+    auto jsonViewBox = JsonUtil::Create(true);
     if (render) {
-        std::string strViewPort;
         auto viewBox = render->GetShapeViewBox();
-        strViewPort.append("x = ")
-            .append(viewBox.Left().ToString())
-            .append(" y = ")
-            .append(viewBox.Top().ToString())
-            .append(" width = ")
-            .append(viewBox.Width().ToString())
-            .append(" height = ")
-            .append(viewBox.Height().ToString());
-        return strViewPort;
+        jsonViewBox->Put("x", viewBox.Left().ToString().c_str());
+        jsonViewBox->Put("y", viewBox.Top().ToString().c_str());
+        jsonViewBox->Put("width", viewBox.Width().ToString().c_str());
+        jsonViewBox->Put("height", viewBox.Height().ToString().c_str());
     }
-    return "";
+    return jsonViewBox;
 }
 
 } // namespace OHOS::Ace::V2

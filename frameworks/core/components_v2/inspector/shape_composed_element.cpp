@@ -35,16 +35,13 @@ const std::unordered_map<std::string, std::function<std::string(const ShapeCompo
     { "strokeOpacity", [](const ShapeComposedElement& inspector) { return inspector.GetStrokeOpacity(); } },
     { "strokeWidth", [](const ShapeComposedElement& inspector) { return inspector.GetStrokeWidth(); } },
     { "antiAlias", [](const ShapeComposedElement& inspector) { return inspector.GetAntiAlias(); } },
-    { "commands", [](const ShapeComposedElement& inspector) { return inspector.GetCommands(); } },
-    { "topLeftRadius", [](const ShapeComposedElement& inspector) { return inspector.GetTopLeftRadius(); } },
-    { "topRightRadius", [](const ShapeComposedElement& inspector) { return inspector.GetTopRightRadius(); } },
-    { "bottomLeftRadius", [](const ShapeComposedElement& inspector) { return inspector.GetBottomLeftRadius(); } },
-    { "bottomRightRadius", [](const ShapeComposedElement& inspector) { return inspector.GetBottomRightRadius(); } },
+    { "commands", [](const ShapeComposedElement& inspector) { return inspector.GetCommands(); } }
 };
 
 using JsonFuncType = std::function<std::unique_ptr<JsonValue>(const ShapeComposedElement&)>;
 const std::unordered_map<std::string, JsonFuncType> CREATE_JSON_JSON_VALUE_MAP {
     { "strokeDashArray", [](const ShapeComposedElement& inspector) { return inspector.GetStrokeDashArray(); } },
+    { "radius", [](const ShapeComposedElement& inspector) { return inspector.GetRadiusArray(); } }
 };
 
 } // namespace
@@ -111,42 +108,6 @@ std::string ShapeComposedElement::GetAntiAlias() const
     auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
     if (render) {
         return ConvertBoolToString(render->GetAntiAlias());
-    }
-    return "";
-}
-
-std::string ShapeComposedElement::GetTopLeftRadius() const
-{
-    auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
-    if (render) {
-        return render->GetTopLeftRadius().ToString();
-    }
-    return "";
-}
-
-std::string ShapeComposedElement::GetTopRightRadius() const
-{
-    auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
-    if (render) {
-        return render->GetTopRightRadius().ToString();
-    }
-    return "";
-}
-
-std::string ShapeComposedElement::GetBottomRightRadius() const
-{
-    auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
-    if (render) {
-        return render->GetBottomRightRadius().ToString();
-    }
-    return "";
-}
-
-std::string ShapeComposedElement::GetBottomLeftRadius() const
-{
-    auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
-    if (render) {
-        return render->GetBottomLeftRadius().ToString();
     }
     return "";
 }
@@ -247,6 +208,29 @@ std::string ShapeComposedElement::GetStrokeWidth() const
         return render->GetStrokeState().GetLineWidth().ToString();
     }
     return "";
+}
+
+std::unique_ptr<JsonValue> ShapeComposedElement::GetRadiusArray() const
+{
+    auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
+    auto jsonRadiusArray = JsonUtil::CreateArray(true);
+    if (render) {
+        std::vector<Radius> rads = {
+            render->GetTopLeftRadius(),
+            render->GetTopRightRadius(),
+            render->GetBottomRightRadius(),
+            render->GetBottomLeftRadius(),
+        };
+
+        for (size_t i = 0; i < rads.size(); i++) {
+            auto jsonObject = JsonUtil::CreateArray(false);
+            jsonObject->Put("0", rads[i].GetX().ToString().c_str());
+            jsonObject->Put("1", rads[i].GetY().ToString().c_str());
+            auto index = std::to_string(i);
+            jsonRadiusArray->Put(index.c_str(), jsonObject);
+        }
+    }
+    return jsonRadiusArray;
 }
 
 } // namespace OHOS::Ace::V2

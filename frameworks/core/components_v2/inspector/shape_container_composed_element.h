@@ -46,7 +46,7 @@ public:
     std::string GetStrokeMiterLimit() const;
     std::string GetStrokeOpacity() const;
     std::string GetStrokeWidth() const;
-    std::string GetViewBox() const;
+    std::unique_ptr<JsonValue> GetViewBox() const;
     std::unique_ptr<JsonValue> GetStrokeDashArray() const;
 
     AceType::IdType GetTargetTypeId() const override
