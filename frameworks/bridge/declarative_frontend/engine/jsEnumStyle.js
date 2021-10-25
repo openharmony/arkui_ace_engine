@@ -40,7 +40,7 @@ var FontWeight;
 (function (FontWeight) {
   FontWeight["Light"] = "light";
   FontWeight["Lighter"] = "lighter";
-  FontWeight["Normal"] = "400";
+  FontWeight["Normal"] = "normal";
   FontWeight["Regular"] = "regular";
   FontWeight["Medium"] = "medium";
   FontWeight["Bold"] = "bold";

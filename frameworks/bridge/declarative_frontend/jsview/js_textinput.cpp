@@ -17,111 +17,35 @@
 
 #include <vector>
 
+#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/common/ime/text_input_action.h"
 #include "frameworks/core/common/ime/text_input_type.h"
-#include "frameworks/core/components/text_field/render_text_field.h"
 #include "frameworks/core/components/text_field/text_field_component.h"
-#include "frameworks/core/components/text_field/text_field_element.h"
 #include "frameworks/core/components/text_field/textfield_theme.h"
 
 namespace OHOS::Ace::Framework {
 
 namespace {
-const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = {"sans-serif"};
-constexpr Dimension BOX_HOVER_RADIUS = 18.0_vp;
-}; // namespace
 
-void JSTextInput::PrepareSpecializedComponent()
+const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
+
+} // namespace
+
+void JSTextInput::InitDefaultStyle()
 {
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
     auto stack = ViewStackProcessor::GetInstance();
-    auto textInputComponent = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    std::vector<InputOption> inputOptions;
-    if (!boxComponent || !textInputComponent) {
-        return;
-    }
-    boxComponent->SetMouseAnimationType(HoverAnimationType::OPACITY);
-    textInputComponent->SetInputOptions(inputOptions);
-
-    UpdateDecoration();
-    boxComponent->SetPadding(Edge());
-    boxComponent->SetDeliverMinToChild(true);
+    auto textInputComponent = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
     auto theme = GetTheme<TextFieldTheme>();
-    if (boxComponent->GetHeightDimension().Value() < 0.0 && theme) {
-        boxComponent->SetHeight(theme->GetHeight().Value(), theme->GetHeight().Unit());
-    }
-    textInputComponent->SetHeight(boxComponent->GetHeightDimension());
-    if (textInputComponent->IsExtend()) {
-        boxComponent->SetHeight(-1.0, DimensionUnit::PX);
-    }
-}
-
-void JSTextInput::UpdateDecoration()
-{
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto stack = ViewStackProcessor::GetInstance();
-    auto textInputComponent = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    auto theme = GetTheme<TextFieldTheme>();
-    Radius defaultRadius_;
-    bool hasBoxRadius = false;
-
-    if (!boxComponent || !textInputComponent) {
-        return;
-    }
-    RefPtr<Decoration> backDecoration = boxComponent->GetBackDecoration();
-
-    RefPtr<Decoration> decoration = textInputComponent->GetDecoration();
-    if (backDecoration) {
-        Border boxBorder = backDecoration->GetBorder();
-        if (decoration) {
-            if (hasBoxRadius) {
-                decoration->SetBorder(boxBorder);
-            } else {
-                Border border = decoration->GetBorder();
-                border.SetLeftEdge(boxBorder.Left());
-                border.SetRightEdge(boxBorder.Right());
-                border.SetTopEdge(boxBorder.Top());
-                border.SetBottomEdge(boxBorder.Bottom());
-                decoration->SetBorder(border);
-            }
-            textInputComponent->SetOriginBorder(decoration->GetBorder());
-        }
-        if (backDecoration->GetImage() || backDecoration->GetGradient().IsValid()) {
-            backDecoration->SetBackgroundColor(Color::RED);
-            Border border;
-            if (!hasBoxRadius) {
-                border.SetBorderRadius(defaultRadius_);
-            } else {
-                border.SetTopLeftRadius(boxBorder.TopLeftRadius());
-                border.SetTopRightRadius(boxBorder.TopRightRadius());
-                border.SetBottomLeftRadius(boxBorder.BottomLeftRadius());
-                border.SetBottomRightRadius(boxBorder.BottomRightRadius());
-            }
-            backDecoration->SetBorder(border);
-        } else {
-            backDecoration = AceType::MakeRefPtr<Decoration>();
-            backDecoration->SetBorderRadius(Radius(BOX_HOVER_RADIUS));
-            boxComponent->SetBackDecoration(backDecoration);
-        }
-    }
-}
-
-void JSTextInput::InitializeStyle()
-{
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto stack = ViewStackProcessor::GetInstance();
-    auto textInputComponent = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    auto theme = GetTheme<TextFieldTheme>();
-    TextStyle textStyle;
     if (!boxComponent || !textInputComponent || !theme) {
         return;
     }
 
     textInputComponent->SetCursorColor(theme->GetCursorColor());
-    textInputComponent->SetTextInputType(TextInputType::TEXT);
+    textInputComponent->SetCursorRadius(theme->GetCursorRadius());
     textInputComponent->SetPlaceholderColor(theme->GetPlaceholderColor());
     textInputComponent->SetFocusBgColor(theme->GetFocusBgColor());
     textInputComponent->SetFocusPlaceholderColor(theme->GetFocusPlaceholderColor());
@@ -131,36 +55,41 @@ void JSTextInput::InitializeStyle()
     textInputComponent->SetSelectedColor(theme->GetSelectedColor());
     textInputComponent->SetHoverColor(theme->GetHoverColor());
     textInputComponent->SetPressColor(theme->GetPressColor());
+    textInputComponent->SetNeedFade(theme->NeedFade());
+    textInputComponent->SetShowEllipsis(theme->ShowEllipsis());
+
+    TextStyle textStyle = textInputComponent->GetTextStyle();
     textStyle.SetTextColor(theme->GetTextColor());
     textStyle.SetFontSize(theme->GetFontSize());
     textStyle.SetFontWeight(theme->GetFontWeight());
-
     textStyle.SetFontFamilies(INPUT_FONT_FAMILY_VALUE);
     textInputComponent->SetTextStyle(textStyle);
+
     textInputComponent->SetCountTextStyle(theme->GetCountTextStyle());
     textInputComponent->SetOverCountStyle(theme->GetOverCountStyle());
     textInputComponent->SetCountTextStyleOuter(theme->GetCountTextStyleOuter());
     textInputComponent->SetOverCountStyleOuter(theme->GetOverCountStyleOuter());
 
+    textInputComponent->SetErrorTextStyle(theme->GetErrorTextStyle());
+    textInputComponent->SetErrorSpacing(theme->GetErrorSpacing());
+    textInputComponent->SetErrorIsInner(theme->GetErrorIsInner());
     textInputComponent->SetErrorBorderWidth(theme->GetErrorBorderWidth());
     textInputComponent->SetErrorBorderColor(theme->GetErrorBorderColor());
 
-    RefPtr<Decoration> backDecoration = AceType::MakeRefPtr<Decoration>();
-    backDecoration->SetPadding(theme->GetPadding());
-    backDecoration->SetBackgroundColor(theme->GetBgColor());
-    Radius defaultRadius;
-    defaultRadius = theme->GetBorderRadius();
-    backDecoration->SetBorderRadius(defaultRadius);
-    if (boxComponent->GetBackDecoration()) {
-        backDecoration->SetImage(boxComponent->GetBackDecoration()->GetImage());
-        backDecoration->SetGradient(boxComponent->GetBackDecoration()->GetGradient());
+    RefPtr<Decoration> decoration = AceType::MakeRefPtr<Decoration>();
+    decoration->SetPadding(theme->GetPadding());
+    decoration->SetBackgroundColor(theme->GetBgColor());
+    decoration->SetBorderRadius(theme->GetBorderRadius());
+    const auto& boxDecoration = boxComponent->GetBackDecoration();
+    if (boxDecoration) {
+        decoration->SetImage(boxDecoration->GetImage());
+        decoration->SetGradient(boxDecoration->GetGradient());
     }
-    textInputComponent->SetDecoration(backDecoration);
+    textInputComponent->SetOriginBorder(decoration->GetBorder());
+    textInputComponent->SetDecoration(decoration);
     textInputComponent->SetIconSize(theme->GetIconSize());
     textInputComponent->SetIconHotZoneSize(theme->GetIconHotZoneSize());
-
-    boxComponent->SetBackDecoration(backDecoration);
-    boxComponent->SetPadding(theme->GetPadding());
+    textInputComponent->SetHeight(theme->GetHeight());
 }
 
 void JSTextInput::JSBind(BindingTarget globalObj)
@@ -174,6 +103,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("enterKeyType", &JSTextInput::SetEnterKeyType);
     JSClass<JSTextInput>::StaticMethod("caretColor", &JSTextInput::SetCaretColor);
     JSClass<JSTextInput>::StaticMethod("maxLength", &JSTextInput::SetMaxLength);
+    JSClass<JSTextInput>::StaticMethod("height", &JSTextInput::JsHeight);
     JSClass<JSTextInput>::StaticMethod("onEditChanged", &JSTextInput::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextInput::SetOnSubmit);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextInput::SetOnChange);
@@ -189,6 +119,12 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     }
 
     RefPtr<TextFieldComponent> textInputComponent = AceType::MakeRefPtr<TextFieldComponent>();
+    
+    // default type is text, default action is done.
+    textInputComponent->SetTextInputType(TextInputType::TEXT);
+    textInputComponent->SetAction(TextInputAction::DONE);
+    textInputComponent->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
+    textInputComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
 
     std::string placeholder;
@@ -196,14 +132,12 @@ void JSTextInput::Create(const JSCallbackInfo& info)
         textInputComponent->SetPlaceholder(placeholder);
     }
 
-    textInputComponent->SetExtend(true);
     std::string text;
     if (ParseJsString(paramObject->GetProperty("text"), text)) {
         textInputComponent->SetValue(text);
     }
     ViewStackProcessor::GetInstance()->Push(textInputComponent);
-    InitializeStyle();
-    PrepareSpecializedComponent();
+    InitDefaultStyle();
 }
 
 void JSTextInput::SetType(const JSCallbackInfo& info)
@@ -214,7 +148,7 @@ void JSTextInput::SetType(const JSCallbackInfo& info)
     }
 
     auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
     if (!info[0]->IsNumber()) {
         LOGE("The inputType is not number");
         return;
@@ -238,7 +172,7 @@ void JSTextInput::SetPlaceholderColor(const JSCallbackInfo& info)
     }
 
     auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
     if (component) {
         component->SetPlaceholderColor(color);
         component->SetFocusPlaceholderColor(color);
@@ -255,7 +189,7 @@ void JSTextInput::SetPlaceholderFont(const JSCallbackInfo& info)
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
     if (!component) {
         LOGE("The component(SetPlaceholderFont) is null");
         return;
@@ -271,14 +205,20 @@ void JSTextInput::SetPlaceholderFont(const JSCallbackInfo& info)
     }
 
     std::string weight;
-    if (ParseJsString(paramObject->GetProperty("weight"), weight)) {
+    auto fontWeight = paramObject->GetProperty("weight");
+    if (!fontWeight->IsNull()) {
+        if (fontWeight->IsNumber()) {
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(fontWeight, weight);
+        }
         textStyle.SetFontWeight(ConvertStrToFontWeight(weight));
     }
 
-    auto font = paramObject->GetProperty("family");
-    if (!font->IsNull()) {
+    auto fontFamily = paramObject->GetProperty("family");
+    if (!fontFamily->IsNull()) {
         std::vector<std::string> fontFamilies;
-        if (ParseJsFontFamilies(font, fontFamilies)) {
+        if (ParseJsFontFamilies(fontFamily, fontFamilies)) {
             textStyle.SetFontFamilies(fontFamilies);
         }
     }
@@ -288,7 +228,7 @@ void JSTextInput::SetPlaceholderFont(const JSCallbackInfo& info)
         FontStyle fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
         textStyle.SetFontStyle(fontStyle);
     }
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSTextInput::SetEnterKeyType(const JSCallbackInfo& info)
@@ -298,7 +238,7 @@ void JSTextInput::SetEnterKeyType(const JSCallbackInfo& info)
     }
 
     auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
     if (!component) {
         LOGE("The component(SetEnterKeyType) is null");
         return;
@@ -325,7 +265,7 @@ void JSTextInput::SetCaretColor(const JSCallbackInfo& info)
     }
 
     auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
     if (component) {
         component->SetCursorColor(color);
     } else {
@@ -337,10 +277,33 @@ void JSTextInput::SetCaretColor(const JSCallbackInfo& info)
 void JSTextInput::SetMaxLength(uint32_t value)
 {
     auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
     if (component) {
         component->SetMaxLength(value);
     }
+}
+
+void JSTextInput::JsHeight(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsHeight(info);
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    if (LessNotEqual(value.Value(), 0.0)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto textInputComponent = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
+    if (!textInputComponent) {
+        LOGE("JSTextInput set height failed, textInputComponent is null.");
+        return;
+    }
+    textInputComponent->SetHeight(value);
 }
 
 void JSTextInput::SetOnEditChanged(const JSCallbackInfo& info)
