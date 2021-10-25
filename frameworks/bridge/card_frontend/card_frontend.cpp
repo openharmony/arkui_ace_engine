@@ -193,6 +193,8 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
             }
 
             auto pipelineContext = frontend->holder_.Get();
+            auto minSdk = frontend->manifestParser_->GetMinPlatformVersion();
+            pipelineContext->SetMinPlatformVersion(minSdk);
 
             auto document = page->GetDomDocument();
             if (frontend->pageLoaded_) {

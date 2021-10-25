@@ -1253,7 +1253,9 @@ void DOMNode::CompositeComponents()
     // At last add to composite component.
     rootComponent_->SetChild(compositeComponent);
     // final set disabled status.
-    rootComponent_->SetDisabledStatus(declaration_ ? declaration_->IsDisabled() : false);
+    if (declaration_ && declaration_->IsDisabled() != rootComponent_->IsDisabledStatus()) {
+        rootComponent_->SetDisabledStatus(declaration_->IsDisabled());
+    }
 }
 
 void DOMNode::UpdateFlexItemComponent()
