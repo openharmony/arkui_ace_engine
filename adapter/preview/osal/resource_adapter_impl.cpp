@@ -17,8 +17,10 @@
 
 #include <set>
 
+#include "base/i18n/localization.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/theme/theme_attributes.h"
 
@@ -328,6 +330,23 @@ std::string ResourceAdapterImpl::GetString(uint32_t resId)
     return strResult;
 }
 
+std::string ResourceAdapterImpl::GetPluralString(uint32_t resId, int quantity)
+{
+    std::vector<std::string> pluralResults;
+    auto ret = resourceManger_.GetStringArray(static_cast<int32_t>(resId), pluralResults);
+    if (!ret) {
+        LOGE("GetPluralString error, id=%{public}u", resId);
+    }
+
+    auto pluralChoice = Localization::GetInstance->PluralRulesFormat(quantity);
+    auto iter = std::find(pluralResults.begin(), pluralResults.end(), pluralChoice);
+    std::string originStr;
+    if (iter != pluralResults.end() && ++iter != pluralResults.end()) {
+        originStr = *iter;
+    }
+    return originStr;
+}
+
 std::vector<std::string> ResourceAdapterImpl::GetStringArray(uint32_t resId) const
 {
     std::vector<std::string> strResults;
@@ -404,6 +423,33 @@ bool ResourceAdapterImpl::GetIdByName(const std::string& resName, const std::str
     }
     resId = static_cast<uint32_t>(globalResId);
     return true;
+}
+
+std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
+{
+    std::string mediaPath = "";
+    auto ret = resourceManger_.(static_cast<int32_t>(resId), mediaPath);
+    if (!ret) {
+        LOGE("GetMediaPath error, id=%{public}u", resId);
+        return "";
+    }
+    return "resource://" + mediaPath.substr(0, mediaPath.find_last_of("/")) + "/" +
+            std::to_string(resId) + mediaPath.substr(mediaPath.find_last_of("."));
+}
+
+std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
+{
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return "";
+    }
+    auto moduleName = container->GetModuleName();
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    return "resource://RAWFILE/" + moduleName + "/resources/rawfile/" + fileName->ToString();
+#else
+    return "resource://RAWFILE/assets/" + moduleName + "/resources/rawfile/" + fileName->ToString();
+#endif
 }
 
 } // namespace OHOS::Ace

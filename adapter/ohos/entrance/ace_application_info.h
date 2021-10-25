@@ -41,46 +41,6 @@ public:
 
     bool GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo) override;
 
-    bool GetMediaById(uint32_t id, std::string& mediaPath) override
-    {
-        if (resourceManager_) {
-            return resourceManager_->GetMediaById(id, mediaPath);
-        }
-        return false;
-    }
-
-    bool GetColorById(uint32_t id, uint32_t& colorId) override
-    {
-        if (resourceManager_) {
-            return resourceManager_->GetColorById(id, colorId);
-        }
-        return false;
-    }
-
-    bool GetFloatById(uint32_t id, float& floatValue) override
-    {
-        if (resourceManager_) {
-            return resourceManager_->GetFloatById(id, floatValue);
-        }
-        return false;
-    }
-
-    bool GetStringById(uint32_t id, std::string& strValue) override
-    {
-        if (resourceManager_) {
-            return resourceManager_->GetStringById(id, strValue);
-        }
-        return false;
-    }
-
-    bool GetPluralStringById(uint32_t id, int count, std::string& pluralResult) override
-    {
-        if (resourceManager_) {
-            return resourceManager_->GetPluralStringById(id, count, pluralResult);
-        }
-        return false;
-    }
-
     double GetLifeTime() const override
     {
         return 0.0;
@@ -94,9 +54,25 @@ public:
         resourceManager_ = resourceManager;
     }
 
+    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager()
+    {
+        return resourceManager_;
+    }
+
+    void SetPackagePathStr(std::string& packagePathStr)
+    {
+        packagePathStr_ = packagePathStr;
+    }
+
+    std::string GetPackagePathStr()
+    {
+        return packagePathStr_;
+    }
+
 private:
     std::map<std::string, std::string> jsEngineParams_;
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_;
+    std::string packagePathStr_;
 };
 
 } // namespace OHOS::Ace::Platform

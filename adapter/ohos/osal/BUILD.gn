@@ -53,6 +53,7 @@ template("ace_osal_ohos_source_set") {
     if (is_standard_system) {
       sources += [ "resource_adapter_impl.cpp" ]
       sources += [ "pixel_map.cpp" ]
+      deps = [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
     } else {
       sources += [ "pixel_map_ohos.cpp" ]
       external_deps += [ "multimedia_image:image" ]

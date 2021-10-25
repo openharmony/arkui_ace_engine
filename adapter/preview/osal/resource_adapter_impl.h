@@ -38,12 +38,15 @@ public:
     Color GetColor(uint32_t resId) override;
     Dimension GetDimension(uint32_t resId) override;
     std::string GetString(uint32_t resId) override;
+    std::string GetPluralString(uint32_t resId, int quantity) override;
     std::vector<std::string> GetStringArray(uint32_t resId) const override;
     double GetDouble(uint32_t resId) override;
     int32_t GetInt(uint32_t resId) override;
     bool GetResource(uint32_t resId, std::ostream& dest) const override;
     bool GetResource(const std::string& path, std::ostream& dest) const override;
     bool GetIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const override;
+    std::string GetMediaPath(uint32_t resId) override;
+    std::string GetRawfile(const std::string& fileName) override;
 
 private:
     bool ConvertToGlobalResourceType(const std::string& resTypeName, Global::Resource::ResourceType& resType) const;

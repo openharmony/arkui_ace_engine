@@ -205,6 +205,8 @@ void AceAbility::OnStart(const Want& want)
     if (moduleInfo != nullptr) {
         packagePathStr += "/" + moduleInfo->name + "/";
     }
+    Platform::AceApplicationInfoImpl::GetInstance().SetPackagePathStr(packagePathStr);
+    
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     std::string srcPath = "";
     if (info != nullptr && !info->srcPath.empty()) {

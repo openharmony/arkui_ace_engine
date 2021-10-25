@@ -19,7 +19,6 @@
 #include <regex>
 #include <vector>
 
-#include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
@@ -1608,13 +1607,13 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
         return false;
     }
 
-    // TODO: should check how to deal with the themeConstants
-    float dimensionFloat = 0.0f;
-    if (!AceApplicationInfo::GetInstance().GetFloatById(resId->ToNumber<uint32_t>(), dimensionFloat)) {
-        result = Dimension(static_cast<double>(dimensionFloat), defaultUnit);
-        return true;
+    auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGE("themeConstants is nullptr");
+        return false;
     }
-    return false;
+    result = themeConstants->GetDimension(resId->ToNumber<uint32_t>());
+    return true;
 }
 
 bool JSViewAbstract::ParseJsDimensionVp(const JSRef<JSVal>& jsValue, Dimension& result)
@@ -1665,13 +1664,13 @@ bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
         return false;
     }
 
-    // TODO: should check how to deal with the themeConstants
-    float resultFloat = 0.0f;
-    if (!AceApplicationInfo::GetInstance().GetFloatById(resId->ToNumber<uint32_t>(), resultFloat)) {
-        result = static_cast<double>(resultFloat);
-        return true;
+    auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is nullptr");
+        return false;
     }
-    return false;
+    result = themeConstants->GetDouble(resId->ToNumber<uint32_t>());
+    return true;
 }
 
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
@@ -1695,13 +1694,13 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
         return false;
     }
 
-    // TODO: should check how to deal with the themeConstants
-    uint32_t colorId;
-    if (!AceApplicationInfo::GetInstance().GetColorById(resId->ToNumber<uint32_t>(), colorId)) {
-        result = Color(colorId);
-        return true;
+    auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is nullptr");
+        return false;
     }
-    return false;
+    result = themeConstants->GetColor(resId->ToNumber<uint32_t>());
+    return true;
 }
 
 bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result)
@@ -1722,7 +1721,6 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
         return false;
     }
 
-    // TODO: should check how to deal with the themeConstants
     auto themeConstants = GetThemeConstants();
     if (!themeConstants) {
         LOGW("themeConstants is nullptr");
@@ -1758,7 +1756,11 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         return false;
     }
 
-    // TODO: should check how to deal with the themeConstants
+    auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is nullptr");
+        return false;
+    }
 
     JSRef<JSVal> args = jsObj->GetProperty("params");
     if (!args->IsArray()) {
@@ -1768,11 +1770,9 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
 
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
     if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::STRING)) {
-        std::string originStr;
-        if (!AceApplicationInfo::GetInstance().GetStringById(resId->ToNumber<uint32_t>(), originStr)) {
-            ReplaceHolder(originStr, params, 0);
-            result = originStr;
-        }
+        auto originStr = themeConstants->GetString(resId->ToNumber<uint32_t>());
+        ReplaceHolder(originStr, params, 0);
+        result = originStr;
     } else if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::PLURAL)) {
         auto countJsVal = params->GetValueAt(0);
         int count = 0;
@@ -1781,11 +1781,9 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
             return false;
         }
         count = countJsVal->ToNumber<int>();
-        std::string pluralResult;
-        if (!AceApplicationInfo::GetInstance().GetPluralStringById(resId->ToNumber<uint32_t>(), count, pluralResult)) {
-            ReplaceHolder(pluralResult, params, 1);
-            result = pluralResult;
-        }
+        auto pluralStr = themeConstants->GetPluralString(resId->ToNumber<uint32_t>(), count);
+        ReplaceHolder(pluralStr, params, 1);
+        result = pluralStr;
     } else {
         return false;
     }
@@ -1809,18 +1807,15 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
     JSRef<JSVal> type = jsObj->GetProperty("type");
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNull() && !type->IsNull() && type->IsNumber() && resId->IsNumber()) {
+        auto themeConstants = GetThemeConstants();
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
         auto typeInteger = type->ToNumber<int32_t>();
-        auto resIdInteger = resId->ToNumber<int32_t>();
         if (typeInteger == static_cast<int>(ResourceType::MEDIA)) {
-            // TODO: should check how to deal with the themeConstants
-            std::string mediaPath;
-            if (!AceApplicationInfo::GetInstance().GetMediaById(resIdInteger, mediaPath)) {
-                result = "file:///" + mediaPath;
-                return true;
-            } else {
-                LOGE("themeConstants GetString failed");
-                return false;
-            }
+            result = themeConstants->GetMediaPath(resId->ToNumber<uint32_t>());
+            return true;
         }
 
         if (typeInteger == static_cast<int>(ResourceType::RAWFILE)) {
@@ -1835,20 +1830,10 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
                 LOGW("fileName is not String");
                 return false;
             }
-            auto container = Container::Current();
-            if (!container) {
-                LOGW("container is null");
-                return false;
-            }
-            auto moduleName = container->GetModuleName();
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-            result = "resource://RAWFILE/" + moduleName + "/resources/rawfile/" + fileName->ToString();
-#else
-            result = "resource://RAWFILE/assets/" + moduleName + "/resources/rawfile/" + fileName->ToString();
-#endif
+            result = themeConstants->GetRawfile(fileName->ToString());
             return true;
         }
-
+        
         LOGE("JSImage::Create ParseJsMedia type is wrong");
         return false;
     }
@@ -3417,14 +3402,13 @@ bool JSViewAbstract::ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonVa
         LOGE("invalid resource id");
         return false;
     }
-
-    // TODO: should check how to deal with the themeConstants
-    float dimensionFloat = 0.0f;
-    if (!AceApplicationInfo::GetInstance().GetFloatById(resId->GetUInt(), dimensionFloat)) {
-        result = Dimension(static_cast<double>(dimensionFloat), defaultUnit);
-        return true;
+    auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGE("themeConstants is nullptr");
+        return false;
     }
-    return false;
+    result = themeConstants->GetDimension(resId->GetUInt());
+    return true;
 }
 
 bool JSViewAbstract::ParseJsonDimensionVp(const std::unique_ptr<JsonValue>& jsonValue, Dimension& result)
@@ -3456,14 +3440,13 @@ bool JSViewAbstract::ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue
         LOGE("invalid resource id");
         return false;
     }
-
-    // TODO: should check how to deal with the themeConstants
-    float resultFloat = 0.0f;
-    if (!AceApplicationInfo::GetInstance().GetFloatById(resId->GetUInt(), resultFloat)) {
-        result = static_cast<double>(resultFloat);
-        return true;
+    auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is nullptr");
+        return false;
     }
-    return false;
+    result = themeConstants->GetDouble(resId->GetUInt());
+    return true;
 }
 
 bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue, Color& result)
@@ -3490,14 +3473,13 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
         LOGE("invalid resource id");
         return false;
     }
-
-    // TODO: should check how to deal with the themeConstants
-    uint32_t colorId;
-    if (!AceApplicationInfo::GetInstance().GetColorById(resId->GetUInt(), colorId)) {
-        result = Color(colorId);
-        return true;
+    auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is nullptr");
+        return false;
     }
-    return false;
+    result = themeConstants->GetColor(resId->GetUInt());
+    return true;
 }
 
 void JSViewAbstract::GetAngle(
