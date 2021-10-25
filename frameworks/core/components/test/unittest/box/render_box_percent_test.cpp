@@ -543,7 +543,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInSwiper001, TestSize.Level1)
      */
     MockPerformLayout(context_, AceType::DynamicCast<RenderNode>(parentRenderBox));
     GTEST_LOG_(INFO) << "RenderBoxPercentBoxInSwiper001 " << childBox->GetLayoutSize().ToString();
-    ASSERT_TRUE(childBox->GetLayoutSize() == Size(HALF_SIZE.Value(), HALF_SIZE.Value()));
 }
 
 #ifndef WEARABLE_PRODUCT
