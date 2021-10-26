@@ -13,120 +13,42 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
+#include "bridge/declarative_frontend/jsview/js_textarea.h"
 
-#include<vector>
+#include <vector>
+
+#include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/jsview/js_container_base.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/text_field/render_text_field.h"
 #include "core/components/text_field/text_field_component.h"
-#include "core/components/text_field/text_field_element.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 
 namespace {
 
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
-const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = {"sans-serif"};
+const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
 constexpr uint32_t TEXTAREA_MAXLENGTH_VALUE_DEFAULT = std::numeric_limits<uint32_t>::max();
-constexpr Dimension BOX_HOVER_RADIUS = 18.0_vp;
 
 }; // namespace
 
-void JSTextArea::PrepareSpecializedComponent()
-{
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto stack = ViewStackProcessor::GetInstance();
-    auto textAreaComponent = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    std::vector<InputOption> inputOptions;
-    if (!boxComponent || !textAreaComponent) {
-        return;
-    }
-    boxComponent->SetMouseAnimationType(HoverAnimationType::OPACITY);
-    textAreaComponent->SetInputOptions(inputOptions);
-    textAreaComponent->SetImageFill(Color::RED);
-    UpdateDecoration();
-    boxComponent->SetPadding(Edge());
-    boxComponent->SetDeliverMinToChild(true);
-    auto theme = GetTheme<TextFieldTheme>();
-    if (boxComponent->GetHeightDimension().Value() < 0.0 && theme) {
-        boxComponent->SetHeight(theme->GetHeight().Value(), theme->GetHeight().Unit());
-    }
-    textAreaComponent->SetHeight(boxComponent->GetHeightDimension());
-    if (textAreaComponent->IsExtend()) {
-        boxComponent->SetHeight(-1.0, DimensionUnit::PX);
-    }
-}
-
-void JSTextArea::UpdateDecoration()
+void JSTextArea::InitDefaultStyle()
 {
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
     auto stack = ViewStackProcessor::GetInstance();
     auto textAreaComponent = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
     auto theme = GetTheme<TextFieldTheme>();
-    Radius defaultRadius_;
-    bool hasBoxRadius = false;
-
-    if (!boxComponent || !textAreaComponent) {
-        return;
-    }
-    RefPtr<Decoration> backDecoration = boxComponent->GetBackDecoration();
-    RefPtr<Decoration> decoration = textAreaComponent->GetDecoration();
-    if (backDecoration) {
-        Border boxBorder = backDecoration->GetBorder();
-        if (decoration) {
-            if (hasBoxRadius) {
-                decoration->SetBorder(boxBorder);
-            } else {
-                Border border = decoration->GetBorder();
-                border.SetLeftEdge(boxBorder.Left());
-                border.SetRightEdge(boxBorder.Right());
-                border.SetTopEdge(boxBorder.Top());
-                border.SetBottomEdge(boxBorder.Bottom());
-                decoration->SetBorder(border);
-            }
-            textAreaComponent->SetOriginBorder(decoration->GetBorder());
-        }
-
-        if (backDecoration->GetImage() || backDecoration->GetGradient().IsValid()) {
-            backDecoration->SetBackgroundColor(Color::TRANSPARENT);
-            Border border;
-            if (!hasBoxRadius) {
-                border.SetBorderRadius(defaultRadius_);
-            } else {
-                border.SetTopLeftRadius(boxBorder.TopLeftRadius());
-                border.SetTopRightRadius(boxBorder.TopRightRadius());
-                border.SetBottomLeftRadius(boxBorder.BottomLeftRadius());
-                border.SetBottomRightRadius(boxBorder.BottomRightRadius());
-            }
-            backDecoration->SetBorder(border);
-        } else {
-            backDecoration = AceType::MakeRefPtr<Decoration>();
-            backDecoration->SetBorderRadius(Radius(BOX_HOVER_RADIUS));
-            boxComponent->SetBackDecoration(backDecoration);
-        }
-    }
-}
-
-void JSTextArea::InitializeStyle()
-{
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto stack = ViewStackProcessor::GetInstance();
-    auto textAreaComponent = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    auto theme = GetTheme<TextFieldTheme>();
-    TextStyle textStyle;
     if (!boxComponent || !textAreaComponent || !theme) {
         return;
     }
+
     textAreaComponent->SetTextMaxLines(TEXTAREA_MAXLENGTH_VALUE_DEFAULT);
     textAreaComponent->SetCursorColor(theme->GetCursorColor());
-    textAreaComponent->SetTextInputType(TextInputType::MULTILINE);
     textAreaComponent->SetPlaceholderColor(theme->GetPlaceholderColor());
     textAreaComponent->SetFocusBgColor(theme->GetFocusBgColor());
     textAreaComponent->SetFocusPlaceholderColor(theme->GetFocusPlaceholderColor());
@@ -136,11 +58,14 @@ void JSTextArea::InitializeStyle()
     textAreaComponent->SetSelectedColor(theme->GetSelectedColor());
     textAreaComponent->SetHoverColor(theme->GetHoverColor());
     textAreaComponent->SetPressColor(theme->GetPressColor());
+
+    TextStyle textStyle = textAreaComponent->GetTextStyle();
     textStyle.SetTextColor(theme->GetTextColor());
     textStyle.SetFontSize(theme->GetFontSize());
     textStyle.SetFontWeight(theme->GetFontWeight());
     textStyle.SetFontFamilies(INPUT_FONT_FAMILY_VALUE);
     textAreaComponent->SetTextStyle(textStyle);
+
     textAreaComponent->SetCountTextStyle(theme->GetCountTextStyle());
     textAreaComponent->SetOverCountStyle(theme->GetOverCountStyle());
     textAreaComponent->SetCountTextStyleOuter(theme->GetCountTextStyleOuter());
@@ -151,18 +76,21 @@ void JSTextArea::InitializeStyle()
     RefPtr<Decoration> backDecoration = AceType::MakeRefPtr<Decoration>();
     backDecoration->SetPadding(theme->GetPadding());
     backDecoration->SetBackgroundColor(theme->GetBgColor());
-    Radius defaultRadius;
-    defaultRadius = theme->GetBorderRadius();
-    backDecoration->SetBorderRadius(defaultRadius);
-    if (boxComponent->GetBackDecoration()) {
-        backDecoration->SetImage(boxComponent->GetBackDecoration()->GetImage());
-        backDecoration->SetGradient(boxComponent->GetBackDecoration()->GetGradient());
+    backDecoration->SetBorderRadius(theme->GetBorderRadius());
+    const auto& boxDecoration = boxComponent->GetBackDecoration();
+    if (boxDecoration) {
+        backDecoration->SetImage(boxDecoration->GetImage());
+        backDecoration->SetGradient(boxDecoration->GetGradient());
     }
+    textAreaComponent->SetOriginBorder(backDecoration->GetBorder());
     textAreaComponent->SetDecoration(backDecoration);
     textAreaComponent->SetIconSize(theme->GetIconSize());
     textAreaComponent->SetIconHotZoneSize(theme->GetIconHotZoneSize());
-    boxComponent->SetBackDecoration(backDecoration);
-    boxComponent->SetPadding(theme->GetPadding());
+    textAreaComponent->SetHeight(theme->GetHeight());
+
+    // text area need to extend height.
+    textAreaComponent->SetExtend(true);
+    boxComponent->SetHeight(-1.0, DimensionUnit::VP);
 }
 
 void JSTextArea::JSBind(BindingTarget globalObj)
@@ -174,6 +102,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("placeholderFont", &JSTextArea::SetPlaceholderFont);
     JSClass<JSTextArea>::StaticMethod("textAlign", &JSTextArea::SetTextAlign);
     JSClass<JSTextArea>::StaticMethod("caretColor", &JSTextArea::SetCaretColor);
+    JSClass<JSTextArea>::StaticMethod("height", &JSTextArea::JsHeight);
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextArea::SetOnChange);
     JSClass<JSTextArea>::Inherit<JSViewAbstract>();
     JSClass<JSTextArea>::Bind(globalObj);
@@ -187,6 +116,9 @@ void JSTextArea::Create(const JSCallbackInfo& info)
     }
 
     RefPtr<TextFieldComponent> textAreaComponent = AceType::MakeRefPtr<TextFieldComponent>();
+    textAreaComponent->SetTextInputType(TextInputType::MULTILINE);
+    textAreaComponent->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
+    textAreaComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
 
     std::string placeholder;
@@ -194,14 +126,12 @@ void JSTextArea::Create(const JSCallbackInfo& info)
         textAreaComponent->SetPlaceholder(placeholder);
     }
 
-    textAreaComponent->SetExtend(true);
     std::string text;
     if (ParseJsString(paramObject->GetProperty("text"), text)) {
         textAreaComponent->SetValue(text);
     }
     ViewStackProcessor::GetInstance()->Push(textAreaComponent);
-    InitializeStyle();
-    PrepareSpecializedComponent();
+    InitDefaultStyle();
 }
 
 void JSTextArea::SetPlaceholderColor(const JSCallbackInfo& info)
@@ -250,14 +180,20 @@ void JSTextArea::SetPlaceholderFont(const JSCallbackInfo& info)
     }
 
     std::string weight;
-    if (ParseJsString(paramObject->GetProperty("weight"), weight)) {
+    auto fontWeight = paramObject->GetProperty("weight");
+    if (!fontWeight->IsNull()) {
+        if (fontWeight->IsNumber()) {
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(fontWeight, weight);
+        }
         textStyle.SetFontWeight(ConvertStrToFontWeight(weight));
     }
 
-    auto font = paramObject->GetProperty("family");
-    if (!font->IsNull()) {
+    auto fontFamily = paramObject->GetProperty("family");
+    if (!fontFamily->IsNull()) {
         std::vector<std::string> fontFamilies;
-        if (ParseJsFontFamilies(font, fontFamilies)) {
+        if (ParseJsFontFamilies(fontFamily, fontFamilies)) {
             textStyle.SetFontFamilies(fontFamilies);
         }
     }
@@ -267,7 +203,7 @@ void JSTextArea::SetPlaceholderFont(const JSCallbackInfo& info)
         FontStyle fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
         textStyle.SetFontStyle(fontStyle);
     }
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSTextArea::SetTextAlign(int32_t value)
@@ -306,6 +242,28 @@ void JSTextArea::SetCaretColor(const JSCallbackInfo& info)
     } else {
         LOGE("The component(SetCaretColor) is null");
     }
+}
+
+void JSTextArea::JsHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    if (LessNotEqual(value.Value(), 0.0)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto textAreaComponent = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
+    if (!textAreaComponent) {
+        LOGE("JSTextArea set height failed, textAreaComponent is null.");
+        return;
+    }
+    textAreaComponent->SetHeight(value);
 }
 
 void JSTextArea::SetOnChange(const JSCallbackInfo& info)

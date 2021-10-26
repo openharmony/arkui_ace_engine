@@ -30,9 +30,10 @@ public:
     static void SetTextAlign(int32_t value);
     static void SetCaretColor(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
-    static void InitializeStyle();
-    static void UpdateDecoration();
-    static void PrepareSpecializedComponent();
+    static void JsHeight(const JSCallbackInfo& info);
+
+private:
+    static void InitDefaultStyle();
 };
 
 } // namespace OHOS::Ace::Fremawork

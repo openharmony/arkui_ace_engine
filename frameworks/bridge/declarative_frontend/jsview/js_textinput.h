@@ -34,9 +34,10 @@ public:
     static void SetOnSubmit(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetMaxLength(uint32_t value);
-    static void InitializeStyle();
-    static void UpdateDecoration();
-    static void PrepareSpecializedComponent();
+    static void JsHeight(const JSCallbackInfo& info);
+
+private:
+    static void InitDefaultStyle();
 };
 
 } // namespace OHOS::Ace::Fremawork
