@@ -132,8 +132,8 @@ static napi_value JSGetInfo(napi_env env, napi_callback_info info)
                 napi_value ret;
                 napi_call_function(env, nullptr, callback, 0, nullptr, &ret);
                 napi_delete_reference(env, asyncContext->cmpCallbackRef);
-                napi_delete_async_work(env, asyncContext->work);
             }
+            napi_delete_async_work(env, asyncContext->work);
             delete asyncContext;
         },
         (void*)asyncContext, &asyncContext->work);
