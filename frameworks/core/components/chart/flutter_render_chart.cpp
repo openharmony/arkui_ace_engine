@@ -115,10 +115,11 @@ void FlutterRenderChart::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     paintWidth_ = dataRegion.GetSize().Width();
-    auto piplelineContext = GetContext().Upgrade();
-    if (piplelineContext && (piplelineContext->GetMinPlatformVersion() >= MIN_SDK_VERSION) && layer_) {
-        layer_->SetClip(dataRegion.Left(), dataRegion.Right(), dataRegion.Top(), dataRegion.Bottom(),
-            Flutter::Clip::HARD_EDGE);
+    auto pipelineContext = GetContext().Upgrade();
+    if (pipelineContext && pipelineContext->UseLiteStyle() &&
+        (pipelineContext->GetMinPlatformVersion() >= MIN_SDK_VERSION) && layer_) {
+        layer_->SetClip(
+            dataRegion.Left(), dataRegion.Right(), dataRegion.Top(), dataRegion.Bottom(), Flutter::Clip::HARD_EDGE);
     }
     PaintDatas(context, dataRegion);
 }
