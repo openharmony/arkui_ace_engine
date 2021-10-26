@@ -335,7 +335,7 @@ void JsInspectorManager::GetAttrsAndStylesV2(std::unique_ptr<JsonValue>& jsonNod
     auto weakComposedElement = GetComposedElementFromPage(node->GetNodeId());
     auto composedElement = weakComposedElement.Upgrade();
     if (!composedElement) {
-        LOGE("return");
+        LOGD("GetComposedElementFromPage faild %{public}d", node->GetNodeId());
         return;
     }
     std::string debugLine = composedElement->GetDebugLine();
