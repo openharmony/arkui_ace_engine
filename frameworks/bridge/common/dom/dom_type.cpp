@@ -503,6 +503,7 @@ const char DOM_LISTITEM_CARD_TYPE[] = "card";
 const char DOM_LISTITEM_CARD_BLUR[] = "blureffect";
 const char DOM_LISTITEM_ACTIVE[] = "active";
 const char DOM_LISTITEM_CLICK_COLOR[] = "clickColor";
+const char DOM_LISTITEM_KEY[] = "key";
 
 // list-items-group attribute and style constants
 const char DOM_LIST_ITEM_GROUP_EVENT_GROUPCLICK[] = "groupclick";

@@ -87,6 +87,9 @@ bool DOMListItem::SetSpecializedAttr(const std::pair<std::string, std::string>& 
     } else if (attr.first == DOM_LISTITEM_ACTIVE) {
         isActive_ = StringToBool(attr.second);
         return true;
+    } else if (attr.first == DOM_LISTITEM_KEY) {
+        key_ = attr.second;
+        return true;
     }
     return false;
 }
@@ -376,7 +379,9 @@ void DOMListItem::PrepareSpecializedComponent()
     if (!indexKey_.empty()) {
         listItemComponent_->SetIndexKey(indexKey_);
     }
-
+    if (!key_.empty()) {
+        listItemComponent_->SetKey(key_);
+    }
     if (flexComponent_) {
         flexComponent_->SetDirection(flexDirection_);
         flexComponent_->SetMainAxisAlign(flexMainAlign_);

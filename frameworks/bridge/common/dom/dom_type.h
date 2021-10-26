@@ -507,6 +507,7 @@ ACE_EXPORT extern const char DOM_LISTITEM_CARD_TYPE[];
 ACE_EXPORT extern const char DOM_LISTITEM_CARD_BLUR[];
 ACE_EXPORT extern const char DOM_LISTITEM_ACTIVE[];
 ACE_EXPORT extern const char DOM_LISTITEM_CLICK_COLOR[];
+ACE_EXPORT extern const char DOM_LISTITEM_KEY[];
 
 // list-items-group attribute and style constants
 ACE_EXPORT extern const char DOM_LIST_ITEM_GROUP_EVENT_GROUPCLICK[];

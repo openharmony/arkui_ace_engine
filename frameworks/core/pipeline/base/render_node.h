@@ -329,10 +329,7 @@ public:
         return needRender_;
     }
 
-    void SetDepth(int32_t depth)
-    {
-        depth_ = depth;
-    }
+    void SetDepth(int32_t depth);
 
     int32_t GetDepth() const
     {

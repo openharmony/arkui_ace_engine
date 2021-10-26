@@ -49,10 +49,11 @@ void ListItemElement::Update()
 {
     auto item = AceType::DynamicCast<ListItemComponent>(component_);
     listItemComponent_ = item;
-    if (item) {
+    if (item && (key_.empty() || key_ == item->GetKey())) {
         type_ = item->GetType();
         flags_ = item->GetFlags();
         index_ = item->GetIndex();
+        key_ = item->GetKey();
         topLeftRadius_ = item->GetTopLeftRadius();
         topRightRadius_ = item->GetTopRightRadius();
         bottomLeftRadius_ = item->GetBottomLeftRadius();
@@ -65,8 +66,10 @@ void ListItemElement::Update()
 void ListItemElement::PerformBuild()
 {
     if (listItemComponent_) {
-        const auto& child = children_.empty() ? nullptr : children_.front();
-        UpdateChild(child, listItemComponent_->GetChild());
+        if (key_.empty() || key_ == listItemComponent_->GetKey()) {
+            const auto& child = children_.empty() ? nullptr : children_.front();
+            UpdateChild(child, listItemComponent_->GetChild());
+        }
     }
 }
 

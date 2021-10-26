@@ -317,7 +317,10 @@ void ListElement::UpdateListItemElement(const RefPtr<Component>& component)
         element = item->second;
     }
     if (element) {
-        UpdateChild(element, component);
+        auto itemElement = ListItemElement::GetListItem(element);
+        if (itemElement->GetKey().empty() || itemElement->GetKey() != itemComponent->GetKey()) {
+            UpdateChild(element, component);
+        }
     }
 }
 
@@ -515,6 +518,7 @@ bool ListElement::RecycleItem(int32_t index)
     if (!itemElement) {
         return false;
     }
+    itemElement->SetKey("");
     auto bucket = cacheBuckets_.find(itemElement->GetItemType());
     if (bucket != cacheBuckets_.end()) {
         auto& elements = bucket->second;

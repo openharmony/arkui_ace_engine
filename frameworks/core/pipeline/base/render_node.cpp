@@ -1667,4 +1667,15 @@ void RenderNode::UpdatePosition()
     }
 }
 
+void RenderNode::SetDepth(int32_t depth)
+{
+    if (depth_ != depth) {
+        depth_ = depth;
+        const auto& children = GetChildren();
+        for (const auto& item : children) {
+            item->SetDepth(depth_ + 1);
+        }
+    }
+}
+
 } // namespace OHOS::Ace

@@ -143,6 +143,9 @@ public:
 
     void SetUpdateType(UpdateType updateType) override
     {
+        if (GetUpdateType() == updateType) {
+            return;
+        }
         RenderComponent::SetUpdateType(updateType);
         for (const auto& child : children_) {
             child->SetUpdateType(updateType);
@@ -151,6 +154,9 @@ public:
 
     void SetDisabledStatus(bool disabledStatus) override
     {
+        if (IsDisabledStatus() == disabledStatus) {
+            return;
+        }
         RenderComponent::SetDisabledStatus(disabledStatus);
         for (const auto& child : children_) {
             child->SetDisabledStatus(disabledStatus);
