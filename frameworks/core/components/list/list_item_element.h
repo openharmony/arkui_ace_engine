@@ -89,6 +89,16 @@ public:
         return nullptr;
     }
 
+    const std::string& GetKey() const
+    {
+        return key_;
+    }
+
+    void SetKey(const std::string& key)
+    {
+        key_ = key;
+    }
+
 private:
     RefPtr<RenderNode> CreateRenderNode() override;
 
@@ -102,6 +112,7 @@ private:
     Radius topRightRadius_;
     Radius bottomLeftRadius_;
     Radius bottomRightRadius_;
+    std::string key_;
 
     RefPtr<RenderNode> proxyNode_;
     RefPtr<ListItemComponent> listItemComponent_;

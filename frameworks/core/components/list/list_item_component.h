@@ -399,6 +399,16 @@ public:
         clickColor_ = clickColor;
     }
 
+    const std::string& GetKey() const
+    {
+        return key_;
+    }
+
+    void SetKey(const std::string& key)
+    {
+        key_ = key;
+    }
+
 private:
     int32_t index_ = -1; // invalid index
     int32_t columnSpan_ = DEFAULT_COLUMN_SPAN;
@@ -413,6 +423,7 @@ private:
     Radius bottomLeftRadius_;
     Radius bottomRightRadius_;
     std::string indexKey_;
+    std::string key_;
     bool needVibrate_ = true;
     bool supportScale_ = true;
     bool supportOpacity_ = false;
