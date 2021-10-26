@@ -22,6 +22,7 @@
 
 namespace OHOS::Ace::Framework {
 
+constexpr size_t MAX_COUNT = 9;
 void JSDataPanel::JSBind(BindingTarget globalObj)
 {
     JSClass<JSDataPanel>::Declare("DataPanel");
@@ -61,7 +62,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         return;
     }
     size_t length = values->GetArraySize();
-    for (size_t i = 0; i < length; i++) {
+    for (size_t i = 0; i < length && i < MAX_COUNT; i++) {
         auto item = values->GetArrayItem(i);
         if (!item || !item->IsNumber()) {
             LOGE("JSDataPanel::Create value is not number");
