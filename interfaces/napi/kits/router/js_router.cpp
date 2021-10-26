@@ -315,6 +315,8 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
                     napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
                     napi_delete_reference(env, asyncContext->callbackComplete);
                 }
+                napi_delete_async_work(env, asyncContext->work);
+                delete asyncContext;
             } else {
                 auto callBack = [env, asyncContext](int32_t callbackType) {
                     napi_value ret;
@@ -358,6 +360,7 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
                             LOGE("callbackType is invalid");
                             break;
                     }
+                    napi_delete_async_work(env, asyncContext->work);
                     delete asyncContext;
                 };
                 jsEngine->GetFrontend()->EnableAlertBeforeBackPage(asyncContext->messageString, std::move(callBack));
@@ -441,6 +444,7 @@ static napi_value JSRouterDisableAlertBeforeBackPage(napi_env env, napi_callback
                 napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
                 napi_delete_reference(env, asyncContext->callbackFail);
             }
+            napi_delete_async_work(env, asyncContext->work);
             delete asyncContext;
         },
         (void*)disableRouterAsyncContext, &disableRouterAsyncContext->work);

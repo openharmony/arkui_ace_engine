@@ -326,9 +326,11 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                             napi_call_function(env, nullptr, callback, 1, &result, &ret);
                             napi_delete_reference(env, asyncContext->callbackComplete);
                         }
+                        napi_delete_async_work(env, asyncContext->work);
                         delete asyncContext;
                         break;
                     default:
+                        napi_delete_async_work(env, asyncContext->work);
                         delete asyncContext;
                         break;
                 }
@@ -491,6 +493,8 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                     napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
                     napi_delete_reference(env, asyncContext->callbackComplete);
                 }
+                napi_delete_async_work(env, asyncContext->work);
+                delete asyncContext;
             } else {
                 auto callBack = [env, asyncContext](int32_t callbackType, int32_t successType) {
                     napi_value ret;
@@ -532,6 +536,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                         default:
                             break;
                     }
+                    napi_delete_async_work(env, asyncContext->work);
                     delete asyncContext;
                 };
                 jsEngine->GetFrontend()->ShowActionMenu(
