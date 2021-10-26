@@ -41,7 +41,8 @@ config("ace_config") {
     defines += ace_ivi_defines
   }
 
-  if ("${product_name}" == "rk3566" || "${product_name}" == "rk3568") {
+  if (defined(product_name) &&
+      (product_name == "rk3566" || product_name == "rk3568")) {
     defines += [ "PRODUCT_RK" ]
   }
 
