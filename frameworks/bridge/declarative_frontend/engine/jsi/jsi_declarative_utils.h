@@ -38,9 +38,10 @@ enum class JsErrorType {
 
 class JsiDeclarativeUtils {
 public:
-    static void SetCurrentState(const std::shared_ptr<JsRuntime>& runtime, JsErrorType
-        errorType = JsErrorType::JS_CRASH, int32_t instanceId = 0, const std::string& pageUrl = "",
-        const RefPtr<JsAcePage>& page = nullptr);
+    static void SetCurrentState(JsErrorType errorType = JsErrorType::JS_CRASH, int32_t instanceId = 0,
+        const std::string& pageUrl = "", const RefPtr<JsAcePage>& page = nullptr);
+    static void SetRuntime(const std::shared_ptr<JsRuntime>& runtime,
+        const std::shared_ptr<JsRuntime>& oldRuntime = nullptr);
     static void ReportJsErrorEvent(std::shared_ptr<JsValue> error);
 
 private:

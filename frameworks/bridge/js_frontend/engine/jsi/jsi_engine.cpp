@@ -2405,9 +2405,14 @@ JsiEngineInstance::~JsiEngineInstance()
     }
 
     if (runtime_) {
+        runtime_->RegisterUncaughtExceptionHandler(nullptr);
+        // reset runtime in utils
+        JsiUtils::SetRuntime(nullptr, runtime_);
+
         runtime_->Reset();
     }
     runtime_.reset();
+    runtime_ = nullptr;
 }
 
 void JsiEngineInstance::FlushCommandBuffer(void* context, const std::string& command)
@@ -2680,6 +2685,9 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
         return false;
     }
 
+    // set new runtime
+    JsiUtils::SetRuntime(runtime_);
+
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     for (const auto& [key, value] : extraNativeObject) {
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
@@ -2733,7 +2741,7 @@ bool JsiEngineInstance::FireJsEvent(const std::string& eventStr)
         LOGE("\"callJs\" is not a function!");
         return false;
     }
-    JsiUtils::SetCurrentState(runtime_, JsErrorType::FIRE_EVENT_ERROR, instanceId_, "", runningPage_);
+    JsiUtils::SetCurrentState(JsErrorType::FIRE_EVENT_ERROR, instanceId_, "", runningPage_);
     func->Call(runtime_, global, argv, argv.size());
     return true;
 }
@@ -2907,7 +2915,7 @@ void JsiEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
 
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetFrontendDelegate();
-    JsiUtils::SetCurrentState(runtime, JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_, page->GetUrl(), page);
+    JsiUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_, page->GetUrl(), page);
 
     // get source map
     std::string jsSourceMap;
@@ -3083,9 +3091,9 @@ void JsiEngine::DestroyPageInstance(int32_t pageId)
     }
     auto page = GetFrontendDelegate(runtime)->GetPage(pageId);
     if (page) {
-        JsiUtils::SetCurrentState(runtime, JsErrorType::DESTROY_PAGE_ERROR, instanceId_, page->GetUrl(), page);
+        JsiUtils::SetCurrentState(JsErrorType::DESTROY_PAGE_ERROR, instanceId_, page->GetUrl(), page);
     } else {
-        JsiUtils::SetCurrentState(runtime, JsErrorType::DESTROY_PAGE_ERROR, instanceId_);
+        JsiUtils::SetCurrentState(JsErrorType::DESTROY_PAGE_ERROR, instanceId_);
     }
     func->Call(runtime, global, argv, argv.size());
 
@@ -3105,7 +3113,7 @@ void JsiEngine::DestroyApplication(const std::string& packageName)
         LOGE("\"appDestroy\" not found or is not a function!");
         return;
     }
-    JsiUtils::SetCurrentState(runtime, JsErrorType::DESTROY_APP_ERROR, instanceId_, "",
+    JsiUtils::SetCurrentState(JsErrorType::DESTROY_APP_ERROR, instanceId_, "",
         engineInstance_->GetStagingPage());
     func->Call(runtime, global, argv, argv.size());
 }

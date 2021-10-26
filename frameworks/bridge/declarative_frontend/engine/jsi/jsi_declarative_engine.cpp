@@ -319,9 +319,14 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
     DestroyAllRootViewHandle();
 
     if (runtime_) {
+        runtime_->RegisterUncaughtExceptionHandler(nullptr);
+        // reset runtime in utils
+        JsiDeclarativeUtils::SetRuntime(nullptr, runtime_);
+
         runtime_->Reset();
     }
     runtime_.reset();
+    runtime_ = nullptr;
 }
 
 bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
@@ -347,6 +352,10 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         LOGE("Js Engine initialize runtime failed");
         return false;
     }
+
+    // set new runtime
+    JsiDeclarativeUtils::SetRuntime(runtime_);
+
     runtime_->SetEmbedderData(this);
     runtime_->RegisterUncaughtExceptionHandler(JsiDeclarativeUtils::ReportJsErrorEvent);
 
@@ -382,13 +391,13 @@ void JsiDeclarativeEngineInstance::InitAceModule()
     bool stateMgmtResult = runtime_->EvaluateJsCode(
         (uint8_t *)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
     if (!stateMgmtResult) {
-        JsiDeclarativeUtils::SetCurrentState(runtime_, JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
+        JsiDeclarativeUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
         LOGE("EvaluateJsCode stateMgmt failed");
     }
     bool jsEnumStyleResult = runtime_->EvaluateJsCode(
         (uint8_t *)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
     if (!jsEnumStyleResult) {
-        JsiDeclarativeUtils::SetCurrentState(runtime_, JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
+        JsiDeclarativeUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
         LOGE("EvaluateJsCode jsEnumStyle failed");
     }
 }
@@ -819,8 +828,7 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
 
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-    JsiDeclarativeUtils::SetCurrentState(
-        runtime, JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_, page->GetUrl(), page);
+    JsiDeclarativeUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_, page->GetUrl(), page);
 
     // get source map
     std::string jsSourceMap;
@@ -972,7 +980,7 @@ void JsiDeclarativeEngine::DestroyApplication(const std::string& packageName)
 {
     LOGI("JsiDeclarativeEngine DestroyApplication, packageName %{public}s", packageName.c_str());
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    JsiDeclarativeUtils::SetCurrentState(runtime, JsErrorType::DESTROY_APP_ERROR, instanceId_, "",
+    JsiDeclarativeUtils::SetCurrentState(JsErrorType::DESTROY_APP_ERROR, instanceId_, "",
         engineInstance_->GetStagingPage());
 
     CallAppFunc("onDestroy");

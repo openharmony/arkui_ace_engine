@@ -86,10 +86,6 @@ std::string JsiUtils::GenerateSummaryBody(std::shared_ptr<JsValue> error, int32_
         summaryBody.append("error uncaught: error is null");
         return summaryBody;
     }
-    if (!runtime_) {
-        summaryBody.append("error uncaught: runtime is null");
-        return summaryBody;
-    }
     if (!error->IsObject(runtime_) || error->IsNull(runtime_)) {
         std::string errorInfo = error->ToString(runtime_);
         summaryBody.append(errorInfo).append("\n");
@@ -153,18 +149,28 @@ void JsiUtils::JsiDumpSourceFile(std::string& stackStr)
     }
 }
 
-void JsiUtils::SetCurrentState(const std::shared_ptr<JsRuntime>& runtime, JsErrorType errorType, int32_t instanceId,
-    const std::string& pageUrl, const RefPtr<JsAcePage>& page)
+void JsiUtils::SetCurrentState(JsErrorType errorType, int32_t instanceId, const std::string& pageUrl,
+    const RefPtr<JsAcePage>& page)
 {
-    runtime_ = runtime;
     currentErrorType_ = errorType;
     instanceId_ = instanceId;
     pageUrl_ = pageUrl;
     page_ = page;
 }
 
+void JsiUtils::SetRuntime(const std::shared_ptr<JsRuntime>& runtime, const std::shared_ptr<JsRuntime>& oldRuntime)
+{
+    if (runtime_ == oldRuntime || oldRuntime == nullptr) {
+        runtime_ = runtime;
+    }
+}
+
 void JsiUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error)
 {
+    if (!runtime_) {
+        LOGI("ReportJsErrorEvent: jsi engine has been destroyed");
+        return;
+    }
     LOGI("ReportJsErrorEvent");
     std::string reasonStr = GetReason(currentErrorType_);
     std::string summaryBody = GenerateSummaryBody(error, instanceId_, pageUrl_);
