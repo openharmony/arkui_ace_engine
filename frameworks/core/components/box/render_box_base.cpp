@@ -478,11 +478,15 @@ void RenderBoxBase::CalculateSelfLayoutSize()
     } else {
         height = childSize_.Height() + padding_.GetLayoutSize().Height() + borderSize.Height();
     }
-    double minWidth = padding_.GetLayoutSize().Width() + borderSize.Width();
-    double minHeight = padding_.GetLayoutSize().Height() + borderSize.Height();
-    width = width > minWidth ? width : minWidth;
-    height = height > minHeight ? height : minHeight;
 
+    const static int32_t PLATFORM_VERSION_SIX = 6;
+    auto context = GetContext().Upgrade();
+    if (context && context->GetMinPlatformVersion() >= PLATFORM_VERSION_SIX) {
+        double minWidth = padding_.GetLayoutSize().Width() + borderSize.Width();
+        double minHeight = padding_.GetLayoutSize().Height() + borderSize.Height();
+        width = width > minWidth ? width : minWidth;
+        height = height > minHeight ? height : minHeight;
+    }
     // allow force layoutsize for parend
     if (layoutSetByParent.GetMaxSize().Width() == layoutSetByParent.GetMinSize().Width()) {
         width = layoutSetByParent.GetMinSize().Width();
@@ -492,19 +496,16 @@ void RenderBoxBase::CalculateSelfLayoutSize()
     }
     paintSize_ = Size(width, height);
 
-    // box layout size = paint size + margin size
-
-    if (LessNotEqual(margin_.LeftPx(), 0.0)) {
-        positionParam_.left = std::make_pair(margin_.Left(), true);
-        margin_.SetLeft(Dimension(0.0, margin_.Left().Unit()));
-    }
-    if (LessNotEqual(margin_.TopPx(), 0.0)) {
-        positionParam_.top = std::make_pair(margin_.Top(), true);
-        margin_.SetTop(Dimension(0.0, margin_.Top().Unit()));
-    }
-
-    auto context = context_.Upgrade();
-    if (context->GetIsDeclarative()) {
+    if (context && context->GetIsDeclarative()) {
+        // box layout size = paint size + margin size
+        if (LessNotEqual(margin_.LeftPx(), 0.0)) {
+            positionParam_.left = std::make_pair(margin_.Left(), true);
+            margin_.SetLeft(Dimension(0.0, margin_.Left().Unit()));
+        }
+        if (LessNotEqual(margin_.TopPx(), 0.0)) {
+            positionParam_.top = std::make_pair(margin_.Top(), true);
+            margin_.SetTop(Dimension(0.0, margin_.Top().Unit()));
+        }
         selfLayoutSize_ = paintSize_ + margin_.GetLayoutSize();
     } else {
         selfLayoutSize_ = GetLayoutParam().Constrain(paintSize_ + margin_.GetLayoutSize());
