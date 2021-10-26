@@ -22,7 +22,6 @@
 
 namespace OHOS::Ace::Framework {
 
-constexpr size_t  MAX_COUNT = 9;
 void JSDataPanel::JSBind(BindingTarget globalObj)
 {
     JSClass<JSDataPanel>::Declare("DataPanel");
@@ -45,30 +44,38 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         LOGE("toggle create error, info is non-valid");
         return;
     }
-
     RefPtr<PercentageDataPanelComponent> component =
         AceType::MakeRefPtr<PercentageDataPanelComponent>(ChartType::RAINBOW);
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto max = paramObject->GetProperty("max");
-    if (max->IsNumber()) {
-        component->SetMaxValue(max->ToNumber<double>());
+    auto param = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (!param || param->IsNull()) {
+        LOGE("JSDataPanel::Create param is null");
+        return;
     }
-
-    JSRef<JSArray> values = paramObject->GetProperty("values");
-    for(size_t i = 0; i < values->Length() && i < MAX_COUNT; ++i) {
-        if (!values->GetValueAt(i)->IsNumber()) {
+    // max
+    auto max = param->GetDouble("max", 100.0);
+    component->SetMaxValue(max);
+    // values
+    auto values = param->GetValue("values");
+    if (!values || !values->IsArray()) {
+        LOGE("JSDataPanel::Create values is not array");
+        return;
+    }
+    size_t length = values->GetArraySize();
+    for (size_t i = 0; i < length; i++) {
+        auto item = values->GetArrayItem(i);
+        if (!item || !item->IsNumber()) {
             LOGE("JSDataPanel::Create value is not number");
             return;
         }
-        double value = values->GetValueAt(i)->ToNumber<double>();
+        auto value = item->GetDouble();
         Segment segment;
         segment.SetValue(value);
         segment.SetColorType(SegmentStyleType::NONE);
         component->AppendSegment(segment);
     }
-    ViewStackProcessor::GetInstance()->Push(component);
     RefPtr<ThemeManager> dataPanelManager = AceType::MakeRefPtr<ThemeManager>();
     component->InitalStyle(dataPanelManager);
+    ViewStackProcessor::GetInstance()->Push(component);
 }
 
 void JSDataPanel::CloseEffect(const JSCallbackInfo& info)

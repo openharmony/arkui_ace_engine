@@ -536,7 +536,7 @@ void FlutterRenderPercentageDataPanel::Paint(RenderContext& context, const Offse
         arcData.endColor = segment.GetEndColor();
         arcData.progress = totalValue * animationPercent_;
         auto context = context_.Upgrade();
-        if (context->GetIsDeclarative()) {
+        if (context && context->GetIsDeclarative()) {
             if (useEffect_) {
                 PaintProgress(canvas, arcData);
             }
