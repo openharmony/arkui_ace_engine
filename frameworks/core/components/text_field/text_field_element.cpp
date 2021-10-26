@@ -200,12 +200,12 @@ void TextFieldElement::OnSurfaceChanged(int32_t width, int32_t height, int32_t o
     }
 }
 
-void TextFieldElement::CloseKeyboard()
+void TextFieldElement::CloseKeyboard(bool forceClose)
 {
     isRequestFocus_ = false;
     auto textField = DynamicCast<RenderTextField>(renderNode_);
     if (textField) {
-        if (textField->CloseKeyboard()) {
+        if (textField->CloseKeyboard(forceClose)) {
             editingMode_ = false;
         }
     }

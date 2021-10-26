@@ -144,16 +144,17 @@ public:
     }
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
-    void ShowDialog(const std::string& title, const std::string& message,
-        const std::vector<std::pair<std::string, std::string>>& buttons, bool autoCancel,
-        std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks) override;
+    void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
+        bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+        const std::set<std::string>& callbacks) override;
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) override {}
 
     void DisableAlertBeforeBackPage() override {}
 
-    void ShowActionMenu(const std::string& title, const std::vector<std::pair<std::string, std::string>>& button,
-        std::function<void(int32_t, int32_t)>&& callback) override {}
+    void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
+        std::function<void(int32_t, int32_t)>&& callback) override
+    {}
 
     Rect GetBoundingRectData(NodeId nodeId) override;
 

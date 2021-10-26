@@ -450,8 +450,13 @@ Size FlutterRenderTextField::Measure()
     if (paragraphTxt != nullptr) {
         auto textHeight = paragraphTxt->GetHeight();
         auto textLines = paragraphTxt->GetLineCount();
+        auto layoutParamChanged = lastLayoutParam_.value() == GetLayoutParam();
+        if (layoutParamChanged) {
+            lastLayoutParam_ = std::make_optional(GetLayoutParam());
+        }
+        bool needNotifyChangeEvent = !isValueFromFront_ || (isValueFromFront_ && layoutParamChanged);
         // If height or lines is changed, make needNotifyChangeEvent_ true to notify change event.
-        if (!NearEqual(textHeight_, textHeight) || textLines_ != textLines) {
+        if (needNotifyChangeEvent && (!NearEqual(textHeight_, textHeight) || textLines_ != textLines)) {
             needNotifyChangeEvent_ = true;
         }
         textHeight_ = textHeight;

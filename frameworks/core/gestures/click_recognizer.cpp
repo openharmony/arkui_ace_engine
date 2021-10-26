@@ -65,6 +65,8 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchPoint& event)
     // the gesture will be rejected when one of them touch up.
     if (pointsCount_ == fingers_) {
         pointsCount_++;
+        LOGE("number of fingers put on the screen more than %{public}d, current fingers is %{public}d",
+            fingers_, pointsCount_);
         return;
     }
 
@@ -79,6 +81,9 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchPoint& event)
             // waiting for multi-finger press
             DeadlineTimer(fingerDeadlineTimer_, MULTI_FINGER_TIMEOUT);
         }
+    } else {
+        LOGE("the state of click recognizer is not ready to recieve touch down event, "
+             "state is %{public}d, id is %{public}d", state_, event.id);
     }
 
     if (pointsCount_ == fingers_) {

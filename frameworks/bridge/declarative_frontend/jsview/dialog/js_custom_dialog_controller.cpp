@@ -94,6 +94,12 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.offset = DimensionOffset(dx, dy);
         }
 
+        // Parses gridCount.
+        auto gridCountValue = constructorArg->GetProperty("gridCount");
+        if (gridCountValue->IsNumber()) {
+            instance->dialogProperties_.gridCount = gridCountValue->ToNumber<int32_t>();
+        }
+
         info.SetReturnValue(instance);
     } else {
         LOGE("JSView creation with invalid arguments.");

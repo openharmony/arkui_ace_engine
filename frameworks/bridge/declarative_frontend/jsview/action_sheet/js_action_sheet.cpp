@@ -132,7 +132,11 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         JSRef<JSVal> value = confirmObj->GetProperty("value");
         std::string buttonValue;
         if (ParseJsString(value, buttonValue)) {
-            properties.buttons.emplace_back(buttonValue, "");
+            ButtonInfo buttonInfo = {
+                .text = buttonValue,
+                .textColor = ""
+            };
+            properties.buttons.emplace_back(buttonInfo);
             JSRef<JSVal> actionValue = confirmObj->GetProperty("action");
             if (actionValue->IsFunction()) {
                 auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
@@ -176,6 +180,12 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         auto dyValue = offsetObj->GetProperty("dy");
         ParseJsDimensionVp(dyValue, dy);
         properties.offset = DimensionOffset(dx, dy);
+    }
+
+    // Parses gridCount.
+    auto gridCountValue = obj->GetProperty("gridCount");
+    if (gridCountValue->IsNumber()) {
+        properties.gridCount = gridCountValue->ToNumber<int32_t>();
     }
 
     // Show ActionSheet.

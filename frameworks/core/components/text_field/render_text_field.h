@@ -352,12 +352,13 @@ protected:
     DirectionStatus directionStatus_ = DirectionStatus::LEFT_LEFT;
 
     bool showPasswordIcon_ = true; // Whether show password icon, effect only type is password.
-    bool showCounter_ = false; // Whether show counter, 10/100 means maxlength is 100 and 10 has inputed.
+    bool showCounter_ = false; // Whether show counter, 10/100 means maxlength is 100 and 10 has been inputted.
     bool overCount_ = false;   // Whether count of text is over limit.
     bool obscure_ = false;     // Obscure the text, for example, password.
     bool enabled_ = true;      // Whether input is disable of enable.
     bool needFade_ = false;    // Fade in/out text when overflow.
     bool blockRightShade_ = false;
+    bool isValueFromFront_ = false;           // Is value from developer-set.
     bool isValueFromRemote_ = false;          // Remote value coming form typing, other is from clopboard.
     bool existStrongDirectionLetter_ = false; // Whether exist strong direction letter in text.
     bool isVisible_ = true;
@@ -378,6 +379,7 @@ protected:
     Dimension iconSizeInDimension_;
     Dimension iconHotZoneSizeInDimension_;
     Dimension widthReserved_;
+    std::optional<LayoutParam> lastLayoutParam_ = std::nullopt;
     std::optional<Color> imageFill_ = std::nullopt;
     std::string iconSrc_;
     std::string showIconSrc_;

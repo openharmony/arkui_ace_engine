@@ -247,6 +247,16 @@ public:
         return offset_;
     }
 
+    void SetGridCount(int32_t gridCount)
+    {
+        gridCount_ = gridCount;
+    }
+
+    int32_t GetGridCount() const
+    {
+        return gridCount_;
+    }
+
 private:
     bool autoCancel_ = true;
     RefPtr<Animator> animator_;
@@ -263,6 +273,7 @@ private:
     int32_t customDialogId_ = -1;
     // Used when pop dialog.
     int32_t dialogId_ = -1;
+    int32_t gridCount_ = 0;
     std::string data_;
     std::function<void(bool)> onStatusChanged_;
 

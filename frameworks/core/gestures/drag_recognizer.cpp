@@ -100,7 +100,8 @@ void DragRecognizer::HandleTouchDownEvent(const TouchPoint& event)
         dragInfo.velocityTracker_.UpdateTouchPoint(event);
         dragInfo.states_ = DetectState::DETECTING;
     } else {
-        LOGE("the state is not ready to receive touch down event");
+        LOGE("the state is not ready to receive touch down event, state is %{public}d, id is %{public}d",
+            dragInfo.states_, event.id);
     }
 }
 
@@ -144,7 +145,7 @@ void DragRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
             GestureReferee::GetInstance().Adjudicate(event.id, AceType::Claim(this), GestureDisposal::ACCEPT);
         }
     } else {
-        LOGD("state is ready, need to use touch down event to trigger");
+        LOGD("state is ready, need to use touch down event to trigger, state is %{public}d", dragInfo.states_);
     }
 }
 
