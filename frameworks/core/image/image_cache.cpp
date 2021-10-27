@@ -77,6 +77,24 @@ T ImageCache::GetCacheObjWithCountLimitLRU(
     }
 }
 
+bool ImageCache::GetFromCacheFile(const std::string& filePath)
+{
+    std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
+    return GetFromCacheFileInner(filePath);
+}
+
+bool ImageCache::GetFromCacheFileInner(const std::string& filePath)
+{
+    std::list<FileInfo>::iterator iter = std::find_if(cacheFileInfo_.begin(), cacheFileInfo_.end(),
+        [&filePath](const FileInfo& fileInfo) { return fileInfo.filePath == filePath; });
+    if (iter == cacheFileInfo_.end()) {
+        return false;
+    }
+    iter->accessTime = time(nullptr);
+    cacheFileInfo_.splice(cacheFileInfo_.end(), cacheFileInfo_, iter);
+    return true;
+}
+
 void ImageCache::CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image)
 {
     if (key.empty() || capacity_ == 0) {
@@ -173,6 +191,14 @@ void ImageCache::WriteCacheFile(const std::string& url, const void * const data,
     std::vector<std::string> removeVector;
     std::string cacheNetworkFilePath = GetImageCacheFilePath(url);
 
+    std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
+    // 1. first check if file has been cached.
+    if (ImageCache::GetFromCacheFileInner(cacheNetworkFilePath)) {
+        LOGI("file has been wrote %{private}s", cacheNetworkFilePath.c_str());
+        return;
+    }
+
+    // 2. if not in dist, write file into disk.
 #ifdef WINDOWS_PLATFORM
     std::ofstream outFile(cacheNetworkFilePath, std::ios::binary);
 #else
@@ -180,26 +206,24 @@ void ImageCache::WriteCacheFile(const std::string& url, const void * const data,
 #endif
     outFile.write(reinterpret_cast<const char*>(data), size);
 
-    {
-        std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
-        cacheFileSize_ += size;
-        cacheFileInfo_.emplace_back(cacheNetworkFilePath, size, time(nullptr));
-        // check if cache files too big.
-        if (cacheFileSize_ > static_cast<int32_t>(cacheFileLimit_)) {
-            int32_t removeCount = cacheFileInfo_.size() * clearCacheFileRatio_;
-            int32_t removeSize = 0;
-            auto iter = cacheFileInfo_.begin();
-            int32_t count = 0;
-            while (count < removeCount) {
-                removeSize += iter->fileSize;
-                removeVector.push_back(iter->filePath);
-                iter++;
-                count++;
-            }
-            cacheFileInfo_.erase(cacheFileInfo_.begin(), iter);
-            cacheFileSize_ -= removeSize;
+    cacheFileSize_ += size;
+    cacheFileInfo_.emplace_back(cacheNetworkFilePath, size, time(nullptr));
+    // check if cache files too big.
+    if (cacheFileSize_ > static_cast<int32_t>(cacheFileLimit_)) {
+        int32_t removeCount = cacheFileInfo_.size() * clearCacheFileRatio_;
+        int32_t removeSize = 0;
+        auto iter = cacheFileInfo_.begin();
+        int32_t count = 0;
+        while (count < removeCount) {
+            removeSize += iter->fileSize;
+            removeVector.push_back(iter->filePath);
+            iter++;
+            count++;
         }
+        cacheFileInfo_.erase(cacheFileInfo_.begin(), iter);
+        cacheFileSize_ -= removeSize;
     }
+    // 3. clear files removed from cache list.
     ClearCacheFile(removeVector);
 }
 
