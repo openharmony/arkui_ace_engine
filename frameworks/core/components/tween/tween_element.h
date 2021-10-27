@@ -41,6 +41,7 @@ public:
     void Update() override;
     bool CanUpdate(const RefPtr<Component>& newComponent) override;
     void OnPostFlush() override;
+    void OnPostAnimationFlush() override;
     void OnPreFlush() override;
     bool ApplyKeyframes();
     void ApplyOptions();

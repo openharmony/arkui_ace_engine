@@ -27,6 +27,9 @@ public:
     // Will be called before flush every vsync.
     virtual void OnPreFlush() {};
 
+    // Will be called after flush build in every vsync.
+    virtual void OnPostAnimationFlush() {};
+
     // Will be called after flush every vsync.
     virtual void OnPostFlush() = 0;
 };
