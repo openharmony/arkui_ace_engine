@@ -584,12 +584,15 @@ const char DOM_VISIBILITY_CHANGE[] = "visibilitychange";
 
 // progress attribute and style constants
 const char DOM_PROGRESS_COLOR[] = "color";
+const char DOM_PROGRESS_DIAMETER[] = "diameter";
+const char DOM_PROGRESS_BUBBLE_RADIUS[] = "bubbleRadius";
 const char DOM_PROGRESS_SECONDARY_COLOR[] = "secondaryColor";
 const char DOM_PROGRESS_BACKGROUND_COLOR[] = "backgroundColor";
 const char DOM_PROGRESS_STROKE_WIDTH[] = "strokeWidth";
 const char DOM_PROGRESS_TYPE[] = "type";
 const char DOM_PROGRESS_TYPE_HORIZONTAL[] = "horizontal";
 const char DOM_PROGRESS_TYPE_CIRCULAR[] = "circular";
+const char DOM_PROGRESS_TYPE_BUBBLE[] = "bubble";
 const char DOM_PROGRESS_TYPE_RING[] = "ring";
 const char DOM_PROGRESS_TYPE_SCALE[] = "scale-ring";
 const char DOM_PROGRESS_TYPE_MOON[] = "eclipse";

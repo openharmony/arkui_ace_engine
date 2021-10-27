@@ -588,12 +588,15 @@ ACE_EXPORT extern const char DOM_VISIBILITY_CHANGE[];
 
 // progress attribute and style constants
 ACE_EXPORT extern const char DOM_PROGRESS_COLOR[];
+ACE_EXPORT extern const char DOM_PROGRESS_DIAMETER[];
+ACE_EXPORT extern const char DOM_PROGRESS_BUBBLE_RADIUS[];
 ACE_EXPORT extern const char DOM_PROGRESS_SECONDARY_COLOR[];
 ACE_EXPORT extern const char DOM_PROGRESS_BACKGROUND_COLOR[];
 ACE_EXPORT extern const char DOM_PROGRESS_STROKE_WIDTH[];
 ACE_EXPORT extern const char DOM_PROGRESS_TYPE[];
 ACE_EXPORT extern const char DOM_PROGRESS_TYPE_HORIZONTAL[];
 ACE_EXPORT extern const char DOM_PROGRESS_TYPE_CIRCULAR[];
+ACE_EXPORT extern const char DOM_PROGRESS_TYPE_BUBBLE[];
 ACE_EXPORT extern const char DOM_PROGRESS_TYPE_MOON[];
 ACE_EXPORT extern const char DOM_PROGRESS_TYPE_RING[];
 ACE_EXPORT extern const char DOM_PROGRESS_TYPE_SCALE[];
