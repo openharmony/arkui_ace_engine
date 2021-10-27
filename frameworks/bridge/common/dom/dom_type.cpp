@@ -471,6 +471,7 @@ const char DOM_LIST_ITEM_OPACITY[] = "itemopacity";
 const char DOM_LIST_ITEM_CENTER[] = "itemcenter";
 const char DOM_LIST_CENTER_LAYOUT[] = "centerlayout";
 const char DOM_LIST_SCROLL_VIBRATE[] = "scrollvibrate";
+const char DOM_LIST_ROTATION_VIBRATE[] = "rotationvibrate";
 const char DOM_LIST_DIVIDER[] = "divider";
 const char DOM_LIST_DIVIDER_COLOR[] = "dividerColor";
 const char DOM_LIST_DIVIDER_HEIGHT[] = "dividerHeight";

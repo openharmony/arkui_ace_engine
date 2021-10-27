@@ -119,6 +119,10 @@ bool DOMList::SetSpecializedAttr(const std::pair<std::string, std::string>& attr
             [](DOMList& list, const std::string& val) { list.repeatedLength_ = StringUtils::StringToInt(val); },
         },
         {
+            DOM_LIST_ROTATION_VIBRATE,
+            [](DOMList& list, const std::string& val) { list.rotationVibrate_ = StringToBool(val); },
+        },
+        {
             DOM_SCROLL_SCROLLBAR,
             [](DOMList& list, const std::string& val) {
                 if (val == DOM_SCROLL_SCROLLBAR_ON) {
@@ -309,6 +313,7 @@ void DOMList::CreateOrUpdateList()
     }
 
     listComponent_->SetScrollVibrate(scrollVibrate_);
+    listComponent_->MarkNeedRotationVibrate(rotationVibrate_);
 
     listComponent_->SetDirection(flexDirection_);
     if (flexDirection_ == FlexDirection::COLUMN || flexDirection_ == FlexDirection::COLUMN_REVERSE) {

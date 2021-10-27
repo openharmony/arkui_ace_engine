@@ -137,6 +137,11 @@ void ListWatchLayoutManager::SetChildPosition(const RefPtr<RenderNode>& child, i
 
 void ListWatchLayoutManager::HandleItemStateAndEffect()
 {
+    auto isFromRotate = false;
+    auto parentScroll = AceType::DynamicCast<RenderScroll>(renderList_.GetParent().Upgrade());
+    if (parentScroll) {
+        isFromRotate = parentScroll->IsFromRotate();
+    }
     RefPtr<RenderListItem> listItem;
     for (const auto& item : renderList_.GetItems()) {
         if (!item.second || item.second->GetChildren().empty()) {
@@ -153,7 +158,7 @@ void ListWatchLayoutManager::HandleItemStateAndEffect()
             (centerIndex == INVALID_INDEX && index == renderList_.GetCurrentMaxIndex())) {
             listItem->SetCurrentState(ItemState::NEARBY);
         }
-        listItem->HandleItemEffect();
+        listItem->HandleItemEffect(isFromRotate);
     }
 }
 

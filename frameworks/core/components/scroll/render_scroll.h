@@ -195,6 +195,16 @@ public:
     virtual bool HandleCrashTop();
     virtual bool HandleCrashBottom();
 
+    void SetIsFromRotate(bool isRotate)
+    {
+        isFromRotate_ = isRotate;
+    }
+
+    bool IsFromRotate()
+    {
+        return isFromRotate_;
+    }
+
 protected:
     explicit RenderScroll();
 
@@ -221,6 +231,7 @@ protected:
     double estimatedHeight_ = 0.0;
     double moveDistance_ = 0.0;
     bool scrollPage_ = false;
+    bool isFromRotate_ = false;
     RefPtr<ScrollPositionController> positionController_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<Scrollable> scrollable_;

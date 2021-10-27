@@ -128,6 +128,7 @@ private:
     double effectOffset_ = 0.0;
     double accumulatedRotationValue_ = 0.0;
     bool scrollVibrate_ = true;
+    bool rotationVibrate_ = false;
 
     RefPtr<Animator> animateController_;
     RefPtr<Vibrator> vibrator_;

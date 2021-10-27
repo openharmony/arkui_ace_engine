@@ -290,7 +290,10 @@ void DOMListItem::OnMounted(const RefPtr<DOMNode>& parentNode)
         if (listItemComponent_ && parentNodeTmp) {
             listItemComponent_->SetSupportScale(parentNodeTmp->GetItemScale());
             listItemComponent_->SetSupportOpacity(parentNodeTmp->GetItemOpacity());
+            // NeedVibrate means scroll and rotation all trigger vibrate.
+            // RotationVibrate means only rotation trigger vibrate.
             listItemComponent_->MarkNeedVibrate(parentNodeTmp->NeedVibrate());
+            listItemComponent_->MarkNeedRotationVibrate(parentNodeTmp->NeedRotationVibrate());
             SetDividerStyle(parentNode);
         }
     } else if (parentNode->GetTag() == DOM_NODE_TAG_LIST_ITEM_GROUP) {
