@@ -162,18 +162,7 @@ public:
         clearCacheFileRatio_ = clearRatio;
     }
 
-    static bool GetFromCacheFile(const std::string& filePath)
-    {
-        std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
-        std::list<FileInfo>::iterator iter = std::find_if(cacheFileInfo_.begin(), cacheFileInfo_.end(),
-            [&filePath](const FileInfo& fileInfo) { return fileInfo.filePath == filePath; });
-        if (iter == cacheFileInfo_.end()) {
-            return false;
-        }
-        iter->accessTime = time(nullptr);
-        cacheFileInfo_.splice(cacheFileInfo_.end(), cacheFileInfo_, iter);
-        return true;
-    }
+    static bool GetFromCacheFile(const std::string& filePath);
 
     virtual void Clear() = 0;
 
@@ -195,6 +184,8 @@ protected:
         const std::string& key,
         std::list<CacheNode<T>>& cacheList,
         std::unordered_map<std::string, typename std::list<CacheNode<T>>::iterator>& cache);
+
+    static bool GetFromCacheFileInner(const std::string& filePath);
 
     bool processImageDataCacheInner(size_t dataSize);
 
