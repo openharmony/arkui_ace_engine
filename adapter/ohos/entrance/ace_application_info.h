@@ -54,25 +54,9 @@ public:
         resourceManager_ = resourceManager;
     }
 
-    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager()
-    {
-        return resourceManager_;
-    }
-
-    void SetPackagePathStr(std::string& packagePathStr)
-    {
-        packagePathStr_ = packagePathStr;
-    }
-
-    std::string GetPackagePathStr()
-    {
-        return packagePathStr_;
-    }
-
 private:
     std::map<std::string, std::string> jsEngineParams_;
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_;
-    std::string packagePathStr_;
 };
 
 } // namespace OHOS::Ace::Platform

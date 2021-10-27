@@ -29,6 +29,7 @@ public:
     ~ResourceAdapterImpl() override = default;
 
     void Init(const ResourceInfo& resourceInfo) override;
+    void UpdateConfig(const ResourceConfiguration& config) override;
 
     Color GetColor(uint32_t resId) override;
     Dimension GetDimension(uint32_t resId) override;
@@ -44,6 +45,7 @@ public:
 
 private:
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_;
+    std::string packagePathStr_;
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImpl);
 };
 

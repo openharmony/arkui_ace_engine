@@ -15,11 +15,78 @@
 
 #include "adapter/ohos/osal/resource_adapter_impl.h"
 
-#include "adapter/ohos/entrance/ace_application_info.h"
+#include "core/common/ace_application_info.h"
 #include "base/utils/system_properties.h"
+#include "resource_manager.h"
 #include "rstate.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr double DPI_BASE = 160.0;
+Global::Resource::DeviceType ConvertDeviceType(DeviceType type)
+{
+    // TODO: check device type WEARABLE / PC 
+    switch (type) {
+        case DeviceType::PHONE:
+            return Global::Resource::DeviceType::DEVICE_PHONE;
+        case DeviceType::TV:
+            return Global::Resource::DeviceType::DEVICE_TV;
+        case DeviceType::WATCH:
+            return Global::Resource::DeviceType::DEVICE_WEARABLE; // CHECK
+        case DeviceType::CAR:
+            return Global::Resource::DeviceType::DEVICE_CAR;
+        case DeviceType::TABLET:
+            return Global::Resource::DeviceType::DEVICE_TABLET;
+        default:
+            return Global::Resource::DeviceType::DEVICE_NOT_SET;
+    }
+}
+
+Global::Resource::Direction ConvertDirection(DeviceOrientation orientation)
+{
+    switch (orientation) {
+        case DeviceOrientation::PORTRAIT:
+            return Global::Resource::Direction::DIRECTION_VERTICAL;
+        case DeviceOrientation::LANDSCAPE:
+            return Global::Resource::Direction::DIRECTION_HORIZONTAL;
+        default:
+            return Global::Resource::Direction::DIRECTION_NOT_SET;
+    }
+}
+
+Global::Resource::ScreenDensity ConvertDensity(double density)
+{
+    static const std::vector<std::pair<double, Global::Resource::ScreenDensity>> resolutions = {
+        { 0.0, Global::Resource::ScreenDensity::SCREEN_DENSITY_NOT_SET },
+        { 120.0, Global::Resource::ScreenDensity::SCREEN_DENSITY_SDPI },
+        { 160.0, Global::Resource::ScreenDensity::SCREEN_DENSITY_MDPI },
+        { 240.0, Global::Resource::ScreenDensity::SCREEN_DENSITY_LDPI },
+        { 320.0, Global::Resource::ScreenDensity::SCREEN_DENSITY_XLDPI },
+        { 480.0, Global::Resource::ScreenDensity::SCREEN_DENSITY_XXLDPI },
+        { 640.0, Global::Resource::ScreenDensity::SCREEN_DENSITY_XXXLDPI },
+    };
+    double deviceDpi = density * DPI_BASE;
+    auto resolution = Global::Resource::ScreenDensity::SCREEN_DENSITY_NOT_SET;
+    for (const auto& [dpi, value] : resolutions) {
+        resolution = value;
+        if (LessOrEqual(deviceDpi, dpi)) {
+            break;
+        }
+    }
+    return resolution;
+}
+
+std::shared_ptr<Global::Resource::ResConfig> ConvertConfig(const ResourceConfiguration& config)
+{
+    std::shared_ptr<Global::Resource::ResConfig> newResCfg(Global::Resource::CreateResConfig());
+    newResCfg->SetLocaleInfo(AceApplicationInfo::GetInstance().GetLanguage().c_str(), 
+        AceApplicationInfo::GetInstance().GetScript().c_str(), AceApplicationInfo::GetInstance().GetCountryOrRegion().c_str());
+    newResCfg->SetDeviceType(ConvertDeviceType(config.GetDeviceType()));
+    newResCfg->SetDirection(ConvertDirection(config.GetOrientation()));
+    newResCfg->SetScreenDensity(ConvertDensity(config.GetDensity()));
+    return newResCfg;
+}
+} // namespace
 
 RefPtr<ResourceAdapter> ResourceAdapter::Create()
 {
@@ -32,7 +99,24 @@ RefPtr<ResourceAdapter> ResourceAdapter::Create()
 
 void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 {
-    resourceManager_ = Platform::AceApplicationInfoImpl::GetInstance().GetResourceManager();
+    std::string resPath = resourceInfo.GetPackagePath();
+    auto resConfig = ConvertConfig(resourceInfo.GetResourceConfiguration());
+    std::shared_ptr<Global::Resource::ResourceManager> newResMgr(Global::Resource::CreateResourceManager());
+    std::string resIndxPath = resPath + "resources.index";
+    auto resRet = newResMgr->AddResource(resIndxPath.c_str());
+    auto configRet = newResMgr->UpdateResConfig(*resConfig);
+    LOGI("AddResource result=%{public}d, UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}d, device=%{public}d",
+        resRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType());
+    resourceManager_ = newResMgr;
+    packagePathStr_ = resPath;
+}
+
+void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
+{
+    auto resConfig = ConvertConfig(config);
+    LOGI("UpdateConfig ori=%{public}d, dpi=%{public}d, device=%{public}d",
+        resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType());
+    resourceManager_->UpdateResConfig(*resConfig);
 }
 
 Color ResourceAdapterImpl::GetColor(uint32_t resId)
@@ -162,8 +246,7 @@ std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
 
 std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
 {
-    auto packagePathStr = Platform::AceApplicationInfoImpl::GetInstance().GetPackagePathStr();
-    return "file:///" + packagePathStr + "/assets/entry/resources/rawfile/" + fileName;
+    return "file:///" + packagePathStr_ + "resources/rawfile/" + fileName;
 }
 
 } // namespace OHOS::Ace
