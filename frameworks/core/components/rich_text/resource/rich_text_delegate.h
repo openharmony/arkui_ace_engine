@@ -31,7 +31,7 @@ public:
     using CreatedCallback = std::function<void()>;
     using ReleasedCallback = std::function<void(bool)>;
     using EventCallback = std::function<void(const std::string&)>;
-    using UpdateWebViewLayoutCallback = std::function<void(int32_t, int32_t)>;
+    using UpdateWebViewLayoutCallback = std::function<void(int32_t, int32_t, int32_t)>;
     enum class State: char {
         WAITINGFORSIZE,
         CREATING,
@@ -60,6 +60,7 @@ public:
     void AddWebLayoutChangeCallback(const UpdateWebViewLayoutCallback& layoutChangeCallback);
     void UpdateRichTextData(const std::string& data);
     void UpdateWebPostion(const int32_t top, const int32_t left);
+    void UpdateContentScroll(const int32_t x, const int32_t y);
     void ChangeRichTextVisibility(const bool visible);
     void HideRichText();
 

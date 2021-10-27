@@ -47,7 +47,7 @@ RefPtr<RenderNode> RichTextComponent::CreateRenderNode()
     auto renderRichText = AceType::DynamicCast<RenderRichText>(renderNode);
 
     delegate_->AddWebLayoutChangeCallback(
-        [renderRichText, weak = WeakClaim(this)](int32_t width, int32_t height) {
+        [renderRichText, weak = WeakClaim(this)](int32_t width, int32_t height, int32_t contentHeight) {
             if (!renderRichText) {
                 LOGE("renderRichText is null");
                 return;
@@ -60,10 +60,10 @@ RefPtr<RenderNode> RichTextComponent::CreateRenderNode()
             auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(),
                 TaskExecutor::TaskType::UI);
             auto weakRender = AceType::WeakClaim(AceType::RawPtr(renderRichText));
-            uiTaskExecutor.PostTask([weakRender, width, height] {
+            uiTaskExecutor.PostTask([weakRender, width, height, contentHeight] {
                 auto renderRichText = weakRender.Upgrade();
                 if (renderRichText) {
-                    renderRichText->UpdateLayoutParams(width, height);
+                    renderRichText->UpdateLayoutParams(width, height, contentHeight);
                 }
             });
     });

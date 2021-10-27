@@ -29,7 +29,7 @@ class RenderRichText : public RenderNode {
 public:
     static RefPtr<RenderNode> Create();
 
-    RenderRichText() : RenderNode(true) {}
+    RenderRichText();
     ~RenderRichText() override = default;
 
     void Update(const RefPtr<Component>& component) override;
@@ -37,14 +37,17 @@ public:
     void MarkNeedRender(bool overlay = false);
     void OnGlobalPositionChanged() override;
 
-    void UpdateLayoutParams(const int32_t width, const int32_t height);
+    void UpdateLayoutParams(const int32_t width, const int32_t height, const int32_t contentHeight);
     void SetDelegate(const RefPtr<RichTextDelegate>& delegate)
     {
         delegate_ = delegate;
     }
+    void OnTouchTestHit(
+        const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
 private:
     void CreateRealWeb(int32_t top, int32_t left, bool visible, bool reCreate = false);
+    void PorcessMove(double posY);
 
 protected:
     RefPtr<RichTextDelegate> delegate_;
@@ -56,6 +59,13 @@ private:
     bool hasCreateWeb_ = false;
     bool isVisible_ = true;
     bool initPositionSet_ = false;
+    RefPtr<RawRecognizer> touchRecognizer_;
+    RefPtr<DragRecognizer> dragRecognizer_;
+    bool canSelfScroll_ = false;
+    bool startSelfScroll_ = true;
+    double prevPos_ = 0.0f;
+    int32_t couldScrollLength_ = 0;
+    int32_t currentScrollLength_ = 0;
 };
 
 } // namespace OHOS::Ace

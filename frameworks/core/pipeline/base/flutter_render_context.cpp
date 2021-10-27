@@ -73,7 +73,6 @@ void FlutterRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Off
             if (child->NeedRender()) {
                 FlutterRenderContext context;
                 context.Repaint(child);
-                LOGE("form  PaintChild  3");
             } else {
                 // No need to repaint, notify to update AccessibilityNode info.
                 child->NotifyPaintFinish();
