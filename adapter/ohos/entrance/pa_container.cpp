@@ -113,7 +113,7 @@ bool PaContainer::RunPa(int32_t instanceId, const std::string& content, const OH
         LOGE("PA: paBackend is nuill");
         return false;
     }
-    // paBackend->RunPa(content, want);
+    paBackend->RunPa(content, want);
     LOGI("PA: PaContainer::RunPa end");
     return true;
 }
@@ -136,7 +136,7 @@ bool PaContainer::OnDelete(int32_t formId)
         LOGE("PA: paBackend is nuill");
         return false;
     }
-    // paBackend->OnDelete(formId);
+    paBackend->OnDelete(formId);
     LOGI("PA: PaContainer::OnDelete end");
     return true;
 }
@@ -159,7 +159,7 @@ bool PaContainer::OnTriggerEvent(int32_t formId, const std::string& message)
         LOGE("PA: paBackend is nuill");
         return false;
     }
-    // paBackend->OnTriggerEvent(formId, message);
+    paBackend->OnTriggerEvent(formId, message);
     LOGI("PA: PaContainer::OnTriggerEvent end");
     return true;
 }
@@ -182,7 +182,7 @@ bool PaContainer::OnUpdate(int32_t formId)
         LOGE("PA: paBackend is nuill");
         return false;
     }
-    // paBackend->OnUpdate(formId);
+    paBackend->OnUpdate(formId);
     LOGI("PA: PaContainer::OnUpdate end");
     return true;
 }
@@ -205,7 +205,7 @@ bool PaContainer::OnCastTemptoNormal(int32_t formId)
         LOGE("PA: paBackend is nuill");
         return false;
     }
-    // paBackend->OnCastTemptoNormal(formId);
+    paBackend->OnCastTemptoNormal(formId);
     LOGI("PA: PaContainer::OnCastTemptoNormal end");
     return true;
 }
@@ -228,7 +228,7 @@ bool PaContainer::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEven
         LOGE("PA: paBackend is nuill");
         return false;
     }
-    // paBackend->OnVisibilityChanged(formEventsMap);
+    paBackend->OnVisibilityChanged(formEventsMap);
     LOGI("PA: PaContainer::OnVisibilityChanged end");
     return true;
 }
@@ -251,7 +251,7 @@ bool PaContainer::OnAcquireState(const OHOS::AAFwk::Want& want)
         LOGE("PA: paBackend is nuill");
         return false;
     }
-    // paBackend->OnAcquireState(want);
+    paBackend->OnAcquireState(want);
     LOGI("PA: PaContainer::OnAcquireState end");
     return true;
 }
@@ -274,8 +274,7 @@ AppExecFwk::FormProviderData PaContainer::GetFormData(int32_t formId)
         LOGE("PA: paBackend is nuill");
         return AppExecFwk::FormProviderData();
     }
-    // return paBackend->GetFormData();
-    return AppExecFwk::FormProviderData();
+    return paBackend->GetFormData();
 }
 
 void PaContainer::DestroyContainer(int32_t instanceId)
@@ -333,9 +332,9 @@ int32_t PaContainer::Insert(int32_t instanceId, const Uri& uri, const OHOS::Nati
         return ret;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
-    auto back = aceContainer->GetBackend();
+    auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (back) {
-        // ret = back->Insert(uri, value);
+        ret = back->Insert(uri, value);
     }
     return ret;
 }
@@ -351,9 +350,9 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> PaContainer::Query(int32_t 
         return ret;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
-    auto back = aceContainer->GetBackend();
+    auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (back) {
-        // ret = back->Query(uri, columns, predicates);
+        ret = back->Query(uri, columns, predicates);
     }
     return ret;
 }
@@ -369,9 +368,9 @@ int32_t PaContainer::Update(int32_t instanceId, const Uri& uri, const OHOS::Nati
         return ret;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
-    auto back = aceContainer->GetBackend();
+    auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (back) {
-        // ret = back->Update(uri, value, predicates);
+        ret = back->Update(uri, value, predicates);
     }
     return ret;
 }
@@ -387,9 +386,9 @@ int32_t PaContainer::Delete(
         return ret;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
-    auto back = aceContainer->GetBackend();
+    auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (back) {
-        // ret = back->Delete(uri, predicates);
+        ret = back->Delete(uri, predicates);
     }
     return ret;
 }
@@ -405,9 +404,9 @@ int32_t PaContainer::BatchInsert(
         return ret;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
-    auto back = aceContainer->GetBackend();
+    auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (back) {
-        // ret = back->BatchInsert(uri, values);
+        ret = back->BatchInsert(uri, values);
     }
     return ret;
 }
@@ -422,9 +421,9 @@ std::string PaContainer::GetType(int32_t instanceId, const Uri& uri)
         return ret;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
-    auto back = aceContainer->GetBackend();
+    auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (back) {
-        // ret = back->GetType(uri);
+        ret = back->GetType(uri);
     }
     return ret;
 }
@@ -440,9 +439,9 @@ std::vector<std::string> PaContainer::GetFileTypes(
         return ret;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
-    auto back = aceContainer->GetBackend();
+    auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (back) {
-        // ret = back->GetFileTypes(uri, mimeTypeFilter);
+        ret = back->GetFileTypes(uri, mimeTypeFilter);
     }
     return ret;
 }
@@ -457,9 +456,9 @@ int32_t PaContainer::OpenFile(int32_t instanceId, const Uri& uri, const std::str
         return ret;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
-    auto back = aceContainer->GetBackend();
+    auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (back) {
-        // ret = back->OpenFile(uri, mode);
+        ret = back->OpenFile(uri, mode);
     }
     return ret;
 }
@@ -474,9 +473,9 @@ int32_t PaContainer::OpenRawFile(int32_t instanceId, const Uri& uri, const std::
         return ret;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
-    auto back = aceContainer->GetBackend();
+    auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (back) {
-        // ret = back->OpenRawFile(uri, mode);
+        ret = back->OpenRawFile(uri, mode);
     }
     return ret;
 }
@@ -491,9 +490,9 @@ Uri PaContainer::NormalizeUri(int32_t instanceId, const Uri& uri)
         return ret;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
-    auto back = aceContainer->GetBackend();
+    auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (back) {
-        // ret = back->NormalizeUri(uri);
+        ret = back->NormalizeUri(uri);
     }
     return ret;
 }
@@ -508,9 +507,9 @@ Uri PaContainer::DenormalizeUri(int32_t instanceId, const Uri& uri)
         return ret;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
-    auto back = aceContainer->GetBackend();
+    auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (back) {
-        // ret = back->DenormalizeUri(uri);
+        ret = back->DenormalizeUri(uri);
     }
     return ret;
 }
@@ -547,7 +546,7 @@ sptr<IRemoteObject> PaContainer::OnConnect(int32_t instanceId, const OHOS::AAFwk
             LOGE("DynamicCast paBackend failed with id %{private}d", instanceId);
             return nullptr;
         }
-        // return paBackend->OnConnect(want);
+        return paBackend->OnConnect(want);
     }
     return nullptr;
 }
@@ -568,7 +567,7 @@ void PaContainer::OnDisConnect(int32_t instanceId, const OHOS::AAFwk::Want& want
             LOGE("DynamicCast paBackend failed with id %{private}d", instanceId);
             return;
         }
-        // paBackend->OnDisConnect(want);
+        paBackend->OnDisConnect(want);
     }
 }
 

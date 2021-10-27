@@ -90,7 +90,7 @@ template("make_skia_deps") {
         "shared_library:libhwui",
       ]
 
-      sources = [ "//third_party/aosp/external/skia/src/utils/SkParsePath.cpp" ]
+      sources = [ "$flutter_root/skia/src/utils/SkParsePath.cpp" ]
     } else {
       public_configs = [
         ":skia_config",

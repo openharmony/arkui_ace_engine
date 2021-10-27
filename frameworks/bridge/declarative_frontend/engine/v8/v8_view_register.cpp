@@ -510,7 +510,6 @@ void SetAppBackgroundColor(const v8::FunctionCallbackInfo<v8::Value>& args)
     ACE_DCHECK(isolate);
     v8::Isolate::Scope isolateScope(isolate);
     v8::HandleScope handleScope(isolate);
-    auto context = isolate->GetCurrentContext();
     if (args.Length() < 1 || !args[0]->IsString()) {
         LOGE("The arg is wrong, must have one argument");
         return;

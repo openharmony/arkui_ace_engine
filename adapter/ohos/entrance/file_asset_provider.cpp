@@ -15,8 +15,10 @@
 
 #include "adapter/ohos/entrance/file_asset_provider.h"
 
+#include <cstring>
 #include <dirent.h>
 #include <limits>
+#include <mutex>
 #include <sys/types.h>
 
 #include "base/log/ace_trace.h"
