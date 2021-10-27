@@ -131,6 +131,7 @@ void RenderDialogTween::Update(const RefPtr<Component>& component)
     }
     alignment_ = dialog->GetAlignment();
     offset_ = dialog->GetOffset();
+    gridCount_ = dialog->GetGridCount();
 
     if (dialog->IsMenu()) {
         auto menuSuccessId = dialog->GetMenuSuccessId();
@@ -239,6 +240,10 @@ void RenderDialogTween::CallOnSuccess(int32_t successType)
 double RenderDialogTween::GetMaxWidthBasedOnGridType(
     const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType)
 {
+    if (gridCount_ > 0) {
+        return info->GetWidth(std::min(gridCount_, GridSystemManager::GetInstance().GetCurrentGridInfo().maxColumns));
+    }
+
     if (deviceType == DeviceType::WATCH) {
         if (type == GridSizeType::SM) {
             return info->GetWidth(3);

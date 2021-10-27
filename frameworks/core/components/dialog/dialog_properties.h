@@ -50,6 +50,20 @@ struct ActionSheetInfo {
     }
 };
 
+// Information of Button.
+struct ButtonInfo {
+    std::string text;      // text of button.
+    std::string textColor; // style of text in button.
+    bool isBgColorSetted = false;
+    Color bgColor;   // background color of button.
+
+    // Whether button info is valid, valid if text is not empty.
+    bool IsValid() const
+    {
+        return !text.empty();
+    }
+};
+
 struct DialogProperties {
     DialogType type = DialogType::COMMON; // type of dialog, current support common dialog and alert dialog.
     std::string title;                    // title of dialog.
@@ -57,10 +71,11 @@ struct DialogProperties {
     bool autoCancel = true;               // pop dialog when click mask if autoCancel is true.
     bool customStyle = false;             // whether use custom style.
     bool isMenu = false;
-    std::vector<std::pair<std::string, std::string>> buttons; // <text of button, color of text>
-    std::unordered_map<std::string, EventMarker> callbacks;   // <callback type(success, cancel, complete), eventId>
-    DialogAlignment alignment = DialogAlignment::DEFAULT;     // Alignment of dialog.
-    DimensionOffset offset;                                   // Offset which base on alignment of Dialog.
+    std::vector<ButtonInfo> buttons;
+    std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
+    DialogAlignment alignment = DialogAlignment::DEFAULT;   // Alignment of dialog.
+    DimensionOffset offset;                                 // Offset which base on alignment of Dialog.
+    int32_t gridCount = 0;
 
     // These ids is used for AlertDialog of declarative.
     EventMarker primaryId;   // first button's callback.

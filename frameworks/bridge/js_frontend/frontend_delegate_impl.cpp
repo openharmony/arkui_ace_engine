@@ -833,8 +833,8 @@ Rect FrontendDelegateImpl::GetBoundingRectData(NodeId nodeId)
 }
 
 void FrontendDelegateImpl::ShowDialog(const std::string& title, const std::string& message,
-    const std::vector<std::pair<std::string, std::string>>& buttons, bool autoCancel,
-    std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
+    const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
 {
     if (!taskExecutor_) {
         LOGE("task executor is null.");
@@ -888,7 +888,7 @@ void FrontendDelegateImpl::ShowDialog(const std::string& title, const std::strin
 }
 
 void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
-    const std::vector<std::pair<std::string, std::string>>& button, std::function<void(int32_t, int32_t)>&& callback)
+    const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
     if (!taskExecutor_) {
         LOGE("task executor is null.");
@@ -927,7 +927,11 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
         .buttons = button,
         .callbacks = std::move(callbackMarkers),
     };
-    dialogProperties.buttons.emplace_back(Localization::GetInstance()->GetEntryLetters("common.cancel"), "#000000");
+    ButtonInfo buttonInfo = {
+        .text = Localization::GetInstance()->GetEntryLetters("common.cancel"),
+        .textColor = "#000000"
+    };
+    dialogProperties.buttons.emplace_back(buttonInfo);
     auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContextHolder_.Get()));
     taskExecutor_->PostTask([weak, dialogProperties,
         isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
@@ -979,8 +983,8 @@ void FrontendDelegateImpl::EnableAlertBeforeBackPage(
     currentPage.dialogProperties = {
         .content = message,
         .autoCancel = false,
-        .buttons = { { Localization::GetInstance()->GetEntryLetters("common.cancel"), "" },
-            { Localization::GetInstance()->GetEntryLetters("common.ok"), "" } },
+        .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
+            { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
         .callbacks = std::move(callbackMarkers),
     };
 }

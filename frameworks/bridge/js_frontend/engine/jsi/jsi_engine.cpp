@@ -849,24 +849,23 @@ void ShowToast(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& 
     GetFrontendDelegate(runtime)->ShowToast(message, duration, bottom);
 }
 
-std::vector<std::pair<std::string, std::string>> ParseDialogButtons(
+std::vector<ButtonInfo> ParseDialogButtons(
     const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg, const std::string& key)
 {
-    std::vector<std::pair<std::string, std::string>> dialogButtons;
+    std::vector<ButtonInfo> dialogButtons;
     std::string argStr = arg->ToString(runtime);
     std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(argStr);
     if (argsPtr != nullptr && argsPtr->GetValue(key) != nullptr && argsPtr->GetValue(key)->IsArray()) {
         for (int32_t i = 0; i < argsPtr->GetValue(key)->GetArraySize(); ++i) {
             auto button = argsPtr->GetValue(key)->GetArrayItem(i);
-            std::string buttonText;
-            std::string buttonColor;
+            ButtonInfo buttonInfo;
             if (button->GetValue("text")) {
-                buttonText = button->GetValue("text")->GetString();
+                buttonInfo.text = button->GetValue("text")->GetString();
             }
             if (button->GetValue("color")) {
-                buttonColor = button->GetValue("color")->GetString();
+                buttonInfo.textColor = button->GetValue("color")->GetString();
             }
-            dialogButtons.emplace_back(buttonText, buttonColor);
+            dialogButtons.emplace_back(buttonInfo);
         }
     }
     return dialogButtons;
@@ -878,7 +877,7 @@ void ShowDialog(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>&
 
     const std::string title = ParseRouteUrl(runtime, arg, PROMPT_KEY_TITLE);
     const std::string message = ParseRouteUrl(runtime, arg, PROMPT_KEY_MESSAGE);
-    std::vector<std::pair<std::string, std::string>> buttons = ParseDialogButtons(runtime, arg, PROMPT_KEY_BUTTONS);
+    std::vector<ButtonInfo> buttons = ParseDialogButtons(runtime, arg, PROMPT_KEY_BUTTONS);
     const std::string success = ParseRouteUrl(runtime, arg, COMMON_SUCCESS);
     const std::string cancel = ParseRouteUrl(runtime, arg, COMMON_CANCEL);
     const std::string complete = ParseRouteUrl(runtime, arg, COMMON_COMPLETE);
@@ -1376,23 +1375,23 @@ shared_ptr<JsValue> JsHandleMediaQuery(
     return runtime->NewNull();
 }
 
-std::vector<std::pair<std::string, std::string>> JsParseDialogButtons(
-    const std::unique_ptr<JsonValue>& argsPtr, const std::string& key)
+std::vector<ButtonInfo> JsParseDialogButtons(const std::unique_ptr<JsonValue>& argsPtr, const std::string& key)
 {
-    std::vector<std::pair<std::string, std::string>> dialogButtons;
+    std::vector<ButtonInfo> dialogButtons;
     if (argsPtr != nullptr && argsPtr->GetValue(key) != nullptr && argsPtr->GetValue(key)->IsArray()) {
         for (int32_t i = 0; i < argsPtr->GetValue(key)->GetArraySize(); i++) {
             auto button = argsPtr->GetValue(key)->GetArrayItem(i);
-            std::string buttonText;
-            std::string buttonColor;
             if (!button->GetValue("text")->IsString()) {
                 continue;
             }
-            buttonText = button->GetValue("text")->GetString();
-            if (button->GetValue("color")) {
-                buttonColor = button->GetValue("color")->GetString();
+            ButtonInfo buttonInfo;
+            if (button->GetValue("text")) {
+                buttonInfo.text = button->GetValue("text")->GetString();
             }
-            dialogButtons.emplace_back(buttonText, buttonColor);
+            if (button->GetValue("color")) {
+                buttonInfo.textColor = button->GetValue("color")->GetString();
+            }
+            dialogButtons.emplace_back(buttonInfo);
         }
     }
     return dialogButtons;
@@ -1414,7 +1413,7 @@ void ShowActionMenu(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsVal
         LOGE("ShowActionMenu failed. argsPtr is nullptr");
         return;
     }
-    std::vector<std::pair<std::string, std::string>> buttons = JsParseDialogButtons(argsPtr, PROMPT_KEY_BUTTONS);
+    std::vector<ButtonInfo> buttons = JsParseDialogButtons(argsPtr, PROMPT_KEY_BUTTONS);
     if (buttons.empty() || buttons.size() > 6) { // The number of buttons cannot be zero or more than six
         LOGE("buttons is invalid");
         if (argsPtr->IsObject()) {

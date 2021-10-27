@@ -40,8 +40,26 @@ void ParseButtonObj(
         auto objInner = JSRef<JSObject>::Cast(jsVal);
         auto value = objInner->GetProperty("value");
         std::string buttonValue;
+        ButtonInfo buttonInfo;
         if (JSAlertDialog::ParseJsString(value, buttonValue)) {
-            properties.buttons.emplace_back(buttonValue, "");
+            buttonInfo.text = buttonValue;
+        }
+
+        auto fontColorValue = objInner->GetProperty("fontColor");
+        Color textColor;
+        if (JSAlertDialog::ParseJsColor(fontColorValue, textColor)) {
+            buttonInfo.textColor = textColor.ColorToString();
+        }
+
+        auto backgroundColorValue = objInner->GetProperty("backgroundColor");
+        Color backgroundColor;
+        if (JSAlertDialog::ParseJsColor(backgroundColorValue, backgroundColor)) {
+            buttonInfo.isBgColorSetted = true;
+            buttonInfo.bgColor = backgroundColor;
+        }
+
+        if (buttonInfo.IsValid()) {
+            properties.buttons.emplace_back(buttonInfo);
         }
 
         auto actionValue = objInner->GetProperty("action");
@@ -79,6 +97,12 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         std::string message;
         if (ParseJsString(messageValue, message)) {
             properties.content = message;
+        }
+
+        // Parses gridCount.
+        auto gridCountValue = obj->GetProperty("gridCount");
+        if (gridCountValue->IsNumber()) {
+            properties.gridCount = gridCountValue->ToNumber<int32_t>();
         }
 
         // Parse auto autoCancel.

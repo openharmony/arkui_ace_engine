@@ -74,6 +74,7 @@ private:
     int32_t composedId_ = 0;
     // used for inspector node in PC preview
     int32_t customDialogId_ = -1;
+    int32_t gridCount_ = 0;
     double dragStart_ = 0.0;
     double dragX_ = 0.0;
     double dragY_ = 0.0;

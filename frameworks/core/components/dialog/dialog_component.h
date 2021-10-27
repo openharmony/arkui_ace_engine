@@ -362,7 +362,7 @@ private:
     static void BuildTitleAndContent(const RefPtr<DialogComponent>& dialog, const DialogProperties& dialogProperties,
         const RefPtr<DialogTheme>& dialogTheme, std::string& data);
     static void BuildButtons(const RefPtr<ThemeManager>& themeManager, const RefPtr<DialogComponent>& dialog,
-        const std::vector<std::pair<std::string, std::string>>& buttons, const RefPtr<DialogTheme>& dialogTheme,
+        const std::vector<ButtonInfo>& buttons, const RefPtr<DialogTheme>& dialogTheme,
         std::string& data);
     static void BuildButtonsForWatch(
         const RefPtr<ThemeManager>& themeManager, const RefPtr<DialogComponent>& dialog, std::string& data);

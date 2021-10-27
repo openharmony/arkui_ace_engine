@@ -75,7 +75,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchPoint& event)
             DeadlineTimer(duration_);
         }
     } else {
-        LOGW("the state is not ready for detecting long press gesture");
+        LOGW("the state is not ready for detecting long press gesture, state id %{public}d, id is %{public}d",
+            state_, event.id);
     }
 }
 

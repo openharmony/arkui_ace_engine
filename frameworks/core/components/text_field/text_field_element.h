@@ -37,11 +37,11 @@ public:
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
 
     bool RequestKeyboard(bool needStartTwinkling = false);
+    void CloseKeyboard(bool forceClose = false);
     void ShowError(const std::string& errorText);
     void Delete();
 
 private:
-    void CloseKeyboard();
     void OnSurfaceChanged(int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight);
 
     bool enabled_ = true;

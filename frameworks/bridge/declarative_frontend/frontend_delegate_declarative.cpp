@@ -942,8 +942,8 @@ void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t 
 }
 
 void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std::string& message,
-    const std::vector<std::pair<std::string, std::string>>& buttons, bool autoCancel,
-    std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
+    const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
 {
     std::unordered_map<std::string, EventMarker> callbackMarkers;
     if (callbacks.find(COMMON_SUCCESS) != callbacks.end()) {

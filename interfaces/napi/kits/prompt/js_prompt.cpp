@@ -145,7 +145,7 @@ struct PromptAsyncContext {
     napi_ref callbackComplete = nullptr;
     std::string titleString;
     std::string messageString;
-    std::vector<std::pair<std::string, std::string>> buttons;
+    std::vector<ButtonInfo> buttons;
     bool autoCancelBool = true;
     std::set<std::string> callbacks;
     std::string callbackSuccessString;
@@ -243,7 +243,11 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     napi_get_value_string_utf8(env, colorNApi, color.get(), colorLen, &ret);
                     colorString = color.get();
                 }
-                asyncContext->buttons.emplace_back(textString, colorString);
+                ButtonInfo buttonInfo = {
+                    .text = textString,
+                    .textColor = colorString
+                };
+                asyncContext->buttons.emplace_back(buttonInfo);
             }
         }
 
@@ -353,7 +357,7 @@ struct ShowActionMenuAsyncContext {
     napi_ref callbackFail = nullptr;
     napi_ref callbackComplete = nullptr;
     std::string titleString;
-    std::vector<std::pair<std::string, std::string>> buttons;
+    std::vector<ButtonInfo> buttons;
 
     std::string callbackSuccessString;
     std::string callbackFailString;
@@ -448,7 +452,11 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                         ParseString(id, type, params, colorString);
                     }
                 }
-                asyncContext->buttons.emplace_back(textString, colorString);
+                ButtonInfo buttonInfo = {
+                    .text = textString,
+                    .textColor = colorString
+                };
+                asyncContext->buttons.emplace_back(buttonInfo);
             }
         }
 

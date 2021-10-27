@@ -200,6 +200,7 @@ void DialogComponent::BuildDialogTween(const RefPtr<TransitionComponent>& transi
     }
     dialogTween->SetAlignment(properties_.alignment);
     dialogTween->SetOffset(properties_.offset);
+    dialogTween->SetGridCount(properties_.gridCount);
     if (dialogTweenBox_) {
         const auto& dialogComposed = GenerateComposed("dialog", dialogTween, false);
         dialogTween->SetComposedId(dialogTweenComposedId_);
@@ -692,7 +693,7 @@ void DialogBuilder::BuildTitleAndContent(const RefPtr<DialogComponent>& dialog,
 }
 
 void DialogBuilder::BuildButtons(const RefPtr<ThemeManager>& themeManager, const RefPtr<DialogComponent>& dialog,
-    const std::vector<std::pair<std::string, std::string>>& buttons, const RefPtr<DialogTheme>& dialogTheme,
+    const std::vector<ButtonInfo>& buttons, const RefPtr<DialogTheme>& dialogTheme,
     std::string& data)
 {
     if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
@@ -709,10 +710,10 @@ void DialogBuilder::BuildButtons(const RefPtr<ThemeManager>& themeManager, const
     int32_t buttonIndex = 0;
     std::list<RefPtr<ButtonComponent>> buttonComponents;
     for (const auto& button : buttons) {
-        if (button.first.empty()) {
+        if (button.text.empty()) {
             continue;
         }
-        data += button.first + SEPARATE;
+        data += button.text + SEPARATE;
 
         // Init text style in button.
         TextStyle buttonTextStyle = buttonTheme->GetTextStyle();
@@ -734,13 +735,13 @@ void DialogBuilder::BuildButtons(const RefPtr<ThemeManager>& themeManager, const
         }
 
         RefPtr<ButtonComponent> buttonComponent;
-        if (!button.second.empty()) {
-            buttonTextStyle.SetTextColor(Color::FromString(button.second));
+        if (!button.textColor.empty()) {
+            buttonTextStyle.SetTextColor(Color::FromString(button.textColor));
             buttonComponent = ButtonBuilder::Build(
-                themeManager, button.first, buttonTextStyle, Color::FromString(button.second), true);
+                themeManager, button.text, buttonTextStyle, Color::FromString(button.textColor), true);
         } else {
             buttonComponent =
-                ButtonBuilder::Build(themeManager, button.first, buttonTextStyle, buttonTextStyle.GetTextColor(), true);
+                ButtonBuilder::Build(themeManager, button.text, buttonTextStyle, buttonTextStyle.GetTextColor(), true);
         }
         buttonComponent->SetBackgroundColor(dialogTheme->GetButtonBackgroundColor());
         if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
@@ -754,6 +755,12 @@ void DialogBuilder::BuildButtons(const RefPtr<ThemeManager>& themeManager, const
         }
         buttonComponent->SetHoverColor(Color::FromString("#0C000000"));
         buttonComponent->SetClickedColor(dialogTheme->GetButtonClickedColor());
+        // If background color of button is setted by developer, use it.
+        if (button.isBgColorSetted) {
+            buttonComponent->SetBackgroundColor(button.bgColor);
+            buttonComponent->SetHoverColor(button.bgColor.BlendColorWithAlpha(dialogTheme->GetButtonClickedColor()));
+            buttonComponent->SetClickedColor(button.bgColor.BlendColorWithAlpha(dialogTheme->GetButtonClickedColor()));
+        }
         buttonComponent->SetType(ButtonType::TEXT);
         buttonComponents.emplace_back(buttonComponent);
         ++buttonIndex;

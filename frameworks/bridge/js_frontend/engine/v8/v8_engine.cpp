@@ -1378,7 +1378,7 @@ void JsHandlePageRoute(const v8::FunctionCallbackInfo<v8::Value>& args, const st
     }
 }
 
-std::vector<std::pair<std::string, std::string>> JsParseDialogButtons(
+std::vector<ButtonInfo> JsParseDialogButtons(
     const v8::FunctionCallbackInfo<v8::Value>& args, const std::string& key, int32_t index)
 {
     CHECK_RUN_ON(JS);
@@ -1387,7 +1387,7 @@ std::vector<std::pair<std::string, std::string>> JsParseDialogButtons(
     ACE_DCHECK(isolate);
     v8::HandleScope handleScope(isolate);
 
-    std::vector<std::pair<std::string, std::string>> dialogButtons;
+    std::vector<ButtonInfo> dialogButtons;
     v8::String::Utf8Value argsJsStr(isolate, args[index]);
     if (!(*argsJsStr)) {
         return dialogButtons;
@@ -1398,16 +1398,17 @@ std::vector<std::pair<std::string, std::string>> JsParseDialogButtons(
     if (argsPtr != nullptr && argsPtr->GetValue(key) != nullptr && argsPtr->GetValue(key)->IsArray()) {
         for (int32_t i = 0; i < argsPtr->GetValue(key)->GetArraySize(); i++) {
             auto button = argsPtr->GetValue(key)->GetArrayItem(i);
-            std::string buttonText;
-            std::string buttonColor;
             if (!button->GetValue("text")->IsString()) {
                 continue;
             }
-            buttonText = button->GetValue("text")->GetString();
-            if (button->GetValue("color")) {
-                buttonColor = button->GetValue("color")->GetString();
+            ButtonInfo buttonInfo;
+            if (button->GetValue("text")) {
+                buttonInfo.text = button->GetValue("text")->GetString();
             }
-            dialogButtons.emplace_back(buttonText, buttonColor);
+            if (button->GetValue("color")) {
+                buttonInfo.textColor = button->GetValue("color")->GetString();
+            }
+            dialogButtons.emplace_back(buttonInfo);
         }
     }
     return dialogButtons;
@@ -1467,7 +1468,7 @@ void JsShowDialog(const v8::FunctionCallbackInfo<v8::Value>& args, int32_t index
 
     const std::string title = JsParseRouteUrl(args, PROMPT_KEY_TITLE, index);
     const std::string message = JsParseRouteUrl(args, PROMPT_KEY_MESSAGE, index);
-    std::vector<std::pair<std::string, std::string>> buttons = JsParseDialogButtons(args, PROMPT_KEY_BUTTONS, index);
+    std::vector<ButtonInfo> buttons = JsParseDialogButtons(args, PROMPT_KEY_BUTTONS, index);
     const std::string success = JsParseRouteUrl(args, COMMON_SUCCESS, index);
     const std::string cancel = JsParseRouteUrl(args, COMMON_CANCEL, index);
     const std::string complete = JsParseRouteUrl(args, COMMON_COMPLETE, index);
@@ -1542,7 +1543,7 @@ void JsShowActionMenu(const v8::FunctionCallbackInfo<v8::Value>& args, int32_t i
         return;
     }
 
-    std::vector<std::pair<std::string, std::string>> buttons = JsParseDialogButtons(args, PROMPT_KEY_BUTTONS, index);
+    std::vector<ButtonInfo> buttons = JsParseDialogButtons(args, PROMPT_KEY_BUTTONS, index);
     if (buttons.empty() || buttons.size() > 6) { // The number of buttons cannot be zero or more than six
         LOGE("buttons is invalid");
         if (argsPtr->IsObject()) {

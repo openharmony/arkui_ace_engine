@@ -332,6 +332,10 @@ void RenderTextField::OnPaintFinish()
 
 void RenderTextField::PerformLayout()
 {
+    if (!lastLayoutParam_.has_value()) {
+        lastLayoutParam_ = std::make_optional(GetLayoutParam());
+    }
+
     if (GetEditingValue().text.empty()) {
         cursorPositionType_ = CursorPositionType::END;
     }
@@ -994,14 +998,16 @@ void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>
         LOGE("the value is nullptr");
         return;
     }
-    if (cursorPositionType_ != CursorPositionType::END) {
-        cursorPositionType_ = CursorPositionType::NORMAL;
-        isValueFromRemote_ = true;
-    }
 
     lastKnownRemoteEditingValue_ = value;
     lastKnownRemoteEditingValue_->hint = placeholder_;
     TextEditingValue temp = *lastKnownRemoteEditingValue_;
+    if (cursorPositionType_ != CursorPositionType::END ||
+        (temp.selection.baseOffset == temp.selection.extentOffset &&
+            temp.selection.baseOffset != static_cast<int32_t>(temp.GetWideText().length()))) {
+        cursorPositionType_ = CursorPositionType::NORMAL;
+        isValueFromRemote_ = true;
+    }
     ChangeCounterStyle(temp);
     for (const auto& formatter : textInputFormatters_) {
         // GetEditingValue() is the old value, and lastKnownRemoteEditingValue_ is the newer.
@@ -1347,6 +1353,7 @@ void RenderTextField::OnStatusChanged(OHOS::Ace::RenderStatus renderStatus)
 
 void RenderTextField::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent)
 {
+    isValueFromFront_ = !needFireChangeEvent;
     TextEditingValue temp = GetEditingValue();
     for (const auto& formatter : textInputFormatters_) {
         if (formatter) {
