@@ -75,10 +75,13 @@ public:
             if (!themeStyle) {
                 return;
             }
-            theme->textStyle_.SetFontSize(themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_BODY2, 0.0_vp));
-            theme->textStyle_.SetTextColor(themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY_INVERSE,
-                Color::BLACK));
-            theme->backgroundColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_TOAST_BG, Color::BLACK);
+            auto toastPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_TOAST, nullptr);
+            if (!toastPattern) {
+                return;
+            }
+            theme->textStyle_.SetFontSize(toastPattern->GetAttr<Dimension>(TOAST_FONT_SIZE, 0.0_vp));
+            theme->textStyle_.SetTextColor(toastPattern->GetAttr<Color>(TOAST_TEXT_COLOR, Color()));
+            theme->backgroundColor_ = toastPattern->GetAttr<Color>(TOAST_BACKGROUND_COLOR, Color());
         }
     };
 
