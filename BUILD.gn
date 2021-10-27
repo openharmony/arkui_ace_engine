@@ -88,6 +88,7 @@ config("ace_test_config") {
     defines += [ "OHOS_STANDARD_SYSTEM" ]
   }
   defines += [ "OHOS_PLATFORM" ]
+  defines += [ "ENABLE_NATIVE_VIEW" ]
 
   if (is_wearable_product) {
     defines += ace_wearable_defines
