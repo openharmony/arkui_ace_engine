@@ -340,11 +340,11 @@ bool QjsPaEngineInstance::InitJsEnv(
 
     const char* str = "\n"
                       "var global = globalThis;\n"
-                      "globalThis.exports = {default: {}};\n"
+                      "globalThis.pa = {default: {}};\n"
                       "function $app_define$(page, packageName, parseContent) {\n"
                       "    const module = {exports: {}};\n"
                       "    parseContent({}, module.exports, module);\n"
-                      "    globalThis.exports.default = module.exports;\n"
+                      "    globalThis.pa = module.exports;\n"
                       "}\n"
                       "function $app_bootstrap$() {}\n";
 
@@ -531,14 +531,8 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
     JS_FreeValue(ctx, CppToJSRet);
 
     // call onstart
-    JSValue exportsObj;
-    exportsObj = Framework::QJSUtils::GetPropertyStr(ctx, globalObj, "exports");
-    if (!JS_IsObject(exportsObj)) {
-        LOGE("get paObj error");
-    }
-
     JSValue paObj;
-    paObj = Framework::QJSUtils::GetPropertyStr(ctx, exportsObj, "default");
+    paObj = Framework::QJSUtils::GetPropertyStr(ctx, globalObj, "pa");
     if (!JS_IsObject(paObj)) {
         LOGE("get paObj error");
     }
