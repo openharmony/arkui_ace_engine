@@ -35,6 +35,11 @@ public:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
+    void SetForbidSwipeToRight(bool forbidSwipeToRight)
+    {
+        forbidSwipeToRight_ = forbidSwipeToRight;
+    }
+
 private:
     void WatchDragToBack();
 
@@ -52,6 +57,7 @@ private:
     double dragOffsetX_ = 0.0;
     double tickTime_ = 0.0;
     bool isRightToLeft_ = false;
+    bool forbidSwipeToRight_ = false;
 };
 
 } // namespace OHOS::Ace

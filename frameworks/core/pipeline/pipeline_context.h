@@ -722,10 +722,7 @@ public:
         return forbidePlatformQuit_;
     }
 
-    void SetForbidePlatformQuit(bool forbidePlatformQuit)
-    {
-        forbidePlatformQuit_ = forbidePlatformQuit;
-    }
+    void SetForbidePlatformQuit(bool forbidePlatformQuit);
 
     void SetRootBgColor(const Color& color);
 

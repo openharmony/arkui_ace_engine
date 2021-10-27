@@ -1784,12 +1784,22 @@ JSValue SetSwipeToDismiss(JSContext* ctx, JSValueConst argv)
         LOGE("SetSwipeToDismiss: argv is not illegal");
         return JS_NULL;
     }
-    bool forbideQuit = false;
-    ScopedString args(ctx, argv);
-    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(args.get());
-    if (argsPtr != nullptr && argsPtr->IsBool()) {
-        forbideQuit = argsPtr->GetBool();
+
+    JSPropertyEnum* pTab = nullptr;
+    uint32_t len = 0;
+    JS_GetOwnPropertyNames(ctx, &pTab, &len, argv, JS_GPN_STRING_MASK);
+    if (len < 2) {
+        LOGE("SetSwipeToDismiss: invalid callback value");
+        js_free(ctx, pTab);
+        return JS_EXCEPTION;
     }
+
+    bool forbideQuit = false;
+    JSValue jsObject = JS_GetProperty(ctx, argv, pTab[0].atom);
+    if (JS_IsBool(jsObject)) {
+        forbideQuit = JS_ToBool(ctx, jsObject);
+    }
+
     QjsEngineInstance* instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     WeakPtr<PipelineContext> pipelineContextWeak = instance->GetDelegate()->GetPipelineContext();
     auto uiTaskExecutor = instance->GetDelegate()->GetUiTask();
@@ -1800,6 +1810,8 @@ JSValue SetSwipeToDismiss(JSContext* ctx, JSValueConst argv)
         }
     });
 
+    JS_FreeValue(ctx, jsObject);
+    js_free(ctx, pTab);
     return JS_NULL;
 }
 
