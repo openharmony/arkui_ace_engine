@@ -50,6 +50,18 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0,    0,  // red
                                       0.30f, 0.59f, 0.11f, 0,    0,  // green
                                       0.30f, 0.59f, 0.11f, 0,    0,  // blue
                                       0,     0,     0,     1.0f, 0}; // alpha transparency
+
+double CorrectVertexCoordinates(double src, double dest, double scale, int32_t& subset)
+{
+    // Avoid the jitter of multiple pixels of the target image due to the 1px movement of the original image
+    double delta = src - subset;
+    if (LessNotEqual(delta, 0.0)) {
+        subset = subset - 1;
+        delta += 1.0;
+    }
+    return dest - delta * scale;
+}
+
 }
 
 union SkColorEx {
@@ -650,23 +662,35 @@ void FlutterRenderImage::DrawImageOnCanvas(
     const flutter::Paint& paint,
     const Offset& dstOffset) const
 {
-    auto skSrcRect = SkIRect::MakeXYWH(
-        Round(srcRect.Left()), Round(srcRect.Top()), Round(srcRect.Width()), Round(srcRect.Height()));
     auto skDstRect = SkRect::MakeXYWH(
         dstRect.Left() - dstOffset.GetX(),
         dstRect.Top() - dstOffset.GetY(),
         dstRect.Width(), dstRect.Height());
 
+    int32_t subsetLeft = Round(srcRect.Left());
+    int32_t subsetTop = Round(srcRect.Top());
+    int32_t subsetWidth = Round(srcRect.Width());
+    int32_t subsetHeight = Round(srcRect.Height());
+    bool useSubset = false;
+    if (subsetWidth < image_->width() || subsetHeight < image_->height() || subsetLeft > 0 || subsetTop > 0) {
+        // if use subset, try to stretch width and height, to avoid 1px jitter
+        subsetWidth = std::min(subsetWidth + 1, static_cast<int32_t>(Round(image_->width())) - 1);
+        subsetHeight = std::min(subsetHeight + 1, static_cast<int32_t>(Round(image_->height())) - 1);
+        useSubset = true;
+    }
+
     // initialize a transform matrix
-    SkScalar scaleX =  skDstRect.width() / skSrcRect.width();
+    SkScalar scaleX =  skDstRect.width() / srcRect.Width();
     SkScalar skewX = 0;
-    SkScalar transX = skDstRect.left();
+    SkScalar transX = CorrectVertexCoordinates(srcRect.Left(), skDstRect.left(), scaleX, subsetLeft);
+    SkScalar scaleY = skDstRect.height() / srcRect.Height();
     SkScalar skewY = 0;
-    SkScalar scaleY = skDstRect.height() / skSrcRect.height();
-    SkScalar transY = skDstRect.top();
+    SkScalar transY = CorrectVertexCoordinates(srcRect.Top(), skDstRect.top(), scaleY, subsetTop);
     SkScalar pers0 = 0;
     SkScalar pers1 = 0;
     SkScalar pers2 = 1;
+
+    auto skSrcRect = SkIRect::MakeXYWH(subsetLeft, subsetTop, subsetWidth, subsetHeight);
 
     if (matchTextDirection_ && GetTextDirection() == TextDirection::RTL) {
         // flip the image algin x direction.
@@ -712,9 +736,8 @@ void FlutterRenderImage::DrawImageOnCanvas(
             break;
     }
 #endif
-    auto imgShader = (skSrcRect.width() < image_->width() || skSrcRect.height() < image_->height()) ?
-                                image_->makeSubset(skSrcRect)->makeShader(xTileMode, yTileMode, &sampleMatrix) :
-                                image_->makeShader(xTileMode, yTileMode, &sampleMatrix);
+    auto imgShader = useSubset ? image_->makeSubset(skSrcRect)->makeShader(xTileMode, yTileMode, &sampleMatrix)
+                               : image_->makeShader(xTileMode, yTileMode, &sampleMatrix);
     SkPaint skPaint = *paint.paint();
     skPaint.setShader(imgShader);
     canvas->canvas()->drawPaint(skPaint);
