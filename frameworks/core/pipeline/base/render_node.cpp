@@ -78,7 +78,10 @@ void RenderNode::AddChild(const RefPtr<RenderNode>& child, int32_t slot)
     child->SetDepth(GetDepth() + 1);
     OnChildAdded(child);
     disappearingNodes_.remove(child);
-    child->NotifyTransition(TransitionType::APPEARING, child->GetNodeId());
+    auto context = context_.Upgrade();
+    if (context && context->GetExplicitAnimationOption().IsValid()) {
+        child->NotifyTransition(TransitionType::APPEARING, child->GetNodeId());
+    }
 }
 
 void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)

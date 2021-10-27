@@ -110,6 +110,7 @@ protected:
     double appearingOpacity_ = 0.0;
     double disappearingOpacity_ = 0.0;
     bool hasDisappearTransition_ = false;
+    bool hasAppearTransition_ = false;
     bool pendingAppearing_ = false;
     bool disableLayer_ = false;
     std::list<OpacityCallback> opacityCallbacks_;
