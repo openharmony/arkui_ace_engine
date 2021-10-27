@@ -50,9 +50,6 @@ template("js_engine_ark") {
     deps = [ "//third_party/jsframework:ark_build" ]
     if (target_cpu == "arm64") {
       defines += [ "APP_USE_ARM64" ]
-      if (!defined(oem_commercial_build) || !oem_commercial_build) {
-        defines += [ "PREBUILD_ARK_RUNTIME" ]
-      }
     } else if (target_cpu == "arm") {
       defines += [ "APP_USE_ARM" ]
     }
