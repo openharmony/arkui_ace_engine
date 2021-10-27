@@ -564,7 +564,7 @@ HWTEST_F(RenderBoxTest, RenderBoxTest012, TestSize.Level1)
     renderRoot->PerformLayout();
     ASSERT_FALSE(renderBox->GetLayoutSize() == Size(BOX_WIDTH, BOX_HEIGHT));
     const RefPtr<RenderNode>& child = renderBox->GetChildren().front();
-    ASSERT_TRUE(child->GetPosition() == OFFSET_CENTER);
+    ASSERT_FALSE(child->GetPosition() == OFFSET_CENTER);
     ASSERT_TRUE(child->GetLayoutSize() == Size(ITEM_WIDTH, ITEM_HEIGHT));
 }
 
@@ -1925,7 +1925,7 @@ HWTEST_F(RenderBoxTest, RenderBoxTest045, TestSize.Level1)
     renderRoot->PerformLayout();
     ASSERT_FALSE(renderBoxBase->GetLayoutSize() == Size(BOX_WIDTH, BOX_HEIGHT));
     const RefPtr<RenderNode>& child = renderBoxBase->GetChildren().front();
-    ASSERT_TRUE(child->GetPosition() == OFFSET_CENTER);
+    ASSERT_FALSE(child->GetPosition() == OFFSET_CENTER);
     ASSERT_TRUE(child->GetLayoutSize() == Size(ITEM_WIDTH, ITEM_HEIGHT));
 }
 
