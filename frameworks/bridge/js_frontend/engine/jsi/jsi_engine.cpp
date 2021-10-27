@@ -2666,9 +2666,7 @@ void JsiEngineInstance::RegisterI18nPluralRulesModule()
 bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<std::string, void*>& extraNativeObject)
 {
     ACE_SCOPED_TRACE("JsiEngine::InitJsEnv");
-#ifdef PREBUILD_ARK_RUNTIME
     runtime_.reset(new ArkJSRuntime());
-#endif
     if (runtime_ == nullptr) {
         LOGE("Js Engine cannot allocate JSI JSRuntime");
         EventReport::SendJsException(JsExcepType::JS_ENGINE_INIT_ERR);
