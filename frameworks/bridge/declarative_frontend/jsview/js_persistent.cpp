@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_persistent.h"
 
+#include "base/memory/referenced.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/storage/storage_proxy.h"
@@ -40,13 +41,16 @@ void JSPersistent::ConstructorCallback(const JSCallbackInfo& args)
         needCrossThread = args[0]->ToBoolean();
     }
     std::string fileName;
-    auto obj = new JSPersistent(needCrossThread, fileName);
-    args.SetReturnValue(obj);
+    auto persistent = Referenced::MakeRefPtr<JSPersistent>(needCrossThread, fileName);
+    persistent->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(persistent));
 }
 
-void JSPersistent::DestructorCallback(JSPersistent* obj)
+void JSPersistent::DestructorCallback(JSPersistent* persistent)
 {
-    delete obj;
+    if (persistent != nullptr) {
+        persistent->DecRefCount();
+    }
 }
 
 void JSPersistent::Set(const JSCallbackInfo& args)
@@ -62,7 +66,6 @@ void JSPersistent::Set(const JSCallbackInfo& args)
         LOGW("container is null");
         return;
     }
-    auto context = container->GetPipelineContext();
     auto executor = container->GetTaskExecutor();
     if(!StorageProxy::GetInstance()->GetStorage(executor)) {
         return;
@@ -89,7 +92,6 @@ void JSPersistent::Get(const JSCallbackInfo& args)
         LOGW("container is null");
         return;
     }
-    auto context = container->GetPipelineContext();
     auto executor = container->GetTaskExecutor();
     std::string value = StorageProxy::GetInstance()->GetStorage(executor)->Get(key);
     auto returnValue = JSVal(ToJSValue(value));
@@ -109,7 +111,6 @@ void JSPersistent::Delete(const JSCallbackInfo& args)
         LOGW("container is null");
         return;
     }
-    auto context = container->GetPipelineContext();
     auto executor = container->GetTaskExecutor();
     StorageProxy::GetInstance()->GetStorage(executor)->Delete(key);
 }
@@ -121,7 +122,6 @@ void JSPersistent::Clear(const JSCallbackInfo& args)
         LOGW("container is null");
         return;
     }
-    auto context = container->GetPipelineContext();
     auto executor = container->GetTaskExecutor();
     StorageProxy::GetInstance()->GetStorage(executor)->Clear();
 }

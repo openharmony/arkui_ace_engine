@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_environment.h"
 
+#include "base/memory/referenced.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/environment/environment_proxy.h"
@@ -39,13 +40,16 @@ void JSEnvironment::JSBind(BindingTarget globalObj)
 
 void JSEnvironment::ConstructorCallback(const JSCallbackInfo& args)
 {
-    auto obj = new JSEnvironment();
-    args.SetReturnValue(obj);
+    auto environment = Referenced::MakeRefPtr<JSEnvironment>();
+    environment->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(environment));
 }
 
-void JSEnvironment::DestructorCallback(JSEnvironment* obj)
+void JSEnvironment::DestructorCallback(JSEnvironment* environment)
 {
-    delete obj;
+    if (environment != nullptr) {
+        environment->DecRefCount();
+    }
 }
 
 void JSEnvironment::GetAccessibilityEnabled(const JSCallbackInfo& args)

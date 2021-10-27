@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSEnvironment : public AceType {
+class JSEnvironment final : public Referenced {
 public:
     void GetAccessibilityEnabled(const JSCallbackInfo& args);
     void GetColorMode(const JSCallbackInfo& args);
