@@ -34,6 +34,7 @@ constexpr char RICH_TEXT_METHOD_HIDE_RICHTEXT_WHNE_PUSH[] = "hideRichTextWhenPus
 constexpr char RICH_TEXT_METHOD_SHOW_RICHTEXT[] = "showRichText";
 constexpr char RICH_TEXT_METHOD_UPDATE_CONTENT[] = "updateRichTextContent";
 constexpr char RICH_TEXT_METHOD_UPDATE_TRANSLATE[] = "updateTranslate";
+constexpr char RICH_TEXT_METHOD_UPDATE_CONTENT_TRANSLATE[] = "updateContentTranslate";
 
 constexpr char RICH_TEXT_EVENT_LOAD_START[] = "onPageStarted";
 constexpr char RICH_TEXT_EVENT_LOAD_FINISHED[] = "onPageFinished";
@@ -46,8 +47,11 @@ constexpr char NTC_PARAM_RICH_TEXT[] = "richtext";
 constexpr char NTC_PARAM_LEFT[] = "left";
 constexpr char NTC_PARAM_TOP[] = "top";
 constexpr char NTC_PARAM_URL[] = "url";
+constexpr char NTC_PARAM_X[] = "x";
+constexpr char NTC_PARAM_Y[] = "y";
 constexpr char NTC_PARAM_LAYOUT_HEIGHT[] = "layoutHeight";
 constexpr char NTC_PARAM_LAYOUT_WIDTH[] = "layoutWidth";
+constexpr char NTC_PARAM_CONTENT_HEIGHT[] = "contentHeight";
 constexpr char NTC_PARAM_RICHTEXT_VISIBILITY[] = "visibility";
 constexpr char NTC_PARAM_PAGE_PATH[] = "pageRoutePath";
 constexpr char NTC_PARAM_DESCRIPTION[] = "description";
@@ -317,6 +321,18 @@ void RichTextDelegate::UpdateWebPostion(const int32_t top, const int32_t left)
     CallResRegisterMethod(updateLayoutPositionMethod, param, nullptr);
 }
 
+void RichTextDelegate::UpdateContentScroll(const int32_t x, const int32_t y)
+{
+    hash_ = MakeResourceHash();
+
+    Method updateLayoutPositionMethod = MakeMethodHash(RICH_TEXT_METHOD_UPDATE_CONTENT_TRANSLATE);
+    std::stringstream paramStream;
+    paramStream << NTC_PARAM_X << RICHTEXT_PARAM_EQUALS << x << RICHTEXT_PARAM_AND
+                << NTC_PARAM_Y << RICHTEXT_PARAM_EQUALS << y;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateLayoutPositionMethod, param, nullptr);
+}
+
 void RichTextDelegate::CallPopPageSuccessPageUrl(const std::string& url, const int32_t pageId)
 {
     if (url == pageUrl_ && pageId == pageId_) {
@@ -384,9 +400,10 @@ void RichTextDelegate::OnPageFinished(const std::string& param)
 void RichTextDelegate::OnGotLayoutParam(const std::string& param)
 {
     int32_t layoutHeight = GetIntParam(param, NTC_PARAM_LAYOUT_HEIGHT);
+    int32_t contentHeight = GetIntParam(param, NTC_PARAM_CONTENT_HEIGHT);
     int32_t layoutWidth = GetIntParam(param, NTC_PARAM_LAYOUT_WIDTH);
     if (webviewLayoutCallback_) {
-        webviewLayoutCallback_(layoutWidth, layoutHeight);
+        webviewLayoutCallback_(layoutWidth, layoutHeight, contentHeight);
     }
 }
 
