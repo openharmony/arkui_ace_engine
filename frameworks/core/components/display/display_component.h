@@ -95,9 +95,11 @@ public:
             hasDisappearTransition_ = true;
             disappearingOpacity_ = opacity;
         } else if (type == TransitionType::APPEARING) {
+            hasAppearTransition_ = true;
             appearingOpacity_ = opacity;
         } else {
             hasDisappearTransition_ = true;
+            hasAppearTransition_ = true;
             disappearingOpacity_ = opacity;
             appearingOpacity_ = opacity;
         }
@@ -106,6 +108,11 @@ public:
     bool HasDisappearTransition() const
     {
         return hasDisappearTransition_;
+    }
+
+    bool HasAppearTransition() const
+    {
+        return hasAppearTransition_;
     }
 
     double GetAppearingOpacity() const
@@ -136,6 +143,7 @@ private:
     double appearingOpacity_ = 0.0;
     double disappearingOpacity_ = 0.0;
     bool hasDisappearTransition_ = false;
+    bool hasAppearTransition_ = false;
     bool disableLayer_ = false;
     int32_t duration_ = 0;
 };

@@ -40,6 +40,10 @@ void RenderDisplay::Update(const RefPtr<Component>& component)
     disappearingOpacity_ = display->GetDisappearingOpacity();
     appearingOpacity_ = display->GetAppearingOpacity();
     hasDisappearTransition_ = display->HasDisappearTransition();
+    hasAppearTransition_ = display->HasAppearTransition();
+    if (!hasDisappearTransition_) {
+        pendingAppearing_ = false;
+    }
     if (!pendingAppearing_) {
         animatableOpacity_ = AnimatableDouble(display->GetOpacity(), display->GetOpacityAnimationOption());
     }

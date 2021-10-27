@@ -351,6 +351,10 @@ void SharedTransitionElement::SetSizeModified(SizeModifiedCallback&& sizeModifie
         return;
     }
     sizeModifiedCallback_ = sizeModifiedCallback;
+    if (!sizeModifiedCallback_) {
+        boxBaseRender->SetLayoutCallback(nullptr);
+        return;
+    }
     boxBaseRender->SetLayoutCallback([sharedWeak = AceType::WeakClaim(this)]() {
         auto shared = sharedWeak.Upgrade();
         if (!shared) {
