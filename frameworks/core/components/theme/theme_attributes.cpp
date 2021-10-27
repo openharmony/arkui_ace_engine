@@ -83,6 +83,7 @@ const char THEME_PATTERN_SWIPER[] = "swiper_pattern";
 const char THEME_PATTERN_SWITCH[] = "switch_pattern";
 const char THEME_PATTERN_TOOLBAR[] = "toolbar_pattern";
 const char THEME_PATTERN_TOGGLE[] = "toggle_pattern";
+const char THEME_PATTERN_TOAST[] = "toast_pattern";
 const char THEME_DIALOG_TOGGLE[] = "dialog_pattern";
 
 // pattern general attributes
@@ -214,5 +215,10 @@ const char DIALOG_MAX_BUTTON_WIDTH[] = "dialog_max_button_width";
 const char DIALOG_MIN_BUTTON_WIDTH[] = "dialog_min_button_width";
 const char DIALOG_ACTIONS_TOP_PADDING[] = "dialog_actions_top_padding";
 const char DIALOG_MASK_COLOR_END[] = "dialog_mask_color_end";
+
+// pattern attributes fot toast
+const char TOAST_FONT_SIZE[] = "font_size";
+const char TOAST_TEXT_COLOR[] = "text_color";
+const char TOAST_BACKGROUND_COLOR[] = "background_color";
 
 } // namespace OHOS::Ace
