@@ -666,7 +666,7 @@ void FlutterRenderImage::DrawImageOnCanvas(
         dstRect.Left() - dstOffset.GetX(),
         dstRect.Top() - dstOffset.GetY(),
         dstRect.Width(), dstRect.Height());
-    
+
     int32_t subsetLeft = Round(srcRect.Left());
     int32_t subsetTop = Round(srcRect.Top());
     int32_t subsetWidth = Round(srcRect.Width());
@@ -737,7 +737,7 @@ void FlutterRenderImage::DrawImageOnCanvas(
     }
 #endif
     auto imgShader = useSubset ? image_->makeSubset(skSrcRect)->makeShader(xTileMode, yTileMode, &sampleMatrix)
-                                : image_->makeShader(xTileMode, yTileMode, &sampleMatrix);
+                               : image_->makeShader(xTileMode, yTileMode, &sampleMatrix);
     SkPaint skPaint = *paint.paint();
     skPaint.setShader(imgShader);
     canvas->canvas()->drawPaint(skPaint);
