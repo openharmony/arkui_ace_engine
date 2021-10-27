@@ -669,13 +669,13 @@ void FlutterRenderImage::DrawImageOnCanvas(
     
     int32_t subsetLeft = Round(srcRect.Left());
     int32_t subsetTop = Round(srcRect.Top());
-    // if use subset, try to stretch width and height, to avoid 1px jitter
-    int32_t subsetWidth =
-        std::min(static_cast<int32_t>(Round(srcRect.Width())) + 1, static_cast<int32_t>(Round(image_->width())) - 1);
-    int32_t subsetHeight =
-        std::min(static_cast<int32_t>(Round(srcRect.Height())) + 1, static_cast<int32_t>(Round(image_->height())) - 1);
+    int32_t subsetWidth = Round(srcRect.Width();
+    int32_t subsetHeight = Round(srcRect.Height();
     bool useSubset = false;
-    if (subsetWidth + 1 < image_->width() || subsetHeight + 1 < image_->height() || subsetLeft > 0 || subsetTop > 0) {
+    if (subsetWidth < image_->width() || subsetHeight < image_->height() || subsetLeft > 0 || subsetTop > 0) {
+        // if use subset, try to stretch width and height, to avoid 1px jitter
+        subsetWidth = std::min(subsetWidth + 1, static_cast<int32_t>(Round(image_->width())) - 1);
+        subsetHeight = std::min(subsetHeight + 1, static_cast<int32_t>(Round(image_->height())) - 1);
         useSubset = true;
     }
 
