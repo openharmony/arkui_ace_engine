@@ -669,8 +669,8 @@ void FlutterRenderImage::DrawImageOnCanvas(
     
     int32_t subsetLeft = Round(srcRect.Left());
     int32_t subsetTop = Round(srcRect.Top());
-    int32_t subsetWidth = Round(srcRect.Width();
-    int32_t subsetHeight = Round(srcRect.Height();
+    int32_t subsetWidth = Round(srcRect.Width());
+    int32_t subsetHeight = Round(srcRect.Height());
     bool useSubset = false;
     if (subsetWidth < image_->width() || subsetHeight < image_->height() || subsetLeft > 0 || subsetTop > 0) {
         // if use subset, try to stretch width and height, to avoid 1px jitter
