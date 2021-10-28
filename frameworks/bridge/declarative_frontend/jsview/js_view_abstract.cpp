@@ -1365,6 +1365,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
     ViewStackProcessor::GetInstance()->Push(menuComponent);
     auto menuTheme = GetTheme<SelectTheme>();
     menuComponent->SetTheme(menuTheme);
+    auto context = info.GetExecutionContext();
 
     auto paramArray = JSRef<JSArray>::Cast(info[0]);
     size_t size = paramArray->Length();
@@ -1383,8 +1384,9 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
         optionComponent->SetTheme(optionTheme);
         optionComponent->SetText(textComponent);
         optionComponent->SetValue(value);
-        optionComponent->SetCustomizedCallback([func = std::move(action)]() {
-            func->Execute();
+        optionComponent->SetCustomizedCallback([action, context] {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
+            action->Execute();
         });
         menuComponent->AppendOption(optionComponent);
     }
