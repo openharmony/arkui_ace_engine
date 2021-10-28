@@ -17,6 +17,9 @@
 
 #include <cerrno>
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef OHOS_STANDARD_SYSTEM
+#include <sys/prctl.h>
+#endif
 #include <sys/resource.h>
 #endif
 #include <sys/time.h>
@@ -276,9 +279,15 @@ void FlutterTaskExecutor::FillTaskTypeTable(TaskType type)
     char threadNameBuf[MAX_THREAD_NAME_SIZE] = { 0 };
     const char* threadName = threadNameBuf;
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef OHOS_STANDARD_SYSTEM
+    if (prctl(PR_GET_NAME, threadNameBuf) < 0) {
+        threadName = "unknown";
+    }
+#else
     if (pthread_getname_np(pthread_self(), threadNameBuf, sizeof(threadNameBuf)) != 0) {
         threadName = "unknown";
     }
+#endif
 #endif
 
     localTaskType = type;
