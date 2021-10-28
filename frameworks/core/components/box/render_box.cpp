@@ -126,7 +126,7 @@ void RenderBox::CreateDragDropRecognizer()
             event->SetPasteData(pasteData);
             event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
             event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
-            LOGE("[Engine Log] Unable to display drag events on the Previewer. Perform this operation on the "
+            LOGW("[Engine Log] Unable to display drag events on the Previewer. Perform this operation on the "
                 "emulator or a real device instead.");
             onDrag(event);
         }

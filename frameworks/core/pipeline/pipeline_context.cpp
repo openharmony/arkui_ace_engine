@@ -2606,6 +2606,22 @@ bool PipelineContext::GetIsDeclarative() const
     return false;
 }
 
+void PipelineContext::SetForbidePlatformQuit(bool forbidePlatformQuit)
+{
+    forbidePlatformQuit_ = forbidePlatformQuit;
+    auto stageElement = GetStageElement();
+    if (!stageElement) {
+        LOGE("Stage is null.");
+        return;
+    }
+    auto renderStage = AceType::DynamicCast<RenderStage>(stageElement->GetRenderNode());
+    if (!renderStage) {
+        LOGE("RenderStage is null.");
+        return;
+    }
+    renderStage->SetForbidSwipeToRight(forbidePlatformQuit_);
+}
+
 void PipelineContext::AddLayoutTransitionNode(const RefPtr<RenderNode>& node)
 {
     CHECK_RUN_ON(UI);

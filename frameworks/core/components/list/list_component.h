@@ -515,6 +515,16 @@ public:
         return scrollVibrate_;
     }
 
+    bool IsRotationVibrate() const
+    {
+        return rotationVibrate_;
+    }
+
+    void MarkNeedRotationVibrate(bool needVibrate)
+    {
+        rotationVibrate_ = needVibrate;
+    }
+
 private:
     EventMarker onRequestItem_;
     EventMarker onScroll_;
@@ -565,6 +575,7 @@ private:
     bool needDivider_ = false;
 
     bool scrollVibrate_ = true;
+    bool rotationVibrate_ = false;
 };
 
 } // namespace OHOS::Ace

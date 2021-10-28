@@ -471,6 +471,7 @@ ACE_EXPORT extern const char DOM_LIST_ITEM_OPACITY[];
 ACE_EXPORT extern const char DOM_LIST_ITEM_CENTER[];
 ACE_EXPORT extern const char DOM_LIST_CENTER_LAYOUT[];
 ACE_EXPORT extern const char DOM_LIST_SCROLL_VIBRATE[];
+ACE_EXPORT extern const char DOM_LIST_ROTATION_VIBRATE[];
 ACE_EXPORT extern const char DOM_LIST_DIVIDER[];
 ACE_EXPORT extern const char DOM_LIST_DIVIDER_COLOR[];
 ACE_EXPORT extern const char DOM_LIST_DIVIDER_HEIGHT[];

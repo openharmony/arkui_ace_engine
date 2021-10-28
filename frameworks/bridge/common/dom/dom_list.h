@@ -66,6 +66,11 @@ public:
         return scrollVibrate_;
     }
 
+    bool NeedRotationVibrate() const
+    {
+        return rotationVibrate_;
+    }
+
     bool GetItemCenter() const
     {
         return itemCenter_;
@@ -152,6 +157,7 @@ private:
     bool itemCenter_ = false;
     bool centerLayout_ = false;
     bool scrollVibrate_ = true;
+    bool rotationVibrate_ = false;
     bool scrollPage_ = false;
     bool chainAnimation_ = false;
     SpringChainProperty chainProperty_;

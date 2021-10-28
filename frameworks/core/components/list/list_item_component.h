@@ -250,6 +250,16 @@ public:
         needVibrate_ = needVibrate;
     }
 
+    bool IsRotationVibrate() const
+    {
+        return rotationVibrate_;
+    }
+
+    void MarkNeedRotationVibrate(bool needVibrate)
+    {
+        rotationVibrate_ = needVibrate;
+    }
+
     bool IsTitle() const
     {
         return isTitle_;
@@ -425,6 +435,7 @@ private:
     std::string indexKey_;
     std::string key_;
     bool needVibrate_ = true;
+    bool rotationVibrate_ = false;
     bool supportScale_ = true;
     bool supportOpacity_ = false;
     bool supportClick_ = true;

@@ -162,6 +162,11 @@ bool RenderScroll::HandleCrashTop()
 
 bool RenderScroll::UpdateOffset(Offset& delta, int32_t source)
 {
+    if (source == SCROLL_FROM_ROTATE) {
+        isFromRotate_ = true;
+    } else {
+        isFromRotate_ = false;
+    }
     if (!scrollable_->Available()) {
         return false;
     }

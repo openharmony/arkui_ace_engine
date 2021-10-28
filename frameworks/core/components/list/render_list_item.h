@@ -211,7 +211,7 @@ public:
         redraw_ = redraw;
     }
 
-    void HandleItemEffect();
+    void HandleItemEffect(bool isFromRotate = false);
 
     // judge is item at center of viewport or not, used on watch
     bool IsItemCenter(bool isVertical, Size viewport);
@@ -345,6 +345,7 @@ protected:
     RefPtr<InteractiveEffect> focusController_;
     RefPtr<RenderDisplay> renderDisplay_;
     bool needVibrate_ = true;
+    bool rotationVibrate_ = false;
     bool supportScale_ = true;
     bool supportOpacity_ = false;
     bool supportClick_ = true;

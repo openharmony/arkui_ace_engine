@@ -235,6 +235,11 @@ void RenderMultiChildScroll::Update(const RefPtr<Component>& component)
         vibrator_ = VibratorProxy::GetInstance().GetVibrator(context->GetTaskExecutor());
     }
 
+    rotationVibrate_ = listComponent->IsRotationVibrate();
+    if (rotationVibrate_ && !vibrator_ && context) {
+        vibrator_ = VibratorProxy::GetInstance().GetVibrator(context->GetTaskExecutor());
+    }
+
     if (listComponent->IsInRefresh()) {
         auto parent = GetParent().Upgrade();
         while (parent) {
@@ -520,6 +525,9 @@ bool RenderMultiChildScroll::HandleCrashTop()
     if (scrollVibrate_ && vibrator_) {
         vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH3);
     }
+    if (rotationVibrate_ && IsFromRotate()) {
+        vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH3);
+    }
 #endif
     return RenderScroll::HandleCrashTop();
 }
@@ -527,6 +535,9 @@ bool RenderMultiChildScroll::HandleCrashBottom()
 {
 #ifdef WEARABLE_PRODUCT
     if (scrollVibrate_ && vibrator_) {
+        vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH3);
+    }
+    if (rotationVibrate_ && IsFromRotate()) {
         vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH3);
     }
 #endif

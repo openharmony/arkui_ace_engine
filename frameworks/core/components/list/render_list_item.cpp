@@ -195,6 +195,11 @@ void RenderListItem::Update(const RefPtr<Component>& component)
             vibrator_ = VibratorProxy::GetInstance().GetVibrator(context->GetTaskExecutor());
         }
 
+        rotationVibrate_ = item->IsRotationVibrate();
+        if (rotationVibrate_ && !vibrator_ && context) {
+            vibrator_ = VibratorProxy::GetInstance().GetVibrator(context->GetTaskExecutor());
+        }
+
         supportScale_ = item->GetSupportScale();
         supportOpacity_ = item->GetSupportOpacity();
         supportClick_ = item->GetSupportClick();
@@ -299,7 +304,7 @@ void RenderListItem::ResetFocusEffect()
     }
 }
 
-void RenderListItem::HandleItemEffect()
+void RenderListItem::HandleItemEffect(bool isFromRotate)
 {
     if (!focusController_) {
         ResetFocusEffect();
@@ -308,6 +313,9 @@ void RenderListItem::HandleItemEffect()
     if (currentState_ != lastState_) {
 #ifdef WEARABLE_PRODUCT
         if (needVibrate_ && lastState_ == ItemState::NEARBY && currentState_ == ItemState::FOCUS && vibrator_) {
+            vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH1);
+        }
+        if (rotationVibrate_ && isFromRotate) {
             vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH1);
         }
 #endif

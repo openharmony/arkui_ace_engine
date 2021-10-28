@@ -841,17 +841,25 @@ void SetSwipeToDismiss(const v8::FunctionCallbackInfo<v8::Value>& args, int32_t 
         LOGE("SetSwipeToDismiss, context is empty!");
         return;
     }
-    bool forbideQuit = false;
-    v8::String::Utf8Value argsJsStr(isolate, args[index]);
-    if (!(*argsJsStr)) {
+
+    if (!args[index]->IsArray()) {
+        LOGE("SetSwipeToDismiss: argv is not Array");
         return;
     }
-    std::string argsStr(*argsJsStr);
 
-    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(argsStr);
-    if (argsPtr != nullptr && argsPtr->IsBool()) {
-        forbideQuit = argsPtr->GetBool();
+    v8::Local<v8::Array> arrayVal = v8::Local<v8::Array>::Cast(args[index]);
+    uint32_t len = arrayVal->Length();
+    if (len < 2) {
+        LOGE("SetSwipeToDismiss: invalid callback value");
+        return;
     }
+
+    bool forbideQuit = false;
+    v8::Local<v8::Value> flag = arrayVal->Get(context, 0).ToLocalChecked();
+    if (flag->IsBoolean()) {
+        forbideQuit = flag->BooleanValue(isolate);
+    }
+
     auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
     WeakPtr<PipelineContext> pipelineContextWeak = (*delegate)->GetPipelineContext();
     auto uiTaskExecutor = (*delegate)->GetUiTask();

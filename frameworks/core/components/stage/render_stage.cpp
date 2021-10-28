@@ -105,6 +105,11 @@ void RenderStage::WatchDragToBack()
 
 void RenderStage::HandleDragUpdate(double deltaX)
 {
+    if (forbidSwipeToRight_) {
+        LOGE("Swipe to right is forbidden.");
+        return;
+    }
+
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         LOGE("HandleDragUpdate : context is null.");
@@ -151,6 +156,11 @@ void RenderStage::HandleDragUpdate(double deltaX)
 
 void RenderStage::HandleDragStart()
 {
+    if (forbidSwipeToRight_) {
+        LOGE("Swipe to right is forbidden.");
+        return;
+    }
+
     auto stageElement = GetStageElement(context_);
     if (!stageElement) {
         LOGE("Notify drag back failed. stageElement is null.");
@@ -178,6 +188,11 @@ void RenderStage::HandleDragStart()
 
 void RenderStage::HandleDragEnd()
 {
+    if (forbidSwipeToRight_) {
+        LOGE("Swipe to right is forbidden.");
+        return;
+    }
+
     if (!controllerIn_ || !controllerOut_) {
         LOGE("HandleDragEnd : controllerIn or controllerOut is null.");
         return;
