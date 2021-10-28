@@ -18,7 +18,6 @@
 #include <algorithm>
 #include <set>
 
-#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"

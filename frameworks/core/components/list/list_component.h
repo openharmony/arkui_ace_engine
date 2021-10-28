@@ -525,6 +525,16 @@ public:
         rotationVibrate_ = needVibrate;
     }
 
+    void SetAccessibilityDisabled(bool disable)
+    {
+        accessibilityDisabled_ = disable;
+    }
+
+    bool IsAccessibilityDisabled() const
+    {
+        return accessibilityDisabled_;
+    }
+
 private:
     EventMarker onRequestItem_;
     EventMarker onScroll_;
@@ -576,6 +586,7 @@ private:
 
     bool scrollVibrate_ = true;
     bool rotationVibrate_ = false;
+    bool accessibilityDisabled_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -478,6 +478,7 @@ const char DOM_LIST_DIVIDER_HEIGHT[] = "dividerHeight";
 const char DOM_LIST_DIVIDER_LENGTH[] = "dividerLength";
 const char DOM_LIST_DIVIDER_ORIGIN[] = "dividerOrigin";
 const char DOM_LIST_ATTR_SELECTED[] = "selected";
+const char DOM_LIST_ACCESSIBILITY_DISABLED[] = "accessibilitydisabled";
 const char DOM_SCROLL_SCROLLBAR[] = "scrollbar";
 const char DOM_SCROLL_SCROLLBAR_OFF[] = "off";
 const char DOM_SCROLL_SCROLLBAR_ON[] = "on";

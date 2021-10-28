@@ -98,12 +98,14 @@ private:
     int32_t length_ = 0;
     int32_t indexOffset_ = 0;
     int32_t tailLength_ = 0;
+    bool accessibilityDisabled_ = false;
 
     int32_t preBuildCount_ = 0;
     std::list<RefPtr<Component>> newListItems_;
     std::map<int32_t, RefPtr<Component>> newListItemsMap_;
     std::vector<RefPtr<Component>> needRefreshItems_;
     std::vector<RefPtr<Component>> itemComponents_;
+    std::pair<int32_t, int32_t> itemVectorHit_ {-1, -1};
     RefPtr<Component> listComponent_;
     bool needRefresh_ = false;
     bool isJsCard_ = false;

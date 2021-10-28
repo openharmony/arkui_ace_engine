@@ -612,6 +612,11 @@ public:
         return imageFill;
     }
 
+    virtual NodeId GetDirtyNodeId() const
+    {
+        return nodeId_;
+    }
+
 protected:
     virtual void OnMounted(const RefPtr<DOMNode>& parentNode) {};
     virtual void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) {};

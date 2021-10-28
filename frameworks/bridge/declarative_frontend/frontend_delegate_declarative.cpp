@@ -893,7 +893,7 @@ void FrontendDelegateDeclarative::TriggerPageUpdate(int32_t pageId, bool directE
 
     taskExecutor_->PostTask(
         [updateTask, pipelineContext, directExecute]() {
-            pipelineContext->AddPageUpdateTask(std::move(updateTask), directExecute);
+            pipelineContext->AddPageUpdateTask({ std::move(updateTask) }, directExecute);
         },
         TaskExecutor::TaskType::UI);
 }

@@ -543,12 +543,18 @@ void PipelineContext::FlushPostAnimation()
 void PipelineContext::FlushPageUpdateTasks()
 {
     CHECK_RUN_ON(UI);
-    while (!pageUpdateTasks_.empty()) {
-        const auto& task = pageUpdateTasks_.front();
-        if (task) {
-            task();
+    decltype(pageUpdateTasks_) pageUpdateTasks(std::move(pageUpdateTasks_));
+    while (!pageUpdateTasks.empty()) {
+        auto task = pageUpdateTasks.front();
+        if (task.frameDelay_ == 0) {
+            if (task.taskFunc_) {
+                task.taskFunc_();
+            }
+        } else {
+            task.frameDelay_--;
+            AddPageUpdateTask(std::move(task));
         }
-        pageUpdateTasks_.pop();
+        pageUpdateTasks.pop();
     }
 }
 
@@ -2311,7 +2317,7 @@ void PipelineContext::RootLostFocus() const
     rootElement_->LostFocus();
 }
 
-void PipelineContext::AddPageUpdateTask(std::function<void()>&& task, bool directExecute)
+void PipelineContext::AddPageUpdateTask(UpdateTask&& task, bool directExecute)
 {
     CHECK_RUN_ON(UI);
     pageUpdateTasks_.emplace(std::move(task));

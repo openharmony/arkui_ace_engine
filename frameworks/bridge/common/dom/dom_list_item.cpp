@@ -448,4 +448,12 @@ RefPtr<Component> DOMListItem::CompositeSpecializedComponent(const std::vector<R
     return listItemComponent_;
 }
 
+NodeId DOMListItem::GetDirtyNodeId() const
+{
+    if (key_.empty()) {
+        return DOMNode::GetNodeId();
+    }
+    return GetParentId();
+}
+
 } // namespace OHOS::Ace::Framework

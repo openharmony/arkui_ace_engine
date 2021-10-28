@@ -358,7 +358,7 @@ void V8DeclarativeEngineInstance::TriggerPageUpdate()
     auto delegate =
         static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
     auto pipelineContext = (*delegate)->GetPipelineContext();
-    pipelineContext->AddPageUpdateTask([] {});
+    pipelineContext->AddPageUpdateTask({ [] {} });
 }
 
 void V8DeclarativeEngineInstance::PostJsTask(std::function<void()>&& task)
