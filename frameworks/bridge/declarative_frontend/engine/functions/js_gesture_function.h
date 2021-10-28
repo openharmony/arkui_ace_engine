@@ -28,7 +28,7 @@ public:
     explicit JsGestureFunction(const JSRef<JSFunc>& jsFunction)
         : JsFunction(JSRef<JSObject>(), jsFunction) {}
 
-    ~JsGestureFunction()
+    ~JsGestureFunction() override
     {
         LOGD("Destroy: JsGestureFunction");
     };

@@ -40,7 +40,7 @@ public:
         jsViewMapperFunc_ = jsViewMapperFunc;
     }
 
-    ~JsForEachFunction()
+    ~JsForEachFunction() override
     {
         LOGD("Destroy: JsForEachFunction");
     }

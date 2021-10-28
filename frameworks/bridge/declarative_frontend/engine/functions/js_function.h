@@ -40,7 +40,7 @@ protected:
 
 public:
     JsFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction);
-    virtual ~JsFunction();
+    ~JsFunction() override;
 };
 
 template<class T, int32_t ARGC = 0>
@@ -53,7 +53,7 @@ public:
     JsEventFunction(const JSRef<JSFunc>& jsFunction, ParseFunc parser)
         : JsFunction(JSRef<JSObject>(), jsFunction), parser_(parser)
     {}
-    ~JsEventFunction() = default;
+    ~JsEventFunction() override = default;
 
     void Execute()
     {
