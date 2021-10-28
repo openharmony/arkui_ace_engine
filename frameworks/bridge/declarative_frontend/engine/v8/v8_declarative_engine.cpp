@@ -54,8 +54,10 @@ namespace {
 
 constexpr int32_t V8_MAX_STACK_SIZE = 1 * 1024 * 1024;
 void* g_debugger = nullptr;
+bool g_flagNeedDebugBreakPoint = false;
 using StartDebug = void (*)(
-    const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context, std::string componentName);
+    const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context, std::string componentName,
+    const bool flagNeedDebugBreakPoint, const int32_t instanceId);
 using WaitingForIde = void (*)();
 
 bool CallEvalBuf(v8::Isolate* isolate, const char* src, int32_t length = -1, const char* filename = nullptr)
@@ -814,19 +816,21 @@ void LoadDebuggerSo()
 }
 
 void StartDebuggerAgent(
-    const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context, std::string componentName)
+    const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context, std::string componentName,
+    const bool flagNeedDebugBreakPoint, const int32_t instanceId)
 {
     LOGI("StartAgent");
     if (g_debugger == nullptr) {
         LOGE("g_debugger is null");
         return;
     }
+    g_flagNeedDebugBreakPoint = flagNeedDebugBreakPoint;
     StartDebug startDebug = (StartDebug)dlsym(g_debugger, "StartDebug");
     if (startDebug == nullptr) {
         LOGE("StartDebug=NULL, dlerror=%s", dlerror());
         return;
     }
-    startDebug(platform, context, componentName);
+    startDebug(platform, context, componentName, flagNeedDebugBreakPoint, instanceId);
 }
 
 // -----------------------
@@ -849,7 +853,12 @@ bool V8DeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     GetPlatform();
 
     // if load debugger.so successfully, debug mode
-    if (IsDebugVersion() && NeedDebugBreakPoint()) {
+    if (IsDebugVersion()) {
+        if (NeedDebugBreakPoint()) {
+            LOGI("NeedDebugBreakPoint = TRUE");
+        } else {
+            LOGI("NeedDebugBreakPoint = FALSE");
+        }
         LoadDebuggerSo();
         LOGI("debug mode in V8DeclarativeEngine");
     }
@@ -880,7 +889,7 @@ bool V8DeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
                 LOGE("GetInstanceName fail, %s", instanceName.c_str());
                 return false;
             }
-            StartDebuggerAgent(GetPlatform(), context, instanceName);
+            StartDebuggerAgent(GetPlatform(), context, instanceName, NeedDebugBreakPoint(), instanceId_);
         }
     }
     nativeEngine_ =

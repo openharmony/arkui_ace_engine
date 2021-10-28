@@ -17,7 +17,7 @@
 
 namespace V8Debugger {
 
-static std::unique_ptr<Inspector> g_inspector = nullptr;
+static thread_local Inspector* g_inspector = nullptr;
 
 static void* HandleClient(void* inspector)
 {
@@ -53,34 +53,37 @@ void DispatchMsgToV8(int sign)
 void StartDebug(
     const std::unique_ptr<v8::Platform>& platform,
     const v8::Local<v8::Context>& context,
-    const std::string& componentName)
+    const std::string& componentName,
+    const bool flagNeedDebugBreakPoint,
+    const int32_t instanceId)
 {
     LOGI("StartDebug!");
-    g_inspector = std::make_unique<Inspector>();
+    g_inspector = new Inspector();
     if (g_inspector == nullptr) {
         LOGE("g_inspector = nullptr!");
         return;
     }
     g_inspector->InitializeInspector(platform, context);
-    g_inspector->waitingForDebugger = true;
+    g_inspector->waitingForDebugger = flagNeedDebugBreakPoint;
     pthread_t tid;
-    if (pthread_create(&tid, nullptr, &HandleClient, reinterpret_cast<void*>(g_inspector.get())) != 0) {
+    if (pthread_create(&tid, nullptr, &HandleClient, reinterpret_cast<void*>(g_inspector)) != 0) {
         LOGE("pthread_create fail!");
         return;
     }
+    g_inspector->websocketServer->instanceId = instanceId;
     g_inspector->websocketServer->tid = pthread_self();
     g_inspector->websocketServer->componentName = componentName;
     signal(SIGALRM, &DispatchMsgToV8);
     while (g_inspector->waitingForDebugger) {
         usleep(g_inspector->DEBUGGER_WAIT_SLEEP_TIME);
     }
+    LOGI("v8_debugger server connected.");
 }
 
 void WaitingForIde()
 {
     LOGI("WaitingForIde");
     g_inspector->inspectorClient->SchedulePauseOnNextStatement(ConvertToStringView("Break on start"));
-    g_inspector->inspectorClient->WaitFrontendMessageOnPause();
 }
 
 void Inspector::OnMessage(const std::string& message)
@@ -95,7 +98,6 @@ void Inspector::OnMessage(const std::string& message)
     std::string startDebugging("Runtime.runIfWaitingForDebugger");
     if (message.find(startDebugging, 0) != std::string::npos) {
         waitingForDebugger = false;
-        return;
     }
 
     if (inspectorClient->GetPausedFlag()) {

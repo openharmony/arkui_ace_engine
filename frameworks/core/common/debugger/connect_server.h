@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_V8_DEBUGGER_WS_SERVER_H
-#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_V8_DEBUGGER_WS_SERVER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DEBUGGER_CONNECT_SERVER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DEBUGGER_CONNECT_SERVER_H
 
 #include <boost/asio/error.hpp>
 #include <boost/asio/local/stream_protocol.hpp>
@@ -22,35 +22,36 @@
 #include <boost/beast/websocket.hpp>
 #include <functional>
 #include <iostream>
-#include <vector>
 
-namespace V8Debugger {
-
+namespace OHOS::Ace {
 namespace beast = boost::beast;
 namespace websocket = beast::websocket;
 using localSocket = boost::asio::local::stream_protocol;
-class WsServer {
+
+class ConnectServer {
 public:
-    explicit WsServer(std::function<void(std::string)> onMessage) : tid(0), instanceId(0),
-        wsOnMessage(std::move(onMessage)) {}
-    ~WsServer() {};
+    ConnectServer(const std::string& bundle, std::function<void(std::string)> onMessage, bool flagNeedDebugBreakPoint)
+        : bundleName_(bundle), wsOnMessage_(std::move(onMessage))
+    {
+        waitingForDebugger_ = flagNeedDebugBreakPoint;
+    }
+    ~ConnectServer() = default;
     void RunServer();
+    void StopServer();
     void SendMessage(const std::string& message) const;
-    void SetTerminateExecutionFlag(bool flag);
-    pthread_t tid;
-    int32_t instanceId;
-    std::string componentName;
+    void WaitMessage() const;
+    void Register(int32_t pid);
+    bool waitingForDebugger_;
 
 private:
-    void StartListening();
-    void WaitFrontendMessage() const;
-    volatile bool terminateExecution = false;
+    volatile bool terminateExecution_ = false;
+    std::string bundleName_;
+    std::function<void(std::string)> wsOnMessage_;
+    std::unique_ptr<websocket::stream<localSocket::socket>> webSocket_ = nullptr;
     static constexpr int DEBUGGER_WAIT_SEND_SIGNAL_TIME = 100;
-
-    std::function<void(std::string)> wsOnMessage;
-    std::unique_ptr<websocket::stream<localSocket::socket>> ws = nullptr;
+    int appPid;
 };
 
-} // namespace V8Debugger
+} // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_V8_DEBUGGER_WS_SERVER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DEBUGGER_CONNECT_SERVER_H

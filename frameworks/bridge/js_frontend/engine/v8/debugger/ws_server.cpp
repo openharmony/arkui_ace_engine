@@ -33,9 +33,9 @@ void WsServer::RunServer()
 {
     try {
         boost::asio::io_context ioContext;
-        int appPid = getpid();
-        std::string pidStr = std::to_string(appPid);
-        std::string sockName = '\0' + pidStr + componentName;
+        std::string tidStr = std::to_string(tid);
+        std::string instanceIdStr = std::to_string(instanceId);
+        std::string sockName = '\0' + instanceIdStr + componentName;
         localSocket::endpoint endPoint(sockName);
         localSocket::socket socket(ioContext);
         localSocket::acceptor acceptor(ioContext, endPoint);

@@ -35,7 +35,9 @@ extern "C" {
 void StartDebug(
     const std::unique_ptr<v8::Platform>& platform,
     const v8::Local<v8::Context>& context,
-    const std::string& componentName);
+    const std::string& componentName,
+    const bool flagNeedDebugBreakPoint,
+    const int32_t instanceId);
 
 void WaitingForIde();
 #ifdef __cplusplus
