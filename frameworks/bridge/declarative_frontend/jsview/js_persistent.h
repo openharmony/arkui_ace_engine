@@ -22,9 +22,9 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSPersistent : public AceType {
+class JSPersistent final : public Referenced {
 public:
-    explicit JSPersistent(bool needCrossThread, const std::string& db)
+    JSPersistent(bool needCrossThread, const std::string& db)
     {
         dbFile_ = db;
         needCrossThread_ = needCrossThread;
