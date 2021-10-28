@@ -228,6 +228,7 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
             decorationPainter->PaintInvert(outerRRect, canvas->canvas(), backDecoration_->GetInvert(), bgColor);
             decorationPainter->PaintSepia(outerRRect, canvas->canvas(), backDecoration_->GetSepia(), bgColor);
             decorationPainter->PaintHueRotate(outerRRect, canvas->canvas(), backDecoration_->GetHueRotate(), bgColor);
+            decorationPainter->PaintColorBlend(outerRRect, canvas->canvas(), backDecoration_->GetColorBlend(), bgColor);
         }
     }
 
@@ -251,6 +252,7 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
             decorationPainter->PaintInvert(outerRRect, canvas->canvas(), frontDecoration_->GetInvert(), bgColor);
             decorationPainter->PaintSepia(outerRRect, canvas->canvas(), frontDecoration_->GetSepia(), bgColor);
             decorationPainter->PaintHueRotate(outerRRect, canvas->canvas(), frontDecoration_->GetHueRotate(), bgColor);
+            decorationPainter->PaintColorBlend(outerRRect, canvas->canvas(), frontDecoration_->GetColorBlend(), bgColor);
         }
     }
 }

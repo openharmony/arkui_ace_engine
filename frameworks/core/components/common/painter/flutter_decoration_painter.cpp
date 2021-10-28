@@ -1,5 +1,4 @@
-
-/*
+ /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +51,7 @@ constexpr float SWEEP_ANGLE = 45.0f;
 constexpr float EXTEND = 1024.0f;
 constexpr float BRIGHT_DARK = 230.0f;
 constexpr float BRIGHT_LIGHT = 45.0f;
+constexpr uint32_t COLOR_MASK = 0xff000000;
 
 class GradientShader {
 public:
@@ -1419,20 +1419,22 @@ void FlutterDecorationPainter::PaintContrast(const flutter::RRect& outerRRect, S
 void FlutterDecorationPainter::PaintColorBlend(const flutter::RRect& outerRRect, SkCanvas* canvas,
     const Color& colorBlend, const Color& color)
 {
-    if (canvas) {
-        SkAutoCanvasRestore acr(canvas, true);
-        canvas->clipRRect(outerRRect.sk_rrect, true);
-        SkPaint paint;
-        paint.setAntiAlias(true);
+    if (colorBlend.GetValue() != COLOR_MASK) {
+        if (canvas) {
+            SkAutoCanvasRestore acr(canvas, true);
+            canvas->clipRRect(outerRRect.sk_rrect, true);
+            SkPaint paint;
+            paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
-        paint.setColorFilter(SkColorFilter::MakeModeFilter(
-            SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
-            SkBlendMode::kPlus));
+            paint.setColorFilter(SkColorFilter::MakeModeFilter(
+                SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
+                SkBlendMode::kPlus));
 #else
-        paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
 #endif
-        SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
-        canvas->saveLayer(slr);
+            SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+            canvas->saveLayer(slr);
+        }
     }
 }
 
