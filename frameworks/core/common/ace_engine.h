@@ -20,6 +20,7 @@
 #include <mutex>
 #include <unordered_map>
 
+#include "base/json/json_util.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_page.h"
@@ -36,7 +37,8 @@ class ACE_EXPORT AceEngine {
 public:
     ~AceEngine() = default;
 
-    void AddContainer(int32_t instanceId, const RefPtr<Container>& container);
+    void AddContainer(int32_t instanceId, const RefPtr<Container>& container,
+        const std::string instanceName = "default");
     void RemoveContainer(int32_t instanceId);
     RefPtr<Container> GetContainer(int32_t instanceId);
     void RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor);
@@ -50,7 +52,10 @@ public:
 
 private:
     AceEngine();
-
+    #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+    std::string GetInstanceMapMessage(const char* messageType, const int32_t instanceId);
+    std::unordered_map<int32_t, std::string> instanceMap_;
+    #endif
     mutable std::mutex mutex_;
     std::unordered_map<int32_t, RefPtr<Container>> containerMap_;
     RefPtr<WatchDog> watchDog_;

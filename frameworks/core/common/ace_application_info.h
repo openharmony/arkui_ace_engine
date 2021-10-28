@@ -103,6 +103,11 @@ public:
         return needDebugBreakpoint_;
     }
 
+    void SetNeedDebugBreakPoint(const bool needDebugBreakpoint)
+    {
+        needDebugBreakpoint_ = needDebugBreakpoint;
+    }
+
     void SetCardType()
     {
         isCardType_ = true;
