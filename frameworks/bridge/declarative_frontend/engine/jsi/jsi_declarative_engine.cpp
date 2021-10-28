@@ -365,6 +365,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     }
 #endif
 
+    LocalScope socpe(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
     InitGlobalObjectTemplate();
     InitConsoleModule();
     InitAceModule();
@@ -589,6 +590,7 @@ void JsiDeclarativeEngineInstance::DestroyRootViewHandle(int32_t pageId)
         panda::Local<panda::ObjectRef> rootView = rootViewMap_[pageId].ToLocal(arkRuntime->GetEcmaVm());
         JSView* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
         jsView->Destroy(nullptr);
+        rootViewMap_[pageId].FreeGlobalHandleAddr();
         rootViewMap_.erase(pageId);
     }
 }
@@ -605,9 +607,11 @@ void JsiDeclarativeEngineInstance::DestroyAllRootViewHandle()
         return;
     }
     for (const auto& pair : rootViewMap_) {
-        panda::Local<panda::ObjectRef> rootView = pair.second.ToLocal(arkRuntime->GetEcmaVm());
+        auto globalRootView = pair.second;
+        panda::Local<panda::ObjectRef> rootView = globalRootView.ToLocal(arkRuntime->GetEcmaVm());
         JSView* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
         jsView->Destroy(nullptr);
+        globalRootView.FreeGlobalHandleAddr();
     }
     rootViewMap_.clear();
 }

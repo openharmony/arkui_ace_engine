@@ -36,28 +36,28 @@ template<typename S>
 JsiType<T>::JsiType(panda::Local<S> val)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), panda::Local<T>(val));
+    handle_ = Global<T>(runtime->GetEcmaVm(), val);
 }
 
 template<typename T>
 JsiType<T>::JsiType(panda::Global<T> other)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), other.ToLocal(runtime->GetEcmaVm()));
+    handle_ = Global<T>(runtime->GetEcmaVm(), other);
 }
 
 template<typename T>
 JsiType<T>::JsiType(const JsiType<T>& rhs)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_.ToLocal(runtime->GetEcmaVm()));
+    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_);
 }
 
 template<typename T>
 JsiType<T>::JsiType(JsiType<T>&& rhs)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_.ToLocal(runtime->GetEcmaVm()));
+    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_);
     rhs.handle_.FreeGlobalHandleAddr();
 }
 
@@ -65,7 +65,7 @@ template<typename T>
 JsiType<T>& JsiType<T>::operator=(const JsiType<T>& rhs)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_.ToLocal(runtime->GetEcmaVm()));
+    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_);
     return *this;
 }
 
@@ -73,7 +73,7 @@ template<typename T>
 JsiType<T>& JsiType<T>::operator=(JsiType<T>&& rhs)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_.ToLocal(runtime->GetEcmaVm()));
+    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_);
     rhs.handle_.FreeGlobalHandleAddr();
     return *this;
 }

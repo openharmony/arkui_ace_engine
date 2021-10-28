@@ -48,6 +48,18 @@
 #define JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(exec, ...) \
     CHECK_JAVASCRIPT_SCOPE(exec, __VA_ARGS__)            \
     JAVASCRIPT_EXECUTION_SCOPE(exec)
+#elif USE_ARK_ENGINE
+#define JAVASCRIPT_EXECUTION_SCOPE(exec) \
+    panda::LocalScope socpe(exec.vm_);
+#define JAVASCRIPT_EXECUTION_SCOPE_STATIC                                                                \
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime()); \
+    panda::LocalScope socpe(runtime->GetEcmaVm());
+#define CHECK_JAVASCRIPT_SCOPE(exec, ...)                                               \
+    if (JsiDeclarativeEngineInstance::GetJsRuntime() == nullptr || exec.vm_ == nullptr) \
+        return __VA_ARGS__;
+#define JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(exec, ...) \
+    CHECK_JAVASCRIPT_SCOPE(exec, __VA_ARGS__)            \
+    JAVASCRIPT_EXECUTION_SCOPE(exec)
 #else
 #define JAVASCRIPT_EXECUTION_SCOPE(exec)
 #define JAVASCRIPT_EXECUTION_SCOPE_STATIC
