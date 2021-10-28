@@ -614,27 +614,8 @@ void CameraCallback::OnCameraSizeChange(double width, double height)
         return;
     }
 
-    std::vector<struct ::OHOS::WMDisplayInfo> displays;
-    ::OHOS::WindowManager::GetInstance()->GetDisplays(displays);
-    if (displays.size() <= 0) {
-        LOGE("WindowManager::GetDisplays return no screen.");
-        return;
-    }
-
-    auto maxWidth = displays[0].width;
-    auto maxHeight = displays[0].height;
-    if (width + windowOffset_.GetX() > maxWidth) {
-        windowSize_.SetWidth(maxWidth - windowOffset_.GetX());
-    } else {
-        windowSize_.SetWidth(width);
-    }
-
-    if (height + windowOffset_.GetY() > maxHeight) {
-        windowSize_.SetHeight(maxHeight - windowOffset_.GetY());
-    } else {
-        windowSize_.SetHeight(height);
-    }
-
+    windowSize_.SetWidth(width);
+    windowSize_.SetHeight(height);
     sizeInitSucceeded_ = true;
     LOGI("CameraCallback::OnCameraSizeChange success: %{public}lf  %{public}lf.", width, height);
     PrepareCamera(false);
@@ -649,17 +630,13 @@ void CameraCallback::OnCameraOffsetChange(double x, double y)
         return;
     }
 
-    bool sizeChange = false;
     auto maxWidth = displays[0].width;
     auto maxHeight = displays[0].height;
-    if (x + windowSize_.Width() > maxWidth) {
-        windowSize_.SetWidth(maxWidth - x);
-        sizeChange = true;
-    }
-
-    if (y + windowSize_.Height() > maxHeight) {
-        windowSize_.SetHeight(maxHeight - y);
-        sizeChange = true;
+    bool isIllegalOffset = (int32_t)x + (int32_t)windowSize_.Width() > maxWidth
+                    || (int32_t)y + (int32_t)windowSize_.Height() > maxHeight;
+    if (isIllegalOffset) {
+        LOGE("CameraCallback::OnCameraOffsetChange: valid offset(%{public}lf, %{public}lf).", x, y);
+        return;
     }
 
     windowOffset_.SetX(x);
