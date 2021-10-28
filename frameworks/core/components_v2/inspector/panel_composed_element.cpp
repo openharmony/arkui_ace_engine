@@ -125,7 +125,7 @@ std::string PanelComposedElement::GetFullHeight() const
     }
     auto renderPanel = AceType::DynamicCast<RenderSlidingPanel>(node);
     if (renderPanel) {
-        return std::to_string(renderPanel->GetFullHeight());
+        return renderPanel->GetFullHeight().ToString();
     }
     return "-";
 }
@@ -138,7 +138,7 @@ std::string PanelComposedElement::GetHalfHeight() const
     }
     auto renderPanel = AceType::DynamicCast<RenderSlidingPanel>(node);
     if (renderPanel) {
-        return std::to_string(renderPanel->GetHalfHeight());
+        return renderPanel->GetHalfHeight().ToString();
     }
     return "-";
 }
@@ -151,7 +151,7 @@ std::string PanelComposedElement::GetMiniHeight() const
     }
     auto renderPanel = AceType::DynamicCast<RenderSlidingPanel>(node);
     if (renderPanel) {
-        return std::to_string(renderPanel->GetMiniHeight());
+        return renderPanel->GetMiniHeight().ToString();
     }
     return "-";
 }

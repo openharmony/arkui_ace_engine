@@ -113,19 +113,19 @@ public:
         return false;
     }
 
-    double GetFullHeight() const
+    const Dimension& GetFullHeight() const
     {
-        return fullHeight_.first.Value();
+        return fullHeight_.first;
     }
 
-    double GetHalfHeight() const
+    const Dimension& GetHalfHeight() const
     {
-        return halfHeight_.first.Value();
+        return halfHeight_.first;
     }
 
-    double GetMiniHeight() const
+    const Dimension& GetMiniHeight() const
     {
-        return miniHeight_.first.Value();
+        return miniHeight_.first;
     }
 
     void UpdateTouchRect() override;
