@@ -255,7 +255,7 @@ void FlutterRenderImage::ImageDataPaintSuccess(const fml::RefPtr<flutter::Canvas
         return;
     }
     UpdateLoadSuccessState();
-    image_ = image->image();
+    image_ = image;
     skiaDom_ = nullptr;
     svgDom_ = nullptr;
     if (imageDataNotReady_) {
@@ -510,7 +510,7 @@ void FlutterRenderImage::Paint(RenderContext& context, const Offset& offset)
     if (pixmap_) {
         colorSpace = ColorSpaceToSkColorSpace(pixmap_);
     } else if (image_) {
-        colorSpace = image_->refColorSpace();
+        colorSpace = image_->image()->refColorSpace();
     }
 #ifdef USE_SYSTEM_SKIA
     paint.paint()->setColor4f(paint.paint()->getColor4f(), colorSpace.get());
@@ -613,7 +613,9 @@ void FlutterRenderImage::CanvasDrawImageRect(
                 true);
 #endif
         }
-        image_ = std::move(skImage);
+        auto canvasImage = flutter::CanvasImage::Create();
+        canvasImage->set_image(flutter::SkiaGPUObject<SkImage>(skImage, renderTaskHolder_->unrefQueue));
+        image_ = canvasImage;
         if (!VerifySkImageDataFromPixmap()) {
             LOGE("pixmap paint failed due to SkImage data verification fail. rawImageSize: %{public}s",
                 rawImageSize_.ToString().c_str());
@@ -736,8 +738,8 @@ void FlutterRenderImage::DrawImageOnCanvas(
             break;
     }
 #endif
-    auto imgShader = useSubset ? image_->makeSubset(skSrcRect)->makeShader(xTileMode, yTileMode, &sampleMatrix)
-                               : image_->makeShader(xTileMode, yTileMode, &sampleMatrix);
+    auto imgShader = useSubset ? image_->image()->makeSubset(skSrcRect)->makeShader(xTileMode, yTileMode, &sampleMatrix)
+                               : image_->image()->makeShader(xTileMode, yTileMode, &sampleMatrix);
     SkPaint skPaint = *paint.paint();
     skPaint.setShader(imgShader);
     canvas->canvas()->drawPaint(skPaint);
@@ -787,7 +789,7 @@ void FlutterRenderImage::PaintBgImage(
         auto skSrcRect = SkRect::MakeXYWH(0.0, 0.0, image_->width(), image_->height());
         auto skDstRect =
             SkRect::MakeXYWH(realDstRect.Left(), realDstRect.Top(), realDstRect.Width(), realDstRect.Height());
-        canvas->canvas()->drawImageRect(image_, skSrcRect, skDstRect, paint.paint());
+        canvas->canvas()->drawImageRect(image_->image(), skSrcRect, skDstRect, paint.paint());
     }
 }
 
@@ -1108,7 +1110,7 @@ bool FlutterRenderImage::IsSourceWideGamut() const
     if (sourceInfo_.IsSvg() || !image_) {
         return false;
     }
-    return ImageProvider::IsWideGamut(image_->refColorSpace());
+    return ImageProvider::IsWideGamut(image_->image()->refColorSpace());
 }
 
 bool FlutterRenderImage::RetryLoading()
