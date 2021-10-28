@@ -55,6 +55,11 @@ void JSPersistent::DestructorCallback(JSPersistent* persistent)
 
 void JSPersistent::Set(const JSCallbackInfo& args)
 {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
+        "emulator or a real device instead.");
+    return;
+#endif
     if (args.Length() < 2) {
         LOGW("fail to set persistent data");
         return;
@@ -82,6 +87,11 @@ void JSPersistent::Set(const JSCallbackInfo& args)
 
 void JSPersistent::Get(const JSCallbackInfo& args)
 {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
+        "emulator or a real device instead.");
+    return;
+#endif
     if (args.Length() < 1) {
         LOGW("fail to Get persistent data");
         return;
@@ -101,6 +111,11 @@ void JSPersistent::Get(const JSCallbackInfo& args)
 
 void JSPersistent::Delete(const JSCallbackInfo& args)
 {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
+        "emulator or a real device instead.");
+    return;
+#endif
     if (args.Length() < 1) {
         LOGW("fail to Delete persistent data");
         return;
@@ -117,6 +132,11 @@ void JSPersistent::Delete(const JSCallbackInfo& args)
 
 void JSPersistent::Clear(const JSCallbackInfo& args)
 {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
+        "emulator or a real device instead.");
+    return;
+#endif    
     auto container = Container::Current();
     if (!container) {
         LOGW("container is null");

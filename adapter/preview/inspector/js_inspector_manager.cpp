@@ -422,15 +422,16 @@ void JsInspectorManager::DumpNodeTreeInfo(int32_t depth, NodeId nodeID)
 void JsInspectorManager::GetChildrenJSONArray(
     int32_t depth, RefPtr<AccessibilityNode> node, std::unique_ptr<JsonValue>& childJSONArray)
 {
-    auto  childNodeJSONVec = nodeJSONInfoMap_[depth + 1];
-    for (auto item : node->GetChildList()) {
-        auto childVec = std::find_if(std::begin(childNodeJSONVec), std::end(childNodeJSONVec),
-            [item](const std::pair<int32_t, std::string>& upper) {
-                return upper.first == item->GetNodeId();
-            });
-        if (childVec != std::end(childNodeJSONVec)) {
-            auto childJSONValue = JsonUtil::ParseJsonString(childVec->second.c_str());
-            childJSONArray->Put(childJSONValue);
+    auto childNodeJSONVec = nodeJSONInfoMap_[depth + 1];
+    auto child = node->GetChildList();
+    for (auto item = child.begin(); item != child.end(); item++) {
+        for (auto iter = childNodeJSONVec.begin(); iter != childNodeJSONVec.end(); iter++) {
+            auto id = (*item)->GetNodeId();
+            if (id == iter->first) {
+                auto childJSONValue = JsonUtil::ParseJsonString(iter->second.c_str());
+                childJSONArray->Put(childJSONValue);
+                break;
+            }
         }
     }
 }
