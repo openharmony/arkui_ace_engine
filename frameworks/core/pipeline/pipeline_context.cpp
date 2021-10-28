@@ -817,6 +817,7 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
         RefPtr<DisplayComponent> display = AceType::MakeRefPtr<DisplayComponent>(pageComponent);
         stageElement->PushPage(display);
     }
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (GetIsDeclarative()) {
         if (isSurfaceReady_) {
             FlushPipelineImmediately();
@@ -825,6 +826,7 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
         }
         return;
     }
+#endif
     FlushBuildAndLayoutBeforeSurfaceReady();
 }
 
