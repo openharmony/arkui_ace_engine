@@ -25,7 +25,6 @@ namespace OHOS::Ace {
 
 class ResourceAdapterImpl : public ResourceAdapter {
     DECLARE_ACE_TYPE(ResourceAdapterImpl, ResourceAdapter);
-
 public:
     ResourceAdapterImpl() = default;
     ~ResourceAdapterImpl() override = default;
@@ -54,7 +53,6 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImpl);
 };
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_RESOURCE_ADAPTER_IMPL_H

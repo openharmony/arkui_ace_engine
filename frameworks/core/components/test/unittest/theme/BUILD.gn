@@ -190,6 +190,7 @@ ohos_unittest("ThemeConstantsTest") {
       "hiviewdfx_hilog_native:libhilog",
       "startup_l2:syspara",
     ]
+    deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
     configs += [ "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config" ]
   } else {
     external_deps = [

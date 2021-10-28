@@ -58,7 +58,6 @@ private:
     std::map<std::string, std::string> jsEngineParams_;
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_;
 };
-
 } // namespace OHOS::Ace::Platform
 
 #endif // FOUNDATION_ACE_ADAPTER_COMMON_CPP_ACE_APPLICATION_INFO_H

@@ -25,14 +25,13 @@ namespace {
 constexpr double DPI_BASE = 160.0;
 Global::Resource::DeviceType ConvertDeviceType(DeviceType type)
 {
-    // TODO: check device type WEARABLE / PC 
     switch (type) {
         case DeviceType::PHONE:
             return Global::Resource::DeviceType::DEVICE_PHONE;
         case DeviceType::TV:
             return Global::Resource::DeviceType::DEVICE_TV;
         case DeviceType::WATCH:
-            return Global::Resource::DeviceType::DEVICE_WEARABLE; // CHECK
+            return Global::Resource::DeviceType::DEVICE_WEARABLE;
         case DeviceType::CAR:
             return Global::Resource::DeviceType::DEVICE_CAR;
         case DeviceType::TABLET:
@@ -79,8 +78,9 @@ Global::Resource::ScreenDensity ConvertDensity(double density)
 std::shared_ptr<Global::Resource::ResConfig> ConvertConfig(const ResourceConfiguration& config)
 {
     std::shared_ptr<Global::Resource::ResConfig> newResCfg(Global::Resource::CreateResConfig());
-    newResCfg->SetLocaleInfo(AceApplicationInfo::GetInstance().GetLanguage().c_str(), 
-        AceApplicationInfo::GetInstance().GetScript().c_str(), AceApplicationInfo::GetInstance().GetCountryOrRegion().c_str());
+    newResCfg->SetLocaleInfo(AceApplicationInfo::GetInstance().GetLanguage().c_str(),
+        AceApplicationInfo::GetInstance().GetScript().c_str(), 
+        AceApplicationInfo::GetInstance().GetCountryOrRegion().c_str());
     newResCfg->SetDeviceType(ConvertDeviceType(config.GetDeviceType()));
     newResCfg->SetDirection(ConvertDirection(config.GetOrientation()));
     newResCfg->SetScreenDensity(ConvertDensity(config.GetDensity()));
@@ -105,7 +105,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     std::string resIndxPath = resPath + "resources.index";
     auto resRet = newResMgr->AddResource(resIndxPath.c_str());
     auto configRet = newResMgr->UpdateResConfig(*resConfig);
-    LOGI("AddResource result=%{public}d, UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}d, device=%{public}d",
+    LOGI("AddRes result=%{public}d, UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}d, device=%{public}d",
         resRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType());
     resourceManager_ = newResMgr;
     packagePathStr_ = resPath;

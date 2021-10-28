@@ -26,7 +26,6 @@
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr char COLOR_VALUE_PREFIX[] = "$color:";
 constexpr char PATTERN_NAME_KEY_WORD[] = "$pattern:";
 constexpr char STATE_VALUE_KEY_WORD[] = ".sxml";
@@ -167,7 +166,6 @@ RefPtr<StateResource> ParseStateResource(const std::string& styleName, const std
     }
     return stateResource;
 }
-
 } // namespace
 
 class RawThemeStyle : public ThemeStyle {
@@ -451,5 +449,4 @@ std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
     return "resource://RAWFILE/assets/" + moduleName + "/resources/rawfile/" + fileName->ToString();
 #endif
 }
-
 } // namespace OHOS::Ace
