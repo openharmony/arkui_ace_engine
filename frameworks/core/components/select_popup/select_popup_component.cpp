@@ -245,13 +245,12 @@ bool SelectPopupComponent::Initialize(const RefPtr<AccessibilityManager>& manage
             [weak = WeakClaim(this), customizedFunc](std::size_t index) {
                 if (customizedFunc) {
                     customizedFunc();
-                } else {
-                    auto refPtr = weak.Upgrade();
-                    if (!refPtr) {
-                        return;
-                    }
-                    refPtr->HandleOptionClick(index);
                 }
+                auto refPtr = weak.Upgrade();
+                if (!refPtr) {
+                    return;
+                }
+                refPtr->HandleOptionClick(index);
             }
         );
         options_[index]->SetParentId(id);
