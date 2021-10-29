@@ -513,9 +513,11 @@ void FlutterRenderCalendar::DrawCardCalendar(
     Offset dateNumberOffset = offset + Offset(x, y + NormalizeToPx(dayYAxisOffset));
     PaintDay(canvas, dateNumberOffset, day, dateTextStyle);
 
-    auto lunarDayYAxisOffset = calendarTheme_.lunarDayYAxisOffset;
-    Offset lunarDayOffset = offset + Offset(x, y + NormalizeToPx(lunarDayYAxisOffset));
-    PaintLunarDay(canvas, lunarDayOffset, day, lunarTextStyle);
+    if (dataAdapter_->ShowLunar() && !day.lunarDay.empty()) {
+        auto lunarDayYAxisOffset = calendarTheme_.lunarDayYAxisOffset;
+        Offset lunarDayOffset = offset + Offset(x, y + NormalizeToPx(lunarDayYAxisOffset));
+        PaintLunarDay(canvas, lunarDayOffset, day, lunarTextStyle);
+    }
 
     if (day.isFirstOfLunar) {
         auto underscoreXAxisOffset = calendarTheme_.underscoreXAxisOffset;
@@ -679,7 +681,7 @@ void FlutterRenderCalendar::InitWorkStateStyle(
         auto workColor = workDayMarkColor_;
         SetWorkStateStyle(day, workColor, offColor, workStateStyle);
     } else {
-        SetWorkStateStyle(day, workDayMarkColor_, focusedAreaBackgroundColor_, workStateStyle);
+        SetWorkStateStyle(day, workDayMarkColor_, markLunarColor_, workStateStyle);
     }
 }
 
