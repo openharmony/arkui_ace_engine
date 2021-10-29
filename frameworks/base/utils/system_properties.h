@@ -196,6 +196,14 @@ public:
         return screenShape_;
     }
 
+    /*
+     * Change px to vp
+     */
+    static double Px2Vp(double pxNum)
+    {
+        return pxNum / resolution_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool accessibilityEnabled_;

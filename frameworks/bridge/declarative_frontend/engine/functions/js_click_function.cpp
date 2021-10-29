@@ -41,10 +41,10 @@ void JsClickFunction::Execute(const ClickInfo& info)
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
-    obj->SetProperty<double>("screenX", globalOffset.GetX());
-    obj->SetProperty<double>("screenY", globalOffset.GetY());
-    obj->SetProperty<double>("x", localOffset.GetX());
-    obj->SetProperty<double>("y", localOffset.GetY());
+    obj->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalOffset.GetX()));
+    obj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalOffset.GetY()));
+    obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
+    obj->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
 
     LOGD("globalOffset.GetX() = %lf, globalOffset.GetY() = %lf, localOffset.GetX() = %lf, localOffset.GetY() = %lf",
@@ -59,10 +59,10 @@ void JsClickFunction::Execute(const GestureEvent& info)
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
-    obj->SetProperty<double>("screenX", globalOffset.GetX());
-    obj->SetProperty<double>("screenY", globalOffset.GetY());
-    obj->SetProperty<double>("x", localOffset.GetX());
-    obj->SetProperty<double>("y", localOffset.GetY());
+    obj->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalOffset.GetX()));
+    obj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalOffset.GetY()));
+    obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
+    obj->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
 
     LOGD("globalOffset.GetX() = %lf, globalOffset.GetY() = %lf, localOffset.GetX() = %lf, localOffset.GetY() = %lf",

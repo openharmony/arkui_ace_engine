@@ -120,7 +120,6 @@ private:
     GestureAcceptResult IsPanGestureAccept() const;
     void Reset();
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
-    double ConvertPxToVp(double offset) const;
     void ChangeFingers(int32_t fingers);
     void ChangeDirection(const PanDirection& direction);
     void ChangeDistance(double distance);
