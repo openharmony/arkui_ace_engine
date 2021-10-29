@@ -53,6 +53,7 @@ template("ace_osal_ohos_source_set") {
     if (is_standard_system) {
       sources += [ "resource_adapter_impl.cpp" ]
       sources += [ "pixel_map.cpp" ]
+      sources += [ "resource_convertor.cpp" ]
       deps = [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
       public_deps =
           [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]

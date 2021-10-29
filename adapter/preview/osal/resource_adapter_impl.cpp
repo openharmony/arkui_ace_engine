@@ -26,6 +26,7 @@
 
 namespace OHOS::Ace {
 namespace {
+
 constexpr char COLOR_VALUE_PREFIX[] = "$color:";
 constexpr char PATTERN_NAME_KEY_WORD[] = "$pattern:";
 constexpr char STATE_VALUE_KEY_WORD[] = ".sxml";

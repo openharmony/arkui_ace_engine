@@ -16,8 +16,9 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_H
 
-#include "core/components/theme/resource_adapter.h"
 #include "resource_manager.h"
+
+#include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
 
