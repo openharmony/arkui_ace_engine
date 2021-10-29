@@ -107,6 +107,26 @@ public:
         colorScheme_ = colorScheme;
     }
 
+    ResourceConfiguration GetResourceConfiguration() const
+    {
+        return resourceInfo_.GetResourceConfiguration();
+    }
+
+    void SetResourceConfiguration(const ResourceConfiguration& config)
+    {
+        resourceInfo_.SetResourceConfiguration(config);
+    }
+
+    std::string GetPackagePathStr() const
+    {
+        return resourceInfo_.GetPackagePath();
+    }
+
+    void SetPackagePathStr(const std::string& packagePath)
+    {
+        resourceInfo_.SetPackagePath(packagePath);
+    }
+
     void Dispatch(
         const std::string& group, std::vector<uint8_t>&& data, int32_t id, bool replyToComponent) const override;
 
@@ -179,6 +199,7 @@ private:
     std::unique_ptr<PlatformEventCallback> platformEventCallback_;
     WindowModal windowModal_ { WindowModal::NORMAL };
     ColorScheme colorScheme_ { ColorScheme::FIRST_VALUE };
+    ResourceInfo resourceInfo_;
     AceAbility* aceAbility_ = nullptr;
     int32_t pageId_ = 0;
 

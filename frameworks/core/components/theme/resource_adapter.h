@@ -33,7 +33,10 @@ public:
     virtual void Init(const ResourceInfo& resourceInfo) {};
     virtual void UpdateConfig(const ResourceConfiguration& config) {};
 
-    virtual RefPtr<ThemeStyle> GetTheme(int32_t themeId) = 0;
+    virtual RefPtr<ThemeStyle> GetTheme(int32_t themeId)
+    {
+        return nullptr;
+    };
 
     virtual Color GetColor(uint32_t resId) = 0;
     virtual Dimension GetDimension(uint32_t resId) = 0;
@@ -41,6 +44,18 @@ public:
     virtual std::vector<std::string> GetStringArray(uint32_t resId) const = 0;
     virtual double GetDouble(uint32_t resId) = 0;
     virtual int32_t GetInt(uint32_t resId) = 0;
+    virtual std::string GetPluralString(uint32_t resId, int quantity)
+    {
+        return "";
+    }
+    virtual std::string GetMediaPath(uint32_t resId)
+    {
+        return "";
+    }
+    virtual std::string GetRawfile(const std::string& fileName)
+    {
+        return "";
+    }
     virtual bool GetBoolean(uint32_t resId) const
     {
         return false;

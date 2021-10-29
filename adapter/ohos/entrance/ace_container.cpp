@@ -689,6 +689,8 @@ void AceContainer::AttachView(
     auto themeManager = AceType::MakeRefPtr<ThemeManager>();
     if (themeManager) {
         pipelineContext_->SetThemeManager(themeManager);
+        // Init resource
+        themeManager->InitResource(resourceInfo_);
         taskExecutor_->PostTask(
             [themeManager, assetManager = assetManager_, colorScheme = colorScheme_] {
                 themeManager->SetColorScheme(colorScheme);

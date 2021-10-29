@@ -26,6 +26,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "base/log/log.h"
+#include "base/utils/system_properties.h"
 #include "core/common/frontend.h"
 
 namespace OHOS {
@@ -214,9 +215,33 @@ void AceAbility::OnStart(const Want& want)
     FrontendType frontendType = GetFrontendTypeFromManifest(packagePathStr, srcPath);
     bool isArkApp = GetIsArkFromConfig(packagePathStr);
 
+    std::string moduleName = info->moduleName;
+    std::shared_ptr<ApplicationInfo> appInfo = GetApplicationInfo();
+    std::vector<ModuleInfo> moduleList = appInfo->moduleInfos;
+
+    std::string resPath;
+    for (auto module : moduleList) {
+        if (module.moduleName == moduleName) {
+            resPath = module.moduleSourceDir + "/assets/" + module.moduleName + "/";
+            break;
+        }
+    }
+
     // create container
     Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, this,
         std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); }));
+    auto container = Platform::AceContainer::GetContainer(abilityId_);
+    if (!container) {
+        LOGE("container is null, set configuration failed.");
+    } else {
+        auto aceResCfg = container->GetResourceConfiguration();
+        aceResCfg.SetOrientation(SystemProperties::GetDevcieOrientation());
+        aceResCfg.SetDensity(SystemProperties::GetResolution());
+        aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
+        container->SetResourceConfiguration(aceResCfg);
+        container->SetPackagePathStr(resPath);
+    }
+    
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
     OHOS::sptr<OHOS::Window> window = Ability::GetWindow();

@@ -188,6 +188,25 @@ std::string ThemeConstants::GetString(uint32_t key) const
     return stringPair.second;
 }
 
+std::string ThemeConstants::GetPluralString(uint32_t key, int count) const
+{
+    if (IsGlobalResource(key)) {
+        if (!resAdapter_) {
+            return "";
+        }
+        return resAdapter_->GetPluralString(key, count);
+    }
+    const auto& valueWrapper = GetValue(key);
+    if (!ValueTypeMatch(valueWrapper, key, ThemeConstantsType::STRING)) {
+        return "";
+    }
+    auto stringPair = valueWrapper.GetValue<std::string>("");
+    if (!stringPair.first) {
+        LOGE("GetPluralString error: %{public}u, type: %{public}u", key, valueWrapper.type);
+    }
+    return stringPair.second;
+}
+
 std::vector<std::string> ThemeConstants::GetStringArray(uint32_t key) const
 {
     if (IsGlobalResource(key)) {
@@ -197,6 +216,25 @@ std::vector<std::string> ThemeConstants::GetStringArray(uint32_t key) const
         return resAdapter_->GetStringArray(key);
     }
     return {};
+}
+
+std::string ThemeConstants::GetMediaPath(uint32_t key) const
+{
+    if (IsGlobalResource(key)) {
+        if (!resAdapter_) {
+            return "";
+        }
+        return resAdapter_->GetMediaPath(key);
+    }
+    return "";
+}
+
+std::string ThemeConstants::GetRawfile(const std::string& fileName) const
+{
+    if (!resAdapter_) {
+        return "";
+    }
+    return resAdapter_->GetRawfile(fileName);
 }
 
 bool ThemeConstants::GetBoolean(uint32_t key) const

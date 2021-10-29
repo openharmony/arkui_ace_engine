@@ -102,6 +102,14 @@ public:
     std::string GetString(uint32_t key) const;
 
     /*
+     * Get plural string value from platform constants.
+     * NOTE: empty string will be returned if not found.
+     * @param[in] key Target key, count Target plural string quantity.
+     * @return plural string value corresponding to the key and count.
+     */
+    std::string GetPluralString(uint32_t key, int count) const;
+    
+    /*
      * Get bool value from platform constants.
      * NOTE: false will be returned if not found or value is not boolean.
      * @param[in] key Target key.
@@ -130,6 +138,22 @@ public:
      * @return string array value corresponding to the key.
      */
     std::vector<std::string> GetStringArray(uint32_t key) const;
+
+    /*
+     * Get media path value from platform constants.
+     * NOTE: empty string will be returned if not found.
+     * @param[in] key Target key.
+     * @return media path value corresponding to the key.
+     */
+    std::string GetMediaPath(uint32_t key) const;
+
+    /*
+     * Get rawfile path.
+     * NOTE: empty string will be returned if not found.
+     * @param[in] fileName Target file name.
+     * @return rawfile path value corresponding to file name.
+     */
+    std::string GetRawfile(const std::string& fileName) const;
 
     template<class T>
     bool GetMediaResource(T& resId, std::ostream& dest) const
