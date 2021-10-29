@@ -33,6 +33,20 @@ void FlutterImageCache::Clear()
     imageDataCache_.clear();
 }
 
+RefPtr<CachedImageData> FlutterImageCache::GetDataFromCacheFile(const std::string& filePath)
+{
+    std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
+    if (!GetFromCacheFileInner(filePath)) {
+        LOGD("file : %{public}s not cached, return nullptr", filePath.c_str());
+        return nullptr;
+    } else {
+        LOGD("file : %{public}s cached found", filePath.c_str());
+    }
+    auto cacheFileLoader = AceType::MakeRefPtr<FileImageLoader>();
+    auto data = cacheFileLoader->LoadImageData(std::string("file:/").append(filePath));
+    return data ? AceType::MakeRefPtr<SkiaCachedImageData>(data) : nullptr;
+}
+
 void ImageCache::Purge()
 {
     SkGraphics::PurgeResourceCache();
