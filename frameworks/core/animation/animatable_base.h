@@ -35,6 +35,10 @@ public:
 
     void AnimateTo(const T& beginValue, const T& endValue)
     {
+        if (endValue_ == endValue) {
+            return;
+        }
+        endValue_ = endValue;
         if (!animationOption_.IsValid()) {
             MoveTo(endValue);
         }
@@ -144,6 +148,7 @@ protected:
     RenderNodeAnimationCallback animationCallback_;
     RenderNodeAnimationCallback stopCallback_;
     RefPtr<Evaluator<T>> evaluator_;
+    T endValue_ {};
 };
 
 } // namespace OHOS::Ace
