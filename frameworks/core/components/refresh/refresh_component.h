@@ -168,7 +168,12 @@ public:
 
     void SetRefreshDistance(const Dimension& refreshDistance)
     {
-        refreshDistance_ = refreshDistance;
+        if(GreatOrEqual(refreshDistance.Value(), 0.0)) {
+            refreshDistance_ = refreshDistance;
+        } else {
+            refreshDistance_ = Dimension(0.0, DimensionUnit::VP);
+        }
+
     }
 
     const Dimension& GetProgressDistance() const

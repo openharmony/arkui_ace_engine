@@ -40,17 +40,19 @@ void JSRefresh::Create(const JSCallbackInfo& info)
 
     RefPtr<RefreshComponent> refreshComponent = AceType::MakeRefPtr<RefreshComponent>();
     RefPtr<RefreshTheme> theme = GetTheme<RefreshTheme>();
-    if (theme) {
-        refreshComponent->SetLoadingDistance(theme->GetLoadingDistance());
-        refreshComponent->SetRefreshDistance(theme->GetRefreshDistance());
-        refreshComponent->SetProgressDistance(theme->GetProgressDistance());
-        refreshComponent->SetProgressDiameter(theme->GetProgressDiameter());
-        refreshComponent->SetMaxDistance(theme->GetMaxDistance());
-        refreshComponent->SetShowTimeDistance(theme->GetShowTimeDistance());
-        refreshComponent->SetTextStyle(theme->GetTextStyle());
-        refreshComponent->SetProgressColor(theme->GetProgressColor());
-        refreshComponent->SetBackgroundColor(theme->GetBackgroundColor());
+    if (!theme) {
+        LOGE("Refresh Theme is null");
+        return;
     }
+    refreshComponent->SetLoadingDistance(theme->GetLoadingDistance());
+    refreshComponent->SetRefreshDistance(theme->GetRefreshDistance());
+    refreshComponent->SetProgressDistance(theme->GetProgressDistance());
+    refreshComponent->SetProgressDiameter(theme->GetProgressDiameter());
+    refreshComponent->SetMaxDistance(theme->GetMaxDistance());
+    refreshComponent->SetShowTimeDistance(theme->GetShowTimeDistance());
+    refreshComponent->SetTextStyle(theme->GetTextStyle());
+    refreshComponent->SetProgressColor(theme->GetProgressColor());
+    refreshComponent->SetBackgroundColor(theme->GetBackgroundColor());
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto refreshing = paramObject->GetProperty("refreshing");
@@ -63,7 +65,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     auto jsOffset = paramObject->GetProperty("offset");
     Dimension offset;
     if (ParseJsDimensionVp(jsOffset, offset)) {
-        refreshComponent->SetIndicatorOffset(offset);
+        refreshComponent->SetRefreshDistance(offset);
     }
 
     auto friction = paramObject->GetProperty("friction");
