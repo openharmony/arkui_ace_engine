@@ -46,7 +46,30 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     gestureInfoObj->SetProperty<double>("localY", SystemProperties::Px2Vp(info.GetLocalLocation().GetY()));
     gestureInfoObj->SetProperty<double>("pinchCenterX", SystemProperties::Px2Vp(info.GetPinchCenter().GetX()));
     gestureInfoObj->SetProperty<double>("pinchCenterY", SystemProperties::Px2Vp(info.GetPinchCenter().GetY()));
+
+    JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
+    const std::list<FingerInfo>& fingerList = info.GetFingerList();
+    uint32_t idx = 0;
+    for (const FingerInfo& info : fingerList) {
+        JSRef<JSObject> element = CreateFingerInfo(info);
+        fingerArr->SetValueAt(idx++, element);
+    }
+    gestureInfoObj->SetPropertyObject("fingerList", fingerArr);
+
     return gestureInfoObj;
+}
+
+JSRef<JSObject> JsGestureFunction::CreateFingerInfo(const FingerInfo& fingerInfo)
+{
+    JSRef<JSObject> fingerInfoObj = JSRef<JSObject>::New();
+    const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
+    const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
+    fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.fingerId_);
+    fingerInfoObj->SetProperty<double>("globalX", SystemProperties::Px2Vp(globalLocation.GetX()));
+    fingerInfoObj->SetProperty<double>("globalY", SystemProperties::Px2Vp(globalLocation.GetY()));
+    fingerInfoObj->SetProperty<double>("localX", SystemProperties::Px2Vp(localLocation.GetX()));
+    fingerInfoObj->SetProperty<double>("localY", SystemProperties::Px2Vp(localLocation.GetY()));
+    return fingerInfoObj;
 }
 
 } // namespace OHOS::Ace::Framework

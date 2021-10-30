@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_INFO_H
 
 #include <functional>
+#include <list>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -264,6 +265,15 @@ private:
     RefPtr<PixelMap> pixelMap_;
 };
 
+struct FingerInfo {
+    int32_t fingerId_ = -1;
+    // global position at which the touch point contacts the screen.
+    Offset globalLocation_;
+    // Different from global location, The local location refers to the location of the contact point relative to the
+    // current node which has the recognizer.
+    Offset localLocation_;
+};
+
 class GestureEvent {
 public:
     GestureEvent() {}
@@ -372,6 +382,16 @@ public:
         return *this;
     }
 
+    const std::list<FingerInfo>& GetFingerList() const
+    {
+        return fingerList_;
+    }
+
+    void SetFingerList(const std::list<FingerInfo>& fingerList)
+    {
+        fingerList_ = fingerList;
+    }
+
 private:
     bool repeat_ = false;
     double offsetX_ = 0.0;
@@ -386,6 +406,7 @@ private:
     // current node which has the recognizer.
     Offset localLocation_;
     Offset pinchCenter_;
+    std::list<FingerInfo> fingerList_;
 };
 
 using GestureEventFunc = std::function<void(const GestureEvent& info)>;

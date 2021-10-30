@@ -44,6 +44,7 @@ void ClickRecognizer::OnAccepted()
         onClick_(info);
     }
 
+    SetFingerList(touchPoints_, coordinateOffset_, fingerList_);
     SendCallbackMsg(onAction_);
     Reset();
 }
@@ -205,6 +206,7 @@ void ClickRecognizer::DeadlineTimer(CancelableCallback<void()>& deadlineTimer, i
 void ClickRecognizer::Reset()
 {
     touchPoints_.clear();
+    fingerList_.clear();
     pointsCount_ = 0;
     equalsToFingers_ = false;
     tappedCount_ = 0;
@@ -238,6 +240,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
     if (onAction && *onAction) {
         GestureEvent info;
         info.SetTimeStamp(time_);
+        info.SetFingerList(fingerList_);
         TouchPoint touchPoint = {};
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;

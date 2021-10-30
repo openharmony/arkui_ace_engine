@@ -36,6 +36,7 @@ void LongPressRecognizer::OnAccepted()
         onLongPress_(info);
     }
 
+    SetFingerList(touchMap_, coordinateOffset_, fingerList_);
     SendCallbackMsg(onAction_, false);
     if (repeat_) {
         StartRepeatTimer();
@@ -217,15 +218,12 @@ void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
         GestureEvent info;
         info.SetTimeStamp(time_);
         info.SetRepeat(isRepeat);
-        if (fingers_ == 1) {
-            TouchPoint trackPoint = touchMap_.begin()->second;
-            Offset local = trackPoint.GetOffset() - coordinateOffset_;
-            Offset localLocation =
-                Offset(ConvertPxToVp(local.GetX()), ConvertPxToVp(local.GetY()));
-            Offset globalLocation =
-                Offset(ConvertPxToVp(trackPoint.x), ConvertPxToVp(trackPoint.y));
-            info.SetGlobalLocation(globalLocation).SetLocalLocation(localLocation);
+        info.SetFingerList(fingerList_);
+        TouchPoint trackPoint = {};
+        if (!touchMap_.empty()) {
+            trackPoint = touchMap_.begin()->second;
         }
+        info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(trackPoint.GetOffset() - coordinateOffset_);
         (*callback)(info);
     }
 }
@@ -233,6 +231,7 @@ void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
 void LongPressRecognizer::Reset()
 {
     touchMap_.clear();
+    fingerList_.clear();
     pointsCount_ = 0;
     timer_.Cancel();
     deadlineTimer_.Cancel();
