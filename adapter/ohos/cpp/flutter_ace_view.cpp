@@ -51,7 +51,7 @@ TouchPoint ConvertTouchEvent(OHOS::TouchEvent& touchEvent)
         case OHOS::TouchEvent::HOVER_POINTER_ENTER:
         case OHOS::TouchEvent::HOVER_POINTER_MOVE:
         case OHOS::TouchEvent::HOVER_POINTER_EXIT:
-            LOGD("ConvertTouchEvent not implement type:%{public}ld", touchEvent.GetAction());
+            LOGD("ConvertTouchEvent not implement type:%{public}d", touchEvent.GetAction());
             break;
         case OHOS::TouchEvent::PRIMARY_POINT_DOWN:
         case OHOS::TouchEvent::OTHER_POINT_DOWN:

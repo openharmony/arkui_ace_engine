@@ -271,7 +271,8 @@ JSValue QJSKlass<C>::GetProto()
 template<typename C>
 int QJSKlass<C>::NumberOfInstances()
 {
-    return JS_CountClassInstances(JS_GetRuntime(QJSContext::Current()), classId_);
+    // return JS_CountClassInstances(JS_GetRuntime(QJSContext::Current()), classId_);
+    return 0;
 }
 
 template<typename C>

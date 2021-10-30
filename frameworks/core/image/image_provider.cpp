@@ -302,7 +302,7 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
         if (needCacheResizedImageFile && !srcKey.empty()) {
             auto data = scaledImage->encodeToData(SkEncodedImageFormat::kPNG, 100);
             if (data) {
-                LOGD("write cache file: %{private}s", srcKey);
+                LOGD("write cache file: %{private}s", srcKey.c_str());
                 ImageCache::WriteCacheFile(srcKey, data->data(), data->size());
             }
         }
