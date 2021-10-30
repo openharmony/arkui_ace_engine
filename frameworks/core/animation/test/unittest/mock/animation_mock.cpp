@@ -18,6 +18,7 @@
 #include "base/log/log.h"
 #include "core/components/dialog_modal/dialog_modal_component.h"
 #include "core/components/semi_modal/semi_modal_component.h"
+#include "core/image/image_loader.h"
 
 namespace OHOS::Ace {
 
@@ -194,6 +195,11 @@ RefPtr<Component> SemiModalComponent::Create(
 }
 
 RefPtr<Component> DialogModalComponent::Create(RefPtr<Component> child)
+{
+    return nullptr;
+}
+
+sk_sp<SkData> FileImageLoader::LoadImageData(const std::string& src, const WeakPtr<PipelineContext> context)
 {
     return nullptr;
 }

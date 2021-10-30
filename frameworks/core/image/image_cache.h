@@ -78,7 +78,7 @@ class ACE_EXPORT ImageCache : public AceType {
 public:
     static RefPtr<ImageCache> Create();
     ImageCache() = default;
-    ~ImageCache() = default;
+    virtual ~ImageCache() = default;
     void CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image);
     std::shared_ptr<CachedImage> GetCacheImage(const std::string& key);
 
@@ -165,6 +165,8 @@ public:
     static bool GetFromCacheFile(const std::string& filePath);
 
     virtual void Clear() = 0;
+
+    virtual RefPtr<CachedImageData> GetDataFromCacheFile(const std::string& filePath) = 0;
 
     static void Purge();
 

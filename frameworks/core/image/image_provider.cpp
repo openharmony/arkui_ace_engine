@@ -131,16 +131,11 @@ sk_sp<SkData> ImageProvider::LoadImageRawData(
             LOGD("size valid try load from cache.");
             std::string cacheFilePath =
                 ImageCache::GetImageCacheFilePath(ImageObject::GenerateCacheKey(imageInfo.GetSrc(), targetSize));
-            LOGD("cache file path: %{public}s", cacheFilePath.c_str());
-            if (ImageCache::GetFromCacheFile(cacheFilePath)) {
-                LOGD("cache file found: %{public}s", cacheFilePath.c_str());
-                auto cacheFileLoader = AceType::MakeRefPtr<FileImageLoader>();
-                auto data = cacheFileLoader->LoadImageData(std::string("file:/").append(cacheFilePath));
-                if (data) {
-                    return data;
-                } else {
-                    LOGW("load data from cache file failed, try load from raw image file.");
-                }
+            LOGD("cache file path: %{private}s", cacheFilePath.c_str());
+            auto data = imageCache->GetDataFromCacheFile(cacheFilePath);
+            if (data) {
+                LOGD("cache file found : %{public}s", cacheFilePath.c_str());
+                return AceType::DynamicCast<SkiaCachedImageData>(data)->imageData;
             }
         } else {
             LOGD("target size is not valid, load raw image file.");

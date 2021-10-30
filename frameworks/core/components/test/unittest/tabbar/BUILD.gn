@@ -85,6 +85,7 @@ ohos_unittest("RenderTabContentTest") {
     "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
     "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
+    "$ace_root/frameworks/core/mock/mock_image_loader.cpp",
     "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
 

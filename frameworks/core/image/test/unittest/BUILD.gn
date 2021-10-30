@@ -55,6 +55,7 @@ ohos_unittest("ImageCacheTest") {
     "$ace_root/frameworks/core/image/image_cache.cpp",
     "$ace_root/frameworks/core/image/image_loader.cpp",
     "$ace_root/frameworks/core/image/image_provider.cpp",
+    "$ace_root/frameworks/core/mock/mock_image_loader.cpp",
     "$ace_root/frameworks/core/pipeline/base/component_group_element.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_element.cpp",

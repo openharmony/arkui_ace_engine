@@ -52,7 +52,10 @@ class FlutterImageCache : public ImageCache {
     DECLARE_ACE_TYPE(FlutterImageCache, ImageCache);
 
 public:
+    FlutterImageCache() = default;
+    ~FlutterImageCache() override = default;
     void Clear() override;
+    virtual RefPtr<CachedImageData> GetDataFromCacheFile(const std::string& filePath) override;
 };
 
 } // namespace OHOS::Ace

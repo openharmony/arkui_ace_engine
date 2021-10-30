@@ -169,6 +169,7 @@ ohos_unittest("RenderImageTest") {
     #mock
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
+    "$ace_root/frameworks/core/mock/mock_image_loader.cpp",
     "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
   ]
 
