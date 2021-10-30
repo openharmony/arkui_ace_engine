@@ -152,8 +152,7 @@ void FormElement::InitEvent(const RefPtr<FormComponent>& component)
 
 void FormElement::HandleOnAcquireEvent(int64_t id) const
 {
-    LOGD("HandleOnAcquireEvent acquire event id:%{public}zu", id);
-
+    LOGD("HandleOnAcquireEvent acquire event id:%{public}d", (int32_t)id);
     if (!onAcquireEvent_) {
         LOGE("could not find available event handle");
         return;

@@ -18,7 +18,12 @@
 #include <cerrno>
 #include <sys/resource.h>
 #include <sys/time.h>
+#include <pthread.h>
 #include <unistd.h>
+
+#ifdef ACE_DEBUG
+#include <sys/prctl.h>
+#endif
 
 #ifdef FML_EMBEDDER_ONLY
 #undef FML_EMBEDDER_ONLY
@@ -242,10 +247,9 @@ void FlutterTaskExecutor::FillTaskTypeTable(TaskType type)
     constexpr size_t MAX_THREAD_NAME_SIZE = 32;
     char threadNameBuf[MAX_THREAD_NAME_SIZE] = {0};
     const char *threadName = threadNameBuf;
-    if (pthread_getname_np(pthread_self(), threadNameBuf, sizeof(threadNameBuf)) != 0) {
+    if (prctl(PR_GET_NAME, threadNameBuf) < 0) {
         threadName = "unknown";
     }
-
     localTaskType = type;
     ThreadInfo info = {
         .threadId = std::this_thread::get_id(),
