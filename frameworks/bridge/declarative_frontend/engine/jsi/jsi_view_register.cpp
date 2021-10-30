@@ -29,6 +29,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
 #endif
@@ -81,10 +82,12 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
@@ -96,6 +99,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
@@ -500,7 +504,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Counter", JSCounter::JSBind },
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
-    { "Row", JSRow::JSBind }, { "Grid", JSGrid::JSBind },
+    { "Row", JSRow::JSBind },
+    { "Grid", JSGrid::JSBind },
     { "GridItem", JSGridItem::JSBind },
     { "GridContainer", JSGridContainer::JSBind },
     { "Slider", JSSlider::JSBind },
@@ -523,7 +528,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Shape", JSShape::JSBind },
     { "Path", JSPath::JSBind },
     { "Circle", JSCircle::JSBind },
-    { "Line", JSPolygon::JSBind },
+    { "Line", JSLine::JSBind },
     { "Polygon", JSPolygon::JSBind },
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
@@ -536,11 +541,13 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RowSplit", JSRowSplit::JSBind },
     { "ColumnSplit", JSColumnSplit::JSBind },
     { "AlphabetIndexer", JSIndexer::JSBind },
+    { "Hyperlink", JSHyperlink::JSBind },
     { "Radio", JSRadio::JSBind },
     { "ActionSheet", JSActionSheet::JSBind },
     { "AlertDialog", JSAlertDialog::JSBind },
     { "AbilityComponent", JSAbilityComponent::JSBind },
     { "TextArea", JSTextArea::JSBind },
+    { "TextInput", JSTextInput::JSBind },
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     { "QRCode", JSQRCode::JSBind },
 #ifdef FORM_SUPPORTED
@@ -556,7 +563,23 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
     { "Gauge", JSGauge::JSBind },
-    { "Marquee", JSMarquee::JSBind }
+    { "Marquee", JSMarquee::JSBind },
+    { "Gesture", JSGesture::JSBind },
+    { "TapGesture", JSGesture::JSBind },
+    { "LongPressGesture", JSGesture::JSBind },
+    { "PanGesture", JSGesture::JSBind },
+    { "PinchGesture", JSGesture::JSBind },
+    { "RotationGesture", JSGesture::JSBind },
+    { "GestureGroup", JSGesture::JSBind },
+    { "PanGestureOption", JSPanGestureOption::JSBind },
+    { "CustomDialogController", JSCustomDialogController::JSBind },
+    { "Scroller", JSScroller::JSBind },
+    { "SwiperController", JSSwiperController::JSBind },
+    { "TabsController", JSTabsController::JSBind },
+    { "CalendarController", JSCalendarController::JSBind },
+    { "AbilityController", JSAbilityComponentController::JSBind },
+    { "VideoController", JSVideoController::JSBind },
+    { "Search", JSSearch::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj)
@@ -667,6 +690,13 @@ void JsRegisterViews(BindingTarget globalObj)
     toggleType.Constant("Switch", 1);
     toggleType.Constant("Button", 2);  // 2 means index of constant
 
+    JSObjectTemplate refreshStatus;
+    refreshStatus.Constant("Inactive", 0);
+    refreshStatus.Constant("Drag", 1);
+    refreshStatus.Constant("OverDrag", 2);
+    refreshStatus.Constant("Refresh", 3); // 3 means index of constant
+    refreshStatus.Constant("Done", 4); // 4 means index of constant
+
     JSObjectTemplate mainAxisAlign;
     mainAxisAlign.Constant("Start", 1);
     mainAxisAlign.Constant("Center", 2);  // 2 means index of constant
@@ -691,10 +721,10 @@ void JsRegisterViews(BindingTarget globalObj)
     loadingProgressStyle.Constant("Orbital", 3);  // 3 means index of constant
 
     JSObjectTemplate progressStyle;
-    progressStyle.Constant("Linear", 1);
-    progressStyle.Constant("Capsule", 2);  // 2 means index of constant
-    progressStyle.Constant("Eclipse", 3);  // 3 means index of constant
-    progressStyle.Constant("Circular", 4);  // 4 means index of constant
+    progressStyle.Constant("Linear", 0);
+    progressStyle.Constant("Capsule", 1);  // 1 means index of constant
+    progressStyle.Constant("Eclipse", 2);  // 2 means index of constant
+    progressStyle.Constant("Circular", 3);  // 3 means index of constant
 
     JSObjectTemplate stackFit;
     stackFit.Constant("Keep", 0);
@@ -741,6 +771,11 @@ void JsRegisterViews(BindingTarget globalObj)
     iconPosition.Constant("Start", 0);
     iconPosition.Constant("End", 1);
 
+    JSObjectTemplate badgePosition;
+    badgePosition.Constant("RightTop", 0);
+    badgePosition.Constant("Right", 1);
+    badgePosition.Constant("Left", 2); // 2 means index of constant
+
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "MainAxisAlign"), *mainAxisAlign);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "CrossAxisAlign"), *crossAxisAlign);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Direction"), *direction);
@@ -751,10 +786,12 @@ void JsRegisterViews(BindingTarget globalObj)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "LoadingProgressStyle"), *loadingProgressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ProgressStyle"), *progressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToggleType"), *toggleType);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "RefreshStatus"), *refreshStatus);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "SliderStyle"), *sliderStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "SliderChangeMode"), *sliderChangeMode);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "IconPosition"), *iconPosition);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "PickerStyle"), *pickerStyle);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "BadgePosition"), *badgePosition);
     LOGD("View classes and jsCreateDocuemnt, registerObservableObject functions registered.");
 }
 
