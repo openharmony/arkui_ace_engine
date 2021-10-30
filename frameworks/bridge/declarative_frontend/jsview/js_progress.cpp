@@ -77,6 +77,7 @@ void JSProgress::JSBind(BindingTarget globalObj)
     JSClass<JSProgress>::StaticMethod("color", &JSProgress::SetColor, opt);
     JSClass<JSProgress>::StaticMethod("circularStyle", &JSProgress::SetCircularStyle, opt);
     JSClass<JSProgress>::StaticMethod("cricularStyle", &JSProgress::SetCircularStyle, opt);
+    JSClass<JSProgress>::StaticMethod("backgroundColor", &JSProgress::JsBackgroundColor, opt);
     JSClass<JSProgress>::Inherit<JSViewAbstract>();
     JSClass<JSProgress>::Bind(globalObj);
 }
@@ -126,6 +127,31 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
         scaleWidthDimension = theme->GetScaleWidth();
     }
     progress->SetScaleWidth(scaleWidthDimension);
+}
+
+void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto progress = AceType::DynamicCast<ProgressComponent>(component);
+    if (!progress) {
+        LOGE("progress Component is null");
+        return;
+    }
+    auto track = progress->GetTrack();
+    if (!track) {
+        LOGE("track Component is null");
+        return;
+    }
+
+    Color colorVal;
+    if (ParseJsColor(info[0], colorVal))  {
+        track->SetBackgroundColor(colorVal);
+    }
 }
 
 }; // namespace OHOS::Ace::Framework
