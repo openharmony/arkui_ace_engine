@@ -40,17 +40,11 @@
 #endif
 
 extern const char _binary_stateMgmt_js_start[];
-extern const char _binary_jsEnumStyle_js_start[];
-extern const char _binary_jsMockSystemPlugin_js_start[];
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-extern const char* _binary_stateMgmt_js_end;
-extern const char* _binary_jsEnumStyle_js_end;
-extern const char* _binary_jsMockSystemPlugin_js_end;
-#else
 extern const char _binary_stateMgmt_js_end[];
+extern const char _binary_jsEnumStyle_js_start[];
 extern const char _binary_jsEnumStyle_js_end[];
+extern const char _binary_jsMockSystemPlugin_js_start[];
 extern const char _binary_jsMockSystemPlugin_js_end[];
-#endif
 
 namespace OHOS::Ace::Framework {
 
@@ -330,8 +324,8 @@ JSModuleDef* JsInitModule(JSContext* ctx)
     return m;
 }
 
-JSContext* InitJSContext(
-    JSContext* ctx1, size_t maxStackSize, const std::unordered_map<std::string, void*>& extraNativeObject)
+JSContext* InitJSContext(JSContext* ctx1, size_t maxStackSize,
+    const std::unordered_map<std::string, void*>& extraNativeObject)
 {
     LOGD("QJS Creating new JS context and loading HBS module");
 
@@ -371,12 +365,10 @@ JSContext* InitJSContext(
     for (const auto& [key, value] : extraNativeObject) {
         auto nativeObjectInfo = std::make_unique<NativeObjectInfo>();
         nativeObjectInfo->nativeObject = value;
-        JSValue abilityValue = JS_NewExternal(
-            ctx1, nativeObjectInfo.release(),
-            [](JSContext* ctx, void* data, void* hint) {
+        JSValue abilityValue = JS_NewExternal(ctx1, nativeObjectInfo.release(),
+            [](JSContext* ctx, void *data, void *hint) {
                 std::unique_ptr<NativeObjectInfo> info(static_cast<NativeObjectInfo*>(data));
-            },
-            nullptr);
+            }, nullptr);
         JS_SetPropertyStr(ctx1, globalObj, key.c_str(), abilityValue);
     }
 #endif
@@ -388,8 +380,8 @@ std::map<std::string, std::string> QJSDeclarativeEngineInstance::mediaResourceFi
 
 std::unique_ptr<JsonValue> QJSDeclarativeEngineInstance::currentConfigResourceData_;
 
-bool QJSDeclarativeEngineInstance::InitJSEnv(
-    JSRuntime* runtime, JSContext* context, const std::unordered_map<std::string, void*>& extraNativeObject)
+bool QJSDeclarativeEngineInstance::InitJSEnv(JSRuntime* runtime, JSContext* context,
+    const std::unordered_map<std::string, void*>& extraNativeObject)
 {
     ACE_SCOPED_TRACE("Init JS Env");
     if (runtime == nullptr) {
@@ -427,16 +419,17 @@ bool QJSDeclarativeEngineInstance::InitJSEnv(
     }
 
     // make jsProxy end of '\0'
-    if (!InitAceModules(
-            _binary_stateMgmt_js_start, _binary_stateMgmt_js_end - _binary_stateMgmt_js_start, "stateMgmt.js") ||
-        !InitAceModules(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end - _binary_jsEnumStyle_js_start,
-            "jsEnumStyle.js")) {
+    std::string jsProxy(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end - _binary_stateMgmt_js_start);
+    std::string jsEnum(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end - _binary_jsEnumStyle_js_start);
+    if (!InitAceModules(jsProxy.c_str(), jsProxy.length(), "stateMgmt.js")
+        || !InitAceModules(jsEnum.c_str(), jsEnum.length(), "jsEnumStyle.js")) {
         return false;
     }
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    if (!InitAceModules(_binary_jsMockSystemPlugin_js_start,
-            _binary_jsMockSystemPlugin_js_end - _binary_jsMockSystemPlugin_js_start, "jsMockSystemPlugin.js")) {
+    std::string jsMockSystemPlugin(_binary_jsMockSystemPlugin_js_start,
+                                   _binary_jsMockSystemPlugin_js_end - _binary_jsMockSystemPlugin_js_start);
+    if (!InitAceModules(jsMockSystemPlugin.c_str(), jsMockSystemPlugin.length(), "jsMockSystemPlugin.js")) {
         return false;
     }
 #endif
@@ -544,8 +537,8 @@ void QJSDeclarativeEngineInstance::FireAsyncEvent(const std::string& eventId, co
     LOGW("QJSDeclarativeEngineInstance FireAsyncEvent is unusable");
 }
 
-std::unique_ptr<JsonValue> QJSDeclarativeEngineInstance::GetI18nStringResource(
-    const std::string& targetStringKey, const std::string& targetStringValue)
+std::unique_ptr<JsonValue> QJSDeclarativeEngineInstance::GetI18nStringResource(const std::string& targetStringKey,
+    const std::string& targetStringValue)
 {
     auto resourceI18nFileNum = currentConfigResourceData_->GetArraySize();
     for (int i = 0; i < resourceI18nFileNum; i++) {
@@ -571,6 +564,7 @@ std::string QJSDeclarativeEngineInstance::GetMeidaResource(const std::string& ta
 
     return std::string();
 }
+
 
 void QJSDeclarativeEngineInstance::RunGarbageCollection()
 {
