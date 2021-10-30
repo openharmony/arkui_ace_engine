@@ -26,7 +26,7 @@ enum class ToggleType {
     BUTTON,
 };
 
-class JSToggle : public JSViewAbstract, public JSInteractableView {
+class JSToggle : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
@@ -38,7 +38,7 @@ public:
     static void JsSize(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
     static void SelectedColor(const JSCallbackInfo& info);
-    static void SwithPointStyle(const JSCallbackInfo& info);
+    static void SwitchPointColor(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
