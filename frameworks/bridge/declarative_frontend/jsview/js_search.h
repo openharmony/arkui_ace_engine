@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSSearch: public JSViewAbstract{
+class JSSearch : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);

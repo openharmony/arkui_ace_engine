@@ -14,10 +14,11 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/chart/chart_component.h"
 #include "core/components/progress/progress_component.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
 

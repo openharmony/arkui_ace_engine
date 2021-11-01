@@ -826,6 +826,8 @@ void V8DeclarativeGroupJsBridge::CallEventJsCallback(int32_t callbackId, std::ve
         bool succ = func->Call(context, global, 1, argv).ToLocal(&res);
         if (!succ) {
             LOGW("trigger JS callback function failed, callbackId:%{private}d", callbackId);
+        } else {
+            LOGW("trigger JS callback function success, callbackId:%{private}d", callbackId);
         }
 
         while (v8::platform::PumpMessageLoop(V8DeclarativeEngine::GetPlatform().get(), isolate)) {

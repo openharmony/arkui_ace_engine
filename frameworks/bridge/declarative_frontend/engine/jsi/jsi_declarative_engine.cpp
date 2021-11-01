@@ -25,6 +25,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_runtime.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
@@ -550,7 +551,11 @@ void JsiDeclarativeEngineInstance::InitGlobalObjectTemplate()
 
 void JsiDeclarativeEngineInstance::InitGroupJsBridge()
 {
-
+    auto groupJsBridge = DynamicCast<JsiDeclarativeGroupJsBridge>(frontendDelegate_->GetGroupJsBridge());
+    if (groupJsBridge == nullptr || groupJsBridge->InitializeGroupJsBridge(runtime_) == JS_CALL_FAIL) {
+        LOGE("Js Engine Initialize GroupJsBridge failed!");
+        EventReport::SendJsException(JsExcepType::JS_ENGINE_INIT_ERR);
+    }
 }
 
 thread_local std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> JsiDeclarativeEngineInstance::rootViewMap_;
@@ -1063,7 +1068,7 @@ void JsiDeclarativeEngine::RunGarbageCollection()
 
 RefPtr<GroupJsBridge> JsiDeclarativeEngine::GetGroupJsBridge()
 {
-    return nullptr;
+    return AceType::MakeRefPtr<JsiDeclarativeGroupJsBridge>();
 }
 
 } // namespace OHOS::Ace::Framework

@@ -151,10 +151,6 @@ inline int64_t StringToLongInt(const std::string& value)
     int64_t result = std::strtoll(value.c_str(), &pEnd, 10);
     if (pEnd == value.c_str() || errno == ERANGE) {
         return 0;
-    } else if (result < INT64_MIN) {
-        return INT64_MIN;
-    } else if (result > INT64_MAX) {
-        return INT64_MAX;
     } else {
         return result;
     }

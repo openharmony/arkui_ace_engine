@@ -317,13 +317,14 @@ void RenderSwiper::PerformLayout()
     swiperHeight_ = (isLinearLayout ? maxHeight : layoutSize.Height());
 
     if (isLinearLayout) {
-        prevItemOffset_ = axis_ == Axis::HORIZONTAL ? (needReverse_ ? swiperWidth_ + halfSpace
-                                               : -swiperWidth_ - halfSpace) :
-                                               -swiperHeight_ ;
+        prevItemOffset_ = axis_ == Axis::HORIZONTAL
+                              ? (needReverse_ ? swiperWidth_ + halfSpace : -swiperWidth_ - halfSpace)
+                              : -swiperHeight_;
     } else {
-        prevItemOffset_ = axis_ == Axis::HORIZONTAL ? (needReverse_ ? swiperWidth_ - prevMargin_ - nextMargin_ + halfSpace
-                                               : -swiperWidth_ + prevMargin_ + nextMargin_ - halfSpace) :
-                                               -swiperHeight_ + prevMargin_ + nextMargin_;
+        prevItemOffset_ = axis_ == Axis::HORIZONTAL
+                              ? (needReverse_ ? swiperWidth_ - prevMargin_ - nextMargin_ + halfSpace
+                                              : -swiperWidth_ + prevMargin_ + nextMargin_ - halfSpace)
+                              : -swiperHeight_ + prevMargin_ + nextMargin_;
     }
     nextItemOffset_ = -prevItemOffset_;
     UpdateChildPosition(0, currentIndex_, true);
@@ -951,7 +952,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
     // Adjust offset more than MIN_SCROLL_OFFSET at least
     double minOffset = 0.0;
     if (axis_ == Axis::VERTICAL) {
-        minOffset = MIN_SCROLL_OFFSET * (swiperHeight_ - prevMargin_ - nextMargin_) ;
+        minOffset = MIN_SCROLL_OFFSET * (swiperHeight_ - prevMargin_ - nextMargin_);
     } else {
         minOffset = MIN_SCROLL_OFFSET * (swiperWidth_ - prevMargin_ - nextMargin_);
     }
@@ -1534,7 +1535,8 @@ void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, bool in
         }
         auto item = items_.find(prevIndex);
         if (item != items_.end()) {
-            item->second->SetPosition(GetMainAxisOffset(offset + (needReverse_ ? (i + 1) * nextItemOffset_ : (i + 1) * prevItemOffset_)));
+            item->second->SetPosition(
+                GetMainAxisOffset(offset + (needReverse_ ? (i + 1) * nextItemOffset_ : (i + 1) * prevItemOffset_)));
         }
     }
 
@@ -1560,7 +1562,8 @@ void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, bool in
         }
         auto item = items_.find(nextIndex);
         if (item != items_.end()) {
-            item->second->SetPosition(GetMainAxisOffset(offset + (needReverse_ ? (i + 1) * prevItemOffset_ : (i + 1) * nextItemOffset_)));
+            item->second->SetPosition(
+                GetMainAxisOffset(offset + (needReverse_ ? (i + 1) * prevItemOffset_ : (i + 1) * nextItemOffset_)));
         }
     }
 

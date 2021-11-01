@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+#include "core/components/data_panel/data_panel_component.h"
+
+#include <vector>
+
+#include "core/components/theme/theme_manager.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include <vector>
-#include "core/components/data_panel/data_panel_component.h"
-#include "core/components/theme/theme_manager.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {

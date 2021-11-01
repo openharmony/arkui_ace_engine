@@ -44,8 +44,8 @@ enum class ParseJsDataResult {
     PARSE_JS_ERR_TOO_MANY_PARAM = 102,
 };
 
-class JsiGroupJsBridge : public GroupJsBridge {
-    DECLARE_ACE_TYPE(JsiGroupJsBridge, GroupJsBridge)
+class JsiDeclarativeGroupJsBridge : public GroupJsBridge {
+    DECLARE_ACE_TYPE(JsiDeclarativeGroupJsBridge, GroupJsBridge)
 
     enum GroupType {
         MODULE_GROUP = 0,
@@ -53,8 +53,8 @@ class JsiGroupJsBridge : public GroupJsBridge {
     };
 
 public:
-    JsiGroupJsBridge() = default;
-    ~JsiGroupJsBridge() override = default;
+    JsiDeclarativeGroupJsBridge() = default;
+    ~JsiDeclarativeGroupJsBridge() override = default;
 
     int32_t InitializeGroupJsBridge(const shared_ptr<JsRuntime>& runtime);
 

@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/components_v2/inspector/search_composed_element.h"
+
 #include <unordered_map>
 
-#include "core/components_v2/inspector/search_composed_element.h"
 #include "core/components/search/search_element.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -70,4 +71,4 @@ OHOS::Ace::RefPtr<OHOS::Ace::RenderSearch> SearchComposedElement::GetRenderSearc
     return nullptr;
 }
 
-}
+} // namespace OHOS::Ace::V2

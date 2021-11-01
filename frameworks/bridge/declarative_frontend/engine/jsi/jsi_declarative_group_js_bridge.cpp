@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_group_js_bridge.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.h"
 
 #include "base/json/json_util.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "frameworks/bridge/codec/function_call.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_utils.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -40,7 +41,7 @@ const int32_t PLUGIN_REQUEST_ARG_APP_PARAMS_INDEX_SYNC = 2;
 
 } // namespace
 
-int32_t JsiGroupJsBridge::InitializeGroupJsBridge(const shared_ptr<JsRuntime>& runtime)
+int32_t JsiDeclarativeGroupJsBridge::InitializeGroupJsBridge(const shared_ptr<JsRuntime>& runtime)
 {
     LOGD("Enter InitializeGroupJsBridge");
     if (!runtime) {
@@ -63,7 +64,7 @@ int32_t JsiGroupJsBridge::InitializeGroupJsBridge(const shared_ptr<JsRuntime>& r
     return JS_CALL_SUCCESS;
 }
 
-int32_t JsiGroupJsBridge::LoadJsBridgeFunction()
+int32_t JsiDeclarativeGroupJsBridge::LoadJsBridgeFunction()
 {
     shared_ptr<JsValue> group = runtime_->NewObject();
     bool succ = group->SetProperty(runtime_, "sendGroupMessage", runtime_->NewFunction(ProcessJsRequest));
@@ -88,22 +89,22 @@ int32_t JsiGroupJsBridge::LoadJsBridgeFunction()
 }
 
 // function callback for groupObj's function: sendGroupMessage
-shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequest(const shared_ptr<JsRuntime>& runtime,
+shared_ptr<JsValue> JsiDeclarativeGroupJsBridge::ProcessJsRequest(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     shared_ptr<JsValue> res = runtime->NewUndefined();
-    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    auto engine = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
     if (engine == nullptr) {
         LOGE("send message para check, fail to get engine");
         return res;
     }
-    auto delegate = engine->GetFrontendDelegate();
+    auto delegate = engine->GetDelegate();
     if (!delegate) {
         LOGE("send message para check, fail to get front-end delegate");
         return res;
     }
 
-    auto groupJsBridge = AceType::DynamicCast<JsiGroupJsBridge>(delegate->GetGroupJsBridge());
+    auto groupJsBridge = AceType::DynamicCast<JsiDeclarativeGroupJsBridge>(delegate->GetGroupJsBridge());
     if (!groupJsBridge) {
         LOGE("send message para check, fail to get group-js-bridge");
         return res;
@@ -168,22 +169,22 @@ shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequest(const shared_ptr<JsRuntim
 }
 
 // function callback for groupObj's function: sendGroupMessageSync
-shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequestSync(const shared_ptr<JsRuntime>& runtime,
+shared_ptr<JsValue> JsiDeclarativeGroupJsBridge::ProcessJsRequestSync(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     shared_ptr<JsValue> res = runtime->NewUndefined();
-    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    auto engine = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
     if (engine == nullptr) {
         LOGE("send message para check, fail to get engine");
         return res;
     }
-    auto delegate = engine->GetFrontendDelegate();
+    auto delegate = engine->GetDelegate();
     if (!delegate) {
         LOGE("send message para check, fail to get front-end delegate");
         return res;
     }
 
-    auto groupJsBridge = AceType::DynamicCast<JsiGroupJsBridge>(delegate->GetGroupJsBridge());
+    auto groupJsBridge = AceType::DynamicCast<JsiDeclarativeGroupJsBridge>(delegate->GetGroupJsBridge());
     if (!groupJsBridge) {
         LOGE("send message para check, fail to get group-js-bridge");
         return res;
@@ -252,7 +253,7 @@ shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequestSync(const shared_ptr<JsRu
     return callBackResult;
 }
 
-bool JsiGroupJsBridge::SetEventGroupCallBackFuncs(const shared_ptr<JsRuntime>& runtime,
+bool JsiDeclarativeGroupJsBridge::SetEventGroupCallBackFuncs(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& localEventCallbackFunc, int32_t callbackId, int32_t requestId)
 {
     if (localEventCallbackFunc->IsNull(runtime) || !localEventCallbackFunc->IsFunction(runtime)) {
@@ -269,7 +270,7 @@ bool JsiGroupJsBridge::SetEventGroupCallBackFuncs(const shared_ptr<JsRuntime>& r
     return true;
 }
 
-void JsiGroupJsBridge::RemoveEventGroupCallBackFuncs(int32_t callbackId)
+void JsiDeclarativeGroupJsBridge::RemoveEventGroupCallBackFuncs(int32_t callbackId)
 {
     LOGI("remove event callback, callbackId:%{private}d", callbackId);
     auto itFunc = eventCallBackFuncs_.find(callbackId);
@@ -278,7 +279,7 @@ void JsiGroupJsBridge::RemoveEventGroupCallBackFuncs(int32_t callbackId)
     }
 }
 
-void JsiGroupJsBridge::AddRequestIdCallbackIdRelation(int32_t eventId, int32_t requestId)
+void JsiDeclarativeGroupJsBridge::AddRequestIdCallbackIdRelation(int32_t eventId, int32_t requestId)
 {
     auto result = requestIdCallbackIdMap_.try_emplace(requestId, eventId);
     if (!result.second) {
@@ -286,7 +287,7 @@ void JsiGroupJsBridge::AddRequestIdCallbackIdRelation(int32_t eventId, int32_t r
     }
 }
 
-void JsiGroupJsBridge::RemoveRequestIdCallbackIdRelation(int32_t requestId, bool removeEventCallback)
+void JsiDeclarativeGroupJsBridge::RemoveRequestIdCallbackIdRelation(int32_t requestId, bool removeEventCallback)
 {
     auto eventId = requestIdCallbackIdMap_.find(requestId);
     if (eventId != requestIdCallbackIdMap_.end()) {
@@ -297,10 +298,10 @@ void JsiGroupJsBridge::RemoveRequestIdCallbackIdRelation(int32_t requestId, bool
     }
 }
 
-void JsiGroupJsBridge::ProcessParseJsError(
+void JsiDeclarativeGroupJsBridge::ProcessParseJsError(
     ParseJsDataResult errorType, const shared_ptr<JsRuntime>& runtime, int32_t callbackId)
 {
-    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    auto engine = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
     if (engine == nullptr) {
         LOGE("Process parse js error check, fail to get engine");
         return;
@@ -328,7 +329,7 @@ void JsiGroupJsBridge::ProcessParseJsError(
     }
 }
 
-bool JsiGroupJsBridge::SetModuleGroupCallbackFuncs(const std::vector<shared_ptr<JsValue>>& argv,
+bool JsiDeclarativeGroupJsBridge::SetModuleGroupCallbackFuncs(const std::vector<shared_ptr<JsValue>>& argv,
     int32_t resolveCallbackIndex, int32_t rejectCallbackIndex, int32_t callbackId)
 {
     LOGD("Enter SetModuleGroupCallbackFuncs");
@@ -351,7 +352,7 @@ bool JsiGroupJsBridge::SetModuleGroupCallbackFuncs(const std::vector<shared_ptr<
     return true;
 }
 
-std::string JsiGroupJsBridge::SerializationObjectToString(
+std::string JsiDeclarativeGroupJsBridge::SerializationObjectToString(
     const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& val)
 {
     shared_ptr<JsValue> global = runtime->GetGlobal();
@@ -369,7 +370,7 @@ std::string JsiGroupJsBridge::SerializationObjectToString(
         LOGE("SerializationObjectToString error: JSON has no attribute stringify");
         return "";
     }
-    JsiUtils::SetCurrentState(JsErrorType::STRINGFY_ERROR);
+    JsiDeclarativeUtils::SetCurrentState(JsErrorType::STRINGFY_ERROR);
     shared_ptr<JsValue> strValue = jsFunc->Call(runtime, runtime->NewUndefined(), { val }, 1);
     if (strValue->IsUndefined(runtime)) {
         LOGE("SerializationObjectToString error: js call error.");
@@ -378,7 +379,7 @@ std::string JsiGroupJsBridge::SerializationObjectToString(
     return strValue->ToString(runtime);
 }
 
-ParseJsDataResult JsiGroupJsBridge::ParseJsPara(const shared_ptr<JsRuntime>& runtime,
+ParseJsDataResult JsiDeclarativeGroupJsBridge::ParseJsPara(const shared_ptr<JsRuntime>& runtime,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t beginIndex, int32_t requestId,
     std::vector<CodecData>& arguments)
 {
@@ -427,7 +428,8 @@ ParseJsDataResult JsiGroupJsBridge::ParseJsPara(const shared_ptr<JsRuntime>& run
     return ParseJsDataResult::PARSE_JS_SUCCESS;
 }
 
-void JsiGroupJsBridge::TriggerModuleJsCallback(int32_t callbackId, int32_t code, std::vector<uint8_t>&& messageData)
+void JsiDeclarativeGroupJsBridge::TriggerModuleJsCallback(
+    int32_t callbackId, int32_t code, std::vector<uint8_t>&& messageData)
 {
     shared_ptr<JsValue> callBackResult;
     CodecData codecResult;
@@ -448,7 +450,8 @@ void JsiGroupJsBridge::TriggerModuleJsCallback(int32_t callbackId, int32_t code,
     messageData.clear();
 }
 
-void JsiGroupJsBridge::CallModuleJsCallback(int32_t callbackId, int32_t code, const shared_ptr<JsValue>& callBackResult)
+void JsiDeclarativeGroupJsBridge::CallModuleJsCallback(
+    int32_t callbackId, int32_t code, const shared_ptr<JsValue>& callBackResult)
 {
     RemoveRequestIdCallbackIdRelation(callbackId, code != PLUGIN_REQUEST_SUCCESS);
 
@@ -464,7 +467,7 @@ void JsiGroupJsBridge::CallModuleJsCallback(int32_t callbackId, int32_t code, co
         }
         std::vector<shared_ptr<JsValue>> argv = { callBackResult };
 
-        JsiUtils::SetCurrentState();
+        JsiDeclarativeUtils::SetCurrentState();
         // Pass only 1 parameter, call promise resolve call back.
         jsFunc->Call(runtime_, global, argv, 1);
         itFunc->second.rejectCallback = runtime_->NewUndefined();
@@ -475,7 +478,7 @@ void JsiGroupJsBridge::CallModuleJsCallback(int32_t callbackId, int32_t code, co
     }
 }
 
-void JsiGroupJsBridge::TriggerModulePluginGetErrorCallback(
+void JsiDeclarativeGroupJsBridge::TriggerModulePluginGetErrorCallback(
     int32_t callbackId, int32_t errorCode, std::string&& errorMessage)
 {
     RemoveRequestIdCallbackIdRelation(callbackId, true);
@@ -515,7 +518,7 @@ void JsiGroupJsBridge::TriggerModulePluginGetErrorCallback(
     }
 }
 
-void JsiGroupJsBridge::CallEventJsCallback(int32_t callbackId, std::vector<uint8_t>&& eventData)
+void JsiDeclarativeGroupJsBridge::CallEventJsCallback(int32_t callbackId, std::vector<uint8_t>&& eventData)
 {
     shared_ptr<JsValue> global = runtime_->GetGlobal();
 
@@ -552,7 +555,8 @@ void JsiGroupJsBridge::CallEventJsCallback(int32_t callbackId, std::vector<uint8
     eventData.clear();
 }
 
-void JsiGroupJsBridge::TriggerEventJsCallback(int32_t callbackId, int32_t code, std::vector<uint8_t>&& eventData)
+void JsiDeclarativeGroupJsBridge::TriggerEventJsCallback(
+    int32_t callbackId, int32_t code, std::vector<uint8_t>&& eventData)
 {
     if (code == PLUGIN_CALLBACK_DESTROY) {
         RemoveEventGroupCallBackFuncs(callbackId);
@@ -561,17 +565,16 @@ void JsiGroupJsBridge::TriggerEventJsCallback(int32_t callbackId, int32_t code, 
     }
 }
 
-void JsiGroupJsBridge::LoadPluginJsCode(std::string&& jsCode)
+void JsiDeclarativeGroupJsBridge::LoadPluginJsCode(std::string&& jsCode)
 {
     LOGE("Do not support load JsCode in ark vm.");
 }
 
-void JsiGroupJsBridge::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen)
+void JsiDeclarativeGroupJsBridge::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen)
 {
     if (!runtime_) {
         return;
     }
-
     int32_t countLen = 0;
     for (auto len : jsCodeLen) {
         runtime_->EvaluateJsCode(jsCode.data() + countLen, len);
@@ -579,7 +582,7 @@ void JsiGroupJsBridge::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::
     }
 }
 
-void JsiGroupJsBridge::Destroy()
+void JsiDeclarativeGroupJsBridge::Destroy()
 {
     eventCallBackFuncs_.clear();
     moduleCallBackFuncs_.clear();

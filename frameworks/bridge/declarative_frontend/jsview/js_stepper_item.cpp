@@ -120,7 +120,7 @@ void JSStepperItem::SetStatus(const JSCallbackInfo& info)
     }
     if (info[0]->IsNumber()) {
         auto index = info[0]->ToNumber<uint32_t>();
-        if (index >= 0 && index < sizeof(statusArray) / sizeof(statusArray[0])){
+        if (index >= 0 && index < sizeof(statusArray) / sizeof(statusArray[0])) {
             status = statusArray[index];
             label.initialStatus = status;
         } else {

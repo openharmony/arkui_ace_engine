@@ -1334,8 +1334,7 @@ void FlutterDecorationPainter::PaintGrayScale(const flutter::RRect& outerRRect, 
             SkPaint paint;
             paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
-            float matrix[20];
-            memset(matrix, 0, 20 * sizeof(float));
+            float matrix[20] = { 0 };
             matrix[0] = matrix[5] = matrix[10] = 0.2126f * scale;
             matrix[1] = matrix[6] = matrix[11] = 0.7152f * scale;
             matrix[2] = matrix[7] = matrix[12] = 0.0722f * scale;
@@ -1362,8 +1361,7 @@ void FlutterDecorationPainter::PaintBrightness(const flutter::RRect& outerRRect,
             canvas->clipRRect(outerRRect.sk_rrect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-            float matrix[20];
-            memset(matrix, 0, 20 * sizeof(float));
+            float matrix[20] = { 0 };
 
             if (bright < 0.0) {
                 return;
@@ -1400,8 +1398,7 @@ void FlutterDecorationPainter::PaintContrast(const flutter::RRect& outerRRect, S
             SkPaint paint;
             paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
-            float matrix[20];
-            memset(matrix, 0, 20 * sizeof(float));
+            float matrix[20] = { 0 };
             matrix[0] = matrix[6] = matrix[12] = contrasts;
             matrix[4] = matrix[9] = matrix[14] = 128 * (1 - contrasts);
             matrix[18] = 1.0f;
@@ -1449,8 +1446,7 @@ void FlutterDecorationPainter::PaintSaturate(const flutter::RRect& outerRRect, S
             SkPaint paint;
             paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
-            float matrix[20];
-            memset(matrix, 0, 20 * sizeof(float));
+            float matrix[20] = { 0 };
             matrix[0] = 0.3086f * (1 - saturates) + saturates;
             matrix[1] = matrix[11] = 0.6094f * (1 - saturates);
             matrix[2] = matrix[7] = 0.0820f * (1 - saturates);
@@ -1518,11 +1514,10 @@ void FlutterDecorationPainter::PaintInvert(const flutter::RRect& outerRRect, SkC
             SkPaint paint;
             paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
-            float matrix[20];
+            float matrix[20] = { 0 };
             if (inverts > 1.0) {
                 inverts = 1.0;
             }
-            memset(matrix, 0, 20 * sizeof(float));
             matrix[0] = matrix[6] = matrix[12] = -1.2f * inverts;
             matrix[3] = matrix[8] = matrix[13] = 1.2f * inverts;
             matrix[4] = matrix[9] = matrix[14] = 1.2f * inverts;
@@ -1552,8 +1547,7 @@ void FlutterDecorationPainter::PaintHueRotate(const flutter::RRect& outerRRect, 
             while (GreatOrEqual(hueRotates, 360)) {
                 hueRotates -= 360;
             }
-            float matrix[20];
-            memset(matrix, 0, 20 * sizeof(float));
+            float matrix[20] = { 0 };
             int32_t type = hueRotates / 120;
             float N = (hueRotates - 120 * type) / 120;
             switch (type) {

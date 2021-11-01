@@ -18,8 +18,8 @@
 #include "core/components/search/search_component.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/text_field_component.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -91,7 +91,7 @@ void InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent,
 }
 
 void UpdateDecorationStyle(const RefPtr<BoxComponent>& boxComponent,
-        const RefPtr<TextFieldComponent>& component, const Border& boxBorder, bool hasBoxRadius)
+    const RefPtr<TextFieldComponent>& component, const Border& boxBorder, bool hasBoxRadius)
 {
     RefPtr<Decoration> decoration = component->GetDecoration();
     if (!decoration) {
@@ -380,4 +380,4 @@ void JSSearch::OnChange(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
-}
+} // namespace OHOS::Ace::Framework

@@ -50,9 +50,9 @@ void JSProgress::Create(const JSCallbackInfo& info)
 
     auto progressStyle = static_cast<ProgressStyle>(jsStyle->ToNumber<int32_t>());
     if (progressStyle == ProgressStyle::Eclipse) {
-       progressType = ProgressType::MOON;
-    } else if(progressStyle == ProgressStyle::Circular){
-       progressType = ProgressType::SCALE;
+        progressType = ProgressType::MOON;
+    } else if (progressStyle == ProgressStyle::Circular) {
+        progressType = ProgressType::SCALE;
     }
 
     auto progressComponent = AceType::MakeRefPtr<OHOS::Ace::ProgressComponent>(0.0, value, 0.0, total, progressType);
@@ -154,4 +154,5 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
     }
 }
 
-}; // namespace OHOS::Ace::Framework
+} // namespace OHOS::Ace::Framework
+

@@ -342,14 +342,14 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
     SkBitmap scaledBitmap;
     if (!scaledBitmap.tryAllocPixels(scaledImageInfo)) {
         LOGE("Could not allocate bitmap when attempting to scale. srcKey: %{private}s, destination size: [%{public}d x"
-            " %{public}d], raw image size: [%{public}d x %{public}d]", srcKey.c_str(), dstWidth, dstHeight,
-            rawImage->width(), rawImage->height());
+            " %{public}d], raw image size: [%{public}d x %{public}d]",
+            srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
         return rawImage;
     }
     if (!rawImage->scalePixels(scaledBitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint)) {
         LOGE("Could not scale pixels srcKey: %{private}s, destination size: [%{public}d x"
-            " %{public}d], raw image size: [%{public}d x %{public}d]", srcKey.c_str(), dstWidth,
-            dstHeight, rawImage->width(), rawImage->height());
+            " %{public}d], raw image size: [%{public}d x %{public}d]",
+            srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
         return rawImage;
     }
     // Marking this as immutable makes the MakeFromBitmap call share the pixels instead of copying.
@@ -368,8 +368,8 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
         return scaledImage;
     }
     LOGE("Could not create a scaled image from a scaled bitmap. srcKey: %{private}s, destination size: [%{public}d x"
-        " %{public}d], raw image size: [%{public}d x %{public}d]", srcKey.c_str(), dstWidth, dstHeight,
-        rawImage->width(), rawImage->height());
+        " %{public}d], raw image size: [%{public}d x %{public}d]",
+        srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
     return rawImage;
 }
 
