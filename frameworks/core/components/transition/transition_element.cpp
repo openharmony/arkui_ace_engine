@@ -145,6 +145,16 @@ RefPtr<DisplayElement> TransitionElement::GetChildDisplay() const
     return AceType::DynamicCast<DisplayElement>(tween->GetFirstChild());
 }
 
+RefPtr<TransformElement> TransitionElement::GetChildTransform() const
+{
+    auto display = GetChildDisplay();
+    if (!display) {
+        LOGE("transition option get failed. no display found.");
+        return nullptr;
+    }
+    return AceType::DynamicCast<TransformElement>(display->GetFirstChild());
+}
+
 RefPtr<BoxBaseElement> TransitionElement::GetChildBox() const
 {
     auto elementDisplay = GetChildDisplay();
@@ -307,6 +317,26 @@ RefPtr<Element> TransitionElement::GetContentElement() const
         return nullptr;
     }
     return tween->GetContentElement();
+}
+
+void TransitionElement::ResetPageTransitionAnimation() const
+{
+    // reset opacity
+    auto display = GetChildDisplay();
+    if (display) {
+        auto renderDisplay = AceType::DynamicCast<RenderDisplay>(display->GetRenderNode());
+        if (renderDisplay) {
+            renderDisplay->UpdateOpacity(UINT8_MAX);
+        }
+    }
+    // reset transform
+    auto transform = GetChildTransform();
+    if (transform) {
+        auto renderTransform = AceType::DynamicCast<RenderTransform>(transform->GetRenderNode());
+        if (renderTransform) {
+            renderTransform->ResetTransform();
+        }
+    }
 }
 
 } // namespace OHOS::Ace

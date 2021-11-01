@@ -334,6 +334,13 @@ void PageTransitionElement::LoadTransition()
     component_ = componentOrigin;
 }
 
+void PageTransitionElement::ResetPageTransitionAnimation()
+{
+    if (contentTransition_) {
+        contentTransition_->ResetPageTransitionAnimation();
+    }
+}
+
 void PageTransitionElement::SetTransition(
     DeviceType deviceType, TransitionEvent event, TransitionDirection direction, const RRect& rrect)
 {

@@ -611,6 +611,7 @@ bool StageElement::InitTransition(const RefPtr<PageTransitionElement>& transitio
     auto context = GetContext().Upgrade();
     if (context && context->GetIsDeclarative()) {
         transition->LoadTransition();
+        transition->ResetPageTransitionAnimation();
     }
     transition->SetTransition(deviceType, event, direction, cardRRect);
     transition->SetTransitionDirection(event, direction);

@@ -37,6 +37,7 @@ public:
     void SetTransitionController();
     const RefPtr<Animator>& GetTransitionController() const;
     void LoadTransition();
+    void ResetPageTransitionAnimation();
     void SetTransition(DeviceType deviceType, TransitionEvent event, TransitionDirection direction,
         const RRect& rrect);
     void SetWrapHidden(bool hidden);
