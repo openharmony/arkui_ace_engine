@@ -1076,6 +1076,12 @@ class AppStorage {
     */
     crossWindowNotify(propName, newValue) {
         var p = this.storage_.get(propName);
+        try {
+            newValue = JSON.parse(newValue);
+        }
+        catch (error) {
+            aceConsole.error(`PersistentStorage: convert for ${propName} has error: ` + error.toString());
+        }
         if (p) {
             aceConsole.debug(`crossWindowNotify(${propName}, ${newValue}) update existing property`);
             p.set(newValue, true);
