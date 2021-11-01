@@ -463,7 +463,7 @@ bool FlutterRenderText::UpdateParagraph()
     style.max_lines = textStyle_.GetMaxLines();
     style.locale = Localization::GetInstance()->GetFontLocale();
     if (textStyle_.GetTextOverflow() == TextOverflow::ELLIPSIS) {
-        if (!IsLongestLineVersion() && textStyle_.GetMaxLines() == UINT32_MAX) {
+        if (!IsLongestLineVersion() && textStyle_.GetMaxLines() == UINT32_MAX && !text_->GetAutoMaxLines()) {
             style.max_lines = 1;
         }
         style.ellipsis = ELLIPSIS;
