@@ -175,7 +175,7 @@ void JSTextArea::SetPlaceholderFont(const JSCallbackInfo& info)
     auto fontSize = paramObject->GetProperty("size");
     if (!fontSize->IsNull()) {
         Dimension size;
-        ParseJsDimensionPx(fontSize, size);
+        ParseJsDimensionFp(fontSize, size);
         textStyle.SetFontSize(size);
     }
 
