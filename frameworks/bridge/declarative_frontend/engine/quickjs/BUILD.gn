@@ -61,8 +61,6 @@ template("declarative_js_engine_qjs") {
     if (platform != "windows" && platform != "mac") {
       deps += [ "//foundation/ace/napi:ace_napi_quickjs" ]
       public_deps = [ "//foundation/ace/napi:ace_napi" ]
-
-      external_deps = worker_deps
     }
   }
 }

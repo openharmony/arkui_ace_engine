@@ -371,19 +371,18 @@ void V8DeclarativeGroupJsBridge::AddCallbackIdIsolateRelation(int32_t callbackId
     LOGD("callbackIdIsolateMap size = %{private}zu", callbackIdIsolateMap_.size());
 }
 
-void V8DeclarativeGroupJsBridge::AddIsolateNativeWorkRelation(v8::Isolate* isolate, NativeEngine* nativeEngine)
+void V8DeclarativeGroupJsBridge::AddIsolateNativeEngineRelation(v8::Isolate* isolate, NativeEngine* nativeEngine)
 {
-    std::lock_guard<std::mutex> lock(isolateNativeWorkMapMutex_);
-    NativeAsyncWork* nativeAsyncWork = nativeEngine->CreateAsyncWork(
-        V8DeclarativeGroupJsBridge::NativeAsyncExecuteCallback,
-        V8DeclarativeGroupJsBridge::NativeAsyncCompleteCallback, nullptr);
-    nativeAsyncWork->Init();
-
-    auto result = isolateNativeWorkMap_.try_emplace(isolate, nativeAsyncWork);
-    if (!result.second) {
-        result.first->second = nativeAsyncWork;
+    if (isolate == nullptr || nativeEngine == nullptr) {
+        LOGE("isolate or nativeEngine is nullptr");
+        return;
     }
-    LOGD("isolateNativeWorkMap size = %{private}zu", isolateNativeWorkMap_.size());
+    std::lock_guard<std::mutex> lock(isolateNativeEngineMapMutex_);
+    auto result = isolateNativeEngineMap_.try_emplace(isolate, nativeEngine);
+    if (!result.second) {
+        result.first->second = nativeEngine;
+    }
+    LOGD("isolateNativeEngineMap size = %{private}zu", isolateNativeEngineMap_.size());
 }
 
 void V8DeclarativeGroupJsBridge::ProcessParseJsError(
@@ -578,18 +577,18 @@ void V8DeclarativeGroupJsBridge::TriggerModuleJsCallback(
         callbackIdIsolateMapMutex_.lock();
         callbackIdIsolateMap_.erase(callbackId);
         callbackIdIsolateMapMutex_.unlock();
-        isolateNativeWorkMapMutex_.lock();
-        auto nativeWorkResult = isolateNativeWorkMap_.find(isolate);
-        isolateNativeWorkMapMutex_.unlock();
-        if (nativeWorkResult != isolateNativeWorkMap_.end()) {
+        isolateNativeEngineMapMutex_.lock();
+        auto nativeEngineResult = isolateNativeEngineMap_.find(isolate);
+        isolateNativeEngineMapMutex_.unlock();
+        if (nativeEngineResult != isolateNativeEngineMap_.end()) {
             // Trigger worker js callback
-            NativeAsyncWork* nativeAsyncWork = nativeWorkResult->second;
-            if (nativeAsyncWork == nullptr) {
-                LOGE("nativeAsyncWork is nullptr");
+            NativeEngine* nativeEngine = nativeEngineResult->second;
+            if (nativeEngine == nullptr) {
+                LOGE("nativeEngine is nullptr");
                 return;
             }
             JsCallbackData* callbackData = new JsCallbackData(callbackId, code, resultString, this, isolate);
-            nativeAsyncWork->Send(callbackData);
+            nativeEngine->SendAsyncWork(callbackData);
             return;
         }
     } else {
@@ -620,6 +619,10 @@ void V8DeclarativeGroupJsBridge::NativeAsyncExecuteCallback(NativeEngine* engine
     auto callbackData = static_cast<JsCallbackData*>(data);
     if (callbackData == nullptr) {
         LOGE("callbackData is nullptr");
+        return;
+    }
+    if (callbackData->groupJsBridge == nullptr) {
+        LOGE("callbackData groupJsBridge is nullptr");
         return;
     }
     callbackData->groupJsBridge->TriggerModuleJsCallback(callbackData->callbackId, callbackData->code,
@@ -712,19 +715,19 @@ void V8DeclarativeGroupJsBridge::TriggerModulePluginGetErrorCallback(
         callbackIdIsolateMapMutex_.lock();
         callbackIdIsolateMap_.erase(callbackId);
         callbackIdIsolateMapMutex_.unlock();
-        isolateNativeWorkMapMutex_.lock();
-        auto nativeWorkResult = isolateNativeWorkMap_.find(isolate);
-        isolateNativeWorkMapMutex_.unlock();
-        if (nativeWorkResult != isolateNativeWorkMap_.end()) {
+        isolateNativeEngineMapMutex_.lock();
+        auto nativeEngineResult = isolateNativeEngineMap_.find(isolate);
+        isolateNativeEngineMapMutex_.unlock();
+        if (nativeEngineResult != isolateNativeEngineMap_.end()) {
             // Trigger worker js callback
-            NativeAsyncWork* nativeAsyncWork = nativeWorkResult->second;
-            if (nativeAsyncWork == nullptr) {
-                LOGE("nativeAsyncWork is nullptr");
+            NativeEngine* nativeEngine = nativeEngineResult->second;
+            if (nativeEngine == nullptr) {
+                LOGE("nativeEngine is nullptr");
                 return;
             }
             JsCallbackData* callbackData = new JsCallbackData(callbackId, errorCode,
                 resultJson->ToString(), this, isolate);
-            nativeAsyncWork->Send(callbackData);
+            nativeEngine->SendAsyncWork(callbackData);
             return;
         }
     } else {
@@ -879,7 +882,7 @@ void V8DeclarativeGroupJsBridge::Destroy(v8::Isolate* isolate, bool isWorker)
 
     DestroyModuleCallbackMap(isolate);
     DestroyCallbackIdIsolateMap(isolate);
-    DestroyIsolateNativeWorkMap(isolate);
+    DestroyIsolateNativeEngineMap(isolate);
 }
 
 void V8DeclarativeGroupJsBridge::GetCallbackId(v8::Isolate* isolate, std::set<int32_t>& callbackIdSet)
@@ -919,18 +922,13 @@ void V8DeclarativeGroupJsBridge::DestroyCallbackIdIsolateMap(v8::Isolate* isolat
     }
 }
 
-void V8DeclarativeGroupJsBridge::DestroyIsolateNativeWorkMap(v8::Isolate* isolate)
+void V8DeclarativeGroupJsBridge::DestroyIsolateNativeEngineMap(v8::Isolate* isolate)
 {
-    std::lock_guard<std::mutex> lock(isolateNativeWorkMapMutex_);
-    auto result = isolateNativeWorkMap_.find(isolate);
-    if (result != isolateNativeWorkMap_.end()) {
+    std::lock_guard<std::mutex> lock(isolateNativeEngineMapMutex_);
+    auto result = isolateNativeEngineMap_.find(isolate);
+    if (result != isolateNativeEngineMap_.end()) {
         LOGD("remove worker isolate, isolate:%{private}p", isolate);
-        NativeAsyncWork* nativeAsyncWork = result->second;
-        if (nativeAsyncWork != nullptr) {
-            delete nativeAsyncWork;
-            nativeAsyncWork = nullptr;
-        }
-        isolateNativeWorkMap_.erase(isolate);
+        isolateNativeEngineMap_.erase(isolate);
     }
 }
 
@@ -942,10 +940,10 @@ bool V8DeclarativeGroupJsBridge::ForwardToWorker(int32_t callbackId)
     callbackIdIsolateMapMutex_.unlock();
     if (result != callbackIdIsolateMap_.end()) {
         isolate = result->second;
-        isolateNativeWorkMapMutex_.lock();
-        auto nativeWorkResult = isolateNativeWorkMap_.find(isolate);
-        isolateNativeWorkMapMutex_.unlock();
-        if (nativeWorkResult != isolateNativeWorkMap_.end()) {
+        isolateNativeEngineMapMutex_.lock();
+        auto nativeEngineResult = isolateNativeEngineMap_.find(isolate);
+        isolateNativeEngineMapMutex_.unlock();
+        if (nativeEngineResult != isolateNativeEngineMap_.end()) {
             return true;
         }
     }

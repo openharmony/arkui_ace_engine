@@ -21,7 +21,6 @@
 
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
-#include "worker_init.h"
 
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
@@ -2829,7 +2828,7 @@ void JsiEngine::RegisterInitWorkerFunc()
             LOGE("Failed to load js framework!");
         }
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
+    nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
 void JsiEngine::RegisterAssetFunc()
@@ -2849,7 +2848,7 @@ void JsiEngine::RegisterAssetFunc()
             delegate->GetResourceData(uri.substr(0, index) + ".abc", content);
         }
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterAssetFunc(assetFunc);
+    nativeEngine_->SetGetAssetFunc(assetFunc);
 }
 
 void JsiEngine::RegisterWorker()

@@ -17,8 +17,6 @@
 
 #include <unistd.h>
 
-#include "worker_init.h"
-
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -790,7 +788,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             LOGE("init worker error");
         }
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
+    nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
 void JsiDeclarativeEngine::RegisterAssetFunc()
@@ -810,7 +808,7 @@ void JsiDeclarativeEngine::RegisterAssetFunc()
             delegate->GetResourceData(uri.substr(0, index) + ".abc", content);
         }
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterAssetFunc(assetFunc);
+    nativeEngine_->SetGetAssetFunc(assetFunc);
 }
 
 void JsiDeclarativeEngine::RegisterWorker()

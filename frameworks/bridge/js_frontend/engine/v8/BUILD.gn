@@ -83,7 +83,6 @@ template("js_engine_v8") {
     }
 
     deps += [ "//foundation/ace/napi:ace_napi_v8" ]
-    external_deps = worker_deps
   }
 }
 

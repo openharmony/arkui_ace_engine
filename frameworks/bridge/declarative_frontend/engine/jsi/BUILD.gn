@@ -96,7 +96,6 @@ template("declarative_js_engine_ark") {
     if (platform != "windows" && platform != "mac") {
       deps += [ "//foundation/ace/napi:ace_napi_ark" ]
       public_deps = [ "//foundation/ace/napi:ace_napi" ]
-      external_deps = worker_deps
     }
 
     deps += [

@@ -22,7 +22,6 @@
 #include <unistd.h>
 
 #include "native_engine/impl/v8/v8_native_engine.h"
-#include "worker_init.h"
 
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
@@ -870,8 +869,6 @@ bool V8DeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         return false;
     }
 
-    RegisterWorker();
-
     v8::Isolate* isolate = engineInstance_->GetV8Isolate();
     ACE_DCHECK(isolate);
     {
@@ -896,6 +893,7 @@ bool V8DeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         new V8NativeEngine(GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
+    RegisterWorker();
 
     return true;
 }
@@ -922,15 +920,10 @@ void V8DeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
 
 void V8DeclarativeEngine::RegisterInitWorkerFunc()
 {
-    auto weakInstance = WeakPtr<V8DeclarativeEngineInstance>(engineInstance_);
     WeakPtr<GroupJsBridge> weakJsBridge = engineInstance_->GetDelegate()->GetGroupJsBridge();
-    auto&& initWorkerFunc = [weakInstance, weakJsBridge, delegate = engineInstance_->GetDelegateForV8Data(),
+    auto&& initWorkerFunc = [weakJsBridge, delegate = engineInstance_->GetDelegateForV8Data(),
         dispatch = engineInstance_->GetJsMessageDispatcherForV8Data()](NativeEngine* nativeEngine) {
         LOGI("WorkerCore RegisterInitWorkerFunc called");
-        if (weakInstance.Invalid()) {
-            LOGE("instance is nullptr");
-            return;
-        }
         if (nativeEngine == nullptr) {
             LOGE("nativeEngine is nullptr");
             return;
@@ -957,7 +950,7 @@ void V8DeclarativeEngine::RegisterInitWorkerFunc()
 
         auto jsBridge = DynamicCast<V8DeclarativeGroupJsBridge>(weakJsBridge.Upgrade());
         if (jsBridge != nullptr) {
-            jsBridge->AddIsolateNativeWorkRelation(isolate, nativeEngine);
+            jsBridge->AddIsolateNativeEngineRelation(isolate, nativeEngine);
             auto source = v8::String::NewFromUtf8(isolate, jsBridge->GetJsCode().c_str()).ToLocalChecked();
             if (!CallEvalBuf(isolate, "var global = globalThis;\n")
                 || jsBridge->InitializeGroupJsBridge(localContext) == JS_CALL_FAIL
@@ -968,7 +961,7 @@ void V8DeclarativeEngine::RegisterInitWorkerFunc()
             LOGE("Worker Initialize GroupJsBridge failed, jsBridge is nullptr");
         }
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
+    nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
 void V8DeclarativeEngine::RegisterAssetFunc()
@@ -983,7 +976,7 @@ void V8DeclarativeEngine::RegisterAssetFunc()
         }
         FrontendDelegate::GetResourceData(uri, asset, content);
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterAssetFunc(assetFunc);
+    nativeEngine_->SetGetAssetFunc(assetFunc);
 }
 
 void V8DeclarativeEngine::RegisterOffWorkerFunc()
@@ -1013,11 +1006,13 @@ void V8DeclarativeEngine::RegisterOffWorkerFunc()
 
         jsBridge->Destroy(isolate, true);
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterOffWorkerFunc(offWorkerFunc);
+    nativeEngine_->SetOffWorkerFunc(offWorkerFunc);
 }
 
 void V8DeclarativeEngine::RegisterWorker()
 {
+    nativeEngine_->SetWorkerAsyncWorkFunc(V8DeclarativeGroupJsBridge::NativeAsyncExecuteCallback,
+        V8DeclarativeGroupJsBridge::NativeAsyncCompleteCallback);
     RegisterInitWorkerFunc();
     RegisterAssetFunc();
     RegisterOffWorkerFunc();

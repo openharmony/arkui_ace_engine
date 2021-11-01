@@ -66,12 +66,10 @@ if (is_standard_system) {
 if (is_standard_system) {
   ace_engine_part = "ace_engine_standard"
   hilog_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-  worker_deps = [ "jsapi_worker:worker_init" ]
   ark_runtime_path = "//ark/runtime_core"
 } else {
   ace_engine_part = "ace_engine_full"
   hilog_deps = [ "hilog:libhilog" ]
-  worker_deps = [ "jsapi_worker:worker_init" ]
   ark_runtime_path = "//ark/runtime"
 }
 

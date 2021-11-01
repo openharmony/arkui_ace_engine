@@ -20,8 +20,6 @@
 #include <regex>
 #include <unistd.h>
 
-#include "worker_init.h"
-
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
@@ -3374,8 +3372,6 @@ bool V8Engine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         return false;
     }
 
-    RegisterWorker();
-
     v8::Isolate* isolate = engineInstance_->GetV8Isolate();
     {
         ACE_DCHECK(isolate);
@@ -3401,6 +3397,7 @@ bool V8Engine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     engineInstance_->SetV8NativeEngine(nativeEngine_);
     SetPostTask();
     nativeEngine_->CheckUVLoop();
+    RegisterWorker();
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
         nativeEngine_->SetPackagePath(packagePath);
@@ -3461,21 +3458,8 @@ void V8Engine::RegisterInitWorkerFunc()
         auto dispatcher = instance->GetJsMessageDispatcher();
         isolate->SetData(V8EngineInstance::DISPATCHER, static_cast<void*>(&dispatcher));
         instance->InitJsConsoleObject(localContext, isolate);
-
-        auto jsBridge = DynamicCast<V8GroupJsBridge>(instance->GetDelegate()->GetGroupJsBridge());
-        if (jsBridge != nullptr) {
-            auto workerJsBridge = AceType::MakeRefPtr<V8GroupJsBridge>(instance->GetInstanceId());
-            auto source = v8::String::NewFromUtf8(isolate, jsBridge->GetJsCode().c_str()).ToLocalChecked();
-            if (!CallEvalBuf(isolate, "var global = globalThis;\n", instance->GetInstanceId())
-                || workerJsBridge->InitializeGroupJsBridge(localContext) == JS_CALL_FAIL
-                || workerJsBridge->CallEvalBuf(isolate, source) == JS_CALL_FAIL) {
-                LOGE("Worker Initialize GroupJsBridge failed!");
-            }
-        } else {
-            LOGE("Worker Initialize GroupJsBridge failed, jsBridge is nullptr");
-        }
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
+    nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
 void V8Engine::RegisterAssetFunc()
@@ -3490,7 +3474,7 @@ void V8Engine::RegisterAssetFunc()
         }
         delegate->GetResourceData(uri, content);
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterAssetFunc(assetFunc);
+    nativeEngine_->SetGetAssetFunc(assetFunc);
 }
 
 void V8Engine::RegisterOffWorkerFunc()
@@ -3498,7 +3482,7 @@ void V8Engine::RegisterOffWorkerFunc()
     auto&& offWorkerFunc = [](NativeEngine* nativeEngine) {
         LOGI("WorkerCore RegisterOffWorkerFunc called");
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterOffWorkerFunc(offWorkerFunc);
+    nativeEngine_->SetOffWorkerFunc(offWorkerFunc);
 }
 
 void V8Engine::RegisterWorker()

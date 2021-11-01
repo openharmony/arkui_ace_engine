@@ -19,7 +19,6 @@
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "native_engine/impl/quickjs/quickjs_native_engine.h"
-#include "worker_init.h"
 #endif
 
 #include "base/log/ace_trace.h"
@@ -121,7 +120,7 @@ void QJSDeclarativeEngine::RegisterInitWorkerFunc()
 
         InitConsole(ctx);
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
+    nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
 void QJSDeclarativeEngine::RegisterAssetFunc()
@@ -136,7 +135,7 @@ void QJSDeclarativeEngine::RegisterAssetFunc()
         }
         delegate->GetResourceData(uri, content);
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterAssetFunc(assetFunc);
+    nativeEngine_->SetGetAssetFunc(assetFunc);
 }
 
 void QJSDeclarativeEngine::RegisterWorker()

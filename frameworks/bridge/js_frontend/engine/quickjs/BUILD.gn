@@ -69,7 +69,6 @@ template("js_engine_qjs") {
       configs += [ "$ace_flutter_engine_root:flutter_config" ]
     } else {
       deps += [ "//foundation/ace/napi:ace_napi_quickjs" ]
-      external_deps = worker_deps
     }
   }
 }

@@ -22,9 +22,6 @@
 #include <unordered_map>
 
 #include "third_party/quickjs/message_server.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-#include "worker_init.h"
-#endif
 
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
@@ -2892,9 +2889,9 @@ bool QjsEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     bool ret = engineInstance_->InitJsEnv(runtime, context, GetExtraNativeObject());
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-    RegisterWorker();
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
+    RegisterWorker();
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
         nativeEngine_->SetPackagePath(packagePath);
@@ -2955,7 +2952,7 @@ void QjsEngine::RegisterInitWorkerFunc()
         InitJsConsoleObject(ctx, globalObj);
         JS_FreeValue(ctx, globalObj);
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
+    nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
 void QjsEngine::RegisterAssetFunc()
@@ -2970,7 +2967,7 @@ void QjsEngine::RegisterAssetFunc()
         }
         delegate->GetResourceData(uri, content);
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterAssetFunc(assetFunc);
+    nativeEngine_->SetGetAssetFunc(assetFunc);
 }
 
 void QjsEngine::RegisterWorker()
