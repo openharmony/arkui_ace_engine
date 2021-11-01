@@ -48,6 +48,7 @@
 #include "core/components_v2/inspector/search_composed_element.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
 #include "core/components_v2/inspector/shape_container_composed_element.h"
+#include "core/components_v2/inspector/sheet_composed_element.h"
 #include "core/components_v2/inspector/slider_composed_element.h"
 #include "core/components_v2/inspector/span_composed_element.h"
 #include "core/components_v2/inspector/stack_composed_element.h"
@@ -150,7 +151,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { PROGRESS_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::ProgressComposedElement>(id); } },
     { DATA_PANEL_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::DataPanelComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::DataPanelComposedElement>(id); } },
+    { SHEET_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::SheetComposedElement>(id); } }
 };
 
 const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP {
@@ -196,7 +199,8 @@ const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_T
     { SLIDER_COMPONENT_TAG, SLIDER_ETS_TAG },
     { RATING_COMPONENT_TAG, RATING_ETS_TAG },
     { PROGRESS_COMPONENT_TAG, PROGRESS_ETS_TAG },
-    { DATA_PANEL_COMPONENT_TAG, DATA_PANEL_ETS_TAG }
+    { DATA_PANEL_COMPONENT_TAG, DATA_PANEL_ETS_TAG },
+    { SHEET_COMPONENT_TAG, SHEET_ETS_TAG }
 };
 
 } // namespace

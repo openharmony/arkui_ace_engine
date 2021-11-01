@@ -218,4 +218,8 @@ ACE_EXPORT extern const char PROGRESS_ETS_TAG[] = "Progress";
 ACE_EXPORT extern const char DATA_PANEL_COMPONENT_TAG[] = "percentageDataPanelComponent";
 ACE_EXPORT extern const char DATA_PANEL_ETS_TAG[] = "DataPanel";
 
+// sheet
+ACE_EXPORT extern const char SHEET_COMPONENT_TAG[] = "SheetComponent";
+ACE_EXPORT extern const char SHEET_ETS_TAG[] = "Sheet";
+
 } // namespace OHOS::Ace::V2

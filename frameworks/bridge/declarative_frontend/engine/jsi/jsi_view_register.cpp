@@ -89,6 +89,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_sheet.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
@@ -584,7 +585,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "CalendarController", JSCalendarController::JSBind },
     { "AbilityController", JSAbilityComponentController::JSBind },
     { "VideoController", JSVideoController::JSBind },
-    { "Search", JSSearch::JSBind }
+    { "Search", JSSearch::JSBind },
+    { "Sheet", JSSheet::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj)

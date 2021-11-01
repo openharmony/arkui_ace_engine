@@ -83,6 +83,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_sheet.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
@@ -529,6 +530,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSTextArea::JSBind(globalObj);
     JSTextInput::JSBind(globalObj);
     JSMarquee::JSBind(globalObj);
+    JSSheet::JSBind(globalObj);
 #if defined(FORM_SUPPORTED)
     JSForm::JSBind(globalObj);
 #endif
