@@ -188,12 +188,21 @@ public:
 
     Matrix4 ComputerRemaining(std::size_t startOffset) const;
 
+    void SetAlwaysRotate(bool alwaysRotate)
+    {
+        alwaysRotate_ = alwaysRotate;
+    }
+
     bool operator==(const TransformOperations& other) const
     {
-        bool equals = false;
+        if (alwaysRotate_) {
+            return false;
+        }
+        if (operations_.size() != other.operations_.size()) {
+            return false;
+        }
         for (size_t index = 0; index < operations_.size(); index++) {
-            equals = equals | operations_[index] == other.operations_[index];
-            if (!equals) {
+            if (!(operations_[index] == other.operations_[index])) {
                 return false;
             }
         }
@@ -202,6 +211,7 @@ public:
 
 protected:
     std::vector<TransformOperation> operations_;
+    bool alwaysRotate_ = false;
 
 private:
     std::size_t MatchingLength(const TransformOperations& to, const TransformOperations& from) const;

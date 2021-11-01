@@ -35,7 +35,7 @@ public:
 
     void AnimateTo(const T& beginValue, const T& endValue)
     {
-        if (endValue_ == endValue) {
+        if (endValue == endValue_) {
             return;
         }
         endValue_ = endValue;

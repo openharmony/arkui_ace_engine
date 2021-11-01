@@ -135,7 +135,7 @@ public:
                     renderNode->transformAnimation_.SetEvaluator(nullptr);
                 }
             });
-            transformAnimation_.PlayTransformAnimation(option, std::vector<TransformOperation>());
+            transformAnimation_.PlayTransformAnimation(option, std::vector<TransformOperation>(), true);
         }
     }
 
