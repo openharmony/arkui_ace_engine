@@ -33,11 +33,15 @@ ohos_shared_library("ace_ndk") {
   ]
 
   sources = [
+    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "//foundation/ace/ace_engine/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
     "native_interface_xcomponent.cpp",
   ]
 
-  deps = [ ":libace_ndk" ]
+  deps = [
+    ":libace_ndk",
+    "//utils/native/base:utilsecurec",
+  ]
 
   cflags_cc = [ "-Wno-missing-braces" ]
 

@@ -170,7 +170,6 @@ void XComponentElement::SetTouchEventType(const TouchPoint& event)
 void XComponentElement::CreatePlatformResource()
 {
     ReleasePlatformResource();
-
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("XComponentElement CreatePlatformResource context = null");

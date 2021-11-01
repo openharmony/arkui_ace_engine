@@ -13,25 +13,23 @@
  * limitations under the License.
  */
 
-#include <memory>
-
-#include "frameworks/bridge/js_frontend/engine/v8/v8_xcomponent_bridge.h"
+#include "frameworks/bridge/js_frontend/engine/quickjs/qjs_xcomponent_bridge.h"
 
 #include "base/utils/string_utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/js_frontend/engine/v8/v8_engine.h"
+#include "frameworks/bridge/js_frontend/engine/quickjs/qjs_engine.h"
 #include "frameworks/bridge/js_frontend/js_command.h"
 #include "frameworks/core/common/ace_view.h"
 #include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::Framework {
-V8XComponentBridge::V8XComponentBridge()
+QjsXComponentBridge::QjsXComponentBridge()
 {
     nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
     nativeXComponent_ = new NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
 }
 
-V8XComponentBridge::~V8XComponentBridge()
+QjsXComponentBridge::~QjsXComponentBridge()
 {
     if (nativeXComponent_) {
         delete nativeXComponent_;
@@ -39,68 +37,70 @@ V8XComponentBridge::~V8XComponentBridge()
     }
 }
 
-void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId id,
-                                       const std::string& args, JsEngineInstance* engine)
+void QjsXComponentBridge::HandleContext(JSContext* ctx, NodeId id, const std::string& args)
 {
-    isolate_ = ctx->GetIsolate();
-    if (!isolate_) {
-        LOGE("V8XComponentBridge isolate_ is null.");
-        return;
-    }
-    ctx_.Reset(isolate_, ctx);
-
     if (hasPluginLoaded_) {
         return;
     }
 
-    auto page = static_cast<RefPtr<JsAcePage>*>(ctx->GetIsolate()->GetData(V8EngineInstance::RUNNING_PAGE));
-    if (!page) {
-        LOGE("V8XComponentBridge page is null.");
+    auto engine = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (engine == nullptr) {
+        LOGE("QjsXComponentBridge::HandleJsContext, engine is null.");
         return;
     }
-    auto domXcomponent = AceType::DynamicCast<DOMXComponent>((*page)->GetDomDocument()->GetDOMNodeById(id));
+
+    auto page = engine->GetRunningPage();
+    if (!page) {
+        LOGE("QjsXComponentBridge page is null.");
+        return;
+    }
+    auto domXcomponent = AceType::DynamicCast<DOMXComponent>(page->GetDomDocument()->GetDOMNodeById(id));
     if (!domXcomponent) {
-        LOGE("V8XComponentBridge domXcomponent is null.");
+        LOGE("QjsXComponentBridge domXcomponent is null.");
         return;
     }
     auto xcomponent = AceType::DynamicCast<XComponentComponent>(domXcomponent->GetSpecializedComponent());
     if (!xcomponent) {
-        LOGE("V8XComponentBridge xcomponent is null.");
+        LOGE("QjsXComponentBridge xcomponent is null.");
         return;
     }
     auto textureId = static_cast<int64_t>(xcomponent->GetTextureId());
 
     auto container = Container::Current();
     if (!container) {
-        LOGE("V8XComponentBridge Current container null");
+        LOGE("QjsXComponentBridge Current container null");
         return;
     }
     auto nativeView = static_cast<AceView*>(container->GetView());
     if (!nativeView) {
-        LOGE("V8XComponentBridge nativeView null");
+        LOGE("QjsXComponentBridge nativeView null");
         return;
     }
     auto nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
     if (!nativeWindow) {
-        LOGE("V8XComponentBridge::HandleJsContext nativeWindow invalid");
+        LOGE("QjsXComponentBridge::HandleJsContext nativeWindow invalid");
         return;
     }
 
     nativeXComponentImpl_->SetSurface(nativeWindow);
     nativeXComponentImpl_->SetXComponentId(xcomponent->GetId());
 
-    std::shared_ptr<V8NativeEngine> nativeEngine = static_cast<V8EngineInstance*>(engine)->GetV8NativeEngine();
-    if (!nativeEngine) {
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    auto nativeEngine = static_cast<QuickJSNativeEngine*>(engine->GetQuickJSNativeEngine());
+    if (nativeEngine == nullptr) {
         LOGE("nativeEngine is null");
         return;
     }
 
-    auto renderContext = nativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true,
-                                                        args, NATIVE_XCOMPONENT_OBJ,
-                                                        reinterpret_cast<void*>(nativeXComponent_));
-    renderContext_.Reset(isolate_, renderContext);
+    renderContext_ = nativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true,
+                                                    args, NATIVE_XCOMPONENT_OBJ,
+                                                    reinterpret_cast<void*>(nativeXComponent_));
 
-    auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate_->GetData(V8EngineInstance::FRONTEND_DELEGATE));
+    auto delegate = engine->GetDelegate();
+    if (delegate == nullptr) {
+        LOGE("delegate is null.");
+        return;
+    }
     auto task = [weak = WeakClaim(this), xcomponent]() {
         auto pool = xcomponent->GetTaskPool();
         if (!pool) {
@@ -108,17 +108,12 @@ void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId
         }
         auto bridge = weak.Upgrade();
         if (bridge) {
-            pool->NativeXComponentInit(
-                bridge->nativeXComponent_,
-                AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
+            pool->NativeXComponentInit(bridge->nativeXComponent_,
+                                       AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
         }
     };
-    if (*delegate == nullptr) {
-        LOGE("delegate is null.");
-        return;
-    }
-    (*delegate)->PostSyncTaskToPage(task);
-
+    delegate->PostSyncTaskToPage(task);
+#endif
     hasPluginLoaded_ = true;
     return;
 }

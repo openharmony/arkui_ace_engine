@@ -27,7 +27,7 @@ class NativeXComponentImpl : public virtual AceType {
     DECLARE_ACE_TYPE(NativeXComponentImpl, AceType);
 
 public:
-    NativeXComponentImpl() : window_(nullptr), width_(0), height_(0), callback_(nullptr) {}
+    NativeXComponentImpl() : window_(nullptr), width_(0), height_(0), x_(0.0), y_(0.0), callback_(nullptr) {}
 
     void SetXComponentId(const std::string& id)
     {
@@ -39,24 +39,44 @@ public:
         return xcomponetId_;
     }
 
-    void SetSurfaceWidth(const int width)
+    void SetXComponentWidth(const int width)
     {
         width_ = width;
     }
 
-    int GetSurfaceWidth() const
+    int GetXComponentWidth() const
     {
         return width_;
     }
 
-    void SetSurfaceHeight(const int height)
+    void SetXComponentHeight(const int height)
     {
         height_ = height;
     }
 
-    int GetSurfaceHeight() const
+    int GetXComponentHeight() const
     {
         return height_;
+    }
+
+    void SetXComponentOffsetX(const double x)
+    {
+        x_ = x;
+    }
+
+    double GetXComponentOffsetX() const
+    {
+        return x_;
+    }
+
+    void SetXComponentOffsetY(const double y)
+    {
+        y_ = y;
+    }
+
+    double GetXComponentOffsetY() const
+    {
+        return y_;
     }
 
     void SetSurface(void* window)
@@ -64,7 +84,7 @@ public:
         window_ = window;
     }
 
-    void* GetSurface() const
+    const void* GetSurface() const
     {
         return window_;
     }
@@ -94,6 +114,8 @@ private:
     void* window_;
     int width_;
     int height_;
+    double x_;
+    double y_;
     TouchInfo touchInfo_;
     NativeXComponentCallback* callback_;
 };
@@ -104,7 +126,8 @@ struct NativeXComponent {
     ~NativeXComponent() {}
     int32_t GetXComponentId(char* id, uint64_t* size);
     int32_t GetNativeWindow(void** window);
-    int32_t GetSurfaceSize(const void* window, uint64_t* width, uint64_t* height);
+    int32_t GetXComponentSize(const void* window, uint64_t* width, uint64_t* height);
+    int32_t GetXComponentOffset(const void* window, double* x, double* y);
     int32_t GetTouchInfo(const void* window, TouchInfo* touchInfo);
     int32_t RegisterCallback(NativeXComponentCallback* callback);
 

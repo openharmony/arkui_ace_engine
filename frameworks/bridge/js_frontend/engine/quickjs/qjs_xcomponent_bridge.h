@@ -13,48 +13,40 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_V8_V8_XCOMPONENT_BRIDGE_H
-#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_V8_V8_XCOMPONENT_BRIDGE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_QUICKJS_XCOMPONENT_BRIDGE_H
+#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_QUICKJS_XCOMPONENT_BRIDGE_H
 
 #include <unordered_map>
-
-#include "third_party/v8/include/v8.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/decoration.h"
 #include "frameworks/bridge/js_frontend/engine/common/base_xcomponent_bridge.h"
-#include "frameworks/bridge/js_frontend/engine/v8/v8_engine.h"
+#include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
 
 namespace OHOS::Ace::Framework {
-class V8XComponentBridge : public BaseXComponentBridge {
-    DECLARE_ACE_TYPE(V8XComponentBridge, BaseXComponentBridge)
+class QjsXComponentBridge : public BaseXComponentBridge {
+    DECLARE_ACE_TYPE(QjsXComponentBridge, BaseXComponentBridge)
 
 public:
-    V8XComponentBridge();
-    ~V8XComponentBridge();
-    void HandleContext(const v8::Local<v8::Context>& ctx, NodeId id, const std::string& args, JsEngineInstance* engine);
+    QjsXComponentBridge();
+    ~QjsXComponentBridge();
 
-    v8::Local<v8::Context> GetContext() const
-    {
-        return ctx_.Get(isolate_);
-    }
+    void HandleContext(JSContext* ctx, NodeId id, const std::string& args);
 
-    v8::Local<v8::Object> GetRenderContext() const
+    JSValue GetRenderContext() const
     {
-        return renderContext_.Get(isolate_);
+        return renderContext_;
     }
 
 private:
-    v8::Persistent<v8::Object> renderContext_;
-    v8::Persistent<v8::Context> ctx_;
-    v8::Isolate* isolate_ = nullptr;
+    JSValue renderContext_;
 
-    NativeXComponent *nativeXComponent_ = nullptr;
+    NativeXComponent* nativeXComponent_;
     RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
 
     bool hasPluginLoaded_ = false;
 };
 } // namespace OHOS::Ace::Framework
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_V8_V8_XCOMPONENT_BRIDGE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_QUICKJS_XCOMPONENT_BRIDGE_H

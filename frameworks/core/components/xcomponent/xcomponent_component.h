@@ -23,7 +23,6 @@
 #include "core/components/declaration/xcomponent/xcomponent_declaration.h"
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "core/components/xcomponent/resource/native_texture.h"
-#include "core/components/xcomponent/xcomponent_element.h"
 #include "core/pipeline/base/element.h"
 
 namespace OHOS::Ace {
@@ -66,7 +65,6 @@ public:
     void NativeXComponentInit(
         NativeXComponent* nativeXComponent,
         WeakPtr<NativeXComponentImpl> nativeXComponentImpl);
-    void PluginUpdate();
 
     WeakPtr<XComponentComponent> component_;
 
@@ -77,7 +75,7 @@ private:
 };
 
 // A component can show different native view.
-class XComponentComponent : public RenderComponent {
+class ACE_EXPORT XComponentComponent : public RenderComponent {
     DECLARE_ACE_TYPE(XComponentComponent, RenderComponent);
 
 public:

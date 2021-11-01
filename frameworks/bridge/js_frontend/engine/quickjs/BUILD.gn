@@ -37,6 +37,7 @@ template("js_engine_qjs") {
       "qjs_engine_loader.cpp",
       "qjs_group_js_bridge.cpp",
       "qjs_utils.cpp",
+      "qjs_xcomponent_bridge.cpp",
       "stepper_bridge.cpp",
     ]
 

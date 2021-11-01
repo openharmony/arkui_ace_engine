@@ -14,7 +14,7 @@
  */
 
 /**
- * @addtogroup xcomponent
+ * @addtogroup ACE
  * @{
  *
  * @brief Provides functions to set and obtain data and callbacks of xcomponent.
@@ -26,7 +26,7 @@
 /**
  * @file native_interface_xcomponent.h
  *
- * @brief Declares APIs to get data from native xcomponet.
+ * @brief Declares APIs to get data from native xcomponent.
  *
  * @since 7
  * @version 1.0
@@ -51,11 +51,11 @@ extern "C" {
  * @version 1.0
  */
 enum {
-    /** Success result */
+    /* Success result */
     XCOMPONENT_RESULT_SUCCESS = 0,
-    /** Failed result */
+    /* Failed result */
     XCOMPONENT_RESULT_FAILED = -1,
-    /** Invalid parameters */
+    /* Invalid parameters */
     XCOMPONENT_RESULT_BAD_PARAMETER = -2,
 };
 
@@ -70,9 +70,9 @@ enum TouchInfoType {
 struct TouchInfo {
     // Point ID of contact between the finger and the screen.
     int32_t id;
-    // Horizontal distance of the touch point relative to the upper left corner of the browser screen.
+    // Horizontal distance of the touch point relative to the upper left corner of screen.
     float x;
-    // Vertical distance of the touch point relative to the upper left corner of the browser screen.
+    // Vertical distance of the touch point relative to the upper left corner of screen.
     float y;
     // Touch type of the touch event.
     TouchInfoType type;
@@ -116,7 +116,13 @@ typedef struct NativeXComponentCallback {
  *
  * @param component Indicates the pointer to this <b>NativeXComponent</b> instance.
  * @param id Indicates the char buffer to keep the ID of the xcomponent.
- * @param size Indicates length of the id.
+ *        Notice that a null-terminator will be append to the char buffer, so the size of the
+ *        char buffer should be at least as large as the size of the real id length plus 1.
+ *        The size of the char buffer is recommend to be [XCOMPONENT_ID_LEN_MAX + 1]
+ * @param size is an in-out param.
+ *        [in] Indicates the length of the id char buffer (including null-terminator)
+ *             The referenced value of 'size' should be in the range (0, XCOMPONENT_ID_LEN_MAX + 1]
+ *        [out] Receives the length of the id (not include null-terminator)
  * @return Returns the execution result.
  * @since 7
  * @version 1.0
@@ -135,17 +141,31 @@ int32_t NativeXComponent_GetXComponentId(NativeXComponent* component, char* id, 
 int32_t NativeXComponent_GetNativeWindow(NativeXComponent* component, void** window);
 
 /**
- * @brief Obtains the size of the native surface.
+ * @brief Obtains the size of the xcomponent.
  *
  * @param component Indicates the pointer to this <b>NativeXComponent</b> instance.
  * @param window Indicates the native window handler.
- * @param width Indicates pointer to the width of the native surface.
- * @param height Indicates pointer to the height of the native surface.
+ * @param width Indicates pointer to the width of the xcomponent.
+ * @param height Indicates pointer to the height of the xcomponent.
  * @return Returns the execution result.
  * @since 7
  * @version 1.0
  */
-int32_t NativeXComponent_GetSurfaceSize(NativeXComponent* component, void* window, uint64_t* width, uint64_t* height);
+int32_t NativeXComponent_GetXComponentSize(NativeXComponent* component, void* window,
+                                           uint64_t* width, uint64_t* height);
+
+/**
+ * @brief Obtains the offset of the xcomponent.
+ *
+ * @param component Indicates the pointer to this <b>NativeXComponent</b> instance.
+ * @param window Indicates the native window handler.
+ * @param x Indicates pointer to the horizontal coordinate of xcomponent relative to upper left corner of screen.
+ * @param y Indicates pointer to the vertical coordinate of xcomponent relative to upper left corner of screen.
+ * @return Returns the execution result.
+ * @since 7
+ * @version 1.0
+ */
+int32_t NativeXComponent_GetXComponentOffset(NativeXComponent* component, void* window, double* x, double* y);
 
 /**
  * @brief Obtains the information of touch event.

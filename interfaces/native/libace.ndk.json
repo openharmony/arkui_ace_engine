@@ -9,7 +9,7 @@
     },
     {
         "first_introduced": "7",
-        "name": "NativeXComponent_GetSurfaceSize"
+        "name": "NativeXComponent_GetXComponentSize"
     },
     {
         "first_introduced": "7",
@@ -18,5 +18,9 @@
     {
         "first_introduced": "7",
         "name": "NativeXComponent_GetTouchInfo"
+    },
+    {
+        "first_introduced": "7",
+        "name": "NativeXComponent_GetXComponentOffset"
     }
 ]

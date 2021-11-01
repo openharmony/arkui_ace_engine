@@ -18,6 +18,7 @@
 #include "base/utils/macros.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/canvas_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_engine.h"
+#include "frameworks/bridge/js_frontend/engine/quickjs/qjs_xcomponent_bridge.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -36,7 +37,7 @@ RefPtr<BaseCanvasBridge> QjsEngineLoader::CreateCanvasBridge() const
 
 RefPtr<BaseXComponentBridge> QjsEngineLoader::CreateXComponentBridge() const
 {
-    return nullptr;
+    return AceType::MakeRefPtr<QjsXComponentBridge>();
 }
 
 #if defined(BUILT_IN_JS_ENGINE)

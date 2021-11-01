@@ -58,6 +58,7 @@
 #include "frameworks/bridge/js_frontend/engine/quickjs/offscreen_canvas_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
+#include "frameworks/bridge/js_frontend/engine/quickjs/qjs_xcomponent_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/stepper_bridge.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
@@ -1918,6 +1919,12 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
         return ComponentApiBridge::JsGetBoundingRect(ctx, nodeId);
     } else if (std::strcmp(methodName.get(), "scrollTo") == 0) {
         ComponentApiBridge::JsScrollTo(ctx, args.get(), nodeId);
+    } else if (std::strcmp(methodName.get(), "getXComponentContext") == 0) {
+        auto bridge = AceType::DynamicCast<QjsXComponentBridge>(page->GetXComponentBridgeById(nodeId));
+        if (bridge) {
+            bridge->HandleContext(ctx, nodeId, args.get());
+            return bridge->GetRenderContext();
+        }
     }
 
     auto resultValue = JSValue();
@@ -3461,7 +3468,20 @@ void QjsEngine::FireSyncEvent(const std::string& eventId, const std::string& par
 
 void QjsEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
 {
+    ACE_DCHECK(engineInstance_);
+    auto context = engineInstance_->GetQjsContext();
 
+    auto page = engineInstance_->GetRunningPage();
+    if (page == nullptr) {
+        LOGE("FireExternalEvent GetRunningPage is nullptr");
+        return;
+    }
+    std::string arguments;
+    auto bridge = AceType::DynamicCast<QjsXComponentBridge>(page->GetXComponentBridgeById(nodeId));
+    if (bridge) {
+        bridge->HandleContext(context, nodeId, arguments);
+        return;
+    }
 }
 
 void QjsEngine::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher)

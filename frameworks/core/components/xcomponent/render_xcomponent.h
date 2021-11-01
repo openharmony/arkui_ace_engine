@@ -49,17 +49,16 @@ public:
         READY,
     };
 
-    virtual void NativeXComponentInit(
+    void NativeXComponentInit(
         NativeXComponent* nativeXComponent,
-        WeakPtr<NativeXComponentImpl> nativeXComponentImpl) = 0;
-    virtual void PluginUpdate() = 0;
+        WeakPtr<NativeXComponentImpl> nativeXComponentImpl);
+
+    void NativeXComponentDestroy();
 
     void SetXComponentSizeChange(XComponentSizeChangeEvent &&xcomponentSizeChangeEvent)
     {
         xcomponentSizeChangeEvent_ = std::move(xcomponentSizeChangeEvent);
     }
-
-    void NativeXComponentDestroy();
 
     void NativeXComponentDispatchTouchEvent(const TouchInfo& touchInfo);
 
@@ -81,6 +80,7 @@ private:
     void CreateXComponentPlatformResource();
     void UpdateXComponentLayout();
     void CallXComponentLayoutMethod();
+    void NativeXComponentOffset(const double& x, const double& y);
     std::string MakeMethodHash(const std::string& method) const;
     bool isCreatePlatformResourceSuccess_ = false;
     State state_ = State::UNINITIALIZED;

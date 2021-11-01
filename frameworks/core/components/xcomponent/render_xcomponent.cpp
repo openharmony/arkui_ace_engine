@@ -85,11 +85,14 @@ void RenderXComponent::PerformLayout()
 
 void RenderXComponent::OnPaintFinish()
 {
-    auto xcomponent = delegate_->GetXComponent().Upgrade();
     position_ = GetGlobalOffset();
+    NativeXComponentOffset(position_.GetX(), position_.GetY());
+
+    auto xcomponent = delegate_->GetXComponent().Upgrade();
     if (std::strcmp(xcomponent->GetXComponentType().c_str(), "texture") == 0) {
         return;
     }
+    
     CreateXComponentPlatformResource();
     UpdateXComponentLayout();
 }
@@ -113,6 +116,37 @@ void RenderXComponent::UpdateXComponentLayout()
     preDrawSize_ = drawSize_;
 }
 
+void RenderXComponent::NativeXComponentInit(
+    NativeXComponent* nativeXComponent,
+    WeakPtr<NativeXComponentImpl> nativeXComponentImpl)
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("NativeXComponentInit pipelineContext is null");
+        return;
+    }
+    nativeXComponent_ = nativeXComponent;
+    nativeXComponentImpl_ = nativeXComponentImpl;
+
+    pipelineContext->GetTaskExecutor()->PostTask(
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_,
+            w = drawSize_.Width(), h = drawSize_.Height()] {
+            auto nXCompImpl = weakNXCompImpl.Upgrade();
+            if (nXComp && nXCompImpl) {
+                nXCompImpl->SetXComponentWidth((int)(w));
+                nXCompImpl->SetXComponentHeight((int)(h));
+                auto surface = const_cast<void*>(nXCompImpl->GetSurface());
+                auto callback = nXCompImpl->GetCallback();
+                if (callback && callback->OnSurfaceCreated != nullptr) {
+                    callback->OnSurfaceCreated(nXComp, surface);
+                }
+            } else {
+                LOGE("Native XComponent nullptr");
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
 void RenderXComponent::NativeXComponentDestroy()
 {
     auto pipelineContext = context_.Upgrade();
@@ -125,7 +159,7 @@ void RenderXComponent::NativeXComponentDestroy()
         [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_] {
         auto nXCompImpl = weakNXCompImpl.Upgrade();
         if (nXComp != nullptr && nXCompImpl) {
-            auto surface = nXCompImpl->GetSurface();
+            auto surface = const_cast<void*>(nXCompImpl->GetSurface());
             auto callback = nXCompImpl->GetCallback();
             if (callback != nullptr && callback->OnSurfaceDestroyed != nullptr) {
                 callback->OnSurfaceDestroyed(nXComp, surface);
@@ -153,7 +187,7 @@ void RenderXComponent::NativeXComponentDispatchTouchEvent(const TouchInfo& touch
             auto nXCompImpl = weakNXCompImpl.Upgrade();
             if (nXComp != nullptr && nXCompImpl) {
                 nXCompImpl->SetTouchInfo(touchInfo);
-                auto surface = nXCompImpl->GetSurface();
+                auto surface = const_cast<void*>(nXCompImpl->GetSurface());
                 auto callback = nXCompImpl->GetCallback();
                 if (callback != nullptr && callback->DispatchTouchEvent != nullptr) {
                     callback->DispatchTouchEvent(nXComp, surface);
@@ -164,6 +198,25 @@ void RenderXComponent::NativeXComponentDispatchTouchEvent(const TouchInfo& touch
         },
         TaskExecutor::TaskType::JS);
     }
+}
+
+void RenderXComponent::NativeXComponentOffset(const double&x, const double& y)
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("NativeXComponentOffset context null");
+        return;
+    }
+    float scale = pipelineContext->GetViewScale();
+    pipelineContext->GetTaskExecutor()->PostTask(
+        [weakNXCompImpl = nativeXComponentImpl_, x, y, scale] {
+            auto nXCompImpl = weakNXCompImpl.Upgrade();
+            if (nXCompImpl) {
+                nXCompImpl->SetXComponentOffsetX(x * scale);
+                nXCompImpl->SetXComponentOffsetY(y * scale);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void RenderXComponent::CallXComponentLayoutMethod()
