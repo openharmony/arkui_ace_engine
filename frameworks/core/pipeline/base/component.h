@@ -204,7 +204,7 @@ private:
     // Set the id for the component to identify the unique component.
     int32_t retakeId_ = 0;
     bool static_ = false;
-    std::string inspectorId_;
+    std::string inspectorId_ = "-1";
     // eventMarker used to handle component detach and attach to the render tree.
     EventMarker appearEventId_;
     EventMarker disappearEventId_;

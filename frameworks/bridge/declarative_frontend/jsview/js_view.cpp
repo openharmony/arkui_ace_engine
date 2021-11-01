@@ -239,8 +239,7 @@ void ViewFunctions::Destroy(JSView* parentCustomView)
     LOGD("ViewFunctions::Destroy() end");
 }
 
-JSView::JSView(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction)
-    : viewId_(viewId)
+JSView::JSView(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction) : viewId_(viewId)
 {
     jsViewFunction_ = AceType::MakeRefPtr<ViewFunctions>(jsObject, jsRenderFunction);
     LOGD("JSView constructor");
@@ -263,9 +262,9 @@ RefPtr<OHOS::Ace::Component> JSView::CreateComponent()
     // add callback for element creation to component, and get pointer reference
     // to the element on creation. When state of this view changes, mark the
     // element to dirty.
-    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<Component> {
+    auto renderFunction = [weak = AceType::WeakClaim(this)](const RefPtr<Component>& component) -> RefPtr<Component> {
         auto jsView = weak.Upgrade();
-        return jsView ? jsView->InternalRender() : nullptr;
+        return jsView ? jsView->InternalRender(component) : nullptr;
     };
 
     auto elementFunction = [weak = AceType::WeakClaim(this), renderFunction](const RefPtr<ComposedElement>& element) {
@@ -312,7 +311,7 @@ RefPtr<OHOS::Ace::PageTransitionComponent> JSView::BuildPageTransitionComponent(
     return pageTransitionComponent;
 }
 
-RefPtr<OHOS::Ace::Component> JSView::InternalRender()
+RefPtr<OHOS::Ace::Component> JSView::InternalRender(const RefPtr<Component>& parent)
 {
     LOGD("JSView: InternalRender");
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
@@ -322,11 +321,14 @@ RefPtr<OHOS::Ace::Component> JSView::InternalRender()
         return nullptr;
     }
     jsViewFunction_->ExecuteAboutToRender();
+    ViewStackProcessor::GetInstance()->SetRootStackId(parent ? StringToInt(parent->GetInspectorId()) : -1);
     jsViewFunction_->ExecuteRender();
     jsViewFunction_->ExecuteOnRenderDone();
     CleanUpAbandonedChild();
     jsViewFunction_->Destroy(this);
-    return ViewStackProcessor::GetInstance()->Finish();
+    auto buildComponent = ViewStackProcessor::GetInstance()->Finish();
+    ViewStackProcessor::GetInstance()->ResetRootStackId();
+    return buildComponent;
 }
 
 /**

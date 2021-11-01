@@ -92,8 +92,7 @@ RefPtr<PopupComponentV2> ViewStackProcessor::GetPopupComponent(bool createNewCom
         return nullptr;
     }
 
-    RefPtr<PopupComponentV2> popupComponent = AceType::MakeRefPtr<OHOS::Ace::PopupComponentV2>(
-            GenerateId(), "popup");
+    RefPtr<PopupComponentV2> popupComponent = AceType::MakeRefPtr<OHOS::Ace::PopupComponentV2>(GenerateId(), "popup");
     wrappingComponentsMap.emplace("popup", popupComponent);
     return popupComponent;
 }
@@ -327,11 +326,13 @@ void ViewStackProcessor::ClearPageTransitionComponent()
     }
 }
 
-void ViewStackProcessor::CreateAccessibilityNode(const RefPtr<Component>& component, const std::string& inspectorTag)
+void ViewStackProcessor::CreateAccessibilityNode(
+    const RefPtr<Component>& component, bool isCustomView, const std::string& inspectorTag)
 {
-    // if_else_component、for_each_component、MultiComposedComponent not create accessibilityNode
-    if (AceType::InstanceOf<MultiComposedComponent>(component)) {
+    // if_else_component, for_each_component, MultiComposedComponen, customView not create accessibilityNode
+    if (AceType::InstanceOf<MultiComposedComponent>(component) || isCustomView) {
         if (!GetMainComponent()) {
+            component->SetInspectorId(std::to_string(stackRootId_));
             return;
         }
         auto parentId = GetMainComponent()->GetInspectorId();
@@ -353,7 +354,8 @@ void ViewStackProcessor::CreateAccessibilityNode(const RefPtr<Component>& compon
     }
     component->SetInspectorId(GenerateId());
     std::string tag = inspectorTag.empty() ? AceType::TypeName(component) : inspectorTag;
-    int32_t parentId = componentsStack_.empty() ? -1 : StringUtils::StringToInt(GetMainComponent()->GetInspectorId());
+    int32_t parentId =
+        componentsStack_.empty() ? stackRootId_ : StringUtils::StringToInt(GetMainComponent()->GetInspectorId());
     auto node = OHOS::Ace::V2::InspectorComposedComponent::CreateAccessibilityNode(tag, inspectorId, parentId, -1);
     if (!node) {
         LOGD("Create AccessibilityNode:%{public}s Failed", tag.c_str());
@@ -368,25 +370,24 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
         Pop();
     }
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    CreateAccessibilityNode(component, inspectorTag);
+    CreateAccessibilityNode(component, isCustomView, inspectorTag);
 #else
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()
-        || SystemProperties::GetAccessibilityEnabled()) {
-        CreateAccessibilityNode(component, inspectorTag);
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || SystemProperties::GetAccessibilityEnabled()) {
+        CreateAccessibilityNode(component, isCustomView, inspectorTag);
     }
 #endif
     wrappingComponentsMap.emplace("main", component);
     componentsStack_.push(wrappingComponentsMap);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component)
-        && !AceType::InstanceOf<TextSpanComponent>(component)) {
+    if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component) &&
+        !AceType::InstanceOf<TextSpanComponent>(component)) {
         GetBoxComponent();
     }
 #else
-    bool isAccessEnable = AceApplicationInfo::GetInstance().IsAccessibilityEnabled()
-        || SystemProperties::GetAccessibilityEnabled();
-    if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component)
-        && !AceType::InstanceOf<TextSpanComponent>(component) && isAccessEnable) {
+    bool isAccessEnable =
+        AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || SystemProperties::GetAccessibilityEnabled();
+    if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component) &&
+        !AceType::InstanceOf<TextSpanComponent>(component) && isAccessEnable) {
         GetBoxComponent();
     }
 #endif

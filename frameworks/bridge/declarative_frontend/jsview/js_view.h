@@ -90,7 +90,7 @@ public:
     JSView(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction);
     virtual ~JSView();
 
-    RefPtr<OHOS::Ace::Component> InternalRender();
+    RefPtr<OHOS::Ace::Component> InternalRender(const RefPtr<Component>& parent);
     void Destroy(JSView* parentCustomView);
     RefPtr<Component> CreateComponent();
     RefPtr<PageTransitionComponent> BuildPageTransitionComponent();

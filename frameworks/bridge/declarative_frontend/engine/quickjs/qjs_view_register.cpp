@@ -141,6 +141,7 @@ static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc,
     auto page = QJSDeclarativeEngineInstance::GetRunningPage(ctx);
     LOGD("Load Document setting root view");
     auto rootComponent = view->CreateComponent();
+    rootComponent->SetInspectorId("-1");
     std::list<RefPtr<Component>> stackChildren;
     stackChildren.emplace_back(rootComponent);
     auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(

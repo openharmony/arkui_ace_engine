@@ -74,10 +74,21 @@ public:
     RefPtr<PageTransitionComponent> GetPageTransitionComponent();
     RefPtr<CoverageComponent> GetCoverageComponent();
     void ClearPageTransitionComponent();
-    void CreateAccessibilityNode(const RefPtr<Component>& component, const std::string& inspectorTag);
+    void CreateAccessibilityNode(
+        const RefPtr<Component>& component, bool isCustomView, const std::string& inspectorTag);
 #ifndef WEARABLE_PRODUCT
     RefPtr<PopupComponentV2> GetPopupComponent(bool createNewComponent = true);
 #endif
+
+    void SetRootStackId(int32_t inspectorId)
+    {
+        stackRootId_ = inspectorId;
+    }
+
+    void ResetRootStackId()
+    {
+        stackRootId_ = -1;
+    }
 
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the stack.
@@ -155,6 +166,8 @@ private:
     std::stack<int32_t> parentIdStack_;
 
     AnimationOption implicitAnimationOption_;
+
+    int32_t stackRootId_ = -1;
 
     static thread_local int32_t composedElementId_;
 

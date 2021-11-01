@@ -31,8 +31,8 @@ class ACE_EXPORT ComposedElement : public Element {
     DECLARE_ACE_TYPE(ComposedElement, Element);
 
 public:
-    using RenderFunction = std::function<RefPtr<Component>()>;
-    using PageTransitionFunction = RenderFunction;
+    using RenderFunction = std::function<RefPtr<Component>(const RefPtr<Component>&)>;
+    using PageTransitionFunction = std::function<RefPtr<Component>()>;
     using ApplyFunction = std::function<void(const RefPtr<RenderElement>&)>;
     explicit ComposedElement(const ComposeId& id);
     ~ComposedElement() override = default;
@@ -65,9 +65,12 @@ public:
         return id_;
     }
 
-    RefPtr<Component> CallRenderFunction()
+    RefPtr<Component> CallRenderFunction(const RefPtr<Component>& componnet)
     {
-        return renderFunction_();
+        if (renderFunction_) {
+            return renderFunction_(componnet);
+        }
+        return nullptr;
     }
 
     void SetRenderFunction(RenderFunction&& func)

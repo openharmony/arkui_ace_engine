@@ -20,6 +20,7 @@
 #include <string>
 
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/jsview/js_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -272,6 +273,7 @@ public:
 
         ScopedViewStackProcessor scopedViewStackProcessor;
         auto viewStack = ViewStackProcessor::GetInstance();
+        viewStack->SetRootStackId(StringToInt(GetInspectorId()));
         auto multiComposed = AceType::MakeRefPtr<MultiComposedComponent>(key, "LazyForEach");
         viewStack->Push(multiComposed);
 
@@ -280,6 +282,7 @@ public:
         viewStack->PopKey();
 
         auto component = viewStack->Finish();
+        viewStack->ResetRootStackId();
         ACE_DCHECK(multiComposed == component);
 
         while (multiComposed) {
