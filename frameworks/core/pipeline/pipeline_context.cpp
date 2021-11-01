@@ -1981,6 +1981,7 @@ void PipelineContext::Destroy()
     hoverNodes_.clear();
     drawDelegate_.reset();
     renderFactory_.Reset();
+    eventManager_.ClearResults();
     window_->Destroy();
     LOGI("PipelineContext::Destroy end.");
 }

@@ -54,6 +54,8 @@ public:
 
     bool DispatchMouseEvent(const MouseEvent& event);
 
+    void ClearResults();
+
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
