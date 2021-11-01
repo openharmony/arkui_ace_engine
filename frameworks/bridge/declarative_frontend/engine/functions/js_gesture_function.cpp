@@ -40,10 +40,10 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     gestureInfoObj->SetProperty<double>("scale", info.GetScale());
     gestureInfoObj->SetProperty<double>("angle", info.GetAngle());
     gestureInfoObj->SetProperty<double>("timestamp", info.GetTimeStamp().time_since_epoch().count());
-    gestureInfoObj->SetProperty<double>("globalX", info.GetGlobalLocation().GetX());
-    gestureInfoObj->SetProperty<double>("globalY", info.GetGlobalLocation().GetY());
-    gestureInfoObj->SetProperty<double>("localX", info.GetLocalLocation().GetX());
-    gestureInfoObj->SetProperty<double>("localY", info.GetLocalLocation().GetY());
+    gestureInfoObj->SetProperty<double>("globalX", SystemProperties::Px2Vp(info.GetGlobalLocation().GetX()));
+    gestureInfoObj->SetProperty<double>("globalY", SystemProperties::Px2Vp(info.GetGlobalLocation().GetY()));
+    gestureInfoObj->SetProperty<double>("localX", SystemProperties::Px2Vp(info.GetLocalLocation().GetX()));
+    gestureInfoObj->SetProperty<double>("localY", SystemProperties::Px2Vp(info.GetLocalLocation().GetY()));
     gestureInfoObj->SetProperty<double>("pinchCenterX", SystemProperties::Px2Vp(info.GetPinchCenter().GetX()));
     gestureInfoObj->SetProperty<double>("pinchCenterY", SystemProperties::Px2Vp(info.GetPinchCenter().GetY()));
     return gestureInfoObj;
