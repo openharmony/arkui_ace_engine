@@ -926,15 +926,7 @@ public:
     {
         windowBlurStyle_ = style;
     }
-    void SetBorderType(int type)
-    {
-        borderType = type;
-    }
 
-    int GetBorderType()
-    {
-        return borderType;
-    }
     const Border& GetBorder() const
     {
         return border_;
@@ -1132,9 +1124,6 @@ private:
     bool hasBorderImageOutset_ = false;
     bool hasBorderImageRepeat_ = false;
     bool hasBorderImageGradient_ = false;
-
-    // 0 border 1 borderimage-url 2 borderimage-gradient
-    int borderType = 0;
 
     // padding is zero
     Edge padding_;

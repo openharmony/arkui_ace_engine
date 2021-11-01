@@ -790,40 +790,43 @@ void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* c
         if (border.HasValue()) {
             // set AntiAlias
             paint.setAntiAlias(true);
-
-            if (decoration_->GetBorderType() == 1) {
+            if (decoration_->GetHasBorderImageSource()) {
+                if (!image) {
+                    return;
+                }
                 canvas->save();
                 canvas->clipRRect(outerRRect.sk_rrect, true);
                 PaintBorderImage(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint, image);
                 canvas->restore();
             }
-            if (decoration_->GetBorderType() == 2) {
+            if (decoration_->GetHasBorderImageGradient()) {
                 Gradient gradient = decoration_->GetGradientBorderImage();
-                if (gradient.IsValid()) {
-                    if (NearZero(paintSize_.Width()) || NearZero(paintSize_.Height())) {
-                        return;
-                    }
-                    canvas->save();
-                    SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()),
-                        SkDoubleToMScalar(paintSize_.Height()));
-                    auto shader = CreateGradientShader(gradient, skPaintSize);
-                    paint.setShader(std::move(shader));
-
-                    auto imageInfo = SkImageInfo::Make(paintSize_.Width(), paintSize_.Height(),
-                        SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
-                    SkBitmap skBitmap_;
-                    skBitmap_.allocPixels(imageInfo);
-                    std::unique_ptr<SkCanvas> skCanvas_ = std::make_unique<SkCanvas>(skBitmap_);
-                    skCanvas_->drawPaint(paint);
-                    sk_sp<SkImage> skImage_ = SkImage::MakeFromBitmap(skBitmap_);
-                    canvas->clipRRect(outerRRect.sk_rrect, true);
-                    PaintBorderImage(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint, skImage_);
-                    paint.setShader(nullptr);
-                    canvas->restore();
+                if (!gradient.IsValid()) {
+                    return;
                 }
+                if (NearZero(paintSize_.Width()) || NearZero(paintSize_.Height())) {
+                    return;
+                }
+                canvas->save();
+                SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()),
+                    SkDoubleToMScalar(paintSize_.Height()));
+                auto shader = CreateGradientShader(gradient, skPaintSize);
+                paint.setShader(std::move(shader));
+
+                auto imageInfo = SkImageInfo::Make(paintSize_.Width(), paintSize_.Height(),
+                    SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+                SkBitmap skBitmap_;
+                skBitmap_.allocPixels(imageInfo);
+                std::unique_ptr<SkCanvas> skCanvas_ = std::make_unique<SkCanvas>(skBitmap_);
+                skCanvas_->drawPaint(paint);
+                sk_sp<SkImage> skImage_ = SkImage::MakeFromBitmap(skBitmap_);
+                canvas->clipRRect(outerRRect.sk_rrect, true);
+                PaintBorderImage(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint, skImage_);
+                paint.setShader(nullptr);
+                canvas->restore();
             }
 
-            if (decoration_->GetBorderType() != 0) {
+            if (decoration_->GetHasBorderImageSource() || decoration_->GetHasBorderImageGradient()) {
                 return;
             }
             AdjustBorderStyle(border);
@@ -879,11 +882,17 @@ void FlutterDecorationPainter::PaintBorderImage(const Offset& offset, const Bord
         bottomWidth_ = WidthNormalizePercentToPx(border.Bottom().GetWidth(), false);
     }
 
-    leftOutset_ = OutsetNormalizePercentToPx(imageLeft.GetBorderImageOutset(), true);
-    topOutset_ = OutsetNormalizePercentToPx(imageTop.GetBorderImageOutset(), false);
-    rightOutset_ = OutsetNormalizePercentToPx(imageRight.GetBorderImageOutset(), true);
-    bottomOutset_ = OutsetNormalizePercentToPx(imageBottom.GetBorderImageOutset(), false);
-
+    if (decoration_->GetHasBorderImageOutset()) {
+        leftOutset_ = OutsetNormalizePercentToPx(imageLeft.GetBorderImageOutset(), true);
+        topOutset_ = OutsetNormalizePercentToPx(imageTop.GetBorderImageOutset(), false);
+        rightOutset_ = OutsetNormalizePercentToPx(imageRight.GetBorderImageOutset(), true);
+        bottomOutset_ = OutsetNormalizePercentToPx(imageBottom.GetBorderImageOutset(), false);
+    } else {
+        leftOutset_ = 0;
+        topOutset_ = 0;
+        rightOutset_ = 0;
+        bottomOutset_ = 0;
+    }
     PaintBorderImageFourCorner(offset, canvas, paint);
 
     BorderImageRepeat repeat = imageLeft.GetBorderImageRepeat();

@@ -54,6 +54,54 @@ RefPtr<RenderNode> RenderBox::Create()
     return AceType::MakeRefPtr<FlutterRenderBox>();
 }
 
+FlutterRenderBox::FlutterRenderBox()
+{
+    auto currentDartState = flutter::UIDartState::Current();
+    if (!currentDartState) {
+        return;
+    }
+    renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(
+        currentDartState->GetSkiaUnrefQueue(),
+        currentDartState->GetIOManager(),
+        currentDartState->GetTaskRunners().GetIOTaskRunner());
+
+    uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)] (
+        ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {
+        auto renderBox = weak.Upgrade();
+        if (!renderBox) {
+            LOGE("renderBox upgrade fail when image load success. callback image source info: %{private}s",
+                sourceInfo.ToString().c_str());
+            return;
+        }
+        renderBox->ImageDataPaintSuccess(image);
+    };
+
+    imageObjSuccessCallback_ = [weak = AceType::WeakClaim(this)](
+        ImageSourceInfo info, const RefPtr<ImageObject>& imageObj) {
+        auto renderBox = weak.Upgrade();
+        if (!renderBox) {
+            LOGE("renderBox upgrade fail when image object is ready. callback image source info: %{private}s",
+                info.ToString().c_str());
+            return;
+        }
+        renderBox->ImageObjReady(imageObj);
+    };
+
+    failedCallback_ = [weak = AceType::WeakClaim(this)](ImageSourceInfo info) {
+        auto renderBox = weak.Upgrade();
+        if (renderBox) {
+            renderBox->ImageObjFailed();
+        }
+    };
+
+    onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)] (CancelableTask task) {
+        auto renderBox = weak.Upgrade();
+        if (renderBox) {
+            renderBox->SetFetchImageObjBackgroundTask(task);
+        }
+    };
+}
+
 void FlutterRenderBox::Update(const RefPtr<Component>& component)
 {
     RenderBox::Update(component);
@@ -87,15 +135,12 @@ void FlutterRenderBox::UpdateBorderImageProvider(const RefPtr<BorderImage>& bIma
         LOGE("borderImageSrc is null!");
         return;
     }
+    image_ = nullptr;
+    imageObj_ = nullptr;
 }
 
 void FlutterRenderBox::FetchImageData()
 {
-    auto piplineContext = GetContext().Upgrade();
-    if (!piplineContext) {
-        return;
-    }
-
     if (backDecoration_) {
         RefPtr<BorderImage> borderImage = backDecoration_->GetBorderImage();
         if (!borderImage) {
@@ -109,8 +154,47 @@ void FlutterRenderBox::FetchImageData()
         if (image_) {
             return;
         }
-        image_ = ImageProvider::GetSkImage(borderSrc_, piplineContext);
+        ImageSourceInfo inComingSource(
+            borderSrc_,
+            Dimension(-1),
+            Dimension(-1),
+            InternalResource::ResourceId::NO_ID
+        );
+        ImageProvider::FetchImageObject(
+            inComingSource,
+            imageObjSuccessCallback_,
+            uploadSuccessCallback_,
+            failedCallback_,
+            GetContext(),
+            false,
+            false,
+            true,
+            Color::TRANSPARENT,
+            renderTaskHolder_,
+            onPostBackgroundTask_);
     }
+}
+
+void FlutterRenderBox::ImageObjReady(const RefPtr<ImageObject>& imageObj)
+{
+    imageObj_ = imageObj;
+    if (imageObj_) {
+        imageObj_->UploadToGpuForRender(GetContext(), renderTaskHolder_, uploadSuccessCallback_, failedCallback_,
+            Size(0, 0), false, false);
+    }
+}
+
+void FlutterRenderBox::ImageObjFailed()
+{
+    image_ = nullptr;
+    imageObj_ = nullptr;
+    MarkNeedLayout();
+}
+
+void FlutterRenderBox::ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasImage>& image)
+{
+    image_ = image->image();
+    MarkNeedLayout();
 }
 
 void FlutterRenderBox::UpdateBackgroundImage(const RefPtr<BackgroundImage>& image)
