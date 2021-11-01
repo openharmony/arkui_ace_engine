@@ -220,6 +220,10 @@ public:
     {
         if (friction >= MIN_FRICTION_RATIO && friction <= MAX_FRICTION_RATIO) {
             friction_ = friction;
+        } else if(friction < MIN_FRICTION_RATIO) {
+            friction_ = MIN_FRICTION_RATIO;
+        } else {
+            friction_ = MAX_FRICTION_RATIO;
         }
     }
 

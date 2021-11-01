@@ -297,6 +297,9 @@ void RenderRefresh::FireRefreshEvent() const
             std::string(R"("refresh",{"refreshing":)").append(refreshing_ ? "true" : "false").append("},null");
         refreshEvent_(param);
     }
+    if (onRefreshing_) {
+        onRefreshing_();
+    }
 }
 
 void RenderRefresh::FirePullDownEvent(const std::string& state) const
@@ -359,7 +362,8 @@ RefreshStatus RenderRefresh::GetNextStatus()
         case RefreshStatus::INACTIVE:
             if (refreshing_) {
                 StartAnimation(0.0, triggerRefreshDistance_, false);
-                return RefreshStatus::REFRESH;
+                nextStatus = RefreshStatus::REFRESH;
+                break;
             }
             if (LessOrEqual(scrollableOffset_.GetY(), 0.0)) {
                 nextStatus = RefreshStatus::INACTIVE;
@@ -390,15 +394,13 @@ RefreshStatus RenderRefresh::GetNextStatus()
             }
             // No break here, continue get next status.
             nextStatus = RefreshStatus::REFRESH;
-            if (onRefreshing_) {
-                onRefreshing_();
-            }
             [[fallthrough]];
         case RefreshStatus::REFRESH:
             if (!refreshing_) {
                 timeText_ = StringUtils::FormatString(lastTimeText_.c_str(), GetFormatDateTime().c_str());
                 StartAnimation(scrollableOffset_.GetY(), 0.0, true);
-                return RefreshStatus::DONE;
+                nextStatus = RefreshStatus::DONE;
+                break;
             }
             nextStatus = RefreshStatus::REFRESH;
             break;
