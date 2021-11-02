@@ -387,11 +387,7 @@ void RenderSlider::HandleDragUpdate(const Offset& updatePoint)
         return;
     }
     if (insideBlockRegion_) {
-        if (NeedSmoothMoving()) {
-            UpdateBlockPosition(updatePoint, false);
-        } else {
-            RenderBlockPosition(updatePoint);
-        }
+        RenderBlockPosition(updatePoint);
         FireMovingEvent(SliderEvent::MOVE_MOVING);
     }
 }
