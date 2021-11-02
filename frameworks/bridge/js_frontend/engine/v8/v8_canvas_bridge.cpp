@@ -298,8 +298,8 @@ void V8CanvasBridge::HandleContext(
         { "shadowOffsetY", V8CanvasBridge::ShadowOffsetYGetter, V8CanvasBridge::ShadowOffsetYSetter },
         { "imageSmoothingEnabled", V8CanvasBridge::SmoothingEnabledGetter, V8CanvasBridge::SmoothingEnabledSetter },
         { "imageSmoothingQuality", V8CanvasBridge::SmoothingQualityGetter, V8CanvasBridge::SmoothingQualitySetter },
-        { "offsetWidth", V8CanvasBridge::OffsetWidthGetter, nullptr },
-        { "offsetHeight", V8CanvasBridge::OffsetHeightGetter, nullptr }
+        { "width", V8CanvasBridge::WidthGetter, nullptr },
+        { "height", V8CanvasBridge::HeightGetter, nullptr }
     };
     for (const auto& item : v8AnimationFuncs) {
         auto getter_templ = v8::FunctionTemplate::New(ctx->GetIsolate(), std::get<1>(item));
@@ -2433,38 +2433,72 @@ void V8CanvasBridge::SmoothingQualitySetter(const v8::FunctionCallbackInfo<v8::V
         v8::String::NewFromUtf8(isolate, "__imageSmoothingQuality").ToLocalChecked(), info[0]).ToChecked();
 }
 
-void V8CanvasBridge::OffsetWidthGetter(const v8::FunctionCallbackInfo<v8::Value>& info)
+void V8CanvasBridge::WidthGetter(const v8::FunctionCallbackInfo<v8::Value>& info)
 {
     v8::Isolate* isolate = info.GetIsolate();
     v8::HandleScope handleScope(isolate);
     auto context = isolate->GetCurrentContext();
+
     NodeId id = GetCurrentNodeId(context, info.Holder());
     auto page = static_cast<RefPtr<JsAcePage>*>(isolate->GetData(V8EngineInstance::RUNNING_PAGE));
     if (!page) {
-        LOGE("page is null.");
         return;
     }
-    auto canvas = AceType::DynamicCast<DOMCanvas>((*page)->GetDomDocument()->GetDOMNodeById(id));
-    if (canvas) {
-        info.GetReturnValue().Set(v8::Number::New(isolate, canvas->GetWidth().Value()));
-    }
+
+    double width = 0.0;
+    auto task = [id, page, &width]() {
+        auto canvas = AceType::DynamicCast<DOMCanvas>((*page)->GetDomDocument()->GetDOMNodeById(id));
+        if (!canvas) {
+            return;
+        }
+        auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
+        if (!paintChild) {
+            return;
+        }
+        auto canvasTask = paintChild->GetTaskPool();
+        if (!canvasTask) {
+            return;
+        }
+        width = canvasTask->GetWidth();
+    };
+    auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
+    (*delegate)->PostSyncTaskToPage(task);
+
+    info.GetReturnValue().Set(v8::Number::New(isolate, width));
 }
 
-void V8CanvasBridge::OffsetHeightGetter(const v8::FunctionCallbackInfo<v8::Value>& info)
+void V8CanvasBridge::HeightGetter(const v8::FunctionCallbackInfo<v8::Value>& info)
 {
     v8::Isolate* isolate = info.GetIsolate();
     v8::HandleScope handleScope(isolate);
     auto context = isolate->GetCurrentContext();
+
     NodeId id = GetCurrentNodeId(context, info.Holder());
     auto page = static_cast<RefPtr<JsAcePage>*>(isolate->GetData(V8EngineInstance::RUNNING_PAGE));
     if (!page) {
-        LOGE("page is null.");
         return;
     }
-    auto canvas = AceType::DynamicCast<DOMCanvas>((*page)->GetDomDocument()->GetDOMNodeById(id));
-    if (canvas) {
-        info.GetReturnValue().Set(v8::Number::New(isolate, canvas->GetHeight().Value()));
-    }
+
+    double height = 0.0;
+    auto task = [id, page, &height]() {
+        auto canvas = AceType::DynamicCast<DOMCanvas>((*page)->GetDomDocument()->GetDOMNodeById(id));
+        if (!canvas) {
+            return;
+        }
+        auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
+        if (!paintChild) {
+            return;
+        }
+        auto canvasTask = paintChild->GetTaskPool();
+        if (!canvasTask) {
+            return;
+        }
+        height = canvasTask->GetHeight();
+    };
+    auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
+    (*delegate)->PostSyncTaskToPage(task);
+
+    info.GetReturnValue().Set(v8::Number::New(isolate, height));
 }
 
 } // namespace OHOS::Ace::Framework

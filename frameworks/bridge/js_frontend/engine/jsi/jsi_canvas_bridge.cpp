@@ -257,8 +257,8 @@ void JsiCanvasBridge::HandleJsContext(const shared_ptr<JsRuntime>& runtime, Node
         { "shadowOffsetY", JsShadowOffsetYGetter, JsShadowOffsetYSetter },
         { "imageSmoothingEnabled", JsSmoothingEnabledGetter, JsSmoothingEnabledSetter },
         { "imageSmoothingQuality", JsSmoothingQualityGetter, JsSmoothingQualitySetter },
-        { "offsetWidth", JsOffsetWidthGetter, nullptr },
-        { "offsetHeight", JsOffsetHeightGetter, nullptr }
+        { "width", JsWidthGetter, nullptr },
+        { "height", JsHeightGetter, nullptr }
     };
     for (const auto& item : animationFuncs) {
         auto getterTempl = runtime->NewFunction(std::get<1>(item));
@@ -2144,48 +2144,80 @@ shared_ptr<JsValue> JsiCanvasBridge::JsSmoothingQualitySetter(const shared_ptr<J
     return runtime->NewUndefined();
 }
 
-shared_ptr<JsValue> JsiCanvasBridge::JsOffsetWidthGetter(const shared_ptr<JsRuntime>& runtime,
+shared_ptr<JsValue> JsiCanvasBridge::JsWidthGetter(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     NodeId id = GetCurrentNodeId(runtime, value);
     auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
     if (!engine) {
-        LOGE("JsOffsetWidthGetter failed. engine is null.");
         return runtime->NewUndefined();
     }
     auto page = engine->GetRunningPage();
     if (!page) {
-        LOGE("JsOffsetWidthGetter failed. page is null.");
         return runtime->NewUndefined();
     }
 
-    auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
-    if (!canvas) {
+    double width = 0.0;
+    auto task = [id, page, &width]() {
+        auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+        if (!canvas) {
+            return;
+        }
+        auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
+        if (!paintChild) {
+            return;
+        }
+        auto canvasTask = paintChild->GetTaskPool();
+        if (!canvasTask) {
+            return;
+        }
+        width = canvasTask->GetWidth();
+    };
+    auto delegate = engine->GetFrontendDelegate();
+    if (!delegate) {
         return runtime->NewUndefined();
     }
-    return runtime->NewNumber(canvas->GetWidth().Value());
+    delegate->PostSyncTaskToPage(task);
+
+    return runtime->NewNumber(width);
 }
 
-shared_ptr<JsValue> JsiCanvasBridge::JsOffsetHeightGetter(const shared_ptr<JsRuntime>& runtime,
+shared_ptr<JsValue> JsiCanvasBridge::JsHeightGetter(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     NodeId id = GetCurrentNodeId(runtime, value);
     auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
     if (!engine) {
-        LOGE("JsOffsetHeightGetter failed. engine is null.");
         return runtime->NewUndefined();
     }
     auto page = engine->GetRunningPage();
     if (!page) {
-        LOGE("JsOffsetHeightGetter failed. page is null.");
         return runtime->NewUndefined();
     }
 
-    auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
-    if (!canvas) {
+    double height = 0.0;
+    auto task = [id, page, &height]() {
+        auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+        if (!canvas) {
+            return;
+        }
+        auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
+        if (!paintChild) {
+            return;
+        }
+        auto canvasTask = paintChild->GetTaskPool();
+        if (!canvasTask) {
+            return;
+        }
+        height = canvasTask->GetHeight();
+    };
+    auto delegate = engine->GetFrontendDelegate();
+    if (!delegate) {
         return runtime->NewUndefined();
     }
-    return runtime->NewNumber(canvas->GetHeight().Value());
+    delegate->PostSyncTaskToPage(task);
+
+    return runtime->NewNumber(height);
 }
 
 } // namespace OHOS::Ace::Framework

@@ -209,9 +209,11 @@ public:
         const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
     static shared_ptr<JsValue> JsSmoothingQualitySetter(const shared_ptr<JsRuntime>& runtime,
         const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
-    static shared_ptr<JsValue> JsOffsetWidthGetter(const shared_ptr<JsRuntime>& runtime,
+
+    // support only read attribute for lottie
+    static shared_ptr<JsValue> JsWidthGetter(const shared_ptr<JsRuntime>& runtime,
         const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
-    static shared_ptr<JsValue> JsOffsetHeightGetter(const shared_ptr<JsRuntime>& runtime,
+    static shared_ptr<JsValue> JsHeightGetter(const shared_ptr<JsRuntime>& runtime,
         const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
 
     static shared_ptr<JsValue> JsPath2DAddPath(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
