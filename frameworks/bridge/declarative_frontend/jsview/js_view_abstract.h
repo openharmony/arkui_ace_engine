@@ -167,6 +167,11 @@ public:
 
     static void JsClip(const JSCallbackInfo& info);
     static void JsMask(const JSCallbackInfo& info);
+
+    static void JsFocusable(const JSCallbackInfo& info);
+    static void JsOnFocusMove(const JSCallbackInfo& args);
+    static void JsOnFocus(const JSCallbackInfo& args);
+    static void JsOnBlur(const JSCallbackInfo& args);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     static void JsDebugLine(const JSCallbackInfo& info);
 #endif

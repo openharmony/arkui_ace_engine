@@ -22,6 +22,7 @@
 #include "base/json/json_util.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 
 #ifdef USE_V8_ENGINE
@@ -2844,6 +2845,62 @@ void JSViewAbstract::JsMask(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        LOGE("The info is wrong, it is supposed to be an boolean");
+        return;
+    }
+
+    auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+    if (!focusComponent) {
+        LOGE("The focusComponent is null");
+        return;
+    } else {
+        focusComponent->SetFocusable(info[0]->ToBoolean());
+    }
+
+}
+
+void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        RefPtr<JsFocusFunction> jsOnFocusMove = AceType::MakeRefPtr<JsFocusFunction>(JSRef<JSFunc>::Cast(args[0]));
+        auto onFocusMove = [execCtx = args.GetExecutionContext(), func = std::move(jsOnFocusMove)](int info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute(info);
+        };
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        focusableComponent->SetOnFocusMove(onFocusMove);
+    }
+}
+
+void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        RefPtr<JsFocusFunction> jsOnFocus = AceType::MakeRefPtr<JsFocusFunction>(JSRef<JSFunc>::Cast(args[0]));
+        auto onFocus = [execCtx = args.GetExecutionContext(), func = std::move(jsOnFocus)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute();
+        };
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        focusableComponent->SetOnFocus(onFocus);
+    }
+}
+
+void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        RefPtr<JsFocusFunction> jsOnBlur = AceType::MakeRefPtr<JsFocusFunction>(JSRef<JSFunc>::Cast(args[0]));
+        auto onBlur_ = [execCtx = args.GetExecutionContext(), func = std::move(jsOnBlur)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute();
+        };
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        focusableComponent->SetOnBlur(onBlur_);
+    }
+}
+
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
@@ -3059,6 +3116,10 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("useSizeType", &JSViewAbstract::JsUseSizeType);
     JSClass<JSViewAbstract>::StaticMethod("shadow", &JSViewAbstract::JsShadow);
     JSClass<JSViewAbstract>::StaticMethod("grayscale", &JSViewAbstract::JsGrayScale);
+    JSClass<JSViewAbstract>::StaticMethod("focusable", &JSViewAbstract::JsFocusable);
+    JSClass<JSViewAbstract>::StaticMethod("onFocusMove", &JSViewAbstract::JsOnFocusMove);
+    JSClass<JSViewAbstract>::StaticMethod("onFocus", &JSViewAbstract::JsOnFocus);
+    JSClass<JSViewAbstract>::StaticMethod("onBlur", &JSViewAbstract::JsOnBlur);
     JSClass<JSViewAbstract>::StaticMethod("brightness", &JSViewAbstract::JsBrightness);
     JSClass<JSViewAbstract>::StaticMethod("contrast", &JSViewAbstract::JsContrast);
     JSClass<JSViewAbstract>::StaticMethod("saturate", &JSViewAbstract::JsSaturate);

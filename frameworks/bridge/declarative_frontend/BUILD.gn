@@ -100,6 +100,7 @@ template("declarative_js_engine") {
       "engine/functions/js_animator_function.cpp",
       "engine/functions/js_click_function.cpp",
       "engine/functions/js_drag_function.cpp",
+      "engine/functions/js_focus_function.cpp",
       "engine/functions/js_foreach_function.cpp",
       "engine/functions/js_function.cpp",
       "engine/functions/js_gesture_function.cpp",

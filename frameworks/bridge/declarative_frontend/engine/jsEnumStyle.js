@@ -455,6 +455,15 @@ var RouteType;
   RouteType[RouteType["Pop"] = 2] = "Pop";
 })(RouteType || (RouteType = {}));
 
+var FocusDirection;
+(function (FocusDirection) {
+  FocusDirection[FocusDirection["Up"] = 19] = "Up";
+  FocusDirection[FocusDirection["Down"] = 20] = "Down";
+  FocusDirection[FocusDirection["Left"] = 21] = "Left";
+  FocusDirection[FocusDirection["Right"] = 22] = "Right";
+  FocusDirection[FocusDirection["Tab"] = 61] = "Tab";
+})(FocusDirection || (FocusDirection = {}));
+
 var SlideEffect;
 (function (SlideEffect) {
   SlideEffect[SlideEffect["None"] = 0] = "None";
