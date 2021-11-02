@@ -14,6 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -33,6 +34,12 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("lunar", &JSDatePicker::SetLunar);
     JSClass<JSDatePicker>::StaticMethod("onChange", &JSDatePicker::OnChange);
     JSClass<JSDatePicker>::StaticMethod("useMilitaryTime", &JSDatePicker::UseMilitaryTime);
+    JSClass<JSDatePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSDatePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSDatePicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSDatePicker>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSDatePicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSDatePicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSDatePicker>::Inherit<JSViewAbstract>();
     JSClass<JSDatePicker>::Bind(globalObj);
 }
