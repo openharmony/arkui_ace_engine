@@ -43,6 +43,7 @@ advance_components_support = false
 form_components_support = false
 xcomponent_components_support = true
 js_pa_support = true
+connect_server_support = false
 pa_engine_path = "adapter/ohos/entrance/pa_engine"
 
 if (disable_gpu) {

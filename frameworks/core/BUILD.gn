@@ -191,6 +191,12 @@ template("ace_core_source_set") {
       ]
     }
 
+    # add sources needed by phone, tv and wearable. previews do not need them
+    if (defined(config.connect_server_support) &&
+        config.connect_server_support) {
+      sources += [ "common/connect_server_manager.cpp" ]
+    }
+
     configs = [ "$ace_root:ace_config" ]
 
     deps = [
