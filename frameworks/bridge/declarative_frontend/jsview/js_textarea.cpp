@@ -104,6 +104,13 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("caretColor", &JSTextArea::SetCaretColor);
     JSClass<JSTextArea>::StaticMethod("height", &JSTextArea::JsHeight);
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextArea::SetOnChange);
+    JSClass<JSTextArea>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSTextArea>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSTextArea>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSTextArea>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSTextArea>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSTextArea>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextArea>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextArea>::Inherit<JSViewAbstract>();
     JSClass<JSTextArea>::Bind(globalObj);
 }

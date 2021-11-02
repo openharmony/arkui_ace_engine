@@ -107,6 +107,13 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onEditChanged", &JSTextInput::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextInput::SetOnSubmit);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextInput::SetOnChange);
+    JSClass<JSTextInput>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSTextInput>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSTextInput>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSTextInput>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSTextInput>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSTextInput>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextInput>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextInput>::Inherit<JSViewAbstract>();
     JSClass<JSTextInput>::Bind(globalObj);
 }
