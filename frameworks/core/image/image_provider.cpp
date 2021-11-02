@@ -393,35 +393,20 @@ sk_sp<SkImage> ImageProvider::GetSkImage(
     return image;
 }
 
-void ImageProvider::CanLoadImage(
-    const RefPtr<PipelineContext>& context,
-    const std::string& src,
-    const std::map<std::string, EventMarker>& callbacks)
+void ImageProvider::TryLoadImageInfo(const RefPtr<PipelineContext>& context, const std::string& src,
+    std::function<void(bool, int32_t, int32_t)>&& loadCallback)
 {
-    if (callbacks.find("success") == callbacks.end() || callbacks.find("fail") == callbacks.end()) {
-        return;
-    }
-    auto onSuccess = AceAsyncEvent<void()>::Create(callbacks.at("success"), context);
-    auto onFail = AceAsyncEvent<void()>::Create(callbacks.at("fail"), context);
-    BackgroundTaskExecutor::GetInstance().PostTask([src, onSuccess, onFail, context]() {
+    BackgroundTaskExecutor::GetInstance().PostTask([src, callback = std::move(loadCallback), context]() {
         auto taskExecutor = context->GetTaskExecutor();
         if (!taskExecutor) {
             return;
         }
         auto image = ImageProvider::GetSkImage(src, context);
         if (image) {
-            taskExecutor->PostTask(
-                [onSuccess] {
-                    onSuccess();
-                },
-                TaskExecutor::TaskType::UI);
+            callback(true, image->width(), image->height());
             return;
         }
-        taskExecutor->PostTask(
-            [onFail] {
-                onFail();
-            },
-            TaskExecutor::TaskType::UI);
+        callback(false, 0, 0);
     });
 }
 

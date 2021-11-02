@@ -2073,9 +2073,10 @@ void PipelineContext::RegisterFont(const std::string& familyName, const std::str
     fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this));
 }
 
-void PipelineContext::CanLoadImage(const std::string& src, const std::map<std::string, EventMarker>& callbacks)
+void PipelineContext::TryLoadImageInfo(
+    const std::string& src, std::function<void(bool, int32_t, int32_t)>&& loadCallback)
 {
-    ImageProvider::CanLoadImage(AceType::Claim(this), src, callbacks);
+    ImageProvider::TryLoadImageInfo(AceType::Claim(this), src, std::move(loadCallback));
 }
 
 void PipelineContext::SetAnimationCallback(AnimationCallback&& callback)

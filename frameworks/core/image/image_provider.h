@@ -62,8 +62,8 @@ using OnPostBackgroundTask = std::function<void(CancelableTask)>;
 class FlutterRenderImage;
 class ImageProvider {
 public:
-    static void CanLoadImage(const RefPtr<PipelineContext>& context, const std::string& src,
-        const std::map<std::string, EventMarker>& callbacks);
+    static void TryLoadImageInfo(const RefPtr<PipelineContext>& context, const std::string& src,
+        std::function<void(bool, int32_t, int32_t)>&& loadCallback);
 
     static void GetSVGImageDOMAsyncFromSrc(
         const std::string& src,

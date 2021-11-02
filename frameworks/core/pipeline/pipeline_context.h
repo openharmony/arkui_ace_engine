@@ -468,7 +468,7 @@ public:
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc);
 
-    void CanLoadImage(const std::string& src, const std::map<std::string, EventMarker>& callbacks);
+    void TryLoadImageInfo(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& loadCallback);
 
     void SetAnimationCallback(AnimationCallback&& callback);
 

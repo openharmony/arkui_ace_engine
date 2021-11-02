@@ -1626,28 +1626,9 @@ void FrontendDelegateDeclarative::RegisterFont(const std::string& familyName, co
 }
 
 void FrontendDelegateDeclarative::HandleImage(
-    const std::string& src, std::function<void(int32_t)>&& callback, const std::set<std::string>& callbacks)
+    const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback)
 {
-    if (src.empty() || !callback) {
-        return;
-    }
-    std::map<std::string, EventMarker> callbackMarkers;
-    if (callbacks.find("success") != callbacks.end()) {
-        auto successEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
-        successEventMarker.SetPreFunction([callback, taskExecutor = taskExecutor_]() {
-            taskExecutor->PostTask([callback] { callback(0); }, TaskExecutor::TaskType::JS);
-        });
-        callbackMarkers.emplace("success", successEventMarker);
-    }
-
-    if (callbacks.find("fail") != callbacks.end()) {
-        auto failEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
-        failEventMarker.SetPreFunction([callback, taskExecutor = taskExecutor_]() {
-            taskExecutor->PostTask([callback] { callback(1); }, TaskExecutor::TaskType::JS);
-        });
-        callbackMarkers.emplace("fail", failEventMarker);
-    }
-    pipelineContextHolder_.Get()->CanLoadImage(src, callbackMarkers);
+    LOGW("Not implement in declarative frontend.");
 }
 
 void FrontendDelegateDeclarative::PushJsCallbackToRenderNode(NodeId id, double ratio,

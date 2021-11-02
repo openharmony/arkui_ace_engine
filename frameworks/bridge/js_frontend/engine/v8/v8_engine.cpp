@@ -1758,30 +1758,24 @@ void JsHandleImage(const v8::FunctionCallbackInfo<v8::Value>& args, int32_t inde
     auto success = JsParseRouteUrl(args, "success", index);
     auto fail = JsParseRouteUrl(args, "fail", index);
 
-    std::set<std::string> callbacks;
-    if (!success.empty()) {
-        callbacks.emplace("success");
-    }
-    if (!fail.empty()) {
-        callbacks.emplace("fail");
-    }
     v8::Local<v8::External> data = v8::Local<v8::External>::Cast(args.Data());
     V8EngineInstance* engineInstance = static_cast<V8EngineInstance*>(data->Value());
 
-    auto callback = [engineInstance, success, fail](int32_t callbackType) {
-        switch (callbackType) {
-            case 0:
-                engineInstance->CallJs(success.c_str(), std::string("\"success\",null").c_str(), false);
-                break;
-            case 1:
-                engineInstance->CallJs(fail.c_str(), std::string("\"fail\",null").c_str(), false);
-                break;
-            default:
-                break;
+    auto&& callback = [engineInstance, success, fail](bool callbackType, int32_t width, int32_t height) {
+        if (callbackType) {
+            engineInstance->CallJs(success,
+                std::string("{\"width\":")
+                    .append(std::to_string(width))
+                    .append(", \"height\":")
+                    .append(std::to_string(height))
+                    .append("}"),
+                false);
+        } else {
+            engineInstance->CallJs(fail, std::string("\"fail\",null"), false);
         }
     };
     auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
-    (*delegate)->HandleImage(src, std::move(callback), callbacks);
+    (*delegate)->HandleImage(src, std::move(callback));
 }
 
 bool ParseResourceStringParam(std::string& str, const char* paramName, const std::map<std::string, std::string>& params)

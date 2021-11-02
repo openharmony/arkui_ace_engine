@@ -1311,32 +1311,25 @@ shared_ptr<JsValue> JsHandleImage(const shared_ptr<JsRuntime>& runtime, const sh
     auto success = ParseRouteUrl(runtime, arg, "success");
     auto fail = ParseRouteUrl(runtime, arg, "fail");
 
-    std::set<std::string> callbacks;
-    if (!success.empty()) {
-        callbacks.emplace("success");
-    }
-    if (!fail.empty()) {
-        callbacks.emplace("fail");
-    }
-
     auto engineInstance = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
     if (!engineInstance) {
         return runtime->NewNull();
     }
 
-    auto&& callback = [engineInstance, success, fail](int32_t callbackType) {
-        switch (callbackType) {
-            case 0:
-                engineInstance->CallJs(success, std::string("\"success\",null"), false);
-                break;
-            case 1:
-                engineInstance->CallJs(fail, std::string("\"fail\",null"), false);
-                break;
-            default:
-                break;
+    auto&& callback = [engineInstance, success, fail](bool callbackType, int32_t width, int32_t height) {
+        if (callbackType) {
+            engineInstance->CallJs(success,
+                std::string("{\"width\":")
+                    .append(std::to_string(width))
+                    .append(", \"height\":")
+                    .append(std::to_string(height))
+                    .append("}"),
+                false);
+        } else {
+            engineInstance->CallJs(fail, std::string("\"fail\",null"), false);
         }
     };
-    engineInstance->GetFrontendDelegate()->HandleImage(src, callback, callbacks);
+    engineInstance->GetFrontendDelegate()->HandleImage(src, callback);
     return runtime->NewNull();
 }
 
