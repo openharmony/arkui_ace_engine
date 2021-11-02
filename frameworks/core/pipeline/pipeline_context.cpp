@@ -481,6 +481,8 @@ void PipelineContext::FlushRender()
         }
     }
 
+    NotifyDrawOnPixelMap();
+
     if (rootElement_) {
         auto renderRoot = rootElement_->GetRenderNode();
         curDirtyRect = curDirtyRect * viewScale_;
@@ -2717,7 +2719,6 @@ void PipelineContext::UpdateNodesNeedDrawOnPixelMap()
     for (const auto& dirtyNode : dirtyRenderNodesInOverlay_) {
         SearchNodesNeedDrawOnPixelMap(dirtyNode);
     }
-    NotifyDrawOnPiexlMap();
 }
 
 void PipelineContext::SearchNodesNeedDrawOnPixelMap(const RefPtr<RenderNode>& renderNode)
@@ -2732,10 +2733,10 @@ void PipelineContext::SearchNodesNeedDrawOnPixelMap(const RefPtr<RenderNode>& re
     }
 }
 
-void PipelineContext::NotifyDrawOnPiexlMap()
+void PipelineContext::NotifyDrawOnPixelMap()
 {
-    decltype(nodesNeedDrawOnPixelMap_) nodesNeedDrawOnPiexlMap(std::move(nodesNeedDrawOnPixelMap_));
-    for (const auto& node : nodesNeedDrawOnPiexlMap) {
+    decltype(nodesNeedDrawOnPixelMap_) nodesNeedDrawOnPixelMap(std::move(nodesNeedDrawOnPixelMap_));
+    for (const auto& node : nodesNeedDrawOnPixelMap) {
         auto box = AceType::DynamicCast<RenderBox>(node);
         if (box) {
             box->DrawOnPixelMap();

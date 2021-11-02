@@ -805,7 +805,7 @@ public:
 
     void UpdateNodesNeedDrawOnPixelMap();
     void SearchNodesNeedDrawOnPixelMap(const RefPtr<RenderNode>& renderNode);
-    void NotifyDrawOnPiexlMap();
+    void NotifyDrawOnPixelMap();
 
     const RefPtr<RootElement>& GetRootElement() const
     {
