@@ -515,11 +515,13 @@ void FlutterRenderImage::ApplyBorderRadius(
         return;
     }
     SetClipRadius();
-    // when there is no repeat to do, border-radius is applied to the single dstRect (aka [paintRectList.front()] here).
-    // when there is a repeat to do, border-radius is applied to the whole image component.
-    Rect clipRect = (imageRepeat_ == ImageRepeat::NOREPEAT) && (imageLoadingStatus_ != ImageLoadingStatus::LOAD_FAIL) ?
-                    paintRect + offset :
-                    Rect(offset, GetLayoutSize());
+    // There are three situations in which we apply border radius to the whole image component:
+    // 1. when the image source is a SVG;
+    // 2. when image loads fail;
+    // 3. when there is a repeat to do;
+    bool clipLayoutSize = sourceInfo_.IsSvg() || (imageRepeat_ != ImageRepeat::NOREPEAT) ||
+        (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL);
+    Rect clipRect = clipLayoutSize ? Rect(offset, GetLayoutSize()) : paintRect + offset;
 
     flutter::RRect rrect;
     rrect.sk_rrect.setRectRadii(
