@@ -908,6 +908,8 @@ protected:
     virtual void OnMouseTestHit(const Offset& coordinateOffset, MouseTestResult& result) {}
     virtual void OnMouseHoverEnterTest() {}
     virtual void OnMouseHoverExitTest() {}
+    virtual void MouseHoverEnterTest() {}
+    virtual void MouseHoverExitTest() {}
 
     void PrepareLayout();
 
@@ -980,6 +982,7 @@ protected:
     bool needWindowBlur_ = false;
     bool needUpdateAccessibility_ = true;
     bool disabled_ = false;
+    HoverAnimationType hoverAnimationType_ = HoverAnimationType::AUTO;
     int32_t minPlatformVersion_ = 0;
 
     MouseState mouseState_ = MouseState::NONE;

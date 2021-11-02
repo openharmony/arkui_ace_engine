@@ -153,12 +153,15 @@ public:
     AnimatableDimension GetBackdropRadius() const;
     void SetWindowBlurProgress(double progress);
     double GetWindowBlurProgress() const;
+    void CreateFloatAnimation(RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue);
 
     Size GetBorderSize() const override;
     ColorPropertyAnimatable::SetterMap GetColorPropertySetterMap() override;
     ColorPropertyAnimatable::GetterMap GetColorPropertyGetterMap() override;
     Offset GetGlobalOffsetExternal() const override;
     Offset GetGlobalOffset() const override;
+    void MouseHoverEnterTest() override;
+    void MouseHoverExitTest() override;
 
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -215,8 +218,12 @@ protected:
     RefPtr<Animator> controllerExit_;
     RefPtr<KeyframeAnimation<Color>> colorAnimationEnter_;
     RefPtr<KeyframeAnimation<Color>> colorAnimationExit_;
+    RefPtr<KeyframeAnimation<float>> scaleAnimationEnter_;
+    RefPtr<KeyframeAnimation<float>> scaleAnimationExit_;
     HoverAnimationType animationType_ = HoverAnimationType::NONE;
     Color hoverColor_ = Color::TRANSPARENT;
+    float scale_ = 1.0f;
+    bool isZoom = false;
 
 private:
     void ResetController(RefPtr<Animator>& controller);

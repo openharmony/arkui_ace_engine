@@ -101,6 +101,7 @@ public:
     static void JsGridSpan(const JSCallbackInfo& Info);
     static void JsGridOffset(const JSCallbackInfo& info);
     static void JsUseSizeType(const JSCallbackInfo& Info);
+    static void JsHoverEffect(const JSCallbackInfo& info);
 
     // for number and string with no unit, use default dimension unit.
     static bool ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& result, DimensionUnit defaultUnit);

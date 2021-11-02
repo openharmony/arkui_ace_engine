@@ -50,6 +50,14 @@ enum class UpdateRenderType : uint32_t {
     EVENT = 1 << 2
 };
 
+enum class HoverAnimationType : int32_t {
+    NONE,
+    OPACITY,
+    SCALE,
+    BOARD,
+    AUTO,
+};
+
 // Component is a read-only structure, represent the basic information how to display it.
 class ACE_EXPORT Component : public virtual AceType {
     DECLARE_ACE_TYPE(Component, AceType);

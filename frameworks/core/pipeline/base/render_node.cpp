@@ -698,7 +698,11 @@ bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)
         }
         // mouse state of the node is from NONE to HOVER, the callback of hover enter is triggered.
         if (mouseState_ == MouseState::NONE) {
-            OnMouseHoverEnterTest();
+            if (hoverAnimationType_ == HoverAnimationType::AUTO) {
+                OnMouseHoverEnterTest();
+            } else {
+                MouseHoverEnterTest();
+            }
             mouseState_ = MouseState::HOVER;
             HandleMouseHoverEvent(MouseState::HOVER);
         }
@@ -709,7 +713,11 @@ bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)
         }
         // mouse state of the node is from HOVER to NONE, the callback of hover exit is triggered.
         if (mouseState_ == MouseState::HOVER) {
-            OnMouseHoverExitTest();
+            if (hoverAnimationType_ == HoverAnimationType::AUTO) {
+                OnMouseHoverExitTest();
+            } else {
+                MouseHoverExitTest();
+            }
             mouseState_ = MouseState::NONE;
             HandleMouseHoverEvent(MouseState::NONE);
         }

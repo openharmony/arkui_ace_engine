@@ -610,3 +610,11 @@ var ItemState
   ItemState[ItemState["Waiting"] = 2] = "Waiting";
   ItemState[ItemState["Skip"] = 3] = "Skip";
 })(ItemState || (ItemState = {}));
+
+var HoverEffect;
+(function (HoverEffect) {
+  HoverEffect[HoverEffect["Auto"] = 4] = "Auto";
+  HoverEffect[HoverEffect["Scale"] = 2] = "Scale";
+  HoverEffect[HoverEffect["Board"] = 3] = "Board";
+  HoverEffect[HoverEffect["None"] = 0] = "None";
+})(HoverEffect || (HoverEffect = {}));

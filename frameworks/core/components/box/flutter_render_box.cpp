@@ -35,6 +35,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components/image/image_component.h"
+#include "core/components/transform/flutter_render_transform.h"
 #include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/flutter_scene_builder.h"
@@ -241,6 +242,19 @@ void FlutterRenderBox::PerformLayout()
 
     // calculate repeatParam.
     CalculateRepeatParam();
+}
+
+void FlutterRenderBox::UpdateLayer()
+{
+    float translateX = GetLayoutSize().Width() / 2.0 * (1.0 - scale_);
+    float translateY = GetLayoutSize().Height() / 2.0 * (1.0 - scale_);
+    Matrix4 translateMatrix = Matrix4::CreateTranslate(translateX, translateY, 0.0);
+    Matrix4 scaleMatrix = Matrix4::CreateScale(scale_, scale_, 1.0);
+    Matrix4 transformMatrix = translateMatrix * scaleMatrix;
+    transformMatrix = FlutterRenderTransform::GetTransformByOffset(transformMatrix, GetGlobalOffset());
+    if (transformLayer_) {
+        transformLayer_->Update(transformMatrix);
+    }
 }
 
 void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
@@ -601,8 +615,14 @@ RenderLayer FlutterRenderBox::GetRenderLayer()
         }
         renderLayer_->SetStaticOffset(alignOffset_.GetX(), alignOffset_.GetY());
     }
-
-    return AceType::RawPtr(renderLayer_);
+    if (isZoom) {
+        if (!transformLayer_) {
+            transformLayer_ = AceType::MakeRefPtr<Flutter::TransformLayer>(Matrix4::CreateIdentity(), 0.0, 0.0);
+        }
+        return AceType::RawPtr(transformLayer_);
+    } else {
+        return AceType::RawPtr(renderLayer_);
+    }
 }
 
 flutter::RRect FlutterRenderBox::GetBoxRRect(

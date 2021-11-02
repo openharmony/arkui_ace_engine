@@ -3128,6 +3128,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("hueRotate", &JSViewAbstract::JsHueRotate);
     JSClass<JSViewAbstract>::StaticMethod("clip", &JSViewAbstract::JsClip);
     JSClass<JSViewAbstract>::StaticMethod("mask", &JSViewAbstract::JsMask);
+    JSClass<JSViewAbstract>::StaticMethod("hoverEffect", &JSViewAbstract::JsHoverEffect);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
 #endif
@@ -3717,6 +3718,16 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants()
         return nullptr;
     }
     return themeManager->GetThemeConstants();
+}
+
+void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsNumber()) {
+        LOGE("info[0] is not a number");
+        return;
+    }
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->SetMouseAnimationType(static_cast<HoverAnimationType>(info[0]->ToNumber<int32_t>()));
 }
 
 } // namespace OHOS::Ace::Framework

@@ -24,11 +24,6 @@
 
 namespace OHOS::Ace {
 
-enum class HoverAnimationType : int32_t {
-    NONE,
-    OPACITY,
-    SCALE,
-};
 
 using OnDragFunc = std::function<void(const RefPtr<DragEvent>& info)>;
 

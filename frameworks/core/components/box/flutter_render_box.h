@@ -28,6 +28,7 @@
 #include "core/pipeline/layers/clip_layer.h"
 #include "core/pipeline/layers/container_layer.h"
 #include "core/pipeline/layers/offset_layer.h"
+#include "core/pipeline/layers/transform_layer.h"
 
 namespace OHOS::Ace {
 
@@ -47,6 +48,7 @@ public:
         return true;
     }
     void DrawOnPixelMap() override;
+    void UpdateLayer();
 
 protected:
     virtual bool MaybeRelease() override;
@@ -166,6 +168,7 @@ private:
     RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
 
     UploadSuccessCallback uploadSuccessCallback_;
+    RefPtr<Flutter::TransformLayer> transformLayer_;
 };
 
 } // namespace OHOS::Ace
