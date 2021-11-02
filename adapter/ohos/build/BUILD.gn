@@ -40,6 +40,9 @@ group("ace_packages") {
 
   # Pa engine
   deps += [ "$ace_root/build:libace_engine_pa_qjs" ]
+
+  # ark debugger
+  deps += [ "$ace_root/frameworks/bridge/js_frontend/engine/jsi/debugger:ark_debugger" ]
 }
 
 # Install packages

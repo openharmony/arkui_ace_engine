@@ -33,7 +33,11 @@ ohos_shared_library("ark_debugger") {
 
   defines += ace_common_defines
 
-  external_deps = [ "hilog:libhilog" ]
+  if (is_standard_system) {
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps = [ "hilog:libhilog" ]
+  }
 
   deps += [ "//third_party/boost:boost" ]
 
