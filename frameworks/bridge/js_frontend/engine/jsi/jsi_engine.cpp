@@ -45,6 +45,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_list_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_offscreen_canvas_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_stepper_bridge.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/jsi_xcomponent_bridge.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -2082,7 +2083,15 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
     } else if (std::strcmp(methodName.c_str(), "scrollTo") == 0) {
         JsiComponentApiBridge::JsScrollTo(runtime, arguments, nodeId);
         return runtime->NewUndefined();
+    } else if (std::strcmp(methodName.c_str(), "getXComponentContext") == 0) {
+        auto bridge = AceType::DynamicCast<JsiXComponentBridge>(page->GetXComponentBridgeById(nodeId));
+        if (bridge) {
+            bridge->HandleContext(runtime, nodeId, arguments);
+            return bridge->GetRenderContext();
+        }
+        return runtime->NewUndefined();
     }
+
     shared_ptr<JsValue> resultValue = runtime->NewUndefined();
     if (std::strcmp(methodName.c_str(), "animate") == 0) {
         LOGD("animate args = %{private}s", arguments.c_str());
@@ -2782,7 +2791,10 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         LOGE("JsiEngine Initialize, vm is null");
         return false;
     }
+
     nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
+    engineInstance_->SetArkNativeEngine(nativeEngine_);
+
     ACE_DCHECK(delegate);
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
@@ -3062,7 +3074,19 @@ void JsiEngine::FireSyncEvent(const std::string& eventId, const std::string& par
 
 void JsiEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
 {
-
+    ACE_DCHECK(engineInstance_);
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto page = GetRunningPage(runtime);
+    if (page == nullptr) {
+        LOGE("FireExternalEvent GetRunningPage is nullptr");
+        return;
+    }
+    std::string arguments;
+    auto bridge = AceType::DynamicCast<JsiXComponentBridge>(page->GetXComponentBridgeById(nodeId));
+    if (bridge) {
+        bridge->HandleContext(runtime, nodeId, arguments);
+        return;
+    }
 }
 
 // Destroy page instance on Js
@@ -3151,5 +3175,4 @@ RefPtr<GroupJsBridge> JsiEngine::GetGroupJsBridge()
 {
     return AceType::MakeRefPtr<JsiGroupJsBridge>();
 }
-
 } // namespace OHOS::Ace::Framework

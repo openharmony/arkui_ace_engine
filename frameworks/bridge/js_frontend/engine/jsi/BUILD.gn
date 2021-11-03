@@ -45,6 +45,7 @@ template("js_engine_ark") {
       "jsi_offscreen_canvas_bridge.cpp",
       "jsi_stepper_bridge.cpp",
       "jsi_utils.cpp",
+      "jsi_xcomponent_bridge.cpp",
     ]
 
     deps = [ "//third_party/jsframework:ark_build" ]
