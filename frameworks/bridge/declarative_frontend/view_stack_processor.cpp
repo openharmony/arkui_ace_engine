@@ -336,8 +336,12 @@ void ViewStackProcessor::CreateAccessibilityNode(const RefPtr<Component>& compon
             LOGD("this is not AccessibilityNode");
             return;
         }
-        auto parentId = GetMainComponent()->GetInspectorId();
-        component->SetInspectorId(parentId);
+
+        if (GetMainComponent()) {
+            auto parentId = GetMainComponent()->GetInspectorId();
+            component->SetInspectorId(parentId);
+        }
+
         return;
     }
     component->SetInspectorId(GenerateId());
