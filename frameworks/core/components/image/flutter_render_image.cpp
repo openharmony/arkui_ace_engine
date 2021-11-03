@@ -638,7 +638,7 @@ void FlutterRenderImage::CanvasDrawImageRect(
     bool isLoading = ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) ||
                       (imageLoadingStatus_ == ImageLoadingStatus::UPDATING));
     Rect scaledSrcRect = isLoading ? currentSrcRect_ : srcRect_;
-    if (!sourceInfo_.GetSrc().empty() && imageObj_ && (imageObj_->GetFrameCount() == 1)) {
+    if (sourceInfo_.IsValid() && imageObj_ && (imageObj_->GetFrameCount() == 1)) {
         Size sourceSize = (image_ ? Size(image_->width(), image_->height()) : Size());
         // calculate srcRect that matches the real image source size
         // note that gif doesn't do resize, so gif does not need to recalculate
