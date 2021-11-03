@@ -278,6 +278,7 @@ protected:
     double ConvertVerticalDimensionToPx(Dimension dimension, bool defaultZero = false) const;
     void CalculateWidth();
     void CalculateHeight();
+    void CalculateAutoMargin();
     void ConvertMarginPaddingToPx();
     void ConvertConstraintsToPx();
     void CalculateGridLayoutSize();

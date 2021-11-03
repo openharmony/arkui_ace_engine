@@ -51,6 +51,10 @@ enum class DimensionUnit {
      * logic pixels used in ACE2.0 instead of PX, and PX is the physical pixels in ACE2.0
      */
     LPX,
+    /*
+     * The value is calculated from the element's parent and another property of the element itself.
+     */
+    AUTO,
 };
 
 /*
@@ -210,7 +214,7 @@ public:
 
     std::string ToString() const
     {
-        static std::string units[5] = {"px", "vp", "fp", "%", "lpx"};
+        static std::string units[6] = {"px", "vp", "fp", "%", "lpx", "auto"};
         if (units[static_cast<int>(unit_)] == units[3]) {
             return std::to_string(value_ * 100).append(units[static_cast<int>(unit_)]);
         }
