@@ -266,17 +266,14 @@ void FlutterRenderCalendar::DrawFocusedArea(
     flutter::Paint paint;
     flutter::PaintData paintData;
     paint.paint()->setAntiAlias(true);
+    paint.paint()->setColor(focusedAreaBackgroundColor_);
 
     if (SystemProperties::GetDeviceType() == DeviceType::WATCH || type_ == CalendarType::SIMPLE) {
         if (day.dayMark == "work" && showHoliday_) {
             paint.paint()->setColor(workDayMarkColor_);
         } else if (day.dayMark == "off" && showHoliday_) {
             paint.paint()->setColor(offDayMarkColor_);
-        } else {
-            paint.paint()->setColor(focusedAreaBackgroundColor_);
         }
-    } else {
-        paint.paint()->setColor(focusedAreaBackgroundColor_);
     }
     Offset circleCenter =
         type_ == CalendarType::SIMPLE
@@ -576,7 +573,7 @@ void FlutterRenderCalendar::DrawTvCalendar(
     }
 
     if (selectedDay == (dateNumber - 1) && !calendarFocusStatus_ && !renderSwiper->GetMoveStatus() &&
-        hasRequestFocus_) {
+        hasRequestFocus_ && type_ != CalendarType::SIMPLE) {
         DrawBlurArea(canvas, offset, x, y);
     }
 
