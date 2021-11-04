@@ -80,7 +80,10 @@ class ThemeStyle : public virtual AceType {
 
 public:
     ThemeStyle() = default;
-    ~ThemeStyle() override = default;
+    ~ThemeStyle() override
+    {
+        attributes_.clear();
+    }
 
     void SetName(const std::string& name)
     {
