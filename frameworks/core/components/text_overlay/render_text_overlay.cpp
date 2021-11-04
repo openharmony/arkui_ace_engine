@@ -468,7 +468,7 @@ bool RenderTextOverlay::TouchTest(const Point& globalPoint, const Point& parentL
         return false;
     }
     const auto localPoint = parentLocalPoint - GetPaintRect().GetOffset();
-    if (showOption_.showMenu) {
+    if (!isSingleHandle_ || showOption_.showMenu) {
         for (auto iter = GetChildren().rbegin(); iter != GetChildren().rend(); ++iter) {
             const auto& child = *iter;
             if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {
