@@ -87,11 +87,6 @@ struct WindowBlurInfo {
     std::vector<RRect> coords_;
 };
 
-struct UpdateTask {
-    std::function<void()> taskFunc_;
-    int32_t frameDelay_ = 0;
-};
-
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 
 class ACE_EXPORT PipelineContext final : public AceType {
@@ -185,7 +180,7 @@ public:
 
     void AddPostFlushListener(const RefPtr<FlushEvent>& listener);
 
-    void AddPageUpdateTask(UpdateTask&& task, bool directExecute = false);
+    void AddPageUpdateTask(std::function<void()>&& task, bool directExecute = false);
 
     void SetRequestedRotationNode(const WeakPtr<RenderNode>& renderNode);
 
@@ -1031,7 +1026,7 @@ private:
     RefPtr<PlatformBridge> messageBridge_;
     WeakPtr<RenderNode> requestedRenderNode_;
     // Make page update tasks pending here to avoid block receiving vsync.
-    std::queue<UpdateTask> pageUpdateTasks_;
+    std::queue<std::function<void()>> pageUpdateTasks_;
     // strong deactivate element and it's id.
     std::map<int32_t, RefPtr<Element>> deactivateElements_;
 

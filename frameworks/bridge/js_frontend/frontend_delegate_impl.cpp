@@ -45,7 +45,6 @@ constexpr int32_t NANO_TO_MILLI = 1000000; // nanosecond to millisecond
 constexpr int32_t TO_MILLI = 1000;         // second to millisecond
 constexpr int32_t COMPATIBLE_VERSION = 7;
 constexpr int32_t WEB_FEATURE_VERSION = 6;
-constexpr int32_t TASK_COUNT_OF_FRAME = 300;
 
 const char MANIFEST_JSON[] = "manifest.json";
 const char FILE_TYPE_JSON[] = ".json";
@@ -711,60 +710,49 @@ void FrontendDelegateImpl::TriggerPageUpdate(int32_t pageId, bool directExecute)
     auto pipelineContext = pipelineContextHolder_.Get();
     WeakPtr<Framework::JsAcePage> jsPageWeak(jsPage);
     WeakPtr<PipelineContext> contextWeak(pipelineContext);
+    auto updateTask = [weak = AceType::WeakClaim(this), jsPageWeak, contextWeak, jsCommands] {
+        ACE_SCOPED_TRACE("FlushUpdateCommands");
+        auto delegate = weak.Upgrade();
+        auto jsPage = jsPageWeak.Upgrade();
+        auto context = contextWeak.Upgrade();
+        if (!delegate || !jsPage || !context) {
+            LOGE("Page update failed. page or context is null.");
+            EventReport::SendPageRouterException(PageRouterExcepType::UPDATE_PAGE_ERR);
+            return;
+        }
+        bool useLiteStyle = delegate->GetMinPlatformVersion() < COMPATIBLE_VERSION && delegate->IsUseLiteStyle();
+        context->SetUseLiteStyle(useLiteStyle);
+        jsPage->SetUseLiteStyle(useLiteStyle);
+        jsPage->SetUseBoxWrap(delegate->GetMinPlatformVersion() >= WEB_FEATURE_VERSION);
+        // Flush all JS commands.
+        for (const auto& command : *jsCommands) {
+            command->Execute(jsPage);
+        }
+        if (jsPage->GetDomDocument()) {
+            jsPage->GetDomDocument()->HandleComponentPostBinding();
+        }
+        auto accessibilityManager = context->GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->HandleComponentPostBinding();
+        }
 
-    int32_t frameDelay = 0;
-    size_t offset = 0;
-    while (offset < jsCommands->size()) {
-        auto count =
-            offset + TASK_COUNT_OF_FRAME > jsCommands->size() ? jsCommands->size() - offset : TASK_COUNT_OF_FRAME;
-        auto jsCommand = std::make_shared<std::vector<RefPtr<JsCommand>>>(
-            jsCommands->begin() + offset, jsCommands->begin() + offset + count);
-        auto updateTask = [weak = AceType::WeakClaim(this), jsPageWeak, contextWeak, jsCommand] {
-            ACE_SCOPED_TRACE("FlushUpdateCommands");
-            auto delegate = weak.Upgrade();
-            auto jsPage = jsPageWeak.Upgrade();
-            auto context = contextWeak.Upgrade();
-            if (!delegate || !jsPage || !context) {
-                LOGE("Page update failed. page or context is null.");
-                EventReport::SendPageRouterException(PageRouterExcepType::UPDATE_PAGE_ERR);
-                return;
+        jsPage->ClearShowCommand();
+        std::vector<NodeId> dirtyNodes;
+        jsPage->PopAllDirtyNodes(dirtyNodes);
+        for (auto nodeId : dirtyNodes) {
+            auto patchComponent = jsPage->BuildPagePatch(nodeId);
+            if (patchComponent) {
+                context->ScheduleUpdate(patchComponent);
             }
-            bool useLiteStyle = delegate->GetMinPlatformVersion() < COMPATIBLE_VERSION && delegate->IsUseLiteStyle();
-            context->SetUseLiteStyle(useLiteStyle);
-            jsPage->SetUseLiteStyle(useLiteStyle);
-            jsPage->SetUseBoxWrap(delegate->GetMinPlatformVersion() >= WEB_FEATURE_VERSION);
-            // Flush all JS commands.
-            for (const auto& command : *jsCommand) {
-                command->Execute(jsPage);
-            }
-            if (jsPage->GetDomDocument()) {
-                jsPage->GetDomDocument()->HandleComponentPostBinding();
-            }
-            auto accessibilityManager = context->GetAccessibilityManager();
-            if (accessibilityManager) {
-                accessibilityManager->HandleComponentPostBinding();
-            }
-
-            jsPage->ClearShowCommand();
-            std::vector<NodeId> dirtyNodes;
-            jsPage->PopAllDirtyNodes(dirtyNodes);
-            for (auto nodeId : dirtyNodes) {
-                auto patchComponent = jsPage->BuildPagePatch(nodeId);
-                if (patchComponent) {
-                    context->ScheduleUpdate(patchComponent);
-                }
-            }
-        };
-        auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext));
-        taskExecutor_->PostTask([updateTask, weakContext, directExecute, frameDelay]() {
-            auto pipelineContext = weakContext.Upgrade();
-            if (pipelineContext) {
-                pipelineContext->AddPageUpdateTask({ std::move(updateTask), frameDelay }, directExecute);
-            }
-        }, TaskExecutor::TaskType::UI);
-        frameDelay++;
-        offset += count;
-    }
+        }
+    };
+    auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext));
+    taskExecutor_->PostTask([updateTask, weakContext, directExecute]() {
+        auto pipelineContext = weakContext.Upgrade();
+        if (pipelineContext) {
+            pipelineContext->AddPageUpdateTask(std::move(updateTask), directExecute);
+        }
+    }, TaskExecutor::TaskType::UI);
 }
 
 void FrontendDelegateImpl::PostJsTask(std::function<void()>&& task)
