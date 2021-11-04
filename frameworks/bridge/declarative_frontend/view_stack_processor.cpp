@@ -626,6 +626,12 @@ RefPtr<Component> ViewStackProcessor::Finish()
         return nullptr;
     }
     auto component = WrapComponents();
+    if (AceType::DynamicCast<ComposedComponent>(component)) {
+        auto childComponent = AceType::DynamicCast<ComposedComponent>(component)->GetChild();
+        SetZIndex(childComponent);
+    } else {
+        SetZIndex(component);
+    }
     componentsStack_.pop();
 
     LOGD("ViewStackProcessor Finish size %{public}zu", componentsStack_.size());
