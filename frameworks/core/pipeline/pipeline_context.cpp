@@ -1974,12 +1974,12 @@ void PipelineContext::Destroy()
     dirtyLayoutNodes_.clear();
     predictLayoutNodes_.clear();
     geometryChangedNodes_.clear();
+    needPaintFinishNodes_.clear();
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
     postFlushListeners_.clear();
     postAnimationFlushListeners_.clear();
     preFlushListeners_.clear();
-    needPaintFinishNodes_.clear();
     sharedTransitionController_.Reset();
     cardTransitionController_.Reset();
     while (!pageUpdateTasks_.empty()) {
@@ -1990,6 +1990,14 @@ void PipelineContext::Destroy()
     drawDelegate_.reset();
     renderFactory_.Reset();
     eventManager_.ClearResults();
+    nodesToNotifyOnPreDraw_.clear();
+    nodesNeedDrawOnPixelMap_.clear();
+    layoutTransitionNodeSet_.clear();
+    preTargetRenderNode_.Reset();
+    imageCache_.Reset();
+    fontManager_.Reset();
+    themeManager_.Reset();
+    sharedImageManager_.Reset();
     window_->Destroy();
     LOGI("PipelineContext::Destroy end.");
 }
