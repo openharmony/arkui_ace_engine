@@ -295,6 +295,15 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         jsBackendEngine->OnCommandApplication(intent, startId);
     };
 
+    builder.commandCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
+            const OHOS::AAFwk::Want &want, int startId) {
+        auto jsBackendEngine = weakEngine.Upgrade();
+        if (!jsBackendEngine) {
+            return;
+        }
+        jsBackendEngine->OnCommand(want, startId);
+    };
+
     builder.taskExecutor = taskExecutor;
     builder.type = type_;
 
