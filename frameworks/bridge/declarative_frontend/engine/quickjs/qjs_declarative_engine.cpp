@@ -69,6 +69,11 @@ bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
+    if (delegate && delegate->GetAssetManager()) {
+        std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
+        auto qjsNativeEngine = static_cast<QuickJSNativeEngine*>(nativeEngine_);
+        qjsNativeEngine->SetPackagePath(packagePath);
+    }
     RegisterWorker();
 #endif
 

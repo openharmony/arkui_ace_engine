@@ -34,6 +34,10 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/pa_container.cpp",
     ]
 
+    if (target_cpu == "arm64") {
+      defines += [ "_ARM64_" ]
+    }
+
     configs = [ "$ace_root:ace_config" ]
 
     include_dirs = [

@@ -757,6 +757,10 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     ACE_DCHECK(delegate);
     delegate->AddTaskObserver([nativeEngine = nativeEngine_]()
         { nativeEngine->Loop(LOOP_NOWAIT); });
+    if (delegate && delegate->GetAssetManager()) {
+        std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
+        nativeEngine_->SetPackagePath(packagePath);
+    }
     RegisterWorker();
     return result;
 }

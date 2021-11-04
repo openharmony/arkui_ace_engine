@@ -50,6 +50,12 @@ constexpr char ARK_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
 constexpr char DECLARATIVE_JS_ENGINE_SHARED_LIB[] = "libace_engine_declarative.z.so";
 constexpr char DECLARATIVE_ARK_ENGINE_SHARED_LIB[] = "libace_engine_declarative_ark.z.so";
 
+#ifdef _ARM64_
+const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
+#else
+const std::string ASSET_LIBARCH_PATH = "/lib/arm";
+#endif
+
 const char* GetEngineSharedLibrary(bool isArkApp)
 {
     if (isArkApp) {
@@ -598,6 +604,9 @@ void AceContainer::AddAssetPath(
             LOGI("Push AssetProvider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
+        std::string absPath(packagePath);
+        std::size_t lastSeperatorPos = absPath.rfind("/");
+        flutterAssetManager->SetPackagePath(absPath.substr(0, lastSeperatorPos).append(ASSET_LIBARCH_PATH));
     }
 }
 

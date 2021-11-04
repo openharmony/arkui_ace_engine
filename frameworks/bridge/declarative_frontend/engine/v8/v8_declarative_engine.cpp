@@ -893,6 +893,11 @@ bool V8DeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         new V8NativeEngine(GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
+    if (delegate && delegate->GetAssetManager()) {
+        std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
+        auto v8NativeEngine = static_cast<V8NativeEngine*>(nativeEngine_);
+        v8NativeEngine->SetPackagePath(packagePath);
+    }
     RegisterWorker();
 
     return true;
