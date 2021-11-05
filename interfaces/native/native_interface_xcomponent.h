@@ -151,7 +151,7 @@ int32_t NativeXComponent_GetNativeWindow(NativeXComponent* component, void** win
  * @since 7
  * @version 1.0
  */
-int32_t NativeXComponent_GetXComponentSize(NativeXComponent* component, void* window,
+int32_t NativeXComponent_GetXComponentSize(NativeXComponent* component, const void* window,
                                            uint64_t* width, uint64_t* height);
 
 /**
@@ -165,7 +165,7 @@ int32_t NativeXComponent_GetXComponentSize(NativeXComponent* component, void* wi
  * @since 7
  * @version 1.0
  */
-int32_t NativeXComponent_GetXComponentOffset(NativeXComponent* component, void* window, double* x, double* y);
+int32_t NativeXComponent_GetXComponentOffset(NativeXComponent* component, const void* window, double* x, double* y);
 
 /**
  * @brief Obtains the information of touch event.
@@ -177,7 +177,7 @@ int32_t NativeXComponent_GetXComponentOffset(NativeXComponent* component, void* 
  * @since 7
  * @version 1.0
  */
-int32_t NativeXComponent_GetTouchInfo(NativeXComponent* component, void* window, TouchInfo* touchInfo);
+int32_t NativeXComponent_GetTouchInfo(NativeXComponent* component, const void* window, TouchInfo* touchInfo);
 
 /**
  * @brief Set the callback to the xcomponent.

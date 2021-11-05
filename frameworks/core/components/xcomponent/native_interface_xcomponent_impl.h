@@ -29,6 +29,8 @@ class NativeXComponentImpl : public virtual AceType {
 public:
     NativeXComponentImpl() : window_(nullptr), width_(0), height_(0), x_(0.0), y_(0.0), callback_(nullptr) {}
 
+    ~NativeXComponentImpl() {}
+
     void SetXComponentId(const std::string& id)
     {
         xcomponetId_ = id;
