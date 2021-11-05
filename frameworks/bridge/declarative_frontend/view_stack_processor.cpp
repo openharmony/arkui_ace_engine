@@ -21,7 +21,6 @@
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/button/button_component.h"
-#include "core/components/checkable/checkable_component.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/menu/menu_component.h"
@@ -392,10 +391,8 @@ bool ViewStackProcessor::ShouldPopImmediately()
     auto multiComposedComponent = AceType::DynamicCast<MultiComposedComponent>(GetMainComponent());
     auto soleChildComponent = AceType::DynamicCast<SoleChildComponent>(GetMainComponent());
     auto menuComponent = AceType::DynamicCast<MenuComponent>(GetMainComponent());
-    auto checkableComponent = AceType::DynamicCast<CheckableComponent>(GetMainComponent());
-
     return (strcmp(type, AceType::TypeName<TextSpanComponent>()) == 0 ||
-            !(componentGroup || multiComposedComponent || soleChildComponent || menuComponent || checkableComponent));
+            !(componentGroup || multiComposedComponent || soleChildComponent || menuComponent));
 }
 
 void ViewStackProcessor::Pop()
@@ -444,14 +441,13 @@ void ViewStackProcessor::PopContainer()
     auto componentGroup = AceType::DynamicCast<ComponentGroup>(GetMainComponent());
     auto multiComposedComponent = AceType::DynamicCast<MultiComposedComponent>(GetMainComponent());
     auto soleChildComponent = AceType::DynamicCast<SoleChildComponent>(GetMainComponent());
-    auto checkableComponent = AceType::DynamicCast<CheckableComponent>(GetMainComponent());
     if ((componentGroup && strcmp(type, AceType::TypeName<TextSpanComponent>()) != 0) || multiComposedComponent ||
-        soleChildComponent || checkableComponent) {
+        soleChildComponent) {
         Pop();
         return;
     }
 
-    while ((!componentGroup && !multiComposedComponent && !soleChildComponent && !checkableComponent) ||
+    while ((!componentGroup && !multiComposedComponent && !soleChildComponent) ||
            strcmp(type, AceType::TypeName<TextSpanComponent>()) == 0) {
         Pop();
         type = AceType::TypeName(GetMainComponent());
