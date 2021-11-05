@@ -606,6 +606,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"FormComponent", JSForm::JSBind},
 #endif
 #endif
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(OHOS_STANDARD_SYSTEM)
+    {"Web", JSWeb::JSBind},
+    {"WebController", JSWebController::JSBind},
+#endif
 #ifndef WEARABLE_PRODUCT
     {"Camera", JSCamera::JSBind},
     {"Piece", JSPiece::JSBind},

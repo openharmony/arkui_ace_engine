@@ -123,15 +123,15 @@ foreach(item, ace_platforms) {
 ohos_source_set("ace_ohos_unittest_base") {
   testonly = true
   sources = [
-    "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
     "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/mock/mock_download_manager.cpp",
+    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
   ]
 
   if (is_standard_system) {
     sources -= [
-      "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
       "$ace_root/frameworks/core/mock/mock_download_manager.cpp",
+      "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
     ]
   }
 

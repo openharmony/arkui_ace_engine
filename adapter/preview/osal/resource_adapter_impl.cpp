@@ -337,7 +337,7 @@ std::string ResourceAdapterImpl::GetPluralString(uint32_t resId, int quantity)
         LOGE("GetPluralString error, id=%{public}u", resId);
     }
 
-    auto pluralChoice = Localization::GetInstance->PluralRulesFormat(quantity);
+    auto pluralChoice = Localization::GetInstance()->PluralRulesFormat(quantity);
     auto iter = std::find(pluralResults.begin(), pluralResults.end(), pluralChoice);
     std::string originStr;
     if (iter != pluralResults.end() && ++iter != pluralResults.end()) {
@@ -427,7 +427,7 @@ bool ResourceAdapterImpl::GetIdByName(const std::string& resName, const std::str
 std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
 {
     std::string mediaPath = "";
-    auto ret = resourceManger_.(static_cast<int32_t>(resId), mediaPath);
+    auto ret = resourceManger_.GetString(static_cast<int32_t>(resId), mediaPath);
     if (!ret) {
         LOGE("GetMediaPath error, id=%{public}u", resId);
         return "";
@@ -445,9 +445,9 @@ std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
     }
     auto moduleName = container->GetModuleName();
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    return "resource://RAWFILE/" + moduleName + "/resources/rawfile/" + fileName->ToString();
+    return "resource://RAWFILE/" + moduleName + "/resources/rawfile/" + fileName;
 #else
-    return "resource://RAWFILE/assets/" + moduleName + "/resources/rawfile/" + fileName->ToString();
+    return "resource://RAWFILE/assets/" + moduleName + "/resources/rawfile/" + fileName;
 #endif
 }
 } // namespace OHOS::Ace

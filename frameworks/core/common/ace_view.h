@@ -98,7 +98,7 @@ public:
     virtual void UpdateWindowblurDrawOp() {}
     virtual void StartSystemDrag(const std::string& str, void* pixelMapManager, int32_t byteCount) {}
     virtual void InitDragListener() {}
-#ifndef WEARABLE_PRODUCT
+#ifdef WEARABLE_PRODUCT
     virtual void CloseSwipeToRight(bool isEnabled) {}
 #endif
     virtual bool GetScale(float& scaleX, float& scaleY)

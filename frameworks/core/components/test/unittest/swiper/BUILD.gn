@@ -77,6 +77,7 @@ ohos_unittest("SwiperComponentTest") {
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
 
     # common
+    "$ace_root/frameworks/core/common/ace_application_info.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/event_manager.cpp",
@@ -193,7 +194,6 @@ ohos_unittest("SwiperComponentTest") {
 
     # theme
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
     "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
@@ -213,6 +213,7 @@ ohos_unittest("SwiperComponentTest") {
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
     "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/mock/mock_image_loader.cpp",
+    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
     "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
     "$root_out_dir/ace/framework/core/components/theme/theme_constants_default.cpp",
     "render_swiper_test.cpp",

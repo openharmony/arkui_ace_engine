@@ -1836,7 +1836,6 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
             result = themeConstants->GetRawfile(fileName->ToString());
             return true;
         }
-        
         LOGE("JSImage::Create ParseJsMedia type is wrong");
         return false;
     }
