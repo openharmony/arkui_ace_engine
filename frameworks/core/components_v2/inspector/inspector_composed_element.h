@@ -61,11 +61,12 @@ class ACE_EXPORT InspectorComposedElement : public ComposedElement {
 
 public:
     explicit InspectorComposedElement(const ComposeId& id) : ComposedElement(id) {}
-    ~InspectorComposedElement() override = default;
+    ~InspectorComposedElement() override;
 
     void Update() override;
     bool CanUpdate(const RefPtr<Component>& newComponent) override;
     void UpdateComposedComponentId(const ComposeId& oldId, const ComposeId& newId);
+    void RemoveInspectorNode(const ComposeId& id);
     RefPtr<RenderNode> GetInspectorNode(IdType typeId) const;
 
     template<class T>

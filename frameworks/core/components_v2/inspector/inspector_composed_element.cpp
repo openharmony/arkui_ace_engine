@@ -195,6 +195,11 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
 
 }; // namespace
 
+InspectorComposedElement::~InspectorComposedElement()
+{
+    RemoveInspectorNode(id_);
+}
+
 std::unique_ptr<JsonValue> InspectorComposedElement::ToJsonObject() const
 {
     auto resultJson = JsonUtil::Create(true);
@@ -252,10 +257,25 @@ void InspectorComposedElement::UpdateComposedComponentId(const ComposeId& oldId,
         LOGW("get AccessibilityManager failed");
         return;
     }
-    accessibilityManager->RemoveComposedElementById(oldId);
-    accessibilityManager->RemoveAccessibilityNodeById(StringUtils::StringToInt(oldId));
+    RemoveInspectorNode(oldId);
     accessibilityManager->AddComposedElement(newId, AceType::Claim(this));
     LOGD("Update ComposedComponent Id %{public}s to %{public}s", oldId.c_str(), newId.c_str());
+}
+
+void InspectorComposedElement::RemoveInspectorNode(const ComposeId& id)
+{
+    auto context = context_.Upgrade();
+    if (context == nullptr) {
+        LOGW("get context failed");
+        return;
+    }
+    auto accessibilityManager = context->GetAccessibilityManager();
+    if (!accessibilityManager) {
+        LOGW("get AccessibilityManager failed");
+        return;
+    }
+    accessibilityManager->RemoveComposedElementById(id);
+    accessibilityManager->RemoveAccessibilityNodeById(StringUtils::StringToInt(id));
 }
 
 RefPtr<RenderNode> InspectorComposedElement::GetInspectorNode(IdType typeId) const

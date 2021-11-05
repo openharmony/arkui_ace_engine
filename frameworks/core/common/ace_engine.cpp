@@ -215,6 +215,10 @@ void AceEngine::Dump(const std::vector<std::string>& params) const
     }
     for (const auto& container : copied) {
         auto pipelineContext = container.second->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGW("the pipeline context is nullptr, pa container");
+            continue;
+        }
         pipelineContext->GetTaskExecutor()->PostSyncTask(
             [params, container = container.second]() { container->Dump(params); }, TaskExecutor::TaskType::UI);
     }
