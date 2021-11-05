@@ -50,12 +50,6 @@ class PandaFunctionData;
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ArkJSRuntime final : public JsRuntime, public std::enable_shared_from_this<ArkJSRuntime> {
 public:
-    static shared_ptr<JsRuntime> GetInstance()
-    {
-        shared_ptr<ArkJSRuntime> runtime = std::make_shared<ArkJSRuntime>();
-        new shared_ptr<ArkJSRuntime>(runtime);
-        return runtime;
-    }
     bool StartDebugger(const char *libraryPath, EcmaVM *vm) const;
     bool Initialize(const std::string &libraryPath) override;
     void Reset() override;

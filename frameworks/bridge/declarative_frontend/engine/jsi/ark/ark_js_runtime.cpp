@@ -22,12 +22,6 @@
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 namespace OHOS::Ace::Framework {
-// NOLINTNEXTLINE(readability-identifier-naming)
-extern "C" void *JSI_GetRuntime()
-{
-    return ArkJSRuntime::GetInstance().get();
-}
-
 static constexpr auto PANDA_MAIN_FUNCTION = "_GLOBAL::func_main_0";
 
 Local<JSValueRef> FunctionCallback(EcmaVM *vm, Local<JSValueRef> thisValue,
