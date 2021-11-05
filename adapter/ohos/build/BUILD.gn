@@ -42,24 +42,7 @@ group("ace_packages") {
   deps += [ "$ace_root/build:libace_engine_pa_qjs" ]
 
   # ark debugger
-  deps += [ "$ace_root/frameworks/bridge/js_frontend/engine/jsi/debugger:ark_debugger" ]
-}
-
-# Install packages
-group("ace_for_windows") {
-  deps = [
-    "$ace_root/adapter/preview/build:libace_engine_windows(${windows_buildtool})",
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
+  deps += [
+    "$ace_root/frameworks/bridge/js_frontend/engine/jsi/debugger:ark_debugger",
   ]
-  if (is_wearable_product) {
-    deps += [ "$ace_root/adapter/preview/entrance/samples:ace_test_windows_wearable(${windows_buildtool})" ]
-  } else {
-    deps += [
-      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_car(${windows_buildtool})",
-      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_card(${windows_buildtool})",
-      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_phone(${windows_buildtool})",
-      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_tablet(${windows_buildtool})",
-      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_tv(${windows_buildtool})",
-    ]
-  }
 }

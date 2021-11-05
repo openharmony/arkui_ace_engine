@@ -30,3 +30,18 @@ libace_engine("libace_engine_windows") {
 libace_engine("libace_engine_mac") {
   platform = "mac"
 }
+
+# Install packages
+group("ace_for_windows") {
+  if (is_wearable_product) {
+    deps = [ "$ace_root/adapter/preview/entrance/samples:ace_test_windows_wearable(${windows_buildtool})" ]
+  } else {
+    deps = [
+      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_car(${windows_buildtool})",
+      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_card(${windows_buildtool})",
+      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_phone(${windows_buildtool})",
+      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_tablet(${windows_buildtool})",
+      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_tv(${windows_buildtool})",
+    ]
+  }
+}
