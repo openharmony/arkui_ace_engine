@@ -88,7 +88,7 @@ bool DOMListItem::SetSpecializedAttr(const std::pair<std::string, std::string>& 
         isActive_ = StringToBool(attr.second);
         return true;
     } else if (attr.first == DOM_LISTITEM_KEY) {
-        key_ = attr.second;
+        key_ = StringUtils::StringToInt(attr.second);
         return true;
     }
     return false;
@@ -382,7 +382,7 @@ void DOMListItem::PrepareSpecializedComponent()
     if (!indexKey_.empty()) {
         listItemComponent_->SetIndexKey(indexKey_);
     }
-    if (!key_.empty()) {
+    if (key_ != -1) {
         listItemComponent_->SetKey(key_);
     }
     if (flexComponent_) {
@@ -450,7 +450,7 @@ RefPtr<Component> DOMListItem::CompositeSpecializedComponent(const std::vector<R
 
 NodeId DOMListItem::GetDirtyNodeId() const
 {
-    if (key_.empty()) {
+    if (key_ == -1) {
         return DOMNode::GetNodeId();
     }
     return GetParentId();

@@ -89,12 +89,12 @@ public:
         return nullptr;
     }
 
-    const std::string& GetKey() const
+    int32_t GetKey() const
     {
         return key_;
     }
 
-    void SetKey(const std::string& key)
+    void SetKey(int32_t key)
     {
         key_ = key;
     }
@@ -112,7 +112,7 @@ private:
     Radius topRightRadius_;
     Radius bottomLeftRadius_;
     Radius bottomRightRadius_;
-    std::string key_;
+    int32_t key_ = -1;
 
     RefPtr<RenderNode> proxyNode_;
     RefPtr<ListItemComponent> listItemComponent_;

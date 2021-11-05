@@ -334,7 +334,7 @@ void ListElement::UpdateListItemElement(const RefPtr<Component>& component)
     }
     if (element) {
         auto itemElement = ListItemElement::GetListItem(element);
-        if (itemElement->GetKey().empty() || itemElement->GetKey() != itemComponent->GetKey()) {
+        if (itemElement->GetKey() == -1 || itemElement->GetKey() != itemComponent->GetKey()) {
             UpdateChild(element, component);
             if (accessibilityDisabled_) {
                 auto renderNode = element->GetRenderNode();
@@ -548,7 +548,7 @@ bool ListElement::RecycleItem(int32_t index)
     if (!itemElement) {
         return false;
     }
-    itemElement->SetKey("");
+    itemElement->SetKey(-1);
     auto bucket = cacheBuckets_.find(itemElement->GetItemType());
     if (bucket != cacheBuckets_.end()) {
         auto& elements = bucket->second;
@@ -665,6 +665,16 @@ void ListElement::UpdateCachedComponent()
     itemComponents_.clear();
     itemVectorHit_ = std::make_pair(-1, -1);
     auto children = group->GetChildren();
+
+    children.sort([](const RefPtr<Component>& node1, const RefPtr<Component>& node2) {
+        auto itemNode1 = ListItemComponent::GetListItem(node1);
+        auto itemNode2 = ListItemComponent::GetListItem(node2);
+        if (itemNode1 && itemNode2) {
+            return itemNode1->GetKey() < itemNode2->GetKey();
+        }
+        return false;
+    });
+
     auto child = children.begin();
     int32_t index = 0;
     for (index = 0; index < indexOffset_ && child != children.end(); ++child) {

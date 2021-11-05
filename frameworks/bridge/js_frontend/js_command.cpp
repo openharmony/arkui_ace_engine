@@ -483,7 +483,7 @@ void JsCommandUpdateDomElementAttrs::Execute(const RefPtr<JsAcePage>& page) cons
     UpdateForInput(node);
 
     node->GenerateComponentNode();
-    page->PushDirtyNode(nodeId_);
+    page->PushDirtyNode(node->GetDirtyNodeId());
 
     // update accessibility node
     auto accessibilityManager = GetAccessibilityManager(page);
