@@ -426,10 +426,8 @@ void QJSDeclarativeEngine::TimerCallJs(const std::string& callbackId, bool isInt
     }
     std::vector<JSValue> jsargv = ModuleManager::GetInstance()->GetCallbackArray(std::stoi(callbackId), isInterval);
     if (jsargv.empty()) {
-        LOGI("jsargv is empty");
         JS_Call(ctx, jsFunc, JS_UNDEFINED, 0, nullptr);
     } else {
-        LOGI("jsargv's size is %{private}zu", jsargv.size());
         JSValue* argv = new JSValue[jsargv.size()];
         uint32_t index = 0;
         while (index < jsargv.size()) {
