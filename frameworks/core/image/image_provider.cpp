@@ -46,8 +46,8 @@ void ImageProvider::FetchImageObject(
     RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     OnPostBackgroundTask onBackgroundTaskPostCallback)
 {
-    auto task = [ context, imageInfo, successCallback, failedCallback, useSkiaSvg, color, &renderTaskHolder,
-        uploadSuccessCallback, needAutoResize] () {
+    auto task = [ context, imageInfo, successCallback, failedCallback, useSkiaSvg, color, renderTaskHolder,
+        uploadSuccessCallback, needAutoResize] () mutable {
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
             LOGE("pipline context has been released. imageInfo: %{private}s", imageInfo.ToString().c_str());
