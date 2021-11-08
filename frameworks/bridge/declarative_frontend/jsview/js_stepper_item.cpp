@@ -52,6 +52,10 @@ void JSStepperItem::JSBind(BindingTarget globalObj)
     JSClass<JSStepperItem>::StaticMethod("prevLabel", &JSStepperItem::SetPrevLabel);
     JSClass<JSStepperItem>::StaticMethod("nextLabel", &JSStepperItem::SetNextLabel);
     JSClass<JSStepperItem>::StaticMethod("status", &JSStepperItem::SetStatus);
+    JSClass<JSStepperItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSStepperItem>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSStepperItem>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSStepperItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSStepperItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSStepperItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSStepperItem>::Inherit<JSContainerBase>();
