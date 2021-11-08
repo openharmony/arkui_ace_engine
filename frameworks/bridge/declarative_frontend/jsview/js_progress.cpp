@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_progress.h"
 
 #include "core/components/common/properties/color.h"
@@ -78,6 +79,12 @@ void JSProgress::JSBind(BindingTarget globalObj)
     JSClass<JSProgress>::StaticMethod("circularStyle", &JSProgress::SetCircularStyle, opt);
     JSClass<JSProgress>::StaticMethod("cricularStyle", &JSProgress::SetCircularStyle, opt);
     JSClass<JSProgress>::StaticMethod("backgroundColor", &JSProgress::JsBackgroundColor, opt);
+    JSClass<JSProgress>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSProgress>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSProgress>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSProgress>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSProgress>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSProgress>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSProgress>::Inherit<JSViewAbstract>();
     JSClass<JSProgress>::Bind(globalObj);
 }
