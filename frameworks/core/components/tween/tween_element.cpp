@@ -164,6 +164,15 @@ void TransformComponentUpdate(WeakPtr<TransformComponent>& transform, const Tran
     }
 }
 
+void RenderTransformOriginUpdate(const WeakPtr<RenderTransform>& weakPtr, const DimensionOffset& origin)
+{
+    auto renderTransformNode = weakPtr.Upgrade();
+    if (renderTransformNode) {
+        renderTransformNode->SetTransformOrigin(origin.GetX(), origin.GetY());
+        renderTransformNode->MarkNeedUpdateOrigin();
+    }
+}
+
 void CreateTransformAnimation(const RefPtr<RenderTransform>& renderTransformNode,
     const WeakPtr<TransformComponent>& transform, TweenOption& option)
 {
@@ -496,6 +505,11 @@ bool TweenElement::IsNeedAnimation(RefPtr<Animator>& controller, TweenOption& op
     if (BindingTransformAnimationToController(controller, option)) {
         needAnimation = true;
     }
+    auto& transformOriginAnimation = option.GetTransformOriginAnimation();
+    if (transformOriginAnimation) {
+        controller->AddInterpolator(transformOriginAnimation);
+        // no need enable needAnimation, Transform Origin Animation only work when set transform animation.
+    }
     auto& opacityAnimation = option.GetOpacityAnimation();
     if (opacityAnimation) {
         LOGD("add opacity animation.");
@@ -696,11 +710,20 @@ void TweenElement::CreateTransformOriginAnimation(
 {
     if (option.HasTransformOriginChanged()) {
         renderTransformNode->SetTransformOrigin(option.GetTransformOriginX(), option.GetTransformOriginY());
+        auto animation = option.GetTransformOriginAnimation();
+        if (animation) {
+            animation->AddListener([weak = AceType::WeakClaim(AceType::RawPtr(renderTransformNode))](
+                                       const DimensionOffset& value) { RenderTransformOriginUpdate(weak, value); });
+
+            if (option.GetCurve()) {
+                animation->SetCurve(option.GetCurve());
+            }
+        }
         option.SetTransformOriginChanged(false);
     } else {
         renderTransformNode->SetTransformOrigin(HALF_PERCENT, HALF_PERCENT);
+        renderTransformNode->MarkNeedUpdateOrigin();
     }
-    renderTransformNode->MarkNeedUpdateOrigin();
 }
 
 void TweenElement::CreateRotateAnimation(const RefPtr<RenderTransform>& renderTransformNode, TweenOption& option)
