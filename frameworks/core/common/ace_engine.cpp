@@ -166,23 +166,21 @@ void AceEngine::RemoveContainer(int32_t instanceId)
     size_t numInstance = 0;
     std::string message = GetInstanceMapMessage("destroyInstance", instanceId);
     LOGI("RemoveContainer messageStr %{public}s", message.c_str());
-    if (g_debugger == nullptr) {
-        LOGE("g_debugger is null");
-        return;
-    }
-    IsAttachStart isAttachStart = (IsAttachStart)dlsym(g_debugger, "IsAttachStart");
-    if (isAttachStart != nullptr) {
-        g_isNeedDebugBreakPoint = g_isNeedDebugBreakPoint || isAttachStart();
-    }
-    if (g_isNeedDebugBreakPoint) {
-        SendMessage sendMessage = (SendMessage)dlsym(g_debugger, "SendMessage");
-        if (sendMessage != nullptr) {
-            sendMessage(message);
+    if (g_debugger) {
+        IsAttachStart isAttachStart = (IsAttachStart)dlsym(g_debugger, "IsAttachStart");
+        if (isAttachStart != nullptr) {
+            g_isNeedDebugBreakPoint = g_isNeedDebugBreakPoint || isAttachStart();
         }
-    } else {
-        RemoveMessage removeMessage = (RemoveMessage)dlsym(g_debugger, "RemoveMessage");
-        if (removeMessage != nullptr) {
-            removeMessage(instanceId);
+        if (g_isNeedDebugBreakPoint) {
+            SendMessage sendMessage = (SendMessage)dlsym(g_debugger, "SendMessage");
+            if (sendMessage != nullptr) {
+                sendMessage(message);
+            }
+        } else {
+            RemoveMessage removeMessage = (RemoveMessage)dlsym(g_debugger, "RemoveMessage");
+            if (removeMessage != nullptr) {
+                removeMessage(instanceId);
+            }
         }
     }
 #endif
