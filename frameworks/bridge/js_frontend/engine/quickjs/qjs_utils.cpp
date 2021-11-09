@@ -625,7 +625,7 @@ void QJSUtils::DefineGlobalFunction(JSContext* ctx, JSCFunction cFunc, const cha
     JS_FreeValue(ctx, global);
 }
 
-#ifdef USE_CLANG_COVERAGE
+#if defined(USE_CLANG_COVERAGE) || defined(CLANG_COVERAGE)
 std::stack<JSContext*> QJSContext::s_qjsContextStack;
 #else
 thread_local std::stack<JSContext*> QJSContext::s_qjsContextStack;

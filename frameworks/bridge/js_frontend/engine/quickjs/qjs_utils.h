@@ -148,7 +148,7 @@ public:
     void operator=(const QJSContext&) = delete;
 
 private:
-#ifdef USE_CLANG_COVERAGE
+#if defined(USE_CLANG_COVERAGE) || defined(CLANG_COVERAGE)
     static std::stack<JSContext*> s_qjsContextStack;
 #else
     static thread_local std::stack<JSContext*> s_qjsContextStack;
