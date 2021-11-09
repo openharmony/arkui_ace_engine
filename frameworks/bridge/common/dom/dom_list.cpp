@@ -124,7 +124,10 @@ bool DOMList::SetSpecializedAttr(const std::pair<std::string, std::string>& attr
         },
         {
             DOM_LIST_ROTATION_VIBRATE,
-            [](DOMList& list, const std::string& val) { list.rotationVibrate_ = StringToBool(val); },
+            [](DOMList& list, const std::string& val) {
+                list.rotationVibrate_ = StringToBool(val);
+                list.scrollVibrate_ = false;
+            },
         },
         {
             DOM_SCROLL_SCROLLBAR,
