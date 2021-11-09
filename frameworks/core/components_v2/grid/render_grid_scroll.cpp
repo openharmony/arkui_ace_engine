@@ -33,8 +33,7 @@ namespace {
 
 const char UNIT_PERCENT[] = "%";
 const char UNIT_RATIO[] = "fr";
-constexpr int32_t TIMETHRESHOLD = 2; // microsecond
-constexpr int64_t SEC_TO_MICROSEC = 1000000;
+constexpr int32_t TIMETHRESHOLD = 2 * 1000000; // microsecond
 
 } // namespace
 
@@ -1467,7 +1466,7 @@ void RenderGridScroll::OnPredictLayout(int64_t targetTimestamp)
                         break;
                     }
                 }
-                if (((targetTimestamp - GetSysTimestamp()) / SEC_TO_MICROSEC) < TIMETHRESHOLD) {
+                if (GetSysTimestamp() + TIMETHRESHOLD > targetTimestamp) {
                     MarkNeedPredictLayout();
                     return;
                 }
