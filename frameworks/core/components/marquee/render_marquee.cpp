@@ -277,9 +277,13 @@ void RenderMarquee::PerformLayout()
     SetLayoutSize(layoutSize);
     LOGD("layoutSize: %{public}s, child: %{public}s", layoutSize.ToString().c_str(),
         childText_->GetLayoutSize().ToString().c_str());
-    if (childText_->GetLayoutSize().Width() <= layoutSize.Width()) {
-        childText_->SetPosition(Offset(0.0, 0.0));
-        return;
+    const static int32_t PLATFORM_VERSION_SIX = 6;
+    auto context = GetContext().Upgrade();
+    if (context && context->GetMinPlatformVersion() >= PLATFORM_VERSION_SIX) {
+        if (childText_->GetLayoutSize().Width() <= layoutSize.Width()) {
+            childText_->SetPosition(Offset(0.0, 0.0));
+            return;
+        }
     }
     if (lastLayoutSize != layoutSize && IsPlayingAnimation(controller_)) {
         UpdateAnimation();
