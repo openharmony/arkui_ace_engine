@@ -169,6 +169,10 @@ void InitializeComponent(OHOS::Ace::RefPtr<OHOS::Ace::SearchComponent>& searchCo
     textFieldComponent->SetFocusPlaceholderColor(searchTheme->GetFocusPlaceholderColor());
     textFieldComponent->SetBlockRightShade(searchTheme->GetBlockRightShade());
 
+    auto textStyle = textFieldComponent->GetTextStyle();
+    searchComponent->SetPlaceHoldStyle(textStyle);
+    searchComponent->SetEditingStyle(textStyle);
+
     std::function<void(const std::string&)> submitEvent;
     searchComponent->SetSubmitEvent(submitEvent);
     searchComponent->SetChild(textFieldComponent);
@@ -221,8 +225,18 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("searchButton", &JSSearch::SetSearchButton, opt);
     JSClass<JSSearch>::StaticMethod("placeholderColor", &JSSearch::SetPlaceholderColor, opt);
     JSClass<JSSearch>::StaticMethod("placeholderFont", &JSSearch::SetPlaceholderFont, opt);
+    JSClass<JSSearch>::StaticMethod("textFont", &JSSearch::SetTextFont, opt);
     JSClass<JSSearch>::StaticMethod("onSubmit", &JSSearch::OnSubmit, opt);
     JSClass<JSSearch>::StaticMethod("onChange", &JSSearch::OnChange, opt);
+
+    JSClass<JSSearch>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSSearch>::StaticMethod("height", &JSSearch::SetHeight);
+    JSClass<JSSearch>::StaticMethod("width", &JSSearch::SetWidth);
+    JSClass<JSSearch>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSSearch>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSSearch>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSSearch>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSearch>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
 
     JSClass<JSSearch>::Inherit<JSViewAbstract>();
     JSClass<JSSearch>::Bind(globalObj);
@@ -266,7 +280,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
     auto icon = param->GetProperty("icon");
     if (!icon->IsNull() && icon->IsString()) {
         auto src = icon->ToString();
-        searchComponent->SetCloseIconSrc(src);
+        textFieldComponent->SetIconImage(src);
     }
 
     ViewStackProcessor::GetInstance()->Push(searchComponent);
@@ -275,25 +289,25 @@ void JSSearch::Create(const JSCallbackInfo& info)
 void JSSearch::SetSearchButton(const std::string& text)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto searchcomponent = AceType::DynamicCast<SearchComponent>(component);
-    if (!searchcomponent) {
+    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
+    if (!searchComponent) {
         LOGE("component error");
         return;
     }
 
-    searchcomponent->SetSearchText(text);
+    searchComponent->SetSearchText(text);
 }
 
 void JSSearch::SetPlaceholderColor(const JSCallbackInfo& info)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto searchcomponent = AceType::DynamicCast<SearchComponent>(component);
-    if (!searchcomponent) {
+    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
+    if (!searchComponent) {
         LOGE("search component error");
         return;
     }
 
-    auto childComponent = searchcomponent->GetChild();
+    auto childComponent = searchComponent->GetChild();
     if (!childComponent) {
         LOGE("component error");
         return;
@@ -318,24 +332,14 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
 {
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto searchcomponent = AceType::DynamicCast<SearchComponent>(component);
-    if (!searchcomponent) {
+    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
+    if (!searchComponent) {
         LOGE("search component error");
-        return;
-    }
-    auto childComponent = searchcomponent->GetChild();
-    if (!childComponent) {
-        LOGE("component error");
-        return;
-    }
-    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
-    if (!textFieldComponent) {
-        LOGE("text component error");
         return;
     }
 
     auto size = param->GetProperty("size");
-    TextStyle textStyle = textFieldComponent->GetTextStyle();
+    TextStyle textStyle = searchComponent->GetPlaceHoldStyle();
 
     if (!size->IsNull() && size->IsNumber()) {
         Dimension fontSize;
@@ -361,7 +365,47 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
         FontStyle styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
         textStyle.SetFontStyle(styleVal);
     }
-    textFieldComponent->SetTextStyle(textStyle);
+    searchComponent->SetPlaceHoldStyle(textStyle);
+}
+
+void JSSearch::SetTextFont(const JSCallbackInfo& info)
+{
+    auto param = JSRef<JSObject>::Cast(info[0]);
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
+    if (!searchComponent) {
+        LOGE("search component error");
+        return;
+    }
+
+    auto size = param->GetProperty("size");
+    TextStyle textStyle = searchComponent->GetEditingStyle();
+
+    if (!size->IsNull() && size->IsNumber()) {
+        Dimension fontSize;
+        if (ParseJsDimensionFp(size, fontSize)) {
+            textStyle.SetFontSize(fontSize);
+        }
+    }
+
+    auto weight = param->GetProperty("weight");
+    if (!weight->IsNull() && weight->IsNumber()) {
+        FontWeight weightVal = static_cast<FontWeight>(weight->ToNumber<int32_t>());
+        textStyle.SetFontWeight(weightVal);
+    }
+
+    auto family = param->GetProperty("family");
+    if (!family->IsNull() && family->IsString()) {
+        auto familyVal = family->ToString();
+        textStyle.SetFontFamilies(ConvertStrToFontFamilies(familyVal));
+    }
+
+    auto style = param->GetProperty("style");
+    if (!style->IsNull() && style->IsNumber()) {
+        FontStyle styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
+        textStyle.SetFontStyle(styleVal);
+    }
+    searchComponent->SetEditingStyle(textStyle);
 }
 
 void JSSearch::OnSubmit(const JSCallbackInfo& info)
@@ -380,4 +424,52 @@ void JSSearch::OnChange(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
-} // namespace OHOS::Ace::Framework
+void JSSearch::SetHeight(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsHeight(info);
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    if (LessNotEqual(value.Value(), 0.0)) {
+        return;
+    }
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto searchComponent = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
+    if (!searchComponent) {
+        LOGE("SearchComponent set height failed, SearchComponent is null.");
+        return;
+    }
+    searchComponent->SetHeight(value);
+}
+
+void JSSearch::SetWidth(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsWidth(info);
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    if (LessNotEqual(value.Value(), 0.0)) {
+        return;
+    }
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto searchComponent = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
+    if (!searchComponent) {
+        LOGE("SearchComponent set height failed, SearchComponent is null.");
+        return;
+    }
+
+    searchComponent->SetWidth(value);
+}
+}

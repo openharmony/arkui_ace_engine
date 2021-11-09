@@ -16,12 +16,12 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SEARCH_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SEARCH_H
 
-#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
 
-class JSSearch : public JSViewAbstract {
+class JSSearch : public JSViewAbstract, public JSInteractableView {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
@@ -29,8 +29,11 @@ public:
     static void SetSearchButton(const std::string& text);
     static void SetPlaceholderColor(const JSCallbackInfo& info);
     static void SetPlaceholderFont(const JSCallbackInfo& info);
+    static void SetTextFont(const JSCallbackInfo& info);
     static void OnSubmit(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
+    static void SetHeight(const JSCallbackInfo& info);
+    static void SetWidth(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

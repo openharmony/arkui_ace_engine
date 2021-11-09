@@ -97,6 +97,10 @@ public:
     const TextEditingValue& GetEditingValue() const;
     const TextEditingValue& GetPreEditingValue() const;
     void Delete(int32_t start, int32_t end);
+    void SetTextStyle(const TextStyle& style)
+    {
+        style_ = style;
+    }
     void SetOnOverlayFocusChange(const std::function<void(bool)>& onOverlayFocusChange)
     {
         onOverlayFocusChange_ = onOverlayFocusChange;
@@ -200,6 +204,11 @@ public:
     void SetOnTextChangeEvent(const std::function<void(const std::string&)>& onTextChangeEvent)
     {
         onTextChangeEvent_ = onTextChangeEvent;
+    }
+
+    void SetOnValueChangeEvent(const std::function<void(const std::string&)>& onTextChangeEvent)
+    {
+        onValueChangeEvent_ = onTextChangeEvent;
     }
 
     void SetNeedNotifyChangeEvent(bool needNotifyChangeEvent)

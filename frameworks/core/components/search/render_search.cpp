@@ -49,6 +49,8 @@ void RenderSearch::Update(const RefPtr<Component>& component)
     }
     needReverse_ = (searchComponent_->GetTextDirection() == TextDirection::RTL);
     closeIconSize_ = searchComponent_->GetCloseIconSize();
+    placeHoldStyle_ = searchComponent_->GetPlaceHoldStyle();
+    editingStyle_ = searchComponent_->GetEditingStyle();
     closeIconHotZoneHorizontal_ = searchComponent_->GetCloseIconHotZoneHorizontal();
 
     decoration_ = searchComponent_->GetDecoration();
@@ -85,27 +87,39 @@ void RenderSearch::Update(const RefPtr<Component>& component)
 void RenderSearch::FireSubmitEvent(const std::string& searchKey)
 {
     if (submitEvent_) {
-        auto submitResult = JsonUtil::Create(true);
-        submitResult->Put("text", searchKey.c_str());
-        submitEvent_(std::string(R"("submit",)").append(submitResult->ToString()));
+        auto context = context_.Upgrade();
+        if (context && context->GetIsDeclarative()) {
+            submitEvent_(searchKey);
+        } else {
+            auto submitResult = JsonUtil::Create(true);
+            submitResult->Put("text", searchKey.c_str());
+            submitEvent_(std::string(R"("submit",)").append(submitResult->ToString()));
+        }
     }
 }
 
 void RenderSearch::PerformLayout()
 {
     const auto& renderTextField = AceType::DynamicCast<RenderTextField>(GetChildren().front());
-    if (renderTextField) {
-        renderTextField->Layout(GetLayoutParam());
-        SetLayoutSize(renderTextField->GetLayoutSize());
-        renderTextField->SetSubmitEvent([weak = WeakClaim(this)](const std::string& searchKey) {
-            auto renderSearch = weak.Upgrade();
-            if (renderSearch) {
-                renderSearch->FireSubmitEvent(searchKey);
-            }
-        });
-
-        renderTextField->SetOnTextChangeEvent(changeEvent_);
+    if (!renderTextField) {
+       return;
     }
+    LayoutParam layout;
+    layout.SetFixedSize(Size(searchComponent_->GetWidth().Value(), searchComponent_->GetHeight().Value()));
+    if (layout.IsValid()) {
+        renderTextField->Layout(layout);
+    } else {
+        renderTextField->Layout(GetLayoutParam());
+    }
+    SetLayoutSize(renderTextField->GetLayoutSize());
+    renderTextField->SetSubmitEvent([weak = WeakClaim(this)](const std::string& searchKey) {
+        auto renderSearch = weak.Upgrade();
+        if (renderSearch) {
+            renderSearch->FireSubmitEvent(searchKey);
+        }
+    });
+
+    renderTextField->SetOnValueChangeEvent(changeEvent_);
 
     Size deflateSize = Size(NormalizeToPx(SEARCH_SPACING), NormalizeToPx(SEARCH_SPACING)) * 2.0;
     auto context = context_.Upgrade();
@@ -191,6 +205,12 @@ void RenderSearch::OnValueChanged(bool needFireChangeEvent, bool needFireSelectC
     if (textEditController_) {
         const auto& currentText = textEditController_->GetValue().text;
         showCloseIcon_ = !currentText.empty();
+        auto renderTextField = AceType::DynamicCast<RenderTextField>(GetChildren().front());
+        if (showCloseIcon_) {
+            renderTextField->SetTextStyle(editingStyle_);
+        } else {
+            renderTextField->SetTextStyle(placeHoldStyle_);
+        }
     }
 }
 

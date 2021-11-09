@@ -29,12 +29,16 @@ struct SearchAttribute : Attribute {
     Dimension closeIconHotZoneHorizontal;
     std::string searchText;
     std::string closeIconSrc;
+    Dimension searchHeight;
+    Dimension searchWidth;
 };
 
 struct SearchStyle : Style {
     RefPtr<Decoration> decoration;
     Color hoverColor;
     Color pressColor;
+    TextStyle editingStyle;
+    TextStyle placeHoldStyle;
 };
 
 struct SearchEvent : Event {
@@ -193,6 +197,54 @@ public:
     void SetTextEditController(const RefPtr<TextEditController>& controller)
     {
         textEditController_ = controller;
+    }
+
+    void SetPlaceHoldStyle(const TextStyle& textstyle)
+    {
+        auto& style = MaybeResetStyle<SearchStyle>(StyleTag::SPECIALIZED_STYLE);
+        style.placeHoldStyle = textstyle;
+    }
+
+    void SetEditingStyle(const TextStyle& textstyle)
+    {
+        auto& style = MaybeResetStyle<SearchStyle>(StyleTag::SPECIALIZED_STYLE);
+        style.editingStyle = textstyle;
+    }
+
+    const TextStyle& GetPlaceHoldStyle() const
+    {
+        auto& style = static_cast<SearchStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        return style.placeHoldStyle;
+    }
+
+    const TextStyle& GetEditingStyle() const
+    {
+        auto& style = static_cast<SearchStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        return style.editingStyle;
+    }
+
+    void SetHeight(const Dimension& height)
+    {
+        auto& attribute = MaybeResetAttribute<SearchAttribute>(AttributeTag::SPECIALIZED_ATTR);
+        attribute.searchHeight = height;
+    }
+
+    const Dimension& GetHeight() const
+    {
+        auto& attribute = static_cast<SearchAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
+        return attribute.searchHeight;
+    }
+
+    void SetWidth(const Dimension& width)
+    {
+        auto& attribute = MaybeResetAttribute<SearchAttribute>(AttributeTag::SPECIALIZED_ATTR);
+        attribute.searchWidth = width;
+    }
+
+    const Dimension& GetWidth() const
+    {
+        auto& attribute = static_cast<SearchAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
+        return attribute.searchWidth;
     }
 
 protected:
