@@ -461,9 +461,9 @@ public:
             hidden_ = hidden;
             AddDirtyRenderBoundaryNode();
             OnHiddenChanged(hidden);
-            for (auto& child : children_) {
-                child->SetHidden(hidden);
-            }
+        }
+        for (auto& child : children_) {
+            child->SetHidden(hidden);
         }
     }
 
