@@ -143,10 +143,13 @@ struct ACE_EXPORT TransformOperation {
                 return rotateOperation_ == other.rotateOperation_;
             }
             case TransformOperationType::SCALE: {
-                    return scaleOperation_ == other.scaleOperation_;
-                }
+                return scaleOperation_ == other.scaleOperation_;
+            }
             case TransformOperationType::SKEW: {
                 return skewOperation_ == other.skewOperation_;
+            }
+            case TransformOperationType::TRANSLATE: {
+                return translateOperation_ == other.translateOperation_;
             }
             case TransformOperationType::UNDEFINED:
                 // fall through
