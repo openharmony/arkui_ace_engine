@@ -801,10 +801,6 @@ void RenderList::CalculateMainScrollExtent(double curMainPos, double mainSize)
     if (scrollable_) {
         scrollable_->MarkAvailable(GreatOrEqual(mainScrollExtent_, mainSize));
     }
-    // last item no need add space width
-    if (spaceWidth_ > 0.0) {
-        mainScrollExtent_ = std::max(0.0, mainScrollExtent_ - spaceWidth_);
-    }
 }
 
 void RenderList::ProcessDragStart(double startPosition)
