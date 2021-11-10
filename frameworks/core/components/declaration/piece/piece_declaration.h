@@ -51,7 +51,7 @@ public:
     ~PieceDeclaration() override = default;
 
     void InitializeStyle(RefPtr<PieceTheme>& theme);
-    void InitializeStyle() override {}
+    void InitializeStyle() override;
     const std::string& GetContent() const
     {
         auto& attribute = static_cast<PieceAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));

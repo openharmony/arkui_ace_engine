@@ -58,7 +58,13 @@ void FlutterRenderPiece::Paint(RenderContext& context, const Offset& offset)
     }
     SkPaint paint;
     skCanvas->save();
-    paint.setColor(pieceComponent_->GetBackGroundColor().GetValue());
+
+    auto contextColor = context_.Upgrade();
+    if (contextColor->GetIsDeclarative()) {
+        paint.setColor(pieceComponent_->GetBackGroundColor().GetValue());
+    } else {
+        paint.setColor(pieceComponent_->GetHoverColor().GetValue());
+    }
     Rect pieceRect(pieceOffset + offset - GetPosition(), pieceSize);
     skCanvas->drawRRect(MakeRRect(pieceRect.GetOffset(), pieceRect.GetSize(), pieceComponent_->GetBorder()), paint);
     skCanvas->restore();
