@@ -52,7 +52,7 @@ private:
     bool AdaptPreferTextSizeGroup(double paragraphMaxWidth);
     bool CheckMeasureFlag();
     bool DidExceedMaxLines(double paragraphMaxWidth);
-    bool IsLongestLineVersion();
+    bool IsCompatibleVersion();
     void EffectAutoMaxLines();
     // Change text direction accroding to first strong direction letter when developer set direction auto.
     void ChangeDirectionIfNeeded(const std::string& data);
