@@ -316,7 +316,7 @@ std::string AssetImageLoader::LoadJsonData(const std::string& src, const WeakPtr
         LOGE("No asset data!");
         return "";
     }
-    return (char *)assetData->GetData();
+    return std::string((char *)assetData->GetData(), assetData->GetSize());
 }
 
 sk_sp<SkData> NetworkImageLoader::LoadImageData(const std::string& uri, const WeakPtr<PipelineContext> context)
