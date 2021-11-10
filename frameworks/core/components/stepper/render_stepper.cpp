@@ -56,10 +56,15 @@ void RenderStepper::Update(const RefPtr<Component>& component)
     childrenArray_.clear();
     needReverse_ = (stepperComponent_->GetTextDirection() == TextDirection::RTL);
     totalItemCount_ = stepperComponent_->GetChildren().size();
-    int32_t index = stepperComponent_->GetIndex();
-    if (index >= 0 && index < totalItemCount_) {
-        currentIndex_ = index;
+
+    // currentIndex_ should be updated only for the first time
+    if (currentIndex_ == -1) {
+        int32_t index = stepperComponent_->GetIndex();
+        if (index >= 0 && index < totalItemCount_) {
+            currentIndex_ = index;
+        }
     }
+
     const auto& stepperController = stepperComponent_->GetStepperController();
     if (stepperController) {
         auto weak = AceType::WeakClaim(this);

@@ -131,7 +131,7 @@ protected:
     RefPtr<StepperComponent> stepperComponent_;
     std::vector<RefPtr<RenderNode>> childrenArray_;
     int32_t totalItemCount_ = 0;
-    int32_t currentIndex_ = 0;
+    int32_t currentIndex_ = -1;
     int32_t outItemIndex_ = 0;
     bool needReverse_ = false;
     bool onFocus_ = false;
