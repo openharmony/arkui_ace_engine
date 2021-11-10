@@ -68,6 +68,7 @@ public:
         return imageFit_;
     }
 
+#ifdef OHOS_STANDARD_SYSTEM
     void OnAppShow() override
     {
         LOGI("RenderTexture: Camera OnAppShow.");
@@ -85,6 +86,7 @@ public:
             hiddenChangeEvent_(true);
         }
     }
+#endif
 
     void SetIsComponentSize(bool isComponentSize)
     {
