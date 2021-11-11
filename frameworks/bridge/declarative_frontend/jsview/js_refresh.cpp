@@ -73,6 +73,9 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     auto friction = paramObject->GetProperty("friction");
     if (friction->IsNumber()) {
         refreshComponent->SetFriction(friction->ToNumber<int32_t>());
+        if (friction->ToNumber<int32_t>() <= 0) {
+            refreshComponent->IsRefresh(true);
+        }
     }
     ViewStackProcessor::GetInstance()->Push(refreshComponent);
 }

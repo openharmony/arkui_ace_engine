@@ -124,6 +124,7 @@ private:
     bool showLastTime_ = false;
     bool refreshing_ = false;
     bool isInitialized_ = false;
+    bool isRefresh_ = false;
     bool isUseOffset_ = false; // Whether use the indicator offset or default
     RefreshType refreshType_ = RefreshType::AUTO;
     Color progressColor_;

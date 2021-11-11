@@ -96,6 +96,7 @@ void RenderRefresh::Update(const RefPtr<Component>& component)
     progressColor_ = refresh->GetProgressColor();
     backgroundColor_ = refresh->GetBackgroundColor();
     frictionRatio_ = refresh->GetFriction() * PERCENT;
+    isRefresh_ = refresh->GetIsRefresh();
 
     loadingComponent_->SetProgressColor(progressColor_);
     loadingComponent_->SetDiameter(Dimension(GetLoadingDiameter()));
@@ -233,6 +234,9 @@ void RenderRefresh::UpdateTouchRect()
 
 void RenderRefresh::HandleDragUpdate(double delta)
 {
+    if (isRefresh_) {
+        return;
+    }
     LOGD("RenderRefresh HandleDragUpdate delta is %{public}lf, offset is %{public}lf", delta, scrollableOffset_.GetY());
     if (NearZero(delta)) {
         LOGD("Delta is near zero!");

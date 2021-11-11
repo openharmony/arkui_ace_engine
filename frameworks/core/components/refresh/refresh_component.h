@@ -66,6 +66,16 @@ public:
         return refreshing_;
     }
 
+    void IsRefresh(bool isRefresh)
+    {
+        isRefresh_ = isRefresh;
+    }
+
+    bool GetIsRefresh() const
+    {
+        return isRefresh_;
+    }
+
     void SetRefreshing(bool isRefreshing)
     {
         refreshing_ = isRefreshing;
@@ -256,6 +266,7 @@ private:
     bool showLastTime_ = false;
     bool refreshing_ = false;
     RefreshType refreshType_ = RefreshType::AUTO;
+    bool isRefresh_ = false;
 
     int32_t friction_ = DEFAULT_FRICTION_RATIO;
     TextStyle textStyle_;
