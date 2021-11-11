@@ -29,8 +29,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
     ImageSourceInfo source,
     const RefPtr<PipelineContext> context,
     const sk_sp<SkData>& skData,
-    bool useSkiaSvg,
-    const std::optional<Color>& color)
+    bool useSkiaSvg)
 {
     // build svg image object.
     if (source.IsSvg()) {
@@ -38,12 +37,13 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
         if (!svgStream) {
             return nullptr;
         }
+        auto color = source.GetFillColor();
         if (!useSkiaSvg) {
             auto svgDom = SvgDom::CreateSvgDom(*svgStream, context, color);
             return svgDom ? MakeRefPtr<SvgImageObject>(source, Size(), 1, svgDom) : nullptr;
         } else {
             int64_t colorValue = 0;
-            if (color) {
+            if (color.has_value()) {
                 colorValue = color.value().GetValue();
                 // skia svg relies on the 32th bit to determine whether or not to use the color we set.
                 colorValue = colorValue | (static_cast<int64_t>(0b1) << 32);

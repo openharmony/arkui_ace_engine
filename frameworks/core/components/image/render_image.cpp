@@ -47,7 +47,6 @@ void RenderImage::Update(const RefPtr<Component>& component)
     fitMaxSize_ = image->GetFitMaxSize();
     hasObjectPosition_ = image->GetHasObjectPosition();
     color_ = image->GetColor();
-    isColorSet_ = image->IsColorSet();
     previousLayoutSize_ = Size();
     SetTextDirection(image->GetTextDirection());
     matchTextDirection_ = image->IsMatchTextDirection();
@@ -79,6 +78,10 @@ void RenderImage::Update(const RefPtr<Component>& component)
         image->GetImageSourceSize().first,
         image->GetImageSourceSize().second,
         inComingSrc.empty() ? image->GetResourceId() : InternalResource::ResourceId::NO_ID);
+    auto fillColor = image->GetImageFill();
+    if (fillColor.has_value()) {
+        inComingSource.SetFillColor(fillColor.value());
+    }
     // this value is used for update frequency with same image source info.
     LOGD("sourceInfo %{public}s", sourceInfo_.ToString().c_str());
     LOGD("inComingSource %{public}s", inComingSource.ToString().c_str());
@@ -594,7 +597,7 @@ void RenderImage::ClearRenderObject()
     imageFit_ = ImageFit::COVER;
     imageRepeat_ = ImageRepeat::NOREPEAT;
     rectList_.clear();
-    color_ = Color::TRANSPARENT;
+    color_.reset();
     sourceInfo_.Reset();
     singleWidth_ = 0.0;
     displaySrcWidth_ = 0.0;

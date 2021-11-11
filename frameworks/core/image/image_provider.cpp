@@ -42,11 +42,10 @@ void ImageProvider::FetchImageObject(
     bool syncMode,
     bool useSkiaSvg,
     bool needAutoResize,
-    const std::optional<Color>& color,
     RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     OnPostBackgroundTask onBackgroundTaskPostCallback)
 {
-    auto task = [ context, imageInfo, successCallback, failedCallback, useSkiaSvg, color, renderTaskHolder,
+    auto task = [ context, imageInfo, successCallback, failedCallback, useSkiaSvg, renderTaskHolder,
         uploadSuccessCallback, needAutoResize] () mutable {
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
@@ -60,7 +59,7 @@ void ImageProvider::FetchImageObject(
         }
         RefPtr<ImageObject> imageObj = QueryImageObjectFromCache(imageInfo, pipelineContext);
         if (!imageObj) { // if image object is not in cache, generate a new one.
-            imageObj = GeneraterAceImageObject(imageInfo, pipelineContext, useSkiaSvg, color);
+            imageObj = GeneraterAceImageObject(imageInfo, pipelineContext, useSkiaSvg);
         }
         if (!imageObj) { // if it fails to generate an image object, trigger fail callback.
             taskExecutor->PostTask([failedCallback, imageInfo] { failedCallback(imageInfo); },
@@ -100,8 +99,7 @@ RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(
 RefPtr<ImageObject> ImageProvider::GeneraterAceImageObject(
     const ImageSourceInfo& imageInfo,
     const RefPtr<PipelineContext> context,
-    bool useSkiaSvg,
-    const std::optional<Color>& color)
+    bool useSkiaSvg)
 {
     auto imageData = LoadImageRawData(imageInfo, context);
 
@@ -110,7 +108,7 @@ RefPtr<ImageObject> ImageProvider::GeneraterAceImageObject(
         return nullptr;
     }
 
-    return ImageObject::BuildImageObject(imageInfo, context, imageData, useSkiaSvg, color);
+    return ImageObject::BuildImageObject(imageInfo, context, imageData, useSkiaSvg);
 }
 
 sk_sp<SkData> ImageProvider::LoadImageRawData(

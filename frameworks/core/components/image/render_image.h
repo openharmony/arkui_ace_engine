@@ -262,8 +262,7 @@ protected:
     std::list<Rect> rectList_;
 
     ImageObjectPosition imageObjectPosition_;
-    Color color_ = Color::TRANSPARENT;
-    bool isColorSet_ = false;
+    std::optional<Color> color_;
     double singleWidth_ = 0.0;
     double displaySrcWidth_ = 0.0;
     double scale_ = 1.0;

@@ -25,4 +25,9 @@ bool ImageSourceInfo::IsSVGSource(const std::string& src, InternalResource::Reso
             resourceId < InternalResource::ResourceId::SVG_END);
 }
 
+void ImageSourceInfo::SetFillColor(const Color& color)
+{
+    fillColor_.emplace(color.GetValue());
+}
+
 } // namespace OHOS::Ace

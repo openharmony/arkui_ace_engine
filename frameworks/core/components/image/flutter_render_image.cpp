@@ -338,12 +338,6 @@ void FlutterRenderImage::FetchImageObject()
     SrcType srcType = ImageLoader::ResolveURI(sourceInfo_.GetSrc());
     if (srcType != SrcType::MEMORY) {
         bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD;
-        std::optional<Color> color;
-        if (isColorSet_ && sourceInfo_.IsSvg()) {
-            color = std::make_optional(color_);
-        } else {
-            color = std::nullopt;
-        }
         ImageProvider::FetchImageObject(
             sourceInfo_,
             imageObjSuccessCallback_,
@@ -353,7 +347,6 @@ void FlutterRenderImage::FetchImageObject()
             syncMode,
             useSkiaSvg_,
             autoResize_,
-            color,
             renderTaskHolder_,
             onPostBackgroundTask_);
         return;
@@ -533,13 +526,17 @@ void FlutterRenderImage::ApplyBorderRadius(
 
 void FlutterRenderImage::ApplyColorFilter(flutter::Paint& paint)
 {
+    if (!color_.has_value()) {
+        return;
+    }
+    Color color = color_.value();
 #ifdef USE_SYSTEM_SKIA
     if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
         paint.paint()->setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(GRAY_COLOR_MATRIX));
         return;
     }
     paint.paint()->setColorFilter(SkColorFilter::MakeModeFilter(
-        SkColorSetARGB(color_.GetAlpha(), color_.GetRed(), color_.GetGreen(), color_.GetBlue()),
+        SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()),
         SkBlendMode::kPlus));
 #else
     if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
@@ -547,7 +544,7 @@ void FlutterRenderImage::ApplyColorFilter(flutter::Paint& paint)
         return;
     }
     paint.paint()->setColorFilter(SkColorFilters::Blend(
-        SkColorSetARGB(color_.GetAlpha(), color_.GetRed(), color_.GetGreen(), color_.GetBlue()),
+        SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()),
         SkBlendMode::kPlus));
 #endif
 }
@@ -847,18 +844,12 @@ void FlutterRenderImage::UpdateData(const std::string& uri, const std::vector<ui
         return;
     }
 
-    std::optional<Color> color;
-    if (isColorSet_ && sourceInfo_.IsSvg()) {
-        color = std::make_optional(color_);
-    } else {
-        color = std::nullopt;
-    }
     auto context = GetContext().Upgrade();
     if (!context) {
         return;
     }
     auto ImageObj =
-        ImageObject::BuildImageObject(sourceInfo_, context, skData, useSkiaSvg_, color);
+        ImageObject::BuildImageObject(sourceInfo_, context, skData, useSkiaSvg_);
     ImageObjReady(ImageObj);
 }
 
@@ -958,8 +949,9 @@ void FlutterRenderImage::PaintSVGImage(const sk_sp<SkData>& skData, bool onlyLay
         }
     };
     SkColorEx skColor;
-    if (isColorSet_) {
-        skColor.color = color_.GetValue();
+    auto fillColor = sourceInfo_.GetFillColor();
+    if (fillColor.has_value()) {
+        skColor.color = fillColor.value().GetValue();
         skColor.valid = 1;
     }
     ImageProvider::GetSVGImageDOMAsyncFromData(
@@ -1138,12 +1130,7 @@ bool FlutterRenderImage::RetryLoading()
         return false;
     }
     bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD;
-    std::optional<Color> color;
-    if (isColorSet_ && sourceInfo_.IsSvg()) {
-        color = std::make_optional(color_);
-    } else {
-        color = std::nullopt;
-    }
+
     ImageProvider::FetchImageObject(
         sourceInfo_,
         imageObjSuccessCallback_,
@@ -1153,7 +1140,6 @@ bool FlutterRenderImage::RetryLoading()
         syncMode,
         useSkiaSvg_,
         autoResize_,
-        color,
         renderTaskHolder_,
         onPostBackgroundTask_);
     LOGW("Retry loading time: %{public}d, triggered by GetImageSize fail, imageSrc: %{private}s", retryCnt_,

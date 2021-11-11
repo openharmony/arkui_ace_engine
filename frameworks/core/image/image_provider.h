@@ -97,7 +97,6 @@ public:
         bool syncMode,
         bool useSkiaSvg,
         bool needAutoResize,
-        const std::optional<Color>& color,
         RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
         OnPostBackgroundTask onBackgroundTaskPostCallback = nullptr);
 
@@ -126,8 +125,7 @@ public:
     static RefPtr<ImageObject> GeneraterAceImageObject(
         const ImageSourceInfo& imageInfo,
         const RefPtr<PipelineContext> context,
-        bool useSkiaSvg,
-        const std::optional<Color>& color);
+        bool useSkiaSvg);
 
     static sk_sp<SkData> LoadImageRawData(
         const ImageSourceInfo& imageInfo,

@@ -16,9 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_ACE_IMAGE_SOURCE_INFO_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_ACE_IMAGE_SOURCE_INFO_H
 
+#include <optional>
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/size.h"
 #include "base/resource/internal_resource.h"
+#include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
 
@@ -44,7 +47,8 @@ public:
         return src_ == info.src_ &&
                resourceId_ == info.resourceId_ &&
                sourceWidth_ == info.sourceWidth_ &&
-               sourceHeight_ == info.sourceHeight_;
+               sourceHeight_ == info.sourceHeight_ &&
+               fillColor_ == info.fillColor_;
     }
 
     bool operator!=(const ImageSourceInfo& info) const
@@ -52,14 +56,16 @@ public:
         return src_ != info.src_ ||
                resourceId_ != info.resourceId_ ||
                sourceWidth_ != info.sourceWidth_ ||
-               sourceHeight_ != info.sourceHeight_;
+               sourceHeight_ != info.sourceHeight_ ||
+               fillColor_ != info.fillColor_;
     }
 
-    void SetSrc(const std::string& src)
+    void SetSrc(const std::string& src, std::optional<Color> fillColor = std::nullopt)
     {
         src_ = src;
         resourceId_ = InternalResource::ResourceId::NO_ID;
         isSvg_ = IsSVGSource(src_, resourceId_);
+        fillColor_ = fillColor;
     }
 
     const std::string& GetSrc() const
@@ -72,6 +78,7 @@ public:
         resourceId_ = id;
         src_.clear();
         isSvg_ = IsSVGSource(src_, resourceId_);
+        fillColor_.reset();
     }
 
     InternalResource::ResourceId GetResourceId() const
@@ -130,6 +137,14 @@ public:
         sourceHeight_ = Dimension(-1);
         resourceId_ = InternalResource::ResourceId::NO_ID;
         isSvg_ = false;
+        fillColor_.reset();
+    }
+
+    void SetFillColor(const Color& color);
+
+    std::optional<Color> GetFillColor() const
+    {
+        return fillColor_;
     }
 
 private:
@@ -138,6 +153,9 @@ private:
     Dimension sourceHeight_ = Dimension(-1);
     InternalResource::ResourceId resourceId_ = InternalResource::ResourceId::NO_ID;
     bool isSvg_ = false;
+
+    // only Svg will set it.
+    std::optional<Color> fillColor_;
 };
 
 } // namespace OHOS::Ace

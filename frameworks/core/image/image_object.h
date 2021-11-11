@@ -31,8 +31,7 @@ public:
         ImageSourceInfo source,
         const RefPtr<PipelineContext> context,
         const sk_sp<SkData>& skData,
-        bool useSkiaSvg,
-        const std::optional<Color>& color);
+        bool useSkiaSvg);
 
     ImageObject() = default;
     ImageObject(
