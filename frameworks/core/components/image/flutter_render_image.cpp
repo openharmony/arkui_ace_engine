@@ -61,11 +61,6 @@ union SkColorEx {
     uint64_t value = 0;
 };
 
-RefPtr<RenderNode> RenderImage::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderImage>();
-}
-
 FlutterRenderImage::FlutterRenderImage()
 {
     auto currentDartState = flutter::UIDartState::Current();

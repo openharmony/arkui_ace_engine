@@ -86,4 +86,18 @@ void SpringAnimation::InitEstimateDuration()
     }
 }
 
+Rosen::RSAnimationTimingCurve SpringAnimation::GetNativeCurve()
+{
+    return Rosen::RSAnimationTimingCurve::CreateCustomCurve([weak = AceType::WeakClaim(this)](float fraction) -> float {
+        auto animation = weak.Upgrade();
+        if (animation == nullptr) {
+            LOGE("create spring curve failed, animation is null!");
+            return NORMALIZED_DURATION_MAX;
+        }
+
+        animation->UpdatePosition(fraction);
+        return animation->currentPosition_;
+    });
+}
+
 } // namespace OHOS::Ace

@@ -20,6 +20,10 @@ build_component("progress") {
     "loading_progress_component.cpp",
     "progress_component.cpp",
     "render_loading_progress.cpp",
+    "render_loading_progress_create.cpp",
     "render_progress.cpp",
+    "render_progress_create.cpp",
+    "rosen_render_loading_progress.cpp",
+    "rosen_render_progress.cpp",
   ]
 }

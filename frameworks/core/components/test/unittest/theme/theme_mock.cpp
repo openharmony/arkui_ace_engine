@@ -200,4 +200,28 @@ void PipelineContext::RemoveScheduleTask(uint32_t id)
 {
 }
 
+bool PipelineContext::Animate(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+    const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack)
+{
+    return true;
+}
+
+void PipelineContext::OpenImplicitAnimation(const AnimationOption& option,
+    const Rosen::RSAnimationTimingCurve& curve, const std::function<void()>& finishCallBack)
+{}
+
+bool PipelineContext::CloseImplicitAnimation()
+{
+    return true;
+}
+
+bool PipelineContext::GetIsDeclarative() const
+{
+    return true;
+}
+
+void PipelineContext::AddGeometryChangedNode(const RefPtr<RenderNode>& renderNode)
+{
+}
+
 } // namespace OHOS::Ace

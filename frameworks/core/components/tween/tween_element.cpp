@@ -544,6 +544,7 @@ RefPtr<Component> TweenElement::BuildChild()
         displayComponent->DisableLayer(tween->IsLeafNode());
         transform_ = transformComponent;
         display_ = displayComponent;
+        Component::MergeRSNode(displayComponent, transformComponent);
         return displayComponent;
     } else {
         LOGE("no tween component found. return empty child.");

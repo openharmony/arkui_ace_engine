@@ -55,6 +55,7 @@ RefPtr<Component> SlidingPanelComponent::Create(const RefPtr<PanelComponent>& co
     slidingPanel->SetPanelId(StringUtils::StringToInt(component->GetId()));
     auto box = AceType::MakeRefPtr<BoxComponent>();
     box->SetChild(slidingPanel);
+    Component::MergeRSNode(box, slidingPanel);
     auto decoration = AceType::MakeRefPtr<Decoration>();
     if (component->GetPanelType() == PanelType::TEMP_DISPLAY) {
         decoration->SetBackgroundColor(BLACK_BG);
@@ -127,6 +128,8 @@ void SlidingPanelComponent::BuildInnerChild(const RefPtr<BoxComponent>& boxStyle
     boxForContent->SetFrontDecoration(frontDecoration);
     boxForContent->SetChild(column);
     SetChild(boxForContent);
+
+    Component::MergeRSNode(boxForContent, column);
 }
 
 } // namespace OHOS::Ace

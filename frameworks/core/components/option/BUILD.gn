@@ -19,5 +19,7 @@ build_component("option") {
     "option_component.cpp",
     "option_element.cpp",
     "render_option.cpp",
+    "render_option_create.cpp",
+    "rosen_render_option.cpp",
   ]
 }

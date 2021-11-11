@@ -34,8 +34,11 @@
 #include "flutter/shell/platform/ohos/platform_task_runner.h"
 #endif
 
+#include "render_service_client/core/ui/rs_ui_director.h"
+
 #include "base/log/log.h"
 #include "base/thread/background_task_executor.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -127,6 +130,12 @@ void FlutterTaskExecutor::InitJsThread(bool newThread)
         jsRunner_ = uiRunner_;
     }
 
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        OHOS::Rosen::RSUIDirector::Instance().SetUITaskRunner(
+            [uiRunner = uiRunner_](const std::function<void()>& task) {
+                uiRunner->PostTask(task);
+            });
+    }
 #ifdef ACE_DEBUG
     PostTaskToTaskRunner(
         jsRunner_, [weak = AceType::WeakClaim(this)] { FillTaskTypeTable(weak, TaskType::JS); }, 0);

@@ -19,5 +19,7 @@ build_component("display") {
     "display_element.cpp",
     "flutter_render_display.cpp",
     "render_display.cpp",
+    "render_display_create.cpp",
+    "rosen_render_display.cpp",
   ]
 }

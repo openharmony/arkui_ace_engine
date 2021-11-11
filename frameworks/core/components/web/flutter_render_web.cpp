@@ -22,11 +22,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderWeb::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderWeb>();
-}
-
 void FlutterRenderWeb::PerformLayout()
 {
     RenderWeb::PerformLayout();

@@ -21,11 +21,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderGridLayout::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderGridLayout>();
-}
-
 RenderLayer FlutterRenderGridLayout::GetRenderLayer()
 {
     if (!layer_) {

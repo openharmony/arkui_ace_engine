@@ -43,6 +43,9 @@ template("js_engine_qjs") {
 
     deps = [
       "$ace_root/frameworks/core/components/theme:build_theme_code",
+
+      # rosen backend
+      "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
       "//third_party/jsframework:jsf",
     ]
 

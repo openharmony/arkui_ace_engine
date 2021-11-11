@@ -151,6 +151,7 @@ private:
         animationController_->SetTempo(animationOption_.GetTempo());
         animationController_->SetAnimationDirection(animationOption_.GetAnimationDirection());
         animationController_->SetFillMode(FillMode::FORWARDS);
+        animationController_->SetAllowRunningAsynchronously(animationOption_.GetAllowRunningAsynchronously());
         animationController_->Play();
     }
 

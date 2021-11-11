@@ -151,6 +151,7 @@ void SharedTransitionController::KickoffSharedTransition(TransitionEvent event, 
     for (const auto& controller : controllers_) {
         if (controller) {
             controller->SetFillMode(FillMode::FORWARDS);
+            controller->SetAllowRunningAsynchronously(true);
             controller->AddStopListener([effectWeak = WeakClaim(this), overlayWeak = WeakClaim(RawPtr(overlay))]() {
                 auto effect = effectWeak.Upgrade();
                 if (!effect) {

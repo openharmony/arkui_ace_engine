@@ -131,6 +131,7 @@ RefPtr<ComposedComponent> NavigationContainerComponent::BuildToolBar(
     tabBarBox->SetChild(tabBar);
     tabBarBox->SetDeliverMinToChild(false);
     tabBarBox->SetHeight(theme->GetDefaultHeight().Value(), theme->GetDefaultHeight().Unit());
+    Component::MergeRSNode(tabBarBox, tabBar);
     return AceType::MakeRefPtr<ComposedComponent>("navigation", "navigationToolBarComposed", tabBarBox);
 #else
     return nullptr;

@@ -21,11 +21,6 @@ namespace OHOS::Ace::V2 {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderGridScroll::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderGridScroll>();
-}
-
 RenderLayer FlutterRenderGridScroll::GetRenderLayer()
 {
     if (!layer_) {

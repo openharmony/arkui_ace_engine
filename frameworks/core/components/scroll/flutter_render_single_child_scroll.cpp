@@ -22,11 +22,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderSingleChildScroll::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSingleChildScroll>();
-}
-
 RenderLayer FlutterRenderSingleChildScroll::GetRenderLayer()
 {
     if (!layer_) {

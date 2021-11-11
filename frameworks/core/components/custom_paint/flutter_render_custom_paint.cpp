@@ -122,11 +122,6 @@ constexpr size_t BLEND_MODE_SIZE = ArraySize(SK_BLEND_MODE_TABLE);
 
 } // namespace
 
-RefPtr<RenderNode> RenderCustomPaint::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderCustomPaint>();
-}
-
 RenderLayer FlutterRenderCustomPaint::GetRenderLayer()
 {
     if (!layer_) {

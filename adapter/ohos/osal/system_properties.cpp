@@ -45,6 +45,11 @@ bool IsTraceEnabled()
         system::GetParameter("debug.ace.trace.enabled", "0") == "1");
 }
 
+bool IsRosenBackendEnabled()
+{
+    return system::GetParameter("debug.rosen_engine.open", "0") == "1";
+}
+
 bool IsAccessibilityEnabled()
 {
     return (system::GetParameter("persist.ace.testmode.enabled", "0") == "1" ||
@@ -78,6 +83,8 @@ int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
 ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
+bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
+bool SystemProperties::isDeclarativeFrontend_ = false;
 
 DeviceType SystemProperties::GetDeviceType()
 {

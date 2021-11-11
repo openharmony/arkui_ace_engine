@@ -107,6 +107,7 @@ RefPtr<Component> VideoElementV2::GetEventComponents(const RefPtr<Component>& vi
     }
 
     auto box = AceType::MakeRefPtr<BoxComponent>();
+    Component::MergeRSNode(box);
     auto oldBoxIter = map_.find("box");
     if (oldBoxIter != map_.end()) {
         auto oldBox = AceType::DynamicCast<BoxComponent>(oldBoxIter->second);

@@ -31,6 +31,9 @@ template("framework_bridge") {
       "common:bridge_common_$platform",
       "common/accessibility:bridge_accessibility_$platform",
       "js_frontend:js_frontend_$platform",
+
+      # rosen backend
+      "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     ]
 
     if (defined(config.js_pa_support) && config.js_pa_support) {

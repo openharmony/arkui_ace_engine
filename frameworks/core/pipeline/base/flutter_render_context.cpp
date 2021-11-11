@@ -30,11 +30,6 @@ inline bool ShouldPaint(const RefPtr<RenderNode>& node)
 
 using namespace Flutter;
 
-RefPtr<RenderContext> RenderContext::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderContext>();
-}
-
 FlutterRenderContext::~FlutterRenderContext()
 {
     StopRecordingIfNeeded();

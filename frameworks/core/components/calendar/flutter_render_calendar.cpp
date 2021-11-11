@@ -86,12 +86,6 @@ void DrawCalendarText(
 }
 
 } // namespace
-
-RefPtr<RenderNode> RenderCalendar::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderCalendar>();
-}
-
 RenderLayer FlutterRenderCalendar::GetRenderLayer()
 {
     if (!layer_) {

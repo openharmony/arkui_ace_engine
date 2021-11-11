@@ -30,12 +30,6 @@ constexpr Dimension HOVER_RADIUS = 16.0_vp;
 
 } // namespace
 
-RefPtr<RenderNode> RenderBlock::Create()
-{
-    LOGD("Slider::Create");
-    return AceType::MakeRefPtr<FlutterRenderCircleBlock>();
-}
-
 void FlutterRenderCircleBlock::Update(const RefPtr<Component>& component)
 {
     LOGD("Slider::Update");

@@ -25,12 +25,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderRoot::Create()
-{
-    LOGD("RootNode::Create");
-    return AceType::MakeRefPtr<FlutterRenderRoot>();
-}
-
 void FlutterRenderRoot::Paint(RenderContext& context, const Offset& offset)
 {
     LOGD("RootNode Paint");

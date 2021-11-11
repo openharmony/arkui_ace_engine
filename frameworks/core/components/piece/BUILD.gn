@@ -19,5 +19,7 @@ build_component("piece") {
     "piece_component.cpp",
     "piece_element.cpp",
     "render_piece.cpp",
+    "render_piece_create.cpp",
+    "rosen_render_piece.cpp",
   ]
 }

@@ -20,7 +20,17 @@ build_component("track") {
     "flutter_render_linear_track.cpp",
     "flutter_render_moon_track.cpp",
     "flutter_render_scale_ring_track.cpp",
+    "render_arc_track_create.cpp",
+    "render_circular_track_create.cpp",
+    "render_linear_track_create.cpp",
+    "render_moon_track_create.cpp",
+    "render_scale_ring_track_create.cpp",
     "render_track.cpp",
+    "rosen_render_arc_track.cpp",
+    "rosen_render_circular_track.cpp",
+    "rosen_render_linear_track.cpp",
+    "rosen_render_moon_track.cpp",
+    "rosen_render_scale_ring_track.cpp",
     "track_component.cpp",
   ]
 }

@@ -17,6 +17,8 @@ build_component("swiper") {
   sources = [
     "flutter_render_swiper.cpp",
     "render_swiper.cpp",
+    "render_swiper_create.cpp",
+    "rosen_render_swiper.cpp",
     "swiper_component.cpp",
     "swiper_element.cpp",
   ]

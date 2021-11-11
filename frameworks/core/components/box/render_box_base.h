@@ -123,7 +123,7 @@ public:
         return height_.Value();
     }
 
-    void SetWidth(double width) // add for animation
+    virtual void SetWidth(double width) // add for animation
     {
         if (GreatOrEqual(width, 0.0) && !NearEqual(width_.Value(), width)) {
             width_.SetValue(width);
@@ -131,7 +131,7 @@ public:
         }
     }
 
-    void SetHeight(double height) // add for animation
+    virtual void SetHeight(double height) // add for animation
     {
         if (GreatOrEqual(height, 0.0) && !NearEqual(height_.Value(), height)) {
             height_.SetValue(height);
@@ -139,7 +139,7 @@ public:
         }
     }
 
-    void SetWidth(const Dimension& width) // add for animation
+    virtual void SetWidth(const Dimension& width) // add for animation
     {
         if (width_ != width) {
             width_ = width;
@@ -152,7 +152,7 @@ public:
         return static_cast<Dimension>(width_);
     }
 
-    void SetHeight(const Dimension& height) // add for animation
+    virtual void SetHeight(const Dimension& height) // add for animation
     {
         if (height_ != height) {
             height_ = height;
@@ -225,7 +225,7 @@ public:
         return alignItemOffset_;
     }
 
-    void CalculateAlignDeclaration();
+    virtual void CalculateAlignDeclaration();
 
     const Alignment& GetAlign() const
     {
@@ -288,10 +288,11 @@ protected:
     void CalculateChildPosition();
     void AdjustSizeByAspectRatio();
     void PerformLayoutInLiteMode();
-    void OnAnimationCallback();
+    virtual void OnAnimationCallback();
 
     AnimatableDimension width_ { AnimatableDimension(-1.0, DimensionUnit::PX) };  // exclude margin
     AnimatableDimension height_ { AnimatableDimension(-1.0, DimensionUnit::PX) }; // exclude margin
+    AnimatableDimension aspectRatio_ = AnimatableDimension();
 
     BoxFlex flex_ = BoxFlex::FLEX_NO;
     LayoutParam constraints_ = LayoutParam(Size(), Size()); // exclude margin
@@ -335,7 +336,6 @@ private:
     double selfMinWidth_ = 0.0;                  // exclude margin
     double selfMaxHeight_ = Size::INFINITE_SIZE; // exclude margin
     double selfMinHeight_ = 0.0;                 // exclude margin
-    AnimatableDimension aspectRatio_ = AnimatableDimension();
     Dimension minWidth_ = Dimension();
     Dimension minHeight_ = Dimension();
     Dimension maxWidth_ = Dimension();

@@ -17,6 +17,8 @@ build_component("tip") {
   sources = [
     "flutter_render_tip.cpp",
     "render_tip.cpp",
+    "render_tip_create.cpp",
+    "rosen_render_tip.cpp",
     "tip_component.cpp",
     "tip_element.cpp",
   ]

@@ -162,8 +162,13 @@ void PageTransitionElement::SetTransitionDirection(TransitionEvent event, Transi
         LOGD("set background transition option type: %{public}d", optionType);
         backgroundTransition_->SwitchTransitionOption(optionType);
     }
-    if (context && context->GetIsDeclarative() && floatAnimation_) {
-        controller_->AddInterpolator(std::move(floatAnimation_));
+    if (context && context->GetIsDeclarative()) {
+        if (floatAnimation_) {
+            controller_->AddInterpolator(std::move(floatAnimation_));
+            controller_->SetAllowRunningAsynchronously(false);
+        } else {
+            controller_->SetAllowRunningAsynchronously(true);
+        }
     }
 }
 
@@ -433,6 +438,7 @@ void PageTransitionElement::BuildCombinedChild(const RefPtr<StackComponent>& com
     }
     // create transition for content
     auto box = AceType::MakeRefPtr<BoxComponent>();
+    Component::MergeRSNode(box);
     auto front = AceType::MakeRefPtr<Decoration>();
     front->SetBackgroundColor(Color::FromRGBO(0, 0, 0, 0.0));
     box->SetFrontDecoration(front);
@@ -441,6 +447,7 @@ void PageTransitionElement::BuildCombinedChild(const RefPtr<StackComponent>& com
         TransitionComponent::AllocTransitionComponentId(), "frontDecoration_transition", box);
 
     auto clip = AceType::MakeRefPtr<ClipComponent>(transition);
+    Component::MergeRSNode(clip);
     auto contentTransitionComponent = AceType::MakeRefPtr<TransitionComponent>(
         TransitionComponent::AllocTransitionComponentId(), "page_transition_content", clip);
 

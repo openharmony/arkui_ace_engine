@@ -36,12 +36,6 @@ constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 
 } // namespace
 
-RefPtr<RenderNode> RenderSlider::Create()
-{
-    LOGD("Slider::Create");
-    return AceType::MakeRefPtr<FlutterRenderSlider>();
-}
-
 void FlutterRenderSlider::Update(const RefPtr<Component>& component)
 {
     LOGD("Slider::Update");

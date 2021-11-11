@@ -33,11 +33,18 @@ template("ace_test") {
   forward_variables_from(invoker, "*")
   ohos_executable(target_name) {
     defines += invoker.defines
-    configs = [ ":ace_pc_preview_config" ]
+    configs = [
+      ":ace_pc_preview_config",
+      "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config",
+    ]
 
     sources = [ "ace_${device}_test.cpp" ]
 
-    deps = [ "$ace_root/adapter/preview/build:libace_engine_$platform(${current_toolchain})" ]
+    deps = [
+      "$ace_root/adapter/preview/build:libace_engine_$platform(${current_toolchain})",
+      "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+    ]
+
     if (platform == "windows") {
       libs = [ "pthread" ]
     }

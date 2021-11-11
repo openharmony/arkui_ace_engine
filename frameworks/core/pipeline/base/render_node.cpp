@@ -31,6 +31,7 @@
 #include "core/components/transform/render_transform.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/component.h"
+#include "render_service_client/core/transition/rs_transition.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -77,9 +78,9 @@ void RenderNode::AddChild(const RefPtr<RenderNode>& child, int32_t slot)
     child->SetDepth(GetDepth() + 1);
     OnChildAdded(child);
     disappearingNodes_.remove(child);
-    auto context = context_.Upgrade();
-    if (context && context->GetExplicitAnimationOption().IsValid()) {
-        child->NotifyTransition(TransitionType::APPEARING, child->GetNodeId());
+    child->NotifyTransition(TransitionType::APPEARING, child->GetNodeId());
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        RSNodeAddChild(child);
     }
 }
 
@@ -110,6 +111,9 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
         disappearingNodes_.emplace_back(child);
         child->SetParent(AceType::WeakClaim(this));
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
+    }
+    if (child->RSNode_) {
+        child->RSNode_->NotifyTransition(Rosen::RSTransitionEffect::FADE_OUT);
     }
     LOGD("RenderNode RemoveChild %{public}zu", children_.size());
 }
@@ -330,6 +334,11 @@ void RenderNode::ClipHole(RenderContext& context, const Offset& offset)
 void RenderNode::MarkNeedLayout(bool selfOnly, bool forceParent)
 {
     bool addSelf = false;
+    auto context = context_.Upgrade();
+    if (context != nullptr) {
+        context->ForceLayoutForImplicitAnimation();
+    }
+
     bool forceSelf = forceParent && AceType::InstanceOf<RenderRoot>(this);
     if (forceSelf) {
         // This is root and child need force parent layout.
@@ -461,6 +470,7 @@ void RenderNode::Attach(const WeakPtr<PipelineContext>& context)
         render->needUpdateTouchRect_ = true;
         render->nonStrictPaintRect_.SetWidth(render->paintW_.Value());
         render->transitionPaintRectSize_.SetWidth(render->paintW_.Value());
+        render->MarkNeedSyncGeometryProperties();
     });
 
     paintH_.SetContextAndCallback(context_, [weak = WeakClaim(this)] {
@@ -472,6 +482,7 @@ void RenderNode::Attach(const WeakPtr<PipelineContext>& context)
         render->needUpdateTouchRect_ = true;
         render->nonStrictPaintRect_.SetHeight(render->paintH_.Value());
         render->transitionPaintRectSize_.SetHeight(render->paintH_.Value());
+        render->MarkNeedSyncGeometryProperties();
     });
 }
 
@@ -490,6 +501,7 @@ void RenderNode::SetPositionInternal(const Offset& offset)
         needUpdateTouchRect_ = true;
         OnPositionChanged();
         OnGlobalPositionChanged();
+        MarkNeedSyncGeometryProperties();
     }
     if (isFirstPositionAssign_) {
         isFirstPositionAssign_ = false;
@@ -977,6 +989,12 @@ Offset RenderNode::GetGlobalOffset() const
     return renderNode ? GetPosition() + renderNode->GetGlobalOffset() : GetPosition();
 }
 
+Offset RenderNode::GetPaintOffset() const
+{
+    auto renderNode = parent_.Upgrade();
+    return (renderNode && !IsHeadRenderNode()) ? GetPosition() + renderNode->GetPaintOffset() : GetPosition();
+}
+
 Offset RenderNode::GetGlobalOffsetExternal() const
 {
     auto renderNode = parent_.Upgrade();
@@ -1047,6 +1065,12 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
     if (renderComponent) {
         motionPathOption_ = renderComponent->GetMotionPathOption();
+        if (SystemProperties::GetRosenBackendEnabled() && motionPathOption_.IsValid()) {
+            if (auto rsNode = GetRSNode()) {
+                rsNode->SetMotionPathOption(motionPathOption_.ToNativeMotionPathOption());
+            }
+        }
+
         positionParam_ = renderComponent->GetPositionParam();
         flexWeight_ = renderComponent->GetFlexWeight();
         displayIndex_ = renderComponent->GetDisplayIndex();
@@ -1061,7 +1085,7 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
     if (context != nullptr) {
         minPlatformVersion_ = context->GetMinPlatformVersion();
     }
-    zIndex_ = renderComponent->GetZIndex();
+    SetZIndex(renderComponent->GetZIndex());
     isPercentSize_ = renderComponent->GetIsPercentSize();
     UpdatePropAnimation(component->GetAnimatables());
     Update(component);
@@ -1075,7 +1099,11 @@ void RenderNode::UpdateOpacity(uint8_t opacity)
     }
     if (opacity_ != opacity) {
         opacity_ = opacity;
-        MarkNeedRender();
+        if (auto rsNode = GetRSNode()) {
+            rsNode->SetAlpha(opacity_ / 255.0);
+        } else {
+            MarkNeedRender();
+        }
     }
 }
 
@@ -1148,7 +1176,10 @@ void RenderNode::ClearRenderObject()
     interceptTouchEvent_ = false;
     mouseState_ = MouseState::NONE;
 
-    children_.clear();
+    ClearChildren();
+    RSNode_ = nullptr;
+    isHeadRenderNode_ = false;
+    isTailRenderNode_ = false;
     accessibilityText_ = "";
     layoutParam_ = LayoutParam();
     paintRect_ = Rect();
@@ -1630,6 +1661,7 @@ void RenderNode::SetLayoutSize(const Size& size)
         paintRect_.SetSize(size);
         needUpdateTouchRect_ = true;
         OnSizeChanged();
+        MarkNeedSyncGeometryProperties();
     }
     if (isFirstSizeAssign_) {
         isFirstSizeAssign_ = false;
@@ -1685,6 +1717,86 @@ void RenderNode::SetDepth(int32_t depth)
         for (const auto& item : children) {
             item->SetDepth(depth_ + 1);
         }
+    }
+}
+
+void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
+{
+    isHeadRenderNode_ = isHead;
+    isTailRenderNode_ = isTail;
+    if (isHead && !RSNode_) {
+        // create RSNode in first node of JSview
+        RSNode_ = CreateRSNode();
+    } else if (!isHead && RSNode_) {
+        // destroy unneeded RSNode
+        RSNode_ = nullptr;
+    }
+}
+
+void RenderNode::MarkNeedSyncGeometryProperties()
+{
+    if (!HasGeometryProperties()) {
+        return;
+    }
+    if (auto pipelineContext = context_.Upgrade()) {
+        pipelineContext->AddGeometryChangedNode(AceType::Claim(this));
+    }
+}
+
+void RenderNode::SyncGeometryProperties()
+{
+    if (!IsTailRenderNode()) {
+        return;
+    }
+    auto rsNode = GetRSNode();
+    if (!rsNode) {
+        return;
+    }
+    Offset paintOffset = GetPaintOffset();
+    Size paintSize = GetLayoutSize();
+    rsNode->SetFrame(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
+}
+
+void RenderNode::SetPaintRect(const Rect& rect)
+{
+    if (paintRect_ == rect) {
+        return;
+    }
+    paintRect_ = rect;
+    needUpdateTouchRect_ = true;
+
+    MarkNeedSyncGeometryProperties();
+}
+
+void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
+{
+    if (!RSNode_) {
+        LOGW("Parent render_node has no RSNode, creating now.");
+        SyncRSNodeBoundary(true, true);
+    }
+    if (IsTailRenderNode()) {
+        if (!child->GetRSNode()) {
+            LOGW("Child render_node has no RSNode, creating now.");
+            child->SyncRSNodeBoundary(true, true);
+        }
+    } else {
+        child->RSNode_ = RSNode_;
+    }
+    if (child->RSNode_) {
+        child->RSNode_->NotifyTransition(Rosen::RSTransitionEffect::FADE_IN);
+    }
+}
+
+void RenderNode::MarkParentNeedRender() const
+{
+    auto renderNode = parent_.Upgrade();
+    if (!renderNode) {
+        return;
+    }
+    if (IsHeadRenderNode()) {
+        renderNode->MarkNeedRender();
+    } else {
+        renderNode->MarkParentNeedRender();
     }
 }
 

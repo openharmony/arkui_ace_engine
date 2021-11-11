@@ -19,7 +19,11 @@ build_component("slider") {
     "flutter_render_circle_block.cpp",
     "flutter_render_slider.cpp",
     "render_block.cpp",
+    "render_block_create.cpp",
     "render_slider.cpp",
+    "render_slider_create.cpp",
+    "rosen_render_circle_block.cpp",
+    "rosen_render_slider.cpp",
     "slider_component.cpp",
   ]
 }

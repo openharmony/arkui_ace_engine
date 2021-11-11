@@ -30,13 +30,6 @@ constexpr double HEIGHT_OFFSET = 5.0;
 constexpr double INDICATOR_STROKE_WIDTH = 5.0;
 constexpr int8_t UNSELECT_ALPHA = 125;
 
-} // namespace
-
-RefPtr<RenderNode> RenderArcTrack::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderArcTrack>();
-}
-
 void DrawGauge(RenderContext& context, const RenderRingInfo& trackInfo)
 {
     auto canvas = ScopedCanvas::Create(context);
@@ -134,6 +127,7 @@ void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo,
     canvas->drawPath(path.get(), paint, paintData);
     canvas->restore();
 }
+} // namespace
 
 void FlutterRenderArcTrack::Paint(RenderContext& context, const Offset& offset)
 {

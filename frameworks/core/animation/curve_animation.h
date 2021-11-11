@@ -67,8 +67,31 @@ public:
     void SetEvaluator(const RefPtr<Evaluator<T>>& evaluator)
     {
         if (evaluator) {
+            isSupportedRunningAsync_ = false;
             evaluator_ = evaluator;
         }
+    }
+
+    virtual bool IsSupportedRunningAsynchronously() override
+    {
+        return isSupportedRunningAsync_;
+    }
+
+    virtual bool RunAsync(const WeakPtr<Scheduler>& weakScheduler, const AnimationOption& option,
+        const std::function<void()> prepareCallback = nullptr,
+        const std::function<void()> finishCallback = nullptr) override
+    {
+        if (!isSupportedRunningAsync_) {
+            LOGE("can not run animation asynchronously with nonlinear evaluator.");
+            return false;
+        }
+
+        return Interpolator::RunAsync(weakScheduler, option, prepareCallback, finishCallback);
+    }
+
+    Rosen::RSAnimationTimingCurve GetNativeCurve() override
+    {
+        return curve_ != nullptr ? curve_->ToNativeCurve() : Rosen::RSAnimationTimingCurve::DEFAULT;
     }
 
 private:
@@ -100,6 +123,7 @@ private:
     T begin_;
     T end_;
     T currentValue_;
+    bool isSupportedRunningAsync_ { true };
     RefPtr<Curve> curve_;
     RefPtr<Curve> reverseCurve_;
     RefPtr<Evaluator<T>> evaluator_ = AceType::MakeRefPtr<LinearEvaluator<T>>();

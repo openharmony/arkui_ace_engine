@@ -32,6 +32,7 @@ public:
     ~CubicCurve() override = default;
 
     float MoveInternal(float time) override;
+    Rosen::RSAnimationTimingCurve ToNativeCurve() override;
     const std::string ToString() override;
 
 private:

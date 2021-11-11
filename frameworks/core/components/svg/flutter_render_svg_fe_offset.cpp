@@ -19,11 +19,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderSvgFeOffset::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSvgFeOffset>();
-}
-
 void FlutterRenderSvgFeOffset::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const
 {
     imageFilter = SkOffsetImageFilter::Make(dx_, dy_, imageFilter);

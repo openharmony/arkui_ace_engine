@@ -58,11 +58,6 @@ sk_sp<SkShader> FlutterRenderLinearTrack::BlendSkShader(const SkPoint pts, const
     return blendShader;
 }
 
-RefPtr<RenderNode> RenderTrack::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderLinearTrack>();
-}
-
 void FlutterRenderLinearTrack::Paint(RenderContext& context, const Offset& offset)
 {
     if (GetSliderMode() == SliderMode::INSET) {

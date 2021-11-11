@@ -22,11 +22,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderPiece::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderPiece>();
-}
-
 void FlutterRenderPiece::Paint(RenderContext& context, const Offset& offset)
 {
     RenderNode::Paint(context, offset);

@@ -16,6 +16,8 @@
 #include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
+bool SystemProperties::rosenBackendEnabled_ = true;
+bool SystemProperties::isDeclarativeFrontend_ = true;
 
 float SystemProperties::GetFontWeightScale()
 {

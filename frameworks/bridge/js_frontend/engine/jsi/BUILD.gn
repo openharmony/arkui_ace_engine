@@ -48,7 +48,11 @@ template("js_engine_ark") {
       "jsi_xcomponent_bridge.cpp",
     ]
 
-    deps = [ "//third_party/jsframework:ark_build" ]
+    deps = [
+      # rosen backend
+      "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+      "//third_party/jsframework:ark_build",
+    ]
     if (target_cpu == "arm64") {
       defines += [ "APP_USE_ARM64" ]
     } else if (target_cpu == "arm") {

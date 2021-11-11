@@ -20,11 +20,6 @@
 
 namespace OHOS::Ace::V2 {
 
-RefPtr<RenderNode> RenderList::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderList>();
-}
-
 RenderLayer FlutterRenderList::GetRenderLayer()
 {
     if (!layer_) {

@@ -15,7 +15,9 @@
 
 #include "core/pipeline/base/component.h"
 
+#include "algorithm"
 #include "core/common/ace_application_info.h"
+#include "core/pipeline/base/render_component.h"
 
 namespace OHOS::Ace {
 std::atomic<int32_t> Component::key_ = 1;
@@ -36,6 +38,46 @@ void Component::SetRetakeId(int32_t retakeId)
 int32_t Component::GetRetakeId() const
 {
     return retakeId_;
+}
+
+namespace {
+bool IsRenderComponent(const RefPtr<Component>& component)
+{
+    return AceType::InstanceOf<RenderComponent>(component);
+}
+} // namespace
+
+void Component::MergeRSNode(const std::vector<RefPtr<Component>>& components, int skip)
+{
+    if (components.empty()) {
+        return;
+    }
+    // locate first & last RenderComponent
+    auto head = std::find_if(components.begin() + skip, components.end(), IsRenderComponent);
+    auto tail = std::find_if(components.rbegin(), components.rend() - skip, IsRenderComponent);
+    if (head == components.end() || tail == components.rend() - skip) {
+        return;
+    }
+    (*head)->isHeadComponent_ = true;
+    (*tail)->isTailComponent_ = true;
+}
+
+void Component::MergeRSNode(const RefPtr<Component>& head, const RefPtr<Component>& tail)
+{
+    if (!head || !tail) {
+        return;
+    }
+    head->isHeadComponent_ = true;
+    tail->isTailComponent_ = true;
+}
+
+void Component::MergeRSNode(const RefPtr<Component>& standaloneNode)
+{
+    if (!standaloneNode) {
+        return;
+    }
+    standaloneNode->isHeadComponent_ = true;
+    standaloneNode->isTailComponent_ = true;
 }
 
 } // namespace OHOS::Ace

@@ -512,6 +512,7 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     if (isItemComponent) {
         itemChildComponent = AceType::DynamicCast<SingleChild>(mainComponent)->GetChild();
         components.emplace_back(mainComponent);
+        Component::MergeRSNode(mainComponent);
     }
 
     std::string componentNames[] = { "flexItem", "display", "transform", "touch", "pan_guesture", "click_guesture",
@@ -544,15 +545,22 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
 
     if (isItemComponent) {
         if (itemChildComponent) {
+            Component::MergeRSNode(components, 1);
             components.emplace_back(itemChildComponent);
         }
     } else if (isStepperItemComponent) {
         if (stepperItemComponentV2) {
             auto scorll = stepperItemComponentV2->AdjustComponentScroll(mainComponent);
             components.emplace_back(scorll);
+            Component::MergeRSNode(components);
         }
+    } else if (!components.empty() && AceType::InstanceOf<TextureComponent>(mainComponent)) {
+        Component::MergeRSNode(components);
+        Component::MergeRSNode(mainComponent);
+        components.emplace_back(mainComponent);
     } else {
         components.emplace_back(mainComponent);
+        Component::MergeRSNode(components);
     }
 
     // First, composite all components.

@@ -24,6 +24,14 @@ build_component("common") {
     "painter/flutter_svg_painter.cpp",
     "painter/flutter_universal_painter.cpp",
 
+    # rosen painter
+    "painter/rosen_checkable_painter.cpp",
+    "painter/rosen_decoration_painter.cpp",
+    "painter/rosen_scroll_bar_painter.cpp",
+    "painter/rosen_scroll_fade_painter.cpp",
+    "painter/rosen_svg_painter.cpp",
+    "painter/rosen_universal_painter.cpp",
+
     # #properties
     "properties/alignment.cpp",
     "properties/animatable_path.cpp",

@@ -19,12 +19,13 @@
 #include <functional>
 
 #include "core/animation/schedule_task.h"
+#include "core/components/common/properties/animation_option.h"
 
 namespace OHOS::Ace {
 
 class PipelineContext;
 
-class Scheduler : public ScheduleTask {
+class ACE_EXPORT Scheduler : public ScheduleTask {
     DECLARE_ACE_TYPE(Scheduler, ScheduleTask);
 
 public:
@@ -53,6 +54,24 @@ public:
     {
         return isRunning_;
     }
+
+    WeakPtr<PipelineContext> GetContext()
+    {
+        return context_;
+    }
+
+    bool Animate(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+        const std::function<void()> propertyCallback, const std::function<void()>& finishCallBack = nullptr);
+
+    void OpenImplicitAnimation(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+        const std::function<void()>& finishCallBack = nullptr);
+
+    bool CloseImplicitAnimation();
+
+    void AddKeyFrame(
+        float fraction, const Rosen::RSAnimationTimingCurve& curve, const std::function<void()>& propertyCallback);
+
+    void AddKeyFrame(float fraction, const std::function<void()>& propertyCallback);
 
 private:
     int32_t scheduleId_ = 0;

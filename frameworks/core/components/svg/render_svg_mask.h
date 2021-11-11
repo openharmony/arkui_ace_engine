@@ -32,6 +32,7 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     bool PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimate) override;
+    virtual void PaintMaskLayer(SkCanvas* canvas, const Offset& offset, const Rect& paintRect) {};
     virtual void PaintMaskLayer(RenderContext& context, const Offset& offset, const Rect& paintRect) {};
 
     bool IsDefalutMaskUnits() const

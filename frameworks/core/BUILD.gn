@@ -203,6 +203,7 @@ template("ace_core_source_set") {
       "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
       "$ace_flutter_engine_root/skia:ace_skia_$platform",
       "pipeline:ace_core_pipeline_$platform",
+      "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     ]
 
     deps += [

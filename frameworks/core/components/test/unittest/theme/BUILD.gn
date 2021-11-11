@@ -81,6 +81,7 @@ ohos_unittest("ThemeManagerTest") {
   deps = [
     "$ace_root/adapter/ohos/osal:ace_osal_ohos",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
@@ -183,6 +184,7 @@ ohos_unittest("ThemeConstantsTest") {
   deps = [
     "$ace_root/build/third_party/cJSON:third_party_cjson",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]

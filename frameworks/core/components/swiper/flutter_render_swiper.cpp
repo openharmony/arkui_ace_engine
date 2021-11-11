@@ -36,10 +36,6 @@ constexpr int32_t INDICATOR_FOCUS_PADDING_START_SIZE = 2;
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderSwiper::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSwiper>();
-}
 
 RenderLayer FlutterRenderSwiper::GetRenderLayer()
 {

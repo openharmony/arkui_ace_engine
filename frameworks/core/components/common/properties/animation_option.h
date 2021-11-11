@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PROPERTIES_ANIMATION_OPTION_H
 
 #include <string>
+#include <unordered_map>
 
 #include "core/animation/animation_pub.h"
 #include "core/animation/curve.h"
@@ -96,6 +97,16 @@ public:
         return curve_;
     }
 
+    void SetFillMode(const FillMode& fillMode)
+    {
+        fillMode_ = fillMode;
+    }
+
+    FillMode GetFillMode() const
+    {
+        return fillMode_;
+    }
+
     void SetOnFinishEvent(const EventMarker& onFinishEvent)
     {
         onFinishEvent_ = onFinishEvent;
@@ -108,7 +119,17 @@ public:
 
     bool IsValid() const
     {
-        return (GetDuration() > 0);
+        return (GetDuration() > 0 || GetAllowRunningAsynchronously());
+    }
+
+    void SetAllowRunningAsynchronously(bool runAsync)
+    {
+        allowRunningAsynchronously_ = runAsync;
+    }
+
+    bool GetAllowRunningAsynchronously() const
+    {
+        return allowRunningAsynchronously_;
     }
 
 private:
@@ -116,6 +137,8 @@ private:
     int32_t delay_ = 0;
     int32_t iteration_ = 1;
     float tempo_ = 1.0f;
+    FillMode fillMode_ = FillMode::FORWARDS;
+    bool allowRunningAsynchronously_ = false;
 
     RefPtr<Curve> curve_;
     EventMarker onFinishEvent_;

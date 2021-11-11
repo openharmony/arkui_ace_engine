@@ -17,6 +17,7 @@ import("//foundation/ace/ace_engine/ace_config.gni")
 # Common config for Ability Cross-platform Environment(ACE) source
 config("ace_config") {
   visibility = [ ":*" ]
+  configs = [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",
@@ -66,6 +67,7 @@ config("ace_config") {
 
 config("ace_test_config") {
   visibility = [ ":*" ]
+  configs = [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",

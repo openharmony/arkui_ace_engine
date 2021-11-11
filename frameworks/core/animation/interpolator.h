@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_INTERPOLATOR_H
 
 #include "core/animation/animation_pub.h"
+#include "core/animation/scheduler.h"
 #include "core/animation/time_event.h"
+#include "core/components/common/properties/animation_option.h"
 
 namespace OHOS::Ace {
 
@@ -52,7 +54,48 @@ public:
 
     virtual void OnInitNotify(float normalizedTime, bool reverse) = 0;
 
+    virtual bool IsSupportedRunningAsynchronously()
+    {
+        return true;
+    }
+
+    virtual bool RunAsync(const WeakPtr<Scheduler>& weakScheduler, const AnimationOption& option,
+        const std::function<void()> prepareCallback = nullptr, const std::function<void()> finishCallback = nullptr)
+    {
+        auto scheduler = weakScheduler.Upgrade();
+        if (scheduler == nullptr) {
+            LOGE("run async failed, scheduler is null.");
+            return false;
+        }
+
+        if (prepareCallback != nullptr) {
+            prepareCallback();
+        }
+        OnNormalizedTimestampChanged(NORMALIZED_DURATION_MIN, false);
+        return scheduler->Animate(
+            option, GetNativeCurve(),
+            [weak = AceType::WeakClaim(this), callback = prepareCallback]() -> void {
+                auto animation = weak.Upgrade();
+                if (animation == nullptr) {
+                    LOGE("propetry change failed, animation is null.");
+                    return;
+                }
+
+                if (callback != nullptr) {
+                    callback();
+                }
+
+                animation->OnNormalizedTimestampChanged(NORMALIZED_DURATION_MAX, false);
+            },
+            finishCallback);
+    }
+
 protected:
+    virtual Rosen::RSAnimationTimingCurve GetNativeCurve()
+    {
+        return Rosen::RSAnimationTimingCurve::DEFAULT;
+    }
+
     // so far, do not support play multi interpolate animations in sequence. so always set it to 1.0
     // but do not change it to const, picture animation's duration may be not equals 1.0
     // and this variable will change to modifiable when support play animations in sequence.

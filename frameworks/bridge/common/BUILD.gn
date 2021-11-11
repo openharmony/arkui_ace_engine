@@ -20,7 +20,10 @@ template("bridge_common") {
   ohos_source_set(target_name) {
     defines += invoker.defines
 
-    configs = [ "$ace_root:ace_config" ]
+    configs = [
+      "$ace_root:ace_config",
+      "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config"
+    ]
 
     sources = [
       # dom

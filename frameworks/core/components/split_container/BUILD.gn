@@ -19,8 +19,12 @@ build_component("split_container") {
     "flutter_render_column_split.cpp",
     "flutter_render_row_split.cpp",
     "render_column_split.cpp",
+    "render_column_split_create.cpp",
     "render_row_split.cpp",
+    "render_row_split_create.cpp",
     "render_split_container.cpp",
+    "rosen_render_column_split.cpp",
+    "rosen_render_row_split.cpp",
     "row_split_component.cpp",
     "split_container_element.cpp",
   ]

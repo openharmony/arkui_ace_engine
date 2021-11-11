@@ -71,6 +71,13 @@ struct SwiperIndicatorData {
     RefPtr<RenderText> textRenderNext;
 };
 
+struct IndicatorOffsetInfo {
+    double focusStart; // start of focus
+    double focusEnd;   // end of focus
+    Offset center; // circle center of point
+    Offset animationMove; // move offset of animation
+};
+
 enum class SpringStatus {
     SPRING_STOP = 0,
     SPRING_START,

@@ -18,10 +18,13 @@
 
 #include <list>
 
+#include "render_service_client/core/ui/rs_node.h"
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "base/utils/system_properties.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/animation/animatable_properties.h"
 #include "core/animation/keyframe_animation.h"
@@ -33,10 +36,10 @@
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/event/touch_event.h"
+#include "core/gestures/drag_recognizer.h"
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline/base/render_layer.h"
 #include "core/pipeline/pipeline_context.h"
-#include "core/gestures/drag_recognizer.h"
 
 namespace OHOS::Ace {
 
@@ -50,6 +53,7 @@ constexpr int32_t PRESS_DURATION = 100;
 constexpr int32_t HOVER_DURATION = 250;
 
 using HoverAndPressCallback = std::function<void(const Color&)>;
+using Rosen::RSNode;
 
 // RenderNode is the base class for different render backend, represent a render unit for render pipeline.
 class ACE_EXPORT RenderNode : public PropertyAnimatable, public AnimatableProperties, public virtual AceType {
@@ -270,11 +274,7 @@ public:
 
     Offset GetTransitionGlobalOffset() const;
 
-    void SetPaintRect(const Rect& rect)
-    {
-        paintRect_ = rect;
-        needUpdateTouchRect_ = true;
-    }
+    void SetPaintRect(const Rect& rect);
 
     void SetTouchRect(const Rect& rect)
     {
@@ -310,7 +310,7 @@ public:
 
     virtual void Dump();
 
-    enum class BridgeType { NONE, AGP, FLUTTER };
+    enum class BridgeType { NONE, ROSEN, FLUTTER };
 
     virtual BridgeType GetBridgeType() const
     {
@@ -438,15 +438,18 @@ public:
         return nullptr;
     }
 
-    void SetVisible(bool visible)
+    void SetVisible(bool visible, bool inRecursion = false)
     {
         if (visible_ != visible) {
             visible_ = visible;
             AddDirtyRenderBoundaryNode();
             OnVisibleChanged();
+            if (!inRecursion && SystemProperties::GetRosenBackendEnabled()) {
+                MarkParentNeedRender();
+            }
         }
         for (auto& child : children_) {
-            child->SetVisible(visible);
+            child->SetVisible(visible, true);
         }
     }
 
@@ -455,15 +458,18 @@ public:
         return visible_;
     }
 
-    virtual void SetHidden(bool hidden)
+    virtual void SetHidden(bool hidden, bool inRecursion = false)
     {
         if (hidden_ != hidden) {
             hidden_ = hidden;
             AddDirtyRenderBoundaryNode();
             OnHiddenChanged(hidden);
+            if (!inRecursion && SystemProperties::GetRosenBackendEnabled()) {
+                MarkParentNeedRender();
+            }
         }
         for (auto& child : children_) {
-            child->SetHidden(hidden);
+            child->SetHidden(hidden, true);
         }
     }
 
@@ -473,6 +479,9 @@ public:
             hidden_ = hidden;
             AddDirtyRenderBoundaryNode();
             OnHiddenChanged(hidden);
+            if (SystemProperties::GetRosenBackendEnabled()) {
+                MarkParentNeedRender();
+            }
         }
     }
 
@@ -488,7 +497,7 @@ public:
 
     virtual bool IsRepaintBoundary() const
     {
-        return false;
+        return IsHeadRenderNode();
     }
 
     virtual const std::list<RefPtr<RenderNode>>& GetChildren() const
@@ -901,6 +910,12 @@ public:
         return hasSubWindow_;
     }
 
+    // mark JSview boundary, create/destroy RSNode if need
+    void SyncRSNodeBoundary(bool isHead, bool isTail);
+    const RSNode::SharedPtr& GetRSNode() const { return RSNode_; }
+    // sync geometry properties to ROSEN backend
+    virtual void SyncGeometryProperties();
+
 protected:
     explicit RenderNode(bool takeBoundary = false);
     virtual void ClearRenderObject();
@@ -930,6 +945,10 @@ protected:
 
     virtual void OnGlobalPositionChanged()
     {
+        MarkNeedSyncGeometryProperties();
+        if (IsTailRenderNode()) {
+            return;
+        }
         for (const auto& child : children_) {
             if (child) {
                 child->OnGlobalPositionChanged();
@@ -998,6 +1017,17 @@ protected:
     AnimationOption nonStrictOption_; // clear after transition done
     MotionPathOption motionPathOption_;
 
+    virtual RSNode::SharedPtr CreateRSNode() const { return RSNode::Create(); }
+    // JSview boundary, all nodes in [head, tail] share the same RSNode
+    bool IsHeadRenderNode() const { return isHeadRenderNode_; }
+    bool IsTailRenderNode() const { return isTailRenderNode_; }
+    Offset GetPaintOffset() const;
+    virtual bool HasGeometryProperties() const
+    {
+        return IsTailRenderNode();
+    }
+    void MarkNeedSyncGeometryProperties();
+
 private:
     void AddDirtyRenderBoundaryNode()
     {
@@ -1056,6 +1086,14 @@ private:
     int32_t zIndex_ = 0;
     bool isPercentSize_ = false;
     uint32_t updateType_ = 0;
+
+    RSNode::SharedPtr RSNode_ = nullptr;
+    bool isHeadRenderNode_ = false;
+    bool isTailRenderNode_ = false;
+    // Sync view hierarchy to RSNode
+    void RSNodeAddChild(const RefPtr<RenderNode>& child);
+    void MarkParentNeedRender() const;
+
     ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
     bool isPaintGeometryTransition_ = false;
 };

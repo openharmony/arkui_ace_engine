@@ -159,6 +159,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         auto padding = AceType::MakeRefPtr<PaddingComponent>();
         padding->SetPadding(buttonTheme ? buttonTheme->GetPadding() : Edge());
         padding->SetChild(textComponent);
+        Component::MergeRSNode(padding, textComponent);
         buttonChildren.emplace_back(padding);
     }
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);

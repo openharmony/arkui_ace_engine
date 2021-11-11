@@ -36,6 +36,7 @@ constexpr double DIAMETER_TO_THICKNESS_RATIO = 0.12;
 
 } // namespace
 
+namespace {
 void PaintTrackBackground(
     const ScopedCanvas& canvas, const Offset& center, double thickness, const Color& color, double diameter)
 {
@@ -359,6 +360,7 @@ void PaintRainbowFilterMask(ScopedCanvas& canvas, double factor, const std::vect
 
     canvas->canvas()->restore();
 }
+} // namespace
 
 void FlutterRenderProgressDataPanel::Paint(RenderContext& context, const Offset& offset)
 {
@@ -483,16 +485,6 @@ void FlutterRenderProgressDataPanel::PaintRingProgress(RenderContext& context, c
         PaintFilterMask(canvas, arcData);
     }
     PaintProgress(canvas, arcData, false, useEffect_, percent_);
-}
-
-RefPtr<RenderNode> RenderProgressDataPanel::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderProgressDataPanel>();
-}
-
-RefPtr<RenderNode> RenderPercentageDataPanel::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderPercentageDataPanel>();
 }
 
 void FlutterRenderPercentageDataPanel::Paint(RenderContext& context, const Offset& offset)

@@ -59,11 +59,6 @@ constexpr double BLUR_SIGMA_FACTOR = 0.33;
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderFocusAnimation::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderFocusAnimation>();
-}
-
 void FlutterRenderFocusAnimation::Paint(RenderContext& context, const Offset& offset)
 {
     if (!isDisplay_ || NearZero(rrect_.Width()) || NearZero(rrect_.Height())) {

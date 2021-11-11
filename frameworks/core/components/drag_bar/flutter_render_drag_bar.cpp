@@ -32,11 +32,6 @@ constexpr Dimension PAINT_HEIGHT = 16.0_vp;
 
 } // namespace
 
-RefPtr<RenderNode> RenderDragBar::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderDragBar>();
-}
-
 void FlutterRenderDragBar::Paint(RenderContext& context, const Offset& offset)
 {
     if (GetLayoutSize().IsEmpty()) {

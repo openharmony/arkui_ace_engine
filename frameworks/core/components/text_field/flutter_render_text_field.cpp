@@ -47,11 +47,6 @@ const char ELLIPSIS[] = "...";
 
 } // namespace
 
-RefPtr<RenderNode> RenderTextField::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderTextField>();
-}
-
 // The outer rect has a decoration, return the inner rect excluded the decoration.
 Rect FlutterRenderTextField::GetInnerRect(const Decoration& decoration, const Rect& outer, double dipScale) const
 {

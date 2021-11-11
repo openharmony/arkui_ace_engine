@@ -42,6 +42,11 @@ float CubicCurve::MoveInternal(float time)
     }
 }
 
+Rosen::RSAnimationTimingCurve CubicCurve::ToNativeCurve()
+{
+    return Rosen::RSAnimationTimingCurve::CreateCubicCurve(x0_, y0_, x1_, y1_);
+}
+
 const std::string CubicCurve::ToString()
 {
     std::string curveString("cubic-bezier");

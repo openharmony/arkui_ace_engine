@@ -161,6 +161,27 @@ RefPtr<PageElement> PipelineContext::GetLastPage() const
     return nullptr;
 }
 
+bool PipelineContext::Animate(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+    const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack)
+{
+    return true;
+}
+
+void PipelineContext::OpenImplicitAnimation(const AnimationOption& option,
+    const Rosen::RSAnimationTimingCurve& curve, const std::function<void()>& finishCallBack)
+{}
+
+bool PipelineContext::CloseImplicitAnimation()
+{
+    return true;
+}
+
+void PipelineContext::AddGeometryChangedNode(const RefPtr<RenderNode>& renderNode)
+{
+}
+
+void PipelineContext::ForceLayoutForImplicitAnimation() {}
+
 class FocusTest : public testing::Test {
 public:
     static void SetUpTestCase();

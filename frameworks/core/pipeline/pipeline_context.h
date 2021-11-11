@@ -174,6 +174,8 @@ public:
 
     void AddPredictLayoutNode(const RefPtr<RenderNode>& renderNode);
 
+    void AddGeometryChangedNode(const RefPtr<RenderNode>& renderNode);
+
     void AddPreFlushListener(const RefPtr<FlushEvent>& listener);
 
     void AddPostAnimationFlushListener(const RefPtr<FlushEvent>& listener);
@@ -689,6 +691,21 @@ public:
 
     void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params);
 
+    void ForceLayoutForImplicitAnimation();
+
+    bool Animate(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+        const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr);
+
+    void OpenImplicitAnimation(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+        const std::function<void()>& finishCallBack = nullptr);
+
+    bool CloseImplicitAnimation();
+
+    void AddKeyFrame(float fraction, const Rosen::RSAnimationTimingCurve& curve,
+        const std::function<void()>& propertyCallback);
+
+    void AddKeyFrame(float fraction, const std::function<void()>& propertyCallback);
+
     void SaveExplicitAnimationOption(const AnimationOption& option);
 
     void ClearExplicitAnimationOption();
@@ -907,10 +924,17 @@ public:
         return isHoleValid_;
     }
 
+    bool IsRebuildFinished() const
+    {
+        return isRebuildFinished_;
+    }
+
 private:
     void FlushPipelineWithoutAnimation();
     void FlushLayout();
+    void FlushGeometryProperties();
     void FlushRender();
+    void FlushMessages();
     void FlushRenderFinish();
     void FireVisibleChangeEvent();
     void FlushPredictLayout(int64_t targetTimestamp);
@@ -970,6 +994,7 @@ private:
     std::set<RefPtr<RenderNode>, NodeCompare<RefPtr<RenderNode>>> dirtyLayoutNodes_;
     std::set<RefPtr<RenderNode>, NodeCompare<RefPtr<RenderNode>>> predictLayoutNodes_;
     std::set<RefPtr<RenderNode>, NodeCompare<RefPtr<RenderNode>>> needPaintFinishNodes_;
+    std::set<RefPtr<RenderNode>, NodeCompare<RefPtr<RenderNode>>> geometryChangedNodes_;
     std::set<RefPtr<RenderNode>> nodesToNotifyOnPreDraw_;
     std::set<RefPtr<RenderNode>> nodesNeedDrawOnPixelMap_;
     std::list<RefPtr<FlushEvent>> postFlushListeners_;
@@ -996,6 +1021,7 @@ private:
     DragEventHandler dragEventHandler_;
     InitDragEventListener initDragEventListener_;
     GetViewScaleCallback getViewScaleCallback_;
+    std::stack<bool> pendingImplicitLayout_;
 
     Rect transparentHole_;
     // use for traversing cliping hole
@@ -1103,6 +1129,7 @@ private:
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
+    bool isRebuildFinished_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

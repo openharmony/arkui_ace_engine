@@ -13,14 +13,22 @@
  * limitations under the License.
  */
 
-#include "core/components/dialog/flutter_render_dialog.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_USE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_USE_H
+
+#include "frameworks/core/components/svg/render_svg_use.h"
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderDialog::Create()
-{
-    LOGD("Create");
-    return AceType::MakeRefPtr<FlutterRenderDialog>();
-}
+class RosenRenderSvgUse : public RenderSvgUse {
+    DECLARE_ACE_TYPE(RosenRenderSvgUse, RenderSvgUse);
+
+public:
+    void Paint(RenderContext& context, const Offset& offset) override;
+
+private:
+};
 
 } // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_H

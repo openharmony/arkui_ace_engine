@@ -19,12 +19,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderDisplay::Create()
-{
-    LOGD("Create");
-    return AceType::MakeRefPtr<FlutterRenderDisplay>();
-}
-
 RenderLayer FlutterRenderDisplay::GetRenderLayer()
 {
     LOGD("GetRenderLayer");

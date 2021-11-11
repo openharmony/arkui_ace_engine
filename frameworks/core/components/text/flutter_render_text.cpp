@@ -52,11 +52,6 @@ double FlutterRenderText::GetBaselineDistance(TextBaseline textBaseline)
     return paragraph_->GetAlphabeticBaseline() + std::max(NormalizeToPx(textStyle_.GetBaselineOffset()), 0.0);
 }
 
-RefPtr<RenderNode> RenderText::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderText>();
-}
-
 void FlutterRenderText::Paint(RenderContext& context, const Offset& offset)
 {
     if (!NeedPaint()) {

@@ -160,6 +160,9 @@ bool SharedTransitionElement::AboardShuttle(Offset& ticket)
     if (parent && parent->GetBackDecoration() != nullptr) {
         passengerComponent_->SetBackDecoration(parent->GetBackDecoration());
     }
+    if (parent && parent->GetFrontDecoration() != nullptr) {
+        passengerComponent_->SetFrontDecoration(parent->GetFrontDecoration());
+    }
 
     passengerElement_ = AceType::DynamicCast<BoxElement>(GetContentElement());
     if (!passengerElement_) {
@@ -208,6 +211,7 @@ void SharedTransitionElement::GetOffShuttle()
     passengerComponent_->SetWidth(passengerWidth_.Value(), passengerWidth_.Unit());
     passengerComponent_->SetHeight(passengerHeight_.Value(), passengerHeight_.Unit());
     passengerComponent_->SetBackDecoration(nullptr);
+    passengerComponent_->SetFrontDecoration(nullptr);
     passengerElement_->SetRenderNode(passengerRender_);
     passengerElement_->SetNewComponent(passengerComponent_);
     passengerElement_->Mount(GetFirstChild());

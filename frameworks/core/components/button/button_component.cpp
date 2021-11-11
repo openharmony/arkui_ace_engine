@@ -62,6 +62,7 @@ RefPtr<ButtonComponent> ButtonBuilder::Build(const RefPtr<ThemeManager>& themeMa
     auto textComponent = AceType::MakeRefPtr<TextComponent>(text);
     auto padding = AceType::MakeRefPtr<PaddingComponent>();
     padding->SetChild(textComponent);
+    Component::MergeRSNode(padding, textComponent);
     std::list<RefPtr<Component>> buttonChildren;
     buttonChildren.emplace_back(padding);
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);

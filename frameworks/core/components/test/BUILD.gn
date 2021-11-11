@@ -20,6 +20,7 @@ ohos_source_set("json") {
   if (is_wearable_product) {
     defines += ace_wearable_defines
   }
+  configs = [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
   include_dirs = [
     ".",
     "//foundation/ace/ace_engine",

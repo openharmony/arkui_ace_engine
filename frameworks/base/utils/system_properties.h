@@ -150,6 +150,16 @@ public:
         return paramDeviceType_;
     }
 
+    static void SetDeclarativeFrontend(bool value)
+    {
+        isDeclarativeFrontend_ = value;
+    }
+
+    static bool GetRosenBackendEnabled()
+    {
+        return rosenBackendEnabled_ && isDeclarativeFrontend_;
+    }
+
     static bool GetTraceEnabled()
     {
         return traceEnabled_;
@@ -225,6 +235,8 @@ private:
     static ColorMode colorMode_;
     static ScreenShape screenShape_;
     static LongScreenType LongScreen_;
+    static bool rosenBackendEnabled_;
+    static bool isDeclarativeFrontend_;
 };
 
 } // namespace OHOS::Ace

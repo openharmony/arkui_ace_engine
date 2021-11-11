@@ -16,15 +16,27 @@
 #include "core/components/page_transition/page_transition_component.h"
 
 #include "core/components/stack/flutter_render_stack.h"
+#include "core/components/stack/rosen_render_stack.h"
 
 namespace OHOS::Ace {
 
 RefPtr<RenderNode> PageTransitionComponent::CreateRenderNode()
 {
-    auto renderNode = AceType::DynamicCast<FlutterRenderStack>(StackComponent::CreateRenderNode());
-    if (renderNode) {
-        renderNode->SetBoundary();
+    auto renderNode = StackComponent::CreateRenderNode();
+
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        auto rosenRenderNode = AceType::DynamicCast<RosenRenderStack>(renderNode);
+        if (rosenRenderNode) {
+            rosenRenderNode->SyncRSNodeBoundary(true, true);
+            rosenRenderNode->SetBoundary();
+        }
+    } else {
+        auto flutterRenderNode = AceType::DynamicCast<FlutterRenderStack>(renderNode);
+        if (flutterRenderNode) {
+            flutterRenderNode->SetBoundary();
+        }
     }
+
     return renderNode;
 }
 

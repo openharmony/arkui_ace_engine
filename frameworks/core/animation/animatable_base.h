@@ -41,6 +41,7 @@ public:
         endValue_ = endValue;
         if (!animationOption_.IsValid()) {
             MoveTo(endValue);
+            return;
         }
         ResetController();
         if (!animationController_) {
@@ -138,6 +139,7 @@ protected:
         animationController_->SetTempo(animationOption_.GetTempo());
         animationController_->SetAnimationDirection(animationOption_.GetAnimationDirection());
         animationController_->SetFillMode(FillMode::FORWARDS);
+        animationController_->SetAllowRunningAsynchronously(animationOption_.GetAllowRunningAsynchronously());
         animationController_->Play();
     }
 

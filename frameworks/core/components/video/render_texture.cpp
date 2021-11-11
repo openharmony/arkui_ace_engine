@@ -36,9 +36,9 @@ void RenderTexture::Update(const RefPtr<Component>& component)
     MarkNeedLayout();
 }
 
-void RenderTexture::SetHidden(bool hidden)
+void RenderTexture::SetHidden(bool hidden, bool inRecursion)
 {
-    RenderNode::SetHidden(hidden);
+    RenderNode::SetHidden(hidden, inRecursion);
     if (hiddenChangeEvent_) {
         hiddenChangeEvent_(hidden);
     }

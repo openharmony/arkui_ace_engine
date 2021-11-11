@@ -16,7 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PROPERTIES_MOTION_PATH_OPTION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PROPERTIES_MOTION_PATH_OPTION_H
 
+#include <memory>
 #include <string>
+
+#include "render_service_client/core/animation/rs_motion_path_option.h"
 
 namespace OHOS::Ace {
 
@@ -69,6 +72,16 @@ public:
     bool IsValid() const
     {
         return !path_.empty();
+    }
+
+    std::shared_ptr<Rosen::RSMotionPathOption> ToNativeMotionPathOption()
+    {
+        auto motionOption = std::make_shared<Rosen::RSMotionPathOption>(GetPath());
+        motionOption->SetBeginFraction(GetBegin());
+        motionOption->SetEndFraction(GetEnd());
+        motionOption->SetRotationMode(
+            GetRotate() ? Rosen::RotationMode::ROTATE_AUTO : Rosen::RotationMode::ROTATE_NONE);
+        return motionOption;
     }
 
 private:

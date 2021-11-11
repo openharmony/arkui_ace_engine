@@ -90,6 +90,9 @@ public:
     // Whether the animation should be played in reverse in turn.
     void SetAnimationDirection(AnimationDirection direction);
 
+    // Whether or not the animator is allowed to run asynchronously off of the UI thread.
+    void SetAllowRunningAsynchronously(bool runAsync);
+
     // Update the played time, will not trigger OnFrame callback.
     void UpdatePlayedTime(int32_t playedTime, bool checkReverse = false);
     int64_t GetPlayedTime() const;
@@ -139,6 +142,16 @@ private:
 
     void StartInner(bool alwaysNotify);
 
+    AnimationOption GetAnimationOption();
+
+    bool IsSupportedRunningAsynchronously();
+
+    bool StartAsync();
+
+    bool StartInnerAsync();
+
+    void StopInnerAsync();
+
     // Calculate played loops and remaining in playedTime
     int32_t GetPlayedLoopsAndRemaining(int32_t& playedTime);
 
@@ -169,10 +182,12 @@ private:
     int32_t repeatTimesLeft_ = 0; // repeat times for controller to play
     int32_t scaledDuration_ = 0;
     int32_t scaledStartDelay_ = 0;
+    int asyncRunningAnimationCount_ = 0;
     bool isReverse_ = false;
     bool isResume_ = false;
     bool isCurDirection_ = false;
     bool toggleDirectionPending_ = false;
+    bool allowRunningAsynchronously_ = false;
     Status status_ = Status::IDLE;
     int32_t controllerId_ = 0;
     static float scale_;

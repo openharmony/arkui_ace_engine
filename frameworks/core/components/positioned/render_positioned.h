@@ -87,7 +87,7 @@ public:
 
     void SetBottom(const Dimension& bottom) override; // add for animation
 
-private:
+protected:
     Dimension bottom_;
     Dimension top_;
     Dimension left_;

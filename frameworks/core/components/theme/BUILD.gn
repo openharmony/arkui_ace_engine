@@ -35,7 +35,10 @@ template("ace_core_components_theme_set") {
   ohos_source_set(target_name) {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
-    deps = [ ":build_theme_code" ]
+    deps = [
+      ":build_theme_code",
+      "$ace_flutter_engine_root/skia:ace_skia_$platform",
+    ]
 
     sources = [
       "$root_out_dir/ace/framework/core/components/theme/theme_constants_default.cpp",
@@ -66,6 +69,7 @@ foreach(item, ace_platforms) {
     }
     if (defined(config.defines)) {
       defines = config.defines
+      platform = item.name
     }
   }
 }

@@ -17,6 +17,8 @@
 
 #include <utility>
 
+#include "render_service_client/core/ui/rs_ui_director.h"
+
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -24,6 +26,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/system_properties.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/shared_transition_controller.h"
 #include "core/common/ace_application_info.h"
@@ -166,6 +169,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     FlushPostAnimation();
     FlushLayout();
     FlushRender();
+    FlushMessages();
     FlushRenderFinish();
     FlushWindowBlur();
     FlushFocus();
@@ -174,12 +178,21 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     ClearDeactivateElements();
 }
 
+void PipelineContext::FlushMessages()
+{
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        OHOS::Rosen::RSUIDirector::Instance().SendMessages();
+    }
+}
+
 void PipelineContext::FlushBuild()
 {
     ACE_FUNCTION_TRACE();
     CHECK_RUN_ON(UI);
 
+    isRebuildFinished_ = false;
     if (dirtyElements_.empty()) {
+        isRebuildFinished_ = true;
         return;
     }
     if (isFirstLoaded_) {
@@ -198,6 +211,7 @@ void PipelineContext::FlushBuild()
             }
         }
     }
+    isRebuildFinished_ = true;
     if (!buildAfterCallback_.empty()) {
         for (const auto& item : buildAfterCallback_) {
             item();
@@ -384,6 +398,7 @@ void PipelineContext::FlushLayout()
     ACE_FUNCTION_TRACE();
 
     if (dirtyLayoutNodes_.empty()) {
+        FlushGeometryProperties();
         return;
     }
     if (isFirstLoaded_) {
@@ -405,6 +420,19 @@ void PipelineContext::FlushLayout()
     alignDeclarationNodeList_.clear();
 
     CreateGeometryTransition();
+    FlushGeometryProperties();
+}
+
+void PipelineContext::FlushGeometryProperties()
+{
+    if (geometryChangedNodes_.empty()) {
+        return;
+    }
+
+    decltype(dirtyLayoutNodes_) geometryChangedNodes(std::move(geometryChangedNodes_));
+    for (const auto& dirtyNode : geometryChangedNodes) {
+        dirtyNode->SyncGeometryProperties();
+    }
 }
 
 void PipelineContext::CorrectPosition()
@@ -653,6 +681,9 @@ RefPtr<Element> PipelineContext::SetupRootElement()
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        OHOS::Rosen::RSUIDirector::Instance().SetRoot(rootRenderNode->GetRSNode()->GetId());
+    }
     sharedTransitionController_->RegisterTransitionListener();
     cardTransitionController_->RegisterTransitionListener();
     if (windowModal_ == WindowModal::DIALOG_MODAL) {
@@ -1018,6 +1049,7 @@ void PipelineContext::ExitAnimation()
 bool PipelineContext::CallRouterBackToPopPage()
 {
     LOGD("CallRouterBackToPopPage");
+    CHECK_RUN_ON(PLATFORM);
     auto frontend = weakFrontend_.Upgrade();
     if (!frontend) {
         // return back to desktop
@@ -1153,6 +1185,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<RenderNode>& renderNode)
     LOGD("schedule layout for %{public}s", AceType::TypeName(AceType::RawPtr(renderNode)));
     renderNode->SaveExplicitAnimationOption(explicitAnimationOption_);
     dirtyLayoutNodes_.emplace(renderNode);
+    ForceLayoutForImplicitAnimation();
     hasIdleTasks_ = true;
     window_->RequestFrame();
 }
@@ -1166,8 +1199,14 @@ void PipelineContext::AddPredictLayoutNode(const RefPtr<RenderNode>& renderNode)
     }
     LOGD("schedule predict layout for %{public}s", AceType::TypeName(renderNode));
     predictLayoutNodes_.emplace(renderNode);
+    ForceLayoutForImplicitAnimation();
     hasIdleTasks_ = true;
     window_->RequestFrame();
+}
+
+void PipelineContext::AddGeometryChangedNode(const RefPtr<RenderNode>& renderNode)
+{
+    geometryChangedNodes_.emplace(renderNode);
 }
 
 void PipelineContext::AddPreFlushListener(const RefPtr<FlushEvent>& listener)
@@ -1431,6 +1470,9 @@ void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
         frameCount_++;
     }
 #endif
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        OHOS::Rosen::RSUIDirector::Instance().SetTimeStamp(nanoTimestamp);
+    }
 
     if (isSurfaceReady_) {
         FlushAnimation(GetTimeFromExternalTimer());
@@ -1794,6 +1836,7 @@ void PipelineContext::NotifyPopupDismiss() const
 
 void PipelineContext::NotifyRouterBackDismiss() const
 {
+    CHECK_RUN_ON(UI);
     if (routerBackEventHandler_) {
         routerBackEventHandler_();
     }
@@ -1911,6 +1954,7 @@ void PipelineContext::Destroy()
     dirtyRenderNodesInOverlay_.clear();
     dirtyLayoutNodes_.clear();
     predictLayoutNodes_.clear();
+    geometryChangedNodes_.clear();
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
     postFlushListeners_.clear();
@@ -2593,6 +2637,123 @@ void PipelineContext::NavigatePage(uint8_t type, const PageTarget& target, const
         return;
     }
     frontend->NavigatePage(type, target, params);
+}
+
+void PipelineContext::ForceLayoutForImplicitAnimation()
+{
+    if (!pendingImplicitLayout_.empty()) {
+        pendingImplicitLayout_.top() = true;
+    }
+}
+
+bool PipelineContext::Animate(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+    const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack)
+{
+    if (!propertyCallback) {
+        LOGE("failed to create animation, property callback is null!");
+        return false;
+    }
+
+    OpenImplicitAnimation(option, curve, finishCallBack);
+    propertyCallback();
+    return CloseImplicitAnimation();
+}
+
+void PipelineContext::OpenImplicitAnimation(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+    const std::function<void()>& finishCallBack)
+{
+    if (!SystemProperties::GetRosenBackendEnabled()) {
+        LOGE("rosen backend is disabled!");
+        return;
+    }
+
+    // initialize false for implicit animation layout pending flag
+    pendingImplicitLayout_.push(false);
+    FlushLayout();
+
+    Rosen::RSAnimationTimingProtocol timingProtocol;
+    timingProtocol.SetDuration(option.GetDuration());
+    timingProtocol.SetStartDelay(option.GetDelay());
+    timingProtocol.SetSpeed(option.GetTempo());
+    timingProtocol.SetRepeatCount(option.GetIteration());
+    timingProtocol.SetDirection(option.GetAnimationDirection() == AnimationDirection::NORMAL ||
+                                option.GetAnimationDirection() == AnimationDirection::ALTERNATE);
+    timingProtocol.SetAutoReverse(option.GetAnimationDirection() == AnimationDirection::ALTERNATE ||
+                                  option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
+    Rosen::RSNode::OpenImplicitAnimation(timingProtocol, curve, finishCallBack);
+}
+
+bool PipelineContext::CloseImplicitAnimation()
+{
+    if (!SystemProperties::GetRosenBackendEnabled()) {
+        LOGE("rosen backend is disabled!");
+        return false;
+    }
+
+    if (pendingImplicitLayout_.empty()) {
+        LOGE("close implicit animation failed, need to open implicit animation first!");
+        return false;
+    }
+
+    // layout the views immediately to animate all related views, if layout updates are pending in the animation closure
+    if (pendingImplicitLayout_.top()) {
+        FlushLayout();
+    }
+    pendingImplicitLayout_.pop();
+
+    auto animations = Rosen::RSNode::CloseImplicitAnimation();
+    return !animations.empty();
+}
+
+void PipelineContext::AddKeyFrame(
+    float fraction, const Rosen::RSAnimationTimingCurve& curve, const std::function<void()>& propertyCallback)
+{
+    if (propertyCallback == nullptr) {
+        LOGE("failed to add key frame, property callback is null!");
+        return;
+    }
+
+    pendingImplicitLayout_.push(false);
+    auto propertyChangeCallback = [weak = AceType::WeakClaim(this), callback = propertyCallback]() {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("failed to add key frame, context is null!");
+            return;
+        }
+
+        callback();
+        if (context->pendingImplicitLayout_.top()) {
+            context->FlushLayout();
+        }
+    };
+    pendingImplicitLayout_.pop();
+
+    Rosen::RSNode::AddKeyFrame(fraction, curve, propertyChangeCallback);
+}
+
+void PipelineContext::AddKeyFrame(float fraction, const std::function<void()>& propertyCallback)
+{
+    if (propertyCallback == nullptr) {
+        LOGE("failed to add key frame, property callback is null!");
+        return;
+    }
+
+    pendingImplicitLayout_.push(false);
+    auto propertyChangeCallback = [weak = AceType::WeakClaim(this), callback = propertyCallback]() {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("failed to add key frame, context is null!");
+            return;
+        }
+
+        callback();
+        if (context->pendingImplicitLayout_.top()) {
+            context->FlushLayout();
+        }
+    };
+    pendingImplicitLayout_.pop();
+
+    Rosen::RSNode::AddKeyFrame(fraction, propertyChangeCallback);
 }
 
 void PipelineContext::SaveExplicitAnimationOption(const AnimationOption& option)

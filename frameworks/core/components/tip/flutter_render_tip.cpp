@@ -34,11 +34,6 @@ constexpr Dimension BEZIER_VERTICAL_OFFSET_THIRD = 8.0_vp;
 
 } // namespace
 
-RefPtr<RenderNode> RenderTip::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderTip>();
-}
-
 void FlutterRenderTip::Paint(RenderContext& context, const Offset& offset)
 {
     PaintTip(context, offset);

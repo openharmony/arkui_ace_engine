@@ -135,7 +135,9 @@ protected:
     virtual void OnMouseHoverExitTest() override;
     virtual bool MouseHoverTest(const Point& parentLocalPoint) override;
     virtual void PaintFocus(
-        const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context) = 0;
+        const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context) {}
+    virtual void PaintFocus(
+        const Offset& offset, double rrectRadius, const Size& boardSize, SkCanvas* canvas) {}
     static void ConstrainScore(double& score, double lowerBoundary, double upperBoundary);
 
     void SetRatingEvent(OperationEvent operationEvent)

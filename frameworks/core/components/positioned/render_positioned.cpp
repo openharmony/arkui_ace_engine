@@ -19,11 +19,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderPositioned::Create()
-{
-    return AceType::MakeRefPtr<RenderPositioned>();
-}
-
 void RenderPositioned::Update(const RefPtr<Component>& component)
 {
     const auto positioned = AceType::DynamicCast<PositionedComponent>(component);

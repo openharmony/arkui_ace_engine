@@ -17,6 +17,8 @@ build_component("select_popup") {
   sources = [
     "flutter_render_select_popup.cpp",
     "render_select_popup.cpp",
+    "render_select_popup_create.cpp",
+    "rosen_render_select_popup.cpp",
     "select_popup_component.cpp",
     "select_popup_element.cpp",
   ]

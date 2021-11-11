@@ -21,6 +21,8 @@ build_component("calendar") {
     "flutter_render_calendar.cpp",
     "focusable_grid.cpp",
     "render_calendar.cpp",
+    "render_calendar_create.cpp",
+    "rosen_render_calendar.cpp",
   ]
 
   component_deps = [

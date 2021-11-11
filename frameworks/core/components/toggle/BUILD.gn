@@ -17,6 +17,8 @@ build_component("toggle") {
   sources = [
     "flutter_render_toggle.cpp",
     "render_toggle.cpp",
+    "render_toggle_create.cpp",
+    "rosen_render_toggle.cpp",
     "toggle_component.cpp",
     "toggle_element.cpp",
   ]

@@ -23,11 +23,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderSvgEllipse::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSvgEllipse>();
-}
-
 RenderLayer FlutterRenderSvgEllipse::GetRenderLayer()
 {
     if (!transformLayer_) {

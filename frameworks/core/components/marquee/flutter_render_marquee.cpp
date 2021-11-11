@@ -23,11 +23,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderMarquee::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderMarquee>();
-}
-
 RenderLayer FlutterRenderMarquee::GetRenderLayer()
 {
     if (!layer_) {

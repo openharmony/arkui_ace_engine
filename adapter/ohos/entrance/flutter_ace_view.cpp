@@ -17,6 +17,8 @@
 
 #include <fstream>
 
+#include "render_service_client/core/ui/rs_ui_director.h"
+
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -172,7 +174,10 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::Window* window)
         LOGE("FlutterAceView::SurfaceCreated, window is nullptr");
         return;
     }
-
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        OHOS::Rosen::RSUIDirector::Instance().SetPlatformSurface(window->GetSurface());
+        OHOS::Rosen::RSUIDirector::Instance().Init();
+    }
     if (view == nullptr) {
         LOGE("FlutterAceView::SurfaceCreated, view is nullptr");
         return;
@@ -180,10 +185,11 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::Window* window)
 
     auto platformView = view->GetShellHolder()->GetPlatformView();
     LOGI("FlutterAceView::SurfaceCreated, GetPlatformView");
-    if (platformView) {
+    if (platformView && !SystemProperties::GetRosenBackendEnabled()) {
         LOGI("FlutterAceView::SurfaceCreated, call NotifyCreated");
         platformView->NotifyCreated(window);
     }
+
     LOGI("<<< FlutterAceView::SurfaceCreated, end");
 }
 
@@ -200,6 +206,9 @@ void FlutterAceView::SurfaceChanged(FlutterAceView* view, int32_t width, int32_t
     if (platformView) {
         LOGI("FlutterAceView::SurfaceChanged, call NotifyChanged");
         platformView->NotifyChanged(SkISize::Make(width, height));
+    }
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        OHOS::Rosen::RSUIDirector::Instance().SetSurfaceSize(width, height);
     }
     LOGI("<<< FlutterAceView::SurfaceChanged, end");
 }

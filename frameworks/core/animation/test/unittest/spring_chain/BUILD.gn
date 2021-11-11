@@ -148,6 +148,7 @@ ohos_unittest("SpringChainTest") {
     "$ace_root/frameworks/core/components/dialog_modal/render_dialog_modal.cpp",
     "$ace_root/frameworks/core/components/drag_bar/render_drag_bar.cpp",
     "$ace_root/frameworks/core/components/positioned/render_positioned.cpp",
+    "$ace_root/frameworks/core/components/positioned/render_positioned_create.cpp",
     "$ace_root/frameworks/core/components/proxy/render_proxy.cpp",
     "$ace_root/frameworks/core/components/refresh/render_refresh.cpp",
     "$ace_root/frameworks/core/components/root/render_root.cpp",
@@ -212,6 +213,7 @@ ohos_unittest("SpringChainTest") {
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "$ace_root/build/third_party/cJSON:third_party_cjson",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]

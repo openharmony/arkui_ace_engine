@@ -36,7 +36,7 @@ public:
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
-    void SetHidden(bool hidden) override;
+    void SetHidden(bool hidden, bool inRecursion) override;
 
     bool IsRepaintBoundary() const override
     {

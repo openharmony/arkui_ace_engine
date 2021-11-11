@@ -17,6 +17,8 @@ build_component("search") {
   sources = [
     "flutter_render_search.cpp",
     "render_search.cpp",
+    "render_search_create.cpp",
+    "rosen_render_search.cpp",
     "search_component.cpp",
     "search_element.cpp",
   ]

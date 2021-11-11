@@ -50,11 +50,6 @@ constexpr int32_t DOUBLE_WIDTH = 2;
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderBox::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderBox>();
-}
-
 FlutterRenderBox::FlutterRenderBox()
 {
     auto currentDartState = flutter::UIDartState::Current();

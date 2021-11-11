@@ -173,6 +173,12 @@ public:
 
     virtual void OnWrap() {}
 
+    bool IsHeadComponent() const { return isHeadComponent_; }
+    bool IsTailComponent() const { return isTailComponent_; }
+    static void MergeRSNode(const std::vector<RefPtr<Component>>& components, int skip = 0);
+    static void MergeRSNode(const RefPtr<Component>& head, const RefPtr<Component>& tail);
+    static void MergeRSNode(const RefPtr<Component>& standaloneNode);
+
     const std::string& GetInspectorId()
     {
         return inspectorId_;
@@ -220,6 +226,8 @@ private:
     // for PC Preview to record the component  the line number in dts file
     std::string debugLine_;
 #endif
+    bool isHeadComponent_ = false;
+    bool isTailComponent_ = false;
 };
 
 } // namespace OHOS::Ace
