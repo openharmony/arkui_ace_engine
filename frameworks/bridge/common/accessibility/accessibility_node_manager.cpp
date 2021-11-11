@@ -513,6 +513,23 @@ void AccessibilityNodeManager::SetCardViewPosition(int id, float offsetX, float 
         "setcardview id=%{public}d offsetX=%{public}f, offsetY=%{public}f", id, cardOffset_.GetX(), cardOffset_.GetY());
 }
 
+void AccessibilityNodeManager::UpdateEventTarget(NodeId id, BaseEventInfo& info)
+{
+    auto composedElement = GetComposedElementFromPage(id);
+    auto inspector = AceType::DynamicCast<V2::InspectorComposedElement>(composedElement.Upgrade());
+    if (!inspector) {
+        LOGE("this is not Inspector composed element");
+        return;
+    }
+    auto rectInLocal = inspector->GetRenderRectInLocal();
+    auto rectInGlobal = inspector->GetRenderRect();
+    auto& target = info.GetTargetWichModify();
+    target.area.SetOffset(DimensionOffset(rectInLocal.GetOffset()));
+    target.area.SetGlobaleOffset(DimensionOffset(rectInGlobal.GetOffset()));
+    target.area.SetWidth(Dimension(rectInLocal.Width()));
+    target.area.SetHeight(Dimension(rectInLocal.Height()));
+}
+
 bool AccessibilityNodeManager::IsDeclarative()
 {
     auto context = context_.Upgrade();

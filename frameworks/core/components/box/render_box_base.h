@@ -149,7 +149,7 @@ public:
 
     Dimension GetWidthDimension() const
     {
-        return static_cast<Dimension>(width_);
+        return width_;
     }
 
     virtual void SetHeight(const Dimension& height) // add for animation
@@ -162,7 +162,7 @@ public:
 
     Dimension GetHeightDimension() const
     {
-        return static_cast<Dimension>(height_);
+        return height_;
     }
 
     EdgePx GetMargin() const

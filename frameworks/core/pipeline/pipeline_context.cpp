@@ -2929,4 +2929,22 @@ bool PipelineContext::IsVisibleChangeNodeExists(NodeId index) const
     return accessibilityManager->IsVisibleChangeNodeExists(index);
 }
 
+void PipelineContext::PostAsyncEvent(TaskExecutor::Task&& task)
+{
+    if (taskExecutor_) {
+        taskExecutor_->PostTask(std::move(task), TaskExecutor::TaskType::UI);
+    } else {
+        LOGE("the task executor is nullptr");
+    }
+}
+
+void PipelineContext::PostAsyncEvent(const TaskExecutor::Task& task)
+{
+    if (taskExecutor_) {
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+    } else {
+        LOGE("the task executor is nullptr");
+    }
+}
+
 } // namespace OHOS::Ace

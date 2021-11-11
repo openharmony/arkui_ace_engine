@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/system_properties.h"
+#include "core/accessibility/accessibility_node.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/button/button_component.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
@@ -29,6 +30,7 @@
 #include "core/components/text_span/text_span_component.h"
 #include "core/components/video/video_component_v2.h"
 #include "core/components_v2/list/list_item_component.h"
+#include "core/pipeline/base/component.h"
 #include "core/pipeline/base/multi_composed_component.h"
 #include "core/pipeline/base/sole_child_component.h"
 
@@ -136,13 +138,17 @@ RefPtr<BoxComponent> ViewStackProcessor::GetBoxComponent()
     return boxComponent;
 }
 
-RefPtr<Component> ViewStackProcessor::GetMainComponent()
+RefPtr<Component> ViewStackProcessor::GetMainComponent() const
 {
     if (componentsStack_.empty()) {
         return nullptr;
     }
     auto& wrappingComponentsMap = componentsStack_.top();
-    return wrappingComponentsMap["main"];
+    auto main = wrappingComponentsMap.find("main");
+    if (main == wrappingComponentsMap.end()) {
+        return nullptr;
+    }
+    return main->second;
 }
 
 bool ViewStackProcessor::HasDisplayComponent() const
@@ -339,14 +345,22 @@ void ViewStackProcessor::CreateAccessibilityNode(
         return;
     }
     component->SetInspectorId(GenerateId());
-    int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
-    std::string tag = inspectorTag.empty() ? AceType::TypeName(component) : inspectorTag;
-    int32_t parentId =
-        componentsStack_.empty() ? stackRootId_ : StringUtils::StringToInt(GetMainComponent()->GetInspectorId());
-    auto node = OHOS::Ace::V2::InspectorComposedComponent::CreateAccessibilityNode(tag, inspectorId, parentId, -1);
-    if (!node) {
-        LOGD("Create AccessibilityNode:%{public}s Failed", tag.c_str());
-        return;
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    bool needCreate = true;
+#else
+    bool needCreate = false;
+#endif
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || SystemProperties::GetAccessibilityEnabled() ||
+        needCreate) {
+        int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
+        std::string tag = inspectorTag.empty() ? AceType::TypeName(component) : inspectorTag;
+        int32_t parentId =
+            componentsStack_.empty() ? stackRootId_ : StringUtils::StringToInt(GetMainComponent()->GetInspectorId());
+        auto node = OHOS::Ace::V2::InspectorComposedComponent::CreateAccessibilityNode(tag, inspectorId, parentId, -1);
+        if (!node) {
+            LOGD("Create AccessibilityNode:%{public}s Failed", tag.c_str());
+        }
     }
 }
 
@@ -356,13 +370,7 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
     if (componentsStack_.size() > 1 && ShouldPopImmediately()) {
         Pop();
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     CreateAccessibilityNode(component, isCustomView, inspectorTag);
-#else
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || SystemProperties::GetAccessibilityEnabled()) {
-        CreateAccessibilityNode(component, isCustomView, inspectorTag);
-    }
-#endif
     wrappingComponentsMap.emplace("main", component);
     componentsStack_.push(wrappingComponentsMap);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
@@ -737,6 +745,15 @@ void ViewStackProcessor::SetIsPercentSize(RefPtr<Component>& component)
     if (renderComponent) {
         renderComponent->SetIsPercentSize(isPercentSize);
     }
+}
+
+NodeId ViewStackProcessor::GetCurrentInspectorNodeId() const
+{
+    auto&& componet =  GetMainComponent();
+    if (!componet) {
+        return -1;
+    }
+    return StringUtils::StringToInt(componet->GetInspectorId());
 }
 
 ScopedViewStackProcessor::ScopedViewStackProcessor()

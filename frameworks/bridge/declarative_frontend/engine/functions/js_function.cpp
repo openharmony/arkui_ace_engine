@@ -78,4 +78,23 @@ JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
     return result;
 }
 
+JSRef<JSObject> CreateEventTargetObject(const BaseEventInfo& info)
+{
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    JSRef<JSObject> target = objectTemplate->NewInstance();
+    JSRef<JSObject> area = objectTemplate->NewInstance();
+    JSRef<JSObject> offset = objectTemplate->NewInstance();
+    JSRef<JSObject> globalOffset = objectTemplate->NewInstance();
+    offset->SetProperty<double>("dx", info.GetTarget().area.GetOffset().GetX().ConvertToVp());
+    offset->SetProperty<double>("dy", info.GetTarget().area.GetOffset().GetY().ConvertToVp());
+    globalOffset->SetProperty<double>("dx", info.GetTarget().area.GetGlobalOffset().GetX().ConvertToVp());
+    globalOffset->SetProperty<double>("dy", info.GetTarget().area.GetGlobalOffset().GetY().ConvertToVp());
+    area->SetPropertyObject("pos", offset);
+    area->SetPropertyObject("globalPos", globalOffset);
+    area->SetProperty<double>("width", info.GetTarget().area.GetWidth().ConvertToVp());
+    area->SetProperty<double>("height", info.GetTarget().area.GetHeight().ConvertToVp());
+    target->SetPropertyObject("area", area);
+    return target;
+}
+
 } // namespace OHOS::Ace::Framework

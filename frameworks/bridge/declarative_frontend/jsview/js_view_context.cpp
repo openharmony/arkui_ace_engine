@@ -15,6 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 
+#include <functional>
+
 #include "base/utils/system_properties.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -95,13 +97,13 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
-    EventMarker onFinishEvent;
+    std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
-        onFinishEvent = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute();
-        });
+        };
     }
 
     auto animationArgs = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -136,13 +138,13 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
-    EventMarker onFinishEvent;
+    std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
-        onFinishEvent = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute();
-        });
+        };
     }
 
     auto animationArgs = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -167,11 +169,10 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     AnimationOption option = CreateAnimation(animationArgs);
     if (SystemProperties::GetRosenBackendEnabled()) {
         LOGD("RSAnimationInfo: Begin JSAnimateTo");
-        auto finishCallBack = AceAsyncEvent<void()>::Create(onFinishEvent, pipelineContext);
         pipelineContext->FlushBuild();
         auto curve =
             option.GetCurve() != nullptr ? option.GetCurve()->ToNativeCurve() : Rosen::RSAnimationTimingCurve::DEFAULT;
-        pipelineContext->OpenImplicitAnimation(option, curve, finishCallBack);
+        pipelineContext->OpenImplicitAnimation(option, curve, onFinishEvent);
         // Execute the function.
         JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
         jsAnimateToFunc->Call(info[1]);

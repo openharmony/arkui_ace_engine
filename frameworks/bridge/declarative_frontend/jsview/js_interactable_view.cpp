@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
+#include "base/log/log_wrapper.h"
+#include "core/common/container.h"
 #include "core/components/gesture_listener/gesture_listener_component.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/pipeline/base/single_child.h"
@@ -32,10 +34,12 @@ void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
 {
     LOGD("JSInteractableView JsOnTouch");
     if (args[0]->IsFunction()) {
+        auto nodeId = ViewStackProcessor::GetInstance()->GetCurrentInspectorNodeId();
         RefPtr<JsTouchFunction> jsOnTouchFunc = AceType::MakeRefPtr<JsTouchFunction>(JSRef<JSFunc>::Cast(args[0]));
         auto onTouchId = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = std::move(jsOnTouchFunc)](BaseEventInfo* info) {
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnTouchFunc), nodeId](BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                UpdateEventTarget(nodeId, *info);
                 auto touchInfo = TypeInfoHelper::DynamicCast<TouchEventInfo>(info);
                 func->Execute(*touchInfo);
             },
@@ -113,23 +117,28 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
 
 EventMarker JSInteractableView::GetClickEventMarker(const JSCallbackInfo& info)
 {
+    auto nodeId = ViewStackProcessor::GetInstance()->GetCurrentInspectorNodeId();
     RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onClickId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)]
+    auto onClickId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), nodeId]
         (const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-        func->Execute(*clickInfo);
+        auto newInfo = *clickInfo;
+        UpdateEventTarget(nodeId, newInfo);
+        func->Execute(newInfo);
     });
     return onClickId;
 }
 
 RefPtr<Gesture> JSInteractableView::GetTapGesture(const JSCallbackInfo& info)
 {
+    auto nodeId = ViewStackProcessor::GetInstance()->GetCurrentInspectorNodeId();
     RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
     RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    tapGesture->SetOnActionId([execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)]
-        (const GestureEvent& info) {
+    tapGesture->SetOnActionId([execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), nodeId]
+        (GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        UpdateEventTarget(nodeId, info);
         func->Execute(info);
     });
     return tapGesture;
@@ -194,6 +203,26 @@ void JSInteractableView::JsOnAccessibility(const JSCallbackInfo& info)
         std::vector<std::string> keys = { "eventType" };
         accessibilityNode->SetFocusChangeEventMarker(GetEventMarker(info, keys));
     }
+}
+
+void JSInteractableView::UpdateEventTarget(NodeId id, BaseEventInfo& info)
+{
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("fail to get container");
+        return;
+    }
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        LOGE("fail to get context");
+        return;
+    }
+    auto accessibilityManager = context->GetAccessibilityManager();
+    if (!accessibilityManager) {
+        LOGE("fail to get accessibility manager");
+        return;
+    }
+    accessibilityManager->UpdateEventTarget(id, info);
 }
 
 EventMarker JSInteractableView::GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys)

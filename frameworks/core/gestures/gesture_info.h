@@ -19,16 +19,17 @@
 #include <functional>
 #include <list>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
-#include "base/image/pixel_map.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/point.h"
+#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/event_callback.h"
 #include "base/utils/macros.h"
 #include "base/utils/type_definition.h"
-#include "base/utils/event_callback.h"
+#include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
 
@@ -274,9 +275,9 @@ struct FingerInfo {
     Offset localLocation_;
 };
 
-class GestureEvent {
+class GestureEvent : public BaseEventInfo {
 public:
-    GestureEvent() {}
+    GestureEvent() : BaseEventInfo("gesture") {}
     ~GestureEvent() = default;
 
     void SetRepeat(bool repeat)
@@ -327,17 +328,6 @@ public:
     double GetAngle() const
     {
         return angle_;
-    }
-
-    GestureEvent& SetTimeStamp(const TimeStamp& timeStamp)
-    {
-        timeStamp_ = timeStamp;
-        return *this;
-    }
-
-    const TimeStamp& GetTimeStamp() const
-    {
-        return timeStamp_;
     }
 
     GestureEvent& SetGlobalPoint(const Point& globalPoint)
@@ -398,7 +388,6 @@ private:
     double offsetY_ = 0.0;
     double scale_ = 1.0;
     double angle_ = 0.0;
-    TimeStamp timeStamp_;
     Point globalPoint_;
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;
@@ -409,7 +398,7 @@ private:
     std::list<FingerInfo> fingerList_;
 };
 
-using GestureEventFunc = std::function<void(const GestureEvent& info)>;
+using GestureEventFunc = std::function<void(GestureEvent& info)>;
 using GestureEventNoParameter = std::function<void()>;
 
 class ACE_EXPORT Gesture : public virtual AceType {
@@ -420,19 +409,19 @@ public:
     explicit Gesture(int32_t fingers) : fingers_(fingers) {};
     ~Gesture() override = default;
 
-    void SetOnActionId(const GestureEventFunc&& onActionId)
+    void SetOnActionId(const GestureEventFunc& onActionId)
     {
         onActionId_ = std::make_unique<GestureEventFunc>(onActionId);
     }
-    void SetOnActionStartId(const GestureEventFunc&& onActionStartId)
+    void SetOnActionStartId(const GestureEventFunc& onActionStartId)
     {
         onActionStartId_ = std::make_unique<GestureEventFunc>(onActionStartId);
     }
-    void SetOnActionUpdateId(const GestureEventFunc&& onActionUpdateId)
+    void SetOnActionUpdateId(const GestureEventFunc& onActionUpdateId)
     {
         onActionUpdateId_ = std::make_unique<GestureEventFunc>(onActionUpdateId);
     }
-    void SetOnActionEndId(const GestureEventFunc&& onActionEndId)
+    void SetOnActionEndId(const GestureEventFunc& onActionEndId)
     {
         onActionEndId_ = std::make_unique<GestureEventFunc>(onActionEndId);
     }

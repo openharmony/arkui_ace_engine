@@ -140,6 +140,15 @@ public:
         return Rect();
     }
 
+    Rect GetRenderRectInLocal() const
+    {
+        auto renderNode = GetRenderNode();
+        if (renderNode) {
+            return renderNode->GetPaintRect();
+        }
+        return Rect();
+    }
+
     const std::list<RefPtr<Element>>& GetChildren() const;
 
     const WeakPtr<PipelineContext>& GetContext() const

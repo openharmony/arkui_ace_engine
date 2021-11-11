@@ -220,8 +220,10 @@ bool PipelineContext::GetIsDeclarative() const
     return true;
 }
 
-void PipelineContext::AddGeometryChangedNode(const RefPtr<RenderNode>& renderNode)
-{
-}
+void PipelineContext::AddGeometryChangedNode(const RefPtr<RenderNode>& renderNode) {}
+
+void PipelineContext::PostAsyncEvent(const std::function<void()>&) {}
+
+void PipelineContext::PostAsyncEvent(std::function<void()>&&) {}
 
 } // namespace OHOS::Ace

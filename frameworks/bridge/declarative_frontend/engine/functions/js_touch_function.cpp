@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_touch_function.h"
 
 #include "base/log/log.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
 namespace OHOS::Ace::Framework {
@@ -43,6 +44,9 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     JSRef<JSArray> changeTouchArr = JSRef<JSArray>::New();
 
     eventObj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+    auto target = CreateEventTargetObject(info);
+    eventObj->SetPropertyObject("target", target);
+
     const std::list<TouchLocationInfo>& touchList = info.GetTouches();
     uint32_t idx = 0;
     for (const TouchLocationInfo& location : touchList) {

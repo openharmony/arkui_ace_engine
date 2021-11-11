@@ -56,6 +56,8 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     }
     gestureInfoObj->SetPropertyObject("fingerList", fingerArr);
 
+    auto target = CreateEventTargetObject(info);
+    gestureInfoObj->SetPropertyObject("target", target);
     return gestureInfoObj;
 }
 

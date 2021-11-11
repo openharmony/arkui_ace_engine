@@ -46,6 +46,8 @@ void JsClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
     obj->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+    auto target = CreateEventTargetObject(info);
+    obj->SetPropertyObject("target", target);
 
     LOGD("globalOffset.GetX() = %lf, globalOffset.GetY() = %lf, localOffset.GetX() = %lf, localOffset.GetY() = %lf",
         globalOffset.GetX(), globalOffset.GetY(), localOffset.GetX(), localOffset.GetY());
@@ -64,6 +66,8 @@ void JsClickFunction::Execute(const GestureEvent& info)
     obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
     obj->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+    auto target = CreateEventTargetObject(info);
+    obj->SetPropertyObject("target", target);
 
     LOGD("globalOffset.GetX() = %lf, globalOffset.GetY() = %lf, localOffset.GetX() = %lf, localOffset.GetY() = %lf",
         globalOffset.GetX(), globalOffset.GetY(), localOffset.GetX(), localOffset.GetY());

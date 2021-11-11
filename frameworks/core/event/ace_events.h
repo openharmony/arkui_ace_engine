@@ -21,12 +21,14 @@
 
 #include "base/memory/type_info_base.h"
 #include "base/utils/type_definition.h"
+#include "base/geometry/dimension_rect.h"
 
 namespace OHOS::Ace {
 
 struct EventTarget final {
     std::string id;
     std::string type;
+    DimensionRect area;
 };
 
 class BaseEventInfo : public virtual TypeInfoBase {
@@ -55,21 +57,17 @@ public:
     {
         return target_;
     }
+    EventTarget& GetTargetWichModify()
+    {
+        return target_;
+    }
+
     BaseEventInfo& SetTarget(const EventTarget& target)
     {
         target_ = target;
         return *this;
     }
 
-    const EventTarget& GetCurrentTarget() const
-    {
-        return currentTarget_;
-    }
-    BaseEventInfo& SetCurrentTarget(const EventTarget& currentTarget)
-    {
-        currentTarget_ = currentTarget;
-        return *this;
-    }
     int64_t GetDeviceId() const
     {
         return deviceId_;
@@ -87,13 +85,12 @@ public:
         stopPropagation_ = stopPropagation;
     }
 
-private:
+protected:
     // Event type like onTouchDown, onClick and so on.
     std::string type_;
     // The origin event time stamp.
     TimeStamp timeStamp_;
     EventTarget target_;
-    EventTarget currentTarget_;
     int64_t deviceId_ = 0;
     bool stopPropagation_ = false;
 };

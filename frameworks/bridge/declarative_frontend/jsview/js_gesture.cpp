@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/components/gesture_listener/gesture_component.h"
 #include "frameworks/core/gestures/gesture_group.h"
@@ -287,20 +288,24 @@ void JSGesture::JsHandlerOnGestureEvent(JSGestureEvent action, const JSCallbackI
         return;
     }
 
+    auto nodeId = ViewStackProcessor::GetInstance()->GetCurrentInspectorNodeId();
     RefPtr<JsGestureFunction> handlerFunc = AceType::MakeRefPtr<JsGestureFunction>(JSRef<JSFunc>::Cast(args[0]));
 
     if (action == JSGestureEvent::CANCEL) {
-        auto onActionCancelFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc)]() {
+        auto onActionCancelFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc), nodeId]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute();
+            auto info = GestureEvent();
+            JSInteractableView::UpdateEventTarget(nodeId, info);
+            func->Execute(info);
         };
         gesture->SetOnActionCancelId(onActionCancelFunc);
         return;
     }
 
-    auto onActionFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc)](
-                            const GestureEvent& info) {
+    auto onActionFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc), nodeId](
+                            GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        JSInteractableView::UpdateEventTarget(nodeId, info);
         func->Execute(info);
     };
 
@@ -481,4 +486,5 @@ void JSGesture::JSBind(BindingTarget globalObj)
     JSClass<JSGestureGroup>::StaticMethod("onCancel", &JSGesture::JsHandlerOnActionCancel);
     JSClass<JSGestureGroup>::Bind<>(globalObj);
 }
+
 }; // namespace OHOS::Ace::Framework

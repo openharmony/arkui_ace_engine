@@ -328,17 +328,8 @@ void RosenRenderImage::FetchImageObject()
     SrcType srcType = ImageLoader::ResolveURI(sourceInfo_.GetSrc());
     if (srcType != SrcType::MEMORY) {
         bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD;
-        ImageProvider::FetchImageObject(
-            sourceInfo_,
-            imageObjSuccessCallback_,
-            uploadSuccessCallback_,
-            failedCallback_,
-            GetContext(),
-            syncMode,
-            useSkiaSvg_,
-            autoResize_,
-            renderTaskHolder_,
-            onPostBackgroundTask_);
+        ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_, failedCallback_,
+            GetContext(), syncMode, useSkiaSvg_, autoResize_, renderTaskHolder_, onPostBackgroundTask_);
         return;
     }
     auto sharedImageManager = context->GetSharedImageManager();
@@ -506,16 +497,14 @@ void RosenRenderImage::ApplyColorFilter(SkPaint& paint)
         return;
     }
     paint.setColorFilter(SkColorFilter::MakeModeFilter(
-        SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()),
-        SkBlendMode::kPlus));
+        SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
 #else
     if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
         paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
         return;
     }
     paint.setColorFilter(SkColorFilters::Blend(
-        SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()),
-        SkBlendMode::kPlus));
+        SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
 #endif
 }
 
@@ -989,18 +978,8 @@ bool RosenRenderImage::RetryLoading()
         return false;
     }
     bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD;
-
-    ImageProvider::FetchImageObject(
-        sourceInfo_,
-        imageObjSuccessCallback_,
-        uploadSuccessCallback_,
-        failedCallback_,
-        GetContext(),
-        syncMode,
-        useSkiaSvg_,
-        autoResize_,
-        renderTaskHolder_,
-        onPostBackgroundTask_);
+    ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_, failedCallback_,
+        GetContext(), syncMode, useSkiaSvg_, autoResize_, renderTaskHolder_, onPostBackgroundTask_);
     LOGW("Retry loading time: %{public}d, triggered by GetImageSize fail, imageSrc: %{private}s", retryCnt_,
         sourceInfo_.ToString().c_str());
     return true;

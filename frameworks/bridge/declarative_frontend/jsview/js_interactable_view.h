@@ -42,6 +42,8 @@ public:
     static void JsOnDelete(const JSCallbackInfo& info);
     static void JsOnAccessibility(const JSCallbackInfo& info);
 
+    static void UpdateEventTarget(NodeId nodeId, BaseEventInfo& info);
+
 private:
     static EventMarker GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys);
 }; // class JSInteractableView

@@ -240,6 +240,10 @@ public:
         eventTrigger_.TriggerSyncEvent(marker, std::forward<Args>(args)...);
     }
 
+    void PostAsyncEvent(TaskExecutor::Task&& task);
+
+    void PostAsyncEvent(const TaskExecutor::Task& task);
+
     void OnSurfaceChanged(int32_t width, int32_t height);
 
     void OnSurfaceDensityChanged(double density);

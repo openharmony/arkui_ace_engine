@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <functional>
 #include "gtest/gtest.h"
 
 #define protected public
@@ -181,6 +182,10 @@ void PipelineContext::AddGeometryChangedNode(const RefPtr<RenderNode>& renderNod
 }
 
 void PipelineContext::ForceLayoutForImplicitAnimation() {}
+
+void PipelineContext::PostAsyncEvent(const std::function<void()>&) {}
+
+void PipelineContext::PostAsyncEvent(std::function<void()>&&) {}
 
 class FocusTest : public testing::Test {
 public:

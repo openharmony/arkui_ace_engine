@@ -73,6 +73,8 @@ private:
     ParseFunc parser_;
 };
 
+JSRef<JSObject> CreateEventTargetObject(const BaseEventInfo& info);
+
 } // namespace OHOS::Ace::Framework
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_FUNCTION_H

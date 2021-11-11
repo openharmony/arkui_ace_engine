@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/utils/macros.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 
 #define NEAR_ZERO(value) ((value > 0.0) ? ((value - 0.0) <= 0.000001f) : ((0.0 - value) <= 0.000001f))
@@ -94,6 +95,18 @@ public:
         } else {
             return value_;
         }
+    }
+
+    double ConvertToVp() const
+    {
+        if (unit_ == DimensionUnit::VP) {
+            return value_;
+        }
+        if (unit_ == DimensionUnit::PX) {
+            return SystemProperties::Px2Vp(value_);
+        }
+        // TODO: add fp and lpx convert.
+        return 0;
     }
 
     constexpr Dimension operator*(double value) const

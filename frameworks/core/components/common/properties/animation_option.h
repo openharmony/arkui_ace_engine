@@ -16,12 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PROPERTIES_ANIMATION_OPTION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PROPERTIES_ANIMATION_OPTION_H
 
+#include <functional>
 #include <string>
 #include <unordered_map>
 
 #include "core/animation/animation_pub.h"
 #include "core/animation/curve.h"
-#include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace {
 
@@ -107,12 +107,12 @@ public:
         return fillMode_;
     }
 
-    void SetOnFinishEvent(const EventMarker& onFinishEvent)
+    void SetOnFinishEvent(const std::function<void()>& onFinishEvent)
     {
         onFinishEvent_ = onFinishEvent;
     }
 
-    const EventMarker& GetOnFinishEvent() const
+    const std::function<void()>& GetOnFinishEvent() const
     {
         return onFinishEvent_;
     }
@@ -141,7 +141,7 @@ private:
     bool allowRunningAsynchronously_ = false;
 
     RefPtr<Curve> curve_;
-    EventMarker onFinishEvent_;
+    std::function<void()> onFinishEvent_;
     AnimationDirection direction_ = AnimationDirection::NORMAL;
 };
 

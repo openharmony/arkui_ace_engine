@@ -215,13 +215,16 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
 {
     LOGD("JSButton JsOnClick");
     if (info[0]->IsFunction()) {
+        auto nodeId = ViewStackProcessor::GetInstance()->GetCurrentInspectorNodeId();
         JSRef<JSFunc> clickFunction = JSRef<JSFunc>::Cast(info[0]);
         auto onClickFunc = AceType::MakeRefPtr<JsClickFunction>(clickFunction);
         EventMarker clickEventId(
-            [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc)](const BaseEventInfo* info) {
+            [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc), nodeId](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-                func->Execute(*clickInfo);
+                auto newInfo = *clickInfo;
+                UpdateEventTarget(nodeId, newInfo);
+                func->Execute(newInfo);
             });
 
         auto buttonComponent =

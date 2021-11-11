@@ -106,9 +106,14 @@ private:
 
         animationController_->AddInterpolator(colorAnimation);
         auto onFinishEvent = animationOption_.GetOnFinishEvent();
-        if (!onFinishEvent.IsEmpty()) {
+        if (onFinishEvent) {
             animationController_->AddStopListener([onFinishEvent, weakContext = context_] {
-                AceAsyncEvent<void()>::Create(onFinishEvent, weakContext)();
+                auto context = weakContext.Upgrade();
+                if (context) {
+                    context->PostAsyncEvent(onFinishEvent);
+                } else {
+                    LOGE("the context is null");
+                }
             });
         }
         animationController_->SetDuration(animationOption_.GetDuration());

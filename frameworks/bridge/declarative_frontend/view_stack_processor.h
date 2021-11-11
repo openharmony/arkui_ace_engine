@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "core/accessibility/accessibility_node.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/pipeline/base/component.h"
 #include "frameworks/core/components/box/box_component.h"
@@ -57,7 +58,7 @@ public:
     static std::string GenerateId();
     RefPtr<FlexItemComponent> GetFlexItemComponent();
     RefPtr<BoxComponent> GetBoxComponent();
-    RefPtr<Component> GetMainComponent();
+    RefPtr<Component> GetMainComponent() const;
     RefPtr<DisplayComponent> GetDisplayComponent();
     bool HasDisplayComponent() const;
     RefPtr<TransformComponent> GetTransformComponent();
@@ -127,6 +128,8 @@ public:
 
     void SetIsPercentSize(RefPtr<Component>& component);
     std::shared_ptr<JsPageRadioGroups> GetRadioGroupCompnent();
+
+    NodeId GetCurrentInspectorNodeId() const;
 
 private:
     ViewStackProcessor();
