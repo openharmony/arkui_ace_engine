@@ -330,6 +330,9 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
         }
     }
 
+    if (isZoom) {
+        UpdateLayer();
+    }
     RenderNode::Paint(context, offset);
     if (frontDecoration_) {
         flutter::Canvas* canvas = renderContext->GetCanvas();
