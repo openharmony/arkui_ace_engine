@@ -125,8 +125,10 @@ bool DOMList::SetSpecializedAttr(const std::pair<std::string, std::string>& attr
         {
             DOM_LIST_ROTATION_VIBRATE,
             [](DOMList& list, const std::string& val) {
+#ifdef WEARABLE_PRODUCT
                 list.rotationVibrate_ = StringToBool(val);
                 list.scrollVibrate_ = false;
+#endif
             },
         },
         {
