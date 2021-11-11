@@ -56,17 +56,24 @@ void NavigationContainerElement::PerformBuild()
     if (!navigationContainer) {
         return;
     }
-    navigationContainer->Build();
-    ComponentGroupElement::PerformBuild();
 
     auto declaration = navigationContainer->GetDeclaration();
     if (!declaration) {
+        ComponentGroupElement::PerformBuild();
         return;
     }
     auto context = context_.Upgrade();
     if (!context) {
         return;
     }
+
+    auto animationOption = context->GetExplicitAnimationOption();
+    if (animationOption.GetDuration() != 0) {
+        declaration->SetAnimationOption(animationOption);
+    }
+    navigationContainer->Build();
+    ComponentGroupElement::PerformBuild();
+
     auto tabController = navigationContainer->GetTabController();
     if (tabController) {
         tabBarChangeListener_ = [declaration, weakContent = context_, tabController](int32_t index) {

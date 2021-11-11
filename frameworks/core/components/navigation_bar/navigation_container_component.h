@@ -46,17 +46,19 @@ public:
     {
         subTitle_ = subTitle;
     }
-    void SetHideBar(bool hide)
+    void SetHideBar(bool hide, const AnimationOption& option)
     {
         hideBar_ = hide ? HIDE::TRUE : HIDE::FALSE;
+        animationOption_ = option;
     }
     void SetHideBarBackButton(bool hide)
     {
         hideBackButton_ = hide ? HIDE::TRUE : HIDE::FALSE;
     }
-    void SetHideToolBar(bool hide)
+    void SetHideToolBar(bool hide, const AnimationOption& option)
     {
         hideToolbar_ = hide ? HIDE::TRUE : HIDE::FALSE;
+        animationOption_ = option;
     }
     void AddToolBarItem(const ToolBarItem& item)
     {
@@ -90,6 +92,14 @@ public:
     {
         return toolbarItems_;
     }
+    const AnimationOption GetAnimationOption() const
+    {
+        return animationOption_;
+    }
+    void SetAnimationOption(const AnimationOption& option)
+    {
+        animationOption_ = option;
+    }
 
     void Append(const RefPtr<NavigationDeclaration>& other);
 
@@ -105,6 +115,7 @@ private:
     HIDE hideBackButton_ = HIDE::UNDEFINED;
     std::list<ToolBarItem> toolbarItems_;
     HIDE hideToolbar_ = HIDE::UNDEFINED;
+    AnimationOption animationOption_;
 };
 
 class NavigationDeclarationCollector : public Component {
@@ -150,7 +161,7 @@ public:
 
     static uint32_t GetGlobalTabControllerId();
     static RefPtr<ComposedComponent> BuildToolBar(
-        const RefPtr<NavigationDeclaration>& declaration,const RefPtr<TabController>& controller);
+        const RefPtr<NavigationDeclaration>& declaration, const RefPtr<TabController>& controller);
 
     RefPtr<TabController> GetTabController()
     {

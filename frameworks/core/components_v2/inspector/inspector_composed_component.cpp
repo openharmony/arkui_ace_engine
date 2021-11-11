@@ -37,7 +37,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/list_composed_element.h"
 #include "core/components_v2/inspector/list_item_composed_element.h"
-#include "core/components_v2/inspector/navigation_view_composed_element.h"
+#include "core/components_v2/inspector/navigation_composed_element.h"
 #include "core/components_v2/inspector/navigator_composed_element.h"
 #include "core/components_v2/inspector/panel_composed_element.h"
 #include "core/components_v2/inspector/progress_composed_element.h"
@@ -76,7 +76,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { COUNTER_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { NAVIGATION_VIEW_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationViewComposedElement>(id); } },
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationComposedElement>(id); } },
     { ROW_SPLIT_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::RowSplitComposedElement>(id); } },
     { STACK_COMPONENT_TAG,

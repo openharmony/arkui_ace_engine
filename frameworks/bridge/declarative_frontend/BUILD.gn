@@ -153,7 +153,7 @@ template("declarative_js_engine") {
       "jsview/js_list_item.cpp",
       "jsview/js_loading_progress.cpp",
       "jsview/js_marquee.cpp",
-      "jsview/js_navigation_view.cpp",
+      "jsview/js_navigation.cpp",
       "jsview/js_navigator.cpp",
       "jsview/js_page_transition.cpp",
       "jsview/js_pan_handler.cpp",

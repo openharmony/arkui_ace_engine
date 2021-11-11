@@ -89,7 +89,7 @@ void TabBarItemComponent::UpdateStyle(const TextStyle& textStyle, const Color& c
         if (text) {
             text->SetTextStyle(textStyle);
         } else if (image) {
-            image->SetColor(color);
+            image->SetImageFill(color);
         } else {
             FindChildren(component, allChildren);
         }

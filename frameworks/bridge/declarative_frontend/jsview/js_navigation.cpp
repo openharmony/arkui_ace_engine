@@ -13,27 +13,27 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_navigation_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 
 #include "core/components/navigation_bar/navigation_container_component.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
-void JSNavigationView::Create()
+void JSNavigation::Create()
 {
     auto navigationContainer = AceType::MakeRefPtr<NavigationContainerComponent>();
     ViewStackProcessor::GetInstance()->Push(navigationContainer);
 }
 
-void JSNavigationView::JSBind(BindingTarget globalObj)
+void JSNavigation::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSNavigationView>::Declare("NavigationView");
+    JSClass<JSNavigation>::Declare("Navigation");
     MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSNavigationView>::StaticMethod("create", &JSNavigationView::Create, opt);
-    JSClass<JSNavigationView>::Inherit<JSContainerBase>();
-    JSClass<JSNavigationView>::Inherit<JSViewAbstract>();
-    JSClass<JSNavigationView>::Bind(globalObj);
+    JSClass<JSNavigation>::StaticMethod("create", &JSNavigation::Create, opt);
+    JSClass<JSNavigation>::Inherit<JSContainerBase>();
+    JSClass<JSNavigation>::Inherit<JSViewAbstract>();
+    JSClass<JSNavigation>::Bind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

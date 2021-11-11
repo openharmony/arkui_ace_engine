@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSNavigationView : public JSContainerBase {
+class JSNavigation : public JSContainerBase {
 public:
     static void Create();
     static void JSBind(BindingTarget globalObj);

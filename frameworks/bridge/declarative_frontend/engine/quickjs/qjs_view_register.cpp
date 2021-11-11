@@ -64,7 +64,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_navigation_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
@@ -505,7 +505,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSSwiper::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
     JSSlidingPanel::JSBind(globalObj);
-    JSNavigationView::JSBind(globalObj);
+    JSNavigation::JSBind(globalObj);
     JSNavigator::JSBind(globalObj);
     JSColumnSplit::JSBind(globalObj);
     JSIfElse::JSBind(globalObj);

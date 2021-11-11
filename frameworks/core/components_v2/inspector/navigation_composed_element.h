@@ -24,12 +24,12 @@
 
 namespace OHOS::Ace::V2 {
 
-class ACE_EXPORT NavigationViewComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(NavigationViewComposedElement, InspectorComposedElement)
+class ACE_EXPORT NavigationComposedElement : public InspectorComposedElement {
+    DECLARE_ACE_TYPE(NavigationComposedElement, InspectorComposedElement)
 
 public:
-    explicit NavigationViewComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}
-    ~NavigationViewComposedElement() override = default;
+    explicit NavigationComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}
+    ~NavigationComposedElement() override = default;
 
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;

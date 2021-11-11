@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_v2/inspector/navigation_view_composed_element.h"
+#include "core/components_v2/inspector/navigation_composed_element.h"
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
@@ -23,25 +23,25 @@ namespace OHOS::Ace::V2 {
 
 namespace {
 
-const std::unordered_map<std::string, std::function<std::string(const NavigationViewComposedElement&)>>
+const std::unordered_map<std::string, std::function<std::string(const NavigationComposedElement&)>>
     CREATE_JSON_STRING_MAP {
         { "navigationTitle",
-            [](const NavigationViewComposedElement& inspector) { return inspector.GetNavigationTitle(); } },
+            [](const NavigationComposedElement& inspector) { return inspector.GetNavigationTitle(); } },
         { "navigationSubTitle",
-            [](const NavigationViewComposedElement& inspector) { return inspector.GetNavigationSubTitle(); } }
+            [](const NavigationComposedElement& inspector) { return inspector.GetNavigationSubTitle(); } }
     };
 
-const std::unordered_map<std::string, std::function<bool(const NavigationViewComposedElement&)>>
+const std::unordered_map<std::string, std::function<bool(const NavigationComposedElement&)>>
     CREATE_JSON_BOOL_MAP {
         { "hideNavigationBackButton",
-            [](const NavigationViewComposedElement& inspector) { return inspector.GetHideNavigationBackButton(); } },
+            [](const NavigationComposedElement& inspector) { return inspector.GetHideNavigationBackButton(); } },
         { "hideNavigationBar",
-            [](const NavigationViewComposedElement& inspector) { return inspector.GetHideNavigationBar(); } }
+            [](const NavigationComposedElement& inspector) { return inspector.GetHideNavigationBar(); } }
     };
 
 }
 
-void NavigationViewComposedElement::Dump()
+void NavigationComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
     DumpLog::GetInstance().AddDesc(
@@ -54,7 +54,7 @@ void NavigationViewComposedElement::Dump()
         std::string("hideNavigationBar: ").append(GetHideNavigationBar() ? "true" : "false"));
 }
 
-std::unique_ptr<JsonValue> NavigationViewComposedElement::ToJsonObject() const
+std::unique_ptr<JsonValue> NavigationComposedElement::ToJsonObject() const
 {
     LOGI("raul ToJsonObject11");
     auto resultJson = InspectorComposedElement::ToJsonObject();
@@ -67,7 +67,7 @@ std::unique_ptr<JsonValue> NavigationViewComposedElement::ToJsonObject() const
     return resultJson;
 }
 
-std::string NavigationViewComposedElement::GetNavigationTitle() const
+std::string NavigationComposedElement::GetNavigationTitle() const
 {
     auto render = GetRenderNavigation();
     if (!render) {
@@ -76,7 +76,7 @@ std::string NavigationViewComposedElement::GetNavigationTitle() const
     return render->GetTitle();
 }
 
-std::string NavigationViewComposedElement::GetNavigationSubTitle() const
+std::string NavigationComposedElement::GetNavigationSubTitle() const
 {
     auto render = GetRenderNavigation();
     if (!render) {
@@ -85,7 +85,7 @@ std::string NavigationViewComposedElement::GetNavigationSubTitle() const
     return render->GetSubTitle();
 }
 
-bool NavigationViewComposedElement::GetHideNavigationBackButton() const
+bool NavigationComposedElement::GetHideNavigationBackButton() const
 {
     auto render = GetRenderNavigation();
     if (!render) {
@@ -94,7 +94,7 @@ bool NavigationViewComposedElement::GetHideNavigationBackButton() const
     return render->GetHideBackButton();
 }
 
-bool NavigationViewComposedElement::GetHideNavigationBar() const
+bool NavigationComposedElement::GetHideNavigationBar() const
 {
     auto render = GetRenderNavigation();
     if (!render) {
@@ -103,7 +103,7 @@ bool NavigationViewComposedElement::GetHideNavigationBar() const
     return render->GetHideNavigationBar();
 }
 
-RefPtr<RenderNavigationContainer> NavigationViewComposedElement::GetRenderNavigation() const
+RefPtr<RenderNavigationContainer> NavigationComposedElement::GetRenderNavigation() const
 {
     auto node = GetInspectorNode(NavigationContainerElement::TypeId());
     if (!node) {

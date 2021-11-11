@@ -3422,7 +3422,7 @@ void JSViewAbstract::SetNavigationSubTitle(const std::string& subTitle)
 
 void JSViewAbstract::SetHideNavigationBar(bool hide)
 {
-    GetNavigationDeclaration()->SetHideBar(hide);
+    GetNavigationDeclaration()->SetHideBar(hide, ViewStackProcessor::GetInstance()->GetImplicitAnimationOption());
 }
 
 void JSViewAbstract::SetHideNavigationBackButton(bool hide)
@@ -3432,7 +3432,7 @@ void JSViewAbstract::SetHideNavigationBackButton(bool hide)
 
 void JSViewAbstract::SetHideToolBar(bool hide)
 {
-    GetNavigationDeclaration()->SetHideToolBar(hide);
+    GetNavigationDeclaration()->SetHideToolBar(hide, ViewStackProcessor::GetInstance()->GetImplicitAnimationOption());
 }
 
 void JSViewAbstract::SetToolBar(const JSCallbackInfo& info)
