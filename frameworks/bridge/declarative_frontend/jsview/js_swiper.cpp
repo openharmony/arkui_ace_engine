@@ -25,6 +25,8 @@
 namespace OHOS::Ace::Framework {
 namespace {
 
+constexpr int32_t DEFAULT_SWIPER_CACHED_COUNT = 1;
+
 JSRef<JSVal> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetIndex()));
@@ -44,6 +46,7 @@ void JSSwiper::Create(const JSCallbackInfo& info)
     }
     component->SetIndicator(InitIndicatorStyle());
     component->SetMainSwiperSize(MainSwiperSize::MIN);
+    component->SetCachedSize(DEFAULT_SWIPER_CACHED_COUNT);
     ViewStackProcessor::GetInstance()->Push(component);
     JSInteractableView::SetFocusNode(true);
 }
@@ -66,6 +69,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("effectMode", &JSSwiper::SetEffectMode);
     JSClass<JSSwiper>::StaticMethod("displayCount", &JSSwiper::SetDisplayCount);
     JSClass<JSSwiper>::StaticMethod("itemSpace", &JSSwiper::SetItemSpace);
+    JSClass<JSSwiper>::StaticMethod("cachedCount", &JSSwiper::SetCachedCount);
     JSClass<JSSwiper>::StaticMethod("onChange", &JSSwiper::SetOnChange);
     JSClass<JSSwiper>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSwiper>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -298,6 +302,15 @@ void JSSwiper::SetDisplayMode(int32_t index)
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
     if (swiper) {
         swiper->SetDisplayMode(static_cast<SwiperDisplayMode>(index));
+    }
+}
+
+void JSSwiper::SetCachedCount(int32_t cachedCount)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetCachedSize(cachedCount);
     }
 }
 

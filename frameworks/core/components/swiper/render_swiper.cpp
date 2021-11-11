@@ -205,6 +205,7 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     duration_ = swiper->GetDuration();
     showIndicator_ = swiper->IsShowIndicator();
 
+    lazyLoadCacheSize_ = swiper->GetCachedSize() * 2 + swiper->GetDisplayCount();
     auto lazyComponent = swiper->GetLazyForEachComponent();
     UpdateItemCount(lazyComponent ? static_cast<int32_t>(lazyComponent->TotalCount()) : itemCount_);
     ClearItems(lazyComponent, static_cast<int32_t>(swiper->GetIndex()));
@@ -2952,6 +2953,11 @@ void RenderSwiper::ClearItems(const RefPtr<Component>& lazyForEachComponent, int
 
 void RenderSwiper::ResetCachedChildren()
 {
+    auto context = context_.Upgrade();
+    if (context->GetIsDeclarative()) {
+        return;
+    }
+
     int32_t cachedSize = swiper_->GetCachedSize();
     int32_t childrenSize = itemCount_;
     int32_t forwardNum = 0;

@@ -47,6 +47,7 @@ protected:
     static void SetDisplayMode(int32_t index);
     static void SetEffectMode(const JSCallbackInfo& info);
     static void SetDisplayCount(const JSCallbackInfo& info);
+    static void SetCachedCount(int32_t cachedCount);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
 };
