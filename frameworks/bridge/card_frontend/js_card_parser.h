@@ -120,6 +120,11 @@ public:
 
     void OnSurfaceChanged(int32_t width, int32_t height);
 
+    void SetCardHapPath(const std::string& path)
+    {
+        cardHapPath_ = path;
+    }
+
 private:
     void GetResImageUrl(std::string& value);
     bool GetI18nData(std::string& value);
@@ -220,6 +225,7 @@ private:
     bool isRepeat_ = false;
     std::string repeatIndex_;
     std::string repeatItem_;
+    std::string cardHapPath_;
 };
 
 } // namespace OHOS::Ace::Framework

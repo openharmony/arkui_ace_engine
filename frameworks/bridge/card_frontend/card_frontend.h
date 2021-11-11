@@ -143,6 +143,11 @@ public:
         pageLoaded_ = false;
     }
 
+    void SetCardHapPath(const std::string& path)
+    {
+        cardHapPath_ = path;
+    }
+
 private:
     void UpdatePageData(const std::string& dataList);
     void LoadPage(const std::string& urlPath, const std::string& params);
@@ -158,6 +163,7 @@ private:
     bool foregroundFrontend_ = false;
     bool pageLoaded_ = false;
     double density_ = 1.0;
+    std::string cardHapPath_;
 
     Framework::PipelineContextHolder holder_;
     RefPtr<AssetManager> assetManager_;
