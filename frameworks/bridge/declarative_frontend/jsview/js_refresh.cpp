@@ -67,7 +67,11 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     auto jsOffset = paramObject->GetProperty("offset");
     Dimension offset;
     if (ParseJsDimensionVp(jsOffset, offset)) {
-        refreshComponent->SetRefreshDistance(offset);
+        if (offset.Value() <= 0.0) {
+            refreshComponent->SetRefreshDistance(theme->GetRefreshDistance());
+        } else {
+            refreshComponent->SetRefreshDistance(offset);
+        }
     }
 
     auto friction = paramObject->GetProperty("friction");
