@@ -41,10 +41,8 @@ public:
 
     WebDelegate() = delete;
     ~WebDelegate() override;
-    WebDelegate(const WeakPtr<WebComponent>& webComponent,
-        const WeakPtr<PipelineContext>& context, ErrorCallback&& onError, const std::string& type)
-        : WebResource(type, context, std::move(onError)),
-        webComponent_(webComponent), state_(State::WAITINGFORSIZE) {
+    WebDelegate(const WeakPtr<PipelineContext>& context, ErrorCallback&& onError, const std::string& type)
+        : WebResource(type, context, std::move(onError)), state_(State::WAITINGFORSIZE) {
         ACE_DCHECK(!type.empty());
     }
 
@@ -55,6 +53,7 @@ public:
     void AddCreatedCallback(const CreatedCallback& createdCallback);
     void RemoveCreatedCallback();
     void AddReleasedCallback(const ReleasedCallback& releasedCallback);
+    void SetComponent(const RefPtr<WebComponent>& component);
     void RemoveReleasedCallback();
     void Reload();
     void UpdateUrl(const std::string& url);
@@ -79,7 +78,7 @@ private:
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
 
-    WeakPtr<WebComponent> webComponent_;
+    RefPtr<WebComponent> webComponent_;
     std::list<CreatedCallback> createdCallbacks_;
     std::list<ReleasedCallback> releasedCallbacks_;
     EventCallback onPageStarted_;
