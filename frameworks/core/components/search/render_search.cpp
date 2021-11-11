@@ -102,7 +102,7 @@ void RenderSearch::PerformLayout()
 {
     const auto& renderTextField = AceType::DynamicCast<RenderTextField>(GetChildren().front());
     if (!renderTextField) {
-       return;
+        return;
     }
     LayoutParam layout;
     layout.SetFixedSize(Size(searchComponent_->GetWidth().Value(), searchComponent_->GetHeight().Value()));
@@ -119,10 +119,14 @@ void RenderSearch::PerformLayout()
         }
     });
 
-    renderTextField->SetOnValueChangeEvent(changeEvent_);
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        renderTextField->SetOnValueChangeEvent(changeEvent_);
+    } else {
+        renderTextField->SetOnTextChangeEvent(changeEvent_);
+    }
 
     Size deflateSize = Size(NormalizeToPx(SEARCH_SPACING), NormalizeToPx(SEARCH_SPACING)) * 2.0;
-    auto context = context_.Upgrade();
     if (context && decoration_) {
         deflateSize += decoration_->GetBorder().GetLayoutSize(context->GetDipScale());
     }
