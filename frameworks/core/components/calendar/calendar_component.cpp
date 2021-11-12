@@ -252,10 +252,10 @@ void CalendarController::UpdateTheme()
     renderText_->SetTextStyle(style);
     renderText_->MarkNeedMeasure();
     renderText_->MarkNeedLayout();
-    leftImageComponent_->SetColor(cardTheme.titleTextColor);
+    leftImageComponent_->SetImageFill(cardTheme.titleTextColor);
     leftImage_->Update(leftImageComponent_);
     leftImage_->MarkNeedLayout();
-    rightImageComponent_->SetColor(cardTheme.titleTextColor);
+    rightImageComponent_->SetImageFill(cardTheme.titleTextColor);
     rightImage_->Update(rightImageComponent_);
     rightImage_->MarkNeedLayout();
     SetButtonClickColor(renderText_, cardTheme.clickEffectColor);

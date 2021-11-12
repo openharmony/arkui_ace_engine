@@ -304,9 +304,10 @@ void RenderRating::UpdateRenderImage(const RefPtr<ImageComponent>& imageComponen
         // Handle situation of resource changes from internal to outer.
         imageComponent->SetColor(Color::TRANSPARENT);
     } else if (sourceErrorColor_ != Color::TRANSPARENT) {
-        imageComponent->SetColor(sourceErrorColor_); // use [sourceErrorColor_] for all stars to show source error
+        imageComponent->SetImageFill(sourceErrorColor_); // use [sourceErrorColor_] for all stars to show source error
     } else {
-        imageComponent->SetColor(Color(svgColor)); // this color only takes effects when using internal svg resources
+        // this color only takes effects when using internal svg resources
+        imageComponent->SetImageFill(std::make_optional<Color>(svgColor));
     }
     imageComponent->SetSrc(imageSrc);
     imageComponent->SetFitMaxSize(true);

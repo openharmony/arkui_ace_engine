@@ -388,8 +388,8 @@ protected:
     Dimension iconSizeInDimension_;
     Dimension iconHotZoneSizeInDimension_;
     Dimension widthReserved_;
-    std::optional<LayoutParam> lastLayoutParam_ = std::nullopt;
-    std::optional<Color> imageFill_ = std::nullopt;
+    std::optional<LayoutParam> lastLayoutParam_;
+    std::optional<Color> imageFill_;
     std::string iconSrc_;
     std::string showIconSrc_;
     std::string hideIconSrc_;

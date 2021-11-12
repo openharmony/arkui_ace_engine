@@ -87,7 +87,7 @@ public:
     EventMarker endClickMarker;
     Color titleColor;
     Color subTitleColor;
-    std::optional<Color> imageFill = std::nullopt;
+    std::optional<Color> imageFill;
     NavigationBarType type = NavigationBarType::NORMAL;
 
 #ifndef WEARABLE_PRODUCT

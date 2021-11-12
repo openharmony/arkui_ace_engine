@@ -333,11 +333,13 @@ RefPtr<OptionComponent> TextOverlayComponent::BuildMenuOption(
     if (useResource) {
         image = AceType::MakeRefPtr<ImageComponent>(resourceId);
         if (theme_) {
-            image->SetColor(theme_->GetMenuIconColor());
+            // fill color only effect svg image color
+            image->SetImageFill(theme_->GetMenuIconColor());
         }
     } else {
         image = AceType::MakeRefPtr<ImageComponent>(imageSrc);
         if (image) {
+            // fill color only effect svg image color
             image->SetImageFill(imageFill_);
         }
     }

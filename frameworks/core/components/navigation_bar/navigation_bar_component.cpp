@@ -241,7 +241,7 @@ void TitleBarMenuBuilder::MoveMenuItemsToBar(const RefPtr<ComponentGroup>& conta
 void TitleBarMenuBuilder::AddCollapseMenu(const RefPtr<ComponentGroup>& container)
 {
     IconImage moreIcon(theme_->GetMoreResourceId(), menuIconSize_, menuIconSize_);
-    moreIcon.image->SetColor(theme_->GetMenuIconColor());
+    moreIcon.image->SetImageFill(theme_->GetMenuIconColor());
     moreButton_ = BuildIconButton(theme_, menuZoneSize_, menuZoneSize_, moreIcon);
     container->AppendChild(GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "moreButton", moreButton_));
     container->AppendChild(menu_);

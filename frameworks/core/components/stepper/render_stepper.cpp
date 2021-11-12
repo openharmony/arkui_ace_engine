@@ -287,7 +287,8 @@ void RenderStepper::InitHotArea(ControlPanelData& buttonData)
                                                         : InternalResource::ResourceId::STEPPER_NEXT_ARROW);
         imageComponent->SetWidth(stepperComponent_->GetArrowWidth());
         imageComponent->SetHeight(stepperComponent_->GetArrowHeight());
-        imageComponent->SetColor(arrowColor_);
+        // this color is only effect svg image path
+        imageComponent->SetImageFill(arrowColor_);
 
         auto renderImage = AceType::DynamicCast<RenderImage>(imageComponent->CreateRenderNode());
         if (buttonData.isLeft) {
@@ -308,10 +309,10 @@ void RenderStepper::UpdateButton(ControlPanelData& buttonData)
     if (!buttonData.isLeft) {
         if (buttonData.buttonStatus == StepperButtonStatus::DISABLED) {
             textStyles_[currentIndex_].SetTextColor(disabledColor_);
-            buttonData.imageComponentRight->SetColor(arrowColor_.ChangeOpacity(disabledAlpha_));
+            buttonData.imageComponentRight->SetImageFill(arrowColor_.ChangeOpacity(disabledAlpha_));
         } else {
             textStyles_[currentIndex_].SetTextColor(textColors_[currentIndex_]);
-            buttonData.imageComponentRight->SetColor(arrowColor_);
+            buttonData.imageComponentRight->SetImageFill(arrowColor_);
         }
         if (buttonData.buttonType == StepperButtonType::TEXT_ARROW) {
             buttonData.imageRenderRight->Update(buttonData.imageComponentRight);
