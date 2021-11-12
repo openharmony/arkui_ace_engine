@@ -130,6 +130,9 @@ public:
     // Stop at the start frame.
     void Cancel();
 
+    // Get Controller Id.
+    int32_t GetId() const;
+
 private:
     // Screen refresh callback. duration is in millisecond.
     void OnFrame(int64_t duration);

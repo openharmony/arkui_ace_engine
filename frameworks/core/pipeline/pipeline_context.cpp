@@ -2782,6 +2782,30 @@ void PipelineContext::SaveExplicitAnimationOption(const AnimationOption& option)
     explicitAnimationOption_ = option;
 }
 
+void PipelineContext::CreateExplicitAnimator(const std::function<void()>& onFinishEvent)
+{
+    if (!onFinishEvent) {
+        return;
+    }
+    auto animator = AceType::MakeRefPtr<Animator>(AceType::WeakClaim(this));
+    animator->AddStopListener([onFinishEvent, weakContext = AceType::WeakClaim(this), id = animator->GetId()] {
+        auto context = weakContext.Upgrade();
+        if (!context) {
+            return;
+        }
+        context->PostAsyncEvent(onFinishEvent);
+        context->explicitAnimators_.erase(id);
+    });
+    animator->SetDuration(explicitAnimationOption_.GetDuration());
+    animator->SetStartDelay(explicitAnimationOption_.GetDelay());
+    animator->SetIteration(explicitAnimationOption_.GetIteration());
+    animator->SetTempo(explicitAnimationOption_.GetTempo());
+    animator->SetAnimationDirection(explicitAnimationOption_.GetAnimationDirection());
+    animator->SetFillMode(FillMode::FORWARDS);
+    animator->Play();
+    explicitAnimators_.emplace(animator->GetId(), animator);
+}
+
 void PipelineContext::ClearExplicitAnimationOption()
 {
     explicitAnimationOption_ = AnimationOption();

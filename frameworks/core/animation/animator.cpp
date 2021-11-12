@@ -507,6 +507,11 @@ void Animator::Cancel()
     NotifyIdleListener();
 }
 
+int32_t Animator::GetId() const
+{
+    return controllerId_;
+}
+
 // Private Functions.
 void Animator::OnFrame(int64_t duration)
 {

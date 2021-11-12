@@ -178,13 +178,13 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         pipelineContext->CloseImplicitAnimation();
         LOGD("RSAnimationInfo: End JSAnimateTo");
     } else {
-        option.SetOnFinishEvent(onFinishEvent);
         pipelineContext->FlushBuild();
         pipelineContext->SaveExplicitAnimationOption(option);
         // Execute the function.
         JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
         jsAnimateToFunc->Call(info[1]);
         pipelineContext->FlushBuild();
+        pipelineContext->CreateExplicitAnimator(onFinishEvent);
         pipelineContext->ClearExplicitAnimationOption();
     }
 }

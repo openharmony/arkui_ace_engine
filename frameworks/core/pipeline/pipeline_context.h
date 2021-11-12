@@ -712,6 +712,8 @@ public:
 
     void SaveExplicitAnimationOption(const AnimationOption& option);
 
+    void CreateExplicitAnimator(const std::function<void()>& onFinishEvent);
+
     void ClearExplicitAnimationOption();
 
     const AnimationOption GetExplicitAnimationOption() const;
@@ -1124,6 +1126,7 @@ private:
     int32_t minPlatformVersion_ = 0;
     std::string photoCachePath_;
     AnimationOption explicitAnimationOption_;
+    std::map<int32_t, RefPtr<Animator>> explicitAnimators_;
     OnRouterChangeCallback OnRouterChangeCallback_ = nullptr;
     bool isAccessibilityEnabled_ = false;
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
