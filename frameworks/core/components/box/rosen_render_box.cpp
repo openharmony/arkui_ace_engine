@@ -158,7 +158,6 @@ void RosenRenderBox::FetchImageData()
             false,
             false,
             true,
-            Color::TRANSPARENT,
             renderTaskHolder_,
             onPostBackgroundTask_);
     }

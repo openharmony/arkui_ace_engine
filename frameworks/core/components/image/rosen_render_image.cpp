@@ -328,14 +328,17 @@ void RosenRenderImage::FetchImageObject()
     SrcType srcType = ImageLoader::ResolveURI(sourceInfo_.GetSrc());
     if (srcType != SrcType::MEMORY) {
         bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD;
-        std::optional<Color> color;
-        if (isColorSet_ && sourceInfo_.IsSvg()) {
-            color = std::make_optional(color_);
-        } else {
-            color = std::nullopt;
-        }
-        ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_, failedCallback_,
-            GetContext(), syncMode, useSkiaSvg_, autoResize_, color, renderTaskHolder_, onPostBackgroundTask_);
+        ImageProvider::FetchImageObject(
+            sourceInfo_,
+            imageObjSuccessCallback_,
+            uploadSuccessCallback_,
+            failedCallback_,
+            GetContext(),
+            syncMode,
+            useSkiaSvg_,
+            autoResize_,
+            renderTaskHolder_,
+            onPostBackgroundTask_);
         return;
     }
     auto sharedImageManager = context->GetSharedImageManager();
@@ -493,20 +496,26 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
 
 void RosenRenderImage::ApplyColorFilter(SkPaint& paint)
 {
+    if (!color_.has_value()) {
+        return;
+    }
+    Color color = color_.value();
 #ifdef USE_SYSTEM_SKIA
     if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
         paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(GRAY_COLOR_MATRIX));
         return;
     }
     paint.setColorFilter(SkColorFilter::MakeModeFilter(
-        SkColorSetARGB(color_.GetAlpha(), color_.GetRed(), color_.GetGreen(), color_.GetBlue()), SkBlendMode::kPlus));
+        SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()),
+        SkBlendMode::kPlus));
 #else
     if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
         paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
         return;
     }
     paint.setColorFilter(SkColorFilters::Blend(
-        SkColorSetARGB(color_.GetAlpha(), color_.GetRed(), color_.GetGreen(), color_.GetBlue()), SkBlendMode::kPlus));
+        SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()),
+        SkBlendMode::kPlus));
 #endif
 }
 
@@ -693,18 +702,12 @@ void RosenRenderImage::UpdateData(const std::string& uri, const std::vector<uint
         return;
     }
 
-    std::optional<Color> color;
-    if (isColorSet_ && sourceInfo_.IsSvg()) {
-        color = std::make_optional(color_);
-    } else {
-        color = std::nullopt;
-    }
     auto context = GetContext().Upgrade();
     if (!context) {
         return;
     }
     auto ImageObj =
-        ImageObject::BuildImageObject(sourceInfo_, context, skData, useSkiaSvg_, color);
+        ImageObject::BuildImageObject(sourceInfo_, context, skData, useSkiaSvg_);
     ImageObjReady(ImageObj);
 }
 
@@ -804,12 +807,18 @@ void RosenRenderImage::PaintSVGImage(const sk_sp<SkData>& skData, bool onlyLayou
         }
     };
     SkColorEx skColor;
-    if (isColorSet_) {
-        skColor.color = color_.GetValue();
+    auto fillColor = sourceInfo_.GetFillColor();
+    if (fillColor.has_value()) {
+        skColor.color = fillColor.value().GetValue();
         skColor.valid = 1;
     }
     ImageProvider::GetSVGImageDOMAsyncFromData(
-        skData, successCallback, failedCallback, GetContext(), skColor.value, onPostBackgroundTask_);
+        skData,
+        successCallback,
+        failedCallback,
+        GetContext(),
+        skColor.value,
+        onPostBackgroundTask_);
     MarkNeedLayout();
 }
 
@@ -980,14 +989,18 @@ bool RosenRenderImage::RetryLoading()
         return false;
     }
     bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD;
-    std::optional<Color> color;
-    if (isColorSet_ && sourceInfo_.IsSvg()) {
-        color = std::make_optional(color_);
-    } else {
-        color = std::nullopt;
-    }
-    ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_, failedCallback_,
-        GetContext(), syncMode, useSkiaSvg_, autoResize_, color, renderTaskHolder_, onPostBackgroundTask_);
+
+    ImageProvider::FetchImageObject(
+        sourceInfo_,
+        imageObjSuccessCallback_,
+        uploadSuccessCallback_,
+        failedCallback_,
+        GetContext(),
+        syncMode,
+        useSkiaSvg_,
+        autoResize_,
+        renderTaskHolder_,
+        onPostBackgroundTask_);
     LOGW("Retry loading time: %{public}d, triggered by GetImageSize fail, imageSrc: %{private}s", retryCnt_,
         sourceInfo_.ToString().c_str());
     return true;
