@@ -204,4 +204,9 @@ size_t GridElement::GetReloadedCheckNum()
     return ElementProxyHost::GetReloadedCheckNum();
 }
 
+void GridElement::Dump()
+{
+    DumpProxy();
+}
+
 } // namespace OHOS::Ace::V2

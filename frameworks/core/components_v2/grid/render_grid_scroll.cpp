@@ -905,7 +905,7 @@ void RenderGridScroll::ClearItems()
         if (item.first < startRankItemIndex_) {
             deleteChildByIndex_(item.first);
         }
-        RemoveChildByIndex(item.second);
+        RemoveChildByIndex(item.first);
     }
     loadingIndex_ = -1;
 }

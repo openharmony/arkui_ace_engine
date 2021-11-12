@@ -36,6 +36,7 @@ public:
     bool GetItemSpanByIndex(int32_t index, bool isHorizontal, int32_t& itemMain, int32_t& itemCross,
         int32_t& itemMainSpan, int32_t& itemCrossSpan);
     size_t GetReloadedCheckNum() override;
+    void Dump() override;
 
 private:
     RefPtr<RenderNode> CreateRenderNode() override;

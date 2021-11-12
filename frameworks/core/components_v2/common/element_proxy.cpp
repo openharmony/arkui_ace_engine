@@ -18,6 +18,7 @@
 #include <map>
 #include <unordered_map>
 
+#include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/utils/macros.h"
 #include "core/components/ifelse/if_else_component.h"
@@ -26,6 +27,8 @@
 
 namespace OHOS::Ace::V2 {
 namespace {
+
+const std::string PREFIX_STEP = "  ";
 
 class RenderElementProxy : public ElementProxy {
 public:
@@ -40,7 +43,7 @@ public:
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
         auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
-        composedId_ = composedComponent ? composedComponent->GetId() : "";
+        SetComposedId(composedComponent ? composedComponent->GetId() : "");
 
         component_ = component;
         while (composedComponent && !composedComponent->HasElementFunction()) {
@@ -103,10 +106,46 @@ public:
         if (!host) {
             return;
         }
+        SetComposedId("");
         element_ = host->OnUpdateElement(element_, nullptr);
     }
 
+    void ReleaseElementById(const ComposeId& id) override
+    {
+        if (id != GetId()) {
+            LOGW("ReleaseElement Failed. Id not equals: (%s) vs (%s)", id.c_str(), GetId().c_str());
+            return;
+        }
+        auto host = host_.Upgrade();
+        if (!host) {
+            return;
+        }
+        host->ReleaseElementById(id);
+    }
+
+    void Dump(const std::string& prefix) const override
+    {
+        if (!DumpLog::GetInstance().GetDumpFile()) {
+            return;
+        }
+        ElementProxy::Dump(prefix);
+        if (element_) {
+            DumpLog::GetInstance().AddDesc(prefix + std::string("[RenderElementProxy] element: ") +
+                                           AceType::TypeName(AceType::RawPtr(element_)) +
+                                           ", retakeId: " + std::to_string(element_->GetRetakeId()));
+        } else {
+            DumpLog::GetInstance().AddDesc(prefix + std::string("[RenderElementProxy] Null element."));
+        }
+    }
+
 private:
+    void SetComposedId(const ComposeId& composedId)
+    {
+        if (composedId_ != composedId) {
+            ReleaseElementById(composedId_);
+        }
+        composedId_ = composedId;
+    }
     bool forceRender_ = false;
     RefPtr<Component> component_;
     RefPtr<Element> element_;
@@ -193,6 +232,13 @@ public:
                 lazyForEachComponent_->ReleaseChildGroupByComposedId(viewId);
             }
             children_.erase(it);
+        }
+    }
+
+    void ReleaseElementById(const ComposeId& composeId) override
+    {
+        if (lazyForEachComponent_) {
+            lazyForEachComponent_->ReleaseChildGroupByComposedId(composeId);
         }
     }
 
@@ -402,6 +448,16 @@ public:
         }
     }
 
+    void Dump(const std::string& prefix) const override
+    {
+        if (!DumpLog::GetInstance().GetDumpFile()) {
+            return;
+        }
+        ElementProxy::Dump(prefix);
+        DumpLog::GetInstance().AddDesc(
+            prefix + std::string("[LazyForEachElementProxy] childSize: ").append(std::to_string(children_.size())));
+    }
+
 private:
     class LazyForEachCache final {
     public:
@@ -497,6 +553,26 @@ public:
                 child->ReleaseElementByIndex(index);
                 break;
             }
+        }
+    }
+
+    void ReleaseElementById(const ComposeId& composeId) override
+    {
+        for (const auto& child : children_) {
+            child->ReleaseElementById(composeId);
+        }
+    }
+
+    void Dump(const std::string& prefix) const override
+    {
+        if (!DumpLog::GetInstance().GetDumpFile()) {
+            return;
+        }
+        ElementProxy::Dump(prefix);
+        DumpLog::GetInstance().AddDesc(
+            prefix + std::string("[LinearElementProxy] childSize: ").append(std::to_string(children_.size())));
+        for (const auto& child : children_) {
+            child->Dump(prefix + PREFIX_STEP);
         }
     }
 
@@ -655,6 +731,13 @@ private:
 
 } // namespace
 
+void ElementProxy::Dump(const std::string& prefix) const
+{
+    if (DumpLog::GetInstance().GetDumpFile()) {
+        DumpLog::GetInstance().AddDesc(prefix + "[ElementProxy] composeId: " + composedId_);
+    }
+}
+
 RefPtr<ElementProxy> ElementProxy::Create(const WeakPtr<ElementProxyHost>& host, const RefPtr<Component>& component)
 {
     if (AceType::InstanceOf<LazyForEachComponent>(component)) {
@@ -707,6 +790,24 @@ void ElementProxyHost::ReleaseElementByIndex(size_t index)
 {
     if (proxy_ && proxy_->IndexInRange(index)) {
         proxy_->ReleaseElementByIndex(index);
+    }
+}
+
+void ElementProxyHost::ReleaseElementById(const std::string& id)
+{
+    if (proxy_) {
+        proxy_->ReleaseElementById(id);
+    }
+}
+
+void ElementProxyHost::DumpProxy()
+{
+    if (proxy_) {
+        proxy_->Dump(PREFIX_STEP);
+    } else {
+        if (DumpLog::GetInstance().GetDumpFile()) {
+            DumpLog::GetInstance().AddDesc(std::string("No Proxy"));
+        }
     }
 }
 
