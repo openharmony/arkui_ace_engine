@@ -17,7 +17,7 @@ build_component("text") {
   sources = [
     "flutter_render_text.cpp",
     "render_text.cpp",
-    "render_text_create.cpp",
+    "render_text_creator.cpp",
     "rosen_render_text.cpp",
     "text_component.cpp",
     "text_component_v2.cpp",

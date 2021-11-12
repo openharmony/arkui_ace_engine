@@ -24,7 +24,7 @@ build_component("image") {
     "image_animator_element.cpp",
     "image_component.cpp",
     "render_image.cpp",
-    "render_image_create.cpp",
+    "render_image_creator.cpp",
     "rosen_render_image.cpp",
   ]
   configs = [ ":rosen_image_config" ]

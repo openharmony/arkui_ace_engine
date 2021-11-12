@@ -48,7 +48,7 @@ build_component("qrcode") {
     "flutter_render_qrcode.cpp",
     "qrcode_component.cpp",
     "render_qrcode.cpp",
-    "render_qrcode_create.cpp",
+    "render_qrcode_creator.cpp",
     "rosen_render_qrcode.cpp",
   ]
 

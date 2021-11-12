@@ -912,7 +912,7 @@ public:
 
     // mark JSview boundary, create/destroy RSNode if need
     void SyncRSNodeBoundary(bool isHead, bool isTail);
-    const RSNode::SharedPtr& GetRSNode() const { return RSNode_; }
+    const RSNode::SharedPtr& GetRSNode() const { return rsNode_; }
     // sync geometry properties to ROSEN backend
     virtual void SyncGeometryProperties();
 
@@ -1087,7 +1087,7 @@ private:
     bool isPercentSize_ = false;
     uint32_t updateType_ = 0;
 
-    RSNode::SharedPtr RSNode_ = nullptr;
+    RSNode::SharedPtr rsNode_ = nullptr;
     bool isHeadRenderNode_ = false;
     bool isTailRenderNode_ = false;
     // Sync view hierarchy to RSNode

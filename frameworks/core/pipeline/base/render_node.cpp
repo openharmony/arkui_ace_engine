@@ -112,8 +112,8 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
         child->SetParent(AceType::WeakClaim(this));
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
     }
-    if (child->RSNode_) {
-        child->RSNode_->NotifyTransition(Rosen::RSTransitionEffect::FADE_OUT);
+    if (child->rsNode_) {
+        child->rsNode_->NotifyTransition(Rosen::RSTransitionEffect::FADE_OUT);
     }
     LOGD("RenderNode RemoveChild %{public}zu", children_.size());
 }
@@ -1177,7 +1177,7 @@ void RenderNode::ClearRenderObject()
     mouseState_ = MouseState::NONE;
 
     ClearChildren();
-    RSNode_ = nullptr;
+    rsNode_ = nullptr;
     isHeadRenderNode_ = false;
     isTailRenderNode_ = false;
     accessibilityText_ = "";
@@ -1724,12 +1724,12 @@ void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
 {
     isHeadRenderNode_ = isHead;
     isTailRenderNode_ = isTail;
-    if (isHead && !RSNode_) {
+    if (isHead && !rsNode_) {
         // create RSNode in first node of JSview
-        RSNode_ = CreateRSNode();
-    } else if (!isHead && RSNode_) {
+        rsNode_ = CreateRSNode();
+    } else if (!isHead && rsNode_) {
         // destroy unneeded RSNode
-        RSNode_ = nullptr;
+        rsNode_ = nullptr;
     }
 }
 
@@ -1770,7 +1770,7 @@ void RenderNode::SetPaintRect(const Rect& rect)
 
 void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
 {
-    if (!RSNode_) {
+    if (!rsNode_) {
         LOGW("Parent render_node has no RSNode, creating now.");
         SyncRSNodeBoundary(true, true);
     }
@@ -1780,10 +1780,10 @@ void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
             child->SyncRSNodeBoundary(true, true);
         }
     } else {
-        child->RSNode_ = RSNode_;
+        child->rsNode_ = rsNode_;
     }
-    if (child->RSNode_) {
-        child->RSNode_->NotifyTransition(Rosen::RSTransitionEffect::FADE_IN);
+    if (child->rsNode_) {
+        child->rsNode_->NotifyTransition(Rosen::RSTransitionEffect::FADE_IN);
     }
 }
 

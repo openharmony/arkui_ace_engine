@@ -20,7 +20,7 @@ build_component("grid_v2") {
     "grid_position_controller.cpp",
     "grid_scroll_controller.cpp",
     "render_grid_scroll.cpp",
-    "render_grid_scroll_create.cpp",
+    "render_grid_scroll_creator.cpp",
     "rosen_render_grid_scroll.cpp",
   ]
 }

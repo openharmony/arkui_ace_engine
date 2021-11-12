@@ -17,7 +17,7 @@ build_component("root") {
   sources = [
     "flutter_render_root.cpp",
     "render_root.cpp",
-    "render_root_create.cpp",
+    "render_root_creator.cpp",
     "root_component.cpp",
     "root_element.cpp",
     "rosen_render_root.cpp",

@@ -17,6 +17,7 @@
 
 #include "ability_info.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
@@ -707,6 +708,13 @@ void AceContainer::AttachView(
                 themeManager->LoadCustomTheme(assetManager);
             },
             TaskExecutor::TaskType::UI);
+    }
+
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        OHOS::Rosen::RSUIDirector::Instance().SetUITaskRunner(
+            [taskExecutor = taskExecutor_](const std::function<void()>& task) {
+                taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+            });
     }
 
     taskExecutor_->PostTask(

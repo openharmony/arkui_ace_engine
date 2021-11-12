@@ -148,7 +148,7 @@ ohos_unittest("SvgAnimateTest") {
     "$ace_root/frameworks/core/components/drag_bar/render_drag_bar.cpp",
     "$ace_root/frameworks/core/components/list/render_list_item.cpp",
     "$ace_root/frameworks/core/components/positioned/render_positioned.cpp",
-    "$ace_root/frameworks/core/components/positioned/render_positioned_create.cpp",
+    "$ace_root/frameworks/core/components/positioned/render_positioned_creator.cpp",
     "$ace_root/frameworks/core/components/proxy/render_proxy.cpp",
     "$ace_root/frameworks/core/components/refresh/render_refresh.cpp",
     "$ace_root/frameworks/core/components/root/render_root.cpp",

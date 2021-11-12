@@ -37,7 +37,7 @@ template("ace_core_pipeline_source_set") {
       "base/multi_composed_component.cpp",
       "base/multi_composed_element.cpp",
       "base/related_node.cpp",
-      "base/render_context_create.cpp",
+      "base/render_context_creator.cpp",
       "base/render_element.cpp",
       "base/render_node.cpp",
       "base/rosen_render_context.cpp",

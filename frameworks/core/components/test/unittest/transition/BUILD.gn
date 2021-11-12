@@ -155,7 +155,7 @@ common_module_files = [
   "$ace_root/frameworks/core/components/focus_animation/render_focus_animation.cpp",
   "$ace_root/frameworks/core/components/drop_filter/render_drop_filter.cpp",
   "$ace_root/frameworks/core/components/positioned/render_positioned.cpp",
-  "$ace_root/frameworks/core/components/positioned/render_positioned_create.cpp",
+  "$ace_root/frameworks/core/components/positioned/render_positioned_creator.cpp",
   "$ace_root/frameworks/core/components/proxy/render_proxy.cpp",
   "$ace_root/frameworks/core/components/refresh/render_refresh.cpp",
   "$ace_root/frameworks/core/components/scroll/render_scroll.cpp",

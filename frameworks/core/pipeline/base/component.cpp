@@ -15,11 +15,13 @@
 
 #include "core/pipeline/base/component.h"
 
-#include "algorithm"
+#include <algorithm>
+
 #include "core/common/ace_application_info.h"
 #include "core/pipeline/base/render_component.h"
 
 namespace OHOS::Ace {
+
 std::atomic<int32_t> Component::key_ = 1;
 
 Component::Component()

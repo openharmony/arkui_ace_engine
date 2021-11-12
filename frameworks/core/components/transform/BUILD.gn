@@ -18,7 +18,7 @@ build_component("transform") {
     "click_spring_effect.cpp",
     "flutter_render_transform.cpp",
     "render_transform.cpp",
-    "render_transform_create.cpp",
+    "render_transform_creator.cpp",
     "rosen_render_transform.cpp",
     "transform_component.cpp",
     "transform_element.cpp",

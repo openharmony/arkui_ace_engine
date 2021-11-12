@@ -17,7 +17,7 @@ build_component("video") {
   sources = [
     "flutter_render_texture.cpp",
     "render_texture.cpp",
-    "render_texture_create.cpp",
+    "render_texture_creator.cpp",
     "resource/player.cpp",
     "resource/resource.cpp",
     "resource/texture.cpp",

@@ -17,7 +17,7 @@ build_component("marquee") {
   sources = [
     "flutter_render_marquee.cpp",
     "render_marquee.cpp",
-    "render_marquee_create.cpp",
+    "render_marquee_creator.cpp",
     "rosen_render_marquee.cpp",
   ]
 }
