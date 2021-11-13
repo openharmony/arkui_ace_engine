@@ -168,26 +168,6 @@ const TextStyle& SearchComponent::GetEditingStyle() const
     return declaration_->GetEditingStyle();
 }
 
-void SearchComponent::SetHeight(const Dimension& height)
-{
-    declaration_->SetHeight(height);
-}
-
-const Dimension& SearchComponent::GetHeight() const
-{
-    return declaration_->GetHeight();
-}
-
-void SearchComponent::SetWidth(const Dimension& width)
-{
-    declaration_->SetWidth(width);
-}
-
-const Dimension& SearchComponent::GetWidth() const
-{
-    return declaration_->GetWidth();
-}
-
 void SearchComponent::SetDeclaration(const RefPtr<SearchDeclaration>& declaration)
 {
     if (declaration) {

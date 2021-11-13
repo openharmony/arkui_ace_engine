@@ -223,30 +223,6 @@ public:
         return style.editingStyle;
     }
 
-    void SetHeight(const Dimension& height)
-    {
-        auto& attribute = MaybeResetAttribute<SearchAttribute>(AttributeTag::SPECIALIZED_ATTR);
-        attribute.searchHeight = height;
-    }
-
-    const Dimension& GetHeight() const
-    {
-        auto& attribute = static_cast<SearchAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
-        return attribute.searchHeight;
-    }
-
-    void SetWidth(const Dimension& width)
-    {
-        auto& attribute = MaybeResetAttribute<SearchAttribute>(AttributeTag::SPECIALIZED_ATTR);
-        attribute.searchWidth = width;
-    }
-
-    const Dimension& GetWidth() const
-    {
-        auto& attribute = static_cast<SearchAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
-        return attribute.searchWidth;
-    }
-
 protected:
     void InitSpecialized() override;
     bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;

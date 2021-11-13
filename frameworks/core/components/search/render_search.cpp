@@ -104,13 +104,7 @@ void RenderSearch::PerformLayout()
     if (!renderTextField) {
         return;
     }
-    LayoutParam layout;
-    layout.SetFixedSize(Size(searchComponent_->GetWidth().Value(), searchComponent_->GetHeight().Value()));
-    if (layout.IsValid()) {
-        renderTextField->Layout(layout);
-    } else {
-        renderTextField->Layout(GetLayoutParam());
-    }
+    renderTextField->Layout(GetLayoutParam());
     SetLayoutSize(renderTextField->GetLayoutSize());
     renderTextField->SetSubmitEvent([weak = WeakClaim(this)](const std::string& searchKey) {
         auto renderSearch = weak.Upgrade();
@@ -174,7 +168,17 @@ void RenderSearch::InitRect(const RefPtr<RenderTextField>& renderTextField)
     } else {
         searchTextRect_ = Rect();
     }
-    renderTextField->SetPaddingHorizonForSearch(searchTextRect_.Width());
+
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        double padding = searchTextRect_.Width() + rightBorderWidth +
+                         NormalizeToPx(closeIconHotZoneHorizontal_) -
+                         (NormalizeToPx(closeIconSize_) / 2.0);
+        renderTextField->SetPaddingHorizonForSearch(padding);
+    } else {
+        renderTextField->SetPaddingHorizonForSearch(searchTextRect_.Width());
+    }
+
     renderTextField->MarkNeedLayout();
 
     // Compute rect of close icon.
@@ -209,11 +213,14 @@ void RenderSearch::OnValueChanged(bool needFireChangeEvent, bool needFireSelectC
     if (textEditController_) {
         const auto& currentText = textEditController_->GetValue().text;
         showCloseIcon_ = !currentText.empty();
-        auto renderTextField = AceType::DynamicCast<RenderTextField>(GetChildren().front());
-        if (showCloseIcon_) {
-            renderTextField->SetTextStyle(editingStyle_);
-        } else {
-            renderTextField->SetTextStyle(placeHoldStyle_);
+        auto context = context_.Upgrade();
+        if (context && context->GetIsDeclarative()) {
+            auto renderTextField = AceType::DynamicCast<RenderTextField>(GetChildren().front());
+            if (showCloseIcon_) {
+                renderTextField->SetTextStyle(editingStyle_);
+            } else {
+                renderTextField->SetTextStyle(placeHoldStyle_);
+            }
         }
     }
 }

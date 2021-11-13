@@ -33,7 +33,6 @@ public:
     static void OnSubmit(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
     static void SetHeight(const JSCallbackInfo& info);
-    static void SetWidth(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

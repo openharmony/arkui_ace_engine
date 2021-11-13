@@ -181,7 +181,7 @@ void InitializeComponent(OHOS::Ace::RefPtr<OHOS::Ace::SearchComponent>& searchCo
     searchComponent->SetCloseIconHotZoneHorizontal(searchTheme->GetCloseIconHotZoneSize());
     searchComponent->SetHoverColor(textFieldTheme->GetHoverColor());
     searchComponent->SetPressColor(textFieldTheme->GetPressColor());
-    isPaddingChanged = true;
+    isPaddingChanged = false;
 }
 
 void PrepareSpecializedComponent(OHOS::Ace::RefPtr<OHOS::Ace::SearchComponent>& searchComponent,
@@ -197,7 +197,7 @@ void PrepareSpecializedComponent(OHOS::Ace::RefPtr<OHOS::Ace::SearchComponent>& 
     }
     searchComponent->SetTextDirection(TextDirection::RTL);
     textFieldComponent->SetTextDirection(TextDirection::RTL);
-    UpdateDecorationStyle(boxComponent, textFieldComponent, boxBorder, true);
+    UpdateDecorationStyle(boxComponent, textFieldComponent, boxBorder, false);
     if (GreatOrEqual(boxComponent->GetHeightDimension().Value(), 0.0)) {
         textFieldComponent->SetHeight(boxComponent->GetHeightDimension());
     }
@@ -231,7 +231,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
 
     JSClass<JSSearch>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSearch>::StaticMethod("height", &JSSearch::SetHeight);
-    JSClass<JSSearch>::StaticMethod("width", &JSSearch::SetWidth);
+    JSClass<JSSearch>::StaticMethod("width", &JSViewAbstract::JsWidth);
     JSClass<JSSearch>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSearch>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSearch>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -255,13 +255,13 @@ void JSSearch::Create(const JSCallbackInfo& info)
     }
 
     auto searchComponent = AceType::MakeRefPtr<OHOS::Ace::SearchComponent>();
-    auto textFieldComponent = AceType::MakeRefPtr<OHOS::Ace::TextFieldComponent>();
+    ViewStackProcessor::GetInstance()->Push(searchComponent);
 
+    auto textFieldComponent = AceType::MakeRefPtr<OHOS::Ace::TextFieldComponent>();
     auto textFieldTheme = GetTheme<TextFieldTheme>();
     auto searchTheme = GetTheme<SearchTheme>();
 
     InitializeComponent(searchComponent, textFieldComponent, searchTheme, textFieldTheme);
-
     PrepareSpecializedComponent(searchComponent, textFieldComponent);
 
     auto param = JSRef<JSObject>::Cast(info[0]);
@@ -282,8 +282,6 @@ void JSSearch::Create(const JSCallbackInfo& info)
         auto src = icon->ToString();
         textFieldComponent->SetIconImage(src);
     }
-
-    ViewStackProcessor::GetInstance()->Push(searchComponent);
 }
 
 void JSSearch::SetSearchButton(const std::string& text)
@@ -433,10 +431,11 @@ void JSSearch::SetHeight(const JSCallbackInfo& info)
     }
     Dimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        LOGE("The arg is wrong, it is supposed to be a number arguments");
         return;
     }
     if (LessNotEqual(value.Value(), 0.0)) {
-        return;
+        value.SetValue(0.0);
     }
 
     auto stack = ViewStackProcessor::GetInstance();
@@ -445,31 +444,16 @@ void JSSearch::SetHeight(const JSCallbackInfo& info)
         LOGE("SearchComponent set height failed, SearchComponent is null.");
         return;
     }
-    searchComponent->SetHeight(value);
-}
-
-void JSSearch::SetWidth(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsWidth(info);
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+    auto childComponent = searchComponent->GetChild();
+    if (!childComponent) {
+        LOGE("component error");
         return;
     }
-    Dimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+    if (!textFieldComponent) {
+        LOGE("text component error");
         return;
     }
-    if (LessNotEqual(value.Value(), 0.0)) {
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto searchComponent = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
-    if (!searchComponent) {
-        LOGE("SearchComponent set height failed, SearchComponent is null.");
-        return;
-    }
-
-    searchComponent->SetWidth(value);
+    textFieldComponent->SetHeight(value);
 }
 }

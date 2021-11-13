@@ -80,12 +80,6 @@ public:
     void SetEditingStyle(const TextStyle& style);
     const TextStyle& GetEditingStyle() const;
 
-    void SetHeight(const Dimension& height);
-    const Dimension& GetHeight() const;
-
-    void SetWidth(const Dimension& width);
-    const Dimension& GetWidth() const;
-
     void SetDeclaration(const RefPtr<SearchDeclaration>& declaration);
 
 private:
