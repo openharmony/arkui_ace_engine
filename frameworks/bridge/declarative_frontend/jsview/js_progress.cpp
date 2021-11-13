@@ -31,12 +31,14 @@ void JSProgress::Create(const JSCallbackInfo& info)
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
+
+    auto value = 0;
     auto jsValue = paramObject->GetProperty("value");
-    if (!jsValue->IsNumber()) {
-        LOGE("create progress fail beacase the value is not number");
-        return;
+    if (jsValue->IsNumber()) {
+        value = jsValue->ToNumber<double>();
+    } else {
+        LOGE("create progress fail because the value is not number");
     }
-    auto value = jsValue->ToNumber<double>();
 
     auto total = 100;
     auto jsTotal = paramObject->GetProperty("total");
@@ -44,6 +46,10 @@ void JSProgress::Create(const JSCallbackInfo& info)
         total = jsTotal->ToNumber<int>();
     } else {
         LOGE("create progress fail because the total is not value");
+    }
+
+    if ((value > total) || (value < 0)) {
+        value = 0;
     }
 
     auto progressType = ProgressType::LINEAR;
