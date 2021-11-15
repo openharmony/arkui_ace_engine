@@ -102,14 +102,22 @@ FrontendDelegateImpl::~FrontendDelegateImpl()
 
 void FrontendDelegateImpl::ParseManifest()
 {
-    std::call_once(onceFlag_, [this]() {
+    std::call_once(onceFlag_, [weak = AceType::WeakClaim(this)]() {
         std::string jsonContent;
-        if (!GetAssetContent(MANIFEST_JSON, jsonContent)) {
-            LOGE("RunPage parse manifest.json failed");
-            EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
-            return;
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            if (!delegate->GetAssetContent(MANIFEST_JSON, jsonContent)) {
+                LOGE("RunPage parse manifest.json failed");
+                EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
+                return;
+            }
+            delegate->manifestParser_->Parse(jsonContent);
+            auto task = [delegate]() {
+                delegate->pipelineContextHolder_.Get(); // Wait until Pipeline Context is attached.
+                delegate->manifestParser_->GetAppInfo()->ParseI18nJsonInfo();
+            };
+            delegate->taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
         }
-        manifestParser_->Parse(jsonContent);
     });
 }
 

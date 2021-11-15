@@ -139,7 +139,12 @@ void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::str
         LOGE("RunPage parse manifest.json failed");
         EventReport::SendPageRouterException(PageRouterExcepType::RUN_PAGE_ERR, url);
     }
-
+    taskExecutor_->PostTask([weak = AceType::WeakClaim(this)]() {
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            delegate->manifestParser_->GetAppInfo()->ParseI18nJsonInfo();
+        }},
+    TaskExecutor::TaskType::JS);
     if (!url.empty()) {
         mainPagePath_ = manifestParser_->GetRouter()->GetPagePath(url);
     } else {
