@@ -54,6 +54,11 @@ void JSStepper::Create(const JSCallbackInfo& info)
         stepperComponent->SetButtonPressedHeight(theme->GetButtonPressedHeight());
         stepperComponent->SetControlHeight(theme->GetControlHeight());
         stepperComponent->SetControlMargin(theme->GetControlMargin());
+        stepperComponent->SetControlPadding(theme->GetControlPadding());
+        stepperComponent->SetFocusColor(theme->GetFocusColor());
+        stepperComponent->SetFocusBorderWidth(theme->GetFocusBorderWidth());
+        stepperComponent->SetMouseHoverColor(theme->GetMouseHoverColor());
+        stepperComponent->SetDisabledAlpha(theme->GetDisabledAlpha());
     }
     ViewStackProcessor::GetInstance()->Push(stepperComponent);
 }

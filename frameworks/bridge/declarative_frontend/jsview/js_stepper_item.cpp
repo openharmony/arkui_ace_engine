@@ -35,7 +35,11 @@ void JSStepperItem::Create(const JSCallbackInfo& info)
     RefPtr<StepperItemComponent> stepperItemComponent = stepperItemComponentV2->GetStepperItemComponent();
     RefPtr<StepperTheme> stepperTheme = GetTheme<StepperTheme>();
     if (stepperTheme) {
-        stepperItemComponent->SetTextStyle(stepperTheme->GetTextStyle());
+        TextStyle textStyle_ = stepperTheme->GetTextStyle();
+        textStyle_.SetAdaptTextSize(stepperTheme->GetTextStyle().GetFontSize(), stepperTheme->GetMinFontSize());
+        textStyle_.SetMaxLines(stepperTheme->GetTextMaxLines());
+        textStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
+        stepperItemComponent->SetTextStyle(textStyle_);
     }
     auto focusAnimationTheme = GetTheme<FocusAnimationTheme>();
     if (focusAnimationTheme) {
