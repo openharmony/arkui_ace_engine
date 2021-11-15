@@ -19,7 +19,7 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
-void JSDivider::Create(const std::string& src)
+void JSDivider::Create()
 {
     RefPtr<Component> dividerComponent = AceType::MakeRefPtr<OHOS::Ace::DividerComponent>();
     ViewStackProcessor::GetInstance()->Push(dividerComponent);

@@ -32,7 +32,7 @@ public:
     static void SetStrokeWidth(const JSCallbackInfo& info);
 
     static void JSBind(BindingTarget globalObj);
-    static void Create(const std::string& src);
+    static void Create();
 };
 
 } // namespace OHOS::Ace::Framework
