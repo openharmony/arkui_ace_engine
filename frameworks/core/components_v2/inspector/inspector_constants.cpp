@@ -215,7 +215,7 @@ ACE_EXPORT extern const char PROGRESS_COMPONENT_TAG[] = "ProgressComponent";
 ACE_EXPORT extern const char PROGRESS_ETS_TAG[] = "Progress";
 
 // datapanel
-ACE_EXPORT extern const char DATA_PANEL_COMPONENT_TAG[] = "percentageDataPanelComponent";
+ACE_EXPORT extern const char DATA_PANEL_COMPONENT_TAG[] = "PercentageDataPanelComponent";
 ACE_EXPORT extern const char DATA_PANEL_ETS_TAG[] = "DataPanel";
 
 // sheet

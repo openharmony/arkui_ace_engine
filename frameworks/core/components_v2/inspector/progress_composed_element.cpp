@@ -83,7 +83,7 @@ std::string ProgressComposedElement::GetStyle() const
         ProgressType type = renderProgress->GetProgressType();
         if (type == ProgressType::LINEAR) {
             return std::string("ProgressStyle.Linear");
-        } else if (type == ProgressType::SCALE) {
+        } else if (type == ProgressType::MOON) {
             return std::string("ProgressStyle.Eclipse");
         } else if (type == ProgressType::CIRCLE) {
             return std::string("ProgressStyle.Circular");
