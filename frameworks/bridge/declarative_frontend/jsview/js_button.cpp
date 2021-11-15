@@ -20,7 +20,6 @@
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/padding/padding_component.h"
-#include "core/components/text/text_component.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -39,15 +38,7 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    auto padingComponent = AceType::DynamicCast<PaddingComponent>(buttonComponent->GetChildren().front());
-
-    // Ignore for image button
-    if (buttonComponent == nullptr || padingComponent == nullptr) {
-        return;
-    }
-    auto textComponent = AceType::DynamicCast<TextComponent>(padingComponent->GetChild());
+    auto textComponent = GetTextComponent();
     if (textComponent) {
         auto textStyle = textComponent->GetTextStyle();
         textStyle.SetFontSize(fontSize);
@@ -58,18 +49,44 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
 
 void JSButton::SetFontWeight(std::string value)
 {
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    auto padingComponent = AceType::DynamicCast<PaddingComponent>(buttonComponent->GetChildren().front());
-
-    // Ignore for image button
-    if (buttonComponent == nullptr || padingComponent == nullptr) {
-        return;
-    }
-    auto textComponent = AceType::DynamicCast<TextComponent>(padingComponent->GetChild());
+    auto textComponent = GetTextComponent();
     if (textComponent) {
         auto textStyle = textComponent->GetTextStyle();
         textStyle.SetFontWeight(ConvertStrToFontWeight(value));
+        textComponent->SetTextStyle(std::move(textStyle));
+    }
+}
+
+void JSButton::SetFontStyle(int32_t value)
+{
+    const std::vector<FontStyle> fontStyles = { FontStyle::NORMAL, FontStyle::ITALIC };
+    if (value < 0 || value >= static_cast<int32_t>(fontStyles.size())) {
+        LOGE("Text fontStyle(%d) is invalid value", value);
+        return;
+    }
+    auto textComponent = GetTextComponent();
+    if (textComponent) {
+        auto textStyle = textComponent->GetTextStyle();
+        textStyle.SetFontStyle(fontStyles[value]);
+        textComponent->SetTextStyle(std::move(textStyle));
+    }
+}
+
+void JSButton::SetFontFamily(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    std::vector<std::string> fontFamilies;
+    if (!ParseJsFontFamilies(info[0], fontFamilies)) {
+        LOGE("Parse FontFamilies failed");
+        return;
+    }
+    auto textComponent = GetTextComponent();
+    if (textComponent) {
+        auto textStyle = textComponent->GetTextStyle();
+        textStyle.SetFontFamilies(fontFamilies);
         textComponent->SetTextStyle(std::move(textStyle));
     }
 }
@@ -84,20 +101,29 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], textColor)) {
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    auto padingComponent = AceType::DynamicCast<PaddingComponent>(buttonComponent->GetChildren().front());
-
-    // Ignore for image button
-    if (buttonComponent == nullptr || padingComponent == nullptr) {
-        return;
-    }
-    auto textComponent = AceType::DynamicCast<TextComponent>(padingComponent->GetChild());
+    auto textComponent = GetTextComponent();
     if (textComponent) {
         auto textStyle = textComponent->GetTextStyle();
         textStyle.SetTextColor(textColor);
         textComponent->SetTextStyle(std::move(textStyle));
     }
+}
+
+RefPtr<TextComponent> JSButton::GetTextComponent()
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    if (buttonComponent == nullptr) {
+        LOGE("Button component create failed");
+        return nullptr;
+    }
+    auto padingComponent = AceType::DynamicCast<PaddingComponent>(buttonComponent->GetChildren().front());
+    if (!padingComponent) {
+        LOGE("Padding component create failed");
+        return nullptr;
+    }
+    auto textComponent = AceType::DynamicCast<TextComponent>(padingComponent->GetChild());
+    return textComponent;
 }
 
 void JSButton::SetType(int value)
@@ -106,7 +132,9 @@ void JSButton::SetType(int value)
         (ButtonType)value == ButtonType::ARC || (ButtonType)value == ButtonType::NORMAL) {
         auto stack = ViewStackProcessor::GetInstance();
         auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-        buttonComponent->SetType((ButtonType)value);
+        if (buttonComponent) {
+            buttonComponent->SetType((ButtonType)value);
+        }
     } else {
         LOGE("Setting button to non valid ButtonType %d", value);
     }
@@ -116,7 +144,9 @@ void JSButton::SetStateEffect(bool stateEffect)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    buttonComponent->SetStateEffect(stateEffect);
+    if (buttonComponent) {
+        buttonComponent->SetStateEffect(stateEffect);
+    }
 }
 
 void JSButton::JSBind(BindingTarget globalObj)
@@ -125,6 +155,8 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("fontColor", &JSButton::SetTextColor, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("fontSize", &JSButton::SetFontSize, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("fontWeight", &JSButton::SetFontWeight, MethodOptions::NONE);
+    JSClass<JSButton>::StaticMethod("fontStyle", &JSButton::SetFontStyle, MethodOptions::NONE);
+    JSClass<JSButton>::StaticMethod("fontFamily", &JSButton::SetFontFamily, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("type", &JSButton::SetType, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("stateEffect", &JSButton::SetStateEffect, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("onClick", &JSButton::JsOnClick);
@@ -229,7 +261,9 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
 
         auto buttonComponent =
             AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        buttonComponent->SetClickedEventId(clickEventId);
+        if (buttonComponent) {
+            buttonComponent->SetClickedEventId(clickEventId);
+        }
     }
 }
 
@@ -245,6 +279,10 @@ void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
     }
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    if (buttonComponent == nullptr) {
+        LOGE("Button component create failed");
+        return;
+    }
     buttonComponent->SetBackgroundColor(backgroundColor);
     auto buttonTheme = GetTheme<ButtonTheme>();
     if (buttonTheme) {
@@ -264,7 +302,9 @@ void JSButton::JsWidth(const JSCallbackInfo& info)
     auto stack = ViewStackProcessor::GetInstance();
     auto option = stack->GetImplicitAnimationOption();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    buttonComponent->SetWidth(value, option);
+    if (buttonComponent) {
+        buttonComponent->SetWidth(value, option);
+    }
 }
 
 void JSButton::JsHeight(const JSCallbackInfo& info)
@@ -277,7 +317,9 @@ void JSButton::JsHeight(const JSCallbackInfo& info)
     auto stack = ViewStackProcessor::GetInstance();
     auto option = stack->GetImplicitAnimationOption();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    buttonComponent->SetHeight(value, option);
+    if (buttonComponent) {
+        buttonComponent->SetHeight(value, option);
+    }
 }
 
 void JSButton::JsSize(const JSCallbackInfo& info)
@@ -294,7 +336,10 @@ void JSButton::JsSize(const JSCallbackInfo& info)
 
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-
+    if (buttonComponent == nullptr) {
+        LOGE("Button component create failed");
+        return;
+    }
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> widthValue = sizeObj->GetProperty("width");
     Dimension width;
@@ -320,6 +365,10 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
     }
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    if (buttonComponent == nullptr) {
+        LOGE("Button component create failed");
+        return;
+    }
     buttonComponent->SetRadiusState(true);
     buttonComponent->SetRectRadius(radius);
     JSViewAbstract::SetBorderRadius(radius, stack->GetImplicitAnimationOption());
