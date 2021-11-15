@@ -45,7 +45,6 @@ constexpr double TARGET_START_OPACITY_TIME = 0.3;
 constexpr double TARGET_END_OPACITY_TIME = 1.0;
 constexpr uint8_t TARGET_START_OPACITY_VALUE = 0;
 constexpr uint8_t TARGET_END_OPACITY_VALUE = 255;
-constexpr float SWIPE_TO_ANIMATION_TIME = 500.0f;
 constexpr uint8_t TRANSLATE_RATIO = 10;
 constexpr int32_t COMPONENT_CHANGE_END_LISTENER_KEY = 1001;
 constexpr double MIN_SCROLL_OFFSET = 0.5;
@@ -1246,7 +1245,7 @@ void RenderSwiper::DoSwipeToAnimation(int32_t fromIndex, int32_t toIndex, bool r
             swiper->MarkNeedLayout();
         }
     });
-    swipeToController_->SetDuration(SWIPE_TO_ANIMATION_TIME);
+    swipeToController_->SetDuration(duration_);
     swipeToController_->AddInterpolator(curTranslateAnimation_);
     swipeToController_->AddInterpolator(targetTranslateAnimation_);
     swipeToController_->AddInterpolator(curOpacityAnimation_);
