@@ -20,7 +20,11 @@ namespace OHOS::Ace {
 RefPtr<RenderNode> RenderSvgFilter::Create()
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef USE_ROSEN_BACKEND
         return AceType::MakeRefPtr<RosenRenderSvgFilter>();
+#else
+        return nullptr;
+#endif
     } else {
         return AceType::MakeRefPtr<FlutterRenderSvgFilter>();
     }

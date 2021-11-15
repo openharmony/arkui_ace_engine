@@ -20,7 +20,11 @@ namespace OHOS::Ace {
 RefPtr<RenderNode> RenderMultiChildScroll::Create()
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef USE_ROSEN_BACKEND
         return AceType::MakeRefPtr<RosenRenderMultiChildScroll>();
+#else
+        return nullptr;
+#endif
     } else {
         return AceType::MakeRefPtr<FlutterRenderMultiChildScroll>();
     }

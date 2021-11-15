@@ -18,8 +18,6 @@
 
 #include <list>
 
-#include "render_service_client/core/ui/rs_node.h"
-
 #include "base/geometry/dimension.h"
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
@@ -40,6 +38,10 @@
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline/base/render_layer.h"
 #include "core/pipeline/pipeline_context.h"
+
+namespace OHOS::Rosen {
+class RSNode;
+}
 
 namespace OHOS::Ace {
 
@@ -912,7 +914,7 @@ public:
 
     // mark JSview boundary, create/destroy RSNode if need
     void SyncRSNodeBoundary(bool isHead, bool isTail);
-    const RSNode::SharedPtr& GetRSNode() const { return rsNode_; }
+    const std::shared_ptr<RSNode>& GetRSNode() const { return rsNode_; }
     // sync geometry properties to ROSEN backend
     virtual void SyncGeometryProperties();
 
@@ -1017,7 +1019,7 @@ protected:
     AnimationOption nonStrictOption_; // clear after transition done
     MotionPathOption motionPathOption_;
 
-    virtual RSNode::SharedPtr CreateRSNode() const { return RSNode::Create(); }
+    virtual std::shared_ptr<RSNode> CreateRSNode() const;
     // JSview boundary, all nodes in [head, tail] share the same RSNode
     bool IsHeadRenderNode() const { return isHeadRenderNode_; }
     bool IsTailRenderNode() const { return isTailRenderNode_; }
@@ -1087,7 +1089,7 @@ private:
     bool isPercentSize_ = false;
     uint32_t updateType_ = 0;
 
-    RSNode::SharedPtr rsNode_ = nullptr;
+    std::shared_ptr<RSNode> rsNode_ = nullptr;
     bool isHeadRenderNode_ = false;
     bool isTailRenderNode_ = false;
     // Sync view hierarchy to RSNode

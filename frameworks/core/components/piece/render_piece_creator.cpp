@@ -20,7 +20,11 @@ namespace OHOS::Ace {
 RefPtr<RenderNode> RenderPiece::Create()
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef USE_ROSEN_BACKEND
         return AceType::MakeRefPtr<RosenRenderPiece>();
+#else
+        return nullptr;
+#endif
     } else {
         return AceType::MakeRefPtr<FlutterRenderPiece>();
     }

@@ -15,7 +15,9 @@
 
 #include "core/pipeline/base/rosen_render_context.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "render_service_client/core/ui/rs_node.h"
+#include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -138,7 +140,8 @@ void RosenRenderContext::ClipHoleEnd()
     canvas->restore();
 }
 
-void RosenRenderContext::InitContext(const RSNode::SharedPtr& rsNode, const Rect& rect, const Offset& initialOffset)
+void RosenRenderContext::InitContext(
+    const std::shared_ptr<RSNode>& rsNode, const Rect& rect, const Offset& initialOffset)
 {
     LOGD("InitContext with width %{public}lf height %{public}lf", rect.Width(), rect.Height());
     rsNode_ = rsNode;
@@ -159,9 +162,30 @@ SkCanvas* RosenRenderContext::GetCanvas()
     return rosenCanvas_;
 }
 
-const Rosen::RSNode::SharedPtr& RosenRenderContext::GetRSNode()
+const std::shared_ptr<RSNode>& RosenRenderContext::GetRSNode()
 {
     return rsNode_;
 }
 
+sk_sp<SkPicture> RosenRenderContext::FinishRecordingAsPicture()
+{
+    if (!recorder_) {
+        return nullptr;
+    }
+    return recorder_->finishRecordingAsPicture();
+}
+
+sk_sp<SkImage> RosenRenderContext::FinishRecordingAsImage()
+{
+    if (!recorder_) {
+    return nullptr;
+    }
+    auto picture = recorder_->finishRecordingAsPicture();
+    if (!picture) {
+        return nullptr;
+    }
+    auto image = SkImage::MakeFromPicture(picture, { estimatedRect_.Width(), estimatedRect_.Height() }, nullptr,
+        nullptr, SkImage::BitDepth::kU8, nullptr);
+    return image;
+}
 } // namespace OHOS::Ace

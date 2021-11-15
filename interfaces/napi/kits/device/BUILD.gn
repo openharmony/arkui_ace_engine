@@ -29,8 +29,6 @@ ohos_shared_library("device") {
     "//foundation/ace/napi/:ace_napi",
   ]
 
-  configs = [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
-
   relative_install_dir = "module"
 
   subsystem_name = "ace"

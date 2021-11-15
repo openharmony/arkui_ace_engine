@@ -81,7 +81,7 @@ void Scheduler::OnFrame(uint64_t nanoTimestamp)
     }
 }
 
-bool Scheduler::Animate(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+bool Scheduler::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()> propertyCallback, const std::function<void()>& finishCallBack)
 {
     auto context = context_.Upgrade();
@@ -98,7 +98,7 @@ bool Scheduler::Animate(const AnimationOption& option, const Rosen::RSAnimationT
     return context->Animate(option, curve, propertyCallback, finishCallBack);
 }
 
-void Scheduler::OpenImplicitAnimation(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+void Scheduler::OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallBack)
 {
     auto context = context_.Upgrade();
@@ -132,7 +132,7 @@ bool Scheduler::CloseImplicitAnimation()
 }
 
 void Scheduler::AddKeyFrame(
-    float fraction, const Rosen::RSAnimationTimingCurve& curve, const std::function<void()>& propertyCallback)
+    float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback)
 {
     auto context = context_.Upgrade();
     if (context == nullptr) {

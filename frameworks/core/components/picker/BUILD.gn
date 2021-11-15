@@ -37,7 +37,9 @@ build_component("picker") {
     "render_picker_column_creator.cpp",
     "render_picker_option.cpp",
     "render_picker_value.cpp",
-    "rosen_render_picker_base.cpp",
     "toss_animation_controller.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_picker_base.cpp" ]
+  }
 }

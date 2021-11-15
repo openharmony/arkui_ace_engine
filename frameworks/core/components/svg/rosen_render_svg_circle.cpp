@@ -20,6 +20,7 @@
 #include "include/core/SkPicture.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkShader.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"

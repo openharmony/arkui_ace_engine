@@ -18,8 +18,10 @@ build_component("tip") {
     "flutter_render_tip.cpp",
     "render_tip.cpp",
     "render_tip_creator.cpp",
-    "rosen_render_tip.cpp",
     "tip_component.cpp",
     "tip_element.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_tip.cpp" ]
+  }
 }

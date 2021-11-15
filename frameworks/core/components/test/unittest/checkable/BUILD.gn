@@ -189,15 +189,9 @@ ohos_unittest("CheckableComponentTest") {
     "$ace_root/frameworks/core/components/checkable/render_radio_creator.cpp",
     "$ace_root/frameworks/core/components/checkable/render_switch.cpp",
     "$ace_root/frameworks/core/components/checkable/render_switch_creator.cpp",
-    "$ace_root/frameworks/core/components/checkable/rosen_render_checkbox.cpp",
-    "$ace_root/frameworks/core/components/checkable/rosen_render_radio.cpp",
-    "$ace_root/frameworks/core/components/checkable/rosen_render_switch.cpp",
     "$ace_root/frameworks/core/components/common/painter/flutter_checkable_painter.cpp",
     "$ace_root/frameworks/core/components/common/painter/flutter_svg_painter.cpp",
     "$ace_root/frameworks/core/components/common/painter/flutter_universal_painter.cpp",
-    "$ace_root/frameworks/core/components/common/painter/rosen_checkable_painter.cpp",
-    "$ace_root/frameworks/core/components/common/painter/rosen_svg_painter.cpp",
-    "$ace_root/frameworks/core/components/common/painter/rosen_universal_painter.cpp",
     "$ace_root/frameworks/core/components/display/render_display.cpp",
     "$ace_root/frameworks/core/components/flex/render_flex.cpp",
     "$ace_root/frameworks/core/components/flex/render_flex_item.cpp",
@@ -239,6 +233,17 @@ ohos_unittest("CheckableComponentTest") {
     "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
   ]
 
+  if (use_rosen_backend) {
+    sources += [
+      "$ace_root/frameworks/core/components/checkable/rosen_render_checkbox.cpp",
+      "$ace_root/frameworks/core/components/checkable/rosen_render_radio.cpp",
+      "$ace_root/frameworks/core/components/checkable/rosen_render_switch.cpp",
+      "$ace_root/frameworks/core/components/common/painter/rosen_checkable_painter.cpp",
+      "$ace_root/frameworks/core/components/common/painter/rosen_svg_painter.cpp",
+      "$ace_root/frameworks/core/components/common/painter/rosen_universal_painter.cpp",
+    ]
+  }
+
   # add sources only needed by wearable like watch.
   if (is_wearable_product) {
     sources += [ "$root_out_dir/ace/framework/core/components/theme/theme_constants_watch.cpp" ]
@@ -262,7 +267,6 @@ ohos_unittest("CheckableComponentTest") {
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "$ace_root/build/third_party/cJSON:third_party_cjson",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]

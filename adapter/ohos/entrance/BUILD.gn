@@ -38,7 +38,10 @@ template("ace_ohos_standard_source_set") {
       defines += [ "_ARM64_" ]
     }
 
-    configs = [ "$ace_root:ace_config" ]
+    configs = [
+      "$ace_root:ace_config",
+      "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config",
+    ]
 
     include_dirs = [
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/featureAbility",

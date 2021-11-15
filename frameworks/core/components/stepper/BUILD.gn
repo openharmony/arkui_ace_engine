@@ -21,8 +21,6 @@ build_component("stepper") {
     "render_stepper_creator.cpp",
     "render_stepper_item.cpp",
     "render_stepper_item_creator.cpp",
-    "rosen_render_stepper.cpp",
-    "rosen_render_stepper_item.cpp",
     "stepper_animation_controller.cpp",
     "stepper_component.cpp",
     "stepper_element.cpp",
@@ -30,4 +28,10 @@ build_component("stepper") {
     "stepper_item_component_v2.cpp",
     "stepper_item_element.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [
+      "rosen_render_stepper.cpp",
+      "rosen_render_stepper_item.cpp",
+    ]
+  }
 }

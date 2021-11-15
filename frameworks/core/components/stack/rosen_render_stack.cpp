@@ -15,6 +15,8 @@
 
 #include "core/components/stack/rosen_render_stack.h"
 
+#include "render_service_client/core/ui/rs_node.h"
+
 namespace OHOS::Ace {
 
 void RosenRenderStack::PerformLayout()

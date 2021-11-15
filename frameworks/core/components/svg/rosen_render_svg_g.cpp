@@ -15,6 +15,8 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_g.h"
 
+#include "render_service_client/core/ui/rs_node.h"
+
 #include "core/pipeline/base/rosen_render_context.h"
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components/svg/render_svg_filter.h"

@@ -15,6 +15,8 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg.h"
 
+#include "render_service_client/core/ui/rs_node.h"
+
 #include "core/pipeline/base/rosen_render_context.h"
 #include "frameworks/core/components/transform/rosen_render_transform.h"
 
@@ -31,7 +33,7 @@ void RosenRenderSvg::Paint(RenderContext& context, const Offset& offset)
     RenderNode::Paint(context, offset);
 }
 
-void RosenRenderSvg::UpdateTransformByGlobalOffset(const RSNode::SharedPtr& rsNode)
+void RosenRenderSvg::UpdateTransformByGlobalOffset(const std::shared_ptr<RSNode>& rsNode)
 {
     if (rsNode == nullptr) {
         return;

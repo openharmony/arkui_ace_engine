@@ -18,6 +18,13 @@
 #include <algorithm>
 #include <set>
 
+#ifdef USE_ROSEN_BACKEND
+#include "render_service_client/core/transition/rs_transition.h"
+#include "render_service_client/core/ui/rs_node.h"
+
+#include "core/animation/native_curve_helper.h"
+#endif
+
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -31,7 +38,6 @@
 #include "core/components/transform/render_transform.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/component.h"
-#include "render_service_client/core/transition/rs_transition.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -112,9 +118,11 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
         child->SetParent(AceType::WeakClaim(this));
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
     }
+#ifdef USE_ROSEN_BACKEND
     if (child->rsNode_) {
         child->rsNode_->NotifyTransition(Rosen::RSTransitionEffect::FADE_OUT);
     }
+#endif
     LOGD("RenderNode RemoveChild %{public}zu", children_.size());
 }
 
@@ -585,9 +593,9 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     // Calculates the local point location in this node.
     const auto localPoint = transformPoint - GetPaintRect().GetOffset();
     bool dispatchSuccess = false;
-    const auto& sortedChildern = SortChildrenByZIndex(GetChildren());
+    const auto& sortedChildren = SortChildrenByZIndex(GetChildren());
     if (IsChildrenTouchEnable()) {
-        for (auto iter = sortedChildern.rbegin(); iter != sortedChildern.rend(); ++iter) {
+        for (auto iter = sortedChildren.rbegin(); iter != sortedChildren.rend(); ++iter) {
             auto& child = *iter;
             if (!child->GetVisible() || child->disabled_ || child->disableTouchEvent_) {
                 continue;
@@ -1065,11 +1073,15 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
     if (renderComponent) {
         motionPathOption_ = renderComponent->GetMotionPathOption();
+#ifdef USE_ROSEN_BACKEND
         if (SystemProperties::GetRosenBackendEnabled() && motionPathOption_.IsValid()) {
             if (auto rsNode = GetRSNode()) {
-                rsNode->SetMotionPathOption(motionPathOption_.ToNativeMotionPathOption());
+                auto nativeMotionOption = std::make_shared<Rosen::RSMotionPathOption>(
+                    NativeCurveHelper::ToNativeMotionPathOption(motionPathOption_));
+                rsNode->SetMotionPathOption(nativeMotionOption);
             }
         }
+#endif
 
         positionParam_ = renderComponent->GetPositionParam();
         flexWeight_ = renderComponent->GetFlexWeight();
@@ -1100,7 +1112,9 @@ void RenderNode::UpdateOpacity(uint8_t opacity)
     if (opacity_ != opacity) {
         opacity_ = opacity;
         if (auto rsNode = GetRSNode()) {
+#ifdef USE_ROSEN_BACKEND
             rsNode->SetAlpha(opacity_ / 255.0);
+#endif
         } else {
             MarkNeedRender();
         }
@@ -1722,6 +1736,7 @@ void RenderNode::SetDepth(int32_t depth)
 
 void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
 {
+#ifdef USE_ROSEN_BACKEND
     isHeadRenderNode_ = isHead;
     isTailRenderNode_ = isTail;
     if (isHead && !rsNode_) {
@@ -1731,6 +1746,7 @@ void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
         // destroy unneeded RSNode
         rsNode_ = nullptr;
     }
+#endif
 }
 
 void RenderNode::MarkNeedSyncGeometryProperties()
@@ -1745,6 +1761,7 @@ void RenderNode::MarkNeedSyncGeometryProperties()
 
 void RenderNode::SyncGeometryProperties()
 {
+#ifdef USE_ROSEN_BACKEND
     if (!IsTailRenderNode()) {
         return;
     }
@@ -1755,6 +1772,7 @@ void RenderNode::SyncGeometryProperties()
     Offset paintOffset = GetPaintOffset();
     Size paintSize = GetLayoutSize();
     rsNode->SetFrame(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
+#endif
 }
 
 void RenderNode::SetPaintRect(const Rect& rect)
@@ -1770,6 +1788,7 @@ void RenderNode::SetPaintRect(const Rect& rect)
 
 void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
 {
+#ifdef USE_ROSEN_BACKEND
     if (!rsNode_) {
         LOGW("Parent render_node has no RSNode, creating now.");
         SyncRSNodeBoundary(true, true);
@@ -1785,6 +1804,7 @@ void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
     if (child->rsNode_) {
         child->rsNode_->NotifyTransition(Rosen::RSTransitionEffect::FADE_IN);
     }
+#endif
 }
 
 void RenderNode::MarkParentNeedRender() const
@@ -1798,6 +1818,15 @@ void RenderNode::MarkParentNeedRender() const
     } else {
         renderNode->MarkParentNeedRender();
     }
+}
+
+std::shared_ptr<RSNode> RenderNode::CreateRSNode() const
+{
+#ifdef USE_ROSEN_BACKEND
+    return Rosen::RSNode::Create();
+#else
+    return nullptr;
+#endif
 }
 
 } // namespace OHOS::Ace

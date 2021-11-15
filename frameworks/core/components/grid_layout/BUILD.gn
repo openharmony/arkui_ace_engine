@@ -23,6 +23,8 @@ build_component("grid_layout") {
     "render_grid_layout.cpp",
     "render_grid_layout_creator.cpp",
     "render_grid_layout_item.cpp",
-    "rosen_render_grid_layout.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_grid_layout.cpp" ]
+  }
 }

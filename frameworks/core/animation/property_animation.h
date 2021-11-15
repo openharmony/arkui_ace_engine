@@ -56,7 +56,7 @@ public:
 private:
     void OnNormalizedTimestampChanged(float normalized, bool reverse) override;
     void OnInitNotify(float normalizedTime, bool reverse) override;
-    Rosen::RSAnimationTimingCurve GetNativeCurve() override;
+    RefPtr<Curve> GetCurve() override;
     void Calculate(float keyTime);
     void TriggerFrame(const RefPtr<Animatable>& start, const RefPtr<Animatable>& end, float time);
 

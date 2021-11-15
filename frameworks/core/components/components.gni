@@ -48,6 +48,11 @@ template("build_component") {
 
       configs = []
       configs += [ "$ace_root:ace_config" ]
+
+      if (use_rosen_backend) {
+        configs += [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
+      }
+
       if (defined(invoker.configs)) {
         configs += invoker.configs
       }

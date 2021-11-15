@@ -19,6 +19,7 @@
 #include "core/animation/curve.h"
 
 namespace OHOS::Ace {
+class NativeCurveHelper;
 
 // Third-order bezier curve. Formula as follows:
 // B(m) = (1-m)^3*P0 + 3m(1-m)^2*P1 + 3m^2*P2 + m^3*P3，
@@ -32,7 +33,6 @@ public:
     ~CubicCurve() override = default;
 
     float MoveInternal(float time) override;
-    Rosen::RSAnimationTimingCurve ToNativeCurve() override;
     const std::string ToString() override;
 
 private:
@@ -44,6 +44,8 @@ private:
     float y0_;                       // Y-axis of the first point (P1)
     float x1_;                       // X-axis of the second point (P2)
     float y1_;                       // Y-axis of the second point (P2)
+
+    friend class NativeCurveHelper;
 };
 
 } // namespace OHOS::Ace

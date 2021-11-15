@@ -26,6 +26,8 @@
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/render_node.h"
 
+class SkCanvas;
+
 namespace OHOS::Ace {
 namespace {
 

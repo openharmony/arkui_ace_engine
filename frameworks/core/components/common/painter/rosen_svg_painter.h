@@ -84,7 +84,7 @@ public:
     static double MeasureTextPathBounds(const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo, Rect& bounds);
     static void StringToPoints(const char str[], std::vector<SkPoint>& points);
     static void UpdateMotionMatrix(
-        const RSNode::SharedPtr& rsNode, const std::string& path, const std::string& rotate, double percent);
+        const std::shared_ptr<RSNode>& rsNode, const std::string& path, const std::string& rotate, double percent);
     static SkMatrix ToSkMatrix(const Matrix4& matrix4);
 
     static void SetGradientStyle(SkPaint& skPaint, const FillState& fillState, double opacity);

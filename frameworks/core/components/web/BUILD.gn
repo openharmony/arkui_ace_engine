@@ -20,8 +20,10 @@ build_component("web") {
     "render_web_creator.cpp",
     "resource/web_delegate.cpp",
     "resource/web_resource.cpp",
-    "rosen_render_web.cpp",
     "web_component.cpp",
     "web_element.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_web.cpp" ]
+  }
 }

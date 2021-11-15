@@ -24,9 +24,6 @@ build_component("tab_bar") {
     "render_tab_bar_item_creator.cpp",
     "render_tab_content.cpp",
     "render_tab_content_creator.cpp",
-    "rosen_render_tab_bar.cpp",
-    "rosen_render_tab_bar_item.cpp",
-    "rosen_render_tab_content.cpp",
     "tab_bar_component.cpp",
     "tab_bar_element.cpp",
     "tab_bar_indicator_component.cpp",
@@ -39,4 +36,11 @@ build_component("tab_bar") {
     "tab_controller.cpp",
     "tabs_component.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [
+      "rosen_render_tab_bar.cpp",
+      "rosen_render_tab_bar_item.cpp",
+      "rosen_render_tab_content.cpp",
+    ]
+  }
 }

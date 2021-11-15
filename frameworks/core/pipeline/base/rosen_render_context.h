@@ -16,14 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ROSEN_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ROSEN_RENDER_CONTEXT_H
 
-#include "render_service_client/core/ui/rs_node.h"
 #include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
 
 #include "base/geometry/rect.h"
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline/base/render_node.h"
+
+class SkImage;
+class SkPicture;
+class SkPictureRecorder;
 
 namespace OHOS::Ace {
 
@@ -40,9 +42,10 @@ public:
     void ClipHoleBegin(const Rect& holeRect) override;
     void ClipHoleEnd() override;
 
-    void InitContext(const RSNode::SharedPtr& rsNode, const Rect& rect, const Offset& initialOffset = Offset::Zero());
+    void InitContext(
+        const std::shared_ptr<RSNode>& rsNode, const Rect& rect, const Offset& initialOffset = Offset::Zero());
     SkCanvas* GetCanvas();
-    const RSNode::SharedPtr& GetRSNode();
+    const std::shared_ptr<RSNode>& GetRSNode();
 
     void StartRecording();
     void StopRecordingIfNeeded();
@@ -52,34 +55,11 @@ public:
         return !!recordingCanvas_;
     }
 
-    sk_sp<SkPicture> FinishRecordingAsPicture()
-    {
-        if (recorder_) {
-            auto picture = recorder_->finishRecordingAsPicture();
-            if (picture) {
-                return picture;
-            }
-        }
-        return nullptr;
-    }
-
-    sk_sp<SkImage> FinishRecordingAsImage()
-    {
-        if (recorder_) {
-            auto picture = recorder_->finishRecordingAsPicture();
-            if (picture) {
-                auto image = SkImage::MakeFromPicture(picture, { estimatedRect_.Width(), estimatedRect_.Height() },
-                    nullptr, nullptr, SkImage::BitDepth::kU8, nullptr);
-                if (image) {
-                    return image;
-                }
-            }
-        }
-        return nullptr;
-    }
+    sk_sp<SkPicture> FinishRecordingAsPicture();
+    sk_sp<SkImage> FinishRecordingAsImage();
 
 private:
-    RSNode::SharedPtr rsNode_ = nullptr;
+    std::shared_ptr<RSNode> rsNode_ = nullptr;
     SkPictureRecorder* recorder_ = nullptr;
     SkCanvas* recordingCanvas_ = nullptr;
     SkCanvas* rosenCanvas_ = nullptr;

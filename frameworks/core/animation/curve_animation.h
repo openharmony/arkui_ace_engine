@@ -89,9 +89,9 @@ public:
         return Interpolator::RunAsync(weakScheduler, option, prepareCallback, finishCallback);
     }
 
-    Rosen::RSAnimationTimingCurve GetNativeCurve() override
+    RefPtr<Curve> GetCurve() override
     {
-        return curve_ != nullptr ? curve_->ToNativeCurve() : Rosen::RSAnimationTimingCurve::DEFAULT;
+        return curve_ != nullptr ? curve_ : AceType::DynamicCast<Curve>(Curves::EASE_IN_OUT);
     }
 
 private:

@@ -17,6 +17,7 @@
 
 #include <cmath>
 
+#include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
 
 namespace OHOS::Ace {

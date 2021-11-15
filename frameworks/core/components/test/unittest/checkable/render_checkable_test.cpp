@@ -120,9 +120,9 @@ SkCanvas* RosenRenderContext::GetCanvas()
     return nullptr;
 }
 
-const Rosen::RSNode::SharedPtr& RosenRenderContext::GetRSNode()
+const std::shared_ptr<RSNode>& RosenRenderContext::GetRSNode()
 {
-    return rsNode_;
+    return nullptr;
 }
 
 class MockRenderSwitch final : public RenderSwitch {

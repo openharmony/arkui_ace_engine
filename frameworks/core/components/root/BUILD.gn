@@ -20,6 +20,8 @@ build_component("root") {
     "render_root_creator.cpp",
     "root_component.cpp",
     "root_element.cpp",
-    "rosen_render_root.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_root.cpp" ]
+  }
 }

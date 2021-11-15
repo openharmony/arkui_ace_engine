@@ -20,6 +20,8 @@ build_component("custom_paint") {
     "flutter_render_offscreen_canvas.cpp",
     "render_custom_paint.cpp",
     "render_custom_paint_creator.cpp",
-    "rosen_render_custom_paint.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_custom_paint.cpp" ]
+  }
 }

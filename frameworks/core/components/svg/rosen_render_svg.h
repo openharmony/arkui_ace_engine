@@ -27,7 +27,7 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
 
 private:
-    void UpdateTransformByGlobalOffset(const RSNode::SharedPtr& rsNode);
+    void UpdateTransformByGlobalOffset(const std::shared_ptr<RSNode>& rsNode);
 };
 
 } // namespace OHOS::Ace

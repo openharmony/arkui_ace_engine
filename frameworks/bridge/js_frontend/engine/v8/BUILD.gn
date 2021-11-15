@@ -54,10 +54,7 @@ template("js_engine_v8") {
       "v8_xcomponent_bridge.cpp",
     ]
 
-    deps = [
-      # rosen backend
-      "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
-    ]
+    deps = []
     if (use_shared_v8) {
       deps += [ "$v8_root:v8_shared" ]
     } else {

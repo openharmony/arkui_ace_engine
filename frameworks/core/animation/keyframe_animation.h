@@ -108,7 +108,7 @@ public:
             return false;
         }
 
-        scheduler->OpenImplicitAnimation(option, Curves::EASE->ToNativeCurve(), finishCallback);
+        scheduler->OpenImplicitAnimation(option, Curves::EASE, finishCallback);
 
         for (const auto& keyframe : keyframes_) {
             if (keyframe == nullptr) {
@@ -116,7 +116,7 @@ public:
             }
 
             float fraction = keyframe->GetKeyTime();
-            auto curve = keyframe->GetCurve() ? keyframe->GetCurve()->ToNativeCurve() : Curves::EASE->ToNativeCurve();
+            auto curve = keyframe->GetCurve() ? keyframe->GetCurve() : AceType::DynamicCast<Curve>(Curves::EASE);
             scheduler->AddKeyFrame(
                 fraction, curve, [weak = AceType::WeakClaim(this), callback = prepareCallback, fraction]() {
                     auto animation = weak.Upgrade();

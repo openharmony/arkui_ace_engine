@@ -21,6 +21,7 @@
 #include "flutter/lib/ui/text/paragraph_builder.h"
 #include "flutter/third_party/icu/source/common/unicode/uchar.h"
 #include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include "render_service_client/core/ui/rs_node.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 
 #include "base/i18n/localization.h"

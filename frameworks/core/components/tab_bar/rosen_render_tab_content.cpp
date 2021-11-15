@@ -15,6 +15,8 @@
 
 #include "core/components/tab_bar/rosen_render_tab_content.h"
 
+#include "render_service_client/core/ui/rs_node.h"
+
 namespace OHOS::Ace {
 
 void RosenRenderTabContent::Update(const RefPtr<Component>& component)

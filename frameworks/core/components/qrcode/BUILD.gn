@@ -49,8 +49,10 @@ build_component("qrcode") {
     "qrcode_component.cpp",
     "render_qrcode.cpp",
     "render_qrcode_creator.cpp",
-    "rosen_render_qrcode.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_qrcode.cpp" ]
+  }
 
   deps = [ ":qrcodegen" ]
 }

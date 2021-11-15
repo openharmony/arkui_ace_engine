@@ -86,9 +86,9 @@ void SpringAnimation::InitEstimateDuration()
     }
 }
 
-Rosen::RSAnimationTimingCurve SpringAnimation::GetNativeCurve()
+RefPtr<Curve> SpringAnimation::GetCurve()
 {
-    return Rosen::RSAnimationTimingCurve::CreateCustomCurve([weak = AceType::WeakClaim(this)](float fraction) -> float {
+    return MakeRefPtr<CustomCurve>([weak = AceType::WeakClaim(this)](float fraction) -> float {
         auto animation = weak.Upgrade();
         if (animation == nullptr) {
             LOGE("create spring curve failed, animation is null!");

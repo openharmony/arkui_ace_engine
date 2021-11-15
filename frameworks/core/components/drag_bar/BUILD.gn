@@ -20,6 +20,8 @@ build_component("drag_bar") {
     "flutter_render_drag_bar.cpp",
     "render_drag_bar.cpp",
     "render_drag_bar_creator.cpp",
-    "rosen_render_drag_bar.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_drag_bar.cpp" ]
+  }
 }

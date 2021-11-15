@@ -19,6 +19,8 @@ build_component("clip") {
     "flutter_render_clip.cpp",
     "render_clip.cpp",
     "render_clip_creator.cpp",
-    "rosen_render_clip.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_clip.cpp" ]
+  }
 }

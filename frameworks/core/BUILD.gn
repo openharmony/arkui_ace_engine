@@ -203,7 +203,6 @@ template("ace_core_source_set") {
       "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
       "$ace_flutter_engine_root/skia:ace_skia_$platform",
       "pipeline:ace_core_pipeline_$platform",
-      "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     ]
 
     deps += [
@@ -307,6 +306,11 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_v2/list:ace_core_components_list_v2_$platform",
       "$ace_root/frameworks/core/components_v2/swiper:ace_core_components_swiper_v2_$platform",
     ]
+
+    if (use_rosen_backend) {
+      sources += [ "animation/native_curve_helper.cpp" ]
+      deps += [ "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client" ]
+    }
 
     if (!use_mingw_win && !use_mac && !is_wearable_product &&
         !is_standard_system) {

@@ -241,7 +241,7 @@ void AceAbility::OnStart(const Want& want)
         container->SetResourceConfiguration(aceResCfg);
         container->SetPackagePathStr(resPath);
     }
-    
+
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
     OHOS::sptr<OHOS::Window> window = Ability::GetWindow();

@@ -15,6 +15,7 @@
 
 #include "core/components/progress/rosen_render_progress.h"
 
+#include "render_service_client/core/ui/rs_node.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 
 #include "core/components/progress/progress_component.h"

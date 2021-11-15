@@ -47,7 +47,12 @@ bool IsTraceEnabled()
 
 bool IsRosenBackendEnabled()
 {
-    return system::GetParameter("debug.rosen_engine.open", "0") == "1";
+#ifdef USE_ROSEN_BACKEND
+    return (system::GetParameter("persist.ace.rosen.backend.enabled", "0") == "1" ||
+        system::GetParameter("debug.ace.rosen.backend.enabled", "0") == "1");
+#else
+    return false;
+#endif
 }
 
 bool IsAccessibilityEnabled()

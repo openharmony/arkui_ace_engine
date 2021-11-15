@@ -18,6 +18,8 @@ build_component("shadow") {
     "flutter_render_shadow.cpp",
     "render_shadow.cpp",
     "render_shadow_creator.cpp",
-    "rosen_render_shadow.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_shadow.cpp" ]
+  }
 }

@@ -19,6 +19,8 @@ build_component("badge") {
     "flutter_render_badge.cpp",
     "render_badge.cpp",
     "render_badge_creator.cpp",
-    "rosen_render_badge.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_badge.cpp" ]
+  }
 }

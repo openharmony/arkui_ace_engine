@@ -15,6 +15,8 @@
 
 #include "core/components/tab_bar/rosen_render_tab_bar_item.h"
 
+#include "render_service_client/core/ui/rs_node.h"
+
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/pipeline/base/rosen_render_context.h"
 

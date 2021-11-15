@@ -15,6 +15,8 @@
 
 #include "core/components/grid_layout/rosen_render_grid_layout.h"
 
+#include "render_service_client/core/ui/rs_node.h"
+
 namespace OHOS::Ace {
 
 void RosenRenderGridLayout::Update(const RefPtr<Component>& component)

@@ -17,6 +17,7 @@
 
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/text/paragraph_builder.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"

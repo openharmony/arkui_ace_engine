@@ -20,6 +20,7 @@
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/third_party/icu/source/common/unicode/uchar.h"
 #include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"

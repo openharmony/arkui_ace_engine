@@ -23,8 +23,6 @@ ohos_shared_library("grid") {
 
   sources = [ "js_grid.cpp" ]
 
-  configs = [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
-
   deps = [
     "$ace_root/build:libace",
     "//foundation/ace/napi/:ace_napi",

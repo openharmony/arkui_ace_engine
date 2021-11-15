@@ -19,6 +19,8 @@ build_component("divider") {
     "flutter_render_divider.cpp",
     "render_divider.cpp",
     "render_divider_creator.cpp",
-    "rosen_render_divider.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_divider.cpp" ]
+  }
 }

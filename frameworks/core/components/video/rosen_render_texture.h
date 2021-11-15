@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_ROSEN_RENDER_TEXTURE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_ROSEN_RENDER_TEXTURE_H
 
-#include "render_service_client/core/ui/rs_texture_node.h"
-
 #include "core/components/video/render_texture.h"
 
 namespace OHOS::Ace {
@@ -31,10 +29,7 @@ public:
 
     void Paint(RenderContext& context, const Offset& offset) override;
 
-    RSNode::SharedPtr CreateRSNode() const override
-    {
-        return OHOS::Rosen::RSTextureNode::Create();
-    }
+    std::shared_ptr<RSNode> CreateRSNode() const override;
 
     void Update(const RefPtr<Component>& component) override;
     void UpdateOpacity(uint8_t opacity) override;

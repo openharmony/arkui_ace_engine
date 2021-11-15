@@ -15,6 +15,8 @@
 
 #include "core/components/display/rosen_render_display.h"
 
+#include "render_service_client/core/ui/rs_node.h"
+
 namespace OHOS::Ace {
 
 void RosenRenderDisplay::Update(const RefPtr<Component>& component)

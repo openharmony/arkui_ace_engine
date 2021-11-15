@@ -19,6 +19,8 @@ build_component("drop_filter") {
     "flutter_render_drop_filter.cpp",
     "render_drop_filter.cpp",
     "render_drop_filter_creator.cpp",
-    "rosen_render_drop_filter.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_drop_filter.cpp" ]
+  }
 }

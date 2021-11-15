@@ -811,7 +811,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         connection_->Show(isFocusViewChanged, GetInstanceId());
 #endif
     }
-    
+
     if (keyboard_ != TextInputType::MULTILINE) {
         resetToStart_ = false;
         MarkNeedLayout();

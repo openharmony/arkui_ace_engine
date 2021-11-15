@@ -17,6 +17,9 @@
 
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
+#ifdef USE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_texture_node.h"
+#endif
 
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -142,6 +145,11 @@ void RosenRenderTexture::DumpTree(int32_t depth)
     for (const auto& item : children) {
         item->DumpTree(depth + 1);
     }
+}
+
+std::shared_ptr<RSNode> RosenRenderTexture::CreateRSNode() const
+{
+    return OHOS::Rosen::RSTextureNode::Create();
 }
 
 } // namespace OHOS::Ace

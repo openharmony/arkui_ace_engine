@@ -17,7 +17,12 @@
 
 #include <utility>
 
+#ifdef USE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
+
+#include "core/animation/native_curve_helper.h"
+#endif
 
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -56,9 +61,9 @@
 #include "core/components/scroll/scrollable.h"
 #include "core/components/semi_modal/semi_modal_component.h"
 #include "core/components/semi_modal/semi_modal_element.h"
-#include "core/components/theme/app_theme.h"
 #include "core/components/stage/stage_component.h"
 #include "core/components/stage/stage_element.h"
+#include "core/components/theme/app_theme.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/factories/flutter_render_factory.h"
@@ -180,9 +185,11 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 
 void PipelineContext::FlushMessages()
 {
+#ifdef USE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
         OHOS::Rosen::RSUIDirector::Instance().SendMessages();
     }
+#endif
 }
 
 void PipelineContext::FlushBuild()
@@ -681,9 +688,11 @@ RefPtr<Element> PipelineContext::SetupRootElement()
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
+#ifdef USE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
         OHOS::Rosen::RSUIDirector::Instance().SetRoot(rootRenderNode->GetRSNode()->GetId());
     }
+#endif
     sharedTransitionController_->RegisterTransitionListener();
     cardTransitionController_->RegisterTransitionListener();
     if (windowModal_ == WindowModal::DIALOG_MODAL) {
@@ -1470,9 +1479,11 @@ void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
         frameCount_++;
     }
 #endif
+#ifdef USE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
         OHOS::Rosen::RSUIDirector::Instance().SetTimeStamp(nanoTimestamp);
     }
+#endif
 
     if (isSurfaceReady_) {
         FlushAnimation(GetTimeFromExternalTimer());
@@ -2646,7 +2657,7 @@ void PipelineContext::ForceLayoutForImplicitAnimation()
     }
 }
 
-bool PipelineContext::Animate(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+bool PipelineContext::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack)
 {
     if (!propertyCallback) {
@@ -2659,9 +2670,10 @@ bool PipelineContext::Animate(const AnimationOption& option, const Rosen::RSAnim
     return CloseImplicitAnimation();
 }
 
-void PipelineContext::OpenImplicitAnimation(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+void PipelineContext::OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallBack)
 {
+#ifdef USE_ROSEN_BACKEND
     if (!SystemProperties::GetRosenBackendEnabled()) {
         LOGE("rosen backend is disabled!");
         return;
@@ -2680,11 +2692,13 @@ void PipelineContext::OpenImplicitAnimation(const AnimationOption& option, const
                                 option.GetAnimationDirection() == AnimationDirection::ALTERNATE);
     timingProtocol.SetAutoReverse(option.GetAnimationDirection() == AnimationDirection::ALTERNATE ||
                                   option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
-    Rosen::RSNode::OpenImplicitAnimation(timingProtocol, curve, finishCallBack);
+    RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), finishCallBack);
+#endif
 }
 
 bool PipelineContext::CloseImplicitAnimation()
 {
+#ifdef USE_ROSEN_BACKEND
     if (!SystemProperties::GetRosenBackendEnabled()) {
         LOGE("rosen backend is disabled!");
         return false;
@@ -2701,12 +2715,15 @@ bool PipelineContext::CloseImplicitAnimation()
     }
     pendingImplicitLayout_.pop();
 
-    auto animations = Rosen::RSNode::CloseImplicitAnimation();
+    auto animations = RSNode::CloseImplicitAnimation();
     return !animations.empty();
+#else
+    return false;
+#endif
 }
 
 void PipelineContext::AddKeyFrame(
-    float fraction, const Rosen::RSAnimationTimingCurve& curve, const std::function<void()>& propertyCallback)
+    float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback)
 {
     if (propertyCallback == nullptr) {
         LOGE("failed to add key frame, property callback is null!");
@@ -2728,7 +2745,9 @@ void PipelineContext::AddKeyFrame(
     };
     pendingImplicitLayout_.pop();
 
-    Rosen::RSNode::AddKeyFrame(fraction, curve, propertyChangeCallback);
+#ifdef USE_ROSEN_BACKEND
+    RSNode::AddKeyFrame(fraction, NativeCurveHelper::ToNativeCurve(curve), propertyChangeCallback);
+#endif
 }
 
 void PipelineContext::AddKeyFrame(float fraction, const std::function<void()>& propertyCallback)
@@ -2753,7 +2772,9 @@ void PipelineContext::AddKeyFrame(float fraction, const std::function<void()>& p
     };
     pendingImplicitLayout_.pop();
 
-    Rosen::RSNode::AddKeyFrame(fraction, propertyChangeCallback);
+#ifdef USE_ROSEN_BACKEND
+    RSNode::AddKeyFrame(fraction, propertyChangeCallback);
+#endif
 }
 
 void PipelineContext::SaveExplicitAnimationOption(const AnimationOption& option)

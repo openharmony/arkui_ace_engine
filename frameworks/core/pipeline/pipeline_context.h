@@ -697,15 +697,15 @@ public:
 
     void ForceLayoutForImplicitAnimation();
 
-    bool Animate(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+    bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
         const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr);
 
-    void OpenImplicitAnimation(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+    void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
         const std::function<void()>& finishCallBack = nullptr);
 
     bool CloseImplicitAnimation();
 
-    void AddKeyFrame(float fraction, const Rosen::RSAnimationTimingCurve& curve,
+    void AddKeyFrame(float fraction, const RefPtr<Curve>& curve,
         const std::function<void()>& propertyCallback);
 
     void AddKeyFrame(float fraction, const std::function<void()>& propertyCallback);

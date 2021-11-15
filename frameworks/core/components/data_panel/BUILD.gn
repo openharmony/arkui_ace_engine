@@ -19,6 +19,8 @@ build_component("data_panel") {
     "flutter_render_data_panel.cpp",
     "render_data_panel.cpp",
     "render_data_panel_creator.cpp",
-    "rosen_render_data_panel.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_data_panel.cpp" ]
+  }
 }

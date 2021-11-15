@@ -20,6 +20,8 @@ build_component("button") {
     "flutter_render_button.cpp",
     "render_button.cpp",
     "render_button_creator.cpp",
-    "rosen_render_button.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_button.cpp" ]
+  }
 }

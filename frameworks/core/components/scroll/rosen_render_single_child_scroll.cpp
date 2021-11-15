@@ -15,6 +15,8 @@
 
 #include "core/components/scroll/rosen_render_single_child_scroll.h"
 
+#include "render_service_client/core/ui/rs_node.h"
+
 #include "core/components/common/painter/rosen_scroll_bar_painter.h"
 #include "core/pipeline/base/rosen_render_context.h"
 

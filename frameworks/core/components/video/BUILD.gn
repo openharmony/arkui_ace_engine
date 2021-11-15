@@ -21,13 +21,16 @@ build_component("video") {
     "resource/player.cpp",
     "resource/resource.cpp",
     "resource/texture.cpp",
-    "rosen_render_texture.cpp",
     "texture_component.cpp",
     "video_component.cpp",
     "video_component_v2.cpp",
     "video_element.cpp",
     "video_element_v2.cpp",
   ]
+
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_texture.cpp" ]
+  }
 
   if (is_standard_system && !use_mingw_win && !use_mac) {
     include_dirs = [

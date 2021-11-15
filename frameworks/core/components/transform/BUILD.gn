@@ -19,8 +19,10 @@ build_component("transform") {
     "flutter_render_transform.cpp",
     "render_transform.cpp",
     "render_transform_creator.cpp",
-    "rosen_render_transform.cpp",
     "transform_component.cpp",
     "transform_element.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_transform.cpp" ]
+  }
 }

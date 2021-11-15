@@ -18,6 +18,8 @@ build_component("marquee") {
     "flutter_render_marquee.cpp",
     "render_marquee.cpp",
     "render_marquee_creator.cpp",
-    "rosen_render_marquee.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_marquee.cpp" ]
+  }
 }

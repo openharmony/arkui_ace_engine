@@ -71,14 +71,12 @@ void PropertyAnimation::OnInitNotify(float normalizedTime, bool reverse)
     }
 }
 
-Rosen::RSAnimationTimingCurve PropertyAnimation::GetNativeCurve()
+RefPtr<Curve> PropertyAnimation::GetCurve()
 {
-    Rosen::RSAnimationTimingCurve nativeCurve = Rosen::RSAnimationTimingCurve::DEFAULT;
     if (!animatables_.empty() && animatables_.front()->GetCurve() != nullptr) {
-        nativeCurve = animatables_.front()->GetCurve()->ToNativeCurve();
+        return animatables_.front()->GetCurve();
     }
-
-    return nativeCurve;
+    return Curves::EASE_IN_OUT;
 }
 
 void PropertyAnimation::Calculate(float keyTime)

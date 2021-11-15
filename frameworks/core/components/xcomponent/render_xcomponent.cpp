@@ -92,7 +92,7 @@ void RenderXComponent::OnPaintFinish()
     if (std::strcmp(xcomponent->GetXComponentType().c_str(), "texture") == 0) {
         return;
     }
-    
+
     CreateXComponentPlatformResource();
     UpdateXComponentLayout();
 }

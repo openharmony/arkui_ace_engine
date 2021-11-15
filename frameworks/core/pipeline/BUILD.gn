@@ -40,7 +40,6 @@ template("ace_core_pipeline_source_set") {
       "base/render_context_creator.cpp",
       "base/render_element.cpp",
       "base/render_node.cpp",
-      "base/rosen_render_context.cpp",
       "base/sole_child_element.cpp",
 
       # factories
@@ -66,8 +65,12 @@ template("ace_core_pipeline_source_set") {
       "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
       "$ace_flutter_engine_root/skia:ace_skia_$platform",
       "$ace_root/frameworks/core/components/theme:build_theme_code",
-      "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     ]
+
+    if (use_rosen_backend) {
+      sources += [ "base/rosen_render_context.cpp" ]
+      deps += [ "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client" ]
+    }
 
     if (platform == "ohos" && defined(config.enable_native_view) &&
         config.enable_native_view) {

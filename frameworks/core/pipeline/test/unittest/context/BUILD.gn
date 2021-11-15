@@ -198,9 +198,13 @@ ohos_unittest("PipelineContextTest") {
     "$ace_root/build/third_party/cJSON:third_party_cjson",
     "$ace_root/frameworks/base/resource:ace_resource",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gtest_main",
   ]
+
+  if (use_rosen_backend) {
+    sources += [ "//foundation/ace/ace_engine/frameworks/core/animation/native_curve_helper.cpp" ]
+    deps += [ "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client" ]
+  }
 
   if (!is_standard_system) {
     aosp_deps = [ "shared_library:libcurl" ]

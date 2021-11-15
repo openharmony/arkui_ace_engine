@@ -15,7 +15,7 @@
 
 #include "core/components_v2/list/rosen_render_list.h"
 
-#include "include/core/SkCanvas.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 #include "base/utils/utils.h"
 #include "core/pipeline/base/rosen_render_context.h"

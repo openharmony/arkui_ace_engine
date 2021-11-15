@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_RECT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_RECT_H
 
+#include "include/core/SkPath.h"
+
 #include "frameworks/core/components/svg/render_svg_rect.h"
 
 namespace OHOS::Ace {

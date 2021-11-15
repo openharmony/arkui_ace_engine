@@ -19,7 +19,11 @@ namespace OHOS::Ace {
 RefPtr<RenderNode> RenderPositioned::Create()
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef USE_ROSEN_BACKEND
         return AceType::MakeRefPtr<RosenRenderPositioned>();
+#else
+        return nullptr;
+#endif
     } else {
         return AceType::MakeRefPtr<RenderPositioned>();
     }

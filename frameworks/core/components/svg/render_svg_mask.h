@@ -22,6 +22,7 @@
 #include "frameworks/core/components/common/properties/svg_paint_state.h"
 #include "frameworks/core/components/svg/render_svg_base.h"
 
+class SkCanvas;
 namespace OHOS::Ace {
 
 class RenderSvgMask : public RenderSvgBase {

@@ -15,6 +15,8 @@
 
 #include "core/components/stepper/rosen_render_stepper.h"
 
+#include "render_service_client/core/ui/rs_node.h"
+
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {

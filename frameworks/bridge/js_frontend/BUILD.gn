@@ -38,10 +38,7 @@ template("js_frontend") {
       sources += [ "engine/common/js_engine_loader.cpp" ]
     }
 
-    deps = [
-      "$ace_root/frameworks/core/components/theme:build_theme_code",
-      "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client"
-    ]
+    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   }
 }
 

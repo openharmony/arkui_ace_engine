@@ -15,6 +15,7 @@
 
 #include "core/components/picker/rosen_render_picker_base.h"
 
+#include "render_service_client/core/ui/rs_node.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #ifdef OHOS_PLATFORM
 #include "render_service_client/core/pipeline/rs_recording_canvas.h"

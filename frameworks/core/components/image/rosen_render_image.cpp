@@ -16,6 +16,7 @@
 #include "core/components/image/rosen_render_image.h"
 
 #include "flutter/common/task_runners.h"
+#include "render_service_client/core/ui/rs_node.h"
 #include "third_party/skia/include/core/SkClipOp.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkRect.h"
@@ -609,7 +610,7 @@ Rect RosenRenderImage::RecalculateSrcRect(const Size& realImageSize)
     return realSrcRect;
 }
 
-void RosenRenderImage::PaintBgImage(const RSNode::SharedPtr& rsNode)
+void RosenRenderImage::PaintBgImage(const std::shared_ptr<RSNode>& rsNode)
 {
     if (!GetBackgroundImageFlag()) {
         return;

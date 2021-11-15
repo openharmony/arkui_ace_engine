@@ -22,6 +22,7 @@
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkLumaColorFilter.h"
 #include "include/utils/SkParsePath.h"
+#include "render_service_client/core/ui/rs_node.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 
 #include "frameworks/core/components/svg/rosen_render_svg_pattern.h"
@@ -519,7 +520,7 @@ void RosenSvgPainter::StringToPoints(const char str[], std::vector<SkPoint>& poi
 }
 
 void RosenSvgPainter::UpdateMotionMatrix(
-    const RSNode::SharedPtr& rsNode, const std::string& path, const std::string& rotate, double percent)
+    const std::shared_ptr<RSNode>& rsNode, const std::string& path, const std::string& rotate, double percent)
 {
     if (path.empty() || rsNode == nullptr) {
         return;

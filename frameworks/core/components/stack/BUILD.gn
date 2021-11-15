@@ -18,8 +18,10 @@ build_component("stack") {
     "flutter_render_stack.cpp",
     "render_stack.cpp",
     "render_stack_creator.cpp",
-    "rosen_render_stack.cpp",
     "stack_component.cpp",
     "stack_element.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_stack.cpp" ]
+  }
 }

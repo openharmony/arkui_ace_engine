@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_INTERPOLATOR_H
 
 #include "core/animation/animation_pub.h"
+#include "core/animation/curves.h"
 #include "core/animation/scheduler.h"
 #include "core/animation/time_event.h"
 #include "core/components/common/properties/animation_option.h"
@@ -73,11 +74,11 @@ public:
         }
         OnNormalizedTimestampChanged(NORMALIZED_DURATION_MIN, false);
         return scheduler->Animate(
-            option, GetNativeCurve(),
+            option, GetCurve(),
             [weak = AceType::WeakClaim(this), callback = prepareCallback]() -> void {
                 auto animation = weak.Upgrade();
                 if (animation == nullptr) {
-                    LOGE("propetry change failed, animation is null.");
+                    LOGE("property change failed, animation is null.");
                     return;
                 }
 
@@ -91,9 +92,9 @@ public:
     }
 
 protected:
-    virtual Rosen::RSAnimationTimingCurve GetNativeCurve()
+    virtual RefPtr<Curve> GetCurve()
     {
-        return Rosen::RSAnimationTimingCurve::DEFAULT;
+        return Curves::EASE_IN_OUT;
     }
 
     // so far, do not support play multi interpolate animations in sequence. so always set it to 1.0

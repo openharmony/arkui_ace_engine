@@ -136,7 +136,7 @@ void JSPersistent::Clear(const JSCallbackInfo& args)
     LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
         "emulator or a real device instead.");
     return;
-#endif    
+#endif
     auto container = Container::Current();
     if (!container) {
         LOGW("container is null");

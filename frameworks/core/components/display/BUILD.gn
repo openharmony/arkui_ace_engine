@@ -20,6 +20,8 @@ build_component("display") {
     "flutter_render_display.cpp",
     "render_display.cpp",
     "render_display_creator.cpp",
-    "rosen_render_display.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_display.cpp" ]
+  }
 }

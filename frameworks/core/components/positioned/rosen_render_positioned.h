@@ -27,16 +27,7 @@ public:
     RosenRenderPositioned() = default;
     ~RosenRenderPositioned() override = default;
 
-    void Update(const RefPtr<Component>& component) override
-    {
-        RenderPositioned::Update(component);
-        auto context = context_.Upgrade();
-        auto rsNode = GetRSNode();
-        if (context && rsNode) {
-            auto dipScale = context->GetDipScale();
-            rsNode->SetFramePosition({left_.ConvertToPx(dipScale), top_.ConvertToPx(dipScale)});
-        }
-    }
+    void Update(const RefPtr<Component>& component) override;
 
 private:
 };

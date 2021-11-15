@@ -73,7 +73,7 @@ std::shared_ptr<Global::Resource::ResConfig> ConvertConfigToGlobal(const Resourc
 {
     std::shared_ptr<Global::Resource::ResConfig> newResCfg(Global::Resource::CreateResConfig());
     newResCfg->SetLocaleInfo(AceApplicationInfo::GetInstance().GetLanguage().c_str(),
-        AceApplicationInfo::GetInstance().GetScript().c_str(), 
+        AceApplicationInfo::GetInstance().GetScript().c_str(),
         AceApplicationInfo::GetInstance().GetCountryOrRegion().c_str());
     newResCfg->SetDeviceType(ConvertDeviceTypeToGlobal(config.GetDeviceType()));
     newResCfg->SetDirection(ConvertDirectionToGlobal(config.GetOrientation()));

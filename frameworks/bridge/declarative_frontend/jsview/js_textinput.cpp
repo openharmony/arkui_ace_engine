@@ -126,7 +126,7 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     }
 
     RefPtr<TextFieldComponent> textInputComponent = AceType::MakeRefPtr<TextFieldComponent>();
-    
+
     // default type is text, default action is done.
     textInputComponent->SetTextInputType(TextInputType::TEXT);
     textInputComponent->SetAction(TextInputAction::DONE);

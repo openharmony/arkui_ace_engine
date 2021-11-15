@@ -17,7 +17,9 @@
 
 #include <fstream>
 
+#ifdef USE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
+#endif
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -131,10 +133,10 @@ void ConvertMouseEvent(OHOS::MouseEvent& mouseEvent, MouseEvent& events)
     events.x = mmiPoint.GetX();
     events.y = mmiPoint.GetY();
     events.z = mmiPoint.GetZ();
-    
+
     GetMouseEventAction(mouseEvent, events);
     GetMouseEventButton(mouseEvent, events);
-    
+
     events.pressedButtons = static_cast<size_t>(mouseEvent.GetPressedButtons());
     std::chrono::microseconds micros(mouseEvent.GetOccurredTime());
     TimeStamp time(micros);
@@ -174,10 +176,13 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::Window* window)
         LOGE("FlutterAceView::SurfaceCreated, window is nullptr");
         return;
     }
+#ifdef USE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
         OHOS::Rosen::RSUIDirector::Instance().SetPlatformSurface(window->GetSurface());
+        LOGI("Init Rosen Backend");
         OHOS::Rosen::RSUIDirector::Instance().Init();
     }
+#endif
     if (view == nullptr) {
         LOGE("FlutterAceView::SurfaceCreated, view is nullptr");
         return;
@@ -207,9 +212,11 @@ void FlutterAceView::SurfaceChanged(FlutterAceView* view, int32_t width, int32_t
         LOGI("FlutterAceView::SurfaceChanged, call NotifyChanged");
         platformView->NotifyChanged(SkISize::Make(width, height));
     }
+#ifdef USE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
         OHOS::Rosen::RSUIDirector::Instance().SetSurfaceSize(width, height);
     }
+#endif
     LOGI("<<< FlutterAceView::SurfaceChanged, end");
 }
 

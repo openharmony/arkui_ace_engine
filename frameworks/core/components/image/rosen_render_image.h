@@ -42,7 +42,7 @@ public:
 
     void UpLoadImageDataForPaint();
 
-    void PaintBgImage(const RSNode::SharedPtr& rsNode);
+    void PaintBgImage(const std::shared_ptr<RSNode>& rsNode);
 
     void FetchImageObject() override;
 

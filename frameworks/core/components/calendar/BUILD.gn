@@ -22,8 +22,11 @@ build_component("calendar") {
     "focusable_grid.cpp",
     "render_calendar.cpp",
     "render_calendar_creator.cpp",
-    "rosen_render_calendar.cpp",
   ]
+
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_calendar.cpp" ]
+  }
 
   component_deps = [
     "box",

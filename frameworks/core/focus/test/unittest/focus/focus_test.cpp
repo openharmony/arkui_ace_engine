@@ -162,14 +162,14 @@ RefPtr<PageElement> PipelineContext::GetLastPage() const
     return nullptr;
 }
 
-bool PipelineContext::Animate(const AnimationOption& option, const Rosen::RSAnimationTimingCurve& curve,
+bool PipelineContext::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack)
 {
     return true;
 }
 
 void PipelineContext::OpenImplicitAnimation(const AnimationOption& option,
-    const Rosen::RSAnimationTimingCurve& curve, const std::function<void()>& finishCallBack)
+    const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
 {}
 
 bool PipelineContext::CloseImplicitAnimation()

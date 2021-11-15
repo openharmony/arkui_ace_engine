@@ -84,7 +84,6 @@ ohos_unittest("RenderBoxPercentTest") {
   deps = [
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
-    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//third_party/zlib:libz",
   ]
 

@@ -18,8 +18,10 @@ build_component("toggle") {
     "flutter_render_toggle.cpp",
     "render_toggle.cpp",
     "render_toggle_creator.cpp",
-    "rosen_render_toggle.cpp",
     "toggle_component.cpp",
     "toggle_element.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_toggle.cpp" ]
+  }
 }

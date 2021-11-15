@@ -29,6 +29,7 @@
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
 #include "include/utils/SkShadowUtils.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 #include "core/components/common/properties/color.h"
 #include "core/pipeline/base/render_node.h"

@@ -22,8 +22,6 @@ build_component("scroll") {
     "render_scroll.cpp",
     "render_single_child_scroll.cpp",
     "render_single_child_scroll_creator.cpp",
-    "rosen_render_multi_child_scroll.cpp",
-    "rosen_render_single_child_scroll.cpp",
     "scroll_bar_controller.cpp",
     "scroll_component.cpp",
     "scroll_element.cpp",
@@ -34,4 +32,10 @@ build_component("scroll") {
     "scroll_spring_effect.cpp",
     "scrollable.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [
+      "rosen_render_multi_child_scroll.cpp",
+      "rosen_render_single_child_scroll.cpp",
+    ]
+  }
 }

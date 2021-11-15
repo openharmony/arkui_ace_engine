@@ -29,6 +29,8 @@ enable_dump_drawcmd = false
 use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"
 use_mac = "${current_os}_${current_cpu}" == "mac_x64"
 
+use_rosen_backend = is_standard_system && !use_mingw_win && !use_mac
+
 # Config path
 ace_root = "//foundation/ace/ace_engine"
 ace_napi = "//foundation/ace/napi"
@@ -92,6 +94,10 @@ if (enable_ace_debug) {
 
 if (enable_dump_drawcmd) {
   ace_common_defines += [ "DUMP_DRAW_CMD" ]
+}
+
+if (use_rosen_backend) {
+  ace_common_defines += [ "USE_ROSEN_BACKEND" ]
 }
 
 ace_platforms = []

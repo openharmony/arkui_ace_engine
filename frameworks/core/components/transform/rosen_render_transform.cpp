@@ -15,6 +15,8 @@
 
 #include "core/components/transform/rosen_render_transform.h"
 
+#include "render_service_client/core/ui/rs_node.h"
+
 namespace OHOS::Ace {
 
 void RosenRenderTransform::UpdateTransformLayer()
@@ -37,7 +39,7 @@ void RosenRenderTransform::UpdateTransformLayer()
     previousTransformMatrix_ = transform;
 }
 
-void RosenRenderTransform::SyncTransformToRsNode(const RSNode::SharedPtr& rsNode, const Matrix4& transformMatrix)
+void RosenRenderTransform::SyncTransformToRsNode(const std::shared_ptr<RSNode>& rsNode, const Matrix4& transformMatrix)
 {
     if (rsNode == nullptr) {
         return;
@@ -66,7 +68,7 @@ void RosenRenderTransform::SyncTransformToRsNode(const RSNode::SharedPtr& rsNode
     });
 }
 
-void RosenRenderTransform::SyncOriginToRsNode(const RSNode::SharedPtr& rsNode)
+void RosenRenderTransform::SyncOriginToRsNode(const std::shared_ptr<RSNode>& rsNode)
 {
     if (!needUpdateOrigin_ || rsNode == nullptr) {
         return;

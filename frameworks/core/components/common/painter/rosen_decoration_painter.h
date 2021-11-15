@@ -29,6 +29,12 @@
 #include "core/components/image/render_image.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
+class SkPath;
+class SkPaint;
+class SkRRect;
+class SkShader;
+struct SkSize;
+
 namespace OHOS::Ace {
 
 class Border;

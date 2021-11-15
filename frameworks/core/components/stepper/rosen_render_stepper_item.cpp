@@ -15,6 +15,8 @@
 
 #include "core/components/stepper/rosen_render_stepper_item.h"
 
+#include "render_service_client/core/ui/rs_node.h"
+
 namespace OHOS::Ace {
 
 void RosenRenderStepperItem::Update(const RefPtr<Component>& component)

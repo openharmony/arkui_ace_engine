@@ -42,21 +42,18 @@ int32_t Component::GetRetakeId() const
     return retakeId_;
 }
 
-namespace {
-bool IsRenderComponent(const RefPtr<Component>& component)
-{
-    return AceType::InstanceOf<RenderComponent>(component);
-}
-} // namespace
-
 void Component::MergeRSNode(const std::vector<RefPtr<Component>>& components, int skip)
 {
+    static auto isRenderComponent = [](const RefPtr<Component>& component) {
+        return AceType::InstanceOf<RenderComponent>(component);
+    };
+
     if (components.empty()) {
         return;
     }
     // locate first & last RenderComponent
-    auto head = std::find_if(components.begin() + skip, components.end(), IsRenderComponent);
-    auto tail = std::find_if(components.rbegin(), components.rend() - skip, IsRenderComponent);
+    auto head = std::find_if(components.begin() + skip, components.end(), isRenderComponent);
+    auto tail = std::find_if(components.rbegin(), components.rend() - skip, isRenderComponent);
     if (head == components.end() || tail == components.rend() - skip) {
         return;
     }

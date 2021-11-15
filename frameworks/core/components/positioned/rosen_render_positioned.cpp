@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
-#include "flutter_render_checkbox.h"
-#include "rosen_render_checkbox.h"
+#include "core/components/positioned/rosen_render_positioned.h"
+
+#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace {
-RefPtr<RenderNode> RenderCheckbox::Create()
+
+void RosenRenderPositioned::Update(const RefPtr<Component>& component)
 {
-    if (SystemProperties::GetRosenBackendEnabled()) {
-#ifdef USE_ROSEN_BACKEND
-        return AceType::MakeRefPtr<RosenRenderCheckbox>();
-#else
-        return nullptr;
-#endif
-    } else {
-        return AceType::MakeRefPtr<FlutterRenderCheckbox>();
+    RenderPositioned::Update(component);
+    auto context = context_.Upgrade();
+    auto rsNode = GetRSNode();
+    if (context && rsNode) {
+        auto dipScale = context->GetDipScale();
+        rsNode->SetFramePosition({ left_.ConvertToPx(dipScale), top_.ConvertToPx(dipScale) });
     }
 }
+
 } // namespace OHOS::Ace

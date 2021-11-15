@@ -24,6 +24,8 @@ build_component("list_v2") {
     "render_list.cpp",
     "render_list_creator.cpp",
     "render_list_item.cpp",
-    "rosen_render_list.cpp",
   ]
+  if (use_rosen_backend) {
+    sources += [ "rosen_render_list.cpp" ]
+  }
 }

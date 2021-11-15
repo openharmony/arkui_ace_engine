@@ -54,7 +54,7 @@ private:
         NotifyListener(currentPosition_);
     }
 
-    Rosen::RSAnimationTimingCurve GetNativeCurve() override;
+    RefPtr<Curve> GetCurve() override;
 
     float estimateDuration_ = 1.0f;
     float currentPosition_ = 0.0f;

@@ -170,9 +170,7 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     if (SystemProperties::GetRosenBackendEnabled()) {
         LOGD("RSAnimationInfo: Begin JSAnimateTo");
         pipelineContext->FlushBuild();
-        auto curve =
-            option.GetCurve() != nullptr ? option.GetCurve()->ToNativeCurve() : Rosen::RSAnimationTimingCurve::DEFAULT;
-        pipelineContext->OpenImplicitAnimation(option, curve, onFinishEvent);
+        pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
         // Execute the function.
         JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
         jsAnimateToFunc->Call(info[1]);

@@ -20,7 +20,11 @@ namespace OHOS::Ace::V2 {
 RefPtr<RenderNode> RenderGridScroll::Create()
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef USE_ROSEN_BACKEND
         return AceType::MakeRefPtr<RosenRenderGridScroll>();
+#else
+        return nullptr;
+#endif
     } else {
         return AceType::MakeRefPtr<FlutterRenderGridScroll>();
     }

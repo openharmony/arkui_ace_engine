@@ -16,13 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CURVE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CURVE_H
 
-#include "render_service_client/core/animation/rs_animation_timing_curve.h"
-
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
+class NativeCurveHelper;
 
 constexpr double SQUARE = 2.0;
 
@@ -48,19 +47,6 @@ public:
     virtual const std::string ToString()
     {
         return "";
-    }
-
-    virtual Rosen::RSAnimationTimingCurve ToNativeCurve()
-    {
-        return Rosen::RSAnimationTimingCurve::CreateCustomCurve([weak = WeakClaim(this)](float fraction) -> float {
-            auto curve = weak.Upgrade();
-            if (curve == nullptr) {
-                LOGE("transform to native curve failed, curve is null!");
-                return 1.0f;
-            }
-
-            return curve->MoveInternal(fraction);
-        });
     }
 };
 
@@ -171,6 +157,23 @@ public:
 private:
     int32_t steps_;
     const StepsCurvePosition position_;
+};
+
+class CustomCurve final : public Curve {
+    DECLARE_ACE_TYPE(CustomCurve, Curve)
+public:
+    explicit CustomCurve(const std::function<float(float)>& func) : interpolateFunc_(func) {}
+    ~CustomCurve() override = default;
+    float MoveInternal(float time) override
+    {
+        float value = interpolateFunc_(time);
+        return std::clamp(value, 0.f, 1.f);
+    }
+
+private:
+    std::function<float(float)> interpolateFunc_;
+
+    friend class NativeCurveHelper;
 };
 
 } // namespace OHOS::Ace
