@@ -45,3 +45,15 @@ group("ace_for_windows") {
     ]
   }
 }
+windows_shared_library_path =
+    get_label_info(":libace_engine_windows($windows_buildtool)",
+                   "root_out_dir") + "/common/common/libace_engine_windows.dll"
+
+ohos_copy("copy_preview_shared_library") {
+  deps = [ "$ace_root/adapter/preview/build:libace_engine_windows(${windows_buildtool})" ]
+  sources = [ windows_shared_library_path ]
+  outputs =
+      [ target_out_dir + "/previewer/common/bin/libace_engine_windows.dll" ]
+  module_source_dir = target_out_dir + "/previewer/common/bin/"
+  module_install_name = ""
+}
