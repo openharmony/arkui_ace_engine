@@ -217,6 +217,13 @@ public:
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }
 
+    void RunNativeEngineLoop() override
+    {
+        if (nativeEngine_ != nullptr) {
+            nativeEngine_->Loop(LOOP_NOWAIT, false);
+        }
+    }
+
 private:
     bool CallAppFunc(const std::string& appFuncName);
 

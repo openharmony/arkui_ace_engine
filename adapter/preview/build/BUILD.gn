@@ -93,4 +93,28 @@ if (target_cpu == "arm64" && is_standard_system) {
       module_install_name = ""
     }
   }
+
+  ohos_copy("copy_napi_shared_library") {
+    shared_library_path =
+        get_label_info("//foundation/ace/napi:ace_napi", "root_out_dir")
+    deps = [
+      "//foundation/ace/napi:ace_napi",
+      "//foundation/ace/napi:ace_napi_quickjs",
+    ]
+    if (use_mac) {
+      sources = [
+        "$shared_library_path/ace/napi/libace_napi.dylib",
+        "$shared_library_path/ace/napi/libace_napi_quickjs.dylib",
+      ]
+    } else {
+      sources = [
+        "$shared_library_path/ace/napi/libace_napi.dll",
+        "$shared_library_path/ace/napi/libace_napi_quickjs.dll",
+      ]
+    }
+    outputs = [ target_out_dir + "/previewer/common/bin/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common/bin"
+    module_install_name = ""
+  }
 }
+

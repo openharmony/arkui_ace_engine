@@ -189,7 +189,6 @@ public:
         return nullptr;
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     static NativeEngine* GetNativeEngine()
     {
         return nativeEngine_;
@@ -205,10 +204,10 @@ public:
         mediaUpdateCallback_ = nullptr;
     }
 
+    virtual void RunNativeEngineLoop();
+
 protected:
     static thread_local NativeEngine* nativeEngine_;
-#endif
-protected:
     std::function<void(JsEngine*)> mediaUpdateCallback_;
 
 private:

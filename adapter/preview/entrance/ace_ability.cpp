@@ -334,6 +334,11 @@ void AceAbility::RunEventLoop()
             SurfaceChanged(runArgs_.deviceConfig.orientation, runArgs_.deviceConfig.density, width, height);
         }
 #endif
+        auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+        if (container) {
+            container->RunNativeEngineLoop();
+        }
+
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
     loopRunning_ = true;

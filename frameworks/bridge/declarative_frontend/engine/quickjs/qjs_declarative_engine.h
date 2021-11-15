@@ -116,17 +116,16 @@ public:
 #endif
 
 private:
-    RefPtr<QJSDeclarativeEngineInstance> engineInstance_;
-    int32_t instanceId_ = 0;
-
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     void RegisterWorker();
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
     void SetPostTask(NativeEngine* nativeEngine);
-#else
-    std::string preContent_ = "";
 
+    RefPtr<QJSDeclarativeEngineInstance> engineInstance_;
+    int32_t instanceId_ = 0;
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    std::string preContent_ = "";
 #endif
 
     ACE_DISALLOW_COPY_AND_MOVE(QJSDeclarativeEngine);

@@ -146,6 +146,13 @@ public:
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }
 
+    void RunNativeEngineLoop() override
+    {
+        if (nativeEngine_ != nullptr) {
+            nativeEngine_->Loop(LOOP_NOWAIT, false);
+        }
+    }
+
 private:
     void SetPostTask(NativeEngine* nativeEngine);
     void GetLoadOptions(std::string& optionStr, bool isMainPage, bool hasAppCode);

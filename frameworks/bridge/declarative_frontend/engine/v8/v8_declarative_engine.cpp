@@ -896,7 +896,9 @@ bool V8DeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     nativeEngine_ =
         new V8NativeEngine(GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
     SetPostTask(nativeEngine_);
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
+#endif
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
         auto v8NativeEngine = static_cast<V8NativeEngine*>(nativeEngine_);
@@ -1040,7 +1042,9 @@ V8DeclarativeEngine::~V8DeclarativeEngine()
     XComponentClient::GetInstance().SetRegisterCallbackToNull();
     XComponentClient::GetInstance().SetJSValCallToNull();
     if (nativeEngine_ != nullptr) {
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
+#endif
         delete nativeEngine_;
     }
     if (nativeXComponent_) {

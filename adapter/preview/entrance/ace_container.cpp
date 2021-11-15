@@ -131,13 +131,15 @@ void AceContainer::InitializeFrontend()
     if (type_ == FrontendType::JS) {
         frontend_ = Frontend::Create();
         auto jsFrontend = AceType::DynamicCast<JsFrontend>(frontend_);
-        jsFrontend->SetJsEngine(Framework::JsEngineLoader::Get().CreateJsEngine(GetInstanceId()));
+        jsEngine_ = Framework::JsEngineLoader::Get().CreateJsEngine(GetInstanceId());
+        jsFrontend->SetJsEngine(jsEngine_);
         jsFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
         jsFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
     } else if (type_ == FrontendType::DECLARATIVE_JS) {
         frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-        declarativeFrontend->SetJsEngine(Framework::JsEngineLoader::GetDeclarative().CreateJsEngine(instanceId_));
+        jsEngine_ = Framework::JsEngineLoader::GetDeclarative().CreateJsEngine(instanceId_);
+        declarativeFrontend->SetJsEngine(jsEngine_);
     } else if (type_ == FrontendType::JS_CARD) {
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
@@ -150,6 +152,13 @@ void AceContainer::InitializeFrontend()
     frontend_->Initialize(type_, taskExecutor_);
     if (assetManager_) {
         frontend_->SetAssetManager(assetManager_);
+    }
+}
+
+void AceContainer::RunNativeEngineLoop()
+{
+    if (jsEngine_) {
+        jsEngine_->RunNativeEngineLoop();
     }
 }
 

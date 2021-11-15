@@ -409,7 +409,9 @@ bool QjsPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     engineInstance_ = AceType::MakeRefPtr<QjsPaEngineInstance>(delegate, instanceId_);
     bool ret = engineInstance_->InitJsEnv(runtime, context, GetExtraNativeObject());
     SetPostTask(nativeEngine_);
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
+#endif
     return ret;
 }
 
@@ -438,7 +440,9 @@ QjsPaEngine::~QjsPaEngine()
     UnloadLibrary();
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     if (nativeEngine_ != nullptr) {
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
+#endif
         delete nativeEngine_;
     }
     if (engineInstance_ && engineInstance_->GetQjsRuntime()) {

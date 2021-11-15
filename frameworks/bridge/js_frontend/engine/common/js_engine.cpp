@@ -16,9 +16,17 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
+#include "native_engine/native_engine.h"
 
 namespace OHOS::Ace::Framework {
 
 thread_local NativeEngine* JsEngine::nativeEngine_ = nullptr;
+
+void JsEngine::RunNativeEngineLoop()
+{
+    if (nativeEngine_ != nullptr) {
+        nativeEngine_->Loop(LOOP_NOWAIT, false);
+    }
+}
 
 } // namespace OHOS::Ace::Framework

@@ -17,9 +17,7 @@
 
 #include <cstdlib>
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "native_engine/impl/quickjs/quickjs_native_engine.h"
-#endif
 
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -43,12 +41,12 @@ constexpr int32_t LOAD_DOCUMENT_STR_LENGTH = 16;
 
 QJSDeclarativeEngine::~QJSDeclarativeEngine()
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (nativeEngine_ != nullptr) {
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
+#endif
         delete nativeEngine_;
     }
-#endif
     if (engineInstance_ && engineInstance_->GetQJSRuntime()) {
         JS_RunGC(engineInstance_->GetQJSRuntime());
     }
@@ -68,29 +66,26 @@ bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
 
     engineInstance_ = AceType::MakeRefPtr<QJSDeclarativeEngineInstance>(delegate);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     nativeEngine_ = new QuickJSNativeEngine(runtime, context, static_cast<void*>(this));
-#endif
     bool res = engineInstance_->InitJSEnv(runtime, context, GetExtraNativeObject());
     if (!res) {
         LOGE("QJSDeclarativeEngine initialize failed: %{public}d", instanceId_);
         return false;
     }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     SetPostTask(nativeEngine_);
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
+#endif
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
         auto qjsNativeEngine = static_cast<QuickJSNativeEngine*>(nativeEngine_);
         qjsNativeEngine->SetPackagePath(packagePath);
     }
     RegisterWorker();
-#endif
 
     return true;
 }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 void QJSDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
@@ -158,7 +153,6 @@ void QJSDeclarativeEngine::RegisterWorker()
     RegisterInitWorkerFunc();
     RegisterAssetFunc();
 }
-#endif
 
 void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {

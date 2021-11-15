@@ -3659,7 +3659,9 @@ bool V8Engine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
     engineInstance_->SetV8NativeEngine(nativeEngine_);
     SetPostTask();
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
+#endif
     RegisterWorker();
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
@@ -3764,9 +3766,12 @@ V8Engine::~V8Engine()
             stopDebug();
         }
     }
+
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     if (nativeEngine_) {
         nativeEngine_->CancelCheckUVLoop();
     }
+#endif
 
     if (g_debugger != nullptr) {
         dlclose(g_debugger);

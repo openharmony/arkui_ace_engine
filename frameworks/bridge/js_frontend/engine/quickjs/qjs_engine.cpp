@@ -3077,26 +3077,23 @@ bool QjsEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     ACE_DCHECK(delegate);
 
     engineInstance_ = AceType::MakeRefPtr<QjsEngineInstance>(delegate, instanceId_);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     nativeEngine_ = new QuickJSNativeEngine(runtime, context, static_cast<void*>(this));
     engineInstance_->SetQuickJSNativeEngine(nativeEngine_);
-#endif
     bool ret = engineInstance_->InitJsEnv(runtime, context, GetExtraNativeObject());
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     SetPostTask(nativeEngine_);
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
+#endif
     RegisterWorker();
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
         nativeEngine_->SetPackagePath(packagePath);
     }
-#endif
 
     return ret;
 }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 void QjsEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
@@ -3170,16 +3167,15 @@ void QjsEngine::RegisterWorker()
     RegisterInitWorkerFunc();
     RegisterAssetFunc();
 }
-#endif
 
 QjsEngine::~QjsEngine()
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (nativeEngine_ != nullptr) {
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
+#endif
         delete nativeEngine_;
     }
-#endif
     if (engineInstance_ && engineInstance_->GetQjsRuntime()) {
         JS_RunGC(engineInstance_->GetQjsRuntime());
     }
