@@ -48,6 +48,7 @@ constexpr uint8_t TARGET_END_OPACITY_VALUE = 255;
 constexpr uint8_t TRANSLATE_RATIO = 10;
 constexpr int32_t COMPONENT_CHANGE_END_LISTENER_KEY = 1001;
 constexpr double MIN_SCROLL_OFFSET = 0.5;
+constexpr int32_t DEFAULT_SHOWING_COUNT = 1;
 
 // for watch rotation const param
 constexpr double ROTATION_SENSITIVITY_NORMAL = 1.4;
@@ -263,10 +264,13 @@ void RenderSwiper::PerformLayout()
     Size maxSize = GetLayoutParam().GetMaxSize();
     Size maxSizeClild = maxSize;
     auto showingCount = swiper_ ? swiper_->GetDisplayCount() : 1;
+    double intervalSpace = swiper_ ? NormalizeToPx(swiper_->GetItemSpace()) : 0.0;
     if (axis_ == Axis::HORIZONTAL) {
-        maxSizeClild.SetWidth(maxSize.Width() / showingCount - prevMargin_ - nextMargin_);
+        maxSizeClild.SetWidth(
+            (maxSize.Width() - intervalSpace * (showingCount - 1)) / showingCount - prevMargin_ - nextMargin_);
     } else {
-        maxSizeClild.SetHeight(maxSize.Height() / showingCount - prevMargin_ - nextMargin_);
+        maxSizeClild.SetHeight(
+            (maxSize.Height() - intervalSpace * (showingCount - 1)) / showingCount - prevMargin_ - nextMargin_);
     }
     innerLayout.SetMaxSize(maxSizeClild);
 
@@ -291,14 +295,22 @@ void RenderSwiper::PerformLayout()
         LOGE("input wrong MainSwiperSize");
     }
 
+    if (axis_ == Axis::HORIZONTAL) {
+        maxWidth = (showingCount > DEFAULT_SHOWING_COUNT) ? innerLayout.GetMaxSize().Width() : maxWidth;
+    } else {
+        maxHeight = (showingCount > DEFAULT_SHOWING_COUNT) ? innerLayout.GetMaxSize().Height() : maxHeight;
+    }
+
     for (auto iter = items_.begin(); iter != items_.end(); iter++) {
         const auto& childItem = iter->second;
         if (!childItem) {
             continue;
         }
         childItem->Layout(innerLayout);
-        maxWidth = std::max(maxWidth, childItem->GetLayoutSize().Width());
-        maxHeight = std::max(maxHeight, childItem->GetLayoutSize().Height());
+        if (showingCount == DEFAULT_SHOWING_COUNT) {
+            maxWidth = std::max(maxWidth, childItem->GetLayoutSize().Width());
+            maxHeight = std::max(maxHeight, childItem->GetLayoutSize().Height());
+        }
     }
 
     if (mainSwiperSize_ == MainSwiperSize::AUTO) {
@@ -308,13 +320,18 @@ void RenderSwiper::PerformLayout()
             SetLayoutSize(maxSize);
         }
     } else {
-        SetLayoutSize(isLinearLayout ? maxSize : Size(maxWidth, maxHeight));
+        SetLayoutSize((isLinearLayout || (showingCount > DEFAULT_SHOWING_COUNT)) ? maxSize : Size(maxWidth, maxHeight));
     }
 
     Size layoutSize = GetLayoutSize();
     double halfSpace = swiper_ ? NormalizeToPx(swiper_->GetItemSpace()) / 2.0 : 0.0;
-    swiperWidth_ = (isLinearLayout ? maxWidth : layoutSize.Width()) + 2.0 * halfSpace;
-    swiperHeight_ = (isLinearLayout ? maxHeight : layoutSize.Height());
+    if (showingCount > DEFAULT_SHOWING_COUNT) {
+        swiperWidth_ = (axis_ == Axis::HORIZONTAL) ? maxWidth + halfSpace : maxWidth;
+        swiperHeight_ = (axis_ == Axis::HORIZONTAL) ? maxHeight : maxHeight + halfSpace;
+    } else {
+        swiperWidth_ = (isLinearLayout ? maxWidth : layoutSize.Width()) + 2.0 * halfSpace;
+        swiperHeight_ = (isLinearLayout ? maxHeight : layoutSize.Height());
+    }
 
     if (isLinearLayout) {
         prevItemOffset_ = axis_ == Axis::HORIZONTAL

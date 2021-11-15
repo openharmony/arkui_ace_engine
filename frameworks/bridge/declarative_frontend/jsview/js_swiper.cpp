@@ -135,7 +135,7 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
     }
 
     if (info[0]->ToString() == "auto") {
-        swiper->SetMainSwiperSize(MainSwiperSize::AUTO);
+        swiper->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
     }
 
     if (info[0]->IsNumber()) {
