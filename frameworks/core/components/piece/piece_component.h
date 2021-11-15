@@ -98,8 +98,6 @@ public:
     void SetText(RefPtr<RowComponent>& row);
     void InitializeStyle(RefPtr<PieceTheme>& theme);
 
-    ACE_DEFINE_COMPONENT_EVENT(OnChange, void(bool));
-
 private:
     IconPosition iconPosition_ = IconPosition::End;
     RefPtr<PieceDeclaration> declaration_;

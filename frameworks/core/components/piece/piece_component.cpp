@@ -193,7 +193,7 @@ void PieceComponent::SetImage(RefPtr<RowComponent>& row)
     gestureListener->SetOnClickId(GetOnDelete());
     gestureListener->SetChild(image);
     auto padding = MakeRefPtr<PaddingComponent>();
-    if (GetTextDirection() == TextDirection::RTL) {
+    if (GetTextDirection() == TextDirection::RTL || GetIconPosition() == IconPosition::Start) {
         padding->SetPadding(Edge(0.0_vp, 0.0_vp, GetInterval(), 0.0_vp));
     } else {
         padding->SetPadding(Edge(GetInterval(), 0.0_vp, 0.0_vp, 0.0_vp));

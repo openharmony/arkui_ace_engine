@@ -33,7 +33,7 @@ public:
     static void SetFontFamily(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
     static void SetShowDelete(const JSCallbackInfo& info);
-    static void SetOnChange(const JSCallbackInfo& info);
+    static void JsOnClose(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

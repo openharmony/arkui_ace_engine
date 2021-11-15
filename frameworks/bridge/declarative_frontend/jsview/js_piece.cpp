@@ -56,6 +56,16 @@ void JSPiece::Create(const JSCallbackInfo& info)
     border.SetBorderRadius(Radius(theme->GetHeight() / 2.0));
     component->SetBorder(border);
     ViewStackProcessor::GetInstance()->Push(component);
+
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    box->SetHeight(theme->GetHeight(), option);
+    Edge edge;
+    edge.SetLeft(theme->GetPaddingHorizontal());
+    edge.SetRight(theme->GetPaddingHorizontal());
+    edge.SetTop(theme->GetPaddingVertical());
+    edge.SetBottom(theme->GetPaddingVertical());
+    box->SetPadding(edge);
 }
 
 void JSPiece::JSBind(BindingTarget globalObj)
@@ -70,8 +80,8 @@ void JSPiece::JSBind(BindingTarget globalObj)
     JSClass<JSPiece>::StaticMethod("fontStyle", &JSPiece::SetFontStyle, opt);
     JSClass<JSPiece>::StaticMethod("fontWeight", &JSPiece::SetFontWeight, opt);
     JSClass<JSPiece>::StaticMethod("fontFamily", &JSPiece::SetFontFamily, opt);
-    JSClass<JSPiece>::StaticMethod("onClick", &JSPiece::JsOnClick);
-    JSClass<JSPiece>::StaticMethod("onChange", &JSPiece::SetOnChange);
+    JSClass<JSPiece>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSPiece>::StaticMethod("onClose", &JSPiece::JsOnClose);
     JSClass<JSPiece>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSPiece>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSPiece>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
@@ -110,25 +120,15 @@ void JSPiece::SetShowDelete(const JSCallbackInfo& info)
     }
 }
 
-void JSPiece::SetOnChange(const JSCallbackInfo& info)
-{
-    if (!JSViewBindEvent(&PieceComponent::SetOnChange, info)) {
-        LOGW("failed to bind event");
-    }
-    info.ReturnSelf();
-}
-
-void JSPiece::JsOnClick(const JSCallbackInfo& info)
+void JSPiece::JsOnClose(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {
         JSRef<JSFunc> clickFunction = JSRef<JSFunc>::Cast(info[0]);
         auto onClickFunc = AceType::MakeRefPtr<JsClickFunction>(clickFunction);
         EventMarker clickEventId(
             [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc)](const BaseEventInfo* info) {
-                LOGE("JSPiece::JsOnClick");
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-                func->Execute(*clickInfo);
+                func->Execute();
             });
         auto pieceComponent =
             AceType::DynamicCast<PieceComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

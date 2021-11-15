@@ -35,26 +35,14 @@ public:
     void PerformLayout() override;
     void OnStatusChanged(RenderStatus renderStatus) override;
     void OnPaintFinish() override;
-    void Initialize();
 protected:
     bool MouseHoverTest(const Point& parentLocalPoint) override;
     void OnMouseHoverEnterTest() override;
     void OnMouseHoverExitTest() override;
-    void OnTouchTestHit(
-        const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
-    void HandleClickEvent(const ClickInfo& info);
-    RefPtr<ClickRecognizer> clickRecognizer_;
     RefPtr<PieceComponent> pieceComponent_;
-    std::function<void(bool)> onChangeShowDelete;
-
-    void SetOnChange(const std::function<void(bool)>& value)
-    {
-        onChangeShowDelete = value;
-    }
 
 private:
     RenderStatus renderStatus_ = RenderStatus::DEFAULT;
-    bool showDelete = false;
 };
 
 } // namespace OHOS::Ace
