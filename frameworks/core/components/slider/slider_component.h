@@ -184,6 +184,17 @@ public:
         return showSteps_;
     }
 
+    void SetDirection(Axis axis)
+    {
+        axis_ = axis;
+        track_->SetDirection(axis_);
+    }
+
+    Axis GetDirection() const
+    {
+        return axis_;
+    }
+
     ACE_DEFINE_COMPONENT_EVENT(OnChange, void(double,int));
 
 private:
@@ -197,6 +208,7 @@ private:
     bool showSteps_ = false;
     SliderMode mode_ = SliderMode::OUTSET;
     RefPtr<RotationController> rotationController_;
+    Axis axis_ = Axis::HORIZONTAL;
 };
 
 } // namespace OHOS::Ace

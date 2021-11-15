@@ -186,6 +186,7 @@ protected:
     double cachedRatio_ = 0.0;
     Dimension thickness_;
     Dimension scaleStrokeWidth_;
+    Axis direction_ = Axis::HORIZONTAL;
 };
 
 class RenderCircleTrack : public RenderTrack {

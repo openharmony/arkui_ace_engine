@@ -98,6 +98,7 @@ void JSSlider::Create(const JSCallbackInfo& info)
     auto getMax = paramObject->GetProperty("max");
     auto getStep = paramObject->GetProperty("step");
     auto getStyle = paramObject->GetProperty("style");
+    auto direction = paramObject->GetProperty("direction");
 
     if (!getValue->IsNull() && getValue->IsNumber()) {
         value = getValue->ToNumber<double>();
@@ -141,8 +142,21 @@ void JSSlider::Create(const JSCallbackInfo& info)
 
     if (sliderMode == SliderStyle::INSET) {
         sliderComponent->SetSliderMode(SliderMode::INSET);
+    } else if (sliderMode == SliderStyle::CAPSULE) {
+        sliderComponent->SetSliderMode(SliderMode::CAPSULE);
     } else {
         sliderComponent->SetSliderMode(SliderMode::OUTSET);
+    }
+
+    auto sliderDirection = Axis::HORIZONTAL;
+    if (!direction->IsNull() && direction->IsNumber()) {
+        sliderDirection = static_cast<Axis>(direction->ToNumber<int32_t>());
+    }
+    sliderComponent->SetDirection(sliderDirection);
+    if (sliderDirection == Axis::VERTICAL) {
+        sliderComponent->SetDirection(Axis::VERTICAL);
+    } else {
+        sliderComponent->SetDirection(Axis::HORIZONTAL);
     }
 
     auto theme = GetTheme<SliderTheme>();

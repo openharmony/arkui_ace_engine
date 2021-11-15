@@ -80,7 +80,12 @@ void FlutterRenderLinearTrack::Paint(RenderContext& context, const Offset& offse
     PaintSliderSteps(context, offset);
 
     // Draw cache region
-    double trackLength = GetLayoutSize().Width();
+    double trackLength = 0.0;
+    if (direction_ == Axis::VERTICAL) {
+        trackLength = GetLayoutSize().Height();
+    } else {
+        trackLength = GetLayoutSize().Width();
+    }
     trackLength = trackLength - trackHeight;
     if (!NearEqual(GetCachedRatio(), 0.0)) {
         flutter::Paint cachedPaint;
@@ -101,17 +106,31 @@ void FlutterRenderLinearTrack::Paint(RenderContext& context, const Offset& offse
         flutter::Paint selectPaint;
         flutter::PaintData selectPaintData;
         selectPaint.paint()->setAntiAlias(true);
-
-        const double startRect = leftToRight_ ? offset.GetX() : offset.GetX() + GetLayoutSize().Width();
-        const double endRect = leftToRight_ ? startRect + trackHeight + trackLength * GetTotalRatio()
-                                            : startRect - trackHeight - trackLength * GetTotalRatio();
-        SkRRect selectRect = SkRRect::MakeRectXY(
-            { startRect, offset.GetY(), endRect, offset.GetY() + trackHeight }, trackHeight * HALF, trackHeight * HALF);
-        flutter::RRect selectRectFlutter = flutter::RRect();
-        selectRectFlutter.sk_rrect = selectRect;
-        selectPaint.paint()->setShader(BlendSkShader({ startRect + scanHighLightValue_ * trackLength, offset.GetY() },
-            GetSelectColor().GetValue(), playAnimation_));
-        canvas->drawRRect(selectRectFlutter, selectPaint, selectPaintData);
+        if (direction_ == Axis::VERTICAL) {
+            const double startRect = offset.GetY();
+            const double endRect = startRect + trackHeight + trackLength * GetTotalRatio();
+            SkRRect selectRect = SkRRect::MakeRectXY(
+                { offset.GetX(), startRect, offset.GetX() + trackHeight, endRect },
+                trackHeight * HALF,
+                trackHeight * HALF);
+            flutter::RRect selectRectFlutter = flutter::RRect();
+            selectRectFlutter.sk_rrect = selectRect;
+            selectPaint.paint()->setShader(BlendSkShader({ offset.GetX(), startRect }, GetSelectColor().GetValue(),
+                playAnimation_));
+            canvas->drawRRect(selectRectFlutter, selectPaint, selectPaintData);
+        } else {
+            const double startRect = leftToRight_ ? offset.GetX() : offset.GetX() + GetLayoutSize().Width();
+            const double endRect = leftToRight_ ? startRect + trackHeight + trackLength * GetTotalRatio()
+                                                : startRect - trackHeight - trackLength * GetTotalRatio();
+            SkRRect selectRect = SkRRect::MakeRectXY({ startRect, offset.GetY(), endRect, offset.GetY() + trackHeight },
+                trackHeight * HALF, trackHeight * HALF);
+            flutter::RRect selectRectFlutter = flutter::RRect();
+            selectRectFlutter.sk_rrect = selectRect;
+            selectPaint.paint()->setShader(
+                BlendSkShader({ startRect + scanHighLightValue_ * trackLength, offset.GetY() },
+                    GetSelectColor().GetValue(), playAnimation_));
+            canvas->drawRRect(selectRectFlutter, selectPaint, selectPaintData);
+        }
     }
 }
 
@@ -145,30 +164,53 @@ void FlutterRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Of
     if (!NearEqual(GetTrackThickness(), 0.0)) {
         trackHeight = GetTrackThickness();
     }
-    const double trackLength = GetLayoutSize().Width();
-    const double dyOffset = offset.GetY() + trackHeight * HALF;
-    double current = offset.GetX();
-
-    SkPaint skPaint;
-    skPaint.setColor(color.GetValue());
-    skPaint.setStyle(SkPaint::Style::kStroke_Style);
-    skPaint.setStrokeWidth(size);
-    skPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
-    SkPath path;
-
-    while (current < offset.GetX() + trackLength) {
-        // do not draw first mark on track head
-        current += GetSliderSteps();
-        double dxOffset = current;
-        if (GetSliderMode() == SliderMode::OUTSET) {
-            dxOffset = std::clamp(current, offset.GetX() + size * HALF, offset.GetX() + trackLength - size * HALF);
-        } else {
-            dxOffset = std::clamp(current, offset.GetX(), offset.GetX() + trackLength);
+    if (direction_ == Axis::VERTICAL) {
+        const double trackLength = GetLayoutSize().Height();
+        const double dxOffset = offset.GetX() + trackHeight * HALF;
+        double current = offset.GetY();
+        SkPaint skPaint;
+        skPaint.setColor(color.GetValue());
+        skPaint.setStyle(SkPaint::Style::kStroke_Style);
+        skPaint.setStrokeWidth(size);
+        skPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
+        SkPath path;
+        while (current < offset.GetY() + trackLength) {
+            // do not draw first mark on track head
+            current += GetSliderSteps();
+            double dyOffset = current;
+            if (GetSliderMode() == SliderMode::OUTSET) {
+                dyOffset = std::clamp(current, offset.GetY() + size * HALF, offset.GetY() + trackLength - size * HALF);
+            } else {
+                dyOffset = std::clamp(current, offset.GetY(), offset.GetY() + trackLength);
+            }
+            path.moveTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
+            path.lineTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
         }
-        path.moveTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
-        path.lineTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
+        skCanvas->drawPath(path, skPaint);
+    } else {
+        const double trackLength = GetLayoutSize().Width();
+        const double dyOffset = offset.GetY() + trackHeight * HALF;
+        double current = offset.GetX();
+        SkPaint skPaint;
+        skPaint.setColor(color.GetValue());
+        skPaint.setStyle(SkPaint::Style::kStroke_Style);
+        skPaint.setStrokeWidth(size);
+        skPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
+        SkPath path;
+        while (current < offset.GetX() + trackLength) {
+            // do not draw first mark on track head
+            current += GetSliderSteps();
+            double dxOffset = current;
+            if (GetSliderMode() == SliderMode::OUTSET) {
+                dxOffset = std::clamp(current, offset.GetX() + size * HALF, offset.GetX() + trackLength - size * HALF);
+            } else {
+                dxOffset = std::clamp(current, offset.GetX(), offset.GetX() + trackLength);
+            }
+            path.moveTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
+            path.lineTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
+        }
+        skCanvas->drawPath(path, skPaint);
     }
-    skCanvas->drawPath(path, skPaint);
 }
 
 void FlutterRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Offset& offset)
@@ -182,8 +224,16 @@ void FlutterRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Of
     if (!NearEqual(GetTrackThickness(), 0.0)) {
         trackHeight = GetTrackThickness();
     }
-    const double trackLength = GetLayoutSize().Width();
-    const double dyOffset = offset.GetY() + trackHeight * HALF;
+    double trackLength = 0.0;
+    double dxOffset = 0.0;
+    double dyOffset = 0.0;
+    if (direction_ == Axis::VERTICAL) {
+        trackLength = GetLayoutSize().Height();
+        dxOffset = offset.GetX() + trackHeight * HALF;
+    } else {
+        trackLength = GetLayoutSize().Width();
+        dyOffset = offset.GetY() + trackHeight * HALF;
+    }
 
     // Draw background
     flutter::Paint railPaint;
@@ -193,7 +243,11 @@ void FlutterRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Of
     railPaint.paint()->setStyle(SkPaint::Style::kStroke_Style);
     railPaint.paint()->setStrokeWidth(trackHeight);
     railPaint.paint()->setStrokeCap(SkPaint::kRound_Cap);
-    canvas->drawLine(offset.GetX(), dyOffset, offset.GetX() + trackLength, dyOffset, railPaint, railPaintData);
+    if (direction_ == Axis::VERTICAL) {
+        canvas->drawLine(dxOffset, offset.GetY(), dxOffset, offset.GetY() + trackLength, railPaint, railPaintData);
+    } else {
+        canvas->drawLine(offset.GetX(), dyOffset, offset.GetX() + trackLength, dyOffset, railPaint, railPaintData);
+    }
 
     // draw steps
     PaintSliderSteps(context, offset);
@@ -207,9 +261,16 @@ void FlutterRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Of
         selectPaint.paint()->setStyle(SkPaint::Style::kStroke_Style);
         selectPaint.paint()->setStrokeWidth(trackHeight);
         selectPaint.paint()->setStrokeCap(SkPaint::kRound_Cap);
-        const double fromX = leftToRight_ ? offset.GetX() : offset.GetX() + trackLength;
-        const double toX = leftToRight_ ? fromX + trackLength * GetTotalRatio() : fromX - trackLength * GetTotalRatio();
-        canvas->drawLine(fromX, dyOffset, toX, dyOffset, selectPaint, selectPaintData);
+        if (direction_ == Axis::VERTICAL) {
+            const double fromY = offset.GetY();
+            const double toY = fromY + trackLength * GetTotalRatio();
+            canvas->drawLine(dxOffset, fromY, dxOffset, toY, selectPaint, selectPaintData);
+        } else {
+            const double fromX = leftToRight_ ? offset.GetX() : offset.GetX() + trackLength;
+            const double toX =
+                leftToRight_ ? fromX + trackLength * GetTotalRatio() : fromX - trackLength * GetTotalRatio();
+            canvas->drawLine(fromX, dyOffset, toX, dyOffset, selectPaint, selectPaintData);
+        }
     }
 }
 
@@ -220,10 +281,18 @@ void FlutterRenderLinearTrack::PaintBackgroundTrack(
     flutter::PaintData railPaintData;
     railPaint.paint()->setAntiAlias(true);
     railPaint.paint()->setColor(GetBackgroundColor().GetValue());
-    double trackLength = GetLayoutSize().Width();
-    SkRRect rrect =
-        SkRRect::MakeRectXY({ offset.GetX(), offset.GetY(), offset.GetX() + trackLength, offset.GetY() + trackHeight },
-            trackHeight * HALF, trackHeight * HALF);
+    SkRRect rrect;
+    if (direction_ == Axis::VERTICAL) {
+        rrect = SkRRect::MakeRectXY(
+            { offset.GetX(), offset.GetY(), offset.GetX() + trackHeight, offset.GetY() + GetLayoutSize().Height() },
+            trackHeight * HALF,
+            trackHeight * HALF);
+    } else {
+        rrect = SkRRect::MakeRectXY(
+            { offset.GetX(), offset.GetY(), offset.GetX() + GetLayoutSize().Width(), offset.GetY() + trackHeight },
+            trackHeight * HALF,
+            trackHeight * HALF);
+    }
     flutter::RRect flutterRect = flutter::RRect();
     flutterRect.sk_rrect = rrect;
     canvas->drawRRect(flutterRect, railPaint, railPaintData);

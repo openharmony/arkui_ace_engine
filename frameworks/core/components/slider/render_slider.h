@@ -248,6 +248,7 @@ protected:
     SliderMode mode_ = SliderMode::OUTSET;
     Dimension blockHotWidth_;
     Dimension blockHotHeight_;
+    Axis direction_ = Axis::HORIZONTAL;
 
     RefPtr<RenderNode> tip_;
     RefPtr<RenderNode> renderText_;

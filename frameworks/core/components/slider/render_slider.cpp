@@ -64,6 +64,7 @@ void RenderSlider::Update(const RefPtr<Component>& component)
         step_ = slider->GetStep();
         disable_ = slider->GetDisable();
         SetTextDirection(slider->GetTextDirection());
+        direction_ = slider->GetDirection();
         isError_ = false;
         isValueError_ = false;
         SyncValueToComponent(std::clamp(slider->GetValue(), min_, max_));
@@ -187,24 +188,44 @@ void RenderSlider::HandleScrollUpdate(double delta)
 
 Size RenderSlider::Measure()
 {
-    Size layoutConstrainMax = GetLayoutParam().GetMaxSize();
-    LayoutParam childrenLayoutConstrain;
-    if (layoutConstrainMax.Width() == Size::INFINITE_SIZE) {
-        // set the default size to (260dp, 40dp) and length to 160dp
-        trackLength_ = NormalizeToPx(DEFAULT_SLIDER_WIDTH_DP) - 2 * NormalizeToPx(SLIDER_PADDING_DP);
-        childrenLayoutConstrain.SetMaxSize(
-            Size(NormalizeToPx(DEFAULT_SLIDER_WIDTH_DP), NormalizeToPx(DEFAULT_SLIDER_HEIGHT_DP)));
+    if (direction_ == Axis::VERTICAL) {
+        Size layoutConstrainMax = GetLayoutParam().GetMaxSize();
+        LayoutParam childrenLayoutConstrain;
+        if (layoutConstrainMax.Height() == Size::INFINITE_SIZE) {
+            trackLength_ = NormalizeToPx(DEFAULT_SLIDER_WIDTH_DP) - 2 * NormalizeToPx(SLIDER_PADDING_DP);
+            childrenLayoutConstrain.SetMaxSize(
+                Size(NormalizeToPx(DEFAULT_SLIDER_HEIGHT_DP), NormalizeToPx(DEFAULT_SLIDER_WIDTH_DP)));
+        } else {
+            trackLength_ = layoutConstrainMax.Height() - 2 * NormalizeToPx(SLIDER_PADDING_DP);
+            childrenLayoutConstrain.SetMaxSize(Size(NormalizeToPx(DEFAULT_SLIDER_HEIGHT_DP), trackLength_));
+        }
+        for (const auto& item : GetChildren()) {
+            item->Layout(childrenLayoutConstrain);
+        }
+        if (trackLength_ < 0.0) {
+            trackLength_ = 0.0;
+        }
+        return Size(NormalizeToPx(DEFAULT_SLIDER_HEIGHT_DP), layoutConstrainMax.Height());
     } else {
-        trackLength_ = layoutConstrainMax.Width() - 2 * NormalizeToPx(SLIDER_PADDING_DP);
-        childrenLayoutConstrain.SetMaxSize(Size(trackLength_, NormalizeToPx(DEFAULT_SLIDER_HEIGHT_DP)));
+        Size layoutConstrainMax = GetLayoutParam().GetMaxSize();
+        LayoutParam childrenLayoutConstrain;
+        if (layoutConstrainMax.Width() == Size::INFINITE_SIZE) {
+            // set the default size to (260dp, 40dp) and length to 160dp
+            trackLength_ = NormalizeToPx(DEFAULT_SLIDER_WIDTH_DP) - 2 * NormalizeToPx(SLIDER_PADDING_DP);
+            childrenLayoutConstrain.SetMaxSize(
+                Size(NormalizeToPx(DEFAULT_SLIDER_WIDTH_DP), NormalizeToPx(DEFAULT_SLIDER_HEIGHT_DP)));
+        } else {
+            trackLength_ = layoutConstrainMax.Width() - 2 * NormalizeToPx(SLIDER_PADDING_DP);
+            childrenLayoutConstrain.SetMaxSize(Size(trackLength_, NormalizeToPx(DEFAULT_SLIDER_HEIGHT_DP)));
+        }
+        for (const auto& item : GetChildren()) {
+            item->Layout(childrenLayoutConstrain);
+        }
+        if (trackLength_ < 0.0) {
+            trackLength_ = 0.0;
+        }
+        return Size(layoutConstrainMax.Width(), NormalizeToPx(DEFAULT_SLIDER_HEIGHT_DP));
     }
-    for (const auto& item : GetChildren()) {
-        item->Layout(childrenLayoutConstrain);
-    }
-    if (trackLength_ < 0.0) {
-        trackLength_ = 0.0;
-    }
-    return Size(layoutConstrainMax.Width(), NormalizeToPx(DEFAULT_SLIDER_HEIGHT_DP));
 }
 
 void RenderSlider::Initialize()
@@ -424,8 +445,13 @@ void RenderSlider::HandleDragEnd()
 // Render the block position after clicking or dragging
 void RenderSlider::RenderBlockPosition(const Offset& touchPosition)
 {
-    double diff = (GetTextDirection() == TextDirection::LTR) ? touchPosition.GetX() - NormalizeToPx(SLIDER_PADDING_DP)
-                                                             : GetLayoutSize().Width() - touchPosition.GetX();
+    double diff = 0.0;
+    if (direction_ == Axis::VERTICAL) {
+        diff = touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP);
+    } else {
+        diff = (GetTextDirection() == TextDirection::LTR) ? touchPosition.GetX() - NormalizeToPx(SLIDER_PADDING_DP)
+                                                                 : GetLayoutSize().Width() - touchPosition.GetX();
+    }
     if (diff < 0.0) {
         SyncValueToComponent(min_);
         SetTotalRatio(0.0);
@@ -525,16 +551,27 @@ TouchRegionPoint RenderSlider::GetBotTouchRegion(const Vertex& center, double wi
 
 void RenderSlider::UpdateTouchRegion()
 {
-    double dxOffset = trackLength_ * totalRatio_ + NormalizeToPx(SLIDER_PADDING_DP);
-    double dyOffset = GetLayoutSize().Height() * HALF;
-    Vertex blockCenter = (GetTextDirection() == TextDirection::LTR)
-                             ? TouchRegionPoint(dxOffset, dyOffset)
-                             : TouchRegionPoint(GetLayoutSize().Width() - dxOffset, dyOffset);
-    TouchRegionPoint blockTopPoint =
-        GetTopTouchRegion(blockCenter, NormalizeToPx(blockHotWidth_), NormalizeToPx(blockHotHeight_));
-    TouchRegionPoint blockBottomPoint =
-        GetBotTouchRegion(blockCenter, NormalizeToPx(blockHotWidth_), NormalizeToPx(blockHotHeight_));
-    blockTouchRegion_ = TouchRegion(blockTopPoint, blockBottomPoint);
+    if (direction_ == Axis::VERTICAL) {
+        double dxOffset = GetLayoutSize().Width() * HALF;
+        double dyOffset = trackLength_ * totalRatio_ + NormalizeToPx(SLIDER_PADDING_DP);
+        Vertex blockCenter = TouchRegionPoint(dxOffset, dyOffset);
+        TouchRegionPoint blockTopPoint =
+            GetTopTouchRegion(blockCenter, NormalizeToPx(blockHotWidth_), NormalizeToPx(blockHotHeight_));
+        TouchRegionPoint blockBottomPoint =
+            GetBotTouchRegion(blockCenter, NormalizeToPx(blockHotWidth_), NormalizeToPx(blockHotHeight_));
+        blockTouchRegion_ = TouchRegion(blockTopPoint, blockBottomPoint);
+    } else {
+        double dxOffset = trackLength_ * totalRatio_ + NormalizeToPx(SLIDER_PADDING_DP);
+        double dyOffset = GetLayoutSize().Height() * HALF;
+        Vertex blockCenter = (GetTextDirection() == TextDirection::LTR)
+                                 ? TouchRegionPoint(dxOffset, dyOffset)
+                                 : TouchRegionPoint(GetLayoutSize().Width() - dxOffset, dyOffset);
+        TouchRegionPoint blockTopPoint =
+            GetTopTouchRegion(blockCenter, NormalizeToPx(blockHotWidth_), NormalizeToPx(blockHotHeight_));
+        TouchRegionPoint blockBottomPoint =
+            GetBotTouchRegion(blockCenter, NormalizeToPx(blockHotWidth_), NormalizeToPx(blockHotHeight_));
+        blockTouchRegion_ = TouchRegion(blockTopPoint, blockBottomPoint);
+    }
 }
 
 bool RenderSlider::HandleFocusEvent(const KeyEvent& keyEvent)

@@ -68,14 +68,21 @@ void FlutterRenderSlider::PerformLayout()
     RenderSlider::PerformLayout();
 
     LOGD("Slider::PerformLayout totalRatio_:%{public}lf, trackLength:%{public}lf", totalRatio_, trackLength_);
-    double dxOffset = (GetTextDirection() == TextDirection::LTR)
-                          ? NormalizeToPx(SLIDER_PADDING_DP) + trackLength_ * totalRatio_
-                          : GetLayoutSize().Width() - NormalizeToPx(SLIDER_PADDING_DP) - trackLength_ * totalRatio_;
-
-    double dyOffset = GetLayoutSize().Height() * HALF;
-    ProcessBlock(Offset(dxOffset, dyOffset));
-    ProcessTrack(Offset(dxOffset, dyOffset));
-    SetTipPosition(dxOffset);
+    if (direction_ == Axis::VERTICAL) {
+        double dxOffset = GetLayoutSize().Width() * HALF;
+        double dyOffset = NormalizeToPx(SLIDER_PADDING_DP) + trackLength_ * totalRatio_;
+        ProcessBlock(Offset(dxOffset, dyOffset));
+        ProcessTrack(Offset(dxOffset, dyOffset));
+        SetTipPosition(dyOffset);
+    } else {
+        double dxOffset = (GetTextDirection() == TextDirection::LTR)
+                              ? NormalizeToPx(SLIDER_PADDING_DP) + trackLength_ * totalRatio_
+                              : GetLayoutSize().Width() - NormalizeToPx(SLIDER_PADDING_DP) - trackLength_ * totalRatio_;
+        double dyOffset = GetLayoutSize().Height() * HALF;
+        ProcessBlock(Offset(dxOffset, dyOffset));
+        ProcessTrack(Offset(dxOffset, dyOffset));
+        SetTipPosition(dxOffset);
+    }
 }
 
 RenderLayer FlutterRenderSlider::GetRenderLayer()
@@ -153,23 +160,40 @@ void FlutterRenderSlider::ProcessTrack(const Offset& currentPosition)
     if (!track) {
         return;
     }
-    double trackPositionHorizontal = NormalizeToPx(SLIDER_PADDING_DP);
-    if (GetTextDirection() == TextDirection::RTL) {
-        trackPositionHorizontal = GetLayoutSize().Width() - NormalizeToPx(SLIDER_PADDING_DP) - trackLength_;
-    }
-    double dyOffset = currentPosition.GetY();
-    double hotRegionHeight = NormalizeToPx(blockHotHeight_);
-    Offset trackPosition = Offset(trackPositionHorizontal, dyOffset - track->GetTrackThickness() * HALF);
-    track->SetSliderMode(mode_);
-    if (showSteps_) {
-        double stepLength = step_ * trackLength_ / (max_ - min_);
-        track->SetSliderSteps(stepLength);
+    if (direction_  == Axis::VERTICAL) {
+        double dxOffset = currentPosition.GetX();
+        double trackPositionHorizontal = NormalizeToPx(SLIDER_PADDING_DP);
+        double hotRegionWidth = NormalizeToPx(blockHotWidth_);
+        Offset trackPosition = Offset(dxOffset - track->GetTrackThickness() * HALF, trackPositionHorizontal);
+        track->SetSliderMode(mode_);
+        if (showSteps_) {
+            double stepLength = step_ * trackLength_ / (max_ - min_);
+            track->SetSliderSteps(stepLength);
+        } else {
+            track->SetSliderSteps(0.0);
+        }
+        track->SetPosition(trackPosition);
+        track->SetTotalRatio(totalRatio_);
+        track->SetLayoutSize(Size(hotRegionWidth, trackLength_));
     } else {
-        track->SetSliderSteps(0.0);
+        double trackPositionHorizontal = NormalizeToPx(SLIDER_PADDING_DP);
+        if (GetTextDirection() == TextDirection::RTL) {
+            trackPositionHorizontal = GetLayoutSize().Width() - NormalizeToPx(SLIDER_PADDING_DP) - trackLength_;
+        }
+        double dyOffset = currentPosition.GetY();
+        double hotRegionHeight = NormalizeToPx(blockHotHeight_);
+        Offset trackPosition = Offset(trackPositionHorizontal, dyOffset - track->GetTrackThickness() * HALF);
+        track->SetSliderMode(mode_);
+        if (showSteps_) {
+            double stepLength = step_ * trackLength_ / (max_ - min_);
+            track->SetSliderSteps(stepLength);
+        } else {
+            track->SetSliderSteps(0.0);
+        }
+        track->SetPosition(trackPosition);
+        track->SetTotalRatio(totalRatio_);
+        track->SetLayoutSize(Size(trackLength_, hotRegionHeight));
     }
-    track->SetPosition(trackPosition);
-    track->SetTotalRatio(totalRatio_);
-    track->SetLayoutSize(Size(trackLength_, hotRegionHeight));
 }
 
 void FlutterRenderSlider::SetTipPosition(double blockOffset)

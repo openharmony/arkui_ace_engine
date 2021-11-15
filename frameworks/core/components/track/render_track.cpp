@@ -49,6 +49,7 @@ void RenderTrack::Update(const RefPtr<Component>& component)
     showIndicator_ = track->GetIndicatorFlag();
     markedText_ = track->GetLableMarkedText();
     markedTextColor_ = track->GetLableMarkedColor();
+    direction_ = track->GetDirection();
 
     leftToRight_ = track->GetTextDirection() == TextDirection::LTR;
 
@@ -159,11 +160,17 @@ Size RenderTrack::Measure()
 {
     if (GetLayoutParam().GetMaxSize().IsInfinite()) {
         auto defaultWidth = theme_ != nullptr ? NormalizeToPx(theme_->GetTrackWidth()) : 0.0;
-        return Size(defaultWidth, paintData_.thickness);
+        return direction_ == Axis::HORIZONTAL ?
+            Size(defaultWidth, paintData_.thickness) : Size(paintData_.thickness, defaultWidth);
     }
     Size layoutSize;
-    layoutSize.SetHeight(paintData_.thickness);
-    layoutSize.SetWidth(GetLayoutParam().GetMaxSize().Width());
+    if (direction_ == Axis::VERTICAL) {
+        layoutSize.SetWidth(paintData_.thickness);
+        layoutSize.SetHeight(GetLayoutParam().GetMaxSize().Height());
+    } else {
+        layoutSize.SetHeight(paintData_.thickness);
+        layoutSize.SetWidth(GetLayoutParam().GetMaxSize().Width());
+    }
     return layoutSize;
 }
 

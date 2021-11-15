@@ -29,6 +29,7 @@ namespace OHOS::Ace {
 enum class SliderMode {
     OUTSET, // block on track, track is thin
     INSET,  // block inside track, track is rough
+    CAPSULE, // capsule slider.
 };
 
 inline const Dimension TRACK_HEIGHT_DP = Dimension(2.0, DimensionUnit::VP);
@@ -341,6 +342,16 @@ public:
         return markedTextColor_;
     }
 
+    Axis GetDirection() const
+    {
+        return axis_;
+    }
+
+    void SetDirection(Axis axis)
+    {
+        axis_ = axis;
+    }
+
 private:
     std::string markedText_;
     Color markedTextColor_;
@@ -354,6 +365,7 @@ private:
     std::vector<Color> colors_;
     std::vector<double> weights_;
     bool showAnimation_ = true;
+    Axis axis_ = Axis::HORIZONTAL;
 };
 
 class LinearTrack : public TrackComponent {
