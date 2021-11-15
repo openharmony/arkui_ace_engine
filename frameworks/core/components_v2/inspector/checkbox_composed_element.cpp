@@ -25,8 +25,9 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const CheckboxComposedElement&)>> CREATE_JSON_MAP {
-    { "ison", [](const CheckboxComposedElement& inspector) { return inspector.GetChecked(); } },
-    { "selectedColor", [](const CheckboxComposedElement& inspector) { return inspector.GetSelectedColor(); } }
+    { "isOn", [](const CheckboxComposedElement& inspector) { return inspector.GetChecked(); } },
+    { "selectedColor", [](const CheckboxComposedElement& inspector) { return inspector.GetSelectedColor(); } },
+    { "type", [](const CheckboxComposedElement& inspector) { return inspector.GetToggleType(); } }
 };
 
 } // namespace
@@ -34,8 +35,9 @@ const std::unordered_map<std::string, std::function<std::string(const CheckboxCo
 void CheckboxComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("ison: ").append(GetChecked()));
+    DumpLog::GetInstance().AddDesc(std::string("isOn: ").append(GetChecked()));
     DumpLog::GetInstance().AddDesc(std::string("selectedColor: ").append(GetSelectedColor()));
+    DumpLog::GetInstance().AddDesc(std::string("type: ").append(GetToggleType()));
 }
 
 std::unique_ptr<JsonValue> CheckboxComposedElement::ToJsonObject() const
@@ -52,6 +54,11 @@ std::string CheckboxComposedElement::GetChecked() const
     auto renderCheckbox = GetRenderCheckbox();
     auto checked = renderCheckbox ? renderCheckbox->GetChecked() : false;
     return ConvertBoolToString(checked);
+}
+
+std::string CheckboxComposedElement::GetToggleType() const
+{
+    return std::string("ToggleType.Checkbox");
 }
 
 std::string CheckboxComposedElement::GetSelectedColor() const
