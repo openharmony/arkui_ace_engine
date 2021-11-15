@@ -28,7 +28,7 @@
 #include "base/utils/utils.h"
 #include "core/common/font_manager.h"
 #include "core/components/font/constants_converter.h"
-#include "core/components/font/flutter_font_collection.h"
+#include "core/components/font/rosen_font_collection.h"
 #include "core/components/text/text_component.h"
 #include "core/components/text_span/rosen_render_text_span.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -475,7 +475,7 @@ bool RosenRenderText::UpdateParagraph()
     style.word_break_type = static_cast<minikin::WordBreakType>(textStyle_.GetWordBreak());
 
     std::unique_ptr<txt::ParagraphBuilder> builder;
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("UpdateParagraph: fontCollection is null");
         return false;

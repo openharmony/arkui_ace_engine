@@ -22,7 +22,7 @@
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkPath.h"
 
-#include "core/components/font/flutter_font_collection.h"
+#include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -71,7 +71,7 @@ void SetTextStyle(SkCanvas* canvas, const RenderRingInfo& trackInfo, const std::
         LOGE("Paint canvas is null");
         return;
     }
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("PaintText: fontCollection is null");
         return;

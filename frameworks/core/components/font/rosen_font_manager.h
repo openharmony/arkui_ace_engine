@@ -13,23 +13,25 @@
  * limitations under the License.
  */
 
-#include "core/components/font/flutter_font_manager.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_ROSEN_FONT_MANAGER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_ROSEN_FONT_MANAGER_H
 
-#include "core/components/font/flutter_font_collection.h"
+#include "core/common/font_manager.h"
 
 namespace OHOS::Ace {
 
-void FlutterFontManager::VaryFontCollectionWithFontWeightScale()
-{
-    if (GreatNotEqual(fontWeightScale_, 0.0)) {
-        FlutterFontCollection::GetInstance().VaryFontCollectionWithFontWeightScale(fontWeightScale_);
-        NotifyVariationNodes();
-    }
-}
+class RosenFontManager : public FontManager {
+DECLARE_ACE_TYPE(RosenFontManager, FontManager);
 
-void FlutterFontManager::LoadSystemFont()
-{
-    FlutterFontCollection::GetInstance().LoadSystemFont();
-}
+public:
+    RosenFontManager() = default;
+    ~RosenFontManager() override = default;
+
+    void VaryFontCollectionWithFontWeightScale() override;
+
+    void LoadSystemFont() override;
+};
 
 } // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_ROSEN_FONT_MANAGER_H

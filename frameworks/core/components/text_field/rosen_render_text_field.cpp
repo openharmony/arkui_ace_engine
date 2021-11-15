@@ -31,7 +31,7 @@
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
-#include "core/components/font/flutter_font_collection.h"
+#include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -998,7 +998,7 @@ double RosenRenderTextField::PreferredLineHeight()
 
 std::shared_ptr<txt::FontCollection> RosenRenderTextField::GetFontCollection()
 {
-    return FlutterFontCollection::GetInstance().GetFontCollection();
+    return RosenFontCollection::GetInstance().GetFontCollection();
 }
 
 void RosenRenderTextField::ResetParagraphIfNeeded()

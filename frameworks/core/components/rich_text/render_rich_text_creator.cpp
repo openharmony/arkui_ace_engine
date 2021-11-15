@@ -13,23 +13,22 @@
  * limitations under the License.
  */
 
-#include "core/components/font/flutter_font_manager.h"
-
-#include "core/components/font/flutter_font_collection.h"
+#include "core/components/rich_text/flutter_render_rich_text.h"
+#include "core/components/rich_text/rosen_render_rich_text.h"
 
 namespace OHOS::Ace {
 
-void FlutterFontManager::VaryFontCollectionWithFontWeightScale()
+RefPtr<RenderNode> RenderRichText::Create()
 {
-    if (GreatNotEqual(fontWeightScale_, 0.0)) {
-        FlutterFontCollection::GetInstance().VaryFontCollectionWithFontWeightScale(fontWeightScale_);
-        NotifyVariationNodes();
+    if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        return AceType::MakeRefPtr<RosenRenderRichText>();
+#else
+        return nullptr;
+#endif
+    } else {
+        return AceType::MakeRefPtr<FlutterRenderRichText>();
     }
-}
-
-void FlutterFontManager::LoadSystemFont()
-{
-    FlutterFontCollection::GetInstance().LoadSystemFont();
 }
 
 } // namespace OHOS::Ace

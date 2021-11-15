@@ -42,7 +42,7 @@
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
-#include "core/components/font/flutter_font_collection.h"
+#include "core/components/font/rosen_font_collection.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
@@ -368,7 +368,7 @@ double RosenRenderCustomPaint::MeasureText(const std::string& text, const PaintS
     using namespace Constants;
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("MeasureText: fontCollection is null");
         return 0.0;
@@ -924,7 +924,7 @@ bool RosenRenderCustomPaint::UpdateParagraph(
     } else {
         style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("UpdateParagraph: fontCollection is null");
         return false;
@@ -1284,7 +1284,7 @@ void RosenRenderCustomPaint::WebGLInit(CanvasRenderContextBase* context)
 
 void RosenRenderCustomPaint::WebGLUpdate()
 {
-    LOGD("FlutterRenderCustomPaint::WebGLUpdate");
+    LOGD("RosenRenderCustomPaint::WebGLUpdate");
     if (skCanvas_ && webglBitmap_.readyToDraw()) {
         skCanvas_->save();
         /* Do mirror flip */

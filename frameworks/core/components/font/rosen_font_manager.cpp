@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-#include "core/components/font/flutter_font_manager.h"
+#include "core/components/font/rosen_font_manager.h"
 
-#include "core/components/font/flutter_font_collection.h"
+#include "core/components/font/rosen_font_collection.h"
 
 namespace OHOS::Ace {
 
-void FlutterFontManager::VaryFontCollectionWithFontWeightScale()
+void RosenFontManager::VaryFontCollectionWithFontWeightScale()
 {
     if (GreatNotEqual(fontWeightScale_, 0.0)) {
-        FlutterFontCollection::GetInstance().VaryFontCollectionWithFontWeightScale(fontWeightScale_);
+        RosenFontCollection::GetInstance().VaryFontCollectionWithFontWeightScale(fontWeightScale_);
         NotifyVariationNodes();
     }
 }
 
-void FlutterFontManager::LoadSystemFont()
+void RosenFontManager::LoadSystemFont()
 {
-    FlutterFontCollection::GetInstance().LoadSystemFont();
+    RosenFontCollection::GetInstance().LoadSystemFont();
 }
 
 } // namespace OHOS::Ace

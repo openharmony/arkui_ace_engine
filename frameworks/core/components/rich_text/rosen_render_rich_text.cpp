@@ -13,26 +13,18 @@
  * limitations under the License.
  */
 
-#include "core/components/rich_text/flutter_render_rich_text.h"
+#include "core/components/rich_text/rosen_render_rich_text.h"
 
-#include "flutter/fml/memory/ref_counted.h"
-#include "flutter/lib/ui/painting/canvas.h"
-#include "flutter/lib/ui/painting/picture_recorder.h"
-#include "flutter/lib/ui/ui_dart_state.h"
-
-#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 
 namespace OHOS::Ace {
 
-using namespace Flutter;
-
-void FlutterRenderRichText::PerformLayout()
+void RosenRenderRichText::PerformLayout()
 {
     RenderRichText::PerformLayout();
 }
 
-void FlutterRenderRichText::DumpTree(int32_t depth)
+void RosenRenderRichText::DumpTree(int32_t depth)
 {
     auto children = GetChildren();
 

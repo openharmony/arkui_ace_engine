@@ -24,7 +24,7 @@
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/font/flutter_font_collection.h"
+#include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -40,7 +40,7 @@ constexpr Dimension CARD_CALENDAR_TITLE_HEIGHT = 68.0_vp;
 std::unique_ptr<txt::Paragraph> GetTextParagraph(const std::string& text, const txt::TextStyle& textStyle)
 {
     txt::ParagraphStyle style;
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("MeasureText: fontCollection is null");
         return nullptr;

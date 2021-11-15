@@ -14,22 +14,21 @@
  */
 
 #include "core/components/font/flutter_font_manager.h"
-
-#include "core/components/font/flutter_font_collection.h"
+#include "core/components/font/rosen_font_manager.h"
 
 namespace OHOS::Ace {
 
-void FlutterFontManager::VaryFontCollectionWithFontWeightScale()
+RefPtr<FontManager> FontManager::Create()
 {
-    if (GreatNotEqual(fontWeightScale_, 0.0)) {
-        FlutterFontCollection::GetInstance().VaryFontCollectionWithFontWeightScale(fontWeightScale_);
-        NotifyVariationNodes();
+    if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        return AceType::MakeRefPtr<RosenFontManager>();
+#else
+        return nullptr;
+#endif
+    } else {
+        return AceType::MakeRefPtr<FlutterFontManager>();
     }
-}
-
-void FlutterFontManager::LoadSystemFont()
-{
-    FlutterFontCollection::GetInstance().LoadSystemFont();
 }
 
 } // namespace OHOS::Ace

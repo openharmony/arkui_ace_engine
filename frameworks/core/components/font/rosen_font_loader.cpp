@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/components/font/flutter_font_loader.h"
+#include "core/components/font/rosen_font_loader.h"
 
 #include "flutter/lib/ui/text/font_collection.h"
 
 #include "base/network/download_manager.h"
-#include "core/components/font/flutter_font_collection.h"
-#include "core/pipeline/base/flutter_render_context.h"
+#include "core/components/font/rosen_font_collection.h"
+#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
 
-FlutterFontLoader::FlutterFontLoader(const std::string& familyName, const std::string& familySrc)
+RosenFontLoader::RosenFontLoader(const std::string& familyName, const std::string& familySrc)
     : FontLoader(familyName, familySrc) {};
 
-void FlutterFontLoader::AddFont(const RefPtr<PipelineContext>& context)
+void RosenFontLoader::AddFont(const RefPtr<PipelineContext>& context)
 {
     if (familySrc_.empty()) {
         return;
@@ -41,7 +41,7 @@ void FlutterFontLoader::AddFont(const RefPtr<PipelineContext>& context)
     }
 }
 
-void FlutterFontLoader::LoadFromNetwork(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)
+void RosenFontLoader::LoadFromNetwork(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)
 {
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(context));
     context->GetTaskExecutor()->PostTask([weak = AceType::WeakClaim(this), weakContext] {
@@ -60,7 +60,7 @@ void FlutterFontLoader::LoadFromNetwork(const OHOS::Ace::RefPtr<OHOS::Ace::Pipel
                 return;
             }
             // Load font.
-            FlutterFontCollection::GetInstance().LoadFontFromList(
+            RosenFontCollection::GetInstance().LoadFontFromList(
                 fontData.data(), fontData.size(), fontLoader->familyName_);
             fontLoader->isLoaded_ = true;
 
@@ -78,7 +78,7 @@ void FlutterFontLoader::LoadFromNetwork(const OHOS::Ace::RefPtr<OHOS::Ace::Pipel
     }, TaskExecutor::TaskType::BACKGROUND);
 }
 
-void FlutterFontLoader::LoadFromAsset(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)
+void RosenFontLoader::LoadFromAsset(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)
 {
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(context));
     context->GetTaskExecutor()->PostTask([weak = AceType::WeakClaim(this), weakContext] {
@@ -110,7 +110,7 @@ void FlutterFontLoader::LoadFromAsset(const OHOS::Ace::RefPtr<OHOS::Ace::Pipelin
                 return;
             }
             // Load font.
-            FlutterFontCollection::GetInstance().LoadFontFromList(
+            RosenFontCollection::GetInstance().LoadFontFromList(
                     assetData->GetData(), assetData->GetSize(), fontLoader->familyName_);
             fontLoader->isLoaded_ = true;
 
