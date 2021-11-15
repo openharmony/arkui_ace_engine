@@ -47,6 +47,8 @@ public:
     std::string GetStrokeWidth() const;
     std::unique_ptr<JsonValue> GetStrokeDashArray() const;
     std::unique_ptr<JsonValue> GetRadiusArray() const;
+    std::unique_ptr<JsonValue> GetRadiusHeightArray() const;
+    std::unique_ptr<JsonValue> GetRadiusWidthArray() const;
 
     AceType::IdType GetTargetTypeId() const override
     {
