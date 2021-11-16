@@ -601,7 +601,7 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
         }
     }
     auto iter = wrappingComponentsMap.find("box");
-    if (iter != wrappingComponentsMap.end()) {
+    if (iter != wrappingComponentsMap.end() && (iter->second->GetTextDirection() != component->GetTextDirection())) {
         component->SetTextDirection(iter->second->GetTextDirection());
     }
     return component;
