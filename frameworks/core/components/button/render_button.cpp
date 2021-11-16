@@ -409,7 +409,7 @@ void RenderButton::PerformLayout()
         width_ = ARC_BUTTON_WIDTH;
         height_ = ARC_BUTTON_HEIGHT;
     }
-    buttonSize_ = Size(NormalizeToPx(width_), NormalizeToPx(height_));
+    buttonSize_ = Size(NormalizePercentToPx(width_, false), NormalizePercentToPx(height_, true));
     rrectRadius_ = NormalizeToPx(buttonComponent_->GetRectRadius());
     layoutSize_ = Measure();
     SetChildrenLayoutSize();
