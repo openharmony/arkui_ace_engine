@@ -139,26 +139,26 @@ std::string GridComposedElement::GetScrollBar() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        return "BarState::OFF";
+        return "BarState::Off";
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
         return DisplayModeToString(renderGrip->GetScrollBar());
     }
-    return "BarState::OFF";
+    return "BarState::Off";
 }
 
 std::string GridComposedElement::DisplayModeToString(DisplayMode displayMode) const
 {
     switch (displayMode) {
         case DisplayMode::OFF:
-            return "BarState::OFF";
+            return "BarState::Off";
         case DisplayMode::AUTO:
-            return "BarState::AUTO";
+            return "BarState::Auto";
         case DisplayMode::ON:
-            return "BarState::ON";
+            return "BarState::On";
     }
-    return "BarState::OFF";
+    return "BarState::Off";
 }
 
 } // namespace OHOS::Ace::V2
