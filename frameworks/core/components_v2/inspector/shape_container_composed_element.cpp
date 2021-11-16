@@ -50,9 +50,9 @@ const std::unordered_map<std::string, JsonFuncType> CREATE_JSON_JSON_VALUE_MAP {
 std::string ShapeContainerComposedElement::LineCapStyleToString(LineCapStyle lineCapStyle)
 {
     static const std::unordered_map<LineCapStyle, std::string> STYLE_MAP {
-        { LineCapStyle::BUTT, "LineCapStyle.BUTT" },
-        { LineCapStyle::ROUND, "LineCapStyle.ROUND" },
-        { LineCapStyle::SQUARE, "LineCapStyle.SQUARE" },
+        { LineCapStyle::BUTT, "LineCapStyle.Butt" },
+        { LineCapStyle::ROUND, "LineCapStyle.Round" },
+        { LineCapStyle::SQUARE, "LineCapStyle.Square" },
     };
 
     auto pos = STYLE_MAP.find(lineCapStyle);
@@ -65,9 +65,9 @@ std::string ShapeContainerComposedElement::LineCapStyleToString(LineCapStyle lin
 std::string ShapeContainerComposedElement::LineJoinStyleToString(LineJoinStyle lineJoinStyle)
 {
     static const std::unordered_map<LineJoinStyle, std::string> STYLE_MAP {
-        { LineJoinStyle::MITER, "LineJoinStyle.MITER" },
-        { LineJoinStyle::BEVEL, "LineJoinStyle.BEVEL" },
-        { LineJoinStyle::ROUND, "LineJoinStyle.ROUND" },
+        { LineJoinStyle::MITER, "LineJoinStyle.Miter" },
+        { LineJoinStyle::BEVEL, "LineJoinStyle.Bevel" },
+        { LineJoinStyle::ROUND, "LineJoinStyle.Round" },
     };
 
     auto pos = STYLE_MAP.find(lineJoinStyle);
