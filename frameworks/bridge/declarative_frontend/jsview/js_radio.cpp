@@ -58,7 +58,7 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("size", &JSRadio::JsSize);
     JSClass<JSRadio>::StaticMethod("padding", &JSRadio::JsPadding);
     JSClass<JSRadio>::StaticMethod("onChange", &JSRadio::OnChange);
-    JSClass<JSRadio>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSRadio>::StaticMethod("onClick", &JSRadio::JsOnClick);
     JSClass<JSRadio>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRadio>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSRadio>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
@@ -224,6 +224,16 @@ void JSRadio::OnChange(const JSCallbackInfo& args)
     if (!JSViewBindEvent(&CheckableComponent::SetOnChange, args)) {
         LOGW("Failed to bind event");
     }
+    args.ReturnSelf();
+}
+
+void JSRadio::JsOnClick(const JSCallbackInfo& args)
+{
+    if (JSViewBindEvent(&CheckableComponent::SetOnClick, args)) {
+    } else {
+        LOGW("Failed to bind event");
+    }
+
     args.ReturnSelf();
 }
 

@@ -173,6 +173,9 @@ void RenderRadio::HandleClick()
     if (clickEvent_) {
         clickEvent_();
     }
+    if (onClick_) {
+        onClick_();
+    }
 }
 
 void RenderRadio::OffAnimationEnd()

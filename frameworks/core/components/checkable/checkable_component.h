@@ -280,6 +280,7 @@ public:
     }
 
     ACE_DEFINE_COMPONENT_EVENT(OnChange, void(bool));
+    ACE_DEFINE_COMPONENT_EVENT(OnClick, void());
 
 protected:
     CheckableType checkableType_ = CheckableType::UNKNOWN;
