@@ -28,8 +28,6 @@ namespace OHOS::Ace {
 namespace {
 
 const auto DRAG_BAR_RADIUS = 24.0_vp;
-const Color BG_COLOR = Color(0xfff7f7f7);
-constexpr uint32_t DEFAULT_COLOR_VALUE = 0xff000000;
 
 } // namespace
 
@@ -60,11 +58,7 @@ void SemiModalComponent::BuildInnerChild(uint32_t color)
     auto dragBar = AceType::MakeRefPtr<DragBarComponent>();
     auto boxForNavigation = AceType::MakeRefPtr<BoxComponent>();
     auto backDecoration = AceType::MakeRefPtr<Decoration>();
-    if (color != DEFAULT_COLOR_VALUE) {
-        backDecoration->SetBackgroundColor(Color(color));
-    } else {
-        backDecoration->SetBackgroundColor(BG_COLOR);
-    }
+    backDecoration->SetBackgroundColor(Color(color));
     Border border;
     border.SetTopLeftRadius(Radius(DRAG_BAR_RADIUS));
     border.SetTopRightRadius(Radius(DRAG_BAR_RADIUS));

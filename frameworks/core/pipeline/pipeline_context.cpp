@@ -61,6 +61,7 @@
 #include "core/components/scroll/scrollable.h"
 #include "core/components/semi_modal/semi_modal_component.h"
 #include "core/components/semi_modal/semi_modal_element.h"
+#include "core/components/semi_modal/semi_modal_theme.h"
 #include "core/components/stage/stage_component.h"
 #include "core/components/stage/stage_element.h"
 #include "core/components/theme/app_theme.h"
@@ -77,6 +78,7 @@ constexpr int32_t MOUSE_PRESS_LEFT = 1;
 constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
+constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;
 
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
     struct timespec ts;
@@ -669,6 +671,12 @@ RefPtr<Element> PipelineContext::SetupRootElement()
     stack->AppendChild(overlay);
     RefPtr<RootComponent> rootComponent;
     if (windowModal_ == WindowModal::SEMI_MODAL || windowModal_ == WindowModal::SEMI_MODAL_FULL_SCREEN) {
+        if (modalColor_ == DEFAULT_MODAL_COLOR) {
+            auto semiModalTheme = themeManager_->GetTheme<SemiModalTheme>();
+            if (semiModalTheme) {
+                SetModalColor(semiModalTheme->GetBgColor().GetValue());
+            }
+        }
         auto semiModal = SemiModalComponent::Create(
             stack, windowModal_ == WindowModal::SEMI_MODAL_FULL_SCREEN, modalHeight_, modalColor_);
         rootComponent = RootComponent::Create(semiModal);

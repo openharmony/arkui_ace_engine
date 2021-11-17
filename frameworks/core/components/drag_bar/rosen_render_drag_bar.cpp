@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/painter/rosen_universal_painter.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -59,6 +60,10 @@ void RosenRenderDragBar::Paint(RenderContext& context, const Offset& offset)
             canvas, Rect(offset + alignOffset, size), HOVER_COLOR, NormalizeToPx(HOVER_RADIUS));
     }
     skPaint.setAlpha(alpha_ * opacity_);
+    auto theme = GetTheme<DragBarTheme>();
+    if (theme) {
+        barColor_ = theme->GetBarColor();
+    }
     skPaint.setColor(barColor_.GetValue());
     skPaint.setStyle(SkPaint::Style::kStroke_Style);
     skPaint.setStrokeWidth(barWidth_ * scaleY_ * scaleWidth_);
