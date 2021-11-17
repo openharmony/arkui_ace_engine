@@ -154,7 +154,10 @@ public:
 
     // graphical transformation
     virtual DimensionOffset GetOriginPoint() const;
-    virtual std::unique_ptr<JsonValue> GetTransformEffect() const;
+    virtual std::unique_ptr<JsonValue> GetRotate() const;
+    virtual std::unique_ptr<JsonValue> GetScale() const;
+    virtual std::unique_ptr<JsonValue> GetTransform() const;
+    virtual std::unique_ptr<JsonValue> GetTranslate() const;
 
     virtual double GetBlur() const;
     virtual double GetBackDropBlur() const;

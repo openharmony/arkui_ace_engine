@@ -182,8 +182,14 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
         [](const InspectorComposedElement& inspector) { return inspector.GetBackgroundImagePosition(); } },
     { "useSizeType",
         [](const InspectorComposedElement& inspector) { return inspector.GetUseSizeType(); } },
-    { "transformEffect",
-        [](const InspectorComposedElement& inspector) { return inspector.GetTransformEffect(); } },
+    { "rotate",
+      [](const InspectorComposedElement& inspector) { return inspector.GetRotate(); } },
+    { "scale",
+      [](const InspectorComposedElement& inspector) { return inspector.GetScale(); } },
+    { "transform",
+      [](const InspectorComposedElement& inspector) { return inspector.GetTransform(); } },
+    { "translate",
+      [](const InspectorComposedElement& inspector) { return inspector.GetTranslate(); } },
     { "markAnchor",
         [](const InspectorComposedElement& inspector) { return inspector.GetMarkAnchor(); } },
     { "clip",
@@ -746,56 +752,77 @@ DimensionOffset InspectorComposedElement::GetOriginPoint() const
     return render->GetTransformOrigin();
 }
 
-std::unique_ptr<JsonValue> InspectorComposedElement::GetTransformEffect() const
+std::unique_ptr<JsonValue> InspectorComposedElement::GetRotate() const
 {
     auto render = AceType::DynamicCast<RenderTransform>(GetInspectorNode(TransformElement::TypeId()));
     if (!render) {
         return nullptr;
     }
-    auto jsonValue = JsonUtil::CreateArray(true);
+    auto jsonValue = JsonUtil::Create(true);
     for (const auto& operation : render->GetTransformEffects().GetOperations()) {
-        switch (operation.type_) {
-            case TransformOperationType::TRANSLATE: {
-                auto itemValue = JsonUtil::Create(true);
-                const auto& translate = operation.translateOperation_;
-                itemValue->Put("type", "translate");
-                itemValue->Put("x", translate.dx.ToString().c_str());
-                itemValue->Put("y", translate.dy.ToString().c_str());
-                itemValue->Put("z", translate.dz.ToString().c_str());
-                jsonValue->Put(itemValue);
-                break;
-            }
-            case TransformOperationType::SCALE: {
-                auto itemValue = JsonUtil::Create(true);
-                const auto& scale = operation.scaleOperation_;
-                itemValue->Put("type", "scale");
-                itemValue->Put("x", std::to_string(scale.scaleX).c_str());
-                itemValue->Put("y", std::to_string(scale.scaleY).c_str());
-                itemValue->Put("z", std::to_string(scale.scaleZ).c_str());
-                jsonValue->Put(itemValue);
-                break;
-            }
-            case TransformOperationType::ROTATE: {
-                auto itemValue = JsonUtil::Create(true);
-                const auto& rotate = operation.rotateOperation_;
-                itemValue->Put("type", "rotate");
-                itemValue->Put("x", std::to_string(rotate.dx).c_str());
-                itemValue->Put("y", std::to_string(rotate.dy).c_str());
-                itemValue->Put("z", std::to_string(rotate.dz).c_str());
-                itemValue->Put("angle", std::to_string(rotate.angle).c_str());
-                jsonValue->Put(itemValue);
-                break;
-            }
-            case TransformOperationType::MATRIX: {
-                auto itemValue = JsonUtil::Create(true);
-                const auto& matrix = operation.matrix4_;
-                itemValue->Put("type", "matrix");
-                itemValue->Put("matrix", matrix.ToString().c_str());
-                jsonValue->Put(itemValue);
-                break;
-            }
-            default:
-                break;
+        if (operation.type_ == TransformOperationType::ROTATE) {
+            const auto& rotate = operation.rotateOperation_;
+            jsonValue->Put("x", std::to_string(rotate.dx).c_str());
+            jsonValue->Put("y", std::to_string(rotate.dy).c_str());
+            jsonValue->Put("z", std::to_string(rotate.dz).c_str());
+            jsonValue->Put("angle", std::to_string(rotate.angle).c_str());
+            break;
+        }
+    }
+    return jsonValue;
+}
+
+std::unique_ptr<JsonValue> InspectorComposedElement::GetScale() const
+{
+    auto render = AceType::DynamicCast<RenderTransform>(GetInspectorNode(TransformElement::TypeId()));
+    if (!render) {
+        return nullptr;
+    }
+    auto jsonValue = JsonUtil::Create(true);
+    for (const auto& operation : render->GetTransformEffects().GetOperations()) {
+        if (operation.type_ == TransformOperationType::SCALE) {
+            const auto& scale = operation.scaleOperation_;
+            jsonValue->Put("x", std::to_string(scale.scaleX).c_str());
+            jsonValue->Put("y", std::to_string(scale.scaleY).c_str());
+            jsonValue->Put("z", std::to_string(scale.scaleZ).c_str());
+            break;
+        }
+    }
+    return jsonValue;
+}
+
+std::unique_ptr<JsonValue> InspectorComposedElement::GetTransform() const
+{
+    auto render = AceType::DynamicCast<RenderTransform>(GetInspectorNode(TransformElement::TypeId()));
+    if (!render) {
+        return nullptr;
+    }
+    auto jsonValue = JsonUtil::Create(true);
+    for (const auto& operation : render->GetTransformEffects().GetOperations()) {
+        if (operation.type_ == TransformOperationType::MATRIX) {
+            const auto& matrix = operation.matrix4_;
+            jsonValue->Put("type", "matrix");
+            jsonValue->Put("matrix", matrix.ToString().c_str());
+            break;
+        }
+    }
+    return jsonValue;
+}
+
+std::unique_ptr<JsonValue> InspectorComposedElement::GetTranslate() const
+{
+    auto render = AceType::DynamicCast<RenderTransform>(GetInspectorNode(TransformElement::TypeId()));
+    if (!render) {
+        return nullptr;
+    }
+    auto jsonValue = JsonUtil::Create(true);
+    for (const auto& operation : render->GetTransformEffects().GetOperations()) {
+        if (operation.type_ == TransformOperationType::TRANSLATE) {
+            const auto& translate = operation.translateOperation_;
+            jsonValue->Put("x", translate.dx.ToString().c_str());
+            jsonValue->Put("y", translate.dy.ToString().c_str());
+            jsonValue->Put("z", translate.dz.ToString().c_str());
+            break;
         }
     }
     return jsonValue;
