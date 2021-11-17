@@ -52,5 +52,5 @@ ohos_shared_library("ark_debugger") {
   configs = [ ":ark_debugger_config" ]
 
   subsystem_name = "ace"
-  part_name = "ace_engine_full"
+  part_name = ace_engine_part
 }
