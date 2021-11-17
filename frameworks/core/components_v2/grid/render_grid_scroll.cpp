@@ -718,7 +718,7 @@ bool RenderGridScroll::Rank(int32_t mainIndex, int32_t itemIndex)
         } else {
             if (!getChildSpanByIndex_(itemIndex, useScrollable_ == SCROLLABLE::HORIZONTAL, itemMain, itemCross,
                 itemMainSpan, itemCrossSpan)) {
-                return false;
+                return (itemIndex == totalCount_);
             }
         }
 
