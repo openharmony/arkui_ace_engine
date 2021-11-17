@@ -795,7 +795,6 @@ void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* c
                     return;
                 }
                 canvas->save();
-                canvas->clipRRect(outerRRect.sk_rrect, true);
                 PaintBorderImage(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint, image);
                 canvas->restore();
             }
@@ -820,7 +819,6 @@ void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* c
                 std::unique_ptr<SkCanvas> skCanvas_ = std::make_unique<SkCanvas>(skBitmap_);
                 skCanvas_->drawPaint(paint);
                 sk_sp<SkImage> skImage_ = SkImage::MakeFromBitmap(skBitmap_);
-                canvas->clipRRect(outerRRect.sk_rrect, true);
                 PaintBorderImage(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint, skImage_);
                 paint.setShader(nullptr);
                 canvas->restore();
