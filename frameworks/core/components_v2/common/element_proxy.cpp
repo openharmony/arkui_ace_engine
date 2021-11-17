@@ -112,6 +112,11 @@ public:
 
     void ReleaseElementById(const ComposeId& id) override
     {
+        LOGD("RenderElementProxy can not release Id. id: %{public}s", id.c_str());
+    }
+
+    void HostReleaseElementById(const ComposeId& id)
+    {
         if (id != GetId()) {
             LOGW("ReleaseElement Failed. Id not equals: (%s) vs (%s)", id.c_str(), GetId().c_str());
             return;
@@ -142,7 +147,7 @@ private:
     void SetComposedId(const ComposeId& composedId)
     {
         if (composedId_ != composedId) {
-            ReleaseElementById(composedId_);
+            HostReleaseElementById(composedId_);
         }
         composedId_ = composedId;
     }
@@ -559,6 +564,9 @@ public:
     void ReleaseElementById(const ComposeId& composeId) override
     {
         for (const auto& child : children_) {
+            if (!child) {
+                continue;
+            }
             child->ReleaseElementById(composeId);
         }
     }
