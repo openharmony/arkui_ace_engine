@@ -90,7 +90,6 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
     if (type_ != FrontendType::DECLARATIVE_JS) {
         flutterTaskExecutor->InitJsThread();
     }
-    SystemProperties::SetDeclarativeFrontend(type_ == FrontendType::DECLARATIVE_JS);
     taskExecutor_ = flutterTaskExecutor;
     taskExecutor_->PostTask([id = instanceId_]() { Container::InitForThread(id); }, TaskExecutor::TaskType::JS);
     platformEventCallback_ = std::move(callback);

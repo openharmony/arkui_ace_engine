@@ -19,6 +19,7 @@
 
 #include "core/common/ace_application_info.h"
 #include "core/pipeline/base/render_component.h"
+#include "core/pipeline/base/single_child.h"
 
 namespace OHOS::Ace {
 
@@ -42,23 +43,59 @@ int32_t Component::GetRetakeId() const
     return retakeId_;
 }
 
+
+namespace {
+template<typename T>
+inline bool IsRenderComponent(const RefPtr<T>& component)
+{
+    return AceType::InstanceOf<RenderComponent>(component);
+}
+} // namespace
+
 void Component::MergeRSNode(const std::vector<RefPtr<Component>>& components, int skip)
 {
-    static auto isRenderComponent = [](const RefPtr<Component>& component) {
-        return AceType::InstanceOf<RenderComponent>(component);
-    };
-
     if (components.empty()) {
         return;
     }
     // locate first & last RenderComponent
-    auto head = std::find_if(components.begin() + skip, components.end(), isRenderComponent);
-    auto tail = std::find_if(components.rbegin(), components.rend() - skip, isRenderComponent);
+    auto head = std::find_if(components.begin() + skip, components.end(), IsRenderComponent<Component>);
+    auto tail = std::find_if(components.rbegin(), components.rend() - skip, IsRenderComponent<Component>);
     if (head == components.end() || tail == components.rend() - skip) {
         return;
     }
     (*head)->isHeadComponent_ = true;
     (*tail)->isTailComponent_ = true;
+}
+
+void Component::MergeRSNode(const std::vector<RefPtr<SingleChild>>& components)
+{
+    if (components.empty()) {
+        return;
+    }
+    // locate first & last RenderComponent
+    auto head = std::find_if(components.begin(), components.end(), IsRenderComponent<SingleChild>);
+    auto tail = std::find_if(components.rbegin(), components.rend(), IsRenderComponent<SingleChild>);
+    if (head == components.end() || tail == components.rend()) {
+        return;
+    }
+    AceType::DynamicCast<Component>(*head)->isHeadComponent_ = true;
+    AceType::DynamicCast<Component>(*tail)->isTailComponent_ = true;
+}
+
+void Component::MergeRSNode(const std::vector<RefPtr<SingleChild>>& components, const RefPtr<Component>& mainComponent)
+{
+    auto head = std::find_if(components.begin(), components.end(), IsRenderComponent<SingleChild>);
+    auto tail = std::find_if(components.rbegin(), components.rend(), IsRenderComponent<SingleChild>);
+    if (components.empty() || head == components.end() || tail == components.rend()) {
+        return MergeRSNode(mainComponent);
+    }
+    // locate first & last RenderComponent
+    AceType::DynamicCast<Component>(*head)->isHeadComponent_ = true;
+    if (IsRenderComponent(mainComponent)) {
+        mainComponent->isTailComponent_ = true;
+    } else {
+        AceType::DynamicCast<Component>(*tail)->isTailComponent_ = true;
+    }
 }
 
 void Component::MergeRSNode(const RefPtr<Component>& head, const RefPtr<Component>& tail)
@@ -72,7 +109,7 @@ void Component::MergeRSNode(const RefPtr<Component>& head, const RefPtr<Componen
 
 void Component::MergeRSNode(const RefPtr<Component>& standaloneNode)
 {
-    if (!standaloneNode) {
+    if (!standaloneNode || !AceType::InstanceOf<RenderComponent>(standaloneNode)) {
         return;
     }
     standaloneNode->isHeadComponent_ = true;

@@ -32,7 +32,8 @@ void RosenRenderRoot::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     rsNode->SetBackgroundColor(bgColor_.GetValue());
-
+    rsNode->SetPivot(0.0f, 0.0f);
+    rsNode->SetScale(scale_);
     auto pipelineContext = GetContext().Upgrade();
     if (pipelineContext) {
         pipelineContext->SetRootBgColor(bgColor_);

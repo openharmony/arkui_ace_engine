@@ -13,13 +13,22 @@
  * limitations under the License.
  */
 
-#include "core/components/list/flutter_render_list_item_group.h"
+#include "core/components/list/flutter_render_list_item.h"
+#include "core/components/list/rosen_render_list_item.h"
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderListItemGroup::Create()
+RefPtr<RenderNode> RenderListItem::Create()
 {
-    return AceType::MakeRefPtr<FlutterRenderListItemGroup>();
+    if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef USE_ROSEN_BACKEND
+        return AceType::MakeRefPtr<RosenRenderListItem>();
+#else
+        return nullptr;
+#endif
+    } else {
+        return AceType::MakeRefPtr<FlutterRenderListItem>();
+    }
 }
 
 } // namespace OHOS::Ace

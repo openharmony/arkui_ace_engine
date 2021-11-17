@@ -13,45 +13,33 @@
  * limitations under the License.
  */
 
-#include "core/components/list/flutter_render_list_item.h"
+#include "core/components/list/rosen_render_list_item.h"
 
-#include <base/utils/device_type.h>
-#include <base/utils/system_properties.h>
-
-#include "core/components/common/painter/flutter_decoration_painter.h"
-#include "core/components/common/painter/flutter_universal_painter.h"
-#include "core/components/transform/flutter_render_transform.h"
-#include "core/pipeline/base/flutter_render_context.h"
+#include "base/utils/device_type.h"
+#include "base/utils/system_properties.h"
+#include "core/components/common/painter/rosen_decoration_painter.h"
+#include "core/components/common/painter/rosen_universal_painter.h"
+#include "core/components/transform/rosen_render_transform.h"
 
 namespace OHOS::Ace {
 namespace {
 
-constexpr uint8_t GREY_START = 255;
-constexpr uint8_t GREY_END = 38;
-constexpr uint8_t DISABLED_OPACITY = 102;
-constexpr uint32_t ACTIVE_BACKGROUND_COLOR = 0x330A59F7;
-constexpr double CENTER_POINT = 2.0;
-constexpr double OPACITY_START = 0.0;
-constexpr double OPACITY_END = 0.6;
-constexpr double HALF_SIZE = 0.5;
-constexpr double FADE_START = 1.0;
-constexpr double FADE_END = 0.0;
-constexpr double SCALE_START = 1.0;
-constexpr double SCALE_END = 0.1;
+constexpr uint8_t GREY_START1 = 255;
+constexpr uint8_t GREY_END1 = 38;
+constexpr uint8_t DISABLED_OPACITY1 = 102;
+constexpr uint32_t ACTIVE_BACKGROUND_COLOR1 = 0x330A59F7;
+constexpr double CENTER_POINT1 = 2.0;
+constexpr double OPACITY_START1 = 0.0;
+constexpr double OPACITY_END1 = 0.6;
+constexpr double FADE_START1 = 1.0;
+constexpr double FADE_END1 = 0.0;
+constexpr double SCALE_START1 = 1.0;
+constexpr double SCALE_END1 = 0.1;
 
 } // namespace
 
-using namespace Flutter;
 
-RenderLayer FlutterRenderListItem::GetRenderLayer()
-{
-    if (!transformLayer_) {
-        transformLayer_ = AceType::MakeRefPtr<TransformLayer>(Matrix4::CreateIdentity(), 0.0, 0.0);
-    }
-    return AceType::RawPtr(transformLayer_);
-}
-
-void FlutterRenderListItem::Paint(RenderContext& context, const Offset& offset)
+void RosenRenderListItem::Paint(RenderContext& context, const Offset& offset)
 {
     if (GetRedraw()) {
         PaintStickyEffectNoTransparent(context, offset);
@@ -60,10 +48,6 @@ void FlutterRenderListItem::Paint(RenderContext& context, const Offset& offset)
     if (focusController_ && !isStretch_) {
         PaintWithFocusEffect(context, offset);
     } else {
-        // restore layer
-        if (transformLayer_) {
-            transformLayer_->Update(Matrix4::CreateIdentity());
-        }
         // restore opacity
         if (!renderDisplay_) {
             auto children = GetChildren();
@@ -73,11 +57,11 @@ void FlutterRenderListItem::Paint(RenderContext& context, const Offset& offset)
         }
         if (renderDisplay_ && !makeCardTransition_) {
             if (disabled_) {
-                renderDisplay_->UpdateOpacity(DISABLED_OPACITY);
+                renderDisplay_->UpdateOpacity(DISABLED_OPACITY1);
             } else if (isStretch_) {
                 renderDisplay_->UpdateOpacity(expandOpacity_);
             } else {
-                renderDisplay_->UpdateOpacity(DEFAULT_OPACITY);
+                renderDisplay_->UpdateOpacity(DEFAULT_OPACITY1);
             }
         }
         RenderNode::Paint(context, offset);
@@ -88,12 +72,12 @@ void FlutterRenderListItem::Paint(RenderContext& context, const Offset& offset)
     PaintItemDivider(context);
 }
 
-void FlutterRenderListItem::OnPaintFinish()
+void RosenRenderListItem::OnPaintFinish()
 {
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     auto accessibilityNode = GetAccessibilityNode().Upgrade();
     if (!accessibilityNode) {
-        LOGE("FlutterRenderListItem::accessibilityNode is null");
+        LOGE("RosenRenderListItem::accessibilityNode is null");
         return;
     }
     if (!NearEqual(scale_, 1.0)) {
@@ -118,47 +102,16 @@ void FlutterRenderListItem::OnPaintFinish()
     ShowFocusAnimation(IsFocused(), Rect(0.0, 0.0, 0.0, 0.0), scale_);
 }
 
-void FlutterRenderListItem::OnGlobalPositionChanged()
+void RosenRenderListItem::PaintActiveBackground(RenderContext& context, const Offset& offset)
 {
-    if (focusController_ && !isStretch_) {
-        UpdateTransformLayer();
-    }
-    RenderListItem::OnGlobalPositionChanged();
+    PaintUniversalBackground(context, offset, ACTIVE_BACKGROUND_COLOR1);
 }
 
-void FlutterRenderListItem::UpdateTransformLayer()
+void RosenRenderListItem::PaintUniversalBackground(RenderContext& context, const Offset& offset, uint32_t colorVal)
 {
-    float translateX = GetLayoutSize().Width() * HALF_SIZE * (DEFAULT_SCALE - scale_);
-    float translateY = GetLayoutSize().Height() * HALF_SIZE * (DEFAULT_SCALE - scale_);
-    Matrix4 translateMatrix = Matrix4::CreateTranslate(translateX, translateY, 0.0);
-    Matrix4 scaleMatrix = Matrix4::CreateScale(scale_, scale_, 1.0);
-    Matrix4 transform = translateMatrix * scaleMatrix;
-    auto offset = GetGlobalOffset();
-    transform = FlutterRenderTransform::GetTransformByOffset(transform, offset);
-
-    if (!transformLayer_) {
-        transformLayer_ = AceType::MakeRefPtr<TransformLayer>(transform, 0.0, 0.0);
-    } else {
-        transformLayer_->Update(transform);
-    }
-}
-
-void FlutterRenderListItem::PaintActiveBackground(RenderContext& context, const Offset& offset)
-{
-    PaintUniversalBackground(context, offset, ACTIVE_BACKGROUND_COLOR);
-}
-
-void FlutterRenderListItem::PaintUniversalBackground(RenderContext& context, const Offset& offset, uint32_t colorVal)
-{
-    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
-    flutter::Canvas* canvas = renderContext->GetCanvas();
+    auto canvas = static_cast<RosenRenderContext&>(context).GetCanvas();
     if (canvas == nullptr) {
         LOGE("Paint canvas is null");
-        return;
-    }
-    SkCanvas* skCanvas = canvas->canvas();
-    if (skCanvas == nullptr) {
-        LOGE("Paint skCanvas is null");
         return;
     }
     auto size = GetPaintSize();
@@ -171,10 +124,10 @@ void FlutterRenderListItem::PaintUniversalBackground(RenderContext& context, con
     if (pipelineContext) {
         dipScale = pipelineContext->GetDipScale();
     }
-    FlutterUniversalPainter::DrawRRectBackground(skCanvas, paintRRect, colorVal, dipScale);
+    RosenUniversalPainter::DrawRRectBackground(canvas, paintRRect, colorVal, dipScale);
 }
 
-void FlutterRenderListItem::PaintWithFocusEffect(RenderContext& context, const Offset& offset)
+void RosenRenderListItem::PaintWithFocusEffect(RenderContext& context, const Offset& offset)
 {
     if (focusController_) {
         if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
@@ -182,11 +135,11 @@ void FlutterRenderListItem::PaintWithFocusEffect(RenderContext& context, const O
                 scale_ = GetScaleFactor();
             }
             if (supportOpacity_) {
-                opacity_ = static_cast<uint8_t>(std::round(GetOpacityFactor() * DEFAULT_OPACITY));
+                opacity_ = static_cast<uint8_t>(std::round(GetOpacityFactor() * DEFAULT_OPACITY1));
             }
         } else {
             scale_ = focusController_->GetScale();
-            opacity_ = static_cast<uint8_t>(std::round(focusController_->GetOpacity() * DEFAULT_OPACITY));
+            opacity_ = static_cast<uint8_t>(std::round(focusController_->GetOpacity() * DEFAULT_OPACITY1));
         }
         decorationAlpha_ = focusController_->GetAlpha();
     }
@@ -200,14 +153,13 @@ void FlutterRenderListItem::PaintWithFocusEffect(RenderContext& context, const O
         }
         if (renderDisplay_ && !makeCardTransition_) {
             if (disabled_) {
-                renderDisplay_->UpdateOpacity(DISABLED_OPACITY);
+                renderDisplay_->UpdateOpacity(DISABLED_OPACITY1);
             } else {
                 renderDisplay_->UpdateOpacity(opacity_);
             }
         }
     }
 
-    UpdateTransformLayer();
     RenderNode::Paint(context, offset);
 
     // paint front decoration
@@ -231,17 +183,16 @@ void FlutterRenderListItem::PaintWithFocusEffect(RenderContext& context, const O
         border.SetBottomLeftRadius(corner.bottomLeftRadius);
         border.SetBottomRightRadius(corner.bottomRightRadius);
         frontDecoration->SetBorder(border);
-        RefPtr<FlutterDecorationPainter> decorationPainter =
-            AceType::MakeRefPtr<FlutterDecorationPainter>(frontDecoration, GetPaintRect(), GetPaintSize(),
+        RefPtr<RosenDecorationPainter> decorationPainter =
+            AceType::MakeRefPtr<RosenDecorationPainter>(frontDecoration, GetPaintRect(), GetPaintSize(),
                 pipelineContext ? pipelineContext->GetDipScale() : 1.0);
         decorationPainter->SetMargin(GetMarginInPx());
-        const auto renderContext = static_cast<FlutterRenderContext*>(&context);
-        flutter::Canvas* canvas = renderContext->GetCanvas();
-        decorationPainter->PaintDecoration(offset, canvas->canvas(), context);
+        auto canvas = static_cast<RosenRenderContext&>(context).GetCanvas();
+        decorationPainter->PaintDecoration(offset, canvas, context);
     }
 }
 
-void FlutterRenderListItem::PaintItemDivider(RenderContext& context)
+void RosenRenderListItem::PaintItemDivider(RenderContext& context)
 {
     if (!NeedDivider() || NearZero(dividerHeight_.Value())) {
         return;
@@ -270,58 +221,54 @@ void FlutterRenderListItem::PaintItemDivider(RenderContext& context)
     double endPointX = isVertical ? position.GetX() + std::min(width, startOrigin + length) : startPointX;
     double endPointY = isVertical ? startPointY : position.GetY() + std::min(height, startOrigin + length);
 
-    flutter::Paint paint;
-    flutter::PaintData paintData;
-    paint.paint()->setStrokeWidth(dividerWidth);
-    paint.paint()->setColor(dividerColor_.GetValue());
+    SkPaint paint;
+    paint.setStrokeWidth(dividerWidth);
+    paint.setColor(dividerColor_.GetValue());
 
-    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
-    flutter::Canvas* canvas = renderContext->GetCanvas();
+    auto canvas = static_cast<RosenRenderContext&>(context).GetCanvas();
     if (isVertical) {
         canvas->drawLine(startPointX, startPointY + dividerWidth / 2.0,
-            endPointX, endPointY + dividerWidth / 2.0, paint, paintData);
+            endPointX, endPointY + dividerWidth / 2.0, paint);
     } else {
         canvas->drawLine(startPointX + dividerWidth / 2.0, startPointY,
-            endPointX + dividerWidth / 2.0, endPointY, paint, paintData);
+            endPointX + dividerWidth / 2.0, endPointY, paint);
     }
 }
 
-void FlutterRenderListItem::PaintStickyEffect(RenderContext& context, const Offset& offset)
+void RosenRenderListItem::PaintStickyEffect(RenderContext& context, const Offset& offset)
 {
     RenderNode::Paint(context, offset);
-    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
-    flutter::Canvas* canvas = renderContext->GetCanvas();
+    auto canvas = static_cast<RosenRenderContext&>(context).GetCanvas();
     if (canvas == nullptr) {
         LOGE("Canvas is null, save failed.");
         return;
     }
     canvas->save();
     Offset center;
-    flutter::Paint paint;
-    flutter::PaintData paintData;
+    SkPaint paint;
     double width = GetLayoutSize().Width() + offset.GetX();
     double height = GetLayoutSize().Height() + offset.GetY();
     if (offset.GetY() <= 0.0) {
-        center.SetX((GetLayoutSize().Width() + offset.GetX()) / CENTER_POINT);
+        center.SetX((GetLayoutSize().Width() + offset.GetX()) / CENTER_POINT1);
         center.SetY(GetLayoutSize().Height() + offset.GetY() - GetStickyRadius());
-        paint.paint()->setColor(Color::FromRGBO(GREY_END, GREY_END, GREY_END, OPACITY_END).GetValue());
-        canvas->clipRect(0, 0, width, height, SkClipOp::kIntersect);
-        canvas->drawCircle(center.GetX(), center.GetY(), GetStickyRadius(), paint, paintData);
+        paint.setColor(Color::FromRGBO(GREY_END1, GREY_END1, GREY_END1, OPACITY_END1).GetValue());
+        canvas->clipRect({0, 0, width, height}, SkClipOp::kIntersect);
+        canvas->drawCircle(center.GetX(), center.GetY(), GetStickyRadius(), paint);
     } else {
         double radius =
             GetStickyRadius() + (RADIUS_START - GetStickyRadius()) * (offset.GetY() / GetLayoutSize().Height());
-        uint8_t grey = GREY_END + (GREY_START - GREY_END) * (offset.GetY() / GetLayoutSize().Height());
-        double opacity = OPACITY_END + (OPACITY_START - OPACITY_END) * (offset.GetY() / GetLayoutSize().Height());
-        center.SetX((GetLayoutSize().Width() + offset.GetX()) / CENTER_POINT);
+        uint8_t grey = GREY_END1 + (GREY_START1 - GREY_END1) * (offset.GetY() / GetLayoutSize().Height());
+        double opacity = OPACITY_END1 + (OPACITY_START1 - OPACITY_END1) * (offset.GetY() / GetLayoutSize().Height());
+        center.SetX((GetLayoutSize().Width() + offset.GetX()) / CENTER_POINT1);
         center.SetY(GetLayoutSize().Height() + offset.GetY() - radius);
-        paint.paint()->setColor(Color::FromRGBO(grey, grey, grey, opacity).GetValue());
-        canvas->clipRect(offset.GetX(), offset.GetY(), width, height, SkClipOp::kIntersect);
-        canvas->drawCircle(center.GetX(), center.GetY(), radius, paint, paintData);
+        paint.setColor(Color::FromRGBO(grey, grey, grey, opacity).GetValue());
+        canvas->clipRect({offset.GetX(), offset.GetY(), width, height}, SkClipOp::kIntersect);
+        canvas->drawCircle(center.GetX(), center.GetY(), radius, paint);
     }
     canvas->restore();
 }
 
-void FlutterRenderListItem::PaintStickyEffectNoTransparent(RenderContext& context, const Offset& offset)
+void RosenRenderListItem::PaintStickyEffectNoTransparent(RenderContext& context, const Offset& offset)
 {
     Size itemSize = GetLayoutSize();
     if (NearZero(itemSize.Height()) || NearZero(itemSize.Width())) {
@@ -343,7 +290,7 @@ void FlutterRenderListItem::PaintStickyEffectNoTransparent(RenderContext& contex
         auto backgroundOld = box->GetBackDecoration();
         if (offset.GetY() > 0.0) { // Next Sticky item.
             PaintNextSticky(background, offset);
-        } else { // Current Sticky item.
+        } else { // CurPaintNextStickyrent Sticky item.
             PaintCurrentSticky(background, offset);
             PaintFadeOutEffect(box, offset);
         }
@@ -356,16 +303,16 @@ void FlutterRenderListItem::PaintStickyEffectNoTransparent(RenderContext& contex
     }
 }
 
-void FlutterRenderListItem::PaintCurrentSticky(const RefPtr<Decoration>& background, const Offset& offset)
+void RosenRenderListItem::PaintCurrentSticky(const RefPtr<Decoration>& background, const Offset& offset)
 {
     Size itemSize = GetLayoutSize();
     double mainOffset = offset.GetY();
-    uint8_t gray = GREY_END;
+    uint8_t gray = GREY_END1;
     Color color = Color::FromRGB(gray, gray, gray);
     double radius = GetStickyRadius();
     if (GetStickyMode() != StickyMode::OPACITY) {
         Point center;
-        center.SetX((itemSize.Width() + offset.GetX()) / CENTER_POINT);
+        center.SetX((itemSize.Width() + offset.GetX()) / CENTER_POINT1);
         center.SetY(itemSize.Height() + offset.GetY() - radius);
         RefPtr<ArcBackground> arcBg = AceType::MakeRefPtr<ArcBackground>(center, radius);
         arcBg->SetColor(color);
@@ -378,7 +325,7 @@ void FlutterRenderListItem::PaintCurrentSticky(const RefPtr<Decoration>& backgro
     }
 }
 
-void FlutterRenderListItem::PaintNextSticky(const RefPtr<Decoration>& background, const Offset& offset)
+void RosenRenderListItem::PaintNextSticky(const RefPtr<Decoration>& background, const Offset& offset)
 {
     Size itemSize = GetLayoutSize();
     double mainOffset = offset.GetY();
@@ -392,19 +339,19 @@ void FlutterRenderListItem::PaintNextSticky(const RefPtr<Decoration>& background
     radius = radius + (RADIUS_START - radius) * pow(mainOffset / itemSize.Height(), 3.0);
 
     // calculate color
-    uint8_t gray = GREY_END * (itemSize.Height() - mainOffset) / itemSize.Height();
+    uint8_t gray = GREY_END1 * (itemSize.Height() - mainOffset) / itemSize.Height();
     Color color = Color::FromRGB(gray, gray, gray);
 
     // calculate center
     Point center;
-    center.SetX((itemSize.Width() + offset.GetX()) / CENTER_POINT);
+    center.SetX((itemSize.Width() + offset.GetX()) / CENTER_POINT1);
     center.SetY(itemSize.Height() + offset.GetY() - radius);
     RefPtr<ArcBackground> arcBg = AceType::MakeRefPtr<ArcBackground>(center, radius);
     arcBg->SetColor(color);
     background->SetArcBackground(arcBg);
 }
 
-void FlutterRenderListItem::PaintFadeOutEffect(const RefPtr<RenderNode>& node, const Offset& offset)
+void RosenRenderListItem::PaintFadeOutEffect(const RefPtr<RenderNode>& node, const Offset& offset)
 {
     if (stickyMode_ != StickyMode::OPACITY || !node || node->GetChildren().empty()) {
         return;
@@ -419,22 +366,14 @@ void FlutterRenderListItem::PaintFadeOutEffect(const RefPtr<RenderNode>& node, c
     }
     double height = GetLayoutSize().Height() / 2;
     double mainOffset = std::abs(offset.GetY());
-    double opacity = std::max(FADE_END, FADE_START - mainOffset / height) * 255.0;
-    double scale = SCALE_START - (std::min(SCALE_START, mainOffset / height) * SCALE_END);
+    double opacity = std::max(FADE_END1, FADE_START1 - mainOffset / height) * 255.0;
+    double scale = SCALE_START1 - (std::min(SCALE_START1, mainOffset / height) * SCALE_END1);
     if (!makeCardTransition_) {
         opacityNode->UpdateOpacity(opacity);
     }
     scaleNode->ResetTransform();
     scaleNode->Scale(scale);
     LOGD("Sticky opacity:%lf scale:%lf %s", opacity, scale, offset.ToString().c_str());
-}
-
-bool FlutterRenderListItem::HasEffectiveTransform() const
-{
-    if (!transformLayer_) {
-        return false;
-    }
-    return !transformLayer_->GetMatrix4().IsIdentityMatrix();
 }
 
 } // namespace OHOS::Ace

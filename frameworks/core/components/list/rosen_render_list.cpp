@@ -13,41 +13,50 @@
  * limitations under the License.
  */
 
-#include "core/components/list/flutter_render_list.h"
-
-#include "core/pipeline/base/flutter_render_context.h"
+#include "core/components/list/rosen_render_list.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace {
 
-using namespace Flutter;
-
-RenderLayer FlutterRenderList::GetRenderLayer()
+void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
 {
-    if (!layer_) {
-        layer_ =
-            AceType::MakeRefPtr<ClipLayer>(0, GetLayoutSize().Width(), 0, GetLayoutSize().Height(), Clip::HARD_EDGE);
-    }
-    return AceType::RawPtr(layer_);
-}
-
-void FlutterRenderList::Paint(RenderContext& context, const Offset& offset)
-{
-    if (makeCardTransition_) {
-        auto pipelineContext = context_.Upgrade();
-        if (!pipelineContext) {
-            layer_->SetClip(0.0, viewPort_.Width(), 0.0, viewPort_.Height(), Clip::HARD_EDGE);
-        } else {
-            layer_->SetClip(-GetGlobalOffset().GetX(), pipelineContext->GetRootWidth(), -shiftHeight_,
-                viewPort_.Height() + shiftHeight_, Clip::HARD_EDGE);
-        }
-    } else {
-        layer_->SetClip(0.0, viewPort_.Width(), 0.0, viewPort_.Height(), Clip::HARD_EDGE);
-    }
     RenderNode::Paint(context, offset);
     PaintStickyItem(context, offset);
 }
 
-void FlutterRenderList::PaintChild(const RefPtr<RenderNode>& child, RenderContext& context, const Offset& offset)
+void RosenRenderList::PerformLayout()
+{
+    RenderList::PerformLayout();
+    auto rsNode = GetRSNode();
+    if (!rsNode) {
+        return;
+    }
+    rsNode->SetClipToBounds(true);
+}
+
+void RosenRenderList::SyncGeometryProperties()
+{
+    auto rsNode = GetRSNode();
+    if (!rsNode) {
+        return;
+    }
+    if (makeCardTransition_) {
+        auto pipelineContext = context_.Upgrade();
+        if (!pipelineContext) {
+            rsNode->SetBounds(0.0, 0.0, viewPort_.Width(), viewPort_.Height());
+        } else {
+            rsNode->SetBounds(-GetGlobalOffset().GetX(), -shiftHeight_, pipelineContext->GetRootWidth(),
+                viewPort_.Height() + shiftHeight_);
+        }
+    } else {
+        rsNode->SetBounds(0.0, 0.0, viewPort_.Width(), viewPort_.Height());
+    }
+    Offset paintOffset = GetPaintOffset();
+    Size paintSize = GetLayoutSize();
+    rsNode->SetFrame(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
+}
+
+void RosenRenderList::PaintChild(const RefPtr<RenderNode>& child, RenderContext& context, const Offset& offset)
 {
     // sticky items paint individually by PaintStickyItem
     RefPtr<RenderListItem> listItem = RenderListItem::GetRenderListItem(child);
@@ -56,7 +65,7 @@ void FlutterRenderList::PaintChild(const RefPtr<RenderNode>& child, RenderContex
     }
 }
 
-void FlutterRenderList::PaintStickyItem(RenderContext& context, const Offset& offset)
+void RosenRenderList::PaintStickyItem(RenderContext& context, const Offset& offset)
 {
     bool watchMode = SystemProperties::GetDeviceType() == DeviceType::WATCH;
     RefPtr<RenderNode> stickyItem = GetStickyItem();

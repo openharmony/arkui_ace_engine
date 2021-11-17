@@ -17,7 +17,6 @@
 
 namespace OHOS::Ace {
 bool SystemProperties::rosenBackendEnabled_ = false;
-bool SystemProperties::isDeclarativeFrontend_ = false;
 
 float SystemProperties::GetFontWeightScale()
 {

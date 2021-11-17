@@ -31,6 +31,7 @@ namespace OHOS::Ace {
 
 class Element;
 class ComposedElement;
+class SingleChild;
 
 using ElementFunction = std::function<void(const RefPtr<ComposedElement>&)>;
 
@@ -176,6 +177,8 @@ public:
     bool IsHeadComponent() const { return isHeadComponent_; }
     bool IsTailComponent() const { return isTailComponent_; }
     static void MergeRSNode(const std::vector<RefPtr<Component>>& components, int skip = 0);
+    static void MergeRSNode(const std::vector<RefPtr<SingleChild>>& components);
+    static void MergeRSNode(const std::vector<RefPtr<SingleChild>>& components, const RefPtr<Component>& mainComponent);
     static void MergeRSNode(const RefPtr<Component>& head, const RefPtr<Component>& tail);
     static void MergeRSNode(const RefPtr<Component>& standaloneNode);
 

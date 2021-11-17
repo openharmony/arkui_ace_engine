@@ -81,7 +81,6 @@ ColorMode SystemProperties::colorMode_ = ColorMode::LIGHT;
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::rosenBackendEnabled_ = false;
-bool SystemProperties::isDeclarativeFrontend_ = false;
 
 DeviceType SystemProperties::GetDeviceType()
 {

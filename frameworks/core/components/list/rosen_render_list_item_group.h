@@ -13,29 +13,21 @@
  * limitations under the License.
  */
 
-#include "base/utils/system_properties.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_LIST_ROSEN_RENDER_LIST_ITEM_GROUP_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_LIST_ROSEN_RENDER_LIST_ITEM_GROUP_H
+
+#include "core/components/list/render_list_item_group.h"
 
 namespace OHOS::Ace {
-namespace {
-DeviceType g_deviceType = DeviceType::TV;
-}
 
-bool SystemProperties::traceEnabled_ = false;
-bool SystemProperties::rosenBackendEnabled_ = true;
+class RosenRenderListItemGroup : public RenderListItemGroup {
+    DECLARE_ACE_TYPE(RosenRenderListItemGroup, RenderListItemGroup);
 
-void SystemProperties::InitDeviceType(DeviceType type)
-{
-    // Treat all other device type as phone.
-    g_deviceType = type;
-}
+public:
+    RosenRenderListItemGroup() = default;
+    ~RosenRenderListItemGroup() override = default;
+};
 
-DeviceType SystemProperties::GetDeviceType()
-{
-    return g_deviceType;
-}
-
-float SystemProperties::GetFontWeightScale()
-{
-    return 1.0f;
-}
 } // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_LIST_FLUTTER_RENDER_LIST_ITEM_GROUP_H
