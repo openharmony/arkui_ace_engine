@@ -183,7 +183,9 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
 {
     std::list<RefPtr<Component>> buttonChildren;
     std::string label;
+    bool labelSet = false;
     if (ParseJsString(info[0], label)) {
+        labelSet = true;
         auto textComponent = AceType::MakeRefPtr<TextComponent>(label);
         auto buttonTheme = GetTheme<ButtonTheme>();
         auto textStyle = buttonTheme ? buttonTheme->GetTextStyle() : textComponent->GetTextStyle();
@@ -196,9 +198,11 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     }
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
     SetDefaultAttributes(buttonComponent);
-    if (info[0]->IsObject() || ((info.Length() > 1) && info[1]->IsObject())) {
-        auto obj = info[0]->IsObject() ? JSRef<JSObject>::Cast(info[0]) : JSRef<JSObject>::Cast(info[1]);
-        SetTypeAndStateEffect(obj, buttonComponent);
+    if (!labelSet && info[0]->IsObject()) {
+        SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]), buttonComponent);
+    }
+    if ((info.Length() > 1) && info[1]->IsObject()) {
+        SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]), buttonComponent);
     }
     ViewStackProcessor::GetInstance()->Push(buttonComponent);
     JSInteractableView::SetFocusNode(true);
