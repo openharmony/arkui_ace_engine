@@ -154,7 +154,7 @@ void GetChartAttrOptionsSeriesLineStyle(
             std::string valStr = item->ToString(runtime);
             static const LinearMapNode<void (*)(const std::string&, ChartOptions&)> chartOptionsSeriesLineStyleMap[] = {
                 { "lineGradient", [](const std::string& valStr, ChartOptions& chartOptions) {
-                    chartOptions.SetWholeLineGradient(StringToDouble(valStr)); } },
+                    chartOptions.SetWholeLineGradient(StringToBool(valStr)); } },
                 { "smooth", [](const std::string& valStr,
                                 ChartOptions& chartOptions) { chartOptions.SetSmoothFlag(StringToBool(valStr)); } },
                 { "targetColor", [](const std::string& valStr, ChartOptions& chartOptions) {
