@@ -21,7 +21,5 @@ build_component("button") {
     "render_button.cpp",
     "render_button_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_button.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_button.cpp" ]
 }

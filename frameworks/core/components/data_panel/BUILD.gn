@@ -20,7 +20,5 @@ build_component("data_panel") {
     "render_data_panel.cpp",
     "render_data_panel_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_data_panel.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_data_panel.cpp" ]
 }

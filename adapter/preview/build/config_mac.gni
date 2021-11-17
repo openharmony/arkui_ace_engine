@@ -33,6 +33,7 @@ form_components_support = false
 xcomponent_components_support = false
 js_pa_support = false
 connect_server_support = false
+enable_rosen_backend = false
 
 cflags_cc = [
   "-std=c++17",

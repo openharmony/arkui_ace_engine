@@ -20,7 +20,7 @@ namespace OHOS::Ace {
 RefPtr<RenderNode> RenderScaleRingTrack::Create()
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
         return AceType::MakeRefPtr<RosenRenderScaleRingTrack>();
 #else
         return nullptr;

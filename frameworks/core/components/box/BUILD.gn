@@ -23,7 +23,5 @@ build_component("box") {
     "render_box_base.cpp",
     "render_box_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_box.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_box.cpp" ]
 }

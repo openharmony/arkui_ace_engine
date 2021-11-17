@@ -49,10 +49,6 @@ template("build_component") {
       configs = []
       configs += [ "$ace_root:ace_config" ]
 
-      if (use_rosen_backend) {
-        configs += [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
-      }
-
       if (defined(invoker.configs)) {
         configs += invoker.configs
       }
@@ -88,6 +84,11 @@ template("build_component") {
       if (defined(invoker.cflags_cc)) {
         cflags_cc = []
         cflags_cc += invoker.cflags_cc
+      }
+
+      if (defined(config.enable_rosen_backend) && config.enable_rosen_backend && defined(invoker.rosen_sources)) {
+        sources += invoker.rosen_sources
+        configs += [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
       }
     }
   }

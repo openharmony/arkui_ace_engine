@@ -21,7 +21,5 @@ build_component("select_popup") {
     "select_popup_component.cpp",
     "select_popup_element.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_select_popup.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_select_popup.cpp" ]
 }

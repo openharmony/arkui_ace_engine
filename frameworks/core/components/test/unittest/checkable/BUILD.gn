@@ -233,17 +233,6 @@ ohos_unittest("CheckableComponentTest") {
     "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
   ]
 
-  if (use_rosen_backend) {
-    sources += [
-      "$ace_root/frameworks/core/components/checkable/rosen_render_checkbox.cpp",
-      "$ace_root/frameworks/core/components/checkable/rosen_render_radio.cpp",
-      "$ace_root/frameworks/core/components/checkable/rosen_render_switch.cpp",
-      "$ace_root/frameworks/core/components/common/painter/rosen_checkable_painter.cpp",
-      "$ace_root/frameworks/core/components/common/painter/rosen_svg_painter.cpp",
-      "$ace_root/frameworks/core/components/common/painter/rosen_universal_painter.cpp",
-    ]
-  }
-
   # add sources only needed by wearable like watch.
   if (is_wearable_product) {
     sources += [ "$root_out_dir/ace/framework/core/components/theme/theme_constants_watch.cpp" ]

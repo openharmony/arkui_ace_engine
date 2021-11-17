@@ -21,7 +21,5 @@ build_component("refresh") {
     "render_refresh.cpp",
     "render_refresh_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_refresh.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_refresh.cpp" ]
 }

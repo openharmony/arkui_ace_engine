@@ -39,7 +39,5 @@ build_component("picker") {
     "render_picker_value.cpp",
     "toss_animation_controller.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_picker_base.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_picker_base.cpp" ]
 }

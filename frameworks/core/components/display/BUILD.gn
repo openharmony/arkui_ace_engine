@@ -21,7 +21,5 @@ build_component("display") {
     "render_display.cpp",
     "render_display_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_display.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_display.cpp" ]
 }

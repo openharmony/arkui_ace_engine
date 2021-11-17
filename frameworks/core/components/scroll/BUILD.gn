@@ -32,10 +32,8 @@ build_component("scroll") {
     "scroll_spring_effect.cpp",
     "scrollable.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [
-      "rosen_render_multi_child_scroll.cpp",
-      "rosen_render_single_child_scroll.cpp",
-    ]
-  }
+  rosen_sources = [
+    "rosen_render_multi_child_scroll.cpp",
+    "rosen_render_single_child_scroll.cpp",
+  ]
 }

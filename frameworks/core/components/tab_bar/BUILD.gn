@@ -36,11 +36,9 @@ build_component("tab_bar") {
     "tab_controller.cpp",
     "tabs_component.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [
-      "rosen_render_tab_bar.cpp",
-      "rosen_render_tab_bar_item.cpp",
-      "rosen_render_tab_content.cpp",
-    ]
-  }
+  rosen_sources = [
+    "rosen_render_tab_bar.cpp",
+    "rosen_render_tab_bar_item.cpp",
+    "rosen_render_tab_content.cpp",
+  ]
 }

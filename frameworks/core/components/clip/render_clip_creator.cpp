@@ -20,7 +20,7 @@ namespace OHOS::Ace {
 RefPtr<RenderNode> RenderClip::Create()
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
         return AceType::MakeRefPtr<RosenRenderClip>();
 #else
         return nullptr;

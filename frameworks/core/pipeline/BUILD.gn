@@ -67,7 +67,7 @@ template("ace_core_pipeline_source_set") {
       "$ace_root/frameworks/core/components/theme:build_theme_code",
     ]
 
-    if (use_rosen_backend) {
+    if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       sources += [ "base/rosen_render_context.cpp" ]
       deps += [ "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client" ]
     }

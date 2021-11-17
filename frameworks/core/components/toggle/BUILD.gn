@@ -21,7 +21,5 @@ build_component("toggle") {
     "toggle_component.cpp",
     "toggle_element.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_toggle.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_toggle.cpp" ]
 }

@@ -21,7 +21,5 @@ build_component("text") {
     "text_component.cpp",
     "text_component_v2.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_text.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_text.cpp" ]
 }

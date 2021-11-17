@@ -20,7 +20,5 @@ build_component("text_span") {
     "render_text_span_creator.cpp",
     "text_span_component.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_text_span.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_text_span.cpp" ]
 }

@@ -27,10 +27,8 @@ build_component("progress") {
     "render_progress.cpp",
     "render_progress_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [
-      "rosen_render_loading_progress.cpp",
-      "rosen_render_progress.cpp",
-    ]
-  }
+  rosen_sources = [
+    "rosen_render_loading_progress.cpp",
+    "rosen_render_progress.cpp",
+  ]
 }

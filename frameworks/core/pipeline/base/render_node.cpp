@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <set>
 
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transition/rs_transition.h"
 #include "render_service_client/core/ui/rs_node.h"
 
@@ -118,7 +118,7 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
         child->SetParent(AceType::WeakClaim(this));
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
     }
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
     if (child->rsNode_) {
         child->rsNode_->NotifyTransition(Rosen::RSTransitionEffect::FADE_OUT);
     }
@@ -1073,7 +1073,7 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
     if (renderComponent) {
         motionPathOption_ = renderComponent->GetMotionPathOption();
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
         if (SystemProperties::GetRosenBackendEnabled() && motionPathOption_.IsValid()) {
             if (auto rsNode = GetRSNode()) {
                 auto nativeMotionOption = std::make_shared<Rosen::RSMotionPathOption>(
@@ -1112,7 +1112,7 @@ void RenderNode::UpdateOpacity(uint8_t opacity)
     if (opacity_ != opacity) {
         opacity_ = opacity;
         if (auto rsNode = GetRSNode()) {
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
             rsNode->SetAlpha(opacity_ / 255.0);
 #endif
         } else {
@@ -1736,7 +1736,7 @@ void RenderNode::SetDepth(int32_t depth)
 
 void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
 {
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
     isHeadRenderNode_ = isHead;
     isTailRenderNode_ = isTail;
     if (isHead && !rsNode_) {
@@ -1761,7 +1761,7 @@ void RenderNode::MarkNeedSyncGeometryProperties()
 
 void RenderNode::SyncGeometryProperties()
 {
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
     if (!IsTailRenderNode()) {
         return;
     }
@@ -1788,7 +1788,7 @@ void RenderNode::SetPaintRect(const Rect& rect)
 
 void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
 {
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
     if (!rsNode_) {
         LOGW("Parent render_node has no RSNode, creating now.");
         SyncRSNodeBoundary(true, true);
@@ -1822,7 +1822,7 @@ void RenderNode::MarkParentNeedRender() const
 
 std::shared_ptr<RSNode> RenderNode::CreateRSNode() const
 {
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
     return Rosen::RSNode::Create();
 #else
     return nullptr;

@@ -19,7 +19,5 @@ build_component("marquee") {
     "render_marquee.cpp",
     "render_marquee_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_marquee.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_marquee.cpp" ]
 }

@@ -21,7 +21,5 @@ build_component("custom_paint") {
     "render_custom_paint.cpp",
     "render_custom_paint_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_custom_paint.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_custom_paint.cpp" ]
 }

@@ -21,7 +21,5 @@ build_component("drag_bar") {
     "render_drag_bar.cpp",
     "render_drag_bar_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_drag_bar.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_drag_bar.cpp" ]
 }

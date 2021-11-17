@@ -21,7 +21,5 @@ build_component("piece") {
     "render_piece.cpp",
     "render_piece_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_piece.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_piece.cpp" ]
 }

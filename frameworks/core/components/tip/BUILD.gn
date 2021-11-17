@@ -21,7 +21,5 @@ build_component("tip") {
     "tip_component.cpp",
     "tip_element.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_tip.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_tip.cpp" ]
 }

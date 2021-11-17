@@ -25,10 +25,8 @@ build_component("shape") {
     "shape_container_component.cpp",
     "shape_container_element.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [
-      "rosen_render_shape.cpp",
-      "rosen_render_shape_container.cpp",
-    ]
-  }
+  rosen_sources = [
+    "rosen_render_shape.cpp",
+    "rosen_render_shape_container.cpp",
+  ]
 }

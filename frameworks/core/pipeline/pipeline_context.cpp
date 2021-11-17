@@ -17,7 +17,7 @@
 
 #include <utility>
 
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 
@@ -185,7 +185,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 
 void PipelineContext::FlushMessages()
 {
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
         OHOS::Rosen::RSUIDirector::Instance().SendMessages();
     }
@@ -688,7 +688,7 @@ RefPtr<Element> PipelineContext::SetupRootElement()
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
         OHOS::Rosen::RSUIDirector::Instance().SetRoot(rootRenderNode->GetRSNode()->GetId());
     }
@@ -1479,7 +1479,7 @@ void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
         frameCount_++;
     }
 #endif
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
         OHOS::Rosen::RSUIDirector::Instance().SetTimeStamp(nanoTimestamp);
     }
@@ -2673,7 +2673,7 @@ bool PipelineContext::Animate(const AnimationOption& option, const RefPtr<Curve>
 void PipelineContext::OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallBack)
 {
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
     if (!SystemProperties::GetRosenBackendEnabled()) {
         LOGE("rosen backend is disabled!");
         return;
@@ -2698,7 +2698,7 @@ void PipelineContext::OpenImplicitAnimation(const AnimationOption& option, const
 
 bool PipelineContext::CloseImplicitAnimation()
 {
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
     if (!SystemProperties::GetRosenBackendEnabled()) {
         LOGE("rosen backend is disabled!");
         return false;
@@ -2745,7 +2745,7 @@ void PipelineContext::AddKeyFrame(
     };
     pendingImplicitLayout_.pop();
 
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
     RSNode::AddKeyFrame(fraction, NativeCurveHelper::ToNativeCurve(curve), propertyChangeCallback);
 #endif
 }
@@ -2772,7 +2772,7 @@ void PipelineContext::AddKeyFrame(float fraction, const std::function<void()>& p
     };
     pendingImplicitLayout_.pop();
 
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
     RSNode::AddKeyFrame(fraction, propertyChangeCallback);
 #endif
 }

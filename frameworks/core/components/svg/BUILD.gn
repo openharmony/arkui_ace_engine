@@ -116,27 +116,25 @@ build_component("svg") {
     "svg_tspan_component.cpp",
     "svg_use_component.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [
-      "rosen_render_svg.cpp",
-      "rosen_render_svg_circle.cpp",
-      "rosen_render_svg_ellipse.cpp",
-      "rosen_render_svg_fe_colormatrix.cpp",
-      "rosen_render_svg_fe_composite.cpp",
-      "rosen_render_svg_fe_gaussianblur.cpp",
-      "rosen_render_svg_fe_offset.cpp",
-      "rosen_render_svg_filter.cpp",
-      "rosen_render_svg_g.cpp",
-      "rosen_render_svg_line.cpp",
-      "rosen_render_svg_mask.cpp",
-      "rosen_render_svg_path.cpp",
-      "rosen_render_svg_pattern.cpp",
-      "rosen_render_svg_polygon.cpp",
-      "rosen_render_svg_rect.cpp",
-      "rosen_render_svg_text.cpp",
-      "rosen_render_svg_text_path.cpp",
-      "rosen_render_svg_tspan.cpp",
-      "rosen_render_svg_use.cpp",
-    ]
-  }
+  rosen_sources = [
+    "rosen_render_svg.cpp",
+    "rosen_render_svg_circle.cpp",
+    "rosen_render_svg_ellipse.cpp",
+    "rosen_render_svg_fe_colormatrix.cpp",
+    "rosen_render_svg_fe_composite.cpp",
+    "rosen_render_svg_fe_gaussianblur.cpp",
+    "rosen_render_svg_fe_offset.cpp",
+    "rosen_render_svg_filter.cpp",
+    "rosen_render_svg_g.cpp",
+    "rosen_render_svg_line.cpp",
+    "rosen_render_svg_mask.cpp",
+    "rosen_render_svg_path.cpp",
+    "rosen_render_svg_pattern.cpp",
+    "rosen_render_svg_polygon.cpp",
+    "rosen_render_svg_rect.cpp",
+    "rosen_render_svg_text.cpp",
+    "rosen_render_svg_text_path.cpp",
+    "rosen_render_svg_tspan.cpp",
+    "rosen_render_svg_use.cpp",
+  ]
 }

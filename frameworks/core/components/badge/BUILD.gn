@@ -20,7 +20,5 @@ build_component("badge") {
     "render_badge.cpp",
     "render_badge_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_badge.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_badge.cpp" ]
 }

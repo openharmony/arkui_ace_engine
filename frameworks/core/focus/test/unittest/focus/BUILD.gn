@@ -81,10 +81,6 @@ ohos_unittest("FocusTest") {
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
-  if (use_rosen_backend) {
-    sources += [ "$ace_root/frameworks/core/animation/native_curve_helper.cpp" ]
-    deps += [ "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client" ]
-  }
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]

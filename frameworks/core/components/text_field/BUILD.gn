@@ -22,9 +22,7 @@ build_component("text_field") {
     "text_field_controller.cpp",
     "text_field_element.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_text_field.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_text_field.cpp" ]
   if (is_standard_system && current_os != "mac" && current_os != "mingw") {
     external_deps = [
       "inputmethod_native:inputmethod_ability",

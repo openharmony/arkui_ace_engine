@@ -20,7 +20,5 @@ build_component("focus_animation") {
     "render_focus_animation.cpp",
     "render_focus_animation_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_focus_animation.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_focus_animation.cpp" ]
 }

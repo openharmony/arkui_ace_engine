@@ -307,7 +307,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_v2/swiper:ace_core_components_swiper_v2_$platform",
     ]
 
-    if (use_rosen_backend) {
+    if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       sources += [ "animation/native_curve_helper.cpp" ]
       deps += [ "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client" ]
     }

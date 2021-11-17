@@ -24,10 +24,8 @@ build_component("slider") {
     "render_slider_creator.cpp",
     "slider_component.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [
-      "rosen_render_circle_block.cpp",
-      "rosen_render_slider.cpp",
-    ]
-  }
+  rosen_sources = [
+    "rosen_render_circle_block.cpp",
+    "rosen_render_slider.cpp",
+  ]
 }

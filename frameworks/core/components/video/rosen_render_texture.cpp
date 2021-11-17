@@ -17,7 +17,7 @@
 
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_texture_node.h"
 #endif
 

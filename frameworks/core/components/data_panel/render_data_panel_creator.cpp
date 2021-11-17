@@ -20,7 +20,7 @@ namespace OHOS::Ace {
 RefPtr<RenderNode> RenderProgressDataPanel::Create()
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
         return AceType::MakeRefPtr<RosenRenderProgressDataPanel>();
 #else
         return nullptr;
@@ -33,7 +33,7 @@ RefPtr<RenderNode> RenderProgressDataPanel::Create()
 RefPtr<RenderNode> RenderPercentageDataPanel::Create()
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
-#ifdef USE_ROSEN_BACKEND
+#ifdef ENABLE_ROSEN_BACKEND
         return AceType::MakeRefPtr<RosenRenderPercentageDataPanel>();
 #else
         return nullptr;

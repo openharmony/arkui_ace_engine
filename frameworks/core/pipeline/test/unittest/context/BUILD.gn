@@ -201,11 +201,6 @@ ohos_unittest("PipelineContextTest") {
     "//third_party/googletest:gtest_main",
   ]
 
-  if (use_rosen_backend) {
-    sources += [ "//foundation/ace/ace_engine/frameworks/core/animation/native_curve_helper.cpp" ]
-    deps += [ "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client" ]
-  }
-
   if (!is_standard_system) {
     aosp_deps = [ "shared_library:libcurl" ]
     external_deps = [

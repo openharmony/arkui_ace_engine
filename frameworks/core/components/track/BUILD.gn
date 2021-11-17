@@ -28,13 +28,11 @@ build_component("track") {
     "render_track.cpp",
     "track_component.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [
-      "rosen_render_arc_track.cpp",
-      "rosen_render_circular_track.cpp",
-      "rosen_render_linear_track.cpp",
-      "rosen_render_moon_track.cpp",
-      "rosen_render_scale_ring_track.cpp",
-    ]
-  }
+  rosen_sources = [
+    "rosen_render_arc_track.cpp",
+    "rosen_render_circular_track.cpp",
+    "rosen_render_linear_track.cpp",
+    "rosen_render_moon_track.cpp",
+    "rosen_render_scale_ring_track.cpp",
+  ]
 }

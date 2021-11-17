@@ -21,7 +21,5 @@ build_component("swiper") {
     "swiper_component.cpp",
     "swiper_element.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_swiper.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_swiper.cpp" ]
 }

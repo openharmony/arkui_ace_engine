@@ -21,7 +21,5 @@ build_component("stack") {
     "stack_component.cpp",
     "stack_element.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_stack.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_stack.cpp" ]
 }

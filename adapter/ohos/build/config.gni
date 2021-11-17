@@ -45,6 +45,7 @@ xcomponent_components_support = true
 js_pa_support = true
 connect_server_support = false
 pa_engine_path = "adapter/ohos/entrance/pa_engine"
+enable_rosen_backend = true
 
 if (disable_gpu) {
   defines += [ "GPU_DISABLED" ]
@@ -52,6 +53,10 @@ if (disable_gpu) {
 
 if (form_components_support) {
   defines += [ "FORM_SUPPORTED" ]
+}
+
+if (enable_rosen_backend) {
+  defines += [ "ENABLE_ROSEN_BACKEND" ]
 }
 
 cflags_cc = [

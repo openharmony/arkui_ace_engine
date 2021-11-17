@@ -21,7 +21,5 @@ build_component("root") {
     "root_component.cpp",
     "root_element.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_root.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_root.cpp" ]
 }

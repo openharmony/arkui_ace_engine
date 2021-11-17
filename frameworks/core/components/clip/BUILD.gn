@@ -20,7 +20,5 @@ build_component("clip") {
     "render_clip.cpp",
     "render_clip_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_clip.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_clip.cpp" ]
 }

@@ -23,7 +23,5 @@ build_component("web") {
     "web_component.cpp",
     "web_element.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_web.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_web.cpp" ]
 }

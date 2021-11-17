@@ -19,7 +19,5 @@ build_component("shadow") {
     "render_shadow.cpp",
     "render_shadow_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_shadow.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_shadow.cpp" ]
 }

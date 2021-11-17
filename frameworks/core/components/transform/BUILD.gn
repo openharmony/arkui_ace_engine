@@ -22,7 +22,5 @@ build_component("transform") {
     "transform_component.cpp",
     "transform_element.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_transform.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_transform.cpp" ]
 }

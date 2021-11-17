@@ -22,7 +22,5 @@ build_component("grid_v2") {
     "render_grid_scroll.cpp",
     "render_grid_scroll_creator.cpp",
   ]
-  if (use_rosen_backend) {
-    sources += [ "rosen_render_grid_scroll.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_grid_scroll.cpp" ]
 }
