@@ -176,6 +176,9 @@ void RenderRadio::HandleClick()
     if (onClick_) {
         onClick_();
     }
+    if (onChange_) {
+        onChange_(checked_);
+    }
 }
 
 void RenderRadio::OffAnimationEnd()

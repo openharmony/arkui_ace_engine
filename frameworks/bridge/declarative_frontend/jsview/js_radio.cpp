@@ -39,12 +39,13 @@ void JSRadio::Create(const JSCallbackInfo& info)
     auto radioGroupComponent = ViewStackProcessor::GetInstance()->GetRadioGroupCompnent();
     radioComponent->SetGroupName(radioGroupName);
     auto& radioGroup = (*radioGroupComponent)[radioGroupName];
+    radioGroup.SetIsDeclarative(true);
     radioGroup.AddRadio(radioComponent);
     ViewStackProcessor::GetInstance()->Push(radioComponent);
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetDeliverMinToChild(true);
-    box->SetWidth(radioTheme->GetWidth() + radioTheme->GetHotZoneHorizontalPadding() * 2);
-    box->SetHeight(radioTheme->GetHeight() + radioTheme->GetHotZoneHorizontalPadding() * 2);
+    box->SetWidth(radioTheme->GetWidth());
+    box->SetHeight(radioTheme->GetHeight());
 }
 
 void JSRadio::JSBind(BindingTarget globalObj)
