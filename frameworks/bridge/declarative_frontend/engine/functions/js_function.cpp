@@ -85,10 +85,10 @@ JSRef<JSObject> CreateEventTargetObject(const BaseEventInfo& info)
     JSRef<JSObject> area = objectTemplate->NewInstance();
     JSRef<JSObject> offset = objectTemplate->NewInstance();
     JSRef<JSObject> globalOffset = objectTemplate->NewInstance();
-    offset->SetProperty<double>("dx", info.GetTarget().area.GetOffset().GetX().ConvertToVp());
-    offset->SetProperty<double>("dy", info.GetTarget().area.GetOffset().GetY().ConvertToVp());
-    globalOffset->SetProperty<double>("dx", info.GetTarget().area.GetGlobalOffset().GetX().ConvertToVp());
-    globalOffset->SetProperty<double>("dy", info.GetTarget().area.GetGlobalOffset().GetY().ConvertToVp());
+    offset->SetProperty<double>("x", info.GetTarget().area.GetOffset().GetX().ConvertToVp());
+    offset->SetProperty<double>("y", info.GetTarget().area.GetOffset().GetY().ConvertToVp());
+    globalOffset->SetProperty<double>("x", info.GetTarget().area.GetGlobalOffset().GetX().ConvertToVp());
+    globalOffset->SetProperty<double>("y", info.GetTarget().area.GetGlobalOffset().GetY().ConvertToVp());
     area->SetPropertyObject("pos", offset);
     area->SetPropertyObject("globalPos", globalOffset);
     area->SetProperty<double>("width", info.GetTarget().area.GetWidth().ConvertToVp());
