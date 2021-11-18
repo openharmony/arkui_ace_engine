@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/resource/internal_resource.h"
+#include "core/components/display/render_display.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/gesture_listener/gesture_listener_component.h"
@@ -71,23 +72,25 @@ HWTEST_F(PieceComponentTest, PieceComponentBuildChild001, TestSize.Level1)
      * @tc.expected: step2. child of PieceComponent is built correctly.
      */
     auto row = AceType::DynamicCast<RowComponent>(piece->BuildChild());
-    EXPECT_TRUE(row);
+    ASSERT_TRUE(row);
     EXPECT_TRUE(row->GetChildren().size() == 2);
     auto textFlex = AceType::DynamicCast<FlexItemComponent>(row->GetChildren().front());
-    EXPECT_TRUE(textFlex);
+    ASSERT_TRUE(textFlex);
     auto text = AceType::DynamicCast<TextComponent>(textFlex->GetChild());
-    EXPECT_TRUE(text);
+    ASSERT_TRUE(text);
     auto content = text->GetData();
     EXPECT_TRUE(PIECE_TEXT == content);
-    auto imageFlex = AceType::DynamicCast<FlexItemComponent>(row->GetChildren().back());
-    EXPECT_TRUE(imageFlex);
+    auto displayComponent = AceType::DynamicCast<DisplayComponent>(row->GetChildren().back());
+    ASSERT_TRUE(displayComponent);
+    auto imageFlex = AceType::DynamicCast<FlexItemComponent>(displayComponent->GetChild());
+    ASSERT_TRUE(imageFlex);
     auto padding = AceType::DynamicCast<PaddingComponent>(imageFlex->GetChild());
-    EXPECT_TRUE(padding);
+    ASSERT_TRUE(padding);
     EXPECT_TRUE(PIECE_IMAGE_PADDING_LTR == padding->GetPadding());
     auto gestureListener = AceType::DynamicCast<GestureListenerComponent>(padding->GetChild());
-    EXPECT_TRUE(gestureListener);
+    ASSERT_TRUE(gestureListener);
     auto image = AceType::DynamicCast<ImageComponent>(gestureListener->GetChild());
-    EXPECT_TRUE(image);
+    ASSERT_TRUE(image);
     EXPECT_TRUE(image->GetSrc().empty());
     EXPECT_TRUE(image->GetResourceId() == InternalResource::ResourceId::PIECE_DELETE_SVG);
 }
@@ -116,17 +119,19 @@ HWTEST_F(PieceComponentTest, PieceComponentBuildChild002, TestSize.Level1)
      * @tc.expected: step2. child of PieceComponent is built correctly.
      */
     auto row = AceType::DynamicCast<RowComponent>(piece->BuildChild());
-    EXPECT_TRUE(row);
+    ASSERT_TRUE(row);
     EXPECT_TRUE(row->GetChildren().size() == 2);
-    auto imageFlex = AceType::DynamicCast<FlexItemComponent>(row->GetChildren().back());
-    EXPECT_TRUE(imageFlex);
+    auto displayComponent = AceType::DynamicCast<DisplayComponent>(row->GetChildren().back());
+    ASSERT_TRUE(displayComponent);
+    auto imageFlex = AceType::DynamicCast<FlexItemComponent>(displayComponent->GetChild());
+    ASSERT_TRUE(imageFlex);
     auto padding = AceType::DynamicCast<PaddingComponent>(imageFlex->GetChild());
-    EXPECT_TRUE(padding);
+    ASSERT_TRUE(padding);
     EXPECT_TRUE(PIECE_IMAGE_PADDING_RTL == padding->GetPadding());
     auto gestureListener = AceType::DynamicCast<GestureListenerComponent>(padding->GetChild());
-    EXPECT_TRUE(gestureListener);
+    ASSERT_TRUE(gestureListener);
     auto image = AceType::DynamicCast<ImageComponent>(gestureListener->GetChild());
-    EXPECT_TRUE(image);
+    ASSERT_TRUE(image);
     EXPECT_TRUE(PIECE_ICON_SRC == image->GetSrc());
     EXPECT_TRUE(image->GetResourceId() == InternalResource::ResourceId::NO_ID);
 }
@@ -151,12 +156,12 @@ HWTEST_F(PieceComponentTest, PieceComponentBuildChild003, TestSize.Level1)
      * @tc.expected: step2. child of PieceComponent is built correctly.
      */
     auto row = AceType::DynamicCast<RowComponent>(piece->BuildChild());
-    EXPECT_TRUE(row);
-    EXPECT_TRUE(row->GetChildren().size() == 1);
+    ASSERT_TRUE(row);
+    EXPECT_TRUE(row->GetChildren().size() == 2);
     auto flex = AceType::DynamicCast<FlexItemComponent>(row->GetChildren().front());
-    EXPECT_TRUE(flex);
+    ASSERT_TRUE(flex);
     auto text = AceType::DynamicCast<TextComponent>(flex->GetChild());
-    EXPECT_TRUE(text);
+    ASSERT_TRUE(text);
 }
 
 /**
