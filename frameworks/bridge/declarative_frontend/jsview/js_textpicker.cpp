@@ -104,10 +104,12 @@ void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
         return;
     }
 
-    if (info[0]->IsNumber()) {
-        auto height = info[0]->ToNumber<double>();
-        TextPicker->SetColumnHeight(Dimension(height));
+    Dimension height;
+    if (!ParseJsDimensionFp(info[0], height)) {
+        return;
     }
+
+    TextPicker->SetColumnHeight(height);
 }
 
 void JSTextPicker::OnAccept(const JSCallbackInfo& info)
