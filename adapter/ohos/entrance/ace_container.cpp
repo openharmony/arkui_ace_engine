@@ -437,8 +437,8 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterIdleCallback(idleCallback);
 }
 
-void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, AceAbility* aceAbility,
-    std::unique_ptr<PlatformEventCallback> callback)
+void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+    std::string instanceName, AceAbility* aceAbility, std::unique_ptr<PlatformEventCallback> callback)
 {
     Container::InitForThread(INSTANCE_ID_PLATFORM);
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, isArkApp, aceAbility, std::move(callback));
@@ -449,6 +449,12 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
         front->UpdateState(Frontend::State::ON_CREATE);
         front->SetJsMessageDispatcher(aceContainer);
     }
+
+    auto jsFront = AceType::DynamicCast<JsFrontend>(front);
+    if (!jsFront) {
+        return;
+    }
+    jsFront->SetInstanceName(instanceName.c_str());
 }
 
 void AceContainer::DestroyContainer(int32_t instanceId)

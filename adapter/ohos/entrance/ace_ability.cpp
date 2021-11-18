@@ -231,8 +231,10 @@ void AceAbility::OnStart(const Want& want)
         }
     }
 
+    AceApplicationInfo::GetInstance().SetDebug(appInfo->debug, want.GetBoolParam("debugApp", false));
+
     // create container
-    Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, this,
+    Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, this,
         std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); }));
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {

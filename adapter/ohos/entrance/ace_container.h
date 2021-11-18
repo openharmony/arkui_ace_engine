@@ -157,8 +157,8 @@ public:
         return "";
     }
 
-    static void CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, AceAbility* aceAbility,
-        std::unique_ptr<PlatformEventCallback> callback);
+    static void CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName
+        , AceAbility* aceAbility, std::unique_ptr<PlatformEventCallback> callback);
     static void DestroyContainer(int32_t instanceId);
     static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& content, const std::string& params);
     static bool PushPage(int32_t instanceId, const std::string& content, const std::string& params);

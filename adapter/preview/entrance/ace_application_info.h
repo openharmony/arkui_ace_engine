@@ -30,6 +30,7 @@ public:
 
     bool GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo) override;
     double GetLifeTime() const override;
+    void SetDebug(bool isDebugVersion, bool needDebugBreakpoint) override;
 
     std::string GetJsEngineParam(const std::string& key) const override;
 };

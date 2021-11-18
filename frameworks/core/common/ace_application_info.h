@@ -40,6 +40,7 @@ public:
     virtual void SetLocale(const std::string& language, const std::string& countryOrRegion, const std::string& script,
         const std::string& keywordsAndValues) = 0;
     virtual void ChangeLocale(const std::string& language, const std::string& countryOrRegion) = 0;
+    virtual void SetDebug(bool isDebugVersion, bool needDebugBreakpoint) = 0;
 
     void SetUserId(int userId)
     {
