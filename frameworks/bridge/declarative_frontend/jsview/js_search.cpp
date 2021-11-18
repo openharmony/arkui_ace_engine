@@ -237,7 +237,9 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSearch>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSearch>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-
+    JSClass<JSSearch>::StaticMethod("onCopy", &JSSearch::SetOnCopy);
+    JSClass<JSSearch>::StaticMethod("onCut", &JSSearch::SetOnCut);
+    JSClass<JSSearch>::StaticMethod("onPaste", &JSSearch::SetOnPaste);
     JSClass<JSSearch>::Inherit<JSViewAbstract>();
     JSClass<JSSearch>::Bind(globalObj);
 }
@@ -456,4 +458,29 @@ void JSSearch::SetHeight(const JSCallbackInfo& info)
     }
     textFieldComponent->SetHeight(value);
 }
+
+void JSSearch::SetOnCopy(const JSCallbackInfo& info)
+{
+    if (!JSViewBindEvent(&TextFieldComponent::SetOnCopy, info)) {
+        LOGW("Failed(OnCopy) to bind event");
+    }
+    info.ReturnSelf();
 }
+
+void JSSearch::SetOnCut(const JSCallbackInfo& info)
+{
+    if (!JSViewBindEvent(&TextFieldComponent::SetOnCut, info)) {
+        LOGW("Failed(OnCut) to bind event");
+    }
+    info.ReturnSelf();
+}
+
+void JSSearch::SetOnPaste(const JSCallbackInfo& info)
+{
+    if (!JSViewBindEvent(&TextFieldComponent::SetOnPaste, info)) {
+        LOGW("Failed(OnPaste) to bind event");
+    }
+    info.ReturnSelf();
+}
+
+} // namespace OHOS::Ace::Framework

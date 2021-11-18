@@ -13,24 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_INTERFACE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_INTERFACE_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CLIPBOARD_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CLIPBOARD_H
 
-#include <mutex>
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
-#include "base/memory/referenced.h"
-#include "base/thread/task_executor.h"
-#include "core/common/clipboard/clipboard.h"
+namespace OHOS::Ace::Framework {
 
-namespace OHOS::Ace {
+class JSClipboard {
 
-class ClipboardInterface {
 public:
-    virtual ~ClipboardInterface() = default;
-
-    virtual RefPtr<Clipboard> GetClipboard(const RefPtr<TaskExecutor>& taskExecutor) const = 0;
+    static void JSBind(BindingTarget globalObj);
+    static void Get(const JSCallbackInfo& info);
+    static void Clear();
+    static void Set(const std::string& data);
 };
 
-} // namespace OHOS::Ace
+}
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_INTERFACE_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CLIPBOARD_H

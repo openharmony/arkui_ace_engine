@@ -29,6 +29,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
@@ -582,7 +583,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "AbilityController", JSAbilityComponentController::JSBind },
     { "VideoController", JSVideoController::JSBind },
     { "Search", JSSearch::JSBind },
-    { "Sheet", JSSheet::JSBind }
+    { "Sheet", JSSheet::JSBind },
+    { "JSClipboard", JSClipboard::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj)

@@ -13,24 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_INTERFACE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_INTERFACE_H
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 
-#include <mutex>
+namespace OHOS::Ace::Framework {
 
-#include "base/memory/referenced.h"
-#include "base/thread/task_executor.h"
-#include "core/common/clipboard/clipboard.h"
+void JsClipboardFunction::Execute(const std::string& direction)
+{
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(direction));
+    JsFunction::ExecuteJS(1, params);
+}
 
-namespace OHOS::Ace {
-
-class ClipboardInterface {
-public:
-    virtual ~ClipboardInterface() = default;
-
-    virtual RefPtr<Clipboard> GetClipboard(const RefPtr<TaskExecutor>& taskExecutor) const = 0;
-};
-
-} // namespace OHOS::Ace
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_INTERFACE_H
+} // namespace OHOS::Ace::Framework

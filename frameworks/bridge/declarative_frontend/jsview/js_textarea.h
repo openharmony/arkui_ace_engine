@@ -31,6 +31,9 @@ public:
     static void SetCaretColor(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
+    static void SetOnCopy(const JSCallbackInfo& info);
+    static void SetOnCut(const JSCallbackInfo& info);
+    static void SetOnPaste(const JSCallbackInfo& info);
 
 private:
     static void InitDefaultStyle();

@@ -114,6 +114,9 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextInput>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextInput>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSTextInput>::StaticMethod("onCopy", &JSTextInput::SetOnCopy);
+    JSClass<JSTextInput>::StaticMethod("onCut", &JSTextInput::SetOnCut);
+    JSClass<JSTextInput>::StaticMethod("onPaste", &JSTextInput::SetOnPaste);
     JSClass<JSTextInput>::Inherit<JSViewAbstract>();
     JSClass<JSTextInput>::Bind(globalObj);
 }
@@ -333,6 +336,30 @@ void JSTextInput::SetOnChange(const JSCallbackInfo& info)
 {
     if (!JSViewBindEvent(&TextFieldComponent::SetOnChange, info)) {
         LOGW("Failed(OnChange) to bind event");
+    }
+    info.ReturnSelf();
+}
+
+void JSTextInput::SetOnCopy(const JSCallbackInfo& info)
+{
+    if (!JSViewBindEvent(&TextFieldComponent::SetOnCopy, info)) {
+        LOGW("Failed(OnCopy) to bind event");
+    }
+    info.ReturnSelf();
+}
+
+void JSTextInput::SetOnCut(const JSCallbackInfo& info)
+{
+    if (!JSViewBindEvent(&TextFieldComponent::SetOnCut, info)) {
+        LOGW("Failed(OnCut) to bind event");
+    }
+    info.ReturnSelf();
+}
+
+void JSTextInput::SetOnPaste(const JSCallbackInfo& info)
+{
+    if (!JSViewBindEvent(&TextFieldComponent::SetOnPaste, info)) {
+        LOGW("Failed(OnPaste) to bind event");
     }
     info.ReturnSelf();
 }

@@ -411,6 +411,7 @@ private:
         PARAGRAPH,
     };
 
+    void SetCallback(const RefPtr<TextFieldComponent>& textField);
     void StartPressAnimation(bool isPressDown);
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
@@ -488,6 +489,9 @@ private:
     std::function<void()> onLongPressEvent_;
     std::function<void()> moveNextFocusEvent_;
     std::function<void(bool)> onOverlayFocusChange_;
+    std::function<void(std::string)> onCopy_;
+    std::function<void(std::string)> onCut_;
+    std::function<void(std::string)> onPaste_;
     EventMarker onOptionsClick_;
     EventMarker onTranslate_;
     EventMarker onShare_;

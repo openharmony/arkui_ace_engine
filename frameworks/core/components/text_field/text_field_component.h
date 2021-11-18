@@ -260,6 +260,12 @@ public:
 
     ACE_DEFINE_COMPONENT_EVENT(OnSubmit, void(int32_t));
 
+    ACE_DEFINE_COMPONENT_EVENT(OnCopy, void(std::string));
+
+    ACE_DEFINE_COMPONENT_EVENT(OnCut, void(std::string));
+
+    ACE_DEFINE_COMPONENT_EVENT(OnPaste, void(std::string));
+
 private:
     RefPtr<TextFieldDeclaration> declaration_;
 };
