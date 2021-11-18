@@ -830,7 +830,6 @@ bool RenderSwiper::SpringItems(const DragEndInfo& info)
     if (edgeEffect == EdgeEffect::SPRING) {
         int32_t toIndex = 0;
         toIndex = GreatNotEqual(scrollOffset_, 0.0) ? GetPrevIndex() : GetNextIndex();
-        nextIndex_ = toIndex;
 
         if (currentIndex_ == toIndex) {
             double minLeading = 0.0;
@@ -1002,6 +1001,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
             }
         }
         targetIndex_ = toIndex;
+        nextIndex_ = targetIndex_;
     } else if (std::abs(scrollOffset_) > minOffset) {
         if (scrollOffset_ > 0.0) {
             toIndex = GetPrevIndex();
@@ -1011,13 +1011,12 @@ void RenderSwiper::MoveItems(double dragVelocity)
             end = prevItemOffset_;
         }
         targetIndex_ = toIndex;
+        nextIndex_ = targetIndex_;
     } else {
         toIndex = scrollOffset_ > 0.0 ? GetPrevIndex() : GetNextIndex();
         end = 0.0;
         needRestore = true;
     }
-    nextIndex_ = targetIndex_;
-
     LOGD("translate animation, start=%{public}f, end=%{public}f", start, end);
     translate_ = AceType::MakeRefPtr<CurveAnimation<double>>(start, end, Curves::LINEAR);
     auto weak = AceType::WeakClaim(this);
@@ -1546,7 +1545,8 @@ void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, bool in
     if (!loop_) {
         prevItemCount = fromIndex;
     } else {
-        prevItemCount = (offset + prevMargin_ + std::fabs(prevItemOffset_) - 1) / std::fabs(prevItemOffset_);
+        // move additional 1 item to make sure display correctly when scroll left and right quickly
+        prevItemCount = (offset + prevMargin_ + std::fabs(prevItemOffset_) - 1) / std::fabs(prevItemOffset_) + 1;
     }
     if (prevItemCount >= itemCount_ - 1) {
         prevItemCount = itemCount_ - 1;
@@ -1573,7 +1573,9 @@ void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, bool in
         nextItemCount = maxNextItemCount;
     } else {
         double maxLength = (axis_ == Axis::HORIZONTAL ? GetLayoutSize().Width() : GetLayoutSize().Height());
-        nextItemCount = (maxLength - offset - prevMargin_) / std::fabs(prevItemOffset_);
+
+        // move additional 1 item to make sure display correctly when scroll left and right quickly
+        nextItemCount = (maxLength - offset - prevMargin_) / std::fabs(prevItemOffset_) + 1;
         if (nextItemCount > maxNextItemCount) {
             nextItemCount = maxNextItemCount;
         }
