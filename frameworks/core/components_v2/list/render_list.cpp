@@ -36,6 +36,13 @@ constexpr int32_t SCROLL_FROM_JUMP = 3;
 
 } // namespace
 
+RenderList::~RenderList()
+{
+    if (scrollBarProxy_) {
+        scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
+    }
+}
+
 void RenderList::Update(const RefPtr<Component>& component)
 {
     component_ = AceType::DynamicCast<ListComponent>(component);
@@ -81,6 +88,12 @@ void RenderList::Update(const RefPtr<Component>& component)
             }
             renderList->AdjustOffset(delta, source);
             renderList->processDragUpdate(renderList->GetMainAxis(delta));
+
+            // Stop animator of scroll bar.
+            auto scrollBarProxy = renderList->scrollBarProxy_;
+            if (scrollBarProxy) {
+                scrollBarProxy->StopScrollBarAnimator();
+            }
             return renderList->UpdateScrollPosition(renderList->GetMainAxis(delta), source);
         };
         scrollable_ = AceType::MakeRefPtr<Scrollable>(callback, axis);
@@ -90,6 +103,15 @@ void RenderList::Update(const RefPtr<Component>& component)
                 return;
             }
             list->ProcessScrollOverCallback(velocity);
+        });
+        scrollable_->SetScrollEndCallback([weak = AceType::WeakClaim(this)]() {
+            auto list = weak.Upgrade();
+            if (list) {
+                auto proxy = list->scrollBarProxy_;
+                if (proxy) {
+                    proxy->StartScrollBarAnimator();
+                }
+            }
         });
         scrollable_->Initialize(context_);
     }
@@ -129,7 +151,27 @@ void RenderList::Update(const RefPtr<Component>& component)
         spaceWidth_ += NormalizeToPx(chainProperty_.Interval());
     }
 
+    scrollBarProxy_ = component_->GetScrollBarProxy();
+    InitScrollBarProxy();
+
     MarkNeedLayout();
+}
+
+void RenderList::InitScrollBarProxy()
+{
+    if (!scrollBarProxy_) {
+        return;
+    }
+    auto callback = [weak = AceType::WeakClaim(this)](double value, int32_t source) {
+        auto renderList = weak.Upgrade();
+        if (!renderList) {
+            LOGE("render list is released");
+            return false;
+        }
+        return renderList->UpdateScrollPosition(value, source);
+    };
+    scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
+    scrollBarProxy_->RegisterScrollableNode({ AceType::WeakClaim(this), callback });
 }
 
 void RenderList::PerformLayout()
@@ -208,6 +250,8 @@ void RenderList::PerformLayout()
         ResumeEventCallback(component_, &ListComponent::GetOnScroll, Dimension(offset_ / dipScale_, DimensionUnit::VP),
             ScrollState(SCROLL_STATE_IDLE));
     }
+
+    realMainSize_ = curMainPos - currentOffset_;
 }
 
 Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutParam)

@@ -38,6 +38,7 @@ void RenderSingleChildScroll::Update(const RefPtr<Component>& component)
     if (axis_ != axis) {
         axis_ = axis;
         ResetScrollable();
+        InitScrollBarProxy();
     }
     padding_ = scroll->GetPadding();
     scrollPage_ = scroll->GetScrollPage();

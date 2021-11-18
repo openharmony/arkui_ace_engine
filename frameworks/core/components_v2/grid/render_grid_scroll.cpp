@@ -42,6 +42,13 @@ std::string GridEventInfo::ToJSONString() const
     return std::string("\"grid\",{\"first\":").append(std::to_string(scrollIndex_)).append("},null");
 }
 
+RenderGridScroll::~RenderGridScroll()
+{
+    if (scrollBarProxy_) {
+        scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
+    }
+}
+
 void RenderGridScroll::Update(const RefPtr<Component>& component)
 {
     InitScrollBar(component);
@@ -68,6 +75,9 @@ void RenderGridScroll::Update(const RefPtr<Component>& component)
     }
     scrolledEventFun_ =
         AceAsyncEvent<void(const std::shared_ptr<GridEventInfo>&)>::Create(grid->GetScrolledEvent(), context_);
+
+    scrollBarProxy_ = grid->GetScrollBarProxy();
+    InitScrollBarProxy();
 }
 
 bool RenderGridScroll::NeedUpdate(const RefPtr<Component>& component)
@@ -119,10 +129,27 @@ void RenderGridScroll::CreateScrollable()
 
     auto callback = [weak = AceType::WeakClaim(this)](double offset, int32_t source) {
         auto renderList = weak.Upgrade();
-        return renderList ? renderList->UpdateScrollPosition(offset, source) : false;
+        if (!renderList) {
+            return false;
+        }
+        // Stop animator of scroll bar.
+        auto scrollBarProxy = renderList->scrollBarProxy_;
+        if (scrollBarProxy) {
+            scrollBarProxy->StopScrollBarAnimator();
+        }
+        return renderList->UpdateScrollPosition(offset, source);
     };
     scrollable_ = AceType::MakeRefPtr<Scrollable>(
         callback, useScrollable_ == SCROLLABLE::HORIZONTAL ? Axis::HORIZONTAL : Axis::VERTICAL);
+    scrollable_->SetScrollEndCallback([weak = AceType::WeakClaim(this)]() {
+        auto grid = weak.Upgrade();
+        if (grid) {
+            auto proxy = grid->scrollBarProxy_;
+            if (proxy) {
+                proxy->StartScrollBarAnimator();
+            }
+        }
+    });
     scrollable_->Initialize(context_);
 }
 
@@ -1084,6 +1111,23 @@ void RenderGridScroll::InitScrollBar(const RefPtr<Component>& component)
     }
     scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
     SetScrollBarCallback();
+}
+
+void RenderGridScroll::InitScrollBarProxy()
+{
+    if (!scrollBarProxy_) {
+        return;
+    }
+    auto&& scrollCallback = [weakScroll = AceType::WeakClaim(this)](double value, int32_t source) {
+        auto grid = weakScroll.Upgrade();
+        if (!grid) {
+            LOGE("render grid is released");
+            return false;
+        }
+        return grid->UpdateScrollPosition(value, source);
+    };
+    scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
+    scrollBarProxy_->RegisterScrollableNode({ AceType::WeakClaim(this), scrollCallback });
 }
 
 void RenderGridScroll::SetScrollBarCallback()

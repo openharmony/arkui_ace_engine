@@ -45,6 +45,13 @@ RenderScroll::RenderScroll() : RenderNode(true)
     Initialize();
 }
 
+RenderScroll::~RenderScroll()
+{
+    if (scrollBarProxy_) {
+        scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
+    }
+}
+
 void RenderScroll::Initialize()
 {
     touchRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
@@ -519,6 +526,11 @@ void RenderScroll::ResetScrollEventCallBack()
             // Send scroll none when scroll is end.
             scroll->HandleScrollPosition(0.0, 0.0, SCROLL_NONE);
             scroll->HandleScrollBarEnd();
+
+            auto proxy = scroll->scrollBarProxy_;
+            if (proxy) {
+                proxy->StartScrollBarAnimator();
+            }
         }
     });
     scrollable_->SetScrollTouchUpCallback([weakScroll = AceType::WeakClaim(this)]() {
@@ -606,6 +618,12 @@ void RenderScroll::ResetScrollable()
         }
         scroll->AdjustOffset(delta, source);
         scroll->NotifyDragUpdate(scroll->GetMainOffset(delta), source);
+
+        // Stop animator of scroll bar.
+        auto scrollBarProxy = scroll->scrollBarProxy_;
+        if (scrollBarProxy) {
+            scrollBarProxy->StopScrollBarAnimator();
+        }
         return scroll->UpdateOffset(delta, source);
     };
     // Initializes scrollable with different direction.
@@ -871,6 +889,35 @@ void RenderScroll::Update(const RefPtr<Component>& component)
     onReachEnd_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachEnd(), context_);
     onReachTop_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachTop(), context_);
     onReachBottom_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachBottom(), context_);
+    scrollBarProxy_ = scroll->GetScrollBarProxy();
+    InitScrollBarProxy();
+}
+
+void RenderScroll::InitScrollBarProxy()
+{
+    if (!scrollBarProxy_) {
+        return;
+    }
+    auto isVertical = (axis_ == Axis::VERTICAL);
+    auto&& scrollCallback = [weakScroll = AceType::WeakClaim(this), isVertical](double value, int32_t source) {
+        auto scroll = weakScroll.Upgrade();
+        if (!scroll) {
+            LOGE("render scroll is released");
+            return false;
+        }
+        Offset delta;
+        if (isVertical) {
+            delta.SetX(0.0);
+            delta.SetY(-value);
+        } else {
+            delta.SetX(-value);
+            delta.SetY(0.0);
+        }
+        scroll->AdjustOffset(delta, source);
+        return scroll->UpdateOffset(delta, source);
+    };
+    scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
+    scrollBarProxy_->RegisterScrollableNode({ AceType::WeakClaim(this), scrollCallback });
 }
 
 void RenderScroll::SetBarCallBack(bool isVertical)

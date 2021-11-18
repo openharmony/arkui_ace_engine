@@ -34,6 +34,14 @@ void JSScroll::Create(const JSCallbackInfo& info)
             auto positionController = AceType::MakeRefPtr<ScrollPositionController>();
             jsScroller->SetController(positionController);
             scrollComponent->SetScrollPositionController(positionController);
+
+            // Init scroll bar proxy.
+            auto proxy = jsScroller->GetScrollBarProxy();
+            if (!proxy) {
+                proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+                jsScroller->SetScrollBarProxy(proxy);
+            }
+            scrollComponent->SetScrollBarProxy(proxy);
         }
     } else {
         auto positionController = AceType::MakeRefPtr<ScrollPositionController>();

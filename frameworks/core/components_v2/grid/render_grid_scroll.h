@@ -60,6 +60,10 @@ public:
     using GetChildSpanByIndex = std::function<bool(int32_t, bool, int32_t&, int32_t&, int32_t&, int32_t&)>;
     using DeleteChildByIndex = std::function<void(int32_t)>;
     using OnScrolledFunc = std::function<void(std::shared_ptr<GridEventInfo>&)>;
+
+    RenderGridScroll() = default;
+    ~RenderGridScroll() override;
+
     static RefPtr<RenderNode> Create();
 
     void Update(const RefPtr<Component>& component) override;
@@ -130,6 +134,11 @@ public:
         return endShowItemIndex_ - startShowItemIndex_;
     }
 
+    Offset GetLastOffset() const
+    {
+        return useScrollable_ == SCROLLABLE::VERTICAL ? Offset(0, lastOffset_) : Offset(lastOffset_, 0);
+    }
+
 protected:
     int32_t GetItemMainIndex(const RefPtr<RenderNode>& child, bool isMain) const;
     void SetMainSize(Size& dst, const Size& src);
@@ -175,6 +184,7 @@ protected:
     void CalculateWholeSize(double drawLength);
 
     void InitScrollBar(const RefPtr<Component>& component);
+    void InitScrollBarProxy();
 
     void DoJump(double position, int32_t source);
 
@@ -241,6 +251,7 @@ protected:
     bool animatorJumpFlag_ = false;
     Color scrollBarColor_;
 
+    RefPtr<ScrollBarProxy> scrollBarProxy_;
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<Animator> animator_;
     RefPtr<GridLayoutComponent> component_;

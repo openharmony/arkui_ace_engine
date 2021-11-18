@@ -42,6 +42,14 @@ void JSGrid::Create(const JSCallbackInfo& info)
             auto positionController = AceType::MakeRefPtr<V2::GridPositionController>();
             jsScroller->SetController(positionController);
             gridComponent->SetController(positionController);
+
+            // Init scroll bar proxy.
+            auto proxy = jsScroller->GetScrollBarProxy();
+            if (!proxy) {
+                proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+                jsScroller->SetScrollBarProxy(proxy);
+            }
+            gridComponent->SetScrollBarProxy(proxy);
         }
     }
     ViewStackProcessor::GetInstance()->Push(gridComponent);

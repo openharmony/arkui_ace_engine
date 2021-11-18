@@ -70,6 +70,11 @@ void FlutterRenderSingleChildScroll::Paint(RenderContext& context, const Offset&
             }
         }
     }
+
+    // Notify scroll bar to update.
+    if (scrollBarProxy_) {
+        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
+    }
 }
 
 }

@@ -618,3 +618,10 @@ var HoverEffect;
   HoverEffect[HoverEffect["Board"] = 3] = "Board";
   HoverEffect[HoverEffect["None"] = 0] = "None";
 })(HoverEffect || (HoverEffect = {}));
+
+var ScrollBarDirection;
+(function (ScrollBarDirection) {
+  ScrollBarDirection[ScrollBarDirection["Vertical"] = 0] = "Vertical";
+  ScrollBarDirection[ScrollBarDirection["Horizontal"] = 1] = "Horizontal";
+  ScrollBarDirection[ScrollBarDirection["None"] = 2] = "None";
+}) (ScrollBarDirection || (ScrollBarDirection = {}));

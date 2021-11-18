@@ -264,6 +264,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/refresh:ace_core_components_refresh_$platform",
       "$ace_root/frameworks/core/components/root:ace_core_components_root_$platform",
       "$ace_root/frameworks/core/components/scroll:ace_core_components_scroll_$platform",
+      "$ace_root/frameworks/core/components/scroll_bar:ace_core_components_scroll_bar_$platform",
       "$ace_root/frameworks/core/components/search:ace_core_components_search_$platform",
       "$ace_root/frameworks/core/components/select_popup:ace_core_components_select_popup_$platform",
       "$ace_root/frameworks/core/components/semi_modal:ace_core_components_semi_modal_$platform",

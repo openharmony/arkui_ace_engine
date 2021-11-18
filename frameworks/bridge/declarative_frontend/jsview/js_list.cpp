@@ -81,6 +81,14 @@ void JSList::Create(const JSCallbackInfo& args)
                 auto listController = AceType::MakeRefPtr<V2::ListPositionController>();
                 scroller->SetController(listController);
                 listComponent->SetScrollController(listController);
+
+                // Init scroll bar proxy.
+                auto proxy = scroller->GetScrollBarProxy();
+                if (!proxy) {
+                    proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+                    scroller->SetScrollBarProxy(proxy);
+                }
+                listComponent->SetScrollBarProxy(proxy);
             }
         }
     }

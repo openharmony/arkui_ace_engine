@@ -19,6 +19,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
+#include "core/components/scroll_bar/scroll_bar_proxy.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/components_v2/grid/grid_position_controller.h"
 #include "core/pipeline/base/component_group.h"
@@ -167,6 +168,16 @@ public:
         return cacheCount_;
     }
 
+    void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
+    {
+        scrollBarProxy_ = scrollBarProxy;
+    }
+
+    const RefPtr<ScrollBarProxy>& GetScrollBarProxy() const
+    {
+        return scrollBarProxy_;
+    }
+
 private:
     FlexDirection direction_ = FlexDirection::COLUMN;
     FlexAlign flexAlign_ = FlexAlign::CENTER;
@@ -190,6 +201,7 @@ private:
     DisplayMode displayMode_ = DisplayMode::OFF;
     RefPtr<V2::GridPositionController> controller_;
     EventMarker scrolledEvent_;
+    RefPtr<ScrollBarProxy> scrollBarProxy_;
 };
 
 } // namespace OHOS::Ace

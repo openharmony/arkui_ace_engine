@@ -109,6 +109,11 @@ void FlutterRenderList::Paint(RenderContext& context, const Offset& offset)
         selectedItem_->SetPosition(MakeValue<Offset>(selectedItemMainAxis_, 0.0));
         PaintChild(selectedItem_, context, offset);
     }
+
+    // Notify scroll bar to update.
+    if (scrollBarProxy_) {
+        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
+    }
 }
 
 } // namespace OHOS::Ace::V2

@@ -111,6 +111,7 @@
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 
 namespace OHOS::Ace::Framework {
@@ -522,6 +523,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ColumnSplit", JSColumnSplit::JSBind },
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },
+    { "ScrollBar", JSScrollBar::JSBind },
     {"Stepper", JSStepper::JSBind },
     {"StepperItem", JSStepperItem::JSBind },
     { "Toggle", JSToggle::JSBind },

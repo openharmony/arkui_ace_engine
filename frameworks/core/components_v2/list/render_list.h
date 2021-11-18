@@ -49,7 +49,7 @@ public:
     static RefPtr<RenderNode> Create();
 
     RenderList() = default;
-    ~RenderList() = default;
+    ~RenderList() override;
 
     void Update(const RefPtr<Component>& component) override;
 
@@ -100,6 +100,11 @@ public:
         return vertical_;
     }
 
+    Axis GetAxis() const
+    {
+        return vertical_ ? Axis::VERTICAL : Axis::HORIZONTAL;
+    }
+
     bool GetEditable() const
     {
         if (component_) {
@@ -122,6 +127,16 @@ public:
     RefPtr<Component> GetComponent() override
     {
         return component_;
+    }
+
+    Offset GetLastOffset() const
+    {
+        return vertical_ ? Offset(0.0, -currentOffset_) : Offset(-currentOffset_, 0.0);
+    }
+
+    double GetEstimatedHeight() const
+    {
+        return realMainSize_;
     }
 
 protected:
@@ -225,6 +240,7 @@ protected:
     WeakPtr<ListItemGenerator> itemGenerator_;
     RefPtr<Scrollable> scrollable_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
+    RefPtr<ScrollBarProxy> scrollBarProxy_;
 
     size_t currentStickyIndex_ = INITIAL_CHILD_INDEX;
     RefPtr<RenderListItem> currentStickyItem_;
@@ -244,6 +260,10 @@ protected:
 private:
     bool ActionByScroll(bool forward, ScrollEventBack scrollEventBack);
     void ModifyActionScroll();
+    void InitScrollBarProxy();
+
+    double realMainSize_ = 0.0; // Real size of main axis.
+
     ACE_DISALLOW_COPY_AND_MOVE(RenderList);
 };
 

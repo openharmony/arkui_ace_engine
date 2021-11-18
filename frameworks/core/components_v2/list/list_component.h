@@ -23,6 +23,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/scroll_bar.h"
+#include "core/components/scroll_bar/scroll_bar_proxy.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/components_v2/list/list_position_controller.h"
 #include "core/pipeline/base/component_group.h"
@@ -69,6 +70,7 @@ public:
     ACE_DEFINE_COMPONENT_PROP(CachedCount, int32_t, 0);
     ACE_DEFINE_COMPONENT_PROP(EditMode, bool, false);
     ACE_DEFINE_COMPONENT_PROP(ScrollController, RefPtr<ListPositionController>);
+    ACE_DEFINE_COMPONENT_PROP(ScrollBarProxy, RefPtr<ScrollBarProxy>);
     ACE_DEFINE_COMPONENT_PROP(ChainAnimation, bool, false);
 
     ACE_DEFINE_COMPONENT_EVENT(OnScroll, void(Dimension, ScrollState));
