@@ -63,7 +63,11 @@ void FlutterRenderTip::PaintTip(RenderContext& context, const Offset& offset)
     paint.setAntiAlias(true);
     paint.setColor(bgColor_.GetValue());
     paint.setStyle(SkPaint::Style::kFill_Style);
-    PaintTopTip(skCanvas, paint, offset);
+    if (direction_ == Axis::VERTICAL) {
+        PaintLeftTip(skCanvas, paint, offset);
+    } else {
+        PaintTopTip(skCanvas, paint, offset);
+    }
 }
 
 void FlutterRenderTip::PaintTopTip(SkCanvas* skCanvas, SkPaint paint, const Offset& offset)
@@ -120,6 +124,65 @@ void FlutterRenderTip::PaintTopTip(SkCanvas* skCanvas, SkPaint paint, const Offs
     path_.quadTo(globalArrowPosition.GetX() - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
         globalArrowPosition.GetY() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
         globalArrowPosition.GetX() + arrowOffset, globalArrowPosition.GetY());
+    path_.close();
+    skCanvas->drawPath(path_, paint);
+    skCanvas->clipPath(path_, SkClipOp::kIntersect);
+}
+
+void FlutterRenderTip::PaintLeftTip(SkCanvas* skCanvas, SkPaint paint, const Offset& offset)
+{
+    if (!skCanvas) {
+        return;
+    }
+
+    double bubbleSpacing = NormalizeToPx(TIP_SPACING);
+    double childWidth = GetLayoutSize().Width() - bubbleSpacing;
+    double childHalfHeight = childSize_.Height() * HALF;
+    double arrowOffset = NormalizeToPx(arrowOffset_);
+    auto globalArrowPosition = offset + Offset(GetLayoutSize().Width(), childHalfHeight);
+
+    path_.reset();
+    path_.moveTo(globalArrowPosition.GetX(), globalArrowPosition.GetY() + arrowOffset);
+    path_.quadTo(globalArrowPosition.GetX() + NormalizeToPx(0.1_vp),
+        globalArrowPosition.GetY() - NormalizeToPx(1.3_vp) + arrowOffset,
+        globalArrowPosition.GetX() - NormalizeToPx(3.0_vp),
+        globalArrowPosition.GetY() - NormalizeToPx(3.2_vp) + arrowOffset);
+    path_.quadTo(globalArrowPosition.GetX() - NormalizeToPx(8.0_vp),
+        globalArrowPosition.GetY() - NormalizeToPx(6.6_vp) + arrowOffset,
+        globalArrowPosition.GetX() - NormalizeToPx(8.0_vp),
+        globalArrowPosition.GetY() - NormalizeToPx(16.0_vp) + arrowOffset);
+    path_.lineTo(globalArrowPosition.GetX() - bubbleSpacing,
+        globalArrowPosition.GetY() - (childHalfHeight - NormalizeToPx(border_.TopRightRadius().GetY())));
+    path_.arcTo(NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()),
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        globalArrowPosition.GetX() - bubbleSpacing - NormalizeToPx(border_.TopRightRadius().GetX()),
+        globalArrowPosition.GetY() - childHalfHeight);
+    path_.lineTo(globalArrowPosition.GetX() - bubbleSpacing - (childWidth - NormalizeToPx(border_.TopLeftRadius().GetX())),
+        globalArrowPosition.GetY() - childHalfHeight);
+    path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
+        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        globalArrowPosition.GetX() - bubbleSpacing - childWidth,
+        globalArrowPosition.GetY() - childHalfHeight + NormalizeToPx(border_.TopLeftRadius().GetY()));
+    path_.lineTo(globalArrowPosition.GetX() - bubbleSpacing - childWidth,
+        globalArrowPosition.GetY() + (childHalfHeight - NormalizeToPx(border_.BottomLeftRadius().GetY())));
+    path_.arcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()), 0.0f,
+        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction, globalArrowPosition.GetX() - bubbleSpacing -
+        (childWidth - NormalizeToPx(border_.BottomLeftRadius().GetX())), globalArrowPosition.GetY() + childHalfHeight);
+    path_.lineTo(globalArrowPosition.GetX() - bubbleSpacing - NormalizeToPx(border_.BottomRightRadius().GetX()),
+        globalArrowPosition.GetY() + childHalfHeight);
+    path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        globalArrowPosition.GetX() - bubbleSpacing,
+        globalArrowPosition.GetY() + (childHalfHeight - NormalizeToPx(border_.BottomRightRadius().GetY())));
+    path_.lineTo(globalArrowPosition.GetX() - NormalizeToPx(8.0_vp),
+        globalArrowPosition.GetY() + NormalizeToPx(16.0_vp) + arrowOffset);
+    path_.quadTo(globalArrowPosition.GetX() - NormalizeToPx(8.0_vp),
+        globalArrowPosition.GetY() + NormalizeToPx(6.6_vp) + arrowOffset,
+        globalArrowPosition.GetX() - NormalizeToPx(3.0_vp),
+        globalArrowPosition.GetY() + NormalizeToPx(3.2_vp) + arrowOffset);
+    path_.quadTo(globalArrowPosition.GetX() + NormalizeToPx(0.1_vp),
+        globalArrowPosition.GetY() + NormalizeToPx(1.3_vp) + arrowOffset,
+        globalArrowPosition.GetX(), globalArrowPosition.GetY() + arrowOffset);
     path_.close();
     skCanvas->drawPath(path_, paint);
     skCanvas->clipPath(path_, SkClipOp::kIntersect);

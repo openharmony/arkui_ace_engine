@@ -31,6 +31,7 @@ void RenderTip::Update(const RefPtr<Component>& component)
     const RefPtr<TipComponent> tip = AceType::DynamicCast<TipComponent>(component);
     if (tip) {
         bgColor_ = tip->GetBgColor();
+        direction_ = tip->GetDirection();
         MarkNeedLayout();
     }
 }
@@ -60,26 +61,44 @@ void RenderTip::PerformLayout()
         double paddingTop = NormalizeToPx(padding_.Top());
         child->SetPosition(Offset(paddingLeft, paddingTop));
         childSize_ = layoutSize + padding_.GetLayoutSizeInPx(context->GetDipScale());
-        border_.SetBorderRadius(Radius(Dimension(childSize_.Height() * HALF, DimensionUnit::PX)));
+        border_.SetBorderRadius(direction_ == Axis::VERTICAL ? Radius(Dimension(childSize_.Width() * HALF,
+            DimensionUnit::PX)) : Radius(Dimension(childSize_.Height() * HALF, DimensionUnit::PX)));
         SetLayoutSize(maxLayoutSize);
     }
 }
 
 void RenderTip::AdaptChildPadding(const Size& childSize, const Size& selfSize)
 {
-    double widthChange = std::max(0.0, NormalizeToPx(TEXT_MIN_WIDTH) - childSize.Width());
-    if (NearEqual(widthChange, 0.0)) {
-        // convert to px
-        padding_.SetLeft(Dimension(NormalizeToPx(padding_.Left()), DimensionUnit::PX));
-        padding_.SetRight(Dimension(NormalizeToPx(padding_.Right()), DimensionUnit::PX));
+    if (direction_ == Axis::VERTICAL) {
+        double widthChange = std::max(0.0, NormalizeToPx(TEXT_MIN_WIDTH) - childSize.Height());
+        if (NearEqual(widthChange, 0.0)) {
+            // convert to px
+            padding_.SetTop(Dimension(NormalizeToPx(padding_.Top()), DimensionUnit::PX));
+            padding_.SetBottom(Dimension(NormalizeToPx(padding_.Bottom()), DimensionUnit::PX));
+        } else {
+            padding_.SetTop(Dimension(widthChange * HALF, DimensionUnit::PX));
+            padding_.SetBottom(Dimension(widthChange * HALF, DimensionUnit::PX));
+        }
+
+        double paddingTopBottom = (selfSize.Width() - NormalizeToPx(TIP_SPACING) - childSize.Width()) * HALF;
+        padding_.SetLeft(Dimension(paddingTopBottom, DimensionUnit::PX));
+        padding_.SetRight(Dimension(paddingTopBottom, DimensionUnit::PX));
     } else {
-        padding_.SetLeft(Dimension(widthChange * HALF, DimensionUnit::PX));
-        padding_.SetRight(Dimension(widthChange * HALF, DimensionUnit::PX));
+        double widthChange = std::max(0.0, NormalizeToPx(TEXT_MIN_WIDTH) - childSize.Width());
+        if (NearEqual(widthChange, 0.0)) {
+            // convert to px
+            padding_.SetLeft(Dimension(NormalizeToPx(padding_.Left()), DimensionUnit::PX));
+            padding_.SetRight(Dimension(NormalizeToPx(padding_.Right()), DimensionUnit::PX));
+        } else {
+            padding_.SetLeft(Dimension(widthChange * HALF, DimensionUnit::PX));
+            padding_.SetRight(Dimension(widthChange * HALF, DimensionUnit::PX));
+        }
+
+        double paddingTopBottom = (selfSize.Height() - NormalizeToPx(TIP_SPACING) - childSize.Height()) * HALF;
+        padding_.SetTop(Dimension(paddingTopBottom, DimensionUnit::PX));
+        padding_.SetBottom(Dimension(paddingTopBottom, DimensionUnit::PX));
     }
 
-    double paddingTopBottom = (selfSize.Height() - NormalizeToPx(TIP_SPACING) - childSize.Height()) * HALF;
-    padding_.SetTop(Dimension(paddingTopBottom, DimensionUnit::PX));
-    padding_.SetBottom(Dimension(paddingTopBottom, DimensionUnit::PX));
 }
 
 } // namespace OHOS::Ace

@@ -49,6 +49,7 @@ protected:
     Size childSize_;
     Edge padding_;
     Border border_;
+    Axis direction_ = Axis::HORIZONTAL;
 
 private:
     void AdaptChildPadding(const Size& childSize, const Size& selfSize);

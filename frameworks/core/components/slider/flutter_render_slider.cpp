@@ -119,6 +119,7 @@ void FlutterRenderSlider::AddTipChild()
 
     auto tipComponent = AceType::MakeRefPtr<TipComponent>(tipText_);
     tipComponent->SetBgColor(theme->GetTipColor());
+    tipComponent->SetDirection(direction_);
 
     renderText_ = RenderText::Create();
     renderText_->Attach(GetContext());
@@ -130,7 +131,8 @@ void FlutterRenderSlider::AddTipChild()
     auto padding = NormalizeToPx(theme->GetTipTextPadding());
     auto renderTip = AceType::DynamicCast<RenderTip>(tip_);
     if (renderTip) {
-        renderTip->SetPadding(Edge(padding, 0.0, padding, 0.0, DimensionUnit::PX));
+        renderTip->SetPadding(direction_ == Axis::VERTICAL ?
+            Edge(0.0, padding, 0.0, padding, DimensionUnit::PX) : Edge(padding, 0.0, padding, 0.0, DimensionUnit::PX));
     }
 
     AddChild(tip_);
@@ -200,9 +202,15 @@ void FlutterRenderSlider::SetTipPosition(double blockOffset)
 {
     auto renderTip = AceType::DynamicCast<RenderTip>(tip_);
     if (renderTip) {
-        const double childHalfWidth = renderTip->GetChildSize().Width() * HALF;
-        const double tipLayoutHeight = renderTip->GetLayoutSize().Height();
-        renderTip->SetPosition(Offset(blockOffset - childHalfWidth, -tipLayoutHeight));
+        if (direction_ == Axis::VERTICAL) {
+            double tipLayoutWidth = renderTip->GetLayoutSize().Width();
+            double childHalfHeight = renderTip->GetChildSize().Height() * HALF;
+            renderTip->SetPosition(Offset(-tipLayoutWidth, blockOffset - childHalfHeight));
+        } else {
+            double childHalfWidth = renderTip->GetChildSize().Width() * HALF;
+            double tipLayoutHeight = renderTip->GetLayoutSize().Height();
+            renderTip->SetPosition(Offset(blockOffset - childHalfWidth, -tipLayoutHeight));
+        }
     }
 }
 
