@@ -19,6 +19,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/slider/flutter_render_slider.h"
 #include "core/components/slider/slider_element.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -116,10 +117,10 @@ std::string SliderComposedElement::GetStyle() const
 std::string SliderComposedElement::GetBlockColor() const
 {
     auto renderSlider = GetRenderSlider();
-    if (renderSlider) {
-        auto slider = renderSlider->GetSliderComponent().Upgrade();
-        if (slider) {
-            auto block = slider->GetBlock();
+    auto flutterRenderSlider = AceType::DynamicCast<FlutterRenderSlider>(renderSlider);
+    if (flutterRenderSlider) {
+        auto block = flutterRenderSlider->GetRenderBlock();
+        if (block) {
             return block->GetBlockColor().ColorToString();
         }
         return "";
@@ -130,11 +131,11 @@ std::string SliderComposedElement::GetBlockColor() const
 std::string SliderComposedElement::GetTrackColor() const
 {
     auto renderSlider = GetRenderSlider();
-    if (renderSlider) {
-        auto slider = renderSlider->GetSliderComponent().Upgrade();
-        if (slider) {
-            auto Track = slider->GetTrack();
-            return Track->GetBackgroundColor().ColorToString();
+    auto flutterRenderSlider = AceType::DynamicCast<FlutterRenderSlider>(renderSlider);
+    if (flutterRenderSlider) {
+        auto track = flutterRenderSlider->GetRenderTrack();
+        if (track) {
+            return track->GetBackgroundColor().ColorToString();
         }
         return "";
     }
@@ -144,11 +145,11 @@ std::string SliderComposedElement::GetTrackColor() const
 std::string SliderComposedElement::GetSelectedColor() const
 {
     auto renderSlider = GetRenderSlider();
-    if (renderSlider) {
-        auto slider = renderSlider->GetSliderComponent().Upgrade();
-        if (slider) {
-            auto Track = slider->GetTrack();
-            return Track->GetSelectColor().ColorToString();
+    auto flutterRenderSlider = AceType::DynamicCast<FlutterRenderSlider>(renderSlider);
+    if (flutterRenderSlider) {
+        auto track = flutterRenderSlider->GetRenderTrack();
+        if (track) {
+            return track->GetSelectColor().ColorToString();
         }
         return "";
     }
