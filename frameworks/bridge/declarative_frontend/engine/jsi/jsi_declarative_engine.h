@@ -210,6 +210,8 @@ private:
 
     void CallAppFunc(const std::string& appFuncName, const std::vector<shared_ptr<JsValue>>& argv);
 
+    void SetPostTask(NativeEngine* nativeEngine);
+
     void TimerCallJs(const std::string& callbackId) const;
 
     void RegisterWorker();

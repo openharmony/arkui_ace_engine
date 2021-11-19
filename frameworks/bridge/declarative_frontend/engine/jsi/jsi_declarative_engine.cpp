@@ -734,6 +734,7 @@ JsiDeclarativeEngine::~JsiDeclarativeEngine()
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     if (nativeEngine_ != nullptr) {
+        nativeEngine_->CancelCheckUVLoop();
         delete nativeEngine_;
     }
 }
@@ -758,15 +759,34 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         return false;
     }
     nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
-    ACE_DCHECK(delegate);
-    delegate->AddTaskObserver([nativeEngine = nativeEngine_]()
-        { nativeEngine->Loop(LOOP_NOWAIT); });
+    SetPostTask(nativeEngine_);
+    nativeEngine_->CheckUVLoop();
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
         nativeEngine_->SetPackagePath(packagePath);
     }
     RegisterWorker();
     return result;
+}
+
+void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
+{
+    LOGI("SetPostTask");
+    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
+    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_](bool needSync) {
+        auto delegate = weakDelegate.Upgrade();
+        if (delegate == nullptr) {
+            LOGE("delegate is nullptr");
+            return;
+        }
+        delegate->PostJsTask([nativeEngine, needSync]() {
+            if (nativeEngine == nullptr) {
+                return;
+            }
+            nativeEngine->Loop(LOOP_NOWAIT, needSync);
+        });
+    };
+    nativeEngine_->SetPostTask(postTask);
 }
 
 void JsiDeclarativeEngine::RegisterInitWorkerFunc()
