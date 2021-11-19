@@ -36,7 +36,6 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void Paint(RenderContext& context, const Offset& offset) override;
     void UpdateData(const std::string& uri, const std::vector<uint8_t>& memData) override;
-    void PerformLayout() override;
 
     void OnHiddenChanged(bool hidden) override;
 
@@ -79,9 +78,17 @@ public:
     void OnAppShow() override;
     void OnVisibleChanged() override;
 
+    void PerformLayoutPixmap() override;
+    void PerformLayoutSvgImage() override;
+
+    Size MeasureForPixmap() override;
+    Size MeasureForSvgImage() override;
+    Size MeasureForNormalImage() override;
+
 protected:
-    virtual bool MaybeRelease() override;
-    virtual void ClearRenderObject() override;
+    bool MaybeRelease() override;
+    void ClearRenderObject() override;
+    void LayoutImageObject() override;
 
 private:
     void InitializeCallbacks();
@@ -99,10 +106,12 @@ private:
     void ApplyInterpolation(SkPaint& paint);
     void AddSvgChild();
     void CreateAnimatedPlayer(const RefPtr<ImageProvider>& provider, SkCodec* codecPtr, bool forceResize);
-    bool VerifySkImageDataFromPixmap();
+    bool VerifySkImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const;
     void PerformLayoutSvgCustom();
     void CancelBackgroundTasks();
     void CacheImageObject();
+    void UpdatePixmap();
+    void ProcessPixmapForPaint();
 
     sk_sp<SkSVGDOM> skiaDom_;
     RefPtr<SvgDom> svgDom_;

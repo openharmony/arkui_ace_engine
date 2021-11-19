@@ -16,6 +16,7 @@
 #include "core/image/image_object.h"
 
 #include "base/thread/background_task_executor.h"
+#include "core/components/image/render_image.h"
 #include "core/image/flutter_image_cache.h"
 namespace OHOS::Ace {
 
@@ -74,6 +75,28 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
     } else {
         return MakeRefPtr<AnimatedImageObject>(source, imageSize, totalFrames, skData);
     }
+}
+
+Size ImageObject::MeasureForImage(RefPtr<RenderImage> image)
+{
+    return image->MeasureForNormalImage();
+}
+
+void SvgImageObject::PerformLayoutImageObject(RefPtr<RenderImage> image)
+{
+    image->PerformLayoutSvgImage();
+}
+
+Size SvgImageObject::MeasureForImage(RefPtr<RenderImage> image)
+{
+    return image->MeasureForSvgImage();
+}
+
+void SvgSkiaImageObject::PerformLayoutImageObject(RefPtr<RenderImage> image) {}
+
+Size SvgSkiaImageObject::MeasureForImage(RefPtr<RenderImage> image)
+{
+    return image->MeasureForSvgImage();
 }
 
 void StaticImageObject::UploadToGpuForRender(
@@ -201,6 +224,16 @@ void AnimatedImageObject::UploadToGpuForRender(
     } else if (animatedPlayer_ && !forceResize) {
         LOGI("animated player has been construced, do nothing!");
     }
+}
+
+void PixelMapImageObject::PerformLayoutImageObject(RefPtr<RenderImage> image)
+{
+    image->PerformLayoutPixmap();
+}
+
+Size PixelMapImageObject::MeasureForImage(RefPtr<RenderImage> image)
+{
+    return image->MeasureForPixmap();
 }
 
 } // namespace OHOS::Ace

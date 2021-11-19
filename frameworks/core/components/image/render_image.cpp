@@ -70,7 +70,6 @@ void RenderImage::Update(const RefPtr<Component>& component)
 
     useSkiaSvg_ = image->GetUseSkiaSvg();
     autoResize_ = image->GetAutoResize();
-    pixmap_ = image->GetPixmap();
     imageAlt_ = image->GetAlt();
     auto inComingSrc = image->GetSrc();
     ImageSourceInfo inComingSource(
@@ -136,15 +135,13 @@ void RenderImage::PerformLayout()
     decltype(imageLayoutCallbacks_) imageLayoutCallbacks(std::move(imageLayoutCallbacks_));
     std::for_each(
         imageLayoutCallbacks.begin(), imageLayoutCallbacks.end(), [](std::function<void()> callback) { callback(); });
-    if (pixmap_) {
-        MarkNeedRender();
-        return;
-    }
+    LayoutImageObject();
     if (renderAltImage_) {
         LayoutParam altLayoutParam;
         altLayoutParam.SetFixedSize(GetLayoutSize());
         renderAltImage_->Layout(altLayoutParam);
     }
+
     CalculateResizeTarget();
     if (hasObjectPosition_) {
         ApplyObjectPosition();
@@ -634,7 +631,6 @@ void RenderImage::ClearRenderObject()
     forceReload_ = false;
     imageSizeForEvent_ =  { 0.0, 0.0 };
     retryCnt_ = 0;
-    pixmap_ = nullptr;
 }
 
 void RenderImage::PrintImageLog(const Size& srcSize, const BackgroundImageSize& imageSize, ImageRepeat imageRepeat,

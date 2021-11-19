@@ -274,23 +274,33 @@ void FlutterRenderImage::CacheImageObject()
     }
 }
 
+void FlutterRenderImage::UpdatePixmap()
+{
+    if (pixmapRawPtr_ == DynamicCast<PixelMapImageObject>(imageObj_)->GetRawPixelMapPtr()) {
+        LOGD("pixmapRawPtr_ not changed.");
+        imageObj_->ClearData();
+    } else {
+        image_ = nullptr;
+        curSourceInfo_.Reset();
+        rawImageSize_ = imageObj_->GetImageSize();
+        rawImageSizeUpdated_ = true;
+        imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
+    }
+    MarkNeedLayout();
+}
+
 void FlutterRenderImage::Update(const RefPtr<Component>& component)
 {
     RenderImage::Update(component);
-    if (pixmap_ != nullptr) {
-        if (pixmapRawPtr_ == pixmap_->GetRawPixelMapPtr()) {
-            pixmap_ = nullptr;
-            MarkNeedLayout();
-            return;
-        }
-        image_ = nullptr;
-        curSourceInfo_.Reset();
-        rawImageSize_ = Size(pixmap_->GetWidth(), pixmap_->GetHeight());
-        rawImageSizeUpdated_ = true;
-        imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
-        MarkNeedLayout();
+    auto pixmap = AceType::DynamicCast<ImageComponent>(component)->GetPixmap();
+    if (pixmap != nullptr) {
+        LOGD("pixmap not null!");
+        sourceInfo_.Reset();
+        imageObj_ = MakeRefPtr<PixelMapImageObject>(pixmap);
+        UpdatePixmap();
         return;
     } else {
+        LOGD("pixmap is null!");
         pixmapRawPtr_ = nullptr;
     }
     // curImageSrc represents the picture currently shown and imageSrc represents next picture to be shown
@@ -366,10 +376,59 @@ void FlutterRenderImage::FetchImageObject()
     }
 }
 
-void FlutterRenderImage::PerformLayout()
+void FlutterRenderImage::PerformLayoutPixmap()
 {
-    RenderImage::PerformLayout();
+    ProcessPixmapForPaint();
+    MarkNeedRender();
+}
 
+void FlutterRenderImage::ProcessPixmapForPaint()
+{
+    LOGD("convert pixmap to skimage");
+    auto pixmap = AceType::DynamicCast<PixelMapImageObject>(imageObj_)->GetPixmap();
+    if (!pixmap) {
+        LOGI("pixmap ref is null, may be released, paint directly");
+        return;
+    }
+    // Step1: Create SkPixmap
+    auto imageInfo = MakeSkImageInfoFromPixelMap(pixmap);
+    SkPixmap imagePixmap(
+        imageInfo, reinterpret_cast<const void*>(pixmap->GetPixels()), pixmap->GetRowBytes());
+
+    // Step2: Create SkImage and draw it, using gpu or cpu
+    sk_sp<SkImage> skImage;
+    if (!renderTaskHolder_->ioManager) {
+        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+    } else {
+#ifndef GPU_DISABLED
+        skImage = SkImage::MakeCrossContextFromPixmap(
+            renderTaskHolder_->ioManager->GetResourceContext().get(),
+            imagePixmap,
+            true,
+            imagePixmap.colorSpace(),
+            true);
+#endif
+    }
+    auto canvasImage = flutter::CanvasImage::Create();
+    canvasImage->set_image(flutter::SkiaGPUObject<SkImage>(skImage, renderTaskHolder_->unrefQueue));
+    image_ = canvasImage;
+    if (!VerifySkImageDataFromPixmap(pixmap)) {
+        LOGE("pixmap paint failed due to SkImage data verification fail. rawImageSize: %{public}s",
+            rawImageSize_.ToString().c_str());
+        imageLoadingStatus_ = ImageLoadingStatus::LOAD_FAIL;
+        FireLoadEvent(Size());
+        image_ = nullptr;
+        imageObj_->ClearData();
+        return;
+    }
+    pixmapRawPtr_ = pixmap->GetRawPixelMapPtr();
+    imageObj_->ClearData();
+    FireLoadEvent(rawImageSize_);
+    renderAltImage_ = nullptr;
+}
+
+void FlutterRenderImage::PerformLayoutSvgImage()
+{
     if (loadSvgAfterLayout_) {
         if (!GetLayoutSize().IsEmpty()) {
             // if layout is empty, wait for next layout
@@ -387,6 +446,13 @@ void FlutterRenderImage::PerformLayout()
                 image->MarkNeedRender();
             }
         }, TaskExecutor::TaskType::UI);
+    }
+}
+
+void FlutterRenderImage::LayoutImageObject()
+{
+    if (imageObj_) {
+        imageObj_->PerformLayoutImageObject(AceType::Claim(this));
     }
 }
 
@@ -423,7 +489,7 @@ void FlutterRenderImage::Paint(RenderContext& context, const Offset& offset)
         renderAltImage_->SetDirectPaint(directPaint_);
         renderAltImage_->RenderWithContext(context, offset);
     }
-    if (sourceInfo_.IsValid() && !pixmap_) {
+    if (sourceInfo_.IsValid()) {
         UpLoadImageDataForPaint();
     }
     auto canvas = ScopedCanvas::Create(context);
@@ -483,9 +549,7 @@ void FlutterRenderImage::Paint(RenderContext& context, const Offset& offset)
     ApplyColorFilter(paint);
     ApplyInterpolation(paint);
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-    if (pixmap_) {
-        colorSpace = ColorSpaceToSkColorSpace(pixmap_);
-    } else if (image_) {
+    if (image_) {
         colorSpace = image_->image()->refColorSpace();
     }
 #ifdef USE_SYSTEM_SKIA
@@ -573,43 +637,6 @@ void FlutterRenderImage::CanvasDrawImageRect(
     if (GetBackgroundImageFlag()) {
         PaintBgImage(paint, offset, canvas);
         return;
-    }
-    if (pixmap_) {
-        LOGD("pixmap begin paint");
-        // Step1: Create SkPixmap
-        auto imageInfo = MakeSkImageInfoFromPixelMap(pixmap_);
-        SkPixmap imagePixmap(
-            imageInfo, reinterpret_cast<const void*>(pixmap_->GetPixels()), pixmap_->GetRowBytes());
-
-        // Step2: Create SkImage and draw it, using gpu or cpu
-        sk_sp<SkImage> skImage;
-        if (!renderTaskHolder_->ioManager) {
-            skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
-        } else {
-#ifndef GPU_DISABLED
-            skImage = SkImage::MakeCrossContextFromPixmap(
-                renderTaskHolder_->ioManager->GetResourceContext().get(),
-                imagePixmap,
-                true,
-                imagePixmap.colorSpace(),
-                true);
-#endif
-        }
-        auto canvasImage = flutter::CanvasImage::Create();
-        canvasImage->set_image(flutter::SkiaGPUObject<SkImage>(skImage, renderTaskHolder_->unrefQueue));
-        image_ = canvasImage;
-        if (!VerifySkImageDataFromPixmap()) {
-            LOGE("pixmap paint failed due to SkImage data verification fail. rawImageSize: %{public}s",
-                rawImageSize_.ToString().c_str());
-            imageLoadingStatus_ = ImageLoadingStatus::LOAD_FAIL;
-            FireLoadEvent(Size());
-            pixmap_ = nullptr;
-            return;
-        }
-        pixmapRawPtr_ = pixmap_->GetRawPixelMapPtr();
-        pixmap_ = nullptr;
-        FireLoadEvent(rawImageSize_);
-        renderAltImage_ = nullptr;
     }
     if (!image_) {
         imageDataNotReady_ = true;
@@ -728,7 +755,7 @@ void FlutterRenderImage::DrawImageOnCanvas(
     canvas->canvas()->drawPaint(skPaint);
 }
 
-bool FlutterRenderImage::VerifySkImageDataFromPixmap()
+bool FlutterRenderImage::VerifySkImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const
 {
     if (!image_) {
         LOGE("image data made from pixmap is null");
@@ -737,7 +764,7 @@ bool FlutterRenderImage::VerifySkImageDataFromPixmap()
     if ((image_->width() <= 0 || image_->height() <= 0)) {
         LOGE("image data made from pixmap is invalid, image data size: [%{public}d x %{public}d], pixmap size:"
              " [%{public}d x %{public}d]",
-            image_->width(), image_->height(), pixmap_->GetWidth(), pixmap_->GetHeight());
+            image_->width(), image_->height(), pixmap->GetWidth(), pixmap->GetHeight());
         return false;
     }
     return true;
@@ -867,14 +894,18 @@ void FlutterRenderImage::SetSkRadii(const Radius& radius, SkVector& radii)
         SkDoubleToScalar(std::max(radius.GetY().ConvertToPx(dipScale), 0.0)));
 }
 
-Size FlutterRenderImage::Measure()
+Size FlutterRenderImage::MeasureForPixmap()
 {
-    if (pixmap_) {
-        return rawImageSize_;
-    }
-    if (sourceInfo_.IsSvg()) {
-        return imageComponentSize_;
-    }
+    return rawImageSize_;
+}
+
+Size FlutterRenderImage::MeasureForSvgImage()
+{
+    return imageComponentSize_;
+}
+
+Size FlutterRenderImage::MeasureForNormalImage()
+{
     switch (imageLoadingStatus_) {
         case ImageLoadingStatus::LOAD_SUCCESS:
         case ImageLoadingStatus::LOADING:
@@ -889,6 +920,15 @@ Size FlutterRenderImage::Measure()
         default:
             return Size();
     }
+}
+
+Size FlutterRenderImage::Measure()
+{
+    if (imageObj_) {
+        return imageObj_->MeasureForImage(AceType::Claim(this));
+    }
+    LOGI("empty image object, measure failed, return empty size.");
+    return Size();
 }
 
 void FlutterRenderImage::OnHiddenChanged(bool hidden)

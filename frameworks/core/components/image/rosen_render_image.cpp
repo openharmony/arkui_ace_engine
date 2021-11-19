@@ -270,23 +270,33 @@ void RosenRenderImage::CacheImageObject()
     }
 }
 
+void RosenRenderImage::UpdatePixmap()
+{
+    if (pixmapRawPtr_ == DynamicCast<PixelMapImageObject>(imageObj_)->GetRawPixelMapPtr()) {
+        LOGD("pixmapRawPtr_ not changed.");
+        imageObj_->ClearData();
+    } else {
+        image_ = nullptr;
+        curSourceInfo_.Reset();
+        rawImageSize_ = imageObj_->GetImageSize();
+        rawImageSizeUpdated_ = true;
+        imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
+    }
+    MarkNeedLayout();
+}
+
 void RosenRenderImage::Update(const RefPtr<Component>& component)
 {
     RenderImage::Update(component);
-    if (pixmap_ != nullptr) {
-        if (pixmapRawPtr_ == pixmap_->GetRawPixelMapPtr()) {
-            pixmap_ = nullptr;
-            MarkNeedLayout();
-            return;
-        }
-        image_ = nullptr;
-        curSourceInfo_.Reset();
-        rawImageSize_ = Size(pixmap_->GetWidth(), pixmap_->GetHeight());
-        rawImageSizeUpdated_ = true;
-        imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
-        MarkNeedLayout();
+    auto pixmap = AceType::DynamicCast<ImageComponent>(component)->GetPixmap();
+    if (pixmap != nullptr) {
+        LOGD("pixmap not null!");
+        sourceInfo_.Reset();
+        imageObj_ = MakeRefPtr<PixelMapImageObject>(pixmap);
+        UpdatePixmap();
         return;
     } else {
+        LOGD("pixmap is null!");
         pixmapRawPtr_ = nullptr;
     }
     // curImageSrc represents the picture currently shown and imageSrc represents next picture to be shown
@@ -353,10 +363,51 @@ void RosenRenderImage::FetchImageObject()
     }
 }
 
-void RosenRenderImage::PerformLayout()
+void RosenRenderImage::PerformLayoutPixmap()
 {
-    RenderImage::PerformLayout();
+    ProcessPixmapForPaint();
+    MarkNeedRender();
+}
+void RosenRenderImage::ProcessPixmapForPaint()
+{
+    LOGD("pixmap begin paint");
+    auto pixmap = AceType::DynamicCast<PixelMapImageObject>(imageObj_)->GetPixmap();
+    if (!pixmap) {
+        LOGI("pixmap ref is null, may be released, paint directly");
+        return;
+    }
+    // Step1: Create SkPixmap
+    auto imageInfo = MakeSkImageInfoFromPixelMap(pixmap);
+    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixmap->GetPixels()), pixmap->GetRowBytes());
 
+    // Step2: Create SkImage and draw it, using gpu or cpu
+    sk_sp<SkImage> skImage;
+    if (!renderTaskHolder_->ioManager) {
+        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+    } else {
+#ifndef GPU_DISABLED
+        skImage = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
+            imagePixmap, true, imagePixmap.colorSpace(), true);
+#endif
+    }
+    image_ = std::move(skImage);
+    if (!VerifySkImageDataFromPixmap(pixmap)) {
+        LOGE("pixmap paint failed due to SkImage data verification fail. rawImageSize: %{public}s",
+            rawImageSize_.ToString().c_str());
+        imageLoadingStatus_ = ImageLoadingStatus::LOAD_FAIL;
+        FireLoadEvent(Size());
+        image_ = nullptr;
+        imageObj_->ClearData();
+        return;
+    }
+    pixmapRawPtr_ = pixmap->GetRawPixelMapPtr();
+    imageObj_->ClearData();
+    FireLoadEvent(rawImageSize_);
+    renderAltImage_ = nullptr;
+}
+
+void RosenRenderImage::PerformLayoutSvgImage()
+{
     if (loadSvgAfterLayout_) {
         if (!GetLayoutSize().IsEmpty()) {
             // if layout is empty, wait for next layout
@@ -367,15 +418,20 @@ void RosenRenderImage::PerformLayout()
         if (!context) {
             return;
         }
-        context->GetTaskExecutor()->PostTask(
-            [weak = WeakClaim(this)] {
-                auto image = weak.Upgrade();
-                if (image) {
-                    image->PerformLayoutSvgCustom();
-                    image->MarkNeedRender();
-                }
-            },
-            TaskExecutor::TaskType::UI);
+        context->GetTaskExecutor()->PostTask([weak = WeakClaim(this)] {
+            auto image = weak.Upgrade();
+            if (image) {
+                image->PerformLayoutSvgCustom();
+                image->MarkNeedRender();
+            }
+        }, TaskExecutor::TaskType::UI);
+    }
+}
+
+void RosenRenderImage::LayoutImageObject()
+{
+    if (imageObj_) {
+        imageObj_->PerformLayoutImageObject(AceType::Claim(this));
     }
 }
 
@@ -412,7 +468,7 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
         renderAltImage_->SetDirectPaint(directPaint_);
         renderAltImage_->RenderWithContext(context, offset);
     }
-    if (sourceInfo_.IsValid() && !pixmap_) {
+    if (sourceInfo_.IsValid()) {
         UpLoadImageDataForPaint();
     }
     auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
@@ -469,9 +525,7 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
     ApplyColorFilter(paint);
     ApplyInterpolation(paint);
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-    if (pixmap_) {
-        colorSpace = ColorSpaceToSkColorSpace(pixmap_);
-    } else if (image_) {
+    if (image_) {
         colorSpace = image_->refColorSpace();
     }
 #ifdef USE_SYSTEM_SKIA
@@ -535,36 +589,6 @@ void RosenRenderImage::CanvasDrawImageRect(
     if (GetBackgroundImageFlag()) {
         return;
     }
-    if (pixmap_) {
-        LOGD("pixmap begin paint");
-        // Step1: Create SkPixmap
-        auto imageInfo = MakeSkImageInfoFromPixelMap(pixmap_);
-        SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixmap_->GetPixels()), pixmap_->GetRowBytes());
-
-        // Step2: Create SkImage and draw it, using gpu or cpu
-        sk_sp<SkImage> skImage;
-        if (!renderTaskHolder_->ioManager) {
-            skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
-        } else {
-#ifndef GPU_DISABLED
-            skImage = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
-                imagePixmap, true, imagePixmap.colorSpace(), true);
-#endif
-        }
-        image_ = std::move(skImage);
-        if (!VerifySkImageDataFromPixmap()) {
-            LOGE("pixmap paint failed due to SkImage data verification fail. rawImageSize: %{public}s",
-                rawImageSize_.ToString().c_str());
-            imageLoadingStatus_ = ImageLoadingStatus::LOAD_FAIL;
-            FireLoadEvent(Size());
-            pixmap_ = nullptr;
-            return;
-        }
-        pixmapRawPtr_ = pixmap_->GetRawPixelMapPtr();
-        pixmap_ = nullptr;
-        FireLoadEvent(rawImageSize_);
-        renderAltImage_ = nullptr;
-    }
     if (!image_) {
         imageDataNotReady_ = true;
         LOGI("image data is not ready, rawImageSize_: %{public}s, image source: %{private}s",
@@ -581,7 +605,7 @@ void RosenRenderImage::CanvasDrawImageRect(
 #endif
 }
 
-bool RosenRenderImage::VerifySkImageDataFromPixmap()
+bool RosenRenderImage::VerifySkImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const
 {
     if (!image_) {
         LOGE("image data made from pixmap is null");
@@ -590,7 +614,7 @@ bool RosenRenderImage::VerifySkImageDataFromPixmap()
     if ((image_->width() <= 0 || image_->height() <= 0)) {
         LOGE("image data made from pixmap is invalid, image data size: [%{public}d x %{public}d], pixmap size:"
              " [%{public}d x %{public}d]",
-            image_->width(), image_->height(), pixmap_->GetWidth(), pixmap_->GetHeight());
+            image_->width(), image_->height(), pixmap->GetWidth(), pixmap->GetHeight());
         return false;
     }
     return true;
@@ -720,14 +744,18 @@ void RosenRenderImage::SetSkRadii(const Radius& radius, SkVector& radii)
         SkDoubleToScalar(std::max(radius.GetY().ConvertToPx(dipScale), 0.0)));
 }
 
-Size RosenRenderImage::Measure()
+Size RosenRenderImage::MeasureForPixmap()
 {
-    if (pixmap_) {
-        return rawImageSize_;
-    }
-    if (sourceInfo_.IsSvg()) {
-        return imageComponentSize_;
-    }
+    return rawImageSize_;
+}
+
+Size RosenRenderImage::MeasureForSvgImage()
+{
+    return imageComponentSize_;
+}
+
+Size RosenRenderImage::MeasureForNormalImage()
+{
     switch (imageLoadingStatus_) {
         case ImageLoadingStatus::LOAD_SUCCESS:
         case ImageLoadingStatus::LOADING:
@@ -742,6 +770,15 @@ Size RosenRenderImage::Measure()
         default:
             return Size();
     }
+}
+
+Size RosenRenderImage::Measure()
+{
+    if (imageObj_) {
+        return imageObj_->MeasureForImage(AceType::Claim(this));
+    }
+    LOGI("empty image object, measure failed, return empty size.");
+    return Size();
 }
 
 void RosenRenderImage::OnHiddenChanged(bool hidden)

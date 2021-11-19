@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_RENDER_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_RENDER_IMAGE_H
 
-#include "base/image/pixel_map.h"
 #include "base/resource/internal_resource.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
@@ -209,6 +208,24 @@ public:
         });
     }
 
+    virtual void PerformLayoutPixmap() {}
+    virtual void PerformLayoutSvgImage() {}
+
+    virtual Size MeasureForPixmap()
+    {
+        return Size();
+    }
+
+    virtual Size MeasureForSvgImage()
+    {
+        return Size();
+    }
+
+    virtual Size MeasureForNormalImage()
+    {
+        return Size();
+    }
+
 protected:
     void ApplyImageFit(Rect& srcRect, Rect& dstRect);
     void ApplyContain(Rect& srcRect, Rect& dstRect, const Size& rawPicSize, const Size& imageComponentSize);
@@ -234,6 +251,7 @@ protected:
         const BackgroundImagePosition& imagePosition) const;
     Size CalculateBackupImageSize(const Size& pictureSize);
     virtual void ClearRenderObject() override;
+    virtual void LayoutImageObject() {}
 
     std::string imageAlt_;
     std::function<void(const std::string&)> loadSuccessEvent_;
@@ -309,7 +327,6 @@ protected:
     bool useSkiaSvg_ = true;
     bool directPaint_ = false;
     int32_t retryCnt_ = 0;
-    RefPtr<PixelMap> pixmap_ = nullptr;
     std::list<std::function<void()>> imageLayoutCallbacks_;
     bool proceedPreviousLoading_ = false;
     ImageSourceInfo sourceInfo_;

@@ -18,12 +18,14 @@
 
 #include "experimental/svg/model/SkSVGDOM.h"
 
+#include "base/image/pixel_map.h"
 #include "core/image/animated_image_player.h"
 #include "core/image/image_source_info.h"
 #include "frameworks/core/components/svg/parse/svg_dom.h"
 
 namespace OHOS::Ace {
 
+class RenderImage;
 class ImageObject : public virtual AceType {
     DECLARE_ACE_TYPE(ImageObject, AceType);
 public:
@@ -78,6 +80,12 @@ public:
     virtual void Resume() {}
     virtual void ClearData() {}
 
+    // this will be called on ui thread when renderImage do perform layout for deferent image objects.
+    virtual void PerformLayoutImageObject(RefPtr<RenderImage> image) {}
+
+    // this will be called on ui thread when renderImage do measure for deferent image objects.
+    virtual Size MeasureForImage(RefPtr<RenderImage> image);
+
     virtual bool CancelBackgroundTasks()
     {
         return false;
@@ -106,6 +114,9 @@ public:
         return skiaDom_;
     }
 
+    void PerformLayoutImageObject(RefPtr<RenderImage> image) override;
+    Size MeasureForImage(RefPtr<RenderImage> image) override;
+
 private:
     sk_sp<SkSVGDOM> skiaDom_;
 };
@@ -125,6 +136,9 @@ public:
     {
         return svgDom_;
     }
+
+    void PerformLayoutImageObject(RefPtr<RenderImage> image) override;
+    Size MeasureForImage(RefPtr<RenderImage> image) override;
 
 private:
     RefPtr<SvgDom> svgDom_;
@@ -207,6 +221,37 @@ public:
 private:
     sk_sp<SkData> skData_;
     RefPtr<AnimatedImagePlayer> animatedPlayer_;
+};
+
+class PixelMapImageObject : public ImageObject {
+    DECLARE_ACE_TYPE(PixelMapImageObject, ImageObject);
+
+public:
+    PixelMapImageObject(const RefPtr<PixelMap>& pixmap) : pixmap_(pixmap)
+    {
+        imageSize_ = Size(pixmap_->GetWidth(), pixmap_->GetHeight());
+    }
+
+    void* GetRawPixelMapPtr()
+    {
+        return pixmap_->GetRawPixelMapPtr();
+    }
+
+    void PerformLayoutImageObject(RefPtr<RenderImage> image) override;
+    Size MeasureForImage(RefPtr<RenderImage> image) override;
+
+    void ClearData() override
+    {
+        pixmap_ = nullptr;
+    }
+
+    const RefPtr<PixelMap>& GetPixmap() const
+    {
+        return pixmap_;
+    }
+
+private:
+    RefPtr<PixelMap> pixmap_;
 };
 
 } // namespace OHOS::Ace
