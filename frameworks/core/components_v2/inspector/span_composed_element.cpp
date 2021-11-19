@@ -29,6 +29,7 @@ const char NULL_STRING[] = "";
 
 const std::unordered_map<std::string, std::function<std::string(const SpanComposedElement&)>> CREATE_JSON_MAP {
     { "content", [](const SpanComposedElement& inspector) { return inspector.GetSpanData(); } },
+    { "fontsize", [](const SpanComposedElement& inspector) { return inspector.GetSpanTextFontSize(); } },
     { "decoration", [](const SpanComposedElement& inspector) { return inspector.GetDeclaration(); } },
     { "textCase", [](const SpanComposedElement& inspector) { return inspector.GetTextCase(); } },
 };
@@ -56,6 +57,13 @@ std::string SpanComposedElement::GetSpanData() const
 {
     auto renderTextSpan = GetRenderTextSpan();
     return renderTextSpan ? renderTextSpan->GetSpanData() : NULL_STRING;
+}
+
+std::string SpanComposedElement::GetSpanTextFontSize() const
+{
+    auto renderTextSpan = GetRenderTextSpan();
+    auto fontSize = renderTextSpan ? renderTextSpan->GetSpanStyle().GetFontSize() : Dimension();
+    return fontSize.ToString();
 }
 
 std::string SpanComposedElement::GetDeclaration() const

@@ -34,6 +34,7 @@ public:
     std::string GetRect() const override;
 
     std::string GetSpanData() const;
+    std::string GetSpanTextFontSize() const;
     std::string GetDeclaration() const;
     std::string GetTextCase() const;
 
