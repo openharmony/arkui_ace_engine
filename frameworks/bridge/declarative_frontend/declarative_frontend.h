@@ -75,7 +75,15 @@ public:
         std::vector<uint8_t>&& data) const override;
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void SetPagePath(const std::string& pagePath)
+    {
+        if (delegate_) {
+            delegate_->SetPagePath(pagePath);
+        }
+    }
+
     void TransferJsResponseDataPreview(int32_t callbackId, int32_t code, ResponseData responseData) const;
+    void ReplaceJSContent(const std::string componentName) const;
 #endif
     void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
     void TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;

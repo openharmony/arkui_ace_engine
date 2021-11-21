@@ -1800,12 +1800,10 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
         LOGE("arg is not Object and String.");
         return false;
     }
-
     if (jsValue->IsString()) {
         result = jsValue->ToString();
         return true;
     }
-
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> type = jsObj->GetProperty("type");
     JSRef<JSVal> resId = jsObj->GetProperty("id");
@@ -1820,7 +1818,6 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
             result = themeConstants->GetMediaPath(resId->ToNumber<uint32_t>());
             return true;
         }
-
         if (typeInteger == static_cast<int>(ResourceType::RAWFILE)) {
             JSRef<JSVal> args = jsObj->GetProperty("params");
             if (!args->IsArray()) {
@@ -1839,7 +1836,6 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
         LOGE("JSImage::Create ParseJsMedia type is wrong");
         return false;
     }
-
     LOGE("input value is not string or number, using PixelMap");
     return false;
 }
@@ -1922,7 +1918,6 @@ bool JSViewAbstract::ParseJsInteger(const JSRef<JSVal>& jsValue, uint32_t& resul
     } else {
         return false;
     }
-
 }
 
 bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result)

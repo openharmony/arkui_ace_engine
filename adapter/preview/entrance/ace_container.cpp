@@ -56,6 +56,7 @@ const char UNICODE_SETTING_TAG[] = "unicodeSetting";
 const char LOCALE_DIR_LTR[] = "ltr";
 const char LOCALE_DIR_RTL[] = "rtl";
 const char LOCALE_KEY[] = "locale";
+const char COMPONENT_PREVIEW[] = "_preview_";
 } // namespace
 
 std::once_flag AceContainer::onceFlag_;
@@ -336,7 +337,6 @@ void AceContainer::DestroyContainer(int32_t instanceId)
 bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string& url, const std::string& params)
 {
     ACE_FUNCTION_TRACE();
-
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
         return false;
@@ -731,6 +731,23 @@ RefPtr<AceContainer> AceContainer::GetContainerInstance(int32_t instanceId)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     return container;
+}
+
+void AceContainer::LoadDocument(const std::string& url, const std::string& componentName)
+{
+    if (type_ != FrontendType::DECLARATIVE_JS) {
+        LOGE("component preview not supported");
+        return;
+    }
+    auto fronended = AceType::DynamicCast<OHOS::Ace::DeclarativeFrontend>(frontend_);
+    if (!fronended) {
+        LOGE("fronended is null, AceContainer::LoadDocument failed");
+        return;
+    }
+    std::string dstUrl = url + COMPONENT_PREVIEW + componentName;
+    fronended->SetPagePath(dstUrl);
+    fronended->ReplaceJSContent(componentName);
+    fronended->ReplacePage(dstUrl, "");
 }
 
 } // namespace OHOS::Ace::Platform

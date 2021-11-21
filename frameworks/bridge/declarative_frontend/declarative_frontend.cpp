@@ -21,6 +21,7 @@
 #include "base/log/event_report.h"
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
+#include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -532,6 +533,21 @@ void DeclarativeFrontend::TransferJsResponseData(int callbackId, int32_t code, s
 void DeclarativeFrontend::TransferJsResponseDataPreview(int callbackId, int32_t code, ResponseData responseData) const
 {
     delegate_->TransferJsResponseDataPreview(callbackId, code, responseData);
+}
+
+void DeclarativeFrontend::ReplaceJSContent(const std::string componentName) const
+{
+    auto jsEngineInstance = AceType::DynamicCast<Framework::QJSDeclarativeEngine>(jsEngine_);
+    if (!jsEngineInstance) {
+        LOGE("jsEngineInstance is null");
+    }
+    std::string jsContent = jsEngineInstance->GetPreContent();
+    if (jsContent == "") {
+        LOGE("jsContent is null, DeclarativeFrontend::ReplaceJSContent failed");
+        return;
+    }
+    jsEngineInstance->ReplaceJSContent(jsContent, componentName);
+    jsEngineInstance->SetPreContent(jsContent);
 }
 #endif
 

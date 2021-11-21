@@ -30,6 +30,15 @@
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+const char COMPONENT_PREVIEW[] = "_preview_";
+const char COMPONENT_PREVIEW_LOAD_DOCUMENT[] = "loadDocument";
+const char COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW[] = "loadDocument(new";
+const char LEFT_PARENTTHESIS[] = "(";
+constexpr int32_t LOAD_DOCUMENT_STR_LENGTH = 16;
+#endif
+}
 
 QJSDeclarativeEngine::~QJSDeclarativeEngine()
 {
@@ -155,11 +164,9 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     LOGD("QJSDeclarativeEngine LoadJs");
     ACE_SCOPED_TRACE("QJSDeclarativeEngine::LoadJS");
     ACE_DCHECK(engineInstance_);
-
     engineInstance_->SetRunningPage(page);
     JSContext* ctx = engineInstance_->GetQJSContext();
     JS_SetContextOpaque(ctx, reinterpret_cast<void*>(AceType::RawPtr(engineInstance_)));
-
     if (isMainPage) {
         std::string appjsContent;
         if (!engineInstance_->GetDelegate()->GetAssetContent("app.js", appjsContent)) {
@@ -180,13 +187,28 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         }
         CallAppFunc("onCreate", 0, nullptr);
     }
-
     std::string jsContent;
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (!engineInstance_->GetDelegate()->GetAssetContent(url, jsContent)) {
         LOGE("js file load failed!");
         return;
     }
-
+#else
+    std::string::size_type posPreview = url.find(COMPONENT_PREVIEW);
+    if (posPreview != std::string::npos) {
+        std::string::size_type pos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT);
+        if (pos != std::string::npos) {
+            jsContent = preContent_;
+        }
+    } else {
+        if (!engineInstance_->GetDelegate()->GetAssetContent(url, jsContent)) {
+            LOGE("js file load failed!");
+            return;
+        }
+    }
+    preContent_ = jsContent;
+#endif
     if (jsContent.empty()) {
         LOGE("js file load failed! url=[%{public}s]", url.c_str());
         return;
@@ -197,12 +219,30 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         LOGE("js compilation failed url=[%{public}s]", url.c_str());
         return;
     }
-
     // Todo: check the fail.
     engineInstance_->ExecuteDocumentJS(compiled);
-
     js_std_loop(engineInstance_->GetQJSContext());
 }
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+void QJSDeclarativeEngine::ReplaceJSContent(std::string& jsContent, const std::string componentName)
+{
+    // replace the component name of loadDocument from current js content.
+    std::string::size_type loadDocomentPos = jsContent.find(COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW);
+    std::string::size_type position = 0;
+    std::string::size_type finalPostion = 0;
+    while ((position = jsContent.find(LEFT_PARENTTHESIS, position)) != std::string::npos) {
+        if (position > loadDocomentPos + LOAD_DOCUMENT_STR_LENGTH) {
+            finalPostion = position;
+            break;
+        }
+        position++;
+    }
+    std::string dstReplaceStr = COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW;
+    dstReplaceStr += " " + componentName;
+    jsContent.replace(loadDocomentPos, finalPostion - loadDocomentPos, dstReplaceStr);
+}
+#endif
 
 void QJSDeclarativeEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)
 {

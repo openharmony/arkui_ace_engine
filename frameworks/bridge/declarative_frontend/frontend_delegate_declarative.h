@@ -210,6 +210,15 @@ public:
         return groupJsBridge_;
     }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void SetPagePath(const std::string& pagePath)
+    {
+        if (manifestParser_) {
+            manifestParser_->SetPagePath(pagePath);
+        }
+    }
+#endif
+
     RefPtr<PipelineContext> GetPipelineContext() override;
 
     void SetGroupJsBridge(const RefPtr<GroupJsBridge>& groupJsBridge)
@@ -220,7 +229,6 @@ public:
     RefPtr<JsAcePage> GetPage(int32_t pageId) const override;
 
     void RebuildAllPages();
-
 private:
     int32_t GenerateNextPageId();
     void RecyclePageId(int32_t pageId);

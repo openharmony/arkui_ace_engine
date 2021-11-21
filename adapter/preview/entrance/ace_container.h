@@ -171,10 +171,11 @@ public:
 
     void UpdateColorMode(ColorMode newColorMode);
 
+    void LoadDocument(const std::string& url,  const std::string& componentName);
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
-
     void AttachView(
         std::unique_ptr<Window> window, FlutterAceView* view, double density, int32_t width, int32_t height);
 

@@ -418,6 +418,16 @@ std::string AceAbility::GetDefaultJSONTree()
     return defaultJsonTreeStr;
 }
 
+void AceAbility::LoadDocument(const std::string& url, const std::string& componentName)
+{
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null");
+        return;
+    }
+    container->LoadDocument(url, componentName);
+}
+
 void AceAbility::ReplacePage(const std::string& url, const std::string& params)
 {
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
