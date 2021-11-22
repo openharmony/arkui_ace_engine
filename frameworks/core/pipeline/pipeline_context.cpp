@@ -186,8 +186,8 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 void PipelineContext::FlushMessages()
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled()) {
-        OHOS::Rosen::RSUIDirector::Instance().SendMessages();
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+        rsUIDirector_->SendMessages();
     }
 #endif
 }
@@ -689,8 +689,8 @@ RefPtr<Element> PipelineContext::SetupRootElement()
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
 #ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled()) {
-        OHOS::Rosen::RSUIDirector::Instance().SetRoot(rootRenderNode->GetRSNode()->GetId());
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+        rsUIDirector_->SetRoot(rootRenderNode->GetRSNode()->GetId());
     }
 #endif
     sharedTransitionController_->RegisterTransitionListener();
@@ -1480,8 +1480,8 @@ void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
     }
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled()) {
-        OHOS::Rosen::RSUIDirector::Instance().SetTimeStamp(nanoTimestamp);
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+        rsUIDirector_->SetTimeStamp(nanoTimestamp);
     }
 #endif
 
@@ -2991,6 +2991,13 @@ void PipelineContext::PostAsyncEvent(const TaskExecutor::Task& task)
     } else {
         LOGE("the task executor is nullptr");
     }
+}
+
+void PipelineContext::SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    rsUIDirector_ = rsUIDirector;
+#endif
 }
 
 } // namespace OHOS::Ace

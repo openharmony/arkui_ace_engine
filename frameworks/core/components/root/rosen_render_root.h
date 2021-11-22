@@ -28,6 +28,7 @@ public:
     ~RosenRenderRoot() override = default;
 
     void Paint(RenderContext& context, const Offset& offset) override;
+    void SyncGeometryProperties() override;
 
     BridgeType GetBridgeType() const override
     {

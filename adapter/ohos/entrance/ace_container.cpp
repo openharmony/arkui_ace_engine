@@ -17,9 +17,6 @@
 
 #include "ability_info.h"
 #include "flutter/lib/ui/ui_dart_state.h"
-#ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/ui/rs_ui_director.h"
-#endif
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
@@ -710,16 +707,6 @@ void AceContainer::AttachView(
             },
             TaskExecutor::TaskType::UI);
     }
-
-#ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled()) {
-        OHOS::Rosen::RSUIDirector::Instance().SetUITaskRunner(
-            [taskExecutor = taskExecutor_](const std::function<void()>& task) {
-                taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-            });
-    }
-#endif
-
     taskExecutor_->PostTask(
         [context = pipelineContext_]() { context->SetupRootElement(); }, TaskExecutor::TaskType::UI);
     aceView_->Launch();

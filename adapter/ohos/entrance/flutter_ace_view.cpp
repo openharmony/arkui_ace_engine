@@ -17,10 +17,6 @@
 
 #include <fstream>
 
-#ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/ui/rs_ui_director.h"
-#endif
-
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -176,13 +172,6 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::Window* window)
         LOGE("FlutterAceView::SurfaceCreated, window is nullptr");
         return;
     }
-#ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled()) {
-        OHOS::Rosen::RSUIDirector::Instance().SetPlatformSurface(window->GetSurface());
-        LOGI("Init Rosen Backend");
-        OHOS::Rosen::RSUIDirector::Instance().Init();
-    }
-#endif
     if (view == nullptr) {
         LOGE("FlutterAceView::SurfaceCreated, view is nullptr");
         return;
@@ -212,11 +201,6 @@ void FlutterAceView::SurfaceChanged(FlutterAceView* view, int32_t width, int32_t
         LOGI("FlutterAceView::SurfaceChanged, call NotifyChanged");
         platformView->NotifyChanged(SkISize::Make(width, height));
     }
-#ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled()) {
-        OHOS::Rosen::RSUIDirector::Instance().SetSurfaceSize(width, height);
-    }
-#endif
     LOGI("<<< FlutterAceView::SurfaceChanged, end");
 }
 

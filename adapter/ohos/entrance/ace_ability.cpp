@@ -22,6 +22,10 @@
 #include "resource_manager.h"
 #include "string_wrapper.h"
 
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_ui_director.h"
+#endif
+
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
@@ -333,6 +337,31 @@ void AceAbility::OnStart(const Want& want)
         context->SetWindowId(window->GetID());
         context->SetActionEventHandler(actionEventHandler);
     }
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+        if (rsUiDirector != nullptr) {
+            rsUiDirector->SetPlatformSurface(window->GetSurface());
+            auto&& rsSurfaceChangedCallBack = [surfaceChangedCallBack, rsUiDirector](uint32_t width, uint32_t height) {
+                rsUiDirector->SetSurfaceSize(width, height);
+                surfaceChangedCallBack(width, height);
+            };
+            window->OnSizeChange(rsSurfaceChangedCallBack);
+            rsUiDirector->SetSurfaceSize(windowConfig.width, windowConfig.height);
+            rsUiDirector->SetUITaskRunner(
+                [taskExecutor = Platform::AceContainer::GetContainer(abilityId_)->GetTaskExecutor()]
+                    (const std::function<void()>& task) {
+                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                    });
+            if (context != nullptr) {
+                context->SetRSUIDirector(rsUiDirector);
+            }
+            rsUiDirector->Init();
+            LOGI("Init Rosen Backend");
+        }
+    }
+#endif
 
     // run page.
     Platform::AceContainer::RunPage(abilityId_, Platform::AceContainer::GetContainer(abilityId_)->GeneratePageId(),

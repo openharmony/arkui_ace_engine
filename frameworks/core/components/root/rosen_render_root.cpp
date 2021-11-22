@@ -41,4 +41,16 @@ void RosenRenderRoot::Paint(RenderContext& context, const Offset& offset)
     RenderNode::Paint(context, offset);
 }
 
+void RosenRenderRoot::SyncGeometryProperties()
+{
+    auto rsNode = GetRSNode();
+    if (!rsNode) {
+        return;
+    }
+    Offset paintOffset = GetPaintOffset();
+    Size paintSize = GetLayoutSize();
+    rsNode->SetBounds(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
+    rsNode->SetFrame(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
+}
+
 } // namespace OHOS::Ace

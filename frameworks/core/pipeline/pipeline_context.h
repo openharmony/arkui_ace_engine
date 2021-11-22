@@ -57,6 +57,10 @@
 #include "core/event/multimodal/multimodal_subscriber.h"
 #endif
 
+namespace OHOS::Rosen {
+class RSUIDirector;
+}
+
 namespace OHOS::Ace {
 
 class OffscreenCanvas;
@@ -935,6 +939,8 @@ public:
         return isRebuildFinished_;
     }
 
+    void SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector);
+
 private:
     void FlushPipelineWithoutAnimation();
     void FlushLayout();
@@ -1137,6 +1143,7 @@ private:
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     bool isRebuildFinished_ = false;
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
