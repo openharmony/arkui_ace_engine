@@ -19,7 +19,7 @@
 #include <set>
 
 #ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/transition/rs_transition.h"
+#include "render_service_client/core/animation/rs_transition.h"
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/animation/native_curve_helper.h"

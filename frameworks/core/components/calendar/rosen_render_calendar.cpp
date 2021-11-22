@@ -26,10 +26,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/font/flutter_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"
-#ifdef OHOS_PLATFORM
-#include "render_service_client/core/pipeline/rs_draw_cmd_list.h"
-#include "render_service_client/core/pipeline/rs_recording_canvas.h"
-#endif
 
 namespace OHOS::Ace {
 namespace {

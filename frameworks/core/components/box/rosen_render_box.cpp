@@ -18,7 +18,6 @@
 #include <cmath>
 
 #include "flutter/common/task_runners.h"
-#include "render_service_client/core/render/rs_filter.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/utils/SkParsePath.h"
@@ -32,9 +31,6 @@
 #include "core/components/image/image_component.h"
 #include "core/components/image/rosen_render_image.h"
 #include "core/pipeline/base/rosen_render_context.h"
-#ifdef OHOS_PLATFORM
-#include "render_service_client/core/render/rs_shader.h"
-#endif
 
 namespace OHOS::Ace {
 namespace {

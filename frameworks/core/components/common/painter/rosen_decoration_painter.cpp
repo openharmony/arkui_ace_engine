@@ -35,9 +35,6 @@
 #include "core/pipeline/base/render_node.h"
 #include "core/pipeline/base/rosen_render_context.h"
 #include "core/pipeline/pipeline_context.h"
-#ifdef OHOS_PLATFORM
-#include "render_service_client/core/render/rs_shader.h"
-#endif
 
 namespace OHOS::Ace {
 namespace {

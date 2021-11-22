@@ -32,10 +32,6 @@
 #include "core/image/image_object.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/rosen_render_context.h"
-#ifdef OHOS_PLATFORM
-#include "render_service_client/core/pipeline/rs_recording_canvas.h"
-#include "render_service_client/core/render/rs_image.h"
-#endif
 
 namespace OHOS::Ace {
 namespace {

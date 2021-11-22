@@ -17,9 +17,6 @@
 
 #include "render_service_client/core/ui/rs_node.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
-#ifdef OHOS_PLATFORM
-#include "render_service_client/core/pipeline/rs_recording_canvas.h"
-#endif
 
 namespace OHOS::Ace {
 namespace {

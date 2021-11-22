@@ -22,10 +22,9 @@
 #include "core/components/box/render_box.h"
 #include "core/pipeline/base/rosen_render_context.h"
 #ifdef OHOS_PLATFORM
-#include "render_service_client/core/pipeline/rs_recording_canvas.h"
-
 #include "core/components/common/painter/rosen_svg_painter.h"
 #endif
+#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace {
 namespace {
