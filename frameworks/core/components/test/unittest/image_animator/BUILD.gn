@@ -219,7 +219,7 @@ ohos_unittest("ImageAnimatorElementTest") {
 
   deps = [
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    "$ace_root/build/third_party/cJSON:third_party_cjson",
+    "$ace_root/build/external_config/cJSON:third_party_cjson",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",

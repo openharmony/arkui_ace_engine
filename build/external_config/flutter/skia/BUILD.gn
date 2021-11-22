@@ -1557,7 +1557,7 @@ ohos_source_set("ace_xml") {
     "$flutter_root/skia/src/xml/SkXMLWriter.cpp",
   ]
 
-  deps = [ "$ace_root/build/third_party/expat:ace_libexpat" ]
+  deps = [ "$ace_root/build/external_config/expat:ace_libexpat" ]
 }
 
 # ------------------------------------------------
@@ -1611,7 +1611,7 @@ template("ace_fontmgr") {
         "$flutter_root/skia/src/ports/SkScalerContext_win_dw.cpp",
         "$flutter_root/skia/src/ports/SkTypeface_win_dw.cpp",
       ]
-      deps = [ "$ace_root/build/third_party/expat:ace_libexpat" ]
+      deps = [ "$ace_root/build/external_config/expat:ace_libexpat" ]
 
       libs = [
         "//prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/lib/libgdi32.a",
@@ -1638,7 +1638,7 @@ template("ace_fontmgr") {
         if (platform == "ohos") {
           sources += [ "$flutter_root/skia/src/ports/SkFontMgr_ohos.cpp" ]
         }
-        deps = [ "$ace_root/build/third_party/expat:ace_libexpat" ]
+        deps = [ "$ace_root/build/external_config/expat:ace_libexpat" ]
       }
     }
   }
@@ -1702,7 +1702,7 @@ ohos_source_set("ace_fontmgr_standard") {
 
   deps = [
     ":ace_fontconfig.json",
-    "$ace_root/build/third_party/jsoncpp:ace_jsoncpp",
+    "$ace_root/build/external_config/jsoncpp:ace_jsoncpp",
   ]
 
   # Only standard system has ohos_fonts source
