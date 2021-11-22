@@ -227,7 +227,7 @@ ohos_unittest("TransitionElementTest") {
 
   deps = [
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    "$ace_root/build/third_party/cJSON:third_party_cjson",
+    "$ace_root/build/external_config/cJSON:third_party_cjson",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
     "//third_party/zlib:libz",
@@ -292,7 +292,7 @@ ohos_unittest("SharedTransitionElementTest") {
 
   deps = [
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    "$ace_root/build/third_party/cJSON:third_party_cjson",
+    "$ace_root/build/external_config/cJSON:third_party_cjson",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
     "//third_party/zlib:libz",
@@ -352,7 +352,7 @@ ohos_unittest("TransitionPropertyElementTest") {
 
   deps = [
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    "$ace_root/build/third_party/cJSON:third_party_cjson",
+    "$ace_root/build/external_config/cJSON:third_party_cjson",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
     "//third_party/zlib:libz",

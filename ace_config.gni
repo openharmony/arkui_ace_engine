@@ -38,7 +38,7 @@ if (!defined(aosp_libs_dir)) {
 }
 libs_root = "${aosp_libs_dir}/sdk"
 
-ace_flutter_engine_root = "$ace_root/build/third_party/flutter"
+ace_flutter_engine_root = "$ace_root/build/external_config/flutter"
 flutter_root = "//third_party/flutter"
 v8_root = "//third_party/v8"
 ark_tools_root = "//prebuilts/ace-toolkit/ace-loader/panda"

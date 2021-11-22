@@ -195,7 +195,7 @@ ohos_unittest("PipelineContextTest") {
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_flutter_engine_root/icu:ace_libicu_ohos",
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    "$ace_root/build/third_party/cJSON:third_party_cjson",
+    "$ace_root/build/external_config/cJSON:third_party_cjson",
     "$ace_root/frameworks/base/resource:ace_resource",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
