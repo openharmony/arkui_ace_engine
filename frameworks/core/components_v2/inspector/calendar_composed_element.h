@@ -31,6 +31,7 @@ public:
     ~CalendarComposedElement() override = default;
 
     std::unique_ptr<JsonValue> ToJsonObject() const override;
+    std::string GetShowLunar() const;
     std::string GetShowHoliday() const;
     std::string GetNeedSlide() const;
     std::string GetStartOfWeek() const;

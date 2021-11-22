@@ -25,6 +25,7 @@ namespace OHOS::Ace::V2 {
 using CalendarJsonFunc = std::function<std::unique_ptr<JsonValue>(const CalendarComposedElement&)>;
 
 const std::unordered_map<std::string, std::function<std::string(const CalendarComposedElement&)>> CREATE_JSON_MAP {
+    { "showLunar", [](const CalendarComposedElement& inspector) { return inspector.GetShowLunar(); } },
     { "ShowHoliday", [](const CalendarComposedElement& inspector) { return inspector.GetShowHoliday(); } },
     { "needSlide", [](const CalendarComposedElement& inspector) { return inspector.GetNeedSlide(); } },
     { "startOfWeek", [](const CalendarComposedElement& inspector) { return inspector.GetStartOfWeek(); } },
@@ -51,6 +52,13 @@ std::unique_ptr<JsonValue> CalendarComposedElement::ToJsonObject() const
         resultJson->Put(value.first.c_str(), value.second(*this));
     }
     return resultJson;
+}
+
+std::string CalendarComposedElement::GetShowLunar() const
+{
+    auto renderCalendar = GetRenderCalendar();
+    auto showLunar = renderCalendar ? renderCalendar->GetCalendarDataAdapter()->ShowLunar() : false;
+    return ConvertBoolToString(showLunar);
 }
 
 std::string CalendarComposedElement::GetShowHoliday() const
