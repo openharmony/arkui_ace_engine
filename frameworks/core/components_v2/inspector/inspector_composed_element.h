@@ -163,6 +163,13 @@ public:
     virtual double GetBackDropBlur() const;
     virtual std::unique_ptr<JsonValue> GetWindowBlur() const;
     virtual std::unique_ptr<JsonValue> GetShadow() const;
+    virtual double GetBrightness() const;
+    virtual double GetSaturate() const;
+    virtual double GetContrast() const;
+    virtual double GetInvert() const;
+    virtual double GetSepia() const;
+    virtual double GetGrayScale() const;
+    virtual double GetHueRotate() const;
 
     // shape clip
     virtual std::unique_ptr<JsonValue> GetClip() const;

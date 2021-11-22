@@ -105,6 +105,13 @@ const std::unordered_map<std::string, DoubleJsonFunc> CREATE_JSON_DOUBLE_MAP {
     { "blur", [](const InspectorComposedElement& inspector) { return inspector.GetBlur(); } },
     { "backdropBlur", [](const InspectorComposedElement& inspector) { return inspector.GetBackDropBlur(); } },
     { "aspectRatio", [](const InspectorComposedElement& inspector) { return inspector.GetAspectRatio(); } },
+    { "brightness", [](const InspectorComposedElement& inspector) { return inspector.GetBrightness(); } },
+    { "saturate", [](const InspectorComposedElement& inspector) { return inspector.GetSaturate(); } },
+    { "contrast", [](const InspectorComposedElement& inspector) { return inspector.GetContrast(); } },
+    { "invert", [](const InspectorComposedElement& inspector) { return inspector.GetInvert(); } },
+    { "sepia", [](const InspectorComposedElement& inspector) { return inspector.GetSepia(); } },
+    { "grayscale", [](const InspectorComposedElement& inspector) { return inspector.GetGrayScale(); } },
+    { "hueRotate", [](const InspectorComposedElement& inspector) { return inspector.GetHueRotate(); } },
 };
 
 const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
@@ -387,11 +394,15 @@ int32_t InspectorComposedElement::GetLayoutPriority() const
 
 int32_t InspectorComposedElement::GetLayoutWeight() const
 {
-    auto render = GetRenderBox();
+    auto node = GetInspectorNode(FlexItemElement::TypeId());
+    if (!node) {
+        return 0;
+    }
+    auto render = AceType::DynamicCast<RenderFlexItem>(node);
     if (render) {
         return render->GetFlexWeight();
     }
-    return 0.0;
+    return 0;
 }
 
 std::string InspectorComposedElement::GetAlign() const
@@ -844,6 +855,69 @@ double InspectorComposedElement::GetBackDropBlur() const
         return 0.0;
     }
     return render->GetBackdropRadius().Value();
+}
+
+double InspectorComposedElement::GetBrightness() const
+{
+    auto render = GetRenderBox();
+    if (render) {
+        return render->GetBrightness();
+    }
+    return 1.0;
+}
+
+double InspectorComposedElement::GetSaturate() const
+{
+    auto render = GetRenderBox();
+    if (render) {
+        return render->GetSaturate();
+    }
+    return 1.0;
+}
+
+double InspectorComposedElement::GetContrast() const
+{
+    auto render = GetRenderBox();
+    if (render) {
+        return render->GetContrast();
+    }
+    return 1.0;
+}
+
+double InspectorComposedElement::GetInvert() const
+{
+    auto render = GetRenderBox();
+    if (render) {
+        return render->GetInvert();
+    }
+    return 0.0;
+}
+
+double InspectorComposedElement::GetSepia() const
+{
+    auto render = GetRenderBox();
+    if (render) {
+        return render->GetSepia();
+    }
+    return 0.0;
+}
+
+double InspectorComposedElement::GetGrayScale() const
+{
+    auto render = GetRenderBox();
+    if (render) {
+        return render->GetGrayScale();
+    }
+    return 0.0;
+}
+
+double InspectorComposedElement::GetHueRotate() const
+{
+    auto render = GetRenderBox();
+    if (render) {
+        return render->GetHueRotate();
+    }
+    return 0.0;
 }
 
 std::unique_ptr<JsonValue> InspectorComposedElement::GetWindowBlur() const
