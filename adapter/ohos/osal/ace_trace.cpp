@@ -106,7 +106,7 @@ void AceTraceEnd()
     if (InitThreadLocalData()) {
         std::string nameStr;
         if (PopString(nameStr)) {
-            FinishTrace(BYTRACE_TAG_ACE, nameStr);
+            FinishTrace(BYTRACE_TAG_ACE);
         } else {
             LOGW("Failed pop last tag name");
         }
