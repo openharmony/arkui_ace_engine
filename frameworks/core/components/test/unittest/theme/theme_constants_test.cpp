@@ -105,6 +105,7 @@ void ThemeConstantsTest::SetUp() {}
 void ThemeConstantsTest::TearDown() {}
 
 bool SystemProperties::rosenBackendEnabled_ = true;
+bool SystemProperties::isDeclarativeFrontend_ = true;
 // Mock get device type.
 DeviceType SystemProperties::GetDeviceType()
 {
