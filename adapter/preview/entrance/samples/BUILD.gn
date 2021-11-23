@@ -37,7 +37,10 @@ template("ace_test") {
 
     sources = [ "ace_${device}_test.cpp" ]
 
-    deps = [ "$ace_root/adapter/preview/build:libace_engine_$platform(${current_toolchain})" ]
+    deps = [
+      ":copy_resource_dynamic_library",
+      "$ace_root/adapter/preview/build:libace_engine_$platform(${current_toolchain})",
+    ]
     if (platform == "windows") {
       libs = [ "pthread" ]
     }
@@ -74,5 +77,37 @@ foreach(item, ace_platforms) {
         device = device
       }
     }
+  }
+}
+
+ohos_copy("copy_resource_dynamic_library") {
+  if (use_mac) {
+    if (is_standard_system) {
+      sources = [
+        "//prebuilts/previewer/darwin/previewer/common/bin/libhmicuuc.dylib",
+        "//prebuilts/previewer/darwin/previewer/common/bin/libresourcemanager_mac.dylib",
+      ]
+    } else {
+      sources = [
+        "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libhmicuuc.dylib",
+        "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libresourcemanager_mac.dylib",
+      ]
+    }
+    outputs =
+        [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
+  } else {
+    if (is_standard_system) {
+      sources = [
+        "//prebuilts/previewer/windows/previewer/common/bin/libhmicuuc.dll",
+        "//prebuilts/previewer/windows/previewer/common/bin/libresourcemanager_win.dll",
+      ]
+    } else {
+      sources = [
+        "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libhmicuuc.dll",
+        "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libresourcemanager_win.dll",
+      ]
+    }
+    outputs =
+        [ root_build_dir + "/mingw_x86_64/common/common/{{source_file_part}}" ]
   }
 }
