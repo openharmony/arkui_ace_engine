@@ -222,4 +222,8 @@ ACE_EXPORT extern const char DATA_PANEL_ETS_TAG[] = "DataPanel";
 ACE_EXPORT extern const char SHEET_COMPONENT_TAG[] = "SheetComponent";
 ACE_EXPORT extern const char SHEET_ETS_TAG[] = "Sheet";
 
+// hyperlink
+ACE_EXPORT extern const char HYPERLINK_COMPONENT_TAG[] = "HyperlinkComponent";
+ACE_EXPORT extern const char HYPERLINK_ETS_TAG[] = "Hyperlink";
+
 } // namespace OHOS::Ace::V2

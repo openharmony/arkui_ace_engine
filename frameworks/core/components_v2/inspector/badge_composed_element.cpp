@@ -23,8 +23,8 @@ namespace OHOS::Ace::V2 {
 
 const std::unordered_map<std::string, std::function<std::string(const BadgeComposedElement&)>> CREATE_JSON_MAP {
     { "count", [](const BadgeComposedElement& inspector) { return inspector.GetCount(); } },
-    { "position", [](const BadgeComposedElement& inspector) { return inspector.GetMaxCount(); } },
-    { "maxCount", [](const BadgeComposedElement& inspector) { return inspector.GetBadgePosition(); } },
+    { "maxCount", [](const BadgeComposedElement& inspector) { return inspector.GetMaxCount(); } },
+    { "position", [](const BadgeComposedElement& inspector) { return inspector.GetBadgePosition(); } },
     { "value", [](const BadgeComposedElement& inspector) { return inspector.GetLabel(); } }
 };
 
@@ -68,9 +68,17 @@ std::string BadgeComposedElement::GetMaxCount(void) const
 std::string BadgeComposedElement::GetBadgePosition(void) const
 {
     auto renderBadge = GetRenderBadge();
-    int64_t type =  renderBadge ? static_cast<int64_t>(renderBadge->GetBadgeComponent()->GetBadgePosition()) :
-        static_cast<int64_t>(BadgePosition::RIGHT_TOP);
-    return std::to_string(type);
+    if (renderBadge) {
+        switch (renderBadge->GetBadgeComponent()->GetBadgePosition()) {
+            case BadgePosition::RIGHT_TOP:
+                return std::string("BadgePosition.RightTop");
+            case BadgePosition::RIGHT:
+                return std::string("BadgePosition.Right");
+            case BadgePosition::LEFT:
+                return std::string("BadgePosition.Left");
+        }
+    }
+    return std::string("-");
 }
 
 std::string BadgeComposedElement::GetLabel(void) const
