@@ -35,18 +35,18 @@ class SynchedPropertySimpleOneWay<T> extends ObservedPropertySimpleAbstract<T> {
 
   // get 'read through` from the ObservedProperty
   public get(): T {
-    console.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: get returns '${this.wrappedValue_}'`);
+    console.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: get returns '${this.wrappedValue_}'`);
     this.notifyPropertyRead();
     return this.wrappedValue_;
   }
 
   public set(newValue: T): void {
     if (this.wrappedValue_ == newValue) {
-      console.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value '${this.wrappedValue_}'- ignoring.`);
+      console.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value '${this.wrappedValue_}'- ignoring.`);
       return;
     }
 
-    console.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
+    console.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
     this.notifyHasChanged(newValue);
     this.wrappedValue_ = newValue;
   }
@@ -87,13 +87,13 @@ class SynchedPropertySimpleOneWaySubscribing<T> extends SynchedPropertySimpleOne
 
   aboutToBeDeleted() {
     // unregister from parent of this prop
-    this.linkedParentProperty_.unlinkSuscriber(this.id());
+    this.linkedParentProperty_.unlinkSuscriber(this.id__());
     super.aboutToBeDeleted();
   }
 
 
   hasChanged(newValue: T): void {
-    console.debug(`SynchedPropertySimpleOneWaySubscribing[${this.id()}, '${this.info() || "unknown"}']: source property hasChanged'.`)
+    console.debug(`SynchedPropertySimpleOneWaySubscribing[${this.id__()}, '${this.info() || "unknown"}']: source property hasChanged'.`)
     this.set(newValue);
   }
 
