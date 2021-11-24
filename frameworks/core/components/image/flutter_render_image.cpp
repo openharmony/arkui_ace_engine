@@ -341,8 +341,9 @@ void FlutterRenderImage::FetchImageObject()
     }
     rawImageSizeUpdated_ = false;
     SrcType srcType = ImageLoader::ResolveURI(sourceInfo_.GetSrc());
+    auto isNetworkSrc = (ImageLoader::ResolveURI(sourceInfo_.GetSrc()) == SrcType::NETWORK);
     if (srcType != SrcType::MEMORY) {
-        bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD;
+        bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD && !isNetworkSrc;
         ImageProvider::FetchImageObject(
             sourceInfo_,
             imageObjSuccessCallback_,
@@ -1164,7 +1165,8 @@ bool FlutterRenderImage::RetryLoading()
             sourceInfo_.ToString().c_str());
         return false;
     }
-    bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD;
+    auto isNetworkSrc = (ImageLoader::ResolveURI(sourceInfo_.GetSrc()) == SrcType::NETWORK);
+    bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD && !isNetworkSrc;
 
     ImageProvider::FetchImageObject(
         sourceInfo_,
