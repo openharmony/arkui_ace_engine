@@ -35,8 +35,8 @@ public:
 
     std::string GetSpanData() const;
     std::string GetSpanTextFontSize() const;
-    std::string GetDeclaration() const;
     std::string GetTextCase() const;
+    std::string GetDeclaration() const;
 
     AceType::IdType GetTargetTypeId() const override
     {
