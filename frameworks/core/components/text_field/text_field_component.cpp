@@ -725,4 +725,24 @@ void TextFieldComponent::SetDeclaration(const RefPtr<TextFieldDeclaration>& decl
     }
 }
 
+void TextFieldComponent::SetPlaceHoldStyle(const TextStyle& style)
+{
+    declaration_->SetPlaceHoldStyle(style);
+}
+
+const TextStyle& TextFieldComponent::GetPlaceHoldStyle() const
+{
+    return declaration_->GetPlaceHoldStyle();
+}
+
+void TextFieldComponent::SetEditingStyle(const TextStyle& style)
+{
+    declaration_->SetEditingStyle(style);
+}
+
+const TextStyle& TextFieldComponent::GetEditingStyle() const
+{
+    return declaration_->GetEditingStyle();
+}
+
 } // namespace OHOS::Ace

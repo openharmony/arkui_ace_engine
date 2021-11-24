@@ -31,6 +31,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
+const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 
 } // namespace
 
@@ -64,6 +65,8 @@ void JSTextInput::InitDefaultStyle()
     textStyle.SetFontWeight(theme->GetFontWeight());
     textStyle.SetFontFamilies(INPUT_FONT_FAMILY_VALUE);
     textInputComponent->SetTextStyle(textStyle);
+    textInputComponent->SetEditingStyle(textStyle);
+    textInputComponent->SetPlaceHoldStyle(textStyle);
 
     textInputComponent->SetCountTextStyle(theme->GetCountTextStyle());
     textInputComponent->SetOverCountStyle(theme->GetOverCountStyle());
@@ -104,6 +107,11 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("caretColor", &JSTextInput::SetCaretColor);
     JSClass<JSTextInput>::StaticMethod("maxLength", &JSTextInput::SetMaxLength);
     JSClass<JSTextInput>::StaticMethod("height", &JSTextInput::JsHeight);
+    JSClass<JSTextInput>::StaticMethod("fontSize", &JSTextInput::SetFontSize);
+    JSClass<JSTextInput>::StaticMethod("fontColor", &JSTextInput::SetTextColor);
+    JSClass<JSTextInput>::StaticMethod("fontWeight", &JSTextInput::SetFontWeight);
+    JSClass<JSTextInput>::StaticMethod("fontStyle", &JSTextInput::SetFontStyle);
+    JSClass<JSTextInput>::StaticMethod("fontFamily", &JSTextInput::SetFontFamily);
     JSClass<JSTextInput>::StaticMethod("onEditChanged", &JSTextInput::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextInput::SetOnSubmit);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextInput::SetOnChange);
@@ -205,7 +213,7 @@ void JSTextInput::SetPlaceholderFont(const JSCallbackInfo& info)
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto textStyle = component->GetTextStyle();
+    auto textStyle = component->GetPlaceHoldStyle();
 
     auto fontSize = paramObject->GetProperty("size");
     if (!fontSize->IsNull()) {
@@ -238,7 +246,7 @@ void JSTextInput::SetPlaceholderFont(const JSCallbackInfo& info)
         FontStyle fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
         textStyle.SetFontStyle(fontStyle);
     }
-    component->SetTextStyle(textStyle);
+    component->SetPlaceHoldStyle(textStyle);
 }
 
 void JSTextInput::SetEnterKeyType(const JSCallbackInfo& info)
@@ -314,6 +322,105 @@ void JSTextInput::JsHeight(const JSCallbackInfo& info)
         return;
     }
     textInputComponent->SetHeight(value);
+}
+
+void JSTextInput::SetFontSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("JSTextInput::SetFontSize The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Dimension fontSize;
+    if (!ParseJsDimensionFp(info[0], fontSize)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("JSTextInput::SetFontSize component is not valid");
+        return;
+    }
+
+    auto textStyle = component->GetEditingStyle();
+    textStyle.SetFontSize(fontSize);
+    component->SetEditingStyle(textStyle);
+}
+
+void JSTextInput::SetTextColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Color textColor;
+    if (!ParseJsColor(info[0], textColor)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    auto textStyle = component->GetEditingStyle();
+    textStyle.SetTextColor(textColor);
+    component->SetEditingStyle(textStyle);
+}
+
+void JSTextInput::SetFontWeight(const std::string& value)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    auto textStyle = component->GetEditingStyle();
+    textStyle.SetFontWeight(ConvertStrToFontWeight(value));
+    component->SetEditingStyle(textStyle);
+}
+
+void JSTextInput::SetFontStyle(int32_t value)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
+        auto textStyle = component->GetEditingStyle();
+        textStyle.SetFontStyle(FONT_STYLES[value]);
+        component->SetEditingStyle(textStyle);
+    } else {
+        LOGE("TextInput fontStyle(%d) illega value", value);
+    }
+}
+
+void JSTextInput::SetFontFamily(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    std::vector<std::string> fontFamilies;
+    if (!ParseJsFontFamilies(info[0], fontFamilies)) {
+        LOGE("Parse FontFamilies failed");
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    auto textStyle = component->GetEditingStyle();
+    textStyle.SetFontFamilies(fontFamilies);
+    component->SetEditingStyle(textStyle);
 }
 
 void JSTextInput::SetOnEditChanged(const JSCallbackInfo& info)

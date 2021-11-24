@@ -29,8 +29,13 @@ public:
     static void SetPlaceholderFont(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
     static void SetCaretColor(const JSCallbackInfo& info);
-    static void SetOnChange(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
+    static void SetFontSize(const JSCallbackInfo& info);
+    static void SetFontWeight(const std::string& value);
+    static void SetTextColor(const JSCallbackInfo& info);
+    static void SetFontStyle(int32_t value);
+    static void SetFontFamily(const JSCallbackInfo& info);
+    static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);

@@ -214,6 +214,8 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     }
     originBorder_ = textField->GetOriginBorder();
     style_ = textField->GetTextStyle();
+    placeHoldStyle_ = textField->GetPlaceHoldStyle();
+    editingStyle_ = textField->GetEditingStyle();
     fontSize_ = style_.GetFontSize();
     errorTextStyle_ = textField->GetErrorTextStyle();
     errorSpacingInDimension_ = textField->GetErrorSpacing();
@@ -833,6 +835,9 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
     if (needStartTwinkling) {
         StartTwinkling();
     }
+    if (onEditChanged_) {
+        onEditChanged_(softKeyboardEnabled_);
+    }
     return true;
 }
 
@@ -1369,6 +1374,24 @@ void RenderTextField::OnValueChanged(bool needFireChangeEvent, bool needFireSele
 {
     isValueFromFront_ = !needFireChangeEvent;
     TextEditingValue temp = GetEditingValue();
+    if (controller_) {
+        const auto& currentText = controller_->GetValue().text;
+        showPlaceholder_ = !currentText.empty();
+        auto context = context_.Upgrade();
+        if (context && context->GetIsDeclarative()) {
+            if (showPlaceholder_) {
+                SetTextStyle(editingStyle_);
+            } else {
+                Dimension fontSize_ = placeHoldStyle_.GetFontSize();
+                if (fontSize_.Value() <= 0) {
+                    Dimension fontSize_ { 14, DimensionUnit::FP };
+                    placeHoldStyle_.SetFontSize(fontSize_);
+                }
+                SetTextStyle(placeHoldStyle_);
+            }
+        }
+    }
+
     for (const auto& formatter : textInputFormatters_) {
         if (formatter) {
             formatter->Format(GetEditingValue(), temp);

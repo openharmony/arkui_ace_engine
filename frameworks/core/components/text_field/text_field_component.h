@@ -254,6 +254,12 @@ public:
 
     void SetDeclaration(const RefPtr<TextFieldDeclaration>& declaration);
 
+    void SetPlaceHoldStyle(const TextStyle& style);
+    const TextStyle& GetPlaceHoldStyle() const;
+
+    void SetEditingStyle(const TextStyle& style);
+    const TextStyle& GetEditingStyle() const;
+
     ACE_DEFINE_COMPONENT_EVENT(OnChange, void(std::string));
 
     ACE_DEFINE_COMPONENT_EVENT(OnEditChanged, void(bool));

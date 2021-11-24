@@ -101,6 +101,7 @@ public:
     {
         style_ = style;
     }
+
     void SetOnOverlayFocusChange(const std::function<void(bool)>& onOverlayFocusChange)
     {
         onOverlayFocusChange_ = onOverlayFocusChange;
@@ -341,6 +342,8 @@ protected:
     TextStyle countTextStyleOuter_;
     TextStyle overCountStyleOuter_;
     TextStyle style_;
+    TextStyle placeHoldStyle_;
+    TextStyle editingStyle_;
     std::string errorText_;
     TextStyle errorTextStyle_;
     double errorSpacing_ = 0.0;

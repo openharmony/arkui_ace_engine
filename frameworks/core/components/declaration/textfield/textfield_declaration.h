@@ -88,6 +88,8 @@ struct TextFieldStyle : Style {
     TextStyle overCountStyle;
     TextStyle countTextStyleOuter;
     TextStyle overCountStyleOuter;
+    TextStyle editingStyle;
+    TextStyle placeHoldStyle;
 
     Color textColor;
     Color focusTextColor;
@@ -180,6 +182,30 @@ public:
     {
         auto& attribute = MaybeResetAttribute<TextFieldAttribute>(AttributeTag::SPECIALIZED_ATTR);
         attribute.isValueUpdated = isValueUpdated;
+    }
+
+    void SetPlaceHoldStyle(const TextStyle& textstyle)
+    {
+        auto& style = MaybeResetStyle<TextFieldStyle>(StyleTag::SPECIALIZED_STYLE);
+        style.placeHoldStyle = textstyle;
+    }
+
+    void SetEditingStyle(const TextStyle& textstyle)
+    {
+        auto& style = MaybeResetStyle<TextFieldStyle>(StyleTag::SPECIALIZED_STYLE);
+        style.editingStyle = textstyle;
+    }
+
+    const TextStyle& GetPlaceHoldStyle() const
+    {
+        auto& style = static_cast<TextFieldStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        return style.placeHoldStyle;
+    }
+
+    const TextStyle& GetEditingStyle() const
+    {
+        auto& style = static_cast<TextFieldStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        return style.editingStyle;
     }
 
     const std::string& GetPlaceholder() const
