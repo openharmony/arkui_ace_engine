@@ -27,6 +27,7 @@ public:
     RosenRenderRoot() = default;
     ~RosenRenderRoot() override = default;
 
+    std::shared_ptr<RSNode> CreateRSNode() const override;
     void Paint(RenderContext& context, const Offset& offset) override;
     void SyncGeometryProperties() override;
 

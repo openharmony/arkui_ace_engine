@@ -16,7 +16,7 @@
 #include "core/components/root/rosen_render_root.h"
 
 #include "include/core/SkColor.h"
-#include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
@@ -51,6 +51,11 @@ void RosenRenderRoot::SyncGeometryProperties()
     Size paintSize = GetLayoutSize();
     rsNode->SetBounds(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
     rsNode->SetFrame(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
+}
+
+std::shared_ptr<RSNode> RosenRenderRoot::CreateRSNode() const
+{
+    return OHOS::Rosen::RSRootNode::Create();
 }
 
 } // namespace OHOS::Ace
