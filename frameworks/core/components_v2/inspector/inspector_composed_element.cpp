@@ -32,20 +32,10 @@ namespace {
 
 constexpr uint32_t WINDOW_BLUR_STYLE_ENUM_OFFSET = 100;
 
-const char* VISIBLE_TYPE[] = {
-    "Visibility.Visible",
-    "Visibility.Hidden",
-    "Visibility.None"
-};
+const char* VISIBLE_TYPE[] = { "Visibility.Visible", "Visibility.Hidden", "Visibility.None" };
 
-const char* ITEM_ALIGN[] = {
-    "ItemAlign.Auto",
-    "ItemAlign.Start",
-    "ItemAlign.Center",
-    "ItemAlign.End",
-    "ItemAlign.Stretch",
-    "ItemAlign.Baseline"
-};
+const char* ITEM_ALIGN[] = { "ItemAlign.Auto", "ItemAlign.Start", "ItemAlign.Center", "ItemAlign.End",
+    "ItemAlign.Stretch", "ItemAlign.Baseline" };
 
 // NONE translate to Solid
 const char* BORDER_STYLE[] = {
@@ -55,47 +45,19 @@ const char* BORDER_STYLE[] = {
     "BorderStyle.Solid",
 };
 
-const char* WINDOW_BLUR_STYLE[] = {
-    "BlurStyle.SmallLight",
-    "BlurStyle.MediumLight",
-    "BlurStyle.LargeLight",
-    "BlurStyle.XlargeLight",
-    "BlurStyle.SmallDark",
-    "BlurStyle.MediumDark",
-    "BlurStyle.LargeDark",
-    "BlurStyle.XlargeDark"
-};
+const char* WINDOW_BLUR_STYLE[] = { "BlurStyle.SmallLight", "BlurStyle.MediumLight", "BlurStyle.LargeLight",
+    "BlurStyle.XlargeLight", "BlurStyle.SmallDark", "BlurStyle.MediumDark", "BlurStyle.LargeDark",
+    "BlurStyle.XlargeDark" };
 
-const char* ALIGNMENT_TYPE[3][3] = {
-    { "Alignment.TopStart", "Alignment.Top", "Alignment.TopEnd" },
+const char* ALIGNMENT_TYPE[3][3] = { { "Alignment.TopStart", "Alignment.Top", "Alignment.TopEnd" },
     { "Alignment.Start", "Alignment.Center", "Alignment.End" },
-    { "Alignment.BottomStart", "Alignment.Bottom", "Alignment.BottomEnd" }
-};
+    { "Alignment.BottomStart", "Alignment.Bottom", "Alignment.BottomEnd" } };
 
-const char* GRID_SIZE_TYPE[] = {
-    "default",
-    "sx",
-    "sm",
-    "md",
-    "lg"
-};
+const char* GRID_SIZE_TYPE[] = { "default", "sx", "sm", "md", "lg" };
 
-constexpr const char* TEXT_DIRECTION[] = {
-    "Ltr",
-    "Rtl",
-    "Inherit",
-    "Auto"
-};
+constexpr const char* TEXT_DIRECTION[] = { "Ltr", "Rtl", "Inherit", "Auto" };
 
-constexpr const char* BASIC_SHAPE_TYPE[] {
-    "None",
-    "Inset",
-    "Circle",
-    "Ellipse",
-    "Polygon",
-    "Path",
-    "Rect"
-};
+constexpr const char* BASIC_SHAPE_TYPE[] { "None", "Inset", "Circle", "Ellipse", "Polygon", "Path", "Rect" };
 
 const std::unordered_map<std::string, DoubleJsonFunc> CREATE_JSON_DOUBLE_MAP {
     { "opacity", [](const InspectorComposedElement& inspector) { return inspector.GetOpacity(); } },
@@ -149,8 +111,7 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
         [](const InspectorComposedElement& inspector) {
             return inspector.GetMargin(AnimatableType::PROPERTY_MARGIN_LEFT).ToString();
         } },
-    { "constraintSize",
-        [](const InspectorComposedElement& inspector) { return inspector.GetConstraintSize(); } },
+    { "constraintSize", [](const InspectorComposedElement& inspector) { return inspector.GetConstraintSize(); } },
     { "borderColor", [](const InspectorComposedElement& inspector) { return inspector.GetBorderColor(); } },
     { "borderStyle", [](const InspectorComposedElement& inspector) { return inspector.GetBorderStyle(); } },
     { "borderWidth", [](const InspectorComposedElement& inspector) { return inspector.GetBorderWidth(); } },
@@ -165,10 +126,13 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
     { "height", [](const InspectorComposedElement& inspector) { return inspector.GetHeight(); } },
     { "align", [](const InspectorComposedElement& inspector) { return inspector.GetAlign(); } },
     { "direction", [](const InspectorComposedElement& inspector) { return inspector.GetDirectionStr(); } },
+
 };
 
-const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP { { "enabled",
-    [](const InspectorComposedElement& inspector) { return inspector.GetEnabled(); } } };
+const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {
+    { "enabled", [](const InspectorComposedElement& inspector) { return inspector.GetEnabled(); } },
+    { "clip", [](const InspectorComposedElement& inspector) { return inspector.GetClip(); } }
+};
 
 const std::unordered_map<std::string, IntJsonFunc> CREATE_JSON_INT_MAP {
     { "zIndex", [](const InspectorComposedElement& inspector) { return inspector.GetZIndex(); } },
@@ -187,22 +151,13 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
         [](const InspectorComposedElement& inspector) { return inspector.GetBackgroundImageSize(); } },
     { "backgroundImagePosition",
         [](const InspectorComposedElement& inspector) { return inspector.GetBackgroundImagePosition(); } },
-    { "useSizeType",
-        [](const InspectorComposedElement& inspector) { return inspector.GetUseSizeType(); } },
-    { "rotate",
-      [](const InspectorComposedElement& inspector) { return inspector.GetRotate(); } },
-    { "scale",
-      [](const InspectorComposedElement& inspector) { return inspector.GetScale(); } },
-    { "transform",
-      [](const InspectorComposedElement& inspector) { return inspector.GetTransform(); } },
-    { "translate",
-      [](const InspectorComposedElement& inspector) { return inspector.GetTranslate(); } },
-    { "markAnchor",
-        [](const InspectorComposedElement& inspector) { return inspector.GetMarkAnchor(); } },
-    { "clip",
-        [](const InspectorComposedElement& inspector) { return inspector.GetClip(); } },
-    { "mask",
-        [](const InspectorComposedElement& inspector) { return inspector.GetMask(); } },
+    { "useSizeType", [](const InspectorComposedElement& inspector) { return inspector.GetUseSizeType(); } },
+    { "rotate", [](const InspectorComposedElement& inspector) { return inspector.GetRotate(); } },
+    { "scale", [](const InspectorComposedElement& inspector) { return inspector.GetScale(); } },
+    { "transform", [](const InspectorComposedElement& inspector) { return inspector.GetTransform(); } },
+    { "translate", [](const InspectorComposedElement& inspector) { return inspector.GetTranslate(); } },
+    { "markAnchor", [](const InspectorComposedElement& inspector) { return inspector.GetMarkAnchor(); } },
+    { "mask", [](const InspectorComposedElement& inspector) { return inspector.GetMask(); } },
     { "useAlign", [](const InspectorComposedElement& inspector) { return inspector.GetUseAlign(); } },
 };
 
@@ -512,10 +467,13 @@ std::string InspectorComposedElement::GetRect() const
     Rect rect = GetRenderRect();
     Rect parentRect = GetParentRect();
     rect = rect.Constrain(parentRect);
-    strRec = std::to_string(rect.Left()).append(",").
-            append(std::to_string(rect.Top())).
-            append(",").append(std::to_string(rect.Width())).
-            append(",").append(std::to_string(rect.Height()));
+    strRec = std::to_string(rect.Left())
+                 .append(",")
+                 .append(std::to_string(rect.Top()))
+                 .append(",")
+                 .append(std::to_string(rect.Width()))
+                 .append(",")
+                 .append(std::to_string(rect.Height()));
     return strRec;
 }
 
@@ -732,6 +690,25 @@ std::string InspectorComposedElement::GetVisibility() const
     return VISIBLE_TYPE[static_cast<int32_t>(render->GetVisibleType())];
 }
 
+bool InspectorComposedElement::GetClip() const
+{
+    auto render = GetRenderBox();
+    if (!render) {
+        return false;
+    }
+    auto clipPath = render->GetClipPath();
+    if (clipPath && clipPath->GetBasicShape()) {
+        int32_t shapeType = static_cast<int32_t>(clipPath->GetBasicShape()->GetBasicShapeType());
+        int32_t size = static_cast<int32_t>(sizeof(BASIC_SHAPE_TYPE) / sizeof(BASIC_SHAPE_TYPE[0]));
+        if (shapeType < size) {
+            return BASIC_SHAPE_TYPE[shapeType];
+        }
+    } else {
+        return render->GetBoxClipFlag();
+    }
+    return false;
+}
+
 bool InspectorComposedElement::GetEnabled() const
 {
     auto node = GetInspectorNode(GetTargetTypeId());
@@ -945,26 +922,6 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetShadow() const
     jsonValue->Put("color", std::to_string(shadow.GetColor().GetValue()).c_str());
     jsonValue->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
     jsonValue->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
-    return jsonValue;
-}
-
-std::unique_ptr<JsonValue> InspectorComposedElement::GetClip() const
-{
-    auto render = GetRenderBox();
-    if (!render) {
-        return nullptr;
-    }
-    auto jsonValue = JsonUtil::Create(true);
-    auto clipPath = render->GetClipPath();
-    if (clipPath && clipPath->GetBasicShape()) {
-        int32_t shapeType = static_cast<int32_t>(clipPath->GetBasicShape()->GetBasicShapeType());
-        int32_t size = static_cast<int32_t>(sizeof(BASIC_SHAPE_TYPE) / sizeof(BASIC_SHAPE_TYPE[0]));
-        if (shapeType < size) {
-            jsonValue->Put("shape", BASIC_SHAPE_TYPE[shapeType]);
-        }
-    } else {
-        jsonValue->Put("shape", render->GetBoxClipFlag());
-    }
     return jsonValue;
 }
 

@@ -172,7 +172,7 @@ public:
     virtual double GetHueRotate() const;
 
     // shape clip
-    virtual std::unique_ptr<JsonValue> GetClip() const;
+    virtual bool GetClip() const;
     virtual std::unique_ptr<JsonValue> GetMask() const;
 
     // grid setting
@@ -194,6 +194,6 @@ protected:
     RefPtr<RenderBox> GetRenderBox() const;
 };
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_COMPOSED_ELEMENT_H
