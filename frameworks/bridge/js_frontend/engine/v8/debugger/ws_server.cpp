@@ -23,30 +23,37 @@
 #include "frameworks/bridge/js_frontend/engine/v8/debugger/utils.h"
 
 namespace V8Debugger {
+bool g_attachState;
 
 void WsServer::SetTerminateExecutionFlag(bool flag)
 {
     terminateExecution = flag;
 }
 
+void AcceptHandler(const boost::system::error_code& error)
+{
+    if (!error) {
+        g_attachState = true;
+    }
+}
+
 void WsServer::RunServer()
 {
     try {
-        int appPid = getpid();
-        std::string pidStr = std::to_string(appPid);
-        boost::asio::io_context ioContext;
-        std::string tidStr = std::to_string(tid);
-        std::string instanceIdStr = std::to_string(instanceId);
-        std::string sockName = '\0' + pidStr + instanceIdStr + componentName;
-        localSocket::endpoint endPoint(sockName);
-        localSocket::socket socket(ioContext);
-        localSocket::acceptor acceptor(ioContext, endPoint);
-        acceptor.accept(socket);
+        acceptor.async_accept(socket, AcceptHandler);
+        ioContext.run();
+        if (!g_attachState) {
+            return;
+        }
         ws = std::unique_ptr<websocket::stream<localSocket::socket>>(
             std::make_unique<websocket::stream<localSocket::socket>>(std::move(socket)));
         StartListening();
     } catch (const std::exception& e) {
         LOGE("Error exception, %s", e.what());
+        return;
+    } catch (beast::system_error const& se) {
+        LOGE("Error system_error");
+        return;
     }
 }
 

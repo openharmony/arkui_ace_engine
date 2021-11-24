@@ -58,6 +58,7 @@ using StartDebug = void (*)(
     const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context, std::string componentName,
     const bool flagNeedDebugBreakPoint, const int32_t instanceId);
 using WaitingForIde = void (*)();
+using StopDebug = void (*)();
 
 bool CallEvalBuf(v8::Isolate* isolate, const char* src, int32_t length = -1, const char* filename = nullptr)
 {
@@ -1026,6 +1027,12 @@ void V8DeclarativeEngine::RegisterWorker()
 V8DeclarativeEngine::~V8DeclarativeEngine()
 {
     CHECK_RUN_ON(JS);
+    if (g_debugger != nullptr) {
+        StopDebug stopDebug = (StopDebug)dlsym(g_debugger, "StopDebug");
+        if (stopDebug != nullptr) {
+            stopDebug();
+        }
+    }
     LOG_DESTROY();
 
     if (nativeEngine_ != nullptr) {

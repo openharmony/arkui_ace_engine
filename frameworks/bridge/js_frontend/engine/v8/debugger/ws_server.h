@@ -31,16 +31,18 @@ namespace websocket = beast::websocket;
 using localSocket = boost::asio::local::stream_protocol;
 class WsServer {
 public:
-    explicit WsServer(std::function<void(std::string)> onMessage) : tid(0), instanceId(0),
-        wsOnMessage(std::move(onMessage)) {}
+    explicit WsServer(std::function<void(std::string)> onMessage, std::string sockName) : tid(0), instanceId(0),
+        endPoint(sockName), socket(ioContext), acceptor(ioContext, endPoint), wsOnMessage(std::move(onMessage)) {}
     ~WsServer() {};
     void RunServer();
     void SendMessage(const std::string& message) const;
     void SetTerminateExecutionFlag(bool flag);
     pthread_t tid;
     int32_t instanceId;
-    std::string componentName;
-
+    localSocket::endpoint endPoint;
+    boost::asio::io_context ioContext;
+    localSocket::socket socket;
+    localSocket::acceptor acceptor;
 private:
     void StartListening();
     void WaitFrontendMessage() const;

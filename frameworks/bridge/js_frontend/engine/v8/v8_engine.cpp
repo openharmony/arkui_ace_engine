@@ -71,6 +71,7 @@ using StartDebug = void (*)(
     const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context, std::string componentName,
     const bool flagNeedDebugBreakPoint, const int32_t instanceId);
 using WaitingForIde = void (*)();
+using StopDebug = void (*)();
 
 bool CallEvalBuf(v8::Isolate* isolate, const char* src, int32_t instanceId)
 {
@@ -3489,7 +3490,12 @@ void V8Engine::RegisterWorker()
 V8Engine::~V8Engine()
 {
     CHECK_RUN_ON(JS);
-
+    if (g_debugger != nullptr) {
+        StopDebug stopDebug = (StopDebug)dlsym(g_debugger, "StopDebug");
+        if (stopDebug != nullptr) {
+            stopDebug();
+        }
+    }
     if (nativeEngine_) {
         nativeEngine_->CancelCheckUVLoop();
     }
