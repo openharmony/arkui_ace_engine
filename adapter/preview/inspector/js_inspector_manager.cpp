@@ -284,6 +284,10 @@ void JsInspectorManager::GetNodeJSONStrMap()
                 LOGE("GetAccessibilityNodeFromPage is null, nodeId: %{public}d", nodeId);
                 continue;
             }
+            if (node->GetTag() == "inspectDialog") {
+                RemoveAccessibilityNodes(node);
+                continue;
+            }
             auto jsonNode = JsonUtil::Create(true);
             auto jsonNodeArray = JsonUtil::CreateArray(true);
             jsonNode->Put(INSPECTOR_TYPE, node->GetTag().c_str());

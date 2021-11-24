@@ -404,8 +404,6 @@ void RenderBox::OnPaintFinish()
         parent->SetLeft(node->GetLeft());
         parent->SetWidth(node->GetWidth());
         parent->SetHeight(node->GetHeight());
-        auto mananger = context->GetAccessibilityManager();
-        mananger->RemoveAccessibilityNodes(node);
     }
 #endif
 }
