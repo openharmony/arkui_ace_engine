@@ -352,6 +352,16 @@ public:
         axis_ = axis;
     }
 
+    bool IsReverse() const
+    {
+        return isReverse_;
+    }
+
+    void SetReverse(bool isReverse)
+    {
+        isReverse_ = isReverse;
+    }
+
 private:
     std::string markedText_;
     Color markedTextColor_;
@@ -361,10 +371,11 @@ private:
     Color backgroundColor_;
     // the thickness of the track. when the track is circle, there is no effect.
     RefPtr<RingTrackInfo> trackPaintData_ = AceType::MakeRefPtr<RingTrackInfo>();
-    bool showIndicator_ = false;
     std::vector<Color> colors_;
     std::vector<double> weights_;
+    bool showIndicator_ = false;
     bool showAnimation_ = true;
+    bool isReverse_ = false;
     Axis axis_ = Axis::HORIZONTAL;
 };
 

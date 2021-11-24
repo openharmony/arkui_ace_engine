@@ -65,6 +65,7 @@ void RenderSlider::Update(const RefPtr<Component>& component)
         disable_ = slider->GetDisable();
         SetTextDirection(slider->GetTextDirection());
         direction_ = slider->GetDirection();
+        isReverse_ = slider->IsReverse();
         isError_ = false;
         isValueError_ = false;
         SyncValueToComponent(std::clamp(slider->GetValue(), min_, max_));
@@ -447,10 +448,16 @@ void RenderSlider::RenderBlockPosition(const Offset& touchPosition)
 {
     double diff = 0.0;
     if (direction_ == Axis::VERTICAL) {
-        diff = touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP);
+        diff = isReverse_ ?
+            GetLayoutSize().Height() - touchPosition.GetY() : touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP);
     } else {
-        diff = (GetTextDirection() == TextDirection::LTR) ? touchPosition.GetX() - NormalizeToPx(SLIDER_PADDING_DP)
-                                                                 : GetLayoutSize().Width() - touchPosition.GetX();
+        if ((GetTextDirection() == TextDirection::LTR &&
+            !isReverse_) || (GetTextDirection() == TextDirection::RTL && isReverse_)) {
+            diff = touchPosition.GetX() - NormalizeToPx(SLIDER_PADDING_DP);
+        } else if ((GetTextDirection() == TextDirection::RTL &&
+            !isReverse_) || (GetTextDirection() == TextDirection::LTR && isReverse_)) {
+            diff = GetLayoutSize().Width() - touchPosition.GetX();
+        }
     }
     if (diff < 0.0) {
         SyncValueToComponent(min_);
@@ -489,9 +496,19 @@ void RenderSlider::UpdateBlockPosition(const Offset& touchPosition, bool isClick
         LOGE("slider parameter trackLength_ invalid");
         return;
     }
-
-    double diff = (GetTextDirection() == TextDirection::LTR) ? touchPosition.GetX() - NormalizeToPx(SLIDER_PADDING_DP)
-                                                             : GetLayoutSize().Width() - touchPosition.GetX();
+    double diff = 0.0;
+    if (direction_ == Axis::VERTICAL) {
+        diff = isReverse_ ?
+            GetLayoutSize().Height() - touchPosition.GetY() : touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP);
+    } else {
+        if ((GetTextDirection() == TextDirection::LTR &&
+            !isReverse_) || (GetTextDirection() == TextDirection::RTL && isReverse_)) {
+            diff = touchPosition.GetX() - NormalizeToPx(SLIDER_PADDING_DP);
+        } else if ((GetTextDirection() == TextDirection::RTL &&
+            !isReverse_) || (GetTextDirection() == TextDirection::LTR && isReverse_)) {
+            diff = GetLayoutSize().Width() - touchPosition.GetX();
+        }
+    }
     double endValue = 0.0;
     double totalRatio = diff / trackLength_;
     if (LessOrEqual(diff, 0.0)) {
@@ -554,7 +571,8 @@ void RenderSlider::UpdateTouchRegion()
     if (direction_ == Axis::VERTICAL) {
         double dxOffset = GetLayoutSize().Width() * HALF;
         double dyOffset = trackLength_ * totalRatio_ + NormalizeToPx(SLIDER_PADDING_DP);
-        Vertex blockCenter = TouchRegionPoint(dxOffset, dyOffset);
+        Vertex blockCenter = isReverse_ ?
+            TouchRegionPoint(dxOffset, GetLayoutSize().Height() - dyOffset) : TouchRegionPoint(dxOffset, dyOffset);
         TouchRegionPoint blockTopPoint =
             GetTopTouchRegion(blockCenter, NormalizeToPx(blockHotWidth_), NormalizeToPx(blockHotHeight_));
         TouchRegionPoint blockBottomPoint =
@@ -563,9 +581,14 @@ void RenderSlider::UpdateTouchRegion()
     } else {
         double dxOffset = trackLength_ * totalRatio_ + NormalizeToPx(SLIDER_PADDING_DP);
         double dyOffset = GetLayoutSize().Height() * HALF;
-        Vertex blockCenter = (GetTextDirection() == TextDirection::LTR)
-                                 ? TouchRegionPoint(dxOffset, dyOffset)
-                                 : TouchRegionPoint(GetLayoutSize().Width() - dxOffset, dyOffset);
+        Vertex blockCenter = TouchRegionPoint();
+        if ((GetTextDirection() == TextDirection::LTR &&
+            !isReverse_) || (GetTextDirection() == TextDirection::RTL && isReverse_)) {
+            blockCenter = TouchRegionPoint(dxOffset, dyOffset);
+        } else if ((GetTextDirection() == TextDirection::RTL &&
+            !isReverse_) || (GetTextDirection() == TextDirection::LTR && isReverse_)) {
+            blockCenter = TouchRegionPoint(GetLayoutSize().Width() - dxOffset, dyOffset);
+        }
         TouchRegionPoint blockTopPoint =
             GetTopTouchRegion(blockCenter, NormalizeToPx(blockHotWidth_), NormalizeToPx(blockHotHeight_));
         TouchRegionPoint blockBottomPoint =

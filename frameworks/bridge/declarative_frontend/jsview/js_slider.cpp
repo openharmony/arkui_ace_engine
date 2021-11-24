@@ -86,6 +86,7 @@ void JSSlider::Create(const JSCallbackInfo& info)
     double min = 0;     // min:Set the minimum value. The default value is 0.
     double max = 100;   // max:Set the maximum value. The default value is 100.
     double step = 1;    // step:Sets the sliding jump value of the slider. The default value is 1.
+    bool reverse = false;
 
     if (!info[0]->IsObject()) {
         LOGE("slider create error, info is non-valid");
@@ -99,6 +100,7 @@ void JSSlider::Create(const JSCallbackInfo& info)
     auto getStep = paramObject->GetProperty("step");
     auto getStyle = paramObject->GetProperty("style");
     auto direction = paramObject->GetProperty("direction");
+    auto isReverse = paramObject->GetProperty("reverse");
 
     if (!getValue->IsNull() && getValue->IsNumber()) {
         value = getValue->ToNumber<double>();
@@ -114,6 +116,10 @@ void JSSlider::Create(const JSCallbackInfo& info)
 
     if (!getStep->IsNull() && getStep->IsNumber()) {
         step = getStep->ToNumber<double>();
+    }
+
+    if (!isReverse->IsNull() && isReverse->IsBoolean()) {
+        reverse = isReverse->ToBoolean();
     }
 
     if (min > max) {
@@ -134,7 +140,6 @@ void JSSlider::Create(const JSCallbackInfo& info)
     value = GetValue(value, max, min);
 
     auto sliderComponent = AceType::MakeRefPtr<OHOS::Ace::SliderComponent>(value, step, min, max);
-
     auto sliderMode = SliderStyle::OUTSET;
     if (!getStyle->IsNull() && getStyle->IsNumber()) {
         sliderMode = static_cast<SliderStyle>(getStyle->ToNumber<int32_t>());
@@ -165,6 +170,7 @@ void JSSlider::Create(const JSCallbackInfo& info)
         return;
     }
     sliderComponent->SetThemeStyle(theme);
+    sliderComponent->SetReverse(reverse);
 
     ViewStackProcessor::GetInstance()->Push(sliderComponent);
 }

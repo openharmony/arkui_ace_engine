@@ -50,6 +50,7 @@ void RenderTrack::Update(const RefPtr<Component>& component)
     markedText_ = track->GetLableMarkedText();
     markedTextColor_ = track->GetLableMarkedColor();
     direction_ = track->GetDirection();
+    isReverse_ = track->IsReverse();
 
     leftToRight_ = track->GetTextDirection() == TextDirection::LTR;
 

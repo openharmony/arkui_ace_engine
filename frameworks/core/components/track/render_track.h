@@ -176,6 +176,7 @@ protected:
     std::chrono::duration<double> animationDuring_;
     bool needUpdateAnimation_ = false;
     bool playAnimation_ = false;
+    bool isReverse_ = false;
     double scanHighLightValue_ = 0.0;
 
     Color selectColor_;

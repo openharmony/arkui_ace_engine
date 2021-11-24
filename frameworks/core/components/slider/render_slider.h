@@ -245,6 +245,7 @@ protected:
     bool showSteps_ = false;
     bool showTips_ = false;
     bool isDraging_ = false;
+    bool isReverse_ = false;
     SliderMode mode_ = SliderMode::OUTSET;
     Dimension blockHotWidth_;
     Dimension blockHotHeight_;

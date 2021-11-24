@@ -92,8 +92,8 @@ void FlutterRenderLinearTrack::Paint(RenderContext& context, const Offset& offse
         flutter::PaintData cachedPaintData;
         cachedPaint.paint()->setAntiAlias(true);
         cachedPaint.paint()->setColor(GetCachedColor().GetValue());
-        const double startRect = leftToRight_ ? offset.GetX() : offset.GetX() + GetLayoutSize().Width();
-        const double endRect = leftToRight_ ? startRect + trackHeight + trackLength * GetCachedRatio()
+        double startRect = leftToRight_ ? offset.GetX() : offset.GetX() + GetLayoutSize().Width();
+        double endRect = leftToRight_ ? startRect + trackHeight + trackLength * GetCachedRatio()
                                             : startRect - trackHeight - trackLength * GetCachedRatio();
         SkRRect cachedRect = SkRRect::MakeRectXY(
             { startRect, offset.GetY(), endRect, offset.GetY() + trackHeight }, trackHeight * HALF, trackHeight * HALF);
@@ -102,36 +102,46 @@ void FlutterRenderLinearTrack::Paint(RenderContext& context, const Offset& offse
         canvas->drawRRect(cachedRectFlutter, cachedPaint, cachedPaintData);
     }
     // Draw selected region
-    if (!NearEqual(GetTotalRatio(), 0.0)) {
-        flutter::Paint selectPaint;
-        flutter::PaintData selectPaintData;
-        selectPaint.paint()->setAntiAlias(true);
-        if (direction_ == Axis::VERTICAL) {
-            const double startRect = offset.GetY();
-            const double endRect = startRect + trackHeight + trackLength * GetTotalRatio();
-            SkRRect selectRect = SkRRect::MakeRectXY(
-                { offset.GetX(), startRect, offset.GetX() + trackHeight, endRect },
-                trackHeight * HALF,
-                trackHeight * HALF);
-            flutter::RRect selectRectFlutter = flutter::RRect();
-            selectRectFlutter.sk_rrect = selectRect;
-            selectPaint.paint()->setShader(BlendSkShader({ offset.GetX(), startRect }, GetSelectColor().GetValue(),
-                playAnimation_));
-            canvas->drawRRect(selectRectFlutter, selectPaint, selectPaintData);
-        } else {
-            const double startRect = leftToRight_ ? offset.GetX() : offset.GetX() + GetLayoutSize().Width();
-            const double endRect = leftToRight_ ? startRect + trackHeight + trackLength * GetTotalRatio()
-                                                : startRect - trackHeight - trackLength * GetTotalRatio();
-            SkRRect selectRect = SkRRect::MakeRectXY({ startRect, offset.GetY(), endRect, offset.GetY() + trackHeight },
-                trackHeight * HALF, trackHeight * HALF);
-            flutter::RRect selectRectFlutter = flutter::RRect();
-            selectRectFlutter.sk_rrect = selectRect;
-            selectPaint.paint()->setShader(
-                BlendSkShader({ startRect + scanHighLightValue_ * trackLength, offset.GetY() },
-                    GetSelectColor().GetValue(), playAnimation_));
-            canvas->drawRRect(selectRectFlutter, selectPaint, selectPaintData);
-        }
+    if (NearEqual(GetTotalRatio(), 0.0)) {
+        return;
     }
+    flutter::Paint selectPaint;
+    flutter::PaintData selectPaintData;
+    selectPaint.paint()->setAntiAlias(true);
+    double startRect = 0.0;
+    double endRect = 0.0;
+    if (direction_ == Axis::VERTICAL) {
+        startRect = isReverse_ ? offset.GetY() + GetLayoutSize().Height() : offset.GetY();
+        endRect = isReverse_ ? startRect - trackHeight - trackLength * GetTotalRatio() :
+            startRect + trackHeight + trackLength * GetTotalRatio();
+        SkRRect selectRect = SkRRect::MakeRectXY(
+            { offset.GetX(), startRect, offset.GetX() + trackHeight, endRect },
+            trackHeight * HALF,
+            trackHeight * HALF);
+        flutter::RRect selectRectFlutter = flutter::RRect();
+        selectRectFlutter.sk_rrect = selectRect;
+        selectPaint.paint()->setShader(BlendSkShader({ offset.GetX(), startRect }, GetSelectColor().GetValue(),
+            playAnimation_));
+        canvas->drawRRect(selectRectFlutter, selectPaint, selectPaintData);
+        return;
+    }
+    if ((leftToRight_ && !isReverse_) || (!leftToRight_ && isReverse_)) {
+        startRect = offset.GetX();
+        endRect = startRect + trackHeight + trackLength * GetTotalRatio();
+    } else {
+        startRect = offset.GetX() + GetLayoutSize().Width();
+        endRect = startRect - trackHeight - trackLength * GetTotalRatio();
+    }
+    SkRRect selectRect = SkRRect::MakeRectXY({ startRect, offset.GetY(), endRect, offset.GetY() + trackHeight },
+        trackHeight * HALF, trackHeight * HALF);
+    flutter::RRect selectRectFlutter = flutter::RRect();
+    selectRectFlutter.sk_rrect = selectRect;
+    selectPaint.paint()->setShader(
+        BlendSkShader({ startRect + scanHighLightValue_ * trackLength, offset.GetY() },
+            GetSelectColor().GetValue(), playAnimation_));
+    canvas->drawRRect(selectRectFlutter, selectPaint, selectPaintData);
+
+
 }
 
 void FlutterRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Offset& offset)
@@ -164,16 +174,16 @@ void FlutterRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Of
     if (!NearEqual(GetTrackThickness(), 0.0)) {
         trackHeight = GetTrackThickness();
     }
+    SkPaint skPaint;
+    skPaint.setColor(color.GetValue());
+    skPaint.setStyle(SkPaint::Style::kStroke_Style);
+    skPaint.setStrokeWidth(size);
+    skPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
+    SkPath path;
     if (direction_ == Axis::VERTICAL) {
-        const double trackLength = GetLayoutSize().Height();
-        const double dxOffset = offset.GetX() + trackHeight * HALF;
+        double trackLength = GetLayoutSize().Height();
+        double dxOffset = offset.GetX() + trackHeight * HALF;
         double current = offset.GetY();
-        SkPaint skPaint;
-        skPaint.setColor(color.GetValue());
-        skPaint.setStyle(SkPaint::Style::kStroke_Style);
-        skPaint.setStrokeWidth(size);
-        skPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
-        SkPath path;
         while (current < offset.GetY() + trackLength) {
             // do not draw first mark on track head
             current += GetSliderSteps();
@@ -187,30 +197,25 @@ void FlutterRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Of
             path.lineTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
         }
         skCanvas->drawPath(path, skPaint);
-    } else {
-        const double trackLength = GetLayoutSize().Width();
-        const double dyOffset = offset.GetY() + trackHeight * HALF;
-        double current = offset.GetX();
-        SkPaint skPaint;
-        skPaint.setColor(color.GetValue());
-        skPaint.setStyle(SkPaint::Style::kStroke_Style);
-        skPaint.setStrokeWidth(size);
-        skPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
-        SkPath path;
-        while (current < offset.GetX() + trackLength) {
-            // do not draw first mark on track head
-            current += GetSliderSteps();
-            double dxOffset = current;
-            if (GetSliderMode() == SliderMode::OUTSET) {
-                dxOffset = std::clamp(current, offset.GetX() + size * HALF, offset.GetX() + trackLength - size * HALF);
-            } else {
-                dxOffset = std::clamp(current, offset.GetX(), offset.GetX() + trackLength);
-            }
-            path.moveTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
-            path.lineTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
-        }
-        skCanvas->drawPath(path, skPaint);
+        return;
     }
+    double trackLength = GetLayoutSize().Width();
+    double dyOffset = offset.GetY() + trackHeight * HALF;
+    double current = offset.GetX();
+
+    while (current < offset.GetX() + trackLength) {
+        // do not draw first mark on track head
+        current += GetSliderSteps();
+        double dxOffset = current;
+        if (GetSliderMode() == SliderMode::OUTSET) {
+            dxOffset = std::clamp(current, offset.GetX() + size * HALF, offset.GetX() + trackLength - size * HALF);
+        } else {
+            dxOffset = std::clamp(current, offset.GetX(), offset.GetX() + trackLength);
+        }
+        path.moveTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
+        path.lineTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
+    }
+    skCanvas->drawPath(path, skPaint);
 }
 
 void FlutterRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Offset& offset)
@@ -261,16 +266,23 @@ void FlutterRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Of
         selectPaint.paint()->setStyle(SkPaint::Style::kStroke_Style);
         selectPaint.paint()->setStrokeWidth(trackHeight);
         selectPaint.paint()->setStrokeCap(SkPaint::kRound_Cap);
+        double fromOffset = 0.0;
+        double toOffset = 0.0;
         if (direction_ == Axis::VERTICAL) {
-            const double fromY = offset.GetY();
-            const double toY = fromY + trackLength * GetTotalRatio();
-            canvas->drawLine(dxOffset, fromY, dxOffset, toY, selectPaint, selectPaintData);
-        } else {
-            const double fromX = leftToRight_ ? offset.GetX() : offset.GetX() + trackLength;
-            const double toX =
-                leftToRight_ ? fromX + trackLength * GetTotalRatio() : fromX - trackLength * GetTotalRatio();
-            canvas->drawLine(fromX, dyOffset, toX, dyOffset, selectPaint, selectPaintData);
+            fromOffset = isReverse_ ? offset.GetY() + trackLength : offset.GetY();
+            toOffset = isReverse_ ?
+                fromOffset - trackLength * GetTotalRatio() : fromOffset + trackLength * GetTotalRatio();
+            canvas->drawLine(dxOffset, fromOffset, dxOffset, toOffset, selectPaint, selectPaintData);
+            return;
         }
+        if (((leftToRight_ && !isReverse_)) || ((!leftToRight_ && isReverse_))) {
+            fromOffset = offset.GetX();
+            toOffset = fromOffset + trackLength * GetTotalRatio();
+        } else {
+            fromOffset = offset.GetX() + trackLength;
+            toOffset = fromOffset - trackLength * GetTotalRatio();
+        }
+        canvas->drawLine(fromOffset, dyOffset, toOffset, dyOffset, selectPaint, selectPaintData);
     }
 }
 

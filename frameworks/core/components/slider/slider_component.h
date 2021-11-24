@@ -195,6 +195,17 @@ public:
         return axis_;
     }
 
+    bool IsReverse() const
+    {
+        return isReverse_;
+    }
+
+    void SetReverse(bool isReverse)
+    {
+        isReverse_ = isReverse;
+        track_->SetReverse(isReverse_);
+    }
+
     ACE_DEFINE_COMPONENT_EVENT(OnChange, void(double,int));
 
 private:
@@ -206,6 +217,7 @@ private:
     bool isDisable_ = false;
     bool showTips_ = false;
     bool showSteps_ = false;
+    bool isReverse_ = false;
     SliderMode mode_ = SliderMode::OUTSET;
     RefPtr<RotationController> rotationController_;
     Axis axis_ = Axis::HORIZONTAL;
