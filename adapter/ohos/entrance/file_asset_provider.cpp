@@ -128,17 +128,17 @@ void FileAssetProvider::GetAssetList(const std::string& path, std::vector<std::s
 {
     std::lock_guard<std::mutex> lock(mutex_);
     for (const auto& basePath : assetBasePaths_) {
-        DIR* dp = nullptr;
-        if (nullptr == (dp = opendir(basePath.c_str()))) {
+        std::string assetPath = packagePath_ + basePath + path;
+        std::unique_ptr<DIR, decltype(&closedir)> dir(opendir(assetPath.c_str()), closedir);
+        if (dir == nullptr) {
             continue;
         }
-        struct dirent* dptr = nullptr;
-        while ((dptr = readdir(dp)) != nullptr) {
+        struct dirent* dptr = readdir(dir.get());
+        while (dptr != nullptr) {
             if (strcmp(dptr->d_name, ".") != 0 && strcmp(dptr->d_name, "..") != 0) {
                 assetList.push_back(dptr->d_name);
             }
         }
-        closedir(dp);
     }
 }
 
