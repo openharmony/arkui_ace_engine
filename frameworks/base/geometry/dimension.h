@@ -109,6 +109,17 @@ public:
         return 0;
     }
 
+    double ConvertToPx() const
+    {
+        if (unit_ == DimensionUnit::PX) {
+            return value_;
+        }
+        if (unit_ == DimensionUnit::VP) {
+            return SystemProperties::Vp2Px(value_);
+        }
+        return 0;
+    }
+
     constexpr Dimension operator*(double value) const
     {
         return Dimension(value_ * value, unit_);

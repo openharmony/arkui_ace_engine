@@ -523,11 +523,17 @@ void AccessibilityNodeManager::UpdateEventTarget(NodeId id, BaseEventInfo& info)
     }
     auto rectInLocal = inspector->GetRenderRectInLocal();
     auto rectInGlobal = inspector->GetRenderRect();
+    auto marginLeft = inspector->GetMargin(AnimatableType::PROPERTY_MARGIN_LEFT).ConvertToPx();
+    auto marginRight = inspector->GetMargin(AnimatableType::PROPERTY_MARGIN_RIGHT).ConvertToPx();
+    auto marginTop = inspector->GetMargin(AnimatableType::PROPERTY_MARGIN_TOP).ConvertToPx();
+    auto marginBottom = inspector->GetMargin(AnimatableType::PROPERTY_MARGIN_BOTTOM).ConvertToPx();
     auto& target = info.GetTargetWichModify();
-    target.area.SetOffset(DimensionOffset(rectInLocal.GetOffset()));
-    target.area.SetGlobaleOffset(DimensionOffset(rectInGlobal.GetOffset()));
-    target.area.SetWidth(Dimension(rectInLocal.Width()));
-    target.area.SetHeight(Dimension(rectInLocal.Height()));
+    target.area.SetOffset(DimensionOffset(
+        Offset(rectInLocal.GetOffset().GetX() + marginLeft, rectInLocal.GetOffset().GetY() + marginTop)));
+    target.area.SetGlobaleOffset(DimensionOffset(
+        Offset(rectInGlobal.GetOffset().GetX() + marginLeft, rectInGlobal.GetOffset().GetY() + marginTop)));
+    target.area.SetWidth(Dimension(rectInLocal.Width() - marginLeft - marginRight));
+    target.area.SetHeight(Dimension(rectInLocal.Height() - marginTop - marginBottom));
 }
 
 bool AccessibilityNodeManager::IsDeclarative()

@@ -214,6 +214,11 @@ public:
         return pxNum / resolution_;
     }
 
+    static double Vp2Px(double pxNum)
+    {
+        return pxNum * resolution_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool accessibilityEnabled_;
