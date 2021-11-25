@@ -533,6 +533,7 @@ bool AceAbility::OnRestoreData(OHOS::AAFwk::WantParams& restoreData)
 
 void AceAbility::OnCompleteContinuation(int result)
 {
+    Ability::OnCompleteContinuation(result);
     LOGI("AceAbility::OnCompleteContinuation called.");
     Platform::AceContainer::OnCompleteContinuation(abilityId_, result);
     LOGI("AceAbility::OnCompleteContinuation finish.");
