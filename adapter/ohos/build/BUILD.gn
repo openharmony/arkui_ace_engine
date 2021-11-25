@@ -40,7 +40,10 @@ group("ace_packages") {
   ]
 
   # Pa engine
-  deps += [ "$ace_root/build:libace_engine_pa_qjs" ]
+  deps += [
+    "$ace_root/build:libace_engine_pa_ark",
+    "$ace_root/build:libace_engine_pa_qjs",
+  ]
 
   # ark debugger
   deps += [

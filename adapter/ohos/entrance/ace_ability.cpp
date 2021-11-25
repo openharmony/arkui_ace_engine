@@ -29,6 +29,7 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
+#include "adapter/ohos/entrance/utils.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/frontend.h"
@@ -101,51 +102,6 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr, cons
         }
     }
     return GetFrontendType(rootJson->GetString("type"));
-}
-
-bool GetIsArkFromConfig(const std::string& packagePathStr)
-{
-    auto configPath = packagePathStr + std::string("config.json");
-    char realPath[PATH_MAX] = { 0x00 };
-    if (realpath(configPath.c_str(), realPath) == nullptr) {
-        LOGE("realpath fail! filePath: %{private}s, fail reason: %{public}s", configPath.c_str(), strerror(errno));
-        LOGE("return not arkApp.");
-        return false;
-    }
-    std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
-    if (!file) {
-        LOGE("open file failed, filePath: %{private}s, fail reason: %{public}s", configPath.c_str(), strerror(errno));
-        LOGE("return not arkApp.");
-        return false;
-    }
-    if (std::fseek(file.get(), 0, SEEK_END) != 0) {
-        LOGE("seek file tail error, return not arkApp.");
-        return false;
-    }
-
-    long size = std::ftell(file.get());
-    if (size == -1L) {
-        return false;
-    }
-    char *fileData = new (std::nothrow) char[size];
-    if (fileData == nullptr) {
-        LOGE("new json buff failed, return not arkApp.");
-        return false;
-    }
-    rewind(file.get());
-    std::unique_ptr<char[]> jsonStream(fileData);
-    size_t result = std::fread(jsonStream.get(), 1, size, file.get());
-    if (result != (size_t)size) {
-        LOGE("read file failed, return not arkApp.");
-        return false;
-    }
-
-    std::string jsonString(jsonStream.get(), jsonStream.get() + size);
-    auto rootJson = JsonUtil::ParseJsonString(jsonString);
-    auto module = rootJson->GetValue("module");
-    auto distro = module->GetValue("distro");
-    std::string virtualMachine = distro->GetString("virtualMachine");
-    return virtualMachine.find("ark") != std::string::npos;
 }
 
 } // namespace

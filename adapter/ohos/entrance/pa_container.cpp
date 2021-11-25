@@ -37,13 +37,23 @@
 namespace OHOS::Ace::Platform {
 namespace {
 
+constexpr char ARK_PA_ENGINE_SHARED_LIB[] = "libace_engine_pa_ark.z.so";
 constexpr char QUICK_JS_PA_ENGINE_SHARED_LIB[] = "libace_engine_pa_qjs.z.so";
+
+const char* GetPaEngineSharedLibrary(bool isArkApp)
+{
+    if (isArkApp) {
+        return ARK_PA_ENGINE_SHARED_LIB;
+    } else {
+        return QUICK_JS_PA_ENGINE_SHARED_LIB;
+    }
+}
 
 } // namespace
 
-PaContainer::PaContainer(
-    int32_t instanceId, BackendType type, void* paAbility, std::unique_ptr<PlatformEventCallback> callback)
-    : instanceId_(instanceId), type_(type), paAbility_(paAbility)
+PaContainer::PaContainer(int32_t instanceId, BackendType type, bool isArkApp, void* paAbility,
+    std::unique_ptr<PlatformEventCallback> callback)
+    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), paAbility_(paAbility)
 {
     ACE_DCHECK(callback);
     auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
@@ -66,10 +76,12 @@ void PaContainer::InitializeBackend()
         return;
     }
 
-    // set JS engine，init in JS thread
-    auto& loader = JsBackendEngineLoader::Get(QUICK_JS_PA_ENGINE_SHARED_LIB);
+    // set JS engine, init in JS thread
+    auto& loader = JsBackendEngineLoader::Get(GetPaEngineSharedLibrary(isArkApp_));
     auto jsEngine = loader.CreateJsBackendEngine(instanceId_);
     jsEngine->AddExtraNativeObject("ability", paAbility_);
+    jsEngine->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
+    jsEngine->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
     paBackend->SetJsEngine(jsEngine);
 
     ACE_DCHECK(backend_);
@@ -82,10 +94,10 @@ RefPtr<PaContainer> PaContainer::GetContainer(int32_t instanceId)
     return AceType::DynamicCast<PaContainer>(container);
 }
 
-void PaContainer::CreateContainer(
-    int32_t instanceId, BackendType type, void* paAbility, std::unique_ptr<PlatformEventCallback> callback)
+void PaContainer::CreateContainer(int32_t instanceId, BackendType type, bool isArkApp, void* paAbility,
+    std::unique_ptr<PlatformEventCallback> callback)
 {
-    auto aceContainer = AceType::MakeRefPtr<PaContainer>(instanceId, type, paAbility, std::move(callback));
+    auto aceContainer = AceType::MakeRefPtr<PaContainer>(instanceId, type, isArkApp, paAbility, std::move(callback));
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
     auto back = aceContainer->GetBackend();

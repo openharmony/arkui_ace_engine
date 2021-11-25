@@ -106,9 +106,8 @@ foreach(item, ace_platforms) {
         }
       }
 
-      # generate libace_engine_pa, now not support ark
-      if (defined(engine_config.js_pa_support) && engine_config.js_pa_support &&
-          engine.engine_name != "ark") {
+      # generate libace_engine_pa
+      if (defined(engine_config.js_pa_support) && engine_config.js_pa_support) {
         ace_bridge_engine("libace_engine_pa_${engine.engine_name}") {
           platform = item.name
           engine_name = engine.engine_name

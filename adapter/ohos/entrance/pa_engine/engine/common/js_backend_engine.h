@@ -104,10 +104,34 @@ public:
         return extraNativeObject_;
     }
 
+    bool IsDebugVersion() const
+    {
+        return isDebugVersion_;
+    }
+
+    void SetDebugVersion(bool value)
+    {
+        isDebugVersion_ = value;
+    }
+
+    bool NeedDebugBreakPoint() const
+    {
+        return needDebugBreakPoint_;
+    }
+
+    void SetNeedDebugBreakPoint(bool value)
+    {
+        needDebugBreakPoint_ = value;
+    }
+
 private:
     std::string instanceName_;
     AppExecFwk::FormProviderData formProviderData_;
     std::unordered_map<std::string, void*> extraNativeObject_;
+    // weather the app has debugger.so.
+    bool isDebugVersion_ = false;
+    // if debug, '-D' means need debug breakpoint, by default, do not enter breakpoint.
+    bool needDebugBreakPoint_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -49,14 +49,28 @@ foreach(item, ace_platforms) {
   support_engines = []
   support_engines = engine_config.js_engines
   foreach(engine, support_engines) {
-    # TODO: pa_engine not support ark yet.
-    if (engine.engine_name != "ark") {
-      js_pa_engine("js_pa_engine_${engine.engine_name}_$platform") {
+    js_pa_engine("js_pa_engine_${engine.engine_name}_$platform") {
+      platform = item.name
+      engine_name = engine.engine_name
+      engine_path = engine.engine_path
+      defines = engine.engine_defines
+      use_js_debug = false
+      config = {
+      }
+      if (defined(item.config)) {
+        config = item.config
+      }
+      if (defined(config.defines)) {
+        defines += config.defines
+      }
+    }
+    if (defined(engine.have_debug) && engine.have_debug) {
+      js_pa_engine("js_pa_engine_${engine.engine_name}_debug_$platform") {
         platform = item.name
         engine_name = engine.engine_name
         engine_path = engine.engine_path
         defines = engine.engine_defines
-        use_js_debug = false
+        use_js_debug = true
         config = {
         }
         if (defined(item.config)) {
@@ -64,23 +78,6 @@ foreach(item, ace_platforms) {
         }
         if (defined(config.defines)) {
           defines += config.defines
-        }
-      }
-      if (defined(engine.have_debug) && engine.have_debug) {
-        js_pa_engine("js_pa_engine_${engine.engine_name}_debug_$platform") {
-          platform = item.name
-          engine_name = engine.engine_name
-          engine_path = engine.engine_path
-          defines = engine.engine_defines
-          use_js_debug = true
-          config = {
-          }
-          if (defined(item.config)) {
-            config = item.config
-          }
-          if (defined(config.defines)) {
-            defines += config.defines
-          }
         }
       }
     }

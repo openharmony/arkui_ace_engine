@@ -40,7 +40,8 @@ class PaContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(PaContainer, Container, JsMessageDispatcher);
 
 public:
-    PaContainer(int32_t instanceId, BackendType type, void* paAbility, std::unique_ptr<PlatformEventCallback> callback);
+    PaContainer(int32_t instanceId, BackendType type, bool isArkApp, void* paAbility,
+        std::unique_ptr<PlatformEventCallback> callback);
     ~PaContainer() override = default;
 
     void Initialize() override {}
@@ -121,8 +122,8 @@ public:
     }
 
     static bool Register();
-    static void CreateContainer(
-        int32_t instanceId, BackendType type, void* paAbility, std::unique_ptr<PlatformEventCallback> callback);
+    static void CreateContainer(int32_t instanceId, BackendType type, bool isArkApp, void* paAbility,
+        std::unique_ptr<PlatformEventCallback> callback);
     static void DestroyContainer(int32_t instanceId);
     static RefPtr<PaContainer> GetContainer(int32_t instanceId);
     static bool RunPa(int32_t instanceId, const std::string& content, const OHOS::AAFwk::Want& want);
@@ -163,6 +164,7 @@ private:
 
     int32_t instanceId_ = 0;
     BackendType type_ = BackendType::SERVICE;
+    bool isArkApp_ = false;
     std::unique_ptr<PlatformEventCallback> platformEventCallback_;
     void* paAbility_ = nullptr;
 
