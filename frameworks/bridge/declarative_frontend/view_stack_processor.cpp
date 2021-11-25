@@ -596,6 +596,11 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     if (iter != wrappingComponentsMap.end() && (iter->second->GetTextDirection() != component->GetTextDirection())) {
         component->SetTextDirection(iter->second->GetTextDirection());
     }
+
+    for (auto&& component : components) {
+        component->SetTouchable(mainComponent->IsTouchable());
+    }
+
     return component;
 }
 

@@ -107,6 +107,17 @@ void JSInteractableView::JsOnDelete(const JSCallbackInfo& info)
     }
 }
 
+void JSInteractableView::JsTouchable(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
+        if (!mainComponent) {
+            return;
+        }
+        mainComponent->SetTouchable(info[0]->ToBoolean());
+    }
+}
+
 void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {

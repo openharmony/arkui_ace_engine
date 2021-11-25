@@ -659,7 +659,7 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
                 dispatchSuccess = true;
                 break;
             }
-            if (child->InterceptTouchEvent() || IsExclusiveEventForChild()) {
+            if (child->IsTouchable() && (child->InterceptTouchEvent() || IsExclusiveEventForChild())) {
                 auto localTransformPoint = child->GetTransformPoint(localPoint);
                 for (auto& rect : child->GetTouchRectList()) {
                     if (rect.IsInRegion(localTransformPoint)) {

@@ -3343,6 +3343,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("accessibilityImportance", &JSViewAbstract::JsAccessibilityImportance);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibility", &JSInteractableView::JsOnAccessibility);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
+    JSClass<JSViewAbstract>::StaticMethod("touchable", &JSInteractableView::JsTouchable);
 }
 
 RefPtr<Decoration> JSViewAbstract::GetFrontDecoration()
