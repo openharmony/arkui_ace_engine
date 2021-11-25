@@ -29,22 +29,31 @@ static constexpr int CONTROL_SOCK_SEND_TIMEOUT = 10U;
 int32_t UnixSocketClient::UnixSocketConn()
 {
     uint32_t sleep_ms = SLEEP_TIME_MS;
-    char destBuff[BUFF_SIZE];
     const uint32_t SLEEP_MAX_MS = 4 * SLEEP_TIME_MS;
-    control_sock = socket(AF_UNIX, SOCK_STREAM, 0);
+    control_sock = TEMP_FAILURE_RETRY(socket(AF_UNIX, SOCK_STREAM, 0));
     if (control_sock < 0) {
         LOGE("Could not create control socket");
-        return -1;
+        return FAIL_CAUSE_SOCKET_NO_CLIENT;
     }
-    memset_s(&controlAddrUn, sizeof(destBuff), 0, sizeof(controlAddrUn));
+    errno_t errRet = memset_s(&controlAddrUn, sizeof(controlAddrUn), 0, sizeof(controlAddrUn));
+    if (errRet != EOK) {
+        LOGE("Socket memset_s fail");
+        return FAIL_CAUSE_SOCKET_NO_CLIENT;
+    }
     controlAddrUn.sun_family = AF_UNIX;
-    memcpy_s(controlAddrUn.sun_path, sizeof(destBuff), JDWP_CONTROL_NAME, JDWP_CONTROL_NAME_LEN);
+    errno_t errNum = memcpy_s(controlAddrUn.sun_path, JDWP_CONTROL_NAME_LEN, JDWP_CONTROL_NAME, JDWP_CONTROL_NAME_LEN);
+    if (errNum != EOK) {
+        LOGE("Socket memcpy_s fail");
+        return FAIL_CAUSE_SOCKET_NO_CLIENT;
+    }
     control_addr_len = sizeof(controlAddrUn.sun_family) + JDWP_CONTROL_NAME_LEN;
+    int keepalive = 1;
+    setsockopt(control_sock, SOL_SOCKET, SO_KEEPALIVE, (void *)&keepalive, sizeof(keepalive));
     while (true) {
-        int ret = connect(control_sock, (struct sockaddr *)&controlAddrUn, control_addr_len);
+        int ret = TEMP_FAILURE_RETRY(connect(control_sock, (struct sockaddr *)&controlAddrUn, control_addr_len));
         if (ret >= 0) {
             LOGI("Connect Successful");
-            return 0;
+            return SOCKET_SUCCESS;
         }
         const int sleep_times = 2;
         usleep(sleep_ms * SLEEP_TIME_MS * sleep_times);
@@ -52,35 +61,38 @@ int32_t UnixSocketClient::UnixSocketConn()
         if (sleep_ms > SLEEP_MAX_MS) {
             sleep_ms = SLEEP_MAX_MS;
         }
+        return FAIL_CAUSE_SOCKET_COMMON_FAIL;
     }
-    return -1;
+    return FAIL_CAUSE_SOCKET_COMMON_FAIL;
 }
 
 int32_t UnixSocketClient::SendMessage(int32_t pid)
 {
     std::string pidStr = std::to_string(pid);
-    int size_ = pidStr.size();
-    char buff[size_];
-    buff[size_] = 0;
+    int pidSize = pidStr.size();
+    int buffSize = pidSize + 1;
+    char buff[buffSize];
     if (control_sock < 0) {
         LOGE("Error Occur!");
-        return -1;
+        return FAIL_CAUSE_SEND_MSG_FAIL;
     }
-    memcpy_s(buff, sizeof(buff), pidStr.c_str(), size_);
+    errno_t errRet = strncpy_s(buff, buffSize, pidStr.c_str(), pidSize);
+    if (errRet != EOK) {
+        LOGE("Send Message fail");
+        return FAIL_CAUSE_SEND_MSG_FAIL;
+    }
     struct timeval timeout {
     };
     timeout.tv_sec = CONTROL_SOCK_SEND_TIMEOUT;
     timeout.tv_usec = 0;
     setsockopt(control_sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
-    while (true) {
-        int ret = send(control_sock, buff, size_, 0);
-        if (ret >= 0) {
-            LOGI("PID sent as '%s' to HDC", buff);
-            return 0;
-        }
-        LOGE("Weird, can't send JDWP process pid to HDC");
-        return -1;
+    int ret = TEMP_FAILURE_RETRY(send(control_sock, buff, pidSize, 0));
+    if (ret >= 0) {
+        LOGI("PID sent as '%s' to HDC", buff);
+        return SOCKET_SUCCESS;
     }
+    LOGE("Weird, can't send JDWP process pid to HDC");
+    return FAIL_CAUSE_SEND_MSG_FAIL;
 }
 
 void UnixSocketClient::UnixSocketClose()

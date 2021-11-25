@@ -49,7 +49,6 @@ private:
     std::function<void(std::string)> wsOnMessage_;
     std::unique_ptr<websocket::stream<localSocket::socket>> webSocket_ = nullptr;
     static constexpr int DEBUGGER_WAIT_SEND_SIGNAL_TIME = 100;
-    int appPid;
 };
 
 } // namespace OHOS::Ace

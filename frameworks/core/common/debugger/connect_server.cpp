@@ -31,7 +31,7 @@ void ConnectServer::RunServer()
 
     try {
         boost::asio::io_context ioContext;
-        appPid = getpid();
+        int appPid = getpid();
         std::string pidStr = std::to_string(appPid);
         std::string sockName = '\0' + pidStr + bundleName_;
         LOGI("App Connect Server Run: %{private}d%{private}s", appPid, bundleName_.c_str());
@@ -96,9 +96,10 @@ void ConnectServer::Register(int32_t pid)
 {
     g_unixSocket = std::make_unique<UnixSocketClient>();
     int connRes = g_unixSocket->UnixSocketConn();
-    if (connRes >= 0) {
-        LOGI("Unix Socket Connect Successfully");
+    if (connRes < 0) {
+        return;
     }
+    LOGI("Unix Socket Connect Successfully");
     int res = g_unixSocket->SendMessage(pid);
     if (res < 0) {
         LOGE("Register Failed!");

@@ -22,7 +22,6 @@ void* g_debugger = nullptr;
 std::map<int32_t, std::string> g_infoBuffer;
 bool g_isAttachStart = false;
 int g_ideWaitTime = 100;
-using WaitingForIde = void (*)();
 
 void* HandleDebugManager(void* const server)
 {

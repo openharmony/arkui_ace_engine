@@ -66,10 +66,10 @@ const int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
 constexpr int32_t V8_MAX_STACK_SIZE = 1 * 1024 * 1024;
 void* g_debugger = nullptr;
-bool g_flagNeedDebugBreakPoint = false;
+
 using StartDebug = void (*)(
     const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context, std::string componentName,
-    const bool flagNeedDebugBreakPoint, const int32_t instanceId);
+    const bool isDebugMode, const int32_t instanceId);
 using WaitingForIde = void (*)();
 using StopDebug = void (*)();
 
@@ -3229,12 +3229,6 @@ bool V8EngineInstance::FireJsEvent(const std::string& param)
 {
     CHECK_RUN_ON(JS);
     LOGI("Enter FireJsEvent");
-    if (g_debugger != nullptr && !g_flagNeedDebugBreakPoint) {
-        WaitingForIde waitingForIde = (WaitingForIde)dlsym(g_debugger, "WaitingForIde");
-        if (waitingForIde != nullptr) {
-            waitingForIde();
-        }
-    }
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
     ACE_DCHECK(isolate);
     v8::HandleScope handleScope(isolate);
@@ -3319,20 +3313,20 @@ void LoadDebuggerSo()
 
 void StartDebuggerAgent(
     const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context, std::string componentName,
-    const bool flagNeedDebugBreakPoint, const int32_t instanceId)
+    const bool isDebugMode, const int32_t instanceId)
 {
     LOGI("StartAgent");
     if (g_debugger == nullptr) {
         LOGE("g_debugger is null");
         return;
     }
-    g_flagNeedDebugBreakPoint = flagNeedDebugBreakPoint;
+
     StartDebug startDebug = (StartDebug)dlsym(g_debugger, "StartDebug");
     if (startDebug == nullptr) {
         LOGE("StartDebug=NULL, dlerror=%s", dlerror());
         return;
     }
-    startDebug(platform, context, componentName, flagNeedDebugBreakPoint, instanceId);
+    startDebug(platform, context, componentName, isDebugMode, instanceId);
 }
 
 // -----------------------

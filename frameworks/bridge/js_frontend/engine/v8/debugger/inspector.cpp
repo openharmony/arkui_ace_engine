@@ -18,7 +18,7 @@
 namespace V8Debugger {
 
 static thread_local Inspector* g_inspector = nullptr;
-
+static bool g_isDebugMode;
 static void* HandleClient(void* inspector)
 {
     LOGI("HandleClient");
@@ -45,6 +45,9 @@ void DispatchMsgToV8(int sign)
         std::string startDebugging("Runtime.runIfWaitingForDebugger");
         if (message.find(startDebugging, 0) != std::string::npos) {
             g_inspector->waitingForDebugger = false;
+            if (!g_isDebugMode) {
+                WaitingForIde();
+            }
         }
     }
     g_inspector->isDispatchingMsg = false;
@@ -54,7 +57,7 @@ void StartDebug(
     const std::unique_ptr<v8::Platform>& platform,
     const v8::Local<v8::Context>& context,
     const std::string& componentName,
-    const bool flagNeedDebugBreakPoint,
+    const bool isDebugMode,
     const int32_t instanceId)
 {
     LOGI("StartDebug!");
@@ -69,8 +72,8 @@ void StartDebug(
     std::string instanceIdStr = std::to_string(instanceId);
     std::string sockName = '\0' + pidStr + instanceIdStr + componentName;
     g_inspector->InitializeInspector(platform, context, sockName);
-    g_inspector->waitingForDebugger = flagNeedDebugBreakPoint;
-
+    g_inspector->waitingForDebugger = isDebugMode;
+    g_isDebugMode = isDebugMode;
     pthread_t tid;
     if (pthread_create(&tid, nullptr, &HandleClient, reinterpret_cast<void*>(g_inspector)) != 0) {
         LOGE("pthread_create fail!");

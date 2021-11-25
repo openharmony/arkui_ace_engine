@@ -36,7 +36,7 @@ void StartDebug(
     const std::unique_ptr<v8::Platform>& platform,
     const v8::Local<v8::Context>& context,
     const std::string& componentName,
-    const bool flagNeedDebugBreakPoint,
+    const bool isDebugMode,
     const int32_t instanceId);
 
 void WaitingForIde();
