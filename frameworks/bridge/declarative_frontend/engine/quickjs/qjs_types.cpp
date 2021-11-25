@@ -201,7 +201,7 @@ void QJSObjTemplate::SetInternalFieldCount(int32_t count) const {}
 
 QJSRef<QJSObject> QJSObjTemplate::NewInstance() const
 {
-    return QJSRef<QJSObject>::Make(GetHandle());
+    return QJSRef<QJSObject>::Make(JS_NewObject(QJSContext::Current()));
 }
 
 QJSFunction::QJSFunction() {}
