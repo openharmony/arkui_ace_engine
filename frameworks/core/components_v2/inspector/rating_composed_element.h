@@ -36,9 +36,7 @@ public:
     std::string GetIndicator() const;
     std::string GetStars() const;
     std::string GetStepSize() const;
-    std::string GetForegroundSrc() const;
-    std::string GetSecondarySrc() const;
-    std::string GetBackgroundSrc() const;
+    std::string GetStarStyle() const;
 
 private:
     RefPtr<RenderRating> GetRenderRating() const;
