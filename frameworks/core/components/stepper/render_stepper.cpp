@@ -62,6 +62,8 @@ void RenderStepper::Update(const RefPtr<Component>& component)
         int32_t index = stepperComponent_->GetIndex();
         if (index >= 0 && index < totalItemCount_) {
             currentIndex_ = index;
+        } else {
+            currentIndex_ = 0;
         }
     }
 
