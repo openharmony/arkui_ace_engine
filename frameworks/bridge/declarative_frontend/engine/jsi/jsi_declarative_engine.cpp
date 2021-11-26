@@ -328,8 +328,8 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
     runtime_ = nullptr;
 }
 
-bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
-    const std::unordered_map<std::string, void*>& extraNativeObject)
+bool JsiDeclarativeEngineInstance::InitJsEnv(
+    bool debuggerMode, const std::unordered_map<std::string, void*>& extraNativeObject)
 {
     CHECK_RUN_ON(JS);
     ACE_SCOPED_TRACE("JsiDeclarativeEngineInstance::InitJsEnv");
@@ -389,13 +389,13 @@ bool JsiDeclarativeEngineInstance::FireJsEvent(const std::string& eventStr)
 void JsiDeclarativeEngineInstance::InitAceModule()
 {
     bool stateMgmtResult = runtime_->EvaluateJsCode(
-        (uint8_t *)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
+        (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
     if (!stateMgmtResult) {
         JsiDeclarativeUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
         LOGE("EvaluateJsCode stateMgmt failed");
     }
     bool jsEnumStyleResult = runtime_->EvaluateJsCode(
-        (uint8_t *)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
+        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
     if (!jsEnumStyleResult) {
         JsiDeclarativeUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
         LOGE("EvaluateJsCode jsEnumStyle failed");
@@ -559,8 +559,8 @@ void JsiDeclarativeEngineInstance::InitGroupJsBridge()
 
 thread_local std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> JsiDeclarativeEngineInstance::rootViewMap_;
 
-void JsiDeclarativeEngineInstance::RootViewHandle(const shared_ptr<JsRuntime>& runtime,
-    panda::Local<panda::ObjectRef> value)
+void JsiDeclarativeEngineInstance::RootViewHandle(
+    const shared_ptr<JsRuntime>& runtime, panda::Local<panda::ObjectRef> value)
 {
     LOGD("RootViewHandle");
     if (runtime == nullptr) {
@@ -810,7 +810,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         }
         instance->InitConsoleModule(arkNativeEngine);
 
-        std::vector<uint8_t> buffer((uint8_t *)_binary_jsEnumStyle_abc_start, (uint8_t *)_binary_jsEnumStyle_abc_end);
+        std::vector<uint8_t> buffer((uint8_t*)_binary_jsEnumStyle_abc_start, (uint8_t*)_binary_jsEnumStyle_abc_end);
         auto stateMgmtResult = arkNativeEngine->RunBufferScript(buffer);
         if (stateMgmtResult == nullptr) {
             LOGE("init worker error");
@@ -844,7 +844,6 @@ void JsiDeclarativeEngine::RegisterWorker()
     RegisterInitWorkerFunc();
     RegisterAssetFunc();
 }
-
 
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
@@ -1011,8 +1010,8 @@ void JsiDeclarativeEngine::DestroyApplication(const std::string& packageName)
 {
     LOGI("JsiDeclarativeEngine DestroyApplication, packageName %{public}s", packageName.c_str());
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    JsiDeclarativeUtils::SetCurrentState(JsErrorType::DESTROY_APP_ERROR, instanceId_, "",
-        engineInstance_->GetStagingPage());
+    JsiDeclarativeUtils::SetCurrentState(
+        JsErrorType::DESTROY_APP_ERROR, instanceId_, "", engineInstance_->GetStagingPage());
 
     CallAppFunc("onDestroy");
 }
@@ -1033,20 +1032,17 @@ void JsiDeclarativeEngine::OnWindowDisplayModeChanged(bool isShownInMultiWindow,
 {
     LOGI("JsiDeclarativeEngine OnWindowDisplayModeChanged");
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = {
-        runtime->NewBoolean(isShownInMultiWindow),
-        runtime->NewString(data)
-    };
+    std::vector<shared_ptr<JsValue>> argv = { runtime->NewBoolean(isShownInMultiWindow), runtime->NewString(data) };
     CallAppFunc("onWindowDisplayModeChanged", argv);
 }
 
-void JsiDeclarativeEngine::CallAppFunc(const std::string& appFuncName)
+bool JsiDeclarativeEngine::CallAppFunc(const std::string& appFuncName)
 {
-    const std::vector<shared_ptr<JsValue>>& argv = { };
-    CallAppFunc(appFuncName, argv);
+    std::vector<shared_ptr<JsValue>> argv = {};
+    return CallAppFunc(appFuncName, argv);
 }
 
-void JsiDeclarativeEngine::CallAppFunc(const std::string& appFuncName, const std::vector<shared_ptr<JsValue>>& argv)
+bool JsiDeclarativeEngine::CallAppFunc(const std::string& appFuncName, std::vector<shared_ptr<JsValue>>& argv)
 {
     LOGD("JsiDeclarativeEngine CallAppFunc");
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
@@ -1055,19 +1051,21 @@ void JsiDeclarativeEngine::CallAppFunc(const std::string& appFuncName, const std
     shared_ptr<JsValue> exportsObject = global->GetProperty(runtime, "exports");
     if (!exportsObject->IsObject(runtime)) {
         LOGE("property \"exports\" is not a object");
-        return;
+        return false;
     }
     shared_ptr<JsValue> defaultObject = exportsObject->GetProperty(runtime, "default");
     if (!defaultObject->IsObject(runtime)) {
         LOGE("property \"default\" is not a object");
-        return;
+        return false;
     }
     shared_ptr<JsValue> func = defaultObject->GetProperty(runtime, appFuncName);
     if (!func || !func->IsFunction(runtime)) {
         LOGE("%{public}s not found or is not a function!", appFuncName.c_str());
-        return;
+        return false;
     }
-    func->Call(runtime, global, argv, argv.size());
+    shared_ptr<JsValue> result;
+    result = func->Call(runtime, defaultObject, argv, argv.size());
+    return (result->ToString(runtime) == "true");
 }
 
 void JsiDeclarativeEngine::MediaQueryCallback(const std::string& callbackId, const std::string& args)
@@ -1075,15 +1073,9 @@ void JsiDeclarativeEngine::MediaQueryCallback(const std::string& callbackId, con
     JsEngine::MediaQueryCallback(callbackId, args);
 }
 
-void JsiDeclarativeEngine::RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp)
-{
+void JsiDeclarativeEngine::RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) {}
 
-}
-
-void JsiDeclarativeEngine::JsCallback(const std::string& callbackId, const std::string& args)
-{
-
-}
+void JsiDeclarativeEngine::JsCallback(const std::string& callbackId, const std::string& args) {}
 
 void JsiDeclarativeEngine::RunGarbageCollection()
 {
@@ -1095,6 +1087,76 @@ void JsiDeclarativeEngine::RunGarbageCollection()
 RefPtr<GroupJsBridge> JsiDeclarativeEngine::GetGroupJsBridge()
 {
     return AceType::MakeRefPtr<JsiDeclarativeGroupJsBridge>();
+}
+
+bool JsiDeclarativeEngine::OnStartContinuation()
+{
+    LOGI("JsiDeclarativeEngine OnStartContinuation");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnStartContinuation failed, runtime is null.");
+        return false;
+    }
+
+    return CallAppFunc("onStartContinuation");
+}
+
+void JsiDeclarativeEngine::OnCompleteContinuation(int32_t code)
+{
+    LOGI("JsiDeclarativeEngine OnCompleteContinuation");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnCompleteContinuation failed, runtime is null.");
+        return;
+    }
+
+    std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(code) };
+    CallAppFunc("onCompleteContinuation", argv);
+}
+
+void JsiDeclarativeEngine::OnRemoteTerminated()
+{
+    LOGI("JsiDeclarativeEngine OnRemoteTerminated");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnRemoteTerminated failed, runtime is null.");
+        return;
+    }
+
+    CallAppFunc("onRemoteTerminated");
+}
+
+void JsiDeclarativeEngine::OnSaveData(std::string& data)
+{
+    LOGI("JsiDeclarativeEngine OnSaveData");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnSaveData failed, runtime is null.");
+        return;
+    }
+
+    shared_ptr<JsValue> object = runtime->NewObject();
+    std::vector<shared_ptr<JsValue>> argv = { object };
+    if (CallAppFunc("onSaveData", argv)) {
+        data = object->GetJsonString(runtime);
+    }
+}
+bool JsiDeclarativeEngine::OnRestoreData(const std::string& data)
+{
+    LOGI("JsiDeclarativeEngine OnRestoreData");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnRestoreData failed, runtime is null.");
+        return false;
+    }
+    shared_ptr<JsValue> result;
+    shared_ptr<JsValue> jsonObj = runtime->ParseJson(data);
+    if (jsonObj->IsUndefined(runtime) || jsonObj->IsException(runtime)) {
+        LOGE("JsiDeclarativeEngine: Parse json for restore data failed.");
+        return false;
+    }
+    std::vector<shared_ptr<JsValue>> argv = { jsonObj };
+    return CallAppFunc("onRestoreData", argv);
 }
 
 } // namespace OHOS::Ace::Framework

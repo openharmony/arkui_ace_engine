@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "native_engine/impl/ark/ark_native_engine.h"
+
 #include "core/common/js_message_dispatcher.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
@@ -26,7 +28,6 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_utils.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
-#include "native_engine/impl/ark/ark_native_engine.h"
 
 namespace OHOS::Ace::Framework {
 class JsiEngineInstance final : public AceType, public JsEngineInstance {
@@ -97,22 +98,49 @@ public:
     ~JsiEngine() override;
 
     bool Initialize(const RefPtr<FrontendDelegate>& delegate) override;
+
     void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
+
     void UpdateRunningPage(const RefPtr<JsAcePage>& page) override;
+
     void UpdateStagingPage(const RefPtr<JsAcePage>& page) override;
+
     void ResetStagingPage() override;
+
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) override;
+
     void DestroyPageInstance(int32_t pageId) override;
+
     void DestroyApplication(const std::string& packageName) override;
+
     void FireAsyncEvent(const std::string& eventId, const std::string& param) override;
+
     void FireSyncEvent(const std::string& eventId, const std::string& param) override;
+
     void FireExternalEvent(const std::string& componentId, const uint32_t nodeId) override;
+
     void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) override;
+
     void MediaQueryCallback(const std::string& callbackId, const std::string& args) override;
+
     void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) override;
+
     void JsCallback(const std::string& callbackId, const std::string& args) override;
+
+    bool OnStartContinuation() override;
+
+    void OnCompleteContinuation(int32_t code) override;
+
+    void OnRemoteTerminated() override;
+
+    void OnSaveData(std::string& data) override;
+
+    bool OnRestoreData(const std::string& data) override;
+
     void RunGarbageCollection() override;
+
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
+
     virtual FrontendDelegate* GetFrontend() override
     {
         return AceType::RawPtr(engineInstance_->GetDelegate());
@@ -123,6 +151,8 @@ private:
     void RegisterWorker();
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
+    bool CallAppFunc(const std::string& appFuncName);
+    bool CallAppFunc(const std::string& appFuncName, std::vector<shared_ptr<JsValue>>& argv);
 
     int32_t instanceId_ = 0;
     RefPtr<JsiEngineInstance> engineInstance_;

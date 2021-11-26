@@ -60,7 +60,7 @@ public:
     bool IsObject(shared_ptr<JsRuntime> runtime) override;
     bool IsArray(shared_ptr<JsRuntime> runtime) override;
     bool IsFunction(shared_ptr<JsRuntime> runtime) override;
-    bool IsException(shared_ptr<JsRuntime> runtime) const;
+    bool IsException(shared_ptr<JsRuntime> runtime) override;
 
     shared_ptr<JsValue> Call(shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
                              std::vector<shared_ptr<JsValue>> argv, int32_t argc) override;

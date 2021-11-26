@@ -79,9 +79,9 @@ public:
 
     void JsCallback(const std::string& callbackId, const std::string& args) override;
 
-    void CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv);
+    void CallAppFunc(const std::string& appFuncName, int argc, JSValueConst* argv);
 
-    void CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv, JSValue& ret);
+    void CallAppFunc(const std::string& appFuncName, int argc, JSValueConst* argv, JSValue& ret);
 
     // destroy application instance according packageName
     void DestroyApplication(const std::string& packageName) override;

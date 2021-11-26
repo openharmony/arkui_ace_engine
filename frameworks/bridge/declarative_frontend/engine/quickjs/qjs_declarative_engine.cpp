@@ -272,7 +272,7 @@ void QJSDeclarativeEngine::DestroyPageInstance(int32_t pageId)
     js_std_loop(engineInstance_->GetQJSContext());
 }
 
-void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv)
+void QJSDeclarativeEngine::CallAppFunc(const std::string& appFuncName, int argc, JSValueConst* argv)
 {
     JSContext* ctx = engineInstance_->GetQJSContext();
     if (!ctx) {
@@ -285,7 +285,7 @@ void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValu
     JS_FreeValue(ctx, ret);
 }
 
-void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv, JSValue& ret)
+void QJSDeclarativeEngine::CallAppFunc(const std::string& appFuncName, int argc, JSValueConst* argv, JSValue& ret)
 {
     JSContext* ctx = engineInstance_->GetQJSContext();
     if (!ctx) {

@@ -245,11 +245,11 @@ public:
     // destroy page instance
     void DestroyPageInstance(int32_t pageId) override;
 
-    virtual void MediaQueryCallback(const std::string& callbackId, const std::string& args) override;
+    void MediaQueryCallback(const std::string& callbackId, const std::string& args) override;
 
-    virtual void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) override;
+    void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) override;
 
-    virtual void JsCallback(const std::string& callbackId, const std::string& args) override;
+    void JsCallback(const std::string& callbackId, const std::string& args) override;
 
     // destroy application instance according packageName
     void DestroyApplication(const std::string& packageName) override {}

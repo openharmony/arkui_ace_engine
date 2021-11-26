@@ -19,13 +19,12 @@
 #include <regex>
 #include <unistd.h>
 
-#include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
-#include "bridge/js_frontend/engine/jsi/ark_js_value.h"
-
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/utils/time_util.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -1033,8 +1032,8 @@ std::string JsParseRouteUrl(const std::unique_ptr<JsonValue>& argsPtr, const std
     return pageRoute;
 }
 
-bool GetParams(const shared_ptr<JsRuntime>& runtime,
-    const shared_ptr<JsValue>& arg, std::map<std::string, std::string>& params)
+bool GetParams(
+    const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg, std::map<std::string, std::string>& params)
 {
     if (!runtime) {
         LOGE("fail to get params due to runtime is illegal");
@@ -1099,8 +1098,8 @@ bool ParseResourceNumberParam(const char* paramName, const std::map<std::string,
     return false;
 }
 
-void ParseResourceParam(const std::map<std::string, std::string>& params,
-    std::string& uri, int32_t& position, int32_t& length)
+void ParseResourceParam(
+    const std::map<std::string, std::string>& params, std::string& uri, int32_t& position, int32_t& length)
 {
     ParseResourceStringParam(READ_KEY_URI, params, uri);
     ParseResourceNumberParam(READ_KEY_POSITION, params, position);
@@ -1158,14 +1157,14 @@ shared_ptr<JsValue> JsReadText(const shared_ptr<JsRuntime>& runtime, const std::
 
     if (fileLength == 0) {
         if ((position <= 0) || (length < 0)) {
-            engine->CallJs(callbackId,
-                R"({"arguments":["wrong start position or wrong read length", 202],"method":"fail"})");
+            engine->CallJs(
+                callbackId, R"({"arguments":["wrong start position or wrong read length", 202],"method":"fail"})");
             return runtime->NewUndefined();
         }
     } else {
         if ((position > fileLength) || (position <= 0) || (length < 0)) {
-            engine->CallJs(callbackId,
-                R"({"arguments":["wrong start position or wrong read length", 202],"method":"fail"})");
+            engine->CallJs(
+                callbackId, R"({"arguments":["wrong start position or wrong read length", 202],"method":"fail"})");
             return runtime->NewUndefined();
         }
 
@@ -1224,8 +1223,8 @@ shared_ptr<JsValue> JsReadArrayBuffer(
     auto fileLength = static_cast<int32_t>(binaryContent.size());
     if (position > fileLength || position <= 0 || length <= 0) {
         LOGE("JsReadArrayBuffer position fileLength failed");
-        engine->CallJs(callbackId,
-            R"({"arguments":["wrong start position or wrong read length", 301],"method":"fail"})");
+        engine->CallJs(
+            callbackId, R"({"arguments":["wrong start position or wrong read length", 301],"method":"fail"})");
         return runtime->NewUndefined();
     }
 
@@ -1240,8 +1239,8 @@ shared_ptr<JsValue> JsReadArrayBuffer(
     return binaryData;
 }
 
-shared_ptr<JsValue> JsHandleReadResource(const shared_ptr<JsRuntime>& runtime,
-    const std::vector<shared_ptr<JsValue>>& argv, const std::string& methodName)
+shared_ptr<JsValue> JsHandleReadResource(
+    const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv, const std::string& methodName)
 {
     LOGD("JsHandleReadResource");
     if (methodName == READ_TEXT) {
@@ -1434,9 +1433,13 @@ void ShowActionMenu(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsVal
         switch (callbackType) {
             case 0:
                 engine->CallJs(success, std::string(R"({"errMsg":"showActionMenu:ok","tapIndex":)")
-                    .append(std::to_string(successType)).append("}").c_str());
+                                            .append(std::to_string(successType))
+                                            .append("}")
+                                            .c_str());
                 engine->CallJs(complete, std::string(R"({"errMsg":"showActionMenu:ok","tapIndex":)")
-                    .append(std::to_string(successType)).append("}").c_str());
+                                             .append(std::to_string(successType))
+                                             .append("}")
+                                             .c_str());
                 break;
             case 1:
                 engine->CallJs(fail, R"({"errMsg":"showActionMenu:fail cancel"})");
@@ -2800,9 +2803,7 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
         nativeEngine_->SetPackagePath(packagePath);
     }
-    delegate->AddTaskObserver([nativeEngine = nativeEngine_]() {
-        nativeEngine->Loop(LOOP_NOWAIT);
-    });
+    delegate->AddTaskObserver([nativeEngine = nativeEngine_]() { nativeEngine->Loop(LOOP_NOWAIT); });
     RegisterWorker();
 
     return true;
@@ -2912,7 +2913,6 @@ void JsiEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
         ACE_DCHECK(!engineInstance_->GetRunningPage());
         engineInstance_->SetRunningPage(page);
     }
-
 
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetFrontendDelegate();
@@ -3126,8 +3126,7 @@ void JsiEngine::DestroyApplication(const std::string& packageName)
         LOGE("\"appDestroy\" not found or is not a function!");
         return;
     }
-    JsiUtils::SetCurrentState(JsErrorType::DESTROY_APP_ERROR, instanceId_, "",
-        engineInstance_->GetStagingPage());
+    JsiUtils::SetCurrentState(JsErrorType::DESTROY_APP_ERROR, instanceId_, "", engineInstance_->GetStagingPage());
     func->Call(runtime, global, argv, argv.size());
 }
 
@@ -3175,4 +3174,108 @@ RefPtr<GroupJsBridge> JsiEngine::GetGroupJsBridge()
 {
     return AceType::MakeRefPtr<JsiGroupJsBridge>();
 }
+
+bool JsiEngine::OnStartContinuation()
+{
+    LOGI("JsiEngine OnStartContinuation");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnStartContinuation failed, runtime is null.");
+        return false;
+    }
+
+    return CallAppFunc("onStartContinuation");
+}
+
+void JsiEngine::OnCompleteContinuation(int32_t code)
+{
+    LOGI("JsiEngine OnCompleteContinuation");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnCompleteContinuation failed, runtime is null.");
+        return;
+    }
+
+    std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(code) };
+    CallAppFunc("onCompleteContinuation", argv);
+}
+
+void JsiEngine::OnRemoteTerminated()
+{
+    LOGI("JsiEngine OnRemoteTerminated");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnRemoteTerminated failed, runtime is null.");
+        return;
+    }
+
+    CallAppFunc("onRemoteTerminated");
+}
+
+void JsiEngine::OnSaveData(std::string& data)
+{
+    LOGI("JsiEngine OnSaveData");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnSaveData failed, runtime is null.");
+        return;
+    }
+
+    shared_ptr<JsValue> object = runtime->NewObject();
+    std::vector<shared_ptr<JsValue>> argv = { object };
+    if (CallAppFunc("onSaveData", argv)) {
+        data = object->GetJsonString(runtime);
+    }
+}
+
+bool JsiEngine::OnRestoreData(const std::string& data)
+{
+    LOGI("JsiEngine OnRestoreData");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnRestoreData failed, runtime is null.");
+        return false;
+    }
+    shared_ptr<JsValue> result;
+    shared_ptr<JsValue> jsonObj = runtime->ParseJson(data);
+    if (jsonObj->IsUndefined(runtime) || jsonObj->IsException(runtime)) {
+        LOGE("JsiDeclarativeEngine: Parse json for restore data failed.");
+        return false;
+    }
+    std::vector<shared_ptr<JsValue>> argv = { jsonObj };
+    return CallAppFunc("onRestoreData", argv);
+}
+
+bool JsiEngine::CallAppFunc(const std::string& appFuncName)
+{
+    std::vector<shared_ptr<JsValue>> argv = {};
+    return CallAppFunc(appFuncName, argv);
+}
+
+bool JsiEngine::CallAppFunc(const std::string& appFuncName, std::vector<shared_ptr<JsValue>>& argv)
+{
+    LOGD("JsiEngine CallAppFunc");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    ACE_DCHECK(runtime);
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> appObj = global->GetProperty(runtime, "aceapp");
+    if (!appObj->IsObject(runtime)) {
+        LOGE("property \"aceapp\" is not a object");
+        return false;
+    }
+    shared_ptr<JsValue> defaultObject = appObj->GetProperty(runtime, "$def");
+    if (!defaultObject->IsObject(runtime)) {
+        LOGE("property \"$def\" is not a object");
+        return false;
+    }
+    shared_ptr<JsValue> func = defaultObject->GetProperty(runtime, appFuncName);
+    if (!func || !func->IsFunction(runtime)) {
+        LOGE("%{public}s not found or is not a function!", appFuncName.c_str());
+        return false;
+    }
+    shared_ptr<JsValue> result;
+    result = func->Call(runtime, defaultObject, argv, argv.size());
+    return (result->ToString(runtime) == "true");
+}
+
 } // namespace OHOS::Ace::Framework

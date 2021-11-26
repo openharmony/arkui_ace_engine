@@ -48,6 +48,7 @@ public:
     virtual bool IsBoolean(shared_ptr<JsRuntime> runtime) = 0;
     virtual bool IsString(shared_ptr<JsRuntime> runtime) = 0;
     virtual bool IsFunction(shared_ptr<JsRuntime> runtime) = 0;
+    virtual bool IsException(shared_ptr<JsRuntime> runtime) = 0;
 
     // NOLINTNEXTLINE(google-runtime-references)
     virtual bool GetPropertyNames(shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> &propertyNames, int32_t &len) = 0;
@@ -76,6 +77,7 @@ public:
 
     virtual shared_ptr<JsValue> Call(shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
                                      std::vector<shared_ptr<JsValue>> argv, int32_t argc) = 0;
+    virtual std::string GetJsonString(const shared_ptr<JsRuntime>& runtime) = 0;
 };
 }  // namespace OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_JS_VALUE_H

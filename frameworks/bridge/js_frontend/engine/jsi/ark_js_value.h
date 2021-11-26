@@ -60,7 +60,7 @@ public:
     bool IsObject(shared_ptr<JsRuntime> runtime) override;
     bool IsArray(shared_ptr<JsRuntime> runtime) override;
     bool IsFunction(shared_ptr<JsRuntime> runtime) override;
-    bool IsException(shared_ptr<JsRuntime> runtime) const;
+    bool IsException(shared_ptr<JsRuntime> runtime) override;
 
     shared_ptr<JsValue> Call(shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
                              std::vector<shared_ptr<JsValue>> argv, int32_t argc) override;
@@ -82,6 +82,7 @@ public:
 
     int32_t GetArrayLength(shared_ptr<JsRuntime> runtime) override;
     shared_ptr<JsValue> GetElement(shared_ptr<JsRuntime> runtime, int32_t idx) override;
+    std::string GetJsonString(const shared_ptr<JsRuntime>& runtime) override;
 
     Local<JSValueRef> GetValue(const shared_ptr<ArkJSRuntime> &runtime)
     {
