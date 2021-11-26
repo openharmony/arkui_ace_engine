@@ -15,6 +15,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
@@ -34,6 +35,9 @@
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
 #endif
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column_split.h"
@@ -68,6 +72,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
@@ -82,6 +87,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
@@ -499,6 +507,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Animator", JSAnimator::JSBind },
     { "Span", JSSpan::JSBind },
     { "Button", JSButton::JSBind },
+    { "Canvas", JSCanvas::JSBind },
     { "LazyForEach", JSLazyForEach::JSBind },
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },
@@ -583,6 +592,12 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TabsController", JSTabsController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
     { "AbilityController", JSAbilityComponentController::JSBind },
+    { "RenderingContext", JSRenderingContext::JSBind},
+    { "CanvasGradient", JSCanvasGradient::JSBind},
+    { "ImageBitmap", JSRenderImage::JSBind},
+    { "ImageData", JSCanvasImageData::JSBind},
+    { "Path2D", JSPath2D::JSBind},
+    { "RenderingContextSettings", JSRenderingContextSettings::JSBind},
     { "VideoController", JSVideoController::JSBind },
     { "Search", JSSearch::JSBind },
     { "Sheet", JSSheet::JSBind },
@@ -596,6 +611,12 @@ void RegisterAllModule(BindingTarget globalObj)
     JSTabsController::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
+    JSRenderingContext::JSBind(globalObj);
+    JSCanvasGradient::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj);
+    JSCanvasImageData::JSBind(globalObj);
+    JSPath2D::JSBind(globalObj);
+    JSRenderingContextSettings::JSBind(globalObj);
     JSAbilityComponentController::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
@@ -634,6 +655,12 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
     while (std::getline(input, moduleName, ',')) {
         RegisterModuleByName(globalObj, moduleName);
     }
+    JSRenderingContext::JSBind(globalObj);
+    JSCanvasGradient::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj);
+    JSCanvasImageData::JSBind(globalObj);
+    JSPath2D::JSBind(globalObj);
+    JSRenderingContextSettings::JSBind(globalObj);
 }
 
 void JsRegisterViews(BindingTarget globalObj)

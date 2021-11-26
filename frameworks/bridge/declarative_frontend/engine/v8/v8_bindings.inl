@@ -144,6 +144,53 @@ void V8Class<C>::CustomMethod(const char* name, JSMemberFunctionCallback<T> call
 }
 
 template<typename C>
+template<typename T>
+void V8Class<C>::CustomProperty(const char* name, MemberFunctionGetCallback<T> callback,
+    int getterId, int setterId)
+{
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto& funtionTemplate = functionTemplates_[isolate];
+
+    funtionTemplate.Get(isolate)->PrototypeTemplate()->SetAccessorProperty(
+        v8::Local<v8::Name>::Cast(V8ValueConvertor::toV8Value<std::string>(name)),
+        v8::FunctionTemplate::New(isolate,
+            InternalMemberFunctionCallback<T, const v8::FunctionCallbackInfo<v8::Value>&>,
+            v8::Integer::New(isolate, getterId)),
+        v8::FunctionTemplate::New(isolate,
+            InternalMemberFunctionCallback<T, const v8::FunctionCallbackInfo<v8::Value>&>,
+            v8::Integer::New(isolate, setterId)));
+}
+
+template<typename C>
+void V8Class<C>::CustomProperty(const char* name, FunctionGetCallback getter, FunctionSetCallback setter)
+{
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto& funtionTemplate = functionTemplates_[isolate];
+    funtionTemplate.Get(isolate)->PrototypeTemplate()->SetAccessorProperty(
+        v8::Local<v8::Name>::Cast(V8ValueConvertor::toV8Value<std::string>(name)),
+        v8::FunctionTemplate::New(isolate, getter),
+        v8::FunctionTemplate::New(isolate, setter));
+}
+
+template<typename C>
+template<typename T>
+void V8Class<C>::CustomProperty(const char* name, JSMemberFunctionCallback<T> callback,
+    int getterId, int setterId)
+{
+    v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto& funtionTemplate = functionTemplates_[isolate];
+    funtionTemplate.Get(isolate)->PrototypeTemplate()->SetAccessorProperty(
+        v8::Local<v8::Name>::Cast(V8ValueConvertor::toV8Value<std::string>(name)),
+        v8::FunctionTemplate::New(
+            isolate, InternalMemberFunctionCallback<T, const JSCallbackInfo&>, v8::Integer::New(isolate, getterId)),
+        v8::FunctionTemplate::New(
+            isolate, InternalMemberFunctionCallback<T, const JSCallbackInfo&>, v8::Integer::New(isolate, setterId)));
+}
+
+template<typename C>
 template<typename R, typename... Args>
 void V8Class<C>::StaticMethod(const char* name, R (*func)(Args...), int id)
 {

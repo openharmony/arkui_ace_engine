@@ -15,6 +15,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
@@ -31,7 +32,14 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
 #endif
@@ -544,6 +552,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"Animator", JSAnimator::JSBind},
     {"Span", JSSpan::JSBind},
     {"Button", JSButton::JSBind},
+    {"Canvas", JSCanvas::JSBind},
     {"LazyForEach", JSLazyForEach::JSBind},
     {"List", JSList::JSBind},
     {"ListItem", JSListItem::JSBind},
@@ -632,6 +641,12 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"SwiperController", JSSwiperController::JSBind},
     {"TabsController", JSTabsController::JSBind},
     {"CalendarController", JSCalendarController::JSBind},
+    {"RenderingContext", JSRenderingContext::JSBind},
+    {"CanvasGradient", JSCanvasGradient::JSBind},
+    {"ImageBitmap", JSRenderImage::JSBind},
+    {"ImageData", JSCanvasImageData::JSBind},
+    {"Path2D", JSPath2D::JSBind},
+    {"RenderingContextSettings", JSRenderingContextSettings::JSBind},
     {"AbilityController", JSAbilityComponentController::JSBind},
     {"VideoController", JSVideoController::JSBind},
     {"Search", JSSearch::JSBind},

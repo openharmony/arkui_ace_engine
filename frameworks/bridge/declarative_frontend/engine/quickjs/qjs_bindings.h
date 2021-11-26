@@ -78,6 +78,14 @@ public:
     template<typename T>
     static void CustomMethod(const char* name, JSMemberFunctionCallback<T> callback, int id);
 
+    static void CustomProperty(const char* name, FunctionGetCallback getter, FunctionSetCallback setter);
+
+    template<typename T>
+    static void CustomProperty(const char* name, MemberFunctionGetCallback<T> cb, int getterId, int setterId);
+
+    template<typename T>
+    static void CustomProperty(const char* name, JSMemberFunctionCallback<T> callback, int getterId, int setterId);
+
     template<typename R, typename... Args>
     static void StaticMethod(const char* name, R (*func)(Args...), int id);
 
@@ -123,8 +131,20 @@ private:
     static JSValue InternalMemberFunctionCallback(
         JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv, int magic);
     template<typename T>
+    static JSValue InternalMemberFunctionGetCallback(
+            JSContext* ctx, JSValueConst thisObj, int magic);
+    template<typename T>
+    static JSValue InternalMemberFunctionSetCallback(
+            JSContext* ctx, JSValueConst thisObj, JSValueConst argv, int magic);
+    template<typename T>
     static JSValue InternalJSMemberFunctionCallback(
         JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv, int magic);
+    template<typename T>
+    static JSValue InternalJSMemberFunctionGetCallback(
+            JSContext* ctx, JSValueConst thisObj, int magic);
+    template<typename T>
+    static JSValue InternalJSMemberFunctionSetCallback(
+            JSContext* ctx, JSValueConst thisObj, JSValueConst argv, int magic);
 
     template<typename Class, typename R, typename... Args>
     static JSValue MethodCallback(JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv, int magic);

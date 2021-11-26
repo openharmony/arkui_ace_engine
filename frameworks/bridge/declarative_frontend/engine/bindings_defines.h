@@ -39,8 +39,14 @@ JSValueConst JS_NewGlobalCConstructor(
 
 using BindingTarget = JSValue;
 using FunctionCallback = JSValue (*)(JSContext*, JSValueConst, int, JSValueConst*);
+using FunctionGetCallback = JSValue (*)(JSContext*, JSValueConst);
+using FunctionSetCallback = JSValue (*)(JSContext*, JSValueConst, JSValueConst);
 template<typename T>
 using MemberFunctionCallback = JSValue (T::*)(JSContext*, JSValueConst, int, JSValueConst*);
+template<typename T>
+using MemberFunctionGetCallback = JSValue (T::*)(JSContext*, JSValueConst);
+template<typename T>
+using MemberFunctionSetCallback = JSValue (T::*)(JSContext*, JSValueConst, JSValueConst);
 using ExoticGetterCallback = JSValue (*)(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
 using ExoticSetterCallback = int (*)(
     JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
@@ -57,8 +63,14 @@ constexpr const JavascriptEngine cCurrentJSEngine = JavascriptEngine::QUICKJS;
 
 using BindingTarget = v8::Local<v8::ObjectTemplate>;
 using FunctionCallback = void (*)(const v8::FunctionCallbackInfo<v8::Value>&);
+using FunctionGetCallback = void (*)(const v8::FunctionCallbackInfo<v8::Value>&);
+using FunctionSetCallback = void (*)(const v8::FunctionCallbackInfo<v8::Value>&);
 template<typename T>
 using MemberFunctionCallback = void (T::*)(const v8::FunctionCallbackInfo<v8::Value>&);
+template<typename T>
+using MemberFunctionGetCallback = void (T::*)(const v8::FunctionCallbackInfo<v8::Value>&);
+template<typename T>
+using MemberFunctionSetCallback = void (T::*)(const v8::FunctionCallbackInfo<v8::Value>&);
 using ExoticGetterCallback = int;
 using ExoticSetterCallback = int;
 using ExoticHasPropertyCallback = int;
@@ -73,8 +85,18 @@ constexpr const JavascriptEngine cCurrentJSEngine = JavascriptEngine::V8;
 using BindingTarget = panda::Local<panda::ObjectRef>;
 using FunctionCallback = panda::Local<panda::JSValueRef>(*)(
     panda::EcmaVM*, panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef> [], int32_t, void*);
+using FunctionGetCallback = panda::Local<panda::JSValueRef>(*)(
+        panda::EcmaVM*, panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef> [], int32_t, void*);
+using FunctionSetCallback = panda::Local<panda::JSValueRef>(*)(
+        panda::EcmaVM*, panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef> [], int32_t, void*);
 template<typename T>
 using MemberFunctionCallback = panda::Local<panda::JSValueRef>(T::*)(
+    panda::EcmaVM*, panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef> [], int32_t, void*);
+template<typename T>
+using MemberFunctionGetCallback = panda::Local<panda::JSValueRef>(T::*)(
+    panda::EcmaVM*, panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef> [], int32_t, void*);
+template<typename T>
+using MemberFunctionSetCallback = panda::Local<panda::JSValueRef>(T::*)(
     panda::EcmaVM*, panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef> [], int32_t, void*);
 using ExoticGetterCallback = int;
 using ExoticSetterCallback = int;

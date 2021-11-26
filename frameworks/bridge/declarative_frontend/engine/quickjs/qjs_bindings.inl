@@ -147,6 +147,40 @@ void QJSKlass<C>::CustomMethod(const char* name, JSMemberFunctionCallback<T> cb,
 }
 
 template<typename C>
+void QJSKlass<C>::CustomProperty(const char* name, FunctionGetCallback getter, FunctionSetCallback setter)
+{
+    JSCFunctionListEntry* funcEntry = QJSFunctionListEntriesContainer::GetInstance().New(
+        name, JS_PROP_CONFIGURABLE, JS_DEF_CGETSET, 0);
+
+    funcEntry->u.getset.get.getter = getter;
+    funcEntry->u.getset.set.setter = setter;
+    functions_.insert_or_assign(name, funcEntry);
+}
+
+template<typename C>
+template<typename T>
+void QJSKlass<C>::CustomProperty(const char* name, MemberFunctionGetCallback<T> cb, int getterId, int setterId)
+{
+    JSCFunctionListEntry* funcEntry = QJSFunctionListEntriesContainer::GetInstance().New(
+        name, JS_PROP_CONFIGURABLE, JS_DEF_CGETSET_MAGIC, getterId);
+
+    funcEntry->u.getset.get.getter_magic = InternalMemberFunctionGetCallback<T>;
+    funcEntry->u.getset.set.setter_magic = InternalMemberFunctionSetCallback<T>;
+    functions_.insert_or_assign(name, funcEntry);
+}
+
+template<typename C>
+template<typename T>
+void QJSKlass<C>::CustomProperty(const char* name, JSMemberFunctionCallback<T> cb, int getterId, int setterId)
+{
+    JSCFunctionListEntry* funcEntry = QJSFunctionListEntriesContainer::GetInstance().New(
+            name, JS_PROP_CONFIGURABLE, JS_DEF_CGETSET_MAGIC, getterId);
+    funcEntry->u.getset.get.getter_magic = InternalJSMemberFunctionGetCallback<T>;;
+    funcEntry->u.getset.set.setter_magic = InternalJSMemberFunctionSetCallback<T>;;
+    functions_.insert_or_assign(name, funcEntry);
+}
+
+template<typename C>
 template<typename R, typename... Args>
 void QJSKlass<C>::StaticMethod(const char* name, R (*func)(Args...), int id)
 {
@@ -315,6 +349,34 @@ JSValue QJSKlass<C>::InternalMemberFunctionCallback(
 
 template<typename C>
 template<typename T>
+JSValue QJSKlass<C>::InternalMemberFunctionGetCallback(
+    JSContext* ctx, JSValueConst thisObj, int magic)
+{
+    C* ptr = static_cast<C*>(Unwrap(thisObj));
+    T* instance = static_cast<T*>(ptr);
+    auto binding = ThisJSClass::GetGetFunctionBinding(magic);
+    LOGD("InternalmemberFunctionGetCallback: Calling %s::%s", ThisJSClass::JSName(), binding->Name());
+    auto fnPtr =
+        static_cast<FunctionBinding<T, JSValue, JSContext*, JSValueConst>*>(binding)->Get();
+    return (instance->*fnPtr)(ctx, thisObj);
+}
+
+template<typename C>
+template<typename T>
+JSValue QJSKlass<C>::InternalMemberFunctionSetCallback(
+    JSContext* ctx, JSValueConst thisObj, JSValueConst val, int magic)
+{
+    C* ptr = static_cast<C*>(Unwrap(thisObj));
+    T* instance = static_cast<T*>(ptr);
+    auto binding = ThisJSClass::GetSetFunctionBinding(magic);
+    LOGD("InternalmemberFunctionSetCallback: Calling %s::%s", ThisJSClass::JSName(), binding->Name());
+    auto fnPtr =
+        static_cast<FunctionBinding<T, JSValue, JSContext*, JSValueConst, JSValueConst>*>(binding)->Get();
+    return (instance->*fnPtr)(ctx, thisObj, val);
+}
+
+template<typename C>
+template<typename T>
 JSValue QJSKlass<C>::InternalJSMemberFunctionCallback(
     JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv, int magic)
 {
@@ -325,6 +387,70 @@ JSValue QJSKlass<C>::InternalJSMemberFunctionCallback(
 
     auto fnPtr = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(binding)->Get();
     QJSCallbackInfo info(ctx, thisObj, argc, argv);
+    (instance->*fnPtr)(info);
+
+    std::variant<void*, JSValue> retVal = info.GetReturnValue();
+    if (retVal.valueless_by_exception()) {
+        LOGD("Method %s::%s did not set a return value, returning 'undefined' by default", ThisJSClass::JSName(),
+            binding->Name());
+        return JS_UNDEFINED;
+    }
+
+    auto jsVal = std::get_if<JSValue>(&retVal);
+    if (jsVal) {
+        JSValue ret = *jsVal;
+        if (!JS_IsUndefined(ret)) {
+            return ret;
+        }
+    }
+
+    return JS_UNDEFINED;
+}
+
+template<typename C>
+template<typename T>
+JSValue QJSKlass<C>::InternalJSMemberFunctionGetCallback(
+    JSContext* ctx, JSValueConst thisObj, int magic)
+{
+    C* ptr = static_cast<C*>(Unwrap(thisObj));
+    T* instance = static_cast<T*>(ptr);
+    auto binding = ThisJSClass::GetGetFunctionBinding(magic);
+    LOGD("InternalmemberFunctionGetCallback: Calling %s::%s", ThisJSClass::JSName(), binding->Name());
+
+    auto fnPtr = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(binding)->Get();
+    QJSCallbackInfo info(ctx, thisObj, 0, nullptr);
+    (instance->*fnPtr)(info);
+
+    std::variant<void*, JSValue> retVal = info.GetReturnValue();
+    if (retVal.valueless_by_exception()) {
+        LOGD("Method %s::%s did not set a return value, returning 'undefined' by default", ThisJSClass::JSName(),
+            binding->Name());
+        return JS_UNDEFINED;
+    }
+
+    auto jsVal = std::get_if<JSValue>(&retVal);
+    if (jsVal) {
+        JSValue ret = *jsVal;
+        if (!JS_IsUndefined(ret)) {
+            return ret;
+        }
+    }
+
+    return JS_UNDEFINED;
+}
+
+template<typename C>
+template<typename T>
+JSValue QJSKlass<C>::InternalJSMemberFunctionSetCallback(
+    JSContext* ctx, JSValueConst thisObj, JSValueConst argv, int magic)
+{
+    C* ptr = static_cast<C*>(Unwrap(thisObj));
+    T* instance = static_cast<T*>(ptr);
+    auto binding = ThisJSClass::GetSetFunctionBinding(magic);
+    LOGD("InternalmemberFunctionSetCallback: Calling %s::%s", ThisJSClass::JSName(), binding->Name());
+
+    auto fnPtr = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(binding)->Get();
+    QJSCallbackInfo info(ctx, thisObj, 1, &argv);
     (instance->*fnPtr)(info);
 
     std::variant<void*, JSValue> retVal = info.GetReturnValue();

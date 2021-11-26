@@ -20,6 +20,10 @@ namespace OHOS::Ace::Framework {
 template<typename T, template<typename> typename ImplDetail>
 std::unordered_map<int, IFunctionBinding*> JSClassImpl<T, ImplDetail>::functions_;
 template<typename T, template<typename> typename ImplDetail>
+std::unordered_map<int, IFunctionBinding*> JSClassImpl<T, ImplDetail>::getFunctions_;
+template<typename T, template<typename> typename ImplDetail>
+std::unordered_map<int, IFunctionBinding*> JSClassImpl<T, ImplDetail>::setFunctions_;
+template<typename T, template<typename> typename ImplDetail>
 int JSClassImpl<T, ImplDetail>::nextFreeId_ = 0;
 template<typename T, template<typename> typename ImplDetail>
 std::string JSClassImpl<T, ImplDetail>::jsName;
@@ -76,6 +80,50 @@ void JSClassImpl<C, ImplDetail>::CustomMethod(const char* name, JSMemberFunction
 {
     functions_.emplace(nextFreeId_, new FunctionBinding(name, MethodOptions::NONE, callback));
     ImplDetail<C>::CustomMethod(name, callback, nextFreeId_++);
+}
+
+template<typename C, template<typename> typename ImplDetail>
+template<typename T>
+void JSClassImpl<C, ImplDetail>::CustomProperty(const char* name, MemberFunctionGetCallback<T> getter,
+    MemberFunctionSetCallback<T> setter)
+{
+    int getFuncId;
+    int setFuncId;
+    getFunctions_.emplace(nextFreeId_, new FunctionBinding(name, MethodOptions::NONE, getter));
+    setFunctions_.emplace(nextFreeId_, new FunctionBinding(name, MethodOptions::NONE, setter));
+
+    static_assert(std::is_base_of_v<T, C>, "Trying to bind an unrelated method!");
+    functions_.emplace(nextFreeId_, new FunctionBinding(name, MethodOptions::NONE, getter));
+    getFuncId = nextFreeId_++;
+    functions_.emplace(nextFreeId_, new FunctionBinding(name, MethodOptions::NONE, setter));
+    setFuncId = nextFreeId_++;
+
+
+    ImplDetail<C>::CustomProperty(name, getter, getFuncId, setFuncId);
+}
+
+template<typename C, template<typename> typename ImplDetail>
+void JSClassImpl<C, ImplDetail>::CustomProperty(const char* name, FunctionGetCallback getter,
+    FunctionSetCallback setter)
+{
+    ImplDetail<C>::CustomProperty(name, getter, setter);
+}
+
+template<typename C, template<typename> typename ImplDetail>
+template<typename T>
+void JSClassImpl<C, ImplDetail>::CustomProperty(const char* name, JSMemberFunctionCallback<T> getter,
+    JSMemberFunctionCallback<T> setter)
+{
+    int getFuncId;
+    int setFuncId;
+    getFunctions_.emplace(nextFreeId_, new FunctionBinding(name, MethodOptions::NONE, getter));
+    setFunctions_.emplace(nextFreeId_, new FunctionBinding(name, MethodOptions::NONE, setter));
+    functions_.emplace(nextFreeId_, new FunctionBinding(name, MethodOptions::NONE, getter));
+    getFuncId = nextFreeId_++;
+    functions_.emplace(nextFreeId_, new FunctionBinding(name, MethodOptions::NONE, setter));
+    setFuncId = nextFreeId_++;
+
+    ImplDetail<C>::CustomProperty(name, getter, getFuncId, setFuncId);
 }
 
 template<typename C, template<typename> typename ImplDetail>
@@ -142,6 +190,18 @@ template<typename C, template<typename> typename ImplDetail>
 IFunctionBinding* JSClassImpl<C, ImplDetail>::GetFunctionBinding(int id)
 {
     return functions_[id];
+}
+
+template<typename C, template<typename> typename ImplDetail>
+IFunctionBinding* JSClassImpl<C, ImplDetail>::GetGetFunctionBinding(int id)
+{
+    return getFunctions_[id];
+}
+
+template<typename C, template<typename> typename ImplDetail>
+IFunctionBinding* JSClassImpl<C, ImplDetail>::GetSetFunctionBinding(int id)
+{
+    return setFunctions_[id];
 }
 
 template<typename C, template<typename> typename ImplDetail>
