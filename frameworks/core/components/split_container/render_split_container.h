@@ -35,8 +35,6 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void InitializeRecognizer();
-    bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
-        TouchTestResult& result) override;
 
     bool GetResizeable() const
     {

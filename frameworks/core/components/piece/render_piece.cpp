@@ -88,22 +88,20 @@ bool RenderPiece::MouseHoverTest(const Point& parentLocalPoint)
     if (!pieceComponent_) {
         return false;
     }
-    auto margin = pieceComponent_->GetMargin();
-    if ((parent->GetTouchRect() - parent->GetTouchRect().GetOffset() + margin.GetOffsetInPx(context->GetDipScale()))
-            .IsInRegion(parentLocalPoint)) {
+    if (InTouchRectList(parentLocalPoint, parent->GetTouchRectList())) {
         if (mouseState_ == MouseState::NONE) {
             OnMouseHoverEnterTest();
             mouseState_ = MouseState::HOVER;
         }
         context->AddToHoverList(AceType::WeakClaim(this).Upgrade());
         return true;
-    } else {
-        if (mouseState_ == MouseState::HOVER) {
-            OnMouseHoverExitTest();
-            mouseState_ = MouseState::NONE;
-        }
-        return false;
     }
+
+    if (mouseState_ == MouseState::HOVER) {
+        OnMouseHoverExitTest();
+        mouseState_ = MouseState::NONE;
+    }
+    return false;
 }
 
 void RenderPiece::OnMouseHoverEnterTest()

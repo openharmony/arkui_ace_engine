@@ -34,6 +34,7 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void Paint(RenderContext& context, const Offset& offset) override;
+    void UpdateTouchRect() override;
 
     void OnChildAdded(const RefPtr<RenderNode>& child) override;
     void OnChildRemoved(const RefPtr<RenderNode>& child) override;

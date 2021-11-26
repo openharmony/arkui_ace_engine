@@ -494,7 +494,7 @@ bool RenderSearch::MouseHoverTest(const Point& parentLocalPoint)
         hoverOrPressRender_ = SearchNodeType::NONE;
         return false;
     }
-    if (!GetTouchRect().IsInRegion(parentLocalPoint)) {
+    if (!InTouchRectList(parentLocalPoint, GetTouchRectList())) {
         if (mouseState_ == MouseState::HOVER) {
             mouseState_ = MouseState::NONE;
             hoverOrPressRender_ = SearchNodeType::NONE;

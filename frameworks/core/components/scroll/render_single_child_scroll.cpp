@@ -145,13 +145,6 @@ bool RenderSingleChildScroll::CalculateMainScrollExtent(const Size& itemSize)
     return isScrollable;
 }
 
-void RenderSingleChildScroll::UpdateTouchRect()
-{
-    touchRect_.SetSize(GetPaintRect().GetSize());
-    touchRect_.SetOffset(GetPaintRect().GetOffset());
-    ownTouchRect_ = touchRect_;
-}
-
 void RenderSingleChildScroll::MoveChildToViewPort(
     const Size& size, const Offset& childOffset, const Offset& effectOffset)
 {

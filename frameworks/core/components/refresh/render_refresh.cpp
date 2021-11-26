@@ -229,7 +229,8 @@ void RenderRefresh::UpdateTouchRect()
 {
     touchRect_.SetSize(viewPort_);
     touchRect_.SetOffset(GetPosition());
-    ownTouchRect_ = touchRect_;
+    touchRectList_.emplace_back(touchRect_);
+    SetTouchRectList(touchRectList_);
 }
 
 void RenderRefresh::HandleDragUpdate(double delta)

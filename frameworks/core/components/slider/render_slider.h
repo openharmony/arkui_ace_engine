@@ -216,7 +216,6 @@ protected:
     void UpdateAccessibilityAttr();
     void InitAccessibilityEventListener();
     void HandleScrollUpdate(double delta);
-    void UpdateTouchRect() override;
 
     bool renderWholeNode_ = true;
 

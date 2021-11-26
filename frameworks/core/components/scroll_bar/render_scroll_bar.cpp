@@ -109,16 +109,12 @@ void RenderScrollBar::HandleDragStart(const DragStartInfo& info)
     if (!child) {
         return;
     }
-    touchInBarRegion_ =
-        child->GetTouchRect().IsInRegion(Point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()));
+
     StopAnimator();
 }
 
 void RenderScrollBar::HandleDragUpdate(const DragUpdateInfo& info)
 {
-    if (!touchInBarRegion_) {
-        return;
-    }
     auto child = GetChildren().front();
     if (!child) {
         return;

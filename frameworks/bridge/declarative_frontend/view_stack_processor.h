@@ -63,8 +63,10 @@ public:
     bool HasDisplayComponent() const;
     RefPtr<TransformComponent> GetTransformComponent();
     RefPtr<TouchListenerComponent> GetTouchListenerComponent();
+    bool HasTouchListenerComponent() const;
     RefPtr<MouseListenerComponent> GetMouseListenerComponent();
     RefPtr<GestureListenerComponent> GetClickGestureListenerComponent();
+    bool HasClickGestureListenerComponent() const;
     RefPtr<GestureListenerComponent> GetPanGestureListenerComponent();
     RefPtr<FocusableComponent> GetFocusableComponent(bool createIfNotExist = true);
     RefPtr<SharedTransitionComponent> GetSharedTransitionComponent();

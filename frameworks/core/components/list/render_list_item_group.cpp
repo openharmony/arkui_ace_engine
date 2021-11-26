@@ -683,12 +683,6 @@ int32_t RenderListItemGroup::GetNextFocusIndex(int32_t lastFocusIndex, bool vert
     return -1;
 }
 
-void RenderListItemGroup::UpdateTouchRect()
-{
-    SetTouchRect(GetPaintRect());
-    ownTouchRect_ = touchRect_;
-}
-
 void RenderListItemGroup::ItemPrimaryChange(int32_t index)
 {
     if (isDefaultPrimary_) {

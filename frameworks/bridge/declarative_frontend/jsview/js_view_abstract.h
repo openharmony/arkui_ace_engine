@@ -22,6 +22,7 @@
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/geometry/dimension_rect.h"
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -102,6 +103,11 @@ public:
     static void JsGridOffset(const JSCallbackInfo& info);
     static void JsUseSizeType(const JSCallbackInfo& Info);
     static void JsHoverEffect(const JSCallbackInfo& info);
+
+    // response region
+    static void JsResponseRegion(const JSCallbackInfo& info);
+    static bool ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std::vector<DimensionRect>& result);
+    static bool ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result);
 
     // for number and string with no unit, use default dimension unit.
     static bool ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& result, DimensionUnit defaultUnit);

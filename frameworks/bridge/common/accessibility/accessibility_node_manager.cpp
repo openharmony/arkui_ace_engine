@@ -530,7 +530,7 @@ void AccessibilityNodeManager::UpdateEventTarget(NodeId id, BaseEventInfo& info)
     auto& target = info.GetTargetWichModify();
     target.area.SetOffset(DimensionOffset(
         Offset(rectInLocal.GetOffset().GetX() + marginLeft, rectInLocal.GetOffset().GetY() + marginTop)));
-    target.area.SetGlobaleOffset(DimensionOffset(
+    target.area.SetGlobalOffset(DimensionOffset(
         Offset(rectInGlobal.GetOffset().GetX() + marginLeft, rectInGlobal.GetOffset().GetY() + marginTop)));
     target.area.SetWidth(Dimension(rectInLocal.Width() - marginLeft - marginRight));
     target.area.SetHeight(Dimension(rectInLocal.Height() - marginTop - marginBottom));

@@ -70,6 +70,9 @@ void RenderBox::Update(const RefPtr<Component>& component)
         isZoom = animationType_ == HoverAnimationType::SCALE;
         MarkNeedLayout();
 
+        responseRegion_ = box->GetResponseRegion();
+        isResponseRegion_ = box->IsResponseRegion();
+
         auto tapGesture = box->GetOnClick();
         if (tapGesture) {
             onClick_ = tapGesture->CreateRecognizer(context_);

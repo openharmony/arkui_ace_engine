@@ -110,7 +110,6 @@ public:
     ~RenderSwiper() override;
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
-    void UpdateTouchRect() override;
     void PerformLayout() override;
 
     bool IsChildrenTouchEnable() override;

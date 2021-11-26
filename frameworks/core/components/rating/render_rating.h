@@ -107,8 +107,6 @@ public:
     }
     void RequestFocusAnimation(const Offset& animationOffset, const Size& animationSize, double borderRadius);
 
-    void UpdateTouchRect() override;
-
     Offset GetStarOffset(double imageVerticalOffset);
 
     void RequestFocusAnimationForPhone();

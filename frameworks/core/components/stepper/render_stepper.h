@@ -87,7 +87,6 @@ class RenderStepper : public RenderNode {
 public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
-    void UpdateTouchRect() override;
     void PerformLayout() override;
     int32_t GetCurrentIndex() const
     {

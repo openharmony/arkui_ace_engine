@@ -530,7 +530,7 @@ bool RenderRating::MouseHoverTest(const Point& parentLocalPoint)
         LOGW("mouseHoverTest failed, singleWidth is zero");
         return false;
     }
-    if (!GetTouchRect().IsInRegion(parentLocalPoint)) {
+    if (!InTouchRectList(parentLocalPoint, GetTouchRectList())) {
         OnMouseHoverExitTest();
         return false;
     }
@@ -545,13 +545,6 @@ bool RenderRating::MouseHoverTest(const Point& parentLocalPoint)
     OnMouseHoverEnterTest();
     context->AddToHoverList(AceType::WeakClaim(this).Upgrade());
     return true;
-}
-
-void RenderRating::UpdateTouchRect()
-{
-    touchRect_.SetSize(GetLayoutSize());
-    touchRect_.SetOffset(GetPosition());
-    ownTouchRect_ = touchRect_;
 }
 
 Offset RenderRating::GetStarOffset(double imageVerticalOffset)

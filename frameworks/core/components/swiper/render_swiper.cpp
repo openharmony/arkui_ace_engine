@@ -226,13 +226,6 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     swiper_ = swiper; // must after UpdateIndex
 }
 
-void RenderSwiper::UpdateTouchRect()
-{
-    touchRect_.SetSize(GetLayoutSize());
-    touchRect_.SetOffset(GetPosition());
-    ownTouchRect_ = touchRect_;
-}
-
 bool RenderSwiper::RefuseUpdatePosition(int32_t index)
 {
     if ((isIndicatorAnimationStart_ && !quickTrunItem_) && (index == currentIndex_ || index == targetIndex_)) {
@@ -2050,8 +2043,7 @@ bool RenderSwiper::MouseHoverTest(const Point& parentLocalPoint)
         auto& child = *iter;
         child->MouseHoverTest(localPoint);
     }
-
-    bool isInRegion = GetTouchRect().IsInRegion(parentLocalPoint);
+    bool isInRegion = InTouchRectList(parentLocalPoint, GetTouchRectList());
     if (isInRegion) {
         context->AddToHoverList(AceType::WeakClaim(this).Upgrade());
     }

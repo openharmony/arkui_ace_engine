@@ -190,6 +190,15 @@ RefPtr<TransformComponent> ViewStackProcessor::GetTransformComponent()
     return transformComponent;
 }
 
+bool ViewStackProcessor::HasTouchListenerComponent() const
+{
+    auto& wrappingComponentsMap = componentsStack_.top();
+    if (wrappingComponentsMap.find("touch") != wrappingComponentsMap.end()) {
+        return true;
+    }
+    return false;
+}
+
 RefPtr<TouchListenerComponent> ViewStackProcessor::GetTouchListenerComponent()
 {
     auto& wrappingComponentsMap = componentsStack_.top();
@@ -218,6 +227,15 @@ RefPtr<MouseListenerComponent> ViewStackProcessor::GetMouseListenerComponent()
     RefPtr<MouseListenerComponent> mouseComponent = AceType::MakeRefPtr<OHOS::Ace::MouseListenerComponent>();
     wrappingComponentsMap.emplace("mouse", mouseComponent);
     return mouseComponent;
+}
+
+bool ViewStackProcessor::HasClickGestureListenerComponent() const
+{
+    auto& wrappingComponentsMap = componentsStack_.top();
+    if (wrappingComponentsMap.find("click_guesture") != wrappingComponentsMap.end()) {
+        return true;
+    }
+    return false;
 }
 
 RefPtr<GestureListenerComponent> ViewStackProcessor::GetClickGestureListenerComponent()

@@ -181,4 +181,23 @@ void RenderListItem::OnTouchTestHit(
     result.emplace_back(longPressRecognizer_);
 }
 
+void RenderListItem::UpdateTouchRect()
+{
+    RenderNode::UpdateTouchRect();
+    if (button_ && IsResponseRegion()) {
+        auto buttonTouchRect = button_->GetPaintRect();
+        std::vector<Rect> touchRectList;
+        for (auto& region : responseRegion_) {
+            double x = GetPxValue(touchRect_.Width(), region.GetOffset().GetX());
+            double y = GetPxValue(touchRect_.Height(), region.GetOffset().GetY());
+            double width = GetPxValue(buttonTouchRect.Width(), region.GetWidth());
+            double height = GetPxValue(buttonTouchRect.Height(), region.GetHeight());
+            Rect responseRegion(buttonTouchRect.GetOffset().GetX() + x,
+                buttonTouchRect.GetOffset().GetY() + y, width, height);
+            touchRectList.emplace_back(responseRegion);
+        }
+        button_->ChangeTouchRectList(touchRectList);
+    }
+}
+
 } // namespace OHOS::Ace::V2

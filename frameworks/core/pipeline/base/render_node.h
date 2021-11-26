@@ -137,6 +137,10 @@ public:
 
     virtual void UpdateTouchRect();
 
+    void SetTouchRectList(std::vector<Rect>& touchRectList);
+    bool CompareTouchRect(const Rect& parentTouchRect, const Rect& childTouchRect);
+    void CompareTouchRectList(std::vector<Rect>& parentTouchRectList, const std::vector<Rect>& childTouchRectList);
+
     bool NeedLayout() const
     {
         return needLayout_;
@@ -251,13 +255,29 @@ public:
         return touchRect_;
     }
 
-    virtual const Rect& GetOwnTouchRect()
+    virtual const std::vector<Rect>& GetTouchRectList()
     {
         if (needUpdateTouchRect_) {
             needUpdateTouchRect_ = false;
+            touchRectList_.clear();
             UpdateTouchRect();
         }
-        return ownTouchRect_;
+        return touchRectList_;
+    }
+
+    void ChangeTouchRectList(std::vector<Rect>& touchRectList)
+    {
+        touchRectList_ = touchRectList;
+    }
+
+    bool InTouchRectList(const Point& parentLocalPoint, const std::vector<Rect>& touchRectList) const
+    {
+        for (auto& rect : touchRectList) {
+            if (rect.IsInRegion(parentLocalPoint)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     virtual Point GetTransformPoint(const Point& point)
@@ -918,6 +938,18 @@ public:
     // sync geometry properties to ROSEN backend
     virtual void SyncGeometryProperties();
 
+    bool IsResponseRegion() const
+    {
+        return isResponseRegion_;
+    }
+
+    double GetPxValue(double standard, const Dimension& value);
+
+    const std::vector<Rect>& GetResponseRegionList() const
+    {
+        return responseRegionList_;
+    }
+
 protected:
     explicit RenderNode(bool takeBoundary = false);
     virtual void ClearRenderObject();
@@ -990,8 +1022,10 @@ protected:
     Size viewPort_;
     Point globalPoint_;
     WeakPtr<AccessibilityNode> accessibilityNode_;
-    Rect touchRect_;    // Self and all children combined touch rect
-    Rect ownTouchRect_; // Self touch rect.
+    Rect touchRect_;    // Self touch rect
+    std::vector<Rect> touchRectList_; // Self and all children touch rect
+    std::vector<DimensionRect> responseRegion_;
+    std::vector<Rect> responseRegionList_;
     PositionParam positionParam_;
     uint8_t opacity_ = 255;
     Shadow shadow_;
@@ -1003,6 +1037,7 @@ protected:
     bool needWindowBlur_ = false;
     bool needUpdateAccessibility_ = true;
     bool disabled_ = false;
+    bool isResponseRegion_ = false;
     HoverAnimationType hoverAnimationType_ = HoverAnimationType::AUTO;
     int32_t minPlatformVersion_ = 0;
 

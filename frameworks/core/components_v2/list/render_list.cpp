@@ -726,13 +726,6 @@ void RenderList::AnimateTo(const Dimension& position, float duration, const RefP
     animator_->Play();
 }
 
-void RenderList::UpdateTouchRect()
-{
-    touchRect_.SetSize(GetLayoutSize());
-    touchRect_.SetOffset(GetPosition());
-    ownTouchRect_ = touchRect_;
-}
-
 void RenderList::AdjustOffset(Offset& delta, int32_t source)
 {
     // when scrollEffect equal to none, no need to adjust offset

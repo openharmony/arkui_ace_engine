@@ -57,8 +57,6 @@ public:
 
     void OnPaintFinish() override;
 
-    void UpdateTouchRect() override;
-
     template<class T>
     T MakeValue(double mainValue, double crossValue) const
     {

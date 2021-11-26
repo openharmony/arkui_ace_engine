@@ -79,7 +79,7 @@ public:
         height_ = height;
     }
 
-    void SetGlobaleOffset(const DimensionOffset& offset)
+    void SetGlobalOffset(const DimensionOffset& offset)
     {
         globalOffset_ = offset;
     }

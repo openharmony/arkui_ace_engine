@@ -37,9 +37,11 @@ public:
     void PerformLayout() override;
     void OnPaintFinish() override;
 
-    const Rect& GetOwnTouchRect() override
+    const std::vector<Rect>& GetTouchRectList() override
     {
-        return childRect_;
+        touchRectList_.clear();
+        touchRectList_.emplace_back(childRect_);
+        return touchRectList_;
     }
 
     bool SupportOpacity() override

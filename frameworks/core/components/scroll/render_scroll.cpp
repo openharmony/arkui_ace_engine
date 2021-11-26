@@ -1063,7 +1063,6 @@ void RenderScroll::UpdateTouchRect()
         if (scrollBar_->GetPositionMode() == PositionMode::LEFT) {
             touchRect_.SetLeft(touchRect_.Left() - scrollBarPosition);
         }
-        ownTouchRect_ = touchRect_;
     }
 }
 

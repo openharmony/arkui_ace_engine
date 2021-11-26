@@ -441,13 +441,6 @@ void RenderStepper::SetRightButtonStatus(const std::string& status, const std::s
     MarkNeedLayout();
 }
 
-void RenderStepper::UpdateTouchRect()
-{
-    touchRect_.SetSize(GetLayoutSize());
-    touchRect_.SetOffset(GetPosition());
-    ownTouchRect_ = touchRect_;
-}
-
 void RenderStepper::PerformLayout()
 {
     // layout stepper item
@@ -793,7 +786,7 @@ bool RenderStepper::MouseHoverTest(const Point& parentLocalPoint)
     if (!context) {
         return false;
     }
-    bool isInRegion = GetTouchRect().IsInRegion(parentLocalPoint);
+    bool isInRegion = InTouchRectList(parentLocalPoint, GetTouchRectList());
     if (isInRegion) {
         context->AddToHoverList(AceType::WeakClaim(this).Upgrade());
     }

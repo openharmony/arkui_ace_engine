@@ -36,7 +36,6 @@ public:
     RenderTabContent();
     ~RenderTabContent() override = default;
 
-    void UpdateTouchRect() override;
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;

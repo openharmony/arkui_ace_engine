@@ -1003,13 +1003,6 @@ void RenderGridScroll::OnDataSourceUpdated(int32_t index)
     MarkNeedLayout();
 }
 
-void RenderGridScroll::UpdateTouchRect()
-{
-    touchRect_.SetSize(GetLayoutSize());
-    touchRect_.SetOffset(GetPosition());
-    ownTouchRect_ = touchRect_;
-}
-
 void RenderGridScroll::CalculateWholeSize(double drawLength)
 {
     if (gridMatrix_.empty() || gridCells_.empty()) {

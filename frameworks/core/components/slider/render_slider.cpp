@@ -726,10 +726,4 @@ void RenderSlider::UpdateAnimation()
     controller_->AddInterpolator(translate_);
 }
 
-void RenderSlider::UpdateTouchRect()
-{
-    touchRect_ = GetPaintRect();
-    ownTouchRect_ = touchRect_;
-}
-
 } // namespace OHOS::Ace

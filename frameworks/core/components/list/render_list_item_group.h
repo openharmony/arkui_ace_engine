@@ -47,7 +47,6 @@ public:
     int32_t GetNextFocusIndex(int32_t lastFocusIndex, bool vertical, bool reverse);
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override {}
-    void UpdateTouchRect() override;
     void ItemPrimaryChange(int32_t index);
 
     void RegisterRebuildCallback(const RebuildFunc& rebuild)

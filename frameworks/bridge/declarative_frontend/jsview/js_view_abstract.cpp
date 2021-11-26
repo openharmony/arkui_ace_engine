@@ -723,6 +723,124 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
     return true;
 }
 
+void JSViewAbstract::JsResponseRegion(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    std::vector<DimensionRect> result;
+    if (!JSViewAbstract::ParseJsResponseRegionArray(info[0], result)) {
+        return;
+    }
+
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
+    if (renderComponent) {
+        renderComponent->SetResponseRegion(result);
+        renderComponent->MarkResponseRegion(true);
+    }
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetResponseRegion(result);
+    box->MarkResponseRegion(true);
+    if (ViewStackProcessor::GetInstance()->HasClickGestureListenerComponent()) {
+        auto click = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();
+        click->SetResponseRegion(result);
+        click->MarkResponseRegion(true);
+    }
+    if (ViewStackProcessor::GetInstance()->HasTouchListenerComponent()) {
+        auto touch = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
+        touch->SetResponseRegion(result);
+        touch->MarkResponseRegion(true);
+    }
+}
+
+bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result)
+{
+    if (!jsValue->IsObject()) {
+        LOGE("arg is not Object.");
+        return false;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> x = obj->GetProperty("x");
+    JSRef<JSVal> y = obj->GetProperty("y");
+    JSRef<JSVal> width = obj->GetProperty("width");
+    JSRef<JSVal> height = obj->GetProperty("height");
+    Dimension xDimen = result.GetOffset().GetX();
+    Dimension yDimen = result.GetOffset().GetY();
+    Dimension widthDimen = result.GetWidth();
+    Dimension heightDimen = result.GetHeight();
+
+    if (ParseJsDimension(x, xDimen, DimensionUnit::VP)) {
+        auto offset = result.GetOffset();
+        offset.SetX(xDimen);
+        result.SetOffset(offset);
+        result.SetGlobalOffset(offset);
+    }
+    if (ParseJsDimension(y, yDimen, DimensionUnit::VP)) {
+        auto offset = result.GetOffset();
+        offset.SetY(yDimen);
+        result.SetOffset(offset);
+        result.SetGlobalOffset(offset);
+    }
+    if (ParseJsDimension(width, widthDimen, DimensionUnit::VP)) {
+        if (widthDimen.Unit() == DimensionUnit::PERCENT && widthDimen.Value() < 0) {
+            return true;
+        }
+        result.SetWidth(widthDimen);
+    }
+    if (ParseJsDimension(height, heightDimen, DimensionUnit::VP)) {
+        if (heightDimen.Unit() == DimensionUnit::PERCENT && heightDimen.Value() < 0) {
+            return true;
+        }
+        result.SetHeight(heightDimen);
+    }
+    return true;
+}
+
+bool JSViewAbstract::ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std::vector<DimensionRect>& result)
+{
+    if (!jsValue->IsArray() && !jsValue->IsObject()) {
+        LOGE("arg is not array or Object.");
+        return false;
+    }
+
+    if (jsValue->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+        for (size_t i = 0; i < array->Length(); i++) {
+            Dimension xDimen = Dimension(0.0, DimensionUnit::VP);
+            Dimension yDimen = Dimension(0.0, DimensionUnit::VP);
+            Dimension widthDimen = Dimension(1, DimensionUnit::PERCENT);
+            Dimension heightDimen = Dimension(1, DimensionUnit::PERCENT);
+            DimensionOffset offsetDimen(xDimen, yDimen);
+            DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen, offsetDimen);
+            if (ParseJsDimensionRect(array->GetValueAt(i), dimenRect)) {
+                result.emplace_back(dimenRect);
+            } else {
+                LOGE("Array element is not Object.");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    Dimension xDimen = Dimension(0.0, DimensionUnit::VP);
+    Dimension yDimen = Dimension(0.0, DimensionUnit::VP);
+    Dimension widthDimen = Dimension(1, DimensionUnit::PERCENT);
+    Dimension heightDimen = Dimension(1, DimensionUnit::PERCENT);
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen, offsetDimen);
+    if (ParseJsDimensionRect(jsValue, dimenRect)) {
+        result.emplace_back(dimenRect);
+        return true;
+    } else {
+        LOGE("Array element is not Object.");
+        return false;
+    }
+}
+
 void JSViewAbstract::JsSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -3021,6 +3139,7 @@ void JSViewAbstract::JSBind()
 
     JSClass<JSViewAbstract>::StaticMethod("width", &JSViewAbstract::JsWidth);
     JSClass<JSViewAbstract>::StaticMethod("height", &JSViewAbstract::JsHeight);
+    JSClass<JSViewAbstract>::StaticMethod("responseRegion", &JSViewAbstract::JsResponseRegion);
     JSClass<JSViewAbstract>::StaticMethod("size", &JSViewAbstract::JsSize);
     JSClass<JSViewAbstract>::StaticMethod("constraintSize", &JSViewAbstract::JsConstraintSize);
     JSClass<JSViewAbstract>::StaticMethod("layoutPriority", &JSViewAbstract::JsLayoutPriority);
