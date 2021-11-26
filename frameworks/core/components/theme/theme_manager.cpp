@@ -151,7 +151,13 @@ Color ThemeManager::GetBackgroundColor() const
     if (!themeStyle) {
         return prebuildColor;
     }
-    return themeStyle->GetAttr<Color>(THEME_ATTR_BG_COLOR, prebuildColor);
+    if (themeStyle->HasAttr(THEME_ATTR_BG_COLOR) && !themeConstants_->HasCustomStyle(THEME_APP_BACKGROUND)) {
+        // Get from resource.
+        return themeStyle->GetAttr<Color>(THEME_ATTR_BG_COLOR, Color::BLACK);
+    } else {
+        // Get from prebuild or custom color.
+        return prebuildColor;
+    }
 }
 
 void ThemeManager::ReloadThemes()
