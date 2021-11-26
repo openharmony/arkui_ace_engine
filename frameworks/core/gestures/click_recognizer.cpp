@@ -24,7 +24,11 @@ namespace {
 constexpr int32_t MULTI_FINGER_TIMEOUT = 300;
 constexpr int32_t MULTI_TAP_TIMEOUT = 300;
 constexpr int32_t MULTI_TAP_SLOP = 100;
+#ifndef WEARABLE_PRODUCT
 constexpr double MAX_THRESHOLD = 20.0;
+#else
+constexpr double MAX_THRESHOLD = 12.0;
+#endif
 constexpr int32_t MAX_TAP_FINGERS = 10;
 
 } // namespace

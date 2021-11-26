@@ -23,7 +23,11 @@
 namespace OHOS::Ace {
 namespace {
 
+#ifndef WEARABLE_PRODUCT
+constexpr double DELTA_DURATION = 3.0;
+#else
 constexpr double DELTA_DURATION = 15.0;
+#endif
 
 } // namespace
 
