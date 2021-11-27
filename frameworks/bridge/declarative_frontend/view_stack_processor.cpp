@@ -328,24 +328,8 @@ void ViewStackProcessor::CreateAccessibilityNode(const RefPtr<Component>& compon
         return;
     }
     component->SetInspectorId(GenerateId());
-    int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
-    if (componentsStack_.empty()) {
-        auto node = OHOS::Ace::V2::InspectorComposedComponent::CreateAccessibilityNode(
-            AceType::TypeName(component), inspectorId, -1, -1);
-        if (!node) {
-            LOGD("this is not AccessibilityNode");
-            return;
-        }
-
-        if (GetMainComponent()) {
-            auto parentId = GetMainComponent()->GetInspectorId();
-            component->SetInspectorId(parentId);
-        }
-
-        return;
-    }
-    component->SetInspectorId(GenerateId());
     std::string tag = inspectorTag.empty() ? AceType::TypeName(component) : inspectorTag;
+    int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
     int32_t parentId = componentsStack_.empty() ? -1 : StringUtils::StringToInt(GetMainComponent()->GetInspectorId());
     auto node = OHOS::Ace::V2::InspectorComposedComponent::CreateAccessibilityNode(tag, inspectorId, parentId, -1);
     if (!node) {
