@@ -153,6 +153,16 @@ public:
         onDragLeaveId_ = std::make_unique<OnDragFunc>(onDragLeaveId);
     }
 
+    void SetInspectorDirection(TextDirection direction)
+    {
+        inspectorDirection_ = direction;
+    }
+
+    TextDirection GetInspectorDirection() const
+    {
+        return inspectorDirection_;
+    }
+
     OnDragFunc GetOnDropId() const
     {
         if (!onDropId_) {
@@ -253,6 +263,7 @@ private:
     EventMarker onDomDragLeaveId_;
     EventMarker onDomDragDropId_;
     std::string geometryTransitionId_;
+    TextDirection inspectorDirection_ { TextDirection::LTR };
 };
 
 } // namespace OHOS::Ace

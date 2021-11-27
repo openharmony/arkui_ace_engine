@@ -98,7 +98,7 @@ public:
     // dimension settings
     virtual std::string GetWidth() const;
     virtual std::string GetHeight() const;
-    virtual Dimension GetPadding(OHOS::Ace::AnimatableType type) const;
+    virtual std::unique_ptr<JsonValue> GetPadding() const;
     virtual Dimension GetMargin(OHOS::Ace::AnimatableType type) const;
     virtual std::string GetConstraintSize() const;
     virtual int32_t GetLayoutPriority() const;
@@ -129,6 +129,7 @@ public:
     virtual std::string GetBorderStyle() const;
     virtual std::string GetBorderWidth() const;
     virtual std::string GetBorderColor() const;
+    virtual std::string GetBorderRadius() const;
 
     // background settings
     virtual RefPtr<Decoration> GetBackDecoration() const;

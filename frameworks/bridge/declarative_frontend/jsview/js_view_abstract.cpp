@@ -3649,11 +3649,14 @@ void JSViewAbstract::SetDirection(const std::string& dir)
 
     if (dir == "Ltr") {
         box->SetTextDirection(TextDirection::LTR);
+        box->SetInspectorDirection(TextDirection::LTR);
     } else if (dir == "Rtl") {
         box->SetTextDirection(TextDirection::RTL);
+        box->SetInspectorDirection(TextDirection::RTL);
     } else if (dir == "Auto") {
         box->SetTextDirection(
             AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+        box->SetInspectorDirection(TextDirection::AUTO);
     }
 }
 

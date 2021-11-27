@@ -71,6 +71,11 @@ public:
         return Color::TRANSPARENT;
     }
 
+    TextDirection GetInspectorDirection() const
+    {
+        return inspectorDirection_;
+    }
+
     RefPtr<Decoration> GetBackDecoration() const
     {
         return backDecoration_;
@@ -252,6 +257,7 @@ private:
     OnDragFunc onDragLeave_;
     OnDragFunc onDrop_;
     RefPtr<GestureRecognizer> onClick_;
+    TextDirection inspectorDirection_ { TextDirection::LTR };
 }; // class RenderBox
 
 } // namespace OHOS::Ace

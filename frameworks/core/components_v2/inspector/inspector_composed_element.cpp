@@ -49,13 +49,13 @@ const char* WINDOW_BLUR_STYLE[] = { "BlurStyle.SmallLight", "BlurStyle.MediumLig
     "BlurStyle.XlargeLight", "BlurStyle.SmallDark", "BlurStyle.MediumDark", "BlurStyle.LargeDark",
     "BlurStyle.XlargeDark" };
 
-const char* ALIGNMENT_TYPE[3][3] = { { "Alignment.TopStart", "Alignment.Top", "Alignment.TopEnd" },
-    { "Alignment.Start", "Alignment.Center", "Alignment.End" },
-    { "Alignment.BottomStart", "Alignment.Bottom", "Alignment.BottomEnd" } };
+const char* ALIGNMENT_TYPE[3][3] = { { "Alignment.TopStart", "Alignment.Start", "Alignment.BottomStart" },
+    { "Alignment.Top", "Alignment.Center", "Alignment.Bottom" },
+    { "Alignment.TopEnd", "Alignment.End", "Alignment.BottomEnd" } };
 
 const char* GRID_SIZE_TYPE[] = { "default", "sx", "sm", "md", "lg" };
 
-constexpr const char* TEXT_DIRECTION[] = { "Ltr", "Rtl", "Inherit", "Auto" };
+constexpr const char* TEXT_DIRECTION[] = { "Direction.Ltr", "Direction.Rtl", "Direction.Inherit", "Direction.Auto" };
 
 constexpr const char* BASIC_SHAPE_TYPE[] { "None", "Inset", "Circle", "Ellipse", "Polygon", "Path", "Rect" };
 
@@ -79,22 +79,6 @@ const std::unordered_map<std::string, DoubleJsonFunc> CREATE_JSON_DOUBLE_MAP {
 const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
     { "visibility", [](const InspectorComposedElement& inspector) { return inspector.GetVisibility(); } },
     { "alignSelf", [](const InspectorComposedElement& inspector) { return inspector.GetAlignSelf(); } },
-    { "padding-top",
-        [](const InspectorComposedElement& inspector) {
-            return inspector.GetPadding(AnimatableType::PROPERTY_PADDING_TOP).ToString();
-        } },
-    { "padding-right",
-        [](const InspectorComposedElement& inspector) {
-            return inspector.GetPadding(AnimatableType::PROPERTY_PADDING_RIGHT).ToString();
-        } },
-    { "padding-bottom",
-        [](const InspectorComposedElement& inspector) {
-            return inspector.GetPadding(AnimatableType::PROPERTY_PADDING_BOTTOM).ToString();
-        } },
-    { "padding-left",
-        [](const InspectorComposedElement& inspector) {
-            return inspector.GetPadding(AnimatableType::PROPERTY_PADDING_LEFT).ToString();
-        } },
     { "margin-top",
         [](const InspectorComposedElement& inspector) {
             return inspector.GetMargin(AnimatableType::PROPERTY_MARGIN_TOP).ToString();
@@ -117,7 +101,7 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
     { "borderWidth", [](const InspectorComposedElement& inspector) { return inspector.GetBorderWidth(); } },
     { "borderRadius",
         [](const InspectorComposedElement& inspector) {
-            return inspector.GetBorder().TopLeftRadius().GetX().ToString();
+            return inspector.GetBorderRadius();
         } },
     { "backgroundImage", [](const InspectorComposedElement& inspector) { return inspector.GetBackgroundImage(); } },
     { "backgroundColor", [](const InspectorComposedElement& inspector) { return inspector.GetBackgroundColor(); } },
@@ -147,6 +131,7 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
     { "shadow", [](const InspectorComposedElement& inspector) { return inspector.GetShadow(); } },
     { "position", [](const InspectorComposedElement& inspector) { return inspector.GetPosition(); } },
     { "offset", [](const InspectorComposedElement& inspector) { return inspector.GetOffset(); } },
+    { "padding", [](const InspectorComposedElement& inspector) { return inspector.GetPadding(); } },
     { "backgroundImageSize",
         [](const InspectorComposedElement& inspector) { return inspector.GetBackgroundImageSize(); } },
     { "backgroundImagePosition",
@@ -272,38 +257,50 @@ std::string InspectorComposedElement::GetWidth() const
 {
     auto render = GetRenderBox();
     if (render) {
-        render->GetWidthDimension();
+        Dimension value = render->GetWidthDimension();
+        if (value.Value() == -1) {
+            return "-";
+        }
         return render->GetWidthDimension().ToString();
     }
-    return "NONE";
+    return "-";
 }
 
 std::string InspectorComposedElement::GetHeight() const
 {
     auto render = GetRenderBox();
     if (render) {
+        Dimension value = render->GetHeightDimension();
+        if (value.Value() == -1) {
+            return "-";
+        }
         return render->GetHeightDimension().ToString();
     }
-    return "NONE";
+    return "-";
 }
 
-Dimension InspectorComposedElement::GetPadding(OHOS::Ace::AnimatableType type) const
+std::unique_ptr<JsonValue> InspectorComposedElement::GetPadding() const
 {
     auto render = GetRenderBox();
+    auto jsonValue = JsonUtil::Create(true);
     if (render) {
-        if (type == AnimatableType::PROPERTY_PADDING_LEFT) {
-            return render->GetPadding(DimensionHelper(&Edge::SetLeft, &Edge::Left));
-        } else if (type == AnimatableType::PROPERTY_PADDING_TOP) {
-            return render->GetPadding(DimensionHelper(&Edge::SetTop, &Edge::Top));
-        } else if (type == AnimatableType::PROPERTY_PADDING_RIGHT) {
-            return render->GetPadding(DimensionHelper(&Edge::SetRight, &Edge::Right));
-        } else if (type == AnimatableType::PROPERTY_PADDING_BOTTOM) {
-            return render->GetPadding(DimensionHelper(&Edge::SetBottom, &Edge::Bottom));
+        auto top = render->GetPadding(DimensionHelper(&Edge::SetTop, &Edge::Top));
+        auto right = render->GetPadding(DimensionHelper(&Edge::SetRight, &Edge::Right));
+        auto bottom = render->GetPadding(DimensionHelper(&Edge::SetBottom, &Edge::Bottom));
+        auto left = render->GetPadding(DimensionHelper(&Edge::SetLeft, &Edge::Left));
+        if (top == right && right == bottom && bottom == left) {
+            auto temp = JsonUtil::Create(true);
+            temp->Put("padding", top.ToString().c_str());
+            jsonValue = temp->GetValue("padding");
         } else {
-            render->GetPadding(DimensionHelper(&Edge::SetLeft, &Edge::Left)).ToString();
+            jsonValue->Put("top", top.ToString().c_str());
+            jsonValue->Put("right", right.ToString().c_str());
+            jsonValue->Put("bottom", bottom.ToString().c_str());
+            jsonValue->Put("left", left.ToString().c_str());
         }
+        return jsonValue;
     }
-    return Dimension();
+    return nullptr;
 }
 
 Dimension InspectorComposedElement::GetMargin(OHOS::Ace::AnimatableType type) const
@@ -378,7 +375,7 @@ std::string InspectorComposedElement::GetDirectionStr() const
     if (!render) {
         return TEXT_DIRECTION[3];
     }
-    auto value = static_cast<int32_t>(render->GetTextDirection());
+    auto value = static_cast<int32_t>(render->GetInspectorDirection());
     auto length = static_cast<int32_t>(sizeof(TEXT_DIRECTION) / sizeof(TEXT_DIRECTION[0]));
     if (value < length) {
         return TEXT_DIRECTION[value];
@@ -393,6 +390,15 @@ TextDirection InspectorComposedElement::GetDirection() const
         return render->GetTextDirection();
     }
     return TextDirection::AUTO;
+}
+
+std::string InspectorComposedElement::GetBorderRadius() const
+{
+    auto value = GetBorder().TopLeftRadius().GetX().Value();
+    if (value == 0.0) {
+        return "0.0vp";
+    }
+    return  GetBorder().TopLeftRadius().GetX().ToString();
 }
 
 std::unique_ptr<JsonValue> InspectorComposedElement::GetPosition() const
@@ -754,6 +760,8 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetRotate() const
             jsonValue->Put("y", std::to_string(rotate.dy).c_str());
             jsonValue->Put("z", std::to_string(rotate.dz).c_str());
             jsonValue->Put("angle", std::to_string(rotate.angle).c_str());
+            jsonValue->Put("centerX", render->GetOriginX().ToString().c_str());
+            jsonValue->Put("centerY", render->GetOriginY().ToString().c_str());
             break;
         }
     }
@@ -773,6 +781,8 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetScale() const
             jsonValue->Put("x", std::to_string(scale.scaleX).c_str());
             jsonValue->Put("y", std::to_string(scale.scaleY).c_str());
             jsonValue->Put("z", std::to_string(scale.scaleZ).c_str());
+            jsonValue->Put("centerX", render->GetOriginX().ToString().c_str());
+            jsonValue->Put("centerY", render->GetOriginY().ToString().c_str());
             break;
         }
     }

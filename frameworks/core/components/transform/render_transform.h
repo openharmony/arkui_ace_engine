@@ -81,6 +81,14 @@ public:
     {
         return DimensionOffset(originX_, originY_);
     }
+    const Dimension& GetOriginX() const
+    {
+        return originX_;
+    }
+    const Dimension& GetOriginY() const
+    {
+        return originY_;
+    }
 
     void SetDisableClickEffect(bool isDisable)
     {
