@@ -93,7 +93,7 @@ void RenderTrack::Update(const RefPtr<Component>& component)
     if (!progressTransitionController_) {
         progressTransitionController_ = AceType::MakeRefPtr<Animator>(pipelineContext);
     }
-    if (!scanHaloController_) {
+    if (!scanHaloController_ && !pipelineContext->IsJsCard()) {
         scanHaloController_ = AceType::MakeRefPtr<Animator>(pipelineContext);
     }
     MarkNeedLayout();
