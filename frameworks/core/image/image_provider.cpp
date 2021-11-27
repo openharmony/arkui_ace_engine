@@ -145,7 +145,7 @@ sk_sp<SkData> ImageProvider::LoadImageRawData(
         LOGE("imageLoader create failed. imageInfo: %{private}s", imageInfo.ToString().c_str());
         return nullptr;
     }
-    auto data = imageLoader->LoadImageData(imageInfo.GetSrc(), context);
+    auto data = imageLoader->LoadImageData(imageInfo, context);
     if (data && imageCache) {
         // cache sk data.
         imageCache->CacheImageData(imageInfo.GetSrc(), AceType::MakeRefPtr<SkiaCachedImageData>(data));
@@ -171,12 +171,13 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(
         if (!taskExecutor) {
             return;
         }
-        auto imageLoader = ImageLoader::CreateImageLoader(ImageSourceInfo(src));
+        ImageSourceInfo info(src);
+        auto imageLoader = ImageLoader::CreateImageLoader(info);
         if (!imageLoader) {
             LOGE("load image failed when create image loader. src: %{private}s", src.c_str());
             return;
         }
-        auto imageData = imageLoader->LoadImageData(src, context);
+        auto imageData = imageLoader->LoadImageData(info, context);
         if (imageData) {
             const auto svgStream = std::make_unique<SkMemoryStream>(std::move(imageData));
             if (svgStream) {
@@ -376,8 +377,9 @@ sk_sp<SkImage> ImageProvider::GetSkImage(
     const WeakPtr<PipelineContext> context,
     Size targetSize)
 {
-    auto imageLoader = ImageLoader::CreateImageLoader(ImageSourceInfo(src));
-    auto imageSkData = imageLoader->LoadImageData(src, context);
+    ImageSourceInfo info(src);
+    auto imageLoader = ImageLoader::CreateImageLoader(info);
+    auto imageSkData = imageLoader->LoadImageData(info, context);
     if (!imageSkData) {
         LOGE("fetch data failed. src: %{private}s", src.c_str());
         return nullptr;

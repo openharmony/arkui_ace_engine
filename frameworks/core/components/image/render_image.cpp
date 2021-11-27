@@ -76,7 +76,8 @@ void RenderImage::Update(const RefPtr<Component>& component)
         inComingSrc,
         image->GetImageSourceSize().first,
         image->GetImageSourceSize().second,
-        inComingSrc.empty() ? image->GetResourceId() : InternalResource::ResourceId::NO_ID);
+        inComingSrc.empty() ? image->GetResourceId() : InternalResource::ResourceId::NO_ID,
+        image->GetPixmap());
     auto fillColor = image->GetImageFill();
     if (fillColor.has_value()) {
         inComingSource.SetFillColor(fillColor.value());

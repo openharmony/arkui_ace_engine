@@ -110,7 +110,8 @@ private:
     void PerformLayoutSvgCustom();
     void CancelBackgroundTasks();
     void CacheImageObject();
-    void UpdatePixmap();
+    void UpdatePixmap(const RefPtr<PixelMap>& pixmap);
+    void UpdateSharedMemoryImage(const RefPtr<PipelineContext>& context);
     void ProcessPixmapForPaint();
 
     sk_sp<SkSVGDOM> skiaDom_;

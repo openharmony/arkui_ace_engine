@@ -40,6 +40,8 @@ public:
     int32_t GetByteCount() const override;
     void* GetPixelManager() const override;
     void* GetRawPixelMapPtr() const override;
+    std::string GetId() override;
+    std::string GetModifyId() override;
 
 private:
     std::shared_ptr<Media::PixelMap> pixmap_;

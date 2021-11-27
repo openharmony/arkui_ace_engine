@@ -187,6 +187,7 @@ void FlutterRenderImage::ImageObjReady(const RefPtr<ImageObject>& imageObj)
         }
     } else {
         LOGI("image is vectorgraph(svg) without absolute size, set svgDom_");
+        image_ = nullptr;
         if (useSkiaSvg_) {
             skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
         } else {
@@ -274,35 +275,21 @@ void FlutterRenderImage::CacheImageObject()
     }
 }
 
-void FlutterRenderImage::UpdatePixmap()
+void FlutterRenderImage::UpdatePixmap(const RefPtr<PixelMap>& pixmap)
 {
-    if (pixmapRawPtr_ == DynamicCast<PixelMapImageObject>(imageObj_)->GetRawPixelMapPtr()) {
-        LOGD("pixmapRawPtr_ not changed.");
-        imageObj_->ClearData();
-    } else {
-        image_ = nullptr;
-        curSourceInfo_.Reset();
-        rawImageSize_ = imageObj_->GetImageSize();
-        rawImageSizeUpdated_ = true;
-        imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
-    }
+    LOGD("update pixmap");
+    imageObj_ = MakeRefPtr<PixelMapImageObject>(pixmap);
+    image_ = nullptr;
+    curSourceInfo_.Reset();
+    rawImageSize_ = imageObj_->GetImageSize();
+    rawImageSizeUpdated_ = true;
+    imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
     MarkNeedLayout();
 }
 
 void FlutterRenderImage::Update(const RefPtr<Component>& component)
 {
     RenderImage::Update(component);
-    auto pixmap = AceType::DynamicCast<ImageComponent>(component)->GetPixmap();
-    if (pixmap != nullptr) {
-        LOGD("pixmap not null!");
-        sourceInfo_.Reset();
-        imageObj_ = MakeRefPtr<PixelMapImageObject>(pixmap);
-        UpdatePixmap();
-        return;
-    } else {
-        LOGD("pixmap is null!");
-        pixmapRawPtr_ = nullptr;
-    }
     // curImageSrc represents the picture currently shown and imageSrc represents next picture to be shown
     imageLoadingStatus_ = (sourceInfo_ != curSourceInfo_) ? ImageLoadingStatus::UPDATING : imageLoadingStatus_;
     UpdateRenderAltImage(component);
@@ -340,25 +327,40 @@ void FlutterRenderImage::FetchImageObject()
         return;
     }
     rawImageSizeUpdated_ = false;
-    SrcType srcType = ImageLoader::ResolveURI(sourceInfo_.GetSrc());
-    auto isNetworkSrc = (ImageLoader::ResolveURI(sourceInfo_.GetSrc()) == SrcType::NETWORK);
-    if (srcType != SrcType::MEMORY) {
-        bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD && !isNetworkSrc;
-        ImageProvider::FetchImageObject(
-            sourceInfo_,
-            imageObjSuccessCallback_,
-            uploadSuccessCallback_,
-            failedCallback_,
-            GetContext(),
-            syncMode,
-            useSkiaSvg_,
-            autoResize_,
-            renderTaskHolder_,
-            onPostBackgroundTask_);
-        return;
+    SrcType srcType = sourceInfo_.GetSrcType();
+    switch (srcType) {
+        case SrcType::PIXMAP: {
+            UpdatePixmap(sourceInfo_.GetPixmap());
+            break;
+        }
+        case SrcType::MEMORY: {
+            UpdateSharedMemoryImage(context);
+            break;
+        }
+        default: {
+            bool syncMode = context->IsBuildingFirstPage() &&
+                            frontend->GetType() == FrontendType::JS_CARD &&
+                            sourceInfo_.GetSrcType() != SrcType::NETWORK;
+            ImageProvider::FetchImageObject(
+                sourceInfo_,
+                imageObjSuccessCallback_,
+                uploadSuccessCallback_,
+                failedCallback_,
+                GetContext(),
+                syncMode,
+                useSkiaSvg_,
+                autoResize_,
+                renderTaskHolder_,
+                onPostBackgroundTask_);
+            break;
+        }
     }
+}
+
+void FlutterRenderImage::UpdateSharedMemoryImage(const RefPtr<PipelineContext>& context)
+{
     auto sharedImageManager = context->GetSharedImageManager();
-    if (sharedImageManager && srcType == SrcType::MEMORY) {
+    if (sharedImageManager) {
         if (sharedImageManager->IsResourceToReload(ImageLoader::RemovePathHead(sourceInfo_.GetSrc()))) {
             // This case means that the imageSrc to load is a memory image and its data is not ready.
             // If run [GetImageSize] here, there will be an unexpected [OnLoadFail] callback from [ImageProvider].
@@ -422,8 +424,6 @@ void FlutterRenderImage::ProcessPixmapForPaint()
         imageObj_->ClearData();
         return;
     }
-    pixmapRawPtr_ = pixmap->GetRawPixelMapPtr();
-    imageObj_->ClearData();
     FireLoadEvent(rawImageSize_);
     renderAltImage_ = nullptr;
 }
@@ -490,7 +490,7 @@ void FlutterRenderImage::Paint(RenderContext& context, const Offset& offset)
         renderAltImage_->SetDirectPaint(directPaint_);
         renderAltImage_->RenderWithContext(context, offset);
     }
-    if (sourceInfo_.IsValid()) {
+    if (sourceInfo_.GetSrcType() != SrcType::PIXMAP) {
         UpLoadImageDataForPaint();
     }
     auto canvas = ScopedCanvas::Create(context);
@@ -648,7 +648,9 @@ void FlutterRenderImage::CanvasDrawImageRect(
     bool isLoading = ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) ||
                       (imageLoadingStatus_ == ImageLoadingStatus::UPDATING));
     Rect scaledSrcRect = isLoading ? currentSrcRect_ : srcRect_;
-    if (sourceInfo_.IsValid() && imageObj_ && (imageObj_->GetFrameCount() == 1)) {
+    if (sourceInfo_.IsValid() &&
+        imageObj_ && (imageObj_->GetFrameCount() == 1) &&
+        sourceInfo_.GetSrcType() != SrcType::PIXMAP) {
         Size sourceSize = (image_ ? Size(image_->width(), image_->height()) : Size());
         // calculate srcRect that matches the real image source size
         // note that gif doesn't do resize, so gif does not need to recalculate
@@ -1165,8 +1167,9 @@ bool FlutterRenderImage::RetryLoading()
             sourceInfo_.ToString().c_str());
         return false;
     }
-    auto isNetworkSrc = (ImageLoader::ResolveURI(sourceInfo_.GetSrc()) == SrcType::NETWORK);
-    bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD && !isNetworkSrc;
+    bool syncMode = context->IsBuildingFirstPage() &&
+                    frontend->GetType() == FrontendType::JS_CARD &&
+                    sourceInfo_.GetSrcType() != SrcType::NETWORK;
 
     ImageProvider::FetchImageObject(
         sourceInfo_,
