@@ -63,11 +63,13 @@ public:
     void SetMaskColor(const Color& maskColor)
     {
         maskColor_ = maskColor;
+        isMaskColorSetted_ = true;
     }
 
     void SetBackgroundColor(const Color& backgroundColor)
     {
         backgroundColor_ = backgroundColor;
+        isBackgrouhdColorSetted_ = true;
     }
 
     void SetOnVisibilityChange(const EventMarker& onVisibilityChange)
@@ -155,9 +157,21 @@ public:
         targetId_ = targetId;
     }
 
+    bool IsMaskColorSetted() const
+    {
+        return isMaskColorSetted_;
+    }
+
+    bool IsBackgroundColorSetted() const
+    {
+        return isBackgrouhdColorSetted_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
+    bool isMaskColorSetted_ = false;
+    bool isBackgrouhdColorSetted_ = false;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;

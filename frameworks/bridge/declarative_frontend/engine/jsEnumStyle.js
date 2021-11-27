@@ -625,3 +625,15 @@ var ScrollBarDirection;
   ScrollBarDirection[ScrollBarDirection["Horizontal"] = 1] = "Horizontal";
   ScrollBarDirection[ScrollBarDirection["None"] = 2] = "None";
 }) (ScrollBarDirection || (ScrollBarDirection = {}));
+
+var Placement;
+(function (Placement) {
+  Placement[Placement["Left"] = 0] = "Left";
+  Placement[Placement["Right"] = 1] = "Right";
+  Placement[Placement["Top"] = 2] = "Top";
+  Placement[Placement["Bottom"] = 3] = "Bottom";
+  Placement[Placement["TopLeft"] = 4] = "TopLeft";
+  Placement[Placement["TopRight"] = 5] = "TopRight";
+  Placement[Placement["BottomLeft"] = 6] = "BottomLeft";
+  Placement[Placement["BottomRight"] = 7] = "BottomRight";
+}) (Placement || (Placement = {}));

@@ -21,6 +21,11 @@
 
 namespace OHOS::Ace::Framework {
 
+JsFunction::JsFunction(const JSRef<JSFunc>& jsFunction)
+{
+    jsFunction_ = jsFunction;
+}
+
 JsFunction::JsFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction)
 {
     jsThis_ = jsObject;

@@ -39,6 +39,7 @@ protected:
     JSRef<JSVal> ExecuteJS(int argc = 0, JSRef<JSVal>* argv = nullptr);
 
 public:
+    JsFunction(const JSRef<JSFunc>& jsFunction);
     JsFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction);
     ~JsFunction() override;
 };

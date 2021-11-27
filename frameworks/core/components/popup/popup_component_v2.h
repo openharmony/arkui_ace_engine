@@ -71,6 +71,16 @@ public:
         placementOnTop_ = placementOnTop;
     }
 
+    void SetCustomComponent(const RefPtr<Component>& customComponent)
+    {
+        customComponent_ = customComponent;
+    }
+
+    const RefPtr<Component>& GetCustomComponent() const
+    {
+        return customComponent_;
+    }
+
 private:
     const RefPtr<Component> CreateChild();
     const RefPtr<Component> CreateMessage();
@@ -85,6 +95,7 @@ private:
     RefPtr<PopupParam> popupParam_;
     RefPtr<PopupController> popupController_;
     RefPtr<ThemeManager> themeManager_;
+    RefPtr<Component> customComponent_;
     WeakPtr<PipelineContext> context_;
 
     ButtonProperties primaryButtonProperties_; // first button.
