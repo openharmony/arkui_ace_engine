@@ -53,6 +53,7 @@
 #include "core/components_v2/inspector/slider_composed_element.h"
 #include "core/components_v2/inspector/span_composed_element.h"
 #include "core/components_v2/inspector/stack_composed_element.h"
+#include "core/components_v2/inspector/stepper_composed_element.h"
 #include "core/components_v2/inspector/swiper_composed_element.h"
 #include "core/components_v2/inspector/switch_composed_element.h"
 #include "core/components_v2/inspector/tab_content_composed_element.h"
@@ -156,7 +157,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { SHEET_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::SheetComposedElement>(id); } },
     { HYPERLINK_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::HyperlinkComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::HyperlinkComposedElement>(id); } },
+    { STEPPER_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::StepperComposedElement>(id); } }
 };
 
 const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP {
@@ -204,7 +207,8 @@ const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_T
     { PROGRESS_COMPONENT_TAG, PROGRESS_ETS_TAG },
     { DATA_PANEL_COMPONENT_TAG, DATA_PANEL_ETS_TAG },
     { SHEET_COMPONENT_TAG, SHEET_ETS_TAG },
-    { HYPERLINK_COMPONENT_TAG, HYPERLINK_ETS_TAG }
+    { HYPERLINK_COMPONENT_TAG, HYPERLINK_ETS_TAG },
+    { STEPPER_COMPONENT_TAG, STEPPER_ETS_TAG }
 };
 
 } // namespace

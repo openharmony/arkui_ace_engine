@@ -226,4 +226,8 @@ ACE_EXPORT extern const char SHEET_ETS_TAG[] = "Sheet";
 ACE_EXPORT extern const char HYPERLINK_COMPONENT_TAG[] = "HyperlinkComponent";
 ACE_EXPORT extern const char HYPERLINK_ETS_TAG[] = "Hyperlink";
 
+// stepper
+ACE_EXPORT extern const char STEPPER_COMPONENT_TAG[] = "StepperComponent";
+ACE_EXPORT extern const char STEPPER_ETS_TAG[] = "Stepper";
+
 } // namespace OHOS::Ace::V2

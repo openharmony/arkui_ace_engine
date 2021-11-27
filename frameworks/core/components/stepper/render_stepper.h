@@ -114,6 +114,11 @@ public:
     {
         return stepperWidth_;
     }
+ 
+    RefPtr<StepperComponent> GetStepperComponent() const
+    {
+        return stepperComponent_;
+    }
 
 protected:
     void OnTouchTestHit(
