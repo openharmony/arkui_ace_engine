@@ -155,7 +155,7 @@ void AceContainer::InitializeFrontend()
         return;
     }
     ACE_DCHECK(frontend_);
-    if(aceAbility_){
+    if (aceAbility_) {
         std::shared_ptr<AppExecFwk::AbilityInfo> info = aceAbility_->GetAbilityInfo();
         if (info && info->isLauncherAbility) {
             frontend_->DisallowPopLastPage();

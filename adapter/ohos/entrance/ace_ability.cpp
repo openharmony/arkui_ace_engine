@@ -190,14 +190,13 @@ void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBoudle, std::stri
 
     // create container
     Platform::AceContainer::CreateContainer(
-            g_dialogId, FrontendType::JS, false, nullptr,
-            std::make_unique<AcePlatformEventCallback>([]() {
-                //TerminateAbility();
-            }));
+        g_dialogId, FrontendType::JS, false, nullptr,
+        std::make_unique<AcePlatformEventCallback>([]() {
+            return;
+        }));
     Platform::AceContainer::SetDialogCallback(g_dialogId, callback);
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(g_dialogId);
-    // window->Resize(460, 700);
     auto&& touchEventCallback = [aceView = flutterAceView](OHOS::TouchEvent event) -> bool {
         LOGD("RegistOnTouchCb touchEventCallback called");
         return aceView->DispatchTouchEvent(aceView, event);
@@ -248,8 +247,8 @@ void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBoudle, std::stri
 
     // run page.
     Platform::AceContainer::RunPage(
-            g_dialogId, Platform::AceContainer::GetContainer(g_dialogId)->GeneratePageId(),
-            jsBoudle, param);
+        g_dialogId, Platform::AceContainer::GetContainer(g_dialogId)->GeneratePageId(),
+        jsBoudle, param);
 
     g_dialogId++;
 }

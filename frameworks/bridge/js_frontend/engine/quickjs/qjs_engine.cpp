@@ -3077,7 +3077,7 @@ void QjsEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
     JS_SetContextOpaque(ctx, reinterpret_cast<void*>(AceType::RawPtr(engineInstance_)));
 
     JSValue globalObj = JS_GetGlobalObject(ctx);
-    if((url.compare(WINDOW_DIALOG_DOUBLE_BUTTON)) == 0) {
+    if (url.compare(WINDOW_DIALOG_DOUBLE_BUTTON) == 0) {
         JS_SetPropertyStr(ctx, globalObj, "dialogId", JS_NewInt32(ctx, instanceId_));
     }
     JSValue createInstanceFunc = QJSUtils::GetPropertyStr(ctx, globalObj, "createInstance");
