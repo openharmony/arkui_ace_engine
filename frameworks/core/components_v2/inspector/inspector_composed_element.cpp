@@ -973,13 +973,16 @@ int32_t InspectorComposedElement::GetGridSpan() const
     if (columnInfo) {
         return columnInfo->GetColumns();
     }
-    return OHOS::Ace::DEFAULT_GRID_COLUMN_SPAN;
+    return 1;
 }
 
 int32_t InspectorComposedElement::GetGridOffset() const
 {
     auto columnInfo = GetGridColumnInfo();
     if (columnInfo) {
+        if (columnInfo->GetOffset(GridSizeType::UNDEFINED) == -1) {
+            return 0;
+        }
         return columnInfo->GetOffset(GridSizeType::UNDEFINED);
     }
     return 0;
