@@ -15,6 +15,8 @@
 
 #include "core/components/form/form_element.h"
 
+#include <string>
+
 #include "core/common/form_manager.h"
 #include "frameworks/base/utils/string_utils.h"
 #include "frameworks/core/components/form/form_component.h"
@@ -113,7 +115,7 @@ void FormElement::HandleOnAcquireEvent(int64_t id) const
     }
 
     auto json = JsonUtil::Create(true);
-    json->Put("id", (size_t)id);
+    json->Put("id", std::to_string(id).c_str());
     onAcquireEvent_(json->ToString());
 }
 
@@ -149,26 +151,24 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
     RenderElement::Prepare(parent);
 
     if (!formManagerBridge_) {
-        formManagerBridge_ =
-            AceType::MakeRefPtr<FormManagerDelegate>(GetContext());
+        formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(GetContext());
         formManagerBridge_->AddFormAcquireCallback(
-            [weak = WeakClaim(this)] (int64_t id, std::string path, std::string module, std::string data) {
-            auto element = weak.Upgrade();
-            auto uiTaskExecutor = SingleTaskExecutor::Make(
-                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([id, path, module, data, weak] {
-                auto form = weak.Upgrade();
-                if (form) {
-                    form->HandleOnAcquireEvent(id);
-                    auto container = form->GetSubContainer();
-                    if (container) {
-                        container->RunCard(id, path, module, data);
+            [weak = WeakClaim(this)](int64_t id, std::string path, std::string module, std::string data) {
+                auto element = weak.Upgrade();
+                auto uiTaskExecutor = SingleTaskExecutor::Make(
+                    element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+                uiTaskExecutor.PostTask([id, path, module, data, weak] {
+                    auto form = weak.Upgrade();
+                    if (form) {
+                        form->HandleOnAcquireEvent(id);
+                        auto container = form->GetSubContainer();
+                        if (container) {
+                            container->RunCard(id, path, module, data);
+                        }
                     }
-                }
+                });
             });
-        });
-        formManagerBridge_->AddFormUpdateCallback(
-            [weak = WeakClaim(this)] (int64_t id, std::string data) {
+        formManagerBridge_->AddFormUpdateCallback([weak = WeakClaim(this)](int64_t id, std::string data) {
             auto element = weak.Upgrade();
             auto uiTaskExecutor = SingleTaskExecutor::Make(
                 element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -181,8 +181,7 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                 }
             });
         });
-        formManagerBridge_->AddFormErrorCallback(
-            [weak = WeakClaim(this)](std::string code, std::string msg) {
+        formManagerBridge_->AddFormErrorCallback([weak = WeakClaim(this)](std::string code, std::string msg) {
             auto element = weak.Upgrade();
             auto uiTaskExecutor = SingleTaskExecutor::Make(
                 element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
