@@ -549,7 +549,7 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
     if (type == BackendType::SERVICE) {
         paStartFunc = Framework::QJSUtils::GetPropertyStr(ctx, paObj, "onStart");
     } else if (type == BackendType::DATA) {
-        paStartFunc = Framework::QJSUtils::GetPropertyStr(ctx, paObj, "onInitalized");
+        paStartFunc = Framework::QJSUtils::GetPropertyStr(ctx, paObj, "onInitialized");
     } else if (type == BackendType::FORM) {
         paStartFunc = Framework::QJSUtils::GetPropertyStr(ctx, paObj, "onCreate");
     } else {
