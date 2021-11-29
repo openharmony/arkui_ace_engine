@@ -37,6 +37,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/frontend.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/back_end_event_manager.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
@@ -78,6 +79,7 @@ constexpr int32_t ARGS_FULL_WINDOW_LENGTH = 2;
 constexpr int32_t ARGS_READ_RESOURCE_LENGTH = 2;
 constexpr int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
+const std::string WINDOW_DIALOG_DOUBLE_BUTTON = "pages/dialog/index.js";
 
 int32_t CallEvalBuf(
     JSContext* ctx, const char* buf, size_t bufLen, const char* filename, int32_t evalFlags, int32_t instanceId)
@@ -2386,6 +2388,30 @@ JSValue JsLoadLocaleData(JSContext* ctx, JSValueConst value, int32_t argc, JSVal
     }
 }
 
+std::map<int32_t, JsEngine *> g_JsEngindMap;
+JSValue JSWindowCallBack(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    ACE_SCOPED_TRACE("QjsEngine::JSWindowCallBack");
+    LOGI("JSWindowCallBack");
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue id = JS_GetPropertyStr(ctx, globalObj, "dialogId");
+    int32_t global_id;
+    JS_ToInt32(ctx, &global_id, id);
+    for (auto& iter : g_JsEngindMap) {
+        if (iter.first == global_id) {
+            JsEngine* jsEngine = iter.second;
+            if (jsEngine == nullptr) {
+                return JS_NULL;
+            }
+            DialogCallback dialogCallback = jsEngine->GetDialogCallback();
+            if (dialogCallback) {
+                dialogCallback("OK", "");
+            }
+        }
+    }
+    return JS_NULL;
+}
+
 // Follow definition in quickjs.
 #define JS_CFUNC_DEF_CPP(name, length, func)                            \
     {                                                                   \
@@ -2453,6 +2479,8 @@ void InitJsConsoleObject(JSContext* ctx, const JSValue& globalObj)
     JS_SetPropertyStr(ctx, aceConsole, "warn", JS_NewCFunction(ctx, JsWarnLogPrint, "warn", 1));
     JS_SetPropertyStr(ctx, aceConsole, "error", JS_NewCFunction(ctx, JsErrorLogPrint, "error", 1));
     JS_SetPropertyStr(ctx, globalObj, "aceConsole", aceConsole);
+
+    JS_SetPropertyStr(ctx, globalObj, "dialogCallback", JS_NewCFunction(ctx, JSWindowCallBack, "dialogCallback", 1));
 }
 
 bool InitJsContext(JSContext* ctx, size_t maxStackSize, int32_t instanceId, const QjsEngineInstance* qjsEngineInstance,
@@ -2847,6 +2875,7 @@ bool QjsEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     ACE_SCOPED_TRACE("QjsEngine::Initialize");
     LOGI("Initialize");
 
+    g_JsEngindMap[instanceId_] = this;
     JSRuntime* runtime = nullptr;
     JSContext* context = nullptr;
 
@@ -3048,6 +3077,9 @@ void QjsEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
     JS_SetContextOpaque(ctx, reinterpret_cast<void*>(AceType::RawPtr(engineInstance_)));
 
     JSValue globalObj = JS_GetGlobalObject(ctx);
+    if (url.compare(WINDOW_DIALOG_DOUBLE_BUTTON) == 0) {
+        JS_SetPropertyStr(ctx, globalObj, "dialogId", JS_NewInt32(ctx, instanceId_));
+    }
     JSValue createInstanceFunc = QJSUtils::GetPropertyStr(ctx, globalObj, "createInstance");
     if (!JS_IsFunction(ctx, createInstanceFunc)) {
         LOGD("createInstance is not found, cannot load js!");
