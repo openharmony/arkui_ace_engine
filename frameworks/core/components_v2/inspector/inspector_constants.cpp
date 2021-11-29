@@ -134,7 +134,7 @@ const char SHAPE_CONTAINER_COMPONENT_TAG[] = "ShapeContainerComponent";
 const char SHAPE_CONTAINER_ETS_TAG[] = "Shape";
 
 // imageAnimator
-const char IMAGE_ANIMATOR_COMPONENT_TAG[] = "ImageAnimatorComponent";
+const char IMAGE_ANIMATOR_COMPONENT_TAG[] = "ImageAnimator";
 const char IMAGE_ANIMATOR_ETS_TAG[] = "ImageAnimator";
 
 // image
