@@ -216,7 +216,9 @@ void RenderScrollBar::StopAnimator()
     if (disappearAnimator_ && !disappearAnimator_->IsStopped()) {
         disappearAnimator_->Stop();
     }
-    UpdateDisplayOpacity(UINT8_MAX);
+    if (displayMode_ != DisplayMode::OFF) {
+        UpdateDisplayOpacity(UINT8_MAX);
+    }
     MarkNeedRender();
 }
 
@@ -249,7 +251,7 @@ void RenderScrollBar::PerformLayout()
 {
     if (!GetChildren().empty()) {
         const auto& child = GetChildren().front();
-        child->Layout(GetLayoutParam());
+        child->Layout(LayoutParam(GetLayoutParam().GetMaxSize(), Size()));
         childRect_ = Rect(child->GetPosition(), child->GetLayoutSize());
     }
     SetLayoutSize(GetLayoutParam().GetMaxSize());

@@ -151,17 +151,16 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<RenderNode>& weakScrollableNo
                 auto positionY = scrollableChildPosition.GetY() * (scrollBarSize - scrollBarChildSize).Height() /
                                  (scrollableChildSize - scrollableSize).Height();
                 positionY = std::clamp(positionY, 0.0, (scrollBarSize - scrollBarChildSize).Height());
-                position.SetY(positionY);
+                position = Offset(scrollBarChild->GetPosition().GetX(), positionY);
             }
         } else {
             if (!NearZero((scrollableChildSize - scrollableSize).Width())) {
                 auto positionX = scrollableChildPosition.GetX() * (scrollBarSize - scrollBarChildSize).Width() /
                                  (scrollableChildSize - scrollableSize).Width();
                 positionX = std::clamp(positionX, 0.0, (scrollBarSize - scrollBarChildSize).Width());
-                position.SetX(positionX);
+                position = Offset(positionX, scrollBarChild->GetPosition().GetY());
             }
         }
-
         scrollBarChild->SetPosition(position);
         scrollBar->MarkNeedRender();
     }
@@ -175,7 +174,9 @@ void ScrollBarProxy::StartScrollBarAnimator()
             LOGE("ScrollBar is released.");
             continue;
         }
-        scrollBar->StartAnimator();
+        if (scrollBar->GetDisplayMode() != DisplayMode::OFF) {
+            scrollBar->StartAnimator();
+        }
     }
 }
 
