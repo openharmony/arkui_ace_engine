@@ -52,6 +52,11 @@ public:
         return axis_;
     }
 
+    DisplayMode GetDisplayMode() const
+    {
+        return displayMode_;
+    }
+
     void StartAnimator();
     void StopAnimator();
 
