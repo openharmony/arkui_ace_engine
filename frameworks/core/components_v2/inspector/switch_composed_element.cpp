@@ -26,7 +26,7 @@ namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const SwitchComposedElement&)>> CREATE_JSON_MAP {
     { "isOn", [](const SwitchComposedElement& inspector) { return inspector.GetChecked(); } },
-    { "SelectedColor", [](const SwitchComposedElement& inspector) { return inspector.GetSelectedColor(); } },
+    { "selectedColor", [](const SwitchComposedElement& inspector) { return inspector.GetSelectedColor(); } },
     { "switchPointColor", [](const SwitchComposedElement& inspector) { return inspector.GetPointColor(); } },
     { "type", [](const SwitchComposedElement& inspector) { return inspector.GetToggleType(); } }
 };
