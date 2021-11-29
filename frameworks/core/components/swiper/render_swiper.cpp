@@ -406,7 +406,7 @@ void RenderSwiper::Initialize(const WeakPtr<PipelineContext>& context, bool catc
         scheduler_->Stop();
     }
 
-    if (autoPlay_ && !scheduler_->IsActive() && show_) {
+    if (autoPlay_ && !scheduler_->IsActive() && show_ && !disableSwipe_) {
         LOGD("start autoplay");
         scheduler_->Start();
     }
@@ -541,6 +541,9 @@ void RenderSwiper::UpdateIndex(int32_t index)
 void RenderSwiper::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
+    if (disableSwipe_) {
+        return;
+    }
     if (dragDetector_) {
         dragDetector_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(dragDetector_);

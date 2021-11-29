@@ -365,6 +365,9 @@ private:
         if (!scheduler_) {
             return;
         }
+        if (disableSwipe_) {
+            return;
+        }
         if (autoPlay_) {
             bool playEnding = currentIndex_ >= itemCount_ - 1 && !loop_;
             if (playEnding && scheduler_->IsActive()) {
