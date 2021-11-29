@@ -24,7 +24,6 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const ShapeComposedElement&)>> CREATE_JSON_MAP {
-    { "shapeType", [](const ShapeComposedElement& inspector) { return inspector.GetShapeType(); } },
     { "fill", [](const ShapeComposedElement& inspector) { return inspector.GetFill(); } },
     { "fillOpacity", [](const ShapeComposedElement& inspector) { return inspector.GetFillOpacity(); } },
     { "stroke", [](const ShapeComposedElement& inspector) { return inspector.GetStroke(); } },
@@ -38,12 +37,27 @@ const std::unordered_map<std::string, std::function<std::string(const ShapeCompo
     { "commands", [](const ShapeComposedElement& inspector) { return inspector.GetCommands(); } }
 };
 
-using JsonFuncType = std::function<std::unique_ptr<JsonValue>(const ShapeComposedElement&)>;
-const std::unordered_map<std::string, JsonFuncType> CREATE_JSON_JSON_VALUE_MAP {
-    { "strokeDashArray", [](const ShapeComposedElement& inspector) { return inspector.GetStrokeDashArray(); } },
+using StringRectType = std::function<std::string(const ShapeComposedElement&)>;
+const std::unordered_map<std::string, StringRectType> CREATE_JSON_JSON_VALUE_RECT_MAP {
     { "radius", [](const ShapeComposedElement& inspector) { return inspector.GetRadiusArray(); } },
     { "radiusWidth", [](const ShapeComposedElement& inspector) { return inspector.GetRadiusWidthArray(); } },
     { "radiusHeight", [](const ShapeComposedElement& inspector) { return inspector.GetRadiusHeightArray(); } }
+};
+
+using JsonFuncType = std::function<std::unique_ptr<JsonValue>(const ShapeComposedElement&)>;
+const std::unordered_map<std::string, JsonFuncType> CREATE_JSON_JSON_VALUE_MAP {
+    { "strokeDashArray", [](const ShapeComposedElement& inspector) { return inspector.GetStrokeDashArray(); } }
+};
+
+using JsonPointType = std::function<std::unique_ptr<JsonValue>(const ShapeComposedElement&)>;
+const std::unordered_map<std::string, JsonPointType> CREATE_JSON_JSON_VALUE_POINT_MAP {
+    { "startPoint", [](const ShapeComposedElement& inspector) { return inspector.GetStartPointArray(); } },
+    { "endPoint", [](const ShapeComposedElement& inspector) { return inspector.GetEndPointArray(); } },
+};
+
+using JsonPointsType = std::function<std::unique_ptr<JsonValue>(const ShapeComposedElement&)>;
+const std::unordered_map<std::string, JsonPointsType> CREATE_JSON_JSON_VALUE_POINTS_MAP {
+    { "points", [](const ShapeComposedElement& inspector) { return inspector.GetPointsArray(); } }
 };
 
 } // namespace
@@ -77,13 +91,29 @@ std::string ShapeComposedElement::GetHeight() const
 std::unique_ptr<JsonValue> ShapeComposedElement::ToJsonObject() const
 {
     auto resultJson = InspectorComposedElement::ToJsonObject();
+    auto shapeType = GetShapeType();
     for (const auto& value : CREATE_JSON_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this).c_str());
     }
+
     for (const auto& value : CREATE_JSON_JSON_VALUE_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this));
     }
-
+    if ((shapeType == "Polyline") || (shapeType == "Polygon")) {
+        for (const auto& value : CREATE_JSON_JSON_VALUE_POINTS_MAP) {
+            resultJson->Put(value.first.c_str(), value.second(*this));
+        }
+    }
+    if (shapeType == "Line") {
+        for (const auto& value : CREATE_JSON_JSON_VALUE_POINT_MAP) {
+            resultJson->Put(value.first.c_str(), value.second(*this));
+        }
+    }
+    if (shapeType == "Rect") {
+        for (const auto& value : CREATE_JSON_JSON_VALUE_RECT_MAP) {
+            resultJson->Put(value.first.c_str(), value.second(*this).c_str());
+        }
+    }
     return resultJson;
 }
 
@@ -91,9 +121,9 @@ std::string ShapeComposedElement::GetShapeType() const
 {
     auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
     if (render) {
-        return std::to_string(static_cast<int32_t>(render->GetShapeType()));
+        return SHAPE_TYPE_STRINGS[static_cast<int32_t>(render->GetShapeType())];
     }
-    return "";
+    return "shape";
 }
 
 std::string ShapeComposedElement::GetCommands() const
@@ -212,75 +242,130 @@ std::string ShapeComposedElement::GetStrokeWidth() const
     return "";
 }
 
-std::unique_ptr<JsonValue> ShapeComposedElement::GetRadiusArray() const
-{
-    auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
-    auto jsonRadiusArray = JsonUtil::CreateArray(true);
-    if (render) {
-        std::vector<Radius> rads = {
-            render->GetTopLeftRadius(),
-            render->GetTopRightRadius(),
-            render->GetBottomRightRadius(),
-            render->GetBottomLeftRadius(),
-        };
-
-        for (size_t i = 0; i < rads.size(); i++) {
-            auto jsonObject = JsonUtil::CreateArray(false);
-            jsonObject->Put("0", rads[i].GetX().ToString().c_str());
-            jsonObject->Put("1", rads[i].GetY().ToString().c_str());
-            auto index = std::to_string(i);
-            jsonRadiusArray->Put(index.c_str(), jsonObject);
-        }
-    }
-    return jsonRadiusArray;
-}
-
-std::unique_ptr<JsonValue> ShapeComposedElement::GetRadiusHeightArray() const
+std::string ShapeComposedElement::GetRadiusArray() const
 {
     auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
     auto jsonRadiusArray = JsonUtil::CreateArray(true);
     if (!render) {
-        return jsonRadiusArray;
+        return "0";
+    }
+    std::vector<Radius> rads = {
+        render->GetTopLeftRadius(), render->GetTopRightRadius(), render->GetBottomLeftRadius(),
+        render->GetBottomRightRadius()
+    };
+    for (size_t i = 0; i < rads.size(); i++) {
+        auto jsonObject = JsonUtil::CreateArray(false);
+        jsonObject->Put("0", rads[i].GetX().Value());
+        jsonObject->Put("1", rads[i].GetY().Value());
+        auto index = std::to_string(i);
+        jsonRadiusArray->Put(index.c_str(), jsonObject);
+    }
+    if (rads[0].GetX().Value() == -1) {
+        return "0";
+    }
+    return jsonRadiusArray->ToString();
+}
+
+std::string ShapeComposedElement::GetRadiusHeightArray() const
+{
+    auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
+    auto jsonRadiusArray = JsonUtil::CreateArray(true);
+    if (!render) {
+        return "0";
     }
     Radius topLeftRadius = render->GetTopLeftRadius();
     Radius topRightRadius = render->GetTopRightRadius();
     Radius bottomRightRadius = render->GetBottomRightRadius();
     Radius bottomLeftRadius = render->GetBottomLeftRadius();
+    if (topLeftRadius.GetY().Value() == -1) {
+        return "0";
+    }
     if ((topLeftRadius.GetY() == topRightRadius.GetY()) && (topLeftRadius.GetY() == bottomRightRadius.GetY()) &&
         (topLeftRadius.GetY() == bottomLeftRadius.GetY())) {
-        jsonRadiusArray->Put("0", topLeftRadius.GetY().ToString().c_str());
-        return jsonRadiusArray;
+        jsonRadiusArray->Put("0", topLeftRadius.GetY().Value());
+        return jsonRadiusArray->ToString();
     } else {
-        jsonRadiusArray->Put("0", topLeftRadius.GetY().ToString().c_str());
-        jsonRadiusArray->Put("1", topRightRadius.GetY().ToString().c_str());
-        jsonRadiusArray->Put("2", bottomLeftRadius.GetY().ToString().c_str());
-        jsonRadiusArray->Put("3", bottomRightRadius.GetY().ToString().c_str());
-        return jsonRadiusArray;
+        jsonRadiusArray->Put("0", topLeftRadius.GetY().Value());
+        jsonRadiusArray->Put("1", topRightRadius.GetY().Value());
+        jsonRadiusArray->Put("2", bottomLeftRadius.GetY().Value());
+        jsonRadiusArray->Put("3", bottomRightRadius.GetY().Value());
+        return jsonRadiusArray->ToString();
     }
 }
 
-std::unique_ptr<JsonValue> ShapeComposedElement::GetRadiusWidthArray() const
+std::string ShapeComposedElement::GetRadiusWidthArray() const
 {
     auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
     auto jsonRadiusArray = JsonUtil::CreateArray(true);
     if (!render) {
-        return jsonRadiusArray;
+        return "0";
     }
     Radius topLeftRadius = render->GetTopLeftRadius();
     Radius topRightRadius = render->GetTopRightRadius();
     Radius bottomRightRadius = render->GetBottomRightRadius();
     Radius bottomLeftRadius = render->GetBottomLeftRadius();
+    if (topLeftRadius.GetX().Value() == -1) {
+        return "0";
+    }
     if ((topLeftRadius.GetX() == topRightRadius.GetX()) && (topLeftRadius.GetX() == bottomRightRadius.GetX()) &&
         (topLeftRadius.GetX() == bottomLeftRadius.GetX())) {
-        jsonRadiusArray->Put("0", topLeftRadius.GetX().ToString().c_str());
-        return jsonRadiusArray;
+        jsonRadiusArray->Put("0", topLeftRadius.GetX().Value());
+        return jsonRadiusArray->ToString();
     } else {
-        jsonRadiusArray->Put("0", topLeftRadius.GetX().ToString().c_str());
-        jsonRadiusArray->Put("1", topRightRadius.GetX().ToString().c_str());
-        jsonRadiusArray->Put("2", bottomLeftRadius.GetX().ToString().c_str());
-        jsonRadiusArray->Put("3", bottomRightRadius.GetX().ToString().c_str());
-        return jsonRadiusArray;
+        jsonRadiusArray->Put("0", topLeftRadius.GetX().Value());
+        jsonRadiusArray->Put("1", topRightRadius.GetX().Value());
+        jsonRadiusArray->Put("2", bottomLeftRadius.GetX().Value());
+        jsonRadiusArray->Put("3", bottomRightRadius.GetX().Value());
+        return jsonRadiusArray->ToString();
     }
+}
+
+std::unique_ptr<JsonValue> ShapeComposedElement::GetStartPointArray() const
+{
+    auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
+    auto startPointArray = JsonUtil::CreateArray(true);
+    if (!render) {
+        startPointArray->Put("0", 0);
+        startPointArray->Put("1", 0);
+        return startPointArray;
+    }
+    ShapePoint startPoint = render->GetStartPoint();
+    startPointArray->Put("0", startPoint.first.Value());
+    startPointArray->Put("1", startPoint.second.Value());
+    return startPointArray;
+}
+
+std::unique_ptr<JsonValue> ShapeComposedElement::GetEndPointArray() const
+{
+    auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
+    auto endPointArray = JsonUtil::CreateArray(true);
+    if (!render) {
+        endPointArray->Put("0", 0);
+        endPointArray->Put("1", 0);
+        return endPointArray;
+    }
+    ShapePoint endPoint = render->GetEndPoint();
+    endPointArray->Put("0", endPoint.first.Value());
+    endPointArray->Put("1", endPoint.second.Value());
+    return endPointArray;
+}
+
+std::unique_ptr<JsonValue> ShapeComposedElement::GetPointsArray() const
+{
+    auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
+    auto pointsArray = JsonUtil::CreateArray(true);
+    if (!render) {
+        return pointsArray;
+    }
+    std::vector<ShapePoint> points = render->GetPoints();
+    for (size_t i = 0; i < points.size(); i++) {
+        auto pointsObject = JsonUtil::CreateArray(false);
+        pointsObject->Put("0", points[i].first.Value());
+        pointsObject->Put("1", points[i].second.Value());
+        auto index = std::to_string(i);
+        pointsArray->Put(index.c_str(), pointsObject);
+    }
+    return pointsArray;
 }
 
 } // namespace OHOS::Ace::V2

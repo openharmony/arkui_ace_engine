@@ -351,8 +351,7 @@ void JsInspectorManager::GetAttrsAndStylesV2(std::unique_ptr<JsonValue>& jsonNod
     }
     auto shapeComposedElement = AceType::DynamicCast<V2::ShapeComposedElement>(inspectorElement);
     if (shapeComposedElement) {
-        int type = StringUtils::StringToInt(shapeComposedElement->GetShapeType());
-        jsonNode->Replace(INSPECTOR_TYPE, SHAPE_TYPE_STRINGS[type]);
+        jsonNode->Replace(INSPECTOR_TYPE, shapeComposedElement->GetShapeType().c_str());
     }
 }
 

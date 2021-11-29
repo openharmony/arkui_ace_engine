@@ -77,6 +77,21 @@ public:
         return bottomRightRadius_;
     }
 
+    ShapePoint GetStartPoint() const
+    {
+        return start_;
+    }
+
+    ShapePoint GetEndPoint() const
+    {
+        return end_;
+    }
+
+    std::vector<ShapePoint> GetPoints() const
+    {
+        return points_;
+    }
+
     std::string GetPathCmd() const
     {
         return pathCmd_.GetValue();

@@ -45,10 +45,13 @@ public:
     std::string GetStrokeMiterLimit() const;
     std::string GetStrokeOpacity() const;
     std::string GetStrokeWidth() const;
+    std::string GetRadiusArray() const;
+    std::string GetRadiusHeightArray() const;
+    std::string GetRadiusWidthArray() const;
     std::unique_ptr<JsonValue> GetStrokeDashArray() const;
-    std::unique_ptr<JsonValue> GetRadiusArray() const;
-    std::unique_ptr<JsonValue> GetRadiusHeightArray() const;
-    std::unique_ptr<JsonValue> GetRadiusWidthArray() const;
+    std::unique_ptr<JsonValue> GetStartPointArray() const;
+    std::unique_ptr<JsonValue> GetEndPointArray() const;
+    std::unique_ptr<JsonValue> GetPointsArray() const;
 
     AceType::IdType GetTargetTypeId() const override
     {
