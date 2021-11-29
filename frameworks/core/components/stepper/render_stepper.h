@@ -114,7 +114,7 @@ public:
     {
         return stepperWidth_;
     }
- 
+
     RefPtr<StepperComponent> GetStepperComponent() const
     {
         return stepperComponent_;

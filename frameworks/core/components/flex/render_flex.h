@@ -71,6 +71,11 @@ public:
         return space_;
     }
 
+    Dimension GetInspectorSpace() const
+    {
+        return inspectorSpace_;
+    }
+
     TextBaseline GetBaseline() const
     {
         return textBaseline_;
@@ -211,6 +216,7 @@ private:
     double allocatedSize_ = 0.0;
 
     double space_ = 0.0;
+    Dimension inspectorSpace_;
 
     std::set<RefPtr<RenderNode>> infinityLayoutNodes_;
     std::set<RefPtr<RenderNode>> absoluteNodes_;

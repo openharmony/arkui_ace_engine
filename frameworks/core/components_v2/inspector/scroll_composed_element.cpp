@@ -69,7 +69,7 @@ std::string ScrollComposedElement::GetAxisDirection() const
         case Axis::NONE:
             return std::string("ScrollDirection.None");
         default:
-            return std::string("");
+            return std::string("ScrollDirection.Vertical");
     }
 }
 

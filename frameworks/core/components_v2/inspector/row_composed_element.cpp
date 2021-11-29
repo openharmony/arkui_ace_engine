@@ -77,7 +77,7 @@ std::string RowComposedElement::GetSpace() const
     }
     auto renderRow = AceType::DynamicCast<RenderFlex>(node);
     if (renderRow) {
-        auto dimension = Dimension(renderRow->GetSpace());
+        auto dimension = renderRow->GetInspectorSpace();
         return dimension.ToString();
     }
     return Dimension(0.0).ToString();
