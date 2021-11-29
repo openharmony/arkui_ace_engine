@@ -57,6 +57,7 @@ void RenderScrollBar::Update(const RefPtr<Component>& component)
     InitOpacity();
     InitRecognizer();
     InitAnimator();
+    InitChildPosition();
     MarkNeedLayout();
 }
 
@@ -172,6 +173,24 @@ void RenderScrollBar::InitOpacity()
             break;
     }
     UpdateDisplayOpacity(opacity_);
+}
+
+void RenderScrollBar::InitChildPosition()
+{
+    auto child = GetLastChild();
+    if (!child) {
+        return;
+    }
+    auto childPosition = child->GetPosition();
+    if (axis_ == Axis::VERTICAL) {
+        childPosition.SetX(0.0);
+    } else if (axis_ == Axis::HORIZONTAL) {
+        childPosition.SetY(0.0);
+    } else {
+        LOGD("Axis of ScrollBar is not support: %{public}d", axis_);
+        return;
+    }
+    child->SetPosition(childPosition);
 }
 
 void RenderScrollBar::InitAnimator()

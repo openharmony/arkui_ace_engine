@@ -74,6 +74,7 @@ private:
 
     void InitOpacity();
     void InitAnimator();
+    void InitChildPosition();
     void UpdateDisplayOpacity(int32_t opacity);
 
     bool isAxisChanged_ = true;

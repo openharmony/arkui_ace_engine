@@ -57,7 +57,7 @@ void ScrollBarProxy::UnRegisterScrollBar(const WeakPtr<RenderScrollBar>& scrollB
     }
 }
 
-void ScrollBarProxy::NotifyScrollableNode(double distance, const WeakPtr<RenderScrollBar>& weakScrollBar)
+void ScrollBarProxy::NotifyScrollableNode(double distance, const WeakPtr<RenderScrollBar>& weakScrollBar) const
 {
     auto scrollBar = weakScrollBar.Upgrade();
     if (!scrollBar) {
@@ -92,6 +92,11 @@ void ScrollBarProxy::NotifyScrollableNode(double distance, const WeakPtr<RenderS
         Size scrollableChildSize = GetScrollableChildSize(scrollable, scrollableChild->GetLayoutSize(), scrollBarAxis);
         Size scrollBarSize = scrollBar->GetLayoutSize();
         Size scrollBarChildSize = scrollBarChild->GetLayoutSize();
+        auto scrollableAxis = GetScrollableAxis(scrollable);
+        if (scrollableAxis != Axis::FREE && scrollBarAxis != Axis::FREE && scrollableAxis != scrollBarAxis) {
+            LOGE("Axis of ScrollBar and Scroll is not match.");
+            return;
+        }
 
         double value = 0.0;
         auto scrollableDeltaSize = scrollableChildSize - scrollableSize;
@@ -110,7 +115,7 @@ void ScrollBarProxy::NotifyScrollableNode(double distance, const WeakPtr<RenderS
     }
 }
 
-void ScrollBarProxy::NotifyScrollBar(const WeakPtr<RenderNode>& weakScrollableNode)
+void ScrollBarProxy::NotifyScrollBar(const WeakPtr<RenderNode>& weakScrollableNode) const
 {
     auto scrollable = weakScrollableNode.Upgrade();
     if (!CheckScrollable(scrollable)) {
@@ -147,26 +152,30 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<RenderNode>& weakScrollableNo
 
         Offset position;
         if (scrollBarAxis == Axis::VERTICAL) {
-            if (!NearZero((scrollableChildSize - scrollableSize).Height())) {
-                auto positionY = scrollableChildPosition.GetY() * (scrollBarSize - scrollBarChildSize).Height() /
-                                 (scrollableChildSize - scrollableSize).Height();
-                positionY = std::clamp(positionY, 0.0, (scrollBarSize - scrollBarChildSize).Height());
-                position = Offset(scrollBarChild->GetPosition().GetX(), positionY);
+            if (LessOrEqual((scrollableChildSize - scrollableSize).Height(), 0.0) ||
+                LessOrEqual((scrollBarSize - scrollBarChildSize).Height(), 0.0)) {
+                continue;
             }
+            auto positionY = scrollableChildPosition.GetY() * (scrollBarSize - scrollBarChildSize).Height() /
+                             (scrollableChildSize - scrollableSize).Height();
+            positionY = std::clamp(positionY, 0.0, (scrollBarSize - scrollBarChildSize).Height());
+            position.SetY(positionY);
         } else {
-            if (!NearZero((scrollableChildSize - scrollableSize).Width())) {
-                auto positionX = scrollableChildPosition.GetX() * (scrollBarSize - scrollBarChildSize).Width() /
-                                 (scrollableChildSize - scrollableSize).Width();
-                positionX = std::clamp(positionX, 0.0, (scrollBarSize - scrollBarChildSize).Width());
-                position = Offset(positionX, scrollBarChild->GetPosition().GetY());
+            if (LessOrEqual((scrollableChildSize - scrollableSize).Width(), 0.0) ||
+                LessOrEqual((scrollBarSize - scrollBarChildSize).Width(), 0.0)) {
+                continue;
             }
+            auto positionX = scrollableChildPosition.GetX() * (scrollBarSize - scrollBarChildSize).Width() /
+                             (scrollableChildSize - scrollableSize).Width();
+            positionX = std::clamp(positionX, 0.0, (scrollBarSize - scrollBarChildSize).Width());
+            position.SetX(positionX);
         }
         scrollBarChild->SetPosition(position);
         scrollBar->MarkNeedRender();
     }
 }
 
-void ScrollBarProxy::StartScrollBarAnimator()
+void ScrollBarProxy::StartScrollBarAnimator() const
 {
     for (const auto& weakScrollBar : scrollBars_) {
         auto scrollBar = weakScrollBar.Upgrade();
@@ -174,13 +183,13 @@ void ScrollBarProxy::StartScrollBarAnimator()
             LOGE("ScrollBar is released.");
             continue;
         }
-        if (scrollBar->GetDisplayMode() != DisplayMode::OFF) {
+        if (scrollBar->GetDisplayMode() == DisplayMode::AUTO) {
             scrollBar->StartAnimator();
         }
     }
 }
 
-void ScrollBarProxy::StopScrollBarAnimator()
+void ScrollBarProxy::StopScrollBarAnimator() const
 {
     for (const auto& weakScrollBar : scrollBars_) {
         auto scrollBar = weakScrollBar.Upgrade();
@@ -192,10 +201,27 @@ void ScrollBarProxy::StopScrollBarAnimator()
     }
 }
 
-bool ScrollBarProxy::CheckScrollable(const RefPtr<RenderNode>& node)
+bool ScrollBarProxy::CheckScrollable(const RefPtr<RenderNode>& node) const
 {
     return AceType::InstanceOf<RenderScroll>(node) || AceType::InstanceOf<V2::RenderGridScroll>(node) ||
            AceType::InstanceOf<V2::RenderList>(node);
+}
+
+Axis ScrollBarProxy::GetScrollableAxis(const RefPtr<RenderNode>& node) const
+{
+    auto renderScroll = AceType::DynamicCast<RenderScroll>(node);
+    if (renderScroll) {
+        return renderScroll->GetAxis();
+    }
+    auto renderGridScroll = AceType::DynamicCast<V2::RenderGridScroll>(node);
+    if (renderGridScroll) {
+        return renderGridScroll->GetAxis();
+    }
+    auto renderList = AceType::DynamicCast<V2::RenderList>(node);
+    if (renderList) {
+        return renderList->GetAxis();
+    }
+    return Axis::NONE;
 }
 
 Size ScrollBarProxy::GetScrollableChildSize(

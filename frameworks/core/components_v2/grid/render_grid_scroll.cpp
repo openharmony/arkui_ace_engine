@@ -128,16 +128,16 @@ void RenderGridScroll::CreateScrollable()
     }
 
     auto callback = [weak = AceType::WeakClaim(this)](double offset, int32_t source) {
-        auto renderList = weak.Upgrade();
-        if (!renderList) {
+        auto grid = weak.Upgrade();
+        if (!grid) {
             return false;
         }
         // Stop animator of scroll bar.
-        auto scrollBarProxy = renderList->scrollBarProxy_;
+        auto scrollBarProxy = grid->scrollBarProxy_;
         if (scrollBarProxy) {
             scrollBarProxy->StopScrollBarAnimator();
         }
-        return renderList->UpdateScrollPosition(offset, source);
+        return grid->UpdateScrollPosition(offset, source);
     };
     scrollable_ = AceType::MakeRefPtr<Scrollable>(
         callback, useScrollable_ == SCROLLABLE::HORIZONTAL ? Axis::HORIZONTAL : Axis::VERTICAL);
@@ -1044,7 +1044,7 @@ void RenderGridScroll::CalculateWholeSize(double drawLength)
             startMainPos_ = scrollBarExtent_;
         }
         if (gridCells_.find(index) == gridCells_.end()) {
-            break;
+            continue;
         }
         scrollBarExtent_ += GetSize(gridCells_.at(index).at(0)) + *mainGap_;
     }

@@ -50,26 +50,27 @@ public:
      * Notify scrollable node to update state, called by scroll bar.
      * @param distance absolute distance that scroll bar has scrolled.
      */
-    void NotifyScrollableNode(double distance, const WeakPtr<RenderScrollBar>& weakScrollBar);
+    void NotifyScrollableNode(double distance, const WeakPtr<RenderScrollBar>& weakScrollBar) const;
 
     /*
      * Notify scroll bar to update state, called by scrollable node.
      * @param distance absolute distance that scrollable node has scrolled.
      */
-    void NotifyScrollBar(const WeakPtr<RenderNode>& weakScrollableNode);
+    void NotifyScrollBar(const WeakPtr<RenderNode>& weakScrollableNode) const;
 
     /*
      * Start animation of ScrollBar.
      */
-    void StartScrollBarAnimator();
+    void StartScrollBarAnimator() const;
 
     /*
      * Stop animation of ScrollBar, and show ScrollBar if needed, when scrollable node is scrolling.
      */
-    void StopScrollBarAnimator();
+    void StopScrollBarAnimator() const;
 
 private:
-    bool CheckScrollable(const RefPtr<RenderNode>& node);
+    bool CheckScrollable(const RefPtr<RenderNode>& node) const;
+    Axis GetScrollableAxis(const RefPtr<RenderNode>& node) const;
     Size GetScrollableChildSize(
         const RefPtr<RenderNode>& scrollable, const Size& scrollableChildSize, Axis scrollBarAxis) const;
     void AdjustParam(const RefPtr<RenderNode>& scrollable, Axis scrollBarAxis, Axis& scrollableAxis,
