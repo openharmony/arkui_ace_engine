@@ -197,6 +197,7 @@ void RenderMarquee::Update(const RefPtr<Component>& component)
     if (LessOrEqual(scrollAmount_, 0.0)) {
         scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT;
     }
+    currentLoop_ = 1;
     loop_ = marquee->GetLoop();
     if (loop_ <= 0) {
         loop_ = ANIMATION_REPEAT_INFINITE;
@@ -211,6 +212,9 @@ void RenderMarquee::Update(const RefPtr<Component>& component)
     bounceEvent_ = AceAsyncEvent<void()>::Create(marquee->GetBounceEventId(), context_);
     finishEvent_ = AceAsyncEvent<void()>::Create(marquee->GetFinishEventId(), context_);
     startEvent_ = AceAsyncEvent<void()>::Create(marquee->GetStartEventId(), context_);
+    if (playerFinishControl_) {
+        playerFinishControl_ = false;
+    }
     bool playStatus = playerFinishControl_ ? false : marquee->GetPlayerStatus();
     const auto& methodController = marquee->GetController();
     if (methodController) {
@@ -263,9 +267,9 @@ void RenderMarquee::PerformLayout()
     childText_ = children.front();
     ACE_DCHECK(childText_);
     childText_->Layout(innerLayout);
-    auto lastLayoutSize = GetLayoutSize();
+    lastLayoutSize_ = GetLayoutSize();
     Size layoutSize = GetLayoutParam().Constrain(Size(Size::INFINITE_SIZE, childText_->GetLayoutSize().Height()));
-    if (childPosition_.IsErrorOffset() || lastLayoutSize != layoutSize) {
+    if (childPosition_.IsErrorOffset() || lastLayoutSize_ != layoutSize) {
         // Initialize child position.
         if (direction_ == MarqueeDirection::LEFT) {
             childPosition_ = Offset(layoutSize.Width(), 0.0);
@@ -279,13 +283,15 @@ void RenderMarquee::PerformLayout()
         childText_->GetLayoutSize().ToString().c_str());
     const static int32_t PLATFORM_VERSION_SIX = 6;
     auto context = GetContext().Upgrade();
-    if (context && context->GetMinPlatformVersion() >= PLATFORM_VERSION_SIX) {
-        if (childText_->GetLayoutSize().Width() <= layoutSize.Width()) {
-            childText_->SetPosition(Offset(0.0, 0.0));
-            return;
+    if (!context->GetIsDeclarative()) {
+        if (context && context->GetMinPlatformVersion() >= PLATFORM_VERSION_SIX) {
+            if (childText_->GetLayoutSize().Width() <= layoutSize.Width()) {
+                childText_->SetPosition(Offset(0.0, 0.0));
+                return;
+            }
         }
     }
-    if (lastLayoutSize != layoutSize && IsPlayingAnimation(controller_)) {
+    if (lastLayoutSize_ != childText_->GetLayoutSize() && IsPlayingAnimation(controller_)) {
         UpdateAnimation();
     }
     if (startAfterLayout_) {

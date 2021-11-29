@@ -81,6 +81,7 @@ private:
     std::function<void()> onBounceEvent_;
     std::function<void()> onFinishEvent_;
     std::function<void()> onStartEvent_;
+    Size lastLayoutSize_;
 };
 
 } // namespace OHOS::Ace
