@@ -17,7 +17,8 @@
 
 namespace OHOS::Ace {
 
-sk_sp<SkData> FileImageLoader::LoadImageData(const std::string& src, const WeakPtr<PipelineContext> context)
+sk_sp<SkData> FileImageLoader::LoadImageData(
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
 {
     return nullptr;
 }

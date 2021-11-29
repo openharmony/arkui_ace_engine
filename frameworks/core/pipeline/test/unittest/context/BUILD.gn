@@ -124,6 +124,7 @@ ohos_unittest("PipelineContextTest") {
     # image
     "//foundation/ace/ace_engine/frameworks/core/image/flutter_image_cache.cpp",
     "//foundation/ace/ace_engine/frameworks/core/image/image_cache.cpp",
+    "//foundation/ace/ace_engine/frameworks/core/image/image_source_info.cpp",
 
     # layout
     "//foundation/ace/ace_engine/frameworks/core/components/common/layout/grid_column_info.cpp",
