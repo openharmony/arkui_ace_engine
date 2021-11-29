@@ -57,6 +57,7 @@ public:
     bool InitJsEnv();
 
     void InitJsConsoleObject(v8::Local<v8::Context>& context, v8::Isolate* isolate);
+    void InitJsDocumentObject(v8::Local<v8::Context>& context, v8::Isolate* isolate);
 
     void InitJsPerfUtilObject(v8::Local<v8::Context>& context);
 

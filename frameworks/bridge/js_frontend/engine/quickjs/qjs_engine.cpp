@@ -76,6 +76,7 @@ constexpr int32_t ARGS_FULL_WINDOW_LENGTH = 2;
 constexpr int32_t ARGS_READ_RESOURCE_LENGTH = 2;
 constexpr int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
+static int32_t globalNodeId = 100000;
 
 int32_t CallEvalBuf(
     JSContext* ctx, const char* buf, size_t bufLen, const char* filename, int32_t evalFlags, int32_t instanceId)
@@ -613,6 +614,30 @@ JSValue JsDomCreateBody(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
     AddDomEvent(ctx, argv[4], *command);
     page->PushCommand(command);
     return JS_NULL;
+}
+
+int32_t CreateDomElement(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    ACE_SCOPED_TRACE("CreateDomElement");
+    if (argv == nullptr) {
+        LOGE("the arg is error");
+        return -1;
+    }
+
+    auto page = GetStagingPage(ctx);
+    if (page == nullptr) {
+        LOGE("the page is nullptr");
+        return -1;
+    }
+    int32_t nodeId = ++globalNodeId;
+    ScopedString tag(ctx, argv[0]);
+    auto command = Referenced::MakeRefPtr<JsCommandCreateDomElement>(tag.get(), nodeId);
+    page->PushCommand(command);
+    // Flush command as fragment immediately when pushed too many commands.
+    if (!page->CheckPageCreated() && page->GetCommandSize() > FRAGMENT_SIZE) {
+        page->FlushCommands();
+    }
+    return  globalNodeId;
 }
 
 JSValue JsDomAddElement(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
@@ -1932,6 +1957,32 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
         return ImageAnimatorBridge::JsGetState(ctx, nodeId);
     } else if (std::strcmp(methodName.get(), "createIntersectionObserver") == 0) {
         return ComponentApiBridge::JsCreateObserver(ctx, args.get(), nodeId);
+    } else if (std::strcmp(methodName.get(), "addChild") == 0) {
+        auto sPage = GetStagingPage(ctx);
+        if (sPage == nullptr) {
+            return JS_EXCEPTION;
+        }
+        int32_t childNodeId = 0;
+        std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args.get());
+        if (argsValue && argsValue->IsArray()) {
+            std::unique_ptr<JsonValue> cNodeId = argsValue->GetArrayItem(0)->GetValue("__nodeId");
+            if (cNodeId && cNodeId->IsNumber()) {
+                childNodeId = cNodeId->GetInt();
+            }
+        }
+        auto domDocument = sPage->GetDomDocument();
+        if (domDocument) {
+            RefPtr<DOMNode> node = domDocument->GetDOMNodeById(childNodeId);
+            if(node == nullptr) {
+                LOGE("node is nullptr");
+                return JS_NULL;
+            }
+            auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node->GetTag(), node->GetNodeId(), nodeId);
+            sPage->PushCommand(command);
+            if (!sPage->CheckPageCreated() && sPage->GetCommandSize() > FRAGMENT_SIZE) {
+                sPage->FlushCommands();
+            }
+        }
     } else {
         page->PushCommand(Referenced::MakeRefPtr<JsCommandCallDomElementMethod>(nodeId, methodName.get(), args.get()));
     }
@@ -2209,6 +2260,149 @@ JSValue AppErrorLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSVal
     return AppLogPrint(ctx, JsLogLevel::ERROR, value, argc, argv);
 }
 
+int32_t GetNodeId(JSContext* ctx, JSValueConst value)
+{
+    int32_t id = 0;
+    JSValue nodeId = JS_GetPropertyStr(ctx, value, "__nodeId");
+    if (JS_IsInteger(nodeId) && (JS_ToInt32(ctx, &id, nodeId)) < 0) {
+        id = 0;
+    }
+    JS_FreeValue(ctx, nodeId);
+    return id;
+}
+
+JSValue JsSetAttribute(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetRunningPage(ctx);
+    if (page == nullptr) {
+        return JS_EXCEPTION;
+    }
+    if (!JS_IsString(argv[0]) || !JS_IsString(argv[1])) {
+        LOGE("args is not string ");
+        return JS_NULL;
+    }
+    ScopedString key(ctx, argv[0]);
+    JSValue attr = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, attr, key.get(), argv[1]);
+
+    int32_t nodeId = GetNodeId(ctx, value);
+    auto command = Referenced::MakeRefPtr<JsCommandUpdateDomElementAttrs>(nodeId);
+    if (SetDomAttributes(ctx, attr, *command)) {
+        page->ReserveShowCommand(command);
+    }
+    page->PushCommand(command);
+    return JS_NULL;
+}
+
+JSValue JsSetStyle(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetRunningPage(ctx);
+    if (page == nullptr) {
+    return JS_EXCEPTION;
+    }
+    if (!JS_IsString(argv[0]) || !JS_IsString(argv[1])) {
+        LOGE("args is not string ");
+        return JS_NULL;
+    }
+    ScopedString key(ctx, argv[0]);
+    JSValue style = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, style, key.get(), argv[1]);
+    int32_t nodeId = GetNodeId(ctx, value);
+    auto command = Referenced::MakeRefPtr<JsCommandUpdateDomElementStyles>(nodeId);
+    SetDomStyle(ctx, style, *command);
+    page->PushCommand(command);
+    return JS_NULL;
+}
+
+JSValue JsAppendChild(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetStagingPage(ctx);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return JS_EXCEPTION;
+    }
+
+    int32_t id = GetNodeId(ctx, argv[0]);
+    auto domDocument = page->GetDomDocument();
+    if (domDocument) {
+        RefPtr<DOMNode> node = domDocument->GetDOMNodeById(id);
+        if (node == nullptr) {
+            LOGE("node is nullptr");
+            return JS_NULL;
+        }
+        int32_t parentNodeId;
+        JSValue bridgeId = JS_GetPropertyStr(ctx, value, "__nodeId");
+        if (JS_IsInteger(bridgeId) && (JS_ToInt32(ctx, &parentNodeId, bridgeId)) < 0) {
+            parentNodeId = 0;
+        }
+        auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node->GetTag(), node->GetNodeId(), parentNodeId);
+        page->PushCommand(command);
+        if (!page->CheckPageCreated() && page->GetCommandSize() > FRAGMENT_SIZE) {
+            page->FlushCommands();
+        }
+    }
+    return JS_NULL;
+}
+
+JSValue JsFocus(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetStagingPage(ctx);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return JS_NULL;
+    }
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        LOGE("JsFocus failed, instance is null.");
+        return JS_NULL;
+    }
+    instance->GetDelegate()->TriggerPageUpdate(page->GetPageId(), true);
+    return JS_NULL;
+}
+
+JSValue JsAnimate(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetStagingPage(ctx);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return JS_NULL;
+    }
+    int32_t nodeId = GetNodeId(ctx, value);
+    ScopedString args(ctx, argv[0]);
+    auto resultValue = AnimationBridgeUtils::CreateAnimationContext(ctx, page->GetPageId(), nodeId);
+    auto animationBridge = AceType::MakeRefPtr<AnimationBridge>(ctx, resultValue, nodeId);
+    auto task = AceType::MakeRefPtr<AnimationBridgeTaskCreate>(animationBridge, args.get());
+    page->PushCommand(Referenced::MakeRefPtr<JsCommandAnimation>(nodeId, task));
+    return JS_NULL;
+}
+
+JSValue JsGetBoundingClientRect(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetStagingPage(ctx);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return JS_NULL;
+    }
+    int32_t nodeId = GetNodeId(ctx, value);
+    ComponentApiBridge::JsGetBoundingRect(ctx, nodeId);
+    return JS_NULL;
+}
+
+JSValue JsCreateElement(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    int32_t newNodeId = CreateDomElement(ctx, value, argc, argv);
+    JSValue node = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, node, "__nodeId",  JS_NewInt32(ctx, newNodeId));
+    JS_SetPropertyStr(ctx, node, "setAttribute", JS_NewCFunction(ctx, JsSetAttribute, "setAttribute", 2));
+    JS_SetPropertyStr(ctx, node, "setStyle", JS_NewCFunction(ctx, JsSetStyle, "setStyle", 2));
+    JS_SetPropertyStr(ctx, node, "addChild", JS_NewCFunction(ctx, JsAppendChild, "addChild", 1));
+    JS_SetPropertyStr(ctx, node, "focus", JS_NewCFunction(ctx, JsFocus, "focus", 1));
+    JS_SetPropertyStr(ctx, node, "animate", JS_NewCFunction(ctx, JsAnimate, "animate", 1));
+    JS_SetPropertyStr(ctx, node, "getBoundingClientRect",
+        JS_NewCFunction(ctx, JsGetBoundingClientRect, "getBoundingClientRect", 1));
+    return node;
+}
+
 JSValue JsLogPrint(JSContext* ctx, JsLogLevel level, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
     ACE_SCOPED_TRACE("JsLogPrint(level=%d)", static_cast<int32_t>(level));
@@ -2452,6 +2646,13 @@ void InitJsConsoleObject(JSContext* ctx, const JSValue& globalObj)
     JS_SetPropertyStr(ctx, globalObj, "aceConsole", aceConsole);
 }
 
+void InitJsDocumentObject(JSContext* ctx, const JSValue& globalObj)
+{
+    JSValue dom = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, dom, "createElement", JS_NewCFunction(ctx, JsCreateElement, "createElement", 1));
+    JS_SetPropertyStr(ctx, globalObj, "dom", dom);
+}
+
 bool InitJsContext(JSContext* ctx, size_t maxStackSize, int32_t instanceId, const QjsEngineInstance* qjsEngineInstance,
     const std::unordered_map<std::string, void*>& extraNativeObject)
 {
@@ -2473,6 +2674,7 @@ bool InitJsContext(JSContext* ctx, size_t maxStackSize, int32_t instanceId, cons
     perfUtil = JS_NewObject(ctx);
 
     InitJsConsoleObject(ctx, globalObj);
+    InitJsDocumentObject(ctx, globalObj);
 
     JS_SetPropertyStr(ctx, perfUtil, "printlog", JS_NewCFunction(ctx, JsPerfPrint, "printlog", 0));
     JS_SetPropertyStr(ctx, perfUtil, "sleep", JS_NewCFunction(ctx, JsPerfSleep, "sleep", 1));
