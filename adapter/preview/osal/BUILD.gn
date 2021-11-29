@@ -59,9 +59,17 @@ template("ace_osal_preview_source_set") {
       "//third_party/curl:curl",
     ]
     if (is_standard_system) {
-      sources += [ "resource_adapter_impl_standard.cpp" ]
+      sources += [
+        "resource_adapter_impl_standard.cpp",
+        "resource_convertor.cpp",
+      ]
       include_dirs = [ "//utils/native/base/include" ]
       defines += [ "OHOS_STANDARD_SYSTEM" ]
+      if (platform == "windows") {
+        deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
+      } else if (platform == "mac") {
+        deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
+      }
     } else {
       sources += [ "resource_adapter_impl.cpp" ]
       include_dirs = [
@@ -115,19 +123,41 @@ foreach(item, ace_platforms) {
   }
 }
 
-if (!is_standard_system) {
-  system_resource_hap_path =
+# Triggered only when the SDK is compiled
+if (target_cpu == "arm64") {
+  if (is_standard_system) {
+    system_resource_hap_path =
+    get_label_info("//utils/resources/systemres:systemres_hap",
+    "target_out_dir") + "/SystemResources.hap"
+    system_resource_path =
+    get_label_info("//utils/resources/systemres:systemres_hap",
+    "target_out_dir") + "/resources"
+    if (host_os == "mac") {
+      resource_manager_library =
       get_label_info(
-          "//utils/resources/systemres:systemres_hap($aosp_arm64_buildtool)",
-          "target_gen_dir") + "/SystemResources.hap"
-  system_resource_path =
+      "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac",
+      "root_out_dir") +
+      "/global/resmgr_standard/libglobal_resmgr_mac.dylib"
+    } else {
+      resource_manager_library =
       get_label_info(
-          "//utils/resources/systemres:systemres_hap($aosp_arm64_buildtool)",
-          "target_gen_dir") + "/resources"
+      "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win",
+      "root_out_dir") + "/global/resmgr_standard/libglobal_resmgr_win.dll"
+    }
+  } else {
+    system_resource_hap_path =
+    get_label_info(
+    "//utils/resources/systemres:systemres_hap($aosp_arm64_buildtool)",
+    "target_gen_dir") + "/SystemResources.hap"
+    system_resource_path =
+    get_label_info(
+    "//utils/resources/systemres:systemres_hap($aosp_arm64_buildtool)",
+    "target_gen_dir") + "/resources"
+  }
+
   action("get_system_resource") {
     script = "get_system_resources.sh"
-    deps =
-        [ "//utils/resources/systemres:systemres_hap($aosp_arm64_buildtool)" ]
+    deps = [ "//utils/resources/systemres:systemres_hap($current_toolchain)" ]
     args = [
       rebase_path(system_resource_hap_path),
       rebase_path(system_resource_path),
@@ -136,40 +166,57 @@ if (!is_standard_system) {
     outputs = [ system_resource_path ]
   }
 
-  # Triggered only when the SDK is compiled
-  if (target_cpu == "arm64") {
-    ohos_copy("copy_system_resource") {
-      if (use_mac) {
-        sources = [ "//prebuilts/ace-toolkit/preview/rich/resources" ]
-        outputs = [ target_out_dir + "/tv_resources/{{source_file_part}}" ]
-        module_source_dir = target_out_dir + "/tv_resources/"
-        module_install_name = ""
-      } else {
-        deps = [ ":get_system_resource($aosp_arm64_buildtool)" ]
-
-        sources = [ system_resource_path ]
-        outputs = [ target_out_dir + "/tv_resources/{{source_file_part}}" ]
-        module_source_dir = target_out_dir + "/tv_resources/"
-        module_install_name = ""
-      }
+  ohos_copy("copy_resource_dynamic_library_standard") {
+    if (host_os == "mac") {
+      deps = [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
+    } else {
+      deps = [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
     }
 
-    ohos_copy("copy_system_resource_wearable") {
-      if (use_mac) {
-        sources = [ "//prebuilts/ace-toolkit/preview/rich/resources" ]
-        outputs =
-            [ target_out_dir + "/wearable_resources/{{source_file_part}}" ]
-        module_source_dir = target_out_dir + "/wearable_resources/"
-        module_install_name = ""
-      } else {
-        deps = [ ":get_system_resource($aosp_arm64_buildtool)" ]
+    sources = [ resource_manager_library ]
 
-        sources = [ system_resource_path ]
-        outputs =
-            [ target_out_dir + "/wearable_resources/{{source_file_part}}" ]
-        module_source_dir = target_out_dir + "/wearable_resources/"
-        module_install_name = ""
-      }
+    outputs = [ target_out_dir + "/previewer/common/bin/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common/bin"
+    module_install_name = ""
+  }
+
+  ohos_copy("copy_system_resource_standard") {
+    deps = [ ":get_system_resource" ]
+
+    sources = [ system_resource_path ]
+
+    outputs = [ target_out_dir + "/previewer/common/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common"
+    module_install_name = ""
+  }
+  ohos_copy("copy_system_resource") {
+    if (use_mac) {
+      sources = [ "//prebuilts/ace-toolkit/preview/rich/resources" ]
+      outputs = [ target_out_dir + "/tv_resources/{{source_file_part}}" ]
+      module_source_dir = target_out_dir + "/tv_resources/"
+      module_install_name = ""
+    } else {
+      deps = [ ":get_system_resource" ]
+
+      sources = [ system_resource_path ]
+      outputs = [ target_out_dir + "/tv_resources/{{source_file_part}}" ]
+      module_source_dir = target_out_dir + "/tv_resources/"
+      module_install_name = ""
+    }
+  }
+  ohos_copy("copy_system_resource_wearable") {
+    if (use_mac) {
+      sources = [ "//prebuilts/ace-toolkit/preview/rich/resources" ]
+      outputs = [ target_out_dir + "/wearable_resources/{{source_file_part}}" ]
+      module_source_dir = target_out_dir + "/wearable_resources/"
+      module_install_name = ""
+    } else {
+      deps = [ ":get_system_resource($aosp_arm64_buildtool)" ]
+
+      sources = [ system_resource_path ]
+      outputs = [ target_out_dir + "/wearable_resources/{{source_file_part}}" ]
+      module_source_dir = target_out_dir + "/wearable_resources/"
+      module_install_name = ""
     }
   }
 }
