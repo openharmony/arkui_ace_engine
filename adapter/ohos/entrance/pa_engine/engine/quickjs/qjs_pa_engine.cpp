@@ -895,7 +895,7 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> QjsPaEngine::Query(
 
     JSValueConst argv[] = { argUriJSValue, argColumnsJSValue, argPredicatesJSValue };
     JSValue retVal = Framework::QJSUtils::Call(ctx, paFunc, JS_UNDEFINED, countof(argv), argv);
-    if (JS_IsException(retVal)) {
+    if (JS_IsException(retVal) || JS_IsUndefined(retVal)) {
         LOGE("Qjs paFunc FAILED!");
         return resultSet;
     }
