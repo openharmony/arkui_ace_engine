@@ -96,6 +96,8 @@ Note:If the text contains special characters, please escape them according to th
             </filefilter>
             <filefilter name="copyrightPolicyFilter" desc="copyright文件头校验策略的过滤条件" >
                 <filteritem type="filepath" name="frameworks/core/components/theme/theme.csv" desc="csv无法添加版权头"/>
+                <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/parser.pegjs" desc="用于测试的文件无法添加License"/>
+                <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/src/utest/resources/test.db" desc="用于测试的文件无法添加License"/>
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imagecache/images/1008157312073340586" desc="自造的二进制文件无法添加版权头"/>
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imagecache/images/13610839755484614436" desc="自造的二进制文件无法添加版权头"/>
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imagecache/images/5841967474238710136" desc="自造的二进制文件无法添加版权头"/>
@@ -104,6 +106,8 @@ Note:If the text contains special characters, please escape them according to th
             </filefilter>
             <filefilter name="defaultPolicyFilter" desc="根目录LICENSE文件校验策略的过滤条件xxx" >
                 <filteritem type="filepath" name="frameworks/core/components/theme/theme.csv" desc="csv无法添加License"/>
+                <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/parser.pegjs" desc="用于测试的文件无法添加License"/>
+                <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/src/utest/resources/test.db" desc="用于测试的文件无法添加License"/>
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imagecache/images/1008157312073340586" desc="用于测试自造的二进制文件无法添加License"/>
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imagecache/images/13610839755484614436" desc="用于测试自造的二进制文件无法添加License"/>
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imagecache/images/5841967474238710136" desc="用于测试自造的二进制文件无法添加License"/>
