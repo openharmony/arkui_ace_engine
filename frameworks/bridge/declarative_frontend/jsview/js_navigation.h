@@ -24,6 +24,15 @@ class JSNavigation : public JSContainerBase {
 public:
     static void Create();
     static void JSBind(BindingTarget globalObj);
+    static void SetTitleMode(int32_t value);
+    static void SetTitle(const JSCallbackInfo& info);
+    static void SetSubTitle(const std::string& subTitle);
+    static void SetHideTitleBar(bool hide);
+    static void SetHideBackButton(bool hide);
+    static void SetHideToolBar(bool hide);
+    static void SetToolBar(const JSCallbackInfo& info);
+    static void SetMenus(const JSCallbackInfo& info);
+    static void SetOnTitleModeChanged(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

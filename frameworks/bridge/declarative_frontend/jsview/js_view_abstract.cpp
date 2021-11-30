@@ -3300,13 +3300,6 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("useAlign", &JSViewAbstract::JsUseAlign);
     JSClass<JSViewAbstract>::StaticMethod("zIndex", &JSViewAbstract::JsZIndex);
     JSClass<JSViewAbstract>::StaticMethod("sharedTransition", &JSViewAbstract::JsSharedTransition);
-    JSClass<JSViewAbstract>::StaticMethod("navigationTitle", &JSViewAbstract::SetNavigationTitle, opt);
-    JSClass<JSViewAbstract>::StaticMethod("navigationSubTitle", &JSViewAbstract::SetNavigationSubTitle, opt);
-    JSClass<JSViewAbstract>::StaticMethod("hideNavigationBar", &JSViewAbstract::SetHideNavigationBar, opt);
-    JSClass<JSViewAbstract>::StaticMethod(
-        "hideNavigationBackButton", &JSViewAbstract::SetHideNavigationBackButton, opt);
-    JSClass<JSViewAbstract>::StaticMethod("hideToolBar", &JSViewAbstract::SetHideToolBar, opt);
-    JSClass<JSViewAbstract>::StaticMethod("toolBar", &JSViewAbstract::SetToolBar);
     JSClass<JSViewAbstract>::StaticMethod("direction", &JSViewAbstract::SetDirection, opt);
 #ifndef WEARABLE_PRODUCT
     JSClass<JSViewAbstract>::StaticMethod("bindPopup", &JSViewAbstract::JsBindPopup);
@@ -3378,17 +3371,6 @@ RefPtr<Decoration> JSViewAbstract::GetBackDecoration()
 const Border& JSViewAbstract::GetBorder()
 {
     return GetBackDecoration()->GetBorder();
-}
-
-RefPtr<NavigationDeclaration> JSViewAbstract::GetNavigationDeclaration()
-{
-    auto navigationDeclarationCollector = ViewStackProcessor::GetInstance()->GetNavigationDeclarationCollector();
-    auto declaration = navigationDeclarationCollector->GetDeclaration();
-    if (!declaration) {
-        declaration = AceType::MakeRefPtr<NavigationDeclaration>();
-        navigationDeclarationCollector->SetDeclaration(declaration);
-    }
-    return declaration;
 }
 
 void JSViewAbstract::SetBorder(const Border& border)
@@ -3625,81 +3607,6 @@ void JSViewAbstract::SetWindowBlur(float progress, WindowBlurStyle blurStyle)
     if (decoration) {
         decoration->SetWindowBlurProgress(progress);
         decoration->SetWindowBlurStyle(blurStyle);
-    }
-}
-
-void JSViewAbstract::SetNavigationTitle(const std::string& title)
-{
-    GetNavigationDeclaration()->SetTitle(title);
-}
-
-void JSViewAbstract::SetNavigationSubTitle(const std::string& subTitle)
-{
-    GetNavigationDeclaration()->SetSubTitle(subTitle);
-}
-
-void JSViewAbstract::SetHideNavigationBar(bool hide)
-{
-    GetNavigationDeclaration()->SetHideBar(hide, ViewStackProcessor::GetInstance()->GetImplicitAnimationOption());
-}
-
-void JSViewAbstract::SetHideNavigationBackButton(bool hide)
-{
-    GetNavigationDeclaration()->SetHideBarBackButton(hide);
-}
-
-void JSViewAbstract::SetHideToolBar(bool hide)
-{
-    GetNavigationDeclaration()->SetHideToolBar(hide, ViewStackProcessor::GetInstance()->GetImplicitAnimationOption());
-}
-
-void JSViewAbstract::SetToolBar(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least one argument");
-        return;
-    }
-
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not a object.");
-        return;
-    }
-
-    auto itemsValue = JSRef<JSObject>::Cast(info[0])->GetProperty("items");
-    if (!itemsValue->IsObject() || !itemsValue->IsArray()) {
-        LOGE("arg format error: not find items");
-        return;
-    }
-    auto itemsArray = JSRef<JSArray>::Cast(itemsValue);
-    auto length = itemsArray->Length();
-    auto navigationDeclaration = GetNavigationDeclaration();
-    for (uint32_t i = 0; i < length; i++) {
-        auto item = itemsArray->GetValueAt(i);
-        if (!item->IsObject()) {
-            LOGE("tab bar item is not json object");
-            continue;
-        }
-
-        auto itemObject = JSRef<JSObject>::Cast(item);
-        ToolBarItem toolBarItem;
-        auto itemValueObject = itemObject->GetProperty("value");
-        if (itemValueObject->IsString()) {
-            toolBarItem.value = itemValueObject->ToString();
-        }
-
-        auto itemIconObject = itemObject->GetProperty("icon");
-        if (itemIconObject->IsString()) {
-            toolBarItem.icon = itemIconObject->ToString();
-        }
-
-        auto itemActionValue = itemObject->GetProperty("action");
-        if (itemActionValue->IsFunction()) {
-            auto tabBarItemActionFunc = AceType::MakeRefPtr<JsEventFunction<BaseEventInfo, 0>>(
-                JSRef<JSFunc>::Cast(itemActionValue), nullptr);
-            toolBarItem.action =
-                EventMarker([func = std::move(tabBarItemActionFunc)]() { func->Execute(); }, "tabBarItemClick", 0);
-        }
-        navigationDeclaration->AddToolBarItem(toolBarItem);
     }
 }
 

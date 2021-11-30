@@ -20,48 +20,22 @@
 #include "core/components/flex/flex_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/navigation_bar/navigation_bar_component.h"
+#include "core/components/navigation_bar/navigation_bar_component_v2.h"
 #include "core/components/navigation_bar/navigation_container_element.h"
 #include "core/components/navigation_bar/render_navigation_container.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/stage/stage_component.h"
-
 namespace OHOS::Ace {
 
 namespace {
 
 static uint32_t g_navigationTabControllerId = 0;
-#ifndef WEARABLE_PRODUCT
 constexpr int32_t BOTTOM_TAB_ICON_SIZE = 24;
 constexpr int32_t BOTTOM_TAB_ICON_AND_TEXT_PADDING = 2;
-#endif
 constexpr double SECTION_INDEX_PART_WEIGHT = 1.0;
 constexpr double SECTION_CONTENT_PART_WEIGHT = 2.0;
 
 } // namespace
-
-void NavigationDeclaration::Append(const RefPtr<NavigationDeclaration>& other)
-{
-    if (!other->title_.empty()) {
-        title_ = other->title_;
-    }
-    if (!other->subTitle_.empty()) {
-        subTitle_ = other->subTitle_;
-    }
-    if (other->hideBar_ != HIDE::UNDEFINED) {
-        hideBar_ = other->hideBar_;
-    }
-    if (other->hideBackButton_ != HIDE::UNDEFINED) {
-        hideBackButton_ = other->hideBackButton_;
-    }
-    if (!other->toolbarItems_.empty()) {
-        toolbarItems_ = other->toolbarItems_;
-    }
-    if (other->hideToolbar_ != HIDE::UNDEFINED) {
-        hideToolbar_ = other->hideToolbar_;
-    }
-
-    animationOption_ = other->GetAnimationOption();
-}
 
 RefPtr<RenderNode> NavigationContainerComponent::CreateRenderNode()
 {
@@ -86,55 +60,28 @@ uint32_t NavigationContainerComponent::GetGlobalTabControllerId()
     return ++g_navigationTabControllerId;
 }
 
-RefPtr<Component> NavigationContainerComponent::BuildNavigationBar() const
-{
-    auto navigationBar = AceType::MakeRefPtr<NavigationBarComponent>(std::string(""), "NavigationBar");
-    auto navigationBarData = navigationBar->GetData();
-    navigationBarData->theme = AceType::MakeRefPtr<ThemeManager>()->GetTheme<NavigationBarTheme>();
-    navigationBarData->title = declaration_->GetTitle();
-    if (!declaration_->GetSubTitle().empty()) {
-        navigationBarData->subTitle = declaration_->GetSubTitle();
-    }
-    navigationBarData->backEnabled = declaration_->HasBackButton();
-
-    RefPtr<BoxComponent> box = AceType::MakeRefPtr<BoxComponent>();
-    box->SetChild(navigationBar);
-    box->SetDeliverMinToChild(false);
-
-    auto display = AceType::MakeRefPtr<DisplayComponent>();
-    display->SetChild(box);
-    if (declaration_ && declaration_->HasNavigationBar() && !declaration_->GetTitle().empty()) {
-        box->SetHeight(navigationBarData->theme->GetHeight(), declaration_->GetAnimationOption());
-        display->SetOpacity(1.0, declaration_->GetAnimationOption());
-    } else {
-        box->SetHeight(Dimension(), declaration_->GetAnimationOption());
-        display->SetOpacity(0.0, declaration_->GetAnimationOption());
-    }
-    return display;
-}
-
 RefPtr<ComposedComponent> NavigationContainerComponent::BuildToolBar(
     const RefPtr<NavigationDeclaration>& declaration, const RefPtr<TabController>& controller)
 {
 #ifndef WEARABLE_PRODUCT
     std::list<RefPtr<Component>> tabBarItems;
-    for (const auto& item : declaration->GetToolBarItems()) {
-        if (!item.icon.empty()) {
+    for (const auto& item : declaration->toolbarItems) {
+        if (!item->icon.empty()) {
             auto itemContainer = AceType::MakeRefPtr<ColumnComponent>(
                 FlexAlign::CENTER, FlexAlign::CENTER, std::list<RefPtr<OHOS::Ace::Component>>());
             auto iconBox = AceType::MakeRefPtr<BoxComponent>();
-            iconBox->SetChild(AceType::MakeRefPtr<ImageComponent>(item.icon));
+            iconBox->SetChild(AceType::MakeRefPtr<ImageComponent>(item->icon));
             iconBox->SetHeight(BOTTOM_TAB_ICON_SIZE, DimensionUnit::VP);
             iconBox->SetWidth(BOTTOM_TAB_ICON_SIZE, DimensionUnit::VP);
             itemContainer->AppendChild(iconBox);
             auto padding = AceType::MakeRefPtr<PaddingComponent>();
             padding->SetPaddingTop(Dimension(BOTTOM_TAB_ICON_AND_TEXT_PADDING, DimensionUnit::VP));
             itemContainer->AppendChild(padding);
-            itemContainer->AppendChild(AceType::MakeRefPtr<TextComponent>(item.value));
+            itemContainer->AppendChild(AceType::MakeRefPtr<TextComponent>(item->value));
             tabBarItems.push_back(AceType::MakeRefPtr<TabBarItemComponent>(itemContainer));
         } else {
             tabBarItems.push_back(
-                AceType::MakeRefPtr<TabBarItemComponent>(AceType::MakeRefPtr<TextComponent>(item.value)));
+                AceType::MakeRefPtr<TabBarItemComponent>(AceType::MakeRefPtr<TextComponent>(item->value)));
         }
     }
     auto tabBar = AceType::MakeRefPtr<TabBarComponent>(tabBarItems, controller);
@@ -145,14 +92,15 @@ RefPtr<ComposedComponent> NavigationContainerComponent::BuildToolBar(
     RefPtr<BoxComponent> tabBarBox = AceType::MakeRefPtr<BoxComponent>();
     tabBarBox->SetChild(display);
     tabBarBox->SetDeliverMinToChild(false);
+
     if (!declaration->HasToolBar()) {
-        display->SetOpacity(0.0, declaration->GetAnimationOption());
-        tabBarBox->SetHeight(Dimension(), declaration->GetAnimationOption());
+        display->SetOpacity(0.0, declaration->animationOption);
+        tabBarBox->SetHeight(Dimension(), declaration->animationOption);
     } else {
-        display->SetOpacity(1.0, declaration->GetAnimationOption());
-        tabBarBox->SetHeight(theme->GetDefaultHeight(), declaration->GetAnimationOption());
+        display->SetOpacity(1.0, declaration->animationOption);
+        tabBarBox->SetHeight(theme->GetDefaultHeight(), declaration->animationOption);
     }
-    Component::MergeRSNode(tabBarBox, display);
+
     return AceType::MakeRefPtr<ComposedComponent>("navigation", "navigationToolBarComposed", tabBarBox);
 #else
     return nullptr;
@@ -166,7 +114,7 @@ bool NavigationContainerComponent::NeedSection() const
     return isSupportDeviceType && isWideScreen;
 }
 
-void NavigationContainerComponent::Build()
+void NavigationContainerComponent::Build(const WeakPtr<PipelineContext>& context)
 {
     if (!declaration_) {
         return;
@@ -177,8 +125,8 @@ void NavigationContainerComponent::Build()
 
     auto originalContent = AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::FLEX_START, content);
     RefPtr<ColumnComponent> fixPart = AceType::MakeRefPtr<ColumnComponent>(
-            FlexAlign::FLEX_START, FlexAlign::FLEX_START, std::list<RefPtr<OHOS::Ace::Component>>());
-    fixPart->AppendChild(BuildNavigationBar());
+        FlexAlign::FLEX_START, FlexAlign::FLEX_START, std::list<RefPtr<OHOS::Ace::Component>>());
+    fixPart->AppendChild(NavigationBarBuilder(declaration_, "navigationBar", direction_).Build(context));
     fixPart->AppendChild(AceType::MakeRefPtr<FlexItemComponent>(1.0, 1.0, 0.0, originalContent));
     tabController_ = TabController::GetController(GetGlobalTabControllerId());
     fixPart->AppendChild(NavigationContainerComponent::BuildToolBar(declaration_, tabController_));

@@ -302,23 +302,6 @@ RefPtr<SharedTransitionComponent> ViewStackProcessor::GetSharedTransitionCompone
     return sharedTransitionComponent;
 }
 
-RefPtr<NavigationDeclarationCollector> ViewStackProcessor::GetNavigationDeclarationCollector(bool createIfNotExist)
-{
-    auto& wrappingComponentsMap = componentsStack_.top();
-    if (wrappingComponentsMap.find("navigation_declaration_collector") != wrappingComponentsMap.end()) {
-        return AceType::DynamicCast<NavigationDeclarationCollector>(
-            wrappingComponentsMap["navigation_declaration_collector"]);
-    }
-
-    if (createIfNotExist) {
-        auto navigationDeclarationCollector = AceType::MakeRefPtr<OHOS::Ace::NavigationDeclarationCollector>();
-        wrappingComponentsMap.emplace("navigation_declaration_collector", navigationDeclarationCollector);
-        return navigationDeclarationCollector;
-    }
-
-    return nullptr;
-}
-
 RefPtr<GestureComponent> ViewStackProcessor::GetGestureComponent()
 {
     auto& wrappingComponentsMap = componentsStack_.top();
@@ -404,10 +387,6 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
         GetBoxComponent();
     }
 #endif
-    auto navigationContainer = AceType::DynamicCast<NavigationContainerComponent>(component);
-    if (navigationContainer) {
-        navigationViewDeclaration_ = navigationContainer->GetDeclaration();
-    }
 }
 
 bool ViewStackProcessor::ShouldPopImmediately()
@@ -425,12 +404,6 @@ void ViewStackProcessor::Pop()
 {
     if (componentsStack_.size() == 1) {
         return;
-    }
-    if (navigationViewDeclaration_) {
-        auto navigationDeclarationCollector = GetNavigationDeclarationCollector(false);
-        if (navigationDeclarationCollector) {
-            navigationDeclarationCollector->CollectTo(navigationViewDeclaration_);
-        }
     }
 
     auto component = WrapComponents();

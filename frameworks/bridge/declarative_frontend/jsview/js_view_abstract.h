@@ -28,7 +28,6 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/container.h"
 #include "core/components/box/box_component.h"
-#include "core/components/navigation_bar/navigation_container_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/transform/transform_component.h"
 #include "core/pipeline/base/component.h"
@@ -207,7 +206,6 @@ protected:
     static RefPtr<Decoration> GetFrontDecoration();
     static RefPtr<Decoration> GetBackDecoration();
     static const Border& GetBorder();
-    static RefPtr<NavigationDeclaration> GetNavigationDeclaration();
     static void SetMarginTop(const JSCallbackInfo& info);
     static void SetMarginBottom(const JSCallbackInfo& info);
     static void SetMarginLeft(const JSCallbackInfo& info);
@@ -226,12 +224,6 @@ protected:
     static void SetBackdropBlur(float radius);
     static void SetBlurRadius(const RefPtr<Decoration>& decoration, float radius);
     static void SetWindowBlur(float progress, WindowBlurStyle blurStyle);
-    static void SetNavigationTitle(const std::string& title);
-    static void SetNavigationSubTitle(const std::string& subTitle);
-    static void SetHideNavigationBar(bool hide);
-    static void SetHideNavigationBackButton(bool hide);
-    static void SetHideToolBar(bool hide);
-    static void SetToolBar(const JSCallbackInfo& info);
     static RefPtr<ThemeConstants> GetThemeConstants();
     static bool JsWidth(const JSRef<JSVal>& jsValue);
     static bool JsHeight(const JSRef<JSVal>& jsValue);

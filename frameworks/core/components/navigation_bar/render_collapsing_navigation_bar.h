@@ -73,6 +73,9 @@ private:
     bool lastUpScroll_ = true;
     Dimension minHeight_;
     double scrollableHeight_ = 0.0;
+    double lastTitleScale_ = 1.0;
+    bool barIsMini_ = false;
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)> changeEvent_;
 
     struct ChangedKeyframe {
         ChangedKeyframe() = default;

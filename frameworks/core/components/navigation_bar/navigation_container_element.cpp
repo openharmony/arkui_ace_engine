@@ -69,9 +69,9 @@ void NavigationContainerElement::PerformBuild()
 
     auto animationOption = context->GetExplicitAnimationOption();
     if (animationOption.GetDuration() != 0) {
-        declaration->SetAnimationOption(animationOption);
+        declaration->animationOption = animationOption;
     }
-    navigationContainer->Build();
+    navigationContainer->Build(context_);
     ComponentGroupElement::PerformBuild();
 
     auto tabController = navigationContainer->GetTabController();
@@ -80,14 +80,13 @@ void NavigationContainerElement::PerformBuild()
             if (!declaration) {
                 return;
             }
-            auto toolbarItems = declaration->GetToolBarItems();
-            if (index < 0 || index >= static_cast<int32_t>(toolbarItems.size())) {
+            if (index < 0 || index >= static_cast<int32_t>(declaration->toolbarItems.size())) {
                 return;
             }
-            auto pos = toolbarItems.begin();
+            auto pos = declaration->toolbarItems.begin();
             std::advance(pos, index);
-            if (!pos->action.IsEmpty()) {
-                AceAsyncEvent<void()>::Create(pos->action, weakContent)();
+            if (!(*pos)->action.IsEmpty()) {
+                AceAsyncEvent<void()>::Create((*pos)->action, weakContent)();
             }
 
             auto pipelineContext = weakContent.Upgrade();

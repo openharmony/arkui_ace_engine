@@ -18,6 +18,7 @@
 
 #include "core/components/button/button_component.h"
 #include "core/components/flex/flex_component.h"
+#include "core/components/navigation_bar/navigation_bar_component_base.h"
 #include "core/components/navigation_bar/navigation_bar_theme.h"
 #include "core/components/text/text_component.h"
 #ifndef WEARABLE_PRODUCT
@@ -148,7 +149,7 @@ private:
 #endif
 };
 
-class CommonBuilder {
+class CommonBuilder : public NavigationBarComponentBase {
 public:
     CommonBuilder() = delete;
     virtual ~CommonBuilder() = default;
@@ -169,10 +170,6 @@ public:
     }
 
 protected:
-    RefPtr<ComposedComponent> GenerateAccessibilityComposed(
-        int32_t parentId, const std::string& name, const RefPtr<Component>& child);
-
-    WeakPtr<PipelineContext> context_;
     RefPtr<NavigationBarTheme> theme_;
     ComposeId id_;
     Dimension menuZoneSize_;
@@ -252,7 +249,7 @@ class TitleBarMenuBuilder : public virtual AceType, public virtual CommonBuilder
 public:
     explicit TitleBarMenuBuilder(const RefPtr<NavigationBarData>& data)
         : CommonBuilder(data->theme), menu_(data->menu), imageFill_(data->imageFill),
-        allMenuItems_(data->allMenuItems) {};
+          allMenuItems_(data->allMenuItems) {};
     ~TitleBarMenuBuilder() = default;
 
     const std::map<std::string, NavigationBarComponent::MenuItemInBar>& GetMenuItemsInBar() const
@@ -385,6 +382,10 @@ class CollapsingNavigationBarComponent : public ComponentGroup {
 
 public:
     CollapsingNavigationBarComponent() = default;
+    CollapsingNavigationBarComponent(const RefPtr<ComposedComponent>& title, const RefPtr<ComposedComponent>& subTitle,
+        const EventMarker& changeEvent)
+        : titleComposed_(title), subTitleComposed_(subTitle), titleModeChangedEvent_(changeEvent)
+    {}
     explicit CollapsingNavigationBarComponent(const RefPtr<EmphasizeTitleBarBuilder>& builder)
     {
         titleComposed_ = builder->GetTitleComposed();
@@ -416,12 +417,17 @@ public:
     {
         minHeight_ = minHeight;
     }
+    const EventMarker& GetTitleModeChangedEvent() const
+    {
+        return titleModeChangedEvent_;
+    }
 
 private:
     RefPtr<TextComponent> titleComponent_;
     RefPtr<ComposedComponent> titleComposed_;
     RefPtr<ComposedComponent> subTitleComposed_;
     Dimension minHeight_;
+    EventMarker titleModeChangedEvent_;
 };
 
 #endif

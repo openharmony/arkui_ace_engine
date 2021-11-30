@@ -87,6 +87,12 @@ void RenderList::Update(const RefPtr<Component>& component)
                 delta.SetY(0.0);
             }
             renderList->AdjustOffset(delta, source);
+            if ((source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION_SPRING) &&
+                renderList->currentOffset_ >= 0.0) {
+                if (renderList->scrollable_->RelatedScrollEventDoing(Offset(0.0, -offset))) {
+                    return false;
+                }
+            }
             renderList->processDragUpdate(renderList->GetMainAxis(delta));
 
             // Stop animator of scroll bar.
@@ -113,6 +119,9 @@ void RenderList::Update(const RefPtr<Component>& component)
                 }
             }
         });
+        if (vertical_) {
+            scrollable_->InitRelatedParent(GetParent());
+        }
         scrollable_->Initialize(context_);
     }
     // now only support spring
@@ -1034,7 +1043,7 @@ void RenderList::UpdateAccessibilityAttr()
 
     auto accessibilityNode = GetAccessibilityNode().Upgrade();
     if (!accessibilityNode) {
-        LOGE("RenderList: current accessibilityNode is null.");
+        LOGD("RenderList: current accessibilityNode is null.");
         return;
     }
 

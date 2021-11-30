@@ -70,7 +70,6 @@ public:
     RefPtr<GestureListenerComponent> GetPanGestureListenerComponent();
     RefPtr<FocusableComponent> GetFocusableComponent(bool createIfNotExist = true);
     RefPtr<SharedTransitionComponent> GetSharedTransitionComponent();
-    RefPtr<NavigationDeclarationCollector> GetNavigationDeclarationCollector(bool createIfNotExist = true);
     RefPtr<GestureComponent> GetGestureComponent();
     RefPtr<PositionedComponent> GetPositionedComponent();
     RefPtr<ComposedComponent> GetRootComponent(const std::string& id = "", const std::string& name = "");
@@ -158,9 +157,6 @@ private:
     // stack
     std::stack<std::unordered_map<std::string, RefPtr<Component>>> componentsStack_;
     std::shared_ptr<JsPageRadioGroups> radioGroups_;
-
-    // navigation declaration of NavigatonView
-    RefPtr<NavigationDeclaration> navigationViewDeclaration_;
 
     RefPtr<PageTransitionComponent> pageTransitionComponent_;
 

@@ -611,6 +611,13 @@ var ItemState
   ItemState[ItemState["Skip"] = 3] = "Skip";
 })(ItemState || (ItemState = {}));
 
+var NavigationTitleMode;
+(function (NavigationTitleMode) {
+  NavigationTitleMode[NavigationTitleMode["Free"] = 0] = "Free";
+  NavigationTitleMode[NavigationTitleMode["Full"] = 1] = "Full";
+  NavigationTitleMode[NavigationTitleMode["Mini"] = 2] = "Mini";
+})(NavigationTitleMode || (NavigationTitleMode = {}));
+
 var HoverEffect;
 (function (HoverEffect) {
   HoverEffect[HoverEffect["Auto"] = 4] = "Auto";

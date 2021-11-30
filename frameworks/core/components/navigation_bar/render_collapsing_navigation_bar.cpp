@@ -16,8 +16,10 @@
 #include "core/components/navigation_bar/render_collapsing_navigation_bar.h"
 
 #include "core/animation/curve_animation.h"
+#include "core/components/display/display_component.h"
 #include "core/components/navigation_bar/navigation_bar_component.h"
 #include "core/components/navigation_bar/render_navigation_container.h"
+#include "core/components/transform/transform_component.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -26,6 +28,7 @@ constexpr int32_t COLLAPSING_ANIMATION_DURATION = 300;
 constexpr double SPRING_DRAG_DELTA_OFFSET_RATIO = 7;
 constexpr double SPRING_RESTORE_DELTA_OFFSET_RATIO = 5;
 constexpr double FIX_TITLE_BAR_OFFSET_RATIO = 1.5;
+constexpr double BIGGER_TITLE_SIZE = 1.0;
 constexpr double BIGGER_TITLE_SIZE_MULTIPLE = 1.1;
 constexpr double MAX_ALPHA_VALUE = 255.0;
 constexpr double TRANSPARENT = 0.0;
@@ -49,24 +52,22 @@ void RenderCollapsingNavigationBar::Update(const RefPtr<Component>& component)
     auto pipelineContext = GetContext();
     auto titleComposed = collapsingComponent->GetTitleComposed();
     if (titleComposed) {
-        titleChangedCallback_ = [titleComposed, pipelineContext](double fontSize) {
-            auto titleComponent = AceType::DynamicCast<TextComponent>(titleComposed->GetChild());
-            if (titleComponent) {
-                auto textStyle = titleComponent->GetTextStyle();
-                textStyle.SetFontSize(Dimension(fontSize, DimensionUnit::VP));
-                titleComponent->SetTextStyle(textStyle);
-                pipelineContext.Upgrade()->ScheduleUpdate(titleComposed);
-                return;
-            }
+        titleChangedCallback_ = [titleComposed, pipelineContext, weakBar = AceType::WeakClaim(this)](double fontSize) {
             auto boxComponent = AceType::DynamicCast<BoxComponent>(titleComposed->GetChild());
             if (!boxComponent) {
                 return;
             }
-            auto selectComponent = AceType::DynamicCast<SelectComponent>(boxComponent->GetChild());
-            if (!selectComponent) {
+            auto transformComponent = AceType::DynamicCast<TransformComponent>(boxComponent->GetChild());
+            if (!transformComponent) {
                 return;
             }
-            selectComponent->SetFontSize(Dimension(fontSize, DimensionUnit::VP));
+            auto bar = weakBar.Upgrade();
+            if (!bar) {
+                return;
+            }
+            double scale = fontSize / bar->lastTitleScale_;
+            transformComponent->Scale(scale, scale);
+            bar->lastTitleScale_ = scale * bar->lastTitleScale_;
             pipelineContext.Upgrade()->ScheduleUpdate(titleComposed);
         };
     }
@@ -74,23 +75,26 @@ void RenderCollapsingNavigationBar::Update(const RefPtr<Component>& component)
     auto subtitleComposed = collapsingComponent->GetSubtitleComposed();
     if (subtitleComposed) {
         subtitleChangedCallback_ = [subtitleComposed, pipelineContext](double opacity) {
-            auto subtitleComponent = AceType::DynamicCast<TextComponent>(subtitleComposed->GetChild());
-            if (!subtitleComponent) {
+            auto boxComponent = AceType::DynamicCast<BoxComponent>(subtitleComposed->GetChild());
+            if (!boxComponent) {
                 return;
             }
-            auto textStyle = subtitleComponent->GetTextStyle();
-            auto color = textStyle.GetTextColor();
-            textStyle.SetTextColor(color.ChangeOpacity(opacity));
-            subtitleComponent->SetTextStyle(textStyle);
+            auto displayComponent = AceType::DynamicCast<DisplayComponent>(boxComponent->GetChild());
+            if (!displayComponent) {
+                return;
+            }
+            displayComponent->SetOpacity(opacity);
             pipelineContext.Upgrade()->ScheduleUpdate(subtitleComposed);
         };
     }
     minHeight_ = collapsingComponent->GetMinHeight();
     auto theme = GetTheme<NavigationBarTheme>();
-    titleSize_ = ChangedKeyframe(theme->GetTitleFontSize().Value(), theme->GetTitleFontSizeBig().Value(),
-        theme->GetTitleFontSizeBig().Value() * BIGGER_TITLE_SIZE_MULTIPLE);
+    titleSize_ = ChangedKeyframe(theme->GetTitleFontSize().Value() / theme->GetTitleFontSizeBig().Value(),
+        BIGGER_TITLE_SIZE, BIGGER_TITLE_SIZE_MULTIPLE);
     double subtitleOpacity = theme->GetSubTitleColor().GetAlpha() / MAX_ALPHA_VALUE;
     subtitleOpacity_ = ChangedKeyframe(TRANSPARENT, subtitleOpacity, subtitleOpacity);
+    changeEvent_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        collapsingComponent->GetTitleModeChangedEvent(), context_);
 }
 
 void RenderCollapsingNavigationBar::PerformLayout()
@@ -135,6 +139,12 @@ void RenderCollapsingNavigationBar::OnRelatedPreScroll(const Offset& delta, Offs
     if (!NeedHidden(dy)) {
         return;
     }
+    if (barIsMini_) {
+        barIsMini_ = false;
+        if (changeEvent_) {
+            changeEvent_(std::make_shared<NavigationTitleModeChangeEvent>(barIsMini_));
+        }
+    }
 
     ScrollBy(dy, positionY_.bigger);
     consumed.SetY(dy);
@@ -161,6 +171,12 @@ void RenderCollapsingNavigationBar::OnRelatedScroll(const Offset& delta, Offset&
     ScrollBy(dy, positionY_.bigger);
     if (LessOrEqual(positionY_.value, positionY_.expand) && relateEvent_) {
         consumed.SetY(dy);
+    }
+    if (!barIsMini_ && NearEqual(positionY_.value, positionY_.collapse)) {
+        barIsMini_ = true;
+        if (changeEvent_) {
+            changeEvent_(std::make_shared<NavigationTitleModeChangeEvent>(barIsMini_));
+        }
     }
 }
 
