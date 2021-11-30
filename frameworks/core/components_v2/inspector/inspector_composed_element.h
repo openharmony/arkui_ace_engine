@@ -137,6 +137,7 @@ public:
     virtual std::string GetBackgroundColor() const;
     virtual std::unique_ptr<JsonValue> GetBackgroundImageSize() const;
     virtual std::unique_ptr<JsonValue> GetBackgroundImagePosition() const;
+    std::unique_ptr<JsonValue> GetAlignmentType(double width, double height) const;
 
     // front decoration settings
     virtual RefPtr<Decoration> GetFrontDecoration() const;

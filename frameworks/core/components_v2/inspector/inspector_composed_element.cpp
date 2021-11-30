@@ -622,16 +622,26 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetBackgroundImageSize() co
     auto jsonValue = JsonUtil::Create(true);
     auto backDecoration = GetBackDecoration();
     if (!backDecoration) {
-        jsonValue->Put("width", 0.0);
-        jsonValue->Put("height", 0.0);
-        return jsonValue;
+        jsonValue->Put("width", "ImageSize.Auto");
+        return jsonValue->GetValue("width");
     }
     auto image = backDecoration->GetImage();
     if (!image) {
-        jsonValue->Put("width", 0.0);
-        jsonValue->Put("height", 0.0);
-        return jsonValue;
+        jsonValue->Put("width", "ImageSize.Auto");
+        return jsonValue->GetValue("width");
     }
+    auto widthType = image->GetImageSize().GetSizeTypeX();
+    if (widthType == BackgroundImageSizeType::CONTAIN) {
+        jsonValue->Put("width", "ImageSize.Contain");
+        return jsonValue->GetValue("width");
+    } else if (widthType == BackgroundImageSizeType::COVER) {
+        jsonValue->Put("width", "ImageSize.Cover");
+        return jsonValue->GetValue("width");
+    } else if (widthType == BackgroundImageSizeType::AUTO) {
+        jsonValue->Put("width", "ImageSize.Auto");
+        return jsonValue->GetValue("width");
+    }
+
     auto width = image->GetImageSize().GetSizeValueX();
     auto height = image->GetImageSize().GetSizeValueY();
     jsonValue->Put("width", width);
@@ -654,11 +664,56 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetBackgroundImagePosition(
         jsonValue->Put("y", 0.0);
         return jsonValue;
     }
-    auto width = image->GetImagePosition().GetSizeValueX();
-    auto height = image->GetImagePosition().GetSizeValueY();
-    jsonValue->Put("x", width);
-    jsonValue->Put("y", height);
-    return jsonValue;
+    if (image->GetImagePosition().GetSizeTypeX() == BackgroundImagePositionType::PX) {
+        auto width = image->GetImagePosition().GetSizeValueX();
+        auto height = image->GetImagePosition().GetSizeValueY();
+        jsonValue->Put("x", width);
+        jsonValue->Put("y", height);
+        return jsonValue;
+    } else {
+        auto width = image->GetImagePosition().GetSizeValueX();
+        auto height = image->GetImagePosition().GetSizeValueY();
+        return GetAlignmentType(width, height);
+    }
+}
+
+std::unique_ptr<JsonValue> InspectorComposedElement::GetAlignmentType(double width, double height) const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    if (width == 0) {
+        if (height == 0) {
+            jsonValue->Put("x", "Alignment.TopStart");
+            return jsonValue->GetValue("x");
+        } else if (height == 50) {
+            jsonValue->Put("x", "Alignment.Start");
+            return jsonValue->GetValue("x");
+        } else {
+            jsonValue->Put("x", "Alignment.BottomStart");
+            return jsonValue->GetValue("x");
+        }
+    } else if (width == 50) {
+        if (height == 0) {
+            jsonValue->Put("x", "Alignment.Top");
+            return jsonValue->GetValue("x");
+        } else if (height == 50) {
+            jsonValue->Put("x", "Alignment.Center");
+            return jsonValue->GetValue("x");
+        } else {
+            jsonValue->Put("x", "Alignment.Bottom");
+            return jsonValue->GetValue("x");
+        }
+    } else {
+        if (height == 0) {
+            jsonValue->Put("x", "Alignment.TopEnd");
+            return jsonValue->GetValue("x");
+        } else if (height == 50) {
+            jsonValue->Put("x", "Alignment.End");
+            return jsonValue->GetValue("x");
+        } else {
+            jsonValue->Put("x", "Alignment.BottomEnd");
+            return jsonValue->GetValue("x");
+        }
+    }
 }
 
 RefPtr<Decoration> InspectorComposedElement::GetFrontDecoration() const
