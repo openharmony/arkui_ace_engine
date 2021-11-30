@@ -580,7 +580,8 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
             components.emplace_back(scorll);
             Component::MergeRSNode(components);
         }
-    } else if (!components.empty() && AceType::InstanceOf<TextureComponent>(mainComponent)) {
+    } else if (!components.empty() && (AceType::InstanceOf<TextureComponent>(mainComponent) ||
+        AceType::InstanceOf<BoxComponent>(mainComponent))) {
         Component::MergeRSNode(components);
         Component::MergeRSNode(mainComponent);
         components.emplace_back(mainComponent);

@@ -61,6 +61,21 @@ void RosenRenderTexture::Paint(RenderContext& context, const Offset& offset)
     RenderNode::Paint(context, offset);
 }
 
+void RosenRenderTexture::SyncGeometryProperties()
+{
+    if (!IsTailRenderNode()) {
+        return;
+    }
+    auto rsNode = GetRSNode();
+    if (!rsNode) {
+        return;
+    }
+    Offset paintOffset = GetPaintOffset();
+    Size paintSize = GetLayoutSize();
+    rsNode->SetFrame(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
+    rsNode->SetBounds(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
+}
+
 void RosenRenderTexture::InitGaussianFuzzyParas()
 {
     gaussianFuzzySize_ = GetPaintRect();

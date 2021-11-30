@@ -29,6 +29,8 @@ public:
 
     void Paint(RenderContext& context, const Offset& offset) override;
 
+    void SyncGeometryProperties() override;
+
     std::shared_ptr<RSNode> CreateRSNode() const override;
 
     void Update(const RefPtr<Component>& component) override;

@@ -16,6 +16,7 @@
 #include "core/animation/native_curve_helper.h"
 
 #include "core/animation/cubic_curve.h"
+#include "core/animation/spring_curve.h"
 
 namespace OHOS::Ace {
 
@@ -26,6 +27,9 @@ Rosen::RSAnimationTimingCurve NativeCurveHelper::ToNativeCurve(const RefPtr<Curv
     } else if (auto cubicCurve = AceType::DynamicCast<CubicCurve>(curve)) {
         return Rosen::RSAnimationTimingCurve::CreateCubicCurve(
             cubicCurve->x0_, cubicCurve->y0_, cubicCurve->x1_, cubicCurve->y1_);
+    } else if (auto springCurve = AceType::DynamicCast<SpringCurve>(curve)) {
+        return Rosen::RSAnimationTimingCurve::CreateSpringCurve(springCurve->velocity_, springCurve->mass_,
+            springCurve->stiffness_, springCurve->damping_);
     } else if (auto customCurve = AceType::DynamicCast<CustomCurve>(curve)) {
         return Rosen::RSAnimationTimingCurve::CreateCustomCurve(customCurve->interpolateFunc_);
     } else {
