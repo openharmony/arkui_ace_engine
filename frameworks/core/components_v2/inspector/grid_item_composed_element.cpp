@@ -61,39 +61,48 @@ std::string GridItemComposedElement::GetRowStart() const
 {
     auto node = GetInspectorNode(GridLayoutItemElement::TypeId());
     if (!node) {
-        return "-";
+        return "0";
     }
     auto renderGripItem = AceType::DynamicCast<RenderGridLayoutItem>(node);
     if (renderGripItem) {
+        if (renderGripItem->GetRowStart() == -1) {
+            return "0";
+        }
         return std::to_string(renderGripItem->GetRowStart());
     }
-    return "-";
+    return "0";
 }
 
 std::string GridItemComposedElement::GetRowEnd() const
 {
     auto node = GetInspectorNode(GridLayoutItemElement::TypeId());
     if (!node) {
-        return "-";
+        return "0";
     }
     auto renderGripItem = AceType::DynamicCast<RenderGridLayoutItem>(node);
     if (renderGripItem) {
-        return std::to_string(renderGripItem->GetRowEnd());
+        if (renderGripItem->GetRowEnd() == 0) {
+            return "0";
+        }
+        return std::to_string(renderGripItem->GetRowEnd() - 1);
     }
-    return "-";
+    return "0";
 }
 
 std::string GridItemComposedElement::GetColumnStart() const
 {
     auto node = GetInspectorNode(GridLayoutItemElement::TypeId());
     if (!node) {
-        return "-";
+        return "0";
     }
     auto renderGripItem = AceType::DynamicCast<RenderGridLayoutItem>(node);
     if (renderGripItem) {
+        if (renderGripItem->GetColumnStart() == -1) {
+            return "0";
+        }
         return std::to_string(renderGripItem->GetColumnStart());
     }
-    return "-";
+    return "0";
 }
 
 
@@ -101,13 +110,16 @@ std::string GridItemComposedElement::GetColumnEnd() const
 {
     auto node = GetInspectorNode(GridLayoutItemElement::TypeId());
     if (!node) {
-        return "-";
+        return "0";
     }
     auto renderGripItem = AceType::DynamicCast<RenderGridLayoutItem>(node);
     if (renderGripItem) {
-        return std::to_string(renderGripItem->GetColumnEnd());
+        if (renderGripItem->GetColumnEnd() == 0) {
+            return "0";
+        }
+        return std::to_string(renderGripItem->GetColumnEnd() - 1);
     }
-    return "-";
+    return "0";
 }
 
 std::string GridItemComposedElement::GetForceRebuild() const

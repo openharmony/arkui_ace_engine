@@ -84,32 +84,32 @@ std::string NavigatorComposedElement::GetNavigatorType() const
 {
     auto node = GetInspectorNode(NavigatorElement::TypeId());
     if (!node) {
-        return "Push";
+        return "NavigationType.Push";
     }
     auto renderNavigator = AceType::DynamicCast<RenderNavigator>(node);
     if (renderNavigator) {
         if (renderNavigator->GetType() == NavigatorType::PUSH) {
-            return "Push";
+            return "NavigationType.Push";
         } else if (renderNavigator->GetType() == NavigatorType::REPLACE) {
-            return "Replace";
+            return "NavigationType.Replace";
         } else {
-            return "Back";
+            return "NavigationType.Back";
         }
     }
-    return "Push";
+    return "NavigationType.Push";
 }
 
 std::string NavigatorComposedElement::GetParams() const
 {
     auto node = GetInspectorNode(NavigatorElement::TypeId());
     if (!node) {
-        return "-";
+        return "{}";
     }
     auto renderNavigator = AceType::DynamicCast<RenderNavigator>(node);
     if (renderNavigator) {
         return renderNavigator->GetParam();
     }
-    return "-";
+    return "{}";
 }
 
 } // namespace OHOS::Ace::V2
