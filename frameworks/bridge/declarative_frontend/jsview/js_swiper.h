@@ -49,6 +49,7 @@ protected:
     static void SetDisplayCount(const JSCallbackInfo& info);
     static void SetCachedCount(int32_t cachedCount);
     static void SetEnabled(const JSCallbackInfo& info);
+    static void SetDisableSwipe(bool disable);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
 };

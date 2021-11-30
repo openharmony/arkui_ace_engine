@@ -365,7 +365,7 @@ private:
         if (!scheduler_) {
             return;
         }
-        if (disableSwipe_) {
+        if (IsDisabled()) {
             return;
         }
         if (autoPlay_) {

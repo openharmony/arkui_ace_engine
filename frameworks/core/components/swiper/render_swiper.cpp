@@ -541,10 +541,10 @@ void RenderSwiper::UpdateIndex(int32_t index)
 void RenderSwiper::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    if (disableSwipe_) {
+    if (IsDisabled()) {
         return;
     }
-    if (dragDetector_) {
+    if (dragDetector_ && !disableSwipe_) {
         dragDetector_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(dragDetector_);
     }

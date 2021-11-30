@@ -80,6 +80,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSwiper>::StaticMethod("indicatorStyle", &JSSwiper::SetIndicatorStyle);
     JSClass<JSSwiper>::StaticMethod("enabled", &JSSwiper::SetEnabled);
+    JSClass<JSSwiper>::StaticMethod("disableSwipe", &JSSwiper::SetDisableSwipe);
     JSClass<JSSwiper>::StaticMethod("height", &JSSwiper::SetHeight);
     JSClass<JSSwiper>::StaticMethod("width", &JSSwiper::SetWidth);
     JSClass<JSSwiper>::StaticMethod("size", &JSSwiper::SetSize);
@@ -112,7 +113,16 @@ void JSSwiper::SetEnabled(const JSCallbackInfo& info)
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
     if (swiper) {
-        swiper->DisableSwipe(!(info[0]->ToBoolean()));
+        swiper->SetDisabledStatus(!(info[0]->ToBoolean()));
+    }
+}
+
+void JSSwiper::SetDisableSwipe(bool disable)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->DisableSwipe(disable);
     }
 }
 
