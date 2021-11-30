@@ -37,6 +37,7 @@ private:
     SkCanvas* GetSkCanvas(RenderContext& context);
     void PaintTip(RenderContext& context, const Offset& offset);
     void PaintTopTip(SkCanvas* skCanvas, SkPaint paint, const Offset& offset);
+    void PaintLeftTip(SkCanvas* skCanvas, SkPaint paint, const Offset& offset);
 
     SkPath path_;
 };

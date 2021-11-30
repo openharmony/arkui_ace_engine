@@ -63,6 +63,11 @@ void RosenRenderSingleChildScroll::Paint(RenderContext& context, const Offset& o
             }
         }
     }
+
+    // Notify scroll bar to update.
+    if (scrollBarProxy_) {
+        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
+    }
 }
 
 } // namespace OHOS::Ace

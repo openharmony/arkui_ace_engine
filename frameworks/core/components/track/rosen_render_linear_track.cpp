@@ -83,7 +83,12 @@ void RosenRenderLinearTrack::Paint(RenderContext& context, const Offset& offset)
     PaintSliderSteps(context, offset);
 
     // Draw cache region
-    double trackLength = GetLayoutSize().Width();
+    double trackLength = 0.0;
+    if (direction_ == Axis::VERTICAL) {
+        trackLength = GetLayoutSize().Height();
+    } else {
+        trackLength = GetLayoutSize().Width();
+    }
     trackLength = trackLength - trackHeight;
     if (!NearEqual(GetCachedRatio(), 0.0)) {
         SkPaint cachedPaint;
@@ -102,17 +107,24 @@ void RosenRenderLinearTrack::Paint(RenderContext& context, const Offset& offset)
     if (!NearEqual(GetTotalRatio(), 0.0)) {
         SkPaint selectPaint;
         selectPaint.setAntiAlias(true);
-
-        const double startRect = leftToRight_ ? offset.GetX() : offset.GetX() + GetLayoutSize().Width();
-        const double endRect = leftToRight_ ? startRect + trackHeight + trackLength * GetTotalRatio()
-                                            : startRect - trackHeight - trackLength * GetTotalRatio();
-        SkRRect selectRect = SkRRect::MakeRectXY(
-            { startRect, offset.GetY(), endRect, offset.GetY() + trackHeight }, trackHeight * HALF, trackHeight * HALF);
-        SkRRect selectRectRosen = SkRRect();
-        selectRectRosen = selectRect;
-        selectPaint.setShader(BlendSkShader({startRect + scanHighLightValue_ * trackLength, offset.GetY()},
-            GetSelectColor().GetValue(), playAnimation_));
-        canvas->drawRRect(selectRectRosen, selectPaint);
+        if (direction_ == Axis::VERTICAL) {
+            const double startRect = offset.GetY();
+            const double endRect = startRect + trackHeight + trackLength * GetTotalRatio();
+            SkRRect selectRect = SkRRect::MakeRectXY({ offset.GetX(), startRect, offset.GetX() + trackHeight, endRect },
+                trackHeight * HALF, trackHeight * HALF);
+            selectPaint.setShader(
+                BlendSkShader({ offset.GetX(), startRect }, GetSelectColor().GetValue(), playAnimation_));
+            canvas->drawRRect(selectRect, selectPaint);
+        } else {
+            const double startRect = leftToRight_ ? offset.GetX() : offset.GetX() + GetLayoutSize().Width();
+            const double endRect = leftToRight_ ? startRect + trackHeight + trackLength * GetTotalRatio()
+                                                : startRect - trackHeight - trackLength * GetTotalRatio();
+            SkRRect selectRect = SkRRect::MakeRectXY({ startRect, offset.GetY(), endRect, offset.GetY() + trackHeight },
+                trackHeight * HALF, trackHeight * HALF);
+            selectPaint.setShader(BlendSkShader({ startRect + scanHighLightValue_ * trackLength, offset.GetY() },
+                GetSelectColor().GetValue(), playAnimation_));
+            canvas->drawRRect(selectRect, selectPaint);
+        }
     }
 }
 
@@ -140,30 +152,53 @@ void RosenRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Offs
     if (!NearEqual(GetTrackThickness(), 0.0)) {
         trackHeight = GetTrackThickness();
     }
-    const double trackLength = GetLayoutSize().Width();
-    const double dyOffset = offset.GetY() + trackHeight * HALF;
-    double current = offset.GetX();
-
-    SkPaint skPaint;
-    skPaint.setColor(color.GetValue());
-    skPaint.setStyle(SkPaint::Style::kStroke_Style);
-    skPaint.setStrokeWidth(size);
-    skPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
-    SkPath path;
-
-    while (current < offset.GetX() + trackLength) {
-        // do not draw first mark on track head
-        current += GetSliderSteps();
-        double dxOffset = current;
-        if (GetSliderMode() == SliderMode::OUTSET) {
-            dxOffset = std::clamp(current, offset.GetX() + size * HALF, offset.GetX() + trackLength - size * HALF);
-        } else {
-            dxOffset = std::clamp(current, offset.GetX(), offset.GetX() + trackLength);
+    if (direction_ == Axis::VERTICAL) {
+        const double trackLength = GetLayoutSize().Height();
+        const double dxOffset = offset.GetX() + trackHeight * HALF;
+        double current = offset.GetY();
+        SkPaint skPaint;
+        skPaint.setColor(color.GetValue());
+        skPaint.setStyle(SkPaint::Style::kStroke_Style);
+        skPaint.setStrokeWidth(size);
+        skPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
+        SkPath path;
+        while (current < offset.GetY() + trackLength) {
+            // do not draw first mark on track head
+            current += GetSliderSteps();
+            double dyOffset = current;
+            if (GetSliderMode() == SliderMode::OUTSET) {
+                dyOffset = std::clamp(current, offset.GetY() + size * HALF, offset.GetY() + trackLength - size * HALF);
+            } else {
+                dyOffset = std::clamp(current, offset.GetY(), offset.GetY() + trackLength);
+            }
+            path.moveTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
+            path.lineTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
         }
-        path.moveTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
-        path.lineTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
+        canvas->drawPath(path, skPaint);
+    } else {
+        const double trackLength = GetLayoutSize().Width();
+        const double dyOffset = offset.GetY() + trackHeight * HALF;
+        double current = offset.GetX();
+        SkPaint skPaint;
+        skPaint.setColor(color.GetValue());
+        skPaint.setStyle(SkPaint::Style::kStroke_Style);
+        skPaint.setStrokeWidth(size);
+        skPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
+        SkPath path;
+        while (current < offset.GetX() + trackLength) {
+            // do not draw first mark on track head
+            current += GetSliderSteps();
+            double dxOffset = current;
+            if (GetSliderMode() == SliderMode::OUTSET) {
+                dxOffset = std::clamp(current, offset.GetX() + size * HALF, offset.GetX() + trackLength - size * HALF);
+            } else {
+                dxOffset = std::clamp(current, offset.GetX(), offset.GetX() + trackLength);
+            }
+            path.moveTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
+            path.lineTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
+        }
+        canvas->drawPath(path, skPaint);
     }
-    canvas->drawPath(path, skPaint);
 }
 
 void RosenRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Offset& offset)
@@ -177,8 +212,16 @@ void RosenRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Offs
     if (!NearEqual(GetTrackThickness(), 0.0)) {
         trackHeight = GetTrackThickness();
     }
-    const double trackLength = GetLayoutSize().Width();
-    const double dyOffset = offset.GetY() + trackHeight * HALF;
+    double trackLength = 0.0;
+    double dxOffset = 0.0;
+    double dyOffset = 0.0;
+    if (direction_ == Axis::VERTICAL) {
+        trackLength = GetLayoutSize().Height();
+        dxOffset = offset.GetX() + trackHeight * HALF;
+    } else {
+        trackLength = GetLayoutSize().Width();
+        dyOffset = offset.GetY() + trackHeight * HALF;
+    }
 
     // Draw background
     SkPaint railPaint;
@@ -187,7 +230,11 @@ void RosenRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Offs
     railPaint.setStyle(SkPaint::Style::kStroke_Style);
     railPaint.setStrokeWidth(trackHeight);
     railPaint.setStrokeCap(SkPaint::kRound_Cap);
-    canvas->drawLine(offset.GetX(), dyOffset, offset.GetX() + trackLength, dyOffset, railPaint);
+    if (direction_ == Axis::VERTICAL) {
+        canvas->drawLine(dxOffset, offset.GetY(), dxOffset, offset.GetY() + trackLength, railPaint);
+    } else {
+        canvas->drawLine(offset.GetX(), dyOffset, offset.GetX() + trackLength, dyOffset, railPaint);
+    }
 
     // draw steps
     PaintSliderSteps(context, offset);
@@ -200,9 +247,16 @@ void RosenRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Offs
         selectPaint.setStyle(SkPaint::Style::kStroke_Style);
         selectPaint.setStrokeWidth(trackHeight);
         selectPaint.setStrokeCap(SkPaint::kRound_Cap);
-        const double fromX = leftToRight_ ? offset.GetX() : offset.GetX() + trackLength;
-        const double toX = leftToRight_ ? fromX + trackLength * GetTotalRatio() : fromX - trackLength * GetTotalRatio();
-        canvas->drawLine(fromX, dyOffset, toX, dyOffset, selectPaint);
+        if (direction_ == Axis::VERTICAL) {
+            const double fromY = offset.GetY();
+            const double toY = fromY + trackLength * GetTotalRatio();
+            canvas->drawLine(dxOffset, fromY, dxOffset, toY, selectPaint);
+        } else {
+            const double fromX = leftToRight_ ? offset.GetX() : offset.GetX() + trackLength;
+            const double toX =
+                leftToRight_ ? fromX + trackLength * GetTotalRatio() : fromX - trackLength * GetTotalRatio();
+            canvas->drawLine(fromX, dyOffset, toX, dyOffset, selectPaint);
+        }
     }
 }
 
@@ -211,13 +265,18 @@ void RosenRenderLinearTrack::PaintBackgroundTrack(SkCanvas* canvas, const Offset
     SkPaint railPaint;
     railPaint.setAntiAlias(true);
     railPaint.setColor(GetBackgroundColor().GetValue());
-    double trackLength = GetLayoutSize().Width();
-    SkRRect rrect =
-        SkRRect::MakeRectXY({offset.GetX(), offset.GetY(), offset.GetX() + trackLength, offset.GetY() + trackHeight},
+    SkRRect rrect;
+    if (direction_ == Axis::VERTICAL) {
+        rrect = SkRRect::MakeRectXY(
+            { offset.GetX(), offset.GetY(), offset.GetX() + trackHeight, offset.GetY() + GetLayoutSize().Height() },
             trackHeight * HALF, trackHeight * HALF);
-    SkRRect rosenRect = SkRRect();
-    rosenRect = rrect;
-    canvas->drawRRect(rosenRect, railPaint);
+    } else {
+        rrect = SkRRect::MakeRectXY(
+            { offset.GetX(), offset.GetY(), offset.GetX() + GetLayoutSize().Width(), offset.GetY() + trackHeight },
+            trackHeight * HALF, trackHeight * HALF);
+    }
+
+    canvas->drawRRect(rrect, railPaint);
 }
 
 } // namespace OHOS::Ace

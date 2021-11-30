@@ -65,14 +65,21 @@ void RosenRenderSlider::PerformLayout()
     RenderSlider::PerformLayout();
 
     LOGD("Slider::PerformLayout totalRatio_:%{public}lf, trackLength:%{public}lf", totalRatio_, trackLength_);
-    double dxOffset = (GetTextDirection() == TextDirection::LTR)
-                          ? NormalizeToPx(SLIDER_PADDING_DP) + trackLength_ * totalRatio_
-                          : GetLayoutSize().Width() - NormalizeToPx(SLIDER_PADDING_DP) - trackLength_ * totalRatio_;
-
-    double dyOffset = GetLayoutSize().Height() * HALF;
-    ProcessBlock(Offset(dxOffset, dyOffset));
-    ProcessTrack(Offset(dxOffset, dyOffset));
-    SetTipPosition(dxOffset);
+    if (direction_ == Axis::VERTICAL) {
+        double dxOffset = GetLayoutSize().Width() * HALF;
+        double dyOffset = NormalizeToPx(SLIDER_PADDING_DP) + trackLength_ * totalRatio_;
+        ProcessBlock(Offset(dxOffset, dyOffset));
+        ProcessTrack(Offset(dxOffset, dyOffset));
+        SetTipPosition(dyOffset);
+    } else {
+        double dxOffset = (GetTextDirection() == TextDirection::LTR)
+                              ? NormalizeToPx(SLIDER_PADDING_DP) + trackLength_ * totalRatio_
+                              : GetLayoutSize().Width() - NormalizeToPx(SLIDER_PADDING_DP) - trackLength_ * totalRatio_;
+        double dyOffset = GetLayoutSize().Height() * HALF;
+        ProcessBlock(Offset(dxOffset, dyOffset));
+        ProcessTrack(Offset(dxOffset, dyOffset));
+        SetTipPosition(dxOffset);
+    }
 }
 
 void RosenRenderSlider::AddTipChild()
@@ -101,6 +108,7 @@ void RosenRenderSlider::AddTipChild()
 
     auto tipComponent = AceType::MakeRefPtr<TipComponent>(tipText_);
     tipComponent->SetBgColor(theme->GetTipColor());
+    tipComponent->SetDirection(direction_);
 
     renderText_ = RenderText::Create();
     renderText_->Attach(GetContext());
@@ -112,7 +120,8 @@ void RosenRenderSlider::AddTipChild()
     auto padding = NormalizeToPx(theme->GetTipTextPadding());
     auto renderTip = AceType::DynamicCast<RenderTip>(tip_);
     if (renderTip) {
-        renderTip->SetPadding(Edge(padding, 0.0, padding, 0.0, DimensionUnit::PX));
+        renderTip->SetPadding(direction_ == Axis::VERTICAL ?
+            Edge(0.0, padding, 0.0, padding, DimensionUnit::PX) : Edge(padding, 0.0, padding, 0.0, DimensionUnit::PX));
     }
 
     AddChild(tip_);
@@ -142,32 +151,55 @@ void RosenRenderSlider::ProcessTrack(const Offset& currentPosition)
     if (!track) {
         return;
     }
-    double trackPositionHorizontal = NormalizeToPx(SLIDER_PADDING_DP);
-    if (GetTextDirection() == TextDirection::RTL) {
-        trackPositionHorizontal = GetLayoutSize().Width() - NormalizeToPx(SLIDER_PADDING_DP) - trackLength_;
-    }
-    double dyOffset = currentPosition.GetY();
-    double hotRegionHeight = NormalizeToPx(blockHotHeight_);
-    Offset trackPosition = Offset(trackPositionHorizontal, dyOffset - track->GetTrackThickness() * HALF);
-    track->SetSliderMode(mode_);
-    if (showSteps_) {
-        double stepLength = step_ * trackLength_ / (max_ - min_);
-        track->SetSliderSteps(stepLength);
+    if (direction_  == Axis::VERTICAL) {
+        double dxOffset = currentPosition.GetX();
+        double trackPositionHorizontal = NormalizeToPx(SLIDER_PADDING_DP);
+        double hotRegionWidth = NormalizeToPx(blockHotWidth_);
+        Offset trackPosition = Offset(dxOffset - track->GetTrackThickness() * HALF, trackPositionHorizontal);
+        track->SetSliderMode(mode_);
+        if (showSteps_) {
+            double stepLength = step_ * trackLength_ / (max_ - min_);
+            track->SetSliderSteps(stepLength);
+        } else {
+            track->SetSliderSteps(0.0);
+        }
+        track->SetPosition(trackPosition);
+        track->SetTotalRatio(totalRatio_);
+        track->SetLayoutSize(Size(hotRegionWidth, trackLength_));
     } else {
-        track->SetSliderSteps(0.0);
+        double trackPositionHorizontal = NormalizeToPx(SLIDER_PADDING_DP);
+        if (GetTextDirection() == TextDirection::RTL) {
+            trackPositionHorizontal = GetLayoutSize().Width() - NormalizeToPx(SLIDER_PADDING_DP) - trackLength_;
+        }
+        double dyOffset = currentPosition.GetY();
+        double hotRegionHeight = NormalizeToPx(blockHotHeight_);
+        Offset trackPosition = Offset(trackPositionHorizontal, dyOffset - track->GetTrackThickness() * HALF);
+        track->SetSliderMode(mode_);
+        if (showSteps_) {
+            double stepLength = step_ * trackLength_ / (max_ - min_);
+            track->SetSliderSteps(stepLength);
+        } else {
+            track->SetSliderSteps(0.0);
+        }
+        track->SetPosition(trackPosition);
+        track->SetTotalRatio(totalRatio_);
+        track->SetLayoutSize(Size(trackLength_, hotRegionHeight));
     }
-    track->SetPosition(trackPosition);
-    track->SetTotalRatio(totalRatio_);
-    track->SetLayoutSize(Size(trackLength_, hotRegionHeight));
 }
 
 void RosenRenderSlider::SetTipPosition(double blockOffset)
 {
     auto renderTip = AceType::DynamicCast<RenderTip>(tip_);
     if (renderTip) {
-        const double childHalfWidth = renderTip->GetChildSize().Width() * HALF;
-        const double tipLayoutHeight = renderTip->GetLayoutSize().Height();
-        renderTip->SetPosition(Offset(blockOffset - childHalfWidth, -tipLayoutHeight));
+        if (direction_ == Axis::VERTICAL) {
+            double tipLayoutWidth = renderTip->GetLayoutSize().Width();
+            double childHalfHeight = renderTip->GetChildSize().Height() * HALF;
+            renderTip->SetPosition(Offset(-tipLayoutWidth, blockOffset - childHalfHeight));
+        } else {
+            double childHalfWidth = renderTip->GetChildSize().Width() * HALF;
+            double tipLayoutHeight = renderTip->GetLayoutSize().Height();
+            renderTip->SetPosition(Offset(blockOffset - childHalfWidth, -tipLayoutHeight));
+        }
     }
 }
 

@@ -35,8 +35,13 @@ void RosenRenderGridScroll::Paint(RenderContext& context, const Offset& offset)
 {
     LOGD("Paint %{public}lf  %{public}lf", GetLayoutSize().Width(), GetLayoutSize().Height());
     RenderNode::Paint(context, offset);
-    // render scroll bar
 
+    // Notify scroll bar to update.
+    if (scrollBarProxy_) {
+        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
+    }
+
+    // render scroll bar
     if (!scrollBar_ || !scrollBar_->NeedPaint()) {
         return;
     }

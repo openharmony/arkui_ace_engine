@@ -39,6 +39,16 @@ public:
     void OnMouseHoverExitTest() override;
     void OnPaintFinish() override;
 
+    RefPtr<RenderBlock> GetRenderBlock()
+    {
+        return AceType::DynamicCast<RenderBlock>(block_);
+    }
+
+    RefPtr<RenderTrack> GetRenderTrack()
+    {
+        return AceType::DynamicCast<RenderTrack>(track_);
+    }
+
 private:
     void AddTipChild();
     void HandleFocus();
