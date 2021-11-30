@@ -128,6 +128,7 @@ void RosenRenderRating::PaintImageArea(RenderContext& context, const RefPtr<Rend
         clipOffset.GetY() + imageAreaSize.Height()},
         SkClipOp::kIntersect, true);
     for (int i = 0; i < properties.repeatNum; ++i) {
+        renderImage->SetAdaptiveFrameRectFlag(false);
         renderImage->RenderWithContext(context, drawOffset + Offset(singleWidth_ * i, 0.0));
     }
     canvas->restore();

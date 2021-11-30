@@ -161,6 +161,16 @@ public:
         return background_;
     }
 
+    void SetAdaptiveFrameRectFlag(bool adaptiveFrameRectFlag)
+    {
+        adaptiveFrameRect_ = adaptiveFrameRectFlag;
+    }
+
+    bool GetAdaptiveFrameRectFlag()
+    {
+        return adaptiveFrameRect_;
+    }
+
     void SetBgImageBoxPaintSize(const Size& boxPaintSize)
     {
         if (background_ && boxPaintSize_ != boxPaintSize) {
@@ -318,6 +328,10 @@ protected:
     ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
     ImageRenderMode imageRenderMode_ = ImageRenderMode::ORIGINAL;
     ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
+
+    // For RosenRenderImage which need to be painted several times on parent RenderNode.
+    // For Example: RosenRenderRating::PaintImageArea
+    bool adaptiveFrameRect_ = true;
 
     bool autoResize_ = true;
 

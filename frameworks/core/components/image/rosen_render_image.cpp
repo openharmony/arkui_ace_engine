@@ -607,7 +607,60 @@ void RosenRenderImage::CanvasDrawImageRect(
     int fitNum = static_cast<int>(imageFit_);
     int repeatNum = static_cast<int>(imageRepeat_);
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
-    recordingCanvas->DrawImageWithParm(image_, fitNum, repeatNum, radius, paint);
+    if (GetAdaptiveFrameRectFlag()) {
+        recordingCanvas->DrawImageWithParm(image_, fitNum, repeatNum, radius, paint);
+    } else {
+        bool isLoading = ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) ||
+                        (imageLoadingStatus_ == ImageLoadingStatus::UPDATING));
+        Rect scaledSrcRect = isLoading ? currentSrcRect_ : srcRect_;
+
+        if (sourceInfo_.IsValid() && imageObj_ && (imageObj_->GetFrameCount() == 1)) {
+            Size sourceSize = (image_ ? Size(image_->width(), image_->height()) : Size());
+            // calculate srcRect that matches the real image source size
+            // note that gif doesn't do resize, so gif does not need to recalculate
+            scaledSrcRect = RecalculateSrcRect(sourceSize);
+            scaledSrcRect.ApplyScaleAndRound(currentResizeScale_);
+        }
+
+        Rect paintRect = ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) && !resizeCallLoadImage_)
+                                ? currentDstRect_
+                                : dstRect_;
+
+        Rect realDstRect = paintRect + offset;
+
+        auto skSrcRect = SkIRect::MakeXYWH(
+            Round(scaledSrcRect.Left()), Round(scaledSrcRect.Top()),
+            Round(scaledSrcRect.Width()), Round(scaledSrcRect.Height()));
+        // only transform one time, set skDstRect.top and skDstRect.left to 0.
+        auto skDstRect = SkRect::MakeXYWH(
+            0, 0,
+            realDstRect.Width(), realDstRect.Height());
+
+        // initialize a transform matrix
+        SkScalar scaleX = skDstRect.width() / skSrcRect.width();
+        SkScalar scaleY = skDstRect.height() / skSrcRect.height();
+        SkScalar transX = realDstRect.Left() - imageRenderPosition_.GetX();
+        SkScalar transY = realDstRect.Top() - imageRenderPosition_.GetY();
+        if (matchTextDirection_ && GetTextDirection() == TextDirection::RTL) {
+            // flip the image algin x direction.
+            scaleX = -1 * scaleX;
+            transX = skDstRect.left() + skDstRect.width();
+        }
+        SkScalar skewX = 0;
+        SkScalar skewY = 0;
+        SkScalar pers0 = 0;
+        SkScalar pers1 = 0;
+        SkScalar pers2 = 1;
+        auto sampleMatrix = SkMatrix::MakeAll(
+            scaleX, skewX, transX,
+            skewY, scaleY, transY,
+            pers0, pers1, pers2);
+
+        recordingCanvas->save();
+        recordingCanvas->concat(sampleMatrix);
+        recordingCanvas->drawImageRect(image_, skSrcRect, skDstRect, &paint, SkCanvas::kFast_SrcRectConstraint);
+        recordingCanvas->restore();
+    }
 #endif
 }
 
