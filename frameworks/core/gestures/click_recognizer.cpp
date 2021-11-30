@@ -88,7 +88,8 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchPoint& event)
         }
     } else {
         LOGE("the state of click recognizer is not ready to recieve touch down event, "
-             "state is %{public}d, id is %{public}d", state_, event.id);
+             "state is %{public}d, id is %{public}d",
+            state_, event.id);
     }
 
     if (pointsCount_ == fingers_) {

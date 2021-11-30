@@ -697,7 +697,7 @@ void RenderBox::MouseHoverEnterTest()
     }
     if (animationType_ == HoverAnimationType::SCALE) {
         scaleAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-        CreateFloatAnimation(scaleAnimationEnter_,1.0, 1.05);
+        CreateFloatAnimation(scaleAnimationEnter_, 1.0, 1.05);
         controllerEnter_->AddInterpolator(scaleAnimationEnter_);
     } else if (animationType_ == HoverAnimationType::BOARD) {
         colorAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();

@@ -42,7 +42,8 @@ public:
     WebDelegate() = delete;
     ~WebDelegate() override;
     WebDelegate(const WeakPtr<PipelineContext>& context, ErrorCallback&& onError, const std::string& type)
-        : WebResource(type, context, std::move(onError)), state_(State::WAITINGFORSIZE) {
+        : WebResource(type, context, std::move(onError)), state_(State::WAITINGFORSIZE)
+    {
         ACE_DCHECK(!type.empty());
     }
 

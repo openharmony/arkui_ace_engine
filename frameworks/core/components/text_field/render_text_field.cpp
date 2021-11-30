@@ -76,17 +76,18 @@ public:
         }
         auto context = renderTextField->GetContext().Upgrade();
         if (context) {
-            context->GetTaskExecutor()->PostTask([renderTextField, text] {
-                if (renderTextField) {
-                    auto value = renderTextField->GetEditingValue();
-                    auto textEditingValue = std::make_shared<TextEditingValue>();
-                    textEditingValue->text =
-                        value.GetBeforeSelection() + StringUtils::Str16ToStr8(text) + value.GetAfterSelection();
-                    textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
-                    renderTextField->UpdateEditingValue(textEditingValue, true);
-                }
-            },
-            TaskExecutor::TaskType::UI);
+            context->GetTaskExecutor()->PostTask(
+                [renderTextField, text] {
+                    if (renderTextField) {
+                        auto value = renderTextField->GetEditingValue();
+                        auto textEditingValue = std::make_shared<TextEditingValue>();
+                        textEditingValue->text =
+                            value.GetBeforeSelection() + StringUtils::Str16ToStr8(text) + value.GetAfterSelection();
+                        textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
+                        renderTextField->UpdateEditingValue(textEditingValue, true);
+                    }
+                },
+                TaskExecutor::TaskType::UI);
         }
     }
 
@@ -104,21 +105,22 @@ public:
 
         auto context = renderTextField->GetContext().Upgrade();
         if (context) {
-            context->GetTaskExecutor()->PostTask([renderTextField, length] {
-                if (renderTextField) {
-                    auto value = renderTextField->GetEditingValue();
-                    auto start = value.selection.GetStart();
-                    auto end = value.selection.GetEnd();
-                    auto textEditingValue = std::make_shared<TextEditingValue>();
-                    textEditingValue->text = value.text;
-                    textEditingValue->UpdateSelection(start, end);
-                    if (start > 0 && end > 0) {
-                        textEditingValue->Delete(start == end ? start - length : start, end);
+            context->GetTaskExecutor()->PostTask(
+                [renderTextField, length] {
+                    if (renderTextField) {
+                        auto value = renderTextField->GetEditingValue();
+                        auto start = value.selection.GetStart();
+                        auto end = value.selection.GetEnd();
+                        auto textEditingValue = std::make_shared<TextEditingValue>();
+                        textEditingValue->text = value.text;
+                        textEditingValue->UpdateSelection(start, end);
+                        if (start > 0 && end > 0) {
+                            textEditingValue->Delete(start == end ? start - length : start, end);
+                        }
+                        renderTextField->UpdateEditingValue(textEditingValue, true);
                     }
-                    renderTextField->UpdateEditingValue(textEditingValue, true);
-                }
-            },
-            TaskExecutor::TaskType::UI);
+                },
+                TaskExecutor::TaskType::UI);
         }
     }
 
@@ -131,18 +133,19 @@ public:
 
         auto context = renderTextField->GetContext().Upgrade();
         if (context) {
-            context->GetTaskExecutor()->PostTask([renderTextField, status] {
-                if (renderTextField) {
-                    LOGE("inputmethod:SetKeyboardStatus, status=%{public}d", status);
-                    if (status) {
-                        renderTextField->SetInputMethodStatus(true);
-                    } else {
-                        MiscServices::InputMethodController::GetInstance()->Close();
-                        renderTextField->SetInputMethodStatus(false);
+            context->GetTaskExecutor()->PostTask(
+                [renderTextField, status] {
+                    if (renderTextField) {
+                        LOGE("inputmethod:SetKeyboardStatus, status=%{public}d", status);
+                        if (status) {
+                            renderTextField->SetInputMethodStatus(true);
+                        } else {
+                            MiscServices::InputMethodController::GetInstance()->Close();
+                            renderTextField->SetInputMethodStatus(false);
+                        }
                     }
-                }
-            },
-            TaskExecutor::TaskType::UI);
+                },
+                TaskExecutor::TaskType::UI);
         }
     }
 

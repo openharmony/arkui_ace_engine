@@ -41,7 +41,8 @@ int32_t NativeXComponent_GetNativeWindow(NativeXComponent* component, void** win
     return component->GetNativeWindow(window);
 }
 
-int32_t NativeXComponent_GetXComponentSize(NativeXComponent* component, const void* window, uint64_t* width, uint64_t* height)
+int32_t NativeXComponent_GetXComponentSize(
+    NativeXComponent* component, const void* window, uint64_t* width, uint64_t* height)
 {
     if ((component == nullptr) || (window == nullptr) || (width == nullptr) || (height == nullptr)) {
         return XCOMPONENT_RESULT_BAD_PARAMETER;

@@ -139,12 +139,14 @@ void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::str
         LOGE("RunPage parse manifest.json failed");
         EventReport::SendPageRouterException(PageRouterExcepType::RUN_PAGE_ERR, url);
     }
-    taskExecutor_->PostTask([weak = AceType::WeakClaim(this)]() {
-        auto delegate = weak.Upgrade();
-        if (delegate) {
-            delegate->manifestParser_->GetAppInfo()->ParseI18nJsonInfo();
-        }},
-    TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->manifestParser_->GetAppInfo()->ParseI18nJsonInfo();
+            }
+        },
+        TaskExecutor::TaskType::JS);
     if (!url.empty()) {
         mainPagePath_ = manifestParser_->GetRouter()->GetPagePath(url);
     } else {
@@ -476,44 +478,52 @@ void FrontendDelegateDeclarative::OnConfigurationUpdated(const std::string& data
 bool FrontendDelegateDeclarative::OnStartContinuation()
 {
     bool ret = false;
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &ret] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onStartContinuationCallBack_) {
-            ret = delegate->onStartContinuationCallBack_();
-        }
-    }, TaskExecutor::TaskType::JS);
+    taskExecutor_->PostSyncTask(
+        [weak = AceType::WeakClaim(this), &ret] {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->onStartContinuationCallBack_) {
+                ret = delegate->onStartContinuationCallBack_();
+            }
+        },
+        TaskExecutor::TaskType::JS);
     return ret;
 }
 
 void FrontendDelegateDeclarative::OnCompleteContinuation(int32_t code)
 {
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), code] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onCompleteContinuationCallBack_) {
-            delegate->onCompleteContinuationCallBack_(code);
-        }
-    }, TaskExecutor::TaskType::JS);
+    taskExecutor_->PostSyncTask(
+        [weak = AceType::WeakClaim(this), code] {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->onCompleteContinuationCallBack_) {
+                delegate->onCompleteContinuationCallBack_(code);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnRemoteTerminated()
 {
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this)] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onRemoteTerminatedCallBack_) {
-            delegate->onRemoteTerminatedCallBack_();
-        }
-    }, TaskExecutor::TaskType::JS);
+    taskExecutor_->PostSyncTask(
+        [weak = AceType::WeakClaim(this)] {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->onRemoteTerminatedCallBack_) {
+                delegate->onRemoteTerminatedCallBack_();
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnSaveData(std::string& data)
 {
     std::string savedData;
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &savedData] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onSaveDataCallBack_) {
-            delegate->onSaveDataCallBack_(savedData);
-        }
-    }, TaskExecutor::TaskType::JS);
+    taskExecutor_->PostSyncTask(
+        [weak = AceType::WeakClaim(this), &savedData] {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->onSaveDataCallBack_) {
+                delegate->onSaveDataCallBack_(savedData);
+            }
+        },
+        TaskExecutor::TaskType::JS);
     std::string pageUri = GetRunningPageUrl();
     data = std::string("{\"url\":\"").append(pageUri).append("\",\"__remoteData\":").append(savedData).append("}");
 }
@@ -521,12 +531,14 @@ void FrontendDelegateDeclarative::OnSaveData(std::string& data)
 bool FrontendDelegateDeclarative::OnRestoreData(const std::string& data)
 {
     bool ret = false;
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &data, &ret] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onRestoreDataCallBack_) {
-            ret = delegate->onRestoreDataCallBack_(data);
-        }
-    }, TaskExecutor::TaskType::JS);
+    taskExecutor_->PostSyncTask(
+        [weak = AceType::WeakClaim(this), &data, &ret] {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->onRestoreDataCallBack_) {
+                ret = delegate->onRestoreDataCallBack_(data);
+            }
+        },
+        TaskExecutor::TaskType::JS);
     return ret;
 }
 

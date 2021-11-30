@@ -28,7 +28,7 @@ constexpr Color LIGHT_COLOR = Color(0xFF8A8A8A);
 
 } // namespace
 
-RenderBubbleProgress::RenderBubbleProgress() : RenderNode( true) {}
+RenderBubbleProgress::RenderBubbleProgress() : RenderNode(true) {}
 
 void RenderBubbleProgress::OnPostFlush()
 {

@@ -178,7 +178,7 @@ public:
 
     void SetRefreshDistance(const Dimension& refreshDistance)
     {
-        if(GreatOrEqual(refreshDistance.Value(), 0.0)) {
+        if (GreatOrEqual(refreshDistance.Value(), 0.0)) {
             refreshDistance_ = refreshDistance;
         } else {
             refreshDistance_ = Dimension(0.0, DimensionUnit::VP);
@@ -230,7 +230,7 @@ public:
     {
         if (friction >= MIN_FRICTION_RATIO && friction <= MAX_FRICTION_RATIO) {
             friction_ = friction;
-        } else if(friction < MIN_FRICTION_RATIO) {
+        } else if (friction < MIN_FRICTION_RATIO) {
             friction_ = MIN_FRICTION_RATIO;
         } else {
             friction_ = MAX_FRICTION_RATIO;

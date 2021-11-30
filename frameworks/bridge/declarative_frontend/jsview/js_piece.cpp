@@ -91,8 +91,8 @@ void JSPiece::JSBind(BindingTarget globalObj)
     JSClass<JSPiece>::Bind<>(globalObj);
 }
 
-//showDelete Parameters should be bool type,but after click event triggering,
-//The callback function transfers parameters, and the parameter type changes to number.
+// showDelete Parameters should be bool type,but after click event triggering,
+// The callback function transfers parameters, and the parameter type changes to number.
 void JSPiece::SetShowDelete(const JSCallbackInfo& info)
 {
     bool showDelete = false;

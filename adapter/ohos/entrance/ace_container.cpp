@@ -108,17 +108,17 @@ void AceContainer::Destroy()
             // 1. Destroy Pipeline on UI thread.
             RefPtr<PipelineContext> context;
             context.Swap(pipelineContext_);
-            taskExecutor_->PostTask([context]() {
-                context->Destroy();
-            }, TaskExecutor::TaskType::UI);
+            taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
 
             // 2. Destroy Frontend on JS thread.
             RefPtr<Frontend> frontend;
             frontend_.Swap(frontend);
-            taskExecutor_->PostTask([frontend]() {
-                frontend->UpdateState(Frontend::State::ON_DESTROY);
-                frontend->Destroy();
-            }, TaskExecutor::TaskType::JS);
+            taskExecutor_->PostTask(
+                [frontend]() {
+                    frontend->UpdateState(Frontend::State::ON_DESTROY);
+                    frontend->Destroy();
+                },
+                TaskExecutor::TaskType::JS);
         }
     }
     resRegister_.Reset();
