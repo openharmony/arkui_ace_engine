@@ -40,6 +40,7 @@ public:
     std::string GetLoop() const;
     std::string GetDuration() const;
     std::string GetVertical() const;
+    std::string GetDisableSwipe() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

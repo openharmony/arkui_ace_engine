@@ -32,6 +32,7 @@ const std::unordered_map<std::string, std::function<std::string(const SwiperComp
     { "loop", [](const SwiperComposedElement& inspector) { return inspector.GetLoop(); } },
     { "duration", [](const SwiperComposedElement& inspector) { return inspector.GetDuration(); } },
     { "vertical", [](const SwiperComposedElement& inspector) { return inspector.GetVertical(); } },
+    { "disableSwipe", [](const SwiperComposedElement& inspector) { return inspector.GetDisableSwipe(); } },
 };
 
 } // namespace
@@ -46,6 +47,7 @@ void SwiperComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(std::string("loop: ").append(GetLoop()));
     DumpLog::GetInstance().AddDesc(std::string("duration: ").append(GetDuration()));
     DumpLog::GetInstance().AddDesc(std::string("vertical: ").append(GetVertical()));
+    DumpLog::GetInstance().AddDesc(std::string("disableSwipe: ").append(GetDisableSwipe()));
 }
 
 std::unique_ptr<JsonValue> SwiperComposedElement::ToJsonObject() const
@@ -104,6 +106,13 @@ std::string SwiperComposedElement::GetVertical() const
     auto renderSwiper = GetRenderSwiper();
     auto isVertical = renderSwiper ? renderSwiper->IsVertical() : false;
     return ConvertBoolToString(isVertical);
+}
+
+std::string SwiperComposedElement::GetDisableSwipe() const
+{
+    auto renderSwiper = GetRenderSwiper();
+    auto disable = renderSwiper ? renderSwiper->GetDisableSwipe() : false;
+    return ConvertBoolToString(disable);
 }
 
 RefPtr<RenderSwiper> SwiperComposedElement::GetRenderSwiper() const

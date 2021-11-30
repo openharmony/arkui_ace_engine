@@ -146,6 +146,11 @@ public:
         disableSwipe_ = disableSwipe;
     }
 
+    bool GetDisableSwipe() const
+    {
+        return disableSwipe_;
+    }
+
     double GetMainSize(const Size& size) const
     {
         return axis_ == Axis::HORIZONTAL ? size.Width() : size.Height();
