@@ -76,20 +76,20 @@ const char* GetDeclarativeSharedLibrary(bool isArkApp)
 
 } // namespace
 
-AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, AceAbility* aceAbility,
+AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AppExecFwk::Ability* aceAbility,
     std::unique_ptr<PlatformEventCallback> callback)
     : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), aceAbility_(aceAbility)
 {
     ACE_DCHECK(callback);
     auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     flutterTaskExecutor->InitPlatformThread();
+    taskExecutor_ = flutterTaskExecutor;
     // No need to create JS Thread for DECLARATIVE_JS
     if (type_ != FrontendType::DECLARATIVE_JS) {
         flutterTaskExecutor->InitJsThread();
+        taskExecutor_->PostTask([id = instanceId_]() { Container::InitForThread(id); }, TaskExecutor::TaskType::JS);
     }
     SystemProperties::SetDeclarativeFrontend(type_ == FrontendType::DECLARATIVE_JS);
-    taskExecutor_ = flutterTaskExecutor;
-    taskExecutor_->PostTask([id = instanceId_]() { Container::InitForThread(id); }, TaskExecutor::TaskType::JS);
     platformEventCallback_ = std::move(callback);
 }
 
@@ -151,7 +151,13 @@ void AceContainer::InitializeFrontend()
         frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
         auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary(isArkApp_));
-        auto jsEngine = loader.CreateJsEngine(instanceId_);
+        RefPtr<Framework::JsEngine> jsEngine;
+        if (GetSettings().UsingSharedRuntime()) {
+            jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
+            LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
+        } else {
+            jsEngine = loader.CreateJsEngine(instanceId_);
+        }
         jsEngine->AddExtraNativeObject("ability", aceAbility_);
         declarativeFrontend->SetJsEngine(jsEngine);
         declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
@@ -437,8 +443,8 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterIdleCallback(idleCallback);
 }
 
-void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp,
-    std::string instanceName, AceAbility* aceAbility, std::unique_ptr<PlatformEventCallback> callback)
+void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
+    OHOS::AppExecFwk::Ability* aceAbility, std::unique_ptr<PlatformEventCallback> callback)
 {
     Container::InitForThread(INSTANCE_ID_PLATFORM);
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, isArkApp, aceAbility, std::move(callback));

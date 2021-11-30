@@ -30,6 +30,7 @@ public:
     static JsEngineLoader& GetDeclarative(const char* sharedLibrary = nullptr);
 
     virtual RefPtr<JsEngine> CreateJsEngine(int32_t instanceId) const = 0;
+    virtual RefPtr<JsEngine> CreateJsEngineUsingSharedRuntime(int32_t instanceId, void* runtime) const = 0;
     virtual RefPtr<BaseCanvasBridge> CreateCanvasBridge() const = 0;
     virtual RefPtr<BaseXComponentBridge> CreateXComponentBridge() const = 0;
 };

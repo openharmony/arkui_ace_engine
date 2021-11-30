@@ -17,6 +17,8 @@
 
 #include <unistd.h>
 
+#include "js_runtime.h"
+
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -328,14 +330,21 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
     runtime_ = nullptr;
 }
 
-bool JsiDeclarativeEngineInstance::InitJsEnv(
-    bool debuggerMode, const std::unordered_map<std::string, void*>& extraNativeObject)
+bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
+    const std::unordered_map<std::string, void*>& extraNativeObject, const shared_ptr<JsRuntime>& runtime)
 {
     CHECK_RUN_ON(JS);
     ACE_SCOPED_TRACE("JsiDeclarativeEngineInstance::InitJsEnv");
-    LOGI("JsiDeclarativeEngineInstance InitJsEnv");
+    bool usingSharedRuntime = false;
+    if (runtime != nullptr) {
+        LOGI("JsiDeclarativeEngineInstance InitJsEnv usingSharedRuntime");
+        runtime_ = runtime;
+        usingSharedRuntime = true;
+    } else {
+        LOGI("JsiDeclarativeEngineInstance InitJsEnv not usingSharedRuntime, create own");
+        runtime_.reset(new ArkJSRuntime());
+    }
 
-    runtime_.reset(new ArkJSRuntime());
     if (runtime_ == nullptr) {
         LOGE("Js Engine cannot allocate JSI JSRuntime");
         EventReport::SendJsException(JsExcepType::JS_ENGINE_INIT_ERR);
@@ -347,7 +356,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(
     if (debuggerMode) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    if (!runtime_->Initialize(libraryPath)) {
+    if (!usingSharedRuntime && !runtime_->Initialize(libraryPath)) {
         LOGE("Js Engine initialize runtime failed");
         return false;
     }
@@ -733,7 +742,8 @@ JsiDeclarativeEngine::~JsiDeclarativeEngine()
     LOG_DESTROY();
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
-    if (nativeEngine_ != nullptr) {
+
+    if (runtime_ != nullptr && nativeEngine_ != nullptr) {
         nativeEngine_->CancelCheckUVLoop();
         delete nativeEngine_;
     }
@@ -746,19 +756,41 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     LOGI("JsiDeclarativeEngine Initialize");
     ACE_DCHECK(delegate);
     engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate, instanceId_);
-    bool result = engineInstance_->InitJsEnv(IsDebugVersion() && NeedDebugBreakPoint(), GetExtraNativeObject());
+    auto sharedRumtime = static_cast<OHOS::AbilityRuntime::JsRuntime*>(runtime_);
+    std::shared_ptr<ArkJSRuntime> arkRuntime;
+    EcmaVM* vm = nullptr;
+    if (!sharedRumtime) {
+        LOGI("Initialize will not use sharedRuntime");
+    } else {
+        LOGI("Initialize will use sharedRuntime");
+        arkRuntime = std::make_shared<ArkJSRuntime>();
+        auto& nativeArkEngine = static_cast<ArkNativeEngine&>(sharedRumtime->GetNativeEngine());
+        vm = const_cast<EcmaVM*>(nativeArkEngine.GetEcmaVm());
+        if (vm == nullptr) {
+            LOGE("NativeDeclarativeEngine Initialize, vm is null");
+            return false;
+        }
+        if (!arkRuntime->InitializeFromExistVM(vm)) {
+            LOGE("Ark Engine initialize runtime failed");
+            return false;
+        }
+    }
+
+    bool result =
+        engineInstance_->InitJsEnv(IsDebugVersion() && NeedDebugBreakPoint(), GetExtraNativeObject(), arkRuntime);
     if (!result) {
         LOGE("JsiDeclarativeEngine Initialize, init js env failed");
         return false;
     }
 
     auto runtime = engineInstance_->GetJsRuntime();
-    auto vm = std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm();
+    vm = vm ? vm : const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
     if (vm == nullptr) {
         LOGE("JsiDeclarativeEngine Initialize, vm is null");
         return false;
     }
-    nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
+
+    nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
     if (delegate && delegate->GetAssetManager()) {

@@ -26,6 +26,7 @@ class DeclarativeEngineLoader : public JsEngineLoader, public Singleton<Declarat
 
 public:
     RefPtr<JsEngine> CreateJsEngine(int32_t instanceId) const final;
+    RefPtr<JsEngine> CreateJsEngineUsingSharedRuntime(int32_t instanceId, void* runtime) const final;
     RefPtr<BaseCanvasBridge> CreateCanvasBridge() const final;
     RefPtr<BaseXComponentBridge> CreateXComponentBridge() const final;
 };

@@ -32,6 +32,9 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
       "$ace_root/adapter/ohos/entrance/flutter_ace_view.cpp",
       "$ace_root/adapter/ohos/entrance/pa_container.cpp",
+
+      # innerkits impl
+      "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
     ]
 
     if (target_cpu == "arm64") {
@@ -70,6 +73,8 @@ template("ace_ohos_standard_source_set") {
       "aafwk_standard:ability_manager",
       "aafwk_standard:base",
       "aafwk_standard:want",
+      "aafwk_standard:runtime",
+      "napi:ace_napi",
       "appexecfwk_standard:appexecfwk_base",
       "appexecfwk_standard:appexecfwk_core",
       "appexecfwk_standard:fmskit_native",

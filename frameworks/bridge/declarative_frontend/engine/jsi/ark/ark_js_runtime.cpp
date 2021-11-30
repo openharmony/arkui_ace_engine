@@ -18,6 +18,7 @@
 #include <memory>
 #include <sys/stat.h>
 
+#include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_value.h"
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -50,10 +51,20 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath)
     return vm_ != nullptr;
 }
 
+bool ArkJSRuntime::InitializeFromExistVM(EcmaVM* vm)
+{
+    vm_ = vm;
+    usingExistVM_ = true;
+    LOGI("InitializeFromExistVM %{public}p", vm);
+    return vm_ != nullptr;
+}
+
 void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
-        JSNApi::DestoryJSVM(vm_);
+        if (!usingExistVM_) {
+            JSNApi::DestoryJSVM(vm_);
+        }
         vm_ = nullptr;
     }
     for (auto data : dataList_) {

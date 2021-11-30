@@ -37,7 +37,7 @@ namespace {
 constexpr int32_t ROTATION_DIVISOR = 64;
 constexpr double PERMIT_ANGLE_VALUE = 0.5;
 
-TouchPoint ConvertTouchEvent(OHOS::TouchEvent& touchEvent)
+TouchPoint ConvertTouchEvent(const OHOS::TouchEvent& touchEvent)
 {
     int32_t id = static_cast<int32_t>(touchEvent.GetIndex());
     MmiPoint mmiPoint = touchEvent.GetPointerPosition(id);
@@ -216,7 +216,7 @@ void FlutterAceView::SetViewportMetrics(FlutterAceView* view, const flutter::Vie
     }
 }
 
-bool FlutterAceView::DispatchTouchEvent(FlutterAceView* view, OHOS::TouchEvent& touchEvent)
+bool FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const OHOS::TouchEvent& touchEvent)
 {
     if (touchEvent.GetSourceDevice() == OHOS::SourceDevice::MOUSE) {
         // mouse event
@@ -294,7 +294,7 @@ void FlutterAceView::SetShellHolder(std::unique_ptr<flutter::OhosShellHolder> ho
     shell_holder_ = std::move(holder);
 }
 
-bool FlutterAceView::ProcessTouchEvent(OHOS::TouchEvent& touchEvent)
+bool FlutterAceView::ProcessTouchEvent(const OHOS::TouchEvent& touchEvent)
 {
     TouchPoint touchPoint = ConvertTouchEvent(touchEvent);
     bool forbiddenToPlatform = false;

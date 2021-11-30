@@ -46,7 +46,7 @@ public:
     static void SurfaceChanged(FlutterAceView* view, int32_t width, int32_t height, int32_t orientation);
     static void SetViewportMetrics(FlutterAceView* view, const flutter::ViewportMetrics& metrics);
 
-    static bool DispatchTouchEvent(FlutterAceView* view, OHOS::TouchEvent& touchEvent);
+    static bool DispatchTouchEvent(FlutterAceView* view, const OHOS::TouchEvent& touchEvent);
 
     static bool DispatchKeyEvent(FlutterAceView* view, int32_t keyCode, int32_t action, int32_t repeatTime,
         int64_t timeStamp, int64_t timeStampStart);
@@ -68,7 +68,7 @@ public:
         return shell_holder_.get();
     }
 
-    bool ProcessTouchEvent(OHOS::TouchEvent& touchEvent);
+    bool ProcessTouchEvent(const OHOS::TouchEvent& touchEvent);
 
     void ProcessMouseEvent(OHOS::MouseEvent& mouseEvent);
 

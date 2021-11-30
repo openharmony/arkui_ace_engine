@@ -52,6 +52,7 @@ class ArkJSRuntime final : public JsRuntime, public std::enable_shared_from_this
 public:
     bool StartDebugger(const char *libraryPath, EcmaVM *vm) const;
     bool Initialize(const std::string &libraryPath) override;
+    bool InitializeFromExistVM(EcmaVM* vm);
     void Reset() override;
     void SetLogPrint(LOG_PRINT out) override;
     shared_ptr<JsValue> EvaluateJsCode(const std::string &src) override;
@@ -85,6 +86,7 @@ private:
     LOG_PRINT print_ { nullptr };
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };
     std::string libPath_ {};
+    bool usingExistVM_ = false;
     int debuggerOrder_ { 0 };
 };
 

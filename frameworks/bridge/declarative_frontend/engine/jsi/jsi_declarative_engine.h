@@ -44,7 +44,8 @@ public:
 
     void FlushCommandBuffer(void* context, const std::string& command) override;
 
-    bool InitJsEnv(bool debuggerMode, const std::unordered_map<std::string, void*>& extraNativeObject);
+    bool InitJsEnv(bool debuggerMode, const std::unordered_map<std::string, void*>& extraNativeObject,
+        const shared_ptr<JsRuntime>& runtime = nullptr);
 
     bool FireJsEvent(const std::string& eventStr);
 
@@ -150,6 +151,7 @@ private:
 class JsiDeclarativeEngine : public JsEngine {
     DECLARE_ACE_TYPE(JsiDeclarativeEngine, JsEngine)
 public:
+    JsiDeclarativeEngine(int32_t instanceId, void* runtime) : instanceId_(instanceId), runtime_(runtime) {}
     JsiDeclarativeEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~JsiDeclarativeEngine() override;
 
@@ -231,6 +233,7 @@ private:
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 
     int32_t instanceId_ = 0;
+    void* runtime_ = nullptr;
 
     ArkNativeEngine* nativeEngine_ = nullptr;
 
