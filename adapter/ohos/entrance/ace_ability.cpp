@@ -215,6 +215,9 @@ void AceAbility::OnStart(const Want& want)
     if (info != nullptr && !info->srcPath.empty()) {
         srcPath = info->srcPath;
     }
+    if (info != nullptr && !info->bundleName.empty()) {
+        AceApplicationInfo::GetInstance().SetPackageName(info->bundleName);
+    }
 
     FrontendType frontendType = GetFrontendTypeFromManifest(packagePathStr, srcPath);
     bool isArkApp = GetIsArkFromConfig(packagePathStr);
