@@ -58,7 +58,9 @@ void JSProgress::Create(const JSCallbackInfo& info)
     auto progressStyle = static_cast<ProgressStyle>(jsStyle->ToNumber<int32_t>());
     if (progressStyle == ProgressStyle::Eclipse) {
         progressType = ProgressType::MOON;
-    } else if (progressStyle == ProgressStyle::Circular) {
+    } else if (progressStyle == ProgressStyle::Ring) {
+        progressType = ProgressType::RING;
+    } else if (progressStyle == ProgressStyle::ScaleRing) {
         progressType = ProgressType::SCALE;
     }
 
@@ -71,6 +73,12 @@ void JSProgress::Create(const JSCallbackInfo& info)
     }
 
     progressComponent->InitStyle(theme);
+
+    if (progressStyle == ProgressStyle::ScaleRing) {
+        progressComponent->SetScaleNumber(100);
+        progressComponent->SetScaleWidth(Dimension(2));
+    }
+
     ViewStackProcessor::GetInstance()->Push(progressComponent);
 }
 

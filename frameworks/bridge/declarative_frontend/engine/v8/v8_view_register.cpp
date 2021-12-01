@@ -775,9 +775,9 @@ void JsRegisterViews(BindingTarget globalObj)
 
     JSObjectTemplate progressStyle;
     progressStyle.Constant("Linear", 0);
-    progressStyle.Constant("Capsule", 1);
+    progressStyle.Constant("Ring", 1);
     progressStyle.Constant("Eclipse", 2);
-    progressStyle.Constant("Circular", 3);
+    progressStyle.Constant("ScaleRing", 3);
 
     JSObjectTemplate stackFit;
     stackFit.Constant("Keep", 0);

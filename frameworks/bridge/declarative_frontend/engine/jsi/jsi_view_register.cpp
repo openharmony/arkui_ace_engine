@@ -756,9 +756,9 @@ void JsRegisterViews(BindingTarget globalObj)
 
     JSObjectTemplate progressStyle;
     progressStyle.Constant("Linear", 0);
-    progressStyle.Constant("Capsule", 1);  // 1 means index of constant
+    progressStyle.Constant("Ring", 1);  // 1 means index of constant
     progressStyle.Constant("Eclipse", 2);  // 2 means index of constant
-    progressStyle.Constant("Circular", 3);  // 3 means index of constant
+    progressStyle.Constant("ScaleRing", 3);  // 3 means index of constant
 
     JSObjectTemplate stackFit;
     stackFit.Constant("Keep", 0);

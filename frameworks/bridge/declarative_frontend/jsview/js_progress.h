@@ -23,9 +23,9 @@ namespace OHOS::Ace::Framework {
 
 enum class ProgressStyle {
     Linear,
-    Capsule,
+    Ring,
     Eclipse,
-    Circular
+    ScaleRing,
 };
 
 class JSProgress : public JSViewAbstract {
