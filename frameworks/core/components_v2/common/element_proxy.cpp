@@ -18,6 +18,7 @@
 #include <map>
 #include <unordered_map>
 
+#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/utils/macros.h"
@@ -250,6 +251,7 @@ public:
     void OnDataReloaded() override
     {
         LOGI("OnDataReloaded()");
+        ACE_SCOPED_TRACE("OnDataReloaded");
 
         LazyForEachCache cache(lazyForEachComponent_);
         size_t oldCount = count_;

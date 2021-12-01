@@ -844,6 +844,12 @@ bool PipelineContext::CanPushPage()
     return stageElement && stageElement->CanPushPage();
 }
 
+bool PipelineContext::IsTransitionStop() const
+{
+    auto stageElement = GetStageElement();
+    return stageElement && stageElement->IsTransitionStop();
+}
+
 void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage)
 {
     ACE_FUNCTION_TRACE();

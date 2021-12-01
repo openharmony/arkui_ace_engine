@@ -29,7 +29,7 @@ RefPtr<SharedTransitionEffect> GetSharedEffect(const ShareId& shareId, const Wea
     auto dest = destWeak.Upgrade();
     auto src = srcWeak.Upgrade();
     if ((!src) && (!dest)) {
-        LOGE("No Shared element found. share id: %{public}s", shareId.c_str());
+        LOGD("No Shared element found. share id: %{public}s", shareId.c_str());
         return nullptr;
     }
     RefPtr<SharedTransitionEffect> effect = dest ? dest->GetEffect() : nullptr;
@@ -224,7 +224,7 @@ bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overla
         }
         RefPtr<SharedTransitionEffect> effect = GetSharedEffect(shareId, destWeak, srcWeak);
         if (!effect) {
-            LOGE("Shared effect is null, maybe no shared element at all. share id: %{public}s", shareId.c_str());
+            LOGD("Shared effect is null, maybe no shared element at all. share id: %{public}s", shareId.c_str());
             continue;
         }
         if (preCheck) {

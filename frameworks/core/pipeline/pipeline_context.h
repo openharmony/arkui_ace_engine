@@ -131,6 +131,8 @@ public:
 
     bool CanPushPage();
 
+    bool IsTransitionStop() const;
+
     void PopPage();
 
     void PopToPage(int32_t pageId);

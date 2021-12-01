@@ -1483,6 +1483,14 @@ void RenderGridScroll::OnPaintFinish()
 
 void RenderGridScroll::OnPredictLayout(int64_t targetTimestamp)
 {
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    if (!context->IsTransitionStop()) {
+        LOGI("In page transition, skip predict.");
+        return;
+    }
     if (loadingIndex_ == -1) {
         DealCache(startIndex_, endIndex_);
         if (loadingIndex_ == -1) {
