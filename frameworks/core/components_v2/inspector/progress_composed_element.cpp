@@ -73,7 +73,7 @@ std::string ProgressComposedElement::GetTotal() const
     if (renderProgress) {
         return std::to_string(renderProgress->GetMaxValue());
     }
-    return "";
+    return "100";
 }
 
 std::string ProgressComposedElement::GetStyle() const
@@ -88,10 +88,10 @@ std::string ProgressComposedElement::GetStyle() const
         } else if (type == ProgressType::CIRCLE) {
             return std::string("ProgressStyle.Circular");
         } else {
-            return "";
+            return "ProgressStyle.Linear";
         }
     }
-    return "";
+    return "ProgressStyle.Linear";
 }
 
 std::string ProgressComposedElement::GetColor() const
@@ -99,7 +99,7 @@ std::string ProgressComposedElement::GetColor() const
     auto renderProgress = GetRenderProgress();
     if (renderProgress) {
         Color color = renderProgress->GetProgressComponent()->GetSelectColor();
-        return std::to_string(color.GetValue());
+        return color.ColorToString();
     }
     return "";
 }

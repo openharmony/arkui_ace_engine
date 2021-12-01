@@ -96,7 +96,7 @@ std::string RatingComposedElement::GetStarStyle() const
         return "";
     }
     jsonStarStyle->Put("backgroundUri", renderRating->GetBackgroundSrc().c_str());
-    jsonStarStyle->Put("foregroundUri", renderRating->GetBackgroundSrc().c_str());
+    jsonStarStyle->Put("foregroundUri", renderRating->GetForegroundSrc().c_str());
     jsonStarStyle->Put("secondaryUri", renderRating->GetSecondarySrc().c_str());
 
     return jsonStarStyle->ToString();

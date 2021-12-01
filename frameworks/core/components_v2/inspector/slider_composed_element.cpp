@@ -70,7 +70,7 @@ std::string SliderComposedElement::GetValue() const
     if (renderSlider) {
         return std::to_string(renderSlider->GetValue());
     }
-    return "";
+    return "0";
 }
 
 std::string SliderComposedElement::GetMax() const
@@ -79,7 +79,7 @@ std::string SliderComposedElement::GetMax() const
     if (renderSlider) {
         return std::to_string(renderSlider->GetMax());
     }
-    return "";
+    return "100";
 }
 
 std::string SliderComposedElement::GetMin() const
@@ -88,7 +88,7 @@ std::string SliderComposedElement::GetMin() const
     if (renderSlider) {
         return std::to_string(renderSlider->GetMin());
     }
-    return "";
+    return "0";
 }
 
 std::string SliderComposedElement::GetStep() const
@@ -97,7 +97,7 @@ std::string SliderComposedElement::GetStep() const
     if (renderSlider) {
         return std::to_string(renderSlider->GetStep());
     }
-    return "";
+    return "1";
 }
 
 std::string SliderComposedElement::GetStyle() const
@@ -106,12 +106,12 @@ std::string SliderComposedElement::GetStyle() const
     if (renderSlider) {
         SliderMode mode = renderSlider->GetMode();
         if (mode == SliderMode::OUTSET) {
-            return std::string("Outset");
+            return std::string("SliderStyle.Outset");
         } else {
-            return std::string("Inset");
+            return std::string("SliderStyle.Inset");
         }
     }
-    return "";
+    return "SliderStyle.Outset";
 }
 
 std::string SliderComposedElement::GetBlockColor() const
@@ -162,7 +162,7 @@ std::string SliderComposedElement::GetShowSteps() const
     if (renderSlider) {
         return ConvertBoolToString(renderSlider->GetShowSteps());
     }
-    return "";
+    return "false";
 }
 
 std::string SliderComposedElement::GetShowTips() const
@@ -171,7 +171,7 @@ std::string SliderComposedElement::GetShowTips() const
     if (renderSlider) {
         return ConvertBoolToString(renderSlider->GetShowTips());
     }
-    return "";
+    return "false";
 }
 
 RefPtr<RenderSlider> SliderComposedElement::GetRenderSlider() const
