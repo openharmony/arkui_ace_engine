@@ -88,7 +88,13 @@ RefPtr<ComposedComponent> NavigationContainerComponent::BuildToolBar(
     auto theme = AceType::MakeRefPtr<ThemeManager>()->GetTheme<TabTheme>();
     tabBar->InitBottomTabStyle(theme);
 
-    auto display = AceType::MakeRefPtr<DisplayComponent>(tabBar);
+    auto component = declaration->toolBarBuilder;
+    auto display = AceType::MakeRefPtr<DisplayComponent>();
+    if (component) {
+        display->SetChild(component);
+    } else {
+        display->SetChild(tabBar);
+    }
     RefPtr<BoxComponent> tabBarBox = AceType::MakeRefPtr<BoxComponent>();
     tabBarBox->SetChild(display);
     tabBarBox->SetDeliverMinToChild(false);

@@ -188,6 +188,15 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
         LOGE("arg is not a object.");
         return;
     }
+    auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
+    if (builderFuncParam->IsFunction()) {
+        ScopedViewStackProcessor builderViewStackProcessor;
+        JsFunction jsBuilderFunc(builderFuncParam);
+        jsBuilderFunc.Execute();
+        RefPtr<Component> builderGeneratedRootComponent = ViewStackProcessor::GetInstance()->Finish();
+        navigationContainer->GetDeclaration()->toolBarBuilder = builderGeneratedRootComponent;
+        return;
+    }
 
     auto itemsValue = JSRef<JSObject>::Cast(info[0])->GetProperty("items");
     if (!itemsValue->IsObject() || !itemsValue->IsArray()) {

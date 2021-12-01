@@ -48,7 +48,7 @@ struct ACE_EXPORT NavigationDeclaration : public virtual AceType {
 public:
     bool HasToolBar()
     {
-        return !hideToolbar && !toolbarItems.empty();
+        return (!hideToolbar && !toolbarItems.empty()) || (!hideToolbar && toolBarBuilder);
     }
 
     RefPtr<Component> customTitle;
@@ -62,6 +62,7 @@ public:
     EventMarker titleModeChangedEvent;
 
     std::list<RefPtr<ToolBarItem>> toolbarItems;
+    RefPtr<Component> toolBarBuilder;
     bool hideToolbar = false;
     AnimationOption animationOption;
 };
