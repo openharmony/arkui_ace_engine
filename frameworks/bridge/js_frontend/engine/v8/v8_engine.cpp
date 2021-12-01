@@ -74,7 +74,7 @@ using StartDebug = void (*)(
 using WaitingForIde = void (*)();
 using StopDebug = void (*)();
 
-bool CallEvalBuf(v8::Isolate* isolate, const char* src, int32_t instanceId)
+bool CallEvalBuf(v8::Isolate* isolate, const char* src, int32_t instanceId, const char* filename = nullptr)
 {
     ACE_DCHECK(isolate);
     CHECK_RUN_ON(JS);
@@ -89,9 +89,17 @@ bool CallEvalBuf(v8::Isolate* isolate, const char* src, int32_t instanceId)
         LOGE("src is null");
         return false;
     }
+
+    const char* origin = filename;
+    if (!origin) {
+        origin = "<anonymous>";
+    }
+
+    v8::ScriptOrigin scriptOrigin(v8::String::NewFromUtf8(isolate, origin).ToLocalChecked());
+
     v8::Local<v8::String> source = v8::String::NewFromUtf8(isolate, src).ToLocalChecked();
     v8::Local<v8::Script> script;
-    if (!v8::Script::Compile(context, source).ToLocal(&script)) {
+    if (!v8::Script::Compile(context, source, &scriptOrigin).ToLocal(&script)) {
         V8Utils::JsStdDumpErrorAce(isolate, &tryCatch, JsErrorType::COMPILE_ERROR, instanceId);
         return false;
     }
@@ -3793,6 +3801,20 @@ void V8Engine::GetLoadOptions(std::string& optionStr, bool isMainPage, const Ref
     renderOption->Put("language", local.c_str());
 
     if (isMainPage) {
+        std::string commonsJsContent;
+        if ((*delegate)->GetAssetContent("commons.js", commonsJsContent)) {
+            bool commonsJsResult = CallEvalBuf(isolate, commonsJsContent.c_str(), instanceId_, "commons.js");
+            if (!commonsJsResult) {
+                LOGE("fail to excute load commonsjs script commonsJsResult");
+            }
+        }
+        std::string vendorsJsContent;
+        if ((*delegate)->GetAssetContent("vendors.js", vendorsJsContent)) {
+            bool vendorsJsResult = CallEvalBuf(isolate, vendorsJsContent.c_str(), instanceId_, "vendors.js");
+            if (!vendorsJsResult) {
+                LOGE("fail to excute load vendorsjs script");
+            }
+        }
         std::string code;
         if ((*delegate)->GetAssetContent("app.js", code)) {
             renderOption->Put("appCreate", "true");

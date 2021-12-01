@@ -910,6 +910,22 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         LOGI("assetPath is: %{private}s", assetPath.c_str());
 
         if (isMainPage) {
+            std::string commonsBasePath = delegate->GetAssetPath("commons.abc");
+            if (!commonsBasePath.empty()) {
+                std::string commonsPath = commonsBasePath.append("commons.abc");
+                if (!runtime->ExecuteJsBin(commonsPath)) {
+                    LOGE("ExecuteJsBin \"commons.js\" failed.");
+                    return;
+                }
+            }
+            std::string vendorsBasePath = delegate->GetAssetPath("vendors.abc");
+            if (!vendorsBasePath.empty()) {
+                std::string vendorsPath = vendorsBasePath.append("vendors.abc");
+                if (!runtime->ExecuteJsBin(vendorsPath)) {
+                    LOGE("ExecuteJsBin \"vendors.js\" failed.");
+                    return;
+                }
+            }
             std::string appMap;
             if (delegate->GetAssetContent("app.js.map", appMap)) {
                 page->SetAppMap(appMap);

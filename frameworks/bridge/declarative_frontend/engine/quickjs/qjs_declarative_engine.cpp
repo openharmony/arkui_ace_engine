@@ -169,6 +169,26 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     JSContext* ctx = engineInstance_->GetQJSContext();
     JS_SetContextOpaque(ctx, reinterpret_cast<void*>(AceType::RawPtr(engineInstance_)));
     if (isMainPage) {
+        std::string commonsJsContent;
+        if (engineInstance_->GetDelegate()->GetAssetContent("commons.js", commonsJsContent)) {
+            auto commonsJsResult = QJSDeclarativeEngineInstance::EvalBuf(
+                ctx, commonsJsContent.c_str(), commonsJsContent.length(),
+                "commons.js", JS_EVAL_TYPE_GLOBAL);
+            if (commonsJsResult == -1) {
+                LOGE("fail to excute load commonsjs script");
+                return;
+            }
+        }
+        std::string vendorsJsContent;
+        if (engineInstance_->GetDelegate()->GetAssetContent("vendors.js", vendorsJsContent)) {
+            auto vendorsJsResult = QJSDeclarativeEngineInstance::EvalBuf(
+                ctx, vendorsJsContent.c_str(), vendorsJsContent.length(),
+                "vendors.js", JS_EVAL_TYPE_GLOBAL);
+            if (vendorsJsResult == -1) {
+                LOGE("fail to excute load vendorsjs script");
+                return;
+            }
+        }
         std::string appjsContent;
         if (!engineInstance_->GetDelegate()->GetAssetContent("app.js", appjsContent)) {
             LOGE("js file load failed!");

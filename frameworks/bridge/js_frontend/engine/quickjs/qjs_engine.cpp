@@ -3208,6 +3208,23 @@ void QjsEngine::GetLoadOptions(std::string& optionStr, bool isMainPage, const Re
     renderOption->Put("language", local.c_str());
 
     if (isMainPage) {
+        JSContext* ctx = engineInstance_->GetQjsContext();
+        std::string commonsJsContent;
+        if (engineInstance_->GetDelegate()->GetAssetContent("commons.js", commonsJsContent)) {
+            auto commonsJsResult = CallEvalBuf(ctx, commonsJsContent.c_str(), commonsJsContent.size(),
+                "commons.js", JS_EVAL_TYPE_MODULE, instanceId_);
+            if (commonsJsResult == JS_CALL_FAIL) {
+                LOGE("fail to excute load commonsjs script");
+            }
+        }
+        std::string vendorsJsContent;
+        if (engineInstance_->GetDelegate()->GetAssetContent("vendors.js", vendorsJsContent)) {
+            bool vendorsJsResult = CallEvalBuf(ctx, vendorsJsContent.c_str(), vendorsJsContent.size(),
+                "vendors.js", JS_EVAL_TYPE_MODULE, instanceId_);
+            if (vendorsJsResult == JS_CALL_FAIL) {
+                LOGE("fail to excute load vendorsjs script");
+            }
+        }
         std::string code;
         std::string appMap;
         if (engineInstance_->GetDelegate()->GetAssetContent("app.js.map", appMap)) {
