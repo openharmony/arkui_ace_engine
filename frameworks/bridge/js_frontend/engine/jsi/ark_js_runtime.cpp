@@ -57,7 +57,7 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath)
 void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
-        JSNApi::DestoryJSVM(vm_);
+        JSNApi::DestroyJSVM(vm_);
         vm_ = nullptr;
     }
     for (auto data : dataList_) {
