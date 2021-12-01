@@ -147,6 +147,7 @@ public:
     }
 
 private:
+    void SetPostTask(NativeEngine* nativeEngine);
     void GetLoadOptions(std::string& optionStr, bool isMainPage, bool hasAppCode);
     void RegisterWorker();
     void RegisterInitWorkerFunc();
