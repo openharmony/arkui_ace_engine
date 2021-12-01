@@ -399,7 +399,7 @@ void RenderSwiper::Initialize(const WeakPtr<PipelineContext>& context, bool catc
         scheduler_->Stop();
     }
 
-    if (autoPlay_ && !scheduler_->IsActive() && show_ && !disableSwipe_) {
+    if (autoPlay_ && !scheduler_->IsActive() && show_ && !IsDisabled()) {
         LOGD("start autoplay");
         scheduler_->Start();
     }
