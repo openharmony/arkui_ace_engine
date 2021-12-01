@@ -26,6 +26,7 @@
 namespace OHOS::Ace::Framework {
 
 class QJSDeclarativeEngine : public JsEngine {
+    DECLARE_ACE_TYPE(QJSDeclarativeEngine, JsEngine)
 public:
     explicit QJSDeclarativeEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~QJSDeclarativeEngine() override;
@@ -33,6 +34,7 @@ public:
     bool Initialize(const RefPtr<FrontendDelegate>& delegate) override;
 
     void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
+    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode) override;
 
     // Update running page
     void UpdateRunningPage(const RefPtr<JsAcePage>& page) override;

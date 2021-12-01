@@ -438,4 +438,21 @@ void AceAbility::ReplacePage(const std::string& url, const std::string& params)
     container->GetFrontend()->ReplacePage(url, params);
 }
 
+void AceAbility::OperateComponent(const std::string& attrsJson)
+{
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    auto taskExecutor = container->GetTaskExecutor();
+
+    auto root = JsonUtil::ParseJsonString(attrsJson);
+    if (!root || !root->IsValid()) {
+        LOGE("the attrsJson is illegal json format");
+        return;
+    }
+    taskExecutor->PostTask(
+        [attrsJson] {
+          OHOS::Ace::Framework::InspectorClient::GetInstance().OperateComponent(attrsJson);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 } // namespace OHOS::Ace::Platform

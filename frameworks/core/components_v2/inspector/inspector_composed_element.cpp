@@ -94,7 +94,6 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
     { "width", [](const InspectorComposedElement& inspector) { return inspector.GetWidth(); } },
     { "height", [](const InspectorComposedElement& inspector) { return inspector.GetHeight(); } },
     { "align", [](const InspectorComposedElement& inspector) { return inspector.GetAlign(); } },
-    { "direction", [](const InspectorComposedElement& inspector) { return inspector.GetDirectionStr(); } },
 };
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {

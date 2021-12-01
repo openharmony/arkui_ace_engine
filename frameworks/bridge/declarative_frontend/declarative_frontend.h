@@ -66,8 +66,6 @@ public:
         return nullptr;
     };
 
-    void TriggerGarbageCollection() override;
-
     void SendCallbackMessage(const std::string& callbackId, const std::string& data) const override;
     // platform channel.
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const override;
@@ -111,14 +109,15 @@ public:
     void OnRemoteTerminated() override;
     void OnNewRequest(const std::string& data) override;
     void OnMemoryLevel(const int32_t level) override;
-    void SetColorMode(ColorMode colorMode) override;
     void CallRouterBack() override;
-    void NotifyAppStorage(const std::string& key, const std::string& value) override;
-
     void OnSurfaceChanged(int32_t width, int32_t height) override;
 
     void DumpFrontend() const override;
-
+    void TriggerGarbageCollection() override;
+    void SetColorMode(ColorMode colorMode) override;
+    void RebuildAllPages() override;
+    void NotifyAppStorage(const std::string& key, const std::string& value) override;
+    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode);
     RefPtr<AceEventHandler> GetEventHandler() override
     {
         return handler_;
@@ -173,9 +172,6 @@ public:
     {
         isSubWindow_ = isSubWindow;
     }
-
-    void RebuildAllPages() override;
-
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 

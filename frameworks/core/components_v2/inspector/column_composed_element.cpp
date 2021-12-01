@@ -106,4 +106,51 @@ std::string ColumnComposedElement::GetHorizontalAlign() const
     return "HorizontalAlign::Center";
 }
 
+RefPtr<RenderFlex> ColumnComposedElement::GetRenderColumn() const
+{
+    auto node = GetInspectorNode(ColumnElement::TypeId());
+    if (node) {
+        return AceType::DynamicCast<RenderFlex>(node);
+    }
+    LOGE("get GetInspectorNode failed");
+    return nullptr;
+}
+
+void ColumnComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto flexElement = GetContentElement<FlexElement>(ColumnElement::TypeId());
+    if (!flexElement) {
+        LOGE("get GetFlexElement failed");
+        return;
+    }
+    flexElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    flexElement->MarkDirty();
+    LOGD("column AddChildWithSlot");
+}
+
+void ColumnComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto flexElement = GetContentElement<FlexElement>(ColumnElement::TypeId());
+    if (!flexElement) {
+        LOGE("get GetFlexElement failed");
+        return;
+    }
+    auto child = flexElement->GetChildBySlot(slot);
+    flexElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    flexElement->MarkDirty();
+    LOGD("column UpdateChildWithSlot");
+}
+
+void ColumnComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto flexElement = GetContentElement<FlexElement>(ColumnElement::TypeId());
+    if (!flexElement) {
+        LOGE("get GetFlexElement failed");
+        return;
+    }
+    flexElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    flexElement->MarkDirty();
+    LOGD("column DeleteChildWithSlot");
+}
+
 } // namespace OHOS::Ace::V2

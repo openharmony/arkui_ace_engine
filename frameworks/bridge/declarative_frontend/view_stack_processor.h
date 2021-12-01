@@ -131,6 +131,7 @@ public:
 
     NodeId GetCurrentInspectorNodeId() const;
 
+    RefPtr<Component> GetNewComponent();
 private:
     ViewStackProcessor();
 

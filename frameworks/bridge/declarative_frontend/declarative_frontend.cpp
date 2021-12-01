@@ -829,6 +829,14 @@ void DeclarativeFrontend::NotifyAppStorage(const std::string& key, const std::st
     delegate_->NotifyAppStorage(jsEngine_, key, value);
 }
 
+RefPtr<Component> DeclarativeFrontend::GetNewComponentWithJsCode(const std::string& jsCode)
+{
+    if (jsEngine_) {
+        return jsEngine_->GetNewComponentWithJsCode(jsCode);
+    }
+    return nullptr;
+}
+
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)
 {
     LOGI("HandleAsyncEvent pageId: %{private}d, eventId: %{private}s, eventType: %{private}s",

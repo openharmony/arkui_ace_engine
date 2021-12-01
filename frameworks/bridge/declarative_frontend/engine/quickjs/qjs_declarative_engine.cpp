@@ -26,6 +26,7 @@
 #include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_helpers.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 
@@ -243,6 +244,16 @@ void QJSDeclarativeEngine::ReplaceJSContent(std::string& jsContent, const std::s
     jsContent.replace(loadDocomentPos, finalPostion - loadDocomentPos, dstReplaceStr);
 }
 #endif
+RefPtr<Component> QJSDeclarativeEngine::GetNewComponentWithJsCode(const std::string& jsCode)
+{
+    bool result = engineInstance_->InitAceModules(jsCode.c_str(), jsCode.length(), "AddComponent");
+    if (!result) {
+        LOGE("execute addComponent failed,script=[%{public}s]", jsCode.c_str());
+        return nullptr;
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetNewComponent();
+    return component;
+}
 
 void QJSDeclarativeEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)
 {

@@ -195,6 +195,21 @@ public:
         return AceType::TypeId(this);
     }
 
+    virtual void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+    {
+        LOGW("inspector AddChildWithSlot");
+    }
+
+    virtual void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+    {
+        LOGW("inspector UpdateChildWithSlot");
+    }
+
+    virtual void DeleteChildWithSlot(int32_t slot)
+    {
+        LOGW("inspector DeleteChildWithSlot");
+    }
+
 protected:
     RefPtr<RenderBox> GetRenderBox() const;
 };

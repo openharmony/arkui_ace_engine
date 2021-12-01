@@ -45,6 +45,7 @@ public:
 
     void AddChild(const RefPtr<Element>& child, int32_t slot = DEFAULT_ELEMENT_SLOT);
     void RemoveChild(const RefPtr<Element>& child);
+    RefPtr<Element> GetChildBySlot(int32_t slot);
     void DeactivateChild(RefPtr<Element> child);
     void Rebuild();
 

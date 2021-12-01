@@ -23,6 +23,8 @@
 
 namespace OHOS::Ace {
 
+class FlexComponent;
+
 struct FlexItemProperties {
     double totalShrink = 0.0;
     double totalGrow = 0.0;

@@ -435,6 +435,22 @@ void ViewStackProcessor::Pop()
     LOGD("ViewStackProcessor Pop size %{public}zu", componentsStack_.size());
 }
 
+RefPtr<Component> ViewStackProcessor::GetNewComponent()
+{
+    auto component = WrapComponents();
+    if (AceType::DynamicCast<ComposedComponent>(component)) {
+        auto childComponent = AceType::DynamicCast<ComposedComponent>(component)->GetChild();
+        SetZIndex(childComponent);
+        SetIsPercentSize(childComponent);
+    } else {
+        SetZIndex(component);
+        SetIsPercentSize(component);
+    }
+    UpdateTopComponentProps(component);
+    componentsStack_.pop();
+    return component;
+}
+
 void ViewStackProcessor::PopContainer()
 {
     auto type = AceType::TypeName(GetMainComponent());
