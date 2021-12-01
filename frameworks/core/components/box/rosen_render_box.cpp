@@ -899,7 +899,6 @@ void RosenRenderBox::SyncDecorationToRSNode()
     uint32_t borderStyle = 0;
     float borderWidth = 0;
     float cornerRadius = 0;
-    uint32_t shadowColor = 0; // transparent
     float shadowRadius = 0;
     uint32_t backgroundColor = 0; // transparent
     uint32_t foregroundColor = 0; // transparent
@@ -922,9 +921,7 @@ void RosenRenderBox::SyncDecorationToRSNode()
         if (!backDecoration_->GetShadows().empty()) {
             shadowRadius = backDecoration_->GetShadows().front().GetBlurRadius();
             shadowRadius = RosenDecorationPainter::ConvertRadiusToSigma(shadowRadius);
-            shadowColor = backDecoration_->GetShadows().front().GetColor().GetValue();
-            rsNode->SetShadowRadius(shadowRadius);
-            rsNode->SetShadowColor(shadowColor);
+            rsNode->SetShadowColor(backDecoration_->GetShadows().front().GetColor().GetValue());
             rsNode->SetShadowOffsetX(backDecoration_->GetShadows().front().GetOffset().GetX());
             rsNode->SetShadowOffsetY(backDecoration_->GetShadows().front().GetOffset().GetY());
         }
@@ -960,6 +957,7 @@ void RosenRenderBox::SyncDecorationToRSNode()
     rsNode->SetForegroundColor(foregroundColor);
     rsNode->SetBackgroundFilter(backFilter);
     rsNode->SetFilter(filter);
+    rsNode->SetShadowRadius(shadowRadius);
 }
 
 void RosenRenderBox::OnAttachContext()
