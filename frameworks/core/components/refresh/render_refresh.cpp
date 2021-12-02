@@ -164,6 +164,7 @@ void RenderRefresh::CalcLoadingParams(const RefPtr<Component>& component)
         triggerRefreshDistance_ = triggerShowTimeDistance_;
     } else {
         triggerRefreshDistance_ = NormalizeToPx(refresh->GetRefreshDistance());
+        inspectorOffset_ = refresh->GetRefreshDistance();
     }
     loadingDiameter_ = NormalizeToPx(refresh->GetProgressDiameter());
     maxScrollOffset_ = NormalizeToPx(refresh->GetMaxDistance());

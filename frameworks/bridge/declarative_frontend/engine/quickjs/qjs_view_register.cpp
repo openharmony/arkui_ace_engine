@@ -560,6 +560,7 @@ void JsRegisterViews(BindingTarget globalObj)
 #ifndef WEARABLE_PRODUCT
     JSPiece::JSBind(globalObj);
     JSRating::JSBind(globalObj);
+    JSRefresh::JSBind(globalObj);
     JSCamera::JSBind(globalObj);
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);

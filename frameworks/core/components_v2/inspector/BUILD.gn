@@ -41,6 +41,7 @@ build_component("inspector_v2") {
     "progress_composed_element.cpp",
     "qrcode_composed_element.cpp",
     "rating_composed_element.cpp",
+    "refresh_composed_element.cpp",
     "row_composed_element.cpp",
     "row_split_composed_element.cpp",
     "scroll_bar_composed_element.cpp",

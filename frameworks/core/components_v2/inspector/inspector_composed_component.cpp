@@ -43,6 +43,7 @@
 #include "core/components_v2/inspector/progress_composed_element.h"
 #include "core/components_v2/inspector/qrcode_composed_element.h"
 #include "core/components_v2/inspector/rating_composed_element.h"
+#include "core/components_v2/inspector/refresh_composed_element.h"
 #include "core/components_v2/inspector/row_composed_element.h"
 #include "core/components_v2/inspector/row_split_composed_element.h"
 #include "core/components_v2/inspector/scroll_bar_composed_element.h"
@@ -162,7 +163,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { STEPPER_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::StepperComposedElement>(id); } },
     { SCROLL_BAR_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::ScrollBarComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::ScrollBarComposedElement>(id); } },
+    { REFRESH_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::RefreshComposedElement>(id); } }
 };
 
 const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP {
@@ -212,7 +215,8 @@ const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_T
     { SHEET_COMPONENT_TAG, SHEET_ETS_TAG },
     { HYPERLINK_COMPONENT_TAG, HYPERLINK_ETS_TAG },
     { STEPPER_COMPONENT_TAG, STEPPER_ETS_TAG },
-    { SCROLL_BAR_COMPONENT_TAG, SCROLL_BAR_ETS_TAG }
+    { SCROLL_BAR_COMPONENT_TAG, SCROLL_BAR_ETS_TAG },
+    { REFRESH_COMPONENT_TAG, REFRESH_ETS_TAG }
 };
 
 } // namespace

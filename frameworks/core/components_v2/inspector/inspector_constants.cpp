@@ -234,4 +234,8 @@ ACE_EXPORT extern const char STEPPER_ETS_TAG[] = "Stepper";
 ACE_EXPORT extern const char SCROLL_BAR_COMPONENT_TAG[] = "ScrollBarComponent";
 ACE_EXPORT extern const char SCROLL_BAR_ETS_TAG[] = "ScrollBar";
 
+// refresh
+ACE_EXPORT extern const char REFRESH_COMPONENT_TAG[] = "RefreshComponent";
+ACE_EXPORT extern const char REFRESH_ETS_TAG[] = "Refresh";
+
 } // namespace OHOS::Ace::V2
