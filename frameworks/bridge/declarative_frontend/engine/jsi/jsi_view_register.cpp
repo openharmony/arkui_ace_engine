@@ -284,7 +284,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodes(panda::EcmaVM* vm, panda::Lo
     }
     auto accessibilityManager = declarativeDelegate->GetJSAccessibilityManager();
     auto nodeInfos = accessibilityManager->DumpComposedElementsToJson();
-    return panda::StringRef::NewFromUtf8(vm, nodeInfos->ToString().c_str());
+    return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfos->ToString().c_str()));
 }
 
 panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
@@ -310,7 +310,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::EcmaVM* vm, panda:
     }
     int32_t intValue = args[0]->Int32Value(vm);
     auto nodeInfo = accessibilityManager->DumpComposedElementToJson(intValue);
-    return panda::StringRef::NewFromUtf8(vm, nodeInfo->ToString().c_str());
+    return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfo->ToString().c_str()));
 }
 
 panda::Local<panda::JSValueRef> Vp2Px(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,

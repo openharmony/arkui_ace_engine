@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
+#include <cstdint>
+
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "bridge/common/accessibility/js_accessibility_manager.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "core/components/common/layout/constants.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
@@ -30,10 +33,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
@@ -468,6 +471,56 @@ JSValue SetAppBackgroundColor(JSContext* ctx, JSValueConst new_target, int argc,
     return JS_UNDEFINED;
 }
 
+JSValue JsGetInspectorNodes(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    QJSContext::Scope scp(ctx);
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+    auto front = container->GetFrontend();
+    if (!front) {
+        return JS_ThrowSyntaxError(ctx, "front is null");;
+    }
+    auto accessibilityManager = AceType::DynamicCast<JsAccessibilityManager>(front->GetAccessibilityManager());
+    if (!accessibilityManager) {
+        return JS_ThrowSyntaxError(ctx, "AccessibilityManager is null");;
+    }
+    auto nodeInfos = accessibilityManager->DumpComposedElementsToJson();
+    auto infoStr = nodeInfos->ToString();
+    return JS_ParseJSON(ctx, infoStr.c_str(), infoStr.length(), nullptr);
+}
+
+JSValue JsGetInspectorNodeById(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    QJSContext::Scope scp(ctx);
+    if (argc != 1) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, it is supposed to have one argument");
+    }
+    if (!JS_IsNumber(argv[0])) {
+        return JS_ThrowSyntaxError(ctx, "input value must be number");
+    }
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+    auto front = container->GetFrontend();
+    if (!front) {
+        return JS_ThrowSyntaxError(ctx, "front is null");;
+    }
+    auto accessibilityManager = AceType::DynamicCast<JsAccessibilityManager>(front->GetAccessibilityManager());
+    if (!accessibilityManager) {
+        return JS_ThrowSyntaxError(ctx, "AccessibilityManager is null");;
+    }
+    int32_t nodeId = 0;
+    if (JS_ToInt32(ctx, &nodeId, argv[0]) < 0) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, must be int32 value");;
+    }
+    auto nodeInfo = accessibilityManager->DumpComposedElementToJson(nodeId);
+    auto infoStr = nodeInfo->ToString();
+    return JS_ParseJSON(ctx, infoStr.c_str(), infoStr.length(), nullptr);
+}
+
 void JsRegisterViews(BindingTarget globalObj)
 {
     JSContext* ctx = QJSContext::Current();
@@ -483,6 +536,8 @@ void JsRegisterViews(BindingTarget globalObj)
     QJSUtils::DefineGlobalFunction(ctx, Lpx2Px, "lpx2px", 1);
     QJSUtils::DefineGlobalFunction(ctx, Px2Lpx, "px2lpx", 1);
     QJSUtils::DefineGlobalFunction(ctx, SetAppBackgroundColor, "setAppBgColor", 1);
+    QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorNodes, "getInspectorNodes", 1);
+    QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorNodeById, "getInspectorNodeById", 1);
 
     JSViewAbstract::JSBind();
     JSContainerBase::JSBind();
