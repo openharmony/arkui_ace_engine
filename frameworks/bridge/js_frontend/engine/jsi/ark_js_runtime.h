@@ -84,7 +84,6 @@ private:
     LOG_PRINT print_ { nullptr };
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };
     std::string libPath_ {};
-    int debuggerOrder_ { 0 };
 };
 
 class PandaFunctionData {

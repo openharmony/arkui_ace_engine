@@ -87,7 +87,6 @@ private:
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };
     std::string libPath_ {};
     bool usingExistVM_ = false;
-    int debuggerOrder_ { 0 };
 };
 
 class PandaFunctionData {

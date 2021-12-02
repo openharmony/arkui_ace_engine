@@ -96,15 +96,16 @@ bool ArkJSRuntime::EvaluateJsCode(const uint8_t *buffer, int32_t size)
 bool ArkJSRuntime::ExecuteJsBin(const std::string &fileName)
 {
     JSExecutionScope executionScope(vm_);
-    if (debuggerOrder_ == 1 && !libPath_.empty()) {
+    static bool debugFlag = true;
+    if (debugFlag && !libPath_.empty()) {
         JSNApi::StartDebugger(libPath_.c_str(), vm_);
+        debugFlag = false;
     }
     LocalScope scope(vm_);
     Local<StringRef> file = StringRef::NewFromUtf8(vm_, fileName.c_str());
     Local<StringRef> entryPoint = StringRef::NewFromUtf8(vm_, PANDA_MAIN_FUNCTION);
     bool ret = JSNApi::Execute(vm_, file, entryPoint);
     HandleUncaughtException();
-    debuggerOrder_++;
     return ret;
 }
 
