@@ -12,8 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#include <dlfcn.h>
+#include <unistd.h>
+#endif
 
 #include "core/common/ace_engine.h"
+
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#include "core/common/ace_application_info.h"
+#endif
 
 #include "base/log/log.h"
 #include "base/memory/memory_monitor.h"
@@ -25,13 +33,49 @@ namespace OHOS::Ace {
 namespace {
 
 std::unique_ptr<AceEngine> g_aceEngine;
-
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+void* g_register = nullptr;
+#endif
 }
+
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+using HdcConnectRun = int (*)(const std::string& pkgName);
+void LoadRegisterSo()
+{
+    LOGI("LoadRegisterSo");
+    const std::string soDir = "libhdc_register.z.so";
+    g_register = dlopen(soDir.c_str(), RTLD_LAZY);
+    if (g_register == nullptr) {
+        LOGE("cannot find register so");
+    }
+}
+
+void StartHdcConnect(const std::string& pkgName)
+{
+    if (g_register == nullptr) {
+        LOGE("g_register is null");
+        return;
+    }
+    HdcConnectRun hdcConnectRun = (HdcConnectRun)dlsym(g_register, "HdcConnectRun");
+    if (hdcConnectRun == nullptr) {
+        LOGE("starthdc=NULL, dlerror=%s", dlerror());
+        return;
+    }
+    hdcConnectRun(pkgName);
+}
+#endif
 
 AceEngine::AceEngine()
 {
     // Watch dog thread(anr) can not exit when app stop.
-    // watchDog_ = AceType::MakeRefPtr<WatchDog>();
+    // watchDog_ = AceType::MakeRefPtr<WatchDog>()
+    #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+        if (AceApplicationInfo::GetInstance().IsDebugVersion()) {
+            LoadRegisterSo();
+            const std::string pkgName = AceApplicationInfo::GetInstance().GetPackageName();
+            StartHdcConnect(pkgName);
+        }
+    #endif
 }
 
 AceEngine& AceEngine::Get()

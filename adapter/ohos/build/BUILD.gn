@@ -46,4 +46,7 @@ group("ace_packages") {
   deps += [
     "$ace_root/frameworks/bridge/js_frontend/engine/jsi/debugger:ark_debugger",
   ]
+
+  # pid Register
+  deps += [ "$ace_root/frameworks/core/common/register:hdc_register" ]
 }
