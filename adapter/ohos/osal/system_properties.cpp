@@ -48,8 +48,8 @@ bool IsTraceEnabled()
 bool IsRosenBackendEnabled()
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    return (system::GetParameter("persist.ace.rosen.backend.enabled", "0") == "1" ||
-        system::GetParameter("debug.ace.rosen.backend.enabled", "0") == "1");
+    return (system::GetParameter("persist.ace.rosen.backend.enabled", "1") == "1" &&
+        system::GetParameter("debug.ace.rosen.backend.enabled", "1") == "1");
 #else
     return false;
 #endif
