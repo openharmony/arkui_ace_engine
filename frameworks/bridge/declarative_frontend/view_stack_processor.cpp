@@ -333,7 +333,7 @@ void ViewStackProcessor::ClearPageTransitionComponent()
 }
 
 void ViewStackProcessor::CreateAccessibilityNode(
-    const RefPtr<Component>& component, bool isCustomView, const std::string& inspectorTag)
+    const RefPtr<Component>& component, bool isCustomView)
 {
     // if_else_component, for_each_component, MultiComposedComponen, customView not create accessibilityNode
     if (AceType::InstanceOf<MultiComposedComponent>(component) || isCustomView) {
@@ -355,7 +355,8 @@ void ViewStackProcessor::CreateAccessibilityNode(
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || SystemProperties::GetAccessibilityEnabled() ||
         needCreate) {
         int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
-        std::string tag = inspectorTag.empty() ? AceType::TypeName(component) : inspectorTag;
+        std::string tag =
+            component->GetInspectorTag().empty() ? AceType::TypeName(component) : component->GetInspectorTag();
         int32_t parentId =
             componentsStack_.empty() ? stackRootId_ : StringUtils::StringToInt(GetMainComponent()->GetInspectorId());
         auto node = OHOS::Ace::V2::InspectorComposedComponent::CreateAccessibilityNode(tag, inspectorId, parentId, -1);
@@ -371,7 +372,7 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
     if (componentsStack_.size() > 1 && ShouldPopImmediately()) {
         Pop();
     }
-    CreateAccessibilityNode(component, isCustomView, inspectorTag);
+    CreateAccessibilityNode(component, isCustomView);
     wrappingComponentsMap.emplace("main", component);
     componentsStack_.push(wrappingComponentsMap);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
@@ -715,10 +716,12 @@ RefPtr<ComposedComponent> ViewStackProcessor::GetInspectorComposedComponent(RefP
 {
     auto component = AceType::DynamicCast<ComposedComponent>(GetMainComponent());
     std::string name;
+    std::string inspectorTag = mainComponent->GetInspectorTag();
     if (component) {
         name = component->GetName();
     }
-    std::string typeName = name.empty() ? AceType::TypeName(mainComponent) : name;
+    std::string typeName =
+        inspectorTag.empty() ? (name.empty() ? AceType::TypeName(mainComponent) : name) : inspectorTag;
     std::string id = mainComponent->GetInspectorId();
     if (OHOS::Ace::V2::InspectorComposedComponent::HasInspectorFinished(typeName)) {
         auto composedComponent = AceType::MakeRefPtr<V2::InspectorComposedComponent>(id, typeName);

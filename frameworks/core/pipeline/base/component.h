@@ -79,6 +79,16 @@ public:
         direction_ = direction;
     }
 
+    virtual void SetInspectorTag(std::string inspectorTag)
+    {
+        inspectorTag_ = inspectorTag;
+    }
+
+    virtual std::string GetInspectorTag()
+    {
+        return inspectorTag_;
+    }
+
     UpdateType GetUpdateType() const
     {
         return updateType_;
@@ -231,6 +241,7 @@ private:
 #endif
     bool isHeadComponent_ = false;
     bool isTailComponent_ = false;
+    std::string inspectorTag_;
 };
 
 } // namespace OHOS::Ace

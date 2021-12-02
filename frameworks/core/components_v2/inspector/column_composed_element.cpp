@@ -76,7 +76,7 @@ std::string ColumnComposedElement::GetSpace() const
     }
     auto renderColumn = AceType::DynamicCast<RenderFlex>(node);
     if (renderColumn) {
-        auto dimension = Dimension(renderColumn->GetSpace());
+        auto dimension = renderColumn->GetInspectorSpace();
         return dimension.ToString();
     }
     return Dimension(0.0).ToString();

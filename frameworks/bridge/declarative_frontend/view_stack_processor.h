@@ -76,8 +76,7 @@ public:
     RefPtr<PageTransitionComponent> GetPageTransitionComponent();
     RefPtr<CoverageComponent> GetCoverageComponent();
     void ClearPageTransitionComponent();
-    void CreateAccessibilityNode(
-        const RefPtr<Component>& component, bool isCustomView, const std::string& inspectorTag);
+    void CreateAccessibilityNode(const RefPtr<Component>& component, bool isCustomView);
 #ifndef WEARABLE_PRODUCT
     RefPtr<PopupComponentV2> GetPopupComponent(bool createNewComponent = true);
 #endif
