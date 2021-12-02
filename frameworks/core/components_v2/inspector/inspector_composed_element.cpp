@@ -79,22 +79,6 @@ const std::unordered_map<std::string, DoubleJsonFunc> CREATE_JSON_DOUBLE_MAP {
 const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
     { "visibility", [](const InspectorComposedElement& inspector) { return inspector.GetVisibility(); } },
     { "alignSelf", [](const InspectorComposedElement& inspector) { return inspector.GetAlignSelf(); } },
-    { "margin-top",
-        [](const InspectorComposedElement& inspector) {
-            return inspector.GetMargin(AnimatableType::PROPERTY_MARGIN_TOP).ToString();
-        } },
-    { "margin-right",
-        [](const InspectorComposedElement& inspector) {
-            return inspector.GetMargin(AnimatableType::PROPERTY_MARGIN_RIGHT).ToString();
-        } },
-    { "margin-bottom",
-        [](const InspectorComposedElement& inspector) {
-            return inspector.GetMargin(AnimatableType::PROPERTY_MARGIN_BOTTOM).ToString();
-        } },
-    { "margin-left",
-        [](const InspectorComposedElement& inspector) {
-            return inspector.GetMargin(AnimatableType::PROPERTY_MARGIN_LEFT).ToString();
-        } },
     { "constraintSize", [](const InspectorComposedElement& inspector) { return inspector.GetConstraintSize(); } },
     { "borderColor", [](const InspectorComposedElement& inspector) { return inspector.GetBorderColor(); } },
     { "borderStyle", [](const InspectorComposedElement& inspector) { return inspector.GetBorderStyle(); } },
@@ -110,7 +94,6 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
     { "height", [](const InspectorComposedElement& inspector) { return inspector.GetHeight(); } },
     { "align", [](const InspectorComposedElement& inspector) { return inspector.GetAlign(); } },
     { "direction", [](const InspectorComposedElement& inspector) { return inspector.GetDirectionStr(); } },
-
 };
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {
@@ -132,6 +115,7 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
     { "position", [](const InspectorComposedElement& inspector) { return inspector.GetPosition(); } },
     { "offset", [](const InspectorComposedElement& inspector) { return inspector.GetOffset(); } },
     { "padding", [](const InspectorComposedElement& inspector) { return inspector.GetPadding(); } },
+    { "margin", [](const InspectorComposedElement& inspector) { return inspector.GetAllMargin(); } },
     { "backgroundImageSize",
         [](const InspectorComposedElement& inspector) { return inspector.GetBackgroundImageSize(); } },
     { "backgroundImagePosition",
@@ -292,6 +276,30 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetPadding() const
             auto temp = JsonUtil::Create(true);
             temp->Put("padding", top.ToString().c_str());
             jsonValue = temp->GetValue("padding");
+        } else {
+            jsonValue->Put("top", top.ToString().c_str());
+            jsonValue->Put("right", right.ToString().c_str());
+            jsonValue->Put("bottom", bottom.ToString().c_str());
+            jsonValue->Put("left", left.ToString().c_str());
+        }
+        return jsonValue;
+    }
+    return nullptr;
+}
+
+std::unique_ptr<JsonValue> InspectorComposedElement::GetAllMargin() const
+{
+    auto render = GetRenderBox();
+    auto jsonValue = JsonUtil::Create(true);
+    if (render) {
+        auto top = render->GetMargin(DimensionHelper(&Edge::SetTop, &Edge::Top));
+        auto right = render->GetMargin(DimensionHelper(&Edge::SetRight, &Edge::Right));
+        auto bottom = render->GetMargin(DimensionHelper(&Edge::SetBottom, &Edge::Bottom));
+        auto left = render->GetMargin(DimensionHelper(&Edge::SetLeft, &Edge::Left));
+        if (top == right && right == bottom && bottom == left) {
+            auto temp = JsonUtil::Create(true);
+            temp->Put("margin", top.ToString().c_str());
+            jsonValue = temp->GetValue("margin");
         } else {
             jsonValue->Put("top", top.ToString().c_str());
             jsonValue->Put("right", right.ToString().c_str());

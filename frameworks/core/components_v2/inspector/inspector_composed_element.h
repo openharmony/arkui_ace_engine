@@ -100,6 +100,7 @@ public:
     virtual std::string GetHeight() const;
     virtual std::unique_ptr<JsonValue> GetPadding() const;
     virtual Dimension GetMargin(OHOS::Ace::AnimatableType type) const;
+    virtual std::unique_ptr<JsonValue> GetAllMargin() const;
     virtual std::string GetConstraintSize() const;
     virtual int32_t GetLayoutPriority() const;
     virtual int32_t GetLayoutWeight() const;
