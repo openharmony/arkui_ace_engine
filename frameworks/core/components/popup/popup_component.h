@@ -167,9 +167,20 @@ public:
         return isBackgrouhdColorSetted_;
     }
 
+    bool EnableArrow() const
+    {
+        return enableArrow_;
+    }
+
+    void SetEnableArrow(bool enableArrow)
+    {
+        enableArrow_ = enableArrow;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
+    bool enableArrow_ = true;
     bool isMaskColorSetted_ = false;
     bool isBackgrouhdColorSetted_ = false;
     Color maskColor_;

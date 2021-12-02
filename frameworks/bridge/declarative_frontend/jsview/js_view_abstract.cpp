@@ -443,10 +443,15 @@ void ParseCustomPopupParam(
         popupParam->SetMaskColor(maskColor);
     }
 
-    auto backgroundColorValue = popupObj->GetProperty("backgroundColor");
+    auto popupColorValue = popupObj->GetProperty("popupColor");
     Color backgroundColor;
-    if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
+    if (JSViewAbstract::ParseJsColor(popupColorValue, backgroundColor)) {
         popupParam->SetBackgroundColor(backgroundColor);
+    }
+
+    auto enableArrowValue = popupObj->GetProperty("enableArrow");
+    if (enableArrowValue->IsBoolean()) {
+        popupParam->SetEnableArrow(enableArrowValue->ToBoolean());
     }
 
     JSRef<JSVal> onStateChangeVal = popupObj->GetProperty("onStateChange");

@@ -62,6 +62,7 @@ protected:
     static const Dimension BUBBLE_SPACING;
 
     bool isShow_ = true;
+    bool enableArrow_ = true;
     // Is there has enough space for showing arrow.
     bool showTopArrow_ = true;
     bool showBottomArrow_ = true;
@@ -85,6 +86,7 @@ protected:
     WeakPtr<StackElement> weakStack_;
 
 private:
+    void InitArrowState();
     // Get size and position of target by targetId.
     void InitTargetSizeAndPosition();
 };

@@ -71,6 +71,7 @@ void RenderBubble::Update(const RefPtr<Component>& component)
     onVisibilityChange_ =
         AceAsyncEvent<void(const std::string&)>::Create(bubble->GetPopupParam()->GetOnVisibilityChange(), context_);
     isShow_ = bubble->GetPopupParam()->IsShow();
+    enableArrow_ = bubble->GetPopupParam()->EnableArrow();
     padding_ = bubble->GetPopupParam()->GetPadding();
     margin_ = bubble->GetPopupParam()->GetMargin();
     border_ = bubble->GetPopupParam()->GetBorder();
@@ -187,9 +188,14 @@ void RenderBubble::InitTargetSizeAndPosition()
     }
 }
 
-Offset RenderBubble::GetChildPosition(const Size& childSize)
+void RenderBubble::InitArrowState()
 {
-    double scaledBubbleSpacing = NormalizeToPx(BUBBLE_SPACING);
+    if (!enableArrow_) {
+        showTopArrow_ = false;
+        showBottomArrow_ = false;
+        return;
+    }
+
     double arrowWidth = NormalizeToPx(ARROW_WIDTH);
     showTopArrow_ = GreatOrEqual(
         childSize_.Width() -
@@ -201,6 +207,12 @@ Offset RenderBubble::GetChildPosition(const Size& childSize)
             std::max(NormalizePercentToPx(padding_.Left(), false), NormalizeToPx(border_.BottomLeftRadius().GetX())) -
             std::max(NormalizePercentToPx(padding_.Right(), false), NormalizeToPx(border_.BottomRightRadius().GetX())),
         arrowWidth);
+}
+
+Offset RenderBubble::GetChildPosition(const Size& childSize)
+{
+    InitArrowState();
+    double scaledBubbleSpacing = NormalizeToPx(BUBBLE_SPACING);
     Offset bottomPosition = Offset(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
         targetOffset_.GetY() + targetSize_.Height() + scaledBubbleSpacing + NormalizePercentToPx(margin_.Top(), true));
     if (showBottomArrow_) {
