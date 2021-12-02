@@ -27,6 +27,7 @@
 #include "core/components_v2/inspector/column_composed_element.h"
 #include "core/components_v2/inspector/column_split_composed_element.h"
 #include "core/components_v2/inspector/data_panel_composed_element.h"
+#include "core/components_v2/inspector/date_picker_composed_element.h"
 #include "core/components_v2/inspector/divider_composed_element.h"
 #include "core/components_v2/inspector/flex_composed_element.h"
 #include "core/components_v2/inspector/grid_composed_element.h"
@@ -61,6 +62,7 @@
 #include "core/components_v2/inspector/tab_content_composed_element.h"
 #include "core/components_v2/inspector/tabs_composed_element.h"
 #include "core/components_v2/inspector/text_composed_element.h"
+#include "core/components_v2/inspector/time_picker_composed_element.h"
 #include "core/components_v2/inspector/toggle_composed_element.h"
 #include "core/components_v2/inspector/wrap_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
@@ -165,7 +167,11 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { SCROLL_BAR_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::ScrollBarComposedElement>(id); } },
     { REFRESH_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::RefreshComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::RefreshComposedElement>(id); } },
+    { DATE_PICKER_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::DatePickerComposedElement>(id); } },
+    { TIME_PICKER_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::TimePickerComposedElement>(id); } }
 };
 
 const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP {
@@ -216,7 +222,9 @@ const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_T
     { HYPERLINK_COMPONENT_TAG, HYPERLINK_ETS_TAG },
     { STEPPER_COMPONENT_TAG, STEPPER_ETS_TAG },
     { SCROLL_BAR_COMPONENT_TAG, SCROLL_BAR_ETS_TAG },
-    { REFRESH_COMPONENT_TAG, REFRESH_ETS_TAG }
+    { REFRESH_COMPONENT_TAG, REFRESH_ETS_TAG },
+    { DATE_PICKER_COMPONENT_TAG, DATE_PICKER_ETS_TAG },
+    { TIME_PICKER_COMPONENT_TAG, TIME_PICKER_ETS_TAG }
 };
 
 } // namespace

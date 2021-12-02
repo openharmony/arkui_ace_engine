@@ -73,6 +73,16 @@ public:
     bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
 
+    const RefPtr<PickerBaseComponent>& GetPickerBaseComponent() const
+    {
+        return data_;
+    }
+
+    const std::vector<RefPtr<RenderPickerColumn>>& GetRenderPickerColumn() const
+    {
+        return columns_;
+    }
+
 protected:
     void OnTouchTestHit(const Offset&, const TouchRestrict&, TouchTestResult& result) override
     {

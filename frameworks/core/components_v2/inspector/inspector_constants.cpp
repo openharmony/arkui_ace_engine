@@ -238,4 +238,10 @@ ACE_EXPORT extern const char SCROLL_BAR_ETS_TAG[] = "ScrollBar";
 ACE_EXPORT extern const char REFRESH_COMPONENT_TAG[] = "RefreshComponent";
 ACE_EXPORT extern const char REFRESH_ETS_TAG[] = "Refresh";
 
+// datePicker
+ACE_EXPORT extern const char DATE_PICKER_COMPONENT_TAG[] = "PickerDateComponent";
+ACE_EXPORT extern const char DATE_PICKER_ETS_TAG[] = "DatePicker";
+ACE_EXPORT extern const char TIME_PICKER_COMPONENT_TAG[] = "PickerTimeComponent";
+ACE_EXPORT extern const char TIME_PICKER_ETS_TAG[] = "DatePicker";
+
 } // namespace OHOS::Ace::V2

@@ -23,6 +23,7 @@ build_component("inspector_v2") {
     "column_composed_element.cpp",
     "column_split_composed_element.cpp",
     "data_panel_composed_element.cpp",
+    "date_picker_composed_element.cpp",
     "divider_composed_element.cpp",
     "flex_composed_element.cpp",
     "grid_composed_element.cpp",
@@ -59,6 +60,7 @@ build_component("inspector_v2") {
     "tab_content_composed_element.cpp",
     "tabs_composed_element.cpp",
     "text_composed_element.cpp",
+    "time_picker_composed_element.cpp",
     "toggle_composed_element.cpp",
     "wrap_composed_element.cpp",
   ]
