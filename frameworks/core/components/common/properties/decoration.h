@@ -1135,7 +1135,7 @@ private:
     // Brightness
     Dimension brightness_;
     // hueRotate
-    float hueRotate_;
+    float hueRotate_ = 0.0f;
     // Contrast
     Dimension contrast_;
     // Saturate

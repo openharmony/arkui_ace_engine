@@ -21,9 +21,8 @@
 #include "flutter/third_party/txt/src/txt/paragraph.h"
 #include "third_party/skia/include/core/SkPath.h"
 
-#include "core/components/custom_paint/render_custom_paint.h"
 #include "core/components/custom_paint/offscreen_canvas.h"
-
+#include "core/components/custom_paint/render_custom_paint.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/clip_layer.h"
 

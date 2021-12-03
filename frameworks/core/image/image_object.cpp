@@ -43,7 +43,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
             auto svgDom = SvgDom::CreateSvgDom(*svgStream, context, color);
             return svgDom ? MakeRefPtr<SvgImageObject>(source, Size(), 1, svgDom) : nullptr;
         } else {
-            int64_t colorValue = 0;
+            uint64_t colorValue = 0;
             if (color.has_value()) {
                 colorValue = color.value().GetValue();
                 // skia svg relies on the 32th bit to determine whether or not to use the color we set.

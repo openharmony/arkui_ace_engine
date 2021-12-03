@@ -43,6 +43,7 @@ public:
         bool isSvg = false)
         : imageSource_(source), imageSize_(imageSize), frameCount_(frameCount), isSvg_(isSvg)
     {}
+    virtual ~ImageObject() = default;
 
     static std::string GenerateCacheKey(const std::string& src, Size targetSize);
 
@@ -109,6 +110,8 @@ public:
         : ImageObject(source, imageSize, frameCount, true), skiaDom_(skiaDom)
     {}
 
+    ~SvgSkiaImageObject() override = default;
+
     const sk_sp<SkSVGDOM>& GetSkiaDom()
     {
         return skiaDom_;
@@ -131,6 +134,8 @@ public:
         const RefPtr<SvgDom>& svgDom)
         : ImageObject(source, imageSize, frameCount, true), svgDom_(svgDom)
     {}
+
+    ~SvgImageObject() override = default;
 
     const RefPtr<SvgDom>& GetSvgDom()
     {
@@ -155,6 +160,8 @@ public:
         const sk_sp<SkData>& data)
         : ImageObject(source, imageSize, frameCount), skData_(data)
     {}
+
+    ~StaticImageObject() override = default;
 
     void UploadToGpuForRender(
         const WeakPtr<PipelineContext> context,
@@ -187,6 +194,8 @@ public:
         const sk_sp<SkData>& data)
         : ImageObject(source, imageSize, frameCount), skData_(data)
     {}
+
+    ~AnimatedImageObject() override = default;
 
     void UploadToGpuForRender(
         const WeakPtr<PipelineContext> context,
@@ -231,6 +240,8 @@ public:
     {
         imageSize_ = Size(pixmap_->GetWidth(), pixmap_->GetHeight());
     }
+
+    ~PixelMapImageObject() override = default;
 
     void* GetRawPixelMapPtr()
     {

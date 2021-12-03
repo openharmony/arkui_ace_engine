@@ -433,6 +433,10 @@ bool AceAbility::OnTouchEvent(const TouchEvent &touchEvent)
     LOGI("AceAbility::OnTouchEvent called ");
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(
         Platform::AceContainer::GetContainer(abilityId_)->GetView());
+    if (!flutterAceView) {
+        LOGE("flutterAceView is null");
+        return false;
+    }
     TouchEvent event = touchEvent;
     bool ret = flutterAceView->DispatchTouchEvent(flutterAceView, event);
     LOGI("AceAbility::OnTouchEvent called End: ret: %{public}d", ret);

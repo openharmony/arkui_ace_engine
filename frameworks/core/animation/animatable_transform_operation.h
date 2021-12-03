@@ -36,6 +36,7 @@ public:
         animationOption_ = animationOption;
         SetCurrentValue(operation);
     }
+    ~AnimatableTransformOperation() override = default;
 
     void MoveTo(const TransformOperation& value) override
     {
@@ -66,6 +67,7 @@ class AnimatableTransformOperations final {
 public:
     AnimatableTransformOperations() = default;
     AnimatableTransformOperations(const AnimatableTransformOperations& other) = default;
+    ~AnimatableTransformOperations() = default;
 
     void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
     {
