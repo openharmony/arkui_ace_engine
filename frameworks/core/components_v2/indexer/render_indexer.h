@@ -118,6 +118,26 @@ public:
         context->CancelFocusAnimation();
     }
 
+    bool GetBubbleEnabled() const
+    {
+        return bubbleEnabled_;
+    }
+
+    AlignStyle GetAlignStyle() const
+    {
+        return alignStyle_;
+    }
+
+    Color& GetBubbleBackgroundColor()
+    {
+        return  color_;
+    }
+
+    RefPtr<TextComponent> GetBubbleText() const
+    {
+        return bubbleText_;
+    }
+
     RefPtr<RenderIndexerItem> GetSpecificItem(int32_t index) const;
 
     void HandleFocusAnimation(const Size& size, const Offset& offset);
@@ -150,6 +170,7 @@ protected:
     double paddingX_ = INDEXER_DEFAULT_PADDING_X;
     double paddingY_ = INDEXER_DEFAULT_PADDING_Y;
     AlignStyle alignStyle_ = AlignStyle::RIGHT;
+    Color color_;
 
     RefPtr<RawRecognizer> touchRecognizer_;
     RefPtr<DragRecognizer> dragRecognizer_;

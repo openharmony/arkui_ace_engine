@@ -42,6 +42,7 @@ void RenderIndexerItem::Update(const RefPtr<Component>& component)
         rotate_ = itemComponent->GetRotateFlag();
         strText_ = itemComponent->GetSectionStr();
         itemType_ = itemComponent->GetItemType();
+        itemSize_ = itemComponent->GetItemSize();
         isPrimary_ = itemComponent->IsItemPrimary();
         selectedBgColor_ = itemComponent->GetSelectedBackgroundColor();
         LOGI("[indexer] Update sectionIndex:%d", sectionIndex_);
