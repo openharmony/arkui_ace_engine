@@ -244,4 +244,8 @@ ACE_EXPORT extern const char DATE_PICKER_ETS_TAG[] = "DatePicker";
 ACE_EXPORT extern const char TIME_PICKER_COMPONENT_TAG[] = "PickerTimeComponent";
 ACE_EXPORT extern const char TIME_PICKER_ETS_TAG[] = "DatePicker";
 
+// Radio
+ACE_EXPORT extern const char RADIO_COMPONENT_TAG[] = "RadioComponent<VALUE_TYPE>";
+ACE_EXPORT extern const char RADIO_ETS_TAG[] = "Radio";
+
 } // namespace OHOS::Ace::V2

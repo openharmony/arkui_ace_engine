@@ -43,6 +43,7 @@
 #include "core/components_v2/inspector/panel_composed_element.h"
 #include "core/components_v2/inspector/progress_composed_element.h"
 #include "core/components_v2/inspector/qrcode_composed_element.h"
+#include "core/components_v2/inspector/radio_composed_element.h"
 #include "core/components_v2/inspector/rating_composed_element.h"
 #include "core/components_v2/inspector/refresh_composed_element.h"
 #include "core/components_v2/inspector/row_composed_element.h"
@@ -171,7 +172,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { DATE_PICKER_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::DatePickerComposedElement>(id); } },
     { TIME_PICKER_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::TimePickerComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::TimePickerComposedElement>(id); } },
+    { RADIO_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::RadioComposedElement>(id); } }
 };
 
 const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP {
@@ -224,7 +227,8 @@ const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_T
     { SCROLL_BAR_COMPONENT_TAG, SCROLL_BAR_ETS_TAG },
     { REFRESH_COMPONENT_TAG, REFRESH_ETS_TAG },
     { DATE_PICKER_COMPONENT_TAG, DATE_PICKER_ETS_TAG },
-    { TIME_PICKER_COMPONENT_TAG, TIME_PICKER_ETS_TAG }
+    { TIME_PICKER_COMPONENT_TAG, TIME_PICKER_ETS_TAG },
+    { RADIO_COMPONENT_TAG, RADIO_ETS_TAG }
 };
 
 } // namespace
