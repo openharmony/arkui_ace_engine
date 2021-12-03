@@ -181,7 +181,7 @@ void RenderXComponent::NativeXComponentDispatchTouchEvent(const TouchInfo& touch
     float scale = pipelineContext->GetViewScale();
     float diffX = touchInfo.x - position_.GetX() * scale;
     float diffY = touchInfo.y - position_.GetY() * scale;
-    if (diffX >= 0 & diffX <= drawSize_.Width() * scale  && diffY >= 0 && diffY <= drawSize_.Height() * scale) {
+    if ((diffX >= 0) && (diffX <= drawSize_.Width() * scale) && (diffY >= 0) && (diffY <= drawSize_.Height() * scale)) {
         pipelineContext->GetTaskExecutor()->PostTask(
         [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, touchInfo] {
             auto nXCompImpl = weakNXCompImpl.Upgrade();
