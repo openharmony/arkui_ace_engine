@@ -188,6 +188,7 @@ public:
     virtual std::unique_ptr<JsonValue> GetUseAlign() const;
     virtual std::unique_ptr<JsonValue> ToJsonObject() const;
 
+    virtual std::unique_ptr<JsonValue> GetOverlay() const;
     virtual AceType::IdType GetTargetTypeId() const
     {
         return AceType::TypeId(this);

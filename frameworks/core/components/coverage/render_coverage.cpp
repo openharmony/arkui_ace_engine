@@ -27,7 +27,10 @@ RefPtr<RenderNode> RenderCoverage::Create()
 
 RenderCoverage::RenderCoverage() {}
 
-void RenderCoverage::Update(const RefPtr<Component>& component) {}
+void RenderCoverage::Update(const RefPtr<Component>& component)
+{
+    coverageComponent_ = AceType::DynamicCast<CoverageComponent>(component);
+}
 
 void RenderCoverage::PerformLayout()
 {

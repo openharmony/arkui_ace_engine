@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/box/box_element.h"
+#include "core/components/coverage/render_coverage.h"
 #include "core/components/display/render_display.h"
 #include "core/components/flex/flex_item_element.h"
 #include "core/components/flex/render_flex_item.h"
@@ -128,6 +129,7 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
     { "markAnchor", [](const InspectorComposedElement& inspector) { return inspector.GetMarkAnchor(); } },
     { "mask", [](const InspectorComposedElement& inspector) { return inspector.GetMask(); } },
     { "useAlign", [](const InspectorComposedElement& inspector) { return inspector.GetUseAlign(); } },
+    { "overlay", [](const InspectorComposedElement& inspector) { return inspector.GetOverlay(); } },
 };
 
 }; // namespace
@@ -995,6 +997,46 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetShadow() const
     jsonValue->Put("color", std::to_string(shadow.GetColor().GetValue()).c_str());
     jsonValue->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
     jsonValue->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
+    return jsonValue;
+}
+
+std::unique_ptr<JsonValue> InspectorComposedElement::GetOverlay() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    auto render =  GetContentRender<RenderCoverage>(ComponentGroupElement::TypeId());
+    if (!render) {
+        jsonValue->Put("options", "align: Alignment.Center,offset: {0, 0}");
+        return jsonValue;
+    }
+    auto coverage = render->GetCoverageComponent();
+    auto title = coverage->GetTextVal();
+    auto alignment = coverage->GetAlignment();
+    auto jsonAlign = JsonUtil::Create(true);
+    if (alignment == Alignment::TOP_LEFT) {
+            jsonAlign->Put("align", "Alignment.TopStart");
+        } else if (alignment == Alignment::TOP_CENTER) {
+            jsonAlign->Put("align", "Alignment.Top");
+        } else if (alignment == Alignment::TOP_RIGHT) {
+            jsonAlign->Put("align", "Alignment.TopEnd");
+        } else if (alignment == Alignment::CENTER_LEFT) {
+            jsonAlign->Put("align", "Alignment.Start");
+        } else if (alignment == Alignment::CENTER_RIGHT) {
+            jsonAlign->Put("align", "Alignment.End");
+        } else if (alignment == Alignment::BOTTOM_LEFT) {
+            jsonAlign->Put("align", "Alignment.BottomStart");
+        } else if (alignment == Alignment::BOTTOM_CENTER) {
+            jsonAlign->Put("align", "Alignment.Bottom");
+        } else if (alignment == Alignment::BOTTOM_RIGHT) {
+            jsonAlign->Put("align", "Alignment.BottomEnd");
+        } else {
+            jsonAlign->Put("align", "Alignment.Center");
+        }
+    auto offsetJson = JsonUtil::Create(true);
+    offsetJson->Put("x", coverage->GetX().ToString().c_str());
+    offsetJson->Put("y", coverage->GetY().ToString().c_str());
+    jsonAlign->Put("offset", offsetJson);
+    jsonValue->Put("title", title.c_str());
+    jsonValue->Put("options", jsonAlign);
     return jsonValue;
 }
 

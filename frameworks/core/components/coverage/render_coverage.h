@@ -30,8 +30,15 @@ public:
 
     static RefPtr<RenderNode> Create();
 
+    const RefPtr<CoverageComponent>& GetCoverageComponent() const
+    {
+        return coverageComponent_;
+    }
+
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
+private:
+    RefPtr<CoverageComponent> coverageComponent_;
 };
 
 } // namespace OHOS::Ace
