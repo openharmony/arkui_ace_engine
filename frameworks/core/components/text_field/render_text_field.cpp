@@ -149,6 +149,18 @@ public:
         }
     }
 
+    void DeleteForward(int32_t length) override
+    {
+    }
+
+    void SendKeyEventFromInputMethod(const MiscServices::KeyEvent& event) override
+    {
+    }
+
+    void SendKeyboardStatus(const MiscServices::KeyboardStatus& status) override
+    {
+    }
+
 private:
     WeakPtr<RenderTextField> field_;
 };
