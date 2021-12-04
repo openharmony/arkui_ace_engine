@@ -1250,6 +1250,7 @@ void RenderSwiper::DoSwipeToAnimation(int32_t fromIndex, int32_t toIndex, bool r
     swipeToController_->AddStopListener([weak, fromIndex, toIndex]() {
         auto swiper = weak.Upgrade();
         if (swiper) {
+            swiper->LoadLazyItems((fromIndex + 1) % swiper->itemCount_ == toIndex);
             swiper->isIndicatorAnimationStart_ = false;
             swiper->outItemIndex_ = fromIndex;
             swiper->currentIndex_ = toIndex;
@@ -2762,6 +2763,7 @@ void RenderSwiper::StartIndicatorAnimation(int32_t fromIndex, int32_t toIndex, b
     indicatorController_->AddStopListener([weak = AceType::WeakClaim(this), fromIndex, toIndex]() {
         auto swiper = weak.Upgrade();
         if (swiper) {
+            swiper->LoadLazyItems((fromIndex + 1) % swiper->itemCount_ == toIndex);
             swiper->isIndicatorAnimationStart_ = false;
             swiper->outItemIndex_ = fromIndex;
             swiper->currentIndex_ = toIndex;
