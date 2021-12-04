@@ -91,6 +91,8 @@ public:
 
     bool GetVisible() const override;
 
+    void OnStatusStyleChanged(StyleState state) override;
+
     void OnTransition(TransitionType type, int32_t id) override;
 
     bool HasDisappearingTransition(int32_t nodeId) override;
@@ -117,6 +119,9 @@ protected:
     WeakPtr<DisplayComponent> displayComponent_;
     RefPtr<CurveAnimation<uint8_t>> appearingAnimation_;
     RefPtr<Animator> animator_;
+#ifdef USE_STATE_STYLE_UPDATER
+    RefPtr<StateAttributeList<DisplayStateAttribute>> stateAttributeList_;
+#endif
 };
 
 } // namespace OHOS::Ace

@@ -17,6 +17,7 @@
 
 #include "base/log/event_report.h"
 #include "base/log/log.h"
+#include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_node.h"
 #include "core/animation/keyframe_animation.h"
 #include "core/common/frontend.h"
@@ -171,7 +172,14 @@ void RenderButton::HandleTouchEvent(bool isTouch)
 {
     isClicked_ = isTouch;
     if (isClicked_) {
+#ifdef USE_STATE_STYLE_UPDATER
+        OnStatusStyleChanged(StyleState::PRESSED);
+#endif
         isMoveEventValid_ = true;
+    } else {
+#ifdef USE_STATE_STYLE_UPDATER
+        OnStatusStyleChanged(StyleState::NORMAL);
+#endif
     }
     if (isMoveEventValid_ || isWatch_) {
         PlayTouchAnimation();
@@ -192,6 +200,9 @@ void RenderButton::HandleMoveEvent(const TouchEventInfo& info)
     if ((moveDeltaX < 0 || moveDeltaX > buttonSize_.Width()) || (moveDeltaY < 0 || moveDeltaY > buttonSize_.Height())) {
         isClicked_ = false;
         MarkNeedRender();
+#ifdef USE_STATE_STYLE_UPDATER
+        OnStatusStyleChanged(StyleState::NORMAL);
+#endif
         isMoveEventValid_ = false;
     }
 }
@@ -392,6 +403,10 @@ void RenderButton::Update(const RefPtr<Component>& component)
     clickRecognizer_->SetUseCatchMode(catchMode);
     SetAccessibilityText(button->GetAccessibilityText());
     UpdateDownloadStyles(button);
+
+#ifdef USE_STATE_STYLE_UPDATER
+    OnStatusStyleChanged(disabled_ ? StyleState::DISABLED : StyleState::NORMAL);
+#endif
     MarkNeedLayout();
 }
 
@@ -737,4 +752,67 @@ void RenderButton::PlayFocusAnimation(bool isFocus)
     }
 }
 
+#ifdef USE_STATE_STYLE_UPDATER
+void RenderButton::OnStatusStyleChanged(StyleState state)
+{
+    RenderNode::OnStatusStyleChanged(state);
+    if (buttonComponent_ == nullptr || !buttonComponent_->HasStateAttributeList()) {
+        return;
+    }
+
+    bool color_defined = false;
+    bool default_color_defined = false;
+    bool border_radius_defined = false;
+    bool default_border_radius_defined = false;
+    bool updated = false;
+
+    for (auto attribute : *buttonComponent_->GetStateAttributeList()) {
+        if (attribute->stateName_ != state) {
+            continue;
+        }
+        updated = true;
+        switch (attribute->id_) {
+            case ButtonStateAttribute::COLOR: {
+                color_defined = true;
+                default_color_defined = default_color_defined || attribute->stateName_ == StyleState::NORMAL;
+
+                auto colorState = AceType::DynamicCast<StateAttributeValue<ButtonStateAttribute, Color>>(attribute);
+                if (attribute->stateName_ == StyleState::PRESSED) {
+                    SetClickedColor(colorState->value_);
+                }
+                if (attribute->stateName_ == StyleState::NORMAL) {
+                    buttonComponent_->SetBackgroundColor(colorState->value_);
+                }
+            } break;
+
+            case ButtonStateAttribute::RADIUS: {
+                border_radius_defined = true;
+                default_border_radius_defined =
+                    default_border_radius_defined || attribute->stateName_ == StyleState::NORMAL;
+
+                auto radiusState =
+                    AceType::DynamicCast<StateAttributeValue<ButtonStateAttribute, Dimension>>(attribute);
+                buttonComponent_->SetRectRadius(radiusState->value_);
+            } break;
+
+            case ButtonStateAttribute::HEIGHT: {
+                auto valueState =
+                    AceType::DynamicCast<StateAttributeValue<ButtonStateAttribute, AnimatableDimension>>(attribute);
+                buttonComponent_->SetHeight(valueState->value_);
+                height_ = valueState->value_;
+            } break;
+
+            case ButtonStateAttribute::WIDTH: {
+                auto valueState =
+                    AceType::DynamicCast<StateAttributeValue<ButtonStateAttribute, AnimatableDimension>>(attribute);
+                buttonComponent_->SetWidth(valueState->value_);
+                width_ = valueState->value_;
+            } break;
+        }
+        if (updated) {
+            MarkNeedLayout();
+        }
+    }
+}
+#endif
 } // namespace OHOS::Ace

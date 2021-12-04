@@ -42,9 +42,7 @@ void RenderElement::Prepare(const WeakPtr<Element>& parent)
         renderNode_ = CreateRenderNode();
     }
     if (renderNode_) {
-        if (SystemProperties::GetRosenBackendEnabled()) {
-            renderNode_->SyncRSNodeBoundary(component_->IsHeadComponent(), component_->IsTailComponent());
-        }
+        renderNode_->SyncRSNodeBoundary(component_->IsHeadComponent(), component_->IsTailComponent());
         SetAccessibilityNode(parent);
         renderNode_->Attach(context_);
     }

@@ -32,6 +32,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components/common/properties/motion_path_option.h"
+#include "core/components/common/properties/state_attributes.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_v2/extensions/events/event_extensions.h"
 #include "core/components_v2/inspector/inspector_node.h"
@@ -569,6 +570,8 @@ public:
             child->ChangeStatus(renderStatus);
         }
     }
+
+    virtual void OnStatusStyleChanged(StyleState state);
 
     Offset GetOffsetFromOrigin(const Offset& offset) const;
 

@@ -164,12 +164,12 @@ void JSFlexImpl::JsFlexWidth(const JSCallbackInfo& info)
         return;
     }
 
+    JSViewAbstract::JsWidth(info);
     JsFlexWidth(info[0]);
 }
 
 void JSFlexImpl::JsFlexWidth(const JSRef<JSVal>& jsValue)
 {
-    JSViewAbstract::JsWidth(jsValue);
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     auto widthVal = box->GetWidth();
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
@@ -195,12 +195,12 @@ void JSFlexImpl::JsFlexHeight(const JSCallbackInfo& info)
         return;
     }
 
+    JSViewAbstract::JsHeight(info);
     JsFlexHeight(info[0]);
 }
 
 void JSFlexImpl::JsFlexHeight(const JSRef<JSVal>& jsValue)
 {
-    JSViewAbstract::JsHeight(jsValue);
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     auto heightVal = box->GetHeight();
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
@@ -232,7 +232,9 @@ void JSFlexImpl::JsFlexSize(const JSCallbackInfo& info)
     }
 
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+    JSViewAbstract::JsWidth(info);
     JsFlexWidth(sizeObj->GetProperty("width"));
+    JSViewAbstract::JsHeight(info);
     JsFlexHeight(sizeObj->GetProperty("height"));
 }
 

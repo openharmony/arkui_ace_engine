@@ -175,7 +175,7 @@ void JSImage::SetBorderRadius(const Dimension& value)
     SetBorder(border);
 }
 
-void JSImage::SetBorderStyle(int32_t style)
+void JSImage::SetBorderStyle(int32_t style, StyleState state)
 {
     BorderStyle borderStyle = BorderStyle::SOLID;
 
@@ -191,7 +191,13 @@ void JSImage::SetBorderStyle(int32_t style)
 
     BorderEdge edge = GetLeftBorderEdge();
     edge.SetStyle(borderStyle);
-    SetBorderEdge(edge);
+    auto stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    if (state == StyleState::NORMAL) {
+        SetBorderEdge(edge);
+    } else {
+        box->SetBorderStyleForState(borderStyle, state);
+    }
 }
 
 void JSImage::SetBorderColor(const Color& color)
@@ -276,7 +282,28 @@ void JSImage::JsBorderColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], borderColor)) {
         return;
     }
-    SetBorderColor(borderColor);
+    auto stack_ = ViewStackProcessor::GetInstance();
+    auto box = stack_->GetBoxComponent();
+    auto state = GetState(info, 1);
+    if (state == StyleState::NORMAL) {
+        SetBorderColor(borderColor);
+    } else {
+        AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+        box->SetBorderColorForState(borderColor, option, state);
+    }
+}
+
+void JSImage::JsBorderStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        LOGE("arg is not a object.");
+        return;
+    }
+    SetBorderStyle(info[0]->ToNumber<int32_t>(), GetState(info, 1));
 }
 
 void JSImage::OnComplete(const JSCallbackInfo& args)
@@ -286,12 +313,12 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
         auto jsLoadSuccFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageSuccessEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageSuccEventToJSValue);
         auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        image->SetLoadSuccessEvent(EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsLoadSuccFunc)]
-            (const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageSuccessEvent>(info);
-            func->Execute(*eventInfo);
-        }));
+        image->SetLoadSuccessEvent(EventMarker(
+            [execCtx = args.GetExecutionContext(), func = std::move(jsLoadSuccFunc)](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageSuccessEvent>(info);
+                func->Execute(*eventInfo);
+            }));
     } else {
         LOGE("args not function");
     }
@@ -304,12 +331,12 @@ void JSImage::OnError(const JSCallbackInfo& args)
         auto jsLoadFailFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageFailEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageFailEventToJSValue);
         auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        image->SetLoadFailEvent(EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsLoadFailFunc)]
-            (const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageFailEvent>(info);
-            func->Execute(*eventInfo);
-        }));
+        image->SetLoadFailEvent(EventMarker(
+            [execCtx = args.GetExecutionContext(), func = std::move(jsLoadFailFunc)](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageFailEvent>(info);
+                func->Execute(*eventInfo);
+            }));
     } else {
         LOGE("args not function");
     }
@@ -362,7 +389,15 @@ void JSImage::JsBorderWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], borderWidth)) {
         return;
     }
-    SetBorderWidth(borderWidth);
+    auto stack_ = ViewStackProcessor::GetInstance();
+    auto box = stack_->GetBoxComponent();
+    auto state = GetState(info, 1);
+    if (state == StyleState::NORMAL) {
+        SetBorderWidth(borderWidth);
+    } else {
+        AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+        box->SetBorderWidthForState(borderWidth, option, state);
+    }
 }
 
 void JSImage::JsBorderRadius(const JSCallbackInfo& info)
@@ -375,7 +410,15 @@ void JSImage::JsBorderRadius(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], borderRadius)) {
         return;
     }
-    SetBorderRadius(borderRadius);
+    auto stack_ = ViewStackProcessor::GetInstance();
+    auto box = stack_->GetBoxComponent();
+    auto state = GetState(info, 1);
+    if (state == StyleState::NORMAL) {
+        SetBorderRadius(borderRadius);
+    } else {
+        AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+        box->SetBorderRadiusForState(borderRadius, option, state);
+    }
 }
 
 void JSImage::JsBorder(const JSCallbackInfo& info)
@@ -400,13 +443,13 @@ void JSImage::JsBorder(const JSCallbackInfo& info)
     ParseJsonDimensionVp(argsPtrItem->GetValue("width"), width);
     ParseJsonDimensionVp(argsPtrItem->GetValue("radius"), radius);
     auto borderStyle = argsPtrItem->GetInt("style", static_cast<int32_t>(BorderStyle::SOLID));
-    LOGD("JsBorder width = %lf unit = %d, radius = %lf unit = %d, borderStyle = %d", width.Value(),
-        width.Unit(), radius.Value(), radius.Unit(), borderStyle);
+    LOGD("JsBorder width = %lf unit = %d, radius = %lf unit = %d, borderStyle = %d", width.Value(), width.Unit(),
+        radius.Value(), radius.Unit(), borderStyle);
     Color color;
     if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
         SetBorderColor(color);
     }
-    SetBorderStyle(borderStyle);
+    SetBorderStyle(borderStyle, GetState(info, 1));
     SetBorderWidth(width);
     SetBorderRadius(radius);
     info.SetReturnValue(info.This());

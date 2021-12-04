@@ -32,6 +32,7 @@ config("ace_config") {
     ]
   }
   defines = ace_common_defines
+  defines += [ "USE_STATE_STYLE_UPDATER" ]
 
   if (is_wearable_product) {
     defines += ace_wearable_defines

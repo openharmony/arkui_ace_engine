@@ -295,12 +295,15 @@ void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
         LOGE("Button component create failed");
         return;
     }
-    buttonComponent->SetBackgroundColor(backgroundColor);
-    auto buttonTheme = GetTheme<ButtonTheme>();
-    if (buttonTheme) {
-        Color blendColor = buttonTheme->GetClickedColor();
-        buttonComponent->SetClickedColor(buttonComponent->GetBackgroundColor().BlendColor(blendColor));
+    auto state = GetState(info, 1);
+    if (state != StyleState::PRESSED) {
+        auto buttonTheme = GetTheme<ButtonTheme>();
+        if (buttonTheme) {
+            Color blendColor = buttonTheme->GetClickedColor();
+            buttonComponent->SetClickedColor(buttonComponent->GetBackgroundColor().BlendColor(blendColor));
+        }
     }
+    buttonComponent->SetColorForState(backgroundColor, GetState(info, 1));
     info.ReturnSelf();
 }
 
@@ -315,7 +318,7 @@ void JSButton::JsWidth(const JSCallbackInfo& info)
     auto option = stack->GetImplicitAnimationOption();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
     if (buttonComponent) {
-        buttonComponent->SetWidth(value, option);
+        buttonComponent->SetWidthForState(value, option, GetState(info, 1));
     }
 }
 
@@ -330,7 +333,7 @@ void JSButton::JsHeight(const JSCallbackInfo& info)
     auto option = stack->GetImplicitAnimationOption();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
     if (buttonComponent) {
-        buttonComponent->SetHeight(value, option);
+        buttonComponent->SetHeightForState(value, option, GetState(info, 1));
     }
 }
 
@@ -382,8 +385,9 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
         return;
     }
     buttonComponent->SetRadiusState(true);
-    buttonComponent->SetRectRadius(radius);
-    JSViewAbstract::SetBorderRadius(radius, stack->GetImplicitAnimationOption());
+    buttonComponent->SetRectRadiusForState(radius, GetState(info, 1));
+    auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
+    boxComponent->SetBorderRadiusForState(radius, stack->GetImplicitAnimationOption(), GetState(info, 1));
 }
 
 Dimension JSButton::GetSizeValue(const JSCallbackInfo& info)

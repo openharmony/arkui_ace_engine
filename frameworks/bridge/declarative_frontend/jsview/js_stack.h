@@ -30,8 +30,8 @@ public:
     static void SetAlignment(int value);
     static void SetWidth(const JSCallbackInfo& info);
     static void SetHeight(const JSCallbackInfo& info);
-    static void SetWidth(const JSRef<JSVal>& jsValue);
-    static void SetHeight(const JSRef<JSVal>& jsValue);
+    static void JsStackWidth(const JSRef<JSVal>& jsValue, const JSCallbackInfo& info);
+    static void JsStackHeight(const JSRef<JSVal>& jsValue, const JSCallbackInfo& info);
     static void SetSize(const JSCallbackInfo& info);
 };
 

@@ -58,6 +58,7 @@ public:
     static void SetSyncLoad(const JSCallbackInfo& info);
 
     static void JsBorderColor(const JSCallbackInfo& info);
+    static void JsBorderStyle(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
     static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
@@ -102,7 +103,7 @@ protected:
     static void SetPaddingRight(const std::string& value);
     static void SetPadding(const std::string& value);
     static void SetBackgroundColor(const Color& color);
-    static void SetBorderStyle(int32_t style);
+    static void SetBorderStyle(int32_t style, StyleState state);
     static void SetBorderColor(const Color& color);
     static void SetLeftBorderColor(const Color& color);
     static void SetTopBorderColor(const Color& color);
