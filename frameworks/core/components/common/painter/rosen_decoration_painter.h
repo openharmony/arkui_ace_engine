@@ -53,25 +53,29 @@ public:
 
     static float ConvertRadiusToSigma(float radius);
 
+    static void PaintGrayScale(const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& grayscale,
+        const Color& color);
+
+    static void PaintBrightness(const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& brightness,
+        const Color& color);
+
+    static void PaintContrast(const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& contrast,
+        const Color& color);
+
+    static void PaintSaturate(const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& saturate,
+        const Color& color);
+
+    static void PaintSepia(const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& sepia, const Color& color);
+
+    static void PaintInvert(const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& invert, const Color& color);
+
+    static void PaintHueRotate(const SkRRect& outerRRect, SkCanvas* canvas, const float& hueRotate, const Color& color);
+
     void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context, const sk_sp<SkImage>& image);
 
     void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context);
 
     void PaintBoxShadows(const SkRRect& rrect, const std::vector<Shadow>& shadows, SkCanvas* canvas);
-
-    void PaintGrayScale(const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& grayscale, const Color& color);
-
-    void PaintBrightness(const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& brightness, const Color& color);
-
-    void PaintContrast(const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& contrast, const Color& color);
-
-    void PaintSaturate(const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& saturate, const Color& color);
-
-    void PaintSepia(const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& sepia, const Color& color);
-
-    void PaintInvert(const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& invert, const Color& color);
-
-    void PaintHueRotate(const SkRRect& outerRRect, SkCanvas* canvas, const float& hueRotate, const Color& color);
 
     void PaintBlur(RenderContext& context, const Dimension& blurRadius);
 

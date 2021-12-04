@@ -273,7 +273,57 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         // draw background image on current context/canvas
         renderImage_->RenderWithContext(context, offset);
     }
+    auto pipeline = context_.Upgrade();
+    if (!pipeline) {
+        return;
+    }
+    Rect paintSize = Rect(offset + margin_.GetOffsetInPx(pipeline->GetDipScale()), paintSize_);
+    if (useLiteStyle_) {
+        Size maxSize;
+        maxSize.SetWidth(paintSize_.Width() > GetPaintRect().Width() ? paintSize_.Width() : GetPaintRect().Width());
+        maxSize.SetHeight(paintSize_.Height() > GetPaintRect().Height() ?
+            paintSize_.Height() : GetPaintRect().Height());
+        paintSize.SetSize(maxSize);
+    }
+    SkRRect outerRRect =
+        SkRRect::MakeRect(SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom()));
+    Color bgColor = pipeline->GetRootBgColor();
+    if (backDecoration_) {
+        auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+        if (canvas == nullptr) {
+            LOGE("Paint canvas is null.");
+            return;
+        }
+        auto context = context_.Upgrade();
+        if (context->GetIsDeclarative()) {
+            RosenDecorationPainter::PaintGrayScale(outerRRect, canvas, backDecoration_->GetGrayScale(), bgColor);
+            RosenDecorationPainter::PaintBrightness(outerRRect, canvas, backDecoration_->GetBrightness(), bgColor);
+            RosenDecorationPainter::PaintContrast(outerRRect, canvas, backDecoration_->GetContrast(), bgColor);
+            RosenDecorationPainter::PaintSaturate(outerRRect, canvas, backDecoration_->GetSaturate(), bgColor);
+            RosenDecorationPainter::PaintInvert(outerRRect, canvas, backDecoration_->GetInvert(), bgColor);
+            RosenDecorationPainter::PaintSepia(outerRRect, canvas, backDecoration_->GetSepia(), bgColor);
+            RosenDecorationPainter::PaintHueRotate(outerRRect, canvas, backDecoration_->GetHueRotate(), bgColor);
+        }
+    }
     RenderNode::Paint(context, offset);
+    if (frontDecoration_) {
+        auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+        if (canvas == nullptr) {
+            LOGE("Paint canvas is null.");
+            return;
+        }
+        auto context = context_.Upgrade();
+        if (context->GetIsDeclarative()) {
+            RosenDecorationPainter::PaintGrayScale(outerRRect, canvas, frontDecoration_->GetGrayScale(), bgColor);
+            RosenDecorationPainter::PaintBrightness(
+                outerRRect, canvas, frontDecoration_->GetBrightness(), bgColor);
+            RosenDecorationPainter::PaintContrast(outerRRect, canvas, frontDecoration_->GetContrast(), bgColor);
+            RosenDecorationPainter::PaintSaturate(outerRRect, canvas, frontDecoration_->GetSaturate(), bgColor);
+            RosenDecorationPainter::PaintInvert(outerRRect, canvas, frontDecoration_->GetInvert(), bgColor);
+            RosenDecorationPainter::PaintSepia(outerRRect, canvas, frontDecoration_->GetSepia(), bgColor);
+            RosenDecorationPainter::PaintHueRotate(outerRRect, canvas, frontDecoration_->GetHueRotate(), bgColor);
+        }
+    }
     if ((!backDecoration_) || backDecoration_->GetImage() ||
         (backDecoration_->GetBackgroundColor() != Color::TRANSPARENT) || !(backDecoration_->GetGradient().IsValid())) {
         // no need to paint gradient
