@@ -129,7 +129,11 @@ std::string GenerateSummaryBody(
 
 } // namespace
 
-thread_local std::stack<QJSHandleScope*> QJSHandleScope::qjsHandleScopeStack;
+#if defined(USE_CLANG_COVERAGE) || defined(CLANG_COVERAGE)
+std::stack<JSContext*> QJSHandleScope::qjsHandleScopeStack_;
+#else
+thread_local std::stack<QJSHandleScope*> QJSHandleScope::qjsHandleScopeStack_;
+#endif
 
 ScopedString::ScopedString(JSContext* ctx, JSValueConst val) : context_(ctx)
 {
@@ -219,8 +223,8 @@ ScopedString::operator std::string() const
 
 JSValue QJSUtils::NewStringLen(JSContext* ctx, const char* str, size_t len)
 {
-    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack.empty());
-    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
+    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack_.empty());
+    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack_.top();
     JSValue retVal = JS_NewStringLen(ctx, str, len);
     scope->jsValues_.push_back(retVal);
     return retVal;
@@ -228,8 +232,8 @@ JSValue QJSUtils::NewStringLen(JSContext* ctx, const char* str, size_t len)
 
 JSValue QJSUtils::NewString(JSContext* ctx, const char* str)
 {
-    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack.empty());
-    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
+    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack_.empty());
+    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack_.top();
     JSValue retVal = JS_NewString(ctx, str);
     scope->jsValues_.push_back(retVal);
     return retVal;
@@ -237,8 +241,8 @@ JSValue QJSUtils::NewString(JSContext* ctx, const char* str)
 
 JSValue QJSUtils::ParseJSON(JSContext* ctx, const char* buf, size_t bufLen, const char* filename)
 {
-    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack.empty());
-    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
+    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack_.empty());
+    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack_.top();
     JSValue retVal = JS_ParseJSON(ctx, buf, bufLen, filename);
     scope->jsValues_.push_back(retVal);
     return retVal;
@@ -246,8 +250,8 @@ JSValue QJSUtils::ParseJSON(JSContext* ctx, const char* buf, size_t bufLen, cons
 
 JSValue QJSUtils::NewObject(JSContext* ctx)
 {
-    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack.empty());
-    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
+    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack_.empty());
+    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack_.top();
     JSValue retVal = JS_NewObject(ctx);
     scope->jsValues_.push_back(retVal);
     return retVal;
@@ -255,8 +259,8 @@ JSValue QJSUtils::NewObject(JSContext* ctx)
 
 JSValue QJSUtils::Call(JSContext* ctx, JSValueConst funcObj, JSValueConst thisObj, int32_t argc, JSValueConst* argv)
 {
-    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack.empty());
-    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
+    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack_.empty());
+    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack_.top();
     JSValue retVal = JS_Call(ctx, funcObj, thisObj, argc, argv);
     scope->jsValues_.push_back(retVal);
     js_std_loop(ctx);
@@ -265,8 +269,8 @@ JSValue QJSUtils::Call(JSContext* ctx, JSValueConst funcObj, JSValueConst thisOb
 
 JSValue QJSUtils::Eval(JSContext* ctx, const char* input, size_t inputLen, const char* filename, int32_t evalFlags)
 {
-    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack.empty());
-    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
+    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack_.empty());
+    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack_.top();
     JSValue retVal = JS_Eval(ctx, input, inputLen, filename, evalFlags);
     scope->jsValues_.push_back(retVal);
     js_std_loop(ctx);
@@ -275,8 +279,8 @@ JSValue QJSUtils::Eval(JSContext* ctx, const char* input, size_t inputLen, const
 
 JSValue QJSUtils::GetPropertyStr(JSContext* ctx, JSValueConst thisObj, const char* prop)
 {
-    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack.empty());
-    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack.top();
+    ACE_DCHECK(!QJSHandleScope::qjsHandleScopeStack_.empty());
+    QJSHandleScope* scope = QJSHandleScope::qjsHandleScopeStack_.top();
     JSValue retVal = JS_GetPropertyStr(ctx, thisObj, prop);
     scope->jsValues_.push_back(retVal);
     return retVal;
@@ -655,12 +659,12 @@ QJSHandleScope::QJSHandleScope(JSContext* ctx)
     static int scopeId = 0;
     scopeId_ = scopeId++;
     context_ = ctx;
-    qjsHandleScopeStack.push(this);
+    qjsHandleScopeStack_.push(this);
 }
 
 QJSHandleScope::~QJSHandleScope()
 {
-    qjsHandleScopeStack.pop();
+    qjsHandleScopeStack_.pop();
     for (const auto& val : jsValues_) {
         JS_FreeValue(context_, val);
     }
@@ -668,7 +672,7 @@ QJSHandleScope::~QJSHandleScope()
 
 QJSHandleScope* QJSHandleScope::GetCurrent()
 {
-    return qjsHandleScopeStack.top();
+    return qjsHandleScopeStack_.top();
 }
 
 void QJSHandleScope::Push(JSValue val)
