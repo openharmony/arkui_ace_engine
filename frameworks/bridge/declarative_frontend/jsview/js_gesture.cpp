@@ -24,6 +24,7 @@
 #include "frameworks/core/gestures/pan_gesture.h"
 #include "frameworks/core/gestures/pinch_gesture.h"
 #include "frameworks/core/gestures/rotation_gesture.h"
+#include "frameworks/core/gestures/slide_gesture.h"
 #include "frameworks/core/gestures/tap_gesture.h"
 
 namespace OHOS::Ace::Framework {
@@ -37,15 +38,19 @@ constexpr int32_t DEFAULT_PINCH_FINGER = 2;
 constexpr double DEFAULT_PINCH_DISTANCE = 3.0;
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
 constexpr double DEFAULT_PAN_DISTANCE = 5.0;
+constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
+constexpr double DEFAULT_SLIDE_SPEED = 100.0;
 constexpr int32_t DEFAULT_ROTATION_FINGER = 2;
 constexpr double DEFAULT_ROTATION_ANGLE = 1.0;
 
 constexpr char GESTURE_FINGERS[] = "fingers";
 constexpr char GESTURE_DISTANCE[] = "distance";
+constexpr char GESTURE_SPEED[] = "speed";
 constexpr char TAP_COUNT[] = "count";
 constexpr char LONG_PRESS_REPEAT[] = "repeat";
 constexpr char LONG_PRESS_DURATION[] = "duration";
 constexpr char PAN_DIRECTION[] = "direction";
+constexpr char SWIPE_DIRECTION[] = "direction";
 constexpr char ROTATION_ANGLE[] = "angle";
 } // namespace
 
@@ -207,6 +212,45 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
     gestureComponent->PushGesture(gesture);
 }
 
+void JSSwipeGesture::Create(const JSCallbackInfo& args)
+{
+    int32_t fingersNum = DEFAULT_SLIDE_FINGER;
+    double speedNum = DEFAULT_SLIDE_SPEED;
+    SwipeDirection slideDirection;
+    auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
+        auto gesture = AceType::MakeRefPtr<SwipeGesture>(fingersNum, slideDirection, speedNum);
+        gestureComponent->PushGesture(gesture);
+        return;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+
+    JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
+    JSRef<JSVal> speed = obj->GetProperty(GESTURE_SPEED);
+    JSRef<JSVal> directionNum = obj->GetProperty(SWIPE_DIRECTION);
+
+    if (fingers->IsNumber()) {
+        int32_t fingersNumber = fingers->ToNumber<int32_t>();
+        fingersNum = fingersNumber <= DEFAULT_PAN_FINGER ? DEFAULT_PAN_FINGER : fingersNumber;
+    }
+
+    if (speed->IsNumber()) {
+        double speedNumber = speed->ToNumber<double>();
+        speedNum = LessNotEqual(speedNumber, 0.0) ? DEFAULT_SLIDE_SPEED : speedNumber;
+    }
+
+    if (directionNum->IsNumber()) {
+        uint32_t directNum = directionNum->ToNumber<uint32_t>();
+        if (directNum >= static_cast<uint32_t>(SwipeDirection::NONE) &&
+            directNum <= static_cast<uint32_t>(SwipeDirection::ALL)) {
+            slideDirection.type = directNum;
+        }
+    }
+    auto gesture = AceType::MakeRefPtr<SwipeGesture>(fingersNum, slideDirection, speedNum);
+    gestureComponent->PushGesture(gesture);
+}
+
 void JSPinchGesture::Create(const JSCallbackInfo& args)
 {
     LOGD("JSPinchGesture Create");
@@ -340,6 +384,7 @@ void JSGesture::JsHandlerOnActionUpdate(const JSCallbackInfo& args)
 {
     JSGesture::JsHandlerOnGestureEvent(JSGestureEvent::UPDATE, args);
 }
+
 void JSGesture::JsHandlerOnActionEnd(const JSCallbackInfo& args)
 {
     JSGesture::JsHandlerOnGestureEvent(JSGestureEvent::END, args);
@@ -461,6 +506,12 @@ void JSGesture::JSBind(BindingTarget globalObj)
     JSClass<JSPanGesture>::StaticMethod("onActionEnd", &JSGesture::JsHandlerOnActionEnd);
     JSClass<JSPanGesture>::StaticMethod("onActionCancel", &JSGesture::JsHandlerOnActionCancel);
     JSClass<JSPanGesture>::Bind(globalObj);
+
+    JSClass<JSSwipeGesture>::Declare("SwipeGesture");
+    JSClass<JSSwipeGesture>::StaticMethod("create", &JSSwipeGesture::Create, opt);
+    JSClass<JSSwipeGesture>::StaticMethod("pop", &JSGesture::Pop);
+    JSClass<JSSwipeGesture>::StaticMethod("onAction", &JSGesture::JsHandlerOnAction);
+    JSClass<JSSwipeGesture>::Bind(globalObj);
 
     JSClass<JSPinchGesture>::Declare("PinchGesture");
     JSClass<JSPinchGesture>::StaticMethod("create", &JSPinchGesture::Create, opt);

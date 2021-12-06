@@ -313,6 +313,14 @@ var PanDirection;
   PanDirection[PanDirection["All"] = 15] = "All";
 })(PanDirection || (PanDirection = {}));
 
+var SwipeDirection;
+(function (SwipeDirection) {
+  SwipeDirection[SwipeDirection["None"] = 0] = "None";
+  SwipeDirection[SwipeDirection["Horizontal"] = 1] = "Horizontal";
+  SwipeDirection[SwipeDirection["Vertical"] = 2] = "Vertical";
+  SwipeDirection[SwipeDirection["All"] = 3] = "All";
+})(SwipeDirection || (SwipeDirection = {}));
+
 var GestureDirection;
 (function (GestureDirection) {
   GestureDirection[GestureDirection["All"] = 0] = "All";

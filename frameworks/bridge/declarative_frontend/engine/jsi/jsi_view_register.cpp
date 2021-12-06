@@ -583,6 +583,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TapGesture", JSGesture::JSBind },
     { "LongPressGesture", JSGesture::JSBind },
     { "PanGesture", JSGesture::JSBind },
+    { "SwipeGesture", JSGesture::JSBind },
     { "PinchGesture", JSGesture::JSBind },
     { "RotationGesture", JSGesture::JSBind },
     { "GestureGroup", JSGesture::JSBind },

@@ -39,6 +39,7 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     gestureInfoObj->SetProperty<double>("offsetY", SystemProperties::Px2Vp(info.GetOffsetY()));
     gestureInfoObj->SetProperty<double>("scale", info.GetScale());
     gestureInfoObj->SetProperty<double>("angle", info.GetAngle());
+    gestureInfoObj->SetProperty<double>("speed", info.GetSpeed());
     gestureInfoObj->SetProperty<double>("timestamp", info.GetTimeStamp().time_since_epoch().count());
     gestureInfoObj->SetProperty<double>("globalX", SystemProperties::Px2Vp(info.GetGlobalLocation().GetX()));
     gestureInfoObj->SetProperty<double>("globalY", SystemProperties::Px2Vp(info.GetGlobalLocation().GetY()));

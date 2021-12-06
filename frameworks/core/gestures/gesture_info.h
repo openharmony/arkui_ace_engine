@@ -36,6 +36,9 @@ namespace OHOS::Ace {
 namespace {
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
 constexpr double DEFAULT_PAN_DISTANCE = 5.0;
+constexpr double DEFAULT_SLIDE_DISTANCE = DEFAULT_PAN_DISTANCE;
+constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
+constexpr double DEFAULT_SLIDE_SPEED = 300.0;
 } // namespace
 
 class GestureRecognizer;
@@ -182,6 +185,21 @@ private:
     std::unordered_map<typename OnPanDirectionFunc::IdType, OnPanDirectionFunc> onPanDirectionIds_;
     std::unordered_map<typename OnPanDistanceFunc::IdType, OnPanDistanceFunc> onPanDistanceIds_;
 };
+
+struct SwipeDirection final {
+    static constexpr uint32_t NONE = 0;
+    static constexpr uint32_t HORIZONTAL = 1;
+    static constexpr uint32_t VERTICAL = 2;
+    static constexpr uint32_t ALL = 3;
+
+    uint32_t type = ALL;
+};
+using OnSwipeFingersFunc = EventCallback<void(int32_t fingers)>;
+using SwipeFingersFuncType = OnSwipeFingersFunc::FunctionType;
+using OnSwipeDirectionFunc = EventCallback<void(const SwipeDirection& direction)>;
+using SwipeDirectionFuncType = OnSwipeDirectionFunc::FunctionType;
+using OnSwipeSpeedFunc = EventCallback<void(double speed)>;
+using SwipeSpeedFuncType = OnSwipeSpeedFunc::FunctionType;
 
 class PasteData : public AceType {
     DECLARE_ACE_TYPE(PasteData, AceType);
@@ -382,12 +400,23 @@ public:
         fingerList_ = fingerList;
     }
 
+    void SetSpeed(double speed)
+    {
+        speed_ = speed;
+    }
+
+    double GetSpeed() const
+    {
+        return speed_;
+    }
+
 private:
     bool repeat_ = false;
     double offsetX_ = 0.0;
     double offsetY_ = 0.0;
     double scale_ = 1.0;
     double angle_ = 0.0;
+    double speed_ = 0.0;
     Point globalPoint_;
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;

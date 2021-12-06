@@ -23,6 +23,7 @@ enum class GestureType {
     LONG_PRESS,
     TOUCH_START,
     TOUCH_MOVE,
+    TOUCH_SLIDE,
     TOUCH_CANCEL,
     TOUCH_END,
 };
