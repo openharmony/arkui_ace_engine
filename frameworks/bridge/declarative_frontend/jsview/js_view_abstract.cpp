@@ -1625,31 +1625,67 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
     ViewStackProcessor::GetInstance()->Push(menuComponent);
     auto menuTheme = GetTheme<SelectTheme>();
     menuComponent->SetTheme(menuTheme);
-    auto context = info.GetExecutionContext();
 
-    auto paramArray = JSRef<JSArray>::Cast(info[0]);
-    size_t size = paramArray->Length();
-    for (size_t i = 0; i < size; i++) {
-        std::string value;
-        auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
-        auto menuValue = indexObject->GetProperty("value");
-        auto menuAction = indexObject->GetProperty("action");
-        ParseJsString(menuValue, value);
-        auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(menuAction));
+    if (info[0]->IsArray()) {
+        auto context = info.GetExecutionContext();
+        auto paramArray = JSRef<JSArray>::Cast(info[0]);
+        size_t size = paramArray->Length();
+        for (size_t i = 0; i < size; i++) {
+            std::string value;
+            auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
+            auto menuValue = indexObject->GetProperty("value");
+            auto menuAction = indexObject->GetProperty("action");
+            ParseJsString(menuValue, value);
+            auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(menuAction));
+
+            auto optionTheme = GetTheme<SelectTheme>();
+            auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+            auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
+
+            optionComponent->SetTheme(optionTheme);
+            optionComponent->SetText(textComponent);
+            optionComponent->SetValue(value);
+            optionComponent->SetCustomizedCallback([action, context] {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
+                action->Execute();
+            });
+            menuComponent->AppendOption(optionComponent);
+        }
+    } else {
+        JSRef<JSObject> menuObj;
+        if (info[0]->IsObject()) {
+            menuObj = JSRef<JSObject>::Cast(info[0]);
+        } else {
+            LOGE("No param object.");
+            return;
+        }
+
+        auto builder = menuObj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            LOGE("builder param is not a function.");
+            return;
+        }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        if (!builderFunc) {
+            LOGE("builder function is null.");
+            return;
+        }
+        // use another VSP instance while executing the builder function
+        ScopedViewStackProcessor builderViewStackProcessor;
+        builderFunc->Execute();
+        auto customComponent = ViewStackProcessor::GetInstance()->Finish();
+        if (!customComponent) {
+            LOGE("Custom component is null.");
+            return;
+        }
 
         auto optionTheme = GetTheme<SelectTheme>();
         auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
-        auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
+        optionComponent->SetCustomComponent(customComponent);
 
-        optionComponent->SetTheme(optionTheme);
-        optionComponent->SetText(textComponent);
-        optionComponent->SetValue(value);
-        optionComponent->SetCustomizedCallback([action, context] {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
-            action->Execute();
-        });
         menuComponent->AppendOption(optionComponent);
     }
+
     ViewStackProcessor::GetInstance()->Pop();
 }
 
