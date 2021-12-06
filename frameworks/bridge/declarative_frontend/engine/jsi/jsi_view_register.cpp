@@ -83,6 +83,7 @@
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
 #endif
+#include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
@@ -593,6 +594,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "CalendarController", JSCalendarController::JSBind },
     { "AbilityController", JSAbilityComponentController::JSBind },
     { "RenderingContext", JSRenderingContext::JSBind},
+    { "OffscreenRenderingContext", JSOffscreenRenderingContext::JSBind},
     { "CanvasGradient", JSCanvasGradient::JSBind},
     { "ImageBitmap", JSRenderImage::JSBind},
     { "ImageData", JSCanvasImageData::JSBind},
@@ -612,6 +614,7 @@ void RegisterAllModule(BindingTarget globalObj)
     JSScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);
+    JSOffscreenRenderingContext::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj);
     JSCanvasImageData::JSBind(globalObj);
@@ -656,6 +659,7 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
         RegisterModuleByName(globalObj, moduleName);
     }
     JSRenderingContext::JSBind(globalObj);
+    JSOffscreenRenderingContext::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj);
     JSCanvasImageData::JSBind(globalObj);

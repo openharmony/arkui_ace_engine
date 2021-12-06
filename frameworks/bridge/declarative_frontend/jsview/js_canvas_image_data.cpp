@@ -25,9 +25,9 @@ JSCanvasImageData::JSCanvasImageData()
 
 void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
 {
-    auto jsCalendarController = Referenced::MakeRefPtr<JSCanvasImageData>();
-    jsCalendarController->IncRefCount();
-    args.SetReturnValue(Referenced::RawPtr(jsCalendarController));
+    auto jsCanvasImageData = Referenced::MakeRefPtr<JSCanvasImageData>();
+    jsCanvasImageData->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(jsCanvasImageData));
 }
 
 void JSCanvasImageData::Destructor(JSCanvasImageData* controller)

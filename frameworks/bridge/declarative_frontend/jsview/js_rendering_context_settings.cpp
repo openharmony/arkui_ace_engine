@@ -25,17 +25,19 @@ JSRenderingContextSettings::JSRenderingContextSettings()
 
 void JSRenderingContextSettings::Constructor(const JSCallbackInfo& args)
 {
-    auto jsCalendarController = Referenced::MakeRefPtr<JSRenderingContextSettings>();
-    jsCalendarController->IncRefCount();
-    args.SetReturnValue(Referenced::RawPtr(jsCalendarController));
+    auto jsRenderingContextSettings = Referenced::MakeRefPtr<JSRenderingContextSettings>();
+    jsRenderingContextSettings->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(jsRenderingContextSettings));
     bool anti = false;
     bool alpha = false;
-    if (args.Length() != 0 && args.Length() == 2) {
+    if (args.Length() > 0) {
         JSViewAbstract::ParseJsBool(args[0], anti);
-        JSViewAbstract::ParseJsBool(args[1], alpha);
-        jsCalendarController->SetAlpha(alpha);
-        jsCalendarController->SetAntialias(anti);
     }
+    if (args.Length() > 1) {
+        JSViewAbstract::ParseJsBool(args[1], alpha);
+    }
+    jsRenderingContextSettings->SetAntialias(anti);
+    jsRenderingContextSettings->SetAlpha(alpha);
 }
 
 void JSRenderingContextSettings::Destructor(JSRenderingContextSettings* controller)

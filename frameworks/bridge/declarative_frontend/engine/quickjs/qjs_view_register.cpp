@@ -38,6 +38,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
@@ -588,6 +589,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSRadio::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);
+    JSOffscreenRenderingContext::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj);
     JSCanvasImageData::JSBind(globalObj);

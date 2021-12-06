@@ -17,18 +17,18 @@
 #define FOUNDATION_ACE_FRAMEWORK_JAVASCRIPT_BRIDGE_JS_VIEW_JS_CANVAS_RENDERER_H
 
 #include "base/memory/referenced.h"
-#include "bridge/declarative_frontend/engine/bindings_defines.h"
-#include "bridge/declarative_frontend/jsview/js_canvas_gradient.h"
-#include "bridge/declarative_frontend/jsview/js_canvas_path.h"
-#include "bridge/declarative_frontend/jsview/js_path2d.h"
-
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_matrix2d.h"
-#include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
-#include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_image_data.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_matrix2d.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
+#include "frameworks/core/components/custom_paint/offscreen_canvas.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -48,7 +48,7 @@ public:
     };
 
     static RefPtr<CanvasPath2D> JsMakePath2D(const JSCallbackInfo& info);
-    void setAnti();
+    void SetAntiAlias();
 
     static void ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint32_t>& array);
 
@@ -129,6 +129,13 @@ public:
     void SetComponent(const RefPtr<CanvasTaskPool>& controller)
     {
         pool_ = controller;
+        isOffscreen_ = false;
+    }
+
+    void SetOffscreenCanvas(const RefPtr<OffscreenCanvas>& offscreenCanvas)
+    {
+        offscreenCanvas_ = offscreenCanvas;
+        isOffscreen_ = true;
     }
 
     std::vector<uint32_t> GetLineDash() const
@@ -141,21 +148,22 @@ public:
         lineDash_ = lineDash;
     }
 
-    std::string GetType() const
+    void SetAnti(bool anti)
     {
-        return type_;
+        anti_ = anti;
     }
 
-    void SetType(std::string type)
+    bool GetAnti()
     {
-        type_ = type;
+        return anti_;
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasRenderer);
 
 protected:
     RefPtr<CanvasTaskPool> pool_;
-    static bool anti_;
+    RefPtr<OffscreenCanvas> offscreenCanvas_;
+    bool anti_ = false;
 
 private:
     PaintState paintState_;
@@ -164,8 +172,8 @@ private:
     static int32_t patternCount_;
     Pattern GetPattern(int32_t id);
     std::vector<uint32_t> lineDash_;
-    std::string type_;
     ImageData imageData_;
+    bool isOffscreen_;
 };
 
 } // namespace OHOS::Ace::Framework

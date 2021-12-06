@@ -39,6 +39,7 @@ public:
     void JsGetHeight(const JSCallbackInfo& info);
     void JsSetHeight(const JSCallbackInfo& info);
     void JsSetWidth(const JSCallbackInfo& info);
+    void JsTransferFromImageBitmap(const JSCallbackInfo& info);
 
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderingContext);
 

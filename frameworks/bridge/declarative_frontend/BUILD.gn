@@ -129,6 +129,7 @@ template("declarative_js_engine") {
       "jsview/js_canvas_path.cpp",
       "jsview/js_render_image.cpp",
       "jsview/js_canvas_image_data.cpp",
+      "jsview/js_offscreen_rendering_context.cpp",
       "jsview/js_path2d.cpp",
       "jsview/js_rendering_context_settings.cpp",
       "jsview/js_matrix2d.cpp",

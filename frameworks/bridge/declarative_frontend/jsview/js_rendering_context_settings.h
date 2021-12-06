@@ -51,8 +51,8 @@ public:
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderingContextSettings);
 
 private:
-    bool alpha_;
-    bool antialias_;
+    bool alpha_ = false;
+    bool antialias_ = false;
 };
 
 } // OHOS::Ace::Framework

@@ -36,6 +36,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
@@ -642,6 +643,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"TabsController", JSTabsController::JSBind},
     {"CalendarController", JSCalendarController::JSBind},
     {"RenderingContext", JSRenderingContext::JSBind},
+    {"OffscreenRenderingContext", JSOffscreenRenderingContext::JSBind},
     {"CanvasGradient", JSCanvasGradient::JSBind},
     {"ImageBitmap", JSRenderImage::JSBind},
     {"ImageData", JSCanvasImageData::JSBind},

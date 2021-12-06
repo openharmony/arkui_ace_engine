@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/js_rendering_context.h"
+#include "js_rendering_context.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
-
+#include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -27,7 +27,7 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRenderingContext>::Declare("RenderingContext");
 
-    JSClass<JSRenderingContext>::CustomMethod("toDataURL", &JSRenderingContext::JsToDataUrl);
+    JSClass<JSRenderingContext>::CustomMethod("toDataURL", &JSCanvasRenderer::JsToDataUrl);
     JSClass<JSRenderingContext>::CustomProperty("width", &JSRenderingContext::JsGetWidth,
                                                 &JSRenderingContext::JsSetWidth);
     JSClass<JSRenderingContext>::CustomProperty("height", &JSRenderingContext::JsGetHeight,
@@ -105,6 +105,8 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
                                                 &JSCanvasRenderer::JsSetImageSmoothingEnabled);
     JSClass<JSRenderingContext>::CustomProperty("imageSmoothingQuality", &JSCanvasRenderer::JsGetImageSmoothingQuality,
                                                 &JSCanvasRenderer::JsSetImageSmoothingQuality);
+    JSClass<JSRenderingContext>::CustomMethod("transferFromImageBitmap",
+                                             &JSRenderingContext::JsTransferFromImageBitmap);
 
     JSClass<JSRenderingContext>::Bind(globalObj, JSRenderingContext::Constructor, JSRenderingContext::Destructor);
 }
@@ -119,8 +121,8 @@ void JSRenderingContext::Constructor(const JSCallbackInfo& args)
         if (args[0]->IsObject()) {
             JSRenderingContextSettings* jsContextSetting
                 = JSRef<JSObject>::Cast(args[0])->Unwrap<JSRenderingContextSettings>();
-            bool antia = jsContextSetting->GetAntialias();
-            anti_ = antia;
+            bool anti = jsContextSetting->GetAntialias();
+            jsRenderContext->SetAnti(anti);
         }
     }
 }
@@ -129,19 +131,6 @@ void JSRenderingContext::Destructor(JSRenderingContext* controller)
 {
     if (controller != nullptr) {
         controller->DecRefCount();
-    }
-}
-
-void JSRenderingContext::JsToDataUrl(const JSCallbackInfo& info)
-{
-    std::string dataUrl = "";
-    std::string result = "";
-    if (info[0]->IsString()) {
-        JSViewAbstract::ParseJsString(info[0], dataUrl);
-        result = pool_->ToDataURL(dataUrl);
-        auto returnValue = JSVal(ToJSValue(result));
-        auto returnPtr = JSRef<JSVal>::Make(returnValue);
-        info.SetReturnValue(returnPtr);
     }
 }
 
@@ -171,6 +160,19 @@ void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
     auto returnValue = JSVal(ToJSValue(height));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
+}
+void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
+{
+    if (info.Length() != 0) {
+        if (info[0]->IsObject()) {
+            uint32_t id = 0;
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+            JSRef<JSVal> widthId = obj->GetProperty("__id");
+            JSViewAbstract::ParseJsInteger(widthId, id);
+            RefPtr<OffscreenCanvas> offscreenCanvas = JSOffscreenRenderingContext::GetOffscreenCanvas(id);
+            pool_->TransferFromImageBitmap(offscreenCanvas);
+        }
+    }
 }
 
 } // namespace OHOS::Ace::Framework

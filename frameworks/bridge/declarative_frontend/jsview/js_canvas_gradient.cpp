@@ -25,9 +25,9 @@ JSCanvasGradient::JSCanvasGradient()
 
 void JSCanvasGradient::Constructor(const JSCallbackInfo& args)
 {
-    auto jsCanvasDradient = Referenced::MakeRefPtr<JSCanvasGradient>();
-    jsCanvasDradient->IncRefCount();
-    args.SetReturnValue(Referenced::RawPtr(jsCanvasDradient));
+    auto jsCanvasGradient = Referenced::MakeRefPtr<JSCanvasGradient>();
+    jsCanvasGradient->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(jsCanvasGradient));
 }
 
 void JSCanvasGradient::Destructor(JSCanvasGradient* controller)

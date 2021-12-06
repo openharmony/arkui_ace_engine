@@ -17,7 +17,6 @@
 #include "bridge/declarative_frontend/engine/bindings.h"
 
 namespace OHOS::Ace::Framework {
-bool JSCanvasRenderer::anti_ = false;
 std::unordered_map<int32_t, Pattern> JSCanvasRenderer::pattern_;
 int32_t JSCanvasRenderer::patternCount_ = 0;
 namespace {
@@ -29,7 +28,7 @@ const std::set<std::string> FONT_WEIGHTS = {
 const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
 const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Defaulte value is low.
-
+constexpr double DEFAULT_QUALITY = 0.92;
 template<typename T>
 inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t length, T defaultValue)
 {
@@ -208,17 +207,10 @@ void JSCanvasRenderer::JsFillText(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], x);
         JSViewAbstract::ParseJsDouble(info[2], y);
 
-        auto pool = pool_;
-        auto container = Container::Current();
-        if (container) {
-            auto executor = container->GetTaskExecutor();
-            if (executor) {
-                executor->PostTask(
-                    [pool, text, x, y]() {
-                        pool->FillText(text, Offset(x, y));
-                    },
-                TaskExecutor::TaskType::UI);
-            }
+        if (isOffscreen_) {
+            offscreenCanvas_->FillText(text, x, y, paintState_);
+        } else {
+            pool_->FillText(text, Offset(x, y));
         }
     }
 }
@@ -238,24 +230,21 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], x);
         JSViewAbstract::ParseJsDouble(info[2], y);
 
-        auto pool = pool_;
-        auto container = Container::Current();
-        if (container) {
-            auto executor = container->GetTaskExecutor();
-            if (executor) {
-                executor->PostTask(
-                    [pool, text, x, y]() {
-                        pool->StrokeText(text, Offset(x, y));
-                    },
-                TaskExecutor::TaskType::UI);
-            }
+        if (isOffscreen_) {
+            offscreenCanvas_->StrokeText(text, x, y, paintState_);
+        } else {
+            pool_->StrokeText(text, Offset(x, y));
         }
     }
 }
 
-void JSCanvasRenderer::setAnti()
+void JSCanvasRenderer::SetAntiAlias()
 {
-    pool_->SetAntiAlias(anti_);
+    if (isOffscreen_) {
+        offscreenCanvas_->SetAntiAlias(anti_);
+    } else {
+        pool_->SetAntiAlias(anti_);
+    }
 }
 
 void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
@@ -273,28 +262,49 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
     for (const auto& fontProp : fontProps) {
         if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
             auto weight = ConvertStrToFontWeight(fontProp);
-            pool_->UpdateFontWeight(weight);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetFontWeight(weight);
+            } else {
+                pool_->UpdateFontWeight(weight);
+            }
+
             style_.SetFontWeight(weight);
         } else if (FONT_STYLES.find(fontProp) != FONT_STYLES.end()) {
             updateFontStyle = true;
             auto fontStyle = ConvertStrToFontStyle(fontProp);
-            pool_->UpdateFontStyle(fontStyle);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetFontStyle(fontStyle);
+            } else {
+                pool_->UpdateFontStyle(fontStyle);
+            }
             style_.SetFontStyle(fontStyle);
         } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
             auto families = ConvertStrToFontFamilies(fontProp);
-            pool_->UpdateFontFamilies(families);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetFontFamilies(families);
+            } else {
+                pool_->UpdateFontFamilies(families);
+            }
             style_.SetFontFamilies(families);
         } else if (fontProp.find("px") != std::string::npos) {
             std::string fontSize = fontProp.substr(0, fontProp.size() - 2);
             auto size = Dimension(StringToDouble(fontProp));
-            pool_->UpdateFontSize(size);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetFontSize(size);
+            } else {
+                pool_->UpdateFontSize(size);
+            }
             style_.SetFontSize(size);
         } else {
             LOGW("parse text error");
         }
     }
     if (!updateFontStyle) {
-        pool_->UpdateFontStyle(FontStyle::NORMAL);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetFontStyle(FontStyle::NORMAL);
+        } else {
+            pool_->UpdateFontStyle(FontStyle::NORMAL);
+        }
     }
 }
 
@@ -399,7 +409,11 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
         std::string colorStr = "";
         JSViewAbstract::ParseJsString(info[0], colorStr);
         auto color = Color::FromString(colorStr);
-        pool_->UpdateFillColor(color);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetFillColor(color);
+        } else {
+            pool_->UpdateFillColor(color);
+        }
     } else {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> typeValue = obj->GetProperty("__type");
@@ -414,13 +428,21 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
             if (!gradient) {
                 return;
             }
-            pool_->UpdateFillGradient(*gradient);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetFillGradient(*gradient);
+            } else {
+                pool_->UpdateFillGradient(*gradient);
+            }
         } else if (type == "pattern") {
             JSRef<JSVal> typeValue = obj->GetProperty("__id");
             int32_t id;
             ParseJsInt(typeValue, id);
             auto pattern = GetPattern(id);
-            pool_->UpdateFillPattern(pattern);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetFillPattern(pattern);
+            } else {
+                pool_->UpdateFillPattern(pattern);
+            }
         } else {
             LOGW("unsupported function for stroke style.");
         }
@@ -439,7 +461,11 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
         std::string colorStr = "";
         JSViewAbstract::ParseJsString(info[0], colorStr);
         auto color = Color::FromString(colorStr);
-        pool_->UpdateStrokeColor(color);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetStrokeColor(color);
+        } else {
+            pool_->UpdateStrokeColor(color);
+        }
     } else {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> typeValue = obj->GetProperty("__type");
@@ -454,13 +480,21 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
             if (!gradient) {
                 return;
             }
-            pool_->UpdateStrokeGradient(*gradient);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetStrokeGradient(*gradient);
+            } else {
+                pool_->UpdateStrokeGradient(*gradient);
+            }
         } else if (type == "pattern") {
             JSRef<JSVal> typeValue = obj->GetProperty("__id");
             int32_t id;
             ParseJsInt(typeValue, id);
             auto pattern = GetPattern(id);
-            pool_->UpdateStrokePattern(pattern);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetStrokePattern(pattern);
+            } else {
+                pool_->UpdateStrokePattern(pattern);
+            }
         } else {
             LOGW("unsupported function for stroke style.");
         }
@@ -521,7 +555,11 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
                 break;
         }
 
-        pool_->DrawImage(image, imgWidth, imgHeight);
+        if (isOffscreen_) {
+            offscreenCanvas_->DrawImage(image, imgWidth, imgHeight);
+        } else {
+            pool_->DrawImage(image, imgWidth, imgHeight);
+        }
     }
 }
 
@@ -628,7 +666,11 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
         }
     }
 
-    pool_->PutImageData(imageData);
+    if (isOffscreen_) {
+        offscreenCanvas_->PutImageData(imageData);
+    } else {
+        pool_->PutImageData(imageData);
+    }
 }
 
 void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint32_t>& array)
@@ -680,7 +722,11 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     JSViewAbstract::ParseJsDouble(info[3], height);
 
     std::unique_ptr<ImageData> data;
-    data = pool_->GetImageData(left, top, width, height);
+    if (isOffscreen_) {
+        data = offscreenCanvas_->GetImageData(left, top, width, height);
+    } else {
+        data = pool_->GetImageData(left, top, width, height);
+    }
 
     final_height = data->dirtyHeight;
     final_width = data->dirtyWidth;
@@ -714,7 +760,9 @@ void JSCanvasRenderer::JsGetJsonData(const JSCallbackInfo& info)
 
     if (info[0]->IsString()) {
         JSViewAbstract::ParseJsString(info[0], path);
-        jsonData = pool_->GetJsonData(path);
+        if (!isOffscreen_) {
+            jsonData = pool_->GetJsonData(path);
+        }
         auto returnValue = JSVal(ToJSValue(jsonData));
         auto returnPtr = JSRef<JSVal>::Make(returnValue);
         info.SetReturnValue(returnPtr);
@@ -725,13 +773,21 @@ void JSCanvasRenderer::JsToDataUrl(const JSCallbackInfo& info)
 {
     std::string dataUrl = "";
     std::string result = "";
+    double quality = DEFAULT_QUALITY;
     if (info[0]->IsString()) {
         JSViewAbstract::ParseJsString(info[0], dataUrl);
-        result = pool_->ToDataURL(dataUrl);
-        auto returnValue = JSVal(ToJSValue(result));
-        auto returnPtr = JSRef<JSVal>::Make(returnValue);
-        info.SetReturnValue(returnPtr);
     }
+    if (info.Length() > 1 && info[1]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[1], quality);
+    }
+    if (isOffscreen_) {
+        result = offscreenCanvas_->ToDataURL(dataUrl, quality);
+    } else {
+        result = pool_->ToDataURL(dataUrl + "," + std::to_string(quality));
+    }
+    auto returnValue = JSVal(ToJSValue(result));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    info.SetReturnValue(returnPtr);
 }
 
 void JSCanvasRenderer::JsSetLineCap(const JSCallbackInfo& info)
@@ -745,7 +801,11 @@ void JSCanvasRenderer::JsSetLineCap(const JSCallbackInfo& info)
             { "square", LineCapStyle::SQUARE },
         };
         auto lineCap = ConvertStrToEnum(capStr.c_str(), lineCapTable, ArraySize(lineCapTable), LineCapStyle::BUTT);
-        pool_->UpdateLineCap(lineCap);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetLineCap(lineCap);
+        } else {
+            pool_->UpdateLineCap(lineCap);
+        }
     }
 }
 
@@ -761,7 +821,11 @@ void JSCanvasRenderer::JsSetLineJoin(const JSCallbackInfo& info)
         };
         auto lineJoin = ConvertStrToEnum(
             joinStr.c_str(), lineJoinTable, ArraySize(lineJoinTable), LineJoinStyle::MITER);
-        pool_->UpdateLineJoin(lineJoin);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetLineJoin(lineJoin);
+        } else {
+            pool_->UpdateLineJoin(lineJoin);
+        }
     }
 }
 
@@ -770,7 +834,11 @@ void JSCanvasRenderer::JsSetMiterLimit(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double limit = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], limit);
-        pool_->UpdateMiterLimit(limit);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetMiterLimit(limit);
+        } else {
+            pool_->UpdateMiterLimit(limit);
+        }
     }
 }
 
@@ -779,7 +847,11 @@ void JSCanvasRenderer::JsSetLineWidth(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double lineWidth = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], lineWidth);
-        pool_->UpdateLineWidth(lineWidth);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetLineWidth(lineWidth);
+        } else {
+            pool_->UpdateLineWidth(lineWidth);
+        }
     }
 }
 
@@ -788,7 +860,11 @@ void JSCanvasRenderer::JsSetGlobalAlpha(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double alpha = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], alpha);
-        pool_->UpdateGlobalAlpha(alpha);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetAlpha(alpha);
+        } else {
+            pool_->UpdateGlobalAlpha(alpha);
+        }
     }
 }
 
@@ -815,7 +891,11 @@ void JSCanvasRenderer::JsSetGlobalCompositeOperation(const JSCallbackInfo& info)
         auto type = ConvertStrToEnum(
             compositeStr.c_str(), compositeOperationTable,
             ArraySize(compositeOperationTable), CompositeOperation::SOURCE_OVER);
-        pool_->UpdateCompositeOperation(type);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetCompositeType(type);
+        } else {
+            pool_->UpdateCompositeOperation(type);
+        }
     }
 }
 
@@ -824,7 +904,11 @@ void JSCanvasRenderer::JsSetLineDashOffset(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double lineDashOffset = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], lineDashOffset);
-        pool_->UpdateLineDashOffset(lineDashOffset);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetLineDashOffset(lineDashOffset);
+        } else {
+            pool_->UpdateLineDashOffset(lineDashOffset);
+        }
     }
 }
 
@@ -833,7 +917,11 @@ void JSCanvasRenderer::JsSetShadowBlur(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double blur = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], blur);
-        pool_->UpdateShadowBlur(blur);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetShadowBlur(blur);
+        } else {
+            pool_->UpdateShadowBlur(blur);
+        }
     }
 }
 
@@ -843,7 +931,11 @@ void JSCanvasRenderer::JsSetShadowColor(const JSCallbackInfo& info)
         std::string colorStr = "";
         JSViewAbstract::ParseJsString(info[0], colorStr);
         auto color = Color::FromString(colorStr);
-        pool_->UpdateShadowColor(color);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetShadowColor(color);
+        } else {
+            pool_->UpdateShadowColor(color);
+        }
     }
 }
 
@@ -852,7 +944,11 @@ void JSCanvasRenderer::JsSetShadowOffsetX(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double offsetX = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], offsetX);
-        pool_->UpdateShadowOffsetX(offsetX);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetShadowOffsetX(offsetX);
+        } else {
+            pool_->UpdateShadowOffsetX(offsetX);
+        }
     }
 }
 
@@ -861,7 +957,11 @@ void JSCanvasRenderer::JsSetShadowOffsetY(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double offsetY = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], offsetY);
-        pool_->UpdateShadowOffsetY(offsetY);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetShadowOffsetY(offsetY);
+        } else {
+            pool_->UpdateShadowOffsetY(offsetY);
+        }
     }
 }
 
@@ -874,7 +974,11 @@ void JSCanvasRenderer::JsSetImageSmoothingEnabled(const JSCallbackInfo& info)
 
     bool enabled = false;
     if (JSViewAbstract::ParseJsBool(info[0], enabled)) {
-        pool_->UpdateSmoothingEnabled(enabled);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetSmoothingEnabled(enabled);
+        } else {
+            pool_->UpdateSmoothingEnabled(enabled);
+        }
     }
 }
 
@@ -890,7 +994,11 @@ void JSCanvasRenderer::JsSetImageSmoothingQuality(const JSCallbackInfo& info)
         if (QUALITY_TYPE.find(quality) == QUALITY_TYPE.end()) {
             return;
         }
-        pool_->UpdateSmoothingQuality(quality);
+        if (isOffscreen_) {
+            offscreenCanvas_->SetSmoothingQuality(quality);
+        } else {
+            pool_->UpdateSmoothingQuality(quality);
+        }
     }
 }
 
@@ -906,7 +1014,11 @@ void JSCanvasRenderer::JsMoveTo(const JSCallbackInfo& info)
         double y = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], x);
         JSViewAbstract::ParseJsDouble(info[1], y);
-        pool_->MoveTo(x, y);
+        if (isOffscreen_) {
+            offscreenCanvas_->MoveTo(x, y);
+        } else {
+            pool_->MoveTo(x, y);
+        }
     }
 }
 
@@ -922,7 +1034,11 @@ void JSCanvasRenderer::JsLineTo(const JSCallbackInfo& info)
         double y = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], x);
         JSViewAbstract::ParseJsDouble(info[1], y);
-        pool_->LineTo(x, y);
+        if (isOffscreen_) {
+            offscreenCanvas_->LineTo(x, y);
+        } else {
+            pool_->LineTo(x, y);
+        }
     }
 }
 
@@ -943,7 +1059,11 @@ void JSCanvasRenderer::JsBezierCurveTo(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[4], param.x);
         JSViewAbstract::ParseJsDouble(info[5], param.y);
 
-        pool_->BezierCurveTo(param);
+        if (isOffscreen_) {
+            offscreenCanvas_->BezierCurveTo(param);
+        } else {
+            pool_->BezierCurveTo(param);
+        }
     }
 }
 
@@ -961,7 +1081,11 @@ void JSCanvasRenderer::JsQuadraticCurveTo(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[2], param.x);
         JSViewAbstract::ParseJsDouble(info[3], param.y);
 
-        pool_->QuadraticCurveTo(param);
+        if (isOffscreen_) {
+            offscreenCanvas_->QuadraticCurveTo(param);
+        } else {
+            pool_->QuadraticCurveTo(param);
+        }
     }
 }
 
@@ -981,7 +1105,11 @@ void JSCanvasRenderer::JsArcTo(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[3], param.y2);
         JSViewAbstract::ParseJsDouble(info[4], param.radius);
 
-        pool_->ArcTo(param);
+        if (isOffscreen_) {
+            offscreenCanvas_->ArcTo(param);
+        } else {
+            pool_->ArcTo(param);
+        }
     }
 }
 
@@ -1004,7 +1132,11 @@ void JSCanvasRenderer::JsArc(const JSCallbackInfo& info)
         if (!info[5]->IsNull()) {
             JSViewAbstract::ParseJsBool(info[5], param.anticlockwise);
         }
-        pool_->Arc(param);
+        if (isOffscreen_) {
+            offscreenCanvas_->Arc(param);
+        } else {
+            pool_->Arc(param);
+        }
     }
 }
 
@@ -1031,13 +1163,21 @@ void JSCanvasRenderer::JsEllipse(const JSCallbackInfo& info)
             JSViewAbstract::ParseJsInteger(info[7], anti);
             param.anticlockwise = (anti == 1);
         }
-        pool_->Ellipse(param);
+        if (isOffscreen_) {
+            offscreenCanvas_->Ellipse(param);
+        } else {
+            pool_->Ellipse(param);
+        }
     }
 }
 
 void JSCanvasRenderer::JsFill(const JSCallbackInfo& info)
 {
-    pool_->Fill();
+    if (isOffscreen_) {
+        offscreenCanvas_->Fill();
+    } else {
+        pool_->Fill();
+    }
 }
 
 void JSCanvasRenderer::JsStroke(const JSCallbackInfo& info)
@@ -1045,21 +1185,37 @@ void JSCanvasRenderer::JsStroke(const JSCallbackInfo& info)
     if (info.Length() == 1) {
         JSPath2D* jsCanvasPath = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPath2D>();
         auto path = jsCanvasPath->GetCanvasPath2d();
-        pool_->Stroke(path);
+        if (isOffscreen_) {
+            offscreenCanvas_->Stroke(path);
+        } else {
+            pool_->Stroke(path);
+        }
         return;
     }
-    pool_->Stroke();
+    if (isOffscreen_) {
+        offscreenCanvas_->Stroke();
+    } else {
+        pool_->Stroke();
+    }
 }
 
 void JSCanvasRenderer::JsClip(const JSCallbackInfo& info)
 {
-    pool_->Clip();
+    if (isOffscreen_) {
+        offscreenCanvas_->Clip();
+    } else {
+        pool_->Clip();
+    }
 }
 
 void JSCanvasRenderer::JsRect(const JSCallbackInfo& info)
 {
     Rect rect = GetJsRectParam(info);
-    pool_->AddRect(rect);
+    if (isOffscreen_) {
+        offscreenCanvas_->AddRect(rect);
+    } else {
+        pool_->AddRect(rect);
+    }
 }
 
 void JSCanvasRenderer::JsBeginPath(const JSCallbackInfo& info)
@@ -1068,7 +1224,11 @@ void JSCanvasRenderer::JsBeginPath(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    pool_->BeginPath();
+    if (isOffscreen_) {
+        offscreenCanvas_->BeginPath();
+    } else {
+        pool_->BeginPath();
+    }
 }
 
 void JSCanvasRenderer::JsClosePath(const JSCallbackInfo& info)
@@ -1077,7 +1237,11 @@ void JSCanvasRenderer::JsClosePath(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    pool_->ClosePath();
+    if (isOffscreen_) {
+        offscreenCanvas_->ClosePath();
+    } else {
+        pool_->ClosePath();
+    }
 }
 
 void JSCanvasRenderer::JsRestore(const JSCallbackInfo& info)
@@ -1086,7 +1250,11 @@ void JSCanvasRenderer::JsRestore(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    pool_->Restore();
+    if (isOffscreen_) {
+        offscreenCanvas_->Restore();
+    } else {
+        pool_->Restore();
+    }
 }
 
 void JSCanvasRenderer::JsSave(const JSCallbackInfo& info)
@@ -1095,7 +1263,11 @@ void JSCanvasRenderer::JsSave(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    pool_->Save();
+    if (isOffscreen_) {
+        offscreenCanvas_->Save();
+    } else {
+        pool_->Save();
+    }
 }
 
 void JSCanvasRenderer::JsRotate(const JSCallbackInfo& info)
@@ -1106,7 +1278,11 @@ void JSCanvasRenderer::JsRotate(const JSCallbackInfo& info)
     }
     double angle = 0.0;
     JSViewAbstract::ParseJsDouble(info[0], angle);
-    pool_->Rotate(angle);
+    if (isOffscreen_) {
+        offscreenCanvas_->Rotate(angle);
+    } else {
+        pool_->Rotate(angle);
+    }
 }
 
 void JSCanvasRenderer::JsScale(const JSCallbackInfo& info)
@@ -1121,7 +1297,11 @@ void JSCanvasRenderer::JsScale(const JSCallbackInfo& info)
         double y = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], x);
         JSViewAbstract::ParseJsDouble(info[1], y);
-        pool_->Scale(x, y);
+        if (isOffscreen_) {
+            offscreenCanvas_->Scale(x, y);
+        } else {
+            pool_->Scale(x, y);
+        }
     }
 }
 
@@ -1138,7 +1318,11 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
             JSViewAbstract::ParseJsDouble(info[4], param.translateX);
             JSViewAbstract::ParseJsDouble(info[5], param.translateY);
 
-            pool_->SetTransform(param);
+            if (isOffscreen_) {
+                offscreenCanvas_->SetTransform(param);
+            } else {
+                pool_->SetTransform(param);
+            }
         }
     } else if (info.Length() == 1) {
         if (info[0]->IsObject()) {
@@ -1151,7 +1335,11 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
                 param.scaleY = jsContext->JsGetScaleY();
                 param.translateX = jsContext->JsGetTranslateX();
                 param.translateY = jsContext->JsGetTranslateY();
-                pool_->SetTransform(param);
+                if (isOffscreen_) {
+                    offscreenCanvas_->SetTransform(param);
+                } else {
+                    pool_->SetTransform(param);
+                }
             }
         }
     } else {
@@ -1177,7 +1365,11 @@ void JSCanvasRenderer::JsTransform(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[4], param.translateX);
         JSViewAbstract::ParseJsDouble(info[5], param.translateY);
 
-        pool_->Transform(param);
+        if (isOffscreen_) {
+            offscreenCanvas_->Transform(param);
+        } else {
+            pool_->Transform(param);
+        }
     }
 }
 
@@ -1193,7 +1385,11 @@ void JSCanvasRenderer::JsTranslate(const JSCallbackInfo& info)
         double y = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], x);
         JSViewAbstract::ParseJsDouble(info[1], y);
-        pool_->Translate(x, y);
+        if (isOffscreen_) {
+            offscreenCanvas_->Translate(x, y);
+        } else {
+            pool_->Translate(x, y);
+        }
     }
 }
 
@@ -1206,7 +1402,11 @@ void JSCanvasRenderer::JsSetLineDash(const JSCallbackInfo& info)
         lineDash.insert(lineDash.end(), lineDash.begin(), lineDash.end());
     }
 
-    pool_->UpdateLineDash(lineDash);
+    if (isOffscreen_) {
+        offscreenCanvas_->SetLineDash(lineDash);
+    } else {
+        pool_->UpdateLineDash(lineDash);
+    }
 }
 
 Pattern JSCanvasRenderer::GetPattern(int32_t id)
@@ -1228,20 +1428,11 @@ void JSCanvasRenderer::JsSetTextAlign(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsString(info[0], value);
         auto align = ConvertStrToTextAlign(value);
 
-        auto pool = pool_;
-
-        auto container = Container::Current();
-        if (container) {
-            auto executor = container->GetTaskExecutor();
-            if (executor) {
-                executor->PostTask(
-                    [pool, align]() {
-                        pool->UpdateTextAlign(align);
-                    },
-                TaskExecutor::TaskType::UI);
-            }
+        if (isOffscreen_) {
+            offscreenCanvas_->SetTextAlign(align);
+        } else {
+            pool_->UpdateTextAlign(align);
         }
-
         paintState_.SetTextAlign(align);
     }
 }
@@ -1259,17 +1450,10 @@ void JSCanvasRenderer::JsSetTextBaseline(const JSCallbackInfo& info)
         auto baseline = ConvertStrToEnum(
             textBaseline.c_str(), BASELINE_TABLE, ArraySize(BASELINE_TABLE), TextBaseline::ALPHABETIC);
 
-        auto pool = pool_;
-        auto container = Container::Current();
-        if (container) {
-            auto executor = container->GetTaskExecutor();
-            if (executor) {
-                executor->PostTask(
-                    [pool, baseline]() {
-                        pool->UpdateTextBaseline(baseline);
-                    },
-                TaskExecutor::TaskType::UI);
-            }
+        if (isOffscreen_) {
+            offscreenCanvas_->SetTextBaseline(baseline);
+        } else {
+            pool_->UpdateTextBaseline(baseline);
         }
         style_.SetTextBaseline(baseline);
     }
@@ -1282,7 +1466,11 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
     double width = 0.0;
     if (info[0]->IsString()) {
         JSViewAbstract::ParseJsString(info[0], text);
-        width = pool_->MeasureText(text, paintState_);
+        if (isOffscreen_) {
+            width = offscreenCanvas_->MeasureText(text, paintState_);
+        } else {
+            width = pool_->MeasureText(text, paintState_);
+        }
 
         auto retObj = JSRef<JSObject>::New();
         retObj->SetProperty("width", width);
@@ -1308,7 +1496,11 @@ void JSCanvasRenderer::JsFillRect(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[3], height);
 
         Rect rect = Rect(x, y, width, height);
-        pool_->FillRect(rect);
+        if (isOffscreen_) {
+            offscreenCanvas_->FillRect(rect);
+        } else {
+            pool_->FillRect(rect);
+        }
     }
 }
 
@@ -1330,7 +1522,11 @@ void JSCanvasRenderer::JsStrokeRect(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[3], height);
 
         Rect rect = Rect(x, y, width, height);
-        pool_->StrokeRect(rect);
+        if (isOffscreen_) {
+            offscreenCanvas_->StrokeRect(rect);
+        } else {
+            pool_->StrokeRect(rect);
+        }
     }
 }
 
@@ -1352,7 +1548,11 @@ void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[3], height);
 
         Rect rect = Rect(x, y, width, height);
-        pool_->ClearRect(rect);
+        if (isOffscreen_) {
+            offscreenCanvas_->ClearRect(rect);
+        } else {
+            pool_->ClearRect(rect);
+        }
     }
 }
 
