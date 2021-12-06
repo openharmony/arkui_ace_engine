@@ -26,21 +26,22 @@ ohos_shared_library("ace_uicontent") {
 
   sources = [ "${ace_root}/interfaces/innerkits/ace/ui_content.cpp" ]
 
+  include_dirs = [
+    "//foundation/appexecfwk/standard/kits/appkit/native/ability_runtime",
+    "//foundation/windowmanager/interfaces/innerkits",
+  ]
+
   deps = [
     "$ace_root/build:libace",
-    "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
+    "//foundation/appexecfwk/standard/kits:app_context",
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
   ]
 
   external_deps = [
-    "aafwk_standard:base",
-    "aafwk_standard:want",
     "aafwk_standard:runtime",
-    "napi:ace_napi",
     "appexecfwk_standard:appexecfwk_base",
-    "appexecfwk_standard:appexecfwk_core",
-    "appexecfwk_standard:libeventhandler",
-    "ipc:ipc_core",
+    "napi:ace_napi",
   ]
 
   subsystem_name = "ace"

@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 
-#include "ability.h"
 #include "interfaces/innerkits/ace/ui_content.h"
 #include "interfaces/innerkits/ace/viewport_config.h"
 #include "key_event.h"
@@ -26,15 +25,21 @@
 
 #include "base/utils/macros.h"
 
+namespace OHOS {
+
+class Window;
+
+} // namespace OHOS
+
 namespace OHOS::Ace {
 
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
-    UIContentImpl(OHOS::AppExecFwk::Context* context);
+    UIContentImpl(OHOS::AbilityRuntime::Context* context);
     ~UIContentImpl() = default;
 
     // UI content lifecycles
-    void Initialize(OHOS::Window* window, const std::string& url, NativeValue* storage) override;
+    void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
@@ -52,10 +57,10 @@ public:
     // interface for test
     bool ProcessTouchEvent(const OHOS::TouchEvent& touchEvent) override;
     void SetRuntime(OHOS::AbilityRuntime::Runtime* runtime) override;
+    void Initialize(OHOS::Window* window, const std::string& url, NativeValue* storage);
 
 private:
-    OHOS::AppExecFwk::Context* context_ = nullptr;
-    OHOS::AppExecFwk::Ability* ability_ = nullptr;
+    OHOS::AbilityRuntime::Context* context_ = nullptr;
     OHOS::AbilityRuntime::Runtime* runtime_ = nullptr;
     OHOS::Window* window_ = nullptr;
     ViewportConfig config_;

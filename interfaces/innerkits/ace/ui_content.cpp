@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace {
 
-std::unique_ptr<UIContent> UIContent::Create(OHOS::AppExecFwk::Context* context)
+std::unique_ptr<UIContent> UIContent::Create(OHOS::AbilityRuntime::Context* context)
 {
     return std::make_unique<UIContentImpl>(context);
 }

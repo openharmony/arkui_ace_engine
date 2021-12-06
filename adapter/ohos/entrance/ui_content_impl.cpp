@@ -17,6 +17,7 @@
 
 #include <atomic>
 
+#include "ability_context.h"
 #include "ability_info.h"
 #include "init_data.h"
 #include "js_runtime.h"
@@ -50,16 +51,20 @@ public:
     }
 };
 
-UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Context* context) : context_(context)
+UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context) : context_(context)
 {
-    ability_ = static_cast<OHOS::AppExecFwk::Ability*>(context_);
+}
+
+void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
+{
+    LOGI("Initialize UIContentImpl start.");
 }
 
 void UIContentImpl::Initialize(OHOS::Window* window, const std::string& url, NativeValue* storage)
 {
     window_ = window;
     startUrl_ = url;
-    if (!ability_) {
+    if (!context_) {
         LOGE("Null ability, can't initialize UI content");
         return;
     }
@@ -67,7 +72,7 @@ void UIContentImpl::Initialize(OHOS::Window* window, const std::string& url, Nat
     SetHwIcuDirectory();
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-    auto resourceManager = ability_->GetResourceManager();
+    auto resourceManager = context_->GetResourceManager();
     if (resourceManager != nullptr) {
         resourceManager->GetResConfig(*resConfig);
         auto localeInfo = resConfig->GetLocaleInfo();
@@ -81,12 +86,13 @@ void UIContentImpl::Initialize(OHOS::Window* window, const std::string& url, Nat
         }
     }
 
-    auto packagePathStr = ability_->GetBundleCodePath();
-    auto moduleInfo = ability_->GetHapModuleInfo();
+    auto packagePathStr = context_->GetBundleCodePath();
+    auto moduleInfo = context_->GetHapModuleInfo();
     if (moduleInfo != nullptr) {
         packagePathStr += "/" + moduleInfo->name + "/";
     }
-    auto info = ability_->GetAbilityInfo();
+    auto abilityContext = static_cast<OHOS::AbilityRuntime::AbilityContext*>(context_);
+    auto info = abilityContext->GetAbilityInfo();
     std::string srcPath = "";
     if (info != nullptr && !info->srcPath.empty()) {
         srcPath = info->srcPath;
@@ -105,7 +111,7 @@ void UIContentImpl::Initialize(OHOS::Window* window, const std::string& url, Nat
     }
 
     std::string moduleName = info->moduleName;
-    std::shared_ptr<OHOS::AppExecFwk::ApplicationInfo> appInfo = ability_->GetApplicationInfo();
+    std::shared_ptr<OHOS::AppExecFwk::ApplicationInfo> appInfo = context_->GetApplicationInfo();
     std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
 
     std::string resPath;
@@ -119,7 +125,7 @@ void UIContentImpl::Initialize(OHOS::Window* window, const std::string& url, Nat
     // create container
     instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
     auto container = AceType::MakeRefPtr<Platform::AceContainer>(
-        instanceId_, FrontendType::DECLARATIVE_JS, true, ability_, std::make_unique<AcePlatformEventCallback>());
+        instanceId_, FrontendType::DECLARATIVE_JS, true, nullptr, std::make_unique<AcePlatformEventCallback>());
     AceEngine::Get().AddContainer(instanceId_, container);
     container->GetSettings().SetUsingSharedRuntime(true);
     container->SetSharedRuntime(runtime_);

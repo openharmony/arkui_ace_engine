@@ -18,14 +18,15 @@
 
 #include <memory>
 
-#include "ability.h"
 #include "axis_event.h"
+#include "context/context.h"
 #include "key_event.h"
 #include "pointer_event.h"
 #include "touch_event.h"
 #include "native_engine/native_value.h"
 #include "runtime.h"
 #include "viewport_config.h"
+#include "wm/window.h"
 
 namespace OHOS::Ace {
 
@@ -33,12 +34,12 @@ namespace OHOS::Ace {
 
 class ACE_EXPORT UIContent {
 public:
-    static std::unique_ptr<UIContent> Create(OHOS::AppExecFwk::Context* context);
+    static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context);
 
     virtual ~UIContent() = default;
 
     // UI content lifecycles
-    virtual void Initialize(OHOS::Window* window, const std::string& url, NativeValue* storage) = 0;
+    virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Focus() = 0;

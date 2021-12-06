@@ -52,6 +52,7 @@ template("ace_ohos_standard_source_set") {
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability/include",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include",
       "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
+      "//foundation/windowmanager/interfaces/innerkits",
       "//third_party/node/src",
       "//utils/native/base/include",
     ]
@@ -70,6 +71,7 @@ template("ace_ohos_standard_source_set") {
         [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
 
     external_deps = [
+      "aafwk_standard:ability_context_native",
       "aafwk_standard:ability_manager",
       "aafwk_standard:base",
       "aafwk_standard:want",
