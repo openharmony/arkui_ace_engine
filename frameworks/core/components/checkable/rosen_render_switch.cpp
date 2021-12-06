@@ -44,8 +44,8 @@ void RosenRenderSwitch::Paint(RenderContext& context, const Offset& offset)
     double pointOriginX = paintOffset.GetX() + currentPointOriginX_;
     double pointOriginY = paintOffset.GetY() + NormalizeToPx(pointPadding_);
 
-    uint32_t trackColor;
-    uint32_t pointColor;
+    uint32_t trackColor = 0;
+    uint32_t pointColor = 0;
     paintTrackSize_ = switchSize_;
     SetPaintStyle(originX, originY, trackColor, pointColor, trackPaint);
     if (IsPhone() && onFocus_) {

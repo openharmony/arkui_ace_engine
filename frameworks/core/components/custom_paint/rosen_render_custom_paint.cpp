@@ -147,7 +147,7 @@ void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
     }
     if (!canvasCache_.readyToDraw()) {
         auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale,
-            SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+            SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
         canvasCache_.allocPixels(imageInfo);
         cacheBitmap_.allocPixels(imageInfo);
         canvasCache_.eraseColor(SK_ColorTRANSPARENT);
