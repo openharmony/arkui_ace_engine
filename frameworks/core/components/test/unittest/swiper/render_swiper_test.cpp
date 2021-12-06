@@ -118,6 +118,8 @@ RefPtr<Component> SwiperElement::OnMakeEmptyComponent()
 
 void SwiperElement::OnDataSourceUpdated(size_t startIndex) {}
 
+void SwiperElement::OnPostFlush() {}
+
 } // namespace V2
 
 size_t V2::LazyForEachComponent::TotalCount()

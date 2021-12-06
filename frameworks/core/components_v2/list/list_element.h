@@ -24,7 +24,11 @@
 
 namespace OHOS::Ace::V2 {
 
-class ListElement : public RenderElement, public FocusGroup, private ListItemGenerator, private ElementProxyHost {
+class ListElement : public RenderElement,
+                    public FocusGroup,
+                    public FlushEvent,
+                    private ListItemGenerator,
+                    private ElementProxyHost {
     DECLARE_ACE_TYPE(V2::ListElement, RenderElement, FocusGroup);
 
 public:
@@ -39,6 +43,7 @@ public:
     size_t FindPreviousStickyListItem(size_t index) override;
 
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
+    void OnPostFlush() override;
 
 private:
     RefPtr<Element> OnUpdateElement(const RefPtr<Element>& element, const RefPtr<Component>& component) override;

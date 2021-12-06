@@ -120,6 +120,15 @@ void SwiperElement::OnDataSourceUpdated(size_t startIndex)
         return;
     }
     render->OnDataSourceUpdated(ElementProxyHost::TotalCount(), startIndex);
+    auto context = context_.Upgrade();
+    if (context) {
+        context->AddPostFlushListener(AceType::Claim(this));
+    }
+}
+
+void SwiperElement::OnPostFlush()
+{
+    ReleaseRedundantComposeIds();
 }
 
 } // namespace OHOS::Ace::V2

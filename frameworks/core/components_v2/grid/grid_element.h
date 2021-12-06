@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::V2 {
 
-class GridElement : public RenderElement, public FocusGroup, private V2::ElementProxyHost {
+class GridElement : public RenderElement, public FocusGroup, public FlushEvent, private V2::ElementProxyHost {
     DECLARE_ACE_TYPE(GridElement, RenderElement, FocusGroup);
 
 public:
@@ -36,6 +36,7 @@ public:
     bool GetItemSpanByIndex(int32_t index, bool isHorizontal, int32_t& itemMain, int32_t& itemCross,
         int32_t& itemMainSpan, int32_t& itemCrossSpan);
     size_t GetReloadedCheckNum() override;
+    void OnPostFlush() override;
     void Dump() override;
 
 private:

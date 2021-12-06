@@ -97,6 +97,15 @@ public:
         return element_;
     }
 
+    void RefreshActiveComposeIds() override
+    {
+        auto host = host_.Upgrade();
+        if (!host) {
+            return;
+        }
+        host->AddActiveComposeId(composedId_);
+    };
+
     void ReleaseElementByIndex(size_t index) override
     {
         ACE_DCHECK(index == startIndex_);
@@ -114,19 +123,6 @@ public:
     void ReleaseElementById(const ComposeId& id) override
     {
         LOGD("RenderElementProxy can not release Id. id: %{public}s", id.c_str());
-    }
-
-    void HostReleaseElementById(const ComposeId& id)
-    {
-        if (id != GetId()) {
-            LOGW("ReleaseElement Failed. Id not equals: (%s) vs (%s)", id.c_str(), GetId().c_str());
-            return;
-        }
-        auto host = host_.Upgrade();
-        if (!host) {
-            return;
-        }
-        host->ReleaseElementById(id);
     }
 
     void Dump(const std::string& prefix) const override
@@ -147,9 +143,15 @@ public:
 private:
     void SetComposedId(const ComposeId& composedId)
     {
-        if (composedId_ != composedId) {
-            HostReleaseElementById(composedId_);
+        auto host = host_.Upgrade();
+        if (!host) {
+            return;
         }
+        if (composedId_ != composedId) {
+            // Add old id to host and remove it later
+            host->AddComposeId(composedId_);
+        }
+        host->AddComposeId(composedId);
         composedId_ = composedId;
     }
     bool forceRender_ = false;
@@ -245,6 +247,17 @@ public:
     {
         if (lazyForEachComponent_) {
             lazyForEachComponent_->ReleaseChildGroupByComposedId(composeId);
+        }
+    }
+
+    void RefreshActiveComposeIds() override
+    {
+        auto host = host_.Upgrade();
+        if (!host) {
+            return;
+        }
+        for (auto const& child : children_) {
+            child.second->RefreshActiveComposeIds();
         }
     }
 
@@ -573,6 +586,16 @@ public:
         }
     }
 
+    void RefreshActiveComposeIds() override
+    {
+        for (const auto& child : children_) {
+            if (!child) {
+                continue;
+            }
+            child->RefreshActiveComposeIds();
+        }
+    }
+
     void Dump(const std::string& prefix) const override
     {
         if (!DumpLog::GetInstance().GetDumpFile()) {
@@ -824,6 +847,35 @@ void ElementProxyHost::DumpProxy()
 size_t ElementProxyHost::GetReloadedCheckNum()
 {
     return TotalCount();
+}
+
+void ElementProxyHost::AddComposeId(const ComposeId& id)
+{
+    composeIds_.emplace(id);
+}
+
+
+void ElementProxyHost::AddActiveComposeId(ComposeId& id)
+{
+    activeComposeIds_.emplace(id);
+}
+
+void ElementProxyHost::ReleaseRedundantComposeIds()
+{
+    if (!proxy_) {
+        return;
+    }
+    activeComposeIds_.clear();
+    proxy_->RefreshActiveComposeIds();
+
+    std::set<ComposeId> idsToRemove;
+    std::set_difference(composeIds_.begin(), composeIds_.end(), activeComposeIds_.begin(), activeComposeIds_.end(),
+        std::inserter(idsToRemove, idsToRemove.begin()));
+    for (auto const& id: idsToRemove) {
+        ReleaseElementById(id);
+    }
+    composeIds_ = activeComposeIds_;
+    activeComposeIds_.clear();
 }
 
 } // namespace OHOS::Ace::V2
