@@ -75,6 +75,7 @@ public:
     void PerformLayout() override;
     // Override TextInputClient
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+    void PerformDefaultAction();
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void OnStatusChanged(RenderStatus renderStatus) override;
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
@@ -222,6 +223,8 @@ public:
     {
         imeAttached_ = imeAttached;
     }
+
+    void UpdateConfiguration();
 #endif
 
 protected:

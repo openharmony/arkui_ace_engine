@@ -34,6 +34,10 @@
 #include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
+#if defined(ENABLE_STANDARD_INPUT)
+#include "core/components/text_field/on_text_changed_listener_impl.h"
+#endif
+
 namespace OHOS::Ace {
 namespace {
 
@@ -603,6 +607,17 @@ void RosenRenderTextField::ComputeOffsetAfterLayout()
             caretRect_ += ComputeVerticalOffsetForCenter(innerRect_.Height(), paragraph_->GetHeight());
         }
     }
+
+#if defined(ENABLE_STANDARD_INPUT)
+    auto globalOffset = GetGlobalOffset();
+    MiscServices::CursorInfo cursorInfo {
+        .left = caretRect_.Left() + globalOffset.GetX(),
+        .top = caretRect_.Top() + globalOffset.GetY(),
+        .width = caretRect_.Width(),
+        .height = caretRect_.Height()
+    };
+    MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
+#endif
 }
 
 Offset RosenRenderTextField::ComputeVerticalOffsetForCenter(double outerHeight, double innerHeight) const

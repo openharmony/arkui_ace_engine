@@ -90,6 +90,19 @@ template("build_component") {
         sources += invoker.rosen_sources
         configs += [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
       }
+
+      if (defined(config.enable_standard_input) && config.enable_standard_input) {
+        if (defined(invoker.standard_input_sources)) {
+          sources += invoker.standard_input_sources
+        }
+        if (defined(invoker.standard_input_deps)) {
+          if (defined(external_deps)) {
+            external_deps += invoker.standard_input_deps
+          } else {
+            external_deps = invoker.standard_input_deps
+          }
+        }
+      }
     }
   }
 

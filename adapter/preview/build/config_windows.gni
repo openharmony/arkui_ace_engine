@@ -38,6 +38,7 @@ xcomponent_components_support = false
 js_pa_support = false
 connect_server_support = false
 enable_rosen_backend = false
+enable_standard_input = false
 
 cflags_cc = [
   "-std=c++17",
