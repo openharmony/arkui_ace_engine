@@ -371,8 +371,10 @@ RefPtr<Element> Element::InflateComponent(const RefPtr<Component>& newComponent,
     }
 
     RefPtr<Element> newChild = newComponent->CreateElement();
-    newChild->SetNewComponent(newComponent);
-    newChild->Mount(AceType::Claim(this), slot, renderSlot);
+    if (newChild) {
+        newChild->SetNewComponent(newComponent);
+        newChild->Mount(AceType::Claim(this), slot, renderSlot);
+    }
     return newChild;
 }
 

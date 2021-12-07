@@ -95,8 +95,6 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return AceType::MakeRefPtr<V2::TabsComposedElement>(id); } },
     { TEXT_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::TextComposedElement>(id); } },
-    { COLUMN_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::ColumnComposedElement>(id); } },
     { FLEX_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::FlexComposedElement>(id); } },
     { WRAP_COMPONENT_TAG,
@@ -141,7 +139,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) {return AceType::MakeRefPtr<V2::ToggleComposedElement>(id); } },
     { SCROLL_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::ScrollComposedElement>(id); } },
-    { CALENDAR_COMPONENT_NAME,
+    { CALENDAR_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::CalendarComposedElement>(id); } },
     { BADGE_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::BadgeComposedElement>(id); } },
@@ -215,7 +213,6 @@ const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_T
     { TOGGLE_COMPONENT_TAG, TOGGLE_ETS_TAG },
     { SCROLL_COMPONENT_TAG, SCROLL_ETS_TAG },
     { CALENDAR_COMPONENT_TAG, CALENDAR_ETS_TAG },
-    { CALENDAR_COMPONENT_NAME, CALENDAR_ETS_TAG },
     { BADGE_COMPONENT_TAG, BADGE_ETS_TAG },
     { SEARCH_COMPONENT_TAG, SEARCH_ETS_TAG },
     { FORM_COMPONENT_TAG, FORM_ETS_TAG },
@@ -271,8 +268,8 @@ RefPtr<AccessibilityManager> InspectorComposedComponent::GetAccessibilityManager
 
 bool InspectorComposedComponent::HasInspectorFinished(std::string tag)
 {
-    auto generateFunc = COMPONENT_TAG_TO_ETS_TAG_MAP.find(tag);
-    if (generateFunc != COMPONENT_TAG_TO_ETS_TAG_MAP.end()) {
+    auto generateFunc = CREATE_ELEMENT_MAP.find(tag);
+    if (generateFunc != CREATE_ELEMENT_MAP.end()) {
         return true;
     }
     return false;

@@ -180,7 +180,6 @@ const char SCROLL_ETS_TAG[] = "Scroll";
 // calendar
 ACE_EXPORT extern const char CALENDAR_COMPONENT_TAG[] = "CalendarComponentV2";
 ACE_EXPORT extern const char CALENDAR_ETS_TAG[] = "Calendar";
-ACE_EXPORT extern const char CALENDAR_COMPONENT_NAME[] = "calendar";
 
 // badge
 const char BADGE_COMPONENT_TAG[] = "BadgeComponent";
