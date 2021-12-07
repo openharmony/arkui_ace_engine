@@ -64,9 +64,6 @@ public:
         return component_;
     }
 
-    void OnTouchTestHit(
-        const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
-
 private:
     void CreateDeleteButton();
 

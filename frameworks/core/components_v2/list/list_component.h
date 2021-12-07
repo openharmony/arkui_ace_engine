@@ -43,6 +43,12 @@ enum class ScrollState {
     FLING,
 };
 
+using OnItemDragStartFunc = std::function<RefPtr<Component>(const ItemDragInfo&, int32_t)>;
+using OnItemDragEnterFunc = std::function<void(const ItemDragInfo&)>;
+using OnItemDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t)>;
+using OnItemDragLeaveFunc = std::function<void(const ItemDragInfo&, int32_t)>;
+using OnItemDropFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>;
+
 class ACE_EXPORT ListComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(V2::ListComponent, ComponentGroup)
 
@@ -83,8 +89,64 @@ public:
 
     uint32_t Compare(const RefPtr<Component>& component) const override;
 
+    OnItemDragStartFunc GetOnItemDragStartId() const
+    {
+        return onItemDragStartId_;
+    }
+
+    void SetOnItemDragStartId(const OnItemDragStartFunc& onItemDragStartId)
+    {
+        onItemDragStartId_ = onItemDragStartId;
+    }
+
+    OnItemDragEnterFunc GetOnItemDragEnterId() const
+    {
+        return onItemDragEnterId_;
+    }
+
+    void SetOnItemDragEnterId(const OnItemDragEnterFunc& onItemDragEnterId)
+    {
+        onItemDragEnterId_ = onItemDragEnterId;
+    }
+
+    OnItemDragMoveFunc GetOnItemDragMoveId() const
+    {
+        return onItemDragMoveId_;
+    }
+
+    void SetOnItemDragMoveId(const OnItemDragMoveFunc& onItemDragMoveId)
+    {
+        onItemDragMoveId_ = onItemDragMoveId;
+    }
+
+    OnItemDragLeaveFunc GetOnItemDragLeaveId() const
+    {
+        return onItemDragLeaveId_;
+    }
+
+    void SetOnItemDragLeaveId(const OnItemDragLeaveFunc& onItemDragLeaveId)
+    {
+        onItemDragLeaveId_ = onItemDragLeaveId;
+    }
+
+    OnItemDropFunc GetOnItemDropId() const
+    {
+        return onItemDropId_;
+    }
+
+    void SetOnItemDropId(const OnItemDropFunc& onItemDropId)
+    {
+        onItemDropId_ = onItemDropId;
+    }
+
 private:
     std::unique_ptr<ItemDivider> itemDivider_;
+
+    OnItemDragStartFunc onItemDragStartId_;
+    OnItemDragEnterFunc onItemDragEnterId_;
+    OnItemDragMoveFunc onItemDragMoveId_;
+    OnItemDragLeaveFunc onItemDragLeaveId_;
+    OnItemDropFunc onItemDropId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListComponent);
 };

@@ -34,10 +34,16 @@ public:
     };
     void Execute();
     void Execute(const RefPtr<DragEvent>& info);
+    JSRef<JSVal> ItemDragStartExecute(const ItemDragInfo& info, int32_t itemIndex);
+    void ItemDragEnterExecute(const ItemDragInfo& info);
+    void ItemDragMoveExecute(const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex);
+    void ItemDragLeaveExecute(const ItemDragInfo& info, int32_t itemIndex);
+    void ItemDropExecute(const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess);
 
 private:
     JSRef<JSObject> CreateDragEvent(const RefPtr<DragEvent>& info);
     JSRef<JSObject> CreatePasteData(const RefPtr<PasteData>& info);
+    JSRef<JSObject> CreateItemDragInfo(const ItemDragInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_V8_FUNCTION_V8_JS_DRAG_FUNCTION_H

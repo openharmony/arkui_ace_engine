@@ -166,6 +166,16 @@ public:
         hasPositionStyle_ = hasPositionStyle;
     }
 
+    const UpdatePositionFunc& GetUpdatePositionFuncId() const
+    {
+        return updatePositionFunc_;
+    }
+
+    void SetUpdatePositionFuncId(const UpdatePositionFunc& updatePositionFunc)
+    {
+        updatePositionFunc_ = updatePositionFunc;
+    }
+
 private:
     Dimension bottom_;
     Dimension left_;
@@ -181,6 +191,8 @@ private:
     bool hasPositionStyle_ = false;
 
     bool isAutoFocus_ = false;
+
+    UpdatePositionFunc updatePositionFunc_;
 };
 
 } // namespace OHOS::Ace

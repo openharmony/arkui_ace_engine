@@ -293,6 +293,36 @@ struct FingerInfo {
     Offset localLocation_;
 };
 
+class ItemDragInfo : public BaseEventInfo {
+public:
+    ItemDragInfo() : BaseEventInfo("itemDrag") {}
+    ~ItemDragInfo() = default;
+
+    double GetX() const
+    {
+        return x_;
+    }
+
+    double GetY() const
+    {
+        return y_;
+    }
+
+    void SetX(double x)
+    {
+        x_ = x;
+    }
+
+    void SetY(double y)
+    {
+        y_ = y;
+    }
+
+private:
+    double x_ = 0.0;
+    double y_ = 0.0;
+};
+
 class GestureEvent : public BaseEventInfo {
 public:
     GestureEvent() : BaseEventInfo("gesture") {}

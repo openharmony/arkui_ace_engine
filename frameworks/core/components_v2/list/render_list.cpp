@@ -20,7 +20,12 @@
 #include "core/components/scroll/render_scroll.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/scroll/scroll_spring_effect.h"
+#include "core/components/stack/stack_element.h"
 #include "core/components_v2/list/list_component.h"
+#include "core/gestures/long_press_recognizer.h"
+#include "core/gestures/pan_recognizer.h"
+#include "core/gestures/sequenced_recognizer.h"
+
 
 namespace OHOS::Ace::V2 {
 namespace {
@@ -33,6 +38,9 @@ constexpr int32_t SCROLL_STATE_SCROLL = 1;
 constexpr int32_t SCROLL_STATE_FLING = 2;
 constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 constexpr int32_t SCROLL_FROM_JUMP = 3;
+constexpr int32_t DEFAULT_FINGERS = 1;
+constexpr int32_t DEFAULT_DURATION = 200;
+constexpr int32_t DEFAULT_DISTANCE = 0;
 
 } // namespace
 
@@ -163,6 +171,16 @@ void RenderList::Update(const RefPtr<Component>& component)
 
     scrollBarProxy_ = component_->GetScrollBarProxy();
     InitScrollBarProxy();
+
+    onItemDragStart_ = component_->GetOnItemDragStartId();
+    onItemDragEnter_ = component_->GetOnItemDragEnterId();
+    onItemDragMove_ = component_->GetOnItemDragMoveId();
+    onItemDragLeave_ = component_->GetOnItemDragLeaveId();
+    onItemDrop_ = component_->GetOnItemDropId();
+
+    if (onItemDragStart_) {
+        CreateDragDropRecognizer();
+    }
 
     MarkNeedLayout();
 }
@@ -469,8 +487,8 @@ void RenderList::OnTouchTestHit(
         return;
     }
 
-    if (PrepareRawRecognizer()) {
-        result.emplace_back(rawRecognizer_);
+    if (component_->GetEditMode() && dragDropGesture_) {
+        result.emplace_back(dragDropGesture_);
     }
 
     // Disable scroll while expand all items
@@ -1237,6 +1255,222 @@ void RenderList::OnSelectedItemStopMoving(bool canceled)
     selectedItemIndex_ = INITIAL_CHILD_INDEX;
     selectedItem_ = nullptr;
     MarkNeedLayout();
+}
+
+void RenderList::CreateDragDropRecognizer()
+{
+    if (dragDropGesture_) {
+        return;
+    }
+
+    auto longPressRecognizer =
+        AceType::MakeRefPtr<OHOS::Ace::LongPressRecognizer>(context_, DEFAULT_DURATION, DEFAULT_FINGERS, false);
+    PanDirection panDirection;
+    auto panRecognizer =
+        AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context_, DEFAULT_FINGERS, panDirection, DEFAULT_DISTANCE);
+    panRecognizer->SetOnActionStart([weakRenderList = AceType::WeakClaim(this), context = context_,
+        onItemDragStart = onItemDragStart_](const GestureEvent& info) {
+        if (onItemDragStart) {
+            auto pipelineContext = context.Upgrade();
+            if (!pipelineContext) {
+                LOGE("Context is null.");
+                return;
+            }
+
+            auto renderList = weakRenderList.Upgrade();
+            if (!renderList) {
+                LOGE("RenderList is null.");
+                return;
+            }
+
+            ItemDragInfo dragInfo;
+            dragInfo.SetX(info.GetGlobalPoint().GetX());
+            dragInfo.SetY(info.GetGlobalPoint().GetY());
+
+            Point point = info.GetGlobalPoint() - renderList->GetGlobalOffset();
+            auto listItem = renderList->FindCurrentListItem(point);
+            if (!listItem) {
+                LOGW("There is no listitem at the point.");
+                return;
+            }
+
+            renderList->selectedDragItem_ = listItem;
+            renderList->selectedItemIndex_ = renderList->GetIndexByListItem(listItem);
+            renderList->selectedDragItem_->SetHidden(true);
+            renderList->MarkNeedLayout();
+
+            auto customComponent = onItemDragStart(dragInfo, int32_t(renderList->selectedItemIndex_));
+            if (!customComponent) {
+                LOGE("Custom component is null.");
+                return;
+            }
+            auto stackElement = pipelineContext->GetLastStack();
+            auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(customComponent);
+            positionedComponent->SetTop(Dimension(listItem->GetGlobalOffset().GetY()));
+            positionedComponent->SetLeft(Dimension(listItem->GetGlobalOffset().GetX()));
+            renderList->SetBetweenItemAndBuilder(Offset(info.GetGlobalPoint().GetX()-listItem->GetGlobalOffset().GetX(),
+                info.GetGlobalPoint().GetY()-listItem->GetGlobalOffset().GetY()));
+
+            auto updatePosition = [weak = weakRenderList](const std::function<void(const Dimension&,
+                const Dimension&)>& func) {
+                auto renderList = weak.Upgrade();
+                if (!renderList) {
+                    return;
+                }
+                renderList->SetUpdateBuilderFuncId(func);
+            };
+
+            positionedComponent->SetUpdatePositionFuncId(updatePosition);
+            stackElement->PushComponent(positionedComponent);
+        }
+    });
+    panRecognizer->SetOnActionUpdate([weakRenderList = AceType::WeakClaim(this), context = context_]
+        (const GestureEvent& info) {
+            auto pipelineContext = context.Upgrade();
+            if (!pipelineContext) {
+                LOGE("Context is null.");
+                return;
+            }
+
+            auto renderList = weakRenderList.Upgrade();
+            if (!renderList) {
+                LOGE("RenderList is null.");
+                return;
+            }
+
+            ItemDragInfo dragInfo;
+            dragInfo.SetX(info.GetGlobalPoint().GetX());
+            dragInfo.SetY(info.GetGlobalPoint().GetY());
+
+            Point point = info.GetGlobalPoint() - renderList->GetBetweenItemAndBuilder();
+            if (renderList->GetUpdateBuilderFuncId()) {
+                renderList->GetUpdateBuilderFuncId()(Dimension(point.GetX()), Dimension(point.GetY()));
+            }
+
+            auto targetRenderlist = renderList->FindTargetRenderList(pipelineContext, info);
+            auto preTargetRenderlist = renderList->GetPreTargetRenderList();
+
+            if (preTargetRenderlist == targetRenderlist) {
+                if (targetRenderlist && targetRenderlist->GetOnItemDragMove()) {
+                    Point point = info.GetGlobalPoint() - targetRenderlist->GetGlobalOffset();
+                    auto newListItem = targetRenderlist->FindCurrentListItem(point);
+                    if (int32_t(targetRenderlist->GetIndexByListItem(newListItem)) > -1) {
+                        renderList->insertItemIndex_ = int32_t(targetRenderlist->GetIndexByListItem(newListItem));
+                    }
+                    (targetRenderlist->GetOnItemDragMove())(dragInfo,
+                        int32_t(renderList->selectedItemIndex_), renderList->insertItemIndex_);
+                }
+                return;
+            }
+            if (preTargetRenderlist) {
+                if (preTargetRenderlist->GetOnItemDragLeave()) {
+                    (preTargetRenderlist->GetOnItemDragLeave())(dragInfo, int32_t(renderList->selectedItemIndex_));
+                }
+            }
+            if (targetRenderlist) {
+                if (targetRenderlist->GetOnItemDragEnter()) {
+                    (targetRenderlist->GetOnItemDragEnter())(dragInfo);
+                }
+            }
+            renderList->SetPreTargetRenderList(targetRenderlist);
+        });
+    panRecognizer->SetOnActionEnd([weakRenderList = AceType::WeakClaim(this), context = context_]
+        (const GestureEvent& info) {
+            auto pipelineContext = context.Upgrade();
+            if (!pipelineContext) {
+                LOGE("Context is null.");
+                return;
+            }
+
+            auto renderList = weakRenderList.Upgrade();
+            if (!renderList) {
+                LOGE("RenderList is null.");
+                return;
+            }
+
+            ItemDragInfo dragInfo;
+            dragInfo.SetX(info.GetGlobalPoint().GetX());
+            dragInfo.SetY(info.GetGlobalPoint().GetY());
+
+            auto stackElement = pipelineContext->GetLastStack();
+            stackElement->PopComponent();
+
+            ACE_DCHECK(renderList->GetPreTargetRenderList() == renderList->FindTargetRenderList(pipelineContext, info));
+            auto targetRenderlist = renderList->GetPreTargetRenderList();
+
+            if (!targetRenderlist) {
+                renderList->SetPreTargetRenderList(nullptr);
+                renderList->selectedDragItem_->SetHidden(false);
+                renderList->MarkNeedLayout();
+                return;
+            }
+
+            renderList->selectedDragItem_->SetHidden(false);
+            if (targetRenderlist->GetOnItemDrop()) {
+                Point point = info.GetGlobalPoint() - targetRenderlist->GetGlobalOffset();
+                auto newListItem = targetRenderlist->FindCurrentListItem(point);
+                if (int32_t(targetRenderlist->GetIndexByListItem(newListItem)) > -1) {
+                    renderList->insertItemIndex_ = int32_t(targetRenderlist->GetIndexByListItem(newListItem));
+                }
+                (targetRenderlist->GetOnItemDrop())(dragInfo,
+                    int32_t(renderList->selectedItemIndex_), renderList->insertItemIndex_, true);
+            }
+            renderList->SetPreTargetRenderList(nullptr);
+        });
+    panRecognizer->SetOnActionCancel([weakRenderList = AceType::WeakClaim(this), context = context_]() {
+        auto pipelineContext = context.Upgrade();
+        if (!pipelineContext) {
+            LOGE("Context is null.");
+            return;
+        }
+
+        auto renderList = weakRenderList.Upgrade();
+        if (!renderList) {
+            LOGE("RenderList is null.");
+            return;
+        }
+
+        auto stackElement = pipelineContext->GetLastStack();
+        stackElement->PopComponent();
+
+        renderList->SetPreTargetRenderList(nullptr);
+        renderList->selectedDragItem_->SetHidden(false);
+        renderList->MarkNeedLayout();
+    });
+    std::vector<RefPtr<GestureRecognizer>> recognizers {longPressRecognizer, panRecognizer};
+    dragDropGesture_ = AceType::MakeRefPtr<OHOS::Ace::SequencedRecognizer>(GetContext(), recognizers);
+}
+
+RefPtr<RenderListItem> RenderList::FindCurrentListItem(const Point& point)
+{
+    const auto& children = GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        for (auto& rect : child->GetTouchRectList()) {
+            if (rect.IsInRegion(point)) {
+                return AceType::DynamicCast<RenderListItem>(child);
+            }
+        }
+    }
+    return nullptr;
+}
+
+RefPtr<RenderList> RenderList::FindTargetRenderList(const RefPtr<PipelineContext> context, const GestureEvent& info)
+{
+    if (!context) {
+        return nullptr;
+    }
+
+    auto pageRenderNode = context->GetLastPageRender();
+    if (!pageRenderNode) {
+        return nullptr;
+    }
+
+    auto targetRenderNode = pageRenderNode->FindDropChild(info.GetGlobalPoint(), info.GetGlobalPoint());
+    if (!targetRenderNode) {
+        return nullptr;
+    }
+    return AceType::DynamicCast<RenderList>(targetRenderNode);
 }
 
 } // namespace OHOS::Ace::V2

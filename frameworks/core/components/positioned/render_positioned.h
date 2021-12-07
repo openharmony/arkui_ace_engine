@@ -21,6 +21,8 @@
 
 namespace OHOS::Ace {
 
+using UpdatePositionFunc = std::function<void(const std::function<void(const Dimension&, const Dimension&)>&)>;
+
 class ACE_EXPORT RenderPositioned : public RenderProxy {
     DECLARE_ACE_TYPE(RenderPositioned, RenderProxy);
 
@@ -99,6 +101,8 @@ protected:
     bool hasTop_ = false;
     bool hasRight_ = false;
     bool hasBottom_ = false;
+
+    UpdatePositionFunc updatePositionFunc_;
 };
 
 } // namespace OHOS::Ace

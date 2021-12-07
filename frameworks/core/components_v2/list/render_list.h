@@ -25,11 +25,14 @@
 #include "core/components/scroll/scroll_edge_effect.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_v2/list/list_component.h"
+#include "core/components/positioned/positioned_component.h"
 #include "core/components_v2/list/render_list_item.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace::V2 {
+
+using UpdateBuilderFunc = std::function<void(const Dimension&, const Dimension&)>;
 
 class ListItemGenerator : virtual public Referenced {
 public:
@@ -150,6 +153,56 @@ public:
         return listSpace_;
     }
 
+    const UpdateBuilderFunc& GetUpdateBuilderFuncId() const
+    {
+        return updateBuilder_;
+    }
+
+    void SetUpdateBuilderFuncId(const UpdateBuilderFunc& updateBuilder)
+    {
+        updateBuilder_ = updateBuilder;
+    }
+
+    const OnItemDragEnterFunc& GetOnItemDragEnter() const
+    {
+        return onItemDragEnter_;
+    }
+
+    const OnItemDragMoveFunc& GetOnItemDragMove() const
+    {
+        return onItemDragMove_;
+    }
+
+    const OnItemDragLeaveFunc& GetOnItemDragLeave() const
+    {
+        return onItemDragLeave_;
+    }
+
+    const OnItemDropFunc& GetOnItemDrop() const
+    {
+        return onItemDrop_;
+    }
+
+    void SetPreTargetRenderList(const RefPtr<RenderList>& preTargetRenderList)
+    {
+        preTargetRenderList_ = preTargetRenderList;
+    }
+
+    const RefPtr<RenderList> GetPreTargetRenderList() const
+    {
+        return preTargetRenderList_;
+    }
+
+    void SetBetweenItemAndBuilder(const Offset& betweenItemAndBuilder)
+    {
+        betweenItemAndBuilder_ = betweenItemAndBuilder;
+    }
+
+    const Offset& GetBetweenItemAndBuilder() const
+    {
+        return betweenItemAndBuilder_;
+    }
+
 protected:
     void UpdateAccessibilityAttr();
     bool HandleActionScroll(bool forward);
@@ -267,12 +320,30 @@ protected:
     double dipScale_ = 1.0;
     double offset_ = 0.0;
 
+    size_t insertItemIndex_ = INITIAL_CHILD_INDEX;
+    Offset betweenItemAndBuilder_;
+    RefPtr<RenderListItem> selectedDragItem_;
+
 private:
     bool ActionByScroll(bool forward, ScrollEventBack scrollEventBack);
     void ModifyActionScroll();
     void InitScrollBarProxy();
     Dimension listSpace_;
     double realMainSize_ = 0.0; // Real size of main axis.
+
+    void CreateDragDropRecognizer();
+    RefPtr<RenderListItem> FindCurrentListItem(const Point& point);
+    RefPtr<RenderList> FindTargetRenderList(const RefPtr<PipelineContext> context, const GestureEvent& info);
+
+    RefPtr<GestureRecognizer> dragDropGesture_;
+    RefPtr<RenderList> preTargetRenderList_;
+    OnItemDragStartFunc onItemDragStart_;
+    OnItemDragEnterFunc onItemDragEnter_;
+    OnItemDragMoveFunc onItemDragMove_;
+    OnItemDragLeaveFunc onItemDragLeave_;
+    OnItemDropFunc onItemDrop_;
+
+    UpdateBuilderFunc updateBuilder_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderList);
 };

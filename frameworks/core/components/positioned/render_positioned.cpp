@@ -35,6 +35,21 @@ void RenderPositioned::Update(const RefPtr<Component>& component)
     hasRight_ = positioned->HasRight();
     hasTop_ = positioned->HasTop();
     hasBottom_ = positioned->HasBottom();
+    updatePositionFunc_ = positioned->GetUpdatePositionFuncId();
+
+    auto updatePosition = [weak = AceType::WeakClaim(this)](const Dimension& x, const Dimension& y) {
+        auto renderPosition = weak.Upgrade();
+        if (!renderPosition) {
+            return;
+        }
+        renderPosition->SetTop(y);
+        renderPosition->SetLeft(x);
+    };
+
+    if (updatePositionFunc_) {
+        updatePositionFunc_(updatePosition);
+    }
+
     MarkNeedLayout();
 }
 

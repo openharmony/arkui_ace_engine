@@ -35,6 +35,7 @@
 #include "core/components/root/render_root.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/transform/render_transform.h"
+#include "core/components_v2/list/render_list.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/component.h"
 
@@ -686,44 +687,37 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
 
 RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Point& parentLocalPoint)
 {
-    if (disableTouchEvent_ || disabled_) {
-        return nullptr;
-    }
     Point transformPoint = GetTransformPoint(parentLocalPoint);
     if (!InTouchRectList(transformPoint, GetTouchRectList())) {
         return nullptr;
     }
 
     const auto localPoint = transformPoint - GetPaintRect().GetOffset();
-    const auto& sortedChildern = SortChildrenByZIndex(GetChildren());
-    if (IsChildrenTouchEnable()) {
-        for (auto iter = sortedChildern.rbegin(); iter != sortedChildern.rend(); ++iter) {
-            auto& child = *iter;
-            if (!child->GetVisible() || child->disabled_ || child->disableTouchEvent_) {
-                continue;
-            }
-            if (child->InterceptTouchEvent() || IsExclusiveEventForChild()) {
-                for (auto& rect : child->GetTouchRectList()) {
-                    if (rect.IsInRegion(localPoint)) {
-                        break;
-                    }
-                }
-                continue;
-            }
+    const auto& children = GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        if (!child->GetVisible()) {
+            continue;
+        }
+        if (child->InterceptTouchEvent()) {
+            continue;
+        }
 
-            auto target = child->FindDropChild(globalPoint, localPoint);
-            if (target) {
-                return target;
-            }
+        auto target = child->FindDropChild(globalPoint, localPoint);
+        if (target) {
+            return target;
         }
     }
 
     for (auto& rect : GetTouchRectList()) {
         if (touchable_ && rect.IsInRegion(transformPoint)) {
-            // Calculates the coordinate offset in this node.
             RefPtr<RenderNode> renderNode = AceType::Claim<RenderNode>(this);
             auto renderBox = AceType::DynamicCast<RenderBox>(renderNode);
             if (renderBox && renderBox->GetOnDrop()) {
+                return renderNode;
+            }
+            auto renderList = AceType::DynamicCast<V2::RenderList>(renderNode);
+            if (renderList && renderList->GetOnItemDrop()) {
                 return renderNode;
             }
         }

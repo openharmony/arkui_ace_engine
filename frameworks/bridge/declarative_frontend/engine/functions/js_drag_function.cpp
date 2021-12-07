@@ -180,6 +180,48 @@ void JsDragFunction::Execute(const RefPtr<DragEvent>& info)
     JsFunction::ExecuteJS(1, &param);
 }
 
+JSRef<JSVal> JsDragFunction::ItemDragStartExecute(const ItemDragInfo& info, int32_t itemIndex)
+{
+    JSRef<JSVal> itemDragInfo = JSRef<JSObject>::Cast(CreateItemDragInfo(info));
+    JSRef<JSVal> itemIndexParam = JSRef<JSVal>::Make(ToJSValue(itemIndex));
+    JSRef<JSVal> params[] = {itemDragInfo, itemIndexParam};
+    return JsFunction::ExecuteJS(2, params);
+}
+
+void JsDragFunction::ItemDragEnterExecute(const ItemDragInfo& info)
+{
+    JSRef<JSObject> itemDragInfo = JSRef<JSObject>::Cast(CreateItemDragInfo(info));
+    JSRef<JSVal> param = itemDragInfo;
+    JsFunction::ExecuteJS(1, &param);
+}
+
+void JsDragFunction::ItemDragMoveExecute(const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex)
+{
+    JSRef<JSVal> itemDragInfo = JSRef<JSObject>::Cast(CreateItemDragInfo(info));
+    JSRef<JSVal> itemIndexParam = JSRef<JSVal>::Make(ToJSValue(itemIndex));
+    JSRef<JSVal> insertIndexParam = JSRef<JSVal>::Make(ToJSValue(insertIndex));
+    JSRef<JSVal> params[] = {itemDragInfo, itemIndexParam, insertIndexParam};
+    JsFunction::ExecuteJS(3, params);
+}
+
+void JsDragFunction::ItemDragLeaveExecute(const ItemDragInfo& info, int32_t itemIndex)
+{
+    JSRef<JSVal> itemDragInfo = JSRef<JSObject>::Cast(CreateItemDragInfo(info));
+    JSRef<JSVal> itemIndexParam = JSRef<JSVal>::Make(ToJSValue(itemIndex));
+    JSRef<JSVal> params[] = {itemDragInfo, itemIndexParam};
+    JsFunction::ExecuteJS(2, params);
+}
+
+void JsDragFunction::ItemDropExecute(const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess)
+{
+    JSRef<JSVal> itemDragInfo = JSRef<JSObject>::Cast(CreateItemDragInfo(info));
+    JSRef<JSVal> itemIndexParam = JSRef<JSVal>::Make(ToJSValue(itemIndex));
+    JSRef<JSVal> insertIndexParam = JSRef<JSVal>::Make(ToJSValue(insertIndex));
+    JSRef<JSVal> isSuccessParam = JSRef<JSVal>::Make(ToJSValue(isSuccess));
+    JSRef<JSVal> params[] = {itemDragInfo, itemIndexParam, insertIndexParam, isSuccessParam};
+    JsFunction::ExecuteJS(4, params);
+}
+
 JSRef<JSObject> JsDragFunction::CreateDragEvent(const RefPtr<DragEvent>& info)
 {
     JSRef<JSObject> dragObj = JSClass<JsDragEvent>::NewInstance();
@@ -197,5 +239,13 @@ JSRef<JSObject> JsDragFunction::CreatePasteData(const RefPtr<PasteData>& info)
     auto pasteData = Referenced::Claim(pasteObj->Unwrap<JsPasteData>());
     pasteData->SetPasteData(info);
     return pasteObj;
+}
+
+JSRef<JSObject> JsDragFunction::CreateItemDragInfo(const ItemDragInfo& info)
+{
+    JSRef<JSObject> itemDragInfoObj = JSRef<JSObject>::New();
+    itemDragInfoObj->SetProperty<double>("x", SystemProperties::Px2Vp(info.GetX()));
+    itemDragInfoObj->SetProperty<double>("y", SystemProperties::Px2Vp(info.GetY()));
+    return itemDragInfoObj;
 }
 } // namespace OHOS::Ace::Framework

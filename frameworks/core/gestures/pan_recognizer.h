@@ -145,6 +145,8 @@ private:
     int32_t newFingers_ = 1;
     double newDistance_ = 0.0;
     PanDirection newDirection_;
+
+    TouchPoint touchUpPoint_;
 };
 
 } // namespace OHOS::Ace
