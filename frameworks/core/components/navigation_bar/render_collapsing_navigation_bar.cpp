@@ -139,15 +139,16 @@ void RenderCollapsingNavigationBar::OnRelatedPreScroll(const Offset& delta, Offs
     if (!NeedHidden(dy)) {
         return;
     }
-    if (barIsMini_) {
-        barIsMini_ = false;
+
+    ScrollBy(dy, positionY_.bigger);
+    consumed.SetY(dy);
+    if (!barIsMini_ && NearEqual(positionY_.value, positionY_.collapse)) {
+        barIsMini_ = true;
+
         if (changeEvent_) {
             changeEvent_(std::make_shared<NavigationTitleModeChangeEvent>(barIsMini_));
         }
     }
-
-    ScrollBy(dy, positionY_.bigger);
-    consumed.SetY(dy);
 }
 
 void RenderCollapsingNavigationBar::OnRelatedScroll(const Offset& delta, Offset& consumed)
@@ -162,6 +163,12 @@ void RenderCollapsingNavigationBar::OnRelatedScroll(const Offset& delta, Offset&
         }
         return;
     }
+    if (barIsMini_) {
+        barIsMini_ = false;
+        if (changeEvent_) {
+            changeEvent_(std::make_shared<NavigationTitleModeChangeEvent>(barIsMini_));
+        }
+    }
 
     if (!relateEvent_ && LessNotEqual(dy, 0.0)) {
         dy = dy / SPRING_RESTORE_DELTA_OFFSET_RATIO;
@@ -171,12 +178,6 @@ void RenderCollapsingNavigationBar::OnRelatedScroll(const Offset& delta, Offset&
     ScrollBy(dy, positionY_.bigger);
     if (LessOrEqual(positionY_.value, positionY_.expand) && relateEvent_) {
         consumed.SetY(dy);
-    }
-    if (!barIsMini_ && NearEqual(positionY_.value, positionY_.collapse)) {
-        barIsMini_ = true;
-        if (changeEvent_) {
-            changeEvent_(std::make_shared<NavigationTitleModeChangeEvent>(barIsMini_));
-        }
     }
 }
 

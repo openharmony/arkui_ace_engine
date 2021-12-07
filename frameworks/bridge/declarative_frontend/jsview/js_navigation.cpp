@@ -25,7 +25,8 @@ namespace {
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
-    return JSRef<JSVal>::Make(ToJSValue(eventInfo.IsMiniBar() ? NavigationTitleMode::MINI : NavigationTitleMode::FULL));
+    return JSRef<JSVal>::Make(ToJSValue(eventInfo.IsMiniBar() ? static_cast<int32_t>(NavigationTitleMode::MINI)
+                                                              : static_cast<int32_t>(NavigationTitleMode::FULL)));
 }
 
 void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarItem>>& items)
@@ -244,9 +245,9 @@ void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
         auto changeHandler = AceType::MakeRefPtr<JsEventFunction<NavigationTitleModeChangeEvent, 1>>(
             JSRef<JSFunc>::Cast(info[0]), TitleModeChangeEventToJSValue);
         auto eventMarker = EventMarker([executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
-                                           const BaseEventInfo* info) {
+                                           const BaseEventInfo* baseInfo) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-            auto eventInfo = TypeInfoHelper::DynamicCast<NavigationTitleModeChangeEvent>(info);
+            auto eventInfo = TypeInfoHelper::DynamicCast<NavigationTitleModeChangeEvent>(baseInfo);
             if (!eventInfo) {
                 LOGE("HandleChangeEvent eventInfo == nullptr");
                 return;
