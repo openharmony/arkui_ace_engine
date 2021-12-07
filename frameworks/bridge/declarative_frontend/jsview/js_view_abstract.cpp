@@ -454,6 +454,11 @@ void ParseCustomPopupParam(
         popupParam->SetEnableArrow(enableArrowValue->ToBoolean());
     }
 
+    auto autoCancelValue = popupObj->GetProperty("autoCancel");
+    if (autoCancelValue->IsBoolean()) {
+        popupParam->SetHasAction(!autoCancelValue->ToBoolean());
+    }
+
     JSRef<JSVal> onStateChangeVal = popupObj->GetProperty("onStateChange");
     if (onStateChangeVal->IsFunction()) {
         std::vector<std::string> keys = { "isVisible" };
