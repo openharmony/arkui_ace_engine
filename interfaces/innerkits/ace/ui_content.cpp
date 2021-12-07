@@ -15,13 +15,39 @@
 
 #include "interfaces/innerkits/ace/ui_content.h"
 
-#include "adapter/ohos/entrance/ui_content_impl.h"
+#include <dlfcn.h>
 
 namespace OHOS::Ace {
 
+using CreateFunc = UIContent* (*)(void*);
+constexpr char UI_CONTENT_CREATE_FUNC[] = "OHOS_ACE_CreateUIContent";
+
+UIContent* CreateUIContent(void* context)
+{
+    void* handle = dlopen("libace.z.so", RTLD_LAZY);
+    if (handle == nullptr) {
+        return nullptr;
+    }
+
+    auto entry = reinterpret_cast<CreateFunc>(dlsym(handle, UI_CONTENT_CREATE_FUNC));
+    if (entry == nullptr) {
+        dlclose(handle);
+        return nullptr;
+    }
+
+    auto content = entry(context);
+    if (content == nullptr) {
+        dlclose(handle);
+    }
+
+    return content;
+}
+
 std::unique_ptr<UIContent> UIContent::Create(OHOS::AbilityRuntime::Context* context)
 {
-    return std::make_unique<UIContentImpl>(context);
+    std::unique_ptr<UIContent> content;
+    content.reset(CreateUIContent(reinterpret_cast<void*>(context)));
+    return content;
 }
 
 } // namespace OHOS::Ace

@@ -32,7 +32,6 @@ ohos_shared_library("ace_uicontent") {
   ]
 
   deps = [
-    "$ace_root/build:libace",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/appexecfwk/standard/kits:app_context",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",

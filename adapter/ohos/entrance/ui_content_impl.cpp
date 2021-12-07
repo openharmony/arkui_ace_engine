@@ -51,13 +51,20 @@ public:
     }
 };
 
+extern "C" ACE_EXPORT void* OHOS_ACE_CreateUIContent(void* context)
+{
+    LOGI("Ace lib loaded, CreateUIContent.");
+    return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context));
+}
+
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context) : context_(context)
 {
+    LOGI("Create UIContentImpl.");
 }
 
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
 {
-    LOGI("Initialize UIContentImpl start.");
+    LOGI("Initialize UIContentImpl using rosen window start.");
 }
 
 void UIContentImpl::Initialize(OHOS::Window* window, const std::string& url, NativeValue* storage)
