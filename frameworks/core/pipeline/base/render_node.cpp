@@ -19,7 +19,6 @@
 #include <set>
 
 #ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/animation/rs_transition.h"
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/animation/native_curve_helper.h"
@@ -119,8 +118,8 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
     }
 #ifdef ENABLE_ROSEN_BACKEND
-    if (child->rsNode_) {
-        child->rsNode_->NotifyTransition(Rosen::RSTransitionEffect::FADE_OUT);
+    if (auto rsNode = child->rsNode_) {
+        child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId(), rsNode->GetId());
     }
 #endif
     LOGD("RenderNode RemoveChild %{public}zu", children_.size());
@@ -1430,12 +1429,16 @@ bool RenderNode::HasDisappearingTransition(int32_t nodeId)
     return false;
 }
 
-void RenderNode::NotifyTransition(TransitionType type, int32_t nodeId)
+void RenderNode::NotifyTransition(TransitionType type, int32_t nodeId, unsigned long long rsNodeId)
 {
+#ifdef ENABLE_ROSEN_BACKEND
+    OnRSTransition(type, rsNodeId);
+#else
     OnTransition(type, nodeId);
+#endif
     for (auto& child : children_) {
         if (child->GetNodeId() == nodeId) {
-            child->NotifyTransition(type, nodeId);
+            child->NotifyTransition(type, nodeId, rsNodeId);
         }
     }
 }
@@ -1881,8 +1884,8 @@ void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
     } else {
         child->rsNode_ = rsNode_;
     }
-    if (child->rsNode_) {
-        child->rsNode_->NotifyTransition(Rosen::RSTransitionEffect::FADE_IN);
+    if (auto rsNode = child->rsNode_) {
+        child->NotifyTransition(TransitionType::APPEARING, child->GetNodeId(), rsNode->GetId());
     }
 #endif
 }

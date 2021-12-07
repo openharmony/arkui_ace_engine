@@ -16,6 +16,7 @@
 #include "core/components/transform/rosen_render_transform.h"
 
 #include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/animation/rs_transition.h"
 
 namespace OHOS::Ace {
 
@@ -24,6 +25,10 @@ void RosenRenderTransform::UpdateTransformLayer()
     auto rsNode = GetRSNode();
     if (!rsNode) {
         return;
+    }
+
+    if (pendingTransitionAppearing_ && hasAppearTransition_) {
+        OnRSTransition(TransitionType::APPEARING, rsNode->GetId());
     }
 
     if (needUpdateTransform_) {
@@ -206,4 +211,58 @@ void RosenRenderTransform::PerformLayout()
     }
 }
 
+void RosenRenderTransform::OnRSTransition(TransitionType type, unsigned long long rsNodeId)
+{
+    std::vector<TransformOperation> transforms;
+    if (type == TransitionType::APPEARING) {
+        if (pendingTransitionAppearing_ && hasAppearTransition_) {
+            pendingTransitionAppearing_ = false;
+            transforms = transformEffectsAppearing_;
+        } else {
+            pendingTransitionAppearing_ = true;
+            return;
+        }
+    } else if (type == TransitionType::DISAPPEARING && hasDisappearTransition_) {
+        transforms = transformEffectsDisappearing_;
+    }
+    std::vector<Rosen::RSTransitionEffect> effects;
+    for (auto transform : transforms) {
+        switch (transform.type_) {
+            case TransformOperationType::SCALE: {
+                auto& scale = transform.scaleOperation_;
+                effects.push_back(Rosen::RSTransitionEffect(
+                    (type == TransitionType::DISAPPEARING) ?
+                        Rosen::RSTransitionEffectType::SCALE_OUT : Rosen::RSTransitionEffectType::SCALE_IN,
+                    Rosen::ScaleParams(scale.scaleX, scale.scaleY, scale.scaleZ, originX_.Value(), originY_.Value())));
+                break;
+            }
+            case TransformOperationType::TRANSLATE: {
+                auto& translate = transform.translateOperation_;
+                effects.push_back(Rosen::RSTransitionEffect(
+                    (type == TransitionType::DISAPPEARING) ?
+                        Rosen::RSTransitionEffectType::TRANSLATE_OUT : Rosen::RSTransitionEffectType::TRANSLATE_IN,
+                    Rosen::TranslateParams(translate.dx.Value(), translate.dy.Value(), translate.dz.Value())));
+                break;
+            }
+            case TransformOperationType::ROTATE: {
+                auto& rotate = transform.rotateOperation_;
+                effects.push_back(Rosen::RSTransitionEffect(
+                    (type == TransitionType::DISAPPEARING) ?
+                        Rosen::RSTransitionEffectType::ROTATE_OUT : Rosen::RSTransitionEffectType::ROTATE_IN,
+                    Rosen::RotateParams(rotate.dx, rotate.dy, rotate.dz, rotate.angle, originX_.Value(), originY_.Value())));
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+    Rosen::RSPropertyNode::NotifyTransition(effects, rsNodeId);
+}
+
+void RosenRenderTransform::ClearRenderObject()
+{
+    RenderTransform::ClearRenderObject();
+    pendingTransitionAppearing_ = false;
+}
 } // namespace OHOS::Ace

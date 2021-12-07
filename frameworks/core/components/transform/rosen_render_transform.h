@@ -50,12 +50,17 @@ public:
 
     void PerformLayout() override;
 
+protected:
+    virtual void ClearRenderObject() override;
+    void OnRSTransition(TransitionType type, unsigned long long rsNodeId) override;
+
 private:
     Matrix4 GetEffectiveTransform(const Offset& offset);
     bool CheckNeedPaint() const;
     double ConvertDimensionToScaleBySize(const Dimension& dimension, double size);
 
     Matrix4 previousTransformMatrix_;
+    bool pendingTransitionAppearing_ = false;
 };
 
 } // namespace OHOS::Ace

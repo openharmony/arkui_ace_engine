@@ -16,6 +16,7 @@
 #include "core/components/display/rosen_render_display.h"
 
 #include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/animation/rs_transition.h"
 
 namespace OHOS::Ace {
 
@@ -24,6 +25,9 @@ void RosenRenderDisplay::Update(const RefPtr<Component>& component)
     RenderDisplay::Update(component);
     if (auto rsNode = GetRSNode()) {
         rsNode->SetAlpha(opacity_ / 255.0);
+        if (pendingTransitionAppearing_ && hasAppearTransition_) {
+            OnRSTransition(TransitionType::APPEARING, rsNode->GetId());
+        }
     }
 }
 
@@ -45,4 +49,25 @@ void RosenRenderDisplay::Paint(RenderContext& context, const Offset& offset)
     }
 }
 
+void RosenRenderDisplay::OnRSTransition(TransitionType type, unsigned long long rsNodeId)
+{
+    if (type == TransitionType::APPEARING) {
+        if (pendingTransitionAppearing_ && hasAppearTransition_) {
+            pendingTransitionAppearing_ = false;
+            Rosen::RSPropertyNode::NotifyTransition(
+                {Rosen::RSTransitionEffect(Rosen::RSTransitionEffectType::FADE_IN)}, rsNodeId);
+        } else {
+            pendingTransitionAppearing_ = true;
+        }
+    } else if (type == TransitionType::DISAPPEARING && hasDisappearTransition_) {
+        Rosen::RSPropertyNode::NotifyTransition(
+            {Rosen::RSTransitionEffect(Rosen::RSTransitionEffectType::FADE_OUT)}, rsNodeId);
+    }
+}
+
+void RosenRenderDisplay::ClearRenderObject()
+{
+    RenderDisplay::ClearRenderObject();
+    pendingTransitionAppearing_ = false;
+}
 } // namespace OHOS::Ace

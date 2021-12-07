@@ -48,8 +48,11 @@ public:
 
 protected:
     void OnOpacityAnimationCallback();
+    virtual void ClearRenderObject() override;
+    void OnRSTransition(TransitionType type, unsigned long long rsNodeId) override;
 
 private:
+    bool pendingTransitionAppearing_ = false;
 };
 
 } // namespace OHOS::Ace
