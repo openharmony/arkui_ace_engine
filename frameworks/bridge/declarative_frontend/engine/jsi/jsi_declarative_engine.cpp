@@ -17,8 +17,6 @@
 
 #include <unistd.h>
 
-#include "js_runtime.h"
-
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -743,7 +741,7 @@ JsiDeclarativeEngine::~JsiDeclarativeEngine()
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
 
-    if (runtime_ != nullptr && nativeEngine_ != nullptr) {
+    if (!runtime_ && nativeEngine_ != nullptr) {
         nativeEngine_->CancelCheckUVLoop();
         delete nativeEngine_;
     }
@@ -756,16 +754,16 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     LOGI("JsiDeclarativeEngine Initialize");
     ACE_DCHECK(delegate);
     engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate, instanceId_);
-    auto sharedRumtime = static_cast<OHOS::AbilityRuntime::JsRuntime*>(runtime_);
+    auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime_);
     std::shared_ptr<ArkJSRuntime> arkRuntime;
     EcmaVM* vm = nullptr;
-    if (!sharedRumtime) {
+    if (!sharedRuntime) {
         LOGI("Initialize will not use sharedRuntime");
     } else {
         LOGI("Initialize will use sharedRuntime");
         arkRuntime = std::make_shared<ArkJSRuntime>();
-        auto& nativeArkEngine = static_cast<ArkNativeEngine&>(sharedRumtime->GetNativeEngine());
-        vm = const_cast<EcmaVM*>(nativeArkEngine.GetEcmaVm());
+        auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
+        vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
         if (vm == nullptr) {
             LOGE("NativeDeclarativeEngine Initialize, vm is null");
             return false;

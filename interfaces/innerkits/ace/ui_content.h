@@ -17,16 +17,30 @@
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_CONTENT_H
 
 #include <memory>
+#include <string>
 
-#include "axis_event.h"
-#include "context/context.h"
-#include "key_event.h"
-#include "pointer_event.h"
-#include "touch_event.h"
-#include "native_engine/native_value.h"
-#include "runtime.h"
 #include "viewport_config.h"
-#include "wm/window.h"
+
+namespace OHOS {
+
+namespace AbilityRuntime {
+class Context;
+}
+
+namespace Rosen {
+class Window;
+}
+
+namespace MMI {
+class PointerEvent;
+class KeyEvent;
+class AxisEvent;
+} // namespace MMI
+
+} // namespace OHOS
+
+class NativeEngine;
+class NativeValue;
 
 namespace OHOS::Ace {
 
@@ -34,11 +48,11 @@ namespace OHOS::Ace {
 
 class ACE_EXPORT UIContent {
 public:
-    static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context);
+    static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime);
 
     virtual ~UIContent() = default;
 
-    // UI content lifecycles
+    // UI content life-cycles
     virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
@@ -53,10 +67,6 @@ public:
     virtual bool ProcessAxisEvent(const OHOS::MMI::AxisEvent& axisEvent) = 0;
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config) = 0;
-
-    // interface for test
-    virtual bool ProcessTouchEvent(const OHOS::TouchEvent& touchEvent) = 0;
-    virtual void SetRuntime(OHOS::AbilityRuntime::Runtime* runtime) = 0;
 };
 
 } // namespace OHOS::Ace

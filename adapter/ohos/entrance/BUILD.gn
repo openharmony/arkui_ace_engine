@@ -75,7 +75,6 @@ template("ace_ohos_standard_source_set") {
       "aafwk_standard:ability_manager",
       "aafwk_standard:base",
       "aafwk_standard:want",
-      "aafwk_standard:runtime",
       "napi:ace_napi",
       "appexecfwk_standard:appexecfwk_base",
       "appexecfwk_standard:appexecfwk_core",

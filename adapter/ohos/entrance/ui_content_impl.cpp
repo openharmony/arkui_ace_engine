@@ -20,7 +20,6 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "init_data.h"
-#include "js_runtime.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
@@ -51,13 +50,14 @@ public:
     }
 };
 
-extern "C" ACE_EXPORT void* OHOS_ACE_CreateUIContent(void* context)
+extern "C" ACE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtime)
 {
     LOGI("Ace lib loaded, CreateUIContent.");
-    return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context));
+    return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
 }
 
-UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context) : context_(context)
+UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime)
+    : context_(context), runtime_(runtime)
 {
     LOGI("Create UIContentImpl.");
 }
@@ -254,12 +254,6 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config)
         Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation());
     }
     config_ = config;
-}
-
-void UIContentImpl::SetRuntime(OHOS::AbilityRuntime::Runtime* runtime)
-{
-    LOGI("UIContent SetRuntime %{public}p", runtime);
-    runtime_ = runtime;
 }
 
 } // namespace OHOS::Ace

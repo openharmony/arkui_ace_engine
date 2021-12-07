@@ -26,23 +26,6 @@ ohos_shared_library("ace_uicontent") {
 
   sources = [ "${ace_root}/interfaces/innerkits/ace/ui_content.cpp" ]
 
-  include_dirs = [
-    "//foundation/appexecfwk/standard/kits/appkit/native/ability_runtime",
-    "//foundation/windowmanager/interfaces/innerkits",
-  ]
-
-  deps = [
-    "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//foundation/appexecfwk/standard/kits:app_context",
-    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
-  ]
-
-  external_deps = [
-    "aafwk_standard:runtime",
-    "appexecfwk_standard:appexecfwk_base",
-    "napi:ace_napi",
-  ]
-
   subsystem_name = "ace"
   part_name = ace_engine_part
 }

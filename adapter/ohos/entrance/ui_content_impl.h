@@ -20,7 +20,6 @@
 #include "interfaces/innerkits/ace/viewport_config.h"
 #include "key_event.h"
 #include "native_engine/native_value.h"
-#include "runtime.h"
 #include "touch_event.h"
 
 #include "base/utils/macros.h"
@@ -35,7 +34,7 @@ namespace OHOS::Ace {
 
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
-    UIContentImpl(OHOS::AbilityRuntime::Context* context);
+    UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
     ~UIContentImpl() = default;
 
     // UI content lifecycles
@@ -55,13 +54,12 @@ public:
     void UpdateViewportConfig(const ViewportConfig& config) override;
 
     // interface for test
-    bool ProcessTouchEvent(const OHOS::TouchEvent& touchEvent) override;
-    void SetRuntime(OHOS::AbilityRuntime::Runtime* runtime) override;
+    bool ProcessTouchEvent(const OHOS::TouchEvent& touchEvent);
     void Initialize(OHOS::Window* window, const std::string& url, NativeValue* storage);
 
 private:
     OHOS::AbilityRuntime::Context* context_ = nullptr;
-    OHOS::AbilityRuntime::Runtime* runtime_ = nullptr;
+    void* runtime_ = nullptr;
     OHOS::Window* window_ = nullptr;
     ViewportConfig config_;
     std::string startUrl_;
