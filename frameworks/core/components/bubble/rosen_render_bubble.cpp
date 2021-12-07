@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/bubble/flutter_render_bubble.h"
+#include "core/components/bubble/rosen_render_bubble.h"
 
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
@@ -21,10 +21,10 @@
 #include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 
-#include "core/components/common/painter/flutter_decoration_painter.h"
+#include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/common/properties/shadow_config.h"
-#include "core/pipeline/base/flutter_render_context.h"
-#include "core/pipeline/base/scoped_canvas_state.h"
+#include "core/pipeline/base/rosen_render_context.h"
+#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -40,17 +40,18 @@ constexpr Dimension BEZIER_VERTICAL_OFFSET_THIRD = 8.0_vp;
 
 } // namespace
 
-SkCanvas* FlutterRenderBubble::GetSkCanvas(RenderContext& context)
+
+SkCanvas* RosenRenderBubble::GetSkCanvas(RenderContext& context)
 {
-    auto canvas = ScopedCanvas::Create(context);
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
     if (!canvas) {
         LOGE("canvas fetch failed");
         return nullptr;
     }
-    return canvas->canvas();
+    return canvas;
 }
 
-void FlutterRenderBubble::UpdateBorderRadius()
+void RosenRenderBubble::UpdateBorderRadius()
 {
     auto rrect = MakeRRect();
     border_.SetTopLeftRadius(
@@ -63,7 +64,7 @@ void FlutterRenderBubble::UpdateBorderRadius()
         Radius(rrect.radii(SkRRect::kLowerLeft_Corner).fX, rrect.radii(SkRRect::kLowerLeft_Corner).fY));
 }
 
-SkRRect FlutterRenderBubble::MakeRRect()
+SkRRect RosenRenderBubble::MakeRRect()
 {
     SkRect rect = SkRect::MakeXYWH(childOffset_.GetX(), childOffset_.GetY(), childSize_.Width(), childSize_.Height());
     SkRRect rrect = SkRRect::MakeEmpty();
@@ -80,7 +81,7 @@ SkRRect FlutterRenderBubble::MakeRRect()
     return rrect;
 }
 
-void FlutterRenderBubble::Paint(RenderContext& context, const Offset& offset)
+void RosenRenderBubble::Paint(RenderContext& context, const Offset& offset)
 {
     if (!isShow_) {
         return;
@@ -96,7 +97,7 @@ void FlutterRenderBubble::Paint(RenderContext& context, const Offset& offset)
     }
 }
 
-void FlutterRenderBubble::PaintMask(RenderContext& context)
+void RosenRenderBubble::PaintMask(RenderContext& context)
 {
     SkCanvas* skCanvas = GetSkCanvas(context);
     if (skCanvas == nullptr) {
@@ -107,7 +108,7 @@ void FlutterRenderBubble::PaintMask(RenderContext& context)
     skCanvas->drawRect(SkRect::MakeXYWH(0.0, 0.0, GetLayoutSize().Width(), GetLayoutSize().Height()), paint);
 }
 
-void FlutterRenderBubble::PaintBubble(RenderContext& context)
+void RosenRenderBubble::PaintBubble(RenderContext& context)
 {
     SkCanvas* skCanvas = GetSkCanvas(context);
     SkPaint paint;
@@ -126,7 +127,7 @@ void FlutterRenderBubble::PaintBubble(RenderContext& context)
     }
 }
 
-void FlutterRenderBubble::PaintTopBubble(SkCanvas* skCanvas, SkPaint paint)
+void RosenRenderBubble::PaintTopBubble(SkCanvas* skCanvas, SkPaint paint)
 {
     if (skCanvas == nullptr) {
         return;
@@ -188,7 +189,7 @@ void FlutterRenderBubble::PaintTopBubble(SkCanvas* skCanvas, SkPaint paint)
     skCanvas->clipPath(path_, SkClipOp::kIntersect);
 }
 
-void FlutterRenderBubble::PaintBottomBubble(SkCanvas* skCanvas, SkPaint paint)
+void RosenRenderBubble::PaintBottomBubble(SkCanvas* skCanvas, SkPaint paint)
 {
     if (skCanvas == nullptr) {
         return;
@@ -249,7 +250,7 @@ void FlutterRenderBubble::PaintBottomBubble(SkCanvas* skCanvas, SkPaint paint)
     skCanvas->clipPath(path_, SkClipOp::kIntersect);
 }
 
-void FlutterRenderBubble::PaintDefaultBubble(SkCanvas* skCanvas, SkPaint paint)
+void RosenRenderBubble::PaintDefaultBubble(SkCanvas* skCanvas, SkPaint paint)
 {
     if (skCanvas == nullptr) {
         return;
@@ -260,7 +261,7 @@ void FlutterRenderBubble::PaintDefaultBubble(SkCanvas* skCanvas, SkPaint paint)
     skCanvas->clipRRect(rrect_, SkClipOp::kIntersect);
 }
 
-void FlutterRenderBubble::PaintShadow(SkCanvas* skCanvas)
+void RosenRenderBubble::PaintShadow(SkCanvas* skCanvas)
 {
     if (skCanvas == nullptr) {
         LOGE("Paint shadow failed, skCanvas is null.");
@@ -268,13 +269,13 @@ void FlutterRenderBubble::PaintShadow(SkCanvas* skCanvas)
     }
 
     if ((arrowPlacement_ == Placement::TOP || arrowPlacement_ == Placement::BOTTOM) && !path_.isEmpty()) {
-        FlutterDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
+        RosenDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
     } else {
-        FlutterDecorationPainter::PaintShadow(SkPath().addRRect(rrect_), ShadowConfig::DefaultShadowM, skCanvas);
+        RosenDecorationPainter::PaintShadow(SkPath().addRRect(rrect_), ShadowConfig::DefaultShadowM, skCanvas);
     }
 }
 
-void FlutterRenderBubble::PaintBorder(RenderContext& context)
+void RosenRenderBubble::PaintBorder(RenderContext& context)
 {
     SkCanvas* skCanvas = GetSkCanvas(context);
     if (skCanvas == nullptr) {

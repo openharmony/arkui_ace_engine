@@ -19,6 +19,8 @@ build_component("scroll_bar") {
     "scroll_bar_element.cpp",
     "flutter_render_scroll_bar.cpp",
     "render_scroll_bar.cpp",
+    "render_scroll_bar_creator.cpp",
     "scroll_bar_proxy.cpp",
   ]
+  rosen_sources = [ "rosen_render_scroll_bar.cpp" ]
 }

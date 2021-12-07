@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/components/scroll_bar/flutter_render_scroll_bar.h"
-
-#include "core/components/scroll_bar/scroll_bar_proxy.h"
-#include "core/pipeline/base/scoped_canvas_state.h"
+#include "flutter_render_scroll_bar.h"
+#include "rosen_render_scroll_bar.h"
 
 namespace OHOS::Ace {
-
-void FlutterRenderScrollBar::Paint(RenderContext& context, const Offset& offset)
+RefPtr<RenderNode> RenderScrollBar::Create()
 {
-    if (displayMode_ == DisplayMode::OFF) {
-        LOGD("DisplayMode is off, or opacity is zero, needn't paint.");
-        return;
+    if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        return AceType::MakeRefPtr<RosenRenderScrollBar>();
+#else
+        return nullptr;
+#endif
+    } else {
+        return AceType::MakeRefPtr<FlutterRenderScrollBar>();
     }
-    RenderNode::Paint(context, offset);
 }
-
 } // namespace OHOS::Ace

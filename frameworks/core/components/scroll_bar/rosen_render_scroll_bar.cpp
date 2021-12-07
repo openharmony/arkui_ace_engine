@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "core/components/scroll_bar/flutter_render_scroll_bar.h"
+#include "core/components/scroll_bar/rosen_render_scroll_bar.h"
 
 #include "core/components/scroll_bar/scroll_bar_proxy.h"
-#include "core/pipeline/base/scoped_canvas_state.h"
+#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
 
-void FlutterRenderScrollBar::Paint(RenderContext& context, const Offset& offset)
+void RosenRenderScrollBar::Paint(RenderContext& context, const Offset& offset)
 {
     if (displayMode_ == DisplayMode::OFF) {
         LOGD("DisplayMode is off, or opacity is zero, needn't paint.");
