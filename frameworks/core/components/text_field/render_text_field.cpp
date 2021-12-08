@@ -157,7 +157,7 @@ public:
     {
     }
 
-    void SendKeyboardStatus(const MiscServices::KeyboardStatus& status) override
+    void SendKeyboardInfo(const MiscServices::KeyboardInfo& info) override
     {
     }
 
