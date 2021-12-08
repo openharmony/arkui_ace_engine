@@ -41,6 +41,7 @@ void RenderImage::Update(const RefPtr<Component>& component)
     currentDstRectList_ = rectList_;
 
     width_ = image->GetWidth();
+    syncMode_ = image->GetSyncMode();
     height_ = image->GetHeight();
     alignment_ = image->GetAlignment();
     imageObjectPosition_ = image->GetImageObjectPosition();

@@ -64,6 +64,8 @@ public:
     void SetUseSkiaSvg(bool useSkiaSvg);
     void SetPixmap(const RefPtr<PixelMap>& pixmap);
     void SetAutoResize(bool autoResize);
+    void SetSyncMode(bool syncMode);
+    bool GetSyncMode();
 
     const std::string& GetAlt() const;
     const Alignment& GetAlignment() const;
@@ -121,6 +123,7 @@ private:
     ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
     std::pair<Dimension, Dimension> imageSourceSize_ = std::pair<Dimension, Dimension>(Dimension(-1), Dimension(-1));
     RefPtr<PixelMap> pixmap_ = nullptr;
+    bool syncMode_ = false;
 };
 
 } // namespace OHOS::Ace

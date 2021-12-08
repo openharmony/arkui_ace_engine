@@ -120,7 +120,7 @@ void FlutterRenderImage::InitializeCallbacks()
             return;
         }
         auto isDeclarative = context->GetIsDeclarative();
-        if (!isDeclarative && renderImage->RetryLoading()) {
+        if (!isDeclarative && !renderImage->syncMode_ && renderImage->RetryLoading()) {
             LOGI("retry loading. sourceInfo: %{private}s", renderImage->sourceInfo_.ToString().c_str());
             return;
         }
@@ -338,9 +338,9 @@ void FlutterRenderImage::FetchImageObject()
             break;
         }
         default: {
-            bool syncMode = context->IsBuildingFirstPage() &&
-                            frontend->GetType() == FrontendType::JS_CARD &&
-                            sourceInfo_.GetSrcType() != SrcType::NETWORK;
+            bool syncMode = (context->IsBuildingFirstPage() &&
+                             frontend->GetType() == FrontendType::JS_CARD &&
+                             sourceInfo_.GetSrcType() != SrcType::NETWORK) || syncMode_;
             ImageProvider::FetchImageObject(
                 sourceInfo_,
                 imageObjSuccessCallback_,
@@ -826,7 +826,7 @@ void FlutterRenderImage::UpLoadImageDataForPaint()
         if (imageObj_) {
             previousResizeTarget_ = resizeTarget_;
             FlutterRenderImage::UploadImageObjToGpuForRender(imageObj_, GetContext(), renderTaskHolder_,
-                uploadSuccessCallback_, failedCallback_, resizeTarget_, forceResize_);
+                uploadSuccessCallback_, failedCallback_, resizeTarget_, forceResize_, syncMode_);
         }
     }
 }
@@ -1170,7 +1170,6 @@ bool FlutterRenderImage::RetryLoading()
     bool syncMode = context->IsBuildingFirstPage() &&
                     frontend->GetType() == FrontendType::JS_CARD &&
                     sourceInfo_.GetSrcType() != SrcType::NETWORK;
-
     ImageProvider::FetchImageObject(
         sourceInfo_,
         imageObjSuccessCallback_,

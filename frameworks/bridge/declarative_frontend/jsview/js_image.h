@@ -55,6 +55,7 @@ public:
     static void OnComplete(const JSCallbackInfo& args);
     static void OnError(const JSCallbackInfo& args);
     static void OnFinish(const JSCallbackInfo& info);
+    static void SetSyncLoad(const JSCallbackInfo& info);
 
     static void JsBorderColor(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);

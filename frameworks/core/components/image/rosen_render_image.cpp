@@ -118,7 +118,7 @@ void RosenRenderImage::InitializeCallbacks()
             return;
         }
         auto isDeclarative = context->GetIsDeclarative();
-        if (!isDeclarative && renderImage->RetryLoading()) {
+        if (!isDeclarative && !renderImage->syncMode_ && renderImage->RetryLoading()) {
             LOGI("retry loading. sourceInfo: %{private}s", renderImage->sourceInfo_.ToString().c_str());
             return;
         }
@@ -330,9 +330,9 @@ void RosenRenderImage::FetchImageObject()
             break;
         }
         default: {
-            bool syncMode = context->IsBuildingFirstPage() &&
+            bool syncMode = (context->IsBuildingFirstPage() &&
                             frontend->GetType() == FrontendType::JS_CARD &&
-                            sourceInfo_.GetSrcType() != SrcType::NETWORK;
+                            sourceInfo_.GetSrcType() != SrcType::NETWORK) || syncMode_;
             ImageProvider::FetchImageObject(
                 sourceInfo_,
                 imageObjSuccessCallback_,
@@ -739,7 +739,7 @@ void RosenRenderImage::UpLoadImageDataForPaint()
         if (imageObj_) {
             previousResizeTarget_ = resizeTarget_;
             RosenRenderImage::UploadImageObjToGpuForRender(imageObj_, GetContext(), renderTaskHolder_,
-                uploadSuccessCallback_, failedCallback_, resizeTarget_, forceResize_);
+                uploadSuccessCallback_, failedCallback_, resizeTarget_, forceResize_, syncMode_);
         }
     }
 }

@@ -479,6 +479,14 @@ void JSImage::SetAutoResize(bool autoResize)
     }
 }
 
+void JSImage::SetSyncLoad(const JSCallbackInfo& info)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetSyncMode(info[0]->ToBoolean());
+    }
+}
+
 void JSImage::JSBind(BindingTarget globalObj)
 {
     JSClass<JSImage>::Declare("Image");
@@ -510,6 +518,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("onComplete", &JSImage::OnComplete);
     JSClass<JSImage>::StaticMethod("onError", &JSImage::OnError);
     JSClass<JSImage>::StaticMethod("onFinish", &JSImage::OnFinish);
+    JSClass<JSImage>::StaticMethod("syncLoad", &JSImage::SetSyncLoad);
     JSClass<JSImage>::Inherit<JSViewAbstract>();
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);

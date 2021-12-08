@@ -182,6 +182,16 @@ void ImageComponent::SetAutoResize(bool autoResize)
     autoResize_ = autoResize;
 }
 
+void ImageComponent::SetSyncMode(bool syncMode)
+{
+    syncMode_ = syncMode;
+}
+
+bool ImageComponent::GetSyncMode()
+{
+    return syncMode_;
+}
+
 RefPtr<ImageComponent> ImageComponent::MakeFromOtherWithoutSourceAndEvent(const RefPtr<ImageComponent>& other)
 {
     RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<ImageComponent>("");

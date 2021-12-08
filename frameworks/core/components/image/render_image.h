@@ -345,6 +345,7 @@ protected:
     bool proceedPreviousLoading_ = false;
     ImageSourceInfo sourceInfo_;
     void* pixmapRawPtr_ = nullptr;
+    bool syncMode_ = false;
 };
 
 } // namespace OHOS::Ace
