@@ -41,7 +41,7 @@ const char ROTATE_TYPE_REVERSE[] = "auto-reverse";
 } // namespace
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-const char FONT_TYPE_HWCHINESE[] = "/system/fonts/HwChinese-Medium.ttf";
+const char FONT_TYPE_HWCHINESE[] = "/system/fonts/DroidSansChinese.ttf";
 const char FONT_TYPE_DROIDSANS[] = "/system/fonts/DroidSans.ttf";
 sk_sp<SkTypeface> FlutterSvgPainter::fontTypeChinese_ = SkTypeface::MakeFromFile(FONT_TYPE_HWCHINESE);
 sk_sp<SkTypeface> FlutterSvgPainter::fontTypeNormal_ = SkTypeface::MakeFromFile(FONT_TYPE_DROIDSANS);
