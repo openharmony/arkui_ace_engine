@@ -68,6 +68,7 @@ public:
     void UpdateComposedComponentId(const ComposeId& oldId, const ComposeId& newId);
     void RemoveInspectorNode(const ComposeId& id);
     RefPtr<RenderNode> GetInspectorNode(IdType typeId) const;
+    RefPtr<RenderNode> GetInspectorCoverage(IdType typeId) const;
 
     template<class T>
     RefPtr<T> GetContentElement(IdType typeId) const

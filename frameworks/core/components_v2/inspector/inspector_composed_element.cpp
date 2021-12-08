@@ -1003,12 +1003,11 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetShadow() const
 std::unique_ptr<JsonValue> InspectorComposedElement::GetOverlay() const
 {
     auto jsonValue = JsonUtil::Create(true);
-    auto render =  GetContentRender<RenderCoverage>(ComponentGroupElement::TypeId());
-    if (!render) {
+    auto coverage =  GetContentRender<RenderCoverage>(ComponentGroupElement::TypeId());
+    if (!coverage) {
         jsonValue->Put("options", "align: Alignment.Center,offset: {0, 0}");
         return jsonValue;
     }
-    auto coverage = render->GetCoverageComponent();
     auto title = coverage->GetTextVal();
     auto alignment = coverage->GetAlignment();
     auto jsonAlign = JsonUtil::Create(true);

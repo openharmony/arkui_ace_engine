@@ -29,7 +29,11 @@ RenderCoverage::RenderCoverage() {}
 
 void RenderCoverage::Update(const RefPtr<Component>& component)
 {
-    coverageComponent_ = AceType::DynamicCast<CoverageComponent>(component);
+    auto coverageComponent = AceType::DynamicCast<CoverageComponent>(component);
+    title_ = coverageComponent->GetTextVal();
+    x_ = coverageComponent->GetX();
+    y_ = coverageComponent->GetY();
+    align_ = coverageComponent->GetAlignment();
 }
 
 void RenderCoverage::PerformLayout()
