@@ -64,6 +64,16 @@ public:
         return rowGap_;
     }
 
+    Dimension GetColumns() const
+    {
+        return userColGap_;
+    }
+
+    Dimension GetRows() const
+    {
+        return userRowGap_;
+    }
+
     const std::string& GetScrollBarWidth() const
     {
         return scrollBarWidth_;
