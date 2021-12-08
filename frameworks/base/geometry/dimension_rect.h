@@ -30,9 +30,8 @@ public:
     DimensionRect() = default;
     ~DimensionRect() = default;
 
-    DimensionRect(const Dimension& width, const Dimension& height, const DimensionOffset& offset,
-        const DimensionOffset& globalOffset)
-        : width_(width), height_(height), offset_(offset), globalOffset_(globalOffset)
+    DimensionRect(const Dimension& width, const Dimension& height, const DimensionOffset& offset)
+        : width_(width), height_(height), offset_(offset)
     {}
 
     DimensionRect(const Dimension& width, const Dimension& height) : width_(width), height_(height) {}
@@ -50,11 +49,6 @@ public:
     const DimensionOffset& GetOffset() const
     {
         return offset_;
-    }
-
-    const DimensionOffset& GetGlobalOffset() const
-    {
-        return globalOffset_;
     }
 
     void SetOffset(const DimensionOffset& offset)
@@ -79,24 +73,18 @@ public:
         height_ = height;
     }
 
-    void SetGlobalOffset(const DimensionOffset& offset)
-    {
-        globalOffset_ = offset;
-    }
 
     void Reset()
     {
         width_ = 0.0_vp;
         height_ = 0.0_vp;
         offset_ = DimensionOffset();
-        globalOffset_ = DimensionOffset();
     }
 
 private:
     Dimension width_ = 0.0_vp;
     Dimension height_ = 0.0_vp;
     DimensionOffset offset_;
-    DimensionOffset globalOffset_;
 };
 
 } // namespace OHOS::Ace

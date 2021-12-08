@@ -320,8 +320,8 @@ void RenderNode::RenderWithContext(RenderContext& context, const Offset& offset)
     for (const auto& item : SortChildrenByZIndex(disappearingNodes_)) {
         PaintChild(item, context, offset);
     }
-
-    if (needUpdateAccessibility_) {
+    auto hasOnAreaChangeCallback = eventExtensions_ ? eventExtensions_->HasOnAreaChangeExtension() : false;
+    if (needUpdateAccessibility_ || hasOnAreaChangeCallback) {
         auto pipelineContext = context_.Upgrade();
         if (pipelineContext != nullptr) {
             pipelineContext->AddNeedRenderFinishNode(AceType::Claim(this));
@@ -1176,6 +1176,9 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
     isPercentSize_ = renderComponent->GetIsPercentSize();
     responseRegion_ = renderComponent->GetResponseRegion();
     isResponseRegion_ = renderComponent->IsResponseRegion();
+    if (component->HasEventExtensions()) {
+        eventExtensions_ = component->GetEventExtensions();
+    }
     UpdatePropAnimation(component->GetAnimatables());
     Update(component);
     MarkNeedLayout();

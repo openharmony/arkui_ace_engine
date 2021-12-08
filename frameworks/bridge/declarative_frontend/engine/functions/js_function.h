@@ -29,20 +29,18 @@ class ACE_EXPORT JsFunction : public virtual AceType {
     DECLARE_ACE_TYPE(JsFunction, AceType);
 
 public:
-    void Execute();
-    void Execute(std::vector<std::string> keys, const std::string& param);
-    void ExecuteNew(std::vector<std::string> keys, const std::string& param);
-
-protected:
-    JSRef<JSFunc> jsFunction_;
-    JSWeak<JSVal> jsThis_;
-
-    JSRef<JSVal> ExecuteJS(int argc = 0, JSRef<JSVal>* argv = nullptr);
-
-public:
-    JsFunction(const JSRef<JSFunc>& jsFunction);
+    explicit JsFunction(const JSRef<JSFunc>& jsFunction);
     JsFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction);
     ~JsFunction() override;
+    void Execute();
+    void Execute(const std::vector<std::string>& keys, const std::string& param);
+    void ExecuteNew(const std::vector<std::string>& keys, const std::string& param);
+
+protected:
+    JSRef<JSVal> ExecuteJS(int argc = 0, JSRef<JSVal>* argv = nullptr);
+
+    JSRef<JSFunc> jsFunction_;
+    JSWeak<JSVal> jsThis_;
 };
 
 template<class T, int32_t ARGC = 0>

@@ -19,6 +19,7 @@
 #include <chrono>
 #include <string>
 
+#include "base/geometry/dimension_offset.h"
 #include "base/memory/type_info_base.h"
 #include "base/utils/type_definition.h"
 #include "base/geometry/dimension_rect.h"
@@ -29,6 +30,7 @@ struct EventTarget final {
     std::string id;
     std::string type;
     DimensionRect area;
+    DimensionOffset origin;
 };
 
 class BaseEventInfo : public virtual TypeInfoBase {

@@ -24,11 +24,11 @@
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
-
+#include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
+#include "core/components_v2/extensions/events/on_area_change_extension.h"
 #ifdef USE_V8_ENGINE
 #include "bridge/declarative_frontend/engine/v8/functions/v8_function.h"
 #endif
-
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_view_register.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -924,13 +924,11 @@ bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, Dimension
         auto offset = result.GetOffset();
         offset.SetX(xDimen);
         result.SetOffset(offset);
-        result.SetGlobalOffset(offset);
     }
     if (ParseJsDimension(y, yDimen, DimensionUnit::VP)) {
         auto offset = result.GetOffset();
         offset.SetY(yDimen);
         result.SetOffset(offset);
-        result.SetGlobalOffset(offset);
     }
     if (ParseJsDimension(width, widthDimen, DimensionUnit::VP)) {
         if (widthDimen.Unit() == DimensionUnit::PERCENT && widthDimen.Value() < 0) {
@@ -962,7 +960,7 @@ bool JSViewAbstract::ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std
             Dimension widthDimen = Dimension(1, DimensionUnit::PERCENT);
             Dimension heightDimen = Dimension(1, DimensionUnit::PERCENT);
             DimensionOffset offsetDimen(xDimen, yDimen);
-            DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen, offsetDimen);
+            DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
             if (ParseJsDimensionRect(array->GetValueAt(i), dimenRect)) {
                 result.emplace_back(dimenRect);
             } else {
@@ -978,7 +976,7 @@ bool JSViewAbstract::ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std
     Dimension widthDimen = Dimension(1, DimensionUnit::PERCENT);
     Dimension heightDimen = Dimension(1, DimensionUnit::PERCENT);
     DimensionOffset offsetDimen(xDimen, yDimen);
-    DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen, offsetDimen);
+    DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
     if (ParseJsDimensionRect(jsValue, dimenRect)) {
         result.emplace_back(dimenRect);
         return true;
@@ -2596,6 +2594,24 @@ void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind on area change event due to info is not function");
+        return;
+    }
+    auto jsOnAreaChangeFunction = AceType::MakeRefPtr<JsOnAreaChangeFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onAreaChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAreaChangeFunction)](
+                                    const Rect& oldRect, const Offset& oldOrigin, const Rect& rect,
+                                    const Offset& origin) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute(oldRect, oldOrigin, rect, origin);
+    };
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->GetEventExtensions()->GetOnAreaChangeExtension()->AddOnAreaChangeEvent(
+        std::move(onAreaChangeCallback));
+}
+
 #ifndef WEARABLE_PRODUCT
 void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
 {
@@ -3378,13 +3394,15 @@ void JSViewAbstract::JSBind()
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
 #endif
+    JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
+    JSClass<JSViewAbstract>::StaticMethod("onAreaChange", &JSViewAbstract::JsOnAreaChange);
+    JSClass<JSViewAbstract>::StaticMethod("touchable", &JSInteractableView::JsTouchable);
+
     JSClass<JSViewAbstract>::StaticMethod("accessibilityGroup", &JSViewAbstract::JsAccessibilityGroup);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityText", &JSViewAbstract::JsAccessibilityText);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityDescription", &JSViewAbstract::JsAccessibilityDescription);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityImportance", &JSViewAbstract::JsAccessibilityImportance);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibility", &JSInteractableView::JsOnAccessibility);
-    JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
-    JSClass<JSViewAbstract>::StaticMethod("touchable", &JSInteractableView::JsTouchable);
 }
 
 RefPtr<Decoration> JSViewAbstract::GetFrontDecoration()

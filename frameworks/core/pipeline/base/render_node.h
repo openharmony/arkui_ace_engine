@@ -33,6 +33,7 @@
 #include "core/components/common/layout/layout_param.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_v2/extensions/events/event_extensions.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/drag_recognizer.h"
 #include "core/pipeline/base/render_context.h"
@@ -1017,6 +1018,23 @@ protected:
         return updateType_;
     }
 
+    virtual std::shared_ptr<RSNode> CreateRSNode() const;
+    // JSview boundary, all nodes in [head, tail] share the same RSNode
+    bool IsHeadRenderNode() const
+    {
+        return isHeadRenderNode_;
+    }
+    bool IsTailRenderNode() const
+    {
+        return isTailRenderNode_;
+    }
+    Offset GetPaintOffset() const;
+    virtual bool HasGeometryProperties() const
+    {
+        return IsTailRenderNode();
+    }
+    void MarkNeedSyncGeometryProperties();
+
     bool hasSubWindow_ = false;
     WeakPtr<PipelineContext> context_;
     Size viewPort_;
@@ -1053,17 +1071,7 @@ protected:
     bool isAppOnShow_ = true;
     AnimationOption nonStrictOption_; // clear after transition done
     MotionPathOption motionPathOption_;
-
-    virtual std::shared_ptr<RSNode> CreateRSNode() const;
-    // JSview boundary, all nodes in [head, tail] share the same RSNode
-    bool IsHeadRenderNode() const { return isHeadRenderNode_; }
-    bool IsTailRenderNode() const { return isTailRenderNode_; }
-    Offset GetPaintOffset() const;
-    virtual bool HasGeometryProperties() const
-    {
-        return IsTailRenderNode();
-    }
-    void MarkNeedSyncGeometryProperties();
+    RefPtr<V2::EventExtensions> eventExtensions_;
 
 private:
     void AddDirtyRenderBoundaryNode()

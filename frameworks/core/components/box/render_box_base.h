@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_RENDER_BOX_BASE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_RENDER_BOX_BASE_H
 
+#include "base/geometry/offset.h"
 #include "base/geometry/size.h"
 #include "core/animation/property_animatable.h"
 #include "core/animation/property_animatable_helper.h"
@@ -265,6 +266,14 @@ public:
     const RefPtr<PixelMap>& GetPixelMap() const
     {
         return pixelMap_;
+    }
+
+    Rect GetPaintRectExcludeMargin() const
+    {
+        Rect rect;
+        rect.SetSize(paintSize_);
+        rect.SetOffset(GetPaintRect().GetOffset() + Offset(margin_.LeftPx(), margin_.TopPx()));
+        return rect;
     }
 
 protected:

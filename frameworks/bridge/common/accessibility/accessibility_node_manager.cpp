@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 
+#include "base/geometry/dimension_offset.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
@@ -533,10 +534,12 @@ void AccessibilityNodeManager::UpdateEventTarget(NodeId id, BaseEventInfo& info)
     auto marginTop = inspector->GetMargin(AnimatableType::PROPERTY_MARGIN_TOP).ConvertToPx();
     auto marginBottom = inspector->GetMargin(AnimatableType::PROPERTY_MARGIN_BOTTOM).ConvertToPx();
     auto& target = info.GetTargetWichModify();
+    auto Localoffset = rectInLocal.GetOffset();
     target.area.SetOffset(DimensionOffset(
-        Offset(rectInLocal.GetOffset().GetX() + marginLeft, rectInLocal.GetOffset().GetY() + marginTop)));
-    target.area.SetGlobalOffset(DimensionOffset(
-        Offset(rectInGlobal.GetOffset().GetX() + marginLeft, rectInGlobal.GetOffset().GetY() + marginTop)));
+        Offset(Localoffset.GetX() + marginLeft, Localoffset.GetY() + marginTop)));
+    auto globalOffset = rectInGlobal.GetOffset();
+    target.origin =
+        DimensionOffset(Offset(globalOffset.GetX() - Localoffset.GetX(), globalOffset.GetY() - Localoffset.GetY()));
     target.area.SetWidth(Dimension(rectInLocal.Width() - marginLeft - marginRight));
     target.area.SetHeight(Dimension(rectInLocal.Height() - marginTop - marginBottom));
 }

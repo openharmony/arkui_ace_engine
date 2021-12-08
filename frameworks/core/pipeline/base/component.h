@@ -23,8 +23,10 @@
 #include <utility>
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "core/animation/property_animation.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_v2/extensions/events/event_extensions.h"
 #include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace {
@@ -218,6 +220,19 @@ public:
         return static_cast<uint32_t>(UpdateRenderType::LAYOUT);
     }
 
+    RefPtr<V2::EventExtensions> GetEventExtensions()
+    {
+        if (!eventExtensions_) {
+            eventExtensions_ = MakeRefPtr<V2::EventExtensions>();
+        }
+        return eventExtensions_;
+    }
+
+    bool HasEventExtensions() const
+    {
+        return eventExtensions_;
+    }
+
 protected:
     TextDirection direction_ = TextDirection::LTR;
 
@@ -239,6 +254,7 @@ private:
     // for PC Preview to record the component  the line number in dts file
     std::string debugLine_;
 #endif
+    RefPtr<V2::EventExtensions> eventExtensions_;
     bool isHeadComponent_ = false;
     bool isTailComponent_ = false;
     std::string inspectorTag_;

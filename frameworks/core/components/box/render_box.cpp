@@ -109,6 +109,11 @@ void RenderBox::Update(const RefPtr<Component>& component)
         auto gestures = box->GetGestures();
         UpdateGestureRecognizer(gestures);
     }
+    // In each update, the extensions will be updated with new one.
+    if (eventExtensions_ && eventExtensions_->HasOnAreaChangeExtension()) {
+        eventExtensions_->GetOnAreaChangeExtension()->SetBase(
+            GetPaintRectExcludeMargin(), GetGlobalOffset() - GetPosition());
+    }
 }
 
 void RenderBox::CreateDragDropRecognizer()
@@ -353,15 +358,9 @@ void RenderBox::UpdateStyleFromRenderNode(PropertyAnimatableType type)
 
 void RenderBox::OnPaintFinish()
 {
-    auto context = context_.Upgrade();
-    if (!context) {
-        return;
-    }
-    auto viewScale = context->GetViewScale();
-    if (NearZero(viewScale)) {
-        LOGE("Get viewScale is zero.");
-        EventReport::SendRenderException(RenderExcepType::VIEW_SCALE_ERR);
-        return;
+    if (eventExtensions_ && eventExtensions_->HasOnAreaChangeExtension()) {
+        eventExtensions_->GetOnAreaChangeExtension()->UpdateArea(
+            GetPaintRectExcludeMargin(), GetGlobalOffset() - GetPosition());
     }
     auto node = GetAccessibilityNode().Upgrade();
     if (!node) {
@@ -377,7 +376,16 @@ void RenderBox::OnPaintFinish()
     if (node->IsValidRect()) {
         return; // Rect already clamp by viewport, no need to set again.
     }
-
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    auto viewScale = context->GetViewScale();
+    if (NearZero(viewScale)) {
+        LOGE("Get viewScale is zero.");
+        EventReport::SendRenderException(RenderExcepType::VIEW_SCALE_ERR);
+        return;
+    }
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     Size size = GetPaintSize() * viewScale;
     Offset globalOffset = (GetGlobalOffsetExternal() + margin_.GetOffset()) * viewScale;

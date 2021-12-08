@@ -107,6 +107,7 @@ template("declarative_js_engine") {
       "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
+      "engine/functions/js_on_area_change_function.cpp",
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
       "engine/functions/js_touch_function.cpp",
