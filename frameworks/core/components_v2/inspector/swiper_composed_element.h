@@ -41,6 +41,7 @@ public:
     std::string GetDuration() const;
     std::string GetVertical() const;
     std::string GetDisableSwipe() const;
+    std::string GetItemSpace() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

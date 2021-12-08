@@ -33,6 +33,7 @@ const std::unordered_map<std::string, std::function<std::string(const SwiperComp
     { "duration", [](const SwiperComposedElement& inspector) { return inspector.GetDuration(); } },
     { "vertical", [](const SwiperComposedElement& inspector) { return inspector.GetVertical(); } },
     { "disableSwipe", [](const SwiperComposedElement& inspector) { return inspector.GetDisableSwipe(); } },
+    { "itemSpace", [](const SwiperComposedElement& inspector) { return inspector.GetItemSpace(); } }
 };
 
 } // namespace
@@ -48,6 +49,7 @@ void SwiperComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(std::string("duration: ").append(GetDuration()));
     DumpLog::GetInstance().AddDesc(std::string("vertical: ").append(GetVertical()));
     DumpLog::GetInstance().AddDesc(std::string("disableSwipe: ").append(GetDisableSwipe()));
+    DumpLog::GetInstance().AddDesc(std::string("itemSpace: ").append(GetItemSpace()));
 }
 
 std::unique_ptr<JsonValue> SwiperComposedElement::ToJsonObject() const
@@ -113,6 +115,16 @@ std::string SwiperComposedElement::GetDisableSwipe() const
     auto renderSwiper = GetRenderSwiper();
     auto disable = renderSwiper ? renderSwiper->GetDisableSwipe() : false;
     return ConvertBoolToString(disable);
+}
+
+std::string SwiperComposedElement::GetItemSpace() const
+{
+    auto renderSwiper = GetRenderSwiper();
+    if (renderSwiper) {
+        auto itemspace = renderSwiper->GetItemSpace();
+        return itemspace.ToString().c_str();
+    }
+    return "0";
 }
 
 RefPtr<RenderSwiper> SwiperComposedElement::GetRenderSwiper() const

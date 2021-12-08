@@ -204,6 +204,7 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     }
     disableSwipe_ = swiper->GetDisableSwipe();
     disableRotation_ = swiper->GetDisableRotation();
+    itemspace_ = swiper->GetItemSpace();
     autoPlay_ = !(context && context->IsJsCard()) && swiper->IsAutoPlay();
     autoPlayInterval_ = swiper->GetAutoPlayInterval();
     loop_ = swiper->IsLoop();

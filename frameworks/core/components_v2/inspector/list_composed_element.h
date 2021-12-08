@@ -37,6 +37,7 @@ public:
     std::string GetEditMode() const;
     std::string GetEdgeEffect() const;
     std::unique_ptr<JsonValue> GetDivider() const;
+    std::string GetChainAnimation() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

@@ -150,6 +150,11 @@ public:
         return disableSwipe_;
     }
 
+    Dimension GetItemSpace() const
+    {
+        return itemspace_;
+    }
+
     double GetMainSize(const Size& size) const
     {
         return axis_ == Axis::HORIZONTAL ? size.Width() : size.Height();
@@ -486,6 +491,7 @@ private:
     bool disableSwipe_ = false;
     bool disableRotation_ = false;
     bool catchMode_ = true;
+    Dimension itemspace_;
     int32_t index_ = 0;
     int32_t swipeToIndex_ = -1;
     MainSwiperSize mainSwiperSize_ = MainSwiperSize::MAX;

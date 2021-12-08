@@ -28,7 +28,8 @@ const std::unordered_map<std::string, std::function<std::string(const ListCompos
     { "initialIndex", [](const ListComposedElement& inspector) { return inspector.GetInitialIndex(); } },
     { "listDirection", [](const ListComposedElement& inspector) { return inspector.GetListDirection(); } },
     { "editMode", [](const ListComposedElement& inspector) { return inspector.GetEditMode(); } },
-    { "edgeEffect", [](const ListComposedElement& inspector) { return inspector.GetEdgeEffect(); } }
+    { "edgeEffect", [](const ListComposedElement& inspector) { return inspector.GetEdgeEffect(); } },
+    { "chainAnimation", [](const ListComposedElement& inspector) { return inspector.GetChainAnimation(); } }
 };
 
 const std::unordered_map<std::string, std::function<std::unique_ptr<JsonValue>(const ListComposedElement&)>>
@@ -49,6 +50,8 @@ void ListComposedElement::Dump()
         std::string("listDirection: ").append(GetListDirection()));
     DumpLog::GetInstance().AddDesc(
         std::string("editMode: ").append(GetEditMode()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("chainAnimation: ").append(GetChainAnimation()));
 }
 
 std::unique_ptr<JsonValue> ListComposedElement::ToJsonObject() const
@@ -181,6 +184,19 @@ std::string ListComposedElement::GetEdgeEffect() const
         }
     } while (0);
     return "EdgeEffect.Spring";
+}
+
+std::string ListComposedElement::GetChainAnimation() const
+{
+    auto node = GetInspectorNode(ListElement::TypeId());
+    if (!node) {
+        return "false";
+    }
+    auto renderList = AceType::DynamicCast<RenderList>(node);
+    if (renderList) {
+        return renderList->GetLinkage() ? "true" : "false";
+    }
+    return "false";
 }
 
 } // namespace OHOS::Ace::V2

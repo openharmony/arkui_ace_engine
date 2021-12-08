@@ -111,6 +111,14 @@ public:
         return false;
     }
 
+    bool GetLinkage() const
+    {
+        if (component_) {
+            return component_->GetChainAnimation();
+        }
+        return false;
+    }
+
     void RegisterItemGenerator(WeakPtr<ListItemGenerator>&& listItemGenerator)
     {
         itemGenerator_ = std::move(listItemGenerator);
