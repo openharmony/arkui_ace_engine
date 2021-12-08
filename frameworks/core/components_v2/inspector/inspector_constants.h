@@ -259,6 +259,11 @@ ACE_EXPORT extern const char RADIO_ETS_TAG[];
 ACE_EXPORT extern const char GRIDCONTAINER_COMPONENT_TAG[];
 ACE_EXPORT extern const char GRIDCONTAINER_ETS_TAG[];
 
+// menu
+ACE_EXPORT extern const char MENU_COMPONENT_TAG[];
+ACE_EXPORT extern const char MENU_TAG[];
+ACE_EXPORT extern const char MENU_ETS_TAG[];
+
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

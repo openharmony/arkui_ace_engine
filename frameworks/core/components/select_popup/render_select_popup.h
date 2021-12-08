@@ -53,6 +53,11 @@ public:
         GetReferenceRenders();
     }
 
+    RefPtr<SelectPopupComponent> GetSelectPopupComponent()
+    {
+        return selectPopup_;
+    }
+
     void SetIsWattingForAnimationStart(bool isWattingForAnimationStart)
     {
         isWattingForAnimationStart_ = isWattingForAnimationStart;

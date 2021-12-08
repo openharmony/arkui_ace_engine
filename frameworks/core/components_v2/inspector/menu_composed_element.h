@@ -13,38 +13,34 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_FLEX_COMPOSED_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_FLEX_COMPOSED_ELEMENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_MENU_COMPOSED_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_MENU_COMPOSED_ELEMENT_H
 
-#include "core/components/flex/flex_element.h"
+#include "core/components/menu/menu_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace::V2 {
 
-class ACE_EXPORT FlexComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(FlexComposedElement, InspectorComposedElement)
+class ACE_EXPORT MenuComposedElement : public InspectorComposedElement {
+    DECLARE_ACE_TYPE(MenuComposedElement, InspectorComposedElement)
 
 public:
-    explicit FlexComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}
-    ~FlexComposedElement() override = default;
+    explicit MenuComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}
+    ~MenuComposedElement() override = default;
 
     void Dump() override;
-
     std::unique_ptr<JsonValue> ToJsonObject() const override;
-    std::unique_ptr<JsonValue> GetConstructor() const;
-    std::string GetFlexDirection() const;
-    std::string GetWrap() const;
-    std::string GetJustifyContent() const;
-    std::string GetAlignItems() const;
-    std::string GetAlignContent() const;
+
+    std::unique_ptr<JsonValue> GetValues() const;
 
     AceType::IdType GetTargetTypeId() const override
     {
-        return FlexElement::TypeId();
+        return MenuElement::TypeId();
     }
+
 };
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_FLEX_COMPOSED_ELEMENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_MENU_COMPOSED_ELEMENT_H

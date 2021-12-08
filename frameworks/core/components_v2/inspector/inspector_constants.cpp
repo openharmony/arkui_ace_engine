@@ -251,4 +251,9 @@ ACE_EXPORT extern const char RADIO_ETS_TAG[] = "Radio";
 ACE_EXPORT extern const char GRIDCONTAINER_COMPONENT_TAG[] = "GridContainer";
 ACE_EXPORT extern const char GRIDCONTAINER_ETS_TAG[] = "GridContainer";
 
+// menu
+ACE_EXPORT extern const char MENU_COMPONENT_TAG[] = "MenuComponent";
+ACE_EXPORT extern const char MENU_TAG[] = "menu";
+ACE_EXPORT extern const char MENU_ETS_TAG[] = "Menu";
+
 } // namespace OHOS::Ace::V2

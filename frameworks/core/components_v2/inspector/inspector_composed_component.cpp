@@ -40,6 +40,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/list_composed_element.h"
 #include "core/components_v2/inspector/list_item_composed_element.h"
+#include "core/components_v2/inspector/menu_composed_element.h"
 #include "core/components_v2/inspector/navigation_composed_element.h"
 #include "core/components_v2/inspector/navigator_composed_element.h"
 #include "core/components_v2/inspector/panel_composed_element.h"
@@ -176,7 +177,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { RADIO_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::RadioComposedElement>(id); } },
     { GRIDCONTAINER_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::GridContainerComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::GridContainerComposedElement>(id); } },
+    { MENU_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::MenuComposedElement>(id); } }
 };
 
 const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP {
@@ -231,7 +234,9 @@ const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_T
     { TIME_PICKER_COMPONENT_TAG, TIME_PICKER_ETS_TAG },
     { RADIO_COMPONENT_TAG, RADIO_ETS_TAG },
     { GRIDCONTAINER_COMPONENT_TAG, GRIDCONTAINER_ETS_TAG },
-    { INDEXER_COMPONENT_TAG, INDEXER_ETS_TAG }
+    { INDEXER_COMPONENT_TAG, INDEXER_ETS_TAG },
+    { MENU_COMPONENT_TAG, MENU_ETS_TAG },
+    { MENU_TAG, MENU_ETS_TAG }
 };
 
 } // namespace
