@@ -193,8 +193,6 @@ void SlideRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
         double diffAngle = fabs((currentAngle_ - initialAngle_));
         if (GreatOrEqual(diffAngle, angle_)) {
             resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
-            state_ = DetectState::DETECTED;
-            Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         }
         auto result = ParseFingersOffset();
         if (result == GestureAcceptResult::ACCEPT) {
