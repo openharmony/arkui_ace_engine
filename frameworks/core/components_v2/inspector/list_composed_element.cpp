@@ -74,7 +74,7 @@ std::string ListComposedElement::GetSpace() const
     }
     auto renderList = AceType::DynamicCast<RenderList>(node);
     if (renderList) {
-        return std::to_string(renderList->GetSpace());
+        return renderList->GetListSpace().ToString().c_str();
     }
     return "0";
 }

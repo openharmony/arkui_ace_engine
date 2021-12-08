@@ -60,6 +60,7 @@ void RenderList::Update(const RefPtr<Component>& component)
     }
 
     const auto& divider = component_->GetItemDivider();
+    listSpace_ = component_->GetSpace();
     spaceWidth_ = std::max(NormalizePercentToPx(component_->GetSpace(), vertical_),
         divider ? NormalizePercentToPx(divider->strokeWidth, vertical_) : 0.0);
 

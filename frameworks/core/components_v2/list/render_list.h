@@ -145,6 +145,11 @@ public:
         return realMainSize_;
     }
 
+    Dimension GetListSpace() const
+    {
+        return listSpace_;
+    }
+
 protected:
     void UpdateAccessibilityAttr();
     void UpdateAccessibilityChild();
@@ -267,7 +272,7 @@ private:
     bool ActionByScroll(bool forward, ScrollEventBack scrollEventBack);
     void ModifyActionScroll();
     void InitScrollBarProxy();
-
+    Dimension listSpace_;
     double realMainSize_ = 0.0; // Real size of main axis.
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderList);
