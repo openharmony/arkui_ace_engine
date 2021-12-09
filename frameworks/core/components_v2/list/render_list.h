@@ -259,8 +259,8 @@ protected:
     size_t targetIndex_ = INITIAL_CHILD_INDEX;
     size_t selectedItemIndex_ = INITIAL_CHILD_INDEX;
     RefPtr<RenderListItem> selectedItem_;
-    double selectedItemMainAxis_;
-    double targetMainAxis_;
+    double selectedItemMainAxis_ = 0.0;
+    double targetMainAxis_ = 0.0;
     RefPtr<RawRecognizer> rawRecognizer_;
     double lastPos_ = 0.0f;
     bool autoScrollingForItemMove_ = false;

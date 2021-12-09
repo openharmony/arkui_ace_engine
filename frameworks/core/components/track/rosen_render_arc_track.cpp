@@ -48,11 +48,10 @@ void DrawGauge(RenderContext& context, const RenderRingInfo& trackInfo)
     paint.setStrokeWidth(thickness);
     paint.setStrokeCap(SkPaint::kRound_Cap);
 
-    canvas->drawArc({
-        trackInfo.center.GetX() + (thickness / 2) - trackInfo.radius,
-        trackInfo.center.GetY() + (thickness / 2) - trackInfo.radius,
-        trackInfo.center.GetX() + trackInfo.radius - (thickness / 2),
-        trackInfo.center.GetY() + trackInfo.radius - (thickness / 2)},
+    canvas->drawArc({ trackInfo.center.GetX() + (thickness / 2) - trackInfo.radius,
+                        trackInfo.center.GetY() + (thickness / 2) - trackInfo.radius,
+                        trackInfo.center.GetX() + trackInfo.radius - (thickness / 2),
+                        trackInfo.center.GetY() + trackInfo.radius - (thickness / 2) },
         trackInfo.startDegree - 90, trackInfo.sweepDegree, false, paint);
 }
 

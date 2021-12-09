@@ -514,8 +514,8 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     }
     std::unordered_map<std::string, RefPtr<Component>> videoMap;
 
-    bool isItemComponent = AceType::InstanceOf<V2::ListItemComponent>(mainComponent);
-    isItemComponent |= AceType::InstanceOf<GridLayoutItemComponent>(mainComponent);
+    bool isItemComponent = AceType::InstanceOf<V2::ListItemComponent>(mainComponent) ||
+                           AceType::InstanceOf<GridLayoutItemComponent>(mainComponent);
     auto stepperItemComponentV2 = AceType::DynamicCast<StepperItemComponentV2>(mainComponent);
     bool isStepperItemComponent = AceType::InstanceOf<StepperItemComponentV2>(mainComponent);
 

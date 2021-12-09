@@ -112,16 +112,14 @@ void FlutterRenderLinearTrack::Paint(RenderContext& context, const Offset& offse
     double endRect = 0.0;
     if (direction_ == Axis::VERTICAL) {
         startRect = isReverse_ ? offset.GetY() + GetLayoutSize().Height() : offset.GetY();
-        endRect = isReverse_ ? startRect - trackHeight - trackLength * GetTotalRatio() :
-            startRect + trackHeight + trackLength * GetTotalRatio();
+        endRect = isReverse_ ? startRect - trackHeight - trackLength * GetTotalRatio()
+                             : startRect + trackHeight + trackLength * GetTotalRatio();
         SkRRect selectRect = SkRRect::MakeRectXY(
-            { offset.GetX(), startRect, offset.GetX() + trackHeight, endRect },
-            trackHeight * HALF,
-            trackHeight * HALF);
+            { offset.GetX(), startRect, offset.GetX() + trackHeight, endRect }, trackHeight * HALF, trackHeight * HALF);
         flutter::RRect selectRectFlutter = flutter::RRect();
         selectRectFlutter.sk_rrect = selectRect;
-        selectPaint.paint()->setShader(BlendSkShader({ offset.GetX(), startRect }, GetSelectColor().GetValue(),
-            playAnimation_));
+        selectPaint.paint()->setShader(
+            BlendSkShader({ offset.GetX(), startRect }, GetSelectColor().GetValue(), playAnimation_));
         canvas->drawRRect(selectRectFlutter, selectPaint, selectPaintData);
         return;
     }
@@ -132,16 +130,13 @@ void FlutterRenderLinearTrack::Paint(RenderContext& context, const Offset& offse
         startRect = offset.GetX() + GetLayoutSize().Width();
         endRect = startRect - trackHeight - trackLength * GetTotalRatio();
     }
-    SkRRect selectRect = SkRRect::MakeRectXY({ startRect, offset.GetY(), endRect, offset.GetY() + trackHeight },
-        trackHeight * HALF, trackHeight * HALF);
+    SkRRect selectRect = SkRRect::MakeRectXY(
+        { startRect, offset.GetY(), endRect, offset.GetY() + trackHeight }, trackHeight * HALF, trackHeight * HALF);
     flutter::RRect selectRectFlutter = flutter::RRect();
     selectRectFlutter.sk_rrect = selectRect;
-    selectPaint.paint()->setShader(
-        BlendSkShader({ startRect + scanHighLightValue_ * trackLength, offset.GetY() },
-            GetSelectColor().GetValue(), playAnimation_));
+    selectPaint.paint()->setShader(BlendSkShader(
+        { startRect + scanHighLightValue_ * trackLength, offset.GetY() }, GetSelectColor().GetValue(), playAnimation_));
     canvas->drawRRect(selectRectFlutter, selectPaint, selectPaintData);
-
-
 }
 
 void FlutterRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Offset& offset)

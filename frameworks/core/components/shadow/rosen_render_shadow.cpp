@@ -45,8 +45,9 @@ void RosenRenderShadow::Paint(RenderContext& context, const Offset& offset)
 
     if (isNeedClip_) {
         canvas->clipRect(SkRect::MakeXYWH(clipRect_.GetOffset().GetX() - NormalizeToPx(SHADOW_OFFSET) / 2,
-            clipRect_.GetOffset().GetY(), clipRect_.Width() + NormalizeToPx(SHADOW_OFFSET),
-            clipRect_.Height() + NormalizeToPx(SHADOW_OFFSET)), true);
+                             clipRect_.GetOffset().GetY(), clipRect_.Width() + NormalizeToPx(SHADOW_OFFSET),
+                             clipRect_.Height() + NormalizeToPx(SHADOW_OFFSET)),
+            true);
     }
 
     double radiusX = NormalizeToPx(rrect_.GetCorner().bottomLeftRadius.GetX());

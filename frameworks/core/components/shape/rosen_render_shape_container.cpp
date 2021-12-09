@@ -46,7 +46,7 @@ void RosenRenderShapeContainer::PerformLayout()
             }
             rsNode->SetPivot(0.0f, 0.0f);
             rsNode->SetScale(scale);
-            rsNode->SetTranslate({tx, ty});
+            rsNode->SetTranslate({ tx, ty });
         }
     }
 }

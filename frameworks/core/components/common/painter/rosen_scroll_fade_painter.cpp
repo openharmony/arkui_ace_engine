@@ -49,7 +49,7 @@ void RosenScrollFadePainter::Paint(SkCanvas* canvas, const Size& size, const Off
 
     canvas->save();
     canvas->scale(1.0, scaleH);
-    canvas->clipRect({clipRect.Left(), clipRect.Top(), clipRect.Right(), clipRect.Bottom()}, SkClipOp::kIntersect);
+    canvas->clipRect({ clipRect.Left(), clipRect.Top(), clipRect.Right(), clipRect.Bottom() }, SkClipOp::kIntersect);
     canvas->drawCircle(center.GetX(), center.GetY(), radius, painter);
     canvas->restore();
 }

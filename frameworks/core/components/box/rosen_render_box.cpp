@@ -751,7 +751,7 @@ void RosenRenderBox::CalculateAlignDeclaration()
     RenderBox::CalculateAlignDeclaration();
     auto rsNode = GetRSNode();
     if (rsNode && isUseAlign_) {
-        rsNode->SetTranslate({alignOffset_.GetX(), alignOffset_.GetY()});
+        rsNode->SetTranslate({ alignOffset_.GetX(), alignOffset_.GetY() });
     }
 }
 

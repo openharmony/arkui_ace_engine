@@ -35,7 +35,8 @@ public:
     static void Destructor(JSOffscreenRenderingContext* controller);
 
     void JsTransferToImageBitmap(const JSCallbackInfo& info);
-    static RefPtr<OffscreenCanvas> GetOffscreenCanvas(int32_t id) {
+    static RefPtr<OffscreenCanvas> GetOffscreenCanvas(int32_t id)
+    {
         std::lock_guard<std::mutex> lock(mutex_);
         return offscreenCanvasMap_[id];
     }

@@ -76,7 +76,7 @@ void RosenRenderSwitch::PaintTrack(
     SkRRect rrect;
     double trackRadius = switchSize_.Height() / 2.0;
     rrect =
-        SkRRect::MakeRectXY({originX, originY, paintTrackSize_.Width() + originX, paintTrackSize_.Height() + originY},
+        SkRRect::MakeRectXY({ originX, originY, paintTrackSize_.Width() + originX, paintTrackSize_.Height() + originY },
             trackRadius, trackRadius);
     skPaint.setAntiAlias(true);
     skPaint.setColor(trackColor);
@@ -97,9 +97,9 @@ void RosenRenderSwitch::PaintCenterPoint(
     double shadowBorderWidth = NormalizeToPx(shadowWidth_);
     SetStrokeWidth(shadowBorderWidth, paint);
     skPaint.setColor(shadowColor_);
-    rrect = SkRRect::MakeRectXY({pointOriginX - shadowBorderWidth, pointOriginY - shadowBorderWidth,
-        rawPointSize_.Width() + pointOriginX + shadowBorderWidth,
-        rawPointSize_.Height() + pointOriginY + shadowBorderWidth},
+    rrect = SkRRect::MakeRectXY({ pointOriginX - shadowBorderWidth, pointOriginY - shadowBorderWidth,
+                                    rawPointSize_.Width() + pointOriginX + shadowBorderWidth,
+                                    rawPointSize_.Height() + pointOriginY + shadowBorderWidth },
         pointRadius_ + shadowBorderWidth, pointRadius_ + shadowBorderWidth);
     canvas->drawRRect(rrect, skPaint);
 }
@@ -136,7 +136,7 @@ void RosenRenderSwitch::DrawTrackOffAndOn(
     SkRRect rrectBottom;
     skPaint.setAntiAlias(true);
     rrectBottom =
-        SkRRect::MakeRectXY({originX, originY, paintTrackSize_.Width() + originX, paintTrackSize_.Height() + originY},
+        SkRRect::MakeRectXY({ originX, originY, paintTrackSize_.Width() + originX, paintTrackSize_.Height() + originY },
             trackRadius, trackRadius);
     skPaint.setColor(inactiveColor_);
     canvas->drawRRect(rrectBottom, skPaint);

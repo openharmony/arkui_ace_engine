@@ -175,8 +175,7 @@ void JSCanvasPath::JsPath2DEllipse(const JSCallbackInfo& info)
             anticlockwise = (anti == 1);
         }
 
-        path2d_->Ellipse(X, Y, radiusX, radiusY, rotation, startAngle,
-                        endAngle, anticlockwise);
+        path2d_->Ellipse(X, Y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise);
     }
 }
 

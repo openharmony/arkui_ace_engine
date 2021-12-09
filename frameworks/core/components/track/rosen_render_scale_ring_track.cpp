@@ -52,11 +52,10 @@ void DrawScaleArc(RenderContext& context, const RenderRingInfo& trackInfo)
     if (trackInfo.clockwise != 1) {
         radiusPrecision = 0.0;
     }
-    canvas->drawArc({
-        trackInfo.center.GetX() - trackInfo.radius - radiusPrecision,
-        trackInfo.center.GetY() - trackInfo.radius - radiusPrecision,
-        trackInfo.center.GetX() + trackInfo.radius + radiusPrecision,
-        trackInfo.center.GetY() + trackInfo.radius + radiusPrecision},
+    canvas->drawArc({ trackInfo.center.GetX() - trackInfo.radius - radiusPrecision,
+                        trackInfo.center.GetY() - trackInfo.radius - radiusPrecision,
+                        trackInfo.center.GetX() + trackInfo.radius + radiusPrecision,
+                        trackInfo.center.GetY() + trackInfo.radius + radiusPrecision },
         180 * (trackInfo.clockwise * (trackInfo.startDegree / (totalDegree / 2.0)) - 0.5),
         360 * (trackInfo.clockwise * trackInfo.sweepDegree / totalDegree), false, paint);
 }

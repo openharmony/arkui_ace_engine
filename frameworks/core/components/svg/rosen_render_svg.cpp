@@ -44,7 +44,7 @@ void RosenRenderSvg::UpdateTransformByGlobalOffset(const std::shared_ptr<RSNode>
         double tx = GetLayoutSize().Width() * 0.5 - (viewBox_.Width() * 0.5 + viewBox_.Left()) * scale;
         double ty = GetLayoutSize().Height() * 0.5 - (viewBox_.Height() * 0.5 + viewBox_.Top()) * scale;
         rsNode->SetScale(scale);
-        rsNode->SetTranslate({tx, ty});
+        rsNode->SetTranslate({ tx, ty });
 
         double pivotX = ConvertDimensionToPx(transformOrigin_.first, LengthType::HORIZONTAL, true) / viewBox_.Width();
         double pivotY = ConvertDimensionToPx(transformOrigin_.second, LengthType::VERTICAL, true) / viewBox_.Height();

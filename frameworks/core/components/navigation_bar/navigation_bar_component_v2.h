@@ -29,6 +29,8 @@ public:
           id_(id), direction_(direction), menuZoneSize_(theme_->GetMenuZoneSize()),
           menuIconSize_(theme_->GetMenuIconSize())
     {}
+    ~NavigationBarBuilder() override = default;
+
     RefPtr<Component> Build(const WeakPtr<PipelineContext>& context)
     {
         context_ = context;

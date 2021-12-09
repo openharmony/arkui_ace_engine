@@ -41,13 +41,13 @@ void RosenRenderTriangle::Paint(RenderContext& context, const Offset& offset)
     const auto& arc2 = data_.GetOutArc2();
     const auto& arc3 = data_.GetOutArc3();
     path.moveTo(arc1.GetStartPoint().GetX(), arc1.GetStartPoint().GetY());
-    path.arcTo({arc1.GetLeft(), arc1.GetTop(), arc1.GetRight(), arc1.GetBottom()},
+    path.arcTo({ arc1.GetLeft(), arc1.GetTop(), arc1.GetRight(), arc1.GetBottom() },
         arc1.GetStartAngle() * RADIAN_TO_DEGREE, arc1.GetSweepAngle() * RADIAN_TO_DEGREE, false);
     path.lineTo(arc2.GetStartPoint().GetX(), arc2.GetStartPoint().GetY());
-    path.arcTo({arc2.GetLeft(), arc2.GetTop(), arc2.GetRight(), arc2.GetBottom()},
+    path.arcTo({ arc2.GetLeft(), arc2.GetTop(), arc2.GetRight(), arc2.GetBottom() },
         arc2.GetStartAngle() * RADIAN_TO_DEGREE, arc2.GetSweepAngle() * RADIAN_TO_DEGREE, false);
     path.lineTo(arc3.GetStartPoint().GetX(), arc3.GetStartPoint().GetY());
-    path.arcTo({arc3.GetLeft(), arc3.GetTop(), arc3.GetRight(), arc3.GetBottom()},
+    path.arcTo({ arc3.GetLeft(), arc3.GetTop(), arc3.GetRight(), arc3.GetBottom() },
         arc3.GetStartAngle() * RADIAN_TO_DEGREE, arc3.GetSweepAngle() * RADIAN_TO_DEGREE, false);
     path.close();
 

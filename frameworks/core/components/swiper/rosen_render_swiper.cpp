@@ -336,13 +336,15 @@ void RosenRenderSwiper::PaintMask(RenderContext& context, const Offset& offset) 
     paint.setShader(SkGradientShader::MakeLinear(pts, colors, pos, gradientColors.size(), SkTileMode::kClamp));
 #endif
     if (axis_ == Axis::HORIZONTAL) {
-        canvas->drawRect({offset.GetX(), offset.GetY() + indicatorPosition_.GetY() - NormalizeToPx(9.0_vp),
-            offset.GetX() + GetLayoutSize().Width(),
-            offset.GetY() + indicatorPosition_.GetY() + NormalizeToPx(15.0_vp)}, paint);
+        canvas->drawRect({ offset.GetX(), offset.GetY() + indicatorPosition_.GetY() - NormalizeToPx(9.0_vp),
+                             offset.GetX() + GetLayoutSize().Width(),
+                             offset.GetY() + indicatorPosition_.GetY() + NormalizeToPx(15.0_vp) },
+            paint);
     } else {
-        canvas->drawRect({offset.GetX() + indicatorPosition_.GetX() - NormalizeToPx(9.0_vp), offset.GetY(),
-            offset.GetX() + indicatorPosition_.GetX() + NormalizeToPx(15.0_vp),
-            offset.GetY() + GetLayoutSize().Height()}, paint);
+        canvas->drawRect({ offset.GetX() + indicatorPosition_.GetX() - NormalizeToPx(9.0_vp), offset.GetY(),
+                             offset.GetX() + indicatorPosition_.GetX() + NormalizeToPx(15.0_vp),
+                             offset.GetY() + GetLayoutSize().Height() },
+            paint);
     }
 }
 

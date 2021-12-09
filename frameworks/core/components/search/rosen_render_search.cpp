@@ -102,7 +102,7 @@ void RosenRenderSearch::PaintFocus()
     }
     RRect rrect = RRect::MakeRect(Rect(offset, size));
     Radius radius = Radius(size.Height() / 2.0);
-    rrect.SetCorner({radius, radius, radius, radius});
+    rrect.SetCorner({ radius, radius, radius, radius });
     context->ShowFocusAnimation(rrect, Color::BLUE, GetGlobalOffset() + offset);
 }
 

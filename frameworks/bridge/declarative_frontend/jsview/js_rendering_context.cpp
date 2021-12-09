@@ -106,7 +106,7 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomProperty("imageSmoothingQuality", &JSCanvasRenderer::JsGetImageSmoothingQuality,
                                                 &JSCanvasRenderer::JsSetImageSmoothingQuality);
     JSClass<JSRenderingContext>::CustomMethod("transferFromImageBitmap",
-                                             &JSRenderingContext::JsTransferFromImageBitmap);
+                                              &JSRenderingContext::JsTransferFromImageBitmap);
 
     JSClass<JSRenderingContext>::Bind(globalObj, JSRenderingContext::Constructor, JSRenderingContext::Destructor);
 }

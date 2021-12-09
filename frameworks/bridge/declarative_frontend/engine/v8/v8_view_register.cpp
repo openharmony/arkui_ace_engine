@@ -31,16 +31,16 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
 #endif

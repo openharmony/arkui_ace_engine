@@ -139,7 +139,8 @@ void RosenRenderTextField::PaintCaret(SkCanvas& canvas, const Rect& caretRect)
         const SkScalar radius = SkDoubleToScalar(NormalizeToPx(cursorRadius_));
         SkRRect rrect;
         rrect.setRectXY(SkRect::MakeLTRB(SkDoubleToScalar(caretRect.Left()), SkDoubleToScalar(caretRect.Top()),
-            SkDoubleToScalar(caretRect.Right()), SkDoubleToScalar(caretRect.Bottom())), radius, radius);
+                            SkDoubleToScalar(caretRect.Right()), SkDoubleToScalar(caretRect.Bottom())),
+            radius, radius);
         canvas.drawRRect(rrect, paint);
     }
 }
@@ -240,7 +241,8 @@ void RosenRenderTextField::PaintIcon(const Offset& offset, RenderContext& contex
         }
         passwordIconRect_ = Rect(
             passwordIconOffset - Offset((iconHotZoneSize_ - iconSize_) / 2.0, (iconHotZoneSize_ - iconSize_) / 2.0) +
-                GetGlobalOffset(), Size(iconHotZoneSize_, iconHotZoneSize_));
+                GetGlobalOffset(),
+            Size(iconHotZoneSize_, iconHotZoneSize_));
     }
 }
 
@@ -272,10 +274,12 @@ void RosenRenderTextField::PaintSelection(SkCanvas* canvas) const
         const auto& selectionRect = ConvertSkRect(box.rect) + effectiveOffset;
         if (box.direction == txt::TextDirection::ltr) {
             canvas->drawRect(SkRect::MakeLTRB(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(),
-                selectionRect.Bottom()), paint);
+                                 selectionRect.Bottom()),
+                paint);
         } else {
             canvas->drawRect(SkRect::MakeLTRB(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(),
-                selectionRect.Bottom()), paint);
+                                 selectionRect.Bottom()),
+                paint);
         }
     }
     canvas->restore();

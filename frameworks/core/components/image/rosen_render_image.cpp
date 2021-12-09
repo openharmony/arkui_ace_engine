@@ -424,13 +424,15 @@ void RosenRenderImage::PerformLayoutSvgImage()
         if (!context) {
             return;
         }
-        context->GetTaskExecutor()->PostTask([weak = WeakClaim(this)] {
-            auto image = weak.Upgrade();
-            if (image) {
-                image->PerformLayoutSvgCustom();
-                image->MarkNeedRender();
-            }
-        }, TaskExecutor::TaskType::UI);
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this)] {
+                auto image = weak.Upgrade();
+                if (image) {
+                    image->PerformLayoutSvgCustom();
+                    image->MarkNeedRender();
+                }
+            },
+            TaskExecutor::TaskType::UI);
     }
 }
 
@@ -507,8 +509,8 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
         auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
         recordingCanvas->DrawAdaptiveRRect(0, paint);
 #else
-        canvas->drawRect({offset.GetX(), offset.GetY(), GetLayoutSize().Width() + offset.GetX(),
-            GetLayoutSize().Height() + offset.GetY()},
+        canvas->drawRect({ offset.GetX(), offset.GetY(), GetLayoutSize().Width() + offset.GetX(),
+                             GetLayoutSize().Height() + offset.GetY() },
             paint);
 #endif
         return;
@@ -937,8 +939,8 @@ void RosenRenderImage::DrawSVGImage(const Offset& offset, SkCanvas* canvas)
         canvas->translate(width, 0);
         canvas->scale(-1, 1);
     }
-    skiaDom_->setContainerSize({width, height});
-    canvas->clipRect({0, 0, width, height}, SkClipOp::kIntersect, true);
+    skiaDom_->setContainerSize({ width, height });
+    canvas->clipRect({ 0, 0, width, height }, SkClipOp::kIntersect, true);
     skiaDom_->render(canvas);
 }
 

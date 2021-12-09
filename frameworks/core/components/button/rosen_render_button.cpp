@@ -261,9 +261,9 @@ void RosenRenderButton::DrawArc(SkCanvas* canvas, const Offset& offset)
 {
     double offsetDelta = NormalizeToPx((OVAL_WIDTH - CIRCLE_DIAMETER)) / 2;
     SkPath arcPath;
-    arcPath.addArc({0, NormalizeToPx(OFFSET_Y), NormalizeToPx(OVAL_WIDTH), NormalizeToPx(OVAL_HEIGHT + OFFSET_Y)},
+    arcPath.addArc({ 0, NormalizeToPx(OFFSET_Y), NormalizeToPx(OVAL_WIDTH), NormalizeToPx(OVAL_HEIGHT + OFFSET_Y) },
         OVAL_START_ANGLE * RADIAN_TO_DEGREE, OVAL_SWEEP_ANGLE * RADIAN_TO_DEGREE);
-    arcPath.addArc({offsetDelta, 0, NormalizeToPx(CIRCLE_DIAMETER) + offsetDelta, NormalizeToPx(CIRCLE_DIAMETER)},
+    arcPath.addArc({ offsetDelta, 0, NormalizeToPx(CIRCLE_DIAMETER) + offsetDelta, NormalizeToPx(CIRCLE_DIAMETER) },
         CIRCLE_START_ANGLE * RADIAN_TO_DEGREE, CIRCLE_SWEEP_ANGLE * RADIAN_TO_DEGREE);
     arcPath.offset(offset.GetX() - NormalizeToPx(OFFSET_X), offset.GetY() - NormalizeToPx(OFFSET_Y));
 
@@ -285,7 +285,7 @@ void RosenRenderButton::DrawLineProgress(SkCanvas* canvas, const Offset& offset)
     rRect.offset(offset.GetX(), offset.GetY());
     canvas->save();
     canvas->clipRRect(rRect, true);
-    canvas->drawRect({offset.GetX(), offset.GetY(), progressWidth_, buttonSize_.Height()}, paint);
+    canvas->drawRect({ offset.GetX(), offset.GetY(), progressWidth_, buttonSize_.Height() }, paint);
     canvas->restore();
 }
 
@@ -295,19 +295,19 @@ void RosenRenderButton::DrawLineProgressAnimation(SkCanvas* canvas, const Offset
     double offsetY = offset.GetY();
     double radius = buttonSize_.Height() / 2.0;
     SkPath path;
-    path.addArc({offsetX, offsetY, buttonSize_.Height() + offsetX, buttonSize_.Height() + offsetY}, 90, 180);
+    path.addArc({ offsetX, offsetY, buttonSize_.Height() + offsetX, buttonSize_.Height() + offsetY }, 90, 180);
     if (LessNotEqual(progressWidth_, radius)) {
-        path.addArc({progressWidth_ + offsetX, offsetY, buttonSize_.Height() - progressWidth_ + offsetX,
-            buttonSize_.Height() + offsetY},
+        path.addArc({ progressWidth_ + offsetX, offsetY, buttonSize_.Height() - progressWidth_ + offsetX,
+                        buttonSize_.Height() + offsetY },
             270, -180);
     } else if (GreatNotEqual(progressWidth_, buttonSize_.Width() - radius)) {
         path.addRect(
             { radius + offsetX, offsetY, buttonSize_.Width() - radius + offsetX, buttonSize_.Height() + offsetY });
-        path.addArc({(buttonSize_.Width() - radius) * 2.0 - progressWidth_ + offsetX, offsetY,
-            progressWidth_ + offsetX, buttonSize_.Height() + offsetY},
+        path.addArc({ (buttonSize_.Width() - radius) * 2.0 - progressWidth_ + offsetX, offsetY,
+                        progressWidth_ + offsetX, buttonSize_.Height() + offsetY },
             270, 180);
     } else {
-        path.addRect({radius + offsetX, offsetY, progressWidth_ + offsetX, buttonSize_.Height() + offsetY});
+        path.addRect({ radius + offsetX, offsetY, progressWidth_ + offsetX, buttonSize_.Height() + offsetY });
     }
     SkPaint paint;
     paint.setColor(progressColor_.GetValue());

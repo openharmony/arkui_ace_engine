@@ -2956,9 +2956,9 @@ inline int32_t GetNodeId(const v8::Local<v8::Context>& ctx, v8::Local<v8::Object
     v8::Isolate* isolate = ctx->GetIsolate();
     v8::HandleScope handleScope(isolate);
     int32_t id = value->Get(ctx, v8::String::NewFromUtf8(isolate, "__nodeId").ToLocalChecked())
-                     .ToLocalChecked()
-                     ->Int32Value(ctx)
-                     .ToChecked();
+        .ToLocalChecked()
+        ->Int32Value(ctx)
+        .ToChecked();
     return id < 0 ? 0 : id;
 }
 
@@ -3092,7 +3092,7 @@ void JsAppendChild(const v8::FunctionCallbackInfo<v8::Value>& args)
     int32_t id = object->Get(context, v8::String::NewFromUtf8(isolate, "__nodeId").ToLocalChecked())
         .ToLocalChecked()->Int32Value(context).ToChecked();
     int32_t childId = id < 0 ? 0 : id;
-     auto domDocument = page->GetDomDocument();
+    auto domDocument = page->GetDomDocument();
     if (domDocument) {
         RefPtr<DOMNode> node = domDocument->GetDOMNodeById(childId);
         if (node == nullptr) {
@@ -3411,12 +3411,12 @@ void V8EngineInstance::InitJsDocumentObject(v8::Local<v8::Context>& localContext
 {
     v8::Local<v8::Object> global = localContext->Global();
     auto  documentObj = v8::Object::New(isolate);
-    global->Set(localContext, v8::String::NewFromUtf8(isolate, "dom").ToLocalChecked(), documentObj)
-        .ToChecked();
+    global->Set(localContext, v8::String::NewFromUtf8(isolate, "dom").ToLocalChecked(), documentObj).ToChecked();
     documentObj
         ->Set(localContext, v8::String::NewFromUtf8(isolate, "createElement").ToLocalChecked(),
-            v8::Function::New(localContext, JsCreateElement,
-            v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::ERROR))).ToLocalChecked())
+            v8::Function::New(
+                localContext, JsCreateElement, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::ERROR)))
+                .ToLocalChecked())
         .ToChecked();
 }
 

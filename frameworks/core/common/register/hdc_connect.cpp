@@ -32,8 +32,7 @@ static void PrintMessage(const char *fmt, ...)
     va_end(ap);
 }
 
-void TryCloseHandle(const uv_handle_t *handle, bool alwaysCallback,
-                           uv_close_cb closeCallBack)
+void TryCloseHandle(const uv_handle_t* handle, bool alwaysCallback, uv_close_cb closeCallBack)
 {
     bool hasCallClose = false;
     if (handle->loop && !uv_is_closing(handle)) {

@@ -157,7 +157,8 @@ void FlutterRenderTip::PaintLeftTip(SkCanvas* skCanvas, SkPaint paint, const Off
         0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
         globalArrowPosition.GetX() - bubbleSpacing - NormalizeToPx(border_.TopRightRadius().GetX()),
         globalArrowPosition.GetY() - childHalfHeight);
-    path_.lineTo(globalArrowPosition.GetX() - bubbleSpacing - (childWidth - NormalizeToPx(border_.TopLeftRadius().GetX())),
+    path_.lineTo(
+        globalArrowPosition.GetX() - bubbleSpacing - (childWidth - NormalizeToPx(border_.TopLeftRadius().GetX())),
         globalArrowPosition.GetY() - childHalfHeight);
     path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
         SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
@@ -165,9 +166,10 @@ void FlutterRenderTip::PaintLeftTip(SkCanvas* skCanvas, SkPaint paint, const Off
         globalArrowPosition.GetY() - childHalfHeight + NormalizeToPx(border_.TopLeftRadius().GetY()));
     path_.lineTo(globalArrowPosition.GetX() - bubbleSpacing - childWidth,
         globalArrowPosition.GetY() + (childHalfHeight - NormalizeToPx(border_.BottomLeftRadius().GetY())));
-    path_.arcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()), 0.0f,
-        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction, globalArrowPosition.GetX() - bubbleSpacing -
-        (childWidth - NormalizeToPx(border_.BottomLeftRadius().GetX())), globalArrowPosition.GetY() + childHalfHeight);
+    path_.arcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        globalArrowPosition.GetX() - bubbleSpacing - (childWidth - NormalizeToPx(border_.BottomLeftRadius().GetX())),
+        globalArrowPosition.GetY() + childHalfHeight);
     path_.lineTo(globalArrowPosition.GetX() - bubbleSpacing - NormalizeToPx(border_.BottomRightRadius().GetX()),
         globalArrowPosition.GetY() + childHalfHeight);
     path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),

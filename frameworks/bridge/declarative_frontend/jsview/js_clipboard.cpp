@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include "bridge/declarative_frontend/jsview/js_clipboard.h"
+
 #include <functional>
 
-#include "bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "base/log/ace_trace.h"
-#include "core/common/container.h"
 #include "core/common/clipboard/clipboard_proxy.h"
+#include "core/common/container.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 
 namespace OHOS::Ace::Framework {

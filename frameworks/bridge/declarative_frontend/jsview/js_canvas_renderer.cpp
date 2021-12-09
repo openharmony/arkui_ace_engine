@@ -1355,8 +1355,8 @@ void JSCanvasRenderer::JsTransform(const JSCallbackInfo& info)
         return;
     }
 
-    if (info[0]->IsNumber() && info[1]->IsNumber() && info[2]->IsNumber() && info[3]->IsNumber()
-       && info[4]->IsNumber() && info[5]->IsNumber()) {
+    if (info[0]->IsNumber() && info[1]->IsNumber() && info[2]->IsNumber() && info[3]->IsNumber() &&
+        info[4]->IsNumber() && info[5]->IsNumber()) {
         TransformParam param;
         JSViewAbstract::ParseJsDouble(info[0], param.scaleX);
         JSViewAbstract::ParseJsDouble(info[1], param.skewX);

@@ -124,8 +124,8 @@ void RosenRenderRating::PaintImageArea(RenderContext& context, const RefPtr<Rend
     auto clipOffset = properties.clipOffset;
     auto drawOffset = properties.drawOffset;
     auto imageAreaSize = properties.imageAreaSize;
-    canvas->clipRect({clipOffset.GetX(), clipOffset.GetY(), clipOffset.GetX() + imageAreaSize.Width(),
-        clipOffset.GetY() + imageAreaSize.Height()},
+    canvas->clipRect({ clipOffset.GetX(), clipOffset.GetY(), clipOffset.GetX() + imageAreaSize.Width(),
+                         clipOffset.GetY() + imageAreaSize.Height() },
         SkClipOp::kIntersect, true);
     for (int i = 0; i < properties.repeatNum; ++i) {
         renderImage->SetAdaptiveFrameRectFlag(false);

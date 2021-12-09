@@ -122,18 +122,18 @@ void RosenSvgPainter::SetGradientStyle(SkPaint& skPaint, const FillState& fillSt
         auto focal = SkPoint::Make(info.fx, info.fx);
 #ifdef USE_SYSTEM_SKIA
         return center == focal ? skPaint.setShader(SkGradientShader::MakeRadial(center, info.r, &colors[0], &pos[0],
-            gradientColors.size(),
-            static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr))
-            : skPaint.setShader(SkGradientShader::MakeTwoPointConical(focal, 0, center, info.r,
-            &colors[0], &pos[0], gradientColors.size(),
-            static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr));
+                                     gradientColors.size(),
+                                     static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr))
+                               : skPaint.setShader(SkGradientShader::MakeTwoPointConical(focal, 0, center, info.r,
+                                     &colors[0], &pos[0], gradientColors.size(),
+                                     static_cast<SkShader::TileMode>(gradient->GetSpreadMethod()), 0, nullptr));
 #else
         return center == focal
-            ? skPaint.setShader(SkGradientShader::MakeRadial(center, info.r, &colors[0], &pos[0],
-            gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr))
-            : skPaint.setShader(
-            SkGradientShader::MakeTwoPointConical(focal, 0, center, info.r, &colors[0], &pos[0],
-            gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr));
+                   ? skPaint.setShader(SkGradientShader::MakeRadial(center, info.r, &colors[0], &pos[0],
+                         gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr))
+                   : skPaint.setShader(
+                         SkGradientShader::MakeTwoPointConical(focal, 0, center, info.r, &colors[0], &pos[0],
+                             gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr));
 #endif
     }
 }
@@ -543,7 +543,7 @@ void RosenSvgPainter::UpdateMotionMatrix(
         degrees = StringUtils::StringToDouble(rotate);
     }
     // reset quaternion
-    rsNode->SetRotation({0., 0., 0., 1.});
+    rsNode->SetRotation({ 0., 0., 0., 1. });
     rsNode->SetRotation(degrees, 0., 0.);
     rsNode->SetPivot(position.x() / rsNode->GetShowingProperties().GetFrameWidth(),
         position.y() / rsNode->GetShowingProperties().GetFrameHeight());

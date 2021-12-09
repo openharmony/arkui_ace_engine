@@ -47,21 +47,21 @@ void RosenRenderMoonTrack::Paint(RenderContext& context, const Offset& offset)
 
     if (GetTotalRatio() <= 0.5) {
         path.moveTo(center.GetX(), center.GetY() - radius);
-        path.addArc({center.GetX() - radius, center.GetY() - radius, center.GetX() + radius, center.GetY() + radius},
+        path.addArc({ center.GetX() - radius, center.GetY() - radius, center.GetX() + radius, center.GetY() + radius },
             90, 180);
         double progressOffset = radius - radius * GetTotalRatio() / 0.5;
-        path.addArc({center.GetX() - progressOffset, center.GetY() - radius, center.GetX() + progressOffset,
-            center.GetY() + radius},
+        path.addArc({ center.GetX() - progressOffset, center.GetY() - radius, center.GetX() + progressOffset,
+                        center.GetY() + radius },
             270, -180);
         canvas->drawPath(path, paint);
     } else {
         double progressOffset = radius * (GetTotalRatio() - 0.5) / 0.5;
         path.moveTo(center.GetX(), center.GetY() - radius);
-        path.addArc({center.GetX() - radius, center.GetY() - radius, center.GetX() + radius, center.GetY() + radius},
+        path.addArc({ center.GetX() - radius, center.GetY() - radius, center.GetX() + radius, center.GetY() + radius },
             90, 180);
 
-        path.addArc({center.GetX() - progressOffset, center.GetY() - radius, center.GetX() + progressOffset,
-            center.GetY() + radius},
+        path.addArc({ center.GetX() - progressOffset, center.GetY() - radius, center.GetX() + progressOffset,
+                        center.GetY() + radius },
             270, 180);
         canvas->drawPath(path, paint);
     }

@@ -15,8 +15,8 @@
 
 #include "core/components/arc/rosen_render_arc.h"
 
-#include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
+#include "third_party/skia/include/core/SkPaint.h"
 
 namespace OHOS::Ace {
 void RosenRenderArc::Paint(RenderContext& context, const Offset& offset)

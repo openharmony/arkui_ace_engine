@@ -252,7 +252,7 @@ void RosenRenderListItem::PaintStickyEffect(RenderContext& context, const Offset
         center.SetX((GetLayoutSize().Width() + offset.GetX()) / CENTER_POINT1);
         center.SetY(GetLayoutSize().Height() + offset.GetY() - GetStickyRadius());
         paint.setColor(Color::FromRGBO(GREY_END1, GREY_END1, GREY_END1, OPACITY_END1).GetValue());
-        canvas->clipRect({0, 0, width, height}, SkClipOp::kIntersect);
+        canvas->clipRect({ 0, 0, width, height }, SkClipOp::kIntersect);
         canvas->drawCircle(center.GetX(), center.GetY(), GetStickyRadius(), paint);
     } else {
         double radius =
@@ -262,7 +262,7 @@ void RosenRenderListItem::PaintStickyEffect(RenderContext& context, const Offset
         center.SetX((GetLayoutSize().Width() + offset.GetX()) / CENTER_POINT1);
         center.SetY(GetLayoutSize().Height() + offset.GetY() - radius);
         paint.setColor(Color::FromRGBO(grey, grey, grey, opacity).GetValue());
-        canvas->clipRect({offset.GetX(), offset.GetY(), width, height}, SkClipOp::kIntersect);
+        canvas->clipRect({ offset.GetX(), offset.GetY(), width, height }, SkClipOp::kIntersect);
         canvas->drawCircle(center.GetX(), center.GetY(), radius, paint);
     }
     canvas->restore();

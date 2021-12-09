@@ -86,8 +86,8 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
     double upperLine = rect.Top() + rect.Height() / 2.0 - dividerSpacing / 2.0;
     double downLine = rect.Top() + rect.Height() / 2.0 + dividerSpacing / 2.0;
     if (!NearZero(dividerThickness) && !data_->GetSubsidiary()) {
-        canvas->drawRect({rect.Left(), upperLine, rect.Right(), upperLine + dividerThickness}, paint);
-        canvas->drawRect({rect.Left(), downLine, rect.Right(), downLine + dividerThickness}, paint);
+        canvas->drawRect({ rect.Left(), upperLine, rect.Right(), upperLine + dividerThickness }, paint);
+        canvas->drawRect({ rect.Left(), downLine, rect.Right(), downLine + dividerThickness }, paint);
     }
     // Paint gradient at top and bottom.
     PaintGradient(canvas, offset, rect, theme);

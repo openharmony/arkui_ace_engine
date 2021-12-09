@@ -1973,7 +1973,7 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
         auto domDocument = sPage->GetDomDocument();
         if (domDocument) {
             RefPtr<DOMNode> node = domDocument->GetDOMNodeById(childNodeId);
-            if(node == nullptr) {
+            if (node == nullptr) {
                 LOGE("node is nullptr");
                 return JS_NULL;
             }

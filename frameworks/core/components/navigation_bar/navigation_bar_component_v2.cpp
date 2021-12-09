@@ -192,9 +192,9 @@ bool NavigationBarBuilder::AddMenu(const RefPtr<ComponentGroup>& container)
     auto menu = AceType::MakeRefPtr<MenuComponent>("navigationMenu", "navigationMenu");
     auto menusSize = declaration_->menuItems.size();
     for (const auto& menuItem : declaration_->menuItems) {
-        hasRoom &= ((showInBarSize < mostShowInBarSize - 1) ||
-                    (showInBarSize == mostShowInBarSize - 1 && menusSize == mostShowInBarSize) ||
-                    (showInBarSize < mostShowInBarSize && SystemProperties::GetDeviceType() == DeviceType::TV));
+        hasRoom = hasRoom && ((showInBarSize < mostShowInBarSize - 1) ||
+            (showInBarSize == mostShowInBarSize - 1 && menusSize == mostShowInBarSize) ||
+            (showInBarSize < mostShowInBarSize && SystemProperties::GetDeviceType() == DeviceType::TV));
         if (hasRoom) {
             showInBarSize++;
             IconImage menuIcon(menuItem->icon, menuIconSize_, menuIconSize_);

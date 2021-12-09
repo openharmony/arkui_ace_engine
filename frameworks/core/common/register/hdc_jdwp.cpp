@@ -94,17 +94,17 @@ void HdcJdwpSimulator::ConnectJdwp(uv_connect_t *connection, int status)
 #ifdef JS_JDWP_CONNECT
     string pkgName = thisClass->gPkgName;
     uint32_t pkgSize = pkgName.size() + sizeof(JsMsgHeader);
-    uint8_t *info = new uint8_t[pkgSize]();
+    uint8_t* info = new uint8_t[pkgSize]();
     if (!info) {
         LOGE("ConnectJdwp new info fail.");
         return;
     }
     std::memset(info, 0, pkgSize);
-    JsMsgHeader *jsMsg = (JsMsgHeader *)info;
+    JsMsgHeader* jsMsg = (JsMsgHeader*)info;
     jsMsg->pid = pid_curr;
     jsMsg->msgLen = pkgSize;
-    LOGI("ConnectJdwp send pid:%{public}d, pkgName:%{public}s, msglen:%{public}d, ",
-                jsMsg->pid, pkgName.c_str(), jsMsg->msgLen);
+    LOGI("ConnectJdwp send pid:%{public}d, pkgName:%{public}s, msglen:%{public}d, ", jsMsg->pid, pkgName.c_str(),
+        jsMsg->msgLen);
     bool retFail = false;
     if (memcpy_s(info + sizeof(JsMsgHeader), pkgName.size(), &pkgName[0], pkgName.size()) != 0) {
         LOGE("ConnectJdwp memcpy_s fail :%{public}s.", pkgName.c_str());
@@ -112,8 +112,7 @@ void HdcJdwpSimulator::ConnectJdwp(uv_connect_t *connection, int status)
     }
     if (!retFail) {
         LOGI("ConnectJdwp send JS msg:%{public}s", info);
-        thisClass->SendToStream((uv_stream_t *)connection->handle, (uint8_t *)info, pkgSize,
-                                (void *)FinishWriteCallback);
+        thisClass->SendToStream((uv_stream_t*)connection->handle, (uint8_t*)info, pkgSize, (void*)FinishWriteCallback);
     }
     if (info) {
         delete[] info;

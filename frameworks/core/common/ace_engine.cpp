@@ -69,13 +69,13 @@ AceEngine::AceEngine()
 {
     // Watch dog thread(anr) can not exit when app stop.
     // watchDog_ = AceType::MakeRefPtr<WatchDog>()
-    #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
-        if (AceApplicationInfo::GetInstance().IsDebugVersion()) {
-            LoadRegisterSo();
-            const std::string pkgName = AceApplicationInfo::GetInstance().GetPackageName();
-            StartHdcConnect(pkgName);
-        }
-    #endif
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+    if (AceApplicationInfo::GetInstance().IsDebugVersion()) {
+        LoadRegisterSo();
+        const std::string pkgName = AceApplicationInfo::GetInstance().GetPackageName();
+        StartHdcConnect(pkgName);
+    }
+#endif
 }
 
 AceEngine& AceEngine::Get()

@@ -48,6 +48,9 @@ private:
 };
 
 class NavigationBarComponentBase {
+public:
+    NavigationBarComponentBase() = default;
+    virtual ~NavigationBarComponentBase() = default;
 protected:
     struct IconImage {
         IconImage(InternalResource::ResourceId resourceId, const Dimension& width, const Dimension& height)

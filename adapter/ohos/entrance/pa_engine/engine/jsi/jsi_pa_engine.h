@@ -148,12 +148,12 @@ private:
 
     void* libRdb_ = nullptr;
     void* libDataAbility_ = nullptr;
-    RdbValueBucketNewInstance rdbValueBucketNewInstance_;
-    RdbValueBucketGetNativeObject rdbValueBucketGetNativeObject_;
-    RdbResultSetProxyNewInstance rdbResultSetProxyNewInstance_;
-    RdbResultSetProxyGetNativeObject rdbResultSetProxyGetNativeObject_;
-    DataAbilityPredicatesNewInstance dataAbilityPredicatesNewInstance_;
-    DataAbilityPredicatesGetNativeObject dataAbilityPredicatesGetNativeObject_;
+    RdbValueBucketNewInstance rdbValueBucketNewInstance_ = nullptr;
+    RdbValueBucketGetNativeObject rdbValueBucketGetNativeObject_ = nullptr;
+    RdbResultSetProxyNewInstance rdbResultSetProxyNewInstance_ = nullptr;
+    RdbResultSetProxyGetNativeObject rdbResultSetProxyGetNativeObject_ = nullptr;
+    DataAbilityPredicatesNewInstance dataAbilityPredicatesNewInstance_ = nullptr;
+    DataAbilityPredicatesGetNativeObject dataAbilityPredicatesGetNativeObject_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiPaEngine);
 };
