@@ -33,6 +33,9 @@ ComposedElement::ComposedElement(const ComposeId& id) : id_(id)
 
 void ComposedElement::Detached()
 {
+    if (!updateNode_) {
+        return;
+    }
     auto context = context_.Upgrade();
     if (addedToMap_ && context) {
         context->RemoveComposedElement(id_, AceType::Claim(this));
@@ -61,7 +64,7 @@ void ComposedElement::PerformBuild()
         return;
     }
 
-    if (!addedToMap_) {
+    if (updateNode_ && !addedToMap_) {
         context->AddComposedElement(id_, AceType::Claim(this));
         addedToMap_ = true;
     }

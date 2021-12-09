@@ -59,7 +59,7 @@ std::unique_ptr<JsonValue> GridItemComposedElement::ToJsonObject() const
 
 std::string GridItemComposedElement::GetRowStart() const
 {
-    auto node = GetInspectorNode(GridLayoutItemElement::TypeId());
+    auto node = GetInspectorNode(GridLayoutItemElement::TypeId(), true);
     if (!node) {
         return "0";
     }
@@ -75,7 +75,7 @@ std::string GridItemComposedElement::GetRowStart() const
 
 std::string GridItemComposedElement::GetRowEnd() const
 {
-    auto node = GetInspectorNode(GridLayoutItemElement::TypeId());
+    auto node = GetInspectorNode(GridLayoutItemElement::TypeId(), true);
     if (!node) {
         return "0";
     }
@@ -91,7 +91,7 @@ std::string GridItemComposedElement::GetRowEnd() const
 
 std::string GridItemComposedElement::GetColumnStart() const
 {
-    auto node = GetInspectorNode(GridLayoutItemElement::TypeId());
+    auto node = GetInspectorNode(GridLayoutItemElement::TypeId(), true);
     if (!node) {
         return "0";
     }
@@ -108,7 +108,7 @@ std::string GridItemComposedElement::GetColumnStart() const
 
 std::string GridItemComposedElement::GetColumnEnd() const
 {
-    auto node = GetInspectorNode(GridLayoutItemElement::TypeId());
+    auto node = GetInspectorNode(GridLayoutItemElement::TypeId(), true);
     if (!node) {
         return "0";
     }
@@ -124,7 +124,7 @@ std::string GridItemComposedElement::GetColumnEnd() const
 
 std::string GridItemComposedElement::GetForceRebuild() const
 {
-    auto node = GetInspectorNode(GridLayoutItemElement::TypeId());
+    auto node = GetInspectorNode(GridLayoutItemElement::TypeId(), true);
     if (!node) {
         return "false";
     }

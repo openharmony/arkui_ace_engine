@@ -34,6 +34,7 @@
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_v2/extensions/events/event_extensions.h"
+#include "core/components_v2/inspector/inspector_node.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/drag_recognizer.h"
 #include "core/pipeline/base/render_context.h"
@@ -951,6 +952,16 @@ public:
         return responseRegionList_;
     }
 
+    const WeakPtr<V2::InspectorNode>& GetInspectorNode() const
+    {
+        return inspector_;
+    }
+
+    void SetInspectorNode(const RefPtr<V2::InspectorNode>& inspectorNode)
+    {
+        inspector_ = inspectorNode;
+    }
+
 protected:
     explicit RenderNode(bool takeBoundary = false);
     virtual void ClearRenderObject();
@@ -1040,7 +1051,9 @@ protected:
     WeakPtr<PipelineContext> context_;
     Size viewPort_;
     Point globalPoint_;
+    WeakPtr<V2::InspectorNode> inspector_;
     WeakPtr<AccessibilityNode> accessibilityNode_;
+
     Rect touchRect_;    // Self touch rect
     std::vector<Rect> touchRectList_; // Self and all children touch rect
     std::vector<DimensionRect> responseRegion_;
@@ -1088,6 +1101,9 @@ private:
 
     void SetPositionInternal(const Offset& offset);
     bool InLayoutTransition() const;
+        // Sync view hierarchy to RSNode
+    void RSNodeAddChild(const RefPtr<RenderNode>& child);
+    void MarkParentNeedRender() const;
 
     std::list<RefPtr<RenderNode>> hoverChildren_;
     std::list<RefPtr<RenderNode>> children_;
@@ -1136,12 +1152,10 @@ private:
     std::shared_ptr<RSNode> rsNode_ = nullptr;
     bool isHeadRenderNode_ = false;
     bool isTailRenderNode_ = false;
-    // Sync view hierarchy to RSNode
-    void RSNodeAddChild(const RefPtr<RenderNode>& child);
-    void MarkParentNeedRender() const;
+
+    bool isPaintGeometryTransition_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
-    bool isPaintGeometryTransition_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -147,7 +147,6 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::EcmaVM* vm, panda::Local<p
 
     LOGD("Load Document setting root view");
     auto rootComponent = view->CreateComponent();
-    rootComponent->SetInspectorId("-1");
     std::list<RefPtr<Component>> stackChildren;
     stackChildren.emplace_back(rootComponent);
     auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(

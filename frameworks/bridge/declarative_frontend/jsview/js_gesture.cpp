@@ -331,25 +331,34 @@ void JSGesture::JsHandlerOnGestureEvent(JSGestureEvent action, const JSCallbackI
         LOGE("top gesture is illegal");
         return;
     }
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("fail to get inspector for on handle event");
+        return;
+    }
+    auto impl = inspector->GetInspectorFunctionImpl();
 
-    auto nodeId = ViewStackProcessor::GetInstance()->GetCurrentInspectorNodeId();
     RefPtr<JsGestureFunction> handlerFunc = AceType::MakeRefPtr<JsGestureFunction>(JSRef<JSFunc>::Cast(args[0]));
 
     if (action == JSGestureEvent::CANCEL) {
-        auto onActionCancelFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc), nodeId]() {
+        auto onActionCancelFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc), impl]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto info = GestureEvent();
-            JSInteractableView::UpdateEventTarget(nodeId, info);
+            if (impl) {
+                impl->UpdateEventInfo(info);
+            }
             func->Execute(info);
         };
         gesture->SetOnActionCancelId(onActionCancelFunc);
         return;
     }
 
-    auto onActionFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc), nodeId](
+    auto onActionFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc), impl](
                             GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        JSInteractableView::UpdateEventTarget(nodeId, info);
+        if (impl) {
+            impl->UpdateEventInfo(info);
+        }
         func->Execute(info);
     };
 
@@ -406,7 +415,7 @@ void JSPanGestureOption::JSBind(BindingTarget globalObj)
 void JSPanGestureOption::SetDirection(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && args[0]->IsNumber()) {
-        PanDirection direction = {args[0]->ToNumber<int32_t>()};
+        PanDirection direction = { args[0]->ToNumber<int32_t>() };
         panGestureOption_->SetDirection(direction);
     }
 }

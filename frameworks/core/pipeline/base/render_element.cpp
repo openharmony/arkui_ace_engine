@@ -14,6 +14,7 @@
  */
 
 #include "core/pipeline/base/render_element.h"
+#include <string>
 
 #include "base/log/log.h"
 #include "base/utils/string_utils.h"
@@ -21,6 +22,7 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/focus_animation/render_focus_animation.h"
 #include "core/components/shadow/render_shadow.h"
+#include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/render_component.h"
@@ -61,17 +63,37 @@ void RenderElement::Prepare(const WeakPtr<Element>& parent)
 
 void RenderElement::SetAccessibilityNode(const WeakPtr<Element>& parent)
 {
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("SetAccessibilityNode context is null");
+        return;
+    }
+    bool ignoreAccessibility = false;
+    if (component_) {
+        ignoreAccessibility = component_->IsIgnoreInspector();
+    }
     auto parentNode = parent.Upgrade();
     while (parentNode) {
         if (!parentNode->IsAutoAccessibility()) {
             break;
         }
-        if (AceType::TypeId(parentNode) == AceType::TypeId<ComposedElement>()) {
-            auto composedElement = AceType::DynamicCast<ComposedElement>(parentNode);
-            if (!composedElement) {
-                LOGE("SetAccessibilityNode composedElement is null");
-                return;
+        if (context->GetIsDeclarative()) {
+            if (ignoreAccessibility || parentNode->IsIgnoreInspector()) {
+                break;
             }
+            auto composedElement = AceType::DynamicCast<V2::InspectorComposedElement>(parentNode);
+            if (composedElement) {
+                composeId_ = std::to_string(composedElement->GetinspectorId());
+                SetAccessibilityNodeById(composeId_);
+                renderNode_->SetInspectorNode(composedElement);
+                break;
+            } else {
+                parentNode = parentNode->GetElementParent().Upgrade();
+            }
+            continue;
+        }
+        auto composedElement = AceType::DynamicCast<ComposedElement>(parentNode);
+        if (composedElement) {
             composeId_ = composedElement->GetId();
             SetAccessibilityNodeById(composeId_);
             break;
@@ -85,7 +107,7 @@ void RenderElement::SetAccessibilityNodeById(const ComposeId& id)
 {
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("SetAccessibilityNode context is null");
+        LOGE("SetAccessibilityNodeById context is null");
         return;
     }
     if (!renderNode_) {
@@ -106,6 +128,15 @@ void RenderElement::SetAccessibilityNodeById(const ComposeId& id)
 
 void RenderElement::UpdateAccessibilityNode()
 {
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("UpdateAccessibilityNode context is null");
+        return;
+    }
+    if (context->GetIsDeclarative()) {
+        LOGE("UpdateAccessibilityNode context is declarative");
+        return;
+    }
     // fetch new composedId from component.
     ComposeId updateId;
     auto component = component_;

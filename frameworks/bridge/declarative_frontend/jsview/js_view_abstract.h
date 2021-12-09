@@ -189,7 +189,6 @@ public:
     static void JsAccessibilityText(const std::string& text);
     static void JsAccessibilityDescription(const std::string& description);
     static void JsAccessibilityImportance(const std::string& importance);
-    static RefPtr<AccessibilityNode> GetAccessibilityNodeById(int32_t nodeId);
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);

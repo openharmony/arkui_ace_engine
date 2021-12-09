@@ -1078,12 +1078,6 @@ void RenderList::UpdateAccessibilityAttr()
 
     accessibilityNode->AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
     accessibilityNode->AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
-    accessibilityNode->SetActionUpdateIdsImpl([weakList = AceType::WeakClaim(this)]() {
-        auto list = weakList.Upgrade();
-        if (list) {
-            list->UpdateAccessibilityChild();
-        }
-    });
 
     scrollFinishEventBack_ = [weakList = AceType::WeakClaim(this)] {
         auto list = weakList.Upgrade();
@@ -1149,57 +1143,6 @@ void RenderList::OnPaintFinish()
     scrollEvent.nodeId = GetAccessibilityNodeId();
     scrollEvent.eventType = "scrollend";
     context->SendEventToAccessibility(scrollEvent);
-}
-
-void RenderList::UpdateAccessibilityChild()
-{
-    auto parentAccessibilityNode = GetAccessibilityNode().Upgrade();
-    if (!parentAccessibilityNode) {
-        LOGE("RenderList: current accessibilityNode is null.");
-        return;
-    }
-
-    auto context = context_.Upgrade();
-    if (!context) {
-        LOGE("RenderList: context is null.");
-        return;
-    }
-
-    std::list<RefPtr<AccessibilityNode>> children;
-    parentAccessibilityNode->ResetChildList(children);
-
-    for (size_t index = (firstDisplayIndex_ - startIndex_); index <= (lastDisplayIndex_ - startIndex_); ++index) {
-        auto iter = items_.begin();
-        std::advance(iter, index);
-        if (iter == items_.end()) {
-            continue;
-        }
-
-        auto childAccessibilityNode = (*iter)->GetAccessibilityNode().Upgrade();
-        if (!childAccessibilityNode) {
-            continue;
-        }
-
-        Rect viewRect = context->GetStageRect();
-        if (childAccessibilityNode->GetLeft() > viewRect.Right() ||
-            childAccessibilityNode->GetTop() > viewRect.Bottom()) {
-            isActionByScroll_ = true;
-            break;
-        }
-
-        if (childAccessibilityNode->GetLeft() + childAccessibilityNode->GetWidth() < viewRect.Left() ||
-            childAccessibilityNode->GetTop() + childAccessibilityNode->GetHeight() < viewRect.Top()) {
-            continue;
-        }
-
-        auto oldParent = childAccessibilityNode->GetParentNode();
-        if (oldParent) {
-            oldParent->RemoveNode(childAccessibilityNode);
-        }
-
-        childAccessibilityNode->SetParentNode(parentAccessibilityNode);
-        childAccessibilityNode->Mount(-1);
-    }
 }
 
 bool RenderList::PrepareRawRecognizer()

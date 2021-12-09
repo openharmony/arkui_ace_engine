@@ -418,7 +418,7 @@ void JsInspectorManager::GetAttrsAndStylesV2(std::unique_ptr<JsonValue>& jsonNod
                                              const RefPtr<AccessibilityNode>& node)
 {
     auto weakComposedElement = GetComposedElementFromPage(node->GetNodeId());
-    auto composedElement = weakComposedElement.Upgrade();
+    auto composedElement = DynamicCast<V2::InspectorComposedElement>(weakComposedElement.Upgrade());
     if (!composedElement) {
         LOGE("return");
         return;

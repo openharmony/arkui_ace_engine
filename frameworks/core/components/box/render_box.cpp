@@ -24,6 +24,7 @@
 #include "core/components/box/box_component.h"
 #include "core/components/root/root_element.h"
 #include "core/components/text_field/render_text_field.h"
+#include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"
@@ -111,8 +112,11 @@ void RenderBox::Update(const RefPtr<Component>& component)
     }
     // In each update, the extensions will be updated with new one.
     if (eventExtensions_ && eventExtensions_->HasOnAreaChangeExtension()) {
-        eventExtensions_->GetOnAreaChangeExtension()->SetBase(
-            GetPaintRectExcludeMargin(), GetGlobalOffset() - GetPosition());
+        auto inspector = inspector_.Upgrade();
+        if (inspector) {
+            auto area = inspector->GetCurrentRectAndOrigin();
+            eventExtensions_->GetOnAreaChangeExtension()->SetBase(area.first, area.second);
+        }
     }
 }
 
@@ -359,8 +363,11 @@ void RenderBox::UpdateStyleFromRenderNode(PropertyAnimatableType type)
 void RenderBox::OnPaintFinish()
 {
     if (eventExtensions_ && eventExtensions_->HasOnAreaChangeExtension()) {
-        eventExtensions_->GetOnAreaChangeExtension()->UpdateArea(
-            GetPaintRectExcludeMargin(), GetGlobalOffset() - GetPosition());
+        auto inspector = inspector_.Upgrade();
+        if (inspector) {
+            auto area = inspector->GetCurrentRectAndOrigin();
+            eventExtensions_->GetOnAreaChangeExtension()->UpdateArea(area.first, area.second);
+        }
     }
     auto node = GetAccessibilityNode().Upgrade();
     if (!node) {

@@ -104,18 +104,6 @@ public:
         return !!pageTransitionFunction_;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    void SetDebugLine(std::string debugLine)
-    {
-        debugLine_ = debugLine;
-    }
-
-    std::string GetDebugLine()
-    {
-        return debugLine_;
-    }
-#endif
-
 protected:
     virtual RefPtr<Component> BuildChild();
     void Apply(const RefPtr<Element>& child) override;
@@ -128,8 +116,8 @@ protected:
 
     ComposeId id_;
     std::string name_;
-    std::string debugLine_;
     bool addedToMap_ = false;
+    bool updateNode_ = true;
     int32_t countRenderNode_ = -1;
     RenderFunction renderFunction_;
     PageTransitionFunction pageTransitionFunction_;

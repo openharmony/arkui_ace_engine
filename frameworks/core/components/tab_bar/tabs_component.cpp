@@ -42,6 +42,7 @@ TabsComponent::TabsComponent(
     flexItem_->SetChild(tabContent_);
     auto box = AceType::MakeRefPtr<BoxComponent>();
     box->SetChild(tabBar_);
+    box->SetIgnoreInspector(true);
     if (barPosition == BarPosition::END) {
         AppendChildDirectly(flexItem_);
         AppendChildDirectly(box);

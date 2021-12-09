@@ -159,7 +159,6 @@ void JsLoadDocument(const v8::FunctionCallbackInfo<v8::Value>& args)
 
     LOGD("Load Document setting root view");
     auto rootComponent = view->CreateComponent();
-    rootComponent->SetInspectorId("-1");
     std::list<RefPtr<Component>> stackChildren;
     stackChildren.emplace_back(rootComponent);
     auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(

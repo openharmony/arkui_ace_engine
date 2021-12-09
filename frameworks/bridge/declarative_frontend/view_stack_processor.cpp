@@ -332,49 +332,17 @@ void ViewStackProcessor::ClearPageTransitionComponent()
     }
 }
 
-void ViewStackProcessor::CreateAccessibilityNode(
-    const RefPtr<Component>& component, bool isCustomView)
-{
-    // if_else_component, for_each_component, MultiComposedComponen, customView not create accessibilityNode
-    if (AceType::InstanceOf<MultiComposedComponent>(component) || isCustomView) {
-        if (!GetMainComponent()) {
-            component->SetInspectorId(std::to_string(stackRootId_));
-            return;
-        }
-        auto parentId = GetMainComponent()->GetInspectorId();
-        component->SetInspectorId(parentId);
-        return;
-    }
-    component->SetInspectorId(GenerateId());
-
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    bool needCreate = true;
-#else
-    bool needCreate = false;
-#endif
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || SystemProperties::GetAccessibilityEnabled() ||
-        needCreate) {
-        int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
-        std::string tag =
-            component->GetInspectorTag().empty() ? AceType::TypeName(component) : component->GetInspectorTag();
-        int32_t parentId =
-            componentsStack_.empty() ? stackRootId_ : StringUtils::StringToInt(GetMainComponent()->GetInspectorId());
-        auto node = OHOS::Ace::V2::InspectorComposedComponent::CreateAccessibilityNode(tag, inspectorId, parentId, -1);
-        if (!node) {
-            LOGD("Create AccessibilityNode:%{public}s Failed", tag.c_str());
-        }
-    }
-}
-
 void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomView, const std::string& inspectorTag)
 {
     std::unordered_map<std::string, RefPtr<Component>> wrappingComponentsMap;
     if (componentsStack_.size() > 1 && ShouldPopImmediately()) {
         Pop();
     }
-    CreateAccessibilityNode(component, isCustomView);
     wrappingComponentsMap.emplace("main", component);
     componentsStack_.push(wrappingComponentsMap);
+
+    CreateInspectorComposedComponent(inspectorTag.empty() ? AceType::TypeName(component) : inspectorTag);
+
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component) &&
         !AceType::InstanceOf<TextSpanComponent>(component)) {
@@ -521,14 +489,15 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
 
     RefPtr<Component> itemChildComponent;
 
-    auto composedComponent = GetInspectorComposedComponent(mainComponent);
-    if (composedComponent) {
-        components.emplace_back(composedComponent);
-    }
     if (isItemComponent) {
         itemChildComponent = AceType::DynamicCast<SingleChild>(mainComponent)->GetChild();
         components.emplace_back(mainComponent);
         Component::MergeRSNode(mainComponent);
+    }
+
+    auto composedComponent = GetInspectorComposedComponent();
+    if (composedComponent) {
+        components.emplace_back(composedComponent);
     }
 
     std::string componentNames[] = { "flexItem", "display", "transform", "touch", "pan_guesture", "click_guesture",
@@ -728,25 +697,27 @@ std::string ViewStackProcessor::GenerateId()
     return std::to_string(composedElementId_++);
 }
 
-RefPtr<ComposedComponent> ViewStackProcessor::GetInspectorComposedComponent(RefPtr<Component> mainComponent)
+RefPtr<V2::InspectorComposedComponent> ViewStackProcessor::GetInspectorComposedComponent() const
 {
-    auto component = AceType::DynamicCast<ComposedComponent>(GetMainComponent());
-    std::string name;
-    std::string inspectorTag = mainComponent->GetInspectorTag();
-    if (component) {
-        name = component->GetName();
+    if (componentsStack_.empty()) {
+        return nullptr;
     }
-    std::string typeName =
-        inspectorTag.empty() ? (name.empty() ? AceType::TypeName(mainComponent) : name) : inspectorTag;
-    std::string id = mainComponent->GetInspectorId();
-    if (OHOS::Ace::V2::InspectorComposedComponent::HasInspectorFinished(typeName)) {
-        auto composedComponent = AceType::MakeRefPtr<V2::InspectorComposedComponent>(id, typeName);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-        composedComponent->SetDebugLine(mainComponent->GetDebugLine());
-#endif
-        return composedComponent;
+    auto& wrappingComponentsMap = componentsStack_.top();
+    auto iter = wrappingComponentsMap.find("inspector");
+    if (iter != wrappingComponentsMap.end()) {
+        return AceType::DynamicCast<V2::InspectorComposedComponent>(iter->second);
     }
     return nullptr;
+}
+
+void ViewStackProcessor::CreateInspectorComposedComponent(const std::string& inspectorTag)
+{
+    if (V2::InspectorComposedComponent::HasInspectorFinished(inspectorTag)) {
+        auto composedComponent =
+            AceType::MakeRefPtr<V2::InspectorComposedComponent>(GenerateId() + inspectorTag, inspectorTag);
+        auto& wrappingComponentsMap = componentsStack_.top();
+        wrappingComponentsMap.emplace("inspector", composedComponent);
+    }
 }
 
 void ViewStackProcessor::SetIsPercentSize(RefPtr<Component>& component)
@@ -761,15 +732,6 @@ void ViewStackProcessor::SetIsPercentSize(RefPtr<Component>& component)
     if (renderComponent) {
         renderComponent->SetIsPercentSize(isPercentSize);
     }
-}
-
-NodeId ViewStackProcessor::GetCurrentInspectorNodeId() const
-{
-    auto&& componet =  GetMainComponent();
-    if (!componet) {
-        return -1;
-    }
-    return StringUtils::StringToInt(componet->GetInspectorId());
 }
 
 ScopedViewStackProcessor::ScopedViewStackProcessor()

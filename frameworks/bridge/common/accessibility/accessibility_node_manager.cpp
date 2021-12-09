@@ -260,23 +260,25 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateDeclarativeAccessibili
             }
         }
     }
-
-    auto accessibilityNode = AceType::MakeRefPtr<AccessibilityNode>(nodeId, tag);
+    auto accessibilityNode = GetAccessibilityNodeById(nodeId);
+    if (!accessibilityNode) {
+        accessibilityNode = AceType::MakeRefPtr<AccessibilityNode>(nodeId, tag);
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            auto result = accessibilityNodes_.try_emplace(nodeId, accessibilityNode);
+            if (!result.second) {
+                LOGW("the accessibility node has already in the map");
+                return nullptr;
+            }
+        }
+    }
+    accessibilityNode->SetTag(tag);
     accessibilityNode->SetIsRootNode(nodeId == rootNodeId_);
     accessibilityNode->SetPageId(rootNodeId_ - DOM_ROOT_NODE_ID_BASE);
     accessibilityNode->SetFocusableState(true);
     if (parentNode) {
         accessibilityNode->SetParentNode(parentNode);
         accessibilityNode->Mount(itemIndex);
-    }
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        auto result = accessibilityNodes_.try_emplace(nodeId, accessibilityNode);
-
-        if (!result.second) {
-            LOGW("the accessibility node has already in the map");
-            return nullptr;
-        }
     }
     return accessibilityNode;
 }

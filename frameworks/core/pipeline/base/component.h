@@ -194,30 +194,19 @@ public:
     static void MergeRSNode(const RefPtr<Component>& head, const RefPtr<Component>& tail);
     static void MergeRSNode(const RefPtr<Component>& standaloneNode);
 
-    const std::string& GetInspectorId()
-    {
-        return inspectorId_;
-    }
-
-    void SetInspectorId(const std::string& id)
-    {
-        inspectorId_ = id;
-    }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    void SetDebugLine(std::string debugLine)
-    {
-        debugLine_ = debugLine;
-    }
-
-    std::string GetDebugLine()
-    {
-        return debugLine_;
-    }
-#endif
-
     virtual uint32_t Compare(const RefPtr<Component>& component) const
     {
         return static_cast<uint32_t>(UpdateRenderType::LAYOUT);
+    }
+
+    void SetIgnoreInspector(bool ignoreInspector)
+    {
+        ignoreInspector_ = ignoreInspector;
+    }
+
+    bool IsIgnoreInspector() const
+    {
+        return ignoreInspector_;
     }
 
     RefPtr<V2::EventExtensions> GetEventExtensions()
@@ -237,6 +226,7 @@ protected:
     TextDirection direction_ = TextDirection::LTR;
 
 private:
+    bool ignoreInspector_ = false;
     PropAnimationMap propAnimations_;
     UpdateType updateType_ = UpdateType::ALL;
     WeakPtr<Component> parent_;
@@ -246,14 +236,9 @@ private:
     // Set the id for the component to identify the unique component.
     int32_t retakeId_ = 0;
     bool static_ = false;
-    std::string inspectorId_ = "-1";
     // eventMarker used to handle component detach and attach to the render tree.
     EventMarker appearEventId_;
     EventMarker disappearEventId_;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    // for PC Preview to record the component  the line number in dts file
-    std::string debugLine_;
-#endif
     RefPtr<V2::EventExtensions> eventExtensions_;
     bool isHeadComponent_ = false;
     bool isTailComponent_ = false;

@@ -321,13 +321,11 @@ RefPtr<OHOS::Ace::Component> JSView::InternalRender(const RefPtr<Component>& par
         return nullptr;
     }
     jsViewFunction_->ExecuteAboutToRender();
-    ViewStackProcessor::GetInstance()->SetRootStackId(parent ? StringToInt(parent->GetInspectorId()) : -1);
     jsViewFunction_->ExecuteRender();
     jsViewFunction_->ExecuteOnRenderDone();
     CleanUpAbandonedChild();
     jsViewFunction_->Destroy(this);
     auto buildComponent = ViewStackProcessor::GetInstance()->Finish();
-    ViewStackProcessor::GetInstance()->ResetRootStackId();
     return buildComponent;
 }
 

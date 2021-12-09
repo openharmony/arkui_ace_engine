@@ -2635,8 +2635,12 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
         return;
     }
 
-    auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
-    popupParam->SetTargetId(mainComponent->GetInspectorId());
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("this component does not hava inspetor");
+        return;
+    }
+    popupParam->SetTargetId(inspector->GetId());
     if (info[0]->IsBoolean()) {
         popupParam->SetIsShow(info[0]->ToBoolean());
     } else {
@@ -3182,7 +3186,7 @@ void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
         return;
     }
 
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (component) {
         component->SetDebugLine(info[0]->ToString());
     }
@@ -3209,80 +3213,42 @@ void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsAccessibilityGroup(bool accessible)
 {
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (!component) {
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("this component does not hava inspetor");
         return;
     }
-
-    int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
-    auto accessibilityNode = GetAccessibilityNodeById(inspectorId);
-    if (accessibilityNode) {
-        accessibilityNode->SetAccessible(accessible);
-    }
+    inspector->SetAccessibilityGroup(accessible);
 }
 
 void JSViewAbstract::JsAccessibilityText(const std::string& text)
 {
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (!component) {
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("this component does not hava inspetor");
         return;
     }
-
-    int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
-    auto accessibilityNode = GetAccessibilityNodeById(inspectorId);
-    if (accessibilityNode) {
-        accessibilityNode->SetAccessibilityLabel(text);
-    }
+    inspector->SetAccessibilitytext(text);
 }
 
 void JSViewAbstract::JsAccessibilityDescription(const std::string& description)
 {
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (!component) {
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("this component does not hava inspetor");
         return;
     }
-
-    int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
-    auto accessibilityNode = GetAccessibilityNodeById(inspectorId);
-    if (accessibilityNode) {
-        accessibilityNode->SetAccessibilityHint(description);
-    }
+    inspector->SetAccessibilityDescription(description);
 }
 
 void JSViewAbstract::JsAccessibilityImportance(const std::string& importance)
 {
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (!component) {
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("this component does not hava inspetor");
         return;
     }
-
-    int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
-    auto accessibilityNode = GetAccessibilityNodeById(inspectorId);
-    if (accessibilityNode) {
-        accessibilityNode->SetImportantForAccessibility(importance);
-    }
-}
-
-RefPtr<AccessibilityNode> JSViewAbstract::GetAccessibilityNodeById(int32_t nodeId)
-{
-    auto container = Container::Current();
-    if (!container) {
-        LOGE("Container is null.");
-        return nullptr;
-    }
-    auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        LOGE("PipelineContext is null.");
-        return nullptr;
-    }
-
-    auto accessibilityManager = pipelineContext->GetAccessibilityManager();
-    if (!accessibilityManager) {
-        LOGE("SetAccessibilityNode accessibilityManager is null.");
-        return nullptr;
-    }
-
-    return accessibilityManager->GetAccessibilityNodeById(nodeId);
+    inspector->SetAccessibilityImportance(importance);
 }
 
 void JSViewAbstract::JSBind()

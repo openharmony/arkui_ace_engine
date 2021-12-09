@@ -190,7 +190,7 @@ const char SEARCH_COMPONENT_TAG[] = "SearchComponent";
 const char SEARCH_ETS_TAG[] = "Search";
 
 // formComponent
-const char FORM_COMPONENT_TAG[] = "card";
+const char FORM_COMPONENT_TAG[] = "FormComponent";
 const char FORM_ETS_TAG[] = "FormComponent";
 
 // video

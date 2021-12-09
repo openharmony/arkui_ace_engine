@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
+#include "base/log/log_wrapper.h"
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/padding/padding_component.h"
@@ -251,15 +252,22 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
 {
     LOGD("JSButton JsOnClick");
     if (info[0]->IsFunction()) {
-        auto nodeId = ViewStackProcessor::GetInstance()->GetCurrentInspectorNodeId();
+        auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+        if (!inspector) {
+            LOGE("fail to get inspector for on click event");
+            return;
+        }
+        auto impl = inspector->GetInspectorFunctionImpl();
         JSRef<JSFunc> clickFunction = JSRef<JSFunc>::Cast(info[0]);
         auto onClickFunc = AceType::MakeRefPtr<JsClickFunction>(clickFunction);
         EventMarker clickEventId(
-            [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc), nodeId](const BaseEventInfo* info) {
+            [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc), impl](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
                 auto newInfo = *clickInfo;
-                UpdateEventTarget(nodeId, newInfo);
+                if (impl) {
+                    impl->UpdateEventInfo(newInfo);
+                }
                 func->Execute(newInfo);
             });
 

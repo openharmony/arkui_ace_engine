@@ -51,7 +51,7 @@ std::unique_ptr<JsonValue> ListItemComposedElement::ToJsonObject() const
 
 std::string ListItemComposedElement::GetSticky() const
 {
-    auto node = GetInspectorNode(ListItemElement::TypeId());
+    auto node = GetInspectorNode(ListItemElement::TypeId(), true);
     if (!node) {
         return "Sticky.None";
     }
@@ -64,7 +64,7 @@ std::string ListItemComposedElement::GetSticky() const
 
 std::string ListItemComposedElement::GetEditMode() const
 {
-    auto node = GetInspectorNode(ListItemElement::TypeId());
+    auto node = GetInspectorNode(ListItemElement::TypeId(), true);
     if (!node) {
         return "EditMode.None";
     }

@@ -75,6 +75,8 @@ namespace OHOS::Ace::V2 {
 
 namespace {
 
+using CreateElementFunc = std::function<RefPtr<InspectorComposedElement>(const std::string& id)>;
+
 const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { COLUMN_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ColumnComposedElement>(id); } },
@@ -245,8 +247,8 @@ RefPtr<Element> InspectorComposedComponent::CreateElement()
 {
     auto generateFunc = CREATE_ELEMENT_MAP.find(GetName());
     if (generateFunc != CREATE_ELEMENT_MAP.end()) {
-        auto composedElement = generateFunc->second(GetId());
-        AddElementToAccessibilityManager(composedElement);
+        auto composedElement = generateFunc->second(id_);
+        composedElement->SetInspectorTag(GetName());
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
         composedElement->SetDebugLine(GetDebugLine());
 #endif
@@ -296,20 +298,6 @@ RefPtr<AccessibilityNode> InspectorComposedComponent::CreateAccessibilityNode(
     }
     auto node = accessibilityManager->CreateAccessibilityNode(iter->second, nodeId, parentNodeId, itemIndex);
     return node;
-}
-
-void InspectorComposedComponent::AddElementToAccessibilityManager(const RefPtr<ComposedElement>& composedElement)
-{
-    if (!composedElement) {
-        LOGE("composedElement is null");
-        return;
-    }
-    auto accessibilityManager = GetAccessibilityManager();
-    if (!accessibilityManager) {
-        LOGE("get AccessibilityManager failed");
-        return;
-    }
-    accessibilityManager->AddComposedElement(composedElement->GetId(), composedElement);
 }
 
 } // namespace OHOS::Ace::V2

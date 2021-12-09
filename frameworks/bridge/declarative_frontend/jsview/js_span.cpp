@@ -234,17 +234,24 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
 void JSSpan::JsOnClick(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {
-        auto nodeId = ViewStackProcessor::GetInstance()->GetCurrentInspectorNodeId();
+        auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+        if (!inspector) {
+            LOGE("fail to get inspector for on click event");
+            return;
+        }
+        auto impl = inspector->GetInspectorFunctionImpl();
         RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onClickId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), nodeId]
-            (const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGD("About to call onclick method on js");
-            auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-            auto newInfo = *clickInfo;
-            UpdateEventTarget(nodeId, newInfo);
-            func->Execute(newInfo);
-        });
+        auto onClickId = EventMarker(
+            [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                LOGD("About to call onclick method on js");
+                auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+                auto newInfo = *clickInfo;
+                if (impl) {
+                    impl->UpdateEventInfo(newInfo);
+                }
+                func->Execute(newInfo);
+            });
         auto component = GetComponent();
         if (component) {
             component->SetOnClick(onClickId);

@@ -15,6 +15,8 @@
 
 #include "core/components/scroll/scroll_element.h"
 
+#include "core/common/text_field_manager.h"
+#include "core/components/page/page_element.h"
 #include "core/components/scroll/render_scroll.h"
 
 namespace OHOS::Ace {
@@ -29,6 +31,15 @@ void ScrollElement::PerformBuild()
 
     if (GetRenderNode()) {
         GetRenderNode()->MarkNeedLayout();
+    }
+}
+
+void ScrollElement::OnMount()
+{
+    auto context = context_.Upgrade();
+    if (context && context->GetTextFieldManager() && context->GetLastPage()) {
+        auto textFeildManager = context->GetTextFieldManager();
+        textFeildManager->SetScrollElement(context->GetLastPage()->GetPageId(), WeakClaim(this));
     }
 }
 
