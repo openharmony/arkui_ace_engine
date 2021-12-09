@@ -86,9 +86,6 @@ void RenderCheckbox::HandleClick()
     if (controller_) {
         controller_->Play();
     }
-    if (clickEvent_) {
-        clickEvent_();
-    }
 }
 
 void RenderCheckbox::UpdateAnimation()
