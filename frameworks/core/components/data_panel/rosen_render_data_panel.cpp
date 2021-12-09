@@ -35,6 +35,7 @@ constexpr double SCAN_DEGREE = 30;
 constexpr int32_t CIRCLE_NUMBER = 50;
 constexpr float SHADOW_BLUR_RADIUS = 5.0f;
 constexpr double DIAMETER_TO_THICKNESS_RATIO = 0.12;
+constexpr double FIXED_WIDTH = 1.0;
 
 } // namespace
 
@@ -486,8 +487,93 @@ void RosenRenderProgressDataPanel::PaintRingProgress(RenderContext& context, con
     PaintProgress(canvas, arcData, false, useEffect_, percent_);
 }
 
+void RosenRenderPercentageDataPanel::PaintBackground(
+    RenderContext& context, const Offset& leftTop, double totalWidth, double height)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        return;
+    }
+    SkPaint backgroundPaint;
+    SkRRect rRect;
+    rRect.setRectXY(SkRect::MakeWH(totalWidth, height), height, height);
+    rRect.offset(leftTop.GetX(), leftTop.GetY());
+    backgroundPaint.setColor(backgroundTrack_.GetValue());
+    backgroundPaint.setStyle(SkPaint::kFill_Style);
+    backgroundPaint.setAntiAlias(true);
+    canvas->clipRRect(rRect, true);
+    canvas->drawRect(
+        { leftTop.GetX(), leftTop.GetY(), totalWidth + leftTop.GetX(), height + leftTop.GetY() }, backgroundPaint);
+}
+
+void RosenRenderPercentageDataPanel::PaintSpace(
+    RenderContext& context, const Offset& leftTop, double segmentWidth, double widthSegment, double height)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        return;
+    }
+    SkPaint segmentPaint;
+    SkRect rect = SkRect::MakeXYWH(widthSegment, leftTop.GetY(), segmentWidth, height);
+    segmentPaint.setColor(Color::WHITE.GetValue());
+    segmentPaint.setStyle(SkPaint::kFill_Style);
+    segmentPaint.setAntiAlias(true);
+    canvas->drawRect(rect, segmentPaint);
+}
+
+void RosenRenderPercentageDataPanel::PaintColorSegment(RenderContext& context, const Offset& leftTop,
+    double segmentValue, double xSegment, double height, const Color segmentStartColor, const Color segmentEndColor)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        return;
+    }
+    SkPaint segmentPaint;
+    SkRect rect;
+    rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue, height);
+    SkPoint segmentStartPoint;
+    segmentStartPoint.set(rect.left(), rect.top());
+    SkPoint segmentEndPoint;
+    segmentEndPoint.set(rect.right(), rect.bottom());
+    SkPoint segmentPoint[2] = { segmentStartPoint, segmentEndPoint };
+    SkColor segmentColor[2] = { segmentStartColor.GetValue(), segmentEndColor.GetValue() };
+    SkScalar pos[2] = { 0.0, 1.0 };
+    segmentPaint.setShader(SkGradientShader::MakeLinear(segmentPoint, segmentColor, pos, 2, SkTileMode::kClamp));
+    segmentPaint.setStyle(SkPaint::kFill_Style);
+    segmentPaint.setAntiAlias(true);
+    canvas->drawRect(rect, segmentPaint);
+}
+
+void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context, const Offset& offset)
+{
+    auto totalWidth = GetLayoutSize().Width();
+    if (GetMaxValue() == 0) {
+        return;
+    }
+    auto segment = GetSegments();
+    auto scaleMaxValue = totalWidth / (GetMaxValue() + (double)(segment.size() - 1) * FIXED_WIDTH);
+    auto height = GetLayoutSize().Height();
+    auto widthSegment = offset.GetX();
+    PaintBackground(context, offset, totalWidth, height);
+    for (int i = 0; i < segment.size(); i++) {
+        auto segmentWidth = segment[i].GetValue();
+        auto segmentStartColor = segment[i].GetStartColor();
+        auto segmentEndColor = segment[i].GetEndColor();
+        PaintColorSegment(
+            context, offset, segmentWidth * scaleMaxValue, widthSegment, height, segmentStartColor, segmentEndColor);
+        widthSegment += segment[i].GetValue() * scaleMaxValue;
+        auto spaceWidth = FIXED_WIDTH * scaleMaxValue;
+        PaintSpace(context, offset, spaceWidth, widthSegment, height);
+        widthSegment += FIXED_WIDTH * scaleMaxValue;
+    }
+}
+
 void RosenRenderPercentageDataPanel::Paint(RenderContext& context, const Offset& offset)
 {
+    if (type_ == ChartType::LINE) {
+        PaintLinearProgress(context, offset);
+        return;
+    }
     ArcData arcData;
     arcData.center = Offset(GetLayoutSize().Width() / 2, GetLayoutSize().Height() / 2);
     arcData.thickness = NormalizeToPx(thickness_);

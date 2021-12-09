@@ -36,6 +36,12 @@ var TextAlign;
   TextAlign[TextAlign["End"] = 2] = "End";
 })(TextAlign || (TextAlign = {}));
 
+var DataPanelType;
+(function (DataPanelType) {
+  DataPanelType[DataPanelType["Line"] = 0] = "Line";
+  DataPanelType[DataPanelType["Rainbow"] = 4] = "Rainbow";
+})(DataPanelType || (DataPanelType = {}));
+
 var FontWeight;
 (function (FontWeight) {
   FontWeight["Light"] = "light";
