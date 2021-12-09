@@ -13,18 +13,19 @@
  * limitations under the License.
  */
 
-#include "core/components/chart/flutter_render_chart.h"
+#include "core/components/chart/rosen_render_chart.h"
 
 #include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/third_party/txt/src/txt/paragraph_txt.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/effects/Sk1DPathEffect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
+#include "third_party/skia/include/core/SkPaint.h"
 
 #include "base/utils/string_utils.h"
-#include "core/components/calendar/flutter_render_calendar.h"
+#include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/font/flutter_font_collection.h"
+#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -48,25 +49,12 @@ constexpr int32_t MIN_SDK_VERSION = 6;
 
 } // namespace
 
-RenderLayer FlutterRenderChart::GetRenderLayer()
-{
-    if (!layer_) {
-        layer_ = AceType::MakeRefPtr<Flutter::ClipLayer>(
-            0, GetLayoutSize().Width(), 0, GetLayoutSize().Height(), Flutter::Clip::NONE);
-        lastLayoutSize_ = GetLayoutSize();
-    } else if (lastLayoutSize_ != GetLayoutSize()) {
-        layer_->SetClip(0, GetLayoutSize().Width(), 0, GetLayoutSize().Height(), Flutter::Clip::NONE);
-        lastLayoutSize_ = GetLayoutSize();
-    }
-    return AceType::RawPtr(layer_);
-}
-
-void FlutterRenderChart::Update(const RefPtr<Component>& component)
+void RosenRenderChart::Update(const RefPtr<Component>& component)
 {
     RenderChart::Update(component);
 }
 
-Offset FlutterRenderChart::ConvertDataToPosition(const Rect& paintRegion, const PointInfo& point)
+Offset RosenRenderChart::ConvertDataToPosition(const Rect& paintRegion, const PointInfo& point)
 {
     double xLength = horizontal_.max - horizontal_.min;
     double yLength = vertical_.max - vertical_.min;
@@ -78,7 +66,7 @@ Offset FlutterRenderChart::ConvertDataToPosition(const Rect& paintRegion, const 
             (point.GetY() - vertical_.min) * paintRegion.Height() / yLength);
 }
 
-void FlutterRenderChart::Paint(RenderContext& context, const Offset& offset)
+void RosenRenderChart::Paint(RenderContext& context, const Offset& offset)
 {
     if (LessOrEqual(vertical_.max, vertical_.min)) {
         vertical_.min = 0.0;
@@ -99,7 +87,6 @@ void FlutterRenderChart::Paint(RenderContext& context, const Offset& offset)
             GetLayoutSize().Width() - 2 * EDGE_PADDING, GetLayoutSize().Height() - 2 * DOUBLE_TEXT_PADDING);
     } else {
         PaintVerticalAxis(context, offset, verticalPaintRegion);
-
         PaintHorizontalAxis(context, horizontalPaintRegion);
         dataRegion = Rect(offset.GetX() + tickHorizontalOffset_ + EDGE_PADDING, offset.GetY() + EDGE_PADDING,
             horizontal_.tickNumber * tickHorizontalOffset_, vertical_.tickNumber * tickOffset_);
@@ -109,44 +96,39 @@ void FlutterRenderChart::Paint(RenderContext& context, const Offset& offset)
             dataRegion.Height(), dataRegion.Width());
         return;
     }
+    // We Do not clip here(compare with FlutterRenderChart).
+    // Cliping here may cause Axis not display when horizontal_.display = true or vertical_.display = true
     paintWidth_ = dataRegion.GetSize().Width();
-    auto pipelineContext = GetContext().Upgrade();
-    if (pipelineContext && pipelineContext->UseLiteStyle() &&
-        (pipelineContext->GetMinPlatformVersion() >= MIN_SDK_VERSION) && layer_) {
-        layer_->SetClip(
-            dataRegion.Left(), dataRegion.Right(), dataRegion.Top(), dataRegion.Bottom(), Flutter::Clip::HARD_EDGE);
-    }
     PaintDatas(context, dataRegion);
 }
 
-void FlutterRenderChart::PaintStylePoints(
-    const ScopedCanvas& canvas, const Rect& paintRegion, const MainChart& chartData)
+void RosenRenderChart::PaintStylePoints(
+    SkCanvas* canvas, const Rect& paintRegion, const MainChart& chartData)
 {
-    flutter::Paint paint;
-    flutter::PaintData paintData;
-    paint.paint()->setAntiAlias(true);
+    SkPaint paint;
+    paint.setAntiAlias(true);
 
     for (const auto& points : chartData.GetData()) {
         const PointInfo& point = points.GetPointInfo();
         if (point.GetDisplay()) {
-            PaintPoint(canvas, ConvertDataToPosition(paintRegion, point), paint, paintData, point);
+            PaintPoint(canvas, ConvertDataToPosition(paintRegion, point), paint, point);
         }
     }
     PointInfo headPoint = chartData.GetHeadPoint();
     if (headPoint.GetDisplay()) {
-        PaintPoint(canvas, ConvertDataToPosition(paintRegion, headPoint), paint, paintData, headPoint);
+        PaintPoint(canvas, ConvertDataToPosition(paintRegion, headPoint), paint, headPoint);
     }
     PointInfo topPoint = chartData.GetTopPoint();
     if (topPoint.GetDisplay()) {
-        PaintPoint(canvas, ConvertDataToPosition(paintRegion, topPoint), paint, paintData, topPoint);
+        PaintPoint(canvas, ConvertDataToPosition(paintRegion, topPoint), paint, topPoint);
     }
     PointInfo bottomPoint = chartData.GetBottomPoint();
     if (bottomPoint.GetDisplay()) {
-        PaintPoint(canvas, ConvertDataToPosition(paintRegion, bottomPoint), paint, paintData, bottomPoint);
+        PaintPoint(canvas, ConvertDataToPosition(paintRegion, bottomPoint), paint, bottomPoint);
     }
 }
 
-void FlutterRenderChart::PaintText(const ScopedCanvas& canvas, const Rect& paintRegion, const MainChart& chartData)
+void RosenRenderChart::PaintText(SkCanvas* canvas, const Rect& paintRegion, const MainChart& chartData)
 {
     if (chartData.GetData().empty()) {
         return;
@@ -176,74 +158,73 @@ void FlutterRenderChart::PaintText(const ScopedCanvas& canvas, const Rect& paint
         paragraph->Layout(paragraphSize);
         Size textSize = Size(paragraph->GetMinIntrinsicWidth(), paragraph->GetHeight());
         if (text.GetPlacement() == Placement::TOP) {
-            paragraph->Paint(canvas->canvas(), pointPosition.GetX() - textSize.Width() / 2,
+            paragraph->Paint(canvas, pointPosition.GetX() - textSize.Width() / 2,
                 pointPosition.GetY() - textSize.Height() - TEXT_PADDING);
         } else if (text.GetPlacement() == Placement::BOTTOM) {
             paragraph->Paint(
-                canvas->canvas(), pointPosition.GetX() - textSize.Width() / 2, pointPosition.GetY() + TEXT_PADDING);
+                canvas, pointPosition.GetX() - textSize.Width() / 2, pointPosition.GetY() + TEXT_PADDING);
         }
     }
 }
 
-void FlutterRenderChart::SetEdgeStyle(const PointInfo& point, flutter::Paint& paint) const
+void RosenRenderChart::SetEdgeStyle(const PointInfo& point, SkPaint& paint) const
 {
-    paint.paint()->setStyle(SkPaint::Style::kStroke_Style);
-    paint.paint()->setStrokeWidth(NormalizeToPx(point.GetPointStrokeWidth()));
-    paint.paint()->setColor(point.GetStrokeColor().GetValue());
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeWidth(NormalizeToPx(point.GetPointStrokeWidth()));
+    paint.setColor(point.GetStrokeColor().GetValue());
 }
 
-void FlutterRenderChart::PaintPoint(const ScopedCanvas& canvas, const Offset& offset, flutter::Paint paint,
-    flutter::PaintData paintData, const PointInfo& point)
+void RosenRenderChart::PaintPoint(SkCanvas* canvas, const Offset& offset, SkPaint paint, const PointInfo& point)
 {
-    paint.paint()->setColor(point.GetFillColor().GetValue());
-    paint.paint()->setStyle(SkPaint::Style::kFill_Style);
+    paint.setColor(point.GetFillColor().GetValue());
+    paint.setStyle(SkPaint::Style::kFill_Style);
     double pointSize = NormalizeToPx(point.GetPointSize());
     double halfThickness = NormalizeToPx(point.GetPointStrokeWidth()) / 2;
     double innerRadius = pointSize / 2 - halfThickness;
     // first fill point color, then draw edge of point.
     switch (point.GetPointShape()) {
         case PointShape::CIRCLE: {
-            canvas->drawCircle(offset.GetX(), offset.GetY(), innerRadius, paint, paintData);
+            canvas->drawCircle(offset.GetX(), offset.GetY(), innerRadius, paint);
             SetEdgeStyle(point, paint);
-            canvas->drawCircle(offset.GetX(), offset.GetY(), pointSize / 2, paint, paintData);
+            canvas->drawCircle(offset.GetX(), offset.GetY(), pointSize / 2, paint);
             break;
         }
         case PointShape::SQUARE: {
-            canvas->drawRect(offset.GetX() - innerRadius, offset.GetY() - innerRadius, offset.GetX() + innerRadius,
-                offset.GetY() + innerRadius, paint, paintData);
+            canvas->drawRect(SkRect::MakeLTRB(offset.GetX() - innerRadius, offset.GetY() - innerRadius,
+                                              offset.GetX() + innerRadius, offset.GetY() + innerRadius), paint);
             SetEdgeStyle(point, paint);
-            canvas->drawRect(offset.GetX() - pointSize / 2, offset.GetY() - pointSize / 2,
-                offset.GetX() + pointSize / 2, offset.GetY() + pointSize / 2, paint, paintData);
+            canvas->drawRect(SkRect::MakeLTRB(offset.GetX() - pointSize / 2, offset.GetY() - pointSize / 2,
+                                              offset.GetX() + pointSize / 2, offset.GetY() + pointSize / 2), paint);
             break;
         }
         case PointShape::TRIANGLE: {
-            auto path = flutter::CanvasPath::Create();
-            path->moveTo(offset.GetX(), offset.GetY() - innerRadius);
-            path->lineTo(offset.GetX() - RATIO_CONSTANT * innerRadius / 2, offset.GetY() + innerRadius / 2);
-            path->lineTo(offset.GetX() + RATIO_CONSTANT * innerRadius / 2, offset.GetY() + innerRadius / 2);
-            path->close();
-            canvas->drawPath(path.get(), paint, paintData);
-            path->reset();
-            path->moveTo(offset.GetX(), offset.GetY() - pointSize / 2);
-            path->lineTo(offset.GetX() - RATIO_CONSTANT * pointSize / 4, offset.GetY() + pointSize / 4);
-            path->lineTo(offset.GetX() + RATIO_CONSTANT * pointSize / 4, offset.GetY() + pointSize / 4);
-            path->close();
+            SkPath path;
+            path.moveTo(offset.GetX(), offset.GetY() - innerRadius);
+            path.lineTo(offset.GetX() - RATIO_CONSTANT * innerRadius / 2, offset.GetY() + innerRadius / 2);
+            path.lineTo(offset.GetX() + RATIO_CONSTANT * innerRadius / 2, offset.GetY() + innerRadius / 2);
+            path.close();
+            canvas->drawPath(path, paint);
+            path.reset();
+            path.moveTo(offset.GetX(), offset.GetY() - pointSize / 2);
+            path.lineTo(offset.GetX() - RATIO_CONSTANT * pointSize / 4, offset.GetY() + pointSize / 4);
+            path.lineTo(offset.GetX() + RATIO_CONSTANT * pointSize / 4, offset.GetY() + pointSize / 4);
+            path.close();
             SetEdgeStyle(point, paint);
-            canvas->drawPath(path.get(), paint, paintData);
+            canvas->drawPath(path, paint);
             break;
         }
         default: {
-            canvas->drawCircle(offset.GetX(), offset.GetY(), innerRadius, paint, paintData);
+            canvas->drawCircle(offset.GetX(), offset.GetY(), innerRadius, paint);
             SetEdgeStyle(point, paint);
-            canvas->drawCircle(offset.GetX(), offset.GetY(), pointSize / 2, paint, paintData);
+            canvas->drawCircle(offset.GetX(), offset.GetY(), pointSize / 2, paint);
             break;
         }
     }
 }
 
-void FlutterRenderChart::PaintDatas(RenderContext& context, const Rect& paintRect)
+void RosenRenderChart::PaintDatas(RenderContext& context, const Rect& paintRect)
 {
-    ScopedCanvas canvas = ScopedCanvas::Create(context);
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
     if (!canvas) {
         LOGE("Paint canvas is null");
         return;
@@ -255,21 +236,21 @@ void FlutterRenderChart::PaintDatas(RenderContext& context, const Rect& paintRec
     if (type_ == ChartType::LINE) {
         PaintLinearGraph(canvas, paintRect);
     } else {
-        flutter::Paint paint;
-        paint.paint()->setAntiAlias(true);
-        paint.paint()->setStyle(SkPaint::Style::kStrokeAndFill_Style);
+        SkPaint paint;
+        paint.setAntiAlias(true);
+        paint.setStyle(SkPaint::Style::kStrokeAndFill_Style);
 
         const int32_t barGroupNumber = mainCharts_.size();
         auto barsAreaNumber = horizontal_.tickNumber;
         for (int32_t barGroupIndex = 0; barGroupIndex < barGroupNumber; ++barGroupIndex) {
             auto barGroup = mainCharts_[barGroupIndex];
-            paint.paint()->setColor(barGroup.GetFillColor().GetValue());
+            paint.setColor(barGroup.GetFillColor().GetValue());
             PaintBar(canvas, paint, barGroup.GetData(), paintRect, barGroupNumber, barsAreaNumber, barGroupIndex);
         }
     }
 }
 
-void FlutterRenderChart::UpdateLineGradientPoint(
+void RosenRenderChart::UpdateLineGradientPoint(
     const std::vector<LineInfo>& pointInfo, const MainChart& line, const Rect& paintRect)
 {
     if (line.GetHeadPointIndex() > 0 && line.GetErasePointNumber() > 0) {
@@ -290,7 +271,7 @@ void FlutterRenderChart::UpdateLineGradientPoint(
     }
 }
 
-void FlutterRenderChart::PaintLinearGraph(const ScopedCanvas& canvas, const Rect& paintRect)
+void RosenRenderChart::PaintLinearGraph(SkCanvas* canvas, const Rect& paintRect)
 {
     for (const auto& line : mainCharts_) {
         const auto& pointInfo = line.GetData();
@@ -302,11 +283,11 @@ void FlutterRenderChart::PaintLinearGraph(const ScopedCanvas& canvas, const Rect
         auto previousPoint = pointInfo[0].GetPointInfo();
         Offset previousPosition = ConvertDataToPosition(paintRect, previousPoint);
         startOffset_ = previousPosition;
-        auto edgePath = flutter::CanvasPath::Create();
-        auto gradientPath = flutter::CanvasPath::Create();
-        edgePath->moveTo(previousPosition.GetX(), previousPosition.GetY());
-        gradientPath->moveTo(previousPosition.GetX(), paintRect.Bottom());
-        gradientPath->lineTo(previousPosition.GetX(), previousPosition.GetY());
+        SkPath edgePath;
+        SkPath gradientPath;
+        edgePath.moveTo(previousPosition.GetX(), previousPosition.GetY());
+        gradientPath.moveTo(previousPosition.GetX(), paintRect.Bottom());
+        gradientPath.lineTo(previousPosition.GetX(), previousPosition.GetY());
 
         UpdateLineGradientPoint(pointInfo, line, paintRect);
 
@@ -318,8 +299,8 @@ void FlutterRenderChart::PaintLinearGraph(const ScopedCanvas& canvas, const Rect
                 AddCubicPath(gradientPath, paintRect, line.GetData(), index, isEnd);
                 AddCubicPath(edgePath, paintRect, line.GetData(), index, isEnd);
             } else {
-                gradientPath->lineTo(currentPosition.GetX(), currentPosition.GetY());
-                edgePath->lineTo(currentPosition.GetX(), currentPosition.GetY());
+                gradientPath.lineTo(currentPosition.GetX(), currentPosition.GetY());
+                edgePath.lineTo(currentPosition.GetX(), currentPosition.GetY());
             }
             wholeLineGradient_ = line.GetWholeLineGradient();
             if (wholeLineGradient_) {
@@ -328,14 +309,14 @@ void FlutterRenderChart::PaintLinearGraph(const ScopedCanvas& canvas, const Rect
             int32_t i = static_cast<int32_t>(index);
             if ((line.GetHeadPointIndex() > 0) && (i > line.GetHeadPointIndex()) &&
                 (i <= line.GetHeadPointIndex() + line.GetErasePointNumber())) {
-                gradientPath->reset();
+                gradientPath.reset();
                 if (i < line.GetHeadPointIndex() + line.GetErasePointNumber()) {
-                    edgePath->reset();
-                    edgePath->moveTo(currentPosition.GetX(), currentPosition.GetY());
+                    edgePath.reset();
+                    edgePath.moveTo(currentPosition.GetX(), currentPosition.GetY());
                 } else {
-                    edgePath->lineTo(currentPosition.GetX(), currentPosition.GetY());
-                    gradientPath->moveTo(currentPosition.GetX(), paintRect.Bottom());
-                    gradientPath->lineTo(currentPosition.GetX(), currentPosition.GetY());
+                    edgePath.lineTo(currentPosition.GetX(), currentPosition.GetY());
+                    gradientPath.moveTo(currentPosition.GetX(), paintRect.Bottom());
+                    gradientPath.lineTo(currentPosition.GetX(), currentPosition.GetY());
                     gradientOfLine_ = true;
                 }
                 previousSegment = pointInfo[index].GetSegmentInfo();
@@ -345,29 +326,29 @@ void FlutterRenderChart::PaintLinearGraph(const ScopedCanvas& canvas, const Rect
             }
             if (previousSegment != pointInfo[index].GetSegmentInfo() ||
                 (line.GetHeadPointIndex() > 0 && line.GetHeadPointIndex() == i)) {
-                gradientPath->lineTo(currentPosition.GetX(), paintRect.Bottom());
-                gradientPath->close();
+                gradientPath.lineTo(currentPosition.GetX(), paintRect.Bottom());
+                gradientPath.close();
                 if (line.GetGradient()) {
                     PaintLineGradient(canvas, gradientPath, paintRect, line.GetFillColor(), line.GetTopPoint());
                 }
                 PaintLineEdge(canvas, edgePath, previousSegment, line.GetLineWidth(), false);
                 // print gradient
-                gradientPath->reset();
-                edgePath->reset();
+                gradientPath.reset();
+                edgePath.reset();
                 previousSegment = pointInfo[index].GetSegmentInfo();
                 previousPoint = currentPoint;
                 previousPosition = currentPosition;
-                edgePath->moveTo(previousPosition.GetX(), previousPosition.GetY());
-                gradientPath->moveTo(previousPosition.GetX(), paintRect.Bottom());
-                gradientPath->lineTo(previousPosition.GetX(), previousPosition.GetY());
+                edgePath.moveTo(previousPosition.GetX(), previousPosition.GetY());
+                gradientPath.moveTo(previousPosition.GetX(), paintRect.Bottom());
+                gradientPath.lineTo(previousPosition.GetX(), previousPosition.GetY());
             } else {
                 previousSegment = pointInfo[index].GetSegmentInfo();
                 previousPoint = currentPoint;
                 previousPosition = currentPosition;
             }
         }
-        gradientPath->lineTo(previousPosition.GetX(), paintRect.Bottom());
-        gradientPath->close();
+        gradientPath.lineTo(previousPosition.GetX(), paintRect.Bottom());
+        gradientPath.close();
         if (line.GetGradient()) {
             PaintLineGradient(canvas, gradientPath, paintRect, line.GetFillColor(), line.GetTopPoint());
         }
@@ -377,22 +358,21 @@ void FlutterRenderChart::PaintLinearGraph(const ScopedCanvas& canvas, const Rect
     }
 }
 
-void FlutterRenderChart::PaintLineEdge(const ScopedCanvas& canvas, fml::RefPtr<flutter::CanvasPath> path,
+void RosenRenderChart::PaintLineEdge(SkCanvas* canvas, SkPath &path,
     const SegmentInfo segmentInfo, double thickness, bool drawGradient)
 {
-    flutter::Paint paint;
-    flutter::PaintData paintData;
-    paint.paint()->setAntiAlias(true);
-    paint.paint()->setColor(segmentInfo.GetSegmentColor().GetValue());
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(segmentInfo.GetSegmentColor().GetValue());
     if (segmentInfo.GetLineType() == LineType::DASHED) {
         SkPath subPath;
         subPath.addRRect(
             SkRRect::MakeRectXY(SkRect::MakeXYWH(0.0, -0.5 * thickness, segmentInfo.GetSolidWidth(), thickness),
                 0.5 * thickness, 0.5 * thickness));
-        paint.paint()->setPathEffect(SkPath1DPathEffect::Make(subPath,
+        paint.setPathEffect(SkPath1DPathEffect::Make(subPath,
             segmentInfo.GetSpaceWidth() + segmentInfo.GetSolidWidth(), 5.0f, SkPath1DPathEffect::kMorph_Style));
     } else {
-        paint.paint()->setStrokeWidth(thickness);
+        paint.setStrokeWidth(thickness);
     }
     if (wholeLineGradient_) {
         double end = startGradientPoint_.GetX();
@@ -402,10 +382,10 @@ void FlutterRenderChart::PaintLineEdge(const ScopedCanvas& canvas, fml::RefPtr<f
         SkPoint points[2] = { SkPoint::Make(startOffset_.GetX(), 0.0f), SkPoint::Make(end, 0.0f) };
         SkColor colors[2] = { segmentInfo.GetSegmentColor().GetValue(), targetColor_.GetValue() };
 #ifdef USE_SYSTEM_SKIA
-        paint.paint()->setShader(
+        paint.setShader(
             SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkShader::kClamp_TileMode, 0, nullptr));
 #else
-        paint.paint()->setShader(
+        paint.setShader(
             SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr));
 #endif
     }
@@ -415,31 +395,30 @@ void FlutterRenderChart::PaintLineEdge(const ScopedCanvas& canvas, fml::RefPtr<f
         SkColor colors[2] = { segmentInfo.GetSegmentColor().ChangeAlpha(0).GetValue(),
             segmentInfo.GetSegmentColor().GetValue() };
 #ifdef USE_SYSTEM_SKIA
-        paint.paint()->setShader(
+        paint.setShader(
             SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkShader::kClamp_TileMode, 0, nullptr));
 #else
-        paint.paint()->setShader(
+        paint.setShader(
             SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr));
 #endif
     }
-    paint.paint()->setStyle(SkPaint::Style::kStroke_Style);
-    canvas->drawPath(path.get(), paint, paintData);
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    canvas->drawPath(path, paint);
 }
 
-void FlutterRenderChart::PaintLineGradient(const ScopedCanvas& canvas, fml::RefPtr<flutter::CanvasPath> path,
+void RosenRenderChart::PaintLineGradient(SkCanvas* canvas, SkPath& path,
     const Rect& paintRect, Color fillColor, const PointInfo& peekPoint)
 {
-    flutter::Paint paint;
-    flutter::PaintData paintData;
-    paint.paint()->setAntiAlias(true);
-    paint.paint()->setShader(
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setShader(
         CreateFillGradientShader(paintRect, fillColor, ConvertDataToPosition(paintRect, peekPoint).GetY()));
 
-    paint.paint()->setStyle(SkPaint::Style::kStrokeAndFill_Style);
-    canvas->drawPath(path.get(), paint, paintData);
+    paint.setStyle(SkPaint::Style::kStrokeAndFill_Style);
+    canvas->drawPath(path, paint);
 }
 
-sk_sp<SkShader> FlutterRenderChart::CreateFillGradientShader(const Rect& paintRect, const Color& fillColor, double top)
+sk_sp<SkShader> RosenRenderChart::CreateFillGradientShader(const Rect& paintRect, const Color& fillColor, double top)
 {
     SkPoint points[2] = { SkPoint::Make(paintRect.GetOffset().GetX(), top),
         SkPoint::Make(paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY() + paintRect.Height()) };
@@ -451,20 +430,20 @@ sk_sp<SkShader> FlutterRenderChart::CreateFillGradientShader(const Rect& paintRe
 #endif
 }
 
-Offset FlutterRenderChart::CalculateControlA(const Offset& prev, const Offset& cur, const Offset& next)
+Offset RosenRenderChart::CalculateControlA(const Offset& prev, const Offset& cur, const Offset& next)
 {
     return Offset(cur.GetX() + (next.GetX() - prev.GetX()) / BEZIER_CONSTANT,
         cur.GetY() + (next.GetY() - prev.GetY()) / BEZIER_CONSTANT);
 }
 
-Offset FlutterRenderChart::CalculateControlB(const Offset& cur, const Offset& next, const Offset& nextNext)
+Offset RosenRenderChart::CalculateControlB(const Offset& cur, const Offset& next, const Offset& nextNext)
 {
     return Offset(next.GetX() - (nextNext.GetX() - cur.GetX()) / BEZIER_CONSTANT,
         next.GetY() - (nextNext.GetY() - cur.GetY()) / BEZIER_CONSTANT);
 }
 
-int32_t FlutterRenderChart::PaintLine(uint32_t startIndex, const std::vector<LineInfo>& line,
-    fml::RefPtr<flutter::CanvasPath> path, const MainChart& data, const Rect& paintRect)
+int32_t RosenRenderChart::PaintLine(uint32_t startIndex, const std::vector<LineInfo>& line,
+    SkPath& path, const MainChart& data, const Rect& paintRect)
 {
     uint32_t index = startIndex;
     startIndex_ = startIndex;
@@ -478,10 +457,10 @@ int32_t FlutterRenderChart::PaintLine(uint32_t startIndex, const std::vector<Lin
         if (startPoint) {
             Offset position = ConvertDataToPosition(paintRect, point);
             if (data.GetGradient() && !drawLine_) {
-                path->moveTo(position.GetX(), paintRect.GetOffset().GetY() + paintRect.GetSize().Height());
-                path->lineTo(position.GetX(), position.GetY());
+                path.moveTo(position.GetX(), paintRect.GetOffset().GetY() + paintRect.GetSize().Height());
+                path.lineTo(position.GetX(), position.GetY());
             } else {
-                path->moveTo(position.GetX(), position.GetY());
+                path.moveTo(position.GetX(), position.GetY());
             }
             startPoint = false;
         } else if (index == line.size() - 1 ||
@@ -490,10 +469,10 @@ int32_t FlutterRenderChart::PaintLine(uint32_t startIndex, const std::vector<Lin
             if (data.GetSmoothFlag()) {
                 AddCubicPath(path, paintRect, line, index, true);
             } else {
-                path->lineTo(position.GetX(), position.GetY());
+                path.lineTo(position.GetX(), position.GetY());
             }
             if (data.GetGradient() && !drawLine_) {
-                path->lineTo(position.GetX(), paintRect.GetOffset().GetY() + paintRect.GetSize().Height());
+                path.lineTo(position.GetX(), paintRect.GetOffset().GetY() + paintRect.GetSize().Height());
             }
             index += 1;
             break;
@@ -502,14 +481,14 @@ int32_t FlutterRenderChart::PaintLine(uint32_t startIndex, const std::vector<Lin
                 AddCubicPath(path, paintRect, line, index, false);
             } else {
                 Offset position = ConvertDataToPosition(paintRect, point);
-                path->lineTo(position.GetX(), position.GetY());
+                path.lineTo(position.GetX(), position.GetY());
             }
         }
     }
     return index;
 }
 
-void FlutterRenderChart::AddCubicPath(fml::RefPtr<flutter::CanvasPath>& path, const Rect& paintRect,
+void RosenRenderChart::AddCubicPath(SkPath& path, const Rect& paintRect,
     const std::vector<LineInfo>& line, uint32_t index, bool isEnd)
 {
     // use control point A = [(Xi + (Xi+1 - Xi-1) / 4), (Yi + (Yi+1 - Yi-1) / 4)]
@@ -523,27 +502,26 @@ void FlutterRenderChart::AddCubicPath(fml::RefPtr<flutter::CanvasPath>& path, co
             (isEnd || index + 1 >= line.size()) ? line[index].GetPointInfo() : line[index + 1].GetPointInfo());
         Offset controlA = CalculateControlA(prev, cur, next);
         Offset controlB = CalculateControlB(cur, next, nextNext);
-        path->cubicTo(controlA.GetX(), controlA.GetY(), controlB.GetX(), controlB.GetY(), next.GetX(), next.GetY());
+        path.cubicTo(controlA.GetX(), controlA.GetY(), controlB.GetX(), controlB.GetY(), next.GetX(), next.GetY());
     } else {
         LOGW("index out of region");
     }
 }
 
-void FlutterRenderChart::PaintHorizontalAxis(RenderContext& context, const Rect& paintRect)
+void RosenRenderChart::PaintHorizontalAxis(RenderContext& context, const Rect& paintRect)
 {
-    ScopedCanvas canvas = ScopedCanvas::Create(context);
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
     if (!canvas) {
         LOGE("Paint canvas is null");
         return;
     }
     const Offset offset = paintRect.GetOffset();
 
-    flutter::Paint paint;
-    flutter::PaintData paintData;
-    paint.paint()->setAntiAlias(true);
-    paint.paint()->setColor(horizontal_.color.GetValue());
-    paint.paint()->setStyle(SkPaint::Style::kStroke_Style);
-    paint.paint()->setStrokeWidth(DEFAULT_AXIS_STROKE_WIDTH);
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(horizontal_.color.GetValue());
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeWidth(DEFAULT_AXIS_STROKE_WIDTH);
 
     if ((horizontal_.tickNumber <= 0) || (horizontal_.tickNumber + 1 == 0)) {
         horizontal_.tickNumber = DEFAULT_AXISTICK;
@@ -557,28 +535,27 @@ void FlutterRenderChart::PaintHorizontalAxis(RenderContext& context, const Rect&
     double tickPosition = EDGE_PADDING + tickHorizontalOffset_;
     for (int32_t index = 0; index < horizontal_.tickNumber; index++) {
         canvas->drawLine(offset.GetX() + tickPosition, offset.GetY(), offset.GetX() + tickPosition,
-            offset.GetY() + TICK_LENGTH, paint, paintData);
+            offset.GetY() + TICK_LENGTH, paint);
         tickPosition += tickHorizontalOffset_;
     }
 
     canvas->drawLine(offset.GetX(), offset.GetY() + 0.5 * TICK_LENGTH, offset.GetX() + paintRect.Width(),
-        offset.GetY() + 0.5 * TICK_LENGTH, paint, paintData);
+        offset.GetY() + 0.5 * TICK_LENGTH, paint);
 }
 
-void FlutterRenderChart::PaintVerticalAxis(RenderContext& context, const Offset& offset, const Rect& paintRect)
+void RosenRenderChart::PaintVerticalAxis(RenderContext& context, const Offset& offset, const Rect& paintRect)
 {
-    ScopedCanvas canvas = ScopedCanvas::Create(context);
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
     if (!canvas) {
         LOGE("Paint canvas is null");
         return;
     }
 
-    flutter::Paint paint;
-    flutter::PaintData paintData;
-    paint.paint()->setAntiAlias(true);
-    paint.paint()->setColor(vertical_.color.GetValue());
-    paint.paint()->setStyle(SkPaint::Style::kStroke_Style);
-    paint.paint()->setStrokeWidth(DEFAULT_AXIS_STROKE_WIDTH);
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(vertical_.color.GetValue());
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeWidth(DEFAULT_AXIS_STROKE_WIDTH);
 
     if ((vertical_.tickNumber <= 0) || (vertical_.tickNumber + 1 == 0)) {
         vertical_.tickNumber = DEFAULT_AXISTICK;
@@ -592,15 +569,15 @@ void FlutterRenderChart::PaintVerticalAxis(RenderContext& context, const Offset&
     double tickPosition = EDGE_PADDING + tickOffset_;
     for (int32_t index = 0; index < vertical_.tickNumber; index++) {
         canvas->drawLine(offset.GetX() + paintRect.Width() - TICK_LENGTH, offset.GetY() + tickPosition,
-            offset.GetX() + paintRect.Width(), offset.GetY() + tickPosition, paint, paintData);
+            offset.GetX() + paintRect.Width(), offset.GetY() + tickPosition, paint);
         tickPosition += tickOffset_;
     }
 
     canvas->drawLine(offset.GetX() + paintRect.Width() - 0.5 * TICK_LENGTH, offset.GetY(),
-        offset.GetX() + paintRect.Width() - 0.5 * TICK_LENGTH, offset.GetY() + paintRect.Height(), paint, paintData);
+        offset.GetX() + paintRect.Width() - 0.5 * TICK_LENGTH, offset.GetY() + paintRect.Height(), paint);
 }
 
-void FlutterRenderChart::PaintBar(const ScopedCanvas& canvas, flutter::Paint& paint,
+void RosenRenderChart::PaintBar(SkCanvas* canvas, SkPaint& paint,
     const std::vector<LineInfo>& barGroupData, const Rect& paintRect, int32_t barGroupNum, int32_t barsAreaNum,
     int32_t barGroupIndex)
 {
@@ -623,18 +600,17 @@ void FlutterRenderChart::PaintBar(const ScopedCanvas& canvas, flutter::Paint& pa
         }
         auto barAreaPaintRect = GetBarAreaPaintRect(barsAreaPaintRect, barGroupIndex, barGroupNum, barInterval);
         Offset position = ConvertDataToPosition(paintRect, point);
-        flutter::RRect rrect;
-        flutter::PaintData paintData;
         // barAreaPaintRect left add bar interval is originX
         auto originX = barAreaPaintRect.GetOffset().GetX() + (BAR_INTERVAL_PROPORTION / 2) * barAreaPaintRect.Width();
         auto originY = position.GetY();
 
-        canvas->drawRect(originX, originY, originX + barAreaPaintRect.Width() * (1 - BAR_INTERVAL_PROPORTION),
-            paintRect.GetOffset().GetY() + paintRect.Height(), paint, paintData);
+        canvas->drawRect(SkRect::MakeLTRB(originX, originY,
+                                          originX + barAreaPaintRect.Width() * (1 - BAR_INTERVAL_PROPORTION),
+                                          paintRect.GetOffset().GetY() + paintRect.Height()), paint);
     }
 }
 
-Rect FlutterRenderChart::GetBarsAreaPaintRect(const Rect& paintRect, int32_t barsAreaIndex)
+Rect RosenRenderChart::GetBarsAreaPaintRect(const Rect& paintRect, int32_t barsAreaIndex)
 {
     auto barsAreaWidth = paintRect.Width() / horizontal_.tickNumber;
     auto barsAreaHeight = paintRect.Height();
@@ -643,7 +619,7 @@ Rect FlutterRenderChart::GetBarsAreaPaintRect(const Rect& paintRect, int32_t bar
     return barsAreaRect;
 }
 
-Rect FlutterRenderChart::GetBarAreaPaintRect(
+Rect RosenRenderChart::GetBarAreaPaintRect(
     const Rect& barsAreaPaintRect, int32_t barGroupIndex, int32_t barGroupNumber, double barInterval)
 {
     // Divide 30% of the horizontal space of barsArea into 2 parts as left and right intervals,
