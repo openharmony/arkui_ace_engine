@@ -120,7 +120,7 @@ std::string ListComposedElement::GetEditMode() const
 
 std::unique_ptr<JsonValue> ListComposedElement::GetDivider() const
 {
-    auto jsonValue = JsonUtil::Create(true);
+    auto jsonValue = JsonUtil::Create(false);
     do {
         auto node = GetInspectorNode(ListElement::TypeId());
         if (!node) {

@@ -155,7 +155,7 @@ std::unique_ptr<JsonValue> CalendarComposedElement::ConvertThemeToDayStyle(const
     Dimension underscoreYAxisOffset = theme.underscoreYAxisOffset;
     Dimension scheduleMarkerXAxisOffset = theme.scheduleMarkerXAxisOffset;
     Dimension scheduleMarkerYAxisOffset = theme.scheduleMarkerYAxisOffset;
-    auto dayStyle = JsonUtil::Create(true);
+    auto dayStyle = JsonUtil::Create(false);
     dayStyle->Put("dayColor", ConvertColorToString(dayColor).c_str());
     dayStyle->Put("lunarColor", ConvertColorToString(lunarColor).c_str());
     dayStyle->Put("markLunarColor", ConvertColorToString(markLunarColor).c_str());
@@ -180,7 +180,7 @@ std::unique_ptr<JsonValue> CalendarComposedElement::ConvertThemeToNonCurrentDayS
     Color nonCurrentMonthLunarColor = theme.nonCurrentMonthLunarColor;
     Color nonCurrentMonthWorkDayMarkColor = theme.nonCurrentMonthWorkDayMarkColor;
     Color nonCurrentMonthOffDayMarkColor = theme.nonCurrentMonthOffDayMarkColor;
-    auto nonCurrentDayStyle = JsonUtil::Create(true);
+    auto nonCurrentDayStyle = JsonUtil::Create(false);
     nonCurrentDayStyle->Put("nonCurrentMonthDayColor", ConvertColorToString(nonCurrentMonthDayColor).c_str());
     nonCurrentDayStyle->Put("nonCurrentMonthLunarColor", ConvertColorToString(nonCurrentMonthLunarColor).c_str());
     nonCurrentDayStyle->Put(
@@ -196,7 +196,7 @@ std::unique_ptr<JsonValue> CalendarComposedElement::ConvertThemeToTodayStyle(con
     Color focusedLunarColor = theme.focusedLunarColor;
     Color focusedAreaBackgroundColor = theme.focusedAreaBackgroundColor;
     Dimension focusedAreaRadius = theme.focusedAreaRadius;
-    auto todayStyle = JsonUtil::Create(true);
+    auto todayStyle = JsonUtil::Create(false);
     todayStyle->Put("focusedDayColor", ConvertColorToString(focusedDayColor).c_str());
     todayStyle->Put("focusedLunarColor", ConvertColorToString(focusedLunarColor).c_str());
     todayStyle->Put("focusedAreaBackgroundColor", ConvertColorToString(focusedAreaBackgroundColor).c_str());
@@ -213,7 +213,7 @@ std::unique_ptr<JsonValue> CalendarComposedElement::ConvertThemeToWeekStyle(cons
     Dimension weekHeight = theme.weekHeight;
     Dimension weekWidth = theme.weekWidth;
     Dimension weekAndDayRowSpace = theme.weekAndDayRowSpace;
-    auto weekStyle = JsonUtil::Create(true);
+    auto weekStyle = JsonUtil::Create(false);
     weekStyle->Put("weekColor", ConvertColorToString(weekColor).c_str());
     weekStyle->Put("weekendDayColor", ConvertColorToString(weekendDayColor).c_str());
     weekStyle->Put("weekendLunarColor", ConvertColorToString(weekendLunarColor).c_str());
@@ -234,7 +234,7 @@ std::unique_ptr<JsonValue> CalendarComposedElement::ConvertThemeToWorkStateStyle
     Dimension workStateWidth = theme.workStateWidth;
     Dimension workStateHorizontalMovingDistance = theme.workStateHorizontalMovingDistance;
     Dimension workStateVerticalMovingDistance = theme.workStateVerticalMovingDistance;
-    auto workStateStyle = JsonUtil::Create(true);
+    auto workStateStyle = JsonUtil::Create(false);
     workStateStyle->Put("workDayMarkColor", ConvertColorToString(workDayMarkColor).c_str());
     workStateStyle->Put("offDayMarkColor", ConvertColorToString(offDayMarkColor).c_str());
     workStateStyle->Put("workDayMarkSize", std::to_string(workDayMarkSize.Value()).c_str());

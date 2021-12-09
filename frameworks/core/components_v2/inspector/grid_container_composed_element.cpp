@@ -54,7 +54,7 @@ std::unique_ptr<JsonValue> GridContainerComposedElement::ToJsonObject() const
 
 std::unique_ptr<JsonValue> GridContainerComposedElement::GetConstructor() const
 {
-    auto jsonStr = JsonUtil::Create(true);
+    auto jsonStr = JsonUtil::Create(false);
     jsonStr->Put("columns", GetColumns().c_str());
     jsonStr->Put("sizeType", GetSizeType().c_str());
     jsonStr->Put("gutter", GetGutter().c_str());

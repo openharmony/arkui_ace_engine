@@ -145,7 +145,7 @@ std::string ShapeContainerComposedElement::GetStrokeDashOffset() const
 std::unique_ptr<JsonValue> ShapeContainerComposedElement::GetStrokeDashArray() const
 {
     auto render = GetContentRender<RenderShapeContainer>(ShapeContainerElement::TypeId());
-    auto jsonDashArray = JsonUtil::CreateArray(true);
+    auto jsonDashArray = JsonUtil::CreateArray(false);
     if (render) {
         std::vector<Dimension> array = render->GetStrokeState().GetStrokeDashArray();
         for (size_t i = 0; i < array.size(); i++) {
@@ -207,7 +207,7 @@ std::string ShapeContainerComposedElement::GetStrokeWidth() const
 std::unique_ptr<JsonValue> ShapeContainerComposedElement::GetViewBox() const
 {
     auto render = GetContentRender<RenderShapeContainer>(ShapeContainerElement::TypeId());
-    auto jsonViewBox = JsonUtil::Create(true);
+    auto jsonViewBox = JsonUtil::Create(false);
     if (render) {
         auto viewBox = render->GetShapeViewBox();
         jsonViewBox->Put("x", viewBox.Left().ToString().c_str());
