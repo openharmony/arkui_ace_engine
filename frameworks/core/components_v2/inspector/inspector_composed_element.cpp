@@ -1002,9 +1002,11 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetShadow() const
 std::unique_ptr<JsonValue> InspectorComposedElement::GetOverlay() const
 {
     auto jsonValue = JsonUtil::Create(false);
-    auto coverage =  GetContentRender<RenderCoverage>(ComponentGroupElement::TypeId());
+    // Since CoverageComponent is inherited from ComponentGroup, but Coverage does not have Element,
+    // ComponentGroupElement is called.
+    auto coverage =  GetInspectorElement<RenderCoverage>(ComponentGroupElement::TypeId());
     if (!coverage) {
-        jsonValue->Put("options", "align: Alignment.Center,offset: {0, 0}");
+        jsonValue->Put("options", "{align: Alignment.Center, offset: {x: 0, y: 0}}");
         return jsonValue;
     }
     auto title = coverage->GetTextVal();

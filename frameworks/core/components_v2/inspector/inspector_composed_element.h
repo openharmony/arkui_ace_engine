@@ -68,7 +68,24 @@ public:
     void UpdateComposedComponentId(const ComposeId& oldId, const ComposeId& newId);
     void RemoveInspectorNode(const ComposeId& id);
     RefPtr<RenderNode> GetInspectorNode(IdType typeId) const;
-    RefPtr<RenderNode> GetInspectorCoverage(IdType typeId) const;
+
+    template<class T>
+    RefPtr<T> GetInspectorElement(IdType typeId) const
+    {
+        auto child = children_.empty() ? nullptr : children_.front();
+        while (child) {
+            auto inspectorComposedElement = AceType::DynamicCast<InspectorComposedElement>(child);
+            if (inspectorComposedElement) {
+                return nullptr;
+            }
+            if (AceType::TypeId(child) == typeId) {
+                return AceType::DynamicCast<T>(child->GetRenderNode());
+            }
+
+            child = child->GetChildren().empty() ? nullptr : child->GetChildren().front();
+        }
+        return nullptr;
+    }
 
     template<class T>
     RefPtr<T> GetContentElement(IdType typeId) const
