@@ -55,6 +55,7 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
 
 void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
 {
+    LOGI("[OnTextChangedListenerImpl] DeleteBackward length: %{public}d", length);
     if (length <= 0) {
         LOGE("Delete nothing.");
         return;
@@ -95,6 +96,7 @@ void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
 
 void OnTextChangedListenerImpl::DeleteForward(int32_t length)
 {
+    LOGI("[OnTextChangedListenerImpl] DeleteForward length: %{public}d", length);
     if (length <= 0) {
         LOGE("Delete nothing.");
         return;
@@ -135,6 +137,7 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
 
 void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
 {
+    LOGI("[OnTextChangedListenerImpl] SetKeyboardStatus status: %{public}d", status);
     auto renderTextField = field_.Upgrade();
     if (!renderTextField) {
         return;
@@ -153,7 +156,6 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
     taskExecutor->PostTask(
         [renderTextField, status] {
             if (renderTextField) {
-                LOGI("inputmethod:SetKeyboardStatus, status=%{public}d", status);
                 if (status) {
                     renderTextField->SetInputMethodStatus(true);
                 } else {
@@ -175,13 +177,44 @@ void OnTextChangedListenerImpl::SendKeyboardInfo(const MiscServices::KeyboardInf
 
 void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status)
 {
+    LOGI("[OnTextChangedListenerImpl] HandleKeyboardStatus status: %{public}d", status);
     if (status == MiscServices::KeyboardStatus::NONE) {
         return;
     }
+
+    auto renderTextField = field_.Upgrade();
+    if (!renderTextField) {
+        return;
+    }
+
+    auto context = renderTextField->GetContext().Upgrade();
+    if (!context) {
+        return;
+    }
+
+    auto taskExecutor = context->GetTaskExecutor();
+    if (!taskExecutor) {
+        return;
+    }
+
+    bool currentStatus = (status == MiscServices::KeyboardStatus::SHOW);
+    taskExecutor->PostTask(
+        [renderTextField, currentStatus] {
+            if (renderTextField) {
+                if (currentStatus) {
+                    renderTextField->SetInputMethodStatus(true);
+                } else {
+                    MiscServices::InputMethodController::GetInstance()->Close();
+                    renderTextField->SetInputMethodStatus(false);
+                }
+            }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey functionKey)
 {
+    LOGI("[OnTextChangedListenerImpl] HandleFunctionKey functionKey: %{public}d", functionKey);
     auto renderTextField = field_.Upgrade();
     if (!renderTextField) {
         return;

@@ -66,6 +66,7 @@ void RenderTextField::UpdateConfiguration()
 {
     MiscServices::Configuration configuration;
     configuration.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>((int32_t)action_));
+    configuration.SetTextInputType(static_cast<MiscServices::TextInputType>((int32_t)keyboard_));
     MiscServices::InputMethodController::GetInstance()->OnConfigurationChange(configuration);
 }
 #endif
