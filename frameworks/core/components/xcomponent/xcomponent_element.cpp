@@ -80,8 +80,7 @@ void XComponentElement::InitEvent()
         onSurfaceInit_ = AceSyncEvent<void(const std::string&, const uint32_t)>::Create(
             xcomponent_->GetXComponentInitEventId(), context_);
         onXComponentInit_ =
-            AceAsyncEvent<void(const std::string&)>::Create(xcomponent_->GetXComponentInitEventId(),
-                                                                            context_);
+            AceAsyncEvent<void(const std::string&)>::Create(xcomponent_->GetXComponentInitEventId(), context_);
     }
     if (!xcomponent_->GetXComponentDestroyEventId().IsEmpty()) {
         onXComponentDestroy_ =
@@ -211,20 +210,22 @@ void XComponentElement::CreatePlatformResource()
         });
     };
     texture_ = AceType::MakeRefPtr<NativeTexture>(context_, errorCallback);
-    texture_->Create([weak = WeakClaim(this), errorCallback](int64_t id) mutable {
-        auto XComponentElement = weak.Upgrade();
-        if (XComponentElement) {
-            auto component = XComponentElement->xcomponent_;
-            if (component) {
-                XComponentElement->isExternalResource_ = true;
-                component->SetTextureId(id);
-                component->SetTexture(XComponentElement->texture_);
-                if (XComponentElement->renderNode_ != nullptr) {
-                    XComponentElement->renderNode_->Update(component);
+    texture_->Create(
+        [weak = WeakClaim(this), errorCallback](int64_t id) mutable {
+            auto XComponentElement = weak.Upgrade();
+            if (XComponentElement) {
+                auto component = XComponentElement->xcomponent_;
+                if (component) {
+                    XComponentElement->isExternalResource_ = true;
+                    component->SetTextureId(id);
+                    component->SetTexture(XComponentElement->texture_);
+                    if (XComponentElement->renderNode_ != nullptr) {
+                        XComponentElement->renderNode_->Update(component);
+                    }
                 }
             }
-        }
-    }, idStr_);
+        },
+        idStr_);
 }
 
 void XComponentElement::ReleasePlatformResource()

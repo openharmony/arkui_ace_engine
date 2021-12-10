@@ -1805,7 +1805,7 @@ void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, cons
     };
     XComponentClient::GetInstance().RegisterJSValCallback(getJSValCallback);
     auto delegate =
-            static_cast<RefPtr<FrontendDelegate>*>(isolateXComp_->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
+        static_cast<RefPtr<FrontendDelegate>*>(isolateXComp_->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
     v8::TryCatch tryCatch(isolateXComp_);
     auto task = [weak = WeakClaim(this), xcomponent]() {
         auto pool = xcomponent->GetTaskPool();
@@ -1815,8 +1815,7 @@ void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, cons
         auto bridge = weak.Upgrade();
         if (bridge) {
             pool->NativeXComponentInit(
-                    bridge->nativeXComponent_,
-                    AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
+                bridge->nativeXComponent_, AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
         }
     };
     if (*delegate == nullptr) {

@@ -100,17 +100,17 @@ EventMarker JSXComponent::GetEventMarker(const JSCallbackInfo& info, const std::
     }
 
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto eventMarker = EventMarker(
-            [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](const std::string& param) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                std::string::size_type posLoad = param.find("load");
-                // load callback method, need to return a napi instance
-                if (posLoad != std::string::npos) {
-                    func->ExecuteNew(keys, param);
-                } else {
-                    func->Execute(keys, param);
-                }
-            });
+    auto eventMarker =
+        EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            std::string::size_type posLoad = param.find("load");
+            // load callback method, need to return a napi instance
+            if (posLoad != std::string::npos) {
+                func->ExecuteNew(keys, param);
+            } else {
+                func->Execute(keys, param);
+            }
+        });
     return eventMarker;
 }
 } // namespace OHOS::Ace::Framework
