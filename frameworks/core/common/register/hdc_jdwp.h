@@ -52,7 +52,6 @@ private:
     static void ReceiveNewFd(uv_stream_t *q, ssize_t nread, const uv_buf_t *buf);
     static void ProcessIncoming(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf);
 #endif // JS_JDWP_CONNECT
-    static void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf);
     static RetErrCode SendToStream(uv_stream_t *handleStream, const uint8_t *buf, const int bufLen,
                                    const void *finishCallback);
     HCtxJdwpSimulator mCtxPoint;

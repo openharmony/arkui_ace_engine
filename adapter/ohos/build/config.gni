@@ -44,6 +44,7 @@ form_components_support = false
 xcomponent_components_support = true
 js_pa_support = true
 connect_server_support = false
+hdc_register_support = true
 pa_engine_path = "adapter/ohos/entrance/pa_engine"
 enable_rosen_backend = true
 enable_standard_input = true

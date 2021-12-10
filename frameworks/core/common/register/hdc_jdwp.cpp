@@ -22,6 +22,7 @@ HdcJdwpSimulator::HdcJdwpSimulator(uv_loop_t *loopIn, const std::string pkgName)
     mLoop = loopIn;
     exit = false;
     gPkgName = pkgName;
+    mCtxPoint = (HCtxJdwpSimulator)MallocContext();
 }
 
 HdcJdwpSimulator::~HdcJdwpSimulator() {}
@@ -73,16 +74,11 @@ RetErrCode HdcJdwpSimulator::SendToStream(uv_stream_t *handleStream, const uint8
         ret = RetErrCode::SUCCESS;
         break;
     }
+    delete[] pDynBuf;
+    pDynBuf = nullptr;
+    delete reqWrite;
+    reqWrite = nullptr;
     return ret;
-}
-
-void HdcJdwpSimulator::alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf)
-{
-    if (suggested_size <= 0) {
-        return;
-    }
-    buf->base = (char *)malloc(suggested_size);
-    buf->len = suggested_size;
 }
 
 void HdcJdwpSimulator::ConnectJdwp(uv_connect_t *connection, int status)
@@ -99,8 +95,12 @@ void HdcJdwpSimulator::ConnectJdwp(uv_connect_t *connection, int status)
         LOGE("ConnectJdwp new info fail.");
         return;
     }
-    std::memset(info, 0, pkgSize);
-    JsMsgHeader* jsMsg = (JsMsgHeader*)info;
+    if (memset_s(info, pkgSize, 0, pkgSize) != 0) {
+        delete[] info;
+        info = nullptr;
+        return;
+    }
+    JsMsgHeader *jsMsg = (JsMsgHeader *)info;
     jsMsg->pid = pid_curr;
     jsMsg->msgLen = pkgSize;
     LOGI("ConnectJdwp send pid:%{public}d, pkgName:%{public}s, msglen:%{public}d, ", jsMsg->pid, pkgName.c_str(),
@@ -155,7 +155,6 @@ bool HdcJdwpSimulator::Connect()
 {
     string jdwpCtrlName = "\0jdwp-control";
     uv_connect_t *connect = new uv_connect_t();
-    mCtxPoint = (HCtxJdwpSimulator)MallocContext();
     if (!mCtxPoint) {
         LOGE("MallocContext failed");
         return false;

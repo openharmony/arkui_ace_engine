@@ -13,37 +13,34 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_REGISTER_HDC_CONNECT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_REGISTER_HDC_CONNECT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_HDC_REGISTER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_HDC_REGISTER_H
 
+#include <memory>
 #include <string>
-#include "frameworks/core/common/register/define.h"
+
+#include "base/utils/macros.h"
+#include "base/utils/noncopyable.h"
+
 namespace OHOS::Ace {
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif
-#endif /* End of #ifdef __cplusplus */
-void StartConnect(const std::string& pkgName);
 
-void StopConnect();
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif
-#endif /* End of #ifdef __cplusplus */
-
-class ConnectManagement {
+class HdcRegister {
 public:
-    ConnectManagement() = default;
-    ~ConnectManagement() {};
-    void SetPkgName(const std::string& pkgName);
-    std::string GetPkgName();
-    bool terminateFlag = false;
+    HdcRegister();
+    ~HdcRegister();
+    static HdcRegister& Get();
+    void StartHdcRegister();
 
 private:
+    void StopHdcRegister();
+    void LoadRegisterSo();
+
+    bool isDebugVersion_;
+    void* registerHandler_;
     std::string pkgName_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(HdcRegister);
 };
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_REGISTER_HDC_CONNECT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_HDC_REGISTER_H

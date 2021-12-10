@@ -28,6 +28,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
+#include "core/common/hdc_register.h"
 #include "core/common/platform_window.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/watch_dog.h"
@@ -449,6 +450,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
     Container::InitForThread(INSTANCE_ID_PLATFORM);
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, isArkApp, aceAbility, std::move(callback));
     AceEngine::Get().AddContainer(instanceId, aceContainer);
+    HdcRegister::Get().StartHdcRegister();
     aceContainer->Initialize();
     auto front = aceContainer->GetFrontend();
     if (front) {

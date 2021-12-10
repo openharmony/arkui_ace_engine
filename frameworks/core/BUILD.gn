@@ -199,6 +199,11 @@ template("ace_core_source_set") {
       sources += [ "common/connect_server_manager.cpp" ]
     }
 
+    if (defined(config.hdc_register_support) &&
+        config.hdc_register_support) {
+      sources += [ "common/hdc_register.cpp" ]
+    }
+
     configs = [ "$ace_root:ace_config" ]
 
     deps = [

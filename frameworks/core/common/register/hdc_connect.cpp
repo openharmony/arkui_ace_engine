@@ -19,8 +19,19 @@
 
 namespace OHOS::Ace {
 
+std::unique_ptr<ConnectManagement> g_connectManagement = nullptr;
 static uv_loop_t loopMain;
 static HdcJdwpSimulator *clsHdcJdwpSimulator = nullptr;
+
+void ConnectManagement::SetPkgName(const std::string &pkgName)
+{
+    pkgName_ = pkgName;
+}
+
+std::string ConnectManagement::GetPkgName()
+{
+    return pkgName_;
+}
 
 static void PrintMessage(const char *fmt, ...)
 {
@@ -109,26 +120,44 @@ void Stop(int signo)
     _exit(0);
 }
 
-int HdcConnectRun(const std::string& pkgName)
+void StopConnect()
+{
+    g_connectManagement->terminateFlag = true;
+}
+
+void* HdcConnectRun(void* pkgContent)
 {
     uv_loop_init(&loopMain);
-
     LOGI("jdwp_process start.");
     PrintMessage("jdwp_process start.");
     if (signal(SIGINT, Stop) == SIG_ERR) {
         PrintMessage("jdwp_process signal fail.");
     }
+    std::string pkgName = static_cast<ConnectManagement*>(pkgContent)->GetPkgName();
     clsHdcJdwpSimulator = new HdcJdwpSimulator(&loopMain, pkgName);
     if (!clsHdcJdwpSimulator->Connect()) {
         PrintMessage("Connect fail.");
-        return -1;
+        return nullptr;
     }
     uv_run(&loopMain, UV_RUN_DEFAULT);
-
+    static constexpr int WAIT_SLEEP_TIME = 1000;
+    while (!g_connectManagement->terminateFlag) {
+        usleep(WAIT_SLEEP_TIME);
+    }
 #ifdef JS_JDWP_CONNECT
-    PrintMessage("Enter stop the test.");
     FreeInstance();
 #endif // JS_JDWP_CONNECT
-    return 0;
+    return nullptr;
+}
+
+void StartConnect(const std::string& pkgName)
+{
+    pthread_t tid;
+    g_connectManagement = std::make_unique<ConnectManagement>();
+    g_connectManagement->SetPkgName(pkgName);
+    if (pthread_create(&tid, nullptr, &HdcConnectRun, static_cast<void*>(g_connectManagement.get())) != 0) {
+        LOGE("pthread_create fail!");
+        return;
+    }
 }
 } // namespace OHOS::Ace
