@@ -46,15 +46,6 @@ void RenderSingleChildScroll::Update(const RefPtr<Component>& component)
     positionController_ = scroll->GetScrollPositionController();
     if (positionController_) {
         positionController_->SetScrollNode(AceType::WeakClaim(this));
-        auto context = context_.Upgrade();
-        // Controller initial offset is not set in Declarative frontend.
-        if (context && !context->GetIsDeclarative()) {
-            if (axis_ == Axis::VERTICAL) {
-                currentOffset_.SetY(positionController_->GetInitialOffset());
-            } else {
-                currentOffset_.SetX(positionController_->GetInitialOffset());
-            }
-        }
         positionController_->SetScrollEvent(ScrollEvent::SCROLL_TOP,
             AceAsyncEvent<void(std::shared_ptr<ScrollEventInfo>&)>::Create(scroll->GetOnScrollEdge(), GetContext()));
         positionController_->SetScrollEvent(ScrollEvent::SCROLL_EDGE,
