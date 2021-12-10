@@ -138,10 +138,10 @@ Size FlutterRenderShape::CreatePolygon(bool needClose)
 
 Size FlutterRenderShape::CreatePath()
 {
+    path_.reset();
     if (pathCmd_.GetValue().empty()) {
         return Size();
     }
-    path_.reset();
     bool ret = SkParsePath::FromSVGString(pathCmd_.GetValue().c_str(), &path_);
     if (width_.IsValid() && height_.IsValid()) {
         return Size(NormalizePercentToPx(width_, false), NormalizePercentToPx(height_, true));
