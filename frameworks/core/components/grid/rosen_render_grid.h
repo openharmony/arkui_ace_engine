@@ -13,27 +13,24 @@
  * limitations under the License.
  */
 
-#include "core/components/grid/flutter_render_grid.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GRID_ROSEN_RENDER_GRID_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GRID_ROSEN_RENDER_GRID_H
 
-#include "core/pipeline/base/flutter_render_context.h"
+#include "core/components/grid/render_grid.h"
 
 namespace OHOS::Ace {
 
-using namespace Flutter;
+class RosenRenderGrid : public RenderGrid {
+    DECLARE_ACE_TYPE(RosenRenderGrid, RenderGrid);
 
-RenderLayer FlutterRenderGrid::GetRenderLayer()
-{
-    if (!layer_) {
-        layer_ = AceType::MakeRefPtr<ClipLayer>(0.0, GetLayoutSize().Width(),
-                                               0.0, GetLayoutSize().Height(), Clip::HARD_EDGE);
-    }
-    return AceType::RawPtr(layer_);
-}
+public:
+    RosenRenderGrid() = default;
+    ~RosenRenderGrid() override = default;
 
-void FlutterRenderGrid::Paint(RenderContext& context, const Offset& offset)
-{
-    layer_->SetClip(0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::HARD_EDGE);
-    RenderNode::Paint(context, offset);
-}
+    void Update(const RefPtr<Component>& component) override;
 
+private:
+};
 } // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GRID_ROSEN_RENDER_GRID_H
