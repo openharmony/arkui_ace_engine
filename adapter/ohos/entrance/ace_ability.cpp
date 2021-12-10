@@ -26,6 +26,8 @@
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
+#include "window.h"
+
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
@@ -209,40 +211,22 @@ void AceAbility::OnStart(const Want& want)
 
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
-    OHOS::sptr<OHOS::Window> window = Ability::GetWindow();
+    OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
 
-    // regist touch event
-    auto&& touchEventCallback = [aceView = flutterAceView](OHOS::TouchEvent event) -> bool {
-        LOGD("RegistOnTouchCb touchEventCallback called");
-        return aceView->DispatchTouchEvent(aceView, event);
-    };
-    window->OnTouch(touchEventCallback);
     // register surface change callback
-    auto&& surfaceChangedCallBack = [flutterAceView](uint32_t width, uint32_t height) {
-        LOGD("RegistWindowInfoChangeCb surfaceChangedCallBack called");
-        flutter::ViewportMetrics metrics;
-        metrics.physical_width = width;
-        metrics.physical_height = height;
-        Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-        Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
-    };
-    window->OnSizeChange(surfaceChangedCallBack);
+    OHOS::sptr<OHOS::Rosen::IWindowChangeListener> thisAbility(this);
+    window->RegisterWindowChangeListener(thisAbility);
 
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window);
 
     // set metrics
-    BufferRequestConfig windowConfig = {
-        .width = window->GetSurface()->GetDefaultWidth(),
-        .height = window->GetSurface()->GetDefaultHeight(),
-        .strideAlignment = 0x8,
-        .format = PIXEL_FMT_RGBA_8888,
-        .usage = window->GetSurface()->GetDefaultUsage(),
-    };
-    LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", windowConfig.width, windowConfig.height);
+    int32_t width = window->GetRect().width_;
+    int32_t height = window->GetRect().height_;
+    LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", width, height);
 
     flutter::ViewportMetrics metrics;
-    metrics.physical_width = windowConfig.width;
-    metrics.physical_height = windowConfig.height;
+    metrics.physical_width = width;
+    metrics.physical_height = height;
     Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
 
     if (srcPath.empty()) {
@@ -254,8 +238,8 @@ void AceAbility::OnStart(const Want& want)
     }
 
     // set view
-    Platform::AceContainer::SetView(flutterAceView, density_, windowConfig.width, windowConfig.height);
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, windowConfig.width, windowConfig.height, 0);
+    Platform::AceContainer::SetView(flutterAceView, density_, width, height);
+    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
 
     // get url
     std::string parsedPageUrl;
@@ -295,7 +279,6 @@ void AceAbility::OnStart(const Want& want)
     // set window id & action event handler
     auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
     if (context != nullptr) {
-        context->SetWindowId(window->GetID());
         context->SetActionEventHandler(actionEventHandler);
     }
 
@@ -303,13 +286,12 @@ void AceAbility::OnStart(const Want& want)
     if (SystemProperties::GetRosenBackendEnabled()) {
         auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
         if (rsUiDirector != nullptr) {
-            rsUiDirector->SetPlatformSurface(window->GetSurface());
-            auto&& rsSurfaceChangedCallBack = [surfaceChangedCallBack, rsUiDirector](uint32_t width, uint32_t height) {
-                rsUiDirector->SetSurfaceSize(width, height);
-                surfaceChangedCallBack(width, height);
-            };
-            window->OnSizeChange(rsSurfaceChangedCallBack);
-            rsUiDirector->SetSurfaceSize(windowConfig.width, windowConfig.height);
+            rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+
+            // todo regist on size change()
+            window->RegisterWindowChangeListener(thisAbility);
+
+            rsUiDirector->SetSurfaceNodeSize(width, height);
             rsUiDirector->SetUITaskRunner(
                 [taskExecutor = Platform::AceContainer::GetContainer(abilityId_)->GetTaskExecutor()]
                     (const std::function<void()>& task) {
@@ -389,19 +371,16 @@ void AceAbility::OnBackPressed()
     LOGI("AceAbility::OnBackPressed called End");
 }
 
-bool AceAbility::OnTouchEvent(const TouchEvent &touchEvent)
+void AceAbility::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    LOGI("AceAbility::OnTouchEvent called ");
+    LOGI("AceAbility::OnPointerEvent called ");
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(
         Platform::AceContainer::GetContainer(abilityId_)->GetView());
     if (!flutterAceView) {
         LOGE("flutterAceView is null");
-        return false;
+        return;
     }
-    TouchEvent event = touchEvent;
-    bool ret = flutterAceView->DispatchTouchEvent(flutterAceView, event);
-    LOGI("AceAbility::OnTouchEvent called End: ret: %{public}d", ret);
-    return ret;
+    flutterAceView->DispatchTouchEvent(flutterAceView, pointerEvent);
 }
 
 void AceAbility::OnNewWant(const Want& want)
@@ -514,6 +493,37 @@ void AceAbility::OnRemoteTerminated()
     LOGI("AceAbility::OnRemoteTerminated called.");
     Platform::AceContainer::OnRemoteTerminated(abilityId_);
     LOGI("AceAbility::OnRemoteTerminated finish.");
+}
+
+void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect)
+{
+    uint32_t width = rect.width_;
+    uint32_t height = rect.height_;
+#ifdef ENABLE_ROSEN_BACKEND
+    auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
+    if (!context) {
+        return;
+    }
+    auto rsUIDirector = context->GetRSUIDirector();
+    if (!rsUIDirector) {
+        LOGE("rsUIDirector is null");
+        return;
+    }
+    rsUIDirector->SetSurfaceNodeSize(width, height);
+#endif
+    auto flutterAceView = static_cast<Platform::FlutterAceView*>(
+        Platform::AceContainer::GetContainer(abilityId_)->GetView());
+
+    if (!flutterAceView) {
+        LOGE("flutterAceView is null");
+        return;
+    }
+
+    flutter::ViewportMetrics metrics;
+    metrics.physical_width = width;
+    metrics.physical_height = height;
+    Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
+    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
 }
 
 } // namespace Ace

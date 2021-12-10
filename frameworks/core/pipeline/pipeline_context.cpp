@@ -3245,4 +3245,13 @@ bool PipelineContext::SendEventByKey(const std::string& key, int action, const s
     return true;
 }
 
+const std::shared_ptr<OHOS::Rosen::RSUIDirector>& PipelineContext::GetRSUIDirector()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return rsUIDirector_;
+#else
+    return nullptr;
+#endif
+}
+
 } // namespace OHOS::Ace

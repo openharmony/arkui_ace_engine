@@ -15,6 +15,7 @@
 
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 
+#include <algorithm>
 #include <fstream>
 
 #include "base/log/dump_log.h"
@@ -37,31 +38,34 @@ namespace {
 constexpr int32_t ROTATION_DIVISOR = 64;
 constexpr double PERMIT_ANGLE_VALUE = 0.5;
 
-TouchPoint ConvertTouchEvent(const OHOS::TouchEvent& touchEvent)
+TouchPoint ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    int32_t id = static_cast<int32_t>(touchEvent.GetIndex());
-    MmiPoint mmiPoint = touchEvent.GetPointerPosition(id);
-    std::chrono::microseconds micros(touchEvent.GetOccurredTime());
+    int32_t pointerID = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = pointerEvent->GetPointerItem(pointerID, item);
+    if (!ret) {
+        LOGE("get pointer item failed.");
+        return TouchPoint();
+    }
+    std::chrono::microseconds micros(item.GetDownTime());
     TimeStamp time(micros);
-    TouchPoint point { id, mmiPoint.GetX(), mmiPoint.GetY(), TouchType::UNKNOWN, time, touchEvent.GetRadius(id) };
-    switch (touchEvent.GetAction()) {
-        case OHOS::TouchEnum::CANCEL:
+
+    int32_t pressWidth = item.GetWidth();
+    int32_t pressHeight = item.GetHeight();
+    double size = std::max(pressWidth, pressHeight) / 2.0; // just get the max of width and height
+    TouchPoint point { pointerID, item.GetLocalX(), item.GetLocalX(), TouchType::UNKNOWN, time, size };
+    int32_t action = pointerEvent->GetPointerAction();
+    switch (action) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
             point.type = TouchType::CANCEL;
             break;
-        case OHOS::TouchEnum::HOVER_POINTER_ENTER:
-        case OHOS::TouchEnum::HOVER_POINTER_MOVE:
-        case OHOS::TouchEnum::HOVER_POINTER_EXIT:
-            LOGD("ConvertTouchEvent not implement type:%{public}d", touchEvent.GetAction());
-            break;
-        case OHOS::TouchEnum::PRIMARY_POINT_DOWN:
-        case OHOS::TouchEnum::OTHER_POINT_DOWN:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN:
             point.type = TouchType::DOWN;
             break;
-        case OHOS::TouchEnum::POINT_MOVE:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
             point.type = TouchType::MOVE;
             break;
-        case OHOS::TouchEnum::PRIMARY_POINT_UP:
-        case OHOS::TouchEnum::OTHER_POINT_UP:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_UP:
             point.type = TouchType::UP;
             break;
         default:
@@ -71,27 +75,17 @@ TouchPoint ConvertTouchEvent(const OHOS::TouchEvent& touchEvent)
     return point;
 }
 
-void GetMouseEventAction(const OHOS::MouseEvent& mouseEvent, MouseEvent& events)
+void GetMouseEventAction(int32_t action, MouseEvent& events)
 {
-    const MouseActionEnum action = static_cast<MouseActionEnum>(mouseEvent.GetAction());
     switch (action) {
-        case MouseActionEnum::PRESS:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
             events.action = MouseAction::PRESS;
             break;
-        case MouseActionEnum::RELEASE:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
             events.action = MouseAction::RELEASE;
             break;
-        case MouseActionEnum::MOVE:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
             events.action = MouseAction::MOVE;
-            break;
-        case MouseActionEnum::HOVER_ENTER:
-            events.action = MouseAction::HOVER_ENTER;
-            break;
-        case MouseActionEnum::HOVER_MOVE:
-            events.action = MouseAction::HOVER_MOVE;
-            break;
-        case MouseActionEnum::HOVER_EXIT:
-            events.action = MouseAction::HOVER_EXIT;
             break;
         default:
             events.action = MouseAction::NONE;
@@ -99,23 +93,17 @@ void GetMouseEventAction(const OHOS::MouseEvent& mouseEvent, MouseEvent& events)
     }
 }
 
-void GetMouseEventButton(const OHOS::MouseEvent& mouseEvent, MouseEvent& events)
+void GetMouseEventButton(int32_t button, MouseEvent& events)
 {
-    switch (mouseEvent.GetActionButton()) {
-        case MouseButtonEnum::LEFT_BUTTON:
+    switch (button) {
+        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_LEFT:
             events.button = MouseButton::LEFT_BUTTON;
             break;
-        case MouseButtonEnum::RIGHT_BUTTON:
+        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_RIGHT:
             events.button = MouseButton::RIGHT_BUTTON;
             break;
-        case MouseButtonEnum::MIDDLE_BUTTON:
+        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_MIDDLE:
             events.button = MouseButton::MIDDLE_BUTTON;
-            break;
-        case MouseButtonEnum::BACK_BUTTON:
-            events.button = MouseButton::BACK_BUTTON;
-            break;
-        case MouseButtonEnum::FORWARD_BUTTON:
-            events.button = MouseButton::FORWARD_BUTTON;
             break;
         default:
             events.button = MouseButton::NONE_BUTTON;
@@ -123,18 +111,37 @@ void GetMouseEventButton(const OHOS::MouseEvent& mouseEvent, MouseEvent& events)
     }
 }
 
-void ConvertMouseEvent(OHOS::MouseEvent& mouseEvent, MouseEvent& events)
+void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, MouseEvent& events)
 {
-    MmiPoint mmiPoint = mouseEvent.GetCursor();
-    events.x = mmiPoint.GetX();
-    events.y = mmiPoint.GetY();
-    events.z = mmiPoint.GetZ();
+    int32_t pointerID = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = pointerEvent->GetPointerItem(pointerID, item);
+    if (!ret) {
+        LOGE("get pointer item failed.");
+        return;
+    }
 
-    GetMouseEventAction(mouseEvent, events);
-    GetMouseEventButton(mouseEvent, events);
+    events.x = item.GetLocalX();
+    events.y = item.GetLocalX();
+    int32_t action = pointerEvent->GetPointerAction();
+    GetMouseEventAction(action, events);
+    int32_t button = pointerEvent->GetButtonId();
+    GetMouseEventButton(button, events);
 
-    events.pressedButtons = static_cast<size_t>(mouseEvent.GetPressedButtons());
-    std::chrono::microseconds micros(mouseEvent.GetOccurredTime());
+    std::set<int32_t> pressedSet = pointerEvent->GetPressedButtons();
+    uint32_t pressedButtons = 0;
+    if (pressedSet.find(OHOS::MMI::PointerEvent::MOUSE_BUTTON_LEFT) != pressedSet.end()) {
+        pressedButtons &= static_cast<uint32_t>(MouseButton::LEFT_BUTTON);
+    }
+    if (pressedSet.find(OHOS::MMI::PointerEvent::MOUSE_BUTTON_RIGHT) != pressedSet.end()) {
+        pressedButtons &= static_cast<uint32_t>(MouseButton::RIGHT_BUTTON);
+    }
+    if (pressedSet.find(OHOS::MMI::PointerEvent::MOUSE_BUTTON_MIDDLE) != pressedSet.end()) {
+        pressedButtons &= static_cast<uint32_t>(MouseButton::MIDDLE_BUTTON);
+    }
+    events.pressedButtons = static_cast<int32_t>(pressedButtons);
+
+    std::chrono::microseconds micros(item.GetDownTime());
     TimeStamp time(micros);
     events.time = time;
 }
@@ -165,9 +172,9 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId)
     return aceSurface;
 }
 
-void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::Window* window)
+void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen::Window> window)
 {
-    LOGI(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", window);
+    LOGI(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", &(*window));
     if (window == nullptr) {
         LOGE("FlutterAceView::SurfaceCreated, window is nullptr");
         return;
@@ -216,24 +223,17 @@ void FlutterAceView::SetViewportMetrics(FlutterAceView* view, const flutter::Vie
     }
 }
 
-bool FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const OHOS::TouchEvent& touchEvent)
+void FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    if (touchEvent.GetSourceDevice() == OHOS::SourceDevice::MOUSE) {
+    if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
         LOGD("DispatchTouchEvent MouseEvent");
-        const MultimodalEvent* multimodalEvent = touchEvent.GetMultimodalEvent();
-        OHOS::MouseEvent* mouseEvent = (OHOS::MouseEvent*)multimodalEvent;
-        if (mouseEvent == nullptr) {
-            LOGE("mouseEvent is nullptr");
-            return false;
-        }
-        view->ProcessMouseEvent(*mouseEvent);
+        view->ProcessMouseEvent(pointerEvent);
     } else {
         // touch event
         LOGD("DispatchTouchEvent TouchEvent");
-        return view->ProcessTouchEvent(touchEvent);
+        view->ProcessTouchEvent(pointerEvent);
     }
-    return true;
 }
 
 bool FlutterAceView::DispatchKeyEvent(FlutterAceView* view, int32_t keyCode, int32_t action, int32_t repeatTime,
@@ -294,10 +294,9 @@ void FlutterAceView::SetShellHolder(std::unique_ptr<flutter::OhosShellHolder> ho
     shell_holder_ = std::move(holder);
 }
 
-bool FlutterAceView::ProcessTouchEvent(const OHOS::TouchEvent& touchEvent)
+void FlutterAceView::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    TouchPoint touchPoint = ConvertTouchEvent(touchEvent);
-    bool forbiddenToPlatform = false;
+    TouchPoint touchPoint = ConvertTouchEvent(pointerEvent);
     if (touchPoint.type != TouchType::UNKNOWN) {
         if (touchEventCallback_) {
             touchEventCallback_(touchPoint);
@@ -305,19 +304,12 @@ bool FlutterAceView::ProcessTouchEvent(const OHOS::TouchEvent& touchEvent)
     } else {
         LOGW("Unknown event.");
     }
-
-#ifdef WEARABLE_PRODUCT
-    forbiddenToPlatform = forbiddenToPlatform || IsNeedForbidToPlatform(point);
-#endif
-
-    // if last page, let os know so that to quit app.
-    return forbiddenToPlatform || (!IsLastPage());
 }
 
-void FlutterAceView::ProcessMouseEvent(OHOS::MouseEvent& mouseEvent)
+void FlutterAceView::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     MouseEvent event;
-    ConvertMouseEvent(mouseEvent, event);
+    ConvertMouseEvent(pointerEvent, event);
     LOGD("ProcessMouseEvent event");
 
     if (mouseEventCallback_) {

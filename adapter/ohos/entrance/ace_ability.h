@@ -23,10 +23,11 @@
 #include "ability_loader.h"
 #include "touch_event.h"
 #include "want.h"
+#include "window.h"
 
 namespace OHOS::Ace {
 
-class AceAbility final : public OHOS::AppExecFwk::Ability {
+class AceAbility final : public OHOS::AppExecFwk::Ability, public OHOS::Rosen::IWindowChangeListener {
 public:
     AceAbility()
     {
@@ -42,7 +43,7 @@ public:
     void OnForeground(const OHOS::AAFwk::Want& want) override;
     void OnBackground() override;
     void OnBackPressed() override;
-    bool OnTouchEvent(const TouchEvent &touchEvent) override;
+    void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
     void OnRestoreAbilityState(const OHOS::AppExecFwk::PacMap& inState) override;
     void OnSaveAbilityState(OHOS::AppExecFwk::PacMap& outState) override;
@@ -57,6 +58,9 @@ public:
     void OnCompleteContinuation(int result) override;
     void OnRemoteTerminated() override;
 
+    // override Rosen::IWindowChangeListener virtual callback function
+    void OnSizeChange(OHOS::Rosen::Rect rect) override;
+
 private:
     static int32_t instanceId_;
     static const std::string START_PARAMS_KEY;
@@ -64,7 +68,7 @@ private:
     static const std::string CONTINUE_PARAMS_KEY;
 
     int32_t abilityId_ = 0;
-    float density_ = 2.0f; // 2.0 for wgr, 3.0 for phone
+    float density_ = 1.5f; // 1.5 for wgr, 3.0 for phone
     std::string remotePageUrl_;
     std::string remoteData_;
     std::string pageUrl_;

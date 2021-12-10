@@ -42,11 +42,11 @@ public:
     explicit FlutterAceView(int32_t id) : instanceId_(id) {}
     ~FlutterAceView() override = default;
     static FlutterAceView* CreateView(int32_t instanceId);
-    static void SurfaceCreated(FlutterAceView* view, OHOS::Window* window);
+    static void SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen::Window> window);
     static void SurfaceChanged(FlutterAceView* view, int32_t width, int32_t height, int32_t orientation);
     static void SetViewportMetrics(FlutterAceView* view, const flutter::ViewportMetrics& metrics);
 
-    static bool DispatchTouchEvent(FlutterAceView* view, const OHOS::TouchEvent& touchEvent);
+    static void DispatchTouchEvent(FlutterAceView* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     static bool DispatchKeyEvent(FlutterAceView* view, int32_t keyCode, int32_t action, int32_t repeatTime,
         int64_t timeStamp, int64_t timeStampStart);
@@ -68,9 +68,9 @@ public:
         return shell_holder_.get();
     }
 
-    bool ProcessTouchEvent(const OHOS::TouchEvent& touchEvent);
+    void ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
-    void ProcessMouseEvent(OHOS::MouseEvent& mouseEvent);
+    void ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     bool ProcessKeyEvent(
         int32_t keyCode, int32_t keyAction, int32_t repeatTime, int64_t timeStamp = 0, int64_t timeStampStart = 0);

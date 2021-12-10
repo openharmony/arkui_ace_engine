@@ -434,7 +434,7 @@ template("flutter_engine_shell") {
       }
       deps += [
         "//foundation/graphic/standard:libvsync_client",
-        "//foundation/graphic/standard:libwmclient",
+        "//foundation/windowmanager/wm:libwm",
       ]
       external_deps = [
         "appexecfwk_standard:libeventhandler",
