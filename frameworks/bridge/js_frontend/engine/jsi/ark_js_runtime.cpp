@@ -200,6 +200,12 @@ void ArkJSRuntime::HandleUncaughtException()
     }
 }
 
+void ArkJSRuntime::ExecutePendingJob()
+{
+    LocalScope scope(vm_);
+    JSNApi::ExecutePendingJob(vm_);
+}
+
 Local<JSValueRef> PandaFunctionData::Callback(const Local<JSValueRef> &thisValue,
                                               const Local<JSValueRef> argument[],  // NOLINT(modernize-avoid-c-arrays)
                                               int32_t length) const

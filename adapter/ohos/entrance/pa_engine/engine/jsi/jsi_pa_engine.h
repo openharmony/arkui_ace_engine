@@ -56,6 +56,28 @@ public:
     RefPtr<BackendDelegate> GetDelegate() const;
     std::shared_ptr<JsRuntime> GetJsRuntime() const;
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher);
+    void SetArkNativeEngine(ArkNativeEngine* nativeEngine);
+    ArkNativeEngine* GetArkNativeEngine() const;
+
+    bool GetBlockWaiting() const
+    {
+        return blockWaiting_;
+    }
+
+    void SetBlockWaiting(bool blockWaiting)
+    {
+        blockWaiting_ = blockWaiting;
+    }
+
+    shared_ptr<JsValue> GetAsyncResult() const
+    {
+        return asyncResult_;
+    }
+
+    void SetAsyncResult(shared_ptr<JsValue> asyncResult)
+    {
+        asyncResult_ = asyncResult;
+    }
 
 private:
     void RegisterPaModule();
@@ -66,6 +88,9 @@ private:
     RefPtr<BackendDelegate> backendDelegate_;
     int32_t instanceId_ = 0;
     WeakPtr<JsMessageDispatcher> dispatcher_;
+    ArkNativeEngine* nativeEngine_ = nullptr;
+    bool blockWaiting_ = false;
+    shared_ptr<JsValue> asyncResult_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiPaEngineInstance);
 };
@@ -136,6 +161,7 @@ private:
     shared_ptr<JsValue> GetPaFunc(const std::string& funcName);
     shared_ptr<JsValue> CallFunc(const shared_ptr<JsValue>& func);
     shared_ptr<JsValue> CallFunc(const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv);
+    shared_ptr<JsValue> CallAsyncFunc(const shared_ptr<JsValue>& func, std::vector<shared_ptr<JsValue>>& argv);
     shared_ptr<JsValue> NativeValueToJsValue(NativeValue* nativeValue);
     shared_ptr<JsValue> WantToJsValue(const OHOS::AAFwk::Want& want);
     void StartService();

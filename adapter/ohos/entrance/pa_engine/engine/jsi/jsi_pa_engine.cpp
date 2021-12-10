@@ -180,11 +180,92 @@ shared_ptr<JsValue> AppErrorLogPrint(const shared_ptr<JsRuntime>& runtime, const
     return AppLogPrint(runtime, JsLogLevel::ERROR, argv, argc);
 }
 
-// native implementation for js function: ace.onCreateFinish()
+// native implementation for js function: Particle.onCreateFinish()
 shared_ptr<JsValue> JsOnCreateFinish(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     LOGD("JsOnCreateFinish");
+    return runtime->NewUndefined();
+}
+
+// native implementation for js function: Particle.JsHandleCallback()
+shared_ptr<JsValue> JsHandleCallback(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    LOGI("JsHandleCallback");
+    if (argc != 2) {
+        LOGE("the arg is error");
+        return runtime->NewUndefined();
+    }
+    std::string callbackId = argv[0]->ToString(runtime);
+    std::string result = argv[1]->ToString(runtime);
+
+    auto engineInstance = static_cast<JsiPaEngineInstance*>(runtime->GetEmbedderData());
+    if (engineInstance == nullptr) {
+        LOGE("engineInstance is nullptr");
+        return runtime->NewUndefined();
+    }
+    auto delegate = engineInstance->GetDelegate();
+    if (delegate == nullptr) {
+        LOGE("delegate is nullptr");
+        return runtime->NewUndefined();
+    }
+    delegate->SetCallBackResult(std::string(callbackId), result);
+
+    return runtime->NewUndefined();
+}
+
+// native implementation for js function: Particle.JsRunLoopOnce()
+shared_ptr<JsValue> JsRunLoopOnce(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    LOGI("JsRunLoopOnce");
+    auto engineInstance = static_cast<JsiPaEngineInstance*>(runtime->GetEmbedderData());
+    if (engineInstance == nullptr) {
+        LOGE("engineInstance is nullptr");
+        return runtime->NewUndefined();
+    }
+    auto nativeEngine = engineInstance->GetArkNativeEngine();
+    if (nativeEngine == nullptr) {
+        LOGE("nativeEngine is nullptr");
+        return runtime->NewUndefined();
+    }
+
+    nativeEngine->Loop(LOOP_ONCE);
+    runtime->ExecutePendingJob();
+    return runtime->NewUndefined();
+}
+
+// native implementation for js function: Particle.JsRunMicrotasks()
+shared_ptr<JsValue> JsRunMicrotasks(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    LOGI("JsRunMicrotasks");
+    runtime->ExecutePendingJob();
+    return runtime->NewUndefined();
+}
+
+shared_ptr<JsValue> AsyncFuncCallBack(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    LOGI("AsyncFuncCallBack");
+    auto engineInstance = static_cast<JsiPaEngineInstance*>(runtime->GetEmbedderData());
+    if (engineInstance == nullptr) {
+        LOGE("engineInstance is nullptr");
+        return runtime->NewUndefined();
+    }
+    if (argc != 2) {
+        LOGE("args length is error");
+        engineInstance->SetBlockWaiting(true);
+        engineInstance->SetAsyncResult(runtime->NewUndefined());
+        return runtime->NewUndefined();
+    }
+    int32_t code = argv[0]->ToInt32(runtime);
+    if (code != 0) {
+        LOGE("AsyncFuncCallBack error code: %{public}d", code);
+    }
+    engineInstance->SetBlockWaiting(true);
+    engineInstance->SetAsyncResult(argv[1]);
     return runtime->NewUndefined();
 }
 
@@ -263,9 +344,18 @@ void JsiPaEngineInstance::RegisterPaModule()
     if (!aceObj->SetProperty(runtime_, "onCreateFinish", runtime_->NewFunction(JsOnCreateFinish))) {
         LOGE("RegisterPaModule onCreateFinish failed.");
     }
+    if (!aceObj->SetProperty(runtime_, "handleCallback", runtime_->NewFunction(JsHandleCallback))) {
+        LOGE("RegisterPaModule handleCallback failed.");
+    }
+    if (!aceObj->SetProperty(runtime_, "runLoopOnce", runtime_->NewFunction(JsRunLoopOnce))) {
+        LOGE("RegisterPaModule runLoopOnce failed.");
+    }
+    if (!aceObj->SetProperty(runtime_, "runMicrotasks", runtime_->NewFunction(JsRunMicrotasks))) {
+        LOGE("RegisterPaModule runMicrotasks failed.");
+    }
 
     shared_ptr<JsValue> global = runtime_->GetGlobal();
-    if (!global->SetProperty(runtime_, "ace", aceObj)) {
+    if (!global->SetProperty(runtime_, "Particle", aceObj)) {
         LOGE("RegisterPaModule ace failed.");
     }
 }
@@ -335,19 +425,14 @@ bool JsiPaEngineInstance::FireJsEvent(const std::string& eventStr)
 {
     LOGI("JsiPaEngineInstance FireJsEvent");
 
-    std::vector<shared_ptr<JsValue>> argv;
-    argv.push_back(runtime_->NewString(std::to_string(instanceId_)));
-    shared_ptr<JsValue> var1 = runtime_->ParseJson(eventStr);
-    argv.push_back(var1);
-
     shared_ptr<JsValue> global = runtime_->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime_, "callJS");
-
     if (!func->IsFunction(runtime_)) {
-        LOGE("\"callJs\" is not a function!");
+        LOGE("\"callJS\" is not a function!");
         return false;
     }
 
+    const std::vector<shared_ptr<JsValue>>& argv = { runtime_->ParseJson(eventStr) };
     JsiUtils::SetCurrentState(JsErrorType::FIRE_EVENT_ERROR, instanceId_);
     func->Call(runtime_, global, argv, argv.size());
     return true;
@@ -418,6 +503,16 @@ void JsiPaEngineInstance::SetJsMessageDispatcher(const RefPtr<JsMessageDispatche
     dispatcher_ = dispatcher;
 }
 
+void JsiPaEngineInstance::SetArkNativeEngine(ArkNativeEngine* nativeEngine)
+{
+    nativeEngine_ = nativeEngine;
+}
+
+ArkNativeEngine* JsiPaEngineInstance::GetArkNativeEngine() const
+{
+    return nativeEngine_;
+}
+
 // -----------------------
 // Start JsiPaEngine
 // -----------------------
@@ -452,6 +547,7 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     LoadLibrary();
 
     nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
+    engineInstance_->SetArkNativeEngine(nativeEngine_);
     ACE_DCHECK(delegate);
     delegate->AddTaskObserver([nativeEngine = nativeEngine_]() {
         nativeEngine->Loop(LOOP_NOWAIT);
@@ -650,6 +746,36 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func,
     return func->Call(runtime, global, argv, argv.size());
 }
 
+shared_ptr<JsValue> JsiPaEngine::CallAsyncFunc(const shared_ptr<JsValue>& func,
+    std::vector<shared_ptr<JsValue>>& argv)
+{
+    LOGI("JsiPaEngine CallAsyncFunc");
+    ACE_DCHECK(engineInstance_);
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    ACE_DCHECK(runtime);
+    if (func == nullptr) {
+        LOGE("func is nullptr!");
+        return runtime->NewUndefined();
+    }
+    if (!func->IsFunction(runtime)) {
+        LOGE("func is not a function!");
+        return runtime->NewUndefined();
+    }
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+
+    argv.push_back(runtime->NewFunction(AsyncFuncCallBack));
+
+    engineInstance_->SetBlockWaiting(false);
+    func->Call(runtime, global, argv, argv.size());
+    runtime->ExecutePendingJob();
+    while (!engineInstance_->GetBlockWaiting()) {
+        nativeEngine_->Loop(LOOP_ONCE);
+        runtime->ExecutePendingJob();
+    }
+    LOGI("JsiPaEngine CallAsyncFunc end");
+    return engineInstance_->GetAsyncResult();
+}
+
 shared_ptr<JsValue> JsiPaEngine::NativeValueToJsValue(NativeValue* nativeValue)
 {
     ACE_DCHECK(engineInstance_);
@@ -836,12 +962,11 @@ int32_t JsiPaEngine::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
     napi_env env = reinterpret_cast<napi_env>(nativeEngine_);
     napi_value argNapiValue = rdbValueBucketNewInstance_(env, const_cast<OHOS::NativeRdb::ValuesBucket&>(value));
     NativeValue* argNapiNativeValue = reinterpret_cast<NativeValue*>(argNapiValue);
-    const std::vector<shared_ptr<JsValue>>& argv = {
-        runtime->NewString(uri.ToString()),
-        NativeValueToJsValue(argNapiNativeValue)
-    };
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime->NewString(uri.ToString()));
+    argv.push_back(NativeValueToJsValue(argNapiNativeValue));
     auto func = GetPaFunc("insert");
-    shared_ptr<JsValue> retVal = CallFunc(func, argv);
+    shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     if (arkJSValue->IsException(runtime)) {
@@ -872,13 +997,11 @@ int32_t JsiPaEngine::BatchInsert(const Uri& uri, const std::vector<OHOS::NativeR
     }
     NativeValue* argColumnsNativeValue = reinterpret_cast<NativeValue*>(argColumnsNapiValue);
 
-    const std::vector<shared_ptr<JsValue>>& argv = {
-        runtime->NewString(uri.ToString()),
-        NativeValueToJsValue(argColumnsNativeValue)
-    };
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime->NewString(uri.ToString()));
+    argv.push_back(NativeValueToJsValue(argColumnsNativeValue));
     auto func = GetPaFunc("batchInsert");
-    shared_ptr<JsValue> retVal = CallFunc(func, argv);
-
+    shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     if (arkJSValue->IsException(runtime)) {
         LOGE("JsiPaEngine BatchInsert FAILED!");
@@ -920,13 +1043,12 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> JsiPaEngine::Query(
         return resultSet;
     }
 
-    const std::vector<shared_ptr<JsValue>>& argv = {
-        runtime->NewString(uri.ToString()),
-        NativeValueToJsValue(argColumnsNativeValue),
-        NativeValueToJsValue(argPredicatesNativeValue)
-    };
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime->NewString(uri.ToString()));
+    argv.push_back(NativeValueToJsValue(argColumnsNativeValue));
+    argv.push_back(NativeValueToJsValue(argPredicatesNativeValue));
     auto func = GetPaFunc("query");
-    shared_ptr<JsValue> retVal = CallFunc(func, argv);
+    shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     if (arkJSValue->IsException(runtime)) {
@@ -975,13 +1097,12 @@ int32_t JsiPaEngine::Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
         return 0;
     }
 
-    const std::vector<shared_ptr<JsValue>>& argv = {
-        runtime->NewString(uri.ToString()),
-        NativeValueToJsValue(argNapiNativeValue),
-        NativeValueToJsValue(argPredicatesNativeValue)
-    };
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime->NewString(uri.ToString()));
+    argv.push_back(NativeValueToJsValue(argNapiNativeValue));
+    argv.push_back(NativeValueToJsValue(argPredicatesNativeValue));
     auto func = GetPaFunc("update");
-    shared_ptr<JsValue> retVal = CallFunc(func, argv);
+    shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     if (arkJSValue->IsException(runtime)) {
@@ -1006,12 +1127,12 @@ int32_t JsiPaEngine::Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPr
         LOGE("JsiPaEngine Delete argPredicatesNativeValue is nullptr");
         return 0;
     }
-    const std::vector<shared_ptr<JsValue>>& argv = {
-        runtime->NewString(uri.ToString()),
-        NativeValueToJsValue(argPredicatesNativeValue)
-    };
+
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime->NewString(uri.ToString()));
+    argv.push_back(NativeValueToJsValue(argPredicatesNativeValue));
     auto func = GetPaFunc("delete");
-    shared_ptr<JsValue> retVal = CallFunc(func, argv);
+    shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     if (arkJSValue->IsException(runtime)) {
@@ -1026,9 +1147,10 @@ std::string JsiPaEngine::GetType(const Uri& uri)
     LOGI("JsiPaEngine GetType");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(uri.ToString()) };
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime->NewString(uri.ToString()));
     auto func = GetPaFunc("getType");
-    shared_ptr<JsValue> retVal = CallFunc(func, argv);
+    shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     if (arkJSValue->IsException(runtime)) {
@@ -1043,12 +1165,11 @@ std::vector<std::string> JsiPaEngine::GetFileTypes(const Uri& uri, const std::st
     LOGI("JsiPaEngine GetFileTypes");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = {
-        runtime->NewString(uri.ToString()),
-        runtime->NewString(mimeTypeFilter)
-    };
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime->NewString(uri.ToString()));
+    argv.push_back(runtime->NewString(mimeTypeFilter));
     auto func = GetPaFunc("getFileTypes");
-    shared_ptr<JsValue> retVal = CallFunc(func, argv);
+    shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
     std::vector<std::string> ret;
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
@@ -1074,12 +1195,11 @@ int32_t JsiPaEngine::OpenFile(const Uri& uri, const std::string& mode)
     LOGI("JsiPaEngine OpenFile");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = {
-        runtime->NewString(uri.ToString()),
-        runtime->NewString(mode)
-    };
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime->NewString(uri.ToString()));
+    argv.push_back(runtime->NewString(mode));
     auto func = GetPaFunc("openFile");
-    shared_ptr<JsValue> retVal = CallFunc(func, argv);
+    shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     if (arkJSValue->IsException(runtime)) {
@@ -1094,12 +1214,11 @@ int32_t JsiPaEngine::OpenRawFile(const Uri& uri, const std::string& mode)
     LOGI("JsiPaEngine OpenRawFile");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = {
-        runtime->NewString(uri.ToString()),
-        runtime->NewString(mode)
-    };
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime->NewString(uri.ToString()));
+    argv.push_back(runtime->NewString(mode));
     auto func = GetPaFunc("openRawFile");
-    shared_ptr<JsValue> retVal = CallFunc(func, argv);
+    shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     if (arkJSValue->IsException(runtime)) {
@@ -1114,9 +1233,10 @@ Uri JsiPaEngine::NormalizeUri(const Uri& uri)
     LOGI("JsiPaEngine NormalizeUri");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(uri.ToString()) };
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime->NewString(uri.ToString()));
     auto func = GetPaFunc("normalizeUri");
-    shared_ptr<JsValue> retVal = CallFunc(func, argv);
+    shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     if (arkJSValue->IsException(runtime)) {
@@ -1131,9 +1251,10 @@ Uri JsiPaEngine::DenormalizeUri(const Uri& uri)
     LOGI("JsiPaEngine DenormalizeUri");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(uri.ToString()) };
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime->NewString(uri.ToString()));
     auto func = GetPaFunc("denormalizeUri");
-    shared_ptr<JsValue> retVal = CallFunc(func, argv);
+    shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     if (arkJSValue->IsException(runtime)) {
