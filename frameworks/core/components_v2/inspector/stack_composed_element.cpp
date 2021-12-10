@@ -76,4 +76,41 @@ RefPtr<RenderStack> StackComposedElement::GetRenderStack() const
     return nullptr;
 }
 
+void StackComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto stackElement = GetContentElement<StackElement>(StackElement::TypeId());
+    if (!stackElement) {
+        LOGE("get GetStackElement failed");
+        return;
+    }
+    stackElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    stackElement->MarkDirty();
+    LOGD("stack AddChildWithSlot");
+}
+
+void StackComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto stackElement = GetContentElement<StackElement>(StackElement::TypeId());
+    if (!stackElement) {
+        LOGE("get GetStackElement failed");
+        return;
+    }
+    auto child = stackElement->GetChildBySlot(slot);
+    stackElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    stackElement->MarkDirty();
+    LOGD("stack UpdateChildWithSlot");
+}
+
+void StackComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto stackElement = GetContentElement<StackElement>(StackElement::TypeId());
+    if (!stackElement) {
+        LOGE("get GetStackElement failed");
+        return;
+    }
+    stackElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    stackElement->MarkDirty();
+    LOGD("stack DeleteChildWithSlot");
+}
+
 } // namespace OHOS::Ace::V2

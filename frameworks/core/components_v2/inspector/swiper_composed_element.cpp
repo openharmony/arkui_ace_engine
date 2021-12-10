@@ -136,4 +136,41 @@ RefPtr<RenderSwiper> SwiperComposedElement::GetRenderSwiper() const
     return nullptr;
 }
 
+void SwiperComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto swiperElement = GetContentElement<SwiperElement>(SwiperElement::TypeId());
+    if (!swiperElement) {
+        LOGE("get GetSwiperElement failed");
+        return;
+    }
+    swiperElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    swiperElement->MarkDirty();
+    LOGD("swiper AddChildWithSlot");
+}
+
+void SwiperComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto swiperElement = GetContentElement<SwiperElement>(SwiperElement::TypeId());
+    if (!swiperElement) {
+        LOGE("get GetSwiperElement failed");
+        return;
+    }
+    auto child = swiperElement->GetChildBySlot(slot);
+    swiperElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    swiperElement->MarkDirty();
+    LOGD("swiper UpdateChildWithSlot");
+}
+
+void SwiperComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto swiperElement = GetContentElement<SwiperElement>(SwiperElement::TypeId());
+    if (!swiperElement) {
+        LOGE("get GetSwiperElement failed");
+        return;
+    }
+    swiperElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    swiperElement->MarkDirty();
+    LOGD("swiper DeleteChildWithSlot");
+}
+
 } // namespace OHOS::Ace::V2

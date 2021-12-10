@@ -61,4 +61,41 @@ RefPtr<RenderRowSplit> RowSplitComposedElement::GetRenderRowSplit() const
     return nullptr;
 }
 
+void RowSplitComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto rowSplitElement = GetContentElement<RowSplitElement>(RowSplitElement::TypeId());
+    if (!rowSplitElement) {
+        LOGE("get GetRowSplitElement failed");
+        return;
+    }
+    rowSplitElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    rowSplitElement->MarkDirty();
+    LOGD("rowSplit AddChildWithSlot");
+}
+
+void RowSplitComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto rowSplitElement = GetContentElement<RowSplitElement>(RowSplitElement::TypeId());
+    if (!rowSplitElement) {
+        LOGE("get GetRowSplitElement failed");
+        return;
+    }
+    auto child = rowSplitElement->GetChildBySlot(slot);
+    rowSplitElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    rowSplitElement->MarkDirty();
+    LOGD("rowSplit UpdateChildWithSlot");
+}
+
+void RowSplitComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto rowSplitElement = GetContentElement<RowSplitElement>(RowSplitElement::TypeId());
+    if (!rowSplitElement) {
+        LOGE("get GetRowSplitElement failed");
+        return;
+    }
+    rowSplitElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    rowSplitElement->MarkDirty();
+    LOGD("rowSplit DeleteChildWithSlot");
+}
+
 } // namespace OHOS::Ace::V2
