@@ -144,10 +144,7 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
 
 }; // namespace
 
-InspectorComposedElement::InspectorComposedElement(const ComposeId& id) : ComposedElement(id)
-{
-    updateNode_ = false;
-}
+InspectorComposedElement::InspectorComposedElement(const ComposeId& id) : ComposedElement(id) {}
 
 InspectorComposedElement::~InspectorComposedElement()
 {

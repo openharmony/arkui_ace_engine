@@ -117,7 +117,6 @@ protected:
     ComposeId id_;
     std::string name_;
     bool addedToMap_ = false;
-    bool updateNode_ = true;
     int32_t countRenderNode_ = -1;
     RenderFunction renderFunction_;
     PageTransitionFunction pageTransitionFunction_;
