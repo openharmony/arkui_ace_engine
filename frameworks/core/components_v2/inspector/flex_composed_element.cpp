@@ -119,4 +119,41 @@ std::string FlexComposedElement::GetAlignContent() const
     return "FlexAlign.Start";
 }
 
+void FlexComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto flexElement = GetContentElement<FlexElement>(FlexElement::TypeId());
+    if (!flexElement) {
+        LOGE("get GetFlexElement failed");
+        return;
+    }
+    flexElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    flexElement->MarkDirty();
+    LOGD("flex AddChildWithSlot");
+}
+
+void FlexComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto flexElement = GetContentElement<FlexElement>(FlexElement::TypeId());
+    if (!flexElement) {
+        LOGE("get GetFlexElement failed");
+        return;
+    }
+    auto child = flexElement->GetChildBySlot(slot);
+    flexElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    flexElement->MarkDirty();
+    LOGD("flex UpdateChildWithSlot");
+}
+
+void FlexComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto flexElement = GetContentElement<FlexElement>(FlexElement::TypeId());
+    if (!flexElement) {
+        LOGE("get GetFlexElement failed");
+        return;
+    }
+    flexElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    flexElement->MarkDirty();
+    LOGD("flex DeleteChildWithSlot");
+}
+
 } // namespace OHOS::Ace::V2

@@ -43,6 +43,10 @@ public:
     {
         return FlexElement::TypeId();
     }
+
+    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void DeleteChildWithSlot(int32_t slot) override;
 };
 
 } // namespace OHOS::Ace
