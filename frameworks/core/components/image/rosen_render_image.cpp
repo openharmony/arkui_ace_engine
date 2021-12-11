@@ -484,6 +484,7 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
+    SkAutoCanvasRestore acr(canvas, true);
     if (!NearZero(rotate_)) {
         Offset center =
             offset + Offset(GetLayoutSize().Width() * SK_ScalarHalf, GetLayoutSize().Height() * SK_ScalarHalf);
