@@ -154,6 +154,7 @@ void RenderTrack::UpdateAnimation()
             scanHaloController_->SetIteration(ANIMATION_REPEAT_INFINITE);
             scanHaloController_->Play();
         }
+        needUpdateAnimation_ = false;
     }
 }
 

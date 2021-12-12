@@ -97,7 +97,6 @@ public:
 
     void SetTotalRatio(const double ratio)
     {
-        needUpdateAnimation_ = false;
         if (!playAnimation_) {
             totalRatio_ = ratio;
         } else if (!NearEqual(ratio, prevousPercentValue_)) {
