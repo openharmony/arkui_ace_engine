@@ -427,7 +427,7 @@ template("flutter_engine_shell") {
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_view_ohos.cc",
       ]
-      if (defined(config.disable_gpu) && !config.disable_gpu) {
+      if (defined(config.disable_gpu) && !config.disable_gpu && defined(config.enable_rosen_backend) && !config.enable_rosen_backend) {
         sources += [
           "$flutter_root/engine/flutter/shell/platform/ohos/ohos_surface_gl.cc",
         ]
@@ -439,6 +439,12 @@ template("flutter_engine_shell") {
       external_deps = [
         "appexecfwk_standard:libeventhandler",
         "ipc:ipc_core",
+      ]
+
+      deps += ["//foundation/graphic/standard/prebuilts/librarys/gpu:gpu_libs"]
+
+      include_dirs += [
+        "//foundation/graphic/standard/prebuilts/librarys/gpu/include"
       ]
     } else if (platform == "ohos" || platform == "android") {
       sources += [
@@ -458,9 +464,14 @@ template("flutter_engine_shell") {
         "$flutter_root/engine/flutter/shell/platform/android/platform_message_response_android.cc",
       ]
 
-      aosp_deps = [
-        "shared_library:libEGL",
-        "shared_library:libGLESv2",
+      #aosp_deps = [
+       # "shared_library:libEGL",
+       # "shared_library:libGLESv2",
+      #]
+      deps += ["//foundation/graphic/standard/prebuilts/librarys/gpu:gpu_libs"]
+
+      include_dirs += [
+        "//foundation/graphic/standard/prebuilts/librarys/gpu/include",
       ]
 
       if (defined(config.use_agp_vsync) && config.use_agp_vsync) {

@@ -32,7 +32,7 @@ ark_engine = {
 }
 js_engines += [ ark_engine ]
 
-disable_gpu = true
+disable_gpu = false
 use_external_icu = "shared"
 use_curl_download = true
 ohos_standard_fontmgr = true
@@ -49,7 +49,7 @@ pa_engine_path = "adapter/ohos/entrance/pa_engine"
 enable_rosen_backend = true
 enable_standard_input = true
 
-if (disable_gpu) {
+if (disable_gpu || enable_rosen_backend) {
   defines += [ "GPU_DISABLED" ]
 }
 
