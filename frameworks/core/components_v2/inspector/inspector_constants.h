@@ -267,6 +267,10 @@ ACE_EXPORT extern const char MENU_COMPONENT_TAG[];
 ACE_EXPORT extern const char MENU_TAG[];
 ACE_EXPORT extern const char MENU_ETS_TAG[];
 
+// textarea
+ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[];
+ACE_EXPORT extern const char TEXTAREA_ETS_TAG[];
+
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

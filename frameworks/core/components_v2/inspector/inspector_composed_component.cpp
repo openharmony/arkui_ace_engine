@@ -66,6 +66,7 @@
 #include "core/components_v2/inspector/tab_content_composed_element.h"
 #include "core/components_v2/inspector/tabs_composed_element.h"
 #include "core/components_v2/inspector/text_composed_element.h"
+#include "core/components_v2/inspector/textarea_composed_element.h"
 #include "core/components_v2/inspector/time_picker_composed_element.h"
 #include "core/components_v2/inspector/toggle_composed_element.h"
 #include "core/components_v2/inspector/wrap_composed_element.h"
@@ -181,7 +182,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { GRIDCONTAINER_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::GridContainerComposedElement>(id); } },
     { MENU_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::MenuComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::MenuComposedElement>(id); } },
+    { TEXTAREA_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::TextareaComposedElement>(id); } }
 };
 
 } // namespace
@@ -240,7 +243,8 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { GRIDCONTAINER_COMPONENT_TAG, GRIDCONTAINER_ETS_TAG },
     { INDEXER_COMPONENT_TAG, INDEXER_ETS_TAG },
     { MENU_COMPONENT_TAG, MENU_ETS_TAG },
-    { MENU_TAG, MENU_ETS_TAG }
+    { MENU_TAG, MENU_ETS_TAG },
+    { TEXTAREA_COMPONENT_TAG, TEXTAREA_ETS_TAG }
 };
 
 RefPtr<Element> InspectorComposedComponent::CreateElement()

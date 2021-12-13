@@ -183,6 +183,41 @@ public:
         return hasTextOverlayPushed_;
     }
 
+    const std::string GetPlaceholder() const
+    {
+        return placeholder_;
+    }
+
+    const std::string GetValue() const
+    {
+        return text_;
+    }
+
+    Color GetInactivePlaceholderColor() const
+    {
+        return inactivePlaceholderColor_;
+    }
+
+    TextStyle GetPlaceHoldStyle()
+    {
+        return placeHoldStyle_;
+    }
+
+    TextAlign GetTextAlign()
+    {
+        return textAlign_;
+    }
+
+    Color GetCursorColor() const
+    {
+        return cursorColor_;
+    }
+
+    TextStyle GetEditingStyle()
+    {
+        return editingStyle_;
+    }
+
     void SetTextOverlayPushed(bool hasTextOverlayPushed)
     {
         hasTextOverlayPushed_ = hasTextOverlayPushed;
@@ -347,6 +382,7 @@ protected:
     TextStyle style_;
     TextStyle placeHoldStyle_;
     TextStyle editingStyle_;
+    std::string text_;
     std::string errorText_;
     TextStyle errorTextStyle_;
     double errorSpacing_ = 0.0;

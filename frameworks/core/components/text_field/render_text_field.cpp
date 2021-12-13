@@ -213,6 +213,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     }
     extend_ = textField->IsExtend();
     softKeyboardEnabled_ = textField->IsSoftKeyboardEnabled();
+    text_ = textField->GetValue();
     showEllipsis_ = textField->ShowEllipsis();
     auto context = context_.Upgrade();
     if (!clipboard_ && context) {
