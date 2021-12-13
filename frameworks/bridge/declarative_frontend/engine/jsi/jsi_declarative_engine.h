@@ -114,6 +114,11 @@ public:
         return runtime_;
     }
 
+    void SetDebugMode(bool isDebugMode)
+    {
+        isDebugMode_ = isDebugMode;
+    }
+
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -144,6 +149,7 @@ private:
     WeakPtr<JsMessageDispatcher> dispatcher_;
     int32_t instanceId_ = 0;
     mutable std::mutex mutex_;
+    bool isDebugMode_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngineInstance);
 };

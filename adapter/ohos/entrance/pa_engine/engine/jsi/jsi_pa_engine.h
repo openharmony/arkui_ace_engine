@@ -79,6 +79,11 @@ public:
         asyncResult_ = asyncResult;
     }
 
+    void SetDebugMode(bool isDebugMode)
+    {
+        isDebugMode_ = isDebugMode;
+    }
+
 private:
     void RegisterPaModule();
     void RegisterConsoleModule();
@@ -91,6 +96,7 @@ private:
     ArkNativeEngine* nativeEngine_ = nullptr;
     bool blockWaiting_ = false;
     shared_ptr<JsValue> asyncResult_ = nullptr;
+    bool isDebugMode_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiPaEngineInstance);
 };

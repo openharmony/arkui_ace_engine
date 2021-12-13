@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
-std::unique_ptr<WsServer> g_websocketServer = nullptr;
+std::unique_ptr<Inspector> g_inspector = nullptr;
 void* g_handle = nullptr;
 constexpr char ARK_DEBUGGER_SHARED_LIB[] = "libark_ecma_debugger.so";
 
@@ -51,24 +51,39 @@ void* GetArkDynFunction(const char* symbol)
     return function;
 }
 
-void OnMessage(const std::string& message)
+void DispatchMsgToArk(int sign)
 {
-    if (message.empty()) {
-        LOGE("message is empty");
+    if (g_inspector->isDispatchingMsg_) {
         return;
     }
-    auto dispatch = reinterpret_cast<void (*)(const std::string&)>(GetArkDynFunction("DispatchProtocolMessage"));
-    if (dispatch == nullptr) {
-        LOGE("dispatch is empty");
+    auto processMsg = reinterpret_cast<void (*)(const std::string &)>(GetArkDynFunction("DispatchProtocolMessage"));
+    if (processMsg == nullptr) {
+        LOGE("processMessage is empty");
         return;
     }
-    dispatch(message);
+    g_inspector->isDispatchingMsg_ = true;
+    while (!g_inspector->websocketServer_->ideMsgQueue.empty()) {
+        const std::string message = g_inspector->websocketServer_->ideMsgQueue.front();
+        g_inspector->websocketServer_->ideMsgQueue.pop();
+        processMsg(message);
+        std::string startDebugging("Runtime.runIfWaitingForDebugger");
+        if (message.find(startDebugging, 0) != std::string::npos) {
+            g_inspector->waitingForDebugger_ = false;
+        }
+    }
+    g_inspector->isDispatchingMsg_ = false;
+}
+
+void OnMessage()
+{
+    pthread_kill(g_inspector->tid_, SIGALRM);
+    return;
 }
 
 void SendReply(const std::string& message)
 {
-    if (g_websocketServer != nullptr) {
-        g_websocketServer->SendReply(message);
+    if (g_inspector->websocketServer_ != nullptr) {
+        g_inspector->websocketServer_->SendReply(message);
     }
 }
 
@@ -78,23 +93,27 @@ void ResetService()
         dlclose(g_handle);
         g_handle = nullptr;
     }
-    if (g_websocketServer != nullptr) {
-        g_websocketServer->StopServer();
-        g_websocketServer.reset();
+    if (g_inspector->websocketServer_ != nullptr) {
+        g_inspector->websocketServer_->StopServer();
+        g_inspector.reset();
     }
 }
 
 } // namespace
 
-bool StartDebug(const std::string& componentName, void *vm)
+bool StartDebug(const std::string& componentName, void *vm, bool isDebugMode)
 {
     LOGI("StartDebug: %{private}s", componentName.c_str());
+    g_inspector = std::make_unique<Inspector>();
+    g_inspector->websocketServer_ = std::make_unique<WsServer>(componentName, std::bind(&OnMessage));
+    g_inspector->tid_ = pthread_self();
+    g_inspector->waitingForDebugger_ = isDebugMode;
+
     g_handle = dlopen(ARK_DEBUGGER_SHARED_LIB, RTLD_LAZY);
     if (g_handle == nullptr) {
         LOGE("handle is empty");
         return false;
     }
-    g_websocketServer = std::make_unique<WsServer>(componentName, std::bind(&OnMessage, std::placeholders::_1));
     auto initialize = reinterpret_cast<void (*)(const std::function<void(std::string)> &, void *)>(
         GetArkDynFunction("InitializeDebugger"));
     if (initialize == nullptr) {
@@ -104,11 +123,16 @@ bool StartDebug(const std::string& componentName, void *vm)
     initialize(std::bind(&SendReply, std::placeholders::_1), vm);
 
     pthread_t tid;
-    if (pthread_create(&tid, nullptr, &HandleClient, static_cast<void*>(g_websocketServer.get())) != 0) {
+    if (pthread_create(&tid, nullptr, &HandleClient, static_cast<void*>(g_inspector->websocketServer_.get())) != 0) {
         LOGE("pthread_create fail!");
         ResetService();
         return false;
     }
+    signal(SIGALRM, &DispatchMsgToArk);
+    while (g_inspector->waitingForDebugger_) {
+        usleep(g_inspector->DEBUGGER_WAIT_SLEEP_TIME);
+    }
+    LOGI("StartDebug Continue");
     return true;
 }
 
@@ -119,9 +143,9 @@ void StopDebug(const std::string& componentName)
         dlclose(g_handle);
         g_handle = nullptr;
     }
-    if (g_websocketServer != nullptr) {
-        g_websocketServer->StopServer();
-        g_websocketServer.reset();
+    if (g_inspector->websocketServer_ != nullptr) {
+        g_inspector->websocketServer_->StopServer();
+        g_inspector.reset();
     }
     auto uninitialize = reinterpret_cast<void (*)()>(GetArkDynFunction("UninitializeDebugger"));
     if (uninitialize == nullptr) {

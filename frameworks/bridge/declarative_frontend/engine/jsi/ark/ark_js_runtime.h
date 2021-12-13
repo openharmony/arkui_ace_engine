@@ -51,7 +51,7 @@ class PandaFunctionData;
 class ArkJSRuntime final : public JsRuntime, public std::enable_shared_from_this<ArkJSRuntime> {
 public:
     bool StartDebugger(const char *libraryPath, EcmaVM *vm) const;
-    bool Initialize(const std::string &libraryPath) override;
+    bool Initialize(const std::string &libraryPath, bool isDebugMode) override;
     bool InitializeFromExistVM(EcmaVM* vm);
     void Reset() override;
     void SetLogPrint(LOG_PRINT out) override;
@@ -87,6 +87,7 @@ private:
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };
     std::string libPath_ {};
     bool usingExistVM_ = false;
+    bool isDebugMode_ = true;
 };
 
 class PandaFunctionData {

@@ -25,7 +25,21 @@ HdcJdwpSimulator::HdcJdwpSimulator(uv_loop_t *loopIn, const std::string pkgName)
     mCtxPoint = (HCtxJdwpSimulator)MallocContext();
 }
 
-HdcJdwpSimulator::~HdcJdwpSimulator() {}
+HdcJdwpSimulator::~HdcJdwpSimulator()
+{
+    if (!mCtxPoint) {
+        return;
+    }
+
+    if (mLoop && !uv_is_closing((uv_handle_t *)&mCtxPoint->pipe)) {
+        uv_close((uv_handle_t *)&mCtxPoint->pipe, nullptr);
+    }
+    if (mCtxPoint->hasNewFd && mLoop && !uv_is_closing((uv_handle_t *)&mCtxPoint->newFd)) {
+        uv_close((uv_handle_t *)&mCtxPoint->newFd, nullptr);
+    }
+    delete mCtxPoint;
+    mCtxPoint = nullptr;
+}
 
 void HdcJdwpSimulator::FinishWriteCallback(uv_write_t *req, int status)
 {
@@ -50,6 +64,7 @@ RetErrCode HdcJdwpSimulator::SendToStream(uv_stream_t *handleStream, const uint8
     }
     if (memcpy_s(pDynBuf, bufLen, buf, bufLen)) {
         delete[] pDynBuf;
+        pDynBuf = nullptr;
         LOGE("HdcJdwpSimulator::SendToStream memcpy fail.");
         return RetErrCode::ERR_BUF_ALLOC;
     }
@@ -67,17 +82,18 @@ RetErrCode HdcJdwpSimulator::SendToStream(uv_stream_t *handleStream, const uint8
         if (!uv_is_writable(handleStream)) {
             LOGI("SendToStream uv_is_unwritable!");
             delete reqWrite;
+            reqWrite = nullptr;
             break;
         }
         LOGI("SendToStream buf:%{public}s", pDynBuf);
         uv_write(reqWrite, handleStream, &bfr, 1, (uv_write_cb)finishCallback);
         ret = RetErrCode::SUCCESS;
+        delete reqWrite;
+        reqWrite = nullptr;
         break;
     }
     delete[] pDynBuf;
     pDynBuf = nullptr;
-    delete reqWrite;
-    reqWrite = nullptr;
     return ret;
 }
 
@@ -133,42 +149,22 @@ void *HdcJdwpSimulator::MallocContext()
     return ctx;
 }
 
-void HdcJdwpSimulator::FreeContext()
-{
-    LOGI("HdcJdwpSimulator::FreeContext start");
-    if (!mCtxPoint) {
-        return;
-    }
-
-    if (mLoop && !uv_is_closing((uv_handle_t *)&mCtxPoint->pipe)) {
-        uv_close((uv_handle_t *)&mCtxPoint->pipe, nullptr);
-    }
-    if (mCtxPoint->hasNewFd && mLoop && !uv_is_closing((uv_handle_t *)&mCtxPoint->newFd)) {
-        uv_close((uv_handle_t *)&mCtxPoint->newFd, nullptr);
-    }
-    delete mCtxPoint;
-    mCtxPoint = nullptr;
-    LOGI("HdcJdwpSimulator::FreeContext end");
-}
-
 bool HdcJdwpSimulator::Connect()
 {
     string jdwpCtrlName = "\0jdwp-control";
     uv_connect_t *connect = new uv_connect_t();
     if (!mCtxPoint) {
         LOGE("MallocContext failed");
+        delete connect;
+        connect = nullptr;
         return false;
     }
     connect->data = mCtxPoint;
     uv_pipe_init(mLoop, (uv_pipe_t *)&mCtxPoint->pipe, 1);
     LOGI("HdcJdwpSimulator Connect begin");
     uv_pipe_connect(connect, &mCtxPoint->pipe, jdwpCtrlName.c_str(), ConnectJdwp);
+    delete connect;
+    connect = nullptr;
     return true;
-}
-
-void HdcJdwpSimulator::stop()
-{
-    LOGI("HdcJdwpSimulator::stop.");
-    FreeContext();
 }
 }

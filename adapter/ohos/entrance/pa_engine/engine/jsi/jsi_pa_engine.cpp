@@ -394,7 +394,7 @@ bool JsiPaEngineInstance::InitJsEnv(bool debuggerMode, const std::unordered_map<
     if (debuggerMode) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    if (!runtime_->Initialize(libraryPath)) {
+    if (!runtime_->Initialize(libraryPath, isDebugMode_)) {
         LOGE("JsiPaEngineInstance initialize runtime failed");
         return false;
     }
@@ -531,7 +531,8 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     ACE_SCOPED_TRACE("JsiPaEngine::Initialize");
     LOGD("JsiPaEngine initialize");
     engineInstance_ = AceType::MakeRefPtr<JsiPaEngineInstance>(delegate, instanceId_);
-    bool result = engineInstance_->InitJsEnv(IsDebugVersion() && NeedDebugBreakPoint(), GetExtraNativeObject());
+    engineInstance_->SetDebugMode(NeedDebugBreakPoint());
+    bool result = engineInstance_->InitJsEnv(IsDebugVersion(), GetExtraNativeObject());
     if (!result) {
         LOGE("JsiPaEngine Initialize, init js env failed");
         return false;

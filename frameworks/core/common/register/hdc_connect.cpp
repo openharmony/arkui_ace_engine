@@ -104,7 +104,6 @@ bool TryCloseLoop(uv_loop_t *ptrLoop, const char *callerName)
 void FreeInstance()
 {
     if (clsHdcJdwpSimulator != nullptr) {
-        clsHdcJdwpSimulator->stop();
         delete clsHdcJdwpSimulator;
         clsHdcJdwpSimulator = nullptr;
     }

@@ -54,6 +54,11 @@ public:
 
     void FlushCommandBuffer(void* context, const std::string& command) override;
 
+    void SetDebugMode(bool isDebugMode)
+    {
+        isDebugMode_ = isDebugMode;
+    }
+
     RefPtr<FrontendDelegate> GetDelegate() const
     {
         return frontendDelegate_;
@@ -90,6 +95,7 @@ private:
     int32_t instanceId_ = 0;
     mutable std::mutex mutex_;
     ArkNativeEngine* nativeEngine_ = nullptr;
+    bool isDebugMode_ = true;
 };
 
 class JsiEngine : public JsEngine {

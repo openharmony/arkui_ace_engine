@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_ARK_DEBUGGER_INSPECTOR_H
 
 #include <string>
+#include "frameworks/bridge/js_frontend/engine/jsi/debugger/ws_server.h"
 
 namespace panda::ecmascript {
 class EcmaVM;
@@ -31,7 +32,7 @@ extern "C" {
 #endif
 #endif /* End of #ifdef __cplusplus */
 
-bool StartDebug(const std::string& componentName, void *vm);
+bool StartDebug(const std::string& componentName, void *vm, bool isDebugMode);
 
 void StopDebug(const std::string& componentName);
 
@@ -41,6 +42,18 @@ void StopDebug(const std::string& componentName);
 #endif
 #endif /* End of #ifdef __cplusplus */
 
+class Inspector {
+public:
+    Inspector() = default;
+    ~Inspector() {};
+
+    pthread_t tid_;
+    std::unique_ptr<WsServer> websocketServer_;
+    static constexpr int DEBUGGER_WAIT_SLEEP_TIME = 100;
+    volatile bool waitingForDebugger_ = true;
+    volatile bool isDispatchingMsg_ = false;
+
+};
 } // namespace OHOS::Ace::Framework
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_ARK_DEBUGGER_INSPECTOR_H

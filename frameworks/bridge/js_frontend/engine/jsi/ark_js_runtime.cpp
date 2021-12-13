@@ -38,7 +38,7 @@ Local<JSValueRef> FunctionCallback(EcmaVM *vm, Local<JSValueRef> thisValue,
     return package->Callback(thisValue, argument, length);
 }
 
-bool ArkJSRuntime::Initialize(const std::string &libraryPath)
+bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
 {
     LOGI("Ark: create jsvm");
     RuntimeOption option;
@@ -49,6 +49,7 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath)
     option.SetLogBufPrint(print_);
     option.SetDebuggerLibraryPath(libraryPath);
     libPath_ = libraryPath;
+    isDebugMode_ = isDebugMode;
 
     vm_ = JSNApi::CreateJSVM(option);
     return vm_ != nullptr;
@@ -91,7 +92,7 @@ bool ArkJSRuntime::ExecuteJsBin(const std::string &fileName)
     JSExecutionScope executionScope(vm_);
     static bool debugFlag = true;
     if (debugFlag && !libPath_.empty()) {
-        JSNApi::StartDebugger(libPath_.c_str(), vm_);
+        JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_);
         debugFlag = false;
     }
     LocalScope scope(vm_);
