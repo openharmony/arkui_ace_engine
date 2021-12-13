@@ -313,6 +313,83 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::EcmaVM* vm, panda:
     return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfo->ToString().c_str()));
 }
 
+panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
+    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+{
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext == nullptr) {
+        LOGE("pipeline is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nodeInfos = pipelineContext->GetInspectorTree();
+    return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
+}
+
+panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
+    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+{
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (argc < 1 || !args[0]->IsString()) {
+        LOGE("The arg is wrong, must have one string argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext == nullptr) {
+        LOGE("pipelineContext==nullptr");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    std::string key = args[0]->ToString(vm)->ToString();
+    auto resultStr = pipelineContext->GetInspectorNodeByKey(key);
+    return panda::StringRef::NewFromUtf8(vm, resultStr.c_str());
+}
+
+panda::Local<panda::JSValueRef> JsSendEventByKey(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
+    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+{
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (argc < 3 || !args[0]->IsString()) {
+        LOGE("The arg is wrong, must have one string argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext == nullptr) {
+        LOGE("pipelineContext==nullptr");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    std::string key = args[0]->ToString(vm)->ToString();
+    auto action = args[1]->Int32Value(vm);
+    auto params = args[2]->ToString(vm)->ToString();
+    auto result = pipelineContext->SendEventByKey(key, action, params);
+    return panda::BooleanRef::New(vm, result);
+}
+
 panda::Local<panda::JSValueRef> Vp2Px(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
     const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
 {
@@ -683,6 +760,12 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodes, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorNodeById"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodeById, nullptr));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorTree"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorTree, nullptr));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorByKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorByKey, nullptr));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendEventByKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendEventByKey, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "vp2px"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Vp2Px, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2vp"),

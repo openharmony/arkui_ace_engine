@@ -204,11 +204,35 @@ public:
 
     std::pair<Rect, Offset> GetCurrentRectAndOrigin() const override;
 
+    void SetKey(const std::string& key)
+    {
+        key_ = key;
+    }
+
+    const std::string& GetKey() const
+    {
+        return key_;
+    }
+
+    const std::string& GetTag() const;
+    bool GetClickable() const override;
+    bool GetCheckable() const override;
+    bool GetFocusable() const override;
+    bool GetScrollable() const override;
+    bool GetLongClickable() const override;
+    bool IsSelected() const override;
+    bool IsPassword() const override;
+    bool IsChecked() const override;
+    bool IsFocused() const override;
+
 protected:
     RefPtr<RenderBox> GetRenderBox() const;
 
     RefPtr<AccessibilityNode> accessibilityNode_;
     bool accessibilityEnabled_ = false;
+    RefPtr<AccessibilityNode> GetAccessibilityNode() const;
+private:
+    std::string key_;
 };
 
 } // namespace OHOS::Ace::V2

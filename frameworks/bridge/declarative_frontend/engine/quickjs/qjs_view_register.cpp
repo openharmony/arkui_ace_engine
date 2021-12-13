@@ -175,6 +175,88 @@ static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc,
     return JS_UNDEFINED;
 }
 
+static JSValue JsGetInspectorTree(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    if (ctx == nullptr) {
+        return JS_UNDEFINED;
+    }
+
+    QJSContext::Scope scope(ctx);
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return JS_ThrowSyntaxError(ctx, "pipeline is null");
+    }
+
+    auto nodeInfos = pipelineContext->GetInspectorTree();
+    JSValue result = JS_NewString(ctx, nodeInfos.c_str());
+    return result;
+}
+
+static JSValue JsGetInspectorByKey(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    QJSContext::Scope scope(ctx);
+    if (argc != 1) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, it is supposed to have one or two arguments");
+    }
+    if (!JS_IsString(argv[0])) {
+        return JS_ThrowSyntaxError(ctx, "input value must be string");
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return JS_ThrowSyntaxError(ctx, "pipeline is null");
+    }
+    ScopedString targetString(ctx, argv[0]);
+    std::string key = targetString.get();
+    auto resultStr = pipelineContext->GetInspectorNodeByKey(key);
+    JSValue result = JS_NewString(ctx, resultStr.c_str());
+    return result;
+}
+
+static JSValue JsSendEventByKey(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    if (argc != 3) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, it is supposed to have 3 arguments");
+    }
+
+    QJSContext::Scope scp(ctx);
+    if (!JS_IsString(argv[0]) || !JS_IsString(argv[2])) {
+        return JS_ThrowSyntaxError(ctx, "parameter 'key' and 'params' must be string");
+    }
+    if (!JS_IsNumber(argv[1])) {
+        return JS_ThrowSyntaxError(ctx, "parameter action must be number");
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return JS_ThrowSyntaxError(ctx, "pipeline is null");
+    }
+
+    ScopedString targetString(ctx, argv[0]);
+    std::string key = targetString.get();
+    ScopedString valueString(ctx, argv[1]);
+    auto action = StringToInt(valueString.get());
+    ScopedString targetParam(ctx, argv[2]);
+    std::string params = targetParam.get();
+
+    auto result = pipelineContext->SendEventByKey(key, action, params);
+    return JS_NewBool(ctx, result);
+}
+
 static JSValue JsDumpMemoryStats(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
 {
 #ifdef ACE_DEBUG
@@ -529,6 +611,9 @@ void JsRegisterViews(BindingTarget globalObj)
     JSContext* ctx = QJSContext::Current();
 
     QJSUtils::DefineGlobalFunction(ctx, JsLoadDocument, "loadDocument", 1);
+    QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorTree, "getInspectorTree", 0);
+    QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorByKey, "getInspectorByKey", 1);
+    QJSUtils::DefineGlobalFunction(ctx, JsSendEventByKey, "sendEventByKey", 3);
     QJSUtils::DefineGlobalFunction(ctx, JsDumpMemoryStats, "dumpMemoryStats", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsGetI18nResource, "$s", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsGetMediaResource, "$m", 1);

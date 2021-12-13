@@ -222,6 +222,14 @@ public:
         return eventExtensions_;
     }
 
+    const std::string& GetInspectorKey() const
+    {
+        return inspectorKey_;
+    }
+    void SetInspectorKey(const std::string& inspectorKey)
+    {
+        inspectorKey_ = inspectorKey;
+    }
 protected:
     TextDirection direction_ = TextDirection::LTR;
 
@@ -236,6 +244,7 @@ private:
     // Set the id for the component to identify the unique component.
     int32_t retakeId_ = 0;
     bool static_ = false;
+    std::string inspectorKey_;
     // eventMarker used to handle component detach and attach to the render tree.
     EventMarker appearEventId_;
     EventMarker disappearEventId_;

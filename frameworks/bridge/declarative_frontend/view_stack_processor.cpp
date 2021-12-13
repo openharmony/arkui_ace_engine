@@ -498,6 +498,7 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     auto composedComponent = GetInspectorComposedComponent();
     if (composedComponent) {
         components.emplace_back(composedComponent);
+        composedComponent->SetInspectorKey(mainComponent->GetInspectorKey());
     }
 
     std::string componentNames[] = { "flexItem", "display", "transform", "touch", "pan_guesture", "click_guesture",

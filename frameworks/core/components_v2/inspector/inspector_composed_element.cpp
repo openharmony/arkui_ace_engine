@@ -105,11 +105,21 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
     { "width", [](const InspectorNode& inspector) { return inspector.GetWidth(); } },
     { "height", [](const InspectorNode& inspector) { return inspector.GetHeight(); } },
     { "align", [](const InspectorNode& inspector) { return inspector.GetAlign(); } },
+    { "direction", [](const InspectorNode& inspector) { return inspector.GetDirectionStr(); } },
 };
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {
     { "enabled", [](const InspectorNode& inspector) { return inspector.GetEnabled(); } },
-    { "clip", [](const InspectorNode& inspector) { return inspector.GetClip(); } }
+    { "clip", [](const InspectorNode& inspector) { return inspector.GetClip(); } },
+    { "clickable", [](const InspectorNode& inspector) { return inspector.GetClickable(); } },
+    { "checkable", [](const InspectorNode& inspector) { return inspector.GetCheckable(); } },
+    { "focusable", [](const InspectorNode& inspector) { return inspector.GetFocusable(); } },
+    { "scrollable", [](const InspectorNode& inspector) { return inspector.GetScrollable(); } },
+    { "long-clickable", [](const InspectorNode& inspector) { return inspector.GetLongClickable(); } },
+    { "selected", [](const InspectorNode& inspector) { return inspector.IsSelected(); } },
+    { "password", [](const InspectorNode& inspector) { return inspector.IsPassword(); } },
+    { "checked", [](const InspectorNode& inspector) { return inspector.IsChecked(); } },
+    { "focused", [](const InspectorNode& inspector) { return inspector.IsFocused(); } },
 };
 
 const std::unordered_map<std::string, IntJsonFunc> CREATE_JSON_INT_MAP {
@@ -302,6 +312,21 @@ RefPtr<RenderNode> InspectorComposedElement::GetInspectorNode(IdType typeId, boo
         child = child->GetChildren().empty() ? nullptr : child->GetChildren().front();
     }
     return nullptr;
+}
+
+RefPtr<AccessibilityNode> InspectorComposedElement::GetAccessibilityNode() const
+{
+    auto context = context_.Upgrade();
+    if (context == nullptr) {
+        LOGW("get context failed");
+        return nullptr;
+    }
+    auto accessibilityManager = context->GetAccessibilityManager();
+    if (!accessibilityManager) {
+        LOGW("get AccessibilityManager failed");
+        return nullptr;
+    }
+    return accessibilityManager->GetAccessibilityNodeById(std::stoi(id_));
 }
 
 RefPtr<RenderBox> InspectorComposedElement::GetRenderBox() const
@@ -1221,6 +1246,86 @@ std::pair<Rect, Offset> InspectorComposedElement::GetCurrentRectAndOrigin() cons
     auto size = Size(rectInLocal.Width() - marginLeft - marginRight, rectInLocal.Height() - marginTop - marginBottom);
     auto globalOffset = rectInGlobal.GetOffset();
     return { { offset, size }, { globalOffset.GetX() - Localoffset.GetX(), globalOffset.GetY() - Localoffset.GetY() } };
+}
+
+
+const std::string& InspectorComposedElement::GetTag() const
+{
+    auto iter = COMPONENT_TAG_TO_ETS_TAG_MAP.find(name_);
+    return iter != COMPONENT_TAG_TO_ETS_TAG_MAP.end() ? iter->second : name_;
+}
+
+bool InspectorComposedElement::GetClickable() const
+{
+    auto node = GetAccessibilityNode();
+    if (!node) {
+        return false;
+    }
+    return node->GetClickableState();
+}
+bool InspectorComposedElement::GetCheckable() const
+{
+    auto node = GetAccessibilityNode();
+    if (!node) {
+        return false;
+    }
+    return node->GetCheckableState();
+}
+bool InspectorComposedElement::GetFocusable() const
+{
+    auto node = GetAccessibilityNode();
+    if (!node) {
+        return false;
+    }
+    return node->GetFocusableState();
+}
+bool InspectorComposedElement::GetScrollable() const
+{
+    auto node = GetAccessibilityNode();
+    if (!node) {
+        return false;
+    }
+    return node->GetScrollableState();
+}
+bool InspectorComposedElement::GetLongClickable() const
+{
+    auto node = GetAccessibilityNode();
+    if (!node) {
+        return false;
+    }
+    return node->GetLongClickableState();
+}
+bool InspectorComposedElement::IsSelected() const
+{
+    auto node = GetAccessibilityNode();
+    if (!node) {
+        return false;
+    }
+    return node->GetSelectedState();
+}
+bool InspectorComposedElement::IsPassword() const
+{
+    auto node = GetAccessibilityNode();
+    if (!node) {
+        return false;
+    }
+    return node->GetIsPassword();
+}
+bool InspectorComposedElement::IsChecked() const
+{
+    auto node = GetAccessibilityNode();
+    if (!node) {
+        return false;
+    }
+    return node->GetCheckedState();
+}
+bool InspectorComposedElement::IsFocused() const
+{
+    auto node = GetAccessibilityNode();
+    if (!node) {
+        return false;
+    }
+    return node->GetFocusedState();
 }
 
 } // namespace OHOS::Ace::V2

@@ -99,6 +99,11 @@ public:
         return clickedColor_;
     }
 
+    Color GetBackgroundColor() const
+    {
+        return buttonComponent_->GetBackgroundColor();
+    }
+
 protected:
     RenderButton();
     virtual Size Measure() = 0;

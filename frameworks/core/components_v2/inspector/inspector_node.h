@@ -180,6 +180,17 @@ public:
 
     virtual std::pair<Rect, Offset> GetCurrentRectAndOrigin() const = 0;
 
+    // auto test
+    virtual bool GetClickable() const = 0;
+    virtual bool GetCheckable() const = 0;
+    virtual bool GetFocusable() const = 0;
+    virtual bool GetScrollable() const = 0;
+    virtual bool GetLongClickable() const = 0;
+    virtual bool IsSelected() const = 0;
+    virtual bool IsPassword() const = 0;
+    virtual bool IsChecked() const = 0;
+    virtual bool IsFocused() const = 0;
+
 protected:
     int32_t inspectorId_ = 0;
     int32_t inspectorParentId_ = -1;

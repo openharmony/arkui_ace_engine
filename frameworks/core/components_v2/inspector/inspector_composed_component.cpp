@@ -184,7 +184,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) {return AceType::MakeRefPtr<V2::MenuComposedElement>(id); } }
 };
 
-const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP {
+} // namespace
+
+const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP {
     { COLUMN_COMPONENT_TAG, COLUMN_ETS_TAG },
     { TEXT_COMPONENT_TAG, TEXT_ETS_TAG },
     { COLUMN_SPLIT_COMPONENT_TAG, COLUMN_SPLIT_ETS_TAG },
@@ -241,8 +243,6 @@ const static std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_T
     { MENU_TAG, MENU_ETS_TAG }
 };
 
-} // namespace
-
 RefPtr<Element> InspectorComposedComponent::CreateElement()
 {
     auto generateFunc = CREATE_ELEMENT_MAP.find(GetName());
@@ -252,6 +252,8 @@ RefPtr<Element> InspectorComposedComponent::CreateElement()
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
         composedElement->SetDebugLine(GetDebugLine());
 #endif
+        auto inspectorElement = AceType::DynamicCast<InspectorComposedElement>(composedElement);
+        inspectorElement->SetKey(GetInspectorKey());
         return composedElement;
     }
     return nullptr;

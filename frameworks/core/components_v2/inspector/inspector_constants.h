@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H
 
 #include <cstdint>
+#include <unordered_map>
+#include <string>
 
 #include "base/utils/macros.h"
 
@@ -241,6 +243,7 @@ ACE_EXPORT extern const char STEPPER_ETS_TAG[];
 ACE_EXPORT extern const char SCROLL_BAR_COMPONENT_TAG[];
 ACE_EXPORT extern const char SCROLL_BAR_ETS_TAG[];
 
+ACE_EXPORT extern const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP;
 // refresh
 ACE_EXPORT extern const char REFRESH_COMPONENT_TAG[];
 ACE_EXPORT extern const char REFRESH_ETS_TAG[];
