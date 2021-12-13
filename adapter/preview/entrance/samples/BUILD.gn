@@ -83,10 +83,11 @@ foreach(item, ace_platforms) {
 ohos_copy("copy_resource_dynamic_library") {
   if (use_mac) {
     if (is_standard_system) {
-      sources = [
-        "//prebuilts/previewer/darwin/previewer/common/bin/libhmicuuc.dylib",
-        "//prebuilts/previewer/darwin/previewer/common/bin/libresourcemanager_mac.dylib",
-      ]
+      resource_manager_library = get_label_info(
+                                     "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac",
+                                     "root_out_dir") + "/global/resmgr_standard/libglobal_resmgr_mac.dylib"
+      deps = [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
+      sources = [ resource_manager_library ]
     } else {
       sources = [
         "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libhmicuuc.dylib",
@@ -97,10 +98,11 @@ ohos_copy("copy_resource_dynamic_library") {
         [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
   } else {
     if (is_standard_system) {
-      sources = [
-        "//prebuilts/previewer/windows/previewer/common/bin/libhmicuuc.dll",
-        "//prebuilts/previewer/windows/previewer/common/bin/libresourcemanager_win.dll",
-      ]
+      resource_manager_library = get_label_info(
+                                     "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win",
+                                     "root_out_dir") + "/global/resmgr_standard/libglobal_resmgr_win.dll"
+      deps = [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
+      sources = [ resource_manager_library ]
     } else {
       sources = [
         "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libhmicuuc.dll",
