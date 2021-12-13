@@ -22,7 +22,7 @@
 namespace OHOS::Ace::V2 {
 
 class EventExtensions : public Extension {
-    DECLARE_ACE_TYPE(OnAreaChangeExtension, Extension);
+    DECLARE_ACE_TYPE(EventExtensions, Extension);
 
 public:
     EventExtensions() = default;
