@@ -19,6 +19,8 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/text/text_component.h"
 #include "core/components_v2/indexer/indexer_element.h"
+#include "core/components_v2/indexer/render_indexer.h"
+#include "core/components_v2/indexer/popup_list_component.h"
 
 namespace OHOS::Ace::V2 {
 RefPtr<Element> IndexerComponent::CreateElement()
@@ -66,7 +68,7 @@ void IndexerComponent::BuildIndexerAlphabet()
 void IndexerComponent::InitIndexerItemStyle()
 {
     // Indexer item style when binding list item is not current.
-    normalStyle_.SetFontSize(Dimension(INDEXER_ITEM_TEXT_SIZE, DimensionUnit::FP));
+    normalStyle_.SetFontSize(Dimension(INDEXER_LIST_ITEM_TEXT_SIZE, DimensionUnit::FP));
     normalStyle_.SetFontWeight(FontWeight::W400);
     normalStyle_.SetTextColor(Color(INDEXER_LIST_COLOR));
 
@@ -106,6 +108,24 @@ void IndexerComponent::BuildBubbleBox()
     bubble->SetChild(bubbleText_);
     RefPtr<DisplayComponent> displayComponent = AceType::MakeRefPtr<DisplayComponent>(bubble);
     displayComponent->SetOpacity(ZERO_OPACITY);
+    displayComponent->SetShadow(ShadowConfig::DefaultShadowL);
+    AppendChild(displayComponent);
+    nonItemCount_++;
+}
+
+void IndexerComponent::BuildPopupList()
+{
+    if (!bubbleEnabled_ && !popupListEnabled_) {
+        return;
+    }
+
+    if (!popupList_) {
+        popupList_ = AceType::MakeRefPtr<PopupListComponent>();
+    }
+    RefPtr<DisplayComponent> displayComponent = AceType::MakeRefPtr<DisplayComponent>(popupList_);
+    displayComponent->SetOpacity(POPUP_LIST_OPACITY);
+    displayComponent->SetShadow(ShadowConfig::DefaultShadowL);
+
     AppendChild(displayComponent);
     nonItemCount_++;
 }
@@ -140,7 +160,6 @@ void IndexerComponent::BuildIndexerItems()
         std::u16string strItem = labelLocal_[i];
         BuildTextItem(sectionsLocal_[i], strItem);
     }
-
     LOGI("[indexer] BuildIndexerItems, itemCount_:%{public}d", itemCount_);
 }
 

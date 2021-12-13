@@ -13,18 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ELEMENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_POPUP_LIST_ITEM_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_POPUP_LIST_ITEM_ELEMENT_H
 
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/component_group_element.h"
 
 namespace OHOS::Ace::V2 {
-class IndexerElement : public ComponentGroupElement, public FocusNode {
-    DECLARE_ACE_TYPE(IndexerElement, ComponentGroupElement, FocusNode);
+class PopupListItemElement : public ComponentGroupElement, public FocusNode {
+    DECLARE_ACE_TYPE(PopupListItemElement, ComponentGroupElement, FocusNode);
 
 public:
     void PerformBuild() override;
 };
-} // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ELEMENT_H
+} // namespace OHOS::Ace::V2
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_POPUP_LIST_ITEM_ELEMENT_H

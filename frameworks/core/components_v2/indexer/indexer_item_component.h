@@ -20,6 +20,7 @@
 #include "core/components/box/box_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/text/text_component.h"
+#include "core/components_v2/indexer/indexer_event_info.h"
 
 namespace OHOS::Ace::V2 {
 class IndexerItemComponent : public SoleChildComponent {

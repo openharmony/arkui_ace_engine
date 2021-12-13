@@ -13,18 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ELEMENT_H
-
-#include "core/focus/focus_node.h"
-#include "core/pipeline/base/component_group_element.h"
+#include "core/components_v2/indexer/popup_list_item_element.h"
+#include "core/components_v2/indexer/popup_list_item_component.h"
+#include "core/pipeline/base/composed_component.h"
 
 namespace OHOS::Ace::V2 {
-class IndexerElement : public ComponentGroupElement, public FocusNode {
-    DECLARE_ACE_TYPE(IndexerElement, ComponentGroupElement, FocusNode);
-
-public:
-    void PerformBuild() override;
-};
-} // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ELEMENT_H
+void PopupListItemElement::PerformBuild()
+{
+    RefPtr<PopupListItemComponent> popupListItemCompoent = AceType::DynamicCast<PopupListItemComponent>(component_);
+    if (popupListItemCompoent) {
+        ComponentGroupElement::PerformBuild();
+    }
+}
+} // namespace OHOS::Ace::V2

@@ -23,6 +23,8 @@
 #include "core/components/focus_animation/render_focus_animation.h"
 #include "core/components_v2/indexer/indexer_component.h"
 #include "core/components_v2/indexer/render_indexer_item.h"
+#include "core/components_v2/indexer/indexer_event_info.h"
+#include "core/components_v2/indexer/render_popup_list.h"
 #include "core/gestures/drag_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
@@ -37,30 +39,13 @@ constexpr double ROTATION_THRESHOLD = 90.0;
 constexpr double HALF = 0.5;
 constexpr double DOUBLE = 2.0;
 
-class IndexerEventInfo : public BaseEventInfo, public EventToJSONStringAdapter {
-    DECLARE_RELATIONSHIP_OF_CLASSES(IndexerEventInfo, BaseEventInfo, EventToJSONStringAdapter);
-public:
-    IndexerEventInfo(int32_t selectedIndex) : BaseEventInfo("indexer"), selectedIndex_(selectedIndex)
-    {}
-
-    ~IndexerEventInfo() = default;
-
-    std::string ToJSONString() const override;
-
-    int32_t GetSelectedIndex() const
-    {
-        return selectedIndex_;
-    }
-
-private:
-    int32_t selectedIndex_ = 0;
-};
-
 class RenderIndexer : public RenderNode, public RotationNode {
     DECLARE_ACE_TYPE(RenderIndexer, RenderNode);
 
 public:
     using OnSelectedFunc = std::function<void(std::shared_ptr<IndexerEventInfo>&)>;
+    using OnRequestPopupDataCallbackFunc = std::function<void(std::vector<std::string>&)>;
+
     RenderIndexer();
     ~RenderIndexer() override = default;
 
@@ -84,6 +69,7 @@ public:
     virtual void UpdateCurrentSectionItem(int32_t curSection) {}
     virtual void BeginFocusAnimation(int32_t originIndex, int32_t targetIndex) {}
     virtual bool IsValidBubbleBox();
+    virtual bool IsValidPopupList();
 
     virtual bool NeedProcess(const RefPtr<RenderNode>& item) const
     {
@@ -150,6 +136,7 @@ protected:
     void MoveList(int32_t index);
 
     void InitFocusedItem();
+    void LayoutPopup();
     void UpdateItems();
     void UpdateBubbleText();
     void BuildBubbleAnimation();
@@ -157,6 +144,9 @@ protected:
     int32_t GetItemIndex(int32_t index); // get first list item index in specified section
 
     void OnSelected(int32_t selected) const;
+    void OnRequestPopupData(int32_t selected);
+    bool GetBubbleRect(Rect& rect);
+    bool GetPopupListRect(Rect& rect);
 
     int32_t focusedItem_ = -1; // the item which set high light
     int32_t nonItemCount_ = 0;
@@ -164,6 +154,9 @@ protected:
 
     bool clicked_ = false;
     bool bubbleEnabled_ = true;
+    bool popupListEnabled_ = false;
+    bool touchBubbleDisplay = false;
+    bool touchPopupListDisplay = false;
 
     double itemSize_ = INDEXER_CIRCLE_ITEM_SIZE;
     double itemSizeRender_ = INDEXER_CIRCLE_ITEM_SIZE;
@@ -177,11 +170,14 @@ protected:
     RefPtr<TextComponent> bubbleText_;
     RefPtr<RenderBox> bubbleBox_;                   // reference of the bubble box render node
     RefPtr<RenderDisplay> bubbleDisplay_;           // reference of the bubble box render node
-    RefPtr<Animator> bubbleController_; // control bubble appear and disappear
+    RefPtr<RenderPopupList> popupList_;             // reference of the popup list render node
+    RefPtr<RenderDisplay> popupListDisplay_;        // reference of the popup list render node
+    RefPtr<Animator> bubbleController_;             // control bubble appear and disappear
     Offset touchPostion_;
     std::list<RefPtr<RenderNode>> items_;
 
     OnSelectedFunc selectedEventFun_;
+    IndexerComponent::OnRequestPopupDataFunc requestPopupDataEventFun_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_INDEXER_V2_RENDER_INDEXER_H

@@ -13,18 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ELEMENT_H
-
-#include "core/focus/focus_node.h"
-#include "core/pipeline/base/component_group_element.h"
+#include "core/components_v2/indexer/indexer_event_info.h"
 
 namespace OHOS::Ace::V2 {
-class IndexerElement : public ComponentGroupElement, public FocusNode {
-    DECLARE_ACE_TYPE(IndexerElement, ComponentGroupElement, FocusNode);
-
-public:
-    void PerformBuild() override;
-};
+std::string IndexerEventInfo::ToJSONString() const
+{
+    return std::string("\"indexer\",{\"selectedIndex\":")
+                .append(std::to_string(selectedIndex_))
+                .append("},null");
+}
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ELEMENT_H
