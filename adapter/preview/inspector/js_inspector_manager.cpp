@@ -124,12 +124,12 @@ void JsInspectorManager::InitializeCallback()
     };
     InspectorClient::GetInstance().RegisterDefaultJSONTreeCallback(assembleDefaultJSONTreeCallback);
     auto operateComponentCallback = [weak = WeakClaim(this)](const std::string& attrsJson) {
-      auto jsInspectorManager = weak.Upgrade();
-      if (!jsInspectorManager) {
-          return false;
-      }
-      jsInspectorManager->OperateComponent(attrsJson);
-      return true;
+        auto jsInspectorManager = weak.Upgrade();
+        if (!jsInspectorManager) {
+            return false;
+        }
+        jsInspectorManager->OperateComponent(attrsJson);
+        return true;
     };
     InspectorClient::GetInstance().RegisterOperateComponentCallback(operateComponentCallback);
 }

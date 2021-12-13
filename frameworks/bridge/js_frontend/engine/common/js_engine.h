@@ -184,7 +184,10 @@ public:
         return extraNativeObject_;
     }
 
-    virtual RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode) { return nullptr;}
+    virtual RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode)
+    {
+        return nullptr;
+    }
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     static NativeEngine* GetNativeEngine()

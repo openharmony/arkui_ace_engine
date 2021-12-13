@@ -15,8 +15,8 @@
 
 #include "core/components/display/rosen_render_display.h"
 
-#include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/animation/rs_transition.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace {
 
@@ -55,13 +55,13 @@ void RosenRenderDisplay::OnRSTransition(TransitionType type, unsigned long long 
         if (pendingTransitionAppearing_ && hasAppearTransition_) {
             pendingTransitionAppearing_ = false;
             Rosen::RSPropertyNode::NotifyTransition(
-                {Rosen::RSTransitionEffect(Rosen::RSTransitionEffectType::FADE_IN)}, rsNodeId);
+                { Rosen::RSTransitionEffect(Rosen::RSTransitionEffectType::FADE_IN) }, rsNodeId);
         } else {
             pendingTransitionAppearing_ = true;
         }
     } else if (type == TransitionType::DISAPPEARING && hasDisappearTransition_) {
         Rosen::RSPropertyNode::NotifyTransition(
-            {Rosen::RSTransitionEffect(Rosen::RSTransitionEffectType::FADE_OUT)}, rsNodeId);
+            { Rosen::RSTransitionEffect(Rosen::RSTransitionEffectType::FADE_OUT) }, rsNodeId);
     }
 }
 

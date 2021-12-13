@@ -483,11 +483,11 @@ JSValue JsGetInspectorNodes(JSContext* ctx, JSValueConst new_target, int argc, J
     }
     auto front = container->GetFrontend();
     if (!front) {
-        return JS_ThrowSyntaxError(ctx, "front is null");;
+        return JS_ThrowSyntaxError(ctx, "front is null");
     }
     auto accessibilityManager = AceType::DynamicCast<JsAccessibilityManager>(front->GetAccessibilityManager());
     if (!accessibilityManager) {
-        return JS_ThrowSyntaxError(ctx, "AccessibilityManager is null");;
+        return JS_ThrowSyntaxError(ctx, "AccessibilityManager is null");
     }
     auto nodeInfos = accessibilityManager->DumpComposedElementsToJson();
     auto infoStr = nodeInfos->ToString();
@@ -509,15 +509,15 @@ JSValue JsGetInspectorNodeById(JSContext* ctx, JSValueConst new_target, int argc
     }
     auto front = container->GetFrontend();
     if (!front) {
-        return JS_ThrowSyntaxError(ctx, "front is null");;
+        return JS_ThrowSyntaxError(ctx, "front is null");
     }
     auto accessibilityManager = AceType::DynamicCast<JsAccessibilityManager>(front->GetAccessibilityManager());
     if (!accessibilityManager) {
-        return JS_ThrowSyntaxError(ctx, "AccessibilityManager is null");;
+        return JS_ThrowSyntaxError(ctx, "AccessibilityManager is null");
     }
     int32_t nodeId = 0;
     if (JS_ToInt32(ctx, &nodeId, argv[0]) < 0) {
-        return JS_ThrowSyntaxError(ctx, "The arg is wrong, must be int32 value");;
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, must be int32 value");
     }
     auto nodeInfo = accessibilityManager->DumpComposedElementToJson(nodeId);
     auto infoStr = nodeInfo->ToString();

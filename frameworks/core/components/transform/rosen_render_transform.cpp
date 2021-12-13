@@ -15,8 +15,8 @@
 
 #include "core/components/transform/rosen_render_transform.h"
 
-#include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/animation/rs_transition.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace {
 
@@ -246,10 +246,11 @@ void RosenRenderTransform::OnRSTransition(TransitionType type, unsigned long lon
             }
             case TransformOperationType::ROTATE: {
                 auto& rotate = transform.rotateOperation_;
-                effects.push_back(Rosen::RSTransitionEffect(
-                    (type == TransitionType::DISAPPEARING) ?
-                        Rosen::RSTransitionEffectType::ROTATE_OUT : Rosen::RSTransitionEffectType::ROTATE_IN,
-                    Rosen::RotateParams(rotate.dx, rotate.dy, rotate.dz, rotate.angle, originX_.Value(), originY_.Value())));
+                effects.push_back(Rosen::RSTransitionEffect((type == TransitionType::DISAPPEARING)
+                                                                ? Rosen::RSTransitionEffectType::ROTATE_OUT
+                                                                : Rosen::RSTransitionEffectType::ROTATE_IN,
+                    Rosen::RotateParams(
+                        rotate.dx, rotate.dy, rotate.dz, rotate.angle, originX_.Value(), originY_.Value())));
                 break;
             }
             default: {

@@ -64,7 +64,7 @@ void Element::RemoveChild(const RefPtr<Element>& child)
 
 RefPtr<Element> Element::GetChildBySlot(int32_t slot)
 {
-    for(auto iter = children_.begin(); iter != children_.end(); iter++) {
+    for (auto iter = children_.begin(); iter != children_.end(); iter++) {
         if (slot == (*iter)->GetSlot()) {
             return (*iter);
         }
