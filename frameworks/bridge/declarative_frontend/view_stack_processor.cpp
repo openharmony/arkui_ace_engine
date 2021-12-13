@@ -340,8 +340,8 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
     }
     wrappingComponentsMap.emplace("main", component);
     componentsStack_.push(wrappingComponentsMap);
-
-    CreateInspectorComposedComponent(inspectorTag.empty() ? AceType::TypeName(component) : inspectorTag);
+    auto tag = component->GetInspectorTag();
+    CreateInspectorComposedComponent(tag.empty() ? AceType::TypeName(component) : tag);
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component) &&
