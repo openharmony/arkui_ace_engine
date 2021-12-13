@@ -196,7 +196,7 @@ void RosenRenderTextField::PaintDecoration(
     const Offset& offset, SkCanvas* canvas, const Size& size, RenderContext& context)
 {
     auto pipelineContext = context_.Upgrade();
-    if (!pipelineContext || !decoration_) {
+    if (!pipelineContext) {
         return;
     }
     pipelineContext->AddDirtyLayoutNode(AceType::Claim(this));

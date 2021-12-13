@@ -706,11 +706,15 @@ RosenDecorationPainter::RosenDecorationPainter(
 void RosenDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context)
 {
     auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
-    if (!canvas) {
-        LOGE("PaintDecoration failed, canvas is null.");
+    if (!canvas || !paintSize_.IsValid() || !rsNode) {
+        LOGE("PaintDecoration failed.");
         return;
     }
-    if (decoration_ && paintSize_.IsValid() && rsNode) {
+    uint32_t borderColor = 0; // transparent
+    uint32_t borderStyle = 0;
+    float borderWidth = 0;
+    float cornerRadius = 0;
+    if (decoration_) {
         SkPaint paint;
 
         if (opacity_ != UINT8_MAX) {
@@ -719,12 +723,19 @@ void RosenDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* can
 
         Border border = decoration_->GetBorder();
         PaintColorAndImage(offset, canvas, paint, context);
+        if (border.HasRadius()) {
+            cornerRadius = NormalizeToPx(border.TopLeftRadius().GetX());
+        }
         if (border.HasValue()) {
-            rsNode->SetBorderColor(border.Top().GetColor().GetValue());
-            rsNode->SetBorderWidth(border.Top().GetWidth().ConvertToPx(dipScale_));
-            rsNode->SetBorderStyle(static_cast<uint32_t>(border.Top().GetBorderStyle()));
+            borderColor = border.Top().GetColor().GetValue();
+            borderWidth = border.Top().GetWidth().ConvertToPx(dipScale_);
+            borderStyle = static_cast<uint32_t>(border.Top().GetBorderStyle());
         }
     }
+    rsNode->SetCornerRadius(cornerRadius);
+    rsNode->SetBorderColor(borderColor);
+    rsNode->SetBorderWidth(borderWidth);
+    rsNode->SetBorderStyle(borderStyle);
 }
 
 void RosenDecorationPainter::PaintDecoration(

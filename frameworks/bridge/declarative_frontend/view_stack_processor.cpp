@@ -27,6 +27,7 @@
 #include "core/components/menu/menu_component.h"
 #include "core/components/stepper/stepper_item_component_v2.h"
 #include "core/components/text/text_component.h"
+#include "core/components/text_field/text_field_component.h"
 #include "core/components/text_span/text_span_component.h"
 #include "core/components/video/video_component_v2.h"
 #include "core/components_v2/list/list_item_component.h"
@@ -540,7 +541,7 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
             Component::MergeRSNode(components);
         }
     } else if (!components.empty() && (AceType::InstanceOf<TextureComponent>(mainComponent) ||
-        AceType::InstanceOf<BoxComponent>(mainComponent))) {
+        AceType::InstanceOf<BoxComponent>(mainComponent) || AceType::InstanceOf<TextFieldComponent>(mainComponent))) {
         Component::MergeRSNode(components);
         Component::MergeRSNode(mainComponent);
         components.emplace_back(mainComponent);
