@@ -57,7 +57,7 @@ std::unique_ptr<JsonValue> FlexComposedElement::ToJsonObject() const
 
 std::unique_ptr<JsonValue> FlexComposedElement::GetConstructor() const
 {
-    auto jsonValue = JsonUtil::Create(true);
+    auto jsonValue = JsonUtil::Create(false);
     jsonValue->Put("direction", GetFlexDirection().c_str());
     jsonValue->Put("wrap", GetWrap().c_str());
     jsonValue->Put("justifyContent", GetJustifyContent().c_str());

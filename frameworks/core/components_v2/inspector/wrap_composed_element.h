@@ -32,6 +32,7 @@ public:
     void Dump() override;
 
     std::unique_ptr<JsonValue> ToJsonObject() const override;
+    std::unique_ptr<JsonValue> GetConstructor() const;
     std::string GetFlexDirection() const;
     std::string GetWrap() const;
     std::string GetJustifyContent() const;
