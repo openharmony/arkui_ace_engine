@@ -1354,17 +1354,19 @@ void RenderList::CreateDragDropRecognizer()
                 if (targetRenderlist && targetRenderlist->GetOnItemDragMove()) {
                     Point point = info.GetGlobalPoint() - targetRenderlist->GetGlobalOffset();
                     auto newListItem = targetRenderlist->FindCurrentListItem(point);
-                    if (int32_t(targetRenderlist->GetIndexByListItem(newListItem)) > -1) {
-                        renderList->insertItemIndex_ = int32_t(targetRenderlist->GetIndexByListItem(newListItem));
+                    if (static_cast<int32_t>(targetRenderlist->GetIndexByListItem(newListItem)) > -1) {
+                        renderList->insertItemIndex_ =
+                            static_cast<int32_t>(targetRenderlist->GetIndexByListItem(newListItem));
                     }
                     (targetRenderlist->GetOnItemDragMove())(dragInfo,
-                        int32_t(renderList->selectedItemIndex_), renderList->insertItemIndex_);
+                        static_cast<int32_t>(renderList->selectedItemIndex_), renderList->insertItemIndex_);
                 }
                 return;
             }
             if (preTargetRenderlist) {
                 if (preTargetRenderlist->GetOnItemDragLeave()) {
-                    (preTargetRenderlist->GetOnItemDragLeave())(dragInfo, int32_t(renderList->selectedItemIndex_));
+                    (preTargetRenderlist->GetOnItemDragLeave())(dragInfo,
+                        static_cast<int32_t>(renderList->selectedItemIndex_));
                 }
             }
             if (targetRenderlist) {
@@ -1409,11 +1411,12 @@ void RenderList::CreateDragDropRecognizer()
             if (targetRenderlist->GetOnItemDrop()) {
                 Point point = info.GetGlobalPoint() - targetRenderlist->GetGlobalOffset();
                 auto newListItem = targetRenderlist->FindCurrentListItem(point);
-                if (int32_t(targetRenderlist->GetIndexByListItem(newListItem)) > -1) {
-                    renderList->insertItemIndex_ = int32_t(targetRenderlist->GetIndexByListItem(newListItem));
+                if (static_cast<int32_t>(targetRenderlist->GetIndexByListItem(newListItem)) > -1) {
+                    renderList->insertItemIndex_ =
+                        static_cast<int32_t>(targetRenderlist->GetIndexByListItem(newListItem));
                 }
                 (targetRenderlist->GetOnItemDrop())(dragInfo,
-                    int32_t(renderList->selectedItemIndex_), renderList->insertItemIndex_, true);
+                    static_cast<int32_t>(renderList->selectedItemIndex_), renderList->insertItemIndex_, true);
             }
             renderList->SetPreTargetRenderList(nullptr);
         });

@@ -188,7 +188,7 @@ public:
         preTargetRenderList_ = preTargetRenderList;
     }
 
-    const RefPtr<RenderList> GetPreTargetRenderList() const
+    const RefPtr<RenderList>& GetPreTargetRenderList() const
     {
         return preTargetRenderList_;
     }
