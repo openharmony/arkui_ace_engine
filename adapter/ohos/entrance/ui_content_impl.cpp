@@ -216,19 +216,19 @@ bool UIContentImpl::ProcessTouchEvent(const OHOS::TouchEvent& touchEvent)
     return false;
 }
 
-bool UIContentImpl::ProcessPointerEvent(const OHOS::MMI::PointerEvent& pointerEvent)
+bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
     LOGI("UIContent ProcessPointerEvent");
     return false;
 }
 
-bool UIContentImpl::ProcessKeyEvent(const OHOS::MMI::KeyEvent& touchEvent)
+bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
     LOGI("UIContent ProcessKeyEvent");
     return false;
 }
 
-bool UIContentImpl::ProcessAxisEvent(const OHOS::MMI::AxisEvent& axisEvent)
+bool UIContentImpl::ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
 {
     LOGI("UIContent ProcessAxisEvent");
     return false;

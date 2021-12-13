@@ -47,9 +47,9 @@ public:
 
     // UI content event process
     bool ProcessBackPressed() override;
-    bool ProcessPointerEvent(const OHOS::MMI::PointerEvent& pointerEvent) override;
-    bool ProcessKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
-    bool ProcessAxisEvent(const OHOS::MMI::AxisEvent& axisEvent) override;
+    bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
+    bool ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) override;
+    bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateViewportConfig(const ViewportConfig& config) override;
 
