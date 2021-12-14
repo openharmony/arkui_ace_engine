@@ -27,7 +27,11 @@ namespace OHOS::Ace {
 
 using JsonObject = cJSON;
 
+#ifndef WINDOWS_PLATFORM
 class ACE_FORCE_EXPORT JsonValue final {
+#else
+class ACE_PREVIEW_EXPORT JsonValue final {
+#endif
 public:
     JsonValue() = default;
     explicit JsonValue(JsonObject* object);

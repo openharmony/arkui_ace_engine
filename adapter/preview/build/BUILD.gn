@@ -71,24 +71,24 @@ if (target_cpu == "arm64" && is_standard_system) {
   ohos_copy("copy_preview_shared_library") {
     if (use_mac) {
       mac_shared_library_path =
-      get_label_info(":libace_engine_mac($mac_buildtool)", "root_out_dir") +
-      "/common/common/libace_engine_mac.dylib"
+          get_label_info(":libace_engine_mac($mac_buildtool)", "root_out_dir") +
+          "/common/common/libace_engine_mac.dylib"
       deps = [
         "$ace_root/adapter/preview/build:libace_engine_mac(${mac_buildtool})",
       ]
       sources = [ mac_shared_library_path ]
       outputs =
-      [ target_out_dir + "/previewer/common/bin/libace_engine_mac.dylib" ]
+          [ target_out_dir + "/previewer/common/bin/libace_engine_mac.dylib" ]
       module_source_dir = target_out_dir + "/previewer/common/bin/"
       module_install_name = ""
     } else {
       windows_shared_library_path =
-      get_label_info(":libace_engine_windows", "root_out_dir") +
-      "/common/common/libace_engine_windows.dll"
+          get_label_info(":libace_engine_windows", "root_out_dir") +
+          "/common/common/libace_engine_windows.dll"
       deps = [ ":libace_engine_windows" ]
       sources = [ windows_shared_library_path ]
       outputs =
-      [ target_out_dir + "/previewer/common/bin/libace_engine_windows.dll" ]
+          [ target_out_dir + "/previewer/common/bin/libace_engine_windows.dll" ]
       module_source_dir = target_out_dir + "/previewer/common/bin/"
       module_install_name = ""
     }
@@ -116,5 +116,22 @@ if (target_cpu == "arm64" && is_standard_system) {
     module_source_dir = target_out_dir + "/previewer/common/bin"
     module_install_name = ""
   }
-}
 
+  ohos_copy("copy_media_query_shared_library") {
+    shared_library_path =
+        get_label_info("$ace_root/interfaces/napi/kits/media_query:mediaquery",
+                       "root_out_dir")
+    deps = [ "$ace_root/interfaces/napi/kits/media_query:mediaquery" ]
+    if (use_mac) {
+      sources =
+          [ "$shared_library_path/ace/ace_engine_standard/libmediaquery.dylib" ]
+    } else {
+      sources =
+          [ "$shared_library_path/ace/ace_engine_standard/libmediaquery.dll" ]
+    }
+    outputs =
+        [ target_out_dir + "/previewer/common/bin/module/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common/bin/module/"
+    module_install_name = ""
+  }
+}
