@@ -66,18 +66,18 @@ void RenderPickerBase::Update(const RefPtr<Component>& component)
     onColumnChangeCallback_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetOnColumnChange(), context_);
 
     auto context = context_.Upgrade();
-    if (context->GetIsDeclarative()) {
-    if (picker->GetOnTextCancel()) {
-        onTextCancel_ = *picker->GetOnTextCancel();
-    }
+    if (context && context->GetIsDeclarative()) {
+        if (picker->GetOnTextCancel()) {
+            onTextCancel_ = *picker->GetOnTextCancel();
+        }
 
-    if (picker->GetOnTextAccept()) {
-        onTextAccept_ = *picker->GetOnTextAccept();
-    }
+        if (picker->GetOnTextAccept()) {
+            onTextAccept_ = *picker->GetOnTextAccept();
+        }
 
-    if (picker->GetOnTextChange()) {
-        onTextChange_ = *picker->GetOnTextChange();
-    }
+        if (picker->GetOnTextChange()) {
+            onTextChange_ = *picker->GetOnTextChange();
+        }
     }
 
     data_->SetFinishCallback([weak = WeakClaim(this)](bool success) {
