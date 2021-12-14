@@ -429,6 +429,16 @@ public:
     RefPtr<RenderNode> CreateRenderNode() override;
 };
 
+class CapsuleTrack : public TrackComponent {
+    DECLARE_ACE_TYPE(CapsuleTrack, TrackComponent);
+
+public:
+    CapsuleTrack() = default;
+    ~CapsuleTrack() override = default;
+
+    RefPtr<RenderNode> CreateRenderNode() override;
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TRACK_TRACK_COMPONENT_H

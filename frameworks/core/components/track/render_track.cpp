@@ -249,4 +249,21 @@ void RenderMoonTrack::Dump()
     DumpLog::GetInstance().AddDesc(std::string("RenderMoonTrack: ").append(GetLayoutSize().ToString()));
 }
 
+Size RenderCapsuleTrack::Measure()
+{
+    if (GetLayoutParam().GetMaxSize().IsInfinite()) {
+        double diameter = theme_ != nullptr ? NormalizeToPx(theme_->GetRingDiameter()) : 0.0;
+        diameter =
+            std::min(diameter, std::min(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height()));
+        return Size(diameter, diameter);
+    }
+    double diameter = std::min(GetLayoutParam().GetMaxSize().Height(), GetLayoutParam().GetMaxSize().Width());
+    return Size(diameter, diameter);
+}
+
+void RenderCapsuleTrack::Dump()
+{
+    DumpLog::GetInstance().AddDesc(std::string("RenderCapsuleTrack: ").append(GetLayoutSize().ToString()));
+}
+
 } // namespace OHOS::Ace

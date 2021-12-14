@@ -62,6 +62,8 @@ void JSProgress::Create(const JSCallbackInfo& info)
         progressType = ProgressType::RING;
     } else if (progressStyle == ProgressStyle::ScaleRing) {
         progressType = ProgressType::SCALE;
+    } else if (progressStyle == ProgressStyle::Capsule) {
+        progressType = ProgressType::CAPSULE;
     }
 
     auto progressComponent = AceType::MakeRefPtr<OHOS::Ace::ProgressComponent>(0.0, value, 0.0, total, progressType);

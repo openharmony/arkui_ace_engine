@@ -26,6 +26,7 @@ enum class ProgressStyle {
     Ring,
     Eclipse,
     ScaleRing,
+    Capsule,
 };
 
 class JSProgress : public JSViewAbstract {

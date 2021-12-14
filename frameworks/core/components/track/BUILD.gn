@@ -16,6 +16,7 @@ import("//foundation/ace/ace_engine/frameworks/core/components/components.gni")
 build_component("track") {
   sources = [
     "flutter_render_arc_track.cpp",
+    "flutter_render_capsule_track.cpp",
     "flutter_render_circular_track.cpp",
     "flutter_render_linear_track.cpp",
     "flutter_render_moon_track.cpp",
@@ -25,6 +26,7 @@ build_component("track") {
     "render_linear_track_creator.cpp",
     "render_moon_track_creator.cpp",
     "render_scale_ring_track_creator.cpp",
+    "render_capsule_track_creator.cpp",
     "render_track.cpp",
     "track_component.cpp",
   ]
@@ -34,5 +36,6 @@ build_component("track") {
     "rosen_render_linear_track.cpp",
     "rosen_render_moon_track.cpp",
     "rosen_render_scale_ring_track.cpp",
+    "rosen_render_capsule_track.cpp",
   ]
 }

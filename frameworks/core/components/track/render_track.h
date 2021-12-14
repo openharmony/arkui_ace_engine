@@ -233,6 +233,17 @@ public:
     void Dump() override;
 };
 
+class RenderCapsuleTrack : public RenderTrack {
+    DECLARE_ACE_TYPE(RenderCapsuleTrack, RenderTrack);
+
+public:
+    static RefPtr<RenderNode> Create();
+
+    Size Measure() override;
+
+    void Dump() override;
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TRACK_RENDER_TRACK_H
