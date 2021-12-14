@@ -180,7 +180,7 @@ std::string TextComposedElement::GetWidth() const
     if (render) {
         Dimension width = render->GetWidthDimension();
         if (!NearEqual(width.Value(), -1.0)) {
-            return render->GetHeightDimension().ToString();
+            return width.ToString();
         }
     }
 
@@ -192,9 +192,9 @@ std::string TextComposedElement::GetHeight() const
 {
     auto render = GetRenderBox();
     if (render) {
-        Dimension height = render->GetWidthDimension();
+        Dimension height = render->GetHeightDimension();
         if (!NearEqual(height.Value(), -1.0)) {
-            return render->GetHeightDimension().ToString();
+            return height.ToString();
         }
     }
 

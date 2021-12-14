@@ -346,7 +346,7 @@ std::string InspectorComposedElement::GetWidth() const
         if (value.Value() == -1) {
             return "-";
         }
-        return render->GetWidthDimension().ToString();
+        return value.ToString();
     }
     return "-";
 }
@@ -359,7 +359,7 @@ std::string InspectorComposedElement::GetHeight() const
         if (value.Value() == -1) {
             return "-";
         }
-        return render->GetHeightDimension().ToString();
+        return value.ToString();
     }
     return "-";
 }
@@ -722,7 +722,6 @@ std::string InspectorComposedElement::GetBackgroundColor() const
         return "NONE";
     }
     auto color = backDecoration->GetBackgroundColor();
-    LOGE("backgroundColor:%{public}s", color.ColorToString().c_str());
     return color.ColorToString();
 }
 
