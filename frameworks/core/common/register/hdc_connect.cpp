@@ -121,7 +121,7 @@ void Stop(int signo)
 
 void StopConnect()
 {
-    g_connectManagement->terminateFlag = true;
+    g_connectManagement->terminateFlag_ = true;
 }
 
 void* HdcConnectRun(void* pkgContent)
@@ -140,7 +140,7 @@ void* HdcConnectRun(void* pkgContent)
     }
     uv_run(&loopMain, UV_RUN_DEFAULT);
     static constexpr int WAIT_SLEEP_TIME = 1000;
-    while (!g_connectManagement->terminateFlag) {
+    while (!g_connectManagement->terminateFlag_) {
         usleep(WAIT_SLEEP_TIME);
     }
 #ifdef JS_JDWP_CONNECT

@@ -19,26 +19,25 @@ namespace OHOS::Ace {
 
 HdcJdwpSimulator::HdcJdwpSimulator(uv_loop_t *loopIn, const std::string pkgName)
 {
-    mLoop = loopIn;
-    exit = false;
-    gPkgName = pkgName;
-    mCtxPoint = (HCtxJdwpSimulator)MallocContext();
+    loop_ = loopIn;
+    exit_ = false;
+    pkgName_ = pkgName;
+    connect_ = new uv_connect_t();
+    ctxPoint_ = (HCtxJdwpSimulator)MallocContext();
 }
 
 HdcJdwpSimulator::~HdcJdwpSimulator()
 {
-    if (!mCtxPoint) {
-        return;
+    if (ctxPoint_ != nullptr && loop_ && !uv_is_closing((uv_handle_t *)&ctxPoint_->pipe)) {
+        uv_close((uv_handle_t *)&ctxPoint_->pipe, nullptr);
     }
-
-    if (mLoop && !uv_is_closing((uv_handle_t *)&mCtxPoint->pipe)) {
-        uv_close((uv_handle_t *)&mCtxPoint->pipe, nullptr);
+    if (ctxPoint_->hasNewFd && loop_ && !uv_is_closing((uv_handle_t *)&ctxPoint_->newFd)) {
+        uv_close((uv_handle_t *)&ctxPoint_->newFd, nullptr);
     }
-    if (mCtxPoint->hasNewFd && mLoop && !uv_is_closing((uv_handle_t *)&mCtxPoint->newFd)) {
-        uv_close((uv_handle_t *)&mCtxPoint->newFd, nullptr);
-    }
-    delete mCtxPoint;
-    mCtxPoint = nullptr;
+    delete ctxPoint_;
+    ctxPoint_ = nullptr;
+    delete connect_;
+    connect_ = nullptr;
 }
 
 void HdcJdwpSimulator::FinishWriteCallback(uv_write_t *req, int status)
@@ -104,7 +103,7 @@ void HdcJdwpSimulator::ConnectJdwp(uv_connect_t *connection, int status)
     HCtxJdwpSimulator ctxJdwp = (HCtxJdwpSimulator)connection->data;
     HdcJdwpSimulator *thisClass = static_cast<HdcJdwpSimulator *>(ctxJdwp->thisClass);
 #ifdef JS_JDWP_CONNECT
-    string pkgName = thisClass->gPkgName;
+    string pkgName = thisClass->pkgName_;
     uint32_t pkgSize = pkgName.size() + sizeof(JsMsgHeader);
     uint8_t* info = new uint8_t[pkgSize]();
     if (!info) {
@@ -152,19 +151,16 @@ void *HdcJdwpSimulator::MallocContext()
 bool HdcJdwpSimulator::Connect()
 {
     string jdwpCtrlName = "\0jdwp-control";
-    uv_connect_t *connect = new uv_connect_t();
-    if (!mCtxPoint) {
+    if (!ctxPoint_) {
         LOGE("MallocContext failed");
-        delete connect;
-        connect = nullptr;
+        delete connect_;
+        connect_ = nullptr;
         return false;
     }
-    connect->data = mCtxPoint;
-    uv_pipe_init(mLoop, (uv_pipe_t *)&mCtxPoint->pipe, 1);
+    connect_->data = ctxPoint_;
+    uv_pipe_init(loop_, (uv_pipe_t *)&ctxPoint_->pipe, 1);
     LOGI("HdcJdwpSimulator Connect begin");
-    uv_pipe_connect(connect, &mCtxPoint->pipe, jdwpCtrlName.c_str(), ConnectJdwp);
-    delete connect;
-    connect = nullptr;
+    uv_pipe_connect(connect_, &ctxPoint_->pipe, jdwpCtrlName.c_str(), ConnectJdwp);
     return true;
 }
 }
