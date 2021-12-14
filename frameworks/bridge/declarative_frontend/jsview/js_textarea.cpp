@@ -128,28 +128,26 @@ void JSTextArea::JSBind(BindingTarget globalObj)
 
 void JSTextArea::Create(const JSCallbackInfo& info)
 {
+    RefPtr<TextFieldComponent> textAreaComponent = AceType::MakeRefPtr<TextFieldComponent>();
+    textAreaComponent->SetTextInputType(TextInputType::MULTILINE);
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+
+    ViewStackProcessor::GetInstance()->Push(textAreaComponent);
+    InitDefaultStyle();
+
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("textarea create error, info is non-valid");
         return;
     }
 
-    RefPtr<TextFieldComponent> textAreaComponent = AceType::MakeRefPtr<TextFieldComponent>();
-    textAreaComponent->SetTextInputType(TextInputType::MULTILINE);
-    textAreaComponent->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
-    textAreaComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-
     std::string placeholder;
     if (ParseJsString(paramObject->GetProperty("placeholder"), placeholder)) {
         textAreaComponent->SetPlaceholder(placeholder);
     }
-
     std::string text;
     if (ParseJsString(paramObject->GetProperty("text"), text)) {
         textAreaComponent->SetValue(text);
     }
-    ViewStackProcessor::GetInstance()->Push(textAreaComponent);
-    InitDefaultStyle();
 }
 
 void JSTextArea::SetPlaceholderColor(const JSCallbackInfo& info)

@@ -183,8 +183,13 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         resetToStart_ = textField->GetResetToStart();
     }
     if (keyboard_ != textField->GetTextInputType()) {
-        if (keyboard_ == TextInputType::VISIBLE_PASSWORD) {
+        auto context = context_.Upgrade();
+        if (context && context->GetIsDeclarative()) {
             ClearEditingValue();
+        } else {
+            if (keyboard_ == TextInputType::VISIBLE_PASSWORD) {
+                ClearEditingValue();
+            }
         }
         keyboard_ = textField->GetTextInputType();
         CloseKeyboard();
@@ -277,6 +282,17 @@ void RenderTextField::PerformLayout()
 
     if (GetEditingValue().text.empty()) {
         cursorPositionType_ = CursorPositionType::END;
+    }
+
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        const auto& currentText = controller_->GetValue().text;
+        showPlaceholder_ = currentText.empty();
+        if (showPlaceholder_) {
+            SetTextStyle(placeHoldStyle_);
+        } else {
+            SetTextStyle(editingStyle_);
+        }
     }
 
     auto pipelineContext = GetContext().Upgrade();
@@ -858,6 +874,18 @@ void RenderTextField::SetEditingValue(TextEditingValue&& newValue, bool needFire
         needNotifyChangeEvent_ = true;
     }
     ChangeCounterStyle(newValue);
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        if (GetEditingValue().text.empty()) {
+            Dimension fontSize_ = placeHoldStyle_.GetFontSize();
+            if (fontSize_.Value() <= 0) {
+                Dimension fontSize_ { 14, DimensionUnit::FP };
+                placeHoldStyle_.SetFontSize(fontSize_);
+            }
+            SetTextStyle(placeHoldStyle_);
+        }
+    }
+
     controller_->SetValue(newValue, needFireChangeEvent);
     UpdateAccessibilityAttr();
 }
@@ -1302,24 +1330,6 @@ void RenderTextField::OnValueChanged(bool needFireChangeEvent, bool needFireSele
 {
     isValueFromFront_ = !needFireChangeEvent;
     TextEditingValue temp = GetEditingValue();
-    if (controller_) {
-        const auto& currentText = controller_->GetValue().text;
-        showPlaceholder_ = !currentText.empty();
-        auto context = context_.Upgrade();
-        if (context && context->GetIsDeclarative()) {
-            if (showPlaceholder_) {
-                SetTextStyle(editingStyle_);
-            } else {
-                Dimension fontSize_ = placeHoldStyle_.GetFontSize();
-                if (fontSize_.Value() <= 0) {
-                    Dimension fontSize_ { 14, DimensionUnit::FP };
-                    placeHoldStyle_.SetFontSize(fontSize_);
-                }
-                SetTextStyle(placeHoldStyle_);
-            }
-        }
-    }
-
     for (const auto& formatter : textInputFormatters_) {
         if (formatter) {
             formatter->Format(GetEditingValue(), temp);

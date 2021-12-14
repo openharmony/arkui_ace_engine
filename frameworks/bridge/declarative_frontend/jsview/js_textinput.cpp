@@ -131,18 +131,18 @@ void JSTextInput::JSBind(BindingTarget globalObj)
 
 void JSTextInput::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("text-input create error, info is non-valid");
-        return;
-    }
-
     RefPtr<TextFieldComponent> textInputComponent = AceType::MakeRefPtr<TextFieldComponent>();
 
     // default type is text, default action is done.
     textInputComponent->SetTextInputType(TextInputType::TEXT);
     textInputComponent->SetAction(TextInputAction::DONE);
-    textInputComponent->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
-    textInputComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+    ViewStackProcessor::GetInstance()->Push(textInputComponent);
+    InitDefaultStyle();
+
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGW("text-input create error, info is non-valid");
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
 
     std::string placeholder;
@@ -154,9 +154,6 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     if (ParseJsString(paramObject->GetProperty("text"), text)) {
         textInputComponent->SetValue(text);
     }
-    textInputComponent->SetInspectorTag("TextInput");
-    ViewStackProcessor::GetInstance()->Push(textInputComponent);
-    InitDefaultStyle();
 }
 
 void JSTextInput::SetType(const JSCallbackInfo& info)
