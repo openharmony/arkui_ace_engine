@@ -733,6 +733,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSTouchHandler::JSBind(globalObj);
     JSPanHandler::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
+    JsGridDragFunction::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
 

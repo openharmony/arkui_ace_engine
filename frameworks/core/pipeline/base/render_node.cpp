@@ -32,6 +32,7 @@
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/rotation/rotation_node.h"
 #include "core/components/focus_animation/render_focus_animation.h"
+#include "core/components/grid_layout/render_grid_layout.h"
 #include "core/components/root/render_root.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/transform/render_transform.h"

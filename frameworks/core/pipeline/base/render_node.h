@@ -890,6 +890,44 @@ public:
 
     RefPtr<RenderNode> FindDropChild(const Point& globalPoint, const Point& parentLocalPoint);
 
+    template<typename T>
+    RefPtr<T> FindChildNodeOfClass(const Point& globalPoint, const Point& parentLocalPoint)
+    {
+        Point transformPoint = GetTransformPoint(parentLocalPoint);
+        if (!InTouchRectList(transformPoint, GetTouchRectList())) {
+            return nullptr;
+        }
+
+        // Calculates the local point location in this node.
+        const auto localPoint = transformPoint - GetPaintRect().GetOffset();
+        const auto& children = GetChildren();
+        for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+            auto& child = *iter;
+            if (!child->GetVisible()) {
+                continue;
+            }
+
+            if (child->InterceptTouchEvent()) {
+                continue;
+            }
+
+            auto target = child->FindChildNodeOfClass<T>(globalPoint, localPoint);
+            if (target) {
+                return target;
+            }
+        }
+
+        for (auto& rect : GetTouchRectList()) {
+            if (touchable_ && rect.IsInRegion(transformPoint)) {
+                RefPtr<RenderNode> renderNode = AceType::Claim<RenderNode>(this);
+                if (AceType::InstanceOf<T>(renderNode)) {
+                    return AceType::DynamicCast<T>(renderNode);
+                }
+            }
+        }
+        return nullptr;
+    }
+
     void SaveExplicitAnimationOption(const AnimationOption& option);
 
     const AnimationOption& GetExplicitAnimationOption() const;
