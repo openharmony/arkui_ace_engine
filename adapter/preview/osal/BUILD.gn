@@ -147,11 +147,11 @@ if (target_cpu == "arm64") {
   } else {
     system_resource_hap_path =
     get_label_info(
-    "//utils/resources/systemres:systemres_hap($aosp_arm64_buildtool)",
+    "//utils/resources/systemres:systemres_hap",
     "target_gen_dir") + "/SystemResources.hap"
     system_resource_path =
     get_label_info(
-    "//utils/resources/systemres:systemres_hap($aosp_arm64_buildtool)",
+    "//utils/resources/systemres:systemres_hap",
     "target_gen_dir") + "/resources"
   }
 
@@ -211,7 +211,7 @@ if (target_cpu == "arm64") {
       module_source_dir = target_out_dir + "/wearable_resources/"
       module_install_name = ""
     } else {
-      deps = [ ":get_system_resource($aosp_arm64_buildtool)" ]
+      deps = [ ":get_system_resource" ]
 
       sources = [ system_resource_path ]
       outputs = [ target_out_dir + "/wearable_resources/{{source_file_part}}" ]
