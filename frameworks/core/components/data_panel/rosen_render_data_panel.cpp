@@ -557,6 +557,9 @@ void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context,
     PaintBackground(context, offset, totalWidth, height);
     for (int i = 0; i < segment.size(); i++) {
         auto segmentWidth = segment[i].GetValue();
+        if (segmentWidth == 0.0) {
+            continue;
+        }
         auto segmentStartColor = segment[i].GetStartColor();
         auto segmentEndColor = segment[i].GetEndColor();
         PaintColorSegment(

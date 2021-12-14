@@ -575,7 +575,17 @@ void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& contex
     bool isFull = false;
     PaintBackground(context, offset, totalWidth, height);
     for (int i = 0; i < segment.size(); i++) {
+        if (i == 0 && segment[0].GetValue() == 0.0) {
+            for (int j = 0; j < segment.size(); j++) {
+                if (segment[j].GetValue() != 0.0 && i == 0) {
+                    i = j;
+                }
+            }
+        }
         auto segmentWidth = segment[i].GetValue();
+        if (segmentWidth == 0.0) {
+            continue;
+        }
         segmentWidthSum += segmentWidth;
         if (segmentWidthSum == GetMaxValue()) {
             isFull = true;
