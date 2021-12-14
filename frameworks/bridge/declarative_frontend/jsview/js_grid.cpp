@@ -304,11 +304,18 @@ void JSGrid::JsOnGridDragStart(const JSCallbackInfo& info)
                                  const RefPtr<ItemDragInfo>& info, int32_t itemIndex) -> RefPtr<Component> {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
             auto ret = func->ExecuteDragStart(info, itemIndex);
-            if (!ret->IsFunction()) {
-                LOGE("builder param is not a function");
+            if (!ret->IsObject()) {
+                LOGE("builder param is not an object.");
                 return nullptr;
             }
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(ret));
+
+            auto builderObj = JSRef<JSObject>::Cast(ret);
+            auto builder = builderObj->GetProperty("builder");
+            if (!builder->IsFunction()) {
+                LOGE("builder param is not a function.");
+                return nullptr;
+            }
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(builder));
             if (!builderFunc) {
                 LOGE("builderfunc is null.");
                 return nullptr;

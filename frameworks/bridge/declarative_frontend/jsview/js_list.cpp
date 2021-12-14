@@ -245,11 +245,18 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
                         const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<Component> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
         auto ret = func->ItemDragStartExecute(dragInfo, itemIndex);
-        if (!ret->IsFunction()) {
+        if (!ret->IsObject()) {
+            LOGE("builder param is not an object.");
+            return nullptr;
+        }
+
+        auto builderObj = JSRef<JSObject>::Cast(ret);
+        auto builder = builderObj->GetProperty("builder");
+        if (!builder->IsFunction()) {
             LOGE("builder param is not a function.");
             return nullptr;
         }
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(ret));
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
         if (!builderFunc) {
             LOGE("builder function is null.");
             return nullptr;
