@@ -193,6 +193,16 @@ public:
         return text_;
     }
 
+    TextInputAction GetAction() const
+    {
+        return action_;
+    }
+
+    TextInputType GetKeyboard() const
+    {
+        return keyboard_;
+    }
+
     Color GetInactivePlaceholderColor() const
     {
         return inactivePlaceholderColor_;
@@ -216,6 +226,11 @@ public:
     TextStyle GetEditingStyle()
     {
         return editingStyle_;
+    }
+
+    int32_t GetMaxLength()
+    {
+        return maxLength_;
     }
 
     void SetTextOverlayPushed(bool hasTextOverlayPushed)

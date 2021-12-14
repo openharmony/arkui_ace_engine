@@ -333,7 +333,7 @@ void ViewStackProcessor::ClearPageTransitionComponent()
     }
 }
 
-void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomView, const std::string& inspectorTag)
+void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomView)
 {
     std::unordered_map<std::string, RefPtr<Component>> wrappingComponentsMap;
     if (componentsStack_.size() > 1 && ShouldPopImmediately()) {

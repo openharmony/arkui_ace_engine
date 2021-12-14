@@ -154,6 +154,7 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     if (ParseJsString(paramObject->GetProperty("text"), text)) {
         textInputComponent->SetValue(text);
     }
+    textInputComponent->SetInspectorTag("TextInput");
     ViewStackProcessor::GetInstance()->Push(textInputComponent);
     InitDefaultStyle();
 }

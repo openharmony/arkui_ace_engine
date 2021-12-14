@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_v2/inspector/textarea_composed_element.h"
+#include "core/components_v2/inspector/textinput_composed_element.h"
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
@@ -24,39 +24,43 @@ namespace OHOS::Ace::V2 {
 
 namespace {
 
-const std::unordered_map<std::string, std::function<std::string(const TextareaComposedElement&)>> CREATE_JSON_MAP {
-    { "placeholder", [](const TextareaComposedElement& inspector) { return inspector.GetPlaceholder(); } },
-    { "text", [](const TextareaComposedElement& inspector) { return inspector.GetText(); } },
-    { "placeholderColor", [](const TextareaComposedElement& inspector) { return inspector.GetPlaceholderColor(); } },
-    { "placeholderFont", [](const TextareaComposedElement& inspector) { return inspector.GetPlaceholderFont(); } },
-    { "textAlign", [](const TextareaComposedElement& inspector) { return inspector.GetTextAlign(); } },
-    { "caretColor", [](const TextareaComposedElement& inspector) { return inspector.GetCaretColor(); } },
-    { "fontColor", [](const TextareaComposedElement& inspector) { return inspector.GetTextFontColor(); } },
-    { "fontSize", [](const TextareaComposedElement& inspector) { return inspector.GetTextFontSize(); } },
-    { "fontStyle", [](const TextareaComposedElement& inspector) { return inspector.GetTextFontStyle(); } },
-    { "fontWeight", [](const TextareaComposedElement& inspector) { return inspector.GetTextFontWeight(); } },
-    { "fontFamily", [](const TextareaComposedElement& inspector) { return inspector.GetTextFontFamily(); } },
+const std::unordered_map<std::string, std::function<std::string(const TextInputComposedElement&)>> CREATE_JSON_MAP {
+    { "placeholder", [](const TextInputComposedElement& inspector) { return inspector.GetPlaceholder(); } },
+    { "text", [](const TextInputComposedElement& inspector) { return inspector.GetText(); } },
+    { "type", [](const TextInputComposedElement& inspector) { return inspector.GetTextinputType(); } },
+    { "placeholderColor", [](const TextInputComposedElement& inspector) { return inspector.GetPlaceholderColor(); } },
+    { "placeholderFont", [](const TextInputComposedElement& inspector) { return inspector.GetPlaceholderFont(); } },
+    { "enterKeyType", [](const TextInputComposedElement& inspector) { return inspector.GetEnterKeyType(); } },
+    { "caretColor", [](const TextInputComposedElement& inspector) { return inspector.GetCaretColor(); } },
+    { "fontColor", [](const TextInputComposedElement& inspector) { return inspector.GetTextInputFontColor(); } },
+    { "fontSize", [](const TextInputComposedElement& inspector) { return inspector.GetTextInputFontSize(); } },
+    { "fontStyle", [](const TextInputComposedElement& inspector) { return inspector.GetTextInputFontStyle(); } },
+    { "fontWeight", [](const TextInputComposedElement& inspector) { return inspector.GetTextInputFontWeight(); } },
+    { "fontFamily", [](const TextInputComposedElement& inspector) { return inspector.GetTextInputFontFamily(); } },
+    { "maxLength", [](const TextInputComposedElement& inspector) { return inspector.GetTextMaxLength(); } },
 };
 
 } // namespace
 
-void TextareaComposedElement::Dump()
+void TextInputComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
     DumpLog::GetInstance().AddDesc(std::string("placeholder: ").append(GetPlaceholder()));
     DumpLog::GetInstance().AddDesc(std::string("text: ").append(GetText()));
+    DumpLog::GetInstance().AddDesc(std::string("type: ").append(GetTextinputType()));
     DumpLog::GetInstance().AddDesc(std::string("placeholderColor: ").append(GetPlaceholderColor()));
     DumpLog::GetInstance().AddDesc(std::string("placeholderFont: ").append(GetPlaceholderFont()));
-    DumpLog::GetInstance().AddDesc(std::string("textAlign: ").append(GetTextAlign()));
+    DumpLog::GetInstance().AddDesc(std::string("enterKeyType: ").append(GetEnterKeyType()));
     DumpLog::GetInstance().AddDesc(std::string("caretColor: ").append(GetCaretColor()));
-    DumpLog::GetInstance().AddDesc(std::string("fontColor: ").append(GetTextFontColor()));
-    DumpLog::GetInstance().AddDesc(std::string("fontSize: ").append(GetTextFontSize()));
-    DumpLog::GetInstance().AddDesc(std::string("fontStyle: ").append(GetTextFontStyle()));
-    DumpLog::GetInstance().AddDesc(std::string("fontWeight: ").append(GetTextFontWeight()));
-    DumpLog::GetInstance().AddDesc(std::string("fontFamily: ").append(GetTextFontFamily()));
+    DumpLog::GetInstance().AddDesc(std::string("fontColor: ").append(GetTextInputFontColor()));
+    DumpLog::GetInstance().AddDesc(std::string("fontSize: ").append(GetTextInputFontSize()));
+    DumpLog::GetInstance().AddDesc(std::string("fontStyle: ").append(GetTextInputFontStyle()));
+    DumpLog::GetInstance().AddDesc(std::string("fontWeight: ").append(GetTextInputFontWeight()));
+    DumpLog::GetInstance().AddDesc(std::string("fontFamily: ").append(GetTextInputFontFamily()));
+    DumpLog::GetInstance().AddDesc(std::string("maxLength: ").append(GetTextMaxLength()));
 }
 
-std::unique_ptr<JsonValue> TextareaComposedElement::ToJsonObject() const
+std::unique_ptr<JsonValue> TextInputComposedElement::ToJsonObject() const
 {
     auto resultJson = InspectorComposedElement::ToJsonObject();
     for (const auto& value : CREATE_JSON_MAP) {
@@ -65,7 +69,7 @@ std::unique_ptr<JsonValue> TextareaComposedElement::ToJsonObject() const
     return resultJson;
 }
 
-std::string TextareaComposedElement::GetPlaceholder() const
+std::string TextInputComposedElement::GetPlaceholder() const
 {
     auto render = GetRenderTextField();
     if (render) {
@@ -74,7 +78,7 @@ std::string TextareaComposedElement::GetPlaceholder() const
     return "";
 }
 
-std::string TextareaComposedElement::GetText() const
+std::string TextInputComposedElement::GetText() const
 {
     auto render = GetRenderTextField();
     if (render) {
@@ -83,7 +87,7 @@ std::string TextareaComposedElement::GetText() const
     return "";
 }
 
-std::string TextareaComposedElement::GetPlaceholderColor() const
+std::string TextInputComposedElement::GetPlaceholderColor() const
 {
     auto render = GetRenderTextField();
     if (render) {
@@ -92,7 +96,7 @@ std::string TextareaComposedElement::GetPlaceholderColor() const
     return "";
 }
 
-std::string TextareaComposedElement::GetPlaceholderFont() const
+std::string TextInputComposedElement::GetPlaceholderFont() const
 {
     auto render = GetRenderTextField();
     auto jsonValue = JsonUtil::Create(true);
@@ -131,15 +135,7 @@ std::string TextareaComposedElement::GetPlaceholderFont() const
     return "";
 }
 
-std::string TextareaComposedElement::GetTextAlign() const
-{
-    auto render = GetRenderTextField();
-    auto textAlign =
-        render ? render->GetTextAlign() : TextAlign::START;
-    return ConvertWrapTextAlignToString(textAlign);
-}
-
-std::string TextareaComposedElement::GetCaretColor() const
+std::string TextInputComposedElement::GetCaretColor() const
 {
     auto render = GetRenderTextField();
     if (render) {
@@ -148,7 +144,7 @@ std::string TextareaComposedElement::GetCaretColor() const
     return "";
 }
 
-std::string TextareaComposedElement::GetTextFontColor() const
+std::string TextInputComposedElement::GetTextInputFontColor() const
 {
     auto render = GetRenderTextField();
     if (render) {
@@ -157,7 +153,7 @@ std::string TextareaComposedElement::GetTextFontColor() const
     return "";
 }
 
-std::string TextareaComposedElement::GetTextFontSize() const
+std::string TextInputComposedElement::GetTextInputFontSize() const
 {
     auto render = GetRenderTextField();
     if (render) {
@@ -166,7 +162,7 @@ std::string TextareaComposedElement::GetTextFontSize() const
     return "";
 }
 
-std::string TextareaComposedElement::GetTextFontStyle() const
+std::string TextInputComposedElement::GetTextInputFontStyle() const
 {
     auto render = GetRenderTextField();
     auto fontStyle =
@@ -174,7 +170,7 @@ std::string TextareaComposedElement::GetTextFontStyle() const
     return ConvertWrapFontStyleToStirng(fontStyle);
 }
 
-std::string TextareaComposedElement::GetTextFontWeight() const
+std::string TextInputComposedElement::GetTextInputFontWeight() const
 {
     auto render = GetRenderTextField();
     auto weight =
@@ -202,14 +198,59 @@ std::string TextareaComposedElement::GetTextFontWeight() const
         }
 }
 
-std::string TextareaComposedElement::GetTextFontFamily() const
+std::string TextInputComposedElement::GetTextInputFontFamily() const
 {
     auto render = GetRenderTextField();
     auto fontFamily = render ? render->GetEditingStyle().GetFontFamilies() : std::vector<std::string>();
     return ConvertFontFamily(fontFamily);
 }
 
-RefPtr<RenderTextField> TextareaComposedElement::GetRenderTextField() const
+std::string TextInputComposedElement::GetTextinputType() const
+{
+    auto render = GetRenderTextField();
+    if (!render) {
+        return "InputType.Normal";
+    }
+    auto keyboard = render->GetKeyboard();
+    if (keyboard == TextInputType::NUMBER) {
+        return "InputType.Number";
+    } else if (keyboard == TextInputType::VISIBLE_PASSWORD) {
+        return "InputType.Password";
+    } else if (keyboard == TextInputType::EMAIL_ADDRESS) {
+        return "InputType.Email";
+    }
+    return "InputType.Normal";
+}
+
+std::string TextInputComposedElement::GetEnterKeyType() const
+{
+    auto render = GetRenderTextField();
+    if (!render) {
+        return "EnterKeyType.Done";
+    }
+    auto action = render->GetAction();
+    if (action == TextInputAction::GO) {
+        return "EnterKeyType.Go";
+    } else if (action == TextInputAction::SEARCH) {
+        return "EnterKeyType.Search";
+    } else if (action == TextInputAction::SEND) {
+        return "EnterKeyType.Send";
+    } else if (action == TextInputAction::NEXT) {
+        return "EnterKeyType.Next";
+    }
+    return "EnterKeyType.Done";
+}
+
+std::string TextInputComposedElement::GetTextMaxLength() const
+{
+    auto render = GetRenderTextField();
+    if (render) {
+        return std::to_string(render->GetMaxLength()).c_str();
+    }
+    return "";
+}
+
+RefPtr<RenderTextField> TextInputComposedElement::GetRenderTextField() const
 {
     auto node = GetInspectorNode(TextFieldElement::TypeId());
     if (node) {
@@ -218,7 +259,7 @@ RefPtr<RenderTextField> TextareaComposedElement::GetRenderTextField() const
     return nullptr;
 }
 
-std::string TextareaComposedElement::ConvertFontFamily(const std::vector<std::string>& fontFamily) const
+std::string TextInputComposedElement::ConvertFontFamily(const std::vector<std::string>& fontFamily) const
 {
     std::string result = "";
     for (const auto& item : fontFamily) {
@@ -228,5 +269,6 @@ std::string TextareaComposedElement::ConvertFontFamily(const std::vector<std::st
     result = result.substr(0, result.size() - 1);
     return result;
 }
+
 
 } // namespace OHOS::Ace::V2

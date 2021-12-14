@@ -260,4 +260,8 @@ ACE_EXPORT extern const char MENU_ETS_TAG[] = "Menu";
 ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[] = "TextFieldComponent";
 ACE_EXPORT extern const char TEXTAREA_ETS_TAG[] = "Textarea";
 
+// textinput
+ACE_EXPORT extern const char TEXTINPUT_COMPONENT_TAG[] = "TextInput";
+ACE_EXPORT extern const char TEXTINPUT_ETS_TAG[] = "Textinput";
+
 } // namespace OHOS::Ace::V2
