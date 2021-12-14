@@ -40,6 +40,12 @@ public:
         jsViewMapperFunc_ = jsViewMapperFunc;
     }
 
+    JsForEachFunction(JSRef<JSObject> jsArray, JSRef<JSFunc> jsViewMapperFunc)
+        : JsFunction(jsArray, JSRef<JSFunc>::Cast(jsArray->GetProperty("map")))
+    {
+        jsViewMapperFunc_ = jsViewMapperFunc;
+    }
+
     ~JsForEachFunction() override
     {
         LOGD("Destroy: JsForEachFunction");
