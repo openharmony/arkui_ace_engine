@@ -138,6 +138,7 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
     { "offset", [](const InspectorNode& inspector) { return inspector.GetOffset(); } },
     { "padding", [](const InspectorNode& inspector) { return inspector.GetPadding(); } },
     { "margin", [](const InspectorNode& inspector) { return inspector.GetAllMargin(); } },
+    { "size", [](const InspectorNode& inspector) { return inspector.GetSize(); } },
     { "backgroundImageSize",
         [](const InspectorNode& inspector) { return inspector.GetBackgroundImageSize(); } },
     { "backgroundImagePosition",
@@ -151,6 +152,10 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
     { "mask", [](const InspectorNode& inspector) { return inspector.GetMask(); } },
     { "useAlign", [](const InspectorNode& inspector) { return inspector.GetUseAlign(); } },
     { "overlay", [](const InspectorNode& inspector) { return inspector.GetOverlay(); } },
+    { "border", [](const InspectorNode& inspector) { return inspector.GetUnifyBorder(); } },
+    { "linearGradient", [](const InspectorNode& inspector) { return inspector.GetLinearGradient(); } },
+    { "sweepGradient", [](const InspectorNode& inspector) { return inspector.GetSweepGradient(); } },
+    { "radialGradient", [](const InspectorNode& inspector) { return inspector.GetRadialGradient(); } },
 };
 
 }; // namespace
@@ -365,6 +370,14 @@ std::string InspectorComposedElement::GetHeight() const
     return "-";
 }
 
+std::unique_ptr<JsonValue> InspectorComposedElement::GetSize() const
+{
+    auto jsonValue = JsonUtil::Create(false);
+    jsonValue->Put("width", GetWidth().c_str());
+    jsonValue->Put("height", GetHeight().c_str());
+    return jsonValue;
+}
+
 std::unique_ptr<JsonValue> InspectorComposedElement::GetPadding() const
 {
     auto render = GetRenderBox();
@@ -513,6 +526,16 @@ std::string InspectorComposedElement::GetBorderRadius() const
         return "0.0vp";
     }
     return GetBorder().TopLeftRadius().GetX().ToString();
+}
+
+std::unique_ptr<JsonValue> InspectorComposedElement::GetUnifyBorder() const
+{
+    auto jsonValue = JsonUtil::Create(false);
+    jsonValue->Put("width", GetBorderWidth().c_str());
+    jsonValue->Put("color", GetBorderColor().c_str());
+    jsonValue->Put("radius", GetBorderRadius().c_str());
+    jsonValue->Put("style", GetBorderStyle().c_str());
+    return jsonValue;
 }
 
 std::unique_ptr<JsonValue> InspectorComposedElement::GetPosition() const
@@ -1111,7 +1134,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetShadow() const
     }
     Shadow shadow = render->GetShadow();
     jsonValue->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
-    jsonValue->Put("color", std::to_string(shadow.GetColor().GetValue()).c_str());
+    jsonValue->Put("color", ConvertColorToString(shadow.GetColor()).c_str());
     jsonValue->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
     jsonValue->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
     return jsonValue;
@@ -1266,6 +1289,142 @@ std::pair<Rect, Offset> InspectorComposedElement::GetCurrentRectAndOrigin() cons
     return { { offset, size }, { globalOffset.GetX() - Localoffset.GetX(), globalOffset.GetY() - Localoffset.GetY() } };
 }
 
+void InspectorComposedElement::GetColorsAndRepeating(
+    std::unique_ptr<JsonValue>& resultJson, const Gradient& gradient) const
+{
+    auto jsoncolorArray = JsonUtil::CreateArray(false);
+    auto colors = gradient.GetColors();
+    for (size_t i = 0; i < colors.size(); ++i) {
+        auto temp = JsonUtil::CreateArray(false);
+        auto value = std::to_string(colors[i].GetDimension().Value() / 100.0);
+        auto color = colors[i].GetColor().ColorToString();
+        temp->Put("0", color.c_str());
+        temp->Put("1", value.c_str());
+        auto index = std::to_string(i);
+        jsoncolorArray->Put(index.c_str(), temp);
+    }
+    resultJson->Put("colors", jsoncolorArray);
+    auto repeat = ConvertBoolToString(gradient.GetRepeat());
+    resultJson->Put("repeating", repeat.c_str());
+}
+
+std::unique_ptr<JsonValue> InspectorComposedElement::GetLinearGradient() const
+{
+    auto resultJson = JsonUtil::Create(false);
+    auto node = GetRenderBox();
+    if (!node) {
+        return resultJson;
+    }
+    auto decoration = node->GetBackDecoration();
+    if (decoration) {
+        auto lineGradient = decoration->GetGradient();
+        if (GradientType::LINEAR != lineGradient.GetType()) {
+            return resultJson;
+        }
+        if (lineGradient.GetLinearGradient().angle) {
+            resultJson->Put("angle", lineGradient.GetLinearGradient().angle->ToString().c_str());
+        }
+
+        auto linearX = lineGradient.GetLinearGradient().linearX;
+        auto linearY = lineGradient.GetLinearGradient().linearY;
+        if (linearX == GradientDirection::LEFT) {
+            if (linearY == GradientDirection::TOP) {
+                resultJson->Put("direction", "GradientDirection.LeftTop");
+            } else if (linearY == GradientDirection::BOTTOM) {
+                resultJson->Put("direction", "GradientDirection.LeftBottom");
+            } else {
+                resultJson->Put("direction", "GradientDirection.Left");
+            }
+        } else if (linearX == GradientDirection::RIGHT) {
+            if (linearY == GradientDirection::TOP) {
+                resultJson->Put("direction", "GradientDirection.RightTop");
+            } else if (linearY == GradientDirection::BOTTOM) {
+                resultJson->Put("direction", "GradientDirection.RightBottom");
+            } else {
+                resultJson->Put("direction", "GradientDirection.Right");
+            }
+        } else {
+            if (linearY == GradientDirection::TOP) {
+                resultJson->Put("direction", "GradientDirection.Top");
+            } else if (linearY == GradientDirection::BOTTOM) {
+                resultJson->Put("direction", "GradientDirection.Bottom");
+            } else {
+                resultJson->Put("direction", "GradientDirection.None");
+            }
+        }
+        GetColorsAndRepeating(resultJson, lineGradient);
+    }
+    return resultJson;
+}
+
+std::unique_ptr<JsonValue> InspectorComposedElement::GetSweepGradient() const
+{
+    auto resultJson = JsonUtil::Create(false);
+    auto node = GetRenderBox();
+    if (!node) {
+        return resultJson;
+    }
+    auto decoration = node->GetBackDecoration();
+    if (decoration) {
+        auto sweepGradient = decoration->GetGradient();
+        if (GradientType::SWEEP != sweepGradient.GetType()) {
+            return resultJson;
+        }
+        auto radialCenterX = sweepGradient.GetRadialGradient().radialCenterX;
+        auto radialCenterY = sweepGradient.GetRadialGradient().radialCenterY;
+        if (radialCenterX && radialCenterY) {
+            auto jsPoint = JsonUtil::CreateArray(false);
+            jsPoint->Put("0", radialCenterX->ToString().c_str());
+            jsPoint->Put("1", radialCenterY->ToString().c_str());
+            resultJson->Put("center", jsPoint);
+        }
+
+        auto startAngle = sweepGradient.GetSweepGradient().startAngle;
+        auto endAngle = sweepGradient.GetSweepGradient().endAngle;
+        if (startAngle) {
+            resultJson->Put("start", startAngle->ToString().c_str());
+        }
+        if (endAngle) {
+            resultJson->Put("angle", endAngle->ToString().c_str());
+        }
+
+        GetColorsAndRepeating(resultJson, sweepGradient);
+    }
+    return resultJson;
+}
+
+std::unique_ptr<JsonValue> InspectorComposedElement::GetRadialGradient() const
+{
+    auto resultJson = JsonUtil::Create(false);
+    auto node = GetRenderBox();
+    if (!node) {
+        return resultJson;
+    }
+    auto decoration = node->GetBackDecoration();
+    if (decoration) {
+        auto radialGradient = decoration->GetGradient();
+        if (GradientType::RADIAL != radialGradient.GetType()) {
+            return resultJson;
+        }
+
+        auto radialCenterX = radialGradient.GetRadialGradient().radialCenterX;
+        auto radialCenterY = radialGradient.GetRadialGradient().radialCenterY;
+        if (radialCenterX && radialCenterY) {
+            auto jsPoint = JsonUtil::CreateArray(false);
+            jsPoint->Put("0", radialCenterX->ToString().c_str());
+            jsPoint->Put("1", radialCenterY->ToString().c_str());
+            resultJson->Put("center", jsPoint);
+        }
+
+        auto radius = radialGradient.GetRadialGradient().radialVerticalSize;
+        if (radius) {
+            resultJson->Put("radius", radius->ToString().c_str());
+        }
+
+        GetColorsAndRepeating(resultJson, radialGradient);
+    }
+    return resultJson;
+}
 
 const std::string& InspectorComposedElement::GetTag() const
 {

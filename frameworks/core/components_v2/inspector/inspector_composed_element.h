@@ -88,6 +88,7 @@ public:
     // dimension settings
     std::string GetWidth() const override;
     std::string GetHeight() const override;
+    std::unique_ptr<JsonValue> GetSize() const override;
     std::unique_ptr<JsonValue> GetPadding() const override;
     Dimension GetMargin(OHOS::Ace::AnimatableType type) const override;
     std::unique_ptr<JsonValue> GetAllMargin() const override;
@@ -117,6 +118,7 @@ public:
 
     // border settings
     Border GetBorder() const override;
+    std::unique_ptr<JsonValue> GetUnifyBorder() const override;
     std::string GetBorderStyle() const override;
     std::string GetBorderWidth() const override;
     std::string GetBorderColor() const override;
@@ -179,6 +181,12 @@ public:
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
     std::unique_ptr<JsonValue> GetOverlay() const override;
+
+    // color gradient
+    std::unique_ptr<JsonValue> GetLinearGradient() const override;
+    std::unique_ptr<JsonValue> GetSweepGradient() const override;
+    std::unique_ptr<JsonValue> GetRadialGradient() const override;
+    void GetColorsAndRepeating(std::unique_ptr<JsonValue>& resultJson, const Gradient& gradient) const;
 
     virtual AceType::IdType GetTargetTypeId() const
     {
