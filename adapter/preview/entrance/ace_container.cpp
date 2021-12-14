@@ -157,9 +157,11 @@ void AceContainer::InitializeFrontend()
 
 void AceContainer::RunNativeEngineLoop()
 {
-    if (jsEngine_) {
-        jsEngine_->RunNativeEngineLoop();
-    }
+    taskExecutor_->PostTask(
+        [jsEngine = jsEngine_]() {
+            jsEngine->RunNativeEngineLoop();
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void AceContainer::InitializeCallback()
