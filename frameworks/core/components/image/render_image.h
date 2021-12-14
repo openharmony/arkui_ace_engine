@@ -74,6 +74,11 @@ public:
     {
         return imageAlt_;
     }
+    bool GetImageSyncMode() const
+    {
+        return syncMode_;
+    }
+
     void SetMatchTextDirection(bool matchTextDirection)
     {
         matchTextDirection_ = matchTextDirection;
