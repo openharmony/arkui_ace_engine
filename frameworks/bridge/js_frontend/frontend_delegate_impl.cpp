@@ -374,28 +374,59 @@ void FrontendDelegateImpl::OnForground()
 
 bool FrontendDelegateImpl::OnStartContinuation()
 {
-    return FireSyncEvent("_root", std::string("\"onStartContinuation\","), std::string(""));
+    bool ret = false;
+    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &ret] {
+        auto delegate = weak.Upgrade();
+        if (delegate && delegate->onStartContinuationCallBack_) {
+            ret = delegate->onStartContinuationCallBack_();
+        }
+    }, TaskExecutor::TaskType::JS);
+    return ret;
 }
 
 void FrontendDelegateImpl::OnCompleteContinuation(int32_t code)
 {
-    FireSyncEvent("_root", std::string("\"onCompleteContinuation\","), std::to_string(code));
+    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), code] {
+        auto delegate = weak.Upgrade();
+        if (delegate && delegate->onCompleteContinuationCallBack_) {
+            delegate->onCompleteContinuationCallBack_(code);
+        }
+    }, TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateImpl::OnRemoteTerminated()
 {
-    FireSyncEvent("_root", std::string("\"onRemoteTerminated\","), std::string(""));
+    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this)] {
+        auto delegate = weak.Upgrade();
+        if (delegate && delegate->onRemoteTerminatedCallBack_) {
+            delegate->onRemoteTerminatedCallBack_();
+        }
+    }, TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateImpl::OnSaveData(std::string& data)
 {
     std::string savedData;
-    FireSyncEvent("_root", std::string("\"onSaveData\","), std::string(""), savedData);
+    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &savedData] {
+        auto delegate = weak.Upgrade();
+        if (delegate && delegate->onSaveDataCallBack_) {
+            delegate->onSaveDataCallBack_(savedData);
+        }
+    }, TaskExecutor::TaskType::JS);
+    std::string pageUri = GetRunningPageUrl();
+    data = std::string("{\"url\":\"").append(pageUri).append("\",\"__remoteData\":").append(savedData).append("}");
 }
 
 bool FrontendDelegateImpl::OnRestoreData(const std::string& data)
 {
-    return FireSyncEvent("_root", std::string("\"onRestoreData\","), data);
+    bool ret = false;
+    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &data, &ret] {
+        auto delegate = weak.Upgrade();
+        if (delegate && delegate->onRestoreDataCallBack_) {
+            ret = delegate->onRestoreDataCallBack_(data);
+        }
+    }, TaskExecutor::TaskType::JS);
+    return ret;
 }
 
 void FrontendDelegateImpl::OnNewRequest(const std::string& data)
