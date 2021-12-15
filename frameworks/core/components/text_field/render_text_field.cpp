@@ -195,7 +195,16 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         CloseKeyboard();
     }
 
-    action_ = textField->GetAction();
+    if (action_ != textField->GetAction()) {
+        auto context = context_.Upgrade();
+        if (context && context->GetIsDeclarative()) {
+            CloseKeyboard();
+            action_ = textField->GetAction();
+        } else {
+            action_ = textField->GetAction();
+        }
+    }
+
     actionLabel_ = textField->GetActionLabel();
     height_ = textField->GetHeight();
     if (textField->IsCursorColorSet()) {
