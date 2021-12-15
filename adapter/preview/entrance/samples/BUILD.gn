@@ -38,9 +38,9 @@ template("ace_test") {
     sources = [ "ace_${device}_test.cpp" ]
 
     deps = [
-      ":copy_media_query_shared_library_for_test",
-      ":copy_napi_shared_library_for_test",
-      ":copy_resource_dynamic_library",
+      ":copy_media_query_shared_library_for_test(${current_toolchain})",
+      ":copy_napi_shared_library_for_test(${current_toolchain})",
+      ":copy_resource_dynamic_library(${current_toolchain})",
       "$ace_napi:ace_napi(${current_toolchain})",
       "$ace_napi/sample/native_module_demo:demo(${current_toolchain})",
       "$ace_root/adapter/preview/build:libace_engine_$platform(${current_toolchain})",
