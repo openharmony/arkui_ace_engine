@@ -62,9 +62,7 @@ public:
         });
     }
 
-#ifdef USE_STATE_STYLE_UPDATER
     virtual void OnStatusStyleChanged(StyleState state) override;
-#endif
     void UpdateStyleFromRenderNode(PropertyAnimatableType type) override;
 
     const Color& GetColor() const override
@@ -261,11 +259,9 @@ private:
     OnDragFunc onDragLeave_;
     OnDragFunc onDrop_;
     RefPtr<GestureRecognizer> onClick_;
-#ifdef USE_STATE_STYLE_UPDATER
     void HandleTouchEvent(bool isTouchDown);
     RefPtr<RawRecognizer> touchRecognizer_;
     RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_;
-#endif
     TextDirection inspectorDirection_ { TextDirection::LTR };
 }; // class RenderBox
 

@@ -119,9 +119,7 @@ protected:
     WeakPtr<DisplayComponent> displayComponent_;
     RefPtr<CurveAnimation<uint8_t>> appearingAnimation_;
     RefPtr<Animator> animator_;
-#ifdef USE_STATE_STYLE_UPDATER
     RefPtr<StateAttributeList<DisplayStateAttribute>> stateAttributeList_;
-#endif
 };
 
 } // namespace OHOS::Ace
