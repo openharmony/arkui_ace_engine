@@ -25,6 +25,7 @@
 #include "core/animation/scheduler.h"
 #include "core/animation/status_listener.h"
 #include "core/animation/time_event.h"
+#include "core/components/common/properties/animation_option.h"
 
 namespace OHOS::Ace {
 
@@ -86,6 +87,9 @@ public:
 
     // tempo is used to control speed of animation.
     void SetTempo(float tempo);
+
+    // init animation parameters with animationOption
+    void ApplyOption(const AnimationOption& option);
 
     // Whether the animation should be played in reverse in turn.
     void SetAnimationDirection(AnimationDirection direction);
