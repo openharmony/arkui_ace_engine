@@ -64,6 +64,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         return;
     }
     size_t length = values->GetArraySize();
+    double valueSum = 0.0;
     for (size_t i = 0; i < length && i < MAX_COUNT; i++) {
         auto item = values->GetArrayItem(i);
         if (!item || !item->IsNumber()) {
@@ -73,6 +74,18 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         auto value = item->GetDouble();
         if (value <= 0.0) {
             value = 0.0;
+        }
+        valueSum += value;
+        if (valueSum >= max) {
+            value = max - (valueSum - value);
+            if (value == 0.0) {
+                break;
+            }
+            Segment segment;
+            segment.SetValue(value);
+            segment.SetColorType(SegmentStyleType::NONE);
+            component->AppendSegment(segment);
+            break;
         }
         Segment segment;
         segment.SetValue(value);

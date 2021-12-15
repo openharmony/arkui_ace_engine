@@ -507,14 +507,14 @@ void RosenRenderPercentageDataPanel::PaintBackground(
 }
 
 void RosenRenderPercentageDataPanel::PaintSpace(
-    RenderContext& context, const Offset& leftTop, double segmentWidth, double widthSegment, double height)
+    RenderContext& context, const Offset& leftTop, double spaceWidth, double xSpace, double height)
 {
     auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
     if (!canvas) {
         return;
     }
     SkPaint segmentPaint;
-    SkRect rect = SkRect::MakeXYWH(widthSegment, leftTop.GetY(), segmentWidth, height);
+    SkRect rect = SkRect::MakeXYWH(xSpace, leftTop.GetY(), spaceWidth, height);
     segmentPaint.setColor(Color::WHITE.GetValue());
     segmentPaint.setStyle(SkPaint::kFill_Style);
     segmentPaint.setAntiAlias(true);
@@ -551,7 +551,8 @@ void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context,
         return;
     }
     auto segment = GetSegments();
-    auto scaleMaxValue = totalWidth / (GetMaxValue() + (double)(segment.size() - 1) * FIXED_WIDTH);
+    auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
+    auto scaleMaxValue = (totalWidth - (double)(segment.size() - 1) * spaceWidth) / GetMaxValue();
     auto height = GetLayoutSize().Height();
     auto widthSegment = offset.GetX();
     PaintBackground(context, offset, totalWidth, height);
@@ -565,9 +566,8 @@ void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context,
         PaintColorSegment(
             context, offset, segmentWidth * scaleMaxValue, widthSegment, height, segmentStartColor, segmentEndColor);
         widthSegment += segment[i].GetValue() * scaleMaxValue;
-        auto spaceWidth = FIXED_WIDTH * scaleMaxValue;
         PaintSpace(context, offset, spaceWidth, widthSegment, height);
-        widthSegment += FIXED_WIDTH * scaleMaxValue;
+        widthSegment += spaceWidth;
     }
 }
 
