@@ -1788,9 +1788,14 @@ void RenderNode::SetIsPaintGeometryTransition(bool isPaintGeometryTransition)
     isPaintGeometryTransition_ = isPaintGeometryTransition;
 }
 
+void RenderNode::SetPaintOutOfParent(bool isPaintOutOfParent)
+{
+    isPaintOutOfParent_ = isPaintOutOfParent;
+}
+
 bool RenderNode::IsPaintOutOfParent()
 {
-    return isPaintGeometryTransition_;
+    return isPaintGeometryTransition_ || isPaintOutOfParent_;
 }
 
 void RenderNode::UpdatePosition()

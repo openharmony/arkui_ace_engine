@@ -148,6 +148,9 @@ void RenderIndexer::LayoutPopup()
         }
 
         bubbleDisplay_->SetPosition(bubblePosition);
+#ifdef ENABLE_ROSEN_BACKEND
+        bubbleDisplay_->SetPaintOutOfParent(true);
+#endif
     }
 
     if (IsValidPopupList()) {
@@ -155,6 +158,9 @@ void RenderIndexer::LayoutPopup()
         popupPosition.SetX(bubbleDisplay_->GetPosition().GetX());
         popupPosition.SetY(bubbleDisplay_->GetPosition().GetY() + bubbleDisplay_->GetLayoutSize().Height());
         popupListDisplay_->SetPosition(popupPosition);
+#ifdef ENABLE_ROSEN_BACKEND
+        popupListDisplay_->SetPaintOutOfParent(true);
+#endif
     }
 }
 

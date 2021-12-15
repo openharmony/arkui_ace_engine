@@ -960,6 +960,7 @@ public:
     void CreateGeometryTransitionFrom(const RefPtr<RenderNode>& targetNode, AnimationOption& sharedOption);
     void CreateGeometryTransitionTo(const RefPtr<RenderNode>& targetNode, AnimationOption& sharedOption);
     void SetIsPaintGeometryTransition(bool isPaintGeometryTransition);
+    void SetPaintOutOfParent(bool isPaintOutOfParent);
     bool IsPaintOutOfParent();
     void UpdatePosition();
 
@@ -1199,6 +1200,7 @@ private:
     bool isTailRenderNode_ = false;
 
     bool isPaintGeometryTransition_ = false;
+    bool isPaintOutOfParent_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
 };
