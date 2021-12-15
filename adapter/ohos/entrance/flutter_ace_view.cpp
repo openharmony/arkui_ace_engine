@@ -53,7 +53,7 @@ TouchPoint ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     int32_t pressWidth = item.GetWidth();
     int32_t pressHeight = item.GetHeight();
     double size = std::max(pressWidth, pressHeight) / 2.0; // just get the max of width and height
-    TouchPoint point { pointerID, item.GetLocalX(), item.GetLocalX(), TouchType::UNKNOWN, time, size };
+    TouchPoint point { pointerID, item.GetLocalX(), item.GetLocalY(), TouchType::UNKNOWN, time, size };
     int32_t action = pointerEvent->GetPointerAction();
     switch (action) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
