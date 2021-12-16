@@ -47,6 +47,7 @@ void RosenRenderContext::Repaint(const RefPtr<RenderNode>& node)
         Offset(rsNode->GetStagingProperties().GetFramePositionX(), rsNode->GetStagingProperties().GetFramePositionY());
     InitContext(rsNode, node->GetRectWithShadow(), offset);
     node->RenderWithContext(*this, offset);
+    StopRecordingIfNeeded();
 }
 
 void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offset& offset)
@@ -67,6 +68,7 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
     auto childRSNode = child->GetRSNode();
     if (childRSNode && childRSNode != rsNode_) {
         rsNode_->AddChild(childRSNode, -1);
+        StopRecordingIfNeeded();
         if (child->NeedRender()) {
             RosenRenderContext context;
             context.Repaint(child);
@@ -88,13 +90,16 @@ void RosenRenderContext::StartRecording()
 
 void RosenRenderContext::StopRecordingIfNeeded()
 {
-    if (!IsRecording()) {
-        return;
+    if (rosenCanvas_ && rsNode_) {
+        rsNode_->FinishRecording();
+        rosenCanvas_ = nullptr;
     }
 
-    delete recorder_;
-    recorder_ = nullptr;
-    recordingCanvas_ = nullptr;
+    if (IsRecording()) {
+        delete recorder_;
+        recorder_ = nullptr;
+        recordingCanvas_ = nullptr;
+    }
 }
 
 bool RosenRenderContext::IsIntersectWith(const RefPtr<RenderNode>& child, Offset& offset)
@@ -155,11 +160,8 @@ void RosenRenderContext::InitContext(
 
 SkCanvas* RosenRenderContext::GetCanvas()
 {
-    if (recordingCanvas_) {
-        // if recording, return recording canvas
-        return recordingCanvas_;
-    }
-    return rosenCanvas_;
+    // if recording, return recording canvas
+    return recordingCanvas_ ? recordingCanvas_ : rosenCanvas_;
 }
 
 const std::shared_ptr<RSNode>& RosenRenderContext::GetRSNode()

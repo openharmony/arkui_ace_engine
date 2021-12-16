@@ -32,7 +32,7 @@ public:
     {
         path_ = path;
     }
-    const std::string GetPath() const
+    const std::string& GetPath() const
     {
         return path_;
     }
