@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSCanvas : public JSContainerBase {
+class JSCanvas : public JSViewAbstract, public JSInteractableView {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);

@@ -46,7 +46,6 @@ void JSCanvas::JSBind(BindingTarget globalObj)
     JSClass<JSCanvas>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSCanvas>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSCanvas>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSCanvas>::Inherit<JSContainerBase>();
     JSClass<JSCanvas>::Inherit<JSViewAbstract>();
     JSClass<JSCanvas>::Bind<>(globalObj);
 }
