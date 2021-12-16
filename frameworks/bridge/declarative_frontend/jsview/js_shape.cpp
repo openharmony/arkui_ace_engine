@@ -372,6 +372,48 @@ void JSShape::SetAntiAlias(bool antiAlias)
     }
 }
 
+void JSShape::SetBitmapMesh(const JSCallbackInfo& info)
+{
+    if (info.Length() != 3) {
+        LOGE("The arg is wrong, it is supposed to have at least 3 argument");
+        return;
+    }
+    std::vector<double> mesh;
+    JSRef<JSVal> meshValue = info[0];
+
+    if (meshValue->IsObject()) {
+        JSRef<JSObject> meshObj = JSRef<JSObject>::Cast(meshValue);
+        JSRef<JSArray> array = meshObj->GetPropertyNames();
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            if (value->IsString()) {
+                std::string valueStr;
+                if (ParseJsString(value, valueStr)) {
+                    double vert;
+                    if (ParseJsDouble(meshObj->GetProperty(valueStr.c_str()), vert)) {
+                        mesh.push_back(vert);
+                    }
+                }
+            }
+        }
+    }
+    uint32_t column = 0;
+    uint32_t row = 0;
+    JSRef<JSVal> columnValue = info[1];
+    JSRef<JSVal> rowValue = info[2];
+    if (!ParseJsInteger(columnValue, column)) {
+        return;
+    }
+    if (!ParseJsInteger(rowValue, row)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
+    if (component) {
+        component->SetBitmapMesh(mesh, (int32_t)column, (int32_t)row);
+    }
+}
+
 void JSShape::JSBind(BindingTarget globalObj)
 {
     JSClass<JSShape>::Declare("Shape");
@@ -393,6 +435,7 @@ void JSShape::JSBind(BindingTarget globalObj)
     JSClass<JSShape>::StaticMethod("fillOpacity", &JSShape::SetFillOpacity);
     JSClass<JSShape>::StaticMethod("strokeWidth", &JSShape::SetStrokeWidth);
     JSClass<JSShape>::StaticMethod("antiAlias", &JSShape::SetAntiAlias);
+    JSClass<JSShape>::StaticMethod("mesh", &JSShape::SetBitmapMesh);
 
     JSClass<JSShape>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSShape>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

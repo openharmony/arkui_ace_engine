@@ -30,6 +30,9 @@ void RenderShapeContainer::Update(const RefPtr<Component>& component)
     fillState_ = shapeContainerComponent->GetFillState();
     strokeState_ = shapeContainerComponent->GetStrokeState();
     antiAlias_ = shapeContainerComponent->GetAntiAlias();
+    column_ = shapeContainerComponent->GetMeshColumn();
+    row_ = shapeContainerComponent->GetMeshRow();
+    mesh_ = shapeContainerComponent->GetMesh();
     MarkNeedLayout();
 }
 

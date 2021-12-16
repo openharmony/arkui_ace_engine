@@ -17,6 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SHAPE_ROSEN_RENDER_SHAPE_CONTAINER_H
 
 #include "frameworks/core/components/shape/render_shape_container.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkBitmap.h"
+#include "include/core/SkPath.h"
+#include "core/components/custom_paint/offscreen_canvas.h"
+#include "core/components/shape/rosen_render_shape.h"
 
 namespace OHOS::Ace {
 
@@ -25,8 +30,18 @@ class RosenRenderShapeContainer : public RenderShapeContainer {
 
 public:
     void PerformLayout() override;
+    void Paint(RenderContext& context, const Offset& offset) override;
+    RefPtr<RosenRenderShape> GetShapeChild(const RefPtr<RenderNode>& node);
 
 private:
+    void BitmapMesh(RenderContext& context, const Offset& offset);
+    void DrawBitmapMesh(SkBitmap& bitmap, int column, int row,
+        const float* vertices, const int* colors, const SkPaint* paint);
+
+    SkPath path_;
+    SkBitmap skOffBitmap_;
+    std::unique_ptr<SkCanvas> skOffCanvas_;
+    SkCanvas* skCanvas_ = nullptr;
 };
 
 } // namespace OHOS::Ace

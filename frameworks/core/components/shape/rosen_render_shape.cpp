@@ -158,10 +158,15 @@ void RosenRenderShape::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
+    PaintOnCanvas(canvas, offset);
+}
+
+void RosenRenderShape::PaintOnCanvas(SkCanvas* skCanvas, const Offset& offset)
+{
     SkPath path = path_;
     path_.offset(offset.GetX(), offset.GetY(), &path);
-    RosenSvgPainter::SetFillStyle(canvas, path, fillState_, UINT8_MAX, antiAlias_.second);
-    DrawStroke(canvas, path);
+    RosenSvgPainter::SetFillStyle(skCanvas, path, fillState_, UINT8_MAX, antiAlias_.second);
+    DrawStroke(skCanvas, path);
 }
 
 void RosenRenderShape::DrawStroke(SkCanvas* skCanvas, const SkPath& path)

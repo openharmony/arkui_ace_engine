@@ -69,6 +69,10 @@ protected:
     FillState fillState_;
     StrokeState strokeState_;
     std::pair<bool, bool> antiAlias_ = std::make_pair(false, true);
+    int32_t row_ = 0;
+    int32_t column_ = 0;
+    std::vector<double> mesh_;
+
 };
 
 } // namespace OHOS::Ace
