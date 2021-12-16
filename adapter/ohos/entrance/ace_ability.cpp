@@ -227,6 +227,7 @@ void AceAbility::OnStart(const Want& want)
     flutter::ViewportMetrics metrics;
     metrics.physical_width = width;
     metrics.physical_height = height;
+    metrics.device_pixel_ratio = density_;
     Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
 
     if (srcPath.empty()) {
@@ -522,6 +523,7 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect)
     flutter::ViewportMetrics metrics;
     metrics.physical_width = width;
     metrics.physical_height = height;
+    metrics.device_pixel_ratio = density_;
     Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
 }

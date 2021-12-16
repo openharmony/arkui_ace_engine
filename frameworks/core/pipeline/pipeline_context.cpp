@@ -1365,7 +1365,7 @@ void PipelineContext::OnTouchEvent(const TouchPoint& point)
         return;
     }
     auto scalePoint = point.CreateScalePoint(viewScale_);
-    LOGD("OnTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
+    LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
     if (scalePoint.type == TouchType::DOWN) {
         LOGD("receive touch down event, first use touch test to collect touch event target");
@@ -1672,9 +1672,11 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnSurfaceDensityChanged(%lf)", density);
-
+    LOGI("OnSurfaceDensityChanged density_(%{public}lf)", density_);
+    LOGI("OnSurfaceDensityChanged dipScale_(%{public}lf)", dipScale_);
     density_ = density;
     if (!NearZero(viewScale_)) {
+        LOGI("OnSurfaceDensityChanged viewScale_(%{public}lf)", viewScale_);
         dipScale_ = density_ / viewScale_;
     }
 }
