@@ -126,6 +126,11 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
 
 void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto progress = AceType::DynamicCast<ProgressComponent>(component);
@@ -137,16 +142,26 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
         LOGI("circular Style error. now use default strokeWidth");
         strokeWidthDimension = theme->GetTrackThickness();
     }
+
+    if (strokeWidthDimension.Value() <= 0.0) {
+        strokeWidthDimension = theme->GetTrackThickness();
+    }
     progress->SetTrackThickness(strokeWidthDimension);
 
     auto jsScaleCount = paramObject->GetProperty("scaleCount");
     auto scaleCount = jsScaleCount->IsNumber() ? jsScaleCount->ToNumber<int32_t>() : theme->GetScaleNumber();
-    progress->SetScaleNumber(scaleCount);
+    if (scaleCount > 0.0) {
+        progress->SetScaleNumber(scaleCount);
+    }
 
     Dimension scaleWidthDimension;
     auto jsScaleWidth = paramObject->GetProperty("scaleWidth");
     if (!ParseJsDimensionVp(jsScaleWidth, scaleWidthDimension)) {
         LOGI("circular Style error. now use default scaleWidth");
+        scaleWidthDimension = theme->GetScaleWidth();
+    }
+
+    if ((scaleWidthDimension.Value() <= 0.0) || (scaleWidthDimension.Value() > strokeWidthDimension.Value())) {
         scaleWidthDimension = theme->GetScaleWidth();
     }
     progress->SetScaleWidth(scaleWidthDimension);
