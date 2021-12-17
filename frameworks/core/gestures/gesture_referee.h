@@ -55,21 +55,21 @@ public:
 
 private:
     bool Existed(const RefPtr<GestureRecognizer>& recognizer);
-    const std::list<RefPtr<GestureRecognizer>>& GetMembersByRecognizer(const RefPtr<GestureRecognizer>& recognizer);
+    const std::list<WeakPtr<GestureRecognizer>>& GetMembersByRecognizer(const RefPtr<GestureRecognizer>& recognizer);
     bool CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer);
     void AcceptGesture(const RefPtr<GestureRecognizer>& recognizer);
-    void UnBlockGesture(std::list<RefPtr<GestureRecognizer>>& members);
+    void UnBlockGesture(std::list<WeakPtr<GestureRecognizer>>& members);
     void HandleParallelDisposal(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
     void HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer);
     void HandlePendingDisposal(const RefPtr<GestureRecognizer>& recognizer);
     void HandleRejectDisposal(const RefPtr<GestureRecognizer>& recognizer);
-    void RemoveAndUnBlockGesture(bool isPrevPending, const RefPtr<GestureRecognizer>& recognizer);
+    void RemoveAndUnBlockGesture(bool isPrevPending, const WeakPtr<GestureRecognizer>& recognizer);
 
     size_t touchId_ = 0;
 
-    std::list<RefPtr<GestureRecognizer>> highRecognizers_;
-    std::list<RefPtr<GestureRecognizer>> lowRecognizers_;
-    std::list<RefPtr<GestureRecognizer>> parallelRecognizers_;
+    std::list<WeakPtr<GestureRecognizer>> highRecognizers_;
+    std::list<WeakPtr<GestureRecognizer>> lowRecognizers_;
+    std::list<WeakPtr<GestureRecognizer>> parallelRecognizers_;
 };
 
 class GestureReferee : public Singleton<GestureReferee> {

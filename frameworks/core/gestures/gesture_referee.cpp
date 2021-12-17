@@ -100,8 +100,6 @@ void GestureScope::HandleGestureDisposal(const RefPtr<GestureRecognizer>& recogn
             LOGW("handle known gesture disposal %{public}d", disposal);
             break;
     }
-
-    return;
 }
 
 void GestureScope::HandleParallelDisposal(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
@@ -151,8 +149,12 @@ void GestureScope::HandleRejectDisposal(const RefPtr<GestureRecognizer>& recogni
     RemoveAndUnBlockGesture(prevState == RefereeState::PENDING, recognizer);
 }
 
-void GestureScope::RemoveAndUnBlockGesture(bool isPrevPending, const RefPtr<GestureRecognizer>& recognizer)
+void GestureScope::RemoveAndUnBlockGesture(bool isPrevPending, const WeakPtr<GestureRecognizer>& weakRecognizer)
 {
+    auto recognizer = weakRecognizer.Upgrade();
+    if (!recognizer) {
+        return;
+    }
     if (recognizer->GetPriority() == GesturePriority::High) {
         highRecognizers_.remove(recognizer);
         if (highRecognizers_.empty()) {
@@ -178,20 +180,16 @@ bool GestureScope::Existed(const RefPtr<GestureRecognizer>& recognizer)
         return false;
     }
 
-    std::list<RefPtr<GestureRecognizer>> members = GetMembersByRecognizer(recognizer);
+    std::list<WeakPtr<GestureRecognizer>> members = GetMembersByRecognizer(recognizer);
     if (members.empty()) {
         return false;
     }
 
     auto result = std::find(members.cbegin(), members.cend(), recognizer);
-    if (result == members.cend()) {
-        return false;
-    }
-
-    return true;
+    return result != members.cend();
 }
 
-const std::list<RefPtr<GestureRecognizer>>& GestureScope::GetMembersByRecognizer(
+const std::list<WeakPtr<GestureRecognizer>>& GestureScope::GetMembersByRecognizer(
     const RefPtr<GestureRecognizer>& recognizer)
 {
     switch (recognizer->GetPriority()) {
@@ -213,10 +211,11 @@ bool GestureScope::CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer)
         return true;
     }
 
-    std::list<RefPtr<GestureRecognizer>> members = GetMembersByRecognizer(recognizer);
+    std::list<WeakPtr<GestureRecognizer>> members = GetMembersByRecognizer(recognizer);
     auto pendingMember =
-        std::find_if(std::begin(members), std::end(members), [recognizer](const RefPtr<GestureRecognizer>& member) {
-            return (member != recognizer) && (member->GetRefereeState() == RefereeState::PENDING);
+        std::find_if(std::begin(members), std::end(members), [recognizer](const WeakPtr<GestureRecognizer>& member) {
+            return (member != recognizer) &&
+                   (member.Upgrade() && member.Upgrade()->GetRefereeState() == RefereeState::PENDING);
         });
 
     if (pendingMember != members.end()) {
@@ -234,24 +233,33 @@ void GestureScope::AcceptGesture(const RefPtr<GestureRecognizer>& recognizer)
             if (rejectedItem == recognizer) {
                 continue;
             }
-            rejectedItem->OnRejected(touchId_);
-            rejectedItem->SetRefereeState(RefereeState::FAIL);
+            auto strongItem = rejectedItem.Upgrade();
+            if (strongItem) {
+                strongItem->OnRejected(touchId_);
+                strongItem->SetRefereeState(RefereeState::FAIL);
+            }
         }
     } else {
         for (const auto& rejectedItem : highRecognizers_) {
             if (rejectedItem == recognizer) {
                 continue;
             }
-            rejectedItem->OnRejected(touchId_);
-            rejectedItem->SetRefereeState(RefereeState::FAIL);
+            auto strongItem = rejectedItem.Upgrade();
+            if (strongItem) {
+                strongItem->OnRejected(touchId_);
+                strongItem->SetRefereeState(RefereeState::FAIL);
+            }
         }
 
         for (const auto& rejectedItem : lowRecognizers_) {
             if (rejectedItem == recognizer) {
                 continue;
             }
-            rejectedItem->OnRejected(touchId_);
-            rejectedItem->SetRefereeState(RefereeState::FAIL);
+            auto strongItem = rejectedItem.Upgrade();
+            if (strongItem) {
+                strongItem->OnRejected(touchId_);
+                strongItem->SetRefereeState(RefereeState::FAIL);
+            }
         }
     }
 
@@ -265,66 +273,84 @@ void GestureScope::AcceptGesture(const RefPtr<GestureRecognizer>& recognizer)
     }
 }
 
-void GestureScope::UnBlockGesture(std::list<RefPtr<GestureRecognizer>>& members)
+void GestureScope::UnBlockGesture(std::list<WeakPtr<GestureRecognizer>>& members)
 {
-    auto blockedMember = std::find_if(std::begin(members), std::end(members),
-        [](const RefPtr<GestureRecognizer>& member) { return member->GetRefereeState() == RefereeState::BLOCKED; });
-    if (blockedMember == members.end()) {
+    auto weakBlockedMember =
+        std::find_if(std::begin(members), std::end(members), [](const WeakPtr<GestureRecognizer>& member) {
+            return member.Upgrade() && member.Upgrade()->GetRefereeState() == RefereeState::BLOCKED;
+        });
+    if (weakBlockedMember == members.end()) {
         LOGD("no blocked gesture in recognizers");
         return;
     }
+    auto blockedMember = (*weakBlockedMember).Upgrade();
+    if (!blockedMember) {
+        LOGW("BlockedMember not exists.");
+        return;
+    }
 
-    if ((*blockedMember)->GetDetectState() == DetectState::DETECTED) {
+    if ((blockedMember)->GetDetectState() == DetectState::DETECTED) {
         LOGD("unblock and accept this gesture");
-        AcceptGesture(*blockedMember);
+        AcceptGesture(blockedMember);
         return;
     }
 
     LOGD("set the gesture %{public}s to be pending", AceType::TypeName((*blockedMember)));
-    (*blockedMember)->SetRefereeState(RefereeState::PENDING);
-    (*blockedMember)->OnPending(touchId_);
+    (blockedMember)->SetRefereeState(RefereeState::PENDING);
+    (blockedMember)->OnPending(touchId_);
 }
 
 void GestureScope::ForceClose()
 {
     LOGD("force close gesture scope of id %{public}zu", touchId_);
-    for (const auto& rejectedItem : lowRecognizers_) {
-        rejectedItem->OnRejected(touchId_);
+    for (const auto& weakRejectedItem : lowRecognizers_) {
+        auto rejectedItem = weakRejectedItem.Upgrade();
+        if (rejectedItem) {
+            rejectedItem->OnRejected(touchId_);
+        }
     }
     lowRecognizers_.clear();
 
-    for (const auto& rejectedItem : highRecognizers_) {
-        rejectedItem->OnRejected(touchId_);
+    for (const auto& weakRejectedItem : highRecognizers_) {
+        auto rejectedItem = weakRejectedItem.Upgrade();
+        if (rejectedItem) {
+            rejectedItem->OnRejected(touchId_);
+        }
     }
     highRecognizers_.clear();
 
-    for (const auto& rejectedItem : parallelRecognizers_) {
-        rejectedItem->OnRejected(touchId_);
+    for (const auto& weakRejectedItem : parallelRecognizers_) {
+        auto rejectedItem = weakRejectedItem.Upgrade();
+        if (rejectedItem) {
+            rejectedItem->OnRejected(touchId_);
+        }
     }
     parallelRecognizers_.clear();
 }
 
 bool GestureScope::IsPending() const
 {
-    auto pendingMember = std::find_if(std::begin(lowRecognizers_), std::end(lowRecognizers_),
-        [](const RefPtr<GestureRecognizer>& member) { return member->GetRefereeState() == RefereeState::PENDING; });
+    auto pendingMember = std::find_if(
+        std::begin(lowRecognizers_), std::end(lowRecognizers_), [](const WeakPtr<GestureRecognizer>& member) {
+            return member.Upgrade() && member.Upgrade()->GetRefereeState() == RefereeState::PENDING;
+        });
     if (pendingMember != lowRecognizers_.end()) {
         return true;
     }
 
-    pendingMember = std::find_if(std::begin(highRecognizers_), std::end(highRecognizers_),
-        [](const RefPtr<GestureRecognizer>& member) { return member->GetRefereeState() == RefereeState::PENDING; });
+    pendingMember = std::find_if(
+        std::begin(highRecognizers_), std::end(highRecognizers_), [](const WeakPtr<GestureRecognizer>& member) {
+            return member.Upgrade() && member.Upgrade()->GetRefereeState() == RefereeState::PENDING;
+        });
     if (pendingMember != highRecognizers_.end()) {
         return true;
     }
 
-    pendingMember = std::find_if(std::begin(parallelRecognizers_), std::end(parallelRecognizers_),
-        [](const RefPtr<GestureRecognizer>& member) { return member->GetRefereeState() == RefereeState::PENDING; });
-    if (pendingMember != parallelRecognizers_.end()) {
-        return true;
-    }
-
-    return false;
+    pendingMember = std::find_if(
+        std::begin(parallelRecognizers_), std::end(parallelRecognizers_), [](const WeakPtr<GestureRecognizer>& member) {
+            return member.Upgrade() && member.Upgrade()->GetRefereeState() == RefereeState::PENDING;
+        });
+    return pendingMember != parallelRecognizers_.end();
 }
 
 void GestureReferee::AddGestureRecognizer(size_t touchId, const RefPtr<GestureRecognizer>& recognizer)
