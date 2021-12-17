@@ -17,7 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_GRID_COMPOSED_ELEMENT_H
 
 #include "core/components/common/properties/scroll_bar.h"
+#include "core/components/grid_layout/grid_layout_component.h"
 #include "core/components/grid_layout/grid_layout_element.h"
+#include "core/components/grid_layout/render_grid_layout.h"
+#include "core/components_v2/grid/grid_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -40,6 +43,10 @@ public:
     std::string GetScrollBarWidth() const;
     std::string GetScrollBarColor() const;
     std::string GetScrollBar() const;
+    std::string GetGridEditMode() const;
+    std::string GetGridMaxCount() const;
+    std::string GetGridMinCount() const;
+    std::string GetGridCellLength() const;
 
     AceType::IdType GetTargetTypeId() const override
     {
