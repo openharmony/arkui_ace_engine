@@ -502,15 +502,17 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect)
     uint32_t height = rect.height_;
 #ifdef ENABLE_ROSEN_BACKEND
     auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
-    if (!context) {
-        return;
+    if (context) {
+        auto rsUIDirector = context->GetRSUIDirector();
+        if (rsUIDirector) {
+            rsUIDirector->SetSurfaceNodeSize(width, height);
+        } else {
+            LOGE("ceAbility::OnSizeChange rsUIDirector is null.");
+        }
+    } else {
+        LOGE("ceAbility::OnSizeChange pipline context is null.");
     }
-    auto rsUIDirector = context->GetRSUIDirector();
-    if (!rsUIDirector) {
-        LOGE("rsUIDirector is null");
-        return;
-    }
-    rsUIDirector->SetSurfaceNodeSize(width, height);
+
 #endif
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(
         Platform::AceContainer::GetContainer(abilityId_)->GetView());
