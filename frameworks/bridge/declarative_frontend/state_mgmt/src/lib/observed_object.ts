@@ -65,15 +65,15 @@ class SubscribableHandler {
   }
 
   addOwningProperty(subscriber: IPropertySubscriber): void {
-    console.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id()}'.`)
-    this.owningProperties_.add(subscriber.id());
+    console.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`)
+    this.owningProperties_.add(subscriber.id__());
   }
 
   /*
       the inverse function of createOneWaySync or createTwoWaySync
     */
   public removeOwningProperty(property: IPropertySubscriber): void {
-    return this.removeOwningPropertyById(property.id());
+    return this.removeOwningPropertyById(property.id__());
   }
 
   public removeOwningPropertyById(subscriberId: number): void {

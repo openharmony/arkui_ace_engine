@@ -172,26 +172,26 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     });
 
     this.links_.clear();
-    SubscriberManager.Get().delete(this.id());
+    SubscriberManager.Get().delete(this.id__());
   }
 
-  public id(): number {
+  public id__(): number {
     return this.id_;
   }
 
-   /**
-   * This methid offers a way to force writing the property value with given
-   * key to persistent storage.
-   * In the general case this is unnecessary as the framework observed changes
-   * and triggers writing to disk by itself. For nested objects (e.g. array of
-   * objects) however changes of a property of a property as not observed. This
-   * is the case where the application needs to signal to the framework.
-   * @param key property that has changed
-   */
-    public static NotifyHasChanged(propName: string) {
-      console.debug(`PersistentStorage: force writing '${propName}'-
+  /**
+  * This methid offers a way to force writing the property value with given
+  * key to persistent storage.
+  * In the general case this is unnecessary as the framework observed changes
+  * and triggers writing to disk by itself. For nested objects (e.g. array of
+  * objects) however changes of a property of a property as not observed. This
+  * is the case where the application needs to signal to the framework.
+  * @param key property that has changed
+  */
+  public static NotifyHasChanged(propName: string) {
+    console.debug(`PersistentStorage: force writing '${propName}'-
         '${PersistentStorage.GetOrCreate().links_.get(propName)}' to storage`);
-      PersistentStorage.Storage_.set(propName,
-        JSON.stringify(PersistentStorage.GetOrCreate().links_.get(propName).get()));
-    }
+    PersistentStorage.Storage_.set(propName,
+      JSON.stringify(PersistentStorage.GetOrCreate().links_.get(propName).get()));
+  }
 };

@@ -25,6 +25,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
+#include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
 
 namespace OHOS::Ace::Platform {
@@ -195,6 +196,7 @@ public:
 
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
+    static void SetDialogCallback(int32_t instanceId, DialogCallback callback);
 
 private:
     void InitializeFrontend();

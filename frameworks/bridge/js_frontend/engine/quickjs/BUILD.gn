@@ -42,8 +42,8 @@ template("js_engine_qjs") {
     ]
 
     deps = [
-      "$ace_root/frameworks/core/components/theme:build_theme_code",
       "$ace_napi:ace_napi_quickjs",
+      "$ace_root/frameworks/core/components/theme:build_theme_code",
       "//third_party/jsframework:jsf",
     ]
 

@@ -148,8 +148,8 @@ template("ace_core_source_set") {
       "gestures/pan_gesture.cpp",
       "gestures/pinch_gesture.cpp",
       "gestures/rotation_gesture.cpp",
-      "gestures/tap_gesture.cpp",
       "gestures/slide_gesture.cpp",
+      "gestures/tap_gesture.cpp",
 
       # event
       "event/back_end_event_manager.cpp",
@@ -199,8 +199,7 @@ template("ace_core_source_set") {
       sources += [ "common/connect_server_manager.cpp" ]
     }
 
-    if (defined(config.hdc_register_support) &&
-        config.hdc_register_support) {
+    if (defined(config.hdc_register_support) && config.hdc_register_support) {
       sources += [ "common/hdc_register.cpp" ]
     }
 

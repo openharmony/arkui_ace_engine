@@ -795,6 +795,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
         nativeEngine_->SetPackagePath(packagePath);
     }
+
     RegisterWorker();
     return result;
 }

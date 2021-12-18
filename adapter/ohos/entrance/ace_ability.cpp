@@ -139,12 +139,93 @@ const std::string AceAbility::PAGE_URI = "url";
 const std::string AceAbility::CONTINUE_PARAMS_KEY = "__remoteData";
 
 REGISTER_AA(AceAbility)
+int32_t g_dialogId = 1000;
+const std::string WINDOW_DIALOG_DOUBLE_BUTTON = "pages/dialog/index.js";
+
+void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBoudle, std::string param, DialogCallback callback)
+{
+    LOGI("showDialog");
+
+    SetHwIcuDirectory();
+
+    // create container
+    Platform::AceContainer::CreateContainer(
+        g_dialogId, FrontendType::JS, false, "dialog", nullptr,
+        std::make_unique<AcePlatformEventCallback>([]() {
+            return;
+        }));
+    Platform::AceContainer::SetDialogCallback(g_dialogId, callback);
+    // create view.
+    auto flutterAceView = Platform::FlutterAceView::CreateView(g_dialogId);
+    auto&& touchEventCallback = [aceView = flutterAceView](OHOS::TouchEvent event) -> bool {
+        LOGD("RegistOnTouchCb touchEventCallback called");
+        return aceView->DispatchTouchEvent(aceView, event);
+    };
+    window->OnTouch(touchEventCallback);
+
+    // register surface change callback
+    auto&& surfaceChangedCallBack = [flutterAceView](uint32_t width, uint32_t height) {
+        LOGD("RegistWindowInfoChangeCb surfaceChangedCallBack called");
+        flutter::ViewportMetrics metrics;
+        metrics.physical_width = width;
+        metrics.physical_height = height;
+        Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
+        Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
+    };
+    window->OnSizeChange(surfaceChangedCallBack);
+    Platform::FlutterAceView::SurfaceCreated(flutterAceView, window);
+
+    // set metrics
+    BufferRequestConfig windowConfig = {
+    .width = window->GetSurface()->GetDefaultWidth(),
+    .height = window->GetSurface()->GetDefaultHeight(),
+    .strideAlignment = 0x8,
+    .format = PIXEL_FMT_RGBA_8888,
+    .usage = window->GetSurface()->GetDefaultUsage(),
+    };
+    LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", windowConfig.width, windowConfig.height);
+
+    flutter::ViewportMetrics metrics;
+    metrics.physical_width = windowConfig.width;
+    metrics.physical_height = windowConfig.height;
+    Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
+
+    // add asset path.
+    auto packagePathStr = "system/dialog/";
+    auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
+    Platform::AceContainer::AddAssetPath(g_dialogId, packagePathStr, assetBasePathStr);
+
+    // set view
+    Platform::AceContainer::SetView(flutterAceView, 1.0f, windowConfig.width, windowConfig.height);
+    Platform::FlutterAceView::SurfaceChanged(flutterAceView, windowConfig.width, windowConfig.height, 0);
+
+    // set window id
+    auto context = Platform::AceContainer::GetContainer(g_dialogId)->GetPipelineContext();
+    if (context != nullptr) {
+        context->SetWindowId(window->GetID());
+    }
+
+    // run page.
+    Platform::AceContainer::RunPage(
+        g_dialogId, Platform::AceContainer::GetContainer(g_dialogId)->GeneratePageId(),
+        jsBoudle, param);
+
+    g_dialogId++;
+}
+
+void DialogHandle1(std::string event, std::string param)
+{
+    LOGI("DialogHandle1  event=%{public}s, param=%{public}s", event.c_str(), param.c_str());
+    Platform::AceContainer::DestroyContainer(1);
+}
+
 void AceAbility::OnStart(const Want& want)
 {
     Ability::OnStart(want);
     LOGI("AceAbility::OnStart called");
 
     SetHwIcuDirectory();
+    bool isSystemUI = false;
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = GetResourceManager();
@@ -165,6 +246,9 @@ void AceAbility::OnStart(const Want& want)
     auto moduleInfo = GetHapModuleInfo();
     if (moduleInfo != nullptr) {
         packagePathStr += "/" + moduleInfo->name + "/";
+    }
+    if ((packagePathStr.find("systemui") != -1) || (packagePathStr.find("launcher") != -1)) {
+        isSystemUI = true;
     }
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     std::string srcPath = "";
@@ -331,6 +415,14 @@ void AceAbility::OnStart(const Want& want)
     if (!remoteData_.empty()) {
         Platform::AceContainer::OnRestoreData(abilityId_, remoteData_);
     }
+
+    if (!isSystemUI && (moduleInfo->name.find("com.istone.system.dialog")) != -1) {
+        std::string dialogParam = "{\"title\":\"Alert!\", \"message\":\"this is a system dialog!\"," \
+             "\"button1\":\"Got it!\", \"button2\":\"Cancel!\"}";
+        showDialog(Ability::GetWindow(), WINDOW_DIALOG_DOUBLE_BUTTON, dialogParam, DialogHandle1);
+        return;
+    }
+
     LOGI("AceAbility::OnStart called End");
 }
 

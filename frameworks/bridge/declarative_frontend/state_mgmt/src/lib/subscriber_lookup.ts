@@ -40,10 +40,10 @@ class SubscriberManager implements IPropertySubscriberLookup {
   }
 
   public add(newSubsriber: IPropertySubscriber): boolean {
-    if (this.has(newSubsriber.id())) {
+    if (this.has(newSubsriber.id__())) {
       return false;
     }
-    this.subscriberById_.set(newSubsriber.id(), newSubsriber);
+    this.subscriberById_.set(newSubsriber.id__(), newSubsriber);
     return true;
   }
 

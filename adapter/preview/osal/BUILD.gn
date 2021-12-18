@@ -127,32 +127,27 @@ foreach(item, ace_platforms) {
 if (target_cpu == "arm64") {
   if (is_standard_system) {
     system_resource_hap_path =
-    get_label_info("//utils/resources/systemres:systemres_hap",
-    "target_out_dir") + "/SystemResources.hap"
+        get_label_info("//utils/resources/systemres:systemres_hap",
+                       "target_out_dir") + "/SystemResources.hap"
     system_resource_path =
-    get_label_info("//utils/resources/systemres:systemres_hap",
-    "target_out_dir") + "/resources"
+        get_label_info("//utils/resources/systemres:systemres_hap",
+                       "target_out_dir") + "/resources"
     if (host_os == "mac") {
-      resource_manager_library =
-      get_label_info(
-      "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac",
-      "root_out_dir") +
-      "/global/resmgr_standard/libglobal_resmgr_mac.dylib"
+      resource_manager_library = get_label_info(
+                                     "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac",
+                                     "root_out_dir") + "/global/resmgr_standard/libglobal_resmgr_mac.dylib"
     } else {
-      resource_manager_library =
-      get_label_info(
-      "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win",
-      "root_out_dir") + "/global/resmgr_standard/libglobal_resmgr_win.dll"
+      resource_manager_library = get_label_info(
+                                     "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win",
+                                     "root_out_dir") + "/global/resmgr_standard/libglobal_resmgr_win.dll"
     }
   } else {
     system_resource_hap_path =
-    get_label_info(
-    "//utils/resources/systemres:systemres_hap",
-    "target_gen_dir") + "/SystemResources.hap"
+        get_label_info("//utils/resources/systemres:systemres_hap",
+                       "target_gen_dir") + "/SystemResources.hap"
     system_resource_path =
-    get_label_info(
-    "//utils/resources/systemres:systemres_hap",
-    "target_gen_dir") + "/resources"
+        get_label_info("//utils/resources/systemres:systemres_hap",
+                       "target_gen_dir") + "/resources"
   }
 
   action("get_system_resource") {

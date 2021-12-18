@@ -522,7 +522,11 @@ public:
 
     virtual bool IsRepaintBoundary() const
     {
+#ifdef ENABLE_ROSEN_BACKEND
         return IsHeadRenderNode();
+#else
+        return false;
+#endif
     }
 
     virtual const std::list<RefPtr<RenderNode>>& GetChildren() const
