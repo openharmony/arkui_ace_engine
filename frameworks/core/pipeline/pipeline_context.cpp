@@ -1632,7 +1632,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
     height_ = height;
 
     ACE_SCOPED_TRACE("OnSurfaceChanged(%d, %d)", width, height);
-
+    LOGI("Surface size changed, [%{private}d * %{private}d]", width, height);
     if (!NearZero(rootHeight_)) {
         double newRootHeight = height / viewScale_;
         double newRootWidth = width / viewScale_;
@@ -1660,6 +1660,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
     if (isSurfaceReady_) {
         return;
     }
+    LOGI("Surface is ready.");
     isSurfaceReady_ = true;
     FlushPipelineWithoutAnimation();
     MarkForcedRefresh();
@@ -1788,7 +1789,7 @@ void PipelineContext::SetRootRect(double width, double height) const
 {
     CHECK_RUN_ON(UI);
     if (NearZero(viewScale_) || !rootElement_) {
-        LOGE("the view scale is zero or root element is nullptr");
+        LOGW("the view scale is zero or root element is nullptr");
         return;
     }
     const Rect paintRect(0.0, 0.0, width, height);

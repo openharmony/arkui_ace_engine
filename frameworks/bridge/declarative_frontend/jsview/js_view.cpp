@@ -193,10 +193,7 @@ void ViewFunctions::ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo)
     }
 
     JSRef<JSVal> jsObject = jsObject_.Lock();
-    JSRef<JSVal> result = func.Lock()->Call(jsObject);
-    if (result.IsEmpty()) {
-        LOGE("Error calling %{public}s", debugInfo);
-    }
+    func.Lock()->Call(jsObject);
 }
 
 JSRef<JSVal> ViewFunctions::ExecuteFunctionWithReturn(JSWeak<JSFunc>& func, const char* debugInfo)

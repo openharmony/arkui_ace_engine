@@ -158,7 +158,7 @@ public:
         {
             RefPtr<CheckboxTheme> theme = AceType::Claim(new CheckboxTheme());
             if (!themeConstants) {
-                LOGE("Build AppTheme error, themeConstants is null!");
+                LOGI("Build AppTheme error, themeConstants is null!");
                 return theme;
             }
             theme->width_ = themeConstants->GetDimension(THEME_CHECKBOX_SIZE);

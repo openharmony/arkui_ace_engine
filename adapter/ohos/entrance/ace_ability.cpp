@@ -49,7 +49,7 @@ FrontendType GetFrontendType(const std::string& frontendType)
     } else if (frontendType == "declarative") {
         return FrontendType::DECLARATIVE_JS;
     } else {
-        LOGE("frontend type not supported. return default frontend: JS frontend.");
+        LOGW("frontend type not supported. return default frontend: JS frontend.");
         return FrontendType::JS;
     }
 }

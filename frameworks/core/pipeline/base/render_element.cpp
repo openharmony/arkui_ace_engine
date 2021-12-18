@@ -132,7 +132,7 @@ void RenderElement::UpdateAccessibilityNode()
         return;
     }
     if (context->GetIsDeclarative()) {
-        LOGE("UpdateAccessibilityNode context is declarative");
+        LOGD("UpdateAccessibilityNode context is declarative");
         return;
     }
     // fetch new composedId from component.
