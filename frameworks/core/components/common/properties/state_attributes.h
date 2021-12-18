@@ -23,7 +23,8 @@
 namespace OHOS::Ace {
 
 enum class StyleState {
-    NORMAL = 0,
+    NOTSET = 0,
+    NORMAL,
     PRESSED,
     DISABLED
 };

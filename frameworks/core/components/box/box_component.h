@@ -87,11 +87,12 @@ public:
         SetDecorationUpdateFlag(true);
     }
 
-    void SetColor(
-        const Color& color, const AnimationOption& option = AnimationOption(), StyleState state = StyleState::NORMAL)
+    void SetColor(const Color& color, const AnimationOption& option = AnimationOption())
     {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(
-            state, BoxStateAttribute::COLOR, AnimatableColor(color, option)));
+        if (!backDecoration_) {
+            backDecoration_ = AceType::MakeRefPtr<Decoration>();
+        }
+        backDecoration_->SetBackgroundColor(color, option);
     }
 
     void SetColor(const AnimatableColor& color)
@@ -280,6 +281,13 @@ public:
     {
         GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(
             state, BoxStateAttribute::HEIGHT, AnimatableDimension(height, option)));
+    }
+
+    void SetColorForState(
+        const Color& color, const AnimationOption& option, StyleState state)
+    {
+        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(
+            state, BoxStateAttribute::COLOR, AnimatableColor(color, option)));
     }
 
     void SetBorderColorForState(const Color& color, const AnimationOption& option, StyleState state)

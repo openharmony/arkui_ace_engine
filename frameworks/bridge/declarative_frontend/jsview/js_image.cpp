@@ -175,7 +175,7 @@ void JSImage::SetBorderRadius(const Dimension& value)
     SetBorder(border);
 }
 
-void JSImage::SetBorderStyle(int32_t style, StyleState state)
+void JSImage::SetBorderStyle(int32_t style)
 {
     BorderStyle borderStyle = BorderStyle::SOLID;
 
@@ -193,10 +193,10 @@ void JSImage::SetBorderStyle(int32_t style, StyleState state)
     edge.SetStyle(borderStyle);
     auto stack = ViewStackProcessor::GetInstance();
     auto box = stack->GetBoxComponent();
-    if (state == StyleState::NORMAL) {
+    if (!stack->IsVisualStateSet()) {
         SetBorderEdge(edge);
     } else {
-        box->SetBorderStyleForState(borderStyle, state);
+        box->SetBorderStyleForState(borderStyle, stack->GetVisualState());
     }
 }
 
@@ -282,28 +282,14 @@ void JSImage::JsBorderColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], borderColor)) {
         return;
     }
-    auto stack_ = ViewStackProcessor::GetInstance();
-    auto box = stack_->GetBoxComponent();
-    auto state = GetState(info, 1);
-    if (state == StyleState::NORMAL) {
+    auto stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    if (!stack->IsVisualStateSet()) {
         SetBorderColor(borderColor);
     } else {
         AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-        box->SetBorderColorForState(borderColor, option, state);
+        box->SetBorderColorForState(borderColor, option, stack->GetVisualState());
     }
-}
-
-void JSImage::JsBorderStyle(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-    if (!info[0]->IsNumber()) {
-        LOGE("arg is not a object.");
-        return;
-    }
-    SetBorderStyle(info[0]->ToNumber<int32_t>(), GetState(info, 1));
 }
 
 void JSImage::OnComplete(const JSCallbackInfo& args)
@@ -389,14 +375,13 @@ void JSImage::JsBorderWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], borderWidth)) {
         return;
     }
-    auto stack_ = ViewStackProcessor::GetInstance();
-    auto box = stack_->GetBoxComponent();
-    auto state = GetState(info, 1);
-    if (state == StyleState::NORMAL) {
+    auto stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    if (!stack->IsVisualStateSet()) {
         SetBorderWidth(borderWidth);
     } else {
         AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-        box->SetBorderWidthForState(borderWidth, option, state);
+        box->SetBorderWidthForState(borderWidth, option, stack->GetVisualState());
     }
 }
 
@@ -410,14 +395,13 @@ void JSImage::JsBorderRadius(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], borderRadius)) {
         return;
     }
-    auto stack_ = ViewStackProcessor::GetInstance();
-    auto box = stack_->GetBoxComponent();
-    auto state = GetState(info, 1);
-    if (state == StyleState::NORMAL) {
+    auto stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    if (!stack->IsVisualStateSet()) {
         SetBorderRadius(borderRadius);
     } else {
         AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-        box->SetBorderRadiusForState(borderRadius, option, state);
+        box->SetBorderRadiusForState(borderRadius, option, stack->GetVisualState());
     }
 }
 
@@ -449,7 +433,7 @@ void JSImage::JsBorder(const JSCallbackInfo& info)
     if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
         SetBorderColor(color);
     }
-    SetBorderStyle(borderStyle, GetState(info, 1));
+    SetBorderStyle(borderStyle);
     SetBorderWidth(width);
     SetBorderRadius(radius);
     info.SetReturnValue(info.This());

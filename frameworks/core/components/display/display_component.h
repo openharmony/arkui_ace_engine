@@ -68,12 +68,9 @@ public:
         visible_ = visible;
     }
 
-    void SetOpacity(double opacity, const AnimationOption& animationOption = AnimationOption(),
-        StyleState state = StyleState::NORMAL)
+    void SetOpacity(double opacity, const AnimationOption& animationOption = AnimationOption())
     {
         opacity_ = AnimatableDouble(opacity, animationOption);
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<DisplayStateAttribute, AnimatableDouble>>(
-            state, DisplayStateAttribute::OPACITY, opacity_));
     }
 
     void DisableLayer(bool disable)
@@ -156,6 +153,13 @@ public:
         return stateAttributeList_ != nullptr;
     }
 
+    void SetOpacityForState(double opacity, const AnimationOption& animationOption = AnimationOption(),
+        StyleState state = StyleState::NORMAL)
+    {
+        opacity_ = AnimatableDouble(opacity, animationOption);
+        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<DisplayStateAttribute, AnimatableDouble>>(
+            state, DisplayStateAttribute::OPACITY, opacity_));
+    }
 private:
     VisibleType visible_ = VisibleType::VISIBLE;
     Shadow shadow_;

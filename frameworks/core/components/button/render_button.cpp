@@ -779,8 +779,7 @@ void RenderButton::OnStatusStyleChanged(StyleState state)
                 auto colorState = AceType::DynamicCast<StateAttributeValue<ButtonStateAttribute, Color>>(attribute);
                 if (attribute->stateName_ == StyleState::PRESSED) {
                     SetClickedColor(colorState->value_);
-                }
-                if (attribute->stateName_ == StyleState::NORMAL) {
+                } else {
                     buttonComponent_->SetBackgroundColor(colorState->value_);
                 }
             } break;

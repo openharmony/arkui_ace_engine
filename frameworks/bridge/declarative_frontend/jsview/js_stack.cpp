@@ -99,10 +99,11 @@ void JSStack::SetWidth(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    JsStackWidth(info[0], info);
+
+    SetWidth(info[0]);
 }
 
-void JSStack::JsStackWidth(const JSRef<JSVal>& jsValue, const JSCallbackInfo& info)
+void JSStack::SetWidth(const JSRef<JSVal>& jsValue)
 {
     Dimension value;
     if (!ConvertFromJSValue(jsValue, value)) {
@@ -113,9 +114,13 @@ void JSStack::JsStackWidth(const JSRef<JSVal>& jsValue, const JSCallbackInfo& in
     if (LessNotEqual(value.Value(), 0.0)) {
         return;
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    box->SetWidthForState(value, option, GetState(info, 1));
+    auto stackProcessor = ViewStackProcessor::GetInstance();
+    auto box = stackProcessor->GetBoxComponent();
+    if (!stackProcessor->IsVisualStateSet()) {
+        box->SetWidth(value, stackProcessor->GetImplicitAnimationOption());
+    } else {
+        box->SetWidthForState(value, stackProcessor->GetImplicitAnimationOption(), stackProcessor->GetVisualState());
+    }
 
     auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (stack) {
@@ -133,10 +138,11 @@ void JSStack::SetHeight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    JsStackHeight(info[0], info);
+
+    SetHeight(info[0]);
 }
 
-void JSStack::JsStackHeight(const JSRef<JSVal>& jsValue, const JSCallbackInfo& info)
+void JSStack::SetHeight(const JSRef<JSVal>& jsValue)
 {
     Dimension value;
     if (!ConvertFromJSValue(jsValue, value)) {
@@ -147,9 +153,13 @@ void JSStack::JsStackHeight(const JSRef<JSVal>& jsValue, const JSCallbackInfo& i
     if (LessNotEqual(value.Value(), 0.0)) {
         return;
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    box->SetHeightForState(value, option, GetState(info, 1));
+    auto stackProcessor = ViewStackProcessor::GetInstance();
+    auto box = stackProcessor->GetBoxComponent();
+    if (!stackProcessor->IsVisualStateSet()) {
+        box->SetHeight(value, stackProcessor->GetImplicitAnimationOption());
+    } else {
+        box->SetHeightForState(value, stackProcessor->GetImplicitAnimationOption(), stackProcessor->GetVisualState());
+    }
 
     auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (stack) {
@@ -174,8 +184,8 @@ void JSStack::SetSize(const JSCallbackInfo& info)
     }
 
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    JsStackWidth(sizeObj->GetProperty("width"), info);
-    JsStackHeight(sizeObj->GetProperty("height"), info);
+    SetWidth(sizeObj->GetProperty("width"));
+    SetHeight(sizeObj->GetProperty("height"));
 }
 
 void JSStack::JSBind(BindingTarget globalObj)
@@ -211,9 +221,8 @@ void JSStack::Create(const JSCallbackInfo& info)
         JSRef<JSVal> stackAlign = obj->GetProperty("alignContent");
         if (stackAlign->IsNumber()) {
             int32_t value = stackAlign->ToNumber<int32_t>();
-            alignment = (value >= 0 && value < static_cast<int>(ALIGNMENT_ARR.size()))
-                        ? ALIGNMENT_ARR[value]
-                        : Alignment::CENTER;
+            alignment = (value >= 0 && value < static_cast<int>(ALIGNMENT_ARR.size())) ? ALIGNMENT_ARR[value]
+                                                                                       : Alignment::CENTER;
         }
     }
 
