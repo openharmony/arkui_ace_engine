@@ -110,6 +110,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #ifndef WEARABLE_PRODUCT
@@ -656,6 +657,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSProgress::JSBind(globalObj);
     JSSwiper::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
+    JSTextTimer::JSBind(globalObj);
+    JSTextTimerController::JSBind(globalObj);
     JSSlidingPanel::JSBind(globalObj);
     JSNavigation::JSBind(globalObj);
     JSNavigator::JSBind(globalObj);

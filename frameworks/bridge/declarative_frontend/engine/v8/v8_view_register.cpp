@@ -116,6 +116,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
@@ -658,7 +659,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"AbilityController", JSAbilityComponentController::JSBind},
     {"VideoController", JSVideoController::JSBind},
     {"Search", JSSearch::JSBind},
-    {"Sheet", JSSheet::JSBind}
+    {"Sheet", JSSheet::JSBind},
+    {"TextTimer", JSTextTimer::JSBind},
+    {"TextTimerController", JSTextTimerController::JSBind}
 };
 
 void RegisterAllModule(BindingTarget globalObj)

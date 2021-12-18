@@ -111,6 +111,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
@@ -680,7 +681,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "VideoController", JSVideoController::JSBind },
     { "Search", JSSearch::JSBind },
     { "Sheet", JSSheet::JSBind },
-    { "JSClipboard", JSClipboard::JSBind }
+    { "JSClipboard", JSClipboard::JSBind },
+    { "TextTimer", JSTextTimer::JSBind },
+    { "TextTimerController", JSTextTimerController::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj)
@@ -699,6 +702,7 @@ void RegisterAllModule(BindingTarget globalObj)
     JSRenderingContextSettings::JSBind(globalObj);
     JSAbilityComponentController::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
+    JSTextTimerController::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
         iter.second(globalObj);
     }
@@ -723,6 +727,8 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         JSVideoController::JSBind(globalObj);
     } else if ((*func).first == "Grid") {
         JSColumn::JSBind(globalObj);
+    } else if ((*func).first == "TextTimer") {
+        JSTextTimerController::JSBind(globalObj);
     }
 
     (*func).second(globalObj);

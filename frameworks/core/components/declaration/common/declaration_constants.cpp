@@ -172,6 +172,16 @@ const std::shared_ptr<TextFieldEvent> DeclarationConstants::DEFAULT_TEXTFIELD_EV
 const std::shared_ptr<TextFieldMethod> DeclarationConstants::DEFAULT_TEXTFIELD_METHOD =
     std::make_shared<TextFieldMethod>();
 
+// default value of texttimer
+const std::shared_ptr<TextTimerAttribute> DeclarationConstants::DEFAULT_TEXTTIMER_ATTR =
+    std::make_shared<TextTimerAttribute>();
+const std::shared_ptr<TextTimerStyle> DeclarationConstants::DEFAULT_TEXTTIMER_STYLE =
+    std::make_shared<TextTimerStyle>();
+const std::shared_ptr<TextTimerEvent> DeclarationConstants::DEFAULT_TEXTTIMER_EVENT =
+    std::make_shared<TextTimerEvent>();
+const std::shared_ptr<TextTimerMethod> DeclarationConstants::DEFAULT_TEXTTIMER_METHOD =
+    std::make_shared<TextTimerMethod>();
+
 // default value of svg
 const std::shared_ptr<SvgAnimateAttribute> DeclarationConstants::DEFAULT_SVG_ANIMATE_ATTR =
     std::make_shared<SvgAnimateAttribute>();

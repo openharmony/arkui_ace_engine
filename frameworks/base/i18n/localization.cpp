@@ -274,6 +274,24 @@ const std::string Localization::FormatDuration(uint32_t duration, bool needShowH
     return ret;
 }
 
+std::string Localization::FormatDuration(uint32_t duration, const std::string& format)
+{
+    WaitingForInit();
+    UErrorCode status = U_ZERO_ERROR;
+
+    const char* engTimeFormat = format.c_str();
+    auto simpleDateFormat = std::make_unique<SimpleDateFormat>(UnicodeString(engTimeFormat), locale_->instance, status);
+    CHECK_RETURN(status, "");
+
+    UnicodeString simpleStr;
+    simpleDateFormat->format(1.0 * duration, simpleStr, status);
+    CHECK_RETURN(status, "");
+
+    std::string ret;
+    UnicodeString2String(simpleStr, ret);
+    return ret;
+}
+
 const std::string Localization::FormatDateTime(DateTime dateTime, const std::string& format)
 {
     WaitingForInit();

@@ -122,6 +122,7 @@ template("ace_core_source_set") {
       "components/declaration/textfield/textfield_declaration.cpp",
       "components/declaration/web/web_declaration.cpp",
       "components/declaration/xcomponent/xcomponent_declaration.cpp",
+      "components/declaration/texttimer/texttimer_declaration.cpp",
 
       # gestures
       "gestures/click_recognizer.cpp",
@@ -303,6 +304,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/tween:ace_core_components_tween_$platform",
       "$ace_root/frameworks/core/components/watch_slider:ace_core_components_watch_slider_$platform",
       "$ace_root/frameworks/core/components/wrap:ace_core_components_wrap_$platform",
+      "$ace_root/frameworks/core/components/texttimer:ace_core_components_texttimer_$platform",
     ]
 
     deps += [

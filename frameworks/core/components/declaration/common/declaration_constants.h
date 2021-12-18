@@ -58,6 +58,7 @@
 #include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components/declaration/text/text_declaration.h"
 #include "core/components/declaration/textfield/textfield_declaration.h"
+#include "core/components/declaration/texttimer/texttimer_declaration.h"
 #include "core/components/declaration/web/web_declaration.h"
 #include "core/components/declaration/xcomponent/xcomponent_declaration.h"
 
@@ -169,6 +170,12 @@ public:
     static const std::shared_ptr<TextFieldStyle> DEFAULT_TEXTFIELD_STYLE;
     static const std::shared_ptr<TextFieldEvent> DEFAULT_TEXTFIELD_EVENT;
     static const std::shared_ptr<TextFieldMethod> DEFAULT_TEXTFIELD_METHOD;
+
+    // default value of texttimer
+    static const std::shared_ptr<TextTimerAttribute> DEFAULT_TEXTTIMER_ATTR;
+    static const std::shared_ptr<TextTimerStyle> DEFAULT_TEXTTIMER_STYLE;
+    static const std::shared_ptr<TextTimerEvent> DEFAULT_TEXTTIMER_EVENT;
+    static const std::shared_ptr<TextTimerMethod> DEFAULT_TEXTTIMER_METHOD;
 
     // default value of svg
     static const std::shared_ptr<SvgAnimateAttribute> DEFAULT_SVG_ANIMATE_ATTR;
