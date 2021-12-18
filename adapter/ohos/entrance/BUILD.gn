@@ -34,17 +34,18 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/pa_container.cpp",
 
       # innerkits impl
-      "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
+      #"$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
     ]
 
     if (target_cpu == "arm64") {
       defines += [ "_ARM64_" ]
     }
 
-    configs = [
-      "$ace_root:ace_config",
-      "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config",
-    ]
+    configs = [ "$ace_root:ace_config" ]
+
+    if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
+      configs += [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
+    }
 
     include_dirs = [
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/featureAbility",
@@ -71,7 +72,7 @@ template("ace_ohos_standard_source_set") {
         [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
 
     external_deps = [
-      "aafwk_standard:ability_context_native",
+      #"aafwk_standard:ability_context_native",
       "aafwk_standard:ability_manager",
       "aafwk_standard:base",
       "aafwk_standard:want",
