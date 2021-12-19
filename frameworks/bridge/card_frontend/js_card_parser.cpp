@@ -1028,7 +1028,6 @@ void JsCardParser::ParseEvents(const std::unique_ptr<JsonValue>& rootJson, const
     LOGD("ParseEvents json:%{public}s", eventJson->ToString().c_str());
     auto eventList = rootJson->GetValue("events");
     if (!eventList || !eventList->IsValid()) {
-        LOGI("ParseEvents eventList is empty or eventList->IsValid()");
         return;
     }
     auto event = eventList->GetChild();

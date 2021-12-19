@@ -82,6 +82,8 @@ public:
     bool Replace(const char* key, const char* value);
     bool Replace(const char* key, int32_t value);
     bool Replace(const char* key, const std::unique_ptr<JsonValue>& value);
+    bool Replace(const char* key, bool value);
+    bool Replace(const char* key, double value);
 
     // delete functions
     bool Delete(const char* key);
