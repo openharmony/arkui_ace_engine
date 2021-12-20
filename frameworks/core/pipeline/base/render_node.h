@@ -1075,7 +1075,11 @@ protected:
     // JSview boundary, all nodes in [head, tail] share the same RSNode
     bool IsHeadRenderNode() const
     {
+#ifdef ENABLE_ROSEN_BACKEND
         return isHeadRenderNode_;
+#else
+        return false;
+#endif
     }
     bool IsTailRenderNode() const
     {

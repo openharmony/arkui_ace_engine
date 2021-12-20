@@ -27,7 +27,7 @@ namespace OHOS::Ace {
 using OnDragFunc = std::function<void(const RefPtr<DragEvent>& info)>;
 
 enum class BoxStateAttribute {
-    ASPECTRATIO,
+    ASPECT_RATIO,
     BORDER,
     COLOR,
     BORDER_COLOR,
@@ -337,8 +337,8 @@ private:
     EventMarker onDomDragLeaveId_;
     EventMarker onDomDragDropId_;
     std::string geometryTransitionId_;
-    RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_ = nullptr;
     TextDirection inspectorDirection_ { TextDirection::LTR };
+    RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_ = nullptr;
 };
 
 } // namespace OHOS::Ace

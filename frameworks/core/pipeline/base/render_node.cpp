@@ -1815,8 +1815,8 @@ void RenderNode::SetDepth(int32_t depth)
 void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
 {
     isHeadRenderNode_ = isHead;
-    isTailRenderNode_ = isTail;
 #ifdef ENABLE_ROSEN_BACKEND
+    isTailRenderNode_ = isTail;
     if (isHead && !rsNode_) {
         // create RSNode in first node of JSview
         rsNode_ = CreateRSNode();

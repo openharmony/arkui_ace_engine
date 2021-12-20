@@ -26,12 +26,12 @@ namespace OHOS::Ace {
 class BoxComponentHelper {
 public:
     static void SetBorderColor(
-        RefPtr<Decoration>& backDecoration, const Color& color, const AnimationOption& option = AnimationOption())
+        const RefPtr<Decoration>& decoration, const Color& color, const AnimationOption& option = AnimationOption())
     {
-        if (!backDecoration) {
-            backDecoration = AceType::MakeRefPtr<Decoration>();
+        if (!decoration) {
+            return;
         }
-        Border border = backDecoration->GetBorder();
+        Border border = decoration->GetBorder();
         BorderEdge edge;
         edge = border.Left();
         edge.SetColor(color, option);
@@ -40,26 +40,26 @@ public:
         border.SetRightEdge(edge);
         border.SetTopEdge(edge);
         border.SetBottomEdge(edge);
-        backDecoration->SetBorder(border);
+        decoration->SetBorder(border);
     }
 
-    static void SetBorderRadius(
-        RefPtr<Decoration>& backDecoration, const Dimension& radius, const AnimationOption& option = AnimationOption())
+    static void SetBorderRadius(const RefPtr<Decoration>& decoration, const Dimension& radius,
+        const AnimationOption& option = AnimationOption())
     {
-        if (!backDecoration) {
-            backDecoration = AceType::MakeRefPtr<Decoration>();
+        if (!decoration) {
+            return;
         }
-        Border border = backDecoration->GetBorder();
+        Border border = decoration->GetBorder();
         border.SetBorderRadius(Radius(AnimatableDimension(radius, option)));
-        backDecoration->SetBorder(border);
+        decoration->SetBorder(border);
     }
 
-    static void SetBorderStyle(RefPtr<Decoration>& backDecoration, BorderStyle style)
+    static void SetBorderStyle(const RefPtr<Decoration>& decoration, BorderStyle style)
     {
-        if (!backDecoration) {
-            backDecoration = AceType::MakeRefPtr<Decoration>();
+        if (!decoration) {
+            return;
         }
-        Border border = backDecoration->GetBorder();
+        Border border = decoration->GetBorder();
         auto edge = border.Left();
 
         edge.SetStyle(style);
@@ -68,18 +68,18 @@ public:
         border.SetTopEdge(edge);
         border.SetBottomEdge(edge);
 
-        backDecoration->SetBorder(border);
+        decoration->SetBorder(border);
     }
 
     static void SetBorderWidth(
-        RefPtr<Decoration>& backDecoration, const Dimension& width, const AnimationOption& option = AnimationOption())
+        const RefPtr<Decoration>& decoration, const Dimension& width, const AnimationOption& option = AnimationOption())
     {
-        if (!backDecoration) {
-            backDecoration = AceType::MakeRefPtr<Decoration>();
+        if (!decoration) {
+            return;
         }
-        Border border = backDecoration->GetBorder();
+        Border border = decoration->GetBorder();
         border.SetWidth(width, option);
-        backDecoration->SetBorder(border);
+        decoration->SetBorder(border);
     }
 };
 

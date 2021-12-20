@@ -121,7 +121,7 @@ public:
     RefPtr<Component> GetNewComponent();
     RefPtr<V2::InspectorComposedComponent> GetInspectorComposedComponent() const;
 
-    void SetVisualState(const std::string state)
+    void SetVisualState(const std::string& state)
     {
         if (state == "pressed") {
             visualState_ = StyleState::PRESSED;

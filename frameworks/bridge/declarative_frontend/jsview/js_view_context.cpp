@@ -189,29 +189,11 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     }
 }
 
-void JSViewContext::JSVisualState(const JSCallbackInfo& info)
-{
-    LOGD("JSVisualState");
-    if (info.Length() < 1) {
-        ViewStackProcessor::GetInstance()->ClearVisualState();
-        return;
-    }
-
-    if (!info[0]->IsString()) {
-        LOGE("JSVisualState: is not a string.");
-        ViewStackProcessor::GetInstance()->ClearVisualState();
-        return;
-    }
-    std::string state = info[0]->ToString();
-    ViewStackProcessor::GetInstance()->SetVisualState(state);
-}
-
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewContext>::Declare("Context");
     JSClass<JSViewContext>::StaticMethod("animation", JSAnimation);
     JSClass<JSViewContext>::StaticMethod("animateTo", JSAnimateTo);
-    JSClass<JSViewContext>::StaticMethod("visualState", JSVisualState);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

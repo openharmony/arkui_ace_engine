@@ -121,6 +121,7 @@
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 
@@ -794,6 +795,7 @@ void JsRegisterViews(BindingTarget globalObj)
 
     JSEnvironment::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);
+    JSViewStackProcessor::JSBind(globalObj);
     JSTouchHandler::JSBind(globalObj);
     JSPanHandler::JSBind(globalObj);
     JSGesture::JSBind(globalObj);

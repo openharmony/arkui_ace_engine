@@ -13,23 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_CONTEXT_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_CONTEXT_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_STACK_PROCESSOR_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_STACK_PROCESSOR_H
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 
-class JSViewContext {
+class JSViewStackProcessor {
 public:
+    JSViewStackProcessor() = default;
+    ~JSViewStackProcessor() = default;
+
     static void JSBind(BindingTarget globalObj);
-    static void JSAnimation(const JSCallbackInfo& info);
-    static void JSAnimateTo(const JSCallbackInfo& info);
 
 private:
-    static const AnimationOption CreateAnimation(const std::unique_ptr<JsonValue>& animationArgs);
+    /**
+     * Binds the native methods to the the js object
+     */
+    static void JSVisualState(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
-
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_CONTEXT_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_STACK_PROCESSOR_H

@@ -1299,10 +1299,12 @@ bool RenderBox::ExistGestureRecognizer()
 void RenderBox::OnStatusStyleChanged(StyleState componentState)
 {
     RenderBoxBase::OnStatusStyleChanged(componentState);
+
     if (stateAttributeList_ == nullptr) {
         return;
     }
 
+    LOGD("state %{public}d  attr count %{public}llu", componentState.c_str(), stateAttributeList_->size());
     bool updated = false;
     for (const auto& attribute : *stateAttributeList_) {
         if (attribute->stateName_ != componentState) {
@@ -1312,55 +1314,59 @@ void RenderBox::OnStatusStyleChanged(StyleState componentState)
         updated = true;
         switch (attribute->id_) {
             case BoxStateAttribute::COLOR: {
+                LOGD("Setting COLOR for state %s", attribute->stateName_);
                 auto colorState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(attribute);
-                if (!backDecoration_) {
-                    backDecoration_ = AceType::MakeRefPtr<Decoration>();
-                }
-                backDecoration_->SetBackgroundColor(colorState->value_);
+                GetBackDecoration()->SetBackgroundColor(colorState->value_);
             } break;
 
             case BoxStateAttribute::BORDER_COLOR: {
+                LOGD("Setting BORDER_COLOR for state %{public}d", attribute->stateName_);
                 auto colorState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(attribute);
-                // TODO: reuse RenderBox::SetBorderColor
-                BoxComponentHelper::SetBorderColor(backDecoration_, colorState->value_);
+                BoxComponentHelper::SetBorderColor(GetBackDecoration(), colorState->value_);
             } break;
 
             case BoxStateAttribute::BORDER_RADIUS: {
+                LOGD("Setting BORDER_RADIUS for state %{public}d", attribute->stateName_);
                 auto radiusState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
-                // TODO: reuse RenderBox::SetBorderRadius
-                BoxComponentHelper::SetBorderRadius(backDecoration_, radiusState->value_);
+                BoxComponentHelper::SetBorderRadius(GetBackDecoration(), radiusState->value_);
             } break;
 
             case BoxStateAttribute::BORDER_STYLE: {
+                LOGD("Setting BORDER_STYLE for state %{public}d", attribute->stateName_);
                 auto attributeStateValue =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, BorderStyle>>(attribute);
-                // TODO: reuse RenderBox::SetBorderStyle
-                BoxComponentHelper::SetBorderStyle(backDecoration_, attributeStateValue->value_);
+                BoxComponentHelper::SetBorderStyle(GetBackDecoration(), attributeStateValue->value_);
             } break;
 
             case BoxStateAttribute::BORDER_WIDTH: {
                 auto widthState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
-                // TODO: reuse RenderBox::SetBorderWidth
-                BoxComponentHelper::SetBorderWidth(backDecoration_, widthState->value_);
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf",
+                    attribute->stateName_, widthState->value_.Value());
+                BoxComponentHelper::SetBorderWidth(GetBackDecoration(), widthState->value_);
             } break;
 
             case BoxStateAttribute::HEIGHT: {
                 auto valueState =
-                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
+                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, Dimension>>(attribute);
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf",
+                    attribute->stateName_, valueState->value_.Value());
                 height_ = valueState->value_;
             } break;
 
             case BoxStateAttribute::WIDTH: {
                 auto valueState =
-                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
+                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, Dimension>>(attribute);
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf",
+                    attribute->stateName_, valueState->value_.Value());
                 width_ = valueState->value_;
             } break;
 
-            case BoxStateAttribute::ASPECTRATIO: {
+            case BoxStateAttribute::ASPECT_RATIO: {
+                LOGD("Setting ASPECT Ration state %{public}d", attribute->stateName_);
                 auto valueState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
                 SetAspectRatio(valueState->value_);
@@ -1376,9 +1382,8 @@ void RenderBox::OnStatusStyleChanged(StyleState componentState)
 
             case BoxStateAttribute::GRADIENT: {
                 auto gradientState = AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, Gradient>>(attribute);
-                if (backDecoration_) {
-                    backDecoration_->SetGradient(gradientState->value_);
-                }
+                LOGD("Setting Gradient state %{public}d", attribute->stateName_);
+                GetBackDecoration()->SetGradient(gradientState->value_);
             } break;
         }
     }

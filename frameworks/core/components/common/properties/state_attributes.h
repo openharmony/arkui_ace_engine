@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_COMMON_STATE_ATTRUBUTES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_COMMON_STATE_ATTRUBUTES_H
 
-#include <list>
-
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
@@ -37,9 +35,9 @@ class StateAttributeBase : public virtual AceType {
     DECLARE_ACE_TYPE(StateAttributeBase<AttributeID>, AceType);
 public:
     StateAttributeBase(StyleState state, AttributeID id) : stateName_(state), id_(id) {}
-    ~StateAttributeBase() override = default;
+    virtual ~StateAttributeBase() {}
     StyleState stateName_;
-    const AttributeID id_;
+    AttributeID id_;
 };
 
 template<class AttributeID, class Attribute>
@@ -49,7 +47,7 @@ public:
     StateAttributeValue(StyleState state, AttributeID id, Attribute value)
         : StateAttributeBase<AttributeID>(state, id), value_(value)
     {}
-    ~StateAttributeValue() override = default;
+    virtual ~StateAttributeValue() {}
     Attribute value_;
 };
 

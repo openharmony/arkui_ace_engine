@@ -126,6 +126,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #endif
@@ -666,6 +667,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSIfElse::JSBind(globalObj);
     JSEnvironment::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);
+    JSViewStackProcessor::JSBind(globalObj);
     JSFlexImpl::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
