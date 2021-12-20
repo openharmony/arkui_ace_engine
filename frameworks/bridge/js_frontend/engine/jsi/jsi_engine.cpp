@@ -2612,6 +2612,8 @@ JsiEngineInstance::~JsiEngineInstance()
     }
     runtime_.reset();
     runtime_ = nullptr;
+
+    JsiUtils::SetCurrentState(JsErrorType::DESTROY_PAGE_ERROR, instanceId_, "", nullptr);
 }
 
 void JsiEngineInstance::FlushCommandBuffer(void* context, const std::string& command)
