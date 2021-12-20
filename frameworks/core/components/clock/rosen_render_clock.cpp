@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "core/components/clock/flutter_render_clock.h"
+#include "core/components/clock/rosen_render_clock.h"
 
-#include "flutter/common/task_runners.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
@@ -23,66 +22,82 @@
 #include "base/json/json_util.h"
 #include "core/components/text/text_component.h"
 #include "core/pipeline/base/constants.h"
-#include "core/pipeline/base/flutter_render_context.h"
-#include "core/pipeline/base/scoped_canvas_state.h"
+#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr double HOUR_ANGLE_UNIT = 360.0 / 12;
 constexpr double MINUTE_ANGLE_UNIT = 360.0 / 60;
 constexpr double SECOND_ANGLE_UNIT = 360.0 / 60;
 constexpr int32_t INTERVAL_OF_USECOND = 1000000;
 constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
-
 } // namespace
 
-void FlutterRenderClock::Paint(RenderContext& context, const Offset& offset)
+void RosenRenderClock::Paint(RenderContext& context, const Offset& offset)
 {
     auto renderOffset = paintOffset_ + offset;
 
     // paint clock face and digit
     context.PaintChild(renderClockFace_, renderOffset);
-    Offset rotateCenter = renderOffset + Offset(drawSize_.Width() / 2.0, drawSize_.Height() / 2.0);
     if (declaration_->GetShowDigit()) {
-        RenderDigit(context, rotateCenter);
+        RenderDigit(context, offset);
     }
 
     // paint clock hand
     context.PaintChild(renderClockHand_, renderOffset);
-    auto flutterRenderClockHand = AceType::DynamicCast<FlutterRenderClockHand>(renderClockHand_);
-    flutterRenderClockHand->RequestRenderForNextSecond();
+    auto rosenRenderClockHand = AceType::DynamicCast<RosenRenderClockHand>(renderClockHand_);
+    rosenRenderClockHand->RequestRenderForNextSecond();
 }
 
-void FlutterRenderClock::RenderDigit(RenderContext& context, const Offset& center)
+void RosenRenderClock::PerformLayout()
 {
-    if (radians_.size() != digitRenderNodes_.size()) {
-        LOGE("Size of [radians] and [digitRenderNodes] does not match! Please check!");
-        return;
+    defaultSize_ = Dimension(NormalizeToPx(defaultSize_), DimensionUnit::PX);
+    CalculateLayoutSize();
+    SetLayoutSize(GetLayoutParam().Constrain(drawSize_));
+    LayoutClockImage(renderClockFace_, drawSize_);
+    auto textColor = renderClockHand_->GetIsDay() ? declaration_->GetDigitColor() : digitColorNight_;
+    if (declaration_->GetShowDigit()) {
+        LayoutParam textLayoutParam = GetLayoutParam();
+        textLayoutParam.SetMinSize(Size());
+        UpdateRenderText(drawSize_.Width() * digitSizeRatio_, textColor);
+        double innerRadius = drawSize_.Width() * digitRadiusRatio_ / 2.0;
+        Offset center = paintOffset_ + Offset(drawSize_.Width() / 2.0, drawSize_.Height() / 2.0);
+        int i = 0;
+        for (const auto& renderDigit : digitRenderNodes_) {
+            auto halfDigitWidth = renderDigit->GetLayoutSize().Width() / 2.0;
+            auto halfDigitHeight = renderDigit->GetLayoutSize().Height() / 2.0;
+            auto digitOffset = Offset(center.GetX() + sin(radians_[i]) * innerRadius - halfDigitWidth,
+                                      center.GetY() - cos(radians_[i]) * innerRadius - halfDigitHeight);
+            renderDigit->Layout(textLayoutParam);
+            renderDigit->SetPosition(digitOffset);
+            ++i;
+        }
     }
-    double innerRadius = drawSize_.Width() * digitRadiusRatio_ / 2.0;
+
+    LayoutParam layoutParam = GetLayoutParam();
+    layoutParam.SetMaxSize(drawSize_);
+    renderClockHand_->Layout(layoutParam);
+
+    paintOffset_ = Alignment::GetAlignPosition(GetLayoutSize(), drawSize_, Alignment::CENTER);
+}
+
+void RosenRenderClock::RenderDigit(RenderContext& context, const Offset& offset)
+{
     for (size_t i = 0; i < radians_.size(); i++) {
-        auto halfDigitWidth = digitRenderNodes_[i]->GetLayoutSize().Width() / 2.0;
-        auto halfDigitHeight = digitRenderNodes_[i]->GetLayoutSize().Height() / 2.0;
-        auto digitOffset = Offset(center.GetX() + sin(radians_[i]) * innerRadius - halfDigitWidth,
-            center.GetY() - cos(radians_[i]) * innerRadius - halfDigitHeight);
-        context.PaintChild(digitRenderNodes_[i], digitOffset);
+        context.PaintChild(digitRenderNodes_[i], offset);
     }
 }
 
-void FlutterRenderClockHand::RenderHand(RenderContext& context, const Offset& offset,
-    const RefPtr<RenderImage>& renderHand, const Offset& rotateCenter, double rotateAngle)
+void RosenRenderClockHand::RenderHand(RenderContext& context, const Offset& offset,
+    const RefPtr<RenderImage>& renderHand, double rotateAngle)
 {
-    auto canvas = ScopedCanvas::Create(context);
-    if (!canvas) {
-        LOGE("Paint canvas is null");
-        return;
-    }
-    canvas->canvas()->rotate(rotateAngle, rotateCenter.GetX(), rotateCenter.GetY());
-    context.PaintChild(renderHand, offset);
+    renderHand->SetRotate(rotateAngle);
+    renderHand->SetPosition(offset);
+    renderHand->MarkNeedRender();
+    context.PaintChild(renderHand, {});
 }
 
-void FlutterRenderClockHand::RequestRenderForNextSecond()
+void RosenRenderClockHand::RequestRenderForNextSecond()
 {
     auto timeOfNow = GetTimeOfNow(hoursWest_);
     auto timeUsec = timeOfNow.timeUsec_;
@@ -138,7 +153,7 @@ void FlutterRenderClockHand::RequestRenderForNextSecond()
     pipelineContext->AddNodesToNotifyOnPreDraw(Claim(this));
 }
 
-void FlutterRenderClockHand::Paint(RenderContext& context, const Offset& offset)
+void RosenRenderClockHand::Paint(RenderContext& context, const Offset& offset)
 {
     auto timeOfNow = GetTimeOfNow(hoursWest_);
     // case [10] means that time travels from light to dark, case [01] means that time travels from dark to light
@@ -153,7 +168,6 @@ void FlutterRenderClockHand::Paint(RenderContext& context, const Offset& offset)
         default:
             break;
     }
-
     auto minute = static_cast<int32_t>(timeOfNow.minute_);
     if (curMinute_ != minute) {
         curMinute_ = minute;
@@ -177,24 +191,23 @@ void FlutterRenderClockHand::Paint(RenderContext& context, const Offset& offset)
     auto handOffset = offset + Offset((clockSize.Width() - renderHourHand_->GetLayoutSize().Width()) / 2.0, 0.0);
     Offset rotateCenter = offset + Offset(clockSize.Width() / 2.0, clockSize.Height() / 2.0);
 
-    RenderHand(context, handOffset, renderMinuteHand_, rotateCenter, timeOfNow.minute_ * MINUTE_ANGLE_UNIT);
-    RenderHand(context, handOffset, renderHourHand_, rotateCenter, timeOfNow.hour12_ * HOUR_ANGLE_UNIT);
-    RenderHand(context, handOffset, renderSecondHand_, rotateCenter, timeOfNow.second_ * SECOND_ANGLE_UNIT);
+    RenderHand(context, handOffset, renderMinuteHand_, timeOfNow.minute_ * MINUTE_ANGLE_UNIT);
+    RenderHand(context, handOffset, renderHourHand_, timeOfNow.hour12_ * HOUR_ANGLE_UNIT);
+    RenderHand(context, handOffset, renderSecondHand_, timeOfNow.second_ * SECOND_ANGLE_UNIT);
 }
 
-void FlutterRenderClockHand::OnAppShow()
+void RosenRenderClockHand::OnAppShow()
 {
     RenderNode::OnAppShow();
     MarkNeedRender();
     RequestRenderForNextSecond();
 }
 
-void FlutterRenderClockHand::OnPreDraw()
+void RosenRenderClockHand::OnPreDraw()
 {
     onPreDraw_ = true;
     stableCnt_ = 0; // if onPreDraw called, clock maybe slide unstably, stableCnt_ should be setted to 0.
     MarkNeedRender();
     RequestRenderForNextSecond();
 }
-
 } // namespace OHOS::Ace
