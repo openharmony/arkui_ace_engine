@@ -53,6 +53,8 @@ public:
 // The reverse curve is used to convert the direction of motion.
 // It uses the 1.0->0.0 motion of the child curve to achieve the reverse purpose.
 class ReverseCurve final : public Curve {
+    DECLARE_ACE_TYPE(ReverseCurve, Curve);
+
 public:
     explicit ReverseCurve(const RefPtr<Curve>& curve) : curve_(curve) {}
     ~ReverseCurve() override = default;
@@ -74,6 +76,8 @@ private:
 };
 
 class ComplementaryCurve final : public Curve {
+    DECLARE_ACE_TYPE(ComplementaryCurve, Curve);
+
 public:
     explicit ComplementaryCurve(const RefPtr<Curve>& curve) : curve_(curve) {}
     ~ComplementaryCurve() override = default;
@@ -95,6 +99,8 @@ private:
 };
 
 class DecelerationCurve final : public Curve {
+    DECLARE_ACE_TYPE(DecelerationCurve, Curve);
+
 public:
     float MoveInternal(float time) override
     {
@@ -103,6 +109,8 @@ public:
 };
 
 class LinearCurve final : public Curve {
+    DECLARE_ACE_TYPE(LinearCurve, Curve);
+
 public:
     float MoveInternal(float time) override
     {
@@ -111,6 +119,8 @@ public:
 };
 
 class SineCurve final : public Curve {
+    DECLARE_ACE_TYPE(SineCurve, Curve);
+
 public:
     float MoveInternal(float time) override
     {
@@ -120,6 +130,8 @@ public:
 };
 
 class ElasticsCurve final : public Curve {
+    DECLARE_ACE_TYPE(ElasticsCurve, Curve);
+
 public:
     explicit ElasticsCurve(float tension) : tension_(tension) {};
     ~ElasticsCurve() override = default;
@@ -139,7 +151,8 @@ enum class StepsCurvePosition {
 };
 
 class StepsCurve : public Curve {
-    DECLARE_ACE_TYPE(StepsCurve, Curve)
+    DECLARE_ACE_TYPE(StepsCurve, Curve);
+
 public:
     explicit StepsCurve(int32_t steps, StepsCurvePosition position = StepsCurvePosition::START)
         : steps_(steps <= 0 ? 1 : steps), position_(position) {};
@@ -160,7 +173,8 @@ private:
 };
 
 class CustomCurve final : public Curve {
-    DECLARE_ACE_TYPE(CustomCurve, Curve)
+    DECLARE_ACE_TYPE(CustomCurve, Curve);
+
 public:
     explicit CustomCurve(const std::function<float(float)>& func) : interpolateFunc_(func) {}
     ~CustomCurve() override = default;

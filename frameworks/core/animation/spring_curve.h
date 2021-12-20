@@ -22,6 +22,8 @@
 namespace OHOS::Ace {
 
 class ACE_EXPORT SpringCurve : public Curve {
+    DECLARE_ACE_TYPE(SpringCurve, Curve);
+
 public:
     SpringCurve(float velocity, float mass, float stiffness, float damping);
     ~SpringCurve() override = default;
