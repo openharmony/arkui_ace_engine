@@ -1153,6 +1153,12 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
 #endif
 
         positionParam_ = renderComponent->GetPositionParam();
+        if (!NearEqual(flexWeight_, renderComponent->GetFlexWeight())) {
+            auto parentFlex = GetParent().Upgrade();
+            if (parentFlex) {
+                parentFlex->MarkNeedLayout();
+            }
+        }
         flexWeight_ = renderComponent->GetFlexWeight();
         displayIndex_ = renderComponent->GetDisplayIndex();
         isIgnored_ = renderComponent->IsIgnored();
