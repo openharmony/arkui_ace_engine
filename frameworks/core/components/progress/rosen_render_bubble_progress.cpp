@@ -13,33 +13,28 @@
  * limitations under the License.
  */
 
-#include "core/components/progress/flutter_render_bubble_progress.h"
+#include "core/components/progress/rosen_render_bubble_progress.h"
 
-#include "flutter/lib/ui/ui_dart_state.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
-
-#include "core/pipeline/base/scoped_canvas_state.h"
-#include "core/pipeline/layers/offset_layer.h"
+#include "third_party/skia/include/core/SkPaint.h"
+#include "base/geometry/offset.h"
+#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr Color DARK_COLOR = Color(0xFF333333);
 constexpr Color LIGHT_COLOR = Color(0xFF8A8A8A);
-
 } // namespace
 
-void FlutterRenderBubbleProgress::Paint(RenderContext& context, const Offset& offset)
+void RosenRenderBubbleProgress::Paint(RenderContext& context, const Offset& offset)
 {
-    auto canvas = ScopedCanvas::Create(context);
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
     if (!canvas) {
         LOGE("canvas is null ptr");
         return;
     }
-    flutter::Paint subCirclePaint;
-
-    subCirclePaint.paint()->setAntiAlias(true);
-    subCirclePaint.paint()->setColor(Color(0xFF8A8A8A).GetValue());
+    SkPaint subCirclePaint;
+    subCirclePaint.setAntiAlias(true);
+    subCirclePaint.setColor(Color(0xFF8A8A8A).GetValue());
 
     int32_t index = 0;
     static const int32_t threshold = 7;
@@ -51,29 +46,19 @@ void FlutterRenderBubbleProgress::Paint(RenderContext& context, const Offset& of
         lightToDarkIndex + 2 > threshold ? (lightToDarkIndex + 2) % maxBubbleCount : lightToDarkIndex + 2;
     int32_t darkToLightIndex =
         lightToDarkIndex + 3 > threshold ? (lightToDarkIndex + 3) % maxBubbleCount : lightToDarkIndex + 3;
-    flutter::PaintData subCirclePaintData;
     for (auto& center : subCircleCenter_) {
         if (index == lightToDarkIndex) {
-            subCirclePaint.paint()->setColor(lightToDark_.GetValue());
+            subCirclePaint.setColor(lightToDark_.GetValue());
         } else if (index == darkToLightIndex) {
-            subCirclePaint.paint()->setColor(darkToLight_.GetValue());
+            subCirclePaint.setColor(darkToLight_.GetValue());
         } else if (index == darkIndex_1 || index == darkIndex_2) {
-            subCirclePaint.paint()->setColor(DARK_COLOR.GetValue());
+            subCirclePaint.setColor(DARK_COLOR.GetValue());
         } else {
-            subCirclePaint.paint()->setColor(LIGHT_COLOR.GetValue());
+            subCirclePaint.setColor(LIGHT_COLOR.GetValue());
         }
         canvas->drawCircle(
-            (offset + center).GetX(), (offset + center).GetY(), maxCircleRadius_, subCirclePaint, subCirclePaintData);
+            (offset + center).GetX(), (offset + center).GetY(), maxCircleRadius_, subCirclePaint);
         index++;
     }
 }
-
-RenderLayer FlutterRenderBubbleProgress::GetRenderLayer()
-{
-    if (!layer_) {
-        layer_ = AceType::MakeRefPtr<Flutter::OffsetLayer>();
-    }
-    return AceType::RawPtr(layer_);
-}
-
 } // namespace OHOS::Ace

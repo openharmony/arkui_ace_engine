@@ -26,9 +26,11 @@ build_component("progress") {
     "render_loading_progress_creator.cpp",
     "render_progress.cpp",
     "render_progress_creator.cpp",
+    "render_bubble_progress_creator.cpp",
   ]
   rosen_sources = [
     "rosen_render_loading_progress.cpp",
     "rosen_render_progress.cpp",
+    "rosen_render_bubble_progress.cpp"
   ]
 }

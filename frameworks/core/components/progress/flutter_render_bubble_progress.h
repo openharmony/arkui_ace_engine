@@ -35,6 +35,11 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
     RenderLayer GetRenderLayer() override;
 
+    bool IsRepaintBoundary() const override
+    {
+        return true;
+    }
+
 private:
     RefPtr<Flutter::ContainerLayer> layer_;
 };
