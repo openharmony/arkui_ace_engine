@@ -555,9 +555,9 @@ void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context,
     }
     auto segmentSize = 0.0;
     if (segmentWidthSum == GetMaxValue()) {
-        segmentSize = (double)(segment.size() - 1);
+        segmentSize = static_cast<double>(segment.size() - 1);
     } else {
-        segmentSize = (double)segment.size();
+        segmentSize = static_cast<double>(segment.size());
     }
     for (int i = 0; i < segment.size(); i++) {
         if (segment[i].GetValue() == 0.0) {
