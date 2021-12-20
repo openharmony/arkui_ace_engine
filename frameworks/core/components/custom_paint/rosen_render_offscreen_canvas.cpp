@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/custom_paint/flutter_render_offscreen_canvas.h"
+#include "core/components/custom_paint/rosen_render_offscreen_canvas.h"
 
 #include <cmath>
 #include <sstream>
@@ -21,7 +21,6 @@
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
-#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkPoint.h"
@@ -103,7 +102,7 @@ const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] =
 constexpr size_t BLEND_MODE_SIZE = ArraySize(SK_BLEND_MODE_TABLE);
 } // namespace
 
-FlutterRenderOffscreenCanvas::FlutterRenderOffscreenCanvas(const WeakPtr<PipelineContext>& context,
+RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(const WeakPtr<PipelineContext>& context,
     int32_t width, int32_t height)
 {
     pipelineContext_ = context;
@@ -119,14 +118,14 @@ FlutterRenderOffscreenCanvas::FlutterRenderOffscreenCanvas(const WeakPtr<Pipelin
     cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
     InitFliterFunc();
 }
-void FlutterRenderOffscreenCanvas::AddRect(const Rect& rect)
+void RosenRenderOffscreenCanvas::AddRect(const Rect& rect)
 {
     SkRect skRect = SkRect::MakeLTRB(rect.Left(), rect.Top(),
         rect.Right(), rect.Bottom());
     skPath_.addRect(skRect);
 }
 
-void FlutterRenderOffscreenCanvas::Fill()
+void RosenRenderOffscreenCanvas::Fill()
 {
     SkPaint paint;
     paint.setAntiAlias(antiAlias_);
@@ -154,12 +153,12 @@ void FlutterRenderOffscreenCanvas::Fill()
     }
 }
 
-void FlutterRenderOffscreenCanvas::Clip()
+void RosenRenderOffscreenCanvas::Clip()
 {
     skCanvas_->clipPath(skPath_);
 }
 
-void FlutterRenderOffscreenCanvas::FillRect(Rect rect)
+void RosenRenderOffscreenCanvas::FillRect(Rect rect)
 {
     SkPaint paint;
     paint.setAntiAlias(antiAlias_);
@@ -190,7 +189,7 @@ void FlutterRenderOffscreenCanvas::FillRect(Rect rect)
     }
 }
 
-void FlutterRenderOffscreenCanvas::PutImageData(const ImageData& imageData)
+void RosenRenderOffscreenCanvas::PutImageData(const ImageData& imageData)
 {
     if (imageData.data.empty()) {
         return;
@@ -212,7 +211,7 @@ void FlutterRenderOffscreenCanvas::PutImageData(const ImageData& imageData)
     delete[] data;
 }
 
-void FlutterRenderOffscreenCanvas::SetPaintImage()
+void RosenRenderOffscreenCanvas::SetPaintImage()
 {
     float matrix[20] = {0};
     matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
@@ -235,7 +234,7 @@ void FlutterRenderOffscreenCanvas::SetPaintImage()
     }
 }
 
-void FlutterRenderOffscreenCanvas::InitImagePaint()
+void RosenRenderOffscreenCanvas::InitImagePaint()
 {
     if (smoothingEnabled_) {
         if (smoothingQuality_ == "low") {
@@ -253,7 +252,7 @@ void FlutterRenderOffscreenCanvas::InitImagePaint()
     SetPaintImage();
 }
 
-void FlutterRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, double width, double height)
+void RosenRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, double width, double height)
 {
     if (!flutter::UIDartState::Current()) {
         return;
@@ -307,7 +306,7 @@ void FlutterRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, dou
     }
 }
 
-std::unique_ptr<ImageData> FlutterRenderOffscreenCanvas::GetImageData(double left, double top,
+std::unique_ptr<ImageData> RosenRenderOffscreenCanvas::GetImageData(double left, double top,
     double width, double height)
 {
     auto imageInfo =
@@ -332,19 +331,19 @@ std::unique_ptr<ImageData> FlutterRenderOffscreenCanvas::GetImageData(double lef
     return imageData;
 }
 
-void FlutterRenderOffscreenCanvas::Save()
+void RosenRenderOffscreenCanvas::Save()
 {
     SaveStates();
     skCanvas_->save();
 }
 
-void FlutterRenderOffscreenCanvas::Restore()
+void RosenRenderOffscreenCanvas::Restore()
 {
     RestoreStates();
     skCanvas_->restore();
 }
 
-std::string FlutterRenderOffscreenCanvas::ToDataURL(const std::string& type, const double quality)
+std::string RosenRenderOffscreenCanvas::ToDataURL(const std::string& type, const double quality)
 {
     std::string mimeType = GetMimeType(type);
     double qua = GetQuality(type, quality);
@@ -383,7 +382,7 @@ std::string FlutterRenderOffscreenCanvas::ToDataURL(const std::string& type, con
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
 }
 
-void FlutterRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradient& gradient)
+void RosenRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradient& gradient)
 {
     SkPoint beginPoint = SkPoint::Make(SkDoubleToScalar(gradient.GetBeginOffset().GetX()),
         SkDoubleToScalar(gradient.GetBeginOffset().GetY()));
@@ -421,12 +420,12 @@ void FlutterRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradi
     paint.setShader(skShader);
 }
 
-void FlutterRenderOffscreenCanvas::BeginPath()
+void RosenRenderOffscreenCanvas::BeginPath()
 {
     skPath_.reset();
 }
 
-void FlutterRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkPaint& paint)
+void RosenRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkPaint& paint)
 {
     if (!flutter::UIDartState::Current()) {
         return;
@@ -486,7 +485,7 @@ void FlutterRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkP
         staticPattern[operatorIter].value(image, paint);
     }
 }
-void FlutterRenderOffscreenCanvas::Arc(const ArcParam& param)
+void RosenRenderOffscreenCanvas::Arc(const ArcParam& param)
 {
     double left = param.x - param.radius;
     double top = param.y - param.radius;
@@ -513,7 +512,7 @@ void FlutterRenderOffscreenCanvas::Arc(const ArcParam& param)
     }
 }
 
-void FlutterRenderOffscreenCanvas::ClearRect(Rect rect)
+void RosenRenderOffscreenCanvas::ClearRect(Rect rect)
 {
     SkPaint paint;
     paint.setAntiAlias(antiAlias_);
@@ -522,7 +521,7 @@ void FlutterRenderOffscreenCanvas::ClearRect(Rect rect)
     skCanvas_->drawRect(skRect, paint);
 }
 
-void FlutterRenderOffscreenCanvas::StrokeRect(Rect rect)
+void RosenRenderOffscreenCanvas::StrokeRect(Rect rect)
 {
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
@@ -549,7 +548,7 @@ void FlutterRenderOffscreenCanvas::StrokeRect(Rect rect)
     }
 }
 
-void FlutterRenderOffscreenCanvas::Stroke()
+void RosenRenderOffscreenCanvas::Stroke()
 {
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
@@ -572,7 +571,7 @@ void FlutterRenderOffscreenCanvas::Stroke()
     }
 }
 
-void FlutterRenderOffscreenCanvas::Stroke(const RefPtr<CanvasPath2D>& path)
+void RosenRenderOffscreenCanvas::Stroke(const RefPtr<CanvasPath2D>& path)
 {
     if (path == nullptr) {
         return;
@@ -632,7 +631,7 @@ void FlutterRenderOffscreenCanvas::Stroke(const RefPtr<CanvasPath2D>& path)
     }
     Path2DStroke();
 }
-SkPaint FlutterRenderOffscreenCanvas::GetStrokePaint()
+SkPaint RosenRenderOffscreenCanvas::GetStrokePaint()
 {
     static const LinearEnumMapNode<LineJoinStyle, SkPaint::Join> skLineJoinTable[] = {
         { LineJoinStyle::MITER, SkPaint::Join::kMiter_Join },
@@ -663,30 +662,30 @@ SkPaint FlutterRenderOffscreenCanvas::GetStrokePaint()
     }
     return paint;
 }
-void FlutterRenderOffscreenCanvas::SetAntiAlias(bool isEnabled)
+void RosenRenderOffscreenCanvas::SetAntiAlias(bool isEnabled)
 {
     antiAlias_ = isEnabled;
 }
-bool FlutterRenderOffscreenCanvas::HasShadow() const
+bool RosenRenderOffscreenCanvas::HasShadow() const
 {
     return !(NearZero(shadow_.GetOffset().GetX()) && NearZero(shadow_.GetOffset().GetY()) &&
          NearZero(shadow_.GetBlurRadius()));
 }
 
-bool FlutterRenderOffscreenCanvas::HasImageShadow() const
+bool RosenRenderOffscreenCanvas::HasImageShadow() const
 {
     return !(NearZero(imageShadow_.GetOffset().GetX()) && NearZero(imageShadow_.GetOffset().GetY()) &&
          NearZero(imageShadow_.GetBlurRadius()));
 }
 
-void FlutterRenderOffscreenCanvas::Path2DAddPath(const PathArgs& args)
+void RosenRenderOffscreenCanvas::Path2DAddPath(const PathArgs& args)
 {
     SkPath out;
     SkParsePath::FromSVGString(args.cmds.c_str(), &out);
     strokePath_.addPath(out);
 }
 
-void FlutterRenderOffscreenCanvas::Path2DSetTransform(const PathArgs& args)
+void RosenRenderOffscreenCanvas::Path2DSetTransform(const PathArgs& args)
 {
     SkMatrix skMatrix;
     double scaleX = args.para1;
@@ -699,21 +698,21 @@ void FlutterRenderOffscreenCanvas::Path2DSetTransform(const PathArgs& args)
     strokePath_.transform(skMatrix);
 }
 
-void FlutterRenderOffscreenCanvas::Path2DMoveTo(const PathArgs& args)
+void RosenRenderOffscreenCanvas::Path2DMoveTo(const PathArgs& args)
 {
     double x = args.para1;
     double y = args.para2;
     strokePath_.moveTo(x, y);
 }
 
-void FlutterRenderOffscreenCanvas::Path2DLineTo(const PathArgs& args)
+void RosenRenderOffscreenCanvas::Path2DLineTo(const PathArgs& args)
 {
     double x = args.para1;
     double y = args.para2;
     strokePath_.lineTo(x, y);
 }
 
-void FlutterRenderOffscreenCanvas::Path2DArc(const PathArgs& args)
+void RosenRenderOffscreenCanvas::Path2DArc(const PathArgs& args)
 {
     double x = args.para1;
     double y = args.para2;
@@ -738,7 +737,7 @@ void FlutterRenderOffscreenCanvas::Path2DArc(const PathArgs& args)
     }
 }
 
-void FlutterRenderOffscreenCanvas::Path2DArcTo(const PathArgs& args)
+void RosenRenderOffscreenCanvas::Path2DArcTo(const PathArgs& args)
 {
     double x1 = args.para1;
     double y1 = args.para2;
@@ -748,7 +747,7 @@ void FlutterRenderOffscreenCanvas::Path2DArcTo(const PathArgs& args)
     strokePath_.arcTo(x1, y1, x2, y2, r);
 }
 
-void FlutterRenderOffscreenCanvas::Path2DQuadraticCurveTo(const PathArgs& args)
+void RosenRenderOffscreenCanvas::Path2DQuadraticCurveTo(const PathArgs& args)
 {
     double cpx = args.para1;
     double cpy = args.para2;
@@ -757,7 +756,7 @@ void FlutterRenderOffscreenCanvas::Path2DQuadraticCurveTo(const PathArgs& args)
     strokePath_.quadTo(cpx, cpy, x, y);
 }
 
-void FlutterRenderOffscreenCanvas::Path2DBezierCurveTo(const PathArgs& args)
+void RosenRenderOffscreenCanvas::Path2DBezierCurveTo(const PathArgs& args)
 {
     double cp1x = args.para1;
     double cp1y = args.para2;
@@ -768,7 +767,7 @@ void FlutterRenderOffscreenCanvas::Path2DBezierCurveTo(const PathArgs& args)
     strokePath_.cubicTo(cp1x, cp1y, cp2x, cp2y, x, y);
 }
 
-void FlutterRenderOffscreenCanvas::Path2DEllipse(const PathArgs& args)
+void RosenRenderOffscreenCanvas::Path2DEllipse(const PathArgs& args)
 {
     if (NearEqual(args.para6, args.para7)) {
         return; // Just return when startAngle is same as endAngle.
@@ -816,7 +815,7 @@ void FlutterRenderOffscreenCanvas::Path2DEllipse(const PathArgs& args)
     }
 }
 
-void FlutterRenderOffscreenCanvas::Path2DRect(const PathArgs& args)
+void RosenRenderOffscreenCanvas::Path2DRect(const PathArgs& args)
 {
     double left = args.para1;
     double top = args.para2;
@@ -825,11 +824,11 @@ void FlutterRenderOffscreenCanvas::Path2DRect(const PathArgs& args)
     strokePath_.addRect(SkRect::MakeLTRB(left, top, right, bottom));
 }
 
-void FlutterRenderOffscreenCanvas::Path2DClosePath(const PathArgs& args)
+void RosenRenderOffscreenCanvas::Path2DClosePath(const PathArgs& args)
 {
     strokePath_.close();
 }
-void FlutterRenderOffscreenCanvas::Path2DStroke()
+void RosenRenderOffscreenCanvas::Path2DStroke()
 {
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
@@ -851,7 +850,7 @@ void FlutterRenderOffscreenCanvas::Path2DStroke()
         cacheBitmap_.eraseColor(0);
     }
 }
-void FlutterRenderOffscreenCanvas::UpdateLineDash(SkPaint& paint)
+void RosenRenderOffscreenCanvas::UpdateLineDash(SkPaint& paint)
 {
     if (!strokeState_.GetLineDash().lineDash.empty()) {
         auto lineDashState = strokeState_.GetLineDash().lineDash;
@@ -863,7 +862,7 @@ void FlutterRenderOffscreenCanvas::UpdateLineDash(SkPaint& paint)
         paint.setPathEffect(SkDashPathEffect::Make(intervals, lineDashState.size(), phase));
     }
 }
-void FlutterRenderOffscreenCanvas::ArcTo(const ArcToParam& param)
+void RosenRenderOffscreenCanvas::ArcTo(const ArcToParam& param)
 {
     double x1 = param.x1;
     double y1 = param.y1;
@@ -873,25 +872,25 @@ void FlutterRenderOffscreenCanvas::ArcTo(const ArcToParam& param)
     skPath_.arcTo(SkDoubleToScalar(x1), SkDoubleToScalar(y1), SkDoubleToScalar(x2), SkDoubleToScalar(y2),
         SkDoubleToScalar(radius));
 }
-void FlutterRenderOffscreenCanvas::MoveTo(double x, double y)
+void RosenRenderOffscreenCanvas::MoveTo(double x, double y)
 {
     skPath_.moveTo(SkDoubleToScalar(x), SkDoubleToScalar(y));
 }
-void FlutterRenderOffscreenCanvas::ClosePath()
+void RosenRenderOffscreenCanvas::ClosePath()
 {
     skPath_.close();
 }
 
-void FlutterRenderOffscreenCanvas::Rotate(double angle)
+void RosenRenderOffscreenCanvas::Rotate(double angle)
 {
     skCanvas_->rotate(angle * 180 / M_PI);
 }
-void FlutterRenderOffscreenCanvas::Scale(double x, double y)
+void RosenRenderOffscreenCanvas::Scale(double x, double y)
 {
     skCanvas_->scale(x, y);
 }
 
-void FlutterRenderOffscreenCanvas::FillText(const std::string& text, double x, double y, const PaintState& state)
+void RosenRenderOffscreenCanvas::FillText(const std::string& text, double x, double y, const PaintState& state)
 {
     if (!UpdateOffParagraph(text, false, state)) {
         return;
@@ -899,7 +898,7 @@ void FlutterRenderOffscreenCanvas::FillText(const std::string& text, double x, d
     PaintText(text, x, y, false);
 }
 
-void FlutterRenderOffscreenCanvas::StrokeText(const std::string& text, double x, double y, const PaintState& state)
+void RosenRenderOffscreenCanvas::StrokeText(const std::string& text, double x, double y, const PaintState& state)
 {
     if (HasShadow()) {
         if (!UpdateOffParagraph(text, true, state, true)) {
@@ -914,7 +913,7 @@ void FlutterRenderOffscreenCanvas::StrokeText(const std::string& text, double x,
     PaintText(text, x, y, true);
 }
 
-double FlutterRenderOffscreenCanvas::MeasureText(const std::string& text, const PaintState& state)
+double RosenRenderOffscreenCanvas::MeasureText(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
     txt::ParagraphStyle style;
@@ -936,7 +935,7 @@ double FlutterRenderOffscreenCanvas::MeasureText(const std::string& text, const 
     return paragraph->GetMaxIntrinsicWidth();
 }
 
-void FlutterRenderOffscreenCanvas::PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow)
+void RosenRenderOffscreenCanvas::PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow)
 {
     paragraph_->Layout(width_);
     if (width_ > paragraph_->GetMaxIntrinsicWidth()) {
@@ -959,7 +958,7 @@ void FlutterRenderOffscreenCanvas::PaintText(const std::string& text, double x, 
     paragraph_->Paint(skCanvas_.get(), dx, dy);
 }
 
-double FlutterRenderOffscreenCanvas::GetAlignOffset(const std::string& text, TextAlign align)
+double RosenRenderOffscreenCanvas::GetAlignOffset(const std::string& text, TextAlign align)
 {
     double x = 0.0;
     switch (align) {
@@ -985,7 +984,7 @@ double FlutterRenderOffscreenCanvas::GetAlignOffset(const std::string& text, Tex
     return x;
 }
 
-TextDirection FlutterRenderOffscreenCanvas::GetTextDirection(const std::string& text)
+TextDirection RosenRenderOffscreenCanvas::GetTextDirection(const std::string& text)
 {
     auto wstring = StringUtils::ToWstring(text);
     // Find first strong direction char.
@@ -1001,13 +1000,13 @@ TextDirection FlutterRenderOffscreenCanvas::GetTextDirection(const std::string& 
     return TextDirection::INHERIT;
 }
 
-void FlutterRenderOffscreenCanvas::InitCachePaint()
+void RosenRenderOffscreenCanvas::InitCachePaint()
 {
     cachePaint_.setBlendMode(
         ConvertEnumToSkEnum(globalState_.GetType(), SK_BLEND_MODE_TABLE, BLEND_MODE_SIZE, SkBlendMode::kSrcOver));
 }
 
-bool FlutterRenderOffscreenCanvas::UpdateOffParagraph(const std::string& text, bool isStroke,
+bool RosenRenderOffscreenCanvas::UpdateOffParagraph(const std::string& text, bool isStroke,
     const PaintState& state, bool hasShadow)
 {
     using namespace Constants;
@@ -1040,7 +1039,7 @@ bool FlutterRenderOffscreenCanvas::UpdateOffParagraph(const std::string& text, b
     return true;
 }
 
-void FlutterRenderOffscreenCanvas::UpdateTextStyleForeground(
+void RosenRenderOffscreenCanvas::UpdateTextStyleForeground(
     bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
 {
     using namespace Constants;
@@ -1085,7 +1084,7 @@ void FlutterRenderOffscreenCanvas::UpdateTextStyleForeground(
     }
 }
 
-double FlutterRenderOffscreenCanvas::GetBaselineOffset(TextBaseline baseline)
+double RosenRenderOffscreenCanvas::GetBaselineOffset(TextBaseline baseline)
 {
     double y = 0.0;
     switch (baseline) {
@@ -1113,22 +1112,22 @@ double FlutterRenderOffscreenCanvas::GetBaselineOffset(TextBaseline baseline)
     }
     return y;
 }
-void FlutterRenderOffscreenCanvas::LineTo(double x, double y)
+void RosenRenderOffscreenCanvas::LineTo(double x, double y)
 {
     skPath_.lineTo(SkDoubleToScalar(x), SkDoubleToScalar(y));
 }
-void FlutterRenderOffscreenCanvas::BezierCurveTo(const BezierCurveParam& param)
+void RosenRenderOffscreenCanvas::BezierCurveTo(const BezierCurveParam& param)
 {
     skPath_.cubicTo(SkDoubleToScalar(param.cp1x), SkDoubleToScalar(param.cp1y),
         SkDoubleToScalar(param.cp2x), SkDoubleToScalar(param.cp2y),
         SkDoubleToScalar(param.x), SkDoubleToScalar(param.y));
 }
-void FlutterRenderOffscreenCanvas::QuadraticCurveTo(const QuadraticCurveParam& param)
+void RosenRenderOffscreenCanvas::QuadraticCurveTo(const QuadraticCurveParam& param)
 {
     skPath_.quadTo(SkDoubleToScalar(param.cpx), SkDoubleToScalar(param.cpy),
         SkDoubleToScalar(param.x), SkDoubleToScalar(param.y));
 }
-void FlutterRenderOffscreenCanvas::Ellipse(const EllipseParam& param)
+void RosenRenderOffscreenCanvas::Ellipse(const EllipseParam& param)
 {
     // Init the start and end angle, then calculated the sweepAngle.
     double startAngle = std::fmod(param.startAngle, M_PI * 2.0);
@@ -1174,7 +1173,7 @@ void FlutterRenderOffscreenCanvas::Ellipse(const EllipseParam& param)
         skPath_.transform(matrix);
     }
 }
-void FlutterRenderOffscreenCanvas::SetTransform(const TransformParam& param)
+void RosenRenderOffscreenCanvas::SetTransform(const TransformParam& param)
 {
     auto pipeline = pipelineContext_.Upgrade();
     if (!pipeline) {
@@ -1189,18 +1188,18 @@ void FlutterRenderOffscreenCanvas::SetTransform(const TransformParam& param)
         param.scaleY * viewScale, param.translateY, 0, 0, 1);
     skCanvas_->setMatrix(skMatrix);
 }
-void FlutterRenderOffscreenCanvas::Transform(const TransformParam& param)
+void RosenRenderOffscreenCanvas::Transform(const TransformParam& param)
 {
     SkMatrix skMatrix;
     skMatrix.setAll(param.scaleX, param.skewY, param.translateX, param.skewX, param.scaleY, param.translateY, 0, 0, 1);
     skCanvas_->concat(skMatrix);
 }
-void FlutterRenderOffscreenCanvas::Translate(double x, double y)
+void RosenRenderOffscreenCanvas::Translate(double x, double y)
 {
     skCanvas_->translate(x, y);
 }
 
-void FlutterRenderOffscreenCanvas::TranspareCmdToPath(const RefPtr<CanvasPath2D>& path)
+void RosenRenderOffscreenCanvas::TranspareCmdToPath(const RefPtr<CanvasPath2D>& path)
 {
     strokePath_.reset();
     for (const auto& [cmd, args] : path->GetCaches()) {
@@ -1256,7 +1255,7 @@ void FlutterRenderOffscreenCanvas::TranspareCmdToPath(const RefPtr<CanvasPath2D>
     }
 }
 
-bool FlutterRenderOffscreenCanvas::IsPointInPathByColor(double x, double y, SkPath& path, SkColor colorMatch)
+bool RosenRenderOffscreenCanvas::IsPointInPathByColor(double x, double y, SkPath& path, SkColor colorMatch)
 {
     auto imageInfo = SkImageInfo::Make(width_, height_, SkColorType::kRGBA_8888_SkColorType,
         SkAlphaType::kOpaque_SkAlphaType);
@@ -1281,36 +1280,36 @@ bool FlutterRenderOffscreenCanvas::IsPointInPathByColor(double x, double y, SkPa
     return false;
 }
 
-bool FlutterRenderOffscreenCanvas::IsPointInPath(double x, double y)
+bool RosenRenderOffscreenCanvas::IsPointInPath(double x, double y)
 {
     return IsPointInPathByColor(x, y, skPath_, SK_ColorRED);
 }
 
-bool FlutterRenderOffscreenCanvas::IsPointInPath(const RefPtr<CanvasPath2D>& path, double x, double y)
+bool RosenRenderOffscreenCanvas::IsPointInPath(const RefPtr<CanvasPath2D>& path, double x, double y)
 {
     TranspareCmdToPath(path);
     return IsPointInPathByColor(x, y, strokePath_, SK_ColorRED);
 }
 
-bool FlutterRenderOffscreenCanvas::IsPointInStroke(double x, double y)
+bool RosenRenderOffscreenCanvas::IsPointInStroke(double x, double y)
 {
     return IsPointInPathByColor(x, y, skPath_, SK_ColorBLUE);
 }
 
-bool FlutterRenderOffscreenCanvas::IsPointInStroke(const RefPtr<CanvasPath2D>& path, double x, double y)
+bool RosenRenderOffscreenCanvas::IsPointInStroke(const RefPtr<CanvasPath2D>& path, double x, double y)
 {
     TranspareCmdToPath(path);
     return IsPointInPathByColor(x, y, strokePath_, SK_ColorBLUE);
 }
 
-void FlutterRenderOffscreenCanvas::ResetTransform()
+void RosenRenderOffscreenCanvas::ResetTransform()
 {
     SkMatrix skMatrix;
     skMatrix.setAll(1, 0, 0, 0, 1, 0, 0, 0, 1);
     skCanvas_->setMatrix(skMatrix);
 }
 
-void FlutterRenderOffscreenCanvas::InitFliterFunc()
+void RosenRenderOffscreenCanvas::InitFliterFunc()
 {
     filterFunc_["grayscale"] = [&](const std::string& percentage) {
         SetGrayFilter(percentage);
@@ -1344,7 +1343,7 @@ void FlutterRenderOffscreenCanvas::InitFliterFunc()
     };
 }
 
-bool FlutterRenderOffscreenCanvas::GetFilterType(std::string& filterType, std::string& filterParam)
+bool RosenRenderOffscreenCanvas::GetFilterType(std::string& filterType, std::string& filterParam)
 {
     std::string paramData = filterParam_;
     size_t index = paramData.find("(");
@@ -1361,7 +1360,7 @@ bool FlutterRenderOffscreenCanvas::GetFilterType(std::string& filterType, std::s
     return true;
 }
 
-bool FlutterRenderOffscreenCanvas::IsPercentStr(std::string& percent)
+bool RosenRenderOffscreenCanvas::IsPercentStr(std::string& percent)
 {
     if (percent.find("%") != std::string::npos) {
         int index = percent.find("%");
@@ -1371,7 +1370,7 @@ bool FlutterRenderOffscreenCanvas::IsPercentStr(std::string& percent)
     return false;
 }
 
-double FlutterRenderOffscreenCanvas::PxStrToDouble(const std::string& str)
+double RosenRenderOffscreenCanvas::PxStrToDouble(const std::string& str)
 {
     double ret = 0;
     size_t index = str.find("px");
@@ -1383,7 +1382,7 @@ double FlutterRenderOffscreenCanvas::PxStrToDouble(const std::string& str)
     return  ret;
 }
 
-double FlutterRenderOffscreenCanvas::BlurStrToDouble(const std::string& str)
+double RosenRenderOffscreenCanvas::BlurStrToDouble(const std::string& str)
 {
     double ret = 0;
     size_t index = str.find("px");
@@ -1406,7 +1405,7 @@ double FlutterRenderOffscreenCanvas::BlurStrToDouble(const std::string& str)
     return  ret;
 }
 
-void FlutterRenderOffscreenCanvas::SetGrayFilter(const std::string& percent)
+void RosenRenderOffscreenCanvas::SetGrayFilter(const std::string& percent)
 {
     std::string percentage = percent;
     bool hasPercent = IsPercentStr(percentage);
@@ -1428,7 +1427,7 @@ void FlutterRenderOffscreenCanvas::SetGrayFilter(const std::string& percent)
     SetColorFilter(matrix);
 }
 
-void FlutterRenderOffscreenCanvas::SetSepiaFilter(const std::string& percent)
+void RosenRenderOffscreenCanvas::SetSepiaFilter(const std::string& percent)
 {
     std::string percentage = percent;
     bool hasPercent = IsPercentStr(percentage);
@@ -1455,7 +1454,7 @@ void FlutterRenderOffscreenCanvas::SetSepiaFilter(const std::string& percent)
     SetColorFilter(matrix);
 }
 
-void FlutterRenderOffscreenCanvas::SetInvertFilter(const std::string& filterParam)
+void RosenRenderOffscreenCanvas::SetInvertFilter(const std::string& filterParam)
 {
     std::string percent = filterParam;
     bool hasPercent = IsPercentStr(percent);
@@ -1473,7 +1472,7 @@ void FlutterRenderOffscreenCanvas::SetInvertFilter(const std::string& filterPara
     SetColorFilter(matrix);
 }
 
-void FlutterRenderOffscreenCanvas::SetOpacityFilter(const std::string& filterParam)
+void RosenRenderOffscreenCanvas::SetOpacityFilter(const std::string& filterParam)
 {
     std::string percent = filterParam;
     bool hasPercent = IsPercentStr(percent);
@@ -1490,7 +1489,7 @@ void FlutterRenderOffscreenCanvas::SetOpacityFilter(const std::string& filterPar
     SetColorFilter(matrix);
 }
 
-void FlutterRenderOffscreenCanvas::SetBrightnessFilter(const std::string& percent)
+void RosenRenderOffscreenCanvas::SetBrightnessFilter(const std::string& percent)
 {
     std::string perStr = percent;
     bool hasPercent = IsPercentStr(perStr);
@@ -1510,7 +1509,7 @@ void FlutterRenderOffscreenCanvas::SetBrightnessFilter(const std::string& percen
     SetColorFilter(matrix);
 }
 
-void FlutterRenderOffscreenCanvas::SetContrastFilter(const std::string& percent)
+void RosenRenderOffscreenCanvas::SetContrastFilter(const std::string& percent)
 {
     std::string perStr = percent;
     float percentage = 0.0f;
@@ -1528,12 +1527,12 @@ void FlutterRenderOffscreenCanvas::SetContrastFilter(const std::string& percent)
     SetColorFilter(matrix);
 }
 
-void FlutterRenderOffscreenCanvas::SetBlurFilter(const std::string& percent)
+void RosenRenderOffscreenCanvas::SetBlurFilter(const std::string& percent)
 {
     imagePaint_.setImageFilter(SkBlurImageFilter::Make(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
 }
 
-void FlutterRenderOffscreenCanvas::SetDropShadowFilter(const std::string& percent)
+void RosenRenderOffscreenCanvas::SetDropShadowFilter(const std::string& percent)
 {
     std::vector<std::string> offsets;
     StringUtils::StringSpliter(percent, ' ', offsets);
@@ -1546,7 +1545,7 @@ void FlutterRenderOffscreenCanvas::SetDropShadowFilter(const std::string& percen
     imageShadow_.SetColor(Color::FromString(offsets[3]));
 }
 
-void FlutterRenderOffscreenCanvas::SetSaturateFilter(const std::string& filterParam)
+void RosenRenderOffscreenCanvas::SetSaturateFilter(const std::string& filterParam)
 {
     std::string percent = filterParam;
     bool hasPercent = IsPercentStr(percent);
@@ -1568,7 +1567,7 @@ void FlutterRenderOffscreenCanvas::SetSaturateFilter(const std::string& filterPa
     SetColorFilter(matrix);
 }
 
-void FlutterRenderOffscreenCanvas::SetHueRotateFilter(const std::string& filterParam)
+void RosenRenderOffscreenCanvas::SetHueRotateFilter(const std::string& filterParam)
 {
     std::string percent = filterParam;
     float degree = 0.0f;
@@ -1623,7 +1622,7 @@ void FlutterRenderOffscreenCanvas::SetHueRotateFilter(const std::string& filterP
     SetColorFilter(matrix);
 }
 
-void FlutterRenderOffscreenCanvas::SetColorFilter(float matrix[20])
+void RosenRenderOffscreenCanvas::SetColorFilter(float matrix[20])
 {
 #ifdef USE_SYSTEM_SKIA
     matrix[4] *= 255;
