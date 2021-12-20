@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components/watch_slider/flutter_render_watch_slider.h"
+#include "core/components/watch_slider/rosen_render_watch_slider.h"
 
 #include "third_party/skia/include/core/SkRRect.h"
+#include "third_party/skia/include/core/SkPaint.h"
 
 #include "base/geometry/dimension.h"
-#include "core/pipeline/base/scoped_canvas_state.h"
+#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -28,10 +29,11 @@ constexpr Dimension DEFAULT_PADDING = 3.0_vp;
 
 } // namespace
 
-void FlutterRenderWatchSlider::Paint(RenderContext& context, const Offset& offset)
+void RosenRenderWatchSlider::Paint(RenderContext& context, const Offset& offset)
 {
     UpdatePosition(offset);
-    ScopedCanvas canvas = ScopedCanvas::Create(context);
+    SkCanvas* canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+
     if (!canvas) {
         LOGE("Paint canvas is null");
         return;
@@ -42,34 +44,31 @@ void FlutterRenderWatchSlider::Paint(RenderContext& context, const Offset& offse
         topY + GetLayoutSize().Height() - 2.0 * NormalizeToPx(DEFAULT_PADDING) };
     SkRRect bottomClipLayer =
         SkRRect::MakeRectXY(bottomClipRect, NormalizeToPx(THICKNESS) / 2.0, NormalizeToPx(THICKNESS) / 2.0);
-    canvas.GetSkCanvas()->clipRRect(bottomClipLayer, SkClipOp::kIntersect, true);
-    flutter::Paint paint;
-    flutter::PaintData paintData;
-    paint.paint()->setColor(backgroundColor_.GetValue());
-    canvas->drawRect(topX, topY, topX + NormalizeToPx(THICKNESS),
-        topY + GetLayoutSize().Height() - 2.0 * NormalizeToPx(DEFAULT_PADDING), paint, paintData);
-    paint.paint()->setColor(selectColor_.GetValue());
+    canvas->clipRRect(bottomClipLayer, SkClipOp::kIntersect, true);
+    SkPaint paint;
+    paint.setColor(backgroundColor_.GetValue());
+    canvas->drawRect({topX, topY, topX + NormalizeToPx(THICKNESS),
+        topY + GetLayoutSize().Height() - 2.0 * NormalizeToPx(DEFAULT_PADDING)},paint);
+    paint.setColor(selectColor_.GetValue());
     double maxRegion = 0.0;
     if (!NearEqual(max_, min_)) {
         maxRegion =
             (GetLayoutSize().Height() - 2.0 * NormalizeToPx(DEFAULT_PADDING)) * ((max_ - value_) / (max_ - min_));
     }
-    canvas->drawRect(topX, topY + maxRegion, topX + NormalizeToPx(THICKNESS),
-        topY + GetLayoutSize().Height() - 2.0 * NormalizeToPx(DEFAULT_PADDING), paint, paintData);
+    canvas->drawRect({topX, topY + maxRegion, topX + NormalizeToPx(THICKNESS),
+        topY + GetLayoutSize().Height() - 2.0 * NormalizeToPx(DEFAULT_PADDING)}, paint);
     double trackLength = GetLayoutSize().Height() - 2.0 * NormalizeToPx(DEFAULT_PADDING);
     if (!isContinuous_) {
-        paint.paint()->setColor(Color::BLACK.GetValue());
+        paint.setColor(Color::BLACK.GetValue());
         // equally divided track into three pieces. each block takes 1/4
-        canvas->drawRect(topX, topY + trackLength * 0.25, topX + NormalizeToPx(THICKNESS),
-            topY + trackLength * 0.25 + 2.0, paint, paintData);
-        canvas->drawRect(topX, topY + trackLength * 0.5, topX + NormalizeToPx(THICKNESS),
-            topY + trackLength * 0.5 + 2.0, paint, paintData);
-        canvas->drawRect(topX, topY + trackLength * 0.75, topX + NormalizeToPx(THICKNESS),
-            topY + trackLength * 0.75 + 2.0, paint, paintData);
+        canvas->drawRect({topX, topY + trackLength * 0.25, topX + NormalizeToPx(THICKNESS),
+            topY + trackLength * 0.25 + 2.0}, paint);
+        canvas->drawRect({topX, topY + trackLength * 0.5, topX + NormalizeToPx(THICKNESS),
+            topY + trackLength * 0.5 + 2.0}, paint);
+        canvas->drawRect({topX, topY + trackLength * 0.75, topX + NormalizeToPx(THICKNESS),
+            topY + trackLength * 0.75 + 2.0}, paint);
     }
-
     bottomIcon_->RenderWithContext(context, bottomIconPosition_);
     topIcon_->RenderWithContext(context, topIconPosition_);
 }
-
 } // namespace OHOS::Ace
