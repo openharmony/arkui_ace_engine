@@ -136,11 +136,20 @@ void RenderDialogTween::Update(const RefPtr<Component>& component)
     if (dialog->IsMenu()) {
         auto menuSuccessId = dialog->GetMenuSuccessId();
         for (size_t index = 0; index < menuSuccessId.size(); ++index) {
-            BackEndEventManager<void()>::GetInstance().BindBackendEvent(
-                menuSuccessId[index], [weak = WeakClaim(this), index]() {
+            const auto context = GetContext().Upgrade();
+            if (context && context->GetIsDeclarative()) {
+                BackEndEventManager<void(const ClickInfo&)>::GetInstance().BindBackendEvent(
+                    menuSuccessId[index], [weak = WeakClaim(this), index](const ClickInfo& info) {
                     auto dialog = weak.Upgrade();
                     dialog->CallOnSuccess(index);
                 });
+            } else {
+                BackEndEventManager<void()>::GetInstance().BindBackendEvent(
+                    menuSuccessId[index], [weak = WeakClaim(this), index]() {
+                    auto dialog = weak.Upgrade();
+                    dialog->CallOnSuccess(index);
+                });
+            }
         }
     }
     BindButtonEvent(dialog);

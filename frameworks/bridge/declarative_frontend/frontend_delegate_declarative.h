@@ -152,13 +152,12 @@ public:
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) override;
 
-    void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) override {}
+    void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) override;
 
-    void DisableAlertBeforeBackPage() override {}
+    void DisableAlertBeforeBackPage() override;
 
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
-        std::function<void(int32_t, int32_t)>&& callback) override
-    {}
+        std::function<void(int32_t, int32_t)>&& callback) override;
 
     Rect GetBoundingRectData(NodeId nodeId) override;
 
@@ -284,6 +283,8 @@ private:
     bool isRouteStackFull_ = false;
     bool isStagingPageExist_ = false;
     std::string mainPagePath_;
+    std::string backUri_;
+    std::string backParam_;
     std::vector<PageInfo> pageRouteStack_;
     std::unordered_map<int32_t, RefPtr<JsAcePage>> pageMap_;
     std::unordered_map<int32_t, std::string> pageParamMap_;
