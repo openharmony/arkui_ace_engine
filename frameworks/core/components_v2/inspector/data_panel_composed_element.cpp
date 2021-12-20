@@ -27,7 +27,8 @@ namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const DataPanelComposedElement&)>> CREATE_JSON_MAP {
     { "max", [](const DataPanelComposedElement& inspector) { return inspector.GetMax(); } },
-    { "closeEffect", [](const DataPanelComposedElement& inspector) { return inspector.GetCloseEffect(); } }
+    { "closeEffect", [](const DataPanelComposedElement& inspector) { return inspector.GetCloseEffect(); } },
+    { "type", [](const DataPanelComposedElement& inspector) { return inspector.GetDataPanelType(); } }
 };
 
 using JsonFuncType = std::function<std::unique_ptr<JsonValue>(const DataPanelComposedElement&)>;
@@ -42,6 +43,7 @@ void DataPanelComposedElement::Dump()
     InspectorComposedElement::Dump();
     DumpLog::GetInstance().AddDesc(std::string("max: ").append(GetMax()));
     DumpLog::GetInstance().AddDesc(std::string("closeEffect: ").append(GetCloseEffect()));
+    DumpLog::GetInstance().AddDesc(std::string("type: ").append(GetDataPanelType()));
 }
 
 std::unique_ptr<JsonValue> DataPanelComposedElement::ToJsonObject() const
@@ -88,6 +90,18 @@ std::string DataPanelComposedElement::GetCloseEffect() const
         return ConvertBoolToString(render->GetCloseEffect());
     }
     return "";
+}
+
+std::string DataPanelComposedElement::GetDataPanelType() const
+{
+    auto render = GetRenderPercentageDataPanel();
+    if (render) {
+        auto panelType = render->GetDataPanelType();
+        if (panelType == ChartType::LINE) {
+            return "DataPanelType.Line";
+        }
+    }
+    return "DataPanelType.Circle";
 }
 
 RefPtr<RenderPercentageDataPanel> DataPanelComposedElement::GetRenderPercentageDataPanel() const
