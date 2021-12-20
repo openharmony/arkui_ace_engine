@@ -12,8 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "core/components/multimodal/flutter_render_multimodal.h"
+#include "core/components/multimodal/rosen_render_multimodal.h"
 
 #include <cstdint>
 
@@ -21,25 +20,27 @@
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
 
+#include "third_party/skia/include/core/SkPaint.h"
+#include "third_party/skia/include/core/SkPoint.h"
+#include "third_party/skia/include/core/SkRRect.h"
+
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
-#include "core/components/calendar/flutter_render_calendar.h"
+#include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/flutter_font_collection.h"
-#include "core/pipeline/base/scoped_canvas_state.h"
+#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr double DEFAULT_SIZE = 20.0;
 constexpr double LIMIT_WIDTH = 18.0;
 constexpr double CORNER_RADIUS = 8.0;
 constexpr double FONT_SIZE = 14;
 const char ELLIPSIS[] = "...";
-
 } // namespace
 
-void FlutterRenderMultimodal::Paint(RenderContext& context, const Offset& offset)
+void RosenRenderMultimodal::Paint(RenderContext& context, const Offset& offset)
 {
     RenderNode::Paint(context, offset);
 
@@ -47,14 +48,9 @@ void FlutterRenderMultimodal::Paint(RenderContext& context, const Offset& offset
         return;
     }
 
-    auto canvas = ScopedCanvas::Create(context);
-    if (!canvas) {
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (canvas == nullptr) {
         LOGE("Paint canvas is null");
-        return;
-    }
-    SkCanvas* skCanvas = canvas->canvas();
-    if (skCanvas == nullptr) {
-        LOGE("skCanvas fetch failed");
         return;
     }
 
@@ -75,15 +71,15 @@ void FlutterRenderMultimodal::Paint(RenderContext& context, const Offset& offset
     SkVector radii[] = { { corner, corner }, { 0, 0 }, { corner, corner }, { 0, 0 } };
     SkRRect rrect;
     rrect.setRectRadii(SkRect::MakeXYWH(offset.GetX(), offset.GetY(), width, height), radii);
-    skCanvas->drawRRect(rrect, paint);
+    canvas->drawRRect(rrect, paint);
 
     auto leftOffset = paragraph_->GetLongestLine() / 2;
     auto centerX = offset.GetX() + width / 2;
     auto centerY = offset.GetY() + height / 2;
-    paragraph_->Paint(skCanvas, centerX - leftOffset, centerY - paragraph_->GetHeight() / 2);
+    paragraph_->Paint(canvas, centerX - leftOffset, centerY - paragraph_->GetHeight() / 2);
 }
 
-void FlutterRenderMultimodal::UpdateParagraph(const Offset& offset, const std::string& text)
+void RosenRenderMultimodal::UpdateParagraph(const Offset& offset, const std::string& text)
 {
     using namespace Constants;
     txt::ParagraphStyle style;
@@ -104,5 +100,4 @@ void FlutterRenderMultimodal::UpdateParagraph(const Offset& offset, const std::s
     builder->AddText(StringUtils::Str8ToStr16(text));
     paragraph_ = builder->Build();
 }
-
 } // namespace OHOS::Ace

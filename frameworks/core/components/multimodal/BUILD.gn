@@ -17,5 +17,7 @@ build_component("multimodal") {
   sources = [
     "flutter_render_multimodal.cpp",
     "render_multimodal.cpp",
+    "render_multimodal_creator.cpp",
   ]
+  rosen_sources = [ "rosen_render_multimodal.cpp" ]
 }
