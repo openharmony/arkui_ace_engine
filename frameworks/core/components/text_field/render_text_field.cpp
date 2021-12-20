@@ -173,7 +173,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     textDirection_ = textField->GetTextDirection();
     realTextDirection_ = textDirection_;
     showCursor_ = textField->ShowCursor();
-    obscure_ = textField->NeedObscure();
+    UpdateObscure(textField);
     enabled_ = textField->IsEnabled();
     widthReserved_ = textField->GetWidthReserved();
     blockRightShade_ = textField->GetBlockRightShade();
@@ -442,6 +442,7 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     Point clickPoint = Point(clickInfo.GetLocalLocation().GetX(), clickInfo.GetLocalLocation().GetY());
     if (showPasswordIcon_ && passwordIconRect_.IsInRegion(clickPoint)) {
         obscure_ = !obscure_;
+        passwordRecord_ = obscure_;
         PopTextOverlay();
         MarkNeedLayout();
         return;
@@ -926,6 +927,25 @@ std::u16string RenderTextField::GetTextForDisplay(const std::string& text) const
     }
 
     return obscured;
+}
+
+void RenderTextField::UpdateObscure(const RefPtr<TextFieldComponent>& textField)
+{
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        if (!passwordRecord_) {
+            if (keyboard_ != textField->GetTextInputType()) {
+                passwordRecord_ = true;
+                obscure_ = textField->NeedObscure();
+            } else {
+                obscure_ = !textField->NeedObscure();
+            }
+        } else {
+            obscure_ = textField->NeedObscure();
+        }
+    } else {
+        obscure_ = textField->NeedObscure();
+    }
 }
 
 void RenderTextField::UpdateFormatters()
