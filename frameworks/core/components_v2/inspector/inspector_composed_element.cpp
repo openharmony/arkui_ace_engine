@@ -94,6 +94,7 @@ const std::unordered_map<std::string, DoubleJsonFunc> CREATE_JSON_DOUBLE_MAP {
 const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
     { "visibility", [](const InspectorNode& inspector) { return inspector.GetVisibility(); } },
     { "alignSelf", [](const InspectorNode& inspector) { return inspector.GetAlignSelf(); } },
+    { "clip", [](const InspectorNode& inspector) { return inspector.GetClip(); } },
     { "constraintSize", [](const InspectorNode& inspector) { return inspector.GetConstraintSize(); } },
     { "borderColor", [](const InspectorNode& inspector) { return inspector.GetBorderColor(); } },
     { "borderStyle", [](const InspectorNode& inspector) { return inspector.GetBorderStyle(); } },
@@ -110,7 +111,6 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {
     { "enabled", [](const InspectorNode& inspector) { return inspector.GetEnabled(); } },
-    { "clip", [](const InspectorNode& inspector) { return inspector.GetClip(); } },
     { "clickable", [](const InspectorNode& inspector) { return inspector.GetClickable(); } },
     { "checkable", [](const InspectorNode& inspector) { return inspector.GetCheckable(); } },
     { "focusable", [](const InspectorNode& inspector) { return inspector.GetFocusable(); } },
@@ -859,23 +859,28 @@ std::string InspectorComposedElement::GetVisibility() const
     return VISIBLE_TYPE[static_cast<int32_t>(render->GetVisibleType())];
 }
 
-bool InspectorComposedElement::GetClip() const
+std::string InspectorComposedElement::GetClip() const
 {
     auto render = GetRenderBox();
     if (!render) {
-        return false;
+        return "false";
     }
     auto clipPath = render->GetClipPath();
+    auto jsonValue = JsonUtil::Create(false);
     if (clipPath && clipPath->GetBasicShape()) {
         int32_t shapeType = static_cast<int32_t>(clipPath->GetBasicShape()->GetBasicShapeType());
         int32_t size = static_cast<int32_t>(sizeof(BASIC_SHAPE_TYPE) / sizeof(BASIC_SHAPE_TYPE[0]));
         if (shapeType < size) {
-            return BASIC_SHAPE_TYPE[shapeType];
+            jsonValue->Put("shape", BASIC_SHAPE_TYPE[shapeType]);
         }
     } else {
-        return render->GetBoxClipFlag();
+        if (render->GetBoxClipFlag() == true) {
+            return "true";
+        } else {
+            return "false";
+        }
     }
-    return false;
+    return jsonValue->ToString();
 }
 
 bool InspectorComposedElement::GetEnabled() const
