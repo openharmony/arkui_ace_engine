@@ -534,7 +534,7 @@ void FlutterRenderPercentageDataPanel::PaintColorSegment(RenderContext& context,
     SkRect rect;
     SkRRect rRect;
     if (isStart && !isFull) {
-        rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue + xSegment, height + leftTop.GetY());
+        rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue, height + leftTop.GetY());
         rRect.setRectXY(SkRect::MakeWH(segmentValue + height / 2, height), height, height);
         rRect.offset(xSegment, leftTop.GetY());
     } else if (isFull && !isStart) {
@@ -545,7 +545,7 @@ void FlutterRenderPercentageDataPanel::PaintColorSegment(RenderContext& context,
         rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue + xSegment, height + leftTop.GetY());
         rRect.setRectXY(SkRect::MakeWH(segmentValue, height), height, height);
         rRect.offset(leftTop.GetX(), leftTop.GetY());
-    } else {
+    } else if (!isStart && !isFull) {
         rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue, height);
     }
     SkPoint segmentStartPoint;
@@ -567,17 +567,32 @@ void FlutterRenderPercentageDataPanel::PaintColorSegment(RenderContext& context,
 void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context, const Offset& offset)
 {
     auto totalWidth = GetLayoutSize().Width();
-    if (GetMaxValue() == 0) {
-        return;
-    }
     auto segment = GetSegments();
     auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
-    auto scaleMaxValue = (totalWidth - (double)(segment.size() - 1) * spaceWidth) / GetMaxValue();
+    auto segmentWidthSum = 0.0;
+    for (int i = 0; i < segment.size(); i++) {
+        segmentWidthSum += segment[i].GetValue();
+    }
+    auto segmentSize = 0.0;
+    if (segmentWidthSum == GetMaxValue()) {
+        segmentSize = (double)(segment.size() - 1);
+    } else {
+        segmentSize = (double)segment.size();
+    }
+    for (int i = 0; i < segment.size(); i++) {
+        if (segment[i].GetValue() == 0.0) {
+            segmentSize -= 1;
+        }
+    }
+    double scaleMaxValue = 0.0;
+    if (GetMaxValue() > 0) {
+        scaleMaxValue = (totalWidth - segmentSize * spaceWidth) / GetMaxValue();
+    }
     auto height = GetLayoutSize().Height();
     auto widthSegment = offset.GetX();
-    auto segmentWidthSum = 0.0;
     bool isStart = true;
     bool isFull = false;
+    auto valueSum = 0.0;
     PaintBackground(context, offset, totalWidth, height);
     for (int i = 0; i < segment.size(); i++) {
         if (i == 0 && segment[0].GetValue() == 0.0) {
@@ -591,8 +606,8 @@ void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& contex
         if (segmentWidth == 0.0) {
             continue;
         }
-        segmentWidthSum += segmentWidth;
-        if (segmentWidthSum == GetMaxValue()) {
+        valueSum += segmentWidth;
+        if (valueSum == GetMaxValue()) {
             isFull = true;
         } else {
             isFull = false;

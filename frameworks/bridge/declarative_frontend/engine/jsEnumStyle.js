@@ -39,7 +39,7 @@ var TextAlign;
 var DataPanelType;
 (function (DataPanelType) {
   DataPanelType[DataPanelType["Line"] = 0] = "Line";
-  DataPanelType[DataPanelType["Rainbow"] = 4] = "Rainbow";
+  DataPanelType[DataPanelType["Circle"] = 4] = "Circle";
 })(DataPanelType || (DataPanelType = {}));
 
 var FontWeight;

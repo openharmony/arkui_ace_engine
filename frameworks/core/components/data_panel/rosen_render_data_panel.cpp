@@ -547,12 +547,27 @@ void RosenRenderPercentageDataPanel::PaintColorSegment(RenderContext& context, c
 void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context, const Offset& offset)
 {
     auto totalWidth = GetLayoutSize().Width();
-    if (GetMaxValue() == 0) {
-        return;
-    }
     auto segment = GetSegments();
     auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
-    auto scaleMaxValue = (totalWidth - (double)(segment.size() - 1) * spaceWidth) / GetMaxValue();
+    auto segmentWidthSum = 0.0;
+    for (int i = 0; i < segment.size(); i++) {
+        segmentWidthSum += segment[i].GetValue();
+    }
+    auto segmentSize = 0.0;
+    if (segmentWidthSum == GetMaxValue()) {
+        segmentSize = (double)(segment.size() - 1);
+    } else {
+        segmentSize = (double)segment.size();
+    }
+    for (int i = 0; i < segment.size(); i++) {
+        if (segment[i].GetValue() == 0.0) {
+            segmentSize -= 1;
+        }
+    }
+    double scaleMaxValue = 0.0;
+    if (GetMaxValue() > 0) {
+        scaleMaxValue = (totalWidth - segmentSize * spaceWidth) / GetMaxValue();
+    }
     auto height = GetLayoutSize().Height();
     auto widthSegment = offset.GetX();
     PaintBackground(context, offset, totalWidth, height);
