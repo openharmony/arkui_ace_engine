@@ -13,25 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/components/tool_bar/flutter_render_tool_bar.h"
+#include "flutter_render_tool_bar.h"
+#include "rosen_render_tool_bar.h"
 
 namespace OHOS::Ace {
-
-using namespace Flutter;
-
-RenderLayer FlutterRenderToolBar::GetRenderLayer()
+RefPtr<RenderNode> RenderToolBar::Create()
 {
-    if (!layer_) {
-        layer_ = AceType::MakeRefPtr<ClipLayer>(
-            0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::HARD_EDGE);
+    if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        return AceType::MakeRefPtr<RosenRenderToolBar>();
+#else
+        return nullptr;
+#endif
+    } else {
+        return AceType::MakeRefPtr<FlutterRenderToolBar>();
     }
-    return AceType::RawPtr(layer_);
 }
-
-void FlutterRenderToolBar::Paint(RenderContext& context, const Offset& offset)
-{
-    layer_->SetClip(0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::HARD_EDGE);
-    RenderToolBar::Paint(context, offset);
-}
-
 } // namespace OHOS::Ace

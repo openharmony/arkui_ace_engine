@@ -13,30 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_FLUTTER_RENDER_TOOL_BAR_ITEM_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_FLUTTER_RENDER_TOOL_BAR_ITEM_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_ROSEN_RENDER_TOOL_BAR_ITEM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_ROSEN_RENDER_TOOL_BAR_ITEM_H
 
-#include "flutter/lib/ui/painting/canvas.h"
+#include "include/core/SkCanvas.h"
 #include "core/components/tool_bar/render_tool_bar_item.h"
-#include "core/pipeline/layers/clip_layer.h"
-#include "core/pipeline/layers/picture_layer.h"
 
 namespace OHOS::Ace {
-
-class FlutterRenderToolBarItem : public RenderToolBarItem {
-    DECLARE_ACE_TYPE(FlutterRenderToolBarItem, RenderToolBarItem);
+class RosenRenderToolBarItem : public RenderToolBarItem {
+    DECLARE_ACE_TYPE(RosenRenderToolBarItem, RenderToolBarItem);
 
 public:
-    RenderLayer GetRenderLayer() override;
     void Paint(RenderContext& context, const Offset& offset) override;
+    void Update(const RefPtr<Component>& component) override;
 
 private:
     void DrawFocus();
-    void DrawShape(flutter::Canvas& canvas, const Rect& paintRect, const Color& color, double radius);
-
-    RefPtr<Flutter::ClipLayer> clipLayer_;
+    void DrawShape(SkCanvas& canvas, const Rect& paintRect, const Color& color, double radius);
 };
-
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_FLUTTER_RENDER_TOOL_BAR_ITEM_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_ROSEN_RENDER_TOOL_BAR_ITEM_H

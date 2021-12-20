@@ -13,40 +13,37 @@
  * limitations under the License.
  */
 
-#include "core/components/tool_bar/flutter_render_tool_bar_item.h"
-
+#include "core/components/tool_bar/rosen_render_tool_bar_item.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
-
-#include "core/components/transform/flutter_render_transform.h"
-#include "core/pipeline/base/flutter_render_context.h"
+#include "frameworks/core/components/transform/rosen_render_transform.h"
+#include "core/pipeline/base/rosen_render_context.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace {
-
 // for focus
 constexpr Dimension TOOL_BAR_FOCUS_DEL_OFFSET = 4.0_vp;
 constexpr Dimension TOOL_BAR_FOCUS_DEL_SIZE = 8.0_vp;
 
-using namespace Flutter;
-
-RenderLayer FlutterRenderToolBarItem::GetRenderLayer()
+void RosenRenderToolBarItem::Update(const RefPtr<Component>& component)
 {
-    if (!clipLayer_) {
-        clipLayer_ = AceType::MakeRefPtr<ClipLayer>(
-            0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::HARD_EDGE);
+    RenderToolBarItem::Update(component);
+    auto rsNode = GetRSNode();
+    if (rsNode == nullptr) {
+        return;
     }
-    return AceType::RawPtr(clipLayer_);
+    rsNode->SetClipToFrame(true);
 }
 
-void FlutterRenderToolBarItem::Paint(RenderContext& context, const Offset& offset)
+
+void RosenRenderToolBarItem::Paint(RenderContext& context, const Offset& offset)
 {
     LOGD("ToolBarItem Paint");
-    clipLayer_->SetClip(0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::HARD_EDGE);
-    auto renderContext = AceType::DynamicCast<FlutterRenderContext>(&context);
+    auto renderContext = AceType::DynamicCast<RosenRenderContext>(&context);
     if (!renderContext) {
         LOGE("Render context is null");
         return;
     }
-    flutter::Canvas* canvas = renderContext->GetCanvas();
+    SkCanvas* canvas = renderContext->GetCanvas();
     if (canvas == nullptr) {
         LOGE("Paint canvas is null");
         return;
@@ -64,7 +61,7 @@ void FlutterRenderToolBarItem::Paint(RenderContext& context, const Offset& offse
     RenderToolBarItem::Paint(context, offset);
 }
 
-void FlutterRenderToolBarItem::DrawFocus()
+void RosenRenderToolBarItem::DrawFocus()
 {
     Offset offset =
         GetPosition() + Offset(NormalizeToPx(TOOL_BAR_FOCUS_DEL_OFFSET), NormalizeToPx(TOOL_BAR_FOCUS_DEL_OFFSET));
@@ -75,17 +72,15 @@ void FlutterRenderToolBarItem::DrawFocus()
     RequestFocusAnimation(globalOffset, Rect(offset, layoutSize), Radius(rrectRadius_));
 }
 
-void FlutterRenderToolBarItem::DrawShape(
-    flutter::Canvas& canvas, const Rect& paintRect, const Color& color, double radius)
+void RosenRenderToolBarItem::DrawShape(
+    SkCanvas& canvas, const Rect& paintRect, const Color& color, double radius)
 {
-    flutter::Paint paint;
-    flutter::RRect rRect;
-    flutter::PaintData paintData;
+    SkPaint paint;
+    SkRRect rRect;
 
-    paint.paint()->setColor(color.GetValue());
-    rRect.sk_rrect.setRectXY(SkRect::MakeIWH(paintRect.Width(), paintRect.Height()), radius, radius);
-    rRect.sk_rrect.offset(paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY());
-    canvas.drawRRect(rRect, paint, paintData);
+    paint.setColor(color.GetValue());
+    rRect.setRectXY(SkRect::MakeIWH(paintRect.Width(), paintRect.Height()), radius, radius);
+    rRect.offset(paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY());
+    canvas.drawRRect(rRect, paint);
 }
-
 } // namespace OHOS::Ace

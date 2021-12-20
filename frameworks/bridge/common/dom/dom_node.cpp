@@ -1197,10 +1197,6 @@ void DOMNode::SetCustomAnimationStyleUpdate(bool enable)
 void DOMNode::CompositeComponents()
 {
     std::vector<RefPtr<SingleChild>> components;
-    // Only fixed position has position component
-    if (positionComponent_ && GetPosition() == PositionType::FIXED) {
-        components.emplace_back(positionComponent_);
-    }
     if (flexItemComponent_) {
         // Update flex item after PrepareSpecializedComponent to make sure sub class has finished prepare.
         UpdateFlexItemComponent();
@@ -1259,6 +1255,11 @@ void DOMNode::CompositeComponents()
         Component::MergeRSNode(mainComponent);
     } else {
         Component::MergeRSNode(components, mainComponent);
+    }
+    // Only fixed position has position component
+    if (positionComponent_ && GetPosition() == PositionType::FIXED) {
+        components.emplace(components.begin(), positionComponent_);
+        Component::MergeRSNode(positionComponent_);
     }
 
     // First, composite all common components.

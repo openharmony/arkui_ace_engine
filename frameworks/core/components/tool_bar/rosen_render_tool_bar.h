@@ -13,26 +13,18 @@
  * limitations under the License.
  */
 
-#include "core/components/positioned/rosen_render_positioned.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_ROSEN_RENDER_TOOL_BAR_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_ROSEN_RENDER_TOOL_BAR_H
 
-#include "render_service_client/core/ui/rs_node.h"
+#include "core/components/tool_bar/render_tool_bar.h"
 
 namespace OHOS::Ace {
+class RosenRenderToolBar : public RenderToolBar {
+    DECLARE_ACE_TYPE(RosenRenderToolBar, RenderToolBar);
 
-void RosenRenderPositioned::Update(const RefPtr<Component>& component)
-{
-    RenderPositioned::Update(component);
-    auto context = context_.Upgrade();
-    auto rsNode = GetRSNode();
-    if (context && rsNode) {
-        auto dipScale = context->GetDipScale();
-        if(hasLeft_){
-            rsNode->SetFramePositionX(left_.ConvertToPx(dipScale));
-        }
-        if(hasTop_){
-            rsNode->SetFramePositionY(top_.ConvertToPx(dipScale));
-        }
-    }
-}
-
+public:
+    void Update(const RefPtr<Component>& component) override;
+};
 } // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_ROSEN_RENDER_TOOL_BAR_H
