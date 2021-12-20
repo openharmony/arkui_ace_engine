@@ -183,7 +183,8 @@ private:
 
     LayoutParam MakeStretchInnerLayoutParam(const RefPtr<RenderNode>& item) const;
     LayoutParam MakeLayoutParamWithLimit(double minMainLimit, double maxMainLimit, bool isStretch) const;
-    LayoutParam MakeConstrainedLayoutParam(double mainFlexExtent, const LayoutParam& constraint, bool isStretch) const;
+    LayoutParam MakeConstrainedLayoutParam(double mainFlexExtent, const LayoutParam& constraint, bool isStretch,
+        bool supportZerolayout = false) const;
 
     void ResizeByItem(const RefPtr<RenderNode>& item, double &allocatedSize);
     void CheckSizeValidity(const RefPtr<RenderNode>& item);
@@ -238,6 +239,7 @@ private:
     int32_t validSizeCount_ = 0;
     double totalFlexWeight_ = 0.0;
     int32_t maxDisplayIndex_ = 0;
+    bool useOldLayoutVersion_ = false;
 
     AlignDeclarationPtr alignPtr_ = nullptr;
 };
