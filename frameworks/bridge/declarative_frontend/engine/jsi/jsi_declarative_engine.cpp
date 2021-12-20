@@ -348,7 +348,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     if (debuggerMode) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    if (!runtime_->Initialize(libraryPath)) {
+    if (!runtime_->Initialize(libraryPath, isDebugMode_)) {
         LOGE("Js Engine initialize runtime failed");
         return false;
     }
@@ -739,7 +739,8 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     LOGI("JsiDeclarativeEngine Initialize");
     ACE_DCHECK(delegate);
     engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate, instanceId_);
-    bool result = engineInstance_->InitJsEnv(IsDebugVersion() && NeedDebugBreakPoint(), GetExtraNativeObject());
+    engineInstance_->SetDebugMode(NeedDebugBreakPoint());
+    bool result = engineInstance_->InitJsEnv(IsDebugVersion(), GetExtraNativeObject());
     if (!result) {
         LOGE("JsiDeclarativeEngine Initialize, init js env failed");
         return false;

@@ -53,6 +53,11 @@ public:
 
     void FlushCommandBuffer(void* context, const std::string& command) override;
 
+    void SetDebugMode(bool isDebugMode)
+    {
+        isDebugMode_ = isDebugMode;
+    }
+
     RefPtr<FrontendDelegate> GetDelegate() const
     {
         return frontendDelegate_;
@@ -78,6 +83,7 @@ private:
     RefPtr<FrontendDelegate> frontendDelegate_;
     int32_t instanceId_ = 0;
     mutable std::mutex mutex_;
+    bool isDebugMode_ = true;
 };
 
 class JsiEngine : public JsEngine {
