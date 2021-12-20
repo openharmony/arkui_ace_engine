@@ -24,6 +24,7 @@
 namespace OHOS::Ace::V2 {
 namespace {
 const std::unordered_map<std::string, std::function<std::string(const RadioComposedElement&)>> CREATE_JSON_MAP {
+    { "value", [](const RadioComposedElement& inspector) { return inspector.GetValue(); } },
     { "checked", [](const RadioComposedElement& inspector) { return inspector.GetChecked(); } }
 };
 }
@@ -31,6 +32,7 @@ const std::unordered_map<std::string, std::function<std::string(const RadioCompo
 void RadioComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
+    DumpLog::GetInstance().AddDesc(std::string("value: ").append(GetValue()));
     DumpLog::GetInstance().AddDesc(std::string("checked: ").append(GetChecked()));
 }
 
@@ -43,11 +45,22 @@ std::unique_ptr<JsonValue> RadioComposedElement::ToJsonObject() const
     return resultJson;
 }
 
+std::string RadioComposedElement::GetValue() const
+{
+    auto render = GetRenderRadio();
+    auto value = render ? render->GetRadioComponent()->GetGroupValue() : "";
+    auto group = render ? render->GetRadioComponent()->GetGroupName() : "";
+    auto resultJson = JsonUtil::Create(true);
+    resultJson->Put("value", value.c_str());
+    resultJson->Put("group", group.c_str());
+    return resultJson->ToString();
+}
+
 std::string RadioComposedElement::GetChecked() const
 {
     auto render = GetRenderRadio();
-    auto showLunar = render ? render->GetChecked() : false;
-    return ConvertBoolToString(showLunar);
+    auto checked = render ? render->GetChecked() : false;
+    return ConvertBoolToString(checked);
 }
 
 RefPtr<RenderRadio> RadioComposedElement::GetRenderRadio() const
