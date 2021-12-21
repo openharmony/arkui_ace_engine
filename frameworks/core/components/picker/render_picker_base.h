@@ -119,6 +119,7 @@ private:
     void HandleFinish(bool success);
     void HandleSwitch(bool checked);
     void HandleColumnChange(const std::string& tag, bool isAdd, uint32_t index, bool needNotify);
+    void OnDialogStatusChange(int32_t status);
 
     void GetRenders();
     void GetRenders(const RefPtr<RenderNode>& render);
@@ -143,13 +144,19 @@ private:
     void SetTriangleHandler();
     void HandleTriangleClick(bool value);
 
+    enum DialogStatus {
+        ACCEPT = 0,
+        CANCEL,
+        UPDATE,
+    };
+
     bool switchHandlerSetted_ = false;
     bool hasLayout_ = false;
 
     std::function<void()> onCancelCallback_;
     std::function<void(const std::string&)> onChangeCallback_;
     std::function<void(const std::string&)> onColumnChangeCallback_;
-
+    std::function<void(const std::string&)> onDialogResult_;
     RefPtr<RenderText> title_;
     RefPtr<RenderTriangle> triangle_;
     RefPtr<RenderDisplay> lunarDisplay_;

@@ -20,6 +20,7 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/common/rotation/rotation_controller.h"
+#include "core/components/dialog/dialog_component.h"
 #include "core/components/picker/picker_animation_controller.h"
 #include "core/components/picker/picker_column_component.h"
 #include "core/components/stack/stack_element.h"
@@ -84,7 +85,7 @@ public:
         week_ = value;
     }
 
-    std::string ToString(bool jsonFormat) const;
+    std::string ToString(bool jsonFormat, int32_t status = -1) const;
 
     uint32_t ToDays() const;
     void FromDays(uint32_t days);
@@ -132,7 +133,7 @@ public:
         second_ = value;
     }
 
-    std::string ToString(bool jsonFormat, bool hasSecond) const;
+    std::string ToString(bool jsonFormat, bool hasSecond, int32_t status = -1) const;
 
 private:
     uint32_t hour_ = 0;
@@ -167,7 +168,7 @@ public:
         time_ = value;
     }
 
-    std::string ToString(bool jsonFormat) const;
+    std::string ToString(bool jsonFormat, int32_t status = -1) const;
 
 private:
     PickerDate date_;
@@ -231,6 +232,15 @@ public:
         isDialog_ = value;
     }
 
+    bool GetIsCreateDialogComponent() const
+    {
+        return isCreateDialogComponent_;
+    }
+    void SetIsCreateDialogComponent(bool value)
+    {
+        isCreateDialogComponent_ = value;
+    }
+
     bool GetSubsidiary() const
     {
         return subsidiary_;
@@ -274,6 +284,15 @@ public:
     void SetOnCancel(const EventMarker& value)
     {
         onCancel_ = value;
+    }
+
+    const EventMarker& GetDialogResult() const
+    {
+        return OnDialogResult_;
+    }
+    void SetDialogResult(const EventMarker& value)
+    {
+        OnDialogResult_ = value;
     }
 
     void ClearColumns();
@@ -351,6 +370,8 @@ public:
 
     void ShowDialog(const RefPtr<StackElement>& stack, bool disableTouchEvent = true);
     bool HideDialog();
+    void OpenDialog(DialogProperties& properties);
+    void CloseDialog();
 
     bool IsDialogShowed()
     {
@@ -409,7 +430,8 @@ public:
 
     virtual void OnColumnsBuilding() {}
 
-    virtual std::string GetSelectedObject(bool isColumnChange, const std::string& changeColumnTag) const
+    virtual std::string GetSelectedObject(bool isColumnChange,
+        const std::string& changeColumnTag, int32_t status = -1) const
     {
         return "{}";
     }
@@ -499,6 +521,7 @@ private:
     bool subsidiary_ = false;
     bool masterHasLunar_ = false;
     bool needVibrate_ = true;
+    bool isCreateDialogComponent_ = false;
     int32_t nodeId_ = -1; // default of dialog's node id.
     // used for inspector node in PC preview
     int32_t pickerId_ = -1;
@@ -523,12 +546,14 @@ private:
     EventMarker onCancel_;
     EventMarker onOkClickId_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
     EventMarker onCancelClickId_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+    EventMarker OnDialogResult_;
 
     Dimension columnHeight_;
 
     RefPtr<RotationController> rotationController_;
 
     RefPtr<PickerAnimationController> animationController_;
+    RefPtr<DialogComponent> dialogComponent_;
 };
 
 } // namespace OHOS::Ace

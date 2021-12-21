@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
+#include "bridge/declarative_frontend/jsview/js_textpicker.h"
 
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/picker/picker_base_component.h"
 #include "core/components/picker/picker_text_component.h"
 #include "core/components/picker/picker_theme.h"
-#include "core/components/picker/render_picker_column.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -57,9 +58,6 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto getValue = paramObject->GetProperty("value");
     auto getSelected = paramObject->GetProperty("selected");
-    auto getLoop = paramObject->GetProperty("loop");
-    auto getStyle = paramObject->GetProperty("style");
-
     JSRef<JSArray> getRange = paramObject->GetProperty("range");
     std::vector<std::string> getRangeVector;
     if (!ParseJsStrArray(getRange, getRangeVector)) {
@@ -86,6 +84,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
     PickerText->SetRange(getRangeVector);
 
     PickerText->SetIsDialog(false);
+    PickerText->SetHasButtons(false);
 
     auto theme = GetTheme<PickerTheme>();
     if (!theme) {
@@ -136,4 +135,61 @@ void JSTextPicker::OnChange(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+void JSTextPickerDialog::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSTextPickerDialog>::Declare("TextPickerDialog");
+    JSClass<JSTextPickerDialog>::StaticMethod("show", &JSTextPickerDialog::Show);
+
+    JSClass<JSTextPickerDialog>::Bind<>(globalObj);
+}
+
+void JSTextPickerDialog::Show(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("TextPicker create error, info is non-valid");
+        return;
+    }
+
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto getValue = paramObject->GetProperty("value");
+    auto getSelected = paramObject->GetProperty("selected");
+    JSRef<JSArray> getRange = paramObject->GetProperty("range");
+    std::vector<std::string> getRangeVector;
+    if (!JSViewAbstract::ParseJsStrArray(getRange, getRangeVector)) {
+        LOGE("parse range failed");
+        return;
+    }
+
+    uint32_t selected = 0;
+    if (!JSViewAbstract::ParseJsInteger(getSelected, selected)) {
+        LOGE("parse selected value failed");
+    }
+
+    auto PickerText = AceType::MakeRefPtr<PickerTextComponent>();
+    if (!PickerText) {
+        LOGE("PickerText Component is null");
+        return;
+    }
+
+    PickerText->SetSelected(selected);
+    PickerText->SetRange(getRangeVector);
+    PickerText->SetIsDialog(false);
+    PickerText->SetIsCreateDialogComponent(true);
+    DialogProperties properties {};
+    properties.alignment = DialogAlignment::CENTER;
+    properties.customComponent = PickerText;
+
+    if (info[1]->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+        auto resultId =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                std::vector<std::string> keys = { "value", "index", "status"};
+                func->Execute(keys, info);
+            });
+        PickerText->SetDialogResult(resultId);
+    }
+
+    PickerText->OpenDialog(properties);
+}
 } // namespace OHOS::Ace::Framework

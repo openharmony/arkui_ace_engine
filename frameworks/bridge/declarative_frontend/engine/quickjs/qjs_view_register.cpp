@@ -636,6 +636,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSAnimator::JSBind(globalObj);
     JSText::JSBind(globalObj);
     JSDatePicker::JSBind(globalObj);
+    JSDatePickerDialog::JSBind(globalObj);
     JSSpan::JSBind(globalObj);
     JSButton::JSBind(globalObj);
     JSCanvas::JSBind(globalObj);
@@ -736,6 +737,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSGauge::JSBind(globalObj);
     JSHyperlink::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
+    JSTextPickerDialog::JSBind(globalObj);
 
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);

@@ -658,3 +658,10 @@ var Placement;
   Placement[Placement["BottomLeft"] = 6] = "BottomLeft";
   Placement[Placement["BottomRight"] = 7] = "BottomRight";
 }) (Placement || (Placement = {}));
+
+var DialogStatus;
+(function (DialogStatus) {
+  DialogStatus[DialogStatus["Accept"] = 0] = "Accept";
+  DialogStatus[DialogStatus["Cancel"] = 1] = "Cancel";
+  DialogStatus[DialogStatus["Update"] = 2] = "Update";
+})(DialogStatus || (DialogStatus = {}));
