@@ -122,7 +122,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     }
 
     events.x = item.GetLocalX();
-    events.y = item.GetLocalX();
+    events.y = item.GetLocalY();
     int32_t action = pointerEvent->GetPointerAction();
     GetMouseEventAction(action, events);
     int32_t button = pointerEvent->GetButtonId();
