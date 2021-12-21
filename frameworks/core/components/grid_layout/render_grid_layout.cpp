@@ -969,23 +969,24 @@ void RenderGridLayout::CreateDragDropRecognizer()
     dragDropGesture_ = AceType::MakeRefPtr<OHOS::Ace::SequencedRecognizer>(GetContext(), recognizers);
 }
 
-void RenderGridLayout::ActionStart(const RefPtr<ItemDragInfo>& info, RefPtr<Component> customComponent)
+void RenderGridLayout::ActionStart(const ItemDragInfo& info, RefPtr<Component> customComponent)
 {
     auto pipelineContext = GetContext().Upgrade();
     if (pipelineContext) {
         auto stackElement = pipelineContext->GetLastStack();
         auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(customComponent);
-        positionedComponent->SetTop(Dimension(info->GetY()));
-        positionedComponent->SetLeft(Dimension(info->GetX()));
+        positionedComponent->SetTop(Dimension(info.GetY()));
+        positionedComponent->SetLeft(Dimension(info.GetX()));
 
-        auto updatePosition = [renderGirdLayout = AceType::Claim(this)](
-                                  const std::function<void(const RefPtr<ItemDragInfo>& info)>& func) {
+        auto updatePosition = [renderGirdLayout = AceType::Claim(this)](const std::function<void(const Dimension&,
+            const Dimension&)>& func) {
             if (!renderGirdLayout) {
                 return;
             }
             renderGirdLayout->SetUpdatePositionId(func);
         };
-        positionedComponent->SetUpdatePositionFunc(updatePosition);
+
+        positionedComponent->SetUpdatePositionFuncId(updatePosition);
         stackElement->PushComponent(positionedComponent);
         stackElement->PerformBuild();
     }
@@ -999,17 +1000,14 @@ void RenderGridLayout::PanOnActionUpdate(const GestureEvent& info)
     }
     if (renderGirdLayout->GetUpdatePositionId()) {
         Point point = info.GetGlobalPoint();
-        RefPtr<ItemDragInfo> eventInfo = AceType::MakeRefPtr<ItemDragInfo>();
-        eventInfo->SetX(point.GetX());
-        eventInfo->SetY(point.GetY());
-        renderGirdLayout->GetUpdatePositionId()(eventInfo);
+        renderGirdLayout->GetUpdatePositionId()(Dimension(point.GetX()), Dimension(point.GetY()));
     }
-    RefPtr<ItemDragInfo> event = AceType::MakeRefPtr<ItemDragInfo>();
+    ItemDragInfo event;
     // MMIO could not provide correct point info when touch up, so keep the last point info
     lastGlobalPoint_.SetX(info.GetGlobalPoint().GetX());
     lastGlobalPoint_.SetY(info.GetGlobalPoint().GetY());
-    event->SetX(info.GetGlobalPoint().GetX());
-    event->SetY(info.GetGlobalPoint().GetY());
+    event.SetX(info.GetGlobalPoint().GetX());
+    event.SetY(info.GetGlobalPoint().GetY());
     auto targetRenderGrid = FindTargetRenderNode<RenderGridLayout>(GetContext().Upgrade(), info);
     auto preTargetRenderGrid = GetPreTargetRenderGrid();
     auto mainTargetRenderGrid = GetMainTargetRenderGrid();
@@ -1026,9 +1024,9 @@ void RenderGridLayout::PanOnActionUpdate(const GestureEvent& info)
     }
     if (preTargetRenderGrid) {
         if (itemLongPressed_) {
-            RefPtr<ItemDragInfo> eventLongPress = AceType::MakeRefPtr<ItemDragInfo>();
-            eventLongPress->SetX(lastLongPressPoint_.GetX());
-            eventLongPress->SetY(lastLongPressPoint_.GetY());
+            ItemDragInfo eventLongPress;
+            eventLongPress.SetX(lastLongPressPoint_.GetX());
+            eventLongPress.SetY(lastLongPressPoint_.GetY());
             mainTargetRenderGrid->OnDragMove(eventLongPress);
         }
         preTargetRenderGrid->OnDragLeave(event);
@@ -1051,10 +1049,10 @@ void RenderGridLayout::PanOnActionEnd(const GestureEvent& info)
         auto stackElement = pipelineContext->GetLastStack();
         stackElement->PopComponent();
     }
-    RefPtr<ItemDragInfo> event = AceType::MakeRefPtr<ItemDragInfo>();
+    ItemDragInfo event;
     // MMIO could not provide correct point info when touch up, so restore the last point info
-    event->SetX(lastGlobalPoint_.GetX());
-    event->SetY(lastGlobalPoint_.GetY());
+    event.SetX(lastGlobalPoint_.GetX());
+    event.SetY(lastGlobalPoint_.GetY());
     auto targetRenderGrid = GetPreTargetRenderGrid();
     auto mainTargetRenderGrid = GetMainTargetRenderGrid();
 
@@ -1072,22 +1070,7 @@ void RenderGridLayout::PanOnActionEnd(const GestureEvent& info)
     }
 }
 
-template<typename T>
-RefPtr<T> RenderGridLayout::FindTargetRenderNode(const RefPtr<PipelineContext> context, const GestureEvent& info)
-{
-    if (!context) {
-        return nullptr;
-    }
-
-    auto pageRenderNode = context->GetLastPageRender();
-    if (!pageRenderNode) {
-        return nullptr;
-    }
-
-    return pageRenderNode->FindChildNodeOfClass<T>(info.GetGlobalPoint(), info.GetGlobalPoint());
-}
-
-void RenderGridLayout::OnDragEnter(const RefPtr<ItemDragInfo>& info)
+void RenderGridLayout::OnDragEnter(const ItemDragInfo& info)
 {
     LOGD("%{public}s begin. itemDragStarted_ %{public}d, itemDragEntered_ %{public}d, itemLongPressed_ %{public}d, "
          "isInMainGrid_ %{public}d, isMainGrid_ %{public}d",
@@ -1122,7 +1105,7 @@ void RenderGridLayout::OnDragEnter(const RefPtr<ItemDragInfo>& info)
     }
 }
 
-void RenderGridLayout::OnDragLeave(const RefPtr<ItemDragInfo>& info)
+void RenderGridLayout::OnDragLeave(const ItemDragInfo& info)
 {
     LOGD("%{public}s begin. itemDragStarted_ %{public}d, itemDragEntered_ %{public}d, itemLongPressed_ %{public}d, "
          "isInMainGrid_ %{public}d, isMainGrid_ %{public}d",
@@ -1168,7 +1151,7 @@ void RenderGridLayout::OnDragLeave(const RefPtr<ItemDragInfo>& info)
     }
 }
 
-void RenderGridLayout::OnDragMove(const RefPtr<ItemDragInfo>& info)
+void RenderGridLayout::OnDragMove(const ItemDragInfo& info)
 {
     LOGD("%{public}s begin. itemDragStarted_ %{public}d, itemDragEntered_ %{public}d, itemLongPressed_ %{public}d, "
          "isInMainGrid_ %{public}d, isMainGrid_ %{public}d",
@@ -1219,7 +1202,7 @@ void RenderGridLayout::OnDragMove(const RefPtr<ItemDragInfo>& info)
     }
 }
 
-bool RenderGridLayout::ImpDropInGrid(const RefPtr<ItemDragInfo>& info)
+bool RenderGridLayout::ImpDropInGrid(const ItemDragInfo& info)
 {
     itemDragStarted_ = false;
     itemDragEntered_ = false;
@@ -1253,7 +1236,7 @@ bool RenderGridLayout::ImpDropInGrid(const RefPtr<ItemDragInfo>& info)
     return result;
 }
 
-bool RenderGridLayout::OnDrop(const RefPtr<ItemDragInfo>& info)
+bool RenderGridLayout::OnDrop(const ItemDragInfo& info)
 {
     LOGD("%{public}s begin. itemDragStarted_ %{public}d, itemDragEntered_ %{public}d, itemLongPressed_ %{public}d, "
          "isInMainGrid_ %{public}d, isMainGrid_ %{public}d",
@@ -1297,7 +1280,7 @@ bool RenderGridLayout::OnDrop(const RefPtr<ItemDragInfo>& info)
     return false;
 }
 
-void RenderGridLayout::ImpDragStart(const RefPtr<ItemDragInfo>& info)
+void RenderGridLayout::ImpDragStart(const ItemDragInfo& info)
 {
     itemDragStarted_ = true;
     itemLongPressed_ = false;
@@ -1317,7 +1300,7 @@ void RenderGridLayout::ImpDragStart(const RefPtr<ItemDragInfo>& info)
     }
 }
 
-void RenderGridLayout::OnCallSubDragEnter(const RefPtr<ItemDragInfo>& info)
+void RenderGridLayout::OnCallSubDragEnter(const ItemDragInfo& info)
 {
     auto subGrid = subGrid_.Upgrade();
     if (subGrid) {
@@ -1325,7 +1308,7 @@ void RenderGridLayout::OnCallSubDragEnter(const RefPtr<ItemDragInfo>& info)
     }
 }
 
-void RenderGridLayout::OnCallSubDragLeave(const RefPtr<ItemDragInfo>& info)
+void RenderGridLayout::OnCallSubDragLeave(const ItemDragInfo& info)
 {
     auto subGrid = subGrid_.Upgrade();
     if (subGrid) {
@@ -1487,12 +1470,12 @@ void RenderGridLayout::PerformLayoutForEditGrid()
     }
 }
 
-bool RenderGridLayout::CalDragCell(const RefPtr<ItemDragInfo>& info)
+bool RenderGridLayout::CalDragCell(const ItemDragInfo& info)
 {
     double gridPositonX = GetGlobalOffset().GetX();
     double gridPositonY = GetGlobalOffset().GetY();
-    double dragRelativelyX = info->GetX() - gridPositonX;
-    double dragRelativelyY = info->GetY() - gridPositonY;
+    double dragRelativelyX = info.GetX() - gridPositonX;
+    double dragRelativelyY = info.GetY() - gridPositonY;
     if (rightToLeft_) {
         dragRelativelyX = colSize_ - dragRelativelyX;
     }

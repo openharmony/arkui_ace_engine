@@ -37,7 +37,7 @@ constexpr int32_t DEFAULT_DISTANCE = 0;
 
 }; // namespace
 
-using OnItemDragFunc = std::function<void(const RefPtr<ItemDragInfo>& info)>;
+using OnItemDragFunc = std::function<void(const Dimension&, const Dimension&)>;
 class RenderGridLayout : public RenderNode {
     DECLARE_ACE_TYPE(RenderGridLayout, RenderNode);
 
@@ -158,9 +158,6 @@ protected:
 
     std::vector<double> ParseAutoFill(const std::vector<std::string>& strs, double size, double gap);
 
-    template<typename T>
-    RefPtr<T> FindTargetRenderNode(const RefPtr<PipelineContext> context, const GestureEvent& info);
-
     void SetPreTargetRenderGrid(const RefPtr<RenderGridLayout>& preTargetRenderGrid)
     {
         preTargetRenderGrid_ = preTargetRenderGrid;
@@ -195,18 +192,18 @@ protected:
     void CalIsVertical();
     void RegisterLongPressedForItems();
     void CreateDragDropRecognizer();
-    void ActionStart(const RefPtr<ItemDragInfo>& info, RefPtr<Component> customComponent);
+    void ActionStart(const ItemDragInfo& info, RefPtr<Component> customComponent);
     void PanOnActionUpdate(const GestureEvent& info);
     void PanOnActionEnd(const GestureEvent& info);
-    void OnDragEnter(const RefPtr<ItemDragInfo>& info);
-    void OnDragLeave(const RefPtr<ItemDragInfo>& info);
-    void OnDragMove(const RefPtr<ItemDragInfo>& info);
-    bool OnDrop(const RefPtr<ItemDragInfo>& info);
-    void ImpDragStart(const RefPtr<ItemDragInfo>& info);
-    bool ImpDropInGrid(const RefPtr<ItemDragInfo>& info);
+    void OnDragEnter(const ItemDragInfo& info);
+    void OnDragLeave(const ItemDragInfo& info);
+    void OnDragMove(const ItemDragInfo& info);
+    bool OnDrop(const ItemDragInfo& info);
+    void ImpDragStart(const ItemDragInfo& info);
+    bool ImpDropInGrid(const ItemDragInfo& info);
 
-    void OnCallSubDragEnter(const RefPtr<ItemDragInfo>& info);
-    void OnCallSubDragLeave(const RefPtr<ItemDragInfo>& info);
+    void OnCallSubDragEnter(const ItemDragInfo& info);
+    void OnCallSubDragLeave(const ItemDragInfo& info);
 
     // Check whether the item is currently allowed to be inserted
     bool CouldBeInserted();
@@ -219,7 +216,7 @@ protected:
     // dragLeave -1;dragEnter 1; none 0;
     void InitialDynamicGridProp(int32_t dragLeaveOrEnter = 0);
     void PerformLayoutForEditGrid();
-    bool CalDragCell(const RefPtr<ItemDragInfo>& info);
+    bool CalDragCell(const ItemDragInfo& info);
     bool CalDragRowIndex(double dragRelativelyY, int32_t& dragRowIndex);
     bool CalDragColumIndex(double dragRelativelyX, int32_t& dragColIndex);
     void MoveItems();

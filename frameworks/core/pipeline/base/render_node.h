@@ -884,8 +884,6 @@ public:
     {}
     virtual void OnPreDraw() {}
 
-    RefPtr<RenderNode> FindDropChild(const Point& globalPoint, const Point& parentLocalPoint);
-
     template<typename T>
     RefPtr<T> FindChildNodeOfClass(const Point& globalPoint, const Point& parentLocalPoint)
     {
@@ -922,6 +920,21 @@ public:
             }
         }
         return nullptr;
+    }
+
+    template<typename T>
+    RefPtr<T> FindTargetRenderNode(const RefPtr<PipelineContext> context, const GestureEvent& info)
+    {
+        if (!context) {
+            return nullptr;
+        }
+
+        auto pageRenderNode = context->GetLastPageRender();
+        if (!pageRenderNode) {
+            return nullptr;
+        }
+
+        return pageRenderNode->FindChildNodeOfClass<T>(info.GetGlobalPoint(), info.GetGlobalPoint());
     }
 
     void SaveExplicitAnimationOption(const AnimationOption& option);

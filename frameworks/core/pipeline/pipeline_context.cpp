@@ -2620,7 +2620,8 @@ bool PipelineContext::ProcessDragEvent(int action, double windowX, double window
     Point localPoint(windowX, windowY);
 
     if (action == DragEventAction::ACTION_DRAG_LOCATION) {
-        auto targetRenderBox = AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, localPoint));
+        auto targetRenderBox =
+            AceType::DynamicCast<RenderBox>(renderNode->FindChildNodeOfClass<RenderBox>(globalPoint, localPoint));
         auto preTargetRenderBox = AceType::DynamicCast<RenderBox>(GetPreTargetRenderNode());
 
         if (targetRenderBox == preTargetRenderBox) {
@@ -2639,7 +2640,8 @@ bool PipelineContext::ProcessDragEvent(int action, double windowX, double window
 
         return targetRenderBox ? true : false;
     } else if (action == DragEventAction::ACTION_DROP) {
-        auto targetRenderBox = AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, localPoint));
+        auto targetRenderBox =
+            AceType::DynamicCast<RenderBox>(renderNode->FindChildNodeOfClass<RenderBox>(globalPoint, localPoint));
 
         if (targetRenderBox && targetRenderBox->GetOnDrop()) {
             (targetRenderBox->GetOnDrop())(event);

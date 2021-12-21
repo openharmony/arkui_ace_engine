@@ -243,112 +243,132 @@ void JSGrid::CellLength(int32_t cellLength)
 
 void JSGrid::JsOnGridDragEnter(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsGridDragFunction> jsGridDragFunc =
-            AceType::MakeRefPtr<JsGridDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsGridDragFunc)](
-                                 const RefPtr<ItemDragInfo>& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->ExecuteDragEnter(info);
-        };
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
-        if (grid) {
-            grid->SetOnGridDragEnterId(onDragEnterId);
-        }
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onItemDragEnter event due to info is not function");
+        return;
     }
+
+    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onItemDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+                                const ItemDragInfo& dragInfo) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->ItemDragEnterExecute(dragInfo);
+    };
+    auto component = AceType::DynamicCast<GridLayoutComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
+        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<GridLayoutComponent>());
+        return;
+    }
+    component->SetOnGridDragEnterId(onItemDragEnterId);
 }
 
 void JSGrid::JsOnGridDragMove(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsGridDragFunction> jsGridDragFunc =
-            AceType::MakeRefPtr<JsGridDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsGridDragFunc)](
-                                const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->ExecuteDragMove(info, itemIndex, insertIndex);
-        };
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
-        if (grid) {
-            grid->SetOnGridDragMoveId(onDragMoveId);
-        }
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onItemDragMove event due to info is not function");
+        return;
     }
+
+    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onItemDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+                            const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->ItemDragMoveExecute(dragInfo, itemIndex, insertIndex);
+    };
+    auto component = AceType::DynamicCast<GridLayoutComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
+        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<GridLayoutComponent>());
+        return;
+    }
+    component->SetOnGridDragMoveId(onItemDragMoveId);
 }
 
 void JSGrid::JsOnGridDragLeave(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsGridDragFunction> jsGridDragFunc =
-            AceType::MakeRefPtr<JsGridDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsGridDragFunc)](
-                                 const RefPtr<ItemDragInfo>& info, int32_t itemIndex) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->ExecuteDragLeave(info, itemIndex);
-        };
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
-        if (grid) {
-            grid->SetOnGridDragLeaveId(onDragLeaveId);
-        }
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onItemDragLeave event due to info is not function");
+        return;
     }
+
+    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onItemDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+                                const ItemDragInfo& dragInfo, int32_t itemIndex) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->ItemDragLeaveExecute(dragInfo, itemIndex);
+    };
+    auto component = AceType::DynamicCast<GridLayoutComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
+        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<GridLayoutComponent>());
+        return;
+    }
+    component->SetOnGridDragLeaveId(onItemDragLeaveId);
 }
 
 void JSGrid::JsOnGridDragStart(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsGridDragFunction> jsGridDragFunc =
-            AceType::MakeRefPtr<JsGridDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsGridDragFunc)](
-                                 const RefPtr<ItemDragInfo>& info, int32_t itemIndex) -> RefPtr<Component> {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
-            auto ret = func->ExecuteDragStart(info, itemIndex);
-            if (!ret->IsObject()) {
-                LOGE("builder param is not an object.");
-                return nullptr;
-            }
-
-            auto builderObj = JSRef<JSObject>::Cast(ret);
-            auto builder = builderObj->GetProperty("builder");
-            if (!builder->IsFunction()) {
-                LOGE("builder param is not a function.");
-                return nullptr;
-            }
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(builder));
-            if (!builderFunc) {
-                LOGE("builderfunc is null.");
-                return nullptr;
-            }
-            ScopedViewStackProcessor builderViewStackProcessor;
-            builderFunc->Execute();
-            RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
-            return customComponent;
-        };
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
-        if (grid) {
-            grid->SetOnGridDragStartId(onDragStartId);
-        }
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onItemDragStart event due to info is not function");
+        return;
     }
+
+    RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onItemDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFunc)](
+                        const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<Component> {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+        auto ret = func->ItemDragStartExecute(dragInfo, itemIndex);
+        if (!ret->IsObject()) {
+            LOGE("builder param is not an object.");
+            return nullptr;
+        }
+
+        auto builderObj = JSRef<JSObject>::Cast(ret);
+        auto builder = builderObj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            LOGE("builder param is not a function.");
+            return nullptr;
+        }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        if (!builderFunc) {
+            LOGE("builder function is null.");
+            return nullptr;
+        }
+        // use another VSP instance while executing the builder function
+        ScopedViewStackProcessor builderViewStackProcessor;
+        builderFunc->Execute();
+        RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
+        if (!customComponent) {
+            LOGE("Custom component is null.");
+            return nullptr;
+        }
+        return customComponent;
+    };
+    auto component = AceType::DynamicCast<GridLayoutComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
+        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<GridLayoutComponent>());
+        return;
+    }
+    component->SetOnGridDragStartId(onItemDragStartId);
 }
 
 void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsGridDragFunction> jsGridDragFunc =
-            AceType::MakeRefPtr<JsGridDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsGridDragFunc)](
-                            const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->ExecuteDrop(info, itemIndex, insertIndex, isSuccess);
-        };
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
-        if (grid) {
-            grid->SetOnGridDropId(onDropId);
-        }
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onItemDrop event due to info is not function");
+        return;
     }
+
+    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onItemDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
+                        const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
+    };
+    auto component = AceType::DynamicCast<GridLayoutComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
+        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<GridLayoutComponent>());
+        return;
+    }
+    component->SetOnGridDropId(onItemDropId);
 }
 
 } // namespace OHOS::Ace::Framework

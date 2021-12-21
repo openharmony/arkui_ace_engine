@@ -26,13 +26,11 @@
 
 namespace OHOS::Ace {
 
-using OnGridDragEnterFunc = std::function<void(const RefPtr<ItemDragInfo>& info)>;
-using OnGridDragMoveFunc =
-    std::function<void(const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex)>;
-using OnGridDragLeaveFunc = std::function<void(const RefPtr<ItemDragInfo>& info, int32_t itemIndex)>;
-using OnGridDragStartFunc = std::function<RefPtr<Component>(const RefPtr<ItemDragInfo>& info, int32_t itemIndex)>;
-using OnGridDropFunc =
-    std::function<void(const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess)>;
+using OnGridDragEnterFunc = std::function<void(const ItemDragInfo&)>;
+using OnGridDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t)>;
+using OnGridDragLeaveFunc = std::function<void(const ItemDragInfo&, int32_t)>;
+using OnGridDragStartFunc = std::function<RefPtr<Component>(const ItemDragInfo&, int32_t)>;
+using OnGridDropFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>;
 
 class ACE_EXPORT GridLayoutComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(GridLayoutComponent, ComponentGroup);

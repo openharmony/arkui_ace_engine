@@ -333,7 +333,6 @@ private:
 
     void CreateDragDropRecognizer();
     RefPtr<RenderListItem> FindCurrentListItem(const Point& point);
-    RefPtr<RenderList> FindTargetRenderList(const RefPtr<PipelineContext> context, const GestureEvent& info);
 
     RefPtr<GestureRecognizer> dragDropGesture_;
     RefPtr<RenderList> preTargetRenderList_;

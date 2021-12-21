@@ -776,7 +776,6 @@ void JsRegisterViews(BindingTarget globalObj)
     JSShareData::JSBind(globalObj);
 
     JsDragFunction::JSBind(globalObj);
-    JsGridDragFunction::JSBind(globalObj);
 
     JSObjectTemplate mainAxisAlign;
     mainAxisAlign.Constant("Start", 1);

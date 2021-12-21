@@ -196,8 +196,6 @@ public:
         return onDrop_;
     }
 
-    RefPtr<RenderBox> FindTargetRenderBox(const RefPtr<PipelineContext> context, const GestureEvent& info);
-
     void AddRecognizerToResult(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& result);
 

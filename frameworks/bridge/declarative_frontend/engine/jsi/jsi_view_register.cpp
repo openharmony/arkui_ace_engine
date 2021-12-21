@@ -817,7 +817,6 @@ void JsRegisterViews(BindingTarget globalObj)
     JSGesture::JSBind(globalObj);
     JSPanGestureOption::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
-    JsGridDragFunction::JSBind(globalObj);
     JSCustomDialogController::JSBind(globalObj);
     JSShareData::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);

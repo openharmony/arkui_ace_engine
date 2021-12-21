@@ -187,7 +187,7 @@ void RenderBox::CreateDragDropRecognizer()
             if (!renderBox) {
                 return;
             }
-            auto targetRenderBox = renderBox->FindTargetRenderBox(context.Upgrade(), info);
+            auto targetRenderBox = renderBox->FindTargetRenderNode<RenderBox>(context.Upgrade(), info);
             auto preTargetRenderBox = renderBox->GetPreTargetRenderBox();
             if (preTargetRenderBox == targetRenderBox) {
                 if (targetRenderBox && targetRenderBox->GetOnDragMove()) {
@@ -216,7 +216,8 @@ void RenderBox::CreateDragDropRecognizer()
             if (!renderBox) {
                 return;
             }
-            ACE_DCHECK(renderBox->GetPreTargetRenderBox() == renderBox->FindTargetRenderBox(context.Upgrade(), info));
+            ACE_DCHECK(renderBox->GetPreTargetRenderBox() ==
+                renderBox->FindTargetRenderNode<RenderBox>(context.Upgrade(), info));
             auto targetRenderBox = renderBox->GetPreTargetRenderBox();
             if (!targetRenderBox) {
                 return;
@@ -264,24 +265,6 @@ void RenderBox::CreateDragDropRecognizer()
     std::vector<RefPtr<GestureRecognizer>> recognizers { longPressRecognizer, panRecognizer };
     dragDropGesture_ = AceType::MakeRefPtr<OHOS::Ace::SequencedRecognizer>(GetContext(), recognizers);
     dragDropGesture_->SetIsExternalGesture(true);
-}
-
-RefPtr<RenderBox> RenderBox::FindTargetRenderBox(const RefPtr<PipelineContext> context, const GestureEvent& info)
-{
-    if (!context) {
-        return nullptr;
-    }
-
-    auto pageRenderNode = context->GetLastPageRender();
-    if (!pageRenderNode) {
-        return nullptr;
-    }
-
-    auto targetRenderNode = pageRenderNode->FindDropChild(info.GetGlobalPoint(), info.GetGlobalPoint());
-    if (!targetRenderNode) {
-        return nullptr;
-    }
-    return AceType::DynamicCast<RenderBox>(targetRenderNode);
 }
 
 void RenderBox::UpdateBackDecoration(const RefPtr<Decoration>& newDecoration)
