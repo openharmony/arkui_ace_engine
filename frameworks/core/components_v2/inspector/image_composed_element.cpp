@@ -85,15 +85,51 @@ std::string ImageComposedElement::GetObjectFit() const
     auto renderImage = GetRenderImage();
     auto imageFit =
         renderImage ? renderImage->GetImageFit() : ImageFit::COVER;
-    return ConvertWrapImageFitToString(imageFit);
+    std::string result = "";
+    switch (imageFit) {
+        case ImageFit::COVER:
+            result = "ImageFit.Cover";
+            break;
+        case ImageFit::FILL:
+            result = "ImageFit.Fill";
+            break;
+        case ImageFit::CONTAIN:
+            result = "ImageFit.Contain";
+            break;
+        case ImageFit::NONE:
+            result = "ImageFit.None";
+            break;
+        case ImageFit::SCALEDOWN:
+            result = "ImageFit.ScaleDown";
+            break;
+        default:
+            LOGD("input do not match any ImageFit");
+    }
+    return result;
 }
 
 std::string ImageComposedElement::GetObjectRepeat() const
 {
     auto renderImage = GetRenderImage();
-    auto imageRepeat =
-        renderImage ? renderImage->GetImageRepeat() : ImageRepeat::NOREPEAT;
-    return ConvertWrapImageRepeatToString(imageRepeat);
+    auto imageRepeat = renderImage ? renderImage->GetImageRepeat() : ImageRepeat::NOREPEAT;
+    std::string result = "";
+    switch (imageRepeat) {
+        case ImageRepeat::NOREPEAT:
+            result = "ImageRepeat.NoRepeat";
+            break;
+        case ImageRepeat::REPEAT:
+            result = "ImageRepeat.XY";
+            break;
+        case ImageRepeat::REPEATX:
+            result = "ImageRepeat.X";
+            break;
+        case ImageRepeat::REPEATY:
+            result = "ImageRepeat.Y";
+            break;
+        default:
+            LOGD("input do not match any ImageRepeat");
+    }
+    return result;
 }
 
 std::string ImageComposedElement::GetInterpolation() const
