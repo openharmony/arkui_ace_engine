@@ -19,7 +19,7 @@
 #include <set>
 
 #ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_canvas_node.h"
 
 #include "core/animation/native_curve_helper.h"
 #endif
@@ -1906,7 +1906,7 @@ void RenderNode::MarkParentNeedRender() const
 std::shared_ptr<RSNode> RenderNode::CreateRSNode() const
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    return Rosen::RSNode::Create();
+    return Rosen::RSCanvasNode::Create();
 #else
     return nullptr;
 #endif

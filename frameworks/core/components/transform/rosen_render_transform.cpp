@@ -258,7 +258,7 @@ void RosenRenderTransform::OnRSTransition(TransitionType type, unsigned long lon
             }
         }
     }
-    Rosen::RSPropertyNode::NotifyTransition(effects, rsNodeId);
+    Rosen::RSNode::NotifyTransition(effects, rsNodeId);
 }
 
 void RosenRenderTransform::ClearRenderObject()
