@@ -41,7 +41,7 @@ Local<JSValueRef> FunctionCallback(EcmaVM *vm, Local<JSValueRef> thisValue,
     return package->Callback(thisValue, argument, length);
 }
 
-bool ArkJSRuntime::Initialize(const std::string &libraryPath)
+bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
 {
     RuntimeOption option;
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
@@ -51,6 +51,7 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath)
     option.SetLogBufPrint(print_);
     option.SetDebuggerLibraryPath(libraryPath);
     libPath_ = libraryPath;
+    isDebugMode_ = isDebugMode;
 
     vm_ = JSNApi::CreateJSVM(option);
     return vm_ != nullptr;
@@ -59,7 +60,7 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath)
 void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
-        JSNApi::DestoryJSVM(vm_);
+        JSNApi::DestroyJSVM(vm_);
         vm_ = nullptr;
     }
     for (auto data : dataList_) {
@@ -92,7 +93,7 @@ bool ArkJSRuntime::ExecuteJsBin(const std::string &fileName)
 {
     JSExecutionScope executionScope(vm_);
     if (debuggerOrder_ == 1 && !libPath_.empty()) {
-        JSNApi::StartDebugger(libPath_.c_str(), vm_);
+        JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_);
     }
     LocalScope scope(vm_);
     Local<StringRef> file = StringRef::NewFromUtf8(vm_, fileName.c_str());
