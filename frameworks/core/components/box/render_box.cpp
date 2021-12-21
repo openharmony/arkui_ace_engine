@@ -110,7 +110,6 @@ void RenderBox::Update(const RefPtr<Component>& component)
 
         auto gestures = box->GetGestures();
         UpdateGestureRecognizer(gestures);
-#ifdef USE_STATE_STYLE_UPDATER
         if (box->HasStateAttributeList()) {
             stateAttributeList_ = box->GetStateAttributeList();
         }
@@ -129,7 +128,6 @@ void RenderBox::Update(const RefPtr<Component>& component)
                 box->HandleTouchEvent(false);
             }
         });
-#endif
     }
     // In each update, the extensions will be updated with new one.
     if (eventExtensions_ && eventExtensions_->HasOnAreaChangeExtension()) {
@@ -140,7 +138,7 @@ void RenderBox::Update(const RefPtr<Component>& component)
         }
     }
 }
-#ifdef USE_STATE_STYLE_UPDATER
+
 void RenderBox::HandleTouchEvent(bool isTouchDown)
 {
     if (isTouchDown) {
@@ -149,7 +147,7 @@ void RenderBox::HandleTouchEvent(bool isTouchDown)
         OnStatusStyleChanged(StyleState::NORMAL);
     }
 }
-#endif
+
 void RenderBox::CreateDragDropRecognizer()
 {
     if (dragDropGesture_) {

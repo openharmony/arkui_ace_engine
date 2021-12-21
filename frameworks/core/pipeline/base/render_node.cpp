@@ -1907,7 +1907,6 @@ std::shared_ptr<RSNode> RenderNode::CreateRSNode() const
 #endif
 }
 
-#ifdef USE_STATE_STYLE_UPDATER
 void RenderNode::OnStatusStyleChanged(StyleState state)
 {
     LOGD("start %{public}s", AceType::TypeName(this));
@@ -1919,6 +1918,5 @@ void RenderNode::OnStatusStyleChanged(StyleState state)
         parent->OnStatusStyleChanged(state);
     }
 }
-#endif
 
 } // namespace OHOS::Ace

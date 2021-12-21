@@ -354,6 +354,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     if (debuggerMode) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
+
     if (!usingSharedRuntime && !runtime_->Initialize(libraryPath, isDebugMode_)) {
         LOGE("Js Engine initialize runtime failed");
         return false;

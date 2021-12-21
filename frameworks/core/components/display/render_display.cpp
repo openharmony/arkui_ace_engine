@@ -61,12 +61,10 @@ void RenderDisplay::Update(const RefPtr<Component>& component)
         animator_->Play();
     }
 
-#ifdef USE_STATE_STYLE_UPDATER
     if (display->HasStateAttributeList()) {
         stateAttributeList_ = display->GetStateAttributeList();
     }
     OnStatusStyleChanged(StyleState::NORMAL);
-#endif
     SetShadow(display->GetShadow());
     MarkNeedLayout();
 }

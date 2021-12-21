@@ -172,14 +172,10 @@ void RenderButton::HandleTouchEvent(bool isTouch)
 {
     isClicked_ = isTouch;
     if (isClicked_) {
-#ifdef USE_STATE_STYLE_UPDATER
         OnStatusStyleChanged(StyleState::PRESSED);
-#endif
         isMoveEventValid_ = true;
     } else {
-#ifdef USE_STATE_STYLE_UPDATER
         OnStatusStyleChanged(StyleState::NORMAL);
-#endif
     }
     if (isMoveEventValid_ || isWatch_) {
         PlayTouchAnimation();
@@ -200,9 +196,7 @@ void RenderButton::HandleMoveEvent(const TouchEventInfo& info)
     if ((moveDeltaX < 0 || moveDeltaX > buttonSize_.Width()) || (moveDeltaY < 0 || moveDeltaY > buttonSize_.Height())) {
         isClicked_ = false;
         MarkNeedRender();
-#ifdef USE_STATE_STYLE_UPDATER
         OnStatusStyleChanged(StyleState::NORMAL);
-#endif
         isMoveEventValid_ = false;
     }
 }
@@ -404,9 +398,7 @@ void RenderButton::Update(const RefPtr<Component>& component)
     SetAccessibilityText(button->GetAccessibilityText());
     UpdateDownloadStyles(button);
 
-#ifdef USE_STATE_STYLE_UPDATER
     OnStatusStyleChanged(disabled_ ? StyleState::DISABLED : StyleState::NORMAL);
-#endif
     MarkNeedLayout();
 }
 
@@ -752,7 +744,6 @@ void RenderButton::PlayFocusAnimation(bool isFocus)
     }
 }
 
-#ifdef USE_STATE_STYLE_UPDATER
 void RenderButton::OnStatusStyleChanged(StyleState state)
 {
     RenderNode::OnStatusStyleChanged(state);
@@ -814,5 +805,4 @@ void RenderButton::OnStatusStyleChanged(StyleState state)
         }
     }
 }
-#endif
 } // namespace OHOS::Ace
