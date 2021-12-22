@@ -21,6 +21,7 @@
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/box/box_element.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/coverage/render_coverage.h"
 #include "core/components/display/render_display.h"
 #include "core/components/flex/flex_item_element.h"
@@ -437,10 +438,14 @@ std::string InspectorComposedElement::GetConstraintSize() const
         layoutParam = render->GetConstraints();
     }
     auto jsonStr = JsonUtil::Create(false);
-    jsonStr->Put("minWidth", layoutParam.GetMinSize().Width());
-    jsonStr->Put("minHeight", layoutParam.GetMinSize().Height());
-    jsonStr->Put("maxWidth", layoutParam.GetMaxSize().Width());
-    jsonStr->Put("maxHeight", layoutParam.GetMaxSize().Height());
+    Dimension minWidth = Dimension(SystemProperties::Px2Vp(layoutParam.GetMinSize().Width()), DimensionUnit::VP);
+    Dimension minHeight = Dimension(SystemProperties::Px2Vp(layoutParam.GetMinSize().Height()), DimensionUnit::VP);
+    Dimension maxWidth = Dimension(SystemProperties::Px2Vp(layoutParam.GetMaxSize().Width()), DimensionUnit::VP);
+    Dimension maxHeight = Dimension(SystemProperties::Px2Vp(layoutParam.GetMaxSize().Height()), DimensionUnit::VP);
+    jsonStr->Put("minWidth", minWidth.ToString().c_str());
+    jsonStr->Put("minHeight", minHeight.ToString().c_str());
+    jsonStr->Put("maxWidth", maxWidth.ToString().c_str());
+    jsonStr->Put("maxHeight", maxHeight.ToString().c_str());
     return jsonStr->ToString();
 }
 
@@ -712,11 +717,20 @@ std::string InspectorComposedElement::GetBackgroundImage() const
     if (!image) {
         return "NONE";
     }
-    return image->GetSrc();
+    auto imageRepeat = image->GetImageRepeat();
+    if (imageRepeat == ImageRepeat::REPEATX) {
+        return image->GetSrc() + ", ImageRepeat.X";
+    } else if (imageRepeat == ImageRepeat::REPEATY) {
+        return image->GetSrc() + ", ImageRepeat.Y";
+    } else if (imageRepeat == ImageRepeat::REPEAT) {
+        return image->GetSrc() + ", ImageRepeat.XY";
+    }
+    return image->GetSrc() + ", ImageRepeat.NoRepeat";
 }
 
 std::string InspectorComposedElement::GetBackgroundColor() const
 {
+    auto jsonValue = JsonUtil::Create(false);
     auto backDecoration = GetBackDecoration();
     if (!backDecoration) {
         return "NONE";
@@ -750,10 +764,10 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetBackgroundImageSize() co
         return jsonValue->GetValue("width");
     }
 
-    auto width = image->GetImageSize().GetSizeValueX();
-    auto height = image->GetImageSize().GetSizeValueY();
-    jsonValue->Put("width", width);
-    jsonValue->Put("height", height);
+    Dimension width = Dimension((image->GetImageSize().GetSizeValueX()), DimensionUnit::VP);
+    Dimension height = Dimension((image->GetImageSize().GetSizeValueY()), DimensionUnit::VP);
+    jsonValue->Put("width", width.ToString().c_str());
+    jsonValue->Put("height", height.ToString().c_str());
     return jsonValue;
 }
 

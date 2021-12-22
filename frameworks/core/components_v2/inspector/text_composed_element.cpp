@@ -141,7 +141,7 @@ std::string TextComposedElement::GetTextFontSize() const
     auto renderText = GetRenderText();
     auto fontSize =
         renderText ? renderText->GetTextStyle().GetFontSize() : Dimension();
-    return std::to_string(static_cast<int32_t>(fontSize.Value()));
+    return fontSize.ToString();
 }
 
 std::string TextComposedElement::GetTextFontStyle() const
