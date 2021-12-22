@@ -87,7 +87,7 @@ std::string ListComposedElement::GetInitialIndex() const
     }
     auto renderList = AceType::DynamicCast<RenderList>(node);
     if (renderList) {
-        return std::to_string(renderList->GetStartIndex());
+        return std::to_string(renderList->GetIndex());
     }
     return "0";
 }
