@@ -178,7 +178,8 @@ void RenderIndexer::Update(const RefPtr<Component>& component)
     bubbleText_ = indexerComponent->GetBubbleTextComponent();
     focusedItem_ = indexerComponent->GetSelectedIndex();
     alignStyle_ = indexerComponent->GetAlignStyle();
-
+    color_ = indexerComponent->GetBubbleBackgroundColor();
+    valueArray_ = indexerComponent->GetArrayValue();
     // update item information
     auto context = GetContext().Upgrade();
     if (context) {

@@ -34,7 +34,9 @@ const std::unordered_map<std::string, std::function<std::string(const IndexerCom
     { "alignStyle", [](const IndexerComposedElement& inspector) { return inspector.GetAlignStyle(); } },
     { "selectedFont", [](const IndexerComposedElement& inspector) { return inspector.GetSelectedFont(); } },
     { "popupFont", [](const IndexerComposedElement& inspector) { return inspector.GetPopupFont(); } },
-    { "font", [](const IndexerComposedElement& inspector) { return inspector.GetFont(); } }
+    { "font", [](const IndexerComposedElement& inspector) { return inspector.GetFont(); } },
+    { "selected", [](const IndexerComposedElement& inspector) { return inspector.GetSelected(); } },
+    { "arrayValue", [](const IndexerComposedElement& inspector) { return inspector.GetArrayValue(); } }
 };
 
 const std::unordered_map<std::string, std::function<bool(const IndexerComposedElement&)>> CREATE_JSON_BOOL_MAP {
@@ -188,6 +190,37 @@ std::string IndexerComposedElement::GetFont() const
     return fontJson->ToString();
 }
 
+std::string IndexerComposedElement::GetSelected() const
+{
+    auto node = GetInspectorNode(IndexerElement::TypeId());
+    if (!node) {
+        return "";
+    }
+    auto render = AceType::DynamicCast<RenderIndexer>(node);
+    auto selected = render->GetFocusIndex();
+    return std::to_string(selected);
+}
+
+std::string IndexerComposedElement::GetArrayValue() const
+{
+    auto node = GetInspectorNode(IndexerElement::TypeId());
+    if (!node) {
+        return "";
+    }
+    auto render = AceType::DynamicCast<RenderIndexer>(node);
+    auto jsonValueArray = JsonUtil::CreateArray(true);
+    auto value = render->GetArrayValue();
+    int32_t length = value.size();
+    if (length <= 0) {
+        return "";
+    }
+    for (int32_t i = 0; i < length; i++) {
+        auto index = std::to_string(i);
+        jsonValueArray->Put(index.c_str(), value[i].c_str());
+    }
+    return jsonValueArray->ToString();
+}
+
 bool IndexerComposedElement::GetUsingPopup() const
 {
     auto node = GetInspectorNode(IndexerElement::TypeId());
@@ -204,13 +237,13 @@ std::string IndexerComposedElement::ConvertAlignStyleToString(AlignStyle alignSt
     std::string result = "";
     switch (alignStyle) {
         case AlignStyle::RIGHT:
-            result = "AlignStyle::RIGHT";
+            result = "AlignStyle.Right";
             break;
         case AlignStyle::LEFT:
-            result = "AlignStyle::LEFT";
+            result = "AlignStyle.Left";
             break;
         default:
-            result = "AlignStyle::RIGHT";
+            LOGD("input do not match any AlignStyle");
     }
     return result;
 }
