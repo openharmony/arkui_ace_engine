@@ -53,9 +53,15 @@ std::string ImageAnimatorComposedElement::GetStatus() const
 {
     auto element = GetContentElement<ImageAnimatorElement>(ImageAnimatorElement::TypeId());
     if (element) {
-        return std::to_string(static_cast<int32_t>(element->GetStatus()));
+        auto statusIndex = static_cast<int32_t>(element->GetStatus());
+        switch (statusIndex) {
+            case 1: return "AnimationStatus.Running";
+            case 2: return "AnimationStatus.Paused";
+            case 3: return "AnimationStatus.Stopped";
+            default: return "AnimationStatus.Initial";
+        }
     }
-    return "";
+    return "AnimationStatus.Initial";
 }
 
 std::string ImageAnimatorComposedElement::GetDuration() const
@@ -107,9 +113,15 @@ std::string ImageAnimatorComposedElement::GetFillMode() const
 {
     auto element = GetContentElement<ImageAnimatorElement>(ImageAnimatorElement::TypeId());
     if (element) {
-        return std::to_string(static_cast<int32_t>(element->GetFillMode()));
+        auto fillModeIndex = static_cast<int32_t>(element->GetFillMode());
+        switch (fillModeIndex) {
+            case 1: return "FillMode.Forwards";
+            case 2: return "FillMode.Backwards";
+            case 3: return "FillMode.Both";
+            default: return "FillMode.None";
+        }
     }
-    return "";
+    return "FillMode.None";
 }
 
 std::string ImageAnimatorComposedElement::GetImages() const
