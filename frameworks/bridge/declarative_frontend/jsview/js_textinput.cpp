@@ -160,6 +160,13 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     if (ParseJsString(paramObject->GetProperty("text"), text)) {
         textInputComponent->SetValue(text);
     }
+
+    auto controllerObj = paramObject->GetProperty("controller");
+    JSTextInputController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextInputController>();
+    if (jsController) {
+        jsController->SetController(textInputComponent->GetTextFieldController());
+    }
+
 }
 
 void JSTextInput::SetType(const JSCallbackInfo& info)
@@ -513,6 +520,36 @@ void JSTextInput::SetOnPaste(const JSCallbackInfo& info)
         LOGW("Failed(OnPaste) to bind event");
     }
     info.ReturnSelf();
+}
+
+void JSTextInputController::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSTextInputController>::Declare("TextInputController");
+    JSClass<JSTextInputController>::Method("caretPosition", &JSTextInputController::CaretPosition);
+    JSClass<JSTextInputController>::Bind(globalObj, JSTextInputController::Constructor,
+                                         JSTextInputController::Destructor);
+}
+
+void JSTextInputController::Constructor(const JSCallbackInfo& args)
+{
+    auto scroller = Referenced::MakeRefPtr<JSTextInputController>();
+    scroller->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(scroller));
+}
+
+void JSTextInputController::Destructor(JSTextInputController* scroller)
+{
+    if (scroller != nullptr) {
+        scroller->DecRefCount();
+    }
+}
+
+void JSTextInputController::CaretPosition(int32_t caretPosition)
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        controller->CaretPosition(caretPosition);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

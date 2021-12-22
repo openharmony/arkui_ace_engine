@@ -692,7 +692,9 @@ void JsRegisterViews(BindingTarget globalObj)
     JSDataPanel::JSBind(globalObj);
     JSBadge::JSBind(globalObj);
     JSTextArea::JSBind(globalObj);
+    JSTextAreaController::JSBind(globalObj);
     JSTextInput::JSBind(globalObj);
+    JSTextInputController::JSBind(globalObj);
     JSMarquee::JSBind(globalObj);
     JSSheet::JSBind(globalObj);
 #if defined(FORM_SUPPORTED)
@@ -701,6 +703,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSRect::JSBind(globalObj);
     JSShape::JSBind(globalObj);
     JSSearch::JSBind(globalObj);
+    JSSearchController::JSBind(globalObj);
     JSPath::JSBind(globalObj);
     JSCircle::JSBind(globalObj);
     JSLine::JSBind(globalObj);

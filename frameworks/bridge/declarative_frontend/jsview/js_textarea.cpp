@@ -148,6 +148,12 @@ void JSTextArea::Create(const JSCallbackInfo& info)
     if (ParseJsString(paramObject->GetProperty("text"), text)) {
         textAreaComponent->SetValue(text);
     }
+
+    auto controllerObj = paramObject->GetProperty("controller");
+    JSTextAreaController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextAreaController>();
+    if (jsController) {
+        jsController->SetController(textAreaComponent->GetTextFieldController());
+    }
 }
 
 void JSTextArea::SetPlaceholderColor(const JSCallbackInfo& info)
@@ -412,6 +418,35 @@ void JSTextArea::SetOnPaste(const JSCallbackInfo& info)
         LOGW("Failed(OnPaste) to bind event");
     }
     info.ReturnSelf();
+}
+
+void JSTextAreaController::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSTextAreaController>::Declare("TextAreaController");
+    JSClass<JSTextAreaController>::Method("caretPosition", &JSTextAreaController::CaretPosition);
+    JSClass<JSTextAreaController>::Bind(globalObj, JSTextAreaController::Constructor, JSTextAreaController::Destructor);
+}
+
+void JSTextAreaController::Constructor(const JSCallbackInfo& args)
+{
+    auto scroller = Referenced::MakeRefPtr<JSTextAreaController>();
+    scroller->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(scroller));
+}
+
+void JSTextAreaController::Destructor(JSTextAreaController* scroller)
+{
+    if (scroller != nullptr) {
+        scroller->DecRefCount();
+    }
+}
+
+void JSTextAreaController::CaretPosition(int32_t caretPosition)
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        controller->CaretPosition(caretPosition);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

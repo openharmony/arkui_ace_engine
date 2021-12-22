@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "frameworks/core/components/text_field/text_field_controller.h"
 
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTAREA_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTAREA_H
@@ -42,6 +43,25 @@ public:
 
 private:
     static void InitDefaultStyle();
+};
+
+class JSTextAreaController final : public Referenced {
+public:
+    JSTextAreaController() = default;
+    ~JSTextAreaController() override = default;
+
+    static void JSBind(BindingTarget globalObj);
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSTextAreaController* scroller);
+    void CaretPosition(int32_t caretPosition);
+    void SetController(const RefPtr<TextFieldController>& controller)
+    {
+        controller_ = controller;
+    }
+
+private:
+    WeakPtr<TextFieldController> controller_;
+    ACE_DISALLOW_COPY_AND_MOVE(JSTextAreaController);
 };
 
 } // namespace OHOS::Ace::Fremawork

@@ -212,6 +212,18 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         cursorColor_ = textField->GetCursorColor();
     }
     cursorRadius_ = textField->GetCursorRadius();
+    const auto& textFieldController = textField->GetTextFieldController();
+    if (textFieldController) {
+        auto weak = AceType::WeakClaim(this);
+        textFieldController->SetCaretPosition([weak](int32_t caretPosition) {
+            auto textField = weak.Upgrade();
+            if (textField) {
+                textField->UpdateSelection(caretPosition);
+                textField->cursorPositionType_ = CursorPositionType::NORMAL;
+                textField->MarkNeedLayout();
+            }
+        });
+    }
     if (textField->GetTextEditController() && controller_ != textField->GetTextEditController()) {
         if (controller_) {
             controller_->RemoveObserver(WeakClaim(this));

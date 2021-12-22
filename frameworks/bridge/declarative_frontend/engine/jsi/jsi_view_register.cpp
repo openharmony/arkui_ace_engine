@@ -683,9 +683,12 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind},
     { "VideoController", JSVideoController::JSBind },
     { "Search", JSSearch::JSBind },
+    { "SearchController", JSSearchController::JSBind },
     { "Sheet", JSSheet::JSBind },
     { "JSClipboard", JSClipboard::JSBind },
     { "TextTimer", JSTextTimer::JSBind },
+    { "TextAreaController", JSTextAreaController::JSBind },
+    { "TextInputController", JSTextInputController::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind }
 };
 
@@ -705,6 +708,9 @@ void RegisterAllModule(BindingTarget globalObj)
     JSRenderingContextSettings::JSBind(globalObj);
     JSAbilityComponentController::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
+    JSTextInputController::JSBind(globalObj);
+    JSTextAreaController::JSBind(globalObj);
+    JSSearchController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
         iter.second(globalObj);
@@ -732,6 +738,12 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         JSColumn::JSBind(globalObj);
     } else if ((*func).first == "TextTimer") {
         JSTextTimerController::JSBind(globalObj);
+    } else if ((*func).first == "TextInput") {
+        JSTextInputController::JSBind(globalObj);
+    } else if ((*func).first == "TextArea") {
+        JSTextAreaController::JSBind(globalObj);
+    } else if ((*func).first == "Search") {
+        JSSearchController::JSBind(globalObj);
     }
 
     (*func).second(globalObj);
