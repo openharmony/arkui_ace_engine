@@ -25,6 +25,14 @@
 namespace OHOS::Ace::V2 {
 namespace {
 
+// NONE translate to Solid
+const char* BORDER_STYLE[] = {
+    "BorderStyle.Solid",
+    "BorderStyle.Dashed",
+    "BorderStyle.Dotted",
+    "BorderStyle.Solid",
+};
+
 const std::unordered_map<std::string, std::function<std::string(const ImageComposedElement&)>> CREATE_JSON_MAP {
     { "uri", [](const ImageComposedElement& inspector) { return inspector.GetUri(); } },
     { "alt", [](const ImageComposedElement& inspector) { return inspector.GetAlt(); } },
@@ -120,6 +128,34 @@ std::string ImageComposedElement::GetsyncMode() const
         return "false";
     }
     return ConvertBoolToString(renderImage->GetImageSyncMode());
+}
+
+std::string ImageComposedElement::GetBorderStyle() const
+{
+    auto border = GetRenderImage()->GetImageComponentBorder();
+    int32_t style = static_cast<int32_t>(border.Left().GetBorderStyle());
+    return BORDER_STYLE[style];
+}
+
+std::string ImageComposedElement::GetBorderWidth() const
+{
+    auto border = GetRenderImage()->GetImageComponentBorder();
+    return border.Left().GetWidth().ToString();
+}
+
+std::string ImageComposedElement::GetBorderColor() const
+{
+    auto border = GetRenderImage()->GetImageComponentBorder();
+    return border.Left().GetColor().ColorToString();
+}
+
+std::string ImageComposedElement::GetBorderRadius() const
+{
+    auto radius = GetRenderImage()->GetImageComponentBorder().TopLeftRadius().GetX();
+    if (radius.Value() == 0.0) {
+        return "0.0vp";
+    }
+    return radius.ToString();
 }
 
 RefPtr<RenderImage> ImageComposedElement::GetRenderImage() const

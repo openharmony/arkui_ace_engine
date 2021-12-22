@@ -42,6 +42,11 @@ public:
     std::string GetSourceSize() const;
     std::string GetsyncMode() const;
 
+    std::string GetBorderStyle() const override;
+    std::string GetBorderWidth() const override;
+    std::string GetBorderColor() const override;
+    std::string GetBorderRadius() const override;
+
     AceType::IdType GetTargetTypeId() const override
     {
         return ImageElement::TypeId();
