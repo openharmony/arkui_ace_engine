@@ -342,6 +342,25 @@ template("ace_core_source_set") {
       deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
     }
 
+    if (defined(config.plugin_components_support) &&
+        config.plugin_components_support) {
+      if (!use_mingw_win && !use_mac) {
+        deps += [ "$ace_root/frameworks/core/components/plugin:ace_core_components_plugin_$platform" ]
+        deps += [ "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native" ]
+
+        external_deps = [
+          "aafwk_standard:base",
+          "aafwk_standard:want",
+          "appexecfwk_standard:appexecfwk_base",
+          "appexecfwk_standard:appexecfwk_core",
+          "appexecfwk_standard:libeventhandler",
+        ]
+      }
+    }
+    if (!use_mingw_win && !use_mac) {
+      sources += [ "common/plugin_manager.cpp" ]
+    }
+
     if (!is_wearable_product) {
       deps += [
         "$ace_root/frameworks/core/components/camera:ace_core_components_camera_$platform",

@@ -1375,6 +1375,16 @@ void PipelineContext::OnTouchEvent(const TouchPoint& point)
             touchRestrict.UpdateForbiddenType(TouchRestrict::LONG_PRESS);
         }
         eventManager_.TouchTest(scalePoint, rootElement_->GetRenderNode(), touchRestrict);
+
+        for (size_t i = 0; i < touchPluginPipelineContext_.size(); i++) {
+            auto pipelineContext = touchPluginPipelineContext_[i].Upgrade();
+            if (!pipelineContext || !pipelineContext->rootElement_) {
+                continue;
+            }
+            auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->pluginOffset_.GetX(),
+                pipelineContext->pluginOffset_.GetY(), point.id + (int32_t)i + 1);
+            pipelineContext->OnTouchEvent(pluginPoint);
+        }
     }
     if (scalePoint.type == TouchType::MOVE) {
         isMoving_ = true;
@@ -1383,6 +1393,18 @@ void PipelineContext::OnTouchEvent(const TouchPoint& point)
         SetIsKeyEvent(false);
     }
     eventManager_.DispatchTouchEvent(scalePoint);
+
+    if (scalePoint.type != TouchType::DOWN) {
+        for (size_t i = 0; i < touchPluginPipelineContext_.size(); i++) {
+            auto pipelineContext = touchPluginPipelineContext_[i].Upgrade();
+            if (!pipelineContext || !pipelineContext->rootElement_) {
+                continue;
+            }
+            auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->pluginOffset_.GetX(),
+                pipelineContext->pluginOffset_.GetY(), point.id + (int32_t)i + 1);
+            pipelineContext->eventManager_.DispatchTouchEvent(pluginPoint);
+        }
+    }
 }
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
@@ -1812,7 +1834,15 @@ void PipelineContext::SetRootRect(double width, double height) const
 void PipelineContext::SetRootBgColor(const Color& color)
 {
     rootBgColor_ = color;
+    if (!themeManager_) {
+        LOGE("PipelineContext::SetRootBgColor:themeManager_ is nullptr!");
+        return;
+    }
     auto appTheme = themeManager_->GetTheme<AppTheme>();
+    if (!appTheme) {
+        LOGE("GetTheme failed!");
+        return;
+    }
     appTheme->SetBackgroundColor(color);
     if (rootElement_) {
         auto renderRoot = DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
@@ -2059,6 +2089,7 @@ void PipelineContext::Destroy()
     themeManager_.Reset();
     sharedImageManager_.Reset();
     window_->Destroy();
+    touchPluginPipelineContext_.clear();
     LOGI("PipelineContext::Destroy end.");
 }
 
@@ -2628,6 +2659,10 @@ void PipelineContext::FlushWindowBlur()
         return;
     }
 
+    if (IsJsPlugin()) {
+        return;
+    }
+
     if (IsJsCard()) {
         if (!needWindowBlurRegionRefresh_) {
             return;
@@ -2897,7 +2932,7 @@ bool PipelineContext::GetIsDeclarative() const
 {
     RefPtr<Frontend> front = GetFrontend();
     if (front) {
-        return front->GetType() == FrontendType::DECLARATIVE_JS;
+        return (front->GetType() == FrontendType::DECLARATIVE_JS || front->GetType() == FrontendType::JS_PLUGIN);
     }
     return false;
 }
@@ -3049,6 +3084,22 @@ bool PipelineContext::IsVisibleChangeNodeExists(NodeId index) const
         return false;
     }
     return accessibilityManager->IsVisibleChangeNodeExists(index);
+}
+
+void PipelineContext::SetTouchPipeline(WeakPtr<PipelineContext> context)
+{
+    auto result = std::find(touchPluginPipelineContext_.begin(), touchPluginPipelineContext_.end(), context);
+    if (result == touchPluginPipelineContext_.end()) {
+        touchPluginPipelineContext_.emplace_back(context);
+    }
+}
+
+void PipelineContext::RemoveTouchPipeline(WeakPtr<PipelineContext> context)
+{
+    auto result = std::find(touchPluginPipelineContext_.begin(), touchPluginPipelineContext_.end(), context);
+    if (result != touchPluginPipelineContext_.end()) {
+        touchPluginPipelineContext_.erase(result);
+    }
 }
 
 void PipelineContext::PostAsyncEvent(TaskExecutor::Task&& task)

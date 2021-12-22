@@ -271,4 +271,46 @@ EventMarker JSInteractableView::GetEventMarker(const JSCallbackInfo& info, const
     return eventMarker;
 }
 
+void JSInteractableView::JsRemoteMessage(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0 || !info[0]->IsObject()) {
+        LOGE("plugincomponent construct param is empty or type is not Object.");
+        return;
+    }
+
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    // Parse action
+    auto actionValue = obj->GetProperty("action");
+    std::string action;
+    if (actionValue->IsString()) {
+        action = actionValue->ToString();
+    }
+    // Parse ability
+    auto abilityValue = obj->GetProperty("ability");
+    std::string ability;
+    if (abilityValue->IsString()) {
+        ability = abilityValue->ToString();
+    }
+    // Parse params
+    auto paramsObj = obj->GetProperty("params");
+    if (paramsObj->IsObject()) {
+        auto ability = paramsObj->ToString();
+    }
+
+    auto eventMarker = [action, ability, paramsObj]() {
+        if (action.compare("message") == 0) {
+            // onCall
+        } else if (action.compare("route") == 0) {
+            // onCreate
+        } else {
+            LOGE("action is error.");
+        }
+    };
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
+    tapGesture->SetOnActionId([eventMarker](const GestureEvent& info) {
+        eventMarker();
+    });
+    auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    click->SetOnClick(tapGesture);
+}
 } // namespace OHOS::Ace::Framework

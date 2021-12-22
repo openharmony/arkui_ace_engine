@@ -54,10 +54,12 @@ public:
     bool ExecuteOnBackPress();
     void ExecuteShow();
     void ExecuteHide();
+    void ExecuteUpdateWithValueParams(const std::string& jsonData);
 
     bool HasPageTransition() const;
 
     void ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo);
+    void ExecuteFunctionWithParams(JSWeak<JSFunc>& func, const char* debugInfo, const std::string& jsonData);
     JSRef<JSVal> ExecuteFunctionWithReturn(JSWeak<JSFunc>& func, const char* debugInfo);
 
     void SetContext(const JSExecutionContext& context)
@@ -81,6 +83,7 @@ private:
     JSWeak<JSFunc> jsOnHideFunc_;
     JSWeak<JSFunc> jsOnShowFunc_;
     JSWeak<JSFunc> jsBackPressFunc_;
+    JSWeak<JSFunc> jsUpdateWithValueParamsFunc_;
 
     JSExecutionContext context_;
 };
@@ -156,6 +159,11 @@ public:
     void SetContext(const JSExecutionContext& context)
     {
         jsViewFunction_->SetContext(context);
+    }
+
+    void ExecuteUpdateWithValueParams(const std::string& jsonData)
+    {
+        jsViewFunction_->ExecuteUpdateWithValueParams(jsonData);
     }
 
     /**

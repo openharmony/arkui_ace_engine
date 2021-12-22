@@ -37,9 +37,6 @@ void EventManager::TouchTest(
     const Point point { touchPoint.x, touchPoint.y };
     // For root node, the parent local point is the same as global point.
     renderNode->TouchTest(point, point, touchRestrict, hitTestResult);
-
-    LOGI("gesture hit test result size %{public}zu", hitTestResult.size());
-
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
 }
 

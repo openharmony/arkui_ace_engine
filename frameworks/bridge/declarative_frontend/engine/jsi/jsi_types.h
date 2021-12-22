@@ -128,6 +128,7 @@ public:
 
     JsiRef<JsiArray> GetPropertyNames() const;
     JsiRef<JsiValue> GetProperty(const char* prop) const;
+    JsiRef<JsiValue> ToJsonObject(const char* value) const;
 
     template<typename T>
     void SetProperty(const char* prop, const T value) const;

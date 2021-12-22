@@ -178,6 +178,15 @@ JsiRef<JsiValue> JsiObject::GetProperty(const char* prop) const
     return refValue;
 }
 
+JsiRef<JsiValue> JsiObject::ToJsonObject(const char* value) const
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto vm = runtime->GetEcmaVm();
+    auto valueRef = JsiValueConvertor::toJsiValue<std::string>(value);
+    auto refValue = JsiRef<JsiValue>::Make(JSON::Parse(vm, valueRef));
+    return refValue;
+}
+
 void JsiObject::SetPropertyJsonObject(const char* prop, const char* value) const
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());

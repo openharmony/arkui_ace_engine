@@ -648,6 +648,16 @@ public:
         return isJsCard_;
     }
 
+    void SetIsJsPlugin(bool isJsPlugin)
+    {
+        isJsPlugin_ = isJsPlugin;
+    }
+
+    bool IsJsPlugin() const
+    {
+        return isJsPlugin_;
+    }
+
     void RefreshRootBgColor() const;
     void AddToHoverList(const RefPtr<RenderNode>& node);
 
@@ -936,6 +946,19 @@ public:
         return isHoleValid_;
     }
 
+    void SetPluginOffset(const Offset& offset)
+    {
+        pluginOffset_ = offset;
+    }
+
+    Offset GetPluginOffset() const
+    {
+        return pluginOffset_;
+    }
+
+    void SetTouchPipeline(WeakPtr<PipelineContext> context);
+    void RemoveTouchPipeline(WeakPtr<PipelineContext> context);
+
     bool IsRebuildFinished() const
     {
         return isRebuildFinished_;
@@ -1113,6 +1136,7 @@ private:
     bool isKeyEvent_ = false;
     bool needWindowBlurRegionRefresh_ = false;
     bool isJsCard_ = false;
+    bool isJsPlugin_ = false;
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
     uint64_t flushAnimationTimestamp_ = 0;
@@ -1152,6 +1176,10 @@ private:
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
+
+    std::vector<WeakPtr<PipelineContext>> touchPluginPipelineContext_;
+    Offset pluginOffset_ {0, 0};
+
     bool isRebuildFinished_ = false;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
 

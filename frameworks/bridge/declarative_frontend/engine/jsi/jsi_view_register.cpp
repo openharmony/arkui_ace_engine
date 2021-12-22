@@ -82,6 +82,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
@@ -645,6 +646,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextInput", JSTextInput::JSBind },
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     { "QRCode", JSQRCode::JSBind },
+    { "PluginComponent", JSPlugin::JSBind },
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
 #endif

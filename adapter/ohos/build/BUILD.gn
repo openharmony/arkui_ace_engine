@@ -24,6 +24,8 @@ group("ace_packages") {
     "$ace_root/interfaces/innerkits/ace:ace_uicontent",
     "$ace_root/interfaces/napi/kits:napi_group",
     "$ace_root/interfaces/native:ace_packages_ndk",
+    "$ace_root/interfaces/innerkits:innerkits_target",
+    "$ace_root/services:services_target",
   ]
 
   # Engine and debugger

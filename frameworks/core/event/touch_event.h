@@ -77,6 +77,15 @@ struct TouchPoint final {
         }
         return { id, x / scale, y / scale, type, time, size, force, deviceId };
     }
+
+    TouchPoint UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const
+    {
+        if (NearZero(scale)) {
+            return { pointId, x- offsetX, y- offsetY, type, time, size, force, deviceId };
+        }
+        return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, type, time, size, force, deviceId };
+    }
+
 };
 
 class TouchCallBackInfo : public BaseEventInfo {

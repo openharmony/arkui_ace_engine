@@ -121,6 +121,7 @@
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_web.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
@@ -174,6 +175,14 @@ static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc,
     page->SetDeclarativeOnPageAppearCallback([view]() { view->FireOnShow(); });
     page->SetDeclarativeOnPageDisAppearCallback([view]() { view->FireOnHide(); });
     page->SetDeclarativeOnPageRefreshCallback([view]() { view->MarkNeedUpdate(); });
+
+    if (page->IsUsePluginComponent()) {
+        LOGI("Load Document UsePluginComponent");
+        if (!page->GetPluginComponentJsonData().empty()) {
+            view->ExecuteUpdateWithValueParams(page->GetPluginComponentJsonData());
+        }
+    }
+
     return JS_UNDEFINED;
 }
 
@@ -696,6 +705,9 @@ void JsRegisterViews(BindingTarget globalObj)
     JSTextInput::JSBind(globalObj);
     JSTextInputController::JSBind(globalObj);
     JSMarquee::JSBind(globalObj);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    JSPlugin::JSBind(globalObj);
+#endif
     JSSheet::JSBind(globalObj);
 #if defined(FORM_SUPPORTED)
     JSForm::JSBind(globalObj);

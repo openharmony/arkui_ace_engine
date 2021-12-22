@@ -178,6 +178,13 @@ QJSRef<QJSValue> QJSObject::GetProperty(const char* prop) const
     return QJSRef<QJSValue>::Make(JS_GetPropertyStr(QJSContext::Current(), GetHandle(), prop));
 }
 
+QJSRef<QJSValue> QJSObject::ToJsonObject(const char* value) const
+{
+    JSContext* ctx = QJSContext::Current();
+    JSValue jsonObj = JS_ParseJSON(ctx, value, strlen(value), "");
+    return QJSRef<QJSValue>::Make(jsonObj);
+}
+
 void QJSObject::SetPropertyJsonObject(const char* prop, const char* value) const
 {
     JSContext* ctx = QJSContext::Current();

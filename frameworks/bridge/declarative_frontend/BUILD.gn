@@ -243,6 +243,11 @@ template("declarative_js_engine") {
       sources += [ "jsview/js_form.cpp" ]
     }
 
+    if (defined(config.plugin_components_support) &&
+        config.plugin_components_support) {
+      sources += [ "jsview/js_plugin.cpp" ]
+    }
+
     if (defined(config.use_build_in_js_engine) &&
         config.use_build_in_js_engine) {
       deps += [ "$ace_root/frameworks/bridge:framework_bridge_$platform" ]

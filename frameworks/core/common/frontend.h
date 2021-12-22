@@ -43,7 +43,7 @@ struct WindowConfig {
     double designWidthScale = 0.0;
 };
 
-enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS };
+enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN };
 
 class ACE_EXPORT Frontend : public AceType {
     DECLARE_ACE_TYPE(Frontend, AceType);

@@ -31,6 +31,7 @@ template("framework_bridge") {
       "common:bridge_common_$platform",
       "common/accessibility:bridge_accessibility_$platform",
       "js_frontend:js_frontend_$platform",
+      "plugin_frontend:plugin_frontend_$platform",
     ]
 
     if (defined(config.js_pa_support) && config.js_pa_support) {

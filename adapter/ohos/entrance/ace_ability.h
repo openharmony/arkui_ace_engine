@@ -21,7 +21,7 @@
 
 #include "ability.h"
 #include "ability_loader.h"
-#include "touch_event.h"
+#include "core/event/touch_event.h"
 #include "want.h"
 #include "window.h"
 

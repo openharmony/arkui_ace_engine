@@ -42,10 +42,6 @@
 #include "core/pipeline/base/render_layer.h"
 #include "core/pipeline/pipeline_context.h"
 
-namespace OHOS::Rosen {
-class RSNode;
-}
-
 namespace OHOS::Ace {
 
 extern const Dimension FOCUS_BOUNDARY;

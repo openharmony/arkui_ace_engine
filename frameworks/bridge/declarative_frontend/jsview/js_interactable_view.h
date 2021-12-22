@@ -41,6 +41,7 @@ public:
 
     static void JsOnDelete(const JSCallbackInfo& info);
     static void JsOnAccessibility(const JSCallbackInfo& info);
+    static void JsRemoteMessage(const JSCallbackInfo& info);
 
     static void UpdateEventTarget(NodeId nodeId, BaseEventInfo& info);
 

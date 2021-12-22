@@ -15,6 +15,7 @@
 
 #include "core/pipeline/base/rosen_render_context.h"
 
+#include "core/components/plugin/render_plugin.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -45,7 +46,11 @@ void RosenRenderContext::Repaint(const RefPtr<RenderNode>& node)
     auto offset =
         node->GetTransitionPaintRect().GetOffset() -
         Offset(rsNode->GetStagingProperties().GetFramePositionX(), rsNode->GetStagingProperties().GetFramePositionY());
-    InitContext(rsNode, node->GetRectWithShadow(), offset);
+
+    std::string name = AceType::TypeName(node);
+    if (name != "RosenRenderForm" && name != "RosenRenderPlugin") {
+        InitContext(rsNode, node->GetRectWithShadow(), offset);
+    }
     node->RenderWithContext(*this, offset);
     StopRecordingIfNeeded();
 }
@@ -56,7 +61,7 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
         LOGD("Node is not need to paint");
         return;
     }
-
+    auto pipelineContext = child->GetContext().Upgrade();
     Rect rect = child->GetTransitionPaintRect() + offset;
     if (!child->IsPaintOutOfParent() && !estimatedRect_.IsIntersectWith(rect)) {
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
@@ -68,12 +73,32 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
     auto childRSNode = child->GetRSNode();
     if (childRSNode && childRSNode != rsNode_) {
         rsNode_->AddChild(childRSNode, -1);
-        if (child->NeedRender()) {
-            RosenRenderContext context;
-            context.Repaint(child);
-        } else {
-            // No need to repaint, notify to update AccessibilityNode info.
-            child->NotifyPaintFinish();
+        std::string name = AceType::TypeName(child);
+        if (name != "RosenRenderForm" && name != "RosenRenderPlugin") {
+            if (child->NeedRender()) {
+                RosenRenderContext context;
+                context.Repaint(child);
+            } else {
+                // No need to repaint, notify to update AccessibilityNode info.
+                child->NotifyPaintFinish();
+            }
+        }
+        Offset pos = rect.GetOffset();
+        if (name == "RosenRenderPlugin") {
+            auto renderPlugin = AceType::DynamicCast<RenderPlugin>(child);
+            if (!renderPlugin) {
+                return;
+            }
+            auto pluginContext = renderPlugin->GetPluginPipelineContext();
+            if (!pluginContext) {
+                return;
+            }
+            if (!pipelineContext) {
+                return;
+            }
+            auto density = pipelineContext->GetDensity();
+            Offset pluginOffset = {pos.GetX() / density, pos.GetY() / density};
+            pluginContext->SetPluginOffset(child->GetGlobalOffset());
         }
     } else {
         child->RenderWithContext(*this, rect.GetOffset());

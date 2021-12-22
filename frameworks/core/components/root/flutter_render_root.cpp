@@ -35,7 +35,7 @@ void FlutterRenderRoot::Paint(RenderContext& context, const Offset& offset)
     }
     auto skColor = SkColorSetARGB(bgColor_.GetAlpha(), bgColor_.GetRed(), bgColor_.GetGreen(), bgColor_.GetBlue());
     auto pipelineContext = GetContext().Upgrade();
-    if (pipelineContext && pipelineContext->IsJsCard()) {
+    if (pipelineContext && (pipelineContext->IsJsCard() || pipelineContext->IsJsPlugin())) {
         canvas->canvas()->drawColor(skColor);
     } else {
         canvas->canvas()->clear(skColor);

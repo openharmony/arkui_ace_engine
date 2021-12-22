@@ -121,6 +121,7 @@ public:
     void SetPropertyObject(const char* prop, QJSRef<QJSValue> value) const;
     QJSRef<QJSArray> GetPropertyNames() const;
     QJSRef<QJSValue> GetProperty(const char* prop) const;
+    QJSRef<QJSValue> ToJsonObject(const char* value) const;
 
     FAKE_PTR_FOR_FUNCTION_ACCESS(QJSObject)
     ENABLE_CAST_FROM_THIS(QJSObject)
