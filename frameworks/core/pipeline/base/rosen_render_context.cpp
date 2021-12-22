@@ -68,7 +68,6 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
     auto childRSNode = child->GetRSNode();
     if (childRSNode && childRSNode != rsNode_) {
         rsNode_->AddChild(childRSNode, -1);
-        StopRecordingIfNeeded();
         if (child->NeedRender()) {
             RosenRenderContext context;
             context.Repaint(child);
