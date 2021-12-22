@@ -64,7 +64,7 @@ private:
     static const std::string CONTINUE_PARAMS_KEY;
 
     int32_t abilityId_ = 0;
-    float density_ = 1.0f;
+    float density_ = 2.0f; // 2.0 for wgr, 3.0 for phone
     std::string remotePageUrl_;
     std::string remoteData_;
     std::string pageUrl_;
