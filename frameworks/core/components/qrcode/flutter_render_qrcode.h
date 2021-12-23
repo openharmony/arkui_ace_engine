@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_FLUTTER_RENDER_QRCODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_FLUTTER_RENDER_QRCODE_H
 
-#include "QrCode.hpp"
+#include "qrcodegen.hpp"
 
 #include "flutter/lib/ui/painting/canvas.h"
 
