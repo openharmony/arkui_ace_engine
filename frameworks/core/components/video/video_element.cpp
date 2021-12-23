@@ -64,6 +64,12 @@ const char* SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 constexpr int32_t WINDOW_HEIGHT_DEFAULT = 1;
 constexpr int32_t WINDOW_WIDTH_DEFAULT = 1;
+
+#ifdef ENABLE_ROSEN_BACKEND
+constexpr int32_t STATUS_BAR_HEIGHT = 110;
+constexpr int32_t VIDEO_DEFLATE_HEIGHT = 40;
+#endif
+
 #else
 constexpr float ILLEGAL_SPEED = 0.0f;
 #endif
@@ -420,6 +426,26 @@ void VideoElement::Prepare(const WeakPtr<Element>& parent)
         }
     }
     isElementPrepared_ = true;
+
+#ifdef ENABLE_ROSEN_BACKEND
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->AddPageTransitionListener([weak = AceType::WeakClaim(this)](const TransitionEvent& event,
+                                           const WeakPtr<PageElement>& in, const WeakPtr<PageElement>& out) {
+        auto video = weak.Upgrade();
+        if (!video) {
+            return;
+        }
+        if (event == TransitionEvent::POP_START) {
+            if (video->previewWindow_) {
+                video->previewWindow_->Hide();
+                video->previewWindow_->Destroy();
+            }
+        }
+    });
+#endif
 }
 
 void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
@@ -438,9 +464,17 @@ void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_
     }
     if (renderNode_) {
         Offset offset = renderNode_->GetGlobalOffset();
-        previewWindow_->MoveTo((int32_t)(offset.GetX() * viewScale), (int32_t)(offset.GetY() * viewScale));
+        previewWindow_->MoveTo(
+            (int32_t)(offset.GetX() * viewScale), (int32_t)((offset.GetY() + STATUS_BAR_HEIGHT) * viewScale));
     }
-    previewWindow_->Resize(textureWidth * viewScale, textureHeight * viewScale);
+    int32_t height = textureHeight;
+    if (needControls_ && theme_) {
+        height -= theme_->GetBtnSize().Height();
+        height -= theme_->GetBtnEdge().Top().Value();
+        height -= theme_->GetBtnEdge().Bottom().Value();
+        height -= VIDEO_DEFLATE_HEIGHT;
+    }
+    previewWindow_->Resize(textureWidth * viewScale, height * viewScale);
     if (!hidden_) {
         previewWindow_->Show();
     }
