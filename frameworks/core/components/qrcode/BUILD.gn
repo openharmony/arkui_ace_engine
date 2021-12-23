@@ -19,7 +19,7 @@ action("apply_patch") {
   visibility = [ ":*" ]
   script = "applypatch.sh"
   inputs = [ qrcodegen_src_dir ]
-  outputs = [ "$qrcodegen_dst_dir/QrCode.cpp" ]
+  outputs = [ "$qrcodegen_dst_dir/qrcodegen.cpp" ]
   args = [
     rebase_path(qrcodegen_src_dir, root_build_dir),
     rebase_path(qrcodegen_dst_dir, root_build_dir),
@@ -33,7 +33,7 @@ config("qrcodegen_config") {
 
 source_set("qrcodegen") {
   deps = [ ":apply_patch" ]
-  sources = [ "$qrcodegen_dst_dir/QrCode.cpp" ]
+  sources = [ "$qrcodegen_dst_dir/qrcodegen.cpp" ]
   cflags = [
     "-Wall",
     "-Wno-reorder",
