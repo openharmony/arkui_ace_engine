@@ -335,11 +335,10 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 {
     CHECK_RUN_ON(JS);
     ACE_SCOPED_TRACE("JsiDeclarativeEngineInstance::InitJsEnv");
-    bool usingSharedRuntime = false;
     if (runtime != nullptr) {
         LOGI("JsiDeclarativeEngineInstance InitJsEnv usingSharedRuntime");
         runtime_ = runtime;
-        usingSharedRuntime = true;
+        usingSharedRuntime_ = true;
     } else {
         LOGI("JsiDeclarativeEngineInstance InitJsEnv not usingSharedRuntime, create own");
         runtime_.reset(new ArkJSRuntime());
@@ -356,7 +355,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     if (debuggerMode) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    if (!usingSharedRuntime && !runtime_->Initialize(libraryPath, isDebugMode_)) {
+    if (!usingSharedRuntime_ && !runtime_->Initialize(libraryPath, isDebugMode_)) {
         LOGE("Js Engine initialize runtime failed");
         return false;
     }
@@ -418,13 +417,15 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
     shared_ptr<JsValue> global = runtime_->GetGlobal();
 
     // app log method
-    shared_ptr<JsValue> consoleObj = runtime_->NewObject();
-    consoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(AppDebugLogPrint));
-    consoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(AppDebugLogPrint));
-    consoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(AppInfoLogPrint));
-    consoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(AppWarnLogPrint));
-    consoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(AppErrorLogPrint));
-    global->SetProperty(runtime_, "console", consoleObj);
+    if (!usingSharedRuntime_) {
+        shared_ptr<JsValue> consoleObj = runtime_->NewObject();
+        consoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(AppDebugLogPrint));
+        consoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(AppDebugLogPrint));
+        consoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(AppInfoLogPrint));
+        consoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(AppWarnLogPrint));
+        consoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(AppErrorLogPrint));
+        global->SetProperty(runtime_, "console", consoleObj);
+    }
 
     // js framework log method
     shared_ptr<JsValue> aceConsoleObj = runtime_->NewObject();

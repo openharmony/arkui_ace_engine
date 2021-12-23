@@ -82,16 +82,32 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
     : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), aceAbility_(aceAbility)
 {
     ACE_DCHECK(callback);
+    InitializeTask();
+    platformEventCallback_ = std::move(callback);
+}
+
+AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AbilityRuntime::Context* context,
+                           std::unique_ptr<PlatformEventCallback> callback)
+    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), context_(context)
+{
+    ACE_DCHECK(callback);
+    InitializeTask();
+    platformEventCallback_ = std::move(callback);
+}
+
+void AceContainer::InitializeTask()
+{
     auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     flutterTaskExecutor->InitPlatformThread();
     taskExecutor_ = flutterTaskExecutor;
     // No need to create JS Thread for DECLARATIVE_JS
-    if (type_ != FrontendType::DECLARATIVE_JS) {
+    if (type_ == FrontendType::DECLARATIVE_JS) {
+        GetSettings().useUIAsJSThread = true;
+    } else {
         flutterTaskExecutor->InitJsThread();
         taskExecutor_->PostTask([id = instanceId_]() { Container::InitForThread(id); }, TaskExecutor::TaskType::JS);
     }
     SystemProperties::SetDeclarativeFrontend(type_ == FrontendType::DECLARATIVE_JS);
-    platformEventCallback_ = std::move(callback);
 }
 
 void AceContainer::Initialize()
@@ -153,7 +169,7 @@ void AceContainer::InitializeFrontend()
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
         auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary(isArkApp_));
         RefPtr<Framework::JsEngine> jsEngine;
-        if (GetSettings().UsingSharedRuntime()) {
+        if (GetSettings().usingSharedRuntime) {
             jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
             LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
         } else {
@@ -169,7 +185,10 @@ void AceContainer::InitializeFrontend()
         return;
     }
     ACE_DCHECK(frontend_);
-    std::shared_ptr<AppExecFwk::AbilityInfo> info = aceAbility_->GetAbilityInfo();
+    std::shared_ptr<AppExecFwk::AbilityInfo> info =
+        aceAbility_
+            ? aceAbility_->GetAbilityInfo()
+            : (context_ ? static_cast<OHOS::AbilityRuntime::AbilityContext*>(context_)->GetAbilityInfo() : nullptr);
     if (info && info->isLauncherAbility) {
         frontend_->DisallowPopLastPage();
     }

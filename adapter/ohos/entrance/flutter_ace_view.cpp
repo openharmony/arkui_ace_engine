@@ -148,7 +148,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
 
 } // namespace
 
-FlutterAceView* FlutterAceView::CreateView(int32_t instanceId)
+FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool usePlatfromThread)
 {
     FlutterAceView* aceSurface = new Platform::FlutterAceView(instanceId);
     flutter::Settings settings;
@@ -159,7 +159,9 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId)
 #else
     settings.enable_software_rendering = true;
 #endif
+    settings.platform_as_ui_thread = usePlatfromThread;
     LOGI("software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
+    LOGI("use platform as ui thread: %{public}s", settings.platform_as_ui_thread ? "true" : "false");
     settings.idle_notification_callback = [aceSurface](int64_t deadline) {
         if (aceSurface != nullptr) {
             aceSurface->ProcessIdleEvent(deadline);

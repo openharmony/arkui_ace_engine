@@ -21,6 +21,10 @@
 #include "ability_info.h"
 #include "init_data.h"
 
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_ui_director.h"
+#endif
+
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
@@ -66,6 +70,10 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
 {
     window_ = window;
     startUrl_ = url;
+    if (!window_) {
+        LOGE("Null window, can't initialize UI content");
+        return;
+    }
     if (!context_) {
         LOGE("Null ability, can't initialize UI content");
         return;
@@ -127,7 +135,7 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     // create container
     instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
     auto container = AceType::MakeRefPtr<Platform::AceContainer>(
-        instanceId_, FrontendType::DECLARATIVE_JS, true, nullptr, std::make_unique<AcePlatformEventCallback>());
+        instanceId_, FrontendType::DECLARATIVE_JS, true, context_, std::make_unique<AcePlatformEventCallback>());
     AceEngine::Get().AddContainer(instanceId_, container);
     container->GetSettings().SetUsingSharedRuntime(true);
     container->SetSharedRuntime(runtime_);
@@ -146,12 +154,39 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     container->SetAssetManager(flutterAssetManager);
 
     // create ace_view
-    auto flutterAceView = Platform::FlutterAceView::CreateView(instanceId_);
+    auto flutterAceView =
+        Platform::FlutterAceView::CreateView(instanceId_, container->GetSettings().usePlatformAsUIThread);
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
 
+    int32_t width = window_->GetRect().width_;
+    int32_t height = window_->GetRect().height_;
+    LOGI("UIContent Initialize: width: %{public}d, height: %{public}d", width, height);
+
     // set view
-    Platform::AceContainer::SetView(flutterAceView, config_.Density(), config_.Width(), config_.Height());
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, config_.Width(), config_.Height(), config_.Orientation());
+    Platform::AceContainer::SetView(flutterAceView, config_.Density(), width, height);
+    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, config_.Orientation());
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+        if (rsUiDirector != nullptr) {
+            rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+            rsUiDirector->SetSurfaceNodeSize(width, height);
+            rsUiDirector->SetUITaskRunner(
+                [taskExecutor = container->GetTaskExecutor()]
+                    (const std::function<void()>& task) {
+                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                    });
+            auto context = container->GetPipelineContext();
+            if (context != nullptr) {
+                context->SetRSUIDirector(rsUiDirector);
+            }
+            rsUiDirector->Init();
+            LOGI("UIContent Init Rosen Backend");
+        }
+    }
+#endif
+
     // run page.
     Platform::AceContainer::RunPage(
         instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
@@ -229,11 +264,25 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config)
     LOGI("UIContent UpdateViewportConfig %{public}s", config.ToString().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (container) {
+#ifdef ENABLE_ROSEN_BACKEND
+        auto context = container->GetPipelineContext();
+        if (context) {
+            auto rsUIDirector = context->GetRSUIDirector();
+            if (rsUIDirector) {
+                rsUIDirector->SetSurfaceNodeSize(config.Width(), config.Height());
+            } else {
+                LOGE("UpdateViewportConfig rsUIDirector is null.");
+            }
+        } else {
+            LOGE("UpdateViewportConfig pipline context is null.");
+        }
+#endif
+
         auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
         flutter::ViewportMetrics metrics;
         metrics.physical_width = config.Width();
         metrics.physical_height = config.Height();
-        metrics.device_pixel_ratio = config.Density();
+        metrics.device_pixel_ratio = 2.0f; // temporary use 2.0 for debug device, should get from window
         Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
         Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation());
     }

@@ -23,19 +23,15 @@
 
 namespace OHOS::Ace {
 
-class ACE_FORCE_EXPORT Settings {
+struct ACE_FORCE_EXPORT Settings {
 public:
     Settings() = default;
     ~Settings() = default;
 
-    void SetUsingSharedRuntime(bool usingSharedRuntime)
+    void SetUsingSharedRuntime(bool useSharedRuntime)
     {
-        usingSharedRuntime_ = usingSharedRuntime;
-    }
-
-    bool UsingSharedRuntime()
-    {
-        return usingSharedRuntime_;
+        usingSharedRuntime = useSharedRuntime;
+        usePlatformAsUIThread = useSharedRuntime;
     }
 
     void SetCustomParams(const std::string& key, const std::string& value)
@@ -53,8 +49,11 @@ public:
         return empty;
     }
 
+    bool usingSharedRuntime = false;
+    bool usePlatformAsUIThread = false;
+    bool useUIAsJSThread = false;
+
 private:
-    bool usingSharedRuntime_ = false;
     std::unordered_map<std::string, std::string> customParams_;
 };
 

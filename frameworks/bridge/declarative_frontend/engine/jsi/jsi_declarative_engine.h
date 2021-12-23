@@ -150,6 +150,7 @@ private:
     int32_t instanceId_ = 0;
     mutable std::mutex mutex_;
     bool isDebugMode_ = true;
+    bool usingSharedRuntime_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngineInstance);
 };

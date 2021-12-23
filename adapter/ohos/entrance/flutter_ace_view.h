@@ -41,7 +41,7 @@ public:
     FlutterAceView() = default;
     explicit FlutterAceView(int32_t id) : instanceId_(id) {}
     ~FlutterAceView() override = default;
-    static FlutterAceView* CreateView(int32_t instanceId);
+    static FlutterAceView* CreateView(int32_t instanceId, bool usePlatfromThread = false);
     static void SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen::Window> window);
     static void SurfaceChanged(FlutterAceView* view, int32_t width, int32_t height, int32_t orientation);
     static void SetViewportMetrics(FlutterAceView* view, const flutter::ViewportMetrics& metrics);
