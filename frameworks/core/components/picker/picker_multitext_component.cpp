@@ -60,17 +60,34 @@ void PickerMultiTextComponent::OnColumnsBuilding()
 std::string PickerMultiTextComponent::GetSelectedObject(bool isColumnChange,
     const std::string& changeColumnTag, int32_t status) const
 {
+    auto container = Container::Current();
+    if (!container) {
+        return "";
+    }
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        return "";
+    }
+
     if (isColumnChange) {
         auto column = GetColumn(changeColumnTag);
         if (!column) {
             LOGE("can not get the changed column.");
             return "";
         }
-        return std::string("{\"column\":") + changeColumnTag + ",\"newValue\":" +
-            column->GetCurrentText() + ",\"newSelected\":" + std::to_string(column->GetCurrentIndex()) + "}";
+        if (context->GetIsDeclarative()) {
+            return std::string("{\"column\":") + changeColumnTag + ",\"value\":" + "\"" +
+                column->GetCurrentText() + "\"" + ",\"index\":" + std::to_string(column->GetCurrentIndex()) + "}";
+        } else {
+            return std::string("{\"column\":") + changeColumnTag + ",\"newValue\":" + "\"" +
+                column->GetCurrentText() + "\"" + ",\"newSelected\":" + std::to_string(column->GetCurrentIndex()) + "}";
+        }
     }
 
     std::string result = "{\"newValue\":[";
+    if (context->GetIsDeclarative()) {
+        result = "{\"value\":[";
+    }
     for (uint32_t index = 0; index < selectedValues_.size(); ++index) {
         if (index == 0) {
             result.append("\"");
@@ -80,7 +97,11 @@ std::string PickerMultiTextComponent::GetSelectedObject(bool isColumnChange,
         result.append(selectedValues_[index]);
         result.append("\"");
     }
-    result.append("],\"newSelected\":[");
+    if (context->GetIsDeclarative()) {
+        result.append("],\"index\":[");
+    } else {
+        result.append("],\"newSelected\":[");
+    }
     for (uint32_t index = 0; index < selectedIndexes_.size(); ++index) {
         if (index != 0) {
             result.append(",");

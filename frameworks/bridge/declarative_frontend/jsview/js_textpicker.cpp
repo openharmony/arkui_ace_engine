@@ -171,10 +171,10 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
         return;
     }
 
-    PickerText->SetSelected(selected);
-    PickerText->SetRange(getRangeVector);
     PickerText->SetIsDialog(false);
     PickerText->SetIsCreateDialogComponent(true);
+    PickerText->SetSelected(selected);
+    PickerText->SetRange(getRangeVector);
     DialogProperties properties {};
     properties.alignment = DialogAlignment::CENTER;
     properties.customComponent = PickerText;
