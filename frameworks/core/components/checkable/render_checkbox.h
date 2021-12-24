@@ -33,6 +33,11 @@ public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void HandleClick() override;
+    bool UpdateGroupValue(const bool groupValue);
+    void SetChecked(bool checked)
+    {
+        checked_ = checked;
+    }
 
 protected:
     void UpdateAnimation();
@@ -45,6 +50,11 @@ protected:
     RefPtr<CurveAnimation<double>> translate_;
 
     double shapeScale_ = 1.0;
+    std::string checkboxGroupName_ = "";
+    RefPtr<CheckboxComponent> component_;
+    bool isGroup_ = false;
+    bool selectAll_ = false;
+    std::function<void(bool)> groupValueChangedListener_;
 };
 
 } // namespace OHOS::Ace

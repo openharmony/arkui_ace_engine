@@ -34,6 +34,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
@@ -671,7 +673,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"SearchController", JSSearchController::JSBind },
     {"TextAreaController", JSTextAreaController::JSBind },
     {"TextInputController", JSTextInputController::JSBind},
-    {"TextTimerController", JSTextTimerController::JSBind}
+    {"TextTimerController", JSTextTimerController::JSBind},
+    {"Checkbox", JSCheckbox::JSBind},
+    {"CheckboxGroup", JSCheckboxGroup::JSBind}
 };
 
 void RegisterAllModule(BindingTarget globalObj)
