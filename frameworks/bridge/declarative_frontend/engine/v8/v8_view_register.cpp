@@ -114,6 +114,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_clock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
@@ -615,6 +616,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"AbilityComponent", JSAbilityComponent::JSBind},
     {"TextArea", JSTextArea::JSBind},
     {"TextInput", JSTextInput::JSBind},
+    {"TextClock", JSTextClock::JSBind},
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     {"QRCode", JSQRCode::JSBind},
 #ifdef FORM_SUPPORTED

@@ -107,6 +107,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_clock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
@@ -704,6 +705,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSTextAreaController::JSBind(globalObj);
     JSTextInput::JSBind(globalObj);
     JSTextInputController::JSBind(globalObj);
+    JSTextClock::JSBind(globalObj);
     JSMarquee::JSBind(globalObj);
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     JSPlugin::JSBind(globalObj);
