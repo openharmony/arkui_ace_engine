@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_ROSEN_RENDER_QRCODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_ROSEN_RENDER_QRCODE_H
 
-#include "QrCode.hpp"
 #include "include/core/SkBitmap.h"
+#include "qrcodegen.hpp"
 
 #include "core/components/qrcode/render_qrcode.h"
 
