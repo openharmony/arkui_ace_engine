@@ -38,20 +38,27 @@ namespace OHOS::Ace {
 
 static std::atomic<int32_t> gInstanceId = 0;
 
-class AcePlatformEventCallback final : public Platform::PlatformEventCallback {
+using ContentFinishCallback = std::function<void()>;
+class ContentEventCallback final : public Platform::PlatformEventCallback {
 public:
-    AcePlatformEventCallback() = default;
-    ~AcePlatformEventCallback() = default;
+    explicit ContentEventCallback(ContentFinishCallback onFinish) : onFinish_(onFinish) {}
+    ~ContentEventCallback() = default;
 
     virtual void OnFinish() const
     {
-        LOGI("AcePlatformEventCallback OnFinish");
+        LOGI("UIContent OnFinish");
+        if (onFinish_) {
+            onFinish_();
+        }
     }
 
     virtual void OnStatusBarBgColorChanged(uint32_t color)
     {
-        LOGI("AcePlatformEventCallback OnStatusBarBgColorChanged");
+        LOGI("UIContent OnStatusBarBgColorChanged");
     }
+
+private:
+    ContentFinishCallback onFinish_;
 };
 
 extern "C" ACE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtime)
@@ -134,8 +141,13 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
 
     // create container
     instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
-    auto container = AceType::MakeRefPtr<Platform::AceContainer>(
-        instanceId_, FrontendType::DECLARATIVE_JS, true, context_, std::make_unique<AcePlatformEventCallback>());
+    auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
+        context_, std::make_unique<ContentEventCallback>([context = context_] {
+            if (context) {
+                auto abilityContext = static_cast<OHOS::AbilityRuntime::AbilityContext*>(context);
+                abilityContext->TerminateSelf();
+            }
+        }));
     AceEngine::Get().AddContainer(instanceId_, container);
     container->GetSettings().SetUsingSharedRuntime(true);
     container->SetSharedRuntime(runtime_);
