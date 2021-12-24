@@ -18,15 +18,22 @@ build_component("scroll") {
     "flutter_render_multi_child_scroll.cpp",
     "flutter_render_single_child_scroll.cpp",
     "render_multi_child_scroll.cpp",
+    "render_multi_child_scroll_creator.cpp",
     "render_scroll.cpp",
     "render_single_child_scroll.cpp",
+    "render_single_child_scroll_creator.cpp",
     "scroll_bar_controller.cpp",
     "scroll_component.cpp",
     "scroll_element.cpp",
     "scroll_fade_controller.cpp",
     "scroll_fade_effect.cpp",
+    "scroll_fade_painter_creator.cpp",
     "scroll_position_controller.cpp",
     "scroll_spring_effect.cpp",
     "scrollable.cpp",
+  ]
+  rosen_sources = [
+    "rosen_render_multi_child_scroll.cpp",
+    "rosen_render_single_child_scroll.cpp",
   ]
 }

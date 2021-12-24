@@ -19,11 +19,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderSvgFeGaussianBlur::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSvgFeGaussianBlur>();
-}
-
 void FlutterRenderSvgFeGaussianBlur::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const
 {
     imageFilter = SkBlurImageFilter::Make(deviationX_, deviationY_, imageFilter, nullptr);

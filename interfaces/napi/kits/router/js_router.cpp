@@ -457,8 +457,8 @@ static napi_value JSRouterGetParams(napi_env env, napi_callback_info info)
     OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
     napi_get_jsEngine(env, (void**)&jsEngine);
     std::string paramsStr = jsEngine->GetFrontend()->GetParams();
-    LOGI("PageGetParams params is null");
     if (paramsStr.empty()) {
+        LOGI("PageGetParams params is null");
         return nullptr;
     }
     napi_value globalValue;

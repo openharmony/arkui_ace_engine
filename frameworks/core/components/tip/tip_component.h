@@ -44,8 +44,19 @@ public:
         bgColor_ = color;
     }
 
+    Axis GetDirection() const
+    {
+        return axis_;
+    }
+
+    void SetDirection(Axis axis)
+    {
+        axis_ = axis;
+    }
+
 private:
     Color bgColor_ = Color::BLACK;
+    Axis axis_ = Axis::HORIZONTAL;
 };
 
 } // namespace OHOS::Ace

@@ -50,10 +50,17 @@ std::string ManifestRouter::GetPagePath(const std::string& uri, const std::strin
     return "";
 }
 
-const std::list<std::string>& ManifestRouter::GetPageList() const
+const std::list<std::string>& ManifestRouter::GetPageList()
 {
     return pages_;
 }
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+void ManifestRouter::InsertPageList(const std::string& uri)
+{
+    pages_.emplace_back(uri);
+}
+#endif
 
 void ManifestRouter::RouterParse(const std::unique_ptr<JsonValue>& root)
 {

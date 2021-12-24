@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_INTERFACE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_INTERFACE_H
 
+#include <mutex>
+
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
 #include "core/common/clipboard/clipboard.h"

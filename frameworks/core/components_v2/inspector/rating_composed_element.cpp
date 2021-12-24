@@ -30,9 +30,7 @@ const std::unordered_map<std::string, std::function<std::string(const RatingComp
     { "indicator", [](const RatingComposedElement& inspector) { return inspector.GetIndicator(); } },
     { "stars", [](const RatingComposedElement& inspector) { return inspector.GetStars(); } },
     { "stepSize", [](const RatingComposedElement& inspector) { return inspector.GetStepSize(); } },
-    { "foregroundUri", [](const RatingComposedElement& inspector) { return inspector.GetForegroundSrc(); } },
-    { "secondaryUri", [](const RatingComposedElement& inspector) { return inspector.GetSecondarySrc(); } },
-    { "backgroundUri", [](const RatingComposedElement& inspector) { return inspector.GetBackgroundSrc(); } }
+    { "starStyle", [](const RatingComposedElement& inspector) { return inspector.GetStarStyle(); } }
 };
 
 } // namespace
@@ -44,9 +42,7 @@ void RatingComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(std::string("indicator: ").append(GetIndicator()));
     DumpLog::GetInstance().AddDesc(std::string("stars: ").append(GetStars()));
     DumpLog::GetInstance().AddDesc(std::string("stepSize: ").append(GetStepSize()));
-    DumpLog::GetInstance().AddDesc(std::string("foregroundUri: ").append(GetForegroundSrc()));
-    DumpLog::GetInstance().AddDesc(std::string("secondaryUri: ").append(GetSecondarySrc()));
-    DumpLog::GetInstance().AddDesc(std::string("backgroundUri: ").append(GetBackgroundSrc()));
+    DumpLog::GetInstance().AddDesc(std::string("starStyle: ").append(GetStarStyle()));
 }
 
 std::unique_ptr<JsonValue> RatingComposedElement::ToJsonObject() const
@@ -92,31 +88,18 @@ std::string RatingComposedElement::GetStepSize() const
     return "";
 }
 
-std::string RatingComposedElement::GetForegroundSrc() const
+std::string RatingComposedElement::GetStarStyle() const
 {
     auto renderRating = GetRenderRating();
-    if (renderRating) {
-        return renderRating->GetForegroundSrc();
+    auto jsonStarStyle = JsonUtil::Create(true);
+    if (!renderRating) {
+        return "";
     }
-    return "";
-}
+    jsonStarStyle->Put("backgroundUri", renderRating->GetBackgroundSrc().c_str());
+    jsonStarStyle->Put("foregroundUri", renderRating->GetForegroundSrc().c_str());
+    jsonStarStyle->Put("secondaryUri", renderRating->GetSecondarySrc().c_str());
 
-std::string RatingComposedElement::GetSecondarySrc() const
-{
-    auto renderRating = GetRenderRating();
-    if (renderRating) {
-        return renderRating->GetSecondarySrc();
-    }
-    return "";
-}
-
-std::string RatingComposedElement::GetBackgroundSrc() const
-{
-    auto renderRating = GetRenderRating();
-    if (renderRating) {
-        return renderRating->GetBackgroundSrc();
-    }
-    return "";
+    return jsonStarStyle->ToString();
 }
 
 RefPtr<RenderRating> RatingComposedElement::GetRenderRating() const

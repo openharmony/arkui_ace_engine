@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <functional>
 #include "gtest/gtest.h"
 
 #define protected public
@@ -160,6 +161,31 @@ RefPtr<PageElement> PipelineContext::GetLastPage() const
 {
     return nullptr;
 }
+
+bool PipelineContext::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack)
+{
+    return true;
+}
+
+void PipelineContext::OpenImplicitAnimation(const AnimationOption& option,
+    const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
+{}
+
+bool PipelineContext::CloseImplicitAnimation()
+{
+    return true;
+}
+
+void PipelineContext::AddGeometryChangedNode(const RefPtr<RenderNode>& renderNode)
+{
+}
+
+void PipelineContext::ForceLayoutForImplicitAnimation() {}
+
+void PipelineContext::PostAsyncEvent(const std::function<void()>&) {}
+
+void PipelineContext::PostAsyncEvent(std::function<void()>&&) {}
 
 class FocusTest : public testing::Test {
 public:

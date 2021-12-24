@@ -22,11 +22,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderShapeContainer::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderShapeContainer>();
-}
-
 RenderLayer FlutterRenderShapeContainer::GetRenderLayer()
 {
     if (!transformLayer_) {

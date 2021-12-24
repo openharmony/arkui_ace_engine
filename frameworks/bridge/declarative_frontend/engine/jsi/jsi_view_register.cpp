@@ -15,6 +15,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
@@ -29,10 +30,14 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
 #endif
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column_split.h"
@@ -63,12 +68,11 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_menu.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_navigation_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_option.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
@@ -79,10 +83,14 @@
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
 #endif
+#include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
@@ -90,9 +98,12 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_sheet.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_stepper.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
@@ -109,6 +120,7 @@
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 
 namespace OHOS::Ace::Framework {
@@ -272,7 +284,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodes(panda::EcmaVM* vm, panda::Lo
     }
     auto accessibilityManager = declarativeDelegate->GetJSAccessibilityManager();
     auto nodeInfos = accessibilityManager->DumpComposedElementsToJson();
-    return panda::StringRef::NewFromUtf8(vm, nodeInfos->ToString().c_str());
+    return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfos->ToString().c_str()));
 }
 
 panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
@@ -298,7 +310,84 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::EcmaVM* vm, panda:
     }
     int32_t intValue = args[0]->Int32Value(vm);
     auto nodeInfo = accessibilityManager->DumpComposedElementToJson(intValue);
-    return panda::StringRef::NewFromUtf8(vm, nodeInfo->ToString().c_str());
+    return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfo->ToString().c_str()));
+}
+
+panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
+    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+{
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext == nullptr) {
+        LOGE("pipeline is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nodeInfos = pipelineContext->GetInspectorTree();
+    return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
+}
+
+panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
+    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+{
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (argc < 1 || !args[0]->IsString()) {
+        LOGE("The arg is wrong, must have one string argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext == nullptr) {
+        LOGE("pipelineContext==nullptr");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    std::string key = args[0]->ToString(vm)->ToString();
+    auto resultStr = pipelineContext->GetInspectorNodeByKey(key);
+    return panda::StringRef::NewFromUtf8(vm, resultStr.c_str());
+}
+
+panda::Local<panda::JSValueRef> JsSendEventByKey(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
+    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+{
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (argc < 3 || !args[0]->IsString()) {
+        LOGE("The arg is wrong, must have one string argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext == nullptr) {
+        LOGE("pipelineContext==nullptr");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    std::string key = args[0]->ToString(vm)->ToString();
+    auto action = args[1]->Int32Value(vm);
+    auto params = args[2]->ToString(vm)->ToString();
+    auto result = pipelineContext->SendEventByKey(key, action, params);
+    return panda::BooleanRef::New(vm, result);
 }
 
 panda::Local<panda::JSValueRef> Vp2Px(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
@@ -495,6 +584,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Animator", JSAnimator::JSBind },
     { "Span", JSSpan::JSBind },
     { "Button", JSButton::JSBind },
+    { "Canvas", JSCanvas::JSBind },
     { "LazyForEach", JSLazyForEach::JSBind },
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },
@@ -513,14 +603,15 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
-    { "Option", JSOption::JSBind },
     { "Panel", JSSlidingPanel::JSBind },
-    { "Menu", JSMenu::JSBind },
-    { "NavigationView", JSNavigationView::JSBind },
+    { "Navigation", JSNavigation::JSBind },
     { "Navigator", JSNavigator::JSBind },
     { "ColumnSplit", JSColumnSplit::JSBind },
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },
+    { "ScrollBar", JSScrollBar::JSBind },
+    {"Stepper", JSStepper::JSBind },
+    {"StepperItem", JSStepperItem::JSBind },
     { "Toggle", JSToggle::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
@@ -568,6 +659,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TapGesture", JSGesture::JSBind },
     { "LongPressGesture", JSGesture::JSBind },
     { "PanGesture", JSGesture::JSBind },
+    { "SwipeGesture", JSGesture::JSBind },
     { "PinchGesture", JSGesture::JSBind },
     { "RotationGesture", JSGesture::JSBind },
     { "GestureGroup", JSGesture::JSBind },
@@ -578,8 +670,17 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TabsController", JSTabsController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
     { "AbilityController", JSAbilityComponentController::JSBind },
+    { "RenderingContext", JSRenderingContext::JSBind},
+    { "OffscreenRenderingContext", JSOffscreenRenderingContext::JSBind},
+    { "CanvasGradient", JSCanvasGradient::JSBind},
+    { "ImageBitmap", JSRenderImage::JSBind},
+    { "ImageData", JSCanvasImageData::JSBind},
+    { "Path2D", JSPath2D::JSBind},
+    { "RenderingContextSettings", JSRenderingContextSettings::JSBind},
     { "VideoController", JSVideoController::JSBind },
-    { "Search", JSSearch::JSBind }
+    { "Search", JSSearch::JSBind },
+    { "Sheet", JSSheet::JSBind },
+    { "JSClipboard", JSClipboard::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj)
@@ -589,6 +690,13 @@ void RegisterAllModule(BindingTarget globalObj)
     JSTabsController::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
+    JSRenderingContext::JSBind(globalObj);
+    JSOffscreenRenderingContext::JSBind(globalObj);
+    JSCanvasGradient::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj);
+    JSCanvasImageData::JSBind(globalObj);
+    JSPath2D::JSBind(globalObj);
+    JSRenderingContextSettings::JSBind(globalObj);
     JSAbilityComponentController::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
@@ -627,6 +735,13 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
     while (std::getline(input, moduleName, ',')) {
         RegisterModuleByName(globalObj, moduleName);
     }
+    JSRenderingContext::JSBind(globalObj);
+    JSOffscreenRenderingContext::JSBind(globalObj);
+    JSCanvasGradient::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj);
+    JSCanvasImageData::JSBind(globalObj);
+    JSPath2D::JSBind(globalObj);
+    JSRenderingContextSettings::JSBind(globalObj);
 }
 
 void JsRegisterViews(BindingTarget globalObj)
@@ -645,6 +760,12 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodes, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorNodeById"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodeById, nullptr));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorTree"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorTree, nullptr));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorByKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorByKey, nullptr));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendEventByKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendEventByKey, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "vp2px"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Vp2Px, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2vp"),
@@ -672,6 +793,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSGesture::JSBind(globalObj);
     JSPanGestureOption::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
+    JsGridDragFunction::JSBind(globalObj);
     JSCustomDialogController::JSBind(globalObj);
     JSShareData::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
@@ -722,9 +844,10 @@ void JsRegisterViews(BindingTarget globalObj)
 
     JSObjectTemplate progressStyle;
     progressStyle.Constant("Linear", 0);
-    progressStyle.Constant("Capsule", 1);  // 1 means index of constant
+    progressStyle.Constant("Ring", 1);  // 1 means index of constant
     progressStyle.Constant("Eclipse", 2);  // 2 means index of constant
-    progressStyle.Constant("Circular", 3);  // 3 means index of constant
+    progressStyle.Constant("ScaleRing", 3);  // 3 means index of constant
+    progressStyle.Constant("Capsule", 4);  // 4 means index of constant
 
     JSObjectTemplate stackFit;
     stackFit.Constant("Keep", 0);

@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H
 
 #include <cstdint>
+#include <unordered_map>
+#include <string>
 
 #include "base/utils/macros.h"
 
@@ -188,7 +190,6 @@ ACE_EXPORT extern const char SCROLL_ETS_TAG[];
 // calendar
 ACE_EXPORT extern const char CALENDAR_COMPONENT_TAG[];
 ACE_EXPORT extern const char CALENDAR_ETS_TAG[];
-ACE_EXPORT extern const char CALENDAR_COMPONENT_NAME[];
 
 // badge
 ACE_EXPORT extern const char BADGE_COMPONENT_TAG[];
@@ -225,6 +226,54 @@ ACE_EXPORT extern const char PROGRESS_ETS_TAG[];
 // datapanel
 ACE_EXPORT extern const char DATA_PANEL_COMPONENT_TAG[];
 ACE_EXPORT extern const char DATA_PANEL_ETS_TAG[];
+
+// sheet
+ACE_EXPORT extern const char SHEET_COMPONENT_TAG[];
+ACE_EXPORT extern const char SHEET_ETS_TAG[];
+
+// hyperlink
+ACE_EXPORT extern const char HYPERLINK_COMPONENT_TAG[];
+ACE_EXPORT extern const char HYPERLINK_ETS_TAG[];
+
+// stepper
+ACE_EXPORT extern const char STEPPER_COMPONENT_TAG[];
+ACE_EXPORT extern const char STEPPER_ETS_TAG[];
+
+// scrollBar
+ACE_EXPORT extern const char SCROLL_BAR_COMPONENT_TAG[];
+ACE_EXPORT extern const char SCROLL_BAR_ETS_TAG[];
+
+ACE_EXPORT extern const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP;
+// refresh
+ACE_EXPORT extern const char REFRESH_COMPONENT_TAG[];
+ACE_EXPORT extern const char REFRESH_ETS_TAG[];
+
+// datePicker
+ACE_EXPORT extern const char DATE_PICKER_COMPONENT_TAG[];
+ACE_EXPORT extern const char DATE_PICKER_ETS_TAG[];
+ACE_EXPORT extern const char TIME_PICKER_COMPONENT_TAG[];
+ACE_EXPORT extern const char TIME_PICKER_ETS_TAG[];
+
+// Radio
+ACE_EXPORT extern const char RADIO_COMPONENT_TAG[];
+ACE_EXPORT extern const char RADIO_ETS_TAG[];
+
+// gridContainer
+ACE_EXPORT extern const char GRIDCONTAINER_COMPONENT_TAG[];
+ACE_EXPORT extern const char GRIDCONTAINER_ETS_TAG[];
+
+// menu
+ACE_EXPORT extern const char MENU_COMPONENT_TAG[];
+ACE_EXPORT extern const char MENU_TAG[];
+ACE_EXPORT extern const char MENU_ETS_TAG[];
+
+// textarea
+ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[];
+ACE_EXPORT extern const char TEXTAREA_ETS_TAG[];
+
+// textinput
+ACE_EXPORT extern const char TEXTINPUT_COMPONENT_TAG[];
+ACE_EXPORT extern const char TEXTINPUT_ETS_TAG[];
 
 } // namespace OHOS::Ace::V2
 

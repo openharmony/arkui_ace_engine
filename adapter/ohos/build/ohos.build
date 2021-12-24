@@ -9,7 +9,19 @@
       ],
       "module_list": [
         "//foundation/ace/ace_engine/adapter/ohos/build:ace_packages",
-        "//foundation/ace/ace_engine/adapter/ohos/build:ace_for_windows"
+        "//foundation/ace/ace_engine/adapter/preview/build:ace_for_windows"
+      ],
+      "inner_kits": [
+        {
+          "header": {
+            "header_base": "//foundation/ace/ace_engine/interfaces/innerkits/ace/",
+            "header_files": [
+              "ui_content.h",
+              "viewport_config.h"
+            ]
+          },
+          "name": "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent"
+        }
       ],
       "test_list": [
         "//foundation/ace/ace_engine/frameworks/base/test:unittest",

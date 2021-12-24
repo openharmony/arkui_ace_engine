@@ -51,18 +51,6 @@ char* realpath(const char* path, char* resolved_path)
 }
 #endif
 
-bool IsValidBase64Head(const std::string& uri, const std::string& pattern)
-{
-    auto iter = uri.find_first_of(',');
-    if (iter == std::string::npos) {
-        LOGE("wrong base64 head format.");
-        return false;
-    }
-    std::string base64Head = uri.substr(0, iter);
-    std::regex regular(pattern);
-    return std::regex_match(base64Head, regular);
-}
-
 } // namespace
 
 void ImageLoader::CacheResizedImage(const sk_sp<SkImage>& image, const std::string& key)
@@ -94,46 +82,9 @@ std::string ImageLoader::RemovePathHead(const std::string& uri)
     return std::string();
 }
 
-SrcType ImageLoader::ResolveURI(const std::string& uri)
-{
-    if (uri.empty()) {
-        return SrcType::UNSUPPORTED;
-    }
-    auto iter = uri.find_first_of(':');
-    if (iter == std::string::npos) {
-        return SrcType::ASSET;
-    }
-    std::string head = uri.substr(0, iter);
-    std::transform(head.begin(), head.end(), head.begin(), [](unsigned char c) { return std::tolower(c); });
-    if (head == "http" or head == "https") {
-        return SrcType::NETWORK;
-    } else if (head == "file") {
-        return SrcType::FILE;
-    } else if (head == "internal") {
-        return SrcType::INTERNAL;
-    } else if (head == "data") {
-        static constexpr char BASE64_PATTERN[] = "^data:image/(jpeg|jpg|png|ico|gif|bmp|webp);base64$";
-        if (IsValidBase64Head(uri, BASE64_PATTERN)) {
-            return SrcType::BASE64;
-        }
-        return SrcType::UNSUPPORTED;
-    } else if (head == "memory") {
-        return SrcType::MEMORY;
-    } else if (head == "resource") {
-        return SrcType::RESOURCE;
-    } else if (head == "dataability") {
-        return SrcType::DATA_ABILITY;
-    } else {
-        return SrcType::UNSUPPORTED;
-    }
-}
-
 RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& imageSourceInfo)
 {
-    if (imageSourceInfo.IsInternalResource()) {
-        return MakeRefPtr<InternalImageLoader>(imageSourceInfo.GetResourceId());
-    }
-    SrcType srcType = ResolveURI(imageSourceInfo.GetSrc());
+    SrcType srcType = imageSourceInfo.GetSrcType();
     switch (srcType) {
         case SrcType::INTERNAL:
         case SrcType::FILE: {
@@ -157,6 +108,9 @@ RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& imageS
         case SrcType::MEMORY: {
             LOGE("Image source type: shared memory. image data is not come from image loader.");
             return nullptr;
+        }
+        case SrcType::RESOURCE_ID: {
+            return MakeRefPtr<InternalImageLoader>();
         }
         default: {
             LOGE("Image source type not supported!");
@@ -189,12 +143,13 @@ sk_sp<SkData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
     return nullptr;
 }
 
-sk_sp<SkData> FileImageLoader::LoadImageData(const std::string& src, const WeakPtr<PipelineContext> context)
+sk_sp<SkData> FileImageLoader::LoadImageData(
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
 {
     LOGD("File Image!");
-    bool isInternal = (ResolveURI(src) == SrcType::INTERNAL);
+    auto src = imageSourceInfo.GetSrc();
     std::string filePath = RemovePathHead(src);
-    if (isInternal) {
+    if (imageSourceInfo.GetSrcType() == SrcType::INTERNAL) {
         // the internal source uri format is like "internal://app/imagename.png", the absolute path of which is like
         // "/data/data/{bundleName}/files/imagename.png"
         auto bundleName = AceApplicationInfo::GetInstance().GetPackageName();
@@ -210,7 +165,7 @@ sk_sp<SkData> FileImageLoader::LoadImageData(const std::string& src, const WeakP
                        .append(bundleName)
                        .append("/files/")           // infix of absolute path
                        .append(filePath.substr(4)); // 4 is the length of "app/" from "internal://app/"
-    }
+    }\
     if (filePath.length() > PATH_MAX) {
         LOGE("src path is too long");
         return nullptr;
@@ -229,8 +184,10 @@ sk_sp<SkData> FileImageLoader::LoadImageData(const std::string& src, const WeakP
     return SkData::MakeFromFILE(file.get());
 }
 
-sk_sp<SkData> DataProviderImageLoader::LoadImageData(const std::string& src, const WeakPtr<PipelineContext> context)
+sk_sp<SkData> DataProviderImageLoader::LoadImageData(
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
 {
+    auto src = imageSourceInfo.GetSrc();
     auto skData = ImageLoader::LoadDataFromCachedFile(src);
     if (skData) {
         return skData;
@@ -255,8 +212,10 @@ sk_sp<SkData> DataProviderImageLoader::LoadImageData(const std::string& src, con
     return SkData::MakeWithCopy(imageData.data(), imageData.size());
 }
 
-sk_sp<SkData> AssetImageLoader::LoadImageData(const std::string& src, const WeakPtr<PipelineContext> context)
+sk_sp<SkData> AssetImageLoader::LoadImageData(
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
 {
+    auto src = imageSourceInfo.GetSrc();
     if (src.empty()) {
         LOGE("image src is empty");
         return nullptr;
@@ -316,11 +275,13 @@ std::string AssetImageLoader::LoadJsonData(const std::string& src, const WeakPtr
         LOGE("No asset data!");
         return "";
     }
-    return (char *)assetData->GetData();
+    return std::string((char *)assetData->GetData(), assetData->GetSize());
 }
 
-sk_sp<SkData> NetworkImageLoader::LoadImageData(const std::string& uri, const WeakPtr<PipelineContext> context)
+sk_sp<SkData> NetworkImageLoader::LoadImageData(
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
 {
+    auto uri = imageSourceInfo.GetSrc();
     // 1. find in cache file path.
     LOGD("Network Image!");
     auto skData = ImageLoader::LoadDataFromCachedFile(uri);
@@ -339,10 +300,12 @@ sk_sp<SkData> NetworkImageLoader::LoadImageData(const std::string& uri, const We
     return SkData::MakeWithCopy(imageData.data(), imageData.size());
 }
 
-sk_sp<SkData> InternalImageLoader::LoadImageData(const std::string& uri, const WeakPtr<PipelineContext> context)
+sk_sp<SkData> InternalImageLoader::LoadImageData(
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
 {
     size_t imageSize = 0;
-    const uint8_t* internalData = InternalResource::GetInstance().GetResource(resourceId_, imageSize);
+    const uint8_t* internalData =
+        InternalResource::GetInstance().GetResource(imageSourceInfo.GetResourceId(), imageSize);
     if (internalData == nullptr) {
         LOGE("data null, the resource id may be wrong.");
         return nullptr;
@@ -350,11 +313,12 @@ sk_sp<SkData> InternalImageLoader::LoadImageData(const std::string& uri, const W
     return SkData::MakeWithCopy(internalData, imageSize);
 }
 
-sk_sp<SkData> Base64ImageLoader::LoadImageData(const std::string& uri, const WeakPtr<PipelineContext> context)
+sk_sp<SkData> Base64ImageLoader::LoadImageData(
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
 {
     SkBase64 base64Decoder;
     size_t imageSize = 0;
-    std::string base64Code = GetBase64ImageCode(uri, imageSize);
+    std::string base64Code = GetBase64ImageCode(imageSourceInfo.GetSrc(), imageSize);
     SkBase64::Error error = base64Decoder.decode(base64Code.c_str(), base64Code.size());
     if (error != SkBase64::kNoError) {
         LOGE("error base64 image code!");
@@ -431,8 +395,10 @@ bool ResourceImageLoader::GetResourceId(const std::string& uri, const RefPtr<The
     return false;
 }
 
-sk_sp<SkData> ResourceImageLoader::LoadImageData(const std::string& uri, const WeakPtr<PipelineContext> context)
+sk_sp<SkData> ResourceImageLoader::LoadImageData(
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
 {
+    auto uri = imageSourceInfo.GetSrc();
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
         LOGE("invalid pipeline context");

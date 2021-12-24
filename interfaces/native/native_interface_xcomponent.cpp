@@ -26,6 +26,10 @@ int32_t NativeXComponent_GetXComponentId(NativeXComponent* component, char* id, 
     if ((component == nullptr) || (id == nullptr) || (size == nullptr)) {
         return XCOMPONENT_RESULT_BAD_PARAMETER;
     }
+    if (((*size) == 0) || ((*size) > (XCOMPONENT_ID_LEN_MAX + 1))) {
+        LOGE("The referenced value of 'size' should be in the range (0, XCOMPONENT_ID_LEN_MAX + 1]");
+        return XCOMPONENT_RESULT_BAD_PARAMETER;
+    }
     return component->GetXComponentId(id, size);
 }
 
@@ -37,15 +41,24 @@ int32_t NativeXComponent_GetNativeWindow(NativeXComponent* component, void** win
     return component->GetNativeWindow(window);
 }
 
-int32_t NativeXComponent_GetSurfaceSize(NativeXComponent* component, void* window, uint64_t* width, uint64_t* height)
+int32_t NativeXComponent_GetXComponentSize(
+    NativeXComponent* component, const void* window, uint64_t* width, uint64_t* height)
 {
     if ((component == nullptr) || (window == nullptr) || (width == nullptr) || (height == nullptr)) {
         return XCOMPONENT_RESULT_BAD_PARAMETER;
     }
-    return component->GetSurfaceSize(window, width, height);
+    return component->GetXComponentSize(window, width, height);
 }
 
-int32_t NativeXComponent_GetTouchInfo(NativeXComponent* component, void* window, TouchInfo* touchInfo)
+int32_t NativeXComponent_GetXComponentOffset(NativeXComponent* component, const void* window, double* x, double* y)
+{
+    if ((component == nullptr) || (window == nullptr) || (x == nullptr) || (y == nullptr)) {
+        return XCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->GetXComponentOffset(window, x, y);
+}
+
+int32_t NativeXComponent_GetTouchInfo(NativeXComponent* component, const void* window, TouchInfo* touchInfo)
 {
     if ((component == nullptr) || (window == nullptr) || (touchInfo == nullptr)) {
         return XCOMPONENT_RESULT_BAD_PARAMETER;

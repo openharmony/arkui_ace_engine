@@ -28,11 +28,6 @@ tonic::Float64List ToFloat64List(const Matrix4& matrix4)
     return floatData;
 }
 
-RefPtr<RenderNode> RenderTransform::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderTransform>();
-}
-
 RenderLayer FlutterRenderTransform::GetRenderLayer()
 {
     if (!layer_) {
@@ -100,21 +95,6 @@ Rect FlutterRenderTransform::GetTransformRect(const Rect& rect)
     auto top = std::min(std::min(ltPoint.GetY(), rtPoint.GetY()), std::min(lbPoint.GetY(), rbPoint.GetY()));
     auto bottom = std::max(std::max(ltPoint.GetY(), rtPoint.GetY()), std::max(lbPoint.GetY(), rbPoint.GetY()));
     return Rect(left, top, right - left, bottom - top).CombineRect(rect);
-}
-
-Matrix4 FlutterRenderTransform::GetTransformByOffset(Matrix4 matrix, const Offset& offset)
-{
-    LOGD("Offset(%{public}lf, %{public}lf)", offset.GetX(), offset.GetY());
-    if (offset.IsZero()) {
-        return matrix;
-    }
-
-    Matrix4 transform =
-        Matrix4::CreateTranslate(static_cast<float>(-offset.GetX()), static_cast<float>(-offset.GetY()), 0.0f);
-    transform = matrix * transform;
-    transform = Matrix4::CreateTranslate(static_cast<float>(offset.GetX()), static_cast<float>(offset.GetY()), 0.0f) *
-                transform;
-    return transform;
 }
 
 Matrix4 FlutterRenderTransform::GetEffectiveTransform(const Offset& offset)

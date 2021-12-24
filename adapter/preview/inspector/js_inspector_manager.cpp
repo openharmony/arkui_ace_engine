@@ -70,7 +70,7 @@
 #include "adapter/preview/inspector/inspect_toolbar_item.h"
 #include "adapter/preview/inspector/inspect_video.h"
 #include "adapter/preview/inspector/inspector_client.h"
-#include "core/components_v2/inspector/inspector_composed_element.h"
+#include "bridge/declarative_frontend/declarative_frontend.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
 
 namespace OHOS::Ace::Framework {
@@ -123,6 +123,15 @@ void JsInspectorManager::InitializeCallback()
         return true;
     };
     InspectorClient::GetInstance().RegisterDefaultJSONTreeCallback(assembleDefaultJSONTreeCallback);
+    auto operateComponentCallback = [weak = WeakClaim(this)](const std::string& attrsJson) {
+        auto jsInspectorManager = weak.Upgrade();
+        if (!jsInspectorManager) {
+            return false;
+        }
+        jsInspectorManager->OperateComponent(attrsJson);
+        return true;
+    };
+    InspectorClient::GetInstance().RegisterOperateComponentCallback(operateComponentCallback);
 }
 
 // assemble the JSON tree using all depth -1 nodes and root nodes.
@@ -261,6 +270,78 @@ void JsInspectorManager::AssembleDefaultJSONTree(std::string& jsonStr)
     jsonStr = jsonNode->ToString();
 }
 
+void JsInspectorManager::OperateComponent(const std::string& jsCode)
+{
+    auto root = JsonUtil::ParseJsonString(jsCode);
+    auto operateType = root->GetString("type", "");
+    auto parentID = root->GetInt("parentID", -1);
+    if (parentID <= 0) {
+        return;
+    }
+    auto slot = root->GetInt("slot", -1);
+    auto parentElement = GetInspectorElementById(parentID);
+    if (operateType == "AddComponent") {
+        auto newComponent = GetNewComponentWithJsCode(root);
+        if (!newComponent) {
+            LOGE("operateType:AddComponent, newComponent should not be nullptr");
+            return;
+        }
+        parentElement->AddChildWithSlot(slot, newComponent);
+    } else if (operateType == "UpdateComponent") {
+        auto newComponent = GetNewComponentWithJsCode(root);
+        if (!newComponent) {
+            LOGE("operateType:UpdateComponent, newComponent should not be nullptr");
+            return;
+        }
+        parentElement->UpdateChildWithSlot(slot, newComponent);
+    } else if (operateType == "DeleteComponent") {
+        parentElement->DeleteChildWithSlot(slot);
+    } else {
+        LOGE("operateType:%{publis}s is not support", operateType.c_str());
+    }
+}
+
+RefPtr<Component> JsInspectorManager::GetNewComponentWithJsCode(const std::unique_ptr<JsonValue>& root)
+{
+    std::string jsCode = root->GetString("jsCode", "");
+    if (jsCode.length() == 0) {
+        LOGE("Get jsCode Failed");
+        return nullptr;
+    }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("Get Context Failed");
+        return nullptr;
+    }
+    auto frontend = context->GetFrontend();
+    if (!frontend) {
+        LOGE("Get frontend Failed");
+        return nullptr;
+    }
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend);
+    if (!declarativeFrontend) {
+        LOGE("Get declarativeFrontend Failed");
+        return nullptr;
+    }
+    auto component = declarativeFrontend->GetNewComponentWithJsCode(jsCode);
+    return component;
+}
+
+RefPtr<V2::InspectorComposedElement> JsInspectorManager::GetInspectorElementById(NodeId nodeId)
+{
+    auto composedElement = GetComposedElementFromPage(nodeId).Upgrade();
+    if (!composedElement) {
+        LOGE("get composedElement failed");
+        return nullptr;
+    }
+    auto inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(composedElement);
+    if (!inspectorElement) {
+        LOGE("get inspectorElement failed");
+        return nullptr;
+    }
+    return inspectorElement;
+}
+
 void JsInspectorManager::GetNodeJSONStrMap()
 {
     ClearContainer();
@@ -282,6 +363,10 @@ void JsInspectorManager::GetNodeJSONStrMap()
             auto node = GetAccessibilityNodeFromPage(nodeId);
             if (node == nullptr) {
                 LOGE("GetAccessibilityNodeFromPage is null, nodeId: %{public}d", nodeId);
+                continue;
+            }
+            if (node->GetTag() == "inspectDialog") {
+                RemoveAccessibilityNodes(node);
                 continue;
             }
             auto jsonNode = JsonUtil::Create(true);
@@ -333,7 +418,7 @@ void JsInspectorManager::GetAttrsAndStylesV2(std::unique_ptr<JsonValue>& jsonNod
                                              const RefPtr<AccessibilityNode>& node)
 {
     auto weakComposedElement = GetComposedElementFromPage(node->GetNodeId());
-    auto composedElement = weakComposedElement.Upgrade();
+    auto composedElement = DynamicCast<V2::InspectorComposedElement>(weakComposedElement.Upgrade());
     if (!composedElement) {
         LOGE("return");
         return;
@@ -347,8 +432,7 @@ void JsInspectorManager::GetAttrsAndStylesV2(std::unique_ptr<JsonValue>& jsonNod
     }
     auto shapeComposedElement = AceType::DynamicCast<V2::ShapeComposedElement>(inspectorElement);
     if (shapeComposedElement) {
-        int type = StringUtils::StringToInt(shapeComposedElement->GetShapeType());
-        jsonNode->Replace(INSPECTOR_TYPE, SHAPE_TYPE_STRINGS[type]);
+        jsonNode->Replace(INSPECTOR_TYPE, shapeComposedElement->GetShapeType().c_str());
     }
 }
 

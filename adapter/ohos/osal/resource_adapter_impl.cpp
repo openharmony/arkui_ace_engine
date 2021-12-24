@@ -32,7 +32,8 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     std::string resIndexPath = resPath + "resources.index";
     auto resRet = newResMgr->AddResource(resIndexPath.c_str());
     auto configRet = newResMgr->UpdateResConfig(*resConfig);
-    LOGI("AddRes result=%{public}d, UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}d, device=%{public}d",
+    LOGI("AddRes result=%{public}d, UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}d, "
+         "device=%{public}d",
         resRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType());
     resourceManager_ = newResMgr;
     packagePathStr_ = resPath;

@@ -26,7 +26,6 @@ class FlutterRenderTransform final : public RenderTransform {
     DECLARE_ACE_TYPE(FlutterRenderTransform, RenderTransform);
 
 public:
-    static Matrix4 GetTransformByOffset(Matrix4 matrix, const Offset& offset);
     FlutterRenderTransform() = default;
     ~FlutterRenderTransform() override = default;
     RenderLayer GetRenderLayer() override;

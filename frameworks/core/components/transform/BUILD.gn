@@ -18,7 +18,9 @@ build_component("transform") {
     "click_spring_effect.cpp",
     "flutter_render_transform.cpp",
     "render_transform.cpp",
+    "render_transform_creator.cpp",
     "transform_component.cpp",
     "transform_element.cpp",
   ]
+  rosen_sources = [ "rosen_render_transform.cpp" ]
 }

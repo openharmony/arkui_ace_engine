@@ -23,11 +23,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderSwitch::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSwitch>();
-}
-
 void FlutterRenderSwitch::Paint(RenderContext& context, const Offset& offset)
 {
     auto canvas = ScopedCanvas::Create(context);

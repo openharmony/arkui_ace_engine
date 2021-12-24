@@ -409,7 +409,9 @@ bool QjsPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     engineInstance_ = AceType::MakeRefPtr<QjsPaEngineInstance>(delegate, instanceId_);
     bool ret = engineInstance_->InitJsEnv(runtime, context, GetExtraNativeObject());
     SetPostTask(nativeEngine_);
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
+#endif
     return ret;
 }
 
@@ -438,7 +440,9 @@ QjsPaEngine::~QjsPaEngine()
     UnloadLibrary();
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     if (nativeEngine_ != nullptr) {
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
+#endif
         delete nativeEngine_;
     }
     if (engineInstance_ && engineInstance_->GetQjsRuntime()) {
@@ -549,7 +553,7 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
     if (type == BackendType::SERVICE) {
         paStartFunc = Framework::QJSUtils::GetPropertyStr(ctx, paObj, "onStart");
     } else if (type == BackendType::DATA) {
-        paStartFunc = Framework::QJSUtils::GetPropertyStr(ctx, paObj, "onInitalized");
+        paStartFunc = Framework::QJSUtils::GetPropertyStr(ctx, paObj, "onInitialized");
     } else if (type == BackendType::FORM) {
         paStartFunc = Framework::QJSUtils::GetPropertyStr(ctx, paObj, "onCreate");
     } else {
@@ -895,7 +899,7 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> QjsPaEngine::Query(
 
     JSValueConst argv[] = { argUriJSValue, argColumnsJSValue, argPredicatesJSValue };
     JSValue retVal = Framework::QJSUtils::Call(ctx, paFunc, JS_UNDEFINED, countof(argv), argv);
-    if (JS_IsException(retVal)) {
+    if (JS_IsException(retVal) || JS_IsUndefined(retVal)) {
         LOGE("Qjs paFunc FAILED!");
         return resultSet;
     }

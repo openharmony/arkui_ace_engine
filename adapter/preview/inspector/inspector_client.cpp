@@ -33,6 +33,11 @@ void InspectorClient::RegisterDefaultJSONTreeCallback(AssembleDefaultJSONTreeCal
     assembleDefaultJSONTreeCallback_ = callback;
 }
 
+void InspectorClient::RegisterOperateComponentCallback(OperateComponentCallback&& callback)
+{
+    operateComponentCallback_ = callback;
+}
+
 bool InspectorClient::AssembleJSONTreeStr(std::string& jsonTreeStr)
 {
     if (assembleJSONTreeCallback_) {
@@ -50,4 +55,14 @@ bool InspectorClient::AssembleDefaultJSONTreeStr(std::string &jsonTreeStr)
         return false;
     }
 }
+
+bool InspectorClient::OperateComponent(const std::string &attrsJson)
+{
+    if (operateComponentCallback_) {
+        return operateComponentCallback_(attrsJson);
+    } else {
+        return false;
+    }
+}
+
 } // namespace OHOS::Ace

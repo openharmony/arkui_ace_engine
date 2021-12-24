@@ -147,6 +147,7 @@ protected:
 private:
     void UpdateWeakTextField(const RefPtr<TextOverlayComponent>& overlay);
     void BindBackendEvent(const RefPtr<TextOverlayComponent>& overlay);
+    void BindBackendEventV2(const RefPtr<TextOverlayComponent>& overlay);
     void RemoveBackendEvent(const RefPtr<TextOverlayComponent>& overlay);
 
     void HandleClick(const Offset& clickOffset);

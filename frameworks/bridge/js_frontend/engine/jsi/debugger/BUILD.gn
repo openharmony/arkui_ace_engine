@@ -33,9 +33,7 @@ ohos_shared_library("ark_debugger") {
 
   defines += ace_common_defines
 
-  external_deps = [ "hilog:libhilog" ]
-
-  deps += [ "//third_party/boost:boost" ]
+  external_deps = hilog_deps
 
   include_dirs = [
     "$ace_root",
@@ -54,5 +52,5 @@ ohos_shared_library("ark_debugger") {
   configs = [ ":ark_debugger_config" ]
 
   subsystem_name = "ace"
-  part_name = "ace_engine_full"
+  part_name = ace_engine_part
 }

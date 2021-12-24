@@ -69,7 +69,7 @@ std::string ScrollComposedElement::GetAxisDirection() const
         case Axis::NONE:
             return std::string("ScrollDirection.None");
         default:
-            return std::string("");
+            return std::string("ScrollDirection.Vertical");
     }
 }
 
@@ -86,11 +86,11 @@ std::string ScrollComposedElement::GetDisplayMode() const
     DisplayMode displayMode = scrollBar->GetDisplayMode();
     switch (displayMode) {
         case DisplayMode::OFF:
-            return std::string("DisplayMode.Off");
+            return std::string("BarState.Off");
         case DisplayMode::AUTO:
-            return std::string("DisplayMode.Auto");
+            return std::string("BarState.Auto");
         case DisplayMode::ON:
-            return std::string("DisplayMode.On");
+            return std::string("BarState.On");
         default:
             return std::string("");
     }

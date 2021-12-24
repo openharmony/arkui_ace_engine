@@ -18,6 +18,12 @@
 
 #define ACE_FORCE_EXPORT __attribute__((visibility("default")))
 
+#ifndef ACE_PREVIEW_EXPORT
+#ifdef _WIN32
+#define ACE_PREVIEW_EXPORT __declspec(dllexport)
+#endif
+#endif // ACE_PREVIEW_EXPORT
+
 #ifndef ACE_EXPORT
 #ifndef WEARABLE_PRODUCT
 #define ACE_EXPORT ACE_FORCE_EXPORT

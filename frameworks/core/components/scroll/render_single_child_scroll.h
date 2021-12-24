@@ -26,7 +26,6 @@ class RenderSingleChildScroll : public RenderScroll {
 public:
     static RefPtr<RenderNode> Create();
 
-    void UpdateTouchRect() override;
     void MoveChildToViewPort(const Size& size, const Offset& childOffset, const Offset& effectOffset);
 
 protected:

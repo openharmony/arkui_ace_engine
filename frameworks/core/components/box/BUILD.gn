@@ -21,5 +21,7 @@ build_component("box") {
     "flutter_render_box.cpp",
     "render_box.cpp",
     "render_box_base.cpp",
+    "render_box_creator.cpp",
   ]
+  rosen_sources = [ "rosen_render_box.cpp" ]
 }

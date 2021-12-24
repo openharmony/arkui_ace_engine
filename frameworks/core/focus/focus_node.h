@@ -161,11 +161,26 @@ protected:
         if (onFocusCallback_) {
             onFocusCallback_();
         }
+        if (onFocus_) {
+            onFocus_();
+        }
     }
     virtual void OnBlur()
     {
         if (onBlurCallback_) {
             onBlurCallback_();
+        }
+        if (onBlur_) {
+            onBlur_();
+        }
+    }
+    virtual void OnFocusMove(KeyCode keyCode)
+    {
+        bool flag = keyCode == KeyCode::TV_CONTROL_UP || keyCode == KeyCode::TV_CONTROL_DOWN ||
+            keyCode == KeyCode::TV_CONTROL_LEFT || keyCode == KeyCode::TV_CONTROL_RIGHT ||
+                keyCode == KeyCode::KEYBOARD_TAB;
+        if (onFocusMove_ && flag) {
+            onFocusMove_((int)keyCode);
         }
     }
 
@@ -188,6 +203,10 @@ protected:
     {
         return false;
     }
+
+    std::function<void(int)> onFocusMove_;
+    std::function<void()> onFocus_;
+    std::function<void()> onBlur_;
 
 private:
     static int32_t GenerateFocusIndex();

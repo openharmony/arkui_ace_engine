@@ -296,6 +296,26 @@ std::string CanvasTaskPool::GetJsonData(const std::string& path)
     return paint->GetJsonData(path);
 }
 
+double CanvasTaskPool::GetWidth() const
+{
+    auto paint = renderNode_.Upgrade();
+    if (!paint) {
+        return 0.0;
+    }
+
+    return paint->GetLayoutSize().Width();
+}
+
+double CanvasTaskPool::GetHeight() const
+{
+    auto paint = renderNode_.Upgrade();
+    if (!paint) {
+        return 0.0;
+    }
+
+    return paint->GetLayoutSize().Height();
+}
+
 void CanvasTaskPool::UpdateFillColor(const Color& color)
 {
     auto task = [color](RenderCustomPaint& interface, const Offset& offset) {

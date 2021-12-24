@@ -19,6 +19,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/slider/flutter_render_slider.h"
 #include "core/components/slider/slider_element.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -69,7 +70,7 @@ std::string SliderComposedElement::GetValue() const
     if (renderSlider) {
         return std::to_string(renderSlider->GetValue());
     }
-    return "";
+    return "0";
 }
 
 std::string SliderComposedElement::GetMax() const
@@ -78,7 +79,7 @@ std::string SliderComposedElement::GetMax() const
     if (renderSlider) {
         return std::to_string(renderSlider->GetMax());
     }
-    return "";
+    return "100";
 }
 
 std::string SliderComposedElement::GetMin() const
@@ -87,7 +88,7 @@ std::string SliderComposedElement::GetMin() const
     if (renderSlider) {
         return std::to_string(renderSlider->GetMin());
     }
-    return "";
+    return "0";
 }
 
 std::string SliderComposedElement::GetStep() const
@@ -96,7 +97,7 @@ std::string SliderComposedElement::GetStep() const
     if (renderSlider) {
         return std::to_string(renderSlider->GetStep());
     }
-    return "";
+    return "1";
 }
 
 std::string SliderComposedElement::GetStyle() const
@@ -105,21 +106,21 @@ std::string SliderComposedElement::GetStyle() const
     if (renderSlider) {
         SliderMode mode = renderSlider->GetMode();
         if (mode == SliderMode::OUTSET) {
-            return std::string("Outset");
+            return std::string("SliderStyle.Outset");
         } else {
-            return std::string("Inset");
+            return std::string("SliderStyle.Inset");
         }
     }
-    return "";
+    return "SliderStyle.Outset";
 }
 
 std::string SliderComposedElement::GetBlockColor() const
 {
     auto renderSlider = GetRenderSlider();
-    if (renderSlider) {
-        auto slider = renderSlider->GetSliderComponent().Upgrade();
-        if (slider) {
-            auto block = slider->GetBlock();
+    auto flutterRenderSlider = AceType::DynamicCast<FlutterRenderSlider>(renderSlider);
+    if (flutterRenderSlider) {
+        auto block = flutterRenderSlider->GetRenderBlock();
+        if (block) {
             return block->GetBlockColor().ColorToString();
         }
         return "";
@@ -130,11 +131,11 @@ std::string SliderComposedElement::GetBlockColor() const
 std::string SliderComposedElement::GetTrackColor() const
 {
     auto renderSlider = GetRenderSlider();
-    if (renderSlider) {
-        auto slider = renderSlider->GetSliderComponent().Upgrade();
-        if (slider) {
-            auto Track = slider->GetTrack();
-            return Track->GetBackgroundColor().ColorToString();
+    auto flutterRenderSlider = AceType::DynamicCast<FlutterRenderSlider>(renderSlider);
+    if (flutterRenderSlider) {
+        auto track = flutterRenderSlider->GetRenderTrack();
+        if (track) {
+            return track->GetBackgroundColor().ColorToString();
         }
         return "";
     }
@@ -144,11 +145,11 @@ std::string SliderComposedElement::GetTrackColor() const
 std::string SliderComposedElement::GetSelectedColor() const
 {
     auto renderSlider = GetRenderSlider();
-    if (renderSlider) {
-        auto slider = renderSlider->GetSliderComponent().Upgrade();
-        if (slider) {
-            auto Track = slider->GetTrack();
-            return Track->GetSelectColor().ColorToString();
+    auto flutterRenderSlider = AceType::DynamicCast<FlutterRenderSlider>(renderSlider);
+    if (flutterRenderSlider) {
+        auto track = flutterRenderSlider->GetRenderTrack();
+        if (track) {
+            return track->GetSelectColor().ColorToString();
         }
         return "";
     }
@@ -161,7 +162,7 @@ std::string SliderComposedElement::GetShowSteps() const
     if (renderSlider) {
         return ConvertBoolToString(renderSlider->GetShowSteps());
     }
-    return "";
+    return "false";
 }
 
 std::string SliderComposedElement::GetShowTips() const
@@ -170,7 +171,7 @@ std::string SliderComposedElement::GetShowTips() const
     if (renderSlider) {
         return ConvertBoolToString(renderSlider->GetShowTips());
     }
-    return "";
+    return "false";
 }
 
 RefPtr<RenderSlider> SliderComposedElement::GetRenderSlider() const

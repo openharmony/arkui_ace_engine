@@ -39,7 +39,7 @@ using EventCallbackMap = std::map<int32_t, v8::Persistent<v8::Value, v8::Copyabl
 using ModuleCallbackMap = std::map<int32_t, PromiseCallback>;
 using RequestIdCallbackIdMap = std::map<int32_t, int32_t>;
 using CallbackIdIsolateMap = std::map<int32_t, v8::Isolate*>;
-using IsolateNativeWorkMap = std::map<v8::Isolate*, NativeAsyncWork*>;
+using IsolateNativeEngineMap = std::map<v8::Isolate*, NativeEngine*>;
 
 enum class ParseJsDataResult {
     PARSE_JS_SUCCESS = 0,
@@ -76,7 +76,10 @@ public:
         return jsCode_;
     }
 
-    void AddIsolateNativeWorkRelation(v8::Isolate* isolate, NativeEngine* nativeEngine);
+    static void NativeAsyncExecuteCallback(NativeEngine* engine, void* data);
+    static void NativeAsyncCompleteCallback(NativeEngine* engine, int status, void* data);
+
+    void AddIsolateNativeEngineRelation(v8::Isolate* isolate, NativeEngine* nativeEngine);
 
     bool ForwardToWorker(int32_t callbackId) override;
 
@@ -120,19 +123,16 @@ private:
 
     void TriggerModuleJsCallback(int32_t callbackId, int32_t code, std::string result, v8::Isolate* isolate);
 
-    static void NativeAsyncExecuteCallback(NativeEngine* engine, void* data);
-    static void NativeAsyncCompleteCallback(NativeEngine* engine, int status, void* data);
-
     void GetCallbackId(v8::Isolate* isolate, std::set<int32_t>& callbackIdSet);
     void DestroyModuleCallbackMap(v8::Isolate* isolate);
     void DestroyCallbackIdIsolateMap(v8::Isolate* isolate);
-    void DestroyIsolateNativeWorkMap(v8::Isolate* isolate);
+    void DestroyIsolateNativeEngineMap(v8::Isolate* isolate);
 
     EventCallbackMap eventCallBackFuncs_;
     ModuleCallbackMap moduleCallBackFuncs_;
     RequestIdCallbackIdMap requestIdCallbackIdMap_;
     CallbackIdIsolateMap callbackIdIsolateMap_;
-    IsolateNativeWorkMap isolateNativeWorkMap_;
+    IsolateNativeEngineMap isolateNativeEngineMap_;
     std::atomic_int pendingCallbackId_ = 1;
 
     v8::Isolate* isolate_ = nullptr;
@@ -141,7 +141,7 @@ private:
     mutable std::mutex moduleCallbackMapMutex_;
     mutable std::mutex requestIdCallbackIdMapMutex_;
     mutable std::mutex callbackIdIsolateMapMutex_;
-    mutable std::mutex isolateNativeWorkMapMutex_;
+    mutable std::mutex isolateNativeEngineMapMutex_;
 };
 
 struct JsCallbackData final {

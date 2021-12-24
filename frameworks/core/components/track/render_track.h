@@ -97,7 +97,6 @@ public:
 
     void SetTotalRatio(const double ratio)
     {
-        needUpdateAnimation_ = false;
         if (!playAnimation_) {
             totalRatio_ = ratio;
         } else if (!NearEqual(ratio, prevousPercentValue_)) {
@@ -176,6 +175,7 @@ protected:
     std::chrono::duration<double> animationDuring_;
     bool needUpdateAnimation_ = false;
     bool playAnimation_ = false;
+    bool isReverse_ = false;
     double scanHighLightValue_ = 0.0;
 
     Color selectColor_;
@@ -186,6 +186,7 @@ protected:
     double cachedRatio_ = 0.0;
     Dimension thickness_;
     Dimension scaleStrokeWidth_;
+    Axis direction_ = Axis::HORIZONTAL;
 };
 
 class RenderCircleTrack : public RenderTrack {
@@ -223,6 +224,17 @@ public:
 
 class RenderMoonTrack : public RenderTrack {
     DECLARE_ACE_TYPE(RenderMoonTrack, RenderTrack);
+
+public:
+    static RefPtr<RenderNode> Create();
+
+    Size Measure() override;
+
+    void Dump() override;
+};
+
+class RenderCapsuleTrack : public RenderTrack {
+    DECLARE_ACE_TYPE(RenderCapsuleTrack, RenderTrack);
 
 public:
     static RefPtr<RenderNode> Create();

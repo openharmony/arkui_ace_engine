@@ -164,6 +164,7 @@ bool DOMSearch::SetSpecializedStyle(const std::pair<std::string, std::string>& s
         { DOM_COLOR,
             [](const std::string& val, StyleParseHolder& holder) {
                 auto color = holder.node.ParseColor(val);
+                holder.textStyle.SetTextColor(color);
                 holder.textField->SetTextColor(color);
                 holder.textField->SetFocusTextColor(color);
             } },

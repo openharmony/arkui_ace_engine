@@ -51,7 +51,7 @@ private:
     v8::Isolate* isolate_ = nullptr;
 
     NativeXComponent *nativeXComponent_ = nullptr;
-    RefPtr<NativeXComponentImpl> nativeXcomponentImpl_;
+    RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
 
     bool hasPluginLoaded_ = false;
 };

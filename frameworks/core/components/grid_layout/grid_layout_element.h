@@ -26,6 +26,7 @@ class GridLayoutElement : public ComponentGroupElement, public FocusGroup {
 public:
     void Update() override;
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
+    void PerformBuild() override;
 
 private:
     RefPtr<RenderNode> CreateRenderNode() override;

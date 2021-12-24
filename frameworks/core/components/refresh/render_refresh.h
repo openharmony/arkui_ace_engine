@@ -62,6 +62,21 @@ public:
         refreshing_ = refreshing;
     }
 
+    bool GetRefreshing() const
+    {
+        return refreshing_;
+    }
+
+    Dimension GetInspectorOffset() const
+    {
+        return inspectorOffset_;
+    }
+
+    double GetFriction() const
+    {
+        // Percent
+        return frictionRatio_ * 100.0;
+    }
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -124,6 +139,7 @@ private:
     bool showLastTime_ = false;
     bool refreshing_ = false;
     bool isInitialized_ = false;
+    bool isRefresh_ = false;
     bool isUseOffset_ = false; // Whether use the indicator offset or default
     RefreshType refreshType_ = RefreshType::AUTO;
     Color progressColor_;
@@ -166,6 +182,7 @@ private:
     double frictionRatio_ = 0.0;
     double timeDistance_ = 0.0;
     double timeOffset_ = 0.0;
+    Dimension inspectorOffset_;
 
     // Use for update loading size when screen size changed.
     double scale_ = 0.0;

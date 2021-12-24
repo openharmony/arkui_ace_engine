@@ -347,6 +347,16 @@ public:
     template<typename T>
     static void CustomMethod(const char* name, JSMemberFunctionCallback<T> callback);
 
+    template<typename T>
+    static void CustomProperty(const char* name, MemberFunctionGetCallback<T> getter,
+        MemberFunctionSetCallback<T> setter);
+
+    static void CustomProperty(const char* name, FunctionGetCallback getter,
+        FunctionSetCallback setter);
+
+    template<typename T>
+    static void CustomProperty(const char* name, JSMemberFunctionCallback<T> getter,
+        JSMemberFunctionCallback<T> setter);
     /**
      *  Register a static method with an engine-specific callback signature
      *
@@ -410,6 +420,8 @@ public:
     static void Inherit();
 
     static IFunctionBinding* GetFunctionBinding(int id);
+    static IFunctionBinding* GetGetFunctionBinding(int id);
+    static IFunctionBinding* GetSetFunctionBinding(int id);
 
     /**
      *  Get the Javascript name of class C
@@ -434,6 +446,8 @@ private:
         But only if current approach proves to be a bottleneck.
     */
     static std::unordered_map<int, IFunctionBinding*> functions_;
+    static std::unordered_map<int, IFunctionBinding*> getFunctions_;
+    static std::unordered_map<int, IFunctionBinding*> setFunctions_;
     static int nextFreeId_;
 };
 

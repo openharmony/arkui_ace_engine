@@ -26,6 +26,10 @@ class V8EngineLoader : public JsEngineLoader, public Singleton<V8EngineLoader> {
 
 public:
     RefPtr<JsEngine> CreateJsEngine(int32_t instanceId) const final;
+    RefPtr<JsEngine> CreateJsEngineUsingSharedRuntime(int32_t instanceId, void* runtime) const override
+    {
+        return nullptr;
+    }
     RefPtr<BaseCanvasBridge> CreateCanvasBridge() const final;
     RefPtr<BaseXComponentBridge> CreateXComponentBridge() const final;
 };

@@ -156,43 +156,83 @@ void RenderTextOverlay::Update(const RefPtr<Component>& component)
 
 void RenderTextOverlay::BindBackendEvent(const RefPtr<TextOverlayComponent>& overlay)
 {
-    BackEndEventManager<void()>::GetInstance().BindBackendEvent(
-        overlay->GetCutButtonMarker(), [weak = WeakClaim(this)]() {
-            auto overlay = weak.Upgrade();
-            if (overlay) {
-                overlay->HandleCut();
-            }
-        });
+    auto context = context_.Upgrade();
+    if (context->GetIsDeclarative()) {
+        BindBackendEventV2(overlay);
+    } else {
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(
+            overlay->GetCutButtonMarker(), [weak = WeakClaim(this)]() {
+                auto overlay = weak.Upgrade();
+                if (overlay) {
+                    overlay->HandleCut();
+                }
+            });
 
-    BackEndEventManager<void()>::GetInstance().BindBackendEvent(
-        overlay->GetCopyButtonMarker(), [weak = WeakClaim(this)]() {
-            auto overlay = weak.Upgrade();
-            if (overlay) {
-                overlay->HandleCopy();
-            }
-        });
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(
+            overlay->GetCopyButtonMarker(), [weak = WeakClaim(this)]() {
+                auto overlay = weak.Upgrade();
+                if (overlay) {
+                    overlay->HandleCopy();
+                }
+            });
 
-    BackEndEventManager<void()>::GetInstance().BindBackendEvent(
-        overlay->GetPasteButtonMarker(), [weak = WeakClaim(this)]() {
-            auto overlay = weak.Upgrade();
-            if (overlay) {
-                overlay->HandlePaste();
-            }
-        });
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(
+            overlay->GetPasteButtonMarker(), [weak = WeakClaim(this)]() {
+                auto overlay = weak.Upgrade();
+                if (overlay) {
+                    overlay->HandlePaste();
+                }
+            });
 
-    BackEndEventManager<void()>::GetInstance().BindBackendEvent(
-        overlay->GetCopyAllButtonMarker(), [weak = WeakClaim(this)]() {
-            auto overlay = weak.Upgrade();
-            if (overlay) {
-                overlay->HandleCopyAll();
-            }
-        });
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(
+            overlay->GetCopyAllButtonMarker(), [weak = WeakClaim(this)]() {
+                auto overlay = weak.Upgrade();
+                if (overlay) {
+                    overlay->HandleCopyAll();
+                }
+            });
+    }
 
     BackEndEventManager<void()>::GetInstance().BindBackendEvent(
         overlay->GetMoreButtonMarker(), [weak = WeakClaim(this)]() {
             auto overlay = weak.Upgrade();
             if (overlay) {
                 overlay->HandleMoreButtonClick();
+            }
+        });
+}
+
+void RenderTextOverlay::BindBackendEventV2(const RefPtr<TextOverlayComponent>& overlay)
+{
+    BackEndEventManager<void(const ClickInfo& info)>::GetInstance().BindBackendEvent(
+        overlay->GetCutButtonMarker(), [weak = WeakClaim(this)](const ClickInfo& info) {
+            auto overlay = weak.Upgrade();
+            if (overlay) {
+                overlay->HandleCut();
+            }
+        });
+
+    BackEndEventManager<void(const ClickInfo& info)>::GetInstance().BindBackendEvent(
+        overlay->GetCopyButtonMarker(), [weak = WeakClaim(this)](const ClickInfo& info) {
+            auto overlay = weak.Upgrade();
+            if (overlay) {
+                overlay->HandleCopy();
+            }
+        });
+
+    BackEndEventManager<void(const ClickInfo& info)>::GetInstance().BindBackendEvent(
+        overlay->GetPasteButtonMarker(), [weak = WeakClaim(this)](const ClickInfo& info) {
+            auto overlay = weak.Upgrade();
+            if (overlay) {
+                overlay->HandlePaste();
+            }
+        });
+
+    BackEndEventManager<void(const ClickInfo& info)>::GetInstance().BindBackendEvent(
+        overlay->GetCopyAllButtonMarker(), [weak = WeakClaim(this)](const ClickInfo& info) {
+            auto overlay = weak.Upgrade();
+            if (overlay) {
+                overlay->HandleCopyAll();
             }
         });
 }
@@ -468,7 +508,7 @@ bool RenderTextOverlay::TouchTest(const Point& globalPoint, const Point& parentL
         return false;
     }
     const auto localPoint = parentLocalPoint - GetPaintRect().GetOffset();
-    if (showOption_.showMenu) {
+    if (!isSingleHandle_ || showOption_.showMenu) {
         for (auto iter = GetChildren().rbegin(); iter != GetChildren().rend(); ++iter) {
             const auto& child = *iter;
             if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {

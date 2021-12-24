@@ -19,11 +19,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderSvgFeComposite::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSvgFeComposite>();
-}
-
 void FlutterRenderSvgFeComposite::OnAsImageFilter(const sk_sp<SkImageFilter>& backImageFilter,
                                                   const sk_sp<SkImageFilter>& foreImageFilter,
                                                   sk_sp<SkImageFilter>& imageFilter) const

@@ -87,7 +87,6 @@ class RenderStepper : public RenderNode {
 public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
-    void UpdateTouchRect() override;
     void PerformLayout() override;
     int32_t GetCurrentIndex() const
     {
@@ -115,6 +114,11 @@ public:
         return stepperWidth_;
     }
 
+    RefPtr<StepperComponent> GetStepperComponent() const
+    {
+        return stepperComponent_;
+    }
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -131,7 +135,7 @@ protected:
     RefPtr<StepperComponent> stepperComponent_;
     std::vector<RefPtr<RenderNode>> childrenArray_;
     int32_t totalItemCount_ = 0;
-    int32_t currentIndex_ = 0;
+    int32_t currentIndex_ = -1;
     int32_t outItemIndex_ = 0;
     bool needReverse_ = false;
     bool onFocus_ = false;
@@ -194,6 +198,12 @@ private:
     OnReturnEventFunc backEvent_;
     RefPtr<RawRecognizer> touchRecognizer_;
     RefPtr<ClickRecognizer> clickRecognizer_;
+
+    std::function<void()> onFinish_;
+    std::function<void()> onSkip_;
+    std::function<void(int32_t, int32_t)> onChange_;
+    std::function<void(int32_t, int32_t)> onNext_;
+    std::function<void(int32_t, int32_t)> onPrevious_;
     // theme style
     double defaultPaddingStart_ = 0.0;
     double defaultPaddingEnd_ = 0.0;

@@ -45,6 +45,16 @@ bool IsTraceEnabled()
         system::GetParameter("debug.ace.trace.enabled", "0") == "1");
 }
 
+bool IsRosenBackendEnabled()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return (system::GetParameter("persist.ace.rosen.backend.enabled", "1") == "1" &&
+        system::GetParameter("debug.ace.rosen.backend.enabled", "1") == "1");
+#else
+    return false;
+#endif
+}
+
 bool IsAccessibilityEnabled()
 {
     return (system::GetParameter("persist.ace.testmode.enabled", "0") == "1" ||
@@ -63,7 +73,7 @@ bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 int32_t SystemProperties::deviceWidth_ = 0;
 int32_t SystemProperties::deviceHeight_ = 0;
-double SystemProperties::resolution_ = 1.0;
+double SystemProperties::resolution_ = 2.0;
 DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
 DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
 std::string SystemProperties::brand_ = INVALID_PARAM;
@@ -78,6 +88,8 @@ int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
 ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
+bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
+bool SystemProperties::isDeclarativeFrontend_ = false;
 
 DeviceType SystemProperties::GetDeviceType()
 {

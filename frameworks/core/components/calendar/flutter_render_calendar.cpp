@@ -86,12 +86,6 @@ void DrawCalendarText(
 }
 
 } // namespace
-
-RefPtr<RenderNode> RenderCalendar::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderCalendar>();
-}
-
 RenderLayer FlutterRenderCalendar::GetRenderLayer()
 {
     if (!layer_) {
@@ -266,17 +260,14 @@ void FlutterRenderCalendar::DrawFocusedArea(
     flutter::Paint paint;
     flutter::PaintData paintData;
     paint.paint()->setAntiAlias(true);
+    paint.paint()->setColor(focusedAreaBackgroundColor_);
 
     if (SystemProperties::GetDeviceType() == DeviceType::WATCH || type_ == CalendarType::SIMPLE) {
         if (day.dayMark == "work" && showHoliday_) {
             paint.paint()->setColor(workDayMarkColor_);
         } else if (day.dayMark == "off" && showHoliday_) {
             paint.paint()->setColor(offDayMarkColor_);
-        } else {
-            paint.paint()->setColor(focusedAreaBackgroundColor_);
         }
-    } else {
-        paint.paint()->setColor(focusedAreaBackgroundColor_);
     }
     Offset circleCenter =
         type_ == CalendarType::SIMPLE
@@ -513,9 +504,11 @@ void FlutterRenderCalendar::DrawCardCalendar(
     Offset dateNumberOffset = offset + Offset(x, y + NormalizeToPx(dayYAxisOffset));
     PaintDay(canvas, dateNumberOffset, day, dateTextStyle);
 
-    auto lunarDayYAxisOffset = calendarTheme_.lunarDayYAxisOffset;
-    Offset lunarDayOffset = offset + Offset(x, y + NormalizeToPx(lunarDayYAxisOffset));
-    PaintLunarDay(canvas, lunarDayOffset, day, lunarTextStyle);
+    if (dataAdapter_->ShowLunar() && !day.lunarDay.empty()) {
+        auto lunarDayYAxisOffset = calendarTheme_.lunarDayYAxisOffset;
+        Offset lunarDayOffset = offset + Offset(x, y + NormalizeToPx(lunarDayYAxisOffset));
+        PaintLunarDay(canvas, lunarDayOffset, day, lunarTextStyle);
+    }
 
     if (day.isFirstOfLunar) {
         auto underscoreXAxisOffset = calendarTheme_.underscoreXAxisOffset;
@@ -574,7 +567,7 @@ void FlutterRenderCalendar::DrawTvCalendar(
     }
 
     if (selectedDay == (dateNumber - 1) && !calendarFocusStatus_ && !renderSwiper->GetMoveStatus() &&
-        hasRequestFocus_) {
+        hasRequestFocus_ && type_ != CalendarType::SIMPLE) {
         DrawBlurArea(canvas, offset, x, y);
     }
 
@@ -679,7 +672,7 @@ void FlutterRenderCalendar::InitWorkStateStyle(
         auto workColor = workDayMarkColor_;
         SetWorkStateStyle(day, workColor, offColor, workStateStyle);
     } else {
-        SetWorkStateStyle(day, workDayMarkColor_, focusedAreaBackgroundColor_, workStateStyle);
+        SetWorkStateStyle(day, workDayMarkColor_, markLunarColor_, workStateStyle);
     }
 }
 

@@ -42,6 +42,8 @@ public:
     virtual RefPtr<Component> GetComponentByIndex(size_t index) = 0;
     virtual RefPtr<Element> GetElementByIndex(size_t index) = 0;
     virtual void ReleaseElementByIndex(size_t index) = 0;
+    virtual void ReleaseElementById(const ComposeId& composeId) = 0;
+    virtual void RefreshActiveComposeIds() = 0;
 
     size_t RenderCount() const
     {
@@ -57,6 +59,8 @@ public:
     {
         return (index >= startIndex_) && (index < startIndex_ + count_);
     }
+
+    virtual void Dump(const std::string& prefix) const;
 
 protected:
     WeakPtr<ElementProxyHost> host_;
@@ -78,6 +82,11 @@ public:
     RefPtr<Component> GetComponentByIndex(size_t index);
     RefPtr<Element> GetElementByIndex(size_t index);
     void ReleaseElementByIndex(size_t index);
+    void ReleaseElementById(const ComposeId& id);
+    void AddComposeId(const ComposeId& id);
+    void AddActiveComposeId(ComposeId& id);
+    void ReleaseRedundantComposeIds();
+    void DumpProxy();
 
     virtual RefPtr<Element> OnUpdateElement(const RefPtr<Element>& element, const RefPtr<Component>& component) = 0;
     virtual RefPtr<Component> OnMakeEmptyComponent() = 0;
@@ -86,6 +95,8 @@ public:
 
 private:
     RefPtr<ElementProxy> proxy_;
+    std::set<ComposeId> composeIds_;
+    std::set<ComposeId> activeComposeIds_;
 };
 
 } // namespace OHOS::Ace::V2

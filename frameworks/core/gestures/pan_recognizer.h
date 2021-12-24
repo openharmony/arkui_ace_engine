@@ -120,7 +120,6 @@ private:
     GestureAcceptResult IsPanGestureAccept() const;
     void Reset();
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
-    double ConvertPxToVp(double offset) const;
     void ChangeFingers(int32_t fingers);
     void ChangeDirection(const PanDirection& direction);
     void ChangeDistance(double distance);
@@ -146,6 +145,8 @@ private:
     int32_t newFingers_ = 1;
     double newDistance_ = 0.0;
     PanDirection newDirection_;
+
+    TouchPoint touchUpPoint_;
 };
 
 } // namespace OHOS::Ace

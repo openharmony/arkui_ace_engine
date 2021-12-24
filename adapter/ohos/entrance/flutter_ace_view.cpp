@@ -37,7 +37,7 @@ namespace {
 constexpr int32_t ROTATION_DIVISOR = 64;
 constexpr double PERMIT_ANGLE_VALUE = 0.5;
 
-TouchPoint ConvertTouchEvent(OHOS::TouchEvent& touchEvent)
+TouchPoint ConvertTouchEvent(const OHOS::TouchEvent& touchEvent)
 {
     int32_t id = static_cast<int32_t>(touchEvent.GetIndex());
     MmiPoint mmiPoint = touchEvent.GetPointerPosition(id);
@@ -129,10 +129,10 @@ void ConvertMouseEvent(OHOS::MouseEvent& mouseEvent, MouseEvent& events)
     events.x = mmiPoint.GetX();
     events.y = mmiPoint.GetY();
     events.z = mmiPoint.GetZ();
-    
+
     GetMouseEventAction(mouseEvent, events);
     GetMouseEventButton(mouseEvent, events);
-    
+
     events.pressedButtons = static_cast<size_t>(mouseEvent.GetPressedButtons());
     std::chrono::microseconds micros(mouseEvent.GetOccurredTime());
     TimeStamp time(micros);
@@ -172,7 +172,6 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::Window* window)
         LOGE("FlutterAceView::SurfaceCreated, window is nullptr");
         return;
     }
-
     if (view == nullptr) {
         LOGE("FlutterAceView::SurfaceCreated, view is nullptr");
         return;
@@ -180,10 +179,11 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::Window* window)
 
     auto platformView = view->GetShellHolder()->GetPlatformView();
     LOGI("FlutterAceView::SurfaceCreated, GetPlatformView");
-    if (platformView) {
+    if (platformView && !SystemProperties::GetRosenBackendEnabled()) {
         LOGI("FlutterAceView::SurfaceCreated, call NotifyCreated");
         platformView->NotifyCreated(window);
     }
+
     LOGI("<<< FlutterAceView::SurfaceCreated, end");
 }
 
@@ -216,7 +216,7 @@ void FlutterAceView::SetViewportMetrics(FlutterAceView* view, const flutter::Vie
     }
 }
 
-bool FlutterAceView::DispatchTouchEvent(FlutterAceView* view, OHOS::TouchEvent& touchEvent)
+bool FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const OHOS::TouchEvent& touchEvent)
 {
     if (touchEvent.GetSourceDevice() == OHOS::SourceDevice::MOUSE) {
         // mouse event
@@ -294,7 +294,7 @@ void FlutterAceView::SetShellHolder(std::unique_ptr<flutter::OhosShellHolder> ho
     shell_holder_ = std::move(holder);
 }
 
-bool FlutterAceView::ProcessTouchEvent(OHOS::TouchEvent& touchEvent)
+bool FlutterAceView::ProcessTouchEvent(const OHOS::TouchEvent& touchEvent)
 {
     TouchPoint touchPoint = ConvertTouchEvent(touchEvent);
     bool forbiddenToPlatform = false;

@@ -409,12 +409,12 @@ public:
         clickColor_ = clickColor;
     }
 
-    const std::string& GetKey() const
+    int32_t GetKey() const
     {
         return key_;
     }
 
-    void SetKey(const std::string& key)
+    void SetKey(int32_t key)
     {
         key_ = key;
     }
@@ -433,7 +433,7 @@ private:
     Radius bottomLeftRadius_;
     Radius bottomRightRadius_;
     std::string indexKey_;
-    std::string key_;
+    int32_t key_ = -1;
     bool needVibrate_ = true;
     bool rotationVibrate_ = false;
     bool supportScale_ = true;

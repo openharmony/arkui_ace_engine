@@ -51,6 +51,9 @@ void FocusableElement::Update()
     const auto& onBlurId = focusableComponent->GetOnBlurId();
     const auto& onKeyId = focusableComponent->GetOnKeyId();
     const auto& onDeleteId = focusableComponent->GetOnDeleteId();
+    onFocusMove_ = focusableComponent->GetOnFocusMove();
+    onFocus_ = focusableComponent->GetOnFocus();
+    onBlur_ = focusableComponent->GetOnBlur();
 
     if (!onClickId.IsEmpty()) {
         SetOnClickCallback(AceAsyncEvent<void()>::Create(onClickId, context_));

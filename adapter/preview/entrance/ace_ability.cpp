@@ -334,6 +334,11 @@ void AceAbility::RunEventLoop()
             SurfaceChanged(runArgs_.deviceConfig.orientation, runArgs_.deviceConfig.density, width, height);
         }
 #endif
+        auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+        if (container) {
+            container->RunNativeEngineLoop();
+        }
+
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
     loopRunning_ = true;
@@ -418,6 +423,16 @@ std::string AceAbility::GetDefaultJSONTree()
     return defaultJsonTreeStr;
 }
 
+void AceAbility::LoadDocument(const std::string& url, const std::string& componentName)
+{
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null");
+        return;
+    }
+    container->LoadDocument(url, componentName);
+}
+
 void AceAbility::ReplacePage(const std::string& url, const std::string& params)
 {
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
@@ -426,6 +441,23 @@ void AceAbility::ReplacePage(const std::string& url, const std::string& params)
         return;
     }
     container->GetFrontend()->ReplacePage(url, params);
+}
+
+void AceAbility::OperateComponent(const std::string& attrsJson)
+{
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    auto taskExecutor = container->GetTaskExecutor();
+
+    auto root = JsonUtil::ParseJsonString(attrsJson);
+    if (!root || !root->IsValid()) {
+        LOGE("the attrsJson is illegal json format");
+        return;
+    }
+    taskExecutor->PostTask(
+        [attrsJson] {
+          OHOS::Ace::Framework::InspectorClient::GetInstance().OperateComponent(attrsJson);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 } // namespace OHOS::Ace::Platform

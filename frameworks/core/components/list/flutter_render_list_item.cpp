@@ -43,11 +43,6 @@ constexpr double SCALE_END = 0.1;
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderListItem::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderListItem>();
-}
-
 RenderLayer FlutterRenderListItem::GetRenderLayer()
 {
     if (!transformLayer_) {

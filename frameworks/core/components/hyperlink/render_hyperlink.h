@@ -38,6 +38,10 @@ public:
 
     void PerformLayout() override;
 
+    RefPtr<HyperlinkComponent> GetHyperlinkComponent() const
+    {
+        return hyperlinkComponent_;
+    }
     const Color& GetColor() const
     {
         return color_;

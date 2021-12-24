@@ -218,6 +218,11 @@ public:
         bubbleBack_->SetBackgroundColor(bgColor.BlendOpacity(NINETY_OPACITY_IN_PERCENT));
     }
 
+    const Color& GetBubbleBackgroundColor()
+    {
+        return bubbleBack_->GetBackgroundColor();
+    }
+
     void SetAlignStyle(AlignStyle align)
     {
         alignStyle_ = align;

@@ -31,8 +31,8 @@ class ACE_EXPORT ComposedElement : public Element {
     DECLARE_ACE_TYPE(ComposedElement, Element);
 
 public:
-    using RenderFunction = std::function<RefPtr<Component>()>;
-    using PageTransitionFunction = RenderFunction;
+    using RenderFunction = std::function<RefPtr<Component>(const RefPtr<Component>&)>;
+    using PageTransitionFunction = std::function<RefPtr<Component>()>;
     using ApplyFunction = std::function<void(const RefPtr<RenderElement>&)>;
     explicit ComposedElement(const ComposeId& id);
     ~ComposedElement() override = default;
@@ -65,9 +65,12 @@ public:
         return id_;
     }
 
-    RefPtr<Component> CallRenderFunction()
+    RefPtr<Component> CallRenderFunction(const RefPtr<Component>& componnet)
     {
-        return renderFunction_();
+        if (renderFunction_) {
+            return renderFunction_(componnet);
+        }
+        return nullptr;
     }
 
     void SetRenderFunction(RenderFunction&& func)
@@ -101,18 +104,6 @@ public:
         return !!pageTransitionFunction_;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    void SetDebugLine(std::string debugLine)
-    {
-        debugLine_ = debugLine;
-    }
-
-    std::string GetDebugLine()
-    {
-        return debugLine_;
-    }
-#endif
-
 protected:
     virtual RefPtr<Component> BuildChild();
     void Apply(const RefPtr<Element>& child) override;
@@ -125,7 +116,6 @@ protected:
 
     ComposeId id_;
     std::string name_;
-    std::string debugLine_;
     bool addedToMap_ = false;
     int32_t countRenderNode_ = -1;
     RenderFunction renderFunction_;

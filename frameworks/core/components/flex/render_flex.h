@@ -23,6 +23,8 @@
 
 namespace OHOS::Ace {
 
+class FlexComponent;
+
 struct FlexItemProperties {
     double totalShrink = 0.0;
     double totalGrow = 0.0;
@@ -69,6 +71,11 @@ public:
     double GetSpace() const
     {
         return space_;
+    }
+
+    Dimension GetInspectorSpace() const
+    {
+        return inspectorSpace_;
     }
 
     TextBaseline GetBaseline() const
@@ -211,6 +218,7 @@ private:
     double allocatedSize_ = 0.0;
 
     double space_ = 0.0;
+    Dimension inspectorSpace_;
 
     std::set<RefPtr<RenderNode>> infinityLayoutNodes_;
     std::set<RefPtr<RenderNode>> absoluteNodes_;

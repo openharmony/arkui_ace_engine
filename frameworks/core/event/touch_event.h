@@ -153,7 +153,7 @@ private:
     TimeStamp time_;
 };
 
-class TouchLocationInfo : public TypeInfoBase {
+class TouchLocationInfo : public virtual TypeInfoBase {
     DECLARE_RELATIONSHIP_OF_CLASSES(TouchLocationInfo, TypeInfoBase);
 
 public:

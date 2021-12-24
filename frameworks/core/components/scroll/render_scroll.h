@@ -44,7 +44,7 @@ class RenderScroll : public RenderNode {
     DECLARE_ACE_TYPE(RenderScroll, RenderNode)
 
 public:
-    ~RenderScroll() override = default;
+    ~RenderScroll() override;
 
     static double CalculateFriction(double gamma);
     static double CalculateOffsetByFriction(double extentOffset, double delta, double friction);
@@ -214,6 +214,7 @@ protected:
     void DoJump(double position, int32_t source = SCROLL_FROM_JUMP);
     void Update(const RefPtr<Component>& component) override;
     void InitScrollBar(const RefPtr<ScrollBar>& scrollBar);
+    void InitScrollBarProxy();
 
     virtual void AdjustTouchRestrict(TouchRestrict& touchRestrict) {};
 
@@ -251,6 +252,7 @@ protected:
 
     double friction_ = 0.0;
     RefPtr<SpringProperty> springProperty_;
+    RefPtr<ScrollBarProxy> scrollBarProxy_;
 
 private:
     bool IsOutOfBoundary();

@@ -25,8 +25,9 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const ToggleComposedElement&)>> CREATE_JSON_MAP {
-    { "ison", [](const ToggleComposedElement& inspector) { return inspector.GetChecked(); } },
-    { "selectedColor", [](const ToggleComposedElement& inspector) { return inspector.GetSelectedColor(); } }
+    { "isOn", [](const ToggleComposedElement& inspector) { return inspector.GetChecked(); } },
+    { "selectedColor", [](const ToggleComposedElement& inspector) { return inspector.GetSelectedColor(); } },
+    { "type", [](const ToggleComposedElement& inspector) { return inspector.GetToggleType(); } }
 };
 
 } // namespace
@@ -34,8 +35,9 @@ const std::unordered_map<std::string, std::function<std::string(const ToggleComp
 void ToggleComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("ison: ").append(GetChecked()));
+    DumpLog::GetInstance().AddDesc(std::string("isOn: ").append(GetChecked()));
     DumpLog::GetInstance().AddDesc(std::string("selectedColor: ").append(GetSelectedColor()));
+    DumpLog::GetInstance().AddDesc(std::string("type: ").append(GetToggleType()));
 }
 
 std::unique_ptr<JsonValue> ToggleComposedElement::ToJsonObject() const
@@ -52,6 +54,11 @@ std::string ToggleComposedElement::GetChecked() const
     auto renderToggle = GetRenderToggle();
     auto checked = renderToggle ? renderToggle->GetToggleComponent()->GetCheckedState() : false;
     return ConvertBoolToString(checked);
+}
+
+std::string ToggleComposedElement::GetToggleType() const
+{
+    return std::string("ToggleType.Button");
 }
 
 std::string ToggleComposedElement::GetSelectedColor() const

@@ -25,6 +25,8 @@
 namespace OHOS::Ace::Framework {
 namespace {
 
+constexpr int32_t DEFAULT_SWIPER_CACHED_COUNT = 1;
+
 JSRef<JSVal> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetIndex()));
@@ -44,6 +46,7 @@ void JSSwiper::Create(const JSCallbackInfo& info)
     }
     component->SetIndicator(InitIndicatorStyle());
     component->SetMainSwiperSize(MainSwiperSize::MIN);
+    component->SetCachedSize(DEFAULT_SWIPER_CACHED_COUNT);
     ViewStackProcessor::GetInstance()->Push(component);
     JSInteractableView::SetFocusNode(true);
 }
@@ -63,7 +66,10 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("indicator", &JSSwiper::SetIndicator, opt);
     JSClass<JSSwiper>::StaticMethod("cancelSwipeOnOtherAxis", &JSSwiper::SetCancelSwipeOnOtherAxis, opt);
     JSClass<JSSwiper>::StaticMethod("displayMode", &JSSwiper::SetDisplayMode);
+    JSClass<JSSwiper>::StaticMethod("effectMode", &JSSwiper::SetEffectMode);
+    JSClass<JSSwiper>::StaticMethod("displayCount", &JSSwiper::SetDisplayCount);
     JSClass<JSSwiper>::StaticMethod("itemSpace", &JSSwiper::SetItemSpace);
+    JSClass<JSSwiper>::StaticMethod("cachedCount", &JSSwiper::SetCachedCount);
     JSClass<JSSwiper>::StaticMethod("onChange", &JSSwiper::SetOnChange);
     JSClass<JSSwiper>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSwiper>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -73,6 +79,8 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSwiper>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSwiper>::StaticMethod("indicatorStyle", &JSSwiper::SetIndicatorStyle);
+    JSClass<JSSwiper>::StaticMethod("enabled", &JSSwiper::SetEnabled);
+    JSClass<JSSwiper>::StaticMethod("disableSwipe", &JSSwiper::SetDisableSwipe);
     JSClass<JSSwiper>::StaticMethod("height", &JSSwiper::SetHeight);
     JSClass<JSSwiper>::StaticMethod("width", &JSSwiper::SetWidth);
     JSClass<JSSwiper>::StaticMethod("size", &JSSwiper::SetSize);
@@ -87,6 +95,81 @@ void JSSwiper::SetAutoplay(bool autoPlay)
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
     if (swiper) {
         swiper->SetAutoPlay(autoPlay);
+    }
+}
+
+void JSSwiper::SetEnabled(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsEnabled(info);
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsBoolean()) {
+        LOGE("info is not bool.");
+        return;
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetDisabledStatus(!(info[0]->ToBoolean()));
+    }
+}
+
+void JSSwiper::SetDisableSwipe(bool disable)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->DisableSwipe(disable);
+    }
+}
+
+void JSSwiper::SetEffectMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (!swiper) {
+        return;
+    }
+
+    if (!info[0]->IsNumber()) {
+        LOGE("info is not a  number ");
+        return;
+    }
+    auto swiperMode = static_cast<EdgeEffect>(info[0]->ToNumber<int32_t>());
+    if (swiperMode == EdgeEffect::SPRING) {
+        swiper->SetEdgeEffect(EdgeEffect::SPRING);
+    } else if (swiperMode == EdgeEffect::FADE) {
+        swiper->SetEdgeEffect(EdgeEffect::FADE);
+    } else {
+        swiper->SetEdgeEffect(EdgeEffect::NONE);
+    }
+}
+
+void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (!swiper) {
+        return;
+    }
+
+    if (info[0]->ToString() == "auto") {
+        swiper->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    }
+
+    if (info[0]->IsNumber()) {
+        swiper->SetDisplayCount(info[0]->ToNumber<int32_t>());
     }
 }
 
@@ -148,9 +231,11 @@ void JSSwiper::SetIndicator(bool showIndicator)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    swiper->SetShowIndicator(showIndicator);
-    if (!showIndicator && swiper) {
-        swiper->SetIndicator(nullptr);
+    if (swiper) {
+        swiper->SetShowIndicator(showIndicator);
+        if (!showIndicator) {
+            swiper->SetIndicator(nullptr);
+        }
     }
 }
 
@@ -247,6 +332,15 @@ void JSSwiper::SetDisplayMode(int32_t index)
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
     if (swiper) {
         swiper->SetDisplayMode(static_cast<SwiperDisplayMode>(index));
+    }
+}
+
+void JSSwiper::SetCachedCount(int32_t cachedCount)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetCachedSize(cachedCount);
     }
 }
 
@@ -367,6 +461,7 @@ void JSSwiperController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSwiperController>::Declare("SwiperController");
     JSClass<JSSwiperController>::CustomMethod("showNext", &JSSwiperController::ShowNext);
+    JSClass<JSSwiperController>::CustomMethod("finishAnimation", &JSSwiperController::FinishAnimation);
     JSClass<JSSwiperController>::CustomMethod("showPrevious", &JSSwiperController::ShowPrevious);
     JSClass<JSSwiperController>::Bind(globalObj, JSSwiperController::Constructor, JSSwiperController::Destructor);
 }
@@ -383,6 +478,24 @@ void JSSwiperController::Destructor(JSSwiperController* scroller)
     if (scroller != nullptr) {
         scroller->DecRefCount();
     }
+}
+
+void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute();
+        });
+        if (controller_) {
+            controller_->SetFinishCallback(eventMarker);
+        }
+    }
+    if (controller_) {
+        controller_->FinishAnimation();
+    }
+    args.ReturnSelf();
 }
 
 } // namespace OHOS::Ace::Framework

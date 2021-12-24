@@ -108,6 +108,14 @@ public:
     template<typename T>
     static void CustomMethod(const char* name, JSMemberFunctionCallback<T> callback, int id);
 
+    template<typename T>
+    static void CustomProperty(const char* name, MemberFunctionGetCallback<T> callback,
+        int getterId, int setterId);
+    static void CustomProperty(const char* name, FunctionGetCallback getter, FunctionSetCallback setter);
+    template<typename T>
+    static void CustomProperty(const char* name, JSMemberFunctionCallback<T> callback,
+        int getterId, int setterId);
+
     template<typename R, typename... Args>
     static void StaticMethod(const char* name, R (*func)(Args...), int id);
     static void StaticMethod(const char* name, JSFunctionCallback callback, int id);

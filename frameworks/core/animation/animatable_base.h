@@ -35,8 +35,13 @@ public:
 
     void AnimateTo(const T& beginValue, const T& endValue)
     {
+        if (endValue == endValue_) {
+            return;
+        }
+        endValue_ = endValue;
         if (!animationOption_.IsValid()) {
             MoveTo(endValue);
+            return;
         }
         ResetController();
         if (!animationController_) {
@@ -119,9 +124,14 @@ protected:
     void ApplyAnimationOptions()
     {
         auto onFinishEvent = animationOption_.GetOnFinishEvent();
-        if (!onFinishEvent.IsEmpty()) {
+        if (onFinishEvent) {
             animationController_->AddStopListener([onFinishEvent, weakContext = context_] {
-                AceAsyncEvent<void()>::Create(onFinishEvent, weakContext)();
+                auto context = weakContext.Upgrade();
+                if (context) {
+                    context->PostAsyncEvent(onFinishEvent);
+                } else {
+                    LOGE("the context is null");
+                }
             });
         }
         if (stopCallback_) {
@@ -134,6 +144,7 @@ protected:
         animationController_->SetTempo(animationOption_.GetTempo());
         animationController_->SetAnimationDirection(animationOption_.GetAnimationDirection());
         animationController_->SetFillMode(FillMode::FORWARDS);
+        animationController_->SetAllowRunningAsynchronously(animationOption_.GetAllowRunningAsynchronously());
         animationController_->Play();
     }
 
@@ -144,6 +155,7 @@ protected:
     RenderNodeAnimationCallback animationCallback_;
     RenderNodeAnimationCallback stopCallback_;
     RefPtr<Evaluator<T>> evaluator_;
+    T endValue_ {};
 };
 
 } // namespace OHOS::Ace

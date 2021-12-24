@@ -58,6 +58,9 @@ void RenderCheckable::Update(const RefPtr<Component>& component)
     if (checkable->GetOnChange()) {
         onChange_ = *checkable->GetOnChange();
     }
+    if (checkable->GetOnClick()) {
+        onClick_ = *checkable->GetOnClick();
+    }
     InitClickRecognizer(catchMode);
     AddAccessibilityAction();
     MarkNeedLayout();

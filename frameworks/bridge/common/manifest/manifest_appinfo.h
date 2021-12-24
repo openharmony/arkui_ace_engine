@@ -45,6 +45,8 @@ public:
 
     void AppInfoParse(const std::unique_ptr<JsonValue>& root);
 
+    void ParseI18nJsonInfo();
+
 private:
     std::string appName_;
     std::string versionName_;

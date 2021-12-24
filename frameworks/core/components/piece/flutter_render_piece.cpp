@@ -22,20 +22,11 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderPiece::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderPiece>();
-}
-
 void FlutterRenderPiece::Paint(RenderContext& context, const Offset& offset)
 {
     RenderNode::Paint(context, offset);
-
-    // Paint overlay when hover.
-    if (mouseState_ != MouseState::HOVER) {
-        return;
-    }
     if (!pieceComponent_) {
+        LOGE("!pieceComponent_");
         return;
     }
     auto margin = pieceComponent_->GetMargin();
@@ -62,7 +53,13 @@ void FlutterRenderPiece::Paint(RenderContext& context, const Offset& offset)
     }
     SkPaint paint;
     skCanvas->save();
-    paint.setColor(pieceComponent_->GetHoverColor().GetValue());
+
+    auto contextColor = context_.Upgrade();
+    if (contextColor->GetIsDeclarative()) {
+        paint.setColor(pieceComponent_->GetBackGroundColor().GetValue());
+    } else {
+        paint.setColor(pieceComponent_->GetHoverColor().GetValue());
+    }
     Rect pieceRect(pieceOffset + offset - GetPosition(), pieceSize);
     skCanvas->drawRRect(MakeRRect(pieceRect.GetOffset(), pieceRect.GetSize(), pieceComponent_->GetBorder()), paint);
     skCanvas->restore();

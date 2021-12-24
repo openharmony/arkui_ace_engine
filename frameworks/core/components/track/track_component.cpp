@@ -44,4 +44,9 @@ RefPtr<RenderNode> MoonTrack::CreateRenderNode()
     return RenderMoonTrack::Create();
 }
 
+RefPtr<RenderNode> CapsuleTrack::CreateRenderNode()
+{
+    return RenderCapsuleTrack::Create();
+}
+
 } // namespace OHOS::Ace

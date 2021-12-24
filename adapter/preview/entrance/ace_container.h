@@ -31,6 +31,7 @@
 #include "core/common/container.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/platform_bridge.h"
+#include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Platform {
 
@@ -171,10 +172,13 @@ public:
 
     void UpdateColorMode(ColorMode newColorMode);
 
+    void LoadDocument(const std::string& url,  const std::string& componentName);
+
+    void RunNativeEngineLoop();
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
-
     void AttachView(
         std::unique_ptr<Window> window, FlutterAceView* view, double density, int32_t width, int32_t height);
 
@@ -184,6 +188,7 @@ private:
     RefPtr<AssetManager> assetManager_;
     RefPtr<PlatformResRegister> resRegister_;
     RefPtr<PipelineContext> pipelineContext_;
+    RefPtr<Framework::JsEngine> jsEngine_;
     RefPtr<Frontend> frontend_;
     RefPtr<PlatformBridge> messageBridge_;
     FrontendType type_ { FrontendType::JSON };

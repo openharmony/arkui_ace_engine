@@ -80,4 +80,10 @@ void GridLayoutElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChil
     renderNode_->AddChild(proxy);
 }
 
+void GridLayoutElement::PerformBuild()
+{
+    children_.clear();
+    ComponentGroupElement::PerformBuild();
+}
+
 } // namespace OHOS::Ace

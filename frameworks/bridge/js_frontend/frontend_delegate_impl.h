@@ -319,8 +319,7 @@ public:
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc) override;
 
-    void HandleImage(const std::string& src, std::function<void(int32_t)>&& callback,
-        const std::set<std::string>& callbacks) override;
+    void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
 
     void RequestAnimationFrame(const std::string& callbackId) override;
 

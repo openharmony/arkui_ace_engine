@@ -24,6 +24,8 @@ class RenderGridLayoutItem : public RenderNode {
     DECLARE_ACE_TYPE(RenderGridLayoutItem, RenderNode);
 
 public:
+    using OnItemLongPressed = std::function<bool(int32_t, const WeakPtr<RenderNode>&)>;
+
     static RefPtr<RenderNode> Create();
 
     void Update(const RefPtr<Component>& component) override;
@@ -102,6 +104,10 @@ public:
         return index_;
     }
 
+    void OnLongPressEvent();
+
+    void SetOnItemLongPressed(const OnItemLongPressed& func);
+
 private:
     int32_t index_ = -1;
     int32_t columnIndex_ = -1;
@@ -109,6 +115,7 @@ private:
     int32_t columnSpan_ = 1;
     int32_t rowSpan_ = 1;
     bool forceRebuild_ = false;
+    OnItemLongPressed OnItemLongPressed_;
 };
 
 } // namespace OHOS::Ace

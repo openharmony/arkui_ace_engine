@@ -25,6 +25,11 @@ namespace OHOS::Ace {
 
 RefPtr<Element> GridLayoutComponent::CreateElement()
 {
+    // judge to create GridLayoutElement for dynamic grid
+    if (((rowsArgs_.empty() && (!columnsArgs_.empty())) || ((!rowsArgs_.empty()) && columnsArgs_.empty())) &&
+        (maxCount_ >= minCount_) && (minCount_ >= 1) && (cellLength_ > 0) && (editMode_ == true)) {
+        return AceType::MakeRefPtr<GridLayoutElement>();
+    }
     if (isDeclarative_ && useScroll_ && (rowsArgs_.empty() || columnsArgs_.empty())) {
         return AceType::MakeRefPtr<V2::GridElement>();
     }
@@ -33,6 +38,11 @@ RefPtr<Element> GridLayoutComponent::CreateElement()
 
 RefPtr<RenderNode> GridLayoutComponent::CreateRenderNode()
 {
+    // judge to create RenderGridLayout for dynamic grid
+    if (((rowsArgs_.empty() && (!columnsArgs_.empty())) || ((!rowsArgs_.empty()) && columnsArgs_.empty())) &&
+        (maxCount_ >= minCount_) && (minCount_ >= 1) && (cellLength_ > 0) && (editMode_ == true)) {
+        return RenderGridLayout::Create();
+    }
     if (isDeclarative_ && useScroll_ && (rowsArgs_.empty() || columnsArgs_.empty())) {
         return V2::RenderGridScroll::Create();
     }
@@ -126,7 +136,6 @@ void GridLayoutComponent::SetRowGap(const Dimension& rowGap)
 
 void GridLayoutComponent::SetRightToLeft(bool rightToLeft)
 {
-    LOGD("SetRightToLeft to %{public}d.", rightToLeft);
     rightToLeft_ = rightToLeft;
 }
 
@@ -143,6 +152,56 @@ void GridLayoutComponent::SetScrollBarWidth(const std::string& width)
 void GridLayoutComponent::SetScrollBar(DisplayMode displayMode)
 {
     displayMode_ = displayMode;
+}
+
+void GridLayoutComponent::SetOnGridDragEnterId(const OnGridDragEnterFunc& onGridDragEnterId)
+{
+    onGridDragEnterId_ = onGridDragEnterId;
+}
+
+void GridLayoutComponent::SetOnGridDragMoveId(const OnGridDragMoveFunc& onGridDragMoveId)
+{
+    onGridDragMoveId_ = onGridDragMoveId;
+}
+
+void GridLayoutComponent::SetOnGridDragLeaveId(const OnGridDragLeaveFunc& onGridDragLeaveId)
+{
+    onGridDragLeaveId_ = onGridDragLeaveId;
+}
+
+void GridLayoutComponent::SetOnGridDragStartId(const OnGridDragStartFunc& onGridDragStartId)
+{
+    onGridDragStartId_ = onGridDragStartId;
+}
+
+void GridLayoutComponent::SetOnGridDropId(const OnGridDropFunc& onGridDropId)
+{
+    onGridDropId_ = onGridDropId;
+}
+
+const OnGridDragEnterFunc& GridLayoutComponent::GetOnGridDragEnterId() const
+{
+    return onGridDragEnterId_;
+}
+
+const OnGridDragMoveFunc& GridLayoutComponent::GetOnGridDragMoveId() const
+{
+    return onGridDragMoveId_;
+}
+
+const OnGridDragLeaveFunc& GridLayoutComponent::GetOnGridDragLeaveId() const
+{
+    return onGridDragLeaveId_;
+}
+
+const OnGridDragStartFunc& GridLayoutComponent::GetOnGridDragStartId() const
+{
+    return onGridDragStartId_;
+}
+
+const OnGridDropFunc& GridLayoutComponent::GetOnGridDropId() const
+{
+    return onGridDropId_;
 }
 
 } // namespace OHOS::Ace

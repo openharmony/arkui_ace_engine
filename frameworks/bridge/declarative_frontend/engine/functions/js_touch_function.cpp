@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_touch_function.h"
 
 #include "base/log/log.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
 namespace OHOS::Ace::Framework {
@@ -27,10 +28,10 @@ JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchI
     const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
     touchInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(touchInfo.GetTouchType()));
     touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetFingerId());
-    touchInfoObj->SetProperty<double>("screenX", globalLocation.GetX());
-    touchInfoObj->SetProperty<double>("screenY", globalLocation.GetY());
-    touchInfoObj->SetProperty<double>("x", localLocation.GetX());
-    touchInfoObj->SetProperty<double>("y", localLocation.GetY());
+    touchInfoObj->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalLocation.GetX()));
+    touchInfoObj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalLocation.GetY()));
+    touchInfoObj->SetProperty<double>("x", SystemProperties::Px2Vp(localLocation.GetX()));
+    touchInfoObj->SetProperty<double>("y", SystemProperties::Px2Vp(localLocation.GetY()));
     return touchInfoObj;
 }
 
@@ -43,6 +44,9 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     JSRef<JSArray> changeTouchArr = JSRef<JSArray>::New();
 
     eventObj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+    auto target = CreateEventTargetObject(info);
+    eventObj->SetPropertyObject("target", target);
+
     const std::list<TouchLocationInfo>& touchList = info.GetTouches();
     uint32_t idx = 0;
     for (const TouchLocationInfo& location : touchList) {

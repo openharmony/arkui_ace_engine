@@ -57,7 +57,7 @@ NativeTexture::~NativeTexture()
     }
 }
 
-void NativeTexture::Create(const std::function<void(int64_t)>& onCreate)
+void NativeTexture::Create(const std::function<void(int64_t)>& onCreate, const std::string& idStr)
 {
     auto context = context_.Upgrade();
     if (!context) {
@@ -67,15 +67,15 @@ void NativeTexture::Create(const std::function<void(int64_t)>& onCreate)
 
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
 
-    platformTaskExecutor.PostTask([weak = WeakClaim(this), onCreate] {
+    platformTaskExecutor.PostTask([weak = WeakClaim(this), onCreate, idStr] {
         auto texture = weak.Upgrade();
         if (texture) {
-            texture->CreateTexture(onCreate);
+            texture->CreateTexture(onCreate, idStr);
         }
     });
 }
 
-void NativeTexture::CreateTexture(const std::function<void(int64_t)>& onCreate)
+void NativeTexture::CreateTexture(const std::function<void(int64_t)>& onCreate, const std::string& idStr)
 {
     auto context = context_.Upgrade();
     auto resRegister = context->GetPlatformResRegister();
@@ -84,7 +84,8 @@ void NativeTexture::CreateTexture(const std::function<void(int64_t)>& onCreate)
         return;
     }
     std::stringstream paramStream;
-    paramStream << XCOMPONENT_PARAM_INIT << XCOMPONENT_PARAM_EQUALS << TEXTURE_REGISTER_SURFACE;
+    paramStream << XCOMPONENT_PARAM_INIT << XCOMPONENT_PARAM_EQUALS << TEXTURE_REGISTER_SURFACE <<
+    XCOMPONENT_PARAM_AND  << "id" << XCOMPONENT_PARAM_EQUALS << idStr;
     std::string param = paramStream.str();
 
     id_ = resRegister->CreateResource(type_, param);
@@ -104,9 +105,9 @@ void NativeTexture::OnSize(int64_t textureId, int32_t textureWidth, int32_t text
 {
     std::stringstream paramStream;
     paramStream << TEXTURE_ID << XCOMPONENT_PARAM_EQUALS << textureId << XCOMPONENT_PARAM_AND
-                << TEXTURE_WIDTH << XCOMPONENT_PARAM_EQUALS << textureWidth << XCOMPONENT_PARAM_AND
-                << TEXTURE_HEIGHT << XCOMPONENT_PARAM_EQUALS << textureHeight << XCOMPONENT_PARAM_AND
-                << TEXTURE_SET_DEFAULT_SIZE << XCOMPONENT_PARAM_EQUALS << TEXTURE_SET_DEFAULT_SIZE_TRUE;
+        << TEXTURE_WIDTH << XCOMPONENT_PARAM_EQUALS << textureWidth << XCOMPONENT_PARAM_AND
+        << TEXTURE_HEIGHT << XCOMPONENT_PARAM_EQUALS << textureHeight << XCOMPONENT_PARAM_AND
+        << TEXTURE_SET_DEFAULT_SIZE << XCOMPONENT_PARAM_EQUALS << TEXTURE_SET_DEFAULT_SIZE_TRUE;
     std::string param = paramStream.str();
     CallResRegisterMethod(MakeMethodHash(SET_TEXTURE_SIZE), param, callback);
 }

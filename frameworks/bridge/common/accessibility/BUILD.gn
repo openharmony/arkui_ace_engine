@@ -37,11 +37,7 @@ template("bridge_accessibility") {
         ]
       }
     } else {
-      sources -= [ "accessibility_node_manager.cpp" ]
-      sources += [
-        "fake_accessibility_manager.cpp",
-        "fake_accessibility_node_manager.cpp",
-      ]
+      sources += [ "fake_accessibility_manager.cpp" ]
     }
 
     deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]

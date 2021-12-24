@@ -21,11 +21,6 @@ namespace OHOS::Ace::V2 {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderGridScroll::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderGridScroll>();
-}
-
 RenderLayer FlutterRenderGridScroll::GetRenderLayer()
 {
     if (!layer_) {
@@ -41,8 +36,13 @@ void FlutterRenderGridScroll::Paint(RenderContext& context, const Offset& offset
     LOGD("Paint %{public}lf  %{public}lf", GetLayoutSize().Width(), GetLayoutSize().Height());
     layer_->SetClip(0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::HARD_EDGE);
     RenderNode::Paint(context, offset);
-    // render scroll bar
 
+    // Notify scroll bar to update.
+    if (scrollBarProxy_) {
+        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
+    }
+
+    // render scroll bar
     if (!scrollBar_ || !scrollBar_->NeedPaint()) {
         return;
     }

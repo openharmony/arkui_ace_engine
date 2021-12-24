@@ -26,11 +26,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderDropFilter::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderDropFilter>();
-}
-
 RenderLayer FlutterRenderDropFilter::GetRenderLayer()
 {
     if (!layer_) {

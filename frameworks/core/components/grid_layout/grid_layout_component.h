@@ -19,11 +19,20 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
+#include "core/components/scroll_bar/scroll_bar_proxy.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/components_v2/grid/grid_position_controller.h"
 #include "core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace {
+
+using OnGridDragEnterFunc = std::function<void(const RefPtr<ItemDragInfo>& info)>;
+using OnGridDragMoveFunc =
+    std::function<void(const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex)>;
+using OnGridDragLeaveFunc = std::function<void(const RefPtr<ItemDragInfo>& info, int32_t itemIndex)>;
+using OnGridDragStartFunc = std::function<RefPtr<Component>(const RefPtr<ItemDragInfo>& info, int32_t itemIndex)>;
+using OnGridDropFunc =
+    std::function<void(const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess)>;
 
 class ACE_EXPORT GridLayoutComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(GridLayoutComponent, ComponentGroup);
@@ -167,6 +176,67 @@ public:
         return cacheCount_;
     }
 
+    void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
+    {
+        scrollBarProxy_ = scrollBarProxy;
+    }
+
+    const RefPtr<ScrollBarProxy>& GetScrollBarProxy() const
+    {
+        return scrollBarProxy_;
+    }
+
+    void SetEditMode(bool editMode)
+    {
+        editMode_ = editMode;
+    }
+
+    bool GetEditMode() const
+    {
+        return editMode_;
+    }
+
+    void SetMaxCount(int32_t maxCount)
+    {
+        maxCount_ = maxCount;
+    }
+
+    int32_t GetMaxCount(void) const
+    {
+        return maxCount_;
+    }
+
+    void SetMinCount(int32_t minCount)
+    {
+        minCount_ = minCount;
+    }
+
+    int32_t GetMinCount(void) const
+    {
+        return minCount_;
+    }
+
+    void SetCellLength(int32_t cellLength)
+    {
+        cellLength_ = cellLength;
+    }
+
+    int32_t GetCellLength(void) const
+    {
+        return cellLength_;
+    }
+
+    void SetOnGridDragEnterId(const OnGridDragEnterFunc& onGridDragEnterId);
+    void SetOnGridDragMoveId(const OnGridDragMoveFunc& onGridDragMoveId);
+    void SetOnGridDragLeaveId(const OnGridDragLeaveFunc& onGridDragLeaveId);
+    void SetOnGridDragStartId(const OnGridDragStartFunc& onGridDragStartId);
+    void SetOnGridDropId(const OnGridDropFunc& onGridDropId);
+    const OnGridDragEnterFunc& GetOnGridDragEnterId() const;
+    const OnGridDragMoveFunc& GetOnGridDragMoveId() const;
+    const OnGridDragLeaveFunc& GetOnGridDragLeaveId() const;
+    const OnGridDragStartFunc& GetOnGridDragStartId() const;
+    const OnGridDropFunc& GetOnGridDropId() const;
+
 private:
     FlexDirection direction_ = FlexDirection::COLUMN;
     FlexAlign flexAlign_ = FlexAlign::CENTER;
@@ -190,6 +260,18 @@ private:
     DisplayMode displayMode_ = DisplayMode::OFF;
     RefPtr<V2::GridPositionController> controller_;
     EventMarker scrolledEvent_;
+    RefPtr<ScrollBarProxy> scrollBarProxy_;
+
+    // drag in grid attribute
+    bool editMode_ = false;
+    int32_t maxCount_ = 1;
+    int32_t minCount_ = 1;
+    int32_t cellLength_ = 0;
+    OnGridDragEnterFunc onGridDragEnterId_;
+    OnGridDragMoveFunc onGridDragMoveId_;
+    OnGridDragLeaveFunc onGridDragLeaveId_;
+    OnGridDragStartFunc onGridDragStartId_;
+    OnGridDropFunc onGridDropId_;
 };
 
 } // namespace OHOS::Ace

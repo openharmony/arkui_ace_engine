@@ -152,9 +152,9 @@ private:
 
 class CaptureListener : public IBufferConsumerListener {
 public:
-    explicit CaptureListener(CameraCallback *cameraCallback) : cameraCallback_(cameraCallback) {
-    }
-    ~CaptureListener() {
+    explicit CaptureListener(CameraCallback *cameraCallback) : cameraCallback_(cameraCallback) {}
+    ~CaptureListener()
+    {
         cameraCallback_->photoListener_ = nullptr;
         cameraCallback_ = nullptr;
     }

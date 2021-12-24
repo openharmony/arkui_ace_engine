@@ -85,6 +85,8 @@ const char THEME_PATTERN_TOOLBAR[] = "toolbar_pattern";
 const char THEME_PATTERN_TOGGLE[] = "toggle_pattern";
 const char THEME_PATTERN_TOAST[] = "toast_pattern";
 const char THEME_DIALOG_TOGGLE[] = "dialog_pattern";
+const char THEME_PATTERN_DRAG_BAR[] = "drag_bar_pattern";
+const char THEME_PATTERN_SEMI_MODAL[] = "semi_modal_pattern";
 
 // pattern general attributes
 const char PATTERN_BG_COLOR[] = "background_color";
@@ -220,5 +222,11 @@ const char DIALOG_MASK_COLOR_END[] = "dialog_mask_color_end";
 const char TOAST_FONT_SIZE[] = "font_size";
 const char TOAST_TEXT_COLOR[] = "text_color";
 const char TOAST_BACKGROUND_COLOR[] = "background_color";
+
+// pattern attributes for drag bar
+const char DRAG_BAR_COLOR[] = "drag_bar_color";
+
+// pattern attributes for semi modal
+const char SEMI_MODAL_BACKGROUND_COLOR[] = "background_color";
 
 } // namespace OHOS::Ace

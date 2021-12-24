@@ -22,16 +22,18 @@
 #include "base/json/json_util.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
-
+#include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
+#include "core/components_v2/extensions/events/on_area_change_extension.h"
 #ifdef USE_V8_ENGINE
 #include "bridge/declarative_frontend/engine/v8/functions/v8_function.h"
 #endif
-
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_view_register.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/ace_application_info.h"
+#include "core/components/box/box_component_helper.h"
 #include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/menu/menu_component.h"
@@ -326,6 +328,153 @@ bool ParseLocationProps(const JSCallbackInfo& info, AnimatableDimension& x, Anim
     return false;
 }
 
+#ifndef WEARABLE_PRODUCT
+const std::vector<Placement> PLACEMENT = { Placement::LEFT, Placement::RIGHT, Placement::TOP, Placement::BOTTOM,
+    Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
+
+void ParsePopupParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupComponentV2>& popupComponent)
+{
+    JSRef<JSVal> messageVal = popupObj->GetProperty("message");
+    popupComponent->SetMessage(messageVal->ToString());
+
+    JSRef<JSVal> placementOnTopVal = popupObj->GetProperty("placementOnTop");
+    if (placementOnTopVal->IsBoolean()) {
+        popupComponent->SetPlacementOnTop(placementOnTopVal->ToBoolean());
+    }
+
+    JSRef<JSVal> onStateChangeVal = popupObj->GetProperty("onStateChange");
+    if (onStateChangeVal->IsFunction()) {
+        std::vector<std::string> keys = { "isVisible" };
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onStateChangeVal));
+        auto eventMarker = EventMarker(
+            [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](const std::string& param) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute(keys, param);
+            });
+        popupComponent->SetOnStateChange(eventMarker);
+    }
+
+    JSRef<JSVal> primaryButtonVal = popupObj->GetProperty("primaryButton");
+    if (primaryButtonVal->IsObject()) {
+        ButtonProperties properties;
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(primaryButtonVal);
+        JSRef<JSVal> value = obj->GetProperty("value");
+        if (value->IsString()) {
+            properties.value = value->ToString();
+        }
+
+        JSRef<JSVal> actionValue = obj->GetProperty("action");
+        if (actionValue->IsFunction()) {
+            auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
+            EventMarker actionId([execCtx = info.GetExecutionContext(), func = std::move(actionFunc)]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute();
+            });
+            properties.actionId = actionId;
+        }
+        properties.showButton = true;
+        popupComponent->SetPrimaryButtonProperties(properties);
+    }
+
+    JSRef<JSVal> secondaryButtonVal = popupObj->GetProperty("secondaryButton");
+    if (secondaryButtonVal->IsObject()) {
+        ButtonProperties properties;
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(secondaryButtonVal);
+        JSRef<JSVal> value = obj->GetProperty("value");
+        if (value->IsString()) {
+            properties.value = value->ToString();
+        }
+
+        JSRef<JSVal> actionValue = obj->GetProperty("action");
+        if (actionValue->IsFunction()) {
+            auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
+            EventMarker actionId([execCtx = info.GetExecutionContext(), func = std::move(actionFunc)]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute();
+            });
+            properties.actionId = actionId;
+        }
+        properties.showButton = true;
+        popupComponent->SetSecondaryButtonProperties(properties);
+    }
+}
+
+void ParseCustomPopupParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupComponentV2>& popupComponent)
+{
+    RefPtr<Component> customComponent;
+    auto builderValue = popupObj->GetProperty("builder");
+    if (!builderValue->IsObject()) {
+        LOGE("builder param is not an object.");
+        return;
+    }
+
+    JSRef<JSObject> builderObj;
+    builderObj = JSRef<JSObject>::Cast(builderValue);
+    auto builder = builderObj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        LOGE("builder param is not a function.");
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    if (!builderFunc) {
+        LOGE("builder function is null.");
+        return;
+    }
+    // use another VSP instance while executing the builder function
+    ScopedViewStackProcessor builderViewStackProcessor;
+    builderFunc->Execute();
+    customComponent = ViewStackProcessor::GetInstance()->Finish();
+    popupComponent->SetCustomComponent(customComponent);
+
+    auto popupParam = popupComponent->GetPopupParam();
+    auto placementValue = popupObj->GetProperty("placement");
+    if (placementValue->IsNumber()) {
+        auto placement = placementValue->ToNumber<int32_t>();
+        if (placement >= 0 && placement <= static_cast<int32_t>(PLACEMENT.size())) {
+            popupParam->SetPlacement(PLACEMENT[placement]);
+        }
+    }
+
+    auto maskColorValue = popupObj->GetProperty("maskColor");
+    Color maskColor;
+    if (JSViewAbstract::ParseJsColor(maskColorValue, maskColor)) {
+        popupParam->SetMaskColor(maskColor);
+    }
+
+    auto popupColorValue = popupObj->GetProperty("popupColor");
+    Color backgroundColor;
+    if (JSViewAbstract::ParseJsColor(popupColorValue, backgroundColor)) {
+        popupParam->SetBackgroundColor(backgroundColor);
+    }
+
+    auto enableArrowValue = popupObj->GetProperty("enableArrow");
+    if (enableArrowValue->IsBoolean()) {
+        popupParam->SetEnableArrow(enableArrowValue->ToBoolean());
+    }
+
+    auto autoCancelValue = popupObj->GetProperty("autoCancel");
+    if (autoCancelValue->IsBoolean()) {
+        popupParam->SetHasAction(!autoCancelValue->ToBoolean());
+    }
+
+    JSRef<JSVal> onStateChangeVal = popupObj->GetProperty("onStateChange");
+    if (onStateChangeVal->IsFunction()) {
+        std::vector<std::string> keys = { "isVisible" };
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onStateChangeVal));
+        auto eventMarker = EventMarker(
+            [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](const std::string& param) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute(keys, param);
+            });
+        popupComponent->SetOnStateChange(eventMarker);
+    }
+}
+#endif
+
 } // namespace
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
@@ -335,6 +484,22 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
         result = origin | COLOR_ALPHA_VALUE;
     }
     return result;
+}
+
+StyleState JSViewAbstract::GetState(const JSCallbackInfo& info, int32_t index)
+{
+    if (info.Length() == (index + 1) && info[index]->IsString()) {
+        auto state = info[index]->ToString();
+        if (state == "pressed") {
+            return StyleState::PRESSED;
+        } else if (state == "disabled") {
+            return StyleState::DISABLED;
+        } else {
+            return StyleState::NORMAL;
+        }
+    } else {
+        return StyleState::NORMAL;
+    }
 }
 
 void JSViewAbstract::JsScale(const JSCallbackInfo& info)
@@ -429,7 +594,7 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
 
     auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    display->SetOpacity(opacity, option);
+    display->SetOpacity(opacity, option, GetState(info, 1));
 }
 
 void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
@@ -658,10 +823,10 @@ void JSViewAbstract::JsWidth(const JSCallbackInfo& info)
         return;
     }
 
-    JsWidth(info[0]);
+    JsWidth(info[0], GetState(info, 1));
 }
 
-bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
+bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue, StyleState state)
 {
     Dimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
@@ -680,9 +845,11 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
             renderComponent->SetIsPercentSize(isPercentSize);
         }
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    box->SetWidth(value, option);
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    AnimationOption option = stack->GetImplicitAnimationOption();
+    box->SetWidthForState(value, option, state);
     return true;
 }
 
@@ -693,10 +860,10 @@ void JSViewAbstract::JsHeight(const JSCallbackInfo& info)
         return;
     }
 
-    JsHeight(info[0]);
+    JsHeight(info[0], GetState(info, 1));
 }
 
-bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
+bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue, StyleState state)
 {
     Dimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
@@ -716,10 +883,127 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         }
     }
 
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    box->SetHeight(value, option);
+    auto stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    AnimationOption option = stack->GetImplicitAnimationOption();
+    box->SetHeightForState(value, option, state);
     return true;
+}
+
+void JSViewAbstract::JsResponseRegion(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    std::vector<DimensionRect> result;
+    if (!JSViewAbstract::ParseJsResponseRegionArray(info[0], result)) {
+        return;
+    }
+
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
+    if (renderComponent) {
+        renderComponent->SetResponseRegion(result);
+        renderComponent->MarkResponseRegion(true);
+    }
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetResponseRegion(result);
+    box->MarkResponseRegion(true);
+    if (ViewStackProcessor::GetInstance()->HasClickGestureListenerComponent()) {
+        auto click = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();
+        click->SetResponseRegion(result);
+        click->MarkResponseRegion(true);
+    }
+    if (ViewStackProcessor::GetInstance()->HasTouchListenerComponent()) {
+        auto touch = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
+        touch->SetResponseRegion(result);
+        touch->MarkResponseRegion(true);
+    }
+}
+
+bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result)
+{
+    if (!jsValue->IsObject()) {
+        LOGE("arg is not Object.");
+        return false;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> x = obj->GetProperty("x");
+    JSRef<JSVal> y = obj->GetProperty("y");
+    JSRef<JSVal> width = obj->GetProperty("width");
+    JSRef<JSVal> height = obj->GetProperty("height");
+    Dimension xDimen = result.GetOffset().GetX();
+    Dimension yDimen = result.GetOffset().GetY();
+    Dimension widthDimen = result.GetWidth();
+    Dimension heightDimen = result.GetHeight();
+
+    if (ParseJsDimension(x, xDimen, DimensionUnit::VP)) {
+        auto offset = result.GetOffset();
+        offset.SetX(xDimen);
+        result.SetOffset(offset);
+    }
+    if (ParseJsDimension(y, yDimen, DimensionUnit::VP)) {
+        auto offset = result.GetOffset();
+        offset.SetY(yDimen);
+        result.SetOffset(offset);
+    }
+    if (ParseJsDimension(width, widthDimen, DimensionUnit::VP)) {
+        if (widthDimen.Unit() == DimensionUnit::PERCENT && widthDimen.Value() < 0) {
+            return true;
+        }
+        result.SetWidth(widthDimen);
+    }
+    if (ParseJsDimension(height, heightDimen, DimensionUnit::VP)) {
+        if (heightDimen.Unit() == DimensionUnit::PERCENT && heightDimen.Value() < 0) {
+            return true;
+        }
+        result.SetHeight(heightDimen);
+    }
+    return true;
+}
+
+bool JSViewAbstract::ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std::vector<DimensionRect>& result)
+{
+    if (!jsValue->IsArray() && !jsValue->IsObject()) {
+        LOGE("arg is not array or Object.");
+        return false;
+    }
+
+    if (jsValue->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+        for (size_t i = 0; i < array->Length(); i++) {
+            Dimension xDimen = Dimension(0.0, DimensionUnit::VP);
+            Dimension yDimen = Dimension(0.0, DimensionUnit::VP);
+            Dimension widthDimen = Dimension(1, DimensionUnit::PERCENT);
+            Dimension heightDimen = Dimension(1, DimensionUnit::PERCENT);
+            DimensionOffset offsetDimen(xDimen, yDimen);
+            DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+            if (ParseJsDimensionRect(array->GetValueAt(i), dimenRect)) {
+                result.emplace_back(dimenRect);
+            } else {
+                LOGE("Array element is not Object.");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    Dimension xDimen = Dimension(0.0, DimensionUnit::VP);
+    Dimension yDimen = Dimension(0.0, DimensionUnit::VP);
+    Dimension widthDimen = Dimension(1, DimensionUnit::PERCENT);
+    Dimension heightDimen = Dimension(1, DimensionUnit::PERCENT);
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+    if (ParseJsDimensionRect(jsValue, dimenRect)) {
+        result.emplace_back(dimenRect);
+        return true;
+    } else {
+        LOGE("Array element is not Object.");
+        return false;
+    }
 }
 
 void JSViewAbstract::JsSize(const JSCallbackInfo& info)
@@ -735,8 +1019,9 @@ void JSViewAbstract::JsSize(const JSCallbackInfo& info)
     }
 
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    JsWidth(sizeObj->GetProperty("width"));
-    JsHeight(sizeObj->GetProperty("height"));
+    auto state = GetState(info, 1);
+    JsWidth(sizeObj->GetProperty("width"), state);
+    JsHeight(sizeObj->GetProperty("height"), state);
 }
 
 void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
@@ -1185,8 +1470,11 @@ void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], borderColor)) {
         return;
     }
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    SetBorderColor(borderColor, option);
+
+    auto stack = ViewStackProcessor::GetInstance();
+    AnimationOption option = stack->GetImplicitAnimationOption();
+    auto boxComponent = stack->GetBoxComponent();
+    boxComponent->SetBorderColorForState(borderColor, option, GetState(info, 1));
 }
 
 void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
@@ -1199,9 +1487,11 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], backgroundColor)) {
         return;
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    box->SetColor(backgroundColor, option);
+
+    auto stack = ViewStackProcessor::GetInstance();
+    AnimationOption option = stack->GetImplicitAnimationOption();
+    auto boxComponent = stack->GetBoxComponent();
+    boxComponent->SetColor(backgroundColor, option, GetState(info, 1));
 }
 
 void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
@@ -1364,31 +1654,67 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
     ViewStackProcessor::GetInstance()->Push(menuComponent);
     auto menuTheme = GetTheme<SelectTheme>();
     menuComponent->SetTheme(menuTheme);
-    auto context = info.GetExecutionContext();
 
-    auto paramArray = JSRef<JSArray>::Cast(info[0]);
-    size_t size = paramArray->Length();
-    for (size_t i = 0; i < size; i++) {
-        std::string value;
-        auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
-        auto menuValue = indexObject->GetProperty("value");
-        auto menuAction = indexObject->GetProperty("action");
-        ParseJsString(menuValue, value);
-        auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(menuAction));
+    if (info[0]->IsArray()) {
+        auto context = info.GetExecutionContext();
+        auto paramArray = JSRef<JSArray>::Cast(info[0]);
+        size_t size = paramArray->Length();
+        for (size_t i = 0; i < size; i++) {
+            std::string value;
+            auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
+            auto menuValue = indexObject->GetProperty("value");
+            auto menuAction = indexObject->GetProperty("action");
+            ParseJsString(menuValue, value);
+            auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(menuAction));
+
+            auto optionTheme = GetTheme<SelectTheme>();
+            auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+            auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
+
+            optionComponent->SetTheme(optionTheme);
+            optionComponent->SetText(textComponent);
+            optionComponent->SetValue(value);
+            optionComponent->SetCustomizedCallback([action, context] {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
+                action->Execute();
+            });
+            menuComponent->AppendOption(optionComponent);
+        }
+    } else {
+        JSRef<JSObject> menuObj;
+        if (info[0]->IsObject()) {
+            menuObj = JSRef<JSObject>::Cast(info[0]);
+        } else {
+            LOGE("No param object.");
+            return;
+        }
+
+        auto builder = menuObj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            LOGE("builder param is not a function.");
+            return;
+        }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        if (!builderFunc) {
+            LOGE("builder function is null.");
+            return;
+        }
+        // use another VSP instance while executing the builder function
+        ScopedViewStackProcessor builderViewStackProcessor;
+        builderFunc->Execute();
+        auto customComponent = ViewStackProcessor::GetInstance()->Finish();
+        if (!customComponent) {
+            LOGE("Custom component is null.");
+            return;
+        }
 
         auto optionTheme = GetTheme<SelectTheme>();
         auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
-        auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
+        optionComponent->SetCustomComponent(customComponent);
 
-        optionComponent->SetTheme(optionTheme);
-        optionComponent->SetText(textComponent);
-        optionComponent->SetValue(value);
-        optionComponent->SetCustomizedCallback([action, context] {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
-            action->Execute();
-        });
         menuComponent->AppendOption(optionComponent);
     }
+
     ViewStackProcessor::GetInstance()->Pop();
 }
 
@@ -1465,23 +1791,25 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
         return;
     }
 
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    auto stack = ViewStackProcessor::GetInstance();
+    AnimationOption option = stack->GetImplicitAnimationOption();
+    auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
 
     Dimension width;
     if (argsPtrItem->Contains("width") && ParseJsonDimensionVp(argsPtrItem->GetValue("width"), width)) {
-        SetBorderWidth(width, option);
+        boxComponent->SetBorderWidthForState(width, option, GetState(info, 1));
     }
     Color color;
     if (argsPtrItem->Contains("color") && ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
-        SetBorderColor(color, option);
+        boxComponent->SetBorderColorForState(color, option, GetState(info, 1));
     }
     Dimension radius;
     if (argsPtrItem->Contains("radius") && ParseJsonDimensionVp(argsPtrItem->GetValue("radius"), radius)) {
-        SetBorderRadius(radius, option);
+        boxComponent->SetBorderRadiusForState(radius, option, GetState(info, 1));
     }
     if (argsPtrItem->Contains("style")) {
         auto borderStyle = argsPtrItem->GetInt("style", static_cast<int32_t>(BorderStyle::SOLID));
-        SetBorderStyle(borderStyle);
+        JsBorderStyle(borderStyle, GetState(info, 1)); // takes care of visualStyle
     }
     info.ReturnSelf();
 }
@@ -1496,8 +1824,10 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], borderWidth)) {
         return;
     }
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    SetBorderWidth(borderWidth, option);
+    auto stack = ViewStackProcessor::GetInstance();
+    AnimationOption option = stack->GetImplicitAnimationOption();
+    auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
+    boxComponent->SetBorderWidthForState(borderWidth, option, GetState(info, 1));
 }
 
 void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
@@ -1511,7 +1841,8 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
         return;
     }
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    SetBorderRadius(borderRadius, option);
+    auto boxComponent = AceType::DynamicCast<BoxComponent>(ViewStackProcessor::GetInstance()->GetBoxComponent());
+    boxComponent->SetBorderRadiusForState(borderRadius, option, GetState(info, 1));
 }
 
 void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
@@ -1799,12 +2130,10 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
         LOGE("arg is not Object and String.");
         return false;
     }
-
     if (jsValue->IsString()) {
         result = jsValue->ToString();
         return true;
     }
-
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> type = jsObj->GetProperty("type");
     JSRef<JSVal> resId = jsObj->GetProperty("id");
@@ -1819,7 +2148,6 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
             result = themeConstants->GetMediaPath(resId->ToNumber<uint32_t>());
             return true;
         }
-
         if (typeInteger == static_cast<int>(ResourceType::RAWFILE)) {
             JSRef<JSVal> args = jsObj->GetProperty("params");
             if (!args->IsArray()) {
@@ -1835,11 +2163,9 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
             result = themeConstants->GetRawfile(fileName->ToString());
             return true;
         }
-        
         LOGE("JSImage::Create ParseJsMedia type is wrong");
         return false;
     }
-
     LOGE("input value is not string or number, using PixelMap");
     return false;
 }
@@ -1922,7 +2248,6 @@ bool JSViewAbstract::ParseJsInteger(const JSRef<JSVal>& jsValue, uint32_t& resul
     } else {
         return false;
     }
-
 }
 
 bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result)
@@ -2300,6 +2625,24 @@ void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind on area change event due to info is not function");
+        return;
+    }
+    auto jsOnAreaChangeFunction = AceType::MakeRefPtr<JsOnAreaChangeFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onAreaChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAreaChangeFunction)](
+                                    const Rect& oldRect, const Offset& oldOrigin, const Rect& rect,
+                                    const Offset& origin) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute(oldRect, oldOrigin, rect, origin);
+    };
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->GetEventExtensions()->GetOnAreaChangeExtension()->AddOnAreaChangeEvent(
+        std::move(onAreaChangeCallback));
+}
+
 #ifndef WEARABLE_PRODUCT
 void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
 {
@@ -2308,86 +2651,47 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
         return;
     }
 
-    if (!info[0]->IsBoolean()) {
+    if (!info[0]->IsBoolean() && !info[1]->IsBoolean()) {
         LOGE("No overLayer text.");
         return;
     }
 
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto popupComponent = ViewStackProcessor::GetInstance()->GetPopupComponent(true);
+    if (!popupComponent) {
+        return;
+    }
     auto popupParam = popupComponent->GetPopupParam();
     if (!popupParam) {
         return;
     }
 
-    auto mainComponen = ViewStackProcessor::GetInstance()->GetMainComponent();
-    popupParam->SetTargetId(mainComponen->GetInspectorId());
-    popupParam->SetIsShow(info[0]->ToBoolean());
-
-    JSRef<JSObject> popupObj = JSRef<JSObject>::Cast(info[1]);
-    JSRef<JSVal> messageVal = popupObj->GetProperty("message");
-    popupComponent->SetMessage(messageVal->ToString());
-
-    JSRef<JSVal> placementOnTopVal = popupObj->GetProperty("placementOnTop");
-    if (placementOnTopVal->IsBoolean()) {
-        popupComponent->SetPlacementOnTop(placementOnTopVal->ToBoolean());
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("this component does not hava inspetor");
+        return;
+    }
+    popupParam->SetTargetId(inspector->GetId());
+    if (info[0]->IsBoolean()) {
+        popupParam->SetIsShow(info[0]->ToBoolean());
+    } else {
+        popupParam->SetIsShow(info[1]->ToBoolean());
     }
 
-    JSRef<JSVal> onStateChangeVal = popupObj->GetProperty("onStateChange");
-    if (onStateChangeVal->IsFunction()) {
-        std::vector<std::string> keys = { "isVisible" };
-        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
-                                    JSRef<JSFunc>::Cast(onStateChangeVal));
-        auto eventMarker = EventMarker(
-            [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](const std::string& param) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                func->Execute(keys, param);
-            });
-        popupComponent->SetOnStateChange(eventMarker);
+    JSRef<JSObject> popupObj;
+    if (info[0]->IsObject()) {
+        popupObj = JSRef<JSObject>::Cast(info[0]);
+    } else if (info[1]->IsObject()) {
+        popupObj = JSRef<JSObject>::Cast(info[1]);
+    } else {
+        LOGE("No param object.");
+        return;
     }
 
-    JSRef<JSVal> primaryButtonVal = popupObj->GetProperty("primaryButton");
-    if (primaryButtonVal->IsObject()) {
-        ButtonProperties properties;
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(primaryButtonVal);
-        JSRef<JSVal> value = obj->GetProperty("value");
-        if (value->IsString()) {
-            properties.value = value->ToString();
-        }
-
-        JSRef<JSVal> actionValue = obj->GetProperty("action");
-        if (actionValue->IsFunction()) {
-            auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-            EventMarker actionId([execCtx = info.GetExecutionContext(), func = std::move(actionFunc)]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                func->Execute();
-            });
-            properties.actionId = actionId;
-        }
-        properties.showButton = true;
-        popupComponent->SetPrimaryButtonProperties(properties);
-    }
-
-    JSRef<JSVal> secondaryButtonVal = popupObj->GetProperty("secondaryButton");
-    if (secondaryButtonVal->IsObject()) {
-        ButtonProperties properties;
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(secondaryButtonVal);
-        JSRef<JSVal> value = obj->GetProperty("value");
-        if (value->IsString()) {
-            properties.value = value->ToString();
-        }
-
-        JSRef<JSVal> actionValue = obj->GetProperty("action");
-        if (actionValue->IsFunction()) {
-            auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-            EventMarker actionId([execCtx = info.GetExecutionContext(), func = std::move(actionFunc)]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                func->Execute();
-            });
-            properties.actionId = actionId;
-        }
-        properties.showButton = true;
-        popupComponent->SetSecondaryButtonProperties(properties);
+    if (popupObj->GetProperty("message")->IsString()) {
+        ParsePopupParam(info, popupObj, popupComponent);
+    } else {
+        ParseCustomPopupParam(info, popupObj, popupComponent);
     }
 }
 #endif
@@ -2462,10 +2766,9 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
     lineGradient.SetRepeat(repeating);
     // color stops
     GetGradientColorStops(lineGradient, argsPtrItem->GetValue("colors"));
-    auto decoration = GetBackDecoration();
-    if (decoration) {
-        decoration->SetGradient(lineGradient);
-    }
+
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->SetGradientForState(lineGradient, GetState(info, 1));
 }
 
 void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
@@ -2521,10 +2824,9 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
     radialGradient.SetRepeat(repeating);
     // color stops
     GetGradientColorStops(radialGradient, argsPtrItem->GetValue("colors"));
-    auto decoration = GetBackDecoration();
-    if (decoration) {
-        decoration->SetGradient(radialGradient);
-    }
+
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->SetGradientForState(radialGradient, GetState(info, 1));
 }
 
 void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
@@ -2593,10 +2895,8 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
     sweepGradient.SetRepeat(repeating);
     // color stops
     GetGradientColorStops(sweepGradient, argsPtrItem->GetValue("colors"));
-    auto decoration = GetBackDecoration();
-    if (decoration) {
-        decoration->SetGradient(sweepGradient);
-    }
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->SetGradientForState(sweepGradient, GetState(info, 1));
 }
 
 void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
@@ -2844,6 +3144,70 @@ void JSViewAbstract::JsMask(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        LOGE("The info is wrong, it is supposed to be an boolean");
+        return;
+    }
+
+    auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+    if (!focusComponent) {
+        LOGE("The focusComponent is null");
+        return;
+    } else {
+        focusComponent->SetFocusable(info[0]->ToBoolean());
+    }
+
+}
+
+void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        RefPtr<JsFocusFunction> jsOnFocusMove = AceType::MakeRefPtr<JsFocusFunction>(JSRef<JSFunc>::Cast(args[0]));
+        auto onFocusMove = [execCtx = args.GetExecutionContext(), func = std::move(jsOnFocusMove)](int info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute(info);
+        };
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        focusableComponent->SetOnFocusMove(onFocusMove);
+    }
+}
+
+void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        RefPtr<JsFocusFunction> jsOnFocus = AceType::MakeRefPtr<JsFocusFunction>(JSRef<JSFunc>::Cast(args[0]));
+        auto onFocus = [execCtx = args.GetExecutionContext(), func = std::move(jsOnFocus)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute();
+        };
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        focusableComponent->SetOnFocus(onFocus);
+    }
+}
+
+void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        RefPtr<JsFocusFunction> jsOnBlur = AceType::MakeRefPtr<JsFocusFunction>(JSRef<JSFunc>::Cast(args[0]));
+        auto onBlur_ = [execCtx = args.GetExecutionContext(), func = std::move(jsOnBlur)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute();
+        };
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        focusableComponent->SetOnBlur(onBlur_);
+    }
+}
+
+void JSViewAbstract::JsKey(const std::string& key)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (component) {
+        component->SetInspectorKey(key);
+    }
+}
+
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
@@ -2857,7 +3221,7 @@ void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
         return;
     }
 
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (component) {
         component->SetDebugLine(info[0]->ToString());
     }
@@ -2884,80 +3248,42 @@ void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsAccessibilityGroup(bool accessible)
 {
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (!component) {
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("this component does not hava inspetor");
         return;
     }
-
-    int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
-    auto accessibilityNode = GetAccessibilityNodeById(inspectorId);
-    if (accessibilityNode) {
-        accessibilityNode->SetAccessible(accessible);
-    }
+    inspector->SetAccessibilityGroup(accessible);
 }
 
 void JSViewAbstract::JsAccessibilityText(const std::string& text)
 {
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (!component) {
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("this component does not hava inspetor");
         return;
     }
-
-    int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
-    auto accessibilityNode = GetAccessibilityNodeById(inspectorId);
-    if (accessibilityNode) {
-        accessibilityNode->SetAccessibilityLabel(text);
-    }
+    inspector->SetAccessibilitytext(text);
 }
 
 void JSViewAbstract::JsAccessibilityDescription(const std::string& description)
 {
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (!component) {
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("this component does not hava inspetor");
         return;
     }
-
-    int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
-    auto accessibilityNode = GetAccessibilityNodeById(inspectorId);
-    if (accessibilityNode) {
-        accessibilityNode->SetAccessibilityHint(description);
-    }
+    inspector->SetAccessibilityDescription(description);
 }
 
 void JSViewAbstract::JsAccessibilityImportance(const std::string& importance)
 {
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    if (!component) {
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("this component does not hava inspetor");
         return;
     }
-
-    int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
-    auto accessibilityNode = GetAccessibilityNodeById(inspectorId);
-    if (accessibilityNode) {
-        accessibilityNode->SetImportantForAccessibility(importance);
-    }
-}
-
-RefPtr<AccessibilityNode> JSViewAbstract::GetAccessibilityNodeById(int32_t nodeId)
-{
-    auto container = Container::Current();
-    if (!container) {
-        LOGE("Container is null.");
-        return nullptr;
-    }
-    auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        LOGE("PipelineContext is null.");
-        return nullptr;
-    }
-
-    auto accessibilityManager = pipelineContext->GetAccessibilityManager();
-    if (!accessibilityManager) {
-        LOGE("SetAccessibilityNode accessibilityManager is null.");
-        return nullptr;
-    }
-
-    return accessibilityManager->GetAccessibilityNodeById(nodeId);
+    inspector->SetAccessibilityImportance(importance);
 }
 
 void JSViewAbstract::JSBind()
@@ -2970,6 +3296,7 @@ void JSViewAbstract::JSBind()
 
     JSClass<JSViewAbstract>::StaticMethod("width", &JSViewAbstract::JsWidth);
     JSClass<JSViewAbstract>::StaticMethod("height", &JSViewAbstract::JsHeight);
+    JSClass<JSViewAbstract>::StaticMethod("responseRegion", &JSViewAbstract::JsResponseRegion);
     JSClass<JSViewAbstract>::StaticMethod("size", &JSViewAbstract::JsSize);
     JSClass<JSViewAbstract>::StaticMethod("constraintSize", &JSViewAbstract::JsConstraintSize);
     JSClass<JSViewAbstract>::StaticMethod("layoutPriority", &JSViewAbstract::JsLayoutPriority);
@@ -3031,14 +3358,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("useAlign", &JSViewAbstract::JsUseAlign);
     JSClass<JSViewAbstract>::StaticMethod("zIndex", &JSViewAbstract::JsZIndex);
     JSClass<JSViewAbstract>::StaticMethod("sharedTransition", &JSViewAbstract::JsSharedTransition);
-    JSClass<JSViewAbstract>::StaticMethod("navigationTitle", &JSViewAbstract::SetNavigationTitle, opt);
-    JSClass<JSViewAbstract>::StaticMethod("navigationSubTitle", &JSViewAbstract::SetNavigationSubTitle, opt);
-    JSClass<JSViewAbstract>::StaticMethod("hideNavigationBar", &JSViewAbstract::SetHideNavigationBar, opt);
-    JSClass<JSViewAbstract>::StaticMethod(
-        "hideNavigationBackButton", &JSViewAbstract::SetHideNavigationBackButton, opt);
-    JSClass<JSViewAbstract>::StaticMethod("hideToolBar", &JSViewAbstract::SetHideToolBar, opt);
     JSClass<JSViewAbstract>::StaticMethod("direction", &JSViewAbstract::SetDirection, opt);
-    JSClass<JSViewAbstract>::CustomStaticMethod("toolBar", &JSViewAbstract::JsToolBar);
 #ifndef WEARABLE_PRODUCT
     JSClass<JSViewAbstract>::StaticMethod("bindPopup", &JSViewAbstract::JsBindPopup);
 #endif
@@ -3059,6 +3379,10 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("useSizeType", &JSViewAbstract::JsUseSizeType);
     JSClass<JSViewAbstract>::StaticMethod("shadow", &JSViewAbstract::JsShadow);
     JSClass<JSViewAbstract>::StaticMethod("grayscale", &JSViewAbstract::JsGrayScale);
+    JSClass<JSViewAbstract>::StaticMethod("focusable", &JSViewAbstract::JsFocusable);
+    JSClass<JSViewAbstract>::StaticMethod("onFocusMove", &JSViewAbstract::JsOnFocusMove);
+    JSClass<JSViewAbstract>::StaticMethod("onFocus", &JSViewAbstract::JsOnFocus);
+    JSClass<JSViewAbstract>::StaticMethod("onBlur", &JSViewAbstract::JsOnBlur);
     JSClass<JSViewAbstract>::StaticMethod("brightness", &JSViewAbstract::JsBrightness);
     JSClass<JSViewAbstract>::StaticMethod("contrast", &JSViewAbstract::JsContrast);
     JSClass<JSViewAbstract>::StaticMethod("saturate", &JSViewAbstract::JsSaturate);
@@ -3067,15 +3391,20 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("hueRotate", &JSViewAbstract::JsHueRotate);
     JSClass<JSViewAbstract>::StaticMethod("clip", &JSViewAbstract::JsClip);
     JSClass<JSViewAbstract>::StaticMethod("mask", &JSViewAbstract::JsMask);
+    JSClass<JSViewAbstract>::StaticMethod("key", &JSViewAbstract::JsKey);
+    JSClass<JSViewAbstract>::StaticMethod("hoverEffect", &JSViewAbstract::JsHoverEffect);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
 #endif
+    JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
+    JSClass<JSViewAbstract>::StaticMethod("onAreaChange", &JSViewAbstract::JsOnAreaChange);
+    JSClass<JSViewAbstract>::StaticMethod("touchable", &JSInteractableView::JsTouchable);
+
     JSClass<JSViewAbstract>::StaticMethod("accessibilityGroup", &JSViewAbstract::JsAccessibilityGroup);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityText", &JSViewAbstract::JsAccessibilityText);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityDescription", &JSViewAbstract::JsAccessibilityDescription);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityImportance", &JSViewAbstract::JsAccessibilityImportance);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibility", &JSInteractableView::JsOnAccessibility);
-    JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
 }
 
 RefPtr<Decoration> JSViewAbstract::GetFrontDecoration()
@@ -3106,30 +3435,25 @@ const Border& JSViewAbstract::GetBorder()
     return GetBackDecoration()->GetBorder();
 }
 
-RefPtr<NavigationDeclaration> JSViewAbstract::GetNavigationDeclaration()
-{
-    auto navigationDeclarationCollector = ViewStackProcessor::GetInstance()->GetNavigationDeclarationCollector();
-    auto declaration = navigationDeclarationCollector->GetDeclaration();
-    if (!declaration) {
-        declaration = AceType::MakeRefPtr<NavigationDeclaration>();
-        navigationDeclarationCollector->SetDeclaration(declaration);
-    }
-    return declaration;
-}
-
 void JSViewAbstract::SetBorder(const Border& border)
 {
     GetBackDecoration()->SetBorder(border);
 }
 
-void JSViewAbstract::SetBorderRadius(const Dimension& value, const AnimationOption& option)
+void JSViewAbstract::SetBorderStyle(const JSCallbackInfo& info)
 {
-    Border border = GetBorder();
-    border.SetBorderRadius(Radius(AnimatableDimension(value, option)));
-    SetBorder(border);
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        LOGE("arg is not a object.");
+        return;
+    }
+    JsBorderStyle(info[0]->ToNumber<int32_t>(), GetState(info, 1));
 }
 
-void JSViewAbstract::SetBorderStyle(int32_t style)
+void JSViewAbstract::JsBorderStyle(int32_t style, StyleState state)
 {
     BorderStyle borderStyle = BorderStyle::SOLID;
 
@@ -3142,19 +3466,20 @@ void JSViewAbstract::SetBorderStyle(int32_t style)
     } else {
         borderStyle = BorderStyle::NONE;
     }
-    Border border = GetBorder();
-    border.SetStyle(borderStyle);
-    SetBorder(border);
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
+    boxComponent->SetBorderStyleForState(borderStyle, state);
 }
 
-void JSViewAbstract::SetBorderColor(const Color& color, const AnimationOption& option)
+void JSViewAbstract::SetBorderColor(const Color& color, const AnimationOption& option, StyleState state)
 {
     auto border = GetBorder();
     border.SetColor(color, option);
     SetBorder(border);
 }
 
-void JSViewAbstract::SetBorderWidth(const Dimension& value, const AnimationOption& option)
+void JSViewAbstract::SetBorderWidth(const Dimension& value, const AnimationOption& option, StyleState state)
 {
     auto border = GetBorder();
     border.SetWidth(value, option);
@@ -3354,31 +3679,6 @@ void JSViewAbstract::SetWindowBlur(float progress, WindowBlurStyle blurStyle)
     }
 }
 
-void JSViewAbstract::SetNavigationTitle(const std::string& title)
-{
-    GetNavigationDeclaration()->SetTitle(title);
-}
-
-void JSViewAbstract::SetNavigationSubTitle(const std::string& subTitle)
-{
-    GetNavigationDeclaration()->SetSubTitle(subTitle);
-}
-
-void JSViewAbstract::SetHideNavigationBar(bool hide)
-{
-    GetNavigationDeclaration()->SetHideBar(hide);
-}
-
-void JSViewAbstract::SetHideNavigationBackButton(bool hide)
-{
-    GetNavigationDeclaration()->SetHideBarBackButton(hide);
-}
-
-void JSViewAbstract::SetHideToolBar(bool hide)
-{
-    GetNavigationDeclaration()->SetHideToolBar(hide);
-}
-
 bool JSViewAbstract::ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonValue, Dimension& result,
     DimensionUnit defaultUnit)
 {
@@ -3543,100 +3843,16 @@ void JSViewAbstract::SetDirection(const std::string& dir)
 
     if (dir == "Ltr") {
         box->SetTextDirection(TextDirection::LTR);
+        box->SetInspectorDirection(TextDirection::LTR);
     } else if (dir == "Rtl") {
         box->SetTextDirection(TextDirection::RTL);
+        box->SetInspectorDirection(TextDirection::RTL);
     } else if (dir == "Auto") {
         box->SetTextDirection(
             AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+        box->SetInspectorDirection(TextDirection::AUTO);
     }
 }
-
-#ifdef USE_QUICKJS_ENGINE
-JSValue JSViewAbstract::JsToolBar(JSContext* ctx, JSValueConst thisValue, int32_t argc, JSValueConst* argv)
-{
-    if ((argv == nullptr) || (argc < 1)) {
-        return JS_ThrowSyntaxError(ctx, "The arg is wrong: less than one parameter");
-    }
-    if (!JS_IsObject(argv[0])) {
-        return JS_ThrowSyntaxError(ctx, "The arg is wrong: parameter of type object expected");
-    }
-    auto argsPtrItem = JsonUtil::ParseJsonString(ScopedString::Stringify(argv[0]));
-    if (!argsPtrItem) {
-        LOGE("Js Parse Border failed. argsPtr is null. %s", ScopedString::Stringify(argv[0]).c_str());
-        return thisValue;
-    }
-    if (argsPtrItem->IsNull()) {
-        LOGE("Js Parse Border failed. argsPtr is null. %s", ScopedString::Stringify(argv[0]).c_str());
-        return thisValue;
-    }
-
-    return thisValue;
-}
-#elif USE_V8_ENGINE
-void JSViewAbstract::JsToolBar(const v8::FunctionCallbackInfo<v8::Value>& info)
-{
-    auto isolate = info.GetIsolate();
-    auto context = isolate->GetCurrentContext();
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not a object.");
-        return;
-    }
-
-    auto object = info[0]->ToObject(context).ToLocalChecked();
-    auto items = object->Get(context, v8::String::NewFromUtf8(isolate, "items").ToLocalChecked()).ToLocalChecked();
-    if (!items->IsObject() || !items->IsArray()) {
-        LOGE("arg format error: not find items");
-        return;
-    }
-    auto itemsObject = items->ToObject(context).ToLocalChecked();
-    auto length = itemsObject->Get(context, v8::String::NewFromUtf8(isolate, "length").ToLocalChecked())
-                      .ToLocalChecked()->Uint32Value(context).ToChecked();
-    auto navigationDeclaration = GetNavigationDeclaration();
-    for (uint32_t i = 0; i < length; i++) {
-        auto item = itemsObject->Get(context, i).ToLocalChecked();
-        if (!item->IsObject()) {
-            LOGE("tab bar item is not json object");
-            continue;
-        }
-
-        ToolBarItem toolBarItem;
-        auto itemObject = item->ToObject(context).ToLocalChecked();
-
-        auto itemValueObject =
-            itemObject->Get(context, v8::String::NewFromUtf8(isolate, "value").ToLocalChecked()).ToLocalChecked();
-        if (itemValueObject->IsString()) {
-            toolBarItem.value = *v8::String::Utf8Value(isolate, itemValueObject->ToString(context).ToLocalChecked());
-        }
-
-        auto itemIconObject =
-            itemObject->Get(context, v8::String::NewFromUtf8(isolate, "icon").ToLocalChecked()).ToLocalChecked();
-        if (itemIconObject->IsString()) {
-            toolBarItem.icon = *v8::String::Utf8Value(isolate, itemIconObject->ToString(context).ToLocalChecked());
-        }
-
-        auto itemActionValue =
-            itemObject->Get(context, v8::String::NewFromUtf8(isolate, "action").ToLocalChecked()).ToLocalChecked();
-        if (itemActionValue->IsFunction()) {
-            auto tabBarItemActionFunc = AceType::MakeRefPtr<V8EventFunction<BaseEventInfo, 0>>(
-                v8::Local<v8::Function>::Cast(itemActionValue), nullptr);
-            toolBarItem.action =
-                EventMarker([func = std::move(tabBarItemActionFunc)]() { func->execute(); }, "tabBarItemClick", 0);
-        }
-        navigationDeclaration->AddToolBarItem(toolBarItem);
-    }
-    info.GetReturnValue().Set(info.This());
-}
-#elif USE_ARK_ENGINE
-panda::Local<panda::JSValueRef> JSViewAbstract::JsToolBar(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> thisObj,
-    const panda::Local<panda::JSValueRef> argv[], int32_t argc, void* data)
-{
-    return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
-}
-#endif // USE_ARK_ENGINE
 
 RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants()
 {
@@ -3656,6 +3872,16 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants()
         return nullptr;
     }
     return themeManager->GetThemeConstants();
+}
+
+void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsNumber()) {
+        LOGE("info[0] is not a number");
+        return;
+    }
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->SetMouseAnimationType(static_cast<HoverAnimationType>(info[0]->ToNumber<int32_t>()));
 }
 
 } // namespace OHOS::Ace::Framework

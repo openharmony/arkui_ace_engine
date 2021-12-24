@@ -18,5 +18,7 @@ build_component("clip") {
     "clip_component.cpp",
     "flutter_render_clip.cpp",
     "render_clip.cpp",
+    "render_clip_creator.cpp",
   ]
+  rosen_sources = [ "rosen_render_clip.cpp" ]
 }

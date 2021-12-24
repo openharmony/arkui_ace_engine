@@ -46,6 +46,8 @@ private:
     float damping_ = 0.0f;
     RefPtr<SpringProperty> property_; // Contain: mass & stiffness & damping
     RefPtr<SpringModel> solution_; // Maybe: CriticalDamped or Overdamped or Underdamped
+
+    friend class NativeCurveHelper;
 };
 
 } // // namespace OHOS::Ace

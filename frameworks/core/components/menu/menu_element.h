@@ -42,6 +42,14 @@ public:
         return menuShow_;
     }
 
+    std::vector<RefPtr<OptionComponent>> GetSelectOptions()
+    {
+        if (data_) {
+            return data_->GetOptions();
+        }
+        return std::vector<RefPtr<OptionComponent>>();
+    }
+
 private:
     void OnTargetCallback(const ComposeId& id, const Offset& point);
     void OnOptionCallback(std::size_t index);

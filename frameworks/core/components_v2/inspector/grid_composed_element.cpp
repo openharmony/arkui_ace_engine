@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/grid_layout/render_grid_layout.h"
+#include "core/components_v2/grid/grid_element.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
@@ -61,7 +62,10 @@ std::string GridComposedElement::GetColumnsTemplate() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        return "1fr";
+        node = GetInspectorNode(V2::GridElement::TypeId());
+        if (!node) {
+            return "1fr";
+        }
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
@@ -74,7 +78,10 @@ std::string GridComposedElement::GetRowsTemplate() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        return "1fr";
+        node = GetInspectorNode(V2::GridElement::TypeId());
+        if (!node) {
+            return "1fr";
+        }
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
@@ -87,33 +94,42 @@ std::string GridComposedElement::GetColumnsGap() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        return "1fr";
+        node = GetInspectorNode(V2::GridElement::TypeId());
+        if (!node) {
+            return "0";
+        }
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
-        return std::to_string(renderGrip->GetColumnsGap());
+        return renderGrip->GetColumns().ToString().c_str();
     }
-    return "1fr";
+    return "0";
 }
 
 std::string GridComposedElement::GetRowsGap() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        return "1fr";
+        node = GetInspectorNode(V2::GridElement::TypeId());
+        if (!node) {
+            return "0";
+        }
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
-        return std::to_string(renderGrip->GetRowGaps());
+        return renderGrip->GetRows().ToString().c_str();
     }
-    return "1fr";
+    return "0";
 }
 
 std::string GridComposedElement::GetScrollBarWidth() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        return "";
+        node = GetInspectorNode(V2::GridElement::TypeId());
+        if (!node) {
+            return "";
+        }
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
@@ -126,7 +142,10 @@ std::string GridComposedElement::GetScrollBarColor() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        return "";
+        node = GetInspectorNode(V2::GridElement::TypeId());
+        if (!node) {
+            return "";
+        }
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
@@ -139,26 +158,66 @@ std::string GridComposedElement::GetScrollBar() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        return "BarState::OFF";
+        node = GetInspectorNode(V2::GridElement::TypeId());
+        if (!node) {
+            return "BarState::Off";
+        }
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
         return DisplayModeToString(renderGrip->GetScrollBar());
     }
-    return "BarState::OFF";
+    return "BarState::Off";
 }
 
 std::string GridComposedElement::DisplayModeToString(DisplayMode displayMode) const
 {
     switch (displayMode) {
         case DisplayMode::OFF:
-            return "BarState::OFF";
+            return "BarState::Off";
         case DisplayMode::AUTO:
-            return "BarState::AUTO";
+            return "BarState::Auto";
         case DisplayMode::ON:
-            return "BarState::ON";
+            return "BarState::On";
     }
-    return "BarState::OFF";
+    return "BarState::Off";
+}
+
+void GridComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto gridLayoutElement = GetContentElement<GridLayoutElement>(GridLayoutElement::TypeId());
+    if (!gridLayoutElement) {
+        LOGE("get GridLayoutElement failed");
+        return;
+    }
+    gridLayoutElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    gridLayoutElement->MarkDirty();
+    LOGD("grid AddChildWithSlot");
+}
+
+void GridComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto gridLayoutElement = GetContentElement<GridLayoutElement>(GridLayoutElement::TypeId());
+    if (!gridLayoutElement) {
+        LOGE("get GridLayoutElement failed");
+        return;
+    }
+    auto child = gridLayoutElement->GetChildBySlot(slot);
+    gridLayoutElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    gridLayoutElement->MarkDirty();
+    LOGD("grid UpdateChildWithSlot");
+}
+
+void GridComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto gridLayoutElement = GetContentElement<GridLayoutElement>(GridLayoutElement::TypeId());
+    if (!gridLayoutElement) {
+        LOGE("get GridLayoutElement failed");
+        return;
+    }
+    gridLayoutElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    gridLayoutElement->MarkDirty();
+    LOGD("grid DeleteChildWithSlot");
 }
 
 } // namespace OHOS::Ace::V2

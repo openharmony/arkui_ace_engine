@@ -74,6 +74,12 @@ public:
     const Color& GetPressColor() const;
     void SetPressColor(const Color& pressColor);
 
+    void SetPlaceHoldStyle(const TextStyle& style);
+    const TextStyle& GetPlaceHoldStyle() const;
+
+    void SetEditingStyle(const TextStyle& style);
+    const TextStyle& GetEditingStyle() const;
+
     void SetDeclaration(const RefPtr<SearchDeclaration>& declaration);
 
 private:

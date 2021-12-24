@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_RENDER_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_RENDER_IMAGE_H
 
-#include "base/image/pixel_map.h"
 #include "base/resource/internal_resource.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
@@ -75,6 +74,11 @@ public:
     {
         return imageAlt_;
     }
+    bool GetImageSyncMode() const
+    {
+        return syncMode_;
+    }
+
     void SetMatchTextDirection(bool matchTextDirection)
     {
         matchTextDirection_ = matchTextDirection;
@@ -162,6 +166,16 @@ public:
         return background_;
     }
 
+    void SetAdaptiveFrameRectFlag(bool adaptiveFrameRectFlag)
+    {
+        adaptiveFrameRect_ = adaptiveFrameRectFlag;
+    }
+
+    bool GetAdaptiveFrameRectFlag()
+    {
+        return adaptiveFrameRect_;
+    }
+
     void SetBgImageBoxPaintSize(const Size& boxPaintSize)
     {
         if (background_ && boxPaintSize_ != boxPaintSize) {
@@ -209,6 +223,24 @@ public:
         });
     }
 
+    virtual void PerformLayoutPixmap() {}
+    virtual void PerformLayoutSvgImage() {}
+
+    virtual Size MeasureForPixmap()
+    {
+        return Size();
+    }
+
+    virtual Size MeasureForSvgImage()
+    {
+        return Size();
+    }
+
+    virtual Size MeasureForNormalImage()
+    {
+        return Size();
+    }
+
 protected:
     void ApplyImageFit(Rect& srcRect, Rect& dstRect);
     void ApplyContain(Rect& srcRect, Rect& dstRect, const Size& rawPicSize, const Size& imageComponentSize);
@@ -234,6 +266,7 @@ protected:
         const BackgroundImagePosition& imagePosition) const;
     Size CalculateBackupImageSize(const Size& pictureSize);
     virtual void ClearRenderObject() override;
+    virtual void LayoutImageObject() {}
 
     std::string imageAlt_;
     std::function<void(const std::string&)> loadSuccessEvent_;
@@ -262,8 +295,7 @@ protected:
     std::list<Rect> rectList_;
 
     ImageObjectPosition imageObjectPosition_;
-    Color color_ = Color::TRANSPARENT;
-    bool isColorSet_ = false;
+    std::optional<Color> color_;
     double singleWidth_ = 0.0;
     double displaySrcWidth_ = 0.0;
     double scale_ = 1.0;
@@ -302,6 +334,10 @@ protected:
     ImageRenderMode imageRenderMode_ = ImageRenderMode::ORIGINAL;
     ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
 
+    // For RosenRenderImage which need to be painted several times on parent RenderNode.
+    // For Example: RosenRenderRating::PaintImageArea
+    bool adaptiveFrameRect_ = true;
+
     bool autoResize_ = true;
 
     bool forceResize_ = false;
@@ -310,11 +346,11 @@ protected:
     bool useSkiaSvg_ = true;
     bool directPaint_ = false;
     int32_t retryCnt_ = 0;
-    RefPtr<PixelMap> pixmap_ = nullptr;
     std::list<std::function<void()>> imageLayoutCallbacks_;
     bool proceedPreviousLoading_ = false;
     ImageSourceInfo sourceInfo_;
     void* pixmapRawPtr_ = nullptr;
+    bool syncMode_ = false;
 };
 
 } // namespace OHOS::Ace

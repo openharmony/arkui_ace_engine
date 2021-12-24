@@ -22,9 +22,14 @@
 #include "resource_manager.h"
 #include "string_wrapper.h"
 
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_ui_director.h"
+#endif
+
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
+#include "adapter/ohos/entrance/utils.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/frontend.h"
@@ -99,51 +104,6 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr, cons
     return GetFrontendType(rootJson->GetString("type"));
 }
 
-bool GetIsArkFromConfig(const std::string& packagePathStr)
-{
-    auto configPath = packagePathStr + std::string("config.json");
-    char realPath[PATH_MAX] = { 0x00 };
-    if (realpath(configPath.c_str(), realPath) == nullptr) {
-        LOGE("realpath fail! filePath: %{private}s, fail reason: %{public}s", configPath.c_str(), strerror(errno));
-        LOGE("return not arkApp.");
-        return false;
-    }
-    std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
-    if (!file) {
-        LOGE("open file failed, filePath: %{private}s, fail reason: %{public}s", configPath.c_str(), strerror(errno));
-        LOGE("return not arkApp.");
-        return false;
-    }
-    if (std::fseek(file.get(), 0, SEEK_END) != 0) {
-        LOGE("seek file tail error, return not arkApp.");
-        return false;
-    }
-
-    long size = std::ftell(file.get());
-    if (size == -1L) {
-        return false;
-    }
-    char *fileData = new (std::nothrow) char[size];
-    if (fileData == nullptr) {
-        LOGE("new json buff failed, return not arkApp.");
-        return false;
-    }
-    rewind(file.get());
-    std::unique_ptr<char[]> jsonStream(fileData);
-    size_t result = std::fread(jsonStream.get(), 1, size, file.get());
-    if (result != (size_t)size) {
-        LOGE("read file failed, return not arkApp.");
-        return false;
-    }
-
-    std::string jsonString(jsonStream.get(), jsonStream.get() + size);
-    auto rootJson = JsonUtil::ParseJsonString(jsonString);
-    auto module = rootJson->GetValue("module");
-    auto distro = module->GetValue("distro");
-    std::string virtualMachine = distro->GetString("virtualMachine");
-    return virtualMachine.find("ark") != std::string::npos;
-}
-
 } // namespace
 
 using namespace OHOS::AAFwk;
@@ -190,7 +150,7 @@ void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBoudle, std::stri
 
     // create container
     Platform::AceContainer::CreateContainer(
-        g_dialogId, FrontendType::JS, false, nullptr,
+        g_dialogId, FrontendType::JS, false, "dialog", nullptr,
         std::make_unique<AcePlatformEventCallback>([]() {
             return;
         }));
@@ -295,6 +255,9 @@ void AceAbility::OnStart(const Want& want)
     if (info != nullptr && !info->srcPath.empty()) {
         srcPath = info->srcPath;
     }
+    if (info != nullptr && !info->bundleName.empty()) {
+        AceApplicationInfo::GetInstance().SetPackageName(info->bundleName);
+    }
 
     FrontendType frontendType = GetFrontendTypeFromManifest(packagePathStr, srcPath);
     bool isArkApp = GetIsArkFromConfig(packagePathStr);
@@ -311,8 +274,10 @@ void AceAbility::OnStart(const Want& want)
         }
     }
 
+    AceApplicationInfo::GetInstance().SetDebug(appInfo->debug, want.GetBoolParam("debugApp", false));
+
     // create container
-    Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, this,
+    Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, this,
         std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); }));
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
@@ -325,7 +290,7 @@ void AceAbility::OnStart(const Want& want)
         container->SetResourceConfiguration(aceResCfg);
         container->SetPackagePathStr(resPath);
     }
-    
+
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
     OHOS::sptr<OHOS::Window> window = Ability::GetWindow();
@@ -418,6 +383,31 @@ void AceAbility::OnStart(const Want& want)
         context->SetActionEventHandler(actionEventHandler);
     }
 
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+        if (rsUiDirector != nullptr) {
+            rsUiDirector->SetPlatformSurface(window->GetSurface());
+            auto&& rsSurfaceChangedCallBack = [surfaceChangedCallBack, rsUiDirector](uint32_t width, uint32_t height) {
+                rsUiDirector->SetSurfaceSize(width, height);
+                surfaceChangedCallBack(width, height);
+            };
+            window->OnSizeChange(rsSurfaceChangedCallBack);
+            rsUiDirector->SetSurfaceSize(windowConfig.width, windowConfig.height);
+            rsUiDirector->SetUITaskRunner(
+                [taskExecutor = Platform::AceContainer::GetContainer(abilityId_)->GetTaskExecutor()]
+                    (const std::function<void()>& task) {
+                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                    });
+            if (context != nullptr) {
+                context->SetRSUIDirector(rsUiDirector);
+            }
+            rsUiDirector->Init();
+            LOGI("Init Rosen Backend");
+        }
+    }
+#endif
+
     // run page.
     Platform::AceContainer::RunPage(abilityId_, Platform::AceContainer::GetContainer(abilityId_)->GeneratePageId(),
         parsedPageUrl, want.GetStringParam(START_PARAMS_KEY));
@@ -439,6 +429,11 @@ void AceAbility::OnStart(const Want& want)
 void AceAbility::OnStop()
 {
     LOGI("AceAbility::OnStop called ");
+#ifdef ENABLE_ROSEN_BACKEND
+    if (auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext()) {
+        context->SetRSUIDirector(nullptr);
+    }
+#endif
     Ability::OnStop();
     Platform::AceContainer::DestroyContainer(abilityId_);
     LOGI("AceAbility::OnStop called End");
@@ -491,6 +486,10 @@ bool AceAbility::OnTouchEvent(const TouchEvent &touchEvent)
     LOGI("AceAbility::OnTouchEvent called ");
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(
         Platform::AceContainer::GetContainer(abilityId_)->GetView());
+    if (!flutterAceView) {
+        LOGE("flutterAceView is null");
+        return false;
+    }
     TouchEvent event = touchEvent;
     bool ret = flutterAceView->DispatchTouchEvent(flutterAceView, event);
     LOGI("AceAbility::OnTouchEvent called End: ret: %{public}d", ret);
@@ -596,6 +595,7 @@ bool AceAbility::OnRestoreData(OHOS::AAFwk::WantParams& restoreData)
 
 void AceAbility::OnCompleteContinuation(int result)
 {
+    Ability::OnCompleteContinuation(result);
     LOGI("AceAbility::OnCompleteContinuation called.");
     Platform::AceContainer::OnCompleteContinuation(abilityId_, result);
     LOGI("AceAbility::OnCompleteContinuation finish.");

@@ -40,12 +40,6 @@ constexpr Dimension BEZIER_VERTICAL_OFFSET_THIRD = 8.0_vp;
 
 } // namespace
 
-RefPtr<RenderNode> RenderBubble::Create()
-{
-    LOGD("Create");
-    return AceType::MakeRefPtr<FlutterRenderBubble>();
-}
-
 SkCanvas* FlutterRenderBubble::GetSkCanvas(RenderContext& context)
 {
     auto canvas = ScopedCanvas::Create(context);

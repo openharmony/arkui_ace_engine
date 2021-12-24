@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "ecmascript/napi/include/jsnapi.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
@@ -30,21 +31,21 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/include/js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
-#include "native_engine/impl/ark/ark_native_engine.h"
 
 namespace OHOS::Ace::Framework {
 
 class JsiDeclarativeEngineInstance final : public AceType, public JsEngineInstance {
     DECLARE_ACE_TYPE(JsiDeclarativeEngineInstance, AceType)
 public:
-
     JsiDeclarativeEngineInstance(const RefPtr<FrontendDelegate>& delegate, int32_t instanceId)
-        : frontendDelegate_(delegate), instanceId_(instanceId) {}
+        : frontendDelegate_(delegate), instanceId_(instanceId)
+    {}
     ~JsiDeclarativeEngineInstance() override;
 
     void FlushCommandBuffer(void* context, const std::string& command) override;
 
-    bool InitJsEnv(bool debuggerMode, const std::unordered_map<std::string, void*>& extraNativeObject);
+    bool InitJsEnv(bool debuggerMode, const std::unordered_map<std::string, void*>& extraNativeObject,
+        const shared_ptr<JsRuntime>& runtime = nullptr);
 
     bool FireJsEvent(const std::string& eventStr);
 
@@ -55,8 +56,8 @@ public:
     void DestroyRootViewHandle(int32_t pageId);
     void DestroyAllRootViewHandle();
 
-    static std::unique_ptr<JsonValue> GetI18nStringResource(const std::string& targetStringKey,
-        const std::string& targetStringValue);
+    static std::unique_ptr<JsonValue> GetI18nStringResource(
+        const std::string& targetStringKey, const std::string& targetStringValue);
     static std::string GetMediaResource(const std::string& targetFileName);
 
     static RefPtr<JsAcePage> GetRunningPage(const shared_ptr<JsRuntime>& runtime);
@@ -64,6 +65,10 @@ public:
     static void PostJsTask(const shared_ptr<JsRuntime>&, std::function<void()>&& task);
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
     static RefPtr<PipelineContext> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
+    WeakPtr<JsMessageDispatcher> GetJsMessageDispatcher() const
+    {
+        return dispatcher_;
+    }
 
     void SetRunningPage(const RefPtr<JsAcePage>& page)
     {
@@ -116,9 +121,9 @@ public:
 
 private:
     void InitGlobalObjectTemplate();
-    void InitConsoleModule();         // add Console object to global
-    void InitAceModule();             // add ace object to global
-    void InitPerfUtilModule();        // add perfutil object to global
+    void InitConsoleModule();  // add Console object to global
+    void InitAceModule();      // add ace object to global
+    void InitPerfUtilModule(); // add perfutil object to global
     void InitJsExportsUtilObject();
     void InitJsNativeModuleObject();
     void InitGroupJsBridge();
@@ -152,6 +157,7 @@ private:
 class JsiDeclarativeEngine : public JsEngine {
     DECLARE_ACE_TYPE(JsiDeclarativeEngine, JsEngine)
 public:
+    JsiDeclarativeEngine(int32_t instanceId, void* runtime) : instanceId_(instanceId), runtime_(runtime) {}
     JsiDeclarativeEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~JsiDeclarativeEngine() override;
 
@@ -185,6 +191,16 @@ public:
     // Destroy page instance
     void DestroyPageInstance(int32_t pageId) override;
 
+    bool OnStartContinuation() override;
+
+    void OnCompleteContinuation(int32_t code) override;
+
+    void OnRemoteTerminated() override;
+
+    void OnSaveData(std::string& data) override;
+
+    bool OnRestoreData(const std::string& data) override;
+
     // Destroy application instance according to packageName
     void DestroyApplication(const std::string& packageName) override;
 
@@ -207,10 +223,17 @@ public:
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }
 
-private:
-    void CallAppFunc(const std::string& appFuncName);
+    void RunNativeEngineLoop() override
+    {
+        if (nativeEngine_ != nullptr) {
+            nativeEngine_->Loop(LOOP_NOWAIT, false);
+        }
+    }
 
-    void CallAppFunc(const std::string& appFuncName, const std::vector<shared_ptr<JsValue>>& argv);
+private:
+    bool CallAppFunc(const std::string& appFuncName);
+
+    bool CallAppFunc(const std::string& appFuncName, std::vector<shared_ptr<JsValue>>& argv);
 
     void SetPostTask(NativeEngine* nativeEngine);
 
@@ -223,6 +246,7 @@ private:
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 
     int32_t instanceId_ = 0;
+    void* runtime_ = nullptr;
 
     ArkNativeEngine* nativeEngine_ = nullptr;
 

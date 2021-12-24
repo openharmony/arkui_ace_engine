@@ -55,6 +55,8 @@ public:
     virtual int32_t GetByteCount() const = 0;
     virtual void* GetPixelManager() const = 0;
     virtual void* GetRawPixelMapPtr() const = 0;
+    virtual std::string GetId() = 0;
+    virtual std::string GetModifyId() = 0;
 };
 
 } // namespace OHOS::Ace

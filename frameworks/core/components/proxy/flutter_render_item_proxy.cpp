@@ -22,11 +22,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderItemProxy::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderItemProxy>();
-}
-
 FlutterRenderItemProxy::FlutterRenderItemProxy() : RenderItemProxy() {}
 
 RenderLayer FlutterRenderItemProxy::GetRenderLayer()

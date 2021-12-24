@@ -53,6 +53,8 @@ public:
         return operation_;
     }
 
+    bool IsTransitionStop() const;
+
 protected:
     void MarkDirty() override;
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
@@ -69,7 +71,6 @@ private:
     void PerformReplaceActiveScene(int32_t newPageId, int32_t replaceId);
     void PerformRemoveInactiveScene(int32_t pageId);
 #endif
-    bool IsTransitionStop() const;
     bool PerformPushPageTransition(const RefPtr<Element>& elementIn, const RefPtr<Element>& elementOut);
     bool PerformPopPageTransition(const RefPtr<Element>& elementIn, const RefPtr<Element>& elementOut);
     void AddListenerForPopPage(const WeakPtr<PageElement>& pageInWeak, const WeakPtr<PageElement>& pageOutWeak);

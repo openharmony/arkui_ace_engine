@@ -72,6 +72,58 @@ private:
     RefPtr<PasteData> pasteData_;
 };
 
+class JsItemDragInfo : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JsItemDragInfo>::Declare("ItemDragInfo");
+        JSClass<JsItemDragInfo>::CustomMethod("getX", &JsItemDragInfo::GetX);
+        JSClass<JsItemDragInfo>::CustomMethod("getY", &JsItemDragInfo::GetY);
+        JSClass<JsItemDragInfo>::Bind(globalObj, &JsItemDragInfo::Constructor, &JsItemDragInfo::Destructor);
+    }
+
+    void GetX(const JSCallbackInfo& args)
+    {
+        auto xValue = JSVal(ToJSValue(itemDragInfo_->GetX()));
+        auto xValueRef = JSRef<JSVal>::Make(xValue);
+        args.SetReturnValue(xValueRef);
+    }
+
+    void GetY(const JSCallbackInfo& args)
+    {
+        auto yValue = JSVal(ToJSValue(itemDragInfo_->GetY()));
+        auto yValueRef = JSRef<JSVal>::Make(yValue);
+        args.SetReturnValue(yValueRef);
+    }
+
+    void SetItemDragInfo(const RefPtr<ItemDragInfo>& itemDragInfo)
+    {
+        itemDragInfo_ = itemDragInfo;
+    }
+
+    RefPtr<ItemDragInfo> GetItemDragInfo() const
+    {
+        return itemDragInfo_;
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto itemDragInfo = Referenced::MakeRefPtr<JsItemDragInfo>();
+        itemDragInfo->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(itemDragInfo));
+    }
+
+    static void Destructor(JsItemDragInfo* itemDragInfo)
+    {
+        if (itemDragInfo != nullptr) {
+            itemDragInfo->DecRefCount();
+        }
+    }
+
+    RefPtr<ItemDragInfo> itemDragInfo_;
+};
+
 class JsDragEvent : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -180,6 +232,48 @@ void JsDragFunction::Execute(const RefPtr<DragEvent>& info)
     JsFunction::ExecuteJS(1, &param);
 }
 
+JSRef<JSVal> JsDragFunction::ItemDragStartExecute(const ItemDragInfo& info, int32_t itemIndex)
+{
+    JSRef<JSVal> itemDragInfo = JSRef<JSObject>::Cast(CreateItemDragInfo(info));
+    JSRef<JSVal> itemIndexParam = JSRef<JSVal>::Make(ToJSValue(itemIndex));
+    JSRef<JSVal> params[] = { itemDragInfo, itemIndexParam };
+    return JsFunction::ExecuteJS(2, params);
+}
+
+void JsDragFunction::ItemDragEnterExecute(const ItemDragInfo& info)
+{
+    JSRef<JSObject> itemDragInfo = JSRef<JSObject>::Cast(CreateItemDragInfo(info));
+    JSRef<JSVal> param = itemDragInfo;
+    JsFunction::ExecuteJS(1, &param);
+}
+
+void JsDragFunction::ItemDragMoveExecute(const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex)
+{
+    JSRef<JSVal> itemDragInfo = JSRef<JSObject>::Cast(CreateItemDragInfo(info));
+    JSRef<JSVal> itemIndexParam = JSRef<JSVal>::Make(ToJSValue(itemIndex));
+    JSRef<JSVal> insertIndexParam = JSRef<JSVal>::Make(ToJSValue(insertIndex));
+    JSRef<JSVal> params[] = { itemDragInfo, itemIndexParam, insertIndexParam };
+    JsFunction::ExecuteJS(3, params);
+}
+
+void JsDragFunction::ItemDragLeaveExecute(const ItemDragInfo& info, int32_t itemIndex)
+{
+    JSRef<JSVal> itemDragInfo = JSRef<JSObject>::Cast(CreateItemDragInfo(info));
+    JSRef<JSVal> itemIndexParam = JSRef<JSVal>::Make(ToJSValue(itemIndex));
+    JSRef<JSVal> params[] = { itemDragInfo, itemIndexParam };
+    JsFunction::ExecuteJS(2, params);
+}
+
+void JsDragFunction::ItemDropExecute(const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess)
+{
+    JSRef<JSVal> itemDragInfo = JSRef<JSObject>::Cast(CreateItemDragInfo(info));
+    JSRef<JSVal> itemIndexParam = JSRef<JSVal>::Make(ToJSValue(itemIndex));
+    JSRef<JSVal> insertIndexParam = JSRef<JSVal>::Make(ToJSValue(insertIndex));
+    JSRef<JSVal> isSuccessParam = JSRef<JSVal>::Make(ToJSValue(isSuccess));
+    JSRef<JSVal> params[] = { itemDragInfo, itemIndexParam, insertIndexParam, isSuccessParam };
+    JsFunction::ExecuteJS(4, params);
+}
+
 JSRef<JSObject> JsDragFunction::CreateDragEvent(const RefPtr<DragEvent>& info)
 {
     JSRef<JSObject> dragObj = JSClass<JsDragEvent>::NewInstance();
@@ -198,4 +292,93 @@ JSRef<JSObject> JsDragFunction::CreatePasteData(const RefPtr<PasteData>& info)
     pasteData->SetPasteData(info);
     return pasteObj;
 }
+
+JSRef<JSObject> JsDragFunction::CreateItemDragInfo(const ItemDragInfo& info)
+{
+    JSRef<JSObject> itemDragInfoObj = JSRef<JSObject>::New();
+    itemDragInfoObj->SetProperty<double>("x", SystemProperties::Px2Vp(info.GetX()));
+    itemDragInfoObj->SetProperty<double>("y", SystemProperties::Px2Vp(info.GetY()));
+    return itemDragInfoObj;
+}
+
+void JsGridDragFunction::JSBind(BindingTarget globalObj)
+{
+    JsPasteData::JSBind(globalObj);
+    JsItemDragInfo::JSBind(globalObj);
+}
+
+JSRef<JSObject> JsGridDragFunction::CreateDragEvent(const RefPtr<ItemDragInfo>& info)
+{
+    JSRef<JSObject> dragObj = JSClass<JsItemDragInfo>::NewInstance();
+    auto dragEvent = Referenced::Claim(dragObj->Unwrap<JsItemDragInfo>());
+    dragEvent->SetItemDragInfo(info);
+    return dragObj;
+}
+
+JSRef<JSObject> JsGridDragFunction::CreatePasteData(const RefPtr<PasteData>& info)
+{
+    JSRef<JSObject> pasteObj = JSClass<JsPasteData>::NewInstance();
+    auto pasteData = Referenced::Claim(pasteObj->Unwrap<JsPasteData>());
+    pasteData->SetPasteData(info);
+    return pasteObj;
+}
+
+void JsGridDragFunction::ExecuteDragEnter(const RefPtr<ItemDragInfo>& info)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(CreateDragEvent(info));
+    JSRef<JSVal> param = obj;
+    JSRef<JSVal> jsRet = JsFunction::ExecuteJS(1, &param);
+    if (jsRet->IsEmpty() && jsRet->IsBoolean()) {
+        jsRet->ToBoolean();
+    }
+}
+
+void JsGridDragFunction::ExecuteDragMove(const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex)
+{
+    constexpr int32_t GRID_MOVE_PARAM_COUNT = 3;
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(CreateDragEvent(info));
+    JSRef<JSVal> param[GRID_MOVE_PARAM_COUNT];
+    param[0] = obj;
+    param[1] = JSRef<JSVal>::Make(ToJSValue(itemIndex));
+    param[GRID_MOVE_PARAM_COUNT - 1] = JSRef<JSVal>::Make(ToJSValue(insertIndex));
+    JsFunction::ExecuteJS(GRID_MOVE_PARAM_COUNT, param);
+}
+
+void JsGridDragFunction::ExecuteDragLeave(const RefPtr<ItemDragInfo>& info, int32_t itemIndex)
+{
+    constexpr int32_t GRID_LEAVE_PARAM_COUNT = 2;
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(CreateDragEvent(info));
+    JSRef<JSVal> param[GRID_LEAVE_PARAM_COUNT];
+    param[0] = obj;
+    param[1] = JSRef<JSVal>::Make(ToJSValue(itemIndex));
+    JSRef<JSVal> jsRet = JsFunction::ExecuteJS(GRID_LEAVE_PARAM_COUNT, param);
+    if (jsRet->IsEmpty() && jsRet->IsBoolean()) {
+        jsRet->ToBoolean();
+    }
+}
+
+JSRef<JSVal> JsGridDragFunction::ExecuteDragStart(const RefPtr<ItemDragInfo>& info, int32_t itemIndex)
+{
+    constexpr int32_t GRID_START_PARAM_COUNT = 2;
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(CreateDragEvent(info));
+    JSRef<JSVal> param[GRID_START_PARAM_COUNT];
+    param[0] = obj;
+    param[1] = JSRef<JSVal>::Make(ToJSValue(itemIndex));
+    return JsFunction::ExecuteJS(GRID_START_PARAM_COUNT, param);
+}
+
+void JsGridDragFunction::ExecuteDrop(
+    const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess)
+{
+    constexpr int32_t GRID_DROP_PARAM_COUNT = 4;
+    int32_t index = 0;
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(CreateDragEvent(info));
+    JSRef<JSVal> param[GRID_DROP_PARAM_COUNT];
+    param[index++] = obj;
+    param[index++] = JSRef<JSVal>::Make(ToJSValue(itemIndex));
+    param[index++] = JSRef<JSVal>::Make(ToJSValue(insertIndex));
+    param[index] = JSRef<JSVal>::Make(ToJSValue(isSuccess));
+    JsFunction::ExecuteJS(GRID_DROP_PARAM_COUNT, param);
+}
+
 } // namespace OHOS::Ace::Framework

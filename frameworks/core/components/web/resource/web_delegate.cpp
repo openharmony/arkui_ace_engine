@@ -75,7 +75,7 @@ void WebDelegate::Stop()
 {
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("fail to get context");
+        LOGI("fail to get context");
         return;
     }
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
@@ -96,7 +96,7 @@ void WebDelegate::UnregisterEvent()
 {
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("fail to get context");
+        LOGI("fail to get context");
         return;
     }
     auto resRegister = context->GetPlatformResRegister();
@@ -144,8 +144,9 @@ void WebDelegate::CreatePluginResource(
 {
     state_ = State::CREATING;
 
-    auto webCom = webComponent_.Upgrade();
+    auto webCom = webComponent_;
     if (!webCom) {
+        LOGI("webCom is null");
         state_ = State::CREATEFAILED;
         OnError(NTC_ERROR, "fail to call WebDelegate::Create due to webComponent is null");
         return;
@@ -153,6 +154,7 @@ void WebDelegate::CreatePluginResource(
 
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
+        LOGI("pipelineContext is null");
         state_ = State::CREATEFAILED;
         OnError(NTC_ERROR, "fail to call WebDelegate::Create due to context is null");
         return;
@@ -165,11 +167,12 @@ void WebDelegate::CreatePluginResource(
     platformTaskExecutor.PostTask([weakWeb = AceType::WeakClaim(this), weakRes, size, position] {
         auto webDelegate = weakWeb.Upgrade();
         if (webDelegate == nullptr) {
-            LOGE("webDelegate is null!");
+            LOGI("webDelegate is null!");
             return;
         }
-        auto webCom = webDelegate->webComponent_.Upgrade();
+        auto webCom = webDelegate->webComponent_;
         if (!webCom) {
+            LOGI("webCom is null!");
             webDelegate->OnError(NTC_ERROR, "fail to call WebDelegate::SetSrc PostTask");
             return;
         }
@@ -182,7 +185,7 @@ void WebDelegate::CreatePluginResource(
         }
         auto context = webDelegate->context_.Upgrade();
         if (!context) {
-            LOGE("context is null");
+            LOGI("context is null");
             return;
         }
 
@@ -222,7 +225,7 @@ void WebDelegate::CreatePluginResource(
 
 void WebDelegate::InitWebEvent()
 {
-    auto webCom = webComponent_.Upgrade();
+    auto webCom = webComponent_;
     if (!webCom) {
         state_ = State::CREATEFAILED;
         OnError(NTC_ERROR, "fail to call WebDelegate::Create due to webComponent is null");
@@ -489,6 +492,11 @@ void WebDelegate::BindIsPagePathInvalidMethod()
             }
         });
     }
+}
+
+void WebDelegate::SetComponent(const RefPtr<WebComponent>& component)
+{
+    webComponent_ = component;
 }
 
 } // namespace OHOS::Ace

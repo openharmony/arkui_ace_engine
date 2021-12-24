@@ -20,11 +20,6 @@
 
 namespace OHOS::Ace::V2 {
 
-RefPtr<RenderNode> RenderList::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderList>();
-}
-
 RenderLayer FlutterRenderList::GetRenderLayer()
 {
     if (!layer_) {
@@ -113,6 +108,11 @@ void FlutterRenderList::Paint(RenderContext& context, const Offset& offset)
     if (selectedItem_) {
         selectedItem_->SetPosition(MakeValue<Offset>(selectedItemMainAxis_, 0.0));
         PaintChild(selectedItem_, context, offset);
+    }
+
+    // Notify scroll bar to update.
+    if (scrollBarProxy_) {
+        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
     }
 }
 

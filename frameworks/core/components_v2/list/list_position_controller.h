@@ -28,6 +28,8 @@ public:
     ~ListPositionController() override = default;
 
     void JumpTo(int32_t index, int32_t source = 3) override;
+    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve) override;
+    Axis GetScrollDirection() const override;
 };
 
 } // namespace OHOS::Ace::V2

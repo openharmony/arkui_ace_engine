@@ -35,7 +35,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("height", &JSToggle::JsHeight);
     JSClass<JSToggle>::StaticMethod("size", &JSToggle::JsSize);
     JSClass<JSToggle>::StaticMethod("padding", &JSToggle::JsPadding);
-    JSClass<JSToggle>::StaticMethod("swithPointStyle", &JSToggle::SwithPointStyle);
+    JSClass<JSToggle>::StaticMethod("switchPointColor", &JSToggle::SwitchPointColor);
     JSClass<JSToggle>::Inherit<JSViewAbstract>();
     JSClass<JSToggle>::Bind(globalObj);
 }
@@ -216,7 +216,7 @@ void JSToggle::SelectedColor(const JSCallbackInfo& info)
     }
 }
 
-void JSToggle::SwithPointStyle(const JSCallbackInfo& info)
+void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
@@ -226,7 +226,7 @@ void JSToggle::SwithPointStyle(const JSCallbackInfo& info)
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto switchComponent = AceType::DynamicCast<SwitchComponent>(mainComponent);
     if (!switchComponent) {
-        LOGE("pointstyle only support swith");
+        LOGE("pointstyle only support switch");
         return;
     }
     Color color;

@@ -38,6 +38,11 @@ public:
         return nullptr;
     }
 
+    RefPtr<JsEngine> CreateJsEngineUsingSharedRuntime(int32_t instanceId, void* runtime) const override
+    {
+        return nullptr;
+    }
+
     RefPtr<BaseCanvasBridge> CreateCanvasBridge() const override
     {
         return nullptr;

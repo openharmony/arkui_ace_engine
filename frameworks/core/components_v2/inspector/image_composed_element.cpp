@@ -33,6 +33,7 @@ const std::unordered_map<std::string, std::function<std::string(const ImageCompo
     { "interpolation", [](const ImageComposedElement& inspector) { return inspector.GetInterpolation(); } },
     { "renderMode", [](const ImageComposedElement& inspector) { return inspector.GetRenderMode(); } },
     { "sourceSize", [](const ImageComposedElement& inspector) { return inspector.GetSourceSize(); } },
+    { "syncMode", [](const ImageComposedElement& inspector) { return inspector.GetsyncMode(); } },
 };
 
 } // namespace
@@ -47,6 +48,7 @@ void ImageComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(std::string("interpolation: ").append(GetInterpolation()));
     DumpLog::GetInstance().AddDesc(std::string("renderMode: ").append(GetRenderMode()));
     DumpLog::GetInstance().AddDesc(std::string("sourceSize: ").append(GetSourceSize()));
+    DumpLog::GetInstance().AddDesc(std::string("syncMode: ").append(GetsyncMode()));
 }
 
 std::unique_ptr<JsonValue> ImageComposedElement::ToJsonObject() const
@@ -108,6 +110,16 @@ std::string ImageComposedElement::GetSourceSize() const
     auto imageSourceSize = renderImage ? renderImage->GetImageSourceSize()
                         : Size();
     return imageSourceSize.ToString();
+}
+
+std::string ImageComposedElement::GetsyncMode() const
+{
+    auto renderImage = GetRenderImage();
+    if(!renderImage)
+    {
+        return "false";
+    }
+    return ConvertBoolToString(renderImage->GetImageSyncMode());
 }
 
 RefPtr<RenderImage> ImageComposedElement::GetRenderImage() const

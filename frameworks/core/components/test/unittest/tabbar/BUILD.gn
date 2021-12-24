@@ -92,6 +92,7 @@ ohos_unittest("RenderTabContentTest") {
     # components
     "$ace_root/frameworks/core/components/box/box_component.cpp",
     "$ace_root/frameworks/core/components/display/display_component.cpp",
+    "$ace_root/frameworks/core/components/image/image_component.cpp",
     "$ace_root/frameworks/core/components/overlay/overlay_component.cpp",
     "$ace_root/frameworks/core/components/page/page_component.cpp",
     "$ace_root/frameworks/core/components/root/root_component.cpp",
@@ -227,7 +228,7 @@ ohos_unittest("RenderTabContentTest") {
       "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
     ]
   } else {
-    sources += [ "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp" ]
+    sources += [ "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp" ]
   }
 
   # add sources only needed by wearable like watch.

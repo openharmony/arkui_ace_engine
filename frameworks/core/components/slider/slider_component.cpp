@@ -50,6 +50,8 @@ void SliderComponent::InitStyle(const RefPtr<SliderTheme>& theme)
     if (mode_ == SliderMode::INSET) {
         track_->SetTrackThickness(theme->GetInsetTrackThickness());
         block_->SetBlockSize(theme->GetInsetBlockSize());
+        block_->SetHotRegionWidth(theme->GetInsetBlockHotSize());
+        block_->SetHotRegionHeight(theme->GetInsetBlockHotSize());
     } else if (mode_ == SliderMode::OUTSET) {
         track_->SetTrackThickness(theme->GetOutsetTrackThickness());
         block_->SetBlockSize(theme->GetOutsetBlockSize());

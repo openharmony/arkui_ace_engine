@@ -58,6 +58,7 @@ config("system_skia_config") {
     "$system_skia_override_path/third_party/skia/include/core",
     "$system_skia_override_path/third_party/skia/include/gpu",
     "$system_skia_override_path/third_party/skia/include/private",
+    "$system_skia_override_path/third_party/skia/include/utils",
   ]
 
   include_dirs += [ "$libs_root/shared_library/${target_os}_${target_cpu}/include/external/vulkan-headers/include" ]

@@ -138,13 +138,18 @@ template("bridge_common") {
       ]
     }
 
+    # xcomponent components supports phone, TV and wearable except PC Preview
+    if (defined(config.xcomponent_components_support) &&
+        config.xcomponent_components_support) {
+      sources += [ "dom/dom_xcomponent.cpp" ]
+    }
+
     # advance components using web or native plugins
     if (defined(config.advance_components_support) &&
         config.advance_components_support) {
       sources += [
         "dom/dom_rich_text.cpp",
         "dom/dom_web.cpp",
-        "dom/dom_xcomponent.cpp",
       ]
     }
 

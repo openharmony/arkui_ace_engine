@@ -21,7 +21,9 @@
 
 namespace OHOS::Ace {
 
-struct ToolBarItem {
+struct ToolBarItem : public virtual AceType {
+    DECLARE_ACE_TYPE(ToolBarItem, AceType);
+
 public:
     ToolBarItem() = default;
     ToolBarItem(const std::string& value, const std::string& icon, const EventMarker& action)
@@ -34,102 +36,35 @@ public:
     EventMarker action;
 };
 
+enum class NavigationTitleMode {
+    FREE = 0,
+    FULL,
+    MINI,
+};
+
 struct ACE_EXPORT NavigationDeclaration : public virtual AceType {
     DECLARE_ACE_TYPE(NavigationDeclaration, AceType);
 
 public:
-    void SetTitle(const std::string& title)
-    {
-        title_ = title;
-    }
-    void SetSubTitle(const std::string& subTitle)
-    {
-        subTitle_ = subTitle;
-    }
-    void SetHideBar(bool hide)
-    {
-        hideBar_ = hide ? HIDE::TRUE : HIDE::FALSE;
-    }
-    void SetHideBarBackButton(bool hide)
-    {
-        hideBackButton_ = hide ? HIDE::TRUE : HIDE::FALSE;
-    }
-    void SetHideToolBar(bool hide)
-    {
-        hideToolbar_ = hide ? HIDE::TRUE : HIDE::FALSE;
-    }
-    void AddToolBarItem(const ToolBarItem& item)
-    {
-        if (item.value.empty() && item.icon.empty()) {
-            return;
-        }
-        toolbarItems_.push_back(item);
-    }
-    const std::string& GetTitle()
-    {
-        return title_;
-    }
-    const std::string& GetSubTitle()
-    {
-        return subTitle_;
-    }
-
-    bool HasNavigationBar()
-    {
-        return hideBar_ != HIDE::TRUE;
-    }
-    bool HasBackButton()
-    {
-        return hideBackButton_ != HIDE::TRUE;
-    }
     bool HasToolBar()
     {
-        return (hideToolbar_ != HIDE::TRUE) && !toolbarItems_.empty();
-    }
-    const std::list<ToolBarItem>& GetToolBarItems()
-    {
-        return toolbarItems_;
+        return (!hideToolbar && !toolbarItems.empty()) || (!hideToolbar && toolBarBuilder);
     }
 
-    void Append(const RefPtr<NavigationDeclaration>& other);
+    RefPtr<Component> customTitle;
+    std::string title;
+    std::string subTitle;
+    bool hideBarBackButton = false;
+    RefPtr<Component> customMenus;
+    std::list<RefPtr<ToolBarItem>> menuItems;
+    NavigationTitleMode titleMode = NavigationTitleMode::MINI;
+    bool hideBar = false;
+    EventMarker titleModeChangedEvent;
 
-private:
-    enum class HIDE {
-        FALSE = 0,
-        TRUE,
-        UNDEFINED,
-    };
-    std::string title_;
-    std::string subTitle_;
-    HIDE hideBar_ = HIDE::UNDEFINED;
-    HIDE hideBackButton_ = HIDE::UNDEFINED;
-    std::list<ToolBarItem> toolbarItems_;
-    HIDE hideToolbar_ = HIDE::UNDEFINED;
-};
-
-class NavigationDeclarationCollector : public Component {
-    DECLARE_ACE_TYPE(NavigationDeclarationCollector, Component);
-
-public:
-    RefPtr<Element> CreateElement() override
-    {
-        return nullptr;
-    }
-    void CollectTo(const RefPtr<NavigationDeclaration>& declaration)
-    {
-        declaration->Append(declaration_);
-    }
-    RefPtr<NavigationDeclaration> GetDeclaration()
-    {
-        return declaration_;
-    }
-    void SetDeclaration(const RefPtr<NavigationDeclaration>& declaration)
-    {
-        declaration_ = declaration;
-    }
-
-private:
-    RefPtr<NavigationDeclaration> declaration_;
+    std::list<RefPtr<ToolBarItem>> toolbarItems;
+    RefPtr<Component> toolBarBuilder;
+    bool hideToolbar = false;
+    AnimationOption animationOption;
 };
 
 class ACE_EXPORT NavigationContainerComponent : public ComponentGroup {
@@ -149,6 +84,9 @@ public:
     RefPtr<Element> CreateElement() override;
 
     static uint32_t GetGlobalTabControllerId();
+    static RefPtr<ComposedComponent> BuildToolBar(
+        const RefPtr<NavigationDeclaration>& declaration, const RefPtr<TabController>& controller);
+
     RefPtr<TabController> GetTabController()
     {
         return tabController_;
@@ -157,11 +95,9 @@ public:
     {
         return declaration_;
     }
-    void Build();
+    void Build(const WeakPtr<PipelineContext>& context);
 
 private:
-    RefPtr<Component> BuildNavigationBar() const;
-    RefPtr<Component> BuildTabBar();
     bool NeedSection() const;
 
     RefPtr<NavigationDeclaration> declaration_;

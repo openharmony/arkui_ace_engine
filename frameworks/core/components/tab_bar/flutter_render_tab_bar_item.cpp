@@ -27,11 +27,6 @@ constexpr double CLICKED_RADIUS = 8.0;
 
 } // namespace
 
-RefPtr<RenderNode> RenderTabBarItem::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderTabBarItem>();
-}
-
 RenderLayer FlutterRenderTabBarItem::GetRenderLayer()
 {
     if (!layer_) {

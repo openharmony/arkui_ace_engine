@@ -45,12 +45,13 @@ public:
 
     void AddChild(const RefPtr<Element>& child, int32_t slot = DEFAULT_ELEMENT_SLOT);
     void RemoveChild(const RefPtr<Element>& child);
+    RefPtr<Element> GetChildBySlot(int32_t slot);
     void DeactivateChild(RefPtr<Element> child);
     void Rebuild();
 
     // create a new child element and mount to element tree.
     RefPtr<Element> InflateComponent(const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot);
-    virtual void Mount(
+    void Mount(
         const RefPtr<Element>& parent, int32_t slot = DEFAULT_ELEMENT_SLOT, int32_t renderSlot = DEFAULT_RENDER_SLOT);
     void AddToFocus();
     virtual RefPtr<Element> UpdateChild(const RefPtr<Element>& child, const RefPtr<Component>& newComponent) = 0;
@@ -60,7 +61,9 @@ public:
     void DetachChild(const RefPtr<Element>&);
     RefPtr<Element> RetakeDeactivateElement(const RefPtr<Component>& newComponent);
 
+    virtual void OnMount() {}
     virtual void Detached() {}
+    virtual void Activate() {}
     virtual void Deactivate() {}
     virtual void UmountRender() {}
     virtual void Prepare(const WeakPtr<Element>& parent) {}
@@ -113,6 +116,7 @@ public:
         if (newComponent) {
             retakeId_ = newComponent->GetRetakeId();
             componentTypeId_ = AceType::TypeId(component_);
+            ignoreInspector_ = newComponent->IsIgnoreInspector();
             MarkNeedRebuild();
         }
     }
@@ -136,6 +140,15 @@ public:
         auto renderNode = GetRenderNode();
         if (renderNode) {
             return renderNode->GetRectBasedWindowTopLeft();
+        }
+        return Rect();
+    }
+
+    Rect GetRenderRectInLocal() const
+    {
+        auto renderNode = GetRenderNode();
+        if (renderNode) {
+            return renderNode->GetPaintRect();
         }
         return Rect();
     }
@@ -226,6 +239,16 @@ public:
         return active_;
     }
 
+    void SetIgnoreInspector(bool ignoreInspector)
+    {
+        ignoreInspector_ = ignoreInspector;
+    }
+
+    bool IsIgnoreInspector() const
+    {
+        return ignoreInspector_;
+    }
+
 protected:
     inline RefPtr<Element> DoUpdateChildWithNewComponent(
         const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot);
@@ -235,6 +258,10 @@ protected:
     virtual void OnContextAttached() {}
 
     void MarkActive(bool active);
+
+    virtual void OnActive() {}
+
+    virtual void OnInactive() {}
 
     RefPtr<ThemeManager> GetThemeManager() const
     {
@@ -264,6 +291,7 @@ private:
     bool needRebuild_ = false;
     // One-to-one correspondence with component through retakeId
     int32_t retakeId_ = 0;
+    bool ignoreInspector_ = false;
 };
 
 } // namespace OHOS::Ace

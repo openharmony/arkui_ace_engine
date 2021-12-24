@@ -91,6 +91,7 @@ void RenderOption::OnFocus(bool focus)
     // lost focus => just update status.
     if (!focus) {
         data_->SetFocused(false);
+        data_->SetSelected(false);
         UpdateStatus();
         return;
     }
@@ -201,6 +202,10 @@ void RenderOption::OnSelect(uint32_t selectIndex)
 
 void RenderOption::OnTouch(bool down)
 {
+    if (data_->GetCustomComponent()) {
+        return;
+    }
+
     if (!data_ || data_->GetDisabled()) {
         return;
     }
@@ -698,6 +703,19 @@ bool RenderOption::IsRTL() const
 
 void RenderOption::PerformLayout()
 {
+    if (data_->GetCustomComponent()) {
+        auto child = GetLastChild();
+        if (!child) {
+            LOGE("child is null.");
+            return;
+        }
+
+        auto layoutParam = LayoutParam(GetLayoutParam().GetMaxSize(), Size());
+        child->Layout(layoutParam);
+        SetLayoutSize(child->GetLayoutSize());
+        return;
+    }
+
     auto text = GetRenderText(AceType::Claim(this));
     if (!text) {
         LOGE("render text is null.");

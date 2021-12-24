@@ -27,8 +27,8 @@
 namespace OHOS::Ace::Framework {
 V8XComponentBridge::V8XComponentBridge()
 {
-    nativeXcomponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
-    nativeXComponent_ = new NativeXComponent(AceType::RawPtr(nativeXcomponentImpl_));
+    nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
+    nativeXComponent_ = new NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
 }
 
 V8XComponentBridge::~V8XComponentBridge()
@@ -85,8 +85,9 @@ void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId
         LOGE("V8XComponentBridge::HandleJsContext nativeWindow invalid");
         return;
     }
-    nativeXcomponentImpl_->SetSurface(nativeWindow);
-    nativeXcomponentImpl_->SetXComponentId(xcomponent->GetId());
+
+    nativeXComponentImpl_->SetSurface(nativeWindow);
+    nativeXComponentImpl_->SetXComponentId(xcomponent->GetId());
 
     std::shared_ptr<V8NativeEngine> nativeEngine = static_cast<V8EngineInstance*>(engine)->GetV8NativeEngine();
     if (!nativeEngine) {
@@ -98,7 +99,6 @@ void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId
                                                         args, NATIVE_XCOMPONENT_OBJ,
                                                         reinterpret_cast<void*>(nativeXComponent_));
     renderContext_.Reset(isolate_, renderContext);
-
     auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate_->GetData(V8EngineInstance::FRONTEND_DELEGATE));
     auto task = [weak = WeakClaim(this), xcomponent]() {
         auto pool = xcomponent->GetTaskPool();
@@ -109,7 +109,7 @@ void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId
         if (bridge) {
             pool->NativeXComponentInit(
                 bridge->nativeXComponent_,
-                AceType::WeakClaim(AceType::RawPtr(bridge->nativeXcomponentImpl_)));
+                AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
         }
     };
     if (*delegate == nullptr) {
@@ -117,7 +117,6 @@ void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId
         return;
     }
     (*delegate)->PostSyncTaskToPage(task);
-
     hasPluginLoaded_ = true;
     return;
 }

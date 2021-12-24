@@ -32,9 +32,7 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/animation_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/animator_bridge.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "native_engine/impl/quickjs/quickjs_native_engine.h"
-#endif
 
 namespace OHOS::Ace::Framework {
 
@@ -171,7 +169,6 @@ public:
         }
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     void SetQuickJSNativeEngine(QuickJSNativeEngine* nativeEngine)
     {
         nativeEngine_ = nativeEngine;
@@ -181,7 +178,6 @@ public:
     {
         return nativeEngine_;
     }
-#endif
 
 private:
     JSRuntime* runtime_ = nullptr;
@@ -202,9 +198,7 @@ private:
     RefPtr<JsAcePage> stagingPage_;
 
     WeakPtr<JsMessageDispatcher> dispatcher_;
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     QuickJSNativeEngine* nativeEngine_ = nullptr;
-#endif
     mutable std::mutex mutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(QjsEngineInstance);
@@ -245,11 +239,11 @@ public:
     // destroy page instance
     void DestroyPageInstance(int32_t pageId) override;
 
-    virtual void MediaQueryCallback(const std::string& callbackId, const std::string& args) override;
+    void MediaQueryCallback(const std::string& callbackId, const std::string& args) override;
 
-    virtual void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) override;
+    void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) override;
 
-    virtual void JsCallback(const std::string& callbackId, const std::string& args) override;
+    void JsCallback(const std::string& callbackId, const std::string& args) override;
 
     // destroy application instance according packageName
     void DestroyApplication(const std::string& packageName) override {}
@@ -275,17 +269,22 @@ public:
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }
 
+    void RunNativeEngineLoop() override
+    {
+        if (nativeEngine_ != nullptr) {
+            nativeEngine_->Loop(LOOP_NOWAIT, false);
+        }
+    }
+
 private:
     void GetLoadOptions(std::string& optionStr, bool isMainPage, const RefPtr<JsAcePage>& page);
     RefPtr<QjsEngineInstance> engineInstance_;
     int32_t instanceId_;
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     void RegisterWorker();
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
     void SetPostTask(NativeEngine* nativeEngine);
     QuickJSNativeEngine* nativeEngine_ = nullptr;
-#endif
     ACE_DISALLOW_COPY_AND_MOVE(QjsEngine);
 };
 

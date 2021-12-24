@@ -21,11 +21,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderRadio::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderRadio>();
-}
-
 void FlutterRenderRadio::Paint(RenderContext& context, const Offset& offset)
 {
     auto paintOffset = offset + paintPosition_;

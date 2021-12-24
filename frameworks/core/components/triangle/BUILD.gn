@@ -17,6 +17,8 @@ build_component("triangle") {
   sources = [
     "flutter_render_triangle.cpp",
     "render_triangle.cpp",
+    "render_triangle_creator.cpp",
     "triangle_component.cpp",
   ]
+  rosen_sources = [ "rosen_render_triangle.cpp" ]
 }

@@ -106,9 +106,10 @@ std::string TextComposedElement::GetTextDecoration() const
     auto textDecoration =
         renderText ? renderText->GetTextStyle().GetTextDecoration() : TextDecoration::NONE;
     auto textDecorationColor = renderText ? renderText->GetTextStyle().GetTextDecorationColor() : Color::BLACK;
-    std::string result =
-        ConvertWrapTextDecorationToStirng(textDecoration) + "," + ConvertColorToString(textDecorationColor);
-    return result;
+    auto resultJson = JsonUtil::Create(true);
+    resultJson->Put("type", ConvertWrapTextDecorationToStirng(textDecoration).c_str());
+    resultJson->Put("color", ConvertColorToString(textDecorationColor).c_str());
+    return resultJson->ToString();
 }
 
 std::string TextComposedElement::GetBaseLineOffset() const
@@ -179,7 +180,7 @@ std::string TextComposedElement::GetWidth() const
     if (render) {
         Dimension width = render->GetWidthDimension();
         if (!NearEqual(width.Value(), -1.0)) {
-            return render->GetHeightDimension().ToString();
+            return width.ToString();
         }
     }
 
@@ -191,9 +192,9 @@ std::string TextComposedElement::GetHeight() const
 {
     auto render = GetRenderBox();
     if (render) {
-        Dimension height = render->GetWidthDimension();
+        Dimension height = render->GetHeightDimension();
         if (!NearEqual(height.Value(), -1.0)) {
-            return render->GetHeightDimension().ToString();
+            return height.ToString();
         }
     }
 
@@ -217,6 +218,7 @@ std::string TextComposedElement::ConvertFontFamily(const std::vector<std::string
         result += item;
         result += ",";
     }
+    result = result.substr(0, result.size() - 1);
     return result;
 }
 

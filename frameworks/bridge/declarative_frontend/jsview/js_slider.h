@@ -24,6 +24,7 @@ namespace OHOS::Ace::Framework {
 enum class SliderStyle {
     OUTSET = 0,
     INSET,
+    CAPSULE,
 };
 
 enum class SliderChangeMode {

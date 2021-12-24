@@ -36,11 +36,6 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
     RenderLayer GetRenderLayer() override;
 
-    void NativeXComponentInit(
-        NativeXComponent* nativeXComponent,
-        WeakPtr<NativeXComponentImpl> nativeXComponentImpl) override;
-    void PluginUpdate() override;
-
     RefPtr<Flutter::TextureLayer> textureLayer_;
     RefPtr<Flutter::ClipLayer> layer_;
     RefPtr<Flutter::PictureLayer> backgroundLayer_;

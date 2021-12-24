@@ -18,55 +18,46 @@
 
 #include <tuple>
 
-#include "base/geometry/dimension_offset.h"
-#include "base/geometry/matrix4.h"
-#include "base/json/json_util.h"
-#include "core/animation/animatable_transform_operation.h"
-#include "core/components/box/mask.h"
 #include "core/components/box/render_box.h"
-#include "core/components/common/layout/grid_column_info.h"
-#include "core/components/common/properties/clip_path.h"
 #include "core/components/display/display_component.h"
+#include "core/components_v2/inspector/inspector_node.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace::V2 {
 
-class InspectorComposedElement;
-
-using DoubleJsonFunc = std::function<double(const InspectorComposedElement&)>;
-using StringJsonFunc = std::function<std::string(const InspectorComposedElement&)>;
-using BoolJsonFunc = std::function<bool(const InspectorComposedElement&)>;
-using IntJsonFunc = std::function<int32_t(const InspectorComposedElement&)>;
-using JsonValueJsonFunc = std::function<std::unique_ptr<JsonValue>(const InspectorComposedElement&)>;
-
-struct RotateParam {
-    float x;
-    float y;
-    float z;
-    float angle;
-    Dimension centerX;
-    Dimension centerY;
-};
-
-struct ScaleParam {
-    float x;
-    float y;
-    float z;
-    Dimension centerX;
-    Dimension centerY;
-};
-
-class ACE_EXPORT InspectorComposedElement : public ComposedElement {
-    DECLARE_ACE_TYPE(InspectorComposedElement, ComposedElement)
+class ACE_EXPORT InspectorComposedElement : public ComposedElement, public InspectorNode {
+    DECLARE_ACE_TYPE(InspectorComposedElement, ComposedElement, InspectorNode)
 
 public:
-    explicit InspectorComposedElement(const ComposeId& id) : ComposedElement(id) {}
-    ~InspectorComposedElement() override = default;
+    explicit InspectorComposedElement(const ComposeId& id);
+    ~InspectorComposedElement() override;
 
+    void Prepare(const WeakPtr<Element>& weakParent) override;
     void Update() override;
     bool CanUpdate(const RefPtr<Component>& newComponent) override;
-    void UpdateComposedComponentId(const ComposeId& oldId, const ComposeId& newId);
-    RefPtr<RenderNode> GetInspectorNode(IdType typeId) const;
+    template<class T>
+    RefPtr<T> GetInspectorElement(IdType typeId) const
+    {
+        auto child = children_.empty() ? nullptr : children_.front();
+        while (child) {
+            auto inspectorComposedElement = AceType::DynamicCast<InspectorComposedElement>(child);
+            if (inspectorComposedElement) {
+                return nullptr;
+            }
+            if (AceType::TypeId(child) == typeId) {
+                return AceType::DynamicCast<T>(child->GetRenderNode());
+            }
+
+            child = child->GetChildren().empty() ? nullptr : child->GetChildren().front();
+        }
+        return nullptr;
+    }
+    void AddComposedComponentId();
+    void RemoveInspectorNode(int32_t id);
+    RefPtr<RenderNode> GetInspectorNode(IdType typeId, bool isForward = false) const;
+
+    void OnInactive() override;
+    void OnActive() override;
 
     template<class T>
     RefPtr<T> GetContentElement(IdType typeId) const
@@ -95,94 +86,155 @@ public:
     }
 
     // dimension settings
-    virtual std::string GetWidth() const;
-    virtual std::string GetHeight() const;
-    virtual Dimension GetPadding(OHOS::Ace::AnimatableType type) const;
-    virtual Dimension GetMargin(OHOS::Ace::AnimatableType type) const;
-    virtual std::string GetConstraintSize() const;
-    virtual int32_t GetLayoutPriority() const;
-    virtual int32_t GetLayoutWeight() const;
+    std::string GetWidth() const override;
+    std::string GetHeight() const override;
+    std::unique_ptr<JsonValue> GetPadding() const override;
+    Dimension GetMargin(OHOS::Ace::AnimatableType type) const override;
+    std::unique_ptr<JsonValue> GetAllMargin() const override;
+    std::string GetConstraintSize() const override;
+    int32_t GetLayoutPriority() const override;
+    int32_t GetLayoutWeight() const override;
 
     // position settings
-    virtual std::string GetAlign() const;
-    virtual std::string GetDirectionStr() const;
-    virtual TextDirection GetDirection() const;
-    virtual std::unique_ptr<JsonValue> GetPosition() const;
-    virtual std::unique_ptr<JsonValue> GetMarkAnchor() const;
-    virtual std::unique_ptr<JsonValue> GetOffset() const;
-    virtual std::string GetRect() const;
-    virtual Rect GetParentRect() const;
+    std::string GetAlign() const override;
+    std::string GetDirectionStr() const override;
+    TextDirection GetDirection() const override;
+    std::unique_ptr<JsonValue> GetPosition() const override;
+    std::unique_ptr<JsonValue> GetMarkAnchor() const override;
+    std::unique_ptr<JsonValue> GetOffset() const override;
+    std::string GetRect() const override;
+    Rect GetParentRect() const override;
 
     // layout constraint
-    virtual double GetAspectRatio() const;
-    virtual int32_t GetDisplayPriority() const;
+    double GetAspectRatio() const override;
+    int32_t GetDisplayPriority() const override;
 
     // flex layout
-    virtual std::string GetFlexBasis() const;
-    virtual double GetFlexGrow() const;
-    virtual double GetFlexShrink() const;
-    virtual std::string GetAlignSelf() const;
+    std::string GetFlexBasis() const override;
+    double GetFlexGrow() const override;
+    double GetFlexShrink() const override;
+    std::string GetAlignSelf() const override;
 
     // border settings
-    virtual Border GetBorder() const;
-    virtual std::string GetBorderStyle() const;
-    virtual std::string GetBorderWidth() const;
-    virtual std::string GetBorderColor() const;
+    Border GetBorder() const override;
+    std::string GetBorderStyle() const override;
+    std::string GetBorderWidth() const override;
+    std::string GetBorderColor() const override;
+    std::string GetBorderRadius() const override;
 
     // background settings
-    virtual RefPtr<Decoration> GetBackDecoration() const;
-    virtual std::string GetBackgroundImage() const;
-    virtual std::string GetBackgroundColor() const;
-    virtual std::unique_ptr<JsonValue> GetBackgroundImageSize() const;
-    virtual std::unique_ptr<JsonValue> GetBackgroundImagePosition() const;
+    RefPtr<Decoration> GetBackDecoration() const override;
+    std::string GetBackgroundImage() const override;
+    std::string GetBackgroundColor() const override;
+    std::unique_ptr<JsonValue> GetBackgroundImageSize() const override;
+    std::unique_ptr<JsonValue> GetBackgroundImagePosition() const override;
+    std::unique_ptr<JsonValue> GetAlignmentType(double width, double height) const override;
 
     // front decoration settings
-    virtual RefPtr<Decoration> GetFrontDecoration() const;
+    RefPtr<Decoration> GetFrontDecoration() const override;
 
     // opacity settings
-    virtual double GetOpacity() const;
+    double GetOpacity() const override;
 
     // visibility settings
-    virtual std::string GetVisibility() const;
+    std::string GetVisibility() const override;
 
     // enable settings
-    virtual bool GetEnabled() const;
+    bool GetEnabled() const override;
 
     // zindex settings
-    virtual int32_t GetZIndex() const;
+    int32_t GetZIndex() const override;
 
     // graphical transformation
-    virtual DimensionOffset GetOriginPoint() const;
-    virtual std::unique_ptr<JsonValue> GetTransformEffect() const;
+    DimensionOffset GetOriginPoint() const override;
+    std::unique_ptr<JsonValue> GetRotate() const override;
+    std::unique_ptr<JsonValue> GetScale() const override;
+    std::unique_ptr<JsonValue> GetTransform() const override;
+    std::unique_ptr<JsonValue> GetTranslate() const override;
 
-    virtual double GetBlur() const;
-    virtual double GetBackDropBlur() const;
-    virtual std::unique_ptr<JsonValue> GetWindowBlur() const;
-    virtual std::unique_ptr<JsonValue> GetShadow() const;
+    double GetBlur() const override;
+    double GetBackDropBlur() const override;
+    std::unique_ptr<JsonValue> GetWindowBlur() const override;
+    std::unique_ptr<JsonValue> GetShadow() const override;
+    double GetBrightness() const override;
+    double GetSaturate() const override;
+    double GetContrast() const override;
+    double GetInvert() const override;
+    double GetSepia() const override;
+    double GetGrayScale() const override;
+    double GetHueRotate() const override;
 
     // shape clip
-    virtual std::unique_ptr<JsonValue> GetClip() const;
-    virtual std::unique_ptr<JsonValue> GetMask() const;
+    bool GetClip() const override;
+    std::unique_ptr<JsonValue> GetMask() const override;
 
     // grid setting
-    virtual int32_t GetGridSpan() const;
-    virtual int32_t GetGridOffset() const;
-    virtual std::unique_ptr<JsonValue> GetUseSizeType() const;
-    virtual RefPtr<GridColumnInfo> GetGridColumnInfo() const;
+    int32_t GetGridSpan() const override;
+    int32_t GetGridOffset() const override;
+    std::unique_ptr<JsonValue> GetUseSizeType() const override;
+    RefPtr<GridColumnInfo> GetGridColumnInfo() const override;
 
     // useAlign seeting
-    virtual std::unique_ptr<JsonValue> GetUseAlign() const;
-    virtual std::unique_ptr<JsonValue> ToJsonObject() const;
+    std::unique_ptr<JsonValue> GetUseAlign() const override;
+    std::unique_ptr<JsonValue> ToJsonObject() const override;
+
+    std::unique_ptr<JsonValue> GetOverlay() const override;
 
     virtual AceType::IdType GetTargetTypeId() const
     {
         return AceType::TypeId(this);
     }
 
+    virtual void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+    {
+        LOGW("inspector AddChildWithSlot");
+    }
+
+    virtual void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+    {
+        LOGW("inspector UpdateChildWithSlot");
+    }
+
+    virtual void DeleteChildWithSlot(int32_t slot)
+    {
+        LOGW("inspector DeleteChildWithSlot");
+    }
+
+    void UpdateEventTarget(BaseEventInfo& info) const override;
+
+    std::pair<Rect, Offset> GetCurrentRectAndOrigin() const override;
+
+    void SetKey(const std::string& key)
+    {
+        key_ = key;
+    }
+
+    const std::string& GetKey() const
+    {
+        return key_;
+    }
+
+    const std::string& GetTag() const;
+    bool GetClickable() const override;
+    bool GetCheckable() const override;
+    bool GetFocusable() const override;
+    bool GetScrollable() const override;
+    bool GetLongClickable() const override;
+    bool IsSelected() const override;
+    bool IsPassword() const override;
+    bool IsChecked() const override;
+    bool IsFocused() const override;
+
 protected:
     RefPtr<RenderBox> GetRenderBox() const;
+
+    RefPtr<AccessibilityNode> accessibilityNode_;
+    bool accessibilityEnabled_ = false;
+    RefPtr<AccessibilityNode> GetAccessibilityNode() const;
+private:
+    std::string key_;
 };
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_COMPOSED_ELEMENT_H

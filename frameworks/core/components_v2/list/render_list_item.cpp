@@ -161,24 +161,23 @@ void RenderListItem::CreateDeleteButton()
     }
 }
 
-void RenderListItem::OnTouchTestHit(
-    const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
+void RenderListItem::UpdateTouchRect()
 {
-    if (!editMode_ || !IsMovable()) {
-        return;
+    RenderNode::UpdateTouchRect();
+    if (button_ && IsResponseRegion()) {
+        auto buttonTouchRect = button_->GetPaintRect();
+        std::vector<Rect> touchRectList;
+        for (auto& region : responseRegion_) {
+            double x = GetPxValue(touchRect_.Width(), region.GetOffset().GetX());
+            double y = GetPxValue(touchRect_.Height(), region.GetOffset().GetY());
+            double width = GetPxValue(buttonTouchRect.Width(), region.GetWidth());
+            double height = GetPxValue(buttonTouchRect.Height(), region.GetHeight());
+            Rect responseRegion(buttonTouchRect.GetOffset().GetX() + x,
+                buttonTouchRect.GetOffset().GetY() + y, width, height);
+            touchRectList.emplace_back(responseRegion);
+        }
+        button_->ChangeTouchRectList(touchRectList);
     }
-
-    if (!longPressRecognizer_) {
-        longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(context_);
-        longPressRecognizer_->SetOnLongPress([weak = AceType::WeakClaim(this)](const LongPressInfo&) {
-            auto spThis = weak.Upgrade();
-            if (spThis) {
-                ResumeEventCallback(spThis, &RenderListItem::GetOnSelect, spThis);
-            }
-        });
-    }
-
-    result.emplace_back(longPressRecognizer_);
 }
 
 } // namespace OHOS::Ace::V2

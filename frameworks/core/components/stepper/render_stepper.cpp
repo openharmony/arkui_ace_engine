@@ -56,10 +56,17 @@ void RenderStepper::Update(const RefPtr<Component>& component)
     childrenArray_.clear();
     needReverse_ = (stepperComponent_->GetTextDirection() == TextDirection::RTL);
     totalItemCount_ = stepperComponent_->GetChildren().size();
-    int32_t index = stepperComponent_->GetIndex();
-    if (index >= 0 && index < totalItemCount_) {
-        currentIndex_ = index;
+
+    // currentIndex_ should be updated only for the first time
+    if (currentIndex_ == -1) {
+        int32_t index = stepperComponent_->GetIndex();
+        if (index >= 0 && index < totalItemCount_) {
+            currentIndex_ = index;
+        } else {
+            currentIndex_ = 0;
+        }
     }
+
     const auto& stepperController = stepperComponent_->GetStepperController();
     if (stepperController) {
         auto weak = AceType::WeakClaim(this);
@@ -69,6 +76,21 @@ void RenderStepper::Update(const RefPtr<Component>& component)
                 stepper->SetRightButtonStatus(status, label);
             }
         });
+    }
+    if (stepperComponent_->GetOnFinish()) {
+        onFinish_ = *stepperComponent_->GetOnFinish();
+    }
+    if (stepperComponent_->GetOnSkip()) {
+        onSkip_ = *stepperComponent_->GetOnSkip();
+    }
+    if (stepperComponent_->GetOnChange()) {
+        onChange_ = *stepperComponent_->GetOnChange();
+    }
+    if (stepperComponent_->GetOnNext()) {
+        onNext_ = *stepperComponent_->GetOnNext();
+    }
+    if (stepperComponent_->GetOnPrevious()) {
+        onPrevious_ = *stepperComponent_->GetOnPrevious();
     }
     finishEvent_ = AceAsyncEvent<void(const std::string&)>::Create(stepperComponent_->GetFinishEventId(), context_);
     skipEvent_ = AceAsyncEvent<void(const std::string&)>::Create(stepperComponent_->GetSkipEventId(), context_);
@@ -267,7 +289,8 @@ void RenderStepper::InitHotArea(ControlPanelData& buttonData)
                                                         : InternalResource::ResourceId::STEPPER_NEXT_ARROW);
         imageComponent->SetWidth(stepperComponent_->GetArrowWidth());
         imageComponent->SetHeight(stepperComponent_->GetArrowHeight());
-        imageComponent->SetColor(arrowColor_);
+        // this color is only effect svg image path
+        imageComponent->SetImageFill(arrowColor_);
 
         auto renderImage = AceType::DynamicCast<RenderImage>(imageComponent->CreateRenderNode());
         if (buttonData.isLeft) {
@@ -288,10 +311,10 @@ void RenderStepper::UpdateButton(ControlPanelData& buttonData)
     if (!buttonData.isLeft) {
         if (buttonData.buttonStatus == StepperButtonStatus::DISABLED) {
             textStyles_[currentIndex_].SetTextColor(disabledColor_);
-            buttonData.imageComponentRight->SetColor(arrowColor_.ChangeOpacity(disabledAlpha_));
+            buttonData.imageComponentRight->SetImageFill(arrowColor_.ChangeOpacity(disabledAlpha_));
         } else {
             textStyles_[currentIndex_].SetTextColor(textColors_[currentIndex_]);
-            buttonData.imageComponentRight->SetColor(arrowColor_);
+            buttonData.imageComponentRight->SetImageFill(arrowColor_);
         }
         if (buttonData.buttonType == StepperButtonType::TEXT_ARROW) {
             buttonData.imageRenderRight->Update(buttonData.imageComponentRight);
@@ -418,13 +441,6 @@ void RenderStepper::SetRightButtonStatus(const std::string& status, const std::s
     MarkNeedLayout();
 }
 
-void RenderStepper::UpdateTouchRect()
-{
-    touchRect_.SetSize(GetLayoutSize());
-    touchRect_.SetOffset(GetPosition());
-    ownTouchRect_ = touchRect_;
-}
-
 void RenderStepper::PerformLayout()
 {
     // layout stepper item
@@ -544,6 +560,9 @@ void RenderStepper::FireFinishEvent() const
         std::string param = std::string("\"finish\",null");
         finishEvent_(param);
     }
+    if (onFinish_) {
+        onFinish_();
+    }
 }
 
 void RenderStepper::FireSkipEvent() const
@@ -551,6 +570,9 @@ void RenderStepper::FireSkipEvent() const
     if (skipEvent_) {
         std::string param = std::string("\"skip\",null");
         skipEvent_(param);
+    }
+    if (onSkip_) {
+        onSkip_();
     }
 }
 
@@ -569,6 +591,9 @@ void RenderStepper::FireChangedEvent(int32_t oldIndex, int32_t newIndex) const
             second(currentIndex_);
         }
     }
+    if (onChange_) {
+        onChange_(oldIndex, newIndex);
+    }
 }
 
 void RenderStepper::FireNextEvent(int32_t currentIndex, int32_t& pendingIndex)
@@ -585,6 +610,9 @@ void RenderStepper::FireNextEvent(int32_t currentIndex, int32_t& pendingIndex)
             pendingIndex = StringUtils::StringToInt(result);
         }
     }
+    if (onNext_) {
+        onNext_(currentIndex, pendingIndex);
+    }
 }
 
 void RenderStepper::FireBackEvent(int32_t currentIndex, int32_t& pendingIndex)
@@ -600,6 +628,9 @@ void RenderStepper::FireBackEvent(int32_t currentIndex, int32_t& pendingIndex)
         if (!result.empty() && isdigit(result[0])) {
             pendingIndex = StringUtils::StringToInt(result);
         }
+    }
+    if (onPrevious_) {
+        onPrevious_(currentIndex, pendingIndex);
     }
 }
 
@@ -734,7 +765,6 @@ void RenderStepper::UpdateItemPosition(double offset, int32_t index)
     }
     const auto& childItem = childrenArray_[index];
     childItem->SetPosition(GetMainAxisOffset(offset));
-
     MarkNeedRender();
 }
 
@@ -756,7 +786,7 @@ bool RenderStepper::MouseHoverTest(const Point& parentLocalPoint)
     if (!context) {
         return false;
     }
-    bool isInRegion = GetTouchRect().IsInRegion(parentLocalPoint);
+    bool isInRegion = InTouchRectList(parentLocalPoint, GetTouchRectList());
     if (isInRegion) {
         context->AddToHoverList(AceType::WeakClaim(this).Upgrade());
     }

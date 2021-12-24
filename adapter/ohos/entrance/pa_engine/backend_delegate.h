@@ -43,6 +43,7 @@ public:
 
     virtual bool GetAssetContent(const std::string& url, std::string& content) = 0;
     virtual bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) = 0;
+    virtual std::string GetAssetPath(const std::string& url) = 0;
 
     virtual void AddTaskObserver(std::function<void()>&& task) = 0;
     virtual void RemoveTaskObserver() = 0;

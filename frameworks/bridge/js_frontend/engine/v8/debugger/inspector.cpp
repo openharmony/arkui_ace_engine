@@ -17,8 +17,8 @@
 
 namespace V8Debugger {
 
-static std::unique_ptr<Inspector> g_inspector = nullptr;
-
+static thread_local Inspector* g_inspector = nullptr;
+static bool g_isDebugMode;
 static void* HandleClient(void* inspector)
 {
     LOGI("HandleClient");
@@ -45,6 +45,9 @@ void DispatchMsgToV8(int sign)
         std::string startDebugging("Runtime.runIfWaitingForDebugger");
         if (message.find(startDebugging, 0) != std::string::npos) {
             g_inspector->waitingForDebugger = false;
+            if (!g_isDebugMode) {
+                WaitingForIde();
+            }
         }
     }
     g_inspector->isDispatchingMsg = false;
@@ -53,34 +56,42 @@ void DispatchMsgToV8(int sign)
 void StartDebug(
     const std::unique_ptr<v8::Platform>& platform,
     const v8::Local<v8::Context>& context,
-    const std::string& componentName)
+    const std::string& componentName,
+    const bool isDebugMode,
+    const int32_t instanceId)
 {
     LOGI("StartDebug!");
-    g_inspector = std::make_unique<Inspector>();
+    g_inspector = new Inspector();
     if (g_inspector == nullptr) {
         LOGE("g_inspector = nullptr!");
         return;
     }
-    g_inspector->InitializeInspector(platform, context);
-    g_inspector->waitingForDebugger = true;
+
+    int appPid = getpid();
+    std::string pidStr = std::to_string(appPid);
+    std::string instanceIdStr = std::to_string(instanceId);
+    std::string sockName = '\0' + pidStr + instanceIdStr + componentName;
+    g_inspector->InitializeInspector(platform, context, sockName);
+    g_inspector->waitingForDebugger = isDebugMode;
+    g_isDebugMode = isDebugMode;
     pthread_t tid;
-    if (pthread_create(&tid, nullptr, &HandleClient, reinterpret_cast<void*>(g_inspector.get())) != 0) {
+    if (pthread_create(&tid, nullptr, &HandleClient, reinterpret_cast<void*>(g_inspector)) != 0) {
         LOGE("pthread_create fail!");
         return;
     }
+    g_inspector->websocketServer->instanceId = instanceId;
     g_inspector->websocketServer->tid = pthread_self();
-    g_inspector->websocketServer->componentName = componentName;
     signal(SIGALRM, &DispatchMsgToV8);
     while (g_inspector->waitingForDebugger) {
         usleep(g_inspector->DEBUGGER_WAIT_SLEEP_TIME);
     }
+    LOGI("v8_debugger server connected.");
 }
 
 void WaitingForIde()
 {
     LOGI("WaitingForIde");
     g_inspector->inspectorClient->SchedulePauseOnNextStatement(ConvertToStringView("Break on start"));
-    g_inspector->inspectorClient->WaitFrontendMessageOnPause();
 }
 
 void Inspector::OnMessage(const std::string& message)
@@ -95,7 +106,6 @@ void Inspector::OnMessage(const std::string& message)
     std::string startDebugging("Runtime.runIfWaitingForDebugger");
     if (message.find(startDebugging, 0) != std::string::npos) {
         waitingForDebugger = false;
-        return;
     }
 
     if (inspectorClient->GetPausedFlag()) {
@@ -110,10 +120,10 @@ void Inspector::SendMessage(const std::string& message) const
 }
 
 void Inspector::InitializeInspector(
-    const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context)
+    const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context, std::string sockName)
 {
-    websocketServer = std::make_unique<WsServer>(std::bind(&Inspector::OnMessage, this, std::placeholders::_1));
-
+    websocketServer = std::make_unique<WsServer>(std::bind(&Inspector::OnMessage, this, std::placeholders::_1),
+        sockName);
     inspectorClient = std::make_unique<V8InspectorClient>();
     inspectorClient->InitializeClient(
         platform, context, std::bind(&Inspector::SendMessage, this, std::placeholders::_1));
@@ -123,6 +133,17 @@ void Inspector::InitializeInspector(
 void Inspector::StartAgent() const
 {
     websocketServer->RunServer();
+}
+
+void StopDebug()
+{
+    if (g_inspector != nullptr) {
+        g_inspector->websocketServer->SetTerminateExecutionFlag(true);
+        g_inspector->websocketServer->acceptor.cancel();
+        g_inspector->websocketServer->ioContext.stop();
+        delete g_inspector;
+        g_inspector = nullptr;
+    }
 }
 
 } // namespace V8Debugger

@@ -36,7 +36,6 @@ DeclarativeEngineLoader::~DeclarativeEngineLoader() = default;
 
 RefPtr<JsEngine> DeclarativeEngineLoader::CreateJsEngine(int32_t instanceId) const
 {
-    // TODO: add instanceId
 #ifdef USE_V8_ENGINE
     return AceType::MakeRefPtr<V8DeclarativeEngine>(instanceId);
 #endif
@@ -47,6 +46,16 @@ RefPtr<JsEngine> DeclarativeEngineLoader::CreateJsEngine(int32_t instanceId) con
 
 #ifdef USE_ARK_ENGINE
     return AceType::MakeRefPtr<JsiDeclarativeEngine>(instanceId);
+#endif
+}
+
+RefPtr<JsEngine> DeclarativeEngineLoader::CreateJsEngineUsingSharedRuntime(int32_t instanceId, void* runtime) const
+{
+#ifdef USE_ARK_ENGINE
+    LOGI("CreateJsEngineUsingSharedRuntime id:%{public}d runtime:%{public}p", instanceId, runtime);
+    return AceType::MakeRefPtr<JsiDeclarativeEngine>(instanceId, runtime);
+#else
+    return nullptr;
 #endif
 }
 

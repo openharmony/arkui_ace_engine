@@ -23,11 +23,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderQrcode::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderQrcode>();
-}
-
 void FlutterRenderQrcode::Paint(RenderContext& context, const Offset& offset)
 {
     auto qrCode = qrcodegen::QrCode::encodeText(value_.c_str(), qrcodegen::QrCode::Ecc::LOW);

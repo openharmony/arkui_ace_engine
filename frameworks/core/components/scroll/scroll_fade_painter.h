@@ -22,6 +22,8 @@
 #include "core/components/common/properties/color.h"
 #include "core/pipeline/base/render_context.h"
 
+class SkCanvas;
+
 namespace OHOS::Ace {
 
 enum class OverScrollDirection {
@@ -37,7 +39,7 @@ class ScrollFadePainter : public AceType {
 public:
     static RefPtr<ScrollFadePainter> CreatePainter();
 
-    virtual void PaintSide(RenderContext& context, const Size& size, const Offset& offset) {}
+    virtual void PaintSide(RenderContext& context, const Size& size, const Offset& offset) = 0;
 
     Color GetColor() const
     {

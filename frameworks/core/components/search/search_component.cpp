@@ -148,6 +148,26 @@ void SearchComponent::SetPressColor(const Color& pressColor)
     declaration_->SetPressColor(pressColor);
 }
 
+void SearchComponent::SetPlaceHoldStyle(const TextStyle& style)
+{
+    declaration_->SetPlaceHoldStyle(style);
+}
+
+const TextStyle& SearchComponent::GetPlaceHoldStyle() const
+{
+    return declaration_->GetPlaceHoldStyle();
+}
+
+void SearchComponent::SetEditingStyle(const TextStyle& style)
+{
+    declaration_->SetEditingStyle(style);
+}
+
+const TextStyle& SearchComponent::GetEditingStyle() const
+{
+    return declaration_->GetEditingStyle();
+}
+
 void SearchComponent::SetDeclaration(const RefPtr<SearchDeclaration>& declaration)
 {
     if (declaration) {

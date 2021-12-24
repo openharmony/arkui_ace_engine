@@ -71,6 +71,14 @@ void PropertyAnimation::OnInitNotify(float normalizedTime, bool reverse)
     }
 }
 
+RefPtr<Curve> PropertyAnimation::GetCurve()
+{
+    if (!animatables_.empty() && animatables_.front()->GetCurve() != nullptr) {
+        return animatables_.front()->GetCurve();
+    }
+    return Curves::EASE_IN_OUT;
+}
+
 void PropertyAnimation::Calculate(float keyTime)
 {
     if (animatables_.empty()) {

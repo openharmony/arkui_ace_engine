@@ -47,6 +47,7 @@ ohos_unittest("ThemeManagerTest") {
     "$ace_root/frameworks/core/animation/scheduler.cpp",
 
     # common
+    "$ace_root/frameworks/core/common/ace_application_info.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
@@ -86,9 +87,9 @@ ohos_unittest("ThemeManagerTest") {
 
   if (!is_standard_system) {
     sources += [
-      "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
       "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
       "$ace_root/frameworks/bridge/common/utils/utils.cpp",
+      "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
     ]
     deps += [ "$ace_root/frameworks/base:ace_base_ohos" ]
     external_deps = [
@@ -148,6 +149,7 @@ ohos_unittest("ThemeConstantsTest") {
     # common
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
     "$ace_root/frameworks/base/memory/memory_monitor.cpp",
+    "$ace_root/frameworks/core/common/ace_application_info.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
@@ -201,7 +203,7 @@ ohos_unittest("ThemeConstantsTest") {
 
   sources += [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
+    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
   ]
   if (!is_standard_system) {
     subsystem_name = "ace"

@@ -29,9 +29,9 @@ public:
     static void JsOnTouch(const JSCallbackInfo& args);
     static void JsOnPan(const JSCallbackInfo& args);
     static void JsOnClick(const JSCallbackInfo& info);
+    static void JsTouchable(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& args);
     static EventMarker GetClickEventMarker(const JSCallbackInfo& info);
-    static RefPtr<Gesture> GetTapGesture(const JSCallbackInfo& info);
     static void JsOnKey(const JSCallbackInfo& args);
     static void SetFocusable(bool focusable);
     static void SetFocusNode(bool isFocusNode);
@@ -42,7 +42,10 @@ public:
     static void JsOnDelete(const JSCallbackInfo& info);
     static void JsOnAccessibility(const JSCallbackInfo& info);
 
+    static void UpdateEventTarget(NodeId nodeId, BaseEventInfo& info);
+
 private:
+    static RefPtr<Gesture> GetTapGesture(const JSCallbackInfo& info);
     static EventMarker GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys);
 }; // class JSInteractableView
 

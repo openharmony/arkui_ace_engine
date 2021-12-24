@@ -104,6 +104,16 @@ public:
         return activeStyle_;
     }
 
+    Color GetSelectedBackgroundColor() const
+    {
+        return selectedBgColor_;
+    }
+
+    const Dimension& GetItemSize() const
+    {
+        return itemSize_;
+    }
+
 protected:
     bool MouseHoverTest(const Point& parentLocalPoint) override;
     void OnMouseHoverEnterTest() override;
@@ -128,6 +138,7 @@ private:
     TextStyle normalStyle_;
     TextStyle activeStyle_;
     Color selectedBgColor_;
+    Dimension itemSize_;
     bool rotate_ = false;
     bool isPrimary_ = false;
     bool isAnimating_ = false;

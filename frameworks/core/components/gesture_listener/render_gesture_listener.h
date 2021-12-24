@@ -32,7 +32,6 @@ class ACE_EXPORT RenderGestureListener final : public RenderProxy {
 public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
-    void UpdateTouchRect() override;
 
     bool GetVisible() const override;
 

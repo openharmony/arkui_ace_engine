@@ -44,51 +44,124 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::Bind(globalObj);
 }
 
+double GetMin(double min)
+{
+    if (min < 0) {
+        min = 0;
+    }
+    return min;
+}
+
+double GetMax(double max)
+{
+    if (max < 0) {
+        max = 0;
+    }
+    return max;
+}
+
+double GetStep(double step, double max)
+{
+    if (step < 1 || step > max) {
+        step = 1;
+    }
+    return step;
+}
+
+double GetValue(double value, double max, double min)
+{
+    if (value < min) {
+        value = min;
+    }
+
+    if (value > max) {
+        value = max;
+    }
+    return value;
+}
+
 void JSSlider::Create(const JSCallbackInfo& info)
 {
     double value = 0;   // value:Current progress value. The default value is 0.
     double min = 0;     // min:Set the minimum value. The default value is 0.
     double max = 100;   // max:Set the maximum value. The default value is 100.
     double step = 1;    // step:Sets the sliding jump value of the slider. The default value is 1.
+    bool reverse = false;
 
     if (!info[0]->IsObject()) {
         LOGE("slider create error, info is non-valid");
         return;
     }
+
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto getValue = paramObject->GetProperty("value");
     auto getMin = paramObject->GetProperty("min");
     auto getMax = paramObject->GetProperty("max");
     auto getStep = paramObject->GetProperty("step");
     auto getStyle = paramObject->GetProperty("style");
+    auto direction = paramObject->GetProperty("direction");
+    auto isReverse = paramObject->GetProperty("reverse");
 
-    if (getValue->IsNumber()) {
+    if (!getValue->IsNull() && getValue->IsNumber()) {
         value = getValue->ToNumber<double>();
     }
 
-    if (getMin->IsNumber()) {
+    if (!getMin->IsNull() && getMin->IsNumber()) {
         min = getMin->ToNumber<double>();
     }
 
-    if (getMax->IsNumber()) {
+    if (!getMax->IsNull() && getMax->IsNumber()) {
         max = getMax->ToNumber<double>();
     }
 
-    if (getStep->IsNumber()) {
+    if (!getStep->IsNull() && getStep->IsNumber()) {
         step = getStep->ToNumber<double>();
     }
 
-    if (step < 0) {
-        step = 0;
+    if (!isReverse->IsNull() && isReverse->IsBoolean()) {
+        reverse = isReverse->ToBoolean();
     }
 
-    auto sliderComponent = AceType::MakeRefPtr<OHOS::Ace::SliderComponent>(value, step, min, max);
+    if (min > max) {
+        min = 0;
+    }
 
-    auto sliderMode = static_cast<SliderStyle>(getStyle->ToNumber<int32_t>());
+    min = GetMin(min);
+
+    max = GetMax(max);
+
+    if (min == max) {
+        min = 0;
+        max = 100;
+    }
+
+    step = GetStep(step, max - min);
+
+    value = GetValue(value, max, min);
+
+    auto sliderComponent = AceType::MakeRefPtr<OHOS::Ace::SliderComponent>(value, step, min, max);
+    auto sliderMode = SliderStyle::OUTSET;
+    if (!getStyle->IsNull() && getStyle->IsNumber()) {
+        sliderMode = static_cast<SliderStyle>(getStyle->ToNumber<int32_t>());
+    }
+
     if (sliderMode == SliderStyle::INSET) {
         sliderComponent->SetSliderMode(SliderMode::INSET);
+    } else if (sliderMode == SliderStyle::CAPSULE) {
+        sliderComponent->SetSliderMode(SliderMode::CAPSULE);
     } else {
         sliderComponent->SetSliderMode(SliderMode::OUTSET);
+    }
+
+    auto sliderDirection = Axis::HORIZONTAL;
+    if (!direction->IsNull() && direction->IsNumber()) {
+        sliderDirection = static_cast<Axis>(direction->ToNumber<int32_t>());
+    }
+    sliderComponent->SetDirection(sliderDirection);
+    if (sliderDirection == Axis::VERTICAL) {
+        sliderComponent->SetDirection(Axis::VERTICAL);
+    } else {
+        sliderComponent->SetDirection(Axis::HORIZONTAL);
     }
 
     auto theme = GetTheme<SliderTheme>();
@@ -97,6 +170,7 @@ void JSSlider::Create(const JSCallbackInfo& info)
         return;
     }
     sliderComponent->SetThemeStyle(theme);
+    sliderComponent->SetReverse(reverse);
 
     ViewStackProcessor::GetInstance()->Push(sliderComponent);
 }

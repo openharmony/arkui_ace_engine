@@ -27,6 +27,12 @@ template<typename C>
 std::unordered_map<std::string, panda::Global<panda::FunctionRef>> JsiClass<C>::customFunctions_;
 
 template<typename C>
+std::unordered_map<std::string, panda::Global<panda::FunctionRef>> JsiClass<C>::customGetFunctions_;
+
+template<typename C>
+std::unordered_map<std::string, panda::Global<panda::FunctionRef>> JsiClass<C>::customSetFunctions_;
+
+template<typename C>
 FunctionCallback JsiClass<C>::constructor_ = nullptr;
 
 template<typename C>
@@ -53,6 +59,8 @@ void JsiClass<C>::Declare(const char* name)
     className_ = name;
     staticFunctions_.clear();
     customFunctions_.clear();
+    customGetFunctions_.clear();
+    customSetFunctions_.clear();
     classFunction_.Empty();
 }
 
@@ -104,6 +112,59 @@ void JsiClass<C>::CustomMethod(const char* name, JSMemberFunctionCallback<T> cal
     customFunctions_.emplace(
         name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
         InternalJSMemberFunctionCallback<T>, funcId.get())));
+}
+
+template<typename C>
+template<typename T>
+void JsiClass<C>::CustomProperty(const char* name, MemberFunctionGetCallback<T> callback, int getterId, int setterId)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
+    auto funcGetId = std::make_shared<int32_t>(getterId);
+    functionIds_.emplace_back(funcGetId);
+
+    customGetFunctions_.emplace(
+        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
+        InternalMemberFunctionCallback<T, panda::EcmaVM*, panda::Local<panda::JSValueRef>,
+        const panda::Local<panda::JSValueRef>[], int32_t, void*>,
+        funcGetId.get())));
+
+    auto funcSetId = std::make_shared<int32_t>(setterId);
+    functionIds_.emplace_back(funcSetId);
+    customSetFunctions_.emplace(
+        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
+        InternalMemberFunctionCallback<T, panda::EcmaVM*, panda::Local<panda::JSValueRef>,
+        const panda::Local<panda::JSValueRef>[], int32_t, void*>,
+        funcSetId.get())));
+}
+
+template<typename C>
+void JsiClass<C>::CustomProperty(const char* name, FunctionGetCallback getter, FunctionSetCallback setter)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
+    customGetFunctions_.emplace(
+        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, getter, nullptr)));
+    customSetFunctions_.emplace(
+        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, setter, nullptr)));
+}
+
+template<typename C>
+template<typename T>
+void JsiClass<C>::CustomProperty(const char* name, JSMemberFunctionCallback<T> callback, int getterId, int setterId)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
+    auto funcGetId = std::make_shared<int32_t>(getterId);
+    functionIds_.emplace_back(funcGetId);
+    customGetFunctions_.emplace(
+        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
+        InternalJSMemberFunctionCallback<T>, funcGetId.get())));
+    auto funcSetId = std::make_shared<int32_t>(setterId);
+    functionIds_.emplace_back(funcSetId);
+    customSetFunctions_.emplace(
+        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
+        InternalJSMemberFunctionCallback<T>, funcSetId.get())));
 }
 
 template<typename C>
@@ -168,6 +229,16 @@ void JsiClass<C>::Bind(BindingTarget t, FunctionCallback ctor)
     for (const auto& [name, val] : customFunctions_) {
         prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal(vm));
     }
+
+    for (const auto& [nameGet, valGet] : customGetFunctions_) {
+        for (const auto& [nameSet, valSet] : customSetFunctions_) {
+            if (nameGet == nameSet) {
+                prototype->SetAccessorProperty(vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()),
+                    valGet.ToLocal(vm), valSet.ToLocal(vm));
+            }
+        }
+    }
+
     t->Set(vm, panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName()), panda::Local<panda::JSValueRef>(classFunction_.ToLocal(vm)));
 }
 
@@ -192,6 +263,16 @@ void JsiClass<C>::Bind(
     for (const auto& [name, val] : customFunctions_) {
         prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal(vm));
     }
+
+    for (const auto& [nameGet, valGet] : customGetFunctions_) {
+        for (const auto& [nameSet, valSet] : customSetFunctions_) {
+            if (nameGet == nameSet) {
+                prototype->SetAccessorProperty(vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()),
+                    valGet.ToLocal(vm), valSet.ToLocal(vm));
+            }
+        }
+    }
+
     t->Set(vm, panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName())),
         panda::Local<panda::JSValueRef>(classFunction_.ToLocal(vm)));
 }
@@ -216,6 +297,16 @@ void JsiClass<C>::Bind(BindingTarget t, JSDestructorCallback<C> dtor, JSGCMarkCa
     for (const auto& [name, val] : customFunctions_) {
         prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal(vm));
     }
+
+    for (const auto& [nameGet, valGet] : customGetFunctions_) {
+        for (const auto& [nameSet, valSet] : customSetFunctions_) {
+            if (nameGet == nameSet) {
+                prototype->SetAccessorProperty(vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()),
+                    valGet.ToLocal(vm), valSet.ToLocal(vm));
+            }
+        }
+    }
+
     t->Set(vm, panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName())),
         panda::Local<panda::JSValueRef>(classFunction_.ToLocal(vm)));
 }

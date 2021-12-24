@@ -19,11 +19,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderStepperItem::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderStepperItem>();
-}
-
 RenderLayer FlutterRenderStepperItem::GetRenderLayer()
 {
     if (!layer_) {

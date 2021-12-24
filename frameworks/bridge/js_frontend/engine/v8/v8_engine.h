@@ -57,6 +57,7 @@ public:
     bool InitJsEnv();
 
     void InitJsConsoleObject(v8::Local<v8::Context>& context, v8::Isolate* isolate);
+    void InitJsDocumentObject(v8::Local<v8::Context>& context, v8::Isolate* isolate);
 
     void InitJsPerfUtilObject(v8::Local<v8::Context>& context);
 
@@ -227,6 +228,13 @@ public:
     virtual FrontendDelegate* GetFrontend() override
     {
         return AceType::RawPtr(engineInstance_->GetDelegate());
+    }
+
+    void RunNativeEngineLoop() override
+    {
+        if (nativeEngine_ != nullptr) {
+            nativeEngine_->Loop(LOOP_NOWAIT, false);
+        }
     }
 
     static std::unique_ptr<v8::Platform>& GetPlatform();

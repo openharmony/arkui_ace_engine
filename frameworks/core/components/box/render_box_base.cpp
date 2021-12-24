@@ -21,6 +21,7 @@
 #include "base/log/dump_log.h"
 #include "core/animation/property_animatable_helper.h"
 #include "core/components/box/box_base_component.h"
+#include "core/components/flex/render_flex.h"
 #include "core/components/text_field/render_text_field.h"
 
 namespace OHOS::Ace {
@@ -29,6 +30,7 @@ namespace {
 const double CIRCLE_LAYOUT_IN_BOX_SCALE = sin(M_PI_4);
 constexpr double BOX_DIAMETER_TO_RADIUS = 2.0;
 constexpr int32_t COMPATIBLE_VERSION = 5;
+constexpr double TWO_SIDES = 2.0;
 
 } // namespace
 
@@ -199,9 +201,58 @@ EdgePx RenderBoxBase::ConvertEdgeToPx(const Edge& edge, bool additional)
     return edgePx;
 }
 
+void RenderBoxBase::CalculateAutoMargin()
+{
+    double freeSpace = 0.0;
+    FlexDirection flexDir = FlexDirection::ROW;
+    if (marginOrigin_.Left().Unit() == DimensionUnit::AUTO || marginOrigin_.Right().Unit() == DimensionUnit::AUTO
+        || marginOrigin_.Top().Unit() == DimensionUnit::AUTO
+        || marginOrigin_.Bottom().Unit() == DimensionUnit::AUTO) {
+        RefPtr<RenderFlex> flexFather;
+        auto parent = GetParent().Upgrade();
+        while (parent) {
+            flexFather = AceType::DynamicCast<RenderFlex>(parent);
+            if (flexFather) {
+                flexDir = flexFather->GetDirection();
+                break;
+            }
+            parent = parent->GetParent().Upgrade();
+        }
+        LayoutParam param = GetLayoutParam();
+        if (flexDir == FlexDirection::ROW) {
+            freeSpace = param.GetMaxSize().Height() - height_.Value();
+            if (marginOrigin_.Top().Unit() == DimensionUnit::AUTO
+                && marginOrigin_.Bottom().Unit() == DimensionUnit::AUTO) {
+                marginOrigin_.SetTop(Dimension(freeSpace / TWO_SIDES, DimensionUnit::PX));
+                marginOrigin_.SetBottom(Dimension(freeSpace / TWO_SIDES, DimensionUnit::PX));
+            } else if (marginOrigin_.Top().Unit() == DimensionUnit::AUTO) {
+                marginOrigin_.SetBottom(Dimension(ConvertMarginToPx(marginOrigin_.Bottom(), true, false)));
+                marginOrigin_.SetTop(Dimension((freeSpace - marginOrigin_.Bottom().Value()), DimensionUnit::PX));
+            } else if (marginOrigin_.Bottom().Unit() == DimensionUnit::AUTO) {
+                marginOrigin_.SetTop(Dimension(ConvertMarginToPx(marginOrigin_.Top(), true, false)));
+                marginOrigin_.SetBottom(Dimension((freeSpace - marginOrigin_.Top().Value()), DimensionUnit::PX));
+            }
+        } else if (flexDir == FlexDirection::COLUMN) {
+            freeSpace = param.GetMaxSize().Width() - width_.Value();
+            if (marginOrigin_.Left().Unit() == DimensionUnit::AUTO
+                && marginOrigin_.Right().Unit() == DimensionUnit::AUTO) {
+                marginOrigin_.SetLeft(Dimension(freeSpace / TWO_SIDES, DimensionUnit::PX));
+                marginOrigin_.SetRight(Dimension(freeSpace / TWO_SIDES, DimensionUnit::PX));
+            } else if (marginOrigin_.Left().Unit() == DimensionUnit::AUTO) {
+                marginOrigin_.SetRight(Dimension(ConvertMarginToPx(marginOrigin_.Right(), false, false)));
+                marginOrigin_.SetLeft(Dimension((freeSpace - marginOrigin_.Right().Value()), DimensionUnit::PX));
+            } else if (marginOrigin_.Right().Unit() == DimensionUnit::AUTO) {
+                marginOrigin_.SetLeft(Dimension(ConvertMarginToPx(marginOrigin_.Left(), false, false)));
+                marginOrigin_.SetRight(Dimension((freeSpace - marginOrigin_.Left().Value()), DimensionUnit::PX));
+            }
+        }
+    }
+}
+
 void RenderBoxBase::ConvertMarginPaddingToPx()
 {
     padding_ = ConvertEdgeToPx(paddingOrigin_, false) + ConvertEdgeToPx(additionalPadding_, true);
+    CalculateAutoMargin();
     margin_ = ConvertEdgeToPx(marginOrigin_, false);
 }
 
@@ -313,10 +364,10 @@ void RenderBoxBase::CalculateSelfLayoutParam()
     // allow overflow parent when set height or width, except when set flexgrow or flexshrink
     if (context->GetIsDeclarative()) {
         if (selfDefineWidth_ && layoutSetByParent.GetMinSize().Width() != layoutSetByParent.GetMaxSize().Width()) {
-            selfMax.SetWidth(constrainMax.Width() - margin_.GetLayoutSize().Width());
+            selfMax.SetWidth(constrainMax.Width());
         }
         if (selfDefineHeight_ && layoutSetByParent.GetMinSize().Height() != layoutSetByParent.GetMaxSize().Height()) {
-            selfMax.SetHeight(constrainMax.Height() - margin_.GetLayoutSize().Height());
+            selfMax.SetHeight(constrainMax.Height());
         }
     }
 

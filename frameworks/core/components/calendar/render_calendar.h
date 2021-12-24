@@ -49,6 +49,11 @@ public:
         return calendarController_;
     }
 
+    const RefPtr<CalendarDataAdapter>& GetCalendarDataAdapter() const
+    {
+        return dataAdapter_;
+    }
+
     bool GetShowHoliday() const
     {
         return showHoliday_;

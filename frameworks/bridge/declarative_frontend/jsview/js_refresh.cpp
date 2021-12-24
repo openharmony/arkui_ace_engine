@@ -27,6 +27,8 @@ void JSRefresh::JSBind(BindingTarget globalObj)
     JSClass<JSRefresh>::StaticMethod("create", &JSRefresh::Create, opt);
     JSClass<JSRefresh>::StaticMethod("onStateChange", &JSRefresh::OnStateChange);
     JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
+    JSClass<JSRefresh>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRefresh>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRefresh>::Inherit<JSViewAbstract>();
     JSClass<JSRefresh>::Bind(globalObj);
 }
@@ -40,17 +42,19 @@ void JSRefresh::Create(const JSCallbackInfo& info)
 
     RefPtr<RefreshComponent> refreshComponent = AceType::MakeRefPtr<RefreshComponent>();
     RefPtr<RefreshTheme> theme = GetTheme<RefreshTheme>();
-    if (theme) {
-        refreshComponent->SetLoadingDistance(theme->GetLoadingDistance());
-        refreshComponent->SetRefreshDistance(theme->GetRefreshDistance());
-        refreshComponent->SetProgressDistance(theme->GetProgressDistance());
-        refreshComponent->SetProgressDiameter(theme->GetProgressDiameter());
-        refreshComponent->SetMaxDistance(theme->GetMaxDistance());
-        refreshComponent->SetShowTimeDistance(theme->GetShowTimeDistance());
-        refreshComponent->SetTextStyle(theme->GetTextStyle());
-        refreshComponent->SetProgressColor(theme->GetProgressColor());
-        refreshComponent->SetBackgroundColor(theme->GetBackgroundColor());
+    if (!theme) {
+        LOGE("Refresh Theme is null");
+        return;
     }
+    refreshComponent->SetLoadingDistance(theme->GetLoadingDistance());
+    refreshComponent->SetRefreshDistance(theme->GetRefreshDistance());
+    refreshComponent->SetProgressDistance(theme->GetProgressDistance());
+    refreshComponent->SetProgressDiameter(theme->GetProgressDiameter());
+    refreshComponent->SetMaxDistance(theme->GetMaxDistance());
+    refreshComponent->SetShowTimeDistance(theme->GetShowTimeDistance());
+    refreshComponent->SetTextStyle(theme->GetTextStyle());
+    refreshComponent->SetProgressColor(theme->GetProgressColor());
+    refreshComponent->SetBackgroundColor(theme->GetBackgroundColor());
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto refreshing = paramObject->GetProperty("refreshing");
@@ -63,12 +67,19 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     auto jsOffset = paramObject->GetProperty("offset");
     Dimension offset;
     if (ParseJsDimensionVp(jsOffset, offset)) {
-        refreshComponent->SetIndicatorOffset(offset);
+        if (offset.Value() <= 0.0) {
+            refreshComponent->SetRefreshDistance(theme->GetRefreshDistance());
+        } else {
+            refreshComponent->SetRefreshDistance(offset);
+        }
     }
 
     auto friction = paramObject->GetProperty("friction");
     if (friction->IsNumber()) {
         refreshComponent->SetFriction(friction->ToNumber<int32_t>());
+        if (friction->ToNumber<int32_t>() <= 0) {
+            refreshComponent->IsRefresh(true);
+        }
     }
     ViewStackProcessor::GetInstance()->Push(refreshComponent);
 }

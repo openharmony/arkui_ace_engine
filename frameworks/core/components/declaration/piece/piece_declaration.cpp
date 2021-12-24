@@ -18,7 +18,6 @@
 #include "base/utils/string_utils.h"
 #include "core/components/declaration/common/declaration_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/core/components/piece/piece_theme.h"
 
 namespace OHOS::Ace {
 
@@ -64,6 +63,39 @@ void PieceDeclaration::InitializeStyle()
     SetIconResource(theme->GetIconResource());
     SetIconSize(theme->GetIconSize());
     SetHoverColor(theme->GetHoverColor());
+}
+
+void PieceDeclaration::InitializeStyle(RefPtr<PieceTheme>& theme)
+{
+    if (!theme) {
+        return;
+    }
+    SetHasBoxStyle(true);
+    SetHasDecorationStyle(true);
+    auto& sizeStyle = MaybeResetStyle<CommonSizeStyle>(StyleTag::COMMON_SIZE_STYLE);
+    if (sizeStyle.IsValid()) {
+        sizeStyle.height = theme->GetHeight();
+    }
+
+    auto& paddingStyle = MaybeResetStyle<CommonPaddingStyle>(StyleTag::COMMON_PADDING_STYLE);
+    if (paddingStyle.IsValid()) {
+        paddingStyle.padding.SetLeft(theme->GetPaddingHorizontal());
+        paddingStyle.padding.SetRight(theme->GetPaddingHorizontal());
+        paddingStyle.padding.SetTop(theme->GetPaddingVertical());
+        paddingStyle.padding.SetBottom(theme->GetPaddingVertical());
+    }
+
+    auto& borderStyle = MaybeResetStyle<CommonBorderStyle>(StyleTag::COMMON_BORDER_STYLE);
+    if (borderStyle.IsValid()) {
+        borderStyle.border.SetBorderRadius(Radius(theme->GetHeight() / 2.0));
+    }
+
+    SetTextStyle(theme->GetTextStyle());
+    SetInterval(theme->GetInterval());
+    SetIconResource(theme->GetIconResource());
+    SetIconSize(theme->GetIconSize());
+    SetHoverColor(theme->GetHoverColor());
+    SetBackGroundColor(theme->GetBackgroundColor());
 }
 
 bool PieceDeclaration::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)

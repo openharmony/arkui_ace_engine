@@ -17,16 +17,19 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_PIECE_COMPONENT_H
 
 #include "base/resource/internal_resource.h"
-#include "core/components/flex/flex_component.h"
+#include "core/components_v2/common/common_def.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/edge.h"
+#include "core/components/flex/flex_component.h"
 #include "core/components/piece/piece_element.h"
 #include "core/components/text/text_component.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/sole_child_component.h"
 #include "core/components/declaration/piece/piece_declaration.h"
+#include "frameworks/core/components/piece/piece_theme.h"
 
 namespace OHOS::Ace {
+
 enum class IconPosition {
     Start = 0,
     End,
@@ -77,6 +80,9 @@ public:
     const Color& GetHoverColor() const;
     void SetHoverColor(const Color& hoverColor);
 
+    const Color& GetBackGroundColor() const;
+    void SetBackGroundColor(const Color& hoverColor);
+
     void SetDeclaration(const RefPtr<PieceDeclaration>& declaration);
 
     IconPosition GetIconPosition() const
@@ -87,8 +93,10 @@ public:
     {
         iconPosition_ = iconPosition;
     }
+
     void SetImage(RefPtr<RowComponent>& row);
     void SetText(RefPtr<RowComponent>& row);
+    void InitializeStyle(RefPtr<PieceTheme>& theme);
 
 private:
     IconPosition iconPosition_ = IconPosition::End;

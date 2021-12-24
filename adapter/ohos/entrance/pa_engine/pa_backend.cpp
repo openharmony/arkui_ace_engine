@@ -232,6 +232,15 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         jsBackendEngine->OnDisconnectService(want);
     };
 
+    builder.commandCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
+                                     const OHOS::AAFwk::Want& want, int startId) {
+        auto jsBackendEngine = weakEngine.Upgrade();
+        if (!jsBackendEngine) {
+            return;
+        }
+        jsBackendEngine->OnCommand(want, startId);
+    };
+
     builder.deleteFormCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                      const int64_t formId) {
         auto jsBackendEngine = weakEngine.Upgrade();

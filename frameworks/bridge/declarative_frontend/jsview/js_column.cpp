@@ -47,8 +47,8 @@ void JSColumn::Create(const JSCallbackInfo& info)
             }
         }
     }
-
-    ViewStackProcessor::GetInstance()->Push(columnComponent, false, inspectorTag_);
+    columnComponent->SetInspectorTag(inspectorTag_);
+    ViewStackProcessor::GetInstance()->Push(columnComponent, false);
     JSInteractableView::SetFocusNode(true);
 }
 

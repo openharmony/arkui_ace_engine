@@ -28,7 +28,7 @@ class JsPageTransitionFunction : public JsFunction {
 public:
     explicit JsPageTransitionFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
 
-    ~JsPageTransitionFunction()
+    ~JsPageTransitionFunction() override
     {
         LOGD("Destroy: JsPageTransitionFunction");
     };

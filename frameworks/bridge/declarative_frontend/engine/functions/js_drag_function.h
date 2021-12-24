@@ -28,16 +28,46 @@ public:
     explicit JsDragFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
     static void JSBind(BindingTarget globalObj);
 
-    ~JsDragFunction()
+    ~JsDragFunction() override
     {
         LOGD("Destroy: JsDragFunction");
     };
     void Execute();
     void Execute(const RefPtr<DragEvent>& info);
+    JSRef<JSVal> ItemDragStartExecute(const ItemDragInfo& info, int32_t itemIndex);
+    void ItemDragEnterExecute(const ItemDragInfo& info);
+    void ItemDragMoveExecute(const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex);
+    void ItemDragLeaveExecute(const ItemDragInfo& info, int32_t itemIndex);
+    void ItemDropExecute(const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess);
 
 private:
     JSRef<JSObject> CreateDragEvent(const RefPtr<DragEvent>& info);
     JSRef<JSObject> CreatePasteData(const RefPtr<PasteData>& info);
+    JSRef<JSObject> CreateItemDragInfo(const ItemDragInfo& info);
 };
+
+class JsGridDragFunction : public JsFunction {
+    DECLARE_ACE_TYPE(JsGridDragFunction, JsFunction)
+
+public:
+    explicit JsGridDragFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
+    static void JSBind(BindingTarget globalObj);
+
+    ~JsGridDragFunction() override
+    {
+        LOGD("Destroy: JsGridDragFunction");
+    };
+
+    void ExecuteDragEnter(const RefPtr<ItemDragInfo>& info);
+    void ExecuteDragMove(const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex);
+    void ExecuteDragLeave(const RefPtr<ItemDragInfo>& info, int32_t itemIndex);
+    JSRef<JSVal> ExecuteDragStart(const RefPtr<ItemDragInfo>& info, int32_t itemIndex);
+    void ExecuteDrop(const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess);
+
+private:
+    JSRef<JSObject> CreateDragEvent(const RefPtr<ItemDragInfo>& info);
+    JSRef<JSObject> CreatePasteData(const RefPtr<PasteData>& info);
+};
+
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_V8_FUNCTION_V8_JS_DRAG_FUNCTION_H

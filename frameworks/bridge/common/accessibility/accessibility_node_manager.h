@@ -119,7 +119,9 @@ public:
     void SetCardViewParams(const std::string& key, bool focus) override;
     void SetCardViewPosition(int id, float offsetX, float offsetY) override;
 
-    virtual void SetSupportAction(uint32_t action, bool isEnable) override {}
+    void SetSupportAction(uint32_t action, bool isEnable) override {}
+
+    void UpdateEventTarget(NodeId id, BaseEventInfo& info) override;
 
     bool IsDeclarative();
 

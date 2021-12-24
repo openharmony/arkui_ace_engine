@@ -77,7 +77,7 @@ std::string RowComposedElement::GetSpace() const
     }
     auto renderRow = AceType::DynamicCast<RenderFlex>(node);
     if (renderRow) {
-        auto dimension = Dimension(renderRow->GetSpace());
+        auto dimension = renderRow->GetInspectorSpace();
         return dimension.ToString();
     }
     return Dimension(0.0).ToString();
@@ -107,6 +107,43 @@ std::string RowComposedElement::GetVerticalAlign() const
         }
     }
     return "verticalAlign::Center";
+}
+
+void RowComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto rowElement = GetContentElement<FlexElement>(RowElement::TypeId());
+    if (!rowElement) {
+        LOGE("get GetRowElement failed");
+        return;
+    }
+    rowElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    rowElement->MarkDirty();
+    LOGD("row AddChildWithSlot");
+}
+
+void RowComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto rowElement = GetContentElement<FlexElement>(RowElement::TypeId());
+    if (!rowElement) {
+        LOGE("get GetRowElement failed");
+        return;
+    }
+    auto child = rowElement->GetChildBySlot(slot);
+    rowElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    rowElement->MarkDirty();
+    LOGD("row UpdateChildWithSlot");
+}
+
+void RowComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto rowElement = GetContentElement<FlexElement>(RowElement::TypeId());
+    if (!rowElement) {
+        LOGE("get GetRowElement failed");
+        return;
+    }
+    rowElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    rowElement->MarkDirty();
+    LOGD("row DeleteChildWithSlot");
 }
 
 } // namespace OHOS::Ace::V2

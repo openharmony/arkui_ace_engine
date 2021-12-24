@@ -102,14 +102,22 @@ FrontendDelegateImpl::~FrontendDelegateImpl()
 
 void FrontendDelegateImpl::ParseManifest()
 {
-    std::call_once(onceFlag_, [this]() {
+    std::call_once(onceFlag_, [weak = AceType::WeakClaim(this)]() {
         std::string jsonContent;
-        if (!GetAssetContent(MANIFEST_JSON, jsonContent)) {
-            LOGE("RunPage parse manifest.json failed");
-            EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
-            return;
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            if (!delegate->GetAssetContent(MANIFEST_JSON, jsonContent)) {
+                LOGE("RunPage parse manifest.json failed");
+                EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
+                return;
+            }
+            delegate->manifestParser_->Parse(jsonContent);
+            auto task = [delegate]() {
+                delegate->pipelineContextHolder_.Get(); // Wait until Pipeline Context is attached.
+                delegate->manifestParser_->GetAppInfo()->ParseI18nJsonInfo();
+            };
+            delegate->taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
         }
-        manifestParser_->Parse(jsonContent);
     });
 }
 
@@ -370,59 +378,28 @@ void FrontendDelegateImpl::OnForground()
 
 bool FrontendDelegateImpl::OnStartContinuation()
 {
-    bool ret = false;
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &ret] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onStartContinuationCallBack_) {
-            ret = delegate->onStartContinuationCallBack_();
-        }
-    }, TaskExecutor::TaskType::JS);
-    return ret;
+    return FireSyncEvent("_root", std::string("\"onStartContinuation\","), std::string(""));
 }
 
 void FrontendDelegateImpl::OnCompleteContinuation(int32_t code)
 {
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), code] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onCompleteContinuationCallBack_) {
-            delegate->onCompleteContinuationCallBack_(code);
-        }
-    }, TaskExecutor::TaskType::JS);
+    FireSyncEvent("_root", std::string("\"onCompleteContinuation\","), std::to_string(code));
 }
 
 void FrontendDelegateImpl::OnRemoteTerminated()
 {
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this)] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onRemoteTerminatedCallBack_) {
-            delegate->onRemoteTerminatedCallBack_();
-        }
-    }, TaskExecutor::TaskType::JS);
+    FireSyncEvent("_root", std::string("\"onRemoteTerminated\","), std::string(""));
 }
 
 void FrontendDelegateImpl::OnSaveData(std::string& data)
 {
     std::string savedData;
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &savedData] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onSaveDataCallBack_) {
-            delegate->onSaveDataCallBack_(savedData);
-        }
-    }, TaskExecutor::TaskType::JS);
-    std::string pageUri = GetRunningPageUrl();
-    data = std::string("{\"url\":\"").append(pageUri).append("\",\"__remoteData\":").append(savedData).append("}");
+    FireSyncEvent("_root", std::string("\"onSaveData\","), std::string(""), savedData);
 }
 
 bool FrontendDelegateImpl::OnRestoreData(const std::string& data)
 {
-    bool ret = false;
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &data, &ret] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onRestoreDataCallBack_) {
-            ret = delegate->onRestoreDataCallBack_(data);
-        }
-    }, TaskExecutor::TaskType::JS);
-    return ret;
+    return FireSyncEvent("_root", std::string("\"onRestoreData\","), data);
 }
 
 void FrontendDelegateImpl::OnNewRequest(const std::string& data)
@@ -1648,29 +1625,18 @@ void FrontendDelegateImpl::RegisterFont(const std::string& familyName, const std
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
 }
 
-void FrontendDelegateImpl::HandleImage(
-    const std::string& src, std::function<void(int32_t)>&& callback, const std::set<std::string>& callbacks)
+void FrontendDelegateImpl::HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback)
 {
     if (src.empty() || !callback) {
         return;
     }
-    std::map<std::string, EventMarker> callbackMarkers;
-    if (callbacks.find("success") != callbacks.end()) {
-        auto successEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
-        successEventMarker.SetPreFunction([callback, taskExecutor = taskExecutor_]() {
-            taskExecutor->PostTask([callback] { callback(0); }, TaskExecutor::TaskType::JS);
-        });
-        callbackMarkers.emplace("success", successEventMarker);
-    }
-
-    if (callbacks.find("fail") != callbacks.end()) {
-        auto failEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
-        failEventMarker.SetPreFunction([callback, taskExecutor = taskExecutor_]() {
-            taskExecutor->PostTask([callback] { callback(1); }, TaskExecutor::TaskType::JS);
-        });
-        callbackMarkers.emplace("fail", failEventMarker);
-    }
-    pipelineContextHolder_.Get()->CanLoadImage(src, callbackMarkers);
+    auto loadCallback = [jsCallback = std::move(callback), taskExecutor = taskExecutor_](
+                            bool success, int32_t width, int32_t height) {
+        taskExecutor->PostTask(
+            [callback = std::move(jsCallback), success, width, height] { callback(success, width, height); },
+            TaskExecutor::TaskType::JS);
+    };
+    pipelineContextHolder_.Get()->TryLoadImageInfo(src, std::move(loadCallback));
 }
 
 void FrontendDelegateImpl::RequestAnimationFrame(const std::string& callbackId)

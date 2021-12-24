@@ -166,6 +166,7 @@ private:
     double overDamping_ = 0.0;
     bool updateEffect_ = false;
     double scrollDistance_ = 0.0;
+    bool accessibilityDisabled_ = false;
     Dimension itemExtent_;
     std::pair<bool, Dimension> scrollbarWidth_;
     std::pair<bool, Color> scrollbarColor_;

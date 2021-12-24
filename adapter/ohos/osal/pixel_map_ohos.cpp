@@ -155,4 +155,20 @@ void* PixelMapOhos::GetRawPixelMapPtr() const
     return pixmap_.get();
 }
 
+std::string PixelMapOhos::GetId()
+{
+    if (pixmap_) {
+        return pixmap_->GetId();
+    }
+    return std::string();
+}
+
+std::string PixelMapOhos::GetModifyId()
+{
+    if (pixmap_) {
+        return pixmap_->GetModifyId();
+    }
+    return std::string();
+}
+
 } // namespace OHOS::Ace

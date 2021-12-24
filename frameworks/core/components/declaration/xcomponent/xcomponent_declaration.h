@@ -27,12 +27,12 @@ struct XComponentAttribute : Attribute {
     std::string libraryName;
 };
 
-struct  XComponentEvent : Event {
+struct XComponentEvent : Event {
     EventMarker xComponentInitEventId;
     EventMarker xComponentDestroyEventId;
 };
 
-class XComponentDeclaration : public Declaration {
+class ACE_EXPORT XComponentDeclaration : public Declaration {
     DECLARE_ACE_TYPE(XComponentDeclaration, Declaration);
 
 public:

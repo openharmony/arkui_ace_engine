@@ -86,12 +86,6 @@ public:
         return column_;
     }
 
-    void UpdateTouchRect() override
-    {
-        touchRect_ = GetPaintRect();
-        ownTouchRect_ = touchRect_;
-    }
-
     void UpdateToss(double y);
 
     void TossStoped();

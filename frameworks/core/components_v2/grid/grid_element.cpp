@@ -184,12 +184,21 @@ RefPtr<Component> GridElement::OnMakeEmptyComponent()
 
 void GridElement::OnDataSourceUpdated(size_t startIndex)
 {
+    auto context = context_.Upgrade();
+    if (context) {
+        context->AddPostFlushListener(AceType::Claim(this));
+    }
     RefPtr<RenderGridScroll> render = AceType::DynamicCast<RenderGridScroll>(renderNode_);
     if (!render) {
         return;
     }
     render->OnDataSourceUpdated(static_cast<int32_t>(startIndex));
     render->SetTotalCount(ElementProxyHost::TotalCount());
+}
+
+void GridElement::OnPostFlush()
+{
+    ReleaseRedundantComposeIds();
 }
 
 size_t GridElement::GetReloadedCheckNum()
@@ -202,6 +211,11 @@ size_t GridElement::GetReloadedCheckNum()
         }
     }
     return ElementProxyHost::GetReloadedCheckNum();
+}
+
+void GridElement::Dump()
+{
+    DumpProxy();
 }
 
 } // namespace OHOS::Ace::V2

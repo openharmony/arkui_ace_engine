@@ -116,7 +116,7 @@ bool ArkJSValue::IsFunction([[maybe_unused]] shared_ptr<JsRuntime> runtime)
 }
 
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
-bool ArkJSValue::IsException([[maybe_unused]] shared_ptr<JsRuntime> runtime) const
+bool ArkJSValue::IsException([[maybe_unused]] shared_ptr<JsRuntime> runtime)
 {
     return value_.IsEmpty() || value_->IsException();
 }

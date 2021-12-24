@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_RENDER_BOX_BASE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_RENDER_BOX_BASE_H
 
+#include "base/geometry/offset.h"
 #include "base/geometry/size.h"
 #include "core/animation/property_animatable.h"
 #include "core/animation/property_animatable_helper.h"
@@ -123,7 +124,7 @@ public:
         return height_.Value();
     }
 
-    void SetWidth(double width) // add for animation
+    virtual void SetWidth(double width) // add for animation
     {
         if (GreatOrEqual(width, 0.0) && !NearEqual(width_.Value(), width)) {
             width_.SetValue(width);
@@ -131,7 +132,7 @@ public:
         }
     }
 
-    void SetHeight(double height) // add for animation
+    virtual void SetHeight(double height) // add for animation
     {
         if (GreatOrEqual(height, 0.0) && !NearEqual(height_.Value(), height)) {
             height_.SetValue(height);
@@ -139,7 +140,7 @@ public:
         }
     }
 
-    void SetWidth(const Dimension& width) // add for animation
+    virtual void SetWidth(const Dimension& width) // add for animation
     {
         if (width_ != width) {
             width_ = width;
@@ -149,10 +150,10 @@ public:
 
     Dimension GetWidthDimension() const
     {
-        return static_cast<Dimension>(width_);
+        return width_;
     }
 
-    void SetHeight(const Dimension& height) // add for animation
+    virtual void SetHeight(const Dimension& height) // add for animation
     {
         if (height_ != height) {
             height_ = height;
@@ -162,7 +163,7 @@ public:
 
     Dimension GetHeightDimension() const
     {
-        return static_cast<Dimension>(height_);
+        return height_;
     }
 
     EdgePx GetMargin() const
@@ -225,7 +226,7 @@ public:
         return alignItemOffset_;
     }
 
-    void CalculateAlignDeclaration();
+    virtual void CalculateAlignDeclaration();
 
     const Alignment& GetAlign() const
     {
@@ -235,6 +236,11 @@ public:
     double GetAspectRatio() const
     {
         return aspectRatio_.Value();
+    }
+
+    void SetAspectRatio(const Dimension& aspectRatio)
+    {
+        aspectRatio_ = aspectRatio;
     }
 
     const RefPtr<ClipPath>& GetClipPath() const
@@ -267,6 +273,14 @@ public:
         return pixelMap_;
     }
 
+    Rect GetPaintRectExcludeMargin() const
+    {
+        Rect rect;
+        rect.SetSize(paintSize_);
+        rect.SetOffset(GetPaintRect().GetOffset() + Offset(margin_.LeftPx(), margin_.TopPx()));
+        return rect;
+    }
+
 protected:
     virtual void ClearRenderObject() override;
     virtual Offset GetBorderOffset() const;
@@ -278,6 +292,7 @@ protected:
     double ConvertVerticalDimensionToPx(Dimension dimension, bool defaultZero = false) const;
     void CalculateWidth();
     void CalculateHeight();
+    void CalculateAutoMargin();
     void ConvertMarginPaddingToPx();
     void ConvertConstraintsToPx();
     void CalculateGridLayoutSize();
@@ -288,10 +303,11 @@ protected:
     void CalculateChildPosition();
     void AdjustSizeByAspectRatio();
     void PerformLayoutInLiteMode();
-    void OnAnimationCallback();
+    virtual void OnAnimationCallback();
 
     AnimatableDimension width_ { AnimatableDimension(-1.0, DimensionUnit::PX) };  // exclude margin
     AnimatableDimension height_ { AnimatableDimension(-1.0, DimensionUnit::PX) }; // exclude margin
+    AnimatableDimension aspectRatio_ = AnimatableDimension();
 
     BoxFlex flex_ = BoxFlex::FLEX_NO;
     LayoutParam constraints_ = LayoutParam(Size(), Size()); // exclude margin
@@ -335,7 +351,6 @@ private:
     double selfMinWidth_ = 0.0;                  // exclude margin
     double selfMaxHeight_ = Size::INFINITE_SIZE; // exclude margin
     double selfMinHeight_ = 0.0;                 // exclude margin
-    AnimatableDimension aspectRatio_ = AnimatableDimension();
     Dimension minWidth_ = Dimension();
     Dimension minHeight_ = Dimension();
     Dimension maxWidth_ = Dimension();

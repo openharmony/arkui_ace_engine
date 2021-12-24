@@ -43,7 +43,7 @@ RefPtr<CachedImageData> FlutterImageCache::GetDataFromCacheFile(const std::strin
         LOGD("file : %{public}s cached found", filePath.c_str());
     }
     auto cacheFileLoader = AceType::MakeRefPtr<FileImageLoader>();
-    auto data = cacheFileLoader->LoadImageData(std::string("file:/").append(filePath));
+    auto data = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
     return data ? AceType::MakeRefPtr<SkiaCachedImageData>(data) : nullptr;
 }
 

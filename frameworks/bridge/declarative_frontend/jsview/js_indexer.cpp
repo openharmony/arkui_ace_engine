@@ -34,7 +34,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         std::vector<std::string> indexerArray;
 
-        JSRef<JSVal> arrayVal = obj->GetProperty("ArrayValue");
+        JSRef<JSVal> arrayVal = obj->GetProperty("arrayValue");
         if (!arrayVal->IsArray()) {
             LOGW("info is invalid");
             return;

@@ -15,6 +15,9 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 
+#include <functional>
+
+#include "base/utils/system_properties.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -61,7 +64,7 @@ const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonV
         }
         curve = CreateCurve(curveString->GetString());
     } else {
-        curve = AceType::MakeRefPtr<LinearCurve>();
+        curve = Curves::EASE_IN_OUT;
     }
 
     option.SetDuration(duration);
@@ -94,13 +97,13 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
-    EventMarker onFinishEvent;
+    std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
-        onFinishEvent = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute();
-        });
+        };
     }
 
     auto animationArgs = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -111,6 +114,9 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     }
     option = CreateAnimation(animationArgs);
     option.SetOnFinishEvent(onFinishEvent);
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        option.SetAllowRunningAsynchronously(true);
+    }
     ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
 }
 
@@ -132,13 +138,13 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
-    EventMarker onFinishEvent;
+    std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
-        onFinishEvent = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute();
-        });
+        };
     }
 
     auto animationArgs = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -161,14 +167,26 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     }
 
     AnimationOption option = CreateAnimation(animationArgs);
-    option.SetOnFinishEvent(onFinishEvent);
-    pipelineContext->FlushBuild();
-    pipelineContext->SaveExplicitAnimationOption(option);
-    // Execute the function.
-    JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
-    jsAnimateToFunc->Call(info[1]);
-    pipelineContext->FlushBuild();
-    pipelineContext->ClearExplicitAnimationOption();
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        LOGD("RSAnimationInfo: Begin JSAnimateTo");
+        pipelineContext->FlushBuild();
+        pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
+        // Execute the function.
+        JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
+        jsAnimateToFunc->Call(info[1]);
+        pipelineContext->FlushBuild();
+        pipelineContext->CloseImplicitAnimation();
+        LOGD("RSAnimationInfo: End JSAnimateTo");
+    } else {
+        pipelineContext->FlushBuild();
+        pipelineContext->SaveExplicitAnimationOption(option);
+        // Execute the function.
+        JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
+        jsAnimateToFunc->Call(info[1]);
+        pipelineContext->FlushBuild();
+        pipelineContext->CreateExplicitAnimator(onFinishEvent);
+        pipelineContext->ClearExplicitAnimationOption();
+    }
 }
 
 void JSViewContext::JSBind(BindingTarget globalObj)

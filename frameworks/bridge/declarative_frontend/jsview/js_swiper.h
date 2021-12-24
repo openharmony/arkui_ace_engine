@@ -45,6 +45,11 @@ protected:
     static void SetIndicatorStyle(const JSCallbackInfo& info);
     static void SetItemSpace(const JSCallbackInfo& info);
     static void SetDisplayMode(int32_t index);
+    static void SetEffectMode(const JSCallbackInfo& info);
+    static void SetDisplayCount(const JSCallbackInfo& info);
+    static void SetCachedCount(int32_t cachedCount);
+    static void SetEnabled(const JSCallbackInfo& info);
+    static void SetDisableSwipe(bool disable);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
 };
@@ -71,6 +76,8 @@ public:
             controller_->ShowPrevious();
         }
     }
+
+    void FinishAnimation(const JSCallbackInfo& args);
 
     void SetController(const RefPtr<SwiperController>& controller)
     {

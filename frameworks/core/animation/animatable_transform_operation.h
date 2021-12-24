@@ -36,6 +36,7 @@ public:
         animationOption_ = animationOption;
         SetCurrentValue(operation);
     }
+    ~AnimatableTransformOperation() override = default;
 
     void MoveTo(const TransformOperation& value) override
     {
@@ -66,6 +67,7 @@ class AnimatableTransformOperations final {
 public:
     AnimatableTransformOperations() = default;
     AnimatableTransformOperations(const AnimatableTransformOperations& other) = default;
+    ~AnimatableTransformOperations() = default;
 
     void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
     {
@@ -140,14 +142,17 @@ public:
     {
         operations_ = other;
         blended = TransformOperations(operations_);
+        endValue_ = blended;
     }
 
-    void PlayTransformAnimation(const AnimationOption& option, const std::vector<TransformOperation>& other)
+    void PlayTransformAnimation(
+        const AnimationOption& option, const std::vector<TransformOperation>& other, bool alwaysRotate = false)
     {
         SetAnimationOption(option);
         auto target = TransformOperations(other);
         TransformOperations::ParseOperationsToMatrix(operations_);
         TransformOperations::ParseOperationsToMatrix(target.GetOperations());
+        target.SetAlwaysRotate(alwaysRotate);
         AnimateTo(blended, target);
         // just move to target, renderNode should use blended to computer matrix
         MoveTo(target);

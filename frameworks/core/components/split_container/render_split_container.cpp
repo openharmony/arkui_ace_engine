@@ -83,12 +83,6 @@ void RenderSplitContainer::InitializeRecognizer()
     }
 }
 
-bool RenderSplitContainer::TouchTest(const Point& globalPoint, const Point& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
-{
-    return RenderNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
-}
-
 void RenderSplitContainer::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {

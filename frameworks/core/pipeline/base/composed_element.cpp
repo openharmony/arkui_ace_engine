@@ -66,7 +66,7 @@ void ComposedElement::PerformBuild()
         addedToMap_ = true;
     }
 
-    auto component = HasRenderFunction() ? CallRenderFunction() : BuildChild();
+    auto component = HasRenderFunction() ? CallRenderFunction(component_) : BuildChild();
     auto child = children_.empty() ? nullptr : children_.front();
     UpdateChild(child, component);
 }

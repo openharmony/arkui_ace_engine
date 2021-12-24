@@ -135,6 +135,7 @@ protected:
     void PrepareAnimation(const std::list<RefPtr<Component>>& componentChildren);
     bool PreparePropertyAnimation(const RefPtr<SvgAnimate>& svgAnimate);
 
+    std::tuple<const Matrix4, float, float> GetRawTransformInfo();
     const Matrix4 GetTransformMatrix4();
     const Matrix4 UpdateTransformMatrix4();
 

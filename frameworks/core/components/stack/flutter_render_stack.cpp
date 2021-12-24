@@ -19,11 +19,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderStack::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderStack>();
-}
-
 void FlutterRenderStack::Paint(RenderContext& context, const Offset& offset)
 {
     if ((GetOverflowFlag() == Overflow::CLIP) && IsChildOverflow()) {

@@ -46,7 +46,7 @@ void ComponentGroupElement::PerformBuild()
     }
 
     const auto& newComponents = componentGroup->GetChildren();
-    if (context->GetIsDeclarative()) {
+    if (context->GetIsDeclarative() && componentGroup->GetUpdateType() != UpdateType::REBUILD) {
         LOGD("Reconciliation via declarative path %{public}s", AceType::TypeName(this));
         UpdateChildrenForDeclarative(newComponents);
     } else {
@@ -99,11 +99,12 @@ void ComponentGroupElement::UpdateChildrenForDeclarative(const std::list<RefPtr<
 
     // For declarative frontend, the component tree is very stable,
     // so size of children MUST be matched between elements and components
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     if (children_.size() != newComponents.size()) {
         LOGW("Size of old children and new components are mismatched");
         return;
     }
-
+#endif
     auto itChild = children_.begin();
     for (const auto& component : newComponents) {
         auto newChild = UpdateChildWithSlot(*(itChild++), component, slot++, renderSlot);

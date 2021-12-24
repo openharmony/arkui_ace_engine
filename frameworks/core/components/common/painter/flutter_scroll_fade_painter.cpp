@@ -29,11 +29,6 @@ constexpr double PI_OVER_2 = 1.5707963; // 3.1415926 / 2.0;
 
 } // namespace
 
-RefPtr<ScrollFadePainter> ScrollFadePainter::CreatePainter()
-{
-    return AceType::MakeRefPtr<FlutterScrollFadePainter>();
-}
-
 void FlutterScrollFadePainter::Paint(flutter::Canvas* canvas, const Size& size, const Offset& offset)
 {
     if (canvas == nullptr || NearZero(opacity_) || size.IsEmpty()) {

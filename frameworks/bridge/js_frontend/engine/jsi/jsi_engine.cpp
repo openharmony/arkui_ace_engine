@@ -19,14 +19,12 @@
 #include <regex>
 #include <unistd.h>
 
-#include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
-#include "bridge/js_frontend/engine/jsi/ark_js_value.h"
-#include "worker_init.h"
-
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/utils/time_util.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -46,6 +44,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_list_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_offscreen_canvas_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_stepper_bridge.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/jsi_xcomponent_bridge.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -1033,8 +1032,8 @@ std::string JsParseRouteUrl(const std::unique_ptr<JsonValue>& argsPtr, const std
     return pageRoute;
 }
 
-bool GetParams(const shared_ptr<JsRuntime>& runtime,
-    const shared_ptr<JsValue>& arg, std::map<std::string, std::string>& params)
+bool GetParams(
+    const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg, std::map<std::string, std::string>& params)
 {
     if (!runtime) {
         LOGE("fail to get params due to runtime is illegal");
@@ -1099,8 +1098,8 @@ bool ParseResourceNumberParam(const char* paramName, const std::map<std::string,
     return false;
 }
 
-void ParseResourceParam(const std::map<std::string, std::string>& params,
-    std::string& uri, int32_t& position, int32_t& length)
+void ParseResourceParam(
+    const std::map<std::string, std::string>& params, std::string& uri, int32_t& position, int32_t& length)
 {
     ParseResourceStringParam(READ_KEY_URI, params, uri);
     ParseResourceNumberParam(READ_KEY_POSITION, params, position);
@@ -1158,14 +1157,14 @@ shared_ptr<JsValue> JsReadText(const shared_ptr<JsRuntime>& runtime, const std::
 
     if (fileLength == 0) {
         if ((position <= 0) || (length < 0)) {
-            engine->CallJs(callbackId,
-                R"({"arguments":["wrong start position or wrong read length", 202],"method":"fail"})");
+            engine->CallJs(
+                callbackId, R"({"arguments":["wrong start position or wrong read length", 202],"method":"fail"})");
             return runtime->NewUndefined();
         }
     } else {
         if ((position > fileLength) || (position <= 0) || (length < 0)) {
-            engine->CallJs(callbackId,
-                R"({"arguments":["wrong start position or wrong read length", 202],"method":"fail"})");
+            engine->CallJs(
+                callbackId, R"({"arguments":["wrong start position or wrong read length", 202],"method":"fail"})");
             return runtime->NewUndefined();
         }
 
@@ -1224,8 +1223,8 @@ shared_ptr<JsValue> JsReadArrayBuffer(
     auto fileLength = static_cast<int32_t>(binaryContent.size());
     if (position > fileLength || position <= 0 || length <= 0) {
         LOGE("JsReadArrayBuffer position fileLength failed");
-        engine->CallJs(callbackId,
-            R"({"arguments":["wrong start position or wrong read length", 301],"method":"fail"})");
+        engine->CallJs(
+            callbackId, R"({"arguments":["wrong start position or wrong read length", 301],"method":"fail"})");
         return runtime->NewUndefined();
     }
 
@@ -1240,8 +1239,8 @@ shared_ptr<JsValue> JsReadArrayBuffer(
     return binaryData;
 }
 
-shared_ptr<JsValue> JsHandleReadResource(const shared_ptr<JsRuntime>& runtime,
-    const std::vector<shared_ptr<JsValue>>& argv, const std::string& methodName)
+shared_ptr<JsValue> JsHandleReadResource(
+    const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv, const std::string& methodName)
 {
     LOGD("JsHandleReadResource");
     if (methodName == READ_TEXT) {
@@ -1312,32 +1311,25 @@ shared_ptr<JsValue> JsHandleImage(const shared_ptr<JsRuntime>& runtime, const sh
     auto success = ParseRouteUrl(runtime, arg, "success");
     auto fail = ParseRouteUrl(runtime, arg, "fail");
 
-    std::set<std::string> callbacks;
-    if (!success.empty()) {
-        callbacks.emplace("success");
-    }
-    if (!fail.empty()) {
-        callbacks.emplace("fail");
-    }
-
     auto engineInstance = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
     if (!engineInstance) {
         return runtime->NewNull();
     }
 
-    auto&& callback = [engineInstance, success, fail](int32_t callbackType) {
-        switch (callbackType) {
-            case 0:
-                engineInstance->CallJs(success, std::string("\"success\",null"), false);
-                break;
-            case 1:
-                engineInstance->CallJs(fail, std::string("\"fail\",null"), false);
-                break;
-            default:
-                break;
+    auto&& callback = [engineInstance, success, fail](bool callbackType, int32_t width, int32_t height) {
+        if (callbackType) {
+            engineInstance->CallJs(success,
+                std::string("{\"width\":")
+                    .append(std::to_string(width))
+                    .append(", \"height\":")
+                    .append(std::to_string(height))
+                    .append("}"),
+                false);
+        } else {
+            engineInstance->CallJs(fail, std::string("\"fail\",null"), false);
         }
     };
-    engineInstance->GetFrontendDelegate()->HandleImage(src, callback, callbacks);
+    engineInstance->GetFrontendDelegate()->HandleImage(src, callback);
     return runtime->NewNull();
 }
 
@@ -1441,9 +1433,13 @@ void ShowActionMenu(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsVal
         switch (callbackType) {
             case 0:
                 engine->CallJs(success, std::string(R"({"errMsg":"showActionMenu:ok","tapIndex":)")
-                    .append(std::to_string(successType)).append("}").c_str());
+                                            .append(std::to_string(successType))
+                                            .append("}")
+                                            .c_str());
                 engine->CallJs(complete, std::string(R"({"errMsg":"showActionMenu:ok","tapIndex":)")
-                    .append(std::to_string(successType)).append("}").c_str());
+                                             .append(std::to_string(successType))
+                                             .append("}")
+                                             .c_str());
                 break;
             case 1:
                 engine->CallJs(fail, R"({"errMsg":"showActionMenu:fail cancel"})");
@@ -2090,7 +2086,15 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
     } else if (std::strcmp(methodName.c_str(), "scrollTo") == 0) {
         JsiComponentApiBridge::JsScrollTo(runtime, arguments, nodeId);
         return runtime->NewUndefined();
+    } else if (std::strcmp(methodName.c_str(), "getXComponentContext") == 0) {
+        auto bridge = AceType::DynamicCast<JsiXComponentBridge>(page->GetXComponentBridgeById(nodeId));
+        if (bridge) {
+            bridge->HandleContext(runtime, nodeId, arguments);
+            return bridge->GetRenderContext();
+        }
+        return runtime->NewUndefined();
     }
+
     shared_ptr<JsValue> resultValue = runtime->NewUndefined();
     if (std::strcmp(methodName.c_str(), "animate") == 0) {
         LOGD("animate args = %{private}s", arguments.c_str());
@@ -2791,18 +2795,40 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         LOGE("JsiEngine Initialize, vm is null");
         return false;
     }
+
     nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
+    engineInstance_->SetArkNativeEngine(nativeEngine_);
+    SetPostTask(nativeEngine_);
+    nativeEngine_->CheckUVLoop();
+
     ACE_DCHECK(delegate);
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
         nativeEngine_->SetPackagePath(packagePath);
     }
-    delegate->AddTaskObserver([nativeEngine = nativeEngine_]() {
-        nativeEngine->Loop(LOOP_NOWAIT);
-    });
     RegisterWorker();
 
     return true;
+}
+
+void JsiEngine::SetPostTask(NativeEngine* nativeEngine)
+{
+    LOGI("SetPostTask");
+    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
+    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_](bool needSync) {
+        auto delegate = weakDelegate.Upgrade();
+        if (delegate == nullptr) {
+            LOGE("delegate is nullptr");
+            return;
+        }
+        delegate->PostJsTask([nativeEngine, needSync]() {
+            if (nativeEngine == nullptr) {
+                return;
+            }
+            nativeEngine->Loop(LOOP_NOWAIT, needSync);
+        });
+    };
+    nativeEngine_->SetPostTask(postTask);
 }
 
 void JsiEngine::RegisterInitWorkerFunc()
@@ -2830,7 +2856,7 @@ void JsiEngine::RegisterInitWorkerFunc()
             LOGE("Failed to load js framework!");
         }
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
+    nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
 void JsiEngine::RegisterAssetFunc()
@@ -2850,7 +2876,7 @@ void JsiEngine::RegisterAssetFunc()
             delegate->GetResourceData(uri.substr(0, index) + ".abc", content);
         }
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterAssetFunc(assetFunc);
+    nativeEngine_->SetGetAssetFunc(assetFunc);
 }
 
 void JsiEngine::RegisterWorker()
@@ -2861,8 +2887,8 @@ void JsiEngine::RegisterWorker()
 
 JsiEngine::~JsiEngine()
 {
-    engineInstance_->GetFrontendDelegate()->RemoveTaskObserver();
     if (nativeEngine_ != nullptr) {
+        nativeEngine_->CancelCheckUVLoop();
         delete nativeEngine_;
     }
 }
@@ -2910,7 +2936,6 @@ void JsiEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
         engineInstance_->SetRunningPage(page);
     }
 
-
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetFrontendDelegate();
     JsiUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_, page->GetUrl(), page);
@@ -2935,6 +2960,24 @@ void JsiEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
         LOGD("assetPath is: %{private}s", assetPath.c_str());
 
         if (isMainPage) {
+            std::string commonsBasePath = delegate->GetAssetPath("commons.abc");
+            if (!commonsBasePath.empty()) {
+                std::string commonsPath = commonsBasePath.append("commons.abc");
+                LOGD("commonsPath is: %{private}s", commonsPath.c_str());
+                if (!runtime->ExecuteJsBin(commonsPath)) {
+                    LOGE("ExecuteJsBin \"commons.js\" failed.");
+                    return;
+                }
+            }
+            std::string vendorsBasePath = delegate->GetAssetPath("vendors.abc");
+            if (!vendorsBasePath.empty()) {
+                std::string vendorsPath = vendorsBasePath.append("vendors.abc");
+                LOGD("vendorsPath is: %{private}s", vendorsPath.c_str());
+                if (!runtime->ExecuteJsBin(vendorsPath)) {
+                    LOGE("ExecuteJsBin \"vendors.js\" failed.");
+                    return;
+                }
+            }
             std::string appMap;
             if (delegate->GetAssetContent("app.js.map", appMap)) {
                 page->SetAppMap(appMap);
@@ -3071,7 +3114,19 @@ void JsiEngine::FireSyncEvent(const std::string& eventId, const std::string& par
 
 void JsiEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
 {
-
+    ACE_DCHECK(engineInstance_);
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto page = GetRunningPage(runtime);
+    if (page == nullptr) {
+        LOGE("FireExternalEvent GetRunningPage is nullptr");
+        return;
+    }
+    std::string arguments;
+    auto bridge = AceType::DynamicCast<JsiXComponentBridge>(page->GetXComponentBridgeById(nodeId));
+    if (bridge) {
+        bridge->HandleContext(runtime, nodeId, arguments);
+        return;
+    }
 }
 
 // Destroy page instance on Js
@@ -3111,8 +3166,7 @@ void JsiEngine::DestroyApplication(const std::string& packageName)
         LOGE("\"appDestroy\" not found or is not a function!");
         return;
     }
-    JsiUtils::SetCurrentState(JsErrorType::DESTROY_APP_ERROR, instanceId_, "",
-        engineInstance_->GetStagingPage());
+    JsiUtils::SetCurrentState(JsErrorType::DESTROY_APP_ERROR, instanceId_, "", engineInstance_->GetStagingPage());
     func->Call(runtime, global, argv, argv.size());
 }
 
@@ -3159,6 +3213,109 @@ void JsiEngine::RunGarbageCollection()
 RefPtr<GroupJsBridge> JsiEngine::GetGroupJsBridge()
 {
     return AceType::MakeRefPtr<JsiGroupJsBridge>();
+}
+
+bool JsiEngine::OnStartContinuation()
+{
+    LOGI("JsiEngine OnStartContinuation");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnStartContinuation failed, runtime is null.");
+        return false;
+    }
+
+    return CallAppFunc("onStartContinuation");
+}
+
+void JsiEngine::OnCompleteContinuation(int32_t code)
+{
+    LOGI("JsiEngine OnCompleteContinuation");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnCompleteContinuation failed, runtime is null.");
+        return;
+    }
+
+    std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(code) };
+    CallAppFunc("onCompleteContinuation", argv);
+}
+
+void JsiEngine::OnRemoteTerminated()
+{
+    LOGI("JsiEngine OnRemoteTerminated");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnRemoteTerminated failed, runtime is null.");
+        return;
+    }
+
+    CallAppFunc("onRemoteTerminated");
+}
+
+void JsiEngine::OnSaveData(std::string& data)
+{
+    LOGI("JsiEngine OnSaveData");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnSaveData failed, runtime is null.");
+        return;
+    }
+
+    shared_ptr<JsValue> object = runtime->NewObject();
+    std::vector<shared_ptr<JsValue>> argv = { object };
+    if (CallAppFunc("onSaveData", argv)) {
+        data = object->GetJsonString(runtime);
+    }
+}
+
+bool JsiEngine::OnRestoreData(const std::string& data)
+{
+    LOGI("JsiEngine OnRestoreData");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnRestoreData failed, runtime is null.");
+        return false;
+    }
+    shared_ptr<JsValue> result;
+    shared_ptr<JsValue> jsonObj = runtime->ParseJson(data);
+    if (jsonObj->IsUndefined(runtime) || jsonObj->IsException(runtime)) {
+        LOGE("JsiDeclarativeEngine: Parse json for restore data failed.");
+        return false;
+    }
+    std::vector<shared_ptr<JsValue>> argv = { jsonObj };
+    return CallAppFunc("onRestoreData", argv);
+}
+
+bool JsiEngine::CallAppFunc(const std::string& appFuncName)
+{
+    std::vector<shared_ptr<JsValue>> argv = {};
+    return CallAppFunc(appFuncName, argv);
+}
+
+bool JsiEngine::CallAppFunc(const std::string& appFuncName, std::vector<shared_ptr<JsValue>>& argv)
+{
+    LOGD("JsiEngine CallAppFunc");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    ACE_DCHECK(runtime);
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> appObj = global->GetProperty(runtime, "aceapp");
+    if (!appObj->IsObject(runtime)) {
+        LOGE("property \"aceapp\" is not a object");
+        return false;
+    }
+    shared_ptr<JsValue> defaultObject = appObj->GetProperty(runtime, "$def");
+    if (!defaultObject->IsObject(runtime)) {
+        LOGE("property \"$def\" is not a object");
+        return false;
+    }
+    shared_ptr<JsValue> func = defaultObject->GetProperty(runtime, appFuncName);
+    if (!func || !func->IsFunction(runtime)) {
+        LOGE("%{public}s not found or is not a function!", appFuncName.c_str());
+        return false;
+    }
+    shared_ptr<JsValue> result;
+    result = func->Call(runtime, defaultObject, argv, argv.size());
+    return (result->ToString(runtime) == "true");
 }
 
 } // namespace OHOS::Ace::Framework

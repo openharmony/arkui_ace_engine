@@ -62,4 +62,41 @@ RefPtr<RenderColumnSplit> ColumnSplitComposedElement::GetRenderColumnSplit() con
     return nullptr;
 }
 
+void ColumnSplitComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto columnSplitElement = GetContentElement<ColumnSplitElement>(ColumnSplitElement::TypeId());
+    if (!columnSplitElement) {
+        LOGE("get GetColumnSplitElement failed");
+        return;
+    }
+    columnSplitElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    columnSplitElement->MarkDirty();
+    LOGD("columnSplit AddChildWithSlot");
+}
+
+void ColumnSplitComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto columnSplitElement = GetContentElement<ColumnSplitElement>(ColumnSplitElement::TypeId());
+    if (!columnSplitElement) {
+        LOGE("get GetColumnSplitElement failed");
+        return;
+    }
+    auto child = columnSplitElement->GetChildBySlot(slot);
+    columnSplitElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    columnSplitElement->MarkDirty();
+    LOGD("columnSplit UpdateChildWithSlot");
+}
+
+void ColumnSplitComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto columnSplitElement = GetContentElement<ColumnSplitElement>(ColumnSplitElement::TypeId());
+    if (!columnSplitElement) {
+        LOGE("get GetColumnSplitElement failed");
+        return;
+    }
+    columnSplitElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    columnSplitElement->MarkDirty();
+    LOGD("columnSplit DeleteChildWithSlot");
+}
+
 } // namespace OHOS::Ace::V2

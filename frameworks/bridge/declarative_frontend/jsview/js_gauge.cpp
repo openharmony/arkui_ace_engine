@@ -14,10 +14,11 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/chart/chart_component.h"
 #include "core/components/progress/progress_component.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -31,8 +32,7 @@ void JSGauge::JSBind(BindingTarget globalObj)
     JSClass<JSGauge>::StaticMethod("endAngle", &JSGauge::SetEndAngle);
     JSClass<JSGauge>::StaticMethod("colors", &JSGauge::SetColors);
     JSClass<JSGauge>::StaticMethod("strokeWidth", &JSGauge::SetStrokeWidth);
-    JSClass<JSGauge>::StaticMethod("labelTextConfig", &JSGauge::SetLableTextConfig);
-    JSClass<JSGauge>::StaticMethod("labelColorConfig", &JSGauge::SetLableColorConfig);
+    JSClass<JSGauge>::StaticMethod("labelConfig", &JSGauge::SetLableConfig);
     JSClass<JSGauge>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSGauge>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSGauge>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -154,31 +154,23 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
     gaugeComponent->SetTrackThickness(strokeWidth);
 }
 
-void JSGauge::SetLableTextConfig(const JSCallbackInfo& info)
+void JSGauge::SetLableConfig(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGI("JSGauge::SetLableTextConfig::The info is wrong, it is supposed to have atleast 1 arguments");
+    if (info.Length() < 1 && !info[0]->IsObject()) {
+        LOGE("JSGauge::SetLableTextConfig::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto lableText = paramObject->GetProperty("text");
+    auto lableColor = paramObject->GetProperty("color");
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
 
-    if (info[0]->IsString()) {
-        gaugeComponent->SetLableMarkedText(info[0]->ToString());
+    if (lableText->IsString()) {
+        gaugeComponent->SetLableMarkedText(lableText->ToString());
     }
-}
-
-void JSGauge::SetLableColorConfig(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGI("JSGauge::SetLableColorConfig::The info is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
     Color currentColor;
-
-    if (ParseJsColor(info[0], currentColor)) {
+    if (ParseJsColor(lableColor, currentColor)) {
         gaugeComponent->SetMarkedTextColor(currentColor);
     }
 }

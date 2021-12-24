@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 
+#include <cstdint>
+
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "bridge/common/accessibility/js_accessibility_manager.h"
+#include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "core/components/common/layout/constants.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine_instance.h"
@@ -29,7 +33,16 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
 #endif
@@ -63,10 +76,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_menu.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_navigation_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_option.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
@@ -84,10 +95,13 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_sheet.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_stepper.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
@@ -111,6 +125,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
+#endif
+#include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 
@@ -155,6 +173,88 @@ static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc,
     page->SetDeclarativeOnPageDisAppearCallback([view]() { view->FireOnHide(); });
     page->SetDeclarativeOnPageRefreshCallback([view]() { view->MarkNeedUpdate(); });
     return JS_UNDEFINED;
+}
+
+static JSValue JsGetInspectorTree(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    if (ctx == nullptr) {
+        return JS_UNDEFINED;
+    }
+
+    QJSContext::Scope scope(ctx);
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return JS_ThrowSyntaxError(ctx, "pipeline is null");
+    }
+
+    auto nodeInfos = pipelineContext->GetInspectorTree();
+    JSValue result = JS_NewString(ctx, nodeInfos.c_str());
+    return result;
+}
+
+static JSValue JsGetInspectorByKey(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    QJSContext::Scope scope(ctx);
+    if (argc != 1) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, it is supposed to have one or two arguments");
+    }
+    if (!JS_IsString(argv[0])) {
+        return JS_ThrowSyntaxError(ctx, "input value must be string");
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return JS_ThrowSyntaxError(ctx, "pipeline is null");
+    }
+    ScopedString targetString(ctx, argv[0]);
+    std::string key = targetString.get();
+    auto resultStr = pipelineContext->GetInspectorNodeByKey(key);
+    JSValue result = JS_NewString(ctx, resultStr.c_str());
+    return result;
+}
+
+static JSValue JsSendEventByKey(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    if (argc != 3) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, it is supposed to have 3 arguments");
+    }
+
+    QJSContext::Scope scp(ctx);
+    if (!JS_IsString(argv[0]) || !JS_IsString(argv[2])) {
+        return JS_ThrowSyntaxError(ctx, "parameter 'key' and 'params' must be string");
+    }
+    if (!JS_IsNumber(argv[1])) {
+        return JS_ThrowSyntaxError(ctx, "parameter action must be number");
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return JS_ThrowSyntaxError(ctx, "pipeline is null");
+    }
+
+    ScopedString targetString(ctx, argv[0]);
+    std::string key = targetString.get();
+    ScopedString valueString(ctx, argv[1]);
+    auto action = StringToInt(valueString.get());
+    ScopedString targetParam(ctx, argv[2]);
+    std::string params = targetParam.get();
+
+    auto result = pipelineContext->SendEventByKey(key, action, params);
+    return JS_NewBool(ctx, result);
 }
 
 static JSValue JsDumpMemoryStats(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
@@ -456,11 +556,64 @@ JSValue SetAppBackgroundColor(JSContext* ctx, JSValueConst new_target, int argc,
     return JS_UNDEFINED;
 }
 
+JSValue JsGetInspectorNodes(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    QJSContext::Scope scp(ctx);
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+    auto front = container->GetFrontend();
+    if (!front) {
+        return JS_ThrowSyntaxError(ctx, "front is null");
+    }
+    auto accessibilityManager = AceType::DynamicCast<JsAccessibilityManager>(front->GetAccessibilityManager());
+    if (!accessibilityManager) {
+        return JS_ThrowSyntaxError(ctx, "AccessibilityManager is null");
+    }
+    auto nodeInfos = accessibilityManager->DumpComposedElementsToJson();
+    auto infoStr = nodeInfos->ToString();
+    return JS_ParseJSON(ctx, infoStr.c_str(), infoStr.length(), nullptr);
+}
+
+JSValue JsGetInspectorNodeById(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    QJSContext::Scope scp(ctx);
+    if (argc != 1) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, it is supposed to have one argument");
+    }
+    if (!JS_IsNumber(argv[0])) {
+        return JS_ThrowSyntaxError(ctx, "input value must be number");
+    }
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+    auto front = container->GetFrontend();
+    if (!front) {
+        return JS_ThrowSyntaxError(ctx, "front is null");
+    }
+    auto accessibilityManager = AceType::DynamicCast<JsAccessibilityManager>(front->GetAccessibilityManager());
+    if (!accessibilityManager) {
+        return JS_ThrowSyntaxError(ctx, "AccessibilityManager is null");
+    }
+    int32_t nodeId = 0;
+    if (JS_ToInt32(ctx, &nodeId, argv[0]) < 0) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, must be int32 value");
+    }
+    auto nodeInfo = accessibilityManager->DumpComposedElementToJson(nodeId);
+    auto infoStr = nodeInfo->ToString();
+    return JS_ParseJSON(ctx, infoStr.c_str(), infoStr.length(), nullptr);
+}
+
 void JsRegisterViews(BindingTarget globalObj)
 {
     JSContext* ctx = QJSContext::Current();
 
     QJSUtils::DefineGlobalFunction(ctx, JsLoadDocument, "loadDocument", 1);
+    QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorTree, "getInspectorTree", 0);
+    QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorByKey, "getInspectorByKey", 1);
+    QJSUtils::DefineGlobalFunction(ctx, JsSendEventByKey, "sendEventByKey", 3);
     QJSUtils::DefineGlobalFunction(ctx, JsDumpMemoryStats, "dumpMemoryStats", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsGetI18nResource, "$s", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsGetMediaResource, "$m", 1);
@@ -471,6 +624,8 @@ void JsRegisterViews(BindingTarget globalObj)
     QJSUtils::DefineGlobalFunction(ctx, Lpx2Px, "lpx2px", 1);
     QJSUtils::DefineGlobalFunction(ctx, Px2Lpx, "px2lpx", 1);
     QJSUtils::DefineGlobalFunction(ctx, SetAppBackgroundColor, "setAppBgColor", 1);
+    QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorNodes, "getInspectorNodes", 1);
+    QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorNodeById, "getInspectorNodeById", 1);
 
     JSViewAbstract::JSBind();
     JSContainerBase::JSBind();
@@ -481,12 +636,11 @@ void JsRegisterViews(BindingTarget globalObj)
     JSDatePicker::JSBind(globalObj);
     JSSpan::JSBind(globalObj);
     JSButton::JSBind(globalObj);
+    JSCanvas::JSBind(globalObj);
     JSLazyForEach::JSBind(globalObj);
     JSList::JSBind(globalObj);
     JSListItem::JSBind(globalObj);
     JSLoadingProgress::JSBind(globalObj);
-    JSMenu::JSBind(globalObj);
-    JSOption::JSBind(globalObj);
     JSImage::JSBind(globalObj);
     JSImageAnimator::JSBind(globalObj);
     JSColumn::JSBind(globalObj);
@@ -495,13 +649,15 @@ void JsRegisterViews(BindingTarget globalObj)
     JSGrid::JSBind(globalObj);
     JSGridItem::JSBind(globalObj);
     JSStack::JSBind(globalObj);
+    JSStepper::JSBind(globalObj);
+    JSStepperItem::JSBind(globalObj);
     JSForEach::JSBind(globalObj);
     JSDivider::JSBind(globalObj);
     JSProgress::JSBind(globalObj);
     JSSwiper::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
     JSSlidingPanel::JSBind(globalObj);
-    JSNavigationView::JSBind(globalObj);
+    JSNavigation::JSBind(globalObj);
     JSNavigator::JSBind(globalObj);
     JSColumnSplit::JSBind(globalObj);
     JSIfElse::JSBind(globalObj);
@@ -510,6 +666,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSFlexImpl::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
+    JSScrollBar::JSBind(globalObj),
     JSToggle::JSBind(globalObj);
     JSSlider::JSBind(globalObj);
     JSTextPicker::JSBind(globalObj);
@@ -518,12 +675,20 @@ void JsRegisterViews(BindingTarget globalObj)
     JSPersistent::JSBind(globalObj);
     JSRadio::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
+    JSRenderingContext::JSBind(globalObj);
+    JSOffscreenRenderingContext::JSBind(globalObj);
+    JSCanvasGradient::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj);
+    JSCanvasImageData::JSBind(globalObj);
+    JSPath2D::JSBind(globalObj);
+    JSRenderingContextSettings::JSBind(globalObj);
     JSQRCode::JSBind(globalObj);
     JSDataPanel::JSBind(globalObj);
     JSBadge::JSBind(globalObj);
     JSTextArea::JSBind(globalObj);
     JSTextInput::JSBind(globalObj);
     JSMarquee::JSBind(globalObj);
+    JSSheet::JSBind(globalObj);
 #if defined(FORM_SUPPORTED)
     JSForm::JSBind(globalObj);
 #endif
@@ -539,6 +704,7 @@ void JsRegisterViews(BindingTarget globalObj)
 #ifndef WEARABLE_PRODUCT
     JSPiece::JSBind(globalObj);
     JSRating::JSBind(globalObj);
+    JSRefresh::JSBind(globalObj);
     JSCamera::JSBind(globalObj);
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
@@ -546,6 +712,9 @@ void JsRegisterViews(BindingTarget globalObj)
     JSWeb::JSBind(globalObj);
     JSWebController::JSBind(globalObj);
 #endif
+#endif
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    JSXComponent::JSBind(globalObj);
 #endif
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
@@ -561,6 +730,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSIndexer::JSBind(globalObj);
     JSGauge::JSBind(globalObj);
     JSHyperlink::JSBind(globalObj);
+    JSClipboard::JSBind(globalObj);
 
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);
@@ -584,6 +754,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSShareData::JSBind(globalObj);
 
     JsDragFunction::JSBind(globalObj);
+    JsGridDragFunction::JSBind(globalObj);
 
     JSObjectTemplate mainAxisAlign;
     mainAxisAlign.Constant("Start", 1);
@@ -610,9 +781,10 @@ void JsRegisterViews(BindingTarget globalObj)
 
     JSObjectTemplate progressStyle;
     progressStyle.Constant("Linear", 0);
-    progressStyle.Constant("Capsule", 1);
+    progressStyle.Constant("Ring", 1);
     progressStyle.Constant("Eclipse", 2);
-    progressStyle.Constant("Circular", 3);
+    progressStyle.Constant("ScaleRing", 3);
+    progressStyle.Constant("Capsule", 4);
 
     JSObjectTemplate stackFit;
     stackFit.Constant("Keep", 0);

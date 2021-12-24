@@ -286,7 +286,6 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     AAFwk::Want want;
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, (long)runningCardId_);
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_MESSAGE_KEY, action);
-    //want.HasParameter(Constants::PARAM_FORM_IDENTITY_KEY)) {
     if (AppExecFwk::FormMgr::GetRecoverStatus() == OHOS::AppExecFwk::Constants::IN_RECOVERING) {
         LOGE("form is in recover status, can't do action on form.");
         return;

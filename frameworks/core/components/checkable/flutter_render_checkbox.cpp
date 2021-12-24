@@ -38,11 +38,6 @@ constexpr double DEFAULT_MIN_CHECKBOX_SHAPE_SCALE = 0.0;
 
 } // namespace
 
-RefPtr<RenderNode> RenderCheckbox::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderCheckbox>();
-}
-
 void FlutterRenderCheckbox::Paint(RenderContext& context, const Offset& offset)
 {
     auto canvas = ScopedCanvas::Create(context);

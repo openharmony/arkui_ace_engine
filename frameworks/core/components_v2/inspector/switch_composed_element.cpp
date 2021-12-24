@@ -25,9 +25,10 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const SwitchComposedElement&)>> CREATE_JSON_MAP {
-    { "ison", [](const SwitchComposedElement& inspector) { return inspector.GetChecked(); } },
-    { "SelectedColor", [](const SwitchComposedElement& inspector) { return inspector.GetSelectedColor(); } },
-    { "PointColor", [](const SwitchComposedElement& inspector) { return inspector.GetPointColor(); } }
+    { "isOn", [](const SwitchComposedElement& inspector) { return inspector.GetChecked(); } },
+    { "selectedColor", [](const SwitchComposedElement& inspector) { return inspector.GetSelectedColor(); } },
+    { "switchPointColor", [](const SwitchComposedElement& inspector) { return inspector.GetPointColor(); } },
+    { "type", [](const SwitchComposedElement& inspector) { return inspector.GetToggleType(); } }
 };
 
 } // namespace
@@ -35,9 +36,10 @@ const std::unordered_map<std::string, std::function<std::string(const SwitchComp
 void SwitchComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("ison: ").append(GetChecked()));
+    DumpLog::GetInstance().AddDesc(std::string("isOn: ").append(GetChecked()));
     DumpLog::GetInstance().AddDesc(std::string("SelectedColor: ").append(GetSelectedColor()));
-    DumpLog::GetInstance().AddDesc(std::string("PointColor: ").append(GetPointColor()));
+    DumpLog::GetInstance().AddDesc(std::string("switchPointColor: ").append(GetPointColor()));
+    DumpLog::GetInstance().AddDesc(std::string("type: ").append(GetToggleType()));
 }
 
 std::unique_ptr<JsonValue> SwitchComposedElement::ToJsonObject() const
@@ -54,6 +56,11 @@ std::string SwitchComposedElement::GetChecked() const
     auto renderSwitch = GetRenderSwitch();
     auto checked = renderSwitch ? renderSwitch->GetChecked() : false;
     return ConvertBoolToString(checked);
+}
+
+std::string SwitchComposedElement::GetToggleType() const
+{
+    return std::string("ToggleType.Switch");
 }
 
 std::string SwitchComposedElement::GetSelectedColor() const

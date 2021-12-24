@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+#include "core/components/data_panel/data_panel_component.h"
+
+#include <vector>
+
+#include "core/components/theme/theme_manager.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include <vector>
-#include "core/components/data_panel/data_panel_component.h"
-#include "core/components/theme/theme_manager.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -69,10 +71,21 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
             return;
         }
         auto value = item->GetDouble();
+        if (value <= 0.0) {
+            value = 0.0;
+        }
         Segment segment;
         segment.SetValue(value);
         segment.SetColorType(SegmentStyleType::NONE);
         component->AppendSegment(segment);
+    }
+    auto type = param->GetValue("type");
+    if (type->IsNumber()) {
+        if (type->GetInt() == static_cast<int32_t>(ChartType::LINE)) {
+            component->SetPanelType(ChartType::LINE);
+        } else if (type->GetInt() == static_cast<int32_t>(ChartType::RAINBOW)) {
+            component->SetPanelType(ChartType::RAINBOW);
+        }
     }
     RefPtr<ThemeManager> dataPanelManager = AceType::MakeRefPtr<ThemeManager>();
     component->InitalStyle(dataPanelManager);

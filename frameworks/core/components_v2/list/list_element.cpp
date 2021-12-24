@@ -98,10 +98,19 @@ RefPtr<Component> ListElement::OnMakeEmptyComponent()
 
 void ListElement::OnDataSourceUpdated(size_t startIndex)
 {
+    auto context = context_.Upgrade();
+    if (context) {
+        context->AddPostFlushListener(AceType::Claim(this));
+    }
     if (renderList_) {
         renderList_->RemoveAllItems();
         renderList_->MarkNeedLayout();
     }
+}
+
+void ListElement::OnPostFlush()
+{
+    ReleaseRedundantComposeIds();
 }
 
 } // namespace

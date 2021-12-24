@@ -25,11 +25,14 @@
 #include "core/components/scroll/scroll_edge_effect.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_v2/list/list_component.h"
+#include "core/components/positioned/positioned_component.h"
 #include "core/components_v2/list/render_list_item.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace::V2 {
+
+using UpdateBuilderFunc = std::function<void(const Dimension&, const Dimension&)>;
 
 class ListItemGenerator : virtual public Referenced {
 public:
@@ -49,15 +52,13 @@ public:
     static RefPtr<RenderNode> Create();
 
     RenderList() = default;
-    ~RenderList() = default;
+    ~RenderList() override;
 
     void Update(const RefPtr<Component>& component) override;
 
     void PerformLayout() override;
 
     void OnPaintFinish() override;
-
-    void UpdateTouchRect() override;
 
     template<class T>
     T MakeValue(double mainValue, double crossValue) const
@@ -100,10 +101,23 @@ public:
         return vertical_;
     }
 
+    Axis GetAxis() const
+    {
+        return vertical_ ? Axis::VERTICAL : Axis::HORIZONTAL;
+    }
+
     bool GetEditable() const
     {
         if (component_) {
             return component_->GetEditMode();
+        }
+        return false;
+    }
+
+    bool GetLinkage() const
+    {
+        if (component_) {
+            return component_->GetChainAnimation();
         }
         return false;
     }
@@ -117,14 +131,80 @@ public:
 
     void JumpToIndex(int32_t idx, int32_t source);
 
+    void AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve);
+
     RefPtr<Component> GetComponent() override
     {
         return component_;
     }
 
+    Offset GetLastOffset() const
+    {
+        return vertical_ ? Offset(0.0, -currentOffset_) : Offset(-currentOffset_, 0.0);
+    }
+
+    double GetEstimatedHeight() const
+    {
+        return realMainSize_;
+    }
+
+    Dimension GetListSpace() const
+    {
+        return listSpace_;
+    }
+
+    const UpdateBuilderFunc& GetUpdateBuilderFuncId() const
+    {
+        return updateBuilder_;
+    }
+
+    void SetUpdateBuilderFuncId(const UpdateBuilderFunc& updateBuilder)
+    {
+        updateBuilder_ = updateBuilder;
+    }
+
+    const OnItemDragEnterFunc& GetOnItemDragEnter() const
+    {
+        return onItemDragEnter_;
+    }
+
+    const OnItemDragMoveFunc& GetOnItemDragMove() const
+    {
+        return onItemDragMove_;
+    }
+
+    const OnItemDragLeaveFunc& GetOnItemDragLeave() const
+    {
+        return onItemDragLeave_;
+    }
+
+    const OnItemDropFunc& GetOnItemDrop() const
+    {
+        return onItemDrop_;
+    }
+
+    void SetPreTargetRenderList(const RefPtr<RenderList>& preTargetRenderList)
+    {
+        preTargetRenderList_ = preTargetRenderList;
+    }
+
+    const RefPtr<RenderList>& GetPreTargetRenderList() const
+    {
+        return preTargetRenderList_;
+    }
+
+    void SetBetweenItemAndBuilder(const Offset& betweenItemAndBuilder)
+    {
+        betweenItemAndBuilder_ = betweenItemAndBuilder;
+    }
+
+    const Offset& GetBetweenItemAndBuilder() const
+    {
+        return betweenItemAndBuilder_;
+    }
+
 protected:
     void UpdateAccessibilityAttr();
-    void UpdateAccessibilityChild();
     bool HandleActionScroll(bool forward);
     LayoutParam MakeInnerLayout();
     Size SetItemsPosition(double mainSize, const LayoutParam& layoutParam);
@@ -210,6 +290,7 @@ protected:
     RefPtr<SpringProperty> overSpringProperty_;
     RefPtr<BilateralSpringAdapter> chainAdapter_;
     RefPtr<SimpleSpringChain> chain_;
+    RefPtr<Animator> animator_;
 
     size_t firstDisplayIndex_ = INITIAL_CHILD_INDEX;
     size_t lastDisplayIndex_ = INITIAL_CHILD_INDEX;
@@ -222,6 +303,7 @@ protected:
     WeakPtr<ListItemGenerator> itemGenerator_;
     RefPtr<Scrollable> scrollable_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
+    RefPtr<ScrollBarProxy> scrollBarProxy_;
 
     size_t currentStickyIndex_ = INITIAL_CHILD_INDEX;
     RefPtr<RenderListItem> currentStickyItem_;
@@ -229,8 +311,8 @@ protected:
     size_t targetIndex_ = INITIAL_CHILD_INDEX;
     size_t selectedItemIndex_ = INITIAL_CHILD_INDEX;
     RefPtr<RenderListItem> selectedItem_;
-    double selectedItemMainAxis_;
-    double targetMainAxis_;
+    double selectedItemMainAxis_ = 0.0;
+    double targetMainAxis_ = 0.0;
     RefPtr<RawRecognizer> rawRecognizer_;
     double lastPos_ = 0.0f;
     bool autoScrollingForItemMove_ = false;
@@ -238,9 +320,31 @@ protected:
     double dipScale_ = 1.0;
     double offset_ = 0.0;
 
+    size_t insertItemIndex_ = INITIAL_CHILD_INDEX;
+    Offset betweenItemAndBuilder_;
+    RefPtr<RenderListItem> selectedDragItem_;
+
 private:
     bool ActionByScroll(bool forward, ScrollEventBack scrollEventBack);
     void ModifyActionScroll();
+    void InitScrollBarProxy();
+    Dimension listSpace_;
+    double realMainSize_ = 0.0; // Real size of main axis.
+
+    void CreateDragDropRecognizer();
+    RefPtr<RenderListItem> FindCurrentListItem(const Point& point);
+    RefPtr<RenderList> FindTargetRenderList(const RefPtr<PipelineContext> context, const GestureEvent& info);
+
+    RefPtr<GestureRecognizer> dragDropGesture_;
+    RefPtr<RenderList> preTargetRenderList_;
+    OnItemDragStartFunc onItemDragStart_;
+    OnItemDragEnterFunc onItemDragEnter_;
+    OnItemDragMoveFunc onItemDragMove_;
+    OnItemDragLeaveFunc onItemDragLeave_;
+    OnItemDropFunc onItemDrop_;
+
+    UpdateBuilderFunc updateBuilder_;
+
     ACE_DISALLOW_COPY_AND_MOVE(RenderList);
 };
 

@@ -199,6 +199,7 @@ JsiFunction::JsiFunction(panda::Local<panda::FunctionRef> val) : JsiType(val)
 
 JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<JsiValue> argv[]) const
 {
+    LocalScope scope(vm_);
     std::vector<panda::Local<panda::JSValueRef>> arguments;
     for (int i = 0; i < argc; ++i) {
         arguments.emplace_back(argv[i].Get().GetHandle());
@@ -253,6 +254,19 @@ JsiCallbackInfo::JsiCallbackInfo(panda::ecmascript::EcmaVM* vm, panda::Local<pan
         argv_.emplace_back(vm, argv[i]);
     }
 
+}
+
+JsiCallbackInfo::~JsiCallbackInfo()
+{
+    thisObj_.FreeGlobalHandleAddr();
+    auto jsVal = std::get_if<panda::Global<panda::JSValueRef>>(&retVal_);
+    if (jsVal) {
+        jsVal->FreeGlobalHandleAddr();
+    }
+    for (int i = 0; i < argc_; i++) {
+        argv_[i].FreeGlobalHandleAddr();
+    }
+    argv_.clear();
 }
 
 JsiRef<JsiValue> JsiCallbackInfo::operator[](size_t index) const

@@ -1,0 +1,180 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/ace/ace_engine/build/ace_lib.gni")
+
+if (is_standard_system) {
+  system_resource_hap_path =
+      get_label_info("//utils/resources/systemres:systemres_hap",
+                     "target_out_dir") + "/SystemResources.hap"
+  system_resource_path =
+      get_label_info("//utils/resources/systemres:systemres_hap",
+                     "target_out_dir") + "/resources"
+  if (host_os == "mac") {
+    resource_manager_library =
+        get_label_info(
+            "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac",
+            "root_out_dir") +
+        "/global/resmgr_standard/libglobal_resmgr_mac.dylib"
+  } else {
+    resource_manager_library =
+        get_label_info(
+            "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win",
+            "root_out_dir") + "/global/resmgr_standard/libglobal_resmgr_win.dll"
+  }
+} else {
+  system_resource_hap_path =
+      get_label_info("//utils/resources/systemres:systemres_hap",
+                     "target_gen_dir") + "/SystemResources.hap"
+  system_resource_path =
+      get_label_info("//utils/resources/systemres:systemres_hap",
+                     "target_gen_dir") + "/resources"
+}
+
+action("get_system_resource") {
+  script = "get_system_resources.sh"
+  deps = [ "//utils/resources/systemres:systemres_hap($current_toolchain)" ]
+  args = [
+    rebase_path(system_resource_hap_path),
+    rebase_path(system_resource_path),
+  ]
+  inputs = [ system_resource_hap_path ]
+  outputs = [ system_resource_path ]
+}
+
+# Triggered only when the SDK is compiled
+if (is_standard_system) {
+  ohos_copy("copy_preview_shared_library") {
+    if (use_mac) {
+      mac_shared_library_path =
+          get_label_info(":libace_engine_mac($mac_buildtool)", "root_out_dir") +
+          "/common/common/libace_engine_mac.dylib"
+      deps = [
+        "$ace_root/adapter/preview/build:libace_engine_mac(${mac_buildtool})",
+      ]
+      sources = [ mac_shared_library_path ]
+      outputs =
+          [ target_out_dir + "/previewer/common/bin/libace_engine_mac.dylib" ]
+      module_source_dir = target_out_dir + "/previewer/common/bin/"
+      module_install_name = ""
+    } else {
+      windows_shared_library_path =
+          get_label_info(":libace_engine_windows", "root_out_dir") +
+          "/common/common/libace_engine_windows.dll"
+      deps = [ "$ace_root/adapter/preview/build:libace_engine_windows" ]
+      sources = [ windows_shared_library_path ]
+      outputs =
+          [ target_out_dir + "/previewer/common/bin/libace_engine_windows.dll" ]
+      module_source_dir = target_out_dir + "/previewer/common/bin/"
+      module_install_name = ""
+    }
+  }
+
+  ohos_copy("copy_napi_shared_library") {
+    shared_library_path =
+        get_label_info("//foundation/ace/napi:ace_napi", "root_out_dir")
+    deps = [
+      "//foundation/ace/napi:ace_napi",
+      "//foundation/ace/napi:ace_napi_quickjs",
+    ]
+    if (use_mac) {
+      sources = [
+        "$shared_library_path/ace/napi/libace_napi.dylib",
+        "$shared_library_path/ace/napi/libace_napi_quickjs.dylib",
+      ]
+    } else {
+      sources = [
+        "$shared_library_path/ace/napi/libace_napi.dll",
+        "$shared_library_path/ace/napi/libace_napi_quickjs.dll",
+      ]
+    }
+    outputs = [ target_out_dir + "/previewer/common/bin/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common/bin"
+    module_install_name = ""
+  }
+
+  ohos_copy("copy_media_query_shared_library") {
+    shared_library_path =
+        get_label_info("$ace_root/interfaces/napi/kits/media_query:mediaquery",
+                       "root_out_dir")
+    deps = [ "$ace_root/interfaces/napi/kits/media_query:mediaquery" ]
+    if (use_mac) {
+      sources =
+          [ "$shared_library_path/ace/ace_engine_standard/libmediaquery.dylib" ]
+    } else {
+      sources =
+          [ "$shared_library_path/ace/ace_engine_standard/libmediaquery.dll" ]
+    }
+    outputs =
+        [ target_out_dir + "/previewer/common/bin/module/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common/bin/module/"
+    module_install_name = ""
+  }
+
+  ohos_copy("copy_resource_dynamic_library_standard") {
+    if (host_os == "mac") {
+      deps = [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
+    } else {
+      deps = [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
+    }
+
+    sources = [ resource_manager_library ]
+
+    outputs = [ target_out_dir + "/previewer/common/bin/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common/bin"
+    module_install_name = ""
+  }
+
+  ohos_copy("copy_system_resource_standard") {
+    deps = [ ":get_system_resource" ]
+
+    sources = [ system_resource_path ]
+
+    outputs = [ target_out_dir + "/previewer/common/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common"
+    module_install_name = ""
+  }
+} else {
+  ohos_copy("copy_system_resource") {
+    if (use_mac) {
+      sources = [ "//prebuilts/ace-toolkit/preview/rich/resources" ]
+      outputs = [ target_out_dir + "/tv_resources/{{source_file_part}}" ]
+      module_source_dir = target_out_dir + "/tv_resources/"
+      module_install_name = ""
+    } else {
+      deps = [ ":get_system_resource" ]
+
+      sources = [ system_resource_path ]
+      outputs = [ target_out_dir + "/tv_resources/{{source_file_part}}" ]
+      module_source_dir = target_out_dir + "/tv_resources/"
+      module_install_name = ""
+    }
+  }
+
+  ohos_copy("copy_system_resource_wearable") {
+    if (use_mac) {
+      sources = [ "//prebuilts/ace-toolkit/preview/rich/resources" ]
+      outputs = [ target_out_dir + "/wearable_resources/{{source_file_part}}" ]
+      module_source_dir = target_out_dir + "/wearable_resources/"
+      module_install_name = ""
+    } else {
+      deps = [ ":get_system_resource" ]
+
+      sources = [ system_resource_path ]
+      outputs = [ target_out_dir + "/wearable_resources/{{source_file_part}}" ]
+      module_source_dir = target_out_dir + "/wearable_resources/"
+      module_install_name = ""
+    }
+  }
+}

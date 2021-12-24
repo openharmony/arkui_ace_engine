@@ -81,12 +81,6 @@ void RenderTabBar::Update(const RefPtr<Component>& component)
     MarkNeedLayout();
 }
 
-void RenderTabBar::UpdateTouchRect()
-{
-    SetTouchRect(GetPaintRect());
-    ownTouchRect_ = touchRect_;
-}
-
 void RenderTabBar::PerformLayout()
 {
     tabsSize_ = 0;

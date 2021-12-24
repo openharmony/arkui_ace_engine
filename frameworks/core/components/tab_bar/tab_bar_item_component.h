@@ -31,7 +31,7 @@ public:
     ~TabBarItemComponent() override = default;
     RefPtr<Element> CreateElement() override;
     RefPtr<RenderNode> CreateRenderNode() override;
-    void UpdateTextStyle(const TextStyle& textStyle);
+    void UpdateStyle(const TextStyle& textStyle, const Color& color);
 
 private:
     RefPtr<TextComponent> text_;

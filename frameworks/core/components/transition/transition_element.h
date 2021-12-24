@@ -21,6 +21,7 @@
 #include "core/components/common/properties/page_transition_option.h"
 #include "core/components/common/properties/tween_option.h"
 #include "core/components/display/display_component.h"
+#include "core/components/transform/transform_element.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {
@@ -54,6 +55,7 @@ public:
     void SetTransition(const TweenOption& inOption, const TweenOption& outOption);
     void SetSharedTransition(const TweenOption& inOption, const TweenOption& outOption);
     RefPtr<Element> GetContentElement() const;
+    void ResetPageTransitionAnimation() const;
 
 protected:
     RefPtr<Component> BuildChild() override;
@@ -62,6 +64,7 @@ private:
     RefPtr<TweenElement> GetChildTween() const;
     RefPtr<BoxBaseElement> GetChildBox() const;
     RefPtr<DisplayElement> GetChildDisplay() const;
+    RefPtr<TransformElement> GetChildTransform() const;
     void ReplaceAnimation(TweenOption& transitionOption);
     void ApplyAnimation(TweenOption& transitionOption);
 

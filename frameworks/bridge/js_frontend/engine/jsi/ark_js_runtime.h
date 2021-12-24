@@ -72,6 +72,7 @@ public:
     shared_ptr<JsValue> NewNativePointer(void *ptr) override;
     void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) override;
     void HandleUncaughtException() override;
+    void ExecutePendingJob() override;
 
     const EcmaVM *GetEcmaVm() const
     {
@@ -84,7 +85,6 @@ private:
     LOG_PRINT print_ { nullptr };
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };
     std::string libPath_ {};
-    int debuggerOrder_ { 0 };
     bool isDebugMode_ {true};
 };
 

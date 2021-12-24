@@ -41,6 +41,12 @@ public:
     static void SetEditMode(bool editMode);
     static void SetCachedCount(int32_t cachedCount);
     static void SetChainAnimation(bool enableChainAnimation);
+
+    static void ItemDragStartCallback(const JSCallbackInfo& info);
+    static void ItemDragEnterCallback(const JSCallbackInfo& info);
+    static void ItemDragMoveCallback(const JSCallbackInfo& info);
+    static void ItemDragLeaveCallback(const JSCallbackInfo& info);
+    static void ItemDropCallback(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

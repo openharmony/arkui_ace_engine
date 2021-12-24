@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_RENDER_COMPONENT_H
 
 #include "base/geometry/animatable_dimension.h"
+#include "base/geometry/dimension_rect.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components/common/layout/position_param.h"
@@ -291,6 +292,26 @@ public:
 
     virtual RefPtr<RenderNode> CreateRenderNode() = 0;
 
+    bool IsResponseRegion() const
+    {
+        return isResponseRegion_;
+    }
+
+    void MarkResponseRegion(bool isResponseRegion)
+    {
+        isResponseRegion_ = isResponseRegion;
+    }
+
+    const std::vector<DimensionRect>& GetResponseRegion() const
+    {
+        return responseRegion_;
+    }
+
+    void SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
+    {
+        responseRegion_ = responseRegion;
+    }
+
 protected:
     bool takeBoundary_ = true;
     std::string accessibilityText_;
@@ -306,6 +327,8 @@ protected:
     bool isPercentSize_ = false;
     int32_t zIndex_ = 0;
     MotionPathOption motionPathOption_;
+    bool isResponseRegion_ = false;
+    std::vector<DimensionRect> responseRegion_;
 };
 
 } // namespace OHOS::Ace

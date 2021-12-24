@@ -29,11 +29,13 @@ RefPtr<RenderNode> IndexerItemComponent::CreateRenderNode()
 void IndexerItemComponent::BuildItem()
 {
     box_ = AceType::MakeRefPtr<BoxComponent>();
+    RefPtr<Component> tail = box_;
     if (rotate_) {
         image_ = AceType::MakeRefPtr<ImageComponent>(InternalResource::ResourceId::INDEXER_ARROW_PNG);
         image_->SetHeight(itemSize_);
         image_->SetWidth(itemSize_);
         box_->SetChild(image_);
+        tail = image_;
     } else {
         text_ = AceType::MakeRefPtr<TextComponent>(StringUtils::Str16ToStr8(strLabel_));
         TextStyle textStyle;
@@ -41,6 +43,7 @@ void IndexerItemComponent::BuildItem()
         textStyle.SetFontWeight(FontWeight::W400);
         text_->SetTextStyle(textStyle);
         box_->SetChild(text_);
+        tail = text_;
     }
     box_->SetFlex(BoxFlex::FLEX_NO);
     box_->SetWidth(itemSize_.Value(), itemSize_.Unit());
@@ -56,8 +59,10 @@ void IndexerItemComponent::BuildItem()
     if (rotate_) {
         RefPtr<TransformComponent> rotate = AceType::MakeRefPtr<TransformComponent>();
         rotate->SetChild(box_);
+        Component::MergeRSNode(rotate, tail);
         SetChild(rotate);
     } else {
+        Component::MergeRSNode(box_, tail);
         SetChild(box_);
     }
 }

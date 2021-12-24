@@ -123,6 +123,11 @@ public:
         return tag_;
     }
 
+    void SetTag(const std::string& tag)
+    {
+        tag_ = tag;
+    }
+
     int32_t GetPageId() const
     {
         return pageId_;
@@ -744,16 +749,6 @@ public:
             child->SetZIndexToChild(index);
         }
         SetZIndex(index);
-    }
-
-    void SetDebugLine(std::string debugLine)
-    {
-        debugLine_ = debugLine;
-    }
-
-    std::string GetDebugLine()
-    {
-        return debugLine_;
     }
 #endif
 

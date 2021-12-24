@@ -99,6 +99,9 @@ private:
 
     Color hoverColor_;
     Color pressColor_;
+
+    TextStyle placeHoldStyle_;
+    TextStyle editingStyle_;
 };
 
 } // namespace OHOS::Ace

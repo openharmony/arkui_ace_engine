@@ -459,10 +459,4 @@ void RenderTabContent::PerformLayout()
     }
 }
 
-void RenderTabContent::UpdateTouchRect()
-{
-    SetTouchRect(GetPaintRect());
-    ownTouchRect_ = touchRect_;
-}
-
 } // namespace OHOS::Ace

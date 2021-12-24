@@ -106,9 +106,8 @@ foreach(item, ace_platforms) {
         }
       }
 
-      # generate libace_engine_pa, now not support ark
-      if (defined(engine_config.js_pa_support) && engine_config.js_pa_support &&
-          engine.engine_name != "ark") {
+      # generate libace_engine_pa
+      if (defined(engine_config.js_pa_support) && engine_config.js_pa_support) {
         ace_bridge_engine("libace_engine_pa_${engine.engine_name}") {
           platform = item.name
           engine_name = engine.engine_name
@@ -123,15 +122,15 @@ foreach(item, ace_platforms) {
 ohos_source_set("ace_ohos_unittest_base") {
   testonly = true
   sources = [
-    "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
     "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/mock/mock_download_manager.cpp",
+    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
   ]
 
   if (is_standard_system) {
     sources -= [
-      "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
       "$ace_root/frameworks/core/mock/mock_download_manager.cpp",
+      "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
     ]
   }
 

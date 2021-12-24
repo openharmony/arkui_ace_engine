@@ -28,7 +28,7 @@ class JsTouchFunction : public JsFunction {
 
 public:
     explicit JsTouchFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
-    ~JsTouchFunction()
+    ~JsTouchFunction() override
     {
         LOGD("Destroy: JsTouchFunction");
     };

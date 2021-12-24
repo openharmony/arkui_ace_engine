@@ -926,15 +926,7 @@ public:
     {
         windowBlurStyle_ = style;
     }
-    void SetBorderType(int type)
-    {
-        borderType = type;
-    }
 
-    int GetBorderType()
-    {
-        return borderType;
-    }
     const Border& GetBorder() const
     {
         return border_;
@@ -1133,9 +1125,6 @@ private:
     bool hasBorderImageRepeat_ = false;
     bool hasBorderImageGradient_ = false;
 
-    // 0 border 1 borderimage-url 2 borderimage-gradient
-    int borderType = 0;
-
     // padding is zero
     Edge padding_;
     // border contains black color and 1.0f thickness as default
@@ -1146,7 +1135,7 @@ private:
     // Brightness
     Dimension brightness_;
     // hueRotate
-    float hueRotate_;
+    float hueRotate_ = 0.0f;
     // Contrast
     Dimension contrast_;
     // Saturate

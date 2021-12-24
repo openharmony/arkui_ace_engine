@@ -2071,6 +2071,7 @@ void Declaration::SetBorderImageWidthForFourEdges(const std::string& value, Decl
                 BorderImageDirection::BOTTOM);
             borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(offsets[0]), BorderImageDirection::LEFT);
             borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(offsets[0]), BorderImageDirection::RIGHT);
+            declaration.backDecoration_->SetHasBorderImageWidth(true);
             break;
         case 2:
             borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(offsets[0]), BorderImageDirection::TOP);
@@ -2078,6 +2079,7 @@ void Declaration::SetBorderImageWidthForFourEdges(const std::string& value, Decl
                 BorderImageDirection::BOTTOM);
             borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(offsets[1]), BorderImageDirection::LEFT);
             borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(offsets[1]), BorderImageDirection::RIGHT);
+            declaration.backDecoration_->SetHasBorderImageWidth(true);
             break;
         case 3:
             borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(offsets[0]), BorderImageDirection::TOP);
@@ -2085,6 +2087,7 @@ void Declaration::SetBorderImageWidthForFourEdges(const std::string& value, Decl
                 BorderImageDirection::BOTTOM);
             borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(offsets[1]), BorderImageDirection::LEFT);
             borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(offsets[1]), BorderImageDirection::RIGHT);
+            declaration.backDecoration_->SetHasBorderImageWidth(true);
             break;
         case 4:
             borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(offsets[0]), BorderImageDirection::TOP);
@@ -2092,11 +2095,17 @@ void Declaration::SetBorderImageWidthForFourEdges(const std::string& value, Decl
                 BorderImageDirection::BOTTOM);
             borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(offsets[1]), BorderImageDirection::LEFT);
             borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(offsets[3]), BorderImageDirection::RIGHT);
+            declaration.backDecoration_->SetHasBorderImageWidth(true);
             break;
         default:
+            borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(value), BorderImageDirection::TOP);
+            borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(value),
+                BorderImageDirection::BOTTOM);
+            borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(value), BorderImageDirection::LEFT);
+            borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(value), BorderImageDirection::RIGHT);
+            declaration.backDecoration_->SetHasBorderImageWidth(false);
             break;
     }
-    declaration.backDecoration_->SetHasBorderImageWidth(true);
     declaration.hasDecorationStyle_ = true;
     declaration.hasBorderStyle_ = true;
 }
@@ -2113,6 +2122,7 @@ void Declaration::SetBorderImageSliceForFourEdges(const std::string& value, Decl
             borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(offsets[0]), BorderImageDirection::RIGHT);
             borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(offsets[0]),
                 BorderImageDirection::BOTTOM);
+            declaration.backDecoration_->SetHasBorderImageSlice(true);
             break;
         case 2:
             borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(offsets[1]), BorderImageDirection::LEFT);
@@ -2120,6 +2130,7 @@ void Declaration::SetBorderImageSliceForFourEdges(const std::string& value, Decl
             borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(offsets[1]), BorderImageDirection::RIGHT);
             borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(offsets[0]),
                 BorderImageDirection::BOTTOM);
+            declaration.backDecoration_->SetHasBorderImageSlice(true);
             break;
         case 3:
             borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(offsets[1]), BorderImageDirection::LEFT);
@@ -2127,6 +2138,7 @@ void Declaration::SetBorderImageSliceForFourEdges(const std::string& value, Decl
             borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(offsets[1]), BorderImageDirection::RIGHT);
             borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(offsets[2]),
                 BorderImageDirection::BOTTOM);
+            declaration.backDecoration_->SetHasBorderImageSlice(true);
             break;
         case 4:
             borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(offsets[3]), BorderImageDirection::LEFT);
@@ -2134,11 +2146,17 @@ void Declaration::SetBorderImageSliceForFourEdges(const std::string& value, Decl
             borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(offsets[1]), BorderImageDirection::RIGHT);
             borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(offsets[2]),
                 BorderImageDirection::BOTTOM);
+            declaration.backDecoration_->SetHasBorderImageSlice(true);
             break;
         default:
+            borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(value), BorderImageDirection::LEFT);
+            borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(value), BorderImageDirection::TOP);
+            borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(value), BorderImageDirection::RIGHT);
+            borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(value),
+                BorderImageDirection::BOTTOM);
+            declaration.backDecoration_->SetHasBorderImageSlice(false);
             break;
     }
-    declaration.backDecoration_->SetHasBorderImageSlice(true);
     declaration.hasDecorationStyle_ = true;
     declaration.hasBorderStyle_ = true;
 }
@@ -2154,29 +2172,37 @@ void Declaration::SetBorderImageOutSetForFourEdges(const std::string& value, Dec
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[0]), BorderImageDirection::TOP);
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[0]), BorderImageDirection::RIGHT);
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[0]), BorderImageDirection::BOTTOM);
+            declaration.backDecoration_->SetHasBorderImageOutset(true);
             break;
         case 2:
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[1]), BorderImageDirection::LEFT);
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[0]), BorderImageDirection::TOP);
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[1]), BorderImageDirection::RIGHT);
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[0]), BorderImageDirection::BOTTOM);
+            declaration.backDecoration_->SetHasBorderImageOutset(true);
             break;
         case 3:
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[1]), BorderImageDirection::LEFT);
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[0]), BorderImageDirection::TOP);
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[1]), BorderImageDirection::RIGHT);
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[2]), BorderImageDirection::BOTTOM);
+            declaration.backDecoration_->SetHasBorderImageOutset(true);
             break;
         case 4:
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[3]), BorderImageDirection::LEFT);
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[0]), BorderImageDirection::TOP);
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[1]), BorderImageDirection::RIGHT);
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[2]), BorderImageDirection::BOTTOM);
+            declaration.backDecoration_->SetHasBorderImageOutset(true);
             break;
         default:
+            bs.border.SetBorderImageOutset(declaration.ParseDimension(value), BorderImageDirection::LEFT);
+            bs.border.SetBorderImageOutset(declaration.ParseDimension(value), BorderImageDirection::TOP);
+            bs.border.SetBorderImageOutset(declaration.ParseDimension(value), BorderImageDirection::RIGHT);
+            bs.border.SetBorderImageOutset(declaration.ParseDimension(value), BorderImageDirection::BOTTOM);
+            declaration.backDecoration_->SetHasBorderImageOutset(false);
             break;
     }
-    declaration.backDecoration_->SetHasBorderImageOutset(true);
     declaration.hasDecorationStyle_ = true;
     declaration.hasBorderStyle_ = true;
 }
@@ -2195,6 +2221,13 @@ void Declaration::SetBorderImageRepeatForFourEdges(const std::string& value, Dec
 
 void Declaration::SetBorderImage(const std::string& value, Declaration& declaration)
 {
+    declaration.backDecoration_->SetHasBorderImageSource(false);
+    declaration.backDecoration_->SetHasBorderImageGradient(false);
+    SetBorderImageSliceForFourEdges("", declaration);
+    SetBorderImageWidthForFourEdges("", declaration);
+    SetBorderImageOutSetForFourEdges("", declaration);
+    SetBorderImageRepeatForFourEdges("", declaration);
+
     auto borderImageJson = JsonUtil::ParseJsonString(value);
     if (!borderImageJson->IsObject()) {
         LOGE("borderImageJson json is not Object");
@@ -2234,7 +2267,6 @@ void Declaration::SetBorderImageGradient(const std::unique_ptr<JsonValue>& value
         }
         SetBorderImageSliceForFourEdges(sliceStr, declaration);
     }
-    declaration.backDecoration_->SetBorderType(2);
     declaration.backDecoration_->SetHasBorderImageGradient(true);
     declaration.hasDecorationStyle_ = true;
     declaration.hasBorderStyle_ = true;
@@ -2285,7 +2317,6 @@ void Declaration::SetBorderImageFindUrl(const std::string& value, Declaration& d
     if (backgroundStyle.IsValid()) {
         backgroundStyle.borderImage->SetSrc(value);
         declaration.backDecoration_->SetBorderImage(backgroundStyle.borderImage);
-        declaration.backDecoration_->SetBorderType(1);
         declaration.backDecoration_->SetHasBorderImageSource(true);
         declaration.hasDecorationStyle_ = true;
     }

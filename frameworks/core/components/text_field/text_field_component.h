@@ -254,11 +254,23 @@ public:
 
     void SetDeclaration(const RefPtr<TextFieldDeclaration>& declaration);
 
+    void SetPlaceHoldStyle(const TextStyle& style);
+    const TextStyle& GetPlaceHoldStyle() const;
+
+    void SetEditingStyle(const TextStyle& style);
+    const TextStyle& GetEditingStyle() const;
+
     ACE_DEFINE_COMPONENT_EVENT(OnChange, void(std::string));
 
     ACE_DEFINE_COMPONENT_EVENT(OnEditChanged, void(bool));
 
     ACE_DEFINE_COMPONENT_EVENT(OnSubmit, void(int32_t));
+
+    ACE_DEFINE_COMPONENT_EVENT(OnCopy, void(std::string));
+
+    ACE_DEFINE_COMPONENT_EVENT(OnCut, void(std::string));
+
+    ACE_DEFINE_COMPONENT_EVENT(OnPaste, void(std::string));
 
 private:
     RefPtr<TextFieldDeclaration> declaration_;

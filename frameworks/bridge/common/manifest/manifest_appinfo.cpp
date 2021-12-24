@@ -15,7 +15,50 @@
 
 #include "frameworks/bridge/common/manifest/manifest_appinfo.h"
 
+#include "core/common/container.h"
+#include "core/components/theme/theme_manager.h"
+
 namespace OHOS::Ace::Framework {
+
+namespace {
+
+const std::string APP_NAME_PREFIX = "$string:";
+
+std::string ParseI18nAppName(std::string& rawAppName)
+{
+    if (!StringUtils::StartWith(rawAppName, APP_NAME_PREFIX) || rawAppName.size() <= APP_NAME_PREFIX.size()) {
+        LOGW("not i18n appName");
+        return rawAppName;
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return rawAppName;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("pipelineContext is null!");
+        return rawAppName;
+    }
+    auto themeManager = pipelineContext->GetThemeManager();
+    if (!themeManager) {
+        LOGE("themeManager is null!");
+        return rawAppName;
+    }
+
+    auto resourceName = rawAppName.substr(APP_NAME_PREFIX.size());
+    auto themeConstants = themeManager->GetThemeConstants();
+    uint32_t resId = 0;
+    auto ret = themeConstants->GetResourceIdByName(resourceName, "string", resId);
+    if (!ret) {
+        LOGW("GetResourceIdByName failed");
+        return rawAppName;
+    }
+    return themeConstants->GetString(resId);
+}
+
+} // namespace
 
 const std::string& ManifestAppInfo::GetAppID() const
 {
@@ -60,6 +103,11 @@ void ManifestAppInfo::AppInfoParse(const std::unique_ptr<JsonValue>& root)
     icon_ = root->GetString("icon");
     appID_ = root->GetString("appID");
     minPlatformVersion_ = root->GetInt("minPlatformVersion", 0);
+}
+
+void ManifestAppInfo::ParseI18nJsonInfo()
+{
+    appName_ = ParseI18nAppName(appName_);
 }
 
 } // namespace OHOS::Ace::Framework

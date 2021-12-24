@@ -134,8 +134,10 @@ public:
     static JSValue JsSmoothingEnabledSetter(JSContext* ctx, JSValueConst value, JSValueConst proto);
     static JSValue JsSmoothingQualityGetter(JSContext* ctx, JSValueConst value);
     static JSValue JsSmoothingQualitySetter(JSContext* ctx, JSValueConst value, JSValueConst proto);
-    static JSValue JsOffsetWidthGetter(JSContext* ctx, JSValueConst value);
-    static JSValue JsOffsetHeightGetter(JSContext* ctx, JSValueConst value);
+
+    // support only read attribute for lottie
+    static JSValue JsWidthGetter(JSContext* ctx, JSValueConst value);
+    static JSValue JsHeightGetter(JSContext* ctx, JSValueConst value);
 
     static JSValue JsPath2DAddPath(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv);
     static JSValue JsPath2DSetTransform(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv);

@@ -66,6 +66,16 @@ public:
         return refreshing_;
     }
 
+    void IsRefresh(bool isRefresh)
+    {
+        isRefresh_ = isRefresh;
+    }
+
+    bool GetIsRefresh() const
+    {
+        return isRefresh_;
+    }
+
     void SetRefreshing(bool isRefreshing)
     {
         refreshing_ = isRefreshing;
@@ -168,7 +178,12 @@ public:
 
     void SetRefreshDistance(const Dimension& refreshDistance)
     {
-        refreshDistance_ = refreshDistance;
+        if (GreatOrEqual(refreshDistance.Value(), 0.0)) {
+            refreshDistance_ = refreshDistance;
+        } else {
+            refreshDistance_ = Dimension(0.0, DimensionUnit::VP);
+        }
+
     }
 
     const Dimension& GetProgressDistance() const
@@ -215,6 +230,10 @@ public:
     {
         if (friction >= MIN_FRICTION_RATIO && friction <= MAX_FRICTION_RATIO) {
             friction_ = friction;
+        } else if (friction < MIN_FRICTION_RATIO) {
+            friction_ = MIN_FRICTION_RATIO;
+        } else {
+            friction_ = MAX_FRICTION_RATIO;
         }
     }
 
@@ -247,6 +266,7 @@ private:
     bool showLastTime_ = false;
     bool refreshing_ = false;
     RefreshType refreshType_ = RefreshType::AUTO;
+    bool isRefresh_ = false;
 
     int32_t friction_ = DEFAULT_FRICTION_RATIO;
     TextStyle textStyle_;

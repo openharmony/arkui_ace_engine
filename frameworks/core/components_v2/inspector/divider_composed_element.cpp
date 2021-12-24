@@ -23,10 +23,10 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const DividerComposedElement&)>> CREATE_JSON_MAP {
-    { "DividerVertical", [](const DividerComposedElement& inspector) { return inspector.GetDividerVertical(); } },
-    { "DividerColor", [](const DividerComposedElement& inspector) { return inspector.GetDividerColor(); } },
-    { "StrokeWidth", [](const DividerComposedElement& inspector) { return inspector.GetStrokeWidth(); } },
-    { "DividerLineCap", [](const DividerComposedElement& inspector) { return inspector.GetDividerLineCap(); } },
+    { "vertical", [](const DividerComposedElement& inspector) { return inspector.GetDividerVertical(); } },
+    { "color", [](const DividerComposedElement& inspector) { return inspector.GetDividerColor(); } },
+    { "strokeWidth", [](const DividerComposedElement& inspector) { return inspector.GetStrokeWidth(); } },
+    { "lineCap", [](const DividerComposedElement& inspector) { return inspector.GetDividerLineCap(); } },
 };
 
 }
@@ -35,13 +35,13 @@ void DividerComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
     DumpLog::GetInstance().AddDesc(
-        std::string("DividerVertical: ").append(GetDividerVertical().c_str()));
+        std::string("vertical: ").append(GetDividerVertical().c_str()));
     DumpLog::GetInstance().AddDesc(
-        std::string("DividerColor: ").append(GetDividerColor().c_str()));
+        std::string("color: ").append(GetDividerColor().c_str()));
     DumpLog::GetInstance().AddDesc(
-        std::string("StrokeWidth: ").append(GetStrokeWidth().c_str()));
+        std::string("strokeWidth: ").append(GetStrokeWidth().c_str()));
     DumpLog::GetInstance().AddDesc(
-        std::string("DividerLineCap: ").append(GetDividerLineCap().c_str()));
+        std::string("lineCap: ").append(GetDividerLineCap().c_str()));
 }
 
 std::unique_ptr<JsonValue> DividerComposedElement::ToJsonObject() const

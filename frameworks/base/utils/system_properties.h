@@ -150,6 +150,16 @@ public:
         return paramDeviceType_;
     }
 
+    static void SetDeclarativeFrontend(bool value)
+    {
+        isDeclarativeFrontend_ = value;
+    }
+
+    static bool GetRosenBackendEnabled()
+    {
+        return rosenBackendEnabled_ && isDeclarativeFrontend_;
+    }
+
     static bool GetTraceEnabled()
     {
         return traceEnabled_;
@@ -196,6 +206,19 @@ public:
         return screenShape_;
     }
 
+    /*
+     * Change px to vp
+     */
+    static double Px2Vp(double pxNum)
+    {
+        return pxNum / resolution_;
+    }
+
+    static double Vp2Px(double pxNum)
+    {
+        return pxNum * resolution_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool accessibilityEnabled_;
@@ -217,6 +240,8 @@ private:
     static ColorMode colorMode_;
     static ScreenShape screenShape_;
     static LongScreenType LongScreen_;
+    static bool rosenBackendEnabled_;
+    static bool isDeclarativeFrontend_;
 };
 
 } // namespace OHOS::Ace

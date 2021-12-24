@@ -535,8 +535,13 @@ void RenderPickerBase::HandleColumnChange(const std::string& tag, bool isAdd, ui
 
     if (!data_->GetIsDialog()) {
         HandleFinish(true);
+        RefPtr<PickerColumnComponent> pickerColumn = data_->GetColumn(tag);
+        if (!pickerColumn) {
+            LOGE("pickerColumn Component is null");
+            return;
+        }
         if (onTextChange_) {
-            onTextChange_(tag, index);
+            onTextChange_(pickerColumn->GetCurrentText(), pickerColumn->GetCurrentIndex());
         }
         return;
     }

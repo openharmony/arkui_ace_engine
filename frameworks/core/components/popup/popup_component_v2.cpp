@@ -59,13 +59,10 @@ void PopupComponentV2::Initialization(
         return;
     }
 
-    if (message_.empty()) {
-        LOGE("message is empty.");
-        return;
-    }
-
     RefPtr<Component> child;
-    if (primaryButtonProperties_.showButton || secondaryButtonProperties_.showButton) {
+    if (customComponent_) {
+        child = customComponent_;
+    } else if (primaryButtonProperties_.showButton || secondaryButtonProperties_.showButton) {
         child = CreateChild();
         GetPopupParam()->SetHasAction(true);
     } else {
@@ -85,12 +82,14 @@ void PopupComponentV2::Initialization(
 
     GetPopupParam()->SetPadding(padding);
     GetPopupParam()->SetBorder(decoration->GetBorder());
-    GetPopupParam()->SetMaskColor(MASK_COLOR);
-    GetPopupParam()->SetBackgroundColor(popupTheme->GetBackgroundColor());
+    if (!GetPopupParam()->IsMaskColorSetted()) {
+        GetPopupParam()->SetMaskColor(MASK_COLOR);
+    }
+    if (!GetPopupParam()->IsBackgroundColorSetted()) {
+        GetPopupParam()->SetBackgroundColor(popupTheme->GetBackgroundColor());
+    }
     if (placementOnTop_) {
         GetPopupParam()->SetPlacement(Placement::TOP);
-    } else {
-        GetPopupParam()->SetPlacement(Placement::BOTTOM);
     }
     SetChild(box);
     hasInitialization_ = true;

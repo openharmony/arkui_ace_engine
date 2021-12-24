@@ -360,12 +360,14 @@ void RenderSlidingPanel::OnTouchTestHit(
 void RenderSlidingPanel::UpdateTouchRect()
 {
     touchRect_ = GetPaintRect();
-    ownTouchRect_ = touchRect_;
+    touchRectList_.emplace_back(touchRect_);
+    SetTouchRectList(touchRectList_);
     if (GetChildren().size() < 2) {
         return;
     }
     touchRect_ = GetChildren().back()->GetPaintRect();
-    ownTouchRect_ = touchRect_;
+    touchRectList_.emplace_back(touchRect_);
+    SetTouchRectList(touchRectList_);
 }
 
 void RenderSlidingPanel::HandleDragStart(const Offset& startPoint)

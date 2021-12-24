@@ -25,6 +25,7 @@ class ScrollElement : public RenderElement {
 
 public:
     void PerformBuild() override;
+    void OnMount() override;
 
 private:
     RefPtr<Component> child_;

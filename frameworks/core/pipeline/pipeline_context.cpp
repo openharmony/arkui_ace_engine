@@ -17,6 +17,13 @@
 
 #include <utility>
 
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
+
+#include "core/animation/native_curve_helper.h"
+#endif
+
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -24,6 +31,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/system_properties.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/shared_transition_controller.h"
 #include "core/common/ace_application_info.h"
@@ -53,9 +61,12 @@
 #include "core/components/scroll/scrollable.h"
 #include "core/components/semi_modal/semi_modal_component.h"
 #include "core/components/semi_modal/semi_modal_element.h"
-#include "core/components/theme/app_theme.h"
+#include "core/components/semi_modal/semi_modal_theme.h"
 #include "core/components/stage/stage_component.h"
 #include "core/components/stage/stage_element.h"
+#include "core/components/theme/app_theme.h"
+#include "core/components_v2/inspector/shape_composed_element.h"
+#include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/factories/flutter_render_factory.h"
@@ -69,6 +80,21 @@ constexpr int32_t MOUSE_PRESS_LEFT = 1;
 constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
+constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;
+
+const char INSPECTOR_TYPE[] = "$type";
+const char INSPECTOR_ROOT[] = "root";
+const char INSPECTOR_WIDTH[] = "width";
+const char INSPECTOR_HEIGHT[] = "height";
+const char INSPECTOR_RESOLUTION[] = "$resolution";
+const char INSPECTOR_CHILDREN[] = "$children";
+const char INSPECTOR_ID[] = "$ID";
+const char INSPECTOR_RECT[] = "$rect";
+const char INSPECTOR_Z_INDEX[] = "$z-index";
+const char INSPECTOR_ATTRS[] = "$attrs";
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+const char INSPECTOR_DEBUGLINE[] = "$debugLine";
+#endif
 
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
     struct timespec ts;
@@ -93,6 +119,41 @@ Rect GetGlobalRect(const RefPtr<Element>& element)
 void ThreadStuckTask(int32_t seconds)
 {
     std::this_thread::sleep_for(std::chrono::seconds(seconds));
+}
+
+RefPtr<V2::InspectorComposedElement> GetInspectorByKey(RefPtr<RootElement>& root, const std::string& key)
+{
+    std::queue<RefPtr<Element>> elements;
+    elements.push(root);
+    RefPtr<V2::InspectorComposedElement> inspectorElement;
+    while (!elements.empty()) {
+        auto current = elements.front();
+        elements.pop();
+        inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(current);
+        if (inspectorElement != nullptr) {
+            if (key == inspectorElement->GetKey()) {
+                return inspectorElement;
+            }
+        }
+        const auto& children = current->GetChildren();
+        for (auto& child : children) {
+            elements.push(child);
+        }
+    }
+    return nullptr;
+}
+
+void DumpElementTree(int32_t depth, RefPtr<Element> element,
+    std::map<int32_t, std::list<RefPtr<Element>>>& depthElementMap)
+{
+    if (element->GetChildren().empty()) {
+        return;
+    }
+    const auto& children = element->GetChildren();
+    depthElementMap[depth].insert(depthElementMap[depth].end(), children.begin(), children.end());
+    for (auto& depthElement: children) {
+        DumpElementTree(depth + 1, depthElement, depthElementMap);
+    }
 }
 
 } // namespace
@@ -166,6 +227,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     FlushPostAnimation();
     FlushLayout();
     FlushRender();
+    FlushMessages();
     FlushRenderFinish();
     FlushWindowBlur();
     FlushFocus();
@@ -174,12 +236,23 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     ClearDeactivateElements();
 }
 
+void PipelineContext::FlushMessages()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+        rsUIDirector_->SendMessages();
+    }
+#endif
+}
+
 void PipelineContext::FlushBuild()
 {
     ACE_FUNCTION_TRACE();
     CHECK_RUN_ON(UI);
 
+    isRebuildFinished_ = false;
     if (dirtyElements_.empty()) {
+        isRebuildFinished_ = true;
         return;
     }
     if (isFirstLoaded_) {
@@ -198,6 +271,7 @@ void PipelineContext::FlushBuild()
             }
         }
     }
+    isRebuildFinished_ = true;
     if (!buildAfterCallback_.empty()) {
         for (const auto& item : buildAfterCallback_) {
             item();
@@ -384,6 +458,7 @@ void PipelineContext::FlushLayout()
     ACE_FUNCTION_TRACE();
 
     if (dirtyLayoutNodes_.empty()) {
+        FlushGeometryProperties();
         return;
     }
     if (isFirstLoaded_) {
@@ -405,6 +480,19 @@ void PipelineContext::FlushLayout()
     alignDeclarationNodeList_.clear();
 
     CreateGeometryTransition();
+    FlushGeometryProperties();
+}
+
+void PipelineContext::FlushGeometryProperties()
+{
+    if (geometryChangedNodes_.empty()) {
+        return;
+    }
+
+    decltype(dirtyLayoutNodes_) geometryChangedNodes(std::move(geometryChangedNodes_));
+    for (const auto& dirtyNode : geometryChangedNodes) {
+        dirtyNode->SyncGeometryProperties();
+    }
 }
 
 void PipelineContext::CorrectPosition()
@@ -480,6 +568,8 @@ void PipelineContext::FlushRender()
             }
         }
     }
+
+    NotifyDrawOnPixelMap();
 
     if (rootElement_) {
         auto renderRoot = rootElement_->GetRenderNode();
@@ -632,6 +722,12 @@ RefPtr<Element> PipelineContext::SetupRootElement()
     stack->AppendChild(overlay);
     RefPtr<RootComponent> rootComponent;
     if (windowModal_ == WindowModal::SEMI_MODAL || windowModal_ == WindowModal::SEMI_MODAL_FULL_SCREEN) {
+        if (modalColor_ == DEFAULT_MODAL_COLOR) {
+            auto semiModalTheme = themeManager_->GetTheme<SemiModalTheme>();
+            if (semiModalTheme) {
+                SetModalColor(semiModalTheme->GetBgColor().GetValue());
+            }
+        }
         auto semiModal = SemiModalComponent::Create(
             stack, windowModal_ == WindowModal::SEMI_MODAL_FULL_SCREEN, modalHeight_, modalColor_);
         rootComponent = RootComponent::Create(semiModal);
@@ -651,6 +747,11 @@ RefPtr<Element> PipelineContext::SetupRootElement()
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+        rsUIDirector_->SetRoot(rootRenderNode->GetRSNode()->GetId());
+    }
+#endif
     sharedTransitionController_->RegisterTransitionListener();
     cardTransitionController_->RegisterTransitionListener();
     if (windowModal_ == WindowModal::DIALOG_MODAL) {
@@ -792,6 +893,12 @@ bool PipelineContext::CanPushPage()
 {
     auto stageElement = GetStageElement();
     return stageElement && stageElement->CanPushPage();
+}
+
+bool PipelineContext::IsTransitionStop() const
+{
+    auto stageElement = GetStageElement();
+    return stageElement && stageElement->IsTransitionStop();
 }
 
 void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage)
@@ -1016,6 +1123,7 @@ void PipelineContext::ExitAnimation()
 bool PipelineContext::CallRouterBackToPopPage()
 {
     LOGD("CallRouterBackToPopPage");
+    CHECK_RUN_ON(PLATFORM);
     auto frontend = weakFrontend_.Upgrade();
     if (!frontend) {
         // return back to desktop
@@ -1151,6 +1259,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<RenderNode>& renderNode)
     LOGD("schedule layout for %{public}s", AceType::TypeName(AceType::RawPtr(renderNode)));
     renderNode->SaveExplicitAnimationOption(explicitAnimationOption_);
     dirtyLayoutNodes_.emplace(renderNode);
+    ForceLayoutForImplicitAnimation();
     hasIdleTasks_ = true;
     window_->RequestFrame();
 }
@@ -1164,8 +1273,14 @@ void PipelineContext::AddPredictLayoutNode(const RefPtr<RenderNode>& renderNode)
     }
     LOGD("schedule predict layout for %{public}s", AceType::TypeName(renderNode));
     predictLayoutNodes_.emplace(renderNode);
+    ForceLayoutForImplicitAnimation();
     hasIdleTasks_ = true;
     window_->RequestFrame();
+}
+
+void PipelineContext::AddGeometryChangedNode(const RefPtr<RenderNode>& renderNode)
+{
+    geometryChangedNodes_.emplace(renderNode);
 }
 
 void PipelineContext::AddPreFlushListener(const RefPtr<FlushEvent>& listener)
@@ -1427,6 +1542,11 @@ void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
 #if defined(ENABLE_NATIVE_VIEW)
     if (frameCount_ < 2) {
         frameCount_++;
+    }
+#endif
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+        rsUIDirector_->SetTimeStamp(nanoTimestamp);
     }
 #endif
 
@@ -1792,6 +1912,7 @@ void PipelineContext::NotifyPopupDismiss() const
 
 void PipelineContext::NotifyRouterBackDismiss() const
 {
+    CHECK_RUN_ON(UI);
     if (routerBackEventHandler_) {
         routerBackEventHandler_();
     }
@@ -1909,12 +2030,13 @@ void PipelineContext::Destroy()
     dirtyRenderNodesInOverlay_.clear();
     dirtyLayoutNodes_.clear();
     predictLayoutNodes_.clear();
+    geometryChangedNodes_.clear();
+    needPaintFinishNodes_.clear();
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
     postFlushListeners_.clear();
     postAnimationFlushListeners_.clear();
     preFlushListeners_.clear();
-    needPaintFinishNodes_.clear();
     sharedTransitionController_.Reset();
     cardTransitionController_.Reset();
     while (!pageUpdateTasks_.empty()) {
@@ -1924,6 +2046,15 @@ void PipelineContext::Destroy()
     hoverNodes_.clear();
     drawDelegate_.reset();
     renderFactory_.Reset();
+    eventManager_.ClearResults();
+    nodesToNotifyOnPreDraw_.clear();
+    nodesNeedDrawOnPixelMap_.clear();
+    layoutTransitionNodeSet_.clear();
+    preTargetRenderNode_.Reset();
+    imageCache_.Reset();
+    fontManager_.Reset();
+    themeManager_.Reset();
+    sharedImageManager_.Reset();
     window_->Destroy();
     LOGI("PipelineContext::Destroy end.");
 }
@@ -2067,9 +2198,10 @@ void PipelineContext::RegisterFont(const std::string& familyName, const std::str
     fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this));
 }
 
-void PipelineContext::CanLoadImage(const std::string& src, const std::map<std::string, EventMarker>& callbacks)
+void PipelineContext::TryLoadImageInfo(
+    const std::string& src, std::function<void(bool, int32_t, int32_t)>&& loadCallback)
 {
-    ImageProvider::CanLoadImage(AceType::Claim(this), src, callbacks);
+    ImageProvider::TryLoadImageInfo(AceType::Claim(this), src, std::move(loadCallback));
 }
 
 void PipelineContext::SetAnimationCallback(AnimationCallback&& callback)
@@ -2488,15 +2620,23 @@ bool PipelineContext::ProcessDragEvent(int action, double windowX, double window
 void PipelineContext::FlushWindowBlur()
 {
     CHECK_RUN_ON(UI);
-    // js card not support window blur
-    if (IsJsCard()) {
-        return;
-    }
 
     if (!updateWindowBlurRegionHandler_) {
         return;
     }
 
+    if (IsJsCard()) {
+        if (!needWindowBlurRegionRefresh_) {
+            return;
+        }
+        std::vector<std::vector<float>> blurRectangles;
+        if (!windowBlurRegions_.empty()) {
+            blurRectangles.push_back(std::vector<float> { 1 });
+        }
+        updateWindowBlurRegionHandler_(blurRectangles);
+        needWindowBlurRegionRefresh_ = false;
+        return;
+    }
     if (!rootElement_) {
         LOGE("root element is null");
         return;
@@ -2584,9 +2724,160 @@ void PipelineContext::NavigatePage(uint8_t type, const PageTarget& target, const
     frontend->NavigatePage(type, target, params);
 }
 
+void PipelineContext::ForceLayoutForImplicitAnimation()
+{
+    if (!pendingImplicitLayout_.empty()) {
+        pendingImplicitLayout_.top() = true;
+    }
+}
+
+bool PipelineContext::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack)
+{
+    if (!propertyCallback) {
+        LOGE("failed to create animation, property callback is null!");
+        return false;
+    }
+
+    OpenImplicitAnimation(option, curve, finishCallBack);
+    propertyCallback();
+    return CloseImplicitAnimation();
+}
+
+void PipelineContext::OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& finishCallBack)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!SystemProperties::GetRosenBackendEnabled()) {
+        LOGE("rosen backend is disabled!");
+        return;
+    }
+
+    // initialize false for implicit animation layout pending flag
+    pendingImplicitLayout_.push(false);
+    FlushLayout();
+
+    Rosen::RSAnimationTimingProtocol timingProtocol;
+    timingProtocol.SetDuration(option.GetDuration());
+    timingProtocol.SetStartDelay(option.GetDelay());
+    timingProtocol.SetSpeed(option.GetTempo());
+    timingProtocol.SetRepeatCount(option.GetIteration());
+    timingProtocol.SetDirection(option.GetAnimationDirection() == AnimationDirection::NORMAL ||
+                                option.GetAnimationDirection() == AnimationDirection::ALTERNATE);
+    timingProtocol.SetAutoReverse(option.GetAnimationDirection() == AnimationDirection::ALTERNATE ||
+                                  option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
+    RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), finishCallBack);
+#endif
+}
+
+bool PipelineContext::CloseImplicitAnimation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!SystemProperties::GetRosenBackendEnabled()) {
+        LOGE("rosen backend is disabled!");
+        return false;
+    }
+
+    if (pendingImplicitLayout_.empty()) {
+        LOGE("close implicit animation failed, need to open implicit animation first!");
+        return false;
+    }
+
+    // layout the views immediately to animate all related views, if layout updates are pending in the animation closure
+    if (pendingImplicitLayout_.top()) {
+        FlushLayout();
+    }
+    pendingImplicitLayout_.pop();
+
+    auto animations = RSNode::CloseImplicitAnimation();
+    return !animations.empty();
+#else
+    return false;
+#endif
+}
+
+void PipelineContext::AddKeyFrame(
+    float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback)
+{
+    if (propertyCallback == nullptr) {
+        LOGE("failed to add key frame, property callback is null!");
+        return;
+    }
+
+    pendingImplicitLayout_.push(false);
+    auto propertyChangeCallback = [weak = AceType::WeakClaim(this), callback = propertyCallback]() {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("failed to add key frame, context is null!");
+            return;
+        }
+
+        callback();
+        if (context->pendingImplicitLayout_.top()) {
+            context->FlushLayout();
+        }
+    };
+    pendingImplicitLayout_.pop();
+
+#ifdef ENABLE_ROSEN_BACKEND
+    RSNode::AddKeyFrame(fraction, NativeCurveHelper::ToNativeCurve(curve), propertyChangeCallback);
+#endif
+}
+
+void PipelineContext::AddKeyFrame(float fraction, const std::function<void()>& propertyCallback)
+{
+    if (propertyCallback == nullptr) {
+        LOGE("failed to add key frame, property callback is null!");
+        return;
+    }
+
+    pendingImplicitLayout_.push(false);
+    auto propertyChangeCallback = [weak = AceType::WeakClaim(this), callback = propertyCallback]() {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("failed to add key frame, context is null!");
+            return;
+        }
+
+        callback();
+        if (context->pendingImplicitLayout_.top()) {
+            context->FlushLayout();
+        }
+    };
+    pendingImplicitLayout_.pop();
+
+#ifdef ENABLE_ROSEN_BACKEND
+    RSNode::AddKeyFrame(fraction, propertyChangeCallback);
+#endif
+}
+
 void PipelineContext::SaveExplicitAnimationOption(const AnimationOption& option)
 {
     explicitAnimationOption_ = option;
+}
+
+void PipelineContext::CreateExplicitAnimator(const std::function<void()>& onFinishEvent)
+{
+    if (!onFinishEvent) {
+        return;
+    }
+    auto animator = AceType::MakeRefPtr<Animator>(AceType::WeakClaim(this));
+    animator->AddStopListener([onFinishEvent, weakContext = AceType::WeakClaim(this), id = animator->GetId()] {
+        auto context = weakContext.Upgrade();
+        if (!context) {
+            return;
+        }
+        context->PostAsyncEvent(onFinishEvent);
+        context->explicitAnimators_.erase(id);
+    });
+    animator->SetDuration(explicitAnimationOption_.GetDuration());
+    animator->SetStartDelay(explicitAnimationOption_.GetDelay());
+    animator->SetIteration(explicitAnimationOption_.GetIteration());
+    animator->SetTempo(explicitAnimationOption_.GetTempo());
+    animator->SetAnimationDirection(explicitAnimationOption_.GetAnimationDirection());
+    animator->SetFillMode(FillMode::FORWARDS);
+    animator->Play();
+    explicitAnimators_.emplace(animator->GetId(), animator);
 }
 
 void PipelineContext::ClearExplicitAnimationOption()
@@ -2705,7 +2996,6 @@ void PipelineContext::UpdateNodesNeedDrawOnPixelMap()
     for (const auto& dirtyNode : dirtyRenderNodesInOverlay_) {
         SearchNodesNeedDrawOnPixelMap(dirtyNode);
     }
-    NotifyDrawOnPiexlMap();
 }
 
 void PipelineContext::SearchNodesNeedDrawOnPixelMap(const RefPtr<RenderNode>& renderNode)
@@ -2720,10 +3010,10 @@ void PipelineContext::SearchNodesNeedDrawOnPixelMap(const RefPtr<RenderNode>& re
     }
 }
 
-void PipelineContext::NotifyDrawOnPiexlMap()
+void PipelineContext::NotifyDrawOnPixelMap()
 {
-    decltype(nodesNeedDrawOnPixelMap_) nodesNeedDrawOnPiexlMap(std::move(nodesNeedDrawOnPixelMap_));
-    for (const auto& node : nodesNeedDrawOnPiexlMap) {
+    decltype(nodesNeedDrawOnPixelMap_) nodesNeedDrawOnPixelMap(std::move(nodesNeedDrawOnPixelMap_));
+    for (const auto& node : nodesNeedDrawOnPixelMap) {
         auto box = AceType::DynamicCast<RenderBox>(node);
         if (box) {
             box->DrawOnPixelMap();
@@ -2756,6 +3046,203 @@ bool PipelineContext::IsVisibleChangeNodeExists(NodeId index) const
         return false;
     }
     return accessibilityManager->IsVisibleChangeNodeExists(index);
+}
+
+void PipelineContext::PostAsyncEvent(TaskExecutor::Task&& task)
+{
+    if (taskExecutor_) {
+        taskExecutor_->PostTask(std::move(task), TaskExecutor::TaskType::UI);
+    } else {
+        LOGE("the task executor is nullptr");
+    }
+}
+
+void PipelineContext::PostAsyncEvent(const TaskExecutor::Task& task)
+{
+    if (taskExecutor_) {
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+    } else {
+        LOGE("the task executor is nullptr");
+    }
+}
+
+void PipelineContext::SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    rsUIDirector_ = rsUIDirector;
+#endif
+}
+
+std::string PipelineContext::GetInspectorNodeByKey(const std::string& key)
+{
+    auto inspectorElement = GetInspectorByKey(rootElement_, key);
+    if (inspectorElement == nullptr) {
+        LOGE("no inspector with key:%s is found", key.c_str());
+        return "";
+    }
+
+    auto jsonNode = JsonUtil::Create(true);
+    jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
+    jsonNode->Put(INSPECTOR_ID, std::stoi(inspectorElement->GetId()));
+    jsonNode->Put(INSPECTOR_Z_INDEX, inspectorElement->GetZIndex());
+    jsonNode->Put(INSPECTOR_RECT, inspectorElement->GetRenderRect().ToBounds().c_str());
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    std::string debugLine = inspectorElement->GetDebugLine();
+    jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
+#endif
+    auto jsonObject = inspectorElement->ToJsonObject();
+    jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
+    return jsonNode->ToString();
+}
+
+std::string PipelineContext::GetInspectorTree()
+{
+    auto jsonRoot = JsonUtil::Create(true);
+    jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
+
+    float scale = GetViewScale();
+    double rootHeight = GetRootHeight();
+    double rootWidth = GetRootWidth();
+    jsonRoot->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
+    jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
+    jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
+
+    auto root = AceType::DynamicCast<Element>(rootElement_);
+    if (root == nullptr) {
+        return jsonRoot->ToString();
+    }
+
+    std::map<int32_t, std::list<RefPtr<Element>>> depthElementMap;
+    depthElementMap[0].emplace_back(root);
+    DumpElementTree(1, root, depthElementMap);
+
+    size_t height = 0;
+    std::unordered_map<int32_t, std::vector<std::pair<RefPtr<Element>, std::string>>> elementJSONInfoMap;
+    for (int depth = depthElementMap.size(); depth > 0; depth--) {
+        const auto& depthElements = depthElementMap[depth];
+        for (const auto& element: depthElements) {
+            auto inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(element);
+            if (inspectorElement == nullptr) {
+                continue;
+            }
+
+            auto jsonNode = JsonUtil::Create(true);
+            jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
+            jsonNode->Put(INSPECTOR_ID, std::stoi(inspectorElement->GetId()));
+            jsonNode->Put(INSPECTOR_Z_INDEX, inspectorElement->GetZIndex());
+            jsonNode->Put(INSPECTOR_RECT, inspectorElement->GetRenderRect().ToBounds().c_str());
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+            std::string debugLine = inspectorElement->GetDebugLine();
+            jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
+#endif
+            auto jsonObject = inspectorElement->ToJsonObject();
+            jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
+            auto shapeComposedElement = AceType::DynamicCast<V2::ShapeComposedElement>(element);
+            if (shapeComposedElement != nullptr) {
+                int type = StringUtils::StringToInt(shapeComposedElement->GetShapeType());
+                jsonNode->Replace(INSPECTOR_TYPE, SHAPE_TYPE_STRINGS[type]);
+            }
+            if (!element->GetChildren().empty()) {
+                if (height > 0) {
+                    auto jsonNodeArray = JsonUtil::CreateArray(true);
+                    auto childNodeJSONVec = elementJSONInfoMap[height - 1];
+                    for (auto iter = childNodeJSONVec.begin(); iter != childNodeJSONVec.end(); iter++) {
+                        auto parent = iter->first->GetElementParent().Upgrade();
+                        while (parent) {
+                            if (AceType::TypeName(parent) == AceType::TypeName(element) &&
+                                parent->GetRetakeId() == element->GetRetakeId()) {
+                                auto childJSONValue = JsonUtil::ParseJsonString(iter->second);
+                                jsonNodeArray->Put(childJSONValue);
+                                break;
+                            } else {
+                                parent = parent->GetElementParent().Upgrade();
+                            }
+                        }
+                    }
+                    if (jsonNodeArray->GetArraySize()) {
+                        jsonNode->Put(INSPECTOR_CHILDREN, jsonNodeArray);
+                    }
+                }
+            }
+            elementJSONInfoMap[height].emplace_back(element, jsonNode->ToString());
+        }
+        if (elementJSONInfoMap.find(height) != elementJSONInfoMap.end()) {
+            height++;
+        }
+    }
+
+    auto jsonNodeArray = JsonUtil::CreateArray(true);
+    auto firstDepthNodeVec = elementJSONInfoMap[elementJSONInfoMap.size() - 1];
+    for (const auto& nodeJSONInfo: firstDepthNodeVec) {
+        auto nodeJSONValue = JsonUtil::ParseJsonString(nodeJSONInfo.second);
+        jsonNodeArray->Put(nodeJSONValue);
+    }
+    jsonRoot->Put(INSPECTOR_CHILDREN, jsonNodeArray);
+    return jsonRoot->ToString();
+}
+
+bool PipelineContext::SendEventByKey(const std::string& key, int action, const std::string& params)
+{
+    auto inspectorElement = GetInspectorByKey(rootElement_, key);
+    if (inspectorElement == nullptr) {
+        LOGE("no inspector with key:%s is found", key.c_str());
+        return false;
+    }
+
+    Rect rect = inspectorElement->GetRenderRect();
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), rect, action, params, inspectorElement]() {
+            auto context = weak.Upgrade();
+            if (!context) {
+                return;
+            }
+
+            TouchPoint point {
+                .x = static_cast<float>(rect.Left() + rect.Width() / 2),
+                .y = static_cast<float>(rect.Top() + rect.Height() / 2),
+                .type = TouchType::DOWN,
+                .time = std::chrono::high_resolution_clock::now()
+            };
+            context->OnTouchEvent(point);
+
+            switch (action) {
+                case static_cast<int>(AceAction::ACTION_CLICK): {
+                    TouchPoint upPoint {
+                        .x = point.x,
+                        .y = point.y,
+                        .type = TouchType::UP,
+                        .time = std::chrono::high_resolution_clock::now()
+                    };
+                    context->OnTouchEvent(upPoint);
+                    break;
+                }
+                case static_cast<int>(AceAction::ACTION_LONG_CLICK): {
+                    CancelableCallback<void()> inspectorTimer;
+                    auto&& callback = [weak, point]() {
+                        auto refPtr = weak.Upgrade();
+                        if (refPtr) {
+                            TouchPoint upPoint {
+                                .x = point.x,
+                                .y = point.y,
+                                .type = TouchType::UP,
+                                .time = std::chrono::high_resolution_clock::now()
+                            };
+                            refPtr->OnTouchEvent(upPoint);
+                        }
+                    };
+                    inspectorTimer.Reset(callback);
+                    auto taskExecutor =
+                        SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+                    taskExecutor.PostDelayedTask(inspectorTimer, 1000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        },
+        TaskExecutor::TaskType::UI);
+
+    return true;
 }
 
 } // namespace OHOS::Ace

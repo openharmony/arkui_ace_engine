@@ -27,7 +27,14 @@ RefPtr<RenderNode> RenderCoverage::Create()
 
 RenderCoverage::RenderCoverage() {}
 
-void RenderCoverage::Update(const RefPtr<Component>& component) {}
+void RenderCoverage::Update(const RefPtr<Component>& component)
+{
+    auto coverageComponent = AceType::DynamicCast<CoverageComponent>(component);
+    title_ = coverageComponent->GetTextVal();
+    x_ = coverageComponent->GetX();
+    y_ = coverageComponent->GetY();
+    align_ = coverageComponent->GetAlignment();
+}
 
 void RenderCoverage::PerformLayout()
 {

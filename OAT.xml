@@ -93,6 +93,12 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="frameworks/base/resource/binary/navigation_bar_more.png" desc="自研的二进制图片"/>
                 <filteritem type="filepath" name="figures/JS-UI框架架构.png" desc="自研的二进制图片"/>
                 <filteritem type="filepath" name="figures/framework-architecture.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/fa_black_clock_widget_hour.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/fa_black_clock_widget_minute.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/fa_black_clock_widget_second.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/fa_clock_widget_hour.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/fa_clock_widget_minute.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/fa_clock_widget_second.png" desc="自研的二进制图片"/>
             </filefilter>
             <filefilter name="copyrightPolicyFilter" desc="copyright文件头校验策略的过滤条件" >
                 <filteritem type="filepath" name="frameworks/core/components/theme/theme.csv" desc="csv无法添加版权头"/>

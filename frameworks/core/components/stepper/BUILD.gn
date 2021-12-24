@@ -18,11 +18,18 @@ build_component("stepper") {
     "flutter_render_stepper.cpp",
     "flutter_render_stepper_item.cpp",
     "render_stepper.cpp",
+    "render_stepper_creator.cpp",
     "render_stepper_item.cpp",
+    "render_stepper_item_creator.cpp",
     "stepper_animation_controller.cpp",
     "stepper_component.cpp",
     "stepper_element.cpp",
     "stepper_item_component.cpp",
+    "stepper_item_component_v2.cpp",
     "stepper_item_element.cpp",
+  ]
+  rosen_sources = [
+    "rosen_render_stepper.cpp",
+    "rosen_render_stepper_item.cpp",
   ]
 }

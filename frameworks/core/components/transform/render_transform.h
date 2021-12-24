@@ -39,6 +39,7 @@ class RenderTransform : public RenderNode {
     DECLARE_ACE_TYPE(RenderTransform, RenderNode);
 
 public:
+    static Matrix4 GetTransformByOffset(Matrix4 matrix, const Offset& offset);
     static RefPtr<RenderNode> Create();
     void Translate(const Dimension& x, const Dimension& y, const Dimension& z);
     void Translate(const Dimension& x, const Dimension& y);
@@ -79,6 +80,14 @@ public:
     DimensionOffset GetTransformOrigin() const
     {
         return DimensionOffset(originX_, originY_);
+    }
+    const Dimension& GetOriginX() const
+    {
+        return originX_;
+    }
+    const Dimension& GetOriginY() const
+    {
+        return originY_;
     }
 
     void SetDisableClickEffect(bool isDisable)
@@ -135,7 +144,7 @@ public:
                     renderNode->transformAnimation_.SetEvaluator(nullptr);
                 }
             });
-            transformAnimation_.PlayTransformAnimation(option, std::vector<TransformOperation>());
+            transformAnimation_.PlayTransformAnimation(option, std::vector<TransformOperation>(), true);
         }
     }
 

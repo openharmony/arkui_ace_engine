@@ -312,7 +312,7 @@ void RenderTextSelectTest::TearDown()
 void RenderTextSelectTest::SetUp()
 {
     context_ = MockRenderCommon::GetMockContext();
-    ClipboardProxy::GetInstance().SetDelegate(std::make_unique<MockClipboardProxyImpl>());
+    ClipboardProxy::GetInstance()->SetDelegate(std::make_unique<MockClipboardProxyImpl>());
 }
 
 void RenderTextSelectTest::WaitAndMockVsync(int64_t waitFor)

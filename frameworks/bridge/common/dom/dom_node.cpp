@@ -26,6 +26,7 @@
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scroll_fade_effect.h"
 #include "core/components/scroll/scroll_spring_effect.h"
+#include "core/components/video/texture_component.h"
 #include "frameworks/bridge/common/dom/dom_div.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -1244,6 +1245,16 @@ void DOMNode::CompositeComponents()
     if (sharedTransitionComponent_) {
         components.emplace_back(sharedTransitionComponent_);
     }
+
+    auto mainComponent = GetSpecializedComponent();
+    if (!components.empty() &&
+        (AceType::InstanceOf<TextureComponent>(mainComponent) || AceType::InstanceOf<ListComponent>(mainComponent))) {
+        Component::MergeRSNode(components);
+        Component::MergeRSNode(mainComponent);
+    } else {
+        Component::MergeRSNode(components, mainComponent);
+    }
+
     // First, composite all common components.
     for (int32_t idx = static_cast<int32_t>(components.size()) - 1; idx - 1 >= 0; --idx) {
         components[idx - 1]->SetChild(DynamicCast<Component>(components[idx]));

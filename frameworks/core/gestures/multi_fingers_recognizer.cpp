@@ -72,4 +72,14 @@ bool MultiFingersRecognizer::IsInReferee(size_t touchId)
     return refereePointers_.find(touchId) != refereePointers_.end();
 }
 
+void MultiFingersRecognizer::SetFingerList(const std::map<int32_t, TouchPoint> touchPoints,
+    const Offset& coordinateOffset, std::list<FingerInfo>& fingerList)
+{
+    for (auto& point : touchPoints) {
+        Offset localLocation = point.second.GetOffset() - coordinateOffset;
+        FingerInfo fingerInfo = {point.first, localLocation, point.second.GetOffset()};
+        fingerList.emplace_back(fingerInfo);
+    }
+}
+
 } // namespace OHOS::Ace

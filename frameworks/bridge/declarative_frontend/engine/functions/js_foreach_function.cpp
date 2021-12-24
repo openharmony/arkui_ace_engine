@@ -66,8 +66,10 @@ void JsForEachFunction::ExecuteBuilderForIndex(int32_t index)
     LOGD("ExecuteBuilderForIndex: start, index %d", index);
     // indexed item
     JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsThis_.Lock());
-    JSRef<JSVal> jsItem = jsArray->GetValueAt(index);
-    jsViewMapperFunc_.Lock()->Call(jsThis_.Lock(), 1, &jsItem);
+    JSRef<JSVal> params[2];
+    params[0] = jsArray->GetValueAt(index);
+    params[1] = JSRef<JSVal>::Make(ToJSValue(index));
+    jsViewMapperFunc_.Lock()->Call(jsThis_.Lock(), 2, params);
 }
 
 } // namespace OHOS::Ace::Framework

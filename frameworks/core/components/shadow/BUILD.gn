@@ -17,5 +17,7 @@ build_component("shadow") {
   sources = [
     "flutter_render_shadow.cpp",
     "render_shadow.cpp",
+    "render_shadow_creator.cpp",
   ]
+  rosen_sources = [ "rosen_render_shadow.cpp" ]
 }

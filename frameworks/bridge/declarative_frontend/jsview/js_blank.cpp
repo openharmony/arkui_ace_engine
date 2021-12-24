@@ -36,29 +36,12 @@ void JSBlank::Create(const JSCallbackInfo& info)
     }
 }
 
-void JSBlank::SetBlankColor(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    Color color;
-    if (!ParseJsColor(info[0], color)) {
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::BoxComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetColor(color);
-    }
-}
-
 void JSBlank::JSBind(BindingTarget globalObj)
 {
     JSClass<JSBlank>::Declare("Blank");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSBlank>::StaticMethod("create", &JSBlank::Create, opt);
-    JSClass<JSBlank>::StaticMethod("color", &JSBlank::SetBlankColor, opt);
+    JSClass<JSBlank>::StaticMethod("color", &JSViewAbstract::JsBackgroundColor, opt);
     JSClass<JSBlank>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSBlank>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSBlank>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);

@@ -21,9 +21,11 @@
 #include <unordered_map>
 #include <vector>
 
+#include "core/accessibility/accessibility_node.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/pipeline/base/component.h"
 #include "frameworks/core/components/box/box_component.h"
+#include "frameworks/core/components/checkable/radio_group_component.h"
 #include "frameworks/core/components/coverage/coverage_component.h"
 #include "frameworks/core/components/display/display_component.h"
 #include "frameworks/core/components/flex/flex_item_component.h"
@@ -43,6 +45,8 @@
 #include "frameworks/core/components_v2/inspector/inspector_composed_component.h"
 
 namespace OHOS::Ace::Framework {
+    using JsPageRadioGroups = std::unordered_map<std::string, RadioGroupComponent<std::string>>;
+
 class ViewStackProcessor final {
 public:
     using SaveComponentEvent = std::function<void(std::unordered_map<std::string, RefPtr<Component>>)>;
@@ -54,24 +58,24 @@ public:
     static std::string GenerateId();
     RefPtr<FlexItemComponent> GetFlexItemComponent();
     RefPtr<BoxComponent> GetBoxComponent();
-    RefPtr<Component> GetMainComponent();
+    RefPtr<Component> GetMainComponent() const;
     RefPtr<DisplayComponent> GetDisplayComponent();
     bool HasDisplayComponent() const;
     RefPtr<TransformComponent> GetTransformComponent();
     RefPtr<TouchListenerComponent> GetTouchListenerComponent();
+    bool HasTouchListenerComponent() const;
     RefPtr<MouseListenerComponent> GetMouseListenerComponent();
     RefPtr<GestureListenerComponent> GetClickGestureListenerComponent();
+    bool HasClickGestureListenerComponent() const;
     RefPtr<GestureListenerComponent> GetPanGestureListenerComponent();
     RefPtr<FocusableComponent> GetFocusableComponent(bool createIfNotExist = true);
     RefPtr<SharedTransitionComponent> GetSharedTransitionComponent();
-    RefPtr<NavigationDeclarationCollector> GetNavigationDeclarationCollector(bool createIfNotExist = true);
     RefPtr<GestureComponent> GetGestureComponent();
     RefPtr<PositionedComponent> GetPositionedComponent();
     RefPtr<ComposedComponent> GetRootComponent(const std::string& id = "", const std::string& name = "");
     RefPtr<PageTransitionComponent> GetPageTransitionComponent();
     RefPtr<CoverageComponent> GetCoverageComponent();
     void ClearPageTransitionComponent();
-    void CreateAccessibilityNode(const RefPtr<Component>& component, const std::string& inspectorTag);
 #ifndef WEARABLE_PRODUCT
     RefPtr<PopupComponentV2> GetPopupComponent(bool createNewComponent = true);
 #endif
@@ -79,7 +83,7 @@ public:
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the stack.
     // use flag: isCustomView to avoid creating redundant Components.
-    void Push(const RefPtr<Component>& component, bool isCustomView = false, const std::string& inspectorTag = "");
+    void Push(const RefPtr<Component>& component, bool isCustomView = false);
 
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrappedcomponent has child of the new stack top's main component.
@@ -112,9 +116,13 @@ public:
     void SetZIndex(RefPtr<Component>& component);
 
     void SetIsPercentSize(RefPtr<Component>& component);
+    std::shared_ptr<JsPageRadioGroups> GetRadioGroupCompnent();
+
+    RefPtr<Component> GetNewComponent();
+    RefPtr<V2::InspectorComposedComponent> GetInspectorComposedComponent() const;
 
 private:
-    ViewStackProcessor() = default;
+    ViewStackProcessor();
 
     bool ShouldPopImmediately();
 
@@ -130,16 +138,14 @@ private:
     // Update position and enabled status
     void UpdateTopComponentProps(const RefPtr<Component>& component);
 
-    RefPtr<ComposedComponent> GetInspectorComposedComponent(RefPtr<Component> mainComponent);
+    void CreateInspectorComposedComponent(const std::string& inspectorTag);
 
     // Singleton instance
     static thread_local std::unique_ptr<ViewStackProcessor> instance;
 
     // stack
     std::stack<std::unordered_map<std::string, RefPtr<Component>>> componentsStack_;
-
-    // navigation declaration of NavigatonView
-    RefPtr<NavigationDeclaration> navigationViewDeclaration_;
+    std::shared_ptr<JsPageRadioGroups> radioGroups_;
 
     RefPtr<PageTransitionComponent> pageTransitionComponent_;
 

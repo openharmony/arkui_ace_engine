@@ -1,5 +1,4 @@
-
-/*
+ /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +51,7 @@ constexpr float SWEEP_ANGLE = 45.0f;
 constexpr float EXTEND = 1024.0f;
 constexpr float BRIGHT_DARK = 230.0f;
 constexpr float BRIGHT_LIGHT = 45.0f;
+constexpr uint32_t COLOR_MASK = 0xff000000;
 
 class GradientShader {
 public:
@@ -790,40 +790,41 @@ void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* c
         if (border.HasValue()) {
             // set AntiAlias
             paint.setAntiAlias(true);
-
-            if (decoration_->GetBorderType() == 1) {
+            if (decoration_->GetHasBorderImageSource()) {
+                if (!image) {
+                    return;
+                }
                 canvas->save();
-                canvas->clipRRect(outerRRect.sk_rrect, true);
                 PaintBorderImage(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint, image);
                 canvas->restore();
             }
-            if (decoration_->GetBorderType() == 2) {
+            if (decoration_->GetHasBorderImageGradient()) {
                 Gradient gradient = decoration_->GetGradientBorderImage();
-                if (gradient.IsValid()) {
-                    if (NearZero(paintSize_.Width()) || NearZero(paintSize_.Height())) {
-                        return;
-                    }
-                    canvas->save();
-                    SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()),
-                        SkDoubleToMScalar(paintSize_.Height()));
-                    auto shader = CreateGradientShader(gradient, skPaintSize);
-                    paint.setShader(std::move(shader));
-
-                    auto imageInfo = SkImageInfo::Make(paintSize_.Width(), paintSize_.Height(),
-                        SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
-                    SkBitmap skBitmap_;
-                    skBitmap_.allocPixels(imageInfo);
-                    std::unique_ptr<SkCanvas> skCanvas_ = std::make_unique<SkCanvas>(skBitmap_);
-                    skCanvas_->drawPaint(paint);
-                    sk_sp<SkImage> skImage_ = SkImage::MakeFromBitmap(skBitmap_);
-                    canvas->clipRRect(outerRRect.sk_rrect, true);
-                    PaintBorderImage(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint, skImage_);
-                    paint.setShader(nullptr);
-                    canvas->restore();
+                if (!gradient.IsValid()) {
+                    return;
                 }
+                if (NearZero(paintSize_.Width()) || NearZero(paintSize_.Height())) {
+                    return;
+                }
+                canvas->save();
+                SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()),
+                    SkDoubleToMScalar(paintSize_.Height()));
+                auto shader = CreateGradientShader(gradient, skPaintSize);
+                paint.setShader(std::move(shader));
+
+                auto imageInfo = SkImageInfo::Make(paintSize_.Width(), paintSize_.Height(),
+                    SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+                SkBitmap skBitmap_;
+                skBitmap_.allocPixels(imageInfo);
+                std::unique_ptr<SkCanvas> skCanvas_ = std::make_unique<SkCanvas>(skBitmap_);
+                skCanvas_->drawPaint(paint);
+                sk_sp<SkImage> skImage_ = SkImage::MakeFromBitmap(skBitmap_);
+                PaintBorderImage(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint, skImage_);
+                paint.setShader(nullptr);
+                canvas->restore();
             }
 
-            if (decoration_->GetBorderType() != 0) {
+            if (decoration_->GetHasBorderImageSource() || decoration_->GetHasBorderImageGradient()) {
                 return;
             }
             AdjustBorderStyle(border);
@@ -879,11 +880,17 @@ void FlutterDecorationPainter::PaintBorderImage(const Offset& offset, const Bord
         bottomWidth_ = WidthNormalizePercentToPx(border.Bottom().GetWidth(), false);
     }
 
-    leftOutset_ = OutsetNormalizePercentToPx(imageLeft.GetBorderImageOutset(), true);
-    topOutset_ = OutsetNormalizePercentToPx(imageTop.GetBorderImageOutset(), false);
-    rightOutset_ = OutsetNormalizePercentToPx(imageRight.GetBorderImageOutset(), true);
-    bottomOutset_ = OutsetNormalizePercentToPx(imageBottom.GetBorderImageOutset(), false);
-
+    if (decoration_->GetHasBorderImageOutset()) {
+        leftOutset_ = OutsetNormalizePercentToPx(imageLeft.GetBorderImageOutset(), true);
+        topOutset_ = OutsetNormalizePercentToPx(imageTop.GetBorderImageOutset(), false);
+        rightOutset_ = OutsetNormalizePercentToPx(imageRight.GetBorderImageOutset(), true);
+        bottomOutset_ = OutsetNormalizePercentToPx(imageBottom.GetBorderImageOutset(), false);
+    } else {
+        leftOutset_ = 0;
+        topOutset_ = 0;
+        rightOutset_ = 0;
+        bottomOutset_ = 0;
+    }
     PaintBorderImageFourCorner(offset, canvas, paint);
 
     BorderImageRepeat repeat = imageLeft.GetBorderImageRepeat();
@@ -1334,8 +1341,7 @@ void FlutterDecorationPainter::PaintGrayScale(const flutter::RRect& outerRRect, 
             SkPaint paint;
             paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
-            float matrix[20];
-            memset(matrix, 0, 20 * sizeof(float));
+            float matrix[20] = { 0 };
             matrix[0] = matrix[5] = matrix[10] = 0.2126f * scale;
             matrix[1] = matrix[6] = matrix[11] = 0.7152f * scale;
             matrix[2] = matrix[7] = matrix[12] = 0.0722f * scale;
@@ -1362,8 +1368,7 @@ void FlutterDecorationPainter::PaintBrightness(const flutter::RRect& outerRRect,
             canvas->clipRRect(outerRRect.sk_rrect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-            float matrix[20];
-            memset(matrix, 0, 20 * sizeof(float));
+            float matrix[20] = { 0 };
 
             if (bright < 0.0) {
                 return;
@@ -1400,8 +1405,7 @@ void FlutterDecorationPainter::PaintContrast(const flutter::RRect& outerRRect, S
             SkPaint paint;
             paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
-            float matrix[20];
-            memset(matrix, 0, 20 * sizeof(float));
+            float matrix[20] = { 0 };
             matrix[0] = matrix[6] = matrix[12] = contrasts;
             matrix[4] = matrix[9] = matrix[14] = 128 * (1 - contrasts);
             matrix[18] = 1.0f;
@@ -1419,20 +1423,22 @@ void FlutterDecorationPainter::PaintContrast(const flutter::RRect& outerRRect, S
 void FlutterDecorationPainter::PaintColorBlend(const flutter::RRect& outerRRect, SkCanvas* canvas,
     const Color& colorBlend, const Color& color)
 {
-    if (canvas) {
-        SkAutoCanvasRestore acr(canvas, true);
-        canvas->clipRRect(outerRRect.sk_rrect, true);
-        SkPaint paint;
-        paint.setAntiAlias(true);
+    if (colorBlend.GetValue() != COLOR_MASK) {
+        if (canvas) {
+            SkAutoCanvasRestore acr(canvas, true);
+            canvas->clipRRect(outerRRect.sk_rrect, true);
+            SkPaint paint;
+            paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
-        paint.setColorFilter(SkColorFilter::MakeModeFilter(
-            SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
-            SkBlendMode::kPlus));
+            paint.setColorFilter(SkColorFilter::MakeModeFilter(
+                SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
+                SkBlendMode::kPlus));
 #else
-        paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
 #endif
-        SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
-        canvas->saveLayer(slr);
+            SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+            canvas->saveLayer(slr);
+        }
     }
 }
 
@@ -1447,8 +1453,7 @@ void FlutterDecorationPainter::PaintSaturate(const flutter::RRect& outerRRect, S
             SkPaint paint;
             paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
-            float matrix[20];
-            memset(matrix, 0, 20 * sizeof(float));
+            float matrix[20] = { 0 };
             matrix[0] = 0.3086f * (1 - saturates) + saturates;
             matrix[1] = matrix[11] = 0.6094f * (1 - saturates);
             matrix[2] = matrix[7] = 0.0820f * (1 - saturates);
@@ -1516,11 +1521,10 @@ void FlutterDecorationPainter::PaintInvert(const flutter::RRect& outerRRect, SkC
             SkPaint paint;
             paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
-            float matrix[20];
+            float matrix[20] = { 0 };
             if (inverts > 1.0) {
                 inverts = 1.0;
             }
-            memset(matrix, 0, 20 * sizeof(float));
             matrix[0] = matrix[6] = matrix[12] = -1.2f * inverts;
             matrix[3] = matrix[8] = matrix[13] = 1.2f * inverts;
             matrix[4] = matrix[9] = matrix[14] = 1.2f * inverts;
@@ -1550,8 +1554,7 @@ void FlutterDecorationPainter::PaintHueRotate(const flutter::RRect& outerRRect, 
             while (GreatOrEqual(hueRotates, 360)) {
                 hueRotates -= 360;
             }
-            float matrix[20];
-            memset(matrix, 0, 20 * sizeof(float));
+            float matrix[20] = { 0 };
             int32_t type = hueRotates / 120;
             float N = (hueRotates - 120 * type) / 120;
             switch (type) {

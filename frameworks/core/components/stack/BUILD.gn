@@ -17,7 +17,9 @@ build_component("stack") {
   sources = [
     "flutter_render_stack.cpp",
     "render_stack.cpp",
+    "render_stack_creator.cpp",
     "stack_component.cpp",
     "stack_element.cpp",
   ]
+  rosen_sources = [ "rosen_render_stack.cpp" ]
 }

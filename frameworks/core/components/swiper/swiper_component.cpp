@@ -254,6 +254,16 @@ void SwiperComponent::SetEdgeEffect(const EdgeEffect edgeEffect)
     declaration_->SetEdgeEffect(edgeEffect);
 }
 
+int32_t SwiperComponent::GetDisplayCount() const
+{
+    return declaration_->GetDisplayCount();
+}
+
+void SwiperComponent::SetDisplayCount(int32_t displayCount)
+{
+    declaration_->SetDisplayCount(displayCount);
+}
+
 void SwiperComponent::SetAnimationFinishEventId(const EventMarker& animationFinishEventId)
 {
     declaration_->SetAnimationFinishEventId(animationFinishEventId);

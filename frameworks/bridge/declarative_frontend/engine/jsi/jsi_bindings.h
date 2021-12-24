@@ -54,6 +54,14 @@ public:
     template<typename T>
     static void CustomMethod(const char* name, JSMemberFunctionCallback<T> callback, int id);
 
+    template<typename T>
+    static void CustomProperty(const char* name, MemberFunctionGetCallback<T> callback, int getterId, int setterId);
+
+    static void CustomProperty(const char* name, FunctionGetCallback getter, FunctionSetCallback setter);
+
+    template<typename T>
+    static void CustomProperty(const char* name, JSMemberFunctionCallback<T> callback, int getterId, int setterId);
+
     template<typename R, typename... Args>
     static void StaticMethod(const char* name, R (*func)(Args...), int id);
 
@@ -130,6 +138,8 @@ private:
 
     static std::unordered_map<std::string, panda::Global<panda::FunctionRef>> staticFunctions_;
     static std::unordered_map<std::string, panda::Global<panda::FunctionRef>> customFunctions_;
+    static std::unordered_map<std::string, panda::Global<panda::FunctionRef>> customGetFunctions_;
+    static std::unordered_map<std::string, panda::Global<panda::FunctionRef>> customSetFunctions_;
     static FunctionCallback constructor_;
     static JSFunctionCallback jsConstructor_;
     static JSDestructorCallback<C> jsDestructor_;

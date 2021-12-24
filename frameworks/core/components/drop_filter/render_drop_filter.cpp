@@ -50,7 +50,8 @@ void RenderDropFilter::UpdateTouchRect()
         return;
     }
     touchRect_ = GetPaintRect();
-    ownTouchRect_ = touchRect_;
+    touchRectList_.emplace_back(touchRect_);
+    SetTouchRectList(touchRectList_);
     auto box = GetChildren().front();
     if (!box) {
         return;
@@ -65,7 +66,7 @@ void RenderDropFilter::UpdateTouchRect()
     }
     panel->UpdateTouchRect();
     touchRect_ = panel->GetTouchRect();
-    ownTouchRect_ = touchRect_;
+    touchRectList_ = panel->GetTouchRectList();
 }
 
 const Rect& RenderDropFilter::GetTouchRect()
@@ -75,6 +76,15 @@ const Rect& RenderDropFilter::GetTouchRect()
     }
     UpdateTouchRect();
     return touchRect_;
+}
+
+const std::vector<Rect>& RenderDropFilter::GetTouchRectList()
+{
+    if (!usePanelTouchRect_) {
+        return RenderNode::GetTouchRectList();
+    }
+    UpdateTouchRect();
+    return touchRectList_;
 }
 
 } // namespace OHOS::Ace

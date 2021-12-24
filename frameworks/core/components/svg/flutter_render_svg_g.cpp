@@ -23,11 +23,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderSvgG::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSvgG>();
-}
-
 RenderLayer FlutterRenderSvgG::GetRenderLayer()
 {
     if (!transformLayer_) {

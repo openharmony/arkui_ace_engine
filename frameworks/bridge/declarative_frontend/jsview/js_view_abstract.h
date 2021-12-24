@@ -22,12 +22,12 @@
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/geometry/dimension_rect.h"
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/container.h"
 #include "core/components/box/box_component.h"
-#include "core/components/navigation_bar/navigation_container_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/transform/transform_component.h"
 #include "core/pipeline/base/component.h"
@@ -101,6 +101,12 @@ public:
     static void JsGridSpan(const JSCallbackInfo& Info);
     static void JsGridOffset(const JSCallbackInfo& info);
     static void JsUseSizeType(const JSCallbackInfo& Info);
+    static void JsHoverEffect(const JSCallbackInfo& info);
+
+    // response region
+    static void JsResponseRegion(const JSCallbackInfo& info);
+    static bool ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std::vector<DimensionRect>& result);
+    static bool ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result);
 
     // for number and string with no unit, use default dimension unit.
     static bool ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& result, DimensionUnit defaultUnit);
@@ -151,6 +157,7 @@ public:
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
+    static void JsOnAreaChange(const JSCallbackInfo& info);
 
     static void JsLinearGradient(const JSCallbackInfo& info);
     static void JsRadialGradient(const JSCallbackInfo& info);
@@ -167,6 +174,13 @@ public:
 
     static void JsClip(const JSCallbackInfo& info);
     static void JsMask(const JSCallbackInfo& info);
+
+    static void JsKey(const std::string& text);
+
+    static void JsFocusable(const JSCallbackInfo& info);
+    static void JsOnFocusMove(const JSCallbackInfo& args);
+    static void JsOnFocus(const JSCallbackInfo& args);
+    static void JsOnBlur(const JSCallbackInfo& args);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     static void JsDebugLine(const JSCallbackInfo& info);
 #endif
@@ -177,7 +191,6 @@ public:
     static void JsAccessibilityText(const std::string& text);
     static void JsAccessibilityDescription(const std::string& description);
     static void JsAccessibilityImportance(const std::string& importance);
-    static RefPtr<AccessibilityNode> GetAccessibilityNodeById(int32_t nodeId);
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);
@@ -188,24 +201,14 @@ public:
      */
     static void JSBind();
 
-#ifdef USE_QUICKJS_ENGINE
-    static JSValue JsToolBar(JSContext* ctx, JSValueConst this_value, int32_t argc, JSValueConst* argv);
-#elif USE_V8_ENGINE
-    static void JsToolBar(const v8::FunctionCallbackInfo<v8::Value>& info);
-#elif USE_ARK_ENGINE
-    static panda::Local<panda::JSValueRef> JsToolBar(panda::EcmaVM* vm,
-        panda::Local<panda::JSValueRef> thisObj, const panda::Local<panda::JSValueRef> argv[], int32_t argc,
-        void* data);
-#endif // USE_ARK_ENGINE
-
 protected:
+    static StyleState GetState(const JSCallbackInfo& info, int32_t index);
     /**
      * box properties setter
      */
     static RefPtr<Decoration> GetFrontDecoration();
     static RefPtr<Decoration> GetBackDecoration();
     static const Border& GetBorder();
-    static RefPtr<NavigationDeclaration> GetNavigationDeclaration();
     static void SetMarginTop(const JSCallbackInfo& info);
     static void SetMarginBottom(const JSCallbackInfo& info);
     static void SetMarginLeft(const JSCallbackInfo& info);
@@ -215,23 +218,19 @@ protected:
     static void SetPaddingLeft(const JSCallbackInfo& info);
     static void SetPaddingRight(const JSCallbackInfo& info);
     static void SetBorder(const Border& border);
-    static void SetBorderStyle(int32_t style);
-    static void SetBorderRadius(const Dimension& value, const AnimationOption& option);
-    static void SetBorderColor(const Color& color, const AnimationOption& option);
-    static void SetBorderWidth(const Dimension& value, const AnimationOption& option);
+    static void SetBorderStyle(const JSCallbackInfo& info);
+    static void JsBorderStyle(int32_t style, StyleState state);
+    static void SetBorderRadius(const Dimension& value, const AnimationOption& option, StyleState state);
+    static void SetBorderColor(const Color& color, const AnimationOption& option, StyleState state);
+    static void SetBorderWidth(const Dimension& value, const AnimationOption& option, StyleState state);
     static void SetBlur(float radius);
     static void SetColorBlend(Color color);
     static void SetBackdropBlur(float radius);
     static void SetBlurRadius(const RefPtr<Decoration>& decoration, float radius);
     static void SetWindowBlur(float progress, WindowBlurStyle blurStyle);
-    static void SetNavigationTitle(const std::string& title);
-    static void SetNavigationSubTitle(const std::string& subTitle);
-    static void SetHideNavigationBar(bool hide);
-    static void SetHideNavigationBackButton(bool hide);
-    static void SetHideToolBar(bool hide);
     static RefPtr<ThemeConstants> GetThemeConstants();
-    static bool JsWidth(const JSRef<JSVal>& jsValue);
-    static bool JsHeight(const JSRef<JSVal>& jsValue);
+    static bool JsWidth(const JSRef<JSVal>& jsValue, StyleState state = StyleState::NORMAL);
+    static bool JsHeight(const JSRef<JSVal>& jsValue, StyleState state = StyleState::NORMAL);
     template<typename T>
     static RefPtr<T> GetTheme()
     {

@@ -22,11 +22,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderSingleChildScroll::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSingleChildScroll>();
-}
-
 RenderLayer FlutterRenderSingleChildScroll::GetRenderLayer()
 {
     if (!layer_) {
@@ -74,6 +69,11 @@ void FlutterRenderSingleChildScroll::Paint(RenderContext& context, const Offset&
                 scrollBar_->HandleScrollBarEnd();
             }
         }
+    }
+
+    // Notify scroll bar to update.
+    if (scrollBarProxy_) {
+        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
     }
 }
 

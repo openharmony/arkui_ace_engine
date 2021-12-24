@@ -77,6 +77,7 @@ protected:
     RefPtr<Player> player_;
     RefPtr<Texture> texture_;
     EventCallback onFullScreenChange_;
+    int32_t currentPlatformVersion_ = 0;
 
 private:
     void OnError(const std::string& errorId, const std::string& param);

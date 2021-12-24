@@ -28,6 +28,7 @@ ohos_unittest("FocusTest") {
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
+    "$ace_root/frameworks/core/common/ace_application_info.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
@@ -52,7 +53,6 @@ ohos_unittest("FocusTest") {
 
     #mock
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
     "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
@@ -66,6 +66,7 @@ ohos_unittest("FocusTest") {
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
     "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
     "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
   ]

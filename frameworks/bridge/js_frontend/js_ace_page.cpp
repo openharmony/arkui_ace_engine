@@ -224,8 +224,29 @@ RefPtr<BaseAnimationBridge> JsAcePage::GetAnimationBridge(NodeId nodeId)
 
 void JsAcePage::RemoveAnimationBridge(NodeId nodeId)
 {
-    std::unique_lock<std::mutex> lock(bridgeMutex_);
-    animationBridges_.erase(nodeId);
+    RefPtr<BaseAnimationBridge> bridge;
+    {
+        std::unique_lock<std::mutex> lock(bridgeMutex_);
+        auto pos = animationBridges_.find(nodeId);
+        if (pos != animationBridges_.end()) {
+            bridge.Swap(pos->second);
+            animationBridges_.erase(pos);
+        }
+    }
+
+    if (bridge) {
+        auto pipelineContext = pipelineContext_.Upgrade();
+        if (!pipelineContext) {
+            LOGE("pipelineContext is nullptr");
+            return;
+        }
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        if (!taskExecutor) {
+            LOGE("taskExecutor is nullptr");
+            return;
+        }
+        taskExecutor->PostSyncTask([&bridge]() { bridge.Reset(); }, TaskExecutor::TaskType::JS);
+    }
 }
 
 void JsAcePage::AddAnimationBridge(NodeId nodeId, const RefPtr<BaseAnimationBridge>& animationBridge)

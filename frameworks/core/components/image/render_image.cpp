@@ -41,13 +41,13 @@ void RenderImage::Update(const RefPtr<Component>& component)
     currentDstRectList_ = rectList_;
 
     width_ = image->GetWidth();
+    syncMode_ = image->GetSyncMode();
     height_ = image->GetHeight();
     alignment_ = image->GetAlignment();
     imageObjectPosition_ = image->GetImageObjectPosition();
     fitMaxSize_ = image->GetFitMaxSize();
     hasObjectPosition_ = image->GetHasObjectPosition();
     color_ = image->GetColor();
-    isColorSet_ = image->IsColorSet();
     previousLayoutSize_ = Size();
     SetTextDirection(image->GetTextDirection());
     matchTextDirection_ = image->IsMatchTextDirection();
@@ -71,14 +71,18 @@ void RenderImage::Update(const RefPtr<Component>& component)
 
     useSkiaSvg_ = image->GetUseSkiaSvg();
     autoResize_ = image->GetAutoResize();
-    pixmap_ = image->GetPixmap();
     imageAlt_ = image->GetAlt();
     auto inComingSrc = image->GetSrc();
     ImageSourceInfo inComingSource(
         inComingSrc,
         image->GetImageSourceSize().first,
         image->GetImageSourceSize().second,
-        inComingSrc.empty() ? image->GetResourceId() : InternalResource::ResourceId::NO_ID);
+        inComingSrc.empty() ? image->GetResourceId() : InternalResource::ResourceId::NO_ID,
+        image->GetPixmap());
+    auto fillColor = image->GetImageFill();
+    if (fillColor.has_value()) {
+        inComingSource.SetFillColor(fillColor.value());
+    }
     // this value is used for update frequency with same image source info.
     LOGD("sourceInfo %{public}s", sourceInfo_.ToString().c_str());
     LOGD("inComingSource %{public}s", inComingSource.ToString().c_str());
@@ -133,15 +137,13 @@ void RenderImage::PerformLayout()
     decltype(imageLayoutCallbacks_) imageLayoutCallbacks(std::move(imageLayoutCallbacks_));
     std::for_each(
         imageLayoutCallbacks.begin(), imageLayoutCallbacks.end(), [](std::function<void()> callback) { callback(); });
-    if (pixmap_) {
-        MarkNeedRender();
-        return;
-    }
+    LayoutImageObject();
     if (renderAltImage_) {
         LayoutParam altLayoutParam;
         altLayoutParam.SetFixedSize(GetLayoutSize());
         renderAltImage_->Layout(altLayoutParam);
     }
+
     CalculateResizeTarget();
     if (hasObjectPosition_) {
         ApplyObjectPosition();
@@ -594,7 +596,7 @@ void RenderImage::ClearRenderObject()
     imageFit_ = ImageFit::COVER;
     imageRepeat_ = ImageRepeat::NOREPEAT;
     rectList_.clear();
-    color_ = Color::TRANSPARENT;
+    color_.reset();
     sourceInfo_.Reset();
     singleWidth_ = 0.0;
     displaySrcWidth_ = 0.0;
@@ -631,7 +633,6 @@ void RenderImage::ClearRenderObject()
     forceReload_ = false;
     imageSizeForEvent_ =  { 0.0, 0.0 };
     retryCnt_ = 0;
-    pixmap_ = nullptr;
 }
 
 void RenderImage::PrintImageLog(const Size& srcSize, const BackgroundImageSize& imageSize, ImageRepeat imageRepeat,

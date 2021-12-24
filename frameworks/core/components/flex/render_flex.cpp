@@ -72,6 +72,7 @@ void RenderFlex::Update(const RefPtr<Component>& component)
     auto context = GetContext().Upgrade();
     if (context) {
         space_ = context->NormalizeToPx(flex->GetSpace());
+        inspectorSpace_ = flex->GetSpace();
         if (GreatNotEqual(space_, 0.0)) {
             mainAxisAlign_ = FlexAlign::SPACE_CUSOMIZATION;
         }

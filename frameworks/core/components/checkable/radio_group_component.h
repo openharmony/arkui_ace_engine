@@ -41,17 +41,50 @@ public:
         return radios_.empty();
     }
 
+    void SetIsDeclarative(bool isDeclarative)
+    {
+        isDeclarative_ = isDeclarative;
+    }
+
 private:
     const std::function<void(T)> groupValueChangedListener_ = [this](T newValue) {
+        std::string name = "";
         for (const auto& radio : radios_) {
             auto refPtr = radio.Upgrade();
             if (refPtr) {
-                refPtr->SetGroupValue(newValue);
-                refPtr->UpdateGroupValue(newValue);
+                groupName_.push_back(refPtr->GetGroupName());
+                if (newValue == refPtr->GetValue()) {
+                    name = refPtr->GetGroupName();
+                }
             }
         }
+        uint32_t counts = 0;
+        counts = count(groupName_.begin(), groupName_.end(), name);
+        for (const auto& radio : radios_) {
+            auto refPtr = radio.Upgrade();
+            if (refPtr) {
+                if (isDeclarative_) {
+                    if (counts > 1) {
+                        refPtr->SetGroupValue(newValue);
+                        refPtr->UpdateGroupValue(newValue);
+                    } else {
+                        if (refPtr->GetOriginChecked()) {
+                            refPtr->SetGroupValue(newValue);
+                        } else {
+                            refPtr->SetGroupValue(" ");
+                        }
+                    }
+                } else {
+                    refPtr->SetGroupValue(newValue);
+                    refPtr->UpdateGroupValue(newValue);
+                }
+            }
+        }
+        groupName_.clear();
     };
     std::list<WeakPtr<RadioComponent<T>>> radios_;
+    std::list<std::string> groupName_;
+    bool isDeclarative_ = false;
 };
 
 } // namespace OHOS::Ace

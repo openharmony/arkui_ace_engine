@@ -23,15 +23,8 @@
 
 namespace OHOS::Ace {
 
-const char FONT_SRC_NETWORK[] = "http";
-
 FlutterFontLoader::FlutterFontLoader(const std::string& familyName, const std::string& familySrc)
     : FontLoader(familyName, familySrc) {};
-
-RefPtr<FontLoader> FontLoader::Create(const std::string& familyName, const std::string& familySrc)
-{
-    return AceType::MakeRefPtr<FlutterFontLoader>(familyName, familySrc);
-}
 
 void FlutterFontLoader::AddFont(const RefPtr<PipelineContext>& context)
 {

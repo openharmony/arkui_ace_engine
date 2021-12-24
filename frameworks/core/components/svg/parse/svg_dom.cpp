@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components/svg/parse/svg_dom.h"
 
+#include "base/utils/system_properties.h"
 #include "frameworks/core/components/box/render_box.h"
 #include "frameworks/core/components/svg/flutter_render_svg.h"
 #include "frameworks/core/components/svg/parse/svg_animation.h"
@@ -311,6 +312,7 @@ void SvgDom::CreateRenderNode(ImageFit imageFit, const SvgRadius& svgRadius, boo
         transformComponent->Scale(scaleX, scaleY);
         auto renderTransform = transformComponent->CreateRenderNode();
         renderTransform->Attach(context_);
+        SyncRSNode(renderTransform);
         renderTransform->Update(transformComponent);
         renderTransform->AddChild(renderSvg);
         renderTransform->Layout(LayoutParam(containerSize_, Size(0.0, 0.0)));
@@ -333,6 +335,7 @@ void SvgDom::CreateRenderNode(ImageFit imageFit, const SvgRadius& svgRadius, boo
         }
         auto renderBox = clipBox->CreateRenderNode();
         renderBox->Attach(context_);
+        SyncRSNode(renderBox);
         renderBox->Update(clipBox);
         renderBox->AddChild(renderTransform);
         renderBox->Layout(LayoutParam(containerSize_, Size(0.0, 0.0)));
@@ -343,6 +346,7 @@ void SvgDom::CreateRenderNode(ImageFit imageFit, const SvgRadius& svgRadius, boo
         boxComponent->SetHeight(containerSize_.Height());
         renderNode_ = boxComponent->CreateRenderNode();
         renderNode_->Attach(context_);
+        SyncRSNode(renderNode_);
         renderNode_->Update(boxComponent);
         renderNode_->AddChild(renderBox);
         renderNode_->Layout(LayoutParam(containerSize_, Size(0.0, 0.0)));
@@ -489,6 +493,14 @@ void SvgDom::AddToAnimatorGroup(const RefPtr<RenderNode>& node, RefPtr<AnimatorG
             }
         }
     }
+}
+
+void SvgDom::SyncRSNode(const RefPtr<RenderNode>& renderNode)
+{
+    if (!SystemProperties::GetRosenBackendEnabled() || !renderNode) {
+        return;
+    }
+    renderNode->SyncRSNodeBoundary(true, true);
 }
 
 } // namespace OHOS::Ace

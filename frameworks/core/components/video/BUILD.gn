@@ -17,6 +17,7 @@ build_component("video") {
   sources = [
     "flutter_render_texture.cpp",
     "render_texture.cpp",
+    "render_texture_creator.cpp",
     "resource/player.cpp",
     "resource/resource.cpp",
     "resource/texture.cpp",
@@ -26,6 +27,8 @@ build_component("video") {
     "video_element.cpp",
     "video_element_v2.cpp",
   ]
+
+  rosen_sources = [ "rosen_render_texture.cpp" ]
 
   if (is_standard_system && !use_mingw_win && !use_mac) {
     include_dirs = [

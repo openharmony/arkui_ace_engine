@@ -24,6 +24,7 @@
 #include "core/components/scroll/scroll_fade_effect.h"
 #include "core/components/scroll/scroll_position_controller.h"
 #include "core/components/scroll/scroll_spring_effect.h"
+#include "core/components/scroll_bar/scroll_bar_proxy.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/pipeline/base/sole_child_component.h"
@@ -224,6 +225,16 @@ public:
         scrollBar_->SetTouchWidth(scrollBarWidth);
     }
 
+    void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
+    {
+        scrollBarProxy_ = scrollBarProxy;
+    }
+
+    const RefPtr<ScrollBarProxy>& GetScrollBarProxy() const
+    {
+        return scrollBarProxy_;
+    }
+
 private:
     Edge padding_;
     Axis axisDirection_ = Axis::VERTICAL;
@@ -233,6 +244,7 @@ private:
     bool enable_ = true;
     bool isEffectSetted_ = false;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
+    RefPtr<ScrollBarProxy> scrollBarProxy_;
 
     // for scroll reaching the edge event
     EventMarker onReachStart_;

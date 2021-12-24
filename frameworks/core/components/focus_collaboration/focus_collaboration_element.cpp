@@ -28,6 +28,8 @@ void FocusCollaborationElement::PerformBuild()
     if (group && group->GetChildren().size() == 1) {
         auto focusAnimation = AceType::MakeRefPtr<FocusAnimationComponent>(isRoot_);
         auto shadow = AceType::MakeRefPtr<ShadowComponent>();
+        Component::MergeRSNode(focusAnimation);
+        Component::MergeRSNode(shadow);
         group->AppendChild(focusAnimation);
         group->AppendChild(shadow);
     }

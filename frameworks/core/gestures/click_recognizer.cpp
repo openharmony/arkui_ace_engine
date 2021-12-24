@@ -24,7 +24,11 @@ namespace {
 constexpr int32_t MULTI_FINGER_TIMEOUT = 300;
 constexpr int32_t MULTI_TAP_TIMEOUT = 300;
 constexpr int32_t MULTI_TAP_SLOP = 100;
+#ifndef WEARABLE_PRODUCT
 constexpr double MAX_THRESHOLD = 20.0;
+#else
+constexpr double MAX_THRESHOLD = 12.0;
+#endif
 constexpr int32_t MAX_TAP_FINGERS = 10;
 
 } // namespace
@@ -44,6 +48,7 @@ void ClickRecognizer::OnAccepted()
         onClick_(info);
     }
 
+    SetFingerList(touchPoints_, coordinateOffset_, fingerList_);
     SendCallbackMsg(onAction_);
     Reset();
 }
@@ -83,7 +88,8 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchPoint& event)
         }
     } else {
         LOGE("the state of click recognizer is not ready to recieve touch down event, "
-             "state is %{public}d, id is %{public}d", state_, event.id);
+             "state is %{public}d, id is %{public}d",
+            state_, event.id);
     }
 
     if (pointsCount_ == fingers_) {
@@ -205,6 +211,7 @@ void ClickRecognizer::DeadlineTimer(CancelableCallback<void()>& deadlineTimer, i
 void ClickRecognizer::Reset()
 {
     touchPoints_.clear();
+    fingerList_.clear();
     pointsCount_ = 0;
     equalsToFingers_ = false;
     tappedCount_ = 0;
@@ -238,6 +245,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
     if (onAction && *onAction) {
         GestureEvent info;
         info.SetTimeStamp(time_);
+        info.SetFingerList(fingerList_);
         TouchPoint touchPoint = {};
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;

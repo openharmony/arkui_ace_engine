@@ -104,7 +104,7 @@ void RenderHyperlink::SetImageChildColor(const RefPtr<Component> node)
     auto imageComponent = AceType::DynamicCast<ImageComponent>(node);
     auto textComponent = AceType::DynamicCast<TextComponent>(node);
     if (imageComponent) {
-        imageComponent->SetColor(GetColor());
+        imageComponent->SetImageFill(GetColor());
         return;
     }
     if (textComponent) {

@@ -107,6 +107,11 @@ private:
     static shared_ptr<JsValue> ProcessJsRequest(const shared_ptr<JsRuntime>& runtime,
         const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
 
+    // JsSendGroupMessage is mapped to the Js function[SendGroupMessageSync]
+    // contains three parameters: groupName, message, params
+    static shared_ptr<JsValue> ProcessJsRequestSync(const shared_ptr<JsRuntime>& runtime,
+        const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
+
     EventCallbackMap eventCallBackFuncs_;
     ModuleCallbackMap moduleCallBackFuncs_;
     RequestIdCallbackIdMap requestIdCallbackIdMap_;

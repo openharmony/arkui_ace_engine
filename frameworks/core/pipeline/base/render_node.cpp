@@ -18,7 +18,12 @@
 #include <algorithm>
 #include <set>
 
-#include "base/log/ace_trace.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_node.h"
+
+#include "core/animation/native_curve_helper.h"
+#endif
+
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -27,9 +32,11 @@
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/rotation/rotation_node.h"
 #include "core/components/focus_animation/render_focus_animation.h"
+#include "core/components/grid_layout/render_grid_layout.h"
 #include "core/components/root/render_root.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/transform/render_transform.h"
+#include "core/components_v2/list/render_list.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/component.h"
 
@@ -78,9 +85,9 @@ void RenderNode::AddChild(const RefPtr<RenderNode>& child, int32_t slot)
     child->SetDepth(GetDepth() + 1);
     OnChildAdded(child);
     disappearingNodes_.remove(child);
-    auto context = context_.Upgrade();
-    if (context && context->GetExplicitAnimationOption().IsValid()) {
-        child->NotifyTransition(TransitionType::APPEARING, child->GetNodeId());
+    child->NotifyTransition(TransitionType::APPEARING, child->GetNodeId());
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        RSNodeAddChild(child);
     }
 }
 
@@ -112,6 +119,11 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
         child->SetParent(AceType::WeakClaim(this));
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
     }
+#ifdef ENABLE_ROSEN_BACKEND
+    if (auto rsNode = child->rsNode_) {
+        child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId(), rsNode->GetId());
+    }
+#endif
     LOGD("RenderNode RemoveChild %{public}zu", children_.size());
 }
 
@@ -155,34 +167,84 @@ void RenderNode::ClearChildren()
 
 void RenderNode::UpdateTouchRect()
 {
-    touchRect_ = GetPaintRect();
-    auto box = AceType::DynamicCast<RenderBox>(this);
-    // For exclude the margin area from touch area and the margin must not be less than zero.
-    if (box && box->GetTouchArea().GetOffset().IsPositiveOffset()) {
-        touchRect_.SetOffset(box->GetTouchArea().GetOffset() + touchRect_.GetOffset());
-        touchRect_.SetSize(box->GetTouchArea().GetSize());
+    if (!isResponseRegion_) {
+        touchRect_ = GetTransformRect(GetPaintRect());
+        touchRectList_.emplace_back(touchRect_);
+        SetTouchRectList(touchRectList_);
+        return;
     }
-    ownTouchRect_ = touchRect_;
+
+    responseRegionList_.clear();
+    touchRect_ = GetTransformRect(GetPaintRect());
+
+    for (auto& region : responseRegion_) {
+        double x = GetPxValue(touchRect_.Width(), region.GetOffset().GetX());
+        double y = GetPxValue(touchRect_.Height(), region.GetOffset().GetY());
+        double width = GetPxValue(touchRect_.Width(), region.GetWidth());
+        double height = GetPxValue(touchRect_.Height(), region.GetHeight());
+        Rect responseRegion(touchRect_.GetOffset().GetX() + x, touchRect_.GetOffset().GetY() + y, width, height);
+        responseRegionList_.emplace_back(responseRegion);
+    }
+
+    touchRectList_ = responseRegionList_;
+    SetTouchRectList(touchRectList_);
+}
+
+void RenderNode::SetTouchRectList(std::vector<Rect>& touchRectList)
+{
     const auto& children = GetChildren();
     if (!children.empty()) {
-        double minX = touchRect_.Left();
-        double minY = touchRect_.Top();
-        double maxX = touchRect_.Right();
-        double maxY = touchRect_.Bottom();
         for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
             auto& child = *iter;
-            if (child->GetTouchRect().GetSize().IsEmpty()) {
-                continue;
-            }
-            minX = std::min(minX, child->GetTouchRect().Left() + GetPaintRect().Left());
-            minY = std::min(minY, child->GetTouchRect().Top() + GetPaintRect().Top());
-            maxX = std::max(maxX, child->GetTouchRect().Right() + GetPaintRect().Left());
-            maxY = std::max(maxY, child->GetTouchRect().Bottom() + GetPaintRect().Top());
+            auto childTouchRectList = child->GetTouchRectList();
+            CompareTouchRectList(touchRectList, childTouchRectList);
         }
-        touchRect_.SetOffset({ minX, minY });
-        touchRect_.SetSize({ maxX - minX, maxY - minY });
     }
-    touchRect_ = GetTransformRect(touchRect_);
+}
+
+void RenderNode::CompareTouchRectList(std::vector<Rect>& parentTouchRectList,
+    const std::vector<Rect>& childTouchRectList)
+{
+    std::vector<Rect> parentRectList = parentTouchRectList;
+    for (auto& childRect : childTouchRectList) {
+        bool isInRegion = false;
+        auto rect = childRect;
+        for (auto& parentRect : parentRectList) {
+            // unified coordinate system
+            rect.SetOffset(childRect.GetOffset() + parentRect.GetOffset());
+            if (CompareTouchRect(parentRect, rect)) {
+                isInRegion = true;
+                break;
+            }
+        }
+        if (!isInRegion && !IsResponseRegion()) {
+            parentTouchRectList.emplace_back(rect);
+        }
+    }
+}
+
+double RenderNode::GetPxValue(double standard, const Dimension& value)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return value.Value();
+    }
+
+    double result = 0.0;
+    if (value.Unit() == DimensionUnit::PERCENT) {
+        result = standard * value.Value();
+    } else {
+        result = context->NormalizeToPx(value);
+    }
+    return result;
+}
+
+bool RenderNode::CompareTouchRect(const Rect& parentTouchRect, const Rect& childTouchRect)
+{
+    if (childTouchRect.IsWrappedBy(parentTouchRect)) {
+        return true;
+    }
+    return false;
 }
 
 void RenderNode::MoveWhenOutOfViewPort(bool hasEffect)
@@ -218,6 +280,12 @@ void RenderNode::DumpTree(int32_t depth)
     const auto& children = GetChildren();
     if (DumpLog::GetInstance().GetDumpFile()) {
         auto dirtyRect = context_.Upgrade()->GetDirtyRect();
+        std::string touchRectList = "[";
+        for (auto& rect : touchRectList_) {
+            touchRectList.append("{").append(rect.ToString()).append("}");
+        }
+        touchRectList.append("]");
+
         DumpLog::GetInstance().AddDesc(std::string("AccessibilityNodeID: ").append(std::to_string(nodeId)));
         DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(depth)));
         DumpLog::GetInstance().AddDesc(
@@ -225,6 +293,7 @@ void RenderNode::DumpTree(int32_t depth)
         DumpLog::GetInstance().AddDesc(std::string("GlobalOffset: ").append(GetGlobalOffset().ToString()));
         DumpLog::GetInstance().AddDesc(std::string("PaintRect: ").append(paintRect_.ToString()));
         DumpLog::GetInstance().AddDesc(std::string("TouchRect: ").append(touchRect_.ToString()));
+        DumpLog::GetInstance().AddDesc(std::string("TouchRectList: ").append(touchRectList));
         DumpLog::GetInstance().AddDesc(std::string("DirtyRect: ").append(dirtyRect.ToString()));
         DumpLog::GetInstance().AddDesc(std::string("LayoutParam: ").append(layoutParam_.ToString()));
         DumpLog::GetInstance().AddDesc(
@@ -252,8 +321,8 @@ void RenderNode::RenderWithContext(RenderContext& context, const Offset& offset)
     for (const auto& item : SortChildrenByZIndex(disappearingNodes_)) {
         PaintChild(item, context, offset);
     }
-
-    if (needUpdateAccessibility_) {
+    auto hasOnAreaChangeCallback = eventExtensions_ ? eventExtensions_->HasOnAreaChangeExtension() : false;
+    if (needUpdateAccessibility_ || hasOnAreaChangeCallback) {
         auto pipelineContext = context_.Upgrade();
         if (pipelineContext != nullptr) {
             pipelineContext->AddNeedRenderFinishNode(AceType::Claim(this));
@@ -331,6 +400,11 @@ void RenderNode::ClipHole(RenderContext& context, const Offset& offset)
 void RenderNode::MarkNeedLayout(bool selfOnly, bool forceParent)
 {
     bool addSelf = false;
+    auto context = context_.Upgrade();
+    if (context != nullptr) {
+        context->ForceLayoutForImplicitAnimation();
+    }
+
     bool forceSelf = forceParent && AceType::InstanceOf<RenderRoot>(this);
     if (forceSelf) {
         // This is root and child need force parent layout.
@@ -462,6 +536,7 @@ void RenderNode::Attach(const WeakPtr<PipelineContext>& context)
         render->needUpdateTouchRect_ = true;
         render->nonStrictPaintRect_.SetWidth(render->paintW_.Value());
         render->transitionPaintRectSize_.SetWidth(render->paintW_.Value());
+        render->MarkNeedSyncGeometryProperties();
     });
 
     paintH_.SetContextAndCallback(context_, [weak = WeakClaim(this)] {
@@ -473,6 +548,7 @@ void RenderNode::Attach(const WeakPtr<PipelineContext>& context)
         render->needUpdateTouchRect_ = true;
         render->nonStrictPaintRect_.SetHeight(render->paintH_.Value());
         render->transitionPaintRectSize_.SetHeight(render->paintH_.Value());
+        render->MarkNeedSyncGeometryProperties();
     });
 }
 
@@ -491,6 +567,7 @@ void RenderNode::SetPositionInternal(const Offset& offset)
         needUpdateTouchRect_ = true;
         OnPositionChanged();
         OnGlobalPositionChanged();
+        MarkNeedSyncGeometryProperties();
     }
     if (isFirstPositionAssign_) {
         isFirstPositionAssign_ = false;
@@ -566,17 +643,15 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     }
 
     Point transformPoint = GetTransformPoint(parentLocalPoint);
-    // Since the paintRect is relative to parent, use parent local point to perform touch test.
-    if (!GetTouchRect().IsInRegion(transformPoint)) {
+    if (!InTouchRectList(transformPoint, GetTouchRectList())) {
         return false;
     }
 
-    // Calculates the local point location in this node.
     const auto localPoint = transformPoint - GetPaintRect().GetOffset();
     bool dispatchSuccess = false;
-    const auto& sortedChildern = SortChildrenByZIndex(GetChildren());
+    const auto& sortedChildren = SortChildrenByZIndex(GetChildren());
     if (IsChildrenTouchEnable()) {
-        for (auto iter = sortedChildern.rbegin(); iter != sortedChildern.rend(); ++iter) {
+        for (auto iter = sortedChildren.rbegin(); iter != sortedChildren.rend(); ++iter) {
             auto& child = *iter;
             if (!child->GetVisible() || child->disabled_ || child->disableTouchEvent_) {
                 continue;
@@ -585,21 +660,27 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
                 dispatchSuccess = true;
                 break;
             }
-            if (child->InterceptTouchEvent() || IsExclusiveEventForChild()) {
+            if (child->IsTouchable() && (child->InterceptTouchEvent() || IsExclusiveEventForChild())) {
                 auto localTransformPoint = child->GetTransformPoint(localPoint);
-                if (child->GetTouchRect().IsInRegion(localTransformPoint)) {
-                    dispatchSuccess = true;
-                    break;
+                for (auto& rect : child->GetTouchRectList()) {
+                    if (rect.IsInRegion(localTransformPoint)) {
+                        dispatchSuccess = true;
+                        break;
+                    }
                 }
             }
         }
     }
+
     auto beforeSize = result.size();
-    if (touchable_ && GetOwnTouchRect().IsInRegion(transformPoint)) {
-        // Calculates the coordinate offset in this node.
-        const auto coordinateOffset = globalPoint - localPoint;
-        globalPoint_ = globalPoint;
-        OnTouchTestHit(coordinateOffset, touchRestrict, result);
+    for (auto& rect : GetTouchRectList()) {
+        if (touchable_ && rect.IsInRegion(transformPoint)) {
+            // Calculates the coordinate offset in this node.
+            const auto coordinateOffset = globalPoint - localPoint;
+            globalPoint_ = globalPoint;
+            OnTouchTestHit(coordinateOffset, touchRestrict, result);
+            break;
+        }
     }
     auto endSize = result.size();
     return dispatchSuccess || beforeSize != endSize;
@@ -608,11 +689,10 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
 RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Point& parentLocalPoint)
 {
     Point transformPoint = GetTransformPoint(parentLocalPoint);
-    if (!GetTouchRect().IsInRegion(transformPoint)) {
+    if (!InTouchRectList(transformPoint, GetTouchRectList())) {
         return nullptr;
     }
 
-    // Calculates the local point location in this node.
     const auto localPoint = transformPoint - GetPaintRect().GetOffset();
     const auto& children = GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
@@ -620,7 +700,6 @@ RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Poi
         if (!child->GetVisible()) {
             continue;
         }
-
         if (child->InterceptTouchEvent()) {
             continue;
         }
@@ -631,11 +710,17 @@ RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Poi
         }
     }
 
-    if (GetOwnTouchRect().IsInRegion(transformPoint)) {
-        RefPtr<RenderNode> renderNode = AceType::Claim<RenderNode>(this);
-        auto renderBox = AceType::DynamicCast<RenderBox>(renderNode);
-        if (renderBox && renderBox->GetOnDrop()) {
-            return renderNode;
+    for (auto& rect : GetTouchRectList()) {
+        if (touchable_ && rect.IsInRegion(transformPoint)) {
+            RefPtr<RenderNode> renderNode = AceType::Claim<RenderNode>(this);
+            auto renderBox = AceType::DynamicCast<RenderBox>(renderNode);
+            if (renderBox && renderBox->GetOnDrop()) {
+                return renderNode;
+            }
+            auto renderList = AceType::DynamicCast<V2::RenderList>(renderNode);
+            if (renderList && renderList->GetOnItemDrop()) {
+                return renderNode;
+            }
         }
     }
 
@@ -649,20 +734,22 @@ void RenderNode::MouseTest(const Point& globalPoint, const Point& parentLocalPoi
     LOGD("MouseTest: the local point refer to parent is %{public}lf, %{public}lf, ", parentLocalPoint.GetX(),
         parentLocalPoint.GetY());
 
-    // Since the paintRect is relative to parent, use parent local point to perform touch test.
-    if (GetTouchRect().IsInRegion(parentLocalPoint)) {
-        // Calculates the local point location in this node.
-        const auto localPoint = parentLocalPoint - paintRect_.GetOffset();
-        const auto& children = GetChildren();
-        for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-            auto& child = *iter;
-            child->MouseTest(globalPoint, localPoint, result);
-        }
-        // Calculates the coordinate offset in this node.
-        const auto coordinateOffset = globalPoint - localPoint;
-        globalPoint_ = globalPoint;
-        OnMouseTestHit(coordinateOffset, result);
+    if (!InTouchRectList(parentLocalPoint, GetTouchRectList())) {
+        return;
     }
+
+    // Calculates the local point location in this node.
+    const auto localPoint = parentLocalPoint - paintRect_.GetOffset();
+    const auto& children = GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        child->MouseTest(globalPoint, localPoint, result);
+    }
+
+    // Calculates the coordinate offset in this node.
+    const auto coordinateOffset = globalPoint - localPoint;
+    globalPoint_ = globalPoint;
+    OnMouseTestHit(coordinateOffset, result);
 }
 
 bool RenderNode::HandleMouseHoverEvent(MouseState mouseState)
@@ -681,41 +768,50 @@ bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)
     }
 
     Point transformPoint = GetTransformPoint(parentLocalPoint);
-    const auto localPoint = transformPoint - paintRect_.GetOffset();
-    // Since the paintRect is relative to parent, use parent local point to perform touch test.
-    if (GetTouchRect().IsInRegion(transformPoint)) {
-        auto context = context_.Upgrade();
-        if (!context) {
-            return false;
-        }
-        hoverChildren_.clear();
-        context->AddToHoverList(AceType::WeakClaim(this).Upgrade());
-        const auto& children = GetChildren();
-        for (auto iter = children.begin(); iter != children.end(); ++iter) {
-            auto& child = *iter;
-            if (child->MouseHoverTest(localPoint)) {
-                hoverChildren_.emplace_back(child);
-            }
-        }
-        // mouse state of the node is from NONE to HOVER, the callback of hover enter is triggered.
-        if (mouseState_ == MouseState::NONE) {
-            OnMouseHoverEnterTest();
-            mouseState_ = MouseState::HOVER;
-            HandleMouseHoverEvent(MouseState::HOVER);
-        }
-        return true;
-    } else {
+    const auto localPoint = transformPoint - GetPaintRect().GetOffset();
+
+    if (!InTouchRectList(transformPoint, GetTouchRectList())) {
         for (const auto& child : hoverChildren_) {
             child->MouseHoverTest(localPoint);
         }
         // mouse state of the node is from HOVER to NONE, the callback of hover exit is triggered.
         if (mouseState_ == MouseState::HOVER) {
-            OnMouseHoverExitTest();
+            if (hoverAnimationType_ == HoverAnimationType::AUTO) {
+                OnMouseHoverExitTest();
+            } else {
+                MouseHoverExitTest();
+            }
             mouseState_ = MouseState::NONE;
             HandleMouseHoverEvent(MouseState::NONE);
         }
         return false;
     }
+
+    // Since the paintRect is relative to parent, use parent local point to perform touch test.
+    auto context = context_.Upgrade();
+    if (!context) {
+        return false;
+    }
+    hoverChildren_.clear();
+    context->AddToHoverList(AceType::WeakClaim(this).Upgrade());
+    const auto& children = GetChildren();
+    for (auto iter = children.begin(); iter != children.end(); ++iter) {
+        auto& child = *iter;
+        if (child->MouseHoverTest(localPoint)) {
+            hoverChildren_.emplace_back(child);
+        }
+    }
+    // mouse state of the node is from NONE to HOVER, the callback of hover enter is triggered.
+    if (mouseState_ == MouseState::NONE) {
+        if (hoverAnimationType_ == HoverAnimationType::AUTO) {
+            OnMouseHoverEnterTest();
+        } else {
+            MouseHoverEnterTest();
+        }
+        mouseState_ = MouseState::HOVER;
+        HandleMouseHoverEvent(MouseState::HOVER);
+    }
+    return true;
 }
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
@@ -970,6 +1066,12 @@ Offset RenderNode::GetGlobalOffset() const
     return renderNode ? GetPosition() + renderNode->GetGlobalOffset() : GetPosition();
 }
 
+Offset RenderNode::GetPaintOffset() const
+{
+    auto renderNode = parent_.Upgrade();
+    return (renderNode && !IsHeadRenderNode()) ? GetPosition() + renderNode->GetPaintOffset() : GetPosition();
+}
+
 Offset RenderNode::GetGlobalOffsetExternal() const
 {
     auto renderNode = parent_.Upgrade();
@@ -1040,6 +1142,16 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
     if (renderComponent) {
         motionPathOption_ = renderComponent->GetMotionPathOption();
+#ifdef ENABLE_ROSEN_BACKEND
+        if (SystemProperties::GetRosenBackendEnabled() && motionPathOption_.IsValid()) {
+            if (auto rsNode = GetRSNode()) {
+                auto nativeMotionOption = std::make_shared<Rosen::RSMotionPathOption>(
+                    NativeCurveHelper::ToNativeMotionPathOption(motionPathOption_));
+                rsNode->SetMotionPathOption(nativeMotionOption);
+            }
+        }
+#endif
+
         positionParam_ = renderComponent->GetPositionParam();
         flexWeight_ = renderComponent->GetFlexWeight();
         displayIndex_ = renderComponent->GetDisplayIndex();
@@ -1054,8 +1166,13 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
     if (context != nullptr) {
         minPlatformVersion_ = context->GetMinPlatformVersion();
     }
-    zIndex_ = renderComponent->GetZIndex();
+    SetZIndex(renderComponent->GetZIndex());
     isPercentSize_ = renderComponent->GetIsPercentSize();
+    responseRegion_ = renderComponent->GetResponseRegion();
+    isResponseRegion_ = renderComponent->IsResponseRegion();
+    if (component->HasEventExtensions()) {
+        eventExtensions_ = component->GetEventExtensions();
+    }
     UpdatePropAnimation(component->GetAnimatables());
     Update(component);
     MarkNeedLayout();
@@ -1068,7 +1185,13 @@ void RenderNode::UpdateOpacity(uint8_t opacity)
     }
     if (opacity_ != opacity) {
         opacity_ = opacity;
-        MarkNeedRender();
+        if (auto rsNode = GetRSNode()) {
+#ifdef ENABLE_ROSEN_BACKEND
+            rsNode->SetAlpha(opacity_ / 255.0);
+#endif
+        } else {
+            MarkNeedRender();
+        }
     }
 }
 
@@ -1141,7 +1264,10 @@ void RenderNode::ClearRenderObject()
     interceptTouchEvent_ = false;
     mouseState_ = MouseState::NONE;
 
-    children_.clear();
+    ClearChildren();
+    rsNode_ = nullptr;
+    isHeadRenderNode_ = false;
+    isTailRenderNode_ = false;
     accessibilityText_ = "";
     layoutParam_ = LayoutParam();
     paintRect_ = Rect();
@@ -1298,12 +1424,16 @@ bool RenderNode::HasDisappearingTransition(int32_t nodeId)
     return false;
 }
 
-void RenderNode::NotifyTransition(TransitionType type, int32_t nodeId)
+void RenderNode::NotifyTransition(TransitionType type, int32_t nodeId, unsigned long long rsNodeId)
 {
+#ifdef ENABLE_ROSEN_BACKEND
+    OnRSTransition(type, rsNodeId);
+#else
     OnTransition(type, nodeId);
+#endif
     for (auto& child : children_) {
         if (child->GetNodeId() == nodeId) {
-            child->NotifyTransition(type, nodeId);
+            child->NotifyTransition(type, nodeId, rsNodeId);
         }
     }
 }
@@ -1623,6 +1753,7 @@ void RenderNode::SetLayoutSize(const Size& size)
         paintRect_.SetSize(size);
         needUpdateTouchRect_ = true;
         OnSizeChanged();
+        MarkNeedSyncGeometryProperties();
     }
     if (isFirstSizeAssign_) {
         isFirstSizeAssign_ = false;
@@ -1678,6 +1809,113 @@ void RenderNode::SetDepth(int32_t depth)
         for (const auto& item : children) {
             item->SetDepth(depth_ + 1);
         }
+    }
+}
+
+void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
+{
+    isHeadRenderNode_ = isHead;
+    isTailRenderNode_ = isTail;
+#ifdef ENABLE_ROSEN_BACKEND
+    if (isHead && !rsNode_) {
+        // create RSNode in first node of JSview
+        rsNode_ = CreateRSNode();
+    } else if (!isHead && rsNode_) {
+        // destroy unneeded RSNode
+        rsNode_ = nullptr;
+    }
+#endif
+}
+
+void RenderNode::MarkNeedSyncGeometryProperties()
+{
+    if (!HasGeometryProperties()) {
+        return;
+    }
+    if (auto pipelineContext = context_.Upgrade()) {
+        pipelineContext->AddGeometryChangedNode(AceType::Claim(this));
+    }
+}
+
+void RenderNode::SyncGeometryProperties()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!IsTailRenderNode()) {
+        return;
+    }
+    auto rsNode = GetRSNode();
+    if (!rsNode) {
+        return;
+    }
+    Offset paintOffset = GetPaintOffset();
+    Size paintSize = GetLayoutSize();
+    rsNode->SetFrame(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
+#endif
+}
+
+void RenderNode::SetPaintRect(const Rect& rect)
+{
+    if (paintRect_ == rect) {
+        return;
+    }
+    paintRect_ = rect;
+    needUpdateTouchRect_ = true;
+
+    MarkNeedSyncGeometryProperties();
+}
+
+void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!rsNode_) {
+        LOGW("Parent render_node has no RSNode, creating now.");
+        SyncRSNodeBoundary(true, true);
+    }
+    if (IsTailRenderNode()) {
+        if (!child->GetRSNode()) {
+            LOGW("Child render_node has no RSNode, creating now.");
+            child->SyncRSNodeBoundary(true, true);
+        }
+    } else {
+        child->rsNode_ = rsNode_;
+    }
+    if (auto rsNode = child->rsNode_) {
+        child->NotifyTransition(TransitionType::APPEARING, child->GetNodeId(), rsNode->GetId());
+    }
+#endif
+}
+
+void RenderNode::MarkParentNeedRender() const
+{
+    auto renderNode = parent_.Upgrade();
+    if (!renderNode) {
+        return;
+    }
+    if (IsHeadRenderNode()) {
+        renderNode->MarkNeedRender();
+    } else {
+        renderNode->MarkParentNeedRender();
+    }
+}
+
+std::shared_ptr<RSNode> RenderNode::CreateRSNode() const
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return Rosen::RSNode::Create();
+#else
+    return nullptr;
+#endif
+}
+
+void RenderNode::OnStatusStyleChanged(StyleState state)
+{
+    LOGD("start %{public}s", AceType::TypeName(this));
+    if (isHeadRenderNode_) {
+        return;
+    }
+    RefPtr<RenderNode> parent = parent_.Upgrade();
+    if (parent) {
+        parent->OnStatusStyleChanged(state);
     }
 }
 

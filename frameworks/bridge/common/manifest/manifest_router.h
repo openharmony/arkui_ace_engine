@@ -32,8 +32,11 @@ public:
 
     std::string GetPagePath(const std::string& uri, const std::string& suffix = ".js") const;
     std::string GetEntry(const std::string& suffix = ".js") const;
-    const std::list<std::string>& GetPageList() const;
+    const std::list<std::string>& GetPageList();
     void RouterParse(const std::unique_ptr<JsonValue>& router);
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void InsertPageList(const std::string& uri);
+#endif
 
 private:
     std::string pagePath_;

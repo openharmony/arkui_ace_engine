@@ -379,6 +379,26 @@ public:
         return output;
     }
 
+    std::string ToBounds() const
+    {
+        std::stringstream ss;
+        ss << "[" << std::fixed << std::setprecision(2) << x_ << ", " << y_ << "][";
+        if (NearEqual(width_, Size::INFINITE_SIZE)) {
+            ss << "INFINITE";
+        } else {
+            ss << (x_ + width_);
+        }
+        ss << ",";
+        if (NearEqual(height_, Size::INFINITE_SIZE)) {
+            ss << "INFINITE";
+        } else {
+            ss << (y_ + height_);
+        }
+        ss << "]";
+        std::string output = ss.str();
+        return output;
+    }
+
     Offset Center() const
     {
         return Offset(width_ / 2.0 + x_, height_ / 2.0 + y_);

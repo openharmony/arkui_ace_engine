@@ -19,8 +19,14 @@ build_component("shape") {
     "flutter_render_shape_container.cpp",
     "render_shape.cpp",
     "render_shape_container.cpp",
+    "render_shape_container_creator.cpp",
+    "render_shape_creator.cpp",
     "shape_component.cpp",
     "shape_container_component.cpp",
     "shape_container_element.cpp",
+  ]
+  rosen_sources = [
+    "rosen_render_shape.cpp",
+    "rosen_render_shape_container.cpp",
   ]
 }

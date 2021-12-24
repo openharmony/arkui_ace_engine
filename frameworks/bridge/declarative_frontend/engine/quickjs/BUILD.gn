@@ -58,12 +58,8 @@ template("declarative_js_engine_qjs") {
     }
 
     # if napi support
-    if (platform != "windows" && platform != "mac") {
-      deps += [ "//foundation/ace/napi:ace_napi_quickjs" ]
-      public_deps = [ "//foundation/ace/napi:ace_napi" ]
-
-      external_deps = worker_deps
-    }
+    deps += [ "//foundation/ace/napi:ace_napi_quickjs" ]
+    public_deps = [ "//foundation/ace/napi:ace_napi" ]
   }
 }
 
@@ -77,7 +73,6 @@ foreach(item, ace_platforms) {
   foreach(engine, support_engines) {
     if (engine.engine_name == "qjs") {
       declarative_js_engine_qjs("declarative_js_engine_bridge_qjs_$platform") {
-        platform = item.name
         defines = engine.engine_defines
         config = {
         }
