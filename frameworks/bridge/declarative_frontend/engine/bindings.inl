@@ -83,6 +83,31 @@ void JSClassImpl<C, ImplDetail>::CustomMethod(const char* name, typename ImplDet
 
 template<typename C, template<typename> typename ImplDetail>
 template<typename T>
+void JSClassImpl<C, ImplDetail>::CustomProperty(
+    const char* name, typename ImplDetail<C>::template MemberFunctionGetCallback<T> getter,
+    typename ImplDetail<C>::template MemberFunctionSetCallback<T> setter)
+{
+    int getFuncId;
+    int setFuncId;
+    static_assert(std::is_base_of_v<T, C>, "Trying to bind an unrelated method!");
+    getFunctions_.emplace(nextFreeId_, new FunctionBinding(name, MethodOptions::NONE, getter));
+    setFunctions_.emplace(nextFreeId_, new FunctionBinding(name, MethodOptions::NONE, setter));
+    functions_.emplace(nextFreeId_, new FunctionBinding(name, MethodOptions::NONE, getter));
+    getFuncId = nextFreeId_++;
+    functions_.emplace(nextFreeId_, new FunctionBinding(name, MethodOptions::NONE, setter));
+    setFuncId = nextFreeId_++;
+    ImplDetail<C>::CustomProperty(name, getter, getFuncId, setFuncId);
+}
+
+template<typename C, template<typename> typename ImplDetail>
+void JSClassImpl<C, ImplDetail>::CustomProperty(const char* name, typename ImplDetail<C>::FunctionGetCallback getter,
+    typename ImplDetail<C>::FunctionSetCallback setter)
+{
+    ImplDetail<C>::CustomProperty(name, getter, setter);
+}
+
+template<typename C, template<typename> typename ImplDetail>
+template<typename T>
 void JSClassImpl<C, ImplDetail>::StaticMethod(
     const char* name, typename ImplDetail<C>::template MemberFunctionCallback<T> callback)
 {

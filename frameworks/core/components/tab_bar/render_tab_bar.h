@@ -34,7 +34,6 @@ class RenderTabBar : public RenderNode {
 
 public:
     ~RenderTabBar() override = default;
-    void UpdateTouchRect() override;
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;

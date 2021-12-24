@@ -28,14 +28,24 @@ void JSRadio::Create(const JSCallbackInfo& info)
         LOGE("radio create error, info is not-valid");
         return;
     }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto groupName = paramObject->GetProperty("group");
+    auto radioValue = paramObject->GetProperty("value");
     RefPtr<RadioTheme> radioTheme = GetTheme<RadioTheme>();
     auto radioComponent = AceType::MakeRefPtr<OHOS::Ace::RadioComponent<std::string>>(radioTheme);
-    radioComponent->SetValue(info[0]->ToString());
+    auto radioGroupName = groupName->ToString();
+    std::string value = radioValue->ToString();
+    radioComponent->SetValue(value);
+    auto radioGroupComponent = ViewStackProcessor::GetInstance()->GetRadioGroupCompnent();
+    radioComponent->SetGroupName(radioGroupName);
+    auto& radioGroup = (*radioGroupComponent)[radioGroupName];
+    radioGroup.SetIsDeclarative(true);
+    radioGroup.AddRadio(radioComponent);
     ViewStackProcessor::GetInstance()->Push(radioComponent);
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetDeliverMinToChild(true);
-    box->SetWidth(radioTheme->GetWidth() + radioTheme->GetHotZoneHorizontalPadding() * 2);
-    box->SetHeight(radioTheme->GetHeight() + radioTheme->GetHotZoneHorizontalPadding() * 2);
+    box->SetWidth(radioTheme->GetWidth());
+    box->SetHeight(radioTheme->GetHeight());
 }
 
 void JSRadio::JSBind(BindingTarget globalObj)
@@ -49,7 +59,7 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("size", &JSRadio::JsSize);
     JSClass<JSRadio>::StaticMethod("padding", &JSRadio::JsPadding);
     JSClass<JSRadio>::StaticMethod("onChange", &JSRadio::OnChange);
-    JSClass<JSRadio>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSRadio>::StaticMethod("onClick", &JSRadio::JsOnClick);
     JSClass<JSRadio>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRadio>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSRadio>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
@@ -59,16 +69,25 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::Bind<>(globalObj);
 }
 
-void JSRadio::Checked(const JSCallbackInfo& info)
+void JSRadio::Checked(bool checked)
 {
-    if (info.Length() < 1) {
-        LOGE("JSRadio checked, info is not-valid");
-        return;
-    }
     auto stack = ViewStackProcessor::GetInstance();
     auto radioComponent = AceType::DynamicCast<RadioComponent<std::string>>(stack->GetMainComponent());
-    radioComponent->SetOriginChecked(info[0]->ToBoolean());
+    if (checked) {
+        radioComponent->SetGroupValue(radioComponent->GetValue());
+        radioComponent->SetOriginChecked(checked);
+    } else {
+        radioComponent->SetGroupValue("");
+    }
 }
+
+void JSRadio::Checked(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        Checked(info[0]->ToBoolean());
+    }
+}
+
 
 void JSRadio::JsWidth(const JSCallbackInfo& info)
 {
@@ -203,9 +222,19 @@ void JSRadio::SetPadding(const Dimension& topDimen, const Dimension& leftDimen)
 
 void JSRadio::OnChange(const JSCallbackInfo& args)
 {
-    if (!JSViewBindEvent(&RadioComponent<std::string>::SetOnChange, args)) {
+    if (!JSViewBindEvent(&CheckableComponent::SetOnChange, args)) {
         LOGW("Failed to bind event");
     }
+    args.ReturnSelf();
+}
+
+void JSRadio::JsOnClick(const JSCallbackInfo& args)
+{
+    if (JSViewBindEvent(&CheckableComponent::SetOnClick, args)) {
+    } else {
+        LOGW("Failed to bind event");
+    }
+
     args.ReturnSelf();
 }
 

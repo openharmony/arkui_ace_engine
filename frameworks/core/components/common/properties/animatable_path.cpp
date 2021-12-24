@@ -82,9 +82,15 @@ void AnimatablePath::AnimateTo(std::string endValue)
 
     animationController_->AddInterpolator(animation);
     auto onFinishEvent = animationOption_.GetOnFinishEvent();
-    if (!onFinishEvent.IsEmpty()) {
-        animationController_->AddStopListener(
-            [onFinishEvent, weakContext = context_] { AceAsyncEvent<void()>::Create(onFinishEvent, weakContext)(); });
+    if (onFinishEvent) {
+        animationController_->AddStopListener([onFinishEvent, weakContext = context_] {
+            auto context = weakContext.Upgrade();
+            if (context) {
+                context->PostAsyncEvent(onFinishEvent);
+            } else {
+                LOGE("the context is null");
+            }
+        });
     }
     animationController_->SetDuration(animationOption_.GetDuration());
     animationController_->SetStartDelay(animationOption_.GetDelay());

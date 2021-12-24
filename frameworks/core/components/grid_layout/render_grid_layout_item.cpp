@@ -102,4 +102,28 @@ void RenderGridLayoutItem::SetRowSpan(int32_t rowSpan)
     rowSpan_ = rowSpan;
 }
 
+void RenderGridLayoutItem::OnLongPressEvent()
+{
+    if (!OnItemLongPressed_) {
+        LOGE("%{public}s OnItemLongPressed_ is null.", __PRETTY_FUNCTION__);
+        return;
+    }
+
+    OnItemLongPressed_(index_, AceType::WeakClaim(this));
+}
+
+void RenderGridLayoutItem::SetOnItemLongPressed(const OnItemLongPressed& func)
+{
+    if (!func) {
+        LOGE("%{public}s func is null.", __PRETTY_FUNCTION__);
+    }
+    if (!OnItemLongPressed_) {
+        LOGI("%{public}s OnItemLongPressed_ is null before.", __PRETTY_FUNCTION__);
+    }
+    OnItemLongPressed_ = func;
+    if (!OnItemLongPressed_) {
+        LOGE("%{public}s OnItemLongPressed_ is null after.", __PRETTY_FUNCTION__);
+    }
+}
+
 } // namespace OHOS::Ace

@@ -67,6 +67,7 @@ constexpr int32_t WINDOW_WIDTH_DEFAULT = 1;
 #else
 constexpr float ILLEGAL_SPEED = 0.0f;
 #endif
+constexpr int32_t COMPATIBLE_VERSION = 5;
 
 } // namespace
 
@@ -1520,11 +1521,12 @@ void VideoElement::FullScreen()
                         composedComponent->GetName() + "fullscreen", composedComponent->GetChild()));
                 }
                 isFullScreen_ = true;
+                currentPlatformVersion_ = context->GetMinPlatformVersion();
+                if (player_ && currentPlatformVersion_ > COMPATIBLE_VERSION) {
 #ifndef OHOS_STANDARD_SYSTEM
-                if (player_) {
                     player_->SetDirection(direction_);
-                }
 #endif
+                }
                 if (onFullScreenChange_) {
                     std::string param;
                     if (IsDeclarativePara()) {
@@ -1560,11 +1562,12 @@ void VideoElement::ExitFullScreen()
             return;
         }
         stackElement->PopComponent();
+        currentPlatformVersion_ = context->GetMinPlatformVersion();
+        if (player_ && currentPlatformVersion_ > COMPATIBLE_VERSION) {
 #ifndef OHOS_STANDARD_SYSTEM
-        if (player_) {
             player_->SetLandscape();
-        }
 #endif
+        }
         isFullScreen_ = false;
         if (onFullScreenChange_) {
             std::string param;

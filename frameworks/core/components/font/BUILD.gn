@@ -19,5 +19,12 @@ build_component("font") {
     "flutter_font_collection.cpp",
     "flutter_font_loader.cpp",
     "flutter_font_manager.cpp",
+    "font_loader_creator.cpp",
+    "font_manager_creator.cpp",
+  ]
+  rosen_sources = [
+    "rosen_font_collection.cpp",
+    "rosen_font_loader.cpp",
+    "rosen_font_manager.cpp",
   ]
 }

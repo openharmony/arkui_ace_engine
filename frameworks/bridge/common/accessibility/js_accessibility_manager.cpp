@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/common/accessibility/js_accessibility_manager.h"
+#include <string>
 
 #include "accessibility_ability_client.h"
 #include "accessibility_system_ability_client.h"
@@ -188,6 +189,51 @@ void UpdateDeclarativeAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& nod
 
     if (!node->GetAccessibilityHint().empty()) {
         nodeInfo.text = nodeInfo.text + "," + node->GetAccessibilityLabel();
+    }
+}
+
+void UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node, AccessibilityNodeInfo& nodeInfo,
+    const RefPtr<JsAccessibilityManager>& manager)
+{
+    if (!node) {
+        return;
+    }
+    if (!(node->WithoutActionUpdateIds())) {
+        auto context = manager->GetPipelineContext().Upgrade();
+        if (context) {
+            context->GetTaskExecutor()->PostSyncTask(
+                [&node]() { node->ActionUpdateIds(); }, TaskExecutor::TaskType::UI);
+        }
+    }
+    auto children = node->GetChildList();
+    std::vector<int32_t> childrenVec;
+    auto cardId = manager->GetCardId();
+    auto rootNodeId = manager->GetRootNodeId();
+
+    // get last stack children to barrier free service.
+    if ((node->GetNodeId() == rootNodeId + ROOT_STACK_BASE) && !children.empty()) {
+        auto lastChildNodeId = children.back()->GetNodeId();
+        if (manager->isOhosHostCard()) {
+            childrenVec.emplace_back(ConvertToCardAccessibilityId(lastChildNodeId, cardId, rootNodeId));
+        } else {
+            childrenVec.emplace_back(lastChildNodeId);
+        }
+    } else {
+        childrenVec.resize(children.size());
+        if (manager->isOhosHostCard()) {
+            std::transform(children.begin(), children.end(), childrenVec.begin(),
+                [cardId, rootNodeId](const RefPtr<AccessibilityNode>& child) {
+                    return ConvertToCardAccessibilityId(child->GetNodeId(), cardId, rootNodeId);
+                });
+        } else {
+            std::transform(children.begin(), children.end(), childrenVec.begin(),
+                [](const RefPtr<AccessibilityNode>& child) { return child->GetNodeId(); });
+        }
+    }
+    bool visible = node->GetShown() && node->GetVisible();
+    if (!node->GetAccessible() && node->GetImportantForAccessibility() != IMPORTANT_NO_HIDE_DES && visible) {
+        nodeInfo.childIDs = std::move(childrenVec);
+        nodeInfo.childCount = nodeInfo.childIDs.size();
     }
 }
 
@@ -729,6 +775,9 @@ void JsAccessibilityManager::DumpTree(int32_t depth, NodeId nodeID)
         info.append(node->GetText());
     }
     DumpLog::GetInstance().AddDesc(info);
+    DumpLog::GetInstance().AddDesc("width: " + std::to_string(node->GetWidth()));
+    DumpLog::GetInstance().AddDesc("height: " + std::to_string(node->GetHeight()));
+    DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->GetShown() && node->GetVisible()));
     DumpLog::GetInstance().Print(depth, node->GetTag(), node->GetChildList().size());
     for (const auto& item : node->GetChildList()) {
         DumpTree(depth + 1, item->GetNodeId());

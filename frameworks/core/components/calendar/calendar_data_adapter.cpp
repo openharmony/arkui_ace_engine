@@ -471,7 +471,7 @@ void CalendarDataAdapter::FillNextMonthData(
 {
     auto nextMonth = CalendarMonth::GetNextMonth(currentMonth);
     // The number of days the month view needs to be displayed
-    const int32_t daysOfCalendar = result.days.size() < 35 ? 35 : 42;
+    const int32_t daysOfCalendar = result.days.size() <= 35 ? 35 : 42;
     int32_t indexOfNextMonth = 0;
     while ((int32_t)result.days.size() < daysOfCalendar) {
         CalendarDay dayInfo;

@@ -32,11 +32,6 @@ constexpr Dimension SHADOW_OFFSET = 10.0_vp;
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderShadow::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderShadow>();
-}
-
 RenderLayer FlutterRenderShadow::GetRenderLayer()
 {
     if (!layer_) {

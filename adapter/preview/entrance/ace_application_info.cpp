@@ -80,6 +80,10 @@ AceApplicationInfoImpl& AceApplicationInfoImpl::GetInstance()
     return instance;
 }
 
+void AceApplicationInfoImpl::SetDebug(bool isDebugVersion, bool needDebugBreakpoint)
+{
+}
+
 } // namespace OHOS::Ace::Platform
 
 namespace OHOS::Ace {

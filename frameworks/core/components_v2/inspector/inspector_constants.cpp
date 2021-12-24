@@ -77,7 +77,7 @@ const char TAB_CONTENT_ITEM_ETS_TAG[] = "TabContent";
 
 // navigation view
 const char NAVIGATION_VIEW_COMPONENT_TAG[] = "NavigationContainerComponent";
-const char NAVIGATION_VIEW_ETS_TAG[] = "NavigationView";
+const char NAVIGATION_VIEW_ETS_TAG[] = "Navigation";
 
 // row split
 const char ROW_SPLIT_COMPONENT_TAG[] = "RowSplitComponent";
@@ -134,7 +134,7 @@ const char SHAPE_CONTAINER_COMPONENT_TAG[] = "ShapeContainerComponent";
 const char SHAPE_CONTAINER_ETS_TAG[] = "Shape";
 
 // imageAnimator
-const char IMAGE_ANIMATOR_COMPONENT_TAG[] = "ImageAnimatorComponent";
+const char IMAGE_ANIMATOR_COMPONENT_TAG[] = "ImageAnimator";
 const char IMAGE_ANIMATOR_ETS_TAG[] = "ImageAnimator";
 
 // image
@@ -180,7 +180,6 @@ const char SCROLL_ETS_TAG[] = "Scroll";
 // calendar
 ACE_EXPORT extern const char CALENDAR_COMPONENT_TAG[] = "CalendarComponentV2";
 ACE_EXPORT extern const char CALENDAR_ETS_TAG[] = "Calendar";
-ACE_EXPORT extern const char CALENDAR_COMPONENT_NAME[] = "calendar";
 
 // badge
 const char BADGE_COMPONENT_TAG[] = "BadgeComponent";
@@ -191,7 +190,7 @@ const char SEARCH_COMPONENT_TAG[] = "SearchComponent";
 const char SEARCH_ETS_TAG[] = "Search";
 
 // formComponent
-const char FORM_COMPONENT_TAG[] = "card";
+const char FORM_COMPONENT_TAG[] = "FormComponent";
 const char FORM_ETS_TAG[] = "FormComponent";
 
 // video
@@ -215,7 +214,54 @@ ACE_EXPORT extern const char PROGRESS_COMPONENT_TAG[] = "ProgressComponent";
 ACE_EXPORT extern const char PROGRESS_ETS_TAG[] = "Progress";
 
 // datapanel
-ACE_EXPORT extern const char DATA_PANEL_COMPONENT_TAG[] = "percentageDataPanelComponent";
+ACE_EXPORT extern const char DATA_PANEL_COMPONENT_TAG[] = "PercentageDataPanelComponent";
 ACE_EXPORT extern const char DATA_PANEL_ETS_TAG[] = "DataPanel";
+
+// sheet
+ACE_EXPORT extern const char SHEET_COMPONENT_TAG[] = "SheetComponent";
+ACE_EXPORT extern const char SHEET_ETS_TAG[] = "Sheet";
+
+// hyperlink
+ACE_EXPORT extern const char HYPERLINK_COMPONENT_TAG[] = "HyperlinkComponent";
+ACE_EXPORT extern const char HYPERLINK_ETS_TAG[] = "Hyperlink";
+
+// stepper
+ACE_EXPORT extern const char STEPPER_COMPONENT_TAG[] = "StepperComponent";
+ACE_EXPORT extern const char STEPPER_ETS_TAG[] = "Stepper";
+
+// scrollbar
+ACE_EXPORT extern const char SCROLL_BAR_COMPONENT_TAG[] = "ScrollBarComponent";
+ACE_EXPORT extern const char SCROLL_BAR_ETS_TAG[] = "ScrollBar";
+
+// refresh
+ACE_EXPORT extern const char REFRESH_COMPONENT_TAG[] = "RefreshComponent";
+ACE_EXPORT extern const char REFRESH_ETS_TAG[] = "Refresh";
+
+// datePicker
+ACE_EXPORT extern const char DATE_PICKER_COMPONENT_TAG[] = "PickerDateComponent";
+ACE_EXPORT extern const char DATE_PICKER_ETS_TAG[] = "DatePicker";
+ACE_EXPORT extern const char TIME_PICKER_COMPONENT_TAG[] = "PickerTimeComponent";
+ACE_EXPORT extern const char TIME_PICKER_ETS_TAG[] = "DatePicker";
+
+// Radio
+ACE_EXPORT extern const char RADIO_COMPONENT_TAG[] = "RadioComponent<VALUE_TYPE>";
+ACE_EXPORT extern const char RADIO_ETS_TAG[] = "Radio";
+
+// gridContainer
+ACE_EXPORT extern const char GRIDCONTAINER_COMPONENT_TAG[] = "GridContainer";
+ACE_EXPORT extern const char GRIDCONTAINER_ETS_TAG[] = "GridContainer";
+
+// menu
+ACE_EXPORT extern const char MENU_COMPONENT_TAG[] = "MenuComponent";
+ACE_EXPORT extern const char MENU_TAG[] = "menu";
+ACE_EXPORT extern const char MENU_ETS_TAG[] = "Menu";
+
+// textarea
+ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[] = "TextFieldComponent";
+ACE_EXPORT extern const char TEXTAREA_ETS_TAG[] = "Textarea";
+
+// textinput
+ACE_EXPORT extern const char TEXTINPUT_COMPONENT_TAG[] = "TextInput";
+ACE_EXPORT extern const char TEXTINPUT_ETS_TAG[] = "Textinput";
 
 } // namespace OHOS::Ace::V2

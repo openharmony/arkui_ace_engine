@@ -23,9 +23,10 @@ namespace OHOS::Ace::Framework {
 
 enum class ProgressStyle {
     Linear,
-    Capsule,
+    Ring,
     Eclipse,
-    Circular
+    ScaleRing,
+    Capsule,
 };
 
 class JSProgress : public JSViewAbstract {
@@ -36,6 +37,7 @@ public:
     static void SetValue(double value);
     static void SetColor(const JSCallbackInfo& info);
     static void SetCircularStyle(const JSCallbackInfo& info);
+    static void JsBackgroundColor(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

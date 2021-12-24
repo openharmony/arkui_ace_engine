@@ -47,7 +47,7 @@ public:
     void SetSrc(const std::string& src);
     void SetAlt(const std::string& alt);
     void SetAlignment(const Alignment& alignment);
-    void SetColor(const Color& color);
+    void SetColor(const std::optional<Color>& color);
     void SetLoadSuccessEvent(const EventMarker& loadSuccessEvent);
     void SetLoadFailEvent(const EventMarker& loadFailEvent);
     void SetSvgAnimatorFinishEvent(const EventMarker& svgAnimatorFinishEvent);
@@ -64,18 +64,19 @@ public:
     void SetUseSkiaSvg(bool useSkiaSvg);
     void SetPixmap(const RefPtr<PixelMap>& pixmap);
     void SetAutoResize(bool autoResize);
+    void SetSyncMode(bool syncMode);
+    bool GetSyncMode();
 
     const std::string& GetAlt() const;
     const Alignment& GetAlignment() const;
     const std::string& GetSrc() const;
-    const Color& GetColor() const;
+    const std::optional<Color>& GetColor() const;
     const Border& GetBorder() const;
     const EventMarker& GetLoadSuccessEvent() const;
     const EventMarker& GetLoadFailEvent() const;
     const EventMarker& GetSvgAnimatorFinishEvent() const;
     InternalResource::ResourceId GetResourceId() const;
     bool GetFitMaxSize() const;
-    bool IsColorSet() const;
     bool IsMatchTextDirection() const;
     bool IsSrcSvgImage() const;
     ImageFit GetImageFit() const;
@@ -91,7 +92,7 @@ public:
     bool GetHasObjectPosition() const;
     void SetImageObjectPosition(const ImageObjectPosition& imageObjectPosition);
     const ImageObjectPosition& GetImageObjectPosition() const;
-    std::optional<Color> GetImageFill() const;
+    const std::optional<Color>& GetImageFill() const;
 
     static RefPtr<ImageComponent> MakeFromOtherWithoutSourceAndEvent(const RefPtr<ImageComponent>& other);
 
@@ -100,10 +101,10 @@ private:
     std::string alt_;
     Alignment alignment_ = Alignment::CENTER;
     ImageObjectPosition imageObjectPosition_;
-    Color color_ = Color::TRANSPARENT;
-    Color fillColor_ = Color::TRANSPARENT;
-    bool isColorSet_ = false;
-    bool isFillSet_ = false;
+
+    std::optional<Color> color_;
+    std::optional<Color> fillColor_; // used for paint svg path.
+
     EventMarker loadSuccessEvent_;
     EventMarker loadFailEvent_;
     EventMarker svgAnimatorFinishEvent_;
@@ -122,6 +123,7 @@ private:
     ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
     std::pair<Dimension, Dimension> imageSourceSize_ = std::pair<Dimension, Dimension>(Dimension(-1), Dimension(-1));
     RefPtr<PixelMap> pixmap_ = nullptr;
+    bool syncMode_ = false;
 };
 
 } // namespace OHOS::Ace

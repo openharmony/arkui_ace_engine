@@ -89,6 +89,8 @@ void SlidingPanelComponentV2::BuildInnerChild()
     boxForContent->SetFrontDecoration(frontDecoration);
     boxForContent->SetChild(column);
     SetChildDirectly(boxForContent);
+
+    Component::MergeRSNode(boxForContent, column);
 }
 
 } // namespace OHOS::Ace

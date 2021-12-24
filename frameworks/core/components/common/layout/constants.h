@@ -301,9 +301,11 @@ enum class SrcType {
     NETWORK,
     MEMORY,
     BASE64,
-    INTERNAL,
+    INTERNAL, // internal cached file resource
     RESOURCE,
     DATA_ABILITY,
+    RESOURCE_ID, // default resource which src is internal resource id
+    PIXMAP,
 };
 
 enum class WrapAlignment {

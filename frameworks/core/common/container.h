@@ -24,6 +24,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/frontend.h"
 #include "core/common/platform_res_register.h"
+#include "core/common/settings.h"
 #include "core/common/window.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -133,6 +134,11 @@ public:
         return cardHapPath_;
     }
 
+    Settings& GetSettings()
+    {
+        return settings_;
+    }
+
     virtual void SetViewFirstUpdating(std::chrono::time_point<std::chrono::high_resolution_clock> time) {}
 
     virtual void UpdateResourceConfiguration(const std::string& jsonStr) {}
@@ -150,6 +156,7 @@ protected:
 private:
     static thread_local int32_t currentId_;
     std::string moduleName_;
+    Settings settings_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

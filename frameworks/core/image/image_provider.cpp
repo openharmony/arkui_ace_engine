@@ -42,12 +42,11 @@ void ImageProvider::FetchImageObject(
     bool syncMode,
     bool useSkiaSvg,
     bool needAutoResize,
-    const std::optional<Color>& color,
     RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     OnPostBackgroundTask onBackgroundTaskPostCallback)
 {
-    auto task = [ context, imageInfo, successCallback, failedCallback, useSkiaSvg, color, &renderTaskHolder,
-        uploadSuccessCallback, needAutoResize] () {
+    auto task = [ context, imageInfo, successCallback, failedCallback, useSkiaSvg, renderTaskHolder,
+        uploadSuccessCallback, needAutoResize] () mutable {
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
             LOGE("pipline context has been released. imageInfo: %{private}s", imageInfo.ToString().c_str());
@@ -60,7 +59,7 @@ void ImageProvider::FetchImageObject(
         }
         RefPtr<ImageObject> imageObj = QueryImageObjectFromCache(imageInfo, pipelineContext);
         if (!imageObj) { // if image object is not in cache, generate a new one.
-            imageObj = GeneraterAceImageObject(imageInfo, pipelineContext, useSkiaSvg, color);
+            imageObj = GeneraterAceImageObject(imageInfo, pipelineContext, useSkiaSvg);
         }
         if (!imageObj) { // if it fails to generate an image object, trigger fail callback.
             taskExecutor->PostTask([failedCallback, imageInfo] { failedCallback(imageInfo); },
@@ -100,8 +99,7 @@ RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(
 RefPtr<ImageObject> ImageProvider::GeneraterAceImageObject(
     const ImageSourceInfo& imageInfo,
     const RefPtr<PipelineContext> context,
-    bool useSkiaSvg,
-    const std::optional<Color>& color)
+    bool useSkiaSvg)
 {
     auto imageData = LoadImageRawData(imageInfo, context);
 
@@ -110,7 +108,7 @@ RefPtr<ImageObject> ImageProvider::GeneraterAceImageObject(
         return nullptr;
     }
 
-    return ImageObject::BuildImageObject(imageInfo, context, imageData, useSkiaSvg, color);
+    return ImageObject::BuildImageObject(imageInfo, context, imageData, useSkiaSvg);
 }
 
 sk_sp<SkData> ImageProvider::LoadImageRawData(
@@ -147,7 +145,7 @@ sk_sp<SkData> ImageProvider::LoadImageRawData(
         LOGE("imageLoader create failed. imageInfo: %{private}s", imageInfo.ToString().c_str());
         return nullptr;
     }
-    auto data = imageLoader->LoadImageData(imageInfo.GetSrc(), context);
+    auto data = imageLoader->LoadImageData(imageInfo, context);
     if (data && imageCache) {
         // cache sk data.
         imageCache->CacheImageData(imageInfo.GetSrc(), AceType::MakeRefPtr<SkiaCachedImageData>(data));
@@ -173,12 +171,13 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(
         if (!taskExecutor) {
             return;
         }
-        auto imageLoader = ImageLoader::CreateImageLoader(ImageSourceInfo(src));
+        ImageSourceInfo info(src);
+        auto imageLoader = ImageLoader::CreateImageLoader(info);
         if (!imageLoader) {
             LOGE("load image failed when create image loader. src: %{private}s", src.c_str());
             return;
         }
-        auto imageData = imageLoader->LoadImageData(src, context);
+        auto imageData = imageLoader->LoadImageData(info, context);
         if (imageData) {
             const auto svgStream = std::make_unique<SkMemoryStream>(std::move(imageData));
             if (svgStream) {
@@ -342,14 +341,14 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
     SkBitmap scaledBitmap;
     if (!scaledBitmap.tryAllocPixels(scaledImageInfo)) {
         LOGE("Could not allocate bitmap when attempting to scale. srcKey: %{private}s, destination size: [%{public}d x"
-            " %{public}d], raw image size: [%{public}d x %{public}d]", srcKey.c_str(), dstWidth, dstHeight,
-            rawImage->width(), rawImage->height());
+            " %{public}d], raw image size: [%{public}d x %{public}d]",
+            srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
         return rawImage;
     }
     if (!rawImage->scalePixels(scaledBitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint)) {
         LOGE("Could not scale pixels srcKey: %{private}s, destination size: [%{public}d x"
-            " %{public}d], raw image size: [%{public}d x %{public}d]", srcKey.c_str(), dstWidth,
-            dstHeight, rawImage->width(), rawImage->height());
+            " %{public}d], raw image size: [%{public}d x %{public}d]",
+            srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
         return rawImage;
     }
     // Marking this as immutable makes the MakeFromBitmap call share the pixels instead of copying.
@@ -368,8 +367,8 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
         return scaledImage;
     }
     LOGE("Could not create a scaled image from a scaled bitmap. srcKey: %{private}s, destination size: [%{public}d x"
-        " %{public}d], raw image size: [%{public}d x %{public}d]", srcKey.c_str(), dstWidth, dstHeight,
-        rawImage->width(), rawImage->height());
+        " %{public}d], raw image size: [%{public}d x %{public}d]",
+        srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
     return rawImage;
 }
 
@@ -378,8 +377,9 @@ sk_sp<SkImage> ImageProvider::GetSkImage(
     const WeakPtr<PipelineContext> context,
     Size targetSize)
 {
-    auto imageLoader = ImageLoader::CreateImageLoader(ImageSourceInfo(src));
-    auto imageSkData = imageLoader->LoadImageData(src, context);
+    ImageSourceInfo info(src);
+    auto imageLoader = ImageLoader::CreateImageLoader(info);
+    auto imageSkData = imageLoader->LoadImageData(info, context);
     if (!imageSkData) {
         LOGE("fetch data failed. src: %{private}s", src.c_str());
         return nullptr;
@@ -393,35 +393,20 @@ sk_sp<SkImage> ImageProvider::GetSkImage(
     return image;
 }
 
-void ImageProvider::CanLoadImage(
-    const RefPtr<PipelineContext>& context,
-    const std::string& src,
-    const std::map<std::string, EventMarker>& callbacks)
+void ImageProvider::TryLoadImageInfo(const RefPtr<PipelineContext>& context, const std::string& src,
+    std::function<void(bool, int32_t, int32_t)>&& loadCallback)
 {
-    if (callbacks.find("success") == callbacks.end() || callbacks.find("fail") == callbacks.end()) {
-        return;
-    }
-    auto onSuccess = AceAsyncEvent<void()>::Create(callbacks.at("success"), context);
-    auto onFail = AceAsyncEvent<void()>::Create(callbacks.at("fail"), context);
-    BackgroundTaskExecutor::GetInstance().PostTask([src, onSuccess, onFail, context]() {
+    BackgroundTaskExecutor::GetInstance().PostTask([src, callback = std::move(loadCallback), context]() {
         auto taskExecutor = context->GetTaskExecutor();
         if (!taskExecutor) {
             return;
         }
         auto image = ImageProvider::GetSkImage(src, context);
         if (image) {
-            taskExecutor->PostTask(
-                [onSuccess] {
-                    onSuccess();
-                },
-                TaskExecutor::TaskType::UI);
+            callback(true, image->width(), image->height());
             return;
         }
-        taskExecutor->PostTask(
-            [onFail] {
-                onFail();
-            },
-            TaskExecutor::TaskType::UI);
+        callback(false, 0, 0);
     });
 }
 

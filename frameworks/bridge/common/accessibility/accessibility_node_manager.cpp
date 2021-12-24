@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 
+#include "base/geometry/dimension_offset.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
@@ -215,6 +216,11 @@ int32_t AccessibilityNodeManager::GenerateNextAccessibilityId()
 RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateSpecializedNode(
     const std::string& tag, int32_t nodeId, int32_t parentNodeId)
 {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    if (IsDeclarative()) {
+        return nullptr;
+    }
+#endif
     if (nodeId < ROOT_STACK_BASE) {
         return nullptr;
     }
@@ -254,23 +260,25 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateDeclarativeAccessibili
             }
         }
     }
-
-    auto accessibilityNode = AceType::MakeRefPtr<AccessibilityNode>(nodeId, tag);
+    auto accessibilityNode = GetAccessibilityNodeById(nodeId);
+    if (!accessibilityNode) {
+        accessibilityNode = AceType::MakeRefPtr<AccessibilityNode>(nodeId, tag);
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            auto result = accessibilityNodes_.try_emplace(nodeId, accessibilityNode);
+            if (!result.second) {
+                LOGW("the accessibility node has already in the map");
+                return nullptr;
+            }
+        }
+    }
+    accessibilityNode->SetTag(tag);
     accessibilityNode->SetIsRootNode(nodeId == rootNodeId_);
     accessibilityNode->SetPageId(rootNodeId_ - DOM_ROOT_NODE_ID_BASE);
     accessibilityNode->SetFocusableState(true);
     if (parentNode) {
         accessibilityNode->SetParentNode(parentNode);
         accessibilityNode->Mount(itemIndex);
-    }
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        auto result = accessibilityNodes_.try_emplace(nodeId, accessibilityNode);
-
-        if (!result.second) {
-            LOGW("the accessibility node has already in the map");
-            return nullptr;
-        }
     }
     return accessibilityNode;
 }
@@ -511,6 +519,31 @@ void AccessibilityNodeManager::SetCardViewPosition(int id, float offsetX, float 
     isOhosHostCard_ = true;
     LOGD(
         "setcardview id=%{public}d offsetX=%{public}f, offsetY=%{public}f", id, cardOffset_.GetX(), cardOffset_.GetY());
+}
+
+void AccessibilityNodeManager::UpdateEventTarget(NodeId id, BaseEventInfo& info)
+{
+    auto composedElement = GetComposedElementFromPage(id);
+    auto inspector = AceType::DynamicCast<V2::InspectorComposedElement>(composedElement.Upgrade());
+    if (!inspector) {
+        LOGE("this is not Inspector composed element");
+        return;
+    }
+    auto rectInLocal = inspector->GetRenderRectInLocal();
+    auto rectInGlobal = inspector->GetRenderRect();
+    auto marginLeft = inspector->GetMargin(AnimatableType::PROPERTY_MARGIN_LEFT).ConvertToPx();
+    auto marginRight = inspector->GetMargin(AnimatableType::PROPERTY_MARGIN_RIGHT).ConvertToPx();
+    auto marginTop = inspector->GetMargin(AnimatableType::PROPERTY_MARGIN_TOP).ConvertToPx();
+    auto marginBottom = inspector->GetMargin(AnimatableType::PROPERTY_MARGIN_BOTTOM).ConvertToPx();
+    auto& target = info.GetTargetWichModify();
+    auto Localoffset = rectInLocal.GetOffset();
+    target.area.SetOffset(DimensionOffset(
+        Offset(Localoffset.GetX() + marginLeft, Localoffset.GetY() + marginTop)));
+    auto globalOffset = rectInGlobal.GetOffset();
+    target.origin =
+        DimensionOffset(Offset(globalOffset.GetX() - Localoffset.GetX(), globalOffset.GetY() - Localoffset.GetY()));
+    target.area.SetWidth(Dimension(rectInLocal.Width() - marginLeft - marginRight));
+    target.area.SetHeight(Dimension(rectInLocal.Height() - marginTop - marginBottom));
 }
 
 bool AccessibilityNodeManager::IsDeclarative()

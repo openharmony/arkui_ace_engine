@@ -35,12 +35,10 @@ public:
     void PerformLayout() override;
     void OnStatusChanged(RenderStatus renderStatus) override;
     void OnPaintFinish() override;
-
 protected:
     bool MouseHoverTest(const Point& parentLocalPoint) override;
     void OnMouseHoverEnterTest() override;
     void OnMouseHoverExitTest() override;
-
     RefPtr<PieceComponent> pieceComponent_;
 
 private:

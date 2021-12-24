@@ -17,11 +17,13 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
+#include "core/components/display/display_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/navigation_bar/navigation_bar_element.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/stack/stack_component.h"
+#include "core/components/transform/transform_component.h"
 #include "core/gestures/click_recognizer.h"
 #ifdef WEARABLE_PRODUCT
 #include "core/components/box/box_component.h"
@@ -54,78 +56,6 @@ constexpr double WATCH_SUBTITLE_PADDING_TOP = 2.0;
 constexpr double WATCH_PADDING_BETWEEN_LOGO_AND_SUBTITLE = 8.0;
 constexpr Dimension WATCH_TITLE_MIN_SIZE = 16.0_fp;
 constexpr Dimension WATCH_SUBTITLE_MIN_SIZE = 13.0_fp;
-
-struct IconImage {
-    IconImage(InternalResource::ResourceId resourceId, const Dimension& width, const Dimension& height)
-        : resourceId(resourceId), width(width), height(height), image(AceType::MakeRefPtr<ImageComponent>(resourceId))
-    {
-        image->SetWidth(width);
-        image->SetHeight(height);
-    };
-    IconImage(const std::string& src, const Dimension& width, const Dimension& height,
-        std::optional<Color> imageFill = std::nullopt)
-        : src(src), width(width), height(height), image(AceType::MakeRefPtr<ImageComponent>(src))
-    {
-        image->SetWidth(width);
-        image->SetHeight(height);
-        image->SetImageFill(imageFill);
-    };
-    ~IconImage() = default;
-
-    InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID;
-    std::string src;
-    Dimension width;
-    Dimension height;
-    RefPtr<ImageComponent> image;
-};
-
-#ifndef WEARABLE_PRODUCT
-RefPtr<ButtonComponent> BuildIconButton(const RefPtr<NavigationBarTheme>& theme, const Dimension& width,
-    const Dimension& height, const IconImage& icon, const EventMarker& clickMarker = EventMarker())
-{
-    std::list<RefPtr<Component>> buttonChildren;
-    buttonChildren.emplace_back(icon.image);
-    auto button = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
-    button->SetType(ButtonType::NORMAL);
-    button->SetWidth(width);
-    button->SetHeight(height);
-    button->SetBackgroundColor(theme->GetButtonNormalColor());
-    button->SetClickedColor(theme->GetButtonPressedColor());
-    button->SetFocusColor(theme->GetButtonFocusColor());
-    button->SetHoverColor(theme->GetButtonHoverColor());
-    button->SetClickedEventId(clickMarker);
-    button->SetRectRadius(theme->GetButtonCornerRadius());
-    return button;
-}
-
-RefPtr<TextComponent> BuildTitleText(
-    const std::string& value, const Color& color, const Dimension& fontSize, const FontWeight& fontWeight)
-{
-    auto text = AceType::MakeRefPtr<TextComponent>(value);
-    TextStyle textStyle;
-    textStyle.SetTextColor(color);
-    textStyle.SetFontSize(fontSize);
-    textStyle.SetAllowScale(false);
-    textStyle.SetFontWeight(fontWeight);
-    textStyle.SetMaxLines(1);
-    textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
-    text->SetTextStyle(textStyle);
-    return text;
-}
-#endif
-
-RefPtr<PaddingComponent> BuildPadding(double size, bool isVertical = false)
-{
-    auto padding = AceType::MakeRefPtr<PaddingComponent>();
-    Edge edge;
-    if (isVertical) {
-        edge.SetBottom(Dimension(size, DimensionUnit::VP));
-    } else {
-        edge.SetRight(Dimension(size, DimensionUnit::VP));
-    }
-    padding->SetPadding(edge);
-    return padding;
-}
 
 RefPtr<TextComponent> BuildWatchTitleText(
     const std::string& value, const Color& color, const Dimension& fontSize, bool subtitle)
@@ -177,13 +107,17 @@ RefPtr<Component> PhoneTitleBarBuilder::BuildTitle(double padding)
         BuildSelectPopup(titleContainer);
     } else if (!title_.empty()) {
         auto titleText = BuildTitleText(title_, titleColor_, titleFontSize_, FontWeight::W500);
-        titleComposed_ = GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "titleText", titleText);
+        auto transform = AceType::MakeRefPtr<TransformComponent>();
+        transform->SetChild(titleText);
+        transform->SetOriginDimension(DimensionOffset(Offset(0.0, 0.0)));
+        titleComposed_ = GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "titleText", transform);
         titleContainer->AppendChild(titleComposed_);
     }
     if (!subTitle_.empty()) {
         titleContainer->AppendChild(BuildPadding(2, true));
         auto subTitleText = BuildTitleText(subTitle_, subTitleColor_, subTitleFontSize_, FontWeight::W400);
-        subTitleComposed_ = GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "subTitleText", subTitleText);
+        auto display = AceType::MakeRefPtr<DisplayComponent>(subTitleText);
+        subTitleComposed_ = GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "subTitleText", display);
         titleContainer->AppendChild(subTitleComposed_);
     }
 
@@ -241,7 +175,7 @@ void TitleBarMenuBuilder::MoveMenuItemsToBar(const RefPtr<ComponentGroup>& conta
 void TitleBarMenuBuilder::AddCollapseMenu(const RefPtr<ComponentGroup>& container)
 {
     IconImage moreIcon(theme_->GetMoreResourceId(), menuIconSize_, menuIconSize_);
-    moreIcon.image->SetColor(theme_->GetMenuIconColor());
+    moreIcon.image->SetImageFill(theme_->GetMenuIconColor());
     moreButton_ = BuildIconButton(theme_, menuZoneSize_, menuZoneSize_, moreIcon);
     container->AppendChild(GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "moreButton", moreButton_));
     container->AppendChild(menu_);
@@ -268,7 +202,11 @@ void PhoneTitleBarBuilder::BuildSelectPopup(const RefPtr<ComponentGroup>& parent
     selectPopup_->SetInnerPadding(Edge());
     selectPopup_->SetClickedColor(Color::TRANSPARENT);
     selectBox->SetChild(selectPopup_);
-    titleComposed_ = GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "select", selectBox);
+
+    auto transform = AceType::MakeRefPtr<TransformComponent>();
+    transform->SetChild(selectBox);
+    transform->SetOriginDimension(DimensionOffset(Offset(0.0, 0.0)));
+    titleComposed_ = GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "select", transform);
     parent->AppendChild(titleComposed_);
 }
 
@@ -372,6 +310,7 @@ RefPtr<Component> NormalTitleBarBuilder::Build()
     RefPtr<RowComponent> container =
         AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, std::list<RefPtr<Component>>());
     container->SetTextDirection(direction_);
+    container->SetUpdateType(UpdateType::REBUILD);
 
     if (backEnabled_) {
         titleFontSize_ = Dimension(20, DimensionUnit::VP);
@@ -526,28 +465,6 @@ RefPtr<Component> WatchTitleBarBuilder::Build()
 
     BuildSubTitle(container);
     return container;
-}
-
-RefPtr<ComposedComponent> CommonBuilder::GenerateAccessibilityComposed(
-    int32_t parentId, const std::string& name, const RefPtr<Component>& child)
-{
-    const auto& pipelineContext = context_.Upgrade();
-    if (!pipelineContext) {
-        return nullptr;
-    }
-
-    const auto& accessibilityManager = pipelineContext->GetAccessibilityManager();
-    if (accessibilityManager) {
-        auto composedId = accessibilityManager->GenerateNextAccessibilityId();
-        auto node = accessibilityManager->CreateSpecializedNode(name, composedId, parentId);
-        if (node) {
-            node->SetFocusableState(true);
-        }
-        auto box = AceType::MakeRefPtr<BoxComponent>();
-        box->SetChild(child);
-        return AceType::MakeRefPtr<ComposedComponent>(std::to_string(composedId), name, box);
-    }
-    return nullptr;
 }
 
 RefPtr<Component> NavigationBarComponent::Build(const WeakPtr<PipelineContext>& context)

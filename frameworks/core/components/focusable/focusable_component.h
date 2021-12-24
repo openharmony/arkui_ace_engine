@@ -78,6 +78,33 @@ public:
         onBlurId_ = onBlurId;
     }
 
+    std::function<void(int)> GetOnFocusMove() const
+    {
+        return onFocusMove_;
+    }
+    void SetOnFocusMove(const std::function<void(int)>& onFocusMove)
+    {
+        onFocusMove_ = onFocusMove;
+    }
+
+    std::function<void()> GetOnFocus() const
+    {
+        return onFocus_;
+    }
+    void SetOnFocus(const std::function<void()>& onFocus)
+    {
+        onFocus_ = onFocus;
+    }
+
+    std::function<void()> GetOnBlur() const
+    {
+        return onBlur_;
+    }
+    void SetOnBlur(const std::function<void()>& onBlur)
+    {
+        onBlur_ = onBlur;
+    }
+
     const EventMarker& GetOnKeyId() const
     {
         return onKeyId_;
@@ -177,6 +204,10 @@ private:
     bool focusable_ { false };
     bool show_ { true };
     bool deleteDisabled_ { false };
+
+    std::function<void(int)> onFocusMove_;
+    std::function<void()> onFocus_;
+    std::function<void()> onBlur_;
 };
 
 } // namespace OHOS::Ace

@@ -177,7 +177,7 @@ class JsiCallbackInfo {
 public:
     JsiCallbackInfo(panda::ecmascript::EcmaVM* vm, panda::Local<panda::JSValueRef> thisObj, int32_t argc,
         const panda::Local<panda::JSValueRef>* argv);
-    ~JsiCallbackInfo() = default;
+    ~JsiCallbackInfo();
     JsiCallbackInfo(const JsiCallbackInfo&) = delete;
     JsiCallbackInfo& operator=(const JsiCallbackInfo&) = delete;
 

@@ -32,11 +32,4 @@ void RenderFocusCollaboration::PerformLayout()
     }
 }
 
-void RenderFocusCollaboration::UpdateTouchRect()
-{
-    touchRect_.SetSize(GetPaintRect().GetSize());
-    touchRect_.SetOffset(GetPaintRect().GetOffset());
-    ownTouchRect_ = touchRect_;
-}
-
 }

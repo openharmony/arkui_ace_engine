@@ -77,6 +77,7 @@ template("declarative_js_engine_ark") {
       "ark/ark_js_runtime.cpp",
       "ark/ark_js_value.cpp",
       "jsi_declarative_engine.cpp",
+      "jsi_declarative_group_js_bridge.cpp",
       "jsi_declarative_utils.cpp",
       "jsi_object_template.cpp",
       "jsi_types.cpp",
@@ -92,11 +93,8 @@ template("declarative_js_engine_ark") {
     deps = [ "//ark/js_runtime:libark_jsruntime" ]
 
     # if napi support
-    if (platform != "windows" && platform != "mac") {
-      deps += [ "//foundation/ace/napi:ace_napi_ark" ]
-      public_deps = [ "//foundation/ace/napi:ace_napi" ]
-      external_deps = worker_deps
-    }
+    deps += [ "//foundation/ace/napi:ace_napi_ark" ]
+    public_deps = [ "//foundation/ace/napi:ace_napi" ]
 
     deps += [
       ":gen_obj_src_abc_enum_style",
@@ -115,7 +113,6 @@ foreach(item, ace_platforms) {
   foreach(engine, support_engines) {
     if (engine.engine_name == "ark") {
       declarative_js_engine_ark("declarative_js_engine_bridge_ark_$platform") {
-        platform = item.name
         defines = engine.engine_defines
         config = {
         }

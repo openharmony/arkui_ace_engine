@@ -340,6 +340,16 @@ public:
         customizedCallback_ = onClickFunc;
     }
 
+    void SetCustomComponent(const RefPtr<Component>& component)
+    {
+        customComponent_ = component;
+    }
+
+    const RefPtr<Component>& GetCustomComponent() const
+    {
+        return customComponent_;
+    }
+
 private:
     // used for inspector node in PC preview
     const std::vector<std::pair<std::string, std::string>> GetAttr()
@@ -360,6 +370,7 @@ private:
     std::vector<std::pair<std::string, std::string>> styles_;
     RefPtr<ImageComponent> icon_;
     RefPtr<TextComponent> text_;
+    RefPtr<Component> customComponent_;
     bool selected_ = false;
     bool clicked_ = false;
     bool focused_ = false;

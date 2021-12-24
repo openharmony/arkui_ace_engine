@@ -17,9 +17,11 @@ build_component("web") {
   sources = [
     "flutter_render_web.cpp",
     "render_web.cpp",
+    "render_web_creator.cpp",
     "resource/web_delegate.cpp",
     "resource/web_resource.cpp",
     "web_component.cpp",
     "web_element.cpp",
   ]
+  rosen_sources = [ "rosen_render_web.cpp" ]
 }

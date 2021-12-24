@@ -19,16 +19,19 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/system_properties.h"
+#include "core/accessibility/accessibility_node.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/button/button_component.h"
-#include "core/components/checkable/checkable_component.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/menu/menu_component.h"
+#include "core/components/stepper/stepper_item_component_v2.h"
 #include "core/components/text/text_component.h"
+#include "core/components/text_field/text_field_component.h"
 #include "core/components/text_span/text_span_component.h"
 #include "core/components/video/video_component_v2.h"
 #include "core/components_v2/list/list_item_component.h"
+#include "core/pipeline/base/component.h"
 #include "core/pipeline/base/multi_composed_component.h"
 #include "core/pipeline/base/sole_child_component.h"
 
@@ -42,6 +45,16 @@ ViewStackProcessor* ViewStackProcessor::GetInstance()
         instance.reset(new ViewStackProcessor);
     }
     return instance.get();
+}
+
+ViewStackProcessor::ViewStackProcessor()
+{
+    radioGroups_ = std::make_shared<JsPageRadioGroups>();
+}
+
+std::shared_ptr<JsPageRadioGroups> ViewStackProcessor::GetRadioGroupCompnent()
+{
+    return radioGroups_;
 }
 
 RefPtr<ComposedComponent> ViewStackProcessor::GetRootComponent(const std::string& id, const std::string& name)
@@ -81,8 +94,7 @@ RefPtr<PopupComponentV2> ViewStackProcessor::GetPopupComponent(bool createNewCom
         return nullptr;
     }
 
-    RefPtr<PopupComponentV2> popupComponent = AceType::MakeRefPtr<OHOS::Ace::PopupComponentV2>(
-            GenerateId(), "popup");
+    RefPtr<PopupComponentV2> popupComponent = AceType::MakeRefPtr<OHOS::Ace::PopupComponentV2>(GenerateId(), "popup");
     wrappingComponentsMap.emplace("popup", popupComponent);
     return popupComponent;
 }
@@ -127,13 +139,17 @@ RefPtr<BoxComponent> ViewStackProcessor::GetBoxComponent()
     return boxComponent;
 }
 
-RefPtr<Component> ViewStackProcessor::GetMainComponent()
+RefPtr<Component> ViewStackProcessor::GetMainComponent() const
 {
     if (componentsStack_.empty()) {
         return nullptr;
     }
     auto& wrappingComponentsMap = componentsStack_.top();
-    return wrappingComponentsMap["main"];
+    auto main = wrappingComponentsMap.find("main");
+    if (main == wrappingComponentsMap.end()) {
+        return nullptr;
+    }
+    return main->second;
 }
 
 bool ViewStackProcessor::HasDisplayComponent() const
@@ -175,6 +191,15 @@ RefPtr<TransformComponent> ViewStackProcessor::GetTransformComponent()
     return transformComponent;
 }
 
+bool ViewStackProcessor::HasTouchListenerComponent() const
+{
+    auto& wrappingComponentsMap = componentsStack_.top();
+    if (wrappingComponentsMap.find("touch") != wrappingComponentsMap.end()) {
+        return true;
+    }
+    return false;
+}
+
 RefPtr<TouchListenerComponent> ViewStackProcessor::GetTouchListenerComponent()
 {
     auto& wrappingComponentsMap = componentsStack_.top();
@@ -203,6 +228,15 @@ RefPtr<MouseListenerComponent> ViewStackProcessor::GetMouseListenerComponent()
     RefPtr<MouseListenerComponent> mouseComponent = AceType::MakeRefPtr<OHOS::Ace::MouseListenerComponent>();
     wrappingComponentsMap.emplace("mouse", mouseComponent);
     return mouseComponent;
+}
+
+bool ViewStackProcessor::HasClickGestureListenerComponent() const
+{
+    auto& wrappingComponentsMap = componentsStack_.top();
+    if (wrappingComponentsMap.find("click_guesture") != wrappingComponentsMap.end()) {
+        return true;
+    }
+    return false;
 }
 
 RefPtr<GestureListenerComponent> ViewStackProcessor::GetClickGestureListenerComponent()
@@ -269,23 +303,6 @@ RefPtr<SharedTransitionComponent> ViewStackProcessor::GetSharedTransitionCompone
     return sharedTransitionComponent;
 }
 
-RefPtr<NavigationDeclarationCollector> ViewStackProcessor::GetNavigationDeclarationCollector(bool createIfNotExist)
-{
-    auto& wrappingComponentsMap = componentsStack_.top();
-    if (wrappingComponentsMap.find("navigation_declaration_collector") != wrappingComponentsMap.end()) {
-        return AceType::DynamicCast<NavigationDeclarationCollector>(
-            wrappingComponentsMap["navigation_declaration_collector"]);
-    }
-
-    if (createIfNotExist) {
-        auto navigationDeclarationCollector = AceType::MakeRefPtr<OHOS::Ace::NavigationDeclarationCollector>();
-        wrappingComponentsMap.emplace("navigation_declaration_collector", navigationDeclarationCollector);
-        return navigationDeclarationCollector;
-    }
-
-    return nullptr;
-}
-
 RefPtr<GestureComponent> ViewStackProcessor::GetGestureComponent()
 {
     auto& wrappingComponentsMap = componentsStack_.top();
@@ -316,61 +333,30 @@ void ViewStackProcessor::ClearPageTransitionComponent()
     }
 }
 
-void ViewStackProcessor::CreateAccessibilityNode(const RefPtr<Component>& component, const std::string& inspectorTag)
-{
-    // if_else_component、for_each_component、MultiComposedComponent not create accessibilityNode
-    if (AceType::InstanceOf<MultiComposedComponent>(component)) {
-        if (!GetMainComponent()) {
-            return;
-        }
-        auto parentId = GetMainComponent()->GetInspectorId();
-        component->SetInspectorId(parentId);
-        return;
-    }
-    component->SetInspectorId(GenerateId());
-    std::string tag = inspectorTag.empty() ? AceType::TypeName(component) : inspectorTag;
-    int32_t inspectorId = StringUtils::StringToInt(component->GetInspectorId());
-    int32_t parentId = componentsStack_.empty() ? -1 : StringUtils::StringToInt(GetMainComponent()->GetInspectorId());
-    auto node = OHOS::Ace::V2::InspectorComposedComponent::CreateAccessibilityNode(tag, inspectorId, parentId, -1);
-    if (!node) {
-        LOGD("Create AccessibilityNode:%{public}s Failed", tag.c_str());
-        return;
-    }
-}
-
-void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomView, const std::string& inspectorTag)
+void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomView)
 {
     std::unordered_map<std::string, RefPtr<Component>> wrappingComponentsMap;
     if (componentsStack_.size() > 1 && ShouldPopImmediately()) {
         Pop();
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    CreateAccessibilityNode(component, inspectorTag);
-#else
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()
-        || SystemProperties::GetAccessibilityEnabled()) {
-        CreateAccessibilityNode(component, inspectorTag);
-    }
-#endif
     wrappingComponentsMap.emplace("main", component);
     componentsStack_.push(wrappingComponentsMap);
+    auto tag = component->GetInspectorTag();
+    CreateInspectorComposedComponent(tag.empty() ? AceType::TypeName(component) : tag);
+
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component)
-        && !AceType::InstanceOf<TextSpanComponent>(component)) {
+    if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component) &&
+        !AceType::InstanceOf<TextSpanComponent>(component)) {
         GetBoxComponent();
     }
 #else
-    bool isAccessEnable = AceApplicationInfo::GetInstance().IsAccessibilityEnabled()
-        || SystemProperties::GetAccessibilityEnabled();
-    if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component)
-        && !AceType::InstanceOf<TextSpanComponent>(component) && isAccessEnable) {
+    bool isAccessEnable =
+        AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || SystemProperties::GetAccessibilityEnabled();
+    if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component) &&
+        !AceType::InstanceOf<TextSpanComponent>(component) && isAccessEnable) {
         GetBoxComponent();
     }
 #endif
-    auto navigationContainer = AceType::DynamicCast<NavigationContainerComponent>(component);
-    if (navigationContainer) {
-        navigationViewDeclaration_ = navigationContainer->GetDeclaration();
-    }
 }
 
 bool ViewStackProcessor::ShouldPopImmediately()
@@ -380,22 +366,14 @@ bool ViewStackProcessor::ShouldPopImmediately()
     auto multiComposedComponent = AceType::DynamicCast<MultiComposedComponent>(GetMainComponent());
     auto soleChildComponent = AceType::DynamicCast<SoleChildComponent>(GetMainComponent());
     auto menuComponent = AceType::DynamicCast<MenuComponent>(GetMainComponent());
-    auto checkableComponent = AceType::DynamicCast<CheckableComponent>(GetMainComponent());
-
     return (strcmp(type, AceType::TypeName<TextSpanComponent>()) == 0 ||
-            !(componentGroup || multiComposedComponent || soleChildComponent || menuComponent || checkableComponent));
+            !(componentGroup || multiComposedComponent || soleChildComponent || menuComponent));
 }
 
 void ViewStackProcessor::Pop()
 {
     if (componentsStack_.size() == 1) {
         return;
-    }
-    if (navigationViewDeclaration_) {
-        auto navigationDeclarationCollector = GetNavigationDeclarationCollector(false);
-        if (navigationDeclarationCollector) {
-            navigationDeclarationCollector->CollectTo(navigationViewDeclaration_);
-        }
     }
 
     auto component = WrapComponents();
@@ -426,20 +404,35 @@ void ViewStackProcessor::Pop()
     LOGD("ViewStackProcessor Pop size %{public}zu", componentsStack_.size());
 }
 
+RefPtr<Component> ViewStackProcessor::GetNewComponent()
+{
+    auto component = WrapComponents();
+    if (AceType::DynamicCast<ComposedComponent>(component)) {
+        auto childComponent = AceType::DynamicCast<ComposedComponent>(component)->GetChild();
+        SetZIndex(childComponent);
+        SetIsPercentSize(childComponent);
+    } else {
+        SetZIndex(component);
+        SetIsPercentSize(component);
+    }
+    UpdateTopComponentProps(component);
+    componentsStack_.pop();
+    return component;
+}
+
 void ViewStackProcessor::PopContainer()
 {
     auto type = AceType::TypeName(GetMainComponent());
     auto componentGroup = AceType::DynamicCast<ComponentGroup>(GetMainComponent());
     auto multiComposedComponent = AceType::DynamicCast<MultiComposedComponent>(GetMainComponent());
     auto soleChildComponent = AceType::DynamicCast<SoleChildComponent>(GetMainComponent());
-    auto checkableComponent = AceType::DynamicCast<CheckableComponent>(GetMainComponent());
     if ((componentGroup && strcmp(type, AceType::TypeName<TextSpanComponent>()) != 0) || multiComposedComponent ||
-        soleChildComponent || checkableComponent) {
+        soleChildComponent) {
         Pop();
         return;
     }
 
-    while ((!componentGroup && !multiComposedComponent && !soleChildComponent && !checkableComponent) ||
+    while ((!componentGroup && !multiComposedComponent && !soleChildComponent) ||
            strcmp(type, AceType::TypeName<TextSpanComponent>()) == 0) {
         Pop();
         type = AceType::TypeName(GetMainComponent());
@@ -490,17 +483,22 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     }
     std::unordered_map<std::string, RefPtr<Component>> videoMap;
 
-    bool isItemComponent = AceType::InstanceOf<V2::ListItemComponent>(mainComponent);
-    isItemComponent |= AceType::InstanceOf<GridLayoutItemComponent>(mainComponent);
+    bool isItemComponent = AceType::InstanceOf<V2::ListItemComponent>(mainComponent) ||
+                           AceType::InstanceOf<GridLayoutItemComponent>(mainComponent);
+    auto stepperItemComponentV2 = AceType::DynamicCast<StepperItemComponentV2>(mainComponent);
+    bool isStepperItemComponent = AceType::InstanceOf<StepperItemComponentV2>(mainComponent);
+
     RefPtr<Component> itemChildComponent;
 
-    auto composedComponent = GetInspectorComposedComponent(mainComponent);
-    if (composedComponent) {
-        components.emplace_back(composedComponent);
-    }
     if (isItemComponent) {
         itemChildComponent = AceType::DynamicCast<SingleChild>(mainComponent)->GetChild();
         components.emplace_back(mainComponent);
+        Component::MergeRSNode(mainComponent);
+    }
+
+    auto composedComponent = GetInspectorComposedComponent();
+    if (composedComponent) {
+        components.emplace_back(composedComponent);
     }
 
     std::string componentNames[] = { "flexItem", "display", "transform", "touch", "pan_guesture", "click_guesture",
@@ -533,10 +531,23 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
 
     if (isItemComponent) {
         if (itemChildComponent) {
+            Component::MergeRSNode(components, 1);
             components.emplace_back(itemChildComponent);
         }
+    } else if (isStepperItemComponent) {
+        if (stepperItemComponentV2) {
+            auto scorll = stepperItemComponentV2->AdjustComponentScroll(mainComponent);
+            components.emplace_back(scorll);
+            Component::MergeRSNode(components);
+        }
+    } else if (!components.empty() && (AceType::InstanceOf<TextureComponent>(mainComponent) ||
+        AceType::InstanceOf<BoxComponent>(mainComponent) || AceType::InstanceOf<TextFieldComponent>(mainComponent))) {
+        Component::MergeRSNode(components);
+        Component::MergeRSNode(mainComponent);
+        components.emplace_back(mainComponent);
     } else {
         components.emplace_back(mainComponent);
+        Component::MergeRSNode(components);
     }
 
     // First, composite all components.
@@ -563,10 +574,20 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     }
 
     auto component = components.front();
+    if (isStepperItemComponent) {
+        if (stepperItemComponentV2) {
+            component = stepperItemComponentV2->AdjustComponentDisplay(component);
+        }
+    }
     auto iter = wrappingComponentsMap.find("box");
-    if (iter != wrappingComponentsMap.end()) {
+    if (iter != wrappingComponentsMap.end() && (iter->second->GetTextDirection() != component->GetTextDirection())) {
         component->SetTextDirection(iter->second->GetTextDirection());
     }
+
+    for (auto&& component : components) {
+        component->SetTouchable(mainComponent->IsTouchable());
+    }
+
     return component;
 }
 
@@ -605,6 +626,12 @@ RefPtr<Component> ViewStackProcessor::Finish()
         return nullptr;
     }
     auto component = WrapComponents();
+    if (AceType::DynamicCast<ComposedComponent>(component)) {
+        auto childComponent = AceType::DynamicCast<ComposedComponent>(component)->GetChild();
+        SetZIndex(childComponent);
+    } else {
+        SetZIndex(component);
+    }
     componentsStack_.pop();
 
     LOGD("ViewStackProcessor Finish size %{public}zu", componentsStack_.size());
@@ -671,23 +698,27 @@ std::string ViewStackProcessor::GenerateId()
     return std::to_string(composedElementId_++);
 }
 
-RefPtr<ComposedComponent> ViewStackProcessor::GetInspectorComposedComponent(RefPtr<Component> mainComponent)
+RefPtr<V2::InspectorComposedComponent> ViewStackProcessor::GetInspectorComposedComponent() const
 {
-    auto component = AceType::DynamicCast<ComposedComponent>(GetMainComponent());
-    std::string name;
-    if (component) {
-        name = component->GetName();
+    if (componentsStack_.empty()) {
+        return nullptr;
     }
-    std::string typeName = name.empty() ? AceType::TypeName(mainComponent) : name;
-    std::string id = mainComponent->GetInspectorId();
-    if (OHOS::Ace::V2::InspectorComposedComponent::HasInspectorFinished(typeName)) {
-        auto composedComponent = AceType::MakeRefPtr<V2::InspectorComposedComponent>(id, typeName);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-        composedComponent->SetDebugLine(mainComponent->GetDebugLine());
-#endif
-        return composedComponent;
+    auto& wrappingComponentsMap = componentsStack_.top();
+    auto iter = wrappingComponentsMap.find("inspector");
+    if (iter != wrappingComponentsMap.end()) {
+        return AceType::DynamicCast<V2::InspectorComposedComponent>(iter->second);
     }
     return nullptr;
+}
+
+void ViewStackProcessor::CreateInspectorComposedComponent(const std::string& inspectorTag)
+{
+    if (V2::InspectorComposedComponent::HasInspectorFinished(inspectorTag)) {
+        auto composedComponent =
+            AceType::MakeRefPtr<V2::InspectorComposedComponent>(GenerateId() + inspectorTag, inspectorTag);
+        auto& wrappingComponentsMap = componentsStack_.top();
+        wrappingComponentsMap.emplace("inspector", composedComponent);
+    }
 }
 
 void ViewStackProcessor::SetIsPercentSize(RefPtr<Component>& component)

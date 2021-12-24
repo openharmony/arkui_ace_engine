@@ -18,6 +18,7 @@
 
 #include <vector>
 
+#include "core/components/progress/bubble_progress_component.h"
 #include "core/components/progress/loading_progress_component.h"
 #include "core/components/progress/progress_component.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
@@ -71,12 +72,16 @@ private:
     double sweepDegree_ = 240.0;
     bool isStartToEnd_ = true;
 
+    Dimension diameter_;
+    Dimension bubbleRadius_;
+
     std::vector<Color> colors_;
     std::vector<double> weights_;
 
     ProgressType type_ = ProgressType::LINEAR;
 
     RefPtr<ProgressComponent> progressChild_;
+    RefPtr<BubbleProgressComponent> bubbleProgressChild_;
     RefPtr<LoadingProgressComponent> loadingProgressChild_;
 };
 

@@ -28,4 +28,23 @@ void ListPositionController::JumpTo(int32_t index, int32_t source)
     list->JumpToIndex(index, source);
 }
 
+bool ListPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
+{
+    auto list = AceType::DynamicCast<V2::RenderList>(scroll_.Upgrade());
+    if (!list) {
+        return false;
+    }
+    list->AnimateTo(position, duration, curve);
+    return true;
+}
+
+Axis ListPositionController::GetScrollDirection() const
+{
+    auto list = AceType::DynamicCast<V2::RenderList>(scroll_.Upgrade());
+    if (!list) {
+        return Axis::NONE;
+    }
+    return list->GetDirection() ? Axis::VERTICAL : Axis::HORIZONTAL;
+}
+
 } // namespace OHOS::Ace::V2

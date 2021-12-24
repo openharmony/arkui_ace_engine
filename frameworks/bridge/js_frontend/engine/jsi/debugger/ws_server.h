@@ -22,6 +22,7 @@
 #include <boost/beast/websocket.hpp>
 #include <functional>
 #include <iostream>
+#include <queue>
 
 namespace OHOS::Ace::Framework {
 
@@ -31,18 +32,19 @@ using localSocket = boost::asio::local::stream_protocol;
 
 class WsServer {
 public:
-    WsServer(const std::string& component, const std::function<void(std::string)>& onMessage)
+    WsServer(const std::string& component, const std::function<void()>& onMessage)
         : componentName_(component), wsOnMessage_(onMessage)
     {}
     ~WsServer() = default;
     void RunServer();
     void StopServer();
     void SendReply(const std::string& message) const;
+    std::queue<const std::string> ideMsgQueue;
 
 private:
     volatile bool terminateExecution_ { false };
     std::string componentName_ {};
-    std::function<void(std::string)> wsOnMessage_ {};
+    std::function<void()> wsOnMessage_ {};
     std::unique_ptr<websocket::stream<localSocket::socket>> webSocket_ { nullptr };
 };
 

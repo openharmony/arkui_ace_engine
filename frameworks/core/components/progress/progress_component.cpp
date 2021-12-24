@@ -44,6 +44,10 @@ ProgressComponent::ProgressComponent(double min, double value, double cachedValu
             track_ = AceType::MakeRefPtr<MoonTrack>();
             break;
         }
+        case ProgressType::CAPSULE: {
+            track_ = AceType::MakeRefPtr<CapsuleTrack>();
+            break;
+        }
         default: {
             track_ = AceType::MakeRefPtr<LinearTrack>();
             break;

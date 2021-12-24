@@ -15,9 +15,11 @@
 
 #include "core/animation/animator.h"
 
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/animation/scheduler.h"
 #include "core/common/thread_checker.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -249,6 +251,12 @@ void Animator::SetAnimationDirection(AnimationDirection direction)
     for (auto& controller : proxyControllers_) {
         controller->SetAnimationDirection(direction);
     }
+}
+
+void Animator::SetAllowRunningAsynchronously(bool runAsync)
+{
+    allowRunningAsynchronously_ = runAsync;
+    LOGD("Set allow running asynchronously. id: %{public}d, allow: %{public}d", controllerId_, runAsync);
 }
 
 // return true, the animation is played backward
@@ -499,6 +507,11 @@ void Animator::Cancel()
     NotifyIdleListener();
 }
 
+int32_t Animator::GetId() const
+{
+    return controllerId_;
+}
+
 // Private Functions.
 void Animator::OnFrame(int64_t duration)
 {
@@ -626,13 +639,144 @@ void Animator::StartInner(bool alwaysNotify)
     }
     toggleDirectionPending_ = false;
     if (scheduler_ && !scheduler_->IsActive()) {
-        scheduler_->Start();
+        if (!StartAsync()) {
+            scheduler_->Start();
+        }
     }
     StatusListenable::NotifyStartListener();
     status_ = Status::RUNNING;
     isCurDirection_ = GetInitAnimationDirection();
     for (auto& controller : proxyControllers_) {
         controller->StartInner(alwaysNotify);
+    }
+}
+
+AnimationOption Animator::GetAnimationOption()
+{
+    AnimationOption option;
+    option.SetDuration(duration_ * scale_);
+    option.SetDelay(startDelay_ * scale_);
+    option.SetIteration(iteration_);
+    option.SetTempo(tempo_);
+    option.SetFillMode(fillMode_);
+
+    AnimationDirection direction = direction_;
+    if (GetInitAnimationDirection()) {
+        switch (direction_) {
+            case AnimationDirection::NORMAL:
+                direction = AnimationDirection::REVERSE;
+                break;
+            case AnimationDirection::ALTERNATE:
+                direction_ = AnimationDirection::ALTERNATE_REVERSE;
+                break;
+            case AnimationDirection::REVERSE:
+                direction = AnimationDirection::NORMAL;
+                break;
+            case AnimationDirection::ALTERNATE_REVERSE:
+                direction_ = AnimationDirection::ALTERNATE;
+                break;
+            default:
+                direction = AnimationDirection::NORMAL;
+                break;
+        }
+    }
+
+    option.SetAnimationDirection(direction);
+    return option;
+}
+
+bool Animator::IsSupportedRunningAsynchronously()
+{
+    for (const auto& animation : interpolators_) {
+        if (!animation->IsSupportedRunningAsynchronously()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Animator::StartAsync()
+{
+    if (!SystemProperties::GetRosenBackendEnabled()) {
+        return false;
+    }
+
+    if (!allowRunningAsynchronously_) {
+        return false;
+    }
+
+    if (interpolators_.empty()) {
+        LOGD("interpolators_ is empty, controller id: %{public}d", controllerId_);
+        return false;
+    }
+
+    if (!IsSupportedRunningAsynchronously()) {
+        LOGW("not support running asynchronously, controller id: %{public}d", controllerId_);
+        return false;
+    }
+    if (scheduler_) {
+        auto context = scheduler_->GetContext().Upgrade();
+        if (context && !context->IsRebuildFinished()) {
+            context->SetBuildAfterCallback([weak = AceType::WeakClaim(this)]() {
+                auto controller = weak.Upgrade();
+                if (controller != nullptr) {
+                    controller->StartInnerAsync();
+                }
+            });
+            return true;
+        }
+    }
+    StartInnerAsync();
+    return true;
+}
+
+bool Animator::StartInnerAsync()
+{
+    LOGD("start inner async, controller id: %{public}d, interpolators size:%{public}zu", controllerId_,
+        interpolators_.size());
+
+    auto prepareCallback = [weak = AceType::WeakClaim(this)]() -> void {
+        auto controller = weak.Upgrade();
+        if (controller != nullptr) {
+            controller->NotifyPrepareListener();
+        }
+    };
+
+    auto stopCallback = [weak = AceType::WeakClaim(this)]() -> void {
+        auto controller = weak.Upgrade();
+        if (controller == nullptr) {
+            LOGE("notify stop failed, controller is null");
+            return;
+        }
+        controller->StopInnerAsync();
+    };
+
+    auto animations = std::move(interpolators_);
+    auto option = GetAnimationOption();
+    asyncRunningAnimationCount_ = 0;
+    for (const auto& animation : animations) {
+        if (animation->RunAsync(scheduler_, option, prepareCallback, stopCallback)) {
+            asyncRunningAnimationCount_++;
+        }
+    }
+
+    LOGD("start animations async. controller id: %{public}d, count: %{public}d", controllerId_,
+        asyncRunningAnimationCount_);
+    return true;
+}
+
+void Animator::StopInnerAsync()
+{
+    if (--asyncRunningAnimationCount_ > 0) {
+        LOGD("notify stop, controller id: %{public}d, running animations count %{public}d", controllerId_,
+            asyncRunningAnimationCount_);
+        return;
+    }
+
+    if (status_ != Status::STOPPED && (!HasScheduler() || !scheduler_->IsActive())) {
+        Stop();
+        LOGD("native animations stop. controller id: %{public}d", controllerId_);
     }
 }
 

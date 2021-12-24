@@ -24,6 +24,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/image/render_image.h"
+#include "core/gestures/raw_recognizer.h"
 #include "base/image/pixel_map.h"
 
 namespace OHOS::Ace {
@@ -61,6 +62,7 @@ public:
         });
     }
 
+    virtual void OnStatusStyleChanged(StyleState state) override;
     void UpdateStyleFromRenderNode(PropertyAnimatableType type) override;
 
     const Color& GetColor() const override
@@ -69,6 +71,11 @@ public:
             return backDecoration_->GetBackgroundColor();
         }
         return Color::TRANSPARENT;
+    }
+
+    TextDirection GetInspectorDirection() const
+    {
+        return inspectorDirection_;
     }
 
     RefPtr<Decoration> GetBackDecoration() const
@@ -81,7 +88,7 @@ public:
         return frontDecoration_;
     }
 
-    void SetColor(const Color& color, bool isBackground) // add for animation
+    virtual void SetColor(const Color& color, bool isBackground) // add for animation
     {
         // create decoration automatically while user had not defined
         if (isBackground) {
@@ -117,11 +124,11 @@ public:
     void StopMouseHoverAnimation() override;
 
     // add for animation
-    void SetBackgroundSize(const BackgroundImageSize& size);
+    virtual void SetBackgroundSize(const BackgroundImageSize& size);
     BackgroundImagePosition GetBackgroundPosition() const;
-    void SetBackgroundPosition(const BackgroundImagePosition& position);
+    virtual void SetBackgroundPosition(const BackgroundImagePosition& position);
     BackgroundImageSize GetBackgroundSize() const;
-    void SetShadow(const Shadow& shadow);
+    virtual void SetShadow(const Shadow& shadow);
     Shadow GetShadow() const;
     void SetGrayScale(double scale);
     double GetGrayScale(void) const;
@@ -139,26 +146,29 @@ public:
     double GetInvert(void) const;
     void SetHueRotate(float deg);
     float GetHueRotate(void) const;
-    void SetBorderWidth(double width, const BorderEdgeHelper& helper);
+    virtual void SetBorderWidth(double width, const BorderEdgeHelper& helper);
     double GetBorderWidth(const BorderEdgeHelper& helper) const;
-    void SetBorderColor(const Color& color, const BorderEdgeHelper& helper);
+    virtual void SetBorderColor(const Color& color, const BorderEdgeHelper& helper);
     Color GetBorderColor(const BorderEdgeHelper& helper) const;
-    void SetBorderStyle(BorderStyle borderStyle, const BorderEdgeHelper& helper);
+    virtual void SetBorderStyle(BorderStyle borderStyle, const BorderEdgeHelper& helper);
     BorderStyle GetBorderStyle(const BorderEdgeHelper& helper) const;
-    void SetBorderRadius(double radius, const BorderRadiusHelper& helper);
+    virtual void SetBorderRadius(double radius, const BorderRadiusHelper& helper);
     double GetBorderRadius(const BorderRadiusHelper& helper) const;
-    void SetBlurRadius(const AnimatableDimension& radius);
+    virtual void SetBlurRadius(const AnimatableDimension& radius);
     AnimatableDimension GetBlurRadius() const;
-    void SetBackdropRadius(const AnimatableDimension& radius);
+    virtual void SetBackdropRadius(const AnimatableDimension& radius);
     AnimatableDimension GetBackdropRadius() const;
-    void SetWindowBlurProgress(double progress);
+    virtual void SetWindowBlurProgress(double progress);
     double GetWindowBlurProgress() const;
+    void CreateFloatAnimation(RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue);
 
     Size GetBorderSize() const override;
     ColorPropertyAnimatable::SetterMap GetColorPropertySetterMap() override;
     ColorPropertyAnimatable::GetterMap GetColorPropertyGetterMap() override;
     Offset GetGlobalOffsetExternal() const override;
     Offset GetGlobalOffset() const override;
+    void MouseHoverEnterTest() override;
+    void MouseHoverExitTest() override;
 
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -215,8 +225,12 @@ protected:
     RefPtr<Animator> controllerExit_;
     RefPtr<KeyframeAnimation<Color>> colorAnimationEnter_;
     RefPtr<KeyframeAnimation<Color>> colorAnimationExit_;
+    RefPtr<KeyframeAnimation<float>> scaleAnimationEnter_;
+    RefPtr<KeyframeAnimation<float>> scaleAnimationExit_;
     HoverAnimationType animationType_ = HoverAnimationType::NONE;
     Color hoverColor_ = Color::TRANSPARENT;
+    float scale_ = 1.0f;
+    bool isZoom = false;
 
 private:
     void ResetController(RefPtr<Animator>& controller);
@@ -245,6 +259,10 @@ private:
     OnDragFunc onDragLeave_;
     OnDragFunc onDrop_;
     RefPtr<GestureRecognizer> onClick_;
+    void HandleTouchEvent(bool isTouchDown);
+    RefPtr<RawRecognizer> touchRecognizer_;
+    RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_;
+    TextDirection inspectorDirection_ { TextDirection::LTR };
 }; // class RenderBox
 
 } // namespace OHOS::Ace

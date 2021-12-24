@@ -40,11 +40,6 @@ constexpr Color GAUSSIAN_COLOR = Color(0xffc7bcb9);
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderTexture::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderTexture>();
-}
-
 void FlutterRenderTexture::Paint(RenderContext& context, const Offset& offset)
 {
     const Size& layout = GetLayoutSize();

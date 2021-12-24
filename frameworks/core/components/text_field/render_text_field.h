@@ -75,6 +75,7 @@ public:
     void PerformLayout() override;
     // Override TextInputClient
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+    void PerformDefaultAction();
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void OnStatusChanged(RenderStatus renderStatus) override;
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
@@ -97,6 +98,11 @@ public:
     const TextEditingValue& GetEditingValue() const;
     const TextEditingValue& GetPreEditingValue() const;
     void Delete(int32_t start, int32_t end);
+    void SetTextStyle(const TextStyle& style)
+    {
+        style_ = style;
+    }
+
     void SetOnOverlayFocusChange(const std::function<void(bool)>& onOverlayFocusChange)
     {
         onOverlayFocusChange_ = onOverlayFocusChange;
@@ -177,6 +183,56 @@ public:
         return hasTextOverlayPushed_;
     }
 
+    const std::string GetPlaceholder() const
+    {
+        return placeholder_;
+    }
+
+    const std::string GetValue() const
+    {
+        return text_;
+    }
+
+    TextInputAction GetAction() const
+    {
+        return action_;
+    }
+
+    TextInputType GetKeyboard() const
+    {
+        return keyboard_;
+    }
+
+    Color GetInactivePlaceholderColor() const
+    {
+        return inactivePlaceholderColor_;
+    }
+
+    TextStyle GetPlaceHoldStyle()
+    {
+        return placeHoldStyle_;
+    }
+
+    TextAlign GetTextAlign()
+    {
+        return textAlign_;
+    }
+
+    Color GetCursorColor() const
+    {
+        return cursorColor_;
+    }
+
+    TextStyle GetEditingStyle()
+    {
+        return editingStyle_;
+    }
+
+    int32_t GetMaxLength()
+    {
+        return maxLength_;
+    }
+
     void SetTextOverlayPushed(bool hasTextOverlayPushed)
     {
         hasTextOverlayPushed_ = hasTextOverlayPushed;
@@ -202,6 +258,11 @@ public:
         onTextChangeEvent_ = onTextChangeEvent;
     }
 
+    void SetOnValueChangeEvent(const std::function<void(const std::string&)>& onTextChangeEvent)
+    {
+        onValueChangeEvent_ = onTextChangeEvent;
+    }
+
     void SetNeedNotifyChangeEvent(bool needNotifyChangeEvent)
     {
         needNotifyChangeEvent_ = needNotifyChangeEvent;
@@ -212,6 +273,8 @@ public:
     {
         imeAttached_ = imeAttached;
     }
+
+    void UpdateConfiguration();
 #endif
 
 protected:
@@ -332,6 +395,9 @@ protected:
     TextStyle countTextStyleOuter_;
     TextStyle overCountStyleOuter_;
     TextStyle style_;
+    TextStyle placeHoldStyle_;
+    TextStyle editingStyle_;
+    std::string text_;
     std::string errorText_;
     TextStyle errorTextStyle_;
     double errorSpacing_ = 0.0;
@@ -379,8 +445,8 @@ protected:
     Dimension iconSizeInDimension_;
     Dimension iconHotZoneSizeInDimension_;
     Dimension widthReserved_;
-    std::optional<LayoutParam> lastLayoutParam_ = std::nullopt;
-    std::optional<Color> imageFill_ = std::nullopt;
+    std::optional<LayoutParam> lastLayoutParam_;
+    std::optional<Color> imageFill_;
     std::string iconSrc_;
     std::string showIconSrc_;
     std::string hideIconSrc_;
@@ -402,6 +468,7 @@ private:
         PARAGRAPH,
     };
 
+    void SetCallback(const RefPtr<TextFieldComponent>& textField);
     void StartPressAnimation(bool isPressDown);
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
@@ -479,6 +546,9 @@ private:
     std::function<void()> onLongPressEvent_;
     std::function<void()> moveNextFocusEvent_;
     std::function<void(bool)> onOverlayFocusChange_;
+    std::function<void(std::string)> onCopy_;
+    std::function<void(std::string)> onCut_;
+    std::function<void(std::string)> onPaste_;
     EventMarker onOptionsClick_;
     EventMarker onTranslate_;
     EventMarker onShare_;

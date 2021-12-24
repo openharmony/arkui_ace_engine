@@ -15,6 +15,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
@@ -30,7 +31,16 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
 #endif
@@ -68,10 +78,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_menu.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_navigation_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_option.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
@@ -95,9 +103,12 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_sheet.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_stepper.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
@@ -114,6 +125,10 @@
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
+#endif
+#include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 
 namespace OHOS::Ace::Framework {
@@ -540,6 +555,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"Animator", JSAnimator::JSBind},
     {"Span", JSSpan::JSBind},
     {"Button", JSButton::JSBind},
+    {"Canvas", JSCanvas::JSBind},
     {"LazyForEach", JSLazyForEach::JSBind},
     {"List", JSList::JSBind},
     {"ListItem", JSListItem::JSBind},
@@ -555,15 +571,18 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"GridContainer", JSGridContainer::JSBind},
     {"Slider", JSSlider::JSBind},
     {"Stack", JSStack::JSBind},
+    {"Stepper", JSStepper::JSBind},
+    {"StepperItem", JSStepperItem::JSBind},
     {"ForEach", JSForEach::JSBind},
     {"Divider", JSDivider::JSBind},
     {"Swiper", JSSwiper::JSBind},
     {"Panel", JSSlidingPanel::JSBind},
-    {"NavigationView", JSNavigationView::JSBind},
+    {"Navigation", JSNavigation::JSBind},
     {"Navigator", JSNavigator::JSBind},
     {"ColumnSplit", JSColumnSplit::JSBind},
     {"If", JSIfElse::JSBind},
     {"Scroll", JSScroll::JSBind},
+    {"ScrollBar", JSScrollBar::JSBind},
     {"Toggle", JSToggle::JSBind},
     {"Blank", JSBlank::JSBind},
     {"Calendar", JSCalendar::JSBind},
@@ -592,19 +611,24 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"AbilityComponent", JSAbilityComponent::JSBind},
     {"TextArea", JSTextArea::JSBind},
     {"TextInput", JSTextInput::JSBind},
-    {"Menu", JSMenu::JSBind},
-    {"Option", JSOption::JSBind},
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     {"QRCode", JSQRCode::JSBind},
 #ifdef FORM_SUPPORTED
     {"FormComponent", JSForm::JSBind},
 #endif
 #endif
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(OHOS_STANDARD_SYSTEM)
+    {"Web", JSWeb::JSBind},
+    {"WebController", JSWebController::JSBind},
+#endif
 #ifndef WEARABLE_PRODUCT
     {"Camera", JSCamera::JSBind},
     {"Piece", JSPiece::JSBind},
     {"Rating", JSRating::JSBind},
     {"Video", JSVideo::JSBind},
+#endif
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    {"XComponent", JSXComponent::JSBind},
 #endif
     {"DataPanel", JSDataPanel::JSBind},
     {"Badge", JSBadge::JSBind},
@@ -614,6 +638,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"TapGesture", JSGesture::JSBind},
     {"LongPressGesture", JSGesture::JSBind},
     {"PanGesture", JSGesture::JSBind},
+    {"SwipeGesture", JSGesture::JSBind},
     {"PinchGesture", JSGesture::JSBind},
     {"RotationGesture", JSGesture::JSBind},
     {"GestureGroup", JSGesture::JSBind},
@@ -623,9 +648,17 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"SwiperController", JSSwiperController::JSBind},
     {"TabsController", JSTabsController::JSBind},
     {"CalendarController", JSCalendarController::JSBind},
+    {"RenderingContext", JSRenderingContext::JSBind},
+    {"OffscreenRenderingContext", JSOffscreenRenderingContext::JSBind},
+    {"CanvasGradient", JSCanvasGradient::JSBind},
+    {"ImageBitmap", JSRenderImage::JSBind},
+    {"ImageData", JSCanvasImageData::JSBind},
+    {"Path2D", JSPath2D::JSBind},
+    {"RenderingContextSettings", JSRenderingContextSettings::JSBind},
     {"AbilityController", JSAbilityComponentController::JSBind},
     {"VideoController", JSVideoController::JSBind},
-    {"Search", JSSearch::JSBind}
+    {"Search", JSSearch::JSBind},
+    {"Sheet", JSSheet::JSBind}
 };
 
 void RegisterAllModule(BindingTarget globalObj)
@@ -700,7 +733,9 @@ void JsRegisterViews(BindingTarget globalObj)
     JSTouchHandler::JSBind(globalObj);
     JSPanHandler::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
+    JsGridDragFunction::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
+    JSClipboard::JSBind(globalObj);
 
     auto delegate =
         static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
@@ -749,9 +784,10 @@ void JsRegisterViews(BindingTarget globalObj)
 
     JSObjectTemplate progressStyle;
     progressStyle.Constant("Linear", 0);
-    progressStyle.Constant("Capsule", 1);
+    progressStyle.Constant("Ring", 1);
     progressStyle.Constant("Eclipse", 2);
-    progressStyle.Constant("Circular", 3);
+    progressStyle.Constant("ScaleRing", 3);
+    progressStyle.Constant("Capsule", 4);
 
     JSObjectTemplate stackFit;
     stackFit.Constant("Keep", 0);

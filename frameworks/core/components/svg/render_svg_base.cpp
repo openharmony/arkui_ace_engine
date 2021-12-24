@@ -18,7 +18,7 @@
 #include "frameworks/core/animation/curve_animation.h"
 #include "frameworks/core/components/svg/render_svg.h"
 #include "frameworks/core/components/svg/render_svg_mask.h"
-#include "frameworks/core/components/transform/flutter_render_transform.h"
+#include "frameworks/core/components/transform/render_transform.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -825,21 +825,34 @@ bool RenderSvgBase::PreparePropertyAnimation(const RefPtr<SvgAnimate>& svgAnimat
     return true;
 }
 
+std::tuple<const Matrix4, float, float> RenderSvgBase::GetRawTransformInfo()
+{
+    transformInfo_ = (!animateTransformAttrs_.empty()) ? SvgTransform::CreateMatrix4(animateTransformAttrs_)
+                                                       : SvgTransform::CreateTransformInfo(transform_);
+    float pivotX = 0.5;
+    float pivotY = 0.5;
+    if (transformInfo_->hasRotateCenter && GetLayoutSize().IsValid()) {
+        pivotX = transformInfo_->rotateCenter.GetX() / GetLayoutSize().Width();
+        pivotY = transformInfo_->rotateCenter.GetY() / GetLayoutSize().Height();
+    }
+    return {transformInfo_->matrix4, pivotX, pivotY};
+}
+
 const Matrix4 RenderSvgBase::GetTransformMatrix4()
 {
     transformInfo_ = (!animateTransformAttrs_.empty()) ? SvgTransform::CreateMatrix4(animateTransformAttrs_)
                                                        : SvgTransform::CreateTransformInfo(transform_);
     if (transformInfo_->hasRotateCenter) {
-        transformInfo_->matrix4 = FlutterRenderTransform::GetTransformByOffset(
+        transformInfo_->matrix4 = RenderTransform::GetTransformByOffset(
             transformInfo_->matrix4, transformInfo_->rotateCenter);
     }
-    return FlutterRenderTransform::GetTransformByOffset(transformInfo_->matrix4, GetTransformOffset());
+    return RenderTransform::GetTransformByOffset(transformInfo_->matrix4, GetTransformOffset());
 }
 
 const Matrix4 RenderSvgBase::UpdateTransformMatrix4()
 {
     if (transformInfo_ != std::nullopt) {
-        return FlutterRenderTransform::GetTransformByOffset(transformInfo_->matrix4, GetTransformOffset());
+        return RenderTransform::GetTransformByOffset(transformInfo_->matrix4, GetTransformOffset());
     } else {
         return Matrix4::CreateIdentity();
     }

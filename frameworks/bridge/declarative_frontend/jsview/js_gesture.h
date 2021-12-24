@@ -102,6 +102,15 @@ public:
     static void Create(const JSCallbackInfo& args);
 };
 
+class JSSwipeGesture : public JSGesture {
+    DECLARE_ACE_TYPE(JSSwipeGesture, JSGesture);
+public:
+    JSSwipeGesture() = default;
+    ~JSSwipeGesture() override = default;
+
+    static void Create(const JSCallbackInfo& args);
+};
+
 class JSPinchGesture : public JSGesture {
     DECLARE_ACE_TYPE(JSPinchGesture, JSGesture);
 

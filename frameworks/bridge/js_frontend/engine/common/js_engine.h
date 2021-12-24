@@ -194,7 +194,11 @@ public:
         return extraNativeObject_;
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    virtual RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode)
+    {
+        return nullptr;
+    }
+
     static NativeEngine* GetNativeEngine()
     {
         return nativeEngine_;
@@ -210,10 +214,10 @@ public:
         mediaUpdateCallback_ = nullptr;
     }
 
+    virtual void RunNativeEngineLoop();
+
 protected:
     static thread_local NativeEngine* nativeEngine_;
-#endif
-protected:
     std::function<void(JsEngine*)> mediaUpdateCallback_;
 
 private:

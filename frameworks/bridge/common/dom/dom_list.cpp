@@ -42,6 +42,10 @@ bool DOMList::SetSpecializedAttr(const std::pair<std::string, std::string>& attr
     // static linear map must be sorted by key.
     static const LinearMapNode<void (*)(DOMList&, const std::string&)> attrOperators[] = {
         {
+            DOM_LIST_ACCESSIBILITY_DISABLED,
+            [](DOMList& list, const std::string& val) { list.accessibilityDisabled_ = StringToBool(val); },
+        },
+        {
             LIST_BEGIN_INDEX,
             [](DOMList& list, const std::string& val) { list.beginIndex_ = StringUtils::StringToInt(val); },
         },
@@ -120,7 +124,12 @@ bool DOMList::SetSpecializedAttr(const std::pair<std::string, std::string>& attr
         },
         {
             DOM_LIST_ROTATION_VIBRATE,
-            [](DOMList& list, const std::string& val) { list.rotationVibrate_ = StringToBool(val); },
+            [](DOMList& list, const std::string& val) {
+#ifdef WEARABLE_PRODUCT
+                list.rotationVibrate_ = StringToBool(val);
+                list.scrollVibrate_ = false;
+#endif
+            },
         },
         {
             DOM_SCROLL_SCROLLBAR,
@@ -353,6 +362,7 @@ void DOMList::CreateOrUpdateList()
     listComponent_->SetColumnCount(listColumns_);
     listComponent_->SetItemExtent(itemExtent_);
     listComponent_->SetUpdateEffect(updateEffect_);
+    listComponent_->SetAccessibilityDisabled(accessibilityDisabled_);
     if (listColumns_ > 1) {
         // itemScale is not supported in 'columns > 1' case.
         itemScale_ = false;

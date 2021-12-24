@@ -100,6 +100,8 @@ public:
     void PutImageData(const ImageData& imageData);
     std::unique_ptr<ImageData> GetImageData(double left, double top, double width, double height);
     std::string GetJsonData(const std::string& path);
+    double GetWidth() const;
+    double GetHeight() const;
 
     void UpdateFillColor(const Color& color);
     void UpdateStrokeColor(const Color& color);
@@ -168,6 +170,14 @@ public:
     void SetHeight(const Dimension& height)
     {
         height_ = height;
+    }
+
+    void SetOnReadyEvent(const EventMarker& value, RefPtr<PipelineContext> context)
+    {
+        std::function<void()> onReady_ = AceAsyncEvent<void()>::Create(value, context);
+        if (onReady_) {
+            onReady_();
+        }
     }
 
     const RefPtr<CanvasTaskPool>& GetTaskPool() const

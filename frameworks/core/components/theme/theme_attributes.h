@@ -85,6 +85,8 @@ extern const char THEME_PATTERN_TOOLBAR[];
 extern const char THEME_PATTERN_TOGGLE[];
 extern const char THEME_PATTERN_TOAST[];
 extern const char THEME_DIALOG_TOGGLE[];
+extern const char THEME_PATTERN_DRAG_BAR[];
+extern const char THEME_PATTERN_SEMI_MODAL[];
 
 // pattern general attributes
 extern const char PATTERN_BG_COLOR[];
@@ -220,6 +222,12 @@ extern const char DIALOG_MASK_COLOR_END[];
 extern const char TOAST_FONT_SIZE[];
 extern const char TOAST_TEXT_COLOR[];
 extern const char TOAST_BACKGROUND_COLOR[];
+
+// pattern attributes for drag bar
+extern const char DRAG_BAR_COLOR[];
+
+// pattern attributes for semi modal
+extern const char SEMI_MODAL_BACKGROUND_COLOR[];
 
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H

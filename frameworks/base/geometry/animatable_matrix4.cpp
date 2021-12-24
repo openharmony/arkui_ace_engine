@@ -95,9 +95,15 @@ void AnimatableMatrix4::AnimateTo(const Matrix4& endValue)
     animation->AddListener(std::bind(&AnimatableMatrix4::OnAnimationCallback, this, std::placeholders::_1));
     animationController_->AddInterpolator(animation);
     auto onFinishEvent = animationOption_.GetOnFinishEvent();
-    if (!onFinishEvent.IsEmpty()) {
-        animationController_->AddStopListener(
-            [onFinishEvent, weakContext = context_] { AceAsyncEvent<void()>::Create(onFinishEvent, weakContext)(); });
+    if (onFinishEvent) {
+        animationController_->AddStopListener([onFinishEvent, weakContext = context_] {
+            auto context = weakContext.Upgrade();
+            if (context) {
+                context->PostAsyncEvent(onFinishEvent);
+            } else {
+                LOGE("the context is null");
+            }
+        });
     }
     if (stopCallback_) {
         animationController_->AddStopListener(stopCallback_);
@@ -108,6 +114,7 @@ void AnimatableMatrix4::AnimateTo(const Matrix4& endValue)
     animationController_->SetTempo(animationOption_.GetTempo());
     animationController_->SetAnimationDirection(animationOption_.GetAnimationDirection());
     animationController_->SetFillMode(FillMode::FORWARDS);
+    animationController_->SetAllowRunningAsynchronously(animationOption_.GetAllowRunningAsynchronously());
     animationController_->Play();
 }
 

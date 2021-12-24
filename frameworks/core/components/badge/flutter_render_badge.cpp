@@ -28,11 +28,6 @@ constexpr Dimension NUMERICAL_BADGE_PADDING = 6.0_vp;
 
 } // namespace
 
-RefPtr<RenderNode> RenderBadge::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderBadge>();
-}
-
 void FlutterRenderBadge::Paint(RenderContext& context, const Offset& offset)
 {
     auto badgeChild = GetChildren().front();

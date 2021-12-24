@@ -28,7 +28,6 @@ const std::unordered_map<std::string, std::function<std::string(const TabsCompos
     { "barPosition", [](const TabsComposedElement& inspector) { return inspector.GetBarPosition(); } },
     { "index", [](const TabsComposedElement& inspector) { return inspector.GetIndex(); } },
     { "vertical", [](const TabsComposedElement& inspector) { return inspector.GetVertical(); } },
-    { "scrollable", [](const TabsComposedElement& inspector) { return inspector.GetScrollable(); } },
     { "barMode", [](const TabsComposedElement& inspector) { return inspector.GetBarMode(); } },
     { "barWidth", [](const TabsComposedElement& inspector) { return inspector.GetBarWidth(); } },
     { "barHeight", [](const TabsComposedElement& inspector) { return inspector.GetBarHeight(); } },
@@ -42,7 +41,7 @@ void TabsComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(std::string("barPosition: ").append(GetBarPosition()));
     DumpLog::GetInstance().AddDesc(std::string("index: ").append(GetIndex()));
     DumpLog::GetInstance().AddDesc(std::string("vertical: ").append(GetVertical()));
-    DumpLog::GetInstance().AddDesc(std::string("scrollable: ").append(GetScrollable()));
+    DumpLog::GetInstance().AddDesc(std::string("scrollable: ").append(ConvertBoolToString(GetScrollable())));
     DumpLog::GetInstance().AddDesc(std::string("barMode: ").append(GetBarMode()));
     DumpLog::GetInstance().AddDesc(std::string("barWidth: ").append(GetBarWidth()));
     DumpLog::GetInstance().AddDesc(std::string("barHeight: ").append(GetBarHeight()));
@@ -78,11 +77,10 @@ std::string TabsComposedElement::GetVertical() const
     return ConvertBoolToString(vertical);
 }
 
-std::string TabsComposedElement::GetScrollable() const
+bool TabsComposedElement::GetScrollable() const
 {
     auto renderTabContent = GetRenderTabContent(GetRenderFlex());
-    auto scrollable = renderTabContent ? renderTabContent->IsScrollable() : true;
-    return ConvertBoolToString(scrollable);
+    return renderTabContent ? renderTabContent->IsScrollable() : true;
 }
 
 std::string TabsComposedElement::GetBarMode() const

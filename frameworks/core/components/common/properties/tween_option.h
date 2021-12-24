@@ -26,6 +26,7 @@
 #include "core/animation/animation_pub.h"
 #include "core/animation/curve.h"
 #include "core/animation/curves.h"
+#include "core/animation/keyframe_animation.h"
 #include "core/animation/property_animatable.h"
 #include "core/animation/property_animation.h"
 #include "core/components/common/properties/color.h"
@@ -127,19 +128,36 @@ public:
 
     void SetTransformOrigin(const Dimension& originX, const Dimension& originY)
     {
-        originX_ = originX;
-        originY_ = originY;
+        auto keyFrameAnimation = AceType::MakeRefPtr<KeyframeAnimation<DimensionOffset>>();
+        auto begin = AceType::MakeRefPtr<Keyframe<DimensionOffset>>(0.0f, DimensionOffset(originX, originY));
+        auto end = AceType::MakeRefPtr<Keyframe<DimensionOffset>>(1.0f, DimensionOffset(originX, originY));
+        keyFrameAnimation->AddKeyframe(begin);
+        keyFrameAnimation->AddKeyframe(end);
+        transformOriginAnimation_ = keyFrameAnimation;
         SetTransformOriginChanged(true);
     }
 
-    const Dimension& GetTransformOriginX() const
+    Dimension GetTransformOriginX() const
     {
-        return originX_;
+        if (transformOriginAnimation_) {
+            return transformOriginAnimation_->GetValue().GetX();
+        }
+
+        return 0.5_pct;
     }
 
-    const Dimension& GetTransformOriginY() const
+    Dimension GetTransformOriginY() const
     {
-        return originY_;
+        if (transformOriginAnimation_) {
+            return transformOriginAnimation_->GetValue().GetY();
+        }
+
+        return 0.5_pct;
+    }
+
+    const RefPtr<Animation<DimensionOffset>>& GetTransformOriginAnimation() const
+    {
+        return transformOriginAnimation_;
     }
 
     void SetIsBackground(bool isBackground)
@@ -336,6 +354,7 @@ private:
     RefPtr<Curve> curve_; // use animation's curve as default.
     RefPtr<Animation<float>> opacityAnimation_;
     RefPtr<Animation<Color>> colorAnimation_;
+    RefPtr<Animation<DimensionOffset>> transformOriginAnimation_;
     PropAnimationMap propAnimations_;
     PropertyAnimationFloatMap floatAnimationMap_;
     std::unordered_map<AnimationType, RefPtr<Animation<DimensionOffset>>> transformOffsetAnimations_;
@@ -349,8 +368,6 @@ private:
     bool changeDuration_ = false;
     double maxScaleXY_ = -1.0;
     float tempo_ = 1.0f;
-    Dimension originX_;
-    Dimension originY_;
     MotionPathOption motionPathOption_;
 };
 

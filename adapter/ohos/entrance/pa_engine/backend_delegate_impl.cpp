@@ -105,6 +105,11 @@ bool BackendDelegateImpl::GetAssetContent(const std::string& url, std::vector<ui
     return Framework::GetAssetContentImpl(assetManager_, url, content);
 }
 
+std::string BackendDelegateImpl::GetAssetPath(const std::string& url)
+{
+    return Framework::GetAssetPathImpl(assetManager_, url);
+}
+
 void BackendDelegateImpl::LoadPa(const std::string& url, const OHOS::AAFwk::Want& want)
 {
     LOGD("BackendDelegateImpl LoadPa: %{private}s.", url.c_str());

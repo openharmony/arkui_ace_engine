@@ -166,6 +166,7 @@ void CardFrontend::ParsePage(const RefPtr<PipelineContext>& context, const std::
     parseJsCard_->SetColorMode(colorMode_);
     parseJsCard_->SetDensity(density_);
     parseJsCard_->LoadImageInfo();
+    parseJsCard_->SetCardHapPath(cardHapPath_);
     parseJsCard_->CreateDomNode(page, rootTemplate, -1);
     parseJsCard_->ResetNodeId();
     page->FlushCommands();

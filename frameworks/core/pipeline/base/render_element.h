@@ -48,8 +48,6 @@ public:
         }
     }
 
-    void SetAccessibilityNodeById(const ComposeId& id);
-
 protected:
     void UpdateAccessibilityNode();
     virtual RefPtr<RenderNode> CreateRenderNode();
@@ -70,6 +68,7 @@ protected:
 
 private:
     void SetAccessibilityNode(const WeakPtr<Element>& parent);
+    void SetAccessibilityNodeById(const ComposeId& id);
 
     ComposeId composeId_;
     // detach and attach event marker

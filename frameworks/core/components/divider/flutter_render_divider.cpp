@@ -23,11 +23,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderDivider::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderDivider>();
-}
-
 void FlutterRenderDivider::Paint(RenderContext& context, const Offset& offset)
 {
     if (NearZero(constrainStrokeWidth_) || NearZero(dividerLength_)) {

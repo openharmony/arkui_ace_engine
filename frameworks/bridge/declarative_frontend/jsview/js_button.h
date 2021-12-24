@@ -19,6 +19,7 @@
 #include <variant>
 
 #include "core/components/button/button_component.h"
+#include "core/components/text/text_component.h"
 #include "core/components/touch_listener/touch_listener_component.h"
 #include "core/event/ace_event_handler.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
@@ -30,6 +31,8 @@ class JSButton : public JSContainerBase {
 public:
     static void SetFontSize(const JSCallbackInfo& info);
     static void SetFontWeight(std::string value);
+    static void SetFontStyle(int32_t value);
+    static void SetFontFamily(const JSCallbackInfo& info);
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetType(int value);
     static void SetStateEffect(bool stateEffect);
@@ -49,6 +52,7 @@ private:
     static void SetDefaultAttributes(const RefPtr<ButtonComponent>& buttonComponent);
     static void SetTypeAndStateEffect(const JSRef<JSObject>& obj, const RefPtr<ButtonComponent>& buttonComponent);
     static Dimension GetSizeValue(const JSCallbackInfo& info);
+    static RefPtr<TextComponent> GetTextComponent();
 };
 
 } // namespace OHOS::Ace::Framework

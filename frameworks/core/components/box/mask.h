@@ -18,10 +18,10 @@
 
 #include <string>
 
-#include "base/memory/ace_type.h"
 #include "base/geometry/rect.h"
+#include "base/memory/ace_type.h"
 #include "core/components/common/properties/clip_path.h"
-#include "core/pipeline/base/render_node.h"
+#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
 
@@ -145,7 +145,6 @@ protected:
     BackgroundImageSize size_;
     RefPtr<MaskPath> maskPath_;
 };
-
 
 } // namespace OHOS::Ace
 

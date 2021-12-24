@@ -21,6 +21,7 @@
 #include "base/log/event_report.h"
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
+#include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -438,13 +439,24 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         }
         return jsEngine->OnRestoreData(data);
     };
+
+    const auto& externalEventCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                    const std::string& componentId, const uint32_t nodeId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->FireExternalEvent(componentId, nodeId);
+    };
+
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
         setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
         resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
         timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
         onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack,
         onNewWantCallBack, onActiveCallBack, onInactiveCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
-        onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack);
+        onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack,
+        onRestoreDataCallBack, externalEventCallback);
     if (disallowPopLastPage_) {
         delegate_->DisallowPopLastPage();
     }
@@ -532,6 +544,21 @@ void DeclarativeFrontend::TransferJsResponseData(int callbackId, int32_t code, s
 void DeclarativeFrontend::TransferJsResponseDataPreview(int callbackId, int32_t code, ResponseData responseData) const
 {
     delegate_->TransferJsResponseDataPreview(callbackId, code, responseData);
+}
+
+void DeclarativeFrontend::ReplaceJSContent(const std::string componentName) const
+{
+    auto jsEngineInstance = AceType::DynamicCast<Framework::QJSDeclarativeEngine>(jsEngine_);
+    if (!jsEngineInstance) {
+        LOGE("jsEngineInstance is null");
+    }
+    std::string jsContent = jsEngineInstance->GetPreContent();
+    if (jsContent == "") {
+        LOGE("jsContent is null, DeclarativeFrontend::ReplaceJSContent failed");
+        return;
+    }
+    jsEngineInstance->ReplaceJSContent(jsContent, componentName);
+    jsEngineInstance->SetPreContent(jsContent);
 }
 #endif
 
@@ -802,6 +829,14 @@ void DeclarativeFrontend::NotifyAppStorage(const std::string& key, const std::st
     delegate_->NotifyAppStorage(jsEngine_, key, value);
 }
 
+RefPtr<Component> DeclarativeFrontend::GetNewComponentWithJsCode(const std::string& jsCode)
+{
+    if (jsEngine_) {
+        return jsEngine_->GetNewComponentWithJsCode(jsCode);
+    }
+    return nullptr;
+}
+
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)
 {
     LOGI("HandleAsyncEvent pageId: %{private}d, eventId: %{private}s, eventType: %{private}s",
@@ -977,7 +1012,9 @@ void DeclarativeEventHandler::HandleSyncEvent(
 void DeclarativeEventHandler::HandleSyncEvent(
     const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId)
 {
-    LOGW("js event handler does not support this event type!");
+    if (delegate_) {
+        delegate_->FireExternalEvent(eventMarker.GetData().eventId, componentId, nodeId);
+    }
 }
 
 } // namespace OHOS::Ace

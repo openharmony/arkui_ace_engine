@@ -20,8 +20,6 @@
 #include <regex>
 #include <unistd.h>
 
-#include "worker_init.h"
-
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
@@ -68,11 +66,15 @@ const int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
 constexpr int32_t V8_MAX_STACK_SIZE = 1 * 1024 * 1024;
 void* g_debugger = nullptr;
+bool g_flagNeedDebugBreakPoint = false;
+static int32_t globalNodeId = 100000;
 using StartDebug = void (*)(
-    const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context, std::string componentName);
+    const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context, std::string componentName,
+    const bool isDebugMode, const int32_t instanceId);
 using WaitingForIde = void (*)();
+using StopDebug = void (*)();
 
-bool CallEvalBuf(v8::Isolate* isolate, const char* src, int32_t instanceId)
+bool CallEvalBuf(v8::Isolate* isolate, const char* src, int32_t instanceId, const char* filename = nullptr)
 {
     ACE_DCHECK(isolate);
     CHECK_RUN_ON(JS);
@@ -87,9 +89,17 @@ bool CallEvalBuf(v8::Isolate* isolate, const char* src, int32_t instanceId)
         LOGE("src is null");
         return false;
     }
+
+    const char* origin = filename;
+    if (!origin) {
+        origin = "<anonymous>";
+    }
+
+    v8::ScriptOrigin scriptOrigin(v8::String::NewFromUtf8(isolate, origin).ToLocalChecked());
+
     v8::Local<v8::String> source = v8::String::NewFromUtf8(isolate, src).ToLocalChecked();
     v8::Local<v8::Script> script;
-    if (!v8::Script::Compile(context, source).ToLocal(&script)) {
+    if (!v8::Script::Compile(context, source, &scriptOrigin).ToLocal(&script)) {
         V8Utils::JsStdDumpErrorAce(isolate, &tryCatch, JsErrorType::COMPILE_ERROR, instanceId);
         return false;
     }
@@ -1758,30 +1768,24 @@ void JsHandleImage(const v8::FunctionCallbackInfo<v8::Value>& args, int32_t inde
     auto success = JsParseRouteUrl(args, "success", index);
     auto fail = JsParseRouteUrl(args, "fail", index);
 
-    std::set<std::string> callbacks;
-    if (!success.empty()) {
-        callbacks.emplace("success");
-    }
-    if (!fail.empty()) {
-        callbacks.emplace("fail");
-    }
     v8::Local<v8::External> data = v8::Local<v8::External>::Cast(args.Data());
     V8EngineInstance* engineInstance = static_cast<V8EngineInstance*>(data->Value());
 
-    auto callback = [engineInstance, success, fail](int32_t callbackType) {
-        switch (callbackType) {
-            case 0:
-                engineInstance->CallJs(success.c_str(), std::string("\"success\",null").c_str(), false);
-                break;
-            case 1:
-                engineInstance->CallJs(fail.c_str(), std::string("\"fail\",null").c_str(), false);
-                break;
-            default:
-                break;
+    auto&& callback = [engineInstance, success, fail](bool callbackType, int32_t width, int32_t height) {
+        if (callbackType) {
+            engineInstance->CallJs(success,
+                std::string("{\"width\":")
+                    .append(std::to_string(width))
+                    .append(", \"height\":")
+                    .append(std::to_string(height))
+                    .append("}"),
+                false);
+        } else {
+            engineInstance->CallJs(fail, std::string("\"fail\",null"), false);
         }
     };
     auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
-    (*delegate)->HandleImage(src, std::move(callback), callbacks);
+    (*delegate)->HandleImage(src, std::move(callback));
 }
 
 bool ParseResourceStringParam(std::string& str, const char* paramName, const std::map<std::string, std::string>& params)
@@ -2628,6 +2632,36 @@ void JsCallComponent(const v8::FunctionCallbackInfo<v8::Value>& args)
         // handle image-animator getState method
         auto state = V8ImageAnimatorBridge::JsGetState(isolate, nodeId);
         args.GetReturnValue().Set(state);
+    } else if (std::strcmp(methodName.c_str(), "addChild") == 0) {
+        auto sPage = GetStagingPage();
+        if (sPage == nullptr) {
+            LOGE("GetStagingPage return nullptr");
+            return;
+        }
+        std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(arguments);
+        if (!argsValue || !argsValue->IsArray()) {
+            LOGE("argsValue is nullptr or not array");
+            return;
+        }
+        std::unique_ptr<JsonValue> indexValue = argsValue->GetArrayItem(0)->GetValue("__nodeId");
+        if (!indexValue || !indexValue->IsNumber()) {
+            LOGE("indexValue is nullptr or not number");
+            return;
+        }
+        int32_t childId = indexValue->GetInt();
+        auto domDocument = sPage->GetDomDocument();
+        if (domDocument) {
+            RefPtr<DOMNode> node = domDocument->GetDOMNodeById(childId);
+            if (node == nullptr) {
+                LOGE("node is nullptr");
+                return;
+            }
+            auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node->GetTag(), node->GetNodeId(), nodeId);
+            sPage->PushCommand(command);
+            if (!sPage->CheckPageCreated() && sPage->GetCommandSize() > FRAGMENT_SIZE) {
+                sPage->FlushCommands();
+            }
+        }
     } else {
         page->PushCommand(Referenced::MakeRefPtr<JsCommandCallDomElementMethod>(nodeId, methodName, arguments));
     }
@@ -2925,6 +2959,227 @@ void JsPluralRulesFormat(const v8::FunctionCallbackInfo<v8::Value>& args)
     }
 }
 
+inline int32_t GetNodeId(const v8::Local<v8::Context>& ctx, v8::Local<v8::Object> value)
+{
+    v8::Isolate* isolate = ctx->GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    int32_t id = value->Get(ctx, v8::String::NewFromUtf8(isolate, "__nodeId").ToLocalChecked())
+        .ToLocalChecked()
+        ->Int32Value(ctx)
+        .ToChecked();
+    return id < 0 ? 0 : id;
+}
+
+void JsFocus(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    auto page = GetStagingPage();
+    if (page == nullptr) {
+        LOGE("GetStagingPage return nullptr");
+        return;
+    }
+    auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
+        (*delegate)->TriggerPageUpdate(page->GetPageId(), true);
+}
+
+void JsAnimate(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    if (context.IsEmpty()) {
+        LOGE("JsAnimate, CurrentContext is empty!");
+        return;
+    }
+    auto page = GetStagingPage();
+    if (page == nullptr) {
+        LOGE("GetStagingPage return nullptr");
+        return;
+    }
+    v8::String::Utf8Value jsArguments(isolate, args[0]);
+    if (!(*jsArguments)) {
+        return;
+    }
+    std::string arguments(*jsArguments);
+    int32_t nodeId = GetNodeId(context, args.Holder());
+    auto resultValue = V8AnimationBridgeUtils::CreateAnimationContext(context, page->GetPageId(), nodeId);
+    auto animationBridge = AceType::MakeRefPtr<V8AnimationBridge>(context, isolate, resultValue, nodeId);
+    auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
+    auto task = AceType::MakeRefPtr<V8AnimationBridgeTaskCreate>(*delegate, animationBridge, arguments);
+    page->PushCommand(Referenced::MakeRefPtr<JsCommandAnimation>(nodeId, task));
+    args.GetReturnValue().Set(resultValue);
+}
+
+void JsGetBoundingClientRect(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    if (context.IsEmpty()) {
+        LOGE("JsGetBoundingClientRect, CurrentContext is empty!");
+        return;
+    }
+    auto page = GetStagingPage();
+    if (page == nullptr) {
+        LOGE("GetStagingPage return nullptr");
+        return;
+    }
+    int32_t nodeId = GetNodeId(context, args.Holder());
+    auto rect = V8ComponentApiBridge::JsGetBoundingRect(isolate, nodeId);
+    args.GetReturnValue().Set(rect);
+}
+
+
+void JsSetAttribute(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    if (context.IsEmpty()) {
+        LOGE("JsSetAttribute, CurrentContext is empty!");
+        return;
+    }
+    auto page = GetStagingPage();
+    if (page == nullptr) {
+        LOGE("GetStagingPage return nullptr");
+        return;
+    }
+    auto attr = v8::Object::New(isolate);
+    attr->Set(context, args[0], args[1]).ToChecked();
+    int32_t nodeId = GetNodeId(context, args.Holder());
+    auto command = Referenced::MakeRefPtr<JsCommandUpdateDomElementAttrs>(nodeId);
+    if (SetDomAttributes(context, attr, *command)) {
+        page->ReserveShowCommand(command);
+    }
+    page->PushCommand(command);
+}
+
+void JsSetStyle(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    if (context.IsEmpty()) {
+        LOGE("JsSetStyle, CurrentContext is empty!");
+        return;
+    }
+    auto page = GetStagingPage();
+    if (page == nullptr) {
+        LOGE("GetStagingPage return nullptr");
+        return;
+    }
+    if (!args[0]->IsString() || !args[1]->IsString()) {
+        LOGE("args is not string ");
+        return;
+    }
+    auto style = v8::Object::New(isolate);
+    style->Set(context, args[0], args[1]).ToChecked();
+    int32_t nodeId = GetNodeId(context, args.Holder());
+    auto command = Referenced::MakeRefPtr<JsCommandUpdateDomElementStyles>(nodeId);
+    SetDomStyle(context, style, *command);
+    page->PushCommand(command);
+}
+
+void JsAppendChild(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    if (context.IsEmpty()) {
+        LOGE("JsAppendChild, CurrentContext is empty!");
+        return;
+    }
+    auto page = GetStagingPage();
+    if (page == nullptr) {
+        LOGE("GetStagingPage return nullptr");
+        return;
+    }
+    int32_t parentNodeId = GetNodeId(context, args.Holder());
+    auto object = args[0]->ToObject(context).ToLocalChecked();
+    int32_t id = object->Get(context, v8::String::NewFromUtf8(isolate, "__nodeId").ToLocalChecked())
+        .ToLocalChecked()->Int32Value(context).ToChecked();
+    int32_t childId = id < 0 ? 0 : id;
+    auto domDocument = page->GetDomDocument();
+    if (domDocument) {
+        RefPtr<DOMNode> node = domDocument->GetDOMNodeById(childId);
+        if (node == nullptr) {
+            LOGE("node is nullptr");
+            return;
+        }
+        auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node->GetTag(), node->GetNodeId(), parentNodeId);
+        page->PushCommand(command);
+        if (!page->CheckPageCreated() && page->GetCommandSize() > FRAGMENT_SIZE) {
+            page->FlushCommands();
+        }
+    }
+}
+
+void CreateDomElement(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    CHECK_RUN_ON(JS);
+    LOGD("Enter CreateDomElement");
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::Isolate::Scope isolateScope(isolate);
+    v8::HandleScope handleScope(isolate);
+    ACE_SCOPED_TRACE("CreateDomElement");
+    if (args.Length() != 1) {
+        LOGE("argc error, argc = %{private}d", args.Length());
+        return;
+    }
+    auto page = GetStagingPage();
+    if (page == nullptr) {
+        LOGE("GetStagingPage return nullptr");
+        return;
+    }
+    int32_t nodeId = ++globalNodeId;
+    v8::String::Utf8Value tagJsStr(isolate, args[0]);
+    if (!(*tagJsStr)) {
+        return;
+    }
+    std::string tag(*tagJsStr);
+    auto command = Referenced::MakeRefPtr<JsCommandCreateDomElement>(tag.c_str(), nodeId);
+    page->PushCommand(command);
+    // Flush command as fragment immediately when pushed too many commands.
+    if (!page->CheckPageCreated() && page->GetCommandSize() > FRAGMENT_SIZE) {
+        page->FlushCommands();
+    }
+}
+
+void JsCreateElement(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    CreateDomElement(args);
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::Isolate::Scope isolateScope(isolate);
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    if (context.IsEmpty()) {
+        LOGE("JsPerfBegin, CurrentContext is empty!");
+        return;
+    }
+    auto nodeObj = v8::Object::New(isolate);
+    nodeObj->Set(context, v8::String::NewFromUtf8(isolate, "__nodeId").ToLocalChecked(),
+        v8::Int32::New(isolate, globalNodeId)).ToChecked();
+    nodeObj->Set(context, v8::String::NewFromUtf8(isolate, "setAttribute").ToLocalChecked(),
+        v8::Function::New(context, JsSetAttribute, v8::Local<v8::Value>(), 1).ToLocalChecked())
+            .ToChecked();
+    nodeObj->Set(context, v8::String::NewFromUtf8(isolate, "setStyle").ToLocalChecked(),
+        v8::Function::New(context, JsSetStyle, v8::Local<v8::Value>(), 1).ToLocalChecked())
+            .ToChecked();
+    nodeObj->Set(context, v8::String::NewFromUtf8(isolate, "addChild").ToLocalChecked(),
+        v8::Function::New(context, JsAppendChild, v8::Local<v8::Value>(), 1).ToLocalChecked())
+            .ToChecked();
+    nodeObj->Set(context, v8::String::NewFromUtf8(isolate, "focus").ToLocalChecked(),
+        v8::Function::New(context, JsFocus, v8::Local<v8::Value>(), 1).ToLocalChecked())
+            .ToChecked();
+    nodeObj->Set(context, v8::String::NewFromUtf8(isolate, "animate").ToLocalChecked(),
+        v8::Function::New(context, JsAnimate, v8::Local<v8::Value>(), 1).ToLocalChecked())
+            .ToChecked();
+    nodeObj->Set(context, v8::String::NewFromUtf8(isolate, "getBoundingClientRect").ToLocalChecked(),
+        v8::Function::New(context, JsGetBoundingClientRect, v8::Local<v8::Value>(), 1).ToLocalChecked())
+            .ToChecked();
+    args.GetReturnValue().Set(nodeObj);
+}
 } // namespace
 
 // -----------------------
@@ -3060,6 +3315,7 @@ void V8EngineInstance::InitJsContext()
     v8::Context::Scope contextScope(localContext);
 
     InitJsConsoleObject(localContext, isolate_);
+    InitJsDocumentObject(localContext, isolate_);
     InitJsPerfUtilObject(localContext);
 
     const char* str = "var global = globalThis;\n"
@@ -3155,6 +3411,19 @@ void V8EngineInstance::InitJsConsoleObject(v8::Local<v8::Context>& localContext,
         ->Set(localContext, v8::String::NewFromUtf8(isolate, "error").ToLocalChecked(),
             v8::Function::New(
                 localContext, JsLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::ERROR)))
+                .ToLocalChecked())
+        .ToChecked();
+}
+
+void V8EngineInstance::InitJsDocumentObject(v8::Local<v8::Context>& localContext, v8::Isolate* isolate)
+{
+    v8::Local<v8::Object> global = localContext->Global();
+    auto  documentObj = v8::Object::New(isolate);
+    global->Set(localContext, v8::String::NewFromUtf8(isolate, "dom").ToLocalChecked(), documentObj).ToChecked();
+    documentObj
+        ->Set(localContext, v8::String::NewFromUtf8(isolate, "createElement").ToLocalChecked(),
+            v8::Function::New(
+                localContext, JsCreateElement, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::ERROR)))
                 .ToLocalChecked())
         .ToChecked();
 }
@@ -3317,19 +3586,21 @@ void LoadDebuggerSo()
 }
 
 void StartDebuggerAgent(
-    const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context, std::string componentName)
+    const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context, std::string componentName,
+    const bool isDebugMode, const int32_t instanceId)
 {
     LOGI("StartAgent");
     if (g_debugger == nullptr) {
         LOGE("g_debugger is null");
         return;
     }
+
     StartDebug startDebug = (StartDebug)dlsym(g_debugger, "StartDebug");
     if (startDebug == nullptr) {
         LOGE("StartDebug=NULL, dlerror=%s", dlerror());
         return;
     }
-    startDebug(platform, context, componentName);
+    startDebug(platform, context, componentName, isDebugMode, instanceId);
 }
 
 // -----------------------
@@ -3353,7 +3624,7 @@ bool V8Engine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     GetPlatform();
 
     // if load debugger.so successfully, debug mode
-    if (IsDebugVersion() && NeedDebugBreakPoint()) {
+    if (IsDebugVersion()) {
         LoadDebuggerSo();
         LOGI("debug mode");
     }
@@ -3363,8 +3634,6 @@ bool V8Engine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     if (!res) {
         return false;
     }
-
-    RegisterWorker();
 
     v8::Isolate* isolate = engineInstance_->GetV8Isolate();
     {
@@ -3383,14 +3652,17 @@ bool V8Engine::Initialize(const RefPtr<FrontendDelegate>& delegate)
                 LOGE("GetInstanceName fail, %s", instanceName.c_str());
                 return false;
             }
-            StartDebuggerAgent(GetPlatform(), context, instanceName);
+            StartDebuggerAgent(GetPlatform(), context, instanceName, NeedDebugBreakPoint(), instanceId_);
         }
     }
     nativeEngine_ = std::make_shared<V8NativeEngine>(
         GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
     engineInstance_->SetV8NativeEngine(nativeEngine_);
     SetPostTask();
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
+#endif
+    RegisterWorker();
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
         nativeEngine_->SetPackagePath(packagePath);
@@ -3451,21 +3723,8 @@ void V8Engine::RegisterInitWorkerFunc()
         auto dispatcher = instance->GetJsMessageDispatcher();
         isolate->SetData(V8EngineInstance::DISPATCHER, static_cast<void*>(&dispatcher));
         instance->InitJsConsoleObject(localContext, isolate);
-
-        auto jsBridge = DynamicCast<V8GroupJsBridge>(instance->GetDelegate()->GetGroupJsBridge());
-        if (jsBridge != nullptr) {
-            auto workerJsBridge = AceType::MakeRefPtr<V8GroupJsBridge>(instance->GetInstanceId());
-            auto source = v8::String::NewFromUtf8(isolate, jsBridge->GetJsCode().c_str()).ToLocalChecked();
-            if (!CallEvalBuf(isolate, "var global = globalThis;\n", instance->GetInstanceId())
-                || workerJsBridge->InitializeGroupJsBridge(localContext) == JS_CALL_FAIL
-                || workerJsBridge->CallEvalBuf(isolate, source) == JS_CALL_FAIL) {
-                LOGE("Worker Initialize GroupJsBridge failed!");
-            }
-        } else {
-            LOGE("Worker Initialize GroupJsBridge failed, jsBridge is nullptr");
-        }
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
+    nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
 void V8Engine::RegisterAssetFunc()
@@ -3480,7 +3739,7 @@ void V8Engine::RegisterAssetFunc()
         }
         delegate->GetResourceData(uri, content);
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterAssetFunc(assetFunc);
+    nativeEngine_->SetGetAssetFunc(assetFunc);
 }
 
 void V8Engine::RegisterOffWorkerFunc()
@@ -3488,7 +3747,7 @@ void V8Engine::RegisterOffWorkerFunc()
     auto&& offWorkerFunc = [](NativeEngine* nativeEngine) {
         LOGI("WorkerCore RegisterOffWorkerFunc called");
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterOffWorkerFunc(offWorkerFunc);
+    nativeEngine_->SetOffWorkerFunc(offWorkerFunc);
 }
 
 void V8Engine::RegisterWorker()
@@ -3501,10 +3760,18 @@ void V8Engine::RegisterWorker()
 V8Engine::~V8Engine()
 {
     CHECK_RUN_ON(JS);
+    if (g_debugger != nullptr) {
+        StopDebug stopDebug = (StopDebug)dlsym(g_debugger, "StopDebug");
+        if (stopDebug != nullptr) {
+            stopDebug();
+        }
+    }
 
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     if (nativeEngine_) {
         nativeEngine_->CancelCheckUVLoop();
     }
+#endif
 
     if (g_debugger != nullptr) {
         dlclose(g_debugger);
@@ -3539,6 +3806,20 @@ void V8Engine::GetLoadOptions(std::string& optionStr, bool isMainPage, const Ref
     renderOption->Put("language", local.c_str());
 
     if (isMainPage) {
+        std::string commonsJsContent;
+        if ((*delegate)->GetAssetContent("commons.js", commonsJsContent)) {
+            bool commonsJsResult = CallEvalBuf(isolate, commonsJsContent.c_str(), instanceId_, "commons.js");
+            if (!commonsJsResult) {
+                LOGE("fail to excute load commonsjs script commonsJsResult");
+            }
+        }
+        std::string vendorsJsContent;
+        if ((*delegate)->GetAssetContent("vendors.js", vendorsJsContent)) {
+            bool vendorsJsResult = CallEvalBuf(isolate, vendorsJsContent.c_str(), instanceId_, "vendors.js");
+            if (!vendorsJsResult) {
+                LOGE("fail to excute load vendorsjs script");
+            }
+        }
         std::string code;
         if ((*delegate)->GetAssetContent("app.js", code)) {
             renderOption->Put("appCreate", "true");

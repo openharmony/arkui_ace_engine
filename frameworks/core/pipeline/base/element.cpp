@@ -18,7 +18,6 @@
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "core/common/frontend.h"
-#include "core/common/text_field_manager.h"
 #include "core/components/focus_animation/focus_animation_element.h"
 #include "core/components/page/page_element.h"
 #include "core/components/shadow/shadow_element.h"
@@ -61,6 +60,16 @@ void Element::RemoveChild(const RefPtr<Element>& child)
         DetachChild(child);
         children_.remove(child);
     }
+}
+
+RefPtr<Element> Element::GetChildBySlot(int32_t slot)
+{
+    for (auto iter = children_.begin(); iter != children_.end(); iter++) {
+        if (slot == (*iter)->GetSlot()) {
+            return (*iter);
+        }
+    }
+    return nullptr;
 }
 
 void Element::ChangeChildSlot(const RefPtr<Element>& child, int32_t slot)
@@ -247,6 +256,8 @@ RefPtr<Element> Element::UpdateChildWithSlot(
 
 void Element::Mount(const RefPtr<Element>& parent, int32_t slot, int32_t renderSlot)
 {
+    MarkActive(true);
+    Activate();
     SetParent(parent);
     SetDepth(parent != nullptr ? parent->GetDepth() + 1 : 1);
     SetPipelineContext(parent != nullptr ? parent->context_ : context_);
@@ -257,13 +268,7 @@ void Element::Mount(const RefPtr<Element>& parent, int32_t slot, int32_t renderS
         AddToFocus();
     }
     Rebuild();
-    auto context = context_.Upgrade();
-    auto scrollElemet = AceType::DynamicCast<ScrollElement>(AceType::Claim(this));
-    if (scrollElemet && context && context->GetTextFieldManager() && context->GetLastPage()) {
-        auto textFeildManager = context->GetTextFieldManager();
-        textFeildManager->SetScrollElement(context->GetLastPage()->GetPageId(), WeakPtr<ScrollElement>(scrollElemet));
-    }
-    MarkActive(true);
+    OnMount();
 }
 
 void Element::AddToFocus()
@@ -371,8 +376,10 @@ RefPtr<Element> Element::InflateComponent(const RefPtr<Component>& newComponent,
     }
 
     RefPtr<Element> newChild = newComponent->CreateElement();
-    newChild->SetNewComponent(newComponent);
-    newChild->Mount(AceType::Claim(this), slot, renderSlot);
+    if (newChild) {
+        newChild->SetNewComponent(newComponent);
+        newChild->Mount(AceType::Claim(this), slot, renderSlot);
+    }
     return newChild;
 }
 
@@ -453,7 +460,15 @@ RefPtr<FocusNode> Element::RebuildFocusChild()
 
 void Element::MarkActive(bool active)
 {
+    if (active_ == active) {
+        return;
+    }
     active_ = active;
+    if (active_) {
+        OnActive();
+    } else {
+        OnInactive();
+    }
     for (auto& item : children_) {
         item->MarkActive(active);
     }

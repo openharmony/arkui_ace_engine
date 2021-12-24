@@ -63,7 +63,7 @@ HWTEST_F(ImageProviderTest, GIFSupport001, TestSize.Level1)
      * @tc.steps: step2. Call LoadImageData.
      * @tc.expected: step2. data should not be nullptr.
      */
-    auto data = imageLoader.LoadImageData(FILE_GIF);
+    auto data = imageLoader.LoadImageData(ImageSourceInfo(FILE_GIF));
     ASSERT_TRUE(data);
 
     /**
@@ -92,7 +92,7 @@ HWTEST_F(ImageProviderTest, GIFSupport002, TestSize.Level1)
      * @tc.steps: step2. Call LoadImageData.
      * @tc.expected: step2. data should not be nullptr.
      */
-    auto data = imageLoader.LoadImageData(FILE_GIF_BROKEN);
+    auto data = imageLoader.LoadImageData(ImageSourceInfo(FILE_GIF_BROKEN));
     ASSERT_TRUE(data);
 
     /**
@@ -123,7 +123,7 @@ HWTEST_F(ImageProviderTest, FileSupport001, TestSize.Level1)
          * @tc.steps: step2. Call LoadImageData.
          * @tc.expected: step2. data should not be nullptr.
          */
-        auto data = imageLoader.LoadImageData(file);
+        auto data = imageLoader.LoadImageData(ImageSourceInfo(file));
         ASSERT_TRUE(data);
 
         /**
@@ -153,7 +153,7 @@ HWTEST_F(ImageProviderTest, FileSupport002, TestSize.Level1)
      * @tc.steps: step2. Call LoadImageData.
      * @tc.expected: step2. data should be nullptr.
      */
-    auto data = imageLoader.LoadImageData(NO_FILE);
+    auto data = imageLoader.LoadImageData(ImageSourceInfo(NO_FILE));
     ASSERT_TRUE(!data);
 }
 
@@ -214,7 +214,7 @@ HWTEST_F(ImageProviderTest, WrongImageData001, TestSize.Level1)
          * @tc.steps: step2. Call LoadImageData.
          * @tc.expected: step2. data should not be nullptr.
          */
-        auto data = imageLoader.LoadImageData(brokenFile);
+        auto data = imageLoader.LoadImageData(ImageSourceInfo(brokenFile));
         ASSERT_TRUE(data);
 
         /**

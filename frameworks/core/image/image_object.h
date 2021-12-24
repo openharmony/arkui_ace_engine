@@ -18,12 +18,14 @@
 
 #include "experimental/svg/model/SkSVGDOM.h"
 
+#include "base/image/pixel_map.h"
 #include "core/image/animated_image_player.h"
 #include "core/image/image_source_info.h"
 #include "frameworks/core/components/svg/parse/svg_dom.h"
 
 namespace OHOS::Ace {
 
+class RenderImage;
 class ImageObject : public virtual AceType {
     DECLARE_ACE_TYPE(ImageObject, AceType);
 public:
@@ -31,8 +33,7 @@ public:
         ImageSourceInfo source,
         const RefPtr<PipelineContext> context,
         const sk_sp<SkData>& skData,
-        bool useSkiaSvg,
-        const std::optional<Color>& color);
+        bool useSkiaSvg);
 
     ImageObject() = default;
     ImageObject(
@@ -42,6 +43,7 @@ public:
         bool isSvg = false)
         : imageSource_(source), imageSize_(imageSize), frameCount_(frameCount), isSvg_(isSvg)
     {}
+    virtual ~ImageObject() = default;
 
     static std::string GenerateCacheKey(const std::string& src, Size targetSize);
 
@@ -79,6 +81,12 @@ public:
     virtual void Resume() {}
     virtual void ClearData() {}
 
+    // this will be called on ui thread when renderImage do perform layout for deferent image objects.
+    virtual void PerformLayoutImageObject(RefPtr<RenderImage> image) {}
+
+    // this will be called on ui thread when renderImage do measure for deferent image objects.
+    virtual Size MeasureForImage(RefPtr<RenderImage> image);
+
     virtual bool CancelBackgroundTasks()
     {
         return false;
@@ -102,10 +110,15 @@ public:
         : ImageObject(source, imageSize, frameCount, true), skiaDom_(skiaDom)
     {}
 
+    ~SvgSkiaImageObject() override = default;
+
     const sk_sp<SkSVGDOM>& GetSkiaDom()
     {
         return skiaDom_;
     }
+
+    void PerformLayoutImageObject(RefPtr<RenderImage> image) override;
+    Size MeasureForImage(RefPtr<RenderImage> image) override;
 
 private:
     sk_sp<SkSVGDOM> skiaDom_;
@@ -122,10 +135,15 @@ public:
         : ImageObject(source, imageSize, frameCount, true), svgDom_(svgDom)
     {}
 
+    ~SvgImageObject() override = default;
+
     const RefPtr<SvgDom>& GetSvgDom()
     {
         return svgDom_;
     }
+
+    void PerformLayoutImageObject(RefPtr<RenderImage> image) override;
+    Size MeasureForImage(RefPtr<RenderImage> image) override;
 
 private:
     RefPtr<SvgDom> svgDom_;
@@ -142,6 +160,8 @@ public:
         const sk_sp<SkData>& data)
         : ImageObject(source, imageSize, frameCount), skData_(data)
     {}
+
+    ~StaticImageObject() override = default;
 
     void UploadToGpuForRender(
         const WeakPtr<PipelineContext> context,
@@ -174,6 +194,8 @@ public:
         const sk_sp<SkData>& data)
         : ImageObject(source, imageSize, frameCount), skData_(data)
     {}
+
+    ~AnimatedImageObject() override = default;
 
     void UploadToGpuForRender(
         const WeakPtr<PipelineContext> context,
@@ -208,6 +230,39 @@ public:
 private:
     sk_sp<SkData> skData_;
     RefPtr<AnimatedImagePlayer> animatedPlayer_;
+};
+
+class PixelMapImageObject : public ImageObject {
+    DECLARE_ACE_TYPE(PixelMapImageObject, ImageObject);
+
+public:
+    PixelMapImageObject(const RefPtr<PixelMap>& pixmap) : pixmap_(pixmap)
+    {
+        imageSize_ = Size(pixmap_->GetWidth(), pixmap_->GetHeight());
+    }
+
+    ~PixelMapImageObject() override = default;
+
+    void* GetRawPixelMapPtr()
+    {
+        return pixmap_->GetRawPixelMapPtr();
+    }
+
+    void PerformLayoutImageObject(RefPtr<RenderImage> image) override;
+    Size MeasureForImage(RefPtr<RenderImage> image) override;
+
+    void ClearData() override
+    {
+        pixmap_ = nullptr;
+    }
+
+    const RefPtr<PixelMap>& GetPixmap() const
+    {
+        return pixmap_;
+    }
+
+private:
+    RefPtr<PixelMap> pixmap_;
 };
 
 } // namespace OHOS::Ace

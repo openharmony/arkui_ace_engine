@@ -20,13 +20,6 @@
 #include "core/pipeline/layers/clip_layer.h"
 
 namespace OHOS::Ace {
-struct IndicatorOffsetInfo {
-    double focusStart; // start of focus
-    double focusEnd;   // end of focus
-    Offset center; // circle center of point
-    Offset animationMove; // move offset of animation
-};
-
 class FlutterRenderSwiper : public RenderSwiper {
     DECLARE_ACE_TYPE(FlutterRenderSwiper, RenderSwiper);
 

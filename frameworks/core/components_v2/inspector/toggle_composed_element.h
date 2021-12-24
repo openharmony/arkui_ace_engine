@@ -35,6 +35,7 @@ public:
 
     std::string GetChecked() const;
     std::string GetSelectedColor() const;
+    std::string GetToggleType() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

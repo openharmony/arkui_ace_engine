@@ -37,7 +37,14 @@ template("ace_test") {
 
     sources = [ "ace_${device}_test.cpp" ]
 
-    deps = [ "$ace_root/adapter/preview/build:libace_engine_$platform(${current_toolchain})" ]
+    deps = [
+      ":copy_media_query_shared_library_for_test(${current_toolchain})",
+      ":copy_napi_shared_library_for_test(${current_toolchain})",
+      ":copy_resource_dynamic_library(${current_toolchain})",
+      "$ace_napi:ace_napi(${current_toolchain})",
+      "$ace_napi/sample/native_module_demo:demo(${current_toolchain})",
+      "$ace_root/adapter/preview/build:libace_engine_$platform(${current_toolchain})",
+    ]
     if (platform == "windows") {
       libs = [ "pthread" ]
     }
@@ -74,5 +81,81 @@ foreach(item, ace_platforms) {
         device = device
       }
     }
+  }
+}
+
+ohos_copy("copy_resource_dynamic_library") {
+  if (use_mac) {
+    if (is_standard_system) {
+      resource_manager_library = get_label_info(
+                                     "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac",
+                                     "root_out_dir") + "/global/resmgr_standard/libglobal_resmgr_mac.dylib"
+      deps = [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
+      sources = [ resource_manager_library ]
+    } else {
+      sources = [
+        "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libhmicuuc.dylib",
+        "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libresourcemanager_mac.dylib",
+      ]
+    }
+    outputs =
+        [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
+  } else {
+    if (is_standard_system) {
+      resource_manager_library = get_label_info(
+                                     "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win",
+                                     "root_out_dir") + "/global/resmgr_standard/libglobal_resmgr_win.dll"
+      deps = [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
+      sources = [ resource_manager_library ]
+    } else {
+      sources = [
+        "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libhmicuuc.dll",
+        "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libresourcemanager_win.dll",
+      ]
+    }
+    outputs =
+        [ root_build_dir + "/mingw_x86_64/common/common/{{source_file_part}}" ]
+  }
+}
+
+ohos_copy("copy_napi_shared_library_for_test") {
+  shared_library_path =
+      get_label_info("$ace_napi:ace_napi(${current_toolchain})", "root_out_dir")
+  deps = [
+    "$ace_napi:ace_napi(${current_toolchain})",
+    "$ace_napi:ace_napi_quickjs(${current_toolchain})",
+  ]
+  if (use_mac) {
+    sources = [
+      "$shared_library_path/ace/napi/libace_napi.dylib",
+      "$shared_library_path/ace/napi/libace_napi_quickjs.dylib",
+    ]
+    outputs =
+        [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
+  } else {
+    sources = [
+      "$shared_library_path/ace/napi/libace_napi.dll",
+      "$shared_library_path/ace/napi/libace_napi_quickjs.dll",
+    ]
+    outputs =
+        [ root_build_dir + "/mingw_x86_64/common/common/{{source_file_part}}" ]
+  }
+}
+
+ohos_copy("copy_media_query_shared_library_for_test") {
+  shared_library_path =
+      get_label_info("$ace_root/interfaces/napi/kits/media_query:mediaquery",
+                     "root_out_dir")
+  deps = [ "$ace_root/interfaces/napi/kits/media_query:mediaquery" ]
+  if (use_mac) {
+    sources =
+        [ "$shared_library_path/ace/ace_engine_standard/libmediaquery.dylib" ]
+    outputs = [ root_build_dir +
+                "/clang_x64/common/common/module/{{source_file_part}}" ]
+  } else {
+    sources =
+        [ "$shared_library_path/ace/ace_engine_standard/libmediaquery.dll" ]
+    outputs = [ root_build_dir +
+                "/mingw_x86_64/common/common/module/{{source_file_part}}" ]
   }
 }

@@ -31,7 +31,7 @@ std::unique_ptr<AceEngine> g_aceEngine;
 AceEngine::AceEngine()
 {
     // Watch dog thread(anr) can not exit when app stop.
-    // watchDog_ = AceType::MakeRefPtr<WatchDog>()
+    // watchDog_ = AceType::MakeRefPtr<WatchDog>();
 }
 
 AceEngine& AceEngine::Get()
@@ -78,6 +78,10 @@ void AceEngine::Dump(const std::vector<std::string>& params) const
     }
     for (const auto& container : copied) {
         auto pipelineContext = container.second->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGW("the pipeline context is nullptr, pa container");
+            continue;
+        }
         pipelineContext->GetTaskExecutor()->PostSyncTask(
             [params, container = container.second]() { container->Dump(params); }, TaskExecutor::TaskType::UI);
     }

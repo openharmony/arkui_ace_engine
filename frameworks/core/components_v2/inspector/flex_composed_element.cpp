@@ -24,12 +24,9 @@
 namespace OHOS::Ace::V2 {
 namespace {
 
-const std::unordered_map<std::string, std::function<std::string(const FlexComposedElement&)>> CREATE_JSON_MAP {
-    { "direction", [](const FlexComposedElement& inspector) { return inspector.GetFlexDirection(); } },
-    { "wrap", [](const FlexComposedElement& inspector) { return inspector.GetWrap(); } },
-    { "justifyContent", [](const FlexComposedElement& inspector) { return inspector.GetJustifyContent(); } },
-    { "alignItems", [](const FlexComposedElement& inspector) { return inspector.GetAlignItems(); } },
-    { "alignContent", [](const FlexComposedElement& inspector) { return inspector.GetAlignContent(); } }
+const std::unordered_map<std::string,
+    std::function<std::unique_ptr<JsonValue>(const FlexComposedElement&)>> CREATE_JSON_MAP {
+    { "constructor", [](const FlexComposedElement& inspector) { return inspector.GetConstructor(); } }
 };
 
 }
@@ -53,9 +50,20 @@ std::unique_ptr<JsonValue> FlexComposedElement::ToJsonObject() const
 {
     auto resultJson = InspectorComposedElement::ToJsonObject();
     for (const auto& value : CREATE_JSON_MAP) {
-        resultJson->Put(value.first.c_str(), value.second(*this).c_str());
+        resultJson->Put(value.first.c_str(), value.second(*this));
     }
     return resultJson;
+}
+
+std::unique_ptr<JsonValue> FlexComposedElement::GetConstructor() const
+{
+    auto jsonValue = JsonUtil::Create(false);
+    jsonValue->Put("direction", GetFlexDirection().c_str());
+    jsonValue->Put("wrap", GetWrap().c_str());
+    jsonValue->Put("justifyContent", GetJustifyContent().c_str());
+    jsonValue->Put("alignItems", GetAlignItems().c_str());
+    jsonValue->Put("alignContent", GetAlignContent().c_str());
+    return jsonValue;
 }
 
 std::string FlexComposedElement::GetFlexDirection() const
@@ -109,6 +117,43 @@ std::string FlexComposedElement::GetAlignContent() const
         return "FlexAlign.Start";
     }
     return "FlexAlign.Start";
+}
+
+void FlexComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto flexElement = GetContentElement<FlexElement>(FlexElement::TypeId());
+    if (!flexElement) {
+        LOGE("get GetFlexElement failed");
+        return;
+    }
+    flexElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    flexElement->MarkDirty();
+    LOGD("flex AddChildWithSlot");
+}
+
+void FlexComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto flexElement = GetContentElement<FlexElement>(FlexElement::TypeId());
+    if (!flexElement) {
+        LOGE("get GetFlexElement failed");
+        return;
+    }
+    auto child = flexElement->GetChildBySlot(slot);
+    flexElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    flexElement->MarkDirty();
+    LOGD("flex UpdateChildWithSlot");
+}
+
+void FlexComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto flexElement = GetContentElement<FlexElement>(FlexElement::TypeId());
+    if (!flexElement) {
+        LOGE("get GetFlexElement failed");
+        return;
+    }
+    flexElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    flexElement->MarkDirty();
+    LOGD("flex DeleteChildWithSlot");
 }
 
 } // namespace OHOS::Ace::V2

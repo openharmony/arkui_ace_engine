@@ -229,12 +229,23 @@ public:
         pattern_ = pattern;
     }
 
+    int32_t GetId() const
+    {
+        return id_;
+    }
+
+    void SetId(int32_t id)
+    {
+        id_ = id;
+    }
+
 protected:
     Color color_ = Color::BLACK;
     Gradient gradient_;
     TextStyle textStyle_;
     TextAlign textAlign_ = TextAlign::LEFT;
     TextDirection textDirection_ = TextDirection::LTR;
+    int32_t id_ = 0;
 
     Pattern pattern_;
 };

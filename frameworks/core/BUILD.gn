@@ -138,6 +138,7 @@ template("ace_core_source_set") {
       "gestures/raw_recognizer.cpp",
       "gestures/rotation_recognizer.cpp",
       "gestures/sequenced_recognizer.cpp",
+      "gestures/slide_recognizer.cpp",
       "gestures/swipe_recognizer.cpp",
       "gestures/velocity_tracker.cpp",
 
@@ -147,6 +148,7 @@ template("ace_core_source_set") {
       "gestures/pan_gesture.cpp",
       "gestures/pinch_gesture.cpp",
       "gestures/rotation_gesture.cpp",
+      "gestures/slide_gesture.cpp",
       "gestures/tap_gesture.cpp",
 
       # event
@@ -189,6 +191,16 @@ template("ace_core_source_set") {
         "event/multimodal/multimodal_manager.cpp",
         "event/multimodal/multimodal_scene.cpp",
       ]
+    }
+
+    # add sources needed by phone, tv and wearable. previews do not need them
+    if (defined(config.connect_server_support) &&
+        config.connect_server_support) {
+      sources += [ "common/connect_server_manager.cpp" ]
+    }
+
+    if (defined(config.hdc_register_support) && config.hdc_register_support) {
+      sources += [ "common/hdc_register.cpp" ]
     }
 
     configs = [ "$ace_root:ace_config" ]
@@ -258,12 +270,14 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/refresh:ace_core_components_refresh_$platform",
       "$ace_root/frameworks/core/components/root:ace_core_components_root_$platform",
       "$ace_root/frameworks/core/components/scroll:ace_core_components_scroll_$platform",
+      "$ace_root/frameworks/core/components/scroll_bar:ace_core_components_scroll_bar_$platform",
       "$ace_root/frameworks/core/components/search:ace_core_components_search_$platform",
       "$ace_root/frameworks/core/components/select_popup:ace_core_components_select_popup_$platform",
       "$ace_root/frameworks/core/components/semi_modal:ace_core_components_semi_modal_$platform",
       "$ace_root/frameworks/core/components/shadow:ace_core_components_shadow_$platform",
       "$ace_root/frameworks/core/components/shape:ace_core_components_shape_$platform",
       "$ace_root/frameworks/core/components/shared_transition:ace_core_components_shared_transition_$platform",
+      "$ace_root/frameworks/core/components/sheet:ace_core_components_sheet_$platform",
       "$ace_root/frameworks/core/components/slider:ace_core_components_slider_$platform",
       "$ace_root/frameworks/core/components/split_container:ace_core_components_split_container_$platform",
       "$ace_root/frameworks/core/components/stack:ace_core_components_stack_$platform",
@@ -300,14 +314,24 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_v2/swiper:ace_core_components_swiper_v2_$platform",
     ]
 
+    if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
+      sources += [ "animation/native_curve_helper.cpp" ]
+      deps += [ "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client" ]
+    }
+
     if (!use_mingw_win && !use_mac && !is_wearable_product &&
         !is_standard_system) {
       deps += [
         "$ace_root/frameworks/core/components/rich_text:ace_core_components_rich_text_$platform",
         "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform",
-        "$ace_root/frameworks/core/components/xcomponent:ace_core_components_xcomponent_$platform",
       ]
       sources += [ "common/form_manager.cpp" ]
+    }
+
+    # xcomponent components supports phone, TV and wearable except PC Preview
+    if (defined(config.xcomponent_components_support) &&
+        config.xcomponent_components_support) {
+      deps += [ "$ace_root/frameworks/core/components/xcomponent:ace_core_components_xcomponent_$platform" ]
     }
 
     if (defined(config.form_components_support) &&

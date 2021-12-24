@@ -68,6 +68,9 @@ public:
             theme->ringRadius_ = themeConstants->GetDimension(THEME_LOADING_PROGRESS_RING_RADIUS);
             theme->orbitRadius_ = themeConstants->GetDimension(THEME_LOADING_PROGRESS_ORBIT_RADIUS);
             theme->cometTailLen_ = themeConstants->GetDouble(THEME_LOADING_PROGRESS_COMET_TAIL_LEN);
+
+            theme->bubbleRadius_ = themeConstants->GetDimension(THEME_BUBBLE_PROGRESS_RADIUS);
+            theme->bubbleDiameter_ = themeConstants->GetDimension(THEME_BUBBLE_PROGRESS_DIAMETER);
             // Read style from system.
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
@@ -202,6 +205,16 @@ public:
         return moonFrontColor_;
     }
 
+    const Dimension& GetBubbleDiameter() const
+    {
+        return bubbleDiameter_;
+    }
+
+    const Dimension& GetBubbleRadius() const
+    {
+        return bubbleRadius_;
+    }
+
 protected:
     ProgressTheme() = default;
 
@@ -214,6 +227,8 @@ private:
 
     Dimension ringThickness_;
     Dimension ringDiameter_;
+    Dimension bubbleDiameter_;
+    Dimension bubbleRadius_;
 
     Dimension loadingDiameter_;
     Color loadingColor_;

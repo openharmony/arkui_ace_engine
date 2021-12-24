@@ -19,11 +19,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<FontManager> FontManager::Create()
-{
-    return AceType::MakeRefPtr<FlutterFontManager>();
-}
-
 void FlutterFontManager::VaryFontCollectionWithFontWeightScale()
 {
     if (GreatNotEqual(fontWeightScale_, 0.0)) {

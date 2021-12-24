@@ -57,6 +57,10 @@
 #include "core/event/multimodal/multimodal_subscriber.h"
 #endif
 
+namespace OHOS::Rosen {
+class RSUIDirector;
+}
+
 namespace OHOS::Ace {
 
 class OffscreenCanvas;
@@ -127,6 +131,8 @@ public:
 
     bool CanPushPage();
 
+    bool IsTransitionStop() const;
+
     void PopPage();
 
     void PopToPage(int32_t pageId);
@@ -173,6 +179,8 @@ public:
     void AddDirtyLayoutNode(const RefPtr<RenderNode>& renderNode);
 
     void AddPredictLayoutNode(const RefPtr<RenderNode>& renderNode);
+
+    void AddGeometryChangedNode(const RefPtr<RenderNode>& renderNode);
 
     void AddPreFlushListener(const RefPtr<FlushEvent>& listener);
 
@@ -237,6 +245,10 @@ public:
     {
         eventTrigger_.TriggerSyncEvent(marker, std::forward<Args>(args)...);
     }
+
+    void PostAsyncEvent(TaskExecutor::Task&& task);
+
+    void PostAsyncEvent(const TaskExecutor::Task& task);
 
     void OnSurfaceChanged(int32_t width, int32_t height);
 
@@ -463,7 +475,7 @@ public:
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc);
 
-    void CanLoadImage(const std::string& src, const std::map<std::string, EventMarker>& callbacks);
+    void TryLoadImageInfo(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& loadCallback);
 
     void SetAnimationCallback(AnimationCallback&& callback);
 
@@ -689,7 +701,24 @@ public:
 
     void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params);
 
+    void ForceLayoutForImplicitAnimation();
+
+    bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr);
+
+    void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& finishCallBack = nullptr);
+
+    bool CloseImplicitAnimation();
+
+    void AddKeyFrame(float fraction, const RefPtr<Curve>& curve,
+        const std::function<void()>& propertyCallback);
+
+    void AddKeyFrame(float fraction, const std::function<void()>& propertyCallback);
+
     void SaveExplicitAnimationOption(const AnimationOption& option);
+
+    void CreateExplicitAnimator(const std::function<void()>& onFinishEvent);
 
     void ClearExplicitAnimationOption();
 
@@ -800,7 +829,7 @@ public:
 
     void UpdateNodesNeedDrawOnPixelMap();
     void SearchNodesNeedDrawOnPixelMap(const RefPtr<RenderNode>& renderNode);
-    void NotifyDrawOnPiexlMap();
+    void NotifyDrawOnPixelMap();
 
     const RefPtr<RootElement>& GetRootElement() const
     {
@@ -907,10 +936,25 @@ public:
         return isHoleValid_;
     }
 
+    bool IsRebuildFinished() const
+    {
+        return isRebuildFinished_;
+    }
+
+    void SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector);
+
+    std::string GetInspectorNodeByKey(const std::string& key);
+
+    std::string GetInspectorTree();
+
+    bool SendEventByKey(const std::string& key, int action, const std::string& params);
+
 private:
     void FlushPipelineWithoutAnimation();
     void FlushLayout();
+    void FlushGeometryProperties();
     void FlushRender();
+    void FlushMessages();
     void FlushRenderFinish();
     void FireVisibleChangeEvent();
     void FlushPredictLayout(int64_t targetTimestamp);
@@ -970,6 +1014,7 @@ private:
     std::set<RefPtr<RenderNode>, NodeCompare<RefPtr<RenderNode>>> dirtyLayoutNodes_;
     std::set<RefPtr<RenderNode>, NodeCompare<RefPtr<RenderNode>>> predictLayoutNodes_;
     std::set<RefPtr<RenderNode>, NodeCompare<RefPtr<RenderNode>>> needPaintFinishNodes_;
+    std::set<RefPtr<RenderNode>, NodeCompare<RefPtr<RenderNode>>> geometryChangedNodes_;
     std::set<RefPtr<RenderNode>> nodesToNotifyOnPreDraw_;
     std::set<RefPtr<RenderNode>> nodesNeedDrawOnPixelMap_;
     std::list<RefPtr<FlushEvent>> postFlushListeners_;
@@ -996,6 +1041,7 @@ private:
     DragEventHandler dragEventHandler_;
     InitDragEventListener initDragEventListener_;
     GetViewScaleCallback getViewScaleCallback_;
+    std::stack<bool> pendingImplicitLayout_;
 
     Rect transparentHole_;
     // use for traversing cliping hole
@@ -1094,6 +1140,7 @@ private:
     int32_t minPlatformVersion_ = 0;
     std::string photoCachePath_;
     AnimationOption explicitAnimationOption_;
+    std::map<int32_t, RefPtr<Animator>> explicitAnimators_;
     OnRouterChangeCallback OnRouterChangeCallback_ = nullptr;
     bool isAccessibilityEnabled_ = false;
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
@@ -1103,6 +1150,8 @@ private:
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
+    bool isRebuildFinished_ = false;
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

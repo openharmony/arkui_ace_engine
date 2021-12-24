@@ -21,6 +21,7 @@ group("ace_packages") {
   # core library for Ability Cross-platform Environment(ACE) JS
   deps += [
     "$ace_root/build:libace",
+    "$ace_root/interfaces/innerkits/ace:ace_uicontent",
     "$ace_root/interfaces/napi/kits:napi_group",
     "$ace_root/interfaces/native:ace_packages_ndk",
   ]
@@ -39,24 +40,16 @@ group("ace_packages") {
   ]
 
   # Pa engine
-  deps += [ "$ace_root/build:libace_engine_pa_qjs" ]
-}
-
-# Install packages
-group("ace_for_windows") {
-  deps = [
-    "$ace_root/adapter/preview/build:libace_engine_windows(${windows_buildtool})",
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
+  deps += [
+    "$ace_root/build:libace_engine_pa_ark",
+    "$ace_root/build:libace_engine_pa_qjs",
   ]
-  if (is_wearable_product) {
-    deps += [ "$ace_root/adapter/preview/entrance/samples:ace_test_windows_wearable(${windows_buildtool})" ]
-  } else {
-    deps += [
-      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_car(${windows_buildtool})",
-      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_card(${windows_buildtool})",
-      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_phone(${windows_buildtool})",
-      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_tablet(${windows_buildtool})",
-      "$ace_root/adapter/preview/entrance/samples:ace_test_windows_tv(${windows_buildtool})",
-    ]
-  }
+
+  # ark debugger
+  deps += [
+    "$ace_root/frameworks/bridge/js_frontend/engine/jsi/debugger:ark_debugger",
+  ]
+
+  # pid Register
+  deps += [ "$ace_root/frameworks/core/common/register:hdc_register" ]
 }

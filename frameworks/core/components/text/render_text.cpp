@@ -151,7 +151,7 @@ bool RenderText::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     }
 
     // Since the paintRect is relative to parent, use parent local point to perform touch test.
-    if (!GetTouchRect().IsInRegion(parentLocalPoint)) {
+    if (!InTouchRectList(parentLocalPoint, GetTouchRectList())) {
         return false;
     }
 

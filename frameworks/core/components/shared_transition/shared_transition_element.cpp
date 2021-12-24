@@ -160,6 +160,9 @@ bool SharedTransitionElement::AboardShuttle(Offset& ticket)
     if (parent && parent->GetBackDecoration() != nullptr) {
         passengerComponent_->SetBackDecoration(parent->GetBackDecoration());
     }
+    if (parent && parent->GetFrontDecoration() != nullptr) {
+        passengerComponent_->SetFrontDecoration(parent->GetFrontDecoration());
+    }
 
     passengerElement_ = AceType::DynamicCast<BoxElement>(GetContentElement());
     if (!passengerElement_) {
@@ -208,6 +211,7 @@ void SharedTransitionElement::GetOffShuttle()
     passengerComponent_->SetWidth(passengerWidth_.Value(), passengerWidth_.Unit());
     passengerComponent_->SetHeight(passengerHeight_.Value(), passengerHeight_.Unit());
     passengerComponent_->SetBackDecoration(nullptr);
+    passengerComponent_->SetFrontDecoration(nullptr);
     passengerElement_->SetRenderNode(passengerRender_);
     passengerElement_->SetNewComponent(passengerComponent_);
     passengerElement_->Mount(GetFirstChild());
@@ -253,7 +257,11 @@ RefPtr<Component> SharedTransitionElement::BuildChild()
             passengerComponent_ = AceType::MakeRefPtr<BoxComponent>();
             passengerComponent_->SetChild(passengerComponent);
         }
-        return AceType::MakeRefPtr<DisplayComponent>(passengerComponent_);
+        if (passengerElement_) {
+            return AceType::MakeRefPtr<DisplayComponent>(AceType::MakeRefPtr<BoxComponent>());
+        } else {
+            return AceType::MakeRefPtr<DisplayComponent>(passengerComponent_);
+        }
     } else {
         LOGE("Build child failed. no shared transition component found. id: %{public}s", GetId().c_str());
         return ComposedElement::BuildChild();

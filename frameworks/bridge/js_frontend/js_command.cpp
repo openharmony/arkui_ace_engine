@@ -235,6 +235,62 @@ RefPtr<DOMNode> JsCommandDomElementCreator::CreateDomNode(const RefPtr<JsAcePage
     return node;
 }
 
+RefPtr<DOMNode> JsCommandDomElementCreator::CreateDomElement(const RefPtr<JsAcePage>& page) const
+{
+    if (!page) {
+        return nullptr;
+    }
+    auto pageId = page->GetPageId();
+    auto domDocument = page->GetDomDocument();
+    ACE_DCHECK(domDocument);
+
+    std::string tagName = tagName_;
+    auto node = domDocument->CreateNodeWithId(tagName, nodeId_, -1);
+    if (!node) {
+        EventReport::SendJsException(JsExcepType::CREATE_NODE_ERR);
+        return nullptr;
+    }
+    if (page->IsLiteStyle()) {
+        node->AdjustParamInLiteMode();
+    }
+    node->SetBoxWrap(page->IsUseBoxWrap());
+
+    TrySaveTargetAndIdNode(id_, target_, domDocument, node);
+    node->SetShareId(shareId_);
+    node->SetPipelineContext(pipelineContext_);
+    node->SetIsCustomComponent(isCustomComponent_);
+    node->InitializeStyle();
+    node->SetAttr(attrs_);
+    if (animationStyles_) {
+        node->SetAnimationStyle(*animationStyles_);
+    }
+    if (transitionEnter_) {
+        node->SetIsTransition(true);
+        node->SetIsEnter(true);
+        node->SetAnimationStyle(*transitionEnter_);
+    }
+    if (transitionExit_) {
+        node->SetIsTransition(true);
+        node->SetIsEnter(false);
+        node->SetAnimationStyle(*transitionExit_);
+    }
+    if (sharedTransitionName_) {
+        node->SetSharedTransitionStyle(*sharedTransitionName_);
+    }
+
+    UpdateForChart(node);
+    UpdateForImageAnimator(node);
+    UpdateForClock(node);
+    UpdateForBadge(node);
+    UpdateForStepperLabel(node);
+    UpdateForInput(node);
+
+    node->SetStyle(styles_);
+    node->AddEvent(pageId, events_);
+    return node;
+}
+
+
 void JsCommandDomElementCreator::MountDomNode(
     const RefPtr<DOMNode>& node, const RefPtr<DOMDocument>& domDocument, NodeId parentNodeId) const
 {
@@ -358,6 +414,20 @@ void JsCommandCreateDomBody::Execute(const RefPtr<JsAcePage>& page) const
     accessibilityNode->AddEvent(page->GetPageId(), events_);
 }
 
+void JsCommandCreateDomElement::Execute(const RefPtr<JsAcePage>& page) const
+{
+    auto domDocument = page ? page->GetDomDocument() : nullptr;
+    if (!domDocument) {
+        LOGE("Failed to get DOM document");
+        EventReport::SendJsException(JsExcepType::CREATE_NODE_ERR);
+        return;
+    }
+    auto node = CreateDomElement(page);
+    if (!node) {
+        LOGE("node is nullptr");
+        return;
+    }
+}
 void JsCommandAddDomElement::Execute(const RefPtr<JsAcePage>& page) const
 {
     auto domDocument = page ? page->GetDomDocument() : nullptr;
@@ -453,6 +523,34 @@ void JsCommandRemoveDomElement::Execute(const RefPtr<JsAcePage>& page) const
     accessibilityManager->RemoveAccessibilityNodes(accessibilityNode);
 }
 
+void JsCommandAppendElement::Execute(const RefPtr<JsAcePage>& page) const
+{
+    auto domDocument = page ? page->GetDomDocument() : nullptr;
+    if (!domDocument) {
+        LOGE("Failed to get DOM document");
+        EventReport::SendJsException(JsExcepType::CREATE_NODE_ERR);
+        return;
+    }
+    auto node = GetNodeFromPage(page, nodeId_);
+    if (!node) {
+        LOGE("node is nullptr");
+        return;
+    }
+    RefPtr<DOMNode> parentNode;
+    int32_t parentNodeId = parentNodeId_;
+    if (parentNodeId != -1) {
+        parentNode = domDocument->GetDOMNodeById(parentNodeId);
+        if (!parentNode) {
+            LOGE("Parent node %{private}d not exists", nodeId_);
+            EventReport::SendJsException(JsExcepType::CREATE_NODE_ERR);
+        }
+    }
+    node->SetParentNode(parentNode);
+
+    MountDomNode(node, domDocument, parentNodeId_);
+    page->PushNewNode(nodeId_, parentNodeId_);
+}
+
 void JsCommandUpdateDomElementAttrs::Execute(const RefPtr<JsAcePage>& page) const
 {
     auto node = GetNodeFromPage(page, nodeId_);
@@ -483,7 +581,7 @@ void JsCommandUpdateDomElementAttrs::Execute(const RefPtr<JsAcePage>& page) cons
     UpdateForInput(node);
 
     node->GenerateComponentNode();
-    page->PushDirtyNode(nodeId_);
+    page->PushDirtyNode(node->GetDirtyNodeId());
 
     // update accessibility node
     auto accessibilityManager = GetAccessibilityManager(page);

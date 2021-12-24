@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_COLUMN_COMPOSED_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_COLUMN_COMPOSED_ELEMENT_H
 
+#include "core/components/flex/flex_component.h"
 #include "core/components/flex/flex_element.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
@@ -36,6 +37,10 @@ public:
     std::string GetSpace() const;
     std::string GetHorizontalAlign() const;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
+    RefPtr<RenderFlex> GetRenderColumn() const;
+    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void DeleteChildWithSlot(int32_t slot) override;
 };
 
 } // namespace OHOS::Ace::V2

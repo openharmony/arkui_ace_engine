@@ -20,6 +20,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/accessibility/js_accessibility_manager.h"
 
@@ -37,6 +38,9 @@ public:
 private:
     void AssembleJSONTree(std::string& jsonStr);
     void AssembleDefaultJSONTree(std::string& jsonStr);
+    void OperateComponent(const std::string& attrsJson);
+    RefPtr<Component> GetNewComponentWithJsCode(const std::unique_ptr<JsonValue>& root);
+    RefPtr<V2::InspectorComposedElement> GetInspectorElementById(NodeId nodeId);
     void GetNodeJSONStrMap();
     void GetAttrsAndStyles(std::unique_ptr<JsonValue>& jsonNode, const RefPtr<AccessibilityNode>& node);
     void GetAttrsAndStylesV2(std::unique_ptr<JsonValue>& jsonNode, const RefPtr<AccessibilityNode>& node);

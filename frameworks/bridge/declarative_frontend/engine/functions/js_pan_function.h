@@ -28,7 +28,7 @@ class JsPanFunction : public JsFunction {
 
 public:
     explicit JsPanFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
-    ~JsPanFunction()
+    ~JsPanFunction() override
     {
         LOGD("Destroy: JsPanFunction");
     };

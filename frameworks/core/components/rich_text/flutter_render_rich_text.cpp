@@ -27,11 +27,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderRichText::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderRichText>();
-}
-
 void FlutterRenderRichText::PerformLayout()
 {
     RenderRichText::PerformLayout();

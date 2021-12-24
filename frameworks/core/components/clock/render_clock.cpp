@@ -215,9 +215,9 @@ void RenderClock::UpdateAccessibilityInfo(double hour, double minute)
     if (!node) {
         return;
     }
-    std::string content = std::to_string(static_cast<int32_t>(hour))
-        .append(":")
-        .append(std::to_string(static_cast<int32_t>(minute)));
+    std::string prefix = minute < 10 ? "0" : "";
+    std::string minuteToString =  prefix.append(std::to_string(static_cast<int32_t>(minute)));
+    std::string content = std::to_string(static_cast<int32_t>(hour)).append(":").append(minuteToString);
     node->SetText(content);
 
     auto context = context_.Upgrade();

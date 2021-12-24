@@ -107,7 +107,6 @@ RefPtr<RenderNode> ListElement::CreateRenderNode()
 
 void ListElement::RetrieveListData(int32_t beginIndex, int32_t endIndex)
 {
-
     if (requestItemAsync_ && !building_) {
         std::string command("\"");
         command.append(LIST_EVENT_REQUEST_ITEM);
@@ -130,14 +129,31 @@ void ListElement::RetrieveListData(int32_t beginIndex, int32_t endIndex)
 bool ListElement::BuildListDataFromChild(int32_t index)
 {
     if (beginIndex_ != LIST_PARAM_INVAID && endIndex_ != LIST_PARAM_INVAID) {
-        for (auto itemIter = itemComponents_.begin(); itemIter != itemComponents_.end(); ++itemIter) {
-            auto itemComponent = ListItemComponent::GetListItem(*itemIter);
-            if (!itemComponent) {
-                LOGE("itemComponent exist but is null");
-                return false;
+        if (index > itemVectorHit_.first) {
+            for (int32_t position = itemVectorHit_.second + 1; position < (int32_t)itemComponents_.size(); position++) {
+                auto itemComponent = ListItemComponent::GetListItem(itemComponents_[position]);
+                if (!itemComponent) {
+                    LOGE("itemComponent exist but is null");
+                    return false;
+                }
+                if (index == itemComponent->GetIndex()) {
+                    itemVectorHit_.first = index;
+                    itemVectorHit_.second = position;
+                    return BuildListComponent(itemComponents_[position]);
+                }
             }
-            if (index == itemComponent->GetIndex()) {
-                return BuildListComponent(*itemIter);
+        } else {
+            for (int position = itemVectorHit_.second; position >= 0; position--) {
+                auto itemComponent = ListItemComponent::GetListItem(itemComponents_[position]);
+                if (!itemComponent) {
+                    LOGE("itemComponent exist but is null");
+                    return false;
+                }
+                if (index == itemComponent->GetIndex()) {
+                    itemVectorHit_.first = index;
+                    itemVectorHit_.second = position;
+                    return BuildListComponent(itemComponents_[position]);
+                }
             }
         }
         LOGW("list-item component (index=%{public}d) not in cache!", index);
@@ -318,8 +334,14 @@ void ListElement::UpdateListItemElement(const RefPtr<Component>& component)
     }
     if (element) {
         auto itemElement = ListItemElement::GetListItem(element);
-        if (itemElement->GetKey().empty() || itemElement->GetKey() != itemComponent->GetKey()) {
+        if (itemElement->GetKey() == -1 || itemElement->GetKey() != itemComponent->GetKey()) {
             UpdateChild(element, component);
+            if (accessibilityDisabled_) {
+                auto renderNode = element->GetRenderNode();
+                if (renderNode) {
+                    renderNode->SetNeedUpdateAccessibility(false);
+                }
+            }
         }
     }
 }
@@ -382,6 +404,14 @@ bool ListElement::BuildListComponent(const RefPtr<Component>& component)
     itemElements_[index] = element;
     renderList_->AddListItem(index, itemProxy);
     itemProxy->SetHidden(false);
+    if (accessibilityDisabled_) {
+        if (accessibilityDisabled_) {
+            auto renderNode = element->GetRenderNode();
+            if (renderNode) {
+                renderNode->SetNeedUpdateAccessibility(false);
+            }
+        }
+    }
     // recover visible state.
     if (itemProxy->GetVisible() != GetRenderNode()->GetVisible()) {
         itemProxy->SetVisible(GetRenderNode()->GetVisible());
@@ -518,7 +548,7 @@ bool ListElement::RecycleItem(int32_t index)
     if (!itemElement) {
         return false;
     }
-    itemElement->SetKey("");
+    itemElement->SetKey(-1);
     auto bucket = cacheBuckets_.find(itemElement->GetItemType());
     if (bucket != cacheBuckets_.end()) {
         auto& elements = bucket->second;
@@ -633,7 +663,18 @@ void ListElement::UpdateCachedComponent()
     }
 
     itemComponents_.clear();
+    itemVectorHit_ = std::make_pair(-1, -1);
     auto children = group->GetChildren();
+
+    children.sort([](const RefPtr<Component>& node1, const RefPtr<Component>& node2) {
+        auto itemNode1 = ListItemComponent::GetListItem(node1);
+        auto itemNode2 = ListItemComponent::GetListItem(node2);
+        if (itemNode1 && itemNode2) {
+            return itemNode1->GetKey() < itemNode2->GetKey();
+        }
+        return false;
+    });
+
     auto child = children.begin();
     int32_t index = 0;
     for (index = 0; index < indexOffset_ && child != children.end(); ++child) {
@@ -654,7 +695,7 @@ void ListElement::UpdateCachedComponent()
             maxCount_ += tailLength_;
         }
         length_ = indexOffset_ + repeatedLength_ + tailLength_;
-    } else  {
+    } else {
         length_ = LIST_LENGTH_INFINITE;
     }
     renderList_->SetLength(length_);
@@ -693,8 +734,8 @@ void ListElement::GetRefreshItems(bool& rebuild, int32_t& tailIndex)
     int32_t currentMax = renderList_->GetCurrentMaxIndex() + 1;
     const auto& components = group->GetChildren();
 
-    LOGD("currentMin: %{public}d, currentMax: %{public}d, components.size(): %{public}d",
-        currentMin, currentMax, static_cast<int>(components.size()));
+    LOGD("currentMin: %{public}d, currentMax: %{public}d, components.size(): %{public}d", currentMin, currentMax,
+        static_cast<int>(components.size()));
     int32_t head = 0;
     bool needRefresh = true;
     bool inRange = false;
@@ -872,14 +913,14 @@ void ListElement::Update()
     if (context && context->GetFrontend() && context->GetFrontendType() == FrontendType::JS) {
         requestItemAsync_ = AceAsyncEvent<void(const std::string&)>::Create(list->GetOnRequestItem(), context_);
     } else {
-        requestItem_ =
-            AceSyncEvent<void(const std::string&, std::string&)>::Create(list->GetOnRequestItem(), context_);
+        requestItem_ = AceSyncEvent<void(const std::string&, std::string&)>::Create(list->GetOnRequestItem(), context_);
     }
     cachedCount_ = list->GetCachedCount();
     beginIndex_ = list->GetBeginIndex();
     endIndex_ = list->GetEndIndex();
     repeatedLength_ = list->GetRepeatedLength();
     indexOffset_ = list->GetIndexOffset();
+    accessibilityDisabled_ = list->IsAccessibilityDisabled();
 
     if (beginIndex_ != LIST_PARAM_INVAID && endIndex_ != LIST_PARAM_INVAID) {
         UpdateCachedComponent();

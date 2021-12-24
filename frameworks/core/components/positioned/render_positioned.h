@@ -21,6 +21,9 @@
 
 namespace OHOS::Ace {
 
+using UpdatePositionFunc = std::function<void(const std::function<void(const Dimension&, const Dimension&)>&)>;
+using UpdatePositionFunction = std::function<void(const std::function<void(const RefPtr<ItemDragInfo>& info)>&)>;
+
 class ACE_EXPORT RenderPositioned : public RenderProxy {
     DECLARE_ACE_TYPE(RenderPositioned, RenderProxy);
 
@@ -87,7 +90,7 @@ public:
 
     void SetBottom(const Dimension& bottom) override; // add for animation
 
-private:
+protected:
     Dimension bottom_;
     Dimension top_;
     Dimension left_;
@@ -99,6 +102,9 @@ private:
     bool hasTop_ = false;
     bool hasRight_ = false;
     bool hasBottom_ = false;
+
+    UpdatePositionFunc updatePositionFunc_;
+    UpdatePositionFunction updatePositionFunction_;
 };
 
 } // namespace OHOS::Ace

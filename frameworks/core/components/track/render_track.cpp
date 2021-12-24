@@ -49,6 +49,8 @@ void RenderTrack::Update(const RefPtr<Component>& component)
     showIndicator_ = track->GetIndicatorFlag();
     markedText_ = track->GetLableMarkedText();
     markedTextColor_ = track->GetLableMarkedColor();
+    direction_ = track->GetDirection();
+    isReverse_ = track->IsReverse();
 
     leftToRight_ = track->GetTextDirection() == TextDirection::LTR;
 
@@ -92,7 +94,7 @@ void RenderTrack::Update(const RefPtr<Component>& component)
     if (!progressTransitionController_) {
         progressTransitionController_ = AceType::MakeRefPtr<Animator>(pipelineContext);
     }
-    if (!scanHaloController_) {
+    if (!scanHaloController_ && !pipelineContext->IsJsCard()) {
         scanHaloController_ = AceType::MakeRefPtr<Animator>(pipelineContext);
     }
     MarkNeedLayout();
@@ -152,6 +154,7 @@ void RenderTrack::UpdateAnimation()
             scanHaloController_->SetIteration(ANIMATION_REPEAT_INFINITE);
             scanHaloController_->Play();
         }
+        needUpdateAnimation_ = false;
     }
 }
 
@@ -159,11 +162,17 @@ Size RenderTrack::Measure()
 {
     if (GetLayoutParam().GetMaxSize().IsInfinite()) {
         auto defaultWidth = theme_ != nullptr ? NormalizeToPx(theme_->GetTrackWidth()) : 0.0;
-        return Size(defaultWidth, paintData_.thickness);
+        return direction_ == Axis::HORIZONTAL ?
+            Size(defaultWidth, paintData_.thickness) : Size(paintData_.thickness, defaultWidth);
     }
     Size layoutSize;
-    layoutSize.SetHeight(paintData_.thickness);
-    layoutSize.SetWidth(GetLayoutParam().GetMaxSize().Width());
+    if (direction_ == Axis::VERTICAL) {
+        layoutSize.SetWidth(paintData_.thickness);
+        layoutSize.SetHeight(GetLayoutParam().GetMaxSize().Height());
+    } else {
+        layoutSize.SetHeight(paintData_.thickness);
+        layoutSize.SetWidth(GetLayoutParam().GetMaxSize().Width());
+    }
     return layoutSize;
 }
 
@@ -238,6 +247,23 @@ Size RenderMoonTrack::Measure()
 void RenderMoonTrack::Dump()
 {
     DumpLog::GetInstance().AddDesc(std::string("RenderMoonTrack: ").append(GetLayoutSize().ToString()));
+}
+
+Size RenderCapsuleTrack::Measure()
+{
+    if (GetLayoutParam().GetMaxSize().IsInfinite()) {
+        double diameter = theme_ != nullptr ? NormalizeToPx(theme_->GetRingDiameter()) : 0.0;
+        diameter =
+            std::min(diameter, std::min(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height()));
+        return Size(diameter, diameter);
+    }
+    double diameter = std::min(GetLayoutParam().GetMaxSize().Height(), GetLayoutParam().GetMaxSize().Width());
+    return Size(diameter, diameter);
+}
+
+void RenderCapsuleTrack::Dump()
+{
+    DumpLog::GetInstance().AddDesc(std::string("RenderCapsuleTrack: ").append(GetLayoutSize().ToString()));
 }
 
 } // namespace OHOS::Ace

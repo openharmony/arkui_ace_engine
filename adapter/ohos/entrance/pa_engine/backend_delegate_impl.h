@@ -137,6 +137,7 @@ public:
 
     bool GetAssetContent(const std::string& url, std::string& content) override;
     bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) override;
+    std::string GetAssetPath(const std::string& url) override;
 
     // JsEventHandler delegate functions.
     void FireAsyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);

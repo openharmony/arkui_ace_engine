@@ -73,7 +73,6 @@ template("declarative_js_engine_v8") {
 
     public_deps = [ "//foundation/ace/napi:ace_napi" ]
     deps += [ "//foundation/ace/napi:ace_napi_v8" ]
-    external_deps = worker_deps
   }
 }
 

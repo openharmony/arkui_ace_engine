@@ -18,7 +18,6 @@
 #include <fstream>
 #include <iostream>
 #include <sys/types.h>
-#include <sys/unistd.h>
 
 #include "base/log/log.h"
 
@@ -45,7 +44,8 @@ void WsServer::RunServer()
             webSocket_->read(buffer);
             std::string message = boost::beast::buffers_to_string(buffer.data());
             LOGI("WsServer OnMessage: %{private}s", message.c_str());
-            wsOnMessage_(std::move(message));
+            ideMsgQueue.push(std::move(message));
+            wsOnMessage_();
         }
     } catch (const beast::system_error& se) {
         if (se.code() != websocket::error::closed) {

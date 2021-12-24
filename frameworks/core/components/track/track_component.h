@@ -29,6 +29,7 @@ namespace OHOS::Ace {
 enum class SliderMode {
     OUTSET, // block on track, track is thin
     INSET,  // block inside track, track is rough
+    CAPSULE, // capsule slider.
 };
 
 inline const Dimension TRACK_HEIGHT_DP = Dimension(2.0, DimensionUnit::VP);
@@ -341,6 +342,26 @@ public:
         return markedTextColor_;
     }
 
+    Axis GetDirection() const
+    {
+        return axis_;
+    }
+
+    void SetDirection(Axis axis)
+    {
+        axis_ = axis;
+    }
+
+    bool IsReverse() const
+    {
+        return isReverse_;
+    }
+
+    void SetReverse(bool isReverse)
+    {
+        isReverse_ = isReverse;
+    }
+
 private:
     std::string markedText_;
     Color markedTextColor_;
@@ -350,10 +371,12 @@ private:
     Color backgroundColor_;
     // the thickness of the track. when the track is circle, there is no effect.
     RefPtr<RingTrackInfo> trackPaintData_ = AceType::MakeRefPtr<RingTrackInfo>();
-    bool showIndicator_ = false;
     std::vector<Color> colors_;
     std::vector<double> weights_;
+    bool showIndicator_ = false;
     bool showAnimation_ = true;
+    bool isReverse_ = false;
+    Axis axis_ = Axis::HORIZONTAL;
 };
 
 class LinearTrack : public TrackComponent {
@@ -402,6 +425,16 @@ class MoonTrack : public TrackComponent {
 public:
     MoonTrack() = default;
     ~MoonTrack() override = default;
+
+    RefPtr<RenderNode> CreateRenderNode() override;
+};
+
+class CapsuleTrack : public TrackComponent {
+    DECLARE_ACE_TYPE(CapsuleTrack, TrackComponent);
+
+public:
+    CapsuleTrack() = default;
+    ~CapsuleTrack() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override;
 };

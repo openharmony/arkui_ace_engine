@@ -43,6 +43,8 @@ public:
     explicit MotionPathEvaluator(const MotionPathOption& option = MotionPathOption(),
         const Offset& start = Offset(0.0, 0.0), const Offset& end = Offset(0.0, 0.0),
         PositionType type = PositionType::RELATIVE);
+    ~MotionPathEvaluator() override = default;
+
     MotionPathPosition Evaluate(float fraction);
 
     RefPtr<Evaluator<double>> CreateXEvaluator()
@@ -102,6 +104,8 @@ class DoubleEvaluator final : public Evaluator<double> {
 public:
     DoubleEvaluator(const RefPtr<MotionPathEvaluator>& evaluator, bool isXAxis)
         : motionPathEvaluator_(evaluator), isXAxis_(isXAxis) {};
+    ~DoubleEvaluator() override = default;
+
     double Evaluate(const double& start, const double& end, float fraction) override;
 
 private:
@@ -113,6 +117,8 @@ private:
 class DimensionOffsetEvaluator final : public Evaluator<DimensionOffset> {
 public:
     DimensionOffsetEvaluator(const RefPtr<MotionPathEvaluator>& evaluator) : motionPathEvaluator_(evaluator) {}
+    ~DimensionOffsetEvaluator() override = default;
+
     DimensionOffset Evaluate(const DimensionOffset& start, const DimensionOffset& end, float fraction) override;
 
 private:
@@ -123,6 +129,8 @@ private:
 class RotateEvaluator final : public Evaluator<float> {
 public:
     explicit RotateEvaluator(const RefPtr<MotionPathEvaluator>& evaluator) : motionPathEvaluator_(evaluator) {};
+    ~RotateEvaluator() override = default;
+
     float Evaluate(const float& start, const float& end, float fraction) override;
 
 private:
@@ -133,7 +141,10 @@ class TransformOperationsEvaluator final : public Evaluator<TransformOperations>
 public:
     explicit TransformOperationsEvaluator(const RefPtr<MotionPathEvaluator>& evaluator)
         : motionPathEvaluator_(evaluator) {};
-    TransformOperations Evaluate(const TransformOperations& start, const TransformOperations& end, float fraction);
+    ~TransformOperationsEvaluator() override = default;
+
+    TransformOperations Evaluate(
+        const TransformOperations& start, const TransformOperations& end, float fraction) override;
 
 private:
     RefPtr<MotionPathEvaluator> motionPathEvaluator_;

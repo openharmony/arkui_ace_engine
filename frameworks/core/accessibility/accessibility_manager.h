@@ -71,6 +71,7 @@ public:
     virtual void AddVisibleChangeNode(NodeId nodeId, double ratio, VisibleRatioCallback callback) = 0;
     virtual void RemoveVisibleChangeNode(NodeId nodeId) = 0;
     virtual bool IsVisibleChangeNodeExists(NodeId nodeId) = 0;
+    virtual void UpdateEventTarget(NodeId id, BaseEventInfo& info) = 0;
 
     void SetVersion(AccessibilityVersion version)
     {

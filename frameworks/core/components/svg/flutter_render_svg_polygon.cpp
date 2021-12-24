@@ -25,11 +25,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderSvgPolygon::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSvgPolygon>();
-}
-
 RenderLayer FlutterRenderSvgPolygon::GetRenderLayer()
 {
     if (!transformLayer_) {

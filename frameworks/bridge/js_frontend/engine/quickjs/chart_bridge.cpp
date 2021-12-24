@@ -168,7 +168,7 @@ void GetChartAttrOptionsSeriesLineStyle(JSContext* ctx, JSValueConst valObject, 
                 chartOptionsSeriesLinestyleMap[] = {
                     { "lineGradient",
                         [](const char* valStr, ChartOptions& chartOptions) {
-                            chartOptions.SetWholeLineGradient(StringToDouble(valStr));
+                            chartOptions.SetWholeLineGradient(StringToBool(valStr));
                         } },
                     { "smooth",
                         [](const char* valStr, ChartOptions& chartOptions) {

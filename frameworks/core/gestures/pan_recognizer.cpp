@@ -80,7 +80,12 @@ void PanRecognizer::HandleTouchUpEvent(const TouchPoint& event)
         return;
     }
 
-    globalPoint_ = Point(event.x, event.y);
+    if (fingers_ == 1) {
+        globalPoint_ = Point(touchUpPoint_.x, touchUpPoint_.y);
+    } else {
+        globalPoint_ = Point(event.x, event.y);
+    }
+
     touchPoints_.erase(itr);
 
     if (state_ == DetectState::READY) {
@@ -119,6 +124,9 @@ void PanRecognizer::HandleTouchUpEvent(const TouchPoint& event)
 
 void PanRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
 {
+    if (fingers_ == 1) {
+        touchUpPoint_ = event;
+    }
     LOGD("pan recognizer receives touch move event");
     auto itr = touchPoints_.find(event.id);
     if (itr == touchPoints_.end()) {
@@ -229,22 +237,11 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
-        info.SetOffsetX(ConvertPxToVp(averageDistance_.GetX()));
-        info.SetOffsetY(ConvertPxToVp(averageDistance_.GetY()));
+        info.SetOffsetX(averageDistance_.GetX());
+        info.SetOffsetY(averageDistance_.GetY());
         info.SetGlobalPoint(globalPoint_);
         (*callback)(info);
     }
-}
-
-double PanRecognizer::ConvertPxToVp(double offset) const
-{
-    auto context = context_.Upgrade();
-    if (!context) {
-        LOGE("fail to detect tap gesture due to context is nullptr");
-        return offset;
-    }
-    double vpOffset = context->ConvertPxToVp(Dimension(offset, DimensionUnit::PX));
-    return vpOffset;
 }
 
 bool PanRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)

@@ -23,14 +23,14 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const BlankComposedElement&)>> CREATE_JSON_MAP {
-    { "min", [](const BlankComposedElement& inspector) { return inspector.GetMin(); } }
+    { "min", [](const BlankComposedElement& inspector) { return inspector.GetMin(); } },
+    { "color", [](const BlankComposedElement& inspector) { return inspector.GetBackgroundColor(); } }
 };
 
 }
 
 void BlankComposedElement::Dump()
 {
-    InspectorComposedElement::Dump();
     DumpLog::GetInstance().AddDesc(std::string("blank_composed_element"));
     DumpLog::GetInstance().AddDesc(
         std::string("min: ").append(GetMin()));

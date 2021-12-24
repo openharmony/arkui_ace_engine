@@ -19,11 +19,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderPositioned::Create()
-{
-    return AceType::MakeRefPtr<RenderPositioned>();
-}
-
 void RenderPositioned::Update(const RefPtr<Component>& component)
 {
     const auto positioned = AceType::DynamicCast<PositionedComponent>(component);
@@ -40,6 +35,34 @@ void RenderPositioned::Update(const RefPtr<Component>& component)
     hasRight_ = positioned->HasRight();
     hasTop_ = positioned->HasTop();
     hasBottom_ = positioned->HasBottom();
+    updatePositionFunc_ = positioned->GetUpdatePositionFuncId();
+
+    auto updatePosition = [weak = AceType::WeakClaim(this)](const Dimension& x, const Dimension& y) {
+        auto renderPosition = weak.Upgrade();
+        if (!renderPosition) {
+            return;
+        }
+        renderPosition->SetTop(y);
+        renderPosition->SetLeft(x);
+    };
+
+    if (updatePositionFunc_) {
+        updatePositionFunc_(updatePosition);
+    }
+
+    updatePositionFunction_ = positioned->GetUpdatePositionFunc();
+    auto func = [weak = AceType::WeakClaim(this)](const RefPtr<ItemDragInfo>& info) {
+        auto renderPosition = weak.Upgrade();
+        if (!renderPosition) {
+            return;
+        }
+        renderPosition->SetTop(Dimension(info->GetY()));
+        renderPosition->SetLeft(Dimension(info->GetX()));
+    };
+    if (updatePositionFunction_) {
+        updatePositionFunction_(func);
+    }
+
     MarkNeedLayout();
 }
 

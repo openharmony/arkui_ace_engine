@@ -28,6 +28,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
+#include "core/common/hdc_register.h"
 #include "core/common/platform_window.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/watch_dog.h"
@@ -50,6 +51,12 @@ constexpr char ARK_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
 constexpr char DECLARATIVE_JS_ENGINE_SHARED_LIB[] = "libace_engine_declarative.z.so";
 constexpr char DECLARATIVE_ARK_ENGINE_SHARED_LIB[] = "libace_engine_declarative_ark.z.so";
 
+#ifdef _ARM64_
+const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
+#else
+const std::string ASSET_LIBARCH_PATH = "/lib/arm";
+#endif
+
 const char* GetEngineSharedLibrary(bool isArkApp)
 {
     if (isArkApp) {
@@ -70,19 +77,20 @@ const char* GetDeclarativeSharedLibrary(bool isArkApp)
 
 } // namespace
 
-AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, AceAbility* aceAbility,
+AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AppExecFwk::Ability* aceAbility,
     std::unique_ptr<PlatformEventCallback> callback)
     : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), aceAbility_(aceAbility)
 {
     ACE_DCHECK(callback);
     auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     flutterTaskExecutor->InitPlatformThread();
+    taskExecutor_ = flutterTaskExecutor;
     // No need to create JS Thread for DECLARATIVE_JS
     if (type_ != FrontendType::DECLARATIVE_JS) {
         flutterTaskExecutor->InitJsThread();
+        taskExecutor_->PostTask([id = instanceId_]() { Container::InitForThread(id); }, TaskExecutor::TaskType::JS);
     }
-    taskExecutor_ = flutterTaskExecutor;
-    taskExecutor_->PostTask([id = instanceId_]() { Container::InitForThread(id); }, TaskExecutor::TaskType::JS);
+    SystemProperties::SetDeclarativeFrontend(type_ == FrontendType::DECLARATIVE_JS);
     platformEventCallback_ = std::move(callback);
 }
 
@@ -101,17 +109,17 @@ void AceContainer::Destroy()
             // 1. Destroy Pipeline on UI thread.
             RefPtr<PipelineContext> context;
             context.Swap(pipelineContext_);
-            taskExecutor_->PostTask([context]() {
-                context->Destroy();
-            }, TaskExecutor::TaskType::UI);
+            taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
 
             // 2. Destroy Frontend on JS thread.
             RefPtr<Frontend> frontend;
             frontend_.Swap(frontend);
-            taskExecutor_->PostTask([frontend]() {
-                frontend->UpdateState(Frontend::State::ON_DESTROY);
-                frontend->Destroy();
-            }, TaskExecutor::TaskType::JS);
+            taskExecutor_->PostTask(
+                [frontend]() {
+                    frontend->UpdateState(Frontend::State::ON_DESTROY);
+                    frontend->Destroy();
+                },
+                TaskExecutor::TaskType::JS);
         }
     }
     resRegister_.Reset();
@@ -144,7 +152,13 @@ void AceContainer::InitializeFrontend()
         frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
         auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary(isArkApp_));
-        auto jsEngine = loader.CreateJsEngine(instanceId_);
+        RefPtr<Framework::JsEngine> jsEngine;
+        if (GetSettings().UsingSharedRuntime()) {
+            jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
+            LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
+        } else {
+            jsEngine = loader.CreateJsEngine(instanceId_);
+        }
         jsEngine->AddExtraNativeObject("ability", aceAbility_);
         declarativeFrontend->SetJsEngine(jsEngine);
         declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
@@ -432,18 +446,27 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterIdleCallback(idleCallback);
 }
 
-void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, AceAbility* aceAbility,
-    std::unique_ptr<PlatformEventCallback> callback)
+void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
+    OHOS::AppExecFwk::Ability* aceAbility, std::unique_ptr<PlatformEventCallback> callback)
 {
     Container::InitForThread(INSTANCE_ID_PLATFORM);
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, isArkApp, aceAbility, std::move(callback));
     AceEngine::Get().AddContainer(instanceId, aceContainer);
+
+    // TODO: HdcRegister will crash, fix it later
+    // HdcRegister::Get().StartHdcRegister();
     aceContainer->Initialize();
     auto front = aceContainer->GetFrontend();
     if (front) {
         front->UpdateState(Frontend::State::ON_CREATE);
         front->SetJsMessageDispatcher(aceContainer);
     }
+
+    auto jsFront = AceType::DynamicCast<JsFrontend>(front);
+    if (!jsFront) {
+        return;
+    }
+    jsFront->SetInstanceName(instanceName.c_str());
 }
 
 void AceContainer::DestroyContainer(int32_t instanceId)
@@ -600,6 +623,9 @@ void AceContainer::AddAssetPath(
             LOGI("Push AssetProvider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
+        std::string absPath(packagePath);
+        std::size_t lastSeperatorPos = absPath.rfind("/");
+        flutterAssetManager->SetPackagePath(absPath.substr(0, lastSeperatorPos).append(ASSET_LIBARCH_PATH));
     }
 }
 
@@ -700,7 +726,6 @@ void AceContainer::AttachView(
             },
             TaskExecutor::TaskType::UI);
     }
-
     taskExecutor_->PostTask(
         [context = pipelineContext_]() { context->SetupRootElement(); }, TaskExecutor::TaskType::UI);
     aceView_->Launch();

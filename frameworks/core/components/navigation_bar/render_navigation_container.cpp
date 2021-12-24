@@ -77,10 +77,10 @@ void RenderNavigationContainer::Update(const RefPtr<Component>& component)
     if (!declaration) {
         return;
     }
-    title_ = declaration->GetTitle();
-    subTitle_ = declaration->GetSubTitle();
-    hideBackButton_ = !declaration->HasBackButton();
-    hideNavigationBar_ = !declaration->HasNavigationBar();
+    title_ = declaration->title;
+    subTitle_ = declaration->subTitle;
+    hideBackButton_ = declaration->hideBarBackButton;
+    hideNavigationBar_ = declaration->hideBar;
 }
 
 } // namespace OHOS::Ace

@@ -30,11 +30,6 @@ const Color SEARCH_DIVIDER_COLOR = Color(0x33000000);
 
 } // namespace
 
-RefPtr<RenderNode> RenderSearch::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSearch>();
-}
-
 void FlutterRenderSearch::Paint(RenderContext& context, const Offset& offset)
 {
     RenderNode::Paint(context, offset);

@@ -216,7 +216,6 @@ protected:
     void UpdateAccessibilityAttr();
     void InitAccessibilityEventListener();
     void HandleScrollUpdate(double delta);
-    void UpdateTouchRect() override;
 
     bool renderWholeNode_ = true;
 
@@ -245,9 +244,11 @@ protected:
     bool showSteps_ = false;
     bool showTips_ = false;
     bool isDraging_ = false;
+    bool isReverse_ = false;
     SliderMode mode_ = SliderMode::OUTSET;
     Dimension blockHotWidth_;
     Dimension blockHotHeight_;
+    Axis direction_ = Axis::HORIZONTAL;
 
     RefPtr<RenderNode> tip_;
     RefPtr<RenderNode> renderText_;

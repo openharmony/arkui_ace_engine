@@ -39,7 +39,7 @@ public:
     std::string GetBarPosition() const;
     std::string GetIndex() const;
     std::string GetVertical() const;
-    std::string GetScrollable() const;
+    bool GetScrollable() const override;
     std::string GetBarMode() const;
     std::string GetBarWidth() const;
     std::string GetBarHeight() const;

@@ -21,11 +21,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderMoonTrack::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderMoonTrack>();
-}
-
 void FlutterRenderMoonTrack::Paint(RenderContext& context, const Offset& offset)
 {
     Size canvasSize = GetLayoutSize();

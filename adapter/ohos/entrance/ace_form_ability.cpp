@@ -21,6 +21,7 @@
 #include "adapter/ohos/entrance/pa_container.h"
 #include "adapter/ohos/entrance/pa_engine/pa_backend.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
+#include "adapter/ohos/entrance/utils.h"
 #include "base/log/log.h"
 #include "core/common/backend.h"
 
@@ -74,17 +75,19 @@ OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::W
     int32_t wantId = atoi(wantIdStr.c_str());
     LOGI("AceFormAbility:: wantId = %{public}s, %{public}d", wantIdStr.c_str(), wantId);
 
-    // init from ability
-    BackendType backendType = BackendType::FORM;
-    Platform::PaContainer::CreateContainer(
-        wantId, backendType, this, std::make_unique<FormPlatformEventCallback>([this]() { TerminateAbility(); }));
-
     // get asset
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
     if (moduleInfo != nullptr) {
         packagePathStr += "/" + moduleInfo->name + "/";
     }
+
+    // init form ability
+    BackendType backendType = BackendType::FORM;
+    bool isArkApp = GetIsArkFromConfig(packagePathStr);
+    Platform::PaContainer::CreateContainer(wantId, backendType, isArkApp, this,
+        std::make_unique<FormPlatformEventCallback>([this]() { TerminateAbility(); }));
+
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     if (info != nullptr && !info->srcPath.empty()) {
         LOGI("AceFormAbility::OnCreate assetBasePathStr: %{public}s, parsedUrl: %{public}s",

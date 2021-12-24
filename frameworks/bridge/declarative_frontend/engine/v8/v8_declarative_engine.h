@@ -30,6 +30,7 @@
 #include "core/common/ace_page.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
+#include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -329,6 +330,11 @@ public:
 
     static std::unique_ptr<v8::Platform>& GetPlatform();
 
+    v8::Local<v8::Object> GetRenderContext() const
+    {
+        return renderContextXComp_.Get(isolateXComp_);
+    }
+
 private:
     void CallAppFunc(v8::Isolate* isolate, const v8::Local<v8::Context>& context, std::string appFuncName);
 
@@ -347,9 +353,18 @@ private:
 
     void TimerCallJs(const std::string& callbackId, bool isInterval);
 
+    void InitXComponent();
+
     RefPtr<V8DeclarativeEngineInstance> engineInstance_;
 
+    RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
+
+    NativeXComponent *nativeXComponent_ = nullptr;
+
     int32_t instanceId_ = 0;
+    v8::Isolate* isolateXComp_ = nullptr;
+    v8::Persistent<v8::Object> renderContextXComp_;
+    v8::Persistent<v8::Context> ctxXComp_;
 
     ACE_DISALLOW_COPY_AND_MOVE(V8DeclarativeEngine);
 };

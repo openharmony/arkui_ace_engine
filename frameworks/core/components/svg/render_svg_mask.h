@@ -22,6 +22,7 @@
 #include "frameworks/core/components/common/properties/svg_paint_state.h"
 #include "frameworks/core/components/svg/render_svg_base.h"
 
+class SkCanvas;
 namespace OHOS::Ace {
 
 class RenderSvgMask : public RenderSvgBase {
@@ -32,6 +33,7 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     bool PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimate) override;
+    virtual void PaintMaskLayer(SkCanvas* canvas, const Offset& offset, const Rect& paintRect) {};
     virtual void PaintMaskLayer(RenderContext& context, const Offset& offset, const Rect& paintRect) {};
 
     bool IsDefalutMaskUnits() const

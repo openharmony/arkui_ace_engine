@@ -71,6 +71,13 @@ struct SwiperIndicatorData {
     RefPtr<RenderText> textRenderNext;
 };
 
+struct IndicatorOffsetInfo {
+    double focusStart; // start of focus
+    double focusEnd;   // end of focus
+    Offset center; // circle center of point
+    Offset animationMove; // move offset of animation
+};
+
 enum class SpringStatus {
     SPRING_STOP = 0,
     SPRING_START,
@@ -103,7 +110,6 @@ public:
     ~RenderSwiper() override;
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
-    void UpdateTouchRect() override;
     void PerformLayout() override;
 
     bool IsChildrenTouchEnable() override;
@@ -139,6 +145,16 @@ public:
         disableSwipe_ = disableSwipe;
     }
 
+    bool GetDisableSwipe() const
+    {
+        return disableSwipe_;
+    }
+
+    Dimension GetItemSpace() const
+    {
+        return itemspace_;
+    }
+
     double GetMainSize(const Size& size) const
     {
         return axis_ == Axis::HORIZONTAL ? size.Width() : size.Height();
@@ -172,7 +188,7 @@ public:
     void StopZoomDotAnimation();
     void StartDragRetractionAnimation(); // on handle drag end
     void StopDragRetractionAnimation();
-    void FinishAllSwipeAnimation();
+    void FinishAllSwipeAnimation(bool useFinish = false);
     bool IsZoomAnimationStopped();
     bool IsZoomOutAnimationStopped();
     bool IsZoomOutDotAnimationStopped();
@@ -358,6 +374,9 @@ private:
         if (!scheduler_) {
             return;
         }
+        if (IsDisabled()) {
+            return;
+        }
         if (autoPlay_) {
             bool playEnding = currentIndex_ >= itemCount_ - 1 && !loop_;
             if (playEnding && scheduler_->IsActive()) {
@@ -377,7 +396,17 @@ private:
         }
     }
 
+    void FinishSwipeAnimation()
+    {
+        if (controller_ && !controller_->IsStopped()) {
+            controller_->Finish();
+        }
+    }
+
+    bool IsAnimatorStopped() const;
+
     void FireItemChangedEvent(bool changed) const;
+    void FireSwiperControllerFinishEvent();
     void ResetCachedChildren();
     void SetSwiperHidden(int32_t forwardNum, int32_t backNum);
     void SetSwiperEffect(double dragOffset);
@@ -462,6 +491,7 @@ private:
     bool disableSwipe_ = false;
     bool disableRotation_ = false;
     bool catchMode_ = true;
+    Dimension itemspace_;
     int32_t index_ = 0;
     int32_t swipeToIndex_ = -1;
     MainSwiperSize mainSwiperSize_ = MainSwiperSize::MAX;

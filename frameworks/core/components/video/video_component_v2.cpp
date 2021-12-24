@@ -20,13 +20,6 @@
 
 namespace OHOS::Ace {
 
-VideoComponentV2::~VideoComponentV2()
-{
-    if (videoControllerV2_) {
-        videoControllerV2_->RemoveVideoController(GetVideoController());
-    }
-}
-
 RefPtr<Element> VideoComponentV2::CreateElement()
 {
     return AceType::MakeRefPtr<VideoElementV2>();

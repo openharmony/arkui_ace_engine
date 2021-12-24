@@ -114,9 +114,7 @@ public:
     // ----------------
     // system.image
     // ----------------
-    virtual void HandleImage(
-        const std::string& src, std::function<void(int32_t)>&& callback, const std::set<std::string>& callbacks) = 0;
-
+    virtual void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) = 0;
     // ----------------
     // internal.jsResult
     // ----------------

@@ -27,17 +27,12 @@ class XComponentElement : public RenderElement {
     DECLARE_ACE_TYPE(XComponentElement, RenderElement);
 
 public:
-    using EventCallback = std::function<void()>;
+    using InitEventCallback = std::function<void(const std::string&)>;
+    using DestroyEventCallback = std::function<void(const std::string&)>;
     ~XComponentElement();
     void Prepare(const WeakPtr<Element>& parent) override;
     void SetNewComponent(const RefPtr<Component>& newComponent) override;
-    void OnXComponentSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
-    void OnTextureSize(int64_t textureId, std::string& result);
-    void CreatePlatformResource();
-    void ReleasePlatformResource();
 
-    bool isExternalResource_ = false;
-    RefPtr<NativeTexture> texture_;
     RefPtr<XComponentComponent> xcomponent_;
 
 private:
@@ -49,13 +44,22 @@ private:
     void OnSurfaceInit(const std::string& componentId, const uint32_t nodeId);
     void RegisterDispatchTouchEventCallback();
     void DispatchTouchEvent(const TouchPoint& event);
+    void OnXComponentSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
+    void OnTextureSize(int64_t textureId, std::string& result);
+
+    void CreatePlatformResource();
+    void ReleasePlatformResource();
+    bool IsDeclarativePara();
 
     std::function<void(const std::string&, const uint32_t)> onSurfaceInit_;
-    EventCallback onXComponentInit_;
-    EventCallback onXComponentDestroy_;
+    InitEventCallback onXComponentInit_;
+    DestroyEventCallback onXComponentDestroy_;
     TouchInfo touchEventPoint_;
     std::string name_;
+    std::string idStr_;
     bool hasSendDestroyEvent_ = false;
+    bool isExternalResource_ = false;
+    RefPtr<NativeTexture> texture_;
 };
 } // namespace OHOS::Ace
 

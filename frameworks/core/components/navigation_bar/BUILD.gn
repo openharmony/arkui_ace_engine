@@ -16,6 +16,8 @@ import("//foundation/ace/ace_engine/frameworks/core/components/components.gni")
 build_component("navigation_bar") {
   sources = [
     "navigation_bar_component.cpp",
+    "navigation_bar_component_base.cpp",
+    "navigation_bar_component_v2.cpp",
     "navigation_bar_element.cpp",
     "navigation_container_component.cpp",
   ]

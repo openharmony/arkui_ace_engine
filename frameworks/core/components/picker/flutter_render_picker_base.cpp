@@ -24,11 +24,6 @@ const uint32_t SEARCH_MAX_DEPTH = 16;
 
 } // namespace
 
-RefPtr<RenderNode> RenderPickerBase::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderPickerBase>();
-}
-
 RenderLayer FlutterRenderPickerBase::GetRenderLayer()
 {
     if (!layer_) {

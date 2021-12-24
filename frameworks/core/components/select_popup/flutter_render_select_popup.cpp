@@ -30,11 +30,6 @@ const uint8_t GRADIENT_END_GRADIENT = 255;
 
 } // namespace
 
-RefPtr<RenderNode> RenderSelectPopup::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSelectPopup>();
-}
-
 double FlutterRenderSelectPopup::GetOptionLeft() const
 {
     if (renderOptions_.empty()) {

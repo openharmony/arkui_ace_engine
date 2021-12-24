@@ -136,9 +136,10 @@ public:
     static void SmoothingEnabledSetter(const v8::FunctionCallbackInfo<v8::Value>& info);
     static void SmoothingQualityGetter(const v8::FunctionCallbackInfo<v8::Value>& info);
     static void SmoothingQualitySetter(const v8::FunctionCallbackInfo<v8::Value>& info);
-    // support only read for lottie
-    static void OffsetWidthGetter(const v8::FunctionCallbackInfo<v8::Value>& info);
-    static void OffsetHeightGetter(const v8::FunctionCallbackInfo<v8::Value>& info);
+
+    // support only read attribute for lottie
+    static void WidthGetter(const v8::FunctionCallbackInfo<v8::Value>& info);
+    static void HeightGetter(const v8::FunctionCallbackInfo<v8::Value>& info);
 
     static void Path2DAddPath(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void Path2DSetTransform(const v8::FunctionCallbackInfo<v8::Value>& args);

@@ -84,7 +84,7 @@ std::string ButtonComposedElement::GetBackgroundColor() const
     if (!renderButton) {
         return "None";
     }
-    return renderButton->GetClickedColor().ColorToString();
+    return renderButton->GetBackgroundColor().ColorToString();
 }
 
 RefPtr<RenderButton> ButtonComposedElement::GetRenderButton() const

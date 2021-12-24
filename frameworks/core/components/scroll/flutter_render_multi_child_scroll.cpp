@@ -22,11 +22,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderMultiChildScroll::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderMultiChildScroll>();
-}
-
 void FlutterRenderMultiChildScroll::Paint(RenderContext& context, const Offset& offset)
 {
     // child position changed when layout, need layout again

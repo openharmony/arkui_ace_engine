@@ -33,7 +33,7 @@ class AceContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
 public:
-    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, AceAbility* aceAbility,
+    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AppExecFwk::Ability* aceAbility,
         std::unique_ptr<PlatformEventCallback> callback);
     ~AceContainer() override = default;
 
@@ -61,6 +61,14 @@ public:
     RefPtr<TaskExecutor> GetTaskExecutor() const override
     {
         return taskExecutor_;
+    }
+
+    void SetAssetManager(RefPtr<AssetManager> assetManager)
+    {
+        assetManager_ = assetManager;
+        if (frontend_) {
+            frontend_->SetAssetManager(assetManager);
+        }
     }
 
     RefPtr<AssetManager> GetAssetManager() const override
@@ -158,8 +166,14 @@ public:
         return "";
     }
 
-    static void CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, AceAbility* aceAbility,
-        std::unique_ptr<PlatformEventCallback> callback);
+    void SetSharedRuntime(void* runtime)
+    {
+        sharedRuntime_ = runtime;
+    }
+
+    static void CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
+        OHOS::AppExecFwk::Ability* aceAbility, std::unique_ptr<PlatformEventCallback> callback);
+
     static void DestroyContainer(int32_t instanceId);
     static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& content, const std::string& params);
     static bool PushPage(int32_t instanceId, const std::string& content, const std::string& params);
@@ -202,7 +216,8 @@ private:
     WindowModal windowModal_ { WindowModal::NORMAL };
     ColorScheme colorScheme_ { ColorScheme::FIRST_VALUE };
     ResourceInfo resourceInfo_;
-    AceAbility* aceAbility_ = nullptr;
+    OHOS::AppExecFwk::Ability* aceAbility_ = nullptr;
+    void* sharedRuntime_ = nullptr;
     int32_t pageId_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);

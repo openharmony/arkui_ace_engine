@@ -250,15 +250,14 @@ std::string TextEditingValue::GetAfterSelection() const
 
 void TextEditingValue::Delete(int32_t start, int32_t end)
 {
-    int32_t startPos = std::max(start, 0);
-    int32_t endPos = std::max(end, 0);
-    startPos = std::min(start, end);
-    endPos = std::max(start, end);
+    auto wideText = GetWideText();
+    auto length = (int32_t)wideText.length();
+    int32_t startPos = std::max(std::min(start, end), 0);
+    int32_t endPos = std::min(std::max(start, end), length);
     if (startPos >= endPos) {
         return;
     }
 
-    auto wideText = GetWideText();
     auto textAfterDelete = wideText.substr(0, startPos) + wideText.substr(endPos);
     text = StringUtils::ToString(textAfterDelete);
     selection.Update(startPos);

@@ -29,18 +29,18 @@ class ACE_EXPORT JsFunction : public virtual AceType {
     DECLARE_ACE_TYPE(JsFunction, AceType);
 
 public:
+    explicit JsFunction(const JSRef<JSFunc>& jsFunction);
+    JsFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction);
+    ~JsFunction() override;
     void Execute();
-    void Execute(std::vector<std::string> keys, const std::string& param);
+    void Execute(const std::vector<std::string>& keys, const std::string& param);
+    void ExecuteNew(const std::vector<std::string>& keys, const std::string& param);
 
 protected:
-    JSRef<JSFunc> jsFunction_;
-    JSWeak<JSVal> jsThis_;
-
     JSRef<JSVal> ExecuteJS(int argc = 0, JSRef<JSVal>* argv = nullptr);
 
-public:
-    JsFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction);
-    virtual ~JsFunction();
+    JSRef<JSFunc> jsFunction_;
+    JSWeak<JSVal> jsThis_;
 };
 
 template<class T, int32_t ARGC = 0>
@@ -53,7 +53,7 @@ public:
     JsEventFunction(const JSRef<JSFunc>& jsFunction, ParseFunc parser)
         : JsFunction(JSRef<JSObject>(), jsFunction), parser_(parser)
     {}
-    ~JsEventFunction() = default;
+    ~JsEventFunction() override = default;
 
     void Execute()
     {
@@ -72,6 +72,8 @@ public:
 private:
     ParseFunc parser_;
 };
+
+JSRef<JSObject> CreateEventTargetObject(const BaseEventInfo& info);
 
 } // namespace OHOS::Ace::Framework
 

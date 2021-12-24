@@ -171,6 +171,7 @@ protected:
     GestureMask priorityMask_ = GestureMask::Normal;
 
     int32_t fingers_ = 1;
+    std::list<FingerInfo> fingerList_;
     bool isExternalGesture_ = false;
 
     std::unique_ptr<GestureEventFunc> onAction_;

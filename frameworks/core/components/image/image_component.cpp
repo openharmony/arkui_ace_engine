@@ -39,10 +39,7 @@ void ImageComponent::SetSrc(const std::string& src)
 
 void ImageComponent::SetImageFill(const std::optional<Color>& color)
 {
-    if (color != std::nullopt) {
-        fillColor_ = color.value();
-        isFillSet_ = true;
-    }
+    fillColor_ = color;
 }
 
 void ImageComponent::SetAlignment(const Alignment& alignment)
@@ -75,15 +72,9 @@ const std::string& ImageComponent::GetAlt() const
     return alt_;
 }
 
-void ImageComponent::SetColor(const Color& color)
+void ImageComponent::SetColor(const std::optional<Color>& color)
 {
     color_ = color;
-    isColorSet_ = true;
-}
-
-bool ImageComponent::IsColorSet() const
-{
-    return IsSrcSvgImage() ? isFillSet_ : isColorSet_;
 }
 
 bool ImageComponent::IsMatchTextDirection() const
@@ -96,9 +87,9 @@ bool ImageComponent::IsSrcSvgImage() const
     return IsSvgSuffix(src_);
 }
 
-const Color& ImageComponent::GetColor() const
+const std::optional<Color>& ImageComponent::GetColor() const
 {
-    return IsSrcSvgImage() ? fillColor_ : color_;
+    return color_;
 }
 
 void ImageComponent::SetLoadSuccessEvent(const EventMarker& loadSuccessEvent)
@@ -191,6 +182,16 @@ void ImageComponent::SetAutoResize(bool autoResize)
     autoResize_ = autoResize;
 }
 
+void ImageComponent::SetSyncMode(bool syncMode)
+{
+    syncMode_ = syncMode;
+}
+
+bool ImageComponent::GetSyncMode()
+{
+    return syncMode_;
+}
+
 RefPtr<ImageComponent> ImageComponent::MakeFromOtherWithoutSourceAndEvent(const RefPtr<ImageComponent>& other)
 {
     RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<ImageComponent>("");
@@ -210,12 +211,9 @@ RefPtr<ImageComponent> ImageComponent::MakeFromOtherWithoutSourceAndEvent(const 
     return imageComponent;
 }
 
-std::optional<Color> ImageComponent::GetImageFill() const
+const std::optional<Color>& ImageComponent::GetImageFill() const
 {
-    if (!isFillSet_) {
-        return std::nullopt;
-    }
-    return std::optional<Color>(fillColor_);
+    return fillColor_;
 }
 
 bool ImageComponent::GetFitMaxSize() const

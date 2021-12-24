@@ -21,6 +21,8 @@ build_component("grid") {
     "grid_element.cpp",
     "grid_item_component.cpp",
     "render_grid.cpp",
+    "render_grid_creator.cpp",
     "render_grid_item.cpp",
   ]
+  rosen_sources = [ "rosen_render_grid.cpp" ]
 }

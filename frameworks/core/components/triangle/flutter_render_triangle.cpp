@@ -19,11 +19,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderTriangle::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderTriangle>();
-}
-
 void FlutterRenderTriangle::Paint(RenderContext& context, const Offset& offset)
 {
     data_.SetRadius(NormalizeToPx(1.0_vp)); // round radius of triangle is 1dp

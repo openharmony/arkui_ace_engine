@@ -66,6 +66,8 @@ void RenderGestureListener::Update(const RefPtr<Component>& component)
     SetOnPinchEndCallback(gestureComponent);
     SetOnPinchCancelCallback(gestureComponent);
     isVisible_ = gestureComponent->IsVisible();
+    responseRegion_ = gestureComponent->GetResponseRegion();
+    isResponseRegion_ = gestureComponent->IsResponseRegion();
     SET_DRAG_CALLBACK(freeDragRecognizer_, FreeDrag, gestureComponent);
     if (!freeDragRecognizer_) {
         // Horizontal and vertical gestures can only be enabled in the absence of free gesture.
@@ -116,26 +118,6 @@ void RenderGestureListener::Update(const RefPtr<Component>& component)
 bool RenderGestureListener::GetVisible() const
 {
     return RenderNode::GetVisible() && isVisible_;
-}
-
-void RenderGestureListener::UpdateTouchRect()
-{
-    RenderNode::UpdateTouchRect();
-    auto child = GetFirstChild();
-    while (child) {
-        if (child->GetChildren().size() > 1) {
-            LOGI("render has more than one child, do not continue to search render box");
-            break;
-        }
-        auto box = AceType::DynamicCast<RenderBox>(child);
-        // For exclude the margin area from touch area and the margin must not be less than zero.
-        if (box) {
-            ownTouchRect_.SetOffset(box->GetTouchArea().GetOffset() + GetPaintRect().GetOffset());
-            ownTouchRect_.SetSize(box->GetTouchArea().GetSize());
-            break;
-        }
-        child = child->GetFirstChild();
-    }
 }
 
 void RenderGestureListener::OnTouchTestHit(

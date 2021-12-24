@@ -22,11 +22,13 @@
 #include "core/components/box/render_box.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/border_edge.h"
+#include "core/image/image_object.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/layers/clip_layer.h"
 #include "core/pipeline/layers/container_layer.h"
 #include "core/pipeline/layers/offset_layer.h"
+#include "core/pipeline/layers/transform_layer.h"
 
 namespace OHOS::Ace {
 
@@ -34,7 +36,7 @@ class FlutterRenderBox : public RenderBox {
     DECLARE_ACE_TYPE(FlutterRenderBox, RenderBox);
 
 public:
-    FlutterRenderBox() = default;
+    FlutterRenderBox();
     ~FlutterRenderBox() override = default;
 
     void Update(const RefPtr<Component>& component) override;
@@ -46,6 +48,7 @@ public:
         return true;
     }
     void DrawOnPixelMap() override;
+    void UpdateLayer();
 
 protected:
     virtual bool MaybeRelease() override;
@@ -114,6 +117,14 @@ protected:
 
     void CalculateRepeatParam();
 
+    void SetFetchImageObjBackgroundTask(CancelableTask task)
+    {
+        if (fetchImageObjTask_) {
+            fetchImageObjTask_.Cancel(false);
+        }
+        fetchImageObjTask_ = task;
+    }
+
 private:
     bool CheckBorderEdgeForRRect(const Border& border);
     SkVector GetSkRadii(const Radius& radius, double shrinkFactor, double borderWidth);
@@ -134,6 +145,10 @@ private:
     bool CreatePath(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
     bool CreateRect(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
 
+    void ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasImage>& image);
+    void ImageObjReady(const RefPtr<ImageObject>& imageObj);
+    void ImageObjFailed();
+
     RefPtr<Flutter::ClipLayer> GetClipLayer();
 
     RefPtr<Flutter::ClipLayer> clipLayer_;
@@ -143,6 +158,17 @@ private:
     void FetchImageData();
     std::string borderSrc_;
     sk_sp<SkImage> image_;
+    CancelableTask fetchImageObjTask_;
+
+    ImageObjSuccessCallback imageObjSuccessCallback_;
+    FailedCallback failedCallback_;
+    OnPostBackgroundTask onPostBackgroundTask_;
+
+    RefPtr<ImageObject> imageObj_;
+    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
+
+    UploadSuccessCallback uploadSuccessCallback_;
+    RefPtr<Flutter::TransformLayer> transformLayer_;
 };
 
 } // namespace OHOS::Ace

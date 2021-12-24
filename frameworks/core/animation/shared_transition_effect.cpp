@@ -100,6 +100,7 @@ bool SharedTransitionEffect::TakeOff(TransitionEvent event, RefPtr<OverlayElemen
     auto tweenSeat = AceType::MakeRefPtr<TweenComponent>("TweenSeat");
     // Find Seat.
     auto seat = AceType::MakeRefPtr<PositionedComponent>(tweenSeat);
+    Component::MergeRSNode(seat);
     LOGD("TakeOff. event: %{public}d, share id: %{public}s. x: %{public}lf, y: %{public}lf", event, shareId_.c_str(),
         ticket.GetX(), ticket.GetY());
     seat->SetLeft(Dimension(ticket.GetX(), DimensionUnit::PX));

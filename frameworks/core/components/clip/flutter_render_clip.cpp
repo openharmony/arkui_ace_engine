@@ -21,12 +21,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderClip::Create()
-{
-    LOGD("Create");
-    return AceType::MakeRefPtr<FlutterRenderClip>();
-}
-
 void FlutterRenderClip::Paint(RenderContext& context, const Offset& offset)
 {
     LOGD("Paint");

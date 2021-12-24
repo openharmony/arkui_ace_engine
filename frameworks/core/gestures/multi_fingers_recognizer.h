@@ -45,6 +45,9 @@ public:
 
     std::set<size_t> refereePointers_;
 
+    void SetFingerList(const std::map<int32_t, TouchPoint> touchPoints, const Offset& coordinateOffset,
+        std::list<FingerInfo>& fingerList);
+
 private:
     size_t acceptedCount_ = 0;
 };

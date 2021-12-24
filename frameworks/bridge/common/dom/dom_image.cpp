@@ -128,11 +128,7 @@ void DOMImage::PrepareSpecializedComponent()
     if (boxComponent_) {
         auto backDecoration = boxComponent_->GetBackDecoration();
         if (backDecoration) {
-            Border border = backDecoration->GetBorder();
-            if (border.TopLeftRadius().IsValid() && border.TopRightRadius().IsValid() &&
-                border.BottomLeftRadius().IsValid() && border.BottomRightRadius().IsValid()) {
-                imageChild_->SetBorder(border);
-            }
+            imageChild_->SetBorder(backDecoration->GetBorder());
         }
     }
     if (flexItemComponent_ && !imageChild_->GetFitMaxSize()) {

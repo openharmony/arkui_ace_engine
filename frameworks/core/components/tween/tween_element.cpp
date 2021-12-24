@@ -91,52 +91,85 @@ void SetAnimationProperties(const RefPtr<Animation<T>>& animation, TweenOption& 
     }
 }
 
-void TransformUpdate(
-    WeakPtr<RenderTransform>& weakPtr, WeakPtr<TransformComponent>& transform, const TransformOperation& value)
+void RenderTransformUpdate(WeakPtr<RenderTransform>& weakPtr, const TransformOperation& value)
 {
     auto renderTransformNode = weakPtr.Upgrade();
-    auto transformComponent = transform.Upgrade();
-    if (renderTransformNode && transformComponent) {
-        transformComponent->ResetTransform();
+    if (renderTransformNode) {
         switch (value.type_) {
             case TransformOperationType::TRANSLATE:
                 renderTransformNode->Translate(
                     value.translateOperation_.dx, value.translateOperation_.dy, value.translateOperation_.dz);
-                transformComponent->Translate(
-                    value.translateOperation_.dx, value.translateOperation_.dy, value.translateOperation_.dz);
                 break;
             case TransformOperationType::SKEW:
                 renderTransformNode->Skew(value.skewOperation_.skewX, value.skewOperation_.skewY);
-                transformComponent->Skew(value.skewOperation_.skewX, value.skewOperation_.skewY);
                 break;
             case TransformOperationType::ROTATE:
                 renderTransformNode->Rotate(value.rotateOperation_.angle, value.rotateOperation_.dx,
                     value.rotateOperation_.dy, value.rotateOperation_.dz);
-                transformComponent->Rotate(value.rotateOperation_.angle, value.rotateOperation_.dx,
-                    value.rotateOperation_.dy, value.rotateOperation_.dz);
                 break;
             case TransformOperationType::MATRIX:
                 renderTransformNode->Matrix3D(value.matrix4_);
-                transformComponent->Matrix3d(value.matrix4_);
                 break;
             case TransformOperationType::SCALE:
                 renderTransformNode->Scale(
                     value.scaleOperation_.scaleX, value.scaleOperation_.scaleY, value.scaleOperation_.scaleZ);
+                break;
+            case TransformOperationType::PERSPECTIVE:
+                renderTransformNode->Perspective(value.perspectiveOperation_.distance);
+                break;
+            case TransformOperationType::UNDEFINED:
+                renderTransformNode->Translate(Dimension {}, Dimension {}, Dimension {});
+                break;
+            default:
+                LOGE("unsupported transform operation");
+                break;
+        }
+    }
+}
+
+void TransformComponentUpdate(WeakPtr<TransformComponent>& transform, const TransformOperation& value)
+{
+    auto transformComponent = transform.Upgrade();
+    if (transformComponent) {
+        transformComponent->ResetTransform();
+        switch (value.type_) {
+            case TransformOperationType::TRANSLATE:
+                transformComponent->Translate(
+                    value.translateOperation_.dx, value.translateOperation_.dy, value.translateOperation_.dz);
+                break;
+            case TransformOperationType::SKEW:
+                transformComponent->Skew(value.skewOperation_.skewX, value.skewOperation_.skewY);
+                break;
+            case TransformOperationType::ROTATE:
+                transformComponent->Rotate(value.rotateOperation_.dx, value.rotateOperation_.dy,
+                    value.rotateOperation_.dz, value.rotateOperation_.angle);
+                break;
+            case TransformOperationType::MATRIX:
+                transformComponent->Matrix3d(value.matrix4_);
+                break;
+            case TransformOperationType::SCALE:
                 transformComponent->Scale(
                     value.scaleOperation_.scaleX, value.scaleOperation_.scaleY, value.scaleOperation_.scaleZ);
                 break;
             case TransformOperationType::PERSPECTIVE:
-                renderTransformNode->Perspective(value.perspectiveOperation_.distance);
                 transformComponent->Perspective(value.perspectiveOperation_.distance);
                 break;
             case TransformOperationType::UNDEFINED:
-                renderTransformNode->Translate(Dimension {}, Dimension {}, Dimension {});
                 transformComponent->Translate(Dimension {}, Dimension {}, Dimension {});
                 break;
             default:
                 LOGE("unsupported transform operation");
                 break;
         }
+    }
+}
+
+void RenderTransformOriginUpdate(const WeakPtr<RenderTransform>& weakPtr, const DimensionOffset& origin)
+{
+    auto renderTransformNode = weakPtr.Upgrade();
+    if (renderTransformNode) {
+        renderTransformNode->SetTransformOrigin(origin.GetX(), origin.GetY());
+        renderTransformNode->MarkNeedUpdateOrigin();
     }
 }
 
@@ -148,7 +181,8 @@ void CreateTransformAnimation(const RefPtr<RenderTransform>& renderTransformNode
     for (const auto& animation : option.GetTransformAnimations()) {
         if (animation) {
             SetAnimationProperties(animation, option);
-            animation->AddListener(std::bind(TransformUpdate, weak, transform, std::placeholders::_1));
+            animation->AddListener(std::bind(RenderTransformUpdate, weak, std::placeholders::_1));
+            animation->AddListener(std::bind(TransformComponentUpdate, transform, std::placeholders::_1));
         }
     }
 }
@@ -471,6 +505,11 @@ bool TweenElement::IsNeedAnimation(RefPtr<Animator>& controller, TweenOption& op
     if (BindingTransformAnimationToController(controller, option)) {
         needAnimation = true;
     }
+    auto& transformOriginAnimation = option.GetTransformOriginAnimation();
+    if (transformOriginAnimation) {
+        controller->AddInterpolator(transformOriginAnimation);
+        // no need enable needAnimation, Transform Origin Animation only work when set transform animation.
+    }
     auto& opacityAnimation = option.GetOpacityAnimation();
     if (opacityAnimation) {
         LOGD("add opacity animation.");
@@ -519,6 +558,7 @@ RefPtr<Component> TweenElement::BuildChild()
         displayComponent->DisableLayer(tween->IsLeafNode());
         transform_ = transformComponent;
         display_ = displayComponent;
+        Component::MergeRSNode(displayComponent, transformComponent);
         return displayComponent;
     } else {
         LOGE("no tween component found. return empty child.");
@@ -670,11 +710,20 @@ void TweenElement::CreateTransformOriginAnimation(
 {
     if (option.HasTransformOriginChanged()) {
         renderTransformNode->SetTransformOrigin(option.GetTransformOriginX(), option.GetTransformOriginY());
+        auto animation = option.GetTransformOriginAnimation();
+        if (animation) {
+            animation->AddListener([weak = AceType::WeakClaim(AceType::RawPtr(renderTransformNode))](
+                                       const DimensionOffset& value) { RenderTransformOriginUpdate(weak, value); });
+
+            if (option.GetCurve()) {
+                animation->SetCurve(option.GetCurve());
+            }
+        }
         option.SetTransformOriginChanged(false);
     } else {
         renderTransformNode->SetTransformOrigin(HALF_PERCENT, HALF_PERCENT);
+        renderTransformNode->MarkNeedUpdateOrigin();
     }
-    renderTransformNode->MarkNeedUpdateOrigin();
 }
 
 void TweenElement::CreateRotateAnimation(const RefPtr<RenderTransform>& renderTransformNode, TweenOption& option)

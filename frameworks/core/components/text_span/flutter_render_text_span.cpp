@@ -21,11 +21,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderTextSpan::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderTextSpan>();
-}
-
 void FlutterRenderTextSpan::UpdateText(
     txt::ParagraphBuilder& builder, std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions)
 {

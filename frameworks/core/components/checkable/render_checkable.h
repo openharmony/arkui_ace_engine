@@ -140,6 +140,7 @@ protected:
     std::function<void()> clickEvent_;
     std::function<void(const std::string&)> domChangeEvent_;
     std::function<void(bool)> onChange_;
+    std::function<void()> onClick_;
     Size drawSize_;
 };
 

@@ -56,32 +56,44 @@ void NavigationContainerElement::PerformBuild()
     if (!navigationContainer) {
         return;
     }
-    navigationContainer->Build();
-    ComponentGroupElement::PerformBuild();
 
     auto declaration = navigationContainer->GetDeclaration();
     if (!declaration) {
+        ComponentGroupElement::PerformBuild();
         return;
     }
     auto context = context_.Upgrade();
     if (!context) {
         return;
     }
+
+    auto animationOption = context->GetExplicitAnimationOption();
+    if (animationOption.GetDuration() != 0) {
+        declaration->animationOption = animationOption;
+    }
+    navigationContainer->Build(context_);
+    ComponentGroupElement::PerformBuild();
+
     auto tabController = navigationContainer->GetTabController();
     if (tabController) {
-        tabBarChangeListener_ = [declaration, content = context_](int32_t index) {
+        tabBarChangeListener_ = [declaration, weakContent = context_, tabController](int32_t index) {
             if (!declaration) {
                 return;
             }
-            auto toolbarItems = declaration->GetToolBarItems();
-            if (index < 0 || index >= static_cast<int32_t>(toolbarItems.size())) {
+            if (index < 0 || index >= static_cast<int32_t>(declaration->toolbarItems.size())) {
                 return;
             }
-            auto pos = toolbarItems.begin();
+            auto pos = declaration->toolbarItems.begin();
             std::advance(pos, index);
-            if (!pos->action.IsEmpty()) {
-                AceAsyncEvent<void()>::Create(pos->action, content)();
+            if (!(*pos)->action.IsEmpty()) {
+                AceAsyncEvent<void()>::Create((*pos)->action, weakContent)();
             }
+
+            auto pipelineContext = weakContent.Upgrade();
+            if (!pipelineContext) {
+                return;
+            }
+            pipelineContext->ScheduleUpdate(NavigationContainerComponent::BuildToolBar(declaration, tabController));
         };
         tabController->SetTabBarChangeListener(tabBarChangeListener_);
     }

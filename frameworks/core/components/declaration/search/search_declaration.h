@@ -29,12 +29,16 @@ struct SearchAttribute : Attribute {
     Dimension closeIconHotZoneHorizontal;
     std::string searchText;
     std::string closeIconSrc;
+    Dimension searchHeight;
+    Dimension searchWidth;
 };
 
 struct SearchStyle : Style {
     RefPtr<Decoration> decoration;
     Color hoverColor;
     Color pressColor;
+    TextStyle editingStyle;
+    TextStyle placeHoldStyle;
 };
 
 struct SearchEvent : Event {
@@ -193,6 +197,30 @@ public:
     void SetTextEditController(const RefPtr<TextEditController>& controller)
     {
         textEditController_ = controller;
+    }
+
+    void SetPlaceHoldStyle(const TextStyle& textstyle)
+    {
+        auto& style = MaybeResetStyle<SearchStyle>(StyleTag::SPECIALIZED_STYLE);
+        style.placeHoldStyle = textstyle;
+    }
+
+    void SetEditingStyle(const TextStyle& textstyle)
+    {
+        auto& style = MaybeResetStyle<SearchStyle>(StyleTag::SPECIALIZED_STYLE);
+        style.editingStyle = textstyle;
+    }
+
+    const TextStyle& GetPlaceHoldStyle() const
+    {
+        auto& style = static_cast<SearchStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        return style.placeHoldStyle;
+    }
+
+    const TextStyle& GetEditingStyle() const
+    {
+        auto& style = static_cast<SearchStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        return style.editingStyle;
     }
 
 protected:

@@ -16,6 +16,7 @@
 #include "core/image/image_object.h"
 
 #include "base/thread/background_task_executor.h"
+#include "core/components/image/render_image.h"
 #include "core/image/flutter_image_cache.h"
 namespace OHOS::Ace {
 
@@ -29,8 +30,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
     ImageSourceInfo source,
     const RefPtr<PipelineContext> context,
     const sk_sp<SkData>& skData,
-    bool useSkiaSvg,
-    const std::optional<Color>& color)
+    bool useSkiaSvg)
 {
     // build svg image object.
     if (source.IsSvg()) {
@@ -38,12 +38,13 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
         if (!svgStream) {
             return nullptr;
         }
+        auto color = source.GetFillColor();
         if (!useSkiaSvg) {
             auto svgDom = SvgDom::CreateSvgDom(*svgStream, context, color);
             return svgDom ? MakeRefPtr<SvgImageObject>(source, Size(), 1, svgDom) : nullptr;
         } else {
-            int64_t colorValue = 0;
-            if (color) {
+            uint64_t colorValue = 0;
+            if (color.has_value()) {
                 colorValue = color.value().GetValue();
                 // skia svg relies on the 32th bit to determine whether or not to use the color we set.
                 colorValue = colorValue | (static_cast<int64_t>(0b1) << 32);
@@ -74,6 +75,28 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
     } else {
         return MakeRefPtr<AnimatedImageObject>(source, imageSize, totalFrames, skData);
     }
+}
+
+Size ImageObject::MeasureForImage(RefPtr<RenderImage> image)
+{
+    return image->MeasureForNormalImage();
+}
+
+void SvgImageObject::PerformLayoutImageObject(RefPtr<RenderImage> image)
+{
+    image->PerformLayoutSvgImage();
+}
+
+Size SvgImageObject::MeasureForImage(RefPtr<RenderImage> image)
+{
+    return image->MeasureForSvgImage();
+}
+
+void SvgSkiaImageObject::PerformLayoutImageObject(RefPtr<RenderImage> image) {}
+
+Size SvgSkiaImageObject::MeasureForImage(RefPtr<RenderImage> image)
+{
+    return image->MeasureForSvgImage();
 }
 
 void StaticImageObject::UploadToGpuForRender(
@@ -201,6 +224,16 @@ void AnimatedImageObject::UploadToGpuForRender(
     } else if (animatedPlayer_ && !forceResize) {
         LOGI("animated player has been construced, do nothing!");
     }
+}
+
+void PixelMapImageObject::PerformLayoutImageObject(RefPtr<RenderImage> image)
+{
+    image->PerformLayoutPixmap();
+}
+
+Size PixelMapImageObject::MeasureForImage(RefPtr<RenderImage> image)
+{
+    return image->MeasureForPixmap();
 }
 
 } // namespace OHOS::Ace

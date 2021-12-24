@@ -403,6 +403,7 @@ bool FocusGroup::OnKeyEvent(const KeyEvent& keyEvent)
     LOGD("Position information: X: %{public}lf Y: %{public}lf W: %{public}lf H: %{public}lf", GetRect().Left(),
         GetRect().Top(), GetRect().Width(), GetRect().Height());
 
+    OnFocusMove(keyEvent.code);
     switch (keyEvent.code) {
         case KeyCode::TV_CONTROL_UP:
             return RequestNextFocus(true, true, GetRect());

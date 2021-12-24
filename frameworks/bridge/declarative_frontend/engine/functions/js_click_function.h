@@ -29,7 +29,7 @@ class JsClickFunction : public JsFunction {
 public:
     explicit JsClickFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
 
-    ~JsClickFunction()
+    ~JsClickFunction() override
     {
         LOGD("Destroy: JsClickFunction");
     };

@@ -62,8 +62,8 @@ using OnPostBackgroundTask = std::function<void(CancelableTask)>;
 class FlutterRenderImage;
 class ImageProvider {
 public:
-    static void CanLoadImage(const RefPtr<PipelineContext>& context, const std::string& src,
-        const std::map<std::string, EventMarker>& callbacks);
+    static void TryLoadImageInfo(const RefPtr<PipelineContext>& context, const std::string& src,
+        std::function<void(bool, int32_t, int32_t)>&& loadCallback);
 
     static void GetSVGImageDOMAsyncFromSrc(
         const std::string& src,
@@ -97,7 +97,6 @@ public:
         bool syncMode,
         bool useSkiaSvg,
         bool needAutoResize,
-        const std::optional<Color>& color,
         RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
         OnPostBackgroundTask onBackgroundTaskPostCallback = nullptr);
 
@@ -126,8 +125,7 @@ public:
     static RefPtr<ImageObject> GeneraterAceImageObject(
         const ImageSourceInfo& imageInfo,
         const RefPtr<PipelineContext> context,
-        bool useSkiaSvg,
-        const std::optional<Color>& color);
+        bool useSkiaSvg);
 
     static sk_sp<SkData> LoadImageRawData(
         const ImageSourceInfo& imageInfo,

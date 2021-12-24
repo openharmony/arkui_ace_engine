@@ -25,11 +25,6 @@ const Dimension ROUND_RADIUS_TV = 8.0_vp;
 
 } // namespace
 
-RefPtr<RenderNode> RenderOption::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderOption>();
-}
-
 void FlutterRenderOption::Paint(RenderContext& context, const Offset& offset)
 {
     PaintBackground(context, offset);

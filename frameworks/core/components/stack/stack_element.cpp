@@ -360,19 +360,37 @@ void StackElement::OnFocus()
         return;
     }
     // Only focus on the top focusable child.
-    if (itLastFocusNode_ != focusNodes_.end()) {
-        return;
-    }
+    itLastFocusNode_ = focusNodes_.end();
     while (itLastFocusNode_ != focusNodes_.begin()) {
         --itLastFocusNode_;
+        (*itLastFocusNode_)->SetParentFocusable(IsParentFocusable());
         if ((*itLastFocusNode_)->RequestFocusImmediately()) {
             FocusNode::OnFocus();
-            return;
+            break;
         }
     }
 
-    // Not found any focusable node, clear focus.
-    itLastFocusNode_ = focusNodes_.end();
+    if (!IsCurrentFocus()) {
+        itLastFocusNode_ = focusNodes_.end();
+    } else {
+        // lower focusable node can not be focus.
+        auto iter = itLastFocusNode_;
+        while (iter != focusNodes_.begin()) {
+            --iter;
+            (*iter)->SetParentFocusable(false);
+        }
+    }
+}
+
+void StackElement::OnBlur()
+{
+    FocusGroup::OnBlur();
+
+    auto iter = focusNodes_.end();
+    while (iter != focusNodes_.begin()) {
+        --iter;
+        (*iter)->SetParentFocusable(IsParentFocusable());
+    }
 }
 
 void StackElement::EnableTouchEventAndRequestFocus()

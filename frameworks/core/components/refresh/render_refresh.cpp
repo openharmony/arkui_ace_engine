@@ -96,6 +96,7 @@ void RenderRefresh::Update(const RefPtr<Component>& component)
     progressColor_ = refresh->GetProgressColor();
     backgroundColor_ = refresh->GetBackgroundColor();
     frictionRatio_ = refresh->GetFriction() * PERCENT;
+    isRefresh_ = refresh->GetIsRefresh();
 
     loadingComponent_->SetProgressColor(progressColor_);
     loadingComponent_->SetDiameter(Dimension(GetLoadingDiameter()));
@@ -163,6 +164,7 @@ void RenderRefresh::CalcLoadingParams(const RefPtr<Component>& component)
         triggerRefreshDistance_ = triggerShowTimeDistance_;
     } else {
         triggerRefreshDistance_ = NormalizeToPx(refresh->GetRefreshDistance());
+        inspectorOffset_ = refresh->GetRefreshDistance();
     }
     loadingDiameter_ = NormalizeToPx(refresh->GetProgressDiameter());
     maxScrollOffset_ = NormalizeToPx(refresh->GetMaxDistance());
@@ -228,11 +230,15 @@ void RenderRefresh::UpdateTouchRect()
 {
     touchRect_.SetSize(viewPort_);
     touchRect_.SetOffset(GetPosition());
-    ownTouchRect_ = touchRect_;
+    touchRectList_.emplace_back(touchRect_);
+    SetTouchRectList(touchRectList_);
 }
 
 void RenderRefresh::HandleDragUpdate(double delta)
 {
+    if (isRefresh_) {
+        return;
+    }
     LOGD("RenderRefresh HandleDragUpdate delta is %{public}lf, offset is %{public}lf", delta, scrollableOffset_.GetY());
     if (NearZero(delta)) {
         LOGD("Delta is near zero!");
@@ -297,6 +303,9 @@ void RenderRefresh::FireRefreshEvent() const
             std::string(R"("refresh",{"refreshing":)").append(refreshing_ ? "true" : "false").append("},null");
         refreshEvent_(param);
     }
+    if (onRefreshing_) {
+        onRefreshing_();
+    }
 }
 
 void RenderRefresh::FirePullDownEvent(const std::string& state) const
@@ -359,7 +368,8 @@ RefreshStatus RenderRefresh::GetNextStatus()
         case RefreshStatus::INACTIVE:
             if (refreshing_) {
                 StartAnimation(0.0, triggerRefreshDistance_, false);
-                return RefreshStatus::REFRESH;
+                nextStatus = RefreshStatus::REFRESH;
+                break;
             }
             if (LessOrEqual(scrollableOffset_.GetY(), 0.0)) {
                 nextStatus = RefreshStatus::INACTIVE;
@@ -390,15 +400,13 @@ RefreshStatus RenderRefresh::GetNextStatus()
             }
             // No break here, continue get next status.
             nextStatus = RefreshStatus::REFRESH;
-            if (onRefreshing_) {
-                onRefreshing_();
-            }
             [[fallthrough]];
         case RefreshStatus::REFRESH:
             if (!refreshing_) {
                 timeText_ = StringUtils::FormatString(lastTimeText_.c_str(), GetFormatDateTime().c_str());
                 StartAnimation(scrollableOffset_.GetY(), 0.0, true);
-                return RefreshStatus::DONE;
+                nextStatus = RefreshStatus::DONE;
+                break;
             }
             nextStatus = RefreshStatus::REFRESH;
             break;

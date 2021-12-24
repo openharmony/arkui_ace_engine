@@ -54,6 +54,12 @@ public:
         resourceManager_ = resourceManager;
     }
 
+    void SetDebug(bool isDebugVersion, bool needDebugBreakpoint) override
+    {
+        AceApplicationInfoImpl::GetInstance().isDebugVersion_ = isDebugVersion;
+        AceApplicationInfoImpl::GetInstance().needDebugBreakpoint_ = needDebugBreakpoint;
+    }
+
 private:
     std::map<std::string, std::string> jsEngineParams_;
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_;

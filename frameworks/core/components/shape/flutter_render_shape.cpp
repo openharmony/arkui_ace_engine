@@ -24,11 +24,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderShape::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderShape>();
-}
-
 Size FlutterRenderShape::CalcSize()
 {
     switch (shapeType_) {

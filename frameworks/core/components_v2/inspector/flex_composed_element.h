@@ -32,6 +32,7 @@ public:
     void Dump() override;
 
     std::unique_ptr<JsonValue> ToJsonObject() const override;
+    std::unique_ptr<JsonValue> GetConstructor() const;
     std::string GetFlexDirection() const;
     std::string GetWrap() const;
     std::string GetJustifyContent() const;
@@ -42,6 +43,10 @@ public:
     {
         return FlexElement::TypeId();
     }
+
+    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void DeleteChildWithSlot(int32_t slot) override;
 };
 
 } // namespace OHOS::Ace

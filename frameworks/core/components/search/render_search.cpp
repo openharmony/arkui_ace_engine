@@ -49,6 +49,8 @@ void RenderSearch::Update(const RefPtr<Component>& component)
     }
     needReverse_ = (searchComponent_->GetTextDirection() == TextDirection::RTL);
     closeIconSize_ = searchComponent_->GetCloseIconSize();
+    placeHoldStyle_ = searchComponent_->GetPlaceHoldStyle();
+    editingStyle_ = searchComponent_->GetEditingStyle();
     closeIconHotZoneHorizontal_ = searchComponent_->GetCloseIconHotZoneHorizontal();
 
     decoration_ = searchComponent_->GetDecoration();
@@ -85,30 +87,40 @@ void RenderSearch::Update(const RefPtr<Component>& component)
 void RenderSearch::FireSubmitEvent(const std::string& searchKey)
 {
     if (submitEvent_) {
-        auto submitResult = JsonUtil::Create(true);
-        submitResult->Put("text", searchKey.c_str());
-        submitEvent_(std::string(R"("submit",)").append(submitResult->ToString()));
+        auto context = context_.Upgrade();
+        if (context && context->GetIsDeclarative()) {
+            submitEvent_(searchKey);
+        } else {
+            auto submitResult = JsonUtil::Create(true);
+            submitResult->Put("text", searchKey.c_str());
+            submitEvent_(std::string(R"("submit",)").append(submitResult->ToString()));
+        }
     }
 }
 
 void RenderSearch::PerformLayout()
 {
     const auto& renderTextField = AceType::DynamicCast<RenderTextField>(GetChildren().front());
-    if (renderTextField) {
-        renderTextField->Layout(GetLayoutParam());
-        SetLayoutSize(renderTextField->GetLayoutSize());
-        renderTextField->SetSubmitEvent([weak = WeakClaim(this)](const std::string& searchKey) {
-            auto renderSearch = weak.Upgrade();
-            if (renderSearch) {
-                renderSearch->FireSubmitEvent(searchKey);
-            }
-        });
+    if (!renderTextField) {
+        return;
+    }
+    renderTextField->Layout(GetLayoutParam());
+    SetLayoutSize(renderTextField->GetLayoutSize());
+    renderTextField->SetSubmitEvent([weak = WeakClaim(this)](const std::string& searchKey) {
+        auto renderSearch = weak.Upgrade();
+        if (renderSearch) {
+            renderSearch->FireSubmitEvent(searchKey);
+        }
+    });
 
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        renderTextField->SetOnValueChangeEvent(changeEvent_);
+    } else {
         renderTextField->SetOnTextChangeEvent(changeEvent_);
     }
 
     Size deflateSize = Size(NormalizeToPx(SEARCH_SPACING), NormalizeToPx(SEARCH_SPACING)) * 2.0;
-    auto context = context_.Upgrade();
     if (context && decoration_) {
         deflateSize += decoration_->GetBorder().GetLayoutSize(context->GetDipScale());
     }
@@ -156,7 +168,17 @@ void RenderSearch::InitRect(const RefPtr<RenderTextField>& renderTextField)
     } else {
         searchTextRect_ = Rect();
     }
-    renderTextField->SetPaddingHorizonForSearch(searchTextRect_.Width());
+
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        double padding = searchTextRect_.Width() + rightBorderWidth +
+                         NormalizeToPx(closeIconHotZoneHorizontal_) -
+                         (NormalizeToPx(closeIconSize_) / 2.0);
+        renderTextField->SetPaddingHorizonForSearch(padding);
+    } else {
+        renderTextField->SetPaddingHorizonForSearch(searchTextRect_.Width());
+    }
+
     renderTextField->MarkNeedLayout();
 
     // Compute rect of close icon.
@@ -191,6 +213,15 @@ void RenderSearch::OnValueChanged(bool needFireChangeEvent, bool needFireSelectC
     if (textEditController_) {
         const auto& currentText = textEditController_->GetValue().text;
         showCloseIcon_ = !currentText.empty();
+        auto context = context_.Upgrade();
+        if (context && context->GetIsDeclarative()) {
+            auto renderTextField = AceType::DynamicCast<RenderTextField>(GetChildren().front());
+            if (showCloseIcon_) {
+                renderTextField->SetTextStyle(editingStyle_);
+            } else {
+                renderTextField->SetTextStyle(placeHoldStyle_);
+            }
+        }
     }
 }
 
@@ -463,7 +494,7 @@ bool RenderSearch::MouseHoverTest(const Point& parentLocalPoint)
         hoverOrPressRender_ = SearchNodeType::NONE;
         return false;
     }
-    if (!GetTouchRect().IsInRegion(parentLocalPoint)) {
+    if (!InTouchRectList(parentLocalPoint, GetTouchRectList())) {
         if (mouseState_ == MouseState::HOVER) {
             mouseState_ = MouseState::NONE;
             hoverOrPressRender_ = SearchNodeType::NONE;

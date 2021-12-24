@@ -17,29 +17,36 @@
 
 #include <cstdlib>
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "native_engine/impl/quickjs/quickjs_native_engine.h"
-#include "worker_init.h"
-#endif
 
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_helpers.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+const char COMPONENT_PREVIEW[] = "_preview_";
+const char COMPONENT_PREVIEW_LOAD_DOCUMENT[] = "loadDocument";
+const char COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW[] = "loadDocument(new";
+const char LEFT_PARENTTHESIS[] = "(";
+constexpr int32_t LOAD_DOCUMENT_STR_LENGTH = 16;
+#endif
+}
 
 QJSDeclarativeEngine::~QJSDeclarativeEngine()
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (nativeEngine_ != nullptr) {
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
+#endif
         delete nativeEngine_;
     }
-#endif
     if (engineInstance_ && engineInstance_->GetQJSRuntime()) {
         JS_RunGC(engineInstance_->GetQJSRuntime());
     }
@@ -59,24 +66,26 @@ bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
 
     engineInstance_ = AceType::MakeRefPtr<QJSDeclarativeEngineInstance>(delegate);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     nativeEngine_ = new QuickJSNativeEngine(runtime, context, static_cast<void*>(this));
-#endif
     bool res = engineInstance_->InitJSEnv(runtime, context, GetExtraNativeObject());
     if (!res) {
         LOGE("QJSDeclarativeEngine initialize failed: %{public}d", instanceId_);
         return false;
     }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     SetPostTask(nativeEngine_);
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
-    RegisterWorker();
 #endif
+    if (delegate && delegate->GetAssetManager()) {
+        std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
+        auto qjsNativeEngine = static_cast<QuickJSNativeEngine*>(nativeEngine_);
+        qjsNativeEngine->SetPackagePath(packagePath);
+    }
+    RegisterWorker();
 
     return true;
 }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 void QJSDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
@@ -121,7 +130,7 @@ void QJSDeclarativeEngine::RegisterInitWorkerFunc()
 
         InitConsole(ctx);
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
+    nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
 void QJSDeclarativeEngine::RegisterAssetFunc()
@@ -136,7 +145,7 @@ void QJSDeclarativeEngine::RegisterAssetFunc()
         }
         delegate->GetResourceData(uri, content);
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterAssetFunc(assetFunc);
+    nativeEngine_->SetGetAssetFunc(assetFunc);
 }
 
 void QJSDeclarativeEngine::RegisterWorker()
@@ -144,19 +153,36 @@ void QJSDeclarativeEngine::RegisterWorker()
     RegisterInitWorkerFunc();
     RegisterAssetFunc();
 }
-#endif
 
 void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
     LOGD("QJSDeclarativeEngine LoadJs");
     ACE_SCOPED_TRACE("QJSDeclarativeEngine::LoadJS");
     ACE_DCHECK(engineInstance_);
-
     engineInstance_->SetRunningPage(page);
     JSContext* ctx = engineInstance_->GetQJSContext();
     JS_SetContextOpaque(ctx, reinterpret_cast<void*>(AceType::RawPtr(engineInstance_)));
-
     if (isMainPage) {
+        std::string commonsJsContent;
+        if (engineInstance_->GetDelegate()->GetAssetContent("commons.js", commonsJsContent)) {
+            auto commonsJsResult = QJSDeclarativeEngineInstance::EvalBuf(
+                ctx, commonsJsContent.c_str(), commonsJsContent.length(),
+                "commons.js", JS_EVAL_TYPE_GLOBAL);
+            if (commonsJsResult == -1) {
+                LOGE("fail to excute load commonsjs script");
+                return;
+            }
+        }
+        std::string vendorsJsContent;
+        if (engineInstance_->GetDelegate()->GetAssetContent("vendors.js", vendorsJsContent)) {
+            auto vendorsJsResult = QJSDeclarativeEngineInstance::EvalBuf(
+                ctx, vendorsJsContent.c_str(), vendorsJsContent.length(),
+                "vendors.js", JS_EVAL_TYPE_GLOBAL);
+            if (vendorsJsResult == -1) {
+                LOGE("fail to excute load vendorsjs script");
+                return;
+            }
+        }
         std::string appjsContent;
         if (!engineInstance_->GetDelegate()->GetAssetContent("app.js", appjsContent)) {
             LOGE("js file load failed!");
@@ -176,13 +202,28 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         }
         CallAppFunc("onCreate", 0, nullptr);
     }
-
     std::string jsContent;
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (!engineInstance_->GetDelegate()->GetAssetContent(url, jsContent)) {
         LOGE("js file load failed!");
         return;
     }
-
+#else
+    std::string::size_type posPreview = url.find(COMPONENT_PREVIEW);
+    if (posPreview != std::string::npos) {
+        std::string::size_type pos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT);
+        if (pos != std::string::npos) {
+            jsContent = preContent_;
+        }
+    } else {
+        if (!engineInstance_->GetDelegate()->GetAssetContent(url, jsContent)) {
+            LOGE("js file load failed!");
+            return;
+        }
+    }
+    preContent_ = jsContent;
+#endif
     if (jsContent.empty()) {
         LOGE("js file load failed! url=[%{public}s]", url.c_str());
         return;
@@ -193,11 +234,39 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         LOGE("js compilation failed url=[%{public}s]", url.c_str());
         return;
     }
-
     // Todo: check the fail.
     engineInstance_->ExecuteDocumentJS(compiled);
-
     js_std_loop(engineInstance_->GetQJSContext());
+}
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+void QJSDeclarativeEngine::ReplaceJSContent(std::string& jsContent, const std::string componentName)
+{
+    // replace the component name of loadDocument from current js content.
+    std::string::size_type loadDocomentPos = jsContent.find(COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW);
+    std::string::size_type position = 0;
+    std::string::size_type finalPostion = 0;
+    while ((position = jsContent.find(LEFT_PARENTTHESIS, position)) != std::string::npos) {
+        if (position > loadDocomentPos + LOAD_DOCUMENT_STR_LENGTH) {
+            finalPostion = position;
+            break;
+        }
+        position++;
+    }
+    std::string dstReplaceStr = COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW;
+    dstReplaceStr += " " + componentName;
+    jsContent.replace(loadDocomentPos, finalPostion - loadDocomentPos, dstReplaceStr);
+}
+#endif
+RefPtr<Component> QJSDeclarativeEngine::GetNewComponentWithJsCode(const std::string& jsCode)
+{
+    bool result = engineInstance_->InitAceModules(jsCode.c_str(), jsCode.length(), "AddComponent");
+    if (!result) {
+        LOGE("execute addComponent failed,script=[%{public}s]", jsCode.c_str());
+        return nullptr;
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetNewComponent();
+    return component;
 }
 
 void QJSDeclarativeEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)
@@ -228,7 +297,7 @@ void QJSDeclarativeEngine::DestroyPageInstance(int32_t pageId)
     js_std_loop(engineInstance_->GetQJSContext());
 }
 
-void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv)
+void QJSDeclarativeEngine::CallAppFunc(const std::string& appFuncName, int argc, JSValueConst* argv)
 {
     JSContext* ctx = engineInstance_->GetQJSContext();
     if (!ctx) {
@@ -241,7 +310,7 @@ void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValu
     JS_FreeValue(ctx, ret);
 }
 
-void QJSDeclarativeEngine::CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv, JSValue& ret)
+void QJSDeclarativeEngine::CallAppFunc(const std::string& appFuncName, int argc, JSValueConst* argv, JSValue& ret)
 {
     JSContext* ctx = engineInstance_->GetQJSContext();
     if (!ctx) {

@@ -37,11 +37,6 @@ constexpr uint8_t RING_BG_BLUR_ALPHA = 150;
 
 } // namespace
 
-RefPtr<RenderNode> RenderLoadingProgress::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderLoadingProgress>();
-}
-
 void FlutterRenderLoadingProgress::Paint(RenderContext& context, const Offset& offset)
 {
     if (cometParams_.empty()) {

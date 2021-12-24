@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/text/text_component.h"
 #include "core/components/text_span/render_text_span.h"
 #include "core/components/text_span/text_span_component.h"
 #include "core/gestures/click_recognizer.h"
@@ -126,8 +127,8 @@ protected:
     uint32_t maxLines_ = UINT32_MAX;
     RefPtr<TextComponent> text_;
     std::map<int32_t, std::map<GestureType, EventMarker>> touchRegions_; // key of map is end position of span.
-    double paragraphWidth_;
-    double paragraphHeight_;
+    double paragraphWidth_ = 0.0;
+    double paragraphHeight_ = 0.0;
 
 private:
     void HandleTouchEvent(GestureType type, const Offset& touchPosition);

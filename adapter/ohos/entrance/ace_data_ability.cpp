@@ -21,6 +21,7 @@
 #include "adapter/ohos/entrance/pa_container.h"
 #include "adapter/ohos/entrance/pa_engine/pa_backend.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
+#include "adapter/ohos/entrance/utils.h"
 #include "base/log/log.h"
 #include "core/common/backend.h"
 
@@ -72,17 +73,18 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want)
         parsedUrl = "data.js";
     }
 
-    // init data ability
-    BackendType backendType = BackendType::DATA;
-    Platform::PaContainer::CreateContainer(
-        abilityId_, backendType, this, std::make_unique<DataPlatformEventCallback>([this]() { TerminateAbility(); }));
-
     // get asset
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
     if (moduleInfo != nullptr) {
         packagePathStr += "/" + moduleInfo->name + "/";
     }
+
+    // init data ability
+    BackendType backendType = BackendType::DATA;
+    bool isArkApp = GetIsArkFromConfig(packagePathStr);
+    Platform::PaContainer::CreateContainer(abilityId_, backendType, isArkApp, this,
+        std::make_unique<DataPlatformEventCallback>([this]() { TerminateAbility(); }));
 
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     if (info != nullptr && !info->srcPath.empty()) {

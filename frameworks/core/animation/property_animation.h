@@ -56,6 +56,7 @@ public:
 private:
     void OnNormalizedTimestampChanged(float normalized, bool reverse) override;
     void OnInitNotify(float normalizedTime, bool reverse) override;
+    RefPtr<Curve> GetCurve() override;
     void Calculate(float keyTime);
     void TriggerFrame(const RefPtr<Animatable>& start, const RefPtr<Animatable>& end, float time);
 

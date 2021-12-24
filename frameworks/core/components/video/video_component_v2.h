@@ -101,7 +101,7 @@ public:
     using SaveComponentEvent = std::function<void(std::unordered_map<std::string, RefPtr<Component>>)>;
 
     VideoComponentV2() = default;
-    ~VideoComponentV2() override;
+    ~VideoComponentV2() override = default;
 
     RefPtr<Element> CreateElement() override;
 

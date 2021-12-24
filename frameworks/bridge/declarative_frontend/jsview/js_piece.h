@@ -26,6 +26,14 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
     static void SetIconPosition(const JSCallbackInfo& info);
+    static void SetTextColor(const JSCallbackInfo& info);
+    static void SetFontSize(const JSCallbackInfo& info);
+    static void SetFontStyle(int32_t value);
+    static void SetFontWeight(const std::string& value);
+    static void SetFontFamily(const JSCallbackInfo& info);
+    static void JsOnClick(const JSCallbackInfo& info);
+    static void SetShowDelete(const JSCallbackInfo& info);
+    static void JsOnClose(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

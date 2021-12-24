@@ -115,6 +115,8 @@ bool DOMProgress::SetSpecializedAttr(const std::pair<std::string, std::string>& 
                     progress.type_ = ProgressType::MOON;
                 } else if ((val == DOM_PROGRESS_TYPE_ARC)) {
                     progress.type_ = ProgressType::ARC;
+                } else if ((val == DOM_PROGRESS_TYPE_BUBBLE)) {
+                    progress.type_ = ProgressType::BUBBLE;
                 } else {
                     progress.type_ = ProgressType::LINEAR;
                 }
@@ -138,6 +140,10 @@ bool DOMProgress::SetSpecializedStyle(const std::pair<std::string, std::string>&
                 progress.backgroundColor_.first = progress.ParseColor(val);
                 progress.backgroundColor_.second = true;
             } },
+        { DOM_PROGRESS_BUBBLE_RADIUS,
+            [](const std::string& val, DOMProgress& progress) {
+                progress.diameter_ = progress.ParseDimension(val);
+            } },
         { DOM_CENTER_X,
             [](const std::string& val, DOMProgress& progress) {
                 progress.centerX_.first = StringToDouble(val);
@@ -156,6 +162,10 @@ bool DOMProgress::SetSpecializedStyle(const std::pair<std::string, std::string>&
                     progress.color_.first = progress.ParseColor(val);
                     progress.color_.second = true;
                 }
+            } },
+        { DOM_PROGRESS_DIAMETER,
+            [](const std::string& val, DOMProgress& progress) {
+                progress.bubbleRadius_ = progress.ParseDimension(val);
             } },
         { DOM_DIRECTION,
             [](const std::string& val, DOMProgress& progress) { progress.isStartToEnd_ = val == DOM_START_TO_END; } },
@@ -203,6 +213,11 @@ void DOMProgress::PrepareSpecializedComponent()
     InitProgressIfNeed();
     if (type_ == ProgressType::CIRCLE) {
         loadingProgressChild_->SetProgressColor(color_.first);
+        return;
+    }
+    if (type_ == ProgressType::BUBBLE) {
+        bubbleProgressChild_->SetBubbleRadius(bubbleRadius_);
+        bubbleProgressChild_->SetDiameter(diameter_);
         return;
     }
     progressChild_->SetMaxValue(max_);
@@ -265,6 +280,8 @@ RefPtr<Component> DOMProgress::GetSpecializedComponent()
 {
     if (type_ == ProgressType::CIRCLE) {
         return loadingProgressChild_;
+    } else if (type_ == ProgressType::BUBBLE) {
+        return bubbleProgressChild_;
     } else {
         return progressChild_;
     }
@@ -290,6 +307,14 @@ void DOMProgress::InitProgressIfNeed()
         }
         return;
     }
+
+    if (type_ == ProgressType::BUBBLE) {
+        if (!bubbleProgressChild_) {
+            bubbleProgressChild_ = AceType::MakeRefPtr<BubbleProgressComponent>();
+        }
+        return;
+    }
+
     if (!progressChild_ || progressChild_->GetType() != type_) {
         progressChild_ = CreateProgressComponent(min_, percent_, cachedValue_, max_, type_);
     }

@@ -25,11 +25,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderSvgCircle::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSvgCircle>();
-}
-
 RenderLayer FlutterRenderSvgCircle::GetRenderLayer()
 {
     if (!transformLayer_) {

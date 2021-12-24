@@ -99,6 +99,43 @@ public:
         }
     }
 
+    bool RunAsync(const WeakPtr<Scheduler>& weakScheduler, const AnimationOption& option,
+        const std::function<void()> prepareCallback, const std::function<void()> finishCallback) override
+    {
+        auto scheduler = weakScheduler.Upgrade();
+        if (scheduler == nullptr) {
+            LOGE("run async failed, scheduler is null!");
+            return false;
+        }
+
+        scheduler->OpenImplicitAnimation(option, Curves::EASE, finishCallback);
+
+        for (const auto& keyframe : keyframes_) {
+            if (keyframe == nullptr) {
+                continue;
+            }
+
+            float fraction = keyframe->GetKeyTime();
+            auto curve = keyframe->GetCurve() ? keyframe->GetCurve() : AceType::DynamicCast<Curve>(Curves::EASE);
+            scheduler->AddKeyFrame(
+                fraction, curve, [weak = AceType::WeakClaim(this), callback = prepareCallback, fraction]() {
+                    auto animation = weak.Upgrade();
+                    if (animation == nullptr) {
+                        LOGE("propetry change failed, animation is null!");
+                        return;
+                    }
+
+                    if (callback != nullptr) {
+                        callback();
+                    }
+
+                    animation->OnNormalizedTimestampChanged(fraction, false);
+                });
+        }
+
+        return scheduler->CloseImplicitAnimation();
+    }
+
 private:
     void Calculate(float keyTime)
     {

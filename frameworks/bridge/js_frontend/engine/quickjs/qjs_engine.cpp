@@ -22,9 +22,6 @@
 #include <unordered_map>
 
 #include "third_party/quickjs/message_server.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-#include "worker_init.h"
-#endif
 
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
@@ -59,6 +56,7 @@
 #include "frameworks/bridge/js_frontend/engine/quickjs/offscreen_canvas_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
+#include "frameworks/bridge/js_frontend/engine/quickjs/qjs_xcomponent_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/stepper_bridge.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
@@ -79,6 +77,7 @@ constexpr int32_t ARGS_FULL_WINDOW_LENGTH = 2;
 constexpr int32_t ARGS_READ_RESOURCE_LENGTH = 2;
 constexpr int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
+static int32_t globalNodeId = 100000;
 const std::string WINDOW_DIALOG_DOUBLE_BUTTON = "pages/dialog/index.js";
 
 int32_t CallEvalBuf(
@@ -617,6 +616,30 @@ JSValue JsDomCreateBody(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
     AddDomEvent(ctx, argv[4], *command);
     page->PushCommand(command);
     return JS_NULL;
+}
+
+int32_t CreateDomElement(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    ACE_SCOPED_TRACE("CreateDomElement");
+    if (argv == nullptr) {
+        LOGE("the arg is error");
+        return -1;
+    }
+
+    auto page = GetStagingPage(ctx);
+    if (page == nullptr) {
+        LOGE("the page is nullptr");
+        return -1;
+    }
+    int32_t nodeId = ++globalNodeId;
+    ScopedString tag(ctx, argv[0]);
+    auto command = Referenced::MakeRefPtr<JsCommandCreateDomElement>(tag.get(), nodeId);
+    page->PushCommand(command);
+    // Flush command as fragment immediately when pushed too many commands.
+    if (!page->CheckPageCreated() && page->GetCommandSize() > FRAGMENT_SIZE) {
+        page->FlushCommands();
+    }
+    return  globalNodeId;
 }
 
 JSValue JsDomAddElement(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
@@ -1238,32 +1261,25 @@ JSValue JsHandleImage(JSContext* ctx, JSValueConst argv)
     auto success = JsParseRouteUrl(ctx, argv, "success");
     auto fail = JsParseRouteUrl(ctx, argv, "fail");
 
-    std::set<std::string> callbacks;
-    if (!success.empty()) {
-        callbacks.emplace("success");
-    }
-    if (!fail.empty()) {
-        callbacks.emplace("fail");
-    }
-
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
         return JS_NULL;
     }
 
-    auto&& callback = [instance, success, fail](int32_t callbackType) {
-        switch (callbackType) {
-            case 0:
-                instance->CallJs(success.c_str(), std::string("\"success\",null").c_str(), false);
-                break;
-            case 1:
-                instance->CallJs(fail.c_str(), std::string("\"fail\",null").c_str(), false);
-                break;
-            default:
-                break;
+    auto&& callback = [instance, success, fail](bool callbackType, int32_t width, int32_t height) {
+        if (callbackType) {
+            instance->CallJs(success,
+                std::string("{\"width\":")
+                    .append(std::to_string(width))
+                    .append(", \"height\":")
+                    .append(std::to_string(height))
+                    .append("}"),
+                false);
+        } else {
+            instance->CallJs(fail, std::string("\"fail\",null"), false);
         }
     };
-    instance->GetDelegate()->HandleImage(src, callback, callbacks);
+    instance->GetDelegate()->HandleImage(src, callback);
     return JS_NULL;
 }
 
@@ -1920,6 +1936,12 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
         return ComponentApiBridge::JsGetBoundingRect(ctx, nodeId);
     } else if (std::strcmp(methodName.get(), "scrollTo") == 0) {
         ComponentApiBridge::JsScrollTo(ctx, args.get(), nodeId);
+    } else if (std::strcmp(methodName.get(), "getXComponentContext") == 0) {
+        auto bridge = AceType::DynamicCast<QjsXComponentBridge>(page->GetXComponentBridgeById(nodeId));
+        if (bridge) {
+            bridge->HandleContext(ctx, nodeId, args.get());
+            return bridge->GetRenderContext();
+        }
     }
 
     auto resultValue = JSValue();
@@ -1937,6 +1959,32 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
         return ImageAnimatorBridge::JsGetState(ctx, nodeId);
     } else if (std::strcmp(methodName.get(), "createIntersectionObserver") == 0) {
         return ComponentApiBridge::JsCreateObserver(ctx, args.get(), nodeId);
+    } else if (std::strcmp(methodName.get(), "addChild") == 0) {
+        auto sPage = GetStagingPage(ctx);
+        if (sPage == nullptr) {
+            return JS_EXCEPTION;
+        }
+        int32_t childNodeId = 0;
+        std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args.get());
+        if (argsValue && argsValue->IsArray()) {
+            std::unique_ptr<JsonValue> cNodeId = argsValue->GetArrayItem(0)->GetValue("__nodeId");
+            if (cNodeId && cNodeId->IsNumber()) {
+                childNodeId = cNodeId->GetInt();
+            }
+        }
+        auto domDocument = sPage->GetDomDocument();
+        if (domDocument) {
+            RefPtr<DOMNode> node = domDocument->GetDOMNodeById(childNodeId);
+            if (node == nullptr) {
+                LOGE("node is nullptr");
+                return JS_NULL;
+            }
+            auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node->GetTag(), node->GetNodeId(), nodeId);
+            sPage->PushCommand(command);
+            if (!sPage->CheckPageCreated() && sPage->GetCommandSize() > FRAGMENT_SIZE) {
+                sPage->FlushCommands();
+            }
+        }
     } else {
         page->PushCommand(Referenced::MakeRefPtr<JsCommandCallDomElementMethod>(nodeId, methodName.get(), args.get()));
     }
@@ -2214,6 +2262,149 @@ JSValue AppErrorLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSVal
     return AppLogPrint(ctx, JsLogLevel::ERROR, value, argc, argv);
 }
 
+int32_t GetNodeId(JSContext* ctx, JSValueConst value)
+{
+    int32_t id = 0;
+    JSValue nodeId = JS_GetPropertyStr(ctx, value, "__nodeId");
+    if (JS_IsInteger(nodeId) && (JS_ToInt32(ctx, &id, nodeId)) < 0) {
+        id = 0;
+    }
+    JS_FreeValue(ctx, nodeId);
+    return id;
+}
+
+JSValue JsSetAttribute(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetRunningPage(ctx);
+    if (page == nullptr) {
+        return JS_EXCEPTION;
+    }
+    if (!JS_IsString(argv[0]) || !JS_IsString(argv[1])) {
+        LOGE("args is not string ");
+        return JS_NULL;
+    }
+    ScopedString key(ctx, argv[0]);
+    JSValue attr = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, attr, key.get(), argv[1]);
+
+    int32_t nodeId = GetNodeId(ctx, value);
+    auto command = Referenced::MakeRefPtr<JsCommandUpdateDomElementAttrs>(nodeId);
+    if (SetDomAttributes(ctx, attr, *command)) {
+        page->ReserveShowCommand(command);
+    }
+    page->PushCommand(command);
+    return JS_NULL;
+}
+
+JSValue JsSetStyle(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetRunningPage(ctx);
+    if (page == nullptr) {
+    return JS_EXCEPTION;
+    }
+    if (!JS_IsString(argv[0]) || !JS_IsString(argv[1])) {
+        LOGE("args is not string ");
+        return JS_NULL;
+    }
+    ScopedString key(ctx, argv[0]);
+    JSValue style = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, style, key.get(), argv[1]);
+    int32_t nodeId = GetNodeId(ctx, value);
+    auto command = Referenced::MakeRefPtr<JsCommandUpdateDomElementStyles>(nodeId);
+    SetDomStyle(ctx, style, *command);
+    page->PushCommand(command);
+    return JS_NULL;
+}
+
+JSValue JsAppendChild(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetStagingPage(ctx);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return JS_EXCEPTION;
+    }
+
+    int32_t id = GetNodeId(ctx, argv[0]);
+    auto domDocument = page->GetDomDocument();
+    if (domDocument) {
+        RefPtr<DOMNode> node = domDocument->GetDOMNodeById(id);
+        if (node == nullptr) {
+            LOGE("node is nullptr");
+            return JS_NULL;
+        }
+        int32_t parentNodeId;
+        JSValue bridgeId = JS_GetPropertyStr(ctx, value, "__nodeId");
+        if (JS_IsInteger(bridgeId) && (JS_ToInt32(ctx, &parentNodeId, bridgeId)) < 0) {
+            parentNodeId = 0;
+        }
+        auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node->GetTag(), node->GetNodeId(), parentNodeId);
+        page->PushCommand(command);
+        if (!page->CheckPageCreated() && page->GetCommandSize() > FRAGMENT_SIZE) {
+            page->FlushCommands();
+        }
+    }
+    return JS_NULL;
+}
+
+JSValue JsFocus(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetStagingPage(ctx);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return JS_NULL;
+    }
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        LOGE("JsFocus failed, instance is null.");
+        return JS_NULL;
+    }
+    instance->GetDelegate()->TriggerPageUpdate(page->GetPageId(), true);
+    return JS_NULL;
+}
+
+JSValue JsAnimate(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetStagingPage(ctx);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return JS_NULL;
+    }
+    int32_t nodeId = GetNodeId(ctx, value);
+    ScopedString args(ctx, argv[0]);
+    auto resultValue = AnimationBridgeUtils::CreateAnimationContext(ctx, page->GetPageId(), nodeId);
+    auto animationBridge = AceType::MakeRefPtr<AnimationBridge>(ctx, resultValue, nodeId);
+    auto task = AceType::MakeRefPtr<AnimationBridgeTaskCreate>(animationBridge, args.get());
+    page->PushCommand(Referenced::MakeRefPtr<JsCommandAnimation>(nodeId, task));
+    return JS_NULL;
+}
+
+JSValue JsGetBoundingClientRect(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetStagingPage(ctx);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return JS_NULL;
+    }
+    int32_t nodeId = GetNodeId(ctx, value);
+    ComponentApiBridge::JsGetBoundingRect(ctx, nodeId);
+    return JS_NULL;
+}
+
+JSValue JsCreateElement(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    int32_t newNodeId = CreateDomElement(ctx, value, argc, argv);
+    JSValue node = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, node, "__nodeId",  JS_NewInt32(ctx, newNodeId));
+    JS_SetPropertyStr(ctx, node, "setAttribute", JS_NewCFunction(ctx, JsSetAttribute, "setAttribute", 2));
+    JS_SetPropertyStr(ctx, node, "setStyle", JS_NewCFunction(ctx, JsSetStyle, "setStyle", 2));
+    JS_SetPropertyStr(ctx, node, "addChild", JS_NewCFunction(ctx, JsAppendChild, "addChild", 1));
+    JS_SetPropertyStr(ctx, node, "focus", JS_NewCFunction(ctx, JsFocus, "focus", 1));
+    JS_SetPropertyStr(ctx, node, "animate", JS_NewCFunction(ctx, JsAnimate, "animate", 1));
+    JS_SetPropertyStr(ctx, node, "getBoundingClientRect",
+        JS_NewCFunction(ctx, JsGetBoundingClientRect, "getBoundingClientRect", 1));
+    return node;
+}
+
 JSValue JsLogPrint(JSContext* ctx, JsLogLevel level, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
     ACE_SCOPED_TRACE("JsLogPrint(level=%d)", static_cast<int32_t>(level));
@@ -2483,6 +2674,13 @@ void InitJsConsoleObject(JSContext* ctx, const JSValue& globalObj)
     JS_SetPropertyStr(ctx, globalObj, "dialogCallback", JS_NewCFunction(ctx, JSWindowCallBack, "dialogCallback", 1));
 }
 
+void InitJsDocumentObject(JSContext* ctx, const JSValue& globalObj)
+{
+    JSValue dom = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, dom, "createElement", JS_NewCFunction(ctx, JsCreateElement, "createElement", 1));
+    JS_SetPropertyStr(ctx, globalObj, "dom", dom);
+}
+
 bool InitJsContext(JSContext* ctx, size_t maxStackSize, int32_t instanceId, const QjsEngineInstance* qjsEngineInstance,
     const std::unordered_map<std::string, void*>& extraNativeObject)
 {
@@ -2504,6 +2702,7 @@ bool InitJsContext(JSContext* ctx, size_t maxStackSize, int32_t instanceId, cons
     perfUtil = JS_NewObject(ctx);
 
     InitJsConsoleObject(ctx, globalObj);
+    InitJsDocumentObject(ctx, globalObj);
 
     JS_SetPropertyStr(ctx, perfUtil, "printlog", JS_NewCFunction(ctx, JsPerfPrint, "printlog", 0));
     JS_SetPropertyStr(ctx, perfUtil, "sleep", JS_NewCFunction(ctx, JsPerfSleep, "sleep", 1));
@@ -2901,31 +3100,30 @@ bool QjsEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         LOGE("GetInstanceName strcpy_s fail");
         return false;
     }
-    DBG_SetComponentName(componentName, strlen(componentName));
+    // TODO: wait for new interface
+    // DBG_SetComponentNameAndInstanceId(componentName, strlen(componentName), instanceId_);
+    // DBG_SetNeedDebugBreakPoint(NeedDebugBreakPoint());
 #endif
     ACE_DCHECK(delegate);
 
     engineInstance_ = AceType::MakeRefPtr<QjsEngineInstance>(delegate, instanceId_);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     nativeEngine_ = new QuickJSNativeEngine(runtime, context, static_cast<void*>(this));
     engineInstance_->SetQuickJSNativeEngine(nativeEngine_);
-#endif
     bool ret = engineInstance_->InitJsEnv(runtime, context, GetExtraNativeObject());
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-    RegisterWorker();
     SetPostTask(nativeEngine_);
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
+#endif
+    RegisterWorker();
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
         nativeEngine_->SetPackagePath(packagePath);
     }
-#endif
 
     return ret;
 }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 void QjsEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
@@ -2976,7 +3174,7 @@ void QjsEngine::RegisterInitWorkerFunc()
         InitJsConsoleObject(ctx, globalObj);
         JS_FreeValue(ctx, globalObj);
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterInitWorkerFunc(initWorkerFunc);
+    nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
 void QjsEngine::RegisterAssetFunc()
@@ -2991,7 +3189,7 @@ void QjsEngine::RegisterAssetFunc()
         }
         delegate->GetResourceData(uri, content);
     };
-    OHOS::CCRuntime::Worker::WorkerCore::RegisterAssetFunc(assetFunc);
+    nativeEngine_->SetGetAssetFunc(assetFunc);
 }
 
 void QjsEngine::RegisterWorker()
@@ -2999,16 +3197,15 @@ void QjsEngine::RegisterWorker()
     RegisterInitWorkerFunc();
     RegisterAssetFunc();
 }
-#endif
 
 QjsEngine::~QjsEngine()
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (nativeEngine_ != nullptr) {
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
+#endif
         delete nativeEngine_;
     }
-#endif
     if (engineInstance_ && engineInstance_->GetQjsRuntime()) {
         JS_RunGC(engineInstance_->GetQjsRuntime());
     }
@@ -3037,6 +3234,23 @@ void QjsEngine::GetLoadOptions(std::string& optionStr, bool isMainPage, const Re
     renderOption->Put("language", local.c_str());
 
     if (isMainPage) {
+        JSContext* ctx = engineInstance_->GetQjsContext();
+        std::string commonsJsContent;
+        if (engineInstance_->GetDelegate()->GetAssetContent("commons.js", commonsJsContent)) {
+            auto commonsJsResult = CallEvalBuf(ctx, commonsJsContent.c_str(), commonsJsContent.size(),
+                "commons.js", JS_EVAL_TYPE_MODULE, instanceId_);
+            if (commonsJsResult == JS_CALL_FAIL) {
+                LOGE("fail to excute load commonsjs script");
+            }
+        }
+        std::string vendorsJsContent;
+        if (engineInstance_->GetDelegate()->GetAssetContent("vendors.js", vendorsJsContent)) {
+            bool vendorsJsResult = CallEvalBuf(ctx, vendorsJsContent.c_str(), vendorsJsContent.size(),
+                "vendors.js", JS_EVAL_TYPE_MODULE, instanceId_);
+            if (vendorsJsResult == JS_CALL_FAIL) {
+                LOGE("fail to excute load vendorsjs script");
+            }
+        }
         std::string code;
         std::string appMap;
         if (engineInstance_->GetDelegate()->GetAssetContent("app.js.map", appMap)) {
@@ -3492,7 +3706,20 @@ void QjsEngine::FireSyncEvent(const std::string& eventId, const std::string& par
 
 void QjsEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
 {
+    ACE_DCHECK(engineInstance_);
+    auto context = engineInstance_->GetQjsContext();
 
+    auto page = engineInstance_->GetRunningPage();
+    if (page == nullptr) {
+        LOGE("FireExternalEvent GetRunningPage is nullptr");
+        return;
+    }
+    std::string arguments;
+    auto bridge = AceType::DynamicCast<QjsXComponentBridge>(page->GetXComponentBridgeById(nodeId));
+    if (bridge) {
+        bridge->HandleContext(context, nodeId, arguments);
+        return;
+    }
 }
 
 void QjsEngine::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher)

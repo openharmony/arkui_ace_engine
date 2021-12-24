@@ -1076,6 +1076,12 @@ class AppStorage {
     */
     crossWindowNotify(propName, newValue) {
         var p = this.storage_.get(propName);
+        try {
+            newValue = JSON.parse(newValue);
+        }
+        catch (error) {
+            aceConsole.error(`PersistentStorage: convert for ${propName} has error: ` + error.toString());
+        }
         if (p) {
             aceConsole.debug(`crossWindowNotify(${propName}, ${newValue}) update existing property`);
             p.set(newValue, true);
@@ -1456,4 +1462,23 @@ function notifyAppStorageChange(key, value) {
         return;
     }
     AppStorage.GetOrCreate().crossWindowNotify(key, value);
+}
+
+class Clipboard {
+    static set(type, value) {
+        JSClipboard.set(value);
+    }
+
+    static get(type) {
+        return new Promise((resolve, reject) => {
+            const callback = () => {
+                resolve();
+            };
+            JSClipboard.get(callback.bind(this));
+        })
+    }
+
+    static clear() {
+        JSClipboard.clear();
+    }
 }

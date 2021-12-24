@@ -80,12 +80,11 @@ void FlutterRenderXComponent::PerformLayout()
 
 void FlutterRenderXComponent::Paint(RenderContext& context, const Offset& offset)
 {
-    const Size& layout = GetLayoutSize();
-    layer_->SetClip(0.0, layout.Width(), 0.0, layout.Height(), Flutter::Clip::NONE);
-
-    AddBackgroundLayer();
-
     if (textureId_ != X_INVALID_ID) {
+        const Size& layout = GetLayoutSize();
+        layer_->SetClip(0.0, layout.Width(), 0.0, layout.Height(), Flutter::Clip::NONE);
+        AddBackgroundLayer();
+
         if (!hasSetDefaultSize_) {
             if (xcomponentSizeChangeEvent_ && (!drawSize_.IsHeightInfinite())) {
                 xcomponentSizeChangeEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
@@ -112,40 +111,5 @@ void FlutterRenderXComponent::DumpTree(int32_t depth)
     for (const auto& item : children) {
         item->DumpTree(depth + 1);
     }
-}
-
-void FlutterRenderXComponent::NativeXComponentInit(
-    NativeXComponent* nativeXComponent,
-    WeakPtr<NativeXComponentImpl> nativeXComponentImpl)
-{
-    auto pipelineContext = context_.Upgrade();
-    if (!pipelineContext) {
-        LOGE("NativeXComponentInit pipelineContext is null");
-        return;
-    }
-    nativeXComponent_ = nativeXComponent;
-    nativeXComponentImpl_ = nativeXComponentImpl;
-
-    pipelineContext->GetTaskExecutor()->PostTask(
-        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_,
-            w = drawSize_.Width(), h = drawSize_.Height()] {
-            auto nXCompImpl = weakNXCompImpl.Upgrade();
-            if (nXComp && nXCompImpl) {
-                nXCompImpl->SetSurfaceWidth((int)(w));
-                nXCompImpl->SetSurfaceHeight((int)(h));
-                auto surface = nXCompImpl->GetSurface();
-                auto callback = nXCompImpl->GetCallback();
-                if (callback && callback->OnSurfaceCreated != nullptr) {
-                    callback->OnSurfaceCreated(nXComp, surface);
-                }
-            } else {
-                LOGE("Native XComponent nullptr");
-            }
-        },
-        TaskExecutor::TaskType::JS);
-}
-
-void FlutterRenderXComponent::PluginUpdate()
-{
 }
 } // namespace OHOS::Ace

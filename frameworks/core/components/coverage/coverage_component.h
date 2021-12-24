@@ -42,6 +42,11 @@ public:
         textComponent_->SetData(val);
     }
 
+    const std::string GetTextVal() const
+    {
+        return textComponent_->GetData();
+    }
+
     void SetAlignment(Alignment alignment)
     {
         alignComponent_->SetAlignment(alignment);
@@ -59,6 +64,21 @@ public:
         textComponent_->SetHasTop(true);
         textComponent_->SetTop(y);
         textComponent_->SetPositionType(PositionType::RELATIVE);
+    }
+
+    const Dimension& GetX() const
+    {
+        return textComponent_->GetLeft();
+    }
+
+    const Alignment& GetAlignment() const
+    {
+        return alignComponent_->GetAlignment();
+    }
+
+    const Dimension& GetY() const
+    {
+        return textComponent_->GetTop();
     }
 
     bool IsOverLay() const

@@ -17,6 +17,7 @@
 
 #include "core/components/overlay/overlay_element.h"
 #include "core/components/stack/flutter_render_stack.h"
+#include "core/components/stack/rosen_render_stack.h"
 
 namespace OHOS::Ace {
 
@@ -27,11 +28,23 @@ RefPtr<Element> OverlayComponent::CreateElement()
 
 RefPtr<RenderNode> OverlayComponent::CreateRenderNode()
 {
-    auto renderNode = AceType::DynamicCast<FlutterRenderStack>(StackComponent::CreateRenderNode());
-    if (renderNode) {
-        renderNode->SetVisible(false);
-        renderNode->SetBoundary();
+    auto renderNode = StackComponent::CreateRenderNode();
+
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        auto rosenRenderNode = AceType::DynamicCast<RosenRenderStack>(renderNode);
+        if (rosenRenderNode) {
+            rosenRenderNode->SyncRSNodeBoundary(true, true);
+            rosenRenderNode->SetVisible(false);
+            rosenRenderNode->SetBoundary();
+        }
+    } else {
+        auto flutterRenderNode = AceType::DynamicCast<FlutterRenderStack>(renderNode);
+        if (flutterRenderNode) {
+            flutterRenderNode->SetVisible(false);
+            flutterRenderNode->SetBoundary();
+        }
     }
+
     return renderNode;
 }
 

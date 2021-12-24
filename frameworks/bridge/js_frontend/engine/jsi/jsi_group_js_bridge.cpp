@@ -33,6 +33,11 @@ const int32_t PLUGIN_REQUEST_ARG_GROUP_NAME_INDEX = 2;
 const int32_t PLUGIN_REQUEST_ARG_FUNCTION_NAME_INDEX = 3;
 const int32_t PLUGIN_REQUEST_ARG_APP_PARAMS_INDEX = 4;
 
+const int32_t PLUGIN_REQUEST_MIN_ARGC_NUM_SYNC = 2;
+const int32_t PLUGIN_REQUEST_ARG_GROUP_NAME_INDEX_SYNC = 0;
+const int32_t PLUGIN_REQUEST_ARG_FUNCTION_NAME_INDEX_SYNC = 1;
+const int32_t PLUGIN_REQUEST_ARG_APP_PARAMS_INDEX_SYNC = 2;
+
 } // namespace
 
 int32_t JsiGroupJsBridge::InitializeGroupJsBridge(const shared_ptr<JsRuntime>& runtime)
@@ -63,7 +68,13 @@ int32_t JsiGroupJsBridge::LoadJsBridgeFunction()
     shared_ptr<JsValue> group = runtime_->NewObject();
     bool succ = group->SetProperty(runtime_, "sendGroupMessage", runtime_->NewFunction(ProcessJsRequest));
     if (!succ) {
-        LOGE("bridge function, set group message sending function mapping failed!");
+        LOGE("bridge function, set sendGroupMessage sending function mapping failed!");
+        EventReport::SendAPIChannelException(APIChannelExcepType::SET_FUNCTION_ERR);
+        return JS_CALL_FAIL;
+    }
+    succ = group->SetProperty(runtime_, "sendGroupMessageSync", runtime_->NewFunction(ProcessJsRequestSync));
+    if (!succ) {
+        LOGE("bridge function, set sendGroupMessageSync sending function mapping failed!");
         EventReport::SendAPIChannelException(APIChannelExcepType::SET_FUNCTION_ERR);
         return JS_CALL_FAIL;
     }
@@ -98,7 +109,7 @@ shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequest(const shared_ptr<JsRuntim
         return res;
     }
 
-    // Should have at least 5 parameters
+    // Should have at least 4 parameters
     if (argv.size() < PLUGIN_REQUEST_MIN_ARGC_NUM) {
         LOGE("send message para check, invalid args number:%{public}u", (uint32_t)argv.size());
         return res;
@@ -154,6 +165,91 @@ shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequest(const shared_ptr<JsRuntim
         groupJsBridge->TriggerModulePluginGetErrorCallback(callbackId, PLUGIN_REQUEST_FAIL, "send message failed");
     }
     return res;
+}
+
+// function callback for groupObj's function: sendGroupMessageSync
+shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequestSync(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    shared_ptr<JsValue> res = runtime->NewUndefined();
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (engine == nullptr) {
+        LOGE("send message para check, fail to get engine");
+        return res;
+    }
+    auto delegate = engine->GetFrontendDelegate();
+    if (!delegate) {
+        LOGE("send message para check, fail to get front-end delegate");
+        return res;
+    }
+
+    auto groupJsBridge = AceType::DynamicCast<JsiGroupJsBridge>(delegate->GetGroupJsBridge());
+    if (!groupJsBridge) {
+        LOGE("send message para check, fail to get group-js-bridge");
+        return res;
+    }
+
+    // Should have at least 2 parameters
+    if (argv.size() < PLUGIN_REQUEST_MIN_ARGC_NUM_SYNC) {
+        LOGE("send message para check, invalid args number:%{public}u", (uint32_t)argv.size());
+        return res;
+    }
+
+    std::string strGroupName(argv[PLUGIN_REQUEST_ARG_GROUP_NAME_INDEX_SYNC]->ToString(runtime));
+    std::string strFunctionName(argv[PLUGIN_REQUEST_ARG_FUNCTION_NAME_INDEX_SYNC]->ToString(runtime));
+    if (strGroupName.empty()) {
+        LOGE("send message para check, group or function name is null");
+        return res;
+    }
+
+    if (strGroupName.empty()) {
+        LOGE("plugin name is null");
+        return res;
+    }
+
+    LOGI("send message, groupName:%{private}s functionName:%{private}s", strGroupName.c_str(), strFunctionName.c_str());
+
+    std::vector<CodecData> arguments;
+    ParseJsDataResult parseJsResult =
+        groupJsBridge->ParseJsPara(runtime, argv, PLUGIN_REQUEST_ARG_APP_PARAMS_INDEX_SYNC, 0, arguments);
+    if (parseJsResult != ParseJsDataResult::PARSE_JS_SUCCESS) {
+        LOGE("encode arguments fail");
+        return res;
+    }
+
+    FunctionCall functionCall(strFunctionName, arguments);
+    StandardFunctionCodec codec;
+    std::vector<uint8_t> encodeBuf;
+    if (!codec.EncodeFunctionCall(functionCall, encodeBuf)) {
+        LOGE("encode request message failed");
+        return res;
+    }
+
+    // CallPlatformFunction
+    auto dispatcher = engine->GetJsMessageDispatcher().Upgrade();
+
+    uint8_t* resData = nullptr;
+    long position = 0;
+    if (dispatcher) {
+        dispatcher->DispatchSync(strGroupName, std::move(encodeBuf), &resData, position);
+    } else {
+        LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
+        return res;
+    }
+    std::vector<uint8_t> messageData = std::vector<uint8_t>(resData, resData + position);
+
+    shared_ptr<JsValue> callBackResult;
+    CodecData codecResult;
+    if (codec.DecodePlatformMessage(messageData, codecResult)) {
+        std::string resultString = codecResult.GetStringValue();
+        LOGI("sync resultString = %{private}s", resultString.c_str());
+        if (resultString.empty()) {
+            callBackResult = runtime->NewNull();
+        } else {
+            callBackResult = runtime->NewString(resultString);
+        }
+    }
+    return callBackResult;
 }
 
 bool JsiGroupJsBridge::SetEventGroupCallBackFuncs(const shared_ptr<JsRuntime>& runtime,

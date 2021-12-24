@@ -38,7 +38,7 @@ public:
     static void JsSize(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
     static void SelectedColor(const JSCallbackInfo& info);
-    static void SwithPointStyle(const JSCallbackInfo& info);
+    static void SwitchPointColor(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

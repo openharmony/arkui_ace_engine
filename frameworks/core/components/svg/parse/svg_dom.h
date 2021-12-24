@@ -99,6 +99,7 @@ private:
     void ApplyFill(double& scaleX, double& scaleY);
     void ApplyContain(double& scaleX, double& scaleY);
     void ApplyCover(double& scaleX, double& scaleY);
+    void SyncRSNode(const RefPtr<RenderNode>& renderNode);
 
     WeakPtr<PipelineContext> context_;
     RefPtr<SvgContext> svgContext_;

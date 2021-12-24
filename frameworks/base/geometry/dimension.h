@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/utils/macros.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 
 #define NEAR_ZERO(value) ((value > 0.0) ? ((value - 0.0) <= 0.000001f) : ((0.0 - value) <= 0.000001f))
@@ -50,6 +51,10 @@ enum class DimensionUnit {
      * logic pixels used in ACE2.0 instead of PX, and PX is the physical pixels in ACE2.0
      */
     LPX,
+    /*
+     * The value is calculated from the element's parent and another property of the element itself.
+     */
+    AUTO,
 };
 
 /*
@@ -94,6 +99,29 @@ public:
         } else {
             return value_;
         }
+    }
+
+    double ConvertToVp() const
+    {
+        if (unit_ == DimensionUnit::VP) {
+            return value_;
+        }
+        if (unit_ == DimensionUnit::PX) {
+            return SystemProperties::Px2Vp(value_);
+        }
+        // TODO: add fp and lpx convert.
+        return 0;
+    }
+
+    double ConvertToPx() const
+    {
+        if (unit_ == DimensionUnit::PX) {
+            return value_;
+        }
+        if (unit_ == DimensionUnit::VP) {
+            return SystemProperties::Vp2Px(value_);
+        }
+        return 0;
     }
 
     constexpr Dimension operator*(double value) const
@@ -186,7 +214,7 @@ public:
 
     std::string ToString() const
     {
-        static std::string units[5] = {"px", "vp", "fp", "%", "lpx"};
+        static std::string units[6] = {"px", "vp", "fp", "%", "lpx", "auto"};
         if (units[static_cast<int>(unit_)] == units[3]) {
             return std::to_string(value_ * 100).append(units[static_cast<int>(unit_)]);
         }

@@ -47,6 +47,7 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void OnPaintFinish() override;
+    virtual void OnStatusStyleChanged(StyleState state) override;
 
     void OnAttachContext() override
     {
@@ -97,6 +98,11 @@ public:
     Color GetClickedColor()
     {
         return clickedColor_;
+    }
+
+    Color GetBackgroundColor() const
+    {
+        return buttonComponent_->GetBackgroundColor();
     }
 
 protected:
@@ -194,7 +200,6 @@ private:
 
     AnimatableDimension width_;
     AnimatableDimension height_;
-    Dimension radius_;
     Dimension minWidth_;
     bool valueChanged_ = false;
     bool isClickAnimation_ = false;

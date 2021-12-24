@@ -21,11 +21,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderRefresh::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderRefresh>();
-}
-
 RenderLayer FlutterRenderRefresh::GetRenderLayer()
 {
     if (!layer_) {

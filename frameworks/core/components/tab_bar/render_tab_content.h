@@ -36,7 +36,6 @@ public:
     RenderTabContent();
     ~RenderTabContent() override = default;
 
-    void UpdateTouchRect() override;
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
@@ -134,7 +133,6 @@ private:
     bool scrollable_ = true;        // the default value is true
     bool isInAnimation_ = false;    // whether it is in animation
     bool isDragging_ = false;       // whether it is dragging
-    bool isPaused_ = false;         // whether the animation is paused
     bool isInitialized_ = false;
     bool isVertical_ = false; // whether the tab is vertical
 

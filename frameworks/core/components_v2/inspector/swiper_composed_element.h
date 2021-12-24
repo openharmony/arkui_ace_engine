@@ -40,11 +40,17 @@ public:
     std::string GetLoop() const;
     std::string GetDuration() const;
     std::string GetVertical() const;
+    std::string GetDisableSwipe() const;
+    std::string GetItemSpace() const;
 
     AceType::IdType GetTargetTypeId() const override
     {
         return SwiperElement::TypeId();
     }
+
+    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void DeleteChildWithSlot(int32_t slot) override;
 
 private:
     RefPtr<RenderSwiper> GetRenderSwiper() const;

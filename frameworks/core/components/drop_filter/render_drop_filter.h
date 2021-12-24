@@ -32,6 +32,7 @@ public:
     void PerformLayout() override;
     void UpdateTouchRect() override;
     const Rect& GetTouchRect() override;
+    const std::vector<Rect>& GetTouchRectList() override;
 
 protected:
     RenderDropFilter();

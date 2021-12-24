@@ -116,7 +116,7 @@ bool ArkJSValue::IsFunction([[maybe_unused]] shared_ptr<JsRuntime> runtime)
 }
 
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
-bool ArkJSValue::IsException([[maybe_unused]] shared_ptr<JsRuntime> runtime) const
+bool ArkJSValue::IsException([[maybe_unused]] shared_ptr<JsRuntime> runtime)
 {
     return value_.IsEmpty() || value_->IsException();
 }
@@ -311,5 +311,20 @@ shared_ptr<JsValue> ArkJSValue::GetElement(shared_ptr<JsRuntime> runtime, int32_
         return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Exception(pandaRuntime->GetEcmaVm()));
     }
     return std::make_shared<ArkJSValue>(pandaRuntime, property);
+}
+
+std::string ArkJSValue::GetJsonString(const shared_ptr<JsRuntime>& runtime)
+{
+    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    LocalScope scope(pandaRuntime->GetEcmaVm());
+    auto stringify = panda::JSON::Stringify(pandaRuntime->GetEcmaVm(), GetValue(pandaRuntime));
+    if (stringify.CheckException()) {
+        return "";
+    }
+    auto valueStr = panda::Local<panda::StringRef>(stringify);
+    if (valueStr.CheckException()) {
+        return "";
+    }
+    return valueStr->ToString();
 }
 }  // namespace OHOS::Ace::Framework

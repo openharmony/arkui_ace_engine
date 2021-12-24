@@ -28,7 +28,7 @@ public:
     explicit JsGestureFunction(const JSRef<JSFunc>& jsFunction)
         : JsFunction(JSRef<JSObject>(), jsFunction) {}
 
-    ~JsGestureFunction()
+    ~JsGestureFunction() override
     {
         LOGD("Destroy: JsGestureFunction");
     };
@@ -37,6 +37,7 @@ public:
 
 private:
     JSRef<JSObject> CreateGestureEvent(const GestureEvent& info);
+    JSRef<JSObject> CreateFingerInfo(const FingerInfo& fingerInfo);
 };
 
 } // namespace OHOS::Ace::Framework

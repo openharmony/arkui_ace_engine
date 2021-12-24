@@ -1155,7 +1155,7 @@ void JsCardParser::LoadImageInfo()
 
 void JsCardParser::UpdatePageData(const std::string& dataList, const RefPtr<JsAcePage>& page)
 {
-    LOGI("update data is %{private}s", dataList.c_str());
+    LOGI("update data is %{private}s card hap path %{public}s", dataList.c_str(), cardHapPath_.c_str());
     if (!page || dataList.empty()) {
         LOGE("update data is null");
         return;
@@ -1551,7 +1551,9 @@ bool JsCardParser::ParseSpecialVariable(std::string& value)
     } else if (StartWith(value, "$t('") && EndWith(value, "')")) {
         // $t('value') --> value
         value = value.substr(4, value.size() - 6);
-        return GetI18nData(value);
+        auto result = GetI18nData(value);
+        LOGI("Get i18n data is %{public}s, card hap path %{public}s", value.c_str(), cardHapPath_.c_str());
+        return result;
     } else if (StartWith(value, "$tc(") && EndWith(value, ")")) {
         GetPlurals(value);
         return true;

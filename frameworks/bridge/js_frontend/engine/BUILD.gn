@@ -31,9 +31,9 @@ template("js_engine") {
     }
 
     # if support napi
-    if (platform != "windows" && platform != "mac") {
-      sources = [ "common/js_engine.cpp" ]
-    }
+    sources = [ "common/js_engine.cpp" ]
+
+    deps += [ "$ace_napi:ace_napi" ]
 
     if (defined(config.use_build_in_js_engine) &&
         config.use_build_in_js_engine) {

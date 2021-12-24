@@ -17,23 +17,28 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_INFO_H
 
 #include <functional>
+#include <list>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
-#include "base/image/pixel_map.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/point.h"
+#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/event_callback.h"
 #include "base/utils/macros.h"
 #include "base/utils/type_definition.h"
-#include "base/utils/event_callback.h"
+#include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
 
 namespace {
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
 constexpr double DEFAULT_PAN_DISTANCE = 5.0;
+constexpr double DEFAULT_SLIDE_DISTANCE = DEFAULT_PAN_DISTANCE;
+constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
+constexpr double DEFAULT_SLIDE_SPEED = 300.0;
 } // namespace
 
 class GestureRecognizer;
@@ -181,6 +186,21 @@ private:
     std::unordered_map<typename OnPanDistanceFunc::IdType, OnPanDistanceFunc> onPanDistanceIds_;
 };
 
+struct SwipeDirection final {
+    static constexpr uint32_t NONE = 0;
+    static constexpr uint32_t HORIZONTAL = 1;
+    static constexpr uint32_t VERTICAL = 2;
+    static constexpr uint32_t ALL = 3;
+
+    uint32_t type = ALL;
+};
+using OnSwipeFingersFunc = EventCallback<void(int32_t fingers)>;
+using SwipeFingersFuncType = OnSwipeFingersFunc::FunctionType;
+using OnSwipeDirectionFunc = EventCallback<void(const SwipeDirection& direction)>;
+using SwipeDirectionFuncType = OnSwipeDirectionFunc::FunctionType;
+using OnSwipeSpeedFunc = EventCallback<void(double speed)>;
+using SwipeSpeedFuncType = OnSwipeSpeedFunc::FunctionType;
+
 class PasteData : public AceType {
     DECLARE_ACE_TYPE(PasteData, AceType);
 
@@ -264,9 +284,49 @@ private:
     RefPtr<PixelMap> pixelMap_;
 };
 
-class GestureEvent {
+struct FingerInfo {
+    int32_t fingerId_ = -1;
+    // global position at which the touch point contacts the screen.
+    Offset globalLocation_;
+    // Different from global location, The local location refers to the location of the contact point relative to the
+    // current node which has the recognizer.
+    Offset localLocation_;
+};
+
+class ItemDragInfo : public BaseEventInfo, public AceType {
+    DECLARE_ACE_TYPE(ItemDragInfo, BaseEventInfo, AceType);
 public:
-    GestureEvent() {}
+    ItemDragInfo() : BaseEventInfo("itemDrag") {}
+    ~ItemDragInfo() = default;
+
+    double GetX() const
+    {
+        return x_;
+    }
+
+    double GetY() const
+    {
+        return y_;
+    }
+
+    void SetX(double x)
+    {
+        x_ = x;
+    }
+
+    void SetY(double y)
+    {
+        y_ = y;
+    }
+
+private:
+    double x_ = 0.0;
+    double y_ = 0.0;
+};
+
+class GestureEvent : public BaseEventInfo {
+public:
+    GestureEvent() : BaseEventInfo("gesture") {}
     ~GestureEvent() = default;
 
     void SetRepeat(bool repeat)
@@ -319,17 +379,6 @@ public:
         return angle_;
     }
 
-    GestureEvent& SetTimeStamp(const TimeStamp& timeStamp)
-    {
-        timeStamp_ = timeStamp;
-        return *this;
-    }
-
-    const TimeStamp& GetTimeStamp() const
-    {
-        return timeStamp_;
-    }
-
     GestureEvent& SetGlobalPoint(const Point& globalPoint)
     {
         globalPoint_ = globalPoint;
@@ -372,13 +421,33 @@ public:
         return *this;
     }
 
+    const std::list<FingerInfo>& GetFingerList() const
+    {
+        return fingerList_;
+    }
+
+    void SetFingerList(const std::list<FingerInfo>& fingerList)
+    {
+        fingerList_ = fingerList;
+    }
+
+    void SetSpeed(double speed)
+    {
+        speed_ = speed;
+    }
+
+    double GetSpeed() const
+    {
+        return speed_;
+    }
+
 private:
     bool repeat_ = false;
     double offsetX_ = 0.0;
     double offsetY_ = 0.0;
     double scale_ = 1.0;
     double angle_ = 0.0;
-    TimeStamp timeStamp_;
+    double speed_ = 0.0;
     Point globalPoint_;
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;
@@ -386,9 +455,10 @@ private:
     // current node which has the recognizer.
     Offset localLocation_;
     Offset pinchCenter_;
+    std::list<FingerInfo> fingerList_;
 };
 
-using GestureEventFunc = std::function<void(const GestureEvent& info)>;
+using GestureEventFunc = std::function<void(GestureEvent& info)>;
 using GestureEventNoParameter = std::function<void()>;
 
 class ACE_EXPORT Gesture : public virtual AceType {
@@ -399,19 +469,19 @@ public:
     explicit Gesture(int32_t fingers) : fingers_(fingers) {};
     ~Gesture() override = default;
 
-    void SetOnActionId(const GestureEventFunc&& onActionId)
+    void SetOnActionId(const GestureEventFunc& onActionId)
     {
         onActionId_ = std::make_unique<GestureEventFunc>(onActionId);
     }
-    void SetOnActionStartId(const GestureEventFunc&& onActionStartId)
+    void SetOnActionStartId(const GestureEventFunc& onActionStartId)
     {
         onActionStartId_ = std::make_unique<GestureEventFunc>(onActionStartId);
     }
-    void SetOnActionUpdateId(const GestureEventFunc&& onActionUpdateId)
+    void SetOnActionUpdateId(const GestureEventFunc& onActionUpdateId)
     {
         onActionUpdateId_ = std::make_unique<GestureEventFunc>(onActionUpdateId);
     }
-    void SetOnActionEndId(const GestureEventFunc&& onActionEndId)
+    void SetOnActionEndId(const GestureEventFunc& onActionEndId)
     {
         onActionEndId_ = std::make_unique<GestureEventFunc>(onActionEndId);
     }

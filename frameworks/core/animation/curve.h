@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
+class NativeCurveHelper;
 
 constexpr double SQUARE = 2.0;
 
@@ -156,6 +157,23 @@ public:
 private:
     int32_t steps_;
     const StepsCurvePosition position_;
+};
+
+class CustomCurve final : public Curve {
+    DECLARE_ACE_TYPE(CustomCurve, Curve)
+public:
+    explicit CustomCurve(const std::function<float(float)>& func) : interpolateFunc_(func) {}
+    ~CustomCurve() override = default;
+    float MoveInternal(float time) override
+    {
+        float value = interpolateFunc_(time);
+        return std::clamp(value, 0.f, 1.f);
+    }
+
+private:
+    std::function<float(float)> interpolateFunc_;
+
+    friend class NativeCurveHelper;
 };
 
 } // namespace OHOS::Ace

@@ -174,7 +174,7 @@ private:
     Rect clipRect_;
     Color handleColor_;
     Color handleColorInner_;
-    std::optional<Color> imageFill_ = std::nullopt;
+    std::optional<Color> imageFill_;
     Dimension handleDiameter_;
     Dimension handleDiameterInner_;
     Dimension menuSpacingWithText_;

@@ -19,11 +19,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderSvgFeColorMatrix::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSvgFeColorMatrix>();
-}
-
 void FlutterRenderSvgFeColorMatrix::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const
 {
 #ifdef USE_SYSTEM_SKIA

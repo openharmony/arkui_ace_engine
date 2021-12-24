@@ -17,11 +17,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderPickerColumn::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderPickerColumn>();
-}
-
 RenderLayer FlutterRenderPickerColumn::GetRenderLayer()
 {
     if (!layer_) {

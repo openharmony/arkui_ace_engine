@@ -17,6 +17,8 @@ build_component("text_span") {
   sources = [
     "flutter_render_text_span.cpp",
     "render_text_span.cpp",
+    "render_text_span_creator.cpp",
     "text_span_component.cpp",
   ]
+  rosen_sources = [ "rosen_render_text_span.cpp" ]
 }

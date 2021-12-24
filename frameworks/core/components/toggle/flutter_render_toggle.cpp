@@ -20,11 +20,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderToggle::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderToggle>();
-}
-
 RenderLayer FlutterRenderToggle::GetRenderLayer()
 {
     if (!transformLayer_) {

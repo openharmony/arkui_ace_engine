@@ -31,6 +31,8 @@ enum class ProgressType {
     GAUGE = 5,
     ARC = 6,
     MOON = 7,
+    BUBBLE = 8,
+    CAPSULE = 9,
 };
 
 class ACE_EXPORT ProgressComponent : public RenderComponent {

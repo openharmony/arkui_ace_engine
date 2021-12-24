@@ -26,26 +26,20 @@ constexpr Dimension DEFAULT_SMALL_TEXT_FONT_SIZE = 10.0_fp;
 constexpr Dimension DEFAULT_SMALL_IMAGE_WIDTH = 24.0_vp;
 constexpr Dimension DEFAULT_SMALL_IMAGE_HEIGHT = 26.0_vp;
 constexpr Dimension DEFAULT_SINGLE_TEXT_FONT_SIZE = 16.0_fp;
-constexpr Dimension DEFAULT_SINGLE_IMAGE_SIZE = 32.0_vp;
 constexpr char DEFAULT_TAB_BAR_NAME[] = "TabBar";
 
 } // namespace
 
 void JSTabContent::Create()
 {
-    auto component = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (component) {
-        auto tabBar = component->GetTabBarChild();
+    auto tabsComponent = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (tabsComponent) {
+        auto tabBar = tabsComponent->GetTabBarChild();
         std::list<RefPtr<Component>> components;
-        auto tabContentItemComponent =
-            AceType::MakeRefPtr<TabContentItemComponent>(components);
+        auto tabContentItemComponent = AceType::MakeRefPtr<TabContentItemComponent>(components);
         tabContentItemComponent->SetCrossAxisSize(CrossAxisSize::MAX);
-        tabContentItemComponent->SetTabsComponent(AceType::WeakClaim(AceType::RawPtr(component)));
-        auto text = AceType::MakeRefPtr<TextComponent>(DEFAULT_TAB_BAR_NAME);
-        auto textStyle = text->GetTextStyle();
-        textStyle.SetFontSize(DEFAULT_SINGLE_TEXT_FONT_SIZE);
-        text->SetTextStyle(textStyle);
-        tabBar->AppendChild(text);
+        tabContentItemComponent->SetTabsComponent(AceType::WeakClaim(AceType::RawPtr(tabsComponent)));
+        tabBar->AppendChild(CreateTabBarLabelComponent(tabBar, std::string(DEFAULT_TAB_BAR_NAME)));
         ViewStackProcessor::GetInstance()->Push(tabContentItemComponent);
     }
 }
@@ -57,64 +51,93 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     if (!tabContentItemComponent) {
         return;
     }
-    auto tabs = tabContentItemComponent->GetTabsComponent();
-    ProcessTabBarData(tabs, tabContentItemComponent, info);
-}
-
-void JSTabContent::ProcessTabBarData(const WeakPtr<TabsComponent>& weakTabs,
-    const RefPtr<TabContentItemComponent>& tabContentItem, const JSCallbackInfo& info)
-{
-    auto tabs = weakTabs.Upgrade();
+    auto weakTabs = tabContentItemComponent->GetTabsComponent();
+    RefPtr<TabsComponent> tabs = weakTabs.Upgrade();
     if (!tabs) {
+        LOGE("can not get Tabs parent component error.");
         return;
     }
-    auto tabBar = tabs->GetTabBarChild();
+    RefPtr<TabBarComponent> tabBar = tabs->GetTabBarChild();
     if (!tabBar) {
+        LOGE("can not get TabBar component error.");
         return;
     }
-    auto text = AceType::DynamicCast<TextComponent>(tabBar->GetChildren().back());
-    if (!text) {
-        return;
-    }
+    RefPtr<Component> tabBarChild = nullptr;
     std::string infoStr;
     if (ParseJsString(info[0], infoStr)) {
-        text->SetData(infoStr.empty() ? DEFAULT_TAB_BAR_NAME : infoStr);
-        tabContentItem->SetBarText(text->GetData());
-    } else if (info[0]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> iconVal = obj->GetProperty("icon");
-        JSRef<JSVal> textVal = obj->GetProperty("text");
-        std::string iconUri;
-        if (!ParseJsMedia(iconVal, iconUri)) {
-            iconUri = "";
-        }
-        std::string textStr;
-        if (!ParseJsString(textVal, textStr)) {
-            textStr = "";
-        }
-        tabContentItem->SetBarIcon(iconUri);
-        tabContentItem->SetBarText(textStr.empty() ? DEFAULT_TAB_BAR_NAME : textStr);
-        if (iconUri.empty()) {
-            text->SetData(textStr.empty() ? DEFAULT_TAB_BAR_NAME : textStr);
-            return;
-        }
-        if (textStr.empty()) {
-            tabBar->RemoveChildDirectly(text);
-            auto box = AceType::MakeRefPtr<BoxComponent>();
-            box->SetChild(AceType::MakeRefPtr<ImageComponent>(iconUri));
-            box->SetWidth(DEFAULT_SINGLE_IMAGE_SIZE);
-            box->SetHeight(DEFAULT_SINGLE_IMAGE_SIZE);
-            tabBar->AppendChild(box);
-            return;
-        }
-        CombineImageAndTextLayout(tabBar, text, iconUri, textStr);
+        std::string textVal = infoStr.empty() ? DEFAULT_TAB_BAR_NAME : infoStr;
+        auto text = AceType::MakeRefPtr<TextComponent>(textVal);
+        auto textStyle = text->GetTextStyle();
+        textStyle.SetFontSize(DEFAULT_SINGLE_TEXT_FONT_SIZE);
+        text->SetTextStyle(textStyle);
+        tabContentItemComponent->SetBarText(textVal);
+        auto defaultTabChild = tabBar->GetChildren().back();
+        tabBar->RemoveChildDirectly(defaultTabChild);
+        tabBar->AppendChild(text);
+        return;
     }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> builderFuncParam = paramObject->GetProperty("builder");
+    JSRef<JSVal> textParam = paramObject->GetProperty("text");
+    JSRef<JSVal> iconParam = paramObject->GetProperty("icon");
+    if (builderFuncParam->IsFunction()) {
+        tabBarChild = ProcessTabBarBuilderFunction(tabBar, builderFuncParam);
+    } else if ((!textParam->IsEmpty()) && (!iconParam->IsEmpty())) {
+        tabBarChild = ProcessTabBarTextIconPair(tabBar, textParam, iconParam);
+    } else if (textParam->IsEmpty() && (!iconParam->IsEmpty())) {
+        tabBarChild = ProcessTabBarLabel(tabBar, textParam);
+    } else {
+        LOGE("invalid parameters: expecting either builder func, text & icon pair, or label");
+        return;
+    }
+    auto defaultTabChild = tabBar->GetChildren().back();
+    ACE_DCHECK(tabBarChild != nullptr);
+    ACE_DCHECK(defaultTabChild != nullptr);
+    tabBar->RemoveChildDirectly(defaultTabChild);
+    tabBar->AppendChild(tabBarChild);
 }
 
-void JSTabContent::CombineImageAndTextLayout(const RefPtr<TabBarComponent>& tabBar, const RefPtr<TextComponent>& text,
-    const std::string& iconUri, const std::string& textStr)
+RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(
+    RefPtr<TabBarComponent>& tabBar, const JSRef<JSObject> builderFunc)
 {
-    tabBar->RemoveChildDirectly(text);
+    ScopedViewStackProcessor builderViewStackProcessor;
+    JsFunction jsBuilderFunc(builderFunc);
+    jsBuilderFunc.Execute();
+    RefPtr<Component> builderGeneratedRootComponent = ViewStackProcessor::GetInstance()->Finish();
+    return builderGeneratedRootComponent;
+}
+
+RefPtr<TextComponent> JSTabContent::CreateTabBarLabelComponent(
+    RefPtr<TabBarComponent>& tabBar, const std::string& labelStr)
+{
+    auto text = AceType::MakeRefPtr<TextComponent>(labelStr);
+    auto textStyle = text->GetTextStyle();
+    textStyle.SetFontSize(DEFAULT_SINGLE_TEXT_FONT_SIZE);
+    text->SetTextStyle(textStyle);
+    return text;
+}
+
+RefPtr<TextComponent> JSTabContent::ProcessTabBarLabel(RefPtr<TabBarComponent>& tabBar, JSRef<JSVal> labelVal)
+{
+    std::string textStr;
+    if (!ParseJsString(labelVal, textStr)) {
+        textStr = DEFAULT_TAB_BAR_NAME;
+    }
+    LOGD("text: %s", textStr.c_str());
+    return CreateTabBarLabelComponent(tabBar, textStr);
+}
+
+RefPtr<Component> JSTabContent::ProcessTabBarTextIconPair(
+    RefPtr<TabBarComponent>& tabBar, JSRef<JSVal> textVal, JSRef<JSVal> iconVal)
+{
+    std::string iconUri;
+    if (!ParseJsMedia(iconVal, iconUri)) {
+        return ProcessTabBarLabel(tabBar, textVal);
+    }
+    std::string textStr;
+    if (!ParseJsString(textVal, textStr)) {
+        textStr = DEFAULT_TAB_BAR_NAME;
+    }
     auto imageComponent = AceType::MakeRefPtr<ImageComponent>(iconUri);
     auto box = AceType::MakeRefPtr<BoxComponent>();
     auto padding = AceType::MakeRefPtr<PaddingComponent>();
@@ -130,10 +153,9 @@ void JSTabContent::CombineImageAndTextLayout(const RefPtr<TabBarComponent>& tabB
     std::list<RefPtr<Component>> children;
     children.emplace_back(box);
     children.emplace_back(textComponent);
-    auto columnComponent = AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER,
-        children);
+    auto columnComponent = AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, children);
     columnComponent->SetMainAxisSize(MainAxisSize::MIN);
-    tabBar->AppendChild(columnComponent);
+    return columnComponent;
 }
 
 void JSTabContent::JSBind(BindingTarget globalObj)

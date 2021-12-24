@@ -304,9 +304,10 @@ void RenderRating::UpdateRenderImage(const RefPtr<ImageComponent>& imageComponen
         // Handle situation of resource changes from internal to outer.
         imageComponent->SetColor(Color::TRANSPARENT);
     } else if (sourceErrorColor_ != Color::TRANSPARENT) {
-        imageComponent->SetColor(sourceErrorColor_); // use [sourceErrorColor_] for all stars to show source error
+        imageComponent->SetImageFill(sourceErrorColor_); // use [sourceErrorColor_] for all stars to show source error
     } else {
-        imageComponent->SetColor(Color(svgColor)); // this color only takes effects when using internal svg resources
+        // this color only takes effects when using internal svg resources
+        imageComponent->SetImageFill(std::make_optional<Color>(svgColor));
     }
     imageComponent->SetSrc(imageSrc);
     imageComponent->SetFitMaxSize(true);
@@ -384,9 +385,6 @@ void RenderRating::HandleTouchEvent(const Offset& updatePoint)
     if (NearEqual(newScore, drawScore_)) {
         return;
     }
-    if (onChangeRating) {
-        onChangeRating(static_cast<double>(drawScore_));
-    }
     drawScore_ = newScore;
     ConstrainScore(drawScore_, stepSize_, starNum_);
     UpdateRatingBar();
@@ -421,6 +419,9 @@ void RenderRating::FireChangeEvent()
     if (onScoreChange_) {
         std::string param = std::string(R"("change",{"rating":)").append(std::to_string(drawScore_).append("}"));
         onScoreChange_(param);
+    }
+    if (onChangeRating) {
+        onChangeRating(static_cast<double>(drawScore_));
     }
 }
 
@@ -529,7 +530,7 @@ bool RenderRating::MouseHoverTest(const Point& parentLocalPoint)
         LOGW("mouseHoverTest failed, singleWidth is zero");
         return false;
     }
-    if (!GetTouchRect().IsInRegion(parentLocalPoint)) {
+    if (!InTouchRectList(parentLocalPoint, GetTouchRectList())) {
         OnMouseHoverExitTest();
         return false;
     }
@@ -544,13 +545,6 @@ bool RenderRating::MouseHoverTest(const Point& parentLocalPoint)
     OnMouseHoverEnterTest();
     context->AddToHoverList(AceType::WeakClaim(this).Upgrade());
     return true;
-}
-
-void RenderRating::UpdateTouchRect()
-{
-    touchRect_.SetSize(GetLayoutSize());
-    touchRect_.SetOffset(GetPosition());
-    ownTouchRect_ = touchRect_;
 }
 
 Offset RenderRating::GetStarOffset(double imageVerticalOffset)

@@ -44,6 +44,7 @@ ohos_unittest("AnimationTest") {
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
 
     # common
+    "$ace_root/frameworks/core/common/ace_application_info.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/event_manager.cpp",
@@ -144,6 +145,7 @@ ohos_unittest("AnimationTest") {
     "$ace_root/frameworks/core/components/dialog_modal/render_dialog_modal.cpp",
     "$ace_root/frameworks/core/components/drag_bar/render_drag_bar.cpp",
     "$ace_root/frameworks/core/components/positioned/render_positioned.cpp",
+    "$ace_root/frameworks/core/components/positioned/render_positioned_creator.cpp",
     "$ace_root/frameworks/core/components/proxy/render_proxy.cpp",
     "$ace_root/frameworks/core/components/refresh/render_refresh.cpp",
     "$ace_root/frameworks/core/components/root/render_root.cpp",
@@ -169,7 +171,6 @@ ohos_unittest("AnimationTest") {
 
     # mock
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
     "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
@@ -182,6 +183,7 @@ ohos_unittest("AnimationTest") {
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
+    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
     "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
   ]
 

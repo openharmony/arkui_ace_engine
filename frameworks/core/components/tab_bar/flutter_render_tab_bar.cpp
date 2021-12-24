@@ -21,11 +21,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderTabBar::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderTabBar>();
-}
-
 RenderLayer FlutterRenderTabBar::GetRenderLayer()
 {
     if (!layer_) {

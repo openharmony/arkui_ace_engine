@@ -99,11 +99,10 @@ void JSStack::SetWidth(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-
-    SetWidth(info[0]);
+    JsStackWidth(info[0], info);
 }
 
-void JSStack::SetWidth(const JSRef<JSVal>& jsValue)
+void JSStack::JsStackWidth(const JSRef<JSVal>& jsValue, const JSCallbackInfo& info)
 {
     Dimension value;
     if (!ConvertFromJSValue(jsValue, value)) {
@@ -116,7 +115,7 @@ void JSStack::SetWidth(const JSRef<JSVal>& jsValue)
     }
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    box->SetWidth(value, option);
+    box->SetWidthForState(value, option, GetState(info, 1));
 
     auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (stack) {
@@ -134,15 +133,14 @@ void JSStack::SetHeight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-
-    SetHeight(info[0]);
+    JsStackHeight(info[0], info);
 }
 
-void JSStack::SetHeight(const JSRef<JSVal>& jsValue)
+void JSStack::JsStackHeight(const JSRef<JSVal>& jsValue, const JSCallbackInfo& info)
 {
     Dimension value;
     if (!ConvertFromJSValue(jsValue, value)) {
-        LOGE("args can not set width");
+        LOGE("args can not set height");
         return;
     }
 
@@ -151,7 +149,7 @@ void JSStack::SetHeight(const JSRef<JSVal>& jsValue)
     }
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    box->SetHeight(value, option);
+    box->SetHeightForState(value, option, GetState(info, 1));
 
     auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (stack) {
@@ -176,8 +174,8 @@ void JSStack::SetSize(const JSCallbackInfo& info)
     }
 
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    SetWidth(sizeObj->GetProperty("width"));
-    SetHeight(sizeObj->GetProperty("height"));
+    JsStackWidth(sizeObj->GetProperty("width"), info);
+    JsStackHeight(sizeObj->GetProperty("height"), info);
 }
 
 void JSStack::JSBind(BindingTarget globalObj)

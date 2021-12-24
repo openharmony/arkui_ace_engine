@@ -17,9 +17,20 @@
 
 namespace OHOS::Ace {
 
-ClipboardProxy::ClipboardProxy() = default;
+ClipboardProxy* ClipboardProxy::inst_ = nullptr;
 
-ClipboardProxy::~ClipboardProxy() = default;
+std::mutex ClipboardProxy::mutex_;
+
+ClipboardProxy* ClipboardProxy::GetInstance()
+{
+    if (inst_ == nullptr) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (inst_ == nullptr) {
+            inst_ = new ClipboardProxy();
+        }
+    }
+    return inst_;
+}
 
 void ClipboardProxy::SetDelegate(std::unique_ptr<ClipboardInterface>&& delegate)
 {

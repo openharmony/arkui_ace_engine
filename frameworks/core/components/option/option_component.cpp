@@ -57,6 +57,11 @@ void OptionComponent::InitTheme(const RefPtr<ThemeManager>& themeManager)
 
 bool OptionComponent::Initialize(const RefPtr<AccessibilityManager>& manager)
 {
+    if (customComponent_) {
+        AppendChild(customComponent_);
+        return true;
+    }
+
     if (!text_ || value_.empty()) {
         LOGW("can not initialize now, text null or value empty.");
         return false;

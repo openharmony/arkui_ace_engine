@@ -29,8 +29,9 @@ const char NULL_STRING[] = "";
 
 const std::unordered_map<std::string, std::function<std::string(const SpanComposedElement&)>> CREATE_JSON_MAP {
     { "content", [](const SpanComposedElement& inspector) { return inspector.GetSpanData(); } },
+    { "fontsize", [](const SpanComposedElement& inspector) { return inspector.GetSpanTextFontSize(); } },
     { "decoration", [](const SpanComposedElement& inspector) { return inspector.GetDeclaration(); } },
-    { "textCase", [](const SpanComposedElement& inspector) { return inspector.GetTextCase(); } },
+    { "textCase", [](const SpanComposedElement& inspector) { return inspector.GetTextCase(); } }
 };
 
 } // namespace
@@ -58,15 +59,11 @@ std::string SpanComposedElement::GetSpanData() const
     return renderTextSpan ? renderTextSpan->GetSpanData() : NULL_STRING;
 }
 
-std::string SpanComposedElement::GetDeclaration() const
+std::string SpanComposedElement::GetSpanTextFontSize() const
 {
     auto renderTextSpan = GetRenderTextSpan();
-    auto textDecoration =
-        renderTextSpan ? renderTextSpan->GetSpanStyle().GetTextDecoration() : TextDecoration::NONE;
-    auto textDecorationColor = renderTextSpan ? renderTextSpan->GetSpanStyle().GetTextDecorationColor() : Color::BLACK;
-    std::string result =
-        ConvertWrapTextDecorationToStirng(textDecoration) + "," + ConvertColorToString(textDecorationColor);
-    return result;
+    auto fontSize = renderTextSpan ? renderTextSpan->GetSpanStyle().GetFontSize() : Dimension();
+    return fontSize.ToString();
 }
 
 std::string SpanComposedElement::GetTextCase() const
@@ -75,6 +72,17 @@ std::string SpanComposedElement::GetTextCase() const
     auto textCase =
         renderTextSpan ? renderTextSpan->GetSpanStyle().GetTextCase() : TextCase::NORMAL;
     return ConvertWrapTextCaseToStirng(textCase);
+}
+
+std::string SpanComposedElement::GetDeclaration() const
+{
+    auto jsonSpanDeclaration = JsonUtil::Create(true);
+    auto renderTextSpan = GetRenderTextSpan();
+    auto textDecoration = renderTextSpan ? renderTextSpan->GetSpanStyle().GetTextDecoration() : TextDecoration::NONE;
+    auto textDecorationColor = renderTextSpan ? renderTextSpan->GetSpanStyle().GetTextDecorationColor() : Color::BLACK;
+    jsonSpanDeclaration->Put("Type", ConvertWrapTextDecorationToStirng(textDecoration).c_str());
+    jsonSpanDeclaration->Put("Color", ConvertColorToString(textDecorationColor).c_str());
+    return jsonSpanDeclaration->ToString();
 }
 
 RefPtr<RenderTextSpan> SpanComposedElement::GetRenderTextSpan() const

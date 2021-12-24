@@ -30,8 +30,33 @@ public:
 
     static RefPtr<RenderNode> Create();
 
+    const Dimension& GetX() const
+    {
+        return x_;
+    }
+
+    const Alignment& GetAlignment() const
+    {
+        return align_;
+    }
+
+    const Dimension& GetY() const
+    {
+        return y_;
+    }
+
+    const std::string GetTextVal() const
+    {
+        return title_;
+    }
+
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
+private:
+    Dimension y_;
+    Alignment align_;
+    Dimension x_;
+    std::string title_;
 };
 
 } // namespace OHOS::Ace

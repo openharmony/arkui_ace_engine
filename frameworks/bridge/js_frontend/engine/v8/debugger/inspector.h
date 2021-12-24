@@ -35,9 +35,13 @@ extern "C" {
 void StartDebug(
     const std::unique_ptr<v8::Platform>& platform,
     const v8::Local<v8::Context>& context,
-    const std::string& componentName);
+    const std::string& componentName,
+    const bool isDebugMode,
+    const int32_t instanceId);
 
 void WaitingForIde();
+
+void StopDebug();
 #ifdef __cplusplus
 #if __cplusplus
 }
@@ -48,7 +52,8 @@ class Inspector {
 public:
     Inspector() = default;
     ~Inspector() {};
-    void InitializeInspector(const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context);
+    void InitializeInspector(const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context,
+        std::string sockName);
     void StartAgent() const;
 
     std::unique_ptr<V8InspectorClient> inspectorClient;

@@ -17,14 +17,17 @@ build_component("text_field") {
   sources = [
     "flutter_render_text_field.cpp",
     "render_text_field.cpp",
+    "render_text_field_creator.cpp",
     "text_field_component.cpp",
     "text_field_controller.cpp",
     "text_field_element.cpp",
   ]
-  if (is_standard_system && current_os != "mac" && current_os != "mingw") {
-    external_deps = [
-      "inputmethod_native:inputmethod_ability",
-      "inputmethod_native:inputmethod_client",
-    ]
-  }
+
+  rosen_sources = [ "rosen_render_text_field.cpp" ]
+
+  #standard_input_sources = [ "on_text_changed_listener_impl.cpp" ]
+  standard_input_deps = [
+    "inputmethod_native:inputmethod_ability",
+    "inputmethod_native:inputmethod_client",
+  ]
 }

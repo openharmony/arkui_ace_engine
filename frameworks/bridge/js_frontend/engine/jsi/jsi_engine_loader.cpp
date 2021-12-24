@@ -18,6 +18,7 @@
 #include "base/utils/macros.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_canvas_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/jsi_xcomponent_bridge.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -36,7 +37,7 @@ RefPtr<BaseCanvasBridge> JsiEngineLoader::CreateCanvasBridge() const
 
 RefPtr<BaseXComponentBridge> JsiEngineLoader::CreateXComponentBridge() const
 {
-    return nullptr;
+    return AceType::MakeRefPtr<JsiXComponentBridge>();
 }
 
 #if defined(BUILT_IN_JS_ENGINE)

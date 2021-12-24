@@ -61,6 +61,8 @@ public:
     void ReplacePage(const std::string& url, const std::string& params);
     std::string GetJSONTree();
     std::string GetDefaultJSONTree();
+    void LoadDocument(const std::string& url, const std::string& componentName);
+    void OperateComponent(const std::string& attrsJson);
 
 private:
     void RunEventLoop();

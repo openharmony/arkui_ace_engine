@@ -17,6 +17,7 @@ build_component("proxy") {
   sources = [
     "flutter_render_item_proxy.cpp",
     "render_item_proxy.cpp",
+    "render_item_proxy_creator.cpp",
     "render_proxy.cpp",
   ]
 }

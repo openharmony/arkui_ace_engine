@@ -25,11 +25,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderSvgFilter::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderSvgFilter>();
-}
-
 void FlutterRenderSvgFilter::Paint(RenderContext& context, const Offset& offset)
 {
     return;

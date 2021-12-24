@@ -29,8 +29,8 @@ public:
         : XComponentResource("texture", context, std::move(onError)) {}
     ~NativeTexture() override;
 
-    void Create(const std::function<void(int64_t)>& onCreate);
-    void CreateTexture(const std::function<void(int64_t)>& onCreate);
+    void Create(const std::function<void(int64_t)>& onCreate, const std::string& idStr);
+    void CreateTexture(const std::function<void(int64_t)>& onCreate, const std::string& idStr);
     void OnSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight,
                 const std::function<void(std::string&)>& callback);
 };

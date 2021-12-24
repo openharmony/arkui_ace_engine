@@ -25,6 +25,7 @@ namespace OHOS::Ace::Framework {
 
 using AssembleJSONTreeCallback = std::function<bool(std::string &jsonTreeStr)>;
 using AssembleDefaultJSONTreeCallback = std::function<bool(std::string &jsonTreeStr)>;
+using OperateComponentCallback = std::function<bool(const std::string &attrsJson)>;
 
 class InspectorClient {
 public:
@@ -35,13 +36,16 @@ public:
     static InspectorClient &GetInstance();
     void RegisterJSONTreeCallback(AssembleJSONTreeCallback &&callback);
     void RegisterDefaultJSONTreeCallback(AssembleDefaultJSONTreeCallback &&callback);
+    void RegisterOperateComponentCallback(OperateComponentCallback &&callback);
     bool AssembleJSONTreeStr(std::string &jsonTreeStr);
     bool AssembleDefaultJSONTreeStr(std::string &jsonTreeStr);
+    bool OperateComponent(const std::string &attrsJson);
 
 private:
     InspectorClient() = default;
     AssembleJSONTreeCallback assembleJSONTreeCallback_;
     AssembleDefaultJSONTreeCallback assembleDefaultJSONTreeCallback_;
+    OperateComponentCallback operateComponentCallback_;
 };
 
 } // namespace OHOS::Ace

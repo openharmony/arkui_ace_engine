@@ -40,7 +40,7 @@ namespace {
 
 const std::u16string ELLIPSIS = u"\u2026";
 constexpr Dimension ADAPT_UNIT = 1.0_fp;
-constexpr int32_t LONGEST_LINE_VERSION = 6;
+constexpr int32_t COMPATIBLE_VERSION = 6;
 
 } // namespace
 
@@ -50,11 +50,6 @@ double FlutterRenderText::GetBaselineDistance(TextBaseline textBaseline)
         return paragraph_->GetIdeographicBaseline() + std::max(NormalizeToPx(textStyle_.GetBaselineOffset()), 0.0);
     }
     return paragraph_->GetAlphabeticBaseline() + std::max(NormalizeToPx(textStyle_.GetBaselineOffset()), 0.0);
-}
-
-RefPtr<RenderNode> RenderText::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderText>();
 }
 
 void FlutterRenderText::Paint(RenderContext& context, const Offset& offset)
@@ -194,14 +189,13 @@ Size FlutterRenderText::Measure()
     return GetSize();
 }
 
-bool FlutterRenderText::IsLongestLineVersion()
+bool FlutterRenderText::IsCompatibleVersion()
 {
-    // Whether use longest line as width of text.
     auto context = context_.Upgrade();
     if (!context) {
         return false;
     }
-    return context->GetMinPlatformVersion() >= LONGEST_LINE_VERSION;
+    return context->GetMinPlatformVersion() >= COMPATIBLE_VERSION;
 }
 
 bool FlutterRenderText::CheckMeasureFlag()
@@ -234,7 +228,7 @@ bool FlutterRenderText::CheckMeasureFlag()
         if (NearEqual(paragraphMaxWidth, lastLayoutMaxWidth_) && NearEqual(paragraphMinWidth, lastLayoutMinWidth_)) {
             // Width constrains not changed.
             constrainsAffect = false;
-        } else if (!IsLongestLineVersion() && GreatOrEqual(layoutWidth, paragraphMinWidth) &&
+        } else if (!IsCompatibleVersion() && GreatOrEqual(layoutWidth, paragraphMinWidth) &&
                    LessOrEqual(layoutWidth, paragraphMaxWidth) && (lastLayoutMaxWidth_ - layoutWidth > 1.0)) {
             // Constrains changed but has no effect. For example, text width is 100 when constrains [0, 200].
             // When constrains changed to [100, 300], there's no need to do layout.
@@ -463,7 +457,7 @@ bool FlutterRenderText::UpdateParagraph()
     style.max_lines = textStyle_.GetMaxLines();
     style.locale = Localization::GetInstance()->GetFontLocale();
     if (textStyle_.GetTextOverflow() == TextOverflow::ELLIPSIS) {
-        if (!IsLongestLineVersion() && textStyle_.GetMaxLines() == UINT32_MAX) {
+        if (!IsCompatibleVersion() && textStyle_.GetMaxLines() == UINT32_MAX && !text_->GetAutoMaxLines()) {
             style.max_lines = 1;
         }
         style.ellipsis = ELLIPSIS;
@@ -509,7 +503,7 @@ double FlutterRenderText::GetTextWidth()
     if (!paragraph_) {
         return 0.0;
     }
-    if (!IsLongestLineVersion()) {
+    if (!IsCompatibleVersion()) {
         return paragraph_->GetMaxIntrinsicWidth();
     }
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
@@ -552,7 +546,8 @@ void FlutterRenderText::ChangeDirectionIfNeeded(const std::string& data)
         } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT) {
             textDirection_ = TextDirection::RTL;
             break;
-        } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC) {
+        } else if (!IsCompatibleVersion() &&
+                   u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC) {
             textDirection_ = TextDirection::RTL;
             break;
         }

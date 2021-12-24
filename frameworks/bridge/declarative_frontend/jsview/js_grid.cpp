@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_v2/grid/render_grid_scroll.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -42,6 +43,14 @@ void JSGrid::Create(const JSCallbackInfo& info)
             auto positionController = AceType::MakeRefPtr<V2::GridPositionController>();
             jsScroller->SetController(positionController);
             gridComponent->SetController(positionController);
+
+            // Init scroll bar proxy.
+            auto proxy = jsScroller->GetScrollBarProxy();
+            if (!proxy) {
+                proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+                jsScroller->SetScrollBarProxy(proxy);
+            }
+            gridComponent->SetScrollBarProxy(proxy);
         }
     }
     ViewStackProcessor::GetInstance()->Push(gridComponent);
@@ -143,6 +152,15 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("scrollBarColor", &JSGrid::SetScrollBarColor, opt);
     JSClass<JSGrid>::StaticMethod("onScrollIndex", &JSGrid::JsOnScrollIndex);
     JSClass<JSGrid>::StaticMethod("cachedCount", &JSGrid::SetCachedCount);
+    JSClass<JSGrid>::StaticMethod("editMode", &JSGrid::SetEditMode, opt);
+    JSClass<JSGrid>::StaticMethod("maxCount", &JSGrid::SetMaxCount, opt);
+    JSClass<JSGrid>::StaticMethod("minCount", &JSGrid::SetMinCount, opt);
+    JSClass<JSGrid>::StaticMethod("cellLength", &JSGrid::CellLength, opt);
+    JSClass<JSGrid>::StaticMethod("onItemDragEnter", &JSGrid::JsOnGridDragEnter);
+    JSClass<JSGrid>::StaticMethod("onItemDragMove", &JSGrid::JsOnGridDragMove);
+    JSClass<JSGrid>::StaticMethod("onItemDragLeave", &JSGrid::JsOnGridDragLeave);
+    JSClass<JSGrid>::StaticMethod("onItemDragStart", &JSGrid::JsOnGridDragStart);
+    JSClass<JSGrid>::StaticMethod("onItemDrop", &JSGrid::JsOnGridDrop);
     JSClass<JSGrid>::Inherit<JSContainerBase>();
     JSClass<JSGrid>::Inherit<JSViewAbstract>();
     JSClass<JSGrid>::Bind<>(globalObj);
@@ -184,6 +202,152 @@ void JSGrid::SetCachedCount(int32_t cachedCount)
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid) {
         grid->SetCachedCount(cachedCount);
+    }
+}
+
+void JSGrid::SetEditMode(bool editMode)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid) {
+        grid->SetEditMode(editMode);
+    }
+}
+
+void JSGrid::SetMaxCount(int32_t maxCount)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid) {
+        grid->SetMaxCount(maxCount);
+    }
+}
+
+void JSGrid::SetMinCount(int32_t minCount)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid) {
+        grid->SetMinCount(minCount);
+    }
+}
+
+void JSGrid::CellLength(int32_t cellLength)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid) {
+        grid->SetCellLength(cellLength);
+    }
+}
+
+void JSGrid::JsOnGridDragEnter(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        RefPtr<JsGridDragFunction> jsGridDragFunc =
+            AceType::MakeRefPtr<JsGridDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsGridDragFunc)](
+                                 const RefPtr<ItemDragInfo>& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->ExecuteDragEnter(info);
+        };
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+        if (grid) {
+            grid->SetOnGridDragEnterId(onDragEnterId);
+        }
+    }
+}
+
+void JSGrid::JsOnGridDragMove(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        RefPtr<JsGridDragFunction> jsGridDragFunc =
+            AceType::MakeRefPtr<JsGridDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsGridDragFunc)](
+                                const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->ExecuteDragMove(info, itemIndex, insertIndex);
+        };
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+        if (grid) {
+            grid->SetOnGridDragMoveId(onDragMoveId);
+        }
+    }
+}
+
+void JSGrid::JsOnGridDragLeave(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        RefPtr<JsGridDragFunction> jsGridDragFunc =
+            AceType::MakeRefPtr<JsGridDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsGridDragFunc)](
+                                 const RefPtr<ItemDragInfo>& info, int32_t itemIndex) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->ExecuteDragLeave(info, itemIndex);
+        };
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+        if (grid) {
+            grid->SetOnGridDragLeaveId(onDragLeaveId);
+        }
+    }
+}
+
+void JSGrid::JsOnGridDragStart(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        RefPtr<JsGridDragFunction> jsGridDragFunc =
+            AceType::MakeRefPtr<JsGridDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsGridDragFunc)](
+                                 const RefPtr<ItemDragInfo>& info, int32_t itemIndex) -> RefPtr<Component> {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+            auto ret = func->ExecuteDragStart(info, itemIndex);
+            if (!ret->IsObject()) {
+                LOGE("builder param is not an object.");
+                return nullptr;
+            }
+
+            auto builderObj = JSRef<JSObject>::Cast(ret);
+            auto builder = builderObj->GetProperty("builder");
+            if (!builder->IsFunction()) {
+                LOGE("builder param is not a function.");
+                return nullptr;
+            }
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(builder));
+            if (!builderFunc) {
+                LOGE("builderfunc is null.");
+                return nullptr;
+            }
+            ScopedViewStackProcessor builderViewStackProcessor;
+            builderFunc->Execute();
+            RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
+            return customComponent;
+        };
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+        if (grid) {
+            grid->SetOnGridDragStartId(onDragStartId);
+        }
+    }
+}
+
+void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        RefPtr<JsGridDragFunction> jsGridDragFunc =
+            AceType::MakeRefPtr<JsGridDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsGridDragFunc)](
+                            const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->ExecuteDrop(info, itemIndex, insertIndex, isSuccess);
+        };
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+        if (grid) {
+            grid->SetOnGridDropId(onDropId);
+        }
     }
 }
 

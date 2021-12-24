@@ -53,7 +53,6 @@ objcopy_default = "${default_aosp_source_dir}/prebuilts/gcc/linux-x86/aarch64/aa
 objcopy_mingw = "${default_aosp_source_dir}/prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8/x86_64-w64-mingw32/bin/objcopy"
 objcopy_x86_64 = "${default_aosp_source_dir}/prebuilts/gcc/linux-x86/x86/x86_64-linux-android-4.9/x86_64-linux-android/bin/objcopy"
 mac_buildtool = "//build/toolchain/mac:clang_x64"
-aosp_arm64_buildtool = "//build/toolchain/aosp:aosp_clang_arm64"
 objcopy_clang = "$clang_base_path/bin/llvm-objcopy"
 
 if (is_standard_system) {
@@ -66,12 +65,10 @@ if (is_standard_system) {
 if (is_standard_system) {
   ace_engine_part = "ace_engine_standard"
   hilog_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-  worker_deps = [ "jsapi_worker:worker_init" ]
   ark_runtime_path = "//ark/runtime_core"
 } else {
   ace_engine_part = "ace_engine_full"
   hilog_deps = [ "hilog:libhilog" ]
-  worker_deps = [ "jsapi_worker:worker_init" ]
   ark_runtime_path = "//ark/runtime"
 }
 

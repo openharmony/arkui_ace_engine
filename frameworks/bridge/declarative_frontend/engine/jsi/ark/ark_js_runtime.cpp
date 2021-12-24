@@ -18,16 +18,11 @@
 #include <memory>
 #include <sys/stat.h>
 
+#include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_value.h"
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 namespace OHOS::Ace::Framework {
-// NOLINTNEXTLINE(readability-identifier-naming)
-extern "C" void *JSI_GetRuntime()
-{
-    return ArkJSRuntime::GetInstance().get();
-}
-
 static constexpr auto PANDA_MAIN_FUNCTION = "_GLOBAL::func_main_0";
 
 Local<JSValueRef> FunctionCallback(EcmaVM *vm, Local<JSValueRef> thisValue,
@@ -57,10 +52,20 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
     return vm_ != nullptr;
 }
 
+bool ArkJSRuntime::InitializeFromExistVM(EcmaVM* vm)
+{
+    vm_ = vm;
+    usingExistVM_ = true;
+    LOGI("InitializeFromExistVM %{public}p", vm);
+    return vm_ != nullptr;
+}
+
 void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
-        JSNApi::DestroyJSVM(vm_);
+        if (!usingExistVM_) {
+            JSNApi::DestroyJSVM(vm_);
+        }
         vm_ = nullptr;
     }
     for (auto data : dataList_) {
@@ -92,15 +97,16 @@ bool ArkJSRuntime::EvaluateJsCode(const uint8_t *buffer, int32_t size)
 bool ArkJSRuntime::ExecuteJsBin(const std::string &fileName)
 {
     JSExecutionScope executionScope(vm_);
-    if (debuggerOrder_ == 1 && !libPath_.empty()) {
+    static bool debugFlag = true;
+    if (debugFlag && !libPath_.empty()) {
         JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_);
+        debugFlag = false;
     }
     LocalScope scope(vm_);
     Local<StringRef> file = StringRef::NewFromUtf8(vm_, fileName.c_str());
     Local<StringRef> entryPoint = StringRef::NewFromUtf8(vm_, PANDA_MAIN_FUNCTION);
     bool ret = JSNApi::Execute(vm_, file, entryPoint);
     HandleUncaughtException();
-    debuggerOrder_++;
     return ret;
 }
 

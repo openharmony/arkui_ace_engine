@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::V2 {
 
-class SwiperElement : public RenderElement, public FocusGroup, private V2::ElementProxyHost {
+class SwiperElement : public RenderElement, public FocusGroup, private V2::ElementProxyHost, public FlushEvent {
     DECLARE_ACE_TYPE(SwiperElement, RenderElement, FocusGroup);
 
 public:
@@ -31,6 +31,7 @@ public:
 
     bool BuildChildByIndex(int32_t index);
     void DeleteChildByIndex(int32_t index);
+    void OnPostFlush() override;
 
 private:
     RefPtr<RenderNode> CreateRenderNode() override;

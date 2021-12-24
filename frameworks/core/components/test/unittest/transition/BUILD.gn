@@ -66,6 +66,7 @@ common_module_files = [
   "$ace_root/frameworks/base/log/dump_log.cpp",
 
   # common
+  "$ace_root/frameworks/core/common/ace_application_info.cpp",
   "$ace_root/frameworks/core/common/ace_engine.cpp",
   "$ace_root/frameworks/core/common/container.cpp",
   "$ace_root/frameworks/core/common/thread_checker.cpp",
@@ -154,6 +155,7 @@ common_module_files = [
   "$ace_root/frameworks/core/components/focus_animation/render_focus_animation.cpp",
   "$ace_root/frameworks/core/components/drop_filter/render_drop_filter.cpp",
   "$ace_root/frameworks/core/components/positioned/render_positioned.cpp",
+  "$ace_root/frameworks/core/components/positioned/render_positioned_creator.cpp",
   "$ace_root/frameworks/core/components/proxy/render_proxy.cpp",
   "$ace_root/frameworks/core/components/refresh/render_refresh.cpp",
   "$ace_root/frameworks/core/components/scroll/render_scroll.cpp",
@@ -252,7 +254,7 @@ ohos_unittest("TransitionElementTest") {
   sources += [
     "$ace_root/adapter/ohos/osal/ace_trace.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
+    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
   ]
   if (!is_standard_system) {
     subsystem_name = "ace"
@@ -317,7 +319,7 @@ ohos_unittest("SharedTransitionElementTest") {
   sources += [
     "$ace_root/adapter/ohos/osal/ace_trace.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
+    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
   ]
   subsystem_name = "ace"
   part_name = "ace_engine_full"
@@ -379,7 +381,7 @@ ohos_unittest("TransitionPropertyElementTest") {
   sources += [
     "$ace_root/adapter/ohos/osal/ace_trace.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/adapter/ohos/osal/resource_adapter_impl.cpp",
+    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
   ]
   subsystem_name = "ace"
   part_name = "ace_engine_full"

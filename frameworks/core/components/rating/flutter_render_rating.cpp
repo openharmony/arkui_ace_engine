@@ -26,11 +26,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderRating::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderRating>();
-}
-
 void FlutterRenderRating::Paint(RenderContext& context, const Offset& offset)
 {
     auto canvas = ScopedCanvas::Create(context);

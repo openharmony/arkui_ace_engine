@@ -56,6 +56,7 @@ const char UNICODE_SETTING_TAG[] = "unicodeSetting";
 const char LOCALE_DIR_LTR[] = "ltr";
 const char LOCALE_DIR_RTL[] = "rtl";
 const char LOCALE_KEY[] = "locale";
+const char COMPONENT_PREVIEW[] = "_preview_";
 } // namespace
 
 std::once_flag AceContainer::onceFlag_;
@@ -70,6 +71,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type)
     if (type != FrontendType::DECLARATIVE_JS) {
         flutterTaskExecutor->InitJsThread();
     }
+    SystemProperties::SetDeclarativeFrontend(type_ == FrontendType::DECLARATIVE_JS);
     taskExecutor_ = flutterTaskExecutor;
     taskExecutor_->PostTask([instanceId]() { Container::InitForThread(instanceId); }, TaskExecutor::TaskType::JS);
     taskExecutor_->PostTask([instanceId]() { Container::InitForThread(instanceId); }, TaskExecutor::TaskType::UI);
@@ -129,13 +131,15 @@ void AceContainer::InitializeFrontend()
     if (type_ == FrontendType::JS) {
         frontend_ = Frontend::Create();
         auto jsFrontend = AceType::DynamicCast<JsFrontend>(frontend_);
-        jsFrontend->SetJsEngine(Framework::JsEngineLoader::Get().CreateJsEngine(GetInstanceId()));
+        jsEngine_ = Framework::JsEngineLoader::Get().CreateJsEngine(GetInstanceId());
+        jsFrontend->SetJsEngine(jsEngine_);
         jsFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
         jsFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
     } else if (type_ == FrontendType::DECLARATIVE_JS) {
         frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-        declarativeFrontend->SetJsEngine(Framework::JsEngineLoader::GetDeclarative().CreateJsEngine(instanceId_));
+        jsEngine_ = Framework::JsEngineLoader::GetDeclarative().CreateJsEngine(instanceId_);
+        declarativeFrontend->SetJsEngine(jsEngine_);
     } else if (type_ == FrontendType::JS_CARD) {
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
@@ -149,6 +153,15 @@ void AceContainer::InitializeFrontend()
     if (assetManager_) {
         frontend_->SetAssetManager(assetManager_);
     }
+}
+
+void AceContainer::RunNativeEngineLoop()
+{
+    taskExecutor_->PostTask(
+        [jsEngine = jsEngine_]() {
+            jsEngine->RunNativeEngineLoop();
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void AceContainer::InitializeCallback()
@@ -335,7 +348,6 @@ void AceContainer::DestroyContainer(int32_t instanceId)
 bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string& url, const std::string& params)
 {
     ACE_FUNCTION_TRACE();
-
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
         return false;
@@ -730,6 +742,23 @@ RefPtr<AceContainer> AceContainer::GetContainerInstance(int32_t instanceId)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     return container;
+}
+
+void AceContainer::LoadDocument(const std::string& url, const std::string& componentName)
+{
+    if (type_ != FrontendType::DECLARATIVE_JS) {
+        LOGE("component preview not supported");
+        return;
+    }
+    auto fronended = AceType::DynamicCast<OHOS::Ace::DeclarativeFrontend>(frontend_);
+    if (!fronended) {
+        LOGE("fronended is null, AceContainer::LoadDocument failed");
+        return;
+    }
+    std::string dstUrl = url + COMPONENT_PREVIEW + componentName;
+    fronended->SetPagePath(dstUrl);
+    fronended->ReplaceJSContent(componentName);
+    fronended->ReplacePage(dstUrl, "");
 }
 
 } // namespace OHOS::Ace::Platform

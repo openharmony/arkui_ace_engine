@@ -26,9 +26,13 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const DataPanelComposedElement&)>> CREATE_JSON_MAP {
-    { "values", [](const DataPanelComposedElement& inspector) { return inspector.GetValues(); } },
     { "max", [](const DataPanelComposedElement& inspector) { return inspector.GetMax(); } },
     { "closeEffect", [](const DataPanelComposedElement& inspector) { return inspector.GetCloseEffect(); } }
+};
+
+using JsonFuncType = std::function<std::unique_ptr<JsonValue>(const DataPanelComposedElement&)>;
+const std::unordered_map<std::string, JsonFuncType> CREATE_JSON_JSON_VALUE_MAP {
+    { "values", [](const DataPanelComposedElement& inspector) { return inspector.GetValues(); } }
 };
 
 } // namespace
@@ -36,7 +40,6 @@ const std::unordered_map<std::string, std::function<std::string(const DataPanelC
 void DataPanelComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("values: ").append(GetValues()));
     DumpLog::GetInstance().AddDesc(std::string("max: ").append(GetMax()));
     DumpLog::GetInstance().AddDesc(std::string("closeEffect: ").append(GetCloseEffect()));
 }
@@ -47,22 +50,26 @@ std::unique_ptr<JsonValue> DataPanelComposedElement::ToJsonObject() const
     for (const auto& value : CREATE_JSON_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this).c_str());
     }
+    for (const auto& value : CREATE_JSON_JSON_VALUE_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
+    }
     return resultJson;
 }
 
-std::string DataPanelComposedElement::GetValues() const
+std::unique_ptr<JsonValue> DataPanelComposedElement::GetValues() const
 {
     auto render = GetRenderPercentageDataPanel();
     if (render) {
-        std::string values = "";
+        auto jsonDashArray = JsonUtil::CreateArray(true);
         auto Segments = render->GetSegments();
         for (size_t i = 0; i < Segments.size(); ++i) {
+            auto index = std::to_string(i);
             double value = Segments[i].GetValue();
-            values += std::to_string(value) + " ";
+            jsonDashArray->Put(index.c_str(), value);
         }
-        return values;
+        return jsonDashArray;
     }
-    return "";
+    return nullptr;
 }
 
 std::string DataPanelComposedElement::GetMax() const

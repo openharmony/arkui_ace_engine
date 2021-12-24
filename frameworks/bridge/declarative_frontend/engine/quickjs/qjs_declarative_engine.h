@@ -26,6 +26,7 @@
 namespace OHOS::Ace::Framework {
 
 class QJSDeclarativeEngine : public JsEngine {
+    DECLARE_ACE_TYPE(QJSDeclarativeEngine, JsEngine)
 public:
     explicit QJSDeclarativeEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~QJSDeclarativeEngine() override;
@@ -33,6 +34,7 @@ public:
     bool Initialize(const RefPtr<FrontendDelegate>& delegate) override;
 
     void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
+    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode) override;
 
     // Update running page
     void UpdateRunningPage(const RefPtr<JsAcePage>& page) override;
@@ -79,9 +81,9 @@ public:
 
     void JsCallback(const std::string& callbackId, const std::string& args) override;
 
-    void CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv);
+    void CallAppFunc(const std::string& appFuncName, int argc, JSValueConst* argv);
 
-    void CallAppFunc(std::string appFuncName, int argc, JSValueConst* argv, JSValue& ret);
+    void CallAppFunc(const std::string& appFuncName, int argc, JSValueConst* argv, JSValue& ret);
 
     // destroy application instance according packageName
     void DestroyApplication(const std::string& packageName) override;
@@ -99,14 +101,31 @@ public:
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    std::string GetPreContent() const
+    {
+        return preContent_;
+    }
+
+    void SetPreContent(std::string& jscontent)
+    {
+        preContent_ = jscontent;
+    }
+
+    void ReplaceJSContent(std::string& jsContent, const std::string componentName);
+#endif
+
 private:
-    RefPtr<QJSDeclarativeEngineInstance> engineInstance_;
-    int32_t instanceId_ = 0;
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     void RegisterWorker();
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
     void SetPostTask(NativeEngine* nativeEngine);
+
+    RefPtr<QJSDeclarativeEngineInstance> engineInstance_;
+    int32_t instanceId_ = 0;
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    std::string preContent_ = "";
 #endif
 
     ACE_DISALLOW_COPY_AND_MOVE(QJSDeclarativeEngine);

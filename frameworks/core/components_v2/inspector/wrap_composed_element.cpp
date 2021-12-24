@@ -23,12 +23,9 @@
 namespace OHOS::Ace::V2 {
 namespace {
 
-const std::unordered_map<std::string, std::function<std::string(const WrapComposedElement&)>> CREATE_JSON_MAP {
-    { "direction", [](const WrapComposedElement& inspector) { return inspector.GetFlexDirection(); } },
-    { "wrap", [](const WrapComposedElement& inspector) { return inspector.GetWrap(); } },
-    { "justifyContent", [](const WrapComposedElement& inspector) { return inspector.GetJustifyContent(); } },
-    { "alignItems", [](const WrapComposedElement& inspector) { return inspector.GetAlignItems(); } },
-    { "alignContent", [](const WrapComposedElement& inspector) { return inspector.GetAlignContent(); } }
+const std::unordered_map<std::string,
+    std::function<std::unique_ptr<JsonValue>(const WrapComposedElement&)>> CREATE_JSON_MAP {
+    { "constructor", [](const WrapComposedElement& inspector) { return inspector.GetConstructor(); } }
 };
 
 }
@@ -52,9 +49,20 @@ std::unique_ptr<JsonValue> WrapComposedElement::ToJsonObject() const
 {
     auto resultJson = InspectorComposedElement::ToJsonObject();
     for (const auto& value : CREATE_JSON_MAP) {
-        resultJson->Put(value.first.c_str(), value.second(*this).c_str());
+        resultJson->Put(value.first.c_str(), value.second(*this));
     }
     return resultJson;
+}
+
+std::unique_ptr<JsonValue> WrapComposedElement::GetConstructor() const
+{
+    auto jsonValue = JsonUtil::Create(false);
+    jsonValue->Put("direction", GetFlexDirection().c_str());
+    jsonValue->Put("wrap", GetWrap().c_str());
+    jsonValue->Put("justifyContent", GetJustifyContent().c_str());
+    jsonValue->Put("alignItems", GetAlignItems().c_str());
+    jsonValue->Put("alignContent", GetAlignContent().c_str());
+    return jsonValue;
 }
 
 std::string WrapComposedElement::GetFlexDirection() const

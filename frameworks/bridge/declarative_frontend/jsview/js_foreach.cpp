@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/functions/js_foreach_function.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/foreach/for_each_component.h"
@@ -25,22 +26,23 @@ namespace OHOS::Ace::Framework {
 
 void JSForEach::Create(const JSCallbackInfo& info)
 {
-    if (!info[2]->IsObject() || !info[3]->IsFunction() || (!info[0]->IsNumber() && !info[0]->IsString()) ||
-        info[1]->IsUndefined() || !info[1]->IsObject()) {
+    if (info.Length() < 4 || !info[2]->IsObject() || !info[3]->IsFunction() ||
+        (!info[0]->IsNumber() && !info[0]->IsString()) || info[1]->IsUndefined() || !info[1]->IsObject()) {
         LOGE("invalid arguments for ForEach");
         return;
     }
 
     JSRef<JSObject> jsArray = JSRef<JSObject>::Cast(info[2]);
-
+    JSRef<JSVal> jsViewMapperFunc = info[3];
     JSRef<JSVal> jsIdentityMapperFunc;
+    RefPtr<JsForEachFunction> jsForEachFunction;
     if (info.Length() > 4 && info[4]->IsFunction()) {
         jsIdentityMapperFunc = info[4];
+        jsForEachFunction = AceType::MakeRefPtr<JsForEachFunction>(
+            jsArray, JSRef<JSFunc>::Cast(jsIdentityMapperFunc), JSRef<JSFunc>::Cast(jsViewMapperFunc));
+    } else {
+        jsForEachFunction = AceType::MakeRefPtr<JsForEachFunction>(jsArray, JSRef<JSFunc>::Cast(jsViewMapperFunc));
     }
-    JSRef<JSVal> jsViewMapperFunc = info[3];
-
-    auto jsForEachFunction = AceType::MakeRefPtr<JsForEachFunction>(
-        jsArray, JSRef<JSFunc>::Cast(jsIdentityMapperFunc), JSRef<JSFunc>::Cast(jsViewMapperFunc));
 
     auto viewStack = ViewStackProcessor::GetInstance();
     std::string viewId = viewStack->ProcessViewId(info[0]->ToString());

@@ -16,7 +16,6 @@
 #include "core/components/split_container/render_row_split.h"
 
 #include "core/components/flex/render_flex.h"
-#include "core/components/split_container/flutter_render_row_split.h"
 #include "core/pipeline/base/position_layout_utils.h"
 
 namespace OHOS::Ace {
@@ -27,11 +26,6 @@ constexpr double DEFAULT_SPLIT_RESPOND_WIDTH = 25.0;
 constexpr size_t DEFAULT_DRAG_INDEX = -1;
 
 } // namespace
-
-RefPtr<RenderNode> RenderRowSplit::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderRowSplit>();
-}
 
 void RenderRowSplit::LayoutChildren()
 {

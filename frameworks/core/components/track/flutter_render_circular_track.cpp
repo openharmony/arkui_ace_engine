@@ -26,8 +26,6 @@ namespace {
 constexpr double COLOR_STOP = 0.4;
 constexpr int32_t COLOR_NUM = 3;
 
-} // namespace
-
 void DrawArc(RenderContext& context, const RenderRingInfo& trackInfo)
 {
     auto canvas = ScopedCanvas::Create(context);
@@ -70,12 +68,7 @@ void DrawArc(RenderContext& context, const RenderRingInfo& trackInfo)
         M_PI * (trackInfo.clockwise * (trackInfo.startDegree / 180)),
         M_PI * 2 * (trackInfo.clockwise * trackInfo.sweepDegree / 360), false, paint, paintData);
 }
-
-RefPtr<RenderNode> RenderCircleTrack::Create()
-{
-    LOGD("Progress::Create");
-    return AceType::MakeRefPtr<FlutterRenderCircularTrack>();
-}
+} // namespace
 
 void FlutterRenderCircularTrack::Paint(RenderContext& context, const Offset& offset)
 {

@@ -17,7 +17,6 @@ build_component("list") {
   sources = [
     "flutter_render_list.cpp",
     "flutter_render_list_item.cpp",
-    "flutter_render_list_item_group.cpp",
     "grid_layout_manager.cpp",
     "interactive_effect.cpp",
     "layout_manager.cpp",
@@ -30,9 +29,17 @@ build_component("list") {
     "list_layout_manager.cpp",
     "list_watch_layout_manager.cpp",
     "render_list.cpp",
+    "render_list_creator.cpp",
     "render_list_item.cpp",
+    "render_list_item_creator.cpp",
     "render_list_item_group.cpp",
+    "render_list_item_group_creator.cpp",
     "tv_interactive_effect.cpp",
+  ]
+
+  rosen_sources = [
+    "rosen_render_list.cpp",
+    "rosen_render_list_item.cpp",
   ]
 
   if (is_wearable_product) {

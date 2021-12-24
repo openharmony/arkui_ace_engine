@@ -20,6 +20,7 @@
 #include <string>
 
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/jsview/js_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"

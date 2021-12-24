@@ -25,6 +25,7 @@
 #include "core/components/data_panel/data_panel_theme.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/divider/divider_theme.h"
+#include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components/focus_animation/focus_animation_theme.h"
 #include "core/components/image/image_theme.h"
 #include "core/components/list/list_item_theme.h"
@@ -41,6 +42,7 @@
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/semi_modal/semi_modal_theme.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components/stepper/stepper_theme.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
@@ -105,7 +107,9 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { QrcodeTheme::TypeId(), &ThemeBuildFunc<QrcodeTheme::Builder> },
     { CameraTheme::TypeId(), &ThemeBuildFunc<CameraTheme::Builder> },
     { ImageTheme::TypeId(), &ThemeBuildFunc<ImageTheme::Builder> },
-    { CounterTheme::TypeId(), &ThemeBuildFunc<CounterTheme::Builder> }
+    { CounterTheme::TypeId(), &ThemeBuildFunc<CounterTheme::Builder> },
+    { DragBarTheme::TypeId(), &ThemeBuildFunc<DragBarTheme::Builder> },
+    { SemiModalTheme::TypeId(), &ThemeBuildFunc<SemiModalTheme::Builder> }
 };
 
 } // namespace
@@ -147,7 +151,13 @@ Color ThemeManager::GetBackgroundColor() const
     if (!themeStyle) {
         return prebuildColor;
     }
-    return themeStyle->GetAttr<Color>(THEME_ATTR_BG_COLOR, prebuildColor);
+    if (themeStyle->HasAttr(THEME_ATTR_BG_COLOR) && !themeConstants_->HasCustomStyle(THEME_APP_BACKGROUND)) {
+        // Get from resource.
+        return themeStyle->GetAttr<Color>(THEME_ATTR_BG_COLOR, Color::BLACK);
+    } else {
+        // Get from prebuild or custom color.
+        return prebuildColor;
+    }
 }
 
 void ThemeManager::ReloadThemes()

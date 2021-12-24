@@ -37,7 +37,7 @@ public:
         return followChildSize_;
     }
 
-    void SetOffsetX(double offsetX)
+    virtual void SetOffsetX(double offsetX)
     {
         if (offsetX < 0.0) {
             return;
@@ -45,7 +45,7 @@ public:
         offsetX_ = offsetX;
     }
 
-    void SetOffsetY(double offsetY)
+    virtual void SetOffsetY(double offsetY)
     {
         if (offsetY < 0.0) {
             return;
@@ -55,7 +55,7 @@ public:
 
     Rect GetClipRect(const Offset& offset) const;
 
-    void SetWidth(double width)
+    virtual void SetWidth(double width)
     {
         if (width < 0.0) {
             return;
@@ -63,7 +63,7 @@ public:
         width_ = width;
     }
 
-    void SetHeight(double height)
+    virtual void SetHeight(double height)
     {
         if (height < 0.0) {
             return;

@@ -214,8 +214,8 @@ const JSCFunctionListEntry JS_ANIMATION_FUNCS[] = {
     JS_CGETSET_DEF("shadowOffsetY", CanvasBridge::JsShadowOffsetYGetter, CanvasBridge::JsShadowOffsetYSetter),
     JS_CGETSET_DEF("imageSmoothingEnabled",
         CanvasBridge::JsSmoothingEnabledGetter, CanvasBridge::JsSmoothingEnabledSetter),
-    JS_CGETSET_DEF("offsetWidth", CanvasBridge::JsOffsetWidthGetter, nullptr),
-    JS_CGETSET_DEF("offsetHeight", CanvasBridge::JsOffsetHeightGetter, nullptr),
+    JS_CGETSET_DEF("width", CanvasBridge::JsWidthGetter, nullptr),
+    JS_CGETSET_DEF("height", CanvasBridge::JsHeightGetter, nullptr),
 };
 
 CanvasBridge::~CanvasBridge()
@@ -2057,7 +2057,7 @@ JSValue CanvasBridge::JsSmoothingQualitySetter(JSContext* ctx, JSValueConst valu
     return JS_NULL;
 }
 
-JSValue CanvasBridge::JsOffsetWidthGetter(JSContext* ctx, JSValueConst value)
+JSValue CanvasBridge::JsWidthGetter(JSContext* ctx, JSValueConst value)
 {
     NodeId id = GetCurrentNodeId(ctx, value);
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
@@ -2065,14 +2065,29 @@ JSValue CanvasBridge::JsOffsetWidthGetter(JSContext* ctx, JSValueConst value)
     if (!page) {
         return JS_NULL;
     }
-    auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
-    if (!canvas) {
-        return JS_NULL;
-    }
-    return JS_NewFloat64(ctx, canvas->GetWidth().Value());
+
+    double width = 0.0;
+    auto task = [id, page, &width]() {
+        auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+        if (!canvas) {
+            return;
+        }
+        auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
+        if (!paintChild) {
+            return;
+        }
+        auto canvasTask = paintChild->GetTaskPool();
+        if (!canvasTask) {
+            return;
+        }
+        width = canvasTask->GetWidth();
+    };
+    instance->GetDelegate()->PostSyncTaskToPage(task);
+
+    return JS_NewFloat64(ctx, width);
 }
 
-JSValue CanvasBridge::JsOffsetHeightGetter(JSContext* ctx, JSValueConst value)
+JSValue CanvasBridge::JsHeightGetter(JSContext* ctx, JSValueConst value)
 {
     NodeId id = GetCurrentNodeId(ctx, value);
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
@@ -2080,11 +2095,26 @@ JSValue CanvasBridge::JsOffsetHeightGetter(JSContext* ctx, JSValueConst value)
     if (!page) {
         return JS_NULL;
     }
-    auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
-    if (!canvas) {
-        return JS_NULL;
-    }
-    return JS_NewFloat64(ctx, canvas->GetHeight().Value());
+
+    double height = 0.0;
+    auto task = [id, page, &height]() {
+        auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+        if (!canvas) {
+            return;
+        }
+        auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
+        if (!paintChild) {
+            return;
+        }
+        auto canvasTask = paintChild->GetTaskPool();
+        if (!canvasTask) {
+            return;
+        }
+        height = canvasTask->GetHeight();
+    };
+    instance->GetDelegate()->PostSyncTaskToPage(task);
+
+    return JS_NewFloat64(ctx, height);
 }
 
 } // namespace OHOS::Ace::Framework

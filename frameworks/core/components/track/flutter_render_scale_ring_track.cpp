@@ -23,6 +23,7 @@
 #include "core/pipeline/base/scoped_canvas_state.h"
 
 namespace OHOS::Ace {
+namespace {
 
 void DrawScaleArc(RenderContext& context, const RenderRingInfo& trackInfo)
 {
@@ -58,6 +59,7 @@ void DrawScaleArc(RenderContext& context, const RenderRingInfo& trackInfo)
         M_PI * (trackInfo.clockwise * (trackInfo.startDegree / (totalDegree / 2.0)) - 0.5),
         M_PI * 2 * (trackInfo.clockwise * trackInfo.sweepDegree / totalDegree), false, paint, paintData);
 }
+} // namespace
 
 void FlutterRenderScaleRingTrack::Paint(RenderContext& context, const Offset& offset)
 {
@@ -84,12 +86,6 @@ void FlutterRenderScaleRingTrack::Paint(RenderContext& context, const Offset& of
     data.color = GetSelectColor();
     data.sweepDegree = paintData_.sweepDegree * GetTotalRatio();
     DrawScaleArc(context, data);
-}
-
-RefPtr<RenderNode> RenderScaleRingTrack::Create()
-{
-    LOGD("Progress::RenderScaleRingTrack Create");
-    return AceType::MakeRefPtr<FlutterRenderScaleRingTrack>();
 }
 
 } // namespace OHOS::Ace

@@ -23,6 +23,7 @@ namespace OHOS::Ace {
 using SwipeToImpl = std::function<void(const int32_t, bool)>;
 using ShowPrevImpl = std::function<void()>;
 using ShowNextImpl = std::function<void()>;
+using FinishAnimationImpl = std::function<void()>;
 
 class SwiperController : public virtual AceType {
     DECLARE_ACE_TYPE(SwiperController, AceType);
@@ -64,10 +65,34 @@ public:
         showNextImpl_ = showNextImpl;
     }
 
+    void FinishAnimation() const
+    {
+        if (finishImpl_) {
+            finishImpl_();
+        }
+    }
+
+    void SetFinishImpl(const FinishAnimationImpl& finishImpl)
+    {
+        finishImpl_ = finishImpl;
+    }
+
+    void SetFinishCallback(const EventMarker& marker)
+    {
+        finishCallback_ = marker;
+    }
+
+    const EventMarker& GetFinishCallback() const
+    {
+        return finishCallback_;
+    }
+
 private:
     SwipeToImpl swipeToImpl_;
     ShowPrevImpl showPrevImpl_;
     ShowNextImpl showNextImpl_;
+    FinishAnimationImpl finishImpl_;
+    EventMarker finishCallback_;
 };
 
 } // namespace OHOS::Ace

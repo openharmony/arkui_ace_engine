@@ -34,6 +34,8 @@
 
 namespace OHOS::Ace::Framework {
 
+using ExternalEventCallback = std::function<void(const std::string&, const uint32_t&)>;
+
 class FrontendDelegateDeclarative : public FrontendDelegate {
     DECLARE_ACE_TYPE(FrontendDelegateDeclarative, FrontendDelegate);
 
@@ -56,7 +58,8 @@ public:
         const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
         const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack,
         const OnSaveDataCallBack& onSaveDataCallBack,
-        const OnRestoreDataCallBack& onRestoreDataCallBack);
+        const OnRestoreDataCallBack& onRestoreDataCallBack,
+        const ExternalEventCallback& externalEventCallback);
     ~FrontendDelegateDeclarative() override;
 
     void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
@@ -116,6 +119,7 @@ public:
     bool FireSyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);
     void FireSyncEvent(
         const std::string& eventId, const std::string& param, const std::string& jsonArgs, std::string& result);
+    void FireExternalEvent(const std::string& eventId, const std::string& componentId, const uint32_t nodeId);
 
     // FrontendDelegate overrides.
     void Push(const PageTarget& target, const std::string& params);
@@ -190,8 +194,7 @@ public:
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc) override;
 
-    void HandleImage(const std::string& src, std::function<void(int32_t)>&& callback,
-        const std::set<std::string>& callbacks) override;
+    void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
 
     void RequestAnimationFrame(const std::string& callbackId) override;
 
@@ -211,6 +214,15 @@ public:
         return groupJsBridge_;
     }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void SetPagePath(const std::string& pagePath)
+    {
+        if (manifestParser_) {
+            manifestParser_->SetPagePath(pagePath);
+        }
+    }
+#endif
+
     RefPtr<PipelineContext> GetPipelineContext() override;
 
     void SetGroupJsBridge(const RefPtr<GroupJsBridge>& groupJsBridge)
@@ -221,7 +233,6 @@ public:
     RefPtr<JsAcePage> GetPage(int32_t pageId) const override;
 
     void RebuildAllPages();
-
 private:
     int32_t GenerateNextPageId();
     void RecyclePageId(int32_t pageId);
@@ -279,6 +290,7 @@ private:
     std::unordered_map<int32_t, std::string> jsCallBackResult_;
 
     LoadJsCallback loadJs_;
+    ExternalEventCallback externalEvent_;
     JsMessageDispatcherSetterCallback dispatcherCallback_;
     EventCallback asyncEvent_;
     EventCallback syncEvent_;

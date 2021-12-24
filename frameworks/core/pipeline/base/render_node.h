@@ -22,6 +22,7 @@
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "base/utils/system_properties.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/animation/animatable_properties.h"
 #include "core/animation/keyframe_animation.h"
@@ -31,12 +32,19 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components/common/properties/motion_path_option.h"
+#include "core/components/common/properties/state_attributes.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_v2/extensions/events/event_extensions.h"
+#include "core/components_v2/inspector/inspector_node.h"
 #include "core/event/touch_event.h"
+#include "core/gestures/drag_recognizer.h"
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline/base/render_layer.h"
 #include "core/pipeline/pipeline_context.h"
-#include "core/gestures/drag_recognizer.h"
+
+namespace OHOS::Rosen {
+class RSNode;
+}
 
 namespace OHOS::Ace {
 
@@ -50,6 +58,7 @@ constexpr int32_t PRESS_DURATION = 100;
 constexpr int32_t HOVER_DURATION = 250;
 
 using HoverAndPressCallback = std::function<void(const Color&)>;
+using Rosen::RSNode;
 
 // RenderNode is the base class for different render backend, represent a render unit for render pipeline.
 class ACE_EXPORT RenderNode : public PropertyAnimatable, public AnimatableProperties, public virtual AceType {
@@ -130,6 +139,10 @@ public:
     virtual void FinishRender(const std::unique_ptr<DrawDelegate>& delegate, const Rect& dirty) {}
 
     virtual void UpdateTouchRect();
+
+    void SetTouchRectList(std::vector<Rect>& touchRectList);
+    bool CompareTouchRect(const Rect& parentTouchRect, const Rect& childTouchRect);
+    void CompareTouchRectList(std::vector<Rect>& parentTouchRectList, const std::vector<Rect>& childTouchRectList);
 
     bool NeedLayout() const
     {
@@ -245,13 +258,29 @@ public:
         return touchRect_;
     }
 
-    virtual const Rect& GetOwnTouchRect()
+    virtual const std::vector<Rect>& GetTouchRectList()
     {
         if (needUpdateTouchRect_) {
             needUpdateTouchRect_ = false;
+            touchRectList_.clear();
             UpdateTouchRect();
         }
-        return ownTouchRect_;
+        return touchRectList_;
+    }
+
+    void ChangeTouchRectList(std::vector<Rect>& touchRectList)
+    {
+        touchRectList_ = touchRectList;
+    }
+
+    bool InTouchRectList(const Point& parentLocalPoint, const std::vector<Rect>& touchRectList) const
+    {
+        for (auto& rect : touchRectList) {
+            if (rect.IsInRegion(parentLocalPoint)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     virtual Point GetTransformPoint(const Point& point)
@@ -270,11 +299,7 @@ public:
 
     Offset GetTransitionGlobalOffset() const;
 
-    void SetPaintRect(const Rect& rect)
-    {
-        paintRect_ = rect;
-        needUpdateTouchRect_ = true;
-    }
+    void SetPaintRect(const Rect& rect);
 
     void SetTouchRect(const Rect& rect)
     {
@@ -310,7 +335,7 @@ public:
 
     virtual void Dump();
 
-    enum class BridgeType { NONE, AGP, FLUTTER };
+    enum class BridgeType { NONE, ROSEN, FLUTTER };
 
     virtual BridgeType GetBridgeType() const
     {
@@ -438,15 +463,18 @@ public:
         return nullptr;
     }
 
-    void SetVisible(bool visible)
+    void SetVisible(bool visible, bool inRecursion = false)
     {
         if (visible_ != visible) {
             visible_ = visible;
             AddDirtyRenderBoundaryNode();
             OnVisibleChanged();
+            if (!inRecursion && SystemProperties::GetRosenBackendEnabled()) {
+                MarkParentNeedRender();
+            }
         }
         for (auto& child : children_) {
-            child->SetVisible(visible);
+            child->SetVisible(visible, true);
         }
     }
 
@@ -455,15 +483,18 @@ public:
         return visible_;
     }
 
-    virtual void SetHidden(bool hidden)
+    virtual void SetHidden(bool hidden, bool inRecursion = false)
     {
         if (hidden_ != hidden) {
             hidden_ = hidden;
             AddDirtyRenderBoundaryNode();
             OnHiddenChanged(hidden);
-            for (auto& child : children_) {
-                child->SetHidden(hidden);
+            if (!inRecursion && SystemProperties::GetRosenBackendEnabled()) {
+                MarkParentNeedRender();
             }
+        }
+        for (auto& child : children_) {
+            child->SetHidden(hidden, true);
         }
     }
 
@@ -473,6 +504,9 @@ public:
             hidden_ = hidden;
             AddDirtyRenderBoundaryNode();
             OnHiddenChanged(hidden);
+            if (SystemProperties::GetRosenBackendEnabled()) {
+                MarkParentNeedRender();
+            }
         }
     }
 
@@ -488,7 +522,11 @@ public:
 
     virtual bool IsRepaintBoundary() const
     {
+#ifdef ENABLE_ROSEN_BACKEND
+        return IsHeadRenderNode();
+#else
         return false;
+#endif
     }
 
     virtual const std::list<RefPtr<RenderNode>>& GetChildren() const
@@ -536,6 +574,8 @@ public:
             child->ChangeStatus(renderStatus);
         }
     }
+
+    virtual void OnStatusStyleChanged(StyleState state);
 
     Offset GetOffsetFromOrigin(const Offset& offset) const;
 
@@ -833,7 +873,7 @@ public:
 
     bool IsDisappearing();
     virtual bool HasDisappearingTransition(int32_t nodeId);
-    void NotifyTransition(TransitionType type, int32_t nodeId);
+    void NotifyTransition(TransitionType type, int32_t nodeId, unsigned long long rsNodeId = 0);
 
     Rect GetDirtyRect() const;
     std::function<void(const DragUpdateInfo&)> onDomDragEnter_ = nullptr;
@@ -853,6 +893,44 @@ public:
     virtual void OnPreDraw() {}
 
     RefPtr<RenderNode> FindDropChild(const Point& globalPoint, const Point& parentLocalPoint);
+
+    template<typename T>
+    RefPtr<T> FindChildNodeOfClass(const Point& globalPoint, const Point& parentLocalPoint)
+    {
+        Point transformPoint = GetTransformPoint(parentLocalPoint);
+        if (!InTouchRectList(transformPoint, GetTouchRectList())) {
+            return nullptr;
+        }
+
+        // Calculates the local point location in this node.
+        const auto localPoint = transformPoint - GetPaintRect().GetOffset();
+        const auto& children = GetChildren();
+        for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+            auto& child = *iter;
+            if (!child->GetVisible()) {
+                continue;
+            }
+
+            if (child->InterceptTouchEvent()) {
+                continue;
+            }
+
+            auto target = child->FindChildNodeOfClass<T>(globalPoint, localPoint);
+            if (target) {
+                return target;
+            }
+        }
+
+        for (auto& rect : GetTouchRectList()) {
+            if (touchable_ && rect.IsInRegion(transformPoint)) {
+                RefPtr<RenderNode> renderNode = AceType::Claim<RenderNode>(this);
+                if (AceType::InstanceOf<T>(renderNode)) {
+                    return AceType::DynamicCast<T>(renderNode);
+                }
+            }
+        }
+        return nullptr;
+    }
 
     void SaveExplicitAnimationOption(const AnimationOption& option);
 
@@ -901,6 +979,34 @@ public:
         return hasSubWindow_;
     }
 
+    // mark JSview boundary, create/destroy RSNode if need
+    void SyncRSNodeBoundary(bool isHead, bool isTail);
+    const std::shared_ptr<RSNode>& GetRSNode() const { return rsNode_; }
+    // sync geometry properties to ROSEN backend
+    virtual void SyncGeometryProperties();
+
+    bool IsResponseRegion() const
+    {
+        return isResponseRegion_;
+    }
+
+    double GetPxValue(double standard, const Dimension& value);
+
+    const std::vector<Rect>& GetResponseRegionList() const
+    {
+        return responseRegionList_;
+    }
+
+    const WeakPtr<V2::InspectorNode>& GetInspectorNode() const
+    {
+        return inspector_;
+    }
+
+    void SetInspectorNode(const RefPtr<V2::InspectorNode>& inspectorNode)
+    {
+        inspector_ = inspectorNode;
+    }
+
 protected:
     explicit RenderNode(bool takeBoundary = false);
     virtual void ClearRenderObject();
@@ -908,6 +1014,8 @@ protected:
     virtual void OnMouseTestHit(const Offset& coordinateOffset, MouseTestResult& result) {}
     virtual void OnMouseHoverEnterTest() {}
     virtual void OnMouseHoverExitTest() {}
+    virtual void MouseHoverEnterTest() {}
+    virtual void MouseHoverExitTest() {}
 
     void PrepareLayout();
 
@@ -928,6 +1036,10 @@ protected:
 
     virtual void OnGlobalPositionChanged()
     {
+        MarkNeedSyncGeometryProperties();
+        if (IsTailRenderNode()) {
+            return;
+        }
         for (const auto& child : children_) {
             if (child) {
                 child->OnGlobalPositionChanged();
@@ -962,13 +1074,35 @@ protected:
         return updateType_;
     }
 
+    virtual std::shared_ptr<RSNode> CreateRSNode() const;
+    virtual void OnRSTransition(TransitionType type, unsigned long long rsNodeId) {};
+    // JSview boundary, all nodes in [head, tail] share the same RSNode
+    bool IsHeadRenderNode() const
+    {
+        return isHeadRenderNode_;
+    }
+    bool IsTailRenderNode() const
+    {
+        return isTailRenderNode_;
+    }
+    Offset GetPaintOffset() const;
+    virtual bool HasGeometryProperties() const
+    {
+        return IsTailRenderNode();
+    }
+    void MarkNeedSyncGeometryProperties();
+
     bool hasSubWindow_ = false;
     WeakPtr<PipelineContext> context_;
     Size viewPort_;
     Point globalPoint_;
+    WeakPtr<V2::InspectorNode> inspector_;
     WeakPtr<AccessibilityNode> accessibilityNode_;
-    Rect touchRect_;    // Self and all children combined touch rect
-    Rect ownTouchRect_; // Self touch rect.
+
+    Rect touchRect_;    // Self touch rect
+    std::vector<Rect> touchRectList_; // Self and all children touch rect
+    std::vector<DimensionRect> responseRegion_;
+    std::vector<Rect> responseRegionList_;
     PositionParam positionParam_;
     uint8_t opacity_ = 255;
     Shadow shadow_;
@@ -980,6 +1114,8 @@ protected:
     bool needWindowBlur_ = false;
     bool needUpdateAccessibility_ = true;
     bool disabled_ = false;
+    bool isResponseRegion_ = false;
+    HoverAnimationType hoverAnimationType_ = HoverAnimationType::AUTO;
     int32_t minPlatformVersion_ = 0;
 
     MouseState mouseState_ = MouseState::NONE;
@@ -994,6 +1130,7 @@ protected:
     bool isAppOnShow_ = true;
     AnimationOption nonStrictOption_; // clear after transition done
     MotionPathOption motionPathOption_;
+    RefPtr<V2::EventExtensions> eventExtensions_;
 
 private:
     void AddDirtyRenderBoundaryNode()
@@ -1009,6 +1146,9 @@ private:
 
     void SetPositionInternal(const Offset& offset);
     bool InLayoutTransition() const;
+        // Sync view hierarchy to RSNode
+    void RSNodeAddChild(const RefPtr<RenderNode>& child);
+    void MarkParentNeedRender() const;
 
     std::list<RefPtr<RenderNode>> hoverChildren_;
     std::list<RefPtr<RenderNode>> children_;
@@ -1053,8 +1193,14 @@ private:
     int32_t zIndex_ = 0;
     bool isPercentSize_ = false;
     uint32_t updateType_ = 0;
-    ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
+
+    std::shared_ptr<RSNode> rsNode_ = nullptr;
+    bool isHeadRenderNode_ = false;
+    bool isTailRenderNode_ = false;
+
     bool isPaintGeometryTransition_ = false;
+
+    ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
 };
 
 } // namespace OHOS::Ace

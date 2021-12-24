@@ -30,11 +30,6 @@ inline bool ShouldPaint(const RefPtr<RenderNode>& node)
 
 using namespace Flutter;
 
-RefPtr<RenderContext> RenderContext::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderContext>();
-}
-
 FlutterRenderContext::~FlutterRenderContext()
 {
     StopRecordingIfNeeded();
@@ -80,6 +75,10 @@ void FlutterRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Off
         }
         // add child layer to parent layer
         OffsetLayer* layer = CastLayerAs<OffsetLayer>(child->GetRenderLayer());
+        if (!layer) {
+            LOGE("layer is null");
+            return;
+        }
         Offset pos = rect.GetOffset();
         if (name != "FlutterRenderForm") {
             layer->SetOffset(pos.GetX(), pos.GetY());

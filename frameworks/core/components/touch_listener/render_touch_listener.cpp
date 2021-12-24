@@ -31,6 +31,8 @@ void RenderTouchListener::Update(const RefPtr<Component>& component)
 {
     auto touchComponent = AceType::DynamicCast<TouchListenerComponent>(component);
     ACE_DCHECK(touchComponent);
+    responseRegion_ = touchComponent->GetResponseRegion();
+    isResponseRegion_ = touchComponent->IsResponseRegion();
     auto context = context_.Upgrade();
     if (context && context->GetIsDeclarative()) {
         onTouchEventCallback_ = AceSyncEvent<void(const std::shared_ptr<TouchEventInfo>&)>::Create(

@@ -19,11 +19,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderArc::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderArc>();
-}
-
 void FlutterRenderArc::Paint(RenderContext& context, const Offset& offset)
 {
     if (!IsAcrValid()) {

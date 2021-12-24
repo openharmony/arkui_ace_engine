@@ -151,4 +151,10 @@ bool EventManager::DispatchMouseEvent(const MouseEvent& event)
     return false;
 }
 
+void EventManager::ClearResults()
+{
+    touchTestResults_.clear();
+    mouseTestResults_.clear();
+}
+
 } // namespace OHOS::Ace

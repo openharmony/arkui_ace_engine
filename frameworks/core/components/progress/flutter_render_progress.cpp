@@ -23,12 +23,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderProgress::Create()
-{
-    LOGD("Progress::Create");
-    return AceType::MakeRefPtr<FlutterRenderProgress>();
-}
-
 void FlutterRenderProgress::Update(const RefPtr<Component>& component)
 {
     const RefPtr<ProgressComponent> progress = AceType::DynamicCast<ProgressComponent>(component);

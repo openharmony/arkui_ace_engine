@@ -45,11 +45,6 @@ constexpr uint8_t DEFAULT_OPACITY = 255;
 
 } // namespace
 
-RefPtr<RenderNode> RenderButton::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderButton>();
-}
-
 RenderLayer FlutterRenderButton::GetRenderLayer()
 {
     if (!transformLayer_) {

@@ -26,6 +26,7 @@
 #include "core/mock/fake_task_executor.h"
 #include "core/mock/mock_resource_register.h"
 #include "core/pipeline/base/flutter_render_context.h"
+#include "core/pipeline/base/rosen_render_context.h"
 #define protected public
 #include "core/components/checkable/render_switch.h"
 #include "core/components/test/unittest/mock/mock_render_depend.h"
@@ -110,6 +111,16 @@ private:
 } // namespace
 
 flutter::Canvas* FlutterRenderContext::GetCanvas()
+{
+    return nullptr;
+}
+
+SkCanvas* RosenRenderContext::GetCanvas()
+{
+    return nullptr;
+}
+
+const std::shared_ptr<RSNode>& RosenRenderContext::GetRSNode()
 {
     return nullptr;
 }

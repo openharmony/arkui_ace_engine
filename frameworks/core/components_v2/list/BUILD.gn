@@ -22,6 +22,8 @@ build_component("list_v2") {
     "list_item_element.cpp",
     "list_position_controller.cpp",
     "render_list.cpp",
+    "render_list_creator.cpp",
     "render_list_item.cpp",
   ]
+  rosen_sources = [ "rosen_render_list.cpp" ]
 }

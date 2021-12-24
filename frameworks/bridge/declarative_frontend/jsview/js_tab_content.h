@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORK_JAVASCRIPT_BRIDGE_JS_VIEW_JS_TAB_CONTENT_H
 #define FOUNDATION_ACE_FRAMEWORK_JAVASCRIPT_BRIDGE_JS_VIEW_JS_TAB_CONTENT_H
 
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/core/components/tab_bar/tab_content_component.h"
 #include "frameworks/core/components/tab_bar/tab_content_item_component.h"
@@ -48,10 +49,12 @@ protected:
     }
 
 private:
-    static void ProcessTabBarData(const WeakPtr<TabsComponent>& tabs,
-        const RefPtr<TabContentItemComponent>& tabContentItem, const JSCallbackInfo& info);
-    static void CombineImageAndTextLayout(const RefPtr<TabBarComponent>& tabBar, const RefPtr<TextComponent>& text,
-        const std::string& iconUri, const std::string& textStr);
+    static RefPtr<Component> ProcessTabBarBuilderFunction(RefPtr<TabBarComponent>& tabBar, JSRef<JSObject> builderFunc);
+    static RefPtr<Component> ProcessTabBarTextIconPair(RefPtr<TabBarComponent>& tabBar, JSRef<JSVal> text,
+        JSRef<JSVal> icon);
+    static RefPtr<TextComponent> CreateTabBarLabelComponent(RefPtr<TabBarComponent>& tabBar,
+        const std::string& labelStr);
+    static RefPtr<TextComponent> ProcessTabBarLabel(RefPtr<TabBarComponent>& tabBar, JSRef<JSVal> labelVal);
 };
 
 } // namespace OHOS::Ace::Framework

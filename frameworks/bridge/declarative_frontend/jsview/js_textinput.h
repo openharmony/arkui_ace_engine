@@ -30,11 +30,19 @@ public:
     static void SetPlaceholderFont(const JSCallbackInfo& info);
     static void SetEnterKeyType(const JSCallbackInfo& info);
     static void SetCaretColor(const JSCallbackInfo& info);
+    static void SetFontSize(const JSCallbackInfo& info);
+    static void SetFontWeight(const std::string& value);
+    static void SetTextColor(const JSCallbackInfo& info);
+    static void SetFontStyle(int32_t value);
+    static void SetFontFamily(const JSCallbackInfo& info);
     static void SetOnEditChanged(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetMaxLength(uint32_t value);
     static void JsHeight(const JSCallbackInfo& info);
+    static void SetOnCopy(const JSCallbackInfo& info);
+    static void SetOnCut(const JSCallbackInfo& info);
+    static void SetOnPaste(const JSCallbackInfo& info);
 
 private:
     static void InitDefaultStyle();

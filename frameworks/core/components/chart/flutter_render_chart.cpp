@@ -48,11 +48,6 @@ constexpr int32_t MIN_SDK_VERSION = 6;
 
 } // namespace
 
-RefPtr<RenderNode> RenderChart::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderChart>();
-}
-
 RenderLayer FlutterRenderChart::GetRenderLayer()
 {
     if (!layer_) {

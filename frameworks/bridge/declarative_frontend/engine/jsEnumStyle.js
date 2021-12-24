@@ -36,6 +36,12 @@ var TextAlign;
   TextAlign[TextAlign["End"] = 2] = "End";
 })(TextAlign || (TextAlign = {}));
 
+var DataPanelType;
+(function (DataPanelType) {
+  DataPanelType[DataPanelType["Line"] = 0] = "Line";
+  DataPanelType[DataPanelType["Rainbow"] = 4] = "Rainbow";
+})(DataPanelType || (DataPanelType = {}));
+
 var FontWeight;
 (function (FontWeight) {
   FontWeight["Light"] = "light";
@@ -313,6 +319,14 @@ var PanDirection;
   PanDirection[PanDirection["All"] = 15] = "All";
 })(PanDirection || (PanDirection = {}));
 
+var SwipeDirection;
+(function (SwipeDirection) {
+  SwipeDirection[SwipeDirection["None"] = 0] = "None";
+  SwipeDirection[SwipeDirection["Horizontal"] = 1] = "Horizontal";
+  SwipeDirection[SwipeDirection["Vertical"] = 2] = "Vertical";
+  SwipeDirection[SwipeDirection["All"] = 3] = "All";
+})(SwipeDirection || (SwipeDirection = {}));
+
 var GestureDirection;
 (function (GestureDirection) {
   GestureDirection[GestureDirection["All"] = 0] = "All";
@@ -455,6 +469,15 @@ var RouteType;
   RouteType[RouteType["Pop"] = 2] = "Pop";
 })(RouteType || (RouteType = {}));
 
+var FocusDirection;
+(function (FocusDirection) {
+  FocusDirection[FocusDirection["Up"] = 19] = "Up";
+  FocusDirection[FocusDirection["Down"] = 20] = "Down";
+  FocusDirection[FocusDirection["Left"] = 21] = "Left";
+  FocusDirection[FocusDirection["Right"] = 22] = "Right";
+  FocusDirection[FocusDirection["Tab"] = 61] = "Tab";
+})(FocusDirection || (FocusDirection = {}));
+
 var SlideEffect;
 (function (SlideEffect) {
   SlideEffect[SlideEffect["None"] = 0] = "None";
@@ -564,6 +587,13 @@ var SwiperDisplayMode;
   SwiperDisplayMode[SwiperDisplayMode["AutoLinear"] = 1] = "AutoLinear";
 })(SwiperDisplayMode || (SwiperDisplayMode = {}));
 
+var EdgeEffect;
+(function (EdgeEffect) {
+  EdgeEffect[EdgeEffect["Spring"] = 0] = "Spring";
+  EdgeEffect[EdgeEffect["Fade"] = 1] = "Fade";
+  EdgeEffect[EdgeEffect["None"] = 2] = "None";
+})(EdgeEffect || (EdgeEffect = {}));
+
 var DatePickerType;
 (function (DatePickerType) {
   DatePickerType[DatePickerType["Time"] = 0] = "Time";
@@ -586,3 +616,45 @@ var EnterKeyType;
   EnterKeyType[EnterKeyType["Next"] = 5] = "Next";
   EnterKeyType[EnterKeyType["Done"] = 6] = "Done";
 })(EnterKeyType || (EnterKeyType = {}));
+
+var ItemState
+(function (ItemState) {
+  ItemState[ItemState["Normal"] = 0] = "Normal";
+  ItemState[ItemState["Disabled"] = 1] = "Disabled";
+  ItemState[ItemState["Waiting"] = 2] = "Waiting";
+  ItemState[ItemState["Skip"] = 3] = "Skip";
+})(ItemState || (ItemState = {}));
+
+var NavigationTitleMode;
+(function (NavigationTitleMode) {
+  NavigationTitleMode[NavigationTitleMode["Free"] = 0] = "Free";
+  NavigationTitleMode[NavigationTitleMode["Full"] = 1] = "Full";
+  NavigationTitleMode[NavigationTitleMode["Mini"] = 2] = "Mini";
+})(NavigationTitleMode || (NavigationTitleMode = {}));
+
+var HoverEffect;
+(function (HoverEffect) {
+  HoverEffect[HoverEffect["Auto"] = 4] = "Auto";
+  HoverEffect[HoverEffect["Scale"] = 2] = "Scale";
+  HoverEffect[HoverEffect["Board"] = 3] = "Board";
+  HoverEffect[HoverEffect["None"] = 0] = "None";
+})(HoverEffect || (HoverEffect = {}));
+
+var ScrollBarDirection;
+(function (ScrollBarDirection) {
+  ScrollBarDirection[ScrollBarDirection["Vertical"] = 0] = "Vertical";
+  ScrollBarDirection[ScrollBarDirection["Horizontal"] = 1] = "Horizontal";
+  ScrollBarDirection[ScrollBarDirection["None"] = 2] = "None";
+}) (ScrollBarDirection || (ScrollBarDirection = {}));
+
+var Placement;
+(function (Placement) {
+  Placement[Placement["Left"] = 0] = "Left";
+  Placement[Placement["Right"] = 1] = "Right";
+  Placement[Placement["Top"] = 2] = "Top";
+  Placement[Placement["Bottom"] = 3] = "Bottom";
+  Placement[Placement["TopLeft"] = 4] = "TopLeft";
+  Placement[Placement["TopRight"] = 5] = "TopRight";
+  Placement[Placement["BottomLeft"] = 6] = "BottomLeft";
+  Placement[Placement["BottomRight"] = 7] = "BottomRight";
+}) (Placement || (Placement = {}));

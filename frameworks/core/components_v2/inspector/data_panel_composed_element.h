@@ -32,7 +32,7 @@ public:
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
-    std::string GetValues() const;
+    std::unique_ptr<JsonValue> GetValues() const;
     std::string GetMax() const;
     std::string GetCloseEffect() const;
 

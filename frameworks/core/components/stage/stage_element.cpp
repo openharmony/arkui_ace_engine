@@ -15,6 +15,7 @@
 
 #include "core/components/stage/stage_element.h"
 
+#include "base/log/ace_trace.h"
 #include "base/utils/system_properties.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/shared_transition_controller.h"
@@ -314,6 +315,7 @@ bool StageElement::PerformPushPageTransition(const RefPtr<Element>& elementIn, c
     }
     LOGD("notify push page event. page id: in: %{public}d, out: %{public}d", pageIn->GetPageId(), pageOut->GetPageId());
     NotifyPageTransitionListeners(TransitionEvent::PUSH_START, pageIn, pageOut);
+    ACE_SCOPED_TRACE("PUSH_START");
     if (!InitTransition(transitionIn, transitionOut, TransitionEvent::PUSH_START)) {
         LOGW("init transition failed, skip push transition.");
         return false;
@@ -333,6 +335,7 @@ bool StageElement::PerformPushPageTransition(const RefPtr<Element>& elementIn, c
         auto stage = weak.Upgrade();
         if (stage) {
             stage->NotifyPageTransitionListeners(TransitionEvent::PUSH_END, pageInWeak, pageOutWeak);
+            ACE_SCOPED_TRACE("PUSH_END");
             auto context = stage->context_.Upgrade();
             if (context) {
                 context->OnPageShow();
@@ -366,6 +369,7 @@ void StageElement::AddListenerForPopPage(
             stage->UpdateChild(elementIn, nullptr);
             stage->MakeTopPageTouchable();
             stage->NotifyPageTransitionListeners(TransitionEvent::POP_END, pageInWeak, pageOutWeak);
+            ACE_SCOPED_TRACE("POP_END");
             stage->RefreshFocus();
         }
     });
@@ -387,6 +391,7 @@ bool StageElement::PerformPopPageTransition(const RefPtr<Element>& elementIn, co
         transitionOut->SetDeclarativeDirection(TransitionDirection::TRANSITION_IN);
     }
     NotifyPageTransitionListeners(TransitionEvent::POP_START, pageIn, pageOut);
+    ACE_SCOPED_TRACE("POP_START");
     if (!InitTransition(transitionIn, transitionOut, TransitionEvent::POP_START)) {
         LOGW("init transition failed, skip pop transition.");
         return false;
@@ -611,6 +616,7 @@ bool StageElement::InitTransition(const RefPtr<PageTransitionElement>& transitio
     auto context = GetContext().Upgrade();
     if (context && context->GetIsDeclarative()) {
         transition->LoadTransition();
+        transition->ResetPageTransitionAnimation();
     }
     transition->SetTransition(deviceType, event, direction, cardRRect);
     transition->SetTransitionDirection(event, direction);

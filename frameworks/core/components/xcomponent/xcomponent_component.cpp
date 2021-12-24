@@ -90,10 +90,4 @@ void XComponentTaskPool::NativeXComponentInit(
     }
     renderNode->NativeXComponentInit(nativeXComponent, nativeXComponentImpl);
 }
-
-void XComponentTaskPool::PluginUpdate()
-{
-    auto task = [](RenderXComponent& interface, const Offset& offset) { interface.PluginUpdate(); };
-    PushTask(task);
-}
 } // namespace OHOS::Ace
