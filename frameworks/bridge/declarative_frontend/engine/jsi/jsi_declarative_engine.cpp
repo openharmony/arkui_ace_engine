@@ -327,6 +327,7 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
     }
     runtime_.reset();
     runtime_ = nullptr;
+    JsiDeclarativeUtils::SetCurrentState(JsErrorType::DESTROY_PAGE_ERROR, instanceId_, "", nullptr);
 }
 
 bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
