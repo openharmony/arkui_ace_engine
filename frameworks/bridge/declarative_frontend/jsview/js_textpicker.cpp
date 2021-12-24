@@ -153,6 +153,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto getValue = paramObject->GetProperty("value");
     auto getSelected = paramObject->GetProperty("selected");
+    auto defaultHeight = paramObject->GetProperty("defaultPickerItemHeight");
     JSRef<JSArray> getRange = paramObject->GetProperty("range");
     std::vector<std::string> getRangeVector;
     if (!JSViewAbstract::ParseJsStrArray(getRange, getRangeVector)) {
@@ -171,8 +172,14 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
         return;
     }
 
+    Dimension height;
+    if (defaultHeight->IsNumber() && !JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
+        return;
+    }
+
     PickerText->SetIsDialog(false);
     PickerText->SetIsCreateDialogComponent(true);
+    PickerText->SetColumnHeight(height);
     PickerText->SetSelected(selected);
     PickerText->SetRange(getRangeVector);
     DialogProperties properties {};
