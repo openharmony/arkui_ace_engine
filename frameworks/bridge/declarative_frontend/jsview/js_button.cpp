@@ -295,15 +295,12 @@ void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
         LOGE("Button component create failed");
         return;
     }
-    auto state = GetState(info, 1);
-    if (state != StyleState::PRESSED) {
-        auto buttonTheme = GetTheme<ButtonTheme>();
-        if (buttonTheme) {
-            Color blendColor = buttonTheme->GetClickedColor();
-            buttonComponent->SetClickedColor(buttonComponent->GetBackgroundColor().BlendColor(blendColor));
-        }
+    buttonComponent->SetBackgroundColor(backgroundColor);
+    auto buttonTheme = GetTheme<ButtonTheme>();
+    if (buttonTheme) {
+        Color blendColor = buttonTheme->GetClickedColor();
+        buttonComponent->SetClickedColor(buttonComponent->GetBackgroundColor().BlendColor(blendColor));
     }
-    buttonComponent->SetColorForState(backgroundColor, GetState(info, 1));
     info.ReturnSelf();
 }
 
@@ -318,7 +315,7 @@ void JSButton::JsWidth(const JSCallbackInfo& info)
     auto option = stack->GetImplicitAnimationOption();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
     if (buttonComponent) {
-        buttonComponent->SetWidthForState(value, option, GetState(info, 1));
+        buttonComponent->SetWidth(value, option);
     }
 }
 
@@ -333,7 +330,7 @@ void JSButton::JsHeight(const JSCallbackInfo& info)
     auto option = stack->GetImplicitAnimationOption();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
     if (buttonComponent) {
-        buttonComponent->SetHeightForState(value, option, GetState(info, 1));
+        buttonComponent->SetHeight(value, option);
     }
 }
 
@@ -385,9 +382,8 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
         return;
     }
     buttonComponent->SetRadiusState(true);
-    buttonComponent->SetRectRadiusForState(radius, GetState(info, 1));
-    auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
-    boxComponent->SetBorderRadiusForState(radius, stack->GetImplicitAnimationOption(), GetState(info, 1));
+    buttonComponent->SetRectRadius(radius);
+    JSViewAbstract::SetBorderRadius(radius, stack->GetImplicitAnimationOption());
 }
 
 Dimension JSButton::GetSizeValue(const JSCallbackInfo& info)

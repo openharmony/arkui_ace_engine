@@ -47,7 +47,6 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void OnPaintFinish() override;
-    virtual void OnStatusStyleChanged(StyleState state) override;
 
     void OnAttachContext() override
     {
@@ -200,6 +199,7 @@ private:
 
     AnimatableDimension width_;
     AnimatableDimension height_;
+    Dimension radius_;
     Dimension minWidth_;
     bool valueChanged_ = false;
     bool isClickAnimation_ = false;

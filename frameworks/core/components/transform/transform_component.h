@@ -32,18 +32,6 @@ inline constexpr int32_t INDEX_THREE = 3;
 inline constexpr float PERSPECTIVE = 0.0005f;
 inline constexpr Dimension HALF_PERCENT = 0.5_pct;
 
-enum class TransformStateAttribute {
-    ROTATE,
-    ROTATEX,
-    ROTATEY,
-    SCALE,
-    SCALEX,
-    SCALEY,
-    TRANSLATE,
-    TRANSLATEX,
-    TRANSLATEY,
-};
-
 class ACE_EXPORT TransformComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(TransformComponent, SoleChildComponent)
 
@@ -167,20 +155,6 @@ public:
     void SetTranslateTransition(TransitionType type, const Dimension& x, const Dimension& y, const Dimension& z);
     void SetRotateTransition(TransitionType type, double x, double y, double z, double angle);
 
-    RefPtr<StateAttributeList<TransformStateAttribute>> GetStateAttributeList()
-    {
-        if (stateAttributeList_ == nullptr) {
-            stateAttributeList_ = MakeRefPtr<StateAttributeList<TransformStateAttribute>>();
-        }
-        return stateAttributeList_;
-    }
-
-    bool HasStateAttributeList()
-    {
-        return stateAttributeList_ != nullptr;
-    }
-
-
 private:
     Matrix4 transform_;
     AnimatableTransformOperations transformEffects;
@@ -192,7 +166,6 @@ private:
     ClickSpringEffectType clickSpringEffectType_ = ClickSpringEffectType::NONE;
     TransitionEffect transitionEffect_ = TransitionEffect::NONE;
     Shadow shadow_;
-    RefPtr<StateAttributeList<TransformStateAttribute>> stateAttributeList_ = nullptr;
 };
 
 } // namespace OHOS::Ace

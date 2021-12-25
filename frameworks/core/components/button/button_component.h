@@ -22,7 +22,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/border_edge.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/state_attributes.h"
 #include "core/pipeline/base/component_group.h"
 #include "core/pipeline/base/measurable.h"
 #include "frameworks/core/components/declaration/button/button_declaration.h"
@@ -33,8 +32,6 @@ namespace OHOS::Ace {
 constexpr int32_t LAYOUT_FLAG_EXTEND_TO_PARENT = 1;
 
 using ProgressCallback = std::function<void(uint32_t)>;
-
-enum class ButtonStateAttribute { COLOR, RADIUS, HEIGHT, WIDTH };
 
 class ACE_EXPORT ButtonComponent : public ComponentGroup, public LabelTarget, public Measurable {
     DECLARE_ACE_TYPE(ButtonComponent, ComponentGroup, LabelTarget, Measurable);
@@ -81,25 +78,6 @@ public:
     void SetRadiusState(bool state);
     void SetMinWidth(const Dimension& width);
     void SetRectRadius(const Dimension& radius);
-
-    void SetHeightForState(const Dimension& height, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<ButtonStateAttribute, AnimatableDimension>>(
-            state, ButtonStateAttribute::HEIGHT, AnimatableDimension(height, option)));
-    }
-
-    void SetWidthForState(const Dimension& width, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<ButtonStateAttribute, AnimatableDimension>>(
-            state, ButtonStateAttribute::WIDTH, AnimatableDimension(width, option)));
-    }
-
-    void SetRectRadiusForState(const Dimension& radius, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<ButtonStateAttribute, Dimension>>(
-            state, ButtonStateAttribute::RADIUS, radius));
-    };
-
     void SetProgressDiameter(const Dimension& diameter);
     void SetBackgroundColor(const Color& color);
     void SetClickedColor(const Color& color);
@@ -109,13 +87,6 @@ public:
     void SetProgressColor(const Color& color);
     void SetProgressFocusColor(const Color& color);
     void SetFocusAnimationColor(const Color& color);
-
-    void SetColorForState(const Color& color, StyleState state)
-    {
-        GetStateAttributeList()->push_back(
-            MakeRefPtr<StateAttributeValue<ButtonStateAttribute, Color>>(state, ButtonStateAttribute::COLOR, color));
-    }
-
     void SetBorderEdge(const BorderEdge& borderEdge);
     void SetClickedEventId(const EventMarker& eventId);
     void SetClickFunction(std::function<void()>&& clickCallback);
@@ -193,19 +164,6 @@ public:
 
     uint32_t Compare(const RefPtr<Component>& component) const override;
 
-    RefPtr<StateAttributeList<ButtonStateAttribute>> GetStateAttributeList()
-    {
-        if (stateAttributeList_ == nullptr) {
-            stateAttributeList_ = MakeRefPtr<StateAttributeList<ButtonStateAttribute>>();
-        }
-        return stateAttributeList_;
-    }
-
-    bool HasStateAttributeList()
-    {
-        return stateAttributeList_ != nullptr;
-    }
-
 private:
     RefPtr<ButtonDeclaration> declaration_;
     ButtonType type_ { ButtonType::NORMAL };
@@ -217,7 +175,6 @@ private:
     uint32_t layoutFlag_ = 0;
     // for custom button type
     std::array<Radius, 4> radii_ = { Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp) };
-    RefPtr<StateAttributeList<ButtonStateAttribute>> stateAttributeList_;
 };
 
 class ButtonBuilder {

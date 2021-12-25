@@ -24,20 +24,8 @@
 
 namespace OHOS::Ace {
 
-using OnDragFunc = std::function<void(const RefPtr<DragEvent>& info)>;
 
-enum class BoxStateAttribute {
-    ASPECTRATIO,
-    BORDER,
-    COLOR,
-    BORDER_COLOR,
-    BORDER_RADIUS,
-    BORDER_STYLE,
-    BORDER_WIDTH,
-    GRADIENT,
-    HEIGHT,
-    WIDTH,
-};
+using OnDragFunc = std::function<void(const RefPtr<DragEvent>& info)>;
 
 // A component can box others components.
 class ACE_EXPORT BoxComponent : public BoxBaseComponent {
@@ -87,11 +75,12 @@ public:
         SetDecorationUpdateFlag(true);
     }
 
-    void SetColor(
-        const Color& color, const AnimationOption& option = AnimationOption(), StyleState state = StyleState::NORMAL)
+    void SetColor(const Color& color, const AnimationOption& option = AnimationOption())
     {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(
-            state, BoxStateAttribute::COLOR, AnimatableColor(color, option)));
+        if (!backDecoration_) {
+            backDecoration_ = AceType::MakeRefPtr<Decoration>();
+        }
+        backDecoration_->SetBackgroundColor(color, option);
     }
 
     void SetColor(const AnimatableColor& color)
@@ -257,61 +246,6 @@ public:
         return geometryTransitionId_;
     }
 
-    RefPtr<StateAttributeList<BoxStateAttribute>> GetStateAttributeList()
-    {
-        if (stateAttributeList_ == nullptr) {
-            stateAttributeList_ = MakeRefPtr<StateAttributeList<BoxStateAttribute>>();
-        }
-        return stateAttributeList_;
-    }
-
-    bool HasStateAttributeList()
-    {
-        return stateAttributeList_ != nullptr;
-    }
-
-    void SetWidthForState(const Dimension& width, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(
-            state, BoxStateAttribute::WIDTH, AnimatableDimension(width, option)));
-    }
-
-    void SetHeightForState(const Dimension& height, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(
-            state, BoxStateAttribute::HEIGHT, AnimatableDimension(height, option)));
-    }
-
-    void SetBorderColorForState(const Color& color, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(
-            state, BoxStateAttribute::BORDER_COLOR, AnimatableColor(color, option)));
-    }
-
-    void SetBorderRadiusForState(const Dimension& radius, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(
-            state, BoxStateAttribute::BORDER_RADIUS, AnimatableDimension(radius, option)));
-    }
-
-    void SetBorderStyleForState(BorderStyle style, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, BorderStyle>>(
-            state, BoxStateAttribute::BORDER_STYLE, style));
-    }
-
-    void SetBorderWidthForState(const Dimension& width, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(
-            state, BoxStateAttribute::BORDER_WIDTH, AnimatableDimension(width, option)));
-    }
-
-    void SetGradientForState(const Gradient& value, StyleState state)
-    {
-        GetStateAttributeList()->push_back(
-            MakeRefPtr<StateAttributeValue<BoxStateAttribute, Gradient>>(state, BoxStateAttribute::GRADIENT, value));
-    }
-
 private:
     RefPtr<Decoration> backDecoration_;
     RefPtr<Decoration> frontDecoration_;
@@ -329,7 +263,6 @@ private:
     EventMarker onDomDragLeaveId_;
     EventMarker onDomDragDropId_;
     std::string geometryTransitionId_;
-    RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_ = nullptr;
     TextDirection inspectorDirection_ { TextDirection::LTR };
 };
 

@@ -107,12 +107,14 @@ void JSFlex::JsHeight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    JSViewAbstract::JsHeight(info);
+
     SetHeight(info[0]);
 }
 
 void JSFlex::SetHeight(const JSRef<JSVal>& jsValue)
 {
+    JSViewAbstract::JsHeight(jsValue);
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto columComponent = AceType::DynamicCast<ColumnComponent>(component);
     auto rowComponent = AceType::DynamicCast<RowComponent>(component);
@@ -131,12 +133,13 @@ void JSFlex::JsWidth(const JSCallbackInfo& info)
         return;
     }
 
-    JSViewAbstract::JsWidth(info);
     SetWidth(info[0]);
 }
 
 void JSFlex::SetWidth(const JSRef<JSVal>& jsValue)
 {
+    JSViewAbstract::JsWidth(jsValue);
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto columComponent = AceType::DynamicCast<ColumnComponent>(component);
     auto rowComponent = AceType::DynamicCast<RowComponent>(component);
@@ -161,9 +164,7 @@ void JSFlex::JsSize(const JSCallbackInfo& info)
     }
 
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    JSViewAbstract::JsWidth(info);
     SetWidth(sizeObj->GetProperty("width"));
-    JSViewAbstract::JsHeight(info);
     SetHeight(sizeObj->GetProperty("height"));
 }
 
