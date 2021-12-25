@@ -25,7 +25,7 @@ build_component("text_field") {
 
   rosen_sources = [ "rosen_render_text_field.cpp" ]
 
-  #standard_input_sources = [ "on_text_changed_listener_impl.cpp" ]
+  standard_input_sources = [ "on_text_changed_listener_impl.cpp" ]
   standard_input_deps = [
     "inputmethod_native:inputmethod_ability",
     "inputmethod_native:inputmethod_client",

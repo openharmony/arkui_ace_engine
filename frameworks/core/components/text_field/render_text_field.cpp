@@ -27,7 +27,7 @@
 #include "core/event/ace_event_helper.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
-// #include "core/components/text_field/on_text_changed_listener_impl.h"
+#include "core/components/text_field/on_text_changed_listener_impl.h"
 #endif
 
 namespace OHOS::Ace {
@@ -60,14 +60,14 @@ constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
 } // namespace
 
 #if defined(ENABLE_STANDARD_INPUT)
-// sptr<MiscServices::OnTextChangedListener> g_listener = nullptr;
+sptr<MiscServices::OnTextChangedListener> g_listener = nullptr;
 
 void RenderTextField::UpdateConfiguration()
 {
-    // MiscServices::Configuration configuration;
-    // configuration.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>((int32_t)action_));
-    // configuration.SetTextInputType(static_cast<MiscServices::TextInputType>((int32_t)keyboard_));
-    // MiscServices::InputMethodController::GetInstance()->OnConfigurationChange(configuration);
+    MiscServices::Configuration configuration;
+    configuration.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>((int32_t)action_));
+    configuration.SetTextInputType(static_cast<MiscServices::TextInputType>((int32_t)keyboard_));
+    MiscServices::InputMethodController::GetInstance()->OnConfigurationChange(configuration);
 }
 #endif
 
@@ -95,7 +95,7 @@ RenderTextField::~RenderTextField()
     // If soft keyboard is still exist, close it.
     if (HasConnection()) {
 #if defined(ENABLE_STANDARD_INPUT)
-        // MiscServices::InputMethodController::GetInstance()->Close();
+        MiscServices::InputMethodController::GetInstance()->Close();
 #else
         connection_->Close(GetInstanceId());
         connection_ = nullptr;
@@ -242,7 +242,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     onSearch_ = textField->GetOnSearch();
 
 #if defined(ENABLE_STANDARD_INPUT)
-    // UpdateConfiguration();
+    UpdateConfiguration();
 #endif
     SetCallback(textField);
     UpdateFormatters();
@@ -750,10 +750,10 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
 
     if (softKeyboardEnabled_) {
 #if defined(ENABLE_STANDARD_INPUT)
-        // if (!HasConnection()) {
-        //     g_listener = new OnTextChangedListenerImpl(WeakClaim(this));
-        //     MiscServices::InputMethodController::GetInstance()->Attach(g_listener);
-        // }
+        if (!HasConnection()) {
+            g_listener = new OnTextChangedListenerImpl(WeakClaim(this));
+            MiscServices::InputMethodController::GetInstance()->Attach(g_listener);
+        }
 #else
         if (!HasConnection()) {
             AttachIme();
@@ -786,7 +786,7 @@ bool RenderTextField::CloseKeyboard(bool forceClose)
         StopTwinkling();
         if (HasConnection()) {
 #if defined(ENABLE_STANDARD_INPUT)
-            // MiscServices::InputMethodController::GetInstance()->HideTextInput();
+            MiscServices::InputMethodController::GetInstance()->HideTextInput();
 #else
             connection_->Close(GetInstanceId());
             connection_ = nullptr;
@@ -1440,9 +1440,9 @@ void RenderTextField::UpdateSelection(int32_t start, int32_t end)
 void RenderTextField::UpdateRemoteEditing(bool needFireChangeEvent)
 {
 #if defined(ENABLE_STANDARD_INPUT)
-    // auto value = GetEditingValue();
-    // MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
-    //     StringUtils::Str8ToStr16(value.text), value.selection.GetStart(), value.selection.GetEnd());
+    auto value = GetEditingValue();
+    MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
+        StringUtils::Str8ToStr16(value.text), value.selection.GetStart(), value.selection.GetEnd());
 #else
     if (!HasConnection()) {
         return;
@@ -1457,7 +1457,7 @@ void RenderTextField::UpdateRemoteEditingIfNeeded(bool needFireChangeEvent)
         return;
     }
 #if defined(ENABLE_STANDARD_INPUT)
-    // UpdateRemoteEditing(needFireChangeEvent);
+    UpdateRemoteEditing(needFireChangeEvent);
 #else
     if (!lastKnownRemoteEditingValue_ || GetEditingValue() != *lastKnownRemoteEditingValue_) {
         lastKnownRemoteEditingValue_ = std::make_shared<TextEditingValue>(GetEditingValue());
