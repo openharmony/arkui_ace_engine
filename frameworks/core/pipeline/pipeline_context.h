@@ -721,8 +721,7 @@ public:
 
     bool CloseImplicitAnimation();
 
-    void AddKeyFrame(float fraction, const RefPtr<Curve>& curve,
-        const std::function<void()>& propertyCallback);
+    void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback);
 
     void AddKeyFrame(float fraction, const std::function<void()>& propertyCallback);
 
@@ -901,7 +900,7 @@ public:
     {
         surfaceChangedCallbackMap_.erase(callbackId);
     }
-    void StartSystemDrag(const std::string &str, const RefPtr<PixelMap>& pixmap);
+    void StartSystemDrag(const std::string& str, const RefPtr<PixelMap>& pixmap);
     void InitDragListener();
     bool ProcessDragEvent(int action, double windowX, double windowY, const std::string& data);
     void SetPreTargetRenderNode(const RefPtr<RenderNode>& preTargetRenderNode);
@@ -968,7 +967,18 @@ public:
 
     const std::shared_ptr<OHOS::Rosen::RSUIDirector>& GetRSUIDirector();
 
+    void SetOnVsyncProfiler(const std::function<void(const std::string&)> callback)
+    {
+        onVsyncProfiler_ = callback;
+    }
+
+    void ResetOnVsyncProfiler()
+    {
+        onVsyncProfiler_ = nullptr;
+    }
+
 private:
+    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
     void FlushLayout();
     void FlushGeometryProperties();
@@ -1172,10 +1182,12 @@ private:
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
 
     std::vector<WeakPtr<PipelineContext>> touchPluginPipelineContext_;
-    Offset pluginOffset_ {0, 0};
+    Offset pluginOffset_ { 0, 0 };
 
     bool isRebuildFinished_ = false;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
+
+    std::function<void(const std::string&)> onVsyncProfiler_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

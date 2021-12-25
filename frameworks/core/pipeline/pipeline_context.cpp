@@ -25,6 +25,7 @@
 #endif
 
 #include "base/log/ace_trace.h"
+#include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -65,8 +66,8 @@
 #include "core/components/stage/stage_component.h"
 #include "core/components/stage/stage_element.h"
 #include "core/components/theme/app_theme.h"
-#include "core/components_v2/inspector/shape_composed_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
+#include "core/components_v2/inspector/shape_composed_element.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/factories/flutter_render_factory.h"
@@ -189,6 +190,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 
 void PipelineContext::FlushMessages()
 {
+    ACE_FUNCTION_TRACK();
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
         rsUIDirector_->SendMessages();
@@ -198,8 +200,9 @@ void PipelineContext::FlushMessages()
 
 void PipelineContext::FlushBuild()
 {
-    ACE_FUNCTION_TRACE();
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
+    ACE_FUNCTION_TRACE();
 
     isRebuildFinished_ = false;
     if (dirtyElements_.empty()) {
@@ -248,6 +251,7 @@ void PipelineContext::FlushPredictLayout(int64_t targetTimestamp)
 void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     if (dirtyFocusNode_) {
         dirtyFocusNode_->RequestFocusImmediately();
         dirtyFocusNode_.Reset();
@@ -276,6 +280,7 @@ void PipelineContext::FlushFocus()
 
 void PipelineContext::FireVisibleChangeEvent()
 {
+    ACE_FUNCTION_TRACK();
     auto accessibilityManager = GetAccessibilityManager();
     if (accessibilityManager) {
         accessibilityManager->TriggerVisibleChangeEvent();
@@ -406,6 +411,7 @@ void PipelineContext::CreateGeometryTransition()
 void PipelineContext::FlushLayout()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
     if (dirtyLayoutNodes_.empty()) {
@@ -471,6 +477,7 @@ void PipelineContext::CorrectPosition()
 void PipelineContext::FlushRender()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
     if (dirtyRenderNodes_.empty() && dirtyRenderNodesInOverlay_.empty() && !needForcedRefresh_) {
@@ -538,6 +545,7 @@ void PipelineContext::FlushRender()
 void PipelineContext::FlushRenderFinish()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
     if (!needPaintFinishNodes_.empty()) {
@@ -551,6 +559,7 @@ void PipelineContext::FlushRenderFinish()
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
     flushAnimationTimestamp_ = nanoTimestamp;
     isFlushingAnimation_ = true;
@@ -570,6 +579,7 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 void PipelineContext::FlushPostAnimation()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
     if (postAnimationFlushListeners_.empty()) {
@@ -596,6 +606,7 @@ void PipelineContext::FlushPageUpdateTasks()
 void PipelineContext::FlushAnimationTasks()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     if (animationCallback_) {
         taskExecutor_->PostTask(animationCallback_, TaskExecutor::TaskType::JS);
     }
@@ -629,6 +640,7 @@ void PipelineContext::ProcessPreFlush()
 void PipelineContext::ProcessPostFlush()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
     if (postFlushListeners_.empty()) {
@@ -1511,7 +1523,19 @@ void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    if (onVsyncProfiler_) {
+        AceTracker::Start();
+    }
+    FlushVsync(nanoTimestamp, frameCount);
+    if (onVsyncProfiler_) {
+        onVsyncProfiler_(AceTracker::Stop());
+    }
+}
 
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
 #if defined(ENABLE_NATIVE_VIEW)
     if (frameCount_ < 2) {
         frameCount_++;
@@ -1522,7 +1546,6 @@ void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
         rsUIDirector_->SetTimeStamp(nanoTimestamp);
     }
 #endif
-
     if (isSurfaceReady_) {
         FlushAnimation(GetTimeFromExternalTimer());
         FlushPipelineWithoutAnimation();
@@ -2474,6 +2497,7 @@ void PipelineContext::AddDeactivateElement(const int32_t id, const RefPtr<Elemen
 void PipelineContext::ClearDeactivateElements()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     for (auto iter = deactivateElements_.begin(); iter != deactivateElements_.end();) {
         auto element = iter->second;
         RefPtr<RenderNode> render = element ? element->GetRenderNode() : nullptr;
@@ -2607,6 +2631,7 @@ bool PipelineContext::ProcessDragEvent(int action, double windowX, double window
 void PipelineContext::FlushWindowBlur()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
 
     if (!updateWindowBlurRegionHandler_) {
         return;

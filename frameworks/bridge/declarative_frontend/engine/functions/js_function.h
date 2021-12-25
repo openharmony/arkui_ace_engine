@@ -35,10 +35,9 @@ public:
     void Execute();
     void Execute(const std::vector<std::string>& keys, const std::string& param);
     void ExecuteNew(const std::vector<std::string>& keys, const std::string& param);
-
-protected:
     JSRef<JSVal> ExecuteJS(int argc = 0, JSRef<JSVal>* argv = nullptr);
 
+protected:
     JSRef<JSFunc> jsFunction_;
     JSWeak<JSVal> jsThis_;
 };

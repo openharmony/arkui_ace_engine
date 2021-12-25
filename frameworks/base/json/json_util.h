@@ -73,6 +73,7 @@ public:
     bool Put(const char* key, const char* value);
     bool Put(const char* key, size_t value);
     bool Put(const char* key, int32_t value);
+    bool Put(const char* key, int64_t value);
     bool Put(const char* key, double value);
     bool Put(const char* key, bool value);
     bool Put(const char* key, const std::unique_ptr<JsonValue>& value);

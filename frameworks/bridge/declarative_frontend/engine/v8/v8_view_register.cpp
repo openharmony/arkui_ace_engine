@@ -15,6 +15,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
@@ -753,6 +754,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JsDragFunction::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
+
+    JSProfiler::JSBind(globalObj);
 
     auto delegate =
         static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));

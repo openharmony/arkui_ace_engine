@@ -18,6 +18,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
 #include "bridge/common/accessibility/js_accessibility_manager.h"
+#include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "core/components/common/layout/constants.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
@@ -835,6 +836,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSShareData::JSBind(globalObj);
 
     JsDragFunction::JSBind(globalObj);
+
+    JSProfiler::JSBind(globalObj);
 
     JSObjectTemplate mainAxisAlign;
     mainAxisAlign.Constant("Start", 1);
