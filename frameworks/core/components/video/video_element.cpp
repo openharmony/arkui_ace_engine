@@ -298,10 +298,15 @@ void VideoElement::PreparePlayer()
 
     sptr<Surface> producerSurface;
 #ifdef ENABLE_ROSEN_BACKEND
-    sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
-    option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_LAUNCHING);
-    option->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-    previewWindow_ = Rosen::Window::Create("video_window", option);
+    if (previewWindow_ == nullptr) {
+        sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
+        option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_LAUNCHING);
+        option->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+        previewWindow_ = Rosen::Window::Create("video_window", option);
+    }
+    if (previewWindow_ == nullptr || previewWindow_->GetSurfaceNode() == nullptr) {
+        return;
+    }
     producerSurface = previewWindow_->GetSurfaceNode()->GetSurface();
     previewWindow_->Show();
 #else
