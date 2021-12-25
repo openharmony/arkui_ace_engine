@@ -117,6 +117,7 @@ class JsiObject : public JsiType<panda::ObjectRef> {
 public:
     JsiObject();
     JsiObject(panda::Local<panda::ObjectRef> val);
+    bool IsUndefined() const;
     ~JsiObject() override = default;
     enum InternalFieldIndex { INSTANCE = 0 };
 
