@@ -67,6 +67,7 @@ void RenderBox::Update(const RefPtr<Component>& component)
         RenderBoxBase::Update(component);
         UpdateBackDecoration(box->GetBackDecoration());
         UpdateFrontDecoration(box->GetFrontDecoration());
+        hoverColorBegin_ = box->GetColor();
         animationType_ = box->GetMouseAnimationType();
         hoverAnimationType_ = animationType_;
         isZoom = animationType_ == HoverAnimationType::SCALE;
@@ -107,6 +108,8 @@ void RenderBox::Update(const RefPtr<Component>& component)
         if (onDrag_ || onDrop_) {
             context->InitDragListener();
         }
+
+        onHover_ = box->GetOnHoverId();
 
         auto gestures = box->GetGestures();
         UpdateGestureRecognizer(gestures);
@@ -271,6 +274,7 @@ void RenderBox::UpdateBackDecoration(const RefPtr<Decoration>& newDecoration)
 {
     if (!newDecoration) {
         backDecoration_ = newDecoration;
+        OnAttachContext();
         return;
     }
 
@@ -278,6 +282,7 @@ void RenderBox::UpdateBackDecoration(const RefPtr<Decoration>& newDecoration)
         LOGD("backDecoration_ is null.");
         backDecoration_ = AceType::MakeRefPtr<Decoration>();
     }
+    OnAttachContext();
 
     backDecoration_->SetAnimationColor(newDecoration->GetAnimationColor());
     backDecoration_->SetArcBackground(newDecoration->GetArcBackground());
@@ -674,7 +679,13 @@ void RenderBox::OnMouseHoverExitAnimation()
     controllerExit_->SetFillMode(FillMode::FORWARDS);
 }
 
-void RenderBox::CreateFloatAnimation(RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue)
+WeakPtr<RenderNode> RenderBox::CheckHoverNode()
+{
+    return AceType::WeakClaim<RenderNode>(this);
+}
+
+void RenderBox::CreateFloatAnimation(
+    RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue)
 {
     if (!floatAnimation) {
         return;
@@ -683,8 +694,7 @@ void RenderBox::CreateFloatAnimation(RefPtr<KeyframeAnimation<float>>& floatAnim
     auto keyframeEnd = AceType::MakeRefPtr<Keyframe<float>>(1.0, endValue);
     floatAnimation->AddKeyframe(keyframeBegin);
     floatAnimation->AddKeyframe(keyframeEnd);
-    WeakPtr<Decoration> weakDecoration = WeakPtr<Decoration>(backDecoration_);
-    floatAnimation->AddListener([weakBox = AceType::WeakClaim(this), weakDecoration](float value) {
+    floatAnimation->AddListener([weakBox = AceType::WeakClaim(this)](float value) {
         auto box = weakBox.Upgrade();
         if (box) {
             box->scale_ = value;
@@ -703,41 +713,59 @@ void RenderBox::CreateColorAnimation(
     auto keyframeEnd = AceType::MakeRefPtr<Keyframe<Color>>(1.0, endValue);
     colorAnimation->AddKeyframe(keyframeBegin);
     colorAnimation->AddKeyframe(keyframeEnd);
-    WeakPtr<Decoration> weakDecoration = WeakPtr<Decoration>(backDecoration_);
-    colorAnimation->AddListener([weakBox = AceType::WeakClaim(this), weakDecoration](const Color& value) {
+    if (!backDecoration_) {
+        backDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    colorAnimation->AddListener([weakBox = AceType::WeakClaim(this)](const Color& value) {
         auto box = weakBox.Upgrade();
         if (!box) {
             return;
         }
         box->hoverColor_ = value;
-        auto decoration = weakDecoration.Upgrade();
-        if (decoration) {
-            decoration->SetAnimationColor(box->hoverColor_);
+        if (box->GetBackDecoration()) {
+            LOGD("RenderBox::CreateColorAnimation box->hoverColor_ = %{public}x", box->hoverColor_.GetValue());
+            box->GetBackDecoration()->SetBackgroundColor(box->hoverColor_);
+            box->GetBackDecoration()->SetAnimationColor(box->hoverColor_);
         }
         box->MarkNeedRender();
     });
 }
 
+void RenderBox::AnimateMouseHoverEnter()
+{
+    MouseHoverEnterTest();
+}
+
 void RenderBox::MouseHoverEnterTest()
 {
+    LOGD("RenderBox::MouseHoverEnterTest in. animationType_ = %{public}d", animationType_);
     ResetController(controllerExit_);
     if (!controllerEnter_) {
         controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
     }
     if (animationType_ == HoverAnimationType::SCALE) {
-        scaleAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
+        if (!scaleAnimationEnter_) {
+            scaleAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
+        }
         CreateFloatAnimation(scaleAnimationEnter_, 1.0, 1.05);
+        controllerEnter_->ClearInterpolators();
         controllerEnter_->AddInterpolator(scaleAnimationEnter_);
     } else if (animationType_ == HoverAnimationType::BOARD) {
-        colorAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-        CreateColorAnimation(colorAnimationEnter_, hoverColor_, Color::FromRGBO(0, 0, 0, 0.05));
+        if (!backDecoration_) {
+            backDecoration_ = AceType::MakeRefPtr<Decoration>();
+        }
+        if (!colorAnimationEnter_) {
+            colorAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
+        }
+        CreateColorAnimation(colorAnimationEnter_, hoverColorBegin_, Color::FromRGBO(0, 0, 0, 0.05));
+        controllerEnter_->ClearInterpolators();
         controllerEnter_->AddInterpolator(colorAnimationEnter_);
     } else {
         return;
     }
     controllerEnter_->SetDuration(HOVER_ANIMATION_DURATION);
-    controllerEnter_->Play();
     controllerEnter_->SetFillMode(FillMode::FORWARDS);
+    controllerEnter_->Play();
 }
 
 void RenderBox::ResetController(RefPtr<Animator>& controller)
@@ -750,8 +778,14 @@ void RenderBox::ResetController(RefPtr<Animator>& controller)
     }
 }
 
+void RenderBox::AnimateMouseHoverExit()
+{
+    MouseHoverExitTest();
+}
+
 void RenderBox::MouseHoverExitTest()
 {
+    LOGD("RenderBox::MouseHoverExitTest in. animationType_ = %{public}d", animationType_);
     ResetController(controllerEnter_);
     if (!controllerExit_) {
         controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
@@ -760,10 +794,19 @@ void RenderBox::MouseHoverExitTest()
         scaleAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
         auto begin = scale_;
         CreateFloatAnimation(scaleAnimationExit_, begin, 1.0);
+        controllerExit_->ClearInterpolators();
         controllerExit_->AddInterpolator(scaleAnimationExit_);
     } else if (animationType_ == HoverAnimationType::BOARD) {
-        colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-        CreateColorAnimation(colorAnimationExit_, hoverColor_, Color::FromRGBO(0, 0, 0, 0.0));
+        if (!backDecoration_) {
+            backDecoration_ = AceType::MakeRefPtr<Decoration>();
+        }
+        if (!colorAnimationExit_) {
+            colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
+        }
+        LOGD("MouseHoverExitTest hoverColor_.GetValue() = %{public}x, hoverColorBegin_.GetValue() = %{public}x",
+            hoverColor_.GetValue(), hoverColorBegin_.GetValue());
+        CreateColorAnimation(colorAnimationExit_, hoverColor_, hoverColorBegin_);
+        controllerExit_->ClearInterpolators();
         controllerExit_->AddInterpolator(colorAnimationExit_);
     } else {
         return;
@@ -771,6 +814,13 @@ void RenderBox::MouseHoverExitTest()
     controllerExit_->SetDuration(HOVER_ANIMATION_DURATION);
     controllerExit_->Play();
     controllerExit_->SetFillMode(FillMode::FORWARDS);
+}
+
+void RenderBox::HandleMouseHoverEvent(MouseState mouseState)
+{
+    if (onHover_) {
+        onHover_(mouseState == MouseState::HOVER);
+    }
 }
 
 void RenderBox::StopMouseHoverAnimation()

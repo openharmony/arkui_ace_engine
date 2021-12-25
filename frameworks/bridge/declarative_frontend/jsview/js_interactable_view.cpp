@@ -81,8 +81,8 @@ void JSInteractableView::JsOnHover(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute(info);
         };
-        auto mouseComponent = ViewStackProcessor::GetInstance()->GetMouseListenerComponent();
-        mouseComponent->SetOnHoverId(onHoverId);
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        box->SetOnHoverId(onHoverId);
     }
 }
 
@@ -136,6 +136,17 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
     }
 }
 
+void JSInteractableView::JsOnDoubleClick(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        auto tapGesture = GetTapGesture(info, 2);
+        if (tapGesture) {
+            click->SetOnClick(tapGesture);
+        }
+    }
+}
+
 EventMarker JSInteractableView::GetClickEventMarker(const JSCallbackInfo& info)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
@@ -158,7 +169,8 @@ EventMarker JSInteractableView::GetClickEventMarker(const JSCallbackInfo& info)
     return onClickId;
 }
 
-RefPtr<Gesture> JSInteractableView::GetTapGesture(const JSCallbackInfo& info)
+RefPtr<Gesture> JSInteractableView::GetTapGesture(
+    const JSCallbackInfo& info, int32_t countNum, int32_t fingerNum)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (!inspector) {
@@ -166,7 +178,7 @@ RefPtr<Gesture> JSInteractableView::GetTapGesture(const JSCallbackInfo& info)
         return nullptr;
     }
     auto impl = inspector->GetInspectorFunctionImpl();
-    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(countNum, fingerNum);
     RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
     tapGesture->SetOnActionId(
         [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](GestureEvent& info) {

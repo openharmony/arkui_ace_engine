@@ -677,8 +677,8 @@ RefPtr<Element> PipelineContext::SetupRootElement()
         rootStage->SetMainStackSize(MainStackSize::LAST_CHILD_HEIGHT);
     }
 
-    auto stack = AceType::MakeRefPtr<StackComponent>(Alignment::TOP_LEFT, StackFit::INHERIT,
-        Overflow::OBSERVABLE, std::list<RefPtr<Component>>());
+    auto stack = AceType::MakeRefPtr<StackComponent>(
+        Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, std::list<RefPtr<Component>>());
     auto overlay = AceType::MakeRefPtr<OverlayComponent>(std::list<RefPtr<Component>>());
     overlay->SetTouchable(false);
     stack->AppendChild(rootStage);
@@ -1401,63 +1401,19 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     LOGD("OnMouseEvent: x=%{public}f, y=%{public}f, type=%{public}d. button=%{public}d, pressbutton=%{public}d}",
         event.x, event.y, event.action, event.button, event.pressedButtons);
 
-    auto touchPoint = event.CreateTouchPoint();
     if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
             event.action == MouseAction::MOVE) &&
         (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
+        auto touchPoint = event.CreateTouchPoint();
         OnTouchEvent(touchPoint);
     }
+
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     eventManager_.MouseTest(scaleEvent, rootElement_->GetRenderNode());
     eventManager_.DispatchMouseEvent(scaleEvent);
-    int32_t preHoverId = hoverNodeId_;
-    std::list<RefPtr<RenderNode>> preHoverNodes;
-    preHoverNodes.assign(hoverNodes_.begin(), hoverNodes_.end());
-    // clear current hover node id and list.
-    hoverNodeId_ = DEFAULT_HOVER_ENTER_ANIMATION_ID;
-    hoverNodes_.clear();
-    eventManager_.MouseHoverTest(scaleEvent, rootElement_->GetRenderNode());
-    if (preHoverId != hoverNodeId_) {
-        // Send Hover Exit Animation event to preHoverNodes.
-        for (const auto& exitNode : preHoverNodes) {
-            exitNode->OnMouseHoverExitAnimation();
-        }
-        // Send Hover Enter Animation event to curHoverNodes.
-        for (const auto& enterNode : hoverNodes_) {
-            enterNode->OnMouseHoverEnterAnimation();
-        }
-    } else {
-        HandleMouseInputEvent(event);
-    }
-    if (touchPoint.type == TouchType::DOWN) {
-        for (const auto& enterNode : hoverNodes_) {
-            enterNode->OnMouseClickDownAnimation();
-        }
-    }
-    if (touchPoint.type == TouchType::UP) {
-        for (const auto& enterNode : hoverNodes_) {
-            enterNode->OnMouseClickUpAnimation();
-        }
-    }
-}
 
-void PipelineContext::HandleMouseInputEvent(const MouseEvent& event)
-{
-    if (event.action == MouseAction::HOVER_EXIT) {
-        for (const auto& exitNode : hoverNodes_) {
-            exitNode->OnMouseHoverExitAnimation();
-        }
-    }
-    if (event.action == MouseAction::PRESS) {
-        for (const auto& exitNode : hoverNodes_) {
-            exitNode->StopMouseHoverAnimation();
-        }
-    }
-    if (event.action == MouseAction::HOVER_ENTER) {
-        for (const auto& enterNode : hoverNodes_) {
-            enterNode->OnMouseHoverEnterAnimation();
-        }
-    }
+    eventManager_.MouseHoverTest(scaleEvent, rootElement_->GetRenderNode());
+    eventManager_.DispatchMouseHoverEvent(scaleEvent);
 }
 
 void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node)
@@ -2760,8 +2716,8 @@ bool PipelineContext::Animate(const AnimationOption& option, const RefPtr<Curve>
     return CloseImplicitAnimation();
 }
 
-void PipelineContext::OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-    const std::function<void()>& finishCallBack)
+void PipelineContext::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!SystemProperties::GetRosenBackendEnabled()) {

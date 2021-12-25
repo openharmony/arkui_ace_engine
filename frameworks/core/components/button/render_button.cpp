@@ -251,6 +251,15 @@ void RenderButton::DisplayFocusAnimation()
     }
 }
 
+WeakPtr<RenderNode> RenderButton::CheckHoverNode()
+{
+    return AceType::WeakClaim<RenderNode>(this);
+}
+
+void RenderButton::AnimateMouseHoverEnter()
+{
+    OnMouseHoverEnterTest();
+}
 void RenderButton::OnMouseHoverEnterTest()
 {
     if (!buttonComponent_) {
@@ -274,6 +283,10 @@ void RenderButton::OnMouseHoverEnterTest()
     }
 }
 
+void RenderButton::AnimateMouseHoverExit()
+{
+    OnMouseHoverExitTest();
+}
 void RenderButton::OnMouseHoverExitTest()
 {
     if (needHoverColor_) {

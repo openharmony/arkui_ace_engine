@@ -541,7 +541,10 @@ public:
 
     virtual bool MouseHoverTest(const Point& parentLocalPoint);
 
-    virtual bool HandleMouseHoverEvent(MouseState mouseState);
+    virtual bool MouseHoverTest(const Point& globalPoint, const Point& parentLocalPoint, MouseHoverTestList& result,
+        WeakPtr<RenderNode>& hoverNode);
+
+    virtual void HandleMouseHoverEvent(MouseState mouseState) {}
 
     virtual bool RotationMatchTest(const RefPtr<RenderNode>& requestRenderNode);
 
@@ -722,6 +725,11 @@ public:
         }
     }
 
+    virtual WeakPtr<RenderNode> CheckHoverNode() { return nullptr; }
+    virtual void MouseHoverEnterTest() {}
+    virtual void MouseHoverExitTest() {}
+    virtual void AnimateMouseHoverEnter() {}
+    virtual void AnimateMouseHoverExit() {}
     virtual void OnCancelPressAnimation() {}
     virtual void OnMouseHoverEnterAnimation() {}
     virtual void OnMouseHoverExitAnimation() {}
@@ -1020,8 +1028,6 @@ protected:
     virtual void OnMouseTestHit(const Offset& coordinateOffset, MouseTestResult& result) {}
     virtual void OnMouseHoverEnterTest() {}
     virtual void OnMouseHoverExitTest() {}
-    virtual void MouseHoverEnterTest() {}
-    virtual void MouseHoverExitTest() {}
 
     void PrepareLayout();
 

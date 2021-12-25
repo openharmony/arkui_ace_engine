@@ -22,13 +22,14 @@
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/rotation_event.h"
-#include "core/focus/focus_node.h"
 #include "core/event/touch_event.h"
+#include "core/focus/focus_node.h"
 
 namespace OHOS::Ace {
 
 class RenderNode;
 class Element;
+using MouseHoverTestList = std::list<WeakPtr<RenderNode>>;
 
 class EventManager {
 public:
@@ -50,15 +51,20 @@ public:
 
     // mouse event target list.
     void MouseTest(const MouseEvent& touchPoint, const RefPtr<RenderNode>& renderNode);
-    static void MouseHoverTest(const MouseEvent& touchPoint, const RefPtr<RenderNode>& renderNode);
+    void MouseHoverTest(const MouseEvent& touchPoint, const RefPtr<RenderNode>& renderNode);
 
     bool DispatchMouseEvent(const MouseEvent& event);
+    bool DispatchMouseHoverEvent(const MouseEvent& event);
 
     void ClearResults();
 
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
+    MouseHoverTestList mouseHoverTestResults_;
+    MouseHoverTestList mouseHoverTestResultsPre_;
+    WeakPtr<RenderNode> mouseHoverNodePre_;
+    WeakPtr<RenderNode> mouseHoverNode_;
 };
 
 } // namespace OHOS::Ace

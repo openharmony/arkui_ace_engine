@@ -1000,7 +1000,6 @@ private:
     void FlushWindowBlur();
     void MakeThreadStuck(const std::vector<std::string>& params) const;
     void DumpFrontend() const;
-    void HandleMouseInputEvent(const MouseEvent& event);
     void ExitAnimation();
     void CreateGeometryTransition();
     void CorrectPosition();

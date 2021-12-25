@@ -172,6 +172,10 @@ public:
     Offset GetGlobalOffset() const override;
     void MouseHoverEnterTest() override;
     void MouseHoverExitTest() override;
+    void AnimateMouseHoverEnter() override;
+    void AnimateMouseHoverExit() override;
+    void HandleMouseHoverEvent(MouseState mouseState) override;
+    WeakPtr<RenderNode> CheckHoverNode() override;
 
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -229,6 +233,7 @@ protected:
     RefPtr<KeyframeAnimation<float>> scaleAnimationEnter_;
     RefPtr<KeyframeAnimation<float>> scaleAnimationExit_;
     HoverAnimationType animationType_ = HoverAnimationType::NONE;
+    Color hoverColorBegin_ = Color::TRANSPARENT;
     Color hoverColor_ = Color::TRANSPARENT;
     float scale_ = 1.0f;
     bool isZoom = false;
@@ -263,6 +268,7 @@ private:
     RefPtr<GestureRecognizer> onClick_;
     RefPtr<RawRecognizer> touchRecognizer_;
     RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_;
+    OnHoverCallback onHover_;
     TextDirection inspectorDirection_ { TextDirection::LTR };
 }; // class RenderBox
 

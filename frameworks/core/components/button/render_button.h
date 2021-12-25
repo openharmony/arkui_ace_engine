@@ -70,6 +70,9 @@ public:
     void HandleClickEvent();
     void DisplayFocusAnimation();
     void PlayFocusAnimation(bool isFocus);
+    void AnimateMouseHoverEnter() override;
+    void AnimateMouseHoverExit() override;
+    WeakPtr<RenderNode> CheckHoverNode() override;
 
     bool IsDisabled() const
     {

@@ -711,9 +711,45 @@ void RenderNode::MouseTest(const Point& globalPoint, const Point& parentLocalPoi
     OnMouseTestHit(coordinateOffset, result);
 }
 
-bool RenderNode::HandleMouseHoverEvent(MouseState mouseState)
+bool RenderNode::MouseHoverTest(const Point& globalPoint, const Point& parentLocalPoint, MouseHoverTestList& hoverList,
+    WeakPtr<RenderNode>& hoverNode)
 {
-    return true;
+    LOGD("MouseHoverTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
+        GetTypeName(), GetTouchRect().Left(), GetTouchRect().Top(), GetTouchRect().Width(), GetTouchRect().Height());
+    if (disabled_) {
+        return false;
+    }
+
+    Point transformPoint = GetTransformPoint(parentLocalPoint);
+    if (!InTouchRectList(transformPoint, GetTouchRectList())) {
+        return false;
+    }
+
+    const auto localPoint = transformPoint - GetPaintRect().GetOffset();
+    const auto& sortedChildren = SortChildrenByZIndex(GetChildren());
+    for (auto iter = sortedChildren.rbegin(); iter != sortedChildren.rend(); ++iter) {
+        auto& child = *iter;
+        if (!child->GetVisible() || child->disabled_) {
+            continue;
+        }
+        child->MouseHoverTest(globalPoint, localPoint, hoverList, hoverNode);
+    }
+
+    auto beforeSize = hoverList.size();
+    for (auto& rect : GetTouchRectList()) {
+        if (touchable_ && rect.IsInRegion(transformPoint)) {
+            if (!hoverNode.Upgrade()) {
+                hoverNode = CheckHoverNode();
+            }
+            hoverList.emplace_back(AceType::WeakClaim<RenderNode>(this));
+            // Calculates the coordinate offset in this node.
+            const auto coordinateOffset = globalPoint - localPoint;
+            globalPoint_ = globalPoint;
+            break;
+        }
+    }
+    auto endSize = hoverList.size();
+    return beforeSize != endSize;
 }
 
 bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)

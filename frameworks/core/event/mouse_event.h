@@ -27,9 +27,10 @@ enum class MouseAction : int32_t {
     PRESS = 1,
     RELEASE = 2,
     MOVE = 3,
-    HOVER_ENTER = 4,
-    HOVER_MOVE = 5,
-    HOVER_EXIT = 6,
+    HOVER = 4,
+    HOVER_ENTER,
+    HOVER_MOVE,
+    HOVER_EXIT,
 };
 
 enum class MouseState : int32_t {

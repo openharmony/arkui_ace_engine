@@ -356,6 +356,8 @@ void JSImage::Create(const JSCallbackInfo& info)
     RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(src);
     imageComponent->SetUseSkiaSvg(false);
     ViewStackProcessor::GetInstance()->Push(imageComponent);
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
     if (usePixMap) {
         return;
     }
@@ -542,6 +544,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSImage>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSImage>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSImage>::StaticMethod("onDoubleClick", &JSInteractableView::JsOnDoubleClick);
     JSClass<JSImage>::StaticMethod("onComplete", &JSImage::OnComplete);
     JSClass<JSImage>::StaticMethod("onError", &JSImage::OnError);
     JSClass<JSImage>::StaticMethod("onFinish", &JSImage::OnFinish);

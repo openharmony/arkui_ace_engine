@@ -277,6 +277,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
     if (!pipeline) {
         return;
     }
+    SyncDecorationToRSNode();
     Rect paintSize = Rect(offset + margin_.GetOffsetInPx(pipeline->GetDipScale()), paintSize_);
     if (useLiteStyle_) {
         Size maxSize;
