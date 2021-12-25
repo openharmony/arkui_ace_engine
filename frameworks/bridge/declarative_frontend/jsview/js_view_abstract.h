@@ -202,7 +202,6 @@ public:
     static void JSBind();
 
 protected:
-    static StyleState GetState(const JSCallbackInfo& info, int32_t index);
     /**
      * box properties setter
      */
@@ -218,19 +217,18 @@ protected:
     static void SetPaddingLeft(const JSCallbackInfo& info);
     static void SetPaddingRight(const JSCallbackInfo& info);
     static void SetBorder(const Border& border);
-    static void SetBorderStyle(const JSCallbackInfo& info);
-    static void JsBorderStyle(int32_t style, StyleState state);
-    static void SetBorderRadius(const Dimension& value, const AnimationOption& option, StyleState state);
-    static void SetBorderColor(const Color& color, const AnimationOption& option, StyleState state);
-    static void SetBorderWidth(const Dimension& value, const AnimationOption& option, StyleState state);
+    static void SetBorderStyle(int32_t style);
+    static void SetBorderRadius(const Dimension& value, const AnimationOption& option);
+    static void SetBorderColor(const Color& color, const AnimationOption& option);
+    static void SetBorderWidth(const Dimension& value, const AnimationOption& option);
     static void SetBlur(float radius);
     static void SetColorBlend(Color color);
     static void SetBackdropBlur(float radius);
     static void SetBlurRadius(const RefPtr<Decoration>& decoration, float radius);
     static void SetWindowBlur(float progress, WindowBlurStyle blurStyle);
     static RefPtr<ThemeConstants> GetThemeConstants();
-    static bool JsWidth(const JSRef<JSVal>& jsValue, StyleState state = StyleState::NORMAL);
-    static bool JsHeight(const JSRef<JSVal>& jsValue, StyleState state = StyleState::NORMAL);
+    static bool JsWidth(const JSRef<JSVal>& jsValue);
+    static bool JsHeight(const JSRef<JSVal>& jsValue);
     template<typename T>
     static RefPtr<T> GetTheme()
     {

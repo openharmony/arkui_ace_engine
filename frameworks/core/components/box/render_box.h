@@ -24,7 +24,6 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/image/render_image.h"
-#include "core/gestures/raw_recognizer.h"
 #include "base/image/pixel_map.h"
 
 namespace OHOS::Ace {
@@ -62,7 +61,6 @@ public:
         });
     }
 
-    virtual void OnStatusStyleChanged(StyleState state) override;
     void UpdateStyleFromRenderNode(PropertyAnimatableType type) override;
 
     const Color& GetColor() const override
@@ -259,9 +257,6 @@ private:
     OnDragFunc onDragLeave_;
     OnDragFunc onDrop_;
     RefPtr<GestureRecognizer> onClick_;
-    void HandleTouchEvent(bool isTouchDown);
-    RefPtr<RawRecognizer> touchRecognizer_;
-    RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_;
     TextDirection inspectorDirection_ { TextDirection::LTR };
 }; // class RenderBox
 

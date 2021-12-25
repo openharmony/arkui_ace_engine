@@ -238,11 +238,6 @@ public:
         return aspectRatio_.Value();
     }
 
-    void SetAspectRatio(const Dimension& aspectRatio)
-    {
-        aspectRatio_ = aspectRatio;
-    }
-
     const RefPtr<ClipPath>& GetClipPath() const
     {
         return clipPath_;
