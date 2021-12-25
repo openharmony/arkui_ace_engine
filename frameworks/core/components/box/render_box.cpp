@@ -22,7 +22,6 @@
 #include "base/utils/utils.h"
 #include "core/animation/property_animatable_helper.h"
 #include "core/components/box/box_component.h"
-#include "core/components/box/box_component_helper.h"
 #include "core/components/root/root_element.h"
 #include "core/components/text_field/render_text_field.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
@@ -110,24 +109,6 @@ void RenderBox::Update(const RefPtr<Component>& component)
 
         auto gestures = box->GetGestures();
         UpdateGestureRecognizer(gestures);
-        if (box->HasStateAttributeList()) {
-            stateAttributeList_ = box->GetStateAttributeList();
-        }
-        OnStatusStyleChanged(disabled_ ? StyleState::DISABLED : StyleState::NORMAL);
-        auto wp = AceType::WeakClaim(this);
-        touchRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
-        touchRecognizer_->SetOnTouchDown([wp](const TouchEventInfo&) {
-            auto box = wp.Upgrade();
-            if (box) {
-                box->HandleTouchEvent(true);
-            }
-        });
-        touchRecognizer_->SetOnTouchUp([wp](const TouchEventInfo&) {
-            auto box = wp.Upgrade();
-            if (box) {
-                box->HandleTouchEvent(false);
-            }
-        });
     }
     // In each update, the extensions will be updated with new one.
     if (eventExtensions_ && eventExtensions_->HasOnAreaChangeExtension()) {
@@ -136,15 +117,6 @@ void RenderBox::Update(const RefPtr<Component>& component)
             auto area = inspector->GetCurrentRectAndOrigin();
             eventExtensions_->GetOnAreaChangeExtension()->SetBase(area.first, area.second);
         }
-    }
-}
-
-void RenderBox::HandleTouchEvent(bool isTouchDown)
-{
-    if (isTouchDown) {
-        OnStatusStyleChanged(StyleState::PRESSED);
-    } else {
-        OnStatusStyleChanged(StyleState::NORMAL);
     }
 }
 
@@ -170,7 +142,7 @@ void RenderBox::CreateDragDropRecognizer()
             event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
             event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
             LOGW("[Engine Log] Unable to display drag events on the Previewer. Perform this operation on the "
-                 "emulator or a real device instead.");
+                "emulator or a real device instead.");
             onDrag(event);
         }
     });
@@ -261,7 +233,7 @@ void RenderBox::CreateDragDropRecognizer()
     });
 #endif
 
-    std::vector<RefPtr<GestureRecognizer>> recognizers { longPressRecognizer, panRecognizer };
+    std::vector<RefPtr<GestureRecognizer>> recognizers {longPressRecognizer, panRecognizer};
     dragDropGesture_ = AceType::MakeRefPtr<OHOS::Ace::SequencedRecognizer>(GetContext(), recognizers);
     dragDropGesture_->SetIsExternalGesture(true);
 }
@@ -355,7 +327,6 @@ void RenderBox::UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration)
     frontDecoration_->SetHueRotate(newDecoration->GetHueRotate());
 }
 
-// TODO: OLEG align with state attributes
 void RenderBox::UpdateStyleFromRenderNode(PropertyAnimatableType type)
 {
     // Operator map for styles
@@ -691,7 +662,8 @@ void RenderBox::OnMouseHoverExitAnimation()
     controllerExit_->SetFillMode(FillMode::FORWARDS);
 }
 
-void RenderBox::CreateFloatAnimation(RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue)
+void RenderBox::CreateFloatAnimation(
+    RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue)
 {
     if (!floatAnimation) {
         return;
@@ -780,7 +752,7 @@ void RenderBox::MouseHoverExitTest()
         controllerExit_->AddInterpolator(scaleAnimationExit_);
     } else if (animationType_ == HoverAnimationType::BOARD) {
         colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-        CreateColorAnimation(colorAnimationExit_, hoverColor_, Color::FromRGBO(0, 0, 0, 0.0));
+        CreateColorAnimation(colorAnimationExit_,  hoverColor_, Color::FromRGBO(0, 0, 0, 0.0));
         controllerExit_->AddInterpolator(colorAnimationExit_);
     } else {
         return;
@@ -1202,8 +1174,8 @@ double RenderBox::GetWindowBlurProgress() const
     return 0.0;
 }
 
-void RenderBox::AddRecognizerToResult(
-    const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
+void RenderBox::AddRecognizerToResult(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
+    TouchTestResult& result)
 {
     if (!ExistGestureRecognizer()) {
         return;
@@ -1256,9 +1228,6 @@ void RenderBox::OnTouchTestHit(
     if (dragDropGesture_) {
         result.emplace_back(dragDropGesture_);
     }
-    if (touchRecognizer_) {
-        result.emplace_back(touchRecognizer_);
-    }
 }
 
 void RenderBox::UpdateGestureRecognizer(const std::array<RefPtr<Gesture>, MAX_GESTURE_SIZE>& gestures)
@@ -1295,96 +1264,5 @@ bool RenderBox::ExistGestureRecognizer()
 
     return false;
 }
-
-void RenderBox::OnStatusStyleChanged(StyleState componentState)
-{
-    RenderBoxBase::OnStatusStyleChanged(componentState);
-    if (stateAttributeList_ == nullptr) {
-        return;
-    }
-
-    bool updated = false;
-    for (const auto& attribute : *stateAttributeList_) {
-        if (attribute->stateName_ != componentState) {
-            continue;
-        }
-
-        updated = true;
-        switch (attribute->id_) {
-            case BoxStateAttribute::COLOR: {
-                auto colorState =
-                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(attribute);
-                if (!backDecoration_) {
-                    backDecoration_ = AceType::MakeRefPtr<Decoration>();
-                }
-                backDecoration_->SetBackgroundColor(colorState->value_);
-            } break;
-
-            case BoxStateAttribute::BORDER_COLOR: {
-                auto colorState =
-                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(attribute);
-                // TODO: reuse RenderBox::SetBorderColor
-                BoxComponentHelper::SetBorderColor(backDecoration_, colorState->value_);
-            } break;
-
-            case BoxStateAttribute::BORDER_RADIUS: {
-                auto radiusState =
-                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
-                // TODO: reuse RenderBox::SetBorderRadius
-                BoxComponentHelper::SetBorderRadius(backDecoration_, radiusState->value_);
-            } break;
-
-            case BoxStateAttribute::BORDER_STYLE: {
-                auto attributeStateValue =
-                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, BorderStyle>>(attribute);
-                // TODO: reuse RenderBox::SetBorderStyle
-                BoxComponentHelper::SetBorderStyle(backDecoration_, attributeStateValue->value_);
-            } break;
-
-            case BoxStateAttribute::BORDER_WIDTH: {
-                auto widthState =
-                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
-                // TODO: reuse RenderBox::SetBorderWidth
-                BoxComponentHelper::SetBorderWidth(backDecoration_, widthState->value_);
-            } break;
-
-            case BoxStateAttribute::HEIGHT: {
-                auto valueState =
-                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
-                height_ = valueState->value_;
-            } break;
-
-            case BoxStateAttribute::WIDTH: {
-                auto valueState =
-                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
-                width_ = valueState->value_;
-            } break;
-
-            case BoxStateAttribute::ASPECTRATIO: {
-                auto valueState =
-                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
-                SetAspectRatio(valueState->value_);
-            } break;
-
-            case BoxStateAttribute::BORDER: {
-                // We replace support for border object with updates to border components:
-                // color, style, width, radius
-                // The reason - developer does not have to provide all border properties
-                // when border is set.
-                // See JSViewAbstract::JsBorder for details
-            } break;
-
-            case BoxStateAttribute::GRADIENT: {
-                auto gradientState = AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, Gradient>>(attribute);
-                if (backDecoration_) {
-                    backDecoration_->SetGradient(gradientState->value_);
-                }
-            } break;
-        }
-    }
-    if (updated) {
-        MarkNeedLayout();
-    }
-};
 
 } // namespace OHOS::Ace

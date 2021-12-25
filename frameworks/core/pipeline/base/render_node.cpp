@@ -1814,9 +1814,9 @@ void RenderNode::SetDepth(int32_t depth)
 
 void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     isHeadRenderNode_ = isHead;
     isTailRenderNode_ = isTail;
-#ifdef ENABLE_ROSEN_BACKEND
     if (isHead && !rsNode_) {
         // create RSNode in first node of JSview
         rsNode_ = CreateRSNode();
@@ -1905,18 +1905,6 @@ std::shared_ptr<RSNode> RenderNode::CreateRSNode() const
 #else
     return nullptr;
 #endif
-}
-
-void RenderNode::OnStatusStyleChanged(StyleState state)
-{
-    LOGD("start %{public}s", AceType::TypeName(this));
-    if (isHeadRenderNode_) {
-        return;
-    }
-    RefPtr<RenderNode> parent = parent_.Upgrade();
-    if (parent) {
-        parent->OnStatusStyleChanged(state);
-    }
 }
 
 } // namespace OHOS::Ace
