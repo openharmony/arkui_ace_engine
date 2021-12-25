@@ -453,8 +453,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, isArkApp, aceAbility, std::move(callback));
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
-    // TODO: HdcRegister will crash, fix it later
-    // HdcRegister::Get().StartHdcRegister();
+    HdcRegister::Get().StartHdcRegister();
     aceContainer->Initialize();
     auto front = aceContainer->GetFrontend();
     if (front) {
