@@ -47,7 +47,7 @@ TouchPoint ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         LOGE("get pointer item failed.");
         return TouchPoint();
     }
-    std::chrono::microseconds micros(item.GetDownTime());
+    std::chrono::microseconds micros(pointerEvent->GetActionTime());
     TimeStamp time(micros);
 
     int32_t pressWidth = item.GetWidth();
