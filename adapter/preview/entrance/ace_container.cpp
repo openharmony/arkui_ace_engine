@@ -756,9 +756,12 @@ void AceContainer::LoadDocument(const std::string& url, const std::string& compo
         return;
     }
     std::string dstUrl = url + COMPONENT_PREVIEW + componentName;
-    fronended->SetPagePath(dstUrl);
-    fronended->ReplaceJSContent(componentName);
-    fronended->ReplacePage(dstUrl, "");
+    taskExecutor_->PostTask(
+        [front = fronended, componentName, dstUrl]() {
+            front->SetPagePath(dstUrl);
+            front->ReplaceJSContent(dstUrl, componentName);
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 } // namespace OHOS::Ace::Platform

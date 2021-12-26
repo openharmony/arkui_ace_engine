@@ -24,6 +24,7 @@
 #include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_helpers.h"
+#include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
@@ -239,20 +240,20 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
 }
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-void QJSDeclarativeEngine::ReplaceJSContent(std::string& jsContent, const std::string componentName)
+void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::string componentName)
 {
     // replace the component name in the last loadDocument from current js content.
     std::string::size_type loadDocomentPos = 0;
-    std::string::size_type  lastLoadDocomentPos = 0;
-    while ((loadDocomentPos = jsContent.find(COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW, loadDocomentPos))
-           != std::string::npos) {
+    std::string::size_type lastLoadDocomentPos = 0;
+    while ((loadDocomentPos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW, loadDocomentPos)) !=
+           std::string::npos) {
         lastLoadDocomentPos = loadDocomentPos;
         loadDocomentPos++;
     }
 
     std::string::size_type position = lastLoadDocomentPos + LOAD_DOCUMENT_STR_LENGTH;
     std::string::size_type finalPostion = 0;
-    while ((position = jsContent.find(LEFT_PARENTTHESIS, position)) != std::string::npos) {
+    while ((position = preContent_.find(LEFT_PARENTTHESIS, position)) != std::string::npos) {
         if (position > loadDocomentPos + LOAD_DOCUMENT_STR_LENGTH) {
             finalPostion = position;
             break;
@@ -261,7 +262,17 @@ void QJSDeclarativeEngine::ReplaceJSContent(std::string& jsContent, const std::s
     }
     std::string dstReplaceStr = COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW;
     dstReplaceStr += " " + componentName;
-    jsContent.replace(lastLoadDocomentPos, finalPostion - lastLoadDocomentPos, dstReplaceStr);
+    preContent_.replace(lastLoadDocomentPos, finalPostion - lastLoadDocomentPos, dstReplaceStr);
+
+    auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(engineInstance_->GetQJSContext()));
+    if (instance == nullptr) {
+        LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
+        return;
+    }
+
+    auto delegate_declarative = AceType::DynamicCast<FrontendDelegateDeclarative>(instance->GetDelegate());
+    delegate_declarative->Push(url, "");
+    delegate_declarative->clearPageRouteStack();
 }
 #endif
 RefPtr<Component> QJSDeclarativeEngine::GetNewComponentWithJsCode(const std::string& jsCode)

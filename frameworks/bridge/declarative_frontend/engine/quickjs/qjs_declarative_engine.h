@@ -102,17 +102,7 @@ public:
     }
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    std::string GetPreContent() const
-    {
-        return preContent_;
-    }
-
-    void SetPreContent(std::string& jscontent)
-    {
-        preContent_ = jscontent;
-    }
-
-    void ReplaceJSContent(std::string& jsContent, const std::string componentName);
+    void ReplaceJSContent(const std::string& url, const std::string componentName);
 #endif
 
 private:

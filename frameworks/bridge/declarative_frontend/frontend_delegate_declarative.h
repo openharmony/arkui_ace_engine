@@ -220,6 +220,10 @@ public:
             manifestParser_->SetPagePath(pagePath);
         }
     }
+    void clearPageRouteStack()
+    {
+        pageRouteStack_.clear();
+    }
 #endif
 
     RefPtr<PipelineContext> GetPipelineContext() override;
