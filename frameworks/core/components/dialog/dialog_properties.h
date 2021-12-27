@@ -34,6 +34,12 @@ enum class DialogAlignment {
     CENTER,
     BOTTOM,
     DEFAULT,
+    TOP_START,
+    TOP_END,
+    CENTER_START,
+    CENTER_END,
+    BOTTOM_START,
+    BOTTOM_END,
 };
 
 // Information of ActionSheet

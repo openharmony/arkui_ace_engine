@@ -62,6 +62,7 @@ private:
     void ComputeInnerLayoutParam(LayoutParam& innerLayout);
     Offset ComputeChildPosition(const Size& childSize) const;
     void HandleDragUpdate(const Offset& currentPoint);
+    bool SetAlignmentSwitch(const Size& maxSize, const Size& childSize, Offset& topLeftPoint) const;
 
     std::function<void(int32_t)> onSuccess_;
     std::function<void()> onCancel_;

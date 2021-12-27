@@ -390,22 +390,7 @@ Offset RenderDialogTween::ComputeChildPosition(const Size& childSize) const
     Offset dialogOffset =
         Offset(NormalizePercentToPx(offset_.GetX(), false, true), NormalizePercentToPx(offset_.GetY(), true, true));
     if (init_) {
-        // If alignment is setted, compute position with alignment and offset.
-        if (alignment_ != DialogAlignment::DEFAULT) {
-            switch (alignment_) {
-                case DialogAlignment::TOP:
-                    topLeftPoint = Offset((maxSize.Width() - childSize.Width()) / 2.0, 0.0);
-                    break;
-                case DialogAlignment::BOTTOM:
-                    topLeftPoint =
-                        Offset((maxSize.Width() - childSize.Width()) / 2.0, maxSize.Height() - childSize.Height());
-                    break;
-                case DialogAlignment::CENTER:
-                default:
-                    topLeftPoint =
-                        Offset(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
-                    break;
-            }
+        if (SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
             return topLeftPoint + dialogOffset;
         }
 
@@ -425,6 +410,52 @@ Offset RenderDialogTween::ComputeChildPosition(const Size& childSize) const
         }
     }
     return topLeftPoint + dialogOffset;
+}
+
+bool RenderDialogTween::SetAlignmentSwitch(const Size& maxSize, const Size& childSize, Offset& topLeftPoint) const
+{
+    // If alignment is setted, compute position with alignment and offset.
+    if (alignment_ != DialogAlignment::DEFAULT) {
+        switch (alignment_) {
+            case DialogAlignment::TOP:
+                topLeftPoint = Offset((maxSize.Width() - childSize.Width()) / 2.0, 0.0);
+                break;
+            case DialogAlignment::CENTER:
+                topLeftPoint =
+                    Offset(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+                break;
+            case DialogAlignment::BOTTOM:
+                topLeftPoint =
+                    Offset((maxSize.Width() - childSize.Width()) / 2.0, maxSize.Height() - childSize.Height());
+                break;
+            case DialogAlignment::TOP_START:
+                topLeftPoint = Offset(0.0, 0.0);
+                break;
+            case DialogAlignment::TOP_END:
+                topLeftPoint = Offset(maxSize.Width() - childSize.Width(), 0.0);
+                break;
+            case DialogAlignment::CENTER_START:
+                topLeftPoint = Offset(0.0, maxSize.Height() - childSize.Height()) / 2.0;
+                break;
+            case DialogAlignment::CENTER_END:
+                topLeftPoint =
+                    Offset(maxSize.Width() - childSize.Width(), (maxSize.Height() - childSize.Height()) / 2.0);
+                break;
+            case DialogAlignment::BOTTOM_START:
+                topLeftPoint = Offset(0.0, maxSize.Height() - childSize.Height());
+                break;
+            case DialogAlignment::BOTTOM_END:
+                topLeftPoint =
+                    Offset(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height());
+                break;
+            default:
+                topLeftPoint =
+                    Offset(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+                break;
+        }
+        return true;
+    }
+    return false;
 }
 
 void RenderDialogTween::UpdateTouchRegion(const Offset& topLeftPoint, const Size& maxSize, const Size& childSize)

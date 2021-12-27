@@ -572,6 +572,12 @@ var DialogAlignment;
   DialogAlignment[DialogAlignment["Center"] = 1] = "Center";
   DialogAlignment[DialogAlignment["Bottom"] = 2] = "Bottom";
   DialogAlignment[DialogAlignment["Default"] = 3] = "Default";
+  DialogAlignment[DialogAlignment["TopStart"] = 4] = "TopStart";
+  DialogAlignment[DialogAlignment["TopEnd"] = 5] = "TopEnd";
+  DialogAlignment[DialogAlignment["CenterStart"] = 6] = "CenterStart";
+  DialogAlignment[DialogAlignment["CenterEnd"] = 7] = "CenterEnd";
+  DialogAlignment[DialogAlignment["BottomStart"] = 8] = "BottomStart";
+  DialogAlignment[DialogAlignment["BottomEnd"] = 9] = "BottomEnd";
 })(DialogAlignment || (DialogAlignment = {}));
 
 var EditMode;
