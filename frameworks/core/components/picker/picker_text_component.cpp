@@ -85,7 +85,7 @@ void PickerTextComponent::OnSelectedSaving()
 
 void PickerTextComponent::HandleSelectedChange()
 {
-    if (!IsDialogShowed() && !GetIsCreateDialogComponent()) {
+    if (!IsDialogShowed()) {
         return;
     }
     auto column = GetColumn(PICKER_TEXT_COLUMN);
@@ -100,7 +100,7 @@ void PickerTextComponent::HandleSelectedChange()
 
 void PickerTextComponent::HandleRangeChange()
 {
-    if (!IsDialogShowed() && !GetIsCreateDialogComponent()) {
+    if (!IsDialogShowed()) {
         return;
     }
 
@@ -110,9 +110,13 @@ void PickerTextComponent::HandleRangeChange()
         return;
     }
 
-    OnColumnsBuilding();
+    auto backupIndex = selectedIndex_;
+    auto backupValue = selectedValue_;
     OnSelectedSaving();
+    OnColumnsBuilding();
     column->HandleChangeCallback(true, false);
+    selectedIndex_ = backupIndex;
+    selectedValue_ = backupValue;
 }
 
 } // namespace OHOS::Ace
