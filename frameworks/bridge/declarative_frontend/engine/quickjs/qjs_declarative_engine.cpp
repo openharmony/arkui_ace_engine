@@ -213,7 +213,6 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     if (posPreview != std::string::npos) {
         std::string::size_type pos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT);
         if (pos != std::string::npos) {
-            LOGE("js file do not have loadDocument,");
             jsContent = preContent_;
         }
     } else {
@@ -270,9 +269,7 @@ void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::s
         return;
     }
 
-    auto delegate_declarative = AceType::DynamicCast<FrontendDelegateDeclarative>(instance->GetDelegate());
-    delegate_declarative->Push(url, "");
-    delegate_declarative->clearPageRouteStack();
+    instance->GetDelegate()->Replace(url, "");
 }
 #endif
 RefPtr<Component> QJSDeclarativeEngine::GetNewComponentWithJsCode(const std::string& jsCode)
