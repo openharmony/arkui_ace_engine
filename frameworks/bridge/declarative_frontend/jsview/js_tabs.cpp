@@ -75,10 +75,6 @@ void JSTabs::Create(const JSCallbackInfo& info)
                 barVal = BAR_POSITIONS[barPositionVal];
             }
         }
-        JSRef<JSVal> index = obj->GetProperty("index");
-        if (index->IsNumber()) {
-            initialIndex = index->ToNumber<int32_t>();
-        }
         JSRef<JSVal> controller = obj->GetProperty("controller");
         if (controller->IsObject()) {
             auto jsTabsController = JSRef<JSObject>::Cast(controller)->Unwrap<JSTabsController>();
@@ -86,11 +82,15 @@ void JSTabs::Create(const JSCallbackInfo& info)
                 tabController = jsTabsController->GetController();
             }
         }
+        JSRef<JSVal> index = obj->GetProperty("index");
+        if (index->IsNumber()) {
+            if (!tabController) {
+                tabController = JSTabsController::CreateController();
+            }
+            initialIndex = index->ToNumber<int32_t>();
+            tabController->SetInitialIndex(initialIndex);
+        }
     }
-    if (!tabController) {
-        tabController = JSTabsController::CreateController();
-    }
-    tabController->SetInitialIndex(initialIndex);
     std::list<RefPtr<Component>> children;
     RefPtr<TabsComponent> tabsComponent =
         AceType::MakeRefPtr<OHOS::Ace::TabsComponent>(children, barVal, tabController);
