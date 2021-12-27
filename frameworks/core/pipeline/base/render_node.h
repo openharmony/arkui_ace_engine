@@ -1086,7 +1086,7 @@ protected:
     bool IsHeadRenderNode() const
     {
 #ifdef ENABLE_ROSEN_BACKEND
-        return isHeadRenderNode_;
+        return SystemProperties::GetRosenBackendEnabled() ? isHeadRenderNode_ : false;
 #else
         return false;
 #endif
