@@ -97,6 +97,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_select.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sheet.h"
@@ -738,6 +739,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind},
     { "VideoController", JSVideoController::JSBind },
     { "Search", JSSearch::JSBind },
+    { "Select", JSSelect::JSBind },
     { "SearchController", JSSearchController::JSBind },
     { "Sheet", JSSheet::JSBind },
     { "JSClipboard", JSClipboard::JSBind },

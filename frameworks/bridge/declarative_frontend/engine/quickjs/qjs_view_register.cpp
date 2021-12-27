@@ -93,6 +93,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_select.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sheet.h"
@@ -773,6 +774,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSShape::JSBind(globalObj);
     JSSearch::JSBind(globalObj);
     JSSearchController::JSBind(globalObj);
+    JSSelect::JSBind(globalObj);
     JSPath::JSBind(globalObj);
     JSCircle::JSBind(globalObj);
     JSLine::JSBind(globalObj);

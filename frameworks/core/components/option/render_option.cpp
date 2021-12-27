@@ -310,8 +310,7 @@ void RenderOption::UpdateSelectedStatus()
     if (!data_ || !data_->GetTheme()) {
         return;
     }
-    auto theme = data_->GetTheme();
-    backColor_ = theme->GetSelectedColor();
+    backColor_ = data_->GetSelectedBackgroundColor();
     needLine_ = false;
     UpdateSelectedText();
     MarkNeedRender();
@@ -334,7 +333,7 @@ void RenderOption::UpdateOthersStatus()
     if (!data_ || !pipe) {
         return;
     }
-    backColor_ = isTv_ ? Color(0x33FFFFFF) : Color::TRANSPARENT;
+    backColor_ = isTv_ ? Color(0x33FFFFFF) : data_->GetBackgroundColor();
     auto upOption = GetUpOption();
     needLine_ = (!(data_->GetFocused() && pipe->IsKeyEvent()) && upOption && upOption->IsNormalStatus());
     UpdateNormalText();
@@ -414,15 +413,24 @@ void RenderOption::UpdateTextColor(bool selected, bool focused)
         return;
     }
     auto style = component->GetTextStyle();
-    if (focused) {
-        style.SetTextColor(Color(0xE6000000));
-        component->SetFocusColor(style.GetTextColor());
-    } else if (selected) {
-        style.SetTextColor(theme->GetSelectedColorText());
-        component->SetFocusColor(style.GetTextColor());
+
+    auto context = context_.Upgrade();
+    if (context->GetIsDeclarative()) {
+        if (focused) {
+            style.SetTextColor(Color(0xE6000000));
+            component->SetFocusColor(style.GetTextColor());
+        }
     } else {
-        style.SetTextColor(theme->GetFontColor());
-        component->SetFocusColor(style.GetTextColor());
+        if (focused) {
+            style.SetTextColor(Color(0xE6000000));
+            component->SetFocusColor(style.GetTextColor());
+        } else if (selected) {
+            style.SetTextColor(theme->GetSelectedColorText());
+            component->SetFocusColor(style.GetTextColor());
+        } else {
+            style.SetTextColor(theme->GetFontColor());
+            component->SetFocusColor(style.GetTextColor());
+        }
     }
     component->SetTextStyle(style);
     render->Update(component);

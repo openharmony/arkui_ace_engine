@@ -183,6 +183,7 @@ template("declarative_js_engine") {
       "jsview/js_scroll.cpp",
       "jsview/js_scroller.cpp",
       "jsview/js_search.cpp",
+      "jsview/js_select.cpp",
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
       "jsview/js_sheet.cpp",
