@@ -28,7 +28,7 @@ JSOffscreenRenderingContext::JSOffscreenRenderingContext()
 
 void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSOffscreenRenderingContext>::Declare("OffscreenRenderingContext");
+    JSClass<JSOffscreenRenderingContext>::Declare("OffscreenCanvasRenderingContext2D");
 
     JSClass<JSOffscreenRenderingContext>::CustomMethod("transferToImageBitmap",
         &JSOffscreenRenderingContext::JsTransferToImageBitmap);
