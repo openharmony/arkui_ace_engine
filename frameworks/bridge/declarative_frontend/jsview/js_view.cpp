@@ -204,7 +204,7 @@ void ViewFunctions::ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo)
         LOGD("View doesn't have %{public}s() method!", debugInfo);
         return;
     }
-
+    ACE_SCOPED_TRACE("%s", debugInfo);
     JSRef<JSVal> jsObject = jsObject_.Lock();
     func.Lock()->Call(jsObject);
 }
@@ -216,7 +216,7 @@ JSRef<JSVal> ViewFunctions::ExecuteFunctionWithReturn(JSWeak<JSFunc>& func, cons
         LOGD("View doesn't have %{public}s() method!", debugInfo);
         return JSRef<JSVal>::Make();
     }
-
+    ACE_SCOPED_TRACE("%s", debugInfo);
     JSRef<JSVal> jsObject = jsObject_.Lock();
     JSRef<JSVal> result = func.Lock()->Call(jsObject);
     if (result.IsEmpty()) {
