@@ -39,8 +39,7 @@ public:
     void Repaint(const RefPtr<RenderNode>& node) override;
     void PaintChild(const RefPtr<RenderNode>& child, const Offset& offset) override;
     bool IsIntersectWith(const RefPtr<RenderNode>& child, Offset& offset) override;
-    void ClipHoleBegin(const Rect& holeRect) override;
-    void ClipHoleEnd() override;
+    void Restore() override;
 
     void InitContext(RenderLayer layer, const Rect& rect);
     flutter::Canvas* GetCanvas();
