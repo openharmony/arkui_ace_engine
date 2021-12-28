@@ -79,19 +79,32 @@ std::string ProgressComposedElement::GetTotal() const
 std::string ProgressComposedElement::GetStyle() const
 {
     auto renderProgress = GetRenderProgress();
-    if (renderProgress) {
-        ProgressType type = renderProgress->GetProgressType();
-        if (type == ProgressType::LINEAR) {
-            return std::string("ProgressStyle.Linear");
-        } else if (type == ProgressType::MOON) {
-            return std::string("ProgressStyle.Eclipse");
-        } else if (type == ProgressType::CIRCLE) {
-            return std::string("ProgressStyle.Circular");
-        } else {
-            return "ProgressStyle.Linear";
-        }
+    if (!renderProgress) {
+        return "ProgressStyle.Linear";
     }
-    return "ProgressStyle.Linear";
+    ProgressType type = renderProgress->GetProgressType();
+
+    std::string result = "";
+    switch (type) {
+        case ProgressType::LINEAR:
+            result = "ProgressStyle.Linear";
+            break;
+        case ProgressType::MOON:
+            result = "ProgressStyle.Eclipse";
+            break;
+        case ProgressType::SCALE:
+            result = "ProgressStyle.ScaleRing";
+            break;
+        case ProgressType::RING:
+            result = "ProgressStyle.Ring";
+            break;
+        case ProgressType::CAPSULE:
+            result = "ProgressStyle.Capsule";
+            break;
+        default:
+            return "ProgressStyle.Linear";
+    }
+    return result;
 }
 
 std::string ProgressComposedElement::GetColor() const

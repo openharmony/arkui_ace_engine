@@ -1005,7 +1005,12 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetTransform() const
         if (operation.type_ == TransformOperationType::MATRIX) {
             const auto& matrix = operation.matrix4_;
             jsonValue->Put("type", "matrix");
-            jsonValue->Put("matrix", matrix.ToString().c_str());
+            auto matrixString = matrix.ToString();
+            while (matrixString.find("\n") != std::string::npos) {
+                auto num = matrixString.find("\n");
+                matrixString.replace(num, 1, "");
+            }
+            jsonValue->Put("matrix", matrixString.c_str());
             break;
         }
     }

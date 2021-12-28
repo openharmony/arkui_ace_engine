@@ -152,13 +152,13 @@ std::string GridComposedElement::GetScrollBar() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        return "BarState::Off";
+        return "BarState.Off";
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
         return DisplayModeToString(renderGrip->GetScrollBar());
     }
-    return "BarState::Off";
+    return "BarState.Off";
 }
 
 std::string GridComposedElement::GetGridEditMode() const
@@ -217,13 +217,13 @@ std::string GridComposedElement::DisplayModeToString(DisplayMode displayMode) co
 {
     switch (displayMode) {
         case DisplayMode::OFF:
-            return "BarState::Off";
+            return "BarState.Off";
         case DisplayMode::AUTO:
-            return "BarState::Auto";
+            return "BarState.Auto";
         case DisplayMode::ON:
-            return "BarState::On";
+            return "BarState.On";
     }
-    return "BarState::Off";
+    return "BarState.Off";
 }
 
 void GridComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)

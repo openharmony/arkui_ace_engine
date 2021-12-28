@@ -34,7 +34,7 @@ const char* BORDER_STYLE[] = {
 };
 
 const std::unordered_map<std::string, std::function<std::string(const ImageComposedElement&)>> CREATE_JSON_MAP {
-    { "uri", [](const ImageComposedElement& inspector) { return inspector.GetUri(); } },
+    { "src", [](const ImageComposedElement& inspector) { return inspector.GetSrc(); } },
     { "alt", [](const ImageComposedElement& inspector) { return inspector.GetAlt(); } },
     { "objectFit", [](const ImageComposedElement& inspector) { return inspector.GetObjectFit(); } },
     { "objectRepeat", [](const ImageComposedElement& inspector) { return inspector.GetObjectRepeat(); } },
@@ -49,7 +49,7 @@ const std::unordered_map<std::string, std::function<std::string(const ImageCompo
 void ImageComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("uri: ").append(GetUri()));
+    DumpLog::GetInstance().AddDesc(std::string("src: ").append(GetSrc()));
     DumpLog::GetInstance().AddDesc(std::string("alt: ").append(GetAlt()));
     DumpLog::GetInstance().AddDesc(std::string("objectFit: ").append(GetObjectFit()));
     DumpLog::GetInstance().AddDesc(std::string("objectRepeat: ").append(GetObjectRepeat()));
@@ -68,10 +68,18 @@ std::unique_ptr<JsonValue> ImageComposedElement::ToJsonObject() const
     return resultJson;
 }
 
-std::string ImageComposedElement::GetUri() const
+std::string ImageComposedElement::GetSrc() const
 {
     auto renderImage = GetRenderImage();
-    return renderImage ? renderImage->GetImageSrc() : "";
+    if (!renderImage) {
+        return "";
+    }
+    auto imageSrc = renderImage->GetImageSrc();
+    while (imageSrc.find("\\") != std::string::npos) {
+        auto num = imageSrc.find("\\");
+        imageSrc.replace(num, 1, "/");
+    }
+    return imageSrc;
 }
 
 std::string ImageComposedElement::GetAlt() const

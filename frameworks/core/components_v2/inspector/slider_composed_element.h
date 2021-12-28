@@ -31,6 +31,7 @@ public:
 
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
+    std::unique_ptr<JsonValue> GetConstructor() const;
 
     std::string GetValue() const;
     std::string GetMax() const;
@@ -42,6 +43,8 @@ public:
     std::string GetSelectedColor() const;
     std::string GetShowSteps() const;
     std::string GetShowTips() const;
+    std::string GetSliderDirection() const;
+
 
 private:
     RefPtr<RenderSlider> GetRenderSlider() const;

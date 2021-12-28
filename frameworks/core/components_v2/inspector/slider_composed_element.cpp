@@ -26,17 +26,9 @@
 namespace OHOS::Ace::V2 {
 namespace {
 
-const std::unordered_map<std::string, std::function<std::string(const SliderComposedElement&)>> CREATE_JSON_MAP {
-    { "value", [](const SliderComposedElement& inspector) { return inspector.GetValue(); } },
-    { "max", [](const SliderComposedElement& inspector) { return inspector.GetMax(); } },
-    { "min", [](const SliderComposedElement& inspector) { return inspector.GetMin(); } },
-    { "step", [](const SliderComposedElement& inspector) { return inspector.GetStep(); } },
-    { "style", [](const SliderComposedElement& inspector) { return inspector.GetStyle(); } },
-    { "blockColor", [](const SliderComposedElement& inspector) { return inspector.GetBlockColor(); } },
-    { "trackColor", [](const SliderComposedElement& inspector) { return inspector.GetTrackColor(); } },
-    { "selectedColor", [](const SliderComposedElement& inspector) { return inspector.GetSelectedColor(); } },
-    { "showSteps", [](const SliderComposedElement& inspector) { return inspector.GetShowSteps(); } },
-    { "showTips", [](const SliderComposedElement& inspector) { return inspector.GetShowTips(); } }
+const std::unordered_map<std::string,
+    std::function<std::unique_ptr<JsonValue>(const SliderComposedElement&)>> CREATE_JSON_MAP {
+    { "constructor", [](const SliderComposedElement& inspector) { return inspector.GetConstructor(); } }
 };
 
 } // namespace
@@ -59,9 +51,40 @@ std::unique_ptr<JsonValue> SliderComposedElement::ToJsonObject() const
 {
     auto resultJson = InspectorComposedElement::ToJsonObject();
     for (const auto& value : CREATE_JSON_MAP) {
-        resultJson->Put(value.first.c_str(), value.second(*this).c_str());
+        resultJson->Put(value.first.c_str(), value.second(*this));
     }
     return resultJson;
+}
+
+std::unique_ptr<JsonValue> SliderComposedElement::GetConstructor() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("direction", GetSliderDirection().c_str());
+    jsonValue->Put("value", GetValue().c_str());
+    jsonValue->Put("max", GetMax().c_str());
+    jsonValue->Put("min", GetMin().c_str());
+    jsonValue->Put("step", GetStep().c_str());
+    jsonValue->Put("style", GetStyle().c_str());
+    jsonValue->Put("blockColor", GetBlockColor().c_str());
+    jsonValue->Put("trackColor", GetTrackColor().c_str());
+    jsonValue->Put("selectedColor", GetSelectedColor().c_str());
+    jsonValue->Put("showSteps", GetShowTips().c_str());
+    jsonValue->Put("showTips", GetSliderDirection().c_str());
+    return jsonValue;
+}
+
+std::string SliderComposedElement::GetSliderDirection() const
+{
+    auto renderSlider = GetRenderSlider();
+    if (!renderSlider) {
+        return "Axis.Axis.Horizontal";
+    }
+    auto direction = renderSlider->GetDirection();
+    if (direction == Axis::VERTICAL) {
+        return "Axis.Vertical";
+    } else {
+        return "Axis.Horizontal";
+    }
 }
 
 std::string SliderComposedElement::GetValue() const
@@ -105,13 +128,13 @@ std::string SliderComposedElement::GetStyle() const
     auto renderSlider = GetRenderSlider();
     if (renderSlider) {
         SliderMode mode = renderSlider->GetMode();
-        if (mode == SliderMode::OUTSET) {
-            return std::string("SliderStyle.Outset");
+        if (mode == SliderMode::INSET) {
+            return "SliderStyle.InSet";
         } else {
-            return std::string("SliderStyle.Inset");
+            return "SliderStyle.OutSet";
         }
     }
-    return "SliderStyle.Outset";
+    return "SliderStyle.OutSet";
 }
 
 std::string SliderComposedElement::GetBlockColor() const
