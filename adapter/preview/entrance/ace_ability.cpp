@@ -443,21 +443,28 @@ void AceAbility::ReplacePage(const std::string& url, const std::string& params)
     container->GetFrontend()->ReplacePage(url, params);
 }
 
-void AceAbility::OperateComponent(const std::string& attrsJson)
+bool AceAbility::OperateComponent(const std::string& attrsJson)
 {
-    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    auto taskExecutor = container->GetTaskExecutor();
+    // fastPreview not support databind
+    if (attrsJson.find("this.") != std::string::npos) {
+        LOGE("fastPreview is not support databind,the attrsJson contains 'this.'");
+        return false;
+    }
 
     auto root = JsonUtil::ParseJsonString(attrsJson);
     if (!root || !root->IsValid()) {
         LOGE("the attrsJson is illegal json format");
-        return;
+        return false;
     }
+
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    auto taskExecutor = container->GetTaskExecutor();
     taskExecutor->PostTask(
         [attrsJson] {
           OHOS::Ace::Framework::InspectorClient::GetInstance().OperateComponent(attrsJson);
         },
         TaskExecutor::TaskType::UI);
+    return true;
 }
 
 } // namespace OHOS::Ace::Platform
