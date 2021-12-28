@@ -176,6 +176,7 @@ public:
     static void JsMask(const JSCallbackInfo& info);
 
     static void JsKey(const std::string& text);
+    static void JsId(const std::string& id);
 
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);

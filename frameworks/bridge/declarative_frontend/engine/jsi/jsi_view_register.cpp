@@ -126,6 +126,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
+#include "core/components_v2/inspector/inspector.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -334,7 +335,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::EcmaVM* vm, panda::Loc
         LOGE("pipeline is null");
         return panda::JSValueRef::Undefined(vm);
     }
-    auto nodeInfos = pipelineContext->GetInspectorTree();
+    auto nodeInfos = V2::Inspector::GetInspectorTree(pipelineContext);
     return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
 }
 
@@ -361,7 +362,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::EcmaVM* vm, panda::Lo
     }
 
     std::string key = args[0]->ToString(vm)->ToString();
-    auto resultStr = pipelineContext->GetInspectorNodeByKey(key);
+    auto resultStr = V2::Inspector::GetInspectorNodeByKey(pipelineContext, key);
     return panda::StringRef::NewFromUtf8(vm, resultStr.c_str());
 }
 
@@ -390,7 +391,57 @@ panda::Local<panda::JSValueRef> JsSendEventByKey(panda::EcmaVM* vm, panda::Local
     std::string key = args[0]->ToString(vm)->ToString();
     auto action = args[1]->Int32Value(vm);
     auto params = args[2]->ToString(vm)->ToString();
-    auto result = pipelineContext->SendEventByKey(key, action, params);
+    auto result = V2::Inspector::SendEventByKey(pipelineContext, key, action, params);
+    return panda::BooleanRef::New(vm, result);
+}
+
+static TouchPoint GetTouchPointFromJS(const JsiObject& value)
+{
+    TouchPoint touchPoint;
+
+    auto type = value->GetProperty("type");
+    touchPoint.type = static_cast<TouchType>(type->ToNumber<int32_t>());
+
+    auto id = value->GetProperty("id");
+    touchPoint.id = id->ToNumber<int32_t>();
+
+    auto x = value->GetProperty("x");
+    touchPoint.x = x->ToNumber<float>();
+
+    auto y = value->GetProperty("y");
+    touchPoint.y = y->ToNumber<float>();
+
+    touchPoint.time = std::chrono::high_resolution_clock::now();
+
+    return touchPoint;
+}
+
+panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
+    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+{
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (argc < 1 || !args[0]->IsObject()) {
+        LOGE("The arg is wrong, must have one object argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext == nullptr) {
+        LOGE("pipelineContext==nullptr");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    JsiObject obj(args[0]);
+    TouchPoint touchPoint = GetTouchPointFromJS(obj);
+    auto result = pipelineContext->GetTaskExecutor()->PostTask(
+        [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); }, TaskExecutor::TaskType::UI);
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -791,6 +842,8 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorByKey, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendEventByKey"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendEventByKey, nullptr));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendTouchEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendTouchEvent, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "vp2px"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Vp2Px, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2vp"),

@@ -966,12 +966,6 @@ public:
 
     void SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector);
 
-    std::string GetInspectorNodeByKey(const std::string& key);
-
-    std::string GetInspectorTree();
-
-    bool SendEventByKey(const std::string& key, int action, const std::string& params);
-
     const std::shared_ptr<OHOS::Rosen::RSUIDirector>& GetRSUIDirector();
 
 private:

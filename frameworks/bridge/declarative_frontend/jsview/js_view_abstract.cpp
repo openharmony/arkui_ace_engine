@@ -3249,6 +3249,11 @@ void JSViewAbstract::JsKey(const std::string& key)
     }
 }
 
+void JSViewAbstract::JsId(const std::string& id)
+{
+    JsKey(id);
+}
+
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
@@ -3433,6 +3438,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("clip", &JSViewAbstract::JsClip);
     JSClass<JSViewAbstract>::StaticMethod("mask", &JSViewAbstract::JsMask);
     JSClass<JSViewAbstract>::StaticMethod("key", &JSViewAbstract::JsKey);
+    JSClass<JSViewAbstract>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSViewAbstract>::StaticMethod("hoverEffect", &JSViewAbstract::JsHoverEffect);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);

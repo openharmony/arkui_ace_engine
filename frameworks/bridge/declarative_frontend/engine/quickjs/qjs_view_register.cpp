@@ -135,6 +135,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
+#include "core/components_v2/inspector/inspector.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -204,7 +205,7 @@ static JSValue JsGetInspectorTree(JSContext* ctx, JSValueConst new_target, int a
         return JS_ThrowSyntaxError(ctx, "pipeline is null");
     }
 
-    auto nodeInfos = pipelineContext->GetInspectorTree();
+    auto nodeInfos = V2::Inspector::GetInspectorTree(pipelineContext);
     JSValue result = JS_NewString(ctx, nodeInfos.c_str());
     return result;
 }
@@ -230,7 +231,7 @@ static JSValue JsGetInspectorByKey(JSContext* ctx, JSValueConst new_target, int 
     }
     ScopedString targetString(ctx, argv[0]);
     std::string key = targetString.get();
-    auto resultStr = pipelineContext->GetInspectorNodeByKey(key);
+    auto resultStr = V2::Inspector::GetInspectorNodeByKey(pipelineContext, key);
     JSValue result = JS_NewString(ctx, resultStr.c_str());
     return result;
 }
@@ -265,7 +266,60 @@ static JSValue JsSendEventByKey(JSContext* ctx, JSValueConst new_target, int arg
     ScopedString targetParam(ctx, argv[2]);
     std::string params = targetParam.get();
 
-    auto result = pipelineContext->SendEventByKey(key, action, params);
+    auto result = V2::Inspector::SendEventByKey(pipelineContext, key, action, params);
+    return JS_NewBool(ctx, result);
+}
+
+static TouchPoint GetTouchPointFromJS(JSContext* ctx, JSValue value)
+{
+    TouchPoint touchPoint;
+
+    auto type = JS_GetPropertyStr(ctx, value, "type");
+    auto iType = static_cast<int32_t>(TouchType::UNKNOWN);
+    JS_ToInt32(ctx, &iType, type);
+    touchPoint.type = static_cast<TouchType>(iType);
+
+    auto id = JS_GetPropertyStr(ctx, value, "id");
+    JS_ToInt32(ctx, &touchPoint.id, id);
+
+    auto x = JS_GetPropertyStr(ctx, value, "x");
+    double dx;
+    JS_ToFloat64(ctx, &dx, x);
+    touchPoint.x = dx;
+
+    auto y = JS_GetPropertyStr(ctx, value, "y");
+    double dy;
+    JS_ToFloat64(ctx, &dy, y);
+    touchPoint.y = dy;
+
+    touchPoint.time = std::chrono::high_resolution_clock::now();
+
+    return touchPoint;
+}
+
+static JSValue JsSendTouchEvent(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    if (argc != 1) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, it is supposed to have 1 arguments");
+    }
+
+    if (!JS_IsObject(argv[0])) {
+        return JS_ThrowSyntaxError(ctx, "input value must be object");
+    }
+
+    QJSContext::Scope scp(ctx);
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return JS_ThrowSyntaxError(ctx, "pipeline is null");
+    }
+    TouchPoint touchPoint = GetTouchPointFromJS(ctx, argv[0]);
+    auto result = pipelineContext->GetTaskExecutor()->PostTask(
+        [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); }, TaskExecutor::TaskType::UI);
+
     return JS_NewBool(ctx, result);
 }
 
@@ -626,6 +680,7 @@ void JsRegisterViews(BindingTarget globalObj)
     QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorTree, "getInspectorTree", 0);
     QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorByKey, "getInspectorByKey", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsSendEventByKey, "sendEventByKey", 3);
+    QJSUtils::DefineGlobalFunction(ctx, JsSendTouchEvent, "sendTouchEvent", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsDumpMemoryStats, "dumpMemoryStats", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsGetI18nResource, "$s", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsGetMediaResource, "$m", 1);
