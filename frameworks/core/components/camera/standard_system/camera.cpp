@@ -51,7 +51,11 @@ const char REGION_POSITION_Y[] = "region_position_y";
 const char REGION_WIDTH[] = "region_width";
 const char REGION_HEIGHT[] = "region_height";
 constexpr int32_t DEFAULT_WIDTH = 640;
+#ifdef PRODUCT_RK
+constexpr int32_t DEFAULT_HEIGHT = 480;
+#else
 constexpr int32_t DEFAULT_HEIGHT = 360;
+#endif
 constexpr int32_t SURFACE_STRIDE_ALIGNMENT_VAL = 8;
 constexpr int32_t PREVIEW_SURFACE_WIDTH = 640;
 constexpr int32_t PREVIEW_SURFACE_HEIGHT = 480;
@@ -231,6 +235,10 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
             return nullptr;
         }
         subwindow_->GetSurface()->SetQueueSize(QUEUE_SIZE);
+        hasMarkWhole_ = false;
+        subwindow_->OnBeforeFrameSubmit([this]() {
+            OnFirstBufferAvailable();
+        });
     }
     previewSurface_ = subwindow_->GetSurface();
     previewSurface_->SetUserData(SURFACE_STRIDE_ALIGNMENT, std::to_string(SURFACE_STRIDE_ALIGNMENT_VAL));
@@ -245,8 +253,17 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
     previewSurface_->SetUserData(REGION_HEIGHT, std::to_string(windowSize_.Height()));
     previewSurface_->SetUserData(REGION_POSITION_X, std::to_string(windowOffset_.GetX()));
     previewSurface_->SetUserData(REGION_POSITION_Y, std::to_string(windowOffset_.GetY()));
-    MarkWhole();
     return previewSurface_;
+}
+
+void CameraCallback::OnFirstBufferAvailable()
+{
+    if (hasMarkWhole_) {
+        return;
+    }
+    LOGI("CameraCallback:OnFirstBufferAvailable first MarkWhole.");
+    MarkWhole();
+    hasMarkWhole_ = true;
 }
 
 void CameraCallback::MarkWhole()
@@ -262,14 +279,16 @@ void CameraCallback::MarkWhole()
     if (renderNode) {
         renderNode->SetHasSubWindow(true);
     }
+    RenderNode::MarkWholeRender(renderNode_, true);
+    LOGI("CameraCallback:MarkWhole success.");
 }
 
 void CameraCallback::SetLayoutOffset(double x, double y)
 {
     layoutOffset_.SetX(x);
     layoutOffset_.SetY(y);
-    if (subwindow_) {
-        LOGI("CameraCallback::SetLayoutOffset:  move %{public}lf %{public}lf ", x, y);
+    if (hasMarkWhole_ && subwindow_) {
+        LOGI("CameraCallback:Hole change  %{public}lf  %{public}lf ", x, y);
         MarkWhole();
     }
 }
@@ -397,8 +416,13 @@ int32_t CameraCallback::PrepareCamera(bool bIsRecorder)
     surface = createSubWindowSurface();
     LOGI("Preview surface width: %{public}d, height: %{public}d", surface->GetDefaultWidth(),
         surface->GetDefaultHeight());
+#ifdef PRODUCT_RK
+    previewOutput_ = camManagerObj->CreateCustomPreviewOutput(surface, PREVIEW_SURFACE_WIDTH,
+                                                              PREVIEW_SURFACE_HEIGHT);
+#else
     previewOutput_ = camManagerObj->CreateCustomPreviewOutput(surface, surface->GetDefaultHeight(),
                                                               surface->GetDefaultWidth());
+#endif
     if (previewOutput_ == nullptr) {
         LOGE("Failed to create PreviewOutput");
         return -1;

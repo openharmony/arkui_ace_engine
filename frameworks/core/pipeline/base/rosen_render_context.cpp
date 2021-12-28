@@ -69,6 +69,14 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
         rsNode_->AddChild(childRSNode, -1);
         if (child->NeedRender()) {
             RosenRenderContext context;
+            auto pipelineContext = child->GetContext().Upgrade();
+            LOGI("Hole: child canvas render");
+            auto transparentHole = pipelineContext->GetTransparentHole();
+            if (transparentHole.IsValid() && child->GetNeedClip()) {
+                Offset childOffset = rect.GetOffset();
+                Rect hole = transparentHole - childOffset;
+                context.SetClipHole(hole);
+            }
             context.Repaint(child);
         } else {
             // No need to repaint, notify to update AccessibilityNode info.
@@ -84,12 +92,23 @@ void RosenRenderContext::StartRecording()
     recorder_ = new SkPictureRecorder();
     recordingCanvas_ = recorder_->beginRecording(
         SkRect::MakeXYWH(estimatedRect_.Left(), estimatedRect_.Top(), estimatedRect_.Width(), estimatedRect_.Height()));
+    if (clipHole_.IsValid()) {
+        recordingCanvas_->save();
+        needRestoreHole_ = true;
+        recordingCanvas_->clipRect(clipHole_.Left(), clipHole_.Top(),
+            clipHole_.Right(), clipHole_.Bottom(), SkClipOp::kDifference);
+    }
 }
 
 void RosenRenderContext::StopRecordingIfNeeded()
 {
     if (!IsRecording()) {
         return;
+    }
+
+    if (needRestoreHole_) {
+        recordingCanvas_->restore();
+        needRestoreHole_ = false;
     }
 
     delete recorder_;
@@ -114,30 +133,6 @@ bool RosenRenderContext::IsIntersectWith(const RefPtr<RenderNode>& child, Offset
 
     offset = rect.GetOffset();
     return true;
-}
-
-void RosenRenderContext::ClipHoleBegin(const Rect& holeRect)
-{
-    auto canvas = GetCanvas();
-    if (!canvas) {
-        return;
-    }
-    LOGI("Hole: PrePaint save clip.");
-    canvas->save();
-    if (holeRect.IsValid()) {
-        canvas->clipRect(
-            { holeRect.Left(), holeRect.Top(), holeRect.Right(), holeRect.Bottom() }, SkClipOp::kDifference);
-    }
-}
-
-void RosenRenderContext::ClipHoleEnd()
-{
-    LOGI("Hole: PostPaint restore clip");
-    auto canvas = GetCanvas();
-    if (!canvas) {
-        return;
-    }
-    canvas->restore();
 }
 
 void RosenRenderContext::InitContext(
@@ -188,4 +183,13 @@ sk_sp<SkImage> RosenRenderContext::FinishRecordingAsImage()
         nullptr, SkImage::BitDepth::kU8, nullptr);
     return image;
 }
+
+void RosenRenderContext::Restore()
+{
+    auto canvas = GetCanvas();
+    if (canvas != nullptr) {
+        canvas->restore();
+    }
+}
+
 } // namespace OHOS::Ace
