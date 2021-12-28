@@ -19,6 +19,7 @@
 
 #include "ability_context.h"
 #include "ability_info.h"
+#include "configuration.h"
 #include "init_data.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -269,6 +270,15 @@ bool UIContentImpl::ProcessVsyncEvent(uint64_t timeStampNanos)
 {
     LOGI("UIContent ProcessVsyncEvent");
     return false;
+}
+
+void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    if (!config) {
+        LOGE("UIContent null config");
+        return;
+    }
+    LOGI("UIContent UpdateConfiguration %{public}s", config->GetName().c_str());
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config)
