@@ -98,6 +98,12 @@ public:
     const TextEditingValue& GetEditingValue() const;
     const TextEditingValue& GetPreEditingValue() const;
     void Delete(int32_t start, int32_t end);
+
+    void SetInputFilter(const std::string& inputFilter)
+    {
+        inputFilter_ = inputFilter;
+    }
+
     void SetTextStyle(const TextStyle& style)
     {
         style_ = style;
@@ -350,6 +356,7 @@ protected:
     Rect passwordIconRect_;
 
     std::string placeholder_;
+    std::string inputFilter_;
     Color placeholderColor_;
     // Colors when not focused.
     Color inactivePlaceholderColor_;
@@ -451,6 +458,8 @@ protected:
     std::string iconSrc_;
     std::string showIconSrc_;
     std::string hideIconSrc_;
+    std::string inputCallBackStr_;
+    int32_t inputCallBackStrSize_ = 0;
     RefPtr<RenderImage> iconImage_;
     RefPtr<RenderImage> renderShowIcon_;
     RefPtr<RenderImage> renderHideIcon_;
@@ -538,6 +547,7 @@ private:
     std::function<void(const double&)> updateHandleDiameterInner_;
     std::function<void(const std::string&)> onTextChangeEvent_;
     std::function<void(std::string)> onChange_;
+    std::function<void(std::string)> onError_;
     std::function<void(bool)> onEditChanged_;
     std::function<void(int32_t)> onSubmit_;
     std::function<void(const std::string&)> onValueChangeEvent_;

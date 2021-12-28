@@ -119,6 +119,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
 
     selection_ = textField->GetSelection();
     placeholder_ = textField->GetPlaceholder();
+    inputFilter_ = textField->GetInputFilter();
     inactivePlaceholderColor_ = textField->GetPlaceholderColor();
     focusPlaceholderColor_ = textField->GetFocusPlaceholderColor();
     focusBgColor_ = textField->GetFocusBgColor();
@@ -145,6 +146,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     inactiveTextColor_ = style_.GetTextColor();
     maxLines_ = textField->GetTextMaxLines();
     onTextChangeEvent_ = AceAsyncEvent<void(const std::string&)>::Create(textField->GetOnTextChange(), context_);
+    onError_ = AceAsyncEvent<void(const std::string&)>::Create(textField->GetOnError(), context_);
     onValueChangeEvent_ = textField->GetOnTextChange().GetUiStrFunction();
     if (textField->GetOnChange()) {
         onChange_ = *textField->GetOnChange();
@@ -908,7 +910,24 @@ void RenderTextField::SetEditingValue(TextEditingValue&& newValue, bool needFire
         }
     }
 
-    controller_->SetValue(newValue, needFireChangeEvent);
+    if (context && context->GetIsDeclarative()) {
+        if (inputFilter_.empty() || newValue.text.empty()) {
+            controller_->SetValue(newValue, needFireChangeEvent);
+        } else {
+            std::regex rw(inputFilter_);
+            if (regex_match(newValue.text.c_str(), rw)) {
+                inputCallBackStrSize_ = newValue.text.length();
+                controller_->SetValue(newValue, needFireChangeEvent);
+            } else {
+                inputCallBackStr_ = newValue.text.substr(inputCallBackStrSize_);
+                if (onError_) {
+                    onError_(inputCallBackStr_);
+                }
+            }
+        }
+    } else {
+        controller_->SetValue(newValue, needFireChangeEvent);
+    }
     UpdateAccessibilityAttr();
 }
 

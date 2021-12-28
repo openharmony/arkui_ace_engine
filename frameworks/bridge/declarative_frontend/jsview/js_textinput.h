@@ -36,6 +36,7 @@ public:
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
     static void SetFontFamily(const JSCallbackInfo& info);
+    static void SetInputFilter(const JSCallbackInfo& info);
     static void SetOnEditChanged(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);

@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -118,6 +119,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("fontWeight", &JSTextInput::SetFontWeight);
     JSClass<JSTextInput>::StaticMethod("fontStyle", &JSTextInput::SetFontStyle);
     JSClass<JSTextInput>::StaticMethod("fontFamily", &JSTextInput::SetFontFamily);
+    JSClass<JSTextInput>::StaticMethod("inputFilter", &JSTextInput::SetInputFilter);
     JSClass<JSTextInput>::StaticMethod("onEditChanged", &JSTextInput::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextInput::SetOnSubmit);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextInput::SetOnChange);
@@ -472,6 +474,37 @@ void JSTextInput::SetFontFamily(const JSCallbackInfo& info)
     auto textStyle = component->GetEditingStyle();
     textStyle.SetFontFamilies(fontFamilies);
     component->SetEditingStyle(textStyle);
+}
+
+void JSTextInput::SetInputFilter(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    std::string inputFilter;
+    if (!ParseJsString(info[0], inputFilter)) {
+        LOGE("Parse inputFilter failed");
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    component->SetInputFilter(inputFilter);
+
+    if (info[1]->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(info[1]));
+        auto resultId =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute(info);
+            });
+        component->SetOnError(resultId);
+    }
 }
 
 void JSTextInput::SetOnEditChanged(const JSCallbackInfo& info)

@@ -745,4 +745,14 @@ const TextStyle& TextFieldComponent::GetEditingStyle() const
     return declaration_->GetEditingStyle();
 }
 
+const std::string& TextFieldComponent::GetInputFilter() const
+{
+    return declaration_->GetInputFilter();
+}
+
+void TextFieldComponent::SetInputFilter(const std::string& inputFilter)
+{
+    declaration_->SetInputFilter(inputFilter);
+}
+
 } // namespace OHOS::Ace

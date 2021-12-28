@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -111,6 +112,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("fontWeight", &JSTextArea::SetFontWeight);
     JSClass<JSTextArea>::StaticMethod("fontStyle", &JSTextArea::SetFontStyle);
     JSClass<JSTextArea>::StaticMethod("fontFamily", &JSTextArea::SetFontFamily);
+    JSClass<JSTextArea>::StaticMethod("inputFilter", &JSTextArea::SetInputFilter);
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextArea::SetOnChange);
     JSClass<JSTextArea>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextArea>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -386,6 +388,39 @@ void JSTextArea::SetFontFamily(const JSCallbackInfo& info)
     auto textStyle = component->GetEditingStyle();
     textStyle.SetFontFamilies(fontFamilies);
     component->SetEditingStyle(textStyle);
+}
+
+void JSTextArea::SetInputFilter(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+
+    std::string inputFilter;
+    if (!ParseJsString(info[0], inputFilter)) {
+        LOGE("Parse inputFilter failed");
+        return;
+    }
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    component->SetInputFilter(inputFilter);
+
+    if (info[1]->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(info[1]));
+        auto resultId =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute(info);
+            });
+        component->SetOnError(resultId);
+    }
 }
 
 void JSTextArea::SetOnChange(const JSCallbackInfo& info)
