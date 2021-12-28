@@ -639,7 +639,7 @@ void FlutterRenderImage::CanvasDrawImageRect(
         PaintBgImage(paint, offset, canvas);
         return;
     }
-    if (!image_) {
+    if (!image_ || !image_->image()) {
         imageDataNotReady_ = true;
         LOGI("image data is not ready, rawImageSize_: %{public}s, image source: %{private}s",
             rawImageSize_.ToString().c_str(), sourceInfo_.ToString().c_str());
@@ -760,7 +760,7 @@ void FlutterRenderImage::DrawImageOnCanvas(
 
 bool FlutterRenderImage::VerifySkImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const
 {
-    if (!image_) {
+    if (!image_ || !image_->image()) {
         LOGE("image data made from pixmap is null");
         return false;
     }
@@ -1128,7 +1128,7 @@ void FlutterRenderImage::ClearRenderObject()
 
 bool FlutterRenderImage::IsSourceWideGamut() const
 {
-    if (sourceInfo_.IsSvg() || !image_) {
+    if (sourceInfo_.IsSvg() || !image_ || !image_->image()) {
         return false;
     }
     return ImageProvider::IsWideGamut(image_->image()->refColorSpace());
