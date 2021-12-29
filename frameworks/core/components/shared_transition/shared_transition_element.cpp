@@ -257,11 +257,14 @@ RefPtr<Component> SharedTransitionElement::BuildChild()
             passengerComponent_ = AceType::MakeRefPtr<BoxComponent>();
             passengerComponent_->SetChild(passengerComponent);
         }
+        auto displayComponent_ = AceType::MakeRefPtr<DisplayComponent>();
         if (passengerElement_) {
-            return AceType::MakeRefPtr<DisplayComponent>(AceType::MakeRefPtr<BoxComponent>());
+            displayComponent_->SetChild(AceType::MakeRefPtr<BoxComponent>());
         } else {
-            return AceType::MakeRefPtr<DisplayComponent>(passengerComponent_);
+            displayComponent_->SetChild(passengerComponent_);
         }
+        Component::MergeRSNode(displayComponent_->GetChild(), displayComponent_);
+        return displayComponent_;
     } else {
         LOGE("Build child failed. no shared transition component found. id: %{public}s", GetId().c_str());
         return ComposedElement::BuildChild();
