@@ -90,6 +90,7 @@ public:
     void OnCameraSizeChange(double width, double height);
     void OnCameraOffsetChange(double x, double y);
     void MarkWhole();
+    void OnFirstBufferAvailable();
     void SetLayoutOffset(double x, double y);
     void SetLayoutSize(double width, double height)
     {
@@ -101,6 +102,8 @@ public:
         prepareEventListener_ = std::move(listener);
     }
     friend class CaptureListener;
+
+    bool hasMarkWhole_ = false;
 
 protected:
     void CloseRecorder();

@@ -17,6 +17,8 @@
 
 #include <algorithm>
 #include <set>
+#include <sstream>
+#include <unistd.h>
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_node.h"
@@ -65,6 +67,51 @@ constexpr Dimension FOCUS_BOUNDARY = 4.0_vp; // focus padding + effect boundary,
 
 RenderNode::RenderNode(bool takeBoundary) : takeBoundary_(takeBoundary) {}
 
+void RenderNode::MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole, bool needFlush)
+{
+    if (root->GetHasSubWindow()) {
+        meetHole = true;
+    }
+
+    if (meetHole) {
+        root->SetNeedClip(false);
+        LOGD("Hole: has meet hole, no need clip");
+    } else {
+        root->SetNeedClip(true);
+        LOGD("Hole: has not meet hole, need clip");
+    }
+
+    if (needFlush) {
+        root->MarkNeedRender();
+    }
+    LOGI("Hole: MarkTreeRender %{public}s", AceType::TypeName(Referenced::RawPtr(root)));
+    bool subMeetHole = meetHole;
+    for (auto child: root->GetChildren()) {
+        MarkTreeRender(child, subMeetHole, needFlush);
+    }
+    meetHole = subMeetHole;
+}
+
+void RenderNode::MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak, bool needFlush)
+{
+    auto node = nodeWeak.Upgrade();
+    if (!node) {
+        LOGE("Hole: MarkWholeRender node is null");
+        return;
+    }
+
+    auto parentWeak = node->GetParent();
+    auto parent = parentWeak.Upgrade();
+    while (parent) {
+        node = parent;
+        parentWeak = node->GetParent();
+        parent = parentWeak.Upgrade();
+    }
+
+    bool meetHole = false;
+    MarkTreeRender(node, meetHole, needFlush);
+}
+
 void RenderNode::AddChild(const RefPtr<RenderNode>& child, int32_t slot)
 {
     if (!child) {
@@ -82,6 +129,10 @@ void RenderNode::AddChild(const RefPtr<RenderNode>& child, int32_t slot)
     std::advance(pos, slot);
     children_.insert(pos, child);
     child->SetParent(AceType::WeakClaim(this));
+    auto context = context_.Upgrade();
+    if (context && context->GetTransparentHole().IsValid()) {
+        MarkWholeRender(AceType::WeakClaim(this), true);
+    }
     child->SetDepth(GetDepth() + 1);
     OnChildAdded(child);
     disappearingNodes_.remove(child);
@@ -316,7 +367,16 @@ void RenderNode::RenderWithContext(RenderContext& context, const Offset& offset)
         onLayoutReady_(std::string("\"layoutReady\",null,null"));
     }
     pendingDispatchLayoutReady_ = false;
-    ClipHole(context, offset);
+    if (GetHasSubWindow() || !GetNeedClip()) {
+        LOGI("Hole: meet subwindow node or no need clip");
+        if (context.GetNeedRestoreHole()) {
+            context.Restore();
+            context.SetNeedRestoreHole(false);
+            context.SetClipHole(Rect());
+        }
+    } else {
+        context.SetClipHole(context_.Upgrade()->GetTransparentHole());
+    }
     Paint(context, offset);
     for (const auto& item : SortChildrenByZIndex(disappearingNodes_)) {
         PaintChild(item, context, offset);
@@ -364,36 +424,6 @@ void RenderNode::PaintChild(const RefPtr<RenderNode>& child, RenderContext& cont
 {
     if (child && child->GetVisible()) {
         context.PaintChild(child, offset);
-    }
-}
-
-void RenderNode::ClipHole(RenderContext& context, const Offset& offset)
-{
-    LOGD("Hole: PrePaint RenderNode");
-    auto pipelineContext = GetContext().Upgrade();
-
-    if (pipelineContext && pipelineContext->GetIsHoleValid()) {
-        if (!(pipelineContext->GetHasClipHole())) {
-            if (!(pipelineContext->GetHasMeetSubWindowNode())) {
-                context.ClipHoleBegin(pipelineContext->GetTransparentHole());
-                pipelineContext->SetHasClipHole(true);
-            } else {
-                LOGI("Hole: hole status is wrong.");
-            }
-        } else {
-            if (!(pipelineContext->GetHasMeetSubWindowNode())) {
-                if (GetHasSubWindow()) {
-                    context.ClipHoleEnd();
-                    pipelineContext->SetHasMeetSubWindowNode(true);
-                } else {
-                    LOGI("Hole: RenderNode has not SubWindow.");
-                }
-            } else {
-                LOGI("Hole: now clip has done.");
-            }
-        }
-    } else {
-        LOGD("Hole: hole is not valid.");
     }
 }
 

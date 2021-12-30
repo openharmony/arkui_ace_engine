@@ -67,6 +67,14 @@ void FlutterRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Off
         if (name != "FlutterRenderForm") {
             if (child->NeedRender()) {
                 FlutterRenderContext context;
+                auto pipelineContext = child->GetContext().Upgrade();
+                LOGI("Hole: child canvas render");
+                auto transparentHole = pipelineContext->GetTransparentHole();
+                if (transparentHole.IsValid() && child->GetNeedClip()) {
+                    Offset childOffset = rect.GetOffset();
+                    Rect hole = transparentHole - childOffset;
+                    context.SetClipHole(hole);
+                }
                 context.Repaint(child);
             } else {
                 // No need to repaint, notify to update AccessibilityNode info.
@@ -110,6 +118,12 @@ void FlutterRenderContext::StartRecording()
     recorder_ = flutter::PictureRecorder::Create();
     canvas_ = flutter::Canvas::Create(
         recorder_.get(), estimatedRect_.Left(), estimatedRect_.Top(), estimatedRect_.Right(), estimatedRect_.Bottom());
+    if (clipHole_.IsValid()) {
+        canvas_->save();
+        needRestoreHole_ = true;
+        canvas_->clipRect(clipHole_.Left(), clipHole_.Top(),
+            clipHole_.Right(), clipHole_.Bottom(), SkClipOp::kDifference);
+    }
     containerLayer_->AddChildren(currentLayer_);
 }
 
@@ -119,6 +133,10 @@ void FlutterRenderContext::StopRecordingIfNeeded()
         return;
     }
 
+    if (needRestoreHole_) {
+        canvas_->restore();
+        needRestoreHole_ = false;
+    }
     currentLayer_->SetPicture(recorder_->endRecording());
     currentLayer_ = nullptr;
     recorder_ = nullptr;
@@ -144,29 +162,6 @@ bool FlutterRenderContext::IsIntersectWith(const RefPtr<RenderNode>& child, Offs
     return true;
 }
 
-void FlutterRenderContext::ClipHoleBegin(const Rect& holeRect)
-{
-    auto canvas = GetCanvas();
-    if (!canvas) {
-        return;
-    }
-    LOGI("Hole: PrePaint save clip.");
-    canvas->save();
-    if (holeRect.IsValid()) {
-        canvas->clipRect(holeRect.Left(), holeRect.Top(), holeRect.Right(), holeRect.Bottom(), SkClipOp::kDifference);
-    }
-}
-
-void FlutterRenderContext::ClipHoleEnd()
-{
-    LOGI("Hole: PostPaint restore clip");
-    auto canvas = GetCanvas();
-    if (!canvas) {
-        return;
-    }
-    canvas->restore();
-}
-
 void FlutterRenderContext::InitContext(RenderLayer layer, const Rect& rect)
 {
     LOGD("InitContext with width %{public}lf height %{public}lf", rect.Width(), rect.Height());
@@ -181,6 +176,14 @@ flutter::Canvas* FlutterRenderContext::GetCanvas()
         StartRecording();
     }
     return canvas_.get();
+}
+
+void FlutterRenderContext::Restore()
+{
+    auto canvas = GetCanvas();
+    if (canvas != nullptr) {
+        canvas->restore();
+    }
 }
 
 } // namespace OHOS::Ace
