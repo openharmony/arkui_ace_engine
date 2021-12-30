@@ -32,7 +32,7 @@ PixelMapNapiEntry pixelMapNapiEntry_ = nullptr;
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 {
     if (!obj->IsObject()) {
-        LOGE("info[0] is not an object.");
+        LOGE("info[0] is not an object when try CreatePixelMapFromNapiValue");
         return nullptr;
     }
     auto nativeEngine = JsEngine::GetNativeEngine();
