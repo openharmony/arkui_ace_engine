@@ -139,10 +139,6 @@ bool StartDebug(const std::string& componentName, void *vm, bool isDebugMode)
 void StopDebug(const std::string& componentName)
 {
     LOGI("StopDebug: %{private}s", componentName.c_str());
-    if (g_handle != nullptr) {
-        dlclose(g_handle);
-        g_handle = nullptr;
-    }
     if (g_inspector->websocketServer_ != nullptr) {
         g_inspector->websocketServer_->StopServer();
         g_inspector.reset();
@@ -152,6 +148,10 @@ void StopDebug(const std::string& componentName)
         return;
     }
     uninitialize();
+    if (g_handle != nullptr) {
+        dlclose(g_handle);
+        g_handle = nullptr;
+    }
     LOGI("StopDebug end");
 }
 
