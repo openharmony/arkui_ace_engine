@@ -109,11 +109,11 @@ void AceContainer::Destroy()
 
     RefPtr<Frontend> frontend;
     frontend_.Swap(frontend);
-    if (frontend_ && taskExecutor_) {
+    if (frontend && taskExecutor_) {
         taskExecutor_->PostTask(
-            [front = frontend_]() {
-                front->UpdateState(Frontend::State::ON_DESTROY);
-                front->Destroy();
+            [frontend]() {
+                frontend->UpdateState(Frontend::State::ON_DESTROY);
+                frontend->Destroy();
             },
             TaskExecutor::TaskType::JS);
     }
@@ -126,20 +126,28 @@ void AceContainer::Destroy()
     LOGI("AceContainer::Destory end");
 }
 
+void AceContainer::DestroyView()
+{
+    if (aceView_ != nullptr) {
+        delete aceView_;
+        aceView_ = nullptr;
+    }
+}
+
 void AceContainer::InitializeFrontend()
 {
     if (type_ == FrontendType::JS) {
         frontend_ = Frontend::Create();
         auto jsFrontend = AceType::DynamicCast<JsFrontend>(frontend_);
-        jsEngine_ = Framework::JsEngineLoader::Get().CreateJsEngine(GetInstanceId());
-        jsFrontend->SetJsEngine(jsEngine_);
+        auto jsEngine = Framework::JsEngineLoader::Get().CreateJsEngine(GetInstanceId());
+        jsFrontend->SetJsEngine(jsEngine);
         jsFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
         jsFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
     } else if (type_ == FrontendType::DECLARATIVE_JS) {
         frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-        jsEngine_ = Framework::JsEngineLoader::GetDeclarative().CreateJsEngine(instanceId_);
-        declarativeFrontend->SetJsEngine(jsEngine_);
+        auto jsEngine = Framework::JsEngineLoader::GetDeclarative().CreateJsEngine(instanceId_);
+        declarativeFrontend->SetJsEngine(jsEngine);
     } else if (type_ == FrontendType::JS_CARD) {
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
@@ -158,8 +166,8 @@ void AceContainer::InitializeFrontend()
 void AceContainer::RunNativeEngineLoop()
 {
     taskExecutor_->PostTask(
-        [jsEngine = jsEngine_]() {
-            jsEngine->RunNativeEngineLoop();
+        [frontend = frontend_]() {
+          frontend->RunNativeEngineLoop();
         },
         TaskExecutor::TaskType::JS);
 }
@@ -342,6 +350,7 @@ void AceContainer::DestroyContainer(int32_t instanceId)
         taskExecutor->PostSyncTask([] { LOGI("Wait UI thread..."); }, TaskExecutor::TaskType::UI);
         taskExecutor->PostSyncTask([] { LOGI("Wait JS thread..."); }, TaskExecutor::TaskType::JS);
     }
+    container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
     AceEngine::Get().RemoveContainer(instanceId);
 }
 

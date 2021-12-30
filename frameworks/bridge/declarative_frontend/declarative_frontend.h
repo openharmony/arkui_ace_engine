@@ -79,6 +79,12 @@ public:
             delegate_->SetPagePath(pagePath);
         }
     }
+    void RunNativeEngineLoop() override
+    {
+        if (jsEngine_) {
+            jsEngine_->RunNativeEngineLoop();
+        }
+    }
 
     void TransferJsResponseDataPreview(int32_t callbackId, int32_t code, ResponseData responseData) const;
     void ReplaceJSContent(const std::string& url, const std::string componentName) const;
