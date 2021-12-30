@@ -146,7 +146,12 @@ void AceAbility::OnStart(const Want& want)
     Ability::OnStart(want);
     LOGI("AceAbility::OnStart called");
 
-    SetHwIcuDirectory();
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        LOGI("Initialize for current process.");
+        SetHwIcuDirectory();
+        Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+    });
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = GetResourceManager();

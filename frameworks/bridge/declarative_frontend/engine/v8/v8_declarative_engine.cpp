@@ -913,16 +913,17 @@ void V8DeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_](bool needSync) {
+    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_, id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync]() {
+        delegate->PostJsTask([nativeEngine, needSync, id]() {
             if (nativeEngine == nullptr) {
                 return;
             }
+            ContainerScope scope(id);
             nativeEngine->Loop(LOOP_NOWAIT, needSync);
         });
     };

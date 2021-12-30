@@ -465,7 +465,7 @@ void ViewStackProcessor::PopContainer()
     Pop();
 }
 
-#ifdef ACE_DEBUG
+#ifdef ACE_DEBUG_LOG
 void ViewStackProcessor::DumpStack()
 {
     LOGD("| stack size: \033[0;33m %{public}d \033[0m", (int)componentsStack_.size());

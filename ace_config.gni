@@ -17,7 +17,17 @@ import("//build/test.gni")
 
 # Config args
 declare_args() {
+  # ace debug flag, enable debug features: like dcheck, thread-checker, mem-monitor...
   enable_ace_debug = false
+
+  # only available when 'enable_ace_debug' set to 'true', show the LOGD infos.
+  enable_ace_debug_log = true
+
+  # only available when 'enable_ace_debug' set to 'true', show the private logs.
+  enable_ace_private_log = true
+
+  # show the instance id in logs.
+  enable_ace_instance_log = true
 
   # Disable glfw window to build for PC preview scenario.
   enable_glfw_window = false
@@ -87,6 +97,16 @@ if (use_clang_coverage) {
 
 if (enable_ace_debug) {
   ace_common_defines += [ "ACE_DEBUG" ]
+  if (enable_ace_debug_log) {
+    ace_common_defines += [ "ACE_DEBUG_LOG" ]
+  }
+  if (enable_ace_private_log) {
+    ace_common_defines += [ "ACE_PRIVATE_LOG" ]
+  }
+}
+
+if (enable_ace_instance_log) {
+  ace_common_defines += [ "ACE_INSTANCE_LOG" ]
 }
 
 if (enable_dump_drawcmd) {

@@ -34,6 +34,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/back_end_event_manager.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
@@ -3119,13 +3120,14 @@ void QjsEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_](bool needSync) {
+    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_, id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync]() {
+        delegate->PostJsTask([nativeEngine, needSync, id]() {
+            ContainerScope scope(id);
             if (nativeEngine == nullptr) {
                 return;
             }

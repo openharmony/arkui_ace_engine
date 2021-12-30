@@ -33,6 +33,7 @@
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Ace {
@@ -87,7 +88,12 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
         return;
     }
     LOGI("Initialize UIContentImpl start.");
-    SetHwIcuDirectory();
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        LOGI("Initialize for current process.");
+        SetHwIcuDirectory();
+        Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+    });
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = context_->GetResourceManager();
@@ -153,6 +159,7 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     container->GetSettings().SetUsingSharedRuntime(true);
     container->SetSharedRuntime(runtime_);
     container->Initialize();
+    ContainerScope scope(instanceId_);
     auto front = container->GetFrontend();
     if (front) {
         front->UpdateState(Frontend::State::ON_CREATE);
