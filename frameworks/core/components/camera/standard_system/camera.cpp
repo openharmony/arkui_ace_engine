@@ -64,9 +64,11 @@ constexpr int32_t PHOTO_SURFACE_HEIGHT = 960;
 constexpr int32_t MAX_DURATION = 36000;
 constexpr int32_t FRAME_RATE = 30;
 constexpr int32_t RATE = 48000;
+#ifndef PRODUCT_RK
 constexpr int32_t AUDIO_CHANNEL_COUNT = 2;
 constexpr int32_t AUDIO_SAMPLE_RATE = 48000;
 constexpr int32_t AUDIO_ENCODING_BITRATE = 48000;
+#endif
 constexpr int32_t QUEUE_SIZE = 10;
 constexpr double FPS = 30;
 const uid_t CHOWN_OWNER_ID = -1;
@@ -106,9 +108,11 @@ std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
     LOGI("Camera CreateRecorder start.");
     int ret = 0;
     Media::VideoSourceType videoSource = Media::VIDEO_SOURCE_SURFACE_ES;
+#ifndef PRODUCT_RK
     Media::AudioSourceType audioSource = Media::AUDIO_MIC;
-    int32_t videoSourceId = 0;
     int32_t audioSourceId = 0;
+#endif
+    int32_t videoSourceId = 0;
     int32_t width = DEFAULT_WIDTH;
     int32_t height = DEFAULT_HEIGHT;
     Media::VideoCodecFormat encoder = Media::H264;
@@ -118,10 +122,12 @@ std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
         LOGE("SetVideoSource failed. ret= %{private}d.", ret);
         return nullptr;
     }
+#ifndef PRODUCT_RK
     if ((ret = recorder->SetAudioSource(audioSource, audioSourceId)) != ERR_OK) {
         LOGE("SetAudioSource failed. ret= %{private}d.", ret);
         return nullptr;
     }
+#endif
     if ((ret = recorder->SetOutputFormat(Media::FORMAT_MPEG_4)) != ERR_OK) {
         LOGE("SetOutputFormat failed. ret= %{private}d.", ret);
         return nullptr;
@@ -146,6 +152,7 @@ std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
         LOGE("SetCaptureRate failed. ret= %{private}d.", ret);
         return nullptr;
     }
+#ifndef PRODUCT_RK
     if ((ret = recorder->SetAudioEncoder(audioSourceId, Media::AAC_LC)) != ERR_OK) {
         LOGE("SetAudioEncoder failed. ret= %{private}d.", ret);
         return nullptr;
@@ -162,6 +169,7 @@ std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
         LOGE("SetAudioEncodingBitRate failed. ret= %{private}d.", ret);
         return nullptr;
     }
+#endif
     if ((ret = recorder->SetMaxDuration(MAX_DURATION)) != ERR_OK) { // 36000s=10h
         LOGE("SetMaxDuration failed. ret= %{private}d.", ret);
         return nullptr;
