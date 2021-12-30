@@ -405,7 +405,11 @@ void AceAbility::OnStart(const Want& want)
             rsUiDirector->Init();
             LOGI("Init Rosen Backend");
         }
+    } else {
+        LOGI("not Init Rosen Backend");
     }
+#else
+    LOGI("no macro Init Rosen Backend");
 #endif
 
     // run page.
