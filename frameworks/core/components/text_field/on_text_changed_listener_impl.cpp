@@ -156,12 +156,7 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
     taskExecutor->PostTask(
         [renderTextField, status] {
             if (renderTextField) {
-                if (status) {
-                    renderTextField->SetInputMethodStatus(true);
-                } else {
-                    MiscServices::InputMethodController::GetInstance()->Close();
-                    renderTextField->SetInputMethodStatus(false);
-                }
+                renderTextField->SetInputMethodStatus(status);
             }
         },
         TaskExecutor::TaskType::UI);
