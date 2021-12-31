@@ -71,6 +71,7 @@ private:
     void Reset();
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     bool ExceedSlop();
+    void InitGlobalValue(SourceType deviceId);
 
     int32_t count_ = 1;
     // number of fingers which put on the screen

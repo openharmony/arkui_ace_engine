@@ -26,6 +26,13 @@
 
 namespace OHOS::Ace {
 
+enum class SourceType : int32_t {
+    NONE = 0,
+    TOUCH = 1,
+    MOUSE = 2,
+    KEYBOARD = 3
+};
+
 struct EventTarget final {
     std::string id;
     std::string type;

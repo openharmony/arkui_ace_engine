@@ -93,27 +93,10 @@ void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& 
         LOGW("renderNode is null.");
         return;
     }
-    MouseTestResult hitTestResult;
-
-    const Point point { event.x, event.y };
-    // For root node, the parent local point is the same as global point.
-    renderNode->MouseTest(point, point, hitTestResult);
-    if (hitTestResult.empty()) {
-        LOGI("mouse test result is empty");
-    }
-    mouseTestResults_[event.GetId()] = std::move(hitTestResult);
-}
-
-void EventManager::MouseHoverTest(const MouseEvent& event, const RefPtr<RenderNode>& renderNode)
-{
-    if (!renderNode) {
-        LOGW("renderNode is null.");
-        return;
-    }
     const Point point { event.x, event.y };
     MouseHoverTestList hitTestResult;
     WeakPtr<RenderNode> hoverNode = nullptr;
-    renderNode->MouseHoverTest(point, point, hitTestResult, hoverNode);
+    renderNode->MouseDetect(point, point, hitTestResult, hoverNode);
     if (hitTestResult.empty()) {
         LOGD("mouse hover test result is empty");
     }
@@ -121,7 +104,7 @@ void EventManager::MouseHoverTest(const MouseEvent& event, const RefPtr<RenderNo
     mouseHoverTestResults_ = std::move(hitTestResult);
     mouseHoverNodePre_ = mouseHoverNode_;
     mouseHoverNode_ = hoverNode;
-    LOGI("MouseHoverTest hit test last/new result size = %{public}zu/%{public}zu", mouseHoverTestResultsPre_.size(),
+    LOGI("MouseDetect hit test last/new result size = %{public}zu/%{public}zu", mouseHoverTestResultsPre_.size(),
         mouseHoverTestResults_.size());
 }
 
@@ -144,19 +127,18 @@ bool EventManager::DispatchRotationEvent(
 
 bool EventManager::DispatchMouseEvent(const MouseEvent& event)
 {
-    const auto iter = mouseTestResults_.find(event.GetId());
-    if (iter != mouseTestResults_.end()) {
-        // If one mouse recognizer has already been won, other mouse recognizers will still be affected by
-        // the event, each recognizer needs to filter the extra events by itself.
-        for (const auto& entry : iter->second) {
-            entry->HandleEvent(event);
+    if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE) {
+        LOGD("RenderBox::HandleMouseEvent, button is %{public}d, action is %{public}d", event.button, event.action);
+        for (const auto& wp : mouseHoverTestResults_) {
+            auto hoverNode = wp.Upgrade();
+            if (hoverNode) {
+                hoverNode->HandleMouseEvent(event);
+            }
         }
-
         return true;
+    } else {
+        return false;
     }
-
-    LOGI("the %{public}d mouse test result does not exist!", event.GetId());
-    return false;
 }
 
 bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)

@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_CLICK_FUNCTION_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_CLICK_FUNCTION_H
 
+#include "core/event/mouse_event.h"
 #include "core/gestures/click_recognizer.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
@@ -36,6 +37,7 @@ public:
     void Execute();
     void Execute(const ClickInfo& info);
     void Execute(const GestureEvent& info);
+    void Execute(const MouseInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

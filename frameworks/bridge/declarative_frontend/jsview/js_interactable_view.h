@@ -24,9 +24,6 @@
 
 namespace OHOS::Ace::Framework {
 
-constexpr int32_t DEFAULT_TAP_FINGERS = 1;
-constexpr int32_t DEFAULT_TAP_COUNTS = 1;
-
 class JSInteractableView {
 public:
     static void JsOnTouch(const JSCallbackInfo& args);

@@ -38,6 +38,20 @@ namespace {
 constexpr int32_t ROTATION_DIVISOR = 64;
 constexpr double PERMIT_ANGLE_VALUE = 0.5;
 
+template<typename E>
+void GetEventDevice(int32_t sourceType, E& event)
+{
+    switch (sourceType) {
+        case OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN:
+            event.sourceType = SourceType::TOUCH;
+        case OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD:
+        case OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE:
+            event.sourceType = SourceType::MOUSE;
+        default:
+            event.sourceType = SourceType::NONE;
+    }
+}
+
 TouchPoint ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
@@ -54,8 +68,10 @@ TouchPoint ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     int32_t pressHeight = item.GetHeight();
     double size = std::max(pressWidth, pressHeight) / 2.0; // just get the max of width and height
     TouchPoint point { pointerID, item.GetLocalX(), item.GetLocalY(), TouchType::UNKNOWN, time, size };
-    int32_t action = pointerEvent->GetPointerAction();
-    switch (action) {
+    int32_t orgDevice = pointerEvent->GetSourceType();
+    GetEventDevice(orgDevice, point);
+    int32_t orgAction = pointerEvent->GetPointerAction();
+    switch (orgAction) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
             point.type = TouchType::CANCEL;
             break;
@@ -123,10 +139,12 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
 
     events.x = item.GetLocalX();
     events.y = item.GetLocalY();
-    int32_t action = pointerEvent->GetPointerAction();
-    GetMouseEventAction(action, events);
-    int32_t button = pointerEvent->GetButtonId();
-    GetMouseEventButton(button, events);
+    int32_t orgAction = pointerEvent->GetPointerAction();
+    GetMouseEventAction(orgAction, events);
+    int32_t orgButton = pointerEvent->GetButtonId();
+    GetMouseEventButton(orgButton, events);
+    int32_t orgDevice = pointerEvent->GetSourceType();
+    GetEventDevice(orgDevice, events);
 
     std::set<int32_t> pressedSet = pointerEvent->GetPressedButtons();
     uint32_t pressedButtons = 0;

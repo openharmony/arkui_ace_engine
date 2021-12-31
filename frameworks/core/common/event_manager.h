@@ -51,7 +51,6 @@ public:
 
     // mouse event target list.
     void MouseTest(const MouseEvent& touchPoint, const RefPtr<RenderNode>& renderNode);
-    void MouseHoverTest(const MouseEvent& touchPoint, const RefPtr<RenderNode>& renderNode);
 
     bool DispatchMouseEvent(const MouseEvent& event);
     bool DispatchMouseHoverEvent(const MouseEvent& event);

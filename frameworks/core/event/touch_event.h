@@ -64,6 +64,7 @@ struct TouchPoint final {
     double size = 0.0;
     float force = 0.0f;
     int64_t deviceId = 0;
+    SourceType sourceType = SourceType::NONE;
 
     Offset GetOffset() const
     {
@@ -73,9 +74,9 @@ struct TouchPoint final {
     TouchPoint CreateScalePoint(float scale) const
     {
         if (NearZero(scale)) {
-            return { id, x, y, type, time, size, force, deviceId };
+            return { id, x, y, type, time, size, force, deviceId, sourceType };
         }
-        return { id, x / scale, y / scale, type, time, size, force, deviceId };
+        return { id, x / scale, y / scale, type, time, size, force, deviceId, sourceType };
     }
 
     TouchPoint UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const

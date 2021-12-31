@@ -1411,8 +1411,6 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     eventManager_.MouseTest(scaleEvent, rootElement_->GetRenderNode());
     eventManager_.DispatchMouseEvent(scaleEvent);
-
-    eventManager_.MouseHoverTest(scaleEvent, rootElement_->GetRenderNode());
     eventManager_.DispatchMouseHoverEvent(scaleEvent);
 }
 

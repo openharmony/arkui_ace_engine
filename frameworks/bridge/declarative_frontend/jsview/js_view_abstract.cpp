@@ -2891,16 +2891,16 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
             sweepGradient.GetSweepGradient().centerX = AnimatableDimension(value, option);
             if (value.Unit() == DimensionUnit::PERCENT) {
                 // [0,1] -> [0, 100]
-                sweepGradient.GetSweepGradient().centerX = AnimatableDimension(
-                    value.Value() * 100.0, DimensionUnit::PERCENT, option);
+                sweepGradient.GetSweepGradient().centerX =
+                    AnimatableDimension(value.Value() * 100.0, DimensionUnit::PERCENT, option);
             }
         }
         if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
             sweepGradient.GetSweepGradient().centerY = AnimatableDimension(value, option);
             if (value.Unit() == DimensionUnit::PERCENT) {
                 // [0,1] -> [0, 100]
-                sweepGradient.GetSweepGradient().centerY = AnimatableDimension(
-                    value.Value() * 100.0, DimensionUnit::PERCENT, option);
+                sweepGradient.GetSweepGradient().centerY =
+                    AnimatableDimension(value.Value() * 100.0, DimensionUnit::PERCENT, option);
             }
         }
     }
@@ -3440,6 +3440,8 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("key", &JSViewAbstract::JsKey);
     JSClass<JSViewAbstract>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSViewAbstract>::StaticMethod("hoverEffect", &JSViewAbstract::JsHoverEffect);
+    JSClass<JSViewAbstract>::StaticMethod("onDoubleClick", &JSViewAbstract::JsOnDoubleClick);
+    JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
 #endif
@@ -3901,6 +3903,61 @@ void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
     }
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
     boxComponent->SetMouseAnimationType(static_cast<HoverAnimationType>(info[0]->ToNumber<int32_t>()));
+}
+
+RefPtr<Gesture> JSViewAbstract::GetTapGesture(const JSCallbackInfo& info, int32_t countNum, int32_t fingerNum)
+{
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("fail to get inspector for on touch event");
+        return nullptr;
+    }
+    auto impl = inspector->GetInspectorFunctionImpl();
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(countNum, fingerNum);
+    RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    tapGesture->SetOnActionId(
+        [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](GestureEvent& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            if (impl) {
+                impl->UpdateEventInfo(info);
+            }
+            func->Execute(info);
+        });
+    return tapGesture;
+}
+
+void JSViewAbstract::JsOnDoubleClick(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        auto tapGesture = GetTapGesture(info, 2);
+        if (tapGesture) {
+            click->SetOnDoubleClick(tapGesture);
+        }
+    }
+}
+
+void JSViewAbstract::JsOnMouse(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+        if (!inspector) {
+            LOGE("fail to get inspector for on mouse event");
+            return;
+        }
+        auto impl = inspector->GetInspectorFunctionImpl();
+        RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args[0]));
+        auto onMouseId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnMouseFunc), impl](
+                             MouseInfo& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            if (impl) {
+                impl->UpdateEventInfo(info);
+            }
+            func->Execute(info);
+        };
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        box->SetOnMouseId(onMouseId);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

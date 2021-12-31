@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_RENDER_BOX_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_RENDER_BOX_H
 
+#include "base/image/pixel_map.h"
 #include "core/animation/animator.h"
 #include "core/animation/keyframe_animation.h"
 #include "core/components/box/box_component.h"
@@ -25,7 +26,6 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/image/render_image.h"
 #include "core/gestures/raw_recognizer.h"
-#include "base/image/pixel_map.h"
 
 namespace OHOS::Ace {
 
@@ -174,6 +174,7 @@ public:
     void MouseHoverExitTest() override;
     void AnimateMouseHoverEnter() override;
     void AnimateMouseHoverExit() override;
+    void HandleMouseEvent(const MouseEvent& event) override;
     void HandleMouseHoverEvent(MouseState mouseState) override;
     WeakPtr<RenderNode> CheckHoverNode() override;
 
@@ -200,8 +201,8 @@ public:
         return onDrop_;
     }
 
-    void AddRecognizerToResult(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
-        TouchTestResult& result);
+    void AddRecognizerToResult(
+        const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result);
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     void SetPreTargetRenderBox(const RefPtr<RenderBox>& preTargetRenderBox)
@@ -266,9 +267,11 @@ private:
     OnDragFunc onDragLeave_;
     OnDragFunc onDrop_;
     RefPtr<GestureRecognizer> onClick_;
+    RefPtr<GestureRecognizer> onDoubleClick_;
     RefPtr<RawRecognizer> touchRecognizer_;
     RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_;
     OnHoverCallback onHover_;
+    OnMouseCallback onMouse_;
     TextDirection inspectorDirection_ { TextDirection::LTR };
 }; // class RenderBox
 

@@ -81,6 +81,11 @@ void RenderBox::Update(const RefPtr<Component>& component)
             onClick_ = tapGesture->CreateRecognizer(context_);
             onClick_->SetIsExternalGesture(true);
         }
+        auto dcGesture = box->GetOnDoubleClick();
+        if (dcGesture) {
+            onDoubleClick_ = dcGesture->CreateRecognizer(context_);
+            onDoubleClick_->SetIsExternalGesture(true);
+        }
 
         onDrag_ = box->GetOnDragId();
         onDragEnter_ = box->GetOnDragEnterId();
@@ -110,6 +115,7 @@ void RenderBox::Update(const RefPtr<Component>& component)
         }
 
         onHover_ = box->GetOnHoverId();
+        onMouse_ = box->GetOnMouseId();
 
         auto gestures = box->GetGestures();
         UpdateGestureRecognizer(gestures);
@@ -580,6 +586,7 @@ void RenderBox::ClearRenderObject()
     onDragLeave_ = nullptr;
     onDrop_ = nullptr;
     onClick_ = nullptr;
+    onDoubleClick_ = nullptr;
 }
 
 BackgroundImagePosition RenderBox::GetBackgroundPosition() const
@@ -684,8 +691,7 @@ WeakPtr<RenderNode> RenderBox::CheckHoverNode()
     return AceType::WeakClaim<RenderNode>(this);
 }
 
-void RenderBox::CreateFloatAnimation(
-    RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue)
+void RenderBox::CreateFloatAnimation(RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue)
 {
     if (!floatAnimation) {
         return;
@@ -830,6 +836,20 @@ void RenderBox::StopMouseHoverAnimation()
             controllerExit_->Stop();
         }
         controllerExit_->ClearInterpolators();
+    }
+}
+
+void RenderBox::HandleMouseEvent(const MouseEvent& event)
+{
+    if (onMouse_) {
+        MouseInfo info;
+        info.SetButton(event.button);
+        info.SetAction(event.action);
+        info.SetGlobalLocation(Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY()));
+        info.SetLocalLocation(Offset(GetGlobalPoint().GetX(), GetGlobalPoint().GetY()));
+        info.SetTimeStamp(event.time);
+        info.SetDeviceId(event.deviceId);
+        onMouse_(info);
     }
 }
 
@@ -1286,6 +1306,9 @@ void RenderBox::OnTouchTestHit(
     if (onClick_) {
         result.emplace_back(onClick_);
     }
+    if (onDoubleClick_) {
+        result.emplace_back(onDoubleClick_);
+    }
     if (dragDropGesture_) {
         result.emplace_back(dragDropGesture_);
     }
@@ -1377,24 +1400,22 @@ void RenderBox::OnStatusStyleChanged(StyleState componentState)
             case BoxStateAttribute::BORDER_WIDTH: {
                 auto widthState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
-                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf",
-                    attribute->stateName_, widthState->value_.Value());
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf", attribute->stateName_,
+                    widthState->value_.Value());
                 BoxComponentHelper::SetBorderWidth(GetBackDecoration(), widthState->value_);
             } break;
 
             case BoxStateAttribute::HEIGHT: {
-                auto valueState =
-                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, Dimension>>(attribute);
-                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf",
-                    attribute->stateName_, valueState->value_.Value());
+                auto valueState = AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, Dimension>>(attribute);
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf", attribute->stateName_,
+                    valueState->value_.Value());
                 height_ = valueState->value_;
             } break;
 
             case BoxStateAttribute::WIDTH: {
-                auto valueState =
-                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, Dimension>>(attribute);
-                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf",
-                    attribute->stateName_, valueState->value_.Value());
+                auto valueState = AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, Dimension>>(attribute);
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf", attribute->stateName_,
+                    valueState->value_.Value());
                 width_ = valueState->value_;
             } break;
 
