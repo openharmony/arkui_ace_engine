@@ -60,8 +60,6 @@ constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
 } // namespace
 
 #if defined(ENABLE_STANDARD_INPUT)
-sptr<MiscServices::OnTextChangedListener> g_listener = nullptr;
-
 void RenderTextField::UpdateConfiguration()
 {
     MiscServices::Configuration configuration;
@@ -750,10 +748,10 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
 
     if (softKeyboardEnabled_) {
 #if defined(ENABLE_STANDARD_INPUT)
-        if (!HasConnection()) {
-            g_listener = new OnTextChangedListenerImpl(WeakClaim(this));
-            MiscServices::InputMethodController::GetInstance()->Attach(g_listener);
+        if (textChangeListener_ == nullptr) {
+            textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
         }
+        MiscServices::InputMethodController::GetInstance()->Attach(textChangeListener_);
 #else
         if (!HasConnection()) {
             AttachIme();
