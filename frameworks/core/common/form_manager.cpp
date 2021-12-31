@@ -73,5 +73,24 @@ RefPtr<SubContainer> FormManager::MatchSubContainerWithFormId(int64_t formId, co
     nonmatchedContainerMap_.erase(iter);
     return subContainer;
 }
+void FormManager::Dump(const std::vector<std::string>& params)
+{
+#ifdef FORM_SUPPORTED
+    std::unordered_map<std::string, RefPtr<SubContainer>> copied;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        copied = nonmatchedContainerMap_;
+    }
+    for (const auto& container : copied) {
+        auto pipelineContext = container.second->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGW("the pipeline context is nullptr, pa container");
+            continue;
+        }
+        pipelineContext->GetTaskExecutor()->PostSyncTask(
+            [params, container = container.second]() { container->Dump(params); }, TaskExecutor::TaskType::UI);
+    }
+#endif
+}
 
 } // namespace OHOS::Ace

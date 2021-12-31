@@ -329,8 +329,8 @@ template("ace_core_source_set") {
         "$ace_root/frameworks/core/components/rich_text:ace_core_components_rich_text_$platform",
         "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform",
       ]
-      sources += [ "common/form_manager.cpp" ]
     }
+    sources += [ "common/form_manager.cpp" ]
 
     # xcomponent components supports phone, TV and wearable except PC Preview
     if (defined(config.xcomponent_components_support) &&

@@ -57,11 +57,11 @@ void JSForm::Create(const JSCallbackInfo& info)
     fomInfo.moduleName = module->ToString();
     fomInfo.dimension = dimension->ToNumber<int32_t>();
 
-    RefPtr<FormComponent> form = AceType::MakeRefPtr<OHOS::Ace::FormComponent>("", "FormComponent");
+    RefPtr<FormComponent> form = AceType::MakeRefPtr<OHOS::Ace::FormComponent>();
     form->SetFormRequestionInfo(fomInfo);
 #else
     // for PC Preivew
-    RefPtr<ComposedComponent> form = AceType::MakeRefPtr<OHOS::Ace::ComposedComponent>("", "FormComponent");
+    RefPtr<ComposedComponent> form = AceType::MakeRefPtr<OHOS::Ace::ComposedComponent>("", "card");
     RefPtr<BoxComponent> mountBox = AceType::MakeRefPtr<OHOS::Ace::BoxComponent>();
     auto textComponent = AceType::MakeRefPtr<TextComponent>("This component is not supported on PC Preview.");
     auto textStyle = textComponent->GetTextStyle();
@@ -75,8 +75,8 @@ void JSForm::Create(const JSCallbackInfo& info)
     mountBox->SetChild(textComponent);
     form->SetChild(mountBox);
 #endif
-
-    ViewStackProcessor::GetInstance()->Push(form, false, "FormComponent");
+    form->SetInspectorTag("FormComponent");
+    ViewStackProcessor::GetInstance()->Push(form, false);
 }
 
 void JSForm::SetSize(const JSCallbackInfo& info)

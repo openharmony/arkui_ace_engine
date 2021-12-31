@@ -36,6 +36,7 @@ public:
     void AddNonmatchedContainer(const std::string& cardKey, const RefPtr<SubContainer>& subContainer);
     RefPtr<SubContainer> GetSubContainer(int64_t formId);
     RefPtr<SubContainer> MatchSubContainerWithFormId(int64_t formId, const std::string& cardKey);
+    void Dump(const std::vector<std::string>& params);
 
 private:
     std::mutex mutex_;
