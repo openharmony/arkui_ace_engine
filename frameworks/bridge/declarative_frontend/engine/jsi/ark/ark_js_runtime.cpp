@@ -14,10 +14,6 @@
  */
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_runtime.h"
 
-#include <iostream>
-#include <memory>
-#include <sys/stat.h>
-
 #include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_value.h"
 
@@ -64,6 +60,7 @@ void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
         if (!usingExistVM_) {
+            JSNApi::StopDebugger(libPath_.c_str());
             JSNApi::DestroyJSVM(vm_);
         }
         vm_ = nullptr;
