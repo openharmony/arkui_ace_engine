@@ -171,6 +171,7 @@ template("declarative_js_engine") {
       "jsview/js_page_transition.cpp",
       "jsview/js_pan_handler.cpp",
       "jsview/js_path.cpp",
+      "jsview/js_pattern_lock.cpp",
       "jsview/js_persistent.cpp",
       "jsview/js_polygon.cpp",
       "jsview/js_polyline.cpp",

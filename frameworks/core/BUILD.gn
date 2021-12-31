@@ -316,6 +316,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_v2/inspector:ace_core_components_inspector_v2_$platform",
       "$ace_root/frameworks/core/components_v2/list:ace_core_components_list_v2_$platform",
       "$ace_root/frameworks/core/components_v2/swiper:ace_core_components_swiper_v2_$platform",
+      "$ace_root/frameworks/core/components_v2/pattern_lock:ace_core_components_pattern_lock_$platform",
     ]
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {

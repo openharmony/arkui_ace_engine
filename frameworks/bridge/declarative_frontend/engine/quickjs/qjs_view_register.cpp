@@ -81,6 +81,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
@@ -812,6 +813,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSGauge::JSBind(globalObj);
     JSHyperlink::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
+    JSPatternLock::JSBind(globalObj);
+    JSPatternLockController::JSBind(globalObj);
     JSTextPickerDialog::JSBind(globalObj);
 
     JSObjectTemplate toggleType;

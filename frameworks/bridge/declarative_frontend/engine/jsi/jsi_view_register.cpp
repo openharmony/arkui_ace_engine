@@ -74,6 +74,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
@@ -744,6 +745,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "SearchController", JSSearchController::JSBind },
     { "Sheet", JSSheet::JSBind },
     { "JSClipboard", JSClipboard::JSBind },
+    { "PatternLock", JSPatternLock::JSBind },
+    { "PatternLockController", JSPatternLockController::JSBind },
     { "TextTimer", JSTextTimer::JSBind },
     { "TextAreaController", JSTextAreaController::JSBind },
     { "TextInputController", JSTextInputController::JSBind },

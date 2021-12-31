@@ -85,6 +85,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
@@ -597,6 +598,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"Refresh", JSRefresh::JSBind},
     {"Shape", JSShape::JSBind},
     {"Path", JSPath::JSBind},
+    {"PatternLock", JSPatternLock::JSBind},
+    {"PatternLockController", JSPatternLockController::JSBind},
     {"Circle", JSCircle::JSBind},
     {"Line", JSLine::JSBind},
     {"Polygon", JSPolygon::JSBind},
