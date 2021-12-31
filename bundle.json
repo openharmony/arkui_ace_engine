@@ -1,0 +1,60 @@
+{
+    "name": "@ohos/ace_engine",
+    "version": "",
+    "description": "完成JS UI控件布局计算、绘制、渲染、事件响应和平台适配桥接等功能。",
+    "homePage": "https://gitee.com/openharmony",
+    "license": "Apache V2",
+    "repository": "https://gitee.com/openharmony/ace_ace_engine",
+    "domain": "os",
+    "language": "",
+    "publishAs": "code-segment",
+    "private": false,
+    "scripts": {},
+    "tags": [
+        "foundation"
+    ],
+    "keywords": [
+        "ace",
+        "engine"
+    ],
+    "envs": [],
+    "dirs": [],
+    "author": {
+        "name": "",
+        "email": "",
+        "url": ""
+    },
+    "contributors": [
+        {
+            "name": "",
+            "email": "",
+            "url": ""
+        }
+    ],
+    "segment": {
+        "destPath": "foundation/ace/ace_engine"
+    },
+    "component": {
+        "name": "ace_engine",
+        "subsystem": "ace",
+        "syscap": [
+            "SystemCapability.ACE.UIEngine"
+        ],
+        "features": [],
+        "adapted_system_type": [
+            "small",
+            "standard"
+        ],
+        "rom": "",
+        "ram": "",
+        "deps": {
+            "components": [],
+            "third_party": []
+        },
+        "build": {
+            "sub_component": [],
+            "inner_kits": [],
+            "test": []
+        }
+    }
+}
