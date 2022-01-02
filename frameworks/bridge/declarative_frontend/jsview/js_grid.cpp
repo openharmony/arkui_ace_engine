@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "core/common/ace_application_info.h"
 #include "core/components_v2/grid/render_grid_scroll.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -27,6 +28,9 @@ namespace {
 
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
+const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDirection::COLUMN,
+    FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
+const std::vector<GridDirection> GRID_DIRECTION = { GridDirection::LTR, GridDirection::RTL, GridDirection::Auto };
 
 } // namespace
 
@@ -156,6 +160,9 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("maxCount", &JSGrid::SetMaxCount, opt);
     JSClass<JSGrid>::StaticMethod("minCount", &JSGrid::SetMinCount, opt);
     JSClass<JSGrid>::StaticMethod("cellLength", &JSGrid::CellLength, opt);
+    JSClass<JSGrid>::StaticMethod("layoutDirection", &JSGrid::SetLayoutDirection, opt);
+    JSClass<JSGrid>::StaticMethod("direction", &JSGrid::SetDirection, opt);
+    JSClass<JSGrid>::StaticMethod("supportAnimation", &JSGrid::SetSupportAnimation, opt);
     JSClass<JSGrid>::StaticMethod("onItemDragEnter", &JSGrid::JsOnGridDragEnter);
     JSClass<JSGrid>::StaticMethod("onItemDragMove", &JSGrid::JsOnGridDragMove);
     JSClass<JSGrid>::StaticMethod("onItemDragLeave", &JSGrid::JsOnGridDragLeave);
@@ -238,6 +245,45 @@ void JSGrid::CellLength(int32_t cellLength)
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid) {
         grid->SetCellLength(cellLength);
+    }
+}
+
+void JSGrid::SetSupportAnimation(bool supportAnimation)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid) {
+        grid->SetSupportAnimation(supportAnimation);
+    }
+}
+
+void JSGrid::SetLayoutDirection(int32_t value)
+{
+    if (value >= 0 && value < static_cast<int32_t>(LAYOUT_DIRECTION.size())) {
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+        if (grid) {
+            grid->SetDirection(LAYOUT_DIRECTION[value]);
+        }
+    }
+}
+
+void JSGrid::SetDirection(int32_t value)
+{
+    if (value >= 0 && value < static_cast<int32_t>(GRID_DIRECTION.size())) {
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+        if (grid) {
+            bool rightToLeft = false;
+            if (value == (int32_t)GridDirection::LTR) {
+                rightToLeft = false;
+            } else if (value == (int32_t)GridDirection::RTL) {
+                rightToLeft = true;
+            } else {
+                rightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+            }
+            grid->SetRightToLeft(rightToLeft);
+        }
     }
 }
 

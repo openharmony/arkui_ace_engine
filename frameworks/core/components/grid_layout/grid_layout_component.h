@@ -224,6 +224,16 @@ public:
         return cellLength_;
     }
 
+    void SetSupportAnimation(bool supportAnimation)
+    {
+        supportAnimation_ = supportAnimation;
+    }
+
+    bool GetSupportAnimation()
+    {
+        return supportAnimation_;
+    }
+
     void SetOnGridDragEnterId(const OnGridDragEnterFunc& onGridDragEnterId);
     void SetOnGridDragMoveId(const OnGridDragMoveFunc& onGridDragMoveId);
     void SetOnGridDragLeaveId(const OnGridDragLeaveFunc& onGridDragLeaveId);
@@ -244,6 +254,7 @@ private:
     int32_t rowCount_ = 1;
     bool isDeclarative_ = false;
     int32_t cacheCount_ = 1;
+    bool supportAnimation_ = false;
 
     std::string columnsArgs_;
     std::string rowsArgs_;

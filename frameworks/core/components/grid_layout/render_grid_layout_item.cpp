@@ -37,6 +37,7 @@ void RenderGridLayoutItem::Update(const RefPtr<Component>& component)
     SetColumnSpan(gridItem->GetColumnSpan());
     SetRowSpan(gridItem->GetRowSpan());
     SetForceRebuild(gridItem->ForceRebuild());
+    InitAnimationController(GetContext());
     MarkNeedLayout();
 }
 
@@ -126,4 +127,39 @@ void RenderGridLayoutItem::SetOnItemLongPressed(const OnItemLongPressed& func)
     }
 }
 
+void RenderGridLayoutItem::InitAnimationController(const WeakPtr<PipelineContext>& context)
+{
+    if (!animationController_) {
+        animationController_ = AceType::MakeRefPtr<Animator>(context);
+        animationController_->SetDuration(300);
+    }
+}
+
+RefPtr<Animator> RenderGridLayoutItem::GetAnimationController()
+{
+    return animationController_;
+}
+
+bool RenderGridLayoutItem::AnimationAddInterpolator(const RefPtr<Animation<Point>>& animation)
+{
+    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
+    if (animationController_) {
+        if (animationController_->IsRunning()) {
+            animationController_->ClearInterpolators();
+            animationController_->ClearAllListeners();
+            animationController_->Stop();
+        }
+        animationController_->AddInterpolator(animation);
+        return true;
+    }
+    return false;
+}
+
+void RenderGridLayoutItem::AnimationPlay()
+{
+    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
+    if (animationController_) {
+        animationController_->Play();
+    }
+}
 } // namespace OHOS::Ace

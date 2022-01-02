@@ -42,6 +42,9 @@ constexpr bool FORWARD = false;
 constexpr bool REVERSE = true;
 constexpr double FULL_PERCENT = 100.0;
 constexpr uint32_t REPEAT_MIN_SIZE = 6;
+constexpr int32_t GAP_DIVIDE_CONSTEXPR = 2;
+constexpr int32_t CELL_EMPTY = -1;
+constexpr int32_t CELL_FOR_INSERT = -2;
 const char UNIT_PIXEL[] = "px";
 const char UNIT_PERCENT[] = "%";
 const char UNIT_RATIO[] = "fr";
@@ -102,6 +105,7 @@ void RenderGridLayout::Update(const RefPtr<Component>& component)
     mainCountMin_ = grid->GetMinCount();
     editMode_ = grid->GetEditMode();
 
+    supportAnimation_ = grid->GetSupportAnimation();
     onGridDragStartFunc_ = grid->GetOnGridDragStartId();
     OnGridDragEnterFunc_ = grid->GetOnGridDragEnterId();
     onGridDragMoveFunc_ = grid->GetOnGridDragMoveId();
@@ -120,10 +124,14 @@ void RenderGridLayout::Update(const RefPtr<Component>& component)
 
     component_ = grid;
 
-    if (editMode_ && grid->GetOnGridDropId()) {
-        CreateDragDropRecognizer();
+    CreateSlideRecognizer();
+    CreateSpringController();
+    if (editMode_) {
+        if (grid->GetOnGridDropId()) {
+            CreateDragDropRecognizer();
+        }
+        InitAnimationController(GetContext());
     }
-
     MarkNeedLayout();
 }
 
@@ -185,7 +193,7 @@ int32_t RenderGridLayout::focusMove(KeyDirection direction)
         }
         next = GetIndexByGrid(nextRow, nextCol);
     }
-    LOGI("PreFocus:%{public}d CurrentFocus:%{public}d", focusIndex_, next);
+    LOGD("PreFocus:%{public}d CurrentFocus:%{public}d", focusIndex_, next);
     focusRow_ = nextRow;
     focusCol_ = nextCol;
     focusIndex_ = next;
@@ -268,9 +276,86 @@ void RenderGridLayout::SetChildPosition(
         positionX = colSize_ - positionX - colLen;
     }
 
-    double widthOffset = (colLen - child->GetLayoutSize().Width()) / 2.0;
-    double heightOffset = (rowLen - child->GetLayoutSize().Height()) / 2.0;
+    double widthOffset = (colLen - child->GetLayoutSize().Width()) / GAP_DIVIDE_CONSTEXPR;
+    double heightOffset = (rowLen - child->GetLayoutSize().Height()) / GAP_DIVIDE_CONSTEXPR;
     child->SetPosition(Offset(positionX + widthOffset, positionY + heightOffset));
+}
+
+Point RenderGridLayout::CalcChildPosition(
+    const RefPtr<RenderNode>& child, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan)
+{
+    LOGD("%{public}s begin. row: %{public}d, col: %{public}d, rowSpan: %{public}d, colSpan: %{public}d",
+        __PRETTY_FUNCTION__, row, col, rowSpan, colSpan);
+    if (focusRow_ < 0 && focusCol_ < 0) {
+        // Make the first item obtain focus.
+        focusRow_ = row;
+        focusCol_ = col;
+    }
+
+    // Calculate the position for current child.
+    double positionX = 0.0;
+    double positionY = 0.0;
+    for (int32_t i = 0; i < row; ++i) {
+        positionY += gridCells_.at(i).at(0).Height();
+    }
+    positionY += row * rowGap_;
+    for (int32_t i = 0; i < col; ++i) {
+        positionX += gridCells_.at(0).at(i).Width();
+    }
+    positionX += col * colGap_;
+
+    // Calculate the size for current child.
+    double rowLen = 0.0;
+    double colLen = 0.0;
+    for (int32_t i = 0; i < rowSpan; ++i) {
+        rowLen += gridCells_.at(row + i).at(col).Height();
+    }
+    rowLen += (rowSpan - 1) * rowGap_;
+    for (int32_t i = 0; i < colSpan; ++i) {
+        colLen += gridCells_.at(row).at(col + i).Width();
+    }
+    colLen += (colSpan - 1) * colGap_;
+
+    // If RTL, place the item from right.
+    if (rightToLeft_) {
+        positionX = colSize_ - positionX - colLen;
+    }
+
+    double widthOffset = (colLen - child->GetLayoutSize().Width()) / GAP_DIVIDE_CONSTEXPR;
+    double heightOffset = (rowLen - child->GetLayoutSize().Height()) / GAP_DIVIDE_CONSTEXPR;
+    return Point(positionX + widthOffset, positionY + heightOffset);
+}
+
+Point RenderGridLayout::CalcDragChildStartPosition(const ItemDragInfo& info)
+{
+    double gridPositonX = GetGlobalOffset().GetX();
+    double gridPositonY = GetGlobalOffset().GetY();
+    double dragRelativelyX = info.GetX() - gridPositonX;
+    double dragRelativelyY = info.GetY() - gridPositonY;
+    return Point(dragRelativelyX, dragRelativelyY);
+}
+
+Point RenderGridLayout::CalcDragChildEndPosition(int32_t rowIndex, int32_t colIndex)
+{
+    LOGD("CalcDragChildEndPosition>>>>>>rowIndex=%{public}d, colIndex=%{public}d", rowIndex, colIndex);
+    double positionX = 0.0;
+    double positionY = 0.0;
+    for (int32_t i = 0; i < rowIndex; ++i) {
+        positionY += gridCells_.at(i).at(0).Height();
+    }
+
+    positionY += rowIndex * rowGap_;
+    for (int32_t i = 0; i < colIndex; ++i) {
+        positionX += gridCells_.at(0).at(i).Width();
+    }
+    positionX += colIndex * colGap_;
+
+    // If RTL, place the item from right.
+    if (rightToLeft_) {
+        double colLen = gridCells_.at(rowIndex).at(colIndex).Width();
+        positionX = colSize_ - positionX - colLen;
+    }
+    return Point(positionX + GetGlobalOffset().GetX(), positionY + GetGlobalOffset().GetY());
 }
 
 void RenderGridLayout::DisableChild(const RefPtr<RenderNode>& child, int32_t index)
@@ -737,6 +822,9 @@ bool RenderGridLayout::CheckGridPlaced(int32_t index, int32_t row, int32_t col, 
 
 void RenderGridLayout::PerformLayout()
 {
+    if (CheckAnimation()) {
+        return;
+    }
     if (isDragChangeLayout_ && !needRestoreScene_) {
         isDragChangeLayout_ = false;
         return;
@@ -761,36 +849,7 @@ void RenderGridLayout::PerformLayout()
     if (editMode_) {
         PerformLayoutForEditGrid();
     } else {
-        int32_t rowIndex = 0;
-        int32_t colIndex = 0;
-        int32_t itemIndex = 0;
-        for (const auto& item : GetChildren()) {
-            int32_t itemRow = GetItemRowIndex(item);
-            int32_t itemCol = GetItemColumnIndex(item);
-            int32_t itemRowSpan = GetItemSpan(item, true);
-            int32_t itemColSpan = GetItemSpan(item, false);
-            if (itemRow >= 0 && itemRow < rowCount_ && itemCol >= 0 && itemCol < colCount_ &&
-                CheckGridPlaced(itemIndex, itemRow, itemCol, itemRowSpan, itemColSpan)) {
-                item->Layout(MakeInnerLayoutParam(itemRow, itemCol, itemRowSpan, itemColSpan));
-                SetChildPosition(item, itemRow, itemCol, itemRowSpan, itemColSpan);
-            } else {
-                while (!CheckGridPlaced(itemIndex, rowIndex, colIndex, itemRowSpan, itemColSpan)) {
-                    GetNextGrid(rowIndex, colIndex);
-                    if (rowIndex >= rowCount_ || colIndex >= colCount_) {
-                        break;
-                    }
-                }
-                if (rowIndex >= rowCount_ || colIndex >= colCount_) {
-                    DisableChild(item, itemIndex);
-                    continue;
-                }
-                item->Layout(MakeInnerLayoutParam(rowIndex, colIndex, itemRowSpan, itemColSpan));
-                SetChildPosition(item, rowIndex, colIndex, itemRowSpan, itemColSpan);
-            }
-            SetItemIndex(item, itemIndex); // Set index for focus adjust.
-            ++itemIndex;
-            LOGD("%{public}d %{public}d %{public}d %{public}d", rowIndex, colIndex, itemRowSpan, itemColSpan);
-        }
+        PerformLayoutForStaticGrid();
     }
     SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_, rowSize_)));
 }
@@ -832,13 +891,31 @@ void RenderGridLayout::BackGridMatrix()
 {
     gridMatrixBack_.clear();
     gridMatrixBack_ = gridMatrix_;
+    if (supportAnimation_) {
+        gridItemPosition_.clear();
+        std::map<int32_t, GridItemIndexPosition> backData;
+        ParseRestoreScenePosition(gridMatrixBack_, backData);
+        for (auto iter = backData.begin(); iter != backData.end(); iter++) {
+            if (iter->first >= 0 && iter->first < (int32_t)itemsInGrid_.size()) {
+                auto item = itemsInGrid_[iter->first];
+                gridItemPosition_[iter->first] = Point(item->GetPosition().GetX(), item->GetPosition().GetY());
+            }
+        }
+    }
 }
 
-void RenderGridLayout::RestoreScene()
+void RenderGridLayout::RestoreScene(const ItemDragInfo& info)
 {
     // Until the moving animation is done, only performlayout needs to be triggered here to retrieve the original data
     // for layout
     needRestoreScene_ = true;
+    if (supportAnimation_) {
+        CalcRestoreScenePosition(info);
+        if (needRunAnimation_) {
+            StartAnimationController(GridLayoutAnimationAct::ANIMATION_RESTORE_SCENCE, nullptr);
+        }
+    }
+    StartFlexController(startGlobalPoint_);
 }
 
 void RenderGridLayout::OnTouchTestHit(
@@ -847,9 +924,22 @@ void RenderGridLayout::OnTouchTestHit(
     if (dragDropGesture_) {
         result.emplace_back(dragDropGesture_);
     }
+    if (slideRecognizer_) {
+        result.emplace_back(slideRecognizer_);
+    }
 }
 
-void RenderGridLayout::ClearDragInfo()
+void RenderGridLayout::ClearPartDragInfo()
+{
+    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
+    curInsertRowIndex_ = -1;
+    curInsertColumnIndex_ = -1;
+    dragPosRowIndex_ = -1;
+    dragPosColumnIndex_ = -1;
+    dragPosChanged_ = false;
+}
+
+void RenderGridLayout::ClearAllDragInfo()
 {
     curInsertRowIndex_ = -1;
     curInsertColumnIndex_ = -1;
@@ -866,7 +956,10 @@ void RenderGridLayout::ClearDragInfo()
     isDragChangeLayout_ = false;
     dragingItemRenderNode_.Reset();
     subGrid_.Reset();
+    mainGrid_.Reset();
 }
+
+
 
 void RenderGridLayout::CalIsVertical()
 {
@@ -950,6 +1043,14 @@ void RenderGridLayout::CreateDragDropRecognizer()
                     lastLongPressPoint.SetX(eventinfo.GetGlobalPoint().GetX());
                     lastLongPressPoint.SetY(eventinfo.GetGlobalPoint().GetY());
                     renderGrid->SetLongPressPoint(lastLongPressPoint);
+                    // update curInsertIndex
+                    ItemDragInfo dragInfo = ItemDragInfo();
+                    dragInfo.SetX(info.GetGlobalLocation().GetX());
+                    dragInfo.SetY(info.GetGlobalLocation().GetY());
+                    if (renderGrid->CalDragCell(dragInfo)) {
+                        renderGrid->UpdateCurInsertPos(
+                            renderGrid->GetDragPosRowIndex(), renderGrid->GetDragPosColumnIndex());
+                    }
                 }
             }
         });
@@ -978,8 +1079,7 @@ void RenderGridLayout::ActionStart(const ItemDragInfo& info, RefPtr<Component> c
         positionedComponent->SetTop(Dimension(info.GetY()));
         positionedComponent->SetLeft(Dimension(info.GetX()));
 
-        auto updatePosition = [renderGirdLayout = AceType::Claim(this)](const std::function<void(const Dimension&,
-            const Dimension&)>& func) {
+        auto updatePosition = [renderGirdLayout = AceType::Claim(this)](const OnItemDragFunc& func) {
             if (!renderGirdLayout) {
                 return;
             }
@@ -998,7 +1098,7 @@ void RenderGridLayout::PanOnActionUpdate(const GestureEvent& info)
     if (!renderGirdLayout) {
         return;
     }
-    if (renderGirdLayout->GetUpdatePositionId()) {
+    if (renderGirdLayout->GetUpdatePositionId() && isExistComponent_) {
         Point point = info.GetGlobalPoint();
         renderGirdLayout->GetUpdatePositionId()(Dimension(point.GetX()), Dimension(point.GetY()));
     }
@@ -1031,7 +1131,9 @@ void RenderGridLayout::PanOnActionUpdate(const GestureEvent& info)
         }
         preTargetRenderGrid->OnDragLeave(event);
         subGrid_.Reset();
+        mainGrid_.Reset();
     } else if (targetRenderGrid && !itemLongPressed_) {
+        targetRenderGrid->mainGrid_ = mainTargetRenderGrid;
         subGrid_ = AceType::WeakClaim(AceType::RawPtr(targetRenderGrid));
         targetRenderGrid->OnDragEnter(event);
     } else {
@@ -1043,11 +1145,8 @@ void RenderGridLayout::PanOnActionUpdate(const GestureEvent& info)
 
 void RenderGridLayout::PanOnActionEnd(const GestureEvent& info)
 {
-    auto pipelineContext = GetContext().Upgrade();
-    auto gridItem = AceType::Claim(this)->dragingItemRenderNode_.Upgrade();
-    if (pipelineContext && gridItem) {
-        auto stackElement = pipelineContext->GetLastStack();
-        stackElement->PopComponent();
+    if (!supportAnimation_) {
+        CloseFlexComponent();
     }
     ItemDragInfo event;
     // MMIO could not provide correct point info when touch up, so restore the last point info
@@ -1085,23 +1184,10 @@ void RenderGridLayout::OnDragEnter(const ItemDragInfo& info)
     }
     if (isMainGrid_) {
         if (itemDragStarted_) {
-            isInMainGrid_ = true;
-            reEnter_ = true;
+            ImpDragEnterMainGrid(info);
         }
     } else {
-        itemDragEntered_ = true;
-        if (CouldBeInserted()) {
-            BackGridMatrix();
-            if (isDynamicGrid_ && NeedBeLarger()) {
-                // BeLager and render
-                InitialDynamicGridProp(1);
-                SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_, rowSize_)));
-                isDragChangeLayout_ = true;
-                MarkNeedLayout();
-            }
-        } else {
-            LOGW("%{public}s couldn't be inserted.", __PRETTY_FUNCTION__);
-        }
+        ImpDragEnterSubGrid(info);
     }
 }
 
@@ -1117,36 +1203,11 @@ void RenderGridLayout::OnDragLeave(const ItemDragInfo& info)
 
     if (isMainGrid_) {
         if (itemDragStarted_) {
-            isInMainGrid_ = false;
-            if (component_->GetOnGridDragLeaveId()) {
-                component_->GetOnGridDragLeaveId()(info, dragingItemIndex_);
-            } else {
-                LOGE("%{public}s no onGridGragLeave registered.", __PRETTY_FUNCTION__);
-            }
-            FakeRemoveDragItem();
-            if (isDynamicGrid_) {
-                InitialDynamicGridProp(-1);
-                SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_, rowSize_)));
-                isDragChangeLayout_ = true;
-                MarkNeedLayout();
-            }
+            ImpDragLeaveMainGrid(info);
         }
     } else {
         if (itemDragEntered_) {
-            itemDragEntered_ = false;
-            if (component_->GetOnGridDragLeaveId()) {
-                component_->GetOnGridDragLeaveId()(info, -1);
-            } else {
-                LOGE("%{public}s no onGridGragLeave registered.", __PRETTY_FUNCTION__);
-            }
-            if (isDynamicGrid_ && NeedBeSmaller()) {
-                // BeSmaller
-                InitialDynamicGridProp(-1);
-                SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_, rowSize_)));
-                RestoreScene();
-                isDragChangeLayout_ = true;
-                MarkNeedLayout();
-            }
+            ImpDragLeaveSubGrid(info);
         }
     }
 }
@@ -1166,25 +1227,7 @@ void RenderGridLayout::OnDragMove(const ItemDragInfo& info)
     }
 
     if ((!isInMainGrid_ && itemDragEntered_) || (itemDragStarted_ && isInMainGrid_ && isMainGrid_)) {
-        if (CouldBeInserted() || itemDragStarted_) {
-            if (CalDragCell(info)) {
-                MoveItems();
-            }
-            int32_t insertIndex = CalIndexForItemByRowAndColum(curInsertRowIndex_, curInsertColumnIndex_);
-            if (component_->GetOnGridDragMoveId()) {
-                component_->GetOnGridDragMoveId()(info, dragingItemIndex_, insertIndex);
-            } else {
-                LOGE("%{public}s no onGridGragMove registered.", __PRETTY_FUNCTION__);
-            }
-            isDragChangeLayout_ = true;
-            MarkNeedLayout();
-        } else {
-            if (component_->GetOnGridDragMoveId()) {
-                component_->GetOnGridDragMoveId()(info, dragingItemIndex_, -1);
-            } else {
-                LOGE("%{public}s no onGridGragMove registered.", __PRETTY_FUNCTION__);
-            }
-        }
+        ImpDragMove(info);
         return;
     }
     if (isMainGrid_) {
@@ -1207,33 +1250,174 @@ bool RenderGridLayout::ImpDropInGrid(const ItemDragInfo& info)
     itemDragStarted_ = false;
     itemDragEntered_ = false;
     bool result = false;
+    int32_t insertIndex = -1;
     gridMatrixBack_.clear();
     if (CouldBeInserted()) {
         if (CalDragCell(info)) {
             MoveItems();
         }
-        int32_t insertIndex = CalIndexForItemByRowAndColum(curInsertRowIndex_, curInsertColumnIndex_);
+        insertIndex = CalIndexForItemByRowAndColum(curInsertRowIndex_, curInsertColumnIndex_);
         if (insertIndex >= 0 && insertIndex < itemCountMax_) {
             result = true;
-        }
-        if (component_->GetOnGridDropId()) {
-            component_->GetOnGridDropId()(info, dragingItemIndex_, insertIndex, result);
+            Point endPoint = CalcDragChildEndPosition(curInsertRowIndex_, curInsertColumnIndex_);
+            RegisterDropJSEvent(info, insertIndex, result);
+
+            if (needRunAnimation_) {
+                StartAnimationController(GridLayoutAnimationAct::ANIMATION_DRAG_DROP, nullptr);
+            }
+
+            if (isMainGrid_ && isInMainGrid_) {
+                StartFlexController(endPoint);
+            } else {
+                auto mainGrid = mainGrid_.Upgrade();
+                if (mainGrid) {
+                    mainGrid->RegisterDropJSEvent(info, -1, result);
+                    mainGrid->StartFlexController(endPoint, true);
+                }
+            }
         } else {
-            LOGE("%{public}s no onGridDrop registered.", __PRETTY_FUNCTION__);
+            RegisterDropJSEvent(info, -1, false);
+            RestoreScene(info);
+            result = true;
         }
-        result = true;
     } else {
-        if (component_->GetOnGridDropId()) {
-            component_->GetOnGridDropId()(info, dragingItemIndex_, -1, false);
+        RegisterDropJSEvent(info, -1, false);
+        RestoreScene(info);
+    }
+    return result;
+}
+
+void RenderGridLayout::ImpDragMove(const ItemDragInfo& info)
+{
+    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
+    if (CouldBeInserted() || itemDragStarted_) {
+        LOGD("%{public}s couldn be inserted.", __PRETTY_FUNCTION__);
+        if (CalDragCell(info)) {
+            MoveItems();
+            if (needRunAnimation_) {
+                StartAnimationController(GridLayoutAnimationAct::ANIMATION_DRAG_MOVE, nullptr);
+            }
+        }
+        if (supportAnimation_) {
+            TriggerMoveEventForJS(info);
         } else {
-            LOGE("%{public}s no onGridDrop registered.", __PRETTY_FUNCTION__);
+            isDragChangeLayout_ = true;
+            TriggerMoveEventForJS(info);
+            MarkNeedLayout();
+        }
+    } else {
+        LOGD("%{public}s couldn't be inserted.", __PRETTY_FUNCTION__);
+        if (component_->GetOnGridDragMoveId()) {
+            LOGD("%{public}s. could not be insert. InsertIndex: %{public}d ,ItemIndex: %{public}d", __PRETTY_FUNCTION__,
+                -1, dragingItemIndex_);
+            component_->GetOnGridDragMoveId()(info, dragingItemIndex_, -1);
+        } else {
+            LOGE("%{public}s no onGridGragMove registered.", __PRETTY_FUNCTION__);
         }
     }
-    dragingItemIndex_ = -1;
-    dragingItemRenderNode_.Reset();
-    curInsertRowIndex_ = -1;
-    curInsertColumnIndex_ = -1;
-    return result;
+}
+
+void RenderGridLayout::ImpDragLeaveMainGrid(const ItemDragInfo& info)
+{
+    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
+    isInMainGrid_ = false;
+    if (component_->GetOnGridDragLeaveId()) {
+        LOGD("%{public}s. from dragstart ItemIndex: %{public}d", __PRETTY_FUNCTION__, dragingItemIndex_);
+        component_->GetOnGridDragLeaveId()(info, dragingItemIndex_);
+    } else {
+        LOGE("%{public}s no onGridGragLeave registered.", __PRETTY_FUNCTION__);
+    }
+    FakeRemoveDragItem();
+    ClearPartDragInfo();
+    if (supportAnimation_ && needRunAnimation_) {
+        StartAnimationController(GridLayoutAnimationAct::ANIMATION_DRAG_MOVE, [weak = WeakClaim(this)]() {
+            auto renderGrid = weak.Upgrade();
+            if (renderGrid) {
+                renderGrid->FakeRemoveDragItemUpdate();
+            }
+        });
+    } else {
+        FakeRemoveDragItemUpdate();
+        isDragChangeLayout_ = true;
+        MarkNeedLayout();
+    }
+}
+
+void RenderGridLayout::ImpDragLeaveSubGrid(const ItemDragInfo& info)
+{
+    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
+    ClearAllDragInfo();
+    if (component_->GetOnGridDragLeaveId()) {
+        LOGD("%{public}s. from dragenter ItemIndex: %{public}d", __PRETTY_FUNCTION__, -1);
+        component_->GetOnGridDragLeaveId()(info, -1);
+    } else {
+        LOGE("%{public}s no onGridGragLeave registered.", __PRETTY_FUNCTION__);
+    }
+    if (isDynamicGrid_ && NeedBeSmaller()) {
+        // BeSmaller
+        InitialDynamicGridProp(DRAG_LEAVE);
+        SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_, rowSize_)));
+        if (rightToLeft_) {
+            ResetItemPosition();
+        }
+    }
+    RestoreScene(info);
+    isDragChangeLayout_ = true;
+    MarkNeedLayout();
+}
+
+void RenderGridLayout::ImpDragEnterMainGrid(const ItemDragInfo& info)
+{
+    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
+    LOGD("%{public}s drag reEnter_ the maingrid.", __PRETTY_FUNCTION__);
+    isInMainGrid_ = true;
+    reEnter_ = true;
+    if (supportAnimation_ && needRunAnimation_) {
+        StartAnimationController(GridLayoutAnimationAct::ANIMATION_DRAG_MOVE, [weak = WeakClaim(this)]() {
+            auto renderGrid = weak.Upgrade();
+            if (renderGrid) {
+                renderGrid->ImpDragEnterMainGridUpdate();
+            }
+        });
+    } else {
+        ImpDragEnterMainGridUpdate();
+    }
+}
+
+void RenderGridLayout::ImpDragEnterMainGridUpdate()
+{
+    if (isDynamicGrid_ && NeedBeLarger()) {
+        // BeLager and render
+        InitialDynamicGridProp(DRAG_ENTER);
+        SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_, rowSize_)));
+        isDragChangeLayout_ = true;
+        if (rightToLeft_) {
+            ResetItemPosition();
+        }
+        MarkNeedLayout();
+    }
+}
+
+void RenderGridLayout::ImpDragEnterSubGrid(const ItemDragInfo& info)
+{
+    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
+    itemDragEntered_ = true;
+    if (CouldBeInserted()) {
+        LOGD("%{public}s could be inserted.", __PRETTY_FUNCTION__);
+        BackGridMatrix();
+        if (isDynamicGrid_ && NeedBeLarger()) {
+            // BeLager and render
+            InitialDynamicGridProp(DRAG_ENTER);
+            SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_, rowSize_)));
+            isDragChangeLayout_ = true;
+            if (rightToLeft_) {
+                ResetItemPosition();
+            }
+            MarkNeedLayout();
+        }
+    } else {
+        LOGD("%{public}s couldn't be inserted.", __PRETTY_FUNCTION__);
+    }
 }
 
 bool RenderGridLayout::OnDrop(const ItemDragInfo& info)
@@ -1248,7 +1432,9 @@ bool RenderGridLayout::OnDrop(const ItemDragInfo& info)
 
     if ((isMainGrid_ && isInMainGrid_ && itemDragStarted_) || (!isMainGrid_ && itemDragEntered_)) {
         bool ret = ImpDropInGrid(info);
-        ClearDragInfo();
+        if (!supportAnimation_) {
+            ClearAllDragInfo();
+        }
         return ret;
     }
 
@@ -1256,27 +1442,19 @@ bool RenderGridLayout::OnDrop(const ItemDragInfo& info)
         auto subGrid = subGrid_.Upgrade();
         if (subGrid && !isInMainGrid_) {
             bool result = subGrid->OnDrop(info);
-            if (component_->GetOnGridDropId()) {
-                component_->GetOnGridDropId()(info, dragingItemIndex_, -1, result);
-            }
-            ClearDragInfo();
             if (!result) {
-                RestoreScene();
+                RestoreScene(info);
                 MarkNeedLayout();
             }
             return result;
         } else if (!isInMainGrid_) {
-            if (component_->GetOnGridDropId()) {
-                component_->GetOnGridDropId()(info, dragingItemIndex_, -1, false);
-            }
-            RestoreScene();
+            RegisterDropJSEvent(info, -1, false);
+            RestoreScene(info);
             isDragChangeLayout_ = true;
-            ClearDragInfo();
-            MarkNeedLayout();
             return false;
         }
     }
-    ClearDragInfo();
+    ClearAllDragInfo();
     return false;
 }
 
@@ -1286,15 +1464,21 @@ void RenderGridLayout::ImpDragStart(const ItemDragInfo& info)
     itemLongPressed_ = false;
     isMainGrid_ = true;
     isInMainGrid_ = true;
+    ClearSpringSlideData();
     BackGridMatrix();
     auto itemRender = dragingItemRenderNode_.Upgrade();
     if (itemRender) {
+        startGlobalPoint_.SetX(itemRender->GetGlobalOffset().GetX());
+        startGlobalPoint_.SetY(itemRender->GetGlobalOffset().GetY());
         itemRender->SetVisible(false);
         DisableChild(itemRender, dragingItemIndex_);
     }
     if (component_->GetOnGridDragStartId()) {
         auto customComponent = component_->GetOnGridDragStartId()(info, dragingItemIndex_);
-        ActionStart(info, customComponent);
+        if (customComponent) {
+            isExistComponent_ = true;
+            ActionStart(info, customComponent);
+        }
     } else {
         LOGE("%{public}s no onGridGragStart registered.", __PRETTY_FUNCTION__);
     }
@@ -1322,18 +1506,42 @@ int32_t RenderGridLayout::CountItemInGrid()
     for (int main = 0; main < rowCount_; main++) {
         auto mainIter = gridMatrix_.find(main);
         if (mainIter != gridMatrix_.end()) {
-            for (int cross = 0; cross < colCount_; cross++) {
-                auto crossIter = mainIter->second.find(cross);
-                if (crossIter != mainIter->second.end()) {
-                    int32_t index = crossIter->second;
-                    if (index >= 0) {
-                        count++;
-                    }
-                }
-            }
+            count += CountItemInRow(mainIter);
         }
     }
     return count;
+}
+
+int32_t RenderGridLayout::CountItemInRow(const std::map<int32_t, std::map<int32_t, int32_t>>::iterator& rowGrid)
+{
+    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
+    int32_t count = 0;
+    for (int cross = 0; cross < colCount_; cross++) {
+        auto crossIter = rowGrid->second.find(cross);
+        if (crossIter != rowGrid->second.end()) {
+            int32_t index = crossIter->second;
+            if (index >= 0) {
+                count++;
+            }
+        }
+    }
+    LOGD("RenderGridLayout CountItemInRow the count is %{public}d ", count);
+    return count;
+}
+
+void RenderGridLayout::ResetItemPosition()
+{
+    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
+    for (const auto& gridMap : gridMatrix_) {
+        int32_t row = gridMap.first;
+        for (const auto& grid : gridMap.second) {
+            int32_t col = grid.first;
+            int32_t index = grid.second;
+            if (index >= 0 && index < (int32_t)itemsInGrid_.size()) {
+                SetChildPosition(itemsInGrid_[index], row, col, 1, 1);
+            }
+        }
+    }
 }
 
 void RenderGridLayout::InitialDynamicGridProp(int32_t dragLeaveOrEnter)
@@ -1347,11 +1555,12 @@ void RenderGridLayout::InitialDynamicGridProp(int32_t dragLeaveOrEnter)
     std::vector<double> rows;
     if (isVertical_) {
         CalculateVerticalSize(cols, rows, dragLeaveOrEnter);
-        itemCountMax_ = cols.size() * mainCountMax_;
+        itemCountMax_ = colCount_ * mainCountMax_;
     } else {
         CalculateHorizontalSize(cols, rows, dragLeaveOrEnter);
-        itemCountMax_ = rows.size() * mainCountMax_;
+        itemCountMax_ = rowCount_ * mainCountMax_;
     }
+    curItemCountMax_ = colCount_ * rowCount_;
 
     UpdateCollectionInfo(cols, rows);
     LOGD("GridLayout: %{public}lf %{public}lf %{public}d %{public}d", colSize_, rowSize_, colCount_, rowCount_);
@@ -1470,6 +1679,41 @@ void RenderGridLayout::PerformLayoutForEditGrid()
     }
 }
 
+void RenderGridLayout::PerformLayoutForStaticGrid()
+{
+    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
+    int32_t rowIndex = 0;
+    int32_t colIndex = 0;
+    int32_t itemIndex = 0;
+    for (const auto& item : GetChildren()) {
+        int32_t itemRow = GetItemRowIndex(item);
+        int32_t itemCol = GetItemColumnIndex(item);
+        int32_t itemRowSpan = GetItemSpan(item, true);
+        int32_t itemColSpan = GetItemSpan(item, false);
+        if (itemRow >= 0 && itemRow < rowCount_ && itemCol >= 0 && itemCol < colCount_ &&
+            CheckGridPlaced(itemIndex, itemRow, itemCol, itemRowSpan, itemColSpan)) {
+            item->Layout(MakeInnerLayoutParam(itemRow, itemCol, itemRowSpan, itemColSpan));
+            SetChildPosition(item, itemRow, itemCol, itemRowSpan, itemColSpan);
+        } else {
+            while (!CheckGridPlaced(itemIndex, rowIndex, colIndex, itemRowSpan, itemColSpan)) {
+                GetNextGrid(rowIndex, colIndex);
+                if (rowIndex >= rowCount_ || colIndex >= colCount_) {
+                    break;
+                }
+            }
+            if (rowIndex >= rowCount_ || colIndex >= colCount_) {
+                DisableChild(item, itemIndex);
+                continue;
+            }
+            item->Layout(MakeInnerLayoutParam(rowIndex, colIndex, itemRowSpan, itemColSpan));
+            SetChildPosition(item, rowIndex, colIndex, itemRowSpan, itemColSpan);
+        }
+        SetItemIndex(item, itemIndex); // Set index for focus adjust.
+        ++itemIndex;
+        LOGD("%{public}d %{public}d %{public}d %{public}d", rowIndex, colIndex, itemRowSpan, itemColSpan);
+    }
+}
+
 bool RenderGridLayout::CalDragCell(const ItemDragInfo& info)
 {
     double gridPositonX = GetGlobalOffset().GetX();
@@ -1506,7 +1750,7 @@ bool RenderGridLayout::CalDragRowIndex(double dragRelativelyY, int32_t& dragRowI
         rowStart = rowEnd;
         double offsetY = 0.0;
         if (row > 0 && row < (rowCount_ - 1)) {
-            offsetY = rowGap_ / 2;
+            offsetY = rowGap_ / GAP_DIVIDE_CONSTEXPR;
         } else {
             offsetY = rowGap_;
         }
@@ -1527,7 +1771,7 @@ bool RenderGridLayout::CalDragColumIndex(double dragRelativelyX, int32_t& dragCo
         columStart = columEnd;
         double offsetX = 0.0;
         if (col > 0 && col < (colCount_ - 1)) {
-            offsetX = colGap_ / 2;
+            offsetX = colGap_ / GAP_DIVIDE_CONSTEXPR;
         } else {
             offsetX = colGap_;
         }
@@ -1591,7 +1835,15 @@ void RenderGridLayout::MoveWhenNoInsertCellButWithItemInDragCellAndDragEnter()
     if (CalTheFirstEmptyCell(endRow, endColum, true)) {
         GetPreviousGird(endRow, endColum);
         if (MoveItemsForward(dragPosRowIndex_, dragPosColumnIndex_, endRow, endColum)) {
-            UpdateCurInsertPos(dragPosRowIndex_, dragPosColumnIndex_);
+            if (supportAnimation_) {
+                std::string key(__FUNCTION__);
+                RegisterAnimationFinishedFunc(
+                    key, [weak = WeakClaim(this), rowIndex = dragPosRowIndex_, colIndex = dragPosColumnIndex_]() {});
+                UpdateCurInsertPos(dragPosRowIndex_, dragPosColumnIndex_);
+                PrepareAnimationController(key);
+            } else {
+                UpdateCurInsertPos(dragPosRowIndex_, dragPosColumnIndex_);
+            }
         }
     }
 }
@@ -1622,7 +1874,15 @@ void RenderGridLayout::MoveWhenWithInsertCellAndNoItemInDragCell()
         int32_t startColum = curInsertColumnIndex_;
         GetNextGrid(startRow, startColum);
         if (MoveItemsBackward(startRow, startColum, endRow, endColum)) {
-            UpdateCurInsertPos(endRow, endColum);
+            if (supportAnimation_) {
+                std::string key(__FUNCTION__);
+                RegisterAnimationFinishedFunc(
+                    key, [weak = WeakClaim(this), rowIndex = endRow, colIndex = endColum]() {});
+                UpdateCurInsertPos(endRow, endColum);
+                PrepareAnimationController(key);
+            } else {
+                UpdateCurInsertPos(endRow, endColum);
+            }
         }
     }
 }
@@ -1645,7 +1905,15 @@ void RenderGridLayout::MoveWhenWithInsertCellButWithItemInDragCellDragBeforeInse
     int32_t endColum = curInsertColumnIndex_;
     GetPreviousGird(endRow, endColum);
     if (MoveItemsForward(dragPosRowIndex_, dragPosColumnIndex_, endRow, endColum)) {
-        UpdateCurInsertPos(dragPosRowIndex_, dragPosColumnIndex_);
+        if (supportAnimation_) {
+            std::string key(__FUNCTION__);
+            RegisterAnimationFinishedFunc(
+                key, [weak = WeakClaim(this), rowIndex = dragPosRowIndex_, colIndex = dragPosColumnIndex_]() {});
+            UpdateCurInsertPos(dragPosRowIndex_, dragPosColumnIndex_);
+            PrepareAnimationController(key);
+        } else {
+            UpdateCurInsertPos(dragPosRowIndex_, dragPosColumnIndex_);
+        }
     }
 }
 
@@ -1655,7 +1923,15 @@ void RenderGridLayout::MoveWhenWithInsertCellButWithItemInDragCellDragAfterInser
     int32_t startColum = curInsertColumnIndex_;
     GetNextGrid(startRow, startColum);
     if (MoveItemsBackward(startRow, startColum, dragPosRowIndex_, dragPosColumnIndex_)) {
-        UpdateCurInsertPos(dragPosRowIndex_, dragPosColumnIndex_);
+        if (supportAnimation_) {
+            std::string key(__FUNCTION__);
+            RegisterAnimationFinishedFunc(
+                key, [weak = WeakClaim(this), rowIndex = dragPosRowIndex_, colIndex = dragPosColumnIndex_]() {});
+            UpdateCurInsertPos(dragPosRowIndex_, dragPosColumnIndex_);
+            PrepareAnimationController(key);
+        } else {
+            UpdateCurInsertPos(dragPosRowIndex_, dragPosColumnIndex_);
+        }
     }
 }
 
@@ -1666,18 +1942,54 @@ void RenderGridLayout::FakeRemoveDragItem()
 
     int32_t endRow = -1;
     int32_t endColum = -1;
-    if (CalTheFirstEmptyCell(endRow, endColum, true)) {
-        GetPreviousGird(endRow, endColum);
+    bool ret = CalTheFirstEmptyCell(endRow, endColum, true);
+    if (!ret) {
+        endRow = rowCount_;
+        endColum = colCount_;
+    }
+    GetPreviousGird(endRow, endColum);
+    if (curInsertRowIndex_ == endRow && curInsertColumnIndex_ == endColum) {
+        UpdateMatrixByIndexStrong(CELL_EMPTY, curInsertRowIndex_, curInsertColumnIndex_);
+        curInsertRowIndex_ = -1;
+        curInsertColumnIndex_ = -1;
+    } else {
         int32_t startRow = curInsertRowIndex_;
         int32_t startColum = curInsertColumnIndex_;
         GetNextGrid(startRow, startColum);
         if (MoveItemsBackward(startRow, startColum, endRow, endColum)) {
-            curInsertRowIndex_ = -1;
-            curInsertColumnIndex_ = -1;
-            UpdateMatrixByIndexStrong(-1, endRow, endColum);
+            if (supportAnimation_) {
+                std::string key(__FUNCTION__);
+                RegisterAnimationFinishedFunc(key, [weak = WeakClaim(this), rowIndex = endRow, colIndex = endColum]() {
+                    auto renderGrid = weak.Upgrade();
+                    if (renderGrid) {
+                        renderGrid->curInsertRowIndex_ = -1;
+                        renderGrid->curInsertColumnIndex_ = -1;
+                        renderGrid->UpdateMatrixByIndexStrong(CELL_EMPTY, rowIndex, colIndex);
+                    }
+                });
+                PrepareAnimationController(key);
+            } else {
+                curInsertRowIndex_ = -1;
+                curInsertColumnIndex_ = -1;
+                UpdateMatrixByIndexStrong(CELL_EMPTY, endRow, endColum);
+            }
         }
     }
 }
+
+void RenderGridLayout::FakeRemoveDragItemUpdate()
+{
+    if (isDynamicGrid_ && NeedBeSmaller()) {
+        InitialDynamicGridProp(DRAG_LEAVE);
+        SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_, rowSize_)));
+        if (rightToLeft_) {
+            ResetItemPosition();
+        }
+    }
+    isDragChangeLayout_ = true;
+    MarkNeedLayout();
+}
+
 
 bool RenderGridLayout::MoveItemsForward(int32_t fromRow, int32_t fromColum, int32_t toRow, int32_t toColum)
 {
@@ -1695,28 +2007,31 @@ bool RenderGridLayout::MoveItemsForward(int32_t fromRow, int32_t fromColum, int3
     bool equal = false;
     equal = SortCellIndex(fromRow, fromColum, curRow, curColum, vaild);
 
+    if (supportAnimation_) {
+        animationItemList_.clear();
+    }
+
     while (vaild || equal) {
         // Get target pos
         GetNextGrid(targetRow, targetColum);
 
         // Get index in the curpos
         tmpIndex = GetIndexByGrid(curRow, curColum);
-        if (tmpIndex < 0) {
+        if (tmpIndex < 0 || (int32_t)itemsInGrid_.size() <= tmpIndex) {
             return false;
         }
 
         // Move the curpos index to the targetpos
         UpdateMatrixByIndexStrong(tmpIndex, targetRow, targetColum);
-
-        if ((int32_t)itemsInGrid_.size() <= tmpIndex) {
-            return false;
-        }
+        UpdateMatrixByIndexStrong(CELL_EMPTY, curRow, curColum);
 
         auto item = itemsInGrid_[tmpIndex];
-
-        // Update the layout and position of the item be moved
-        item->Layout(MakeInnerLayoutParam(targetRow, targetColum, 1, 1));
-        SetChildPosition(item, targetRow, targetColum, 1, 1);
+        if (supportAnimation_) {
+            AddNodeAnimationToController(tmpIndex, targetRow, targetColum, 1, 1);
+        } else {
+            item->Layout(MakeInnerLayoutParam(targetRow, targetColum, 1, 1));
+            SetChildPosition(item, targetRow, targetColum, 1, 1);
+        }
 
         // move the curpos backward
         GetPreviousGird(curRow, curColum);
@@ -1743,30 +2058,30 @@ bool RenderGridLayout::MoveItemsBackward(int32_t fromRow, int32_t fromColum, int
 
     bool equal = false;
     equal = SortCellIndex(curRow, curColum, toRow, toColum, vaild);
-
+    if (supportAnimation_) {
+        animationItemList_.clear();
+    }
     while (vaild || equal) {
         // Get target pos
         GetPreviousGird(targetRow, targetColum);
 
         // Get index in the curpos
         tmpIndex = GetIndexByGrid(curRow, curColum);
-        if (tmpIndex < 0) {
+        if (tmpIndex < 0 || (int32_t)itemsInGrid_.size() <= tmpIndex) {
             return false;
         }
 
         // Move the curpos index to the targetpos
         UpdateMatrixByIndexStrong(tmpIndex, targetRow, targetColum);
-
-        if ((int32_t)itemsInGrid_.size() <= tmpIndex) {
-            return false;
-        }
+        UpdateMatrixByIndexStrong(CELL_EMPTY, curRow, curColum);
 
         auto item = itemsInGrid_[tmpIndex];
-
-        // Update the layout and position of the item be moved
-        item->Layout(MakeInnerLayoutParam(targetRow, targetColum, 1, 1));
-        SetChildPosition(item, targetRow, targetColum, 1, 1);
-
+        if (supportAnimation_) {
+            AddNodeAnimationToController(tmpIndex, targetRow, targetColum, 1, 1);
+        } else {
+            item->Layout(MakeInnerLayoutParam(targetRow, targetColum, 1, 1));
+            SetChildPosition(item, targetRow, targetColum, 1, 1);
+        }
         // move the curpos and targetpos backward
         GetNextGrid(curRow, curColum);
         targetRow = curRow;
@@ -1868,7 +2183,7 @@ bool RenderGridLayout::CalTheFirstEmptyCell(int32_t& rowIndex, int32_t& columInd
 
     index = GetIndexByGrid(row, colum);
 
-    while ((-1 != index) && (ignoreInsert || (-2 != index))) {
+    while ((-1 != index) && (ignoreInsert || (CELL_FOR_INSERT != index))) {
         GetNextGrid(row, colum);
         if (row >= rowCount_ || colum >= colCount_) {
             return false;
@@ -1879,6 +2194,678 @@ bool RenderGridLayout::CalTheFirstEmptyCell(int32_t& rowIndex, int32_t& columInd
     rowIndex = row;
     columIndex = colum;
     return true;
+}
+
+void RenderGridLayout::InitAnimationController(const WeakPtr<PipelineContext>& context)
+{
+    if (!animationController_) {
+        animationController_ = AceType::MakeRefPtr<Animator>(context);
+    }
+    if (!flexController_) {
+        flexController_ = AceType::MakeRefPtr<Animator>(context);
+    }
+}
+
+bool RenderGridLayout::AddNodeAnimationToController(
+    int32_t itemIndex, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan)
+{
+    auto item = itemsInGrid_[itemIndex];
+    if (!item || !animationController_) {
+        return false;
+    }
+
+    Point startPoint(item->GetPosition().GetX(), item->GetPosition().GetY());
+    Point endPoint = CalcChildPosition(item, row, col, rowSpan, colSpan);
+    auto animationRef = AceType::MakeRefPtr<CurveAnimation<Point>>(startPoint, endPoint, Curves::FRICTION);
+    animationRef->AddListener(
+        [item, weak = WeakClaim(this)](const Point newPoint) {
+            if (item) {
+                item->SetPosition(Offset(newPoint.GetX(), newPoint.GetY()));
+            }
+            auto renderGrid = weak.Upgrade();
+            if (renderGrid) {
+                renderGrid->MarkNeedLayout();
+            }
+    });
+
+    auto gridLayoutItem = AceType::DynamicCast<RenderGridLayoutItem>(item);
+    int32_t depth = DEFAULT_DEPTH;
+    while (!gridLayoutItem && depth > 0) {
+        if (!item || item->GetChildren().empty()) {
+            LOGE("%{public}s. item has no children anymore", __PRETTY_FUNCTION__);
+            break;
+        }
+        item = item->GetChildren().front();
+        gridLayoutItem = AceType::DynamicCast<RenderGridLayoutItem>(item);
+        --depth;
+    }
+    if (gridLayoutItem) {
+        if (gridLayoutItem->AnimationAddInterpolator(animationRef)) {
+            needRunAnimation_ = true;
+            animationItemList_.emplace_back(item);
+        }
+    }
+    return true;
+}
+
+void RenderGridLayout::AddNodeAnimationToControllerForDrop(
+    const RefPtr<RenderNode>& item, const Point& startPoint, const Point& endPoint)
+{
+    if (!item || !animationController_ || startPoint == endPoint) {
+        return;
+    }
+    item->SetNeedRender(true);
+    item->MarkNeedPredictLayout();
+
+    if (curInsertRowIndex_ >= 0 && curInsertColumnIndex_ >=0) {
+        item->Layout(MakeInnerLayoutParam(curInsertRowIndex_, curInsertColumnIndex_, 1, 1));
+    }
+    auto animationRef = AceType::MakeRefPtr<CurveAnimation<Point>>(startPoint, endPoint, Curves::FRICTION);
+    animationRef->AddListener([weak = WeakClaim(this), item](const Point newPoint) {
+        auto renderGrid = weak.Upgrade();
+        if (renderGrid) {
+            if (item) {
+                item->SetPosition(Offset(newPoint.GetX(), newPoint.GetY()));
+            }
+            renderGrid->MarkNeedLayout();
+        }
+    });
+
+    auto itemTmp = item;
+    auto gridLayoutItem = AceType::DynamicCast<RenderGridLayoutItem>(itemTmp);
+    int32_t depth = DEFAULT_DEPTH;
+    while (!gridLayoutItem && depth > 0) {
+        if (!itemTmp || itemTmp->GetChildren().empty()) {
+            LOGE("%{public}s. itemTmp has no children anymore", __PRETTY_FUNCTION__);
+            break;
+        }
+        itemTmp = itemTmp->GetChildren().front();
+        gridLayoutItem = AceType::DynamicCast<RenderGridLayoutItem>(itemTmp);
+        --depth;
+    }
+    if (gridLayoutItem) {
+        if (gridLayoutItem->AnimationAddInterpolator(animationRef)) {
+            needRunAnimation_ = true;
+            animationItemList_.emplace_back(itemTmp);
+        }
+    }
+}
+
+void RenderGridLayout::PrepareAnimationController(const std::string& key)
+{
+    LOGD("%{public}s called.", __FUNCTION__);
+    if (animationAct_ != GridLayoutAnimationAct::ANIMATION_NONE) {
+        LOGD("%{public}s indicator animation is processing.", __FUNCTION__);
+        return;
+    }
+
+    needRunAnimation_ = true;
+    animationController_->SetDuration(ITEM_ANIMATION_DURATION);
+    animationController_->ClearStopListeners();
+    animationController_->AddStopListener([weak = AceType::WeakClaim(this), key]() {
+        auto renderGrid = weak.Upgrade();
+        if (renderGrid) {
+            renderGrid->FinishedAnimationController(key);
+        }
+    });
+}
+
+void RenderGridLayout::StartAnimationController(GridLayoutAnimationAct animationAct, const OnAnimationCallJSFunc& func)
+{
+    LOGD("%{public}s called.", __FUNCTION__);
+    if (needRunAnimation_) {
+        animationAct_ = animationAct;
+        needRunAnimation_ = false;
+        switch (animationAct_) {
+            case GridLayoutAnimationAct::ANIMATION_DRAG_MOVE:
+                jsMoveFunc_ = func;
+                break;
+            case GridLayoutAnimationAct::ANIMATION_DRAG_DROP:
+                jsDropFunc_ = func;
+                break;
+            case GridLayoutAnimationAct::ANIMATION_RESTORE_SCENCE:
+                restoreScenceFunc_ = func;
+                break;
+            default:
+                jsMoveFunc_ = nullptr;
+                jsDropFunc_ = nullptr;
+                restoreScenceFunc_ = nullptr;
+                break;
+        }
+        animationController_->Play();
+
+        for (auto itor = animationItemList_.begin(); itor != animationItemList_.end(); ++itor) {
+            AceType::DynamicCast<RenderGridLayoutItem>(*itor)->AnimationPlay();
+        }
+    }
+}
+
+void RenderGridLayout::StopAnimationController()
+{
+    LOGD("%{public}s called.", __FUNCTION__);
+    if (animationController_ && !animationController_->IsStopped()) {
+        animationController_->ClearStopListeners();
+        animationController_->Stop();
+        animationAct_ = GridLayoutAnimationAct::ANIMATION_NONE;
+    }
+}
+
+void RenderGridLayout::FinishedAnimationController(const std::string& key)
+{
+    LOGD("%{public}s called.", __FUNCTION__);
+    {
+        std::lock_guard<std::mutex> funLock(animationLock_);
+        auto iter = animationFinishedFuncList_.find(key);
+        if (iter != animationFinishedFuncList_.end()) {
+            iter->second();
+            animationFinishedFuncList_.erase(iter);
+        }
+        animationController_->ClearInterpolators();
+    }
+
+    OnAnimationCallJSFunc func = nullptr;
+    switch (animationAct_) {
+        case GridLayoutAnimationAct::ANIMATION_DRAG_MOVE:
+            func = jsMoveFunc_;
+            break;
+        case GridLayoutAnimationAct::ANIMATION_DRAG_DROP:
+            func = jsDropFunc_;
+            break;
+        case GridLayoutAnimationAct::ANIMATION_RESTORE_SCENCE:
+            func = restoreScenceFunc_;
+            break;
+        default:
+            break;
+    }
+    animationAct_ = GridLayoutAnimationAct::ANIMATION_NONE;
+    if (func) {
+        func();
+    }
+    MarkNeedLayout();
+}
+
+void RenderGridLayout::RegisterAnimationFinishedFunc(const std::string& key, std::function<void()> func)
+{
+    std::lock_guard<std::mutex> funLock(animationLock_);
+    if (func) {
+        animationFinishedFuncList_[key] = func;
+    }
+}
+
+void RenderGridLayout::TriggerMoveEventForJS(const ItemDragInfo& info)
+{
+    int32_t insertIndex = CalIndexForItemByRowAndColum(curInsertRowIndex_, curInsertColumnIndex_);
+    if (component_->GetOnGridDragMoveId()) {
+        LOGD("%{public}s. could be insert. InsertIndex: %{public}d ,ItemIndex: %{public}d", __PRETTY_FUNCTION__,
+            insertIndex, dragingItemIndex_);
+        component_->GetOnGridDragMoveId()(info, dragingItemIndex_, insertIndex);
+    } else {
+        LOGE("%{public}s no onGridGragMove registered.", __PRETTY_FUNCTION__);
+    }
+}
+
+void RenderGridLayout::TriggerDropEventForJS(const ItemDragInfo& info, int32_t insertIndex, bool successed)
+{
+    if (component_->GetOnGridDropId()) {
+        LOGD("%{public}s. could be insert. ItemIndex: %{public}d, InsertIndex: %{public}d ", __PRETTY_FUNCTION__,
+            dragingItemIndex_, insertIndex);
+        component_->GetOnGridDropId()(info, dragingItemIndex_, insertIndex, successed);
+    } else {
+        LOGE("%{public}s no onGridDrop registered.", __PRETTY_FUNCTION__);
+    }
+}
+
+void RenderGridLayout::RegisterDropJSEvent(const ItemDragInfo& info, int32_t insertIndex, bool successed)
+{
+    auto weak = WeakClaim(this);
+    RegisterDropJSFunc([weak, info, insertIndex, successed]() {
+        auto renderGrid = weak.Upgrade();
+        if (renderGrid) {
+            renderGrid->TriggerDropEventForJS(info, insertIndex, successed);
+        }
+    });
+    triggerJSDrop_.store(true);
+}
+
+void RenderGridLayout::RegisterDropJSFunc(const OnCallJSDropFunc& func)
+{
+    std::lock_guard<std::mutex> lock(dropJSFuncListLock_);
+    if (func != nullptr) {
+        dropJSFuncList_.push_back(std::move(func));
+    }
+}
+
+void RenderGridLayout::CallDropJSFunc()
+{
+    std::lock_guard<std::mutex> lock(dropJSFuncListLock_);
+    for (auto& func: dropJSFuncList_) {
+        func();
+    }
+    dropJSFuncList_.clear();
+}
+
+bool RenderGridLayout::CheckAnimation()
+{
+    if (!supportAnimation_) {
+        return false;
+    }
+    if (animationAct_ != GridLayoutAnimationAct::ANIMATION_NONE || runFlexAnimation_.load()) {
+        return true;
+    }
+    if (!(GetSlideStatus() == GridSlideStatus::SLIDE_NONE || GetSlideStatus() == GridSlideStatus::SLIDE_START)) {
+        return true;
+    }
+
+    if (!isMainGrid_) {
+        if (itemDragEntered_) {
+            auto mainGrid = mainGrid_.Upgrade();
+            if (mainGrid) {
+                return mainGrid->isExistComponent_;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        return isExistComponent_;
+    }
+    return false;
+}
+
+void RenderGridLayout::ParseRestoreScenePosition(
+    const std::map<int32_t, std::map<int32_t, int32_t>>& data, std::map<int32_t, GridItemIndexPosition>& info)
+{
+    info.clear();
+    for (auto rowIter = data.begin(); rowIter != data.end(); rowIter++) {
+        for (auto colIter = rowIter->second.begin(); colIter != rowIter->second.end(); colIter++) {
+            if (info.find(colIter->second) == info.end()) {
+                GridItemIndexPosition itemIndexPosition(rowIter->first, colIter->first);
+                info.emplace(colIter->second, itemIndexPosition);
+            }
+        }
+    }
+}
+
+void RenderGridLayout::CalcRestoreScenePosition(const ItemDragInfo& info)
+{
+    std::map<int32_t, GridItemIndexPosition> backData;
+    std::map<int32_t, GridItemIndexPosition> recentData;
+    ParseRestoreScenePosition(gridMatrixBack_, backData);
+    ParseRestoreScenePosition(gridMatrix_, recentData);
+
+    for (auto backIter = backData.begin(); backIter != backData.end(); backIter++) {
+        auto recentIter = recentData.find(backIter->first);
+        if (recentIter != recentData.end() && backIter->second != recentIter->second &&
+            backIter->first != dragingItemIndex_ && backIter->first >= 0 &&
+            backIter->first < (int32_t)itemsInGrid_.size()) {
+            auto item = itemsInGrid_[backIter->first];
+            if (item) {
+                Point startPoint(item->GetPosition().GetX(), item->GetPosition().GetY());
+                AddNodeAnimationToControllerForDrop(item, startPoint, gridItemPosition_[backIter->first]);
+            }
+        }
+    }
+}
+
+void RenderGridLayout::StartFlexController(const Point& endPoint, bool includeSubGrid)
+{
+    if (!supportAnimation_) {
+        CloseFlexComponent();
+        if (includeSubGrid) {
+            FinishedFlexControllerForSubGrid();
+        }
+        FinishedFlexController();
+        ClearAllDragInfo();
+        MarkNeedLayout();
+        return;
+    }
+    runFlexAnimation_.store(true);
+    auto animationRef = AceType::MakeRefPtr<CurveAnimation<Point>>(lastGlobalPoint_, endPoint, Curves::FRICTION);
+    animationRef->AddListener(
+        [weak = WeakClaim(this)](const Point newPoint) {
+            auto renderGrid = weak.Upgrade();
+            if (renderGrid) {
+                renderGrid->UpdateFlexComponenPosition(newPoint);
+            }
+        });
+
+    flexController_->AddInterpolator(animationRef);
+    flexController_->SetDuration(ITEM_ANIMATION_DURATION);
+    flexController_->ClearStopListeners();
+    flexController_->AddStopListener([weak = AceType::WeakClaim(this), includeSubGrid]() {
+        auto renderGrid = weak.Upgrade();
+        if (renderGrid) {
+            if (includeSubGrid) {
+                renderGrid->FinishedFlexControllerForSubGrid();
+            }
+            renderGrid->FinishedFlexController();
+            renderGrid->ClearAllDragInfo();
+            renderGrid->MarkNeedLayout();
+        }
+    });
+    flexController_->Play();
+}
+
+void RenderGridLayout::FinishedFlexController()
+{
+    runFlexAnimation_.store(false);
+    CloseFlexComponent();
+    if (animationAct_ == GridLayoutAnimationAct::ANIMATION_NONE) {
+        if (triggerJSDrop_.load()) {
+            triggerJSDrop_.store(false);
+            CallDropJSFunc();
+        }
+    }
+}
+
+void RenderGridLayout::FinishedFlexControllerForSubGrid()
+{
+    auto subGrid = subGrid_.Upgrade();
+    if (subGrid) {
+        subGrid->CallDropJSFunc();
+        subGrid->ClearAllDragInfo();
+    }
+}
+
+void RenderGridLayout::CloseFlexComponent()
+{
+    auto pipelineContext = GetContext().Upgrade();
+    if (pipelineContext && isExistComponent_) {
+        LOGD("RenderGridLayout::PanOnActionEnd PopComponent");
+        auto stackElement = pipelineContext->GetLastStack();
+        stackElement->PopComponent();
+        isExistComponent_ = false;
+    }
+}
+
+void RenderGridLayout::UpdateFlexComponenPosition(const Point& pos)
+{
+    if (GetUpdatePositionId() && isExistComponent_) {
+        LOGD("RenderGridLayout::PanOnActionUpdate move x=%{public}f, y=%{public}f.", pos.GetX(), pos.GetY());
+        auto eventInfo = ItemDragInfo();
+        eventInfo.SetX(pos.GetX());
+        eventInfo.SetY(pos.GetY());
+        GetUpdatePositionId()(Dimension(pos.GetX()), Dimension(pos.GetY()));
+        MarkNeedLayout();
+    }
+}
+
+void RenderGridLayout::ClearSpringSlideData()
+{
+    gravitationDirect_ = GridSpringGravitationDirect::SPRING_NONE;
+    slideDirect_ = GridSlideDirect::SLIDE_NODE;
+    slideStatus_.store(GridSlideStatus::SLIDE_NONE);
+    slideStartPoint_ = Point(0.0, 0.0);
+    slideDistance_ = Point(0.0, 0.0);
+    slidePriPoint_ = Point(0.0, 0.0);
+    slideCurPoint_ = Point(0.0, 0.0);
+}
+
+void RenderGridLayout::CreateSlideRecognizer()
+{
+    if (!supportAnimation_ || slideRecognizer_) {
+        return;
+    }
+    slideRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
+    auto weak = AceType::WeakClaim(this);
+    slideRecognizer_->SetOnTouchDown([weak](const TouchEventInfo& info) {
+        auto renderGrid = weak.Upgrade();
+        if (renderGrid) {
+            renderGrid->HandleSlideStart(info);
+        }
+    });
+    slideRecognizer_->SetOnTouchUp([weak](const TouchEventInfo& info) {
+        auto renderGrid = weak.Upgrade();
+        if (renderGrid) {
+            renderGrid->HandleSlideEnd(info);
+        }
+    });
+    slideRecognizer_->SetOnTouchMove([weak](const TouchEventInfo& info) {
+        auto renderGrid = weak.Upgrade();
+        if (renderGrid) {
+            renderGrid->HandleSlideUpdate(info);
+        }
+    });
+}
+
+void RenderGridLayout::HandleSlideStart(const TouchEventInfo& info)
+{
+    if (CheckLongPress() || GetSlideStatus() != GridSlideStatus::SLIDE_NONE) {
+        return;
+    }
+    slideStartPoint_ = GetPointFromTouchInfo(info);
+    slidePriPoint_ = slideStartPoint_;
+    slideCurPoint_ = slideStartPoint_;
+    slideDistance_ = Point(0.0, 0.0);
+    UpdateSlideStatus(GridSlideStatus::SLIDE_START);
+}
+
+void RenderGridLayout::HandleSlideUpdate(const TouchEventInfo& info)
+{
+    if (CheckLongPress()) {
+        return;
+    }
+    if (GetSlideStatus() != GridSlideStatus::SLIDE_START && GetSlideStatus() != GridSlideStatus::SLIDE_SLIDING) {
+        return;
+    }
+    if (GetSlideStatus() == GridSlideStatus::SLIDE_START && !MayStartToSlide(info)) {
+        return;
+    }
+    UpdateSlideStatus(GridSlideStatus::SLIDE_SLIDING);
+    slideCurPoint_ = GetPointFromTouchInfo(info);
+    CalcSlideDirect(slideCurPoint_);
+    double dx = slideCurPoint_.GetX() - slidePriPoint_.GetX();
+    double dy = slideCurPoint_.GetY() - slidePriPoint_.GetY();
+    MoveRelativeDistance(dx, dy);
+    for (auto& item : itemsInGrid_) {
+        if (slideDirect_ == GridSlideDirect::SLIDE_VERTICAL) {
+            item->SetPosition(Offset(item->GetPosition().GetX(), item->GetPosition().GetY() + dy));
+        } else {
+            item->SetPosition(Offset(item->GetPosition().GetX() + dx, item->GetPosition().GetY()));
+        }
+    }
+    MarkNeedLayout();
+    slidePriPoint_ = slideCurPoint_;
+}
+
+void RenderGridLayout::HandleSlideEnd(const TouchEventInfo& info)
+{
+    if (CheckLongPress()) {
+        return;
+    }
+    if (GetSlideStatus() == GridSlideStatus::SLIDE_SPRING_START || GetSlideStatus() == GridSlideStatus::SLIDE_NONE) {
+        return;
+    }
+    UpdateSlideStatus(GridSlideStatus::SLIDE_SPRING_START);
+    CalcSpringGravitationDirect();
+    if (gravitationDirect_ != GridSpringGravitationDirect::SPRING_NONE) {
+        BackupSpringItemsData();
+        Point startPoint = GetSpringStartPoint();
+        Point endPoint = GetSpringEndPoint();
+        StartSpringAnimation(startPoint, endPoint);
+    } else {
+        FinishedSpringAnimation();
+    }
+}
+
+bool RenderGridLayout::MayStartToSlide(const TouchEventInfo& info)
+{
+    bool result = false;
+    Point movePoint = GetPointFromTouchInfo(info);
+    double dx = std::fabs(movePoint.GetX() - slideStartPoint_.GetX());
+    double dy = std::fabs(movePoint.GetY() - slideStartPoint_.GetY());
+    if (dx >= GRID_SPRING_SLIDE_LIMIT || dy >= GRID_SPRING_SLIDE_LIMIT) {
+        slidePriPoint_ = movePoint;
+        slideCurPoint_ = movePoint;
+        result = true;
+    }
+    return result;
+}
+
+bool RenderGridLayout::CheckLongPress()
+{
+    if (animationAct_ != GridLayoutAnimationAct::ANIMATION_NONE || itemLongPressed_ ||
+        isExistComponent_ || itemDragStarted_ || GetChildren().empty()) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void RenderGridLayout::UpdateSlideStatus(GridSlideStatus status)
+{
+    slideStatus_.store(status);
+}
+
+GridSlideStatus RenderGridLayout::GetSlideStatus()
+{
+    return slideStatus_.load();
+}
+
+Point RenderGridLayout::GetPointFromTouchInfo(const TouchEventInfo& info)
+{
+    const auto& locationInfo = info.GetTouches().front();
+    return Point(locationInfo.GetLocalLocation().GetX() - GetGlobalOffset().GetX(),
+        locationInfo.GetLocalLocation().GetY() - GetGlobalOffset().GetY());
+}
+
+void RenderGridLayout::MoveRelativeDistance(double& dx, double& dy)
+{
+    if (slideDistance_.GetX() + dx < 0.0) {
+        dx = -slideDistance_.GetX();
+    }
+    slideDistance_.SetX(slideDistance_.GetX() + dx);
+
+    if (slideDistance_.GetY() + dy < 0.0) {
+        dy = -slideDistance_.GetY();
+    }
+    slideDistance_.SetY(slideDistance_.GetY() + dy);
+}
+
+void RenderGridLayout::CreateSpringController()
+{
+    if (!springController_) {
+        springController_ = AceType::MakeRefPtr<Animator>(GetContext());
+    }
+}
+
+Point RenderGridLayout::GetSpringStartPoint()
+{
+    double dx = 0.0;
+    double dy = 0.0;
+    if (slideDirect_ == GridSlideDirect::SLIDE_HORIZON) {
+        dx = GetLeft().Value();
+        dy = (GetTop().Value() + GetBottom().Value()) / GAP_DIVIDE_CONSTEXPR;
+    } else {
+        dx = (GetLeft().Value() + GetRight().Value()) / GAP_DIVIDE_CONSTEXPR;
+        dy = GetTop().Value();
+    }
+    return Point(dx, dy);
+}
+
+Point RenderGridLayout::GetSpringEndPoint()
+{
+    double dx = 0.0;
+    double dy = 0.0;
+    if (slideDirect_ == GridSlideDirect::SLIDE_HORIZON) {
+        dx = GetLeft().Value() + slideDistance_.GetX();
+        dy = (GetTop().Value() + GetRight().Value()) / GAP_DIVIDE_CONSTEXPR;
+    } else {
+        dx = (GetLeft().Value() + GetRight().Value()) / GAP_DIVIDE_CONSTEXPR;
+        dy = GetTop().Value() + slideDistance_.GetY();
+    }
+    return Point(dx, dy);
+}
+
+void RenderGridLayout::StartSpringAnimation(const Point& startPoint, const Point& endPoint)
+{
+    double start = 0.0;
+    double end = 0.0;
+    GetMotionPosition(startPoint, endPoint, start, end);
+    auto springDes = AceType::MakeRefPtr<SpringProperty>(GRID_SPRING_MASS, GRID_SPRING_STIFF, GRID_SPRING_DAMP);
+    if (!springMotion_) {
+        springMotion_ = AceType::MakeRefPtr<SpringMotion>(start, end, 0.0, springDes);
+    } else {
+        springMotion_->Reset(start, end, 0.0, springDes);
+    }
+
+    springMotion_->ClearListeners();
+    springMotion_->AddListener([weak = AceType::WeakClaim(this)](double position) {
+        auto renderGrid = weak.Upgrade();
+        if (renderGrid) {
+            renderGrid->UpdateSprintAnimationPosition(position);
+        }
+    });
+
+    springController_->PlayMotion(springMotion_);
+    springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+        auto renderGrid = weak.Upgrade();
+        if (renderGrid) {
+            renderGrid->FinishedSpringAnimation();
+        }
+    });
+}
+
+void RenderGridLayout::FinishedSpringAnimation()
+{
+    ClearSpringSlideData();
+    MarkNeedLayout();
+}
+
+void RenderGridLayout::UpdateSprintAnimationPosition(double position)
+{
+    LOGD("UpdateSprintAnimationPosition: distance(%{public}f,%{public}f), offset=%{public}f",
+        slideDistance_.GetX(), slideDistance_.GetY(), position);
+    size_t index = 0;
+    for (auto& item : itemsInGrid_) {
+        auto& itemPos = springStartPosition_[index];
+        if (slideDirect_ == GridSlideDirect::SLIDE_HORIZON) {
+            item->SetPosition(Offset(itemPos.GetX() - position, itemPos.GetY()));
+        } else {
+            item->SetPosition(Offset(itemPos.GetX(), itemPos.GetY() - position));
+        }
+        index++;
+    }
+    MarkNeedLayout();
+}
+
+void RenderGridLayout::BackupSpringItemsData()
+{
+    springStartPosition_.clear();
+    for (auto& item : itemsInGrid_) {
+        springStartPosition_.push_back(item->GetPosition());
+    }
+}
+
+void RenderGridLayout::GetMotionPosition(const Point& startPoint, const Point& endPoint, double& start, double& end)
+{
+    if (slideDirect_ == GridSlideDirect::SLIDE_HORIZON) {
+        start = startPoint.GetX();
+        end = endPoint.GetX();
+    } else {
+        start = startPoint.GetY();
+        end = endPoint.GetY();
+    }
+}
+
+void RenderGridLayout::CalcSlideDirect(const Point& curPos)
+{
+    if (slideDirect_ != GridSlideDirect::SLIDE_NODE) {
+        return;
+    }
+    if (isVertical_) {
+        slideDirect_ = GridSlideDirect::SLIDE_VERTICAL;
+    } else {
+        slideDirect_ = GridSlideDirect::SLIDE_HORIZON;
+    }
+}
+
+void RenderGridLayout::CalcSpringGravitationDirect()
+{
+    if (slideDirect_ == GridSlideDirect::SLIDE_HORIZON) {
+        gravitationDirect_ = GridSpringGravitationDirect::SPRING_TO_LEFT;
+    } else {
+        gravitationDirect_ = GridSpringGravitationDirect::SPRING_TO_UP;
+    }
 }
 
 } // namespace OHOS::Ace

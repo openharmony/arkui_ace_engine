@@ -108,6 +108,10 @@ public:
 
     void SetOnItemLongPressed(const OnItemLongPressed& func);
 
+    RefPtr<Animator> GetAnimationController();
+    bool AnimationAddInterpolator(const RefPtr<Animation<Point>>& animation);
+    void AnimationPlay();
+
 private:
     int32_t index_ = -1;
     int32_t columnIndex_ = -1;
@@ -116,6 +120,8 @@ private:
     int32_t rowSpan_ = 1;
     bool forceRebuild_ = false;
     OnItemLongPressed OnItemLongPressed_;
+    RefPtr<Animator> animationController_;
+    void InitAnimationController(const WeakPtr<PipelineContext>& context);
 };
 
 } // namespace OHOS::Ace
