@@ -41,6 +41,14 @@
 #include "core/pipeline/base/overlay_show_option.h"
 #include "core/pipeline/base/render_node.h"
 
+#if defined(ENABLE_STANDARD_INPUT)
+#include "utils/native/base/include/refbase.h"
+
+namespace OHOS::MiscServices {
+class OnTextChangedListener;
+}
+#endif
+
 namespace OHOS::Ace {
 
 class ClickRecognizer;
@@ -571,6 +579,10 @@ private:
     RefPtr<Animator> animator_;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     bool imeAttached_ = false;
+#endif
+
+#if defined(ENABLE_STANDARD_INPUT)
+    sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
 #endif
 };
 
