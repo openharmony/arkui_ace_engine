@@ -48,7 +48,7 @@ bool IsTraceEnabled()
 bool IsRosenBackendEnabled()
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    return false;
+    return true;
 #else
     return false;
 #endif
