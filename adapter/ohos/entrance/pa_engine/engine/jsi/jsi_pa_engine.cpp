@@ -631,7 +631,11 @@ void JsiPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
 
 void JsiPaEngine::LoadLibrary()
 {
+#ifdef APP_USE_ARM
     const char* rdbPath = "/system/lib/module/data/librdb.z.so";
+#else
+    const char* rdbPath = "/system/lib64/module/data/librdb.z.so";
+#endif
     if (strlen(rdbPath) == 0) {
         LOGE("module path is empty");
         return;
@@ -666,7 +670,11 @@ void JsiPaEngine::LoadLibrary()
         LOGE("symbol not found: %{public}s", dlerror());
     }
 
+#ifdef APP_USE_ARM
     const char* dataAbilityPath = "/system/lib/module/data/libdataability.z.so";
+#else
+    const char* dataAbilityPath = "/system/lib64/module/data/libdataability.z.so";
+#endif
     if (strlen(dataAbilityPath) == 0) {
         LOGE("module path is empty");
         return;
