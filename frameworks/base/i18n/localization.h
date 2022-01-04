@@ -122,6 +122,15 @@ public:
     const std::string FormatDuration(uint32_t duration, bool needShowHour = false);
 
     /**
+     * For formatting local format duration. Cannot be formatted correctly when duration greater than 24
+     * hours. For example: 10:00.
+     * @param duration    The value used to set the duration, the range is 0 to 90,000.
+     * @param format      the pattern for the format.For example: HH-mm-ss-SS.
+     * @return local format duration.
+     */
+    std::string FormatDuration(uint32_t duration, const std::string& format);
+
+    /**
      * For formatting date time. For example: 2020/03/30 08:00:00.
      * @param dateTime    The value of date time.
      * @param format      the pattern for the format.

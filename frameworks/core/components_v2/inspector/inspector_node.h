@@ -161,7 +161,7 @@ public:
     virtual double GetHueRotate() const = 0;
 
     // shape clip
-    virtual bool GetClip() const = 0;
+    virtual std::string GetClip() const = 0;
     virtual std::unique_ptr<JsonValue> GetMask() const = 0;
 
     // grid setting

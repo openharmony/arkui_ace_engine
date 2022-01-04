@@ -146,6 +146,16 @@ size_t JsiArray::Length() const
     return GetHandle()->Length(runtime->GetEcmaVm());
 }
 
+bool JsiArray::IsArray() const
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    if (GetHandle().IsEmpty()) {
+        return false;
+    } else {
+        return GetHandle()->IsArray(runtime->GetEcmaVm());
+    }
+}
+
 // -----------------------
 // Implementation of JsiObject
 // -----------------------

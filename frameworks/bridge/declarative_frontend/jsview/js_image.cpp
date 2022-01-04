@@ -191,7 +191,13 @@ void JSImage::SetBorderStyle(int32_t style)
 
     BorderEdge edge = GetLeftBorderEdge();
     edge.SetStyle(borderStyle);
-    SetBorderEdge(edge);
+    auto stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    if (!stack->IsVisualStateSet()) {
+        SetBorderEdge(edge);
+    } else {
+        box->SetBorderStyleForState(borderStyle, stack->GetVisualState());
+    }
 }
 
 void JSImage::SetBorderColor(const Color& color)
@@ -276,7 +282,14 @@ void JSImage::JsBorderColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], borderColor)) {
         return;
     }
-    SetBorderColor(borderColor);
+    auto stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    if (!stack->IsVisualStateSet()) {
+        SetBorderColor(borderColor);
+    } else {
+        AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+        box->SetBorderColorForState(borderColor, option, stack->GetVisualState());
+    }
 }
 
 void JSImage::OnComplete(const JSCallbackInfo& args)
@@ -286,12 +299,12 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
         auto jsLoadSuccFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageSuccessEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageSuccEventToJSValue);
         auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        image->SetLoadSuccessEvent(EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsLoadSuccFunc)]
-            (const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageSuccessEvent>(info);
-            func->Execute(*eventInfo);
-        }));
+        image->SetLoadSuccessEvent(EventMarker(
+            [execCtx = args.GetExecutionContext(), func = std::move(jsLoadSuccFunc)](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageSuccessEvent>(info);
+                func->Execute(*eventInfo);
+            }));
     } else {
         LOGE("args not function");
     }
@@ -304,12 +317,12 @@ void JSImage::OnError(const JSCallbackInfo& args)
         auto jsLoadFailFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageFailEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageFailEventToJSValue);
         auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        image->SetLoadFailEvent(EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsLoadFailFunc)]
-            (const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageFailEvent>(info);
-            func->Execute(*eventInfo);
-        }));
+        image->SetLoadFailEvent(EventMarker(
+            [execCtx = args.GetExecutionContext(), func = std::move(jsLoadFailFunc)](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageFailEvent>(info);
+                func->Execute(*eventInfo);
+            }));
     } else {
         LOGE("args not function");
     }
@@ -362,7 +375,14 @@ void JSImage::JsBorderWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], borderWidth)) {
         return;
     }
-    SetBorderWidth(borderWidth);
+    auto stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    if (!stack->IsVisualStateSet()) {
+        SetBorderWidth(borderWidth);
+    } else {
+        AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+        box->SetBorderWidthForState(borderWidth, option, stack->GetVisualState());
+    }
 }
 
 void JSImage::JsBorderRadius(const JSCallbackInfo& info)
@@ -375,7 +395,14 @@ void JSImage::JsBorderRadius(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], borderRadius)) {
         return;
     }
-    SetBorderRadius(borderRadius);
+    auto stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    if (!stack->IsVisualStateSet()) {
+        SetBorderRadius(borderRadius);
+    } else {
+        AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+        box->SetBorderRadiusForState(borderRadius, option, stack->GetVisualState());
+    }
 }
 
 void JSImage::JsBorder(const JSCallbackInfo& info)
@@ -400,8 +427,8 @@ void JSImage::JsBorder(const JSCallbackInfo& info)
     ParseJsonDimensionVp(argsPtrItem->GetValue("width"), width);
     ParseJsonDimensionVp(argsPtrItem->GetValue("radius"), radius);
     auto borderStyle = argsPtrItem->GetInt("style", static_cast<int32_t>(BorderStyle::SOLID));
-    LOGD("JsBorder width = %lf unit = %d, radius = %lf unit = %d, borderStyle = %d", width.Value(),
-        width.Unit(), radius.Value(), radius.Unit(), borderStyle);
+    LOGD("JsBorder width = %lf unit = %d, radius = %lf unit = %d, borderStyle = %d", width.Value(), width.Unit(),
+        radius.Value(), radius.Unit(), borderStyle);
     Color color;
     if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
         SetBorderColor(color);

@@ -21,6 +21,8 @@
 namespace OHOS::Ace {
 
 class AnticipateCurve : public Curve {
+    DECLARE_ACE_TYPE(AnticipateCurve, Curve);
+
 public:
     explicit AnticipateCurve(float tension);
     ~AnticipateCurve() override = default;

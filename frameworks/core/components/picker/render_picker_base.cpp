@@ -64,6 +64,7 @@ void RenderPickerBase::Update(const RefPtr<Component>& component)
     onCancelCallback_ = AceAsyncEvent<void()>::Create(data_->GetOnCancel(), context_);
     onChangeCallback_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetOnChange(), context_);
     onColumnChangeCallback_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetOnColumnChange(), context_);
+    onDialogResult_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetDialogResult(), context_);
 
     const auto context = context_.Upgrade();
     if (context && context->GetIsDeclarative()) {
@@ -90,7 +91,7 @@ void RenderPickerBase::Update(const RefPtr<Component>& component)
             refPtr->HandleColumnChange(tag, add, index, notify);
         }
     });
-    if (data_->GetIsDialog()) {
+    if (data_->GetIsDialog() || data_->GetIsCreateDialogComponent()) {
         SetButtonHandler();
     }
     SetTextDirection(data_->GetTextDirection());
@@ -108,24 +109,48 @@ void RenderPickerBase::SetButtonHandler()
     // RenderPicker may created for same component(when showing again),
     // these event id may already bind, so remove first.
     BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(data_->GetOnCancelClickId());
-    BackEndEventManager<void()>::GetInstance().BindBackendEvent(
-        data_->GetOnCancelClickId(), [weak = WeakClaim(this)]() {
-            const auto& picker = weak.Upgrade();
-            if (picker) {
-                picker->HandleFinish(false);
-            } else {
-                LOGE("GetOnCancelClickId picker weak.Upgrade is null");
-            }
-        });
     BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(data_->GetOnOkClickId());
-    BackEndEventManager<void()>::GetInstance().BindBackendEvent(data_->GetOnOkClickId(), [weak = WeakClaim(this)]() {
-        const auto& picker = weak.Upgrade();
-        if (picker) {
-            picker->HandleFinish(true);
-        } else {
-            LOGE("GetOnOkClickId picker weak.Upgrade is null");
-        }
-    });
+
+    auto context = context_.Upgrade();
+    if (context->GetIsDeclarative()) {
+        BackEndEventManager<void(const ClickInfo& info)>::GetInstance().BindBackendEvent(
+            data_->GetOnCancelClickId(), [weak = WeakClaim(this)](const ClickInfo& info) {
+                const auto& picker = weak.Upgrade();
+                if (picker) {
+                    picker->HandleFinish(false);
+                } else {
+                    LOGE("GetOnCancelClickId picker weak.Upgrade is null");
+                }
+            });
+        BackEndEventManager<void(const ClickInfo& info)>::GetInstance().BindBackendEvent(
+            data_->GetOnOkClickId(), [weak = WeakClaim(this)](const ClickInfo& info) {
+                const auto& picker = weak.Upgrade();
+                if (picker) {
+                    picker->HandleFinish(true);
+                } else {
+                    LOGE("GetOnOkClickId picker weak.Upgrade is null");
+                }
+            });
+    } else {
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(
+            data_->GetOnCancelClickId(), [weak = WeakClaim(this)]() {
+                const auto& picker = weak.Upgrade();
+                if (picker) {
+                    picker->HandleFinish(false);
+                } else {
+                    LOGE("GetOnCancelClickId picker weak.Upgrade is null");
+                }
+            });
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(
+            data_->GetOnOkClickId(), [weak = WeakClaim(this)]() {
+                const auto& picker = weak.Upgrade();
+                if (picker) {
+                    picker->HandleFinish(true);
+                } else {
+                    LOGE("GetOnOkClickId picker weak.Upgrade is null");
+                }
+            });
+    }
     auto cancelNode = data_->GetCancelAccessibility();
     if (cancelNode) {
         cancelNode->SetActionClickImpl([weakPtr = WeakClaim(this)]() {
@@ -487,6 +512,7 @@ void RenderPickerBase::HandleFinish(bool success)
         onTextCancel_();
     }
 
+    OnDialogStatusChange(success ? DialogStatus::ACCEPT : DialogStatus::CANCEL);
     data_->HideDialog();
 }
 
@@ -533,7 +559,7 @@ void RenderPickerBase::HandleColumnChange(const std::string& tag, bool isAdd, ui
         }
     }
 
-    if (!data_->GetIsDialog()) {
+    if (!data_->GetIsDialog() && !data_->GetIsCreateDialogComponent()) {
         HandleFinish(true);
         RefPtr<PickerColumnComponent> pickerColumn = data_->GetColumn(tag);
         if (!pickerColumn) {
@@ -546,6 +572,8 @@ void RenderPickerBase::HandleColumnChange(const std::string& tag, bool isAdd, ui
         return;
     }
 
+    OnDialogStatusChange(DialogStatus::UPDATE);
+
     data_->OnTitleBuilding();
     auto titleComponent = data_->GetTitle();
     if (data_->GetHasTitle()) {
@@ -554,6 +582,16 @@ void RenderPickerBase::HandleColumnChange(const std::string& tag, bool isAdd, ui
         } else {
             LOGE("render title or title component is null.");
         }
+    }
+}
+
+void RenderPickerBase::OnDialogStatusChange(int32_t status)
+{
+    if (!data_->GetIsCreateDialogComponent()) {
+        return;
+    }
+    if (onDialogResult_) {
+        onDialogResult_(std::string("\"change\",") + data_->GetSelectedObject(false, "", status) + ",null");
     }
 }
 

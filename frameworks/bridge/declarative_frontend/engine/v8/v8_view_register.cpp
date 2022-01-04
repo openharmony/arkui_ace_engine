@@ -116,6 +116,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
@@ -125,6 +126,7 @@
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #endif
@@ -598,7 +600,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"Tabs", JSTabs::JSBind},
     {"TabContent", JSTabContent::JSBind},
     {"TextPicker", JSTextPicker::JSBind},
+    {"TextPickerDialog", JSTextPickerDialog::JSBind},
     {"DatePicker", JSDatePicker::JSBind},
+    {"DatePickerDialog", JSDatePickerDialog::JSBind},
     {"PageTransitionEnter", JSPageTransition::JSBind},
     {"PageTransitionExit", JSPageTransition::JSBind},
     {"RowSplit", JSRowSplit::JSBind},
@@ -658,7 +662,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"AbilityController", JSAbilityComponentController::JSBind},
     {"VideoController", JSVideoController::JSBind},
     {"Search", JSSearch::JSBind},
-    {"Sheet", JSSheet::JSBind}
+    {"Sheet", JSSheet::JSBind},
+    {"TextTimer", JSTextTimer::JSBind},
+    {"TextTimerController", JSTextTimerController::JSBind}
 };
 
 void RegisterAllModule(BindingTarget globalObj)
@@ -730,6 +736,7 @@ void JsRegisterViews(BindingTarget globalObj)
 
     JSEnvironment::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);
+    JSViewStackProcessor::JSBind(globalObj);
     JSTouchHandler::JSBind(globalObj);
     JSPanHandler::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);

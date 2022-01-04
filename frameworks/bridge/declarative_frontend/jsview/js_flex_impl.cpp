@@ -135,6 +135,10 @@ RefPtr<WrapComponent> JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info
             }
             wrapComponent->SetDirection((WrapDirection)direction);
         }
+    } else {
+        // No direction set case: wrapVal == 2 means FlexWrap.WrapReverse.
+        WrapDirection wrapDirection = wrapVal == 2 ? WrapDirection::HORIZONTAL_REVERSE : WrapDirection::HORIZONTAL;
+        wrapComponent->SetDirection(wrapDirection);
     }
     if (justifyVal->IsNumber()) {
         auto mainAlign = justifyVal->ToNumber<int32_t>();

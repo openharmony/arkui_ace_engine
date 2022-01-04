@@ -26,6 +26,8 @@
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
+#include "window.h"
+
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
@@ -47,7 +49,7 @@ FrontendType GetFrontendType(const std::string& frontendType)
     } else if (frontendType == "declarative") {
         return FrontendType::DECLARATIVE_JS;
     } else {
-        LOGE("frontend type not supported. return default frontend: JS frontend.");
+        LOGW("frontend type not supported. return default frontend: JS frontend.");
         return FrontendType::JS;
     }
 }
@@ -139,85 +141,6 @@ const std::string AceAbility::PAGE_URI = "url";
 const std::string AceAbility::CONTINUE_PARAMS_KEY = "__remoteData";
 
 REGISTER_AA(AceAbility)
-int32_t g_dialogId = 1000;
-const std::string WINDOW_DIALOG_DOUBLE_BUTTON = "pages/dialog/index.js";
-
-void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBoudle, std::string param, DialogCallback callback)
-{
-    LOGI("showDialog");
-
-    SetHwIcuDirectory();
-
-    // create container
-    Platform::AceContainer::CreateContainer(
-        g_dialogId, FrontendType::JS, false, "dialog", nullptr,
-        std::make_unique<AcePlatformEventCallback>([]() {
-            return;
-        }));
-    Platform::AceContainer::SetDialogCallback(g_dialogId, callback);
-    // create view.
-    auto flutterAceView = Platform::FlutterAceView::CreateView(g_dialogId);
-    auto&& touchEventCallback = [aceView = flutterAceView](OHOS::TouchEvent event) -> bool {
-        LOGD("RegistOnTouchCb touchEventCallback called");
-        return aceView->DispatchTouchEvent(aceView, event);
-    };
-    window->OnTouch(touchEventCallback);
-
-    // register surface change callback
-    auto&& surfaceChangedCallBack = [flutterAceView](uint32_t width, uint32_t height) {
-        LOGD("RegistWindowInfoChangeCb surfaceChangedCallBack called");
-        flutter::ViewportMetrics metrics;
-        metrics.physical_width = width;
-        metrics.physical_height = height;
-        Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-        Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
-    };
-    window->OnSizeChange(surfaceChangedCallBack);
-    Platform::FlutterAceView::SurfaceCreated(flutterAceView, window);
-
-    // set metrics
-    BufferRequestConfig windowConfig = {
-    .width = window->GetSurface()->GetDefaultWidth(),
-    .height = window->GetSurface()->GetDefaultHeight(),
-    .strideAlignment = 0x8,
-    .format = PIXEL_FMT_RGBA_8888,
-    .usage = window->GetSurface()->GetDefaultUsage(),
-    };
-    LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", windowConfig.width, windowConfig.height);
-
-    flutter::ViewportMetrics metrics;
-    metrics.physical_width = windowConfig.width;
-    metrics.physical_height = windowConfig.height;
-    Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-
-    // add asset path.
-    auto packagePathStr = "system/dialog/";
-    auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
-    Platform::AceContainer::AddAssetPath(g_dialogId, packagePathStr, assetBasePathStr);
-
-    // set view
-    Platform::AceContainer::SetView(flutterAceView, 1.0f, windowConfig.width, windowConfig.height);
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, windowConfig.width, windowConfig.height, 0);
-
-    // set window id
-    auto context = Platform::AceContainer::GetContainer(g_dialogId)->GetPipelineContext();
-    if (context != nullptr) {
-        context->SetWindowId(window->GetID());
-    }
-
-    // run page.
-    Platform::AceContainer::RunPage(
-        g_dialogId, Platform::AceContainer::GetContainer(g_dialogId)->GeneratePageId(),
-        jsBoudle, param);
-
-    g_dialogId++;
-}
-
-void DialogHandle1(std::string event, std::string param)
-{
-    LOGI("DialogHandle1  event=%{public}s, param=%{public}s", event.c_str(), param.c_str());
-    Platform::AceContainer::DestroyContainer(1);
-}
 
 void AceAbility::OnStart(const Want& want)
 {
@@ -225,7 +148,6 @@ void AceAbility::OnStart(const Want& want)
     LOGI("AceAbility::OnStart called");
 
     SetHwIcuDirectory();
-    bool isSystemUI = false;
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = GetResourceManager();
@@ -239,16 +161,19 @@ void AceAbility::OnStart(const Want& want)
             auto script = localeInfo->getScript();
             AceApplicationInfo::GetInstance().SetLocale((language == nullptr) ? "" : language,
                 (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
-        }
+        } else {
+	   LOGW("localeInfo is null.");
+	   AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
+	}
+    } else {
+       LOGW("resourceManager is null.");
+       AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
     }
 
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
     if (moduleInfo != nullptr) {
         packagePathStr += "/" + moduleInfo->name + "/";
-    }
-    if ((packagePathStr.find("systemui") != -1) || (packagePathStr.find("launcher") != -1)) {
-        isSystemUI = true;
     }
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     std::string srcPath = "";
@@ -293,40 +218,23 @@ void AceAbility::OnStart(const Want& want)
 
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
-    OHOS::sptr<OHOS::Window> window = Ability::GetWindow();
+    OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
 
-    // regist touch event
-    auto&& touchEventCallback = [aceView = flutterAceView](OHOS::TouchEvent event) -> bool {
-        LOGD("RegistOnTouchCb touchEventCallback called");
-        return aceView->DispatchTouchEvent(aceView, event);
-    };
-    window->OnTouch(touchEventCallback);
     // register surface change callback
-    auto&& surfaceChangedCallBack = [flutterAceView](uint32_t width, uint32_t height) {
-        LOGD("RegistWindowInfoChangeCb surfaceChangedCallBack called");
-        flutter::ViewportMetrics metrics;
-        metrics.physical_width = width;
-        metrics.physical_height = height;
-        Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-        Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
-    };
-    window->OnSizeChange(surfaceChangedCallBack);
+    OHOS::sptr<OHOS::Rosen::IWindowChangeListener> thisAbility(this);
+    window->RegisterWindowChangeListener(thisAbility);
 
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window);
 
     // set metrics
-    BufferRequestConfig windowConfig = {
-        .width = window->GetSurface()->GetDefaultWidth(),
-        .height = window->GetSurface()->GetDefaultHeight(),
-        .strideAlignment = 0x8,
-        .format = PIXEL_FMT_RGBA_8888,
-        .usage = window->GetSurface()->GetDefaultUsage(),
-    };
-    LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", windowConfig.width, windowConfig.height);
+    int32_t width = window->GetRect().width_;
+    int32_t height = window->GetRect().height_;
+    LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", width, height);
 
     flutter::ViewportMetrics metrics;
-    metrics.physical_width = windowConfig.width;
-    metrics.physical_height = windowConfig.height;
+    metrics.physical_width = width;
+    metrics.physical_height = height;
+    metrics.device_pixel_ratio = density_;
     Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
 
     if (srcPath.empty()) {
@@ -338,8 +246,8 @@ void AceAbility::OnStart(const Want& want)
     }
 
     // set view
-    Platform::AceContainer::SetView(flutterAceView, density_, windowConfig.width, windowConfig.height);
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, windowConfig.width, windowConfig.height, 0);
+    Platform::AceContainer::SetView(flutterAceView, density_, width, height);
+    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
 
     // get url
     std::string parsedPageUrl;
@@ -379,7 +287,6 @@ void AceAbility::OnStart(const Want& want)
     // set window id & action event handler
     auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
     if (context != nullptr) {
-        context->SetWindowId(window->GetID());
         context->SetActionEventHandler(actionEventHandler);
     }
 
@@ -387,13 +294,12 @@ void AceAbility::OnStart(const Want& want)
     if (SystemProperties::GetRosenBackendEnabled()) {
         auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
         if (rsUiDirector != nullptr) {
-            rsUiDirector->SetPlatformSurface(window->GetSurface());
-            auto&& rsSurfaceChangedCallBack = [surfaceChangedCallBack, rsUiDirector](uint32_t width, uint32_t height) {
-                rsUiDirector->SetSurfaceSize(width, height);
-                surfaceChangedCallBack(width, height);
-            };
-            window->OnSizeChange(rsSurfaceChangedCallBack);
-            rsUiDirector->SetSurfaceSize(windowConfig.width, windowConfig.height);
+            rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+
+            // todo regist on size change()
+            window->RegisterWindowChangeListener(thisAbility);
+
+            rsUiDirector->SetSurfaceNodeSize(width, height);
             rsUiDirector->SetUITaskRunner(
                 [taskExecutor = Platform::AceContainer::GetContainer(abilityId_)->GetTaskExecutor()]
                     (const std::function<void()>& task) {
@@ -419,14 +325,6 @@ void AceAbility::OnStart(const Want& want)
     if (!remoteData_.empty()) {
         Platform::AceContainer::OnRestoreData(abilityId_, remoteData_);
     }
-
-    if (!isSystemUI && (moduleInfo->name.find("com.istone.system.dialog")) != -1) {
-        std::string dialogParam = "{\"title\":\"Alert!\", \"message\":\"this is a system dialog!\"," \
-             "\"button1\":\"Got it!\", \"button2\":\"Cancel!\"}";
-        showDialog(Ability::GetWindow(), WINDOW_DIALOG_DOUBLE_BUTTON, dialogParam, DialogHandle1);
-        return;
-    }
-
     LOGI("AceAbility::OnStart called End");
 }
 
@@ -485,19 +383,16 @@ void AceAbility::OnBackPressed()
     LOGI("AceAbility::OnBackPressed called End");
 }
 
-bool AceAbility::OnTouchEvent(const TouchEvent &touchEvent)
+void AceAbility::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    LOGI("AceAbility::OnTouchEvent called ");
+    LOGI("AceAbility::OnPointerEvent called ");
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(
         Platform::AceContainer::GetContainer(abilityId_)->GetView());
     if (!flutterAceView) {
         LOGE("flutterAceView is null");
-        return false;
+        return;
     }
-    TouchEvent event = touchEvent;
-    bool ret = flutterAceView->DispatchTouchEvent(flutterAceView, event);
-    LOGI("AceAbility::OnTouchEvent called End: ret: %{public}d", ret);
-    return ret;
+    flutterAceView->DispatchTouchEvent(flutterAceView, pointerEvent);
 }
 
 void AceAbility::OnNewWant(const Want& want)
@@ -610,6 +505,40 @@ void AceAbility::OnRemoteTerminated()
     LOGI("AceAbility::OnRemoteTerminated called.");
     Platform::AceContainer::OnRemoteTerminated(abilityId_);
     LOGI("AceAbility::OnRemoteTerminated finish.");
+}
+
+void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect)
+{
+    uint32_t width = rect.width_;
+    uint32_t height = rect.height_;
+#ifdef ENABLE_ROSEN_BACKEND
+    auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
+    if (context) {
+        auto rsUIDirector = context->GetRSUIDirector();
+        if (rsUIDirector) {
+            rsUIDirector->SetSurfaceNodeSize(width, height);
+        } else {
+            LOGE("ceAbility::OnSizeChange rsUIDirector is null.");
+        }
+    } else {
+        LOGE("ceAbility::OnSizeChange pipline context is null.");
+    }
+
+#endif
+    auto flutterAceView = static_cast<Platform::FlutterAceView*>(
+        Platform::AceContainer::GetContainer(abilityId_)->GetView());
+
+    if (!flutterAceView) {
+        LOGE("flutterAceView is null");
+        return;
+    }
+
+    flutter::ViewportMetrics metrics;
+    metrics.physical_width = width;
+    metrics.physical_height = height;
+    metrics.device_pixel_ratio = density_;
+    Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
+    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
 }
 
 } // namespace Ace

@@ -166,7 +166,8 @@ public:
 
     void OnSelectedSaving() override;
 
-    std::string GetSelectedObject(bool isColumnChange, const std::string& changeColumnTag) const override;
+    std::string GetSelectedObject(bool isColumnChange,
+        const std::string& changeColumnTag, int status = -1) const override;
 
     void OnDataLinking(
         const std::string& tag, bool isAdd, uint32_t index, std::vector<std::string>& resultTags) override;

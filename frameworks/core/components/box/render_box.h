@@ -24,6 +24,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/image/render_image.h"
+#include "core/gestures/raw_recognizer.h"
 #include "base/image/pixel_map.h"
 
 namespace OHOS::Ace {
@@ -61,6 +62,7 @@ public:
         });
     }
 
+    void OnStatusStyleChanged(StyleState state) override;
     void UpdateStyleFromRenderNode(PropertyAnimatableType type) override;
 
     const Color& GetColor() const override
@@ -76,8 +78,11 @@ public:
         return inspectorDirection_;
     }
 
-    RefPtr<Decoration> GetBackDecoration() const
+    RefPtr<Decoration> GetBackDecoration()
     {
+        if (!backDecoration_) {
+            backDecoration_ = AceType::MakeRefPtr<Decoration>();
+        }
         return backDecoration_;
     }
 
@@ -243,6 +248,7 @@ private:
     void CalculateRotate(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
     void CalculateTranslate(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
 #endif
+    void HandleTouchEvent(bool isTouchDown);
 
     // 0 - low priority gesture, 1 - high priority gesture, 2 - parallel priority gesture
     std::array<RefPtr<GestureRecognizer>, MAX_GESTURE_SIZE> recognizers_;
@@ -257,6 +263,8 @@ private:
     OnDragFunc onDragLeave_;
     OnDragFunc onDrop_;
     RefPtr<GestureRecognizer> onClick_;
+    RefPtr<RawRecognizer> touchRecognizer_;
+    RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_;
     TextDirection inspectorDirection_ { TextDirection::LTR };
 }; // class RenderBox
 

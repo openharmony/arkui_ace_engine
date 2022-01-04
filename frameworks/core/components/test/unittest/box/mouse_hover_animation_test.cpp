@@ -33,6 +33,9 @@ const double BOX_WIDTH_PARENT = 500.0;
 const double BOX_HEIGHT_PARENT = 500.0;
 const double BOX_WIDTH_CHILD = 300.0;
 const double BOX_HEIGHT_CHILD = 300.0;
+std::vector<Rect> BASE_VECTOR = {Rect(0.0, 0.0, 1080.0, 1920.0)};
+std::vector<Rect> PARENT_VECTOR = {Rect(0.0, 0.0, BOX_WIDTH_PARENT, BOX_HEIGHT_PARENT)};
+std::vector<Rect> CHILD_VECTOR = {Rect(0.0, 0.0, BOX_WIDTH_CHILD, BOX_HEIGHT_CHILD)};
 
 } // namespace
 
@@ -117,12 +120,12 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest002, TestSize.Level1)
      * @tc.steps: step2. set RenderBox and RenderRoot TouchRect.
      * @tc.expected: step2. properties set correctly.
      */
-    renderRoot->SetTouchRect(Rect(0.0, 0.0, 1080.0, 1920.0));
-    stackRender->SetTouchRect(Rect(0.0, 0.0, 1080.0, 1920.0));
+    renderRoot->ChangeTouchRectList(BASE_VECTOR);
+    stackRender->ChangeTouchRectList(BASE_VECTOR);
     RefPtr<AccessibilityNode> accessNode = AceType::MakeRefPtr<AccessibilityNode>(1, "box");
     RefPtr<MockRenderBox> renderBox = AceType::MakeRefPtr<MockRenderBox>();
     renderBox->SetAccessibilityNode(accessNode);
-    renderBox->SetTouchRect(Rect(0.0, 0.0, BOX_WIDTH_PARENT, BOX_HEIGHT_PARENT));
+    renderBox->ChangeTouchRectList(PARENT_VECTOR);
     renderBox->Attach(mockContext);
     stackRender->AddChild(renderBox);
 
@@ -158,12 +161,12 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest003, TestSize.Level1)
      * @tc.steps: step2. set RenderBox and RenderRoot TouchRect.
      * @tc.expected: step2. properties set correctly.
      */
-    renderRoot->SetTouchRect(Rect(0.0, 0.0, 1080.0, 1920.0));
-    stackRender->SetTouchRect(Rect(0.0, 0.0, 1080.0, 1920.0));
+    renderRoot->ChangeTouchRectList(BASE_VECTOR);
+    stackRender->ChangeTouchRectList(BASE_VECTOR);
     RefPtr<AccessibilityNode> accessNode = AceType::MakeRefPtr<AccessibilityNode>(1, "box");
     RefPtr<MockRenderBox> renderBox = AceType::MakeRefPtr<MockRenderBox>();
     renderBox->SetAccessibilityNode(accessNode);
-    renderBox->SetTouchRect(Rect(0.0, 0.0, BOX_WIDTH_PARENT, BOX_HEIGHT_PARENT));
+    renderBox->ChangeTouchRectList(PARENT_VECTOR);
     renderBox->Attach(mockContext);
     stackRender->AddChild(renderBox);
 
@@ -205,12 +208,12 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest004, TestSize.Level1)
      * @tc.steps: step2. set RenderBox and RenderRoot TouchRect.
      * @tc.expected: step2. properties set correctly.
      */
-    renderRoot->SetTouchRect(Rect(0.0, 0.0, 1080.0, 1920.0));
-    stackRender->SetTouchRect(Rect(0.0, 0.0, 1080.0, 1920.0));
+    renderRoot->ChangeTouchRectList(BASE_VECTOR);
+    stackRender->ChangeTouchRectList(BASE_VECTOR);
     RefPtr<AccessibilityNode> accessNode = AceType::MakeRefPtr<AccessibilityNode>(1, "box");
     RefPtr<MockRenderBox> renderBox = AceType::MakeRefPtr<MockRenderBox>();
     renderBox->SetAccessibilityNode(accessNode);
-    renderBox->SetTouchRect(Rect(0.0, 0.0, BOX_WIDTH_PARENT, BOX_HEIGHT_PARENT));
+    renderBox->ChangeTouchRectList(PARENT_VECTOR);
     renderBox->Attach(mockContext);
     stackRender->AddChild(renderBox);
 
@@ -334,12 +337,12 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest007, TestSize.Level1)
      * @tc.steps: step2. set RenderBox and RenderRoot TouchRect.
      * @tc.expected: step2. properties set correctly.
      */
-    renderRoot->SetTouchRect(Rect(0.0, 0.0, 1080.0, 1920.0));
-    stackRender->SetTouchRect(Rect(0.0, 0.0, 1080.0, 1920.0));
+    renderRoot->ChangeTouchRectList(BASE_VECTOR);
+    stackRender->ChangeTouchRectList(BASE_VECTOR);
     RefPtr<AccessibilityNode> accessNode = AceType::MakeRefPtr<AccessibilityNode>(1, "box");
     RefPtr<MockRenderBox> renderBox = AceType::MakeRefPtr<MockRenderBox>();
     renderBox->SetAccessibilityNode(accessNode);
-    renderBox->SetTouchRect(Rect(0.0, 0.0, BOX_WIDTH_PARENT, BOX_HEIGHT_PARENT));
+    renderBox->ChangeTouchRectList(PARENT_VECTOR);
     renderBox->Attach(mockContext);
     stackRender->AddChild(renderBox);
 
@@ -428,16 +431,16 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest009, TestSize.Level1)
      * @tc.steps: step2. set RenderBox and RenderRoot TouchRect.
      * @tc.expected: step2. properties set correctly.
      */
-    renderRoot->SetTouchRect(Rect(0.0, 0.0, 1080.0, 1920.0));
-    stackRender->SetTouchRect(Rect(0.0, 0.0, 1080.0, 1920.0));
+    renderRoot->ChangeTouchRectList(BASE_VECTOR);
+    stackRender->ChangeTouchRectList(BASE_VECTOR);
     RefPtr<AccessibilityNode> accessNode = AceType::MakeRefPtr<AccessibilityNode>(1, "box");
     RefPtr<MockRenderBox> renderBoxParent = AceType::MakeRefPtr<MockRenderBox>();
     renderBoxParent->SetAccessibilityNode(accessNode);
     RefPtr<AccessibilityNode> accessNodeTwo = AceType::MakeRefPtr<AccessibilityNode>(2, "box");
     RefPtr<MockRenderBox> renderBoxChild = AceType::MakeRefPtr<MockRenderBox>();
     renderBoxChild->SetAccessibilityNode(accessNodeTwo);
-    renderBoxParent->SetTouchRect(Rect(0.0, 0.0, BOX_WIDTH_PARENT, BOX_HEIGHT_PARENT));
-    renderBoxChild->SetTouchRect(Rect(0.0, 0.0, BOX_WIDTH_CHILD, BOX_HEIGHT_CHILD));
+    renderBoxParent->ChangeTouchRectList(PARENT_VECTOR);
+    renderBoxChild->ChangeTouchRectList(CHILD_VECTOR);
     renderBoxParent->Attach(mockContext);
     renderBoxChild->Attach(mockContext);
     stackRender->AddChild(renderBoxParent);
@@ -502,16 +505,16 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest010, TestSize.Level1)
      * @tc.steps: step2. set RenderBox and RenderRoot TouchRect.
      * @tc.expected: step2. properties set correctly.
      */
-    renderRoot->SetTouchRect(Rect(0.0, 0.0, 1080.0, 1920.0));
-    stackRender->SetTouchRect(Rect(0.0, 0.0, 1080.0, 1920.0));
+    renderRoot->ChangeTouchRectList(BASE_VECTOR);
+    stackRender->ChangeTouchRectList(BASE_VECTOR);
     RefPtr<AccessibilityNode> accessNode = AceType::MakeRefPtr<AccessibilityNode>(1, "box");
     RefPtr<MockRenderBox> renderBoxParent = AceType::MakeRefPtr<MockRenderBox>();
     renderBoxParent->SetAccessibilityNode(accessNode);
     RefPtr<AccessibilityNode> accessNodeTwo = AceType::MakeRefPtr<AccessibilityNode>(2, "box");
     RefPtr<MockRenderBox> renderBoxChild = AceType::MakeRefPtr<MockRenderBox>();
     renderBoxChild->SetAccessibilityNode(accessNodeTwo);
-    renderBoxParent->SetTouchRect(Rect(0.0, 0.0, BOX_WIDTH_PARENT, BOX_HEIGHT_PARENT));
-    renderBoxChild->SetTouchRect(Rect(0.0, 0.0, BOX_WIDTH_CHILD, BOX_HEIGHT_CHILD));
+    renderBoxParent->ChangeTouchRectList(PARENT_VECTOR);
+    renderBoxChild->ChangeTouchRectList(CHILD_VECTOR);
     renderBoxParent->Attach(mockContext);
     renderBoxChild->Attach(mockContext);
     stackRender->AddChild(renderBoxParent);

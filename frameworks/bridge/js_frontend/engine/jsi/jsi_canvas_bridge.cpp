@@ -233,6 +233,7 @@ void JsiCanvasBridge::HandleJsContext(const shared_ptr<JsRuntime>& runtime, Node
         { "getImageData", JsGetImageData },
         { "getJsonData", JsGetJsonData },
         { "transferFromImageBitmap", JsTransferFromImageBitmap },
+        { "drawBitmapMesh", JsDrawBitmapMesh },
     };
     renderContext_->SetProperty(runtime, "__nodeId", runtime->NewInt32(id));
     for (const auto& iter : contextTable) {
@@ -1632,6 +1633,41 @@ shared_ptr<JsValue> JsiCanvasBridge::JsTransferFromImageBitmap(const shared_ptr<
             auto offscreenCanvas = birdge->GetOffscreenCanvas();
             auto task = [offscreenCanvas](const RefPtr<CanvasTaskPool>& pool) {
                 pool->TransferFromImageBitmap(offscreenCanvas);
+            };
+            PushTaskToPage(runtime, value, task);
+        }
+    }
+    return runtime->NewUndefined();
+}
+
+shared_ptr<JsValue> JsiCanvasBridge::JsDrawBitmapMesh(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argc != 4) {
+        return runtime->NewUndefined();
+    }
+    int32_t bridgeId = 0;
+    auto id = argv[0]->GetProperty(runtime, "__bridgeId");
+    if (id && id->IsInt32(runtime)) {
+        bridgeId = id->ToInt32(runtime);
+    }
+    bridgeId = bridgeId < 0 ? 0 : bridgeId;
+    auto mesh = GetJsDashValue(runtime, argv[1]);
+    int32_t column = argv[2]->ToInt32(runtime);
+    int32_t row = argv[3]->ToInt32(runtime);
+
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engine) {
+        return runtime->NewUndefined();
+    }
+    auto page = engine->GetRunningPage();
+    if (page) {
+        RefPtr<JsiOffscreenCanvasBridge> birdge = AceType::DynamicCast<JsiOffscreenCanvasBridge>(
+            page->GetOffscreenCanvasBridgeById(bridgeId));
+        if (birdge) {
+            auto offscreenCanvas = birdge->GetOffscreenCanvas();
+            auto task = [offscreenCanvas, mesh, column, row](const RefPtr<CanvasTaskPool>& pool) {
+                pool->DrawBitmapMesh(offscreenCanvas, mesh, column, row);
             };
             PushTaskToPage(runtime, value, task);
         }

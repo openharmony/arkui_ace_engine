@@ -40,6 +40,7 @@ public:
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetMaxLength(uint32_t value);
     static void JsHeight(const JSCallbackInfo& info);
+    static void JsPadding(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);

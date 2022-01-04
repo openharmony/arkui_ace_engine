@@ -48,6 +48,7 @@ public:
 
 protected:
     void OnOpacityAnimationCallback();
+    void OnVisibleChanged() override;
     virtual void ClearRenderObject() override;
     void OnRSTransition(TransitionType type, unsigned long long rsNodeId) override;
 

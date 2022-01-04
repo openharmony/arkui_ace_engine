@@ -89,7 +89,7 @@ bool ScrollPositionController::AnimateTo(const Dimension& position, float durati
     RefPtr<RenderNode> node = scroll_.Upgrade();
     if (node) {
         auto scroll = AceType::DynamicCast<RenderScroll>(node);
-        if (scroll) {
+        if (scroll && scroll->GetAxis() != Axis::NONE) {
             auto normalizedPos = scroll->NormalizePercentToPx(position, scroll->GetAxis() == Axis::VERTICAL);
             scroll->AnimateTo(normalizedPos, duration, curve, true, nullptr);
             return true;
@@ -171,7 +171,7 @@ void ScrollPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool 
     RefPtr<RenderNode> node = scroll_.Upgrade();
     if (node) {
         auto scroll = AceType::DynamicCast<RenderScroll>(node);
-        if (scroll) {
+        if (scroll && scroll->GetAxis() != Axis::NONE) {
             scroll->ScrollToEdge(scrollEdgeType, smooth);
         }
     }
@@ -182,7 +182,7 @@ void ScrollPositionController::ScrollPage(bool reverse, bool smooth)
     RefPtr<RenderNode> node = scroll_.Upgrade();
     if (node) {
         auto scroll = AceType::DynamicCast<RenderScroll>(node);
-        if (scroll) {
+        if (scroll && scroll->GetAxis() != Axis::NONE) {
             scroll->ScrollPage(reverse, smooth);
         }
     }

@@ -88,7 +88,8 @@ public:
 
     void OnColumnsBuilding() override;
 
-    std::string GetSelectedObject(bool isColumnChange, const std::string& changeColumnTag) const override;
+    std::string GetSelectedObject(bool isColumnChange,
+        const std::string& changeColumnTag, int32_t status = -1) const override;
 
     void OnSelectedSaving() override;
 

@@ -104,13 +104,14 @@ void PickerTimeComponent::HandleHourColumnBuilding()
     }
 }
 
-std::string PickerTimeComponent::GetSelectedObject(bool isColumnChange, const std::string& changeColumnTag) const
+std::string PickerTimeComponent::GetSelectedObject(bool isColumnChange,
+    const std::string& changeColumnTag, int32_t status) const
 {
     if (isColumnChange) {
         LOGE("not support.");
         return "";
     }
-    return selectedTime_.ToString(true, hasSecond_);
+    return selectedTime_.ToString(true, hasSecond_, status);
 }
 
 void PickerTimeComponent::OnDataLinking(const std::string& tag, bool isAdd, uint32_t index,

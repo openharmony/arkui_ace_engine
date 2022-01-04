@@ -507,14 +507,14 @@ void RosenRenderPercentageDataPanel::PaintBackground(
 }
 
 void RosenRenderPercentageDataPanel::PaintSpace(
-    RenderContext& context, const Offset& leftTop, double segmentWidth, double widthSegment, double height)
+    RenderContext& context, const Offset& leftTop, double spaceWidth, double xSpace, double height)
 {
     auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
     if (!canvas) {
         return;
     }
     SkPaint segmentPaint;
-    SkRect rect = SkRect::MakeXYWH(widthSegment, leftTop.GetY(), segmentWidth, height);
+    SkRect rect = SkRect::MakeXYWH(xSpace, leftTop.GetY(), spaceWidth, height);
     segmentPaint.setColor(Color::WHITE.GetValue());
     segmentPaint.setStyle(SkPaint::kFill_Style);
     segmentPaint.setAntiAlias(true);
@@ -547,11 +547,27 @@ void RosenRenderPercentageDataPanel::PaintColorSegment(RenderContext& context, c
 void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context, const Offset& offset)
 {
     auto totalWidth = GetLayoutSize().Width();
-    if (GetMaxValue() == 0) {
-        return;
-    }
     auto segment = GetSegments();
-    auto scaleMaxValue = totalWidth / (GetMaxValue() + (double)(segment.size() - 1) * FIXED_WIDTH);
+    auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
+    auto segmentWidthSum = 0.0;
+    for (int i = 0; i < segment.size(); i++) {
+        segmentWidthSum += segment[i].GetValue();
+    }
+    auto segmentSize = 0.0;
+    if (segmentWidthSum == GetMaxValue()) {
+        segmentSize = (double)(segment.size() - 1);
+    } else {
+        segmentSize = (double)segment.size();
+    }
+    for (int i = 0; i < segment.size(); i++) {
+        if (segment[i].GetValue() == 0.0) {
+            segmentSize -= 1;
+        }
+    }
+    double scaleMaxValue = 0.0;
+    if (GetMaxValue() > 0) {
+        scaleMaxValue = (totalWidth - segmentSize * spaceWidth) / GetMaxValue();
+    }
     auto height = GetLayoutSize().Height();
     auto widthSegment = offset.GetX();
     PaintBackground(context, offset, totalWidth, height);
@@ -565,9 +581,8 @@ void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context,
         PaintColorSegment(
             context, offset, segmentWidth * scaleMaxValue, widthSegment, height, segmentStartColor, segmentEndColor);
         widthSegment += segment[i].GetValue() * scaleMaxValue;
-        auto spaceWidth = FIXED_WIDTH * scaleMaxValue;
         PaintSpace(context, offset, spaceWidth, widthSegment, height);
-        widthSegment += FIXED_WIDTH * scaleMaxValue;
+        widthSegment += spaceWidth;
     }
 }
 

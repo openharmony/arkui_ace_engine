@@ -28,6 +28,7 @@ const std::unordered_map<std::string, std::function<std::string(const ButtonComp
     { "type", [](const ButtonComposedElement& inspector) { return inspector.GetButtonType(); } },
     { "stateEffect", [](const ButtonComposedElement& inspector) { return inspector.GetStateEffect(); } },
     { "label", [](const ButtonComposedElement& inspector) { return inspector.GetLabel(); } },
+    { "fontSize", [](const ButtonComposedElement& inspector) { return inspector.GetFontSize(); } },
 };
 
 void ButtonComposedElement::Dump()
@@ -76,6 +77,20 @@ std::string ButtonComposedElement::GetLabel() const
         return "";
     }
     return render->GetTextData();
+}
+
+std::string ButtonComposedElement::GetFontSize() const
+{
+    auto node = GetInspectorNode(TextElement::TypeId());
+    if (!node) {
+        return "";
+    }
+    auto render = AceType::DynamicCast<RenderText>(node);
+    if (!render) {
+        return "";
+    }
+    auto fontSize = render ? render->GetTextStyle().GetFontSize() : Dimension();
+    return std::to_string(static_cast<int32_t>(fontSize.ConvertToVp()));
 }
 
 std::string ButtonComposedElement::GetBackgroundColor() const

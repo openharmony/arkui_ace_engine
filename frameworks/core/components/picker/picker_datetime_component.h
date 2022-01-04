@@ -58,7 +58,8 @@ public:
 
     void OnSelectedSaving() override;
 
-    std::string GetSelectedObject(bool isColumnChange, const std::string& changeColumnTag) const override;
+    std::string GetSelectedObject(bool isColumnChange,
+        const std::string& changeColumnTag, int32_t status = -1) const override;
 
     void OnLunarCallback(bool checked, std::vector<std::string>& resultTags) override;
 

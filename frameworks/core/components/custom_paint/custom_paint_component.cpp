@@ -54,6 +54,15 @@ void CanvasTaskPool::TransferFromImageBitmap(const RefPtr<OffscreenCanvas>& offs
     PushTask(task);
 }
 
+void CanvasTaskPool::DrawBitmapMesh(const RefPtr<OffscreenCanvas>& offscreenCanvas,
+    const std::vector<double>& mesh, int32_t column, int32_t row)
+{
+    auto task = [offscreenCanvas, mesh, column, row](RenderCustomPaint& interface, const Offset&) {
+        interface.DrawBitmapMesh(offscreenCanvas, mesh, column, row);
+    };
+    PushTask(task);
+}
+
 void CanvasTaskPool::SetWebGLInstance(CanvasRenderContextBase* context)
 {
     auto paint = renderNode_.Upgrade();

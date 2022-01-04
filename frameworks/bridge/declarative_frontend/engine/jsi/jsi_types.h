@@ -105,7 +105,7 @@ public:
     JsiRef<JsiValue> GetValueAt(size_t index) const;
     void SetValueAt(size_t index, JsiRef<JsiValue> value) const;
     size_t Length() const;
-
+    bool IsArray() const;
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiArray)
 };
 

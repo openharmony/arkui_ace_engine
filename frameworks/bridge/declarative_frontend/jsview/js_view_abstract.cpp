@@ -33,6 +33,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_register.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/ace_application_info.h"
+#include "core/components/box/box_component_helper.h"
 #include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/menu/menu_component.h"
@@ -576,8 +577,12 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
     }
 
     auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    display->SetOpacity(opacity, option);
+    auto stack = ViewStackProcessor::GetInstance();
+    if (!stack->IsVisualStateSet()) {
+        display->SetOpacity(opacity, stack->GetImplicitAnimationOption());
+    } else {
+        display->SetOpacityForState(opacity, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+    }
 }
 
 void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
@@ -828,9 +833,14 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
             renderComponent->SetIsPercentSize(isPercentSize);
         }
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    box->SetWidth(value, option);
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    if (!stack->IsVisualStateSet()) {
+        box->SetWidth(value, stack->GetImplicitAnimationOption());
+    } else {
+        box->SetWidthForState(value, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+    }
     return true;
 }
 
@@ -864,9 +874,13 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         }
     }
 
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    box->SetHeight(value, option);
+    auto stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    if (!stack->IsVisualStateSet()) {
+        box->SetHeight(value, stack->GetImplicitAnimationOption());
+    } else {
+        box->SetHeightForState(value, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+    }
     return true;
 }
 
@@ -1449,8 +1463,14 @@ void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], borderColor)) {
         return;
     }
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    SetBorderColor(borderColor, option);
+
+    auto stack = ViewStackProcessor::GetInstance();
+    if (!stack->IsVisualStateSet()) {
+        BoxComponentHelper::SetBorderColor(GetBackDecoration(), borderColor, stack->GetImplicitAnimationOption());
+    } else {
+        auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
+        boxComponent->SetBorderColorForState(borderColor, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+    }
 }
 
 void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
@@ -1463,9 +1483,14 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], backgroundColor)) {
         return;
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    box->SetColor(backgroundColor, option);
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto boxComponent = stack->GetBoxComponent();
+    if (!stack->IsVisualStateSet()) {
+        boxComponent->SetColor(backgroundColor, stack->GetImplicitAnimationOption());
+    } else {
+        boxComponent->SetColorForState(backgroundColor, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+    }
 }
 
 void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
@@ -1765,23 +1790,37 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
         return;
     }
 
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    auto stack = ViewStackProcessor::GetInstance();
+    AnimationOption option = stack->GetImplicitAnimationOption();
+    auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
 
     Dimension width;
     if (argsPtrItem->Contains("width") && ParseJsonDimensionVp(argsPtrItem->GetValue("width"), width)) {
-        SetBorderWidth(width, option);
+        if (!stack->IsVisualStateSet()) {
+            BoxComponentHelper::SetBorderWidth(GetBackDecoration(), width, option);
+        } else {
+            boxComponent->SetBorderWidthForState(width, option, stack->GetVisualState());
+        }
     }
     Color color;
     if (argsPtrItem->Contains("color") && ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
-        SetBorderColor(color, option);
+        if (!stack->IsVisualStateSet()) {
+            BoxComponentHelper::SetBorderColor(GetBackDecoration(), color, option);
+        } else {
+            boxComponent->SetBorderColorForState(color, option, stack->GetVisualState());
+        }
     }
     Dimension radius;
     if (argsPtrItem->Contains("radius") && ParseJsonDimensionVp(argsPtrItem->GetValue("radius"), radius)) {
-        SetBorderRadius(radius, option);
+        if (!stack->IsVisualStateSet()) {
+            BoxComponentHelper::SetBorderRadius(GetBackDecoration(), radius, option);
+        } else {
+            boxComponent->SetBorderRadiusForState(radius, option, stack->GetVisualState());
+        }
     }
     if (argsPtrItem->Contains("style")) {
         auto borderStyle = argsPtrItem->GetInt("style", static_cast<int32_t>(BorderStyle::SOLID));
-        SetBorderStyle(borderStyle);
+        SetBorderStyle(borderStyle); // takes care of visualStyle
     }
     info.ReturnSelf();
 }
@@ -1796,8 +1835,13 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], borderWidth)) {
         return;
     }
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    SetBorderWidth(borderWidth, option);
+    auto stack = ViewStackProcessor::GetInstance();
+    if (!ViewStackProcessor::GetInstance()->IsVisualStateSet()) {
+        BoxComponentHelper::SetBorderWidth(GetBackDecoration(), borderWidth, stack->GetImplicitAnimationOption());
+    } else {
+        auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
+        boxComponent->SetBorderWidthForState(borderWidth, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+    }
 }
 
 void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
@@ -1810,8 +1854,14 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], borderRadius)) {
         return;
     }
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    SetBorderRadius(borderRadius, option);
+    auto stack = ViewStackProcessor::GetInstance();
+    if (!stack->IsVisualStateSet()) {
+        SetBorderRadius(borderRadius, stack->GetImplicitAnimationOption());
+    } else {
+        auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
+        boxComponent->SetBorderRadiusForState(
+            borderRadius, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+    }
 }
 
 void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
@@ -2221,7 +2271,6 @@ bool JSViewAbstract::ParseJsInteger(const JSRef<JSVal>& jsValue, uint32_t& resul
 
 bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result)
 {
-
     if (!jsValue->IsArray() && !jsValue->IsObject()) {
         LOGE("arg is not array or Object.");
         return false;
@@ -2327,7 +2376,6 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
         return false;
     }
 }
-
 
 std::pair<Dimension, Dimension> JSViewAbstract::ParseSize(const JSCallbackInfo& info)
 {
@@ -2735,9 +2783,16 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
     lineGradient.SetRepeat(repeating);
     // color stops
     GetGradientColorStops(lineGradient, argsPtrItem->GetValue("colors"));
-    auto decoration = GetBackDecoration();
-    if (decoration) {
-        decoration->SetGradient(lineGradient);
+
+    auto stack = ViewStackProcessor::GetInstance();
+    if (!stack->IsVisualStateSet()) {
+        auto decoration = GetBackDecoration();
+        if (decoration) {
+            decoration->SetGradient(lineGradient);
+        }
+    } else {
+        auto boxComponent = stack->GetBoxComponent();
+        boxComponent->SetGradientForState(lineGradient, stack->GetVisualState());
     }
 }
 
@@ -2794,9 +2849,16 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
     radialGradient.SetRepeat(repeating);
     // color stops
     GetGradientColorStops(radialGradient, argsPtrItem->GetValue("colors"));
-    auto decoration = GetBackDecoration();
-    if (decoration) {
-        decoration->SetGradient(radialGradient);
+
+    auto stack = ViewStackProcessor::GetInstance();
+    if (!stack->IsVisualStateSet()) {
+        auto decoration = GetBackDecoration();
+        if (decoration) {
+            decoration->SetGradient(radialGradient);
+        }
+    } else {
+        auto boxComponent = stack->GetBoxComponent();
+        boxComponent->SetGradientForState(radialGradient, stack->GetVisualState());
     }
 }
 
@@ -2866,9 +2928,16 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
     sweepGradient.SetRepeat(repeating);
     // color stops
     GetGradientColorStops(sweepGradient, argsPtrItem->GetValue("colors"));
-    auto decoration = GetBackDecoration();
-    if (decoration) {
-        decoration->SetGradient(sweepGradient);
+
+    auto stack = ViewStackProcessor::GetInstance();
+    if (!stack->IsVisualStateSet()) {
+        auto decoration = GetBackDecoration();
+        if (decoration) {
+            decoration->SetGradient(sweepGradient);
+        }
+    } else {
+        auto boxComponent = stack->GetBoxComponent();
+        boxComponent->SetGradientForState(sweepGradient, stack->GetVisualState());
     }
 }
 
@@ -3131,7 +3200,6 @@ void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
     } else {
         focusComponent->SetFocusable(info[0]->ToBoolean());
     }
-
 }
 
 void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
@@ -3403,21 +3471,9 @@ RefPtr<Decoration> JSViewAbstract::GetBackDecoration()
     return decoration;
 }
 
-const Border& JSViewAbstract::GetBorder()
-{
-    return GetBackDecoration()->GetBorder();
-}
-
-void JSViewAbstract::SetBorder(const Border& border)
-{
-    GetBackDecoration()->SetBorder(border);
-}
-
 void JSViewAbstract::SetBorderRadius(const Dimension& value, const AnimationOption& option)
 {
-    Border border = GetBorder();
-    border.SetBorderRadius(Radius(AnimatableDimension(value, option)));
-    SetBorder(border);
+    BoxComponentHelper::SetBorderRadius(GetBackDecoration(), value, option);
 }
 
 void JSViewAbstract::SetBorderStyle(int32_t style)
@@ -3433,23 +3489,14 @@ void JSViewAbstract::SetBorderStyle(int32_t style)
     } else {
         borderStyle = BorderStyle::NONE;
     }
-    Border border = GetBorder();
-    border.SetStyle(borderStyle);
-    SetBorder(border);
-}
 
-void JSViewAbstract::SetBorderColor(const Color& color, const AnimationOption& option)
-{
-    auto border = GetBorder();
-    border.SetColor(color, option);
-    SetBorder(border);
-}
-
-void JSViewAbstract::SetBorderWidth(const Dimension& value, const AnimationOption& option)
-{
-    auto border = GetBorder();
-    border.SetWidth(value, option);
-    SetBorder(border);
+    auto stack = ViewStackProcessor::GetInstance();
+    if (!stack->IsVisualStateSet()) {
+        BoxComponentHelper::SetBorderStyle(GetBackDecoration(), borderStyle);
+    } else {
+        auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
+        boxComponent->SetBorderStyleForState(borderStyle, stack->GetVisualState());
+    }
 }
 
 void JSViewAbstract::SetMarginTop(const JSCallbackInfo& info)
@@ -3645,8 +3692,8 @@ void JSViewAbstract::SetWindowBlur(float progress, WindowBlurStyle blurStyle)
     }
 }
 
-bool JSViewAbstract::ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonValue, Dimension& result,
-    DimensionUnit defaultUnit)
+bool JSViewAbstract::ParseJsonDimension(
+    const std::unique_ptr<JsonValue>& jsonValue, Dimension& result, DimensionUnit defaultUnit)
 {
     if (!jsonValue || jsonValue->IsNull()) {
         LOGD("invalid json value");

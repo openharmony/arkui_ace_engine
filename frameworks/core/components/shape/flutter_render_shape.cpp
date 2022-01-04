@@ -167,6 +167,11 @@ void FlutterRenderShape::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint skCanvas is null");
         return;
     }
+    PaintOnCanvas(skCanvas, offset);
+}
+
+void FlutterRenderShape::PaintOnCanvas(SkCanvas* skCanvas, const Offset& offset)
+{
     SkPath path;
     path_.offset(offset.GetX(), offset.GetY(), &path);
     FlutterSvgPainter::SetFillStyle(skCanvas, path, fillState_, UINT8_MAX, antiAlias_.second);

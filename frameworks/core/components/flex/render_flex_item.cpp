@@ -45,6 +45,13 @@ void RenderFlexItem::Update(const RefPtr<Component>& component)
     canStretch_ = flexItem->GetStretchFlag();
     mustStretch_ = flexItem->MustStretch();
     alignSelf_ = flexItem->GetAlignSelf();
+    if (minWidth_ != flexItem->GetMinWidth() || maxWidth_ != flexItem->GetMaxWidth() ||
+        minHeight_ != flexItem->GetMinHeight() || maxHeight_ != flexItem->GetMaxHeight()) {
+        auto parentFlex = GetParent().Upgrade();
+        if (parentFlex) {
+            parentFlex->MarkNeedLayout();
+        }
+    }
     minWidth_ = flexItem->GetMinWidth();
     minHeight_ = flexItem->GetMinHeight();
     maxWidth_ = flexItem->GetMaxWidth();

@@ -165,7 +165,7 @@ public:
     double GetHueRotate() const override;
 
     // shape clip
-    bool GetClip() const override;
+    std::string GetClip() const override;
     std::unique_ptr<JsonValue> GetMask() const override;
 
     // grid setting

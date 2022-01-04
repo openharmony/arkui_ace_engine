@@ -54,8 +54,7 @@ public:
     void PaintColorSegment(RenderContext& context, const Offset& leftTop, double segmentValue, double xSegment,
         double height, const Color segmentStartColor, const Color segmentEndColor);
     void PaintBackground(RenderContext& context, const Offset& leftTop, double totalWidth, double height);
-    void PaintSpace(
-        RenderContext& context, const Offset& leftTop, double segmentWidth, double widthSegment, double height);
+    void PaintSpace(RenderContext& context, const Offset& leftTop, double spaceWidth, double xSpace, double height);
 };
 
 } // namespace OHOS::Ace

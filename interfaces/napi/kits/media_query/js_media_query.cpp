@@ -123,6 +123,10 @@ public:
         napi_create_reference(env, cb, 1, &ref);
         listener->cbList_.emplace_back(ref);
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+        NapiCallback(jsEngine);
+#endif
+
         return nullptr;
     }
 

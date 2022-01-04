@@ -56,8 +56,7 @@ public:
     void PaintLinearProgress(RenderContext& context, const Offset& offset);
     void PaintColorSegment(RenderContext& context, const Offset& leftTop, double segmentValue, double widthSegment,
         double height, const Color segmentStartColor, const Color segmentEndColor, bool isFull, bool isStart);
-    void PaintSpace(
-        RenderContext& context, const Offset& leftTop, double segmentWidth, double widthSegment, double height);
+    void PaintSpace(RenderContext& context, const Offset& leftTop, double spaceWidth, double xSpace, double height);
     void PaintBackground(RenderContext& context, const Offset& leftTop, double totalWidth, double height);
 };
 

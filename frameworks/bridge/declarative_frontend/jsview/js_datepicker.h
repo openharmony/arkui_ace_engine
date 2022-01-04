@@ -37,5 +37,16 @@ private:
     static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
 };
 
+class JSDatePickerDialog {
+public:
+    static void JSBind(BindingTarget globalObj);
+    static void Show(const JSCallbackInfo& info);
+
+private:
+    static void CreateDatePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
+    static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
+    static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
+    static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
+};
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_DATEPICKER_H

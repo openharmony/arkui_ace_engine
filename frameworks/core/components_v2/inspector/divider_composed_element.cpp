@@ -78,7 +78,7 @@ std::string DividerComposedElement::GetDividerLineCap() const
 {
     auto renderDivider = GetRenderDivider();
     auto lineCap = renderDivider ? renderDivider->GetLineCap() : LineCap::BUTT;
-    return std::to_string(static_cast<int32_t>(lineCap));
+    return ConvertLineCapToString(lineCap);
 }
 
 RefPtr<RenderDivider> DividerComposedElement::GetRenderDivider() const
@@ -88,6 +88,25 @@ RefPtr<RenderDivider> DividerComposedElement::GetRenderDivider() const
         return AceType::DynamicCast<RenderDivider>(node);
     }
     return nullptr;
+}
+
+std::string DividerComposedElement::ConvertLineCapToString(LineCap cap) const
+{
+    std::string result = "";
+    switch (cap) {
+        case LineCap::BUTT:
+            result = "LineCapStyle.Butt";
+            break;
+        case LineCap::ROUND:
+            result = "LineCapStyle.Round";
+            break;
+        case LineCap::SQUARE:
+            result = "LineCapStyle.Square";
+            break;
+        default:
+            LOGD("input do not match any ButtonType");
+    }
+    return result;
 }
 
 } // namespace OHOS::Ace::V2

@@ -32,6 +32,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components/common/properties/motion_path_option.h"
+#include "core/components/common/properties/state_attributes.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_v2/extensions/events/event_extensions.h"
 #include "core/components_v2/inspector/inspector_node.h"
@@ -578,6 +579,8 @@ public:
         }
     }
 
+    virtual void OnStatusStyleChanged(StyleState state);
+
     Offset GetOffsetFromOrigin(const Offset& offset) const;
 
     virtual Offset GetGlobalOffset() const;
@@ -965,6 +968,7 @@ public:
     void CreateGeometryTransitionFrom(const RefPtr<RenderNode>& targetNode, AnimationOption& sharedOption);
     void CreateGeometryTransitionTo(const RefPtr<RenderNode>& targetNode, AnimationOption& sharedOption);
     void SetIsPaintGeometryTransition(bool isPaintGeometryTransition);
+    void SetPaintOutOfParent(bool isPaintOutOfParent);
     bool IsPaintOutOfParent();
     void UpdatePosition();
 
@@ -1088,7 +1092,11 @@ protected:
     // JSview boundary, all nodes in [head, tail] share the same RSNode
     bool IsHeadRenderNode() const
     {
+#ifdef ENABLE_ROSEN_BACKEND
         return isHeadRenderNode_;
+#else
+        return false;
+#endif
     }
     bool IsTailRenderNode() const
     {
@@ -1209,6 +1217,7 @@ private:
     bool isTailRenderNode_ = false;
 
     bool isPaintGeometryTransition_ = false;
+    bool isPaintOutOfParent_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
 };

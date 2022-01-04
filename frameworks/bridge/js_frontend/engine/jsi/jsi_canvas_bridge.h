@@ -132,6 +132,8 @@ public:
         const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
     static shared_ptr<JsValue> JsTransferFromImageBitmap(const shared_ptr<JsRuntime>& runtime,
         const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
+    static shared_ptr<JsValue> JsDrawBitmapMesh(const shared_ptr<JsRuntime>& runtime,
+        const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
     // support to read inner json data by lottie
     static shared_ptr<JsValue> JsGetJsonData(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
         const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);

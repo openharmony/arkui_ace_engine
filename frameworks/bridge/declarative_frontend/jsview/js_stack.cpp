@@ -114,9 +114,13 @@ void JSStack::SetWidth(const JSRef<JSVal>& jsValue)
     if (LessNotEqual(value.Value(), 0.0)) {
         return;
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    box->SetWidth(value, option);
+    auto stackProcessor = ViewStackProcessor::GetInstance();
+    auto box = stackProcessor->GetBoxComponent();
+    if (!stackProcessor->IsVisualStateSet()) {
+        box->SetWidth(value, stackProcessor->GetImplicitAnimationOption());
+    } else {
+        box->SetWidthForState(value, stackProcessor->GetImplicitAnimationOption(), stackProcessor->GetVisualState());
+    }
 
     auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (stack) {
@@ -142,16 +146,20 @@ void JSStack::SetHeight(const JSRef<JSVal>& jsValue)
 {
     Dimension value;
     if (!ConvertFromJSValue(jsValue, value)) {
-        LOGE("args can not set width");
+        LOGE("args can not set height");
         return;
     }
 
     if (LessNotEqual(value.Value(), 0.0)) {
         return;
     }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    box->SetHeight(value, option);
+    auto stackProcessor = ViewStackProcessor::GetInstance();
+    auto box = stackProcessor->GetBoxComponent();
+    if (!stackProcessor->IsVisualStateSet()) {
+        box->SetHeight(value, stackProcessor->GetImplicitAnimationOption());
+    } else {
+        box->SetHeightForState(value, stackProcessor->GetImplicitAnimationOption(), stackProcessor->GetVisualState());
+    }
 
     auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (stack) {
@@ -213,9 +221,8 @@ void JSStack::Create(const JSCallbackInfo& info)
         JSRef<JSVal> stackAlign = obj->GetProperty("alignContent");
         if (stackAlign->IsNumber()) {
             int32_t value = stackAlign->ToNumber<int32_t>();
-            alignment = (value >= 0 && value < static_cast<int>(ALIGNMENT_ARR.size()))
-                        ? ALIGNMENT_ARR[value]
-                        : Alignment::CENTER;
+            alignment = (value >= 0 && value < static_cast<int>(ALIGNMENT_ARR.size())) ? ALIGNMENT_ARR[value]
+                                                                                       : Alignment::CENTER;
         }
     }
 

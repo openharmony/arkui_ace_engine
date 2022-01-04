@@ -54,7 +54,7 @@ void PickerDateTimeComponent::OnSelectedSaving()
 }
 
 std::string PickerDateTimeComponent::GetSelectedObject(bool isColumnChange,
-    const std::string& changeColumnTag) const
+    const std::string& changeColumnTag, int32_t status) const
 {
     if (isColumnChange) {
         LOGE("datetime picker not support column change event.");
@@ -65,7 +65,7 @@ std::string PickerDateTimeComponent::GetSelectedObject(bool isColumnChange,
     // W3C's month is between 0 to 11, need to reduce one.
     date.SetMonth(date.GetMonth() - 1);
     PickerDateTime dateTime(date, GetSelectedTime());
-    return dateTime.ToString(true);
+    return dateTime.ToString(true, status);
 }
 
 void PickerDateTimeComponent::OnLunarCallback(bool checked, std::vector<std::string>& resultTags)

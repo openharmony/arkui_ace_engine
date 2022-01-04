@@ -28,11 +28,13 @@ HdcJdwpSimulator::HdcJdwpSimulator(uv_loop_t *loopIn, const std::string pkgName)
 
 HdcJdwpSimulator::~HdcJdwpSimulator()
 {
-    if (ctxPoint_ != nullptr && loop_ && !uv_is_closing((uv_handle_t *)&ctxPoint_->pipe)) {
-        uv_close((uv_handle_t *)&ctxPoint_->pipe, nullptr);
-    }
-    if (ctxPoint_->hasNewFd && loop_ && !uv_is_closing((uv_handle_t *)&ctxPoint_->newFd)) {
-        uv_close((uv_handle_t *)&ctxPoint_->newFd, nullptr);
+    if (ctxPoint_ != nullptr && loop_ != nullptr) {
+        if (!uv_is_closing((uv_handle_t *)&ctxPoint_->pipe)) {
+            uv_close((uv_handle_t *)&ctxPoint_->pipe, nullptr);
+        }
+        if (ctxPoint_->hasNewFd && !uv_is_closing((uv_handle_t *)&ctxPoint_->newFd)) {
+            uv_close((uv_handle_t *)&ctxPoint_->newFd, nullptr);
+        }
     }
     delete ctxPoint_;
     ctxPoint_ = nullptr;

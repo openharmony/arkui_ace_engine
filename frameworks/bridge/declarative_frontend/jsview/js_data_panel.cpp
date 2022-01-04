@@ -56,7 +56,6 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
     }
     // max
     auto max = param->GetDouble("max", 100.0);
-    component->SetMaxValue(max);
     // values
     auto values = param->GetValue("values");
     if (!values || !values->IsArray()) {
@@ -64,6 +63,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         return;
     }
     size_t length = values->GetArraySize();
+    double valueSum = 0.0;
     for (size_t i = 0; i < length && i < MAX_COUNT; i++) {
         auto item = values->GetArrayItem(i);
         if (!item || !item->IsNumber()) {
@@ -74,11 +74,27 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         if (value <= 0.0) {
             value = 0.0;
         }
+        valueSum += value;
+        if (valueSum >= max && max > 0) {
+            value = max - (valueSum - value);
+            if (value == 0.0) {
+                break;
+            }
+            Segment segment;
+            segment.SetValue(value);
+            segment.SetColorType(SegmentStyleType::NONE);
+            component->AppendSegment(segment);
+            break;
+        }
         Segment segment;
         segment.SetValue(value);
         segment.SetColorType(SegmentStyleType::NONE);
         component->AppendSegment(segment);
     }
+    if (max <= 0.0) {
+        max = valueSum;
+    }
+    component->SetMaxValue(max);
     auto type = param->GetValue("type");
     if (type->IsNumber()) {
         if (type->GetInt() == static_cast<int32_t>(ChartType::LINE)) {

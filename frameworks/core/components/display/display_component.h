@@ -23,6 +23,10 @@
 
 namespace OHOS::Ace {
 
+enum class DisplayStateAttribute {
+    OPACITY,
+};
+
 enum class VisibleType {
     VISIBLE,
     INVISIBLE,
@@ -136,6 +140,26 @@ public:
         return duration_;
     }
 
+    RefPtr<StateAttributeList<DisplayStateAttribute>> GetStateAttributeList()
+    {
+        if (stateAttributeList_ == nullptr) {
+            stateAttributeList_ = MakeRefPtr<StateAttributeList<DisplayStateAttribute>>();
+        }
+        return stateAttributeList_;
+    }
+
+    bool HasStateAttributeList()
+    {
+        return stateAttributeList_ != nullptr;
+    }
+
+    void SetOpacityForState(double opacity, const AnimationOption& animationOption = AnimationOption(),
+        StyleState state = StyleState::NORMAL)
+    {
+        opacity_ = AnimatableDouble(opacity, animationOption);
+        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<DisplayStateAttribute, AnimatableDouble>>(
+            state, DisplayStateAttribute::OPACITY, opacity_));
+    }
 private:
     VisibleType visible_ = VisibleType::VISIBLE;
     Shadow shadow_;
@@ -146,6 +170,7 @@ private:
     bool hasAppearTransition_ = false;
     bool disableLayer_ = false;
     int32_t duration_ = 0;
+    RefPtr<StateAttributeList<DisplayStateAttribute>> stateAttributeList_ = nullptr;
 };
 
 } // namespace OHOS::Ace

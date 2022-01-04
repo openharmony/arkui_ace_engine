@@ -17,8 +17,15 @@ build_component("indexer_v2") {
   sources = [
     "indexer_component.cpp",
     "indexer_element.cpp",
+    "indexer_event_info.cpp",
     "indexer_item_component.cpp",
+    "popup_list_component.cpp",
+    "popup_list_element.cpp",
+    "popup_list_item_component.cpp",
+    "popup_list_item_element.cpp",
     "render_indexer.cpp",
     "render_indexer_item.cpp",
+    "render_popup_list.cpp",
+    "render_popup_list_item.cpp",
   ]
 }

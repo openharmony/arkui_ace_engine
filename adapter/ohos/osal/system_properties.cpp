@@ -72,7 +72,7 @@ bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 int32_t SystemProperties::deviceWidth_ = 0;
 int32_t SystemProperties::deviceHeight_ = 0;
-double SystemProperties::resolution_ = 2.0;
+double SystemProperties::resolution_ = 2.0; // 2.0 for WGR
 DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
 DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
 std::string SystemProperties::brand_ = INVALID_PARAM;

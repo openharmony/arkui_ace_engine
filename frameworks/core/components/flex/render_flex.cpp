@@ -25,6 +25,8 @@
 namespace OHOS::Ace {
 namespace {
 
+const static int32_t PLATFORM_VERSION_FIVE = 5;
+
 inline FlexDirection FlipAxis(FlexDirection direction)
 {
     if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
@@ -73,6 +75,7 @@ void RenderFlex::Update(const RefPtr<Component>& component)
     if (context) {
         space_ = context->NormalizeToPx(flex->GetSpace());
         inspectorSpace_ = flex->GetSpace();
+        useOldLayoutVersion_ = context->GetMinPlatformVersion() <= PLATFORM_VERSION_FIVE;
         if (GreatNotEqual(space_, 0.0)) {
             mainAxisAlign_ = FlexAlign::SPACE_CUSOMIZATION;
         }
@@ -197,13 +200,19 @@ LayoutParam RenderFlex::MakeLayoutParamWithLimit(double minMainLimit, double max
 }
 
 LayoutParam RenderFlex::MakeConstrainedLayoutParam(
-    double mainFlexExtent, const LayoutParam& constraints, bool isStretch) const
+    double mainFlexExtent, const LayoutParam& constraints, bool isStretch, bool supportZero) const
 {
     LayoutParam innerLayout;
-    if (LessOrEqual(mainFlexExtent, 0.0)) {
+    if (LessNotEqual(mainFlexExtent, 0.0)) {
         innerLayout.SetMaxSize(GetLayoutParam().GetMaxSize());
-    } else {
+    } else if (GreatNotEqual(mainFlexExtent, 0.0)) {
         innerLayout = MakeLayoutParamWithLimit(mainFlexExtent, mainFlexExtent, isStretch);
+    } else {
+        if (supportZero) {
+            innerLayout = MakeLayoutParamWithLimit(mainFlexExtent, mainFlexExtent, isStretch);
+        } else {
+            innerLayout.SetMaxSize(GetLayoutParam().GetMaxSize());
+        }
     }
     innerLayout.SetMaxSize(constraints.Constrain(innerLayout.GetMaxSize()));
     innerLayout.SetMinSize(constraints.Constrain(innerLayout.GetMinSize()));
@@ -764,10 +773,8 @@ void RenderFlex::RelayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, double
 {
     bool canItemStretch = flexItem->MustStretch() || ((GetSelfAlign(flexItem) == FlexAlign::STRETCH) &&
                                                          (flexItem->GetStretchFlag()) && (relativeNodes_.size() > 1));
-    const static int32_t PLATFORM_VERSION_FIVE = 5;
-    auto context = GetContext().Upgrade();
-    if (context && context->GetMinPlatformVersion() <= PLATFORM_VERSION_FIVE) {
-        // less or equal than api 5
+    // less or equal than api 5
+    if (useOldLayoutVersion_) {
         canItemStretch =
             flexItem->MustStretch() || ((GetSelfAlign(flexItem) == FlexAlign::STRETCH) && (flexItem->GetStretchFlag()));
     }
@@ -781,7 +788,8 @@ void RenderFlex::RelayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, double
         mainFlexExtent = childMainContent;
     }
     allocatedSize_ -= GetMainSize(flexItem);
-    auto innerLayout = MakeConstrainedLayoutParam(mainFlexExtent, flexItem->GetNormalizedConstraints(), canItemStretch);
+    auto innerLayout = MakeConstrainedLayoutParam(mainFlexExtent, flexItem->GetNormalizedConstraints(), canItemStretch,
+        flexItem->MustStretch());
     if (flexItem->MustStretch()) {
         auto crossStretch = crossAxisSize_ == CrossAxisSize::MAX
                                 ? GetMainAxisValue(GetLayoutParam().GetMaxSize(), FlipAxis(direction_))
@@ -947,13 +955,16 @@ void RenderFlex::ResizeByItem(const RefPtr<RenderNode>& item, double &allocatedS
     }
 
     crossSize_ = std::max(crossSize_, GetCrossSize(item));
+    // Semi relative and variable allocatedSize is used for grid container.
     if ((item->GetPositionType() == PositionType::SEMI_RELATIVE) &&
         (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)) {
         allocatedSize_ = std::max(allocatedSize_, mainSize);
         allocatedSize = mainSize;
     } else {
         allocatedSize_ += mainSize;
+        allocatedSize_ += space_;
         allocatedSize += mainSize;
+        allocatedSize += space_;
     }
 }
 

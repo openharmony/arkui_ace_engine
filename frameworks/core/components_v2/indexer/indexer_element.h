@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ELEMENT_H
 
-#include "core/components_v2/indexer/render_indexer.h"
-#include "core/components_v2/indexer/render_indexer_item.h"
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/component_group_element.h"
 

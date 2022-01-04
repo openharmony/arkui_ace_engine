@@ -44,6 +44,7 @@
 #include "core/components/font/flutter_font_collection.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/flutter_render_context.h"
+#include "utils/native/base/include/securec.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -274,6 +275,134 @@ void FlutterRenderCustomPaint::TransferFromImageBitmap(const RefPtr<OffscreenCan
     if (imageData != nullptr) {
         PutImageData(Offset(0, 0), *imageDataPtr);
     }
+}
+
+void FlutterRenderCustomPaint::Mesh(SkBitmap& bitmap, int column, int row,
+    const float* vertices, const int* colors, const SkPaint* paint)
+{
+    const int vertCounts = (column + 1) * (row + 1);
+    int32_t size = 6;
+    const int indexCount = column * row * size;
+    uint32_t flags = SkVertices::kHasTexCoords_BuilderFlag;
+    if (colors) {
+        flags |= SkVertices::kHasColors_BuilderFlag;
+    }
+    SkVertices::Builder builder(SkVertices::kTriangles_VertexMode, vertCounts, indexCount, flags);
+    if (memcpy_s(builder.positions(), vertCounts * sizeof(SkPoint), vertices, vertCounts * sizeof(SkPoint)) != 0) {
+        return;
+    }
+    if (colors) {
+        if (memcpy_s(builder.colors(), vertCounts * sizeof(SkColor), colors, vertCounts * sizeof(SkColor)) != 0) {
+            return;
+        }
+    }
+    SkPoint* texsPoint = builder.texCoords();
+    uint16_t* indices = builder.indices();
+    const SkScalar height = SkIntToScalar(bitmap.height());
+    const SkScalar width = SkIntToScalar(bitmap.width());
+
+    if (row==0) {
+        LOGE("row is zero");
+        return;
+    }
+    if (column==0) {
+        LOGE("column is zero");
+        return;
+    }
+    const SkScalar dy = height / row;
+    const SkScalar dx = width / column;
+
+    SkPoint* texsPit = texsPoint;
+    SkScalar y = 0;
+    for (int i = 0; i <= row; i++) {
+        if (i == row) {
+            y = height;  // to ensure numerically we hit h exactly
+        }
+        SkScalar x = 0;
+        for (int j = 0; j < column; j++) {
+            texsPit->set(x, y);
+            texsPit += 1;
+            x += dx;
+        }
+        texsPit->set(width, y);
+        texsPit += 1;
+        y += dy;
+    }
+
+    uint16_t* dex = indices;
+    int index = 0;
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < column; j++) {
+            *dex++ = index;
+            *dex++ = index + column + 1;
+            *dex++ = index + column + 2;
+
+            *dex++ = index;
+            *dex++ = index + column + 2;
+            *dex++ = index + 1;
+
+            index += 1;
+        }
+        index += 1;
+    }
+
+    SkPaint tempPaint;
+    if (paint) {
+        tempPaint = *paint;
+    }
+    sk_sp<SkColorFilter> colorFter;
+    sk_sp<SkShader> shader;
+    sk_sp<SkImage> image = SkImage::MakeFromBitmap(bitmap);
+#ifdef USE_SYSTEM_SKIA
+    shader = image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode);
+#else
+    shader = image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp);
+#endif
+    if (colorFter) {
+        shader = shader->makeWithColorFilter(colorFter);
+    }
+    tempPaint.setShader(shader);
+    skCanvas_->drawVertices(builder.detach(), SkBlendMode::kModulate, tempPaint);
+}
+
+
+void FlutterRenderCustomPaint::DrawBitmapMesh(const RefPtr<OffscreenCanvas>& offscreenCanvas,
+    const std::vector<double>& mesh, int32_t column, int32_t row)
+{
+    std::unique_ptr<ImageData> imageData = offscreenCanvas->GetImageData(0, 0,
+        offscreenCanvas->GetWidth(), offscreenCanvas->GetHeight());
+    if (imageData != nullptr) {
+
+        if (imageData->data.empty()) {
+            LOGE("PutImageData failed, image data is empty.");
+            return;
+        }
+        uint32_t* data = new (std::nothrow)uint32_t[imageData->data.size()];
+        if (data == nullptr) {
+            LOGE("PutImageData failed, new data is null.");
+            return;
+        }
+
+        for (uint32_t i = 0; i < imageData->data.size(); ++i) {
+            data[i] = imageData->data[i].GetValue();
+        }
+        SkBitmap skBitmap;
+        auto imageInfo = SkImageInfo::Make(imageData->dirtyWidth, imageData->dirtyHeight,
+            SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+        skBitmap.allocPixels(imageInfo);
+        skBitmap.setPixels(data);
+
+        int32_t size = mesh.size();
+        float verts[size];
+        for (int32_t i = 0; i < size; i++) {
+            verts[i] = mesh[i];
+        }
+
+        Mesh(skBitmap, column, row, verts, 0, nullptr);
+
+        delete[] data;
+    }
+
 }
 
 void FlutterRenderCustomPaint::FillRect(const Offset& offset, const Rect& rect)

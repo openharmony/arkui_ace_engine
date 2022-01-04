@@ -53,14 +53,10 @@ public:
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateViewportConfig(const ViewportConfig& config) override;
 
-    // interface for test
-    bool ProcessTouchEvent(const OHOS::TouchEvent& touchEvent);
-    void Initialize(OHOS::Window* window, const std::string& url, NativeValue* storage);
-
 private:
     OHOS::AbilityRuntime::Context* context_ = nullptr;
     void* runtime_ = nullptr;
-    OHOS::Window* window_ = nullptr;
+    OHOS::Rosen::Window* window_ = nullptr;
     ViewportConfig config_;
     std::string startUrl_;
     int32_t instanceId_ = -1;

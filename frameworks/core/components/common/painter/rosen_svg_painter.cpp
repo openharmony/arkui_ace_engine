@@ -545,8 +545,8 @@ void RosenSvgPainter::UpdateMotionMatrix(
     // reset quaternion
     rsNode->SetRotation({ 0., 0., 0., 1. });
     rsNode->SetRotation(degrees, 0., 0.);
-    rsNode->SetPivot(position.x() / rsNode->GetShowingProperties().GetFrameWidth(),
-        position.y() / rsNode->GetShowingProperties().GetFrameHeight());
+    rsNode->SetPivot(position.x() / rsNode->GetStagingProperties().GetFrameWidth(),
+        position.y() / rsNode->GetStagingProperties().GetFrameHeight());
 }
 
 SkMatrix RosenSvgPainter::ToSkMatrix(const Matrix4& matrix4)

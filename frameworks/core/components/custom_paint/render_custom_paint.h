@@ -61,6 +61,8 @@ public:
     void FlushPipelineImmediately();
 
     virtual void TransferFromImageBitmap(const RefPtr<OffscreenCanvas>& offscreenCanvas) = 0;
+    virtual void DrawBitmapMesh(const RefPtr<OffscreenCanvas>& offscreenCanvas,
+        const std::vector<double>& mesh, int32_t column, int32_t row) = 0;
     virtual std::string ToDataURL(const std::string& args) = 0;
     virtual void SetAntiAlias(bool isEnabled) = 0;
     virtual void FillRect(const Offset& offset, const Rect& rect) = 0;

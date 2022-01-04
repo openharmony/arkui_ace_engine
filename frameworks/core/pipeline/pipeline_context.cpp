@@ -1369,7 +1369,7 @@ void PipelineContext::OnTouchEvent(const TouchPoint& point)
         return;
     }
     auto scalePoint = point.CreateScalePoint(viewScale_);
-    LOGD("OnTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
+    LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
     if (scalePoint.type == TouchType::DOWN) {
         LOGD("receive touch down event, first use touch test to collect touch event target");
@@ -1636,7 +1636,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
     height_ = height;
 
     ACE_SCOPED_TRACE("OnSurfaceChanged(%d, %d)", width, height);
-
+    LOGI("Surface size changed, [%{private}d * %{private}d]", width, height);
     if (!NearZero(rootHeight_)) {
         double newRootHeight = height / viewScale_;
         double newRootWidth = width / viewScale_;
@@ -1664,6 +1664,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
     if (isSurfaceReady_) {
         return;
     }
+    LOGI("Surface is ready.");
     isSurfaceReady_ = true;
     FlushPipelineWithoutAnimation();
     MarkForcedRefresh();
@@ -1676,9 +1677,11 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnSurfaceDensityChanged(%lf)", density);
-
+    LOGI("OnSurfaceDensityChanged density_(%{public}lf)", density_);
+    LOGI("OnSurfaceDensityChanged dipScale_(%{public}lf)", dipScale_);
     density_ = density;
     if (!NearZero(viewScale_)) {
+        LOGI("OnSurfaceDensityChanged viewScale_(%{public}lf)", viewScale_);
         dipScale_ = density_ / viewScale_;
     }
 }
@@ -1790,7 +1793,7 @@ void PipelineContext::SetRootRect(double width, double height) const
 {
     CHECK_RUN_ON(UI);
     if (NearZero(viewScale_) || !rootElement_) {
-        LOGE("the view scale is zero or root element is nullptr");
+        LOGW("the view scale is zero or root element is nullptr");
         return;
     }
     const Rect paintRect(0.0, 0.0, width, height);
@@ -3247,6 +3250,15 @@ bool PipelineContext::SendEventByKey(const std::string& key, int action, const s
         TaskExecutor::TaskType::UI);
 
     return true;
+}
+
+const std::shared_ptr<OHOS::Rosen::RSUIDirector>& PipelineContext::GetRSUIDirector()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return rsUIDirector_;
+#else
+    return nullptr;
+#endif
 }
 
 } // namespace OHOS::Ace

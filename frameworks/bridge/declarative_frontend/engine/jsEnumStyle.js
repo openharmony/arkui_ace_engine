@@ -39,7 +39,7 @@ var TextAlign;
 var DataPanelType;
 (function (DataPanelType) {
   DataPanelType[DataPanelType["Line"] = 0] = "Line";
-  DataPanelType[DataPanelType["Rainbow"] = 4] = "Rainbow";
+  DataPanelType[DataPanelType["Circle"] = 4] = "Circle";
 })(DataPanelType || (DataPanelType = {}));
 
 var FontWeight;
@@ -658,3 +658,10 @@ var Placement;
   Placement[Placement["BottomLeft"] = 6] = "BottomLeft";
   Placement[Placement["BottomRight"] = 7] = "BottomRight";
 }) (Placement || (Placement = {}));
+
+var DialogStatus;
+(function (DialogStatus) {
+  DialogStatus[DialogStatus["Accept"] = 0] = "Accept";
+  DialogStatus[DialogStatus["Cancel"] = 1] = "Cancel";
+  DialogStatus[DialogStatus["Update"] = 2] = "Update";
+})(DialogStatus || (DialogStatus = {}));

@@ -1186,8 +1186,16 @@ void RenderGridScroll::ScrollToIndex(int32_t index, int32_t source)
         LOGI("already in map, not need to jump.");
         return;
     }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("context is null");
+        return;
+    }
     // Build items
     if (index < startShowItemIndex_ || index > endShowItemIndex_) {
+        // do not need layout transition
+        auto option = context->GetExplicitAnimationOption();
+        context->SaveExplicitAnimationOption(AnimationOption());
         firstLineToBottom_.emplace(index > endShowItemIndex_);
         if (scrollable_ && !scrollable_->IsStopped()) {
             scrollable_->StopScrollable();
@@ -1197,6 +1205,7 @@ void RenderGridScroll::ScrollToIndex(int32_t index, int32_t source)
         ClearLayout(false);
         currentOffset_ = 0;
         MarkNeedLayout();
+        context->SaveExplicitAnimationOption(option);
         return;
     }
     // Calculate scroll length
@@ -1243,7 +1252,7 @@ void RenderGridScroll::ScrollToIndex(int32_t index, int32_t source)
         }
     });
     animator_->AddInterpolator(animation);
-    animator_->SetDuration(300);
+    animator_->ApplyOption(context->GetExplicitAnimationOption());
     animator_->ClearStopListeners();
     animator_->AddStopListener([weakScroll = AceType::WeakClaim(this)]() {
         auto scroll = weakScroll.Upgrade();

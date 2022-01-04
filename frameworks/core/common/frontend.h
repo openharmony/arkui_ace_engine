@@ -32,7 +32,6 @@ constexpr int32_t DEFAULT_DESIGN_WIDTH = 720;
 #else
 constexpr int32_t DEFAULT_DESIGN_WIDTH = 454;
 #endif
-using DialogCallback = std::function<void(std::string event, std::string param)>;
 
 // Window config of frontend.
 struct WindowConfig {
@@ -179,7 +178,6 @@ public:
     // navigator component call router
     virtual void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) {};
 
-    virtual void SetDialogCallback(DialogCallback callback) {};
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {};
 
     // Disallow pop last page

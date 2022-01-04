@@ -508,14 +508,14 @@ void FlutterRenderPercentageDataPanel::PaintBackground(
 }
 
 void FlutterRenderPercentageDataPanel::PaintSpace(
-    RenderContext& context, const Offset& leftTop, double segmentWidth, double widthSegment, double height)
+    RenderContext& context, const Offset& leftTop, double spaceWidth, double xSpace, double height)
 {
     auto canvas = ScopedCanvas::Create(context);
     if (!canvas) {
         return;
     }
     SkPaint segmentPaint;
-    SkRect rect = SkRect::MakeXYWH(widthSegment, leftTop.GetY(), segmentWidth, height);
+    SkRect rect = SkRect::MakeXYWH(xSpace, leftTop.GetY(), spaceWidth, height);
     segmentPaint.setColor(Color::WHITE.GetValue());
     segmentPaint.setStyle(SkPaint::kFill_Style);
     segmentPaint.setAntiAlias(true);
@@ -533,15 +533,19 @@ void FlutterRenderPercentageDataPanel::PaintColorSegment(RenderContext& context,
     SkPaint segmentPaint;
     SkRect rect;
     SkRRect rRect;
-    if (isStart) {
-        rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue + xSegment, height + leftTop.GetY());
+    if (isStart && !isFull) {
+        rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue, height + leftTop.GetY());
         rRect.setRectXY(SkRect::MakeWH(segmentValue + height / 2, height), height, height);
         rRect.offset(xSegment, leftTop.GetY());
-    } else if (isFull) {
+    } else if (isFull && !isStart) {
         rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue + xSegment, height + leftTop.GetY());
         rRect.setRectXY(SkRect::MakeWH(segmentValue + height / 2, height), height, height);
         rRect.offset(xSegment - height / 2, leftTop.GetY());
-    } else {
+    } else if (isStart && isFull) {
+        rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue + xSegment, height + leftTop.GetY());
+        rRect.setRectXY(SkRect::MakeWH(segmentValue, height), height, height);
+        rRect.offset(leftTop.GetX(), leftTop.GetY());
+    } else if (!isStart && !isFull) {
         rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue, height);
     }
     SkPoint segmentStartPoint;
@@ -563,16 +567,32 @@ void FlutterRenderPercentageDataPanel::PaintColorSegment(RenderContext& context,
 void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context, const Offset& offset)
 {
     auto totalWidth = GetLayoutSize().Width();
-    if (GetMaxValue() == 0) {
-        return;
-    }
     auto segment = GetSegments();
-    auto scaleMaxValue = totalWidth / (GetMaxValue() + (double)(segment.size() - 1) * FIXED_WIDTH);
+    auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
+    auto segmentWidthSum = 0.0;
+    for (int i = 0; i < segment.size(); i++) {
+        segmentWidthSum += segment[i].GetValue();
+    }
+    auto segmentSize = 0.0;
+    if (segmentWidthSum == GetMaxValue()) {
+        segmentSize = (double)(segment.size() - 1);
+    } else {
+        segmentSize = (double)segment.size();
+    }
+    for (int i = 0; i < segment.size(); i++) {
+        if (segment[i].GetValue() == 0.0) {
+            segmentSize -= 1;
+        }
+    }
+    double scaleMaxValue = 0.0;
+    if (GetMaxValue() > 0) {
+        scaleMaxValue = (totalWidth - segmentSize * spaceWidth) / GetMaxValue();
+    }
     auto height = GetLayoutSize().Height();
     auto widthSegment = offset.GetX();
-    auto segmentWidthSum = 0.0;
     bool isStart = true;
     bool isFull = false;
+    auto valueSum = 0.0;
     PaintBackground(context, offset, totalWidth, height);
     for (int i = 0; i < segment.size(); i++) {
         if (i == 0 && segment[0].GetValue() == 0.0) {
@@ -586,8 +606,8 @@ void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& contex
         if (segmentWidth == 0.0) {
             continue;
         }
-        segmentWidthSum += segmentWidth;
-        if (segmentWidthSum == GetMaxValue()) {
+        valueSum += segmentWidth;
+        if (valueSum == GetMaxValue()) {
             isFull = true;
         } else {
             isFull = false;
@@ -597,12 +617,11 @@ void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& contex
         PaintColorSegment(context, offset, segmentWidth * scaleMaxValue, widthSegment, height, segmentStartColor,
             segmentEndColor, isFull, isStart);
         widthSegment += segment[i].GetValue() * scaleMaxValue;
-        auto spaceWidth = FIXED_WIDTH * scaleMaxValue;
         if (isFull && segment.size() == 9) {
             return;
         }
         PaintSpace(context, offset, spaceWidth, widthSegment, height);
-        widthSegment += FIXED_WIDTH * scaleMaxValue;
+        widthSegment += spaceWidth;
         isStart = false;
     }
 }

@@ -31,6 +31,13 @@ void RosenRenderDisplay::Update(const RefPtr<Component>& component)
     }
 }
 
+void RosenRenderDisplay::OnVisibleChanged()
+{
+    if (auto rsNode = GetRSNode()) {
+        rsNode->SetVisible(RenderDisplay::GetVisible());
+    }
+}
+
 void RosenRenderDisplay::OnOpacityAnimationCallback()
 {
     double value = animatableOpacity_.GetValue();

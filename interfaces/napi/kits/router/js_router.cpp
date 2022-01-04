@@ -78,7 +78,7 @@ static napi_value JSRouterPush(napi_env env, napi_callback_info info)
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
     if (valueType == napi_object) {
-        napi_get_named_property(env, argv, "uri", &uriNApi);
+        napi_get_named_property(env, argv, "url", &uriNApi);
         napi_typeof(env, uriNApi, &valueType);
         if (valueType != napi_string) {
             LOGE("uri is required");
@@ -118,7 +118,7 @@ static napi_value JSRouterReplace(napi_env env, napi_callback_info info)
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
     if (valueType == napi_object) {
-        napi_get_named_property(env, argv, "uri", &uriNApi);
+        napi_get_named_property(env, argv, "url", &uriNApi);
         napi_typeof(env, uriNApi, &valueType);
         if (valueType != napi_string) {
             LOGE("uri is required");
@@ -159,7 +159,7 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
     if (valueType == napi_object) {
-        napi_get_named_property(env, argv, "uri", &uriNApi);
+        napi_get_named_property(env, argv, "path", &uriNApi);
         napi_get_named_property(env, argv, "params", &params);
     }
     napi_typeof(env, uriNApi, &valueType);

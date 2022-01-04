@@ -144,6 +144,28 @@ public:
         antiAlias_.second = antiAlias;
     }
 
+    void SetBitmapMesh(const std::vector<double>& mesh, int32_t column, int32_t row)
+    {
+        mesh_ = mesh;
+        column_ = column;
+        row_ = row;
+    }
+
+    int32_t GetMeshColumn() const
+    {
+        return column_;
+    }
+
+    int32_t GetMeshRow() const
+    {
+        return row_;
+    }
+
+    const std::vector<double> GetMesh() const
+    {
+        return mesh_;
+    }
+
     const std::pair<bool, bool>& GetAntiAlias() const
     {
         return antiAlias_;
@@ -226,6 +248,9 @@ private:
     std::pair<bool, bool> antiAlias_ = std::make_pair(false, true);
     bool hasDefineWidth_ = false;
     bool hasDefineHeight_ = false;
+    int32_t column_ = 0;
+    int32_t row_ = 0;
+    std::vector<double> mesh_;
 };
 
 } // namespace OHOS::Ace

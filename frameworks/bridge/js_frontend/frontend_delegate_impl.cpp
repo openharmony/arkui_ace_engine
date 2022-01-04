@@ -166,10 +166,6 @@ void FrontendDelegateImpl::RunPage(const std::string& url, const std::string& pa
     } else {
         mainPagePath_ = manifestParser_->GetRouter()->GetEntry();
     }
-
-    if ((url.find("pages/dialog/index.js")) != -1)  {
-        mainPagePath_ = url;
-    }
     LoadPage(GenerateNextPageId(), mainPagePath_, true, params);
 }
 
