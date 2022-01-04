@@ -22,6 +22,7 @@
 #include "core/accessibility/accessibility_node.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/button/button_component.h"
+#include "core/components/form/form_component.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/menu/menu_component.h"
@@ -546,7 +547,8 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
             Component::MergeRSNode(components);
         }
     } else if (!components.empty() && (AceType::InstanceOf<TextureComponent>(mainComponent) ||
-        AceType::InstanceOf<BoxComponent>(mainComponent) || AceType::InstanceOf<TextFieldComponent>(mainComponent))) {
+        AceType::InstanceOf<BoxComponent>(mainComponent) || AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
+        AceType::InstanceOf<FormComponent>(mainComponent))) {
         Component::MergeRSNode(components);
         Component::MergeRSNode(mainComponent);
         components.emplace_back(mainComponent);
