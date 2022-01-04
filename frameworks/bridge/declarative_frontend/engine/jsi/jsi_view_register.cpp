@@ -448,6 +448,109 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::EcmaVM* vm, panda::Local
     return panda::BooleanRef::New(vm, result);
 }
 
+static V2::JsKeyEvent GetKeyEventFromJS(const JsiObject& value)
+{
+    V2::JsKeyEvent keyEvent;
+    auto type = value->GetProperty("type");
+    keyEvent.action = static_cast<KeyAction>(type->ToNumber<int32_t>());
+
+    auto jsKeyCode = value->GetProperty("keyCode");
+    keyEvent.code = static_cast<KeyCode>(jsKeyCode->ToNumber<int32_t>());
+
+    auto jsKeySource = value->GetProperty("keySource");
+    keyEvent.sourceDevice = jsKeySource->ToNumber<int32_t>();
+
+    auto jsDeviceId = value->GetProperty("deviceId");
+    keyEvent.deviceId = jsDeviceId->ToNumber<int32_t>();
+
+    auto jsMetaKey = value->GetProperty("metaKey");
+    keyEvent.metaKey = jsMetaKey->ToNumber<int32_t>();
+
+    auto jsTimestamp = value->GetProperty("timestamp");
+    keyEvent.timeStamp = jsTimestamp->ToNumber<int64_t>();
+
+    return keyEvent;
+}
+
+panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
+    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+{
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (argc < 1 || !args[0]->IsObject()) {
+        LOGE("The arg is wrong, must have one object argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext == nullptr) {
+        LOGE("pipelineContext==nullptr");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    JsiObject obj(args[0]);
+    auto result = V2::Inspector::SendKeyEvent(pipelineContext, GetKeyEventFromJS(obj));
+    return panda::BooleanRef::New(vm, result);
+}
+
+static MouseEvent GetMouseEventFromJS(const JsiObject& value)
+{
+    MouseEvent mouseEvent;
+
+    auto action = value->GetProperty("action");
+    mouseEvent.action = static_cast<MouseAction>(action->ToNumber<int32_t>());
+
+    auto button = value->GetProperty("button");
+    mouseEvent.button = static_cast<MouseButton>(button->ToNumber<int32_t>());
+
+    auto x = value->GetProperty("x");
+    mouseEvent.x = x->ToNumber<float>();
+    mouseEvent.deltaX = mouseEvent.x;
+
+    auto y = value->GetProperty("y");
+    mouseEvent.y = y->ToNumber<float>();
+    mouseEvent.deltaY = mouseEvent.y;
+
+    mouseEvent.time = std::chrono::high_resolution_clock::now();
+    mouseEvent.sourceType = SourceType::MOUSE;
+    return mouseEvent;
+}
+
+panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
+    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+{
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (argc < 1 || !args[0]->IsObject()) {
+        LOGE("The arg is wrong, must have one object argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext == nullptr) {
+        LOGE("pipelineContext==nullptr");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    JsiObject obj(args[0]);
+    MouseEvent mouseEvent = GetMouseEventFromJS(obj);
+    auto result = pipelineContext->GetTaskExecutor()->PostTask(
+        [pipelineContext, mouseEvent]() { pipelineContext->OnMouseEvent(mouseEvent); }, TaskExecutor::TaskType::UI);
+    return panda::BooleanRef::New(vm, result);
+}
+
 panda::Local<panda::JSValueRef> Vp2Px(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
     const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
 {
@@ -850,6 +953,10 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendEventByKey, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendTouchEvent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendTouchEvent, nullptr));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendKeyEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendKeyEvent, nullptr));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendMouseEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendMouseEvent, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "vp2px"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Vp2Px, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2vp"),

@@ -245,4 +245,11 @@ bool Inspector::SendEventByKey(
     return true;
 }
 
+bool Inspector::SendKeyEvent(const RefPtr<PipelineContext>& context, const JsKeyEvent& event)
+{
+    KeyEvent keyEvent(event.code, event.action, 1, event.timeStamp, event.timeStamp, event.metaKey, event.sourceDevice,
+                      event.deviceId);
+    return context->GetTaskExecutor()->PostTask([context, keyEvent]() { context->OnKeyEvent(keyEvent); },
+                                                TaskExecutor::TaskType::UI);
+}
 } // namespace OHOS::Ace::V2

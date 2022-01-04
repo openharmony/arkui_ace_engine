@@ -20,6 +20,15 @@
 
 namespace OHOS::Ace::V2 {
 
+struct JsKeyEvent final {
+    KeyCode code { KeyCode::UNKNOWN };
+    KeyAction action { KeyAction::UNKNOWN };
+    int64_t timeStamp = 0;
+    int32_t metaKey = 0;
+    int32_t sourceDevice = 0;
+    int32_t deviceId = 0;
+};
+
 class ACE_EXPORT Inspector {
 public:
     static std::string GetInspectorNodeByKey(const RefPtr<PipelineContext>& context, const std::string& key);
@@ -28,6 +37,8 @@ public:
 
     static bool SendEventByKey(
         const RefPtr<PipelineContext>& context, const std::string& key, int action, const std::string& params);
+
+    static bool SendKeyEvent(const RefPtr<PipelineContext>& context, const JsKeyEvent& event);
 };
 
 } // namespace OHOS::Ace::V2

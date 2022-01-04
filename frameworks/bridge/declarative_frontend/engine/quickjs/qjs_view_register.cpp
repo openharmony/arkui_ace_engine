@@ -326,6 +326,115 @@ static JSValue JsSendTouchEvent(JSContext* ctx, JSValueConst new_target, int arg
     return JS_NewBool(ctx, result);
 }
 
+static V2::JsKeyEvent GetKeyEventFromJS(JSContext* ctx, JSValue value)
+{
+    V2::JsKeyEvent event;
+    auto jsType = JS_GetPropertyStr(ctx, value, "type");
+    auto type = static_cast<int32_t>(KeyAction::UNKNOWN);
+    JS_ToInt32(ctx, &type, jsType);
+    event.action = static_cast<KeyAction>(type);
+
+    auto jsKeyCode = JS_GetPropertyStr(ctx, value, "keyCode");
+    auto code = static_cast<int32_t>(KeyCode::UNKNOWN);
+    JS_ToInt32(ctx, &code, jsKeyCode);
+    event.code = static_cast<KeyCode>(code);
+
+    auto jsKeySource = JS_GetPropertyStr(ctx, value, "keySource");
+    JS_ToInt32(ctx, &event.sourceDevice, jsKeySource);
+
+    auto jsDeviceId = JS_GetPropertyStr(ctx, value, "deviceId");
+    JS_ToInt32(ctx, &event.deviceId, jsDeviceId);
+
+    auto jsMetaKey = JS_GetPropertyStr(ctx, value, "metaKey");
+    JS_ToInt32(ctx, &event.metaKey, jsMetaKey);
+
+    auto jsTimestamp = JS_GetPropertyStr(ctx, value, "timestamp");
+    JS_ToInt64(ctx, &event.timeStamp, jsTimestamp);
+
+    return event;
+}
+
+static JSValue JsSendKeyEvent(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    if (argc != 1) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, it is supposed to have 1 arguments");
+    }
+
+    if (!JS_IsObject(argv[0])) {
+        return JS_ThrowSyntaxError(ctx, "input value must be object");
+    }
+
+    QJSContext::Scope scp(ctx);
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return JS_ThrowSyntaxError(ctx, "pipeline is null");
+    }
+    auto keyEvent = GetKeyEventFromJS(ctx, argv[0]);
+    auto result = V2::Inspector::SendKeyEvent(pipelineContext, keyEvent);
+    return JS_NewBool(ctx, result);
+}
+
+static MouseEvent GetMouseEventFromJS(JSContext* ctx, JSValue value)
+{
+    MouseEvent mouseEvent;
+
+    auto type = JS_GetPropertyStr(ctx, value, "action");
+    auto iType = static_cast<int32_t>(MouseAction::NONE);
+    JS_ToInt32(ctx, &iType, type);
+    mouseEvent.action = static_cast<MouseAction>(iType);
+
+    auto button = JS_GetPropertyStr(ctx, value, "button");
+    auto iButton = static_cast<int32_t>(MouseButton::NONE_BUTTON);
+    JS_ToInt32(ctx, &iButton, button);
+    mouseEvent.button = static_cast<MouseButton>(iButton);
+
+    auto x = JS_GetPropertyStr(ctx, value, "x");
+    double dx;
+    JS_ToFloat64(ctx, &dx, x);
+    mouseEvent.x = dx;
+    mouseEvent.deltaX = mouseEvent.x;
+
+    auto y = JS_GetPropertyStr(ctx, value, "y");
+    double dy;
+    JS_ToFloat64(ctx, &dy, y);
+    mouseEvent.y = dy;
+    mouseEvent.deltaY = mouseEvent.y;
+
+    mouseEvent.time = std::chrono::high_resolution_clock::now();
+    mouseEvent.sourceType = SourceType::MOUSE;
+    return mouseEvent;
+}
+
+static JSValue JsSendMouseEvent(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    if (argc != 1) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, it is supposed to have 1 arguments");
+    }
+
+    if (!JS_IsObject(argv[0])) {
+        return JS_ThrowSyntaxError(ctx, "input value must be object");
+    }
+
+    QJSContext::Scope scp(ctx);
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return JS_ThrowSyntaxError(ctx, "pipeline is null");
+    }
+    auto mouseEvent = GetMouseEventFromJS(ctx, argv[0]);
+    auto result = pipelineContext->GetTaskExecutor()->PostTask(
+        [pipelineContext, mouseEvent]() { pipelineContext->OnMouseEvent(mouseEvent); }, TaskExecutor::TaskType::UI);
+
+    return JS_NewBool(ctx, result);
+}
+
 static JSValue JsDumpMemoryStats(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
 {
 #ifdef ACE_DEBUG
@@ -684,6 +793,8 @@ void JsRegisterViews(BindingTarget globalObj)
     QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorByKey, "getInspectorByKey", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsSendEventByKey, "sendEventByKey", 3);
     QJSUtils::DefineGlobalFunction(ctx, JsSendTouchEvent, "sendTouchEvent", 1);
+    QJSUtils::DefineGlobalFunction(ctx, JsSendKeyEvent, "sendKeyEvent", 1);
+    QJSUtils::DefineGlobalFunction(ctx, JsSendMouseEvent, "sendMouseEvent", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsDumpMemoryStats, "dumpMemoryStats", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsGetI18nResource, "$s", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsGetMediaResource, "$m", 1);
