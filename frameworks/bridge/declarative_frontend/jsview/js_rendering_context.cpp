@@ -25,7 +25,7 @@ JSRenderingContext::JSRenderingContext()
 
 void JSRenderingContext::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSRenderingContext>::Declare("RenderingContext");
+    JSClass<JSRenderingContext>::Declare("CanvasRenderingContext2D");
 
     JSClass<JSRenderingContext>::CustomMethod("toDataURL", &JSCanvasRenderer::JsToDataUrl);
     JSClass<JSRenderingContext>::CustomProperty("width", &JSRenderingContext::JsGetWidth,
