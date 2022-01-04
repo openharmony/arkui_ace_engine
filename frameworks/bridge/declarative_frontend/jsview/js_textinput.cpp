@@ -499,10 +499,10 @@ void JSTextInput::SetInputFilter(const JSCallbackInfo& info)
     if (info[1]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(info[1]));
         auto resultId =
-            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+            [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 func->Execute(info);
-            });
+            };
         component->SetOnError(resultId);
     }
 }

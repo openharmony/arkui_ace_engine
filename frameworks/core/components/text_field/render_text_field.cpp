@@ -146,7 +146,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     inactiveTextColor_ = style_.GetTextColor();
     maxLines_ = textField->GetTextMaxLines();
     onTextChangeEvent_ = AceAsyncEvent<void(const std::string&)>::Create(textField->GetOnTextChange(), context_);
-    onError_ = AceAsyncEvent<void(const std::string&)>::Create(textField->GetOnError(), context_);
+    onError_ = textField->GetOnError();
     onValueChangeEvent_ = textField->GetOnTextChange().GetUiStrFunction();
     if (textField->GetOnChange()) {
         onChange_ = *textField->GetOnChange();

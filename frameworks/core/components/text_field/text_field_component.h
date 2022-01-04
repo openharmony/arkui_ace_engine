@@ -263,11 +263,11 @@ public:
     void SetInputFilter(const std::string& inputFilter);
     const std::string& GetInputFilter() const;
 
-    void SetOnError(const EventMarker& value)
+    void SetOnError(const std::function<void(const std::string&)>& value)
     {
         OnError_ = value;
     }
-    const EventMarker& GetOnError() const
+    const std::function<void(const std::string&)>& GetOnError() const
     {
         return OnError_;
     }
@@ -286,7 +286,7 @@ public:
 
 private:
     RefPtr<TextFieldDeclaration> declaration_;
-    EventMarker OnError_;
+    std::function<void(const std::string&)> OnError_;
 };
 
 } // namespace OHOS::Ace
