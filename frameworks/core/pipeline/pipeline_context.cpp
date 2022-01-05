@@ -2183,6 +2183,7 @@ void PipelineContext::SetMultimodalSubscriber(const RefPtr<MultimodalSubscriber>
 void PipelineContext::OnShow()
 {
     onShow_ = true;
+    window_->OnShow();
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Resume();
@@ -2215,6 +2216,7 @@ void PipelineContext::OnShow()
 void PipelineContext::OnHide()
 {
     onShow_ = false;
+    window_->OnHide();
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Hide();
